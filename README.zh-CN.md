@@ -73,7 +73,7 @@ v0 用 Adapter 验证可行性，v1 将用 Compiler 保证零运行时开销。
 - **官网：** [proto-ui.com](https://proto-ui.com)（文档与 Demo 正在准备中）
 - **Issues：** GitHub Issues 是主要贡献入口。
 - **开始贡献：** 参见 `CONTRIBUTING.md` 和 Issue 模板。
-- **Discord：** [加入社区](https://discord.gg/hMuSD6gH)
+- **Discord：** [加入社区](https://discord.gg/MrWQd7h34R)
 - **邮箱：** guangliang2018@foxmail.com
 
 欢迎参与适配器、原型库、文档或社区建设。

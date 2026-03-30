@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { loadPrototypes } from '../../../../apps/www/src/components/PrototypePreviewer/prototype-modules';
 import { renderDemo } from '../../../../apps/www/src/components/PrototypePreviewer/demo-renderer';
-import demo from '../../../../apps/www/src/content/docs/zh-cn/demo-shadcn-tabs.demo';
+import demo from '../../../../apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs.demo';
 
 describe('PrototypePreviewer demo-renderer / wc', () => {
   it('renders shadcn tabs parts with host classes in demo wc mode', async () => {
     await loadPrototypes([
+      'shadcn-button',
       'shadcn-tabs-root',
       'shadcn-tabs-list',
       'shadcn-tabs-trigger',

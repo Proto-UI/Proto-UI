@@ -73,7 +73,7 @@ The architecture is stable enough to move from v0 to v1 without destructive rewr
 - **Website:** [proto-ui.com](https://proto-ui.com) (docs and demos are in preparation)
 - **Issues:** GitHub Issues are the main entry point for contributions.
 - **Start contributing:** see `CONTRIBUTING.md` and the issue templates.
-- **Discord:** [Join the community](https://discord.gg/WT4EX3G3)
+- **Discord:** [Join the community](https://discord.gg/MrWQd7h34R)
 - **Email:** guangliang2018@foxmail.com
 
 If you want to help with adapters, prototypes, docs, or community building, we would love to talk.

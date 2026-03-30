@@ -1,3 +1,11 @@
+---
+const { hasSidebar, entry } = Astro.locals.starlightRoute;
+const isSplash = entry.data.template === 'splash';
+const mainPaneClass = isSplash
+  ? 'main-pane mx-auto flex w-full max-w-[88rem] min-w-0 flex-1 flex-col gap-10 px-4 py-6 text-neutral-800 md:px-6 lg:py-10 dark:text-neutral-300'
+  : 'main-pane mx-auto flex w-full max-w-2xl min-w-0 flex-1 flex-col gap-8 px-4 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-300';
+---
+
 <div class="lg:sl-flex">
   {
     Astro.locals.starlightRoute.toc && (
@@ -8,7 +16,13 @@
       </aside>
     )
   }
-  <div class="main-pane mx-auto flex w-full max-w-2xl min-w-0 flex-1 flex-col gap-8 px-4 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-300"><slot /></div>
+  <div
+    class={mainPaneClass}
+    data-layout={isSplash ? 'splash' : 'docs'}
+    data-has-sidebar={hasSidebar}
+  >
+    <slot />
+  </div>
 </div>
 
 <style>
@@ -48,6 +62,11 @@
         width: calc(
           var(--sl-content-width) + (100% - var(--sl-content-width) - var(--sl-sidebar-width)) / 2
         );
+      }
+
+      .main-pane[data-layout='splash'] {
+        width: 100%;
+        max-width: min(100%, 88rem);
       }
     }
   }

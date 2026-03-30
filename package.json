@@ -17,6 +17,7 @@
     "docs:dev": "pnpm --filter apps-www dev",
     "docs:build": "pnpm --filter apps-www build",
     "docs:preview": "pnpm --filter apps-www preview",
+    "sync:links": "node scripts/sync-shared-links.mjs",
     "release:scan": "node scripts/release/scan.mjs",
     "release:sync-metadata": "node scripts/release/sync-metadata.mjs",
     "release:stage": "node scripts/release/publish.mjs --dry-run",

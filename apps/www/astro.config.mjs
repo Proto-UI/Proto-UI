@@ -14,6 +14,7 @@ const inProgressBadge = {
 };
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://www.proto-ui.com',
   integrations: [
     starlight({
       title: 'Proto UI',

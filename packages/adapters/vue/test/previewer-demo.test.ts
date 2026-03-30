@@ -1,10 +1,38 @@
 import { describe, expect, it } from 'vitest';
-
-import demo from '../../../../apps/www/src/content/docs/zh-cn/demo-combo.demo';
-import DemoInline from '../../../../apps/www/src/content/docs/zh-cn/demo-inline.demo.proto';
+import { definePrototype } from '@proto.ui/core';
 
 import { VueAny, flushVue } from './utils/vue';
 import { createVueAdapter } from '../src/adapt';
+
+const demoInline = definePrototype({
+  name: 'vue-previewer-inline',
+  setup(def) {
+    def.props.define({
+      label: { type: 'string', default: 'fallback' },
+    });
+
+    return (r) => [r.el('div', String(r.read.props.get().label))];
+  },
+});
+
+const demo = {
+  type: 'demo' as const,
+  root: {
+    kind: 'box' as const,
+    children: [
+      {
+        kind: 'proto' as const,
+        className: 'rounded bg-red-500',
+        props: { label: 'Vue Button' },
+      },
+      {
+        kind: 'proto' as const,
+        className: 'rounded bg-red-500',
+        props: { label: 'Hello' },
+      },
+    ],
+  },
+};
 
 function renderDemoNodeVue(Vue: any, adapter: ReturnType<typeof createVueAdapter>, node: any): any {
   if (typeof node === 'string') return node;
@@ -14,7 +42,7 @@ function renderDemoNodeVue(Vue: any, adapter: ReturnType<typeof createVueAdapter
     return Vue.h('div', { class: node.className }, kids);
   }
 
-  const Component = adapter(DemoInline as any);
+  const Component = adapter(demoInline as any);
   const kids = (node.children ?? []).map((child: any) => renderDemoNodeVue(Vue, adapter, child));
   const props = { ...(node.props ?? {}) } as Record<string, unknown>;
   if (node.className) (props as any).hostClass = node.className;

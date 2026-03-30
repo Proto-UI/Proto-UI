@@ -44,7 +44,7 @@ if (image) {
         ></a
       >
       <h1
-        class="text-primary leading-tighter text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tighter max-w-4xl"
+        class="text-primary leading-tighter text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] lg:font-semibold xl:text-5xl xl:tracking-tighter max-w-5xl"
         id={PAGE_TITLE_ID}
         data-page-title
         set:html={title}
@@ -52,7 +52,7 @@ if (image) {
       {
         tagline && (
           <div
-            class="text-foreground max-w-3xl text-base text-balance sm:text-lg"
+            class="text-foreground max-w-4xl text-base text-balance sm:text-lg"
             set:html={tagline}
           />
         )
@@ -72,6 +72,34 @@ if (image) {
           </div>
         )
       }
+
+      <script is:inline>
+        (function () {
+          function centerScrollToHash(hash) {
+            if (!hash || hash === '#') return false;
+            var target = document.querySelector(hash);
+            if (!target) return false;
+            target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            if (window.location.hash !== hash) {
+              history.replaceState(null, '', hash);
+            }
+            return true;
+          }
+
+          document.addEventListener('click', function (event) {
+            var el = event.target;
+            if (!(el instanceof Element)) return;
+            var link = el.closest('a[href]');
+            if (!(link instanceof HTMLAnchorElement)) return;
+
+            var href = link.getAttribute('href') || '';
+            if (!href.startsWith('#')) return;
+
+            event.preventDefault();
+            centerScrollToHash(href);
+          });
+        })();
+      </script>
     </div>
   </div>
 </section>

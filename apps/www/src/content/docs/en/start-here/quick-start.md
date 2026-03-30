@@ -4,6 +4,10 @@ desp: 'Initialize Proto UI and install components into your project'
 description: 'Initialize Proto UI and install components into your project'
 ---
 
+:::caution[Not Installable Yet] The Proto UI CLI is not ready yet, so it is **not currently installable and should not be used via the commands below**.
+
+The CLI is expected to be ready by **April 15, 2026**. For now, the commands, folder structure, and setup flow in this document are provided only to explain the intended future workflow. Do not run these installation commands yet. :::
+
 ## Install the Proto UI CLI
 
 You can use the Proto UI CLI directly with `npx`. There is no need to install it globally in advance.

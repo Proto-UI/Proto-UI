@@ -8,17 +8,47 @@ hero:
     - text: 查看文档
       link: /zh-cn/start-here/what-you-saw/
     - text: 试试 Demo
-      link: /#
+      link: '#home-demo-previewer'
       icon: external
       variant: minimal
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import { HomeDemoPreviewer } from '@/components/PrototypePreviewer';
 
-{/* 原型会自动按需加载，只需指定 prototypeId 即可 */}
+export const homeDemos = [
+  {
+    id: 'demo-shadcn-button',
+    label: 'Button',
+    description: '一套按钮语义，在不同 runtime 中保持同样的 variant、状态和组合方式。',
+  },
+  {
+    id: 'demo-shadcn-switch',
+    label: 'Switch',
+    description: '交互状态与开关语义保持一致，不需要每个宿主重新定义 checked 行为。',
+  },
+  {
+    id: 'demo-shadcn-toggle',
+    label: 'Toggle',
+    description: '切换可视样式、默认状态和 disabled 语义时，协议层仍然是同一套表达。',
+  },
+  {
+    id: 'demo-shadcn-hover-card',
+    label: 'Hover Card',
+    description: '浮层类组件更能体现协议价值，因为 open/close 与内容承接不再绑死在单一框架上。',
+  },
+  {
+    id: 'demo-shadcn-tabs',
+    label: 'Tabs',
+    description:
+      '包含 root、list、trigger、content 的复合组件，也能在不同 runtime 复用同一组语义部件。',
+  },
+];
 
-<PrototypePreviewer
-  demoId="demo-shadcn-button"
+<HomeDemoPreviewer
+  id="home-demo-previewer"
+  demos={homeDemos}
+  initialDemoId="demo-shadcn-button"
   initialRuntime="wc"
-
+  pickerLabel="组件 Demo"
+  runtimeLabel="Runtime"
 />

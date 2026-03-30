@@ -2,7 +2,7 @@
 
 Thanks for your interest in Proto UI. Contributions are welcome, and we value clear discussion before large changes.
 
-If you are unsure, open an Issue first. You do not need to join Discord to contribute, but a quick heads-up helps reviewers help you faster.
+If you are unsure, open an Issue first. You do not need to join [Discord](https://discord.gg/MrWQd7h34R) to contribute, but a quick heads-up there can help reviewers help you faster.
 
 ---
 
@@ -41,4 +41,4 @@ New dependencies are **discouraged** and must be **explicitly discussed** in an 
 ## Communication
 
 - GitHub Issues are the primary entry point.
-- Discord is available for quick syncs, but not required.
+- [Discord](https://discord.gg/MrWQd7h34R) is available for quick syncs, but not required.

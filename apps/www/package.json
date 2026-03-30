@@ -7,7 +7,7 @@
     "generate-code": "tsx scripts/example_code_generation/cli.ts",
     "dev": "pnpm run generate:prototype-tokens && astro dev",
     "start": "pnpm run dev",
-    "build": "pnpm run generate:prototype-tokens && astro build",
+    "build": "pnpm run generate:prototype-tokens && astro build && node ./scripts/clean-sitemap.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "astro": "astro"

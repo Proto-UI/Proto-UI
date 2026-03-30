@@ -8,7 +8,51 @@ hero:
     - text: View Docs
       link: /en/start-here/what-you-saw/
     - text: Try Demo
-      link: /#
+      link: '#home-demo-previewer'
       icon: external
       variant: minimal
 ---
+
+import { HomeDemoPreviewer } from '@/components/PrototypePreviewer';
+
+export const homeDemos = [
+  {
+    id: 'demo-shadcn-button',
+    label: 'Button',
+    description:
+      'One semantic button model, shown across runtimes without redefining variants and interaction states per host.',
+  },
+  {
+    id: 'demo-shadcn-switch',
+    label: 'Switch',
+    description:
+      'Checked state and switch behavior stay aligned across runtimes instead of being re-expressed per framework.',
+  },
+  {
+    id: 'demo-shadcn-toggle',
+    label: 'Toggle',
+    description:
+      'Style variants, default state, and disabled behavior remain one protocol-level shape even when the host changes.',
+  },
+  {
+    id: 'demo-shadcn-hover-card',
+    label: 'Hover Card',
+    description:
+      'Overlay-like components show the value more clearly because open and close orchestration is not tied to one framework.',
+  },
+  {
+    id: 'demo-shadcn-tabs',
+    label: 'Tabs',
+    description:
+      'Compound components such as root, list, trigger, and content can still share the same semantic structure across runtimes.',
+  },
+];
+
+<HomeDemoPreviewer
+  id="home-demo-previewer"
+  demos={homeDemos}
+  initialDemoId="demo-shadcn-button"
+  initialRuntime="wc"
+  pickerLabel="Component Demo"
+  runtimeLabel="Runtime"
+/>

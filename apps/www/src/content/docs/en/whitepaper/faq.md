@@ -270,6 +270,6 @@ This FAQ only covers the most common questions for now.
 If you still have other questions, discussion is welcome.
 
 Questions that are suitable for long-term accumulation and searchability fit better in GitHub Discussions.  
-Questions better suited to quick exchanges, temporary follow-ups, or more open-ended discussion fit better in the Discord community.
+Questions better suited to quick exchanges, temporary follow-ups, or more open-ended discussion fit better in the [Discord community](https://discord.gg/MrWQd7h34R).
 
 If a question comes up repeatedly, it may also later enter the FAQ or the whitepaper itself.

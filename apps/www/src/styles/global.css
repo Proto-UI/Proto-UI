@@ -23,18 +23,18 @@
   }
 }
 
-@media (min-width: 64rem) {
+@media (max-width: 64rem) {
   .container {
     max-width: 64rem;
   }
 }
 
-@media (min-width: 48rem) {
+@media (max-width: 48rem) {
   .container {
     max-width: 48rem;
   }
 }
-@media (min-width: 40rem) {
+@media (max-width: 40rem) {
   .container {
     max-width: 40rem;
   }
