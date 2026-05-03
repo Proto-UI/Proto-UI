@@ -10,6 +10,14 @@ description: '如何阅读规范'
 - 规范文与白皮书、工程文档分别有什么分工。
 - 这一章应该如何阅读、如何查阅、如何引用。
 
+## 概念速览卡（Concept Card）
+
+当你在正文里第一次遇到 Proto UI 的专有术语时，可以用行内概念卡做“就地解释”，不跳转、不打断阅读节奏。
+
+示例：:concept[host]、:concept[adapter]、:concept[prototype]
+
+你也可以覆盖摘要（用于临时补充或语境化解释）：:concept[host]{summary="这里的 host 指你选择的技术载体/运行环境。"}
+
 ## 这一章不负责什么？
 
 写作提示：
