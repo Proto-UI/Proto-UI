@@ -1,6 +1,7 @@
 ---
 import MobileMenuToggle from '@astrojs/starlight/components/MobileMenuToggle.astro';
 import '../../styles/global.css';
+import conceptScriptUrl from '../../scripts/proto-concept.ts?url';
 
 const { hasSidebar } = Astro.locals.starlightRoute;
 ---
@@ -8,6 +9,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 <div
   class="bg-background text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
 >
+  <script is:inline type="module" src={conceptScriptUrl}></script>
   <div class="bg-background container-wrapper flex flex-1 flex-col px-2">
     <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
     <div

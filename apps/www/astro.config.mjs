@@ -2,10 +2,12 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import starlight from '@astrojs/starlight';
+import remarkDirective from 'remark-directive';
 
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'node:url';
 import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
+import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
 
 const inProgressBadge = {
   text: { en: 'WIP', 'zh-CN': '施工中' },
@@ -485,6 +487,7 @@ export default defineConfig({
     mdx(),
   ],
   markdown: {
+    remarkPlugins: [remarkDirective, remarkConceptDirective],
     rehypePlugins: [rehypeEnhancedImage],
   },
   vite: {
@@ -497,7 +500,8 @@ export default defineConfig({
       // 允许 dev server 读取到仓库根（否则访问 workspace 包会被拦）
       fs: { allow: ['../..'] },
     },
-    plugins: [tailwindcss()],
+    // @tailwindcss/vite 的类型版本与 Astro 内部 Vite 类型可能不一致（运行时兼容即可）
+    plugins: /** @type {any} */ ([tailwindcss()]),
     optimizeDeps: {
       exclude: [
         '@proto.ui/core',
