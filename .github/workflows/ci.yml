@@ -45,7 +45,14 @@ jobs:
           esac
 
           corepack enable
+          # Activate the lockfile-selected pnpm so any bare `pnpm` invocation
+          # (including child spawns inside scripts/release/lib.mjs) honors the
+          # version we picked, instead of falling back to package.json#packageManager.
+          corepack prepare pnpm@"${PNPM_VERSION}" --activate
           echo "PROTO_PNPM_VERSION=${PNPM_VERSION}" >> "$GITHUB_ENV"
+          # Tell corepack to ignore package.json#packageManager so child processes
+          # spawning bare `pnpm` see the activated version.
+          echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
           corepack pnpm@"${PNPM_VERSION}" --version
 
       - name: Install
@@ -86,7 +93,14 @@ jobs:
           esac
 
           corepack enable
+          # Activate the lockfile-selected pnpm so any bare `pnpm` invocation
+          # (including child spawns inside scripts/release/lib.mjs) honors the
+          # version we picked, instead of falling back to package.json#packageManager.
+          corepack prepare pnpm@"${PNPM_VERSION}" --activate
           echo "PROTO_PNPM_VERSION=${PNPM_VERSION}" >> "$GITHUB_ENV"
+          # Tell corepack to ignore package.json#packageManager so child processes
+          # spawning bare `pnpm` see the activated version.
+          echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
           corepack pnpm@"${PNPM_VERSION}" --version
 
       - name: Install
@@ -94,3 +108,225 @@ jobs:
 
       - name: Test
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s test
+
+  release-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm (corepack)
+        run: |
+          set -euo pipefail
+          PACKAGE_MANAGER=$(node -p "require('./package.json').packageManager || ''")
+          LOCKFILE_VERSION=$(node -e "const fs=require('fs');const text=fs.readFileSync('pnpm-lock.yaml','utf8');const m=text.match(/^lockfileVersion:\\s*['\\\"]?([^'\\\"\\n]+)['\\\"]?/m);if(!m){throw new Error('lockfileVersion not found');}process.stdout.write(m[1]);")
+          echo "packageManager=${PACKAGE_MANAGER}"
+          echo "lockfileVersion=${LOCKFILE_VERSION}"
+
+          case "${LOCKFILE_VERSION}" in
+            6* )
+              PNPM_VERSION="8.13.1"
+              ;;
+            9* )
+              PNPM_VERSION="10.32.1"
+              ;;
+            * )
+              echo "Unsupported pnpm lockfileVersion: ${LOCKFILE_VERSION}"
+              exit 1
+              ;;
+          esac
+
+          corepack enable
+          # Activate the lockfile-selected pnpm so any bare `pnpm` invocation
+          # (including child spawns inside scripts/release/lib.mjs) honors the
+          # version we picked, instead of falling back to package.json#packageManager.
+          corepack prepare pnpm@"${PNPM_VERSION}" --activate
+          echo "PROTO_PNPM_VERSION=${PNPM_VERSION}" >> "$GITHUB_ENV"
+          # Tell corepack to ignore package.json#packageManager so child processes
+          # spawning bare `pnpm` see the activated version.
+          echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
+          corepack pnpm@"${PNPM_VERSION}" --version
+
+      - name: Install
+        run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
+
+      - name: Release scan
+        run: |
+          set -euo pipefail
+          # --json gives us per-package issue arrays. Parsing the structured form
+          # avoids dropping whole lines that mix `workspace deps:` with real
+          # offenders (e.g. "workspace deps: 1; missing license field").
+          SCAN_JSON=$(corepack pnpm@"${PROTO_PNPM_VERSION}" -s release:scan -- --json)
+          echo "$SCAN_JSON" | node -e '
+            const fs = require("fs");
+            const data = JSON.parse(fs.readFileSync(0, "utf8"));
+            const tolerated = (issue) => /^workspace deps:/.test(issue);
+            console.log("Discovered packages:", data.packageCount);
+            console.log("Selected:", data.selectedCount);
+            console.log("");
+            const offenders = [];
+            for (const pkg of data.selected || []) {
+              const all = pkg.issues || [];
+              const residual = all.filter((i) => !tolerated(i));
+              const tail = all.length === 0 ? "clean" : all.join("; ");
+              console.log("- " + pkg.name + " | " + tail);
+              if (residual.length > 0) offenders.push({ name: pkg.name, residual });
+            }
+            console.log("");
+            if (offenders.length > 0) {
+              for (const o of offenders) {
+                console.error("::error::" + o.name + ": " + o.residual.join("; "));
+              }
+              process.exit(1);
+            }
+            console.log("release-scan: clean (workspace-deps fragments tolerated)");
+          '
+
+  release-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm (corepack)
+        run: |
+          set -euo pipefail
+          PACKAGE_MANAGER=$(node -p "require('./package.json').packageManager || ''")
+          LOCKFILE_VERSION=$(node -e "const fs=require('fs');const text=fs.readFileSync('pnpm-lock.yaml','utf8');const m=text.match(/^lockfileVersion:\\s*['\\\"]?([^'\\\"\\n]+)['\\\"]?/m);if(!m){throw new Error('lockfileVersion not found');}process.stdout.write(m[1]);")
+          echo "packageManager=${PACKAGE_MANAGER}"
+          echo "lockfileVersion=${LOCKFILE_VERSION}"
+
+          case "${LOCKFILE_VERSION}" in
+            6* )
+              PNPM_VERSION="8.13.1"
+              ;;
+            9* )
+              PNPM_VERSION="10.32.1"
+              ;;
+            * )
+              echo "Unsupported pnpm lockfileVersion: ${LOCKFILE_VERSION}"
+              exit 1
+              ;;
+          esac
+
+          corepack enable
+          # Activate the lockfile-selected pnpm so any bare `pnpm` invocation
+          # (including child spawns inside scripts/release/lib.mjs) honors the
+          # version we picked, instead of falling back to package.json#packageManager.
+          corepack prepare pnpm@"${PNPM_VERSION}" --activate
+          echo "PROTO_PNPM_VERSION=${PNPM_VERSION}" >> "$GITHUB_ENV"
+          # Tell corepack to ignore package.json#packageManager so child processes
+          # spawning bare `pnpm` see the activated version.
+          echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
+          corepack pnpm@"${PNPM_VERSION}" --version
+
+      - name: Install
+        run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
+
+      - name: Release stage (tsc + npm publish --dry-run for all packages)
+        run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s release:stage
+
+  cli-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Pack CLI tarball
+        run: |
+          set -euo pipefail
+          cd packages/cli
+          TARBALL_NAME=$(npm pack --silent)
+          echo "CLI_TARBALL=$PWD/$TARBALL_NAME" >> "$GITHUB_ENV"
+          echo "Packed: $TARBALL_NAME"
+
+      - name: Smoke (init + add) in clean project
+        run: |
+          set -euo pipefail
+          SMOKE_DIR=$(mktemp -d -t proto-ui-smoke-XXXXXX)
+          cd "$SMOKE_DIR"
+          npm init -y > /dev/null
+          # react, react-dom, vue cover the runtime requirements declared by the
+          # adapter registry (adapter-web-component declares no runtime).
+          npm install --silent react react-dom vue "$CLI_TARBALL"
+
+          BIN="node node_modules/@proto.ui/cli/bin/proto-ui.js"
+
+          # NOTE: this smoke assumes every @proto.ui/adapter-* and @proto.ui/prototypes-*
+          # package the CLI registry can resolve is published on npm. If any are not,
+          # `add` will fail with E404 and this job will go red — that is the intended
+          # signal to ship the missing packages first.
+          $BIN --help > /dev/null
+          $BIN init --yes --no-interactive
+
+          # Cover every adapter and every prototype package the v0 CLI registry exposes
+          # (decision §4.2 / §4.5 / §4.6) by walking host × prototype-family pairs.
+          $BIN add react shadcn-button --no-interactive
+          $BIN add react base-button --no-interactive
+          $BIN add vue shadcn-button --no-interactive
+          $BIN add wc shadcn-button --no-interactive
+
+          # Config + facade structure
+          test -f proto-ui/config.json
+          test -f proto-ui/components/index.ts
+          test -f proto-ui/components/react/index.ts
+          test -f proto-ui/components/vue/index.ts
+          test -f proto-ui/components/wc/index.ts
+
+          # Config shape per onboarding decision §4.2 (multi-adapter)
+          grep -q '"@proto.ui/adapter-react"' proto-ui/config.json
+          grep -q '"@proto.ui/adapter-vue"' proto-ui/config.json
+          grep -q '"@proto.ui/adapter-web-component"' proto-ui/config.json
+          grep -q '"shadcn-button"' proto-ui/config.json
+          grep -q '"base-button"' proto-ui/config.json
+
+          # React facade per onboarding decision §4.5
+          grep -q "createReactAdapter(React)" proto-ui/components/react/index.ts
+          grep -q "export const Button = adapt(shadcnButton)" proto-ui/components/react/index.ts
+          grep -q "export const BaseButton = adapt(button)" proto-ui/components/react/index.ts
+
+          # Vue facade
+          grep -q "createVueAdapter(Vue)" proto-ui/components/vue/index.ts
+          grep -q "export const Button = adapt(shadcnButton)" proto-ui/components/vue/index.ts
+
+          # Web Component facade
+          grep -q "AdaptToWebComponent(shadcnButton" proto-ui/components/wc/index.ts
+
+          # Host-prefixed root re-export per onboarding decision §4.6
+          grep -q "Button as ReactButton" proto-ui/components/index.ts
+          grep -q "BaseButton as ReactBaseButton" proto-ui/components/index.ts
+          grep -q "Button as VueButton" proto-ui/components/index.ts
+          grep -q "ButtonElement } from './wc'" proto-ui/components/index.ts
+
+          # All adapter + prototype packages must actually be installed end-to-end
+          test -d node_modules/@proto.ui/adapter-react
+          test -d node_modules/@proto.ui/adapter-vue
+          test -d node_modules/@proto.ui/adapter-web-component
+          test -d node_modules/@proto.ui/prototypes-shadcn
+          test -d node_modules/@proto.ui/prototypes-base
+
+          # Beyond install + grep, exercise the generated facades through real
+          # renderers. SSR catches React/Vue adapter regressions (broken behavior
+          # plug, missing prototype mount) and happy-dom + customElements catches
+          # WC registration regressions — none of which file-existence assertions
+          # would surface. tsx is needed because the generated facades export .ts
+          # and Node 20 cannot strip types natively.
+          npm install --silent --no-save tsx @happy-dom/global-registrator
+          cp -r "$GITHUB_WORKSPACE/packages/cli/test/smoke-render/." .
+          node --import tsx ./react.mjs
+          node --import tsx ./vue.mjs
+          node --import tsx ./wc.mjs
+
+          echo "cli-smoke: ok ($SMOKE_DIR)"

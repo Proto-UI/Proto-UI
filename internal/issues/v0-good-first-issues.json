@@ -1,0 +1,584 @@
+{
+  "version": 1,
+  "campaign": "v0-good-first-issues",
+  "defaultLabels": ["good first issue", "help wanted", "v0 launch"],
+  "issues": [
+    {
+      "id": "base-radio-prototype",
+      "category": "prototype",
+      "title": "Add a base Radio prototype",
+      "labels": ["prototype"],
+      "difficulty": "small",
+      "summary": "Add the headless base Radio prototype and a minimal demo so contributors can use the same pattern for value-like primitives.",
+      "scope": [
+        "Add a base Radio or RadioGroup prototype under the base prototype package.",
+        "Follow the existing base prototype API style and naming conventions; use base Switch for boolean state shape and base Tabs/Select for grouped item patterns.",
+        "Add or update a docs demo that shows checked, unchecked, disabled, and grouped states."
+      ],
+      "acceptance": [
+        "The prototype exposes state and events through existing Proto UI conventions.",
+        "The demo renders in the documentation previewer.",
+        "The implementation does not introduce a new runtime dependency unless maintainers approve it."
+      ],
+      "references": [
+        "packages/prototypes/base/src/switch/root.ts",
+        "packages/prototypes/base/src/switch/thumb.ts",
+        "packages/prototypes/base/src/switch/types.ts",
+        "packages/prototypes/base/test/switch.test.ts",
+        "packages/prototypes/base/src/tabs/root.ts",
+        "packages/prototypes/base/src/tabs/trigger.ts",
+        "packages/prototypes/base/test/tabs.test.ts",
+        "packages/prototypes/base/src/select/root.ts",
+        "packages/prototypes/base/src/select/item.ts",
+        "packages/prototypes/base/test/select.test.ts",
+        "apps/www/src/content/docs/en/ui-libraries/base",
+        "internal/contracts/prototype-base"
+      ],
+      "outOfScope": [
+        "A design-language styled version.",
+        "A full form library or validation system."
+      ]
+    },
+    {
+      "id": "base-checkbox-prototype",
+      "category": "prototype",
+      "title": "Add a base Checkbox prototype",
+      "labels": ["prototype"],
+      "difficulty": "small",
+      "summary": "Add the headless base Checkbox prototype with checked, unchecked, disabled, and indeterminate coverage.",
+      "scope": [
+        "Add a base Checkbox prototype using the existing base prototype structure.",
+        "Use base Switch and base Toggle as the closest references for checked/pressed boolean state and disabled behavior.",
+        "Include an indeterminate-state example if it fits the current state model.",
+        "Add a documentation demo and API notes."
+      ],
+      "acceptance": [
+        "Checked and disabled states are represented through Proto UI state conventions.",
+        "A contributor can inspect the demo source from docs.",
+        "Existing type and runtime checks continue to pass."
+      ],
+      "references": [
+        "packages/prototypes/base/src/switch/root.ts",
+        "packages/prototypes/base/src/switch/shared.ts",
+        "packages/prototypes/base/src/switch/types.ts",
+        "packages/prototypes/base/test/switch.test.ts",
+        "packages/prototypes/base/src/toggle/toggle.ts",
+        "packages/prototypes/base/src/toggle/types.ts",
+        "packages/prototypes/base/test/toggle.test.ts",
+        "apps/www/src/content/docs/en/ui-libraries/base",
+        "internal/contracts/state"
+      ],
+      "outOfScope": ["Form serialization.", "Styled checkbox implementations."]
+    },
+    {
+      "id": "base-slider-prototype",
+      "category": "prototype",
+      "title": "Add a base Slider prototype",
+      "labels": ["prototype"],
+      "difficulty": "medium",
+      "summary": "Add a headless Slider prototype with value, min, max, step, disabled, and orientation basics.",
+      "scope": [
+        "Implement the smallest useful Slider prototype in the base package.",
+        "Use base Select for value-oriented state/event conventions and base Switch/Toggle for disabled-state conventions.",
+        "Document expected value and event behavior.",
+        "Add one horizontal demo and one disabled-state demo."
+      ],
+      "acceptance": [
+        "The value path follows existing value-like component conventions.",
+        "The docs demo makes value changes visible.",
+        "Keyboard and pointer behavior gaps are documented if not fully implemented."
+      ],
+      "references": [
+        "packages/prototypes/base/src/select/root.ts",
+        "packages/prototypes/base/src/select/value.ts",
+        "packages/prototypes/base/src/select/types.ts",
+        "packages/prototypes/base/test/select.test.ts",
+        "packages/prototypes/base/src/switch/root.ts",
+        "packages/prototypes/base/src/toggle/toggle.ts",
+        "internal/contracts/props",
+        "internal/contracts/state"
+      ],
+      "outOfScope": [
+        "Range sliders with multiple thumbs.",
+        "Advanced accessibility behavior not already supported by the runtime."
+      ]
+    },
+    {
+      "id": "base-tooltip-prototype",
+      "category": "prototype",
+      "title": "Add a base Tooltip prototype",
+      "labels": ["prototype"],
+      "difficulty": "small",
+      "summary": "Add a base Tooltip prototype that demonstrates trigger, content, open state, and delay configuration.",
+      "scope": [
+        "Use existing overlay and trigger concepts where possible; base Hover Card is the primary anatomy and open-state reference.",
+        "Add a minimal docs demo with hover/focus open behavior.",
+        "Document any behavior intentionally left to adapters or host runtimes."
+      ],
+      "acceptance": [
+        "The prototype has clear trigger and content anatomy.",
+        "Open state is observable in the demo.",
+        "The issue does not require a positioning engine."
+      ],
+      "references": [
+        "packages/prototypes/base/src/hover-card/root.ts",
+        "packages/prototypes/base/src/hover-card/trigger.ts",
+        "packages/prototypes/base/src/hover-card/content.ts",
+        "packages/prototypes/base/src/hover-card/types.ts",
+        "packages/prototypes/base/test/hover-card.test.ts",
+        "packages/prototypes/base/src/dialog/trigger.ts",
+        "packages/prototypes/base/src/dialog/content.ts",
+        "packages/prototypes/base/test/dialog.test.ts",
+        "internal/contracts/overlay/as-overlay.v0.md",
+        "packages/modules/as-trigger"
+      ],
+      "outOfScope": ["Collision-aware floating positioning.", "Rich hover-card behavior."]
+    },
+    {
+      "id": "shadcn-radio-group-prototype",
+      "category": "prototype",
+      "title": "Add a shadcn-style Radio Group prototype",
+      "labels": ["prototype"],
+      "difficulty": "small",
+      "summary": "Build the shadcn-style Radio Group prototype on top of the base Radio work and match the current shadcn package conventions.",
+      "scope": [
+        "Add the shadcn-facing prototype after the base Radio API is available.",
+        "Match the existing shadcn docs and token usage patterns; use shadcn Switch/Tabs as implementation references.",
+        "Add a demo page or demo module."
+      ],
+      "acceptance": [
+        "The implementation reuses base behavior instead of duplicating state logic.",
+        "The demo visually matches the existing shadcn prototype family.",
+        "The docs mention the base prototype dependency."
+      ],
+      "references": [
+        "packages/prototypes/shadcn/src/switch/root.ts",
+        "packages/prototypes/shadcn/src/switch/thumb.ts",
+        "packages/prototypes/shadcn/test/switch.test.ts",
+        "packages/prototypes/shadcn/src/tabs/root.ts",
+        "packages/prototypes/shadcn/src/tabs/trigger.ts",
+        "packages/prototypes/shadcn/test/tabs.test.ts",
+        "apps/www/src/content/docs/en/ui-libraries/shadcn",
+        "internal/issues/v0-good-first-issues.json#base-radio-prototype"
+      ],
+      "outOfScope": ["A new design token system.", "Changes to unrelated shadcn prototypes."]
+    },
+    {
+      "id": "shadcn-checkbox-prototype",
+      "category": "prototype",
+      "title": "Add a shadcn-style Checkbox prototype",
+      "labels": ["prototype"],
+      "difficulty": "small",
+      "summary": "Build a shadcn-style Checkbox prototype on top of the base Checkbox work.",
+      "scope": [
+        "Add the shadcn-facing Checkbox prototype after the base Checkbox API is available.",
+        "Use existing shadcn styles and docs conventions; use shadcn Switch and Toggle as boolean-control references.",
+        "Show checked, unchecked, disabled, and indeterminate examples where supported."
+      ],
+      "acceptance": [
+        "The implementation delegates behavior to the base prototype.",
+        "The demo fits the existing shadcn documentation structure.",
+        "The API notes identify any unsupported shadcn behavior."
+      ],
+      "references": [
+        "packages/prototypes/shadcn/src/switch/root.ts",
+        "packages/prototypes/shadcn/src/switch/thumb.ts",
+        "packages/prototypes/shadcn/test/switch.test.ts",
+        "packages/prototypes/shadcn/src/toggle/index.ts",
+        "packages/prototypes/shadcn/src/toggle/types.ts",
+        "packages/prototypes/shadcn/test/toggle.test.ts",
+        "apps/www/src/content/docs/en/ui-libraries/shadcn",
+        "internal/issues/v0-good-first-issues.json#base-checkbox-prototype"
+      ],
+      "outOfScope": [
+        "Form submission behavior.",
+        "New icon packages unless approved by maintainers."
+      ]
+    },
+    {
+      "id": "shadcn-slider-prototype",
+      "category": "prototype",
+      "title": "Add a shadcn-style Slider prototype",
+      "labels": ["prototype"],
+      "difficulty": "medium",
+      "summary": "Build a shadcn-style Slider prototype on top of the base Slider work.",
+      "scope": [
+        "Add the shadcn-facing Slider prototype after the base Slider API is available.",
+        "Use existing shadcn docs and styling conventions; use shadcn Switch for styled part composition and base Select for value behavior.",
+        "Include a value display in the demo."
+      ],
+      "acceptance": [
+        "The demo renders and updates value state.",
+        "The implementation does not fork base Slider behavior.",
+        "Known accessibility gaps are documented."
+      ],
+      "references": [
+        "packages/prototypes/shadcn/src/switch/root.ts",
+        "packages/prototypes/shadcn/src/switch/thumb.ts",
+        "packages/prototypes/shadcn/test/switch.test.ts",
+        "packages/prototypes/base/src/select/root.ts",
+        "packages/prototypes/base/src/select/value.ts",
+        "packages/prototypes/base/test/select.test.ts",
+        "apps/www/src/content/docs/en/ui-libraries/shadcn",
+        "internal/issues/v0-good-first-issues.json#base-slider-prototype"
+      ],
+      "outOfScope": ["Multi-thumb slider support.", "Custom animation systems."]
+    },
+    {
+      "id": "shadcn-tooltip-prototype",
+      "category": "prototype",
+      "title": "Add a shadcn-style Tooltip prototype",
+      "labels": ["prototype"],
+      "difficulty": "small",
+      "summary": "Build a shadcn-style Tooltip prototype on top of the base Tooltip work.",
+      "scope": [
+        "Add the shadcn-facing Tooltip prototype after the base Tooltip API is available.",
+        "Match existing shadcn style conventions; use shadcn Hover Card/Dialog as trigger/content styling references.",
+        "Add a minimal trigger/content demo."
+      ],
+      "acceptance": [
+        "The demo shows the tooltip opening from an interactive trigger.",
+        "The implementation keeps positioning expectations modest and documented.",
+        "The docs link back to the base Tooltip prototype."
+      ],
+      "references": [
+        "packages/prototypes/shadcn/src/hover-card/root.ts",
+        "packages/prototypes/shadcn/src/hover-card/trigger.ts",
+        "packages/prototypes/shadcn/src/hover-card/content.ts",
+        "packages/prototypes/shadcn/test/hover-card.test.ts",
+        "packages/prototypes/shadcn/src/dialog/trigger.ts",
+        "packages/prototypes/shadcn/src/dialog/content.ts",
+        "packages/prototypes/shadcn/test/dialog.test.ts",
+        "apps/www/src/content/docs/en/ui-libraries/shadcn",
+        "internal/issues/v0-good-first-issues.json#base-tooltip-prototype"
+      ],
+      "outOfScope": ["A full floating-ui integration.", "HoverCard behavior."]
+    },
+    {
+      "id": "styled-library-scaffold",
+      "category": "prototype",
+      "title": "Create a design-language prototype library scaffold on top of base",
+      "labels": ["prototype", "spike"],
+      "difficulty": "medium",
+      "summary": "Create a small scaffold that demonstrates how a new design-language prototype library can wrap base prototypes.",
+      "scope": [
+        "Pick a small, clearly named experimental library package.",
+        "Wrap one existing base prototype with design-language defaults, using the shadcn package as the primary reference for package shape and delegation.",
+        "Document what must be repeated to add more components."
+      ],
+      "acceptance": [
+        "The scaffold builds in the workspace.",
+        "The README explains how it depends on base prototypes.",
+        "The implementation is clearly marked as experimental if the design language is not final."
+      ],
+      "references": [
+        "packages/prototypes/shadcn/src/button/index.ts",
+        "packages/prototypes/shadcn/src/switch/root.ts",
+        "packages/prototypes/shadcn/src/dialog/root.ts",
+        "packages/prototypes/shadcn/README.md",
+        "packages/prototypes/base/src/button/button.ts",
+        "packages/prototypes/base/src/switch/root.ts",
+        "packages/prototypes/base/src/dialog/root.ts",
+        "apps/www/src/content/docs/en/build/prototypes/building-a-styled-library-on-top-of-base"
+      ],
+      "outOfScope": [
+        "A complete component library.",
+        "A commitment to official long-term support for the selected design language."
+      ]
+    },
+    {
+      "id": "adapter-host-capability-checklist",
+      "category": "adapter",
+      "title": "Document the host capability checklist for new adapters",
+      "labels": ["adapter", "docs"],
+      "difficulty": "small",
+      "summary": "Turn the information-flow model into a practical checklist for deciding whether a host can support a Proto UI adapter.",
+      "scope": [
+        "Summarize the minimum host capabilities an adapter needs.",
+        "Map each capability to the information-flow model and existing adapter docs.",
+        "Add the checklist to the adapter guide or a linked document."
+      ],
+      "acceptance": [
+        "A contributor can use the checklist before proposing a new adapter.",
+        "The checklist includes rendering, event, state, lifecycle, and feedback paths.",
+        "The doc links to the whitepaper information-flow model."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/whitepaper/information-flow-model.md",
+        "apps/www/src/content/docs/en/build/adapter-guide.md",
+        "internal/contracts/integration/portability-and-integration.md"
+      ],
+      "outOfScope": ["Implementing a new adapter.", "Changing the adapter contract."]
+    },
+    {
+      "id": "mini-program-adapter-spike",
+      "category": "adapter",
+      "title": "Research a Mini Program adapter spike",
+      "labels": ["adapter", "spike"],
+      "difficulty": "medium",
+      "summary": "Produce a small feasibility note for a Mini Program adapter using the information-flow model.",
+      "scope": [
+        "Pick one Mini Program host target and identify its rendering/event/state constraints.",
+        "Map the host capabilities to the adapter checklist.",
+        "Recommend the smallest prototype that would validate the adapter path."
+      ],
+      "acceptance": [
+        "The output is a markdown note or draft docs page.",
+        "The note lists blockers and unknowns clearly.",
+        "The work does not need to ship a production adapter."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/whitepaper/information-flow-model.md",
+        "apps/www/src/content/docs/en/build/adapter-guide.md",
+        "packages/adapters/base"
+      ],
+      "outOfScope": [
+        "A full Mini Program adapter implementation.",
+        "Support for multiple Mini Program ecosystems at once."
+      ]
+    },
+    {
+      "id": "vue2-adapter-spike",
+      "category": "adapter",
+      "title": "Research a Vue 2 adapter spike",
+      "labels": ["adapter", "spike"],
+      "difficulty": "medium",
+      "summary": "Write a feasibility note for a Vue 2 adapter and identify the minimum runtime surface required.",
+      "scope": [
+        "Compare the existing Vue adapter assumptions with Vue 2 constraints.",
+        "Identify whether lifecycle, slots, and event paths can satisfy Proto UI contracts.",
+        "Recommend a minimal demo component for validation."
+      ],
+      "acceptance": [
+        "The output identifies clear go/no-go criteria.",
+        "Known compatibility risks are listed.",
+        "The note references the current Vue adapter package."
+      ],
+      "references": [
+        "packages/adapters/vue",
+        "internal/contracts/adapter-vue/adapter-vue.v0.md",
+        "apps/www/src/content/docs/en/build/adapter-guide.md"
+      ],
+      "outOfScope": ["Shipping Vue 2 adapter code.", "Replacing the current Vue adapter."]
+    },
+    {
+      "id": "react15-adapter-spike",
+      "category": "adapter",
+      "title": "Research a React 15 adapter spike",
+      "labels": ["adapter", "spike"],
+      "difficulty": "medium",
+      "summary": "Write a feasibility note for a React 15 adapter and identify what differs from the current React adapter.",
+      "scope": [
+        "Compare the current React adapter assumptions with React 15 constraints.",
+        "Identify lifecycle, refs, event, and rendering gaps.",
+        "Recommend a minimal component to validate."
+      ],
+      "acceptance": [
+        "The output is reviewable as markdown.",
+        "The note separates true blockers from implementation tasks.",
+        "The note links to the current React adapter contract."
+      ],
+      "references": [
+        "packages/adapters/react",
+        "internal/contracts/adapter-react/adapter-react.v0.md",
+        "apps/www/src/content/docs/en/build/adapter-guide.md"
+      ],
+      "outOfScope": [
+        "Shipping React 15 adapter code.",
+        "Changing the current React adapter package."
+      ]
+    },
+    {
+      "id": "whitepaper-information-flow-diagram",
+      "category": "docs",
+      "title": "Add an information-flow diagram to the whitepaper",
+      "labels": ["docs", "whitepaper"],
+      "difficulty": "small",
+      "summary": "Add a diagram that explains how intent, props, state, events, feedback, and host rendering connect in Proto UI.",
+      "scope": [
+        "Create a diagram for the information-flow model page.",
+        "Keep labels consistent with the whitepaper terminology.",
+        "Add alt text or nearby prose so the diagram is understandable without images."
+      ],
+      "acceptance": [
+        "The diagram appears in both English and Chinese whitepaper pages or has a clear follow-up note for translation.",
+        "The diagram does not introduce new terminology.",
+        "The docs build still passes."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/whitepaper/information-flow-model.md",
+        "apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md",
+        "internal/contracts/integration/portability-and-integration.md"
+      ],
+      "outOfScope": ["Redesigning the full whitepaper.", "Adding animation."]
+    },
+    {
+      "id": "first-prototype-guide",
+      "category": "docs",
+      "title": "Write the first-prototype contributor guide",
+      "labels": ["docs"],
+      "difficulty": "small",
+      "summary": "Write a practical guide that helps a new contributor add their first Proto UI prototype.",
+      "scope": [
+        "Start from the existing prototype docs and contributor docs.",
+        "Use a small existing prototype as the walkthrough example.",
+        "Include local commands for build, docs preview, and checks."
+      ],
+      "acceptance": [
+        "The guide has a clear step-by-step path from package location to demo.",
+        "The guide includes a checklist before opening a PR.",
+        "The guide links to relevant contracts instead of duplicating them."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/build/prototypes",
+        "apps/www/src/content/docs/en/build/contribute.md",
+        "packages/prototypes/base/README.md"
+      ],
+      "outOfScope": ["A full API reference rewrite.", "Adapter implementation details."]
+    },
+    {
+      "id": "first-adapter-guide",
+      "category": "docs",
+      "title": "Write the first-adapter contributor guide",
+      "labels": ["docs", "adapter"],
+      "difficulty": "small",
+      "summary": "Write a practical guide that helps a new contributor evaluate and start their first Proto UI adapter.",
+      "scope": [
+        "Explain the adapter proposal path.",
+        "Link to the host capability checklist.",
+        "Walk through a minimal adapter validation plan."
+      ],
+      "acceptance": [
+        "The guide distinguishes a research spike from a production adapter.",
+        "The guide includes expected tests or demos for a minimal adapter.",
+        "The guide links to existing React, Vue, and Web Component adapters."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/build/adapter-guide.md",
+        "packages/adapters/react",
+        "packages/adapters/vue",
+        "packages/adapters/web-component"
+      ],
+      "outOfScope": ["Adding a new adapter.", "Changing adapter contracts."]
+    },
+    {
+      "id": "contribution-path-docs",
+      "category": "docs",
+      "title": "Clarify contribution paths for new contributors",
+      "labels": ["docs"],
+      "difficulty": "small",
+      "summary": "Document the main contribution paths: prototype work, adapter work, docs, diagrams, and community content.",
+      "scope": [
+        "Add or update a contribution-path section in docs.",
+        "Explain what maintainers need in an issue or PR.",
+        "Link to Good First Issue categories."
+      ],
+      "acceptance": [
+        "A new contributor can choose a path in under five minutes.",
+        "Each path links to at least one existing guide or template.",
+        "The wording avoids promising maintainers will accept every proposal."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/build/contribute.md",
+        ".github/ISSUE_TEMPLATE",
+        "internal/records/2026-05-04-v0-good-first-issue-release-plan.zh-CN.md"
+      ],
+      "outOfScope": ["A governance policy rewrite.", "Maintainer assignment automation."]
+    },
+    {
+      "id": "internal-tutorial-index",
+      "category": "docs",
+      "title": "Create an internal tutorial index for maintainers",
+      "labels": ["docs"],
+      "difficulty": "small",
+      "summary": "Create a short index that points maintainers to internal tutorials and records that are useful when mentoring new contributors.",
+      "scope": [
+        "Inventory existing internal tutorial and record files.",
+        "Group links by prototype, adapter, docs, and release topics.",
+        "Call out stale or missing tutorial areas."
+      ],
+      "acceptance": [
+        "The index lives under internal documentation.",
+        "The index uses relative links and short descriptions.",
+        "Any gaps are listed as follow-up candidates."
+      ],
+      "references": ["internal/tutorial", "internal/records/README.md", "internal/records"],
+      "outOfScope": [
+        "Rewriting all internal tutorials.",
+        "Publishing internal-only notes to public docs."
+      ]
+    },
+    {
+      "id": "concept-video-outline",
+      "category": "community",
+      "title": "Draft a Proto UI concept video outline",
+      "labels": ["community"],
+      "difficulty": "small",
+      "summary": "Draft a video outline that explains the Proto UI idea for a YouTube-style introduction.",
+      "scope": [
+        "Write a concise outline with sections, talking points, and demo moments.",
+        "Identify which docs pages and demos should be shown.",
+        "Keep the outline implementation-agnostic enough for non-core contributors."
+      ],
+      "acceptance": [
+        "The outline can be used to record a 5-8 minute introductory video.",
+        "The outline explains prototypes, adapters, and the information-flow model without requiring source-code reading.",
+        "The outline links to public docs pages."
+      ],
+      "references": [
+        "README.md",
+        "apps/www/src/content/docs/en/start-here/why-proto-ui.mdx",
+        "apps/www/src/content/docs/en/whitepaper/information-flow-model.md"
+      ],
+      "outOfScope": ["Recording or editing the final video.", "Creating a full marketing campaign."]
+    },
+    {
+      "id": "tutorial-video-outline",
+      "category": "community",
+      "title": "Draft a tutorial video outline for first contributors",
+      "labels": ["community", "docs"],
+      "difficulty": "small",
+      "summary": "Draft a tutorial video outline that walks through a first contribution to Proto UI.",
+      "scope": [
+        "Choose one beginner-friendly contribution path.",
+        "Write the sequence of screen captures and narration beats.",
+        "List commands and docs pages to show."
+      ],
+      "acceptance": [
+        "The outline supports a 10-15 minute tutorial video.",
+        "The outline ends with opening a small PR or draft PR.",
+        "The outline does not depend on unreleased private tooling."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/build/contribute.md",
+        "apps/www/src/content/docs/en/build/prototypes",
+        "internal/issues/v0-good-first-issues.json"
+      ],
+      "outOfScope": ["Recording the video.", "Designing thumbnails or branding assets."]
+    },
+    {
+      "id": "community-playbook",
+      "category": "community",
+      "title": "Draft a community channel maintenance playbook",
+      "labels": ["community"],
+      "difficulty": "small",
+      "summary": "Draft a lightweight playbook for maintaining official QQ, WeChat, Discord, or similar community channels.",
+      "scope": [
+        "Define common channel types and maintainer responsibilities.",
+        "Suggest response patterns for contributor questions, bug reports, and proposal discussions.",
+        "List escalation paths back to GitHub Issues or Discussions."
+      ],
+      "acceptance": [
+        "The playbook is concise enough for maintainers to follow.",
+        "The playbook avoids committing to channels that are not yet official.",
+        "The playbook includes a clear path from chat discussion to tracked GitHub work."
+      ],
+      "references": [
+        "apps/www/src/content/docs/en/project/links.md",
+        "apps/www/src/content/docs/en/build/contribute.md",
+        "internal/records/2026-05-04-v0-good-first-issue-release-plan.zh-CN.md"
+      ],
+      "outOfScope": ["Creating or moderating the channels directly.", "Writing legal policy."]
+    }
+  ]
+}

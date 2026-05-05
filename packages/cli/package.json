@@ -6,6 +6,12 @@
   "bin": {
     "proto-ui": "bin/proto-ui.js"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "!src/**/*.ts",
+    "README.md"
+  ],
   "dependencies": {
     "prompts": "^2.4.2",
     "typescript": "^5.0.0"

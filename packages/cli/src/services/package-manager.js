@@ -31,7 +31,14 @@ export function installPackages(pm, cwd, packages, { dev = false } = {}) {
     args = ['install', '--save-dev', ...packages];
   }
 
-  const result = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: false });
+  // Windows: spawnSync needs shell:true to resolve npm/yarn/pnpm via .cmd shims.
+  // Node 18.20+ blocks .cmd/.bat under shell:false (CVE-2024-27980 mitigation).
+  const isWindows = process.platform === 'win32';
+  const result = spawnSync(cmd, args, {
+    cwd,
+    stdio: 'inherit',
+    shell: isWindows,
+  });
   if (result.error) throw result.error;
   if (result.status !== 0) {
     throw new Error(`${cmd} ${args.join(' ')} exited with code ${result.status ?? 'unknown'}`);

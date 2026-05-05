@@ -162,6 +162,7 @@ if (failedBuilds.length > 0) {
       console.log(`  ${line}`);
     }
   }
+  process.exit(1);
 }
 
 console.log('');

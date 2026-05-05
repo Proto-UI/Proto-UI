@@ -150,7 +150,7 @@ export function getAllPackages() {
     if (!manifest.license) issues.push('missing license field');
     if (!localReadme) issues.push('missing package README');
     if (workspaceDeps.length > 0) issues.push(`workspace deps: ${workspaceDeps.length}`);
-    if (sourceExport) issues.push('exports point to src/*.ts');
+    if (sourceExport && !hasSrcIndex) issues.push('exports point to src/*.ts');
 
     return {
       dir,

@@ -95,7 +95,14 @@ jobs:
           esac
 
           corepack enable
+          # Activate the lockfile-selected pnpm so any bare `pnpm` invocation
+          # (including child spawns inside scripts/release/lib.mjs) honors the
+          # version we picked, instead of falling back to package.json#packageManager.
+          corepack prepare pnpm@"${PNPM_VERSION}" --activate
           echo "PROTO_PNPM_VERSION=${PNPM_VERSION}" >> "$GITHUB_ENV"
+          # Tell corepack to ignore package.json#packageManager so child processes
+          # spawning bare `pnpm` see the activated version.
+          echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
           corepack pnpm@"${PNPM_VERSION}" --version
 
       - name: Install

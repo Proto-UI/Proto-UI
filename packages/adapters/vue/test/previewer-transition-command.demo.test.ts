@@ -22,9 +22,36 @@ function clickRef(host: HTMLElement, ref: string) {
   el?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 }
 
-function getStateLabel(host: HTMLElement) {
-  const label = host.querySelector('[data-demo-ref="stateLabel"]') as HTMLElement | null;
-  return label?.textContent?.trim() ?? '';
+// Source of truth is the prototype's reflected attribute, not the demo's
+// stateLabel textContent. The demo updates the label through a
+// MutationObserver subscribed to `data-transition-state` changes, but
+// happy-dom's MutationObserver callback dispatch isn't reliably aligned
+// with rAF/microtask flushes — under load we routinely observed the
+// attribute already at the new state while the label was still stale,
+// which made the previous label-based assertion flake at ~40-50% locally.
+// Reading the attribute directly tests the state machine itself, which is
+// what this test cares about; the demo-renderer's label binding has its
+// own coverage in the previewer/demo-renderer tests.
+function getTransitionState(host: HTMLElement) {
+  const el = host.querySelector('[data-transition-state]') as HTMLElement | null;
+  return el?.getAttribute('data-transition-state') ?? '';
+}
+
+// Poll until the prototype reaches `target`, then return the current state
+// for the caller's expect(). The earlier version drove every transition step
+// with a fixed `flushFrames(3)` and a direct equality check, which was racy:
+// every Vue→presence→adapter step takes a variable number of rAFs, so a
+// single fixed wait flaked at ~40% locally with failures spread across all
+// four assertions, matching different micro-task vs rAF interleavings rather
+// than a single broken step. All four labels we wait for ('entered',
+// 'leaving', 'closed', 'entering') are stable in command mode (no
+// auto-advance), so polling can only end on the target — it cannot overshoot
+// to a later state.
+async function waitForState(host: HTMLElement, target: string, maxFrames = 32) {
+  for (let i = 0; i < maxFrames && getTransitionState(host) !== target; i++) {
+    await flushFrames(1);
+  }
+  return getTransitionState(host);
 }
 
 describe('PrototypePreviewer demo-renderer / vue command transition', () => {
@@ -48,26 +75,18 @@ describe('PrototypePreviewer demo-renderer / vue command transition', () => {
 
       // Normalize initial appear/open flow: entering -> entered.
       clickRef(host, 'completeBtn');
-      await flushFrames(3);
-      expect(getStateLabel(host)).toBe('entered');
+      expect(await waitForState(host, 'entered')).toBe('entered');
 
       // entered -> leaving -> closed, then wait for soft-unmount to settle.
       clickRef(host, 'leaveBtn');
-      await flushFrames(3);
-      expect(getStateLabel(host)).toBe('leaving');
+      expect(await waitForState(host, 'leaving')).toBe('leaving');
 
       clickRef(host, 'completeBtn');
-      await flushFrames(6);
-      expect(getStateLabel(host)).toBe('closed');
+      expect(await waitForState(host, 'closed')).toBe('closed');
 
       // A single Enter click should be enough to reach entering.
       clickRef(host, 'enterBtn');
-
-      for (let i = 0; i < 8 && getStateLabel(host) !== 'entering'; i++) {
-        await flushFrames(2);
-      }
-
-      expect(getStateLabel(host)).toBe('entering');
+      expect(await waitForState(host, 'entering')).toBe('entering');
       expect(host.querySelector('[data-demo-ref="transition"]')).not.toBeNull();
     } finally {
       await session.destroy();

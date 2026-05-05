@@ -26,6 +26,8 @@
     "release:stage:launch": "node scripts/release/publish.mjs --dry-run --profile launch --check-governance",
     "release:publish": "node scripts/release/publish.mjs --publish",
     "release:publish:launch": "node scripts/release/publish.mjs --publish --profile launch --check-governance",
+    "issues:good-first:dry-run": "node scripts/issues/publish-good-first-issues.mjs --dry-run",
+    "issues:good-first:publish": "node scripts/issues/publish-good-first-issues.mjs --publish",
     "check:types:workspace": "tsc -p tsconfig.workspace.json --noEmit",
     "check:types:docs": "pnpm --filter apps-www check",
     "check:types": "pnpm -s check:types:workspace && pnpm -s check:types:docs",
