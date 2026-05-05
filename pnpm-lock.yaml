@@ -510,6 +510,9 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-boundary':
+        specifier: workspace:*
+        version: link:../boundary
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
