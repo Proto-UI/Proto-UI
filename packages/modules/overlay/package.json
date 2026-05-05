@@ -6,7 +6,6 @@
   "dependencies": {
     "@proto.ui/core": "workspace:*",
     "@proto.ui/module-base": "workspace:*",
-    "@proto.ui/module-boundary": "workspace:*",
     "@proto.ui/types": "workspace:*"
   },
   "exports": {
