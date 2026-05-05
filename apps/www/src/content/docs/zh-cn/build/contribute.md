@@ -118,6 +118,13 @@ Prototype 方向更关心组件本身的交互语义，例如：
 - 帮已有原型补齐更合理的状态 / 反馈表达
 - 让某个原型在更多场景下保持更高保真
 
+**相关模板与入口：**
+
+- [原型提案 Issue 模板](https://github.com/Proto-UI/Proto-UI/issues/new?template=prototype-proposal.md)
+- [Good First Issue：prototype](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aprototype)
+- [编写一个定制的单体原型](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/)
+- [原型作者检查清单](/zh-cn/build/prototypes/checklist/)
+
 ---
 
 ### Adapter（适配器）
@@ -160,6 +167,12 @@ Adapter 方向需要处理的问题通常包括：
 - 为新宿主建立最小可工作的适配器
 - 补足某类宿主缺失能力的承接方案
 
+**相关模板与入口：**
+
+- [适配器提案 Issue 模板](https://github.com/Proto-UI/Proto-UI/issues/new?template=adapter-proposal.md)
+- [Good First Issue：adapter](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aadapter)
+- [Adapter 指南](/zh-cn/build/adapter-guide/)（施工中）
+
 Adapter 会比 Prototype 更偏深水区，  
 但它也非常关键，因为 Proto UI 最终能否进入真实项目，取决于翻译层是否可靠。
 
@@ -195,6 +208,12 @@ Adapter 会比 Prototype 更偏深水区，
 - 帮现有原型 / 适配器找出“不一致但还没被约束”的位置
 - 把已有共识整理成可验证的契约
 
+**相关模板与入口：**
+
+- [Good First Issue：automation](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aautomation)
+- [Good First Issue：prototype](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aprototype)（部分涉及测试的 prototype issue）
+- [契约与测试](/zh-cn/build/contracts-and-tests/)（施工中）
+
 ---
 
 ### Docs / Demo（文档与示例）
@@ -226,6 +245,11 @@ Proto UI 目前的理论密度不低，
 - 为某个原型补最小示例
 - 把某个抽象概念转成更容易理解的 Demo
 - 补充 FAQ、导读、贡献入口等生态文档
+
+**相关模板与入口：**
+
+- [文档需求 Issue 模板](https://github.com/Proto-UI/Proto-UI/issues/new?template=docs-request.md)
+- [Good First Issue：docs](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Adocs)
 
 ---
 
@@ -259,6 +283,11 @@ Proto UI 的成长不只来自代码。
 - 帮忙维护 FAQ 或讨论索引
 - 把一些零散讨论沉淀成可引用的结论
 - 协助新贡献者找到适合自己的入口
+
+**相关入口：**
+
+- [Good First Issue：community](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Acommunity)
+- [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions)
 
 ---
 
@@ -302,6 +331,31 @@ Proto UI 的成长不只来自代码。
 
 Proto UI 目前的理论与工程都还在逐步收敛。  
 越早对齐边界，后面的返工就越少。
+
+### 从 Good First Issue 开始
+
+我们维护了一批专门为新贡献者准备的 [Good First Issue](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22)，每个 issue 都包含了明确的目标、范围、验收标准和参考资料。
+
+这些 issue 按分类标记，方便你快速找到感兴趣的方向：
+
+- [prototype](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aprototype) — 原型相关
+- [adapter](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aadapter) — 适配器相关
+- [docs](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Adocs) — 文档相关
+- [community](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Acommunity) — 社区相关
+- [automation](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aautomation) — 自动化 / 测试相关
+
+找到感兴趣的 issue 后，在 issue 下留言说明你想接手。  
+如果对范围或方案不确定，直接在 issue 里提问 —— 在写代码之前先对齐边界，能省下大量时间。
+
+此外，如果你想提出新想法，也可以通过 Issue 模板提交：
+
+- [原型提案](https://github.com/Proto-UI/Proto-UI/issues/new?template=prototype-proposal.md)
+- [适配器提案](https://github.com/Proto-UI/Proto-UI/issues/new?template=adapter-proposal.md)
+- [文档需求](https://github.com/Proto-UI/Proto-UI/issues/new?template=docs-request.md)
+
+需要说明的是：提交提案不代表一定会被接受。  
+Proto UI 目前仍处于早期收敛阶段，维护者会根据当前优先级、边界判断和生态一致性来评估每个提案。  
+建议在提交正式提案之前，先在 [Discussions](https://github.com/Proto-UI/Proto-UI/discussions) 或社群里讨论方向。
 
 ---
 
@@ -426,6 +480,8 @@ Proto UI 欢迎社区原型和社区适配器的存在。
 如果你还不确定从哪里开始，  
 先从一个小问题、一个小原型，或者一段文档修订开始，往往是更好的方式。
 
+浏览已开放的 [Good First Issue](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22)，找到和你兴趣匹配的带 scope 的任务。
+
 ---
 
 ## 还有别的问题？
@@ -434,5 +490,5 @@ Proto UI 欢迎社区原型和社区适配器的存在。
 更具体的流程、规范和仓库协作细节，会放在对应仓库的开发文档里。
 
 如果你对贡献方向、边界判断或当前优先级还有疑问，  
-欢迎继续到讨论区或社群里交流。  
+欢迎继续到 [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions) 或社群里交流。  
 很多问题只要先对齐方向，后面的推进会轻松很多。
