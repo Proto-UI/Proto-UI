@@ -219,6 +219,23 @@ Proto UI 可以承认这种方向存在，并把它视作潜在的 `host` 通路
 因此，信息通路模型是开放的，  
 但 Proto UI 对哪些通路应当进入核心原型，仍然会保持审慎。
 
+下图总结了上文描述的关系：
+
+```mermaid
+graph TB
+    User["用户<br/>User"] -->|"event"| Component["组件<br/>Component"]
+    Component -->|"feedback"| User
+    Maker["组装者<br/>Maker"] -->|"props"| Component
+    Component -->|"expose"| Maker
+    Other["其他组件<br/>Other Component"] <-.->|"context"| Component
+    Component --- State["state"]
+    Component --- Lifecycle["lifecycle"]
+    Component --- Meta["meta"]
+    Host["宿主<br/>Host"] -.->|"host（潜在）"| Component
+```
+
+*图示：信息通路模型。组件通过 event、feedback、props、expose、context 与 User、Maker、Other Component 交换信息。内部维度（state、lifecycle、meta）处理不直接属于外部交换的部分。host 通路（虚线）为潜在扩展。*
+
 ---
 
 ## 这一篇没有展开什么？

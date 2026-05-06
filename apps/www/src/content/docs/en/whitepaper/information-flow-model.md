@@ -219,6 +219,23 @@ The reason is simple:
 So the Information Flow Model is open,  
 but Proto UI still remains cautious about which flows should enter the core prototype.
 
+The following diagram summarizes the relationships described above:
+
+```mermaid
+graph TB
+    User["User"] -->|"event"| Component["Component"]
+    Component -->|"feedback"| User
+    Maker["Maker"] -->|"props"| Component
+    Component -->|"expose"| Maker
+    Other["Other Component"] <-.->|"context"| Component
+    Component --- State["state"]
+    Component --- Lifecycle["lifecycle"]
+    Component --- Meta["meta"]
+    Host["Host"] -.->|"host (potential)"| Component
+```
+
+*Figure: The Information Flow Model. The component exchanges information with User, Maker, and Other Component through event, feedback, props, expose, and context. Internal dimensions (state, lifecycle, meta) handle aspects that do not directly belong to external exchange. The host flow (dotted) is a potential extension.*
+
 ---
 
 ## What does this article not expand on?
