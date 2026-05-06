@@ -25,7 +25,7 @@ function setupSliderRoot(def: DefHandle<SliderRootProps, SliderRootExposes>): vo
 
   def.expose.event('valueChange', { payload: 'json' });
 
-  const value = def.state.number('value', 0);
+  const value = def.state.numberDiscrete('value', 0, {});
   const disabled = def.state.bool('disabled', false);
   def.expose.state('value', value);
   def.expose.state('disabled', disabled);
@@ -69,7 +69,7 @@ function setupSliderRoot(def: DefHandle<SliderRootProps, SliderRootExposes>): vo
     disabled.set(!!next.disabled, 'reason: props.watch(disabled)');
   });
 
-  def.event.on('slide.commit', (run) => {
+  def.event.on('slide.commit' as any, (run: any) => {
     if (disabled.get()) return;
     const nextValue = run.event.payload?.value as number | undefined;
     if (nextValue === undefined) return;
