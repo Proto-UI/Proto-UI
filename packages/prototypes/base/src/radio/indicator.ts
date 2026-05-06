@@ -35,6 +35,9 @@ function setupRadioItem(def: DefHandle<RadioItemProps, RadioItemExposes>): void 
 
   def.lifecycle.onCreated((run) => {
     currentItemValue = run.props.get().value ?? '';
+    const ctx = run.context.read(RADIO_GROUP_CONTEXT);
+    const isChecked = ctx.value !== '' && ctx.value === currentItemValue;
+    checked.set(isChecked, 'reason: lifecycle.onCreated => sync initial checked from group');
   });
 
   def.event.on('press.commit', (run) => {
