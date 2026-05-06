@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asToggle } from '../toggle';
+import { asButton } from '../button';
 import { RADIO_GROUP_CONTEXT, RADIO_GROUP_FAMILY } from './shared';
 import type {
   RadioItemAsHookContract,
@@ -19,9 +19,9 @@ function setupRadioItem(def: DefHandle<RadioItemProps, RadioItemExposes>): void 
     disabled: false,
   });
 
-  asToggle();
+  asButton();
 
-  const checked = def.state.bool('checked', false);
+  const checked = def.state.fromAccessibility('checked');
   def.expose.state('checked', checked);
 
   let currentItemValue = '';
