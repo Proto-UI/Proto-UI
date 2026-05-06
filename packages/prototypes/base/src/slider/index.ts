@@ -1,4 +1,4 @@
-export { asSliderRoot, default } from './root';
+export { asSliderRoot, default as sliderRoot } from './root';
 export type {
   SliderRootProps,
   SliderRootExposes,

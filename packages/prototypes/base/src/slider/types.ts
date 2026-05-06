@@ -1,4 +1,4 @@
-import type { ExposeEvent, ExposeState, State } from '@proto.ui/core';
+import { ExposeEvent, ExposeState, State } from '@proto.ui/core';
 
 export interface SliderRootProps {
   value?: number;
@@ -12,10 +12,10 @@ export interface SliderRootProps {
 
 export type SliderRootExposes = {
   value: ExposeState<number>;
+  disabled: ExposeState<boolean>;
   min: ExposeState<number>;
   max: ExposeState<number>;
   step: ExposeState<number>;
-  disabled: ExposeState<boolean>;
   orientation: ExposeState<string>;
   valueChange: ExposeEvent<{ value: number }>;
 };

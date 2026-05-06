@@ -1,0 +1,34 @@
+---
+title: 'Slider'
+desp: 'Slider'
+description: 'Slider base prototype'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+<div class="slider-demo-container">
+  <PrototypePreviewer
+    demoId="demo-base-slider"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+The Slider prototype provides a headless value-selection control with configurable min, max, and step.
+
+- **value**: controlled via `value` prop, or uncontrolled via `defaultValue`.
+- **min / max / step**: define the value range and increment.
+- **disabled**: suppresses value changes.
+- **orientation**: `"horizontal"` (default) or `"vertical"`.
+
+The slider emits a `valueChange` event whenever the value changes. Host adapters should dispatch `slide.commit` events to drive the slider.
+
+## Disabled
+
+<PrototypePreviewer
+  demoId="demo-base-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>

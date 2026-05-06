@@ -1,0 +1,34 @@
+---
+title: 'Slider'
+desp: 'Slider'
+description: 'Slider 基础原型'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+<div class="slider-demo-container">
+  <PrototypePreviewer
+    demoId="demo-base-slider"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+Slider 原型提供无头（headless）的值选择控件，支持可配置的 min、max 和 step。
+
+- **value**: 通过 `value` prop 受控，或通过 `defaultValue` 非受控。
+- **min / max / step**: 定义取值范围和步长。
+- **disabled**: 禁用时抑制值变化。
+- **orientation**: `"horizontal"`（默认）或 `"vertical"`。
+
+slider 在值变化时触发 `valueChange` 事件。宿主适配器应通过 `slide.commit` 事件驱动 slider。
+
+## 禁用状态
+
+<PrototypePreviewer
+  demoId="demo-base-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>
