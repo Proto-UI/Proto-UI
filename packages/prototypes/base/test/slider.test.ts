@@ -13,6 +13,13 @@ import {
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
 } from '@proto.ui/module-as-trigger';
+import {
+  ANATOMY_GET_PROTO_CAP,
+  ANATOMY_INSTANCE_TOKEN_CAP,
+  ANATOMY_ORDER_OBSERVER_CAP,
+  ANATOMY_PARENT_CAP,
+  ANATOMY_ROOT_TARGET_CAP,
+} from '@proto.ui/module-anatomy';
 import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
 import slider from '../src/slider';
 import { asSliderRoot } from '../src/slider';
@@ -23,6 +30,7 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
   const globalTarget = new EventTarget();
   const emitted: Array<{ key: string; payload: unknown }> = [];
   let exposes: Record<string, any> | null = null;
+  const instance = {};
 
   const host: RuntimeHost<any> = {
     prototypeName: 'base-slider-contract',
@@ -46,6 +54,18 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
       ]);
       wiring.attach('expose-state', [
         [EXPOSE_STATE_SET_EXPOSES_CAP, (next: Record<string, unknown>) => (exposes = next)],
+      ]);
+      wiring.attach('anatomy', [
+        [ANATOMY_INSTANCE_TOKEN_CAP, instance],
+        [ANATOMY_PARENT_CAP, () => null],
+        [ANATOMY_GET_PROTO_CAP, () => null],
+        [ANATOMY_ROOT_TARGET_CAP, (inst: unknown) => inst as EventTarget],
+        [
+          ANATOMY_ORDER_OBSERVER_CAP,
+          (_target: unknown, _notify: () => void) => {
+            return () => {};
+          },
+        ],
       ]);
     },
   };

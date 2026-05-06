@@ -69,9 +69,9 @@ function setupSliderRoot(def: DefHandle<SliderRootProps, SliderRootExposes>): vo
     disabled.set(!!next.disabled, 'reason: props.watch(disabled)');
   });
 
-  def.event.on('slide.commit' as any, (run: any) => {
+  def.event.on('slide.commit' as any, (run: any, ev: any) => {
     if (disabled.get()) return;
-    const nextValue = run.event.payload?.value as number | undefined;
+    const nextValue = ev?.detail?.value as number | undefined;
     if (nextValue === undefined) return;
     const min = run.props.get().min ?? 0;
     const max = run.props.get().max ?? 100;
