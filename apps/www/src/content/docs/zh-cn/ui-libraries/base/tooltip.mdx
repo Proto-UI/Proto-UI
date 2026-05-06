@@ -1,0 +1,30 @@
+---
+title: 'Tooltip'
+desp: 'Tooltip'
+description: 'Tooltip 基础原型'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+<div class="tooltip-demo-container">
+  <PrototypePreviewer
+    demoId="demo-base-tooltip"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+Tooltip 家族提供基于 hover 和 focus 的提示框行为。
+
+- **tooltip-root**: 持有 `open` 状态，通过 context 管理 hover/focus 追踪，提供 `openTooltip`/`close`/`toggle` 方法。
+- **tooltip-trigger**: 触发 tooltip 的元素，响应 hover 或 focus。
+- **tooltip-content**: 浮层内容，通过 overlay 定位。关闭时隐藏。
+
+传入 `open` 以受控方式使用 tooltip，或传入 `defaultOpen` 以非受控方式使用。使用 `delay` 配置显示延迟（毫秒）。
+
+<style>{`
+  .tooltip-demo-container [data-state="closed"] {
+    display: none;
+  }
+`}</style>
