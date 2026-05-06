@@ -20,3 +20,5 @@ export { default as dialog } from './dialog';
 export { default as tooltipRoot } from './tooltip/root';
 export { default as tooltipTrigger } from './tooltip/trigger';
 export { default as tooltipContent } from './tooltip/content';
+export * from './slider';
+export { default as slider } from './slider';
