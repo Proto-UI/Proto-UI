@@ -4,6 +4,8 @@ desp: '如何阅读规范'
 description: '如何阅读规范'
 ---
 
+![1777827879475](image/introduction/1777827879475.png)
+
 ## 这篇文章要回答什么？
 
 - `Specifications` 这一章在整个文档站里承担什么职责。
