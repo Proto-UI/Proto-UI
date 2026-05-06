@@ -31,22 +31,10 @@ function setupRadioGroupRoot(
   let controlled = false;
   let emitValueChange: ((v: string) => void) | null = null;
 
-  const selectItem = (itemValue: string) => {
-    if (disabled.get()) return;
-    const prev = value.get();
-    if (itemValue === prev) return;
-    value.set(itemValue, 'reason: selectItem');
-    pushContext();
-    if (!controlled) {
-      emitValueChange?.(itemValue);
-    }
-  };
-
   const updateContext = def.context.provide(RADIO_GROUP_CONTEXT, {
     value: '',
     disabled: false,
     controlled: false,
-    selectItem,
   });
 
   const pushContext = () => {
@@ -54,9 +42,18 @@ function setupRadioGroupRoot(
       value: value.get(),
       disabled: disabled.get(),
       controlled,
-      selectItem,
     });
   };
+
+  def.context.subscribe(RADIO_GROUP_CONTEXT, (_run, next) => {
+    if (controlled) return;
+    const nextValue = next.value ?? '';
+    const prev = value.get();
+    if (nextValue === prev) return;
+    value.set(nextValue, 'reason: context.subscribe => item selected');
+    pushContext();
+    emitValueChange?.(nextValue);
+  });
 
   def.lifecycle.onCreated((run) => {
     emitValueChange = (v: string) => run.event.emit('valueChange', { value: v });

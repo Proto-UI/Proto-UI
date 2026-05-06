@@ -5,7 +5,6 @@ export type RadioGroupContextValue = {
   value: string;
   disabled: boolean;
   controlled: boolean;
-  selectItem: (itemValue: string) => void;
 };
 
 export const RADIO_GROUP_FAMILY = createAnatomyFamily('base-radio-group', {

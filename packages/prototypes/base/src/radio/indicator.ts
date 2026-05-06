@@ -37,13 +37,12 @@ function setupRadioItem(def: DefHandle<RadioItemProps, RadioItemExposes>): void 
     currentItemValue = run.props.get().value ?? '';
   });
 
-  def.event.on('click', (run) => {
+  def.event.on('press.commit', (run) => {
     const itemValue = run.props.get().value;
     if (!itemValue) return;
-    const groupCtx = run.context.get(RADIO_GROUP_CONTEXT);
-    if (groupCtx && typeof groupCtx.selectItem === 'function') {
-      groupCtx.selectItem(itemValue);
-    }
+    const ctx = run.context.read(RADIO_GROUP_CONTEXT);
+    if (ctx && ctx.disabled) return;
+    run.context.update(RADIO_GROUP_CONTEXT, (prev) => ({ ...prev, value: itemValue }));
   });
 }
 
