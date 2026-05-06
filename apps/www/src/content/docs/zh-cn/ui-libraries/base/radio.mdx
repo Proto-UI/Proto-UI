@@ -1,0 +1,35 @@
+---
+title: 'Radio Group'
+desp: 'Radio Group'
+description: 'Radio Group 基础原型'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+<div class="radio-demo-container">
+  <PrototypePreviewer
+    demoId="demo-base-radio-group"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+Radio Group 家族提供基于上下文的单选行为。
+
+- **radio-group-root**：持有 `value` 状态，通过上下文管理选中项，并发出 `valueChange` 事件。
+- **radio-item**：从 group 上下文中读取 checked 状态，点击时调用 `selectItem`。
+
+传入 `value` 以受控方式使用 radio group，或传入 `defaultValue` 以非受控方式使用。向 root 传入 `disabled` 可禁用全部 item，也可单独为某个 item 设置 `disabled`。
+
+<style>{`
+  .radio-demo-container [data-checked] {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+  .radio-demo-container [data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`}</style>

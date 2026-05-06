@@ -1,0 +1,35 @@
+---
+title: 'Radio Group'
+desp: 'Radio Group'
+description: 'Radio group base prototype'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+<div class="radio-demo-container">
+  <PrototypePreviewer
+    demoId="demo-base-radio-group"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+The radio group family provides context-based single-selection behavior.
+
+- **radio-group-root**: Holds the `value` state, manages selection via context, and emits `valueChange`.
+- **radio-item**: Reads checked state from the group context, calls `selectItem` on click.
+
+Pass `value` to control the radio group externally, or `defaultValue` for uncontrolled usage. Pass `disabled` to the root to disable all items, or to individual items for per-item control.
+
+<style>{`
+  .radio-demo-container [data-checked] {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+  .radio-demo-container [data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`}</style>
