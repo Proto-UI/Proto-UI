@@ -1,0 +1,42 @@
+---
+title: 'Checkbox'
+desp: 'Checkbox'
+description: 'Checkbox base prototype'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+The Checkbox base prototype provides checked, unchecked, disabled, and indeterminate interactions on top of Toggle semantics.
+
+<div>
+  <PrototypePreviewer
+    demoId="demo-base-checkbox"
+    initialRuntime="wc"
+    runtimes={['wc']}
+    hasCode={true}
+  />
+</div>
+
+## Anatomy
+
+Checkbox is split into root and indicator parts connected through the anatomy system.
+
+- **Root** (`base-checkbox-root`) manages Toggle state (`checked`, `checkedChange`), disabled behavior, and the additional `indeterminate` state.
+- **Indicator** (`base-checkbox-indicator`) reads the root `checked` and `indeterminate` states through anatomy runtime access and reflects them for rendering. It does not own checkbox state.
+
+The `base-checkbox` anatomy family uses a `contains` relation from root to indicator. A checkbox is expected to have at least one indicator, and may have more than one indicator when multiple visual surfaces need the same indicator semantics.
+
+In the Web Components preview runtime, prototype IDs are registered with a `wc-` tag prefix: `wc-base-checkbox-root` and `wc-base-checkbox-indicator`.
+
+## Indeterminate Behavior
+
+`indeterminate` may be uncontrolled via `defaultIndeterminate` or controlled via `indeterminate`.
+
+When an enabled indeterminate checkbox is pressed:
+
+1. `checked` follows the normal `asToggle()` checked behavior and emits `checkedChange`.
+2. The root requests `indeterminate: false` by emitting `indeterminateChange`.
+3. If `indeterminate` is uncontrolled, the root also clears its internal indeterminate state.
+4. If `indeterminate` is controlled, the external owner must handle `indeterminateChange` and pass `indeterminate={false}` back in.
+
+Disabled checkboxes do not change checked or indeterminate state on press.

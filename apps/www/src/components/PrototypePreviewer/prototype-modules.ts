@@ -83,6 +83,14 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/base/src/tooltip/content');
     registerPrototype('base-tooltip-content', mod.default);
   },
+  'base-checkbox-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/checkbox/root');
+    registerPrototype('base-checkbox-root', mod.default);
+  },
+  'base-checkbox-indicator': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/checkbox/indicator');
+    registerPrototype('base-checkbox-indicator', mod.default);
+  },
   'base-transition': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/transition/transition');
     registerPrototype('base-transition', mod.default);

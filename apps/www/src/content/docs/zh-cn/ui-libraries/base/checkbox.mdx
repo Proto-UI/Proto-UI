@@ -1,0 +1,42 @@
+---
+title: 'Checkbox'
+desp: 'Checkbox'
+description: 'Checkbox 基础原型'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+Checkbox 基础原型在 Toggle 语义之上提供 checked、unchecked、disabled 和 indeterminate 交互能力。
+
+<div>
+  <PrototypePreviewer
+    demoId="demo-base-checkbox"
+    initialRuntime="wc"
+    runtimes={['wc']}
+    hasCode={true}
+  />
+</div>
+
+## 结构
+
+Checkbox 通过 anatomy 系统拆分为 root 和 indicator 两个部分。
+
+- **Root** (`base-checkbox-root`) 管理 Toggle 状态（`checked`、`checkedChange`）、disabled 行为以及额外的 `indeterminate` 状态。
+- **Indicator** (`base-checkbox-indicator`) 通过 anatomy 运行时访问读取 root 的 `checked` 和 `indeterminate` 状态，并将这些状态反映给渲染层。它不独立拥有 checkbox 状态。
+
+`base-checkbox` anatomy family 使用 root 到 indicator 的 `contains` 关系。Checkbox 预期至少有一个 indicator；当多个视觉区域需要表达同一份 indicator 语义时，也允许存在多个 indicator。
+
+在 Web Components 预览运行时中，prototype ID 会注册为带 `wc-` 前缀的标签：`wc-base-checkbox-root` 和 `wc-base-checkbox-indicator`。
+
+## Indeterminate 行为
+
+`indeterminate` 可以通过 `defaultIndeterminate` 作为非受控状态使用，也可以通过 `indeterminate` 作为受控状态使用。
+
+当启用状态下的 indeterminate checkbox 被按下时：
+
+1. `checked` 遵循正常的 `asToggle()` checked 行为，并发出 `checkedChange`。
+2. Root 通过 `indeterminateChange` 请求将 `indeterminate` 清为 `false`。
+3. 如果 `indeterminate` 是非受控状态，root 会同时清除内部 indeterminate 状态。
+4. 如果 `indeterminate` 是受控状态，外部 owner 需要处理 `indeterminateChange`，并重新传入 `indeterminate={false}`。
+
+Disabled checkbox 在按下时不会改变 checked 或 indeterminate 状态。
