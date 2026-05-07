@@ -18,7 +18,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 The radio group family provides context-based single-selection behavior.
 
 - **radio-group-root**: Holds the `value` state, manages selection via context, and emits `valueChange`.
-- **radio-item**: Reads checked state from the group context, calls `selectItem` on click.
+- **radio-item**: Reads checked state from the group context and requests a value change on press.
 
 Pass `value` to control the radio group externally, or `defaultValue` for uncontrolled usage. Pass `disabled` to the root to disable all items, or to individual items for per-item control.
 

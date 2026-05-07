@@ -1,4 +1,4 @@
-import { ExposeEvent, ExposeMethod, ExposeState, State } from '@proto.ui/core';
+import { ExposeEvent, ExposeMethod, ExposeState, FocusRequestOptions, State } from '@proto.ui/core';
 
 export interface RadioGroupRootProps {
   value?: string;
@@ -35,7 +35,7 @@ export type RadioItemExposes = {
   focusVisible: ExposeState<boolean>;
   pressed: ExposeState<boolean>;
   click: ExposeEvent<void>;
-  focusSelf: ExposeMethod<() => void>;
+  focusSelf: ExposeMethod<(options?: FocusRequestOptions) => void>;
 };
 
 export type RadioItemStateHandles = {

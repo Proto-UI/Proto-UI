@@ -15,6 +15,6 @@ At the base layer, a prototype should stop at interaction semantics that are bro
 - active item, roving focus, and typeahead
 - narrow policy surfaces for item commit close and open entry (`closeOnItemCommit` / `closeOnCommit`, `openEntry` / `openEntryValue`)
 
-It does not, at this layer, define persistent selection, checkbox/radio item semantics, or submenu anatomy. The transient active navigation state is kept internal for now instead of being committed as root API. Those should be composed above base prototypes instead of being precommitted here.
+Dropdown-menu does not, at this layer, define persistent selection, checked/radio item semantics, or submenu anatomy. The transient active navigation state is kept internal for now instead of being committed as root API. Selection-oriented primitives such as `select` and `radio-group` are modeled as separate base families instead of being folded into menu items.
 
 `select` is the current probe for a slightly different boundary: it still stays protocol-first, but it explicitly keeps a `value` presentation part inside the family. That part is used to validate Proto UI's current value-class component path, where selected text is owned by the prototype and refreshed through explicit update-driven re-render instead of being pushed entirely to the host app.

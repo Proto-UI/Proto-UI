@@ -71,6 +71,14 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/base/src/hover-card/content');
     registerPrototype('base-hover-card-content', mod.default);
   },
+  'base-radio-group-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/radio/root');
+    registerPrototype('base-radio-group-root', mod.default);
+  },
+  'base-radio-item': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/radio/item');
+    registerPrototype('base-radio-item', mod.default);
+  },
   'base-transition': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/transition/transition');
     registerPrototype('base-transition', mod.default);

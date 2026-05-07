@@ -14,7 +14,7 @@ export * from './dialog';
 export * from './tools';
 export * from './radio';
 export { default as radioGroupRoot } from './radio/root';
-export { default as radioItem } from './radio/indicator';
+export { default as radioItem } from './radio/item';
 export { default as dropdown } from './dropdown';
 export { default as select } from './select';
 export { default as hoverCard } from './hover-card';

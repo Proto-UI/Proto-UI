@@ -3,6 +3,7 @@ import type { ContextKey } from '@proto.ui/types';
 
 export type RadioGroupContextValue = {
   value: string;
+  requestedValue: string;
   disabled: boolean;
   controlled: boolean;
 };

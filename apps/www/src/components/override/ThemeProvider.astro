@@ -10,6 +10,7 @@
     const KEY = 'starlight-theme';
     const mql = window.matchMedia('(prefers-color-scheme: light)');
     const getSystem = () => (mql.matches ? 'light' : 'dark');
+    const normalize = (theme) => (theme === 'light' || theme === 'dark' ? theme : 'auto');
 
     // 只保留两态：'light' | 'dark'
     const load = () => {
@@ -26,6 +27,30 @@
     const initial = load() || getSystem();
     apply(initial);
 
+    const updatePickers = (theme = load() || 'auto') => {
+      const nextTheme = normalize(theme);
+      const resolvedTheme = nextTheme === 'auto' ? getSystem() : nextTheme;
+      document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+        const select = picker.querySelector('select');
+        if (select) select.value = nextTheme;
+
+        const tmpl = document.getElementById('starlight-theme-icons');
+        const newIcon = tmpl && tmpl.content.querySelector('.' + resolvedTheme);
+        if (!newIcon) return;
+
+        const oldIcon = picker.querySelector('svg.label-icon');
+        if (oldIcon) {
+          oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+        }
+      });
+
+      queueMicrotask(() => {
+        document.dispatchEvent(
+          new CustomEvent('starlight-theme:change', { detail: { theme: resolvedTheme } })
+        );
+      });
+    };
+
     // 供其它组件调用的轻量全局单例
     window.StarlightTheme = {
       get() {
@@ -39,7 +64,7 @@
         } catch (e) {}
         apply(t);
         // 通知所有 UI 控件同步自身外观
-        document.dispatchEvent(new CustomEvent('starlight-theme:change', { detail: { theme: t } }));
+        updatePickers(t);
       },
       toggle() {
         this.set(this.get() === 'light' ? 'dark' : 'light');
@@ -51,11 +76,13 @@
     };
 
     // 如果恰好监听到了主题切换，那么随系统切换主题
+    window.StarlightThemeProvider = {
+      updatePickers,
+    };
+
     mql.addEventListener('change', () => {
       apply(getSystem());
-      document.dispatchEvent(
-        new CustomEvent('starlight-theme:change', { detail: { theme: getSystem() } })
-      );
+      updatePickers('auto');
     });
   })();
 </script>

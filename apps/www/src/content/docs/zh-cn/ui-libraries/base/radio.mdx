@@ -18,7 +18,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 Radio Group 家族提供基于上下文的单选行为。
 
 - **radio-group-root**：持有 `value` 状态，通过上下文管理选中项，并发出 `valueChange` 事件。
-- **radio-item**：从 group 上下文中读取 checked 状态，点击时调用 `selectItem`。
+- **radio-item**：从 group 上下文中读取 checked 状态，并在按下时请求切换选中值。
 
 传入 `value` 以受控方式使用 radio group，或传入 `defaultValue` 以非受控方式使用。向 root 传入 `disabled` 可禁用全部 item，也可单独为某个 item 设置 `disabled`。
 

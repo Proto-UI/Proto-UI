@@ -6,9 +6,7 @@ import type {
   RadioGroupRootProps,
 } from './types';
 
-function setupRadioGroupRoot(
-  def: DefHandle<RadioGroupRootProps, RadioGroupRootExposes>
-): void {
+function setupRadioGroupRoot(def: DefHandle<RadioGroupRootProps, RadioGroupRootExposes>): void {
   def.anatomy.claim(RADIO_GROUP_FAMILY, { role: 'root' });
 
   def.props.define({
@@ -33,6 +31,7 @@ function setupRadioGroupRoot(
 
   const updateContext = def.context.provide(RADIO_GROUP_CONTEXT, {
     value: '',
+    requestedValue: '',
     disabled: false,
     controlled: false,
   });
@@ -40,16 +39,29 @@ function setupRadioGroupRoot(
   const pushContext = () => {
     updateContext({
       value: value.get(),
+      requestedValue: '',
       disabled: disabled.get(),
       controlled,
     });
   };
 
   def.context.subscribe(RADIO_GROUP_CONTEXT, (_run, next) => {
-    if (controlled) return;
+    const requestedValue = next.requestedValue ?? '';
+    if (requestedValue) {
+      if (requestedValue !== value.get()) {
+        emitValueChange?.(requestedValue);
+      }
+      pushContext();
+      return;
+    }
+
     const nextValue = next.value ?? '';
     const prev = value.get();
     if (nextValue === prev) return;
+    if (controlled) {
+      pushContext();
+      return;
+    }
     value.set(nextValue, 'reason: context.subscribe => item selected');
     pushContext();
     emitValueChange?.(nextValue);
@@ -70,11 +82,7 @@ function setupRadioGroupRoot(
     controlled = run.props.isProvided('value');
     if (controlled) {
       const nextValue = next.value ?? '';
-      const prev = value.get();
       value.set(nextValue, 'reason: props.watch(value) => controlled sync');
-      if (nextValue !== prev) {
-        run.event.emit('valueChange', { value: nextValue });
-      }
     }
     pushContext();
   });

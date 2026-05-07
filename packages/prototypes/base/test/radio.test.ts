@@ -100,4 +100,124 @@ describe('prototypes/base: radio', () => {
     root.remove();
     await Promise.resolve();
   });
+
+  it('radio-item resyncs checked state when its value prop changes', async () => {
+    const root = document.createElement('wc-base-radio-group-root') as any;
+    setElementProps(root, { defaultValue: 'b' });
+    const item = document.createElement('wc-base-radio-item') as any;
+    setElementProps(item, { value: 'a' });
+    root.appendChild(item);
+    document.body.appendChild(root);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const itemExposes = item.getExposes() as any;
+    expect(itemExposes.checked.get()).toBe(false);
+
+    setElementProps(item, { value: 'b' });
+    await Promise.resolve();
+
+    expect(itemExposes.checked.get()).toBe(true);
+
+    root.remove();
+    await Promise.resolve();
+  });
+
+  it('disabled radio-item does not change the selected value', async () => {
+    const root = document.createElement('wc-base-radio-group-root') as any;
+    setElementProps(root, { defaultValue: 'a' });
+    const itemA = document.createElement('wc-base-radio-item') as any;
+    const itemB = document.createElement('wc-base-radio-item') as any;
+    setElementProps(itemA, { value: 'a' });
+    setElementProps(itemB, { value: 'b', disabled: true });
+    root.appendChild(itemA);
+    root.appendChild(itemB);
+    document.body.appendChild(root);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    itemB.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    const rootExposes = root.getExposes() as any;
+    const itemAExposes = itemA.getExposes() as any;
+    const itemBExposes = itemB.getExposes() as any;
+    expect(rootExposes.value.get()).toBe('a');
+    expect(itemAExposes.checked.get()).toBe(true);
+    expect(itemBExposes.checked.get()).toBe(false);
+
+    root.remove();
+    await Promise.resolve();
+  });
+
+  it('disabled radio-group-root prevents item selection', async () => {
+    const root = document.createElement('wc-base-radio-group-root') as any;
+    setElementProps(root, { defaultValue: 'a', disabled: true });
+    const itemA = document.createElement('wc-base-radio-item') as any;
+    const itemB = document.createElement('wc-base-radio-item') as any;
+    setElementProps(itemA, { value: 'a' });
+    setElementProps(itemB, { value: 'b' });
+    root.appendChild(itemA);
+    root.appendChild(itemB);
+    document.body.appendChild(root);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    itemB.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    const rootExposes = root.getExposes() as any;
+    const itemAExposes = itemA.getExposes() as any;
+    const itemBExposes = itemB.getExposes() as any;
+    expect(rootExposes.value.get()).toBe('a');
+    expect(itemAExposes.checked.get()).toBe(true);
+    expect(itemBExposes.checked.get()).toBe(false);
+
+    root.remove();
+    await Promise.resolve();
+  });
+
+  it('controlled radio-group-root emits valueChange without changing value directly', async () => {
+    const root = document.createElement('wc-base-radio-group-root') as any;
+    setElementProps(root, { value: 'a' });
+    const itemA = document.createElement('wc-base-radio-item') as any;
+    const itemB = document.createElement('wc-base-radio-item') as any;
+    setElementProps(itemA, { value: 'a' });
+    setElementProps(itemB, { value: 'b' });
+    root.appendChild(itemA);
+    root.appendChild(itemB);
+    document.body.appendChild(root);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    let emittedValue = '';
+    root.addEventListener('valueChange', (e: any) => {
+      emittedValue = e.detail?.value ?? '';
+    });
+
+    itemB.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+
+    const rootExposes = root.getExposes() as any;
+    const itemAExposes = itemA.getExposes() as any;
+    const itemBExposes = itemB.getExposes() as any;
+    expect(emittedValue).toBe('b');
+    expect(rootExposes.value.get()).toBe('a');
+    expect(itemAExposes.checked.get()).toBe(true);
+    expect(itemBExposes.checked.get()).toBe(false);
+
+    setElementProps(root, { value: 'b' });
+    await Promise.resolve();
+
+    expect(rootExposes.value.get()).toBe('b');
+    expect(itemAExposes.checked.get()).toBe(false);
+    expect(itemBExposes.checked.get()).toBe(true);
+
+    root.remove();
+    await Promise.resolve();
+  });
 });
