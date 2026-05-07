@@ -219,22 +219,64 @@ Proto UI 可以承认这种方向存在，并把它视作潜在的 `host` 通路
 因此，信息通路模型是开放的，  
 但 Proto UI 对哪些通路应当进入核心原型，仍然会保持审慎。
 
-下图总结了上文描述的关系：
+下图总结了上文描述的关系。图注也说明了同一组关系，因此不依赖图片也可以理解：
 
-```mermaid
-graph TB
-    User["用户<br/>User"] -->|"event"| Component["组件<br/>Component"]
-    Component -->|"feedback"| User
-    Maker["组装者<br/>Maker"] -->|"props"| Component
-    Component -->|"expose"| Maker
-    Other["其他组件<br/>Other Component"] <-.->|"context"| Component
-    Component --- State["state"]
-    Component --- Lifecycle["lifecycle"]
-    Component --- Meta["meta"]
-    Host["宿主<br/>Host"] -.->|"host（潜在）"| Component
-```
-
-*图示：信息通路模型。组件通过 event、feedback、props、expose、context 与 User、Maker、Other Component 交换信息。内部维度（state、lifecycle、meta）处理不直接属于外部交换的部分。host 通路（虚线）为潜在扩展。*
+<figure class="information-flow-diagram" style="margin: 2rem 0;">
+  <svg role="img" aria-labelledby="information-flow-diagram-title-zh information-flow-diagram-desc-zh" viewBox="0 0 960 460" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%; height: auto; color: var(--sl-color-text, #111827); font-family: var(--sl-font-system, system-ui, sans-serif);">
+    <title id="information-flow-diagram-title-zh">信息通路模型</title>
+    <desc id="information-flow-diagram-desc-zh">User 的 event 与 Maker 的 props 进入 Component。Component 内部由 intent 和 state 组织行为。feedback 经由 host rendering 输出并回到 User。Other Component 通过 context 与 Component 交换信息，Component 也可以通过 expose 向 Maker 暴露能力。</desc>
+    <defs>
+      <marker id="flow-arrow-accent-zh" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+        <path d="M0 0L10 5L0 10Z" fill="var(--sl-color-accent, #2563eb)" />
+      </marker>
+      <marker id="flow-arrow-muted-zh" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse">
+        <path d="M0 0L10 5L0 10Z" fill="var(--sl-color-gray-4, #94a3b8)" />
+      </marker>
+    </defs>
+    <rect x="32" y="24" width="896" height="390" rx="18" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="480" y="58" text-anchor="middle" fill="currentColor" font-size="24" font-weight="700">信息通路模型</text>
+    <rect x="80" y="76" width="180" height="70" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="170" y="104" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">用户</text>
+    <text x="170" y="128" text-anchor="middle" fill="currentColor" font-size="16" font-weight="650">User</text>
+    <rect x="80" y="190" width="180" height="70" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="170" y="218" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">组装者</text>
+    <text x="170" y="242" text-anchor="middle" fill="currentColor" font-size="16" font-weight="650">Maker</text>
+    <rect x="80" y="322" width="180" height="70" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="170" y="350" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">其他组件</text>
+    <text x="170" y="374" text-anchor="middle" fill="currentColor" font-size="16" font-weight="650">Other Component</text>
+    <rect x="360" y="122" width="260" height="220" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" />
+    <text x="490" y="148" text-anchor="middle" fill="currentColor" font-size="18" font-weight="700">组件</text>
+    <text x="490" y="171" text-anchor="middle" fill="currentColor" font-size="18" font-weight="700">Component</text>
+    <rect x="392" y="184" width="88" height="54" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-accent, #2563eb)" />
+    <text x="436" y="218" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">intent</text>
+    <rect x="500" y="184" width="88" height="54" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-accent, #2563eb)" />
+    <text x="544" y="218" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">state</text>
+    <rect x="392" y="266" width="88" height="42" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="436" y="293" text-anchor="middle" fill="currentColor" font-size="14" font-weight="600">lifecycle</text>
+    <rect x="500" y="266" width="88" height="42" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="544" y="293" text-anchor="middle" fill="currentColor" font-size="14" font-weight="600">meta</text>
+    <rect x="720" y="190" width="170" height="80" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="805" y="218" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">宿主渲染</text>
+    <text x="805" y="243" text-anchor="middle" fill="currentColor" font-size="16" font-weight="650">host rendering</text>
+    <path d="M260 111C308 111 313 177 360 194" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent-zh)" />
+    <rect x="292" y="104" width="66" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="325" y="123" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">event</text>
+    <path d="M260 225L360 225" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent-zh)" />
+    <rect x="293" y="207" width="64" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="325" y="226" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">props</text>
+    <path d="M360 257L260 257" fill="none" stroke="var(--sl-color-gray-4, #94a3b8)" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#flow-arrow-muted-zh)" />
+    <rect x="292" y="263" width="72" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="328" y="282" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">expose</text>
+    <path d="M260 357C308 357 314 313 360 303" fill="none" stroke="var(--sl-color-gray-4, #94a3b8)" stroke-width="2" stroke-dasharray="7 6" marker-start="url(#flow-arrow-muted-zh)" marker-end="url(#flow-arrow-muted-zh)" />
+    <rect x="292" y="332" width="78" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="331" y="351" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">context</text>
+    <path d="M620 230L720 230" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent-zh)" />
+    <rect x="638" y="205" width="94" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="685" y="224" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">feedback</text>
+    <path d="M805 190C805 84 404 64 260 100" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent-zh)" />
+  </svg>
+  <figcaption style="margin-top: 0.75rem; color: var(--sl-color-text-secondary, #64748b); font-size: 0.95rem;">图示：信息通路模型。<code>props</code> 与 <code>event</code> 从 Maker 与 User 进入 Component；<code>intent</code> 与 <code>state</code> 在 Component 内部组织行为，<code>lifecycle</code> 与 <code>meta</code> 仍作为内部维度存在；<code>feedback</code> 经由 host rendering 面向 User 输出；<code>context</code> 连接 Other Component，<code>expose</code> 指回 Maker。</figcaption>
+</figure>
 
 ---
 

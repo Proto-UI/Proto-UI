@@ -219,22 +219,61 @@ The reason is simple:
 So the Information Flow Model is open,  
 but Proto UI still remains cautious about which flows should enter the core prototype.
 
-The following diagram summarizes the relationships described above:
+The following diagram summarizes the relationships described above. The caption describes the same relationships so the model remains understandable without the image:
 
-```mermaid
-graph TB
-    User["User"] -->|"event"| Component["Component"]
-    Component -->|"feedback"| User
-    Maker["Maker"] -->|"props"| Component
-    Component -->|"expose"| Maker
-    Other["Other Component"] <-.->|"context"| Component
-    Component --- State["state"]
-    Component --- Lifecycle["lifecycle"]
-    Component --- Meta["meta"]
-    Host["Host"] -.->|"host (potential)"| Component
-```
-
-*Figure: The Information Flow Model. The component exchanges information with User, Maker, and Other Component through event, feedback, props, expose, and context. Internal dimensions (state, lifecycle, meta) handle aspects that do not directly belong to external exchange. The host flow (dotted) is a potential extension.*
+<figure class="information-flow-diagram" style="margin: 2rem 0;">
+  <svg role="img" aria-labelledby="information-flow-diagram-title information-flow-diagram-desc" viewBox="0 0 960 460" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%; height: auto; color: var(--sl-color-text, #111827); font-family: var(--sl-font-system, system-ui, sans-serif);">
+    <title id="information-flow-diagram-title">Information Flow Model</title>
+    <desc id="information-flow-diagram-desc">User event and Maker props enter the Component. Inside the Component, intent and state organize behavior. Feedback leaves the Component through host rendering and returns to the User. Other Component exchanges context with the Component, and the Component can expose capabilities back to Maker.</desc>
+    <defs>
+      <marker id="flow-arrow-accent" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+        <path d="M0 0L10 5L0 10Z" fill="var(--sl-color-accent, #2563eb)" />
+      </marker>
+      <marker id="flow-arrow-muted" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse">
+        <path d="M0 0L10 5L0 10Z" fill="var(--sl-color-gray-4, #94a3b8)" />
+      </marker>
+    </defs>
+    <rect x="32" y="24" width="896" height="390" rx="18" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="480" y="58" text-anchor="middle" fill="currentColor" font-size="24" font-weight="700">Information Flow Model</text>
+    <rect x="80" y="76" width="180" height="70" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="170" y="119" text-anchor="middle" fill="currentColor" font-size="18" font-weight="650">User</text>
+    <rect x="80" y="190" width="180" height="70" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="170" y="233" text-anchor="middle" fill="currentColor" font-size="18" font-weight="650">Maker</text>
+    <rect x="80" y="322" width="180" height="70" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="170" y="351" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">Other</text>
+    <text x="170" y="374" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">Component</text>
+    <rect x="360" y="122" width="260" height="220" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" />
+    <text x="490" y="156" text-anchor="middle" fill="currentColor" font-size="20" font-weight="700">Component</text>
+    <rect x="392" y="184" width="88" height="54" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-accent, #2563eb)" />
+    <text x="436" y="218" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">intent</text>
+    <rect x="500" y="184" width="88" height="54" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-accent, #2563eb)" />
+    <text x="544" y="218" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">state</text>
+    <rect x="392" y="266" width="88" height="42" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="436" y="293" text-anchor="middle" fill="currentColor" font-size="14" font-weight="600">lifecycle</text>
+    <rect x="500" y="266" width="88" height="42" rx="8" fill="var(--sl-color-bg-nav, #f8fafc)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="544" y="293" text-anchor="middle" fill="currentColor" font-size="14" font-weight="600">meta</text>
+    <rect x="720" y="190" width="170" height="80" rx="10" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="805" y="223" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">host</text>
+    <text x="805" y="247" text-anchor="middle" fill="currentColor" font-size="17" font-weight="650">rendering</text>
+    <path d="M260 111C308 111 313 177 360 194" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent)" />
+    <rect x="292" y="104" width="66" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="325" y="123" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">event</text>
+    <path d="M260 225L360 225" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent)" />
+    <rect x="293" y="207" width="64" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="325" y="226" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">props</text>
+    <path d="M360 257L260 257" fill="none" stroke="var(--sl-color-gray-4, #94a3b8)" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#flow-arrow-muted)" />
+    <rect x="292" y="263" width="72" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="328" y="282" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">expose</text>
+    <path d="M260 357C308 357 314 313 360 303" fill="none" stroke="var(--sl-color-gray-4, #94a3b8)" stroke-width="2" stroke-dasharray="7 6" marker-start="url(#flow-arrow-muted)" marker-end="url(#flow-arrow-muted)" />
+    <rect x="292" y="332" width="78" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="331" y="351" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">context</text>
+    <path d="M620 230L720 230" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent)" />
+    <rect x="638" y="205" width="94" height="28" rx="14" fill="var(--sl-color-bg, #ffffff)" stroke="var(--sl-color-gray-5, #cbd5e1)" />
+    <text x="685" y="224" text-anchor="middle" fill="currentColor" font-size="14" font-weight="650">feedback</text>
+    <path d="M805 190C805 84 404 64 260 100" fill="none" stroke="var(--sl-color-accent, #2563eb)" stroke-width="2" marker-end="url(#flow-arrow-accent)" />
+  </svg>
+  <figcaption style="margin-top: 0.75rem; color: var(--sl-color-text-secondary, #64748b); font-size: 0.95rem;">Figure: The Information Flow Model. <code>props</code> and <code>event</code> enter Component from Maker and User. Inside Component, <code>intent</code> and <code>state</code> organize behavior, while <code>lifecycle</code> and <code>meta</code> remain internal dimensions. <code>feedback</code> reaches User through host rendering. <code>context</code> connects Other Component, and <code>expose</code> points back to Maker.</figcaption>
+</figure>
 
 ---
 
