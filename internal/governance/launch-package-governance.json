@@ -6,7 +6,9 @@
     "@proto.ui/adapter-react",
     "@proto.ui/adapter-vue",
     "@proto.ui/adapter-web-component",
+    "@proto.ui/cli",
     "@proto.ui/prototypes-base",
+    "@proto.ui/prototypes-lucide",
     "@proto.ui/prototypes-shadcn"
   ],
   "publicNonLaunchCommitmentPackages": [

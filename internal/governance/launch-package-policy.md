@@ -73,14 +73,17 @@ The current launch commitment package list for `v0.1.0` is:
 - `@proto.ui/adapter-react`
 - `@proto.ui/adapter-vue`
 - `@proto.ui/adapter-web-component`
+- `@proto.ui/cli`
 - `@proto.ui/prototypes-base`
+- `@proto.ui/prototypes-lucide`
 - `@proto.ui/prototypes-shadcn`
 
 These packages define the main first-release story:
 
 - Proto UI can be consumed through official adapters
+- Proto UI ships an official CLI for project scaffolding
 - Proto UI provides an official base prototype library
-- Proto UI also provides a styled prototype library for practical usage and demos
+- Proto UI also provides styled and icon-driven prototype libraries for practical usage and demos
 
 If a package is not in this list, it is not automatically part of the launch commitment just because it exists in the workspace or is technically publishable.
 
@@ -245,7 +248,9 @@ The `v0.1.0` launch commitment package list is currently:
 - `@proto.ui/adapter-react`
 - `@proto.ui/adapter-vue`
 - `@proto.ui/adapter-web-component`
+- `@proto.ui/cli`
 - `@proto.ui/prototypes-base`
+- `@proto.ui/prototypes-lucide`
 - `@proto.ui/prototypes-shadcn`
 
 Everything else should be judged against whether it supports that frozen first-release story, rather than against whether it exists in the workspace.

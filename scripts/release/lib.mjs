@@ -20,6 +20,11 @@ const PACKAGES_DIR = join(ROOT_DIR, 'packages');
 const ROOT_LICENSE = join(ROOT_DIR, 'LICENSE');
 const ROOT_README = join(ROOT_DIR, 'README.md');
 
+// Windows resolves `pnpm` / `npm` as `.cmd` shims; Node 18.20+ refuses to spawn
+// `.cmd` without a shell (CVE-2024-27980 mitigation), so we opt into shell:true
+// only on win32 to keep POSIX hosts unaffected.
+const IS_WINDOWS = process.platform === 'win32';
+
 const DEFAULT_EXCLUDES = {
   legacy: true,
   test: false,
@@ -285,6 +290,7 @@ export function buildPrerequisitePackages(packages) {
     const result = spawnSync('pnpm', ['--filter', pkg.name, 'build'], {
       cwd: ROOT_DIR,
       encoding: 'utf8',
+      shell: IS_WINDOWS,
     });
     const diagnostics = collectNonEmptyLines(`${result.stdout}\n${result.stderr}`);
     results.push({
@@ -356,6 +362,7 @@ export function stagePackage(pkg, options) {
   const buildResult = spawnSync('pnpm', tscArgs, {
     cwd: ROOT_DIR,
     encoding: 'utf8',
+    shell: IS_WINDOWS,
   });
 
   const buildErrors = collectNonEmptyLines(`${buildResult.stdout}\n${buildResult.stderr}`);
@@ -384,6 +391,7 @@ export function stagePackage(pkg, options) {
       const result = spawnSync('npm', publishArgs, {
         cwd: stageDir,
         encoding: 'utf8',
+        shell: IS_WINDOWS,
         env: {
           ...process.env,
           npm_config_cache: npmCacheDir,

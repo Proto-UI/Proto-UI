@@ -184,6 +184,11 @@ export default defineConfig({
                   translations: { en: 'Select', 'zh-CN': 'Select' },
                   slug: 'ui-libraries/base/select',
                 },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/base/checkbox',
+                },
               ],
             },
             {

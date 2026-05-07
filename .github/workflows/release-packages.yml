@@ -4,29 +4,30 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'scan, stage(dry-run), or publish'
+        description: 'scan, stage(dry-run), publish-all, or publish-single'
         required: true
         type: choice
         options:
           - scan
           - stage
-          - publish
+          - publish-all
+          - publish-single
         default: scan
       profile:
-        description: 'release profile'
+        description: 'release profile (workspace = all 34, launch = governance subset)'
         required: true
         type: choice
         options:
           - launch
           - workspace
-        default: launch
+        default: workspace
       include_approved_candidates:
-        description: 'include approved candidate packages'
+        description: 'include approved candidate packages (launch profile only)'
         required: true
         type: boolean
         default: false
       version:
-        description: 'override package version, e.g. 0.1.0'
+        description: 'override VERSION on publish-all (e.g. 0.1.0); ignored for other modes'
         required: false
         type: string
       tag:
@@ -35,7 +36,7 @@ on:
         default: latest
         type: string
       only:
-        description: 'optional package names/paths separated by commas'
+        description: 'comma-separated package names (required for publish-single)'
         required: false
         type: string
       publish_delay_ms:
@@ -65,12 +66,31 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    # publish-all and publish-single both write to the registry; gate them on the
+    # npm environment (required reviewers + branch=main only). scan and
+    # stage have no side effects but ride the same job to keep the workflow shape
+    # simple — the environment check on those modes is a no-op (no rules trigger
+    # for non-deployment runs that don't need approval).
+    # Name matches the Environment field configured in the npm Trusted Publisher
+    # binding for every @proto.ui/* package — they MUST stay in sync or OIDC
+    # exchange fails with "no matching trusted publisher".
+    environment: ${{ (inputs.mode == 'publish-all' || inputs.mode == 'publish-single') && 'npm' || '' }}
+    permissions:
+      # OIDC token for npm Trusted Publishing.
+      id-token: write
+      # commit + tag push back to main on publish-* modes.
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Need full history for tag computation and post-publish commits.
+          fetch-depth: 0
+          # Token has to allow writes for the post-publish push step.
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
 
       - name: Setup pnpm (corepack)
@@ -109,32 +129,55 @@ jobs:
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
 
       - name: Validate Publish Branch
-        if: ${{ inputs.mode == 'publish' }}
+        if: ${{ inputs.mode == 'publish-all' || inputs.mode == 'publish-single' }}
         run: |
           set -euo pipefail
-          case "${GITHUB_REF_NAME}" in
-            main|feat/v0-release-prep)
-              echo "publish allowed on ${GITHUB_REF_NAME}"
-              ;;
-            *)
-              echo "publish mode is only allowed on main or feat/v0-release-prep"
-              exit 1
-              ;;
-          esac
-
-      - name: Validate npm token for publish
-        if: ${{ inputs.mode == 'publish' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [[ -z "${NODE_AUTH_TOKEN}" ]]; then
-            echo "NPM_TOKEN is required for publish mode"
+          if [[ "${GITHUB_REF_NAME}" != "main" ]]; then
+            echo "publish-* modes are only allowed on main (got: ${GITHUB_REF_NAME})"
             exit 1
           fi
 
+      - name: Configure git identity
+        if: ${{ inputs.mode == 'publish-all' || inputs.mode == 'publish-single' }}
+        run: |
+          git config user.name "proto-ui-release-bot"
+          git config user.email "release-bot@proto-ui.invalid"
+
+      - name: Override VERSION (publish-all only)
+        if: ${{ inputs.mode == 'publish-all' && inputs.version != '' }}
+        run: |
+          set -euo pipefail
+          echo "${{ inputs.version }}" > VERSION
+          echo "VERSION overridden to ${{ inputs.version }}"
+
+      - name: Stamp + lockstep (publish-all only)
+        if: ${{ inputs.mode == 'publish-all' }}
+        run: |
+          set -euo pipefail
+          node scripts/release/stamp-version.mjs
+          node scripts/release/check-lockstep.mjs
+
+      - name: Lockstep guard (other modes)
+        if: ${{ inputs.mode != 'publish-all' }}
+        run: node scripts/release/check-lockstep.mjs
+
+      - name: Patch-bump selected packages (publish-single only)
+        if: ${{ inputs.mode == 'publish-single' }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${{ inputs.only }}" ]]; then
+            echo "publish-single requires inputs.only"
+            exit 1
+          fi
+          # Convert "a,b" -> "a b" then call the standalone bump script.
+          # The script writes release-bump.json describing the rewrite,
+          # which the commit+tag step downstream consumes. publish-single
+          # is patch-only by contract; the script bumps patch unconditionally.
+          TARGETS=$(echo "${{ inputs.only }}" | tr ',' ' ')
+          node scripts/release/bump-version.mjs -- $TARGETS
+          node scripts/release/check-lockstep.mjs
+
       - name: Run Release Command
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -155,10 +198,6 @@ jobs:
             ARGS+=(--only "${{ inputs.only }}")
           fi
 
-          if [[ -n "${{ inputs.version }}" ]]; then
-            ARGS+=(--version "${{ inputs.version }}")
-          fi
-
           case "${{ inputs.mode }}" in
             scan)
               node scripts/release/scan.mjs "${ARGS[@]}" --json | tee release-scan.json
@@ -166,9 +205,15 @@ jobs:
             stage)
               node scripts/release/publish.mjs --dry-run "${ARGS[@]}"
               ;;
-            publish)
-              if [[ -z "${{ inputs.version }}" ]]; then
-                echo "inputs.version is required for publish mode"
+            publish-all)
+              # OIDC: no NODE_AUTH_TOKEN, no NPM_TOKEN. npm CLI auto-detects
+              # ACTIONS_ID_TOKEN_REQUEST_URL/_TOKEN and exchanges for a
+              # short-lived publish credential (with provenance).
+              node scripts/release/publish.mjs --publish "${ARGS[@]}"
+              ;;
+            publish-single)
+              if [[ -z "${{ inputs.only }}" ]]; then
+                echo "publish-single requires inputs.only"
                 exit 1
               fi
               node scripts/release/publish.mjs --publish "${ARGS[@]}"
@@ -185,3 +230,51 @@ jobs:
         with:
           name: release-scan
           path: release-scan.json
+
+      - name: Commit + tag (publish-all)
+        if: ${{ inputs.mode == 'publish-all' }}
+        run: |
+          set -euo pipefail
+          VERSION_VALUE=$(cat VERSION)
+          # Narrow to the files this mode actually rewrites (VERSION + every
+          # @proto.ui/* manifest stamped by stamp-version.mjs). Anything else
+          # in the worktree is an unintended side effect and should not ride
+          # along on the release commit.
+          git add VERSION packages/*/package.json
+          git commit -m "chore(release): publish ${VERSION_VALUE}"
+          git tag "release/${VERSION_VALUE}"
+          git push origin HEAD
+          git push origin "release/${VERSION_VALUE}"
+
+      - name: Commit + tag (publish-single)
+        if: ${{ inputs.mode == 'publish-single' }}
+        run: |
+          set -euo pipefail
+          # release-bump.json was written by the bump step earlier in the job
+          # and is the source of truth for what to commit/tag. Iterate its
+          # `bumped` array to produce one commit + one tag per package.
+          if [[ ! -f release-bump.json ]]; then
+            echo "release-bump.json missing — bump step did not run"
+            exit 1
+          fi
+          mapfile -t LINES < <(node --input-type=module -e "
+            import { readFileSync } from 'node:fs';
+            const { bumped } = JSON.parse(readFileSync('release-bump.json', 'utf8'));
+            for (const entry of bumped) {
+              process.stdout.write(\`\${entry.name}\t\${entry.to}\n\`);
+            }
+          ")
+          for line in "${LINES[@]}"; do
+            [[ -z "$line" ]] && continue
+            name="${line%%$'\t'*}"
+            version="${line##*$'\t'}"
+            # Narrow to the files this mode rewrites: bumped manifests and the
+            # bump summary. VERSION is intentionally excluded — publish-single
+            # is patch-only and must not touch it; if it did, leaving it out
+            # surfaces the surprise as a dirty-worktree push failure.
+            git add packages/*/package.json release-bump.json
+            git commit -m "chore(release): publish ${name}@${version}"
+            git tag "${name}@${version}"
+          done
+          git push origin HEAD
+          git push origin --tags
