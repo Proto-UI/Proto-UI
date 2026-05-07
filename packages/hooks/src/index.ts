@@ -1,4 +1,5 @@
 export * from './as-boundary';
+export * from './as-delay';
 export * from './as-focusable';
 export * from './as-focus-group';
 export * from './as-focus-scope';

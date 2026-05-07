@@ -91,7 +91,8 @@ const tooltipContent = definePrototype({
   setup(def) {
     setupTooltipContent(def);
     def.feedback.style.use(
-      tw('absolute left-0 top-full z-50 mt-1 rounded bg-gray-900 px-2 py-1 text-xs text-white')
+      // Visual style only. Positioning is handled by overlay semantics.
+      tw('z-50 rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-sm')
     );
   },
 });

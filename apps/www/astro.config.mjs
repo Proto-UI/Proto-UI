@@ -170,6 +170,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/hover-card',
                 },
                 {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/base/tooltip',
+                },
+                {
                   label: 'Dialog',
                   translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
                   slug: 'ui-libraries/base/dialog',

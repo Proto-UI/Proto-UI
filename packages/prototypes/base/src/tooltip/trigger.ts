@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asButton } from '../button';
+import { asFocusable } from '@proto.ui/hooks';
 import { TOOLTIP_CONTEXT, TOOLTIP_FAMILY } from './shared';
 import type {
   TooltipTriggerAsHookContract,
@@ -9,7 +9,9 @@ import type {
 
 function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerExposes>): void {
   def.anatomy.claim(TOOLTIP_FAMILY, { role: 'trigger' });
-  asButton();
+  // Tooltip trigger can be any interactive element (text/icon/link/input/etc).
+  // Do not force button semantics here; only opt into focus semantics.
+  asFocusable({ kind: 'trigger' });
 
   def.props.define({
     disabled: { type: 'boolean', empty: 'fallback' },
