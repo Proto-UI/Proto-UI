@@ -11,6 +11,21 @@
   vertical-align: baseline;
 }
 
+proto-concept {
+  display: inline;
+  border-radius: 0.25rem;
+  background: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--color-primary) 14%, transparent) 0%,
+      color-mix(in oklab, var(--color-primary) 14%, transparent) 100%
+    )
+    0 100% / 100% 0.55em no-repeat;
+  border-bottom: 1px dashed color-mix(in oklab, var(--color-primary) 70%, transparent);
+  color: color-mix(in oklab, var(--color-primary) 82%, var(--color-foreground));
+  cursor: help;
+  font-weight: 600;
+}
+
 .proto-concept__trigger {
   appearance: none;
   border: 0;
@@ -20,14 +35,16 @@
   font: inherit;
   line-height: inherit;
   cursor: pointer;
-  color: var(--color-foreground);
-  border-bottom: 1px dashed color-mix(in oklab, var(--color-primary) 60%, transparent);
+  color: color-mix(in oklab, var(--color-primary) 82%, var(--color-foreground));
+  font-weight: 600;
+  border-radius: 0.25rem;
+  border-bottom: 1px dashed color-mix(in oklab, var(--color-primary) 70%, transparent);
   background: linear-gradient(
       to top,
-      color-mix(in oklab, var(--color-primary) 10%, transparent) 0%,
-      color-mix(in oklab, var(--color-primary) 10%, transparent) 100%
+      color-mix(in oklab, var(--color-primary) 14%, transparent) 0%,
+      color-mix(in oklab, var(--color-primary) 14%, transparent) 100%
     )
-    0 100% / 100% 0.45em no-repeat;
+    0 100% / 100% 0.55em no-repeat;
   transition:
     border-color 180ms ease,
     background-size 180ms ease,
