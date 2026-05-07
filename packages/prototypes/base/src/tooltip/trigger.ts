@@ -11,7 +11,7 @@ function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerE
   def.anatomy.claim(TOOLTIP_FAMILY, { role: 'trigger' });
   // Tooltip trigger can be any interactive element (text/icon/link/input/etc).
   // Do not force button semantics here; only opt into focus semantics.
-  asFocusable({ kind: 'trigger' });
+  asFocusable({ meta: { kind: 'trigger' } });
 
   def.props.define({
     disabled: { type: 'boolean', empty: 'fallback' },
