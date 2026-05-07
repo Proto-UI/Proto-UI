@@ -3,13 +3,18 @@ import { asOpenState } from '../tools';
 import { TOOLTIP_CONTEXT, TOOLTIP_FAMILY, type TooltipContextValue } from './shared';
 import type { TooltipRootAsHookContract, TooltipRootExposes, TooltipRootProps } from './types';
 
+const TOOLTIP_DELAY_OPEN_EVENT = 'host.tooltip-delay-open';
+const TOOLTIP_DELAY_OPEN_DOM_EVENT = 'tooltip-delay-open';
+
 function deriveOpen(ctx: TooltipContextValue): boolean {
+  if (ctx.disabled) return false;
   return ctx.triggerHovered || ctx.triggerFocused;
 }
 
 function sameContext(a: TooltipContextValue, b: TooltipContextValue): boolean {
   return (
     a.open === b.open &&
+    a.openRevision === b.openRevision &&
     a.controlled === b.controlled &&
     a.disabled === b.disabled &&
     a.delay === b.delay &&
@@ -35,6 +40,7 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
 
   const updateContext = def.context.provide(TOOLTIP_CONTEXT, {
     open: false,
+    openRevision: 0,
     controlled: false,
     disabled: false,
     delay: 0,
@@ -47,6 +53,7 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
 
   const initialContext: TooltipContextValue = {
     open: false,
+    openRevision: 0,
     controlled: false,
     disabled: false,
     delay: 0,
@@ -55,21 +62,96 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
   };
   let snapshot: TooltipContextValue = initialContext;
   let published: TooltipContextValue = initialContext;
+  let lastPublishedOpen = false;
+  let openRevision = 0;
+  let delayTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
+  let delayToken = 0;
+
+  const normalizeDelay = (value: unknown): number => {
+    const delay = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+    return Math.max(0, delay);
+  };
+
+  const clearDelayedOpen = () => {
+    delayToken++;
+    if (!delayTimer) return;
+    globalThis.clearTimeout(delayTimer);
+    delayTimer = null;
+  };
 
   const syncContext = () => {
-    const next = { ...snapshot, open: open?.get() ?? false };
+    const currentOpen = open?.get() ?? false;
+    if (currentOpen !== lastPublishedOpen) {
+      openRevision += 1;
+      lastPublishedOpen = currentOpen;
+    }
+    const next = { ...snapshot, open: currentOpen, openRevision };
     snapshot = next;
     if (sameContext(published, next)) return;
     published = next;
     updateContext(next);
   };
 
-  def.context.subscribe(TOOLTIP_CONTEXT, (_run, next) => {
+  const requestOpenFromInteraction = (run: any, next: TooltipContextValue) => {
+    clearDelayedOpen();
+    if (open?.get()) return;
+
+    const delay = normalizeDelay(next.delay);
+    const target = run.host?.get?.();
+    if (!target || typeof target.dispatchEvent !== 'function') {
+      open?.set(true, 'reason: tooltip delay host unavailable => open');
+      return;
+    }
+
+    if (delay <= 0) {
+      const token = ++delayToken;
+      const dispatch = () => {
+        target.dispatchEvent(new CustomEvent(TOOLTIP_DELAY_OPEN_DOM_EVENT, { detail: { token } }));
+      };
+      if (typeof globalThis.queueMicrotask === 'function') {
+        globalThis.queueMicrotask(dispatch);
+      } else {
+        Promise.resolve().then(dispatch);
+      }
+      return;
+    }
+
+    const token = ++delayToken;
+    delayTimer = globalThis.setTimeout(() => {
+      delayTimer = null;
+      target.dispatchEvent(new CustomEvent(TOOLTIP_DELAY_OPEN_DOM_EVENT, { detail: { token } }));
+    }, delay);
+  };
+
+  def.context.subscribe(TOOLTIP_CONTEXT, (run, next, prev) => {
     snapshot = next;
     published = next;
-    if (!snapshot.controlled) {
-      open?.set(deriveOpen(snapshot), 'reason: tooltip context sync => open');
+    lastPublishedOpen = next.open;
+    openRevision = next.openRevision;
+    const interactionChanged =
+      next.controlled !== prev.controlled ||
+      next.disabled !== prev.disabled ||
+      next.delay !== prev.delay ||
+      next.triggerHovered !== prev.triggerHovered ||
+      next.triggerFocused !== prev.triggerFocused;
+
+    if (!interactionChanged) return;
+    clearDelayedOpen();
+
+    if (snapshot.controlled) return;
+
+    if (deriveOpen(snapshot)) {
+      requestOpenFromInteraction(run, snapshot);
+      return;
     }
+    open?.set(false, 'reason: tooltip trigger interaction => close');
+  });
+
+  def.event.on(TOOLTIP_DELAY_OPEN_EVENT, (run, ev) => {
+    if (ev?.detail?.token !== delayToken) return;
+    const ctx = run.context.read(TOOLTIP_CONTEXT);
+    if (ctx.controlled || !deriveOpen(ctx)) return;
+    open?.set(true, 'reason: tooltip delay elapsed => open');
   });
 
   def.lifecycle.onCreated((run) => {
@@ -95,6 +177,10 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
   open?.watch((_run, event) => {
     if (event.type !== 'next') return;
     syncContext();
+  });
+
+  def.lifecycle.onUnmounted(() => {
+    clearDelayedOpen();
   });
 }
 

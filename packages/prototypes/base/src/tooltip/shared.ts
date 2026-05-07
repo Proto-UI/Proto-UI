@@ -3,6 +3,7 @@ import type { ContextKey } from '@proto.ui/types';
 
 export type TooltipContextValue = {
   open: boolean;
+  openRevision: number;
   controlled: boolean;
   disabled: boolean;
   delay: number;

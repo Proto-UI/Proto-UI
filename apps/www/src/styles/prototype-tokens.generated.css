@@ -40,6 +40,7 @@
 @source inline("bg-destructive/10");
 @source inline("bg-destructive/20");
 @source inline("bg-destructive/30");
+@source inline("bg-gray-900");
 @source inline("bg-input");
 @source inline("bg-input/30");
 @source inline("bg-input/50");
@@ -140,6 +141,7 @@
 @source inline("min-w-56");
 @source inline("min-w-8");
 @source inline("min-w-9");
+@source inline("mt-1");
 @source inline("mt-2");
 @source inline("opacity-50");
 @source inline("outline-none");
@@ -153,9 +155,11 @@
 @source inline("pointer-events-none");
 @source inline("pr-0.5");
 @source inline("pr-[22px]");
+@source inline("px-2");
 @source inline("px-2.5");
 @source inline("px-3");
 @source inline("px-5");
+@source inline("py-1");
 @source inline("py-1.5");
 @source inline("py-2");
 @source inline("relative");
@@ -169,6 +173,7 @@
 @source inline("ring-offset-background");
 @source inline("ring-ring/40");
 @source inline("ring-ring/50");
+@source inline("rounded");
 @source inline("rounded-[min(var(--radius-md),12px)]");
 @source inline("rounded-full");
 @source inline("rounded-lg");
@@ -193,6 +198,8 @@
 @source inline("text-primary-foreground");
 @source inline("text-secondary-foreground");
 @source inline("text-sm");
+@source inline("text-white");
+@source inline("text-xs");
 @source inline("top-1/2");
 @source inline("top-full");
 @source inline("tracking-tight");
@@ -208,3 +215,4 @@
 @source inline("whitespace-nowrap");
 @source inline("will-change-transform");
 @source inline("z-40");
+@source inline("z-50");
