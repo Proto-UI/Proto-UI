@@ -21,6 +21,19 @@
       // 给 chrome/safari 一个暗色介面提示（和 meta 协同）
       document.documentElement.style.colorScheme = t;
     };
+    const updatePickers = (theme = load() || 'auto') => {
+      document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+        const select = picker.querySelector('select');
+        if (select) select.value = theme;
+
+        const tmpl = document.getElementById('starlight-theme-icons');
+        const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+        const oldIcon = picker.querySelector('svg.label-icon');
+        if (newIcon && oldIcon) {
+          oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+        }
+      });
+    };
 
     // 初始化（若无存储，则跟随系统）
     const initial = load() || getSystem();
@@ -48,6 +61,12 @@
       hydratePickers() {
         document.dispatchEvent(new CustomEvent('starlight-theme:hydrate'));
       },
+    };
+
+    // Compatibility for Starlight's built-in ThemeSelect used in the default
+    // mobile sidebar preferences slot.
+    window.StarlightThemeProvider = {
+      updatePickers,
     };
 
     // 如果恰好监听到了主题切换，那么随系统切换主题
@@ -99,5 +118,21 @@
     <path d="M12 9l4.65 -4.65"></path>
     <path d="M12 14.3l7.37 -7.37"></path>
     <path d="M12 19.6l8.85 -8.85"></path>
+  </svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="size-4.5 auto"
+  >
+    <path d="M4 5a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2H6a2 2 0 0 1 -2 -2z"></path>
+    <path d="M8 21h8"></path>
+    <path d="M12 15v6"></path>
   </svg>
 </template>
