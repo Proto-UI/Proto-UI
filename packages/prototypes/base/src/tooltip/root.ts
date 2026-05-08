@@ -1,7 +1,13 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
 import { asDelay } from '@proto.ui/hooks';
 import { asOpenState } from '../tools';
-import { TOOLTIP_CONTEXT, TOOLTIP_FAMILY, type TooltipContextValue } from './shared';
+import {
+  TOOLTIP_CONTEXT,
+  TOOLTIP_FAMILY,
+  TOOLTIP_GROUP_CONTEXT,
+  type TooltipContextValue,
+  type TooltipGroupContextValue,
+} from './shared';
 import type { TooltipRootAsHookContract, TooltipRootExposes, TooltipRootProps } from './types';
 
 function deriveOpen(ctx: TooltipContextValue): boolean {
@@ -68,9 +74,33 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
   let pendingOpenToken = 0;
   let requestUpdate: (() => void) | null = null;
 
+  // Group-level state (optional — only active when inside a TooltipGroup).
+  let groupSnapshot: TooltipGroupContextValue | null = null;
+  let lastReportedOpen = false;
+
   const normalizeDelay = (value: unknown): number => {
     const delay = typeof value === 'number' && Number.isFinite(value) ? value : 0;
     return Math.max(0, delay);
+  };
+
+  /** Resolve the effective delay, considering group skip-delay. */
+  const resolveDelay = (configuredDelay: number): number => {
+    if (groupSnapshot && groupSnapshot.openCount > 0) {
+      return normalizeDelay(groupSnapshot.skipDelayDuration);
+    }
+    return normalizeDelay(configuredDelay);
+  };
+
+  /** Update the group's openCount when our open state changes. */
+  const syncGroupOpenCount = (run: any, isOpen: boolean) => {
+    if (!groupSnapshot) return;
+    if (isOpen === lastReportedOpen) return;
+    lastReportedOpen = isOpen;
+    const delta = isOpen ? 1 : -1;
+    run.context.tryUpdate(TOOLTIP_GROUP_CONTEXT, (prev: TooltipGroupContextValue) => ({
+      ...prev,
+      openCount: Math.max(0, prev.openCount + delta),
+    }));
   };
 
   const clearDelayedOpen = () => {
@@ -97,7 +127,7 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
     clearDelayedOpen();
     if (open?.get()) return;
 
-    const ms = normalizeDelay(next.delay);
+    const ms = resolveDelay(next.delay);
     if (ms <= 0) {
       open?.set(true, 'reason: tooltip trigger interaction => open');
       return;
@@ -112,6 +142,11 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
       requestUpdate?.();
     });
   };
+
+  // Optionally subscribe to group context for skip-delay coordination.
+  def.context.trySubscribe(TOOLTIP_GROUP_CONTEXT, (_run, next) => {
+    groupSnapshot = next;
+  });
 
   def.context.subscribe(TOOLTIP_CONTEXT, (run, next, prev) => {
     snapshot = next;
@@ -139,6 +174,8 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
 
   def.lifecycle.onCreated((run) => {
     requestUpdate = () => run.update();
+    // Hydrate group snapshot (the group may have published before we subscribed).
+    groupSnapshot = run.context.tryRead(TOOLTIP_GROUP_CONTEXT);
     snapshot = {
       ...snapshot,
       controlled: run.props.isProvided('open'),
@@ -167,13 +204,16 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
     syncContext();
   });
 
-  open?.watch((_run, event) => {
+  open?.watch((run, event) => {
     if (event.type !== 'next') return;
     syncContext();
+    syncGroupOpenCount(run, open?.get() ?? false);
   });
 
-  def.lifecycle.onUnmounted(() => {
+  def.lifecycle.onUnmounted((run) => {
     clearDelayedOpen();
+    // Ensure group openCount is decremented if this root was open.
+    syncGroupOpenCount(run, false);
   });
 }
 

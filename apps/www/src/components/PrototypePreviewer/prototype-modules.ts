@@ -71,6 +71,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/base/src/hover-card/content');
     registerPrototype('base-hover-card-content', mod.default);
   },
+  'base-tooltip-group': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/tooltip/group');
+    registerPrototype('base-tooltip-group', mod.default);
+  },
   'base-tooltip-root': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/tooltip/root');
     registerPrototype('base-tooltip-root', mod.default);
@@ -79,9 +83,17 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/base/src/tooltip/trigger');
     registerPrototype('base-tooltip-trigger', mod.default);
   },
+  'base-tooltip-overlay': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/tooltip/overlay');
+    registerPrototype('base-tooltip-overlay', mod.default);
+  },
   'base-tooltip-content': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/tooltip/content');
     registerPrototype('base-tooltip-content', mod.default);
+  },
+  'base-tooltip-arrow': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/tooltip/arrow');
+    registerPrototype('base-tooltip-arrow', mod.default);
   },
   'base-checkbox-root': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/checkbox/root');

@@ -17,10 +17,13 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 The tooltip family provides hover-and-focus-based tooltip behavior.
 
+- **tooltip-group**: Optional grouping container. When a tooltip in the group is already open, the next tooltip skips the delay and opens immediately.
 - **tooltip-root**: Holds the `open` state, manages hover/focus tracking via context, and provides `openTooltip`/`close`/`toggle` methods.
-- **tooltip-trigger**: The element that triggers the tooltip on hover or focus.
-- **tooltip-content**: The floating content, positioned via overlay. Hidden when closed.
+- **tooltip-trigger**: The element that triggers the tooltip on hover or focus. Uses `asFocusable` (not `asButton`) so it does not force button semantics.
+- **tooltip-overlay**: The overlay container that uses `asOverlay` for positioning and visibility. Hidden when closed.
+- **tooltip-content**: Semantic content wrapper nested inside the overlay.
+- **tooltip-arrow**: Decorative arrow indicator nested inside the overlay.
 
 Pass `open` to control the tooltip externally, or `defaultOpen` for uncontrolled usage. Use `delay` to configure the show delay in milliseconds.
 
-The demo includes an open-state label so you can observe the state transition directly. Collision-aware placement, arrows, and portal behavior are intentionally left to host runtimes or adapters.
+The demo includes an open-state label so you can observe the state transition directly.

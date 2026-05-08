@@ -6,7 +6,7 @@ export default {
     const label = refs.stateLabel;
     if (!label) return;
 
-    const openHandle = api.getExposes('root')?.open as
+    const openHandle = api.getExposes('overlay')?.open as
       | {
           get?: () => boolean;
           subscribe?: (cb: () => void) => (() => void) | undefined;
@@ -55,11 +55,21 @@ export default {
           },
           {
             kind: 'proto',
-            prototypeId: 'base-tooltip-content',
-            ref: 'content',
-            className:
-              'absolute left-0 top-full z-50 mt-1 rounded-md bg-gray-900 px-3 py-1.5 text-xs text-white shadow-lg',
-            children: ['Tooltip text'],
+            prototypeId: 'base-tooltip-overlay',
+            ref: 'overlay',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'base-tooltip-content',
+                ref: 'content',
+                children: ['Tooltip text'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'base-tooltip-arrow',
+                ref: 'arrow',
+              },
+            ],
           },
         ],
       },

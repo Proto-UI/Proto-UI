@@ -1,4 +1,12 @@
-import { ExposeEvent, ExposeMethod, ExposeState, State } from '@proto.ui/core';
+import { ExposeMethod, ExposeState, State } from '@proto.ui/core';
+
+export interface TooltipGroupProps {
+  skipDelayDuration?: number;
+}
+
+export type TooltipGroupExposes = {};
+
+export type TooltipGroupAsHookContract = {};
 
 export interface TooltipRootProps {
   open?: boolean;
@@ -31,24 +39,32 @@ export type TooltipTriggerExposes = {
   hovered: ExposeState<boolean>;
   focused: ExposeState<boolean>;
   focusVisible: ExposeState<boolean>;
-  pressed: ExposeState<boolean>;
-  click: ExposeEvent<void>;
 };
 
-export type TooltipTriggerAsHookContract = {
-  event: { click: void };
+export type TooltipTriggerAsHookContract = {};
+
+export interface TooltipOverlayProps {}
+
+export type TooltipOverlayExposes = {
+  open: ExposeState<boolean>;
+};
+
+export type TooltipOverlayStateHandles = {
+  open: State<boolean>;
+};
+
+export type TooltipOverlayAsHookContract = {
+  state: TooltipOverlayStateHandles;
 };
 
 export interface TooltipContentProps {}
 
-export type TooltipContentExposes = {
-  open: ExposeState<boolean>;
-};
+export type TooltipContentExposes = {};
 
-export type TooltipContentStateHandles = {
-  open: State<boolean>;
-};
+export type TooltipContentAsHookContract = {};
 
-export type TooltipContentAsHookContract = {
-  state: TooltipContentStateHandles;
-};
+export interface TooltipArrowProps {}
+
+export type TooltipArrowExposes = {};
+
+export type TooltipArrowAsHookContract = {};

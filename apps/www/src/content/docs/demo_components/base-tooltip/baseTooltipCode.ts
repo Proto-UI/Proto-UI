@@ -8,9 +8,12 @@ export const codeMap: Record<RuntimeId, Record<string, string>> = {
   <wc-base-tooltip-trigger class="inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium cursor-pointer select-none">
     Hover me
   </wc-base-tooltip-trigger>
-  <wc-base-tooltip-content class="absolute left-0 top-full z-50 mt-1 rounded-md bg-gray-900 px-3 py-1.5 text-xs text-white shadow-lg">
-    Tooltip text
-  </wc-base-tooltip-content>
+  <wc-base-tooltip-overlay>
+    <wc-base-tooltip-content>
+      Tooltip text
+    </wc-base-tooltip-content>
+    <wc-base-tooltip-arrow></wc-base-tooltip-arrow>
+  </wc-base-tooltip-overlay>
 </wc-base-tooltip-root>
     `),
   },
@@ -19,7 +22,9 @@ export const codeMap: Record<RuntimeId, Record<string, string>> = {
 import {
   BaseTooltipRoot,
   BaseTooltipTrigger,
+  BaseTooltipOverlay,
   BaseTooltipContent,
+  BaseTooltipArrow,
 } from '@prototype-libs/base';
 
 export function DemoBaseTooltipDemo() {
@@ -29,9 +34,10 @@ export function DemoBaseTooltipDemo() {
         <BaseTooltipTrigger className="inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium cursor-pointer select-none">
           Hover me
         </BaseTooltipTrigger>
-        <BaseTooltipContent className="absolute left-0 top-full z-50 mt-1 rounded-md bg-gray-900 px-3 py-1.5 text-xs text-white shadow-lg">
-          Tooltip text
-        </BaseTooltipContent>
+        <BaseTooltipOverlay>
+          <BaseTooltipContent>Tooltip text</BaseTooltipContent>
+          <BaseTooltipArrow />
+        </BaseTooltipOverlay>
       </BaseTooltipRoot>
     </div>
   );
@@ -44,7 +50,9 @@ export function DemoBaseTooltipDemo() {
 import {
   BaseTooltipRoot,
   BaseTooltipTrigger,
+  BaseTooltipOverlay,
   BaseTooltipContent,
+  BaseTooltipArrow,
 } from '@prototype-libs/base';
 </script>
 
@@ -54,9 +62,10 @@ import {
       <BaseTooltipTrigger class="inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium cursor-pointer select-none">
         Hover me
       </BaseTooltipTrigger>
-      <BaseTooltipContent class="absolute left-0 top-full z-50 mt-1 rounded-md bg-gray-900 px-3 py-1.5 text-xs text-white shadow-lg">
-        Tooltip text
-      </BaseTooltipContent>
+      <BaseTooltipOverlay>
+        <BaseTooltipContent>Tooltip text</BaseTooltipContent>
+        <BaseTooltipArrow />
+      </BaseTooltipOverlay>
     </BaseTooltipRoot>
   </div>
 </template>

@@ -17,10 +17,13 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 Tooltip 家族提供基于 hover 和 focus 的提示框行为。
 
+- **tooltip-group**: 可选的分组容器。当组内已有 tooltip 打开时，新 tooltip 跳过延迟立即显示。
 - **tooltip-root**: 持有 `open` 状态，通过 context 管理 hover/focus 追踪，提供 `openTooltip`/`close`/`toggle` 方法。
-- **tooltip-trigger**: 触发 tooltip 的元素，响应 hover 或 focus。
-- **tooltip-content**: 浮层内容，通过 overlay 定位。关闭时隐藏。
+- **tooltip-trigger**: 触发 tooltip 的元素，响应 hover 或 focus。使用 `asFocusable` 而非 `asButton`，不强制按钮语义。
+- **tooltip-overlay**: 浮层容器，使用 `asOverlay` 处理定位和可见性。关闭时隐藏。
+- **tooltip-content**: 语义化的内容容器，嵌套在 overlay 内部。
+- **tooltip-arrow**: 装饰性箭头指示器，嵌套在 overlay 内部。
 
 传入 `open` 以受控方式使用 tooltip，或传入 `defaultOpen` 以非受控方式使用。使用 `delay` 配置显示延迟（毫秒）。
 
-Demo 中包含 open 状态标签，可以直接观察状态变化。碰撞检测定位、箭头和 portal 行为有意留给宿主运行时或适配器处理。
+Demo 中包含 open 状态标签，可以直接观察状态变化。

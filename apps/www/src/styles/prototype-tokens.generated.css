@@ -141,7 +141,6 @@
 @source inline("min-w-56");
 @source inline("min-w-8");
 @source inline("min-w-9");
-@source inline("mt-1");
 @source inline("mt-2");
 @source inline("opacity-50");
 @source inline("outline-none");
@@ -183,6 +182,7 @@
 @source inline("scale-[0.99]");
 @source inline("select-none");
 @source inline("shadow-lg");
+@source inline("shadow-sm");
 @source inline("shadow-xs");
 @source inline("shrink-0");
 @source inline("size-5");
