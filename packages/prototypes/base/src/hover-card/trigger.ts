@@ -12,7 +12,11 @@ function setupHoverCardTrigger(
   def: DefHandle<HoverCardTriggerProps, HoverCardTriggerExposes>
 ): void {
   def.anatomy.claim(HOVER_CARD_FAMILY, { role: 'trigger' });
-  asButton();
+  const button = asButton();
+  const buttonState = button.stateHandles;
+  if (!buttonState) {
+    throw new Error('[base-hover-card-trigger] asButton must project Button state handles.');
+  }
 
   def.props.define({
     disabled: { type: 'boolean', empty: 'fallback' },
@@ -22,7 +26,7 @@ function setupHoverCardTrigger(
   });
 
   def.context.subscribe(HOVER_CARD_CONTEXT);
-  const hovered = def.state.fromInteraction('hovered');
+  const hovered = buttonState.hovered;
   const focusable = asFocusable<HoverCardTriggerProps>();
   const focused = focusable.focused;
 

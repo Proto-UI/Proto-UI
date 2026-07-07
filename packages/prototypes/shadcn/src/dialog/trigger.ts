@@ -1,5 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asDialogTrigger } from '@proto.ui/prototypes-base';
+import { asButton, asDialogTrigger } from '@proto.ui/prototypes-base';
 import type { ShadcnDialogTriggerExposes, ShadcnDialogTriggerProps } from './types';
 
 type ShadcnDialogTriggerVariant =
@@ -56,10 +56,11 @@ const dialogTrigger = definePrototype<ShadcnDialogTriggerProps, ShadcnDialogTrig
     });
 
     asDialogTrigger();
-    const disabled = def.state.fromInteraction('disabled');
-    const hovered = def.state.fromInteraction('hovered');
-    const focusVisible = def.state.fromInteraction('focusVisible');
-    const pressed = def.state.fromInteraction('pressed');
+    const buttonState = asButton().stateHandles;
+    if (!buttonState) {
+      throw new Error('[shadcn-dialog-trigger] asButton must project Button state handles.');
+    }
+    const { disabled, hovered, focusVisible, pressed } = buttonState;
     const expanded = def.state.fromAccessibility('expanded');
     const invalid = def.state.fromAccessibility('invalid');
 

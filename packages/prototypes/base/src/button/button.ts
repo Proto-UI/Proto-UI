@@ -17,19 +17,13 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
     disabled: false,
   });
 
-  /*
-   * TODO(D-STATE-SEMANTIC-ACCESSORS-DEPRECATION-0001): Button still writes the
-   * deprecated interaction slots because uncataloged button-like prototypes
-   * call asButton() and then read fromInteraction('disabled' | 'hovered' | 'pressed').
-   * Migrate those protocols before removing this compatibility path.
-   */
   // P-BASE-BUTTON-DISABLED-EXPOSE
-  const disabled = def.state.fromInteraction('disabled');
+  const disabled = def.state.bool('disabled', false);
   def.expose.state('disabled', disabled);
   def.a11y.state('disabled', disabled);
 
   // P-BASE-BUTTON-POINTER-HOVER
-  const hovered = def.state.fromInteraction('hovered');
+  const hovered = def.state.bool('hovered', false);
   def.expose.state('hovered', hovered);
 
   // P-BASE-BUTTON-FOCUSABLE, P-BASE-BUTTON-DISABLED-REJECT-FOCUS
@@ -50,7 +44,7 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   });
 
   // P-BASE-BUTTON-PRESS-LIFECYCLE
-  const pressed = def.state.fromInteraction('pressed');
+  const pressed = def.state.bool('pressed', false);
   def.expose.state('pressed', pressed);
 
   const clearTransientInteraction = (reason: string) => {

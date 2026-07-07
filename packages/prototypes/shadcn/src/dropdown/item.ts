@@ -1,5 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asDropdownItem } from '@proto.ui/prototypes-base';
+import { asButton, asDropdownItem } from '@proto.ui/prototypes-base';
 import type { ShadcnDropdownItemExposes, ShadcnDropdownItemProps } from './types';
 
 const ITEM_BASE_TOKENS = [
@@ -25,11 +25,11 @@ const dropdownItem = definePrototype<ShadcnDropdownItemProps, ShadcnDropdownItem
   name: 'shadcn-dropdown-item',
   setup(def) {
     asDropdownItem();
-    const disabled = def.state.fromInteraction('disabled');
-    const hovered = def.state.fromInteraction('hovered');
-    const focused = def.state.fromInteraction('focused');
-    const focusVisible = def.state.fromInteraction('focusVisible');
-    const pressed = def.state.fromInteraction('pressed');
+    const buttonState = asButton().stateHandles;
+    if (!buttonState) {
+      throw new Error('[shadcn-dropdown-item] asButton must project Button state handles.');
+    }
+    const { disabled, hovered, focused, focusVisible, pressed } = buttonState;
 
     def.feedback.style.use(tw(ITEM_BASE_TOKENS));
 

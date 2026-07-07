@@ -42,6 +42,76 @@ describe('adapter-web-component: rule expose-state-web optimization (v0)', () =>
     document.body.removeChild(el);
   });
 
+  it('optimizes false bool state conditions to internal not-[data-*] selector tokens', async () => {
+    const proto: Prototype = {
+      name: 'x-rule-esw-negative-bool-opt',
+      setup(def: DefHandle<any>) {
+        const hovered = def.state.bool('hovered', false);
+        const active = def.state.bool('active', false);
+        def.expose('hovered', hovered);
+        def.expose('active', active);
+
+        def.rule({
+          when: (w) => w.all(w.state(hovered).eq(true), w.state(active).eq(false)),
+          intent: (i) => i.feedback.style.use(tw('bg-muted')),
+        });
+
+        def.lifecycle.onMounted(() => {
+          hovered.set(true);
+        });
+
+        return (r: any) => [r.el('div', {}, ['ok'])];
+      },
+    } as any;
+
+    const El = AdaptToWebComponent(proto);
+    const el = new El();
+    document.body.appendChild(el);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(el.getAttribute('data-pui-style')).toBe('data-[hovered]:not-[data-active]:bg-muted');
+    expect(el.getAttribute('data-hovered')).toBe('');
+    expect(el.hasAttribute('data-active')).toBe(false);
+    expect(el.classList.contains('data-[hovered]:not-[data-active]:bg-muted'), el.className).toBe(
+      false
+    );
+    expect(el.classList.contains('bg-muted')).toBe(false);
+
+    document.body.removeChild(el);
+  });
+
+  it('does not optimize a standalone false bool state condition', async () => {
+    const proto: Prototype = {
+      name: 'x-rule-esw-standalone-negative-bool',
+      setup(def: DefHandle<any>) {
+        const open = def.state.bool('open', false);
+        def.expose('open', open);
+
+        def.rule({
+          when: (w) => w.state(open).eq(false),
+          intent: (i) => i.feedback.style.use(tw('hidden')),
+        });
+
+        return (r: any) => [r.el('div', {}, ['ok'])];
+      },
+    } as any;
+
+    const El = AdaptToWebComponent(proto);
+    const el = new El();
+    document.body.appendChild(el);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(el.getAttribute('data-pui-style')).toBe('hidden');
+    expect(el.hasAttribute('data-open')).toBe(false);
+    expect(el.classList.contains('not-[data-open]:hidden'), el.className).toBe(false);
+
+    document.body.removeChild(el);
+  });
+
   it('does not optimize when state is continuous number (number.range)', async () => {
     const proto: Prototype = {
       name: 'x-rule-esw-range',

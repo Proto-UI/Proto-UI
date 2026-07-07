@@ -117,8 +117,9 @@ function buildVariant(
   const key = stripDataPrefix(attr);
 
   if (binding.kind === 'bool') {
-    if (condition.literal !== true) return null;
-    return `data-[${key}]`;
+    if (condition.literal === true) return `data-[${key}]`;
+    if (condition.literal === false) return `not-[data-${key}]`;
+    return null;
   }
 
   if (condition.literal === null) return null;
@@ -127,6 +128,10 @@ function buildVariant(
   }
 
   return null;
+}
+
+function isNegativeDataVariant(variant: string): boolean {
+  return /^not-\[data-[a-zA-Z0-9-]+\]$/.test(variant);
 }
 
 class RuleExposeStateWebImpl extends ModuleBase {
@@ -229,6 +234,7 @@ class RuleExposeStateWebImpl extends ModuleBase {
       }
 
       if (!ok || variants.length === 0) continue;
+      if (variants.every(isNegativeDataVariant)) continue;
 
       const prefix = variants.join(':');
       const tokens = c.tokens.map((t) => `${prefix}:${t}`);

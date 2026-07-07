@@ -1,6 +1,8 @@
 import type { StyleHandle, ModuleInstance } from '@proto.ui/core';
 import type { ModuleFacade, ModuleHooks, ModuleScope } from '@proto.ui/core';
 
+export type FeedbackRuntimeStyleDisposer = (options?: { flush?: boolean }) => void;
+
 export interface FeedbackFacade extends ModuleFacade {
   style: {
     /** setup-only */
@@ -28,7 +30,13 @@ export type FeedbackPort = {
   applyMergedStyle(handle: StyleHandle): void;
 
   /** Internal: record a rule-produced base style use (returns unUse). */
-  useStyleRuntime: (...handles: StyleHandle[]) => () => void;
+  useStyleRuntime: (...handles: StyleHandle[]) => FeedbackRuntimeStyleDisposer;
+
+  /** Internal: replace a rule-produced style contribution with a single flush. */
+  replaceStyleRuntime: (
+    previous: FeedbackRuntimeStyleDisposer | null,
+    ...handles: StyleHandle[]
+  ) => FeedbackRuntimeStyleDisposer | null;
 
   /** Runtime-only public feedback.style patch surface. */
   patchStyle: (...handles: StyleHandle[]) => void;

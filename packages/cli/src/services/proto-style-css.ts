@@ -320,6 +320,11 @@ function applyVariant(selector: string, variant: string): string[] {
   if (variant === 'disabled') return [`${selector}:disabled`];
   if (variant === 'focus-visible') return [`${selector}:focus-visible`];
 
+  const notDataMatch = variant.match(/^not-\[data-([a-zA-Z0-9-]+)\]$/);
+  if (notDataMatch) {
+    return [`${selector}:not([data-${notDataMatch[1]}])`];
+  }
+
   if (variant.startsWith('aria-')) {
     const name = variant.slice('aria-'.length);
     return [`${selector}[aria-${name}='true']`];

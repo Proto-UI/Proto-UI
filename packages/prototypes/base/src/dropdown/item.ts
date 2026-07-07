@@ -7,9 +7,13 @@ import type { DropdownItemAsHookContract, DropdownItemExposes, DropdownItemProps
 const DROPDOWN_ROVING_HANDLED = '__dropdownRovingHandled';
 
 function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes>): void {
-  asButton();
+  const button = asButton();
+  const buttonState = button.stateHandles;
+  if (!buttonState) {
+    throw new Error('[base-dropdown-item] asButton must project Button state handles.');
+  }
   const focusable = asFocusable<DropdownItemProps>();
-  const hovered = def.state.fromInteraction('hovered');
+  const hovered = buttonState.hovered;
   const focused = focusable.focused;
   const active = def.state.bool('active', false);
   const collectionItem = asCollectionItem();

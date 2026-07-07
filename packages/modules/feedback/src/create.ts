@@ -5,7 +5,12 @@ import { FeedbackStyleRecorder } from '@proto.ui/core';
 import { createModule, defineModule, ModuleBase } from '@proto.ui/module-base';
 import type { ModuleFactoryArgs } from '@proto.ui/module-base';
 
-import type { FeedbackFacade, FeedbackModule, FeedbackPort } from './types';
+import type {
+  FeedbackFacade,
+  FeedbackModule,
+  FeedbackPort,
+  FeedbackRuntimeStyleDisposer,
+} from './types';
 import { EFFECTS_CAP } from './caps';
 
 export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
@@ -45,7 +50,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         }
 
         /** internal runtime base style contribution, used by rule execution */
-        useStyleRuntime(handles: StyleHandle[]): () => void {
+        useStyleRuntime(handles: StyleHandle[]): FeedbackRuntimeStyleDisposer {
           const op = 'rule.feedback.style.use';
           if (this.protoPhase === 'setup') {
             throw illegalPhase(op, this.protoPhase, {
@@ -58,11 +63,26 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           this.dirty = true;
           this.flushIfPossible();
 
-          return () => {
-            unUse();
-            this.dirty = true;
-            this.flushIfPossible();
-          };
+          return this.createRuntimeStyleDisposer(unUse);
+        }
+
+        replaceStyleRuntime(
+          previous: FeedbackRuntimeStyleDisposer | null,
+          handles: StyleHandle[]
+        ): FeedbackRuntimeStyleDisposer | null {
+          const op = 'rule.feedback.style.replace';
+          if (this.protoPhase === 'setup') {
+            throw illegalPhase(op, this.protoPhase, {
+              prototypeName: init.prototypeName,
+              hint: `Use 'def' only during setup.`,
+            });
+          }
+
+          previous?.({ flush: false });
+          const next = handles.length > 0 ? this.recorder.use(...handles) : null;
+          this.dirty = true;
+          this.flushIfPossible();
+          return next ? this.createRuntimeStyleDisposer(next) : null;
         }
 
         /** runtime-only public patch API */
@@ -183,6 +203,14 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             });
           }
         }
+
+        private createRuntimeStyleDisposer(unUse: () => void): FeedbackRuntimeStyleDisposer {
+          return (options = {}) => {
+            unUse();
+            this.dirty = true;
+            if (options.flush !== false) this.flushIfPossible();
+          };
+        }
       }
 
       const impl = new Impl(caps);
@@ -202,6 +230,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         port: {
           applyMergedStyle: (h) => impl.applyMergedStyle(h),
           useStyleRuntime: (...handles) => impl.useStyleRuntime(handles),
+          replaceStyleRuntime: (previous, ...handles) =>
+            impl.replaceStyleRuntime(previous, handles),
           patchStyle: (...handles) => impl.patchStyle(handles),
           suppressStyle: (...handles) => impl.suppressStyle(handles),
           clearStylePatch: () => impl.clearStylePatch(),

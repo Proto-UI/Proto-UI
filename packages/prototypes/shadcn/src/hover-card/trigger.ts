@@ -1,5 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asHoverCardTrigger } from '@proto.ui/prototypes-base';
+import { asButton, asHoverCardTrigger } from '@proto.ui/prototypes-base';
 import type { ShadcnHoverCardTriggerExposes, ShadcnHoverCardTriggerProps } from './types';
 
 const TRIGGER_BASE_TOKENS = [
@@ -26,10 +26,11 @@ const hoverCardTrigger = definePrototype<
   name: 'shadcn-hover-card-trigger',
   setup(def) {
     asHoverCardTrigger();
-    const disabled = def.state.fromInteraction('disabled');
-    const hovered = def.state.fromInteraction('hovered');
-    const focusVisible = def.state.fromInteraction('focusVisible');
-    const pressed = def.state.fromInteraction('pressed');
+    const buttonState = asButton().stateHandles;
+    if (!buttonState) {
+      throw new Error('[shadcn-hover-card-trigger] asButton must project Button state handles.');
+    }
+    const { disabled, hovered, focusVisible, pressed } = buttonState;
 
     def.feedback.style.use(tw(TRIGGER_BASE_TOKENS));
 

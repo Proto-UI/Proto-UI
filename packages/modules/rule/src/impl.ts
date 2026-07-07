@@ -12,7 +12,7 @@ import { evaluateRulesToPlan } from './eval';
 import type { PropsBaseType } from '@proto.ui/types';
 import type { PropsFacade, PropsPort } from '@proto.ui/module-props';
 import type { StatePort } from '@proto.ui/module-state';
-import type { FeedbackPort } from '@proto.ui/module-feedback';
+import type { FeedbackPort, FeedbackRuntimeStyleDisposer } from '@proto.ui/module-feedback';
 import type { ContextFacade } from '@proto.ui/module-context';
 
 type RuleExecutorDeps<Props extends PropsBaseType> = {
@@ -34,7 +34,7 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   private stateWatchOffs: Array<() => void> = [];
   private stateWatchesInstalled = false;
   private driverActive = false;
-  private unUseRuleStyle: (() => void) | null = null;
+  private unUseRuleStyle: FeedbackRuntimeStyleDisposer | null = null;
 
   define(spec: RuleSpec<Props>): RuleHandle {
     const ir = compileRule(spec, {
@@ -199,25 +199,18 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
 
     if (res.kind !== 'plan' || res.plan.kind !== 'style.tokens') {
       if (this.unUseRuleStyle) {
-        this.unUseRuleStyle();
-        this.unUseRuleStyle = null;
+        this.unUseRuleStyle = feedbackPort.replaceStyleRuntime(this.unUseRuleStyle);
       }
       return;
     }
 
     const tokens = res.plan.tokens ?? [];
+    if (tokens.length === 0 && !this.unUseRuleStyle) return;
 
-    if (this.unUseRuleStyle) {
-      this.unUseRuleStyle();
-      this.unUseRuleStyle = null;
-    }
-
-    if (tokens.length > 0) {
-      this.unUseRuleStyle = feedbackPort.useStyleRuntime({
-        kind: 'tw',
-        tokens,
-      });
-    }
+    this.unUseRuleStyle = feedbackPort.replaceStyleRuntime(
+      this.unUseRuleStyle,
+      ...(tokens.length > 0 ? [{ kind: 'tw' as const, tokens }] : [])
+    );
   }
 
   private ensureDeps(): void {

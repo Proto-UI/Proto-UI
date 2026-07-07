@@ -92,6 +92,48 @@ describe('runtime: feedback.style runtime patch v0', () => {
     expect(lastTokens(styles)).toEqual(['opacity-100']);
   });
 
+  it('replaces rule-produced runtime style with one effects flush', () => {
+    const styles: StyleHandle[] = [];
+    let flushCount = 0;
+    let mode: { set(v: string, reason?: unknown): void } | undefined;
+
+    const proto: Prototype = {
+      name: 'feedback-style-runtime-rule-replace',
+      setup(def: DefHandle<any>) {
+        mode = def.state.string('mode', 'a');
+        def.rule({
+          when: (w) => w.state(mode as any).eq('a'),
+          intent: (i) => i.feedback.style.use(tw('opacity-50')),
+        });
+        def.rule({
+          when: (w) => w.state(mode as any).eq('b'),
+          intent: (i) => i.feedback.style.use(tw('bg-muted')),
+        });
+        return (r: any) => [r.el('div', 'ok')];
+      },
+    } as any;
+
+    const result = executeWithHost(
+      proto,
+      makeHost(proto.name, styles, {
+        onFlush: () => {
+          flushCount += 1;
+        },
+      })
+    );
+
+    styles.length = 0;
+    flushCount = 0;
+
+    result.invokeInCallbackScope(() => {
+      mode?.set('b', 'test: switch rule style');
+    });
+
+    expect(flushCount).toBe(1);
+    expect(styles).toHaveLength(1);
+    expect(lastTokens(styles)).toEqual(['bg-muted']);
+  });
+
   it('rejects runtime patch inputs that are not author-side style tokens', () => {
     const proto: Prototype = {
       name: 'feedback-style-runtime-patch-token-purity',
@@ -113,13 +155,16 @@ function makeHost(
   options: {
     rawProps?: Record<string, any>;
     onCommit?: () => void;
+    onFlush?: () => void;
   } = {}
 ): RuntimeHost<any> {
   const effects: EffectsPort = {
     queueStyle(handle) {
       styles.push({ kind: handle.kind, tokens: [...handle.tokens] });
     },
-    requestFlush() {},
+    requestFlush() {
+      options.onFlush?.();
+    },
   };
 
   return {
