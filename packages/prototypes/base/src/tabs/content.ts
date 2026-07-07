@@ -1,5 +1,5 @@
-import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
-import { asFocusEntry } from '@proto.ui/hooks';
+import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
+import { asFocusEntry, asHideable } from '@proto.ui/hooks';
 import { createTabsPartId, TABS_CONTEXT, TABS_FAMILY, type TabsContextValue } from './shared';
 import type { TabsContentAsHookContract, TabsContentExposes, TabsContentProps } from './types';
 
@@ -8,12 +8,15 @@ function syncCurrentFromContext(
   ownValue: string,
   current: { set(value: boolean, reason?: string): void },
   hidden: { set(value: boolean, reason?: string): void },
+  hideable: { setHidden(hidden: boolean): void },
   focusEntry: { setDisabled(disabled: boolean): void }
 ): void {
   const nextCurrent = ownValue === nextValue;
+  const nextHidden = !nextCurrent;
   current.set(nextCurrent, 'reason: tabs context sync => current');
-  hidden.set(!nextCurrent, 'reason: tabs context sync => hidden');
-  focusEntry.setDisabled(!nextCurrent);
+  hideable.setHidden(nextHidden);
+  hidden.set(nextHidden, 'reason: tabs context sync => hidden');
+  focusEntry.setDisabled(nextHidden);
 }
 
 function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>): void {
@@ -24,6 +27,8 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
   const hidden = def.state.bool('hidden', true);
   const contentId = def.state.string('contentId', '');
   const triggerId = def.state.string('triggerId', '');
+  const hideable = asHideable<TabsContentProps>();
+  hideable.setDefaultHidden(true);
   // P-BASE-TABS-CONTENT-FOCUS-ENTRY
   const focusEntry = asFocusEntry<TabsContentProps>();
   focusEntry.configure({
@@ -62,7 +67,7 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
   const syncContext = (next: TabsContextValue) => {
     rootId = next.rootId;
     syncIds();
-    syncCurrentFromContext(next.value, ownValue, current, hidden, focusEntry);
+    syncCurrentFromContext(next.value, ownValue, current, hidden, hideable, focusEntry);
   };
 
   def.context.subscribe(TABS_CONTEXT, (_run, next) => {
@@ -79,14 +84,9 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
     syncContext(run.context.read(TABS_CONTEXT));
   });
 
-  // TODO(P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE): Web currently also receives
-  // a host hidden attribute from a11y state projection; this style fallback
-  // keeps current feedback-style demos stable until hidden is modeled as a
-  // dedicated host capability outside a11y.
-  def.rule({
-    when: (w) => w.state(hidden).eq(true),
-    intent: (i) => i.feedback.style.use(tw('hidden')),
-  });
+  // P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE: host visibility projection is
+  // driven through asHideable; the local hidden state remains the public
+  // expose/a11y fact for the Tabs Content protocol.
 }
 
 export const asTabsContent = defineAsHook<
