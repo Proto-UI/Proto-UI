@@ -8,6 +8,10 @@ export type CommitSignal = {
   done(): void;
 };
 
+export type ScheduledDelayTask = {
+  cancel(): void;
+};
+
 export interface RuntimeHost<P extends PropsBaseType> {
   /** For diagnostics / errors */
   readonly prototypeName: string;
@@ -17,6 +21,13 @@ export interface RuntimeHost<P extends PropsBaseType> {
 
   /** Scheduling hook (for microtask/macrotask decisions, adapter controls timing) */
   schedule(task: () => void): void;
+
+  /**
+   * Optional delay scheduling hook. Hosts may map this to platform timers,
+   * frame-aware schedulers, or deterministic test clocks. It is required
+   * only when code running in this host calls core `delay()`.
+   */
+  scheduleDelay?(durationMs: number, task: () => void): ScheduledDelayTask;
 
   /** Optional diagnostics hook for canonical lifecycle checkpoint traces. */
   onLifecycleCheckpoint?(cp: RuntimeCheckpoint): void;

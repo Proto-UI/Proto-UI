@@ -12,7 +12,7 @@ export type AdapterHostHooks<P extends PropsBaseType> = {
 
 export type AdapterHostInput<P extends PropsBaseType> = Pick<
   RuntimeHost<P>,
-  'commit' | 'schedule' | 'getRawProps' | 'onLifecycleCheckpoint'
+  'commit' | 'schedule' | 'scheduleDelay' | 'getRawProps' | 'onLifecycleCheckpoint'
 >;
 
 export type AdapterHostSession<P extends PropsBaseType> = {
@@ -35,6 +35,7 @@ export function createAdapterHost<P extends PropsBaseType>(
     getRawProps: host.getRawProps,
     commit: host.commit,
     schedule: host.schedule,
+    scheduleDelay: host.scheduleDelay ?? defaultScheduleDelay,
     onLifecycleCheckpoint: host.onLifecycleCheckpoint,
     onRuntimeReady: hooks.onRuntimeReady,
     onUnmountBegin: hooks.onUnmountBegin,
@@ -50,6 +51,15 @@ export function createAdapterHost<P extends PropsBaseType>(
         res.invokeUnmounted();
         hooks.afterUnmount?.();
       });
+    },
+  };
+}
+
+function defaultScheduleDelay(durationMs: number, task: () => void): { cancel(): void } {
+  const timer = setTimeout(task, durationMs);
+  return {
+    cancel() {
+      clearTimeout(timer);
     },
   };
 }

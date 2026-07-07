@@ -43,6 +43,52 @@ export function executeWithHost<P extends PropsBaseType>(
   let ended = false;
   let updateInFlight = false;
   let updateQueued = false;
+  const pendingDelayTasks = new Set<{ cancel(): void }>();
+
+  const cancelPendingDelayTasks = () => {
+    for (const task of pendingDelayTasks) {
+      task.cancel();
+    }
+    pendingDelayTasks.clear();
+  };
+
+  callbackScope.setDelayContext({
+    prototypeName: host.prototypeName,
+    scheduleDelay(durationMs, callback) {
+      if (!host.scheduleDelay) {
+        throw new Error(
+          `[Delay] host scheduler is not available for ${host.prototypeName}. Provide RuntimeHost.scheduleDelay.`
+        );
+      }
+
+      let active = true;
+      let hostCancel: (() => void) | undefined;
+
+      const task = {
+        cancel() {
+          if (!active) return;
+          active = false;
+          pendingDelayTasks.delete(task);
+          hostCancel?.();
+        },
+      };
+
+      const invoke = () => {
+        if (!active) return;
+        active = false;
+        pendingDelayTasks.delete(task);
+        if (ended) return;
+        callbackScope.run(run, callback);
+      };
+
+      const hostTask = host.scheduleDelay(durationMs, invoke);
+
+      hostCancel = () => hostTask.cancel();
+      pendingDelayTasks.add(task);
+
+      return task;
+    },
+  });
 
   const doRenderCommit = (kind: 'initial' | 'update', onCommitted?: () => void) => {
     // pull latest raw before rendering
@@ -193,6 +239,7 @@ export function executeWithHost<P extends PropsBaseType>(
   const invokeUnmounted = async () => {
     if (ended) return;
     ended = true;
+    cancelPendingDelayTasks();
 
     const unmountPromise = presencePort?.awaitUnmount();
     if (unmountPromise) {
@@ -215,6 +262,7 @@ export function executeWithHost<P extends PropsBaseType>(
 
     moduleHub.setProtoPhase('unmounted');
     inst.dispose();
+    cancelPendingDelayTasks();
     timeline.mark('CP10_DISPOSE_COMPLETE');
   };
 

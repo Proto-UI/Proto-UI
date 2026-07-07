@@ -1,6 +1,11 @@
 // packages/runtime/src/instance/execute/callback-scope.ts
 import type { PropsBaseType } from '@proto.ui/types';
 import type { RunHandle } from '@proto.ui/core';
+import {
+  enterActiveRuntimeDelayContext,
+  exitActiveRuntimeDelayContext,
+  type ActiveRuntimeDelayContext,
+} from '@proto.ui/core/internal';
 import type { ExecPhase } from '@proto.ui/module-base';
 import type { ModuleOrchestrator } from '../../orchestrator/module-orchestrator';
 import type { PropsPort, PropsWatchTask } from '@proto.ui/module-props';
@@ -16,11 +21,17 @@ import type { PropsPort, PropsWatchTask } from '@proto.ui/module-props';
  * It only manages callback context and pre-callback plumbing.
  */
 export class CallbackScope<P extends PropsBaseType> {
+  private delayContext: ActiveRuntimeDelayContext | undefined;
+
   constructor(
     private readonly getPhase: () => ExecPhase,
     private readonly setPhase: (p: ExecPhase) => void,
     private readonly moduleHub: ModuleOrchestrator
   ) {}
+
+  setDelayContext(ctx: ActiveRuntimeDelayContext): void {
+    this.delayContext = ctx;
+  }
 
   private syncPropsFromHost() {
     const propsPort = this.moduleHub.getPort<PropsPort<P>>('props');
@@ -48,12 +59,14 @@ export class CallbackScope<P extends PropsBaseType> {
 
     // Provide callback ctx for modules via SYS_CAP.getCallbackCtx()
     (this.moduleHub as any).__setCallbackCtx?.(ctx);
+    if (this.delayContext) enterActiveRuntimeDelayContext(this.delayContext);
 
     try {
       this.syncPropsFromHost();
       this.dispatchPropsTasks(ctx);
       return fn();
     } finally {
+      if (this.delayContext) exitActiveRuntimeDelayContext();
       (this.moduleHub as any).__setCallbackCtx?.(prevCtx);
       this.setPhase(prevPhase);
     }
@@ -70,11 +83,13 @@ export class CallbackScope<P extends PropsBaseType> {
 
     this.setPhase('callback');
     (this.moduleHub as any).__setCallbackCtx?.(ctx);
+    if (this.delayContext) enterActiveRuntimeDelayContext(this.delayContext);
 
     try {
       this.dispatchPropsTasks(ctx);
       return fn();
     } finally {
+      if (this.delayContext) exitActiveRuntimeDelayContext();
       (this.moduleHub as any).__setCallbackCtx?.(prevCtx);
       this.setPhase(prevPhase);
     }

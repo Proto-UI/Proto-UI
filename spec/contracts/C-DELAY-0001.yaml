@@ -1,0 +1,91 @@
+id: C-DELAY-0001
+type: contract
+title: Core delay schedules lifecycle-bound runtime callbacks
+status: draft
+since: 0.1.0
+summary: Core `delay` is a runtime-only primitive that requests a lifecycle-bound callback after a minimum duration through host-neutral scheduling.
+statement:
+  zh-CN: >-
+    Core `delay` 是从 `@proto.ui/core` 直接导出的 runtime-only 语法原语。它允许原型作者或官方 asHook 在合法 runtime 上下文中请求：经过指定的最小延迟时长后，由 adapter/host 提供的调度能力执行一个绑定当前组件实例生命周期的 callback。`delay` 不通过 `def` 句柄声明，不记录 setup-time IR，不承诺真实时间或帧级精度，也不绑定 JavaScript `setTimeout`、event loop、线程、RAF 或任何具体宿主计时机制。Runtime 只负责阶段守卫、生命周期绑定、取消失效与 callback context 恢复；具体计时机制必须由 host/adapter capability 提供。
+
+
+  en: >-
+    Core `delay` is a runtime-only syntax primitive exported directly from `@proto.ui/core`. It lets prototype authors or official asHooks request, from a valid runtime context, that an adapter/host-provided scheduler invoke a callback bound to the current component instance lifecycle after a requested minimum delay. `delay` is not declared through the `def` handle, does not record setup-time IR, does not guarantee real-time or frame-accurate timing, and is not bound to JavaScript `setTimeout`, an event loop, threads, RAF, or any specific host timing mechanism. Runtime is responsible only for phase guards, lifecycle binding, cancellation invalidation, and callback-context restoration; the concrete timing mechanism must be supplied by a host/adapter capability.
+
+
+criteria:
+  - id: C-DELAY-0001-A
+    text:
+      zh-CN: '`delay` 的作者可见语法必须由 Core 直接导出；它不得要求原型作者先通过 `def` 句柄声明 delay slot。'
+      en: The author-visible `delay` syntax must be exported directly by Core; it must not require prototype authors to declare a delay slot through the `def` handle first.
+  - id: C-DELAY-0001-B
+    text:
+      zh-CN: '`delay` 必须只能在合法 runtime 上下文中调用；setup、module top-level、definition 阶段或其它无当前组件实例的上下文中调用必须失败。'
+      en: '`delay` must be callable only in valid runtime contexts; calls during setup, at module top level, during definition, or in any context without a current component instance must fail.'
+  - id: C-DELAY-0001-C
+    text:
+      zh-CN: '`durationMs` 必须表示以毫秒为单位的非负有限最小延迟请求；无效、负数或非有限值必须失败。'
+      en: '`durationMs` must represent a non-negative finite minimum-delay request in milliseconds; invalid, negative, or non-finite values must fail.'
+  - id: C-DELAY-0001-D
+    text:
+      zh-CN: callback 不得早于宿主/runtime 认定 `durationMs` 延迟请求已满足之前执行。
+      en: The callback must not run before the host/runtime considers the requested `durationMs` delay satisfied.
+  - id: C-DELAY-0001-E
+    text:
+      zh-CN: 即使 `durationMs` 为 `0`，callback 也不得在当前同步调用栈内执行；它必须经过至少一轮宿主调度点，与后续同步代码错开。
+      en: Even when `durationMs` is `0`, the callback must not run in the current synchronous call stack; it must pass through at least one host scheduling point and be separated from subsequent synchronous code.
+  - id: C-DELAY-0001-F
+    text:
+      zh-CN: 延迟满足后，宿主应在下一次可用调度机会尽快执行 callback；具备视觉帧调度的交互宿主通常应接近一帧内响应，但契约不保证帧级精度，也不要求宿主具备帧模型。
+      en: After the requested delay is satisfied, the host should schedule the callback at the next available scheduling opportunity; frame-based interactive hosts should usually respond near the next visual frame, but the contract does not guarantee frame accuracy or require a frame model.
+  - id: C-DELAY-0001-G
+    text:
+      zh-CN: '`delay` 返回的 task 必须提供幂等取消能力；取消后 callback 不得产生 runtime 行为，即使宿主已经排队了底层调度项，也必须由 runtime guard 屏蔽。'
+      en: The task returned by `delay` must provide idempotent cancellation; after cancellation, the callback must not produce runtime behavior, even if the host has already queued an underlying scheduled item and runtime guards must suppress it.
+  - id: C-DELAY-0001-H
+    text:
+      zh-CN: pending delay 必须绑定当前组件实例生命周期；实例 unmount/dispose 后，尚未执行的 callback 必须失效，不得访问已处置 runtime handle。
+      en: Pending delays must be bound to the current component instance lifecycle; after instance unmount/dispose, callbacks that have not run must become ineffective and must not access disposed runtime handles.
+  - id: C-DELAY-0001-I
+    text:
+      zh-CN: delay callback 执行时必须进入合法 runtime callback 上下文；它不得获得 setup 权限，也不得伪造 definition-time 能力。
+      en: Delay callbacks must execute in a valid runtime callback context; they must not gain setup authority or forge definition-time capabilities.
+  - id: C-DELAY-0001-J
+    text:
+      zh-CN: delay callback 属于 runtime-local 行为，不是可序列化契约内容；`delay` 调用不得被解释为 setup-time IR、rule intent 或 host-independent data record。
+      en: A delay callback is runtime-local behavior, not serializable contract content; a `delay` call must not be interpreted as setup-time IR, rule intent, or a host-independent data record.
+  - id: C-DELAY-0001-K
+    text:
+      zh-CN: callback 抛错必须进入 runtime 错误处理或诊断路径；实现不得让错误表现为宿主 scheduler 本身的未治理失败。
+      en: Callback errors must enter runtime error handling or diagnostics; implementations must not let such errors appear as unmanaged failures of the host scheduler itself.
+  - id: C-DELAY-0001-L
+    text:
+      zh-CN: runtime/host 必须允许测试环境通过可控 scheduler 驱动 delay completion；契约测试不得只能依赖真实时间等待。
+      en: Runtime/host must allow tests to drive delay completion through a controllable scheduler; contract tests must not have to rely only on real-time waiting.
+  - id: C-DELAY-0001-M
+    text:
+      zh-CN: Runtime 不得内建某个具体计时机制作为 `delay` 的可移植默认实现；当代码调用 `delay` 时，当前 host/adapter 必须提供 delayed scheduling capability，否则调用必须失败并给出可诊断错误。
+      en: Runtime must not embed a concrete timing mechanism as the portable default implementation for `delay`; when code calls `delay`, the current host/adapter must provide a delayed scheduling capability, otherwise the call must fail with a diagnosable error.
+sources:
+  - path: internal/records/2026-07-06-presence-visibility-governance.zh-CN.md
+    sections:
+      - 近期工作路线
+      - 保留断口
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0001
+    - C-LIFECYCLE-0002
+    - C-CORE-SYNTAX-0007
+relates:
+  contracts:
+    - C-AS-HOOK-PRIVILEGED-0001
+revisions:
+  - version: 0.1.0
+    change: introduced
+    summary: Drafted the core runtime delay primitive contract for host-neutral asynchronous scheduling.
+tags:
+  - core
+  - delay
+  - runtime
+  - scheduler
+  - lifecycle

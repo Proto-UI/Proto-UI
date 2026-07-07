@@ -17,5 +17,6 @@ export * from './boundary';
 export * from './hit-participation';
 export * from './overlay';
 export * from './collection';
+export * from './delay';
 
 export * from './caps';

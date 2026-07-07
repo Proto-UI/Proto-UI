@@ -1,0 +1,134 @@
+id: T-DELAY-0001
+type: test
+title: Core delay runtime scheduling tests
+status: draft
+since: 0.1.0
+summary: Contract tests for core `delay` as a runtime-only, host-neutral, lifecycle-bound, cancelable delayed callback primitive.
+cases:
+  - id: T-DELAY-0001-CASE-RUNTIME-ONLY
+    title: delay is available only in runtime contexts
+    covers:
+      - C-DELAY-0001-A
+      - C-DELAY-0001-B
+      - C-DELAY-0001-J
+    expectation: direct-core-delay-runtime-only
+    notes:
+      - Verifies the direct Core import shape without adding `def` delay declarations.
+      - Setup, definition, module top-level, and no-instance calls must fail instead of creating delayed work.
+  - id: T-DELAY-0001-CASE-DURATION-VALIDATION
+    title: delay accepts only non-negative finite millisecond durations
+    covers:
+      - C-DELAY-0001-C
+    expectation: delay-duration-non-negative-finite-ms
+  - id: T-DELAY-0001-CASE-MINIMUM-DELAY
+    title: callback does not run before the requested minimum delay is satisfied
+    covers:
+      - C-DELAY-0001-D
+      - C-DELAY-0001-F
+    expectation: callback-after-minimum-delay-and-host-scheduling
+    notes:
+      - The fixture should model host scheduling quality without asserting real-time or frame-accurate execution.
+  - id: T-DELAY-0001-CASE-ZERO-ASYNC
+    title: zero-millisecond delay still runs asynchronously
+    covers:
+      - C-DELAY-0001-E
+    expectation: zero-delay-separated-from-current-call-stack
+    notes:
+      - Verifies that `delay(0, cb)` cannot call `cb` synchronously before later statements in the current stack execute.
+  - id: T-DELAY-0001-CASE-CANCEL
+    title: canceling a delay task prevents runtime behavior
+    covers:
+      - C-DELAY-0001-G
+    expectation: canceled-delay-task-is-ineffective
+    notes:
+      - Cancellation must be idempotent.
+      - If the underlying host item has already been queued, runtime guards must still suppress the callback behavior.
+  - id: T-DELAY-0001-CASE-LIFECYCLE-BOUND
+    title: pending delay callbacks are invalidated by unmount and dispose
+    covers:
+      - C-DELAY-0001-H
+    expectation: pending-delay-invalid-after-instance-disposal
+  - id: T-DELAY-0001-CASE-CALLBACK-CONTEXT
+    title: delay callbacks run with runtime callback authority only
+    covers:
+      - C-DELAY-0001-I
+      - C-DELAY-0001-K
+    expectation: delay-callback-runtime-context-and-error-routing
+    notes:
+      - Callback execution must not regain setup authority.
+      - Callback errors should be observable through runtime diagnostics or error handling, not as unmanaged scheduler failures.
+  - id: T-DELAY-0001-CASE-CONTROLLABLE-SCHEDULER
+    title: tests can drive delay completion without real-time waiting
+    covers:
+      - C-DELAY-0001-L
+    expectation: delay-completion-driven-by-test-scheduler
+  - id: T-DELAY-0001-CASE-MISSING-SCHEDULER
+    title: delay fails when the current host does not provide delayed scheduling
+    covers:
+      - C-DELAY-0001-M
+    expectation: missing-host-delay-scheduler-diagnostic
+implementations:
+  - id: delay-runtime-fixture
+    kind: fixture
+    status: planned
+    path: packages/spec/fixtures/src/delay/runtime-delay.ts
+    required: true
+    consumesCases:
+      - T-DELAY-0001-CASE-MINIMUM-DELAY
+      - T-DELAY-0001-CASE-ZERO-ASYNC
+      - T-DELAY-0001-CASE-CANCEL
+      - T-DELAY-0001-CASE-CONTROLLABLE-SCHEDULER
+    notes:
+      - Shared deterministic scheduler fixture for runtime, adapter, and future host-capability conformance tests.
+  - id: runtime-delay-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/delay.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-DELAY-0001-CASE-RUNTIME-ONLY
+      - T-DELAY-0001-CASE-DURATION-VALIDATION
+      - T-DELAY-0001-CASE-MINIMUM-DELAY
+      - T-DELAY-0001-CASE-ZERO-ASYNC
+      - T-DELAY-0001-CASE-CANCEL
+      - T-DELAY-0001-CASE-LIFECYCLE-BOUND
+      - T-DELAY-0001-CASE-CALLBACK-CONTEXT
+      - T-DELAY-0001-CASE-CONTROLLABLE-SCHEDULER
+      - T-DELAY-0001-CASE-MISSING-SCHEDULER
+verifies:
+  contracts:
+    - id: C-DELAY-0001
+      anchors:
+        - C-DELAY-0001-A
+        - C-DELAY-0001-B
+        - C-DELAY-0001-C
+        - C-DELAY-0001-D
+        - C-DELAY-0001-E
+        - C-DELAY-0001-F
+        - C-DELAY-0001-G
+        - C-DELAY-0001-H
+        - C-DELAY-0001-I
+        - C-DELAY-0001-J
+        - C-DELAY-0001-K
+        - C-DELAY-0001-L
+        - C-DELAY-0001-M
+exercises:
+  contracts:
+    - id: C-LIFECYCLE-0001
+      role: lifecycle-model
+      coverageImpact: exercises-test-surface
+      note: Runtime-only availability and disposal invalidation rely on the shared setup/runtime lifecycle model.
+    - id: C-LIFECYCLE-0002
+      role: phase-boundary
+      coverageImpact: exercises-test-surface
+      note: Delay lifecycle invalidation uses the same unmount/dispose boundary as lifecycle callbacks and runtime handles.
+revisions:
+  - version: 0.1.0
+    change: introduced
+    summary: Added planned contract test cases for the core runtime delay primitive.
+tags:
+  - core
+  - delay
+  - scheduler
+  - contract-test
+  - runtime
