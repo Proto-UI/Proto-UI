@@ -1,0 +1,106 @@
+id: T-AS-HIDEABLE-0001
+type: test
+title: asHideable visibility hook tests
+status: active
+since: 0.1.0
+summary: Contract tests for asHideable as a no-arg privileged hook that exposes setup default hidden configuration, runtime hide/show control, a state-backed observed hidden handle, and host visibility projection.
+cases:
+  - id: T-AS-HIDEABLE-0001-CASE-NO-ARG-SINGLETON
+    title: asHideable is no-arg and singleton per setup frame
+    covers:
+      - C-AS-HIDEABLE-0001-A
+      - C-AS-HIDEABLE-0001-B
+    expectation: no-arg-singleton-hideable-handle
+  - id: T-AS-HIDEABLE-0001-CASE-HIDDEN-OBSERVED
+    title: hidden is a state-backed observed handle without write authority
+    covers:
+      - C-AS-HIDEABLE-0001-C
+      - C-AS-HIDEABLE-0001-D
+    expectation: hidden-observed-state-handle
+  - id: T-AS-HIDEABLE-0001-CASE-PHASES
+    title: default hidden is setup-only and hide/show/setHidden are runtime-only
+    covers:
+      - C-AS-HIDEABLE-0001-E
+      - C-AS-HIDEABLE-0001-F
+      - C-AS-HIDEABLE-0001-K
+    expectation: hideable-setup-runtime-phase-boundaries
+  - id: T-AS-HIDEABLE-0001-CASE-HIDE-SHOW
+    title: hide and show update the hidden fact
+    covers:
+      - C-AS-HIDEABLE-0001-G
+    expectation: hide-show-toggle-hidden-fact
+  - id: T-AS-HIDEABLE-0001-CASE-VISIBILITY-PROJECTION
+    title: hidden fact drives visibility projection without unmount
+    covers:
+      - C-AS-HIDEABLE-0001-H
+      - C-AS-HIDEABLE-0001-I
+      - C-VISIBILITY-0001-B
+      - C-VISIBILITY-0001-C
+    expectation: hidden-projects-visibility-without-presence-leave
+  - id: T-AS-HIDEABLE-0001-CASE-BOUNDARY
+    title: asHideable does not own transition overlay or layout semantics
+    covers:
+      - C-AS-HIDEABLE-0001-J
+    expectation: hideable-boundary-excludes-transition-overlay-layout
+implementations:
+  - id: runtime-as-hideable-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/as-hideable.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-AS-HIDEABLE-0001-CASE-NO-ARG-SINGLETON
+      - T-AS-HIDEABLE-0001-CASE-HIDDEN-OBSERVED
+      - T-AS-HIDEABLE-0001-CASE-PHASES
+      - T-AS-HIDEABLE-0001-CASE-HIDE-SHOW
+      - T-AS-HIDEABLE-0001-CASE-VISIBILITY-PROJECTION
+      - T-AS-HIDEABLE-0001-CASE-BOUNDARY
+  - id: module-visibility-web-host-bridge
+    kind: module-test
+    status: passing
+    path: packages/modules/visibility/test/web-host-bridge.v0.test.ts
+    required: true
+    consumesCases:
+      - T-AS-HIDEABLE-0001-CASE-VISIBILITY-PROJECTION
+verifies:
+  contracts:
+    - id: C-AS-HIDEABLE-0001
+      anchors:
+        - C-AS-HIDEABLE-0001-A
+        - C-AS-HIDEABLE-0001-B
+        - C-AS-HIDEABLE-0001-C
+        - C-AS-HIDEABLE-0001-D
+        - C-AS-HIDEABLE-0001-E
+        - C-AS-HIDEABLE-0001-F
+        - C-AS-HIDEABLE-0001-G
+        - C-AS-HIDEABLE-0001-H
+        - C-AS-HIDEABLE-0001-I
+        - C-AS-HIDEABLE-0001-J
+        - C-AS-HIDEABLE-0001-K
+    - id: C-VISIBILITY-0001
+      anchors:
+        - C-VISIBILITY-0001-B
+        - C-VISIBILITY-0001-C
+exercises:
+  contracts:
+    - id: C-STATE-0009
+      role: api-surface
+      coverageImpact: exercises-test-surface
+      note: Hidden handle shape follows observed state view semantics.
+    - id: C-LIFECYCLE-0001
+      role: phase-boundary
+      coverageImpact: exercises-test-surface
+      note: asHideable setup/runtime API split relies on the shared lifecycle phase model.
+revisions:
+  - version: 0.1.0
+    change: introduced
+    summary: Added planned test mapping for asHideable visibility hook behavior.
+  - version: 0.1.0
+    change: implemented
+    summary: Mapped passing runtime and module tests for asHideable observed state, phase guards, hidden mutation, and web host projection.
+tags:
+  - visibility
+  - hidden
+  - as-hideable
+  - as-hook
+  - contract-test

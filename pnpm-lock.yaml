@@ -235,6 +235,9 @@ importers:
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
+      '@proto.ui/module-visibility':
+        specifier: workspace:*
+        version: link:../../modules/visibility
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
@@ -301,6 +304,9 @@ importers:
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
+      '@proto.ui/module-visibility':
+        specifier: workspace:*
+        version: link:../../modules/visibility
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
@@ -370,6 +376,9 @@ importers:
       '@proto.ui/module-test-sys':
         specifier: workspace:*
         version: link:../../modules/test-sys
+      '@proto.ui/module-visibility':
+        specifier: workspace:*
+        version: link:../../modules/visibility
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
@@ -738,6 +747,21 @@ importers:
         specifier: workspace:*
         version: link:../../types
 
+  packages/modules/visibility:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-state':
+        specifier: workspace:*
+        version: link:../state
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
+
   packages/prototypes/base:
     dependencies:
       '@proto.ui/core':
@@ -881,6 +905,9 @@ importers:
       '@proto.ui/module-test-sys':
         specifier: workspace:*
         version: link:../modules/test-sys
+      '@proto.ui/module-visibility':
+        specifier: workspace:*
+        version: link:../modules/visibility
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../types

@@ -13,6 +13,7 @@ export * from './state';
 export * from './context';
 export * from './a11y';
 export * from './focus';
+export * from './visibility';
 export * from './boundary';
 export * from './hit-participation';
 export * from './overlay';

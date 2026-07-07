@@ -1,0 +1,113 @@
+id: C-AS-HIDEABLE-0001
+type: contract
+title: asHideable declares a hideable subject
+status: draft
+since: 0.1.0
+summary: asHideable is an author-facing privileged no-arg asHook that gives the caller a controlled hide/show API and a state-backed observed hidden handle.
+statement:
+  zh-CN: >-
+    `asHideable()` 是 author-facing privileged asHook，用于声明当前原型实例或 part 是一个 hideable subject。它必须保持 no-arg、once/singleton 安装形态，并通过返回的 handle 提供 setup-only 的默认 hidden 配置、runtime-only 的 `hide()` / `show()` / `setHidden(...)` 写入口，以及名为 `hidden` 的标准 state-backed observed state handle。`hidden` 不得是自制的 state-like 结构，也不得是原型作者可写的 owned 或 borrowed view；它必须由 State 体系创建或投影，使读取、watch、生命周期与其它 state handle 语义继承 State 契约。`asHideable()` 只治理 Visibility hidden fact，不拥有 presence、unmount、transition、overlay dismiss、portal、layer 或 focus trap 语义。
+
+
+  en: >-
+    `asHideable()` is an author-facing privileged asHook for declaring the current prototype instance or part as a hideable subject. It must remain a no-arg once/singleton install hook and expose, through its returned handle, setup-only default hidden configuration, runtime-only `hide()` / `show()` / `setHidden(...)` write entries, and a standard state-backed observed state handle named `hidden`. `hidden` must not be a custom state-like object and must not be an author-writable owned or borrowed view; it must be created or projected through the State system so reading, watching, lifecycle, and other state handle semantics inherit the State contracts. `asHideable()` governs only the Visibility hidden fact and does not own presence, unmount, transition, overlay dismiss, portal, layer, or focus-trap semantics.
+
+
+criteria:
+  - id: C-AS-HIDEABLE-0001-A
+    text:
+      zh-CN: '`asHideable()` 必须是 privileged asHook，并必须以 no-arg caller 形态调用。'
+      en: '`asHideable()` must be a privileged asHook and must be called as a no-arg caller.'
+    dependsOn:
+      contracts:
+        - C-AS-HOOK-PRIVILEGED-0001
+  - id: C-AS-HIDEABLE-0001-B
+    text:
+      zh-CN: 同一 setup 中重复调用 `asHideable()` 必须复用同一个 hideable handle，不得重复安装 hideable capability。
+      en: Repeated `asHideable()` calls in the same setup must reuse the same hideable handle and must not reinstall the hideable capability.
+  - id: C-AS-HIDEABLE-0001-C
+    text:
+      zh-CN: '`asHideable()` 返回的 `hidden` 必须是 State 体系提供的标准 state-backed observed state handle，不得是自制 state-like 结构。'
+      en: The `hidden` value returned by `asHideable()` must be a standard state-backed observed state handle provided by the State system, not a custom state-like object.
+    dependsOn:
+      contracts:
+        - C-STATE-0009
+  - id: C-AS-HIDEABLE-0001-D
+    text:
+      zh-CN: '`hidden` observed handle 不得提供作者可写的 `set(...)` 或 `setDefault(...)` 权限；写入 hidden fact 必须经由 `asHideable()` handle 的正式写入口。'
+      en: The `hidden` observed handle must not provide author-writable `set(...)` or `setDefault(...)` authority; writes to the hidden fact must go through the official entries on the `asHideable()` handle.
+    dependsOn:
+      contracts:
+        - C-STATE-0009
+  - id: C-AS-HIDEABLE-0001-E
+    text:
+      zh-CN: '`asHideable().setDefaultHidden(...)` 必须是 setup-only API，用于设置该 hideable subject 的默认 hidden fact。'
+      en: '`asHideable().setDefaultHidden(...)` must be a setup-only API for setting the hideable subject default hidden fact.'
+    dependsOn:
+      contracts:
+        - C-LIFECYCLE-0001
+  - id: C-AS-HIDEABLE-0001-F
+    text:
+      zh-CN: '`asHideable().hide()`、`asHideable().show()` 与 `asHideable().setHidden(...)` 必须是 runtime-only API。'
+      en: '`asHideable().hide()`, `asHideable().show()`, and `asHideable().setHidden(...)` must be runtime-only APIs.'
+    dependsOn:
+      contracts:
+        - C-LIFECYCLE-0001
+  - id: C-AS-HIDEABLE-0001-G
+    text:
+      zh-CN: '`hide()` 必须等价于将当前 hidden fact 设为 `true`，`show()` 必须等价于将当前 hidden fact 设为 `false`。'
+      en: '`hide()` must be equivalent to setting the current hidden fact to `true`, and `show()` must be equivalent to setting the current hidden fact to `false`.'
+  - id: C-AS-HIDEABLE-0001-H
+    text:
+      zh-CN: '`asHideable()` 写入 hidden fact 后必须驱动 Visibility 投射；该投射不得被简化为只写 visual style 或只写 accessibility hidden。'
+      en: After `asHideable()` writes the hidden fact, it must drive Visibility projection; that projection must not be reduced to only writing visual style or only writing accessibility hidden.
+    dependsOn:
+      contracts:
+        - C-VISIBILITY-0001
+  - id: C-AS-HIDEABLE-0001-I
+    text:
+      zh-CN: '`asHideable()` 不得因为 hidden 为 `true` 而触发 presence leave、unmount、absence、dispose 或 template 逻辑树移除。'
+      en: '`asHideable()` must not trigger presence leave, unmount, absence, disposal, or template logic-tree removal merely because hidden is `true`.'
+    dependsOn:
+      contracts:
+        - C-VISIBILITY-0001
+  - id: C-AS-HIDEABLE-0001-J
+    text:
+      zh-CN: '`asHideable()` 不拥有 transition timing、overlay dismiss、portal、layer、modal lock、focus trap 或 layout measurement 语义。'
+      en: '`asHideable()` does not own transition timing, overlay dismiss, portal, layer, modal lock, focus trap, or layout measurement semantics.'
+  - id: C-AS-HIDEABLE-0001-K
+    text:
+      zh-CN: '`asHideable()` 的默认 hidden 值如果未被 setup 配置覆盖，应为 `false`。'
+      en: The default hidden value of `asHideable()` should be `false` unless overridden by setup-time configuration.
+sources:
+  - path: internal/records/2026-07-06-presence-visibility-governance.zh-CN.md
+    sections:
+      - 术语边界
+      - 近期工作路线
+  - path: spec/contracts/C-AS-FOCUSABLE-0001.yaml
+    sections:
+      - C-AS-FOCUSABLE-0001-C
+dependsOn:
+  contracts:
+    - C-VISIBILITY-0001
+    - C-STATE-0009
+    - C-STATE-0010
+    - C-AS-HOOK-PRIVILEGED-0001
+    - C-LIFECYCLE-0001
+relates:
+  contracts:
+    - C-AS-FOCUSABLE-0001
+    - C-AS-FOCUS-ENTRY-0001
+revisions:
+  - version: 0.1.0
+    change: introduced
+    summary: Drafted asHideable as the narrow author-facing hidden control hook backed by Visibility and state-backed observed hidden facts.
+  - version: 0.1.0
+    change: clarified
+    summary: Resolved the state-port question; asHideable can create an internal owned hidden state and return StatePort.createObservedHandle without extending State.
+tags:
+  - visibility
+  - hidden
+  - as-hook
+  - as-hideable
+  - privileged

@@ -5,6 +5,7 @@ export * from './as-focus-entry';
 export * from './as-focus-roving';
 export * from './as-focusable';
 export * from './as-focus-scope';
+export * from './as-hideable';
 export * from './as-hit-participation';
 export * from './as-overlay';
 export * from './as-trigger';

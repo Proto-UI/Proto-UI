@@ -57,6 +57,10 @@ import { PRESENCE_HOST_BRIDGE_CAP, type PresenceHostBridge } from '@proto.ui/mod
 import { RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/module-rule-expose-state-web';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import {
+  createWebVisibilityHostBridge,
+  VISIBILITY_HOST_BRIDGE_CAP,
+} from '@proto.ui/module-visibility';
 import type { PropsBaseType } from '@proto.ui/types';
 
 import { getProtoParent, getPrototypeByInstance, setProtoParent } from '../platform/instance-tree';
@@ -84,6 +88,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [[EFFECTS_CAP, effectsPort]])
     .use('a11y', [[A11Y_PROJECT_CAP, createWebA11yProjector(el)]])
+    .use('visibility', [[VISIBILITY_HOST_BRIDGE_CAP, createWebVisibilityHostBridge(el)]])
     .use('event', [
       [EVENT_ROOT_TARGET_CAP, () => router.rootTarget],
       [EVENT_GLOBAL_TARGET_CAP, () => router.globalTarget],

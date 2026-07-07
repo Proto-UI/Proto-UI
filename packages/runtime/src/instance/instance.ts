@@ -27,6 +27,7 @@ import { BoundaryModuleDef } from '@proto.ui/module-boundary';
 import { HitParticipationModuleDef } from '@proto.ui/module-hit-participation';
 import { OverlayModuleDef } from '@proto.ui/module-overlay';
 import { PresenceModuleDef } from '@proto.ui/module-presence';
+import { VisibilityModuleDef } from '@proto.ui/module-visibility';
 import { __RUN_TEST_SYS, TestSysModuleDef, type TestSysPort } from '@proto.ui/module-test-sys';
 
 import type { ModuleOrchestrator } from '../orchestrator/module-orchestrator';
@@ -88,6 +89,7 @@ export function createRuntimeInstance<P extends PropsBaseType>(
     HitParticipationModuleDef,
     OverlayModuleDef,
     PresenceModuleDef,
+    VisibilityModuleDef,
     TestSysModuleDef,
   ]);
 

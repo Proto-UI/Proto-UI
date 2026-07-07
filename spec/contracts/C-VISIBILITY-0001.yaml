@@ -1,0 +1,94 @@
+id: C-VISIBILITY-0001
+type: contract
+title: Visibility governs hidden participation across user-facing channels
+status: draft
+since: 0.1.0
+summary: Visibility records host-neutral hidden facts for an existing subject and projects them across visual, accessibility, focus, and hit-participation channels without implying unmount.
+statement:
+  zh-CN: >-
+    Visibility 是针对已经存在的组件实例、原型主体或 anatomy part 的 host-neutral runtime fact domain。它记录该 subject 当前是否 hidden，并要求 runtime/adapter 将 hidden fact 投射到用户可感知或可参与的通道，包括视觉感知、accessibility semantic tree、顺序焦点参与与 hit participation。Visibility 不拥有结构生命周期，不得把 hidden 解释为 unmount、absence、dispose 或 template 逻辑树变化；具体宿主投射不得绑定到 `display: none`、`hidden` attribute、`aria-hidden`、`inert`、CSS visibility 或任一具体平台机制。
+
+
+  en: >-
+    Visibility is a host-neutral runtime fact domain for an already-existing component instance, prototype subject, or anatomy part. It records whether that subject is currently hidden and requires runtime/adapters to project the hidden fact into user-perceivable or user-participation channels, including visual perception, the accessibility semantic tree, sequential focus participation, and hit participation. Visibility does not own structural lifecycle and must not interpret hidden as unmount, absence, disposal, or a template logic-tree change; concrete host projection must not be bound to `display: none`, the `hidden` attribute, `aria-hidden`, `inert`, CSS visibility, or any specific platform mechanism.
+
+
+criteria:
+  - id: C-VISIBILITY-0001-A
+    text:
+      zh-CN: Visibility hidden fact 必须表示一个仍然存在的 subject 是否应被视为 hidden，而不是该 subject 是否存在。
+      en: A Visibility hidden fact must indicate whether an existing subject should be treated as hidden, not whether that subject exists.
+  - id: C-VISIBILITY-0001-B
+    text:
+      zh-CN: hidden 不得默认触发 unmount、absence、dispose、presence leave 或 template 逻辑树移除。
+      en: Hidden must not by default trigger unmount, absence, disposal, presence leave, or removal from the template logic tree.
+  - id: C-VISIBILITY-0001-C
+    text:
+      zh-CN: hidden fact 的投射必须至少考虑视觉感知、accessibility semantic tree、顺序焦点参与与 hit participation 这些用户通道。
+      en: Projection of a hidden fact must at least consider visual perception, the accessibility semantic tree, sequential focus participation, and hit participation as user-facing channels.
+  - id: C-VISIBILITY-0001-D
+    text:
+      zh-CN: >-
+        Visibility 契约不得绑定任何具体宿主机制；`display: none`、`hidden` attribute、`aria-hidden`、`inert`、CSS visibility 或 style token 都只能是某个宿主的投射选择。
+
+
+      en: >-
+        The Visibility contract must not bind itself to any concrete host mechanism; `display: none`, the `hidden` attribute, `aria-hidden`, `inert`, CSS visibility, or style tokens may only be projection choices for a particular host.
+
+
+  - id: C-VISIBILITY-0001-E
+    text:
+      zh-CN: accessibility hidden 是 Visibility 投射的一部分，但 a11y domain 不得成为 Visibility fact 的唯一事实源或所有者。
+      en: Accessibility hidden is part of Visibility projection, but the a11y domain must not become the only source or owner of the Visibility fact.
+  - id: C-VISIBILITY-0001-F
+    text:
+      zh-CN: visual hidden 是 Visibility 投射的一部分，但 `feedback.style` 不得被解释为完整 Visibility 语义的所有者。
+      en: Visual hidden is part of Visibility projection, but `feedback.style` must not be interpreted as the owner of full Visibility semantics.
+  - id: C-VISIBILITY-0001-G
+    text:
+      zh-CN: 当多个 domain 同时影响同一用户通道时，解除某个 hidden fact 只能撤销 Visibility 自己贡献的 hidden 因子，不得覆盖 disabled、inactive focus scope、host inert ancestor 或其它独立约束。
+      en: When multiple domains affect the same user-facing channel, clearing a hidden fact may only remove Visibility's own hidden factor and must not override disabled, inactive focus scope, host inert ancestor, or other independent constraints.
+  - id: C-VISIBILITY-0001-H
+    text:
+      zh-CN: Visibility fact 可以由组件状态、context、privileged asHook、presence/transition state 或其它官方 runtime source 派生，但派生来源不得改变 hidden 不等于 unmount 的边界。
+      en: A Visibility fact may be derived from component state, context, privileged asHooks, presence/transition state, or another official runtime source, but the derivation source must not change the boundary that hidden is not unmount.
+sources:
+  - path: internal/records/2026-07-06-presence-visibility-governance.zh-CN.md
+    sections:
+      - 术语边界
+      - 决策
+  - path: spec/prototypes/P-BASE-TABS-CONTENT.yaml
+    sections:
+      - P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE
+      - P-BASE-TABS-CONTENT-NOT-UNMOUNTED-BY-DEFAULT
+dependsOn:
+  contracts:
+    - C-A11Y-0001
+    - C-AS-FOCUS-ENTRY-0001
+    - C-FEEDBACK-STYLE-0001
+relates:
+  contracts:
+    - C-DELAY-0001
+  prototypes:
+    - P-BASE-TABS-CONTENT
+openQuestions:
+  - id: C-VISIBILITY-0001-Q-HOST-CAPABILITY
+    question:
+      zh-CN: Visibility 投射是否应拆出独立 host capability/module port，以统一 a11y、focus、hit 与 visual channel 的 host 投射？
+      en: Should Visibility projection be split into a dedicated host capability or module port to unify host projection across a11y, focus, hit, and visual channels?
+    context:
+      zh-CN: 当前实现中相关能力分散在 a11y、focus、hit participation 与 style 投射中，第一轮契约先定义事实域与边界。
+      en: Current implementation paths are distributed across a11y, focus, hit participation, and style projection; the first contract pass defines the fact domain and boundary first.
+    blocks:
+      - C-VISIBILITY-0001
+revisions:
+  - version: 0.1.0
+    change: introduced
+    summary: Drafted Visibility as the host-neutral hidden fact domain distinct from presence and host-specific projection mechanisms.
+tags:
+  - visibility
+  - hidden
+  - host-projection
+  - focus
+  - a11y
+  - hit-participation

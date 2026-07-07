@@ -25,7 +25,8 @@
     "@proto.ui/module-presence": "workspace:*",
     "@proto.ui/module-rule-expose-state-web": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
-    "@proto.ui/module-test-sys": "workspace:*"
+    "@proto.ui/module-test-sys": "workspace:*",
+    "@proto.ui/module-visibility": "workspace:*"
   },
   "devDependencies": {},
   "exports": {
