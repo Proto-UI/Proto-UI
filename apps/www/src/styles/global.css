@@ -150,14 +150,6 @@ proto-concept {
   text-decoration: none;
 }
 
-.proto-concept__close {
-  appearance: none;
-  border: 1px solid color-mix(in oklab, var(--color-border) 86%, transparent);
-  background: color-mix(in oklab, var(--color-muted) 72%, transparent);
-  color: var(--color-foreground);
-  cursor: pointer;
-}
-
 .proto-concept__link {
   color: var(--color-primary);
   background: color-mix(in oklab, var(--color-primary) 12%, transparent);

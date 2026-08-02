@@ -51,25 +51,21 @@ class ProtoConceptElement extends HTMLElement {
         <span class="proto-concept__eyebrow">${locale === 'zh-cn' ? '概念' : 'Concept'}</span>
         <span class="proto-concept__title">${escapeHtml(entry?.term[locale] || termLabel)}</span>
         ${summary ? `<span class="proto-concept__summary">${escapeHtml(summary)}</span>` : ''}
-        <span class="proto-concept__actions">
-          <button class="proto-concept__action proto-concept__close" type="button">
-            ${locale === 'zh-cn' ? '关闭' : 'Close'}
-          </button>
-          ${
-            href
-              ? `<a class="proto-concept__action proto-concept__link" href="${escapeHtml(href)}">${
+        ${
+          href
+            ? `<span class="proto-concept__actions">
+                <a class="proto-concept__action proto-concept__link" href="${escapeHtml(href)}">${
                   locale === 'zh-cn' ? '了解更多' : 'Learn more'
-                }</a>`
-              : ''
-          }
-        </span>
+                }</a>
+              </span>`
+            : ''
+        }
       </span>
     `;
 
     this.replaceWith(root);
 
     const trigger = root.querySelector('.proto-concept__trigger');
-    const close = root.querySelector('.proto-concept__close');
     if (!(trigger instanceof HTMLButtonElement)) return;
 
     const setPinned = (next: boolean) => {
@@ -90,10 +86,6 @@ class ProtoConceptElement extends HTMLElement {
       const pinned = root.dataset.pinned === 'true';
       setPinned(!pinned);
     });
-
-    if (close instanceof HTMLButtonElement) {
-      close.addEventListener('click', () => setPinned(false));
-    }
 
     root.addEventListener('pointerenter', onEnter);
     root.addEventListener('pointerleave', onLeave);
