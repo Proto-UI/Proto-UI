@@ -158,8 +158,11 @@
       "publishOrder": 17,
       "internalDependencies": [
         "@proto.ui/core",
+        "@proto.ui/module-anatomy",
         "@proto.ui/module-base",
         "@proto.ui/module-boundary",
+        "@proto.ui/module-event",
+        "@proto.ui/module-positioning",
         "@proto.ui/types"
       ]
     },
