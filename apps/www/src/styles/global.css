@@ -97,7 +97,6 @@ proto-concept {
 }
 
 .proto-concept[data-hovering='true'] .proto-concept__card,
-.proto-concept:focus-within .proto-concept__card,
 .proto-concept[data-pinned='true'] .proto-concept__card {
   opacity: 1;
   pointer-events: auto;
@@ -164,7 +163,6 @@ proto-concept {
   }
 
   .proto-concept[data-hovering='true'] .proto-concept__card,
-  .proto-concept:focus-within .proto-concept__card,
   .proto-concept[data-pinned='true'] .proto-concept__card {
     translate: 0 0;
   }
