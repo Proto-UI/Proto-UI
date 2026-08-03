@@ -11,6 +11,12 @@ importers:
       '@proto.ui/types':
         specifier: workspace:*
         version: link:packages/types
+      '@types/node':
+        specifier: ^25.6.2
+        version: 25.9.5
+      esbuild:
+        specifier: 0.25.12
+        version: 0.25.12
       happy-dom:
         specifier: ^15.0.0
         version: 15.11.7
@@ -20,6 +26,9 @@ importers:
       lint-staged:
         specifier: ^16.3.1
         version: 16.4.0
+      npm:
+        specifier: ^11.14.1
+        version: 11.19.0
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
@@ -34,16 +43,53 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^2.0.0
-        version: 2.1.9(@types/node@24.12.0)(happy-dom@15.11.7)(lightningcss@1.32.0)
+        version: 2.1.9(@types/node@25.9.5)(happy-dom@15.11.7)(lightningcss@1.32.0)
+      yaml:
+        specifier: ^2.8.3
+        version: 2.8.3
+
+  apps/workspace:
+    dependencies:
+      '@proto.ui/spec-engine':
+        specifier: workspace:*
+        version: link:../../packages/spec/engine
+      '@proto.ui/spec-graph':
+        specifier: workspace:*
+        version: link:../../packages/spec/graph
+      '@proto.ui/spec-schema':
+        specifier: workspace:*
+        version: link:../../packages/spec/schema
+      react:
+        specifier: ^19.2.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.8(react@19.2.8)
+      vite:
+        specifier: ^6.4.1
+        version: 6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.14)
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   apps/www:
     dependencies:
       '@astrojs/mdx':
         specifier: ^4.3.13
-        version: 4.3.14(astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
+        version: 4.3.14(astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
       '@astrojs/starlight':
         specifier: ^0.35.2
-        version: 0.35.3(astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
+        version: 0.35.3(astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
       '@proto.ui/adapter-react':
         specifier: workspace:*
         version: link:../../packages/adapters/react
@@ -62,6 +108,9 @@ importers:
       '@proto.ui/prototypes-base':
         specifier: workspace:*
         version: link:../../packages/prototypes/base
+      '@proto.ui/prototypes-brutalist':
+        specifier: workspace:*
+        version: link:../../packages/prototypes/brutalist
       '@proto.ui/prototypes-lucide':
         specifier: workspace:*
         version: link:../../packages/prototypes/lucide
@@ -73,7 +122,7 @@ importers:
         version: link:../../packages/types
       '@tailwindcss/vite':
         specifier: ^4.1.11
-        version: 4.2.2(vite@6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
+        version: 4.2.2(vite@6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
       '@types/react':
         specifier: ^19.2.0
         version: 19.2.14
@@ -82,7 +131,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       astro:
         specifier: ^5.6.1
-        version: 5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+        version: 5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
       remark-directive:
         specifier: ^4.0.0
         version: 4.0.0
@@ -132,6 +181,9 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/module-expose-state':
+        specifier: workspace:*
+        version: link:../../modules/expose-state
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
@@ -150,6 +202,9 @@ importers:
       '@proto.ui/hooks':
         specifier: workspace:*
         version: link:../../hooks
+      '@proto.ui/module-a11y':
+        specifier: workspace:*
+        version: link:../../modules/a11y
       '@proto.ui/module-anatomy':
         specifier: workspace:*
         version: link:../../modules/anatomy
@@ -183,9 +238,9 @@ importers:
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
-      '@proto.ui/module-presence':
+      '@proto.ui/module-positioning':
         specifier: workspace:*
-        version: link:../../modules/presence
+        version: link:../../modules/positioning
       '@proto.ui/module-props':
         specifier: workspace:*
         version: link:../../modules/props
@@ -195,12 +250,31 @@ importers:
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
+      '@proto.ui/module-scroll':
+        specifier: workspace:*
+        version: link:../../modules/scroll
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
+    devDependencies:
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../../prototypes/base
+      '@types/react':
+        specifier: ^19.2.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.14)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.8(react@19.2.8)
 
   packages/adapters/vue:
     dependencies:
@@ -213,6 +287,9 @@ importers:
       '@proto.ui/hooks':
         specifier: workspace:*
         version: link:../../hooks
+      '@proto.ui/module-a11y':
+        specifier: workspace:*
+        version: link:../../modules/a11y
       '@proto.ui/module-anatomy':
         specifier: workspace:*
         version: link:../../modules/anatomy
@@ -246,9 +323,9 @@ importers:
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
-      '@proto.ui/module-presence':
+      '@proto.ui/module-positioning':
         specifier: workspace:*
-        version: link:../../modules/presence
+        version: link:../../modules/positioning
       '@proto.ui/module-props':
         specifier: workspace:*
         version: link:../../modules/props
@@ -258,12 +335,22 @@ importers:
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
+      '@proto.ui/module-scroll':
+        specifier: workspace:*
+        version: link:../../modules/scroll
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
+    devDependencies:
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../../prototypes/base
+      vue:
+        specifier: ^3.5.13
+        version: 3.5.31(typescript@5.9.3)
 
   packages/adapters/web-component:
     dependencies:
@@ -276,6 +363,9 @@ importers:
       '@proto.ui/hooks':
         specifier: workspace:*
         version: link:../../hooks
+      '@proto.ui/module-a11y':
+        specifier: workspace:*
+        version: link:../../modules/a11y
       '@proto.ui/module-anatomy':
         specifier: workspace:*
         version: link:../../modules/anatomy
@@ -309,9 +399,9 @@ importers:
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
-      '@proto.ui/module-presence':
+      '@proto.ui/module-positioning':
         specifier: workspace:*
-        version: link:../../modules/presence
+        version: link:../../modules/positioning
       '@proto.ui/module-props':
         specifier: workspace:*
         version: link:../../modules/props
@@ -321,6 +411,9 @@ importers:
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
+      '@proto.ui/module-scroll':
+        specifier: workspace:*
+        version: link:../../modules/scroll
       '@proto.ui/module-test-sys':
         specifier: workspace:*
         version: link:../../modules/test-sys
@@ -339,6 +432,13 @@ importers:
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.2
+        version: 25.9.5
+      '@types/prompts':
+        specifier: ^2.4.9
+        version: 2.4.9
 
   packages/core:
     devDependencies:
@@ -354,12 +454,24 @@ importers:
       '@proto.ui/module-anatomy':
         specifier: workspace:*
         version: link:../modules/anatomy
-      '@proto.ui/module-presence':
+      '@proto.ui/module-collection':
         specifier: workspace:*
-        version: link:../modules/presence
+        version: link:../modules/collection
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../types
+
+  packages/modules/a11y:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-state':
+        specifier: workspace:*
+        version: link:../state
 
   packages/modules/anatomy:
     dependencies:
@@ -396,6 +508,24 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-event':
+        specifier: workspace:*
+        version: link:../event
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
+
+  packages/modules/collection:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../anatomy
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
@@ -486,6 +616,12 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-event':
+        specifier: workspace:*
+        version: link:../event
+      '@proto.ui/module-state':
+        specifier: workspace:*
+        version: link:../state
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
@@ -516,6 +652,18 @@ importers:
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
+
+  packages/modules/positioning:
+    dependencies:
+      '@floating-ui/dom':
+        specifier: ^1.7.4
+        version: 1.8.0
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
 
   packages/modules/presence:
     dependencies:
@@ -598,6 +746,27 @@ importers:
         specifier: workspace:*
         version: link:../rule
 
+  packages/modules/scroll:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../anatomy
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-context':
+        specifier: workspace:*
+        version: link:../context
+      '@proto.ui/module-state':
+        specifier: workspace:*
+        version: link:../state
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
+
   packages/modules/state:
     dependencies:
       '@proto.ui/core':
@@ -630,6 +799,9 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-event':
+        specifier: workspace:*
+        version: link:../event
       '@proto.ui/module-state':
         specifier: workspace:*
         version: link:../state
@@ -674,6 +846,37 @@ importers:
         specifier: workspace:*
         version: link:../../runtime
 
+  packages/prototypes/brutalist:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/hooks':
+        specifier: workspace:*
+        version: link:../../hooks
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../base
+    devDependencies:
+      '@proto.ui/adapter-web-component':
+        specifier: workspace:*
+        version: link:../../adapters/web-component
+      '@proto.ui/cli':
+        specifier: workspace:*
+        version: link:../../cli
+      '@proto.ui/module-as-trigger':
+        specifier: workspace:*
+        version: link:../../modules/as-trigger
+      '@proto.ui/module-event':
+        specifier: workspace:*
+        version: link:../../modules/event
+      '@proto.ui/module-rule-meta':
+        specifier: workspace:*
+        version: link:../../modules/rule-meta
+      '@proto.ui/runtime':
+        specifier: workspace:*
+        version: link:../../runtime
+
   packages/prototypes/lucide:
     dependencies:
       '@proto.ui/core':
@@ -686,6 +889,9 @@ importers:
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
+      prettier:
+        specifier: ^3.8.1
+        version: 3.8.1
 
   packages/prototypes/shadcn:
     dependencies:
@@ -717,6 +923,9 @@ importers:
       '@proto.ui/hooks':
         specifier: workspace:*
         version: link:../hooks
+      '@proto.ui/module-a11y':
+        specifier: workspace:*
+        version: link:../modules/a11y
       '@proto.ui/module-anatomy':
         specifier: workspace:*
         version: link:../modules/anatomy
@@ -729,6 +938,9 @@ importers:
       '@proto.ui/module-boundary':
         specifier: workspace:*
         version: link:../modules/boundary
+      '@proto.ui/module-collection':
+        specifier: workspace:*
+        version: link:../modules/collection
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../modules/context
@@ -756,6 +968,9 @@ importers:
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../modules/overlay
+      '@proto.ui/module-positioning':
+        specifier: workspace:*
+        version: link:../modules/positioning
       '@proto.ui/module-presence':
         specifier: workspace:*
         version: link:../modules/presence
@@ -771,6 +986,9 @@ importers:
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../modules/rule-meta
+      '@proto.ui/module-scroll':
+        specifier: workspace:*
+        version: link:../modules/scroll
       '@proto.ui/module-state':
         specifier: workspace:*
         version: link:../modules/state
@@ -787,7 +1005,51 @@ importers:
         specifier: workspace:*
         version: link:../types
 
+  packages/spec/engine:
+    dependencies:
+      '@proto.ui/spec-schema':
+        specifier: workspace:*
+        version: link:../schema
+      yaml:
+        specifier: ^2.8.3
+        version: 2.8.3
+
+  packages/spec/fixtures: {}
+
+  packages/spec/graph:
+    dependencies:
+      '@proto.ui/spec-engine':
+        specifier: workspace:*
+        version: link:../engine
+      '@proto.ui/spec-schema':
+        specifier: workspace:*
+        version: link:../schema
+
+  packages/spec/schema:
+    dependencies:
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
+
   packages/types: {}
+
+  packages/web-conformance:
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.14)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.8(react@19.2.8)
+      vue:
+        specifier: ^3.5.13
+        version: 3.5.31(typescript@5.9.3)
 
 packages:
 
@@ -1358,6 +1620,15 @@ packages:
   '@expressive-code/plugin-text-markers@0.41.7':
     resolution: {integrity: sha512-Ewpwuc5t6eFdZmWlFyeuy3e1PTQC0jFvw2Q+2bpcWXbOZhPLsT7+h8lsSIJxb5mS7wZko7cKyQ2RLYDyK6Fpmw==}
 
+  '@floating-ui/core@1.8.0':
+    resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
+
+  '@floating-ui/dom@1.8.0':
+    resolution: {integrity: sha512-yXSrzeHZBTZadLOlfyhCkJHNeLJnHRnRInwdZ40L7ZiaAtrBwoYlsDrX3v5zB1Utk7CLfzcOVnVVWoXEky7Ceg==}
+
+  '@floating-ui/utils@0.2.12':
+    resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
     engines: {node: '>=18'}
@@ -1388,89 +1659,105 @@ packages:
     resolution: {integrity: sha512-excjX8DfsIcJ10x1Kzr4RcWe1edC9PquDRRPx3YVCvQv+U5p7Yin2s32ftzikXojb1PIFc/9Mt28/y+iRklkrw==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-libvips-linux-arm@1.2.4':
     resolution: {integrity: sha512-bFI7xcKFELdiNCVov8e44Ia4u2byA+l3XtsAj+Q8tfCwO6BQ8iDojYdvoPMqsKDkuoOo+X6HZA0s0q11ANMQ8A==}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-libvips-linux-ppc64@1.2.4':
     resolution: {integrity: sha512-FMuvGijLDYG6lW+b/UvyilUWu5Ayu+3r2d1S8notiGCIyYU/76eig1UfMmkZ7vwgOrzKzlQbFSuQfgm7GYUPpA==}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-libvips-linux-riscv64@1.2.4':
     resolution: {integrity: sha512-oVDbcR4zUC0ce82teubSm+x6ETixtKZBh/qbREIOcI3cULzDyb18Sr/Wcyx7NRQeQzOiHTNbZFF1UwPS2scyGA==}
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-libvips-linux-s390x@1.2.4':
     resolution: {integrity: sha512-qmp9VrzgPgMoGZyPvrQHqk02uyjA0/QrTO26Tqk6l4ZV0MPWIW6LTkqOIov+J1yEu7MbFQaDpwdwJKhbJvuRxQ==}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-libvips-linux-x64@1.2.4':
     resolution: {integrity: sha512-tJxiiLsmHc9Ax1bz3oaOYBURTXGIRDODBqhveVHonrHJ9/+k89qbLl0bcJns+e4t4rvaNBxaEZsFtSfAdquPrw==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-libvips-linuxmusl-arm64@1.2.4':
     resolution: {integrity: sha512-FVQHuwx1IIuNow9QAbYUzJ+En8KcVm9Lk5+uGUQJHaZmMECZmOlix9HnH7n1TRkXMS0pGxIJokIVB9SuqZGGXw==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@img/sharp-libvips-linuxmusl-x64@1.2.4':
     resolution: {integrity: sha512-+LpyBk7L44ZIXwz/VYfglaX/okxezESc6UxDSoyo2Ks6Jxc4Y7sGjpgU9s4PMgqgjj1gZCylTieNamqA1MF7Dg==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@img/sharp-linux-arm64@0.34.5':
     resolution: {integrity: sha512-bKQzaJRY/bkPOXyKx5EVup7qkaojECG6NLYswgktOZjaXecSAeCWiZwwiFf3/Y+O1HrauiE3FVsGxFg8c24rZg==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-linux-arm@0.34.5':
     resolution: {integrity: sha512-9dLqsvwtg1uuXBGZKsxem9595+ujv0sJ6Vi8wcTANSFpwV/GONat5eCkzQo/1O6zRIkh0m/8+5BjrRr7jDUSZw==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-linux-ppc64@0.34.5':
     resolution: {integrity: sha512-7zznwNaqW6YtsfrGGDA6BRkISKAAE1Jo0QdpNYXNMHu2+0dTrPflTLNkpc8l7MUP5M16ZJcUvysVWWrMefZquA==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-linux-riscv64@0.34.5':
     resolution: {integrity: sha512-51gJuLPTKa7piYPaVs8GmByo7/U7/7TZOq+cnXJIHZKavIRHAP77e3N2HEl3dgiqdD/w0yUfiJnII77PuDDFdw==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-linux-s390x@0.34.5':
     resolution: {integrity: sha512-nQtCk0PdKfho3eC5MrbQoigJ2gd1CgddUMkabUj+rBevs8tZ2cULOx46E7oyX+04WGfABgIwmMC0VqieTiR4jg==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-linux-x64@0.34.5':
     resolution: {integrity: sha512-MEzd8HPKxVxVenwAa+JRPwEC7QFjoPWuS5NZnBt6B3pu7EG2Ge0id1oLHZpPJdn3OQK+BQDiw9zStiHBTJQQQQ==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@img/sharp-linuxmusl-arm64@0.34.5':
     resolution: {integrity: sha512-fprJR6GtRsMt6Kyfq44IsChVZeGN97gTD331weR1ex1c1rypDEABN6Tm2xa1wE6lYb5DdEnk03NZPqA7Id21yg==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@img/sharp-linuxmusl-x64@0.34.5':
     resolution: {integrity: sha512-Jg8wNT1MUzIvhBFxViqrEhWDGzqymo3sV7z7ZsaWbZNDLXRJZoRGrjulp60YYtV4wfY8VIKcWidjojlLcWrd8Q==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@img/sharp-wasm32@0.34.5':
     resolution: {integrity: sha512-OdWTEiVkY2PHwqkbBI8frFxQQFekHaSSkUIJkwzclWZe64O1X4UlUjqqqLaPbUpMOQk6FBu/HtlGXNblIs0huw==}
@@ -1593,66 +1880,79 @@ packages:
     resolution: {integrity: sha512-L+34Qqil+v5uC0zEubW7uByo78WOCIrBvci69E7sFASRl0X7b/MB6Cqd1lky/CtcSVTydWa2WZwFuWexjS5o6g==}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.60.1':
     resolution: {integrity: sha512-n83O8rt4v34hgFzlkb1ycniJh7IR5RCIqt6mz1VRJD6pmhRi0CXdmfnLu9dIUS6buzh60IvACM842Ffb3xd6Gg==}
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.60.1':
     resolution: {integrity: sha512-Nql7sTeAzhTAja3QXeAI48+/+GjBJ+QmAH13snn0AJSNL50JsDqotyudHyMbO2RbJkskbMbFJfIJKWA6R1LCJQ==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.60.1':
     resolution: {integrity: sha512-+pUymDhd0ys9GcKZPPWlFiZ67sTWV5UU6zOJat02M1+PiuSGDziyRuI/pPue3hoUwm2uGfxdL+trT6Z9rxnlMA==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-loong64-gnu@4.60.1':
     resolution: {integrity: sha512-VSvgvQeIcsEvY4bKDHEDWcpW4Yw7BtlKG1GUT4FzBUlEKQK0rWHYBqQt6Fm2taXS+1bXvJT6kICu5ZwqKCnvlQ==}
     cpu: [loong64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-loong64-musl@4.60.1':
     resolution: {integrity: sha512-4LqhUomJqwe641gsPp6xLfhqWMbQV04KtPp7/dIp0nzPxAkNY1AbwL5W0MQpcalLYk07vaW9Kp1PBhdpZYYcEw==}
     cpu: [loong64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-ppc64-gnu@4.60.1':
     resolution: {integrity: sha512-tLQQ9aPvkBxOc/EUT6j3pyeMD6Hb8QF2BTBnCQWP/uu1lhc9AIrIjKnLYMEroIz/JvtGYgI9dF3AxHZNaEH0rw==}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-ppc64-musl@4.60.1':
     resolution: {integrity: sha512-RMxFhJwc9fSXP6PqmAz4cbv3kAyvD1etJFjTx4ONqFP9DkTkXsAMU4v3Vyc5BgzC+anz7nS/9tp4obsKfqkDHg==}
     cpu: [ppc64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-riscv64-gnu@4.60.1':
     resolution: {integrity: sha512-QKgFl+Yc1eEk6MmOBfRHYF6lTxiiiV3/z/BRrbSiW2I7AFTXoBFvdMEyglohPj//2mZS4hDOqeB0H1ACh3sBbg==}
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-musl@4.60.1':
     resolution: {integrity: sha512-RAjXjP/8c6ZtzatZcA1RaQr6O1TRhzC+adn8YZDnChliZHviqIjmvFwHcxi4JKPSDAt6Uhf/7vqcBzQJy0PDJg==}
     cpu: [riscv64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-s390x-gnu@4.60.1':
     resolution: {integrity: sha512-wcuocpaOlaL1COBYiA89O6yfjlp3RwKDeTIA0hM7OpmhR1Bjo9j31G1uQVpDlTvwxGn2nQs65fBFL5UFd76FcQ==}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.60.1':
     resolution: {integrity: sha512-77PpsFQUCOiZR9+LQEFg9GClyfkNXj1MP6wRnzYs0EeWbPcHs02AXu4xuUbM1zhwn3wqaizle3AEYg5aeoohhg==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.60.1':
     resolution: {integrity: sha512-5cIATbk5vynAjqqmyBjlciMJl1+R/CwX9oLk/EyiFXDWd95KpHdrOJT//rnUl4cUcskrd0jCCw3wpZnhIHdD9w==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-openbsd-x64@4.60.1':
     resolution: {integrity: sha512-cl0w09WsCi17mcmWqqglez9Gk8isgeWvoUZ3WiJFYSR3zjBQc2J5/ihSjpl+VLjPqjQ/1hJRcqBfLjssREQILw==}
@@ -1743,24 +2043,28 @@ packages:
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@tailwindcss/oxide-linux-arm64-musl@4.2.2':
     resolution: {integrity: sha512-oCfG/mS+/+XRlwNjnsNLVwnMWYH7tn/kYPsNPh+JSOMlnt93mYNCKHYzylRhI51X+TbR+ufNhhKKzm6QkqX8ag==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@tailwindcss/oxide-linux-x64-gnu@4.2.2':
     resolution: {integrity: sha512-rTAGAkDgqbXHNp/xW0iugLVmX62wOp2PoE39BTCGKjv3Iocf6AFbRP/wZT/kuCxC9QBh9Pu8XPkv/zCZB2mcMg==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@tailwindcss/oxide-linux-x64-musl@4.2.2':
     resolution: {integrity: sha512-XW3t3qwbIwiSyRCggeO2zxe3KWaEbM0/kW9e8+0XpBgyKU4ATYzcVSMKteZJ1iukJ3HgHBjbg9P5YPRCVUxlnQ==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@tailwindcss/oxide-wasm32-wasi@4.2.2':
     resolution: {integrity: sha512-eKSztKsmEsn1O5lJ4ZAfyn41NfG7vzCg496YiGtMDV86jz1q/irhms5O0VrY6ZwTUkFy/EKG3RfWgxSI3VbZ8Q==}
@@ -1824,6 +2128,12 @@ packages:
 
   '@types/node@24.12.0':
     resolution: {integrity: sha512-GYDxsZi3ChgmckRT9HPU0WEhKLP08ev/Yfcq2AstjrDASOYCSXeyjDsHg4v5t4jOj7cyDX3vmprafKlWIG9MXQ==}
+
+  '@types/node@25.9.5':
+    resolution: {integrity: sha512-OScDchr2fwuUmWdf4kZ9h7PcJiYDVInhJizG/biAq3cAvqwYktuy/TYGGdZNMtNTFUP7rnb0NU4TUdm82kt4Rg==}
+
+  '@types/prompts@2.4.9':
+    resolution: {integrity: sha512-qTxFi6Buiu8+50/+3DGIWLHM6QuWsEKugJnnP6iv2Mc4ncxE4A/OJkjuVOA+5X0X1S/nq5VJRa8Lu+nwcvbrKA==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -2577,24 +2887,28 @@ packages:
     engines: {node: '>= 12.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-arm64-musl@1.32.0:
     resolution: {integrity: sha512-UpQkoenr4UJEzgVIYpI80lDFvRmPVg6oqboNHfoH4CQIfNA+HOrZ7Mo7KZP02dC6LjghPQJeBsvXhJod/wnIBg==}
     engines: {node: '>= 12.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-linux-x64-gnu@1.32.0:
     resolution: {integrity: sha512-V7Qr52IhZmdKPVr+Vtw8o+WLsQJYCTd8loIfpDaMRWGUZfBOYEJeyJIkqGIDMZPwPx24pUMfwSxxI8phr/MbOA==}
     engines: {node: '>= 12.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-x64-musl@1.32.0:
     resolution: {integrity: sha512-bYcLp+Vb0awsiXg/80uCRezCYHNg1/l3mt0gzHnWV9XP1W5sKa5/TCdGWaR/zBM2PeF/HbsQv/j2URNOiVuxWg==}
     engines: {node: '>= 12.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-win32-arm64-msvc@1.32.0:
     resolution: {integrity: sha512-8SbC8BR40pS6baCM8sbtYDSwEVQd4JlFTOlaD3gWGHfThTcABnNDBda6eTZeqbofalIJhFx0qKzgHJmcPTnGdw==}
@@ -2858,6 +3172,77 @@ packages:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
 
+  npm@11.19.0:
+    resolution: {integrity: sha512-SDd/hHg3KqHE5Ht2NHWxNYNtqCQ2pXAPLl6OtQhPyED5PHsRfrOtO199MZTIG2cQoQ1ZRI9t28shrD+2cr3AAw==}
+    engines: {node: ^20.17.0 || >=22.9.0}
+    hasBin: true
+    bundledDependencies:
+      - '@isaacs/string-locale-compare'
+      - '@npmcli/arborist'
+      - '@npmcli/config'
+      - '@npmcli/fs'
+      - '@npmcli/map-workspaces'
+      - '@npmcli/metavuln-calculator'
+      - '@npmcli/package-json'
+      - '@npmcli/promise-spawn'
+      - '@npmcli/redact'
+      - '@npmcli/run-script'
+      - '@sigstore/tuf'
+      - abbrev
+      - archy
+      - cacache
+      - chalk
+      - ci-info
+      - fastest-levenshtein
+      - fs-minipass
+      - glob
+      - graceful-fs
+      - hosted-git-info
+      - ini
+      - init-package-json
+      - is-cidr
+      - json-parse-even-better-errors
+      - libnpmaccess
+      - libnpmdiff
+      - libnpmexec
+      - libnpmfund
+      - libnpmorg
+      - libnpmpack
+      - libnpmpublish
+      - libnpmsearch
+      - libnpmteam
+      - libnpmversion
+      - make-fetch-happen
+      - minimatch
+      - minipass
+      - minipass-pipeline
+      - ms
+      - node-gyp
+      - nopt
+      - npm-audit-report
+      - npm-install-checks
+      - npm-package-arg
+      - npm-pick-manifest
+      - npm-profile
+      - npm-registry-fetch
+      - npm-user-validate
+      - p-map
+      - pacote
+      - parse-conflict-json
+      - proc-log
+      - qrcode-terminal
+      - read
+      - semver
+      - spdx-expression-parse
+      - ssri
+      - supports-color
+      - tar
+      - text-table
+      - tiny-relative-date
+      - treeverse
+      - validate-npm-package-name
+      - which
+
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
@@ -2965,6 +3350,15 @@ packages:
 
   radix3@1.1.2:
     resolution: {integrity: sha512-b484I/7b8rDEdSDKckSSBA8knMpcdsXudlE/LNL639wFoHKwLbEkQFZHWEYwDC0wa0FKUcCY+GAF73Z7wxNVFA==}
+
+  react-dom@19.2.8:
+    resolution: {integrity: sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ==}
+    peerDependencies:
+      react: ^19.2.8
+
+  react@19.2.8:
+    resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
+    engines: {node: '>=0.10.0'}
 
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
@@ -3093,6 +3487,9 @@ packages:
   sax@1.6.0:
     resolution: {integrity: sha512-6R3J5M4AcbtLUdZmRv2SygeVaM7IhrLXu9BmnOGmmACak8fiUtOsYNWUS4uK7upbmHIBbLBeFeI//477BKLBzA==}
     engines: {node: '>=11.0.0'}
+
+  scheduler@0.27.0:
+    resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
 
   semver@7.7.4:
     resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
@@ -3280,6 +3677,9 @@ packages:
 
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
 
   unified@11.0.5:
     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
@@ -3762,12 +4162,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@4.3.14(astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))':
+  '@astrojs/mdx@4.3.14(astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.11
       '@mdx-js/mdx': 3.1.1
       acorn: 8.16.0
-      astro: 5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      astro: 5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
       es-module-lexer: 1.7.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.5
@@ -3791,17 +4191,17 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 4.3.6
 
-  '@astrojs/starlight@0.35.3(astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))':
+  '@astrojs/starlight@0.35.3(astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.11
-      '@astrojs/mdx': 4.3.14(astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
+      '@astrojs/mdx': 4.3.14(astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
       '@astrojs/sitemap': 3.7.2
       '@pagefind/default-ui': 1.4.0
       '@types/hast': 3.0.4
       '@types/js-yaml': 4.0.9
       '@types/mdast': 4.0.4
-      astro: 5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
-      astro-expressive-code: 0.41.7(astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
+      astro: 5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      astro-expressive-code: 0.41.7(astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
       bcp-47: 2.1.0
       hast-util-from-html: 2.0.3
       hast-util-select: 6.0.4
@@ -4138,6 +4538,17 @@ snapshots:
   '@expressive-code/plugin-text-markers@0.41.7':
     dependencies:
       '@expressive-code/core': 0.41.7
+
+  '@floating-ui/core@1.8.0':
+    dependencies:
+      '@floating-ui/utils': 0.2.12
+
+  '@floating-ui/dom@1.8.0':
+    dependencies:
+      '@floating-ui/core': 1.8.0
+      '@floating-ui/utils': 0.2.12
+
+  '@floating-ui/utils@0.2.12': {}
 
   '@img/colour@1.1.0': {}
 
@@ -4483,12 +4894,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.2.2
       '@tailwindcss/oxide-win32-x64-msvc': 4.2.2
 
-  '@tailwindcss/vite@4.2.2(vite@6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))':
+  '@tailwindcss/vite@4.2.2(vite@6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@tailwindcss/node': 4.2.2
       '@tailwindcss/oxide': 4.2.2
       tailwindcss: 4.2.2
-      vite: 6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
 
   '@types/debug@4.1.13':
     dependencies:
@@ -4522,6 +4933,15 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  '@types/node@25.9.5':
+    dependencies:
+      undici-types: 7.24.6
+
+  '@types/prompts@2.4.9':
+    dependencies:
+      '@types/node': 25.9.5
+      kleur: 3.0.3
+
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
       '@types/react': 19.2.14
@@ -4532,7 +4952,7 @@ snapshots:
 
   '@types/sax@1.2.7':
     dependencies:
-      '@types/node': 24.12.0
+      '@types/node': 25.9.5
 
   '@types/unist@2.0.11': {}
 
@@ -4547,13 +4967,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@24.12.0)(lightningcss@1.32.0))':
+  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@25.9.5)(lightningcss@1.32.0))':
     dependencies:
       '@vitest/spy': 2.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 5.4.21(@types/node@24.12.0)(lightningcss@1.32.0)
+      vite: 5.4.21(@types/node@25.9.5)(lightningcss@1.32.0)
 
   '@vitest/pretty-format@2.1.9':
     dependencies:
@@ -4736,12 +5156,12 @@ snapshots:
 
   astring@1.9.0: {}
 
-  astro-expressive-code@0.41.7(astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)):
+  astro-expressive-code@0.41.7(astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)):
     dependencies:
-      astro: 5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      astro: 5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
       rehype-expressive-code: 0.41.7
 
-  astro@5.18.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3):
+  astro@5.18.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3):
     dependencies:
       '@astrojs/compiler': 2.13.1
       '@astrojs/internal-helpers': 0.7.6
@@ -4798,8 +5218,8 @@ snapshots:
       unist-util-visit: 5.1.0
       unstorage: 1.17.5
       vfile: 6.0.3
-      vite: 6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
-      vitefu: 1.1.2(vite@6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
+      vite: 6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
+      vitefu: 1.1.2(vite@6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
       xxhash-wasm: 1.1.0
       yargs-parser: 21.1.1
       yocto-spinner: 0.2.3
@@ -6106,6 +6526,8 @@ snapshots:
 
   normalize-path@3.0.0: {}
 
+  npm@11.19.0: {}
+
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
@@ -6223,6 +6645,13 @@ snapshots:
   property-information@7.1.0: {}
 
   radix3@1.1.2: {}
+
+  react-dom@19.2.8(react@19.2.8):
+    dependencies:
+      react: 19.2.8
+      scheduler: 0.27.0
+
+  react@19.2.8: {}
 
   readdirp@4.1.2: {}
 
@@ -6456,6 +6885,8 @@ snapshots:
 
   sax@1.6.0: {}
 
+  scheduler@0.27.0: {}
+
   semver@7.7.4: {}
 
   sharp@0.34.5:
@@ -6650,6 +7081,8 @@ snapshots:
 
   undici-types@7.16.0: {}
 
+  undici-types@7.24.6: {}
+
   unified@11.0.5:
     dependencies:
       '@types/unist': 3.0.3
@@ -6740,13 +7173,13 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite-node@2.1.9(@types/node@24.12.0)(lightningcss@1.32.0):
+  vite-node@2.1.9(@types/node@25.9.5)(lightningcss@1.32.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 1.1.2
-      vite: 5.4.21(@types/node@24.12.0)(lightningcss@1.32.0)
+      vite: 5.4.21(@types/node@25.9.5)(lightningcss@1.32.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -6758,17 +7191,17 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.4.21(@types/node@24.12.0)(lightningcss@1.32.0):
+  vite@5.4.21(@types/node@25.9.5)(lightningcss@1.32.0):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.8
       rollup: 4.60.1
     optionalDependencies:
-      '@types/node': 24.12.0
+      '@types/node': 25.9.5
       fsevents: 2.3.3
       lightningcss: 1.32.0
 
-  vite@6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3):
+  vite@6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.4)
@@ -6777,21 +7210,21 @@ snapshots:
       rollup: 4.60.1
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.12.0
+      '@types/node': 25.9.5
       fsevents: 2.3.3
       jiti: 2.6.1
       lightningcss: 1.32.0
       tsx: 4.21.0
       yaml: 2.8.3
 
-  vitefu@1.1.2(vite@6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)):
+  vitefu@1.1.2(vite@6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)):
     optionalDependencies:
-      vite: 6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 6.4.1(@types/node@25.9.5)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
 
-  vitest@2.1.9(@types/node@24.12.0)(happy-dom@15.11.7)(lightningcss@1.32.0):
+  vitest@2.1.9(@types/node@25.9.5)(happy-dom@15.11.7)(lightningcss@1.32.0):
     dependencies:
       '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@24.12.0)(lightningcss@1.32.0))
+      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@25.9.5)(lightningcss@1.32.0))
       '@vitest/pretty-format': 2.1.9
       '@vitest/runner': 2.1.9
       '@vitest/snapshot': 2.1.9
@@ -6807,11 +7240,11 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.1.1
       tinyrainbow: 1.2.0
-      vite: 5.4.21(@types/node@24.12.0)(lightningcss@1.32.0)
-      vite-node: 2.1.9(@types/node@24.12.0)(lightningcss@1.32.0)
+      vite: 5.4.21(@types/node@25.9.5)(lightningcss@1.32.0)
+      vite-node: 2.1.9(@types/node@25.9.5)(lightningcss@1.32.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.12.0
+      '@types/node': 25.9.5
       happy-dom: 15.11.7
     transitivePeerDependencies:
       - less
