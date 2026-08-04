@@ -16,7 +16,9 @@ function escapeHtml(input: string): string {
 
 class ProtoConceptElement extends HTMLElement {
   #instanceId = `proto-concept-${Math.random().toString(36).slice(2, 10)}`;
-  #cleanup: (() => void) | null = null;
+  #trigger: HTMLButtonElement | null = null;
+  #card: HTMLElement | null = null;
+  #abortController: AbortController | null = null;
 
   connectedCallback() {
     const locale = detectLocale();
@@ -35,19 +37,19 @@ class ProtoConceptElement extends HTMLElement {
     if (this.dataset.hydrated === 'true') return;
     this.dataset.hydrated = 'true';
 
-    const root = document.createElement('span');
-    root.className = 'proto-concept';
-    root.dataset.protoConcept = '';
-    root.id = this.#instanceId;
+    // Keep the custom element as the container to preserve lifecycle
+    this.className = 'proto-concept';
+    this.dataset.protoConcept = '';
+    this.id = this.#instanceId;
 
-    root.innerHTML = `
+    this.innerHTML = `
       <button
         class="proto-concept__trigger"
         type="button"
         aria-expanded="false"
         aria-controls="${this.#instanceId}-card"
       >${escapeHtml(termLabel)}</button>
-      <span class="proto-concept__card" role="note" id="${this.#instanceId}-card">
+      <span class="proto-concept__card" role="note" id="${this.#instanceId}-card" inert aria-hidden="true">
         <span class="proto-concept__eyebrow">${locale === 'zh-cn' ? '概念' : 'Concept'}</span>
         <span class="proto-concept__title">${escapeHtml(entry?.term[locale] || termLabel)}</span>
         ${summary ? `<span class="proto-concept__summary">${escapeHtml(summary)}</span>` : ''}
@@ -63,54 +65,71 @@ class ProtoConceptElement extends HTMLElement {
       </span>
     `;
 
-    this.replaceWith(root);
+    this.#trigger = this.querySelector('.proto-concept__trigger');
+    this.#card = this.querySelector('.proto-concept__card');
+    if (!this.#trigger || !this.#card) return;
 
-    const trigger = root.querySelector('.proto-concept__trigger');
-    if (!(trigger instanceof HTMLButtonElement)) return;
+    this.#abortController = new AbortController();
+    const signal = this.#abortController.signal;
 
     const setPinned = (next: boolean) => {
-      root.dataset.pinned = next ? 'true' : 'false';
-      trigger.setAttribute('aria-expanded', next ? 'true' : 'false');
+      if (!this.#trigger || !this.#card) return;
+
+      this.dataset.pinned = next ? 'true' : 'false';
+      this.#trigger.setAttribute('aria-expanded', next ? 'true' : 'false');
+
+      // Synchronize semantic/focus visibility
+      if (next) {
+        this.#card.removeAttribute('inert');
+        this.#card.setAttribute('aria-hidden', 'false');
+      } else {
+        this.#card.setAttribute('inert', '');
+        this.#card.setAttribute('aria-hidden', 'true');
+
+        // Return focus to trigger if focus is inside the card
+        if (this.#card.contains(document.activeElement)) {
+          this.#trigger.focus();
+        }
+      }
     };
 
     const supportsHover =
       window.matchMedia?.('(hover: hover) and (pointer: fine)')?.matches ?? false;
     const onEnter = () => {
-      if (supportsHover) root.dataset.hovering = 'true';
+      if (supportsHover) this.dataset.hovering = 'true';
     };
     const onLeave = () => {
-      if (supportsHover) root.dataset.hovering = 'false';
+      if (supportsHover) this.dataset.hovering = 'false';
     };
 
-    trigger.addEventListener('click', () => {
-      const pinned = root.dataset.pinned === 'true';
-      setPinned(!pinned);
-    });
+    this.#trigger.addEventListener(
+      'click',
+      () => {
+        const pinned = this.dataset.pinned === 'true';
+        setPinned(!pinned);
+      },
+      { signal }
+    );
 
-    root.addEventListener('pointerenter', onEnter);
-    root.addEventListener('pointerleave', onLeave);
+    this.addEventListener('pointerenter', onEnter, { signal });
+    this.addEventListener('pointerleave', onLeave, { signal });
 
     const onDocClick = (event: MouseEvent) => {
-      if (!root.contains(event.target as Node)) setPinned(false);
+      if (!this.contains(event.target as Node)) setPinned(false);
     };
     const onKeydown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setPinned(false);
     };
 
-    document.addEventListener('click', onDocClick);
-    root.addEventListener('keydown', onKeydown);
-
-    this.#cleanup = () => {
-      document.removeEventListener('click', onDocClick);
-      root.removeEventListener('keydown', onKeydown);
-      root.removeEventListener('pointerenter', onEnter);
-      root.removeEventListener('pointerleave', onLeave);
-    };
+    document.addEventListener('click', onDocClick, { signal });
+    this.addEventListener('keydown', onKeydown, { signal });
   }
 
   disconnectedCallback() {
-    this.#cleanup?.();
-    this.#cleanup = null;
+    this.#abortController?.abort();
+    this.#abortController = null;
+    this.#trigger = null;
+    this.#card = null;
   }
 }
 
