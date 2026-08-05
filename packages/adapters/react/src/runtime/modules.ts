@@ -74,6 +74,11 @@ import { RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/module-rule-expose-state-web';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
 import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
+import {
+  createWebTextControlHost,
+  TEXT_CONTROL_HOST_CAP,
+  TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+} from '@proto.ui/module-text-control';
 import type { PropsBaseType } from '@proto.ui/types';
 
 import {
@@ -222,7 +227,13 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     };
   };
 
+  const physicalControl = () => args.getCurrentElement() as HTMLTextAreaElement | null;
+
   return createCapsWiring()
+    .use('text-control', [
+      [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
+      [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [[EFFECTS_CAP, effectsPort]])
     .use('a11y', [

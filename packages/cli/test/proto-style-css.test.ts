@@ -23,6 +23,13 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
+  it('renders the vertical resize utility used by Brutalist Textarea', () => {
+    const css = renderProtoStyleTokenCss(['resize-y']);
+
+    expect(css).toContain('resize: vertical;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
   it('renders intrinsic sizing and surface utilities used by Shadcn Tabs v4', () => {
     const css = renderProtoStyleTokenCss([
       'w-fit',

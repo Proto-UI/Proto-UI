@@ -20,3 +20,5 @@ Base 准入并不限于交互，但每个进入 Base 的原型都必须拥有可
 它在这一层不定义持久 selection，不内建 checkbox/radio item 语义，也不预先承诺 submenu anatomy。瞬时的 active 导航状态目前保持为内部实现，不作为 root 的正式公开 API。这些应当由上层原型库通过组合来补，而不是在 base 中先行固化。
 
 `select` 是当前用来验证另一条边界的探针：它仍然保持 protocol-first，但会把 `value` 呈现部件明确留在 family 内部。这个部件用于验证 Proto UI 在 value 类组件上的当前路径，也就是“选中值文本由原型自身定义，并通过显式 update 驱动重渲染”，而不是完全把值展示下放给宿主应用。
+
+`textarea` 用来验证 host-mediated native-control 边界：Root 拥有一个 logical multiline editor，renderer 保持 contentless，由 adapter 选择物理宿主目标。当前 Web profile 在 Web Component、React 与 Vue 中使用一个原生 textarea。它维持稳定的受控/非受控所有权，归一化 input/change/IME signal，保留 active editing session，在 composition 结束后恢复未被接纳的受控提案，并投影 property、focus 与 accessibility；它不声明 form submission、rich text、auto-resize、系统 editing chrome 或 live-region 语义。

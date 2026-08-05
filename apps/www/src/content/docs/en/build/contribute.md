@@ -7,6 +7,12 @@ description: 'Contribution paths, entry points, and practical advice for the cur
 
 If you're new to Proto UI, the simplest first step is to browse [Good First Issues](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22) — they're scoped with clear acceptance criteria. Comment on the issue before starting. If the scope or approach isn't clear, ask in [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions).
 
+## Contribution rights and provenance
+
+Proto UI accepts contributions under its current [MIT License](https://github.com/Proto-UI/Proto-UI/blob/main/LICENSE), and contributors retain copyright in original work. Every new commit, including documentation and small fixes, must carry a DCO 1.1 `Signed-off-by` trailer. Third-party or materially AI-assisted content must be disclosed so reviewers can verify its source and usage rights.
+
+The repository policies are authoritative. Read [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md), the verbatim [DCO 1.1](https://github.com/Proto-UI/Proto-UI/blob/main/DCO.md), and the [contribution provenance policy](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/contribution-provenance.md) before opening a pull request.
+
 ## Choose a path
 
 ### Prototype

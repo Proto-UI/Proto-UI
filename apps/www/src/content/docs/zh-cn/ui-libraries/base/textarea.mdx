@@ -1,0 +1,55 @@
+---
+title: 'Textarea'
+desp: 'Textarea 基础原型'
+description: '无内容渲染的宿主协同多行文本控件原型'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-textarea-root` 是一个无内容渲染的 Base 原型。它静态声明 `plain-text`、`multiline` 与 host-owned editing requirement，由 adapter 选择一个物理宿主 editor。当前 Web profile 将该 requirement 解析为原生 `<textarea>`；Web Component、React 与 Vue 的演示是同一 Web host 上的 cross-adapter evidence，不代表已经完成多宿主 conformance。
+
+<div>
+  <PrototypePreviewer
+    demoId="demo-base-textarea"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+  />
+</div>
+
+## 所有权与事件
+
+实例创建时会确定 value 所有权模式，并在整个实例生命周期内保持稳定：
+
+- 使用 `defaultValue` 时，Root 为非受控模式。它只用默认值初始化一次，随后接纳用户输入；其他 props 更新不会重置已经编辑过的值。
+- 使用 `value` 时，Root 为受控模式。用户编辑只构成提案：Root 会将其发出，但 owner 必须把接纳后的 `value` 传回，该值才会成为权威事实。
+
+对外事件携带归一化数据，不泄漏原生事件对象：
+
+- `valueChange` 跟随原生 `input`，发出 `{ value, composing, data, inputType }`。
+- `change` 跟随原生 change 边界，发出 `{ value }`。
+- `compositionStart`、`compositionUpdate` 与 `compositionEnd` 分别发出 `{ value, data }`，供应用观察 IME 过程。
+
+在受控 IME 会话期间，物理 textarea 会保留正在输入的候选文本。`compositionEnd` 后，如果 owner 没有接纳候选值，控件才恢复为当前受控 `value`；恢复不会打断组合输入。
+
+普通 property update 或未改变 value 的同步会保留当前 cursor/selection。长按选择、selection handles、软件键盘与系统复制/剪切/粘贴菜单属于宿主 editing session；Base Textarea 不另外定义 touch-only 原型，也不替换系统 editing chrome。
+
+## 原生控件投影
+
+Root 将这些 props 投影到同一个物理 textarea：`disabled`、`readOnly`、`required`、`name`、`placeholder`、`autoComplete`、`minLength`、`maxLength`、`rows` 与 `wrap`。`value` 和 `defaultValue` 遵循上述所有权规则，不会创建第二个控件。
+
+Expose surface 提供 `focusSelf()`、`blurSelf()`，以及 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` state。无障碍投影保留 textarea 的 textbox role，将 disabled/read-only state 镜像为 `aria-disabled`/`aria-readonly`，并将 `ariaLabel`、`labelledBy`、`describedBy` 映射为该物理目标上的 `aria-label`、`aria-labelledby`、`aria-describedby`。
+
+Base 不提供 child renderer，也不提供视觉样式。应用作者应在这个 contentless 协议边界之外为原生控件添加样式与标签，而不是在 Root 内放入 authored content 或 rich text。
+
+`asTextareaRoot.modules` 公开该 authored asHook 的冻结 pre-render module requirements。使用 `asTextareaRoot()` 创建 styled prototype 时，调用者必须在自己的 prototype definition 上复用这个 surface；setup-time 调用不会事后改变 adapter 已完成的 target selection。
+
+## 当前边界
+
+`base-textarea-root` 不拥有 form submission、hidden field、form-data 协作、validation message、auto-resize、rich-text editing、status/live-region announcement、系统 selection/edit-menu chrome，也不拥有单一物理 editor 之外的组合能力。Web 表单相关 props 可以被投影，但这不会让原型成为表单工作流的 owner。
+
+## 参考
+
+- 原型：[P-BASE-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TEXTAREA.yaml)
+- 契约：[C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
+- 源码：[packages/prototypes/base/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/textarea)
+- 测试：[textarea.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/textarea.test.ts)

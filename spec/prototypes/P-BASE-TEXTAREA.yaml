@@ -1,0 +1,78 @@
+id: P-BASE-TEXTAREA
+type: prototype
+title: Base Textarea owns a host-mediated multiline text-control protocol
+status: draft
+since: 0.2.0-rc.7
+summary: Base Textarea is a contentless single-target protocol for stable controlled or uncontrolled value ownership, normalized editing events, live native properties, accessibility, and physical focus.
+statement:
+  zh-CN: Base Textarea 通过 Text Control host boundary 拥有一个 logical multiline editor，由 adapter 选择物理宿主目标；当前 Web profile 使用一个原生 textarea。它固定 controlled/uncontrolled value ownership，标准化 input/change/IME event，投影 property 与 textbox 无障碍信息，并提供物理 focus/blur；它不拥有 form workflow、validation message、auto-resize、rich-text composition 或系统 editing chrome。
+  en: Base Textarea owns one logical multiline editor through the Text Control host boundary while the adapter selects the physical host target; the current Web profile uses one native textarea. It fixes controlled or uncontrolled value ownership, normalizes input/change/IME events, projects properties and textbox accessibility, and exposes physical focus and blur; it does not own form workflow, validation messages, auto-resize, rich-text composition, or system editing chrome.
+criteria:
+  - id: P-BASE-TEXTAREA-AUTHORING-ENTRIES
+    text:
+      zh-CN: '`base-textarea-root` 与 `asTextareaRoot` 必须是同一 Root protocol 的 direct 与 authored-asHook entries；`asTextareaRoot.modules` 必须提供调用者在 prototype definition 上复用的冻结 static requirements。'
+      en: '`base-textarea-root` and `asTextareaRoot` must be the direct and authored-asHook entries of the same Root protocol; `asTextareaRoot.modules` must provide frozen static requirements for caller prototype definitions to reuse.'
+  - id: P-BASE-TEXTAREA-PHYSICAL-TARGET
+    text:
+      zh-CN: Root 必须静态声明 host-owned plain-text multiline requirement；每个实例只能绑定一个物理 editor，当前 Web profile materialize 一个 textarea，且 protocol renderer 必须返回 null、不得渲染 authored child。
+      en: Root must statically declare a host-owned plain-text multiline requirement; each instance may bind one physical editor, the current Web profile materializes one textarea, and the protocol renderer must return null without rendering authored children.
+  - id: P-BASE-TEXTAREA-VALUE-OWNERSHIP
+    text:
+      zh-CN: 使用 value 的实例必须保持 controlled，使用 defaultValue 的实例必须保持 uncontrolled；uncontrolled dirty value 不得被后续 prop update 重置，controlled proposal 只有在 owner 回传 value 后才成为权威值。
+      en: An instance using value must remain controlled and one using defaultValue must remain uncontrolled; later prop updates must not reset a dirty uncontrolled value, and a controlled proposal becomes authoritative only when the owner supplies it back through value.
+  - id: P-BASE-TEXTAREA-EVENTS-AND-IME
+    text:
+      zh-CN: Root 必须发出归一化 valueChange、change、compositionStart、compositionUpdate 与 compositionEnd payload；controlled IME candidate 在 composition 期间必须保留，并在 boundary 后才恢复未接纳的 owner value。
+      en: Root must emit normalized valueChange, change, compositionStart, compositionUpdate, and compositionEnd payloads; a controlled IME candidate must remain intact during composition, with an unaccepted owner value restored only after the boundary.
+  - id: P-BASE-TEXTAREA-NATIVE-PROPS
+    text:
+      zh-CN: Root 必须在同一个物理 textarea 上实时投影 value/defaultValue、disabled、readOnly、required、name、placeholder、autoComplete、minLength、maxLength、rows 与 soft/hard wrap；defaultValue 更新必须同步 textarea.defaultValue 但不得覆写 dirty uncontrolled value。
+      en: Root must live-project value/defaultValue, disabled, readOnly, required, name, placeholder, autoComplete, minLength, maxLength, rows, and soft/hard wrap to the same physical textarea; a defaultValue update must synchronize textarea.defaultValue without overwriting a dirty uncontrolled value.
+  - id: P-BASE-TEXTAREA-A11Y-AND-FOCUS
+    text:
+      zh-CN: 物理 target 必须保留 textbox role，将 ariaLabel、labelledBy、describedBy、disabled 与 readOnly 投影为对应 aria 信息，并提供 disabled-aware focusSelf()、blurSelf() 与 live value/disabled/readOnly/focused/focusVisible/composing state。
+      en: The physical target must retain the textbox role; project ariaLabel, labelledBy, describedBy, disabled, and readOnly to the corresponding ARIA information; and expose disabled-aware focusSelf(), blurSelf(), and live value/disabled/readOnly/focused/focusVisible/composing state.
+  - id: P-BASE-TEXTAREA-PRESENTATION-SURFACE
+    text:
+      zh-CN: Root visual intent 必须投影到同一个物理 editor；adapter infrastructure wrapper 可以保留 logical boundary，但不得接收本应作用于 textarea 的 surface class/style 或 focus pseudo-class。
+      en: Root visual intent must project to the same physical editor; an adapter infrastructure wrapper may retain the logical boundary but must not receive surface class or style, or focus pseudo-classes, that are intended for the textarea.
+  - id: P-BASE-TEXTAREA-BOUNDARY
+    text:
+      zh-CN: Root 不得拥有 form submission、hidden-field、form-data、validation message、auto-resize、rich-text、live-region announcement、系统 selection/edit menu chrome 或第二个 physical editor；长按输入模态不得产生 touch-only Textarea 原型。
+      en: Root must not own form submission, hidden fields, form-data integration, validation messages, auto-resize, rich text, live-region announcements, system selection or edit-menu chrome, or a second physical editor; long-press input modality must not create a touch-only Textarea prototype.
+sources:
+  - path: packages/prototypes/base/src/textarea/root.proto.ts
+  - path: packages/prototypes/base/src/textarea/types.ts
+dependsOn:
+  decisions:
+    - D-TEXT-CONTROL-PROJECTION-0001
+  contracts:
+    - C-AS-HOOK-0001
+    - C-HOST-SURFACE-PROJECTION-0001
+    - C-TEXT-CONTROL-0001
+    - C-PROPS-0001
+    - C-STATE-0001
+    - C-EXPOSE-STATE-0001
+    - C-A11Y-0001
+    - C-FOCUS-0001
+  modules:
+    - M-TEXT-CONTROL-0001
+verifies:
+  tests:
+    - T-BASE-TEXTAREA-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Required Root visual intent to target the physical editor across wrapper-backed adapters.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Made physical materialization host-selected and kept system editing chrome outside the prototype boundary.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged Base Textarea as a focused host-mediated multiline text-control protocol with an initial Web profile.
+tags:
+  - prototype
+  - base
+  - textarea
+  - text-control
+  - native-control

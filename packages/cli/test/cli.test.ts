@@ -96,6 +96,76 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('registers the promoted Brutalist families and both Textarea projections', () => {
+    const brutalistIds = Object.keys(COMPONENT_REGISTRY)
+      .filter((id) => id.startsWith('brutalist-'))
+      .sort();
+    expect(brutalistIds).toEqual([
+      'brutalist-button',
+      'brutalist-dialog',
+      'brutalist-dropdown',
+      'brutalist-hover-card',
+      'brutalist-scroll-area',
+      'brutalist-select',
+      'brutalist-separator',
+      'brutalist-skeleton',
+      'brutalist-switch',
+      'brutalist-tabs',
+      'brutalist-textarea',
+      'brutalist-toggle',
+    ]);
+    expect(COMPONENT_REGISTRY['base-textarea']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/textarea',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'textareaRoot',
+          reactExport: 'BaseTextareaRoot',
+          elementName: 'proto-ui-base-textarea',
+        },
+      ],
+    });
+    expect(COMPONENT_REGISTRY['brutalist-textarea']).toMatchObject({
+      packageName: '@proto.ui/prototypes-brutalist',
+      importPath: '@proto.ui/prototypes-brutalist/textarea',
+      stylePreset: 'brutalist',
+      items: [
+        {
+          prototypeImport: 'brutalistTextareaRoot',
+          reactExport: 'BrutalistTextareaRoot',
+          elementName: 'proto-ui-brutalist-textarea',
+        },
+      ],
+    });
+
+    const react = renderHostIndex('react', ['base-textarea', 'brutalist-textarea']);
+    expect(react).toContain("import { textareaRoot } from '@proto.ui/prototypes-base/textarea';");
+    expect(react).toContain(
+      "import { brutalistTextareaRoot } from '@proto.ui/prototypes-brutalist/textarea';"
+    );
+    expect(react).toContain('export const BaseTextareaRoot = adapt(textareaRoot);');
+    expect(react).toContain('export const BrutalistTextareaRoot = adapt(brutalistTextareaRoot);');
+
+    for (const adapter of ['react', 'vue', 'wc'] as const) {
+      const source = renderHostIndex(adapter, brutalistIds);
+      for (const id of brutalistIds) {
+        const entry = COMPONENT_REGISTRY[id];
+        expect(source).toContain(entry.importPath);
+        for (const item of entry.items) {
+          expect(source).toContain(item.prototypeImport);
+          const exportName =
+            adapter === 'react'
+              ? item.reactExport
+              : adapter === 'vue'
+                ? item.vueExport
+                : item.wcExport;
+          expect(source).toContain(exportName);
+        }
+      }
+    }
+  });
+
   it('registers Base Live Region and Async Region public facades', () => {
     expect(COMPONENT_REGISTRY['base-live-region']).toMatchObject({
       packageName: '@proto.ui/prototypes-base',

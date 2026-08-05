@@ -21,5 +21,6 @@ export * from './scroll';
 export * from './move';
 export * from './collection';
 export * from './delay';
+export * from './text-control';
 
 export * from './caps';

@@ -194,6 +194,16 @@
     @apply leading-relaxed;
   }
 
+  /* 该 SVG 自带圆角、描边与内边距，无需外层卡片 */
+  main[data-pagefind-body]
+    .enhanced-image-wrapper:has(.enhanced-image[src$='/diagrams/information-flow-model.svg'])
+    .enhanced-image-container {
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+
   /* 响应式调整 */
   @media (max-width: 768px) {
     main[data-pagefind-body] .enhanced-image-wrapper {
@@ -205,12 +215,6 @@
       width: calc(100vw - 4rem);
       max-width: calc(100vw - 4rem);
       margin-inline: 0;
-    }
-
-    main[data-pagefind-body]
-      .enhanced-image-wrapper:has(.enhanced-image[src$='/diagrams/information-flow-model.svg'])
-      .enhanced-image-container {
-      padding: 0.5rem;
     }
 
     main[data-pagefind-body] .enhanced-image-container {

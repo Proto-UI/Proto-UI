@@ -47,6 +47,14 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/separator');
     registerPrototype('base-separator-root', mod.default);
   },
+  'base-textarea-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/textarea');
+    registerPrototype('base-textarea-root', mod.textareaRoot);
+  },
+  'brutalist-textarea-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/textarea');
+    registerPrototype('brutalist-textarea-root', mod.brutalistTextareaRoot);
+  },
   'base-live-region-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/live-region');
     registerPrototype('base-live-region-root', mod.default);

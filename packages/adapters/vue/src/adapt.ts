@@ -1,4 +1,8 @@
-import type { Prototype, ScrollProjectionPreference } from '@proto.ui/core';
+import {
+  getModuleDeclaration,
+  type Prototype,
+  type ScrollProjectionPreference,
+} from '@proto.ui/core';
 import type {
   CommitSignal,
   RuntimeCheckpoint,
@@ -17,6 +21,10 @@ import {
   scheduleAfterWebLayout,
 } from '@proto.ui/adapter-base';
 import type { ExposeStateWebMode } from '@proto.ui/module-expose-state-web';
+import {
+  resolveWebTextControlLocalName,
+  TEXT_CONTROL_DECLARATION,
+} from '@proto.ui/module-text-control';
 import {
   createZIndexOverlayLayerScheduler,
   type OverlayLayerScheduler,
@@ -67,7 +75,9 @@ export type VueAdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
     class?: string | string[] | Record<string, boolean>;
     hostClass?: string | string[] | Record<string, boolean>;
+    surfaceClass?: string | string[] | Record<string, boolean>;
     hostStyle?: Record<string, string> | string | Array<Record<string, string>>;
+    surfaceStyle?: Record<string, string> | string | Array<Record<string, string>>;
     [key: `on${string}`]: unknown;
   };
 
@@ -94,7 +104,14 @@ export interface VueAdapterOptions<Props extends PropsBaseType> {
 function defaultGetProps<Props extends PropsBaseType>(
   props: VueAdapterProps<Props>
 ): Partial<Props> {
-  const { class: className, hostClass, hostStyle, ...rest } = (props ?? {}) as any;
+  const {
+    class: className,
+    hostClass,
+    surfaceClass,
+    hostStyle,
+    surfaceStyle,
+    ...rest
+  } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(rest)) {
     if (isFrameworkEventProp(key, value)) continue;
@@ -130,7 +147,17 @@ export function createVueAdapter(runtime: VueRuntime) {
     const exposeStateWebMode = opt.exposeStateWebMode;
     const scrollProjection = opt.scrollProjection;
     const autoUpdate = opt.autoUpdateOnPropsChange ?? true;
-    const rootTag = opt.rootTag ?? 'div';
+    const textControl = getModuleDeclaration(proto, TEXT_CONTROL_DECLARATION)?.config;
+    const textControlRootTag = textControl
+      ? resolveWebTextControlLocalName(textControl)
+      : undefined;
+    if (textControlRootTag && opt.rootTag && opt.rootTag !== textControlRootTag) {
+      throw new Error(
+        `[Vue Adapter] text-control declaration conflicts with rootTag: ${opt.rootTag}`
+      );
+    }
+    const rootTag = textControlRootTag ?? opt.rootTag ?? 'div';
+
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
       (typeof opt.overlayLayer.baseZIndex !== 'undefined' ||
@@ -151,7 +178,9 @@ export function createVueAdapter(runtime: VueRuntime) {
       inheritAttrs: false,
       props: {
         hostClass: { type: [String, Array, Object], default: undefined },
+        surfaceClass: { type: [String, Array, Object], default: undefined },
         hostStyle: { type: [String, Array, Object], default: undefined },
+        surfaceStyle: { type: [String, Array, Object], default: undefined },
       },
       setup(props: any, ctx: any) {
         const rootRef = runtime.ref<HTMLElement | null>(null);
@@ -484,8 +513,8 @@ export function createVueAdapter(runtime: VueRuntime) {
               ref: (el: HTMLElement | null) => {
                 rootRef.value = el;
               },
-              class: mergeHostClass([props.hostClass, ctx.attrs.class]),
-              style: mergeHostStyle([props.hostStyle, ctx.attrs.style]),
+              class: mergeHostClass([props.surfaceClass, props.hostClass, ctx.attrs.class]),
+              style: mergeHostStyle([props.surfaceStyle, props.hostStyle, ctx.attrs.style]),
               'data-pui-root': '',
               [PUI_VIEW_PENDING_ATTR]: viewReady ? undefined : '',
               'data-pui-style': serializeStyleTokens(hostTokens.value),

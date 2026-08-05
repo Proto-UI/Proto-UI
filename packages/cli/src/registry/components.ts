@@ -160,6 +160,31 @@ const shadcnCompound = (
     { stylePreset: 'shadcn', preset }
   );
 
+const brutalist = (id: string, label: string, prototypeImport: string, exportBaseName: string) =>
+  defineSimple(
+    id,
+    label,
+    '@proto.ui/prototypes-brutalist',
+    `@proto.ui/prototypes-brutalist/${id.slice('brutalist-'.length)}`,
+    prototypeImport,
+    exportBaseName,
+    { stylePreset: 'brutalist' }
+  );
+
+const brutalistCompound = (
+  id: string,
+  label: string,
+  parts: { prototypeImport: string; exportBaseName: string; elementName: string }[]
+) =>
+  defineCompound(
+    id,
+    label,
+    '@proto.ui/prototypes-brutalist',
+    `@proto.ui/prototypes-brutalist/${id.slice('brutalist-'.length)}`,
+    parts,
+    { stylePreset: 'brutalist' }
+  );
+
 const base = (id: string, label: string, prototypeImport: string, exportBaseName: string) =>
   defineSimple(
     id,
@@ -355,9 +380,222 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     SHADCN_COMPONENT_PRESET_RECIPES['shadcn-dialog']
   ),
 
+  'brutalist-button': brutalist(
+    'brutalist-button',
+    'Brutalist Button',
+    'brutalistButton',
+    'BrutalistButton'
+  ),
+  'brutalist-toggle': brutalist(
+    'brutalist-toggle',
+    'Brutalist Toggle',
+    'brutalistToggle',
+    'BrutalistToggle'
+  ),
+  'brutalist-separator': brutalist(
+    'brutalist-separator',
+    'Brutalist Separator',
+    'brutalistSeparatorRoot',
+    'BrutalistSeparatorRoot'
+  ),
+  'brutalist-skeleton': brutalist(
+    'brutalist-skeleton',
+    'Brutalist Skeleton',
+    'brutalistSkeletonRoot',
+    'BrutalistSkeletonRoot'
+  ),
+  'brutalist-textarea': brutalist(
+    'brutalist-textarea',
+    'Brutalist Textarea',
+    'brutalistTextareaRoot',
+    'BrutalistTextareaRoot'
+  ),
+
+  'brutalist-switch': brutalistCompound('brutalist-switch', 'Brutalist Switch', [
+    {
+      prototypeImport: 'brutalistSwitchRoot',
+      exportBaseName: 'BrutalistSwitchRoot',
+      elementName: 'proto-ui-brutalist-switch-root',
+    },
+    {
+      prototypeImport: 'brutalistSwitchThumb',
+      exportBaseName: 'BrutalistSwitchThumb',
+      elementName: 'proto-ui-brutalist-switch-thumb',
+    },
+  ]),
+
+  'brutalist-tabs': brutalistCompound('brutalist-tabs', 'Brutalist Tabs', [
+    {
+      prototypeImport: 'brutalistTabsRoot',
+      exportBaseName: 'BrutalistTabsRoot',
+      elementName: 'proto-ui-brutalist-tabs-root',
+    },
+    {
+      prototypeImport: 'brutalistTabsList',
+      exportBaseName: 'BrutalistTabsList',
+      elementName: 'proto-ui-brutalist-tabs-list',
+    },
+    {
+      prototypeImport: 'brutalistTabsTrigger',
+      exportBaseName: 'BrutalistTabsTrigger',
+      elementName: 'proto-ui-brutalist-tabs-trigger',
+    },
+    {
+      prototypeImport: 'brutalistTabsContent',
+      exportBaseName: 'BrutalistTabsContent',
+      elementName: 'proto-ui-brutalist-tabs-content',
+    },
+  ]),
+
+  'brutalist-hover-card': brutalistCompound('brutalist-hover-card', 'Brutalist Hover Card', [
+    {
+      prototypeImport: 'brutalistHoverCardRoot',
+      exportBaseName: 'BrutalistHoverCardRoot',
+      elementName: 'proto-ui-brutalist-hover-card-root',
+    },
+    {
+      prototypeImport: 'brutalistHoverCardTrigger',
+      exportBaseName: 'BrutalistHoverCardTrigger',
+      elementName: 'proto-ui-brutalist-hover-card-trigger',
+    },
+    {
+      prototypeImport: 'brutalistHoverCardContent',
+      exportBaseName: 'BrutalistHoverCardContent',
+      elementName: 'proto-ui-brutalist-hover-card-content',
+    },
+  ]),
+
+  'brutalist-dropdown': brutalistCompound('brutalist-dropdown', 'Brutalist Dropdown', [
+    {
+      prototypeImport: 'brutalistDropdownRoot',
+      exportBaseName: 'BrutalistDropdownRoot',
+      elementName: 'proto-ui-brutalist-dropdown-root',
+    },
+    {
+      prototypeImport: 'brutalistDropdownTrigger',
+      exportBaseName: 'BrutalistDropdownTrigger',
+      elementName: 'proto-ui-brutalist-dropdown-trigger',
+    },
+    {
+      prototypeImport: 'brutalistDropdownContent',
+      exportBaseName: 'BrutalistDropdownContent',
+      elementName: 'proto-ui-brutalist-dropdown-content',
+    },
+    {
+      prototypeImport: 'brutalistDropdownItem',
+      exportBaseName: 'BrutalistDropdownItem',
+      elementName: 'proto-ui-brutalist-dropdown-item',
+    },
+  ]),
+
+  'brutalist-select': brutalistCompound('brutalist-select', 'Brutalist Select', [
+    {
+      prototypeImport: 'brutalistSelectRoot',
+      exportBaseName: 'BrutalistSelectRoot',
+      elementName: 'proto-ui-brutalist-select-root',
+    },
+    {
+      prototypeImport: 'brutalistSelectTrigger',
+      exportBaseName: 'BrutalistSelectTrigger',
+      elementName: 'proto-ui-brutalist-select-trigger',
+    },
+    {
+      prototypeImport: 'brutalistSelectValue',
+      exportBaseName: 'BrutalistSelectValue',
+      elementName: 'proto-ui-brutalist-select-value',
+    },
+    {
+      prototypeImport: 'brutalistSelectContent',
+      exportBaseName: 'BrutalistSelectContent',
+      elementName: 'proto-ui-brutalist-select-content',
+    },
+    {
+      prototypeImport: 'brutalistSelectItem',
+      exportBaseName: 'BrutalistSelectItem',
+      elementName: 'proto-ui-brutalist-select-item',
+    },
+  ]),
+
+  'brutalist-dialog': brutalistCompound('brutalist-dialog', 'Brutalist Dialog', [
+    {
+      prototypeImport: 'brutalistDialogRoot',
+      exportBaseName: 'BrutalistDialogRoot',
+      elementName: 'proto-ui-brutalist-dialog-root',
+    },
+    {
+      prototypeImport: 'brutalistDialogTrigger',
+      exportBaseName: 'BrutalistDialogTrigger',
+      elementName: 'proto-ui-brutalist-dialog-trigger',
+    },
+    {
+      prototypeImport: 'brutalistDialogMask',
+      exportBaseName: 'BrutalistDialogMask',
+      elementName: 'proto-ui-brutalist-dialog-mask',
+    },
+    {
+      prototypeImport: 'brutalistDialogContent',
+      exportBaseName: 'BrutalistDialogContent',
+      elementName: 'proto-ui-brutalist-dialog-content',
+    },
+    {
+      prototypeImport: 'brutalistDialogTitle',
+      exportBaseName: 'BrutalistDialogTitle',
+      elementName: 'proto-ui-brutalist-dialog-title',
+    },
+    {
+      prototypeImport: 'brutalistDialogDescription',
+      exportBaseName: 'BrutalistDialogDescription',
+      elementName: 'proto-ui-brutalist-dialog-description',
+    },
+    {
+      prototypeImport: 'brutalistDialogClose',
+      exportBaseName: 'BrutalistDialogClose',
+      elementName: 'proto-ui-brutalist-dialog-close',
+    },
+    {
+      prototypeImport: 'brutalistDialogCloseIcon',
+      exportBaseName: 'BrutalistDialogCloseIcon',
+      elementName: 'proto-ui-brutalist-dialog-close-icon',
+    },
+    {
+      prototypeImport: 'brutalistDialogHeader',
+      exportBaseName: 'BrutalistDialogHeader',
+      elementName: 'proto-ui-brutalist-dialog-header',
+    },
+    {
+      prototypeImport: 'brutalistDialogFooter',
+      exportBaseName: 'BrutalistDialogFooter',
+      elementName: 'proto-ui-brutalist-dialog-footer',
+    },
+  ]),
+
+  'brutalist-scroll-area': brutalistCompound('brutalist-scroll-area', 'Brutalist Scroll Area', [
+    {
+      prototypeImport: 'brutalistScrollAreaRoot',
+      exportBaseName: 'BrutalistScrollAreaRoot',
+      elementName: 'proto-ui-brutalist-scroll-area-root',
+    },
+    {
+      prototypeImport: 'brutalistScrollAreaViewport',
+      exportBaseName: 'BrutalistScrollAreaViewport',
+      elementName: 'proto-ui-brutalist-scroll-area-viewport',
+    },
+    {
+      prototypeImport: 'brutalistScrollAreaScrollbar',
+      exportBaseName: 'BrutalistScrollAreaScrollbar',
+      elementName: 'proto-ui-brutalist-scroll-area-scrollbar',
+    },
+    {
+      prototypeImport: 'brutalistScrollAreaThumb',
+      exportBaseName: 'BrutalistScrollAreaThumb',
+      elementName: 'proto-ui-brutalist-scroll-area-thumb',
+    },
+  ]),
+
   'base-button': base('base-button', 'base Button', 'button', 'BaseButton'),
   'base-toggle': base('base-toggle', 'base Toggle', 'toggle', 'BaseToggle'),
   'base-transition': base('base-transition', 'base Transition', 'transition', 'BaseTransition'),
+  'base-textarea': base('base-textarea', 'Base Textarea', 'textareaRoot', 'BaseTextareaRoot'),
 
   'base-switch': baseCompound('base-switch', 'base Switch', [
     {

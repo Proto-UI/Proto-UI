@@ -6,7 +6,8 @@
   "sideEffects": false,
   "dependencies": {
     "@proto.ui/core": "workspace:*",
-    "@proto.ui/hooks": "workspace:*"
+    "@proto.ui/hooks": "workspace:*",
+    "@proto.ui/module-text-control": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/module-anatomy": "workspace:*",
@@ -96,6 +97,11 @@
       "types": "./dist/scroll-area/index.d.ts",
       "import": "./dist/scroll-area/index.js",
       "default": "./dist/scroll-area/index.js"
+    },
+    "./textarea": {
+      "types": "./dist/textarea/index.d.ts",
+      "import": "./dist/textarea/index.js",
+      "default": "./dist/textarea/index.js"
     },
     "./live-region": {
       "types": "./dist/live-region/index.d.ts",

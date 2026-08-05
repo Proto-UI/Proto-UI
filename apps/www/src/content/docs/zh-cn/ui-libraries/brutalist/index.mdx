@@ -9,7 +9,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 Brutalist 是 Proto UI 的贡献者原创 Neo-Brutalist 风格原型库。它参考的是广义 Neo-Brutalist 视觉语言：方角几何、强边框、平涂填色、硬偏移阴影、直接的运动方式和高对比排版；它不是对任何特定第三方组件系统的兼容层。
 
-本切片合并既有稳定 Base family 投影——Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select 与 Dialog——并加入 Base Separator 投影和直接定义的 styled-only Skeleton 原型。package 在 rc.7 仍为私有；后续 family 继续通过独立小 PR 引入。
+`0.2.0-rc.7` candidate 汇集既有 Base family 投影——Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea——以及直接定义的 styled-only Skeleton 原型。Textarea 是 Base Textarea 上的纯视觉投影。该 package 已进入公开 draft BOM，本页不把它描述为已经发布。
 
 <BrutalistPageStyle />
 
@@ -31,7 +31,7 @@ Brutalist 是 Proto UI 的贡献者原创 Neo-Brutalist 风格原型库。它参
 ## 状态
 
 - 来源：贡献者原创 Proto UI style family，仅使用一般 Neo-Brutalist 视觉参考。
-- 语义：Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog 与 Separator 投射各自的 Base 协议；Skeleton 是直接定义的 styled-only、passive、contentless 视觉原型，loading、announcement、替换时机与焦点连续性由父级拥有。
-- 发布状态：私有 workspace package（`0.0.0`），不改写已发布的 rc.6 evidence，也不提供公开 `proto-ui add` 条目。
-- 私有包入口：root 以及 `./button`、`./toggle`、`./switch`、`./tabs`、`./hover-card`、`./dropdown`、`./select`、`./dialog`、`./separator`、`./skeleton` source subpath。
-- 维护：贡献者负责初始拆分序列；是否进入 release 及长期所有权由 Proto UI governance 决定。
+- 语义：Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea 投射各自的 Base 协议。Textarea 只增加 resize-y、方角薰衣草紫/ink、硬阴影视觉样式。Skeleton 是直接定义的 styled-only、passive、contentless 视觉原型，loading、announcement、替换时机与焦点连续性由父级拥有。
+- 发布状态：已作为公开草案 package 进入 40-package `0.2.0-rc.7` BOM；本页记录发布前的 candidate 状态，不改写此前 release evidence。
+- Candidate package surface：root 以及 `./button`、`./toggle`、`./switch`、`./tabs`、`./hover-card`、`./dropdown`、`./select`、`./dialog`、`./scroll-area`、`./separator`、`./skeleton`、`./textarea` subpath。
+- 维护：已进入 rc.7 launch-commitment set；后续语义变化与长期所有权仍由 Proto UI governance 决定。

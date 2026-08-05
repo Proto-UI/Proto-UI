@@ -6,6 +6,7 @@ export * from './as-focus-roving';
 export * from './as-focusable';
 export * from './as-focus-scope';
 export * from './as-hit-participation';
+export * from './as-text-control';
 export * from './as-overlay';
 export * from './as-scroll-surface';
 export * from './as-trigger';

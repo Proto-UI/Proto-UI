@@ -66,15 +66,16 @@ Proto UI 当前已经拥有较多 workspace package，但第一次公开发布�
 
 ---
 
-## 3. `v0.2.0-rc.0` 首发承诺包名单
+## 3. `v0.2.0` Release Train 首发承诺包名单
 
-当前 `v0.2.0-rc.0` 的首发承诺包名单为：
+当前 `v0.2.0` release train 的首发承诺包名单为：
 
 - `@proto.ui/adapter-react`
 - `@proto.ui/adapter-vue`
 - `@proto.ui/adapter-web-component`
 - `@proto.ui/cli`
 - `@proto.ui/prototypes-base`
+- `@proto.ui/prototypes-brutalist`
 - `@proto.ui/prototypes-lucide`
 - `@proto.ui/prototypes-shadcn`
 
@@ -89,7 +90,7 @@ Proto UI 当前已经拥有较多 workspace package，但第一次公开发布�
 
 ### 3.1 组件原型库的消费粒度
 
-对于 Base、Shadcn 这类组件原型库，完整 npm package 是安装、版本与发布单位，anatomy family subpath 是推荐 import 单位。例如，Button 应从 `@proto.ui/prototypes-base/button` 或 `@proto.ui/prototypes-shadcn/button` 消费。
+对于 Base、Shadcn、Brutalist 这类组件原型库，完整 npm package 是安装、版本与发布单位，anatomy family subpath 是推荐 import 单位。例如，Button 应从 `@proto.ui/prototypes-base/button`、`@proto.ui/prototypes-shadcn/button` 或 `@proto.ui/prototypes-brutalist/button` 消费。
 
 - 根 package export 必须继续兼容已有消费者，但不作为 CLI 生成代码的默认入口。
 - 一个复合 anatomy family 的全部 part 共用同一个 family subpath，不拆成 part 级 package 或 public subpath。
@@ -158,6 +159,7 @@ Proto UI 当前已经拥有较多 workspace package，但第一次公开发布�
 - `@proto.ui/module-state-accessibility`
 - `@proto.ui/module-state-interaction`
 - `@proto.ui/module-test-sys`
+- `@proto.ui/module-text-control`
 
 这样的分层**不**意味着它们不重要。
 
@@ -264,13 +266,14 @@ release note 与 launch messaging 应明确区分：
 - 公开但非首发承诺包
 - Internal 或 dependency-directed 包
 
-当前 `v0.2.0-rc.0` 的首发承诺包名单为：
+当前 `v0.2.0` release train 的首发承诺包名单为：
 
 - `@proto.ui/adapter-react`
 - `@proto.ui/adapter-vue`
 - `@proto.ui/adapter-web-component`
 - `@proto.ui/cli`
 - `@proto.ui/prototypes-base`
+- `@proto.ui/prototypes-brutalist`
 - `@proto.ui/prototypes-lucide`
 - `@proto.ui/prototypes-shadcn`
 

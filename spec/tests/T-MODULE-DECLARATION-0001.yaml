@@ -1,0 +1,82 @@
+id: T-MODULE-DECLARATION-0001
+type: test
+title: Static module declaration contract tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers typed declaration tokens, immutable prototype and authored-asHook requirements, duplicate rejection, typed lookup, and runtime propagation before module construction.
+cases:
+  - id: T-MODULE-DECLARATION-0001-CASE-TOKEN-AND-BINDING
+    title: Typed tokens bind one immutable top-level module configuration
+    covers:
+      - C-MODULE-DECLARATION-0001-A
+      - C-MODULE-DECLARATION-0001-B
+    expectation: genuine-typed-token-binds-one-frozen-declaration-and-config
+  - id: T-MODULE-DECLARATION-0001-CASE-PROTOTYPE-SURFACE
+    title: Prototype definitions freeze declarations and reject duplicate stable IDs
+    covers:
+      - C-MODULE-DECLARATION-0001-C
+    expectation: prototype-declaration-view-is-frozen-and-duplicate-ids-fail-fast
+  - id: T-MODULE-DECLARATION-0001-CASE-TYPED-LOOKUP
+    title: Token lookup returns only the matching typed declaration
+    covers:
+      - C-MODULE-DECLARATION-0001-D
+    expectation: declaration-lookup-matches-stable-id-or-returns-undefined
+  - id: T-MODULE-DECLARATION-0001-CASE-RUNTIME-INIT
+    title: Every runtime module receives one frozen declaration view before construction
+    covers:
+      - C-MODULE-DECLARATION-0001-E
+    expectation: module-init-receives-the-shared-immutable-prototype-declaration-view
+  - id: T-MODULE-DECLARATION-0001-CASE-AS-HOOK-REQUIREMENTS
+    title: Authored asHooks publish frozen module requirements for explicit caller-definition reuse
+    covers:
+      - C-MODULE-DECLARATION-0001-F
+    expectation: authored-as-hook-static-requirements-are-frozen-reusable-and-duplicate-safe
+implementations:
+  - id: core-static-module-declarations
+    kind: module-test
+    status: passing
+    path: packages/core/test/contract/prototype.module-declarations.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-MODULE-DECLARATION-0001-CASE-TOKEN-AND-BINDING
+      - T-MODULE-DECLARATION-0001-CASE-PROTOTYPE-SURFACE
+      - T-MODULE-DECLARATION-0001-CASE-TYPED-LOOKUP
+      - T-MODULE-DECLARATION-0001-CASE-AS-HOOK-REQUIREMENTS
+  - id: runtime-static-module-declaration-init
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/module-declarations.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-MODULE-DECLARATION-0001-CASE-RUNTIME-INIT
+verifies:
+  contracts:
+    - id: C-MODULE-DECLARATION-0001
+      anchors:
+        - C-MODULE-DECLARATION-0001-A
+        - C-MODULE-DECLARATION-0001-B
+        - C-MODULE-DECLARATION-0001-C
+        - C-MODULE-DECLARATION-0001-D
+        - C-MODULE-DECLARATION-0001-E
+        - C-MODULE-DECLARATION-0001-F
+exercises:
+  contracts:
+    - id: C-CORE-SYNTAX-0003
+      role: api-surface
+      coverageImpact: exercises-test-surface
+sources:
+  - path: packages/core/test/contract/prototype.module-declarations.v0.contract.test.ts
+  - path: packages/runtime/test/contract/module-declarations.v0.contract.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added authored-asHook static requirement coverage.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable coverage for typed static module declarations and runtime propagation.
+tags:
+  - core
+  - module
+  - declaration
+  - runtime
+  - contract-test

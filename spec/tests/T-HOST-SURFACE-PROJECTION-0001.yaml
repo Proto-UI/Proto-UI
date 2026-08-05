@@ -1,0 +1,142 @@
+id: T-HOST-SURFACE-PROJECTION-0001
+type: test
+title: Host boundary and presentation surface projection tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers collapsed and split boundary/surface mappings, owned visual projection migration, Web Component Text Control surface targeting, and cross-adapter preview surface parity.
+cases:
+  - id: T-HOST-SURFACE-PROJECTION-0001-CASE-DEFAULT
+    title: Ordinary host projection collapses boundary and presentation roles onto one target
+    covers:
+      - C-HOST-SURFACE-PROJECTION-0001-A
+      - C-HOST-SURFACE-PROJECTION-0001-B
+    expectation: default-host-surface-is-the-logical-boundary-target
+  - id: T-HOST-SURFACE-PROJECTION-0001-CASE-SPLIT-TEXT-CONTROL
+    title: Web Component Text Control retains its custom-element boundary while styling the inner textarea surface
+    covers:
+      - C-HOST-SURFACE-PROJECTION-0001-B
+      - C-HOST-SURFACE-PROJECTION-0001-C
+      - C-HOST-SURFACE-PROJECTION-0001-D
+    expectation: wc-text-control-boundary-metadata-stays-on-wrapper-and-surface-style-reaches-textarea
+  - id: T-HOST-SURFACE-PROJECTION-0001-CASE-REPLACEMENT
+    title: Replacing a presentation target migrates only adapter-owned surface projection
+    covers:
+      - C-HOST-SURFACE-PROJECTION-0001-E
+    expectation: owned-surface-projection-is-revoked-and-replayed-across-target-replacement
+  - id: T-HOST-SURFACE-PROJECTION-0001-CASE-NORMALIZED-CHANNEL
+    title: Previewer surface classes reach the physical visual target across Web Component React and Vue
+    covers:
+      - C-HOST-SURFACE-PROJECTION-0001-C
+      - C-HOST-SURFACE-PROJECTION-0001-F
+    expectation: normalized-preview-surface-class-does-not-style-a-wc-infrastructure-wrapper
+  - id: T-HOST-SURFACE-PROJECTION-0001-CASE-STATE-SELECTOR-CONTEXT
+    title: Stateful feedback selectors evaluate on a split Web Component presentation surface
+    covers:
+      - C-HOST-SURFACE-PROJECTION-0001-C
+      - C-HOST-SURFACE-PROJECTION-0001-G
+    expectation: canonical-state-remains-on-boundary-while-surface-receives-selector-context
+implementations:
+  - id: adapter-base-host-surface-projection
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/host-surface-projection.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-SURFACE-PROJECTION-0001-CASE-DEFAULT
+    exercises:
+      - C-HOST-SURFACE-PROJECTION-0001
+  - id: adapter-web-component-text-control-surface
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/text-control.integration.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-SURFACE-PROJECTION-0001-CASE-SPLIT-TEXT-CONTROL
+    exercises:
+      - C-HOST-SURFACE-PROJECTION-0001
+      - HC-TEXT-CONTROL-0001
+  - id: adapter-web-component-owned-surface-migration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/surface-projection.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-SURFACE-PROJECTION-0001-CASE-REPLACEMENT
+    exercises:
+      - C-HOST-SURFACE-PROJECTION-0001
+  - id: prototype-previewer-cross-adapter-surface
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/previewer.demo-renderer.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-SURFACE-PROJECTION-0001-CASE-NORMALIZED-CHANNEL
+    exercises:
+      - C-HOST-SURFACE-PROJECTION-0001
+      - P-BASE-TEXTAREA
+  - id: prototype-previewer-react-surface-channel
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/previewer.demo-renderer.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-SURFACE-PROJECTION-0001-CASE-NORMALIZED-CHANNEL
+    exercises:
+      - C-HOST-SURFACE-PROJECTION-0001
+      - P-BASE-TEXTAREA
+  - id: prototype-previewer-vue-textarea-surface
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/previewer-textarea.demo.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-SURFACE-PROJECTION-0001-CASE-NORMALIZED-CHANNEL
+    exercises:
+      - C-HOST-SURFACE-PROJECTION-0001
+      - P-BASE-TEXTAREA
+  - id: prototypes-brutalist-textarea-stateful-surface
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/brutalist/test/textarea.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-SURFACE-PROJECTION-0001-CASE-STATE-SELECTOR-CONTEXT
+    exercises:
+      - C-HOST-SURFACE-PROJECTION-0001
+      - P-BRUTALIST-TEXTAREA
+verifies:
+  contracts:
+    - id: C-HOST-SURFACE-PROJECTION-0001
+      anchors:
+        - C-HOST-SURFACE-PROJECTION-0001-A
+        - C-HOST-SURFACE-PROJECTION-0001-B
+        - C-HOST-SURFACE-PROJECTION-0001-C
+        - C-HOST-SURFACE-PROJECTION-0001-D
+        - C-HOST-SURFACE-PROJECTION-0001-E
+        - C-HOST-SURFACE-PROJECTION-0001-F
+        - C-HOST-SURFACE-PROJECTION-0001-G
+exercises:
+  hostCaps:
+    - HC-TEXT-CONTROL-0001
+  prototypes:
+    - P-BASE-TEXTAREA
+sources:
+  - path: packages/adapters/base/test/host-surface-projection.test.ts
+  - path: packages/adapters/web-component/test/text-control.integration.test.ts
+  - path: packages/adapters/web-component/test/surface-projection.test.ts
+  - path: packages/adapters/web-component/test/previewer.demo-renderer.test.ts
+  - path: packages/adapters/react/test/previewer.demo-renderer.test.ts
+  - path: packages/adapters/vue/test/previewer-textarea.demo.test.ts
+  - path: packages/prototypes/brutalist/test/textarea.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added split-surface selector-context coverage for state-dependent feedback.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable coverage for boundary/surface role separation and the initial Text Control Web profile.
+tags:
+  - test
+  - adapter
+  - host-projection
+  - presentation-surface

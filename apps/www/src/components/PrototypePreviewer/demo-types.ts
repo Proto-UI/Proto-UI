@@ -17,6 +17,7 @@ export type DemoNode =
       kind: 'proto';
       prototypeId: string;
       className?: string;
+      surfaceStyle?: string | Record<string, string> | Array<Record<string, string>>;
       ref?: string;
       props?: Record<string, unknown>;
       children?: DemoChild[];
@@ -114,6 +115,9 @@ export function assertDemoSpec(demo: DemoSpec) {
     }
     if (node.kind === 'box') {
       assertClassName((node as any).className, [...path, 'className']);
+      if ((node as any).surfaceStyle !== undefined) {
+        assertJsonLike((node as any).surfaceStyle, [...path, 'surfaceStyle']);
+      }
       if (
         (node as Record<string, unknown>).ref !== undefined &&
         typeof (node as Record<string, unknown>).ref !== 'string'

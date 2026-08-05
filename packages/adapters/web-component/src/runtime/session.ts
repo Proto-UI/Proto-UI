@@ -15,6 +15,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   root: Element | ShadowRoot;
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
+  textControlTarget: HTMLTextAreaElement | null;
   wiring: ReturnType<typeof createHostWiring>;
   eventGate: {
     enable(): void;
@@ -41,6 +42,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     schedule,
     rawPropsSource,
     wiring,
+    textControlTarget,
     eventGate,
     router,
     onLifecycleCheckpoint,
@@ -66,6 +68,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           root,
           children,
           shadow,
+          textControlTarget,
           eventGate,
           getSlotProjector,
           ensureSlotProjector,
@@ -105,6 +108,7 @@ function commitWebComponentChildren(args: {
   root: Element | ShadowRoot;
   children: TemplateChildren;
   shadow: boolean;
+  textControlTarget: HTMLTextAreaElement | null;
   eventGate: { enable(): void };
   getSlotProjector: () => SlotProjector | null;
   ensureSlotProjector: () => SlotProjector;
@@ -114,11 +118,24 @@ function commitWebComponentChildren(args: {
     root,
     children,
     shadow,
+    textControlTarget,
     eventGate,
     getSlotProjector,
     ensureSlotProjector,
     clearSlotProjector,
   } = args;
+  if (textControlTarget) {
+    const hasChildren = Array.isArray(children) ? children.length > 0 : children != null;
+    if (hasChildren) {
+      throw new Error('[WC Adapter] text-control prototypes must return empty Template children.');
+    }
+    if (root.firstChild !== textControlTarget || root.childNodes.length !== 1) {
+      root.replaceChildren(textControlTarget);
+    }
+    clearSlotProjector();
+    eventGate.enable();
+    return;
+  }
 
   if (shadow) {
     commitChildren(root as any, children, { mode: 'shadow' });

@@ -1,0 +1,49 @@
+{
+  "name": "@proto.ui/module-text-control",
+  "version": "0.2.0-rc.7",
+  "private": false,
+  "type": "module",
+  "sideEffects": false,
+  "dependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/module-base": "workspace:*",
+    "@proto.ui/types": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "description": "Proto UI portable multiline text-control host protocol.",
+  "license": "MIT",
+  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/text-control",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proto-UI/Proto-UI.git",
+    "directory": "packages/modules/text-control"
+  },
+  "bugs": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "proto-ui",
+    "proto",
+    "ui",
+    "module",
+    "text-control",
+    "textarea"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/module-text-control",
+    "prepack": "pnpm run build"
+  }
+}

@@ -1,0 +1,58 @@
+id: K-HOST-SURFACE-ROLES-0001
+type: knowledge
+title: Logical boundaries and presentation surfaces are distinct host roles
+status: draft
+since: 0.2.0-rc.7
+summary: A projected component can retain one logical instance boundary while presenting itself through another host-owned surface; most adapters collapse the roles, while wrapper-backed controls make the distinction observable.
+statement:
+  zh-CN: >-
+    Proto UI 的一个 logical component instance 不必与一个可见宿主盒一一对应。`boundaryTarget` 表示 adapter 用来维持 lifecycle、logical tree、event boundary 与 instance-facing API 的宿主锚点；`surfaceTarget` 表示 User 实际感知 Root visual intent 的宿主表面。两者通常重合，但 infrastructure wrapper、portal replacement、host-owned native widget 等 projection 可以使其分离。角色分离不意味着出现第二个 component、第二个协议 owner 或新的 portable information channel。
+
+
+  en: >-
+    A Proto UI logical component instance does not need to correspond one-to-one with a visible host box. The `boundaryTarget` is the host anchor an adapter uses for lifecycle, the logical tree, the event boundary, and instance-facing APIs; the `surfaceTarget` is the host surface through which the User perceives Root visual intent. The roles normally coincide, but infrastructure wrappers, portal replacement, and host-owned native widgets can separate them. Role separation does not create a second component, a second protocol owner, or a new portable information channel.
+
+
+criteria:
+  - id: K-HOST-SURFACE-ROLES-0001-A
+    text:
+      zh-CN: Boundary 是 logical instance 的宿主锚点，不等同于必然可见或可交互的 UI box。
+      en: A boundary is the host anchor of a logical instance and is not necessarily a visible or interactive UI box.
+  - id: K-HOST-SURFACE-ROLES-0001-B
+    text:
+      zh-CN: Surface 是 Root visual intent 的感知表面，不自动拥有 focus、a11y、event、hit-testing 或 native state。
+      en: A surface is the perceptual target of Root visual intent and does not automatically own focus, accessibility, events, hit testing, or native state.
+  - id: K-HOST-SURFACE-ROLES-0001-C
+    text:
+      zh-CN: 普通 adapter 可以将 boundary 与 surface 折叠为同一对象；角色抽象的价值在于解释确实发生分离的 projection，而不是强迫所有宿主增加 wrapper。
+      en: Ordinary adapters may collapse boundary and surface onto one object; the role model exists to explain projections that genuinely separate them rather than forcing every host to add a wrapper.
+  - id: K-HOST-SURFACE-ROLES-0001-D
+    text:
+      zh-CN: Host-specific wrapper、DOM node、native widget 或 controller 仍属于翻译层产物；prototype author 不因角色模型而获得 raw target access。
+      en: Host-specific wrappers, DOM nodes, native widgets, and controllers remain translation-layer artifacts; the role model does not give prototype authors raw target access.
+  - id: K-HOST-SURFACE-ROLES-0001-E
+    text:
+      zh-CN: State ownership 与 state selector context 不是同一概念。Boundary 可以继续拥有并暴露 canonical state，而翻译层为了让 surface 上的条件样式成立，可以把有限的 Web selector marker 投影到 surface；这种投影是视觉求值环境，不是第二份协议状态。
+      en: State ownership and state-selector context are not the same concept. A boundary can continue to own and expose canonical state while the translation layer projects bounded Web selector markers onto the surface so conditional styling can evaluate there; that projection is a visual evaluation environment, not a second protocol state.
+sources:
+  - path: internal/records/2026-08-02-host-surface-projection.zh-CN.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/translation-layer.md
+  - path: apps/www/src/content/docs/en/whitepaper/translation-layer.md
+explains:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+relates:
+  decisions:
+    - D-TEXT-CONTROL-PROJECTION-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Distinguished canonical state ownership from the selector context needed by a split presentation surface.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged boundary and presentation surface as distinct but commonly collapsed host projection roles.
+tags:
+  - host-projection
+  - boundary
+  - presentation-surface
+  - translation-layer

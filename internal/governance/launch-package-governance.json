@@ -8,6 +8,7 @@
     "@proto.ui/adapter-web-component",
     "@proto.ui/cli",
     "@proto.ui/prototypes-base",
+    "@proto.ui/prototypes-brutalist",
     "@proto.ui/prototypes-lucide",
     "@proto.ui/prototypes-shadcn"
   ],
@@ -44,7 +45,8 @@
     "@proto.ui/module-state",
     "@proto.ui/module-state-accessibility",
     "@proto.ui/module-state-interaction",
-    "@proto.ui/module-test-sys"
+    "@proto.ui/module-test-sys",
+    "@proto.ui/module-text-control"
   ],
   "candidatePackages": []
 }

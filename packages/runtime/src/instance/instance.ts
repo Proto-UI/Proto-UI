@@ -30,6 +30,7 @@ import { PositioningModuleDef } from '@proto.ui/module-positioning';
 import { ScrollModuleDef } from '@proto.ui/module-scroll';
 import { PresenceModuleDef } from '@proto.ui/module-presence';
 import { __RUN_TEST_SYS, TestSysModuleDef, type TestSysPort } from '@proto.ui/module-test-sys';
+import { TextControlModuleDef } from '@proto.ui/module-text-control';
 
 import type { ModuleOrchestrator } from '../orchestrator/module-orchestrator';
 import { RuntimeModuleOrchestrator } from '../orchestrator/module-orchestrator';
@@ -67,33 +68,37 @@ export function createRuntimeInstance<P extends PropsBaseType>(
   let phaseRef: ExecPhase = 'unknown';
   const getPhase = () => phaseRef;
 
-  const moduleHub = new RuntimeModuleOrchestrator({ prototypeName: proto.name, getPhase }, [
-    AsTriggerModuleDef,
-    RuleModuleDef,
-    RuleMetaModuleDef,
-    FeedbackModuleDef,
-    PropsModuleDef,
-    EventModuleDef,
-    ExposeModuleDef,
-    AnatomyModuleDef,
-    ExposeStateModuleDef,
-    ExposeStateWebModuleDef,
-    RuleExposeStateWebModuleDef,
-    StateModuleDef,
-    StateInteractionModuleDef,
-    StateAccessibilityModuleDef,
-    A11yModuleDef,
-    CollectionModuleDef,
-    ContextModuleDef,
-    FocusModuleDef,
-    BoundaryModuleDef,
-    HitParticipationModuleDef,
-    PositioningModuleDef,
-    ScrollModuleDef,
-    OverlayModuleDef,
-    PresenceModuleDef,
-    TestSysModuleDef,
-  ]);
+  const moduleHub = new RuntimeModuleOrchestrator(
+    { prototypeName: proto.name, declarations: proto.modules, getPhase },
+    [
+      AsTriggerModuleDef,
+      RuleModuleDef,
+      RuleMetaModuleDef,
+      FeedbackModuleDef,
+      PropsModuleDef,
+      EventModuleDef,
+      ExposeModuleDef,
+      AnatomyModuleDef,
+      ExposeStateModuleDef,
+      ExposeStateWebModuleDef,
+      RuleExposeStateWebModuleDef,
+      StateModuleDef,
+      StateInteractionModuleDef,
+      StateAccessibilityModuleDef,
+      A11yModuleDef,
+      CollectionModuleDef,
+      ContextModuleDef,
+      FocusModuleDef,
+      TextControlModuleDef,
+      BoundaryModuleDef,
+      HitParticipationModuleDef,
+      PositioningModuleDef,
+      ScrollModuleDef,
+      OverlayModuleDef,
+      PresenceModuleDef,
+      TestSysModuleDef,
+    ]
+  );
 
   opt?.onModulesReady?.(moduleHub);
 

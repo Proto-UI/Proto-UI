@@ -40,7 +40,9 @@ describe('adapter-vue: type helpers', () => {
       disabled?: boolean;
       class?: string | string[] | Record<string, boolean>;
       hostClass?: string | string[] | Record<string, boolean>;
+      surfaceClass?: string | string[] | Record<string, boolean>;
       hostStyle?: Record<string, string> | string | Array<Record<string, string>>;
+      surfaceStyle?: Record<string, string> | string | Array<Record<string, string>>;
       onClick?: () => void;
       onCheckedChange?: (payload: { checked: boolean }, options?: Record<string, unknown>) => void;
     }>({} as any);

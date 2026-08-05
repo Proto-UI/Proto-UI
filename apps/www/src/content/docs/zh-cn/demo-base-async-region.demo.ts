@@ -9,9 +9,7 @@ export default {
       {
         kind: 'box',
         className: 'flex items-center gap-2',
-        children: [
-          { kind: 'box', className: 'text-slate-400', children: ['Loading results…'] },
-        ],
+        children: [{ kind: 'box', className: 'text-slate-400', children: ['Loading results…'] }],
       },
     ],
   },

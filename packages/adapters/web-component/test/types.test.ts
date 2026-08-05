@@ -40,6 +40,12 @@ describe('adapter-web-component: public type projection', () => {
       disabled?: boolean;
       class?: string | string[] | Record<string, boolean>;
       className?: string | string[] | Record<string, boolean>;
+      surfaceClass?: string | string[] | Record<string, boolean>;
+      surfaceClassName?: string | string[] | Record<string, boolean>;
+      surfaceStyle?:
+        | string
+        | Record<string, string | number | null | undefined>
+        | Array<Record<string, string | number | null | undefined>>;
     }>({} as any);
     expectTypeOf<ReturnType<Element['getExposes']>>().toEqualTypeOf<{
       checked: ExposeStateExternalHandle<boolean>;

@@ -7,6 +7,12 @@ description: 'Proto UI 当前阶段的贡献入口、主要路径与实践建议
 
 如果你刚接触 Proto UI，最简单的第一步是浏览 [Good First Issue](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22)——每个 issue 都有明确的范围和验收标准。开始前先在 issue 下留言说明。如果对范围或方案不确定，到 [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions) 提问。
 
+## 贡献权利与来源
+
+Proto UI 按当前的 [MIT License](https://github.com/Proto-UI/Proto-UI/blob/main/LICENSE) 接受贡献，贡献者保留其原创内容的著作权。每个新提交（包括文档和小修复）都必须带有 DCO 1.1 `Signed-off-by` trailer。第三方内容和具有实质影响的 AI 辅助内容必须披露，以便 reviewer 核实来源和使用权利。
+
+仓库治理文档是详细规则的权威来源。提交 PR 前请阅读 [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md)、未经修改的 [DCO 1.1](https://github.com/Proto-UI/Proto-UI/blob/main/DCO.md) 和[贡献来源治理政策](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/contribution-provenance.md)。
+
 ## 选择你的路径
 
 ### Prototype（原型）

@@ -3,7 +3,7 @@ type: version
 title: Proto UI 0.2.0-rc.7
 status: draft
 since: 0.2.0-rc.7
-summary: Seventh globally exact release candidate (draft) tracking executable-artifact production for all 38 public packages, continuous-trigger-group merge boundary, and the repository-side Neo-Brutalist foundation prior to publication.
+summary: Seventh globally exact release candidate (draft) tracking executable-artifact production for all 40 public packages, continuous-trigger-group merge boundary, and the repository-side Neo-Brutalist foundation prior to publication.
 statement:
   en: Proto UI 0.2.0-rc.7 is one ecosystem release identity that will be shared exactly by every public @proto.ui package and the corresponding immutable spec snapshot once published.
   zh-CN: Proto UI 0.2.0-rc.7 是将由全部公开 @proto.ui package 与对应不可变 spec snapshot 在发布后精确共享的一次生态发行身份。
@@ -39,6 +39,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Opened the draft rc.7 release train tracking executable-artifact production, trigger-group merge boundary, and repository-side Neo-Brutalist foundation.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Expanded the draft candidate to 40 public packages with Text Control, Base Textarea, and Brutalist Textarea.
 tags:
   - release
   - prerelease

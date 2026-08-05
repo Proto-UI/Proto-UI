@@ -21,15 +21,21 @@
 - The Proto style CSS compiler now supports `w-fit`, `h-fit`, `flex-1`, `shadow-sm`, and the required outline tokens so the aligned prototype styles reach Web output without degrading into unsupported tokens.
 - This pass intentionally covers the default variant's horizontal primary path. The `line` variant, vertical layout, explicit dark branch, SVG descendant rules, and complete native API/data forwarding remain tracked parity gaps.
 
-### CLI Brutalist CSS-only style preset
+### CLI Brutalist preset and public prototype package
 
-- `proto-ui init --prototypes brutalist` is now a first-class CSS-only style preset. It writes a Brutalist theme (`brutalist-theme.css` with light/dark variables and the flat canary/mint/lavender/coral/sky accent palette) plus a generated Proto UI token closure scanned from official Brutalist prototype sources, so target projects get usable initial CSS before any prototype package is installed.
-- The preset is intentionally CSS-only. The private workspace package `@proto.ui/prototypes-brutalist` (Button reference family) has no public install path yet and is not part of the rc.7 BOM; the CLI `add` component registry exposes no Brutalist entry until the package is promoted through a later release train.
+- `proto-ui init --prototypes brutalist` is a first-class CSS-only style preset. It writes a Brutalist theme (`brutalist-theme.css` with light/dark variables and the flat canary/mint/lavender/coral/sky accent palette) plus a generated Proto UI token closure scanned from official Brutalist prototype sources.
+- `@proto.ui/prototypes-brutalist` is now a public `0.2.0-rc.7` draft package in the 40-package BOM. Its exported family subpaths and generated `proto-ui add` entries cover the admitted Button, Toggle, Switch, Tabs, Hover Card, Dropdown, Select, Dialog, Scroll Area, Separator, Skeleton, and Textarea surfaces. This release-candidate state is not represented as already published.
 
 ### Separator protocol and Skeleton visual prototype
 
 - Base Separator now has explicit horizontal/vertical orientation, decorative-versus-semantic accessibility behavior, live post-mount projection, and no semantic-only orientation in decorative mode.
-- The private `@proto.ui/prototypes-brutalist` workspace package adds a Separator projection and a direct styled-only Skeleton source subpath. Skeleton is passive, contentless, aria-hidden, and consumer-sized; the parent loading region retains busy state, announcements, replacement timing, and focus continuity. These candidates remain outside the 38-package rc.7 BOM and add no public Brutalist `proto-ui add` entries.
+- The public Brutalist release candidate includes a Separator projection and a direct styled-only Skeleton subpath. Skeleton is passive, contentless, aria-hidden, and consumer-sized; the parent loading region retains busy state, announcements, replacement timing, and focus continuity.
+
+### Native Textarea protocol and Brutalist projection
+
+- A typed static module-declaration substrate now lets a prototype declare adapter-owned host-infrastructure requirements before render without widening Template v0; authored asHooks may publish frozen requirements for explicit caller-definition reuse. The public `@proto.ui/module-text-control` package uses a host-neutral plain-text/multiline declaration whose current Web profile leases one native textarea across Web Component, React, and Vue.
+- Base Textarea owns one contentless logical multiline editor with stable controlled or uncontrolled value ownership, normalized input/change/IME payloads, composition-safe controlled restoration, selection/cursor-preserving Web property projection, accessibility, and physical focus/blur methods. Current verification is cross-adapter evidence on one Web host and does not claim multi-host conformance.
+- Brutalist Textarea inherits the complete Base protocol on that same target and adds only square lavender/ink, monospace, hard-shadow styling. It does not own form workflow, validation messaging, auto-resize, rich text, live-region announcements, or a second control.
 
 ### Live Region and Async Region accessibility boundaries
 
@@ -39,12 +45,12 @@
 
 ## Build and release
 
-### Executable artifacts for all 38 public packages
+### Executable artifacts for all 40 public packages
 
-- All 38 public `@proto.ui/*` packages now produce `dist/*.js` and `dist/*.d.ts` before publication. Package exports point separately to the JavaScript runtime and declaration outputs instead of publishing `.ts` source as an npm runtime entry that requires a TypeScript loader.
+- All 40 public `@proto.ui/*` packages now produce `dist/*.js` and `dist/*.d.ts` before publication. Package exports point separately to the JavaScript runtime and declaration outputs instead of publishing `.ts` source as an npm runtime entry that requires a TypeScript loader.
 - Every public package now has a package-local `build` and `prepack` contract. The root `build:packages` command builds selected packages and their upstream closure in production-dependency order, validates every export target, and runs import smoke tests in native Node ESM without loading TypeScript.
 - Release staging now reuses and copies the same locally verified `dist` output used by development and CI instead of maintaining a second temporary compilation path that could drift.
-- A generator now maintains public manifest `dist` exports, `files` allowlists, and build scripts consistently. Source and tests remain repository inputs but are excluded from the default npm payload; test files across the 38 tarballs were reduced from 1,031,558 B to 0 B.
+- A generator maintains public manifest `dist` exports, `files` allowlists, and build scripts consistently. Source and tests remain repository inputs but are excluded from the default npm payload; release rehearsal validates the complete 40-package set.
 
 ### Bundle, documentation, and CI feedback
 
@@ -55,8 +61,10 @@
 
 ## Validation
 
-- The trigger-group and Tabs v4 style-fidelity changes pass the complete workspace test suite: 239 test files and 1,077 tests passed, together with the prototype catalog, style preset, type checks, generated Agent-document check, and the shared Web Component/React/Vue Dialog conformance journey.
-- The delivery optimization has validated builds, export targets, native Node ESM imports, release staging, and `npm publish --dry-run` for 38/38 public packages. Package-manifest, bundle-budget, type, test, Astro check, and documentation-build gates also passed.
+- The complete workspace suite passes with 273 test files and 1,226 tests, plus 3 intentionally skipped files and 34 todo cases. Workspace and documentation type checks cover 126 files with zero errors, warnings, or hints; the catalog reports 112 declarations, 155 static authoring entries, 111 cataloged P entities, and zero known debt files.
+- All 40 public packages pass production build, export-target validation, native Node ESM import smoke, staging, and `npm publish --dry-run`. The React tarball consumer uses 36/40 packed packages, the CLI multi-host consumer uses 38/40, and the production documentation build emits 186 pages with 184 indexed by Pagefind.
+- The built Brutalist Textarea showcase was exercised in a browser across Web Component, React, and Vue. Each adapter mounts one native textarea; the route preserves native properties and accessible label/help relations, accepts uncontrolled editing, and renders the square lavender/ink, vertical-resize, hard-shadow surface.
+- The integrated release rehearsal passes release identity/assets, catalog, types, release tests, runtime tests, spec snapshot generation, and launch-governance scan, then stops at the external registry-readiness gate because `@proto.ui/module-text-control` does not yet have an npm package identity. `@proto.ui/prototypes-brutalist` already resolves at its non-release bootstrap identity. The remaining package identity must be bootstrapped and configured with a Trusted Publisher before publication; all post-registry rehearsal steps were run independently and pass.
 - The development Demo Matrix was verified with 27 demos and 81 simultaneously mounted previewers, 27 each for Web Component, React, and Vue. Its English and Chinese routes are absent from the 150-page production build, sitemap, and Pagefind index; the development-only and three-adapter side-by-side policies are now covered by the 37 release tests.
 
 ## Upgrade notes
@@ -66,4 +74,4 @@
 
 ## Release preparation still required
 
-- This draft does not mean rc.7 is installable. The draft version entity, aligned public package manifests, and 38-package BOM exist; the complete release rehearsal, immutable spec snapshot, Git tag, GitHub prerelease, and npm publication still require separate verification before activation.
+- This draft does not mean rc.7 is installable. Before activation, bootstrap the missing `@proto.ui/module-text-control` npm identity, configure its Trusted Publisher, rerun the complete release rehearsal, and then establish the immutable spec snapshot, Git tag, GitHub prerelease, and npm publication.

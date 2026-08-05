@@ -9,7 +9,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 Brutalist is a contributor-authored Neo-Brutalist style family for Proto UI. It is inspired by the broader Neo-Brutalist visual language—square geometry, strong borders, flat fills, hard offset shadows, abrupt movement, and high-contrast typography—but it is not a compatibility layer for a named third-party component system.
 
-This split combines the stable projections over existing Base families—Button, Toggle, Switch, Tabs, Hover Card, Dropdown Menu, Select, and Dialog—with the Base Separator projection and a direct styled-only Skeleton prototype. The package remains private on rc.7; later families continue through separate focused PRs.
+The `0.2.0-rc.7` candidate combines projections over existing Base families—Button, Toggle, Switch, Tabs, Hover Card, Dropdown Menu, Select, Dialog, Scroll Area, Separator, and Textarea—with a direct styled-only Skeleton prototype. Textarea is a visual-only projection over Base Textarea. The package is in the public draft BOM and is not represented here as already published.
 
 <BrutalistPageStyle />
 
@@ -31,7 +31,7 @@ This split combines the stable projections over existing Base families—Button,
 ## Status
 
 - Provenance: contributor-authored Proto UI style family, with general Neo-Brutalist visual references only.
-- Semantics: Button, Toggle, Switch, Tabs, Hover Card, Dropdown Menu, Select, Dialog, and Separator project their corresponding Base protocols. Skeleton is a direct styled-only, passive, contentless visual prototype; its parent owns loading, announcements, replacement timing, and focus continuity.
-- Release status: private workspace package (`0.0.0`); does not rewrite published rc.6 evidence and has no public `proto-ui add` entries.
-- Private package surface: root plus `./button`, `./toggle`, `./switch`, `./tabs`, `./hover-card`, `./dropdown`, `./select`, `./dialog`, `./separator`, and `./skeleton` source subpaths.
-- Maintenance: the contributor maintains the initial split sequence; release inclusion and long-term ownership remain subject to Proto UI governance.
+- Semantics: Button, Toggle, Switch, Tabs, Hover Card, Dropdown Menu, Select, Dialog, Scroll Area, Separator, and Textarea project their corresponding Base protocols. Textarea adds only resize-y, square lavender/ink, hard-shadow styling. Skeleton is a direct styled-only, passive, contentless visual prototype; its parent owns loading, announcements, replacement timing, and focus continuity.
+- Release status: public draft package in the 40-package `0.2.0-rc.7` BOM; this page records the candidate state before publication and does not rewrite earlier release evidence.
+- Candidate package surface: root plus `./button`, `./toggle`, `./switch`, `./tabs`, `./hover-card`, `./dropdown`, `./select`, `./dialog`, `./scroll-area`, `./separator`, `./skeleton`, and `./textarea` subpaths.
+- Maintenance: admitted to the rc.7 launch-commitment set; later semantic changes and long-term ownership remain subject to Proto UI governance.

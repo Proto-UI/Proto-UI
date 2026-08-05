@@ -42,8 +42,10 @@ describe('adapter-react: type helpers', () => {
       children?: any;
       className?: string;
       hostClassName?: string;
+      surfaceClassName?: string;
       style?: any;
       hostStyle?: any;
+      surfaceStyle?: any;
       onClick?: () => void;
       onCheckedChange?: (payload: { checked: boolean }) => void;
     }>({} as any);

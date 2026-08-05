@@ -103,6 +103,7 @@ const staticUtilities: Record<string, string[]> = {
   'overflow-hidden': ['overflow: hidden;'],
   'overflow-x-hidden': ['overflow-x: hidden;'],
   'overflow-y-auto': ['overflow-y: auto;'],
+  'resize-y': ['resize: vertical;'],
   'whitespace-nowrap': ['white-space: nowrap;'],
   'bg-clip-padding': ['background-clip: padding-box;'],
   'will-change-transform': ['will-change: transform;'],

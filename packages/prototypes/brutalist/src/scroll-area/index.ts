@@ -1,7 +1,19 @@
-export { BrutalistScrollAreaRoot } from './root.proto';
-export { BrutalistScrollAreaViewport } from './viewport.proto';
-export { BrutalistScrollAreaScrollbar } from './scrollbar.proto';
-export { BrutalistScrollAreaThumb } from './thumb.proto';
+export {
+  BrutalistScrollAreaRoot,
+  BrutalistScrollAreaRoot as brutalistScrollAreaRoot,
+} from './root.proto';
+export {
+  BrutalistScrollAreaViewport,
+  BrutalistScrollAreaViewport as brutalistScrollAreaViewport,
+} from './viewport.proto';
+export {
+  BrutalistScrollAreaScrollbar,
+  BrutalistScrollAreaScrollbar as brutalistScrollAreaScrollbar,
+} from './scrollbar.proto';
+export {
+  BrutalistScrollAreaThumb,
+  BrutalistScrollAreaThumb as brutalistScrollAreaThumb,
+} from './thumb.proto';
 export type {
   BrutalistScrollAreaRootProps,
   BrutalistScrollAreaRootExposes,

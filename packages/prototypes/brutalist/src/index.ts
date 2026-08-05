@@ -9,6 +9,8 @@ export type {
 } from './button';
 export * from './separator';
 export * from './skeleton';
+export { default as textareaRoot, default as brutalistTextareaRoot } from './textarea';
+export type { BrutalistTextareaRootExposes, BrutalistTextareaRootProps } from './textarea';
 
 export { default as toggle, default as brutalistToggle } from './toggle';
 export type {

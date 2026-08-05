@@ -93,6 +93,40 @@ describe('collectProtoStyleTokens', () => {
     expect(tokens).not.toContain('active:translate-x-[5px]');
   });
 
+  it('maps asTextareaRoot state rules to their web data attributes', async () => {
+    await writeFile(
+      path.join(dir, 'textarea.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        "import { asTextareaRoot } from '@proto.ui/prototypes-base/textarea';",
+        '',
+        'const textarea = definePrototype({',
+        "  name: 'styled-textarea',",
+        '  setup(def) {',
+        '    const hook = asTextareaRoot();',
+        '    const state = hook.stateHandles;',
+        '    if (!state) throw new Error("missing state handles");',
+        '    def.rule({',
+        '      when: (w) => w.state(state.disabled).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),",
+        '    });',
+        '    def.rule({',
+        '      when: (w) => w.state(state.focusVisible).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('ring-[7px]')),",
+        '    });',
+        '  },',
+        '});',
+        'export default textarea;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+
+    expect(tokens).toContain('data-[disabled]:cursor-not-allowed');
+    expect(tokens).toContain('data-[disabled]:opacity-50');
+    expect(tokens).toContain('data-[focus-visible]:ring-[7px]');
+  });
+
   it('maps asSeparatorRoot enum rules to data-orientation value selectors', async () => {
     await writeFile(
       path.join(dir, 'separator.proto.ts'),

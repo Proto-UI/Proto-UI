@@ -45,7 +45,9 @@ export type ProtoVueProps<TProto extends ProtoLike> = (PropsOf<TProto> extends P
   : never) & {
   class?: string | string[] | Record<string, boolean>;
   hostClass?: string | string[] | Record<string, boolean>;
+  surfaceClass?: string | string[] | Record<string, boolean>;
   hostStyle?: Record<string, string> | string | Array<Record<string, string>>;
+  surfaceStyle?: Record<string, string> | string | Array<Record<string, string>>;
 } & ProtoVueEventProps<TProto>;
 
 export type ProtoVueEmits<TProto extends ProtoLike> = ProtoEmitTuples<ExposeOf<TProto>>;

@@ -13,6 +13,7 @@ const ARIA_STATE_ATTRS: Record<string, string> = {
   live: 'aria-live',
   orientation: 'aria-orientation',
   pressed: 'aria-pressed',
+  readOnly: 'aria-readonly',
   selected: 'aria-selected',
   modal: 'aria-modal',
 };

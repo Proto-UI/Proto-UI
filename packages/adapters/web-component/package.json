@@ -24,6 +24,7 @@
     "@proto.ui/module-overlay": "workspace:*",
     "@proto.ui/module-positioning": "workspace:*",
     "@proto.ui/module-scroll": "workspace:*",
+    "@proto.ui/module-text-control": "workspace:*",
     "@proto.ui/module-rule-expose-state-web": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
     "@proto.ui/module-test-sys": "workspace:*"

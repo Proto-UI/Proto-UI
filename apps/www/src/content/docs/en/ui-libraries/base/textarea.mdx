@@ -1,0 +1,55 @@
+---
+title: 'Textarea'
+desp: 'Textarea base prototype'
+description: 'Contentless host-mediated multiline text-control prototype'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-textarea-root` is a contentless Base prototype. It statically declares a plain-text, multiline, host-owned editing requirement and lets the adapter select one physical host editor. The current Web profile resolves that requirement to a native `<textarea>`; the Web Component, React, and Vue demos are cross-adapter evidence on one Web host rather than completed multi-host conformance.
+
+<div>
+  <PrototypePreviewer
+    demoId="demo-base-textarea"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+  />
+</div>
+
+## Ownership and Events
+
+Value ownership is selected when the instance is created and remains stable for its lifetime:
+
+- With `defaultValue`, Root is uncontrolled. It seeds its value once, adopts subsequent user input, and keeps dirty input when unrelated props update.
+- With `value`, Root is controlled. User edits are proposals: Root emits them, but the owner must pass an accepted `value` back before it becomes the authoritative value.
+
+The outward events contain normalized data rather than native event objects:
+
+- `valueChange` follows native `input` and emits `{ value, composing, data, inputType }`.
+- `change` follows the native change boundary and emits `{ value }`.
+- `compositionStart`, `compositionUpdate`, and `compositionEnd` each emit `{ value, data }` for IME observation.
+
+During a controlled IME session, the physical textarea keeps the in-progress candidate visible. After `compositionEnd`, an unaccepted candidate is restored to the current controlled `value`; restoration never interrupts composition.
+
+Ordinary property updates and synchronization with an unchanged value preserve the current cursor and selection. Long-press selection, selection handles, software keyboards, and system copy, cut, and paste menus belong to the host editing session. Base Textarea neither defines a touch-only prototype nor replaces system editing chrome.
+
+## Native Control Projection
+
+Root projects these props to the same physical textarea: `disabled`, `readOnly`, `required`, `name`, `placeholder`, `autoComplete`, `minLength`, `maxLength`, `rows`, and `wrap`. `value` and `defaultValue` participate in the ownership rules above rather than creating a second control.
+
+The expose surface includes `focusSelf()` and `blurSelf()` plus `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, and `composing` state. Accessibility projection keeps the textarea's textbox role, mirrors disabled/read-only state to `aria-disabled`/`aria-readonly`, and maps `ariaLabel`, `labelledBy`, and `describedBy` to `aria-label`, `aria-labelledby`, and `aria-describedby` on that physical target.
+
+Base contributes no child renderer and no visual treatment. App authors style and label the native control around this contentless protocol boundary rather than placing authored or rich-text content inside Root.
+
+`asTextareaRoot.modules` publishes the authored asHook's frozen pre-render module requirements. A styled prototype using `asTextareaRoot()` must reuse this surface on its prototype definition; the setup-time call cannot retroactively change adapter target selection.
+
+## Current Boundary
+
+`base-textarea-root` does not own form submission, hidden fields, form-data coordination, validation messaging, auto-resize, rich-text editing, status/live-region announcements, system selection or edit-menu chrome, or composition outside the single physical editor. Web form-related props can still be projected without making the prototype the owner of a form workflow.
+
+## References
+
+- Prototype: [P-BASE-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TEXTAREA.yaml)
+- Contract: [C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
+- Source: [packages/prototypes/base/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/textarea)
+- Test: [textarea.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/textarea.test.ts)

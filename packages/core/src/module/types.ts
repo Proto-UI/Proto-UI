@@ -1,3 +1,5 @@
+import type { PrototypeModuleDeclaration } from '../prototype';
+
 // packages/core/src/module/types.ts
 export type ModuleScope = 'instance' | 'host' | 'singleton';
 
@@ -14,6 +16,7 @@ export type ProtoPhase = 'setup' | 'mounted' | 'updated' | 'unmounted';
 export type ModuleInit = {
   prototypeName: string;
   debugLabel?: string;
+  declarations: readonly PrototypeModuleDeclaration[];
 };
 
 export interface ModuleFacade {

@@ -2,7 +2,7 @@
 
 Contributor-authored Neo-Brutalist Proto UI style library.
 
-> **Release status:** private workspace package (`0.0.0`, `protoUi.release.scan: false`). Not part of the published `0.2.0-rc.6` package set. Publication is deferred to a later release train.
+> **Release status:** public `0.2.0-rc.7` draft release candidate in the 40-package rc.7 BOM. The npm bootstrap identity exists, but rc.7 is not installable until the release rehearsal and publication complete.
 
 ## Purpose
 
@@ -12,20 +12,18 @@ This package is not owned by or claimed to be compatible with a named third-part
 
 ## Current workspace scope
 
-This private rc.7 workspace package includes:
+The rc.7 release-candidate package includes:
 
-- shared Brutalist style tokens and theme grammar;
-- package and CLI style-preset integration;
+- shared Brutalist style tokens, light/dark theme grammar, and the CLI style preset;
 - Button as the reference family;
-- stable Base family projections: Toggle, Switch, Tabs, Hover Card, Dropdown, Select, and Dialog;
-- the Brutalist Separator projection over Base Separator;
-- the direct styled-only Brutalist Skeleton;
-- private source subpaths for every included family;
-- no public `proto-ui add` entries.
+- Base protocol projections: Toggle, Switch, Tabs, Hover Card, Dropdown, Select, Dialog, Scroll Area, Separator, and Textarea;
+- the direct styled-only, passive Brutalist Skeleton;
+- public anatomy-family subpaths for every included family;
+- public `proto-ui add` entries that generate facades from those family subpaths.
 
 Brutalist Skeleton is passive, contentless, and excluded from the accessibility tree. The consuming async/loading region—not Skeleton—owns busy state, announcements, content replacement timing, and focus continuity.
 
-Additional prototype families continue to land through focused split PRs under incubation #323.
+Only families present in this package's exports and CLI registry are in the rc.7 release scope; draft PR #323 remains incubation history rather than a second release surface.
 
 ## Button public API
 
@@ -42,17 +40,19 @@ Every fill co-selects its foreground. Solid accents keep black text in both Ligh
 
 ```ts
 import { brutalistButton } from '@proto.ui/prototypes-brutalist/button';
-import { BrutalistSeparatorRoot } from '@proto.ui/prototypes-brutalist/separator';
-import { BrutalistSkeletonRoot } from '@proto.ui/prototypes-brutalist/skeleton';
+import { brutalistSeparatorRoot } from '@proto.ui/prototypes-brutalist/separator';
+import { brutalistSkeletonRoot } from '@proto.ui/prototypes-brutalist/skeleton';
+import { brutalistTextareaRoot } from '@proto.ui/prototypes-brutalist/textarea';
 ```
 
 ## Maintenance
 
-The contributor maintains the initial split sequence. Release inclusion and long-term ownership remain subject to Proto UI governance.
+The package is admitted to the rc.7 launch-commitment set. Long-term family ownership and later semantic changes remain subject to Proto UI governance.
 
 ## Related packages
 
 - `@proto.ui/core`
+- `@proto.ui/module-text-control`
 - `@proto.ui/prototypes-base`
 
 ## License

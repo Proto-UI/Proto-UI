@@ -459,6 +459,17 @@ function resolveKnownAsHookStateHandles(node) {
     ]);
   }
 
+  if (hookName === 'asTextareaRoot') {
+    return new Map([
+      ['value', 'data-[value]'],
+      ['disabled', 'data-[disabled]'],
+      ['readOnly', 'data-[read-only]'],
+      ['focused', 'data-[focused]'],
+      ['focusVisible', 'data-[focus-visible]'],
+      ['composing', 'data-[composing]'],
+    ]);
+  }
+
   if (hookName === 'asAsyncRegionRoot') {
     return new Map([['busy', 'data-[busy]']]);
   }
@@ -536,9 +547,9 @@ function analyzeWhenVariants(node, scope) {
           if (subjectMethod === 'state') {
             const firstArg = subject.arguments[0];
             const expected = current.arguments[0];
-            if (firstArg && ts.isIdentifier(firstArg)) {
-              const binding = lookup(firstArg.text, scope);
-              const variant = resolveStateEqVariant(binding.semantic, expected);
+            if (firstArg) {
+              const semantic = resolveStateHandleSemantic(firstArg, scope);
+              const variant = resolveStateEqVariant(semantic, expected);
               if (variant) out.add(variant);
             }
             return;
@@ -564,6 +575,14 @@ function analyzeWhenVariants(node, scope) {
 
     ts.forEachChild(current, visit);
   }
+}
+
+function resolveStateHandleSemantic(node, scope) {
+  if (ts.isIdentifier(node)) return lookup(node.text, scope).semantic ?? null;
+  if (!ts.isPropertyAccessExpression(node)) return null;
+
+  const owner = resolveExpression(node.expression, scope);
+  return owner.semanticMap?.get(node.name.text) ?? null;
 }
 
 function resolveStateEqVariant(semantic, expected) {

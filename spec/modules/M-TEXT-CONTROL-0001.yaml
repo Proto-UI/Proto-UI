@@ -1,0 +1,32 @@
+id: M-TEXT-CONTROL-0001
+type: module
+title: Text Control module owns multiline value reconciliation
+status: draft
+since: 0.2.0-rc.7
+summary: The mixed-lifetime Text Control module owns stable value mode, portable multiline editing patches, normalized callback routing, composition-safe restoration, and host lease rebinding.
+satisfies:
+  contracts:
+    - C-TEXT-CONTROL-0001
+requires:
+  hostCaps:
+    - HC-TEXT-CONTROL-0001
+verifies:
+  tests:
+    - T-TEXT-CONTROL-0001
+sources:
+  - path: packages/modules/text-control/src/create.ts
+  - path: packages/modules/text-control/src/declaration.ts
+  - path: packages/modules/text-control/src/impl.ts
+  - path: packages/modules/text-control/src/types.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Adopted host-neutral static requirements and editing-session preservation.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added the mixed-lifetime Text Control module for native multiline controls.
+tags:
+  - text-control
+  - textarea
+  - module
+  - editing

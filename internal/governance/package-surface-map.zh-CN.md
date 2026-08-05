@@ -269,6 +269,14 @@ Proto UI 的 package surface 可以大致理解为以下几层：
 
 Shadcn family 应通过对应的 Base family subpath 表达继承边界，默认不依赖其他 Shadcn family。CLI 安装完整 package，但生成的 facade 使用 family subpath。
 
+### 8.3 `@proto.ui/prototypes-brutalist`
+
+`@proto.ui/prototypes-brutalist` 是进入公开 `v0.2.0-rc.7` release train 的贡献者原创 Neo-Brutalist styled library。
+
+只有当 Base 拥有可独立测试的跨宿主协议时，Brutalist family 才复用 Base；仅承载视觉语法的 styled-only 项直接定义为 prototype，不以空 Base 抽象占位。完整 package 是发布单位，family subpath 与 Brutalist CLI preset 是消费侧集成边界。
+
+该 library 不拥有任何第三方兼容性声明；package 描述、catalog entity 与文档必须保留 `K-BRUTALIST-0001` 记录的来源边界。
+
 ---
 
 ## 9. Module 能力层
@@ -310,6 +318,9 @@ module 包不是通用 end-user package。
 - expose
 - boundary
 - scroll
+- text control
+
+`@proto.ui/module-text-control` 拥有 semantic host-owned text-editor requirement 的 adapter-facing host boundary：稳定的 controlled/uncontrolled value ownership、归一化 input/change/composition event、property 投影、editing-session preservation 与 physical focus access。当前 Web profile 将 multiline plain text 解析为 `HTMLTextAreaElement`；其它宿主通过等价 capability 接入，不向 prototype 暴露 widget 名称。它是 Base Textarea 与官方 adapter 的 dependency-directed 基础设施，不是 `Maker` 的通用入口。
 
 这些 package 更适合被理解为：
 

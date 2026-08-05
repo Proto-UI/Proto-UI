@@ -1,0 +1,153 @@
+id: T-TEXT-CONTROL-0001
+type: test
+title: Text Control declaration, host bridge, and adapter tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers host-neutral static editing requirements, the Web textarea profile, portable property projection, normalized events, composition-safe value reconciliation, selection preservation, cross-adapter materialization, native-event containment, and lease cleanup.
+cases:
+  - id: T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+    title: Host-neutral static requirements materialize one textarea across Web Component, React, and Vue adapters on the Web host
+    covers:
+      - C-TEXT-CONTROL-0001-A
+    expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
+  - id: T-TEXT-CONTROL-0001-CASE-PROPERTIES
+    title: Portable patches project every supported native textarea property and defaultValue update
+    covers:
+      - C-TEXT-CONTROL-0001-B
+    expectation: portable-textarea-properties-and-native-default-value-project-live
+  - id: T-TEXT-CONTROL-0001-CASE-EVENTS
+    title: Input, change, and IME composition normalize without native Event payloads
+    covers:
+      - C-TEXT-CONTROL-0001-C
+    expectation: native-editing-sequence-emits-only-normalized-text-control-facts
+  - id: T-TEXT-CONTROL-0001-CASE-VALUE-AND-IME
+    title: Stable value ownership preserves uncontrolled edits and controlled IME candidates through the callback boundary
+    covers:
+      - C-TEXT-CONTROL-0001-D
+      - C-TEXT-CONTROL-0001-E
+    expectation: logical-value-mode-is-stable-and-controlled-restoration-is-composition-safe
+  - id: T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
+    title: Web Component native events remain contained and detach revokes target listeners
+    covers:
+      - C-TEXT-CONTROL-0001-F
+    expectation: inner-native-events-and-listeners-remain-bounded-by-the-wrapper-host-lease
+  - id: T-TEXT-CONTROL-0001-CASE-EDITING-SESSION
+    title: Ordinary patches preserve active selection and controlled composition candidates
+    covers:
+      - C-TEXT-CONTROL-0001-G
+    expectation: web-host-patches-preserve-selection-cursor-and-active-composition
+  - id: T-TEXT-CONTROL-0001-CASE-PRESENTATION-SURFACE
+    title: Wrapper-backed Web Component projection keeps boundary metadata on the custom element and visual intent on the textarea
+    covers:
+      - C-TEXT-CONTROL-0001-H
+      - C-HOST-SURFACE-PROJECTION-0001-B
+      - C-HOST-SURFACE-PROJECTION-0001-C
+    expectation: wc-text-control-wrapper-is-logical-only-while-textarea-is-the-presentation-surface
+implementations:
+  - id: module-text-control-web-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/text-control/test/web.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-PROPERTIES
+      - T-TEXT-CONTROL-0001-CASE-EVENTS
+      - T-TEXT-CONTROL-0001-CASE-EDITING-SESSION
+    exercises:
+      - M-TEXT-CONTROL-0001
+      - HC-TEXT-CONTROL-0001
+  - id: module-text-control-value-reconciliation
+    kind: module-test
+    status: passing
+    path: packages/modules/text-control/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-VALUE-AND-IME
+      - T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
+    exercises:
+      - M-TEXT-CONTROL-0001
+      - HC-TEXT-CONTROL-0001
+  - id: adapter-web-component-text-control-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/text-control.integration.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
+      - T-TEXT-CONTROL-0001-CASE-PRESENTATION-SURFACE
+    exercises:
+      - M-TEXT-CONTROL-0001
+      - HC-TEXT-CONTROL-0001
+  - id: adapter-react-text-control-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/text-control.integration.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+    exercises:
+      - M-TEXT-CONTROL-0001
+      - HC-TEXT-CONTROL-0001
+  - id: adapter-vue-text-control-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/text-control.integration.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+    exercises:
+      - M-TEXT-CONTROL-0001
+      - HC-TEXT-CONTROL-0001
+  - id: prototypes-base-textarea-value-reconciliation
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/textarea.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-VALUE-AND-IME
+    exercises:
+      - P-BASE-TEXTAREA
+verifies:
+  contracts:
+    - id: C-TEXT-CONTROL-0001
+      anchors:
+        - C-TEXT-CONTROL-0001-A
+        - C-TEXT-CONTROL-0001-B
+        - C-TEXT-CONTROL-0001-C
+        - C-TEXT-CONTROL-0001-D
+        - C-TEXT-CONTROL-0001-E
+        - C-TEXT-CONTROL-0001-F
+        - C-TEXT-CONTROL-0001-G
+        - C-TEXT-CONTROL-0001-H
+    - id: C-HOST-SURFACE-PROJECTION-0001
+      anchors:
+        - C-HOST-SURFACE-PROJECTION-0001-B
+        - C-HOST-SURFACE-PROJECTION-0001-C
+exercises:
+  modules:
+    - M-TEXT-CONTROL-0001
+  hostCaps:
+    - HC-TEXT-CONTROL-0001
+  prototypes:
+    - P-BASE-TEXTAREA
+sources:
+  - path: packages/modules/text-control/test/web.test.ts
+  - path: packages/modules/text-control/test/impl-spec.test.ts
+  - path: packages/adapters/react/test/text-control.integration.test.ts
+  - path: packages/adapters/vue/test/text-control.integration.test.ts
+  - path: packages/adapters/web-component/test/text-control.integration.test.ts
+  - path: packages/prototypes/base/test/textarea.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added host-neutral declaration and Web editing-session preservation coverage.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added focused Text Control host and cross-adapter conformance coverage.
+tags:
+  - text-control
+  - textarea
+  - test
+  - adapter
+  - host-projection

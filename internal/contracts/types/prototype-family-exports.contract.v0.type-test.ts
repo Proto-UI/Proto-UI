@@ -68,6 +68,56 @@ import {
   shadcnTabsTrigger,
 } from '@proto.ui/prototypes-shadcn/tabs';
 import { shadcnToggle } from '@proto.ui/prototypes-shadcn/toggle';
+import { separatorRoot } from '@proto.ui/prototypes-base/separator';
+import { textareaRoot } from '@proto.ui/prototypes-base/textarea';
+import { brutalistButton } from '@proto.ui/prototypes-brutalist/button';
+import {
+  brutalistDialogClose,
+  brutalistDialogCloseIcon,
+  brutalistDialogContent,
+  brutalistDialogDescription,
+  brutalistDialogFooter,
+  brutalistDialogHeader,
+  brutalistDialogMask,
+  brutalistDialogRoot,
+  brutalistDialogTitle,
+  brutalistDialogTrigger,
+} from '@proto.ui/prototypes-brutalist/dialog';
+import {
+  brutalistDropdownContent,
+  brutalistDropdownItem,
+  brutalistDropdownRoot,
+  brutalistDropdownTrigger,
+} from '@proto.ui/prototypes-brutalist/dropdown';
+import {
+  brutalistHoverCardContent,
+  brutalistHoverCardRoot,
+  brutalistHoverCardTrigger,
+} from '@proto.ui/prototypes-brutalist/hover-card';
+import {
+  brutalistScrollAreaRoot,
+  brutalistScrollAreaScrollbar,
+  brutalistScrollAreaThumb,
+  brutalistScrollAreaViewport,
+} from '@proto.ui/prototypes-brutalist/scroll-area';
+import {
+  brutalistSelectContent,
+  brutalistSelectItem,
+  brutalistSelectRoot,
+  brutalistSelectTrigger,
+  brutalistSelectValue,
+} from '@proto.ui/prototypes-brutalist/select';
+import { brutalistSeparatorRoot } from '@proto.ui/prototypes-brutalist/separator';
+import { brutalistSkeletonRoot } from '@proto.ui/prototypes-brutalist/skeleton';
+import { brutalistSwitchRoot, brutalistSwitchThumb } from '@proto.ui/prototypes-brutalist/switch';
+import {
+  brutalistTabsContent,
+  brutalistTabsList,
+  brutalistTabsRoot,
+  brutalistTabsTrigger,
+} from '@proto.ui/prototypes-brutalist/tabs';
+import { brutalistTextareaRoot } from '@proto.ui/prototypes-brutalist/textarea';
+import { brutalistToggle } from '@proto.ui/prototypes-brutalist/toggle';
 
 // The CLI registry consumes these exact named exports from family subpaths.
 void [
@@ -101,6 +151,8 @@ void [
   dialogTitle,
   dialogDescription,
   dialogClose,
+  separatorRoot,
+  textareaRoot,
   shadcnButton,
   shadcnToggle,
   shadcnSwitchRoot,
@@ -128,4 +180,41 @@ void [
   shadcnDialogTitle,
   shadcnDialogDescription,
   shadcnDialogClose,
+  brutalistButton,
+  brutalistToggle,
+  brutalistSeparatorRoot,
+  brutalistSkeletonRoot,
+  brutalistTextareaRoot,
+  brutalistSwitchRoot,
+  brutalistSwitchThumb,
+  brutalistTabsRoot,
+  brutalistTabsList,
+  brutalistTabsTrigger,
+  brutalistTabsContent,
+  brutalistHoverCardRoot,
+  brutalistHoverCardTrigger,
+  brutalistHoverCardContent,
+  brutalistDropdownRoot,
+  brutalistDropdownTrigger,
+  brutalistDropdownContent,
+  brutalistDropdownItem,
+  brutalistSelectRoot,
+  brutalistSelectTrigger,
+  brutalistSelectValue,
+  brutalistSelectContent,
+  brutalistSelectItem,
+  brutalistDialogRoot,
+  brutalistDialogTrigger,
+  brutalistDialogMask,
+  brutalistDialogContent,
+  brutalistDialogTitle,
+  brutalistDialogDescription,
+  brutalistDialogClose,
+  brutalistDialogCloseIcon,
+  brutalistDialogHeader,
+  brutalistDialogFooter,
+  brutalistScrollAreaRoot,
+  brutalistScrollAreaViewport,
+  brutalistScrollAreaScrollbar,
+  brutalistScrollAreaThumb,
 ];

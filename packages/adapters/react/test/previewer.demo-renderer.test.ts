@@ -53,7 +53,7 @@ describe('PrototypePreviewer demo-renderer / react', () => {
     flushSync.mockClear();
   });
 
-  it('passes hostClassName and props into React adapter tree', async () => {
+  it('passes surfaceClassName and props into React adapter tree', async () => {
     const proto = definePrototype({
       name: 'previewer-react-inline',
       setup(def) {
@@ -93,7 +93,7 @@ describe('PrototypePreviewer demo-renderer / react', () => {
 
     const tree = reactRoot.render.mock.calls[0]?.[0] as any;
     expect(typeof tree.type).toBe('function');
-    expect(tree.props.hostClassName).toBe('rounded bg-red-500');
+    expect(tree.props.surfaceClassName).toBe('rounded bg-red-500');
     expect(tree.props.label).toBe('Second');
     expect(tree.props.children).toBe('Hello');
 

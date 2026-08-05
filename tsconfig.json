@@ -29,6 +29,8 @@
       ],
       "@proto.ui/prototypes-lucide/icons/*": ["packages/prototypes/lucide/src/icons/*.ts"],
       "@proto.ui/prototypes-lucide/*": ["packages/prototypes/lucide/src/*"],
+      "@proto.ui/prototypes-brutalist": ["packages/prototypes/brutalist/src/index.ts"],
+      "@proto.ui/prototypes-brutalist/*": ["packages/prototypes/brutalist/src/*/index.ts"],
       "@proto.ui/prototypes-*": ["packages/prototypes/*/src"],
       "@proto.ui/*": [
         "packages/*/src",

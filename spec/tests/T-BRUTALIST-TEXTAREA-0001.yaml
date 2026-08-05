@@ -1,0 +1,70 @@
+id: T-BRUTALIST-TEXTAREA-0001
+type: test
+title: Brutalist Textarea inheritance and visual contract tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers complete Base Textarea inheritance on one contentless native target and the square lavender, ink, monospace, hard-shadow visual delta.
+cases:
+  - id: T-BRUTALIST-TEXTAREA-0001-CASE-INHERITANCE
+    title: Brutalist Textarea preserves the complete Base protocol and normalized uncontrolled editing on one native target
+    covers:
+      - P-BRUTALIST-TEXTAREA-BASE-INHERITANCE
+      - P-BRUTALIST-TEXTAREA-SINGLE-TARGET
+      - P-BRUTALIST-TEXTAREA-NO-PROTOCOL-DELTA
+    expectation: brutalist-textarea-reuses-one-base-backed-native-control-without-behavioral-delta
+  - id: T-BRUTALIST-TEXTAREA-0001-CASE-VISUAL-GRAMMAR
+    title: The native target receives the lavender ink monospace hard-shadow treatment
+    covers:
+      - P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
+      - P-BRUTALIST-TEXTAREA-SINGLE-TARGET
+    expectation: brutalist-textarea-projects-square-lavender-ink-hard-shadow-tokens
+  - id: T-BRUTALIST-TEXTAREA-0001-CASE-STATEFUL-SURFACE
+    title: Disabled and read-only selector context is colocated with the styled physical textarea
+    covers:
+      - P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
+      - P-BRUTALIST-TEXTAREA-SINGLE-TARGET
+      - C-HOST-SURFACE-PROJECTION-0001-G
+    expectation: wc-brutalist-textarea-state-markers-and-conditional-style-share-one-surface
+implementations:
+  - id: prototypes-brutalist-textarea-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/textarea.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TEXTAREA-0001-CASE-INHERITANCE
+      - T-BRUTALIST-TEXTAREA-0001-CASE-VISUAL-GRAMMAR
+      - T-BRUTALIST-TEXTAREA-0001-CASE-STATEFUL-SURFACE
+    exercises:
+      - P-BASE-TEXTAREA
+      - P-BRUTALIST-TEXTAREA
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-TEXTAREA
+      anchors:
+        - P-BRUTALIST-TEXTAREA-BASE-INHERITANCE
+        - P-BRUTALIST-TEXTAREA-SINGLE-TARGET
+        - P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
+        - P-BRUTALIST-TEXTAREA-NO-PROTOCOL-DELTA
+exercises:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+  prototypes:
+    - P-BASE-TEXTAREA
+    - P-BRUTALIST-TEXTAREA
+sources:
+  - path: packages/prototypes/brutalist/test/textarea.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added state-selector colocation coverage for the Web Component presentation surface.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable Brutalist Textarea inheritance and visual coverage.
+tags:
+  - test
+  - prototype
+  - brutalist
+  - neo-brutalist
+  - textarea
+  - visual
