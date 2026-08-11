@@ -26,6 +26,7 @@ describe('proto-concept: lifecycle and memory management', () => {
 
   afterEach(() => {
     container.remove();
+    vi.unstubAllGlobals();
   });
 
   it('cleans up document event listeners when custom element is removed', async () => {
@@ -66,7 +67,7 @@ describe('proto-concept: lifecycle and memory management', () => {
     document.removeEventListener('click', outsideClickSpy);
   });
 
-  it('does not leak event listeners when element is moved within document', async () => {
+  it('rebinds listeners when moved within document and cleans them up on removal', async () => {
     const hostA = document.createElement('div');
     const hostB = document.createElement('div');
     container.appendChild(hostA);
@@ -79,21 +80,54 @@ describe('proto-concept: lifecycle and memory management', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    // Spy on document addEventListener
-    const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
-    const initialAddCount = addEventListenerSpy.mock.calls.length;
+    const trigger = conceptEl.querySelector('.proto-concept__trigger') as HTMLButtonElement;
 
-    // Move element to different parent (should not add new listeners)
+    // Moving a connected custom element disconnects and reconnects it.
     hostB.appendChild(conceptEl);
 
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    const finalAddCount = addEventListenerSpy.mock.calls.length;
+    trigger.click();
+    expect(conceptEl.dataset.pinned).toBe('true');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
 
-    // No new document listeners should be added during move
-    expect(finalAddCount).toBe(initialAddCount);
+    container.remove();
+    document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(conceptEl.dataset.pinned).toBe('true');
+  });
 
-    addEventListenerSpy.mockRestore();
+  it('synchronizes semantic visibility for fine-pointer hover', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({ matches: true }))
+    );
+
+    const conceptEl = document.createElement('proto-concept');
+    conceptEl.setAttribute('slug', 'test-concept');
+    conceptEl.setAttribute('href', 'https://example.com');
+    conceptEl.textContent = 'Test';
+    container.appendChild(conceptEl);
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    const trigger = conceptEl.querySelector('.proto-concept__trigger') as HTMLButtonElement;
+    const card = conceptEl.querySelector('.proto-concept__card') as HTMLElement;
+    const link = conceptEl.querySelector('.proto-concept__link') as HTMLAnchorElement;
+
+    conceptEl.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    expect(conceptEl.dataset.hovering).toBe('true');
+    expect(conceptEl.dataset.open).toBe('true');
+    expect(card.hasAttribute('inert')).toBe(false);
+    expect(card.getAttribute('aria-hidden')).toBe('false');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(link).toBeTruthy();
+
+    conceptEl.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+    expect(conceptEl.dataset.hovering).toBe('false');
+    expect(conceptEl.dataset.open).toBe('false');
+    expect(card.hasAttribute('inert')).toBe(true);
+    expect(card.getAttribute('aria-hidden')).toBe('true');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('sets inert and aria-hidden on closed card', async () => {

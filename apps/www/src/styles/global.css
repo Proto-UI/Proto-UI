@@ -96,8 +96,7 @@ proto-concept {
     0 2px 10px rgba(0, 0, 0, 0.28);
 }
 
-.proto-concept[data-hovering='true'] .proto-concept__card,
-.proto-concept[data-pinned='true'] .proto-concept__card {
+.proto-concept[data-open='true'] .proto-concept__card {
   opacity: 1;
   pointer-events: auto;
   translate: -50% 0;
@@ -162,8 +161,7 @@ proto-concept {
     translate: 0 0.35rem;
   }
 
-  .proto-concept[data-hovering='true'] .proto-concept__card,
-  .proto-concept[data-pinned='true'] .proto-concept__card {
+  .proto-concept[data-open='true'] .proto-concept__card {
     translate: 0 0;
   }
 }
