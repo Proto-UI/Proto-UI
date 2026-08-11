@@ -13,7 +13,7 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-focus@0.0.1
+npm install @proto.ui/module-focus@0.2.0-rc.7
 ```
 
 ## Internal Structure
@@ -28,6 +28,8 @@ npm install @proto.ui/module-focus@0.0.1
 
 - `@proto.ui/core`
 - `@proto.ui/module-base`
+- `@proto.ui/module-event`
+- `@proto.ui/module-state`
 - `@proto.ui/types`
 
 ## License

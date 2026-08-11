@@ -108,12 +108,12 @@ export function createTextareaDemoSetup(resetProps: Readonly<Record<string, unkn
     });
 
     const onExposedEvent = (event: Event) => {
-      const custom = event as CustomEvent<unknown>;
+      if (!(event instanceof CustomEvent)) return;
       const source =
         (event.target as HTMLElement | null)
           ?.closest('[data-demo-ref]')
           ?.getAttribute('data-demo-ref') ?? 'textarea';
-      record(source, event.type, custom.detail);
+      record(source, event.type, event.detail);
     };
     for (const eventName of eventNames) host.addEventListener(eventName, onExposedEvent);
 

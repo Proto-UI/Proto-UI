@@ -101,7 +101,9 @@ describe('@proto.ui/cli', () => {
       .filter((id) => id.startsWith('brutalist-'))
       .sort();
     expect(brutalistIds).toEqual([
+      'brutalist-badge',
       'brutalist-button',
+      'brutalist-card',
       'brutalist-dialog',
       'brutalist-dropdown',
       'brutalist-hover-card',
@@ -114,6 +116,45 @@ describe('@proto.ui/cli', () => {
       'brutalist-textarea',
       'brutalist-toggle',
     ]);
+    expect(COMPONENT_REGISTRY['brutalist-badge']).toMatchObject({
+      packageName: '@proto.ui/prototypes-brutalist',
+      importPath: '@proto.ui/prototypes-brutalist/badge',
+      stylePreset: 'brutalist',
+      items: [
+        {
+          prototypeImport: 'brutalistBadgeRoot',
+          reactExport: 'BrutalistBadgeRoot',
+          elementName: 'proto-ui-brutalist-badge',
+        },
+      ],
+    });
+    expect(COMPONENT_REGISTRY['brutalist-card']).toMatchObject({
+      packageName: '@proto.ui/prototypes-brutalist',
+      importPath: '@proto.ui/prototypes-brutalist/card',
+      stylePreset: 'brutalist',
+      items: [
+        {
+          prototypeImport: 'brutalistCardRoot',
+          reactExport: 'BrutalistCardRoot',
+          elementName: 'proto-ui-brutalist-card-root',
+        },
+        {
+          prototypeImport: 'brutalistCardHeader',
+          reactExport: 'BrutalistCardHeader',
+          elementName: 'proto-ui-brutalist-card-header',
+        },
+        {
+          prototypeImport: 'brutalistCardContent',
+          reactExport: 'BrutalistCardContent',
+          elementName: 'proto-ui-brutalist-card-content',
+        },
+        {
+          prototypeImport: 'brutalistCardFooter',
+          reactExport: 'BrutalistCardFooter',
+          elementName: 'proto-ui-brutalist-card-footer',
+        },
+      ],
+    });
     expect(COMPONENT_REGISTRY['base-textarea']).toMatchObject({
       packageName: '@proto.ui/prototypes-base',
       importPath: '@proto.ui/prototypes-base/textarea',

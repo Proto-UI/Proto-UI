@@ -46,6 +46,8 @@ npm install @proto.ui/adapter-react@0.2.0-rc.7
 - `@proto.ui/module-props`
 - `@proto.ui/module-rule-expose-state-web`
 - `@proto.ui/module-rule-meta`
+- `@proto.ui/module-scroll`
+- `@proto.ui/module-text-control`
 - `@proto.ui/runtime`
 - `@proto.ui/types`
 

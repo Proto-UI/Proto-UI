@@ -1,37 +1,22 @@
 ---
 title: 'Brutalist 原型库'
-desp: '贡献者原创、基于 Proto UI Base 的 Neo-Brutalist 风格原型库'
-description: '贡献者原创、基于 Proto UI Base 的 Neo-Brutalist 风格原型库'
+description: '贡献者原创的 Proto UI Neo-Brutalist 风格原型库总览。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
-import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
 
-Brutalist 是 Proto UI 的贡献者原创 Neo-Brutalist 风格原型库。它参考的是广义 Neo-Brutalist 视觉语言：方角几何、强边框、平涂填色、硬偏移阴影、直接的运动方式和高对比排版；它不是对任何特定第三方组件系统的兼容层。
+Brutalist 是 Proto UI 贡献者原创并维护的 Neo-Brutalist 设计语言投射，使用方角几何、强边框、平涂填色、硬偏移阴影与高对比排版。它不是任何第三方组件系统的移植、兼容层或认证集成。
 
-`0.2.0-rc.7` candidate 汇集既有 Base family 投影——Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea——以及直接定义的 styled-only Skeleton 原型。Textarea 是 Base Textarea 上的纯视觉投影。该 package 已进入公开 draft BOM，本页不把它描述为已经发布。
+`0.2.0-rc.7` candidate 汇集既有 Base family 投影——Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea——以及直接定义的 styled-only Badge、Card 与 Skeleton 原型。Textarea 是 Base Textarea 上的纯视觉投影。该 package 已进入公开 draft BOM，本页不把它描述为已经发布。
 
-<BrutalistPageStyle />
+下方每张卡片只展示一个基础 Demo，用于快速浏览组件范围与整体视觉；API 文档与代码示例保留在独立组件页。
 
-## Light 主题
-
-<div style="--pui-radius:0;--pui-background:#f4f1ea;--pui-secondary-background:#ffffff;--pui-foreground:#000000;--pui-main:#ffd23f;--pui-main-foreground:#000000;--pui-destructive:#ff6b6b;--pui-border:#000000;--pui-ring:#000000;--pui-overlay:rgba(0,0,0,.75);background:#f4f1ea;color:#000;border:2px solid var(--pui-foreground);border-radius:0;box-shadow:3px 3px 0 0 var(--pui-foreground);padding:1rem;margin:1rem 0 2rem;">
-  <PrototypePreviewer demoId="demo-brutalist-button" initialRuntime="wc" />
-</div>
-
-## Dark 主题
-
-<div
-  data-theme="dark"
-  style="--pui-radius:0;--pui-background:#1c1914;--pui-secondary-background:#2a241c;--pui-foreground:#f4f1ea;--pui-main:#ffd23f;--pui-main-foreground:#000000;--pui-destructive:#ff6b6b;--pui-border:#000000;--pui-ring:#f4f1ea;--pui-overlay:rgba(0,0,0,.85);background:#1c1914;color:#f4f1ea;border:2px solid var(--pui-foreground);border-radius:0;box-shadow:3px 3px 0 0 var(--pui-foreground);padding:1rem;margin:1rem 0 2rem;"
->
-  <PrototypePreviewer demoId="demo-brutalist-button" initialRuntime="wc" />
-</div>
+<PrototypeLibraryOverview library="brutalist" locale="zh-cn" />
 
 ## 状态
 
 - 来源：贡献者原创 Proto UI style family，仅使用一般 Neo-Brutalist 视觉参考。
-- 语义：Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea 投射各自的 Base 协议。Textarea 只增加 resize-y、方角薰衣草紫/ink、硬阴影视觉样式。Skeleton 是直接定义的 styled-only、passive、contentless 视觉原型，loading、announcement、替换时机与焦点连续性由父级拥有。
+- 语义：Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea 投射各自的 Base 协议。Textarea 只增加 resize-y、方角薰衣草紫/ink、硬阴影视觉样式；Badge 与 Card 是没有 Base counterpart 的 direct passive styled-only prototype。Skeleton 是直接定义的 styled-only、passive、contentless 视觉原型，loading、announcement、替换时机与焦点连续性由父级拥有。
 - 发布状态：已作为公开草案 package 进入 40-package `0.2.0-rc.7` BOM；本页记录发布前的 candidate 状态，不改写此前 release evidence。
-- Candidate package surface：root 以及 `./button`、`./toggle`、`./switch`、`./tabs`、`./hover-card`、`./dropdown`、`./select`、`./dialog`、`./scroll-area`、`./separator`、`./skeleton`、`./textarea` subpath。
+- Candidate package surface：root 以及 `./button`、`./badge`、`./card`、`./toggle`、`./switch`、`./tabs`、`./hover-card`、`./dropdown`、`./select`、`./dialog`、`./scroll-area`、`./separator`、`./skeleton`、`./textarea` subpath。
 - 维护：已进入 rc.7 launch-commitment set；后续语义变化与长期所有权仍由 Proto UI governance 决定。

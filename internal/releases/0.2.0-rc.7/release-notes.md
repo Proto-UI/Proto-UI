@@ -24,12 +24,17 @@
 ### CLI Brutalist preset and public prototype package
 
 - `proto-ui init --prototypes brutalist` is a first-class CSS-only style preset. It writes a Brutalist theme (`brutalist-theme.css` with light/dark variables and the flat canary/mint/lavender/coral/sky accent palette) plus a generated Proto UI token closure scanned from official Brutalist prototype sources.
-- `@proto.ui/prototypes-brutalist` is now a public `0.2.0-rc.7` draft package in the 40-package BOM. Its exported family subpaths and generated `proto-ui add` entries cover the admitted Button, Toggle, Switch, Tabs, Hover Card, Dropdown, Select, Dialog, Scroll Area, Separator, Skeleton, and Textarea surfaces. This release-candidate state is not represented as already published.
+- `@proto.ui/prototypes-brutalist` is now a public `0.2.0-rc.7` draft package in the 40-package BOM. Its exported family subpaths and generated `proto-ui add` entries cover the admitted Button, Badge, Card, Toggle, Switch, Tabs, Hover Card, Dropdown, Select, Dialog, Scroll Area, Separator, Skeleton, and Textarea surfaces. This release-candidate state is not represented as already published.
 
 ### Separator protocol and Skeleton visual prototype
 
 - Base Separator now has explicit horizontal/vertical orientation, decorative-versus-semantic accessibility behavior, live post-mount projection, and no semantic-only orientation in decorative mode.
 - The public Brutalist release candidate includes a Separator projection and a direct styled-only Skeleton subpath. Skeleton is passive, contentless, aria-hidden, and consumer-sized; the parent loading region retains busy state, announcements, replacement timing, and focus continuity.
+
+### Direct Badge and Card visual prototypes
+
+- Brutalist Badge is a direct styled-only passive label with no Base counterpart. Its public `accent | info | danger` tones pair flat fills with their intended foregrounds, while the structural ink border and hard shadow remain invariant. It owns no status announcement, activation, pressed, selected, event, state, command, or method channel.
+- Brutalist Card is a direct styled-only passive grouping surface with only Root, Header, Content, and Footer parts. Titles and descriptions remain ordinary content, while actions compose Button or Link so those children retain their own protocols.
 
 ### Native Textarea protocol and Brutalist projection
 
@@ -61,11 +66,11 @@
 
 ## Validation
 
-- The complete workspace suite passes with 273 test files and 1,226 tests, plus 3 intentionally skipped files and 34 todo cases. Workspace and documentation type checks cover 126 files with zero errors, warnings, or hints; the catalog reports 112 declarations, 155 static authoring entries, 111 cataloged P entities, and zero known debt files.
-- All 40 public packages pass production build, export-target validation, native Node ESM import smoke, staging, and `npm publish --dry-run`. The React tarball consumer uses 36/40 packed packages, the CLI multi-host consumer uses 38/40, and the production documentation build emits 186 pages with 184 indexed by Pagefind.
+- The complete workspace suite passes with 280 test files and 1,244 tests, plus 3 intentionally skipped files and 34 todo cases. Workspace and documentation type checks cover 130 files with zero errors, warnings, or hints; the catalog reports 117 declarations, 160 static authoring entries, 116 cataloged P entities, and zero known debt files.
+- All 40 public packages pass production build, export-target validation, native Node ESM import smoke, staging, and `npm publish --dry-run`. The React tarball consumer uses 36/40 packed packages, the CLI multi-host consumer uses 38/40, and the production documentation build emits 190 pages with 188 indexed by Pagefind.
 - The built Brutalist Textarea showcase was exercised in a browser across Web Component, React, and Vue. Each adapter mounts one native textarea; the route preserves native properties and accessible label/help relations, accepts uncontrolled editing, and renders the square lavender/ink, vertical-resize, hard-shadow surface.
 - The integrated release rehearsal passes release identity/assets, catalog, types, release tests, runtime tests, spec snapshot generation, and launch-governance scan, then stops at the external registry-readiness gate because `@proto.ui/module-text-control` does not yet have an npm package identity. `@proto.ui/prototypes-brutalist` already resolves at its non-release bootstrap identity. The remaining package identity must be bootstrapped and configured with a Trusted Publisher before publication; all post-registry rehearsal steps were run independently and pass.
-- The development Demo Matrix was verified with 27 demos and 81 simultaneously mounted previewers, 27 each for Web Component, React, and Vue. Its English and Chinese routes are absent from the 150-page production build, sitemap, and Pagefind index; the development-only and three-adapter side-by-side policies are now covered by the 37 release tests.
+- The development Demo Matrix was verified with 45 demos and 135 simultaneously mounted previewers, 45 each for Web Component, React, and Vue. Its English and Chinese routes are absent from the 190-page production build, sitemap, and Pagefind index; the development-only and three-adapter side-by-side policies are now covered by the 41 release tests.
 
 ## Upgrade notes
 

@@ -267,7 +267,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
         FOCUS_SET_FOCUSABLE_CAP,
         (target: HTMLElement, enabled: boolean) => {
           const surface = getLogicalTriggerSurfaceRoot(instanceToken);
-          target.tabIndex = enabled && (!surface || surface === target) ? 0 : -1;
+          projectFocusable(target, enabled && (!surface || surface === target));
         },
       ],
       [
@@ -387,4 +387,14 @@ function isNativelyFocusable(el: HTMLElement): boolean {
   }
   if (tag === 'a') return el.hasAttribute('href');
   return false;
+}
+
+function projectFocusable(target: HTMLElement, enabled: boolean): void {
+  if (enabled) {
+    target.tabIndex = 0;
+  } else if (isNativelyFocusable(target)) {
+    target.tabIndex = -1;
+  } else {
+    target.removeAttribute('tabindex');
+  }
 }

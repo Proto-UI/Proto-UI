@@ -325,14 +325,9 @@ export default defineConfig({
               translations: { en: 'Lucide', 'zh-CN': 'Lucide' },
               items: [
                 {
-                  label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  label: 'Icon Library',
+                  translations: { en: 'Icon Library', 'zh-CN': '图标库' },
                   slug: 'ui-libraries/lucide',
-                },
-                {
-                  label: 'Icons',
-                  translations: { en: 'Icons', 'zh-CN': '图标列表' },
-                  slug: 'ui-libraries/lucide/icons',
                 },
               ],
             },
@@ -349,6 +344,18 @@ export default defineConfig({
                   label: 'Design Contract',
                   translations: { en: 'Design Contract', 'zh-CN': '设计合约' },
                   slug: 'ui-libraries/brutalist/design-contract',
+                },
+                {
+                  label: 'Badge',
+                  translations: { en: 'Badge', 'zh-CN': 'Badge' },
+                  slug: 'ui-libraries/brutalist/components/badge',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Card',
+                  translations: { en: 'Card', 'zh-CN': 'Card' },
+                  slug: 'ui-libraries/brutalist/components/card',
+                  badge: inProgressBadge,
                 },
                 {
                   label: 'Separator',

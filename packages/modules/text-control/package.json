@@ -35,6 +35,8 @@
     "proto",
     "ui",
     "module",
+    "text",
+    "control",
     "text-control",
     "textarea"
   ],

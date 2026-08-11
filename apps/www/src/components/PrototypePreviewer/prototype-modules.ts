@@ -35,6 +35,26 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/brutalist/src/button/index');
     registerPrototype('brutalist-button', mod.default);
   },
+  'brutalist-badge-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/badge');
+    registerPrototype('brutalist-badge-root', mod.BrutalistBadgeRoot);
+  },
+  'brutalist-card-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-root', mod.BrutalistCardRoot);
+  },
+  'brutalist-card-header': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-header', mod.BrutalistCardHeader);
+  },
+  'brutalist-card-content': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-content', mod.BrutalistCardContent);
+  },
+  'brutalist-card-footer': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-footer', mod.BrutalistCardFooter);
+  },
   'brutalist-separator-root': async () => {
     const mod = await import('@proto.ui/prototypes-brutalist/separator');
     registerPrototype('brutalist-separator-root', mod.BrutalistSeparatorRoot);

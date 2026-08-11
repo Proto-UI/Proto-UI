@@ -366,7 +366,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         FOCUS_SET_FOCUSABLE_CAP,
         (target: HTMLElement, enabled: boolean) => {
           const surface = physicalControl() ?? getLogicalTriggerSurfaceRoot(instanceToken);
-          target.tabIndex = enabled && (!surface || surface === target) ? 0 : -1;
+          projectFocusable(target, enabled && (!surface || surface === target));
         },
       ],
       [
@@ -377,12 +377,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         FOCUS_SET_ENTRY_FOCUSABLE_CAP,
         (target: HTMLElement, config: FocusEntryConfig, enabled: boolean) => {
           if (!enabled) {
-            target.tabIndex = -1;
+            projectFocusable(target, false);
             return;
           }
 
           const resolved = resolveFocusEntryTarget(target, config);
-          target.tabIndex = resolved === target ? 0 : -1;
+          projectFocusable(target, resolved === target);
         },
       ],
       [
@@ -547,6 +547,16 @@ function isNativelyFocusable(el: HTMLElement): boolean {
     return el.hasAttribute('href');
   }
   return false;
+}
+
+function projectFocusable(target: HTMLElement, enabled: boolean): void {
+  if (enabled) {
+    target.tabIndex = 0;
+  } else if (isNativelyFocusable(target)) {
+    target.tabIndex = -1;
+  } else {
+    target.removeAttribute('tabindex');
+  }
 }
 
 function resolveFocusEntryTarget(

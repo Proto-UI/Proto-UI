@@ -25,7 +25,7 @@ Prototype-oriented icon utilities for Proto UI render templates.
 ## Install
 
 ```bash
-npm install @proto.ui/prototypes-lucide@0.2.0-rc.0
+npm install @proto.ui/prototypes-lucide@0.2.0-rc.7
 ```
 
 ## Internal Structure

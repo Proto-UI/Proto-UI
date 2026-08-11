@@ -42,6 +42,7 @@ interface Props {
   code?: string;
   hasCode?: boolean;
   codePanel?: boolean;
+  lazy?: boolean; // 进入视口附近后再加载 demo 与原型模块
 }
 
 function assertJsonLike(value: unknown, path: string[] = []) {
@@ -113,9 +114,10 @@ const {
   code: codeSnippet,
   hasCode = false,
   codePanel = true,
+  lazy = false,
 } = Astro.props;
 
-const autoCodeMap = demoId ? findCodeMapForDemo(demoId) : undefined;
+const autoCodeMap = demoId && codePanel ? findCodeMapForDemo(demoId) : undefined;
 const effectiveHasCode = codePanel && (hasCode || !!autoCodeMap || !!codeSnippet);
 const effectiveCode = autoCodeMap ? autoCodeMap[initialRuntime] : codeSnippet;
 
@@ -150,6 +152,7 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
   data-loader={loader || ''}
   data-code-map={autoCodeMap ? JSON.stringify(autoCodeMap) : ''}
   data-code-highlights={Object.keys(highlights).length ? JSON.stringify(highlights) : ''}
+  data-lazy={lazy ? 'true' : 'false'}
 >
   {
     toolbar && (
@@ -170,7 +173,9 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
     data-panel="preview"
   >
     <div class="proto-previewer__preview" role="region" aria-live="polite">
-      <div class="host"></div>
+      <div class="host">
+        {lazy && <span class="proto-previewer__skeleton" aria-hidden="true" />}
+      </div>
     </div>
   </div>
 
@@ -237,6 +242,35 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
       justify-content: center;
     }
 
+    .proto-previewer__skeleton {
+      width: min(9rem, 58%);
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      background: linear-gradient(
+        100deg,
+        color-mix(in oklch, var(--color-muted) 55%, transparent) 30%,
+        color-mix(in oklch, var(--color-muted) 85%, transparent) 48%,
+        color-mix(in oklch, var(--color-muted) 55%, transparent) 66%
+      );
+      background-size: 260% 100%;
+      animation: proto-previewer-skeleton 1.5s ease-in-out infinite;
+    }
+
+    @keyframes proto-previewer-skeleton {
+      from {
+        background-position: 100% 0;
+      }
+      to {
+        background-position: 0 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .proto-previewer__skeleton {
+        animation: none;
+      }
+    }
+
     @media (max-width: 640px) {
       .proto-previewer__preview {
         padding: 1.1rem;
@@ -250,35 +284,70 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
   </style>
 
   <script>
-    import { initPreviewer } from './previewer-client';
     import type { RuntimeId } from './runtimes/registry';
-    import { AdapterIds } from './runtimes/registry';
+    const defaultRuntimeIds: RuntimeId[] = ['wc', 'react', 'vue'];
+
+    async function mount(root: HTMLElement) {
+      if (root.dataset.inited === '1' || root.dataset.mounting === '1') return;
+      root.dataset.mounting = '1';
+      const prototypeId = root.dataset.prototypeId || '';
+      const demoId = root.dataset.demoId || '';
+      const initialRuntime = (root.dataset.initialRuntime || 'wc') as RuntimeId;
+      const demoProps = root.dataset.props ? JSON.parse(root.dataset.props) : {};
+      const runtimeList = root.dataset.runtimes
+        ? JSON.parse(root.dataset.runtimes)
+        : defaultRuntimeIds;
+      const loader = root.dataset.loader || '';
+
+      if (!prototypeId && !demoId) {
+        console.error('[PrototypePreviewer] missing prototypeId or demoId', root);
+        delete root.dataset.mounting;
+        return;
+      }
+
+      try {
+        const { initPreviewer } = await import('./previewer-client');
+        if (!root.isConnected) return;
+        initPreviewer({
+          root,
+          prototypeId,
+          demoId,
+          initialRuntime,
+          demoProps,
+          runtimeList,
+          loader,
+        });
+      } finally {
+        delete root.dataset.mounting;
+      }
+    }
+
     function init() {
       document
         .querySelectorAll<HTMLElement>('.proto-previewer[data-previewer-id]:not([data-inited])')
         .forEach((root) => {
-          const prototypeId = root.dataset.prototypeId || '';
-          const demoId = root.dataset.demoId || '';
-          const initialRuntime = (root.dataset.initialRuntime || 'wc') as RuntimeId;
-          const demoProps = root.dataset.props ? JSON.parse(root.dataset.props) : {};
-          const runtimeList = root.dataset.runtimes
-            ? JSON.parse(root.dataset.runtimes)
-            : AdapterIds;
-          const loader = root.dataset.loader || '';
-
-          if (!prototypeId && !demoId) {
-            console.error('[PrototypePreviewer] missing prototypeId or demoId', root);
+          if (root.dataset.lazy !== 'true') {
+            void mount(root);
             return;
           }
-          initPreviewer({
-            root,
-            prototypeId,
-            demoId,
-            initialRuntime,
-            demoProps,
-            runtimeList,
-            loader,
-          });
+
+          if (root.dataset.lazyObserved === '1') return;
+          root.dataset.lazyObserved = '1';
+
+          if (typeof IntersectionObserver === 'undefined') {
+            void mount(root);
+            return;
+          }
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              if (!entries.some((entry) => entry.isIntersecting)) return;
+              observer.disconnect();
+              void mount(root);
+            },
+            { rootMargin: '360px 0px' }
+          );
+          observer.observe(root);
         });
     }
 
@@ -287,5 +356,7 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
     } else {
       init();
     }
+
+    document.addEventListener('astro:page-load', init);
   </script>
 </div>

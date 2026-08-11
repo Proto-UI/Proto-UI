@@ -13,12 +13,11 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-expose@0.0.1
+npm install @proto.ui/module-expose@0.2.0-rc.7
 ```
 
 ## Internal Structure
 
-- `src/caps.ts`
 - `src/create.ts`
 - `src/error.ts`
 - `src/impl.ts`

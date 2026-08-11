@@ -40,6 +40,8 @@ relates:
   prototypes:
     [
       P-BRUTALIST-BUTTON,
+      P-BRUTALIST-BADGE,
+      P-BRUTALIST-CARD,
       P-BRUTALIST-TOGGLE,
       P-BRUTALIST-SWITCH,
       P-BRUTALIST-TABS,
@@ -47,6 +49,10 @@ relates:
       P-BRUTALIST-DROPDOWN-MENU,
       P-BRUTALIST-SELECT,
       P-BRUTALIST-DIALOG,
+      P-BRUTALIST-SCROLL-AREA,
+      P-BRUTALIST-SEPARATOR,
+      P-BRUTALIST-SKELETON,
+      P-BRUTALIST-TEXTAREA,
     ]
 verifies:
   tests: [T-CLI-BRUTALIST-PRESET-CLOSURE-0001]
@@ -54,3 +60,6 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Introduced the decision scoping the CLI Brutalist CSS-only preset closure on the rc.7 release train (Button-only foundation). Not present in the immutable rc.6 snapshot.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Revised the public Brutalist family/token closure to include the complete 14-family surface, including Badge and Card.

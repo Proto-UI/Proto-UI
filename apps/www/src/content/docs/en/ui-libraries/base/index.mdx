@@ -1,14 +1,13 @@
 ---
 title: 'Base Library'
-desp: 'Base prototype library'
-description: 'Base prototype library'
+description: 'Overview and interactive previews for the unstyled Base prototype library.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
 
-This page showcases the plain protocol-first base prototypes.
+Base prescribes no default visual language. It provides testable interaction semantics that can move across hosts. Each card below shows one basic demo for quick browsing; API documentation and code examples stay on the individual prototype pages.
 
-Base admission is not limited to interaction, but every admitted prototype must own an independently testable cross-host information path. Separator owns decorative/semantic orientation projection; Live Region owns status/alert and atomic announcement semantics; Async Region owns busy-state projection. Visual-only carriers remain in styled libraries.
+The Base entities currently remain in the draft catalog lifecycle. These previews describe the current official working surface, not a frozen stable API guarantee.
 
 For interactive families, the Base prototype should stop at semantics that are broadly reusable. For dropdown-menu, that boundary is:
 
@@ -22,3 +21,5 @@ It does not, at this layer, define persistent selection, checkbox/radio item sem
 `select` is the current probe for a slightly different boundary: it still stays protocol-first, but it explicitly keeps a `value` presentation part inside the family. That part is used to validate Proto UI's current value-class component path, where selected text is owned by the prototype and refreshed through explicit update-driven re-render instead of being pushed entirely to the host app.
 
 `textarea` exercises a host-mediated native-control boundary: Root owns one logical multiline editor while its renderer stays contentless, and the adapter selects the physical host target. The current Web profile uses one native textarea across Web Component, React, and Vue. It keeps controlled/uncontrolled ownership stable, normalizes input/change/IME signals, preserves the active editing session, restores unaccepted controlled proposals after composition, and projects properties, focus, and accessibility without claiming form submission, rich text, auto-resize, system editing chrome, or live-region semantics.
+
+<PrototypeLibraryOverview library="base" locale="en" />

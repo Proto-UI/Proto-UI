@@ -550,7 +550,7 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
   document.addEventListener('astro:page-load', initAll);
 </script>
 
-<style>
+<style is:global>
   .lucide-gallery {
     display: grid;
     gap: 1rem;

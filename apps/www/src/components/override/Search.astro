@@ -1,4 +1,5 @@
 ---
+import '@pagefind/default-ui/css/ui.css';
 import project from 'virtual:starlight/project-context';
 
 const pagefindTranslations = {
@@ -615,8 +616,6 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
 </style>
 
 <style is:global>
-  @import url('@pagefind/default-ui/css/ui.css') layer(starlight.core);
-
   @layer starlight.core {
     [data-search-modal-open] {
       overflow: hidden;

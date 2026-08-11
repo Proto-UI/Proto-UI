@@ -1,14 +1,13 @@
 ---
-title: '基础原型库'
-desp: '基础原型库'
-description: '基础原型库'
+title: 'Base 原型库'
+description: '无默认样式的基础原型库总览与交互预览。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
 
-当前页面用于展示更接近协议层的 base 原型。
+Base 不规定默认视觉，只提供可测试、可跨宿主迁移的交互语义。下方每张卡片只展示该原型的一个基础 Demo，用于快速了解当前覆盖范围与行为边界；这里不重复 API 文档或代码示例。
 
-Base 准入并不限于交互，但每个进入 Base 的原型都必须拥有可独立测试、可跨宿主迁移的信息通路。Separator 拥有 decorative/semantic orientation 投射；Live Region 拥有 status/alert 与 atomic 播报语义；Async Region 拥有 busy state 投射。仅承担视觉结构的 carrier 继续留在 styled library。
+当前 catalog 中的 Base 原型仍处于 draft 生命周期，以下是现阶段可交互的官方预览，不代表已冻结的稳定 API 保证。
 
 对于交互 family，Base 原型应停在可广泛复用的语义边界。以 dropdown-menu 为例，目前边界是：
 
@@ -22,3 +21,5 @@ Base 准入并不限于交互，但每个进入 Base 的原型都必须拥有可
 `select` 是当前用来验证另一条边界的探针：它仍然保持 protocol-first，但会把 `value` 呈现部件明确留在 family 内部。这个部件用于验证 Proto UI 在 value 类组件上的当前路径，也就是“选中值文本由原型自身定义，并通过显式 update 驱动重渲染”，而不是完全把值展示下放给宿主应用。
 
 `textarea` 用来验证 host-mediated native-control 边界：Root 拥有一个 logical multiline editor，renderer 保持 contentless，由 adapter 选择物理宿主目标。当前 Web profile 在 Web Component、React 与 Vue 中使用一个原生 textarea。它维持稳定的受控/非受控所有权，归一化 input/change/IME signal，保留 active editing session，在 composition 结束后恢复未被接纳的受控提案，并投影 property、focus 与 accessibility；它不声明 form submission、rich text、auto-resize、系统 editing chrome 或 live-region 语义。
+
+<PrototypeLibraryOverview library="base" locale="zh-cn" />

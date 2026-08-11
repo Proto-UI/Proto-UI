@@ -7,6 +7,8 @@ export type {
   BrutalistButtonSize,
   BrutalistButtonVariant,
 } from './button';
+export * from './badge';
+export * from './card';
 export * from './separator';
 export * from './skeleton';
 export { default as textareaRoot, default as brutalistTextareaRoot } from './textarea';

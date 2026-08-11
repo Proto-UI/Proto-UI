@@ -386,6 +386,12 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     'brutalistButton',
     'BrutalistButton'
   ),
+  'brutalist-badge': brutalist(
+    'brutalist-badge',
+    'Brutalist Badge',
+    'brutalistBadgeRoot',
+    'BrutalistBadgeRoot'
+  ),
   'brutalist-toggle': brutalist(
     'brutalist-toggle',
     'Brutalist Toggle',
@@ -410,6 +416,28 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     'brutalistTextareaRoot',
     'BrutalistTextareaRoot'
   ),
+  'brutalist-card': brutalistCompound('brutalist-card', 'Brutalist Card', [
+    {
+      prototypeImport: 'brutalistCardRoot',
+      exportBaseName: 'BrutalistCardRoot',
+      elementName: 'proto-ui-brutalist-card-root',
+    },
+    {
+      prototypeImport: 'brutalistCardHeader',
+      exportBaseName: 'BrutalistCardHeader',
+      elementName: 'proto-ui-brutalist-card-header',
+    },
+    {
+      prototypeImport: 'brutalistCardContent',
+      exportBaseName: 'BrutalistCardContent',
+      elementName: 'proto-ui-brutalist-card-content',
+    },
+    {
+      prototypeImport: 'brutalistCardFooter',
+      exportBaseName: 'BrutalistCardFooter',
+      elementName: 'proto-ui-brutalist-card-footer',
+    },
+  ]),
 
   'brutalist-switch': brutalistCompound('brutalist-switch', 'Brutalist Switch', [
     {

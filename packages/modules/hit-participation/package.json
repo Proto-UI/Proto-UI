@@ -34,6 +34,8 @@
     "proto",
     "ui",
     "module",
+    "hit",
+    "participation",
     "hit-participation"
   ],
   "files": [

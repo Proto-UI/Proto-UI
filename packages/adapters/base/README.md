@@ -20,6 +20,7 @@ npm install @proto.ui/adapter-base@0.2.0-rc.7
 
 - `src/events/`
 - `src/gate/`
+- `src/gestures/`
 - `src/host/`
 - `src/index.ts`
 - `src/lifecycle/`

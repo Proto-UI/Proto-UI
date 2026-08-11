@@ -24,12 +24,17 @@
 ### CLI Brutalist preset 与公开原型 package
 
 - `proto-ui init --prototypes brutalist` 是一等 CSS-only style preset。它会写出 Brutalist 主题（`brutalist-theme.css`，包含 Light/Dark 变量与扁平 canary/mint/lavender/coral/sky 强调调色板），以及从官方 Brutalist prototype 源码扫描生成的 Proto UI token closure。
-- `@proto.ui/prototypes-brutalist` 现已作为公开 `0.2.0-rc.7` 草案 package 进入 40-package BOM。其导出的 family subpath 与生成的 `proto-ui add` 条目覆盖已准入的 Button、Toggle、Switch、Tabs、Hover Card、Dropdown、Select、Dialog、Scroll Area、Separator、Skeleton 与 Textarea surface；此 release-candidate 状态不代表已经发布。
+- `@proto.ui/prototypes-brutalist` 现已作为公开 `0.2.0-rc.7` 草案 package 进入 40-package BOM。其导出的 family subpath 与生成的 `proto-ui add` 条目覆盖已准入的 Button、Badge、Card、Toggle、Switch、Tabs、Hover Card、Dropdown、Select、Dialog、Scroll Area、Separator、Skeleton 与 Textarea surface；此 release-candidate 状态不代表已经发布。
 
 ### Separator 协议与 Skeleton 视觉原型
 
 - Base Separator 现已明确横向/纵向 orientation、decorative 与 semantic accessibility 行为、mounted 后的实时投影，并确保 decorative 模式不残留仅属于语义模式的 orientation。
 - 公开 Brutalist release candidate 包含 Separator 投影与直接定义的 styled-only Skeleton subpath。Skeleton 是 passive、contentless、aria-hidden 且尺寸由消费端拥有；父级 loading region 继续拥有 busy 状态、announcement、替换时机与焦点连续性。
+
+### Direct Badge 与 Card 视觉原型
+
+- Brutalist Badge 是没有 Base counterpart 的 direct styled-only 被动标签。公开 `accent | info | danger` tone 将平涂 fill 与对应 foreground 配对，同时保持结构性 ink 边框与硬阴影不变；它不拥有 status announcement、activation、pressed、selected、event、state、command 或 method channel。
+- Brutalist Card 是没有 Base counterpart 的 direct styled-only 被动分组表面，只保留 Root、Header、Content 与 Footer part。Title 与 description 使用普通内容，action 则组合 Button 或 Link，使这些 child 保留自己的协议。
 
 ### 原生 Textarea 协议与 Brutalist 投影
 
@@ -61,11 +66,11 @@
 
 ## 验证
 
-- 完整工作区测试通过：273 个测试文件、1,226 个测试通过，另有 3 个按设计跳过的文件与 34 个 todo case。工作区与文档类型检查覆盖 126 个文件，错误、警告和提示均为 0；catalog 统计为 112 个 declaration、155 个 static authoring entry、111 个已编目的 P entity，known debt file 为 0。
-- 40 个公开 package 均通过生产构建、export target 校验、原生 Node ESM import smoke、staging 与 `npm publish --dry-run`。React tarball consumer 实际使用 36/40 个打包产物，CLI multi-host consumer 使用 38/40 个；生产文档构建产出 186 个页面，其中 184 个进入 Pagefind。
+- 完整工作区测试通过：280 个测试文件、1,244 个测试通过，另有 3 个按设计跳过的文件与 34 个 todo case。工作区与文档类型检查覆盖 130 个文件，错误、警告和提示均为 0；catalog 统计为 117 个 declaration、160 个 static authoring entry、116 个已编目的 P entity，known debt file 为 0。
+- 40 个公开 package 均通过生产构建、export target 校验、原生 Node ESM import smoke、staging 与 `npm publish --dry-run`。React tarball consumer 实际使用 36/40 个打包产物，CLI multi-host consumer 使用 38/40 个；生产文档构建产出 190 个页面，其中 188 个进入 Pagefind。
 - 已在浏览器中对构建后的 Brutalist Textarea showcase 进行 Web Component、React 与 Vue 三适配器实测。每个适配器均只挂载一个原生 textarea；路由保留原生属性与可访问 label/help 关联，支持非受控编辑，并呈现方角薰衣草紫/ink、纵向 resize 与硬阴影视觉表面。
 - 集成 release rehearsal 已通过 release identity/assets、catalog、types、release tests、runtime tests、spec snapshot 生成与 launch-governance scan，随后在外部 registry-readiness 门禁停止：`@proto.ui/module-text-control` 尚无 npm package identity。`@proto.ui/prototypes-brutalist` 已可解析到非发布 bootstrap identity。正式发布前必须先 bootstrap 剩余 package identity 并配置 Trusted Publisher；registry 门禁之后的所有 rehearsal 步骤均已单独运行并通过。
-- Demo Matrix 开发路由实测同时挂载 27 个 demo、81 个 previewer，Web Component、React 与 Vue 各 27 个；生产构建的 150 个页面、sitemap 与 Pagefind index 均不包含其中英文 Demo Matrix 路由。新增的 development-only 与三 adapter 并排 policy 已进入 37 条 release tests。
+- Demo Matrix 开发路由实测同时挂载 45 个 demo、135 个 previewer，Web Component、React 与 Vue 各 45 个；生产构建的 190 个页面、sitemap 与 Pagefind index 均不包含其中英文 Demo Matrix 路由。新增的 development-only 与三 adapter 并排 policy 已进入 41 条 release tests。
 
 ## 升级提示
 

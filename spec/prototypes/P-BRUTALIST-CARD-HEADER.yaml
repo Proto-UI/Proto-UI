@@ -1,0 +1,32 @@
+id: P-BRUTALIST-CARD-HEADER
+type: prototype
+title: Brutalist Card Header styled region
+status: draft
+since: 0.2.0-rc.7
+summary: Direct Card header region with layout and lower separator grammar.
+statement:
+  en: Brutalist Card Header is a styled-only region for leading Card content and optional composed controls.
+  zh-CN: Brutalist Card Header 是用于 Card 前置内容及可选组合 control 的 styled-only 区域。
+criteria:
+  - id: P-BRUTALIST-CARD-HEADER-VISUAL
+    text:
+      en: Header directly owns flex alignment, spacing, horizontal padding, and a 2px lower ink separator while claiming no content semantics or interaction behavior.
+      zh-CN: Header 直接拥有 flex 对齐、间距、水平 padding 与 2px 下方 ink 分隔线，不声明内容语义或交互行为。
+sources:
+  - path: packages/prototypes/brutalist/src/card/header.proto.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+  prototypes: [P-BRUTALIST-CARD]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-FEEDBACK-STYLE-0002, C-FEEDBACK-STYLE-0003]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Introduced the direct Brutalist Card Header region.
+tags:
+  - prototype
+  - brutalist
+  - card
+verifies:
+  tests:
+    - T-BRUTALIST-CARD-0001

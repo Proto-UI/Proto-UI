@@ -1,15 +1,12 @@
 ---
 title: 'Lucide 图标库'
-description: '基于 Lucide 的 Proto UI 图标原型库。'
+description: '可检索、按图标加载并可直接复制使用片段的 Lucide 原型图标库。'
 ---
 
-`Lucide` 图标库基于 `lucide-static` 生成图标原型。
+import LucideIconGallery from '@/components/LucideIconGallery.astro';
 
-它遵循 Proto UI 对图标的两种使用形态：
+Proto UI 从 `lucide-static` 生成 Lucide 图标原型。这是该图标库的主要工作页面：可直接检索图标，打开图标卡片查看导入路径，并复制 `asHook` 或内联 `render` 片段。
 
-- 当图标被视作独立交互主体时，使用 `asHook`。
-- 当图标只是附属视觉结构时，使用 `render` 片段嵌入到其他原型模板。
+图标以独立入口按需引入；网格分批渲染，每个 SVG 只在接近视口时加载，不需要为单个图标进入独立文档页。
 
-为了控制体积，每个图标都可以从独立入口按需引入（`@proto.ui/prototypes-lucide/icons/<name>`），不需要一次性加载全量图标。
-
-继续查看[图标列表页](./icons/)，可直接复制每个图标对应的原型代码。
+<LucideIconGallery locale="zh-cn" />

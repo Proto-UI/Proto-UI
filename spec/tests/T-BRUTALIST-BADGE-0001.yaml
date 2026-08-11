@@ -1,0 +1,50 @@
+id: T-BRUTALIST-BADGE-0001
+type: test
+title: Brutalist Badge visual contract tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers direct ownership, passive boundaries, native tones, default restoration, and structural visual grammar.
+cases:
+  - id: T-BRUTALIST-BADGE-0001-CASE-1
+    title: Badge is a direct passive styled-only prototype
+    covers:
+      - P-BRUTALIST-BADGE-PASSIVE-BOUNDARY
+    expectation: p-brutalist-badge-passive-contract
+  - id: T-BRUTALIST-BADGE-0001-CASE-2
+    title: Every public tone selects its paired flat fill and restores the default
+    covers:
+      - P-BRUTALIST-BADGE-TONES
+    expectation: p-brutalist-badge-tone-contract
+  - id: T-BRUTALIST-BADGE-0001-CASE-3
+    title: Border and outline remain common structural grammar
+    covers:
+      - P-BRUTALIST-BADGE-VISUAL-GRAMMAR
+    expectation: p-brutalist-badge-visual-contract
+implementations:
+  - id: prototypes-brutalist-badge-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/badge.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-BADGE-0001-CASE-1
+      - T-BRUTALIST-BADGE-0001-CASE-2
+      - T-BRUTALIST-BADGE-0001-CASE-3
+    exercises:
+      - P-BRUTALIST-BADGE
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-BADGE
+exercises:
+  prototypes:
+    - P-BRUTALIST-BADGE
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added draft Brutalist badge prototype coverage.
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - badge

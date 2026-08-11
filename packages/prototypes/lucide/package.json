@@ -79,8 +79,9 @@
     "proto",
     "ui",
     "prototypes",
-    "icon",
     "lucide",
+    "prototype-library",
+    "icon",
     "svg"
   ],
   "files": [

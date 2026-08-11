@@ -47,6 +47,7 @@ describe('adapter-web-component focus wiring', () => {
     document.body.appendChild(el);
 
     expect(el.tabIndex).toBe(-1);
+    expect(el.hasAttribute('tabindex')).toBe(false);
     expect(document.activeElement).not.toBe(el);
   });
 
@@ -75,6 +76,7 @@ describe('adapter-web-component focus wiring', () => {
     await Promise.resolve();
 
     expect(withButton.tabIndex).toBe(-1);
+    expect(withButton.hasAttribute('tabindex')).toBe(false);
 
     empty.remove();
     withButton.remove();

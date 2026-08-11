@@ -1,0 +1,538 @@
+---
+import PrototypePreviewer from './PrototypePreviewer/PrototypePreviewer.astro';
+
+type Locale = 'en' | 'zh-cn';
+type LibraryId = 'base' | 'shadcn' | 'brutalist';
+
+interface Props {
+  library: LibraryId;
+  locale?: Locale;
+}
+
+type PrototypeEntry = {
+  id: string;
+  name: string;
+  demoId: string;
+  description: string;
+  href?: string;
+};
+
+const { library, locale = 'en' } = Astro.props as Props;
+const isZh = locale === 'zh-cn';
+
+const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
+  base: [
+    {
+      id: 'checkbox',
+      name: 'Checkbox',
+      demoId: 'demo-base-checkbox',
+      description: isZh
+        ? '复选状态与 Indicator 投射。'
+        : 'Checkbox state with an Indicator projection.',
+      href: './checkbox/',
+    },
+    {
+      id: 'dialog',
+      name: 'Dialog',
+      demoId: 'demo-base-dialog',
+      description: isZh
+        ? '模态层、关闭请求与焦点返还。'
+        : 'Modal layering, close requests, and focus return.',
+      href: './dialog/',
+    },
+    {
+      id: 'dropdown-menu',
+      name: 'Dropdown Menu',
+      demoId: 'demo-base-dropdown-menu',
+      description: isZh
+        ? '集合导航、输入查找与提交关闭。'
+        : 'Collection navigation, typeahead, and commit-close behavior.',
+    },
+    {
+      id: 'select',
+      name: 'Select',
+      demoId: 'demo-base-select',
+      description: isZh
+        ? '值选择、列表导航与值展示。'
+        : 'Value selection, list navigation, and value display.',
+      href: './select/',
+    },
+    {
+      id: 'hover-card',
+      name: 'Hover Card',
+      demoId: 'demo-base-hover-card',
+      description: isZh
+        ? '指针与焦点驱动的非模态浮层。'
+        : 'A pointer- and focus-driven non-modal overlay.',
+      href: './hover-card/',
+    },
+    {
+      id: 'tooltip',
+      name: 'Tooltip',
+      demoId: 'demo-base-tooltip',
+      description: isZh
+        ? '延时、暖启窗口与辅助描述协作。'
+        : 'Delay, warm-window, and accessible-description coordination.',
+      href: './tooltip/',
+    },
+    {
+      id: 'transition',
+      name: 'Transition',
+      demoId: 'demo-base-transition-command',
+      description: isZh
+        ? '进入、退出与 presence 生命周期。'
+        : 'Enter, exit, and presence lifecycle semantics.',
+      href: './transition/',
+    },
+    {
+      id: 'live-region',
+      name: 'Live Region',
+      demoId: 'demo-base-live-region',
+      description: isZh
+        ? '受控的 status / alert 播报通道。'
+        : 'Controlled status and alert announcement channels.',
+      href: './live-region/',
+    },
+    {
+      id: 'async-region',
+      name: 'Async Region',
+      demoId: 'demo-base-async-region',
+      description: isZh
+        ? '忙碌状态与异步结果播报。'
+        : 'Busy-state projection and asynchronous result announcements.',
+      href: './async-region/',
+    },
+    {
+      id: 'textarea',
+      name: 'Textarea',
+      demoId: 'demo-base-textarea',
+      description: isZh
+        ? '宿主介导的原生多行文本编辑。'
+        : 'Host-mediated native multiline text editing.',
+      href: './textarea/',
+    },
+  ],
+  shadcn: [
+    {
+      id: 'button',
+      name: 'Button',
+      demoId: 'demo-button-variants',
+      description: isZh
+        ? '常用按钮层级、尺寸与状态。'
+        : 'Familiar button hierarchy, sizes, and states.',
+      href: './button/',
+    },
+    {
+      id: 'toggle',
+      name: 'Toggle',
+      demoId: 'demo-shadcn-toggle',
+      description: isZh
+        ? '适合工具栏的按压式开关。'
+        : 'A pressed-state control suited to toolbars.',
+      href: './toggle/',
+    },
+    {
+      id: 'switch',
+      name: 'Switch',
+      demoId: 'demo-shadcn-switch',
+      description: isZh ? '紧凑的布尔设置控件。' : 'A compact boolean setting control.',
+      href: './switch/',
+    },
+    {
+      id: 'tabs',
+      name: 'Tabs',
+      demoId: 'demo-shadcn-tabs',
+      description: isZh
+        ? '清晰的分组导航与内容面板。'
+        : 'Crisp grouped navigation and content panels.',
+      href: './tabs/',
+    },
+    {
+      id: 'hover-card',
+      name: 'Hover Card',
+      demoId: 'demo-shadcn-hover-card',
+      description: isZh
+        ? '为链接或对象补充上下文。'
+        : 'Supplementary context for links or objects.',
+      href: './hover-card/',
+    },
+    {
+      id: 'dialog',
+      name: 'Dialog',
+      demoId: 'demo-shadcn-dialog',
+      description: isZh
+        ? '带标准内容结构的模态任务面板。'
+        : 'A modal task surface with familiar content structure.',
+    },
+    {
+      id: 'dropdown-menu',
+      name: 'Dropdown Menu',
+      demoId: 'demo-shadcn-dropdown-menu',
+      description: isZh
+        ? '紧凑操作集合与键盘导航。'
+        : 'Compact action collections with keyboard navigation.',
+      href: './dropdown-menu/',
+    },
+    {
+      id: 'select',
+      name: 'Select',
+      demoId: 'demo-shadcn-select',
+      description: isZh
+        ? '熟悉的触发器、值展示与选项面板。'
+        : 'A familiar trigger, value display, and options panel.',
+      href: './select/',
+    },
+  ],
+  brutalist: [
+    {
+      id: 'button',
+      name: 'Button',
+      demoId: 'demo-brutalist-button',
+      description: isZh
+        ? '硬阴影、强边框与高对比操作面。'
+        : 'Hard shadows, strong borders, and high-contrast actions.',
+      href: './components/button/',
+    },
+    {
+      id: 'badge',
+      name: 'Badge',
+      demoId: 'demo-brutalist-badge',
+      description: isZh
+        ? '被动、无角色的高对比标签，提供三种语义色调。'
+        : 'A passive, roleless high-contrast label with three semantic tones.',
+      href: './components/badge/',
+    },
+    {
+      id: 'card',
+      name: 'Card',
+      demoId: 'demo-brutalist-card',
+      description: isZh
+        ? '带硬边结构的四部分被动内容分组表面。'
+        : 'A passive four-part content grouping surface with hard-edged structure.',
+      href: './components/card/',
+    },
+    {
+      id: 'toggle',
+      name: 'Toggle',
+      demoId: 'demo-brutalist-toggle',
+      description: isZh
+        ? '带明确按压感的方角切换器。'
+        : 'A square toggle with an explicit pressed state.',
+      href: './components/toggle/',
+    },
+    {
+      id: 'switch',
+      name: 'Switch',
+      demoId: 'demo-brutalist-switch',
+      description: isZh ? '大胆、直接的布尔状态切换。' : 'A bold, direct boolean state switch.',
+      href: './components/switch/',
+    },
+    {
+      id: 'tabs',
+      name: 'Tabs',
+      demoId: 'demo-brutalist-tabs',
+      description: isZh ? '方角标签与强调色选中状态。' : 'Square tabs with vivid selected states.',
+      href: './components/tabs/',
+    },
+    {
+      id: 'hover-card',
+      name: 'Hover Card',
+      demoId: 'demo-brutalist-hover-card',
+      description: isZh
+        ? '像纸片一样浮起的补充信息层。'
+        : 'A supplementary surface that lifts like a paper card.',
+      href: './components/hover-card/',
+    },
+    {
+      id: 'dialog',
+      name: 'Dialog',
+      demoId: 'demo-brutalist-dialog',
+      description: isZh
+        ? '高对比遮罩与硬边任务面板。'
+        : 'A high-contrast mask and hard-edged task surface.',
+      href: './components/dialog/',
+    },
+    {
+      id: 'dropdown-menu',
+      name: 'Dropdown Menu',
+      demoId: 'demo-brutalist-dropdown-menu',
+      description: isZh
+        ? '直白的操作列表与高亮反馈。'
+        : 'A direct action list with emphatic highlighting.',
+      href: './components/dropdown-menu/',
+    },
+    {
+      id: 'select',
+      name: 'Select',
+      demoId: 'demo-brutalist-select',
+      description: isZh
+        ? '强边框值选择器与选项面板。'
+        : 'A strongly bordered value picker and options panel.',
+      href: './components/select/',
+    },
+    {
+      id: 'separator',
+      name: 'Separator',
+      demoId: 'demo-brutalist-separator',
+      description: isZh
+        ? '作为视觉节拍的明确分割线。'
+        : 'An explicit dividing line used as visual rhythm.',
+      href: './components/separator/',
+    },
+    {
+      id: 'skeleton',
+      name: 'Skeleton',
+      demoId: 'demo-brutalist-skeleton',
+      description: isZh ? '高对比的被动加载占位。' : 'A high-contrast passive loading placeholder.',
+      href: './components/skeleton/',
+    },
+    {
+      id: 'scroll-area',
+      name: 'Scroll Area',
+      demoId: 'demo-brutalist-scroll-area',
+      description: isZh
+        ? '可见的轨道、滑块与原生滚动。'
+        : 'Visible track and thumb over native scrolling.',
+      href: './components/scroll-area/',
+    },
+    {
+      id: 'textarea',
+      name: 'Textarea',
+      demoId: 'demo-brutalist-textarea',
+      description: isZh
+        ? '带方角、硬阴影与原生编辑能力的多行输入。'
+        : 'Native multiline editing with square geometry and a hard shadow.',
+      href: './components/textarea/',
+    },
+  ],
+};
+
+const entries = entriesByLibrary[library];
+const copy = isZh
+  ? {
+      aria: '原型预览索引',
+      count: `${entries.length} 个可预览原型`,
+      lazy: '示例将在接近视口时加载',
+      demo: '基础 Demo',
+      details: '查看详情',
+      jump: '快速跳转',
+    }
+  : {
+      aria: 'Prototype preview index',
+      count: `${entries.length} previewable prototypes`,
+      lazy: 'Demos load as they approach the viewport',
+      demo: 'Basic demo',
+      details: 'View details',
+      jump: 'Quick jump',
+    };
+---
+
+<section class:list={['prototype-library', `prototype-library--${library}`]} aria-label={copy.aria}>
+  <div class="prototype-library__meta">
+    <strong>{copy.count}</strong>
+    <span>{copy.lazy}</span>
+  </div>
+
+  <nav class="prototype-library__jump" aria-label={copy.jump}>
+    {entries.map((entry) => <a href={`#${library}-${entry.id}`}>{entry.name}</a>)}
+  </nav>
+
+  <div class="prototype-library__grid">
+    {
+      entries.map((entry) => (
+        <article class="prototype-card" id={`${library}-${entry.id}`}>
+          <header class="prototype-card__header">
+            <div>
+              <span>{copy.demo}</span>
+              <h2>{entry.name}</h2>
+            </div>
+            {entry.href && (
+              <a href={entry.href} aria-label={`${copy.details}: ${entry.name}`}>
+                {copy.details}
+                <span aria-hidden="true">→</span>
+              </a>
+            )}
+          </header>
+          <p>{entry.description}</p>
+          <div class="prototype-card__demo">
+            <PrototypePreviewer
+              demoId={entry.demoId}
+              initialRuntime="wc"
+              toolbar={false}
+              runtimes={['wc']}
+              codePanel={false}
+              lazy
+            />
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .prototype-library {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .prototype-library__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: 0.75rem 0;
+    border-block: 1px solid var(--color-border);
+    font-size: 0.8rem;
+  }
+
+  .prototype-library__meta strong {
+    color: var(--color-foreground);
+  }
+
+  .prototype-library__meta span {
+    color: var(--color-muted-foreground);
+    text-align: right;
+  }
+
+  .prototype-library__jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .prototype-library__jump a {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  .prototype-library__jump a:hover,
+  .prototype-library__jump a:focus-visible {
+    border-color: var(--color-foreground);
+    color: var(--color-foreground);
+    background: color-mix(in oklab, var(--color-muted) 34%, transparent);
+  }
+
+  .prototype-library__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .prototype-card {
+    min-width: 0;
+    scroll-margin-top: 5rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.9rem;
+    background: var(--sl-color-bg);
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--color-foreground) 6%, transparent);
+  }
+
+  .prototype-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .prototype-card__header > div {
+    display: grid;
+    gap: 0.16rem;
+  }
+
+  .prototype-card__header span {
+    color: var(--color-muted-foreground);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .prototype-card__header h2 {
+    margin: 0;
+    color: var(--color-foreground);
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+
+  .prototype-card__header a {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.25rem;
+    padding-top: 0.1rem;
+    color: var(--color-muted-foreground);
+    font-size: 0.68rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .prototype-card__header a:hover,
+  .prototype-card__header a:focus-visible {
+    color: var(--color-foreground);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .prototype-card > p {
+    min-height: 2.6em;
+    margin: 0.55rem 0 0.85rem;
+    color: var(--color-muted-foreground);
+    font-size: 0.76rem;
+    line-height: 1.5;
+  }
+
+  .prototype-card__demo :global(.proto-previewer) {
+    border-radius: 0.65rem;
+  }
+
+  .prototype-card__demo :global(.proto-previewer__preview) {
+    min-height: 12rem;
+    padding: 1rem;
+  }
+
+  .prototype-card__demo :global(.proto-previewer__preview .host) {
+    min-height: 7rem;
+  }
+
+  .prototype-library--brutalist .prototype-card {
+    border: 2px solid #000;
+    border-radius: 0;
+    background: var(--sl-color-bg);
+    box-shadow: 3px 3px 0 #000;
+  }
+
+  .prototype-library--brutalist .prototype-card__demo {
+    --pui-radius: 0;
+    --pui-background: #f4f1ea;
+    --pui-secondary-background: #ffffff;
+    --pui-foreground: #000000;
+    --pui-border: #000000;
+    --pui-main: #ffd23f;
+    --pui-main-foreground: #000000;
+    --pui-destructive: #ff6b6b;
+    --pui-ring: #000000;
+  }
+
+  @media (max-width: 48rem) {
+    .prototype-library__meta {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .prototype-library__meta span {
+      text-align: left;
+    }
+  }
+</style>

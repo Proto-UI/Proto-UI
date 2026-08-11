@@ -70,6 +70,13 @@ import {
 import { shadcnToggle } from '@proto.ui/prototypes-shadcn/toggle';
 import { separatorRoot } from '@proto.ui/prototypes-base/separator';
 import { textareaRoot } from '@proto.ui/prototypes-base/textarea';
+import { brutalistBadgeRoot } from '@proto.ui/prototypes-brutalist/badge';
+import {
+  brutalistCardContent,
+  brutalistCardFooter,
+  brutalistCardHeader,
+  brutalistCardRoot,
+} from '@proto.ui/prototypes-brutalist/card';
 import { brutalistButton } from '@proto.ui/prototypes-brutalist/button';
 import {
   brutalistDialogClose,
@@ -181,6 +188,11 @@ void [
   shadcnDialogDescription,
   shadcnDialogClose,
   brutalistButton,
+  brutalistBadgeRoot,
+  brutalistCardRoot,
+  brutalistCardHeader,
+  brutalistCardContent,
+  brutalistCardFooter,
   brutalistToggle,
   brutalistSeparatorRoot,
   brutalistSkeletonRoot,
