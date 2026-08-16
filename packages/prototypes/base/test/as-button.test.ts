@@ -5,11 +5,8 @@ import { definePrototype } from '@proto.ui/core';
 import type { RuntimeHost } from '@proto.ui/runtime';
 import { executeWithHost } from '@proto.ui/runtime';
 import type { FocusPort } from '@proto.ui/module-focus';
-import {
-  EVENT_EMIT_CAP,
-  EVENT_GLOBAL_TARGET_CAP,
-  EVENT_ROOT_TARGET_CAP,
-} from '@proto.ui/module-event';
+import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
   AS_TRIGGER_INSTANCE_CAP,
@@ -40,8 +37,8 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
       wiring.attach('event', [
         [EVENT_ROOT_TARGET_CAP, () => rootTarget],
         [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
-        [EVENT_EMIT_CAP, (key: string) => emitted.push(key)],
       ]);
+      wiring.attach('expose-event', [[EXPOSE_EVENT_SINK_CAP, (key: string) => emitted.push(key)]]);
       wiring.attach('as-trigger', [
         [AS_TRIGGER_INSTANCE_CAP, rootTarget],
         [AS_TRIGGER_PARENT_CAP, () => null],

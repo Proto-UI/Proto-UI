@@ -6,11 +6,11 @@ since: 0.1.0
 summary: The standard instance Event module owns setup registration, token identity, runtime dispatch planning, scoped binding lifetime, and the privileged coordination used by runtime and interaction modules.
 statement:
   zh-CN: >-
-    Event module 是 standard Proto UI runtime 固定安装的 instance module。它拥有 setup-time registration、precise token removal、registration diagnostics、runtime binding plan 与 instance-lifetime cleanup；prototype author surface 只通过 runtime 投影为 `def.event.on`、`onGlobal` 与 `off`，callback 的 `run handle` 由 runtime 在 dispatch window 绑定。Privileged port 供 runtime、其它 Module 与特权 asHook 注册内部 listener、bind/unbind、redirect semantic root、执行内部 callback、请求 default-action cancellation 与读取 diagnostics。Adapter 通过 host-neutral scoped Event binding 与独立 Default Action capability 落地宿主交互。当前 package 共置的 Expose Event registry/emit bridge 不改变 Event channel 的所有权，也不得产生普通 `run.event` API。
+    Event module 是 standard Proto UI runtime 固定安装的 instance module。它拥有 setup-time registration、precise token removal、registration diagnostics、runtime binding plan 与 instance-lifetime cleanup；prototype author surface 只通过 runtime 投影为 `def.event.on`、`onGlobal` 与 `off`，callback 的 `run handle` 由 runtime 在 dispatch window 绑定。Privileged port 供 runtime、其它 Module 与特权 asHook 注册内部 listener、bind/unbind、redirect semantic root、执行内部 callback、请求 default-action cancellation 与读取 diagnostics。Adapter 通过 host-neutral scoped Event binding 与独立 Default Action capability 落地宿主交互。Expose Event 已由独立 Module 承载，不属于 Event facade、port、registry 或 host-cap wiring。
 
 
   en: >-
-    The Event module is an instance module installed by the standard Proto UI runtime. It owns setup-time registration, precise token removal, registration diagnostics, runtime binding plans, and instance-lifetime cleanup; the prototype-author surface is projected by the runtime only as `def.event.on`, `onGlobal`, and `off`, while the runtime binds the callback's `run handle` during the dispatch window. Its privileged port lets the runtime, other Modules, and privileged asHooks register internal listeners, bind or unbind, redirect the semantic root, invoke internal callbacks, request default-action cancellation, and read diagnostics. The adapter realizes host interaction through host-neutral scoped Event binding plus the separate Default Action capability. The Expose Event registry and emit bridge currently co-located in the package does not change Event-channel ownership and must not create an ordinary `run.event` API.
+    The Event module is an instance module installed by the standard Proto UI runtime. It owns setup-time registration, precise token removal, registration diagnostics, runtime binding plans, and instance-lifetime cleanup; the prototype-author surface is projected by the runtime only as `def.event.on`, `onGlobal`, and `off`, while the runtime binds the callback's `run handle` during the dispatch window. Its privileged port lets the runtime, other Modules, and privileged asHooks register internal listeners, bind or unbind, redirect the semantic root, invoke internal callbacks, request default-action cancellation, and read diagnostics. The adapter realizes host interaction through host-neutral scoped Event binding plus the separate Default Action capability. Expose Event is now owned by a standalone Module and does not belong to the Event facade, port, registry, or host-capability wiring.
 
 
 criteria:
@@ -44,8 +44,8 @@ criteria:
       en: The privileged port's default-action request must be projected through the separate `HC-DEFAULT-ACTION-0001`, must not require callers to depend on DOM `preventDefault()`, and must not merge default-action control with Event routing or boundary classification.
   - id: M-EVENT-0001-H
     text:
-      zh-CN: 当前 Event package 内的 `ExposeEventFacade` 与 `EXPOSE_EVENT_SINK_CAP` 由 `M-EXPOSE-EVENT-0001` 拥有；它们不属于 Event 信息通路 author facade 或 Event host-cap baseline。Composite `EventFacade` 与 legacy `EVENT_EMIT_CAP` alias 只能作为 physical/source compatibility，不得重新混合语义所有权。
-      en: The `ExposeEventFacade` and `EXPOSE_EVENT_SINK_CAP` currently in the Event package are owned by `M-EXPOSE-EVENT-0001`; they do not belong to the Event information-channel author facade or Event host-cap baseline. The composite `EventFacade` and legacy `EVENT_EMIT_CAP` alias exist only for physical or source compatibility and must not merge semantic ownership again.
+      zh-CN: '`EventFacade` 必须只等于 Event-channel-owned `EventChannelFacade`。Event package 对 `ExposeEventFacade`、`EXPOSE_EVENT_SINK_CAP` 与 legacy `EVENT_EMIT_CAP` 的导出只能是带 deprecation 的 source re-export；Adapter 必须把 sink 接到 `expose-event`，旧 `event` wiring 必须给出迁移诊断而不能假装构成 Expose Event 支持。'
+      en: '`EventFacade` must contain only the Event-channel-owned `EventChannelFacade`. Event-package exports of `ExposeEventFacade`, `EXPOSE_EVENT_SINK_CAP`, and legacy `EVENT_EMIT_CAP` may exist only as deprecated source re-exports; Adapters must wire the sink to `expose-event`, and legacy `event` wiring must produce a migration diagnostic rather than masquerade as Expose Event support.'
 satisfies:
   contracts:
     - C-EVENT-0001
@@ -84,6 +84,7 @@ references:
 sources:
   - path: internal/records/2026-08-13-module-host-cap-adapter-catalog-route.zh-CN.md
   - path: internal/records/2026-08-14-event-module-host-cap-adapter-audit.zh-CN.md
+  - path: internal/records/2026-08-16-expose-event-package-extraction.zh-CN.md
   - path: internal/contracts/event/event.v0.md
   - path: packages/modules/event/src/create.ts
   - path: packages/modules/event/src/types.ts
@@ -111,6 +112,9 @@ openQuestions:
       en: The current Runtime installs the Event module and every official Web profile supports it; because no host cap is needed without registrations, package installation and an actual host requirement are not equivalent.
     blocks: [configurable-runtime-module-selection, adapter-module-omission-diagnostics]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Removed the Expose Event implementation and composite facade from Event while retaining only deprecated source re-exports for migration.
   - version: 0.2.0-rc.7
     change: revised
     summary: Assigned the co-located Expose Event facade and canonical signal sink to M-EXPOSE-EVENT-0001 while retaining source-compatible package aliases.

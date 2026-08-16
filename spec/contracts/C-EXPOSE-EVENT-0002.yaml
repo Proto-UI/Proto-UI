@@ -49,15 +49,18 @@ sources:
     sections:
       - ExposeEventSpec
       - Runtime Semantics
-  - path: packages/modules/event/src/types.ts
+  - path: packages/modules/expose-event/src/types.ts
     sections:
-      - EventFacade
+      - ExposeEventFacade
   - path: packages/runtime/test/contract/expose-event.v0.contract.test.ts
 dependsOn:
   contracts:
     - C-EXPOSE-EVENT-0001
     - C-CORE-VALUE-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Moved the payload facade evidence to the standalone Expose Event package.
   - version: 0.1.0
     change: introduced
     summary: Captured the minimal v0 payload semantics and the open portability boundary.

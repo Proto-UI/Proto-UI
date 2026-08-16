@@ -223,6 +223,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -311,6 +314,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -390,6 +396,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -565,6 +574,9 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../expose-event
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
@@ -577,6 +589,21 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+
+  packages/modules/expose-event:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-expose':
+        specifier: workspace:*
+        version: link:../expose
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
 
   packages/modules/expose-state:
     dependencies:
@@ -875,6 +902,9 @@ importers:
       '@proto.ui/module-expose':
         specifier: workspace:*
         version: link:../../modules/expose
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-focus':
         specifier: workspace:*
         version: link:../../modules/focus
@@ -909,6 +939,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
@@ -947,6 +980,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
@@ -989,6 +1025,9 @@ importers:
       '@proto.ui/module-expose':
         specifier: workspace:*
         version: link:../modules/expose
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../modules/expose-state

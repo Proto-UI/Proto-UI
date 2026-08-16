@@ -1,5 +1,5 @@
 {
-  "name": "@proto.ui/module-event",
+  "name": "@proto.ui/module-expose-event",
   "version": "0.3.0-alpha.0",
   "private": false,
   "type": "module",
@@ -7,7 +7,7 @@
     "@proto.ui/core": "workspace:*",
     "@proto.ui/types": "workspace:*",
     "@proto.ui/module-base": "workspace:*",
-    "@proto.ui/module-expose-event": "workspace:*"
+    "@proto.ui/module-expose": "workspace:*"
   },
   "exports": {
     ".": {
@@ -16,13 +16,13 @@
       "default": "./dist/index.js"
     }
   },
-  "description": "Proto UI module that provides event capability for adapters.",
+  "description": "Proto UI module that provides outward signal expose capability for adapters.",
   "license": "MIT",
-  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/event",
+  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/expose-event",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Proto-UI/Proto-UI.git",
-    "directory": "packages/modules/event"
+    "directory": "packages/modules/expose-event"
   },
   "bugs": {
     "url": "https://github.com/Proto-UI/Proto-UI/issues"
@@ -35,14 +35,16 @@
     "proto",
     "ui",
     "module",
-    "event"
+    "expose",
+    "event",
+    "signal"
   ],
   "files": [
     "dist/",
     "README.md"
   ],
   "scripts": {
-    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/module-event",
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/module-expose-event",
     "prepack": "pnpm run build"
   }
 }

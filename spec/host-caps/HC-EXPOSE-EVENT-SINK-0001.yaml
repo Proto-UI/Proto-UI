@@ -47,12 +47,16 @@ verifies:
     - T-EXPOSE-EVENT-0002
 sources:
   - path: internal/records/2026-08-14-expose-event-module-adapter-audit.zh-CN.md
-  - path: packages/modules/event/src/caps.ts
-  - path: packages/modules/event/src/impl.ts
+  - path: internal/records/2026-08-16-expose-event-package-extraction.zh-CN.md
+  - path: packages/modules/expose-event/src/caps.ts
+  - path: packages/modules/expose-event/src/impl.ts
   - path: packages/adapters/react/src/runtime/modules.ts
   - path: packages/adapters/vue/src/runtime/modules.ts
   - path: packages/adapters/web-component/src/runtime/modules.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Moved the canonical sink and its consumer into the standalone Expose Event package while preserving the token identity.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged the validated outward-signal emission tuple, current-sink semantics, host-neutral direction, and profile-owned translation boundary.

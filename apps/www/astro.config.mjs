@@ -749,6 +749,7 @@ export default defineConfig({
         '@proto.ui/module-props',
         '@proto.ui/module-event',
         '@proto.ui/module-expose',
+        '@proto.ui/module-expose-event',
         '@proto.ui/module-expose-state-web',
         '@proto.ui/module-rule-expose-state-web',
         '@proto.ui/module-rule-meta',

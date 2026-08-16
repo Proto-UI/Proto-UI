@@ -5,7 +5,7 @@ import type { RuntimeHost } from '@proto.ui/runtime';
 import { executeWithHost } from '@proto.ui/runtime';
 import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
 import { PRESENCE_HOST_BRIDGE_CAP } from '@proto.ui/module-presence';
-import { EVENT_EMIT_CAP } from '@proto.ui/module-event';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
 import { asOverlay } from '@proto.ui/hooks';
 import { OVERLAY_GLOBAL_MOUNT_CAP, OVERLAY_MODAL_CAP } from '@proto.ui/module-overlay';
@@ -77,8 +77,8 @@ function createHost(
       wiring.attach('expose-state', [
         [EXPOSE_STATE_SET_EXPOSES_CAP, (next: Record<string, unknown>) => (exposes = next as any)],
       ]);
-      wiring.attach('event', [
-        [EVENT_EMIT_CAP, (key: string, payload: unknown) => emitted.push({ key, payload })],
+      wiring.attach('expose-event', [
+        [EXPOSE_EVENT_SINK_CAP, (key: string, payload: unknown) => emitted.push({ key, payload })],
       ]);
       wiring.attach('rule-meta', [
         [
