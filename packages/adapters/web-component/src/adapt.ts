@@ -351,6 +351,25 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         currentEventGate = eventGate;
         currentRouter = router;
         this._applier = applier;
+        let disposeFocusBridge: (() => void) | null = null;
+        if (this._textControlTarget) {
+          // Native focus/blur do not bubble from the physical text control, so
+          // project them onto the custom-element boundary where host-bound
+          // focus listeners are attached.
+          const control = this._textControlTarget;
+          const onFocusIn = (e: FocusEvent) => {
+            if (e.target === control) thisEl.dispatchEvent(new FocusEvent('focus'));
+          };
+          const onFocusOut = (e: FocusEvent) => {
+            if (e.target === control) thisEl.dispatchEvent(new FocusEvent('blur'));
+          };
+          thisEl.addEventListener('focusin', onFocusIn);
+          thisEl.addEventListener('focusout', onFocusOut);
+          disposeFocusBridge = () => {
+            thisEl.removeEventListener('focusin', onFocusIn);
+            thisEl.removeEventListener('focusout', onFocusOut);
+          };
+        }
 
         let disposed = false;
         const disposeView = () => {
@@ -360,6 +379,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           eventGate.dispose();
           unbindLogicalEventTarget(this._instanceToken, router.rootTarget);
           router.dispose();
+          disposeFocusBridge?.();
+          disposeFocusBridge = null;
           applier.clear();
           releaseRenderedChildren();
           if (currentEventGate === eventGate) currentEventGate = null;
