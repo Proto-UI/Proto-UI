@@ -45,6 +45,7 @@ sources:
   - path: internal/releases/0.3.0-alpha.0/release-notes.zh-CN.md
   - path: internal/records/2026-08-16-0.3.0-alpha.0-release-train.zh-CN.md
   - path: internal/records/2026-08-16-expose-event-package-extraction.zh-CN.md
+  - path: internal/records/2026-08-16-expose-event-npm-identity-bootstrap.zh-CN.md
 openQuestions: []
 revisions:
   - version: 0.3.0-alpha.0

@@ -18,7 +18,7 @@ Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution 
 - Aligns the current 41 public packages under the exact `0.3.0-alpha.0` ecosystem identity.
 - Gives 0.3 contributions an exact declared V-entity version while keeping each feature or package change independently reviewable.
 - Keeps future public package identities and their registry bootstrap work in the implementation PRs that introduce them.
-- Keeps publication blocked until the `@proto.ui/module-expose-event` npm identity is bootstrapped and configured for the protected workflow.
+- Completes the `@proto.ui/module-expose-event` npm identity bootstrap and Trusted Publisher binding ahead of release; its deprecated placeholder is not release evidence.
 
 ## Publication status
 

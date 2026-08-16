@@ -18,7 +18,7 @@ Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。�
 - 将当前 41 个公开 package 对齐到精确的 `0.3.0-alpha.0` 生态身份。
 - 为 0.3 contribution 提供已声明的精确 V-entity version，同时继续让每个 feature 或 package 变化独立接受评审。
 - 未来新增公开 package 的 identity 与 registry bootstrap 仍由引入它们的实现 PR 负责。
-- 在 `@proto.ui/module-expose-event` npm identity 完成 bootstrap 并配置受保护 workflow 前，真实发布保持 blocked。
+- 已提前完成 `@proto.ui/module-expose-event` npm identity bootstrap 与 Trusted Publisher 绑定；其 deprecated placeholder 不构成 release evidence。
 
 ## 发布状态
 
