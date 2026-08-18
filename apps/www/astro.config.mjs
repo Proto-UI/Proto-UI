@@ -67,6 +67,10 @@ const inProgressBadge = {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.proto-ui.com',
+  redirects: {
+    '/en/prototypes/shadcn/dialog': '/en/ui-libraries/shadcn/dialog/',
+    '/zh-cn/prototypes/shadcn/dialog': '/zh-cn/ui-libraries/shadcn/dialog/',
+  },
   integrations: [
     starlight({
       title: 'Proto UI',
@@ -330,6 +334,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/button',
                 },
                 {
+                  label: 'Dialog',
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/shadcn/dialog',
+                },
+                {
                   label: 'Dropdown Menu',
                   translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
                   slug: 'ui-libraries/shadcn/dropdown-menu',
@@ -338,6 +347,11 @@ export default defineConfig({
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/shadcn/hover-card',
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/shadcn/select',
                 },
                 {
                   label: 'Switch',
@@ -350,14 +364,14 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/tabs',
                 },
                 {
-                  label: 'Toggle',
-                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
-                  slug: 'ui-libraries/shadcn/toggle',
-                },
-                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/shadcn/textarea',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/shadcn/toggle',
                 },
               ],
             },
