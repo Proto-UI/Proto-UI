@@ -1,0 +1,43 @@
+---
+title: 'Dropdown Menu'
+description: 'Base Dropdown Menu action-menu ownership, anatomy, evidence, and boundaries.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Dropdown Menu is a compound action-menu opened by a Trigger. Root owns visibility, request arbitration, collection order, entry policy, and shared facts; transient active navigation never becomes persistent selection.
+
+<PrototypePreviewer
+  demoId="demo-base-dropdown-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family and request ownership
+
+The canonical family contains one Root, at most one Trigger and Content, and up to 100 Items. All visibility changes—methods, Trigger activation, dismissal, and Item commit—enter Root's `openChange` request channel.
+
+Root accepts `open`, `defaultOpen`, `disabled`, `closeOnItemCommit`, `openEntry`, and `openEntryValue`. It exposes open state, collection facts, and `openDropdown()`, `close()`, `toggle()`, and `requestOpen()`. Controlled mode retains owner-provided `open` until new input arrives.
+
+Content composes overlay, transition, collection navigation, typeahead, and anchor positioning. Item accepts `value`, `textValue`, `disabled`, and `closeOnCommit`; it exposes active/interaction facts and emits `select`. Closing clears transient active state, so reopening follows the new entry policy instead of restoring a false “selection.”
+
+## Accessibility boundary
+
+This family represents actions or functions opened by a button. It must not disguise ordinary navigation, arbitrary forms, or persistent selection as a menu. Group, Label, Separator, Checkbox Item, Radio Item, and Submenu are not current Base guarantees.
+
+## 0.2 delivery and evidence
+
+The stable 0.2.0 package exports `@proto.ui/prototypes-base/dropdown`. The CLI component ID is `base-dropdown` and generates Root, Trigger, Content, and Item. `T-BASE-DROPDOWN-MENU-0001` maps the family criteria to `packages/prototypes/base/test/dropdown.test.ts`; the preview runs through the Web Component, React, and Vue adapters.
+
+## Lifecycle
+
+`P-BASE-DROPDOWN-MENU` and its Trigger, Content, and Item entities are **draft**. Published package availability does not promote them to active guarantees.
+
+## References
+
+- [P-BASE-DROPDOWN-MENU](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU.yaml)
+- Parts: [Trigger](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-TRIGGER.yaml), [Content](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-CONTENT.yaml), [Item](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-ITEM.yaml)
+- [Dropdown source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/dropdown)
+- [Dropdown evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/dropdown.test.ts)
+- Styled projection: [Brutalist Dropdown Menu](/en/ui-libraries/brutalist/components/dropdown-menu/)

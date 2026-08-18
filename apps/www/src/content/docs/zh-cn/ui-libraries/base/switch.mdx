@@ -1,0 +1,46 @@
+---
+title: 'Switch'
+description: 'Base Switch 的 Root-owned on/off 语义、anatomy、证据与边界。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Switch 是 on/off value control。Root 拥有持久 checked value 与 activation route；Thumb 是可选的 same-domain indicator，不会成为第二个 input target。
+
+<PrototypePreviewer
+  demoId="demo-base-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family 与 ownership
+
+Cataloged family 包含：
+
+- `base-switch-root`（`1..1`）：semantic owner、value owner、focus 与 activation target；
+- `base-switch-thumb`（`0..*`）：消费 Root context 的 presentational indicator。
+
+Root 与 Thumb 连同 `asSwitchRoot()`、`asSwitchThumb()` 一起由 `@proto.ui/prototypes-base/switch` 导出。Root 接受 `checked`、`defaultChecked`、`disabled`，expose checked 与交互事实，提供 `focusSelf()`，并发出 `checkedChange`。
+
+受控模式在更新 input 到达前保持 owner 提供的 `checked` fact；非受控 activation 会在本地提交下一个 checked value。Switch 不包含 mixed/indeterminate state；需要该状态时应使用 Checkbox 边界。
+
+## Accessibility 边界
+
+Root 在唯一可聚焦 control 上投射 `switch` role 与 checked state。Thumb 是 presentational part：它不拥有 activation、value、focus target 或独立 accessibility control 语义。Base 不规定 track geometry、motion、color 或 variant。
+
+## 0.2 交付与证据
+
+稳定版 0.2.0 package 导出了 Switch family，CLI registry 通过 `base-switch` 提供 Root 与 Thumb。`T-BASE-SWITCH-0001` 把 Root criteria 映射到 `packages/prototypes/base/test/switch.test.ts`；本页可直接比较三个 Web Adapter 的投射。
+
+## Lifecycle
+
+`P-BASE-SWITCH` 与 `P-BASE-SWITCH-THUMB` 当前都是 **draft**。它们出现在稳定 package 中是 release evidence，不是 lifecycle promotion。
+
+## 参考
+
+- [P-BASE-SWITCH](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SWITCH.yaml)
+- [P-BASE-SWITCH-THUMB](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SWITCH-THUMB.yaml)
+- [Switch source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/switch)
+- [Switch evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/switch.test.ts)
+- 风格化投射：[Shadcn Switch](/zh-cn/ui-libraries/shadcn/switch/) 与 [Brutalist Switch](/zh-cn/ui-libraries/brutalist/components/switch/)

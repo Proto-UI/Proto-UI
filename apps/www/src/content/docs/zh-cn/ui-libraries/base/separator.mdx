@@ -1,0 +1,43 @@
+---
+title: 'Separator'
+description: 'Base Separator 的 orientation 与无交互 accessibility 语义。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Separator 是用于 horizontal/vertical separation 的 contentless、non-interactive boundary。它拥有 orientation 与 decorative 状态；layout、color、thickness 与 visual rhythm 属于设计语言。
+
+<PrototypePreviewer
+  demoId="demo-base-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## 公开表面
+
+`@proto.ui/prototypes-base/separator` 导出 `separatorRoot` 与 `asSeparatorRoot()`。当前 props 是：
+
+- `orientation?: 'horizontal' | 'vertical'`，默认 `horizontal`；
+- `decorative?: boolean`，默认 `true`。
+
+Root expose `orientation` 与 `decorative` state。它刻意不提供 focus、tab stop、event、command、activation 或 mutable-value channel；renderer 也是 contentless 的，避免 decorative semantics 意外隐藏 authored descendants。
+
+## Accessibility 边界
+
+Decorative mode 会从 accessibility tree 隐藏，既不输出 `separator` role，也不输出 orientation state。Semantic mode 投射 `role="separator"` 和对应 orientation。Divider 是否对辅助技术有意义，是 authoring decision，不是 styling side effect。
+
+## 0.2 交付与证据
+
+稳定版 0.2.0 package 导出了 Separator subpath，CLI registry 提供 `base-separator`。`T-BASE-SEPARATOR-0001` 把 protocol 映射到 `packages/prototypes/base/test/separator.test.ts`；Preview 通过三个 Web Adapter 验证 decorative 与 semantic cases。
+
+## Lifecycle
+
+`P-BASE-SEPARATOR` 当前是 **draft**。它的小型 surface 已有完整证据，但尚未提升为 active protocol guarantee。
+
+## 参考
+
+- [P-BASE-SEPARATOR](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SEPARATOR.yaml)
+- [Separator source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/separator)
+- [Separator evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/separator.test.ts)
+- 风格化投射：[Brutalist Separator](/zh-cn/ui-libraries/brutalist/components/separator/)
