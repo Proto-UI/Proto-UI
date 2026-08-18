@@ -1,53 +1,67 @@
 ---
 title: '规范导读'
-desp: '如何阅读规范'
-description: '如何阅读规范'
+desp: 'Proto UI 实体目录的权威性、生命周期、关系与阅读路径'
+description: 'Proto UI 实体目录的权威性、生命周期、关系与阅读路径'
 ---
 
-## 这篇文章要回答什么？
+Specifications 是 Proto UI 机器治理实体目录的公开阅读指南。它帮助你判断“项目当前保证什么”、把规则追溯到证据，并区分稳定契约与仅作为当前方向登记的工作。
 
-- `Specifications` 这一章在整个文档站里承担什么职责。
-- 规范文与白皮书、工程文档分别有什么分工。
-- 这一章应该如何阅读、如何查阅、如何引用。
+目录有意保持不完整。一个实体已经存在，不代表它已经稳定；一个实体尚未出现，也不代表实现中不存在相关行为。
 
-## 这一章不负责什么？
+## 权威顺序
 
-写作提示：
+当不同来源出现冲突时，按以下顺序处理：
 
-- 说明它不承担项目动机论证，那是 `Whitepaper` 的职责。
-- 说明它不承担工程实现与 API 教程，那是 `Engineering` 的职责。
-- 说明它也不是新读者的 onboarding 入口，那是 `Start Here` 的职责。
+1. `spec/**` 中适用的实体是权威来源。
+2. 内部 contract prose 可以补充尚未被目录登记的空白，但不能覆盖已有实体。
+3. 工程记录保存观察、备选方案与阶段性方向，不具有规范性。
+4. 实现与测试是当前行为的证据。它们与实体不一致时，应调查 drift，而不是默认契约已经改变。
+5. 本站和 package README 是面向读者的投影；发生漂移时应修正投影。
 
-## 这一章负责什么？
+本章负责解释目录，不建立第二套事实来源。评审或实现需要精确引用时，请使用 entity ID 与 criterion ID。
 
-写作提示：
+## 九类实体
 
-- 说明它定义的是 Proto UI 的正式语义与契约边界。
-- 说明它需要同时服务原型作者与适配器作者。
-- 说明它更适合被查阅、引用与裁决歧义，而不是连续读完。
+| 前缀  | 实体            | 职责                                             |
+| ----- | --------------- | ------------------------------------------------ |
+| `C-`  | Contract        | 跨领域协议规则与验收条件                         |
+| `P-`  | Prototype       | 官方原型或原型部件的身份与行为                   |
+| `M-`  | Module          | 语义模块身份及其满足的 contract                  |
+| `A-`  | Adapter         | 官方 Adapter profile、目标运行时与已审计支持决策 |
+| `D-`  | Decision        | 已稳定的设计或治理选择                           |
+| `HC-` | Host capability | 宿主应提供或被投影出的能力                       |
+| `T-`  | Test            | 一致性案例与可执行证据映射                       |
+| `V-`  | Version         | 发行身份、channel、package policy 与发布证据     |
+| `K-`  | Knowledge       | 共享术语与解释模型                               |
 
-## 建议如何阅读这一章？
+实体通过带类型的关系组成图。`satisfies`、`verifies`、`supports`、`provides`、`omits` 等关系把规则、所有权与证据连接起来。尤其对 Adapter profile 而言，一个 Module 同时不在 `supports` 和 `omits` 中，只表示它**尚未被目录审计**，不能据此判断支持或不支持。
 
-写作提示：
+## 生命周期不等于发行版本
 
-- 给首次进入规范区的读者一个建议顺序，例如先读 `Core`，再按能力逐项阅读。
-- 告诉读者每篇规范文前半适合顺读，后半适合按需查阅。
-- 告诉读者当问题涉及“为什么要这样设计”时，应回到 `Whitepaper`。
+每个实体同时声明 `since` 与生命周期状态：
 
-## 每篇规范文建议使用统一结构
+| 状态         | 含义                                                           |
+| ------------ | -------------------------------------------------------------- |
+| `active`     | 当前适用的保证                                                 |
+| `draft`      | 已登记的当前方向，但不是稳定公开保证                           |
+| `deprecated` | 为兼容或迁移保留；需继续阅读 `deprecatedSince` 与 `replacedBy` |
+| `removed`    | 从 `removedSince` 起不再可用，只保留历史                       |
 
-写作提示：
+不要把三种不同的“当前版本”混在一起：
 
-- 摘要：这项规范定义什么，解决什么语义问题。
-- 术语：本篇使用的核心术语。
-- 对原型作者意味着什么。
-- 对适配器作者意味着什么。
-- 正式语义。
-- 有效行为 / 无效行为 / 未定义行为。
-- 与其他规范的关系。
+- `V-PROTO-UI-0008` 记录已经发布且不可变的 **0.2.0 stable** 生态快照。
+- checkout 中的目录是当前工作区投影，可以包含此后的 draft 工作。
+- 在本文编写时，`V-PROTO-UI-0009` 描述的是 **draft 0.3.0-alpha.0** release train，并不构成已经发布的证据。
 
-## 这篇要把读者带到哪里？
+一个 package 已随 0.2.0 发布，不会自动把相关实体都变为 `active`；实体生命周期与发行证据必须分别阅读。
 
-写作提示：
+## 建议阅读路径
 
-- 把读者带到 `Core`，作为具体规范阅读的起点。
+先读[核心规范](/zh-cn/specifications/core/)，理解可移植边界与作者执行时期，再按问题所属能力继续：
+
+- [生命周期](/zh-cn/specifications/lifecycle/)、[Template](/zh-cn/specifications/template/) 与 [Props](/zh-cn/specifications/props/)
+- [Event](/zh-cn/specifications/event/)、[Expose](/zh-cn/specifications/expose/) 与 [State](/zh-cn/specifications/state/)
+- [Context](/zh-cn/specifications/context/)、[Anatomy](/zh-cn/specifications/anatomy/) 与 [Feedback](/zh-cn/specifications/feedback/)
+- [asHook](/zh-cn/specifications/as-hook/) 与 [Rule](/zh-cn/specifications/rule/)
+
+需要精确裁决时，从页面中点名的实体继续追踪 criteria、relations、sources 与 `T-*` 证据。需要理解设计动机时回到 Whitepaper；需要了解实现机制时前往 Engineering 或 Reference。
