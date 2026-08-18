@@ -180,8 +180,11 @@ jobs:
       - name: Install
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
 
-      - name: Prototype catalog gate and tests
-        run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s test
+      - name: Public documentation gate and repository tests
+        run: |
+          corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:public-docs
+          corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:public-docs
+          corepack pnpm@"${PROTO_PNPM_VERSION}" -s test
 
   release-scan:
     runs-on: ubuntu-latest
