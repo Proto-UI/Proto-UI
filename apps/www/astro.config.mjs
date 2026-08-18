@@ -520,7 +520,6 @@ export default defineConfig({
               label: 'Runtime Architecture',
               translations: { en: 'Runtime Architecture', 'zh-CN': 'Runtime 架构' },
               slug: 'build/runtime-architecture',
-              badge: inProgressBadge,
             },
             {
               label: 'Adapter Guide',
@@ -532,25 +531,21 @@ export default defineConfig({
               label: 'Compiler Guide',
               translations: { en: 'Compiler Guide', 'zh-CN': 'Compiler 指南' },
               slug: 'build/compiler-guide',
-              badge: inProgressBadge,
             },
             {
               label: 'Host Caps',
               translations: { en: 'Host Caps', 'zh-CN': 'Host Caps' },
               slug: 'build/host-caps',
-              badge: inProgressBadge,
             },
             {
               label: 'Module & Extension Architecture',
               translations: { en: 'Module & Extension Architecture', 'zh-CN': '模块与扩展架构' },
               slug: 'build/module-extension-architecture',
-              badge: inProgressBadge,
             },
             {
               label: 'Contracts & Tests',
               translations: { en: 'Contracts & Tests', 'zh-CN': '契约与测试' },
               slug: 'build/contracts-and-tests',
-              badge: inProgressBadge,
             },
             {
               label: 'Contribute',
