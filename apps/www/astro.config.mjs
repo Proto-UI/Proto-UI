@@ -567,13 +567,11 @@ export default defineConfig({
               label: 'Introduction',
               translations: { en: 'Introduction', 'zh-CN': '规范导读' },
               slug: 'specifications/introduction',
-              badge: inProgressBadge,
             },
             {
               label: 'Core',
               translations: { en: 'Core', 'zh-CN': '核心' },
               slug: 'specifications/core',
-              badge: inProgressBadge,
             },
             {
               label: 'Lifecycle',
@@ -653,13 +651,11 @@ export default defineConfig({
               label: 'Prototype API',
               translations: { en: 'Prototype API', 'zh-CN': 'Prototype API' },
               slug: 'reference/prototype-api',
-              badge: inProgressBadge,
             },
             {
               label: 'Compatibility',
               translations: { en: 'Compatibility', 'zh-CN': '兼容性' },
               slug: 'reference/compatibility',
-              badge: inProgressBadge,
             },
           ],
         },
