@@ -9,7 +9,13 @@ Base prescribes no default visual language. It provides testable interaction sem
 
 The Base entities currently remain in the draft catalog lifecycle. These previews describe the current official working surface, not a frozen stable API guarantee.
 
-For interactive families, the Base prototype should stop at semantics that are broadly reusable. For dropdown-menu, that boundary is:
+## Released 0.2 family inventory
+
+The stable 0.2.0 package exports 16 intentionally documented component families: Button, Toggle, Switch, Tabs, Checkbox, Dialog, Dropdown Menu, Select, Hover Card, Tooltip, Transition, Separator, Scroll Area, Textarea, Live Region, and Async Region. Non-component `behaviors` and `tools` exports are library utilities and do not require component detail routes.
+
+Package exports and the CLI registry are related but not identical inventories. The CLI calls the package's `dropdown` family `base-dropdown`; its `base-tabs` facade currently omits the optional Indicator authoring surface; and it has no `base-scroll-area` facade, while exposing the complete `brutalist-scroll-area` projection. Those differences are stated on the affected detail pages instead of being hidden or treated as missing protocols.
+
+For interactive families, the Base prototype should stop at semantics that are broadly reusable. For Dropdown Menu, that boundary is:
 
 - overlay open/close coordination
 - collection ordering and item snapshots
