@@ -36,6 +36,7 @@ Execute one eligible transition in Proto UI's autonomous-maintenance protocol. K
 
 - Record whether the verified finding is worth pursuing separately from whether a proposed behavior is desirable.
 - Require explicit human semantic acceptance before changing a draft or active guarantee.
+- Before asking for either decision, present one concentrated human decision packet that states the verified fact, recommended disposition, exact semantic or remediation scope, explicit exclusions, material residual risks, what approval authorizes next, and what it does not authorize.
 - If the decision is absent, stop with the smallest concrete semantic question. This pause is required by the Phase 0 protocol.
 
 ### Remediate
@@ -82,4 +83,5 @@ Return:
 - commands and evidence results;
 - remaining uncertainty and residual risks;
 - the next eligible transition;
-- the exact human decision required, or state that none is required.
+- the exact human decision required, or state that none is required;
+- at a human gate, one consolidated approval summary rather than decision-relevant facts scattered across progress updates.

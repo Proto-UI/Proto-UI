@@ -77,6 +77,10 @@ Stop after reporting at most three documentation-projection findings that surviv
 - Verifier classification: confirmed (`0.99` confidence)
 - Verifier result: both rendered language pages flatten the active state-specific fallback order; active authority, implementation, and focused evidence preserve the correct distinction.
 - Corrected scope: the two public `C-PROPS-0009` previews, plus a separately identified stale PropsKernel comment; no active semantic, runtime, test, or generic preview-component change is indicated.
+- Human finding disposition: accepted
+- Human semantic direction: preserve active `C-PROPS-0009`; correct only the bilingual public projection and directly related stale source comment.
+- Authorization boundary: remediation may prepare and implement that bounded change; commit, merge, publication, and release remain separately gated.
+- Next eligible transition: create the remediation review packet before editing the public projection or source comment.
 - Observer-created repository changes: none
 - Validation: Agent projection generated from 529 entities, prototype catalog passed, and 4 focused files with 36 tests passed in an isolated temporary checkout.
 - Environment limit: the Observer's successful reproduction used Node 20.19.4 rather than the repository's Node 22 CI baseline.

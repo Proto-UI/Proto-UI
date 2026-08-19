@@ -50,6 +50,21 @@ The run finishes when it has either:
 7. Promote only accepted durable observations to a dated file under `internal/records/**`, an Issue, or the normal spec/test workflow.
 8. Confirm the final tracked diff contains only intentionally authored experiment infrastructure, not Observer mutations.
 
+## Human decision packets
+
+When a run reaches a human finding, semantic, or integration gate, the controller must collect decision-relevant material into one concise approval packet. Progress updates and linked evidence may support the packet, but the maintainer must not need to reconstruct the requested decision from them.
+
+The packet must state:
+
+- the verified fact and confidence;
+- the recommended decision;
+- the exact scope that approval would authorize;
+- explicit exclusions and material residual risks;
+- the next automated stage after approval;
+- actions that remain separately gated, especially commit, merge, publication, and release.
+
+Keep finding disposition, semantic direction, and integration authorization distinguishable even when the maintainer chooses to approve more than one of them in a single reply.
+
 ## Remediation review gate
 
 The Observer and Verifier remain read-only. Remediation has two human gates with automated implementation completion between them:
