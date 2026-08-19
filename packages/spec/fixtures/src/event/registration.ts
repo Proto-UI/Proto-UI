@@ -7,6 +7,7 @@ export type EventRegistrationExpectation =
   | 'no-registration-dedup'
   | 'token-precise-removal'
   | 'cleanup-and-rebind'
+  | 'failed-target-preflight'
   | 'default-action-cancel-request';
 
 export type EventRegistrationCase = {
@@ -98,6 +99,15 @@ export const EVENT_REGISTRATION_CASES = [
     eventType: 'host:click',
     scope: 'root',
     expectation: 'cleanup-and-rebind',
+  },
+  {
+    id: 'event-failed-target-preflight',
+    title: 'failed target preflight adds no listener and permits explicit retry',
+    specCase: 'T-EVENT-0001-CASE-BIND-TARGET-PREFLIGHT',
+    covers: ['C-EVENT-0007-F'],
+    eventType: 'host:click',
+    scope: 'root',
+    expectation: 'failed-target-preflight',
   },
   {
     id: 'event-default-action-control',

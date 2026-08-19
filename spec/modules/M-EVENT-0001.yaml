@@ -3,7 +3,7 @@ type: module
 title: Event module
 status: draft
 since: 0.1.0
-summary: The standard instance Event module owns setup registration, token identity, runtime dispatch planning, scoped binding lifetime, and the privileged coordination used by runtime and interaction modules.
+summary: The standard instance Event module owns setup registration, token identity, runtime dispatch planning, target-preflighted scoped binding lifetime, and the privileged coordination used by runtime and interaction modules.
 statement:
   zh-CN: >-
     Event module 是 standard Proto UI runtime 固定安装的 instance module。它拥有 setup-time registration、precise token removal、registration diagnostics、runtime binding plan 与 instance-lifetime cleanup；prototype author surface 只通过 runtime 投影为 `def.event.on`、`onGlobal` 与 `off`，callback 的 `run handle` 由 runtime 在 dispatch window 绑定。Privileged port 供 runtime、其它 Module 与特权 asHook 注册内部 listener、bind/unbind、redirect semantic root、执行内部 callback、请求 default-action cancellation 与读取 diagnostics。Adapter 通过 host-neutral scoped Event binding 与独立 Default Action capability 落地宿主交互。当前 package 共置的 Expose Event registry/emit bridge 不改变 Event channel 的所有权，也不得产生普通 `run.event` API。
@@ -46,6 +46,10 @@ criteria:
     text:
       zh-CN: 当前 Event package 内的 `ExposeEventFacade` 与 `EXPOSE_EVENT_SINK_CAP` 由 `M-EXPOSE-EVENT-0001` 拥有；它们不属于 Event 信息通路 author facade 或 Event host-cap baseline。Composite `EventFacade` 与 legacy `EVENT_EMIT_CAP` alias 只能作为 physical/source compatibility，不得重新混合语义所有权。
       en: The `ExposeEventFacade` and `EXPOSE_EVENT_SINK_CAP` currently in the Event package are owned by `M-EXPOSE-EVENT-0001`; they do not belong to the Event information-channel author facade or Event host-cap baseline. The composite `EventFacade` and legacy `EVENT_EMIT_CAP` alias exist only for physical or source compatibility and must not merge semantic ownership again.
+  - id: M-EVENT-0001-I
+    text:
+      zh-CN: 一次 runtime binding attempt 必须在添加该次 attempt 的任何 host listener 前，为全部当前未绑定 registration 解析 target；若 target resolution 失败，该次 attempt 不得新增 host listener，target 可用后显式 bind retry 必须能够重试完整 registration set。该准则不要求失败后由 capability epoch 自动 retry，也不规定 listener attachment 或 cleanup 自身抛错时的事务语义；explicit unbind 后不得仅因 capability epoch 重新绑定。
+      en: A runtime binding attempt must resolve targets for every currently unbound registration before adding any host listener for that attempt; if target resolution fails, the attempt must add no host listener, and an explicit bind retry must be able to retry the complete registration set after targets become available. This criterion does not require automatic retry on a capability epoch after failure and does not define transactional semantics when listener attachment or cleanup itself throws; an explicit unbind must not rebind solely because of a capability epoch.
 satisfies:
   contracts:
     - C-EVENT-0001
@@ -120,4 +124,7 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Drafted the Event module entity and recorded default-action control as an internal Event port capability.
+  - version: 0.2.0
+    change: strengthened
+    summary: Required target preflight before listener attachment, zero new listeners on target-resolution failure, and an explicit complete-plan retry without automatic recovery semantics.
 tags: [event, module, required, adapter, lifecycle]
