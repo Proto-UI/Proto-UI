@@ -27,7 +27,7 @@ runs:
       integration:
         status: accepted
         reviewMinutes: null
-        commit: 541d55673231da9af343e34cb02c8eab0a4aed47
+        commit: 1e3ed571fe14c01e7eae09697cd5a3913428ec9c
         notes: Props remediation committed separately; merge and release were not authorized.
     remediation:
       status: completed
@@ -67,7 +67,7 @@ runs:
       integration:
         status: accepted
         reviewMinutes: null
-        commit: c4a44df6e9489d0b344a7f7f7a959188ff16a5d3
+        commit: 58d734ac8fded9adb4873b8d524476897173f19c
         notes: Event remediation committed separately; merge and release were not authorized.
     remediation:
       status: completed

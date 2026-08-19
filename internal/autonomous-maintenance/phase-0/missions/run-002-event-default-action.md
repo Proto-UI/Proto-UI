@@ -88,5 +88,5 @@ Stop after reporting at most three findings that survived falsification, or afte
 - Observer-created implementation changes: none
 - Accepted remediation: narrowed to target preflight plus explicit retry after an independent `incomplete` review; automatic capability recovery and attachment/cleanup failure guarantees were removed.
 - Semantic decision: accepted. Round-two review is adequate (`0.96`), Node 22.23.2 validation passed, and the implementation remediation completed automatically on 2026-08-19.
-- Integration decision: Event remediation committed separately as `c4a44df6e9489d0b344a7f7f7a959188ff16a5d3`; merge and release were not authorized.
+- Integration decision: Event remediation committed separately as `58d734ac8fded9adb4873b8d524476897173f19c`; merge and release were not authorized.
 - Remediation review: [`AM-P0-002-F1`](../reviews/AM-P0-002-F1.md)
