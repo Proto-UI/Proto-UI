@@ -6,7 +6,7 @@ export const publicDocPolicy = {
   },
   release: {
     versionEntities: 'spec/versions',
-    additionalCurrentProjections: ['README.md'],
+    additionalCurrentProjections: ['README.md', 'README.zh-CN.md'],
     archivedRoutes: [],
     pendingMarkers: [
       'stable publication pending',

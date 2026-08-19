@@ -15,6 +15,8 @@ const CURRENT_CONTEXT =
   /\b(?:current|currently|latest|stable|recommended|install|use)\b|当前|目前|最新|稳定|推荐|安装|使用/i;
 const HISTORICAL_CONTEXT =
   /\b(?:historical|archived|previous|former|preceding|prerelease evidence)\b|历史|归档|此前|先前|候选阶段|历史证据/i;
+const DEVELOPMENT_CONTEXT =
+  /\b(?:draft|workspace|development train|unpublished)\b|草案|工作区|开发中|未发布/i;
 
 function relative(root, file) {
   return path.relative(root, file).split(path.sep).join('/');
@@ -131,7 +133,6 @@ export function findStaleReleaseClaims({
 }) {
   if (archived) return [];
   const errors = [];
-  const stableCore = parseSemver(currentVersion).core;
   for (const marker of pendingMarkers) {
     const offset = text.toLocaleLowerCase().indexOf(marker.toLocaleLowerCase());
     if (offset !== -1) {
@@ -143,9 +144,11 @@ export function findStaleReleaseClaims({
   let lineOffset = 0;
   for (const line of text.split('\n')) {
     for (const match of line.matchAll(PRERELEASE_PATTERN)) {
-      if (parseSemver(match[0]).core !== stableCore) continue;
       const installClaim = INSTALL_CONTEXT.test(line);
-      const currentClaim = CURRENT_CONTEXT.test(line) && !HISTORICAL_CONTEXT.test(line);
+      const currentClaim =
+        CURRENT_CONTEXT.test(line) &&
+        !HISTORICAL_CONTEXT.test(line) &&
+        !DEVELOPMENT_CONTEXT.test(line);
       if (!installClaim && !currentClaim) continue;
       errors.push(
         `${file}:${lineNumber(text, lineOffset + (match.index ?? 0))}: ${match[0]} is presented as a current install/release claim, but ${currentVersion} is the active stable release. Governed source: ${governedSource}. Use the derived stable version or rewrite the text as explicitly historical.`
@@ -338,12 +341,22 @@ export function checkLibraryInventory({
       }
       if (!entityAvailableInRelease(entity, releaseVersion)) continue;
       const entries = overviewEntries.get(library.id) ?? [];
-      if (!entries.some((entry) => entry.id === family)) {
+      const overviewEntry = entries.find((entry) => entry.id === family);
+      if (!overviewEntry) {
         errors.push(
           `${library.packageName} ${exportName}: released family ${family} (${catalogId}) is absent from the ${library.id} overview inventory in apps/www/src/components/PrototypeLibraryOverview.astro.`
         );
       }
       const expectedSlug = `${library.detailPrefix}/${family}`;
+      if (overviewEntry) {
+        const relativeDetail = path.posix.relative(`${library.overviewSlug}/`, `${expectedSlug}/`);
+        const expectedHref = `./${relativeDetail}${relativeDetail.endsWith('/') ? '' : '/'}`;
+        if (overviewEntry.href !== expectedHref) {
+          errors.push(
+            `${library.packageName} ${exportName}: overview entry ${family} links to ${overviewEntry.href ?? 'no href'}, expected localized relative href ${expectedHref} for ${expectedSlug}.`
+          );
+        }
+      }
       if (!sidebar.has(expectedSlug)) {
         errors.push(
           `${library.packageName} ${exportName}: released family ${family} (${catalogId}) is absent from primary sidebar slug ${expectedSlug}.`
