@@ -74,7 +74,9 @@ Stop after reporting at most three documentation-projection findings that surviv
 - Candidate findings: 1
 - Finding: [`AM-P0-003-F1`](../findings/AM-P0-003-F1.md)
 - Observer confidence: `0.98`
-- Verifier classification: pending
+- Verifier classification: confirmed (`0.99` confidence)
+- Verifier result: both rendered language pages flatten the active state-specific fallback order; active authority, implementation, and focused evidence preserve the correct distinction.
+- Corrected scope: the two public `C-PROPS-0009` previews, plus a separately identified stale PropsKernel comment; no active semantic, runtime, test, or generic preview-component change is indicated.
 - Observer-created repository changes: none
 - Validation: Agent projection generated from 529 entities, prototype catalog passed, and 4 focused files with 36 tests passed in an isolated temporary checkout.
 - Environment limit: the Observer's successful reproduction used Node 20.19.4 rather than the repository's Node 22 CI baseline.
