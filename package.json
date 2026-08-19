@@ -53,6 +53,7 @@
     "component-presets:generate": "node --import tsx scripts/components/generate-shadcn-component-presets.mjs",
     "check:component-presets": "node --import tsx scripts/components/generate-shadcn-component-presets.mjs --check",
     "check:prototype-catalog": "node scripts/spec/check-prototype-catalog.mjs",
+    "check:autonomous-review": "node scripts/autonomous-maintenance/check-review-packets.mjs",
     "spec:docs:agent": "tsx scripts/spec/generate-agent-project-understanding.mjs",
     "check:agent-doc": "tsx scripts/spec/generate-agent-project-understanding.mjs --check",
     "check:release-version": "node scripts/release/check-version-governance.mjs",
