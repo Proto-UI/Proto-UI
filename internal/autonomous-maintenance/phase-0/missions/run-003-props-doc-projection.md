@@ -66,3 +66,15 @@ The Observer may add exact focused evidence when falsifying a suspected document
 ## Stop condition
 
 Stop after reporting at most three documentation-projection findings that survived falsification, or after the selected slice has been traced and no verified finding was discovered. Do not implement fixes, modify tracked files, or create external writes.
+
+## Observer result
+
+- Status: completed
+- Actual starting and final HEAD: `d7bf6c9ff4191388c5d35e4b58e2908b6c1817d4`
+- Candidate findings: 1
+- Finding: [`AM-P0-003-F1`](../findings/AM-P0-003-F1.md)
+- Observer confidence: `0.98`
+- Verifier classification: pending
+- Observer-created repository changes: none
+- Validation: Agent projection generated from 529 entities, prototype catalog passed, and 4 focused files with 36 tests passed in an isolated temporary checkout.
+- Environment limit: the Observer's successful reproduction used Node 20.19.4 rather than the repository's Node 22 CI baseline.
