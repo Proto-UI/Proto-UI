@@ -2,6 +2,14 @@
 
 Phase 0 evaluates autonomous discovery before building a scheduler, controller, or mutation workflow.
 
+## Phase 0.1 execution surface
+
+The repository-scoped Skill at [`.agents/skills/proto-ui-autonomous-maintenance/SKILL.md`](../../../.agents/skills/proto-ui-autonomous-maintenance/SKILL.md) routes one eligible protocol stage at a time. It does not replace this workflow or project authority. Independent Observer, Verifier, and remediation-review roles still require fresh task contexts.
+
+Machine-readable experiment state lives in [`runs.yaml`](./runs.yaml). Candidate discovery, control, and targeted follow-up work lives in [`mission-queue.yaml`](./mission-queue.yaml). Run `corepack pnpm@10.32.1 check:autonomous-maintenance` after changing packets, run state, or the queue.
+
+Phase 0.1 remains manually triggered. It does not schedule tasks, infer permission to create a new task, or authorize commit, merge, publication, or release.
+
 ## Hypothesis
 
 When given one bounded semantic slice, broad read and experiment permissions, and no known bug, an Agent can discover findings that are:
@@ -65,6 +73,8 @@ Reviewability is part of the experiment outcome. Capture whether the reviewer co
 - [`prompts/review-synthesizer.md`](./prompts/review-synthesizer.md): fresh-task reviewability and impact-analysis prompt.
 - [`templates/finding.md`](./templates/finding.md): finding and human-disposition template.
 - [`templates/remediation-review.md`](./templates/remediation-review.md): proposal and post-implementation review packet template.
+- [`runs.yaml`](./runs.yaml): machine-readable run outcomes, missing metrics, completion rules, and integration evidence.
+- [`mission-queue.yaml`](./mission-queue.yaml): bounded candidates for discovery, no-finding, repeatability, and targeted follow-up work.
 - [`reviews/AM-P0-002-F1.md`](./reviews/AM-P0-002-F1.md): retrospective first remediation review pilot.
 - [`missions/run-001-props.md`](./missions/run-001-props.md): frozen first mission scope.
 - [`missions/run-002-remediation-review.md`](./missions/run-002-remediation-review.md): historical fresh-task prompt used for the first remediation review; its approval wording predates the automated-completion rule.

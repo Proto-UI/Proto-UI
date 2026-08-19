@@ -1,0 +1,77 @@
+schemaVersion: 1
+missions:
+  - id: AM-P0-003
+    class: discovery
+    status: candidate
+    priority: 1
+    title: Public documentation projection drift
+    objective: Select one active semantic slice and test whether public documentation still projects its current guarantees without importing draft direction.
+    scopeHint: One active contract or prototype chain plus its directly related website pages and executable evidence.
+    oracle:
+      - active spec criteria
+      - executable evidence
+      - current public documentation
+    budgetClass: medium
+    mutationPolicy: read-only
+    source: phase-0-evaluation-plan
+
+  - id: AM-P0-004
+    class: discovery
+    status: candidate
+    priority: 3
+    title: Cross-Adapter lifecycle parity
+    objective: Select one lifecycle-sensitive behavior and test whether official React, Vue, and Web Component paths preserve the same portable semantics.
+    scopeHint: One Module and host-capability lifecycle chain across the three active official Adapter profiles.
+    oracle:
+      - applicable spec criteria by lifecycle
+      - cross-Adapter observable behavior
+      - focused contract and browser evidence
+    budgetClass: large
+    mutationPolicy: read-only
+    source: phase-0-evaluation-plan
+
+  - id: AM-P0-005
+    class: control
+    status: candidate
+    priority: 2
+    title: No-finding stop control
+    objective: Audit one recently stabilized and well-covered slice to test whether the Observer can exhaust the scope and stop without manufacturing a finding.
+    scopeHint: One active slice with recent audit records, connected test evidence, and no known open defect supplied to the Observer.
+    oracle:
+      - active spec criteria
+      - recent audit record
+      - complete mapped executable evidence
+    budgetClass: medium
+    mutationPolicy: read-only
+    source: phase-0-evaluation-plan
+
+  - id: AM-P0-006
+    class: control
+    status: blocked
+    priority: 4
+    title: Observer repeatability control
+    objective: Re-run one frozen discovery mission in a fresh context and compare surviving findings without exposing the first trajectory or verdict.
+    scopeHint: Reuse the exact mission and baseline of a future discovery run after its first result has been preserved outside the second task context.
+    oracle:
+      - identical mission and baseline
+      - independent finding classifications
+      - overlap and contradiction analysis
+    budgetClass: medium
+    mutationPolicy: read-only
+    source: phase-0-evaluation-plan
+    blockedBy: first eligible future discovery run
+
+  - id: AM-P0-007
+    class: targeted-follow-up
+    status: candidate
+    priority: 5
+    title: Cross-catalog verifies-anchor completeness
+    objective: Measure and classify the residual verifies-anchor to case to required-implementation gaps without assuming every structural gap is a behavioral defect.
+    scopeHint: The seven residual test entities and 35 uncovered verifies anchors recorded by AM-P0-001-F1.
+    oracle:
+      - spec graph relation semantics
+      - case coverage
+      - required passing implementation consumption
+    budgetClass: medium
+    mutationPolicy: read-only
+    source: AM-P0-001-F1

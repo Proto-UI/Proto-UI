@@ -6,6 +6,6 @@ Applicable `spec/**` entities remain authoritative according to lifecycle. `inte
 
 ## Current stage
 
-The current experiment is Phase 0: manually triggered, read-only Observer runs. Its purpose is to test whether an Agent can discover previously unknown, reproducible, valuable maintenance findings without being given a known bug. Accepted findings also pass through a separate remediation review gate so discovery quality is not confused with whether an Agent-authored repair is understandable and governable by a human.
+The current experiment is Phase 0.1: manually triggered runs using the repository-scoped `proto-ui-autonomous-maintenance` Skill. Observer and Verifier stages remain read-only. Its purpose is to test whether an Agent can discover previously unknown, reproducible, valuable maintenance findings without being given a known bug, while preserving independent verification, governed remediation, measurable run state, and explicit semantic and integration decisions.
 
 See [`phase-0/README.md`](./phase-0/README.md) for the run protocol.

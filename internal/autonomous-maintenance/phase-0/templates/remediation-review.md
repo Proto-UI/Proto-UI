@@ -24,6 +24,7 @@ humanDecisions:
   integration:
     status: pending | accepted | rejected
     decision:
+    evidence: []
 
 automatedCompletion:
   status: pending | complete | blocked

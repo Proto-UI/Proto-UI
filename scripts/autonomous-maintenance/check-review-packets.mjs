@@ -226,8 +226,8 @@ function validateReview(file) {
   if (!/^[0-9a-f]{40}$/.test(metadata.baselineCommit ?? '')) {
     fail(errors, file, 'baselineCommit must be a full 40-character lowercase SHA');
   }
-  if (!nonEmptyArray(metadata.decisionRequested)) {
-    fail(errors, file, 'decisionRequested must not be empty');
+  if (!Array.isArray(metadata.decisionRequested)) {
+    fail(errors, file, 'decisionRequested must be an array');
   }
   if (!['pending', 'accepted', 'rejected'].includes(metadata.humanDecisions?.semantic?.status)) {
     fail(
@@ -242,6 +242,49 @@ function validateReview(file) {
       file,
       `invalid humanDecisions.integration.status: ${metadata.humanDecisions?.integration?.status}`
     );
+  }
+  if (
+    metadata.humanDecisions?.integration?.status === 'pending' &&
+    !nonEmptyArray(metadata.decisionRequested)
+  ) {
+    fail(errors, file, 'pending integration requires a non-empty decisionRequested array');
+  }
+  if (
+    ['accepted', 'rejected'].includes(metadata.humanDecisions?.integration?.status) &&
+    !metadata.humanDecisions?.integration?.decision
+  ) {
+    fail(errors, file, 'resolved integration requires a recorded decision');
+  }
+  if (metadata.humanDecisions?.integration?.status === 'accepted') {
+    const evidence = metadata.humanDecisions.integration.evidence;
+    if (!nonEmptyArray(evidence)) {
+      fail(errors, file, 'accepted integration requires evidence');
+    } else {
+      for (const [index, item] of evidence.entries()) {
+        if (!/^[0-9a-f]{40}$/.test(item ?? '')) {
+          fail(
+            errors,
+            file,
+            `humanDecisions.integration.evidence[${index}] must be a full commit SHA`
+          );
+          continue;
+        }
+        try {
+          execFileSync('git', ['cat-file', '-e', `${item}^{commit}`], {
+            cwd: root,
+            stdio: 'ignore',
+          });
+        } catch {
+          fail(errors, file, `humanDecisions.integration.evidence[${index}] is not a local commit`);
+        }
+      }
+    }
+  }
+  if (
+    ['accepted', 'rejected'].includes(metadata.humanDecisions?.integration?.status) &&
+    /- \[ \].*integration decision/im.test(content)
+  ) {
+    fail(errors, file, 'resolved integration retains an unchecked integration decision item');
   }
 
   const findingFile = resolveRepositoryPath(file, metadata.findingPath, errors, 'findingPath');
