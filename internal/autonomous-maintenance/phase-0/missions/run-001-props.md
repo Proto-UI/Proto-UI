@@ -76,4 +76,4 @@ Stop after reporting at most three findings that survived falsification, or afte
 - Human disposition: accepted for remediation
 - Observer-created implementation changes: none
 - Accepted remediation: completed; see the finding record for changes and validation evidence.
-- Integration decision: Props remediation committed separately as `dc6fcf02bf83def61f1a7ae69157f7f0e047bad2`; merge and release were not authorized.
+- Integration decision: Props remediation committed separately as `541d55673231da9af343e34cb02c8eab0a4aed47`; merge and release were not authorized.
