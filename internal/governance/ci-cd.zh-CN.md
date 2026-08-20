@@ -11,6 +11,7 @@
 | CI | `.github/workflows/ci.yml` | PR 与主干的类型、测试、spec 和全局版本门禁 |
 | Release Packages | `.github/workflows/release-packages.yml` | 手动执行 release scan、stage 彩排或全量发布 |
 | Release Cadence | `.github/workflows/release-cadence.yml` | 定期检查距最近 `v*` release 的时间并提醒维护者 |
+| Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR 路由实验 |
 
 ## CI 工作流（`ci.yml`）
 
@@ -24,6 +25,12 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 任何新数字版本都必须先成为受评审的 release train，不能通过局部 package 改版绕过。
 
 `public_package_plan` 会根据 pull request diff 推导受影响的公开 package 图。package 变化会选中改动 package、它的反向消费者，以及构建该集合所需的全部上游公开依赖；仓库级构建、release、lockfile、manifest 或 workflow 变化则选中全部公开 package。后续 build job 会检查生成式 manifest、产出 JavaScript 与声明文件、执行原生 ESM import smoke，并检查代表性 gzip 预算。如果 PR 的受影响公开 package 图为空，release stage 与隔离 consumer job 可以跳过；`main` 与手动触发仍运行全量集合。
+
+## Agent Operations Shadow 工作流（`agent-operations-shadow.yml`）
+
+这项 Phase A 实验每天定时或由维护者手动触发。它会采集有上限的开放 Issue 与 PR 快照；在配置了 `OPENAI_API_KEY` 时执行只读结构化分析、校验结果，并以 14 天保留期上传输入和报告。没有配置密钥时，工作流只保留有边界的输入快照。
+
+该工作流对 `contents`、`issues` 与 `pull-requests` 只有读取权限，禁用 checkout credential 持久化，并让 Codex 使用 `:read-only` permission profile 和 `drop-sudo`。它不响应 PR 事件，不发布评论、不修改 label、不创建分支或 PR，也不授权 integration。未来若增加 GitHub 写权限，必须通过 `internal/agent-operations/**` 下的独立策略变更接受评审，并取得维护者的明确决定。
 
 `release-consumer-react` 进一步从当前源码构建全部公开 package tarball，并在 monorepo 外的临时 React + Vite 项目中安装当前发布依赖闭包。该门禁禁止 `@proto.ui/*` 回退到 npm registry 或 workspace 源码，验证 staged manifest 的全部非通配 export target，并验证 CLI facade 生成、TypeScript、production build 和基础运行时行为。在扩展完整 fixture 前，它还会先只生成 Shadcn Button，并检查最终 Rollup module graph 不包含其他 Base/Shadcn prototype family；这是一项 family 边界检测，不是固定 bundle 大小预算。
 

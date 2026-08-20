@@ -11,6 +11,7 @@ The current published prerelease release train is `0.2.0-rc.7` under the npm `ne
 | CI | `.github/workflows/ci.yml` | Type, test, spec, and global-version gates for pull requests and `main` |
 | Release Packages | `.github/workflows/release-packages.yml` | Manual release scan, stage rehearsal, or full-set publication |
 | Release Cadence | `.github/workflows/release-cadence.yml` | Periodic reminder based on the latest `v*` release tag |
+| Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request routing experiment |
 
 ## CI Workflow (`ci.yml`)
 
@@ -24,6 +25,12 @@ CI runs for pull requests, pushes to `main`, and manual dispatch. In addition to
 Every new numeric version must therefore be a reviewed release train; a package-local bump cannot bypass the gate.
 
 `public_package_plan` derives the affected public package graph from the pull request diff. Package changes select the changed package, its reverse consumers, and every upstream public dependency required to build that set. Repository-wide build, release, lockfile, manifest, or workflow changes select all public packages. The resulting build job validates the generated manifests, produces JavaScript plus declaration artifacts, runs native ESM import smokes, and enforces representative gzip budgets. Release-stage and isolated-consumer jobs may skip a pull request whose affected public package graph is empty; the full set still runs on `main` and manual dispatch.
+
+## Agent Operations Shadow workflow (`agent-operations-shadow.yml`)
+
+This daily or manually dispatched Phase A experiment collects a bounded snapshot of open Issues and pull requests, runs a read-only structured analysis when `OPENAI_API_KEY` is configured, validates the result, and uploads the input and report with 14-day retention. If the key is absent, the workflow preserves only the bounded input snapshot.
+
+The workflow has read-only `contents`, `issues`, and `pull-requests` permissions, disables persisted checkout credentials, and runs Codex with the `:read-only` permission profile and `drop-sudo`. It does not run from pull-request events, post comments, change labels, create branches or pull requests, or authorize integration. Any future GitHub write permission requires a separate reviewed policy change and an explicit maintainer decision under `internal/agent-operations/**`.
 
 `release-consumer-react` additionally builds tarballs for every public package and installs the current declared release closure in a temporary React + Vite project outside the monorepo. The gate prevents `@proto.ui/*` from falling back to the npm registry or workspace sources, validates every non-wildcard export target in staged manifests, then verifies CLI facade generation, TypeScript, a production build, and baseline runtime behavior. Before expanding the full fixture, it generates only Shadcn Button and checks that the final Rollup module graph contains no other Base/Shadcn prototype family. This is a family-boundary assertion rather than a fixed bundle-size budget.
 
