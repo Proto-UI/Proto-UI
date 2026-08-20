@@ -125,14 +125,15 @@ export const contractPreviews = [
   },
   {
     id: 'C-PROPS-0009',
-    title: 'Empty and invalid values resolve through deterministic fallback',
+    title: 'Missing, empty, and invalid values use state-specific fallback',
     summary:
-      '`Missing`, `provided-empty`, and `invalid` values resolve through the configured `empty` behavior and fallback chain.',
+      '`Missing` skips `prevValid` and resolves from defaults, while provided-empty and invalid input entering fallback may reuse `prevValid` first.',
     quote:
-      'The fallback candidate order must be `prevValid`, `setDefaults`, declaration `default`, then final `null`.',
+      'For `missing`, the fallback candidate order is `setDefaults`, declaration `default`, then final `null`; when `provided-empty` or `invalid` enters fallback, `prevValid` comes first.',
     criteria: [
+      '`Missing` never reuses `prevValid`; it releases a withdrawn host value and uses the defaults-only chain.',
       '`empty: "accept"` resolves provided-empty input to `null`.',
-      'Default `empty: "fallback"` enters the fallback chain.',
+      'Provided-empty or invalid input entering fallback checks `prevValid` before defaults.',
       '`empty: "error"` requires a non-empty valid fallback result.',
     ],
     tests:

@@ -79,3 +79,42 @@ runs:
       previouslyUnknown: true
       actionValue: 2
       residualRiskCount: 4
+
+  - id: AM-P0-003
+    missionPath: internal/autonomous-maintenance/phase-0/missions/run-003-props-doc-projection.md
+    findingPaths:
+      - internal/autonomous-maintenance/phase-0/findings/AM-P0-003-F1.md
+    baselineCommit: 0303cdf06ee6f47c16264b570d839c899057d286
+    budgetClass: medium
+    observer:
+      status: completed
+      elapsedMinutes: 9.2
+      tokenUsage: null
+      candidateFindingCount: 1
+      trackedMutationCount: 0
+    verification:
+      status: completed
+      classification: confirmed
+      confidence: 0.99
+    humanDecisions:
+      findingDisposition:
+        status: accepted
+        reviewMinutes: null
+      semantic:
+        status: accepted
+        reviewMinutes: null
+        notes: Preserved active C-PROPS-0009 semantics and limited remediation to the bilingual previews plus both directly related stale PropsKernel comments.
+      integration:
+        status: pending
+        reviewMinutes: null
+        notes: Technical remediation is complete; commit, push, merge, publication, and release remain separately gated.
+    remediation:
+      status: completed
+      completionRule: adequate-independent-review-and-required-validation
+      validationStatus: passed
+      completedOn: 2026-08-19
+      reviewPacket: internal/autonomous-maintenance/phase-0/reviews/AM-P0-003-F1.md
+    outcome:
+      previouslyUnknown: true
+      actionValue: 2
+      residualRiskCount: 4

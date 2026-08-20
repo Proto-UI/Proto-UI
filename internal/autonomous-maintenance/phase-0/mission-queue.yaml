@@ -1,22 +1,5 @@
 schemaVersion: 1
 missions:
-  - id: AM-P0-003
-    class: discovery
-    status: running
-    priority: 1
-    title: Public documentation projection drift
-    objective: Test whether the English and Chinese Props documentation faithfully project active declared-key resolved-snapshot and state-specific fallback guarantees.
-    scopeHint: C-PROPS-0008, C-PROPS-0009, the corresponding M-PROPS-0001 surface, T-PROPS-0005/T-PROPS-0006 evidence, and both public Props specification pages.
-    missionPath: internal/autonomous-maintenance/phase-0/missions/run-003-props-doc-projection.md
-    baselineCommit: 0303cdf06ee6f47c16264b570d839c899057d286
-    oracle:
-      - active spec criteria
-      - executable evidence
-      - current public documentation
-    budgetClass: medium
-    mutationPolicy: read-only
-    source: phase-0-evaluation-plan
-
   - id: AM-P0-004
     class: discovery
     status: candidate

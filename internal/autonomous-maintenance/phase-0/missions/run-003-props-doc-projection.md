@@ -78,9 +78,11 @@ Stop after reporting at most three documentation-projection findings that surviv
 - Verifier result: both rendered language pages flatten the active state-specific fallback order; active authority, implementation, and focused evidence preserve the correct distinction.
 - Corrected scope: the two public `C-PROPS-0009` previews, plus a separately identified stale PropsKernel comment; no active semantic, runtime, test, or generic preview-component change is indicated.
 - Human finding disposition: accepted
-- Human semantic direction: preserve active `C-PROPS-0009`; correct only the bilingual public projection and directly related stale source comment.
+- Human semantic direction: preserve active `C-PROPS-0009`; correct only the bilingual public projection and both directly related stale PropsKernel comments, including the `prevValid` field comment approved after review round one.
 - Authorization boundary: remediation may prepare and implement that bounded change; commit, merge, publication, and release remain separately gated.
-- Next eligible transition: create the remediation review packet before editing the public projection or source comment.
+- Remediation status: technically completed after the revised packet received an independent `adequate` review (`0.99` confidence); both directly related PropsKernel comments are corrected, packet boundaries are repaired, and the full validation floor passed on Node 22.23.2.
+- Review packet: [`AM-P0-003-F1`](../reviews/AM-P0-003-F1.md)
+- Next eligible transition: request the separate human integration decision for the completed remediation; commit, push, merge, publication, and release remain unauthorized until explicitly approved.
 - Observer-created repository changes: none
 - Validation: Agent projection generated from 529 entities, prototype catalog passed, and 4 focused files with 36 tests passed in an isolated temporary checkout.
 - Environment limit: the Observer's successful reproduction used Node 20.19.4 rather than the repository's Node 22 CI baseline.
