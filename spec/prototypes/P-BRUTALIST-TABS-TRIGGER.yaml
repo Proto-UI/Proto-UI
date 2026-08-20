@@ -80,7 +80,6 @@ revisions:
     summary: >-
       Introduced the draft Brutalist Tabs Trigger projection with real public-API criteria (selected pair invariant, non-selected hover lift, press/focus/disabled) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
 
-
   - version: 0.2.0
     change: revised
     summary: >-

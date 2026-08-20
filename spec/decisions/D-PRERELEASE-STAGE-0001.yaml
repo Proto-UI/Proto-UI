@@ -7,10 +7,8 @@ summary: Proto UI uses alpha for architecture and API exploration, beta for stab
 statement:
   zh-CN: >-
     Proto UI 的 prerelease suffix 必须表达 release train 的稳定化阶段，而不是泛化的内部版本编号。`alpha` 阶段允许经过评审的架构调整、顶层 API 变化与新特性进入；`beta` 只在核心范围与主要 API 收敛后开启，重点转向集成、兼容与缺陷修复；`rc` 只用于维护者认为可直接晋升为对应 stable 的候选版本，不得仍预定架构重构或顶层 breaking API 调整。每个数字版本仍由独立 V 实体、全局精确 package 版本与 release evidence 治理。
-
   en: >-
     Proto UI prerelease suffixes must communicate a release train's stabilization stage rather than act as generic internal build numbers. The `alpha` stage admits reviewed architecture changes, top-level API changes, and new features; `beta` begins only after the core scope and major APIs converge and shifts attention toward integration, compatibility, and defect correction; `rc` is reserved for a build maintainers believe can be promoted directly to the corresponding stable release and must not carry planned architectural rewrites or top-level breaking API changes. Every numeric version remains governed by its own V entity, globally exact package versions, and release evidence.
-
 criteria:
   - id: D-PRERELEASE-STAGE-0001-ALPHA
     text:

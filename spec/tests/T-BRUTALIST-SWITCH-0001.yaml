@@ -88,7 +88,6 @@ revisions:
     summary: >-
       Introduced draft Brutalist Switch coverage mapped 1:1 to the rc.7 P criteria (entry/inheritance, single-movement, checked pair, interaction, visual grammar). Not present in the immutable rc.6 snapshot.
 
-
   - version: 0.2.0
     change: revised
     summary: >-
