@@ -287,6 +287,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icon/index');
     registerPrototype('lucide-icon', mod.default);
   },
+  'shadcn-separator-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/separator');
+    registerPrototype('shadcn-separator-root', mod.default);
+  },
   'shadcn-switch-root': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/switch/root.proto');
     registerPrototype('shadcn-switch-root', mod.default);

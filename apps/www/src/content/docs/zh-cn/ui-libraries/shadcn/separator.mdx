@@ -1,0 +1,14 @@
+---
+title: 'Separator'
+description: '基于 Proto UI 重构的 Shadcn Separator。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+当前页面展示 Proto UI 中 `shadcn` 风格的 `separator` 条目。
+
+协议由 Base Separator 拥有：`orientation` 默认为 `horizontal`，`decorative` 默认为 `true`。decorative 分隔线隐藏于 accessibility tree 且不带 role，`decorative={false}` 则投影 `separator` role 与对应的 `aria-orientation`。shadcn 层只增加表现：border 颜色，以及跟随继承 orientation 的 1px 细线几何。
+
+Separator 是 contentless 的，不声明 focus、tab stop 或 event 通路。长度由周围布局决定，间距由组合负责。
+
+<PrototypePreviewer demoId="demo-shadcn-separator" initialRuntime="wc" />

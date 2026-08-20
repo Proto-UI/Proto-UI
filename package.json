@@ -66,7 +66,7 @@
     "test:release": "node --test scripts/release/test/*.test.mjs",
     "test:types": "echo \"[types] checking type contracts...\" && tsc -p internal/contracts/types/tsconfig.json && echo \"[types] OK\"",
     "test:web-conformance": "vitest run packages/web-conformance/test",
-    "test:runtime": "vitest run",
+    "test:runtime": "node --test scripts/test/run-runtime-tests.test.mjs && node scripts/test/run-runtime-tests.mjs",
     "styles:variant-order:generate": "node --import tsx scripts/styles/generate-lowered-variant-order.ts",
     "check:styles:variant-order": "node --import tsx scripts/styles/generate-lowered-variant-order.ts --check"
   },
