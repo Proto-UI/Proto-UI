@@ -79,10 +79,11 @@ Stop after reporting at most three documentation-projection findings that surviv
 - Corrected scope: the two public `C-PROPS-0009` previews, plus a separately identified stale PropsKernel comment; no active semantic, runtime, test, or generic preview-component change is indicated.
 - Human finding disposition: accepted
 - Human semantic direction: preserve active `C-PROPS-0009`; correct only the bilingual public projection and both directly related stale PropsKernel comments, including the `prevValid` field comment approved after review round one.
-- Authorization boundary: remediation may prepare and implement that bounded change; commit, merge, publication, and release remain separately gated.
+- Integration decision: the maintainer approved the bounded eight-file commit and push to draft PR #451, then separately approved DCO repair and final evidence recording.
 - Remediation status: technically completed after the revised packet received an independent `adequate` review (`0.99` confidence); both directly related PropsKernel comments are corrected, packet boundaries are repaired, and the full validation floor passed on Node 22.23.2.
 - Review packet: [`AM-P0-003-F1`](../reviews/AM-P0-003-F1.md)
-- Next eligible transition: request the separate human integration decision for the completed remediation; commit, push, merge, publication, and release remain unauthorized until explicitly approved.
+- Integration evidence: signed remediation commit `a2cc88d41962bde747b4fd2c7654f61c12421af3` on `codex/autonomous-maintenance-phase-0`; merge, publication, and release remain unauthorized.
+- Next eligible transition: observe PR checks and review state; any merge, publication, or release requires a separate human decision.
 - Observer-created repository changes: none
 - Validation: Agent projection generated from 529 entities, prototype catalog passed, and 4 focused files with 36 tests passed in an isolated temporary checkout.
 - Environment limit: the Observer's successful reproduction used Node 20.19.4 rather than the repository's Node 22 CI baseline.

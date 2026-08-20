@@ -105,9 +105,10 @@ runs:
         reviewMinutes: null
         notes: Preserved active C-PROPS-0009 semantics and limited remediation to the bilingual previews plus both directly related stale PropsKernel comments.
       integration:
-        status: pending
+        status: accepted
         reviewMinutes: null
-        notes: Technical remediation is complete; commit, push, merge, publication, and release remain separately gated.
+        commit: a2cc88d41962bde747b4fd2c7654f61c12421af3
+        notes: Maintainer approved the eight-file commit and push to draft PR #451, then approved DCO repair and evidence recording; merge, publication, and release remain unauthorized.
     remediation:
       status: completed
       completionRule: adequate-independent-review-and-required-validation
