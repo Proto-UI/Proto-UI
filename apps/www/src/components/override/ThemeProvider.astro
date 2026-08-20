@@ -11,62 +11,35 @@
     const mql = window.matchMedia('(prefers-color-scheme: light)');
     const getSystem = () => (mql.matches ? 'light' : 'dark');
 
-    const normalizePreference = (value) =>
-      value === 'light' || value === 'dark' || value === 'auto' ? value : 'auto';
-
-    const loadPreference = () => {
-      const value = typeof localStorage !== 'undefined' && localStorage.getItem(KEY);
-      return normalizePreference(value || 'auto');
+    // 只保留两态：'light' | 'dark'
+    const load = () => {
+      const v = typeof localStorage !== 'undefined' && localStorage.getItem(KEY);
+      return v === 'light' || v === 'dark' ? v : null;
     };
-
-    const resolveTheme = (preference) => (preference === 'auto' ? getSystem() : preference);
-
-    const storePreference = (preference) => {
-      try {
-        localStorage.setItem(KEY, preference === 'auto' ? '' : preference);
-      } catch (e) {}
-    };
-
     const apply = (t) => {
       document.documentElement.dataset.theme = t;
       // 给 chrome/safari 一个暗色介面提示（和 meta 协同）
       document.documentElement.style.colorScheme = t;
     };
 
-    const updatePickers = (preference = loadPreference()) => {
+    // 初始化（若无存储，则跟随系统）
+    const initial = load() || getSystem();
+    apply(initial);
+
+    // Keep Starlight's built-in mobile ThemeSelect compatible with this custom provider.
+    const updatePickers = (theme = load() || 'auto') => {
       document.querySelectorAll('starlight-theme-select').forEach((picker) => {
         const select = picker.querySelector('select');
-        if (select) select.value = preference;
-
-        const tmpl =
-          document.querySelector('#theme-icons') ||
-          document.querySelector('#starlight-theme-icons');
-        const iconName = preference === 'auto' ? resolveTheme(preference) : preference;
-        const newIcon = tmpl && tmpl.content.querySelector('.' + iconName);
+        if (select) select.value = theme;
+        const tmpl = document.querySelector('#starlight-theme-icons');
+        const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
         const oldIcon = picker.querySelector('svg.label-icon');
         if (newIcon && oldIcon) {
           oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
         }
       });
     };
-
-    const setPreference = (preference) => {
-      const nextPreference = normalizePreference(preference);
-      const theme = resolveTheme(nextPreference);
-      storePreference(nextPreference);
-      apply(theme);
-      updatePickers(nextPreference);
-      document.dispatchEvent(
-        new CustomEvent('starlight-theme:change', { detail: { theme, preference: nextPreference } })
-      );
-    };
-
-    // 初始化（若无存储，则跟随系统）
-    apply(resolveTheme(loadPreference()));
-
-    window.StarlightThemeProvider = {
-      updatePickers,
-    };
+    window.StarlightThemeProvider = { updatePickers };
 
     // 供其它组件调用的轻量全局单例
     window.StarlightTheme = {
@@ -75,21 +48,32 @@
         return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
       },
       set(theme /* 'light' | 'dark' */) {
-        setPreference(theme === 'light' ? 'light' : 'dark');
+        const t = theme === 'light' ? 'light' : 'dark';
+        try {
+          localStorage.setItem(KEY, t);
+        } catch (e) {}
+        apply(t);
+        updatePickers(t);
+        // 通知所有 UI 控件同步自身外观
+        document.dispatchEvent(new CustomEvent('starlight-theme:change', { detail: { theme: t } }));
       },
       toggle() {
         this.set(this.get() === 'light' ? 'dark' : 'light');
       },
       // 让选择器控件在挂载时就能对齐当前主题/图标
       hydratePickers() {
-        updatePickers(loadPreference());
+        updatePickers();
         document.dispatchEvent(new CustomEvent('starlight-theme:hydrate'));
       },
     };
 
-    // 如果恰好监听到了主题切换，那么随系统切换主题
+    // Follow system changes only while no explicit preference is stored.
     mql.addEventListener('change', () => {
-      if (loadPreference() === 'auto') setPreference('auto');
+      if (load()) return;
+      const theme = getSystem();
+      apply(theme);
+      updatePickers('auto');
+      document.dispatchEvent(new CustomEvent('starlight-theme:change', { detail: { theme } }));
     });
   })();
 </script>
