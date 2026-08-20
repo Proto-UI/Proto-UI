@@ -56,7 +56,6 @@ criteria:
       en: >-
         The reference demo must keep a visible caption inside each Switch root so inherited Base `nameFromContent` derives the same meaningful accessible name in Web Components, React, and Vue. The caption must remain visible, must not rely on a native label relationship that cannot target the custom-element host, and must follow the Switch activation path while disabled remains inert.
 
-
       zh-CN: >-
         参考 demo 必须把可见 caption 放在每个 Switch root 内，使继承的 Base `nameFromContent` 在 Web Components、React 与 Vue 中派生同一条有意义的 accessible name。Caption 必须保持可见，不得依赖无法指向 custom-element host 的原生 label 关系；点击 caption 必须沿 Switch activation path 生效，而 disabled 保持 inert。
 
@@ -90,7 +89,6 @@ revisions:
     change: introduced
     summary: >-
       Introduced the draft Brutalist Switch Root projection with real public-API criteria (checked pair invariant, press feedback, no-padding-swap defect guard) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
-
 
   - version: 0.2.0
     change: revised

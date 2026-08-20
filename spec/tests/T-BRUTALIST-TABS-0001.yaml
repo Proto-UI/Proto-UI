@@ -111,7 +111,6 @@ revisions:
     summary: >-
       Introduced draft Brutalist Tabs coverage mapped 1:1 to the rc.7 P criteria (list+root entry, trigger selected pair, trigger interaction, content hidden). Not present in the immutable rc.6 snapshot.
 
-
   - version: 0.2.0
     change: revised
     summary: >-

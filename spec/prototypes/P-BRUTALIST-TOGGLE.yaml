@@ -104,7 +104,6 @@ revisions:
     summary: >-
       Introduced the draft Brutalist Toggle projection with real public-API criteria (size enum, defaults, active pair invariant, interaction states) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
 
-
   - version: 0.2.0
     change: revised
     summary: >-
