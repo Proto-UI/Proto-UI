@@ -4,12 +4,21 @@
 
 Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。使用 alpha 是有意的：本阶段仍可接纳经过评审的架构调整、顶层 API 变化与新能力，它不是 release candidate，也不构成 stable compatibility 承诺。
 
+## Expose Event ownership
+
+- 新增公开 package `@proto.ui/module-expose-event` 与独立 `ExposeEventModuleDef`。
+- 将 outward-signal facade implementation 与 `EXPOSE_EVENT_SINK_CAP` consumption 从 User → Component Event Module 移出。
+- 以 Expose core registry 作为唯一 declaration registry，删除 Event 持有的重复 key map。
+- 将 standard Runtime 以及 React、Vue、Web Component Adapter profile 迁移到 `expose-event` wiring。
+- 在 `@proto.ui/module-event` 暂时保留 deprecated source re-export 与完全相同的 legacy token identity；Adapter wiring 必须从 `event` 迁移到 `expose-event`。
+
 ## Release governance
 
 - 明确 alpha、beta 与 rc 的稳定化阶段语义；rc 只用于被认为可晋升 stable 的候选版本。
-- 将当前 40 个公开 package 对齐到精确的 `0.3.0-alpha.0` 生态身份。
+- 将当前 41 个公开 package 对齐到精确的 `0.3.0-alpha.0` 生态身份。
 - 为 0.3 contribution 提供已声明的精确 V-entity version，同时继续让每个 feature 或 package 变化独立接受评审。
 - 未来新增公开 package 的 identity 与 registry bootstrap 仍由引入它们的实现 PR 负责。
+- 已提前完成 `@proto.ui/module-expose-event` npm identity bootstrap 与 Trusted Publisher 绑定；其 deprecated placeholder 不构成 release evidence。
 
 ## 发布状态
 

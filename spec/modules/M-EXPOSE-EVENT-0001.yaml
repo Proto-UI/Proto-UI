@@ -3,21 +3,21 @@ type: module
 title: Expose Event outward-signal bridge module
 status: draft
 since: 0.1.0
-summary: The required Expose Event semantic module composes Expose shared-key declaration with an instance-scoped outward-signal registry and a host-neutral Adapter sink, while remaining distinct from the User-to-Component Event channel.
+summary: The required standalone Expose Event module composes Expose shared-key declarations with a host-neutral Adapter sink while remaining distinct from the User-to-Component Event channel.
 statement:
   zh-CN: >-
-    Expose Event 是 standard Runtime 与 official Adapter 的 required semantic Module slice。它目前没有独立 package，而是把 outward registry/emit bridge 物理共置在 `@proto.ui/module-event`，再由 runtime 与 Expose core shared namespace 组合；该放置不把 Component → App Maker signal 变成 User → Component Event channel。Prototype-author facade 只被 runtime 投影为 setup-only `def.expose.event` 与 runtime-only `run.expose.emit`，不产生普通 `run.event`。声明以 branded internal metadata 占用 Expose shared key，并可随 classified translation record 到达 Adapter；Adapter 必须把它翻译为 callback、framework emit、CustomEvent、message 或其它忠实 outward carrier，而不能让 metadata 成为 `getExposes()` value。实际 emission 通过 `HC-EXPOSE-EVENT-SINK-0001` 交付。当前没有独立 privileged port。
+    Expose Event 是 standard Runtime 与 official Adapter 的 required instance Module，由独立的 `@proto.ui/module-expose-event` package 与 `ExposeEventModuleDef` 承载。它硬依赖 Expose core 的只读 port，以 branded declaration 复用唯一的 shared-key registry，而不再在 Event Module 中维护第二份 outward registry；Component → App Maker signal 不得进入 User → Component Event channel。Prototype-author facade 只被 runtime 投影为 setup-only `def.expose.event` 与 runtime-only `run.expose.emit`，不产生普通 `run.event`。声明 metadata 可随 classified translation record 到达 Adapter；Adapter 必须把它翻译为 callback、framework emit、CustomEvent、message 或其它忠实 outward carrier，而不能让 metadata 成为 `getExposes()` value。实际 emission 通过 `HC-EXPOSE-EVENT-SINK-0001` 交付。当前没有独立 privileged port。
 
 
   en: >-
-    Expose Event is a required semantic Module slice for the standard Runtime and official Adapters. It currently has no standalone package: its outward registry and emit bridge are physically co-located in `@proto.ui/module-event` and composed by the runtime with the Expose core shared namespace. That placement does not turn a Component-to-App-Maker signal into the User-to-Component Event channel. The prototype-author facade is projected only as setup-only `def.expose.event` and runtime-only `run.expose.emit`, without creating an ordinary `run.event`. A declaration occupies the Expose shared key through branded internal metadata and may reach the Adapter in the classified translation record; the Adapter must translate it into a callback, framework emit, CustomEvent, message, or another faithful outward carrier rather than expose the metadata as a `getExposes()` value. Actual emissions pass through `HC-EXPOSE-EVENT-SINK-0001`. There is currently no separate privileged port.
+    Expose Event is a required instance Module for the standard Runtime and official Adapters, owned by the standalone `@proto.ui/module-expose-event` package and `ExposeEventModuleDef`. It has a hard dependency on the read-only Expose core port, reusing its single shared-key registry through branded declarations instead of keeping a second outward registry in the Event Module; Component-to-App-Maker signals must not enter the User-to-Component Event channel. The prototype-author facade is projected only as setup-only `def.expose.event` and runtime-only `run.expose.emit`, without creating an ordinary `run.event`. Declaration metadata may reach the Adapter in the classified translation record; the Adapter must translate it into a callback, framework emit, CustomEvent, message, or another faithful outward carrier rather than expose the metadata as a `getExposes()` value. Actual emissions pass through `HC-EXPOSE-EVENT-SINK-0001`. There is currently no separate privileged port.
 
 
 criteria:
   - id: M-EXPOSE-EVENT-0001-A
     text:
-      zh-CN: Expose Event 必须是独立于 Event information channel 的语义 Module slice；当前与 Event package 共置只属于 implementation placement，不得改变 Component → App Maker 方向，也不得让 outward key 进入 root/global input routing。
-      en: Expose Event must remain a semantic Module slice distinct from the Event information channel; current co-location in the Event package is implementation placement only and must not change the Component-to-App-Maker direction or place outward keys into root or global input routing.
+      zh-CN: Expose Event 必须由独立 `@proto.ui/module-expose-event` package 与 ModuleDef 承载，并保持独立于 Event information channel；不得让 outward key 进入 root/global input routing。Event package 只能保留有明确 deprecation 的 source re-export 与旧 wiring target 的迁移诊断，不得继续拥有 facade implementation、registry 或 sink wiring。
+      en: Expose Event must be owned by a standalone `@proto.ui/module-expose-event` package and ModuleDef and remain distinct from the Event information channel; outward keys must not enter root or global input routing. The Event package may retain explicitly deprecated source re-exports and a migration diagnostic for the old wiring target only, and must no longer own the facade implementation, registry, or sink wiring.
   - id: M-EXPOSE-EVENT-0001-B
     text:
       zh-CN: Author facade 必须由 runtime 分别投影为 setup-only `def.expose.event(key, spec?)` 与 runtime-only `run.expose.emit(key, payload?, options?)`；不得产生普通 `run.event`，当前也不得虚构独立 privileged port。
@@ -44,8 +44,8 @@ criteria:
       en: Each valid emission must read only the current sink and pass its key, payload, and opaque options; capability replacement or removal affects only later emissions and must not replay, buffer, or redirect them into Event input dispatch.
   - id: M-EXPOSE-EVENT-0001-H
     text:
-      zh-CN: Declaration registry 与 emit authority 属于 instance lifetime，必须跨 repeatable view detach/remount 保留；terminal disposal 必须清除 registration 并使残留 `run.expose.emit` authority 失败。
-      en: The declaration registry and emit authority belong to instance lifetime and must survive repeatable view detachment and remounting; terminal disposal must clear registrations and make retained `run.expose.emit` authority fail.
+      zh-CN: Expose core declaration registry 与 Expose Event emit authority 属于同一 instance lifetime，必须跨 repeatable view detach/remount 保留；terminal disposal 必须清除 core registration 并使残留 `run.expose.emit` authority 失败。Expose Event Module 不得维护可与 core registry 漂移的第二份 key map。
+      en: The Expose core declaration registry and Expose Event emission authority belong to the same instance lifetime and must survive repeatable view detachment and remounting; terminal disposal must clear the core registration and make retained `run.expose.emit` authority fail. The Expose Event Module must not keep a second key map that can drift from the core registry.
   - id: M-EXPOSE-EVENT-0001-I
     text:
       zh-CN: React `onXxx`、Vue emit/listener 与 Web Component `CustomEvent` 是 profile-specific translation，不是 Module 或 host-cap 的跨宿主形状；这些 listener props 不得泄漏进 Proto raw props，signal declaration 也不得作为 record value 暴露。
@@ -66,7 +66,6 @@ verifies:
 dependsOn:
   modules:
     - M-EXPOSE-0001
-    - M-EVENT-0001
   contracts:
     - C-EXPOSE-0005
     - C-EXPOSE-0008
@@ -77,23 +76,17 @@ dependsOn:
     - K-DESIGN-TRADEOFF-0001
 sources:
   - path: internal/records/2026-08-14-expose-event-module-adapter-audit.zh-CN.md
+  - path: internal/records/2026-08-16-expose-event-package-extraction.zh-CN.md
   - path: internal/contracts/expose/expose-event.v0.md
   - path: packages/modules/expose/src/types.ts
-  - path: packages/modules/event/src/types.ts
-  - path: packages/modules/event/src/caps.ts
-  - path: packages/modules/event/src/impl.ts
+  - path: packages/modules/expose-event/src/create.ts
+  - path: packages/modules/expose-event/src/types.ts
+  - path: packages/modules/expose-event/src/caps.ts
+  - path: packages/modules/expose-event/src/impl.ts
   - path: packages/runtime/src/kernel/handles/def.ts
   - path: packages/runtime/src/kernel/handles/run.ts
   - path: packages/modules/expose-state/src/impl.ts
 openQuestions:
-  - id: M-EXPOSE-EVENT-0001-Q-PHYSICAL-OWNERSHIP
-    question:
-      zh-CN: Expose Event 何时应从 Event package 的 composite facade 拆为独立 package/ModuleDef，或由通用 outward compositor 提供明确 ownership adapter？
-      en: When should Expose Event move from the Event package's composite facade into a standalone package or ModuleDef, or gain an explicit ownership adapter from a generalized outward compositor?
-    context:
-      zh-CN: 当前共置保持兼容且 runtime projection 已隔离公开 API，但 package 名称、facade 类型与 host-cap wiring 仍容易让维护者误判它属于 User input channel。
-      en: Current co-location preserves compatibility and runtime projection isolates the public API, but package naming, facade types, and host-cap wiring can still make maintainers mistake it for part of the User input channel.
-    blocks: [expose-event-physical-module-boundary, generalized-expose-projector-pipeline]
   - id: M-EXPOSE-EVENT-0001-Q-PAYLOAD-OPTIONS
     question:
       zh-CN: portable JSON validation、host-local payload escape hatch 与 options 白名单应由 Module、host-cap 还是 profile-specific contract 拥有？
@@ -111,6 +104,9 @@ openQuestions:
       en: All current official Adapters provide the sink, while emission is a compatibility no-op when the capability is absent; generic feature-use validation is not yet implemented.
     blocks: [configurable-runtime-module-selection, adapter-module-support-validation]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Extracted Expose Event into a standalone required package and ModuleDef, made Expose core the only declaration registry, moved Adapter sink wiring, and limited Event-package compatibility to deprecated source re-exports.
   - version: 0.2.0-rc.7
     change: revised
     summary: Cataloged the co-located semantic Module boundary, branded shared-key declaration through the Adapter translation boundary, host-neutral signal sink, instance lifetime, and official Adapter mappings.

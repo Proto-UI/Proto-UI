@@ -10,7 +10,7 @@ import {
 } from '@proto.ui/core';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
 import { asOverlay } from '@proto.ui/hooks';
-import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-event';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import { EFFECTS_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
 import {
@@ -54,7 +54,9 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
     const session = createRuntimeSession(
       proto,
       createImmediateHost((wiring) => {
-        wiring.attach('event', [[EXPOSE_EVENT_SINK_CAP, (key: string) => emitted.push(key)]]);
+        wiring.attach('expose-event', [
+          [EXPOSE_EVENT_SINK_CAP, (key: string) => emitted.push(key)],
+        ]);
       })
     );
 

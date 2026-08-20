@@ -3,7 +3,7 @@ type: contract
 title: Event bindings are cleaned up with component lifecycle
 status: draft
 since: 0.1.0
-summary: Event bindings must unbind on component teardown, and target replacement must be transparent to prototype authors.
+summary: Event bindings must preflight targets, unbind on component teardown, and recover target replacement transparently to prototype authors.
 statement:
   zh-CN: >-
     Event binding 生命周期必须由 runtime/adapter 管理，并对原型作者透明。所有通过 `def.event` 注册的 listener 必须在组件实例 unmount/dispose 时自动解绑并清理；如果 runtime 或 adapter 在实例存活期间替换 root/global target，后续 event binding 必须指向新的 target，原型作者不需要也不得负责管理 target 迁移。
@@ -34,6 +34,10 @@ criteria:
     text:
       zh-CN: Event cleanup 与 target migration 的实现策略不由本契约规定，可以通过 rebinding、stable wrapper、delegation 或其他 adapter/runtime 机制实现。
       en: The implementation strategy for Event cleanup and target migration is not prescribed by this contract; it may use rebinding, stable wrappers, delegation, or other adapter/runtime mechanisms.
+  - id: C-EVENT-0007-F
+    text:
+      zh-CN: 一次 binding attempt 必须在添加该次 attempt 的任何 host listener 前解析全部所需 target；若 target unavailable 或 target resolution 抛错，该次 attempt 不得新增 listener，target 可用后 runtime/adapter 必须能够通过显式 bind retry 重试完整 binding plan。该准则不要求 capability epoch 自动恢复失败的 attempt，也不规定 listener attachment 或 cleanup 自身抛错时的事务保证；explicit unbind 必须保持解绑，直到后续显式 bind。
+      en: A binding attempt must resolve every required target before adding any host listener for that attempt; if a target is unavailable or target resolution throws, the attempt must add no listener, and the runtime or adapter must be able to retry the complete binding plan through an explicit bind after targets become available. This criterion does not require a capability epoch to recover a failed attempt and does not define a transactional guarantee when listener attachment or cleanup itself throws; an explicit unbind must remain unbound until a later explicit bind.
 sources:
   - path: internal/contracts/event/event.v0.md
     sections:
@@ -43,6 +47,10 @@ sources:
     sections:
       - onProtoPhase
       - onCapsEpoch
+  - path: packages/modules/event/src/kernel.ts
+    sections:
+      - bindAll
+      - unbindAll
   - path: packages/adapters/web-component/test/contract/event.disabled.after-unmount.v0.contract.test.ts
     sections:
       - after disconnected
@@ -54,6 +62,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Captured automatic cleanup and transparent target migration semantics for event bindings.
+  - version: 0.2.0
+    change: strengthened
+    summary: Required target preflight, zero new listeners on target-resolution failure, and explicit complete-plan retry while leaving attachment and cleanup failure semantics open.
 tags:
   - event
   - lifecycle

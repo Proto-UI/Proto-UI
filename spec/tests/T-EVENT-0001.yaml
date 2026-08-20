@@ -3,7 +3,7 @@ type: test
 title: Event registration and dispatch tests
 status: draft
 since: 0.1.0
-summary: Shared fixtures and module/runtime/adapter tests for setup event registration, runtime callback dispatch, target binding, tokens, cleanup, and rebinding.
+summary: Shared fixtures and module/runtime/adapter tests for setup event registration, runtime callback dispatch, target binding, tokens, target-preflight failure, cleanup, and rebinding.
 cases:
   - id: T-EVENT-0001-CASE-SETUP-ROOT
     title: Root listener registration is setup-only
@@ -66,6 +66,11 @@ cases:
       - C-EVENT-0007-C
       - C-EVENT-0007-D
     expectation: cleanup-and-rebind
+  - id: T-EVENT-0001-CASE-BIND-TARGET-PREFLIGHT
+    title: Failed target preflight adds no listener and permits explicit retry
+    covers:
+      - C-EVENT-0007-F
+    expectation: target-resolution-failure-adds-no-listener-and-explicit-retry-binds-complete-plan
   - id: T-EVENT-0001-CASE-DEFAULT-ACTION-CONTROL
     title: Event port forwards a host-independent default-action cancellation request
     covers:
@@ -86,6 +91,7 @@ implementations:
       - T-EVENT-0001-CASE-NO-DEDUP
       - T-EVENT-0001-CASE-TOKEN-REMOVAL
       - T-EVENT-0001-CASE-CLEANUP-REBIND
+      - T-EVENT-0001-CASE-BIND-TARGET-PREFLIGHT
       - T-EVENT-0001-CASE-DEFAULT-ACTION-CONTROL
   - id: module-event-registration-contract
     kind: module-test
@@ -100,6 +106,7 @@ implementations:
       - T-EVENT-0001-CASE-NO-DEDUP
       - T-EVENT-0001-CASE-TOKEN-REMOVAL
       - T-EVENT-0001-CASE-CLEANUP-REBIND
+      - T-EVENT-0001-CASE-BIND-TARGET-PREFLIGHT
       - T-EVENT-0001-CASE-DEFAULT-ACTION-CONTROL
   - id: adapter-web-component-event-router-cleanup-contract
     kind: adapter-test
@@ -153,6 +160,7 @@ verifies:
         - C-EVENT-0007-B
         - C-EVENT-0007-C
         - C-EVENT-0007-D
+        - C-EVENT-0007-F
   hostCaps:
     - id: HC-DEFAULT-ACTION-0001
       anchors:
@@ -177,6 +185,9 @@ revisions:
   - version: 0.1.1
     change: refined
     summary: Added root-scoped semantic keyboard ownership coverage.
+  - version: 0.2.0
+    change: strengthened
+    summary: Added target-preflight failure, explicit complete-plan retry, and explicit-unbind stability coverage.
 tags:
   - event
   - registration

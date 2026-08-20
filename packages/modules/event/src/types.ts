@@ -1,7 +1,10 @@
 // packages/modules/event/src/types.ts
 import type { ModuleInstance } from '@proto.ui/core';
 import type { ModulePort } from '@proto.ui/core';
-import { EventListenerToken, EventTypeV0, ExposeEventSpec } from '@proto.ui/types';
+import { EventListenerToken, EventTypeV0 } from '@proto.ui/types';
+
+/** @deprecated Import ExposeEventFacade from @proto.ui/module-expose-event. */
+export type { ExposeEventFacade } from '@proto.ui/module-expose-event';
 
 export type EventDispatch = (id: string, ev: any) => void;
 export type EventInternalCallback = (ev: any) => void;
@@ -15,19 +18,7 @@ export type EventChannelFacade = {
   off(token: EventListenerToken): void;
 };
 
-export type ExposeEventFacade = {
-  // expose-event (setup-only)
-  registerExposeEvent(key: string, spec?: ExposeEventSpec): void;
-
-  // emit expose-event (runtime)
-  emit(key: string, payload?: any, options?: Record<string, unknown>): void;
-};
-
-/**
- * Physical facade exposed by the currently co-located Event package.
- * Event-channel and Expose-Event ownership remain separate semantic slices.
- */
-export type EventFacade = EventChannelFacade & ExposeEventFacade;
+export type EventFacade = EventChannelFacade;
 
 export type EventModule = ModuleInstance<EventFacade> & {
   name: 'event';

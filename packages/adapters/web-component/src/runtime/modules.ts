@@ -32,10 +32,10 @@ import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module
 import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
-  EXPOSE_EVENT_SINK_CAP,
   EVENT_GLOBAL_TARGET_CAP,
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import {
   createExposeStateWebNameMap,
@@ -179,7 +179,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
         ),
       ],
     ])
-    .use('event', [
+    .use('expose-event', [
       [
         EXPOSE_EVENT_SINK_CAP,
         (key: string, payload?: unknown, options?: Record<string, unknown>) => {
@@ -336,6 +336,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [EVENT_ROOT_TARGET_CAP, () => router.rootTarget],
       [EVENT_GLOBAL_TARGET_CAP, () => router.globalTarget],
       [EVENT_CANCEL_DEFAULT_ACTION_CAP, cancelWebEventDefaultAction],
+    ])
+    .use('expose-event', [
       [
         EXPOSE_EVENT_SINK_CAP,
         (key: string, payload?: unknown, options?: Record<string, unknown>) => {

@@ -322,6 +322,57 @@ describe('event-module: contract v0 (module semantics)', () => {
     expect(calls[0]![0]).toBe((token as any).id);
   });
 
+  it('EV-MOD-V0-1550: failed target resolution MUST add no listener and permit explicit retry', () => {
+    const sys = createSysCaps();
+    const semanticRoot = createMockTarget('semanticRoot');
+    const recoveredRoot = createMockTarget('recoveredRoot');
+
+    const caps = makeCaps({
+      sys,
+      getRootTarget: () => null,
+      getGlobalTarget: () => null,
+    });
+
+    const impl = new EventModuleImpl(caps as any, 'test-proto');
+
+    sys.__setExecPhase('setup');
+    impl.redirectSemanticRoot(semanticRoot);
+    const semanticToken = impl.on('key.down' as any);
+    const hostToken = impl.on('host:click' as any);
+
+    const calls: string[] = [];
+    sys.__setExecPhase('render');
+
+    expect(() => impl.bind((id) => calls.push(id))).toThrow(/root target unavailable/i);
+    expect(semanticRoot.__count('key.down')).toBe(0);
+    expect(impl.getDiagnostics().map((entry) => entry.bound)).toEqual([false, false]);
+
+    (caps as any).__set('getRootTarget', () => recoveredRoot);
+    (caps as any).__bumpEpoch();
+
+    expect(semanticRoot.__count('key.down')).toBe(0);
+    expect(recoveredRoot.__count('host:click')).toBe(0);
+    expect(impl.getDiagnostics().map((entry) => entry.bound)).toEqual([false, false]);
+
+    impl.bind((id) => calls.push(id));
+
+    expect(semanticRoot.__count('key.down')).toBe(1);
+    expect(recoveredRoot.__count('host:click')).toBe(1);
+    expect(impl.getDiagnostics().map((entry) => entry.bound)).toEqual([true, true]);
+
+    semanticRoot.__fire('key.down');
+    recoveredRoot.__fire('host:click');
+    expect(calls).toEqual([(semanticToken as any).id, (hostToken as any).id]);
+
+    impl.unbind();
+    expect(semanticRoot.__count('key.down')).toBe(0);
+    expect(recoveredRoot.__count('host:click')).toBe(0);
+
+    (caps as any).__bumpEpoch();
+    expect(semanticRoot.__count('key.down')).toBe(0);
+    expect(recoveredRoot.__count('host:click')).toBe(0);
+  });
+
   it('EV-MOD-V0-1600: onCapsEpoch() MUST rebind to new targets when bound', () => {
     const sys = createSysCaps();
     const rootA = createMockTarget('rootA');

@@ -35,7 +35,7 @@ const dropdownItem = definePrototype<BrutalistDropdownItemProps, BrutalistDropdo
     // P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT (destructive resting text pairing).
     def.rule({
       when: (w) => w.prop('variant').eq('destructive'),
-      intent: (i) => i.feedback.style.use(tw('text-destructive')),
+      intent: (i) => i.feedback.style.use(tw('text-destructive-ink')),
     });
 
     // P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT,

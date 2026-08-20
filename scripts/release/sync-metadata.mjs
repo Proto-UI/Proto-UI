@@ -87,8 +87,16 @@ const PACKAGE_RULES = {
     preserveReadme: true,
   },
   '@proto.ui/module-context': moduleRule('context capability'),
-  '@proto.ui/module-event': moduleRule('event capability'),
+  '@proto.ui/module-event': {
+    ...moduleRule('event capability'),
+    preserveReadme: true,
+  },
   '@proto.ui/module-expose': moduleRule('expose capability'),
+  '@proto.ui/module-expose-event': {
+    ...moduleRule('outward signal expose capability'),
+    preserveReadme: true,
+    extraKeywords: ['signal'],
+  },
   '@proto.ui/module-expose-state': moduleRule('state expose capability'),
   '@proto.ui/module-expose-state-web': moduleRule('web state expose capability'),
   '@proto.ui/module-feedback': moduleRule('feedback capability'),

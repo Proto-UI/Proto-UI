@@ -8,11 +8,8 @@ import {
   FOCUS_ROOT_TARGET_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
 } from '@proto.ui/module-focus';
-import {
-  EVENT_EMIT_CAP,
-  EVENT_GLOBAL_TARGET_CAP,
-  EVENT_ROOT_TARGET_CAP,
-} from '@proto.ui/module-event';
+import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
   AS_TRIGGER_INSTANCE_CAP,
@@ -59,8 +56,10 @@ function createToggleContext(initialRaw: BrutalistToggleProps = {}): ToggleConte
       wiring.attach('event', [
         [EVENT_ROOT_TARGET_CAP, () => rootTarget],
         [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
+      ]);
+      wiring.attach('expose-event', [
         [
-          EVENT_EMIT_CAP,
+          EXPOSE_EVENT_SINK_CAP,
           (key: string, payload: unknown) => {
             if (key === 'activeChange') activeChanges.push(payload as { active: boolean });
           },

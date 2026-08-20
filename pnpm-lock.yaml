@@ -135,6 +135,9 @@ importers:
       astro:
         specifier: ^5.6.1
         version: 5.18.1(@types/node@25.6.2)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      remark-directive:
+        specifier: ^4.0.0
+        version: 4.0.0
       sharp:
         specifier: ^0.34.2
         version: 0.34.5
@@ -223,6 +226,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -311,6 +317,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -390,6 +399,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -565,6 +577,9 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../expose-event
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
@@ -577,6 +592,21 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+
+  packages/modules/expose-event:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-expose':
+        specifier: workspace:*
+        version: link:../expose
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
 
   packages/modules/expose-state:
     dependencies:
@@ -875,6 +905,9 @@ importers:
       '@proto.ui/module-expose':
         specifier: workspace:*
         version: link:../../modules/expose
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-focus':
         specifier: workspace:*
         version: link:../../modules/focus
@@ -909,6 +942,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
@@ -947,6 +983,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
@@ -989,6 +1028,9 @@ importers:
       '@proto.ui/module-expose':
         specifier: workspace:*
         version: link:../modules/expose
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../modules/expose-state
@@ -3073,6 +3115,9 @@ packages:
   micromark-extension-directive@3.0.2:
     resolution: {integrity: sha512-wjcXHgk+PPdmvR58Le9d7zQYWy+vKEU9Se44p2CrCDPiLr2FMyiT4Fyb5UFKFC66wGB3kPlgD7q3TnoqPS7SZA==}
 
+  micromark-extension-directive@4.0.0:
+    resolution: {integrity: sha512-/C2nqVmXXmiseSSuCdItCMho7ybwwop6RrrRPk0KbOHW21JKoCldC+8rFOaundDoRBUWBnJJcxeA/Kvi34WQXg==}
+
   micromark-extension-gfm-autolink-literal@2.1.0:
     resolution: {integrity: sha512-oOg7knzhicgQ3t4QCjCWgTmfNhvQbDDnJeVu9v81r7NltNCVmhPy1fJRX27pISafdjL+SVc4d3l48Gb6pbRypw==}
 
@@ -3458,6 +3503,9 @@ packages:
 
   remark-directive@3.0.1:
     resolution: {integrity: sha512-gwglrEQEZcZYgVyG1tQuA+h58EZfq5CSULw7J90AFuCTyib1thgHPoqQ+h9iFvU6R+vnZ5oNFQR5QKgGpk741A==}
+
+  remark-directive@4.0.0:
+    resolution: {integrity: sha512-7sxn4RfF1o3izevPV1DheyGDD6X4c9hrGpfdUpm7uC++dqrnJxIZVkk7CoKqcLm0VUMAuOol7Mno3m6g8cfMuA==}
 
   remark-gfm@4.0.1:
     resolution: {integrity: sha512-1quofZ2RQ9EWdeN34S79+KExV1764+wCUGop5CPL1WGdD0ocPpu91lzPGbwWMECpEpd42kJGQwzRfyov9j4yNg==}
@@ -6290,6 +6338,16 @@ snapshots:
       micromark-util-types: 2.0.2
       parse-entities: 4.0.2
 
+  micromark-extension-directive@4.0.0:
+    dependencies:
+      devlop: 1.1.0
+      micromark-factory-space: 2.0.1
+      micromark-factory-whitespace: 2.0.1
+      micromark-util-character: 2.1.1
+      micromark-util-symbol: 2.0.1
+      micromark-util-types: 2.0.2
+      parse-entities: 4.0.2
+
   micromark-extension-gfm-autolink-literal@2.1.0:
     dependencies:
       micromark-util-character: 2.1.1
@@ -6776,6 +6834,15 @@ snapshots:
       '@types/mdast': 4.0.4
       mdast-util-directive: 3.1.0
       micromark-extension-directive: 3.0.2
+      unified: 11.0.5
+    transitivePeerDependencies:
+      - supports-color
+
+  remark-directive@4.0.0:
+    dependencies:
+      '@types/mdast': 4.0.4
+      mdast-util-directive: 3.1.0
+      micromark-extension-directive: 4.0.0
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
