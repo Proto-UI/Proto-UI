@@ -10,6 +10,7 @@ type CssRule = {
 
 const spacing: Record<string, string> = {
   '0': '0px',
+  px: '1px',
   '0.5': '0.125rem',
   '1': '0.25rem',
   '1.5': '0.375rem',

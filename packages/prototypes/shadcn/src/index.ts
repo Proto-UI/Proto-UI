@@ -16,6 +16,7 @@ export { tabsRoot, tabsList, tabsTrigger, tabsContent } from './tabs';
 export { hoverCardRoot, hoverCardTrigger, hoverCardContent } from './hover-card';
 export { dropdownRoot, dropdownTrigger, dropdownContent, dropdownItem } from './dropdown';
 export { selectRoot, selectTrigger, selectValue, selectContent, selectItem } from './select';
+export { default as shadcnSeparatorRoot } from './separator';
 export { default as shadcnTabsRoot } from './tabs/root.proto';
 export { default as shadcnTabsList } from './tabs/list.proto';
 export { default as shadcnTabsTrigger } from './tabs/trigger.proto';
@@ -132,6 +133,12 @@ export type {
   ShadcnSelectItemExposes,
   ShadcnSelectItemAsHookContract,
 } from './select/types';
+export type {
+  ShadcnSeparatorRootProps,
+  ShadcnSeparatorRootExposes,
+  ShadcnSeparatorRootStateHandles,
+  ShadcnSeparatorRootAsHookContract,
+} from './separator/types';
 export type {
   ShadcnDialogRootProps,
   ShadcnDialogRootExposes,
