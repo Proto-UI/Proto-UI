@@ -140,6 +140,7 @@ The following packages should be treated as internal or dependency-directed for 
 - `@proto.ui/module-context`
 - `@proto.ui/module-event`
 - `@proto.ui/module-expose`
+- `@proto.ui/module-expose-event`
 - `@proto.ui/module-expose-state`
 - `@proto.ui/module-expose-state-web`
 - `@proto.ui/module-feedback`

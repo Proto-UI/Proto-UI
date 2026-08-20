@@ -20,6 +20,10 @@ criteria:
     text:
       zh-CN: Root 不得提供固定 width 或 height；Scroll Area 尺寸属于调用方 layout，而不是 design-language protocol。
       en: Root must not provide a fixed width or height; Scroll Area dimensions belong to consumer layout rather than the design-language protocol.
+  - id: P-BRUTALIST-SCROLL-AREA-DEMO-RESPONSIVE-SIZING
+    text:
+      zh-CN: 参考 demo 作为 consumer layout，必须在 `w-full max-w-80` wrapper 内给 Root 使用 `h-48 w-full`；桌面宽度上限保持 20rem，在 320、360、375 与 390px viewport 下则随 preview content box 收缩，使完整 Root 与 visual scrollbar 留在 viewport 内，且不得引入 document-level horizontal overflow。Web Components、React 与 Vue 必须保持等价几何。
+      en: As consumer layout, the reference demo must give Root `h-48 w-full` inside a `w-full max-w-80` wrapper. The desktop width cap stays at 20rem, while 320, 360, 375, and 390px viewports shrink to the preview content box so the complete Root and visual scrollbar remain inside the viewport without document-level horizontal overflow. Web Components, React, and Vue must preserve equivalent geometry.
   - id: P-BRUTALIST-SCROLL-AREA-TESTED-SURFACE
     text:
       zh-CN: 当前 passing surface 包含 Base anatomy/context family binding、Viewport composed preference、Scrollbar orientation styling、host-projected Thumb geometry 与 Move Gesture-backed Thumb drag；仍不包含 track page press 或完整 Drag and Drop。
@@ -27,6 +31,7 @@ criteria:
 sources:
   - path: packages/prototypes/brutalist/src/scroll-area/root.proto.ts
   - path: packages/prototypes/brutalist/test/scroll-area.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-scroll-area.demo.ts
 dependsOn:
   contracts:
     [
@@ -41,6 +46,9 @@ inherits:
     - id: P-BASE-SCROLL-AREA
 verifies: { tests: [T-BRUTALIST-SCROLL-AREA-0001] }
 revisions:
+  - version: 0.2.0
+    change: revised
+    summary: Made the reference demo consumer sizing responsive up to the existing 20rem desktop cap so the complete Root and scrollbar remain available in phone preview frames.
   - version: 0.2.0-rc.7
     change: revised
     summary: Expanded the passing surface to Move Gesture-backed Thumb drag while retaining host-owned scroll facts and geometry.

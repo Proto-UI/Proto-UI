@@ -21,17 +21,25 @@ This document describes the visual grammar used by the Brutalist foundation and 
 | Hover   | `-1px, -1px` | `4px 4px`   |
 | Pressed | `1px, 1px`   | none        |
 
+Persistent active state is not transient press feedback. Toggle keeps its outer `3px 3px` elevation and adds a 2px inset ink frame while active; pressing preserves that inset frame, translates the control, and clears only the outer elevation until release. The inset frame uses box shadow, so state changes do not alter layout geometry.
+
 ## Color
 
-The base palette is paper plus ink. Flat accent colors carry semantic emphasis: canary for decisive actions, mint for confirmation, lavender for focus or annotation, coral for warning and press feedback, and sky for discovery or selected tracks. Gradients, glass, blur, and soft glow are excluded.
+The base palette is paper plus ink. Flat accent colors carry semantic emphasis: canary for decisive actions, mint for confirmation, lavender for annotation, coral for warning and press feedback, and sky for discovery or selected tracks. Gradients, glass, blur, and soft glow are excluded.
 
 Position, labels, geometry, and state are primary signals; color is supplementary.
 
 Each accent fill is shipped as a fixed background/foreground pair (for example `bg-main` with `text-main-foreground`). Accent foregrounds stay ink in both Light and Dark. Theme-dependent surfaces such as paper panels resolve through CSS variables so a host theme change repaints mounted controls without a pointer refresh.
 
+## Preset delivery
+
+The package-owned `BRUTALIST_THEME` manifest is the authoring source for Light and Dark semantic values. Documentation pages and the CLI preset consume generated projections of the same complete key set; examples do not maintain local palette subsets.
+
+Proto UI config v1 enables one project-wide style preset. Start a Brutalist project with `proto-ui init --prototypes brutalist`. Adding a Brutalist component to a project with another enabled preset fails before installation or generated-file changes; the CLI does not replace the application's theme automatically. With `--no-styles`, `add` succeeds with an ownership note and the application explicitly supplies every required `--pui-*` semantic token.
+
 ## Accessibility
 
-- Focus uses a visible hard outline with offset.
+- Focus uses a visible hard outline with offset. The theme `ring` resolves to the foreground color in each mode and keeps at least 3:1 contrast against both page and panel backgrounds; a Tabs panel used as the fallback entry target preserves the browser's native focus-visible outline rather than suppressing it.
 - Disabled controls preserve border and geometry while reducing emphasis.
 - Interactive targets retain accessible names and Base keyboard behavior.
 - Portaled surfaces inherit page-level theme variables.

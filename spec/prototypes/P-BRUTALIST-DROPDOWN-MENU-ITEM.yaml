@@ -54,11 +54,11 @@ criteria:
   - id: P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
     text:
       en: >-
-        Every interactive branch must co-select an explicit fill+foreground pair, never opacity-only. The base resting row uses `bg-secondary-background` with `text-foreground`. Default variant under any of `active | focused | focusVisible | pressed` uses `bg-main` with `text-main-foreground`. Destructive variant resting uses `text-destructive` (paper base retained); destructive variant under any of `active | focused | focusVisible | pressed` uses `bg-destructive` with `text-destructive-foreground`. Disabled uses `bg-secondary-background` with `text-muted-foreground` (plus `pointer-events-none`). No rule may replace a branch's foreground with a theme-global text token independently of its background.
+        Every interactive branch must co-select an explicit fill+foreground pair, never opacity-only. The base resting row uses `bg-secondary-background` with `text-foreground`. Default variant under any of `active | focused | focusVisible | pressed` uses `bg-main` with `text-main-foreground`. Destructive variant resting uses `text-destructive-ink` (paper base retained), a theme-relative ink rather than the `destructive` fill, which is unreadable on the Light paper row; destructive variant under any of `active | focused | focusVisible | pressed` uses `bg-destructive` with `text-destructive-foreground`. Disabled uses `bg-secondary-background` with `text-muted-foreground` (plus `pointer-events-none`). No rule may replace a branch's foreground with a theme-global text token independently of its background.
 
 
       zh-CN: >-
-        每个交互分支都必须同时选择显式填充+前景色对，绝不只改不透明度。基础静止行使用 `bg-secondary-background` 配 `text-foreground`。default variant 在 `active | focused | focusVisible | pressed` 任一状态下使用 `bg-main` 配 `text-main-foreground`。destructive variant 静止使用 `text-destructive`（保留纸面底）；destructive variant 在 `active | focused | focusVisible | pressed` 任一状态下使用 `bg-destructive` 配 `text-destructive-foreground`。disabled 使用 `bg-secondary-background` 配 `text-muted-foreground`（外加 `pointer-events-none`）。任何规则都不得在脱离背景的情况下用主题全局文本 token 覆盖某分支前景。
+        每个交互分支都必须同时选择显式填充+前景色对，绝不只改不透明度。基础静止行使用 `bg-secondary-background` 配 `text-foreground`。default variant 在 `active | focused | focusVisible | pressed` 任一状态下使用 `bg-main` 配 `text-main-foreground`。destructive variant 静止使用 `text-destructive-ink`（保留纸面底），即随主题变化的墨色而非 `destructive` 填充色，后者在 Light 纸面行上无法阅读；destructive variant 在 `active | focused | focusVisible | pressed` 任一状态下使用 `bg-destructive` 配 `text-destructive-foreground`。disabled 使用 `bg-secondary-background` 配 `text-muted-foreground`（外加 `pointer-events-none`）。任何规则都不得在脱离背景的情况下用主题全局文本 token 覆盖某分支前景。
 
 
   - id: P-BRUTALIST-DROPDOWN-MENU-ITEM-INTERACTION
@@ -85,6 +85,12 @@ inherits:
     - id: P-BASE-DROPDOWN-MENU-ITEM
 verifies: { tests: [T-BRUTALIST-DROPDOWN-MENU-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: amended
+    summary: >-
+      Destructive resting rows now cite `text-destructive-ink` instead of the `destructive` fill. Measured on the Light paper row the fill gave 1.41:1, below the 4.5:1 body-text floor; the ink gives 8.02:1. Dark is unchanged at 10.73:1 because the ink resolves there to the value the row already painted.
+
+
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

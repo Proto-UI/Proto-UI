@@ -1,0 +1,179 @@
+id: T-STATE-0005
+type: test
+title: State module boundary and official Adapter conformance
+status: draft
+since: 0.2.0-rc.7
+summary: Module, runtime, and official Adapter evidence verifies the State facade and port split, capability views, required installation, no-host-cap boundary, explicit rendering, and instance-lifetime preservation.
+cases:
+  - id: T-STATE-0005-CASE-FACADE-PORT-SPLIT
+    title: Author definitions and privileged State operations remain separate
+    covers:
+      - M-STATE-0001-A
+      - M-STATE-0001-B
+      - M-STATE-0001-C
+    expectation: state-facade-and-port-preserve-capability-boundaries
+  - id: T-STATE-0005-CASE-HOST-NEUTRAL
+    title: State needs no host capability and projects no host side effects
+    covers:
+      - M-STATE-0001-D
+    expectation: state-is-instance-memory-without-host-capability
+  - id: T-STATE-0005-CASE-REQUIRED-SUPPORT
+    title: Standard Runtime and official Adapter profiles install State as required
+    covers:
+      - M-STATE-0001-E
+      - A-REACT-18-19-0001-J
+      - A-VUE-3-0001-J
+      - A-WEB-COMPONENT-0001-J
+    expectation: official-adapters-expose-required-state-runtime
+  - id: T-STATE-0005-CASE-INSTANCE-LIFETIME
+    title: State values, views, and watchers survive repeatable view epochs
+    covers:
+      - M-STATE-0001-F
+      - C-STATE-0011-D
+      - C-STATE-0012-A
+      - C-STATE-0012-B
+      - C-STATE-0012-C
+      - C-STATE-0012-D
+      - C-STATE-0012-E
+    expectation: state-survives-detach-and-invalidates-on-terminal-dispose
+  - id: T-STATE-0005-CASE-AS-HOOK-PROJECTION
+    title: Privileged asHook projection shares borrowed views without authority escalation
+    covers:
+      - M-STATE-0001-G
+    expectation: as-hook-state-is-projected-as-borrowed-view
+  - id: T-STATE-0005-CASE-SEMANTIC-BRIDGES
+    title: Interaction and accessibility compatibility accessors remain outside the core facade
+    covers:
+      - M-STATE-0001-H
+    expectation: semantic-state-accessors-delegate-to-dependent-modules
+  - id: T-STATE-0005-CASE-EXPLICIT-RENDER
+    title: State mutation through each official Adapter remains separate from update
+    covers:
+      - M-STATE-0001-D
+      - A-REACT-18-19-0001-J
+      - A-VUE-3-0001-J
+      - A-WEB-COMPONENT-0001-J
+    expectation: state-mutation-does-not-render-until-adapter-update
+implementations:
+  - id: module-state-boundary-types
+    kind: workspace-check
+    status: passing
+    path: packages/modules/state/src/types.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-FACADE-PORT-SPLIT
+      - T-STATE-0005-CASE-HOST-NEUTRAL
+      - T-STATE-0005-CASE-SEMANTIC-BRIDGES
+  - id: module-state-port-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/state/test/port.v0.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-FACADE-PORT-SPLIT
+      - T-STATE-0005-CASE-HOST-NEUTRAL
+  - id: runtime-required-state-module
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/state-basic.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-REQUIRED-SUPPORT
+      - T-STATE-0005-CASE-EXPLICIT-RENDER
+  - id: runtime-state-instance-lifecycle
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/state-lifecycle.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-INSTANCE-LIFETIME
+  - id: runtime-as-hook-state-projection
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/as-hook.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-AS-HOOK-PROJECTION
+  - id: runtime-semantic-state-bridge
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/state.semantic.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-SEMANTIC-BRIDGES
+  - id: adapter-react-state-runtime
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/contract/state-runtime.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-REQUIRED-SUPPORT
+      - T-STATE-0005-CASE-EXPLICIT-RENDER
+  - id: adapter-vue-state-runtime
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/contract/state-runtime.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-REQUIRED-SUPPORT
+      - T-STATE-0005-CASE-EXPLICIT-RENDER
+  - id: adapter-web-component-state-runtime
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/state-no-auto-render.v0.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-REQUIRED-SUPPORT
+      - T-STATE-0005-CASE-EXPLICIT-RENDER
+  - id: adapter-profile-state-slice-schema
+    kind: workspace-check
+    status: passing
+    path: packages/spec/fixtures/test/adapter-profile-schema.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-REQUIRED-SUPPORT
+verifies:
+  modules:
+    - id: M-STATE-0001
+      anchors:
+        - M-STATE-0001-A
+        - M-STATE-0001-B
+        - M-STATE-0001-C
+        - M-STATE-0001-D
+        - M-STATE-0001-E
+        - M-STATE-0001-F
+        - M-STATE-0001-G
+        - M-STATE-0001-H
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-J
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-J
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-J
+exercises:
+  contracts:
+    - id: C-STATE-0001
+      role: portability-rationale
+      coverageImpact: exercises-test-surface
+      note: Exercises State as a host-neutral internal dimension with no implicit side effects.
+    - id: C-STATE-0003
+      role: api-surface
+      coverageImpact: exercises-test-surface
+      note: Exercises owned, borrowed, and observed projections through the facade and privileged port.
+    - id: C-STATE-0005
+      role: execution-order
+      coverageImpact: exercises-test-surface
+      note: Exercises explicit Adapter update after host-neutral State mutation.
+    - id: C-STATE-0012
+      role: lifecycle-model
+      coverageImpact: exercises-test-surface
+      note: Exercises instance-lifetime preservation across repeatable view epochs and terminal invalidation.
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added State Module, required official Adapter support, no-host-cap, explicit-render, capability-view, compatibility-bridge, and instance-lifecycle conformance mappings.
+tags: [state, module, adapter, lifecycle, conformance]

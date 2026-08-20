@@ -45,7 +45,7 @@ export const EXPOSE_STATE_CASES = [
     id: 'state-surface-lifecycle',
     title: 'expose-state external handles inherit expose instance lifecycle safety',
     specCase: 'T-EXPOSE-STATE-0001-CASE-LIFECYCLE',
-    covers: ['C-EXPOSE-0008-B', 'C-EXPOSE-0008-E'],
+    covers: ['C-EXPOSE-0008-B', 'C-EXPOSE-0008-E', 'C-EXPOSE-STATE-0001-I'],
     expectation: 'state-surface-lifecycle',
   },
 ] as const satisfies readonly ExposeStateCase[];

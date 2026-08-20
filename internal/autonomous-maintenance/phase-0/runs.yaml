@@ -1,0 +1,121 @@
+schemaVersion: 1
+runs:
+  - id: AM-P0-001
+    missionPath: internal/autonomous-maintenance/phase-0/missions/run-001-props.md
+    findingPaths:
+      - internal/autonomous-maintenance/phase-0/findings/AM-P0-001-F1.md
+    baselineCommit: 109083311d32c1a43ba3d66e55e7cd0b7c08f1dc
+    budgetClass: large
+    observer:
+      status: completed
+      elapsedMinutes: 25
+      tokenUsage: null
+      candidateFindingCount: 1
+      trackedMutationCount: 0
+    verification:
+      status: completed
+      classification: confirmed
+      confidence: 0.98
+    humanDecisions:
+      findingDisposition:
+        status: accepted
+        reviewMinutes: null
+      semantic:
+        status: accepted
+        reviewMinutes: null
+        notes: Retrospective acceptance before the explicit proposal-packet gate existed.
+      integration:
+        status: accepted
+        reviewMinutes: null
+        commit: 1e3ed571fe14c01e7eae09697cd5a3913428ec9c
+        notes: Props remediation committed separately; merge and release were not authorized.
+    remediation:
+      status: completed
+      completionRule: retrospective-before-review-packet-gate
+      validationStatus: passed
+      completedOn: 2026-08-19
+      reviewPacket: null
+    outcome:
+      previouslyUnknown: true
+      actionValue: 2
+      residualRiskCount: 1
+
+  - id: AM-P0-002
+    missionPath: internal/autonomous-maintenance/phase-0/missions/run-002-event-default-action.md
+    findingPaths:
+      - internal/autonomous-maintenance/phase-0/findings/AM-P0-002-F1.md
+    baselineCommit: 109083311d32c1a43ba3d66e55e7cd0b7c08f1dc
+    budgetClass: large
+    observer:
+      status: completed
+      elapsedMinutes: 18
+      tokenUsage: null
+      candidateFindingCount: 1
+      trackedMutationCount: 0
+    verification:
+      status: completed
+      classification: partially-confirmed
+      confidence: 0.96
+    humanDecisions:
+      findingDisposition:
+        status: accepted-with-corrected-scope
+        reviewMinutes: null
+      semantic:
+        status: accepted
+        reviewMinutes: null
+        notes: Accepted target preflight, explicit retry, and explicit-unbind stability only.
+      integration:
+        status: accepted
+        reviewMinutes: null
+        commit: 58d734ac8fded9adb4873b8d524476897173f19c
+        notes: Event remediation committed separately; merge and release were not authorized.
+    remediation:
+      status: completed
+      completionRule: adequate-independent-review-and-required-validation
+      validationStatus: passed
+      completedOn: 2026-08-19
+      reviewPacket: internal/autonomous-maintenance/phase-0/reviews/AM-P0-002-F1.md
+    outcome:
+      previouslyUnknown: true
+      actionValue: 2
+      residualRiskCount: 4
+
+  - id: AM-P0-003
+    missionPath: internal/autonomous-maintenance/phase-0/missions/run-003-props-doc-projection.md
+    findingPaths:
+      - internal/autonomous-maintenance/phase-0/findings/AM-P0-003-F1.md
+    baselineCommit: 0303cdf06ee6f47c16264b570d839c899057d286
+    budgetClass: medium
+    observer:
+      status: completed
+      elapsedMinutes: 9.2
+      tokenUsage: null
+      candidateFindingCount: 1
+      trackedMutationCount: 0
+    verification:
+      status: completed
+      classification: confirmed
+      confidence: 0.99
+    humanDecisions:
+      findingDisposition:
+        status: accepted
+        reviewMinutes: null
+      semantic:
+        status: accepted
+        reviewMinutes: null
+        notes: Preserved active C-PROPS-0009 semantics and limited remediation to the bilingual previews plus both directly related stale PropsKernel comments.
+      integration:
+        status: accepted
+        reviewMinutes: null
+        commit: a2cc88d41962bde747b4fd2c7654f61c12421af3
+        notes: Maintainer approved the eight-file commit and push to draft PR #451, then approved DCO repair and evidence recording; merge, publication, and release remain unauthorized.
+    remediation:
+      status: completed
+      completionRule: adequate-independent-review-and-required-validation
+      validationStatus: passed
+      completedOn: 2026-08-19
+      reviewPacket: internal/autonomous-maintenance/phase-0/reviews/AM-P0-003-F1.md
+    outcome:
+      previouslyUnknown: true
+      actionValue: 2
+      residualRiskCount: 4

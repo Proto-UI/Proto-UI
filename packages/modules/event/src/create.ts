@@ -22,8 +22,6 @@ export function createEventModule(ctx: ModuleFactoryArgs): EventModule {
           on: (type, options) => impl.on(type, options),
           onGlobal: (type, options) => impl.onGlobal(type, options),
           off: (token) => impl.off(token),
-          registerExposeEvent: (key, spec) => impl.registerExposeEvent(key, spec),
-          emit: (key, payload, options) => impl.emit(key, payload, options),
         },
         hooks: {
           onProtoPhase: (p) => impl.onProtoPhase(p),

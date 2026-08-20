@@ -5,6 +5,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
 
+import { canonicalizeLoweredVariants } from '../generated/lowered-variant-order.js';
+
 export async function collectProtoStyleTokens(root) {
   const files = await collectSourceFiles(root);
   const tokens = new Set();
@@ -205,7 +207,10 @@ function resolveExpression(node, scope) {
       if (!value.single) return emptyValue();
       parts.push(value.single);
     }
-    return asStringValue([parts.join(',')]);
+    // Keep the element list: a comma-joined string cannot tell an element
+    // boundary from a comma inside an arbitrary token such as
+    // `transition-[color,box-shadow]`.
+    return { ...asStringValue([parts.join(',')]), elements: parts };
   }
 
   if (
@@ -292,6 +297,7 @@ function resolveJoinCall(node, scope) {
       ? separatorArg.text
       : ',';
   const base = resolveExpression(node.expression.expression, scope);
+  if (base.elements) return asStringValue([base.elements.join(separator)]);
   if (!base.single) return emptyValue();
   return asStringValue([base.single.split(',').join(separator)]);
 }
@@ -513,9 +519,9 @@ function analyzeWhenVariants(node, scope) {
   const out = new Set();
 
   visit(node);
-  const variants = Array.from(out);
+  const variants = canonicalizeLoweredVariants(Array.from(out));
   if (variants.length > 0 && variants.every(isNegativeDataVariant)) return [];
-  return variants.sort(compareVariants);
+  return variants;
 
   function visit(current) {
     if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
@@ -644,14 +650,6 @@ function collectTwTokens(node, scope) {
 
     ts.forEachChild(current, (child) => visit(child, currentScope));
   }
-}
-
-function compareVariants(a, b) {
-  const order = ['dark', 'hover', 'active', 'focus', 'focus-visible', 'disabled'];
-  const ai = order.indexOf(a);
-  const bi = order.indexOf(b);
-  if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-  return a.localeCompare(b);
 }
 
 function isPropertyNamed(node, name) {

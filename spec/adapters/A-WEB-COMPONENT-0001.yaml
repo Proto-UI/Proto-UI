@@ -1,0 +1,180 @@
+id: A-WEB-COMPONENT-0001
+type: adapter
+title: Official Web Component Adapter profile
+status: active
+since: 0.2.0-rc.7
+summary: The official Web Component Adapter owns the Runtime lifecycle boundary and translates Custom Element configuration and Web input into required semantic modules.
+adapterProfile:
+  package: '@proto.ui/adapter-web-component'
+  target:
+    platform: web
+    runtime:
+      name: custom-elements
+statement:
+  zh-CN: >-
+    该 profile 表示 `@proto.ui/adapter-web-component` 面向 Web Custom Elements runtime 的 official translation identity。当前 Props slice 同时存在 attribute-backed pull source 与 `setElementProps` direct-push：前者通过 profile `getProps(el)` 分类并由 `MutationObserver` 发送 invalidation，后者剥离 presentation fields 后调用 runtime `applyRawProps`。两条入口共享 Props kernel，但 direct push 不是 host capability，attribute invalidation 也不自动 render。Event slice 固定安装 required Event Module，通过共用 Web router 把 Custom Element 及其 logical/portal surface 的 native input 翻译为 root/global Proto event stream，按 logical interaction owner 路由 semantic event，在 detach/dispose 时停止 delivery，并把 default-action request 翻译为 DOM `preventDefault()`。Lifecycle slice 由 Custom Element owner 持有 RuntimeSession，将内部 view materialization 翻译为 repeatable mount epoch；同步 DOM move 不得终止 instance，确认断开后的 terminal teardown 才 dispose，并透传结构化 lifecycle diagnostics。Lifecycle 是 Runtime 与 Adapter 的执行协议，不虚构对应 Module 或 host-cap。State slice 使用 standard Runtime 固定安装的 required State Module；其 value 与 watcher 属于 instance lifetime，mutation 不隐式触发 Custom Element render，且纯内存语义不要求 Adapter 提供 State host-cap。Expose core slice 同样由 standard Runtime 固定安装；Custom Element 通过 `getExposes()` 提供 detached App Maker record，递归 callable 自动进入 instance callback scope，registry 跨内部 repeatable view epoch 与同步 DOM move 保留且 core 不要求直接 host-cap。Expose State slice 将 internal State handle 降权为稳定、只读、同源的 external handle，并通过 Adapter 提供的 complete record sink 发布到同一 Custom Element；sink rebind/terminal disposal 清理旧 record，DOM/CSS mirror 不属于该 baseline。 Expose Event slice 将 shared-key declaration 与 outward registry/emit bridge 组合，并通过 Adapter 提供的 host-neutral signal sink 在 persistent Custom Element owner 上 dispatch 同名 `CustomEvent`；declaration metadata 不进入 element `getExposes()` record，内部 repeatable view epoch 与同步 DOM move 保留 registration。
+
+
+  en: >-
+    This profile is the official translation identity of `@proto.ui/adapter-web-component` for the Web Custom Elements runtime. Its current Props slice has both an attribute-backed pull source and a `setElementProps` direct-push path: the former classifies through profile `getProps(el)` and sends invalidation through `MutationObserver`, while the latter excludes presentation fields and calls runtime `applyRawProps`. Both ingress paths share the Props kernel, but direct push is not a host capability and attribute invalidation does not render automatically. Its Event slice installs the required Event module, uses the shared Web router to translate native input from the Custom Element and its logical or portal surfaces into root and global Proto event streams, routes semantic events by logical interaction owner, stops delivery on detach or disposal, and translates default-action requests to DOM `preventDefault()`. Its Lifecycle slice lets the Custom Element owner retain the RuntimeSession and translates internal view materialization into repeatable mount epochs; a synchronous DOM move must not terminate the instance, while terminal teardown after confirmed disconnection disposes it. The Adapter also forwards structured lifecycle diagnostics. Lifecycle is a Runtime-to-Adapter execution protocol and does not invent a corresponding Module or host capability. Its State slice uses the required State module installed by the standard Runtime; values and watchers belong to instance lifetime, mutation does not implicitly render Custom Element output, and the in-memory semantics require no State host capability from the Adapter. Its Expose core slice is likewise installed by the standard Runtime; the Custom Element provides detached App Maker records through `getExposes()`, recursively callable values automatically enter the instance callback scope, the registry survives internal repeatable view epochs and synchronous DOM moves, and the core requires no direct host capability. Its Expose State slice attenuates internal State handles into stable, read-only, same-source external handles and publishes them to the same Custom Element through an Adapter-provided complete-record sink; sink rebinding and terminal disposal clear old records, while DOM or CSS mirroring is outside this baseline. Its Expose Event slice composes shared-key declaration with the outward registry and emit bridge, then uses the Adapter-provided host-neutral signal sink to dispatch a same-named `CustomEvent` on the persistent Custom Element owner; declaration metadata does not enter the element's `getExposes()` record, and registrations survive internal repeatable view epochs and synchronous DOM moves.
+
+
+criteria:
+  - id: A-WEB-COMPONENT-0001-A
+    text:
+      zh-CN: Profile identity 必须对应 `@proto.ui/adapter-web-component` 与 Web Custom Elements runtime，不得被表述为非 Web host 的保证。
+      en: The profile identity must correspond to `@proto.ui/adapter-web-component` and the Web Custom Elements runtime and must not be represented as a guarantee for a non-Web host.
+  - id: A-WEB-COMPONENT-0001-B
+    text:
+      zh-CN: Adapter 必须把 Props Module 作为 required Module 接入，并以 translated capability 提供 `HC-PROPS-SOURCE-0001`。
+      en: The Adapter must wire the Props Module as required and provide `HC-PROPS-SOURCE-0001` as a translated capability.
+  - id: A-WEB-COMPONENT-0001-C
+    text:
+      zh-CN: Attribute-backed source 必须通过 `getProps(el)` 读取 adapter-normalized snapshot，并只用 `MutationObserver` 发送 invalidation；attribute change 本身不得自动产生 Proto render commit。
+      en: The attribute-backed source must read an adapter-normalized snapshot through `getProps(el)` and use `MutationObserver` only for invalidation; an attribute change must not automatically produce a Proto render commit.
+  - id: A-WEB-COMPONENT-0001-D
+    text:
+      zh-CN: '`setElementProps` 必须剥离 class/style presentation fields 后走 `controller.applyRawProps` direct-push path；该路径可以派发 watcher，但不得被误写为 source notification 或隐式 render。'
+      en: '`setElementProps` must exclude class and style presentation fields and use the `controller.applyRawProps` direct-push path; this path may dispatch watchers but must not be represented as source notification or implicit rendering.'
+  - id: A-WEB-COMPONENT-0001-E
+    text:
+      zh-CN: Adapter 必须把 Event Module 作为 required Module 接入，并以 translated capability 提供 `HC-EVENT-BINDING-0001` 与 `HC-DEFAULT-ACTION-0001`；这些关系不得把 DOM `EventTarget` 写成跨宿主保证。
+      en: The Adapter must wire the Event module as required and provide `HC-EVENT-BINDING-0001` and `HC-DEFAULT-ACTION-0001` as translated capabilities; these relations must not turn DOM `EventTarget` into a cross-host guarantee.
+  - id: A-WEB-COMPONENT-0001-F
+    text:
+      zh-CN: Web Component view wiring 必须把 element、logical child 与 portal surface 的 host input 只路由给当前 logical owner，翻译为当前支持的 root/global Event type，并在 detach/dispose 后停止旧 route 的 delivery。
+      en: Web Component view wiring must route host input from the element, logical children, and portal surfaces only to the current logical owner, translate it into currently supported root and global Event types, and stop delivery from the old route after detach or disposal.
+  - id: A-WEB-COMPONENT-0001-G
+    text:
+      zh-CN: Custom Element lifecycle owner 必须持有一个 Proto RuntimeSession；内部 view detach/remount 必须推进 repeatable mount epoch，同步 DOM move 不得触发 terminal teardown，而确认断开后的 owner teardown 必须且只能 dispose 该 instance 一次。
+      en: The Custom Element lifecycle owner must retain one Proto RuntimeSession; internal view detach/remount must advance repeatable mount epochs, a synchronous DOM move must not trigger terminal teardown, and owner teardown after confirmed disconnection must dispose that instance exactly once.
+  - id: A-WEB-COMPONENT-0001-H
+    text:
+      zh-CN: Adapter diagnostics 必须透传 Runtime 的 structured lifecycle event stream；deprecated CP0-CP10 只允许作为有损兼容投影，且该协议不得被建模为 Module support 或 host-cap provision。
+      en: Adapter diagnostics must forward Runtime's structured lifecycle event stream; deprecated CP0-CP10 checkpoints may exist only as a lossy compatibility projection, and this protocol must not be modeled as Module support or host-capability provision.
+  - id: A-WEB-COMPONENT-0001-I
+    text:
+      zh-CN: Custom Element owner 必须在 created callbacks 后按最新 ViewIntent 调和首次及后续内部 view epoch，在首次 commit 与 view effects 一致前隐藏 retained shell 或新 root，并让 terminal teardown 权限高于 desired presence。
+      en: The Custom Element owner must reconcile the latest ViewIntent into initial and subsequent internal view epochs after created callbacks, hide its retained shell or new root until the first commit and view effects are coherent, and let terminal teardown authority override desired presence.
+  - id: A-WEB-COMPONENT-0001-J
+    text:
+      zh-CN: Adapter 必须通过 standard Runtime 接入 required State Module，跨 repeatable view epoch 保留其 instance-owned value 与 watcher；State mutation 不得绕过显式 Adapter update 触发 Custom Element render，且 profile 不得虚构 State host-cap。
+      en: The Adapter must wire the required State module through the standard Runtime and retain its instance-owned values and watchers across repeatable view epochs; State mutation must not bypass explicit Adapter update to render Custom Element output, and the profile must not invent a State host capability.
+  - id: A-WEB-COMPONENT-0001-K
+    text:
+      zh-CN: Adapter 必须通过 standard Runtime 接入 required Expose core Module，以 Custom Element `getExposes()` 向 App Maker 返回 detached record，跨内部 repeatable view epoch 与同步 DOM move 保留 registry，并让 record 中的 JavaScript callable 自动进入所属 instance callback scope；terminal owner disposal 后 surface 必须不可用，且 profile 不得虚构 core Expose host-cap。
+      en: The Adapter must wire the required Expose core module through the standard Runtime, return a detached App Maker record from Custom Element `getExposes()`, preserve the registry across internal repeatable view epochs and synchronous DOM moves, and automatically enter the owning instance callback scope for JavaScript callables in that record; the surface must become unavailable after terminal owner disposal, and the profile must not invent a core Expose host capability.
+  - id: A-WEB-COMPONENT-0001-L
+    text:
+      zh-CN: Adapter 必须接入 required Expose State Module，并以 translated capability 提供 `HC-EXPOSES-RECORD-SINK-0001`；Custom Element 中的 state 必须是稳定、只读、同源 external handle，跨内部 repeatable view epoch 与同步 DOM move 保留，sink replacement/removal 与 terminal disposal 必须清理旧 record，且该关系不得暗含 DOM/CSS projection。
+      en: The Adapter must wire the required Expose State module and provide `HC-EXPOSES-RECORD-SINK-0001` as a translated capability; State entries on the Custom Element must be stable, read-only, same-source external handles retained across internal repeatable view epochs and synchronous DOM moves, sink replacement or removal and terminal disposal must clear old records, and this relation must not imply DOM or CSS projection.
+  - id: A-WEB-COMPONENT-0001-M
+    text:
+      zh-CN: Adapter 必须接入 required Expose Event semantic Module，并以 translated capability 提供 `HC-EXPOSE-EVENT-SINK-0001`；合法 emission 必须在 persistent Custom Element owner 上映射为同名 `CustomEvent`，declaration metadata 不得进入 `getExposes()`，跨内部 repeatable view epoch 与同步 DOM move 保留，且该关系不得被解释为 Event input routing。
+      en: The Adapter must wire the required Expose Event semantic Module and provide `HC-EXPOSE-EVENT-SINK-0001` as a translated capability; valid emissions must map to same-named `CustomEvent`s on the persistent Custom Element owner, declaration metadata must not enter `getExposes()`, registration must survive internal repeatable view epochs and synchronous DOM moves, and this relation must not be interpreted as Event input routing.
+supports:
+  modules:
+    - id: M-PROPS-0001
+      role: required-module
+      note: Props is required for the standard Maker-to-Component configuration channel.
+    - id: M-EVENT-0001
+      role: required-module
+      note: Event is installed for the standard User-to-Component interaction channel; host binding is only required for scopes with registrations.
+    - id: M-STATE-0001
+      role: required-module
+      note: State is the host-neutral instance memory baseline and requires no Adapter-provided host capability.
+    - id: M-EXPOSE-0001
+      role: required-module
+      note: Expose core provides the standard Component-to-App-Maker registry and directly requires no Adapter-provided host capability.
+    - id: M-EXPOSE-STATE-0001
+      role: required-module
+      note: Expose State finalizes the complete outward record and attenuates internal State handles before Adapter publication.
+    - id: M-EXPOSE-EVENT-0001
+      role: required-module
+      note: The standalone Expose Event module owns the Component-to-App-Maker outward-signal bridge and receives its sink through expose-event wiring.
+provides:
+  hostCaps:
+    - id: HC-PROPS-SOURCE-0001
+      role: translated-capability
+      note: A custom getProps classifier and MutationObserver provide the attribute-backed source; imperative snapshots use a separate direct-push path.
+    - id: HC-EVENT-BINDING-0001
+      role: translated-capability
+      note: The shared Web router translates DOM input from Custom Element and logical surfaces into Adapter-owned root and global Proto event streams.
+    - id: HC-DEFAULT-ACTION-0001
+      role: translated-capability
+      note: Default-action cancellation requests are translated to preventDefault when the native DOM event supports it.
+    - id: HC-EXPOSES-RECORD-SINK-0001
+      role: translated-capability
+      note: The Custom Element receives classified translation snapshots, filters declaration descriptors, and returns detached public records through getExposes.
+    - id: HC-EXPOSE-EVENT-SINK-0001
+      role: translated-capability
+      note: The persistent Custom Element owner dispatches validated outward signals as same-named CustomEvents.
+relates:
+  decisions:
+    - D-ADAPTER-PROFILE-0001
+verifies:
+  tests:
+    - T-ADAPTER-PROFILE-0001
+    - T-PROPS-0012
+    - T-EVENT-0003
+    - T-LIFECYCLE-0003
+    - T-LIFECYCLE-0005
+    - T-LIFECYCLE-0006
+    - T-STATE-0005
+    - T-EXPOSE-0002
+    - T-EXPOSE-STATE-0002
+    - T-EXPOSE-EVENT-0002
+openQuestions:
+  - id: A-WEB-COMPONENT-0001-Q-INGRESS-PRECEDENCE
+    question:
+      zh-CN: '`setElementProps` 写入的 element-local snapshot 与 attribute-derived `getProps(el)` 应保持互斥接管、建立 merge precedence，还是拆为两个显式 profile mode？'
+      en: 'Should an element-local snapshot written by `setElementProps` take over mutually from attribute-derived `getProps(el)`, follow a defined merge precedence, or become one of two explicit profile modes?'
+    context:
+      zh-CN: 当前 `getElementProps(el)` 一旦存在就优先于 `getProps(el)`；本轮记录事实，不在没有兼容性决策时改变行为。
+      en: Currently `getElementProps(el)` takes precedence once present; this pass records the fact without changing behavior before a compatibility decision.
+    blocks: [web-component-props-ingress-profile]
+sources:
+  - path: packages/adapters/web-component/package.json
+  - path: packages/adapters/web-component/src/adapt.ts
+  - path: packages/adapters/web-component/src/props.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+  - path: packages/adapters/web-component/test/contract/props-host-source.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/props-reprovide.test.ts
+  - path: packages/adapters/base/src/events/web-event-router.ts
+  - path: packages/adapters/web-component/test/contract/event.router.mapping.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/contract/event.router.dispose.v0.contract.test.ts
+  - path: packages/adapters/web-component/src/runtime/session.ts
+  - path: packages/adapters/web-component/test/contract/lifecycle-events.v1.contract.test.ts
+  - path: packages/adapters/web-component/test/contract/lifecycle-wc-adapter.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/lifecycle-view-intent.test.ts
+  - path: packages/adapters/web-component/test/state-no-auto-render.v0.test.ts
+  - path: packages/adapters/base/src/host/exposes.ts
+  - path: packages/adapters/web-component/test/contract/expose.basic.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/expose.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Migrated the outward signal sink from Event wiring to the standalone Expose Event Module.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required Expose Event support, translated signal sink provision, persistent-owner CustomEvent mapping, and declaration-record exclusion.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required Expose State composition, finalized-record sink provision, stable read-only external handles, and sink lifecycle criteria.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required host-neutral Expose core support, Custom Element record access, instance-lifetime preservation, terminal invalidation, and automatic callback-scope translation.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required host-neutral State Module support, instance-lifetime preservation, explicit-render behavior, and no-host-cap criteria.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Cataloged lifecycle ownership, repeatable mount epochs, structured diagnostics, confirmed-disconnection disposal, and ViewIntent reconciliation without inventing a Lifecycle Module or host capability.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required Event Module support, translated scoped Event binding, Default Action provision, logical-owner routing and disposal criteria, and conformance evidence.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the official Web Component profile identity and its source plus direct-push Props translation slice.
+tags:
+  [adapter, web-component, custom-elements, web, props, event, lifecycle, state, expose, official]

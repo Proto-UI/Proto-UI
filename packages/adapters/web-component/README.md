@@ -13,7 +13,7 @@ Adapter package intended to be used together with Proto UI prototypes and the sh
 ## Install
 
 ```bash
-npm install @proto.ui/adapter-web-component@0.2.0-rc.7
+npm install @proto.ui/adapter-web-component@0.3.0-alpha.0
 ```
 
 ## Internal Structure
@@ -42,6 +42,7 @@ npm install @proto.ui/adapter-web-component@0.2.0-rc.7
 - `@proto.ui/module-boundary`
 - `@proto.ui/module-context`
 - `@proto.ui/module-event`
+- `@proto.ui/module-expose-event`
 - `@proto.ui/module-expose-state`
 - `@proto.ui/module-expose-state-web`
 - `@proto.ui/module-feedback`

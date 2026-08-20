@@ -1,0 +1,114 @@
+id: M-STATE-0001
+type: module
+title: State module
+status: draft
+since: 0.1.0
+summary: The required host-neutral State module owns instance-lifetime state slots, controlled capability views, portable change records, and privileged view projection without host capabilities.
+statement:
+  zh-CN: >-
+    State module 是 standard Proto UI runtime 与 official Adapter 的必装 instance module。它拥有有限 host-neutral value spec 的 state slot、owned view facade、portable StateEvent、watch registration 与 deterministic mutation record；runtime 将 facade 投影为 setup-time `def.state.bool`、`enum`、`string`、`numberRange` 与 `numberDiscrete`。Privileged port 供 runtime、其它 Module 与特权 asHook 进行 internal mutation、watch、disconnect 以及 observed/borrowed view projection，不进入普通作者 surface。State logical resources 属于 instance lifetime，跨 repeatable view detach/remount 保留并在 terminal disposal 失效。Module 不投射宿主效果、不隐式 render，也不索取 host-cap。
+
+
+  en: >-
+    The State module is a required instance module for the standard Proto UI runtime and official Adapters. It owns state slots with finite host-neutral value specs, an owned-view facade, portable StateEvents, watch registrations, and deterministic mutation records; the runtime projects its facade as the setup-time `def.state.bool`, `enum`, `string`, `numberRange`, and `numberDiscrete` APIs. Its privileged port lets the runtime, other Modules, and privileged asHooks perform internal mutation, watch, disconnection, and observed or borrowed view projection without entering the ordinary author surface. State logical resources belong to the instance lifetime, survive repeatable view detachment and remounting, and become invalid on terminal disposal. The Module projects no host effects, never renders implicitly, and requires no host capability.
+
+
+criteria:
+  - id: M-STATE-0001-A
+    text:
+      zh-CN: Module facade 必须提供 `bool`、`enum`、`string`、`numberRange` 与 `numberDiscrete` state definition，并返回 owned view；runtime 必须把这些定义 API 仅投影到 setup-time `def.state`，不得建立普通 `run.state` mutation surface。
+      en: The module facade must provide `bool`, `enum`, `string`, `numberRange`, and `numberDiscrete` state definitions returning owned views; the runtime must project these definition APIs only onto setup-time `def.state` and must not create an ordinary `run.state` mutation surface.
+  - id: M-STATE-0001-B
+    text:
+      zh-CN: Module port 必须为 runtime、其它 Module 与特权 asHook 提供 internal `watch`、`disconnect`、`set`、`setDefault` 以及 observed/borrowed view creation；这些能力必须维持 capability view 与 phase boundary，不得直接暴露给普通作者。
+      en: The module port must provide internal `watch`, `disconnect`, `set`, `setDefault`, and observed or borrowed view creation for the runtime, other Modules, and privileged asHooks; these capabilities must preserve capability-view and phase boundaries and must not be exposed directly to ordinary authors.
+  - id: M-STATE-0001-C
+    text:
+      zh-CN: Module 必须区分 owned、borrowed 与 observed view，不得向作者暴露裸 state slot；每种 view 的 `get`、`setDefault`、`set` 与 `watch` 能力必须符合对应 `C-STATE-*` 契约且不可动态升级。
+      en: The Module must distinguish owned, borrowed, and observed views and must not expose raw state slots to authors; each view's `get`, `setDefault`, `set`, and `watch` capabilities must follow the corresponding `C-STATE-*` contracts and must not be dynamically escalated.
+  - id: M-STATE-0001-D
+    text:
+      zh-CN: State value、spec 与 StateEvent 必须保持 host-neutral；Module 不得读取 host object、索取 host-cap、投射宿主效果，或因 mutation/watch callback 隐式请求 render、commit、update 或 feedback flush。
+      en: State values, specs, and StateEvents must remain host-neutral; the Module must not read host objects, require host capabilities, project host effects, or implicitly request render, commit, update, or feedback flush because of mutation or a watch callback.
+  - id: M-STATE-0001-E
+    text:
+      zh-CN: Standard Runtime 与 official Adapter profile 必须安装 State Module，使 `def.state.*` 与依赖 State port 的基础组合能力可用；未来可配置 runtime 若缺失 State，必须在使用相关 syntax 或依赖 Module 前明确拒绝，而不是静默 no-op。
+      en: The standard Runtime and official Adapter profiles must install the State module so `def.state.*` and foundational composition that depends on the State port remain available; a future configurable runtime missing State must explicitly reject relevant syntax or dependent Modules before use rather than silently no-op.
+  - id: M-STATE-0001-F
+    text:
+      zh-CN: State slot、value、view identity 与 watcher registration 属于 instance lifetime，必须跨 repeatable detach/remount 保留；只有 terminal disposal 或显式 semantic source disconnection 可以发出 disconnect，terminal disposal 必须清理 subscription 并使残留 view 失效。
+      en: State slots, values, view identities, and watch registrations belong to the instance lifetime and must survive repeatable detachment and remounting; only terminal disposal or explicit semantic-source disconnection may emit disconnect, and terminal disposal must clean subscriptions and invalidate retained views.
+  - id: M-STATE-0001-G
+    text:
+      zh-CN: asHook state projector 可以通过 privileged port 将捕获的 owned handle 递归投影为 borrowed view，使调用方共享控制与观察；该投影不得泄漏裸 slot、改变 state identity 或把 borrowed/observed view 升级为 owned authority。
+      en: The asHook state projector may use the privileged port to recursively project captured owned handles as borrowed views so callers can share control and observation; that projection must not leak raw slots, change state identity, or upgrade a borrowed or observed view to owned authority.
+  - id: M-STATE-0001-H
+    text:
+      zh-CN: '`def.state.fromInteraction` 与 `fromAccessibility` 是 runtime 对 State Interaction / State Accessibility Module facade 的 deprecated compatibility bridge，不属于 core State Module facade；外围语义 Module 可以依赖 State facade/port，但不得把自己的 host input 或语义所有权归入 `M-STATE-0001`。'
+      en: '`def.state.fromInteraction` and `fromAccessibility` are deprecated runtime compatibility bridges to the State Interaction and State Accessibility Module facades rather than part of the core State module facade; peripheral semantic Modules may depend on the State facade and port but must not move their host input or semantic ownership into `M-STATE-0001`.'
+satisfies:
+  contracts:
+    - C-STATE-0001
+    - C-STATE-0002
+    - C-STATE-0003
+    - C-STATE-0004
+    - C-STATE-0005
+    - C-STATE-0006
+    - C-STATE-0007
+    - C-STATE-0008
+    - C-STATE-0009
+    - C-STATE-0010
+    - C-STATE-0011
+    - C-STATE-0012
+verifies:
+  tests:
+    - T-STATE-0001
+    - T-STATE-0002
+    - T-STATE-0003
+    - T-STATE-0004
+    - id: T-STATE-0005
+      since: 0.2.0-rc.7
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0006
+  knowledge:
+    - K-COMPONENT-ACTOR-0001
+    - K-DESIGN-TRADEOFF-0001
+sources:
+  - path: internal/records/2026-08-13-module-host-cap-adapter-catalog-route.zh-CN.md
+  - path: internal/records/2026-08-14-state-module-adapter-audit.zh-CN.md
+  - path: internal/contracts/state/state-v0.md
+  - path: internal/contracts/state/state-handle-views.v0.md
+  - path: internal/contracts/state/state-watch.v0.md
+  - path: packages/modules/state/src/create.ts
+  - path: packages/modules/state/src/types.ts
+  - path: packages/modules/state/src/impl.ts
+  - path: packages/modules/state/src/kernel.ts
+  - path: packages/runtime/src/instance/instance.ts
+  - path: packages/runtime/src/kernel/handles/def.ts
+  - path: packages/runtime/src/kernel/as-hook.ts
+openQuestions:
+  - id: M-STATE-0001-Q-VALUE-VALIDATION
+    question:
+      zh-CN: 何时应把现有 validator helper 接入 define、`setDefault` 与 `set`，并决定 range clamp 与 invalid mutation 的统一诊断语义？
+      en: When should the existing validator helpers be wired into definition, `setDefault`, and `set`, with unified diagnostics for range clamping and invalid mutation?
+    context:
+      zh-CN: 当前 Module 保存有限 spec metadata，但 kernel 尚未执行完整 value-domain validation；`C-STATE-0006-Q-VALIDATION` 仍是明确债务，本轮不把 helper 的存在冒充 runtime guarantee。
+      en: The Module currently preserves finite spec metadata, but the kernel does not yet enforce complete value-domain validation; `C-STATE-0006-Q-VALIDATION` remains explicit debt, and this pass does not treat the helper's existence as a runtime guarantee.
+    blocks: [state-value-validation-implementation]
+  - id: M-STATE-0001-Q-REQUIRED-MODULE-VALIDATION
+    question:
+      zh-CN: 未来可配置 module set 应由 schema、runtime graph 还是 Adapter conformance 在 setup 前拒绝缺失 State 及其 dependent Modules？
+      en: Should a future configurable module set use schema validation, the runtime graph, or Adapter conformance to reject missing State and its dependent Modules before setup?
+    context:
+      zh-CN: 当前 Runtime 固定安装 StateModuleDef，三个 official Adapter 没有正常的缺失路径；required 属性仍需要未来通用 module selection 机制承接。
+      en: The current Runtime installs StateModuleDef unconditionally and the three official Adapters have no normal missing path; a future generic module-selection mechanism still needs to enforce required status.
+    blocks: [configurable-runtime-module-selection]
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Cataloged the State facade, privileged port, capability views, required official Adapter support, no-host-cap boundary, instance lifetime, asHook projection, semantic compatibility bridges, and validation debt.
+  - version: 0.1.0
+    change: introduced
+    summary: Established the State module identity for host-neutral internal state semantics.
+tags: [state, module, required, host-neutral, adapter, lifecycle]

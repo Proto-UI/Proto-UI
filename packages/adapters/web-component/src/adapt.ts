@@ -247,6 +247,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         }
         fn();
       };
+      const scopedExposesReader = createScopedExposesReader(() => runFocusCallbackScope);
       const setExposes = (record: Record<string, unknown>) => {
         this._exposes = record;
       };
@@ -314,6 +315,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           },
           clearSlotProjector,
           onAfterUnmount: () => {
+            scopedExposesReader.invalidate();
+            runFocusCallbackScope = null;
             this._exposes = {};
             this._applier?.clear();
             this._applier = null;
@@ -468,9 +471,6 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       installDebugHooks(thisEl, hostSession.caps);
 
       (this as any).update = () => controller.update();
-      const scopedExposesReader = createScopedExposesReader(
-        () => hostSession.invokeInCallbackScope
-      );
 
       (this as any).getExposes = () => {
         if (!this.isConnected) return {};

@@ -1,0 +1,88 @@
+id: HC-EVENT-BINDING-0001
+type: host-cap
+title: Host binds scoped Event registrations to translated interaction streams
+status: draft
+since: 0.2.0-rc.7
+summary: The adapter binds distinct root- or global-scoped Event registrations to host interaction streams, translates supported Proto event types and payloads, and releases each binding without exposing concrete host targets to prototype authors.
+statement:
+  zh-CN: >-
+    Event Binding host capability 允许 Adapter 按 `root` 或 `global` logical scope 为 Event Module 建立独立 registration binding，把宿主输入翻译为所声明的 Proto event type 与 payload，并返回可释放该 binding 的 lease。Capability 不要求宿主提供 Web `EventTarget`、DOM node、window、document 或任何其它具体 target 对象；这些对象、native listener、delegation、portal routing 与 target replacement 均留在 Adapter 内部。没有 registration 时不得要求 capability 可用，只有实际使用的 scope 才必须能够绑定。
+
+
+  en: >-
+    The Event Binding host capability lets an adapter establish an independent registration binding for a `root` or `global` logical scope, translate host input into the declared Proto event type and payload, and return a lease that releases that binding. The capability does not require the host to provide a Web `EventTarget`, DOM node, window, document, or any other concrete target object; such objects, native listeners, delegation, portal routing, and target replacement remain inside the adapter. The capability is not required when there are no registrations, and only a scope that is actually used must be bindable.
+
+
+criteria:
+  - id: HC-EVENT-BINDING-0001-A
+    text:
+      zh-CN: capability 必须能为每个 root/global registration 建立独立 binding，并返回幂等释放该 binding 的 lease 或 disposer；相同 type 与 options 的 registration 不得因此被去重。
+      en: The capability must establish an independent binding for each root or global registration and return a lease or disposer that idempotently releases it; registrations with the same type and options must not be deduplicated as a result.
+  - id: HC-EVENT-BINDING-0001-B
+    text:
+      zh-CN: Adapter 必须拥有 root interaction owner 与 global scope 的宿主映射；prototype author 与 Event facade 不得读取、选择或依赖具体宿主 target。
+      en: The adapter must own the host mapping of the root interaction owner and global scope; prototype authors and the Event facade must not read, select, or depend on concrete host targets.
+  - id: HC-EVENT-BINDING-0001-C
+    text:
+      zh-CN: capability 必须把宿主输入翻译为 registration 声明的 Event type，并满足相应 portable payload contract；native event 与 concrete target 只能作为 host-local escape hatch。
+      en: The capability must translate host input into the Event type declared by the registration and satisfy its applicable portable payload contract; native events and concrete targets may only be host-local escape hatches.
+  - id: HC-EVENT-BINDING-0001-D
+    text:
+      zh-CN: 没有 Event registration 时不得读取或要求 root/global binding；只存在 root registration 时不得要求 global scope 可用，反之亦然。
+      en: With no Event registrations, root or global binding must not be read or required; root-only registrations must not require a global scope, and vice versa.
+  - id: HC-EVENT-BINDING-0001-E
+    text:
+      zh-CN: root/global target、view epoch 或 Adapter route owner 变化时，后续 delivery 必须使用当前映射，旧 binding 必须被释放且不得继续派发。
+      en: When a root or global target, view epoch, or adapter route owner changes, subsequent delivery must use the current mapping and the old binding must be released and must no longer dispatch.
+  - id: HC-EVENT-BINDING-0001-F
+    text:
+      zh-CN: instance unmount、terminal disposal 或 registration removal 必须释放对应宿主 listener、observer、delegate 与其它 binding resource。
+      en: Instance unmount, terminal disposal, or registration removal must release the corresponding host listener, observer, delegate, and other binding resources.
+relates:
+  contracts:
+    - C-EVENT-0002
+    - C-EVENT-0003
+    - C-EVENT-0004
+    - C-EVENT-0005
+    - C-EVENT-0007
+    - C-EVENT-TYPE-0001
+    - C-EVENT-TYPE-0002
+    - C-EVENT-TYPE-0003
+    - C-EVENT-TYPE-0004
+  knowledge:
+    - K-INFORMATION-CHANNEL-0001
+    - K-DESIGN-TRADEOFF-0001
+verifies:
+  tests:
+    - T-EVENT-0003
+sources:
+  - path: internal/records/2026-08-14-event-module-host-cap-adapter-audit.zh-CN.md
+  - path: internal/contracts/event/event.v0.md
+  - path: packages/modules/event/src/caps.ts
+  - path: packages/modules/event/src/impl.ts
+  - path: packages/adapters/base/src/events/web-event-router.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+openQuestions:
+  - id: HC-EVENT-BINDING-0001-Q-LEASE-SHAPE
+    question:
+      zh-CN: 当前 `EventTarget` getter cap 应直接替换为统一 `bind(registration) => lease`，还是保留为 Web-only helper 并由新的跨宿主 binding cap 包装？
+      en: Should the current `EventTarget` getter caps be replaced directly by a unified `bind(registration) => lease`, or remain Web-only helpers wrapped by a new cross-host binding cap?
+    context:
+      zh-CN: 当前三类 official profile 都是 Web host，可以通过 `EventTarget` 实现完整语义；该形状不能证明 Flutter 或其它非 DOM host 能自然提供相同对象。
+      en: All current official profiles are Web hosts and can realize the semantics through `EventTarget`; this shape does not prove that Flutter or another non-DOM host can naturally provide the same object.
+    blocks: [cross-host-event-binding-port]
+  - id: HC-EVENT-BINDING-0001-Q-OPTIONS
+    question:
+      zh-CN: Event registration options 的 portable subset 应为空、只包含一次性策略，还是定义独立于 DOM capture/passive 的跨宿主策略对象？
+      en: Should the portable Event registration options subset be empty, contain only a once policy, or define a cross-host policy object independent of DOM capture and passive options?
+    context:
+      zh-CN: 当前 facade 类型直接使用 DOM `EventListenerOptions`，属于未解决的 Web 偏置；本轮不把它提升为 host-cap guarantee。
+      en: The current facade type directly uses DOM `EventListenerOptions`, which is unresolved Web bias; this pass does not promote it into a host-cap guarantee.
+    blocks: [portable-event-listener-options]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged host-neutral scoped Event binding, translation, conditional availability, rebinding, and cleanup while recording the current EventTarget realization as portability debt.
+tags: [host-capability, event, binding, adapter, lifecycle]

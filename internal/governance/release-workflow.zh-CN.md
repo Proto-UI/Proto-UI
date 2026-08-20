@@ -39,6 +39,16 @@
 - 40 位发布 commit SHA
 - `sha256` spec snapshot digest
 
+### 2.3 Prerelease 阶段
+
+Prerelease suffix 用来表达稳定化阶段，而不是泛化的内部构建顺序：
+
+- `alpha` 可以接纳经过评审的架构调整、顶层 API 变化与新 feature；它不表示 API freeze 或 feature freeze。
+- `beta` 在核心范围与主要 API 收敛后开启，重点转向集成、兼容与缺陷修复；出现新的 breaking 方向时必须明确判断是否退回 alpha。
+- `rc` 只用于维护者认为可在最终验证或 blocker 修复后直接晋升对应 stable 的候选；仍计划架构重构、顶层 breaking API 变化或新增核心 feature 时不得使用 rc。
+
+每个实际发布的阶段仍必须拥有精确 V 实体、完整全局对齐 package set、tag、dist-tag 与不可变 snapshot evidence。
+
 ## 3. 准备流程
 
 1. 从最新 `main` 创建 topic branch。

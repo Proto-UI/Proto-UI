@@ -1,4 +1,5 @@
 export * from './style';
+export * from './theme';
 export { default as button, default as brutalistButton } from './button';
 export type {
   BrutalistButtonColor,

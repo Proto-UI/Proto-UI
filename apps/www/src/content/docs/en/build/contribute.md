@@ -1,155 +1,123 @@
 ---
 title: 'How to Contribute'
-description: 'Contribution paths, entry points, and practical advice for the current phase of Proto UI'
+description: 'Choose work by contribution readiness and take a Proto UI change from local development to a reviewable pull request.'
 ---
 
-## Start here
+Proto UI does not create a large starter queue by lowering its protocol or engineering standards. Instead, the project aims to make decided boundaries explicit so first-time contributors, experienced implementers, and core-design contributors can each find an appropriate entry point.
 
-If you're new to Proto UI, the simplest first step is to browse [Good First Issues](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22) — they're scoped with clear acceptance criteria. Comment on the issue before starting. If the scope or approach isn't clear, ask in [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions).
+The repository [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md) is authoritative for environment setup, DCO, provenance, validation, and the pull-request workflow. This page helps you choose a path.
 
-## Contribution rights and provenance
+## Check contribution readiness first
 
-Proto UI accepts contributions under its current [MIT License](https://github.com/Proto-UI/Proto-UI/blob/main/LICENSE), and contributors retain copyright in original work. Every new commit, including documentation and small fixes, must carry a DCO 1.1 `Signed-off-by` trailer. Third-party or materially AI-assisted content must be disclosed so reviewers can verify its source and usage rights.
+Effort and readiness are different. A semantic boundary may be fully decided while its delivery surface remains large; a small code change may still depend on unresolved architecture.
 
-The repository policies are authoritative. Read [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md), the verbatim [DCO 1.1](https://github.com/Proto-UI/Proto-UI/blob/main/DCO.md), and the [contribution provenance policy](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/contribution-provenance.md) before opening a pull request.
+### Starter
 
-## Choose a path
+F1–F2 work with a fixed expected result and little Proto UI domain judgment, such as:
 
-### Prototype
+- fixing existing docs, demos, narrow-screen behavior, or dark mode;
+- adding a bounded regression test for existing behavior;
+- correcting an accessible name or preview entry; or
+- improving an existing English or Chinese page.
 
-This path is about **how a component should interact** — state flow, events, feedback, and interaction semantics.
+Work genuinely suitable for a first pull request carries the [`good first issue`](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22) label. An empty list does not mean contributions are closed.
 
-**Best for:** component library developers, design system engineers, headless component authors, accessibility specialists
+### Contributor-ready
 
-**Typical tasks:**
+The semantic boundary is decided, but implementation may still be F3–F5. Experienced component-library, design-system, and framework contributors can inspect [`help wanted`](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22help+wanted%22) issues and confirm that the issue states:
 
-- Adding a specific interaction capability to an existing prototype
-- Creating a new, well-scoped base prototype
-- Improving state / feedback expression for an existing prototype
+- what is already decided;
+- what the contributor may decide;
+- what implementation must not change;
+- whether implementation is authorized; and
+- the required validation.
 
-**Start here:**
+`help wanted` does not override `needs maintainer design`. Wait for a recorded maintainer checkpoint when both apply.
 
-- [Prototype Proposal Template](https://github.com/Proto-UI/Proto-UI/issues/new?template=prototype-proposal.md)
-- [Good First Issues: prototype](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aprototype)
-- [Writing A Custom Primitive Prototype](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/) (Chinese — English version in progress)
-- [Prototype Author Checklist](/zh-cn/build/prototypes/checklist/) (Chinese)
+### Maintainer-guided
 
-**Before opening a PR:** describe the interaction behavior, explain the prototype boundary if relevant, and include preview / tests when possible.
+New Base subjects, Prototype admission, protocol ownership, and cross-layer architecture start as assessments or proposals. Do not open an implementation pull request until the issue records a maintainer checkpoint.
 
----
+## Spec entities first
 
-### Adapter
+Before editing, find the applicable `P-*` entity and read its lifecycle, criteria, relations, sources, and `T-*` evidence.
 
-This path is about **how prototypes land in a specific host** — contract mapping, capability gaps, and host-native fidelity.
+The authority order is:
 
-**Best for:** framework maintainers, platform engineers, anyone deeply familiar with React, Vue, Web Components, Flutter, Qt, or native UI technologies
+```text
+applicable spec entity
+→ internal contract for an uncataloged gap or explanation
+→ relevant dated record for current context
+→ implementation and tests as evidence
+→ README and website as reader projections
+```
 
-**Typical tasks:**
+Treat a mismatch as drift to investigate rather than assuming the current implementation silently amended the spec. See the [spec catalog guide](https://github.com/Proto-UI/Proto-UI/blob/main/spec/README.md) for entity authoring rules.
 
-- Filling in a contract-adherence gap for an existing host
-- Improving host-side fidelity for an existing prototype
-- Building a minimal working adapter for a new host
+## Prototype paths available now
 
-**Start here:**
+The current `P-*` catalog supports complete Prototype contribution paths.
 
-- [Adapter Proposal Template](https://github.com/Proto-UI/Proto-UI/issues/new?template=adapter-proposal.md)
-- [Good First Issues: adapter](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aadapter)
-- [Adapter Guide](/en/build/adapter-guide/) (in progress — see Chinese version [here](/zh-cn/build/adapter-guide/))
+### Maintain an existing Prototype
 
-**Before opening a PR:** confirm the host capability mapping, explain fallback strategies if any, and test across host scenarios.
+Fix existing behavior, add regression coverage, improve docs and demos, or reconcile drift among P/T entities, implementation, exports, and public pages.
 
----
+[Read the existing Prototype maintenance guide](/en/build/prototypes/maintaining-an-existing-prototype/)
 
-### Contracts / Tests
+### Project Base into a design language
 
-This path is about **what it means to "really support" a capability** — verifying that prototypes are clearly defined and adapters truly fulfill their contracts.
+Add design-language props, tokens, rules, and visual anatomy on top of an existing Base protocol. Do not redefine value, event, focus, accessibility, or host-capability semantics already owned by Base. Every new public Prototype must also appear on a reachable website page where maintainers can interact with the real package export.
 
-**Best for:** engineers who care about semantic boundaries, behavior verification, and contract consistency
+[Read the design-language projection guide](/en/build/prototypes/projecting-base-into-a-design-language/)
 
-**Typical tasks:**
+### Implement an approved Base semantic slice
 
-- Adding contract tests for existing capabilities
-- Writing minimal verification for documented semantics
-- Spotting and constraining inconsistent behavior in prototypes or adapters
+This is advanced implementation work. The independent subject, information paths, negative boundary, public API, P/T graph, and validation scope must first pass a maintainer checkpoint. A complete slice includes a website page and the applicable Web Component, React, and Vue previews, not source and tests alone.
 
-**Start here:**
+[Read the approved Base slice implementation guide](/en/build/prototypes/implementing-an-approved-base-slice/)
 
-- [Contracts & Tests](/en/build/contracts-and-tests/) (in progress — see Chinese version [here](/zh-cn/build/contracts-and-tests/))
-- [Good First Issues: automation](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aautomation)
+### Propose a new Base subject
 
-**Before opening a PR:** describe what the contract verifies, why the boundary is drawn there, and include tests that fail before the change passes.
+A familiar component name, directory, or styled-library need does not establish a Base Prototype. A proposal must prove an independent, cross-host, testable protocol subject with an owned input-fact-to-observable-output path.
 
----
+[Use the Prototype Proposal template](https://github.com/Proto-UI/Proto-UI/issues/new?template=prototype-proposal.md)
 
-### Docs / Demo
+## Website preview is part of Prototype delivery
 
-This path is about **whether others can understand Proto UI** — lowering the barrier for new users and contributors.
+Every new public Prototype identity or anatomy family must appear on a reachable website page in the same pull request. That page must consume the real public package export and provide the applicable Web Component, React, and Vue previews. Record a local route that maintainers can open directly; the internal Demo Matrix does not replace this page.
 
-**Best for:** technical writers, educators, anyone who can turn abstract concepts into clear docs, examples, diagrams, or demos
+A demo should approximate direct usage after package installation. An autonomous Prototype should work through its own anatomy, triggers, state, events, and defaults instead of gaining a page-level owner or callback merely to make the demonstration function. Minimal external control is allowed only when there is no natural trigger or when public controls are themselves under demonstration. The exception must use public APIs only and identify which orchestration is not installed with the package and must be recreated by consumers.
 
-**Typical tasks:**
+## The Adapter path is intentionally deferred
 
-- Revising existing docs to smooth the entry path
-- Adding minimal examples for a prototype
-- Turning an abstract concept into an approachable demo
+The Module, Host Capability, and official Adapter-profile catalog is still being completed, and related architecture and known drift are not fully reconciled. Proto UI therefore does not currently publish a general Adapter contribution guide or recommend adding an Adapter by analogy.
 
-**Start here:**
+Experienced contributors may still work on a bounded Adapter parity bug when its issue identifies the applicable entities, owning layer, expected behavior, and validation boundary. New Adapters remain maintainer-guided research.
 
-- [Docs Request Template](https://github.com/Proto-UI/Proto-UI/issues/new?template=docs-request.md)
-- [Good First Issues: docs](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Adocs)
+## From local development to a pull request
 
-**Before opening a PR:** explain what confusion or gap the change addresses, and verify the page renders correctly in the docs site.
+The current CI baseline is Node.js 22 with pnpm 10.32.1:
 
----
+```sh
+corepack enable
+corepack pnpm@10.32.1 install --frozen-lockfile
+corepack pnpm@10.32.1 docs:dev
+```
 
-### Community / Curation
+The basic workflow is:
 
-This path is about **organizing questions, discussions, and consensus** — helping the ecosystem stay navigable and newcomers get consistent responses.
+1. Comment on the issue and confirm readiness.
+2. Create a short-lived branch from current `main`.
+3. Trace P/T entities and implementation evidence before editing.
+4. Keep the source of truth, implementation, tests, and affected public projections aligned.
+5. Run focused tests first, then the proportional catalog, type, docs, or full checks.
+6. Commit with `git commit --signoff`.
+7. Record exact validation, provenance, and material AI assistance in the pull request.
 
-**Best for:** community organizers, people who summarize discussions, maintain issue indices, or help others articulate ideas
+See [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md) for exact commands, DCO remediation, provenance requirements, and the validation matrix.
 
-**Typical tasks:**
+## Communication
 
-- Cataloging recurring questions
-- Maintaining FAQ or discussion indices
-- Distilling scattered discussions into citable conclusions
-- Helping new contributors find their entry point
-
-**Start here:**
-
-- [Good First Issues: community](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Acommunity)
-- [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions)
-
-**Before opening a PR:** summarize the pattern or consensus being captured, and link to the source discussions.
-
----
-
-## First-time contributor workflow
-
-1. Pick a small, clearly scoped [Good First Issue](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
-2. Comment on the issue before starting
-3. Confirm the boundary in the issue thread or [Discussions](https://github.com/Proto-UI/Proto-UI/discussions) if unclear
-4. Keep the PR small — the smallest reviewable result, not one massive change
-5. Explain what changed and why in the PR description
-
-For prototypes and adapters, the simplest way to preview your work is to wire it into the docs site. Until dedicated debugging tooling matures, this is the most direct feedback loop.
-
----
-
-## Discuss first for larger changes
-
-These situations should be discussed before writing code:
-
-- Adding a new host adapter
-- Extending the prototype DSL
-- Changing existing contract-layer boundaries
-- Introducing a new core capability dimension
-- Large-scale refactors
-
-These aren't off-limits — they just affect the mainline direction more than typical contributions. Discussing first is far easier than explaining after writing everything.
-
----
-
-## Proposal acceptance
-
-Submitting a proposal does not guarantee acceptance. Maintainers evaluate proposals based on current priorities, boundary fit, and long-term ecosystem consistency. If you're unsure whether an idea fits, start a [Discussion](https://github.com/Proto-UI/Proto-UI/discussions) before opening a formal proposal.
+- [GitHub Issues](https://github.com/Proto-UI/Proto-UI/issues) track bounded work.
+- [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions) is appropriate for questions and ideas that do not yet have an issue boundary.
+- [Discord](https://discord.gg/MrWQd7h34R) is available for quick synchronization but is not required. Decisions that affect implementation scope should be recorded back in an Issue, Discussion, spec entity, or pull request.

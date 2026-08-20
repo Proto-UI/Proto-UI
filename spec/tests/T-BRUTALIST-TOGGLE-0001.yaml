@@ -4,7 +4,7 @@ title: Brutalist Toggle visual contract and public API tests
 status: draft
 since: 0.2.0-rc.7
 summary: >-
-  Covers the Brutalist Toggle public API (size enum, defaults), active accent pair, and interaction states against P-BRUTALIST-TOGGLE criteria.
+  Covers the Brutalist Toggle public API (size enum, defaults), active accent pair and persistent non-color frame, interaction precedence, and Base semantic ownership against P-BRUTALIST-TOGGLE criteria.
 
 
 cases:
@@ -41,6 +41,18 @@ cases:
       - P-BRUTALIST-TOGGLE-INTERACTION
       - P-BRUTALIST-TOGGLE-BASE-INHERITANCE
     expectation: p-brutalist-toggle-interaction
+  - id: T-BRUTALIST-TOGGLE-0001-CASE-7
+    title: Active state keeps a persistent geometry-stable inset ink frame
+    covers:
+      - P-BRUTALIST-TOGGLE-ACTIVE-SIGNAL
+      - P-BRUTALIST-TOGGLE-PAIR-INVARIANT
+    expectation: p-brutalist-toggle-active-non-color-signal
+  - id: T-BRUTALIST-TOGGLE-0001-CASE-8
+    title: Press takes precedence over hover and outer active elevation
+    covers:
+      - P-BRUTALIST-TOGGLE-ACTIVE-SIGNAL
+      - P-BRUTALIST-TOGGLE-INTERACTION
+    expectation: p-brutalist-toggle-state-precedence
 implementations:
   - id: prototypes-brutalist-toggle-contract
     kind: module-test
@@ -54,6 +66,8 @@ implementations:
       - T-BRUTALIST-TOGGLE-0001-CASE-4
       - T-BRUTALIST-TOGGLE-0001-CASE-5
       - T-BRUTALIST-TOGGLE-0001-CASE-6
+      - T-BRUTALIST-TOGGLE-0001-CASE-7
+      - T-BRUTALIST-TOGGLE-0001-CASE-8
     exercises:
       - P-BASE-TOGGLE
       - P-BRUTALIST-TOGGLE
@@ -69,6 +83,12 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Toggle coverage mapped to the rc.7 P criteria (size, defaults, active pair, interaction). Not present in the immutable rc.6 snapshot.
+
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Added executable coverage for the persistent non-color active frame and deterministic hover/press/active precedence.
 
 
 tags:

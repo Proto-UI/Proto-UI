@@ -1,10 +1,10 @@
 id: T-BRUTALIST-SWITCH-0001
 type: test
-title: Brutalist Switch visual contract and public API tests
+title: Brutalist Switch visual, interaction, and demo naming tests
 status: draft
 since: 0.2.0-rc.7
 summary: >-
-  Covers the Brutalist Switch public API (root checked-fill pair without padding swap, thumb single-movement checked translation, press/focus/disabled) against P-BRUTALIST-SWITCH and P-BRUTALIST-SWITCH-THUMB criteria.
+  Covers the Brutalist Switch public API (root checked-fill pair without padding swap, thumb single-movement checked translation, press/focus/disabled) plus the visible name-from-content reference-demo composition against P-BRUTALIST-SWITCH and P-BRUTALIST-SWITCH-THUMB criteria.
 
 
 cases:
@@ -40,6 +40,11 @@ cases:
       - P-BRUTALIST-SWITCH-VISUAL-GRAMMAR
       - P-BRUTALIST-SWITCH-THUMB-VISUAL-GRAMMAR
     expectation: p-brutalist-switch-visual-grammar
+  - id: T-BRUTALIST-SWITCH-0001-CASE-6
+    title: Visible demo captions supply the accessible name through Switch content
+    covers:
+      - P-BRUTALIST-SWITCH-DEMO-NAMING
+    expectation: p-brutalist-switch-demo-name-from-content
 implementations:
   - id: prototypes-brutalist-switch-contract
     kind: module-test
@@ -57,6 +62,16 @@ implementations:
       - P-BASE-SWITCH-THUMB
       - P-BRUTALIST-SWITCH
       - P-BRUTALIST-SWITCH-THUMB
+  - id: www-brutalist-control-demo-contract
+    kind: workspace-check
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SWITCH-0001-CASE-6
+    exercises:
+      - P-BASE-SWITCH
+      - P-BRUTALIST-SWITCH
 verifies:
   prototypes:
     - id: P-BRUTALIST-SWITCH
@@ -72,6 +87,12 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Switch coverage mapped 1:1 to the rc.7 P criteria (entry/inheritance, single-movement, checked pair, interaction, visual grammar). Not present in the immutable rc.6 snapshot.
+
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Added executable reference-demo coverage that keeps each visible caption inside its Switch root for inherited name-from-content projection.
 
 
 tags:

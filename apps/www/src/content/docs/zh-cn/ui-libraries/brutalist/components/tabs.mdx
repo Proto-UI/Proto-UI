@@ -8,8 +8,8 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-Tabs 继承 Base 的选择与激活语义，并使用方角 list/trigger 几何与硬阴影。
+Tabs 继承 Base 的选择、激活与 descendant-first panel focus-entry 语义，并使用方角 list/trigger 几何与硬阴影。参考 demo 为 Root 提供响应式稳定宽度，因此切换 panel 不会让 widget 改变宽度或重新居中。
 
-<div style="--pui-radius:0;--pui-background:#f4f1ea;--pui-secondary-background:#ffffff;--pui-foreground:#000000;--pui-border:#000000;background:#f4f1ea;color:#000;border:2px solid var(--pui-foreground);box-shadow:3px 3px 0 0 var(--pui-foreground);padding:1rem;">
+<div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
 </div>

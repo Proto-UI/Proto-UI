@@ -7,6 +7,7 @@ import { FeedbackModuleDef } from '@proto.ui/module-feedback';
 import { PropsModuleDef } from '@proto.ui/module-props';
 import { EventModuleDef } from '@proto.ui/module-event';
 import { ExposeModuleDef } from '@proto.ui/module-expose';
+import { ExposeEventModuleDef } from '@proto.ui/module-expose-event';
 import { AnatomyModuleDef } from '@proto.ui/module-anatomy';
 import type { AnatomyPort } from '@proto.ui/module-anatomy';
 import { ExposeStateModuleDef } from '@proto.ui/module-expose-state';
@@ -78,6 +79,7 @@ export function createRuntimeInstance<P extends PropsBaseType>(
       PropsModuleDef,
       EventModuleDef,
       ExposeModuleDef,
+      ExposeEventModuleDef,
       AnatomyModuleDef,
       ExposeStateModuleDef,
       ExposeStateWebModuleDef,

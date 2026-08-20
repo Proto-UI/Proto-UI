@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/module-state-interaction",
-  "version": "0.2.0-rc.7",
+  "version": "0.3.0-alpha.0",
   "private": false,
   "type": "module",
   "dependencies": {

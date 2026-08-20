@@ -160,6 +160,9 @@ importers:
       mdast-util-mdx:
         specifier: ^3.0.0
         version: 3.0.0
+      playwright-core:
+        specifier: 1.58.2
+        version: 1.58.2
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
@@ -220,6 +223,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -308,6 +314,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -387,6 +396,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
@@ -562,6 +574,9 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../expose-event
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../../types
@@ -574,6 +589,21 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+
+  packages/modules/expose-event:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-expose':
+        specifier: workspace:*
+        version: link:../expose
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
 
   packages/modules/expose-state:
     dependencies:
@@ -872,6 +902,9 @@ importers:
       '@proto.ui/module-expose':
         specifier: workspace:*
         version: link:../../modules/expose
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-focus':
         specifier: workspace:*
         version: link:../../modules/focus
@@ -906,6 +939,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
@@ -944,6 +980,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
@@ -986,6 +1025,9 @@ importers:
       '@proto.ui/module-expose':
         specifier: workspace:*
         version: link:../modules/expose
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../modules/expose-state
@@ -3349,6 +3391,11 @@ packages:
   picomatch@4.0.4:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
+
+  playwright-core@1.58.2:
+    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   postcss-nested@6.2.0:
     resolution: {integrity: sha512-HQbt28KulC5AJzG+cZtj9kvKB93CFCdLvog1WFLf1D+xmMvPGlBstkpTEZfK5+AN9hfJocyBFCNiqyS48bpgzQ==}
@@ -6633,6 +6680,8 @@ snapshots:
   picomatch@2.3.2: {}
 
   picomatch@4.0.4: {}
+
+  playwright-core@1.58.2: {}
 
   postcss-nested@6.2.0(postcss@8.5.8):
     dependencies:

@@ -8,11 +8,8 @@ import {
   FOCUS_ROOT_TARGET_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
 } from '@proto.ui/module-focus';
-import {
-  EVENT_EMIT_CAP,
-  EVENT_GLOBAL_TARGET_CAP,
-  EVENT_ROOT_TARGET_CAP,
-} from '@proto.ui/module-event';
+import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
   AS_TRIGGER_INSTANCE_CAP,
@@ -59,8 +56,10 @@ function createToggleContext(initialRaw: BrutalistToggleProps = {}): ToggleConte
       wiring.attach('event', [
         [EVENT_ROOT_TARGET_CAP, () => rootTarget],
         [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
+      ]);
+      wiring.attach('expose-event', [
         [
-          EVENT_EMIT_CAP,
+          EXPOSE_EVENT_SINK_CAP,
           (key: string, payload: unknown) => {
             if (key === 'activeChange') activeChanges.push(payload as { active: boolean });
           },
@@ -147,6 +146,17 @@ describe('prototypes/brutalist: toggle', () => {
     expect(context.a11ySnapshots.at(-1)).toMatchObject({
       states: { pressed: true, disabled: false },
     });
+
+    invokeUnmounted();
+  });
+
+  it('uses a persistent inset frame as the active non-color signal', () => {
+    // T-BRUTALIST-TOGGLE-0001-CASE-7
+    const { context, controller, invokeUnmounted } = executeToggle({ defaultActive: true });
+    const tokens = controller.getRuleStyleTokens();
+
+    expect(context.getExposes().active.get()).toBe(true);
+    expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]');
 
     invokeUnmounted();
   });
@@ -257,6 +267,41 @@ describe('prototypes/brutalist: toggle', () => {
     expect(tokens).toEqual(
       expect.arrayContaining(['pointer-events-none', 'opacity-50', 'rounded-none'])
     );
+
+    invokeUnmounted();
+  });
+
+  it('gives press precedence over hover and outer active elevation', () => {
+    // T-BRUTALIST-TOGGLE-0001-CASE-8
+    const { context, controller, invokeUnmounted } = executeToggle();
+
+    context.rootTarget.dispatchEvent(new CustomEvent('pointer.enter'));
+    context.rootTarget.dispatchEvent(new CustomEvent('pointer.down'));
+    let tokens = controller.getRuleStyleTokens();
+    expect(context.getExposes().hovered.get()).toBe(true);
+    expect(context.getExposes().pressed.get()).toBe(true);
+    expect(tokens).toEqual(
+      expect.arrayContaining(['translate-x-px', 'translate-y-px', 'shadow-none'])
+    );
+    expect(tokens).not.toContain('-translate-x-px');
+    expect(tokens).not.toContain('-translate-y-px');
+    expect(tokens).not.toContain('shadow-[4px_4px_0_0_#000]');
+
+    context.rootTarget.dispatchEvent(new CustomEvent('pointer.leave'));
+    expect(context.getExposes().hovered.get()).toBe(false);
+    expect(context.getExposes().pressed.get()).toBe(false);
+
+    context.rootTarget.dispatchEvent(new CustomEvent('press.commit'));
+    context.rootTarget.dispatchEvent(new CustomEvent('pointer.down'));
+    tokens = controller.getRuleStyleTokens();
+    expect(context.getExposes().active.get()).toBe(true);
+    expect(context.getExposes().pressed.get()).toBe(true);
+    expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000]');
+    expect(tokens).not.toContain('shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]');
+
+    context.rootTarget.dispatchEvent(new CustomEvent('pointer.leave'));
+    tokens = controller.getRuleStyleTokens();
+    expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]');
 
     invokeUnmounted();
   });

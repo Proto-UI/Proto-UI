@@ -618,6 +618,112 @@ describe('@proto.ui/cli', () => {
     expect(theme).toContain('--pui-radius-sm: 2px');
   });
 
+  it('allows Brutalist add with styles disabled and emits an actionable ownership note', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-styles-disabled', {
+      name: 'pui-cli-brutalist-styles-disabled',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+    const configPath = path.join(cwd, 'proto-ui/config.json');
+    const packagePath = path.join(cwd, 'package.json');
+    const configBefore = await fs.readFile(configPath, 'utf8');
+    const packageBefore = await fs.readFile(packagePath, 'utf8');
+
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('styles are disabled');
+    expect(result.stdout).toContain('complete brutalist --pui-* token set');
+    await expect(fs.readFile(configPath, 'utf8')).resolves.not.toBe(configBefore);
+    await expect(fs.readFile(packagePath, 'utf8')).resolves.toBe(packageBefore);
+    await expect(
+      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.ts'), 'utf8')
+    ).resolves.toContain('brutalistButton');
+  });
+
+  it('rejects Brutalist add under the Shadcn preset without mutating project state', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-preset-mismatch', {
+      name: 'pui-cli-brutalist-preset-mismatch',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-install']).status).toBe(0);
+    const configPath = path.join(cwd, 'proto-ui/config.json');
+    const packagePath = path.join(cwd, 'package.json');
+    const configBefore = await fs.readFile(configPath, 'utf8');
+    const packageBefore = await fs.readFile(packagePath, 'utf8');
+
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('brutalist-button');
+    expect(result.stderr).toContain('requires the brutalist style preset');
+    expect(result.stderr).toContain('shadcn');
+    await expect(fs.readFile(configPath, 'utf8')).resolves.toBe(configBefore);
+    await expect(fs.readFile(packagePath, 'utf8')).resolves.toBe(packageBefore);
+    await expect(
+      fs.stat(path.join(cwd, 'proto-ui/components/react/index.ts'))
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('adds Brutalist under the matching enabled preset', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-preset-match', {
+      name: 'pui-cli-brutalist-preset-match',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(
+      runCli(cwd, ['init', '--no-interactive', '--no-install', '--prototypes', 'brutalist']).status
+    ).toBe(0);
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(0);
+    await expect(
+      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.ts'), 'utf8')
+    ).resolves.toContain('brutalistButton');
+  });
+
+  it('rejects a missing enabled preset before mutating project state', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-preset-missing', {
+      name: 'pui-cli-brutalist-preset-missing',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-install']).status).toBe(0);
+    const configPath = path.join(cwd, 'proto-ui/config.json');
+    const config = JSON.parse(await fs.readFile(configPath, 'utf8'));
+    config.styles.preset = null;
+    await fs.writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
+    const configBefore = await fs.readFile(configPath, 'utf8');
+
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('requires the brutalist style preset');
+    expect(result.stderr).toContain('enables no preset');
+    await expect(fs.readFile(configPath, 'utf8')).resolves.toBe(configBefore);
+    await expect(
+      fs.stat(path.join(cwd, 'proto-ui/components/react/index.ts'))
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
   it('fails fast when the required React runtime is missing', async () => {
     const cwd = await createTempProject('pui-cli-missing-runtime', {
       name: 'pui-cli-missing-runtime',

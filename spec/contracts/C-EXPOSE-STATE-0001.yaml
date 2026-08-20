@@ -3,7 +3,7 @@ type: contract
 title: Expose state projects internal state as an App-Maker-facing view
 status: draft
 since: 0.1.0
-summary: Expose-state projects an internal state slot to the App Maker as a read-only external state handle with value access, subscription, and state spec metadata.
+summary: Expose-state projects an internal state slot to the App Maker as a stable read-only external state handle with value access, subscription, state spec metadata, and instance-lifetime identity.
 statement:
   zh-CN: >-
     Expose-state 是 Expose 与 State 的交叉模块。组件可以通过 `def.expose.state(key, handle)`，或等价地暴露 state handle，让 App Maker 获得该内部 state slot 的外部 view。App Maker 拿到的不是裸 state slot，也不是原型作者侧 owned、borrowed 或 observed view；它是翻译层/adapter 面向 App Maker 的 external state handle。
@@ -46,6 +46,10 @@ criteria:
     text:
       zh-CN: external subscription callback 的 event shape 应与 StateEvent 对齐，但不得携带 prototype-author `run handle`。
       en: External subscription callback event shape should align with StateEvent, but must not carry a prototype-author `run handle`.
+  - id: C-EXPOSE-STATE-0001-I
+    text:
+      zh-CN: 同一组件 instance 内，同一 internal state source 的重复 projection 必须保持 external handle identity，并跨 repeatable view detach/remount 保留；terminal disposal 后残留 handle 必须失效。
+      en: Within one component instance, repeated projection of the same internal State source must preserve external-handle identity across repeatable view detachment and remounting; retained handles must become invalid after terminal disposal.
 sources:
   - path: internal/contracts/expose/expose-state.v0.md
     sections:
@@ -71,6 +75,9 @@ refines:
         - C-STATE-0003-D
       note: Expose-state defines the App-Maker-facing external state view mentioned by the State view contract.
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Required stable external-handle identity across repeatable view epochs with invalidation at terminal disposal.
   - version: 0.1.0
     change: introduced
     summary: Captured the external state handle projection for exposed state.

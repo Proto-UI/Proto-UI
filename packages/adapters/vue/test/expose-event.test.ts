@@ -26,6 +26,7 @@ describe('adapter-vue: expose event bridge', () => {
 
     expect(onCheckedChange).toHaveBeenCalledTimes(1);
     expect(onCheckedChange).toHaveBeenCalledWith({ checked: true }, undefined);
+    expect(mounted.vm.getExposes()).not.toHaveProperty('checkedChange');
 
     mounted.unmount();
   });

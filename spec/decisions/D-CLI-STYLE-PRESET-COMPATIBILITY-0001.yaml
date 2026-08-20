@@ -1,0 +1,44 @@
+id: D-CLI-STYLE-PRESET-COMPATIBILITY-0001
+type: decision
+title: CLI add enforces the configured style preset before mutation
+status: draft
+since: 0.2.0-rc.7
+summary: Proto UI config v1 owns one project-wide style preset, so add validates each component preset requirement before installation or generated-file mutation instead of producing visually incomplete output.
+statement:
+  en: >-
+    When a registry component declares `stylePreset` and styles are enabled, `proto-ui add` must compare that requirement with the one enabled project preset before package inspection, installation, config mutation, or facade generation. It must reject missing or different enabled presets without changing the project, and it must not silently migrate the project-wide preset. Explicitly disabled styles remain a consumer-owned escape hatch with an actionable token-ownership note.
+
+
+  zh-CN: >-
+    当 registry component 声明 `stylePreset` 且 styles 已启用时，`proto-ui add` 必须在 package 检查、安装、config 修改或 facade 生成之前，将该要求与项目唯一启用的 preset 比较。缺失或不同的已启用 preset 必须在不修改项目的情况下被拒绝，CLI 不得静默迁移项目级 preset。显式禁用 styles 仍是 consumer-owned 逃生口，并必须给出可执行的 token ownership 提示。
+
+
+criteria:
+  - id: D-CLI-STYLE-PRESET-COMPATIBILITY-0001-A
+    text:
+      en: A component with no style-preset requirement, or with a requirement exactly matching the enabled configured preset, may proceed through the existing add flow.
+      zh-CN: 未声明 style-preset 要求，或其要求与已启用 configured preset 完全一致的 component，可继续执行现有 add 流程。
+  - id: D-CLI-STYLE-PRESET-COMPATIBILITY-0001-B
+    text:
+      en: An enabled config with a missing or different preset must fail before package inspection, installation, config mutation, and facade generation, naming the required and configured presets and the one-preset limitation.
+      zh-CN: 启用样式但 preset 缺失或不一致时，必须在 package 检查、安装、config 修改与 facade 生成前失败，并指出所需 preset、configured preset 与单 preset 限制。
+  - id: D-CLI-STYLE-PRESET-COMPATIBILITY-0001-C
+    text:
+      en: The mismatch diagnostic must offer an explicit project-wide migration choice or a compatible component; it must not install, generate, or select another preset automatically.
+      zh-CN: mismatch 诊断必须提供显式的项目级迁移选择或兼容 component；不得自动安装、生成或选择另一 preset。
+  - id: D-CLI-STYLE-PRESET-COMPATIBILITY-0001-D
+    text:
+      en: When styles are explicitly disabled, add may proceed as a consumer-owned styling escape hatch but must state that the required semantic tokens are now the consumer's responsibility.
+      zh-CN: 当 styles 被显式禁用时，add 可作为 consumer-owned styling 逃生口继续执行，但必须说明所需 semantic tokens 由 consumer 负责。
+sources:
+  - path: packages/cli/src/config/project-config.ts
+  - path: packages/cli/src/registry/components.ts
+  - path: packages/cli/src/commands/add.ts
+  - path: packages/cli/test/cli.test.ts
+verifies:
+  tests: [T-CLI-STYLE-PRESET-COMPATIBILITY-0001]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged config-v1 preflight enforcement for registry style-preset requirements after the issue 367 integration failure exposed silent Shadcn/Brutalist mismatch.
+tags: [cli, style-preset, compatibility, preflight]

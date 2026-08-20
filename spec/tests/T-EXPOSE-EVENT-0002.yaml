@@ -1,0 +1,218 @@
+id: T-EXPOSE-EVENT-0002
+type: test
+title: Expose Event Module, signal sink, and Adapter conformance
+status: draft
+since: 0.2.0-rc.7
+summary: Module, Runtime, translation-record, official Adapter, and schema evidence verifies outward-signal ownership, shared-key declaration metadata, current-sink delivery, instance lifetime, and host-specific mapping.
+cases:
+  - id: T-EXPOSE-EVENT-0002-CASE-SURFACE
+    title: Expose Event projects only def.expose.event and run.expose.emit
+    covers:
+      - M-EXPOSE-EVENT-0001-A
+      - M-EXPOSE-EVENT-0001-B
+    expectation: outward-signal-surface-remains-separate-from-event-input
+  - id: T-EXPOSE-EVENT-0002-CASE-DECLARATION
+    title: Branded declaration metadata reaches Adapter translation but is absent from public getExposes
+    covers:
+      - M-EXPOSE-EVENT-0001-C
+      - C-EXPOSE-EVENT-0001-G
+    expectation: shared-key-metadata-reaches-adapter-translation-not-public-record
+  - id: T-EXPOSE-EVENT-0002-CASE-VALIDATION
+    title: Registration validation completes before sink delivery
+    covers:
+      - M-EXPOSE-EVENT-0001-D
+      - HC-EXPOSE-EVENT-SINK-0001-A
+    expectation: only-registered-outward-signals-reach-sink
+  - id: T-EXPOSE-EVENT-0002-CASE-PAYLOAD
+    title: Payload declarations remain minimal v0 metadata
+    covers:
+      - M-EXPOSE-EVENT-0001-E
+      - C-EXPOSE-EVENT-0002-A
+      - C-EXPOSE-EVENT-0002-B
+      - C-EXPOSE-EVENT-0002-C
+      - C-EXPOSE-EVENT-0002-D
+      - C-EXPOSE-EVENT-0002-E
+    expectation: payload-and-options-remain-minimal-v0-hints
+  - id: T-EXPOSE-EVENT-0002-CASE-SINK
+    title: Current host-neutral sink receives one immediate outward emission
+    covers:
+      - M-EXPOSE-EVENT-0001-F
+      - M-EXPOSE-EVENT-0001-G
+      - HC-EXPOSE-EVENT-SINK-0001-A
+      - HC-EXPOSE-EVENT-SINK-0001-B
+      - HC-EXPOSE-EVENT-SINK-0001-C
+      - HC-EXPOSE-EVENT-SINK-0001-D
+      - HC-EXPOSE-EVENT-SINK-0001-E
+    expectation: current-sink-receives-host-neutral-emission-without-replay
+  - id: T-EXPOSE-EVENT-0002-CASE-LIFECYCLE
+    title: Registration and emit authority follow instance lifetime
+    covers:
+      - M-EXPOSE-EVENT-0001-H
+      - C-EXPOSE-EVENT-0001-H
+    expectation: preserve-view-epochs-and-invalidate-at-terminal-disposal
+  - id: T-EXPOSE-EVENT-0002-CASE-PROFILES
+    title: Official Adapters translate outward signals without leaking listener props or declarations
+    covers:
+      - M-EXPOSE-EVENT-0001-I
+      - A-REACT-18-19-0001-M
+      - A-VUE-3-0001-M
+      - A-WEB-COMPONENT-0001-M
+    expectation: official-adapters-provide-profile-specific-outward-carriers
+  - id: T-EXPOSE-EVENT-0002-CASE-COMPATIBILITY
+    title: Legacy EVENT_EMIT_CAP remains the same token as the canonical sink
+    covers:
+      - M-EXPOSE-EVENT-0001-F
+    expectation: legacy-event-emit-token-is-a-source-compatible-alias
+  - id: T-EXPOSE-EVENT-0002-CASE-WIRING-MIGRATION
+    title: Legacy Event-target sink wiring fails with an Expose Event migration diagnostic
+    covers:
+      - M-EXPOSE-EVENT-0001-A
+      - M-EVENT-0001-H
+    expectation: source-import-alias-remains-but-wiring-target-must-be-expose-event
+implementations:
+  - id: expose-event-surface-fixture
+    kind: fixture
+    status: active
+    path: packages/spec/fixtures/src/event/type-payload.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-SURFACE
+  - id: expose-event-payload-fixture
+    kind: fixture
+    status: active
+    path: packages/spec/fixtures/src/expose/event.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-PAYLOAD
+  - id: module-expose-event-outward-bridge-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/expose-event/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-SURFACE
+      - T-EXPOSE-EVENT-0002-CASE-VALIDATION
+      - T-EXPOSE-EVENT-0002-CASE-SINK
+      - T-EXPOSE-EVENT-0002-CASE-LIFECYCLE
+      - T-EXPOSE-EVENT-0002-CASE-COMPATIBILITY
+  - id: module-expose-event-declaration-brand-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/expose/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+  - id: module-expose-state-event-translation-record-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/expose-state/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+  - id: adapter-base-expose-event-public-record-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/contract/expose-record.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+  - id: runtime-expose-event-bridge-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/expose-event.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-SURFACE
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+      - T-EXPOSE-EVENT-0002-CASE-VALIDATION
+      - T-EXPOSE-EVENT-0002-CASE-SINK
+      - T-EXPOSE-EVENT-0002-CASE-WIRING-MIGRATION
+  - id: runtime-expose-event-lifecycle-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-LIFECYCLE
+  - id: adapter-react-expose-event-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/expose-event.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+      - T-EXPOSE-EVENT-0002-CASE-PROFILES
+  - id: adapter-vue-expose-event-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/expose-event.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+      - T-EXPOSE-EVENT-0002-CASE-PROFILES
+  - id: adapter-web-component-expose-event-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/expose.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+      - T-EXPOSE-EVENT-0002-CASE-PROFILES
+  - id: adapter-profile-expose-event-schema
+    kind: workspace-check
+    status: passing
+    path: packages/spec/fixtures/test/adapter-profile-schema.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-PROFILES
+verifies:
+  modules:
+    - id: M-EXPOSE-EVENT-0001
+      anchors:
+        - M-EXPOSE-EVENT-0001-A
+        - M-EXPOSE-EVENT-0001-B
+        - M-EXPOSE-EVENT-0001-C
+        - M-EXPOSE-EVENT-0001-D
+        - M-EXPOSE-EVENT-0001-E
+        - M-EXPOSE-EVENT-0001-F
+        - M-EXPOSE-EVENT-0001-G
+        - M-EXPOSE-EVENT-0001-H
+        - M-EXPOSE-EVENT-0001-I
+  hostCaps:
+    - id: HC-EXPOSE-EVENT-SINK-0001
+      anchors:
+        - HC-EXPOSE-EVENT-SINK-0001-A
+        - HC-EXPOSE-EVENT-SINK-0001-B
+        - HC-EXPOSE-EVENT-SINK-0001-C
+        - HC-EXPOSE-EVENT-SINK-0001-D
+        - HC-EXPOSE-EVENT-SINK-0001-E
+  contracts:
+    - id: C-EXPOSE-EVENT-0001
+      anchors:
+        - C-EXPOSE-EVENT-0001-G
+        - C-EXPOSE-EVENT-0001-H
+    - id: C-EXPOSE-EVENT-0002
+      anchors:
+        - C-EXPOSE-EVENT-0002-A
+        - C-EXPOSE-EVENT-0002-B
+        - C-EXPOSE-EVENT-0002-C
+        - C-EXPOSE-EVENT-0002-D
+        - C-EXPOSE-EVENT-0002-E
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-M
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-M
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-M
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Moved Module bridge, shared-registry validation, current-sink, and legacy-token evidence into the standalone Expose Event package.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added semantic ownership, declaration transport and public filtering, canonical sink, lifetime, official Adapter translation, and compatibility evidence.
+tags: [expose, event, signal, module, host-capability, adapter, lifecycle, conformance]

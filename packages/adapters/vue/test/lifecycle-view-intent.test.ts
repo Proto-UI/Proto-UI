@@ -38,6 +38,10 @@ describe('adapter-vue: L1 view intent', () => {
         def.lifecycle.onBeforeDispose(() => {
           calls.disposed += 1;
         });
+        def.expose('view', {
+          show: () => run.lifecycle.setPresent(true),
+          hide: () => run.lifecycle.setPresent(false),
+        });
         return (renderer) => {
           calls.render += 1;
           return renderer.el('div', 'ok');
@@ -62,7 +66,7 @@ describe('adapter-vue: L1 view intent', () => {
         disposed: 0,
       });
 
-      vm.invokeInCallbackScope(() => run.lifecycle.setPresent(true));
+      vm.getExposes().view.show();
       await flushVue();
       await flushVue();
       const firstRoot = host.querySelector<HTMLElement>('[data-pui-root]');
@@ -71,8 +75,8 @@ describe('adapter-vue: L1 view intent', () => {
       expect(firstRoot?.getAttribute('data-pui-style')).toBe('rounded-md p-4');
       expect(calls.mounted).toBe(1);
 
-      vm.invokeInCallbackScope(() => run.lifecycle.setPresent(false));
-      vm.invokeInCallbackScope(() => run.lifecycle.setPresent(true));
+      vm.getExposes().view.hide();
+      vm.getExposes().view.show();
       await flushVue();
       const remountedRoot = host.querySelector<HTMLElement>('[data-pui-root]');
       expect(remountedRoot).not.toBeNull();
@@ -80,13 +84,13 @@ describe('adapter-vue: L1 view intent', () => {
       expect(remountedRoot?.getAttribute('data-pui-style')).toBe('rounded-md p-4');
       expect(calls.unmounted).toBe(0);
 
-      vm.invokeInCallbackScope(() => run.lifecycle.setPresent(false));
+      vm.getExposes().view.hide();
       await flushVue();
       await flushVue();
       expect(host.querySelector('[data-pui-root]')).toBeNull();
       expect(calls.unmounted).toBe(1);
 
-      vm.invokeInCallbackScope(() => run.lifecycle.setPresent(true));
+      vm.getExposes().view.show();
       await flushVue();
       while (frames.size > 0) {
         const [id, frame] = frames.entries().next().value!;

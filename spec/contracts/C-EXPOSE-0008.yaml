@@ -3,37 +3,37 @@ type: contract
 title: Expose entries are bound to instance lifecycle
 status: draft
 since: 0.1.0
-summary: Expose entries are valid only while the component instance remains under runtime responsibility and must be cleared or invalidated after dispose.
+summary: Expose entries belong to the component instance, survive repeatable view epochs, and must be cleared or invalidated only at terminal disposal.
 statement:
   zh-CN: >-
-    Expose entries 绑定到组件实例生命周期。实例存活期间，App Maker 可以通过 adapter 提供的方式访问该实例已声明的 exposes。实例 unmount/dispose 后，exposes 必须被清理、失效，或以可区分方式表示不可用；残留旧 record 不得继续表现为当前有效组件能力。
+    Expose entries 绑定到组件 instance lifetime，而不是某一次 view epoch。实例存活期间，App Maker 可以通过 adapter 提供的方式访问该实例已声明的 exposes；repeatable view detach/remount 不得清空 registry、重建 entry identity 或终止 specialized expose surface。只有 terminal disposal 后，exposes 才必须被清理、失效，或以可区分方式表示不可用；残留旧 record 不得继续表现为当前有效组件能力。
 
 
   en: >-
-    Expose entries are bound to the component instance lifecycle. While the instance is alive, the App Maker may access the instance's declared exposes through adapter-provided surfaces. After unmount/dispose, exposes must be cleared, invalidated, or made distinguishably unavailable; leftover old records must not continue to present themselves as currently valid component capabilities.
+    Expose entries are bound to the component instance lifetime rather than to one view epoch. While the instance is alive, the App Maker may access its declared exposes through adapter-provided surfaces; repeatable view detachment and remounting must not clear the registry, recreate entry identities, or terminate specialized expose surfaces. Only after terminal disposal must exposes be cleared, invalidated, or made distinguishably unavailable; leftover old records must not continue to present themselves as currently valid component capabilities.
 
 
 criteria:
   - id: C-EXPOSE-0008-A
     text:
-      zh-CN: 实例存活期间，已注册 expose entry 必须按 adapter surface 对 App Maker 可访问。
-      en: While the instance is alive, registered expose entries must be accessible to the App Maker through adapter surfaces.
+      zh-CN: 实例存活期间，包括 view 处于 detached epoch 时，已注册 expose entry 必须继续属于该 instance，并可通过仍存活的 adapter owner surface 对 App Maker 访问。
+      en: While the instance remains alive, including during a detached view epoch, registered expose entries must continue to belong to that instance and remain accessible through any still-live Adapter owner surface.
   - id: C-EXPOSE-0008-B
     text:
-      zh-CN: 实例 unmount/dispose 后，exposes 必须被清理、失效，或以可区分方式表示不可用。
-      en: After instance unmount/dispose, exposes must be cleared, invalidated, or made distinguishably unavailable.
+      zh-CN: Repeatable view detach/remount 不得清空 registry、改变 entry identity 或终止 specialized expose surface；remount 后必须继续承接同一 instance 的 outward promises。
+      en: Repeatable view detachment and remounting must not clear the registry, change entry identities, or terminate specialized expose surfaces; after remount they must continue the same instance's outward promises.
   - id: C-EXPOSE-0008-C
     text:
-      zh-CN: dispose 后读取 expose registry 的 internal port 必须失败或返回明确清理后的状态；不得继续返回旧的有效 registry。
-      en: After dispose, internal reads of the expose registry must fail or return a clearly cleared state; they must not continue returning the old valid registry.
+      zh-CN: Terminal dispose 后，exposes 必须被清理、失效或以可区分方式表示不可用；读取 registry 的 internal port 必须失败或返回明确清理后的状态，不得继续返回旧的有效 registry。
+      en: After terminal disposal, exposes must be cleared, invalidated, or made distinguishably unavailable; internal registry reads must fail or return a clearly cleared state rather than the old valid registry.
   - id: C-EXPOSE-0008-D
     text:
       zh-CN: adapter 暴露给 App Maker 的旧 snapshot 或宿主引用若仍可被持有，不得被解释为当前 live instance expose registry。
       en: Old snapshots or host references held by the App Maker after disposal must not be interpreted as the current live instance expose registry.
   - id: C-EXPOSE-0008-E
     text:
-      zh-CN: 更具体 expose surface，例如 expose-state subscription 或 expose-event emit，必须继承 instance lifecycle safety。
-      en: More specific expose surfaces, such as expose-state subscriptions or expose-event emission, must inherit instance lifecycle safety.
+      zh-CN: 更具体 expose surface，例如 expose-state subscription 或 expose-event emit，必须继承 repeatable view epoch preservation 与 terminal disposal safety。
+      en: More specific expose surfaces, such as expose-state subscriptions or expose-event emission, must inherit repeatable-view-epoch preservation and terminal-disposal safety.
 sources:
   - path: internal/contracts/expose/expose.v0.md
     sections:
@@ -49,7 +49,11 @@ dependsOn:
   contracts:
     - C-EXPOSE-0004
     - C-LIFECYCLE-0004
+    - C-LIFECYCLE-0006
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Aligned Expose ownership with the dual-axis lifecycle so repeatable view detachment preserves entries and only terminal disposal invalidates them.
   - version: 0.1.0
     change: introduced
     summary: Captured lifecycle invalidation and cleanup for expose entries.

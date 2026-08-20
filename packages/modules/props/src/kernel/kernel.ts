@@ -46,8 +46,8 @@ export class PropsKernel<P extends PropsBaseType> {
   private defaultStack: PropsDefaults<P>[] = []; // latest-first
 
   /**
-   * per-key previous NON-EMPTY valid
-   * NOTE: used for fallback when raw is missing/empty/invalid (per contract).
+   * Per-key previous non-empty valid resolved candidate.
+   * Used only for provided-empty or invalid fallback; missing always skips it.
    */
   private prevValid: Partial<Record<keyof P, any>> = {};
 
@@ -351,7 +351,7 @@ export class PropsKernel<P extends PropsBaseType> {
   }
 
   /**
-   * Missing fallback: prevValid -> defaults -> spec.default -> null.
+   * Missing fallback: setDefaults layers -> spec.default -> null (never prevValid).
    *
    * - if requireNonEmpty=true: must find non-empty valid fallback; otherwise fail.
    * - else: may return null if nothing provided.

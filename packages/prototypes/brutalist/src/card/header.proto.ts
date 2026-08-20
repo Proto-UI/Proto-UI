@@ -8,9 +8,7 @@ export const BrutalistCardHeader = definePrototype<
   name: 'brutalist-card-header',
   setup(def) {
     def.feedback.style.use(
-      tw(
-        'flex items-start justify-between gap-4 border-b-2 brutalist-border-bottom-black px-6 pb-4'
-      )
+      tw('flex items-start justify-between gap-4 border-b-2 border-foreground px-6 pb-4')
     );
     return (renderer) => [renderer.r.slot()];
   },

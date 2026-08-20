@@ -2,12 +2,12 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex gap-5',
+    className: 'w-full max-w-80',
     children: [
       {
         kind: 'proto',
         prototypeId: 'brutalist-scroll-area-root',
-        className: 'h-48 w-80',
+        className: 'h-48 w-full',
         children: [
           {
             kind: 'proto',

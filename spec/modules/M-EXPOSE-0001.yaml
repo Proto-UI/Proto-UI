@@ -1,0 +1,113 @@
+id: M-EXPOSE-0001
+type: module
+title: Expose core module
+status: draft
+since: 0.1.0
+summary: The required host-neutral Expose core module owns the instance-level Component-to-App-Maker registry, its setup-only facade, privileged read port, shared key namespace, and terminal lifecycle boundary without directly requiring a host capability.
+statement:
+  zh-CN: >-
+    Expose core module 是 standard Proto UI runtime 与 official Adapter 的必装 instance module。它拥有 Component → App Maker outward capability registry，并通过 facade 接受 setup-only `expose(key, value)` registration；runtime 将其投影为 base、value、state、method 与 event declaration syntax。Privileged port 只供 runtime、其它 Module 与特权 asHook 读取 registry、keys 与 diagnostics，不成为普通作者的 runtime mutation API。Core registry 拥有 shared key namespace、detached record snapshot 与 instance lifetime；它不直接索取 host-cap。State external handle 与 outward signal emission 分别由 Expose State 和 Expose Event 组合层负责，而 official JavaScript Adapter 通过宿主惯例提供 App-Maker-facing record，并自动把 callable method 带入所属 instance 的 callback scope。
+
+
+  en: >-
+    The Expose core module is a required instance module for the standard Proto UI runtime and official Adapters. It owns the Component-to-App-Maker outward-capability registry and accepts setup-only `expose(key, value)` registration through its facade; the runtime projects that facade as the base, value, state, method, and event declaration syntax. Its privileged port lets only the runtime, other Modules, and privileged asHooks read the registry, keys, and diagnostics, without becoming an ordinary author-facing runtime mutation API. The core registry owns the shared key namespace, detached record snapshots, and instance lifetime, and directly requires no host capability. State external handles and outward-signal emission remain the responsibility of the Expose State and Expose Event composition layers, while official JavaScript Adapters provide a host-idiomatic App-Maker-facing record and automatically enter the owning instance's callback scope for callable methods.
+
+
+criteria:
+  - id: M-EXPOSE-0001-A
+    text:
+      zh-CN: Module facade 必须提供 setup-only `expose(key, value)` registration；runtime 必须将 base、value、state、method 与 branded event declaration reservation 汇入同一 core registry，且不得建立普通 `run.expose` registry mutation surface。
+      en: The module facade must provide setup-only `expose(key, value)` registration; the runtime must route base, value, state, method, and branded event-declaration reservation into one core registry and must not create an ordinary `run.expose` registry-mutation surface.
+  - id: M-EXPOSE-0001-B
+    text:
+      zh-CN: Module port 必须只向 runtime、其它 Module 与特权 asHook 提供 `get`、`getAll`、`has`、`keys` 与 diagnostics 等读取能力；这些能力不得直接提升为普通 prototype-author API。
+      en: The module port must provide `get`, `getAll`, `has`, `keys`, diagnostics, and similar read capabilities only to the runtime, other Modules, and privileged asHooks; those capabilities must not be promoted directly into ordinary prototype-author APIs.
+  - id: M-EXPOSE-0001-C
+    text:
+      zh-CN: Core registry 必须对所有分类维持单一非空 string key namespace，拒绝 duplicate registration，并返回不会反向修改 live registry 的 record snapshot；任何合法 key，包括 `__proto__` 等特殊 property name，都必须作为普通 own entry 保留且不得改变 snapshot prototype。
+      en: The core registry must maintain one non-empty-string key namespace across all classifications, reject duplicate registration, and return record snapshots that cannot mutate the live registry; every valid key, including special property names such as `__proto__`, must remain an ordinary own entry and must not alter the snapshot prototype.
+  - id: M-EXPOSE-0001-D
+    text:
+      zh-CN: Core Module 拥有 base registration、shared namespace 以及 value/method promise；state registration 与 event declaration 可以共享该 registry，但 App-Maker-facing state handle projection、event declaration translation/omission 与 outward emission 分别属于 Expose State、Adapter translation 与 Expose Event 组合层，不得把 specialized semantics 冒充 core 行为。
+      en: The core Module owns base registration, the shared namespace, and value or method promises; state registration and event declaration may share the registry, but App-Maker-facing State-handle projection, event-declaration translation or omission, and outward emission belong respectively to Expose State, Adapter translation, and the Expose Event composition layer and must not be represented as core behavior.
+  - id: M-EXPOSE-0001-E
+    text:
+      zh-CN: Standard Runtime 与 official Adapter profile 必须安装 Expose core Module，使 Component → App Maker standard channel 可用；未来可配置 runtime 若缺失 Expose，必须在使用相关 syntax 或 dependent Module 前明确拒绝，而不是静默 no-op。
+      en: The standard Runtime and official Adapter profiles must install the Expose core module so the standard Component-to-App-Maker channel remains available; a future configurable runtime missing Expose must explicitly reject relevant syntax or dependent Modules before use rather than silently no-op.
+  - id: M-EXPOSE-0001-F
+    text:
+      zh-CN: Core registry 是 host-neutral instance memory，不读取 host object、投射宿主效果或直接索取 host-cap；完整 Adapter-facing record 的 finalization 与 host sink 由 `M-EXPOSE-STATE-0001` 承接，以确保 internal State handle 在发布前被降权，core 不得绕过该 compositor 直接泄漏 raw authority。
+      en: The core registry is host-neutral instance memory and must not read host objects, project host effects, or directly require a host capability; `M-EXPOSE-STATE-0001` owns finalization and the host sink for the complete Adapter-facing record so internal State handles are attenuated before publication, and core must not bypass that compositor to leak raw authority.
+  - id: M-EXPOSE-0001-G
+    text:
+      zh-CN: Registry entry、value identity 与 shared namespace 属于 instance lifetime，必须跨 repeatable view detach/remount 保留；terminal disposal 必须清理 registry 并使 port 失效，旧 Adapter snapshot 不得被视为当前 live registry。
+      en: Registry entries, value identities, and the shared namespace belong to the instance lifetime and must survive repeatable view detachment and remounting; terminal disposal must clear the registry and invalidate the port, and old Adapter snapshots must not be treated as the current live registry.
+  - id: M-EXPOSE-0001-H
+    text:
+      zh-CN: Official JavaScript Adapter 必须以宿主惯例让 App Maker 读取 detached exposes record；若把 method 投射为 JavaScript callable，则调用必须自动进入所属 prototype instance 的 callback scope，并递归覆盖 record 中由 value/method 承载的 nested callable。
+      en: Official JavaScript Adapters must let the App Maker read a detached exposes record through host-idiomatic surfaces; if a method is projected as a JavaScript callable, invocation must automatically enter the owning prototype instance's callback scope, recursively including nested callables carried by value or method records.
+  - id: M-EXPOSE-0001-I
+    text:
+      zh-CN: 特权 asHook 可以捕获 expose method 与相关 outward artifacts，并按 hook policy 投影给调用方；该 capture 不得被误写为 Adapter 的 App Maker registry，也不得开放普通 runtime registry mutation。
+      en: Privileged asHooks may capture expose methods and related outward artifacts and project them to callers under hook policy; that capture must not be represented as an Adapter App-Maker registry and must not open ordinary runtime registry mutation.
+satisfies:
+  contracts:
+    - C-EXPOSE-0001
+    - C-EXPOSE-0002
+    - C-EXPOSE-0003
+    - C-EXPOSE-0004
+    - C-EXPOSE-0005
+    - C-EXPOSE-0006
+    - C-EXPOSE-0007
+    - C-EXPOSE-0008
+verifies:
+  tests:
+    - T-EXPOSE-0001
+    - id: T-EXPOSE-0002
+      since: 0.2.0-rc.7
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0006
+  knowledge:
+    - K-COMPONENT-ACTOR-0001
+    - K-INFORMATION-CHANNEL-0001
+    - K-DESIGN-TRADEOFF-0001
+references:
+  modules:
+    - M-EXPOSE-STATE-0001
+    - M-EXPOSE-EVENT-0001
+sources:
+  - path: internal/records/2026-08-13-module-host-cap-adapter-catalog-route.zh-CN.md
+  - path: internal/records/2026-08-14-expose-core-module-adapter-audit.zh-CN.md
+  - path: internal/contracts/expose/expose.v0.md
+  - path: internal/contracts/expose/expose-classification.v0.md
+  - path: packages/modules/expose/src/create.ts
+  - path: packages/modules/expose/src/types.ts
+  - path: packages/modules/expose/src/impl.ts
+  - path: packages/modules/expose/src/kernel.ts
+  - path: packages/runtime/src/kernel/handles/def.ts
+  - path: packages/runtime/src/kernel/as-hook.ts
+  - path: packages/adapters/base/src/host/exposes.ts
+openQuestions:
+  - id: M-EXPOSE-0001-Q-REQUIRED-MODULE-VALIDATION
+    question:
+      zh-CN: 未来可配置 module set 应由 schema、runtime graph 还是 Adapter conformance 在 setup 前拒绝缺失 Expose 及其 dependent Modules？
+      en: Should a future configurable module set use schema validation, the runtime graph, or Adapter conformance to reject missing Expose and its dependent Modules before setup?
+    context:
+      zh-CN: 当前 Runtime 固定安装 ExposeModuleDef，三个 official Adapter 没有正常的缺失路径；required 属性仍需要未来通用 module selection 机制承接。
+      en: The current Runtime installs ExposeModuleDef unconditionally and the three official Adapters have no normal missing path; a future generic module-selection mechanism still needs to enforce required status.
+    blocks: [configurable-runtime-module-selection]
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Clarified branded Expose Event shared-key reservation, internal declaration metadata, and Expose Event composition ownership.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Resolved finalized-record publication ownership in favor of the Expose State compositor and its host-neutral record sink.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Cataloged the Expose core facade, privileged read port, shared registry, no-direct-host-cap boundary, required official Adapter support, instance lifetime, callback-scoped methods, and composition ownership debt.
+  - version: 0.1.0
+    change: introduced
+    summary: Established the Expose core module identity for Component-to-App-Maker outward capability registration.
+tags: [expose, module, required, host-neutral, adapter, lifecycle, app-maker]

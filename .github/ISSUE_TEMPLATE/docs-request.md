@@ -22,4 +22,12 @@ What should this doc explain or clarify?
 
 ## References
 
-Links to related contracts, prototypes, or prior discussions.
+Links to applicable spec entities, implementation evidence, current pages, or prior discussions.
+
+## Expected reader outcome
+
+What should a reader be able to understand or do after this change?
+
+## Validation
+
+Which route, language, examples, links, or rendered states need verification?

@@ -1,34 +1,35 @@
 id: D-CLI-BRUTALIST-PRESET-CLOSURE-0001
 type: decision
-title: CLI Brutalist preset is a generated closure of official prototype style tokens
+title: CLI Brutalist preset is a generated closure of official theme and style tokens
 status: draft
 since: 0.2.0-rc.7
-summary: The CLI carries an install-time Brutalist token preset for first-run and offline use, generated deterministically from official Brutalist prototype sources instead of maintained as an independent token list.
+summary: The Brutalist package owns one complete Light/Dark semantic theme manifest, while the CLI carries a deterministic checked projection of that manifest and the official prototype style-token scan for first-run and offline use.
 statement:
   en: >-
-    `proto-ui init --prototypes brutalist` must produce usable initial CSS before the target project installs prototype packages, so the CLI carries a static Brutalist preset manifest generated from `packages/prototypes/brutalist/src` through the shared scanner.
+    `proto-ui init --prototypes brutalist` must produce usable initial CSS before the target project installs prototype packages. The Brutalist package therefore owns the complete semantic theme manifest, and the CLI carries checked static projections of that manifest and the style-token closure scanned from official prototype sources.
 
 
   zh-CN: >-
-    `proto-ui init --prototypes brutalist` 必须在目标项目安装 prototype package 之前生成可用初始 CSS，因此 CLI 携带由 `packages/prototypes/brutalist/src` 通过共享 scanner 生成的静态 Brutalist preset manifest。
+    `proto-ui init --prototypes brutalist` 必须在目标项目安装 prototype package 之前生成可用初始 CSS。因此 Brutalist package 维护完整 semantic theme manifest，CLI 携带该 manifest 与官方 prototype 源码 style-token closure 的受检查静态投影。
 
 
 criteria:
   - id: D-CLI-BRUTALIST-PRESET-CLOSURE-0001-A
     text:
-      en: The Brutalist preset manifest carried by the CLI must be generated deterministically from official Brutalist prototype sources through the shared scanner and provide an executable stale check.
-      zh-CN: CLI 携带的 Brutalist preset manifest 必须由官方 Brutalist prototype 源码经共享 scanner 确定性生成，并提供可执行 stale check。
+      en: The Brutalist package must own one structured semantic theme manifest whose Light and Dark modes have identical keys and complete background/foreground pairs.
+      zh-CN: Brutalist package 必须维护一份结构化 semantic theme manifest；其 Light 与 Dark mode 必须具有相同 keys 与完整 background/foreground 配对。
   - id: D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B
     text:
       en: Token CSS produced by `proto-ui init --prototypes brutalist` must include the hard-shadow and square-corner token closure scanned from official Brutalist prototype sources.
       zh-CN: '`proto-ui init --prototypes brutalist` 产生的 token CSS 必须包含从官方 Brutalist prototype 源码扫描出的硬阴影与直角 token closure。'
   - id: D-CLI-BRUTALIST-PRESET-CLOSURE-0001-C
     text:
-      en: The generated Brutalist theme CSS must include light and dark theme variables while preserving prefixed Proto UI CSS variable output.
-      zh-CN: 生成的 Brutalist theme CSS 必须包含 Light 与 Dark theme 变量，并保持 Proto UI prefixed CSS variable 输出。
+      en: The generated Brutalist theme projection must stay current with the package manifest and produce prefixed Light/Dark Proto UI CSS variables without maintaining a second authored palette.
+      zh-CN: 生成的 Brutalist theme 投影必须与 package manifest 保持同步，并产生带前缀的 Light/Dark Proto UI CSS variables，不得维护第二份手写 palette。
 sources:
   - path: docs/superpowers/specs/2026-07-24-brutalist-design-system-design.md
   - path: internal/records/2026-07-27-brutalist-button-foundation-review.zh-CN.md
+  - path: packages/prototypes/brutalist/src/theme.ts
   - path: scripts/styles/generate-brutalist-style-tokens.ts
   - path: packages/cli/src/generated/brutalist-style-tokens.ts
   - path: packages/cli/src/services/prototype-style-tokens.ts
@@ -63,3 +64,6 @@ revisions:
   - version: 0.2.0-rc.7
     change: revised
     summary: Revised the public Brutalist family/token closure to include the complete 14-family surface, including Badge and Card.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Made the package-owned semantic theme manifest and its checked offline CLI projection part of the preset closure, including Light/Dark key parity and paired foreground completeness.

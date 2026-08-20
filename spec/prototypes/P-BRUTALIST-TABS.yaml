@@ -41,11 +41,22 @@ criteria:
         root 表面必须是 `flex flex-col gap-3` 垂直堆叠并带 `text-foreground`，使子 Tabs part 继承 Brutalist 墨色前景。root 自身不带填充、边框或阴影——那些位于 list/trigger/content part——且不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
 
 
+  - id: P-BRUTALIST-TABS-DEMO-STABLE-WIDTH
+    text:
+      en: >-
+        The reference demo, acting as consumer layout, must give Root `w-full max-w-sm`. Overview and Details must retain the same outer Root width and x-position through selection at desktop, remain inside 320–390px viewports without document-level horizontal overflow, and preserve equivalent geometry and interaction in Web Components, React, and Vue. The prototype itself must retain consumer-selectable intrinsic sizing.
+
+
+      zh-CN: >-
+        参考 demo 作为 consumer layout，必须给 Root 使用 `w-full max-w-sm`。Overview 与 Details 在桌面选择切换时必须保持相同的 Root 外部宽度与 x 位置，并在 320–390px viewport 内不产生 document-level horizontal overflow；Web Components、React 与 Vue 必须保持等价几何和交互。Prototype 本身必须继续允许 consumer 选择 intrinsic sizing。
+
+
 sources:
   - path: packages/prototypes/brutalist/src/tabs/root.proto.ts
   - path: packages/prototypes/brutalist/src/tabs/types.ts
   - path: packages/prototypes/brutalist/test/tabs.test.ts
   - path: packages/prototypes/brutalist/src/style.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-tabs.demo.ts
 relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
@@ -59,6 +70,12 @@ revisions:
     change: introduced
     summary: >-
       Introduced the draft Brutalist Tabs Root projection with real public-API criteria (vertical stack layout, inherited foreground) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Added a responsive reference-demo sizing guard that prevents selection-driven width and centering changes without constraining the prototype API.
 
 
 tags: [prototype, brutalist, neo-brutalist, visual, delta, tabs]

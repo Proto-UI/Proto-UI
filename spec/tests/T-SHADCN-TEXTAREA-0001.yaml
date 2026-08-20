@@ -1,0 +1,72 @@
+id: T-SHADCN-TEXTAREA-0001
+type: test
+title: Shadcn Textarea Root delta protocol contract tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Covers Textarea Root identity, Base inheritance, the single host-owned editor, state-driven presentation, the restated contentless renderer, and its slice boundary.
+cases:
+  - id: T-SHADCN-TEXTAREA-0001-CASE-EXPORTS
+    title: Root is a direct unofficial projection reachable through exact package entries
+    covers:
+      [
+        P-SHADCN-TEXTAREA-UPSTREAM-IDENTITY,
+        P-SHADCN-TEXTAREA-DIRECT-ENTRY,
+        P-SHADCN-TEXTAREA-COMPATIBILITY-SUBSET,
+      ]
+    expectation: shadcn-textarea-root-direct-entry-is-exported-once
+  - id: T-SHADCN-TEXTAREA-0001-CASE-EDITOR-OWNERSHIP
+    title: Base keeps one host-owned editor with unchanged value and accessibility projection
+    covers:
+      [
+        P-SHADCN-TEXTAREA-BASE-INHERITANCE,
+        P-SHADCN-TEXTAREA-CURRENT-BASE-DEVIATIONS,
+        P-SHADCN-TEXTAREA-BOUNDARY,
+      ]
+    expectation: shadcn-textarea-materializes-exactly-one-host-owned-editor
+  - id: T-SHADCN-TEXTAREA-0001-CASE-SURFACE
+    title: Root projects the current field surface
+    covers: [P-SHADCN-TEXTAREA-CURRENT-VISUAL-SURFACE]
+    expectation: shadcn-textarea-projects-the-current-field-surface
+  - id: T-SHADCN-TEXTAREA-0001-CASE-CONTENTLESS
+    title: Projection stays contentless and adds no second editing surface
+    covers: [P-SHADCN-TEXTAREA-CONTENTLESS, P-SHADCN-TEXTAREA-BOUNDARY]
+    expectation: shadcn-textarea-drops-authored-children-and-declares-no-second-editor
+  - id: T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE
+    title: Focus, disabled, and dark rules reach the web style projection as conditional presentation
+    covers: [P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES]
+    expectation: shadcn-textarea-state-rules-lower-to-conditional-web-presentation
+implementations:
+  - id: prototypes-shadcn-textarea-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/textarea.test.ts
+    required: true
+    consumesCases:
+      [
+        T-SHADCN-TEXTAREA-0001-CASE-EXPORTS,
+        T-SHADCN-TEXTAREA-0001-CASE-EDITOR-OWNERSHIP,
+        T-SHADCN-TEXTAREA-0001-CASE-SURFACE,
+        T-SHADCN-TEXTAREA-0001-CASE-CONTENTLESS,
+        T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE,
+      ]
+    exercises: &id001 [P-SHADCN-TEXTAREA, P-BASE-TEXTAREA]
+    notes:
+      - Positive tests cover only the current Proto UI guarantee; asChild omission, auto-resize, aria-invalid presentation, and remaining parity gaps are bounded by the decision, declared surface, and centralized compatibility question.
+      - The web-state case asserts Adapter lowering of the three condition-driven rules on the Web Component host, including the colorScheme rule. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited focus, disabled, and value state handles.
+  - id: prototypes-shadcn-textarea-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE]
+    exercises: *id001
+    notes:
+      - Drives light to dark and back in Web Components, React, and Vue without remounting the adapter. Static lowering of the colorScheme rule is what makes the repaint happen; a rule left on the default plan samples the scheme once and leaves stale presentation.
+      - Asserts the transitioned property set is exactly `color, box-shadow` at the upstream duration and easing. The set matters beyond parity, because a wider set would also animate the background and make the colorScheme reads race the animation.
+      - Covers the pointer-focus ring in both directions and requires a frame strictly between the two endpoints, so an instant jump cannot pass. Web Components is asserted as unringed until #426 projects text-control focus; the case starts covering it automatically once that lands.
+      - The ring currently keys the inherited `focused` state rather than `focusVisible`, because the latter misses pointer focus on text controls in this host. That is tracked in #438; when it lands the rule returns to `focusVisible` and this coverage should stay green unchanged.
+verifies:
+  prototypes:
+    - id: P-SHADCN-TEXTAREA
+exercises:
+  prototypes: *id001

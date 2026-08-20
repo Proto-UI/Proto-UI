@@ -3,7 +3,45 @@ type: module
 title: Props module
 status: active
 since: 0.1.0
-summary: Owns the semantic model for host-facing props.
+summary: The required Props module owns Maker configuration declaration, raw-to-resolved snapshot semantics, and callback-safe props observation.
+statement:
+  zh-CN: >-
+    Props module 是正常 Proto UI runtime 与 Adapter 的必装 instance module。它把 Adapter 提供的当前 raw props snapshot 解析为声明 key 的 portable resolved snapshot，并拥有 declaration、defaults、provided-state、fallback、watch diff 与 diagnostic task。Facade 经 runtime 投影到 `def.props` 与 `run.props`；port 只供 runtime 同步 host source、直接应用 raw snapshot、取得 watcher tasks 与 diagnostics。Module 不拥有宿主 props/attrs/property 的原始分类，也不因 props 变化隐式调度 render commit。
+
+
+  en: >-
+    The Props module is a required instance module for normal Proto UI runtimes and adapters. It resolves the current adapter-provided raw props snapshot into a portable declared-key resolved snapshot and owns declarations, defaults, provided state, fallback, watcher diffs, and diagnostic tasks. Its facade is projected by the runtime onto `def.props` and `run.props`; its port is reserved for runtime synchronization with the host source, direct raw-snapshot application, watcher-task consumption, and diagnostics. The module does not own the host's original props, attrs, or property classification and does not implicitly schedule a render commit when props change.
+
+
+criteria:
+  - id: M-PROPS-0001-A
+    text:
+      zh-CN: Module facade 必须提供 setup-time `define`、`setDefaults`、resolved/raw watcher registration，以及 runtime `get`、`getRaw`、`isProvided`；runtime 必须只把相应阶段允许的部分投影到 `def.props` 与 `run.props`。
+      en: The module facade must provide setup-time `define`, `setDefaults`, resolved and raw watcher registration, plus runtime `get`, `getRaw`, and `isProvided`; the runtime must project only the phase-appropriate parts onto `def.props` and `run.props`.
+  - id: M-PROPS-0001-B
+    text:
+      zh-CN: Module port 必须提供 `syncFromHost`、`applyRaw`、`consumeTasks` 与 diagnostics，使 runtime 可以在 callback-safe point 同步输入并绑定 watcher callback context；这些能力不得直接进入普通 prototype author surface。
+      en: The module port must provide `syncFromHost`, `applyRaw`, `consumeTasks`, and diagnostics so the runtime can synchronize input and bind watcher callback context at callback-safe points; these capabilities must not enter the ordinary prototype-author surface directly.
+  - id: M-PROPS-0001-C
+    text:
+      zh-CN: Module 必须通过一个 raw props snapshot source host capability 读取 Adapter 已规范化的当前输入，并把宿主或框架原始 props/attrs/property 分类留给 Adapter。
+      en: The module must read adapter-normalized current input through one raw props snapshot-source host capability while leaving original host or framework props, attrs, and property classification to the adapter.
+  - id: M-PROPS-0001-D
+    text:
+      zh-CN: source change notification 只能使当前 raw snapshot 失效；Module 必须在 runtime sync point 重新读取并按 Props contract 比较，不得把通知次数解释为 delivery event、watcher 次数或 render commit 请求。
+      en: A source-change notification may only invalidate the current raw snapshot; the module must reread and compare it at a runtime synchronization point under the Props contracts and must not interpret notification count as delivery events, watcher count, or render-commit requests.
+  - id: M-PROPS-0001-E
+    text:
+      zh-CN: '`applyRaw` 是 runtime/controller 的直接输入 port，与 host source pull/subscription 路径共享相同 Props kernel semantics，但它不是 host capability，且不得隐式 render。'
+      en: '`applyRaw` is a direct runtime or controller input port that shares Props-kernel semantics with the host-source pull and subscription path; it is not a host capability and must not implicitly render.'
+  - id: M-PROPS-0001-F
+    text:
+      zh-CN: 正常 Proto UI runtime 与 official Adapter 必须安装并接入 Props module；不提供该 module 的适配结果不得声称支持 Maker 到 Component 的标准 Props 配置通路。
+      en: Normal Proto UI runtimes and official adapters must install and wire the Props module; an adaptation without it must not claim support for the standard Maker-to-Component Props configuration channel.
+  - id: M-PROPS-0001-G
+    text:
+      zh-CN: Props logical state 与 declaration 属于 instance lifetime；host source replacement 必须取消旧订阅并读取新 source，terminal disposal 必须释放订阅与 pending tasks。
+      en: Props logical state and declarations belong to the instance lifetime; host-source replacement must unsubscribe from the old source and read the new source, while terminal disposal must release subscriptions and pending tasks.
 satisfies:
   contracts:
     - C-PROPS-0001
@@ -20,9 +58,69 @@ satisfies:
     - C-PROPS-0012
     - C-PROPS-0013
     - C-PROPS-0014
+requires:
+  hostCaps:
+    - id: HC-PROPS-SOURCE-0001
+      since: 0.2.0-rc.7
+verifies:
+  tests:
+    - T-PROPS-0001
+    - T-PROPS-0002
+    - T-PROPS-0003
+    - T-PROPS-0004
+    - T-PROPS-0005
+    - T-PROPS-0006
+    - T-PROPS-0007
+    - T-PROPS-0008
+    - T-PROPS-0009
+    - T-PROPS-0010
+    - T-PROPS-0011
+    - id: T-PROPS-0012
+      since: 0.2.0-rc.7
+dependsOn:
+  knowledge:
+    - K-COMPONENT-ACTOR-0001
+    - K-INFORMATION-CHANNEL-0001
+    - K-DESIGN-TRADEOFF-0001
+sources:
+  - path: internal/records/2026-08-13-module-host-cap-adapter-catalog-route.zh-CN.md
+  - path: internal/records/2026-08-14-props-official-adapter-profile-audit.zh-CN.md
+  - path: internal/governance/module-capability-index.zh-CN.md
+  - path: packages/modules/props/src/create.ts
+  - path: packages/modules/props/src/types.ts
+  - path: packages/modules/props/src/caps.ts
+  - path: packages/modules/props/src/impl.ts
+  - path: packages/modules/props/src/kernel/kernel.ts
+  - path: packages/runtime/src/instance/instance.ts
+  - path: packages/runtime/src/instance/session.ts
+openQuestions:
+  - id: M-PROPS-0001-Q-REQUIRED-MODULE-VALIDATION
+    question:
+      zh-CN: 当 runtime 未来允许自定义 module set 时，应由 schema、runtime graph 还是 Adapter conformance 在创建组件前拒绝缺失 Props module？
+      en: If runtimes later allow custom module sets, should schema validation, the runtime graph, or adapter conformance reject a missing Props module before component creation?
+    context:
+      zh-CN: 当前 runtime 固定安装 PropsModuleDef，因此 official adapters 不存在正常的缺失路径；required 属性仍需要未来通用 module selection 机制承接。
+      en: The current runtime installs PropsModuleDef unconditionally, so official adapters have no normal missing-module path; a future generic module-selection mechanism still needs to enforce required status.
+    blocks:
+      - configurable runtime module selection
+  - id: M-PROPS-0001-Q-SOURCE-MODES
+    question:
+      zh-CN: 未来是否需要允许 pull-only 或 push-only Props ingress，使 `RawPropsSource.subscribe` 不再是所有 host profile 的强制形状？
+      en: Should future Props ingress support pull-only or push-only modes so `RawPropsSource.subscribe` is no longer mandatory for every host profile?
+    context:
+      zh-CN: 当前 React、Vue 与 Web Component attribute profile 都能提供 `get + subscribe`；Web Component `setElementProps` 与 `controller.applyRawProps` 也已形成独立 direct-push path。现有证据支持两条路径共存，尚不支持提前扩张 capability shape。
+      en: The current React, Vue, and Web Component attribute profiles can all provide `get + subscribe`; Web Component `setElementProps` and `controller.applyRawProps` also form a distinct direct-push path. Existing evidence supports coexistence of the two paths but does not yet justify expanding the capability shape.
+    blocks:
+      - Props host ingress modes
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Cataloged Props facade, privileged port, required Adapter support, raw snapshot source host capability, lifecycle ownership, official Adapter translation evidence, and conformance relations.
   - version: 0.1.0
     change: introduced
     summary: Initial module identity for props semantics.
 tags:
   - props
+  - module
+  - required
+  - adapter

@@ -1,0 +1,47 @@
+id: T-CLI-STYLE-PRESET-COMPATIBILITY-0001
+type: test
+title: CLI style-preset compatibility preflight tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers matching, missing, mismatched, and explicitly disabled style-preset states at the add preflight boundary, including diagnostics and absence of mismatch side effects.
+cases:
+  - id: T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-MATCH
+    title: matching enabled preset preserves the existing add flow
+    covers: [D-CLI-STYLE-PRESET-COMPATIBILITY-0001-A]
+    expectation: style-preset-match-adds-component
+  - id: T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-MISMATCH
+    title: different enabled preset fails before project mutation with safe remediation
+    covers:
+      - D-CLI-STYLE-PRESET-COMPATIBILITY-0001-B
+      - D-CLI-STYLE-PRESET-COMPATIBILITY-0001-C
+    expectation: style-preset-mismatch-fails-without-side-effects
+  - id: T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-MISSING
+    title: missing enabled preset fails before project mutation
+    covers:
+      - D-CLI-STYLE-PRESET-COMPATIBILITY-0001-B
+      - D-CLI-STYLE-PRESET-COMPATIBILITY-0001-C
+    expectation: missing-style-preset-fails-without-side-effects
+  - id: T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-DISABLED
+    title: explicitly disabled styles preserve consumer ownership with an actionable note
+    covers: [D-CLI-STYLE-PRESET-COMPATIBILITY-0001-D]
+    expectation: disabled-styles-adds-with-consumer-owned-token-note
+implementations:
+  - id: cli-style-preset-compatibility-test
+    kind: module-test
+    status: passing
+    path: packages/cli/test/cli.test.ts
+    required: true
+    consumesCases:
+      - T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-MATCH
+      - T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-MISMATCH
+      - T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-MISSING
+      - T-CLI-STYLE-PRESET-COMPATIBILITY-0001-CASE-DISABLED
+verifies:
+  decisions: [D-CLI-STYLE-PRESET-COMPATIBILITY-0001]
+exercises:
+  prototypes: [P-BRUTALIST-BUTTON]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable add-command coverage for config-v1 style-preset compatibility and side-effect ordering.
+tags: [test, cli, style-preset, compatibility]

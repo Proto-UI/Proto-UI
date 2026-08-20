@@ -4,16 +4,16 @@ title: Brutalist Tabs Content inherits Base Tabs Content and layers a hard-shado
 status: draft
 since: 0.2.0-rc.7
 summary: >-
-  Brutalist Tabs Content inherits Base Tabs Content reveal semantics and projects a style-family panel surface: a square bordered panel with a hard offset shadow, hidden via the `hidden` token when its tab is not active.
+  Brutalist Tabs Content inherits Base Tabs Content reveal and descendant-first focus-entry semantics and projects a square hard-shadowed panel that preserves the browser's native fallback-self focus indication.
 
 
 statement:
   en: >-
-    Brutalist Tabs Content is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Tabs Content. It preserves inherited Base protocol semantics (the hidden handle driven by tab activation) and adds only visual/style behavior: a square bordered panel with a hard zero-blur offset shadow, flat theme-token fill, and a hidden-state guard that collapses the panel when `hidden` is true.
+    Brutalist Tabs Content is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Tabs Content. It preserves inherited Base protocol semantics (the hidden handle driven by tab activation and descendant-first focus entry) and adds only visual/style behavior: a square bordered panel with a hard zero-blur offset shadow, flat theme-token fill, a hidden-state guard, and no suppression of native focus indication when the panel root is the fallback entry target.
 
 
   zh-CN: >-
-    Brutalist Tabs Content 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Tabs Content 之上。它保留继承的 Base 协议语义（由 tab 激活驱动的 hidden handle），仅增加视觉/style 行为：带零模糊硬偏移阴影的直角边框面板、平面主题 token 填充，以及 `hidden` 为 true 时折叠面板的 hidden-state 守卫。
+    Brutalist Tabs Content 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Tabs Content 之上。它保留继承的 Base 协议语义（由 tab 激活驱动的 hidden handle 与 descendant-first focus entry），仅增加视觉/style 行为：带零模糊硬偏移阴影的直角边框面板、平面主题 token 填充、hidden-state 守卫，以及当面板 root 是 fallback entry target 时不抑制原生 focus indication。
 
 
 criteria:
@@ -39,6 +39,16 @@ criteria:
 
       zh-CN: >-
         当 `hidden` 为 true 时 content 必须通过单一规则应用 `hidden` token（display: none）完全折叠；不允许部分内容隐藏或离屏隐藏。当 `hidden` 为 false 时面板表面随内容完全渲染。
+
+
+  - id: P-BRUTALIST-TABS-CONTENT-FOCUS-INDICATION
+    text:
+      en: >-
+        The panel must not apply `outline-none` or otherwise suppress the browser's native focus-visible indication when Base Tabs Content makes the panel root the fallback focus-entry target. The projection must not add a second focus hook or focus state: when a tabbable descendant owns entry, the panel remains unfocusable and the descendant owns its own focus indicator.
+
+
+      zh-CN: >-
+        当 Base Tabs Content 将面板 root 设为 fallback focus-entry target 时，面板不得应用 `outline-none` 或以其他方式抑制浏览器原生 focus-visible indication。该投射不得添加第二个 focus hook 或 focus state：当 tabbable descendant 拥有 entry 时，面板保持不可聚焦，并由 descendant 拥有自身 focus indicator。
 
 
   - id: P-BRUTALIST-TABS-CONTENT-VISUAL-GRAMMAR
@@ -69,6 +79,12 @@ revisions:
     change: introduced
     summary: >-
       Introduced the draft Brutalist Tabs Content projection with real public-API criteria (hidden-state collapse, square panel grammar) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Preserved native fallback-self focus indication without adding a second focus protocol or changing descendant-first entry.
 
 
 tags: [prototype, brutalist, neo-brutalist, visual, delta, tabs]

@@ -1,5 +1,5 @@
 // packages/modules/expose/src/impl.ts
-import type { ProtoPhase, CapsVaultView } from '@proto.ui/core';
+import type { CapsVaultView } from '@proto.ui/core';
 import { illegalPhase } from '@proto.ui/core';
 
 import { ModuleBase } from '@proto.ui/module-base';
@@ -97,14 +97,6 @@ export class ExposeModuleImpl extends ModuleBase {
   // -------------------------
   // lifecycle + caps wiring
   // -------------------------
-
-  override onProtoPhase(phase: ProtoPhase): void {
-    super.onProtoPhase(phase);
-
-    if (phase === 'unmounted') {
-      this.dispose();
-    }
-  }
 
   dispose(): void {
     if (this.disposed) return;

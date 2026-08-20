@@ -13,7 +13,7 @@ Author-facing hook package for focus, overlay, trigger, collection, boundary, hi
 ## Install
 
 ```bash
-npm install @proto.ui/hooks@0.2.0-rc.7
+npm install @proto.ui/hooks@0.3.0-alpha.0
 ```
 
 ## Internal Structure

@@ -27,6 +27,38 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base');
     registerPrototype('base-button', mod.button);
   },
+  'base-toggle': async () => {
+    const mod = await import('@proto.ui/prototypes-base/toggle');
+    registerPrototype('base-toggle', mod.toggle);
+  },
+  'base-switch-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/switch');
+    registerPrototype('base-switch-root', mod.switchRoot);
+  },
+  'base-switch-thumb': async () => {
+    const mod = await import('@proto.ui/prototypes-base/switch');
+    registerPrototype('base-switch-thumb', mod.switchThumb);
+  },
+  'base-tabs-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-root', mod.tabsRoot);
+  },
+  'base-tabs-list': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-list', mod.tabsList);
+  },
+  'base-tabs-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-trigger', mod.tabsTrigger);
+  },
+  'base-tabs-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-content', mod.tabsContent);
+  },
+  'base-tabs-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-indicator', mod.tabsIndicator);
+  },
   'shadcn-button': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/button/index');
     registerPrototype('shadcn-button', mod.default);
@@ -66,6 +98,22 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'base-separator-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/separator');
     registerPrototype('base-separator-root', mod.default);
+  },
+  'base-scroll-area-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-root', mod.scrollAreaRoot);
+  },
+  'base-scroll-area-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-viewport', mod.scrollAreaViewport);
+  },
+  'base-scroll-area-scrollbar': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-scrollbar', mod.scrollAreaScrollbar);
+  },
+  'base-scroll-area-thumb': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-thumb', mod.scrollAreaThumb);
   },
   'base-textarea-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/textarea');
@@ -238,6 +286,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'lucide-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icon/index');
     registerPrototype('lucide-icon', mod.default);
+  },
+  'shadcn-separator-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/separator');
+    registerPrototype('shadcn-separator-root', mod.default);
   },
   'shadcn-switch-root': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/switch/root.proto');
@@ -461,6 +513,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'shadcn-dialog-header': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/dialog/header.proto');
     registerPrototype('shadcn-dialog-header', mod.default);
+  },
+  'shadcn-textarea-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/textarea');
+    registerPrototype('shadcn-textarea-root', mod.default);
   },
   'shadcn-dialog-footer': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/dialog/footer.proto');

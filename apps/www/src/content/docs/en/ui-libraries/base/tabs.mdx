@@ -1,0 +1,49 @@
+---
+title: 'Tabs'
+description: 'Base Tabs selection, anatomy, focus ownership, evidence, and current boundaries.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Tabs is a compound single-selection protocol. Root owns the selected value; List owns roving focus; Trigger requests selection; Content projects the current panel; Indicator only reflects context for downstream visual treatment.
+
+<PrototypePreviewer
+  demoId="demo-base-tabs"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family and ownership
+
+The canonical family is:
+
+- Root `1..1`
+- List `0..1`
+- Trigger `0..*`
+- Content `0..*`
+- Indicator `0..*`
+
+Root accepts `value`, `defaultValue`, `orientation`, and `activationMode`, and emits `valueChange`. A controlled Root treats selection as a request until the owner provides a new value. List adds `loop`, optional `a11yLabel`, orientation-aware arrow navigation, Home/End, and focus methods. Trigger owns its `value`, disabled gate, interaction facts, focus request, selected projection, and tab accessibility. Content matches its `value`, exposes `current`/`hidden`, and can retain an inactive host view with `keepMounted`.
+
+Indicator is a presentational context consumer. It exposes current value, active value, and orientation, but owns no selection, event route, focus target, measurement, positioning, or visual variant.
+
+## Accessibility and presence
+
+The Web profile projects tablist, tab, and tabpanel relationships. Disabled triggers remain outside selection. Automatic activation selects while focus moves; manual activation keeps focus navigation and selection separate. Inactive Content detaches by default; `keepMounted` preserves the complete host view while accessibility-hidden.
+
+## 0.2 delivery and evidence
+
+The stable 0.2.0 package exports all five authoring surfaces from `@proto.ui/prototypes-base/tabs`. The current `base-tabs` CLI facade generates Root, List, Trigger, and Content; Indicator remains a public package authoring surface but is not included in that generated facade. The mapped `T-BASE-TABS-*` entities cover `packages/prototypes/base/test/tabs.test.ts`, and this preview exercises the family through all three Web adapters.
+
+## Lifecycle
+
+The five `P-BASE-TABS*` entities are **draft**. Current implementation and evidence are reviewable working surfaces, not a frozen compatibility promise.
+
+## References
+
+- [P-BASE-TABS](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS.yaml)
+- Parts: [List](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-LIST.yaml), [Trigger](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-TRIGGER.yaml), [Content](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-CONTENT.yaml), [Indicator](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-INDICATOR.yaml)
+- [Tabs source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/tabs)
+- [Tabs evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/tabs.test.ts)
+- Styled projections: [Shadcn Tabs](/en/ui-libraries/shadcn/tabs/) and [Brutalist Tabs](/en/ui-libraries/brutalist/components/tabs/)

@@ -247,7 +247,9 @@ describe('prototypes/brutalist: dropdown menu', () => {
     const item = items[0];
     if (!item) throw new Error('Expected the destructive Dropdown item.');
     expect(styleContains(item, 'bg-secondary-background')).toBe(true);
-    expect(styleContains(item, 'text-destructive')).toBe(true);
+    // The resting row reads with the ink, not the fill; `destructive` on paper
+    // was 1.41:1.
+    expect(styleContains(item, 'text-destructive-ink')).toBe(true);
 
     trigger.click();
     await settle();

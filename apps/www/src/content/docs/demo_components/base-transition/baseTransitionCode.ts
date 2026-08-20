@@ -30,7 +30,7 @@ export const codeMap: Record<RuntimeId, Record<string, string>> = {
   wc: {
     'demo-base-transition-command': formatCode(`
 <wc-base-transition open appear class="transition-wrapper">
-  <div class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box">
+  <div class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box">
     <span class="text-lg font-semibold">Animated Box</span>
   </div>
 </wc-base-transition>
@@ -41,7 +41,7 @@ ${cssSnippet}
     `),
     'demo-base-transition-controlled': formatCode(`
 <wc-base-transition class="transition-wrapper">
-  <div class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box cursor-pointer select-none">
+  <div class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box cursor-pointer select-none">
     <span class="text-lg font-semibold">Click Me</span>
   </div>
 </wc-base-transition>
@@ -58,7 +58,7 @@ import { BaseTransition } from '@prototype-libs/base';
 export function DemoBaseTransitionCommandDemo() {
   return (
     <BaseTransition open appear className="transition-wrapper">
-      <div className="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box">
+      <div className="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box">
         <span className="text-lg font-semibold">Animated Box</span>
       </div>
     </BaseTransition>
@@ -98,7 +98,7 @@ export function DemoBaseTransitionControlledDemo() {
   return (
     <BaseTransition open={open} className="transition-wrapper">
       <div
-        className="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box cursor-pointer select-none"
+        className="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box cursor-pointer select-none"
         onClick={() => setOpen((v) => !v)}
       >
         <span className="text-lg font-semibold">Click Me</span>
@@ -139,7 +139,7 @@ import { BaseTransition } from '@prototype-libs/base';
 
 <template>
   <BaseTransition open appear class="transition-wrapper">
-    <div class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box">
+    <div class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box">
       <span class="text-lg font-semibold">Animated Box</span>
     </div>
   </BaseTransition>
@@ -160,7 +160,7 @@ const open = ref(false);
 <template>
   <BaseTransition :open="open" class="transition-wrapper">
     <div
-      class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box cursor-pointer select-none"
+      class="w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box cursor-pointer select-none"
       @click="open = !open"
     >
       <span class="text-lg font-semibold">Click Me</span>

@@ -62,14 +62,26 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
-  it('renders projection-local directional border colors', () => {
+  it('renders the composed inset and outer hard shadows used by active Brutalist Toggle', () => {
     const css = renderProtoStyleTokenCss([
-      'brutalist-border-bottom-black',
-      'brutalist-border-top-black',
+      'shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]',
+      'shadow-[inset_0_0_0_2px_#000]',
     ]);
 
-    expect(css).toContain('border-bottom-color: #000;');
-    expect(css).toContain('border-top-color: #000;');
+    expect(css).toContain('--pui-shadow: inset 0 0 0 2px #000, 3px 3px 0 0 #000;');
+    expect(css).toContain('--pui-shadow: inset 0 0 0 2px #000;');
+    expect(css).toContain(
+      'box-shadow: var(--pui-ring-offset-shadow, 0 0 #0000), var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000);'
+    );
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
+  it('renders directional separator borders in the theme foreground', () => {
+    const css = renderProtoStyleTokenCss(['border-b-2', 'border-t-2', 'border-foreground']);
+
+    expect(css).toContain('border-bottom-width: 2px;');
+    expect(css).toContain('border-top-width: 2px;');
+    expect(css).toContain('border-color: var(--pui-foreground);');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 

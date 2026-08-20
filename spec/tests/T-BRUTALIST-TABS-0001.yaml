@@ -4,7 +4,7 @@ title: Brutalist Tabs visual contract and public API tests
 status: draft
 since: 0.2.0-rc.7
 summary: >-
-  Covers the Brutalist Tabs public API (root+list entry/square strip, trigger selected pair and non-selected hover lift, content hidden-state collapse) against P-BRUTALIST-TABS family criteria.
+  Covers the Brutalist Tabs public API, trigger selected/hover/press precedence, content hidden-state collapse, and native fallback focus indication against P-BRUTALIST-TABS family criteria.
 
 
 cases:
@@ -40,6 +40,23 @@ cases:
       - P-BRUTALIST-TABS-CONTENT-HIDDEN-STATE
       - P-BRUTALIST-TABS-CONTENT-VISUAL-GRAMMAR
     expectation: p-brutalist-tabs-content-hidden
+  - id: T-BRUTALIST-TABS-0001-CASE-5
+    title: Selected trigger elevation yields to transient press and returns on release
+    covers:
+      - P-BRUTALIST-TABS-TRIGGER-SELECTED-PAIR-INVARIANT
+      - P-BRUTALIST-TABS-TRIGGER-INTERACTION
+    expectation: p-brutalist-tabs-trigger-press-precedence
+  - id: T-BRUTALIST-TABS-0001-CASE-6
+    title: Content preserves native fallback focus indication and descendant-first entry
+    covers:
+      - P-BRUTALIST-TABS-CONTENT-BASE-INHERITANCE
+      - P-BRUTALIST-TABS-CONTENT-FOCUS-INDICATION
+    expectation: p-brutalist-tabs-content-focus-indication
+  - id: T-BRUTALIST-TABS-0001-CASE-7
+    title: Reference demo keeps Root width and position stable across selection
+    covers:
+      - P-BRUTALIST-TABS-DEMO-STABLE-WIDTH
+    expectation: p-brutalist-tabs-responsive-stable-demo-width
 implementations:
   - id: prototypes-brutalist-tabs-contract
     kind: module-test
@@ -51,6 +68,8 @@ implementations:
       - T-BRUTALIST-TABS-0001-CASE-2
       - T-BRUTALIST-TABS-0001-CASE-3
       - T-BRUTALIST-TABS-0001-CASE-4
+      - T-BRUTALIST-TABS-0001-CASE-5
+      - T-BRUTALIST-TABS-0001-CASE-6
     exercises:
       - P-BASE-TABS
       - P-BASE-TABS-LIST
@@ -60,6 +79,16 @@ implementations:
       - P-BRUTALIST-TABS-LIST
       - P-BRUTALIST-TABS-TRIGGER
       - P-BRUTALIST-TABS-CONTENT
+  - id: www-brutalist-tabs-demo-layout
+    kind: workspace-check
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TABS-0001-CASE-7
+    exercises:
+      - P-BASE-TABS
+      - P-BRUTALIST-TABS
 verifies:
   prototypes:
     - id: P-BRUTALIST-TABS
@@ -81,6 +110,12 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Tabs coverage mapped 1:1 to the rc.7 P criteria (list+root entry, trigger selected pair, trigger interaction, content hidden). Not present in the immutable rc.6 snapshot.
+
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Added coverage for deterministic trigger press precedence, unsuppressed native fallback panel focus indication, and responsive selection-stable reference-demo geometry.
 
 
 tags:

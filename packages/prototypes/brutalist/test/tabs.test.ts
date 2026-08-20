@@ -18,7 +18,7 @@ async function flush(): Promise<void> {
   for (let index = 0; index < 4; index += 1) await Promise.resolve();
 }
 
-function createTabs() {
+function createTabs(contentAFocusTarget?: HTMLElement) {
   const root = document.createElement(tabsRoot.name) as TabsRootElement;
   const list = document.createElement(tabsList.name) as TabsListElement;
   const triggerA = document.createElement(tabsTrigger.name) as TabsTriggerElement;
@@ -34,7 +34,11 @@ function createTabs() {
   setElementProps(contentB, { value: 'b', keepMounted: true });
   triggerA.textContent = 'Alpha';
   triggerB.textContent = 'Beta';
-  contentA.textContent = 'Alpha panel';
+  if (contentAFocusTarget) {
+    contentA.appendChild(contentAFocusTarget);
+  } else {
+    contentA.textContent = 'Alpha panel';
+  }
   contentB.textContent = 'Beta panel';
 
   list.append(triggerA, triggerB);
@@ -98,7 +102,7 @@ describe('prototypes/brutalist: tabs', () => {
       'data-[selected]:bg-main',
       'data-[selected]:text-main-foreground',
       'data-[selected]:border-black',
-      'data-[selected]:shadow-[3px_3px_0_0_#000]',
+      'data-[selected]:not-[data-pressed]:shadow-[3px_3px_0_0_#000]',
     ]) {
       expect(styleContains(triggerA, token)).toBe(true);
     }
@@ -132,12 +136,14 @@ describe('prototypes/brutalist: tabs', () => {
     await flush();
     expect(triggerB.getExposes().hovered.get()).toBe(true);
     expect(triggerB.hasAttribute('data-hovered')).toBe(true);
+    // Variant order follows the generated stylesheet, not the authoring order of
+    // the rule's conditions; see packages/cli/test/lowered-variant-order.test.ts.
     for (const token of [
-      'data-[hovered]:not-[data-selected]:bg-background',
-      'data-[hovered]:not-[data-selected]:border-black',
-      'data-[hovered]:not-[data-selected]:-translate-x-px',
-      'data-[hovered]:not-[data-selected]:-translate-y-px',
-      'data-[hovered]:not-[data-selected]:shadow-[4px_4px_0_0_#000]',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:bg-background',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:border-black',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:-translate-x-px',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:-translate-y-px',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:shadow-[4px_4px_0_0_#000]',
     ]) {
       expect(styleContains(triggerB, token)).toBe(true);
     }
@@ -205,5 +211,59 @@ describe('prototypes/brutalist: tabs', () => {
     expect(contentB.getExposes().hidden.get()).toBe(false);
     expect(contentB.hasAttribute('hidden')).toBe(false);
     expect(contentB.textContent).toBe('Beta panel');
+  });
+
+  it('lets press suppress selected elevation until release', async () => {
+    // T-BRUTALIST-TABS-0001-CASE-5
+    const { triggerA } = createTabs();
+    await flush();
+
+    triggerA.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await flush();
+    expect(triggerA.getExposes().selected.get()).toBe(true);
+    expect(triggerA.getExposes().pressed.get()).toBe(true);
+    expect(triggerA.hasAttribute('data-selected')).toBe(true);
+    expect(triggerA.hasAttribute('data-pressed')).toBe(true);
+    expect(
+      styleContains(triggerA, 'data-[selected]:not-[data-pressed]:shadow-[3px_3px_0_0_#000]')
+    ).toBe(true);
+    expect(styleContains(triggerA, 'data-[pressed]:shadow-none')).toBe(true);
+
+    triggerA.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    await flush();
+    expect(triggerA.getExposes().pressed.get()).toBe(false);
+    expect(triggerA.hasAttribute('data-selected')).toBe(true);
+  });
+
+  it('preserves native fallback-self focus indication and delegates descendant-first entry', async () => {
+    // T-BRUTALIST-TABS-0001-CASE-6
+    const fallbackTabs = createTabs();
+    await flush();
+
+    expect(fallbackTabs.contentA.tabIndex).toBe(0);
+    expect('focusVisible' in fallbackTabs.contentA.getExposes()).toBe(false);
+    expect(styleContains(fallbackTabs.contentA, 'outline-none')).toBe(false);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    fallbackTabs.contentA.focus();
+    await flush();
+    expect(document.activeElement).toBe(fallbackTabs.contentA);
+    expect(fallbackTabs.contentA.hasAttribute('data-focus-visible')).toBe(false);
+    expect(styleContains(fallbackTabs.contentA, 'outline-none')).toBe(false);
+
+    fallbackTabs.root.remove();
+    await flush();
+
+    const descendant = document.createElement('button');
+    descendant.textContent = 'Panel action';
+    const delegatedTabs = createTabs(descendant);
+    await flush();
+
+    expect(delegatedTabs.contentA.tabIndex).toBe(-1);
+    expect(styleContains(delegatedTabs.contentA, 'outline-none')).toBe(false);
+    descendant.focus();
+    await flush();
+    expect(document.activeElement).toBe(descendant);
+    expect(delegatedTabs.contentA.hasAttribute('data-focus-visible')).toBe(false);
   });
 });

@@ -1,0 +1,84 @@
+---
+title: 'Dialog'
+description: 'Shadcn modal Dialog projected over the Proto UI Base Dialog protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+> Availability: `@proto.ui/prototypes-shadcn@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: the [Shadcn Dialog](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG.yaml) family and its inherited Base entities remain `draft`; this page documents the released and tested 0.2 surface, not an active protocol guarantee.
+
+Shadcn Dialog is a styled projection over [Base Dialog](../../base/dialog/). Base owns modal state, commands, focus, dismissal, presence, and accessibility relations. The Shadcn layer adds the centered panel, backdrop, motion, typography, layout groups, and a replaceable default X close surface.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+## Install and styles
+
+Initialize the project and import the generated stylesheet once as described in the [Quick Start](../../../start-here/quick-start/), then generate the Dialog facade for the selected host:
+
+```bash
+npx @proto.ui/cli@latest add react shadcn-dialog
+```
+
+Use `vue` or `wc` instead of `react` for the other official Web adapters. The command generates the compound host exports from `@proto.ui/prototypes-shadcn/dialog`; the generated `proto-ui-style.css` supplies the Shadcn theme and every visual token used below.
+
+## Compound parts
+
+| Generated surface | Responsibility |
+| --- | --- |
+| `ShadcnDialogRoot` | Owns controlled or uncontrolled `open`, disabled state, alert-dialog mode, fallback accessible name, context, and open/close/toggle exposes. |
+| `ShadcnDialogTrigger` | Requests opening through Base command semantics. It is intentionally unstyled; compose a `ShadcnButton` child for a button surface. |
+| `ShadcnDialogMask` | Projects modal occlusion, presence, and the backdrop transition. |
+| `ShadcnDialogContentRaw` | Projects the centered panel while retaining Base focus, dismissal, presence, and accessibility behavior, without adding a default close part. |
+| `ShadcnDialogContent` | CLI-generated convenience facade over ContentRaw with the replaceable CloseIcon preset. |
+| `ShadcnDialogHeader` / `ShadcnDialogFooter` | Optional layout-only groups. They do not own title, description, confirm, cancel, save, or dismissal semantics. |
+| `ShadcnDialogTitle` / `ShadcnDialogDescription` | Supply the live label and description relations for the active dialog surface. |
+| `ShadcnDialogClose` | Requests dismissal through an intentionally unstyled command boundary; compose a Button child for a visible action. |
+| `ShadcnDialogCloseIcon` | Independent accessible X close control used as Content's default preset part. |
+
+These names match the `shadcn-dialog` CLI registry entry. The package exports the underlying ten direct prototypes; the CLI adds the generated convenience `ShadcnDialogContent` facade while preserving `ShadcnDialogContentRaw`.
+
+## Default close part
+
+The Content preset has three intentional states:
+
+- with no override, `ShadcnDialogContent` materializes a `ShadcnDialogCloseIcon` direct child;
+- a direct CloseIcon child, React `close` prop, or Vue `#close` slot replaces the default;
+- React `close={null}`, an empty Vue `#close` slot, or Web Component `data-pui-no-default-close` explicitly omits it.
+
+Use `ShadcnDialogContentRaw` when no preset materialization is wanted. The recipe owns part identity and replacement policy only; the CloseIcon prototype owns its X glyph, accessible `Close` name, placement, hover, disabled, and focus-visible styling.
+
+## Base-owned behavior
+
+The Shadcn family inherits these behaviors rather than reimplementing them:
+
+- Root is the single owner of `open`; controlled requests signal without silently taking ownership.
+- Trigger, Close, and the default CloseIcon use the same command and disabled-state model.
+- Content traps and loops focus while open, then restores focus to the triggering surface on dismissal.
+- Escape and outside-press requests close a regular dialog. Alert mode keeps Escape dismissal but rejects outside-press dismissal.
+- Title and Description are associated with Content through live `aria-labelledby` and `aria-describedby` relations; `a11yLabel` is the Root fallback when no Title exists.
+- Mask retains presence through its 150 ms leave transition, while Content retains presence through its 200 ms leave transition, before either detaches.
+
+Set `alert` on `ShadcnDialogRoot`, not Content, to request `role="alertdialog"`. Alert dialogs require a Description containing the primary message.
+
+## Current boundaries
+
+- Every `P-SHADCN-DIALOG-*` entity is still `draft`, even though the executable family shipped in 0.2.0.
+- Content's documented public props are currently empty; inherited transition controls are not a stable Shadcn public API.
+- Proto UI exposes Mask and Content separately instead of mirroring the upstream Portal/Overlay composition.
+- `asChild`, upstream `showCloseButton`, `modal`, `data-slot`, `className`/native-prop forwarding, and exact responsive width parity are not part of the current documented Shadcn surface.
+- Header and Footer are layout only. Application validation and persistence remain consumer-owned; request dismissal only after that work succeeds.
+
+## References
+
+- Root: [P-SHADCN-DIALOG](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG.yaml)
+- Content: [P-SHADCN-DIALOG-CONTENT](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG-CONTENT.yaml)
+- Default close: [P-SHADCN-DIALOG-CLOSE-ICON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG-CLOSE-ICON.yaml)
+- Base protocol: [P-BASE-DIALOG](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DIALOG.yaml)
+- Source: [packages/prototypes/shadcn/src/dialog](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/shadcn/src/dialog)

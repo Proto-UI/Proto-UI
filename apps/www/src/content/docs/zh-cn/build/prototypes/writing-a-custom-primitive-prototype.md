@@ -1,124 +1,92 @@
 ---
 title: '编写一个定制的单体原型'
-description: '从最小结构出发理解 Proto UI 单体原型的写法。'
+description: '在已批准边界内理解 direct Prototype 与 authored asHook 的最小结构。'
 ---
 
-这一篇只讨论最小的、单体的原型。  
-它不讨论复合组件的拆分，也不试图讲完所有能力。
+单体 Prototype 对应一个边界明确、可以独立承担信息通路责任的 protocol subject。Button 与 Toggle 是当前较清楚的例子。
 
-目标只有一个：
+> 本文解释 authoring 结构，不负责批准新的 Base identity。实现新 Base subject 前，必须先完成 maintainer checkpoint，并使用[实现已批准的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)所定义的完整交付流程。
 
-> 让你知道一个 Proto UI 原型最小是怎样长出来的。
+## 从实体和证据开始
 
-## 单体原型到底在描述什么？
+不要先复制源码。以 Button 为例，阅读顺序应是：
 
-Proto UI 的单体原型通常对应一个相对完整、边界明确的交互主体。  
-例如 `button`、`toggle`，这类对象通常不需要先拆成多个 part，才能成立。
+1. `P-BASE-BUTTON` 的 lifecycle、criteria、relations 与 sources；
+2. `T-BASE-BUTTON-0001` 的 cases 与 executable mappings；
+3. [packages/prototypes/base/src/button/button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts)；
+4. `packages/prototypes/base/test/as-button.test.ts` 及相关 Adapter evidence；
+5. package exports、CLI、文档和 Demo。
 
-从白皮书角度讲，它已经是一个能独立承担信息通路责任的对象。  
-从代码角度讲，它通常会体现为：
+当前 `P-BASE-BUTTON` 是 `draft`。源码是当前实现证据，不高于适用实体。
 
-- 一个 `setup(def)` 过程
-- 一组最小 props
-- 几个核心 state
-- 必要的 event / expose
-- 如果需要复用，再导出一个 `asHook`
+## `base-button` 展示了什么
 
-## 一个最小例子：`base-button`
+Button 的两个官方 authoring entries 是：
 
-[packages/prototypes/base/src/button/button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts) 是当前仓库里最适合作为起点的例子之一。
+- `base-button` direct prototype；
+- `asButton` authored asHook。
 
-它的结构很典型：
+它们共享 `setupButton(def)`，所以不会各自维护一套 Button 语义。这是 `P-BASE-BUTTON-AUTHORING-ENTRIES` 的具体投影，不是每个 Prototype 都必须复制的固定模板。
 
-1. 先定义 `setupButton(def)`
-2. 在里面声明 `props`
-3. 建立内部状态与 exposed state
-4. 绑定事件
-5. 最后同时导出 `asButton` 和 `base-button`
+当前实现的关键结构包括：
 
-这背后的思路是：
+- `def.props.define()` 声明 `disabled`；
+- `def.state.bool()` 建立 `disabled`、`hovered` 与 `pressed` 等状态；
+- `asFocusable()` 提供 `focused`、`focusVisible` 与 focus method；
+- `def.event.on()` 承接 pointer 与 `press.commit`；
+- `def.expose.state()`、`def.expose.method()` 和 `def.expose.event()` 提供 outward surface；
+- `def.a11y.*` 声明 Button 的 role、name、state 与 action。
 
-- 行为先被组织成一段可复用的 setup
-- `asHook` 与 `prototype` 共用同一份核心交互逻辑
+旧的 `def.state.fromInteraction()` 例子已经不代表当前 Button 实现，不应继续作为这篇指南的示例。
 
-## `def` 和 `run` 的分割到底是什么意思？
+## `def` 与 `run` 的边界
 
-Proto UI 里一个很重要的分界是：
+`def` 用于声明 setup-time 计划：props、state、events、exposes、a11y、rules 与 lifecycle hooks。`run` 只在具体 runtime callback 中提供当前 props、context、lifecycle 与 outward effect 入口。
 
-- `def` 负责定义结构、能力和规则
-- `run` 负责在真实执行中读取当前值、更新上下文、发出效果
+例如：
 
-简单理解：
+```ts
+def.event.on('press.commit', (run) => {
+  if (disabled.get()) return;
+  run.expose.emit('click');
+});
+```
 
-- 在 `def` 阶段，你是在说“这个原型允许什么、会有哪些能力、要监听什么”
-- 在 `run` 阶段，你才真正面对某一次实例化后的当前数据
+这里 event route 在 setup 期注册；真正的 outward signal 在事件发生时通过 `run` 发出。
 
-例如在 `base-button` 里：
+## 什么时候提供 authored asHook
 
-- `def.props.define()` 是定义 props 契约
-- `def.state.fromInteraction()` 是声明要使用哪些交互状态
-- `def.event.on('press.commit', (run) => { ... })` 则是在实际事件触发时通过 `run` 处理当前实例
+不要把“只导出 prototype，不导出 asHook”当成通用错误。先问：
 
-如果你把这两层混在一起，通常会很快丢掉 Proto UI 对执行期的基本秩序。
+- applicable P 是否把 direct form 与 authored asHook 记录为同一 protocol 的两个 entries？
+- 两者是否应共享完整协议面与实现？
+- 这个 hook 是否只服务其 owning protocol，而不是被误用为跨 Prototype substrate？
+- 新增 entry 是否会引入未经治理的 options、merge 或 configure 语义？
 
-## 单体原型最小会碰到哪些能力？
+`D-PROTOTYPE-ENTITY-NAMING-0001` 要求同一协议已有的多个 entries 编目在同一个 P 实体；它不要求每个 direct Prototype 自动生成 asHook。`D-AS-HOOK-CONFIGURABLE-AUTHORED-0001` 还将普通 configurable authored asHook 保留为待治理设计空间。
 
-对一个基础单体原型来说，最常见的是下面这几类：
+## 一个完整单体 slice 还需要什么
 
-- `props` 用来承接 Maker 侧的输入，例如 `disabled`
-- `state` 用来保存原型内部需要稳定表达的状态
-- `event` 用来承接用户输入或宿主输入
-- `expose` 用来把状态或方法交还给外部
+源码文件只是交付面的一部分。获批的新单体 Prototype 通常还需要：
 
-`base-button` 就几乎把这一组最小能力都走了一遍：
+```text
+approved checkpoint
+→ P criteria and relations
+→ T cases and executable tests
+→ implementation and public exports
+→ CLI facade generation
+→ bilingual docs and real public-package demo
+→ applicable WC / React / Vue evidence
+```
 
-- 通过 `def.props.define()` 声明 `disabled`
-- 通过 `def.state.fromInteraction()` 建立 `hovered`、`pressed`、`focused`
-- 通过 `def.event.on()` 监听 `pointer.enter`、`press.commit` 等事件
-- 通过 `def.expose.state()` 和 `def.expose.method()` 向外暴露能力
+三套当前 Adapter 预览验证的是一个 Web host profile，不能自动推导为多宿主 conformance。
 
-## `asHook` 在这里是什么角色？
+## 何时暂停
 
-在 Proto UI 里，`asHook` 不是一个次要配件，而是“把一段原型能力拿出来重组”的标准入口。
-
-在 `base-button` 里，`asButton` 与 `base-button` 共用同一份 `setupButton`。  
-这意味着：
-
-- 原型作者可以直接消费 `base-button`
-- 更高层的原型作者也可以只复用 `button` 的交互骨架
-
-因此，当你在写一个新的单体原型时，最好尽早判断：
-
-- 这段逻辑以后是否值得被别的原型复用？
-
-如果答案是“很可能会”，那通常值得像 `base-button` 一样，把共享的 setup 单独整理出来，再同时导出 `asHook` 和 `prototype`。
-
-## 单体原型最常见的误区
-
-### 1. 一开始就试图把所有能力都塞进去
-
-Proto UI 的原型不是“能力越多越完整”。  
-单体原型更适合先围绕一个稳定的交互核心收敛最小能力。
-
-### 2. 把风格表达和交互边界混在一起
-
-如果你还在定义交互主体本身，先不要急着把 design system 的变体、视觉规则也一起塞进来。  
-这类东西更适合在库层长出来。
-
-### 3. 只导出 prototype，不导出 `asHook`
-
-如果你写出来的是一个明显可能被复用的基础能力，却没有提供 `asHook`，后面别人更容易被逼着重新写一遍。
-
-## 什么样的单体原型比较像“写对了”？
-
-你可以先用很现实的标准判断：
-
-- 它描述的是一个独立交互主体，而不是一段局部拼图
-- 它只承诺自己真正应该承诺的能力
-- 它能被更高层原型复用，而不是只能作为最终产物存在
-- 它暂时不依赖某个特定 design system 才成立
+如果实现中需要新增公共 prop/event/state、改变 owner、引入 raw host object，或发现 P/T 与实现互相矛盾，应回到 Issue 请求 checkpoint，而不是在源码里扩张边界。
 
 ## 下一步
 
-- 如果你已经发现自己写的不是单体对象，而是一个复合组件系统，继续读 [编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
-- 如果你其实想做的是风格库，继续读 [基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)
+- 复合 family：读[编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
+- 设计语言投射：读[基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)
+- 提交前：使用[原型作者检查清单](/zh-cn/build/prototypes/checklist/)

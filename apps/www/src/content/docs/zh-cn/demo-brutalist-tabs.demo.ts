@@ -3,6 +3,7 @@ export default {
   root: {
     kind: 'proto',
     prototypeId: 'brutalist-tabs-root',
+    className: 'w-full max-w-sm',
     props: { defaultValue: 'overview' },
     children: [
       {

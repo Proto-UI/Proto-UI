@@ -1,6 +1,8 @@
 {
   "version": 1,
   "campaign": "v0-good-first-issues",
+  "status": "retired",
+  "retiredReason": "The v0 seed predates the current spec-first Prototype catalog, readiness model, labels, and implemented families. Keep it as historical planning data; do not publish from it.",
   "defaultLabels": ["good first issue", "help wanted", "v0 launch"],
   "issues": [
     {

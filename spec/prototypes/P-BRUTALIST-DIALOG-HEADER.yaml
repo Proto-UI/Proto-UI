@@ -34,11 +34,11 @@ criteria:
   - id: P-BRUTALIST-DIALOG-HEADER-VISUAL-GRAMMAR
     text:
       en: >-
-        The surface uses `grid gap-1 border-b-2 brutalist-border-bottom-black pb-3 text-left` — a grid layout panel with a projection-local 2px black bottom border, no fill of its own, and left-aligned text, preserving the Neo-Brutalist structural border grammar without gradients, glass, rounded cards, or soft elevation.
+        The surface uses `grid gap-1 border-b-2 border-foreground pb-3 text-left` — a grid layout panel with a 2px bottom border resolved from the theme foreground rather than a fixed black, no fill of its own, and left-aligned text, preserving the Neo-Brutalist structural border grammar without gradients, glass, rounded cards, or soft elevation.
 
 
       zh-CN: >-
-        表面使用 `grid gap-1 border-b-2 brutalist-border-bottom-black pb-3 text-left`——带有投射局部 2px 黑色下边框的 grid 布局面板、无自有填充、左对齐文本，保持 Neo-Brutalist 结构边框语法，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+        表面使用 `grid gap-1 border-b-2 border-foreground pb-3 text-left`——带有由主题 foreground 解析而非固定黑色的 2px 下边框的 grid 布局面板、无自有填充、左对齐文本，保持 Neo-Brutalist 结构边框语法，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
 
 
 sources:
@@ -54,6 +54,12 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Dialog Header projection with real public-API criteria (direct entry, DIALOG_FAMILY header anatomy, visual grammar) on rc.7. Not present in immutable rc.6.
+
+
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Resolved the lower separator ink from the theme foreground instead of a fixed black.
 
 
 tags: [prototype, brutalist, neo-brutalist, visual, delta, dialog]

@@ -33,7 +33,14 @@ export class ExposeKernel {
 
   toRecord(): Record<string, unknown> {
     const out: Record<string, unknown> = {};
-    for (const [k, v] of this.map) out[k] = v;
+    for (const [k, v] of this.map) {
+      Object.defineProperty(out, k, {
+        value: v,
+        enumerable: true,
+        configurable: true,
+        writable: true,
+      });
+    }
     return out;
   }
 

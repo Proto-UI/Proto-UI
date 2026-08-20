@@ -1,4 +1,5 @@
 import {
+  cancelWebEventDefaultAction,
   createCapsWiring,
   createWebMoveGestureHost,
   type LogicalInstanceToken,
@@ -30,12 +31,11 @@ import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module
 import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
-  type EventDefaultActionCancelRequest,
-  EVENT_EMIT_CAP,
   EVENT_GLOBAL_TARGET_CAP,
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
-import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import {
   FOCUS_BLUR_CAP,
   FOCUS_INSTANCE_TOKEN_CAP,
@@ -127,7 +127,7 @@ export function createVueOwnerModules<Props extends PropsBaseType>(
 
   return createCapsWiring()
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
-    .use('event', [[EVENT_EMIT_CAP, emit]])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
@@ -135,7 +135,7 @@ export function createVueOwnerModules<Props extends PropsBaseType>(
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },
@@ -247,16 +247,9 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     .use('event', [
       [EVENT_ROOT_TARGET_CAP, () => router.rootTarget],
       [EVENT_GLOBAL_TARGET_CAP, () => router.globalTarget],
-      [
-        EVENT_CANCEL_DEFAULT_ACTION_CAP,
-        ({ event }: EventDefaultActionCancelRequest) => {
-          if (typeof (event as Event | undefined)?.preventDefault === 'function') {
-            (event as Event).preventDefault();
-          }
-        },
-      ],
-      [EVENT_EMIT_CAP, emit],
+      [EVENT_CANCEL_DEFAULT_ACTION_CAP, cancelWebEventDefaultAction],
     ])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
@@ -294,7 +287,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },

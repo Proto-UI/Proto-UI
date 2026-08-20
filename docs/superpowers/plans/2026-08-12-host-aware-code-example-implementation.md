@@ -4,7 +4,7 @@
 
 **Goal:** Deliver issue #344 as a documentation-only, host-aware multi-file code display that reuses CodePanel and the site's canonical adapter preference.
 
-**Architecture:** Centralize the existing adapter preference and Shiki transforms. Extract CodePanel's scoped DOM controller. Compose CodePanel in a new static CodeExample with nested accessible tabs. Migrate one bilingual RC Trial example. Do not alter Proto UI specs or PrototypePreviewer public/runtime contracts.
+**Architecture:** Centralize the existing adapter preference and Shiki transforms. Extract CodePanel's scoped DOM controller. Compose CodePanel in a new static CodeExample with nested accessible tabs. Migrate one bilingual stable Quick Start example; the original RC Trial target was removed by the later public-docs gate. Do not alter Proto UI specs or PrototypePreviewer public/runtime contracts.
 
 **Tech stack:** Astro 5, TypeScript, Shiki, Starlight, happy-dom/Vitest.
 
@@ -50,15 +50,15 @@ Use one server-side highlighter and one scoped client controller. Add optional C
 
 Validate input; render canonical hosts and all files server-side; wire exact tab/tablist/tabpanel relationships; implement one non-looping horizontal activation routine for both nesting levels; implement global-following/local-override host state and independent per-host file state; contain strip/code overflow locally. Make focused client tests GREEN.
 
-### Task 5: Adopt on the real bilingual RC Trial page
+### Task 5: Adopt on the real bilingual Quick Start page
 
 **Files:**
 
-- Modify: `apps/www/src/content/docs/en/start-here/rc-trial.mdx`
-- Modify: `apps/www/src/content/docs/zh-cn/start-here/rc-trial.mdx`
+- Modify: `apps/www/src/content/docs/en/start-here/quick-start.mdx`
+- Modify: `apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx`
 
-Replace the existing multi-host fences with one two-host/two-file CodeExample in each locale. Preserve current commands and explanatory prose. Do not change generated demo wrappers or `scan-mdx.ts`.
+Replace the separate React-only add/import fences with one React/Web Components, two-file-per-host CodeExample in each locale. Preserve the stable `@latest` / `0.2.0` onboarding contract. Do not restore the removed RC Trial pages or change generated demo wrappers or `scan-mdx.ts`.
 
 ### Task 6: Verify end to end
 
-Run focused tests, type checks, the apps-www production build, and full repository tests. Browser-smoke the migrated RC Trial route at 320px and desktop for local overflow, keyboard tabs, preference sync/local override/reload, exact copy/expand, theme switching, and client navigation. Confirm no `spec/**` or `packages/prototypes/**` files changed.
+Run focused tests, type checks, the apps-www production build, and full repository tests. Browser-smoke the migrated bilingual Quick Start routes at 320px and desktop for local overflow, keyboard tabs, preference sync/local override/reload, exact copy/expand, theme switching, and client navigation. Confirm no `spec/**` or `packages/prototypes/**` files changed.

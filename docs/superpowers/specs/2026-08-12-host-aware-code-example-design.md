@@ -130,3 +130,12 @@ Run focused Vitest, `corepack pnpm@10.32.1 --filter apps-www build`, type checks
 - **Generated-doc coupling:** leave generator-discovered preview wrappers unchanged.
 - **HTML size:** this component is for bounded examples, not arbitrary project trees or an editor.
 - **Astro navigation:** use the repository's `astro:page-load` plus per-root initialization guard and clean root-owned observers/listeners when roots disappear.
+
+## Current-main adoption adjustment
+
+The original RC Trial route was removed when the stable `0.2.0` public documentation gate landed. The reusable component contract above is unchanged. Its first real adoption now replaces the separate React-only command and import snippets in the bilingual stable Quick Start:
+
+- `apps/www/src/content/docs/en/start-here/quick-start.mdx`
+- `apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx`
+
+The adopted example keeps two files for each of React and Web Components, uses `@latest` / `0.2.0` rather than the retired RC pin, and preserves the stable onboarding claims. Browser verification targets the corresponding bilingual Quick Start routes instead of restoring the obsolete RC Trial pages.

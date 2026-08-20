@@ -42,18 +42,20 @@ const tabsTrigger = definePrototype<BrutalistTabsTriggerProps, BrutalistTabsTrig
 
     def.feedback.style.use(tw(BASE_TOKENS));
 
-    // P-BRUTALIST-TABS-TRIGGER-SELECTED-PAIR-INVARIANT — selected: bg-main + text-main-foreground
-    // + border-black + hard shadow lift the active trigger above the strip.
+    // P-BRUTALIST-TABS-TRIGGER-SELECTED-PAIR-INVARIANT — selected keeps its
+    // semantic color and border while press independently owns elevation.
     def.rule({
       when: (w) => w.state(selected).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('bg-main text-main-foreground border-black shadow-[3px_3px_0_0_#000]')
-        ),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(selected).eq(true), w.state(pressed).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('shadow-[3px_3px_0_0_#000]')),
     });
     // P-BRUTALIST-TABS-TRIGGER-INTERACTION — hover lift (non-selected only)
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.state(selected).eq(false)),
+      when: (w) =>
+        w.all(w.state(hovered).eq(true), w.state(selected).eq(false), w.state(pressed).eq(false)),
       intent: (i) =>
         i.feedback.style.use(
           tw('bg-background border-black -translate-x-px -translate-y-px shadow-[4px_4px_0_0_#000]')

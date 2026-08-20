@@ -16,6 +16,7 @@ const ENTITY_TYPE_ORDER = [
   'prototype',
   'module',
   'host-cap',
+  'adapter',
   'test',
   'version',
 ];
@@ -32,6 +33,9 @@ const RELATION_KINDS = [
   'exercises',
   'requires',
   'owns',
+  'supports',
+  'provides',
+  'omits',
 ];
 
 const root = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -179,17 +183,20 @@ function renderDocument({
     '  C --> P',
     '  C --> M["Modules: 语义能力身份"]',
     '  HC["Host capabilities: 宿主能力"] --> M',
+    '  M --> A["Adapter profiles: 翻译身份与支持矩阵"]',
+    '  HC --> A',
     '  C --> T["Tests: conformance 映射"]',
     '  P --> T',
+    '  A --> T',
     '  T --> I["Executable implementation paths"]',
     '  M --> I',
-    '  I --> A["Adapters / runtime / prototype packages"]',
-    '  A --> DOC["README / 官网 / 示例投射"]',
+    '  A --> I',
+    '  I --> DOC["README / 官网 / 示例投射"]',
     '```',
     '',
     '这张图是阅读顺序，不表示每条边都必须使用同一种 relation。实际关系由 `dependsOn`、`satisfies`、`verifies`、`exercises`、`requires`、`inherits` 等字段表达。',
     '',
-    '当前 schema 没有 adapter 或 compiler 实体类型。Adapter 已存在于实现与旧契约层，但其完整 profile 不能从 catalog 自动推断；Compiler 也不应被描述成当前已编目的交付能力。',
+    '当前 schema 已将 official Adapter profile 建模为 `A-*` 实体；Compiler 仍无一级实体类型。Adapter profile 采用逐 Module slice 编目，未列出的 Module 不能从 catalog 推断为支持或不支持。',
     '',
     '### 实体职责与成熟度',
     '',
@@ -220,7 +227,7 @@ function renderDocument({
     'Prototype 实体描述官方协议身份，而不是某个框架组件的偶然实现。Base 通常表达基础协议，Shadcn 等 design-language 实体可通过 `inherits.prototypes` 表达继承与差异。',
     '',
     ...renderGroupedEntities(byType.get('prototype') ?? [], context, renderPrototypeTable),
-    '## 五、Module 与 Host Capability',
+    '## 五、Module、Host Capability 与 Adapter Profile',
     '',
     'Module 实体是语义能力的稳定身份锚点；Host Capability 表达宿主可提供或可接受的能力。实体数不应机械追随 package 数或 capability token 数，而应形成有准则、有关系、有验证证据的语义切片。',
     '',
@@ -231,6 +238,12 @@ function renderDocument({
     '### Host capabilities',
     '',
     ...renderHostCapTable(byType.get('host-cap') ?? [], context),
+    '',
+    '### Official Adapter profiles',
+    '',
+    'Adapter Profile 是具体 official translation identity。`supports.modules` 与 `omits.modules` 记录已经审查的支持决策，`provides.hostCaps` 记录 capability 的兑现方式；缺席项保持 uncataloged。',
+    '',
+    ...renderAdapterTable(byType.get('adapter') ?? [], context),
     '',
     '## 六、关键决策',
     '',
@@ -283,6 +296,13 @@ function renderDocument({
     '3. 确保 P/T/implementation 的追溯链成立；不要用文件数量代替覆盖判断。',
     '4. 保持跨 Adapter 的交互语义，除非实体明确声明宿主差异。',
     '',
+    '### 修改 Adapter 或 Module wiring',
+    '',
+    '1. 从对应 `A-*` profile 查看 target runtime、已编目的 Module support 与 host capability provision。',
+    '2. 以 `M-*`、`HC-*` 与 Contract 为 portable baseline，不从 framework 实现反向改写协议。',
+    '3. 支持、拒绝或不适用必须分别进入 `supports.modules` 或 `omits.modules`，并说明 role。',
+    '4. 用 `T-*` 的 `verifies.adapters` 将 profile criteria 绑定到 executable Adapter evidence。',
+    '',
     '### 处理 catalog 空白',
     '',
     '1. 确认确实没有适用实体，而不是搜索遗漏。',
@@ -293,8 +313,8 @@ function renderDocument({
     '## 十一、当前快照的结构性限制',
     '',
     `- ${byStatus.get('draft') ?? 0}/${entities.length} 个实体仍为 draft；catalog 广度不能直接解释为稳定度。`,
-    `- 当前只有 ${byType.get('module')?.length ?? 0} 个 Module 与 ${byType.get('host-cap')?.length ?? 0} 个 Host Capability 实体；不要据此推断实现中只有这些能力。`,
-    '- Adapter 与 Compiler 尚无一级实体类型，因此宿主 profile、支持矩阵和 translation-layer 权衡仍可能主要存在于实现、旧契约和 records。',
+    `- 当前只有 ${byType.get('module')?.length ?? 0} 个 Module、${byType.get('host-cap')?.length ?? 0} 个 Host Capability 与 ${byType.get('adapter')?.length ?? 0} 个 Adapter Profile 实体；不要据此推断实现中只有这些能力或 profile 已形成完整矩阵。`,
+    '- Compiler 尚无一级实体类型；Adapter 已有 profile identity，但尚未编目的 Module 必须保持 unknown，不能从 package dependency 推断。',
     '- 生成器只验证 schema 与关系完整性，不验证网站内容、README、package exports 或运行时代码与实体完全一致。',
     '- 发布 snapshot digest 与当前工作区指纹用途不同；同一版本下继续编辑 draft 实体时，两者可能不同。',
     '- 本文提供完整实体导航，但不会复制每条 criterion、relation anchor 和测试代码；做出行为判断前必须进入链接源文件。',
@@ -385,6 +405,24 @@ function renderHostCapTable(entities, context) {
       const contracts =
         allRelationIdsByTargetType(entity, 'contracts').map(code).join('<br>') || '—';
       return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | ${escapeTable(entity.title)} | ${contracts} | ${entity.criteria.length} | ${escapeTable(entity.summary ?? '')} |`;
+    }),
+  ];
+}
+
+function renderAdapterTable(entities, context) {
+  return [
+    '| Entity | 状态 | Package | Target | Supports Modules | Omits Modules | Provides Host Caps |',
+    '| --- | --- | --- | --- | --- | --- | --- |',
+    ...entities.map((entity) => {
+      const profile = entity.adapterProfile;
+      const runtime = profile?.target.runtime;
+      const target = [profile?.target.platform, runtime?.name, runtime?.versionRange]
+        .filter(Boolean)
+        .join(' / ');
+      const supports = relationIds(entity.supports, 'modules').map(code).join('<br>') || '—';
+      const omits = relationIds(entity.omits, 'modules').map(code).join('<br>') || '—';
+      const provides = relationIds(entity.provides, 'hostCaps').map(code).join('<br>') || '—';
+      return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | \`${escapeTable(profile?.package ?? '—')}\` | ${escapeTable(target || '—')} | ${supports} | ${omits} | ${provides} |`;
     }),
   ];
 }

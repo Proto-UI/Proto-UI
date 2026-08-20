@@ -1,5 +1,9 @@
 ---
-const controlId = `adapter-select-${Math.random().toString(36).slice(2)}`;
+interface Props {
+  id?: string;
+}
+
+const { id = 'adapter-select' } = Astro.props;
 
 // 适配器选项
 const options = [
@@ -9,13 +13,14 @@ const options = [
 ];
 ---
 
-<div class="adapter-select-wrapper relative inline-flex items-center" data-adapter-select>
-  <label class="sr-only" for={controlId}>选择适配器</label>
+<div class="adapter-select-wrapper relative inline-flex items-center">
+  <label class="sr-only" for={id}>选择适配器</label>
   <select
-    id={controlId}
+    id={id}
     class="adapter-select appearance-none inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all outline-none h-8 rounded-md gap-1.5 px-3 pr-8 cursor-pointer bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
     aria-label="选择适配器"
     autocomplete="off"
+    data-adapter-select
   >
     {options.map((opt) => <option value={opt.value}>{opt.label}</option>)}
   </select>

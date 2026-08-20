@@ -31,6 +31,16 @@ criteria:
     text:
       en: The direct prototype entry name is `brutalist-dialog-close`.
       zh-CN: 直接 prototype 入口名为 `brutalist-dialog-close`。
+  - id: P-BRUTALIST-DIALOG-CLOSE-COMPOSITION
+    text:
+      en: >-
+        Close owns dismissal and projects no control surface of its own: it claims no role, stays off the tab ring, and carries no resting, hover, pressed, or focus-visible treatment. A consumer that needs a visible action composes a control child, normally Brutalist Button, whose continuous trigger route merges with Close under `asTrigger()`, so the composition keeps one tab stop and issues one dismissal.
+
+
+      zh-CN: >-
+        Close 拥有 dismissal，自身不投射任何 control surface：不声明 role、不进入 tab 序列，也不带 resting、hover、pressed 或 focus-visible 处理。需要可见 action 的调用方组合一个 control child（通常是 Brutalist Button），其连续 trigger route 在 `asTrigger()` 下与 Close 合并，因此组合后只有一个 tab stop、只发出一次 dismissal。
+
+
 sources:
   - path: packages/prototypes/brutalist/src/dialog/close.proto.ts
   - path: packages/prototypes/brutalist/test/dialog.test.ts
@@ -47,6 +57,12 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Dialog Close projection with real public-API criteria (Base inheritance, direct entry) on rc.7. Not present in immutable rc.6.
+
+
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Cataloged that Close owns dismissal without a control surface and that consumers compose one.
 
 
 tags: [prototype, brutalist, neo-brutalist, visual, delta, dialog]
