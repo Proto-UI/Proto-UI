@@ -8,7 +8,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-> 状态：已随公开 `0.2.0-rc.7` package 发布，可通过 npm `next` 获取，并以相同 surface 进入 draft stable `0.2.0` release train。
+> 可用状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml) 及其继承的 Base 协议仍为 `draft`；本页描述已发布并经过测试的 0.2 surface，不构成 active 协议保证。
 
 `brutalist-textarea-root` 是 Base Textarea 上的直接视觉组合。它保留同一个物理原生 `<textarea>`，不新增 interaction、state、event、accessibility 或 ownership 协议。
 
@@ -22,7 +22,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 ## 继承的行为
 
-全部行为都来自 `base-textarea-root`：稳定的受控/非受控 value 所有权、归一化的 `valueChange` 与 `change` signal、归一化的 IME composition event、composition-safe 受控值恢复、原生 textarea props 投影、物理 focus/blur method，以及 textbox name/description 无障碍投影。
+全部行为都来自 `base-textarea-root`：明确的受控/非受控 value 所有权、归一化的 `valueChange` 与 `change` signal、归一化的 IME composition event、composition-safe 受控值恢复、原生 textarea props 投影、物理 focus/blur method，以及 textbox name/description 无障碍投影。
 
 因此 Brutalist 原型保留 Base 的 contentless 所有权边界。它不增加 child、form submission 所有权、rich-text editing、status/live-region 语义，也不创建第二个物理控件。
 

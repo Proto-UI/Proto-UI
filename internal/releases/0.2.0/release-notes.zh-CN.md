@@ -1,6 +1,6 @@
 # Proto UI 0.2.0
 
-> 稳定版发行说明草稿。Proto UI 0.2.0 正在为 npm `latest` channel 做准备，但尚未发布。在发行证据完成核验前，`0.2.0-rc.7` 仍是可复现的公开试用版本。
+> 已于 2026 年 8 月 13 日通过 npm `latest` channel 发布。全部 40 个公开 package、`v0.2.0` tag、稳定版 GitHub Release 与不可变 spec snapshot 共享这一精确发行身份。
 
 Proto UI 0.2.0 将完整的 40-package rc.7 生态 surface 晋升为 0.2 release line 的首个稳定版。它继续遵守全局精确版本规则：应用中的全部公开 `@proto.ui/*` package 都应使用相同的 `0.2.0` 版本。
 
@@ -45,4 +45,4 @@ Proto UI 0.2.0 将完整的 40-package rc.7 生态 surface 晋升为 0.2 release
 
 ## 发版验证
 
-发布前，已评审的准备 commit 必须通过仓库完整 `release:rehearse` 门禁、Agent 投影检查与 clean-diff 检查。发布后将通过独立证据 PR 核验全部 40 个 npm 版本与 `latest` tag、`v0.2.0` commit、GitHub Release assets 和不可变 snapshot digest，之后才能把本版本标记为 active。
+受保护的 `publish-all` workflow 已通过 npm Trusted Publishing 从受评审的 `70e2eb1a1bcd9264cf8c08e6ede210f96ee04606` commit 发布全部 40 个公开 package。独立 registry 核对确认 40 个精确版本、40 个 `latest` tag、每个 package 的 integrity 与 shasum 记录，以及 216 个精确内部 dependency 引用均完整。Workflow 随后创建 `v0.2.0` tag、稳定版 GitHub Release 与不可变 spec snapshot；该 snapshot 的 SHA-256 digest 为 `98c09de2502e85fe94259ba7f936f4a4350ef5374d2d638969118f3ed3428478`。

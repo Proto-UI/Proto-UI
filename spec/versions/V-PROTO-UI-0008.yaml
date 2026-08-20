@@ -1,12 +1,12 @@
 id: V-PROTO-UI-0008
 type: version
 title: Proto UI 0.2.0
-status: draft
+status: active
 since: 0.2.0
-summary: First stable release on the 0.2 line, promoting the rc.7 ecosystem surface after its public trial and immutable release evidence.
+summary: First stable release on the 0.2 line, promoting the complete rc.7 ecosystem surface after its public trial and preserving one globally exact identity across all 40 public packages and the immutable spec snapshot.
 statement:
-  en: Proto UI 0.2.0 will be one stable ecosystem release identity shared exactly by every public @proto.ui package and the corresponding immutable spec snapshot once published.
-  zh-CN: Proto UI 0.2.0 将在发布后成为由全部公开 @proto.ui package 与对应不可变 spec snapshot 精确共享的一次稳定生态发行身份。
+  en: Proto UI 0.2.0 is one stable ecosystem release identity shared exactly by every public @proto.ui package and the corresponding immutable spec snapshot.
+  zh-CN: Proto UI 0.2.0 是由全部公开 @proto.ui package 与对应不可变 spec snapshot 精确共享的一次稳定生态发行身份。
 release:
   version: 0.2.0
   channel: stable
@@ -14,6 +14,9 @@ release:
   npmDistTag: latest
   packageVersionPolicy: exact
   packageScope: public-@proto.ui
+  publishedAt: 2026-08-13T06:31:58Z
+  commit: 70e2eb1a1bcd9264cf8c08e6ede210f96ee04606
+  specSnapshotDigest: sha256:98c09de2502e85fe94259ba7f936f4a4350ef5374d2d638969118f3ed3428478
 dependsOn:
   decisions:
     - D-GLOBAL-RELEASE-VERSION-0001
@@ -38,11 +41,15 @@ sources:
   - path: internal/releases/0.2.0/package-bom.json
   - path: internal/releases/0.2.0/release-notes.md
   - path: internal/releases/0.2.0/release-notes.zh-CN.md
+  - path: internal/records/2026-08-15-0.2.0-stable-release-evidence.zh-CN.md
 openQuestions: []
 revisions:
   - version: 0.2.0
     change: introduced
     summary: Opened the stable 0.2.0 release train over the published rc.7 ecosystem surface while keeping publication evidence pending.
+  - version: 0.2.0
+    change: updated
+    summary: Activated after publishing all 40 packages under npm latest, the v0.2.0 Git tag, the stable GitHub Release, and the immutable spec snapshot evidence.
 tags:
   - release
   - stable

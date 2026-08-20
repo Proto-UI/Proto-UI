@@ -8,7 +8,7 @@ export const BrutalistCardFooter = definePrototype<
   name: 'brutalist-card-footer',
   setup(def) {
     def.feedback.style.use(
-      tw('flex items-center justify-between gap-4 border-t-2 brutalist-border-top-black px-6 pt-4')
+      tw('flex items-center justify-between gap-4 border-t-2 border-foreground px-6 pt-4')
     );
     return (renderer) => [renderer.r.slot()];
   },

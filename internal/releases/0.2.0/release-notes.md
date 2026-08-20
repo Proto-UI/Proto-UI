@@ -1,6 +1,6 @@
 # Proto UI 0.2.0
 
-> Draft stable release notes. Proto UI 0.2.0 is prepared for the npm `latest` channel but has not been published. Until publication evidence is verified, `0.2.0-rc.7` remains the reproducible public trial release.
+> Published on August 13, 2026 under the npm `latest` channel. All 40 public packages, the `v0.2.0` tag, the stable GitHub Release, and the immutable spec snapshot share this exact release identity.
 
 Proto UI 0.2.0 promotes the complete 40-package rc.7 ecosystem surface to the first stable release on the 0.2 line. It keeps the global exact-version rule: applications should use the same `0.2.0` version for every public `@proto.ui/*` package.
 
@@ -45,4 +45,4 @@ Proto UI 0.2.0 promotes the complete 40-package rc.7 ecosystem surface to the fi
 
 ## Release validation
 
-Before publication, the reviewed preparation commit must pass the repository's full `release:rehearse` gate, agent projection check, and clean-diff check. After publication, a separate evidence PR will verify all 40 npm versions and `latest` tags, the `v0.2.0` commit, GitHub Release assets, and the immutable snapshot digest before this release is marked active.
+The protected `publish-all` workflow published all 40 public packages from the reviewed `70e2eb1a1bcd9264cf8c08e6ede210f96ee04606` commit through npm Trusted Publishing. Independent registry verification confirms all 40 exact versions, all 40 `latest` tags, integrity and shasum records for every package, and 216 exact internal dependency references. The workflow then created the `v0.2.0` tag, the stable GitHub Release, and the immutable spec snapshot whose SHA-256 digest is `98c09de2502e85fe94259ba7f936f4a4350ef5374d2d638969118f3ed3428478`.

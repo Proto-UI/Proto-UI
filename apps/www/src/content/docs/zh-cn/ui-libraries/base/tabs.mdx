@@ -1,0 +1,49 @@
+---
+title: 'Tabs'
+description: 'Base Tabs 的 selection、anatomy、focus ownership、证据与当前边界。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Tabs 是 compound single-selection protocol。Root 拥有 selected value；List 拥有 roving focus；Trigger 请求 selection；Content 投射当前 panel；Indicator 只反映 context，供下游添加视觉处理。
+
+<PrototypePreviewer
+  demoId="demo-base-tabs"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family 与 ownership
+
+Canonical family 是：
+
+- Root `1..1`
+- List `0..1`
+- Trigger `0..*`
+- Content `0..*`
+- Indicator `0..*`
+
+Root 接受 `value`、`defaultValue`、`orientation`、`activationMode`，并发出 `valueChange`。受控 Root 把 selection 作为 request，直到 owner 提供新 value。List 增加 `loop`、可选 `a11yLabel`、orientation-aware arrow navigation、Home/End 与 focus methods。Trigger 拥有自身 `value`、disabled gate、交互事实、focus request、selected projection 与 tab accessibility。Content 匹配自身 `value`，expose `current`/`hidden`，并可用 `keepMounted` 保留 inactive host view。
+
+Indicator 是 presentational context consumer。它 expose 当前 value、active value 与 orientation，但不拥有 selection、event route、focus target、measurement、positioning 或视觉 variant。
+
+## Accessibility 与 presence
+
+Web profile 投射 tablist、tab 与 tabpanel relations。disabled Trigger 不参与 selection。automatic activation 会随 focus 移动选择；manual activation 将 focus navigation 与 selection 分开。inactive Content 默认 detach；`keepMounted` 会保留完整 host view，同时在 accessibility tree 中隐藏。
+
+## 0.2 交付与证据
+
+稳定版 0.2.0 package 从 `@proto.ui/prototypes-base/tabs` 导出全部五个 authoring surfaces。当前 `base-tabs` CLI facade 生成 Root、List、Trigger 与 Content；Indicator 是 public package authoring surface，但尚未进入该 generated facade。映射的 `T-BASE-TABS-*` entities 覆盖 `packages/prototypes/base/test/tabs.test.ts`，本页 Preview 通过三个 Web Adapter 运行整个 family。
+
+## Lifecycle
+
+五个 `P-BASE-TABS*` entities 当前都是 **draft**。当前实现与证据是可审查的工作表面，不是冻结的兼容性承诺。
+
+## 参考
+
+- [P-BASE-TABS](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS.yaml)
+- Parts：[List](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-LIST.yaml)、[Trigger](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-TRIGGER.yaml)、[Content](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-CONTENT.yaml)、[Indicator](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-INDICATOR.yaml)
+- [Tabs source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/tabs)
+- [Tabs evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/tabs.test.ts)
+- 风格化投射：[Shadcn Tabs](/zh-cn/ui-libraries/shadcn/tabs/) 与 [Brutalist Tabs](/zh-cn/ui-libraries/brutalist/components/tabs/)

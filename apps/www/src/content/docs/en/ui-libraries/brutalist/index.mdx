@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Library'
-description: 'Overview of Proto UI’s contributor-authored Neo-Brutalist prototype library.'
+description: 'Overview and 0.2.0 availability of Proto UI’s contributor-authored Neo-Brutalist prototype library.'
 ---
 
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
@@ -10,7 +10,7 @@ import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astr
 
 Brutalist is a Proto UI-maintained, contributor-authored Neo-Brutalist design-language projection built from square geometry, strong borders, flat color, hard offset shadows, and high-contrast typography. It is not a port, compatibility layer, or certified integration of any third-party component system.
 
-The published `0.2.0-rc.7` package combines projections over existing Base families—Button, Toggle, Switch, Tabs, Hover Card, Dropdown Menu, Select, Dialog, Scroll Area, Separator, and Textarea—with direct styled-only Badge, Card, and Skeleton prototypes. Textarea is a visual-only projection over Base Textarea. The same reviewed surface is included in the draft stable `0.2.0` BOM, but that stable version is not represented here as already published.
+The stable `@proto.ui/prototypes-brutalist@0.2.0` package combines projections over existing Base families—Button, Toggle, Switch, Tabs, Hover Card, Dropdown Menu, Select, Dialog, Scroll Area, Separator, and Textarea—with direct styled-only Badge, Card, and Skeleton prototypes. Textarea is a visual-only projection over Base Textarea. This is the same reviewed surface admitted in rc.7, now published without surface expansion as part of the exact 40-package 0.2.0 ecosystem release.
 
 Each card below shows one basic demo for quickly browsing the component range and visual language. API documentation and code examples remain on the individual component pages.
 
@@ -20,6 +20,7 @@ Each card below shows one basic demo for quickly browsing the component range an
 
 - Provenance: contributor-authored Proto UI style family, with general Neo-Brutalist visual references only.
 - Semantics: Button, Toggle, Switch, Tabs, Hover Card, Dropdown Menu, Select, Dialog, Scroll Area, Separator, and Textarea project their corresponding Base protocols. Textarea adds only resize-y, square lavender/ink, hard-shadow styling. Badge and Card are direct passive styled-only prototypes with no Base counterparts. Skeleton is a direct styled-only, passive, contentless visual prototype; its parent owns loading, announcements, replacement timing, and focus continuity.
-- Release status: published in the 40-package `0.2.0-rc.7` ecosystem release under npm `next`, with immutable evidence attached to the [v0.2.0-rc.7 prerelease](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0-rc.7), and included without surface expansion in the draft stable `0.2.0` BOM.
-- Prepared package surface: root plus `./button`, `./badge`, `./card`, `./toggle`, `./switch`, `./tabs`, `./hover-card`, `./dropdown`, `./select`, `./dialog`, `./scroll-area`, `./separator`, `./skeleton`, and `./textarea` subpaths.
+- Release status: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of the stable [v0.2.0 release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0); rc.7 remains available only as [historical prerelease evidence](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0-rc.7).
+- Lifecycle boundary: stable package publication does not promote every included prototype contract. Each catalog entity keeps its own active, draft, deprecated, or removed status; the individual pages and linked spec entities define the applicable guarantee.
+- 0.2.0 package surface: root plus `./button`, `./badge`, `./card`, `./toggle`, `./switch`, `./tabs`, `./hover-card`, `./dropdown`, `./select`, `./dialog`, `./scroll-area`, `./separator`, `./skeleton`, and `./textarea` subpaths.
 - Maintenance: admitted to the 0.2 launch-commitment set; later semantic changes and long-term ownership remain subject to Proto UI governance.

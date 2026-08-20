@@ -13,10 +13,10 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 The panel keeps Base Dialog semantics and command wiring while using an industrial poster treatment.
 
 - The opener uses a sky-blue hard-shadow control.
-- The top-right X is a dedicated canary-yellow square control, not a borderless icon.
+- The top-right X is a dedicated canary-yellow square control, not a borderless icon. Its glyph takes the canary fill's paired foreground, so it stays legible in both themes.
 - Hover changes the X to coral and increases its hard shadow.
 - Press advances the control `1px` in both axes and removes its shadow.
-- Footer dismiss actions use the same explicit close semantics; they must not masquerade as neutral text links.
+- Footer dismiss actions use the same explicit close semantics; they must not masquerade as neutral text links. Close owns dismissal without a control surface of its own, so the footer action composes a Button child and the composition keeps one tab stop.
 - Focus remains a visible hard outline; the accessible `Close` name is preserved.
 
 <div class="brutalist-demo-frame">

@@ -212,6 +212,13 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   'shadcn-button': shadcn('shadcn-button', 'shadcn Button', 'shadcnButton', 'ShadcnButton'),
   'shadcn-toggle': shadcn('shadcn-toggle', 'shadcn Toggle', 'shadcnToggle', 'ShadcnToggle'),
 
+  'shadcn-textarea': shadcn(
+    'shadcn-textarea',
+    'shadcn Textarea',
+    'shadcnTextareaRoot',
+    'ShadcnTextareaRoot'
+  ),
+
   'shadcn-switch': shadcnCompound(
     'shadcn-switch',
     'shadcn Switch',

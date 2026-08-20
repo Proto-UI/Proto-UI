@@ -1,0 +1,46 @@
+---
+title: 'Scroll Area'
+description: 'Base Scroll Area 的 host-projected scrolling domain、anatomy、证据与边界。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Scroll Area 建模一个 logical scrolling domain，而不是包装 Web DOM scrollbar。Viewport 拥有 surface，并通过特权 capability 接入 host scrolling；Root 与 composed controls 只作为 layout/projection parts。
+
+<PrototypePreviewer
+  demoId="demo-base-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family 与 host ownership
+
+Canonical family 包含：
+
+- Root `1..1`：只拥有 anatomy 与 JSON-only family scope，不拥有 offset、geometry、focus、event 或 default size；
+- Viewport `1..1`：唯一 logical scroll-surface owner；
+- Scrollbar `0..2`：horizontal/vertical composed-control route；
+- Thumb `0..2`：Scrollbar 内的 feedback-only hit subregion。
+
+Viewport expose normalized axes、position、visible ratio、direction availability、scrolling state 与 resolved projection。Raw DOM node、pixel、widget、physics 与 input recognizer 仍由 host 负责。
+
+`system` 与 `composed` 是同一 protocol 的投射策略。默认值由 Host Adapter 和 design-language preference 共同解析；它们不是两个 Base Prototype。composed mode 中，host 把 normalized facts 映射为 Thumb geometry，并通过现有 scroll engine 路由 movement。Thumb 不拥有独立 offset state、focus target、`scrollbar` role 或 Drag and Drop 语义。
+
+## 0.2 交付与证据
+
+稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/scroll-area`。与本组另外六个 family 不同，当前 CLI registry 没有 `base-scroll-area` component facade；它提供的是完整的 `brutalist-scroll-area` projection。Base library author 可以直接消费 public subpath，而面向 App 的 generated usage 当前从风格化投射进入。
+
+`T-BASE-SCROLL-AREA-0001` 及相关 Scroll/Move tests 把 host boundary 映射到 `packages/prototypes/base/test/scroll-area.test.ts` 与 cross-adapter Web conformance。本页 Preview 通过三个 Web Adapter 渲染同一个 logical family。
+
+## Lifecycle 与当前限制
+
+Root、Viewport、Scrollbar 与 Thumb entities 当前都是 **draft**。现有证据覆盖 system/composed projection、normalized facts/requests、host cleanup 与 composed Thumb movement。Track-page press、完整 keyboard scrollbar semantics、RTL/writing-mode normalization、velocity 与通用 Drag and Drop 仍不在 guarantee 内。
+
+## 参考
+
+- [P-BASE-SCROLL-AREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA.yaml)
+- Parts：[Viewport](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-VIEWPORT.yaml)、[Scrollbar](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-SCROLLBAR.yaml)、[Thumb](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-THUMB.yaml)
+- [Scroll Area source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/scroll-area)
+- [Scroll Area evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/scroll-area.test.ts)
+- 风格化投射：[Brutalist Scroll Area](/zh-cn/ui-libraries/brutalist/components/scroll-area/)

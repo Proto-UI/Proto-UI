@@ -56,6 +56,10 @@ describe('prototypes/brutalist: scroll-area', () => {
     await flush();
     expect(styleContains(thumb, 'h-full')).toBe(true);
     expect(styleContains(thumb, 'w-full')).toBe(true);
+    // The lavender track does not flip with the theme, so the Thumb takes that
+    // accent's paired foreground rather than the theme-global one.
+    expect(styleContains(thumb, 'bg-lavender-foreground')).toBe(true);
+    expect(styleContains(thumb, 'bg-foreground')).toBe(false);
 
     const scrollbar = document.createElement('brutalist-scroll-area-scrollbar') as any;
     document.body.appendChild(scrollbar);

@@ -6,7 +6,7 @@ Proto UI 的“原型（Prototype）”描述组件的身份与交互语义，Ad
 
 中文 | [English](README.md)
 
-> **当前状态：** Proto UI 处于 v0 预发布阶段。精确版本 `0.2.0-rc.7` 已通过 npm `next` channel 发布，可用于可复现试用；它不是稳定的 `latest` 上手路径，也不推荐用于关键生产业务。
+> **当前状态：** Proto UI 是一个 v0 项目。精确版本 `0.2.0` 已通过 npm 稳定 `latest` channel 发布。0.2 release line 的稳定发布不等于 v1 兼容性承诺；用于生产环境前，请先评估当前边界。
 
 ## 核心思路
 
@@ -28,19 +28,19 @@ Prototype protocol -> Compiler -> Host component code
 
 当前发布采用 Adapter 架构；Compiler 输出与零运行时交付还不是已经发布的保证。
 
-## 试用当前候选版本
+## 从稳定版 0.2.0 开始
 
-请使用精确版本，确保 CLI、Adapter、Prototype package 与试用结果都属于同一条 release train：
+公开上手流程使用 npm `latest`。在本次发行中，`@latest` 解析到 `0.2.0`；CLI 会按自身精确版本安装 Adapter 与 Prototype package，使整个生态保持在同一条 release train：
 
 ```sh
-npx @proto.ui/cli@0.2.0-rc.7 --help
-npx @proto.ui/cli@0.2.0-rc.7 init
-npx @proto.ui/cli@0.2.0-rc.7 add react shadcn-button
+npx @proto.ui/cli@latest --help
+npx @proto.ui/cli@latest init
+npx @proto.ui/cli@latest add react shadcn-button
 ```
 
 请在已有应用项目中执行 `init` 和 `add`。CLI 会创建本地 `proto-ui/` workspace，安装版本完全一致的官方 package，生成样式预设和宿主专用的 component facade。
 
-完整的生成路径、样式引入、带类型组件使用、多宿主方式和当前限制见 [0.2 RC 试用](https://proto-ui.com/zh-cn/start-here/rc-trial/)。不可变发行证据见 [v0.2.0-rc.7 Release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0-rc.7)。
+完整的生成路径、样式引入、带类型组件使用、多宿主方式和当前限制见[快速开始](https://proto-ui.com/zh-cn/start-here/quick-start/)。发行证据见 [v0.2.0 Release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0)。
 
 ## 目前已经具备的能力
 
@@ -53,14 +53,14 @@ npx @proto.ui/cli@0.2.0-rc.7 add react shadcn-button
 
 ## 当前边界
 
-- API、生成结构和部分协议细节在稳定版 `0.2.0` 前仍可能调整。
+- `0.2.0` 已稳定发布到 npm `latest` channel，但 v0 API、生成结构与协议细节仍可能在后续版本中继续演进。
 - 当前 CLI 会安装官方 Prototype package 并生成本地 component facade；暂时还不会把 styled prototype 源码写入应用项目供直接编辑。
 - Shadcn 兼容是明确目标，但尚不完整；当前模型有意不提供 Radix 风格的 `asChild`。
 - Adapter 架构仍然携带 runtime；Compiler 输出与零运行时交付属于未来工作。
 - 文档、真实项目试用证据、SSR 覆盖、可访问性验证和 bundle 分析仍在补充。
 - 当前大部分 catalog 实体仍为 `draft`；进入 catalog 不等于已经成为稳定公共保证。
 
-Proto UI 当前更适合实验、可控项目、组件系统研究，以及愿意参与预发布验证的贡献者。
+Proto UI 当前更适合实验、可控接入、组件系统研究，以及能够评估 v0 兼容性边界的团队。
 
 ## 项目真理之源与文档
 
@@ -108,7 +108,7 @@ corepack pnpm@10.32.1 test
 
 ## 近期方向
 
-当前工作的重点是：在真实项目中试用 `0.2.0-rc.7`，修复上手或语义 blocker，按照试用暴露的真实缺口补充文档，并在不无序扩张 Prototype 表面的前提下完成 `0.2` release line 收口。
+当前工作的重点是：在真实项目中使用稳定版 `0.2.0`，修复上手或语义 blocker，依据消费证据持续完善文档，并在不无序扩张 Prototype surface 的前提下准备后续发行工作。
 
 Module、Host Capability 与 Adapter 的系统编目会根据真实消费证据，以完整垂直切片继续推进。Compiler 方向和可在本地编辑的 styled prototype 工作流仍属于长期方向，而不是当前版本承诺。
 

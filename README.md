@@ -6,7 +6,7 @@ A Proto UI _prototype_ describes the identity and interaction semantics of a com
 
 English | [中文](README.zh-CN.md)
 
-> **Status:** Proto UI is in its v0 prerelease stage. The exact `0.2.0-rc.7` ecosystem release is available on npm under the `next` channel for reproducible trials. It is not the stable `latest` onboarding path and is not recommended for critical production workloads.
+> **Status:** Proto UI is a v0 project. The exact `0.2.0` ecosystem release is available on npm under the stable `latest` channel. Stable publication on the 0.2 line does not imply a v1 compatibility promise; evaluate the current boundaries before production adoption.
 
 ## The core idea
 
@@ -28,19 +28,19 @@ Prototype protocol -> Compiler -> Host component code
 
 The current release is Adapter-based. Compiler output and zero-runtime delivery are not current shipped guarantees.
 
-## Try the current release candidate
+## Start with stable 0.2.0
 
-Use the exact version so the CLI, Adapter, Prototype packages, and trial result all belong to the same release train:
+The public onboarding flow uses npm `latest`. For this release, `@latest` resolves to `0.2.0`, and the CLI installs Adapter and Prototype packages at its own exact version so the ecosystem stays on one release train:
 
 ```sh
-npx @proto.ui/cli@0.2.0-rc.7 --help
-npx @proto.ui/cli@0.2.0-rc.7 init
-npx @proto.ui/cli@0.2.0-rc.7 add react shadcn-button
+npx @proto.ui/cli@latest --help
+npx @proto.ui/cli@latest init
+npx @proto.ui/cli@latest add react shadcn-button
 ```
 
 Run `init` and `add` from an existing application project. The CLI creates a local `proto-ui/` workspace, installs the matching official packages, writes style presets, and generates host-specific component facades.
 
-Follow the complete [0.2 RC Trial](https://proto-ui.com/en/start-here/rc-trial/) for generated paths, style imports, typed component usage, multiple hosts, and the current limitations. See the [v0.2.0-rc.7 release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0-rc.7) for immutable release evidence.
+Follow the complete [Quick Start](https://proto-ui.com/en/start-here/quick-start/) for generated paths, style imports, typed component usage, multiple hosts, and the current limitations. See the [v0.2.0 release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) for release evidence.
 
 ## What exists today
 
@@ -53,14 +53,14 @@ Follow the complete [0.2 RC Trial](https://proto-ui.com/en/start-here/rc-trial/)
 
 ## Current boundaries
 
-- APIs, generated structure, and some protocol details may still change before stable `0.2.0`.
+- `0.2.0` is stable on the npm `latest` channel, but v0 APIs, generated structure, and protocol details may continue to evolve in later releases.
 - The current CLI installs official Prototype packages and generates local component facades; it does not yet vendor styled prototype source into the application for direct editing.
 - Shadcn compatibility is intentional but incomplete. Proto UI deliberately does not expose Radix-style `asChild` in the current model.
 - The Adapter architecture carries a runtime. Compiler output and zero-runtime delivery remain future work.
 - Documentation, real-project trial evidence, SSR coverage, accessibility validation, and bundle analysis are still being expanded.
 - Most catalog entities are still `draft`; catalog presence should not be confused with a stable public guarantee.
 
-Proto UI is currently best suited to experiments, controlled projects, component-system research, and contributors who are comfortable evaluating prerelease behavior.
+Proto UI is currently best suited to experiments, controlled adoption, component-system research, and teams that can evaluate v0 compatibility boundaries.
 
 ## Project truth and documentation
 
@@ -108,7 +108,7 @@ corepack pnpm@10.32.1 test
 
 ## Near-term direction
 
-The immediate focus is to exercise `0.2.0-rc.7` in real projects, fix onboarding or semantic blockers, improve the documentation paths exposed by those trials, and close the `0.2` release line without expanding the Prototype surface indiscriminately.
+The immediate focus is to exercise stable `0.2.0` in real projects, fix onboarding or semantic blockers, improve documentation from consumer evidence, and prepare later release work without expanding the Prototype surface indiscriminately.
 
 Module, Host Capability, and Adapter catalog work will continue through coherent vertical slices informed by real consumption evidence. Compiler-oriented and editable local styled-prototype workflows remain longer-term directions rather than current release promises.
 

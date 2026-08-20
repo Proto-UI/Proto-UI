@@ -5,7 +5,11 @@ description: 'The current scope, expectations, and stage of Proto UI'
 
 # Current Status
 
-Proto UI is currently in its pre-release stage (v0) and is closing the **0.2** release line. Stable onboarding always follows the npm `latest` channel, while release-candidate validation uses the exact version documented in the [0.2 RC Trial](/en/start-here/rc-trial/) so that test results remain reproducible.
+Proto UI remains in its **v0** stage, while the **0.2** release line is now published. [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) is the current stable ecosystem release under npm `latest`; all public `@proto.ui/*` dependencies in one application must stay aligned at exactly `0.2.0`. Use the [Quick Start](/en/start-here/quick-start/) for current installation guidance.
+
+Stable npm availability and project maturity describe different boundaries. The package release is stable for the 0.2 line, but Proto UI is still a v0 protocol project: active, draft, deprecated, and removed spec entities remain the authority for individual semantic guarantees. Publishing a package in 0.2.0 did not automatically promote every draft prototype or capability.
+
+The reviewed release facts are preserved in the [0.2.0 release notes](https://github.com/Proto-UI/Proto-UI/blob/main/internal/releases/0.2.0/release-notes.md), the [tagged package BOM](https://github.com/Proto-UI/Proto-UI/blob/v0.2.0/internal/releases/0.2.0/package-bom.json), and the immutable assets attached to the GitHub Release.
 
 At this stage, the priority is not to expand surface-level features as quickly as possible, but to first clarify the core semantics between prototypes, adapters, and runtimes, and to verify whether this system can be translated and implemented consistently across different hosts.
 

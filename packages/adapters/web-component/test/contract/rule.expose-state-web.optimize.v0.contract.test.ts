@@ -42,6 +42,41 @@ describe('adapter-web-component: rule expose-state-web optimization (v0)', () =>
     document.body.removeChild(el);
   });
 
+  it('collapses a condition that lowers to the same variant twice', async () => {
+    const proto: Prototype = {
+      name: 'x-rule-esw-duplicate-lowering',
+      setup(def: DefHandle<any>) {
+        const hovered = def.state.bool('hovered', false);
+        def.expose('hovered', hovered);
+
+        def.rule({
+          when: (w) => w.all(w.state(hovered).eq(true), w.state(hovered).eq(true)),
+          intent: (i) => i.feedback.style.use(tw('bg-muted')),
+        });
+
+        def.lifecycle.onMounted(() => {
+          hovered.set(true);
+        });
+
+        return (r: any) => [r.el('div', {}, ['ok'])];
+      },
+    } as any;
+
+    const El = AdaptToWebComponent(proto);
+    const el = new El();
+    document.body.appendChild(el);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // The extractor accumulates variants into a Set, so a repeated condition
+    // yields one segment there. A second segment here would be a class with no
+    // generated rule.
+    expect(el.getAttribute('data-pui-style')).toBe('data-[hovered]:bg-muted');
+
+    document.body.removeChild(el);
+  });
+
   it('optimizes false bool state conditions to internal not-[data-*] selector tokens', async () => {
     const proto: Prototype = {
       name: 'x-rule-esw-negative-bool-opt',
@@ -174,8 +209,40 @@ describe('adapter-web-component: rule expose-state-web optimization (v0)', () =>
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(el.getAttribute('data-pui-style')).toBe('data-[btn-disabled]:dark:bg-zinc-950');
+    // Variants are ordered the way the generated stylesheet writes them, so the
+    // dark segment leads regardless of where the condition sits in `when`.
+    expect(el.getAttribute('data-pui-style')).toBe('dark:data-[btn-disabled]:bg-zinc-950');
     expect(el.classList.contains('data-[btn-disabled]:dark:bg-zinc-950'), el.className).toBe(false);
+    expect(el.classList.contains('bg-zinc-950')).toBe(false);
+
+    document.body.removeChild(el);
+  });
+
+  it('optimizes a pure meta(colorScheme=dark) rule on a Prototype with no exposed state', async () => {
+    const proto: Prototype = {
+      name: 'x-rule-meta-only-dark-opt',
+      setup(def: DefHandle<any>) {
+        // No def.state, no def.expose: the exposed-state map stays empty, and a
+        // pure-meta candidate must still lower rather than fall back to the
+        // default plan, which samples the scheme once and goes stale.
+        def.rule({
+          when: (w) => w.meta('colorScheme').eq('dark'),
+          intent: (i) => i.feedback.style.use(tw('bg-zinc-950')),
+        });
+
+        return (r: any) => [r.el('div', {}, ['ok'])];
+      },
+    } as any;
+
+    const El = AdaptToWebComponent(proto);
+    const el = new El();
+    document.body.appendChild(el);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(el.getAttribute('data-pui-style')).toBe('dark:bg-zinc-950');
+    expect(el.classList.contains('dark:bg-zinc-950'), el.className).toBe(false);
     expect(el.classList.contains('bg-zinc-950')).toBe(false);
 
     document.body.removeChild(el);

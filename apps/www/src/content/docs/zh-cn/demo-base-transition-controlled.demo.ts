@@ -76,7 +76,7 @@ export default {
             kind: 'box',
             ref: 'box',
             className:
-              'w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box cursor-pointer select-none',
+              'w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box cursor-pointer select-none',
             children: [
               {
                 kind: 'box',
@@ -95,7 +95,7 @@ export default {
             kind: 'box',
             ref: 'toggleBtn',
             className:
-              'px-3 py-1.5 text-sm font-medium text-white bg-slate-700 hover:bg-slate-800 rounded-md cursor-pointer select-none',
+              'px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-md cursor-pointer select-none',
             children: ['Toggle Open'],
           },
         ],
@@ -119,22 +119,22 @@ export default {
         children: [
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-gray-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['closed'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-blue-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['entering'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-green-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['entered'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-orange-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['leaving'],
           },
         ],

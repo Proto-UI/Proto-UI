@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/prototypes-shadcn",
-  "version": "0.2.0",
+  "version": "0.3.0-alpha.0",
   "private": false,
   "type": "module",
   "sideEffects": false,
@@ -66,6 +66,11 @@
       "types": "./dist/tabs/index.d.ts",
       "import": "./dist/tabs/index.js",
       "default": "./dist/tabs/index.js"
+    },
+    "./textarea": {
+      "types": "./dist/textarea/index.d.ts",
+      "import": "./dist/textarea/index.js",
+      "default": "./dist/textarea/index.js"
     },
     "./toggle": {
       "types": "./dist/toggle/index.d.ts",

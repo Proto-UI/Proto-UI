@@ -155,3 +155,5 @@ export type {
   ShadcnDialogCloseExposes,
   ShadcnDialogCloseAsHookContract,
 } from './dialog/types';
+export { ShadcnTextareaRoot, shadcnTextareaRoot } from './textarea';
+export type { ShadcnTextareaRootProps, ShadcnTextareaRootExposes } from './textarea';

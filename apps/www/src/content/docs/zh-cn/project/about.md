@@ -30,7 +30,6 @@ Proto UI 不预设唯一的渲染实现方式，但会为适配器生态提供�
 
 ## 当前阶段
 
-预发布阶段（v0）
+v0 项目阶段；当前稳定 package release 为 0.2.0
 
-核心交互语义仍在持续稳定中。  
-部分 API 与实现细节在后续迭代中仍可能发生变化。
+当前公开 package line 是通过 npm `latest` 发布的 [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0)。Proto UI 仍在持续稳定核心交互语义并建设基础能力，因此部分 API 与实现细节在后续迭代中仍可能变化。Package 可用性不会覆盖单个 spec entity 的 active 或 draft 生命周期状态。

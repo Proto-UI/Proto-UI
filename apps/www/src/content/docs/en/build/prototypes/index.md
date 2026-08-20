@@ -31,7 +31,15 @@ Every new public Prototype must appear on a reachable website page in the same p
 
 Proto UI does not admit a Base Prototype because a component name is familiar or a styled library wants an inheritance point. A Base subject must own an independent, cross-host, testable input-fact-to-observable-output path with substantive executable evidence.
 
-The longer conceptual authoring series is currently maintained primarily in Chinese. Its English routes remain available through the documentation locale fallback while translation is in progress.
+## Conceptual reading sequence
+
+If you are still deciding what kind of Prototype work you have:
+
+1. Read [Why You Usually Do Not Need a New Prototype](/en/build/prototypes/when-not-to-write-a-new-prototype/)
+2. Use [Writing a Custom Primitive Prototype](/en/build/prototypes/writing-a-custom-primitive-prototype/) to understand a leaf authoring entry inside an approved boundary
+3. Continue to [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/) when the approved subject is a family
+4. For presentation and compatibility deltas, read [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
+5. Follow [How to Read Reference Implementations](/en/build/prototypes/reference-patterns/) from P/T entities into source and public projections
 
 ## Current boundary
 

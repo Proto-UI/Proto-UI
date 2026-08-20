@@ -13,7 +13,7 @@ Type foundation package used by core, runtime, modules, adapters, and prototype 
 ## Install
 
 ```bash
-npm install @proto.ui/types@0.2.0
+npm install @proto.ui/types@0.3.0-alpha.0
 ```
 
 ## Internal Structure

@@ -1,32 +1,137 @@
 ---
 title: 'Quick Start'
-description: 'Start using Proto UI from the stable npm latest release'
+description: 'Initialize Proto UI 0.2.0 and add a component from the stable npm latest release'
 ---
 
 import DocStageNotice from '@/components/DocStageNotice.astro';
+import { Aside } from '@astrojs/starlight/components';
 
 <DocStageNotice
-  tone="amber"
-  title="The Proto UI 0.2 stable onboarding flow is not open yet."
-  body="The main Quick Start always follows npm latest and does not put prerelease builds on the default user path."
+  title="Proto UI 0.2.0 is available from npm latest."
+  body="This is the current stable onboarding path. The commands use @latest, which resolves to 0.2.0 for this release."
 />
 
-## Stable-version contract
+<Aside type="note" title="Stable package channel, v0 project">
+  `0.2.0` is stable on npm's `latest` channel, but Proto UI is still a v0 project. Stable
+  publication does not imply a v1 compatibility promise; check the current boundaries below before
+  adopting it in production.
+</Aside>
 
-This page is the stable Proto UI onboarding entry. After `0.2.0` is published, its commands will always use npm's default `latest` channel:
+## Before you begin
+
+Run these commands from an existing React, Vue, or Web Components application. The example below uses a React application that already has `react` installed.
+
+The CLI installs the selected Adapter and Prototype packages at its own exact version. With the current `@latest` release, all public `@proto.ui/*` dependencies added by this flow resolve to `0.2.0`, so release trains are not mixed.
+
+## Run the CLI
+
+You can invoke the CLI with `npx`; a global installation is not required:
 
 ```bash
-npx @proto.ui/cli --help
+npx @proto.ui/cli@latest --help
 ```
 
-Before the stable release, this page will not substitute `@next` for the official onboarding flow or ask the current `0.1.x` packages to follow instructions written for the `0.2` code generator.
+Using the explicit `@latest` tag makes the stable channel policy visible. For a permanently reproducible installation or CI workflow, replace it with `@0.2.0`.
 
-## Join the 0.2 RC trial
+## Initialize your project
 
-To verify installation, generation, and component usage with the published `0.2.0-rc.7`, use the separate [0.2 RC Trial](/en/start-here/rc-trial/). That page pins the exact RC version, keeping trial results reproducible when the `next` dist-tag moves.
+From the application root, run:
+
+```bash
+npx @proto.ui/cli@latest init
+```
+
+Accepting the defaults creates the local Proto UI workspace and the Shadcn style preset:
+
+```txt
+your-project/
+├── src/
+│   └── styles/
+│       ├── proto-ui-style.css
+│       ├── proto-ui-tokens.generated.css
+│       └── shadcn-theme.css
+├── proto-ui/
+│   ├── adapters/
+│   ├── prototypes/
+│   ├── components/
+│   └── config.json
+├── package.json
+└── ...
+```
+
+- `proto-ui/config.json` records the project configuration used by later CLI commands.
+- `proto-ui/components/` contains generated host entries that the application imports.
+- `proto-ui/adapters/` and `proto-ui/prototypes/` are CLI-managed areas.
+- `src/styles/proto-ui-style.css` composes the generated theme and token CSS.
+
+The CLI manages generated files; do not edit them by hand. Use `--prototypes brutalist` when initializing a project that should use the Brutalist preset, or `--no-styles` when the application will provide the complete semantic token surface itself.
+
+## Import the styles once
+
+Import the generated stylesheet from the application entry:
+
+```ts
+import './styles/proto-ui-style.css';
+```
+
+Adjust the relative path if your entry file is elsewhere. When the application has not selected a theme, the generated Shadcn theme follows `prefers-color-scheme`. Set `data-theme="light"` / `data-theme="dark"` on the root element, or use the compatible `.light` / `.dark` classes, to override the system preference.
+
+## Add a component
+
+Add the official Shadcn Button facade for React:
+
+```bash
+npx @proto.ui/cli@latest add react shadcn-button
+```
+
+The command checks that the React runtime exists, installs `@proto.ui/adapter-react@0.2.0` and `@proto.ui/prototypes-shadcn@0.2.0` when needed, and generates `proto-ui/components/react/index.ts`.
+
+For Vue, replace `react` with `vue`; for Web Components, use `wc`. The same component can be generated for more than one host.
+
+## Import the generated component
+
+From a typical `src/App.tsx`, import the generated React host entry with a relative path:
+
+```tsx
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>;
+}
+```
+
+The relative import is intentional: applications do not share one path-alias setup or directory depth. Generated facades preserve the Prototype's declared props, event listeners, and ref/expose surface, so supported values receive TypeScript completion and invalid props are rejected.
+
+## Continue one component at a time
+
+```bash
+npx @proto.ui/cli@latest add react shadcn-toggle
+npx @proto.ui/cli@latest add react shadcn-dialog
+```
+
+The generated host entry accumulates exports, so the application can keep importing from the same path:
+
+```tsx
+import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/components/react';
+```
+
+To generate without installing missing packages, add `--no-install`. The CLI will print exact install commands, but the generated entry will not build until those dependencies are present.
+
+## Current boundaries
+
+- `0.2.0` is the stable release for the 0.2 line, not a v1 compatibility guarantee.
+- Spec entity lifecycle still applies: an `active` entity is a current guarantee, while a `draft` entity remains work in progress even when related executable packages are published.
+- The CLI installs official Prototype packages and generates local component facades. It does not copy styled Prototype source into the application for direct editing.
+- The current Adapter architecture includes a runtime. Compiler output and zero-runtime delivery remain future work.
+- Shadcn compatibility is intentional but incomplete; the current model does not expose Radix-style `asChild`.
+- Review component and Adapter coverage for your use case, and validate accessibility, SSR, and bundle behavior in your own application before production adoption.
+
+## Release
+
+- [Proto UI 0.2.0 release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0)
 
 ## Next
 
-- [0.2 RC Trial](/en/start-here/rc-trial/)
 - [How It Works](/en/start-here/how-it-works/)
+- [UI Libraries](/en/ui-libraries/)
 - [Why Proto UI](/en/start-here/why-proto-ui/)

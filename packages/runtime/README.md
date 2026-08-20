@@ -13,7 +13,7 @@ Runtime package that coordinates setup, rendering, lifecycle, module orchestrati
 ## Install
 
 ```bash
-npm install @proto.ui/runtime@0.2.0
+npm install @proto.ui/runtime@0.3.0-alpha.0
 ```
 
 ## Internal Structure

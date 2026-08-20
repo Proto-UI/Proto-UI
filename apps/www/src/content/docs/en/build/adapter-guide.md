@@ -1,41 +1,53 @@
 ---
 title: 'Adapter Contribution Guide Deferred'
-description: 'Why Proto UI does not infer a general Adapter authoring workflow from an incomplete catalog and current implementation.'
+description: 'The evidence available today, bounded Adapter work that may proceed, and why a general authoring workflow is not yet published.'
 ---
 
-Proto UI does not currently publish a general Adapter contribution guide.
+Proto UI does not currently publish a general Adapter authoring tutorial. The shipped 0.2 execution architecture and the first reviewed profile slices are now documented, but the catalog is intentionally partial and there is no stable public SPI for constructing a new Adapter by analogy.
 
-Module, Host Capability, and official Adapter-profile cataloging is still in progress. Architecture ownership, omission strategy, lifecycle resource ownership, and executable conformance have not all converged. The React, Vue, and Web Component implementations are important evidence, but they may still contain unresolved drift and cannot by themselves define a stable authoring API.
+Use the focused architecture guides first:
 
-Until that catalog chain is complete, this page will not:
+- [Runtime Architecture](/en/build/runtime-architecture/) explains `RuntimeSession`, commit ownership, and the host handoff.
+- [Host Caps](/en/build/host-caps/) explains capability tokens, wiring, target projection, and resource lifetime.
+- [Module & Extension Architecture](/en/build/module-extension-architecture/) explains facade/port/dependency ownership and the fixed Runtime Module set.
+- [Compatibility](/en/reference/compatibility/) reports only the currently reviewed relations for the official Web Component, React, and Vue profiles.
 
-- present the current Web Adapter structure as stable cross-host architecture;
-- provide a step-by-step new-Adapter tutorial;
+Those pages describe current facts; together they still do not define a complete new-Adapter recipe.
+
+## Why the general workflow remains deferred
+
+Official Adapter profiles are cataloged one Module slice at a time. Unlisted Modules are uncataloged, not implicitly supported or unsupported. Lifecycle ownership, capability omission strategy, host target roles, and executable conformance must all be decided for a concrete target. Existing Web implementations are evidence, but Web-specific routing and framework mechanics cannot define a cross-host architecture by themselves.
+
+This page therefore will not:
+
+- present current Web Adapter structure as a stable cross-host SPI;
 - infer complete Module support from package dependencies;
-- describe uncataloged fallback or host wiring as a formal guarantee; or
+- treat uncataloged fallback or host wiring as a guarantee;
+- promise dynamic Runtime Module registration; or
 - encourage Prototype-specific patches for Adapter parity problems.
 
-## What can contributors do now?
+## Bounded work that can proceed
 
-Experienced contributors may work on a bounded Adapter parity bug when its issue states:
+Experienced contributors may implement an Adapter parity bug when its Issue states:
 
 - applicable `C-*`, `M-*`, `HC-*`, `A-*`, and `T-*` entities;
-- the owning layer;
-- expected behavior and protocol boundaries that must remain unchanged;
-- focused conformance tests;
-- evidence to preserve or align across Web Component, React, and Vue; and
-- explicit authorization to implement.
+- the owning semantic or translation layer;
+- the profile and target runtime/version range;
+- behavior that must remain unchanged across Adapters;
+- focused Runtime/Module and Adapter evidence; and
+- explicit implementation authorization.
 
-New Adapter proposals are maintainer-guided research. They may collect a host-capability inventory, omission strategy, and minimal feasibility evidence, but they do not automatically authorize an implementation pull request.
+New Adapter proposals remain maintainer-guided research. A useful proposal can inventory host capabilities, model honest support/omission decisions, identify lifecycle and target ownership, and build minimal feasibility evidence. It does not automatically authorize a production Adapter PR.
 
-## When can a complete guide be published?
+## What would unlock a complete guide
 
-At minimum:
+A trustworthy exemplar needs:
 
-- relevant Module facade, port, and Host Capability ownership is cataloged;
-- official Adapter `supports`, `omits`, and `provides` relations have reviewed evidence;
-- lifecycle attach, rebind, reset, and disposal responsibilities are executable;
-- major drift between entities and implementation is resolved or recorded; and
-- one complete vertical slice can serve as a trustworthy exemplar.
+1. a coherent set of Module facade/port and Host Capability owners;
+2. reviewed profile `supports`, `omits`, and `provides` relations;
+3. executable attach/rebind/reset/dispose responsibilities;
+4. resolved or explicitly recorded implementation/catalog drift;
+5. target-specific commit, event, projection, and diagnostics behavior; and
+6. conformance evidence that separates portable semantics from host mechanics.
 
-Until then, use the [contribution guide](/en/build/contribute/) to choose a Prototype, docs, demo, or bounded bug path.
+Until then, choose a Prototype, docs, demo, Module slice, or bounded bug through [How to Contribute](/en/build/contribute/) and use [Contracts & Tests](/en/build/contracts-and-tests/) to design evidence.

@@ -136,12 +136,14 @@ describe('prototypes/brutalist: tabs', () => {
     await flush();
     expect(triggerB.getExposes().hovered.get()).toBe(true);
     expect(triggerB.hasAttribute('data-hovered')).toBe(true);
+    // Variant order follows the generated stylesheet, not the authoring order of
+    // the rule's conditions; see packages/cli/test/lowered-variant-order.test.ts.
     for (const token of [
-      'data-[hovered]:not-[data-selected]:not-[data-pressed]:bg-background',
-      'data-[hovered]:not-[data-selected]:not-[data-pressed]:border-black',
-      'data-[hovered]:not-[data-selected]:not-[data-pressed]:-translate-x-px',
-      'data-[hovered]:not-[data-selected]:not-[data-pressed]:-translate-y-px',
-      'data-[hovered]:not-[data-selected]:not-[data-pressed]:shadow-[4px_4px_0_0_#000]',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:bg-background',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:border-black',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:-translate-x-px',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:-translate-y-px',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:shadow-[4px_4px_0_0_#000]',
     ]) {
       expect(styleContains(triggerB, token)).toBe(true);
     }

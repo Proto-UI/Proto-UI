@@ -13,7 +13,7 @@ Core package for defining prototypes, handles, template primitives, and protocol
 ## Install
 
 ```bash
-npm install @proto.ui/core@0.2.0
+npm install @proto.ui/core@0.3.0-alpha.0
 ```
 
 ## Internal Structure

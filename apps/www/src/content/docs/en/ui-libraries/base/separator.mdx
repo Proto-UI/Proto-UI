@@ -1,0 +1,43 @@
+---
+title: 'Separator'
+description: 'Base Separator orientation and accessibility semantics without interaction.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Separator is a contentless, non-interactive boundary for horizontal or vertical separation. It owns orientation and whether the separator is decorative; layout, color, thickness, and rhythm belong to the design language.
+
+<PrototypePreviewer
+  demoId="demo-base-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Public surface
+
+`@proto.ui/prototypes-base/separator` exports `separatorRoot` and `asSeparatorRoot()`. Current props are:
+
+- `orientation?: 'horizontal' | 'vertical'`, defaulting to `horizontal`;
+- `decorative?: boolean`, defaulting to `true`.
+
+The root exposes `orientation` and `decorative` state. It intentionally exposes no focus, tab stop, event, command, activation, or mutable-value channel, and its renderer is contentless so decorative semantics cannot accidentally hide authored descendants.
+
+## Accessibility boundary
+
+Decorative mode is hidden from the accessibility tree and emits neither `separator` role nor orientation state. Semantic mode projects `role="separator"` and the corresponding orientation. Whether a divider is meaningful to assistive technology is an authoring decision, not a styling side effect.
+
+## 0.2 delivery and evidence
+
+The stable 0.2.0 package exports the Separator subpath, and the CLI registry exposes `base-separator`. `T-BASE-SEPARATOR-0001` maps the protocol to `packages/prototypes/base/test/separator.test.ts`; the preview verifies both decorative and semantic cases across the Web adapters.
+
+## Lifecycle
+
+`P-BASE-SEPARATOR` is **draft**. Its small surface is fully evidenced, but it has not been promoted to an active protocol guarantee.
+
+## References
+
+- [P-BASE-SEPARATOR](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SEPARATOR.yaml)
+- [Separator source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/separator)
+- [Separator evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/separator.test.ts)
+- Styled projection: [Brutalist Separator](/en/ui-libraries/brutalist/components/separator/)

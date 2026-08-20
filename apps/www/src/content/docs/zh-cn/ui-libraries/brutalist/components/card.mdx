@@ -15,7 +15,7 @@ Brutalist Card 是没有 Base counterpart 的 direct styled-only 分组表面。
 
 - 公开 surface 有意只保留 Root、Header、Content 与 Footer。
 - Root 是被动的方形 paper 面板，带 `2px` ink frame 与偏移硬阴影；它没有 role、focus、activation 或 selection mode。
-- Header 与 Footer 拥有方向性 ink 分隔线和布局；Content 拥有水平间距。
+- Header 与 Footer 拥有方向性 ink 分隔线和布局；Content 拥有水平间距。分隔线的 ink 解析为主题 foreground，与 Root frame 使用同一结构色，因此主题切换时两者一起重绘。
 - Title 与 description 使用普通内容；action 组合 Button 或 Link child，并保留这些 child 自己的语义。
 
 Card 用于被动视觉分组。Selection、disclosure、navigation 与 activation 属于各自协议，而不是 Card mode。

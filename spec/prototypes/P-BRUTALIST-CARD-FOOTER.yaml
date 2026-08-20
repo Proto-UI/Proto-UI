@@ -10,8 +10,8 @@ statement:
 criteria:
   - id: P-BRUTALIST-CARD-FOOTER-VISUAL
     text:
-      en: Footer directly owns flex alignment, spacing, horizontal padding, and a 2px upper ink separator while composed actions retain their own semantics.
-      zh-CN: Footer 直接拥有 flex 对齐、间距、水平 padding 与 2px 上方 ink 分隔线，组合 action 保留自身语义。
+      en: Footer directly owns flex alignment, spacing, horizontal padding, and a 2px upper ink separator while composed actions retain their own semantics. Its ink must resolve the theme foreground, the same structural color as the Root frame, rather than a fixed black.
+      zh-CN: Footer 直接拥有 flex 对齐、间距、水平 padding 与 2px 上方 ink 分隔线，组合 action 保留自身语义。其 ink 必须解析为主题 foreground，即与 Root frame 相同的结构色，而不是固定黑色。
 sources:
   - path: packages/prototypes/brutalist/src/card/footer.proto.ts
 relates:
@@ -23,6 +23,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Introduced the direct Brutalist Card Footer region.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Unified the upper separator ink with the Root frame's theme foreground instead of a fixed black.
 tags:
   - prototype
   - brutalist

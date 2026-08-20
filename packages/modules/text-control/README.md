@@ -15,7 +15,7 @@ Adapter-facing dependency used by Base Textarea and official Web Component, Reac
 `0.2.0-rc.7` is published for reproducible prerelease trials. The stable `0.2.0` package is under review and is not installable until publication completes.
 
 ```bash
-npm install @proto.ui/module-text-control@0.2.0
+npm install @proto.ui/module-text-control@0.3.0-alpha.0
 ```
 
 ## Main exports
