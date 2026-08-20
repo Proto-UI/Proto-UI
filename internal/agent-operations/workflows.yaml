@@ -1,0 +1,48 @@
+schemaVersion: 1
+registryVersion: 2026-08-20.phase-a
+workflows:
+  - id: issue-steward
+    status: shadow
+    triggerClasses:
+      - scheduled-snapshot
+      - manual-dispatch
+    inputKinds:
+      - issue
+    implementationPath: .github/codex/prompts/agent-operations-shadow.md
+    outputSchemaPath: internal/agent-operations/schemas/shadow-report.schema.json
+    mutationPolicy: proposal-only
+    humanGates:
+      - semantic
+      - scope
+      - contributor-rights
+      - security
+      - integration
+  - id: pr-steward
+    status: shadow
+    triggerClasses:
+      - scheduled-snapshot
+      - manual-dispatch
+    inputKinds:
+      - pull-request
+    implementationPath: .github/codex/prompts/agent-operations-shadow.md
+    outputSchemaPath: internal/agent-operations/schemas/shadow-report.schema.json
+    mutationPolicy: proposal-only
+    humanGates:
+      - semantic
+      - scope
+      - contributor-rights
+      - security
+      - integration
+  - id: autonomous-maintenance
+    status: manual-phase-0.1
+    triggerClasses:
+      - explicit-maintainer-task
+    inputKinds:
+      - bounded-maintenance-mission
+    implementationPath: internal/autonomous-maintenance/phase-0/README.md
+    outputSchemaPath: internal/autonomous-maintenance/phase-0/runs.yaml
+    mutationPolicy: delegated-protocol
+    humanGates:
+      - finding-disposition
+      - semantic
+      - integration
