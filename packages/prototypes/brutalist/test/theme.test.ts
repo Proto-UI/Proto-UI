@@ -75,6 +75,27 @@ describe('prototypes/brutalist: canonical theme manifest', () => {
     }
   });
 
+  it('keeps the destructive resting ink readable on the row it paints on', () => {
+    // The resting destructive row keeps the paper fill, so the pair that has to
+    // hold is ink against `secondary-background`. Asserting the token name would
+    // pass again if the value went back to the fill colour, which measured
+    // 1.41:1 on Light paper.
+    for (const mode of [BRUTALIST_THEME.light, BRUTALIST_THEME.dark]) {
+      expect(
+        contrastRatio(mode['destructive-ink'], mode['secondary-background'])
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+
+    // The fill is not an ink: this is the substitution the defect made, kept
+    // here so the two roles cannot quietly collapse back into one token.
+    expect(
+      contrastRatio(
+        BRUTALIST_THEME.light.destructive,
+        BRUTALIST_THEME.light['secondary-background']
+      )
+    ).toBeLessThan(4.5);
+  });
+
   it('renders deterministic selectors and variable prefixes', () => {
     const css = renderBrutalistThemeCss({
       variablePrefix: 'pui-',

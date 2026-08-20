@@ -25,36 +25,34 @@ const localizedPath = (path: string) =>
 
 <div class="container-wrapper 3xl:fixed:px-0 px-6">
   <div
-    class="3xl:fixed:container grid h-(--header-height) min-w-0 grid-cols-[minmax(0,1fr)_auto] grid-rows-[3.5rem_2.5rem] items-center gap-x-2 **:data-[slot=separator]:!h-4 lg:flex lg:gap-2"
+    class="3xl:fixed:container flex h-(--header-height) min-w-0 items-center gap-2 **:data-[slot=separator]:!h-4"
   >
     <div class="title-wrapper sl-flex -ml-2 min-w-0">
       <SiteTitle />
     </div>
     <a
-      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 lg:inline-flex"
+      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-1.5 min-[65rem]:px-3 has-[>svg]:px-2.5 lg:inline-flex"
       data-slot="button"
       href={localizedPath('/start-here/what-you-saw/')}
     >
       Docs
     </a>
     <a
-      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 lg:inline-flex"
+      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-1.5 min-[65rem]:px-3 has-[>svg]:px-2.5 lg:inline-flex"
       data-slot="button"
       href={localizedPath('/ui-libraries/')}
     >
       Prototypes
     </a>
     <a
-      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 lg:inline-flex"
+      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-1.5 min-[65rem]:px-3 has-[>svg]:px-2.5 lg:inline-flex"
       data-slot="button"
       href={localizedPath('/whitepaper/component-as-protocol/')}
     >
       Whitepaper
     </a>
 
-    <div
-      class="col-start-2 row-start-1 mr-12 flex items-center justify-end gap-2 lg:col-auto lg:row-auto lg:mr-0 lg:ml-auto lg:flex-1"
-    >
+    <div class="mr-12 ml-auto flex min-w-0 items-center justify-end gap-2 lg:mr-0 lg:flex-1">
       <div class="sl-flex print:hidden">
         {shouldRenderSearch && <Search />}
       </div>
@@ -69,30 +67,27 @@ const localizedPath = (path: string) =>
         </div>
       </div>
       <ThemeToggle />
+      <div class="hidden min-w-0 items-center gap-2 md:flex">
+        <div
+          data-orientation="vertical"
+          role="none"
+          data-slot="separator"
+          class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
+        >
+        </div>
+        <LanguageSelect />
+        <div
+          data-orientation="vertical"
+          role="none"
+          data-slot="separator"
+          class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
+        >
+        </div>
+        <AdapterSelect />
+      </div>
       <div class="mobile-menu-control lg:hidden">
         <MobileMenuToggle />
       </div>
-    </div>
-
-    <div
-      class="col-span-2 row-start-2 flex min-w-0 items-center justify-end gap-2 lg:col-auto lg:row-auto"
-    >
-      <div
-        data-orientation="vertical"
-        role="none"
-        data-slot="separator"
-        class="bg-border hidden shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px lg:block"
-      >
-      </div>
-      <LanguageSelect />
-      <div
-        data-orientation="vertical"
-        role="none"
-        data-slot="separator"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
-      >
-      </div>
-      <AdapterSelect />
     </div>
   </div>
 </div>

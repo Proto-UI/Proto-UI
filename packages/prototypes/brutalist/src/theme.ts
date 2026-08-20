@@ -47,6 +47,10 @@ export const BRUTALIST_THEME: BrutalistThemeManifest = Object.freeze({
     muted: '#e5e5e5',
     'muted-foreground': '#525252',
     ring: '#171717',
+    // `destructive` is a fill, so it cannot double as resting text. This is its
+    // ink counterpart and it flips, because the pale fill already reads well on
+    // the Dark panel and would need no help there.
+    'destructive-ink': '#9f1239',
     ...SHARED_ACCENTS,
   }),
   dark: Object.freeze({
@@ -63,6 +67,8 @@ export const BRUTALIST_THEME: BrutalistThemeManifest = Object.freeze({
     muted: '#404040',
     'muted-foreground': '#d4d4d4',
     ring: '#f5f5f5',
+    // Unchanged from what the row already painted here: 10.73:1 on the panel.
+    'destructive-ink': '#fecdd3',
     ...SHARED_ACCENTS,
   }),
 });

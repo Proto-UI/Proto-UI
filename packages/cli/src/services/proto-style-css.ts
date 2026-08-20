@@ -41,6 +41,7 @@ const colorVars = new Set([
   'border',
   'destructive',
   'destructive-foreground',
+  'destructive-ink',
   'foreground',
   'input',
   'muted',

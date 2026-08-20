@@ -3,7 +3,7 @@ type: test
 title: Props module boundary and host source conformance
 status: draft
 since: 0.2.0-rc.7
-summary: Module, runtime, and official Adapter tests verify the Props facade and port split, required runtime installation, raw snapshot source semantics, callback-safe invalidation, direct-push separation, source replacement cleanup, and terminal disposal.
+summary: Module, runtime, and official Adapter tests verify the Props facade and port split, required runtime installation, Adapter input normalization, raw snapshot source semantics, callback-safe invalidation, direct-push separation, source replacement cleanup, and terminal disposal.
 cases:
   - id: T-PROPS-0012-CASE-FACADE-PORT-SPLIT
     title: Props facade and privileged port expose distinct surfaces
@@ -16,6 +16,13 @@ cases:
     covers:
       - M-PROPS-0001-F
     expectation: runtime-always-constructs-props-module
+  - id: T-PROPS-0012-CASE-ADAPTER-WIRING
+    title: Official Adapters install Props and provide its translated host source
+    covers:
+      - A-REACT-18-19-0001-B
+      - A-VUE-3-0001-B
+      - A-WEB-COMPONENT-0001-B
+    expectation: official-adapters-wire-required-props-and-translated-source-capability
   - id: T-PROPS-0012-CASE-SOURCE-SNAPSHOT
     title: Adapter source provides a current string-keyed snapshot
     covers:
@@ -29,12 +36,26 @@ cases:
       - M-PROPS-0001-D
       - HC-PROPS-SOURCE-0001-B
       - HC-PROPS-SOURCE-0001-C
+      - A-REACT-18-19-0001-D
+      - A-VUE-3-0001-D
+      - A-WEB-COMPONENT-0001-C
     expectation: notification-does-not-dispatch-until-runtime-sync
+  - id: T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
+    title: React and Vue classify framework inputs before exposing raw Props
+    covers:
+      - A-REACT-18-19-0001-C
+      - A-VUE-3-0001-C
+    expectation: default-filtering-and-explicit-get-props-replacement-are-executable
   - id: T-PROPS-0012-CASE-DIRECT-APPLY
     title: Direct runtime apply uses the Props kernel without becoming a host capability
     covers:
       - M-PROPS-0001-E
     expectation: direct-apply-dispatches-at-callback-safe-point-without-render
+  - id: T-PROPS-0012-CASE-WEB-COMPONENT-DIRECT-NORMALIZATION
+    title: Web Component direct apply keeps presentation fields outside raw Props
+    covers:
+      - A-WEB-COMPONENT-0001-D
+    expectation: presentation-projection-and-direct-props-application-remain-separated
   - id: T-PROPS-0012-CASE-SOURCE-REPLACEMENT
     title: Source replacement disposes the old subscription and reads the new source
     covers:
@@ -73,6 +94,7 @@ implementations:
     path: packages/adapters/react/test/contract/props-host-source.v0.contract.test.ts
     required: true
     consumesCases:
+      - T-PROPS-0012-CASE-ADAPTER-WIRING
       - T-PROPS-0012-CASE-SOURCE-SNAPSHOT
       - T-PROPS-0012-CASE-INVALIDATION
   - id: adapter-vue-props-host-source
@@ -81,6 +103,7 @@ implementations:
     path: packages/adapters/vue/test/contract/props-host-source.v0.contract.test.ts
     required: true
     consumesCases:
+      - T-PROPS-0012-CASE-ADAPTER-WIRING
       - T-PROPS-0012-CASE-SOURCE-SNAPSHOT
       - T-PROPS-0012-CASE-INVALIDATION
   - id: adapter-web-component-props-host-source
@@ -89,8 +112,30 @@ implementations:
     path: packages/adapters/web-component/test/contract/props-host-source.v0.contract.test.ts
     required: true
     consumesCases:
+      - T-PROPS-0012-CASE-ADAPTER-WIRING
       - T-PROPS-0012-CASE-SOURCE-SNAPSHOT
       - T-PROPS-0012-CASE-INVALIDATION
+  - id: adapter-react-props-normalization
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/contract/props-normalization.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
+  - id: adapter-vue-props-normalization
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/contract/props-normalization.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
+  - id: adapter-web-component-props-normalization
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/contract/props-normalization.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-PROPS-0012-CASE-WEB-COMPONENT-DIRECT-NORMALIZATION
   - id: adapter-official-resolved-snapshot-shapes
     kind: adapter-test
     status: passing
@@ -160,6 +205,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added Props Module, host-source, official Adapter profile evidence, and direct-push boundary conformance mappings.
+  - version: 0.2.0
+    change: strengthened
+    summary: Added addressable Adapter wiring and normalization cases with direct React, Vue, and Web Component executable evidence.
 tags:
   - props
   - module

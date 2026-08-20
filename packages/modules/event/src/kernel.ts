@@ -107,16 +107,30 @@ export class EventKernel {
     dispatch: EventDispatch,
     getTarget: (kind: TargetKind, type: EventTypeV0) => EventTarget
   ) {
+    const pending: Array<{
+      registration: Reg;
+      target: EventTarget;
+      wrapper: (ev: any) => void;
+    }> = [];
+
     for (const r of this.regs) {
       if (r.wrapper && r.boundTarget) continue;
 
       const target = getTarget(r.kind, r.type);
       const wrapper = (ev: any) => dispatch(r.id, ev);
 
-      target.addEventListener(r.type as any, wrapper as any, r.options as any);
+      pending.push({ registration: r, target, wrapper });
+    }
 
-      r.wrapper = wrapper;
-      r.boundTarget = target;
+    for (const { registration, target, wrapper } of pending) {
+      target.addEventListener(
+        registration.type as any,
+        wrapper as any,
+        registration.options as any
+      );
+
+      registration.wrapper = wrapper;
+      registration.boundTarget = target;
     }
   }
 

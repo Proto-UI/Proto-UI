@@ -2,6 +2,7 @@
 import context from 'virtual:starlight/project-context';
 import { localizedUrl } from '../../utils/localizedUrl';
 import '../../styles/global.css';
+import AdapterSelect from './AdapterSelect.astro';
 
 const { hasSidebar, locale } = Astro.locals.starlightRoute;
 const localizedPath = (path: string) =>
@@ -9,7 +10,7 @@ const localizedPath = (path: string) =>
 ---
 
 <div
-  class="bg-background text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*24)] lg:[--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
+  class="bg-background text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
 >
   <div class="bg-background container-wrapper flex flex-1 flex-col px-2">
     <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
@@ -56,6 +57,9 @@ const localizedPath = (path: string) =>
             >
               <div id="starlight__sidebar" class="mobile-sidebar-pane sidebar-pane">
                 <div class="mobile-sidebar-content sidebar-content sl-flex">
+                  <div class="mobile-preferences">
+                    <AdapterSelect id="adapter-select-mobile" />
+                  </div>
                   <div class="mobile-primary-links" aria-label="Primary">
                     <a href={localizedPath('/start-here/what-you-saw/')}>Docs</a>
                     <a href={localizedPath('/ui-libraries/')}>Prototypes</a>
@@ -78,6 +82,9 @@ const localizedPath = (path: string) =>
           <nav class="docs-sidebar primary-only-sidebar" aria-label="Primary navigation">
             <div id="starlight__sidebar" class="mobile-sidebar-pane sidebar-pane">
               <div class="mobile-sidebar-content sidebar-content sl-flex">
+                <div class="mobile-preferences">
+                  <AdapterSelect id="adapter-select-mobile" />
+                </div>
                 <div class="mobile-primary-links" aria-label="Primary">
                   <a href={localizedPath('/start-here/what-you-saw/')}>Docs</a>
                   <a href={localizedPath('/ui-libraries/')}>Prototypes</a>
@@ -175,6 +182,28 @@ const localizedPath = (path: string) =>
     gap: 0.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobile-preferences {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .mobile-preferences :global(.adapter-select-wrapper),
+  .mobile-preferences :global(select) {
+    width: 100%;
+  }
+
+  .mobile-preferences :global(select) {
+    border-color: var(--color-border);
+    text-align: left;
+  }
+
+  @media (min-width: 48rem) {
+    .mobile-preferences {
+      display: none;
+    }
   }
 
   .mobile-primary-links a {

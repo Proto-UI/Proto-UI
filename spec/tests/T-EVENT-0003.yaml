@@ -3,7 +3,7 @@ type: test
 title: Event Module boundary and official Adapter binding conformance
 status: draft
 since: 0.2.0-rc.7
-summary: Module, runtime, Adapter-base, official Adapter, and profile-schema evidence verifies the Event facade/port boundary, conditional scoped binding, translation ownership, cleanup, default-action projection, and Expose Event separation.
+summary: Module, runtime, Adapter-base, official Adapter, and profile-schema evidence verifies the Event facade/port boundary, conditional and target-preflighted scoped binding, translation ownership, cleanup, default-action projection, and Expose Event separation.
 cases:
   - id: T-EVENT-0003-CASE-FACADE-PORT-SPLIT
     title: Event author facade and privileged port expose distinct surfaces
@@ -39,6 +39,11 @@ cases:
       - HC-EVENT-BINDING-0001-E
       - HC-EVENT-BINDING-0001-F
     expectation: old-event-binding-cannot-dispatch-after-replacement-or-disposal
+  - id: T-EVENT-0003-CASE-BIND-TARGET-PREFLIGHT
+    title: Failed target preflight adds no listener and permits explicit retry
+    covers:
+      - M-EVENT-0001-I
+    expectation: target-resolution-failure-adds-no-listener-and-explicit-retry-binds-complete-plan
   - id: T-EVENT-0003-CASE-DEFAULT-ACTION-REQUEST
     title: Event port projects a host-independent request through a separate capability
     covers:
@@ -76,6 +81,7 @@ implementations:
       - T-EVENT-0003-CASE-FACADE-PORT-SPLIT
       - T-EVENT-0003-CASE-REQUIRED-CONDITIONAL-BINDING
       - T-EVENT-0003-CASE-REBIND-CLEANUP
+      - T-EVENT-0003-CASE-BIND-TARGET-PREFLIGHT
       - T-EVENT-0003-CASE-DEFAULT-ACTION-REQUEST
   - id: module-event-expose-wiring-migration-contract
     kind: module-test
@@ -157,6 +163,7 @@ verifies:
         - M-EVENT-0001-F
         - M-EVENT-0001-G
         - M-EVENT-0001-H
+        - M-EVENT-0001-I
   hostCaps:
     - id: HC-EVENT-BINDING-0001
       anchors:
@@ -204,4 +211,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added Event Module, host-neutral binding, default-action, official Adapter profile, lifecycle, and Expose-boundary conformance mappings.
+  - version: 0.2.0
+    change: strengthened
+    summary: Added Module-level target-preflight failure, explicit retry, and explicit-unbind stability coverage without claiming official Adapter failure-path evidence.
 tags: [event, module, host-capability, adapter, conformance]

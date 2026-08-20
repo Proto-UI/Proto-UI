@@ -8,26 +8,6 @@
     @apply w-full;
   }
 
-  @media (max-width: 49.99rem) {
-    header .container-wrapper > div {
-      min-width: 0;
-      width: 100%;
-      height: auto;
-      min-height: var(--header-height);
-      flex-wrap: wrap;
-    }
-
-    header .container-wrapper > div > .ml-auto {
-      margin-left: 0;
-      min-width: 0;
-      flex: 1 1 100%;
-      flex-basis: 100%;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      align-content: center;
-    }
-  }
-
   main[data-pagefind-body] {
     font-size: 15px;
     line-height: 1.625;
