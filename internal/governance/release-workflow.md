@@ -39,6 +39,16 @@ A V entity becomes `active` only after npm packages, the Git tag, and the spec s
 - the 40-character release commit SHA
 - the `sha256` spec snapshot digest
 
+### 2.3 Prerelease Stages
+
+Prerelease suffixes communicate stabilization stage rather than generic internal build order:
+
+- `alpha` admits reviewed architecture changes, top-level API changes, and new features. It is not an API or feature freeze.
+- `beta` begins after core scope and major APIs converge, shifting the train toward integration, compatibility, and defect correction. A new breaking direction requires an explicit decision about returning to alpha.
+- `rc` is reserved for a build maintainers believe can be promoted directly to the corresponding stable release after final verification or blocker fixes. Do not use rc while architectural rewrites, top-level breaking API changes, or new core features remain planned.
+
+Every published stage still requires an exact V entity, complete globally aligned package set, tag, dist-tag, and immutable snapshot evidence.
+
 ## 3. Preparation
 
 1. Create a topic branch from current `main`.

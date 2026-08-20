@@ -1,0 +1,14 @@
+---
+title: 'Textarea'
+description: 'Shadcn textarea reconstructed on Proto UI.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+This entry shows the current `shadcn` textarea implementation in Proto UI.
+
+Base Textarea owns the protocol: controlled and uncontrolled value, normalized input, change, and IME events, native properties such as `rows`, `maxLength`, and `readOnly`, accessibility projection, and focus and blur. It materializes exactly one host-owned multiline editor, and the shadcn layer adds presentation only — field dimensions, border, focus ring, and the disabled treatment.
+
+The projection is contentless. Authored children never become a second editor, and the slice adds no form workflow, validation message, auto-resize, or rich-text behavior.
+
+<PrototypePreviewer demoId="demo-shadcn-textarea" initialRuntime="wc" />

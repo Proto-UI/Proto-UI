@@ -10,6 +10,7 @@ type CssRule = {
 
 const spacing: Record<string, string> = {
   '0': '0px',
+  px: '1px',
   '0.5': '0.125rem',
   '1': '0.25rem',
   '1.5': '0.375rem',
@@ -25,6 +26,7 @@ const spacing: Record<string, string> = {
   '10': '2.5rem',
   '11': '2.75rem',
   '12': '3rem',
+  '16': '4rem',
   '32': '8rem',
   '64': '16rem',
   '28': '7rem',
@@ -39,6 +41,7 @@ const colorVars = new Set([
   'border',
   'destructive',
   'destructive-foreground',
+  'destructive-ink',
   'foreground',
   'input',
   'muted',
@@ -128,6 +131,7 @@ const staticUtilities: Record<string, string[]> = {
   'slide-in-from-right-2': ['--pui-translate-x: 0.5rem;'],
   'slide-in-from-top-2': ['--pui-translate-y: -0.5rem;'],
   'transition-all': ['transition-property: all;'],
+  'transition-[color,box-shadow]': ['transition-property: color, box-shadow;'],
   'transition-opacity': ['transition-property: opacity;'],
   'transition-none': ['transition-property: none;'],
   'transition-colors': [
@@ -164,8 +168,6 @@ const staticUtilities: Record<string, string[]> = {
   'border-t-2': ['border-top-width: 2px;', 'border-top-style: solid;'],
   'border-b': ['border-bottom-width: 1px;', 'border-bottom-style: solid;'],
   'border-l-2': ['border-left-width: 2px;', 'border-left-style: solid;'],
-  'brutalist-border-bottom-black': ['border-bottom-color: #000;'],
-  'brutalist-border-top-black': ['border-top-color: #000;'],
   'border-ink': ['border-color: var(--pui-foreground);'],
   'border-black': ['border-color: #000;'],
   'border-foreground': ['border-color: var(--pui-foreground);'],
@@ -216,6 +218,11 @@ const staticUtilities: Record<string, string[]> = {
   'shadow-[4px_4px_0_0_#000]': ['--pui-shadow: 4px 4px 0 0 #000;', ...composedShadow()],
   'shadow-[6px_6px_0_0_#000]': ['--pui-shadow: 6px 6px 0 0 #000;', ...composedShadow()],
   'shadow-[-3px_3px_0_0_#000]': ['--pui-shadow: -3px 3px 0 0 #000;', ...composedShadow()],
+  'shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]': [
+    '--pui-shadow: inset 0 0 0 2px #000, 3px 3px 0 0 #000;',
+    ...composedShadow(),
+  ],
+  'shadow-[inset_0_0_0_2px_#000]': ['--pui-shadow: inset 0 0 0 2px #000;', ...composedShadow()],
   'shadow-[2px_2px_0_0_var(--pui-foreground)]': [
     '--pui-shadow: 2px 2px 0 0 var(--pui-foreground);',
     ...composedShadow(),

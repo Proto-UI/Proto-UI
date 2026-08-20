@@ -100,10 +100,15 @@ describe('prototypes/brutalist: card', () => {
     expect(styleContains(root, 'border-2')).toBe(true);
     expect(styleContains(root, 'border-foreground')).toBe(true);
     expect(styleContains(header, 'border-b-2')).toBe(true);
-    expect(styleContains(header, 'brutalist-border-bottom-black')).toBe(true);
+    expect(styleContains(header, 'border-foreground')).toBe(true);
     expect(styleContains(content, 'px-6')).toBe(true);
     expect(styleContains(footer, 'border-t-2')).toBe(true);
-    expect(styleContains(footer, 'brutalist-border-top-black')).toBe(true);
+    expect(styleContains(footer, 'border-foreground')).toBe(true);
+
+    // Section separators resolve the same ink as the Root frame, so a theme
+    // change repaints them with the Card instead of leaving fixed black.
+    expect(styleContains(header, 'brutalist-border-bottom-black')).toBe(false);
+    expect(styleContains(footer, 'brutalist-border-top-black')).toBe(false);
 
     root.remove();
   });

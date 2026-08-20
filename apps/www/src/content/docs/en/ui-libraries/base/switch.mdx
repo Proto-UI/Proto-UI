@@ -1,0 +1,46 @@
+---
+title: 'Switch'
+description: 'Base Switch root-owned on/off semantics, anatomy, evidence, and boundaries.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Switch is an on/off value control. Root owns the persistent checked value and activation route; Thumb is an optional same-domain indicator and never becomes a second input target.
+
+<PrototypePreviewer
+  demoId="demo-base-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family and ownership
+
+The cataloged family contains:
+
+- `base-switch-root` (`1..1`): semantic owner, value owner, focus and activation target;
+- `base-switch-thumb` (`0..*`): presentational indicator that consumes Root context.
+
+Root and Thumb are exported from `@proto.ui/prototypes-base/switch` together with `asSwitchRoot()` and `asSwitchThumb()`. Root accepts `checked`, `defaultChecked`, and `disabled`, exposes checked and interaction facts, offers `focusSelf()`, and emits `checkedChange`.
+
+Controlled mode keeps the owner-provided `checked` fact until updated input arrives. Uncontrolled activation commits the next checked value locally. Mixed/indeterminate state is not part of Switch; use a Checkbox boundary when that state is required.
+
+## Accessibility boundary
+
+Root projects the `switch` role and checked state on the single focusable control. Thumb is presentational: it has no activation, value ownership, focus target, or independent accessibility control semantics. Base does not prescribe track geometry, motion, color, or variants.
+
+## 0.2 delivery and evidence
+
+The stable 0.2.0 package exports the Switch family, and the CLI registry exposes the Root and Thumb through `base-switch`. `T-BASE-SWITCH-0001` maps Root criteria to `packages/prototypes/base/test/switch.test.ts`; current Web adapter projection can be compared directly in this preview.
+
+## Lifecycle
+
+`P-BASE-SWITCH` and `P-BASE-SWITCH-THUMB` are **draft**. Their presence in a stable package is release evidence, not lifecycle promotion.
+
+## References
+
+- [P-BASE-SWITCH](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SWITCH.yaml)
+- [P-BASE-SWITCH-THUMB](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SWITCH-THUMB.yaml)
+- [Switch source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/switch)
+- [Switch evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/switch.test.ts)
+- Styled projections: [Shadcn Switch](/en/ui-libraries/shadcn/switch/) and [Brutalist Switch](/en/ui-libraries/brutalist/components/switch/)

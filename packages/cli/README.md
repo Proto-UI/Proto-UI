@@ -13,7 +13,7 @@ CLI package used by applications and maintainers to scaffold Proto UI configurat
 ## Install
 
 ```bash
-npm install @proto.ui/cli@0.2.0-rc.7
+npm install @proto.ui/cli@0.3.0-alpha.0
 ```
 
 ## Internal Structure

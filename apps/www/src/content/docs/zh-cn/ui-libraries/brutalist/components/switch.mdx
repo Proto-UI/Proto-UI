@@ -17,6 +17,8 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 - Pressed：轨道切换为珊瑚红并移除硬阴影，释放后回弹。
 - Focus：硬轮廓；Disabled：降低强调但保留结构。
 
-<div style="--pui-radius:0;--pui-background:#f4f1ea;--pui-foreground:#000;--pui-border:#000;--pui-sky:#BAE6FD;--pui-canary:#FEF08A;--pui-coral:#FECDD3;background:#f4f1ea;color:#000;border:2px solid var(--pui-foreground);box-shadow:3px 3px 0 var(--pui-foreground);padding:1rem;">
+每个 runtime-neutral demo 示例都把可见 caption 放在 Switch root 内。继承的 Base `nameFromContent` 投射因此能在 Web Components、React 与 Vue 中从同一段可见文本派生 accessible name；示例既不需要 host-specific `aria-label`，也不需要无法指向 custom-element host 的原生 `<label for>` 关系。Caption 属于 Switch control surface，因此点击 caption 会沿 Switch activation path 生效，而 disabled 示例保持 inert。
+
+<div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
 </div>

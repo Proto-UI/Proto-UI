@@ -23,7 +23,7 @@ import {
   renderProtoStyleTokenCss,
 } from '../../../cli/src/services/proto-style-css.js';
 import { BRUTALIST_STYLE_TOKENS } from '../../../cli/src/generated/brutalist-style-tokens.js';
-import { BRUTALIST_THEME_CSS } from '../../../cli/src/legacy/type.js';
+import { BRUTALIST_THEME_CSS } from '../../../cli/src/generated/brutalist-theme.js';
 import { brutalistButton } from '../src/button';
 
 // Strip `@layer proto-ui { ... }` wrapper (happy-dom does not implement @layer).

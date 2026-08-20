@@ -1,0 +1,65 @@
+id: T-SHADCN-SEPARATOR-0001
+type: test
+title: Shadcn Separator Root delta protocol contract tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Covers Separator Root identity, Base inheritance, orientation-driven geometry, the restated contentless renderer, and its passive boundary.
+cases:
+  - id: T-SHADCN-SEPARATOR-0001-CASE-EXPORTS
+    title: Root is a direct unofficial projection reachable through exact package entries
+    covers:
+      [
+        P-SHADCN-SEPARATOR-UPSTREAM-IDENTITY,
+        P-SHADCN-SEPARATOR-DIRECT-ENTRY,
+        P-SHADCN-SEPARATOR-COMPATIBILITY-SUBSET,
+      ]
+    expectation: shadcn-separator-root-direct-entry-is-exported-once
+  - id: T-SHADCN-SEPARATOR-0001-CASE-DEFAULTS
+    title: Decorative default inherits Base accessibility and projects the upstream horizontal surface
+    covers:
+      [
+        P-SHADCN-SEPARATOR-BASE-INHERITANCE,
+        P-SHADCN-SEPARATOR-CURRENT-BASE-DEVIATIONS,
+        P-SHADCN-SEPARATOR-CURRENT-VISUAL-SURFACE,
+      ]
+    expectation: shadcn-separator-defaults-to-decorative-horizontal-hairline
+  - id: T-SHADCN-SEPARATOR-0001-CASE-DYNAMIC-SEMANTICS
+    title: Live semantic and orientation changes reproject role and accessible orientation
+    covers: [P-SHADCN-SEPARATOR-BASE-INHERITANCE, P-SHADCN-SEPARATOR-STATE-DRIVEN-GEOMETRY]
+    expectation: shadcn-separator-live-semantics-reproject-accessible-orientation
+  - id: T-SHADCN-SEPARATOR-0001-CASE-PASSIVE-BOUNDARY
+    title: Projection stays contentless and adds no interaction surface
+    covers: [P-SHADCN-SEPARATOR-CONTENTLESS, P-SHADCN-SEPARATOR-PASSIVE-BOUNDARY]
+    expectation: shadcn-separator-drops-authored-children-and-declares-no-interaction
+  - id: T-SHADCN-SEPARATOR-0001-CASE-WEB-GEOMETRY-EVIDENCE
+    title: Both orientation rules reach the web style projection as conditional geometry
+    covers: [P-SHADCN-SEPARATOR-STATE-DRIVEN-GEOMETRY]
+    expectation: shadcn-separator-orientation-rules-lower-to-conditional-web-geometry
+implementations:
+  - id: prototypes-shadcn-separator-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/separator.test.ts
+    required: true
+    consumesCases:
+      [
+        T-SHADCN-SEPARATOR-0001-CASE-EXPORTS,
+        T-SHADCN-SEPARATOR-0001-CASE-DEFAULTS,
+        T-SHADCN-SEPARATOR-0001-CASE-DYNAMIC-SEMANTICS,
+        T-SHADCN-SEPARATOR-0001-CASE-PASSIVE-BOUNDARY,
+        T-SHADCN-SEPARATOR-0001-CASE-WEB-GEOMETRY-EVIDENCE,
+      ]
+    exercises: &id001 [P-SHADCN-SEPARATOR, P-BASE-SEPARATOR]
+    notes:
+      - Positive tests cover only the current Proto UI guarantee; asChild omission and remaining parity gaps are bounded by the decision, declared surface, and centralized compatibility question.
+      - The web-geometry case asserts Adapter lowering of the two state-conditioned rules on the Web Component host. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited orientation state handle plus semantic aria-orientation.
+verifies:
+  prototypes:
+    - id: P-SHADCN-SEPARATOR
+exercises:
+  prototypes: *id001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added draft Shadcn Separator projection coverage.
+tags: [test, shadcn, separator, visual, compatibility]

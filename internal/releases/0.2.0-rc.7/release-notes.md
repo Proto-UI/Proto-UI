@@ -1,8 +1,8 @@
-# Proto UI 0.2.0-rc.7 (Draft)
+# Proto UI 0.2.0-rc.7
 
-> These notes track candidate changes after `0.2.0-rc.6` that are intended for rc.7. `0.2.0-rc.7` has not been published. Exact package versions, the BOM, Git tag, GitHub prerelease, and immutable spec snapshot must be established and verified separately by the release-train preparation.
+> Published on August 11, 2026 under the npm `next` channel. All 40 public packages, the `v0.2.0-rc.7` tag, the GitHub prerelease, and the immutable spec snapshot share this exact release identity.
 
-## Fixed
+## Fixed and hardened
 
 ### Continuous trigger groups and Dialog hit boundaries
 
@@ -21,10 +21,30 @@
 - The Proto style CSS compiler now supports `w-fit`, `h-fit`, `flex-1`, `shadow-sm`, and the required outline tokens so the aligned prototype styles reach Web output without degrading into unsupported tokens.
 - This pass intentionally covers the default variant's horizontal primary path. The `line` variant, vertical layout, explicit dark branch, SVG descendant rules, and complete native API/data forwarding remain tracked parity gaps.
 
+### Passive focus and documentation runtime behavior
+
+- Web Component, React, and Vue now write `tabindex="0"` only when a prototype declares an actual focus surface. Disabled native controls retain `tabindex="-1"`, while passive non-native hosts omit the attribute instead of becoming click-focusable through cleanup or nested-trigger projection.
+- The documentation ThemeProvider installs the Starlight picker bridge before built-in mobile pickers can call it, keeps explicit preferences stable across system-theme changes, and no longer raises the previous fresh-load `ReferenceError`.
+- The Base Textarea demo logger records only normalized exposed `CustomEvent` payloads; a bubbling native `change` event no longer replaces the projected event record with a duplicate, unnormalized entry.
+
+## Added and expanded
+
+### Scroll domain and Scroll Area
+
+- A draft Scroll knowledge, decision, contract, module, host-capability, and test chain establishes that the host owns the scrolling engine, physics, inertia, and input integration, while Proto UI owns logical surfaces, facts, requests, and chrome-projection negotiation.
+- Base Scroll Area catalogs Root, Viewport, Scrollbar, and a feedback-only Thumb. Web supports `system` and `composed` chrome; the family host session binds the actual Thumb as a bounded Move Gesture hit subregion and maps movement to normalized `control-drag` requests without creating a second scroll-state owner.
+- Web Component, React, and Vue share the Scroll runtime, while Brutalist adds a Scroll Area visual projection and a cross-adapter journey. The rc.7 Scroll catalog remains `draft` and is not a completed stable cross-host guarantee.
+
+### Base Tooltip and Tooltip Group
+
+- Draft Base Tooltip Root, Trigger, Content, and Group cover delayed open, hover/focus coordination, the Escape owner bridge, anchored overlay/portal projection, and group warm/cold delay windows with active-tooltip coordination.
+- Accessibility relation projection is additive, so Tooltip can append its own `aria-describedby` token without overwriting host-authored IDREF relations.
+- The first pass intentionally omits an empty Portal prototype and Arrow without a governed arrow-geometry channel. Touch long-press and input-modality suppression remain explicit deferred gaps.
+
 ### CLI Brutalist preset and public prototype package
 
 - `proto-ui init --prototypes brutalist` is a first-class CSS-only style preset. It writes a Brutalist theme (`brutalist-theme.css` with light/dark variables and the flat canary/mint/lavender/coral/sky accent palette) plus a generated Proto UI token closure scanned from official Brutalist prototype sources.
-- `@proto.ui/prototypes-brutalist` is now a public `0.2.0-rc.7` draft package in the 40-package BOM. Its exported family subpaths and generated `proto-ui add` entries cover the admitted Button, Badge, Card, Toggle, Switch, Tabs, Hover Card, Dropdown, Select, Dialog, Scroll Area, Separator, Skeleton, and Textarea surfaces. This release-candidate state is not represented as already published.
+- `@proto.ui/prototypes-brutalist` is a public `0.2.0-rc.7` package in the 40-package BOM, published on npm under `next` outside the launch-commitment tier. Its exported family subpaths and generated `proto-ui add` entries cover the admitted Button, Badge, Card, Toggle, Switch, Tabs, Hover Card, Dropdown, Select, Dialog, Scroll Area, Separator, Skeleton, and Textarea surfaces.
 
 ### Separator protocol and Skeleton visual prototype
 
@@ -64,19 +84,28 @@
 - CI now computes affected public packages from the workspace production-dependency graph and enforces gzip budgets for representative package entries. `main` and manually triggered workflows continue to run the complete public-package validation.
 - A repeatable monorepo analysis snapshot now records builds, tests, tarballs, bundles, documentation output, and package update frequency so these improvements can be audited under the same measurement method.
 
+### Documentation discovery and contributor governance
+
+- The bilingual documentation search is now a keyboard-operable Pagefind dialog with localized idle, loading, empty, pagination, and retryable failure states; timeouts prevent index or runtime failures from leaving an endless spinner.
+- The UI-library landing page is now a card-based showcase. Base, Shadcn, and Brutalist have lazy single-column component overviews, while Lucide has a searchable icon grid; the post-Badge/Card Brutalist overview contains all 14 admitted previews.
+- The information-flow whitepaper includes one shared User/Maker/Other Component diagram with localized surrounding explanation, responsive presentation, and no redundant outer image frame. The shared documentation GitHub link now targets the canonical `Proto-UI/Proto-UI` repository.
+- Repository contribution intake now records the Developer Certificate of Origin 1.1, per-commit sign-off, source provenance, AI-assistance disclosure, and a governed individual-remediation path for otherwise valid unsigned commits.
+- Release metadata synchronization preserves reviewed package READMEs while verifying their exact install version and documented production dependencies, preventing curated package guidance from silently drifting from the public rc.7 graph.
+
 ## Validation
 
-- The complete workspace suite passes with 280 test files and 1,244 tests, plus 3 intentionally skipped files and 34 todo cases. Workspace and documentation type checks cover 130 files with zero errors, warnings, or hints; the catalog reports 117 declarations, 160 static authoring entries, 116 cataloged P entities, and zero known debt files.
+- The complete workspace suite passes with 280 test files and 1,244 tests, plus 3 intentionally skipped files and 34 todo cases. Workspace and documentation type checks cover 134 Astro files with zero errors, warnings, or hints; the catalog reports 117 declarations, 160 static authoring entries, 116 cataloged P entities, zero known debt files, and one dynamic factory file.
 - All 40 public packages pass production build, export-target validation, native Node ESM import smoke, staging, and `npm publish --dry-run`. The React tarball consumer uses 36/40 packed packages, the CLI multi-host consumer uses 38/40, and the production documentation build emits 190 pages with 188 indexed by Pagefind.
 - The built Brutalist Textarea showcase was exercised in a browser across Web Component, React, and Vue. Each adapter mounts one native textarea; the route preserves native properties and accessible label/help relations, accepts uncontrolled editing, and renders the square lavender/ink, vertical-resize, hard-shadow surface.
-- The integrated release rehearsal passes release identity/assets, catalog, types, release tests, runtime tests, spec snapshot generation, and launch-governance scan, then stops at the external registry-readiness gate because `@proto.ui/module-text-control` does not yet have an npm package identity. `@proto.ui/prototypes-brutalist` already resolves at its non-release bootstrap identity. The remaining package identity must be bootstrapped and configured with a Trusted Publisher before publication; all post-registry rehearsal steps were run independently and pass.
+- The protected `publish-all` workflow published all 40 public packages from the reviewed `692a6cfa30eae3049017d3c2b9e86d7f216e2176` commit through npm Trusted Publishing. Registry verification confirms all 40 exact versions, `next` tags, and integrity records; the workflow then created the Git tag, GitHub prerelease, and immutable snapshot assets.
 - The development Demo Matrix was verified with 45 demos and 135 simultaneously mounted previewers, 45 each for Web Component, React, and Vue. Its English and Chinese routes are absent from the 190-page production build, sitemap, and Pagefind index; the development-only and three-adapter side-by-side policies are now covered by the 41 release tests.
+- The public Brutalist library overview was exercised in real Chromium with 14/14 previews initialized, including Badge and Card, with no console, page, or request errors.
 
 ## Upgrade notes
 
 - Consumers that use public package exports do not need to change their imports, but runtime resolution now targets compiled `.js` and type resolution targets `.d.ts`. Non-public usage that imports package-internal `src/*.ts` paths or assumes source/tests are present in the npm payload is not a compatibility guarantee.
 - Custom host integrations should migrate to the trigger-group capability names. Deprecated route-owner aliases are transitional only.
 
-## Release preparation still required
+## Still under validation
 
-- This draft does not mean rc.7 is installable. Before activation, bootstrap the missing `@proto.ui/module-text-control` npm identity, configure its Trusted Publisher, rerun the complete release rehearsal, and then establish the immutable spec snapshot, Git tag, GitHub prerelease, and npm publication.
+- Additional installation, runtime, CSS, accessibility, bundle, composition, and API findings from post-publication `0.2.0-rc.7` trials will enter a later release train.

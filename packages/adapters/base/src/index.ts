@@ -9,6 +9,7 @@ export * from './host/view-epoch-owner';
 export * from './host/view-visibility';
 export * from './host/surface-projection';
 export * from './events/web-event-router';
+export * from './events/web-default-action';
 export * from './gestures/web-move-gesture-host';
 export * from './platform/instance-tree';
 export * from './platform/layout-ready';

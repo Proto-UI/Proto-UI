@@ -142,6 +142,7 @@ Proto UI 当前已经拥有较多 workspace package，但第一次公开发布�
 - `@proto.ui/module-context`
 - `@proto.ui/module-event`
 - `@proto.ui/module-expose`
+- `@proto.ui/module-expose-event`
 - `@proto.ui/module-expose-state`
 - `@proto.ui/module-expose-state-web`
 - `@proto.ui/module-feedback`

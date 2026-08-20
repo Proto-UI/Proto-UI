@@ -8,12 +8,12 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
-> Status: public rc.7 draft release candidate. The package and CLI entry are part of this train but are not installable until publication completes.
+> Availability: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: [P-BRUTALIST-SKELETON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SKELETON.yaml) remains `draft`; this page describes the released and tested 0.2 surface, not an active protocol guarantee.
 
 Brutalist Skeleton is a direct styled-only visual placeholder: a static square Yandu Lavender surface with an ink border and hard shadow. It is passive, contentless, excluded from the accessibility tree, and owns no repeating shimmer or pulse.
 
 Use it inside a parent async/loading region when an unresolved layout benefits from visual shape feedback. The parent owns loading and `aria-busy` state, announcements, placeholder-to-content replacement timing, and focus continuity. Skeleton does not create those semantics; any added motion must also respect reduced-motion preferences.
 
-<div style="--pui-lavender:#DDD6FE;--pui-foreground:#000;background:#f4f1ea;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:1rem;">
+<div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-skeleton" initialRuntime="wc" />
 </div>

@@ -5,8 +5,21 @@
 ## Related context
 
 - Issue:
-- Spec / contract / prototype entity:
+- Applicable spec entities and lifecycle:
+- Criteria / test anchors:
 - Related upstream:
+
+## Scope boundary
+
+- What was already decided by the issue or maintainer checkpoint?
+- What did this pull request decide?
+- What intentionally remains out of scope?
+
+## Source-of-truth alignment
+
+- [ ] I checked applicable `spec/**` entities before relying on contracts, records, implementation, or docs.
+- [ ] Normative behavior changes include coherent P/C/T criteria, revisions, executable evidence, and affected projections.
+- [ ] This change does not create an empty catalog identity or silently widen a draft/active public guarantee.
 
 ## Contribution provenance
 
@@ -36,6 +49,28 @@ This checkbox is only a reminder; it does not replace commit sign-off.
 
 - [ ] I have checked the DCO status of this PR.
 
+## Prototype website preview
+
+Complete the first item for a new public Prototype identity or anatomy family. Otherwise complete the second item and explain why the existing preview remains accurate.
+
+- [ ] This pull request adds or changes public Prototype behavior and includes the required reachable website page or page update.
+- [ ] A new or updated website page is not applicable because:
+
+- Public docs route:
+- Local preview URL or route:
+- Applicable runtimes manually reviewed: Web Component / React / Vue
+- [ ] The demo consumes the real public package export and prefers the Prototype's own anatomy, triggers, state, events, and defaults.
+- [ ] The Demo Matrix, when used, is supplementary evidence rather than a replacement for the website page.
+- External demo orchestration: none / required because:
+- Consumer-owned orchestration that is not installed with the package:
+
 ## Validation
 
-<!-- Commands, tests, screenshots, or manual verification. -->
+<!-- List exact commands and results. Do not list checks that were not run. -->
+
+- Focused tests:
+- Catalog / generated checks:
+- Types / repository tests:
+- Docs build / preview:
+- Manual or browser evidence:
+- Not run or not applicable, with reason:

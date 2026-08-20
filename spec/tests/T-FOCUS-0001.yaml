@@ -61,10 +61,10 @@ cases:
       - C-AS-FOCUSABLE-0001-E
     expectation: disabled-focus-request-rejected
   - id: T-FOCUS-0001-CASE-NAV-PARTICIPATION
-    title: Runtime navParticipation can remove a focusable from sequential navigation without disabling explicit focus requests
+    title: Runtime navParticipation removes a focusable from sequential navigation while preserving explicit and roving focus requests
     covers:
       - C-AS-FOCUSABLE-0001-F
-    expectation: nav-participation-none-does-not-disable-explicit-focus
+    expectation: nav-participation-none-preserves-programmatic-focusability
   - id: T-FOCUS-0001-CASE-PENDING-HOST-TARGET
     title: A focus request waits for host target projection without fabricating facts
     covers:
@@ -134,6 +134,13 @@ implementations:
     required: false
     consumesCases:
       - T-FOCUS-0001-CASE-UNIQUE-OWNER
+  - id: prototypes-base-tabs-nav-participation
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/tabs.test.ts
+    required: true
+    consumesCases:
+      - T-FOCUS-0001-CASE-NAV-PARTICIPATION
 verifies:
   contracts:
     - id: C-FOCUS-0001
@@ -204,6 +211,9 @@ revisions:
   - version: 0.1.11
     change: refined
     summary: Added native projection coverage for scroll-preserving focus requests.
+  - version: 0.1.12
+    change: refined
+    summary: Added Web projection coverage that sequentially excluded roving members remain programmatically focusable.
 tags:
   - focus
   - as-focusable

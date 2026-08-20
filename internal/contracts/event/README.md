@@ -22,7 +22,7 @@ Event is **not** responsible for:
 - `event.v0.md`
   - v0 normative contract for:
     - `def.event.on/off`
-    - `def.event.onGlobal/offGlobal`
+    - `def.event.onGlobal` (global registrations are also removed through token-based `off`)
     - callback signature and phase rules
     - auto cleanup
     - ProtoEvent union (minimal set)

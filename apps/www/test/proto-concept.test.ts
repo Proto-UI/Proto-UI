@@ -130,6 +130,37 @@ describe('proto-concept: lifecycle and memory management', () => {
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
   });
 
+  it('dismisses a hover-open card with Escape until pointer re-entry', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({ matches: true }))
+    );
+
+    const conceptEl = document.createElement('proto-concept');
+    conceptEl.setAttribute('slug', 'test-concept');
+    conceptEl.textContent = 'Test';
+    container.appendChild(conceptEl);
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    const trigger = conceptEl.querySelector('.proto-concept__trigger') as HTMLButtonElement;
+    const card = conceptEl.querySelector('.proto-concept__card') as HTMLElement;
+
+    conceptEl.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    expect(conceptEl.dataset.open).toBe('true');
+
+    conceptEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(conceptEl.dataset.hovering).toBe('false');
+    expect(conceptEl.dataset.open).toBe('false');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(card.hasAttribute('inert')).toBe(true);
+    expect(card.getAttribute('aria-hidden')).toBe('true');
+
+    conceptEl.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+    conceptEl.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    expect(conceptEl.dataset.open).toBe('true');
+  });
+
   it('sets inert and aria-hidden on closed card', async () => {
     const conceptEl = document.createElement('proto-concept');
     conceptEl.setAttribute('slug', 'test-concept');

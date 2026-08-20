@@ -31,7 +31,6 @@ Proto UI does not require a single rendering model, but it does provide the cons
 
 ## Current Stage
 
-Pre-release (v0)
+v0 project stage; stable package release 0.2.0
 
-Proto UI is currently in the stage of stabilizing its core semantics and building up its foundational capabilities.  
-Some APIs and implementation details may still change in later iterations.
+The current public package line is [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0), published under npm `latest`. Proto UI is still stabilizing its core semantics and building foundational capabilities, so some APIs and implementation details may change in later iterations. Package availability does not override the active or draft lifecycle of individual spec entities.

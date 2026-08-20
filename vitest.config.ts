@@ -80,6 +80,7 @@ export default defineConfig({
       'packages/**/test/**/*.test.ts',
       'internal/contracts/__tests__/**/*.test.ts',
       'apps/**/test/**/*.test.ts',
+      'apps/www/src/**/*.test.ts',
     ],
   },
 });

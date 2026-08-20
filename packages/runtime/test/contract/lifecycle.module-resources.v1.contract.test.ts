@@ -10,7 +10,8 @@ import {
 } from '@proto.ui/core';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
 import { asOverlay } from '@proto.ui/hooks';
-import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import { EFFECTS_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
 import {
   HIT_PARTICIPATION_HOST_BRIDGE_CAP,
@@ -36,6 +37,39 @@ function createImmediateHost(
 }
 
 describe('runtime contract: lifecycle module resource ownership (v1)', () => {
+  it('keeps Expose Event declarations across view epochs and invalidates emit at disposal', async () => {
+    const emitted: string[] = [];
+    let retainedRun: any;
+    const proto = definePrototype({
+      name: 'lifecycle-expose-event-resource-owner',
+      setup(def) {
+        def.expose.event('ready');
+        def.lifecycle.onMounted((run) => {
+          retainedRun = run;
+          run.expose.emit('ready');
+        });
+        return (run) => run.el('div', 'ok');
+      },
+    });
+    const session = createRuntimeSession(
+      proto,
+      createImmediateHost((wiring) => {
+        wiring.attach('expose-event', [
+          [EXPOSE_EVENT_SINK_CAP, (key: string) => emitted.push(key)],
+        ]);
+      })
+    );
+
+    await session.mount();
+    await session.unmount();
+    await session.mount();
+
+    expect(emitted).toEqual(['ready', 'ready']);
+
+    await session.dispose();
+    expect(() => retainedRun.expose.emit('ready')).toThrow();
+  });
+
   it('keeps Feedback logical style state while suppressing detached host flushes', async () => {
     const queued: unknown[] = [];
     const stylesSeenAtCommit: unknown[] = [];
@@ -112,13 +146,14 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
           [A11Y_PROJECT_CAP, (snapshot: A11ySemanticObjectSnapshot) => snapshots.push(snapshot)],
         ]);
         wiring.attach('expose-state', [
-          [EXPOSE_STATE_SET_EXPOSES_CAP, (record: Record<string, unknown>) => exposes.push(record)],
+          [EXPOSES_RECORD_SINK_CAP, (record: Record<string, unknown>) => exposes.push(record)],
         ]);
       })
     );
 
     expect(snapshots).toEqual([]);
     expect(exposes.at(-1)).toHaveProperty('disabled');
+    const initialExternalHandle = exposes.at(-1)?.disabled;
     await session.mount();
     expect(snapshots.at(-1)?.states.disabled).toBe(false);
     expect(exposes.at(-1)).toHaveProperty('disabled');
@@ -135,6 +170,7 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
     await session.mount();
     expect(snapshots.at(-1)?.states.disabled).toBe(true);
     expect((exposes.at(-1)?.disabled as { get(): boolean }).get()).toBe(true);
+    expect(exposes.at(-1)?.disabled).toBe(initialExternalHandle);
   });
 
   it('keeps HitParticipation regions detached and re-syncs them on the next mount', async () => {

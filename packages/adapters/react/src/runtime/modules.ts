@@ -1,4 +1,5 @@
 import {
+  cancelWebEventDefaultAction,
   createCapsWiring,
   createWebMoveGestureHost,
   type LogicalInstanceToken,
@@ -30,12 +31,11 @@ import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module
 import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
-  type EventDefaultActionCancelRequest,
-  EVENT_EMIT_CAP,
   EVENT_GLOBAL_TARGET_CAP,
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
-import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import type { RawPropsSource } from '@proto.ui/module-props';
 import {
   createExposeStateWebNameMap,
@@ -127,7 +127,7 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
 
   return createCapsWiring()
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
-    .use('event', [[EVENT_EMIT_CAP, emit]])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
@@ -135,7 +135,7 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },
@@ -247,16 +247,9 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     .use('event', [
       [EVENT_ROOT_TARGET_CAP, () => router.rootTarget],
       [EVENT_GLOBAL_TARGET_CAP, () => router.globalTarget],
-      [
-        EVENT_CANCEL_DEFAULT_ACTION_CAP,
-        ({ event }: EventDefaultActionCancelRequest) => {
-          if (typeof (event as Event | undefined)?.preventDefault === 'function') {
-            (event as Event).preventDefault();
-          }
-        },
-      ],
-      [EVENT_EMIT_CAP, emit],
+      [EVENT_CANCEL_DEFAULT_ACTION_CAP, cancelWebEventDefaultAction],
     ])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
@@ -265,9 +258,9 @@ export function createReactModules<Props extends PropsBaseType>(args: {
       [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, isNativelyFocusable],
       [
         FOCUS_SET_FOCUSABLE_CAP,
-        (target: HTMLElement, enabled: boolean) => {
+        (target: HTMLElement, enabled: boolean, options?: { programmatic?: boolean }) => {
           const surface = getLogicalTriggerSurfaceRoot(instanceToken);
-          projectFocusable(target, enabled && (!surface || surface === target));
+          projectFocusable(target, enabled && (!surface || surface === target), options);
         },
       ],
       [
@@ -294,7 +287,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },
@@ -389,11 +382,15 @@ function isNativelyFocusable(el: HTMLElement): boolean {
   return false;
 }
 
-function projectFocusable(target: HTMLElement, enabled: boolean): void {
+function projectFocusable(
+  target: HTMLElement,
+  enabled: boolean,
+  options?: { programmatic?: boolean }
+): void {
   if (enabled) {
-    target.tabIndex = 0;
-  } else if (isNativelyFocusable(target)) {
-    target.tabIndex = -1;
+    target.setAttribute('tabindex', '0');
+  } else if (options?.programmatic || isNativelyFocusable(target)) {
+    target.setAttribute('tabindex', '-1');
   } else {
     target.removeAttribute('tabindex');
   }

@@ -60,7 +60,7 @@ export default {
           {
             kind: 'box',
             className:
-              'w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box',
+              'w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box',
             children: [
               {
                 kind: 'box',
@@ -79,21 +79,21 @@ export default {
             kind: 'box',
             ref: 'enterBtn',
             className:
-              'px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md cursor-pointer select-none',
+              'px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-md cursor-pointer select-none',
             children: ['Enter'],
           },
           {
             kind: 'box',
             ref: 'leaveBtn',
             className:
-              'px-3 py-1.5 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-md cursor-pointer select-none',
+              'px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-md cursor-pointer select-none',
             children: ['Leave'],
           },
           {
             kind: 'box',
             ref: 'completeBtn',
             className:
-              'px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md cursor-pointer select-none',
+              'px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-md cursor-pointer select-none',
             children: ['Complete'],
           },
         ],
@@ -117,22 +117,22 @@ export default {
         children: [
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-gray-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['closed'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-blue-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['entering'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-green-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['entered'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-orange-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['leaving'],
           },
         ],

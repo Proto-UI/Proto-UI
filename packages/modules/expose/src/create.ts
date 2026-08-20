@@ -21,7 +21,6 @@ export function createExposeModule(ctx: ModuleFactoryArgs): ExposeModule {
         facade: impl.facade,
         port: impl.port,
         hooks: {
-          onProtoPhase: (p) => impl.onProtoPhase(p),
           dispose: () => impl.dispose(),
         },
       };

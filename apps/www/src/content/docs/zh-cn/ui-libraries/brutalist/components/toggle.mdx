@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Toggle'
-description: '基于 Base Toggle 的按压态 Neo-Brutalist 投影'
+description: '基于 Base Toggle 的持续状态 Neo-Brutalist 投影'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,8 +8,8 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-Toggle 保留 Base 的 pressed 语义，并套上 Brutalist 硬表面视觉处理。
+Toggle 保留 Base 的 activation 与 `aria-pressed` 所有权。锁存 active state 使用持续 inset ink frame 作为非颜色信号；瞬时 pointer press 仍使用独立的压入与释放反馈。
 
-<div style="--pui-radius:0;--pui-background:#f4f1ea;--pui-secondary-background:#ffffff;--pui-foreground:#000000;--pui-border:#000000;background:#f4f1ea;color:#000;border:2px solid var(--pui-foreground);box-shadow:3px 3px 0 0 var(--pui-foreground);padding:1rem;">
+<div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
 </div>

@@ -1,0 +1,217 @@
+id: T-EVENT-0003
+type: test
+title: Event Module boundary and official Adapter binding conformance
+status: draft
+since: 0.2.0-rc.7
+summary: Module, runtime, Adapter-base, official Adapter, and profile-schema evidence verifies the Event facade/port boundary, conditional and target-preflighted scoped binding, translation ownership, cleanup, default-action projection, and Expose Event separation.
+cases:
+  - id: T-EVENT-0003-CASE-FACADE-PORT-SPLIT
+    title: Event author facade and privileged port expose distinct surfaces
+    covers:
+      - M-EVENT-0001-A
+      - M-EVENT-0001-B
+      - M-EVENT-0001-C
+    expectation: author-event-surface-excludes-binding-target-and-internal-dispatch-control
+  - id: T-EVENT-0003-CASE-REQUIRED-CONDITIONAL-BINDING
+    title: Standard Runtime installs Event while unused registration scopes require no host binding
+    covers:
+      - M-EVENT-0001-D
+      - HC-EVENT-BINDING-0001-D
+    expectation: installed-event-module-binds-only-scopes-with-registrations
+  - id: T-EVENT-0003-CASE-SCOPED-TRANSLATION
+    title: Official Adapters translate host input into root and global Event streams
+    covers:
+      - M-EVENT-0001-E
+      - HC-EVENT-BINDING-0001-A
+      - HC-EVENT-BINDING-0001-B
+      - HC-EVENT-BINDING-0001-C
+      - A-REACT-18-19-0001-E
+      - A-REACT-18-19-0001-F
+      - A-VUE-3-0001-E
+      - A-VUE-3-0001-F
+      - A-WEB-COMPONENT-0001-E
+      - A-WEB-COMPONENT-0001-F
+    expectation: adapter-owned-event-routing-delivers-declared-types-to-the-owning-scope
+  - id: T-EVENT-0003-CASE-REBIND-CLEANUP
+    title: Binding replacement and terminal disposal release prior host resources
+    covers:
+      - M-EVENT-0001-F
+      - HC-EVENT-BINDING-0001-E
+      - HC-EVENT-BINDING-0001-F
+    expectation: old-event-binding-cannot-dispatch-after-replacement-or-disposal
+  - id: T-EVENT-0003-CASE-BIND-TARGET-PREFLIGHT
+    title: Failed target preflight adds no listener and permits explicit retry
+    covers:
+      - M-EVENT-0001-I
+    expectation: target-resolution-failure-adds-no-listener-and-explicit-retry-binds-complete-plan
+  - id: T-EVENT-0003-CASE-DEFAULT-ACTION-REQUEST
+    title: Event port projects a host-independent request through a separate capability
+    covers:
+      - M-EVENT-0001-G
+      - HC-DEFAULT-ACTION-0001-A
+    expectation: default-action-request-is-host-mediated
+  - id: T-EVENT-0003-CASE-DEFAULT-ACTION-WEB
+    title: Official Web Adapters project default-action cancellation to preventDefault
+    covers:
+      - HC-DEFAULT-ACTION-0001-B
+      - A-REACT-18-19-0001-E
+      - A-VUE-3-0001-E
+      - A-WEB-COMPONENT-0001-E
+    expectation: cancelable-dom-event-receives-prevent-default
+  - id: T-EVENT-0003-CASE-EXPOSE-BOUNDARY
+    title: Expose Event implementation and wiring remain outside the Event Module
+    covers:
+      - M-EVENT-0001-H
+    expectation: event-facade-and-wiring-exclude-the-standalone-expose-event-bridge
+implementations:
+  - id: module-event-boundary-types
+    kind: workspace-check
+    status: passing
+    path: packages/modules/event/src/types.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-FACADE-PORT-SPLIT
+      - T-EVENT-0003-CASE-EXPOSE-BOUNDARY
+  - id: module-event-binding-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/event/test/contract/event-module.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-FACADE-PORT-SPLIT
+      - T-EVENT-0003-CASE-REQUIRED-CONDITIONAL-BINDING
+      - T-EVENT-0003-CASE-REBIND-CLEANUP
+      - T-EVENT-0003-CASE-BIND-TARGET-PREFLIGHT
+      - T-EVENT-0003-CASE-DEFAULT-ACTION-REQUEST
+  - id: module-event-expose-wiring-migration-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/event/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-EXPOSE-BOUNDARY
+  - id: runtime-required-event-module
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/event-no-registrations.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-REQUIRED-CONDITIONAL-BINDING
+  - id: adapter-base-event-target-requirements
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/contract/event-target-requirements.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-REQUIRED-CONDITIONAL-BINDING
+      - T-EVENT-0003-CASE-SCOPED-TRANSLATION
+  - id: adapter-react-event-binding
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/event-routing.test.ts
+    required: true
+    notes:
+      - Supporting native delivery and post-unmount cleanup coverage is in packages/adapters/react/test/event.test.ts.
+    consumesCases:
+      - T-EVENT-0003-CASE-SCOPED-TRANSLATION
+      - T-EVENT-0003-CASE-REBIND-CLEANUP
+  - id: adapter-vue-event-binding
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/event-routing.test.ts
+    required: true
+    notes:
+      - Supporting commit-gate and post-unmount cleanup coverage is in packages/adapters/vue/test/event.test.ts.
+    consumesCases:
+      - T-EVENT-0003-CASE-SCOPED-TRANSLATION
+      - T-EVENT-0003-CASE-REBIND-CLEANUP
+  - id: adapter-web-component-event-binding
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/contract/event.router.mapping.v0.contract.test.ts
+    required: true
+    notes:
+      - Dispose, precise removal, host-bound, dual-path, and ownership behavior have parallel focused router contract tests.
+    consumesCases:
+      - T-EVENT-0003-CASE-SCOPED-TRANSLATION
+      - T-EVENT-0003-CASE-REBIND-CLEANUP
+  - id: adapter-profile-event-slice-schema
+    kind: workspace-check
+    status: passing
+    path: packages/spec/fixtures/test/adapter-profile-schema.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-SCOPED-TRANSLATION
+  - id: adapter-official-web-default-action-projection
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/contract/event-default-action.v0.contract.test.ts
+    required: true
+    notes:
+      - React, Vue, and Web Component profiles inject the tested Adapter Base projection as their Event default-action capability.
+    consumesCases:
+      - T-EVENT-0003-CASE-DEFAULT-ACTION-WEB
+verifies:
+  modules:
+    - id: M-EVENT-0001
+      anchors:
+        - M-EVENT-0001-A
+        - M-EVENT-0001-B
+        - M-EVENT-0001-C
+        - M-EVENT-0001-D
+        - M-EVENT-0001-E
+        - M-EVENT-0001-F
+        - M-EVENT-0001-G
+        - M-EVENT-0001-H
+        - M-EVENT-0001-I
+  hostCaps:
+    - id: HC-EVENT-BINDING-0001
+      anchors:
+        - HC-EVENT-BINDING-0001-A
+        - HC-EVENT-BINDING-0001-B
+        - HC-EVENT-BINDING-0001-C
+        - HC-EVENT-BINDING-0001-D
+        - HC-EVENT-BINDING-0001-E
+        - HC-EVENT-BINDING-0001-F
+    - id: HC-DEFAULT-ACTION-0001
+      anchors:
+        - HC-DEFAULT-ACTION-0001-A
+        - HC-DEFAULT-ACTION-0001-B
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-E
+        - A-REACT-18-19-0001-F
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-E
+        - A-VUE-3-0001-F
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-E
+        - A-WEB-COMPONENT-0001-F
+exercises:
+  contracts:
+    - id: C-EVENT-0002
+      role: phase-boundary
+      coverageImpact: exercises-test-surface
+      note: Facade registration and runtime callback binding define the author-facing Event phase split.
+    - id: C-EVENT-0003
+      role: test-surface
+      coverageImpact: exercises-test-surface
+      note: Root/global interaction ownership is realized by Adapter translation and scoped binding.
+    - id: C-EVENT-0007
+      role: execution-order
+      coverageImpact: exercises-test-surface
+      note: Rebinding and disposal evidence exercises Event lifecycle guarantees.
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Updated the Expose Event separation case for the standalone package, Event-only facade, and dedicated wiring target.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added Event Module, host-neutral binding, default-action, official Adapter profile, lifecycle, and Expose-boundary conformance mappings.
+  - version: 0.2.0
+    change: strengthened
+    summary: Added Module-level target-preflight failure, explicit retry, and explicit-unbind stability coverage without claiming official Adapter failure-path evidence.
+tags: [event, module, host-capability, adapter, conformance]

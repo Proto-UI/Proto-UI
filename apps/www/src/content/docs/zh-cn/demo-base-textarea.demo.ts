@@ -201,7 +201,7 @@ export default {
       {
         kind: 'box',
         ref: 'help',
-        className: 'text-xs text-slate-600',
+        className: 'text-xs text-muted-foreground',
         children: [
           'Type, blur, or use IME to inspect normalized events. Live controls exercise props and exposes.',
         ],
@@ -236,13 +236,13 @@ export default {
       {
         kind: 'box',
         ref: 'stateLabel',
-        className: 'break-words font-mono text-xs text-slate-700',
+        className: 'break-words font-mono text-xs text-muted-foreground',
         children: ['State exposes'],
       },
       {
         kind: 'box',
         ref: 'eventLog',
-        className: 'min-h-5 break-words font-mono text-xs text-slate-700',
+        className: 'min-h-5 break-words font-mono text-xs text-muted-foreground',
         children: ['Event log: edit the textarea'],
       },
     ],

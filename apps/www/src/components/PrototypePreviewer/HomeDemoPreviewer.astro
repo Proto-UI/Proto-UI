@@ -166,32 +166,12 @@ const initialDemo = demos.find((demo) => demo.id === initialDemoId) ?? demos[0];
     border: 1px solid color-mix(in oklch, var(--color-border) 86%, transparent);
     border-radius: 1.5rem;
     overflow: hidden;
-    background:
-      radial-gradient(
-        circle at top left,
-        color-mix(in oklch, var(--color-accent) 12%, transparent),
-        transparent 34%
-      ),
-      linear-gradient(
-        180deg,
-        color-mix(in oklch, var(--color-muted) 28%, transparent),
-        transparent 40%
-      ),
-      linear-gradient(
-        135deg,
-        color-mix(in oklch, var(--color-accent) 5%, transparent),
-        transparent 55%
-      ),
-      var(--color-background);
-    box-shadow:
-      0 16px 48px color-mix(in oklch, black 10%, transparent),
-      inset 0 1px 0 color-mix(in oklch, white 55%, transparent);
+    background: var(--color-background);
+    box-shadow: 0 16px 48px color-mix(in oklch, black 10%, transparent);
   }
 
   :global([data-theme='dark']) .home-demo-previewer__panel {
-    box-shadow:
-      0 20px 56px color-mix(in oklch, black 22%, transparent),
-      inset 0 1px 0 color-mix(in oklch, white 10%, transparent);
+    box-shadow: 0 20px 56px color-mix(in oklch, black 22%, transparent);
   }
 
   .home-demo-previewer__header {

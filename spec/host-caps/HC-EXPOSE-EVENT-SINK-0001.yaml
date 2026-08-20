@@ -1,0 +1,63 @@
+id: HC-EXPOSE-EVENT-SINK-0001
+type: host-cap
+title: Host accepts Component-to-App-Maker outward signal emissions
+status: draft
+since: 0.2.0-rc.7
+summary: The Adapter provides an instance-scoped host-neutral sink that translates each validated Expose Event emission without becoming a User-to-Component input route.
+statement:
+  zh-CN: >-
+    Expose Event Sink host capability 让 Expose Event Module 在 validation 后把一次 Component → App Maker outward signal emission 交给 Adapter。Payload 是 `(key, payload?, options?)`；调用表示一次即时 emission，不是 registration、subscription、record snapshot、Event input dispatch 或 replay queue。Adapter 可把它翻译为 React callback、Vue emit/listener、CustomEvent、message 或其它宿主惯例 carrier，但 capability 本身不要求 DOM、EventTarget、framework instance 或特定 listener naming。`options` 在 v0 是 opaque host-local 扩展，不构成 portable guarantee。
+
+
+  en: >-
+    The Expose Event Sink host capability lets the Expose Event Module hand one validated Component-to-App-Maker outward-signal emission to an Adapter. Its payload is `(key, payload?, options?)`; each call represents one immediate emission rather than registration, subscription, a record snapshot, Event input dispatch, or a replay queue. An Adapter may translate it into a React callback, Vue emit or listener, CustomEvent, message, or another host-idiomatic carrier, but the capability itself requires no DOM, EventTarget, framework instance, or particular listener naming. In v0, `options` is an opaque host-local extension rather than a portable guarantee.
+
+
+criteria:
+  - id: HC-EXPOSE-EVENT-SINK-0001-A
+    text:
+      zh-CN: Capability 必须接受一个已经过 Module registration validation 的 non-empty key、可选 payload 与可选 opaque options；一次调用必须表示一次即时 outward emission。
+      en: The capability must accept a non-empty key already validated against Module registration, an optional payload, and optional opaque options; each call must represent one immediate outward emission.
+  - id: HC-EXPOSE-EVENT-SINK-0001-B
+    text:
+      zh-CN: Adapter translation 必须保持 Component → App Maker 方向，不得把 key 注入 root/global Event input routing，也不得要求 Module 构造 native event 或读取 host listener。
+      en: Adapter translation must preserve the Component-to-App-Maker direction, must not inject the key into root or global Event input routing, and must not require the Module to construct a native event or read host listeners.
+  - id: HC-EXPOSE-EVENT-SINK-0001-C
+    text:
+      zh-CN: 缺失对应 host listener 时 translation 可以 no-op；capability replacement/removal 只影响后续 emission，不得 replay、buffer、deduplicate 或重新发送既有 emission。
+      en: Translation may no-op when the corresponding host listener is absent; capability replacement or removal affects only future emissions and must not replay, buffer, deduplicate, or resend earlier emissions.
+  - id: HC-EXPOSE-EVENT-SINK-0001-D
+    text:
+      zh-CN: '`payload` hint 与 `options` 不得被解释为跨宿主 serialization、bubbling、cancelability、error propagation 或 scheduling 保证；更具体行为必须由 contract/profile 另行规定。'
+      en: 'Payload hints and `options` must not be interpreted as cross-host guarantees for serialization, bubbling, cancelability, error propagation, or scheduling; more specific behavior requires a separate contract or profile rule.'
+  - id: HC-EXPOSE-EVENT-SINK-0001-E
+    text:
+      zh-CN: Capability 必须保持 host-neutral，不得要求 DOM node、EventTarget、React/Vue object、CustomEvent 或 `onXxx` naming；这些形状属于 Adapter profile translation。
+      en: The capability must remain host-neutral and must not require a DOM node, EventTarget, React or Vue object, CustomEvent, or `onXxx` naming; those shapes belong to Adapter profile translation.
+relates:
+  contracts:
+    - C-EXPOSE-EVENT-0001
+    - C-EXPOSE-EVENT-0002
+  knowledge:
+    - K-COMPONENT-ACTOR-0001
+    - K-INFORMATION-CHANNEL-0001
+    - K-DESIGN-TRADEOFF-0001
+verifies:
+  tests:
+    - T-EXPOSE-EVENT-0002
+sources:
+  - path: internal/records/2026-08-14-expose-event-module-adapter-audit.zh-CN.md
+  - path: internal/records/2026-08-16-expose-event-package-extraction.zh-CN.md
+  - path: packages/modules/expose-event/src/caps.ts
+  - path: packages/modules/expose-event/src/impl.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Moved the canonical sink and its consumer into the standalone Expose Event package while preserving the token identity.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the validated outward-signal emission tuple, current-sink semantics, host-neutral direction, and profile-owned translation boundary.
+tags: [host-capability, expose, event, signal, adapter]

@@ -8,8 +8,8 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-Tabs inherit Base selection and activation semantics while using square list/trigger geometry and hard shadows.
+Tabs inherit Base selection, activation, and descendant-first panel focus-entry semantics while using square list/trigger geometry and hard shadows. The reference demo gives the Root a responsive stable width, so changing panels does not resize or recenter the widget.
 
-<div style="--pui-radius:0;--pui-background:#f4f1ea;--pui-secondary-background:#ffffff;--pui-foreground:#000000;--pui-border:#000000;background:#f4f1ea;color:#000;border:2px solid var(--pui-foreground);box-shadow:3px 3px 0 0 var(--pui-foreground);padding:1rem;">
+<div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
 </div>

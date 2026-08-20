@@ -33,7 +33,7 @@ If a task exposes a real contradiction, do not silently choose the most convenie
 
 ## Repository map
 
-- `spec/**`: cataloged contracts, prototypes, modules, decisions, host capabilities, tests, versions, and knowledge.
+- `spec/**`: cataloged contracts, prototypes, modules, Adapter profiles, decisions, host capabilities, tests, versions, and knowledge.
 - `packages/spec/**`: schema, loader, relation validation, snapshot, and graph tooling for the catalog.
 - `packages/core/**`: protocol syntax and core primitives.
 - `packages/runtime/**`: runtime execution and orchestration.
@@ -52,7 +52,7 @@ If a task exposes a real contradiction, do not silently choose the most convenie
 
 Before changing behavior:
 
-- Trace the relevant entity chain where available: knowledge/decision -> contract or prototype -> module/host capability -> test -> implementation/docs.
+- Trace the relevant entity chain where available: knowledge/decision -> contract or prototype -> module/host capability -> Adapter profile -> test -> implementation/docs.
 - Check whether the affected entity is `draft`, `active`, deprecated, or absent.
 - Search `internal/contracts/**` for uncataloged constraints and rationale.
 - Search `internal/records/**` by topic and date for current work direction. Do not assume the newest record in the directory is relevant to every domain.
@@ -73,7 +73,7 @@ When recording unsettled work:
 
 ## Commands and verification
 
-Use the pnpm version declared in `package.json` through Corepack.
+Use Node.js 22, the current CI baseline, and the pnpm version declared in `package.json` through Corepack.
 
 Common checks:
 

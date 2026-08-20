@@ -16,11 +16,13 @@ const tabsContent = definePrototype<BrutalistTabsContentProps, BrutalistTabsCont
     }
     const { hidden } = contentState;
 
+    // P-BRUTALIST-TABS-CONTENT-FOCUS-INDICATION — do not suppress the native
+    // focus-visible outline when Base Tabs Content selects the root fallback.
     // P-BRUTALIST-TABS-CONTENT-VISUAL-GRAMMAR — square bordered panel: BRUTALIST_PANEL_TOKENS
     // (rounded-none, border-2 border-black, hard shadow, bg-secondary-background, text-foreground)
     // over a block w-full min-h-28 p-4 text-sm content surface.
     def.feedback.style.use(
-      tw(`block w-full min-h-28 p-4 text-sm leading-6 outline-none ${BRUTALIST_PANEL_TOKENS}`)
+      tw(`block w-full min-h-28 p-4 text-sm leading-6 ${BRUTALIST_PANEL_TOKENS}`)
     );
     // P-BRUTALIST-TABS-CONTENT-HIDDEN-STATE — hidden collapses the panel via the `hidden` token.
     def.rule({

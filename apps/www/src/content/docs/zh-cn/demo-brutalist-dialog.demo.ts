@@ -30,7 +30,11 @@ export default {
             kind: 'proto',
             prototypeId: 'brutalist-dialog-footer',
             children: [
-              { kind: 'proto', prototypeId: 'brutalist-dialog-close', children: ['Close'] },
+              {
+                kind: 'proto',
+                prototypeId: 'brutalist-dialog-close',
+                children: [{ kind: 'proto', prototypeId: 'brutalist-button', children: ['Close'] }],
+              },
             ],
           },
           { kind: 'proto', prototypeId: 'brutalist-dialog-close-icon' },

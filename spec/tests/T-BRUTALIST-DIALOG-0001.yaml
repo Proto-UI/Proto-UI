@@ -57,11 +57,12 @@ cases:
       - P-BRUTALIST-DIALOG-DESCRIPTION-VISUAL-GRAMMAR
     expectation: p-brutalist-dialog-description-typography
   - id: T-BRUTALIST-DIALOG-0001-CASE-7
-    title: Close bare entry and Base inheritance
+    title: Close entry, Base inheritance, and composed control surface
     covers:
       - P-BRUTALIST-DIALOG-CLOSE-ENTRY
       - P-BRUTALIST-DIALOG-CLOSE-BASE-INHERITANCE
-    expectation: p-brutalist-dialog-close-entry-inheritance
+      - P-BRUTALIST-DIALOG-CLOSE-COMPOSITION
+    expectation: p-brutalist-dialog-close-entry-inheritance-and-single-owner-composition
   - id: T-BRUTALIST-DIALOG-0001-CASE-8
     title: Close-icon canary pair, a11y Close name and interaction
     covers:

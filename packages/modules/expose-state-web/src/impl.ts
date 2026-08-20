@@ -1,11 +1,14 @@
 // packages/modules/expose-state-web/src/impl.ts
-import type { CapsVaultView, MountPhase, ProtoPhase } from '@proto.ui/core';
+import type { CapsVaultView, MountPhase } from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import type { ModuleDeps } from '@proto.ui/module-base';
 import type { StateSpec } from '@proto.ui/types';
 
 import type { ExposeStatePort } from '@proto.ui/module-expose-state';
-import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
+import {
+  isExposeStateExternalHandle,
+  type ExposeStateExternalHandle,
+} from '@proto.ui/module-expose-state';
 
 import {
   EXPOSE_STATE_WEB_MAP_CAP,
@@ -25,17 +28,6 @@ type Binding = {
   kind?: StateSpec['kind'];
   stateId?: string;
 };
-
-function isExternalStateHandle(x: any): x is ExposeStateExternalHandle<any> {
-  return (
-    !!x &&
-    typeof x === 'object' &&
-    typeof x.get === 'function' &&
-    typeof x.subscribe === 'function' &&
-    typeof x.unsubscribe === 'function' &&
-    !!x.spec
-  );
-}
 
 export class ExposeStateWebModuleImpl extends ModuleBase {
   private readonly exposeState: ExposeStatePort;
@@ -58,11 +50,6 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
   constructor(caps: CapsVaultView, deps: ModuleDeps) {
     super(caps);
     this.exposeState = deps.requirePort<ExposeStatePort>('expose-state');
-  }
-
-  override onProtoPhase(phase: ProtoPhase): void {
-    super.onProtoPhase(phase);
-    if (phase === 'unmounted') this.dispose();
   }
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
@@ -122,7 +109,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     this.exposedByStateId.clear();
 
     for (const [key, value] of Object.entries(all)) {
-      if (!isExternalStateHandle(value)) continue;
+      if (!isExposeStateExternalHandle(value)) continue;
 
       const spec = value.spec as StateSpec;
       const semantic = (value as any).__stateSemantic || key;

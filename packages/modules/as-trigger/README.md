@@ -13,7 +13,7 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-as-trigger@0.2.0-rc.7
+npm install @proto.ui/module-as-trigger@0.3.0-alpha.0
 ```
 
 ## Internal Structure

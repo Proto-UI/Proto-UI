@@ -307,6 +307,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             setCommitVersion(commitVersionRef.current);
           },
           onAfterUnmount: () => {
+            scopedExposesReaderRef.current.invalidate();
+            invokeInCallbackScopeRef.current = null;
             hostSessionRef.current = null;
             controllerRef.current = null;
             exposesRef.current = {};

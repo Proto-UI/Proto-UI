@@ -186,4 +186,36 @@ describe('collectProtoStyleTokens', () => {
     expect(tokens).toContain('data-[busy]:opacity-50');
     expect(tokens).toContain('data-[busy]:cursor-wait');
   });
+  it('keeps commas inside arbitrary tokens when an array literal is joined', async () => {
+    await writeFile(
+      path.join(dir, 'field.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        '',
+        'const BASE_TOKENS = [',
+        "  'flex',",
+        "  'transition-[color,box-shadow]',",
+        "  'duration-150',",
+        "].join(' ');",
+        '',
+        'const field = definePrototype({',
+        "  name: 'styled-field',",
+        '  setup(def) {',
+        '    def.feedback.style.use(tw(BASE_TOKENS));',
+        '  },',
+        '});',
+        'export default field;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+
+    // The comma belongs to the token, not to the element list, so joining must
+    // not hand the splitter an element boundary it never had.
+    expect(tokens).toContain('transition-[color,box-shadow]');
+    expect(tokens).not.toContain('transition-[color');
+    expect(tokens).not.toContain('box-shadow]');
+    expect(tokens).toContain('flex');
+    expect(tokens).toContain('duration-150');
+  });
 });

@@ -6,13 +6,14 @@ import { ModuleBase } from '@proto.ui/module-base';
 
 import type { EventDispatch, EventInternalCallback } from './types';
 import { EventKernel } from './kernel';
-import type { EventListenerToken, EventTypeV0, ExposeEventSpec } from '@proto.ui/types';
+import type { EventListenerToken, EventTypeV0 } from '@proto.ui/types';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   EVENT_GLOBAL_TARGET_CAP,
   EVENT_ROOT_TARGET_CAP,
-  EVENT_EMIT_CAP,
+  EXPOSE_EVENT_SINK_CAP,
 } from './caps';
+import { eventInvalidArg, eventTargetUnavailable } from './error';
 
 const CORE_EVENT_TYPES = [
   'press.start',
@@ -38,22 +39,6 @@ const OPTIONAL_EVENT_TYPES = [
   'change',
   'context.menu',
 ] as const;
-
-function illegalEventTarget(message: string, detail?: any) {
-  const err = new Error(message) as any;
-  err.name = 'EventTargetUnavailable';
-  err.code = 'EVENT_TARGET_UNAVAILABLE';
-  err.detail = detail;
-  return err as Error;
-}
-
-function illegalEventArg(message: string, detail?: any) {
-  const err = new Error(message) as any;
-  err.name = 'EventInvalidArgument';
-  err.code = 'EVENT_INVALID_ARGUMENT';
-  err.detail = detail;
-  return err as Error;
-}
 
 function isValidEventType(type: any): type is EventTypeV0 {
   if (typeof type !== 'string' || !type) return false;
@@ -82,7 +67,6 @@ export class EventModuleImpl extends ModuleBase {
   private lastDispatch: EventDispatch | null = null;
   private isBound = false;
 
-  private exposedEvents = new Map<string, ExposeEventSpec | undefined>();
   private internalCallbacks = new Map<string, EventInternalCallback>();
 
   constructor(caps: CapsVaultView, prototypeName: string) {
@@ -145,9 +129,9 @@ export class EventModuleImpl extends ModuleBase {
   }
 
   redirectRoot(target: EventTarget) {
-    this.ensureSetup('def.event.redirectRoot');
+    this.ensureSetup('event.port.redirectRoot');
     if (!isEventTargetLike(target)) {
-      throw illegalEventArg(`[Event] redirectRoot() requires an EventTarget-like object.`, {
+      throw eventInvalidArg(`[Event] redirectRoot() requires an EventTarget-like object.`, {
         prototypeName: this.prototypeName,
         target,
       });
@@ -156,9 +140,9 @@ export class EventModuleImpl extends ModuleBase {
   }
 
   redirectSemanticRoot(target: EventTarget) {
-    this.ensureSetup('def.event.redirectSemanticRoot');
+    this.ensureSetup('event.port.redirectSemanticRoot');
     if (!isEventTargetLike(target)) {
-      throw illegalEventArg(`[Event] redirectSemanticRoot() requires an EventTarget-like object.`, {
+      throw eventInvalidArg(`[Event] redirectSemanticRoot() requires an EventTarget-like object.`, {
         prototypeName: this.prototypeName,
         target,
       });
@@ -184,7 +168,7 @@ export class EventModuleImpl extends ModuleBase {
     this.ensureSetup('event.port.on');
     this.guardArgs(type);
     if (typeof cb !== 'function') {
-      throw illegalEventArg(`[Event] internal listener requires a callback.`, {
+      throw eventInvalidArg(`[Event] internal listener requires a callback.`, {
         prototypeName: this.prototypeName,
         type,
       });
@@ -202,7 +186,7 @@ export class EventModuleImpl extends ModuleBase {
     this.ensureSetup('event.port.onGlobal');
     this.guardArgs(type);
     if (typeof cb !== 'function') {
-      throw illegalEventArg(`[Event] internal global listener requires a callback.`, {
+      throw eventInvalidArg(`[Event] internal global listener requires a callback.`, {
         prototypeName: this.prototypeName,
         type,
       });
@@ -216,54 +200,13 @@ export class EventModuleImpl extends ModuleBase {
     this.ensureSetup('def.event.off');
     const id = (token as any)?.id;
     if (typeof id !== 'string' || !id) {
-      throw illegalEventArg(`[Event] invalid token.`, {
+      throw eventInvalidArg(`[Event] invalid token.`, {
         prototypeName: this.prototypeName,
         token,
       });
     }
     this.internalCallbacks.delete(id);
     this.kernel.offById(id);
-  }
-
-  registerExposeEvent(key: string, spec?: ExposeEventSpec) {
-    this.ensureSetup('def.expose.event');
-    if (typeof key !== 'string' || !key) {
-      throw illegalEventArg(`[Event] expose.event requires a non-empty string key.`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    if (this.exposedEvents.has(key)) {
-      throw illegalEventArg(`[Event] duplicate expose.event key: ${key}`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    this.exposedEvents.set(key, spec);
-  }
-
-  emit(key: string, payload?: any, options?: Record<string, unknown>) {
-    this.ensureRuntime('rt.expose.emit');
-    if (typeof key !== 'string' || !key) {
-      throw illegalEventArg(`[Event] emit requires a non-empty string key.`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    if (!this.exposedEvents.has(key)) {
-      throw illegalEventArg(`[Event] emit for unregistered expose.event key: ${key}`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    if (!this.caps.has(EVENT_EMIT_CAP)) return;
-    const sink = this.caps.get(EVENT_EMIT_CAP);
-    if (!sink) return;
-    try {
-      sink(key, payload, options);
-    } catch {
-      // v0: ignore host errors to keep module stable
-    }
   }
 
   // -------------------------
@@ -287,11 +230,11 @@ export class EventModuleImpl extends ModuleBase {
       ? this.caps.get(EVENT_GLOBAL_TARGET_CAP)
       : undefined;
 
-    const root = rootGetter?.() ?? null;
+    const root = needsRoot ? (rootGetter?.() ?? null) : null;
 
     const global = needsGlobal ? (globalGetter?.() ?? null) : null;
     if (needsGlobal && !global) {
-      throw illegalEventTarget(`[Event] global target unavailable during bind().`, {
+      throw eventTargetUnavailable(`[Event] global target unavailable during bind().`, {
         prototypeName: this.prototypeName,
       });
     }
@@ -305,7 +248,7 @@ export class EventModuleImpl extends ModuleBase {
         (String(type).startsWith('host:') ? null : this.overriddenSemanticRootTarget) ??
         root;
       if (!target) {
-        throw illegalEventTarget(`[Event] root target unavailable during bind().`, {
+        throw eventTargetUnavailable(`[Event] root target unavailable during bind().`, {
           prototypeName: this.prototypeName,
           type,
         });
@@ -370,12 +313,19 @@ export class EventModuleImpl extends ModuleBase {
       this.lastDispatch = null;
       this.isBound = false;
       this.overriddenRootTarget = null;
-      this.exposedEvents.clear();
+      this.overriddenSemanticRootTarget = null;
       this.internalCallbacks.clear();
     }
   }
 
   protected override onCapsEpoch(_epoch: number): void {
+    if (this.caps.has(EXPOSE_EVENT_SINK_CAP)) {
+      throw eventInvalidArg(
+        `[Event] EXPOSE_EVENT_SINK_CAP must be wired to the expose-event module, not event.`,
+        { prototypeName: this.prototypeName, targetModule: 'expose-event' }
+      );
+    }
+
     // Targets might change. If already bound and we have a dispatch,
     // rebind immediately to avoid stale listeners.
     if (!this.isBound) return;
@@ -393,7 +343,7 @@ export class EventModuleImpl extends ModuleBase {
 
   private guardArgs(type: EventTypeV0) {
     if (!isValidEventType(type)) {
-      throw illegalEventArg(`[Event] invalid event type: ${String(type)}`, {
+      throw eventInvalidArg(`[Event] invalid event type: ${String(type)}`, {
         prototypeName: this.prototypeName,
         type,
       });

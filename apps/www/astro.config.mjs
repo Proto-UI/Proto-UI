@@ -66,17 +66,29 @@ const inProgressBadge = {
   class:
     'text-xs px-1.5 h-4.5 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100',
 };
-const prereleaseBadge = {
-  text: 'RC',
-  class:
-    'text-xs px-1.5 h-4.5 rounded-full bg-violet-100 text-violet-900 dark:bg-violet-900 dark:text-violet-100',
-};
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.proto-ui.com',
+  redirects: {
+    '/en/prototypes/shadcn/dialog': '/en/ui-libraries/shadcn/dialog/',
+    '/zh-cn/prototypes/shadcn/dialog': '/zh-cn/ui-libraries/shadcn/dialog/',
+  },
   integrations: [
     starlight({
       title: 'Proto UI',
+      expressiveCode: {
+        styleOverrides: {
+          borderRadius: 'calc(0.75rem - 1px)',
+          borderColor: 'var(--color-border)',
+          codeFontSize: '0.8125rem',
+          codeLineHeight: '1.5rem',
+          codeBackground: 'var(--color-muted)',
+          frames: {
+            editorBackground: 'var(--color-muted)',
+            terminalBackground: 'var(--color-muted)',
+          },
+        },
+      },
 
       defaultLocale: 'zh-cn',
       locales: {
@@ -90,6 +102,10 @@ export default defineConfig({
         },
       },
       head: [
+        {
+          tag: 'style',
+          content: '@layer base, starlight, components, utilities;',
+        },
         // 双 theme-color
         {
           tag: 'script',
@@ -153,15 +169,6 @@ export default defineConfig({
                 'zh-CN': '快速开始',
               },
               slug: 'start-here/quick-start',
-            },
-            {
-              label: '0.2 RC 试用',
-              translations: {
-                en: '0.2 RC Trial',
-                'zh-CN': '0.2 RC 试用',
-              },
-              slug: 'start-here/rc-trial',
-              badge: prereleaseBadge,
             },
           ],
         },
@@ -233,6 +240,26 @@ export default defineConfig({
                   slug: 'ui-libraries/base',
                 },
                 {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/base/button',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/base/toggle',
+                },
+                {
+                  label: 'Switch',
+                  translations: { en: 'Switch', 'zh-CN': 'Switch' },
+                  slug: 'ui-libraries/base/switch',
+                },
+                {
+                  label: 'Tabs',
+                  translations: { en: 'Tabs', 'zh-CN': 'Tabs' },
+                  slug: 'ui-libraries/base/tabs',
+                },
+                {
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/base/hover-card',
@@ -246,6 +273,11 @@ export default defineConfig({
                   label: 'Dialog',
                   translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
                   slug: 'ui-libraries/base/dialog',
+                },
+                {
+                  label: 'Dropdown Menu',
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
+                  slug: 'ui-libraries/base/dropdown-menu',
                 },
                 {
                   label: 'Transition',
@@ -266,6 +298,16 @@ export default defineConfig({
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/base/separator',
+                },
+                {
+                  label: 'Scroll Area',
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/base/scroll-area',
                 },
                 {
                   label: 'Live Region',
@@ -294,6 +336,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/button',
                 },
                 {
+                  label: 'Dialog',
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/shadcn/dialog',
+                },
+                {
                   label: 'Dropdown Menu',
                   translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
                   slug: 'ui-libraries/shadcn/dropdown-menu',
@@ -304,6 +351,16 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/hover-card',
                 },
                 {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/shadcn/select',
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/shadcn/separator',
+                },
+                {
                   label: 'Switch',
                   translations: { en: 'Switch', 'zh-CN': 'Switch' },
                   slug: 'ui-libraries/shadcn/switch',
@@ -312,6 +369,11 @@ export default defineConfig({
                   label: 'Tabs',
                   translations: { en: 'Tabs', 'zh-CN': 'Tabs' },
                   slug: 'ui-libraries/shadcn/tabs',
+                },
+                {
+                  label: 'Textarea',
+                  translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
+                  slug: 'ui-libraries/shadcn/textarea',
                 },
                 {
                   label: 'Toggle',
@@ -443,6 +505,30 @@ export default defineConfig({
                   slug: 'build/prototypes',
                 },
                 {
+                  label: 'Maintaining an Existing Prototype',
+                  translations: {
+                    en: 'Maintaining an Existing Prototype',
+                    'zh-CN': '维护已有 Prototype',
+                  },
+                  slug: 'build/prototypes/maintaining-an-existing-prototype',
+                },
+                {
+                  label: 'Projecting Base into a Design Language',
+                  translations: {
+                    en: 'Projecting Base into a Design Language',
+                    'zh-CN': '从 Base 投射风格化 Prototype',
+                  },
+                  slug: 'build/prototypes/projecting-base-into-a-design-language',
+                },
+                {
+                  label: 'Implementing an Approved Base Slice',
+                  translations: {
+                    en: 'Implementing an Approved Base Slice',
+                    'zh-CN': '实现已批准的 Base Slice',
+                  },
+                  slug: 'build/prototypes/implementing-an-approved-base-slice',
+                },
+                {
                   label: 'When Not To Write A New Prototype',
                   translations: {
                     en: 'When Not To Write A New Prototype',
@@ -490,7 +576,6 @@ export default defineConfig({
               label: 'Runtime Architecture',
               translations: { en: 'Runtime Architecture', 'zh-CN': 'Runtime 架构' },
               slug: 'build/runtime-architecture',
-              badge: inProgressBadge,
             },
             {
               label: 'Adapter Guide',
@@ -502,25 +587,21 @@ export default defineConfig({
               label: 'Compiler Guide',
               translations: { en: 'Compiler Guide', 'zh-CN': 'Compiler 指南' },
               slug: 'build/compiler-guide',
-              badge: inProgressBadge,
             },
             {
               label: 'Host Caps',
               translations: { en: 'Host Caps', 'zh-CN': 'Host Caps' },
               slug: 'build/host-caps',
-              badge: inProgressBadge,
             },
             {
               label: 'Module & Extension Architecture',
               translations: { en: 'Module & Extension Architecture', 'zh-CN': '模块与扩展架构' },
               slug: 'build/module-extension-architecture',
-              badge: inProgressBadge,
             },
             {
               label: 'Contracts & Tests',
               translations: { en: 'Contracts & Tests', 'zh-CN': '契约与测试' },
               slug: 'build/contracts-and-tests',
-              badge: inProgressBadge,
             },
             {
               label: 'Contribute',
@@ -537,13 +618,11 @@ export default defineConfig({
               label: 'Introduction',
               translations: { en: 'Introduction', 'zh-CN': '规范导读' },
               slug: 'specifications/introduction',
-              badge: inProgressBadge,
             },
             {
               label: 'Core',
               translations: { en: 'Core', 'zh-CN': '核心' },
               slug: 'specifications/core',
-              badge: inProgressBadge,
             },
             {
               label: 'Lifecycle',
@@ -623,13 +702,11 @@ export default defineConfig({
               label: 'Prototype API',
               translations: { en: 'Prototype API', 'zh-CN': 'Prototype API' },
               slug: 'reference/prototype-api',
-              badge: inProgressBadge,
             },
             {
               label: 'Compatibility',
               translations: { en: 'Compatibility', 'zh-CN': '兼容性' },
               slug: 'reference/compatibility',
-              badge: inProgressBadge,
             },
           ],
         },
@@ -711,6 +788,7 @@ export default defineConfig({
         '@proto.ui/module-props',
         '@proto.ui/module-event',
         '@proto.ui/module-expose',
+        '@proto.ui/module-expose-event',
         '@proto.ui/module-expose-state-web',
         '@proto.ui/module-rule-expose-state-web',
         '@proto.ui/module-rule-meta',

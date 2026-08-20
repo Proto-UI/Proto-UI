@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/prototypes-brutalist",
-  "version": "0.2.0-rc.7",
+  "version": "0.3.0-alpha.0",
   "private": false,
   "type": "module",
   "sideEffects": false,
@@ -13,6 +13,7 @@
   "devDependencies": {
     "@proto.ui/module-as-trigger": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
     "@proto.ui/runtime": "workspace:*",
     "@proto.ui/adapter-web-component": "workspace:*",
@@ -23,6 +24,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "import": "./dist/theme.js",
+      "default": "./dist/theme.js"
     },
     "./button": {
       "types": "./dist/button/index.d.ts",

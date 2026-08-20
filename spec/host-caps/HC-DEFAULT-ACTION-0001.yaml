@@ -30,7 +30,26 @@ relates:
   contracts:
     - C-EVENT-TYPE-0002
     - C-FOCUS-0001
+  modules:
+    - M-EVENT-0001
+verifies:
+  tests:
+    - T-EVENT-0001
+    - id: T-EVENT-0003
+      since: 0.2.0-rc.7
+sources:
+  - path: internal/records/2026-08-14-event-module-host-cap-adapter-audit.zh-CN.md
+  - path: packages/modules/event/src/caps.ts
+  - path: packages/modules/event/src/impl.ts
+  - path: packages/adapters/base/src/events/web-default-action.ts
+  - path: packages/adapters/base/test/contract/event-default-action.v0.contract.test.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Connected the capability to the Event privileged port, official Web Adapter projections, and Event Module conformance evidence.
   - version: 0.1.0
     change: introduced
     summary: Drafted default-action cancellation as a host capability.

@@ -67,6 +67,14 @@ implementations:
     consumesCases:
       - T-STATE-0004-CASE-LIFECYCLE-ALIVE
       - T-STATE-0004-CASE-DISCONNECT-CLEANUP
+  - id: runtime-state-repeatable-lifecycle-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/state-lifecycle.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0004-CASE-DISCONNECT-CLEANUP
+      - T-STATE-0004-CASE-LIFECYCLE-ALIVE
 verifies:
   contracts:
     - id: C-STATE-0004
@@ -99,6 +107,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Exercises watch callbacks as state-change records that do not themselves schedule render or update.
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added direct evidence that State values and watchers survive repeatable detach and disconnect only on terminal disposal.
   - version: 0.1.0
     change: introduced
     summary: Added state watch, StateEvent, and lifecycle test mapping.

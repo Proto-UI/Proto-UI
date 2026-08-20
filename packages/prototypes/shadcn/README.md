@@ -22,7 +22,7 @@ Prototype library package intended to be consumed together with Proto UI adapter
 ## Install
 
 ```bash
-npm install @proto.ui/prototypes-shadcn@0.2.0-rc.7
+npm install @proto.ui/prototypes-shadcn@0.3.0-alpha.0
 ```
 
 ## Family Imports

@@ -24,6 +24,7 @@ describe('adapter-react: expose event bridge', () => {
 
     expect(onCheckedChange).toHaveBeenCalledTimes(1);
     expect(onCheckedChange).toHaveBeenCalledWith({ checked: true });
+    expect(mounted.ref.current.getExposes()).not.toHaveProperty('checkedChange');
 
     mounted.unmount();
   });

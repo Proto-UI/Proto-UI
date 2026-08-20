@@ -2,7 +2,7 @@ const HELP_TEXT = `proto-ui
 
 Usage:
   proto-ui [--help|-h|help]
-  proto-ui init [--root-dir <dir>] [--styles-dir <dir>] [--no-styles] [--no-interactive] [--yes|-y]
+  proto-ui init [--prototypes <shadcn|brutalist>] [--root-dir <dir>] [--styles-dir <dir>] [--no-styles] [--no-interactive] [--yes|-y]
   proto-ui add <host> <component> [--root-dir <dir>] [--no-install] [--no-interactive]
 
 Core commands:
@@ -18,6 +18,7 @@ Style commands:
 Examples:
   proto-ui init
   proto-ui init --no-styles
+  proto-ui init --prototypes brutalist
   proto-ui add react shadcn-button
   proto-ui add wc shadcn-button --no-install
 `;
@@ -26,17 +27,19 @@ const COMMAND_HELP: Record<string, string> = {
   init: `proto-ui init
 
 Usage:
-  proto-ui init [--root-dir <dir>] [--styles-dir <dir>] [--no-styles] [--no-tailwind] [--no-interactive] [--yes|-y]
+  proto-ui init [--prototypes <shadcn|brutalist>] [--root-dir <dir>] [--styles-dir <dir>] [--no-styles] [--no-tailwind] [--no-interactive] [--yes|-y]
 
 Behavior:
   - creates ./proto-ui by default
   - writes proto-ui/config.json
   - creates proto-ui/components, proto-ui/adapters, proto-ui/prototypes
   - generates style preset files unless disabled
+  - configures one project-wide style preset (default: shadcn)
 
 Options:
   --root-dir <dir>        Custom Proto UI workspace root (default: ./proto-ui)
   --styles-dir <dir>      Where style preset files are written (default: ./src/styles)
+  --prototypes <preset>   Project-wide style preset: shadcn or brutalist
   --no-styles             Skip style preset generation
   --no-tailwind           Alias of --no-styles
   --no-interactive        Never prompt
@@ -58,6 +61,9 @@ Behavior:
   - installs Proto UI adapter/prototype packages unless --no-install is used
   - generates proto-ui/components/<host>/index.ts
   - updates proto-ui/components/index.ts
+  - when styles are enabled, rejects components that require a different project-wide preset
+  - with --no-styles, reports that the application owns the required semantic tokens
+  - never replaces the configured style preset automatically
 `,
 };
 

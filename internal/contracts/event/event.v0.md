@@ -104,7 +104,9 @@ cb(run, ev) => void
 Where:
 
 - `run` is the runtime handle (**always the first argument**)
-- `ev` is the host- or platform-provided event object
+- `ev` is the Event payload; its portable guarantees come from the cataloged Event contracts
+
+Native host event objects, concrete targets, and host control methods MAY be carried as host-local escape hatches, but Component Authors MUST NOT treat them as portable payload guarantees.
 
 #### Layering Constraint (Normative)
 

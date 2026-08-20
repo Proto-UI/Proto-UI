@@ -132,8 +132,9 @@ class ProtoConceptElement extends HTMLElement {
       if (!this.contains(event.target as Node)) setPinned(false);
     };
     const onKeydown = (event: KeyboardEvent) => {
-      if (signal.aborted) return;
-      if (event.key === 'Escape') setPinned(false);
+      if (signal.aborted || event.key !== 'Escape') return;
+      this.dataset.hovering = 'false';
+      setPinned(false);
     };
 
     document.addEventListener('click', onDocClick, { signal });

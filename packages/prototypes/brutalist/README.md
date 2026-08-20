@@ -2,7 +2,7 @@
 
 Contributor-authored Neo-Brutalist Proto UI style library.
 
-> **Release status:** public `0.2.0-rc.7` draft release candidate in the 40-package rc.7 BOM. The npm bootstrap identity exists, but rc.7 is not installable until the release rehearsal and publication complete.
+> **Release status:** public `0.2.0-rc.7` package published on npm under `next`. The stable `0.2.0` release train is under review and is not installable until publication completes.
 
 ## Purpose
 
@@ -10,9 +10,9 @@ Provides a Proto UI design-language foundation: square geometry, strong structur
 
 This package is not owned by or claimed to be compatible with a named third-party component system. It uses only general Neo-Brutalist visual references.
 
-## Current workspace scope
+## Published rc.7 scope
 
-The rc.7 release-candidate package includes:
+The published rc.7 package and the prepared 0.2.0 stable package include:
 
 - shared Brutalist style tokens, light/dark theme grammar, and the CLI style preset;
 - Button as the reference family;
@@ -23,7 +23,23 @@ The rc.7 release-candidate package includes:
 
 Brutalist Skeleton is passive, contentless, and excluded from the accessibility tree. The consuming async/loading region—not Skeleton—owns busy state, announcements, content replacement timing, and focus continuity.
 
-Only families present in this package's exports and CLI registry are in the rc.7 release scope; draft PR #323 remains incubation history rather than a second release surface.
+Only families present in this package's exports and CLI registry are in the 0.2.0 release scope; draft PR #323 remains incubation history rather than a second release surface.
+
+## Theme preset
+
+`BRUTALIST_THEME` is the canonical Light/Dark semantic-color manifest. Both modes expose the same keys and explicit background/foreground pairs. `renderBrutalistThemeCss()` projects that manifest for package consumers; the CLI carries a checked generated copy so initialization also works before this package is installed.
+
+```ts
+import { BRUTALIST_THEME, renderBrutalistThemeCss } from '@proto.ui/prototypes-brutalist/theme';
+```
+
+Initialize a project with the matching project-wide preset:
+
+```sh
+proto-ui init --prototypes brutalist
+```
+
+Config v1 supports one enabled style preset. `proto-ui add` rejects a Brutalist component when another preset is enabled rather than silently replacing the application's theme. `--no-styles` remains an explicit consumer-owned styling mode; in that mode `add` succeeds with a note and the application must provide every required `--pui-*` semantic token.
 
 ## Button public API
 
@@ -58,7 +74,7 @@ import { brutalistTextareaRoot } from '@proto.ui/prototypes-brutalist/textarea';
 
 ## Maintenance
 
-The package is admitted to the rc.7 launch-commitment set. Long-term family ownership and later semantic changes remain subject to Proto UI governance.
+The package is admitted to the 0.2 launch-commitment set. Long-term family ownership and later semantic changes remain subject to Proto UI governance.
 
 ## Related packages
 

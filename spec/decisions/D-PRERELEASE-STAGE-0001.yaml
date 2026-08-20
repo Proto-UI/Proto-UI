@@ -1,0 +1,43 @@
+id: D-PRERELEASE-STAGE-0001
+type: decision
+title: Prerelease suffixes express stabilization stage
+status: draft
+since: 0.3.0-alpha.0
+summary: Proto UI uses alpha for architecture and API exploration, beta for stabilization after scope convergence, and rc only for builds believed ready to become the corresponding stable release.
+statement:
+  zh-CN: >-
+    Proto UI 的 prerelease suffix 必须表达 release train 的稳定化阶段，而不是泛化的内部版本编号。`alpha` 阶段允许经过评审的架构调整、顶层 API 变化与新特性进入；`beta` 只在核心范围与主要 API 收敛后开启，重点转向集成、兼容与缺陷修复；`rc` 只用于维护者认为可直接晋升为对应 stable 的候选版本，不得仍预定架构重构或顶层 breaking API 调整。每个数字版本仍由独立 V 实体、全局精确 package 版本与 release evidence 治理。
+
+  en: >-
+    Proto UI prerelease suffixes must communicate a release train's stabilization stage rather than act as generic internal build numbers. The `alpha` stage admits reviewed architecture changes, top-level API changes, and new features; `beta` begins only after the core scope and major APIs converge and shifts attention toward integration, compatibility, and defect correction; `rc` is reserved for a build maintainers believe can be promoted directly to the corresponding stable release and must not carry planned architectural rewrites or top-level breaking API changes. Every numeric version remains governed by its own V entity, globally exact package versions, and release evidence.
+
+criteria:
+  - id: D-PRERELEASE-STAGE-0001-ALPHA
+    text:
+      zh-CN: Alpha 可以包含经过评审的架构、顶层 API 与 feature 变化；其存在不得被解释为 feature freeze、API freeze 或 stable compatibility 承诺。
+      en: Alpha may contain reviewed architectural, top-level API, and feature changes and must not be interpreted as a feature freeze, API freeze, or stable compatibility promise.
+  - id: D-PRERELEASE-STAGE-0001-BETA
+    text:
+      zh-CN: Beta 只能在核心范围与主要 API 已收敛后开启；新增 breaking change 必须重新评估是否退回 alpha，而不能把 beta 当作继续探索的普通编号。
+      en: Beta may begin only after core scope and major APIs have converged; a new breaking change must trigger an explicit assessment of whether the train returns to alpha rather than treating beta as another exploration counter.
+  - id: D-PRERELEASE-STAGE-0001-RC
+    text:
+      zh-CN: Release candidate 必须是维护者认为满足当前 stable scope、只待最终验证或 blocker 修复的候选；仍计划架构调整、顶层 API 变化或新增核心 feature 时不得使用 rc。
+      en: A release candidate must be believed to satisfy the current stable scope and await only final verification or blocker fixes; rc must not be used while architectural changes, top-level API changes, or new core features remain planned.
+  - id: D-PRERELEASE-STAGE-0001-IDENTITY
+    text:
+      zh-CN: Alpha、beta 与 rc 均不替代 V 实体或 global exact-version policy；每个发布的 prerelease 仍必须拥有精确版本、完整 package set、tag、dist-tag 与 snapshot evidence。
+      en: Alpha, beta, and rc do not replace V entities or the global exact-version policy; every published prerelease still requires an exact version, complete package set, tag, dist-tag, and snapshot evidence.
+relates:
+  decisions:
+    - D-GLOBAL-RELEASE-VERSION-0001
+sources:
+  - path: internal/governance/release-workflow.md
+  - path: internal/governance/release-workflow.zh-CN.md
+  - path: internal/records/2026-08-16-0.3.0-alpha.0-release-train.zh-CN.md
+openQuestions: []
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Replaced the prior generic use of rc with explicit alpha, beta, and release-candidate stabilization semantics for the 0.3 train and later releases.
+tags: [release, prerelease, alpha, beta, release-candidate, governance]

@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Toggle'
-description: 'Pressed Neo-Brutalist Toggle projection over Base Toggle'
+description: 'Persistent-state Neo-Brutalist Toggle projection over Base Toggle'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,8 +8,8 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-Toggle keeps Base pressed-state semantics and projects the Brutalist hard-surface treatment.
+Toggle keeps Base activation and `aria-pressed` ownership. Its latched active state adds a persistent inset ink frame as a non-color signal; transient pointer press still uses the separate translate-and-release feedback.
 
-<div style="--pui-radius:0;--pui-background:#f4f1ea;--pui-secondary-background:#ffffff;--pui-foreground:#000000;--pui-border:#000000;background:#f4f1ea;color:#000;border:2px solid var(--pui-foreground);box-shadow:3px 3px 0 0 var(--pui-foreground);padding:1rem;">
+<div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
 </div>

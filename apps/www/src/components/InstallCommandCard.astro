@@ -212,14 +212,8 @@ const activeManager =
     border: 1px solid var(--color-border);
     border-radius: 1.5rem;
     overflow: hidden;
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklch, var(--color-muted) 42%, var(--color-background) 58%),
-      color-mix(in oklch, var(--color-muted) 68%, var(--color-background) 32%)
-    );
-    box-shadow:
-      0 1px 0 color-mix(in oklch, var(--color-foreground) 4%, transparent),
-      inset 0 1px 0 color-mix(in oklch, white 35%, transparent);
+    background: color-mix(in oklch, var(--color-muted) 55%, var(--color-background) 45%);
+    box-shadow: 0 1px 0 color-mix(in oklch, var(--color-foreground) 4%, transparent);
   }
 
   .install-command-card__toolbar {
@@ -323,14 +317,7 @@ const activeManager =
   }
 
   :global([data-theme='dark']) .install-command-card {
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklch, var(--color-muted) 24%, #080808 76%),
-      color-mix(in oklch, var(--color-muted) 14%, #111111 86%)
-    );
-    box-shadow:
-      0 1px 0 color-mix(in oklch, white 3%, transparent),
-      inset 0 1px 0 color-mix(in oklch, white 4%, transparent);
+    box-shadow: 0 1px 0 color-mix(in oklch, white 3%, transparent);
   }
 
   :global([data-theme='dark']) .install-command-card__prompt {

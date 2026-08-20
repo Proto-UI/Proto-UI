@@ -153,6 +153,8 @@ const labels =
     z-index: 35;
     display: grid;
     gap: 0.7rem;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-wrap: anywhere;
     width: min(29rem, calc(100vw - 2rem));
     border: 1px solid color-mix(in oklab, var(--color-border) 86%, transparent);
     border-radius: 0.5rem;
@@ -182,6 +184,10 @@ const labels =
     translate: -50% 0;
   }
 
+  .spec-contract-preview__panel > * {
+    min-width: 0;
+  }
+
   .spec-contract-preview__eyebrow,
   .spec-contract-preview__label,
   .spec-contract-preview__meta span,
@@ -206,6 +212,10 @@ const labels =
     color: var(--color-muted-foreground);
     font-size: 0.84rem;
     line-height: 1.55;
+  }
+
+  .spec-contract-preview__source code {
+    overflow-wrap: anywhere;
   }
 
   .spec-contract-preview__panel p {

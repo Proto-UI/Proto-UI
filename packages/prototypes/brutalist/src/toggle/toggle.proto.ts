@@ -28,6 +28,9 @@ const SIZE_TOKENS: Record<BrutalistToggleSize, string> = {
   lg: `${BRUTALIST_CONTROL_TOKENS} h-12 min-w-12 px-4 text-base`,
 };
 
+const ACTIVE_FRAME_TOKENS = 'shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]';
+const ACTIVE_PRESSED_FRAME_TOKENS = 'shadow-[inset_0_0_0_2px_#000]';
+
 const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
   // P-BRUTALIST-TOGGLE-ENTRY
   name: 'brutalist-toggle',
@@ -64,15 +67,26 @@ const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
       when: (w) => w.state(active).eq(true),
       intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
     });
+    // P-BRUTALIST-TOGGLE-ACTIVE-SIGNAL — an inset frame persists independently of color.
+    def.rule({
+      when: (w) => w.all(w.state(active).eq(true), w.state(pressed).eq(false)),
+      intent: (i) => i.feedback.style.use(tw(ACTIVE_FRAME_TOKENS)),
+    });
     // P-BRUTALIST-TOGGLE-INTERACTION — hover lift (non-active)
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.state(active).eq(false)),
+      when: (w) =>
+        w.all(w.state(hovered).eq(true), w.state(active).eq(false), w.state(pressed).eq(false)),
       intent: (i) => i.feedback.style.use(tw(BRUTALIST_HOVER_LIFT_TOKENS)),
     });
     // P-BRUTALIST-TOGGLE-INTERACTION — press
     def.rule({
       when: (w) => w.state(pressed).eq(true),
       intent: (i) => i.feedback.style.use(tw(BRUTALIST_PRESS_TOKENS)),
+    });
+    // Keep the active inset marker while pressed; only the outer elevation collapses.
+    def.rule({
+      when: (w) => w.all(w.state(active).eq(true), w.state(pressed).eq(true)),
+      intent: (i) => i.feedback.style.use(tw(ACTIVE_PRESSED_FRAME_TOKENS)),
     });
     // P-BRUTALIST-TOGGLE-INTERACTION — focus-visible
     def.rule({

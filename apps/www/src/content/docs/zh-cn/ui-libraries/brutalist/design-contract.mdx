@@ -21,17 +21,25 @@ description: '贡献者原创 Brutalist 风格族使用的视觉语法'
 | 悬停 | `-1px, -1px` | `4px 4px` |
 | 按下 | `1px, 1px`   | 无        |
 
+持续 active state 不等于瞬时 press feedback。Toggle 在 active 时保留外部 `3px 3px` 高度并增加 2px inset ink frame；按下时保留该 inset frame、平移控件，并只清除外部高度直到释放。Inset frame 使用 box shadow，因此状态变化不会改变布局几何。
+
 ## 配色
 
-基础色为 paper/ink。平涂强调色承担语义：金丝雀黄用于明确动作、薄荷绿用于确认、薰衣草紫用于 focus 或批注、珊瑚红用于警示与按压、天空蓝用于发现或选中轨道。禁止渐变、玻璃、模糊和柔光。
+基础色为 paper/ink。平涂强调色承担语义：金丝雀黄用于明确动作、薄荷绿用于确认、薰衣草紫用于批注、珊瑚红用于警示与按压、天空蓝用于发现或选中轨道。禁止渐变、玻璃、模糊和柔光。
 
 位置、标签、几何和状态是主要信号；颜色只是辅助。
 
 每一种强调填充都以固定的背景/前景色对交付（例如 `bg-main` 配 `text-main-foreground`）。强调前景在 Light 与 Dark 下都保持墨色。纸面等主题相关表面通过 CSS 变量解析，使宿主主题切换时已挂载控件无需指针交互即可重绘。
 
+## Preset 交付
+
+Package-owned `BRUTALIST_THEME` manifest 是 Light 与 Dark semantic values 的 authoring source。文档页面与 CLI preset 消费同一完整 key set 的 generated projection；示例不再维护局部 palette subset。
+
+Proto UI config v1 只启用一个项目级 style preset。Brutalist 项目应使用 `proto-ui init --prototypes brutalist` 初始化。若项目已启用另一 preset，添加 Brutalist component 会在安装或修改 generated files 前失败；CLI 不会自动替换应用主题。使用 `--no-styles` 时，`add` 会成功并给出 ownership note，应用显式提供全部必需的 `--pui-*` semantic tokens。
+
 ## 无障碍
 
-- Focus 使用有偏移的硬轮廓。
+- Focus 使用有偏移的可见硬轮廓。主题 `ring` 在每个模式中解析为 foreground color，并与页面及面板背景都保持至少 3:1 对比度；当 Tabs panel 作为 fallback entry target 时，保留浏览器原生 focus-visible outline 而不抑制它。
 - Disabled 保留边框和结构，同时降低强调。
 - 交互目标保留可访问名称和 Base 键盘行为。
 - Portal surface 继承页面级主题变量。

@@ -14,6 +14,7 @@ import {
   dialogTitle,
   dialogTrigger,
 } from '../src/dialog';
+import { brutalistButton } from '../src/button';
 import type {
   BrutalistDialogContentExposes,
   BrutalistDialogContentProps,
@@ -48,6 +49,7 @@ for (const prototype of [
 ]) {
   AdaptToWebComponent(prototype);
 }
+AdaptToWebComponent(brutalistButton);
 
 async function flush(): Promise<void> {
   for (let index = 0; index < 4; index += 1) await Promise.resolve();
@@ -319,11 +321,14 @@ describe('prototypes/brutalist: dialog', () => {
       'border-2',
       'border-black',
       'bg-canary',
-      'text-foreground',
+      'text-canary-foreground',
       'shadow-[3px_3px_0_0_#000]',
     ]) {
       expect(styleContains(closeIcon, token)).toBe(true);
     }
+    // Canary is a fixed accent, so the glyph takes its paired foreground; the
+    // theme-global one flips to near-white and disappears on the yellow square.
+    expect(styleContains(closeIcon, 'text-foreground')).toBe(false);
     expect(
       Array.from(closeIcon.querySelectorAll('path')).map((path) => path.getAttribute('d'))
     ).toEqual(['M18 6 6 18', 'm6 6 12 12']);
@@ -331,6 +336,7 @@ describe('prototypes/brutalist: dialog', () => {
     await flush();
     expect(closeIcon.getExposes().hovered.get()).toBe(true);
     expect(styleContains(closeIcon, 'data-[hovered]:bg-coral')).toBe(true);
+    expect(styleContains(closeIcon, 'data-[hovered]:text-coral-foreground')).toBe(true);
     expect(styleContains(closeIcon, 'data-[hovered]:shadow-[4px_4px_0_0_#000]')).toBe(true);
 
     setElementProps(closeIcon, { disabled: true });
@@ -365,20 +371,16 @@ describe('prototypes/brutalist: dialog', () => {
     expect(dialogHeader.name).toBe('brutalist-dialog-header');
     expect(header.contains(title)).toBe(true);
     expect(header.contains(description)).toBe(true);
-    for (const token of [
-      'grid',
-      'gap-1',
-      'border-b-2',
-      'brutalist-border-bottom-black',
-      'pb-3',
-      'text-left',
-    ]) {
+    for (const token of ['grid', 'gap-1', 'border-b-2', 'border-foreground', 'pb-3', 'text-left']) {
       expect(
         styleContains(header, token),
         `${token} :: ${header.getAttribute('data-pui-style')}`
       ).toBe(true);
     }
     expect(styleContains(header, 'border-black')).toBe(false);
+    // Section separators resolve the theme foreground, so a theme change
+    // repaints them with the panel instead of leaving fixed black.
+    expect(styleContains(header, 'brutalist-border-bottom-black')).toBe(false);
 
     expect(dialogFooter.name).toBe('brutalist-dialog-footer');
     expect(footer.contains(close)).toBe(true);
@@ -387,12 +389,42 @@ describe('prototypes/brutalist: dialog', () => {
       'flex-col-reverse',
       'gap-2',
       'border-t-2',
-      'brutalist-border-top-black',
+      'border-foreground',
       'pt-3',
       'justify-end',
     ]) {
       expect(styleContains(footer, token)).toBe(true);
     }
     expect(styleContains(footer, 'border-black')).toBe(false);
+    expect(styleContains(footer, 'brutalist-border-top-black')).toBe(false);
+  });
+
+  it('gives a composed footer Close one control surface and one dismissal', async () => {
+    // T-BRUTALIST-DIALOG-0001-CASE-7
+    vi.useFakeTimers();
+    const { root, trigger, close } = createDialog();
+    const button = document.createElement(brutalistButton.name) as HTMLElement;
+    button.textContent = 'Close';
+    close.replaceChildren(button);
+    await flush();
+    trigger.click();
+    await vi.advanceTimersByTimeAsync(0);
+    await flush();
+
+    // The Close keeps dismissal ownership but stays off the tab ring; the Button
+    // is the only control surface, so there is one stop and one command.
+    expect(close.getAttribute('role')).toBeNull();
+    expect(close.tabIndex).toBe(-1);
+    expect(button.getAttribute('role')).toBe('button');
+    expect(button.tabIndex).toBe(0);
+    for (const token of ['border-2', 'shadow-[3px_3px_0_0_#000]', 'data-[focus-visible]:ring-2']) {
+      expect(styleContains(button, token)).toBe(true);
+    }
+
+    expect(root.getExposes().open.get()).toBe(true);
+    button.click();
+    await vi.advanceTimersByTimeAsync(0);
+    await flush();
+    expect(root.getExposes().open.get()).toBe(false);
   });
 });

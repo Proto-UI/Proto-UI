@@ -95,18 +95,13 @@ describe('prototypes/base: textarea', () => {
     expect(target.children).toHaveLength(0);
     expect(Object.keys(element.getExposes()).sort()).toEqual([
       'blurSelf',
-      'change',
       'composing',
-      'compositionEnd',
-      'compositionStart',
-      'compositionUpdate',
       'disabled',
       'focusSelf',
       'focusVisible',
       'focused',
       'readOnly',
       'value',
-      'valueChange',
     ]);
     expect(target.hasAttribute('data-pui-a11y-actions')).toBe(false);
     element.remove();

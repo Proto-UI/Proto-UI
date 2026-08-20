@@ -42,7 +42,7 @@
   }
 
   .sidebar-pane a[aria-current='page'] span {
-    @apply bg-accent border-accent;
+    @apply bg-accent text-accent-foreground border-accent;
   }
 
   :where(a)[aria-current='page'],

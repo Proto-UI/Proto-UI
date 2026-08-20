@@ -146,7 +146,8 @@ describe('PrototypePreviewer demo-renderer / wc', () => {
 
     const root = host.querySelector('wc-shadcn-tabs-root') as HTMLElement | null;
     const list = host.querySelector('wc-shadcn-tabs-list') as HTMLElement | null;
-    const trigger = host.querySelector('wc-shadcn-tabs-trigger') as HTMLElement | null;
+    const triggers = Array.from(host.querySelectorAll('wc-shadcn-tabs-trigger')) as HTMLElement[];
+    const trigger = triggers[0] ?? null;
     const content = host.querySelector('wc-shadcn-tabs-content') as HTMLElement | null;
 
     expect(root).not.toBeNull();
@@ -161,8 +162,18 @@ describe('PrototypePreviewer demo-renderer / wc', () => {
     expect(styleContains(list, 'h-9')).toBe(true);
     expect(styleContains(trigger, 'rounded-md')).toBe(true);
     expect(styleContains(trigger, 'flex-1')).toBe(true);
+    expect(triggers[1]?.getAttribute('tabindex')).toBe('-1');
     expect(styleContains(content, 'flex-1')).toBe(true);
     expect(styleContains(content, 'outline-none')).toBe(true);
+
+    trigger?.focus();
+    trigger?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+    );
+    await settle();
+
+    expect(document.activeElement).toBe(triggers[1]);
+    expect(triggers[1]?.getAttribute('aria-selected')).toBe('true');
 
     await session.destroy();
     host.remove();

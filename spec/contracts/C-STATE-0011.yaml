@@ -3,14 +3,14 @@ type: contract
 title: StateEvent records value changes and disconnects
 status: draft
 since: 0.1.0
-summary: State watchers receive `next` events for value transitions and `disconnect` events for lifecycle disconnection.
+summary: State watchers receive `next` events for value transitions and `disconnect` events for terminal or explicit source disconnection.
 statement:
   zh-CN: >-
-    StateEvent 是 state 变化记录的 portable event shape。state value 发生实际变化时，watcher 接收 `next` event，包含 `prev`、`next` 与可选 `reason`；state slot 与 watcher 因 lifecycle 断开时，watcher 可以接收 `disconnect` event。StateEvent 不携带 render 调度语义。
+    StateEvent 是 state 变化记录的 portable event shape。state value 发生实际变化时，watcher 接收 `next` event，包含 `prev`、`next` 与可选 `reason`；state slot 与 watcher 因 terminal lifecycle 或显式 semantic source 断开时，watcher 可以接收 `disconnect` event。repeatable view detach 不得断开 instance-owned state slot 或 watcher。StateEvent 不携带 render 调度语义。
 
 
   en: >-
-    StateEvent is the portable event shape for state-change records. When the state value actually changes, watchers receive a `next` event containing `prev`, `next`, and optional `reason`; when a state slot and watcher disconnect due to lifecycle, watchers may receive a `disconnect` event. StateEvent carries no render scheduling semantics.
+    StateEvent is the portable event shape for state-change records. When the state value actually changes, watchers receive a `next` event containing `prev`, `next`, and optional `reason`; when a state slot and watcher disconnect because of terminal lifecycle or an explicit semantic source disconnection, watchers may receive a `disconnect` event. Repeatable view detachment must not disconnect an instance-owned state slot or watcher. StateEvent carries no render scheduling semantics.
 
 
 criteria:
@@ -28,8 +28,8 @@ criteria:
       en: '`setDefault(...)` must not dispatch `next` StateEvents.'
   - id: C-STATE-0011-D
     text:
-      zh-CN: "state slot 与 watcher 因 unmount/dispose 断开时，可以派发 `{ type: 'disconnect', reason: 'unmount' }`。"
-      en: "When a state slot and watcher disconnect due to unmount/dispose, `{ type: 'disconnect', reason: 'unmount' }` may be dispatched."
+      zh-CN: "state slot 与 watcher 因 terminal dispose 或显式 semantic source 断开时，可以派发 `{ type: 'disconnect', reason: 'unmount' }`；repeatable view detach 本身不得派发该事件。"
+      en: "When a state slot and watcher disconnect because of terminal disposal or an explicit semantic source disconnection, `{ type: 'disconnect', reason: 'unmount' }` may be dispatched; repeatable view detachment alone must not dispatch it."
   - id: C-STATE-0011-E
     text:
       zh-CN: re-entrant `set(...)` 触发的 StateEvent 必须以确定性顺序派发，不得丢失已记录的状态转换。
@@ -48,6 +48,9 @@ dependsOn:
     - C-STATE-0010
     - C-STATE-0005
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Distinguished terminal or explicit source disconnection from repeatable view detachment.
   - version: 0.1.0
     change: introduced
     summary: Captured StateEvent shape, same-value suppression, disconnect, and deterministic re-entrant delivery.
