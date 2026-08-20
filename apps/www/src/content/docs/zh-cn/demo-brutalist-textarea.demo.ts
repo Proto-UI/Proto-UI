@@ -51,21 +51,24 @@ export default {
             kind: 'box',
             ref: 'toggleProps',
             className:
-              'cursor-pointer select-none border-2 border-black bg-yellow-300 px-2 py-1 text-xs font-bold uppercase shadow-[2px_2px_0_0_#000]',
+              // Accent fills ship as a fixed background/foreground pair, so the chip
+              // keeps ink text and an ink outline in both themes. Only its hard shadow,
+              // which falls on the page surface, follows the theme.
+              'cursor-pointer select-none border-2 border-[var(--pui-main-foreground)] bg-[var(--pui-main)] px-2 py-1 text-xs font-bold uppercase text-[var(--pui-main-foreground)] shadow-[2px_2px_0_0_var(--pui-foreground)]',
             children: ['Toggle live props'],
           },
           {
             kind: 'box',
             ref: 'focusButton',
             className:
-              'cursor-pointer select-none border-2 border-black bg-white px-2 py-1 text-xs font-bold shadow-[2px_2px_0_0_#000]',
+              'cursor-pointer select-none border-2 border-[var(--pui-foreground)] bg-[var(--pui-secondary-background)] px-2 py-1 text-xs font-bold text-[var(--pui-foreground)] shadow-[2px_2px_0_0_var(--pui-foreground)]',
             children: ['focusSelf()'],
           },
           {
             kind: 'box',
             ref: 'blurButton',
             className:
-              'cursor-pointer select-none border-2 border-black bg-white px-2 py-1 text-xs font-bold shadow-[2px_2px_0_0_#000]',
+              'cursor-pointer select-none border-2 border-[var(--pui-foreground)] bg-[var(--pui-secondary-background)] px-2 py-1 text-xs font-bold text-[var(--pui-foreground)] shadow-[2px_2px_0_0_var(--pui-foreground)]',
             children: ['blurSelf()'],
           },
         ],
@@ -73,13 +76,15 @@ export default {
       {
         kind: 'box',
         ref: 'stateLabel',
-        className: 'break-words border-2 border-black bg-white p-2 text-xs',
+        className:
+          'break-words border-2 border-[var(--pui-foreground)] bg-[var(--pui-secondary-background)] p-2 text-xs text-[var(--pui-foreground)]',
         children: ['State exposes'],
       },
       {
         kind: 'box',
         ref: 'eventLog',
-        className: 'min-h-8 break-words border-2 border-black bg-white p-2 text-xs',
+        className:
+          'min-h-8 break-words border-2 border-[var(--pui-foreground)] bg-[var(--pui-secondary-background)] p-2 text-xs text-[var(--pui-foreground)]',
         children: ['Event log: edit the textarea'],
       },
     ],

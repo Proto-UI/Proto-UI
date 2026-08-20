@@ -1,0 +1,43 @@
+---
+title: 'Dropdown Menu'
+description: 'Base Dropdown Menu 的 action-menu ownership、anatomy、证据与边界。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Dropdown Menu 是由 Trigger 打开的 compound action-menu。Root 拥有 visibility、request arbitration、collection order、entry policy 与 shared facts；瞬时 active navigation 永远不会变成 persistent selection。
+
+<PrototypePreviewer
+  demoId="demo-base-dropdown-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family 与 request ownership
+
+Canonical family 包含一个 Root、至多一个 Trigger 和 Content，以及最多 100 个 Items。所有 visibility 变化——methods、Trigger activation、dismissal 与 Item commit——都进入 Root 的 `openChange` request channel。
+
+Root 接受 `open`、`defaultOpen`、`disabled`、`closeOnItemCommit`、`openEntry` 与 `openEntryValue`。它 expose open state、collection facts，以及 `openDropdown()`、`close()`、`toggle()`、`requestOpen()`。受控模式在新 input 到达前保持 owner 提供的 `open`。
+
+Content 组合 overlay、transition、collection navigation、typeahead 与 anchor positioning。Item 接受 `value`、`textValue`、`disabled`、`closeOnCommit`，expose active/interaction facts，并发出 `select`。关闭会清空瞬时 active state，因此重新打开时服从新的 entry policy，而不会恢复虚假的“selection”。
+
+## Accessibility 边界
+
+这个 family 表示由按钮打开的一组 action/function。它不得把普通导航、任意 form 或 persistent selection 伪装成 menu。Group、Label、Separator、Checkbox Item、Radio Item 与 Submenu 不属于当前 Base guarantee。
+
+## 0.2 交付与证据
+
+稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/dropdown`。CLI component ID 是 `base-dropdown`，会生成 Root、Trigger、Content 与 Item。`T-BASE-DROPDOWN-MENU-0001` 把 family criteria 映射到 `packages/prototypes/base/test/dropdown.test.ts`；Preview 通过 Web Component、React 与 Vue Adapter 运行。
+
+## Lifecycle
+
+`P-BASE-DROPDOWN-MENU` 及其 Trigger、Content、Item entities 当前都是 **draft**。Package 可用性不会把它们提升为 active guarantees。
+
+## 参考
+
+- [P-BASE-DROPDOWN-MENU](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU.yaml)
+- Parts：[Trigger](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-TRIGGER.yaml)、[Content](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-CONTENT.yaml)、[Item](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-ITEM.yaml)
+- [Dropdown source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/dropdown)
+- [Dropdown evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/dropdown.test.ts)
+- 风格化投射：[Brutalist Dropdown Menu](/zh-cn/ui-libraries/brutalist/components/dropdown-menu/)

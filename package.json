@@ -62,11 +62,13 @@
     "check:types": "corepack pnpm@10.32.1 -s check:types:workspace && corepack pnpm@10.32.1 -s check:types:docs",
     "format": "prettier --write .",
     "prepare": "husky install",
-    "test": "corepack pnpm@10.32.1 -s check:release-version && corepack pnpm@10.32.1 -s release:assets:check && corepack pnpm@10.32.1 -s check:styles:preset && corepack pnpm@10.32.1 -s check:component-presets && corepack pnpm@10.32.1 -s check:prototype-catalog && corepack pnpm@10.32.1 -s test:release && corepack pnpm@10.32.1 -s test:types && corepack pnpm@10.32.1 -s test:runtime",
+    "test": "corepack pnpm@10.32.1 -s check:release-version && corepack pnpm@10.32.1 -s release:assets:check && corepack pnpm@10.32.1 -s check:styles:preset && corepack pnpm@10.32.1 -s check:styles:variant-order && corepack pnpm@10.32.1 -s check:component-presets && corepack pnpm@10.32.1 -s check:prototype-catalog && corepack pnpm@10.32.1 -s test:release && corepack pnpm@10.32.1 -s test:types && corepack pnpm@10.32.1 -s test:runtime",
     "test:release": "node --test scripts/release/test/*.test.mjs",
     "test:types": "echo \"[types] checking type contracts...\" && tsc -p internal/contracts/types/tsconfig.json && echo \"[types] OK\"",
     "test:web-conformance": "vitest run packages/web-conformance/test",
-    "test:runtime": "vitest run"
+    "test:runtime": "vitest run",
+    "styles:variant-order:generate": "node --import tsx scripts/styles/generate-lowered-variant-order.ts",
+    "check:styles:variant-order": "node --import tsx scripts/styles/generate-lowered-variant-order.ts --check"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,mts,json,css,md,mdx,astro,yaml,yml}": "prettier --write"

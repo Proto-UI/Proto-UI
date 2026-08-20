@@ -123,15 +123,8 @@ const instanceId = `wiki-term-${slug}-${Math.random().toString(36).slice(2, 10)}
     display: inline;
     color: var(--color-foreground);
     border-bottom: 1px dashed color-mix(in oklab, var(--color-primary) 60%, transparent);
-    background: linear-gradient(
-        to top,
-        color-mix(in oklab, var(--color-primary) 10%, transparent) 0%,
-        color-mix(in oklab, var(--color-primary) 10%, transparent) 100%
-      )
-      0 100% / 100% 0.45em no-repeat;
     transition:
       border-color 180ms ease,
-      background-size 180ms ease,
       color 180ms ease;
     text-decoration: none;
   }
@@ -140,7 +133,6 @@ const instanceId = `wiki-term-${slug}-${Math.random().toString(36).slice(2, 10)}
   .wiki-term__trigger:focus-visible {
     color: var(--color-primary);
     border-bottom-color: var(--color-primary);
-    background-size: 100% 0.8em;
     outline: none;
   }
 
@@ -154,11 +146,7 @@ const instanceId = `wiki-term-${slug}-${Math.random().toString(36).slice(2, 10)}
     translate: -50% 0.35rem;
     border: 1px solid color-mix(in oklab, var(--color-border) 88%, transparent);
     border-radius: 1rem;
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--color-background) 92%, white 8%),
-      color-mix(in oklab, var(--color-background) 98%, black 2%)
-    );
+    background: var(--color-background);
     box-shadow:
       0 18px 40px rgba(15, 23, 42, 0.12),
       0 2px 10px rgba(15, 23, 42, 0.08);
@@ -171,11 +159,6 @@ const instanceId = `wiki-term-${slug}-${Math.random().toString(36).slice(2, 10)}
   }
 
   [data-theme='dark'] .wiki-term__card {
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--color-background) 88%, white 4%),
-      color-mix(in oklab, var(--color-background) 94%, black 6%)
-    );
     box-shadow:
       0 18px 40px rgba(0, 0, 0, 0.4),
       0 2px 10px rgba(0, 0, 0, 0.28);

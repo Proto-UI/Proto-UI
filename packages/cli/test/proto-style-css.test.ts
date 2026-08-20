@@ -76,14 +76,12 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
-  it('renders projection-local directional border colors', () => {
-    const css = renderProtoStyleTokenCss([
-      'brutalist-border-bottom-black',
-      'brutalist-border-top-black',
-    ]);
+  it('renders directional separator borders in the theme foreground', () => {
+    const css = renderProtoStyleTokenCss(['border-b-2', 'border-t-2', 'border-foreground']);
 
-    expect(css).toContain('border-bottom-color: #000;');
-    expect(css).toContain('border-top-color: #000;');
+    expect(css).toContain('border-bottom-width: 2px;');
+    expect(css).toContain('border-top-width: 2px;');
+    expect(css).toContain('border-color: var(--pui-foreground);');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 

@@ -1,0 +1,84 @@
+---
+title: 'Dialog'
+description: '基于 Proto UI Base Dialog 协议投射的 Shadcn 模态对话框。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+> 可用状态：`@proto.ui/prototypes-shadcn@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[Shadcn Dialog](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG.yaml) family 及其继承的 Base entity 仍为 `draft`；本页描述已发布并经过测试的 0.2 surface，不构成 active 协议保证。
+
+Shadcn Dialog 是 [Base Dialog](../../base/dialog/) 之上的样式投射。Base 持有 modal state、command、focus、dismissal、presence 与 accessibility relation；Shadcn 层增加居中 panel、backdrop、motion、typography、layout group，以及可替换的默认 X close surface。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+## 安装与样式
+
+先按[快速开始](../../../start-here/quick-start/)完成初始化，并在应用入口引入一次生成的样式表；然后为所选 host 生成 Dialog facade：
+
+```bash
+npx @proto.ui/cli@latest add react shadcn-dialog
+```
+
+另外两个官方 Web adapter 分别使用 `vue` 或 `wc` 替换 `react`。命令会从 `@proto.ui/prototypes-shadcn/dialog` 生成 compound host exports；已生成的 `proto-ui-style.css` 提供下列界面使用的 Shadcn theme 与全部视觉 token。
+
+## Compound parts
+
+| 生成 surface | 职责 |
+| --- | --- |
+| `ShadcnDialogRoot` | 持有受控或非受控 `open`、disabled state、alert-dialog mode、fallback accessible name、context，以及 open/close/toggle exposes。 |
+| `ShadcnDialogTrigger` | 通过 Base command 语义请求打开。它有意保持无样式；需要按钮表面时组合一个 `ShadcnButton` child。 |
+| `ShadcnDialogMask` | 投射 modal occlusion、presence 与 backdrop transition。 |
+| `ShadcnDialogContentRaw` | 投射居中 panel，并保留 Base focus、dismissal、presence 与 accessibility behavior，但不增加默认 close part。 |
+| `ShadcnDialogContent` | CLI 在 ContentRaw 之上生成的 convenience facade，包含可替换 CloseIcon preset。 |
+| `ShadcnDialogHeader` / `ShadcnDialogFooter` | 可选的纯布局分组；不持有 title、description、confirm、cancel、save 或 dismissal 语义。 |
+| `ShadcnDialogTitle` / `ShadcnDialogDescription` | 为当前 dialog surface 提供动态 label 与 description relation。 |
+| `ShadcnDialogClose` | 通过有意保持无样式的 command boundary 请求关闭；需要可见 action 时组合 Button child。 |
+| `ShadcnDialogCloseIcon` | Content 默认 preset 使用的独立、可访问 X close control。 |
+
+这些名称与 `shadcn-dialog` CLI registry entry 一致。package 导出底层十个 direct prototype；CLI 在保留 `ShadcnDialogContentRaw` 的同时，额外生成 convenience `ShadcnDialogContent` facade。
+
+## 默认 close part
+
+Content preset 有三种明确状态：
+
+- 未提供覆盖时，`ShadcnDialogContent` 物化一个 `ShadcnDialogCloseIcon` direct child；
+- direct CloseIcon child、React `close` prop 或 Vue `#close` slot 会替换默认部分；
+- React `close={null}`、空 Vue `#close` slot 或 Web Component `data-pui-no-default-close` 会明确省略默认部分。
+
+完全不需要 preset 物化时使用 `ShadcnDialogContentRaw`。recipe 只持有 part identity 与 replacement policy；CloseIcon prototype 自己持有 X glyph、可访问名称 `Close`、position、hover、disabled 与 focus-visible 样式。
+
+## Base 持有的行为
+
+Shadcn family 继承下列行为，不重新实现它们：
+
+- Root 是 `open` 的唯一 owner；受控请求只发出 signal，不会静默接管所有权。
+- Trigger、Close 与默认 CloseIcon 使用同一套 command 与 disabled-state model。
+- Content 在打开期间 trap 并 loop focus，关闭后把 focus 恢复到触发 surface。
+- 普通 dialog 可由 Escape 与 outside press 请求关闭；alert mode 保留 Escape dismissal，但拒绝 outside-press dismissal。
+- Title 与 Description 通过动态 `aria-labelledby` / `aria-describedby` relation 关联到 Content；缺少 Title 时使用 Root 的 `a11yLabel` 作为 fallback。
+- Mask 在 150 ms leave transition 结束前保持 presence，Content 则保持到 200 ms leave transition 结束，随后各自 detach。
+
+要请求 `role="alertdialog"`，应把 `alert` 设置在 `ShadcnDialogRoot`，而不是 Content。Alert dialog 必须提供包含主要消息的 Description。
+
+## 当前边界
+
+- 即使可执行 family 已随 0.2.0 发布，全部 `P-SHADCN-DIALOG-*` entity 仍为 `draft`。
+- Content 当前声明的 public props 为空；继承的内部 transition controls 不构成稳定 Shadcn public API。
+- Proto UI 分别公开 Mask 与 Content，不复刻 upstream Portal/Overlay 的组合方式。
+- `asChild`、upstream `showCloseButton`、`modal`、`data-slot`、`className`/native-prop forwarding 以及精确 responsive width parity 不属于当前已文档化的 Shadcn surface。
+- Header 与 Footer 只负责布局。应用 validation 与 persistence 仍由 consumer 持有；只有工作成功后才应请求关闭。
+
+## 参考
+
+- Root：[P-SHADCN-DIALOG](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG.yaml)
+- Content：[P-SHADCN-DIALOG-CONTENT](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG-CONTENT.yaml)
+- 默认关闭：[P-SHADCN-DIALOG-CLOSE-ICON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG-CLOSE-ICON.yaml)
+- Base 协议：[P-BASE-DIALOG](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DIALOG.yaml)
+- 源码：[packages/prototypes/shadcn/src/dialog](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/shadcn/src/dialog)

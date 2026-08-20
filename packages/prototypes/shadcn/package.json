@@ -68,6 +68,11 @@
       "import": "./dist/tabs/index.js",
       "default": "./dist/tabs/index.js"
     },
+    "./textarea": {
+      "types": "./dist/textarea/index.d.ts",
+      "import": "./dist/textarea/index.js",
+      "default": "./dist/textarea/index.js"
+    },
     "./toggle": {
       "types": "./dist/toggle/index.d.ts",
       "import": "./dist/toggle/index.js",

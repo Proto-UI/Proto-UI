@@ -59,11 +59,13 @@ description: '在提交一个新原型或大改动之前，先过一遍这张清
 - unsupported upstream API 和 compatibility boundary 是否明确？
 - 如果对象没有 Base 协议，是否应成为 styled-only，而不是制造空 Base identity？
 
-## 八、别人未来是否还能复用它？
+## 八、Authoring entries 是否与编目协议一致？
 
-- 这段能力是否值得抽成 `asHook`？
-- 暴露出去的 state / method 是否具有稳定意义？
-- 这份实现是否会迫使别人重复写一遍类似逻辑？
+- 适用 P 实体要求 direct Prototype、authored asHook，还是两者都存在？
+- direct 与 authored-asHook entries 表达同一协议时，是否共享实现并记录在同一个 P 实体？
+- 我是否避免了仅为 API 对称增加 asHook？
+- 我是否避免了让一个 protocol-specific authored asHook 成为另一个 Base protocol 的行为 substrate？
+- configurable authored asHook 是否有明确治理契约？
 
 ## 九、官网 Demo 是否代表真实安装体验？
 

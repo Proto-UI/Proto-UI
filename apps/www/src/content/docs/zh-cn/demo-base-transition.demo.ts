@@ -27,7 +27,7 @@ export default {
           {
             kind: 'box',
             className:
-              'w-64 h-40 rounded-xl flex flex-col items-center justify-center text-white shadow-xl transition-box',
+              'w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box',
             children: [
               {
                 kind: 'box',
@@ -49,22 +49,22 @@ export default {
         children: [
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-gray-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['closed'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-blue-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['entering'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-green-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['entered'],
           },
           {
             kind: 'box',
-            className: 'px-3 py-1 bg-orange-200 rounded',
+            className: 'px-3 py-1 bg-muted text-muted-foreground rounded',
             children: ['leaving'],
           },
         ],

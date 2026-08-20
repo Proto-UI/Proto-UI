@@ -9,7 +9,13 @@ Base 不规定默认视觉，只提供可测试、可跨宿主迁移的交互语
 
 当前 catalog 中的 Base 原型仍处于 draft 生命周期，以下是现阶段可交互的官方预览，不代表已冻结的稳定 API 保证。
 
-对于交互 family，Base 原型应停在可广泛复用的语义边界。以 dropdown-menu 为例，目前边界是：
+## 已发布的 0.2 family inventory
+
+稳定版 0.2.0 package 导出了 16 个有意纳入文档的 component families：Button、Toggle、Switch、Tabs、Checkbox、Dialog、Dropdown Menu、Select、Hover Card、Tooltip、Transition、Separator、Scroll Area、Textarea、Live Region 与 Async Region。非组件的 `behaviors` 和 `tools` exports 属于 library utilities，不要求 component detail route。
+
+Package exports 与 CLI registry 是相关但不完全相同的 inventory。CLI 把 package 的 `dropdown` family 称为 `base-dropdown`；当前 `base-tabs` facade 没有包含可选 Indicator authoring surface；CLI 也没有 `base-scroll-area` facade，而是提供完整的 `brutalist-scroll-area` projection。这些差异会在相应 detail page 中明确说明，而不是被隐藏或误判为缺失 protocol。
+
+对于交互 family，Base 原型应停在可广泛复用的语义边界。以 Dropdown Menu 为例，目前边界是：
 
 - 浮层开合协作
 - collection 顺序与 item snapshot

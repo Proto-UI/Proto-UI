@@ -13,9 +13,9 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 面板保持 Base Dialog 语义和命令连接，并使用工业海报式处理。
 
 - 触发器使用天空蓝色块与硬阴影。
-- 右上角 X 是独立金丝雀黄色方形控件，不是无边框图标。
+- 右上角 X 是独立金丝雀黄色方形控件，不是无边框图标；其 glyph 取金丝雀填充的配对前景，因此在两个主题下都可读。
 - Hover 变珊瑚红并增加硬阴影；Pressed 移除阴影。
-- footer dismiss 动作保留明确关闭语义，不伪装成普通文本链接。
+- footer dismiss 动作保留明确关闭语义，不伪装成普通文本链接。Close 自身不带 control surface、只拥有 dismissal，因此 footer 动作组合一个 Button child，组合后保持单一 tab stop。
 - 保留硬轮廓 Focus 和可访问名称 `Close`。
 
 <div class="brutalist-demo-frame">

@@ -14,8 +14,8 @@ criteria:
       en: Thumb must inherit Base anatomy identity, the no-independent-semantics boundary, and the host-managed Move hit-subregion role through `asScrollAreaThumb()`.
   - id: P-BRUTALIST-SCROLL-AREA-THUMB-SURFACE
     text:
-      zh-CN: Thumb 必须投射 `relative h-full w-full rounded-none bg-foreground` 作为交叉轴填充，并允许 host session 通过专用 CSS variables/transform 覆盖主轴 geometry；该样式本身不取得 pointer interaction ownership，Move binding 仍属于 host session。
-      en: Thumb must project `relative h-full w-full rounded-none bg-foreground` for cross-axis fill and allow the host session to override primary-axis geometry through dedicated CSS variables and transform; the style itself acquires no pointer-interaction ownership, which remains in the host-session Move binding.
+      zh-CN: Thumb 必须投射 `relative h-full w-full rounded-none bg-lavender-foreground` 作为交叉轴填充，并允许 host session 通过专用 CSS variables/transform 覆盖主轴 geometry；该样式本身不取得 pointer interaction ownership，Move binding 仍属于 host session。填充必须取 Scrollbar track 那个固定 lavender accent 的配对前景，而不是主题全局 foreground，否则 track 不随主题翻转时 thumb 会失去对比度。
+      en: Thumb must project `relative h-full w-full rounded-none bg-lavender-foreground` for cross-axis fill and allow the host session to override primary-axis geometry through dedicated CSS variables and transform; the style itself acquires no pointer-interaction ownership, which remains in the host-session Move binding. The fill must resolve the paired foreground of the Scrollbar track's fixed lavender accent rather than the theme-global foreground, because the track does not flip with the theme and the Thumb would otherwise lose contrast against it.
 sources:
   - path: packages/prototypes/brutalist/src/scroll-area/thumb.proto.ts
 dependsOn:
@@ -34,4 +34,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged the square foreground Thumb feedback surface and explicit no-drag guarantee.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Resolved the Thumb fill from the lavender track's paired foreground instead of the theme-global foreground.
 tags: [prototype, brutalist, scroll-area, thumb, feedback, move, visual]

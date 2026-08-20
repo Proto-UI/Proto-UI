@@ -43,9 +43,10 @@ Base 已经拥有协议，derived P 只增加设计语言 props、tokens、rules
 如果你还没有明确自己是否真的需要新原型：
 
 1. 先读 [为什么你通常不需要新写一个原型？](/zh-cn/build/prototypes/when-not-to-write-a-new-prototype/)
-2. 再读 [编写一个定制的单体原型](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/)
-3. 然后视需要进入 [编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
+2. 再用 [编写一个定制的单体原型](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/) 理解已批准边界内的 leaf authoring entry
+3. 如果获批 subject 是 family，进入 [编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
 4. 如果你主要想做新的组件风格或 UI 库，再读 [基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)
+5. 最后沿 [参考实现应该怎么看](/zh-cn/build/prototypes/reference-patterns/) 从 P/T 实体进入源码与公开投影
 
 ## 当前边界
 

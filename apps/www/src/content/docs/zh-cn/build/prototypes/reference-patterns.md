@@ -1,92 +1,109 @@
 ---
 title: '参考实现应该怎么看'
-description: '当现有原型库本身就是最好的文档时，应该怎么看它们。'
+description: '从 P/T 实体进入源码、测试、导出与公开投影，而不是把实现当规范。'
 ---
 
-对 Proto UI 原型作者来说，现有原型库往往比单篇文档更有帮助。  
-但“去看代码”本身并不是方法。你还需要知道该看什么。
+现有 Prototype 实现是重要证据，但不是最高权威。一个更稳的阅读顺序是：
 
-## 先看哪一层？
+```text
+applicable P lifecycle and criteria
+→ related decisions / contracts / inheritance
+→ mapped T cases and executable paths
+→ implementation and focused tests
+→ exports, CLI, docs, demo
+```
 
-一个比较稳的顺序通常是：
+如果实现与适用实体冲突，先把它标记为 drift；不要用“仓库现在这样写”静默修改协议含义。
 
-1. 先看 `base`
-2. 再看某个风格库如何复用它
+## 1. 找到适用 P/T
 
-这样你更容易分清：
+可以从名称、ID 或 criterion 搜索：
 
-- 哪些是共享交互骨架
-- 哪些是库层才叠加上去的东西
+```sh
+rg -n "<prototype name|entity id|criterion id>" spec packages/prototypes apps/www internal/records
+```
 
-## 想看单体原型，先看什么？
+先确认：
 
-优先看：
+- P entity 是 `draft`、`active`、deprecated 还是 removed；
+- 哪些 criteria 真正适用于当前问题；
+- direct Prototype、authored asHook 与 parts 如何被编目；
+- `inherits.prototypes`、dependsOn 与 related decisions；
+- T cases 映射到了哪些可执行测试。
 
-- [packages/prototypes/base/src/button/button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts)
-- [packages/prototypes/base/src/toggle/toggle.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/toggle/toggle.proto.ts)
+旧 contract 与 record 可以解释背景；在已有实体的主题上，它们不能覆盖 spec。
 
-看这些文件时，重点不是逐行抄写 API，而是看：
+## 2. 阅读单体 Prototype
 
-- `setup` 里最先声明了什么
-- `props / state / event / expose` 是如何组织的
-- 是否同时导出了 `asHook`
+Button 是较小的垂直切片：
 
-## 想看复合原型，先看什么？
+- `P-BASE-BUTTON`；
+- `T-BASE-BUTTON-0001`；
+- [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts)；
+- `packages/prototypes/base/test/as-button.test.ts`。
 
-优先看 `tabs` 和 `hover-card`：
+重点看 criterion 如何落到 props、state、a11y、event、expose 与 absence guarantees，而不是只记录 API 调用顺序。
 
-- [packages/prototypes/base/src/tabs/shared.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/shared.ts)
-- [packages/prototypes/base/src/tabs/root.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/root.proto.ts)
-- [packages/prototypes/base/src/tabs/trigger.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/trigger.proto.ts)
-- [packages/prototypes/base/src/tabs/content.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/content.proto.ts)
-- [packages/prototypes/base/src/hover-card/root.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/hover-card/root.proto.ts)
+Toggle 可用于比较另一个独立 Base protocol：
 
-重点看：
+- `P-BASE-TOGGLE` 与 `T-BASE-TOGGLE-0001`；
+- [toggle.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/toggle/toggle.proto.ts)。
 
-- family 是怎么定义的
-- context 是怎么提供和订阅的
-- 各 part 的职责是否清楚
+不要因为 Button 与 Toggle 都有 authored asHook，就让一个 protocol 消费另一个 protocol-specific hook。
 
-## 想看“风格如何长出来”，先看什么？
+## 3. 阅读复合 family
 
-优先看：
+Tabs 需要同时阅读 Root 与 Parts：
 
-- [packages/prototypes/shadcn/src/button/button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts)
-- [packages/prototypes/shadcn/src/switch/root.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/switch/root.proto.ts)
-- [packages/prototypes/shadcn/src/tabs/root.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/tabs/root.proto.ts)
+- `P-BASE-TABS` 及 List、Trigger、Content、Indicator P entities；
+- 对应的 `T-BASE-TABS-*` entities；
+- [shared.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/shared.ts)；
+- [root.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/root.proto.ts)；
+- [list.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/list.proto.ts)；
+- [trigger.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/trigger.proto.ts)；
+- [content.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/content.proto.ts)；
+- [indicator.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/indicator.proto.ts)。
 
-重点看：
+阅读时追踪 owner、context facts、anatomy claims、collection/focus responsibility 与 mapped tests。文件数量本身不能证明边界正确。
 
-- 是否先复用了 `base` 的 `asHook`
-- 库级 props 是如何叠加的
-- style token 和 rule 是如何组织的
-- 哪些地方保留了 Proto UI 的共享语义，而没有退回宿主私有写法
+## 4. 阅读设计语言投射
 
-## 看代码时最容易看错什么？
+Shadcn Button 是 Base projection 的紧凑例子：
 
-### 1. 只看文件数量，不看边界
+- `P-SHADCN-BUTTON` 与 `T-SHADCN-BUTTON-0001`；
+- inherited `P-BASE-BUTTON` criteria；
+- [Shadcn Button source](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts)；
+- `packages/prototypes/shadcn/test/button.test.ts`。
 
-文件多不代表拆分合理，文件少也不代表边界清楚。  
-关键是每个文件是否对应了稳定的交互责任。
+重点确认：
 
-### 2. 只看样式，不看它依赖的状态来源
+- derived P 只声明 delta；
+- 实现确实调用 owning Base asHook；
+- rules 依赖 inherited protocol states，而不是宿主 selector 成为第二真相；
+- unsupported upstream API 与 absence assertions 有记录；
+- package export、CLI facade、官网 Demo 与 P/T surface 一致。
 
-风格库里的 rule 之所以成立，往往因为它站在共享状态上。  
-不要只看 `tw(...)`，要先看这些 rule 依赖了哪些 `state` 和 `meta`。
+还可以用 Shadcn Switch 和 Tabs 比较不同大小的投射，但每次都应从各自 P/T 开始，而不是机械复制目录结构。
 
-### 3. 把“当前实现这么写”误当成“Proto UI 要求必须这么写”
+## 5. 最后检查公开交付面
 
-现有原型库是重要参考，但不是唯一合法写法。  
-你更应该学习的是：
+源码和测试通过后，继续检查：
 
-- 它为什么这样切边界
-- 为什么这里复用了 `asHook`
-- 为什么这里用 `context`，而不是别的方式
+- package subpath 与 root exports；
+- CLI registry 和 generated facades；
+- component preset / style token closure（如适用）；
+- 双语文档与真实 public-package demo；
+- WC、React、Vue 的 Web evidence；
+- generated workspace 与 Agent projection。
 
-## 最后一个建议
+这一步能区分“实现存在”和“贡献已经形成可消费闭环”。
 
-如果你在读某个实现时，发现自己开始纠结某个局部 API 细节，先退回去问：
+## Lifecycle 提醒
 
-> 这个文件在整个原型里承担什么角色？
+本文列出的 Base Button、Toggle、Tabs 与 Shadcn Button 实体当前均为 `draft`。学习它们的 owner/evidence 结构，不要把当前实现细节扩张为未编目的稳定保证。
 
-Proto UI 的原型实现，比起单个 API 名字，更值得优先理解的是角色分工与边界判断。
+## 延伸阅读
+
+- [维护已有 Prototype](/zh-cn/build/prototypes/maintaining-an-existing-prototype/)
+- [从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)
+- [实现已批准的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)

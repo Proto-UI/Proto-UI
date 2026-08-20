@@ -1,32 +1,136 @@
 ---
 title: '快速开始'
-description: '使用 npm latest 稳定版本开始使用 Proto UI'
+description: '通过 npm latest 稳定版本初始化 Proto UI 0.2.0 并添加组件'
 ---
 
 import DocStageNotice from '@/components/DocStageNotice.astro';
+import { Aside } from '@astrojs/starlight/components';
 
 <DocStageNotice
-  tone="amber"
-  title="Proto UI 0.2 stable 上手流程尚未开放。"
-  body="官网主 Quick Start 永远跟随 npm latest，不会默认把预发布版本交给普通使用者。"
+  title="Proto UI 0.2.0 已通过 npm latest 发布。"
+  body="这是当前稳定版上手路径。命令统一使用 @latest；在本次发行中，它解析到 0.2.0。"
 />
 
-## 稳定版本约定
+<Aside type="note" title="稳定 package channel，v0 项目">
+  `0.2.0` 是 npm `latest` channel 上的稳定版本，但 Proto UI 仍处于 v0 阶段。稳定发布不等于 v1
+  兼容性承诺；在用于生产环境前，请先阅读下方的当前边界。
+</Aside>
 
-本页面是 Proto UI 的稳定上手入口。`0.2.0` 发布后，这里提供的命令将始终使用 npm 默认的 `latest` channel：
+## 开始之前
+
+请在已有的 React、Vue 或 Web Components 应用中执行这些命令。下面以一个已经安装 `react` 的 React 应用为例。
+
+CLI 会按照自身精确版本安装所选 Adapter 与 Prototype package。使用当前 `@latest` 时，这条流程新增的全部公开 `@proto.ui/*` dependency 都解析为 `0.2.0`，不会混用不同 release train。
+
+## 运行 CLI
+
+可以直接通过 `npx` 调用 CLI，不需要全局安装：
 
 ```bash
-npx @proto.ui/cli --help
+npx @proto.ui/cli@latest --help
 ```
 
-在稳定版发布之前，本页面不会用 `@next` 替代正式上手流程，也不会让当前 `0.1.x` package 执行面向 `0.2` codegen 编写的说明。
+显式写出 `@latest` 是为了让稳定 channel 策略一目了然。如果需要永久可复现的安装或 CI 流程，请改用 `@0.2.0`。
 
-## 参与 0.2 RC 试用
+## 初始化项目
 
-如果你希望使用已发布的 `0.2.0-rc.7` 验证安装、生成和组件使用流程，请前往独立的 [0.2 RC 试用页面](/zh-cn/start-here/rc-trial/)。该页面固定使用精确 RC 版本，试用结果不会因 `next` dist-tag 移动而失去复现能力。
+在应用根目录执行：
+
+```bash
+npx @proto.ui/cli@latest init
+```
+
+接受默认选项后，CLI 会创建本地 Proto UI workspace 与 Shadcn 样式预设：
+
+```txt
+your-project/
+├── src/
+│   └── styles/
+│       ├── proto-ui-style.css
+│       ├── proto-ui-tokens.generated.css
+│       └── shadcn-theme.css
+├── proto-ui/
+│   ├── adapters/
+│   ├── prototypes/
+│   ├── components/
+│   └── config.json
+├── package.json
+└── ...
+```
+
+- `proto-ui/config.json` 记录后续 CLI 命令读取的项目配置。
+- `proto-ui/components/` 保存应用需要导入的已生成 host 入口。
+- `proto-ui/adapters/` 与 `proto-ui/prototypes/` 是 CLI 管理区。
+- `src/styles/proto-ui-style.css` 组合生成的 theme 与 token CSS。
+
+生成文件由 CLI 管理，请勿手动修改。如果项目要使用 Brutalist preset，请在初始化时加上 `--prototypes brutalist`；如果应用会自行提供完整的语义 token surface，可使用 `--no-styles`。
+
+## 引入一次样式
+
+从应用入口导入生成的样式表：
+
+```ts
+import './styles/proto-ui-style.css';
+```
+
+如果入口文件位于其他位置，请调整相对路径。应用未主动选择主题时，生成的 Shadcn theme 会跟随 `prefers-color-scheme`。在根元素设置 `data-theme="light"` / `data-theme="dark"`，或使用兼容的 `.light` / `.dark` class，可以覆盖系统偏好。
+
+## 添加组件
+
+为 React 添加官方 Shadcn Button facade：
+
+```bash
+npx @proto.ui/cli@latest add react shadcn-button
+```
+
+命令会检查 React runtime，在需要时安装 `@proto.ui/adapter-react@0.2.0` 与 `@proto.ui/prototypes-shadcn@0.2.0`，并生成 `proto-ui/components/react/index.ts`。
+
+Vue 项目把 `react` 换成 `vue`；Web Components 项目使用 `wc`。同一个组件也可以分别为多个 host 生成。
+
+## 导入生成的组件
+
+在常见的 `src/App.tsx` 中，通过相对路径导入生成的 React host 入口：
+
+```tsx
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>;
+}
+```
+
+这里有意使用相对路径：不同应用并不共享同一套路径别名与目录层级。生成的 facade 会保留 Prototype 声明的 props、事件 listener 与 ref/expose surface，因此受支持的值可以获得 TypeScript 补全，非法 prop 会被类型检查拒绝。
+
+## 按组件继续接入
+
+```bash
+npx @proto.ui/cli@latest add react shadcn-toggle
+npx @proto.ui/cli@latest add react shadcn-dialog
+```
+
+生成的 host 入口会持续累积导出，因此应用可以始终从同一路径导入：
+
+```tsx
+import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/components/react';
+```
+
+如果只想生成文件而不安装缺失 package，可添加 `--no-install`。CLI 会打印精确安装命令，但在补齐这些 dependency 前，生成入口无法完成构建。
+
+## 当前边界
+
+- `0.2.0` 是 0.2 release line 的稳定版本，但不等于 v1 兼容性承诺。
+- Spec entity lifecycle 仍然有效：`active` entity 是当前保证；即使相关可执行 package 已发布，`draft` entity 仍属于推进中的工作。
+- CLI 会安装官方 Prototype package 并生成本地 component facade；它不会把 styled Prototype 源码复制到应用中供直接编辑。
+- 当前 Adapter 架构仍包含 runtime；Compiler 输出与零运行时交付属于未来方向。
+- Shadcn 兼容是明确目标，但尚不完整；当前模型不提供 Radix 风格的 `asChild`。
+- 用于生产环境前，请按实际场景核对组件与 Adapter 覆盖，并在应用中验证 accessibility、SSR 与 bundle 表现。
+
+## Release
+
+- [Proto UI 0.2.0 Release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0)
 
 ## 下一步
 
-- [0.2 RC 试用](/zh-cn/start-here/rc-trial/)
 - [它是怎么工作的？](/zh-cn/start-here/how-it-works/)
+- [UI Library](/zh-cn/ui-libraries/)
 - [Why Proto UI](/zh-cn/start-here/why-proto-ui/)

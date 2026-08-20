@@ -1,0 +1,44 @@
+---
+title: 'Toggle'
+description: 'Base Toggle 的持久 active-state 语义、证据与当前边界。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Toggle 是拥有持久二值 `active` 状态的 button-like control。它适合 pin、文字格式启用等 mode；它既不是一次性的 Button action，也不是 Switch 的 on/off value。
+
+<PrototypePreviewer
+  demoId="demo-base-toggle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Protocol 边界
+
+`P-BASE-TOGGLE` 拥有 `active`、activation、disabled 与 focus 行为、瞬时交互事实和 `activeChange`。direct `base-toggle` Prototype 与 `asToggle()` 是同一 protocol 的 authoring entries；Toggle 不从 Button 或 Switch 专属 hook 借取自身语义。
+
+当前 props 是 `active`、`defaultActive` 与 `disabled`。非受控模式会在成功 activation 后翻转 `active`；受控模式会发出所请求的下一个 `{ active }` 值，并在 owner 提供新 input 之前保持 owner fact。
+
+Toggle 是单一 subject。Toggle Group、exclusive/multiple selection、collection membership 与独立 anatomy part 不属于这个 protocol。图标与视觉 indicator 仍是 authored content，而不是 Toggle part。
+
+## 交互与可访问性
+
+Root expose `active`、disabled/focus/press facts、`focusSelf()` 和 `activeChange`。Web accessibility projection 是带 pressed-state 语义的 button-like control。disabled control 会抑制 activation 并清理瞬时状态。
+
+Form integration、group policy 与视觉 variant 仍由下游负责。
+
+## 0.2 交付与证据
+
+稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/toggle`，CLI registry 提供 `base-toggle`。`T-BASE-TOGGLE-0001` 把 draft criteria 映射到 `packages/prototypes/base/test/toggle.test.ts`；Preview 通过三个 Web Adapter 运行当前 Web profile。
+
+## Lifecycle
+
+`P-BASE-TOGGLE` 当前是 **draft**。0.2.0 package 包含这个 surface，但 catalog lifecycle 仍允许它继续收敛。
+
+## 参考
+
+- [P-BASE-TOGGLE](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TOGGLE.yaml)
+- [Toggle source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/toggle)
+- [Toggle evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/toggle.test.ts)
+- 风格化投射：[Shadcn Toggle](/zh-cn/ui-libraries/shadcn/toggle/) 与 [Brutalist Toggle](/zh-cn/ui-libraries/brutalist/components/toggle/)

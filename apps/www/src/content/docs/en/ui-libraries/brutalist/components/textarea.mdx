@@ -8,7 +8,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-> Status: published in the public `0.2.0-rc.7` package under npm `next` and included unchanged in the draft stable `0.2.0` release train.
+> Availability: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: [P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml) and its inherited Base protocol remain `draft`; this page describes the released and tested 0.2 surface, not an active protocol guarantee.
 
 `brutalist-textarea-root` is a direct visual composition over Base Textarea. It keeps the same single physical native `<textarea>` and adds no new interaction, state, event, accessibility, or ownership protocol.
 
@@ -22,7 +22,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 ## Inherited Behavior
 
-All behavior comes from `base-textarea-root`: stable controlled/uncontrolled value ownership, normalized `valueChange` and `change` signals, normalized IME composition events, composition-safe controlled restoration, native textarea prop projection, physical focus/blur methods, and textbox name/description accessibility projection.
+All behavior comes from `base-textarea-root`: defined controlled/uncontrolled value ownership, normalized `valueChange` and `change` signals, normalized IME composition events, composition-safe controlled restoration, native textarea prop projection, physical focus/blur methods, and textbox name/description accessibility projection.
 
 The Brutalist prototype therefore retains Base's contentless ownership boundary. It does not add children, form submission ownership, rich-text editing, status/live-region semantics, or any second physical control.
 

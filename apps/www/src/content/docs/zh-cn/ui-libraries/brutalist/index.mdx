@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist 原型库'
-description: '贡献者原创的 Proto UI Neo-Brutalist 风格原型库总览。'
+description: '贡献者原创的 Proto UI Neo-Brutalist 风格原型库总览与 0.2.0 可用状态。'
 ---
 
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
@@ -10,7 +10,7 @@ import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astr
 
 Brutalist 是 Proto UI 贡献者原创并维护的 Neo-Brutalist 设计语言投射，使用方角几何、强边框、平涂填色、硬偏移阴影与高对比排版。它不是任何第三方组件系统的移植、兼容层或认证集成。
 
-已发布的 `0.2.0-rc.7` package 汇集既有 Base family 投影——Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea——以及直接定义的 styled-only Badge、Card 与 Skeleton 原型。Textarea 是 Base Textarea 上的纯视觉投影。同一已评审 surface 已进入 draft stable `0.2.0` BOM，但本页不把尚未发布的稳定版描述为已可安装。
+稳定版 `@proto.ui/prototypes-brutalist@0.2.0` package 汇集既有 Base family 投影——Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea——以及直接定义的 styled-only Badge、Card 与 Skeleton 原型。Textarea 是 Base Textarea 上的纯视觉投影。这与 rc.7 准入的已评审 surface 相同，现已在不扩张 surface 的前提下随精确对齐的 40-package 0.2.0 生态发行发布。
 
 下方每张卡片只展示一个基础 Demo，用于快速浏览组件范围与整体视觉；API 文档与代码示例保留在独立组件页。
 
@@ -20,6 +20,7 @@ Brutalist 是 Proto UI 贡献者原创并维护的 Neo-Brutalist 设计语言投
 
 - 来源：贡献者原创 Proto UI style family，仅使用一般 Neo-Brutalist 视觉参考。
 - 语义：Button、Toggle、Switch、Tabs、Hover Card、Dropdown Menu、Select、Dialog、Scroll Area、Separator 与 Textarea 投射各自的 Base 协议。Textarea 只增加 resize-y、方角薰衣草紫/ink、硬阴影视觉样式；Badge 与 Card 是没有 Base counterpart 的 direct passive styled-only prototype。Skeleton 是直接定义的 styled-only、passive、contentless 视觉原型，loading、announcement、替换时机与焦点连续性由父级拥有。
-- 发布状态：已进入 40-package `0.2.0-rc.7` 生态发行并可通过 npm `next` 获取，不可变证据见 [v0.2.0-rc.7 prerelease](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0-rc.7)；同一 surface 在不扩张的前提下进入 draft stable `0.2.0` BOM。
-- 准备中的 package surface：root 以及 `./button`、`./badge`、`./card`、`./toggle`、`./switch`、`./tabs`、`./hover-card`、`./dropdown`、`./select`、`./dialog`、`./scroll-area`、`./separator`、`./skeleton`、`./textarea` subpath。
+- 发布状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随稳定版 [v0.2.0 release](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布；rc.7 仅作为[历史 prerelease 证据](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0-rc.7)保留。
+- 生命周期边界：稳定 package 发布不会自动提升其中每个 prototype contract。各 catalog entity 仍保留自身的 active、draft、deprecated 或 removed 状态；适用保证以组件页和所链接的 spec entity 为准。
+- 0.2.0 package surface：root 以及 `./button`、`./badge`、`./card`、`./toggle`、`./switch`、`./tabs`、`./hover-card`、`./dropdown`、`./select`、`./dialog`、`./scroll-area`、`./separator`、`./skeleton`、`./textarea` subpath。
 - 维护：已进入 0.2 launch-commitment set；后续语义变化与长期所有权仍由 Proto UI governance 决定。

@@ -7,10 +7,8 @@ const dialogHeader = definePrototype({
   setup(def) {
     // P-BRUTALIST-DIALOG-HEADER-ANATOMY: claim DIALOG_FAMILY header role.
     def.anatomy.claim(DIALOG_FAMILY, { role: 'header' });
-    // P-BRUTALIST-DIALOG-HEADER-VISUAL-GRAMMAR: grid gap with a projection-local 2px black bottom rule.
-    def.feedback.style.use(
-      tw('grid gap-1 border-b-2 brutalist-border-bottom-black pb-3 text-left')
-    );
+    // P-BRUTALIST-DIALOG-HEADER-VISUAL-GRAMMAR: grid gap with a 2px bottom rule in the theme foreground.
+    def.feedback.style.use(tw('grid gap-1 border-b-2 border-foreground pb-3 text-left'));
     return (renderer) => renderer.r.slot();
   },
 });

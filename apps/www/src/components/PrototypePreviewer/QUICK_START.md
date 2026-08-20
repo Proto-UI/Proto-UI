@@ -1,32 +1,32 @@
 # PrototypePreviewer 快速参考
 
-## 📝 添加新原型（2 步完成）
+## 添加新原型（2 步完成）
 
-### 1️⃣ 创建原型文件
+### 1. 创建原型文件
 
 ```typescript
-// src/content/docs/zh-cn/my-awesome-demo.demo.proto.ts
+// src/content/docs/zh-cn/my-demo.demo.proto.ts
 import { definePrototype } from '@proto.ui/core';
 
-const MyAwesomeDemo = definePrototype({
-  name: 'my-awesome-demo',
+const MyDemo = definePrototype({
+  name: 'my-demo',
   setup(props) {
     return (h) => {
       return h(
         'div',
         {
-          class: 'p-4 bg-blue-500 text-white rounded',
+          class: 'p-4 bg-muted text-foreground rounded',
         },
-        'My Awesome Demo!'
+        'My demo'
       );
     };
   },
 });
 
-export default MyAwesomeDemo;
+export default MyDemo;
 ```
 
-### 2️⃣ 在 MDX 中使用
+### 2. 在 MDX 中使用
 
 ```mdx
 ---
@@ -36,14 +36,14 @@ title: 我的页面
 import { PrototypePreviewer } from '../../../components/PrototypePreviewer';
 // 或使用 DemoPreviewer（PrototypePreviewer 的别名）
 
-<PrototypePreviewer prototypeId="my-awesome-demo" initialRuntime="wc" />
+<PrototypePreviewer prototypeId="my-demo" initialRuntime="wc" />
 ```
 
-完成！🎉
+完成。
 
 ---
 
-## 🎨 常用配置
+## 常用配置
 
 ### 基础用法
 
@@ -121,7 +121,7 @@ export default {
 
 ---
 
-## 🔍 调试命令
+## 调试命令
 
 ### 查看所有可用原型
 
@@ -146,7 +146,7 @@ await loadPrototype('demo-inline');
 
 ---
 
-## ⚡️ 性能技巧
+## 性能技巧
 
 ### 预加载多个原型
 
@@ -167,9 +167,9 @@ await loadPrototype('demo-inline');
 
 ---
 
-## 🚨 常见错误
+## 常见错误
 
-### ❌ 错误: "未找到原型"
+### 错误: "未找到原型"
 
 ```
 Error: [PrototypePreviewer] 未找到原型 "my-demo"
@@ -179,7 +179,7 @@ Error: [PrototypePreviewer] 未找到原型 "my-demo"
 
 ---
 
-### ❌ 错误: "无法加载原型模块"
+### 错误: "无法加载原型模块"
 
 ```
 Error: 加载原型模块 "my-demo" 失败
@@ -189,7 +189,7 @@ Error: 加载原型模块 "my-demo" 失败
 
 ---
 
-### ❌ 错误: "registerPrototype: invalid id"
+### 错误: "registerPrototype: invalid id"
 
 ```
 Error: registerPrototype: invalid id
@@ -199,7 +199,7 @@ Error: registerPrototype: invalid id
 
 ---
 
-## 📚 完整文档
+## 完整文档
 
 - [完整使用指南](./README.md)
 - [迁移指南](./MIGRATION.md)
@@ -218,9 +218,9 @@ Error: registerPrototype: invalid id
 - 例外逻辑必须位于 Prototype 之外、只调用 public API，并在 Demo source 与 PR 中说明它不会随 package 安装、消费者需要自行实现什么；
 - 内部 Demo Matrix 只能补充验证，不能替代官网页面。
 
-## 💡 最佳实践速查
+## 最佳实践速查
 
-✅ **DO**
+**DO**
 
 - 使用 kebab-case 命名原型 ID
 - 使用 `*.demo.proto.ts` 后缀，靠近文档就近维护
@@ -228,7 +228,7 @@ Error: registerPrototype: invalid id
 - 为原型添加有意义的注释
 - 优先让 Demo 依靠 Prototype 自身公开交互完成演示
 
-❌ **DON'T**
+**DON'T**
 
 - 不要在 MDX 中直接 import 原型文件
 - 不要使用 camelCase 或 PascalCase 作为原型 ID
@@ -237,7 +237,7 @@ Error: registerPrototype: invalid id
 
 ---
 
-## 🎯 快速模板
+## 快速模板
 
 复制粘贴这个模板快速开始：
 
@@ -266,4 +266,4 @@ import { PrototypePreviewer } from '../../../components/PrototypePreviewer';
 <PrototypePreviewer prototypeId="your-demo" />
 ```
 
-现在开始创建吧！🚀
+现在可以开始创建了。
