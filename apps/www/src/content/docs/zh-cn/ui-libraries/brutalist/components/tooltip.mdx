@@ -1,0 +1,18 @@
+---
+title: Tooltip
+sidebar:
+  order: 16
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+Brutalist Tooltip 投影当前的三部件 Base Tooltip 协议：Root 负责受控或非受控 open state 与 delay，Trigger 负责 hover/focus 路由和无障碍描述关联，Content 负责 presence、锚定 portal 定位、Escape dismissal 与 `role="tooltip"`。
+
+Brutalist 层只增加方形高对比 Content surface，不重复 interaction、accessibility、presence、portal 或 positioning behavior。悬停或聚焦下方 Trigger 可以打开 Tooltip，Escape 会关闭它。
+
+<div style="--pui-background:#f4f1ea;--pui-foreground:#000;background:#f4f1ea;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:2rem;">
+  <PrototypePreviewer demoId="demo-brutalist-tooltip" initialRuntime="wc" />
+</div>

@@ -486,6 +486,12 @@ export default defineConfig({
                   translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
                   slug: 'ui-libraries/brutalist/components/scroll-area',
                 },
+                {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/brutalist/components/tooltip',
+                  badge: inProgressBadge,
+                },
               ],
             },
           ],
