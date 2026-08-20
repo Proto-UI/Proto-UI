@@ -83,6 +83,8 @@ Reviewability is part of the experiment outcome. Capture whether the reviewer co
 
 ## Files
 
+- [`AUDIT-2026-08-20.zh-CN.md`](./AUDIT-2026-08-20.zh-CN.md): Phase 0.1 audit covering workflow assets, three completed runs, maturity, limits, and recommended next experiments.
+- [`TUTORIAL.zh-CN.md`](./TUTORIAL.zh-CN.md): maintainer-oriented Chinese tutorial with applicability guidance, task prompts, real examples, no-finding behavior, and integration boundaries.
 - [`prompts/observer.md`](./prompts/observer.md): reusable Observer prompt.
 - [`prompts/verifier.md`](./prompts/verifier.md): independent verification prompt.
 - [`prompts/review-synthesizer.md`](./prompts/review-synthesizer.md): fresh-task reviewability and impact-analysis prompt.
