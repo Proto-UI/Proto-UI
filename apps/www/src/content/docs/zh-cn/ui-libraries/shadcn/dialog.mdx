@@ -63,7 +63,7 @@ Shadcn family 继承下列行为，不重新实现它们：
 - Content 在打开期间 trap 并 loop focus，关闭后把 focus 恢复到触发 surface。
 - 普通 dialog 可由 Escape 与 outside press 请求关闭；alert mode 保留 Escape dismissal，但拒绝 outside-press dismissal。
 - Title 与 Description 通过动态 `aria-labelledby` / `aria-describedby` relation 关联到 Content；缺少 Title 时使用 Root 的 `a11yLabel` 作为 fallback。
-- Mask 与 Content 在 200 ms leave transition 结束前保持 presence，随后才 detach。
+- Mask 在 150 ms leave transition 结束前保持 presence，Content 则保持到 200 ms leave transition 结束，随后各自 detach。
 
 要请求 `role="alertdialog"`，应把 `alert` 设置在 `ShadcnDialogRoot`，而不是 Content。Alert dialog 必须提供包含主要消息的 Description。
 

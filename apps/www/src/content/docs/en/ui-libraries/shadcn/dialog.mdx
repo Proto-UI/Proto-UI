@@ -63,7 +63,7 @@ The Shadcn family inherits these behaviors rather than reimplementing them:
 - Content traps and loops focus while open, then restores focus to the triggering surface on dismissal.
 - Escape and outside-press requests close a regular dialog. Alert mode keeps Escape dismissal but rejects outside-press dismissal.
 - Title and Description are associated with Content through live `aria-labelledby` and `aria-describedby` relations; `a11yLabel` is the Root fallback when no Title exists.
-- Mask and Content retain presence through their 200 ms leave transitions before detaching.
+- Mask retains presence through its 150 ms leave transition, while Content retains presence through its 200 ms leave transition, before either detaches.
 
 Set `alert` on `ShadcnDialogRoot`, not Content, to request `role="alertdialog"`. Alert dialogs require a Description containing the primary message.
 
