@@ -1,0 +1,14 @@
+---
+title: 'Separator'
+description: 'Shadcn separator reconstructed on Proto UI.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+This entry shows the current `shadcn` separator implementation in Proto UI.
+
+Base Separator owns the protocol: `orientation` defaults to `horizontal`, and `decorative` defaults to `true`. A decorative separator stays hidden from the accessibility tree with no role, while `decorative={false}` projects the `separator` role and a matching `aria-orientation`. The shadcn layer adds presentation only — the border color and the 1px hairline geometry that follows the inherited orientation.
+
+The separator is contentless and declares no focus, tab stop, or event channel. Length comes from the surrounding layout, and spacing stays with the composition.
+
+<PrototypePreviewer demoId="demo-shadcn-separator" initialRuntime="wc" />

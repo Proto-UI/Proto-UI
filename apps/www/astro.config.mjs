@@ -354,6 +354,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/select',
                 },
                 {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/shadcn/separator',
+                },
+                {
                   label: 'Switch',
                   translations: { en: 'Switch', 'zh-CN': 'Switch' },
                   slug: 'ui-libraries/shadcn/switch',

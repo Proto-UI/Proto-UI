@@ -57,6 +57,11 @@
       "import": "./dist/select/index.js",
       "default": "./dist/select/index.js"
     },
+    "./separator": {
+      "types": "./dist/separator/index.d.ts",
+      "import": "./dist/separator/index.js",
+      "default": "./dist/separator/index.js"
+    },
     "./switch": {
       "types": "./dist/switch/index.d.ts",
       "import": "./dist/switch/index.js",
