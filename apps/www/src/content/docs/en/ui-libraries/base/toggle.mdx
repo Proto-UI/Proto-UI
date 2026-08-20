@@ -1,0 +1,44 @@
+---
+title: 'Toggle'
+description: 'Base Toggle persistent active-state semantics, evidence, and current boundaries.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Toggle is a button-like control that owns a persistent binary `active` state. It is for modes such as pinning or text-format activation—not a one-shot Button action and not a Switch on/off value.
+
+<PrototypePreviewer
+  demoId="demo-base-toggle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Protocol boundary
+
+`P-BASE-TOGGLE` owns `active`, activation, disabled and focus behavior, transient interaction facts, and `activeChange`. The direct `base-toggle` Prototype and `asToggle()` are authoring entries of that same protocol; Toggle does not obtain its semantics from Button- or Switch-specific hooks.
+
+Current props are `active`, `defaultActive`, and `disabled`. In uncontrolled mode, successful activation flips `active`. In controlled mode it emits the requested next `{ active }` value while retaining the owner-provided fact until new input arrives.
+
+Toggle is a single subject. Toggle Group, exclusive or multiple selection, collection membership, and separate anatomy parts are outside this protocol. Icons and visual indicators remain authored content rather than Toggle parts.
+
+## Interaction and accessibility
+
+The root exposes `active`, disabled/focus/press facts, `focusSelf()`, and `activeChange`. Its Web accessibility projection is button-like with pressed-state semantics. Disabled controls suppress activation and clear transient state.
+
+Form integration, group policy, and visual variants remain downstream responsibilities.
+
+## 0.2 delivery and evidence
+
+The stable 0.2.0 package exports `@proto.ui/prototypes-base/toggle`, and the CLI registry exposes `base-toggle`. `T-BASE-TOGGLE-0001` maps the draft criteria to `packages/prototypes/base/test/toggle.test.ts`; the preview runs the Web profile through all three Web adapters.
+
+## Lifecycle
+
+`P-BASE-TOGGLE` is **draft**. The 0.2.0 package contains this surface, but its catalog lifecycle still permits refinement.
+
+## References
+
+- [P-BASE-TOGGLE](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TOGGLE.yaml)
+- [Toggle source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/toggle)
+- [Toggle evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/toggle.test.ts)
+- Styled projections: [Shadcn Toggle](/en/ui-libraries/shadcn/toggle/) and [Brutalist Toggle](/en/ui-libraries/brutalist/components/toggle/)

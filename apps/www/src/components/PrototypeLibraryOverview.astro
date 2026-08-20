@@ -23,6 +23,42 @@ const isZh = locale === 'zh-cn';
 const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
   base: [
     {
+      id: 'button',
+      name: 'Button',
+      demoId: 'demo-base-button',
+      description: isZh
+        ? '可聚焦、可禁用的离散 command control。'
+        : 'A focusable, disable-able discrete command control.',
+      href: './button/',
+    },
+    {
+      id: 'toggle',
+      name: 'Toggle',
+      demoId: 'demo-base-toggle',
+      description: isZh
+        ? '拥有持久 active 状态的 button-like control。'
+        : 'A button-like control with persistent active state.',
+      href: './toggle/',
+    },
+    {
+      id: 'switch',
+      name: 'Switch',
+      demoId: 'demo-base-switch',
+      description: isZh
+        ? 'Root 拥有状态的 on/off value control。'
+        : 'A root-owned on/off value control.',
+      href: './switch/',
+    },
+    {
+      id: 'tabs',
+      name: 'Tabs',
+      demoId: 'demo-base-tabs',
+      description: isZh
+        ? '单选标签、焦点导航与内容投射。'
+        : 'Single selection, focus navigation, and panel projection.',
+      href: './tabs/',
+    },
+    {
       id: 'checkbox',
       name: 'Checkbox',
       demoId: 'demo-base-checkbox',
@@ -47,6 +83,7 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
       description: isZh
         ? '集合导航、输入查找与提交关闭。'
         : 'Collection navigation, typeahead, and commit-close behavior.',
+      href: './dropdown-menu/',
     },
     {
       id: 'select',
@@ -83,6 +120,24 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
         ? '进入、退出与 presence 生命周期。'
         : 'Enter, exit, and presence lifecycle semantics.',
       href: './transition/',
+    },
+    {
+      id: 'separator',
+      name: 'Separator',
+      demoId: 'demo-base-separator',
+      description: isZh
+        ? '无交互的方向与装饰性分隔语义。'
+        : 'Non-interactive orientation and decorative separation semantics.',
+      href: './separator/',
+    },
+    {
+      id: 'scroll-area',
+      name: 'Scroll Area',
+      demoId: 'demo-base-scroll-area',
+      description: isZh
+        ? 'Viewport 拥有、由宿主投射的滚动域。'
+        : 'A viewport-owned, host-projected scrolling domain.',
+      href: './scroll-area/',
     },
     {
       id: 'live-region',
@@ -172,6 +227,7 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
       description: isZh
         ? '带标准内容结构的模态任务面板。'
         : 'A modal task surface with familiar content structure.',
+      href: './dialog/',
     },
     {
       id: 'dropdown-menu',

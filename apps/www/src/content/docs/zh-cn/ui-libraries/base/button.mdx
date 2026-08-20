@@ -1,0 +1,45 @@
+---
+title: 'Button'
+description: 'Base Button 的 command 语义、公开表面、证据与当前边界。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Button 是用于一次离散 action 的可聚焦 command control。它拥有 activation、disabled gate、focus、瞬时交互事实与 `click` outward signal；它刻意不拥有视觉语言。
+
+<PrototypePreviewer
+  demoId="demo-base-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Protocol 边界
+
+`P-BASE-BUTTON` 为同一个 protocol 编目了两个 authoring entries：
+
+- direct `base-button` Prototype，由 `@proto.ui/prototypes-base/button` 导出为 `button`；
+- authored `asButton()` hook，供需要保留 Button 语义的 derived Prototype 使用。
+
+当前 props 只有 `disabled`。它 expose `disabled`、`hovered`、`focused`、`focusVisible` 和表示“正被按住”的 `pressed` facts；`focusSelf()` 请求焦点，成功 activation 后发出 `click`。这个 signal 是 protocol output，不是 props callback，也不承诺以原生 DOM `click` 实现。
+
+## 交互与可访问性
+
+Button 通过官方 trigger route 处理指针与键盘 activation。Space 参与 press lifecycle 并阻止滚动默认行为；Enter activation 服从宿主 trigger path。disabled Button 拒绝 activation 和主动 focus 请求，不发出 `click`，并清理瞬时交互状态。
+
+Web profile 投射 command-control accessibility，并以 authored content 作为 accessible name。Form submission、`type`、`name`、command integration 与视觉 variant 不属于当前 Base guarantee。
+
+## 0.2 交付与证据
+
+稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/button`，CLI registry 提供 `base-button`。聚焦证据是 `T-BASE-BUTTON-0001` 和 `packages/prototypes/base/test/as-button.test.ts`。本页 Preview 通过 Web Component、React 与 Vue Adapter 运行同一个 Web host profile。
+
+## Lifecycle
+
+`P-BASE-BUTTON` 当前是 **draft**。Package 发布使实现可被消费，但不会把 draft protocol 变成冻结的兼容性保证。
+
+## 参考
+
+- [P-BASE-BUTTON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-BUTTON.yaml)
+- [Button source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/button)
+- [Button evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/as-button.test.ts)
+- 风格化投射：[Shadcn Button](/zh-cn/ui-libraries/shadcn/button/) 与 [Brutalist Button](/zh-cn/ui-libraries/brutalist/components/button/)

@@ -67,6 +67,10 @@ const inProgressBadge = {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.proto-ui.com',
+  redirects: {
+    '/en/prototypes/shadcn/dialog': '/en/ui-libraries/shadcn/dialog/',
+    '/zh-cn/prototypes/shadcn/dialog': '/zh-cn/ui-libraries/shadcn/dialog/',
+  },
   integrations: [
     starlight({
       title: 'Proto UI',
@@ -234,6 +238,26 @@ export default defineConfig({
                   slug: 'ui-libraries/base',
                 },
                 {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/base/button',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/base/toggle',
+                },
+                {
+                  label: 'Switch',
+                  translations: { en: 'Switch', 'zh-CN': 'Switch' },
+                  slug: 'ui-libraries/base/switch',
+                },
+                {
+                  label: 'Tabs',
+                  translations: { en: 'Tabs', 'zh-CN': 'Tabs' },
+                  slug: 'ui-libraries/base/tabs',
+                },
+                {
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/base/hover-card',
@@ -247,6 +271,11 @@ export default defineConfig({
                   label: 'Dialog',
                   translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
                   slug: 'ui-libraries/base/dialog',
+                },
+                {
+                  label: 'Dropdown Menu',
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
+                  slug: 'ui-libraries/base/dropdown-menu',
                 },
                 {
                   label: 'Transition',
@@ -267,6 +296,16 @@ export default defineConfig({
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/base/separator',
+                },
+                {
+                  label: 'Scroll Area',
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/base/scroll-area',
                 },
                 {
                   label: 'Live Region',
@@ -295,6 +334,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/button',
                 },
                 {
+                  label: 'Dialog',
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/shadcn/dialog',
+                },
+                {
                   label: 'Dropdown Menu',
                   translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
                   slug: 'ui-libraries/shadcn/dropdown-menu',
@@ -303,6 +347,11 @@ export default defineConfig({
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/shadcn/hover-card',
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/shadcn/select',
                 },
                 {
                   label: 'Switch',
@@ -315,14 +364,14 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/tabs',
                 },
                 {
-                  label: 'Toggle',
-                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
-                  slug: 'ui-libraries/shadcn/toggle',
-                },
-                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/shadcn/textarea',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/shadcn/toggle',
                 },
               ],
             },
@@ -520,7 +569,6 @@ export default defineConfig({
               label: 'Runtime Architecture',
               translations: { en: 'Runtime Architecture', 'zh-CN': 'Runtime 架构' },
               slug: 'build/runtime-architecture',
-              badge: inProgressBadge,
             },
             {
               label: 'Adapter Guide',
@@ -532,25 +580,21 @@ export default defineConfig({
               label: 'Compiler Guide',
               translations: { en: 'Compiler Guide', 'zh-CN': 'Compiler 指南' },
               slug: 'build/compiler-guide',
-              badge: inProgressBadge,
             },
             {
               label: 'Host Caps',
               translations: { en: 'Host Caps', 'zh-CN': 'Host Caps' },
               slug: 'build/host-caps',
-              badge: inProgressBadge,
             },
             {
               label: 'Module & Extension Architecture',
               translations: { en: 'Module & Extension Architecture', 'zh-CN': '模块与扩展架构' },
               slug: 'build/module-extension-architecture',
-              badge: inProgressBadge,
             },
             {
               label: 'Contracts & Tests',
               translations: { en: 'Contracts & Tests', 'zh-CN': '契约与测试' },
               slug: 'build/contracts-and-tests',
-              badge: inProgressBadge,
             },
             {
               label: 'Contribute',
@@ -567,13 +611,11 @@ export default defineConfig({
               label: 'Introduction',
               translations: { en: 'Introduction', 'zh-CN': '规范导读' },
               slug: 'specifications/introduction',
-              badge: inProgressBadge,
             },
             {
               label: 'Core',
               translations: { en: 'Core', 'zh-CN': '核心' },
               slug: 'specifications/core',
-              badge: inProgressBadge,
             },
             {
               label: 'Lifecycle',
@@ -653,13 +695,11 @@ export default defineConfig({
               label: 'Prototype API',
               translations: { en: 'Prototype API', 'zh-CN': 'Prototype API' },
               slug: 'reference/prototype-api',
-              badge: inProgressBadge,
             },
             {
               label: 'Compatibility',
               translations: { en: 'Compatibility', 'zh-CN': '兼容性' },
               slug: 'reference/compatibility',
-              badge: inProgressBadge,
             },
           ],
         },

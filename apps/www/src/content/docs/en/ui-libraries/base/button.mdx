@@ -1,0 +1,45 @@
+---
+title: 'Button'
+description: 'Base Button command semantics, public surface, evidence, and current boundaries.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Button is a focusable command control for one discrete action. It owns activation, disabled gating, focus, transient interaction facts, and the outward `click` signal; it deliberately does not own a visual language.
+
+<PrototypePreviewer
+  demoId="demo-base-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Protocol boundary
+
+`P-BASE-BUTTON` catalogs two authoring entries for the same protocol:
+
+- the direct `base-button` Prototype, exported as `button` from `@proto.ui/prototypes-base/button`;
+- the authored `asButton()` hook for a derived Prototype that needs to retain Button semantics.
+
+The public props surface currently contains only `disabled`. Exposed facts are `disabled`, `hovered`, `focused`, `focusVisible`, and held-down `pressed`; `focusSelf()` requests focus, and successful activation emits `click`. The signal is protocol output, not a props callback and not a promise of a native DOM `click` implementation.
+
+## Interaction and accessibility
+
+Button uses the official trigger route for pointer and keyboard activation. Space participates in the press lifecycle and prevents its scrolling default; Enter activation follows the host trigger path. A disabled Button rejects activation and active focus requests, emits no `click`, and clears transient interaction state.
+
+The Web profile projects command-control accessibility and takes the accessible name from authored content. Form submission, `type`, `name`, command integration, and visual variants are outside the current Base guarantee.
+
+## 0.2 delivery and evidence
+
+The stable 0.2.0 package exports `@proto.ui/prototypes-base/button`, and the CLI registry exposes `base-button`. The focused protocol evidence is `T-BASE-BUTTON-0001` and `packages/prototypes/base/test/as-button.test.ts`. This page's preview exercises the same Web host profile through the Web Component, React, and Vue adapters.
+
+## Lifecycle
+
+`P-BASE-BUTTON` is **draft**. Package publication makes the implementation consumable; it does not turn the draft protocol into a frozen compatibility guarantee.
+
+## References
+
+- [P-BASE-BUTTON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-BUTTON.yaml)
+- [Button source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/button)
+- [Button evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/as-button.test.ts)
+- Styled projections: [Shadcn Button](/en/ui-libraries/shadcn/button/) and [Brutalist Button](/en/ui-libraries/brutalist/components/button/)

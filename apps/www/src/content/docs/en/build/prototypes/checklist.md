@@ -49,7 +49,15 @@ description: 'Check contribution readiness, spec ownership, evidence, and delive
 - Are unsupported upstream APIs and compatibility limits documented?
 - Should a subject with no Base protocol be styled-only rather than creating an empty Base identity?
 
-## 8. Does the website demo represent installed usage?
+## 8. Do authoring entries match the cataloged protocol?
+
+- Does the applicable P entity require a direct Prototype, an authored asHook, or both?
+- When direct and authored-asHook entries express one protocol, do they share implementation and remain in one P entity?
+- Did I avoid adding an asHook merely for API symmetry?
+- Did I avoid using one protocol-specific authored asHook as another Base protocol's behavior substrate?
+- Does any configurable authored asHook stay within an explicitly governed contract?
+
+## 9. Does the website demo represent installed usage?
 
 - Does every new public Prototype identity or anatomy family have a reachable page connected to the website documentation entry point?
 - Does the pull request provide a local preview route that maintainers can open directly?
@@ -60,7 +68,7 @@ description: 'Check contribution readiness, spec ownership, evidence, and delive
 - Does the demo source and pull request say which exception code is not installed with the package and must be recreated by consumers?
 - Is the internal Demo Matrix treated as supplementary evidence rather than a replacement for the website page?
 
-## 9. Is evidence coherent?
+## 10. Is evidence coherent?
 
 - Does every new or changed P criterion have a substantive `T-*` case?
 - Do T cases anchor exact criteria and map real executable paths?

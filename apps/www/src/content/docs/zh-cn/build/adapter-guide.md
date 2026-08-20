@@ -1,41 +1,53 @@
 ---
 title: 'Adapter 贡献指南暂缓发布'
-description: '为什么当前不从尚未完成的 catalog 和实现推导通用 Adapter 作者流程。'
+description: '当前已有的证据、可以推进的有界 Adapter 工作，以及为何仍不发布通用作者流程。'
 ---
 
-Proto UI 当前不发布通用 Adapter 贡献指南。
+Proto UI 当前不发布通用 Adapter authoring tutorial。0.2 已交付执行架构与第一批 reviewed profile slice 现在已有文档，但 catalog 有意保持 partial，并不存在可以让贡献者通过类比新增 Adapter 的稳定 public SPI。
 
-Module、Host Capability 和官方 Adapter profile 的实体编目仍在推进，相关架构责任、缺失策略、生命周期资源所有权和 executable conformance 还没有全部收口。现有 React、Vue 和 Web Component 实现是重要证据，但其中仍可能存在尚未处理的 drift，不能仅靠模仿当前代码推导稳定作者 API。
+请先阅读聚焦的架构指南：
 
-在这条 catalog chain 完成前，本页不会：
+- [Runtime 架构](/zh-cn/build/runtime-architecture/)解释 `RuntimeSession`、commit ownership 与 host handoff。
+- [Host Caps](/zh-cn/build/host-caps/)解释 capability token、wiring、target projection 与 resource lifetime。
+- [模块与扩展架构](/zh-cn/build/module-extension-architecture/)解释 facade/port/dependency ownership 与固定 Runtime Module set。
+- [兼容性](/zh-cn/reference/compatibility/)只报告 Web Component、React 与 Vue official profile 当前已经审计的 relation。
 
-- 把当前 Web Adapter 结构描述成跨宿主稳定架构；
-- 给出新增 Adapter 的逐步实现教程；
+这些页面描述当前事实，但合在一起仍不能定义完整的新 Adapter recipe。
+
+## 为什么通用流程仍然暂缓
+
+Official Adapter profile 按 Module slice 逐步编目。未列出的 Module 属于 uncataloged，不代表支持或不支持。Lifecycle ownership、capability omission strategy、host target role 与 executable conformance 都必须针对具体 target 决定。现有 Web implementation 是证据，但 Web-specific routing 与 framework mechanics 不能自行定义 cross-host architecture。
+
+因此本文不会：
+
+- 把当前 Web Adapter structure 描述成稳定 cross-host SPI；
 - 从 package dependency 推断完整 Module support；
-- 把未编目的 fallback 或 host wiring 描述成正式保证；
-- 鼓励贡献者通过 Prototype 私有逻辑修补 Adapter parity 问题。
+- 把 uncataloged fallback 或 host wiring 当作保证；
+- 承诺 dynamic Runtime Module registration；
+- 鼓励通过 Prototype-specific patch 修补 Adapter parity。
 
-## 现在仍可以参与什么？
+## 可以推进的有界工作
 
-边界明确的 Adapter parity bug 仍可能开放给有经验的贡献者。对应 Issue 必须说明：
+有经验的贡献者可以在 Issue 已经写清以下内容时实现 Adapter parity bug：
 
 - 适用的 `C-*`、`M-*`、`HC-*`、`A-*` 与 `T-*` 实体；
-- 问题属于哪个 owner layer；
-- 预期行为和不能改变的协议边界；
-- focused conformance test；
-- Web Component、React、Vue 中需要保持或对齐的证据；
-- implementation 是否已经被 maintainer 明确授权。
+- semantic 或 translation owning layer；
+- profile 与 target runtime/version range；
+- 跨 Adapter 不得改变的行为；
+- focused Runtime/Module 与 Adapter evidence；
+- 明确的 implementation authorization。
 
-新的 Adapter proposal 当前只用于 maintainer-guided research。它可以收集 host capability inventory、缺失策略和最小 feasibility evidence，但不自动授权实现 PR。
+新 Adapter proposal 仍属于 maintainer-guided research。有效 proposal 可以整理 host capability inventory、诚实的 support/omission decision、lifecycle/target ownership 与最小 feasibility evidence，但不会自动授权 production Adapter PR。
 
-## 何时发布完整指南？
+## 什么会解锁完整指南
 
-至少需要：
+一个可信 exemplar 至少需要：
 
-- 相关 Module 的 facade、port 和 Host Capability owner 已编目；
-- official Adapter 的 `supports`、`omits` 与 `provides` 关系有 reviewed evidence；
-- lifecycle、attach/rebind/reset/disposal 责任可执行验证；
-- 主要实现与实体 drift 已解决或显式记录；
-- 一个完整纵向切片可以作为可信 exemplar。
+1. 一组完整的 Module facade/port 与 Host Capability owner；
+2. reviewed profile `supports`、`omits`、`provides` relation；
+3. 可执行的 attach/rebind/reset/dispose responsibility；
+4. 已解决或明确记录的 implementation/catalog drift；
+5. target-specific commit、event、projection 与 diagnostics behavior；
+6. 能区分 portable semantics 与 host mechanics 的 conformance evidence。
 
-在此之前，请从[贡献指南](/zh-cn/build/contribute/)选择 Prototype、文档、Demo 或已明确边界的 bug 路径。
+在此之前，请通过[参与贡献](/zh-cn/build/contribute/)选择 Prototype、docs、demo、Module slice 或 bounded bug，并用[契约与测试](/zh-cn/build/contracts-and-tests/)设计 evidence。
