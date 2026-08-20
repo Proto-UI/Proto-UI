@@ -209,6 +209,46 @@ async function applyColorScheme(page: Page, colorScheme: ColorScheme): Promise<v
     { timeout: 10_000 }
   );
 }
+type TextareaFocusSnapshot = {
+  active: boolean;
+  focused: boolean;
+  focusVisible: boolean;
+  hostFocused: boolean;
+  hostFocusVisible: boolean;
+  surfaceFocusVisible: boolean;
+  hostTabIndex: string | null;
+  surfaceTabIndex: number;
+  textareaCount: number;
+  boxShadow: string;
+};
+
+async function wcTextareaFocusSnapshot(previewer: Locator): Promise<TextareaFocusSnapshot> {
+  return previewer.evaluate((root) => {
+    const host = root.querySelector<HTMLElement>('.host [data-pui-root]');
+    const textarea = root.querySelector<HTMLTextAreaElement>('textarea');
+    if (!host || !textarea) throw new Error('Web Component Textarea projection is missing.');
+    const exposes = (
+      host as HTMLElement & {
+        getExposes(): {
+          focused: { get(): boolean };
+          focusVisible: { get(): boolean };
+        };
+      }
+    ).getExposes();
+    return {
+      active: document.activeElement === textarea,
+      focused: exposes.focused.get(),
+      focusVisible: exposes.focusVisible.get(),
+      hostFocused: host.hasAttribute('data-focused'),
+      hostFocusVisible: host.hasAttribute('data-focus-visible'),
+      surfaceFocusVisible: textarea.hasAttribute('data-focus-visible'),
+      hostTabIndex: host.getAttribute('tabindex'),
+      surfaceTabIndex: textarea.tabIndex,
+      textareaCount: root.querySelectorAll('textarea').length,
+      boxShadow: getComputedStyle(textarea).boxShadow,
+    };
+  });
+}
 
 /**
  * Resolves each demo surface's text colour and nearest opaque backdrop through a
@@ -522,6 +562,89 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
 
       expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(GEOMETRY_EPSILON);
     } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it('projects one native WC Textarea focus target and its Brutalist ring by modality', async () => {
+    const { context, page, previewer } = await openRoute(TEXTAREA_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      await selectRuntime(page, previewer, 'wc', 'textarea', 1);
+      const runtimeSelect = previewer.locator('select.adapter-select');
+      const textarea = previewer.locator('textarea');
+
+      const initial = await wcTextareaFocusSnapshot(previewer);
+      expect(initial.textareaCount).toBe(1);
+      expect(initial.hostTabIndex).toBeNull();
+      expect(initial.surfaceTabIndex).toBe(0);
+
+      for (const colorScheme of COLOR_SCHEMES) {
+        await applyColorScheme(page, colorScheme);
+        await runtimeSelect.focus();
+        await page.keyboard.press('Tab');
+        await page.waitForFunction(
+          () => {
+            const root = document.querySelector<HTMLElement>(
+              '[data-previewer-id] .host [data-pui-root]'
+            );
+            return (
+              root?.hasAttribute('data-focused') === true && root.hasAttribute('data-focus-visible')
+            );
+          },
+          undefined,
+          { timeout: 10_000 }
+        );
+
+        const keyboard = await wcTextareaFocusSnapshot(previewer);
+        expect(keyboard.active, `${colorScheme}/keyboard active target`).toBe(true);
+        expect(keyboard.focused, `${colorScheme}/keyboard focused expose`).toBe(true);
+        expect(keyboard.focusVisible, `${colorScheme}/keyboard focusVisible expose`).toBe(true);
+        expect(keyboard.hostFocused, `${colorScheme}/keyboard host focused marker`).toBe(true);
+        expect(keyboard.hostFocusVisible, `${colorScheme}/keyboard host marker`).toBe(true);
+        expect(keyboard.surfaceFocusVisible, `${colorScheme}/keyboard surface marker`).toBe(true);
+
+        expect(keyboard.boxShadow, `${colorScheme}/physical ring inner edge`).toContain(
+          '0px 0px 0px 2px'
+        );
+        expect(keyboard.boxShadow, `${colorScheme}/physical ring outer edge`).toContain(
+          '0px 0px 0px 4px'
+        );
+        await textarea.evaluate((element) => (element as HTMLTextAreaElement).blur());
+        await page.waitForFunction(
+          () =>
+            !document
+              .querySelector<HTMLElement>('[data-previewer-id] .host [data-pui-root]')
+              ?.hasAttribute('data-focused')
+        );
+        const blurred = await wcTextareaFocusSnapshot(previewer);
+        expect(blurred.focused, `${colorScheme}/blur focused expose`).toBe(false);
+        expect(blurred.focusVisible, `${colorScheme}/blur focusVisible expose`).toBe(false);
+
+        await textarea.click();
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector<HTMLElement>('[data-previewer-id] .host [data-pui-root]')
+              ?.hasAttribute('data-focused') === true
+        );
+        const pointer = await wcTextareaFocusSnapshot(previewer);
+        expect(pointer.active, `${colorScheme}/pointer active target`).toBe(true);
+        expect(pointer.focused, `${colorScheme}/pointer focused expose`).toBe(true);
+        expect(pointer.focusVisible, `${colorScheme}/pointer focusVisible expose`).toBe(false);
+        expect(pointer.hostFocusVisible, `${colorScheme}/pointer host marker`).toBe(false);
+        expect(pointer.surfaceFocusVisible, `${colorScheme}/pointer surface marker`).toBe(false);
+        expect(pointer.boxShadow, `${colorScheme}/modality-specific ring`).not.toBe(
+          keyboard.boxShadow
+        );
+        await textarea.evaluate((element) => (element as HTMLTextAreaElement).blur());
+      }
+    } finally {
+      await applyColorScheme(page, 'light');
       await context.close();
     }
   }, 90_000);

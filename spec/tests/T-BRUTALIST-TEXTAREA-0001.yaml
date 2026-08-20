@@ -3,7 +3,7 @@ type: test
 title: Brutalist Textarea inheritance and visual contract tests
 status: draft
 since: 0.2.0-rc.7
-summary: Covers complete Base Textarea inheritance on one contentless native target and the square lavender, ink, monospace, hard-shadow visual delta.
+summary: Covers complete Base Textarea inheritance on one contentless native target, Web Component modality-correct focus projection, and the square lavender, ink, monospace, hard-shadow visual delta.
 cases:
   - id: T-BRUTALIST-TEXTAREA-0001-CASE-INHERITANCE
     title: Brutalist Textarea preserves the complete Base protocol and normalized uncontrolled editing on one native target
@@ -25,6 +25,15 @@ cases:
       - P-BRUTALIST-TEXTAREA-SINGLE-TARGET
       - C-HOST-SURFACE-PROJECTION-0001-G
     expectation: wc-brutalist-textarea-state-markers-and-conditional-style-share-one-surface
+  - id: T-BRUTALIST-TEXTAREA-0001-CASE-WC-FOCUS-RING
+    title: Keyboard focus projects the Brutalist ring onto the single physical Web Component textarea while pointer focus does not
+    covers:
+      - P-BRUTALIST-TEXTAREA-BASE-INHERITANCE
+      - P-BRUTALIST-TEXTAREA-SINGLE-TARGET
+      - P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
+      - P-BASE-TEXTAREA-A11Y-AND-FOCUS
+      - P-BASE-TEXTAREA-PRESENTATION-SURFACE
+    expectation: wc-brutalist-textarea-renders-the-physical-ring-only-for-keyboard-focus-visible
 implementations:
   - id: prototypes-brutalist-textarea-contract
     kind: module-test
@@ -35,6 +44,16 @@ implementations:
       - T-BRUTALIST-TEXTAREA-0001-CASE-INHERITANCE
       - T-BRUTALIST-TEXTAREA-0001-CASE-VISUAL-GRAMMAR
       - T-BRUTALIST-TEXTAREA-0001-CASE-STATEFUL-SURFACE
+    exercises:
+      - P-BASE-TEXTAREA
+      - P-BRUTALIST-TEXTAREA
+  - id: docs-browser-brutalist-textarea-focus
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TEXTAREA-0001-CASE-WC-FOCUS-RING
     exercises:
       - P-BASE-TEXTAREA
       - P-BRUTALIST-TEXTAREA
@@ -54,7 +73,11 @@ exercises:
     - P-BRUTALIST-TEXTAREA
 sources:
   - path: packages/prototypes/brutalist/test/textarea.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added Light/Dark browser evidence for native keyboard focus, pointer modality, exposed focus facts, colocalized DOM markers, and the physical Brutalist ring.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added state-selector colocation coverage for the Web Component presentation surface.

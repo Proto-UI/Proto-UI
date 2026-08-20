@@ -131,11 +131,15 @@ describe('adapter-web-component text control', () => {
     expect(moduleInputValues).toEqual(['edited']);
   });
 
-  it('projects physical textarea focus onto host focus states', async () => {
+  it('projects native text-control focus across modality, remount, and teardown', async () => {
     const shell = document.createElement('x-wc-text-control-focus') as WebComponentAdapterElement<
       typeof focusTextareaPrototype
     >;
     setElementProps(shell, { defaultValue: '', placeholder: 'Write', rows: 4 });
+    let projectedFocusCount = 0;
+    shell.addEventListener('focus', () => {
+      projectedFocusCount += 1;
+    });
     document.body.appendChild(shell);
     await flush();
 
@@ -145,24 +149,60 @@ describe('adapter-web-component text control', () => {
       focused: { get(): boolean };
       focusVisible: { get(): boolean };
     };
+    expect(shell.hasAttribute('tabindex')).toBe(false);
+    expect(textarea.tabIndex).toBe(0);
     expect(exposes.focused.get()).toBe(false);
     expect(exposes.focusVisible.get()).toBe(false);
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
-    textarea.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    textarea.focus();
+    expect(document.activeElement).toBe(textarea);
+    expect(projectedFocusCount).toBe(1);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(true);
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
+    expect(textarea.hasAttribute('data-focus-visible')).toBe(true);
 
-    textarea.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    textarea.blur();
+    expect(document.activeElement).not.toBe(textarea);
     expect(exposes.focused.get()).toBe(false);
     expect(exposes.focusVisible.get()).toBe(false);
     expect(shell.hasAttribute('data-focus-visible')).toBe(false);
+    expect(textarea.hasAttribute('data-focus-visible')).toBe(false);
+
+    textarea.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+    textarea.focus();
+    expect(document.activeElement).toBe(textarea);
+    expect(projectedFocusCount).toBe(2);
+    expect(exposes.focused.get()).toBe(true);
+    expect(exposes.focusVisible.get()).toBe(false);
+    expect(shell.hasAttribute('data-focus-visible')).toBe(false);
+    expect(textarea.hasAttribute('data-focus-visible')).toBe(false);
+    textarea.blur();
 
     shell.remove();
     await flush();
-    expect(() =>
-      textarea.dispatchEvent(new FocusEvent('focusin', { bubbles: true }))
-    ).not.toThrow();
+    const countAfterDetach = projectedFocusCount;
+    textarea.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(projectedFocusCount).toBe(countAfterDetach);
+
+    document.body.appendChild(shell);
+    await flush();
+    const remountedTextarea = shell.querySelector('textarea');
+    if (!remountedTextarea) throw new Error('remounted physical textarea was not materialized');
+    const remountedExposes = shell.getExposes() as typeof exposes;
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+    remountedTextarea.focus();
+    expect(document.activeElement).toBe(remountedTextarea);
+    expect(projectedFocusCount).toBe(countAfterDetach + 1);
+    expect(remountedExposes.focused.get()).toBe(true);
+    expect(remountedExposes.focusVisible.get()).toBe(true);
+    remountedTextarea.blur();
+
+    shell.remove();
+    await flush();
+    const countAfterDispose = projectedFocusCount;
+    remountedTextarea.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(projectedFocusCount).toBe(countAfterDispose);
   });
 });
