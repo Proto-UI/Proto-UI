@@ -29,7 +29,7 @@ The scheduled and manually dispatched workflow in `.github/workflows/agent-opera
 1. check out the default-branch repository state with persisted Git credentials disabled;
 2. collect a bounded GitHub snapshot using read-only repository permissions;
 3. validate the versioned policy, workflow registry, schema, and fixtures;
-4. run Codex with the `:read-only` permission profile and no network access when `OPENAI_API_KEY` is available;
+4. run the commit-pinned Codex Action with Codex CLI `0.138.0`, the `:read-only` permission profile, and no network access when `OPENAI_API_KEY` is available;
 5. validate the structured report against the snapshot and Phase A invariants;
 6. upload the input and report as artifacts without writing to GitHub collaboration surfaces.
 

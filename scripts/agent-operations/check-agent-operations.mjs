@@ -244,6 +244,9 @@ function validatePromptAndWorkflow() {
   if (!source.includes("permission-profile: ':read-only'")) {
     fail(workflowFile, 'Codex permission profile must be :read-only');
   }
+  if (!source.includes("codex-version: '0.138.0'")) {
+    fail(workflowFile, 'Codex CLI version must remain pinned to 0.138.0');
+  }
   if (source.includes('sandbox:')) {
     fail(workflowFile, 'legacy sandbox input must not be combined with the permission profile');
   }
