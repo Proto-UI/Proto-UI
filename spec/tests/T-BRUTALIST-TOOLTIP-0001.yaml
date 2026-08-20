@@ -1,0 +1,51 @@
+id: T-BRUTALIST-TOOLTIP-0001
+type: test
+title: Brutalist Tooltip projection contract test
+status: draft
+since: 0.3.0-alpha.0
+summary: Verifies current Base interaction and accessibility inheritance plus the exact Brutalist Content visual delta.
+cases:
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-INHERITANCE
+    title: Three-part projection preserves Base behavior and Content grammar
+    covers:
+      - P-BASE-TOOLTIP-ROOT-OWNER
+      - P-BASE-TOOLTIP-ANATOMY-CONTEXT
+      - P-BASE-TOOLTIP-TRIGGER-INTERACTION
+      - P-BASE-TOOLTIP-TRIGGER-DESCRIPTION
+      - P-BASE-TOOLTIP-CONTENT-SEMANTICS
+      - P-BASE-TOOLTIP-CONTENT-PORTAL-BOUNDARY
+      - P-BRUTALIST-TOOLTIP-BASE-INHERITANCE
+      - P-BRUTALIST-TOOLTIP-VISUAL-ONLY
+      - P-BRUTALIST-TOOLTIP-TRIGGER-PURE-INHERITANCE
+      - P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
+      - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
+    expectation: A typed Web Component composition opens from real Trigger pointer intent, projects the Base tooltip role/open/describedBy facts, closes on leave, and carries the exact Content style tokens.
+implementations:
+  - id: prototypes-brutalist-tooltip-projection
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/tooltip.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-TOOLTIP-0001-CASE-INHERITANCE]
+    exercises:
+      - P-BASE-TOOLTIP
+      - P-BASE-TOOLTIP-TRIGGER
+      - P-BASE-TOOLTIP-CONTENT
+      - P-BRUTALIST-TOOLTIP
+      - P-BRUTALIST-TOOLTIP-TRIGGER
+      - P-BRUTALIST-TOOLTIP-CONTENT
+verifies:
+  prototypes: [{ id: P-BRUTALIST-TOOLTIP }]
+exercises:
+  prototypes:
+    - P-BASE-TOOLTIP
+    - P-BASE-TOOLTIP-TRIGGER
+    - P-BASE-TOOLTIP-CONTENT
+    - P-BRUTALIST-TOOLTIP
+    - P-BRUTALIST-TOOLTIP-TRIGGER
+    - P-BRUTALIST-TOOLTIP-CONTENT
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Replaced static five-part shell assertions with executable current-Base behavior coverage.
+tags: [test, brutalist, visual, tooltip, interaction, accessibility]

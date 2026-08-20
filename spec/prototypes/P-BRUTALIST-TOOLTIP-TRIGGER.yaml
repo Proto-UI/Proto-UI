@@ -1,0 +1,26 @@
+id: P-BRUTALIST-TOOLTIP-TRIGGER
+type: prototype
+title: Brutalist Tooltip Trigger projection
+status: draft
+since: 0.3.0-alpha.0
+summary: Brutalist Trigger preserves Base interaction and accessible-description behavior without a visual delta.
+statement:
+  en: Brutalist Trigger consumes Base Trigger and adds no props, state, events, behavior, accessibility semantics, or feedback style.
+  zh-CN: Brutalist Trigger 消费 Base Trigger，不增加 props、state、events、behavior、accessibility semantics 或 feedback style。
+criteria:
+  - id: P-BRUTALIST-TOOLTIP-TRIGGER-PURE-INHERITANCE
+    text:
+      en: Trigger must consume asTooltipTrigger and preserve Base disabled, hover, focus, focus-visible, focusSelf, and describedBy behavior without additions.
+      zh-CN: Trigger 必须消费 asTooltipTrigger，并原样保留 Base disabled、hover、focus、focus-visible、focusSelf 与 describedBy behavior。
+sources: [{ path: packages/prototypes/brutalist/src/tooltip/trigger.proto.ts }]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Aligned Trigger with the interactive Base Tooltip protocol.
+tags: [prototype, brutalist, tooltip, trigger]
+inherits:
+  prototypes: [{ id: P-BASE-TOOLTIP-TRIGGER }]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001]
+verifies:
+  tests: [T-BRUTALIST-TOOLTIP-0001]
