@@ -11,7 +11,7 @@ type DynamicEventTarget = EventTarget & {
 };
 
 export function releaseWebTriggerSurface(target: HTMLElement): void {
-  target.tabIndex = -1;
+  target.removeAttribute('tabindex');
   for (const attr of target.getAttributeNames()) {
     if (attr === 'role' || attr.startsWith('aria-') || attr.startsWith('data-pui-a11y-')) {
       target.removeAttribute(attr);

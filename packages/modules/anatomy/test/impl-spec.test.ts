@@ -437,6 +437,61 @@ describe('AnatomyModuleImpl', () => {
     off();
   });
 
+  it('signals target readiness changes across a family domain', () => {
+    const family = createAnatomyFamily('target-readiness-subscribe', {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        thumb: { cardinality: { min: 0, max: 1 } },
+      },
+    });
+    const root = {};
+    const thumb = {};
+    const parentMap = new Map<unknown, unknown | null>([
+      [root, null],
+      [thumb, root],
+    ]);
+    const rootImpl = new AnatomyModuleImpl(
+      makeCaps({
+        instance: root,
+        getParent: (instance) => parentMap.get(instance) ?? null,
+        getPrototype: () => makeProto([]),
+      }),
+      'root',
+      makeExposePort()
+    );
+    const thumbImpl = new AnatomyModuleImpl(
+      makeCaps({
+        instance: thumb,
+        getParent: (instance) => parentMap.get(instance) ?? null,
+        getPrototype: () => makeProto([]),
+      }),
+      'thumb',
+      makeExposePort()
+    );
+
+    rootImpl.claim(family, { role: 'root' });
+    thumbImpl.claim(family, { role: 'thumb' });
+
+    let calls = 0;
+    let callbackContext: unknown = null;
+    rootImpl.port.setOrderCallbackDispatcher((fn) => fn('target-context'));
+    const off = rootImpl.port.subscribeTargets(family, (ctx) => {
+      calls++;
+      callbackContext = ctx;
+    });
+
+    thumbImpl.onMountPhase('mounted', 1);
+    expect(calls).toBe(1);
+    expect(callbackContext).toBe('target-context');
+
+    thumbImpl.onMountPhase('detached', 1);
+    expect(calls).toBe(2);
+
+    off();
+    thumbImpl.onMountPhase('mounted', 2);
+    expect(calls).toBe(2);
+  });
+
   it('supports null/empty query policies when current instance is outside a valid domain', () => {
     const family = createAnatomyFamily('query-policy-outside-domain', {
       roles: {

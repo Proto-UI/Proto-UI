@@ -11,6 +11,7 @@ import type {
   A11yTextAlternative,
   A11yTreeBehavior,
   State,
+  OwnedStateHandle,
   Unsubscribe,
   MountPhase,
 } from '@proto.ui/core';
@@ -175,6 +176,19 @@ class A11yModuleImpl extends ModuleBase {
       this.stateWatchOffs.push(off);
     }
 
+    if (isState(this.ir.tree?.hidden)) {
+      const off = watchState(this.statePort, this.ir.tree.hidden, () => {
+        this.applyProjection();
+      });
+      this.stateWatchOffs.push(off);
+    }
+    if (isState(this.ir.tree?.mergeChildren)) {
+      const off = watchState(this.statePort, this.ir.tree.mergeChildren, () => {
+        this.applyProjection();
+      });
+      this.stateWatchOffs.push(off);
+    }
+
     this.stateWatchesInstalled = true;
   }
 
@@ -185,10 +199,25 @@ class A11yModuleImpl extends ModuleBase {
     }
 
     const relations: Record<string, string | null | undefined> = {};
+    const relationModes: NonNullable<A11ySemanticObjectSnapshot['relationModes']> = {};
     for (const [key, binding] of this.ir.relations) {
       const target = binding.spec.target;
       relations[key] = isState(target) ? target.get() : target;
+      if (binding.spec.mode === 'append') relationModes[key] = 'append';
     }
+
+    const tree = this.ir.tree
+      ? Object.fromEntries(
+          Object.entries({
+            hidden: isState(this.ir.tree.hidden)
+              ? (this.ir.tree.hidden.get() as boolean)
+              : this.ir.tree.hidden,
+            mergeChildren: isState(this.ir.tree.mergeChildren)
+              ? (this.ir.tree.mergeChildren.get() as boolean)
+              : this.ir.tree.mergeChildren,
+          }).filter(([, value]) => typeof value !== 'undefined')
+        )
+      : undefined;
 
     return {
       id: isState(this.ir.id) ? (this.ir.id.get() as string | null | undefined) : this.ir.id,
@@ -198,7 +227,8 @@ class A11yModuleImpl extends ModuleBase {
       states,
       actions: Object.fromEntries(this.ir.actions),
       relations,
-      tree: this.ir.tree ? { ...this.ir.tree } : undefined,
+      ...(Object.keys(relationModes).length ? { relationModes } : {}),
+      tree,
     };
   }
 
@@ -207,6 +237,13 @@ class A11yModuleImpl extends ModuleBase {
     if (!this.caps.has(A11Y_PROJECT_CAP)) return;
     this.caps.get(A11Y_PROJECT_CAP)(this.getSnapshot());
   }
+}
+
+function watchState<V>(statePort: StatePort, handle: State<V>, callback: () => void): Unsubscribe {
+  if ('watch' in handle && typeof handle.watch === 'function') {
+    return handle.watch(() => callback());
+  }
+  return statePort.watch(handle as OwnedStateHandle<V>, () => callback());
 }
 
 function isState(value: unknown): value is State<unknown> {

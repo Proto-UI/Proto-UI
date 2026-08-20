@@ -1,0 +1,86 @@
+id: T-BASE-LIVE-REGION-0001
+type: test
+title: Base Live Region behavior tests
+status: draft
+since: 0.2.0-rc.7
+summary: Web Component coverage for polite/assertive role and aria-live projection, atomic projection, mounted transitions, content preservation, and non-interaction.
+cases:
+  - id: T-BASE-LIVE-REGION-0001-CASE-TYPED-POLITENESS
+    title: Public politeness type preserves the polite and assertive literal union
+    covers:
+      - P-BASE-LIVE-REGION-POLITENESS
+    expectation: live-region-public-types-preserve-politeness-literals
+  - id: T-BASE-LIVE-REGION-0001-CASE-DEFAULTS
+    title: Live Region defaults to polite status semantics with atomic true and no interaction
+    covers:
+      - P-BASE-LIVE-REGION-POLITENESS
+      - P-BASE-LIVE-REGION-ATOMIC
+      - P-BASE-LIVE-REGION-SEMANTICS
+      - P-BASE-LIVE-REGION-NO-INTERACTION
+    expectation: polite-status-with-atomic-true-and-empty-exposes
+  - id: T-BASE-LIVE-REGION-0001-CASE-ASSERTIVE
+    title: Assertive politeness projects alert role and assertive aria-live
+    covers:
+      - P-BASE-LIVE-REGION-POLITENESS
+      - P-BASE-LIVE-REGION-SEMANTICS
+    expectation: assertive-projects-alert-role-and-assertive-aria-live
+  - id: T-BASE-LIVE-REGION-0001-CASE-ATOMIC-FALSE
+    title: atomic=false projects aria-atomic false while preserving polite status semantics
+    covers:
+      - P-BASE-LIVE-REGION-ATOMIC
+      - P-BASE-LIVE-REGION-SEMANTICS
+    expectation: atomic-false-projects-aria-atomic-false
+  - id: T-BASE-LIVE-REGION-0001-CASE-DYNAMIC-SEMANTICS
+    title: Mounted prop transitions update role, aria-live, and aria-atomic synchronously
+    covers:
+      - P-BASE-LIVE-REGION-POLITENESS
+      - P-BASE-LIVE-REGION-ATOMIC
+      - P-BASE-LIVE-REGION-SEMANTICS
+      - P-BASE-LIVE-REGION-DYNAMIC
+    expectation: mounted-prop-transitions-update-all-three-attributes-synchronously
+  - id: T-BASE-LIVE-REGION-0001-CASE-CONTENT-PRESERVATION
+    title: Authored child content is preserved as the announcement payload across prop transitions
+    covers:
+      - P-BASE-LIVE-REGION-CONTENT
+      - P-BASE-LIVE-REGION-DYNAMIC
+    expectation: authored-content-preserved-across-prop-transitions
+implementations:
+  - id: prototypes-base-live-region-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/live-region.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-LIVE-REGION-0001-CASE-TYPED-POLITENESS
+      - T-BASE-LIVE-REGION-0001-CASE-DEFAULTS
+      - T-BASE-LIVE-REGION-0001-CASE-ASSERTIVE
+      - T-BASE-LIVE-REGION-0001-CASE-ATOMIC-FALSE
+      - T-BASE-LIVE-REGION-0001-CASE-DYNAMIC-SEMANTICS
+      - T-BASE-LIVE-REGION-0001-CASE-CONTENT-PRESERVATION
+    exercises:
+      - P-BASE-LIVE-REGION
+verifies:
+  prototypes:
+    - id: P-BASE-LIVE-REGION
+      anchors:
+        - P-BASE-LIVE-REGION-POLITENESS
+        - P-BASE-LIVE-REGION-ATOMIC
+        - P-BASE-LIVE-REGION-SEMANTICS
+        - P-BASE-LIVE-REGION-DYNAMIC
+        - P-BASE-LIVE-REGION-CONTENT
+        - P-BASE-LIVE-REGION-NO-INTERACTION
+  contracts:
+    - id: C-ASYNC-A11Y-0001
+      anchors:
+        - C-ASYNC-A11Y-0001-A
+        - C-ASYNC-A11Y-0001-B
+        - C-ASYNC-A11Y-0001-C
+exercises:
+  prototypes: [P-BASE-LIVE-REGION]
+sources:
+  - path: packages/prototypes/base/test/live-region.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable Live Region protocol coverage.
+tags: [base, live-region, a11y, test]

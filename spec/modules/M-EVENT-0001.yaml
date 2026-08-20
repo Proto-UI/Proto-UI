@@ -1,9 +1,55 @@
 id: M-EVENT-0001
 type: module
-title: Event module owns protocol event dispatch and default-action control requests
+title: Event module
 status: draft
 since: 0.1.0
-summary: The event module owns protocol event registration/dispatch and provides the internal port used by foundation modules to request host-mediated default-action cancellation.
+summary: The standard instance Event module owns setup registration, token identity, runtime dispatch planning, target-preflighted scoped binding lifetime, and the privileged coordination used by runtime and interaction modules.
+statement:
+  zh-CN: >-
+    Event module 是 standard Proto UI runtime 固定安装的 instance module。它拥有 setup-time registration、precise token removal、registration diagnostics、runtime binding plan 与 instance-lifetime cleanup；prototype author surface 只通过 runtime 投影为 `def.event.on`、`onGlobal` 与 `off`，callback 的 `run handle` 由 runtime 在 dispatch window 绑定。Privileged port 供 runtime、其它 Module 与特权 asHook 注册内部 listener、bind/unbind、redirect semantic root、执行内部 callback、请求 default-action cancellation 与读取 diagnostics。Adapter 通过 host-neutral scoped Event binding 与独立 Default Action capability 落地宿主交互。Expose Event 已由独立 Module 承载，不属于 Event facade、port、registry 或 host-cap wiring。
+
+
+  en: >-
+    The Event module is an instance module installed by the standard Proto UI runtime. It owns setup-time registration, precise token removal, registration diagnostics, runtime binding plans, and instance-lifetime cleanup; the prototype-author surface is projected by the runtime only as `def.event.on`, `onGlobal`, and `off`, while the runtime binds the callback's `run handle` during the dispatch window. Its privileged port lets the runtime, other Modules, and privileged asHooks register internal listeners, bind or unbind, redirect the semantic root, invoke internal callbacks, request default-action cancellation, and read diagnostics. The adapter realizes host interaction through host-neutral scoped Event binding plus the separate Default Action capability. Expose Event is now owned by a standalone Module and does not belong to the Event facade, port, registry, or host-capability wiring.
+
+
+criteria:
+  - id: M-EVENT-0001-A
+    text:
+      zh-CN: Event-channel-owned `EventChannelFacade` 必须提供 setup-time `on`、`onGlobal` 与 precise-token `off` registration surface；runtime 必须只把它们投影到 `def.event`，不得固化普通 prototype-author `run.event` API。
+      en: The Event-channel-owned `EventChannelFacade` must provide setup-time `on`, `onGlobal`, and precise-token `off` registration surfaces; the runtime must project them only onto `def.event` and must not stabilize an ordinary prototype-author `run.event` API.
+  - id: M-EVENT-0001-B
+    text:
+      zh-CN: Module port 必须为 runtime、其它 Module 与特权 asHook 提供 internal `on`/`onGlobal`、`bind`/`unbind`、`dispatchInternal`、root redirect、semantic-only root redirect 与 diagnostics；这些能力不得直接进入普通作者 surface。
+      en: The module port must provide internal `on` and `onGlobal`, `bind` and `unbind`, `dispatchInternal`, root redirect, semantic-only root redirect, and diagnostics for the runtime, other Modules, and privileged asHooks; these capabilities must not directly enter the ordinary author surface.
+  - id: M-EVENT-0001-C
+    text:
+      zh-CN: Event Module 只保存 registration identity 与 binding plan，不得理解或构造 callback `run handle`，也不得向 prototype author 暴露、允许选择或要求读取具体 root/global host target。
+      en: The Event module may retain registration identity and binding plans but must not understand or construct callback `run handles`, and must not expose, allow selection of, or require prototype authors to read concrete root or global host targets.
+  - id: M-EVENT-0001-D
+    text:
+      zh-CN: Standard Runtime 与当前 official interactive Web Adapter profile 必须安装 Event Module；没有 registration 时 Module 必须 no-op 且不要求 Event binding capability，只有实际使用的 root/global scope 才能成为 host requirement。
+      en: The standard Runtime and current official interactive Web Adapter profiles must install the Event module; with no registrations the module must be a no-op and require no Event binding capability, and only a root or global scope that is actually used may become a host requirement.
+  - id: M-EVENT-0001-E
+    text:
+      zh-CN: Module 必须通过 `HC-EVENT-BINDING-0001` 把每个 root/global registration 交给 Adapter-owned translated interaction stream；相同 registration 不得去重，Adapter 的 route ownership 与 native mapping 不得进入 Module portable semantics。
+      en: The module must use `HC-EVENT-BINDING-0001` to connect each root or global registration to an adapter-owned translated interaction stream; identical registrations must not be deduplicated, and adapter route ownership and native mapping must not enter the module's portable semantics.
+  - id: M-EVENT-0001-F
+    text:
+      zh-CN: Registration 属于 instance lifetime；off、unbind、target/capability replacement、unmount 与 terminal disposal 必须释放旧 binding，并保证旧 target 不再 delivery，必要时对当前映射透明 rebind。
+      en: Registrations belong to the instance lifetime; off, unbind, target or capability replacement, unmount, and terminal disposal must release old bindings, ensure old targets no longer deliver, and transparently rebind to the current mapping when necessary.
+  - id: M-EVENT-0001-G
+    text:
+      zh-CN: Privileged port 的 default-action request 必须通过独立 `HC-DEFAULT-ACTION-0001` 投射，不得要求调用者依赖 DOM `preventDefault()`，也不得把 default-action control 与 Event routing 或 boundary classification 合并。
+      en: The privileged port's default-action request must be projected through the separate `HC-DEFAULT-ACTION-0001`, must not require callers to depend on DOM `preventDefault()`, and must not merge default-action control with Event routing or boundary classification.
+  - id: M-EVENT-0001-H
+    text:
+      zh-CN: '`EventFacade` 必须只等于 Event-channel-owned `EventChannelFacade`。Event package 对 `ExposeEventFacade`、`EXPOSE_EVENT_SINK_CAP` 与 legacy `EVENT_EMIT_CAP` 的导出只能是带 deprecation 的 source re-export；Adapter 必须把 sink 接到 `expose-event`，旧 `event` wiring 必须给出迁移诊断而不能假装构成 Expose Event 支持。'
+      en: '`EventFacade` must contain only the Event-channel-owned `EventChannelFacade`. Event-package exports of `ExposeEventFacade`, `EXPOSE_EVENT_SINK_CAP`, and legacy `EVENT_EMIT_CAP` may exist only as deprecated source re-exports; Adapters must wire the sink to `expose-event`, and legacy `event` wiring must produce a migration diagnostic rather than masquerade as Expose Event support.'
+  - id: M-EVENT-0001-I
+    text:
+      zh-CN: 一次 runtime binding attempt 必须在添加该次 attempt 的任何 host listener 前，为全部当前未绑定 registration 解析 target；若 target resolution 失败，该次 attempt 不得新增 host listener，target 可用后显式 bind retry 必须能够重试完整 registration set。该准则不要求失败后由 capability epoch 自动 retry，也不规定 listener attachment 或 cleanup 自身抛错时的事务语义；explicit unbind 后不得仅因 capability epoch 重新绑定。
+      en: A runtime binding attempt must resolve targets for every currently unbound registration before adding any host listener for that attempt; if target resolution fails, the attempt must add no host listener, and an explicit bind retry must be able to retry the complete registration set after targets become available. This criterion does not require automatic retry on a capability epoch after failure and does not define transactional semantics when listener attachment or cleanup itself throws; an explicit unbind must not rebind solely because of a capability epoch.
 satisfies:
   contracts:
     - C-EVENT-0001
@@ -13,23 +59,76 @@ satisfies:
     - C-EVENT-0005
     - C-EVENT-0006
     - C-EVENT-0007
+    - C-EVENT-TOKEN-0001
+    - C-EVENT-TYPE-0001
     - C-EVENT-TYPE-0002
+    - C-EVENT-TYPE-0003
+    - C-EVENT-TYPE-0004
 requires:
   hostCaps:
+    - id: HC-EVENT-BINDING-0001
+      since: 0.2.0-rc.7
     - HC-DEFAULT-ACTION-0001
 verifies:
   tests:
     - T-EVENT-0001
+    - T-EVENT-0002
+    - id: T-EVENT-0003
+      since: 0.2.0-rc.7
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0001
+  knowledge:
+    - K-COMPONENT-ACTOR-0001
+    - K-INFORMATION-CHANNEL-0001
+    - K-DESIGN-TRADEOFF-0001
+references:
+  modules:
+    - M-EXPOSE-EVENT-0001
 sources:
+  - path: internal/records/2026-08-13-module-host-cap-adapter-catalog-route.zh-CN.md
+  - path: internal/records/2026-08-14-event-module-host-cap-adapter-audit.zh-CN.md
+  - path: internal/records/2026-08-16-expose-event-package-extraction.zh-CN.md
+  - path: internal/contracts/event/event.v0.md
   - path: packages/modules/event/src/create.ts
   - path: packages/modules/event/src/types.ts
   - path: packages/modules/event/src/caps.ts
   - path: packages/modules/event/src/impl.ts
+  - path: packages/modules/event/src/kernel.ts
+  - path: packages/runtime/src/instance/instance.ts
+  - path: packages/runtime/src/kernel/handles/def.ts
+  - path: packages/runtime/src/kernel/event/runtime-event-callbacks.ts
+openQuestions:
+  - id: M-EVENT-0001-Q-HOST-BINDING-SHAPE
+    question:
+      zh-CN: Event implementation 何时应把 `EventTarget` getter caps 收敛为 `HC-EVENT-BINDING-0001` 所描述的 host-owned subscription lease？
+      en: When should the Event implementation replace its `EventTarget` getter caps with the host-owned subscription lease described by `HC-EVENT-BINDING-0001`?
+    context:
+      zh-CN: 当前 Web profiles 的行为证据完整，但 cap shape 直接依赖 DOM EventTarget，尚不能作为非 Web Adapter baseline。
+      en: Current Web profiles have substantial behavioral evidence, but the cap shape directly depends on DOM EventTarget and cannot yet serve as a non-Web Adapter baseline.
+    blocks: [cross-host-event-binding-port]
+  - id: M-EVENT-0001-Q-REQUIRED-MODULE-POLICY
+    question:
+      zh-CN: 未来 non-interactive 或 static Adapter 是否可以显式 omit Event Module；若允许，使用 `def.event` 的 prototype 应在 schema、adapt time 还是 first bind 时失败？
+      en: May a future non-interactive or static adapter explicitly omit the Event module, and if so, should a prototype using `def.event` fail at schema validation, adaptation time, or first bind?
+    context:
+      zh-CN: 当前 Runtime 固定安装 Event Module，official Web profiles 全部支持；没有 registration 时无需 host cap，因此 package installation 与实际 host requirement 不能简单等同。
+      en: The current Runtime installs the Event module and every official Web profile supports it; because no host cap is needed without registrations, package installation and an actual host requirement are not equivalent.
+    blocks: [configurable-runtime-module-selection, adapter-module-omission-diagnostics]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Removed the Expose Event implementation and composite facade from Event while retaining only deprecated source re-exports for migration.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Assigned the co-located Expose Event facade and canonical signal sink to M-EXPOSE-EVENT-0001 while retaining source-compatible package aliases.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Cataloged the Event facade and privileged port, required official profile support, host-neutral binding and default-action capabilities, lifecycle ownership, Expose Event boundary, and current EventTarget portability debt.
   - version: 0.1.0
     change: introduced
-    summary: Drafted the event module entity and recorded default-action control as an internal event port capability.
-tags:
-  - event
-  - module
-  - default-action
+    summary: Drafted the Event module entity and recorded default-action control as an internal Event port capability.
+  - version: 0.2.0
+    change: strengthened
+    summary: Required target preflight before listener attachment, zero new listeners on target-resolution failure, and an explicit complete-plan retry without automatic recovery semantics.
+tags: [event, module, required, adapter, lifecycle]

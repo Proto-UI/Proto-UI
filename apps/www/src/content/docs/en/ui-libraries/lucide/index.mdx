@@ -1,15 +1,12 @@
 ---
-title: 'Lucide Library'
-description: 'Lucide-based icon prototype library for Proto UI.'
+title: 'Lucide Icon Library'
+description: 'A searchable Lucide prototype icon grid with per-icon loading and copy-ready usage snippets.'
 ---
 
-The Lucide library provides icon prototypes generated from `lucide-static`.
+import LucideIconGallery from '@/components/LucideIconGallery.astro';
 
-Its usage model follows Proto UI constraints:
+Proto UI generates Lucide icon prototypes from `lucide-static`. This is the library’s primary working page: search icons directly, open a card to inspect its import path, and copy either an `asHook` or inline `render` snippet.
 
-- Use `asHook` when the icon itself is treated as a standalone interaction subject.
-- Use `render` helper when the icon is only a visual fragment embedded into another prototype's template.
+Icons use independent entry points for on-demand imports. The grid renders in batches and loads each SVG only as it approaches the viewport, so there is no need for a separate documentation page for every icon.
 
-For bundle control, each icon can be imported from its own entry (`@proto.ui/prototypes-lucide/icons/<name>`), so consumers do not need to load all icons upfront.
-
-Continue to the [icon catalog](./icons/) for per-icon preview and copyable prototype snippets.
+<LucideIconGallery locale="en" />

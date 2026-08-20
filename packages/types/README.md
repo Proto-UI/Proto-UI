@@ -13,7 +13,7 @@ Type foundation package used by core, runtime, modules, adapters, and prototype 
 ## Install
 
 ```bash
-npm install @proto.ui/types@0.0.1
+npm install @proto.ui/types@0.3.0-alpha.0
 ```
 
 ## Internal Structure
@@ -22,7 +22,6 @@ npm install @proto.ui/types@0.0.1
 - `src/event.ts`
 - `src/feedback/`
 - `src/index.ts`
-- `src/ir/`
 - `src/props.ts`
 - `src/rule/`
 - `src/semantics.ts`

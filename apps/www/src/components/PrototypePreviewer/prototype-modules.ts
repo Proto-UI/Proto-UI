@@ -27,6 +27,38 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base');
     registerPrototype('base-button', mod.button);
   },
+  'base-toggle': async () => {
+    const mod = await import('@proto.ui/prototypes-base/toggle');
+    registerPrototype('base-toggle', mod.toggle);
+  },
+  'base-switch-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/switch');
+    registerPrototype('base-switch-root', mod.switchRoot);
+  },
+  'base-switch-thumb': async () => {
+    const mod = await import('@proto.ui/prototypes-base/switch');
+    registerPrototype('base-switch-thumb', mod.switchThumb);
+  },
+  'base-tabs-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-root', mod.tabsRoot);
+  },
+  'base-tabs-list': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-list', mod.tabsList);
+  },
+  'base-tabs-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-trigger', mod.tabsTrigger);
+  },
+  'base-tabs-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-content', mod.tabsContent);
+  },
+  'base-tabs-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tabs');
+    registerPrototype('base-tabs-indicator', mod.tabsIndicator);
+  },
   'shadcn-button': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/button/index');
     registerPrototype('shadcn-button', mod.default);
@@ -35,25 +67,217 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/brutalist/src/button/index');
     registerPrototype('brutalist-button', mod.default);
   },
+  'brutalist-badge-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/badge');
+    registerPrototype('brutalist-badge-root', mod.BrutalistBadgeRoot);
+  },
+  'brutalist-card-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-root', mod.BrutalistCardRoot);
+  },
+  'brutalist-card-header': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-header', mod.BrutalistCardHeader);
+  },
+  'brutalist-card-content': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-content', mod.BrutalistCardContent);
+  },
+  'brutalist-card-footer': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/card');
+    registerPrototype('brutalist-card-footer', mod.BrutalistCardFooter);
+  },
+  'brutalist-separator-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/separator');
+    registerPrototype('brutalist-separator-root', mod.BrutalistSeparatorRoot);
+  },
+  'brutalist-skeleton-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/skeleton');
+    registerPrototype('brutalist-skeleton-root', mod.BrutalistSkeletonRoot);
+  },
+  'base-separator-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/separator');
+    registerPrototype('base-separator-root', mod.default);
+  },
+  'base-scroll-area-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-root', mod.scrollAreaRoot);
+  },
+  'base-scroll-area-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-viewport', mod.scrollAreaViewport);
+  },
+  'base-scroll-area-scrollbar': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-scrollbar', mod.scrollAreaScrollbar);
+  },
+  'base-scroll-area-thumb': async () => {
+    const mod = await import('@proto.ui/prototypes-base/scroll-area');
+    registerPrototype('base-scroll-area-thumb', mod.scrollAreaThumb);
+  },
+  'base-textarea-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/textarea');
+    registerPrototype('base-textarea-root', mod.textareaRoot);
+  },
+  'brutalist-textarea-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/textarea');
+    registerPrototype('brutalist-textarea-root', mod.brutalistTextareaRoot);
+  },
+  'base-live-region-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/live-region');
+    registerPrototype('base-live-region-root', mod.default);
+  },
+  'base-async-region-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/async-region');
+    registerPrototype('base-async-region-root', mod.default);
+  },
+  'brutalist-toggle': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/toggle/index');
+    registerPrototype('brutalist-toggle', mod.default);
+  },
+  'brutalist-switch-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/switch/root.proto');
+    registerPrototype('brutalist-switch-root', mod.default);
+  },
+  'brutalist-switch-thumb': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/switch/thumb.proto');
+    registerPrototype('brutalist-switch-thumb', mod.default);
+  },
+  'brutalist-tabs-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/tabs/root.proto');
+    registerPrototype('brutalist-tabs-root', mod.default);
+  },
+  'brutalist-tabs-list': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/tabs/list.proto');
+    registerPrototype('brutalist-tabs-list', mod.default);
+  },
+  'brutalist-tabs-trigger': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/tabs/trigger.proto');
+    registerPrototype('brutalist-tabs-trigger', mod.default);
+  },
+  'brutalist-tabs-content': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/tabs/content.proto');
+    registerPrototype('brutalist-tabs-content', mod.default);
+  },
+  'brutalist-hover-card-root': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/hover-card/root.proto');
+    registerPrototype('brutalist-hover-card-root', mod.default);
+  },
+  'brutalist-hover-card-trigger': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/hover-card/trigger.proto');
+    registerPrototype('brutalist-hover-card-trigger', mod.default);
+  },
+  'brutalist-hover-card-content': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/hover-card/content.proto');
+    registerPrototype('brutalist-hover-card-content', mod.default);
+  },
+  'brutalist-dropdown-root': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dropdown/root.proto');
+    registerPrototype('brutalist-dropdown-root', mod.default);
+  },
+  'brutalist-dropdown-trigger': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dropdown/trigger.proto');
+    registerPrototype('brutalist-dropdown-trigger', mod.default);
+  },
+  'brutalist-dropdown-content': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dropdown/content.proto');
+    registerPrototype('brutalist-dropdown-content', mod.default);
+  },
+  'brutalist-dropdown-item': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dropdown/item.proto');
+    registerPrototype('brutalist-dropdown-item', mod.default);
+  },
+  'brutalist-select-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/select/root.proto');
+    registerPrototype('brutalist-select-root', mod.default);
+  },
+  'brutalist-select-trigger': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/select/trigger.proto');
+    registerPrototype('brutalist-select-trigger', mod.default);
+  },
+  'brutalist-select-value': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/select/value.proto');
+    registerPrototype('brutalist-select-value', mod.default);
+  },
+  'brutalist-select-content': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/select/content.proto');
+    registerPrototype('brutalist-select-content', mod.default);
+  },
+  'brutalist-select-item': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/select/item.proto');
+    registerPrototype('brutalist-select-item', mod.default);
+  },
+  'brutalist-dialog-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/dialog/root.proto');
+    registerPrototype('brutalist-dialog-root', mod.default);
+  },
+  'brutalist-dialog-trigger': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dialog/trigger.proto');
+    registerPrototype('brutalist-dialog-trigger', mod.default);
+  },
+  'brutalist-dialog-mask': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dialog/overlay.proto');
+    registerPrototype('brutalist-dialog-mask', mod.default);
+  },
+  'brutalist-dialog-content': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dialog/content.proto');
+    registerPrototype('brutalist-dialog-content', mod.default);
+  },
+  'brutalist-dialog-title': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/dialog/title.proto');
+    registerPrototype('brutalist-dialog-title', mod.default);
+  },
+  'brutalist-dialog-description': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dialog/description.proto');
+    registerPrototype('brutalist-dialog-description', mod.default);
+  },
+  'brutalist-dialog-close': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/dialog/close.proto');
+    registerPrototype('brutalist-dialog-close', mod.default);
+  },
+  'brutalist-dialog-close-icon': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dialog/close-icon.proto');
+    registerPrototype('brutalist-dialog-close-icon', mod.default);
+  },
+  'brutalist-dialog-header': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dialog/header.proto');
+    registerPrototype('brutalist-dialog-header', mod.default);
+  },
+  'brutalist-dialog-footer': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/dialog/footer.proto');
+    registerPrototype('brutalist-dialog-footer', mod.default);
+  },
   'brutalist-scroll-area-root': async () => {
-    const mod = await import('@proto.ui/prototypes-brutalist/scroll-area');
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/scroll-area/index');
     registerPrototype('brutalist-scroll-area-root', mod.BrutalistScrollAreaRoot);
   },
   'brutalist-scroll-area-viewport': async () => {
-    const mod = await import('@proto.ui/prototypes-brutalist/scroll-area');
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/scroll-area/index');
     registerPrototype('brutalist-scroll-area-viewport', mod.BrutalistScrollAreaViewport);
   },
   'brutalist-scroll-area-scrollbar': async () => {
-    const mod = await import('@proto.ui/prototypes-brutalist/scroll-area');
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/scroll-area/index');
     registerPrototype('brutalist-scroll-area-scrollbar', mod.BrutalistScrollAreaScrollbar);
   },
   'brutalist-scroll-area-thumb': async () => {
-    const mod = await import('@proto.ui/prototypes-brutalist/scroll-area');
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/scroll-area/index');
     registerPrototype('brutalist-scroll-area-thumb', mod.BrutalistScrollAreaThumb);
-  },
-  'brutalist-scroll-area-corner': async () => {
-    const mod = await import('@proto.ui/prototypes-brutalist/scroll-area');
-    registerPrototype('brutalist-scroll-area-corner', mod.BrutalistScrollAreaCorner);
   },
   'shadcn-toggle': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/toggle/index');
@@ -62,6 +286,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'lucide-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icon/index');
     registerPrototype('lucide-icon', mod.default);
+  },
+  'shadcn-separator-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/separator');
+    registerPrototype('shadcn-separator-root', mod.default);
   },
   'shadcn-switch-root': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/switch/root.proto');
@@ -100,6 +328,22 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod =
       await import('../../../../../packages/prototypes/base/src/hover-card/content.proto');
     registerPrototype('base-hover-card-content', mod.default);
+  },
+  'base-tooltip-group': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/tooltip/group.proto');
+    registerPrototype('base-tooltip-group', mod.default);
+  },
+  'base-tooltip-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/tooltip/root.proto');
+    registerPrototype('base-tooltip-root', mod.default);
+  },
+  'base-tooltip-trigger': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/tooltip/trigger.proto');
+    registerPrototype('base-tooltip-trigger', mod.default);
+  },
+  'base-tooltip-content': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/tooltip/content.proto');
+    registerPrototype('base-tooltip-content', mod.default);
   },
   'base-dropdown-root': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/dropdown/root.proto');
@@ -269,6 +513,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'shadcn-dialog-header': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/dialog/header.proto');
     registerPrototype('shadcn-dialog-header', mod.default);
+  },
+  'shadcn-textarea-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/textarea');
+    registerPrototype('shadcn-textarea-root', mod.default);
   },
   'shadcn-dialog-footer': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/dialog/footer.proto');

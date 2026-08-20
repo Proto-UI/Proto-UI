@@ -1,0 +1,168 @@
+id: T-BRUTALIST-DIALOG-0001
+type: test
+title: Brutalist Dialog visual contract and public API tests
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Covers the Brutalist Dialog public API (trigger sky pair, mask fade, content fade-zoom panel, close-icon canary pair + a11y Close name, header/footer anatomy) against P-BRUTALIST-DIALOG criteria.
+
+
+cases:
+  - id: T-BRUTALIST-DIALOG-0001-CASE-1
+    title: Root entry, Base inheritance, and container visual grammar
+    covers:
+      - P-BRUTALIST-DIALOG-ENTRY
+      - P-BRUTALIST-DIALOG-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-root-entry-container
+  - id: T-BRUTALIST-DIALOG-0001-CASE-2
+    title: Trigger fixed sky pair and interaction surfaces
+    covers:
+      - P-BRUTALIST-DIALOG-TRIGGER-ENTRY
+      - P-BRUTALIST-DIALOG-TRIGGER-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-TRIGGER-PAIR-INVARIANT
+      - P-BRUTALIST-DIALOG-TRIGGER-INTERACTION
+      - P-BRUTALIST-DIALOG-TRIGGER-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-trigger-pair-interaction
+  - id: T-BRUTALIST-DIALOG-0001-CASE-3
+    title: Mask fade transition and flat no-blur overlay
+    covers:
+      - P-BRUTALIST-DIALOG-MASK-ENTRY
+      - P-BRUTALIST-DIALOG-MASK-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-MASK-PUBLIC-BOUNDARY
+      - P-BRUTALIST-DIALOG-MASK-TRANSITION
+      - P-BRUTALIST-DIALOG-MASK-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-mask-transition-no-blur
+  - id: T-BRUTALIST-DIALOG-0001-CASE-4
+    title: Content fade-zoom transition and centered hard-shadowed panel
+    covers:
+      - P-BRUTALIST-DIALOG-CONTENT-ENTRY
+      - P-BRUTALIST-DIALOG-CONTENT-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-CONTENT-PUBLIC-BOUNDARY
+      - P-BRUTALIST-DIALOG-CONTENT-TRANSITION
+      - P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-content-transition-panel
+  - id: T-BRUTALIST-DIALOG-0001-CASE-5
+    title: Title heading typography
+    covers:
+      - P-BRUTALIST-DIALOG-TITLE-ENTRY
+      - P-BRUTALIST-DIALOG-TITLE-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-TITLE-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-title-typography
+  - id: T-BRUTALIST-DIALOG-0001-CASE-6
+    title: Description mono typography
+    covers:
+      - P-BRUTALIST-DIALOG-DESCRIPTION-ENTRY
+      - P-BRUTALIST-DIALOG-DESCRIPTION-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-DESCRIPTION-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-description-typography
+  - id: T-BRUTALIST-DIALOG-0001-CASE-7
+    title: Close entry, Base inheritance, and composed control surface
+    covers:
+      - P-BRUTALIST-DIALOG-CLOSE-ENTRY
+      - P-BRUTALIST-DIALOG-CLOSE-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-CLOSE-COMPOSITION
+    expectation: p-brutalist-dialog-close-entry-inheritance-and-single-owner-composition
+  - id: T-BRUTALIST-DIALOG-0001-CASE-8
+    title: Close-icon canary pair, a11y Close name and interaction
+    covers:
+      - P-BRUTALIST-DIALOG-CLOSE-ICON-ENTRY
+      - P-BRUTALIST-DIALOG-CLOSE-ICON-BASE-INHERITANCE
+      - P-BRUTALIST-DIALOG-CLOSE-ICON-A11Y-NAME
+      - P-BRUTALIST-DIALOG-CLOSE-ICON-PAIR-INVARIANT
+      - P-BRUTALIST-DIALOG-CLOSE-ICON-INTERACTION
+      - P-BRUTALIST-DIALOG-CLOSE-ICON-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-close-icon-pair-a11y
+  - id: T-BRUTALIST-DIALOG-0001-CASE-9
+    title: Header anatomy and layout surface
+    covers:
+      - P-BRUTALIST-DIALOG-HEADER-ENTRY
+      - P-BRUTALIST-DIALOG-HEADER-ANATOMY
+      - P-BRUTALIST-DIALOG-HEADER-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-header-anatomy
+  - id: T-BRUTALIST-DIALOG-0001-CASE-10
+    title: Footer anatomy and layout surface
+    covers:
+      - P-BRUTALIST-DIALOG-FOOTER-ENTRY
+      - P-BRUTALIST-DIALOG-FOOTER-ANATOMY
+      - P-BRUTALIST-DIALOG-FOOTER-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-footer-anatomy
+implementations:
+  - id: prototypes-brutalist-dialog-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/dialog.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DIALOG-0001-CASE-1
+      - T-BRUTALIST-DIALOG-0001-CASE-2
+      - T-BRUTALIST-DIALOG-0001-CASE-3
+      - T-BRUTALIST-DIALOG-0001-CASE-4
+      - T-BRUTALIST-DIALOG-0001-CASE-5
+      - T-BRUTALIST-DIALOG-0001-CASE-6
+      - T-BRUTALIST-DIALOG-0001-CASE-7
+      - T-BRUTALIST-DIALOG-0001-CASE-8
+      - T-BRUTALIST-DIALOG-0001-CASE-9
+      - T-BRUTALIST-DIALOG-0001-CASE-10
+    exercises:
+      - P-BASE-DIALOG
+      - P-BASE-DIALOG-CLOSE
+      - P-BASE-DIALOG-CONTENT
+      - P-BASE-DIALOG-DESCRIPTION
+      - P-BASE-DIALOG-MASK
+      - P-BASE-DIALOG-TITLE
+      - P-BASE-DIALOG-TRIGGER
+      - P-BRUTALIST-DIALOG
+      - P-BRUTALIST-DIALOG-CLOSE
+      - P-BRUTALIST-DIALOG-CLOSE-ICON
+      - P-BRUTALIST-DIALOG-CONTENT
+      - P-BRUTALIST-DIALOG-DESCRIPTION
+      - P-BRUTALIST-DIALOG-FOOTER
+      - P-BRUTALIST-DIALOG-HEADER
+      - P-BRUTALIST-DIALOG-MASK
+      - P-BRUTALIST-DIALOG-TITLE
+      - P-BRUTALIST-DIALOG-TRIGGER
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-DIALOG
+    - id: P-BRUTALIST-DIALOG-TRIGGER
+    - id: P-BRUTALIST-DIALOG-MASK
+    - id: P-BRUTALIST-DIALOG-CONTENT
+    - id: P-BRUTALIST-DIALOG-TITLE
+    - id: P-BRUTALIST-DIALOG-DESCRIPTION
+    - id: P-BRUTALIST-DIALOG-CLOSE
+    - id: P-BRUTALIST-DIALOG-CLOSE-ICON
+    - id: P-BRUTALIST-DIALOG-HEADER
+    - id: P-BRUTALIST-DIALOG-FOOTER
+exercises:
+  prototypes:
+    - P-BASE-DIALOG
+    - P-BASE-DIALOG-CLOSE
+    - P-BASE-DIALOG-CONTENT
+    - P-BASE-DIALOG-DESCRIPTION
+    - P-BASE-DIALOG-MASK
+    - P-BASE-DIALOG-TITLE
+    - P-BASE-DIALOG-TRIGGER
+    - P-BRUTALIST-DIALOG
+    - P-BRUTALIST-DIALOG-CLOSE
+    - P-BRUTALIST-DIALOG-CLOSE-ICON
+    - P-BRUTALIST-DIALOG-CONTENT
+    - P-BRUTALIST-DIALOG-DESCRIPTION
+    - P-BRUTALIST-DIALOG-FOOTER
+    - P-BRUTALIST-DIALOG-HEADER
+    - P-BRUTALIST-DIALOG-MASK
+    - P-BRUTALIST-DIALOG-TITLE
+    - P-BRUTALIST-DIALOG-TRIGGER
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dialog coverage mapped to the rc.7 P criteria (trigger pair, mask transition, content panel, close-icon pair + a11y, title/description typography, header/footer anatomy). Not present in the immutable rc.6 snapshot.
+
+
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - dialog

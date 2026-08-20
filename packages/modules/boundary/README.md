@@ -1,6 +1,6 @@
 # @proto.ui/module-boundary
 
-Proto UI module that provides interaction-boundary capability for adapters.
+Proto UI module that provides interaction-boundary capability.
 
 ## Purpose
 
@@ -13,7 +13,7 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-boundary@0.0.1
+npm install @proto.ui/module-boundary@0.3.0-alpha.0
 ```
 
 ## Internal Structure
@@ -23,12 +23,13 @@ npm install @proto.ui/module-boundary@0.0.1
 - `src/impl.ts`
 - `src/index.ts`
 - `src/types.ts`
-- `src/web/host-bridge.ts`
+- `src/web/`
 
 ## Related Internal Packages
 
 - `@proto.ui/core`
 - `@proto.ui/module-base`
+- `@proto.ui/module-event`
 - `@proto.ui/types`
 
 ## License

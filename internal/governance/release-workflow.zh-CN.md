@@ -39,6 +39,16 @@
 - 40 位发布 commit SHA
 - `sha256` spec snapshot digest
 
+### 2.3 Prerelease 阶段
+
+Prerelease suffix 用来表达稳定化阶段，而不是泛化的内部构建顺序：
+
+- `alpha` 可以接纳经过评审的架构调整、顶层 API 变化与新 feature；它不表示 API freeze 或 feature freeze。
+- `beta` 在核心范围与主要 API 收敛后开启，重点转向集成、兼容与缺陷修复；出现新的 breaking 方向时必须明确判断是否退回 alpha。
+- `rc` 只用于维护者认为可在最终验证或 blocker 修复后直接晋升对应 stable 的候选；仍计划架构重构、顶层 breaking API 变化或新增核心 feature 时不得使用 rc。
+
+每个实际发布的阶段仍必须拥有精确 V 实体、完整全局对齐 package set、tag、dist-tag 与不可变 snapshot evidence。
+
 ## 3. 准备流程
 
 1. 从最新 `main` 创建 topic branch。
@@ -111,7 +121,7 @@ npm Trusted Publisher 是 package 级配置，因此 package identity 不存在�
 2. 更新根 `VERSION`、创建新的 `draft` V 实体，并对齐 launch governance release line。
 3. 运行 `node scripts/release/stamp-version.mjs`，使全部公开 package manifest 使用同一精确版本，再用仓库声明的 pnpm 版本刷新 lockfile。
 4. 更新双语 release notes 并运行 `pnpm release:bom`。随 tarball 分发且会引用自身版本的 package README 也在此阶段更新。
-5. 运行 `pnpm spec:docs:agent` 重新生成 spec 投影，并审阅新 V 实体影响的 entity graph。
+5. 运行 `pnpm spec:docs:agent` 生成被 Git 忽略的本地 Agent 投影，并审阅新 V 实体影响的 entity graph；不得把该一次性投影加入提交。
 6. 提交前运行 `pnpm release:rehearse`、`pnpm check:agent-doc` 与 `git diff --check`。
 7. 创建 Draft PR，明确发行范围、检查结果、package 数量，以及尚未执行真实发布这一事实。
 
@@ -155,7 +165,7 @@ V 实体必须记录 tag 所附不可变 draft snapshot 的 digest。不得在 V
 4. 将 release notes 从草稿措辞切换为已发布措辞
 5. 更新双语仓库状态、精确 prerelease trial 命令、Release 链接与当前版本 CI/CD 说明
 6. 新增 dated record，记录 workflow、npm、tag、GitHub Release 与 snapshot 事实
-7. 重新生成 spec 投影，并运行 `check:release-version`、`release:assets:check`、`check:agent-doc`、类型检查与文档构建
+7. 生成并审阅被 Git 忽略的本地 Agent 投影，再运行 `check:release-version`、`release:assets:check`、`check:agent-doc`、类型检查与文档构建
 8. 证据 PR 合入后，使用已合入的英文 `internal/releases/<version>/release-notes.md` 更新 GitHub Release 正文，并确认公共页面不再保留发布前 draft 措辞；不得在评审前发布这项可变文案更新，也不得替换或重新生成不可变 snapshot assets
 
 证据 PR 不改动 `VERSION` 或 package manifest，也不会重新发布 package。它的职责是让仓库真理与已经不可变的外部事实一致。只有该 PR 合入后，release 才能在 catalog 中表述为 `active`，并在公共文档中表述为当前可复现的 prerelease。

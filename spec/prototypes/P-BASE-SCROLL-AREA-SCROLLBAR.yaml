@@ -1,27 +1,47 @@
 id: P-BASE-SCROLL-AREA-SCROLLBAR
 type: prototype
-title: Base Scroll Area Scrollbar protocol
+title: Base Scroll Area Scrollbar is an optional composed control route
 status: draft
 since: 0.2.0-rc.7
-summary: Base Scroll Area Scrollbar protocol for the Proto UI framework.
+summary: Scrollbar carries orientation, track geometry, and the composed control route without owning the Viewport offset.
 statement:
-  en: Base Scroll Area Scrollbar protocol. This draft entity catalogs the protocol surface.
-  zh-CN: Base Scroll Area Scrollbar protocol。该 draft entity 编目协议面。
+  zh-CN: Scrollbar 是 composed projection 中可选的方向性控制路线。它公开 vertical/horizontal orientation，并由 family-scoped host session 使用 track geometry 与后代 Thumb 接收 control request；逻辑 offset、extent 与 scrolling 仍由 Viewport 的宿主滚动面拥有，system projection 可以不渲染该 part。
+  en: Scrollbar is an optional directional control route in composed projection. It exposes vertical or horizontal orientation and lets the family-scoped host session use track geometry plus the descendant Thumb to receive control requests; logical offset, extent, and scrolling remain owned by the Viewport host surface, and system projection may omit this part.
 criteria:
-  - id: P-BASE-SCROLL-AREA-SCROLLBAR-CATALOGED
+  - id: P-BASE-SCROLL-AREA-SCROLLBAR-AUTHORING-ENTRIES
     text:
-      en: The protocol is cataloged for traceability.
-      zh-CN: 该协议已编目以便追溯。
+      zh-CN: '`base-scroll-area-scrollbar` 与 `asScrollAreaScrollbar` 必须是同一 Scrollbar protocol 的 direct 与 authored-asHook entries。'
+      en: '`base-scroll-area-scrollbar` and `asScrollAreaScrollbar` must be direct and authored-asHook entries for the same Scrollbar protocol.'
+  - id: P-BASE-SCROLL-AREA-SCROLLBAR-ORIENTATION
+    text:
+      zh-CN: Scrollbar 必须接受 `vertical` 或 `horizontal` orientation，缺省为 `vertical`，并 expose 当前 orientation。
+      en: Scrollbar must accept vertical or horizontal orientation, default to vertical, and expose the current orientation.
+  - id: P-BASE-SCROLL-AREA-SCROLLBAR-NOT-OFFSET-OWNER
+    text:
+      zh-CN: Scrollbar 不得复制或成为 Viewport scroll offset、extent、scrolling 与 projection 的 source of truth。
+      en: Scrollbar must not duplicate or become the source of truth for Viewport scroll offset, extent, scrolling, or projection.
+  - id: P-BASE-SCROLL-AREA-SCROLLBAR-PROJECTION-PARTICIPATION
+    text:
+      zh-CN: Scrollbar 只在 composed projection 中需要参与视觉树；system projection 可由 host adapter 隐藏或省略它，而不改变逻辑 Scroll Area。
+      en: Scrollbar only needs to participate in the visual tree for composed projection; a host adapter may hide or omit it for system projection without changing the logical Scroll Area.
+  - id: P-BASE-SCROLL-AREA-SCROLLBAR-HOST-CONTROL
+    text:
+      zh-CN: Scrollbar 必须提供 orientation、track target 与对后代 Thumb 的结构归属；family-scoped host session 拥有 track measurement、Thumb geometry projection，以及把 Thumb Move Gesture 映射为 `control-drag` request 的路线。
+      en: Scrollbar must provide orientation, a track target, and structural ownership of its descendant Thumb; the family-scoped host session owns track measurement, Thumb geometry projection, and the route that maps the Thumb Move Gesture to `control-drag` requests.
 sources:
   - path: packages/prototypes/base/src/scroll-area/scrollbar.proto.ts
+dependsOn:
+  prototypes: [P-BASE-SCROLL-AREA]
+  contracts: [C-AS-HOOK-0001, C-SCROLL-0001, C-SCROLL-COMPOSED-CONTROL-0001]
+verifies: { tests: [T-BASE-SCROLL-AREA-0001, T-SCROLL-COMPOSED-CONTROL-0001] }
 revisions:
   - version: 0.2.0-rc.7
+    change: revised
+    summary: Resolved the composed-control route through the family host session and Move Gesture-backed Thumb hit subregion.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added host-owned passive track and Thumb geometry participation without interaction ownership.
+  - version: 0.2.0-rc.7
     change: introduced
-    summary: Introduced base scroll area scrollbar protocol.
-verifies:
-  tests:
-    - T-BRUTALIST-SCROLL-AREA-0001
-tags:
-  - prototype
-  - base
-  - scroll_area
+    summary: Cataloged Scrollbar orientation and composed-projection boundary without claiming unimplemented control binding.
+tags: [prototype, base, scroll-area, scrollbar, composed-projection, move]

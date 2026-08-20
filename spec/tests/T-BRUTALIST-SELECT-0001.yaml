@@ -1,0 +1,118 @@
+id: T-BRUTALIST-SELECT-0001
+type: test
+title: Brutalist Select visual contract and public API tests
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Covers the Brutalist Select public API (size enum, defaults, placeholder state, chevron indicator, selected pair invariant, selected indicator, transition) against P-BRUTALIST-SELECT criteria.
+
+
+cases:
+  - id: T-BRUTALIST-SELECT-0001-CASE-1
+    title: Direct entry and Base Select inheritance
+    covers:
+      - P-BRUTALIST-SELECT-ENTRY
+      - P-BRUTALIST-SELECT-BASE-INHERITANCE
+      - P-BRUTALIST-SELECT-TRIGGER-ENTRY
+      - P-BRUTALIST-SELECT-TRIGGER-BASE-INHERITANCE
+      - P-BRUTALIST-SELECT-VALUE-ENTRY
+      - P-BRUTALIST-SELECT-VALUE-BASE-INHERITANCE
+    expectation: p-brutalist-select-entry-inheritance
+  - id: T-BRUTALIST-SELECT-0001-CASE-2
+    title: Trigger size options map to dimension tokens and restore defaults
+    covers:
+      - P-BRUTALIST-SELECT-TRIGGER-SIZE-PROP
+      - P-BRUTALIST-SELECT-TRIGGER-DEFAULTS
+    expectation: p-brutalist-select-trigger-sizes
+  - id: T-BRUTALIST-SELECT-0001-CASE-3
+    title: Placeholder state mutes foreground and chevron renders
+    covers:
+      - P-BRUTALIST-SELECT-TRIGGER-PLACEHOLDER-STATE
+      - P-BRUTALIST-SELECT-TRIGGER-CHEVRON
+    expectation: p-brutalist-select-placeholder-chevron
+  - id: T-BRUTALIST-SELECT-0001-CASE-4
+    title: Trigger interaction surfaces and visual grammar
+    covers:
+      - P-BRUTALIST-SELECT-TRIGGER-INTERACTION
+      - P-BRUTALIST-SELECT-TRIGGER-VISUAL-GRAMMAR
+    expectation: p-brutalist-select-trigger-interaction-grammar
+  - id: T-BRUTALIST-SELECT-0001-CASE-5
+    title: Value renders displayValue or null
+    covers:
+      - P-BRUTALIST-SELECT-VALUE-DISPLAY-RENDER
+    expectation: p-brutalist-select-value-display-render
+  - id: T-BRUTALIST-SELECT-0001-CASE-6
+    title: Content transition and panel visual grammar
+    covers:
+      - P-BRUTALIST-SELECT-CONTENT-ENTRY
+      - P-BRUTALIST-SELECT-CONTENT-BASE-INHERITANCE
+      - P-BRUTALIST-SELECT-CONTENT-TRANSITION
+      - P-BRUTALIST-SELECT-CONTENT-VISUAL-GRAMMAR
+    expectation: p-brutalist-select-content-transition-panel
+  - id: T-BRUTALIST-SELECT-0001-CASE-7
+    title: Item selected pair, indicator, interaction and visual grammar
+    covers:
+      - P-BRUTALIST-SELECT-ITEM-ENTRY
+      - P-BRUTALIST-SELECT-ITEM-BASE-INHERITANCE
+      - P-BRUTALIST-SELECT-ITEM-SELECTED-PAIR-INVARIANT
+      - P-BRUTALIST-SELECT-ITEM-INTERACTION
+      - P-BRUTALIST-SELECT-ITEM-SELECTED-INDICATOR
+      - P-BRUTALIST-SELECT-ITEM-VISUAL-GRAMMAR
+    expectation: p-brutalist-select-item-selected-indicator
+implementations:
+  - id: prototypes-brutalist-select-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/select.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SELECT-0001-CASE-1
+      - T-BRUTALIST-SELECT-0001-CASE-2
+      - T-BRUTALIST-SELECT-0001-CASE-3
+      - T-BRUTALIST-SELECT-0001-CASE-4
+      - T-BRUTALIST-SELECT-0001-CASE-5
+      - T-BRUTALIST-SELECT-0001-CASE-6
+      - T-BRUTALIST-SELECT-0001-CASE-7
+    exercises:
+      - P-BASE-SELECT
+      - P-BASE-SELECT-CONTENT
+      - P-BASE-SELECT-TRIGGER
+      - P-BASE-SELECT-VALUE
+      - P-BASE-SELECT-ITEM
+      - P-BRUTALIST-SELECT
+      - P-BRUTALIST-SELECT-CONTENT
+      - P-BRUTALIST-SELECT-ITEM
+      - P-BRUTALIST-SELECT-TRIGGER
+      - P-BRUTALIST-SELECT-VALUE
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-SELECT
+    - id: P-BRUTALIST-SELECT-TRIGGER
+    - id: P-BRUTALIST-SELECT-VALUE
+    - id: P-BRUTALIST-SELECT-CONTENT
+    - id: P-BRUTALIST-SELECT-ITEM
+exercises:
+  prototypes:
+    - P-BASE-SELECT
+    - P-BASE-SELECT-CONTENT
+    - P-BASE-SELECT-TRIGGER
+    - P-BASE-SELECT-VALUE
+    - P-BASE-SELECT-ITEM
+    - P-BRUTALIST-SELECT
+    - P-BRUTALIST-SELECT-CONTENT
+    - P-BRUTALIST-SELECT-ITEM
+    - P-BRUTALIST-SELECT-TRIGGER
+    - P-BRUTALIST-SELECT-VALUE
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Select coverage mapped to the rc.7 P criteria (size, defaults, placeholder, chevron, selected pair, indicator, transition). Not present in the immutable rc.6 snapshot.
+
+
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - select

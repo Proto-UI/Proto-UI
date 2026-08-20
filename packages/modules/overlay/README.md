@@ -13,20 +13,26 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-overlay@0.0.1
+npm install @proto.ui/module-overlay@0.3.0-alpha.0
 ```
 
 ## Internal Structure
 
+- `src/caps.ts`
 - `src/create.ts`
 - `src/impl.ts`
 - `src/index.ts`
 - `src/types.ts`
+- `src/web/`
 
 ## Related Internal Packages
 
 - `@proto.ui/core`
+- `@proto.ui/module-anatomy`
 - `@proto.ui/module-base`
+- `@proto.ui/module-boundary`
+- `@proto.ui/module-event`
+- `@proto.ui/module-positioning`
 - `@proto.ui/types`
 
 ## License

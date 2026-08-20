@@ -1,0 +1,25 @@
+---
+title: 'Brutalist Switch'
+description: 'Mechanical Neo-Brutalist switch states and interaction contract'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+# Switch
+
+The housing stays fixed. The square thumb is the actuator.
+
+- **Off:** paper track and ink thumb.
+- **On:** sky-blue track and canary-yellow thumb; position remains the primary checked signal.
+- **Pressed:** the track switches to coral and loses its hard shadow. Release restores the full structure.
+- **Focus:** hard offset outline.
+- **Disabled:** structure remains visible at reduced emphasis.
+
+Each runtime-neutral demo example keeps its visible caption inside the Switch root. Inherited Base `nameFromContent` projection therefore derives the accessible name from the same visible text in Web Components, React, and Vue; the examples need neither a host-specific `aria-label` nor a native `<label for>` relationship that cannot target a custom-element host. The caption is part of the Switch control surface, so clicking it follows the Switch activation path while the disabled example remains inert.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
+</div>

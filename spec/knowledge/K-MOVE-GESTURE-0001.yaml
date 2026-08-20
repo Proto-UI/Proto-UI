@@ -1,0 +1,44 @@
+id: K-MOVE-GESTURE-0001
+type: knowledge
+title: Move Gesture is a bounded continuous-contact substrate rather than Drag and Drop
+status: draft
+since: 0.2.0-rc.7
+summary: Move Gesture describes host-recognized continuous movement and cancellation while domain controls and future Drag and Drop own their distinct meanings.
+statement:
+  zh-CN: >-
+    Move Gesture 是 primary contact 被宿主接受后形成的有界连续移动会话。它提供 start、move、end、cancel 与宿主本地坐标 sample，但不决定被移动对象、值域、尺寸约束、scroll range、drag payload、drop target、collision、reorder 或 accessibility semantics。Scroll Thumb、Slider、Resize 与未来 Drag and Drop 可以复用该 substrate，再由各自领域把移动解释为 request 或行为。
+
+
+  en: >-
+    Move Gesture is a bounded continuous-movement session formed after a host accepts a primary contact. It provides start, move, end, cancel, and host-local coordinate samples without deciding the moved object, value range, size constraints, scroll range, drag payload, drop target, collision, reorder, or accessibility semantics. Scroll Thumb, Slider, Resize, and future Drag and Drop may reuse this substrate and let their own domains interpret movement as requests or behavior.
+
+
+criteria:
+  - id: K-MOVE-GESTURE-0001-A
+    text:
+      zh-CN: Move Gesture 必须与完整 Drag and Drop 区分；后者需要 source/payload、drop discovery、acceptance/collision、preview、reorder 与可访问替代路径等附加语义。
+      en: Move Gesture must remain distinct from full Drag and Drop, which requires additional source and payload, drop discovery, acceptance and collision, preview, reorder, and accessible-alternative semantics.
+  - id: K-MOVE-GESTURE-0001-B
+    text:
+      zh-CN: Move sample 的坐标与单位属于宿主会话，不得被提升为 prototype author state 或假定为 CSS pixel。
+      en: Move-sample coordinates and units belong to the host session and must not be promoted to prototype-author state or assumed to be CSS pixels.
+  - id: K-MOVE-GESTURE-0001-C
+    text:
+      zh-CN: 领域消费者必须把 Move 生命周期解释为自己的 request；Move 本身不得拥有 Scroll position、Slider value、Resize size 或 drop result。
+      en: Domain consumers must interpret the Move lifecycle as their own requests; Move itself must not own Scroll position, Slider value, Resize size, or a drop result.
+sources:
+  - path: internal/records/2026-07-29-move-gesture-first-consumer.zh-CN.md
+  - path: https://www.w3.org/TR/pointerevents/
+    label: W3C Pointer Events
+  - path: https://api.flutter.dev/flutter/gestures/GestureArenaManager-class.html
+    label: Flutter GestureArenaManager
+  - path: https://react-aria.adobe.com/useMove
+    label: React Aria useMove
+explains:
+  decisions: [D-MOVE-GESTURE-0001]
+  contracts: [C-MOVE-GESTURE-0001]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Distinguished the reusable continuous-move substrate from domain controls and Drag and Drop.
+tags: [move, gesture, drag, drag-and-drop, host]

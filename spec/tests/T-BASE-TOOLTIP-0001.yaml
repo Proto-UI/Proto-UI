@@ -1,0 +1,88 @@
+id: T-BASE-TOOLTIP-0001
+type: test
+title: Base Tooltip compound protocol tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers Root ownership, delayed and immediate interaction, controlled Escape requests, disabled state, semantics, additive description relation, Overlay, Transition, and positioning wiring.
+cases:
+  - id: T-BASE-TOOLTIP-0001-CASE-DELAYS
+    title: Pointer delay is cancellable while focus opens immediately and close remains hoverable
+    covers: [P-BASE-TOOLTIP-DELAYS, P-BASE-TOOLTIP-CONTENT-HOVERABLE]
+    expectation: tooltip-pointer-delay-reverses-and-focus-opens-immediately
+  - id: T-BASE-TOOLTIP-0001-CASE-CONTROLLED-ESCAPE
+    title: Controlled Tooltip retains owner fact and emits Escape close request
+    covers: [P-BASE-TOOLTIP-REQUESTS, P-BASE-TOOLTIP-CONTENT-ESCAPE]
+    expectation: controlled-tooltip-escape-enters-owner-request-channel
+  - id: T-BASE-TOOLTIP-0001-CASE-A11Y
+    title: Open Tooltip projects role and additive description relation
+    covers:
+      [P-BASE-TOOLTIP-PURPOSE, P-BASE-TOOLTIP-TRIGGER-DESCRIPTION, P-BASE-TOOLTIP-CONTENT-SEMANTICS]
+    expectation: tooltip-description-preserves-host-idref-and-cleans-owned-token
+  - id: T-BASE-TOOLTIP-0001-CASE-DISABLED
+    title: Disabled Tooltip cancels, closes, and rejects interaction
+    covers: [P-BASE-TOOLTIP-DISABLED, P-BASE-TOOLTIP-TRIGGER-DISABLED]
+    expectation: disabled-tooltip-closes-and-rejects-new-intent
+  - id: T-BASE-TOOLTIP-0001-CASE-BOUNDARY
+    title: Content uses Overlay-owned Portal and defers Arrow
+    covers:
+      [
+        P-BASE-TOOLTIP-CONTENT-OVERLAY,
+        P-BASE-TOOLTIP-CONTENT-PRESENCE,
+        P-BASE-TOOLTIP-CONTENT-POSITION,
+        P-BASE-TOOLTIP-CONTENT-PORTAL-BOUNDARY,
+        P-BASE-TOOLTIP-CONTENT-DEFERRED-ARROW,
+      ]
+    expectation: tooltip-content-wires-existing-overlay-transition-and-positioning-capabilities
+implementations:
+  - id: prototypes-base-tooltip-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/tooltip.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-TOOLTIP-0001-CASE-DELAYS
+      - T-BASE-TOOLTIP-0001-CASE-CONTROLLED-ESCAPE
+      - T-BASE-TOOLTIP-0001-CASE-A11Y
+      - T-BASE-TOOLTIP-0001-CASE-DISABLED
+      - T-BASE-TOOLTIP-0001-CASE-BOUNDARY
+    exercises: [P-BASE-TOOLTIP, P-BASE-TOOLTIP-TRIGGER, P-BASE-TOOLTIP-CONTENT]
+verifies:
+  prototypes:
+    - id: P-BASE-TOOLTIP
+      anchors:
+        [
+          P-BASE-TOOLTIP-PURPOSE,
+          P-BASE-TOOLTIP-ROOT-OWNER,
+          P-BASE-TOOLTIP-PROPS,
+          P-BASE-TOOLTIP-REQUESTS,
+          P-BASE-TOOLTIP-DELAYS,
+          P-BASE-TOOLTIP-DISABLED,
+          P-BASE-TOOLTIP-ANATOMY-CONTEXT,
+          P-BASE-TOOLTIP-INDEPENDENCE,
+        ]
+    - id: P-BASE-TOOLTIP-TRIGGER
+      anchors:
+        [
+          P-BASE-TOOLTIP-TRIGGER-INTERACTION,
+          P-BASE-TOOLTIP-TRIGGER-HOST-SEMANTICS,
+          P-BASE-TOOLTIP-TRIGGER-DESCRIPTION,
+          P-BASE-TOOLTIP-TRIGGER-DISABLED,
+        ]
+    - id: P-BASE-TOOLTIP-CONTENT
+      anchors:
+        [
+          P-BASE-TOOLTIP-CONTENT-SEMANTICS,
+          P-BASE-TOOLTIP-CONTENT-OVERLAY,
+          P-BASE-TOOLTIP-CONTENT-ESCAPE,
+          P-BASE-TOOLTIP-CONTENT-PRESENCE,
+          P-BASE-TOOLTIP-CONTENT-HOVERABLE,
+          P-BASE-TOOLTIP-CONTENT-POSITION,
+          P-BASE-TOOLTIP-CONTENT-PORTAL-BOUNDARY,
+          P-BASE-TOOLTIP-CONTENT-DEFERRED-ARROW,
+        ]
+exercises: { prototypes: [P-BASE-TOOLTIP, P-BASE-TOOLTIP-TRIGGER, P-BASE-TOOLTIP-CONTENT] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added focused Base Tooltip behavior, accessibility, and boundary coverage.
+tags: [prototype, base, tooltip, test]

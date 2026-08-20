@@ -7,6 +7,7 @@ import { test } from 'node:test';
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const BASE_ROOT = join(ROOT_DIR, 'packages', 'prototypes', 'base');
 const SHADCN_ROOT = join(ROOT_DIR, 'packages', 'prototypes', 'shadcn');
+const BRUTALIST_ROOT = join(ROOT_DIR, 'packages', 'prototypes', 'brutalist');
 const BASE_COMPONENT_FAMILIES = new Set([
   'button',
   'checkbox',
@@ -18,6 +19,24 @@ const BASE_COMPONENT_FAMILIES = new Set([
   'tabs',
   'toggle',
 ]);
+const BASE_FAMILIES = new Set([
+  'async-region',
+  'button',
+  'checkbox',
+  'dialog',
+  'dropdown',
+  'hover-card',
+  'live-region',
+  'scroll-area',
+  'select',
+  'separator',
+  'switch',
+  'tabs',
+  'textarea',
+  'toggle',
+  'tooltip',
+  'transition',
+]);
 const SHADCN_FAMILIES = new Set([
   'button',
   'dialog',
@@ -28,10 +47,27 @@ const SHADCN_FAMILIES = new Set([
   'tabs',
   'toggle',
 ]);
+const BRUTALIST_FAMILIES = new Set([
+  'badge',
+  'button',
+  'card',
+  'dialog',
+  'dropdown',
+  'hover-card',
+  'scroll-area',
+  'select',
+  'separator',
+  'skeleton',
+  'switch',
+  'tabs',
+  'textarea',
+  'toggle',
+]);
 
 test('prototype packages expose side-effect-free family entry points', () => {
-  assertFamilyExports(BASE_ROOT, BASE_COMPONENT_FAMILIES);
+  assertFamilyExports(BASE_ROOT, BASE_FAMILIES);
   assertFamilyExports(SHADCN_ROOT, SHADCN_FAMILIES);
+  assertFamilyExports(BRUTALIST_ROOT, BRUTALIST_FAMILIES);
 });
 
 test('Base component families do not import sibling component families', () => {

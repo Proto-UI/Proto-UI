@@ -1,0 +1,78 @@
+---
+import { LUCIDE_ARROW_UP_RIGHT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/arrow-up-right';
+import { LUCIDE_CIRCLE_CHECK_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/circle-check';
+import { LUCIDE_HEART_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/heart';
+import { LUCIDE_PANELS_TOP_LEFT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/panels-top-left';
+import { LUCIDE_SEARCH_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/search';
+import { LUCIDE_SPARKLES_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/sparkles';
+import { LUCIDE_SUN_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/sun';
+
+type ShapeTag = 'path' | 'circle' | 'line' | 'rect' | 'polyline' | 'ellipse' | 'polygon';
+type ShapeAttrs = Record<string, string | number | boolean | null | undefined>;
+
+interface Props {
+  name: PreviewIconName;
+}
+
+type PreviewIconName =
+  | 'arrow-up-right'
+  | 'circle-check'
+  | 'heart'
+  | 'panels-top-left'
+  | 'search'
+  | 'sparkles'
+  | 'sun';
+
+const factories = {
+  'arrow-up-right': LUCIDE_ARROW_UP_RIGHT_SHAPE_FACTORY,
+  'circle-check': LUCIDE_CIRCLE_CHECK_SHAPE_FACTORY,
+  heart: LUCIDE_HEART_SHAPE_FACTORY,
+  'panels-top-left': LUCIDE_PANELS_TOP_LEFT_SHAPE_FACTORY,
+  search: LUCIDE_SEARCH_SHAPE_FACTORY,
+  sparkles: LUCIDE_SPARKLES_SHAPE_FACTORY,
+  sun: LUCIDE_SUN_SHAPE_FACTORY,
+} satisfies Record<PreviewIconName, (svg: never) => unknown>;
+
+const { name } = Astro.props as Props;
+const shape = (tag: ShapeTag) => (attrs: ShapeAttrs) => ({ tag, attrs });
+const svgFactories = {
+  path: shape('path'),
+  circle: shape('circle'),
+  line: shape('line'),
+  rect: shape('rect'),
+  polyline: shape('polyline'),
+  ellipse: shape('ellipse'),
+  polygon: shape('polygon'),
+};
+const generatedNodes = factories[name](svgFactories as never) as unknown;
+const nodes = (Array.isArray(generatedNodes) ? generatedNodes : [generatedNodes]) as Array<{
+  tag: ShapeTag;
+  attrs: ShapeAttrs;
+}>;
+---
+
+<svg
+  class="static-lucide-icon"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {
+    nodes.map((node) => {
+      const Shape = node.tag;
+      return <Shape {...node.attrs} />;
+    })
+  }
+</svg>
+
+<style>
+  .static-lucide-icon {
+    display: block;
+    width: 1.65rem;
+    height: 1.65rem;
+  }
+</style>

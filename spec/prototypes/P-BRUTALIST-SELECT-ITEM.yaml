@@ -1,0 +1,92 @@
+id: P-BRUTALIST-SELECT-ITEM
+type: prototype
+title: Brutalist Select Item inherits Base Select Item and layers selected option styling with a check indicator
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Select Item inherits Base Select Item option ownership and projects a style-family visual API: an active/selected main accent pair, interaction state styling, a selected check indicator, and mono item typography within the listbox panel.
+
+
+statement:
+  en: >-
+    Brutalist Select Item is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Select Item. It preserves inherited Base protocol semantics (selected/active/hovered/focused/focusVisible/pressed/disabled state ownership) and adds only visual/style behavior: a main accent pair for active/selected, interaction projection, a trailing check SVG indicator when selected, and mono item typography.
+
+
+  zh-CN: >-
+    Brutalist Select Item 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Select Item 之上。它保留继承的 Base 协议语义（selected/active/hovered/focused/focusVisible/pressed/disabled 状态归属），仅增加视觉/style 行为：active/selected 的 main 强调色对、交互投射、selected 时的尾部 check SVG 指示器，以及 mono 项排版。
+
+
+criteria:
+  - id: P-BRUTALIST-SELECT-ITEM-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Select Item through `asSelectItem()` once and must not redefine Base selected, active, hovered, focused, focusVisible, pressed, or disabled protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asSelectItem()` 一次性继承 Base Select Item，不得重定义 Base 的 selected、active、hovered、focused、focusVisible、pressed 或 disabled 协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-SELECT-ITEM-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-select-item`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-select-item`。
+  - id: P-BRUTALIST-SELECT-ITEM-SELECTED-PAIR-INVARIANT
+    text:
+      en: >-
+        When selected, the item fill must co-select its foreground: `bg-main` with `text-main-foreground`. No rule may replace the selected fill's foreground with a theme-global text token independently of its background.
+
+
+      zh-CN: >-
+        selected 时，item 填充必须同时选择其前景：`bg-main` 与 `text-main-foreground`。任何规则都不得在脱离背景的情况下用主题全局文本 token 覆盖 selected 填充前景。
+
+
+  - id: P-BRUTALIST-SELECT-ITEM-INTERACTION
+    text:
+      en: >-
+        Active, hovered, focused, focusVisible, and pressed all co-select the main pair (`bg-main text-main-foreground`). Disabled reduces emphasis with `opacity-50` and `pointer-events-none` (never an opacity-only fill swap) while preserving geometry.
+
+
+      zh-CN: >-
+        active、hovered、focused、focusVisible 与 pressed 均同时选择 main 色对（`bg-main text-main-foreground`）。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调（绝非仅以 opacity 调整填充），同时保留几何。
+
+
+  - id: P-BRUTALIST-SELECT-ITEM-SELECTED-INDICATOR
+    text:
+      en: >-
+        The item renders a trailing check SVG indicator (a 16×16 path `m20 6-11 11-5-5`) when selected, and renders `null` (empty indicator slot) when not selected, with `pointer-events-none` so the indicator never captures interaction.
+
+
+      zh-CN: >-
+        item 在 selected 时渲染尾部 check SVG 指示器（16×16 路径 `m20 6-11 11-5-5`），未选中时渲染 `null`（空指示器槽），并设置 `pointer-events-none`，使指示器永不捕获交互。
+
+
+  - id: P-BRUTALIST-SELECT-ITEM-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The resting item surface uses `font-mono text-sm` with full-width flex layout, square `rounded-none`, gap-2 spacing, and `select-none`, preserving mono typography and flat structure without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        静止 item 表面使用 `font-mono text-sm`，全宽 flex 布局、直角 `rounded-none`、gap-2 间距与 `select-none`，保持 mono 排版与平面结构，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/select/item.proto.ts
+  - path: packages/prototypes/brutalist/test/select.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-SELECT-ITEM
+verifies: { tests: [T-BRUTALIST-SELECT-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Select Item projection with real public-API criteria (Base inheritance, direct entry, selected pair invariant, interaction, selected indicator, visual grammar) on rc.7. Not present in immutable rc.6.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, select]

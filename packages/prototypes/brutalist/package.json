@@ -1,16 +1,19 @@
 {
   "name": "@proto.ui/prototypes-brutalist",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.3.0-alpha.0",
+  "private": false,
   "type": "module",
   "sideEffects": false,
   "dependencies": {
     "@proto.ui/core": "workspace:*",
+    "@proto.ui/hooks": "workspace:*",
+    "@proto.ui/module-text-control": "workspace:*",
     "@proto.ui/prototypes-base": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/module-as-trigger": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
     "@proto.ui/runtime": "workspace:*",
     "@proto.ui/adapter-web-component": "workspace:*",
@@ -18,22 +21,87 @@
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "import": "./dist/theme.js",
+      "default": "./dist/theme.js"
     },
     "./button": {
-      "types": "./src/button/index.ts",
-      "import": "./src/button/index.ts",
-      "default": "./src/button/index.ts"
+      "types": "./dist/button/index.d.ts",
+      "import": "./dist/button/index.js",
+      "default": "./dist/button/index.js"
+    },
+    "./badge": {
+      "types": "./dist/badge/index.d.ts",
+      "import": "./dist/badge/index.js",
+      "default": "./dist/badge/index.js"
+    },
+    "./card": {
+      "types": "./dist/card/index.d.ts",
+      "import": "./dist/card/index.js",
+      "default": "./dist/card/index.js"
+    },
+    "./separator": {
+      "types": "./dist/separator/index.d.ts",
+      "import": "./dist/separator/index.js",
+      "default": "./dist/separator/index.js"
+    },
+    "./skeleton": {
+      "types": "./dist/skeleton/index.d.ts",
+      "import": "./dist/skeleton/index.js",
+      "default": "./dist/skeleton/index.js"
+    },
+    "./toggle": {
+      "types": "./dist/toggle/index.d.ts",
+      "import": "./dist/toggle/index.js",
+      "default": "./dist/toggle/index.js"
+    },
+    "./switch": {
+      "types": "./dist/switch/index.d.ts",
+      "import": "./dist/switch/index.js",
+      "default": "./dist/switch/index.js"
+    },
+    "./tabs": {
+      "types": "./dist/tabs/index.d.ts",
+      "import": "./dist/tabs/index.js",
+      "default": "./dist/tabs/index.js"
+    },
+    "./hover-card": {
+      "types": "./dist/hover-card/index.d.ts",
+      "import": "./dist/hover-card/index.js",
+      "default": "./dist/hover-card/index.js"
+    },
+    "./dropdown": {
+      "types": "./dist/dropdown/index.d.ts",
+      "import": "./dist/dropdown/index.js",
+      "default": "./dist/dropdown/index.js"
+    },
+    "./select": {
+      "types": "./dist/select/index.d.ts",
+      "import": "./dist/select/index.js",
+      "default": "./dist/select/index.js"
+    },
+    "./dialog": {
+      "types": "./dist/dialog/index.d.ts",
+      "import": "./dist/dialog/index.js",
+      "default": "./dist/dialog/index.js"
     },
     "./scroll-area": {
-      "types": "./src/scroll-area/index.ts",
-      "import": "./src/scroll-area/index.ts",
-      "default": "./src/scroll-area/index.ts"
+      "types": "./dist/scroll-area/index.d.ts",
+      "import": "./dist/scroll-area/index.js",
+      "default": "./dist/scroll-area/index.js"
+    },
+    "./textarea": {
+      "types": "./dist/textarea/index.d.ts",
+      "import": "./dist/textarea/index.js",
+      "default": "./dist/textarea/index.js"
     }
   },
-  "description": "Private Neo-Brutalist Proto UI foundation with Button and Scroll Area projections.",
+  "description": "Neo-Brutalist Proto UI prototype library with package and CLI family imports.",
   "license": "MIT",
   "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist",
   "repository": {
@@ -44,10 +112,16 @@
   "bugs": {
     "url": "https://github.com/Proto-UI/Proto-UI/issues"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "proto-ui",
-    "prototype-library",
+    "proto",
+    "ui",
+    "prototypes",
     "brutalist",
+    "prototype-library",
     "neo-brutalist"
   ],
   "files": [
@@ -55,11 +129,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/prototypes-brutalist"
-  },
-  "protoUi": {
-    "release": {
-      "scan": false
-    }
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/prototypes-brutalist",
+    "prepack": "pnpm run build"
   }
 }

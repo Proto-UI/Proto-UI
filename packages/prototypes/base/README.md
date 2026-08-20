@@ -13,7 +13,7 @@ Prototype library package intended to be consumed together with Proto UI adapter
 ## Install
 
 ```bash
-npm install @proto.ui/prototypes-base@0.2.0-rc.0
+npm install @proto.ui/prototypes-base@0.3.0-alpha.0
 ```
 
 ## Family Imports
@@ -29,6 +29,7 @@ The root package export remains available for compatibility. Compound anatomy pa
 
 ## Internal Structure
 
+- `src/async-region/`
 - `src/behaviors/`
 - `src/button/`
 - `src/checkbox/`
@@ -36,11 +37,16 @@ The root package export remains available for compatibility. Compound anatomy pa
 - `src/dropdown/`
 - `src/hover-card/`
 - `src/index.ts`
+- `src/live-region/`
+- `src/scroll-area/`
 - `src/select/`
+- `src/separator/`
 - `src/switch/`
 - `src/tabs/`
+- `src/textarea/`
 - `src/toggle/`
 - `src/tools/`
+- `src/tooltip/`
 - `src/transition/`
 
 ## Behavior Authoring Constraints
@@ -60,6 +66,7 @@ The root package export remains available for compatibility. Compound anatomy pa
 
 - `@proto.ui/core`
 - `@proto.ui/hooks`
+- `@proto.ui/module-text-control`
 
 ## License
 

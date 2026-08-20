@@ -1,0 +1,77 @@
+id: T-BRUTALIST-HOVER-CARD-0001
+type: test
+title: Brutalist Hover Card visual contract and public API tests
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Covers the Brutalist Hover Card family public API against P-BRUTALIST-HOVER-CARD criteria: root inline-flex container, trigger main-pair surface with hover/focus-visible/disabled interaction, and content 200ms transition with fade-zoom open animation, side slide-in, and hard-shadowed panel.
+
+
+cases:
+  - id: T-BRUTALIST-HOVER-CARD-0001-CASE-1
+    title: Root direct entry and Base Hover Card inheritance (relative inline-flex)
+    covers:
+      - P-BRUTALIST-HOVER-CARD-BASE-INHERITANCE
+      - P-BRUTALIST-HOVER-CARD-ENTRY
+      - P-BRUTALIST-HOVER-CARD-VISUAL-GRAMMAR
+    expectation: p-brutalist-hover-card-root-entry-inheritance
+  - id: T-BRUTALIST-HOVER-CARD-0001-CASE-2
+    title: Trigger main-pair surface and hover focus-visible disabled interaction
+    covers:
+      - P-BRUTALIST-HOVER-CARD-TRIGGER-BASE-INHERITANCE
+      - P-BRUTALIST-HOVER-CARD-TRIGGER-ENTRY
+      - P-BRUTALIST-HOVER-CARD-TRIGGER-PAIR-INVARIANT
+      - P-BRUTALIST-HOVER-CARD-TRIGGER-INTERACTION
+      - P-BRUTALIST-HOVER-CARD-TRIGGER-VISUAL-GRAMMAR
+    expectation: p-brutalist-hover-card-trigger-pair-interaction
+  - id: T-BRUTALIST-HOVER-CARD-0001-CASE-3
+    title: Content 200ms fade-zoom transition, side slide-in, and hard-shadowed panel
+    covers:
+      - P-BRUTALIST-HOVER-CARD-CONTENT-BASE-INHERITANCE
+      - P-BRUTALIST-HOVER-CARD-CONTENT-ENTRY
+      - P-BRUTALIST-HOVER-CARD-CONTENT-TRANSITION
+      - P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR
+    expectation: p-brutalist-hover-card-content-transition-panel
+implementations:
+  - id: prototypes-brutalist-hover-card-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/hover-card.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-HOVER-CARD-0001-CASE-1
+      - T-BRUTALIST-HOVER-CARD-0001-CASE-2
+      - T-BRUTALIST-HOVER-CARD-0001-CASE-3
+    exercises:
+      - P-BASE-HOVER-CARD
+      - P-BASE-HOVER-CARD-CONTENT
+      - P-BASE-HOVER-CARD-TRIGGER
+      - P-BRUTALIST-HOVER-CARD
+      - P-BRUTALIST-HOVER-CARD-CONTENT
+      - P-BRUTALIST-HOVER-CARD-TRIGGER
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-HOVER-CARD
+    - id: P-BRUTALIST-HOVER-CARD-TRIGGER
+    - id: P-BRUTALIST-HOVER-CARD-CONTENT
+exercises:
+  prototypes:
+    - P-BASE-HOVER-CARD
+    - P-BASE-HOVER-CARD-CONTENT
+    - P-BASE-HOVER-CARD-TRIGGER
+    - P-BRUTALIST-HOVER-CARD
+    - P-BRUTALIST-HOVER-CARD-CONTENT
+    - P-BRUTALIST-HOVER-CARD-TRIGGER
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Hover Card coverage mapped 1:1 to the rc.7 P criteria (root entry+inheritance, trigger pair+interaction, content transition+panel). Not present in the immutable rc.6 snapshot.
+
+
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - hover-card

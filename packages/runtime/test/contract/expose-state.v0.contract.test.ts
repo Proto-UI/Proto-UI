@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
 import { executeWithHost } from '@proto.ui/runtime';
-import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 
 function makeHost() {
   const tasks: Array<() => void> = [];
@@ -21,7 +21,7 @@ function makeHost() {
     onRuntimeReady(wiring: any) {
       wiring.attach('expose-state', [
         [
-          EXPOSE_STATE_SET_EXPOSES_CAP,
+          EXPOSES_RECORD_SINK_CAP,
           (record: Record<string, unknown>) => {
             lastExposes = record;
           },

@@ -81,6 +81,10 @@ export function getSemanticGroupKeyV0(token: string): string {
   ) {
     return 'border-width';
   }
+  const directionalBorderWidth = token.match(/^border-([trblxy])(?:-(0|2|4|8))?$/);
+  if (directionalBorderWidth) {
+    return `border-${directionalBorderWidth[1]}-width`;
+  }
   if (token.startsWith('border-')) {
     return 'border-color';
   }

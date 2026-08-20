@@ -2,7 +2,7 @@
 
 This document describes the repository's GitHub Actions workflows and how they relate to global exact-version and launch-package governance.
 
-The current published prerelease release train is `0.2.0-rc.6` under the npm `next` channel.
+The current published prerelease release train is `0.2.0-rc.7` under the npm `next` channel.
 
 ## Workflows
 

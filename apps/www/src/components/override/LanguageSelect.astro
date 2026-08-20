@@ -34,12 +34,11 @@ localeOptions.forEach((opt) => {
 });
 ---
 
-<div class="language-select-wrapper relative inline-flex items-center">
-  <label class="sr-only" for="language-select">选择语言 / Select Language</label>
+<label class="language-select-wrapper relative inline-flex items-center">
+  <span class="sr-only">选择语言 / Select Language</span>
   <select
-    id="language-select"
     class="language-select appearance-none inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all outline-none h-8 rounded-md gap-1.5 px-3 pr-8 cursor-pointer bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-    aria-label="选择语言 / Select Language"
+    data-language-select
     autocomplete="off"
     data-current-locale={currentLocale || ''}
     data-locale-paths={JSON.stringify(localePaths)}
@@ -69,7 +68,7 @@ localeOptions.forEach((opt) => {
       stroke-linecap="round"
       stroke-linejoin="round"></path>
   </svg>
-</div>
+</label>
 
 <style>
   .language-select-wrapper:hover .language-select-arrow {
@@ -125,9 +124,8 @@ localeOptions.forEach((opt) => {
       return match ? decodeURIComponent(match[1]) : '';
     }
 
-    function initLanguageSelect() {
-      const select = document.getElementById('language-select');
-      if (!select) return;
+    function initLanguageSelect(select) {
+      if (select.dataset.languageSelectInitialized === 'true') return;
 
       const currentLocale = select.dataset.currentLocale || '';
       let localePaths = {};
@@ -159,14 +157,19 @@ localeOptions.forEach((opt) => {
         // ignore storage errors
       }
 
+      select.dataset.languageSelectInitialized = 'true';
       select.addEventListener('change', handleLanguageChange);
+    }
+
+    function initLanguageSelects() {
+      document.querySelectorAll('select[data-language-select]').forEach(initLanguageSelect);
     }
 
     // Ensure DOM is ready
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initLanguageSelect);
+      document.addEventListener('DOMContentLoaded', initLanguageSelects, { once: true });
     } else {
-      initLanguageSelect();
+      initLanguageSelects();
     }
   })();
 </script>

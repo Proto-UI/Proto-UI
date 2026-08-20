@@ -1,0 +1,71 @@
+id: T-SCROLL-COMPOSED-CHROME-0001
+type: test
+title: Composed scroll chrome passive geometry conformance
+status: draft
+since: 0.2.0-rc.7
+summary: Covers family binding, proportional Thumb geometry, movement, cleanup, and passive accessibility boundaries.
+cases:
+  - id: T-SCROLL-COMPOSED-CHROME-0001-CASE-FAMILY
+    title: Context scope and Anatomy relation bind the correct controls
+    covers:
+      - C-SCROLL-COMPOSED-CHROME-0001-A
+    expectation: nearest-scroll-area-scope-binds-each-scrollbar-to-its-descendant-thumb
+  - id: T-SCROLL-COMPOSED-CHROME-0001-CASE-GEOMETRY
+    title: Thumb size and offset derive from host facts and track geometry
+    covers:
+      - C-SCROLL-COMPOSED-CHROME-0001-B
+      - C-SCROLL-COMPOSED-CHROME-0001-C
+      - C-SCROLL-COMPOSED-CHROME-0001-D
+    expectation: visible-ratio-projects-size-and-normalized-position-projects-travel
+  - id: T-SCROLL-COMPOSED-CHROME-0001-CASE-LIFETIME
+    title: Resize, replacement, and disposal keep projection current and bounded
+    covers:
+      - C-SCROLL-COMPOSED-CHROME-0001-E
+    expectation: host-local-observers-refresh-and-disposal-restores-owned-styles
+  - id: T-SCROLL-COMPOSED-CHROME-0001-CASE-A11Y
+    title: Passive Thumb remains presentational while native Viewport scrolling remains active
+    covers:
+      - C-SCROLL-COMPOSED-CHROME-0001-F
+    expectation: passive-thumb-has-no-focus-or-scrollbar-role
+implementations:
+  - id: web-scroll-composed-chrome-host
+    kind: adapter-test
+    status: passing
+    path: packages/modules/scroll/test/web-scroll-host.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-GEOMETRY
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-LIFETIME
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-A11Y
+  - id: brutalist-scroll-area-family-session
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/brutalist/test/scroll-area.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-FAMILY
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-GEOMETRY
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-A11Y
+verifies:
+  contracts:
+    - C-SCROLL-COMPOSED-CHROME-0001
+  decisions:
+    - D-SCROLL-COMPOSED-PROJECTION-0001
+exercises:
+  modules:
+    - M-SCROLL-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+  prototypes:
+    - P-BASE-SCROLL-AREA
+    - P-BASE-SCROLL-AREA-VIEWPORT
+    - P-BASE-SCROLL-AREA-SCROLLBAR
+    - P-BASE-SCROLL-AREA-THUMB
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added executable multi-content resize, late insertion, replacement, and observer cleanup coverage.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable coverage for passive composed Thumb geometry and family-session ownership.
+tags: [test, scroll, composed-chrome, geometry, accessibility]

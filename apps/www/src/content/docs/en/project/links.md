@@ -7,6 +7,7 @@ description: 'Official entry points, community channels, and contribution links 
 
 - Homepage: https://www.proto-ui.com
 - GitHub Repository: https://github.com/Proto-UI/Proto-UI
+- Current Release: [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0)
 
 ## Community & Contact
 

@@ -38,6 +38,10 @@ describe('adapter-react: L1 view intent', () => {
         def.lifecycle.onBeforeDispose(() => {
           calls.disposed += 1;
         });
+        def.expose('view', {
+          show: () => run.lifecycle.setPresent(true),
+          hide: () => run.lifecycle.setPresent(false),
+        });
         return (renderer) => {
           calls.render += 1;
           return renderer.el('div', 'ok');
@@ -61,7 +65,7 @@ describe('adapter-react: L1 view intent', () => {
         disposed: 0,
       });
 
-      mounted.ref.current.invokeInCallbackScope(() => run.lifecycle.setPresent(true));
+      mounted.ref.current.getExposes().view.show();
       mounted.update();
       await Promise.resolve();
       mounted.update();
@@ -71,20 +75,20 @@ describe('adapter-react: L1 view intent', () => {
       expect(calls.mounted).toBe(1);
 
       // Reversal before React renders keeps the current view attached.
-      mounted.ref.current.invokeInCallbackScope(() => run.lifecycle.setPresent(false));
-      mounted.ref.current.invokeInCallbackScope(() => run.lifecycle.setPresent(true));
+      mounted.ref.current.getExposes().view.hide();
+      mounted.ref.current.getExposes().view.show();
       mounted.update();
       expect(mounted.root).not.toBeNull();
       expect(calls.unmounted).toBe(0);
 
-      mounted.ref.current.invokeInCallbackScope(() => run.lifecycle.setPresent(false));
+      mounted.ref.current.getExposes().view.hide();
       mounted.update();
       await Promise.resolve();
       mounted.update();
       expect(mounted.root).toBeNull();
       expect(calls.unmounted).toBe(1);
 
-      mounted.ref.current.invokeInCallbackScope(() => run.lifecycle.setPresent(true));
+      mounted.ref.current.getExposes().view.show();
       mounted.update();
       await Promise.resolve();
       mounted.update();

@@ -1,0 +1,83 @@
+id: P-BRUTALIST-DIALOG-CONTENT
+type: prototype
+title: Brutalist Dialog Content inherits Base content and layers a hard-shadowed modal panel
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Dialog Content inherits Base Dialog Content open/transition ownership and projects a style-family visual API: a centered modal panel with hard offset shadows, a 200ms fade-zoom transition, and an empty own-prop TypeScript consumer boundary.
+
+
+statement:
+  en: >-
+    Brutalist Dialog Content is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dialog Content. It preserves inherited Base protocol semantics (open/transitionState/isPresent state ownership) and adds only visual/style behavior: a centered grid panel via `left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`, zero radius, black structural borders, hard offset shadows, flat panel fills, an empty own-prop TypeScript consumer boundary, and a 200ms fade-zoom transition.
+
+
+  zh-CN: >-
+    Brutalist Dialog Content 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dialog Content 之上。它保留继承的 Base 协议语义（open/transitionState/isPresent 状态归属），仅增加视觉/style 行为：通过 `left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2` 实现居中 grid 面板、零圆角、黑色结构边框、硬偏移阴影、平面面板填充、空自有 prop 的 TypeScript 消费者边界，以及 200ms 淡入缩放 transition。
+
+
+criteria:
+  - id: P-BRUTALIST-DIALOG-CONTENT-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Dialog Content through `asDialogContent()` once and must not redefine Base open, transitionState, or isPresent protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asDialogContent()` 一次性继承 Base Dialog Content，不得重定义 Base 的 open、transitionState 或 isPresent 协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-DIALOG-CONTENT-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-dialog-content`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-dialog-content`。
+  - id: P-BRUTALIST-DIALOG-CONTENT-PUBLIC-BOUNDARY
+    text:
+      en: >-
+        The content declares no consumer props of its own. Its TypeScript exposes retain only `open`, `transitionState`, and `isPresent`; this declared consumer boundary does not require an adapter to erase Base Transition runtime plumbing from its internal bridge object.
+
+
+      zh-CN: >-
+        content 不声明自有消费者 props；其 TypeScript exposes 仅保留 `open`、`transitionState` 与 `isPresent`；该声明的消费者边界不要求 adapter 从其内部 bridge object 中擦除 Base Transition runtime plumbing。
+
+
+  - id: P-BRUTALIST-DIALOG-CONTENT-TRANSITION
+    text:
+      en: >-
+        The content configures its transition with `enterDuration: 200, leaveDuration: 200`. When open it applies `animate-in fade-in-0 zoom-in-95`; when open is false it applies `animate-out fade-out-0 zoom-out-95`. There is no side-based slide component.
+
+
+      zh-CN: >-
+        content 将其 transition 配置为 `enterDuration: 200, leaveDuration: 200`。open 时应用 `animate-in fade-in-0 zoom-in-95`；open 为 false 时应用 `animate-out fade-out-0 zoom-out-95`。无基于 side 的 slide 分量。
+
+
+  - id: P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The panel surface reuses `BRUTALIST_PANEL_TOKENS` (`rounded-none border-2 border-black shadow-[3px_3px_0_0_#000] bg-secondary-background text-foreground`), centered via fixed translate, `grid gap-4 max-w-lg p-6`, preserving square corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        面板表面复用 `BRUTALIST_PANEL_TOKENS`（`rounded-none border-2 border-black shadow-[3px_3px_0_0_#000] bg-secondary-background text-foreground`），通过 fixed translate 居中、`grid gap-4 max-w-lg p-6`，保持直角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/dialog/content.proto.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+  - path: packages/prototypes/brutalist/test/dialog.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-DIALOG-CONTENT
+verifies: { tests: [T-BRUTALIST-DIALOG-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dialog Content projection with real public-API criteria (Base inheritance, direct entry, empty Pick boundary, fade-zoom transition, centered panel visual grammar) on rc.7. Not present in immutable rc.6.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, dialog]

@@ -40,10 +40,20 @@ export type AnatomyPort = ModulePort & {
   getDiagnostics(): readonly AnatomyDiagnostic[];
   /** Module-internal bridge. Never expose the returned host target to prototype authors. */
   resolvePartTarget(part: AnatomyPartView): unknown | null;
+  /** Opaque root-claim identity for bounded module-internal family coordination. */
+  resolveDomainScope(family: AnatomyFamily): unknown | null;
+  /** Module-internal structural query scoped to one already resolved family domain. */
+  descendantsOf(
+    family: AnatomyFamily,
+    ancestor: AnatomyPartView,
+    role: string
+  ): readonly AnatomyPartView[];
   parts: AnatomyQueryOrderView['parts'];
   order: AnatomyQueryOrderView;
   setOrderCallbackDispatcher(dispatch: AnatomyOrderCallbackDispatcher): void;
   subscribeOrder(family: AnatomyFamily, cb: AnatomyOrderChangeCb): Unsubscribe;
+  /** Module-internal target readiness/replacement signal; carries no target or data payload. */
+  subscribeTargets(family: AnatomyFamily, cb: AnatomyOrderChangeCb): Unsubscribe;
 };
 
 export type AnatomyModule = ModuleInstance<AnatomyFacade> & {

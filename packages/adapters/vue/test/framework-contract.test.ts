@@ -153,4 +153,28 @@ describe('adapter-vue: framework contract', () => {
 
     mounted.unmount();
   });
+
+  it('does not leak fallthrough style into prototype raw props', async () => {
+    let seenStyle: unknown = 'unset';
+
+    const proto: Prototype = {
+      name: 'vue-style-prop-boundary',
+      setup(def) {
+        def.lifecycle.onMounted((run) => {
+          seenStyle = (run.props.getRaw() as { style?: unknown }).style;
+        });
+        return (r) => [r.el('div', 'ok')];
+      },
+    };
+
+    const mounted = createMountedVueAdapter(proto, {
+      style: { width: '200px' },
+    });
+
+    await flushVue();
+
+    expect(seenStyle).toBeUndefined();
+
+    mounted.unmount();
+  });
 });

@@ -1,0 +1,56 @@
+id: V-PROTO-UI-0008
+type: version
+title: Proto UI 0.2.0
+status: active
+since: 0.2.0
+summary: First stable release on the 0.2 line, promoting the complete rc.7 ecosystem surface after its public trial and preserving one globally exact identity across all 40 public packages and the immutable spec snapshot.
+statement:
+  en: Proto UI 0.2.0 is one stable ecosystem release identity shared exactly by every public @proto.ui package and the corresponding immutable spec snapshot.
+  zh-CN: Proto UI 0.2.0 是由全部公开 @proto.ui package 与对应不可变 spec snapshot 精确共享的一次稳定生态发行身份。
+release:
+  version: 0.2.0
+  channel: stable
+  gitTag: v0.2.0
+  npmDistTag: latest
+  packageVersionPolicy: exact
+  packageScope: public-@proto.ui
+  publishedAt: 2026-08-13T06:31:58Z
+  commit: 70e2eb1a1bcd9264cf8c08e6ede210f96ee04606
+  specSnapshotDigest: sha256:98c09de2502e85fe94259ba7f936f4a4350ef5374d2d638969118f3ed3428478
+dependsOn:
+  decisions:
+    - D-GLOBAL-RELEASE-VERSION-0001
+criteria:
+  - id: V-PROTO-UI-0008-DRAFT-BOUNDARY
+    text:
+      en: The draft entity may govern aligned 0.2.0 package manifests, release assets, and catalog references, but it must not claim npm, Git tag, GitHub Release, latest-channel, or immutable snapshot evidence.
+      zh-CN: 本 draft 实体可以治理已对齐的 0.2.0 package manifest、发行物料与 catalog 引用，但不得声称已存在 npm、Git tag、GitHub Release、latest channel 或不可变 snapshot 证据。
+  - id: V-PROTO-UI-0008-IDENTITY
+    text:
+      en: Before publication, VERSION, every public @proto.ui package manifest, staged internal dependency versions, and the spec snapshot must be prepared at 0.2.0 exactly.
+      zh-CN: 发布前，VERSION、全部公开 @proto.ui package manifest、暂存发布包的内部依赖版本以及 spec snapshot 必须统一准备为 0.2.0。
+  - id: V-PROTO-UI-0008-STABLE-PROMOTION
+    text:
+      en: The stable release may publish only after the rc.7 evidence closure is merged, the full release rehearsal passes from the reviewed preparation diff, and no unresolved release blocker is admitted into the train.
+      zh-CN: 仅当 rc.7 证据闭环已合入、完整 release rehearsal 在已评审准备差异上通过，且不存在被纳入 release train 的未解决发版 blocker 时，才可发布稳定版。
+  - id: V-PROTO-UI-0008-PUBLICATION
+    text:
+      en: The entity may become active only after all 40 npm packages exist at 0.2.0, their latest tags point to it, the v0.2.0 Git tag resolves to the publication commit, and immutable snapshot evidence exists.
+      zh-CN: 仅当 40 个 npm package 均存在 0.2.0、各自 latest tag 均指向该版本、v0.2.0 Git tag 解析到发布 commit，且不可变 snapshot 证据存在后，本实体才可转为 active。
+sources:
+  - path: internal/releases/0.2.0/package-bom.json
+  - path: internal/releases/0.2.0/release-notes.md
+  - path: internal/releases/0.2.0/release-notes.zh-CN.md
+  - path: internal/records/2026-08-15-0.2.0-stable-release-evidence.zh-CN.md
+openQuestions: []
+revisions:
+  - version: 0.2.0
+    change: introduced
+    summary: Opened the stable 0.2.0 release train over the published rc.7 ecosystem surface while keeping publication evidence pending.
+  - version: 0.2.0
+    change: updated
+    summary: Activated after publishing all 40 packages under npm latest, the v0.2.0 Git tag, the stable GitHub Release, and the immutable spec snapshot evidence.
+tags:
+  - release
+  - stable
+  - global-version

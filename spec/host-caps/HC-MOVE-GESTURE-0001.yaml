@@ -1,0 +1,44 @@
+id: HC-MOVE-GESTURE-0001
+type: host-cap
+title: Host recognizes and owns bounded Move Gesture sessions
+status: draft
+since: 0.2.0-rc.7
+summary: The host resolves a move target, recognizes a primary continuous movement, owns platform capture or gesture arbitration, emits local samples, and cleans up the session.
+statement:
+  zh-CN: >-
+    Move Gesture host capability 必须把 logical binding 翻译为当前宿主的连续移动 recognizer。Web 可以使用 Pointer Events/pointer capture，Flutter 可以使用 GestureRecognizer/Gesture Arena；宿主必须协调 direct manipulation 与 selection 等默认行为，维持单一所有权，报告本地 samples，并在 end、cancel、replacement、detach 或 dispose 时释放全部资源。
+
+
+  en: >-
+    The Move Gesture host capability must translate a logical binding into the current host's continuous-movement recognizer. Web may use Pointer Events and pointer capture, while Flutter may use GestureRecognizer and Gesture Arena; the host must coordinate direct-manipulation and selection defaults, retain single ownership, report local samples, and release all resources on end, cancel, replacement, detach, or disposal.
+
+
+criteria:
+  - id: HC-MOVE-GESTURE-0001-A
+    text:
+      zh-CN: Host 必须只在 target 可解析且 shouldStart 接受 primary contact 时取得会话所有权。
+      en: The host must acquire session ownership only when the target is resolvable and shouldStart accepts a primary contact.
+  - id: HC-MOVE-GESTURE-0001-B
+    text:
+      zh-CN: Host 必须用平台原生机制使已接受会话在 contact 离开初始 hit region 后仍能继续，或在无法维持所有权时 cancel。
+      en: The host must use platform-native mechanisms to continue an accepted session after the contact leaves the initial hit region or cancel when ownership cannot be retained.
+  - id: HC-MOVE-GESTURE-0001-C
+    text:
+      zh-CN: Host-local coordinate units、pointer/contact identity、capture/arena 与默认行为机制不得暴露给 prototype author。
+      en: Host-local coordinate units, pointer or contact identity, capture or arena mechanics, and default-action mechanisms must not be exposed to prototype authors.
+  - id: HC-MOVE-GESTURE-0001-D
+    text:
+      zh-CN: Lease update/dispose 与 target detach 必须遵守 `C-MOVE-GESTURE-0001` 的终止和资源恢复规则。
+      en: Lease update and disposal plus target detachment must obey the termination and resource-restoration rules of `C-MOVE-GESTURE-0001`.
+satisfies:
+  contracts: [C-MOVE-GESTURE-0001]
+verifies:
+  tests: [T-MOVE-GESTURE-0001]
+sources:
+  - path: packages/core/src/move.ts
+  - path: packages/adapters/base/src/gestures/web-move-gesture-host.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged cross-host Move recognition and ownership with the Web host as the first realization.
+tags: [host-capability, move, gesture, pointer-capture, gesture-arena]

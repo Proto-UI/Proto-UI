@@ -1,0 +1,89 @@
+id: P-BRUTALIST-TABS-TRIGGER
+type: prototype
+title: Brutalist Tabs Trigger inherits Base Tabs Trigger and layers selected-pair block styling
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Tabs Trigger inherits Base Tabs Trigger selection semantics and projects a style-family trigger surface: a transparent-bordered label at rest, a selected fill pair with a black border and hard shadow, a hover lift for the non-selected state, plus deterministic press/focus-visible/disabled projection.
+
+
+statement:
+  en: >-
+    Brutalist Tabs Trigger is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Tabs Trigger. It preserves inherited Base protocol semantics (selected/disabled/hovered/focusVisible/pressed) and adds only visual/style behavior: a bold-uppercase resting label with a transparent border, a selected fill pair (`bg-main`/`text-main-foreground`) with a black border and hard shadow while released, a hover lift applied only when neither selected nor pressed, press translation that suppresses outer elevation, a focus-visible ring, and disabled de-emphasis.
+
+
+  zh-CN: >-
+    Brutalist Tabs Trigger 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Tabs Trigger 之上。它保留继承的 Base 协议语义（selected/disabled/hovered/focusVisible/pressed），仅增加视觉/style 行为：rest 为粗体大写标签配透明边框、released selected 填充色对（`bg-main`/`text-main-foreground`）附加黑色边框与硬阴影、仅 neither selected nor pressed 时应用的 hover lift、清除外部高度的 press 平移、focus-visible ring 与 disabled 降阶。
+
+
+criteria:
+  - id: P-BRUTALIST-TABS-TRIGGER-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Tabs Trigger through `asTabsTrigger()` once and must not redefine Base selected, hovered, focus-visible, pressed, or disabled protocol semantics. Visual projection may only consume the projected state handles (`selected`, `hovered`, `focusVisible`, `pressed`, `disabled`).
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asTabsTrigger()` 一次性继承 Base Tabs Trigger，不得重定义 Base 的 selected、hovered、focus-visible、pressed 或 disabled 协议语义；视觉投射只能消费投影出的 state handles（`selected`、`hovered`、`focusVisible`、`pressed`、`disabled`）。
+
+
+  - id: P-BRUTALIST-TABS-TRIGGER-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-tabs-trigger` and is the only public Tabs Trigger entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-tabs-trigger`，且是本 foundation 切片中唯一公开的 Tabs Trigger 入口。
+  - id: P-BRUTALIST-TABS-TRIGGER-SELECTED-PAIR-INVARIANT
+    text:
+      en: >-
+        When `selected` the trigger must co-select its fill and foreground as `bg-main` with `text-main-foreground` and add structural `border-black`. While selected and not pressed, it must add `shadow-[3px_3px_0_0_#000]` to lift the active trigger above the strip; transient press suppresses that outer shadow until release. The selected pair is a single rule; no state may replace the selected fill's foreground with a theme-global text token independently of its background.
+
+
+      zh-CN: >-
+        当 `selected` 时 trigger 必须同时选择填充与前景为 `bg-main` 与 `text-main-foreground`，并附加结构 `border-black`。当 selected 且未 pressed 时，必须附加 `shadow-[3px_3px_0_0_#000]` 使 active trigger 高于 strip；瞬时 press 在释放前抑制该外部阴影。selected 色对为单一规则；任何 state 不得在脱离背景的情况下用主题全局文本 token 覆盖 selected 填充前景。
+
+
+  - id: P-BRUTALIST-TABS-TRIGGER-INTERACTION
+    text:
+      en: >-
+        Hover only while neither selected nor pressed lifts the trigger with `bg-background border-black` and a deeper `-translate-x-px -translate-y-px shadow-[4px_4px_0_0_#000]`. Press takes precedence over hover and selected elevation, translates into the shadow axis, and clears the outer shadow until release. Focus-visible applies a hard ring with offset. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry.
+
+
+      zh-CN: >-
+        仅在 neither selected nor pressed 时，hover 以 `bg-background border-black` 与更深 `-translate-x-px -translate-y-px shadow-[4px_4px_0_0_#000]` 抬升 trigger。Press 优先于 hover 与 selected 高度，沿阴影轴平移并清除外部阴影直至释放。Focus-visible 使用带 offset 的硬 ring。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调同时保留几何。
+
+
+  - id: P-BRUTALIST-TABS-TRIGGER-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The trigger resting surface must preserve square `rounded-none` corners, a `border-2` border that is transparent at rest and black when selected/hovered, bold-uppercase typography, and a flat ink-foreground `text-foreground` resting fill. No gradients, glass, rounded cards, or soft elevation. Fills are flat theme-token pairs; only selected/hover add a hard zero-blur offset shadow.
+
+
+      zh-CN: >-
+        trigger 静止表面必须保持直角 `rounded-none`、`border-2` 边框（rest 为透明、selected/hover 为黑色）、粗体大写排版与平面墨色前景 `text-foreground` 静止填充。不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。填充为平面主题 token 色对；唯有 selected/hover 附加零模糊硬偏移阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/tabs/trigger.proto.ts
+  - path: packages/prototypes/brutalist/src/tabs/types.ts
+  - path: packages/prototypes/brutalist/test/tabs.test.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TABS-TRIGGER
+verifies: { tests: [T-BRUTALIST-TABS-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced the draft Brutalist Tabs Trigger projection with real public-API criteria (selected pair invariant, non-selected hover lift, press/focus/disabled) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Made transient press precedence over hover and selected outer elevation explicit and executable.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, tabs]

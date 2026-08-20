@@ -5,11 +5,49 @@ import type { TemplateChildren } from './spec';
 import type { BorrowedStateHandle, State } from './state';
 import { getActiveAsHookContext } from './internal';
 
+const MODULE_DECLARATION_TOKEN_BRAND = Symbol('@proto.ui/module-declaration-token');
+
+export type ModuleDeclarationToken<Config> = Readonly<{
+  id: string;
+  readonly __type?: Config;
+  readonly [MODULE_DECLARATION_TOKEN_BRAND]: true;
+}>;
+
+export type PrototypeModuleDeclaration<Config = unknown> = Readonly<{
+  id: string;
+  token: ModuleDeclarationToken<Config>;
+  config: Readonly<Config>;
+}>;
+
+export function moduleDeclaration<Config>(id: string): ModuleDeclarationToken<Config> {
+  if (typeof id !== 'string' || id.trim().length === 0) {
+    throw new Error(`[Prototype] module declaration token id must be a non-empty string.`);
+  }
+  return Object.freeze({
+    id,
+    [MODULE_DECLARATION_TOKEN_BRAND]: true as const,
+  }) as ModuleDeclarationToken<Config>;
+}
+
+export function declareModule<Config>(
+  token: ModuleDeclarationToken<Config>,
+  config: Config
+): PrototypeModuleDeclaration<Config> {
+  if (token?.[MODULE_DECLARATION_TOKEN_BRAND] !== true) {
+    throw new Error(`[Prototype] declareModule() expects a ModuleDeclarationToken.`);
+  }
+  const frozenConfig =
+    config !== null && typeof config === 'object' ? Object.freeze(config) : config;
+  return Object.freeze({ id: token.id, token, config: frozenConfig as Readonly<Config> });
+}
+
 export interface Prototype<
   Props extends PropsBaseType = PropsBaseType,
   Exposes = Record<string, unknown>,
 > {
   name: string;
+  modules?: readonly PrototypeModuleDeclaration[];
+
   setup: (def: DefHandle<Props, Exposes>) => RenderFn | void;
 }
 
@@ -145,6 +183,8 @@ export type AsHookPrototype<
   Handle = AsHookResult<Props, ContractInput>,
 > = {
   name: string;
+  /** Static module requirements that a caller prototype must carry before adapter selection. */
+  modules?: readonly PrototypeModuleDeclaration[];
   setup: (def: DefHandle<Props, Exposes>) => RenderFn | void;
   /**
    * Projects the captured authored-asHook result into its public caller handle.
@@ -181,6 +221,7 @@ export type AsHookCaller<
 > = (() => Handle) & {
   readonly kind: 'asHook';
   readonly definition: AsHookPrototype<Props, Exposes, ContractInput, Handle>;
+  readonly modules: readonly PrototypeModuleDeclaration[];
 };
 
 export type HookContract = AsHookContract;
@@ -237,6 +278,15 @@ function normalizeAsHookRender(value: RenderFn | void): RenderFn | undefined {
   return typeof value === 'function' ? value : undefined;
 }
 
+export function getModuleDeclaration<Config>(
+  proto: Pick<Prototype, 'modules'>,
+  token: ModuleDeclarationToken<Config>
+): PrototypeModuleDeclaration<Config> | undefined {
+  return proto.modules?.find((declaration) => declaration.id === token.id) as
+    | PrototypeModuleDeclaration<Config>
+    | undefined;
+}
+
 /** Thin wrapper: stabilize author-facing entry & improve inference */
 export function definePrototype<P extends PropsBaseType, E = Record<string, unknown>>(
   proto: Prototype<P, E>
@@ -250,7 +300,23 @@ export function definePrototype<P extends PropsBaseType, E = Record<string, unkn
   if (typeof proto.setup !== 'function') {
     throw new Error(`[Prototype] setup must be a function.`);
   }
+  proto.modules = freezeModuleDeclarations(proto.modules, 'Prototype');
   return proto;
+}
+
+function freezeModuleDeclarations(
+  declarations: readonly PrototypeModuleDeclaration[] | undefined,
+  owner: 'Prototype' | 'AsHook'
+): readonly PrototypeModuleDeclaration[] {
+  const values = declarations ?? [];
+  const ids = new Set<string>();
+  for (const declaration of values) {
+    if (ids.has(declaration.id)) {
+      throw new Error(`[${owner}] duplicate module declaration id: ${declaration.id}`);
+    }
+    ids.add(declaration.id);
+  }
+  return Object.freeze(values.slice());
 }
 
 /**
@@ -284,6 +350,18 @@ function createHookCaller<P extends PropsBaseType, E = Record<string, unknown>, 
   }
   if (typeof proto.setup !== 'function') {
     throw new Error(`[${kind === 'hook' ? 'Hook' : 'AsHook'}] setup must be a function.`);
+  }
+  const staticModules =
+    kind === 'asHook'
+      ? freezeModuleDeclarations((proto as AsHookPrototype<P, E, C, unknown>).modules, 'AsHook')
+      : Object.freeze([] as PrototypeModuleDeclaration[]);
+  if (kind === 'asHook') {
+    Object.defineProperty(proto, 'modules', {
+      value: staticModules,
+      enumerable: true,
+      configurable: false,
+      writable: false,
+    });
   }
   // TODO: 寻找更可靠的验证函数名
   // if (!/^as[A-Z]/.test(proto.name)) {
@@ -415,6 +493,14 @@ function createHookCaller<P extends PropsBaseType, E = Record<string, unknown>, 
     configurable: false,
     writable: false,
   });
+  if (kind === 'asHook') {
+    Object.defineProperty(caller, 'modules', {
+      value: staticModules,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+  }
 
   return caller;
 }

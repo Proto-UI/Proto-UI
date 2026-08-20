@@ -1,0 +1,64 @@
+id: P-BRUTALIST-TABS-LIST
+type: prototype
+title: Brutalist Tabs List inherits Base Tabs List and layers a square ruled tab strip
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Tabs List inherits Base Tabs List coordination semantics and projects a style-family panel surface: a square horizontal strip with a fixed height, black structural borders, a hard offset shadow, and a flat theme-token fill.
+
+
+statement:
+  en: >-
+    Brutalist Tabs List is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Tabs List. It preserves inherited Base protocol semantics (trigger activation/rendering) and adds only visual/style behavior: zero radius, black structural borders, a hard zero-blur offset shadow, and a flat `bg-secondary-background` resting fill. The list is the single panel that frames the trigger row.
+
+
+  zh-CN: >-
+    Brutalist Tabs List 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Tabs List 之上。它保留继承的 Base 协议语义（trigger activation/rendering），仅增加视觉/style 行为：零圆角、黑色结构边框、零模糊硬偏移阴影与平面 `bg-secondary-background` 静止填充。list 是框住 trigger 行的单一面板。
+
+
+criteria:
+  - id: P-BRUTALIST-TABS-LIST-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Tabs List through `asTabsList()` once and must not redefine Base trigger activation, rendering, or keyboard-navigation protocol semantics. Visual projection may only own the strip surface; trigger fills belong to the Tabs trigger.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asTabsList()` 一次性继承 Base Tabs List，不得重定义 Base 的 trigger activation、渲染或键盘导航协议语义。视觉投射仅可承担 strip 表面；trigger 填充归 Tabs trigger 所有。
+
+
+  - id: P-BRUTALIST-TABS-LIST-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-tabs-list` and is the only public Tabs List entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-tabs-list`，且是本 foundation 切片中唯一公开的 Tabs List 入口。
+  - id: P-BRUTALIST-TABS-LIST-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The strip surface must preserve a square `rounded-none` panel of fixed `h-11`, a black structural `border-2 border-black`, a hard zero-blur offset shadow (`shadow-[3px_3px_0_0_#000]`), and a flat `bg-secondary-background` fill with `text-foreground`, laid out as `inline-flex items-center p-1`. No gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        strip 表面必须保持直角 `rounded-none` 固定 `h-11` 面板、黑色结构边框 `border-2 border-black`、零模糊硬偏移阴影（`shadow-[3px_3px_0_0_#000]`）与平面 `bg-secondary-background` 填充及 `text-foreground`，以 `inline-flex items-center p-1` 布局。不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/tabs/list.proto.ts
+  - path: packages/prototypes/brutalist/src/tabs/types.ts
+  - path: packages/prototypes/brutalist/test/tabs.test.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TABS-LIST
+verifies: { tests: [T-BRUTALIST-TABS-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced the draft Brutalist Tabs List projection with real public-API criteria (square strip panel, fixed height, hard shadow) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, tabs]

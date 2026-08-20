@@ -205,6 +205,7 @@ describe('EventModuleImpl (contract-ish)', () => {
 
   it('unmounted phase triggers cleanupAll()', () => {
     const root = new FakeEventTarget();
+    const semantic = new FakeEventTarget();
     const sys = createSysCaps();
     const caps = makeCaps({
       sys,
@@ -215,15 +216,17 @@ describe('EventModuleImpl (contract-ish)', () => {
     const impl = new EventModuleImpl(caps, 'p-x');
 
     sys.__setExecPhase('setup');
-    impl.on('press.commit' as any);
+    impl.redirectSemanticRoot(semantic as any);
+    impl.on('host:focus' as any);
 
     sys.__setExecPhase('callback');
     impl.bind(makeDispatch().dispatch);
-    expect(root.count('press.commit')).toBe(1);
+    expect(root.count('host:focus')).toBe(1);
 
     impl.onProtoPhase('unmounted' as any);
 
-    expect(root.count('press.commit')).toBe(0);
+    expect(root.count('host:focus')).toBe(0);
+    expect((impl as any).overriddenSemanticRootTarget).toBeNull();
     sys.__setExecPhase('callback');
     expect(() => impl.unbind()).not.toThrow();
   });
@@ -261,6 +264,14 @@ describe('EventModuleImpl (contract-ish)', () => {
     expect(root2.count('press.commit')).toBe(1);
   });
 
+  it('rejects legacy Expose Event sink wiring on the Event module', () => {
+    const caps = makeCaps({ sys: createSysCaps() });
+    new EventModuleImpl(caps, 'p-x');
+
+    caps.__set('exposeEventSink', () => undefined);
+    expect(() => caps.__bumpEpoch()).toThrow(/wired to the expose-event module, not event/i);
+  });
+
   it('token.desc() stores label for diagnostics', () => {
     const root = new FakeEventTarget();
     const sys = createSysCaps();
@@ -278,29 +289,5 @@ describe('EventModuleImpl (contract-ish)', () => {
 
     const diags = impl.getDiagnostics();
     expect(diags[0].label).toBe('asButton: commit');
-  });
-
-  it('expose-event: register in setup, emit in runtime, and reject unregistered keys', () => {
-    const sys = createSysCaps();
-    const calls: Array<{ key: string; payload: any; options: any }> = [];
-
-    const caps = makeCaps({
-      sys,
-      emit: (key, payload, options) => calls.push({ key, payload, options }),
-    });
-
-    const impl = new EventModuleImpl(caps, 'p-x');
-
-    sys.__setExecPhase('setup');
-    impl.registerExposeEvent('ready', { payload: 'json' });
-
-    // emit must be runtime-only
-    expect(() => impl.emit('ready', { ok: true })).toThrow();
-
-    sys.__setExecPhase('callback');
-    impl.emit('ready', { ok: true }, { any: 1 });
-    expect(calls).toEqual([{ key: 'ready', payload: { ok: true }, options: { any: 1 } }]);
-
-    expect(() => impl.emit('missing', 1)).toThrow();
   });
 });

@@ -1,0 +1,62 @@
+id: T-BRUTALIST-CARD-0001
+type: test
+title: Brutalist Card styled-only contract tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers direct four-part ownership, passive boundaries, visual grouping, and semantic child composition.
+cases:
+  - id: T-BRUTALIST-CARD-0001-CASE-1
+    title: Card exposes only four direct styled-only parts
+    covers:
+      - P-BRUTALIST-CARD-REDUCED-ANATOMY
+    expectation: p-brutalist-card-direct-four-part-contract
+  - id: T-BRUTALIST-CARD-0001-CASE-2
+    title: Card remains passive while ordinary child controls keep their semantics
+    covers:
+      - P-BRUTALIST-CARD-PASSIVE-BOUNDARY
+      - P-BRUTALIST-CARD-CONTENT-VISUAL
+    expectation: p-brutalist-card-passive-composition-contract
+  - id: T-BRUTALIST-CARD-0001-CASE-3
+    title: Retained regions project square grouping and directional separators
+    covers:
+      - P-BRUTALIST-CARD-ROOT-VISUAL
+      - P-BRUTALIST-CARD-HEADER-VISUAL
+      - P-BRUTALIST-CARD-FOOTER-VISUAL
+    expectation: p-brutalist-card-visual-regions-contract
+implementations:
+  - id: prototypes-brutalist-card-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/card.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-CARD-0001-CASE-1
+      - T-BRUTALIST-CARD-0001-CASE-2
+      - T-BRUTALIST-CARD-0001-CASE-3
+    exercises:
+      - P-BRUTALIST-CARD
+      - P-BRUTALIST-CARD-HEADER
+      - P-BRUTALIST-CARD-CONTENT
+      - P-BRUTALIST-CARD-FOOTER
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-CARD
+    - id: P-BRUTALIST-CARD-HEADER
+    - id: P-BRUTALIST-CARD-CONTENT
+    - id: P-BRUTALIST-CARD-FOOTER
+exercises:
+  prototypes:
+    - P-BRUTALIST-CARD
+    - P-BRUTALIST-CARD-HEADER
+    - P-BRUTALIST-CARD-CONTENT
+    - P-BRUTALIST-CARD-FOOTER
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added direct styled-only Brutalist Card coverage.
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - card

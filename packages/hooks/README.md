@@ -8,19 +8,20 @@ Provides the built-in `as-*` hook DSL used by prototypes, while keeping runtime 
 
 ## Package Role
 
-Author-facing hook package for focus, overlay, trigger, and collection helpers.
+Author-facing hook package for focus, overlay, trigger, collection, boundary, hit-participation, scroll-surface, and text-control helpers.
 
 ## Install
 
 ```bash
-npm install @proto.ui/hooks@0.0.1
+npm install @proto.ui/hooks@0.3.0-alpha.0
 ```
 
 ## Internal Structure
 
 - `src/index.ts`
-- `src/internal.ts`
+- `src/as-*.ts` (public hook entrypoints)
 - `src/collection/`
+- `src/privileged.ts` (privileged runtime bridges)
 
 ## Authoring Constraints
 
@@ -33,8 +34,9 @@ npm install @proto.ui/hooks@0.0.1
 ## Related Internal Packages
 
 - `@proto.ui/core`
-- `@proto.ui/runtime`
 - `@proto.ui/module-anatomy`
+- `@proto.ui/module-collection`
+- `@proto.ui/types`
 
 ## License
 

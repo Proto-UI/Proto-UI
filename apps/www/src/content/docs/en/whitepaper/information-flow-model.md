@@ -103,6 +103,8 @@ Instead, the organization of capabilities itself is derived from these relations
 
 If you look at the directions of information exchange, several core capabilities in Proto UI emerge naturally.
 
+![](/diagrams/information-flow-model.svg)
+
 ### User ↔ Component
 
 The relationship between user and component contains at least two directions:

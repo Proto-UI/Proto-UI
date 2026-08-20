@@ -84,4 +84,5 @@ export type PropsPort<P extends PropsBaseType> = {
 export type PropsModule<P extends PropsBaseType> = ModuleInstance<PropsFacade<P>> & {
   name: 'props';
   scope: 'instance';
+  port: PropsPort<P>;
 };

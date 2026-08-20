@@ -1,0 +1,69 @@
+id: D-ADAPTER-PROFILE-0001
+type: decision
+title: Official Adapter profiles are first-class spec identities
+status: active
+since: 0.2.0-rc.7
+summary: Official Adapter profiles use stable A-* identities and explicit Module-support, Module-omission, host-capability, target-runtime, lifecycle, and conformance relations.
+statement:
+  zh-CN: >-
+    Official Adapter profile 必须成为独立的 `adapter` 实体，而不是从 package、测试文件或抽象 host 名称临时推断。Profile 用 `A-*` 保持可版本化身份，用 `adapterProfile` 声明 official package 与目标 platform/runtime range，用 `supports.modules` 表达正向 Module 支持，用 `omits.modules` 表达经过审查的拒绝或不适用，并用 `provides.hostCaps` 表达宿主能力由 Adapter 原生提供、翻译还是模拟。未出现在 supports 或 omits 中的 Module 只表示尚未编目，不得推断为支持或不支持。具体行为继续由 Contract 拥有，测试可以通过 `verifies.adapters` 把 translation evidence 绑定到 profile criteria。
+
+
+  en: >-
+    An official Adapter profile must be a first-class `adapter` entity rather than something inferred ad hoc from packages, test files, or abstract host names. A profile keeps a versionable `A-*` identity, declares its official package and target platform or runtime range through `adapterProfile`, records positive Module support through `supports.modules`, records reviewed refusal or non-applicability through `omits.modules`, and states whether host capabilities are native, translated, or emulated through `provides.hostCaps`. A Module absent from both supports and omits is merely uncataloged and must not be inferred as supported or unsupported. Contracts continue to own behavior, while tests may bind translation evidence to profile criteria through `verifies.adapters`.
+
+
+criteria:
+  - id: D-ADAPTER-PROFILE-0001-A
+    text:
+      zh-CN: 每个 official Adapter profile 必须拥有稳定的 `A-*` identity、package name、target platform，以及适用时的 host runtime/framework version range；它表示具体翻译实现 profile，而不是抽象宿主类别。
+      en: Every official Adapter profile must have a stable `A-*` identity, package name, target platform, and an applicable host runtime or framework version range; it represents a concrete translation profile rather than an abstract host category.
+  - id: D-ADAPTER-PROFILE-0001-B
+    text:
+      zh-CN: '`supports.modules` 必须表达已经审查的正向支持及 required/recommended/optional/partial 角色；`omits.modules` 必须表达已经审查的 unsupported/not-applicable/deferred 结论，并且同一 Module 不得同时出现于两者。'
+      en: '`supports.modules` must record reviewed positive support with required, recommended, optional, or partial roles; `omits.modules` must record reviewed unsupported, not-applicable, or deferred conclusions, and the same Module must not appear in both.'
+  - id: D-ADAPTER-PROFILE-0001-C
+    text:
+      zh-CN: Module 没有出现在某个 profile 的 supports 或 omits 中时，其状态必须解释为 uncataloged；局部编目不得伪装成完整支持矩阵。
+      en: When a Module appears in neither supports nor omits for a profile, its status must be interpreted as uncataloged; a partial catalog must not masquerade as a complete support matrix.
+  - id: D-ADAPTER-PROFILE-0001-D
+    text:
+      zh-CN: '`provides.hostCaps` 必须使用 native、translated 或 emulated role 说明能力兑现方式；无法忠实满足的 capability 不得被列为已提供。'
+      en: '`provides.hostCaps` must use a native, translated, or emulated role to state how the capability is fulfilled; a capability that cannot be satisfied faithfully must not be listed as provided.'
+  - id: D-ADAPTER-PROFILE-0001-E
+    text:
+      zh-CN: Adapter identity 不替代 Contract；portable baseline 与 host-specific mapping 仍由 Contract criteria 表达，Test 通过 `verifies.adapters` 将 executable translation evidence 绑定到具体 profile。
+      en: An Adapter identity does not replace Contracts; portable baselines and host-specific mappings remain Contract criteria, while Tests bind executable translation evidence to a concrete profile through `verifies.adapters`.
+  - id: D-ADAPTER-PROFILE-0001-F
+    text:
+      zh-CN: Profile 必须使用通用 entity lifecycle、relation version range 与 `replacedBy` 表达演进；breaking target/runtime boundary 不得通过静默改写旧 profile 掩盖。
+      en: Profiles must use the common entity lifecycle, relation version ranges, and `replacedBy` to express evolution; breaking target or runtime boundaries must not be hidden by silently rewriting an old profile.
+  - id: D-ADAPTER-PROFILE-0001-G
+    text:
+      zh-CN: Compiler 与 Adapter 同属 translation layer 的概念问题不在本决策中扩张 schema；`adapter` entity 只治理当前 official runtime Adapter profiles。
+      en: This decision does not expand the schema for Compilers even though Compilers and Adapters share a translation-layer concept; the `adapter` entity governs only current official runtime Adapter profiles.
+explains:
+  adapters:
+    - A-REACT-18-19-0001
+    - A-VUE-3-0001
+    - A-WEB-COMPONENT-0001
+relates:
+  contracts:
+    - C-ADAPTER-TYPES-0001
+  knowledge:
+    - K-DESIGN-TRADEOFF-0001
+verifies:
+  tests:
+    - T-ADAPTER-PROFILE-0001
+sources:
+  - path: internal/records/2026-05-22-spec-entity-scope-governance.zh-CN.md
+  - path: internal/records/2026-06-26-core-compaction-fracture-inventory.zh-CN.md
+  - path: internal/records/2026-08-13-module-host-cap-adapter-catalog-route.zh-CN.md
+  - path: internal/records/2026-08-14-props-official-adapter-profile-audit.zh-CN.md
+  - path: packages/spec/schema/src/index.ts
+  - path: packages/spec/engine/src/node.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added first-class official Adapter profile identities and graph relations for Module support, omission, and host-capability provision.
+tags: [adapter, profile, translation-layer, catalog, governance]

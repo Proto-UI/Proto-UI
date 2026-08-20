@@ -1,0 +1,44 @@
+id: P-BRUTALIST-SKELETON
+type: prototype
+title: Brutalist Skeleton protocol
+status: draft
+since: 0.2.0-rc.7
+summary: Brutalist Skeleton is a direct styled-only, contentless placeholder with a static hard-shadow surface.
+statement:
+  en: Brutalist Skeleton directly owns a passive, aria-hidden, contentless visual placeholder with square lavender fill, ink border, and hard offset shadow without owning loading state, announcements, or dimensions.
+  zh-CN: Brutalist Skeleton 直接拥有 passive、aria-hidden、contentless 的视觉占位原型，使用方形 lavender 填色、ink 边框和硬偏移阴影，但不拥有 loading 状态、announcement 或尺寸。
+criteria:
+  - id: P-BRUTALIST-SKELETON-DIRECT-OWNERSHIP
+    text:
+      en: The prototype must materialize directly without inheriting or invoking a Base Skeleton hook.
+      zh-CN: 该原型必须直接 materialize，不得继承或调用 Base Skeleton hook。
+  - id: P-BRUTALIST-SKELETON-VISUAL-ONLY
+    text:
+      en: The prototype must be contentless, aria-hidden, passive, and non-focusable, with no loading, busy, announcement, action, event, or command surface.
+      zh-CN: 该原型必须是 contentless、aria-hidden、passive 且不可聚焦，并且不得拥有 loading、busy、announcement、action、event 或 command surface。
+  - id: P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
+    text:
+      en: The projection must use square geometry, a foreground border, lavender fill, and a hard 2px offset shadow without built-in motion.
+      zh-CN: 该投影必须使用方角 geometry、foreground 边框、lavender 填色与 2px 硬偏移阴影，且不内置 motion。
+  - id: P-BRUTALIST-SKELETON-CONSUMER-SIZE
+    text:
+      en: The projection must not emit width, height, or min/max dimension tokens; the consuming composition owns size.
+      zh-CN: 该投影不得生成 width、height 或 min/max dimension token；尺寸由消费端组合拥有。
+sources:
+  - path: packages/prototypes/brutalist/src/skeleton/root.proto.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Introduced brutalist skeleton protocol.
+tags:
+  - prototype
+  - brutalist
+  - skeleton
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-A11Y-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+verifies:
+  tests:
+    - T-BRUTALIST-SKELETON-0001

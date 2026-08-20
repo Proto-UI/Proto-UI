@@ -1,0 +1,58 @@
+id: C-AS-SCROLL-SURFACE-0001
+type: contract
+title: asScrollSurface declares a no-arg singleton logical scroll surface
+status: draft
+since: 0.2.0-rc.7
+summary: asScrollSurface is a privileged no-argument once hook that declares the caller as a logical scroll surface and returns setup configuration and family binding, observed facts, and scroll requests.
+statement:
+  zh-CN: >-
+    `asScrollSurface()` 是 Scroll domain 的特权 no-arg once/singleton asHook。它声明当前 prototype instance 为 logical scroll surface，并返回稳定 handle；handle 提供 setup-only configuration、module-owned observed facts 与 scroll requests。该 hook 不暴露 raw host target、DOM metrics、Flutter controller 或宿主写入能力，也不单独定义 Scroll domain。
+
+
+  en: >-
+    `asScrollSurface()` is the Scroll-domain privileged no-argument once or singleton asHook. It declares the current prototype instance as a logical scroll surface and returns a stable handle providing setup-only configuration, module-owned observed facts, and scroll requests. The hook exposes neither raw host targets, DOM metrics, Flutter controllers, nor host write authority, and it does not define the Scroll domain by itself.
+
+
+criteria:
+  - id: C-AS-SCROLL-SURFACE-0001-A
+    text:
+      zh-CN: '`asScrollSurface()` 必须采用 no-arg once/singleton caller；同一 setup 重复调用必须返回严格相同的 handle。'
+      en: '`asScrollSurface()` must use a no-argument once or singleton caller; repeated calls in one setup must return the exact same handle.'
+  - id: C-AS-SCROLL-SURFACE-0001-B
+    text:
+      zh-CN: configuration 必须通过返回 handle 的 setup-only API 表达，不得通过重复参数化调用合并隐式副作用。
+      en: Configuration must be expressed through the returned handle's setup-only API rather than by merging implicit side effects from repeated parameterized calls.
+  - id: C-AS-SCROLL-SURFACE-0001-C
+    text:
+      zh-CN: axis、overflow、normalized position、visible ratio、scrolling 与 resolved projection 必须是 module-owned observed facts，而不是 author-writable state。
+      en: Axis, overflow, normalized position, visible ratio, scrolling, and resolved projection must be module-owned observed facts rather than author-writable state.
+  - id: C-AS-SCROLL-SURFACE-0001-D
+    text:
+      zh-CN: '`scrollBy`、`scrollTo`、page increment 与 control drag 必须作为 request API 表达，并服从 C-SCROLL-0001 的 fact/request 因果边界。'
+      en: '`scrollBy`, `scrollTo`, page increment, and control drag must be expressed as request APIs and obey the fact and request causality boundary in C-SCROLL-0001.'
+  - id: C-AS-SCROLL-SURFACE-0001-E
+    text:
+      zh-CN: 返回 handle 不得暴露 raw host target、宿主 geometry object 或宿主 controller。
+      en: The returned handle must not expose a raw host target, host geometry object, or host controller.
+  - id: C-AS-SCROLL-SURFACE-0001-F
+    text:
+      zh-CN: handle 可以通过 setup-only `bindComposedChrome` 声明 Context scope、Anatomy family/roles 与 orientation expose key，但不得接收 host target 或像素 geometry。
+      en: The handle may use setup-only `bindComposedChrome` to declare a Context scope, Anatomy family and roles, and an orientation expose key, but it must not accept host targets or pixel geometry.
+sources:
+  - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
+dependsOn:
+  contracts:
+    - C-SCROLL-0001
+    - C-SCROLL-COMPOSED-CHROME-0001
+    - C-AS-HOOK-PRIVILEGED-0001
+verifies:
+  tests:
+    - T-SCROLL-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Resolved composed-control registration as a setup-only family binding on the privileged surface handle.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Drafted asScrollSurface as the restricted authoring entry to Scroll module facts and requests.
+tags: [scroll, as-hook, privileged, surface]

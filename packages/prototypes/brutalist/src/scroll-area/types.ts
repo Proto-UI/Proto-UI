@@ -1,6 +1,4 @@
 import type {
-  ScrollAreaCornerExposes,
-  ScrollAreaCornerProps,
   ScrollAreaRootExposes,
   ScrollAreaRootProps,
   ScrollAreaScrollbarExposes,
@@ -18,5 +16,3 @@ export type BrutalistScrollAreaScrollbarProps = ScrollAreaScrollbarProps;
 export type BrutalistScrollAreaScrollbarExposes = ScrollAreaScrollbarExposes;
 export type BrutalistScrollAreaThumbProps = ScrollAreaThumbProps;
 export type BrutalistScrollAreaThumbExposes = ScrollAreaThumbExposes;
-export type BrutalistScrollAreaCornerProps = ScrollAreaCornerProps;
-export type BrutalistScrollAreaCornerExposes = ScrollAreaCornerExposes;

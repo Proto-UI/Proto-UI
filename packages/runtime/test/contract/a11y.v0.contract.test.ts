@@ -80,7 +80,7 @@ describe('runtime contract: a11y (v0)', () => {
         def.a11y.state('disabled', disabled);
         def.a11y.action('activate', { event: 'click' });
         def.a11y.relation('controls', { target: controls });
-        def.a11y.relation('describedBy', { target: 'help-a' });
+        def.a11y.relation('describedBy', { target: 'help-a', mode: 'append' });
         def.a11y.tree({ mergeChildren: true });
 
         def.lifecycle.onCreated((run) => {
@@ -106,6 +106,7 @@ describe('runtime contract: a11y (v0)', () => {
       states: { disabled: false },
       actions: { activate: { event: 'click' } },
       relations: { controls: 'panel-a', describedBy: 'help-a' },
+      relationModes: { describedBy: 'append' },
       tree: { mergeChildren: true },
     });
 

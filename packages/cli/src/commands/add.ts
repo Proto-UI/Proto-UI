@@ -55,6 +55,7 @@ export async function runAddCommand(argv: string[]): Promise<void> {
       `missing Proto UI config at ${relativeToCwd(paths.configPath, cwd)}. Run "proto-ui init" first.`
     );
   }
+  assertStylePresetCompatible(config, componentEntry.id, componentEntry.stylePreset);
 
   const projectPkg = await readProjectPackageJson(cwd);
   if (!projectPkg) {
@@ -92,10 +93,25 @@ export async function runAddCommand(argv: string[]): Promise<void> {
   console.log(
     `[proto-ui] add: generated ${relativeToCwd(paths.componentsDir, cwd)} for ${host}/${componentEntry.id}`
   );
-
   if (componentEntry.stylePreset && nextConfig.styles?.enabled === false) {
     console.log(
-      `[proto-ui] add: note that this component expects the ${componentEntry.stylePreset} style preset, but styles are disabled in proto-ui/config.json`
+      `[proto-ui] add: styles are disabled; provide the complete ${componentEntry.stylePreset} --pui-* token set for ${componentEntry.id}`
+    );
+  }
+}
+
+function assertStylePresetCompatible(
+  config: { styles?: { enabled?: boolean; preset?: string | null } },
+  componentId: string,
+  requiredPreset: string | null
+): void {
+  if (!requiredPreset) return;
+  if (config.styles?.enabled === false) return;
+
+  const configuredPreset = config.styles?.preset ?? null;
+  if (configuredPreset !== requiredPreset) {
+    throw new Error(
+      `${componentId} requires the ${requiredPreset} style preset, but proto-ui/config.json enables ${configuredPreset ?? 'no preset'}. Proto UI config v1 supports one project-wide preset; migrate explicitly with "proto-ui init --prototypes ${requiredPreset}" or choose a component compatible with ${configuredPreset ?? 'the configured styling mode'}.`
     );
   }
 }

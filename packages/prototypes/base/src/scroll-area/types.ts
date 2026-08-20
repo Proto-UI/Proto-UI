@@ -10,7 +10,19 @@ export type ScrollAreaRootAsHookContract = {};
 
 export interface ScrollAreaViewportProps {}
 
-export type ScrollAreaViewportExposes = {};
+export type ScrollAreaViewportExposes = {
+  scrollAxes: ExposeState<string>;
+  scrolling: ExposeState<boolean>;
+  scrollProjection: ExposeState<string>;
+  scrollXPosition: ExposeState<number>;
+  scrollXVisibleRatio: ExposeState<number>;
+  canScrollLeft: ExposeState<boolean>;
+  canScrollRight: ExposeState<boolean>;
+  scrollYPosition: ExposeState<number>;
+  scrollYVisibleRatio: ExposeState<number>;
+  canScrollUp: ExposeState<boolean>;
+  canScrollDown: ExposeState<boolean>;
+};
 
 export type ScrollAreaViewportStateHandles = {};
 
@@ -39,11 +51,3 @@ export type ScrollAreaThumbExposes = {};
 export type ScrollAreaThumbStateHandles = {};
 
 export type ScrollAreaThumbAsHookContract = {};
-
-export interface ScrollAreaCornerProps {}
-
-export type ScrollAreaCornerExposes = {};
-
-export type ScrollAreaCornerStateHandles = {};
-
-export type ScrollAreaCornerAsHookContract = {};

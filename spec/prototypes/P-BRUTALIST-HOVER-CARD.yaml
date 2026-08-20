@@ -1,0 +1,64 @@
+id: P-BRUTALIST-HOVER-CARD
+type: prototype
+title: Brutalist Hover Card inherits Base Hover Card and layers a relative inline-flex root
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Hover Card Root inherits Base Hover Card ownership and projects a style-family visual API: a relative inline-flex container that anchors trigger and content, square geometry and hard-shadow surfaces through the Brutalist visual grammar.
+
+
+statement:
+  en: >-
+    Brutalist Hover Card is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Hover Card. It preserves inherited Base protocol semantics where an inherited prototype is declared and adds only visual/style behavior: a relative inline-flex root container, zero radius, black structural borders, hard offset shadows, and flat theme-token fills.
+
+
+  zh-CN: >-
+    Brutalist Hover Card 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Hover Card 之上。它在声明继承关系的位置保留 Base protocol 语义，仅增加视觉/style 行为：relative inline-flex 根容器、零圆角、黑色结构边框、硬偏移阴影与平面主题 token 填充。
+
+
+criteria:
+  - id: P-BRUTALIST-HOVER-CARD-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Hover Card through `asHoverCardRoot()` once and must not redefine Base open, hover, focus, or disabled protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asHoverCardRoot()` 一次性继承 Base Hover Card，不得重定义 Base 的 open、hover、focus 或 disabled 协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-HOVER-CARD-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-hover-card-root` and is the only public Hover Card root entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-hover-card-root`，且是本 foundation 切片中唯一公开的 Hover Card 根入口。
+  - id: P-BRUTALIST-HOVER-CARD-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The root projects a `relative inline-flex items-start` container so trigger and content anchor without reflow, and must preserve square corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        根投射 `relative inline-flex items-start` 容器，使 trigger 与 content 锚定而不回流，且必须保持直角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/hover-card/root.proto.ts
+  - path: packages/prototypes/brutalist/src/hover-card/types.ts
+  - path: packages/prototypes/brutalist/test/hover-card.test.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-HOVER-CARD
+verifies: { tests: [T-BRUTALIST-HOVER-CARD-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Hover Card root projection with real public-API criteria (Base inheritance, relative inline-flex entry, visual grammar) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, hover-card]

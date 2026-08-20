@@ -1,33 +1,78 @@
 ---
-import MobileMenuToggle from '@astrojs/starlight/components/MobileMenuToggle.astro';
+import context from 'virtual:starlight/project-context';
+import { localizedUrl } from '../../utils/localizedUrl';
 import '../../styles/global.css';
+import AdapterSelect from './AdapterSelect.astro';
 
-const { hasSidebar } = Astro.locals.starlightRoute;
+const { hasSidebar, locale } = Astro.locals.starlightRoute;
+const localizedPath = (path: string) =>
+  localizedUrl(new URL(path, Astro.url), locale || 'en', context.trailingSlash).pathname;
 ---
 
 <div
   class="bg-background text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
 >
+  <script>
+    import '../../scripts/proto-concept';
+  </script>
   <div class="bg-background container-wrapper flex flex-1 flex-col px-2">
     <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
+    <noscript>
+      <style is:inline>
+        @media (max-width: 63.999rem) {
+          [data-page-frame-layout] {
+            flex-direction: column !important;
+          }
+
+          .docs-sidebar {
+            width: 100% !important;
+          }
+
+          .mobile-sidebar-pane {
+            position: static !important;
+            inset: auto !important;
+            display: flex !important;
+            width: 100% !important;
+            max-height: min(60svh, 32rem);
+            border-bottom: 1px solid var(--color-border);
+          }
+
+          .main-frame {
+            width: 100% !important;
+          }
+
+          starlight-menu-button {
+            display: none !important;
+          }
+        }
+      </style>
+    </noscript>
     <div
-      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:calc(var(--spacing)*4)]"
+      data-page-frame-layout
+      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-w-0 w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:calc(var(--spacing)*4)]"
     >
       {
         hasSidebar && (
           <>
             <nav
-              class="no-scrollbar overflow-scroll text-sidebar-foreground w-(--sidebar-width) flex-col sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-var(--header-height))] bg-transparent lg:flex"
+              class="docs-sidebar text-sidebar-foreground"
               aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}
             >
-              <MobileMenuToggle />
-              <div id="starlight__sidebar" class="sidebar-pane">
-                <div class="sidebar-content sl-flex">
+              <div id="starlight__sidebar" class="mobile-sidebar-pane sidebar-pane">
+                <div class="mobile-sidebar-content sidebar-content sl-flex">
+                  <div class="mobile-preferences">
+                    <AdapterSelect id="adapter-select-mobile" />
+                  </div>
+                  <div class="mobile-primary-links" aria-label="Primary">
+                    <a href={localizedPath('/start-here/what-you-saw/')}>Docs</a>
+                    <a href={localizedPath('/ui-libraries/')}>Prototypes</a>
+                    <a href={localizedPath('/whitepaper/component-as-protocol/')}>Whitepaper</a>
+                  </div>
                   <slot name="sidebar" />
                 </div>
               </div>
             </nav>
-            <div class="main-frame">
+            <div class="main-frame min-w-0 w-full">
               <slot />
             </div>
           </>
@@ -36,12 +81,187 @@ const { hasSidebar } = Astro.locals.starlightRoute;
     </div>
     {
       !hasSidebar && (
-        <div class="main-frame">
-          <slot />
-        </div>
+        <>
+          <nav class="docs-sidebar primary-only-sidebar" aria-label="Primary navigation">
+            <div id="starlight__sidebar" class="mobile-sidebar-pane sidebar-pane">
+              <div class="mobile-sidebar-content sidebar-content sl-flex">
+                <div class="mobile-preferences">
+                  <AdapterSelect id="adapter-select-mobile" />
+                </div>
+                <div class="mobile-primary-links" aria-label="Primary">
+                  <a href={localizedPath('/start-here/what-you-saw/')}>Docs</a>
+                  <a href={localizedPath('/ui-libraries/')}>Prototypes</a>
+                  <a href={localizedPath('/whitepaper/component-as-protocol/')}>Whitepaper</a>
+                </div>
+              </div>
+            </div>
+          </nav>
+          <div class="main-frame min-w-0 w-full">
+            <slot />
+          </div>
+        </>
       )
     }
   </div>
 </div>
 
-<style></style>
+<script>
+  const menuHost = document.querySelector('starlight-menu-button');
+  const menuControl = menuHost?.querySelector('button');
+
+  if (menuHost && menuControl) {
+    const syncExpandedState = () => {
+      menuControl.setAttribute(
+        'aria-expanded',
+        menuHost.getAttribute('aria-expanded') === 'true' ? 'true' : 'false'
+      );
+    };
+    const collapseMenu = (restoreFocus = false) => {
+      menuHost.setAttribute('aria-expanded', 'false');
+      document.body.removeAttribute('data-mobile-menu-expanded');
+      syncExpandedState();
+      if (restoreFocus) menuControl.focus();
+    };
+    const desktopQuery = window.matchMedia('(min-width: 64rem)');
+    const collapseOnDesktop = () => {
+      if (desktopQuery.matches) collapseMenu();
+    };
+
+    new MutationObserver(syncExpandedState).observe(menuHost, {
+      attributes: true,
+      attributeFilter: ['aria-expanded'],
+    });
+    desktopQuery.addEventListener('change', collapseOnDesktop);
+    syncExpandedState();
+    collapseOnDesktop();
+
+    document.addEventListener('keyup', (event) => {
+      if (event.key !== 'Escape') return;
+      if (!document.body.hasAttribute('data-mobile-menu-expanded')) return;
+      collapseMenu(true);
+    });
+  }
+</script>
+
+<style>
+  .docs-sidebar {
+    width: 0;
+    flex: none;
+  }
+
+  .mobile-sidebar-pane {
+    position: fixed;
+    z-index: 40;
+    inset: var(--header-height) 0 0;
+    display: none;
+    width: 100%;
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--color-background);
+  }
+
+  :global([data-mobile-menu-expanded]) .mobile-sidebar-pane {
+    display: flex;
+  }
+
+  @media (max-width: 63.999rem) {
+    :global(body[data-mobile-menu-expanded]) {
+      overflow: hidden;
+    }
+  }
+
+  .mobile-sidebar-content {
+    width: 100%;
+    min-height: max-content;
+    padding: 1rem var(--sl-sidebar-pad-x, 1rem) 2rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mobile-primary-links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobile-preferences {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .mobile-preferences :global(.adapter-select-wrapper),
+  .mobile-preferences :global(select) {
+    width: 100%;
+  }
+
+  .mobile-preferences :global(select) {
+    border-color: var(--color-border);
+    text-align: left;
+  }
+
+  @media (min-width: 48rem) {
+    .mobile-preferences {
+      display: none;
+    }
+  }
+
+  .mobile-primary-links a {
+    display: inline-flex;
+    min-height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 0.5rem;
+    border-radius: var(--radius-md);
+    color: var(--color-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .mobile-primary-links a:hover,
+  .mobile-primary-links a:focus-visible {
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+
+  @media (min-width: 64rem) {
+    .docs-sidebar {
+      position: sticky;
+      z-index: 30;
+      top: calc(var(--header-height) + 1px);
+      display: flex;
+      width: var(--sidebar-width);
+      height: calc(100svh - var(--header-height));
+      flex-direction: column;
+      overflow-y: auto;
+      background: transparent;
+      scrollbar-width: none;
+    }
+
+    .mobile-sidebar-pane {
+      position: static;
+      z-index: auto;
+      display: flex;
+      width: var(--sidebar-width);
+      padding-block: 1rem 3rem;
+      overflow: visible;
+      background: transparent;
+    }
+
+    .mobile-sidebar-content {
+      padding: 0;
+    }
+
+    .mobile-primary-links {
+      display: none;
+    }
+
+    .docs-sidebar.primary-only-sidebar {
+      display: none;
+    }
+  }
+</style>

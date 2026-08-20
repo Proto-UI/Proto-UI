@@ -1,0 +1,102 @@
+id: T-BRUTALIST-SWITCH-0001
+type: test
+title: Brutalist Switch visual, interaction, and demo naming tests
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Covers the Brutalist Switch public API (root checked-fill pair without padding swap, thumb single-movement checked translation, press/focus/disabled) plus the visible name-from-content reference-demo composition against P-BRUTALIST-SWITCH and P-BRUTALIST-SWITCH-THUMB criteria.
+
+
+cases:
+  - id: T-BRUTALIST-SWITCH-0001-CASE-1
+    title: Direct entry and Base Switch inheritance for root and thumb
+    covers:
+      - P-BRUTALIST-SWITCH-ENTRY
+      - P-BRUTALIST-SWITCH-BASE-INHERITANCE
+      - P-BRUTALIST-SWITCH-THUMB-ENTRY
+      - P-BRUTALIST-SWITCH-THUMB-BASE-INHERITANCE
+    expectation: p-brutalist-switch-entry-inheritance
+  - id: T-BRUTALIST-SWITCH-0001-CASE-2
+    title: Thumb is the sole checked-movement mechanism; root padding stays symmetric
+    covers:
+      - P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT
+      - P-BRUTALIST-SWITCH-CHECKED-PAIR-INVARIANT
+    expectation: p-brutalist-switch-single-movement
+  - id: T-BRUTALIST-SWITCH-0001-CASE-3
+    title: Checked root swaps fill to bg-sky without geometry change
+    covers:
+      - P-BRUTALIST-SWITCH-CHECKED-PAIR-INVARIANT
+      - P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT
+    expectation: p-brutalist-switch-checked-pair
+  - id: T-BRUTALIST-SWITCH-0001-CASE-4
+    title: Press focus-visible and disabled projection on root
+    covers:
+      - P-BRUTALIST-SWITCH-INTERACTION
+      - P-BRUTALIST-SWITCH-BASE-INHERITANCE
+    expectation: p-brutalist-switch-interaction
+  - id: T-BRUTALIST-SWITCH-0001-CASE-5
+    title: Visual grammar remains square hard-shadow Neo-Brutalist for root and thumb
+    covers:
+      - P-BRUTALIST-SWITCH-VISUAL-GRAMMAR
+      - P-BRUTALIST-SWITCH-THUMB-VISUAL-GRAMMAR
+    expectation: p-brutalist-switch-visual-grammar
+  - id: T-BRUTALIST-SWITCH-0001-CASE-6
+    title: Visible demo captions supply the accessible name through Switch content
+    covers:
+      - P-BRUTALIST-SWITCH-DEMO-NAMING
+    expectation: p-brutalist-switch-demo-name-from-content
+implementations:
+  - id: prototypes-brutalist-switch-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/switch.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SWITCH-0001-CASE-1
+      - T-BRUTALIST-SWITCH-0001-CASE-2
+      - T-BRUTALIST-SWITCH-0001-CASE-3
+      - T-BRUTALIST-SWITCH-0001-CASE-4
+      - T-BRUTALIST-SWITCH-0001-CASE-5
+    exercises:
+      - P-BASE-SWITCH
+      - P-BASE-SWITCH-THUMB
+      - P-BRUTALIST-SWITCH
+      - P-BRUTALIST-SWITCH-THUMB
+  - id: www-brutalist-control-demo-contract
+    kind: workspace-check
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SWITCH-0001-CASE-6
+    exercises:
+      - P-BASE-SWITCH
+      - P-BRUTALIST-SWITCH
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-SWITCH
+    - id: P-BRUTALIST-SWITCH-THUMB
+exercises:
+  prototypes:
+    - P-BASE-SWITCH
+    - P-BASE-SWITCH-THUMB
+    - P-BRUTALIST-SWITCH
+    - P-BRUTALIST-SWITCH-THUMB
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Switch coverage mapped 1:1 to the rc.7 P criteria (entry/inheritance, single-movement, checked pair, interaction, visual grammar). Not present in the immutable rc.6 snapshot.
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Added executable reference-demo coverage that keeps each visible caption inside its Switch root for inherited name-from-content projection.
+
+
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - switch

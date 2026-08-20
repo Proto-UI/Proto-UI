@@ -1,0 +1,64 @@
+id: M-SCROLL-0001
+type: module
+title: Scroll module owns logical surface sessions and projection negotiation
+status: draft
+since: 0.2.0-rc.7
+summary: The Scroll module owns logical surface identity, observed facts, requests, projection negotiation, and bounded host-session lifetime.
+statement:
+  zh-CN: Scroll module 把特权 `asScrollSurface()` 的声明转换为 logical surface session，归一化 host facts 与 author requests，解析 projection policy，并通过一个 Scroll Surface host capability 建立有界 lease。
+  en: The Scroll module turns privileged `asScrollSurface()` declarations into logical surface sessions, normalizes host facts and author requests, resolves projection policy, and establishes a bounded lease through one Scroll Surface host capability.
+criteria:
+  - id: M-SCROLL-0001-A
+    text:
+      zh-CN: Module 必须为每个 logical surface 保持稳定 identity，并使 host target replacement 不改变该 identity。
+      en: The module must retain stable identity for each logical surface without allowing host-target replacement to change that identity.
+  - id: M-SCROLL-0001-B
+    text:
+      zh-CN: Module 必须拥有 observed facts 与 request arbitration，不得让 adapter 自行形成第二套 logical scroll state。
+      en: The module must own observed facts and request arbitration and must not allow an adapter to form a second logical scroll-state model.
+  - id: M-SCROLL-0001-C
+    text:
+      zh-CN: Module 必须根据 preference、requirements 与 host support 解析 resolved projection，并在 required projection 无法满足时诊断。
+      en: The module must resolve projection from preferences, requirements, and host support and diagnose an unsatisfied required projection.
+  - id: M-SCROLL-0001-D
+    text:
+      zh-CN: Module 必须在 view/target detach 或 logical dispose 时释放 host lease，并忽略 lease epoch 之外的迟到 facts。
+      en: The module must release the host lease on view or target detachment or logical disposal and ignore late facts from outside the lease epoch.
+  - id: M-SCROLL-0001-E
+    text:
+      zh-CN: Module 必须使用 module-internal Context scope identity 与 Anatomy relations 把 composed controls 附着到同一个 surface lease，同时使高频 geometry 留在 host-local sink。
+      en: The module must use module-internal Context scope identity and Anatomy relations to attach composed controls to the same surface lease while keeping high-frequency geometry in the host-local sink.
+  - id: M-SCROLL-0001-F
+    text:
+      zh-CN: Module 必须把 family-resolved Scrollbar/Thumb control route 附着到同一 surface session，使 host Move Gesture 产生既有 `control-drag` request，而不是创建第二份 Thumb scroll state。
+      en: The module must attach the family-resolved Scrollbar and Thumb control route to the same surface session so host Move Gesture produces the existing `control-drag` request rather than a second Thumb scroll state.
+satisfies:
+  contracts:
+    - C-SCROLL-0001
+    - C-AS-SCROLL-SURFACE-0001
+    - C-SCROLL-COMPOSED-CHROME-0001
+    - C-SCROLL-COMPOSED-CONTROL-0001
+requires:
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+    - HC-MOVE-GESTURE-0001
+verifies:
+  tests:
+    - T-SCROLL-0001
+    - T-SCROLL-COMPOSED-CHROME-0001
+    - T-SCROLL-COMPOSED-CONTROL-0001
+sources:
+  - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
+  - path: packages/modules/scroll/src/create.ts
+  - path: packages/modules/scroll/src/impl.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Attached Move Gesture-backed composed controls to the existing Scroll surface session and request path.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added Context-scoped and Anatomy-resolved composed chrome attachment ownership.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the planned Scroll module as owner of logical sessions, facts, requests, negotiation, and host-lease lifetime.
+tags: [scroll, module, session, negotiation]

@@ -1,0 +1,108 @@
+id: T-BASE-TEXTAREA-0001
+type: test
+title: Base Textarea protocol tests
+status: draft
+since: 0.2.0-rc.7
+summary: Web Component coverage for one contentless Web textarea profile, shared direct/asHook static requirements, stable value ownership, normalized edit and IME events, native property and accessibility projection, physical focus, and the bounded expose surface.
+cases:
+  - id: T-BASE-TEXTAREA-0001-CASE-PHYSICAL-SURFACE
+    title: Root materializes one contentless native textarea with the complete initial property surface
+    covers:
+      - P-BASE-TEXTAREA-PHYSICAL-TARGET
+      - P-BASE-TEXTAREA-NATIVE-PROPS
+      - P-BASE-TEXTAREA-BOUNDARY
+    expectation: base-textarea-is-one-contentless-native-target-with-exact-props
+  - id: T-BASE-TEXTAREA-0001-CASE-UNCONTROLLED
+    title: Uncontrolled input stays dirty across prop and defaultValue updates while normalized events remain observable
+    covers:
+      - P-BASE-TEXTAREA-VALUE-OWNERSHIP
+      - P-BASE-TEXTAREA-EVENTS-AND-IME
+      - P-BASE-TEXTAREA-NATIVE-PROPS
+    expectation: uncontrolled-dirty-value-survives-live-property-and-default-value-projection
+  - id: T-BASE-TEXTAREA-0001-CASE-CONTROLLED
+    title: Controlled input emits a proposal and restores the authoritative owner value
+    covers:
+      - P-BASE-TEXTAREA-VALUE-OWNERSHIP
+      - P-BASE-TEXTAREA-EVENTS-AND-IME
+    expectation: controlled-value-change-is-a-proposal-until-owner-acceptance
+  - id: T-BASE-TEXTAREA-0001-CASE-COMPOSITION
+    title: Controlled IME composition preserves the candidate before restoring an unaccepted value after completion
+    covers:
+      - P-BASE-TEXTAREA-EVENTS-AND-IME
+      - P-BASE-TEXTAREA-VALUE-OWNERSHIP
+    expectation: composition-candidate-and-cursor-are-not-clobbered-mid-session
+  - id: T-BASE-TEXTAREA-0001-CASE-A11Y-FOCUS
+    title: Accessibility labels and read-only state update on the physical target while focus methods remain disabled-aware
+    covers:
+      - P-BASE-TEXTAREA-A11Y-AND-FOCUS
+      - P-BASE-TEXTAREA-NATIVE-PROPS
+    expectation: live-a11y-and-focus-project-to-the-same-native-textarea
+  - id: T-BASE-TEXTAREA-0001-CASE-PRESENTATION-SURFACE
+    title: Root visual intent and focus styling project to the physical textarea rather than an adapter wrapper
+    covers:
+      - P-BASE-TEXTAREA-PHYSICAL-TARGET
+      - P-BASE-TEXTAREA-PRESENTATION-SURFACE
+    expectation: base-textarea-visual-and-focus-surface-is-the-single-physical-editor
+  - id: T-BASE-TEXTAREA-0001-CASE-AUTHORING-SURFACE
+    title: Direct and asHook entries expose the same bounded Textarea protocol and static requirements
+    covers:
+      - P-BASE-TEXTAREA-AUTHORING-ENTRIES
+      - P-BASE-TEXTAREA-BOUNDARY
+    expectation: direct-and-authored-textarea-entries-share-one-protocol-and-module-requirement
+implementations:
+  - id: prototypes-base-textarea-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/textarea.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-TEXTAREA-0001-CASE-PHYSICAL-SURFACE
+      - T-BASE-TEXTAREA-0001-CASE-UNCONTROLLED
+      - T-BASE-TEXTAREA-0001-CASE-CONTROLLED
+      - T-BASE-TEXTAREA-0001-CASE-COMPOSITION
+      - T-BASE-TEXTAREA-0001-CASE-A11Y-FOCUS
+      - T-BASE-TEXTAREA-0001-CASE-AUTHORING-SURFACE
+    exercises:
+      - P-BASE-TEXTAREA
+  - id: prototype-previewer-base-textarea-surface
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/previewer.demo-renderer.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-TEXTAREA-0001-CASE-PRESENTATION-SURFACE
+    exercises:
+      - P-BASE-TEXTAREA
+verifies:
+  prototypes:
+    - id: P-BASE-TEXTAREA
+      anchors:
+        - P-BASE-TEXTAREA-AUTHORING-ENTRIES
+        - P-BASE-TEXTAREA-PHYSICAL-TARGET
+        - P-BASE-TEXTAREA-VALUE-OWNERSHIP
+        - P-BASE-TEXTAREA-EVENTS-AND-IME
+        - P-BASE-TEXTAREA-NATIVE-PROPS
+        - P-BASE-TEXTAREA-A11Y-AND-FOCUS
+        - P-BASE-TEXTAREA-PRESENTATION-SURFACE
+        - P-BASE-TEXTAREA-BOUNDARY
+exercises:
+  prototypes:
+    - P-BASE-TEXTAREA
+  modules:
+    - M-TEXT-CONTROL-0001
+sources:
+  - path: packages/prototypes/base/test/textarea.test.ts
+  - path: packages/adapters/web-component/test/previewer.demo-renderer.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added host-neutral direct/asHook static requirement coverage.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable Base Textarea protocol coverage.
+tags:
+  - test
+  - prototype
+  - base
+  - textarea
+  - text-control

@@ -4,6 +4,7 @@ export const SPEC_ENTITY_TYPES = [
   'contract',
   'prototype',
   'module',
+  'adapter',
   'decision',
   'host-cap',
   'test',
@@ -15,6 +16,7 @@ export const SPEC_ENTITY_PREFIXES = {
   contract: 'C',
   prototype: 'P',
   module: 'M',
+  adapter: 'A',
   decision: 'D',
   'host-cap': 'HC',
   test: 'T',
@@ -35,6 +37,25 @@ export const SPEC_RELATION_KINDS = [
   'exercises',
   'requires',
   'owns',
+  'supports',
+  'provides',
+  'omits',
+] as const;
+export const SPEC_ADAPTER_MODULE_SUPPORT_ROLES = [
+  'required-module',
+  'recommended-module',
+  'optional-module',
+  'partial-module',
+] as const;
+export const SPEC_ADAPTER_MODULE_OMISSION_ROLES = [
+  'unsupported-module',
+  'not-applicable-module',
+  'deferred-module',
+] as const;
+export const SPEC_ADAPTER_CAPABILITY_ROLES = [
+  'native-capability',
+  'translated-capability',
+  'emulated-capability',
 ] as const;
 export const SPEC_RELATION_ROLES = [
   'value-boundary',
@@ -46,6 +67,10 @@ export const SPEC_RELATION_ROLES = [
   'diagnostic-policy',
   'test-surface',
   'test-entrypoint',
+  'profile-conformance',
+  ...SPEC_ADAPTER_MODULE_SUPPORT_ROLES,
+  ...SPEC_ADAPTER_MODULE_OMISSION_ROLES,
+  ...SPEC_ADAPTER_CAPABILITY_ROLES,
 ] as const;
 export const SPEC_COVERAGE_IMPACTS = [
   'expands-test-surface',
@@ -86,7 +111,7 @@ export type SpecIdParts = {
 };
 
 const specIdPattern =
-  /^(?:(P)-([A-Z0-9]+(?:-[A-Z0-9]+)*)|((?:C|M|D|HC|T|V|K)-([A-Z0-9]+(?:-[A-Z0-9]+)*)-(\d{4})))$/;
+  /^(?:(P)-([A-Z0-9]+(?:-[A-Z0-9]+)*)|((?:C|M|A|D|HC|T|V|K)-([A-Z0-9]+(?:-[A-Z0-9]+)*)-(\d{4})))$/;
 const semverPattern = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 
 export const specVersionSchema = z.string().regex(semverPattern, 'Expected a semver version.');
@@ -118,6 +143,7 @@ export const specRelationsSchema = z
     contracts: z.array(specRelationTargetSchema).optional(),
     prototypes: z.array(specRelationTargetSchema).optional(),
     modules: z.array(specRelationTargetSchema).optional(),
+    adapters: z.array(specRelationTargetSchema).optional(),
     decisions: z.array(specRelationTargetSchema).optional(),
     hostCaps: z.array(specRelationTargetSchema).optional(),
     tests: z.array(specRelationTargetSchema).optional(),
@@ -163,6 +189,27 @@ export const specSourceRefSchema = z.object({
   label: z.string().optional(),
   sections: z.array(z.string()).optional(),
 });
+
+export const specAdapterRuntimeSchema = z
+  .object({
+    name: z.string().min(1),
+    versionRange: z.string().min(1).optional(),
+  })
+  .strict();
+
+export const specAdapterTargetSchema = z
+  .object({
+    platform: z.string().min(1),
+    runtime: specAdapterRuntimeSchema.optional(),
+  })
+  .strict();
+
+export const specAdapterProfileSchema = z
+  .object({
+    package: z.string().regex(/^@proto\.ui\/adapter-[a-z0-9-]+$/),
+    target: specAdapterTargetSchema,
+  })
+  .strict();
 
 export const specAnatomyCardinalityMaxSchema = z.union([
   z.number().int().nonnegative(),
@@ -344,6 +391,7 @@ export const specEntitySchema = z
     summary: z.string().optional(),
     statement: specLocalizedTextSchema.optional(),
     anatomy: specAnatomySchema.optional(),
+    adapterProfile: specAdapterProfileSchema.optional(),
     criteria: z.array(specCriterionSchema).default([]),
     openQuestions: z.array(specOpenQuestionSchema).default([]),
     cases: z.array(specTestCaseSchema).default([]),
@@ -361,6 +409,9 @@ export const specEntitySchema = z
     explains: specRelationsSchema,
     exercises: specRelationsSchema,
     owns: specRelationsSchema,
+    supports: specRelationsSchema,
+    provides: specRelationsSchema,
+    omits: specRelationsSchema,
     release: specReleaseSchema.optional(),
     revisions: z.array(specRevisionSchema).default([]),
     tags: z.array(z.string()).default([]),
@@ -399,6 +450,76 @@ export const specEntitySchema = z
         path: ['inherits'],
         message: 'Only prototype entities may declare prototype inheritance.',
       });
+    }
+
+    if (entity.type === 'adapter' && !entity.adapterProfile) {
+      context.addIssue({
+        code: 'custom',
+        path: ['adapterProfile'],
+        message: 'Adapter entities must declare adapterProfile metadata.',
+      });
+    }
+
+    if (entity.type !== 'adapter' && entity.adapterProfile) {
+      context.addIssue({
+        code: 'custom',
+        path: ['adapterProfile'],
+        message: 'Only adapter entities may declare adapterProfile metadata.',
+      });
+    }
+
+    if (entity.type !== 'adapter' && (entity.supports || entity.provides || entity.omits)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['supports'],
+        message: 'Only adapter entities may declare supports, provides, or omits relations.',
+      });
+    }
+
+    if (entity.type === 'adapter') {
+      const supportedModules = entity.supports?.modules ?? [];
+      const omittedModules = entity.omits?.modules ?? [];
+      const providedHostCaps = entity.provides?.hostCaps ?? [];
+
+      if (supportedModules.length === 0 && omittedModules.length === 0) {
+        context.addIssue({
+          code: 'custom',
+          path: ['supports'],
+          message: 'Adapter entities must catalog at least one supported or omitted module slice.',
+        });
+      }
+
+      validateOnlyRelationTargetKind(context, 'supports', entity.supports, 'modules');
+      validateOnlyRelationTargetKind(context, 'provides', entity.provides, 'hostCaps');
+      validateOnlyRelationTargetKind(context, 'omits', entity.omits, 'modules');
+      validateAdapterRelationRoles(
+        context,
+        'supports',
+        supportedModules,
+        SPEC_ADAPTER_MODULE_SUPPORT_ROLES
+      );
+      validateAdapterRelationRoles(
+        context,
+        'provides',
+        providedHostCaps,
+        SPEC_ADAPTER_CAPABILITY_ROLES
+      );
+      validateAdapterRelationRoles(
+        context,
+        'omits',
+        omittedModules,
+        SPEC_ADAPTER_MODULE_OMISSION_ROLES
+      );
+
+      const supportedIds = new Set(supportedModules.map((target) => target.id));
+      for (const omitted of omittedModules) {
+        if (!supportedIds.has(omitted.id)) continue;
+        context.addIssue({
+          code: 'custom',
+          path: ['omits', 'modules'],
+          message: `Adapter module ${omitted.id} cannot be both supported and omitted.`,
+        });
+      }
     }
 
     if (entity.type === 'version' && !entity.release) {
@@ -571,12 +692,47 @@ export type SpecPrototypeInheritance = z.infer<typeof specPrototypeInheritanceSc
 export type SpecRevision = z.infer<typeof specRevisionSchema>;
 export type SpecRelease = z.infer<typeof specReleaseSchema>;
 export type SpecSourceRef = z.infer<typeof specSourceRefSchema>;
+export type SpecAdapterRuntime = z.infer<typeof specAdapterRuntimeSchema>;
+export type SpecAdapterTarget = z.infer<typeof specAdapterTargetSchema>;
+export type SpecAdapterProfile = z.infer<typeof specAdapterProfileSchema>;
 export type SpecAnatomy = z.infer<typeof specAnatomySchema>;
 export type SpecCriterion = z.infer<typeof specCriterionSchema>;
 export type SpecOpenQuestion = z.infer<typeof specOpenQuestionSchema>;
 export type SpecTestCase = z.infer<typeof specTestCaseSchema>;
 export type SpecTestImplementation = z.infer<typeof specTestImplementationSchema>;
 export type SpecEntity = z.infer<typeof specEntitySchema>;
+
+function validateOnlyRelationTargetKind(
+  context: z.RefinementCtx,
+  relationKind: 'supports' | 'provides' | 'omits',
+  relations: SpecRelations,
+  allowedTargetKind: keyof NonNullable<SpecRelations>
+): void {
+  for (const [targetKind, targets] of Object.entries(relations ?? {})) {
+    if (targetKind === allowedTargetKind || !targets?.length) continue;
+    context.addIssue({
+      code: 'custom',
+      path: [relationKind, targetKind],
+      message: `Adapter ${relationKind} relations may target only ${allowedTargetKind}.`,
+    });
+  }
+}
+
+function validateAdapterRelationRoles(
+  context: z.RefinementCtx,
+  relationKind: 'supports' | 'provides' | 'omits',
+  targets: SpecRelationTarget[],
+  allowedRoles: readonly string[]
+): void {
+  for (const [index, target] of targets.entries()) {
+    if (target.role && allowedRoles.includes(target.role)) continue;
+    context.addIssue({
+      code: 'custom',
+      path: [relationKind, index, 'role'],
+      message: `Adapter ${relationKind} relation to ${target.id} must declare one of: ${allowedRoles.join(', ')}.`,
+    });
+  }
+}
 
 export type SpecValidationIssue = {
   filePath?: string;

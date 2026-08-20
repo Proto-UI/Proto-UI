@@ -1,0 +1,42 @@
+---
+title: 'Live Region'
+desp: 'Live Region base prototype'
+description: 'Live Region base prototype'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-live-region-root` is a narrow async accessibility primitive that projects governed ARIA live-region semantics without interaction.
+
+<div>
+  <PrototypePreviewer demoId="demo-base-live-region" initialRuntime="wc" />
+</div>
+
+It derives `role`, `aria-live`, and `aria-atomic` from two props:
+
+- `politeness`: `polite` (default) projects `role=status` + `aria-live=polite`; `assertive` projects `role=alert` + `aria-live=assertive`
+- `atomic`: `true` (default) projects `aria-atomic=true`; `false` projects `aria-atomic=false`
+
+Authored child content is the announcement payload. The prototype declares no focus, event, command, selection, or accessible-name override channel; the exposes surface is empty.
+
+## Current v0 Boundary
+
+`base-live-region-root` currently includes:
+
+- polite/assertive role and aria-live projection
+- atomic aria-atomic projection
+- mounted prop transitions that update all three attributes synchronously
+- authored child content preservation across prop transitions
+
+It does not include:
+
+- `aria-relevant` granularity control
+- announcement timers or replacement state machines
+- accessible-name override
+- focus, event, command, or selection channels
+
+## References
+
+- Contract: [C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
+- Source: [packages/prototypes/base/src/live-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/live-region)
+- Test: [live-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/live-region.test.ts)

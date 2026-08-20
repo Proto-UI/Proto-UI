@@ -119,14 +119,15 @@ export const contractPreviews = [
   },
   {
     id: 'C-PROPS-0009',
-    title: 'Empty 与 invalid 通过确定性 fallback 解析',
+    title: 'Missing、empty 与 invalid 按输入状态进入不同 fallback',
     summary:
-      '`missing`、`provided-empty` 与 `invalid` 经过 `empty` 行为和 fallback chain 得到稳定 resolved value。',
+      '`missing` 跳过 `prevValid` 并从默认值解析；`provided-empty` 或 `invalid` 进入 fallback 时可以先复用 `prevValid`。',
     quote:
-      'The fallback candidate order must be `prevValid`, `setDefaults`, declaration `default`, then final `null`.',
+      '`missing` 的 fallback 候选顺序是 `setDefaults`、声明中的 `default`、最后的 `null`；`provided-empty` 或 `invalid` 进入 fallback 时，`prevValid` 排在最前。',
     criteria: [
+      '`missing` 不得复用 `prevValid`；宿主撤回输入后，必须进入仅含默认值的 fallback chain。',
       '`empty: "accept"` 将 provided-empty 解析为 `null`。',
-      '默认 `empty: "fallback"` 进入 fallback chain。',
+      '`provided-empty` 或 `invalid` 进入 fallback 时，先检查 `prevValid`，再检查默认值。',
       '`empty: "error"` 要求 fallback 结果是非空有效值。',
     ],
     tests:

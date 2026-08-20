@@ -270,6 +270,14 @@ Contributors should treat base inheritance and behavior fidelity as more importa
 
 A Shadcn family should express inheritance through its corresponding Base family subpath and must not depend on another Shadcn family by default. The CLI installs the complete package while generated facades use family subpaths.
 
+### 8.3 `@proto.ui/prototypes-brutalist`
+
+`@proto.ui/prototypes-brutalist` is the contributor-authored Neo-Brutalist styled library promoted to the public `v0.2.0-rc.7` release train.
+
+Its families reuse Base only when Base owns an independently testable cross-host protocol. Styled-only visual carriers remain direct prototypes rather than creating empty Base abstractions. The complete package is the release unit; family subpaths and the Brutalist CLI preset are the consumer-facing integration boundary.
+
+The library owns no third-party compatibility claim. Its package description, catalog entities, and docs must preserve the provenance boundary recorded by `K-BRUTALIST-0001`.
+
 ---
 
 ## 9. Module Capability Layers
@@ -308,6 +316,10 @@ Examples include:
 - rule
 - expose
 - boundary
+- scroll
+- text control
+
+`@proto.ui/module-text-control` owns the adapter-facing host boundary for semantic host-owned text-editor requirements: stable controlled/uncontrolled value ownership, normalized input/change/composition events, property projection, editing-session preservation, and physical focus access. The current Web profile resolves multiline plain text to `HTMLTextAreaElement`; other hosts provide equivalent capabilities without exposing widget names to prototypes. It is dependency-directed infrastructure for Base Textarea and official adapters, not a general Maker entry point.
 
 These packages should usually be understood as:
 

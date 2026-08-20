@@ -226,6 +226,7 @@ export class AnatomyModuleImpl extends ModuleBase {
   private claimFamilies = new Set<AnatomyFamily>();
   private orderDispatch: AnatomyOrderCallbackDispatcher = (fn) => fn(undefined);
   private orderListeners = new Map<AnatomyFamily, Set<AnatomyOrderChangeCb>>();
+  private targetListeners = new Map<AnatomyFamily, Set<AnatomyOrderChangeCb>>();
   private observedOrderRoots = new Map<AnatomyFamily, AnatomyInstanceToken>();
   private orderVersionByFamily = new Map<AnatomyFamily, number>();
   private orderSignatureByFamily = new Map<AnatomyFamily, string>();
@@ -455,6 +456,31 @@ export class AnatomyModuleImpl extends ModuleBase {
       const claim = CLAIM_BY_PART_VIEW.get(part);
       return claim?.getRootTarget(claim.instance) ?? null;
     },
+    resolveDomainScope: (family: AnatomyFamily): unknown | null =>
+      this.resolveCurrentDomain(family, false).rootInstance,
+    descendantsOf: (
+      family: AnatomyFamily,
+      ancestor: AnatomyPartView,
+      role: string
+    ): readonly AnatomyPartView[] => {
+      const ancestorClaim = CLAIM_BY_PART_VIEW.get(ancestor);
+      if (!ancestorClaim || ancestorClaim.family !== family) return [];
+      const domain = this.resolveCurrentDomain(family, false);
+      if (!domain.rootInstance || !domain.claims.includes(ancestorClaim)) return [];
+      const getParent = this.getParentGetter();
+      return this.sortClaims(
+        domain.claims.filter((claim) => {
+          if (claim.role !== role) return false;
+          let current = getParent(claim.instance);
+          while (current) {
+            if (current === ancestorClaim.instance) return true;
+            if (current === domain.rootInstance) return false;
+            current = getParent(current);
+          }
+          return false;
+        })
+      ).map((claim) => this.toPartView(claim));
+    },
     parts: (family: AnatomyFamily, options?: AnatomyQueryOptions) => {
       if (options?.missing === 'null') return this.tryParts(family);
       if (options?.missing === 'empty') return this.tryParts(family) ?? [];
@@ -537,6 +563,8 @@ export class AnatomyModuleImpl extends ModuleBase {
     },
     subscribeOrder: (family: AnatomyFamily, cb: AnatomyOrderChangeCb) =>
       this.subscribeOrder(family, cb),
+    subscribeTargets: (family: AnatomyFamily, cb: AnatomyOrderChangeCb) =>
+      this.subscribeTargets(family, cb),
   };
 
   override onProtoPhase(phase: ProtoPhase): void {
@@ -544,14 +572,19 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (phase === 'mounted') {
       for (const family of this.claimFamilies) {
         AnatomyModuleImpl.notifyStructuralChange(family);
+        AnatomyModuleImpl.notifyTargetChange(family);
       }
     }
-    if (phase === 'unmounted') this.dispose();
+    if (phase === 'unmounted') {
+      for (const family of this.claimFamilies) AnatomyModuleImpl.notifyTargetChange(family);
+      this.dispose();
+    }
   }
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
     if (phase === 'unmounting' || phase === 'detached') {
+      for (const family of this.claimFamilies) AnatomyModuleImpl.notifyTargetChange(family);
       for (const family of Array.from(this.observedOrderRoots.keys())) {
         this.teardownOrderObserver(family);
       }
@@ -559,10 +592,12 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
     if (phase === 'mounted') {
       for (const family of this.orderListeners.keys()) this.ensureOrderObserver(family);
+      for (const family of this.claimFamilies) AnatomyModuleImpl.notifyTargetChange(family);
     }
   }
 
   protected override onCapsEpoch(_epoch: number): void {
+    for (const family of this.claimFamilies) AnatomyModuleImpl.notifyTargetChange(family);
     if (this.mountPhase !== 'mounted') return;
     for (const family of Array.from(this.observedOrderRoots.keys())) {
       this.teardownOrderObserver(family);
@@ -579,6 +614,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
     this.observedOrderRoots.clear();
     this.orderListeners.clear();
+    this.targetListeners.clear();
     if (this.claimFamilies.size === 0) return;
     if (!this.caps.has(ANATOMY_INSTANCE_TOKEN_CAP)) return;
 
@@ -644,10 +680,34 @@ export class AnatomyModuleImpl extends ModuleBase {
     };
   }
 
+  private subscribeTargets(family: AnatomyFamily, cb: AnatomyOrderChangeCb): Unsubscribe {
+    let set = this.targetListeners.get(family);
+    if (!set) {
+      set = new Set();
+      this.targetListeners.set(family, set);
+    }
+    set.add(cb);
+    return () => {
+      const current = this.targetListeners.get(family);
+      current?.delete(cb);
+      if (current?.size === 0) this.targetListeners.delete(family);
+    };
+  }
+
   private static notifyStructuralChange(family: AnatomyFamily): void {
     for (const impl of AnatomyModuleImpl.liveInstances) {
       if (!impl.orderListeners.has(family)) continue;
       impl.emitOrderChangeIfNeeded(family);
+    }
+  }
+
+  private static notifyTargetChange(family: AnatomyFamily): void {
+    for (const impl of AnatomyModuleImpl.liveInstances) {
+      const listeners = impl.targetListeners.get(family);
+      if (!listeners?.size) continue;
+      impl.orderDispatch((ctx) => {
+        for (const listener of listeners) listener(ctx);
+      });
     }
   }
 

@@ -1,0 +1,192 @@
+id: T-EXPOSE-0002
+type: test
+title: Expose core Module and Adapter profile conformance
+status: draft
+since: 0.2.0-rc.7
+summary: Module, Runtime, Adapter-base, official Adapter, and schema tests verify the Expose core facade/port boundary, safe shared registry, composition ownership, instance lifetime, and callback-scoped App Maker methods.
+cases:
+  - id: T-EXPOSE-0002-CASE-FACADE-PORT
+    title: Expose keeps setup registration separate from privileged reads
+    covers:
+      - M-EXPOSE-0001-A
+      - M-EXPOSE-0001-B
+    expectation: setup-facade-and-privileged-read-port
+  - id: T-EXPOSE-0002-CASE-REGISTRY
+    title: Expose preserves one safe detached key registry
+    covers:
+      - M-EXPOSE-0001-C
+    expectation: shared-safe-record-snapshot
+  - id: T-EXPOSE-0002-CASE-COMPOSITION
+    title: Core Expose remains host-neutral while specialized composition owns projection
+    covers:
+      - M-EXPOSE-0001-D
+      - M-EXPOSE-0001-F
+    expectation: host-neutral-core-and-specialized-projection
+  - id: T-EXPOSE-0002-CASE-PROFILE
+    title: Official Adapter profiles support required core Expose
+    covers:
+      - M-EXPOSE-0001-E
+      - A-REACT-18-19-0001-K
+      - A-VUE-3-0001-K
+      - A-WEB-COMPONENT-0001-K
+    expectation: required-official-adapter-support
+  - id: T-EXPOSE-0002-CASE-LIFECYCLE
+    title: Expose registry survives view epochs and ends at terminal disposal
+    covers:
+      - M-EXPOSE-0001-G
+      - C-EXPOSE-0008-A
+      - C-EXPOSE-0008-B
+      - C-EXPOSE-0008-C
+      - C-EXPOSE-0008-D
+      - C-EXPOSE-0008-E
+    expectation: instance-owned-registry-lifecycle
+  - id: T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+    title: App Maker callables enter the owning callback scope
+    covers:
+      - M-EXPOSE-0001-H
+      - C-EXPOSE-0007-F
+      - A-REACT-18-19-0001-K
+      - A-VUE-3-0001-K
+      - A-WEB-COMPONENT-0001-K
+    expectation: recursive-callback-scoped-callables
+  - id: T-EXPOSE-0002-CASE-AS-HOOK
+    title: Privileged asHook capture remains distinct from the Adapter registry
+    covers:
+      - M-EXPOSE-0001-I
+    expectation: policy-scoped-expose-capture
+implementations:
+  - id: module-expose-core-boundary-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/expose/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-FACADE-PORT
+      - T-EXPOSE-0002-CASE-REGISTRY
+  - id: runtime-expose-instance-lifecycle-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/expose-lifecycle.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-LIFECYCLE
+  - id: runtime-expose-state-lifecycle-composition-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-COMPOSITION
+      - T-EXPOSE-0002-CASE-LIFECYCLE
+  - id: runtime-as-hook-expose-policy-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/as-hook.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-AS-HOOK
+  - id: adapter-base-expose-record-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/contract/expose-record.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-REGISTRY
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-react-expose-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/expose.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-react-expose-lifecycle-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/lifecycle-view-intent.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+      - T-EXPOSE-0002-CASE-LIFECYCLE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-vue-expose-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/expose.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-vue-expose-lifecycle-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/lifecycle-view-intent.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+      - T-EXPOSE-0002-CASE-LIFECYCLE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-web-component-expose-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/contract/expose.basic.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-web-component-expose-lifecycle-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/lifecycle-view-intent.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+      - T-EXPOSE-0002-CASE-LIFECYCLE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-profile-expose-support-fixture
+    kind: fixture
+    status: passing
+    path: packages/spec/fixtures/test/adapter-profile-schema.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+verifies:
+  modules:
+    - id: M-EXPOSE-0001
+      anchors:
+        - M-EXPOSE-0001-A
+        - M-EXPOSE-0001-B
+        - M-EXPOSE-0001-C
+        - M-EXPOSE-0001-D
+        - M-EXPOSE-0001-E
+        - M-EXPOSE-0001-F
+        - M-EXPOSE-0001-G
+        - M-EXPOSE-0001-H
+        - M-EXPOSE-0001-I
+  contracts:
+    - id: C-EXPOSE-0007
+      anchors:
+        - C-EXPOSE-0007-F
+    - id: C-EXPOSE-0008
+      anchors:
+        - C-EXPOSE-0008-A
+        - C-EXPOSE-0008-B
+        - C-EXPOSE-0008-C
+        - C-EXPOSE-0008-D
+        - C-EXPOSE-0008-E
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-K
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-K
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-K
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added Expose core Module and official Adapter profile conformance mapping.
+tags: [expose, module, adapter, lifecycle, callback-scope, contract-test]

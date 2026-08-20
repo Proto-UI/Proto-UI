@@ -1,0 +1,47 @@
+id: D-MOVE-GESTURE-0001
+type: decision
+title: Move Gesture starts as an internal host capability with Scroll Thumb as its first consumer
+status: draft
+since: 0.2.0-rc.7
+summary: Proto UI extracts bounded continuous-move ownership now while deferring a public module, asHook, and Drag and Drop semantics until independent consumers validate them.
+statement:
+  zh-CN: >-
+    Proto UI 必须先以内部 host capability 表达 Move Gesture，并由 Scroll Thumb 验证其 session 生命周期。Core 只携带 host-neutral binding/sample/lease vocabulary；各宿主负责 gesture recognition、输入所有权、capture/arena、默认行为协调与 target lifetime。现阶段不得发布 `asMove()`、`asDrag()` 或完整 Drag and Drop API；第二个独立领域消费者出现后，才评估 Module 与 privileged asHook 边界。
+
+
+  en: >-
+    Proto UI must first express Move Gesture as an internal host capability and validate its session lifecycle with Scroll Thumb. Core carries only host-neutral binding, sample, and lease vocabulary, while each host owns gesture recognition, input ownership, capture or arena mechanics, default-action coordination, and target lifetime. This phase must not publish `asMove()`, `asDrag()`, or a full Drag and Drop API; the Module and privileged-asHook boundary will be evaluated after a second independent domain consumer appears.
+
+
+criteria:
+  - id: D-MOVE-GESTURE-0001-A
+    text:
+      zh-CN: Web pointer capture 与 Flutter Gesture Arena 必须是同一 host capability 的不同 realization，而不是 portable contract 的 API。
+      en: Web pointer capture and Flutter Gesture Arena must be different realizations of the same host capability rather than APIs of the portable contract.
+  - id: D-MOVE-GESTURE-0001-B
+    text:
+      zh-CN: Move Gesture 不得通过 prototype 作者自行拼装 `pointer.down/move/up/cancel` 来获得，因为这种拼装缺少识别、所有权、replacement 与 bounded cleanup 保证。
+      en: Move Gesture must not be obtained by asking prototype authors to assemble `pointer.down/move/up/cancel`, because that assembly lacks recognition, ownership, replacement, and bounded-cleanup guarantees.
+  - id: D-MOVE-GESTURE-0001-C
+    text:
+      zh-CN: 第一消费者只允许验证 immediate primary-contact move；threshold、press arbitration、keyboard move、velocity 与多 recognizer competition 不得被虚构为已稳定保证。
+      en: The first consumer may validate only immediate primary-contact movement; threshold, press arbitration, keyboard movement, velocity, and multi-recognizer competition must not be fabricated as stable guarantees.
+  - id: D-MOVE-GESTURE-0001-D
+    text:
+      zh-CN: 公共 Module/asHook 提升必须等待至少一个非 Scroll 的独立消费者，并重新审查作者信息通路与原型边界。
+      en: Promotion to a public Module or asHook must wait for at least one independent non-Scroll consumer and a renewed review of author information flow and prototype boundaries.
+sources:
+  - path: internal/records/2026-07-29-move-gesture-first-consumer.zh-CN.md
+  - path: packages/core/src/move.ts
+  - path: packages/adapters/base/src/gestures/web-move-gesture-host.ts
+dependsOn:
+  knowledge: [K-MOVE-GESTURE-0001]
+relates:
+  contracts: [C-EVENT-TYPE-0001, C-EVENT-TYPE-0003]
+explains:
+  contracts: [C-MOVE-GESTURE-0001, C-SCROLL-COMPOSED-CONTROL-0001]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Selected an internal host capability and second-consumer gate instead of Scroll-local pointer code or premature Drag and Drop APIs.
+tags: [move, gesture, decision, host-capability, drag-and-drop]

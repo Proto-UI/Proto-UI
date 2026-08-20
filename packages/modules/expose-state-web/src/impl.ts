@@ -1,14 +1,18 @@
 // packages/modules/expose-state-web/src/impl.ts
-import type { CapsVaultView, MountPhase, ProtoPhase } from '@proto.ui/core';
+import type { CapsVaultView, MountPhase } from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import type { ModuleDeps } from '@proto.ui/module-base';
 import type { StateSpec } from '@proto.ui/types';
 
 import type { ExposeStatePort } from '@proto.ui/module-expose-state';
-import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
+import {
+  isExposeStateExternalHandle,
+  type ExposeStateExternalHandle,
+} from '@proto.ui/module-expose-state';
 
 import {
   EXPOSE_STATE_WEB_MAP_CAP,
+  EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP,
   EXPOSE_STATE_WEB_MODE_CAP,
   HOST_ELEMENT_CAP,
   type ExposeStateWebMode,
@@ -24,17 +28,6 @@ type Binding = {
   kind?: StateSpec['kind'];
   stateId?: string;
 };
-
-function isExternalStateHandle(x: any): x is ExposeStateExternalHandle<any> {
-  return (
-    !!x &&
-    typeof x === 'object' &&
-    typeof x.get === 'function' &&
-    typeof x.subscribe === 'function' &&
-    typeof x.unsubscribe === 'function' &&
-    !!x.spec
-  );
-}
 
 export class ExposeStateWebModuleImpl extends ModuleBase {
   private readonly exposeState: ExposeStatePort;
@@ -57,11 +50,6 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
   constructor(caps: CapsVaultView, deps: ModuleDeps) {
     super(caps);
     this.exposeState = deps.requirePort<ExposeStatePort>('expose-state');
-  }
-
-  override onProtoPhase(phase: ProtoPhase): void {
-    super.onProtoPhase(phase);
-    if (phase === 'unmounted') this.dispose();
   }
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
@@ -121,7 +109,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     this.exposedByStateId.clear();
 
     for (const [key, value] of Object.entries(all)) {
-      if (!isExternalStateHandle(value)) continue;
+      if (!isExposeStateExternalHandle(value)) continue;
 
       const spec = value.spec as StateSpec;
       const semantic = (value as any).__stateSemantic || key;
@@ -178,14 +166,18 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
 
     const setAttr = (val: string | null) => {
       if (!attr) return;
-      if (val === null) host.removeAttribute(attr);
-      else host.setAttribute(attr, val);
+      for (const target of this.resolveProjectionTargets(host)) {
+        if (val === null) target.removeAttribute(attr);
+        else target.setAttribute(attr, val);
+      }
     };
 
     const setVar = (val: string | null) => {
       if (!cssVar) return;
-      if (val === null) host.style.removeProperty(cssVar);
-      else host.style.setProperty(cssVar, val);
+      for (const target of this.resolveProjectionTargets(host)) {
+        if (val === null) target.style.removeProperty(cssVar);
+        else target.style.setProperty(cssVar, val);
+      }
     };
 
     switch (kind) {
@@ -219,6 +211,19 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
         break;
       }
     }
+  }
+
+  private resolveProjectionTargets(host: HTMLElement): HTMLElement[] {
+    const targets = [host];
+    const seen = new Set<HTMLElement>(targets);
+    if (!this.caps.has(EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP)) return targets;
+
+    for (const target of this.caps.get(EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP)()) {
+      if (!target || seen.has(target)) continue;
+      seen.add(target);
+      targets.push(target);
+    }
+    return targets;
   }
 
   private clearBindings(): void {

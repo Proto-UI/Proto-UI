@@ -1,27 +1,54 @@
 id: P-BASE-SCROLL-AREA-VIEWPORT
 type: prototype
-title: Base Scroll Area Viewport protocol
+title: Base Scroll Area Viewport owns the logical scroll surface
 status: draft
 since: 0.2.0-rc.7
-summary: Base Scroll Area Viewport protocol for the Proto UI framework.
+summary: Viewport is the single semantic owner of the Scroll Area surface and exposes normalized host-independent scrolling facts.
 statement:
-  en: Base Scroll Area Viewport protocol. This draft entity catalogs the protocol surface.
-  zh-CN: Base Scroll Area Viewport protocol。该 draft entity 编目协议面。
+  zh-CN: Viewport 通过特权 `asScrollSurface` 将 prototype instance 绑定到宿主滚动能力，默认允许双轴并请求 auto projection。它只 expose 归一化位置、可见比例、可滚方向、scrolling 与已解析 projection，不泄露 DOM target 或精确像素 geometry。
+  en: Viewport binds the prototype instance to host scrolling through the privileged `asScrollSurface`, allowing both axes and requesting auto projection by default. It exposes only normalized position, visible ratios, available directions, scrolling state, and the resolved projection, without leaking a DOM target or exact pixel geometry.
 criteria:
-  - id: P-BASE-SCROLL-AREA-VIEWPORT-CATALOGED
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-AUTHORING-ENTRIES
     text:
-      en: The protocol is cataloged for traceability.
-      zh-CN: 该协议已编目以便追溯。
+      zh-CN: '`base-scroll-area-viewport` 与 `asScrollAreaViewport` 必须是同一 Viewport protocol 的 direct 与 authored-asHook entries。'
+      en: '`base-scroll-area-viewport` and `asScrollAreaViewport` must be direct and authored-asHook entries for the same Viewport protocol.'
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-SURFACE-OWNER
+    text:
+      zh-CN: Viewport 必须是 Scroll Area 中唯一调用 `asScrollSurface` 的 Base anatomy part，并通过它 configure、observe 与 request 宿主滚动。
+      en: Viewport must be the only Base Scroll Area anatomy part that calls `asScrollSurface`, using it to configure, observe, and request host scrolling.
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-NORMALIZED-FACTS
+    text:
+      zh-CN: Viewport 必须 expose axes、scrolling、resolved projection，以及每轴的归一化 position、visible ratio 与 before/after 可滚方向；这些 facts 不得包含 HTMLElement、Flutter object 或宿主像素长度。
+      en: Viewport must expose axes, scrolling, resolved projection, and normalized position, visible ratio, and before/after availability for each axis; these facts must not contain an HTMLElement, Flutter object, or host pixel lengths.
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-HOST-REQUESTS
+    text:
+      zh-CN: 程序化滚动必须通过 Scroll Host Capability request sink 进入宿主；prototype 不得直接调用 DOM 或其他宿主对象。
+      en: Programmatic scrolling must enter the host through the Scroll Host Capability request sink; the prototype must not call the DOM or another host object directly.
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-COMPOSED-BINDING
+    text:
+      zh-CN: Viewport 必须把 Scroll Area Context scope 与 Anatomy Scrollbar/Thumb roles 声明给同一个 `asScrollSurface` handle，使 composed chrome 共享 surface lease 与 facts。
+      en: Viewport must declare the Scroll Area Context scope and Anatomy Scrollbar and Thumb roles to the same `asScrollSurface` handle so composed chrome shares the surface lease and facts.
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-A11Y-NEUTRALITY
+    text:
+      zh-CN: Scroll Area 本身没有专用 ARIA widget role；Viewport 不得仅因可滚动而伪造 region、scrollbar 或 application role。需要 accessible name 或 landmark 时由调用方依据内容语义组合。
+      en: Scroll Area has no dedicated ARIA widget role; Viewport must not invent region, scrollbar, or application solely because it scrolls. Consumers compose an accessible name or landmark when content semantics require one.
 sources:
   - path: packages/prototypes/base/src/scroll-area/viewport.proto.ts
+  - path: packages/modules/scroll/src/impl.ts
+  - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
+  - path: https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/
+    label: WAI-ARIA APG keyboard interface guidance
+dependsOn:
+  prototypes: [P-BASE-SCROLL-AREA]
+  contracts:
+    [C-AS-SCROLL-SURFACE-0001, C-SCROLL-0001, C-SCROLL-COMPOSED-CHROME-0001, C-EXPOSE-STATE-0001]
+  hostCaps: [HC-SCROLL-SURFACE-0001]
+verifies: { tests: [T-BASE-SCROLL-AREA-0001] }
 revisions:
   - version: 0.2.0-rc.7
+    change: revised
+    summary: Bound authored composed controls to the Viewport surface through Context scope and Anatomy roles.
+  - version: 0.2.0-rc.7
     change: introduced
-    summary: Introduced base scroll area viewport protocol.
-verifies:
-  tests:
-    - T-BRUTALIST-SCROLL-AREA-0001
-tags:
-  - prototype
-  - base
-  - scroll_area
+    summary: Cataloged Viewport ownership, normalized facts, host-mediated requests, and role-neutral accessibility.
+tags: [prototype, base, scroll-area, viewport, host-projection, accessibility]

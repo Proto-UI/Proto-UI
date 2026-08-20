@@ -1,0 +1,64 @@
+id: HC-EXPOSES-RECORD-SINK-0001
+type: host-cap
+title: Host accepts classified exposes translation snapshots
+status: draft
+since: 0.2.0-rc.7
+summary: The Adapter provides an instance-scoped replacement sink for complete classified exposes translation records without receiving raw internal State authority or host-specific projection policy.
+statement:
+  zh-CN: >-
+    Exposes Record Sink host capability 允许 Expose State compositor 把一个组件 instance 的完整 classified outward translation record 交给 Adapter。每次调用替换该 instance 当前的 translation snapshot，而不是增量 mutation 或 event delivery。Record 可以包含普通 value/method、只读 external state handle，以及供 Adapter 识别 outward signal 的 branded declaration descriptor，但不得泄漏 raw internal State slot 或 prototype-author capability view。Adapter 必须把 descriptor 翻译为宿主 outward carrier，并从 App Maker-facing record value 中删除；capability 本身不包含 DOM、framework object、callback-scope policy 或 Web attribute/CSS projection。
+
+
+  en: >-
+    The Exposes Record Sink host capability lets the Expose State compositor deliver a component instance's complete classified outward translation record to an Adapter. Each call replaces that instance's current translation snapshot rather than representing an incremental mutation or event delivery. The record may contain ordinary values or methods, read-only external State handles, and branded declaration descriptors that let the Adapter recognize outward signals, but it must not leak raw internal State slots or prototype-author capability views. The Adapter must translate those descriptors into host outward carriers and omit them from App-Maker-facing record values; the capability itself contains no DOM or framework object, callback-scope policy, or Web attribute/CSS projection.
+
+
+criteria:
+  - id: HC-EXPOSES-RECORD-SINK-0001-A
+    text:
+      zh-CN: Capability 必须接受一个 string-keyed complete record snapshot；一次调用必须替换当前 instance record，不得被解释为逐 key patch、subscription event 或 render commit。
+      en: The capability must accept a complete string-keyed record snapshot; each call must replace the current instance record and must not be interpreted as a per-key patch, subscription event, or render commit.
+  - id: HC-EXPOSES-RECORD-SINK-0001-B
+    text:
+      zh-CN: Sink 接收的 state entry 必须已投影为只读 external handle，不得包含 raw slot、owned/borrowed/observed author view 或 App Maker 写入 authority；branded Expose Event declaration metadata 可以保留供 Adapter translation，但不得进入 App Maker-facing record value，其它 entry 必须保留 core Expose promise 的语义。
+      en: State entries received by the sink must already be projected as read-only external handles and must not contain raw slots, owned, borrowed, or observed author views, or App Maker write authority; branded Expose Event declaration metadata may remain for Adapter translation but must not enter App-Maker-facing record values, and other entries must preserve their core Expose promise semantics.
+  - id: HC-EXPOSES-RECORD-SINK-0001-C
+    text:
+      zh-CN: Adapter 可以把 snapshot 翻译为宿主惯例 access surface，但 mutation 所取得的 record 不得反向修改 Module registry；JavaScript callable 的 callback-scope wrapping 属于 Adapter translation，不属于 sink payload。
+      en: An Adapter may translate the snapshot into a host-idiomatic access surface, but mutating a returned record must not mutate the Module registry; callback-scope wrapping of JavaScript callables belongs to Adapter translation rather than to the sink payload.
+  - id: HC-EXPOSES-RECORD-SINK-0001-D
+    text:
+      zh-CN: Capability replacement、removal 或 terminal disposal 必须先以空 record 清理先前已发布的 sink；repeatable view detach 不得清理仍存活 owner 的 instance record，新 sink attach 后必须收到当前完整 snapshot。
+      en: Capability replacement, removal, or terminal disposal must clear the previously published sink with an empty record; repeatable view detachment must not clear the instance record of a still-live owner, and a newly attached sink must receive the current complete snapshot.
+  - id: HC-EXPOSES-RECORD-SINK-0001-E
+    text:
+      zh-CN: Capability 必须保持 host-neutral，不得要求 DOM node、React/Vue instance、attribute、CSS variable 或其它单一宿主对象；这些 projection 属于 Adapter 或更具体的 Web Module。
+      en: The capability must remain host-neutral and must not require a DOM node, React or Vue instance, attribute, CSS variable, or another single-host object; those projections belong to the Adapter or a more specific Web Module.
+relates:
+  contracts:
+    - C-EXPOSE-0004
+    - C-EXPOSE-0007
+    - C-EXPOSE-0008
+    - C-EXPOSE-STATE-0001
+  knowledge:
+    - K-COMPONENT-ACTOR-0001
+    - K-INFORMATION-CHANNEL-0001
+    - K-DESIGN-TRADEOFF-0001
+verifies:
+  tests:
+    - T-EXPOSE-STATE-0002
+sources:
+  - path: internal/records/2026-08-14-expose-state-module-adapter-audit.zh-CN.md
+  - path: packages/modules/expose-state/src/caps.ts
+  - path: packages/modules/expose-state/src/impl.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Preserved branded Expose Event descriptors for Adapter translation while requiring public-record omission.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the complete classified exposes translation-record replacement sink, rebind cleanup, lifecycle preservation, and host-neutral Adapter boundary.
+tags: [host-capability, expose, state, adapter, snapshot, lifecycle]

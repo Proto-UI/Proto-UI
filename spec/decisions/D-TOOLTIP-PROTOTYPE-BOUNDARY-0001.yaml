@@ -1,0 +1,52 @@
+id: D-TOOLTIP-PROTOTYPE-BOUNDARY-0001
+type: decision
+title: Tooltip catalogs semantic channels rather than ecosystem part names
+status: draft
+since: 0.2.0-rc.7
+summary: Base Tooltip consists of Root, Trigger, and Content protocols plus an adjacent Group protocol; Portal remains an Overlay projection and Arrow is deferred until it owns a governed geometry channel.
+statement:
+  zh-CN: >-
+    Tooltip 的 Base 边界按 Proto UI《原型边界》的反馈与非反馈通道判断，而不机械复制 Radix UI、Base UI 或 shadcn/ui 的公开 part 清单。Root、Trigger 与 Content 分别拥有 open coordination、interaction/a11y relation 与 overlay/presence/positioning 通道，因此各自编目；Tooltip Group 通过独立 Context 协调多个 Root 的 delay warm state 与 active owner，属于同一 Tooltip family 的相邻协议。Portal 已由 Content 消费的 Overlay/renderer projection 持有，不再编目空壳 Portal；Arrow 在当前 Positioning 尚无 arrow target、尺寸与偏移反馈通道时不进入 Base 保证。
+
+
+  en: >-
+    The Base Tooltip boundary follows the feedback and non-feedback channel test from the Proto UI Prototype Boundary whitepaper instead of mechanically copying the public part lists of Radix UI, Base UI, or shadcn/ui. Root, Trigger, and Content own open coordination, interaction and accessibility relation, and overlay, presence, and positioning channels respectively, so each is cataloged. Tooltip Group coordinates delay warm state and the active owner across Roots through a separate Context and is an adjacent protocol in the same Tooltip family. Portal is already owned by the Overlay and renderer projection consumed by Content and is not cataloged as an empty shell. Arrow does not enter the Base guarantee until Positioning has governed arrow target, size, and offset feedback channels.
+
+
+criteria:
+  - id: D-TOOLTIP-PROTOTYPE-BOUNDARY-0001-A
+    text:
+      zh-CN: Base Tooltip 必须编目 Root、Trigger 与 Content，因为三者各自拥有非 feedback-only 的独立通道。
+      en: Base Tooltip must catalog Root, Trigger, and Content because each owns an independent channel that is not feedback-only.
+  - id: D-TOOLTIP-PROTOTYPE-BOUNDARY-0001-B
+    text:
+      zh-CN: Tooltip Group 必须作为同族相邻协议独立编目，并通过自身 Context 协调多个 Tooltip Root；不得伪装成 Root 的 Anatomy part。
+      en: Tooltip Group must be cataloged as an adjacent protocol in the same family and coordinate multiple Tooltip Roots through its own Context; it must not masquerade as a Root anatomy part.
+  - id: D-TOOLTIP-PROTOTYPE-BOUNDARY-0001-C
+    text:
+      zh-CN: Portal 不得仅因其它组件库公开同名 part 而成为 Base prototype；Content 的 Overlay portal policy 与 renderer projection 持有该能力。
+      en: Portal must not become a Base prototype merely because other component libraries expose a similarly named part; Content's Overlay portal policy and renderer projection own that capability.
+  - id: D-TOOLTIP-PROTOTYPE-BOUNDARY-0001-D
+    text:
+      zh-CN: Arrow 在没有可执行的 arrow geometry/positioning 通道前必须保持 deferred；styled library 可以拥有内部视觉投影，但不得宣称 Base Arrow compatibility。
+      en: Arrow must remain deferred until an executable arrow geometry and positioning channel exists; a styled library may own an internal visual projection but must not claim Base Arrow compatibility.
+sources:
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/prototype-boundary.md
+  - path: packages/prototypes/base/src/tooltip/shared.ts
+  - path: packages/prototypes/base/src/tooltip/group.proto.ts
+  - path: packages/prototypes/base/src/tooltip/content.proto.ts
+  - path: https://www.radix-ui.com/primitives/docs/components/tooltip
+    label: Radix UI Tooltip
+  - path: https://base-ui.com/react/components/tooltip
+    label: Base UI Tooltip
+  - path: https://ui.shadcn.com/docs/components/tooltip
+    label: shadcn/ui Tooltip
+relates:
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  knowledge: [K-PROTOTYPE-COMPOSITION-0001]
+  prototypes: [P-BASE-TOOLTIP, P-BASE-TOOLTIP-TRIGGER, P-BASE-TOOLTIP-CONTENT, P-BASE-TOOLTIP-GROUP]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the Tooltip channel boundary and deferred behaviorless Portal and unsupported Arrow parts.
+tags: [tooltip, prototype-boundary, base, overlay, positioning]

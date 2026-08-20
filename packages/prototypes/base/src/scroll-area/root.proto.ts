@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { SCROLL_AREA_FAMILY } from './shared';
+import { SCROLL_AREA_CONTEXT, SCROLL_AREA_FAMILY } from './shared';
 import type {
   ScrollAreaRootAsHookContract,
   ScrollAreaRootExposes,
@@ -7,6 +7,7 @@ import type {
 } from './types';
 
 function setupScrollAreaRoot(def: DefHandle<ScrollAreaRootProps, ScrollAreaRootExposes>): void {
+  def.context.provide(SCROLL_AREA_CONTEXT, { family: 'base-scroll-area' });
   def.anatomy.claim(SCROLL_AREA_FAMILY, { role: 'root' });
 }
 

@@ -306,6 +306,12 @@ export class ContextModuleImpl extends ModuleBase {
     this.callbackDispatcher = dispatch;
   }
 
+  resolveScope(key: ContextKey<any>, consumer?: ContextInstanceToken): ContextInstanceToken | null {
+    const from = consumer ?? this.tryGetSelfToken();
+    if (!from) return null;
+    return CONTEXT_CENTER.resolveProvider(from, key, this.getParentGetter());
+  }
+
   // -------------------------
   // helpers
   // -------------------------

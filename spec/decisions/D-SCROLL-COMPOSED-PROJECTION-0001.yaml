@@ -1,0 +1,69 @@
+id: D-SCROLL-COMPOSED-PROJECTION-0001
+type: decision
+title: Composed scroll chrome uses a Context-scoped host projection session
+status: draft
+since: 0.2.0-rc.7
+summary: Context identifies one logical Scroll Area family, Anatomy resolves its authored parts, and a bounded host session projects continuous Thumb geometry without routing host resources or per-frame facts through Context.
+statement:
+  zh-CN: >-
+    Composed scroll chrome 必须由家族级 host projection session 承载。Root 提供的 Context scope 只建立逻辑家族 identity 与生命周期；Context value 仍保持 JSON-only，不得包含 host target、controller、lease、function 或连续 geometry。Anatomy 只提供 Scrollbar/Thumb 的结构关系与 module-internal target resolution。Scroll module 将二者绑定到当前 Viewport surface lease，host capability 使用宿主本地 measurement、scheduler 与 paint/style sink 投射 Thumb 尺寸和位置。Web 可以投射多个 DOM part，Flutter 等宿主可以把相同逻辑 parts 折叠为一个原生 widget 或 painter。
+
+
+  en: >-
+    Composed scroll chrome must be carried by a family-level host projection session. Context supplied by Root establishes only logical family identity and lifetime; Context values remain JSON-only and must not contain host targets, controllers, leases, functions, or continuous geometry. Anatomy supplies only Scrollbar and Thumb structural relations plus module-internal target resolution. The Scroll module binds both to the current Viewport surface lease, while the host capability projects Thumb size and position through host-local measurement, scheduling, and paint or style sinks. Web may project multiple DOM parts, while hosts such as Flutter may collapse the same logical parts into one native widget or painter.
+
+
+criteria:
+  - id: D-SCROLL-COMPOSED-PROJECTION-0001-A
+    text:
+      zh-CN: Context provider identity 可以作为 module-internal family scope token，但该 token 与任何 host session object 都不得进入 Context value 或作者 API。
+      en: Context provider identity may serve as a module-internal family scope token, but neither that token nor any host-session object may enter a Context value or author API.
+  - id: D-SCROLL-COMPOSED-PROJECTION-0001-B
+    text:
+      zh-CN: Anatomy 只负责验证和解析 family parts 的结构归属；它不得存储 scroll facts、host session 或逐帧 geometry。
+      en: Anatomy is responsible only for validating and resolving structural family-part membership; it must not store scroll facts, host sessions, or per-frame geometry.
+  - id: D-SCROLL-COMPOSED-PROJECTION-0001-C
+    text:
+      zh-CN: 高频 Thumb geometry 必须从同一 host-owned surface snapshot 派生，并通过 host-local sink 直接投射，不得依赖 Context update 或 prototype rerender。
+      en: High-frequency Thumb geometry must derive from the same host-owned surface snapshot and project through a host-local sink without depending on Context updates or prototype rerenders.
+  - id: D-SCROLL-COMPOSED-PROJECTION-0001-D
+    text:
+      zh-CN: logical part 与 host materialization 不要求一一对应；adapter 可以保持 Web 多节点结构，也可以把家族 parts 折叠到一个 native scrollbar painter/widget。
+      en: Logical parts and host materialization need not be one-to-one; an adapter may retain a multi-node Web structure or collapse the family parts into one native scrollbar painter or widget.
+  - id: D-SCROLL-COMPOSED-PROJECTION-0001-E
+    text:
+      zh-CN: Thumb 可以作为 Scrollbar control route 的 pointer Move 命中子区域，但不得因此自动成为 focusable、ARIA scrollbar、独立 prototype Event control 或 Drag and Drop source。
+      en: Thumb may act as the pointer-Move hit subregion of the Scrollbar control route, but it must not thereby become focusable, an ARIA scrollbar, an independent prototype Event control, or a Drag and Drop source.
+sources:
+  - path: packages/modules/context/src/types.ts
+  - path: packages/modules/anatomy/src/types.ts
+  - path: packages/modules/scroll/src/impl.ts
+  - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
+  - path: https://www.radix-ui.com/primitives/docs/components/scroll-area
+    label: Radix UI Scroll Area
+  - path: https://api.flutter.dev/flutter/widgets/ScrollbarPainter-class.html
+    label: Flutter ScrollbarPainter
+dependsOn:
+  contracts:
+    - C-CONTEXT-0009
+    - C-ANATOMY-0001
+    - C-SCROLL-0001
+    - C-MOVE-GESTURE-0001
+relates:
+  decisions:
+    - D-SCROLL-PROJECTION-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+    - HC-MOVE-GESTURE-0001
+explains:
+  contracts:
+    - C-SCROLL-COMPOSED-CHROME-0001
+    - C-SCROLL-COMPOSED-CONTROL-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Extended the host projection session from passive geometry to a Move Gesture-backed Thumb hit subregion without independent control ownership.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Selected Context-scoped, Anatomy-resolved, host-local composed chrome projection.
+tags: [scroll, composed-chrome, context, anatomy, host-session]

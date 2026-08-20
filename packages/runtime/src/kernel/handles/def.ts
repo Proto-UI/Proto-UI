@@ -7,13 +7,14 @@ import type { ExposeEventSpec, PropsBaseType } from '@proto.ui/types';
 import type { ModuleOrchestratorFacadeView } from '../../orchestrator/module-orchestrator/types';
 import type { FeedbackFacade } from '@proto.ui/module-feedback';
 import type { PropsFacade } from '@proto.ui/module-props';
-import type { EventFacade } from '@proto.ui/module-event';
+import type { EventChannelFacade } from '@proto.ui/module-event';
+import type { ExposeEventFacade } from '@proto.ui/module-expose-event';
 import type { StateFacade } from '@proto.ui/module-state';
 import type { StateInteractionFacade } from '@proto.ui/module-state-interaction';
 import type { StateAccessibilityFacade } from '@proto.ui/module-state-accessibility';
 import type { A11yFacade } from '@proto.ui/module-a11y';
 import type { ContextFacade } from '@proto.ui/module-context';
-import type { ExposeFacade } from '@proto.ui/module-expose';
+import { createExposeEventDeclaration, type ExposeFacade } from '@proto.ui/module-expose';
 import type { AnatomyFacade } from '@proto.ui/module-anatomy';
 import { RuntimeEventCallbacks } from '../event';
 
@@ -73,7 +74,8 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
   const expose = facades['expose'] as ExposeFacade;
   const anatomy = facades['anatomy'] as AnatomyFacade | undefined;
 
-  const eventFacade = facades['event'] as EventFacade;
+  const eventFacade = facades['event'] as EventChannelFacade;
+  const exposeEventFacade = facades['expose-event'] as ExposeEventFacade;
   const eventCallbacks = new RuntimeEventCallbacks<P>();
   eventSink?.setEventCallbacks(eventCallbacks);
 
@@ -178,8 +180,8 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
 
       fn.event = (key: string, spec?: ExposeEventSpec) => {
         ensureSetup('def.expose.event');
-        expose.expose(key, { __pui_expose: 'event', spec } as any);
-        eventFacade.registerExposeEvent(key, spec);
+        expose.expose(key, createExposeEventDeclaration(spec));
+        exposeEventFacade.registerExposeEvent(key, spec);
         recordCaptured(def, 'event', { op: 'expose.event', key, spec });
       };
 

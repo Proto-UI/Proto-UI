@@ -1,0 +1,80 @@
+id: C-ASYNC-A11Y-0001
+type: contract
+title: Async accessibility boundary contracts
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Live Region and Async Region define the narrow async accessibility boundary: governed ARIA live/atomic/busy projection without interaction, announcement scheduling, or replacement state machines.
+
+
+statement:
+  zh-CN: >-
+    Live Region 与 Async Region 构成异步无障碍边界：Live Region 通过受治理的 politeness/atomic props 投射 role、aria-live 与 aria-atomic，authored 子内容即为播报载荷；Async Region 通过受治理的 busy prop 投射 aria-busy 并暴露 busy state handle。两者均不声明 focus、event、command、announcement 调度或定时、替换状态机或聊天语义；应用层负责在 styled Card/Badge 表面中组合这些语义原语。
+
+
+  en: >-
+    Live Region and Async Region form the async accessibility boundary: Live Region projects role, aria-live, and aria-atomic from governed politeness/atomic props, with authored child content as the announcement payload; Async Region projects aria-busy from a governed busy prop and exposes the busy state handle. Neither declares focus, event, command, announcement scheduling, replacement state machines, or chat semantics; applications compose these semantic primitives inside styled Card/Badge surfaces.
+
+
+criteria:
+  - id: C-ASYNC-A11Y-0001-A
+    text:
+      zh-CN: >-
+        Live Region 必须从 politeness prop 成对推导 role 与 aria-live：polite 对应 role=status + aria-live=polite，assertive 对应 role=alert + aria-live=assertive。
+
+
+      en: >-
+        Live Region must derive role and aria-live together from the politeness prop: polite maps to role=status + aria-live=polite, assertive maps to role=alert + aria-live=assertive.
+
+
+  - id: C-ASYNC-A11Y-0001-B
+    text:
+      zh-CN: Live Region 必须将 atomic prop 投射为 aria-atomic，默认 true，mounted prop 变更必须同步更新 role、aria-live 与 aria-atomic。
+      en: Live Region must project the atomic prop as aria-atomic, defaulting to true; mounted prop changes must update role, aria-live, and aria-atomic synchronously.
+  - id: C-ASYNC-A11Y-0001-C
+    text:
+      zh-CN: Live Region 的 authored 子内容必须作为播报载荷保留；不得声明 accessible-name override、focus、event、command 或 selection 通路。
+      en: Live Region authored child content must be preserved as the announcement payload; no accessible-name override, focus, event, command, or selection channel may be declared.
+  - id: C-ASYNC-A11Y-0001-D
+    text:
+      zh-CN: Async Region 必须将 busy prop 投射为 aria-busy，默认 false，并仅暴露受治理的 busy state handle。
+      en: Async Region must project the busy prop as aria-busy, defaulting to false, and expose only the governed busy state handle.
+  - id: C-ASYNC-A11Y-0001-E
+    text:
+      zh-CN: Async Region 不得声明 role、accessible name、loading 定时器、替换状态机、announcement、action、event、command 或聊天语义；authored 后代与焦点在 prop-only 转换中必须保留。
+      en: Async Region must declare no role, accessible name, loading timers, replacement state machine, announcements, action, event, command, or chat semantics; authored descendants and focus must be preserved on prop-only transitions.
+  - id: C-ASYNC-A11Y-0001-F
+    text:
+      zh-CN: Web adapter 必须将 a11y state key live、atomic、busy 分别投射为 aria-live、aria-atomic、aria-busy host attribute，并随 state 值变化更新。
+      en: The Web adapter must project a11y state keys live, atomic, and busy to aria-live, aria-atomic, and aria-busy host attributes respectively, updating as state values change.
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-PROPS-0001
+    - C-STATE-0001
+    - C-EXPOSE-STATE-0001
+    - C-AS-HOOK-0001
+    - C-A11Y-0001
+verifies:
+  tests:
+    - T-BASE-LIVE-REGION-0001
+    - T-BASE-ASYNC-REGION-0001
+sources:
+  - path: packages/prototypes/base/src/live-region/root.proto.ts
+  - path: packages/prototypes/base/src/live-region/types.ts
+  - path: packages/prototypes/base/src/async-region/root.proto.ts
+  - path: packages/prototypes/base/src/async-region/types.ts
+  - path: packages/modules/a11y/src/web.ts
+  - path: packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts
+  - path: https://www.w3.org/TR/wai-aria-1.2/
+    label: WAI-ARIA 1.2
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Introduced the async accessibility boundary contract for Live Region and Async Region.
+tags:
+  - a11y
+  - accessibility
+  - live-region
+  - async-region
+  - base

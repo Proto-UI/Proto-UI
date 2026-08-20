@@ -1,0 +1,44 @@
+id: P-BASE-TOOLTIP-TRIGGER
+type: prototype
+title: Base Tooltip Trigger publishes description intent
+status: draft
+since: 0.2.0-rc.7
+summary: Tooltip Trigger preserves the host interaction role, publishes hover and focus intent, and additively relates the open Content description.
+statement:
+  zh-CN: Tooltip Trigger 拥有自身 hover、focus 与 disabled facts，但不拥有 open 或 activation。它不得自行投射 button role 或 press action，并必须保留应用 surface 的 accessible name 与 activation。Tooltip open 时，Trigger 通过 additive describedBy relation 引用 Content identity；关闭时只移除 Tooltip 自身拥有的 IDREF，不得覆盖宿主既有 relation。
+  en: Tooltip Trigger owns its hover, focus, and disabled facts but owns neither open state nor activation. It must not independently project a button role or press action and must preserve the accessible name and activation of the application surface. While Tooltip is open, Trigger references Content identity through an additive describedBy relation; on close it removes only the IDREF owned by Tooltip without replacing an existing host relation.
+criteria:
+  - id: P-BASE-TOOLTIP-TRIGGER-INTERACTION
+    text:
+      zh-CN: Trigger 必须 expose disabled、hovered、focused、focusVisible 与 focusSelf，并发布 pointer enter/leave 与 focus/blur intent。
+      en: Trigger must expose disabled, hovered, focused, focusVisible, and focusSelf and publish pointer enter and leave plus focus and blur intent.
+  - id: P-BASE-TOOLTIP-TRIGGER-HOST-SEMANTICS
+    text:
+      zh-CN: Trigger 不得 author button role、press/click activation 或 accessible name；这些语义继续由宿主 surface 持有。
+      en: Trigger must not author a button role, press or click activation, or accessible name; those semantics remain owned by the host surface.
+  - id: P-BASE-TOOLTIP-TRIGGER-DESCRIPTION
+    text:
+      zh-CN: open 时 Trigger 必须以 additive `describedBy` 引用稳定 Content id；close 或 dispose 只能清理自身拥有的 relation token。
+      en: While open, Trigger must additively reference the stable Content id through `describedBy`; close or disposal may clean up only its owned relation token.
+    dependsOn:
+      contracts:
+        - id: C-A11Y-0001
+          anchors: [C-A11Y-0001-H, C-A11Y-0001-K]
+  - id: P-BASE-TOOLTIP-TRIGGER-DISABLED
+    text:
+      zh-CN: own 或 Root disabled 必须清除交互 intent 并拒绝新的 pointer 与 focus request。
+      en: Own or Root disabled state must clear interaction intent and reject new pointer and focus requests.
+sources:
+  - path: packages/prototypes/base/src/tooltip/trigger.proto.ts
+  - path: packages/prototypes/base/test/tooltip.test.ts
+  - path: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
+    label: WAI-ARIA APG Tooltip Pattern
+dependsOn:
+  prototypes: [P-BASE-TOOLTIP]
+  contracts: [C-AS-FOCUSABLE-0001, C-STATE-INTERACTION-0001, C-A11Y-0001]
+verifies: { tests: [T-BASE-TOOLTIP-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged Trigger intent, host-semantic preservation, and additive description linkage.
+tags: [prototype, base, tooltip, trigger, a11y]

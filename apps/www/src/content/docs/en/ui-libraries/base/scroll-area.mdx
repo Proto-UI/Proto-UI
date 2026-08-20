@@ -1,0 +1,46 @@
+---
+title: 'Scroll Area'
+description: 'Base Scroll Area host-projected scrolling domain, anatomy, evidence, and boundaries.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Scroll Area models one logical scrolling domain rather than wrapping a Web DOM scrollbar. Viewport owns the surface and reaches host scrolling through a privileged capability; Root and composed controls stay layout and projection parts.
+
+<PrototypePreviewer
+  demoId="demo-base-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  codePanel={false}
+/>
+
+## Family and host ownership
+
+The canonical family contains:
+
+- Root `1..1`: anatomy and JSON-only family scope, with no offset, geometry, focus, event, or default-size ownership;
+- Viewport `1..1`: the single logical scroll-surface owner;
+- Scrollbar `0..2`: horizontal or vertical composed-control route;
+- Thumb `0..2`: a feedback-only hit subregion inside Scrollbar.
+
+Viewport exposes normalized axes, position, visible ratio, direction availability, scrolling state, and resolved projection. Raw DOM nodes, pixels, widgets, physics, and input recognizers remain host responsibilities.
+
+`system` and `composed` are projection strategies for the same protocol. The host adapter and design-language preference resolve the default; they are not separate Base Prototypes. In composed mode the host maps normalized facts to Thumb geometry and routes movement through the existing scroll engine. Thumb owns no independent offset state, focus target, `scrollbar` role, or drag-and-drop semantics.
+
+## 0.2 delivery and evidence
+
+The stable 0.2.0 package exports `@proto.ui/prototypes-base/scroll-area`. Unlike the other six families on this page set, the current CLI registry has no `base-scroll-area` component facade; it exposes the complete `brutalist-scroll-area` projection instead. Base library authors can consume the public subpath directly, while app-facing generated usage currently starts from the styled projection.
+
+`T-BASE-SCROLL-AREA-0001` and the related Scroll/Move tests map the host boundary to `packages/prototypes/base/test/scroll-area.test.ts` and cross-adapter Web conformance. This preview renders the same logical family through all three Web adapters.
+
+## Lifecycle and current limitations
+
+The Root, Viewport, Scrollbar, and Thumb entities are **draft**. Current evidence covers system/composed projection, normalized facts and requests, host cleanup, and composed Thumb movement. Track-page press, full keyboard scrollbar semantics, RTL/writing-mode normalization, velocity, and general Drag and Drop remain outside the guarantee.
+
+## References
+
+- [P-BASE-SCROLL-AREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA.yaml)
+- Parts: [Viewport](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-VIEWPORT.yaml), [Scrollbar](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-SCROLLBAR.yaml), [Thumb](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-THUMB.yaml)
+- [Scroll Area source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/scroll-area)
+- [Scroll Area evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/scroll-area.test.ts)
+- Styled projection: [Brutalist Scroll Area](/en/ui-libraries/brutalist/components/scroll-area/)

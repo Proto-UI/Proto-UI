@@ -1,0 +1,55 @@
+id: T-BASE-TOOLTIP-GROUP-0001
+type: test
+title: Base Tooltip Group coordination tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers Group delay inheritance, warm sibling opening, single active ownership, and cooldown restoration.
+cases:
+  - id: T-BASE-TOOLTIP-GROUP-0001-CASE-WARMTH
+    title: Sibling opens immediately while warm and returns to cold after skipDelay
+    covers: [P-BASE-TOOLTIP-GROUP-DELAYS, P-BASE-TOOLTIP-GROUP-WARMTH]
+    expectation: tooltip-group-warm-window-skips-and-restores-open-delay
+  - id: T-BASE-TOOLTIP-GROUP-0001-CASE-ACTIVE
+    title: New active Tooltip closes the previous Root through its request channel
+    covers:
+      [
+        P-BASE-TOOLTIP-GROUP-CONTEXT,
+        P-BASE-TOOLTIP-GROUP-ACTIVE-OWNER,
+        P-BASE-TOOLTIP-GROUP-NO-NEW-MODULE,
+      ]
+    expectation: tooltip-group-coordinates-one-active-owner-with-context-and-delay
+  - id: T-BASE-TOOLTIP-GROUP-0001-CASE-HANDOFF
+    title: Uncontrolled sibling handoff ends the previous Content presence immediately
+    covers: [P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF]
+    expectation: tooltip-group-handoff-has-no-visible-overlap
+implementations:
+  - id: prototypes-base-tooltip-group-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/tooltip.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-TOOLTIP-GROUP-0001-CASE-WARMTH,
+        T-BASE-TOOLTIP-GROUP-0001-CASE-ACTIVE,
+        T-BASE-TOOLTIP-GROUP-0001-CASE-HANDOFF,
+      ]
+    exercises: [P-BASE-TOOLTIP-GROUP, P-BASE-TOOLTIP]
+verifies:
+  prototypes:
+    - id: P-BASE-TOOLTIP-GROUP
+      anchors:
+        [
+          P-BASE-TOOLTIP-GROUP-CONTEXT,
+          P-BASE-TOOLTIP-GROUP-DELAYS,
+          P-BASE-TOOLTIP-GROUP-WARMTH,
+          P-BASE-TOOLTIP-GROUP-ACTIVE-OWNER,
+          P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF,
+          P-BASE-TOOLTIP-GROUP-NO-NEW-MODULE,
+        ]
+exercises: { prototypes: [P-BASE-TOOLTIP-GROUP, P-BASE-TOOLTIP] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added Tooltip Group warm-window and active-owner coordination coverage.
+tags: [prototype, base, tooltip, group, test]

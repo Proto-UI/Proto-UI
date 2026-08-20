@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInstanceTreeMarkers } from '../src';
+import { createInstanceTreeMarkers, releaseWebTriggerSurface } from '../src';
 
 describe('adapter-base: logical instance tree', () => {
   it('binds owner-level parent identity before either token has a host view', () => {
@@ -151,5 +151,22 @@ describe('adapter-base: logical instance tree', () => {
       accepted: true,
       surface: child,
     });
+  });
+  it('releases a div trigger surface without leaving a click-focusable tabindex', () => {
+    const root = document.createElement('div');
+    root.setAttribute('tabindex', '0');
+    root.setAttribute('role', 'button');
+    root.setAttribute('aria-disabled', 'false');
+    root.setAttribute('data-pui-a11y-actions', 'activate');
+    const removeAttribute = vi.spyOn(root, 'removeAttribute');
+
+    releaseWebTriggerSurface(root);
+
+    expect(root.tabIndex).toBe(-1);
+    expect(root.hasAttribute('tabindex')).toBe(false);
+    expect(removeAttribute).toHaveBeenCalledWith('tabindex');
+    expect(root.hasAttribute('role')).toBe(false);
+    expect(root.hasAttribute('aria-disabled')).toBe(false);
+    expect(root.hasAttribute('data-pui-a11y-actions')).toBe(false);
   });
 });

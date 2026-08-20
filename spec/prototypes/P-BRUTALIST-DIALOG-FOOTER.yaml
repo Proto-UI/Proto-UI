@@ -1,0 +1,65 @@
+id: P-BRUTALIST-DIALOG-FOOTER
+type: prototype
+title: Brutalist Dialog Footer is an optional layout-only anatomy part
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Dialog Footer is an optional layout-only anatomy part inside the DIALOG_FAMILY. It has no Base prototype to inherit; the projection is limited to the direct entry, a DIALOG_FAMILY footer anatomy claim, and a top-bordered flex-col-reverse layout surface.
+
+
+statement:
+  en: >-
+    Brutalist Dialog Footer is a draft Proto UI-maintained Neo-Brutalist design-language projection with no Base prototype to inherit (anatomy-only). It claims the `footer` role inside the `DIALOG_FAMILY` anatomy and adds only a flex-col-reverse layout surface with a top border, justify-end alignment, and gap spacing; it carries no interactive or close behavior of its own.
+
+
+  zh-CN: >-
+    Brutalist Dialog Footer 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，为 anatomy-only，无可继承的 Base prototype。它在 `DIALOG_FAMILY` anatomy 中声明 `footer` 角色，仅增加带上边框的 flex-col-reverse 布局表面、justify-end 对齐与 gap 间距；自身不带任何交互或 close 行为。
+
+
+criteria:
+  - id: P-BRUTALIST-DIALOG-FOOTER-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-dialog-footer`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-dialog-footer`。
+  - id: P-BRUTALIST-DIALOG-FOOTER-ANATOMY
+    text:
+      en: >-
+        The prototype claims the `footer` role inside the `DIALOG_FAMILY` anatomy and forwards its slot content. It is optional and does not own open/close or interaction semantics.
+
+
+      zh-CN: >-
+        该 prototype 在 `DIALOG_FAMILY` anatomy 中声明 `footer` 角色并透传其 slot 内容。它是可选的，不持有 open/close 或交互语义。
+
+
+  - id: P-BRUTALIST-DIALOG-FOOTER-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The surface uses `flex flex-col-reverse gap-2 border-t-2 border-foreground pt-3 justify-end` — a flex-col-reverse layout panel with a 2px top border resolved from the theme foreground rather than a fixed black, no fill of its own, and tail-aligned content, preserving the Neo-Brutalist structural border grammar without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        表面使用 `flex flex-col-reverse gap-2 border-t-2 border-foreground pt-3 justify-end`——带有由主题 foreground 解析而非固定黑色的 2px 上边框的 flex-col-reverse 布局面板、无自有填充、尾部对齐内容，保持 Neo-Brutalist 结构边框语法，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/dialog/footer.proto.ts
+  - path: packages/prototypes/brutalist/test/dialog.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+verifies: { tests: [T-BRUTALIST-DIALOG-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dialog Footer projection with real public-API criteria (direct entry, DIALOG_FAMILY footer anatomy, visual grammar) on rc.7. Not present in immutable rc.6.
+
+
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Resolved the upper separator ink from the theme foreground instead of a fixed black.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, dialog]

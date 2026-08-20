@@ -1,0 +1,73 @@
+id: HC-PROPS-SOURCE-0001
+type: host-cap
+title: Host provides the current raw Props snapshot source
+status: draft
+since: 0.2.0-rc.7
+summary: The adapter provides a readable current raw props snapshot plus invalidation notifications, without imposing host-specific props, attrs, property, or render semantics on the Props module.
+statement:
+  zh-CN: >-
+    Props Source host capability 允许 Adapter 向 Props module 提供当前 adapter-normalized raw props snapshot，并在该 snapshot 可能变化时发送失效通知。Adapter 可以按宿主惯例先完成 props、attrs、listeners、attributes、properties 或其它输入的分类，但 capability 输出必须保持为 string-keyed snapshot；通知只要求 Module 在下一个 runtime sync point 重新读取，不代表 delivery event、watcher dispatch 或 render update。该 capability 不包含 React、Vue、DOM 或其它宿主对象。
+
+
+  en: >-
+    The Props Source host capability lets an adapter provide the current adapter-normalized raw props snapshot to the Props module and notify it when that snapshot may have changed. The adapter may first classify props, attrs, listeners, attributes, properties, or other input according to host conventions, but the capability output must remain a string-keyed snapshot. A notification only asks the module to reread at the next runtime synchronization point; it is not a delivery event, watcher dispatch, or render update. The capability contains no React, Vue, DOM, or other host object.
+
+
+criteria:
+  - id: HC-PROPS-SOURCE-0001-A
+    text:
+      zh-CN: capability 必须允许同步读取当前 adapter-normalized raw props snapshot，并且 snapshot 顶层只能是 string-keyed record。
+      en: The capability must allow synchronous reading of the current adapter-normalized raw props snapshot, whose top level must be a string-keyed record.
+  - id: HC-PROPS-SOURCE-0001-B
+    text:
+      zh-CN: capability 必须允许订阅 snapshot 可能变化的失效通知，并返回可释放该订阅的 disposer。
+      en: The capability must allow subscription to invalidation notifications that the snapshot may have changed and return a disposer for that subscription.
+  - id: HC-PROPS-SOURCE-0001-C
+    text:
+      zh-CN: 失效通知不得承诺一次通知对应一次 raw delivery、watcher callback 或 render commit；Module 必须重新读取并执行语义 diff。
+      en: An invalidation notification must not promise a one-to-one raw delivery, watcher callback, or render commit; the module must reread and perform the semantic diff.
+  - id: HC-PROPS-SOURCE-0001-D
+    text:
+      zh-CN: Adapter 可以在进入 capability 前执行宿主输入分类与规范化，但不得把 framework props object、DOM node、attribute collection、listener 或其它宿主对象作为 portable raw props value guarantee。
+      en: An adapter may classify and normalize host input before it enters the capability, but it must not make framework props objects, DOM nodes, attribute collections, listeners, or other host objects part of the portable raw-props value guarantee.
+  - id: HC-PROPS-SOURCE-0001-E
+    text:
+      zh-CN: source 被替换或 Module terminal disposal 时，旧订阅必须被释放；失效通知不得在释放后继续影响 Props state。
+      en: When the source is replaced or the module reaches terminal disposal, the old subscription must be released and its invalidation notifications must no longer affect Props state.
+relates:
+  contracts:
+    - C-PROPS-0001
+    - C-PROPS-0003
+    - C-PROPS-0008
+    - C-PROPS-0012
+  knowledge:
+    - K-COMPONENT-ACTOR-0001
+    - K-INFORMATION-CHANNEL-0001
+    - K-DESIGN-TRADEOFF-0001
+verifies:
+  tests:
+    - T-PROPS-0012
+sources:
+  - path: internal/records/2026-08-14-props-official-adapter-profile-audit.zh-CN.md
+  - path: packages/modules/props/src/caps.ts
+  - path: packages/modules/props/src/types.ts
+  - path: packages/modules/props/src/impl.ts
+  - path: packages/adapters/react/src/adapt.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/adapt.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/adapt.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+  - path: packages/adapters/react/test/contract/props-host-source.v0.contract.test.ts
+  - path: packages/adapters/vue/test/contract/props-host-source.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/contract/props-host-source.v0.contract.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the raw Props source wiring as a host-neutral snapshot and invalidation capability with React, Vue, and Web Component translation evidence.
+tags:
+  - host-capability
+  - props
+  - adapter
+  - snapshot
+  - invalidation

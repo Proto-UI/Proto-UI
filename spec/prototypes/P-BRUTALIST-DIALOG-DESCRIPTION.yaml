@@ -1,0 +1,62 @@
+id: P-BRUTALIST-DIALOG-DESCRIPTION
+type: prototype
+title: Brutalist Dialog Description inherits Base description relations and layers mono description typography
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Dialog Description inherits Base Dialog Description relations and projects mono small description typography with flat foreground. The projection is limited to Base inheritance, the direct entry, and description typography styling.
+
+
+statement:
+  en: >-
+    Brutalist Dialog Description is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dialog Description. It preserves inherited Base protocol semantics (description relation ownership) and adds only visual/style behavior: mono `text-sm` typography with flat `text-foreground`, and the direct prototype entry.
+
+
+  zh-CN: >-
+    Brutalist Dialog Description 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dialog Description 之上。它保留继承的 Base 协议语义（描述关系归属），仅增加视觉/style 行为：mono `text-sm` 排版与平面 `text-foreground`，以及直接 prototype 入口。
+
+
+criteria:
+  - id: P-BRUTALIST-DIALOG-DESCRIPTION-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Dialog Description through `asDialogDescription()` once and must not redefine Base description relation protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asDialogDescription()` 一次性继承 Base Dialog Description，不得重定义 Base 的 description 关系协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-DIALOG-DESCRIPTION-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-dialog-description`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-dialog-description`。
+  - id: P-BRUTALIST-DIALOG-DESCRIPTION-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The description surface uses `font-mono text-sm text-foreground` — flat mono body typography with small size and a flat theme-token foreground without borders, shadows, or fills of its own.
+
+
+      zh-CN: >-
+        description 表面使用 `font-mono text-sm text-foreground`——平面 mono 正文排版，小字号与平面主题 token 前景，自身不带边框、阴影或填充。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/dialog/description.proto.ts
+  - path: packages/prototypes/brutalist/test/dialog.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-DIALOG-DESCRIPTION
+verifies: { tests: [T-BRUTALIST-DIALOG-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dialog Description projection with real public-API criteria (Base inheritance, direct entry, mono description typography visual grammar) on rc.7. Not present in immutable rc.6.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, dialog]

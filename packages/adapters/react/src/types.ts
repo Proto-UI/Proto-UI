@@ -28,8 +28,10 @@ export type ProtoReactProps<TProto extends ProtoLike> = (PropsOf<TProto> extends
   children?: any;
   className?: string;
   hostClassName?: string;
+  surfaceClassName?: string;
   style?: any;
   hostStyle?: any;
+  surfaceStyle?: any;
 } & ProtoReactEventProps<TProto>;
 
 export type ReactAdapterHandle<

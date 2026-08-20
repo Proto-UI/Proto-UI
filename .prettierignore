@@ -2,3 +2,5 @@ node_modules
 dist
 *.min.js
 pnpm-lock.yaml
+# Verbatim legal text; formatting would alter the official DCO 1.1 copy.
+DCO.md

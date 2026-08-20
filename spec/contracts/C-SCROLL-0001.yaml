@@ -1,0 +1,90 @@
+id: C-SCROLL-0001
+type: contract
+title: Scroll coordinates logical surfaces, facts, requests, and host sessions
+status: draft
+since: 0.2.0-rc.7
+summary: The Scroll domain owns logical scroll identities and request/fact coordination while a bounded host session owns geometry, input physics, and concrete projection.
+statement:
+  zh-CN: >-
+    Scroll 必须作为宿主协同的 logical surface domain 建模。Scroll module 保持 logical surface/control identity、portable facts、requests、projection negotiation 与 session lifetime；host capability 在有界 lease 内解析当前宿主 target，读取 geometry/offset，接收 requests，并投影宿主 scrolling engine、chrome participation 与 accessibility。原型作者不得直接访问 raw host target 或把宿主 facts 当作可写 State。
+
+
+  en: >-
+    Scroll must be modeled as a host-mediated logical surface domain. The Scroll module preserves logical surface and control identity, portable facts, requests, projection negotiation, and session lifetime; a host capability resolves the current host target within a bounded lease, reads geometry and offsets, accepts requests, and projects the host scrolling engine, chrome participation, and accessibility. Prototype authors must not access raw host targets or treat host facts as writable State.
+
+
+criteria:
+  - id: C-SCROLL-0001-A
+    text:
+      zh-CN: Scroll domain 必须区分 logical surface、可选 control、facts、requests、projection policy 与 host session。
+      en: The Scroll domain must distinguish a logical surface, optional controls, facts, requests, projection policy, and the host session.
+  - id: C-SCROLL-0001-B
+    text:
+      zh-CN: Surface facts 至少必须能表达 axis、是否存在前向/后向 overflow、normalized position、visible ratio、scrolling activity 与 resolved projection；这些 facts 由 module/host 拥有并以只读 observed handle 消费。
+      en: Surface facts must at least express axis, before and after overflow, normalized position, visible ratio, scrolling activity, and resolved projection; these facts are module or host owned and consumed through read-only observed handles.
+  - id: C-SCROLL-0001-C
+    text:
+      zh-CN: Scroll requests 至少必须区分相对移动、绝对 normalized position、page increment 与 control drag；request 不得在 host 确认或上报前伪造新的 facts。
+      en: Scroll requests must at least distinguish relative movement, absolute normalized position, page increment, and control drag; a request must not fabricate new facts before host confirmation or reporting.
+  - id: C-SCROLL-0001-D
+    text:
+      zh-CN: 原型作者与通用 prototype implementation 不得直接测量、写入或保留 raw 宿主 scroll target；这些操作必须由 Scroll host capability 执行。
+      en: Prototype authors and generic prototype implementations must not directly measure, write, or retain raw host scroll targets; those operations must be performed by the Scroll host capability.
+  - id: C-SCROLL-0001-E
+    text:
+      zh-CN: Host session 必须跟随当前 surface view epoch 与 target readiness；detach、target replacement 或 dispose 必须释放旧 lease，且不得把旧 target facts 归因给新 epoch。
+      en: A host session must follow the current surface view epoch and target readiness; detach, target replacement, or disposal must release the old lease and must not attribute old-target facts to a new epoch.
+  - id: C-SCROLL-0001-F
+    text:
+      zh-CN: 第一阶段 projection 必须遵循 `D-SCROLL-PROJECTION-0001` 的 host-owned engine 与 system/composed chrome 边界。
+      en: Initial projection must follow the host-owned engine and system or composed chrome boundary in `D-SCROLL-PROJECTION-0001`.
+  - id: C-SCROLL-0001-G
+    text:
+      zh-CN: Scroll accessibility 必须通过中立 role/state/action 语义交给 A11y host capability；Web adapter 可以使用原生滚动语义或 ARIA，非 Web 宿主不得被要求复制 ARIA。
+      en: Scroll accessibility must be handed to the A11y host capability as neutral role, state, and action semantics; a Web adapter may use native scrolling semantics or ARIA, while non-Web hosts must not be required to reproduce ARIA.
+  - id: C-SCROLL-0001-H
+    text:
+      zh-CN: Authored composed chrome 必须遵循 `C-SCROLL-COMPOSED-CHROME-0001` 的 family binding 与 host-local continuous projection，不得通过 Context value 或 prototype State 复制宿主 geometry。
+      en: Authored composed chrome must follow the family binding and host-local continuous projection in `C-SCROLL-COMPOSED-CHROME-0001` without copying host geometry through Context values or prototype State.
+  - id: C-SCROLL-0001-I
+    text:
+      zh-CN: composed Thumb movement 必须遵循 `C-SCROLL-COMPOSED-CONTROL-0001`，由 Move Gesture host session 产生 `control-drag` request，并继续以实际 surface facts 作为位置真相。
+      en: Composed Thumb movement must follow `C-SCROLL-COMPOSED-CONTROL-0001`, producing `control-drag` requests from a Move Gesture host session while retaining actual surface facts as position truth.
+openQuestions:
+  - id: C-SCROLL-0001-Q-LENGTH
+    question:
+      zh-CN: portable facts 是否需要定义抽象 logical length，还是只保证 normalized ratio 与 categorical overflow？
+      en: Must portable facts define an abstract logical length, or should they guarantee only normalized ratios and categorical overflow?
+    blocks: [portable-scroll-length]
+  - id: C-SCROLL-0001-Q-DIRECTION
+    question:
+      zh-CN: RTL、writing mode、reversed axis 与 bidirectional surface 应如何规范化？
+      en: How should RTL, writing modes, reversed axes, and bidirectional surfaces be normalized?
+    blocks: [horizontal-scroll-conformance]
+sources:
+  - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
+dependsOn:
+  knowledge:
+    - K-SCROLL-0001
+  decisions:
+    - D-SCROLL-PROJECTION-0001
+relates:
+  contracts:
+    - C-A11Y-0001
+    - C-AS-HOOK-PRIVILEGED-0001
+    - C-SCROLL-COMPOSED-CHROME-0001
+    - C-SCROLL-COMPOSED-CONTROL-0001
+verifies:
+  tests:
+    - T-SCROLL-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Routed composed Thumb movement through the Move Gesture-backed control contract and existing Scroll request path.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Resolved continuous composed Thumb projection through the family-scoped host-local chrome contract.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Defined logical Scroll ownership, portable facts and requests, bounded host sessions, and accessibility projection.
+tags: [scroll, contract, host, geometry, accessibility]

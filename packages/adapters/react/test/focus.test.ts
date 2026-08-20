@@ -44,6 +44,7 @@ describe('adapter-react: focus wiring', () => {
     const mounted = createMountedReactAdapter(proto);
 
     expect(mounted.root?.tabIndex).toBe(-1);
+    expect(mounted.root?.hasAttribute('tabindex')).toBe(false);
 
     mounted.unmount();
   });

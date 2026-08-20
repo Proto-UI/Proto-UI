@@ -1,0 +1,71 @@
+id: C-HOST-SURFACE-PROJECTION-0001
+type: contract
+title: Host projection separates the logical boundary from the presentation surface
+status: draft
+since: 0.2.0-rc.7
+summary: Adapters keep one logical instance boundary while resolving the host target that receives Root-level visual intent, defaulting both roles to the same target and allowing host-owned controls to split them.
+statement:
+  zh-CN: >-
+    Host projection 必须区分 logical `boundaryTarget` 与 visual `surfaceTarget`。Boundary 承载实例生命周期、逻辑树、event boundary、exposes/ref 与 adapter metadata；surface 承载 Root-level visual intent。普通 projection 可以让两者指向同一宿主 target；当 adapter 为 host-owned control 保留 infrastructure wrapper 时，必须把 surface 解析到实际可见控件，而不得让 wrapper 与物理控件形成两个竞争的视觉/聚焦表面。该角色映射属于 adapter/host translation，不向 prototype author 暴露 raw host target。
+
+
+  en: >-
+    Host projection must distinguish the logical `boundaryTarget` from the visual `surfaceTarget`. The boundary carries instance lifecycle, the logical tree, the event boundary, exposes or refs, and adapter metadata; the surface receives Root-level visual intent. Ordinary projections may resolve both roles to the same host target. When an adapter retains an infrastructure wrapper around a host-owned control, it must resolve the surface to the actually visible control rather than creating competing wrapper and physical-control visual or focus surfaces. This role mapping belongs to adapter and host translation and does not expose raw host targets to prototype authors.
+
+
+criteria:
+  - id: C-HOST-SURFACE-PROJECTION-0001-A
+    text:
+      zh-CN: 每个投影视图必须具有一个 logical boundary role 与一个 presentation surface role；默认允许两者指向同一 target，差异只在 host projection 确实需要 wrapper 或替换 target 时出现。
+      en: Every projected view must have a logical-boundary role and a presentation-surface role; both may resolve to the same target by default and diverge only when host projection genuinely requires a wrapper or replacement target.
+  - id: C-HOST-SURFACE-PROJECTION-0001-B
+    text:
+      zh-CN: 实例生命周期、逻辑父子关系、semantic event boundary、exposes/ref 与 `data-pui-root` 等 adapter identity metadata 必须锚定 boundaryTarget，不得因视觉 target 分离而迁移到 raw physical control。
+      en: Instance lifecycle, logical parenthood, the semantic event boundary, exposes or refs, and adapter identity metadata such as `data-pui-root` must remain anchored to the boundaryTarget rather than moving to the raw physical control when the visual target diverges.
+  - id: C-HOST-SURFACE-PROJECTION-0001-C
+    text:
+      zh-CN: Prototype Root style、`feedback.style` 翻译结果与 adapter-normalized surface class/style 必须投影到 surfaceTarget；wrapper 不得因误收这些视觉输入而形成额外边框、背景、命中错觉或无法命中的 focus pseudo-class。
+      en: Prototype Root styling, translated `feedback.style` output, and adapter-normalized surface class or style must project to the surfaceTarget; a wrapper must not accidentally receive those visual inputs and create an extra border, background, misleading hit area, or focus pseudo-class that can never match.
+  - id: C-HOST-SURFACE-PROJECTION-0001-D
+    text:
+      zh-CN: Surface role 不得被解释为通用 focus、a11y、event、hit-testing 或 native-property target；这些 domain 继续由各自 contract/host capability 决定，并可在具体 profile 中与 surfaceTarget 指向同一物理对象。
+      en: The surface role must not be treated as a universal focus, accessibility, event, hit-testing, or native-property target; those domains remain governed by their own contracts and host capabilities and may resolve to the same physical object as the surfaceTarget in a specific profile.
+  - id: C-HOST-SURFACE-PROJECTION-0001-E
+    text:
+      zh-CN: 当 view epoch 或 host projection 替换 surfaceTarget 时，adapter 必须从旧 target 撤销自己拥有的 surface class/style，并把当前视觉投影重放到新 target；不得删除宿主或 consumer 不属于该 adapter source 的样式。
+      en: When a view epoch or host projection replaces the surfaceTarget, the adapter must revoke its owned surface class or style from the previous target and replay the current visual projection onto the replacement without deleting host or consumer styling not owned by that adapter source.
+  - id: C-HOST-SURFACE-PROJECTION-0001-F
+    text:
+      zh-CN: 原生 host `class`/`style` attribute 仍可作为 adapter-local boundary escape hatch；跨 adapter 的 presentation intent 必须通过显式 normalized surface channel 传递，不得把宿主原生 attribute 假定为 portable Props guarantee。
+      en: Native host `class` or `style` attributes may remain adapter-local boundary escape hatches; cross-adapter presentation intent must travel through an explicit normalized surface channel rather than treating native host attributes as a portable Props guarantee.
+  - id: C-HOST-SURFACE-PROJECTION-0001-G
+    text:
+      zh-CN: 当 adapter 把 rule 翻译成依赖 Web state attribute 或其他 selector context 的 surface style，并且 boundaryTarget 与 surfaceTarget 分离时，attached view 必须在 surfaceTarget 上提供等价的 selector context；canonical instance state exposure 仍保留在 boundaryTarget，surface 上的副本只属于 presentation translation，不得因此获得第二份 state ownership 或 adapter identity metadata。
+      en: When an adapter translates a rule into surface styling that depends on Web state attributes or other selector context while boundaryTarget and surfaceTarget diverge, the attached view must provide equivalent selector context on the surfaceTarget. Canonical instance-state exposure remains on the boundaryTarget; the surface copy belongs only to presentation translation and must not create a second state owner or receive adapter identity metadata.
+sources:
+  - path: internal/records/2026-08-02-host-surface-projection.zh-CN.md
+  - path: packages/adapters/base/src/host/surface-projection.ts
+  - path: packages/adapters/web-component/src/adapt.ts
+  - path: apps/www/src/components/PrototypePreviewer/demo-renderer.ts
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-STYLE-0003
+  knowledge:
+    - K-HOST-SURFACE-ROLES-0001
+verifies:
+  tests:
+    - T-HOST-SURFACE-PROJECTION-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Required state-dependent translated styles to receive equivalent selector context on split presentation surfaces.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Separated logical boundary ownership from the host target that receives Root-level visual intent.
+tags:
+  - adapter
+  - host-projection
+  - presentation-surface
+  - boundary
+  - style

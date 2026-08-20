@@ -1,0 +1,57 @@
+id: K-SCROLL-0001
+type: knowledge
+title: Scroll is a host-mediated surface domain
+status: draft
+since: 0.2.0-rc.7
+summary: Scroll coordinates logical surfaces, controls, facts, requests, and projection policy while leaving input physics and host geometry to the host.
+statement:
+  zh-CN: >-
+    Scroll 是宿主协同的 surface domain。它区分 logical scroll surface、可选 scroll control、宿主上报的 facts、发往宿主的 requests、scrolling engine ownership 与 scrollbar chrome projection。Web DOM overflow、CSS pixel、ARIA attribute、Flutter ScrollController 或具体平台 physics 都只是宿主实现，不是 Scroll domain 本身。
+
+
+  en: >-
+    Scroll is a host-mediated surface domain. It distinguishes a logical scroll surface, optional scroll controls, host-reported facts, host-directed requests, scrolling-engine ownership, and scrollbar-chrome projection. Web DOM overflow, CSS pixels, ARIA attributes, Flutter ScrollController, and platform-specific physics are host implementations rather than the Scroll domain itself.
+
+
+criteria:
+  - id: K-SCROLL-0001-A
+    text:
+      zh-CN: Scroll surface identity 必须独立于当前宿主 target、widget、controller 或 view epoch。
+      en: Scroll surface identity must remain independent of the current host target, widget, controller, or view epoch.
+  - id: K-SCROLL-0001-B
+    text:
+      zh-CN: Scroll facts 与 scroll requests 必须保持不同所有权；原型作者不得通过写入 facts 伪造宿主滚动结果。
+      en: Scroll facts and scroll requests must keep distinct ownership; prototype authors must not fabricate host scroll results by writing facts.
+  - id: K-SCROLL-0001-C
+    text:
+      zh-CN: scrolling engine ownership 与 scrollbar chrome projection 必须作为独立维度建模。
+      en: Scrolling-engine ownership and scrollbar-chrome projection must be modeled as independent dimensions.
+  - id: K-SCROLL-0001-D
+    text:
+      zh-CN: Accessibility 必须由中立 scroll semantics 投影到宿主 accessibility surface，而不是把 ARIA 当作所有宿主的共同表示。
+      en: Accessibility must project neutral scroll semantics to the host accessibility surface rather than treating ARIA as the common representation for every host.
+sources:
+  - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
+  - path: https://www.radix-ui.com/primitives/docs/components/scroll-area
+    label: Radix UI Scroll Area
+  - path: https://base-ui.com/react/components/scroll-area
+    label: Base UI Scroll Area
+  - path: https://api.flutter.dev/flutter/widgets/Scrollable-class.html
+    label: Flutter Scrollable
+explains:
+  contracts:
+    - C-SCROLL-0001
+    - C-AS-SCROLL-SURFACE-0001
+  decisions:
+    - D-SCROLL-PROJECTION-0001
+relates:
+  knowledge:
+    - K-MOVE-GESTURE-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Related Scroll control requests to the separate Move Gesture substrate without merging their ownership.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Defined the cross-host vocabulary for logical scroll surfaces, facts, requests, engine ownership, and chrome projection.
+tags: [scroll, surface, host, portability]

@@ -2,7 +2,7 @@
 
 本文说明仓库内 GitHub Actions 工作流的职责，以及它们与全局精确版本和首发 package 治理的关系。
 
-当前已发布的 prerelease release train 为 `0.2.0-rc.6`，使用 npm `next` channel。
+当前已发布的 prerelease release train 为 `0.2.0-rc.7`，使用 npm `next` channel。
 
 ## 工作流总览
 

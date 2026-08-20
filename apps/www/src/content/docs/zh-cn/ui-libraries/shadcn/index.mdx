@@ -1,57 +1,12 @@
 ---
 title: 'Shadcn 原型库'
-desp: '基于 Proto UI Base 原型实现的 Shadcn 风格原型库'
-description: '基于 Proto UI Base 原型实现的 Shadcn 风格原型库'
+description: '基于 Proto UI Base 的 Shadcn 风格原型库总览。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
 
-当前页面用于集中展示 shadcn 系列原型。现阶段提供 `button`、`toggle`、`switch`、`tabs`、`hover-card`、`dialog`、单层 `dropdown-menu` 与 `select`。
+Shadcn 原型库在 Base 交互协议之上投射熟悉、清晰且实用的产品界面风格。这个页面是快速索引：每个原型只显示首个基础 Demo，不包含 API 表与代码示例。
 
-## Button
+当前 Shadcn catalog 实体仍处于 draft 生命周期，页面反映现有官方实现，不将其表述为已冻结的稳定保证。
 
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-button" initialRuntime="wc" />
-</div>
-
-## Toggle
-
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-toggle" initialRuntime="wc" />
-</div>
-
-## Switch
-
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
-</div>
-
-## Tabs
-
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-tabs" initialRuntime="wc" />
-</div>
-
-## Hover Card
-
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-hover-card" initialRuntime="wc" />
-</div>
-
-## Dialog
-
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-dialog" initialRuntime="wc" />
-</div>
-
-## Dropdown Menu
-
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-dropdown-menu" initialRuntime="wc" />
-</div>
-
-## Select
-
-<div>
-  <PrototypePreviewer demoId="demo-shadcn-select" initialRuntime="wc" />
-</div>
+<PrototypeLibraryOverview library="shadcn" locale="zh-cn" />

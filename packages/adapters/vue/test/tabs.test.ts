@@ -5,7 +5,7 @@ import { VueAny, flushVue } from './utils/vue';
 import { createVueAdapter } from '../src/adapt';
 
 describe('adapter-vue: base tabs compound protocol', () => {
-  it('coordinates tabs context, anatomy, a11y label, and trigger activation', async () => {
+  it('coordinates tabs context, anatomy, a11y label, trigger activation, and roving focus', async () => {
     const adapter = createVueAdapter(VueAny);
     const Root = adapter(tabsRoot);
     const List = adapter(tabsList);
@@ -54,23 +54,31 @@ describe('adapter-vue: base tabs compound protocol', () => {
     expect(refs.contentA?.getExposes().current.get()).toBe(true);
     expect(host.textContent).not.toContain('B panel');
     expect(host.textContent).toContain('C panel');
+    expect(refs.triggerB?.$el.getAttribute('tabindex')).toBe('-1');
 
-    refs.triggerB?.$el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    await flushVue();
+    refs.triggerA?.$el.focus();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await flushVue();
 
+    expect(document.activeElement).toBe(refs.triggerB?.$el);
     expect(refs.root?.getExposes().value.get()).toBe('b');
-    expect(refs.triggerA?.getExposes().selected.get()).toBe(false);
-    expect(refs.triggerB?.getExposes().selected.get()).toBe(true);
-    expect(refs.contentA?.getExposes().current.get()).toBe(false);
-    expect(refs.contentB?.getExposes().current.get()).toBe(true);
-    expect(host.textContent).toContain('B panel');
 
     refs.triggerA?.$el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await flushVue();
     await flushVue();
 
+    expect(refs.root?.getExposes().value.get()).toBe('a');
+    expect(refs.triggerA?.getExposes().selected.get()).toBe(true);
+    expect(refs.triggerB?.getExposes().selected.get()).toBe(false);
+    expect(refs.contentA?.getExposes().current.get()).toBe(true);
+    expect(refs.contentB?.getExposes().current.get()).toBe(false);
     expect(host.textContent).not.toContain('B panel');
+
+    refs.triggerB?.$el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await flushVue();
+    await flushVue();
+
+    expect(host.textContent).toContain('B panel');
     expect(host.textContent).toContain('C panel');
 
     app.unmount();

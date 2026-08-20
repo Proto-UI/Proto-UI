@@ -36,8 +36,8 @@ criteria:
       en: A disabled focusable must not accept focus requests that activate focus facts.
   - id: C-AS-FOCUSABLE-0001-F
     text:
-      zh-CN: '`asFocusable()` 必须允许运行时切换自然导航参与状态；`navParticipation: none` 应将 target 排除出宿主顺序焦点导航，但不得等同于 disabled，也不得阻止显式 focus request。'
-      en: '`asFocusable()` must allow runtime switching of natural navigation participation; `navParticipation: none` should remove the target from host sequential focus navigation, but must not be equivalent to disabled and must not block explicit focus requests.'
+      zh-CN: '`asFocusable()` 必须允许运行时切换自然导航参与状态；`navParticipation: none` 应将 target 排除出宿主顺序焦点导航，但不得等同于 disabled，也不得阻止显式或 roving focus request。对于非原生可聚焦 target，支持该投射的 Web host 必须保留程序化聚焦能力，例如使用 `tabindex="-1"`，而不得通过完全移除 `tabindex` 使请求失效。'
+      en: '`asFocusable()` must allow runtime switching of natural navigation participation; `navParticipation: none` should remove the target from host sequential focus navigation, but must not be equivalent to disabled or block explicit or roving focus requests. For a target that is not natively focusable, a Web host supporting this projection must preserve programmatic focusability, for example with `tabindex="-1"`, rather than removing `tabindex` entirely and making the request inapplicable.'
   - id: C-AS-FOCUSABLE-0001-G
     text:
       zh-CN: 当合法的 logical focus request 发生时 host target 尚未完成 projection，Focus 必须只保留最新 pending request，并在该实例后续 commit/mounted readiness 使 target 与 logical parent 可用后重新经过 Focus Center policy 再兑现；host focus capability 必须能够拒绝当前尚不可应用的 target，且拒绝不得被解释为成功或产生 facts。当宿主的 connected 与 focus-ready 不是同一时刻时，adapter 必须通过窄化的 target-readiness host capability 发出就绪信号。retained view detach 仅结束当前 host view epoch，不得丢弃 logical owner 的 pending request；若 Portal 或后续 retained view epoch 移动或替换 native target，同一就绪信号必须把 pending 或既有 focus owner 投射到新 target，而不得伪造或改写 semantic facts。`preventScroll` request policy 必须由支持该能力的宿主投射为保持 viewport 的原生 focus option，不支持的宿主可以忽略该 policy，但不得拒绝 logical focus。pending 期间不得伪造 focus facts，blur、disabled、更新的 request、logical instance 的 terminal unmount 或 dispose 必须取消或取代旧 request。
@@ -106,6 +106,9 @@ revisions:
   - version: 0.1.9
     change: refined
     summary: Added host projection semantics for scroll-preserving focus requests.
+  - version: 0.1.10
+    change: refined
+    summary: Required navParticipation none to preserve programmatic focusability for non-native Web targets.
 tags:
   - focus
   - as-hook

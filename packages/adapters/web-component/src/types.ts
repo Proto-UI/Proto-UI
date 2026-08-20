@@ -5,6 +5,12 @@ export type ProtoWebComponentProps<TProto extends Prototype<any, any>> =
   ProtoAdapterProps<TProto> & {
     class?: string | string[] | Record<string, boolean>;
     className?: string | string[] | Record<string, boolean>;
+    surfaceClass?: string | string[] | Record<string, boolean>;
+    surfaceClassName?: string | string[] | Record<string, boolean>;
+    surfaceStyle?:
+      | string
+      | Record<string, string | number | null | undefined>
+      | Array<Record<string, string | number | null | undefined>>;
   };
 
 export type WebComponentAdapterHandle<

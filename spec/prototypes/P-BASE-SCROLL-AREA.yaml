@@ -1,31 +1,72 @@
 id: P-BASE-SCROLL-AREA
 type: prototype
-title: Base Scroll Area protocol
+title: Base Scroll Area defines a host-projected scrolling domain
 status: draft
 since: 0.2.0-rc.7
-summary: Five-part behaviorless Scroll Area anatomy for downstream visual and behavior projections.
+summary: Base Scroll Area is a compound protocol whose Viewport owns one logical scroll surface while Root and composed controls remain layout and projection parts.
 statement:
-  en: Base Scroll Area defines Root, Viewport, Scrollbar, Thumb, and Corner anatomy. This shell slice owns only part identity, containment, and Scrollbar orientation; portable metrics and thumb drag behavior remain outside this entity.
-  zh-CN: Base Scroll Area 定义 Root、Viewport、Scrollbar、Thumb 与 Corner anatomy。本 shell 切片只拥有 part identity、containment 与 Scrollbar orientation；可移植 metrics 与 thumb 拖拽行为不属于本实体。
+  zh-CN: Base Scroll Area 把滚动建模为跨宿主语义域，而不是 Web DOM scrollbar 的薄包装。Viewport 通过特权 `asScrollSurface` 接入宿主滚动能力；Root 只建立 anatomy 边界，Scrollbar 与 Thumb 只在 composed projection 中承担可视控制部件。Web 可以选择 system 或 composed 投射，其他宿主可映射到自身原生滚动容器。
+  en: Base Scroll Area models scrolling as a cross-host semantic domain rather than a thin wrapper over a Web DOM scrollbar. Viewport reaches host scrolling through the privileged `asScrollSurface`; Root only establishes the anatomy boundary, while Scrollbar and Thumb are visual control parts for composed projection. Web may select system or composed projection and other hosts may map the domain to their native scrolling containers.
+anatomy:
+  family: base-scroll-area
+  roles:
+    root: { cardinality: { min: 1, max: 1 } }
+    viewport: { cardinality: { min: 1, max: 1 } }
+    scrollbar: { cardinality: { min: 0, max: 2 } }
+    thumb: { cardinality: { min: 0, max: 2 } }
+  relations:
+    - { kind: contains, parent: root, child: viewport }
+    - { kind: contains, parent: root, child: scrollbar }
+    - { kind: contains, parent: scrollbar, child: thumb }
 criteria:
+  - id: P-BASE-SCROLL-AREA-SEMANTIC-DOMAIN
+    text:
+      zh-CN: Scroll Area 必须表示一个具有 position、extent、可滚方向、scrolling 与 scroll request 的逻辑滚动域，不得把某一宿主的 DOM、widget 或原始 geometry 当作跨宿主协议。
+      en: Scroll Area must represent a logical scrolling domain with position, extent, available directions, scrolling state, and scroll requests; a host-specific DOM node, widget, or raw geometry must not become the cross-host protocol.
+  - id: P-BASE-SCROLL-AREA-AUTHORING-ENTRIES
+    text:
+      zh-CN: '`base-scroll-area-root` 与 `asScrollAreaRoot` 必须是同一 Root protocol 的 direct 与 authored-asHook entries。'
+      en: '`base-scroll-area-root` and `asScrollAreaRoot` must be the direct and authored-asHook entries of the same Root protocol.'
   - id: P-BASE-SCROLL-AREA-ANATOMY
     text:
-      en: Root and Viewport are required singletons; Root may contain up to two Scrollbars and one Corner; the family allows up to two Thumbs, each contained by a Scrollbar.
-      zh-CN: Root 与 Viewport 为必需 singleton；Root 最多包含两个 Scrollbar 与一个 Corner；family 最多允许两个 Thumb，且每个 Thumb 由 Scrollbar 包含。
-  - id: P-BASE-SCROLL-AREA-SHELL-BOUNDARY
+      zh-CN: canonical Root、Viewport、Scrollbar 与 Thumb roles、cardinality 及 contains relations 必须由顶层 anatomy 字段定义；普通盒状 Corner 不构成独立 prototype role。
+      en: Canonical Root, Viewport, Scrollbar, and Thumb roles, cardinalities, and contains relations must be defined by the top-level anatomy field; a plain box-shaped corner is not an independent prototype role.
+  - id: P-BASE-SCROLL-AREA-ROOT-NO-BEHAVIOR
     text:
-      en: Root, Viewport, Thumb, and Corner define no props, state, events, focus, metrics, or drag behavior. Scrollbar owns only `horizontal | vertical` orientation state with default `vertical`.
-      zh-CN: Root、Viewport、Thumb 与 Corner 不定义 props、state、event、focus、metrics 或 drag 行为；Scrollbar 只拥有默认 `vertical` 的 `horizontal | vertical` orientation state。
+      zh-CN: Root 只拥有 anatomy 与 JSON-only Context family scope，不得拥有 viewport offset、host geometry、focus target、滚动事件或默认尺寸。
+      en: Root owns only the Anatomy and JSON-only Context family scope and must not own viewport offsets, host geometry, a focus target, scrolling events, or a default size.
+  - id: P-BASE-SCROLL-AREA-PROJECTION-CHOICE
+    text:
+      zh-CN: system 与 composed 是同一逻辑滚动域的宿主投射策略，不得裂变为两个 Base prototype；默认策略由 host adapter 与 design-language preference 共同解析。
+      en: System and composed are host projection strategies for the same logical scrolling domain and must not split into separate Base prototypes; the host adapter and design-language preference jointly resolve the default.
+  - id: P-BASE-SCROLL-AREA-FAMILY-SESSION
+    text:
+      zh-CN: Root 必须提供 Scroll Area Context scope，使 Viewport 可以在不把 session object 写入 Context value 的前提下建立家族级 composed host attachment。
+      en: Root must provide the Scroll Area Context scope so Viewport can establish a family-level composed host attachment without placing a session object in the Context value.
 sources:
   - path: packages/prototypes/base/src/scroll-area/root.proto.ts
+  - path: packages/prototypes/base/src/scroll-area/shared.ts
+  - path: packages/prototypes/base/test/scroll-area.test.ts
+  - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
+dependsOn:
+  contracts:
+    [
+      C-ANATOMY-0002,
+      C-AS-HOOK-0001,
+      C-AS-SCROLL-SURFACE-0001,
+      C-SCROLL-0001,
+      C-SCROLL-COMPOSED-CHROME-0001,
+    ]
+  decisions: [D-SCROLL-PROJECTION-0001, D-SCROLL-COMPOSED-PROJECTION-0001]
+  modules: [M-SCROLL-0001]
+relates:
+  knowledge: [K-SCROLL-0001]
+verifies: { tests: [T-BASE-SCROLL-AREA-0001] }
 revisions:
   - version: 0.2.0-rc.7
+    change: revised
+    summary: Added a JSON-only Context family scope for composed host projection sessions.
+  - version: 0.2.0-rc.7
     change: introduced
-    summary: Introduced Base Scroll Area protocol.
-verifies:
-  tests:
-    - T-BRUTALIST-SCROLL-AREA-0001
-tags:
-  - prototype
-  - base
-  - scroll_area
+    summary: Cataloged Scroll Area as a cross-host semantic domain with one Viewport-owned surface and host-selectable system or composed projection.
+tags: [prototype, base, scroll-area, compound, host-projection]

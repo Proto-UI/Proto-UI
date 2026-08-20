@@ -42,6 +42,11 @@ const UI_TEXT = {
     since: 'Since',
     noEntity: 'No entity selected.',
     statement: 'Statement',
+    adapterProfile: 'Adapter Profile',
+    packageName: 'Package',
+    platform: 'Platform',
+    runtime: 'Runtime',
+    versionRange: 'Version Range',
     anatomy: 'Anatomy',
     family: 'Family',
     roles: 'Roles',
@@ -93,11 +98,15 @@ const UI_TEXT = {
       exercises: 'Exercises',
       requires: 'Requires',
       owns: 'Owns',
+      supports: 'Supports',
+      provides: 'Provides',
+      omits: 'Omits',
     },
     relationTargetKinds: {
       contracts: 'Contracts',
       prototypes: 'Prototypes',
       modules: 'Modules',
+      adapters: 'Adapters',
       decisions: 'Decisions',
       hostCaps: 'Host Capabilities',
       tests: 'Tests',
@@ -120,6 +129,7 @@ const UI_TEXT = {
       contract: 'Contracts',
       prototype: 'Prototypes',
       module: 'Modules',
+      adapter: 'Adapters',
       decision: 'Decisions',
       'host-cap': 'Host Capabilities',
       test: 'Tests',
@@ -148,6 +158,11 @@ const UI_TEXT = {
     since: '引入版本',
     noEntity: '未选择实体。',
     statement: '契约陈述',
+    adapterProfile: 'Adapter Profile',
+    packageName: 'Package',
+    platform: '平台',
+    runtime: 'Runtime',
+    versionRange: '版本范围',
     anatomy: '解剖学',
     family: '家族',
     roles: '角色',
@@ -199,11 +214,15 @@ const UI_TEXT = {
       exercises: '演练',
       requires: '要求',
       owns: '拥有',
+      supports: '支持',
+      provides: '提供',
+      omits: '不接入',
     },
     relationTargetKinds: {
       contracts: '契约',
       prototypes: '原型',
       modules: '模块',
+      adapters: 'Adapter',
       decisions: '决策',
       hostCaps: 'Host 能力',
       tests: '测试',
@@ -226,6 +245,7 @@ const UI_TEXT = {
       contract: '契约',
       prototype: '原型',
       module: '模块',
+      adapter: 'Adapter',
       decision: '决策',
       'host-cap': 'Host 能力',
       test: '测试',
@@ -638,6 +658,9 @@ function EntityInspector(props: {
       {entity.anatomy ? (
         <AnatomySection anatomy={entity.anatomy} locale={props.locale} t={props.t} />
       ) : null}
+      {entity.adapterProfile ? (
+        <AdapterProfileSection profile={entity.adapterProfile} t={props.t} />
+      ) : null}
       {entity.criteria.length > 0 ? (
         <section className="detail-section">
           <h3>{props.t.criteria}</h3>
@@ -885,6 +908,39 @@ function AnatomySection(props: {
           </div>
         </div>
       ) : null}
+    </section>
+  );
+}
+
+function AdapterProfileSection(props: {
+  profile: NonNullable<SpecEntity['adapterProfile']>;
+  t: UiText;
+}) {
+  return (
+    <section className="detail-section">
+      <h3>{props.t.adapterProfile}</h3>
+      <dl className="entity-meta">
+        <div>
+          <dt>{props.t.packageName}</dt>
+          <dd>{props.profile.package}</dd>
+        </div>
+        <div>
+          <dt>{props.t.platform}</dt>
+          <dd>{props.profile.target.platform}</dd>
+        </div>
+        {props.profile.target.runtime ? (
+          <>
+            <div>
+              <dt>{props.t.runtime}</dt>
+              <dd>{props.profile.target.runtime.name}</dd>
+            </div>
+            <div>
+              <dt>{props.t.versionRange}</dt>
+              <dd>{props.profile.target.runtime.versionRange ?? '—'}</dd>
+            </div>
+          </>
+        ) : null}
+      </dl>
     </section>
   );
 }
@@ -1606,6 +1662,7 @@ function getEntityTypePrefix(type: SpecEntity['type']): string {
     contract: 'C',
     prototype: 'P',
     module: 'M',
+    adapter: 'A',
     decision: 'D',
     'host-cap': 'HC',
     test: 'T',
@@ -1631,7 +1688,8 @@ function getEntityTypeOrder(type: SpecEntity['type']): number {
     knowledge: 4,
     decision: 5,
     'host-cap': 6,
-    version: 7,
+    adapter: 7,
+    version: 8,
   };
 
   return order[type] ?? 99;

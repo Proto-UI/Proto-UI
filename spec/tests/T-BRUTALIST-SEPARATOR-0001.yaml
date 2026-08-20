@@ -1,0 +1,47 @@
+id: T-BRUTALIST-SEPARATOR-0001
+type: test
+title: Brutalist Separator visual contract tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers the current tested Neo-Brutalist visual grammar and Base-inherited runtime behavior for brutalist separator.
+cases:
+  - id: T-BRUTALIST-SEPARATOR-0001-CASE-DEFAULTS
+    title: Decorative default projects horizontal Brutalist geometry
+    covers:
+      - P-BRUTALIST-SEPARATOR-BASE-INHERITANCE
+      - P-BRUTALIST-SEPARATOR-VISUAL-GRAMMAR
+    expectation: brutalist-separator-defaults-to-decorative-horizontal-state-selector-geometry
+  - id: T-BRUTALIST-SEPARATOR-0001-CASE-DYNAMIC-SEMANTICS
+    title: Semantic state switches to vertical geometry after mount
+    covers:
+      - P-BRUTALIST-SEPARATOR-BASE-INHERITANCE
+      - P-BRUTALIST-SEPARATOR-VISUAL-GRAMMAR
+      - P-BRUTALIST-SEPARATOR-DYNAMIC-GEOMETRY
+    expectation: brutalist-separator-live-semantics-select-vertical-geometry
+implementations:
+  - id: prototypes-brutalist-separator-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/separator.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SEPARATOR-0001-CASE-DEFAULTS
+      - T-BRUTALIST-SEPARATOR-0001-CASE-DYNAMIC-SEMANTICS
+    exercises: &id001
+      - P-BRUTALIST-SEPARATOR
+      - P-BASE-SEPARATOR
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-SEPARATOR
+exercises:
+  prototypes: *id001
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added draft Brutalist separator prototype coverage.
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - separator

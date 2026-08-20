@@ -10,7 +10,7 @@ function appendHost(parent: HTMLElement): HTMLElement {
 }
 
 describe('adapter-react: base tabs compound protocol', () => {
-  it('coordinates tabs context, anatomy, a11y label, and trigger activation', () => {
+  it('coordinates tabs context, anatomy, a11y label, trigger activation, and roving focus', () => {
     const root = createMountedReactAdapter(tabsRoot, { defaultValue: 'a' });
     const rootEl = root.root as HTMLElement;
     const list = createMountedReactAdapterInto(tabsList, appendHost(rootEl), {
@@ -34,14 +34,21 @@ describe('adapter-react: base tabs compound protocol', () => {
     expect(root.ref.current?.getExposes().value.get()).toBe('a');
     expect(triggerA.ref.current?.getExposes().selected.get()).toBe(true);
     expect(contentA.ref.current?.getExposes().current.get()).toBe(true);
+    expect(triggerB.root?.getAttribute('tabindex')).toBe('-1');
 
-    triggerB.root?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    triggerA.root?.focus();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
 
+    expect(document.activeElement).toBe(triggerB.root);
     expect(root.ref.current?.getExposes().value.get()).toBe('b');
-    expect(triggerA.ref.current?.getExposes().selected.get()).toBe(false);
-    expect(triggerB.ref.current?.getExposes().selected.get()).toBe(true);
-    expect(contentA.ref.current?.getExposes().current.get()).toBe(false);
-    expect(contentB.ref.current?.getExposes().current.get()).toBe(true);
+
+    triggerA.root?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(root.ref.current?.getExposes().value.get()).toBe('a');
+    expect(triggerA.ref.current?.getExposes().selected.get()).toBe(true);
+    expect(triggerB.ref.current?.getExposes().selected.get()).toBe(false);
+    expect(contentA.ref.current?.getExposes().current.get()).toBe(true);
+    expect(contentB.ref.current?.getExposes().current.get()).toBe(false);
 
     contentB.unmount();
     contentA.unmount();

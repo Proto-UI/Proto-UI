@@ -3,6 +3,12 @@ export const PREFERRED_KEY = 'preferred-prototypes-adapter';
 import { AdapterIds } from '../PrototypePreviewer/runtimes/registry';
 export const DEFAULT_ADAPTER = 'wc';
 
+interface Props {
+  id?: string;
+}
+
+const { id = 'adapter-select' } = Astro.props;
+
 // 适配器选项
 const options = [
   { value: 'wc', label: 'Web Components' },
@@ -12,34 +18,52 @@ const options = [
 ---
 
 <div class="adapter-select-wrapper relative inline-flex items-center">
-  <label class="sr-only" for="adapter-select">选择适配器</label>
+  <label class="sr-only" for={id}>选择适配器</label>
   <select
-    id="adapter-select"
+    id={id}
     class="adapter-select appearance-none inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all outline-none h-8 rounded-md gap-1.5 px-3 pr-8 cursor-pointer bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
     aria-label="选择适配器"
     autocomplete="off"
+    data-adapter-select
   >
     {options.map((opt) => <option value={opt.value}>{opt.label}</option>)}
   </select>
   <script is:inline define:vars={{ PREFERRED_KEY, DEFAULT_ADAPTER, AdapterIds }}>
     (function () {
-      var select = document.getElementById('adapter-select');
-      if (!select) return;
+      function initAdapterSelect(select) {
+        if (select.dataset.adapterSelectInitialized === 'true') return;
 
-      try {
-        let SelectedAdapter = localStorage.getItem(PREFERRED_KEY);
-        if (SelectedAdapter && AdapterIds.indexOf(SelectedAdapter) !== -1)
-          select.value = SelectedAdapter;
-      } catch (e) {}
-
-      select.addEventListener('change', function () {
         try {
-          localStorage.setItem(PREFERRED_KEY, select.value);
+          var selectedAdapter = localStorage.getItem(PREFERRED_KEY);
+          if (selectedAdapter && AdapterIds.indexOf(selectedAdapter) !== -1) {
+            select.value = selectedAdapter;
+          }
         } catch (e) {}
-        document.dispatchEvent(
-          new CustomEvent('proto-adapter:change', { detail: { adapter: select.value } })
-        );
-      });
+
+        select.dataset.adapterSelectInitialized = 'true';
+        select.addEventListener('change', function () {
+          try {
+            localStorage.setItem(PREFERRED_KEY, select.value);
+          } catch (e) {}
+
+          document.querySelectorAll('select[data-adapter-select]').forEach(function (otherSelect) {
+            otherSelect.value = select.value;
+          });
+          document.dispatchEvent(
+            new CustomEvent('proto-adapter:change', { detail: { adapter: select.value } })
+          );
+        });
+      }
+
+      function initAdapterSelects() {
+        document.querySelectorAll('select[data-adapter-select]').forEach(initAdapterSelect);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAdapterSelects, { once: true });
+      } else {
+        initAdapterSelects();
+      }
     })();
   </script>
   <svg

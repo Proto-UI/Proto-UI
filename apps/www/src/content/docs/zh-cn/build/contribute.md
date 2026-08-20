@@ -1,149 +1,123 @@
 ---
 title: '如何参与贡献'
-description: 'Proto UI 当前阶段的贡献入口、主要路径与实践建议'
+description: '按贡献就绪度选择工作，并从本地开发走到可审阅的 Proto UI PR。'
 ---
 
-## 从这开始
+Proto UI 不会通过降低协议和工程标准来制造大量简单任务。我们更希望把已经确定的边界说清楚，让第一次参与、熟练实现和核心设计三种贡献都能找到合适入口。
 
-如果你刚接触 Proto UI，最简单的第一步是浏览 [Good First Issue](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22)——每个 issue 都有明确的范围和验收标准。开始前先在 issue 下留言说明。如果对范围或方案不确定，到 [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions) 提问。
+完整的环境、DCO、来源披露、验证和 PR 流程以仓库 [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md) 为准。本页帮助你选择路径。
 
-## 选择你的路径
+## 先看贡献是否已经就绪
 
-### Prototype（原型）
+贡献难度和贡献就绪度是两件事：一个改动的语义可以已经确定，但交付面仍然很大；一个代码改动也可能很小，却仍依赖尚未完成的架构决定。
 
-这条路径关注的是**组件应该如何交互**——状态流转、事件进入、反馈表达和交互语义。
+### Starter
 
-**适合：** 组件库开发者、设计系统工程师、Headless 组件作者、无障碍优化者
+F1–F2、预期结果固定、几乎不需要 Proto UI 领域判断的任务，例如：
 
-**常见任务：**
+- 修复现有文档、Demo、窄屏或暗色模式问题；
+- 为已有行为补一个明确的回归测试；
+- 修复缺失的可访问性名称或预览入口；
+- 补充已有页面的中文或英文表达。
 
-- 为已有原型补足某个明确的交互能力
-- 新增一个边界清晰的基础原型
-- 改进已有原型的状态 / 反馈表达
+真正适合第一次 PR 的工作会标记为 [`good first issue`](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22)。这个列表暂时为空时，不代表项目不接受贡献。
 
-**从这里开始：**
+### Contributor-ready
 
-- [原型提案 Issue 模板](https://github.com/Proto-UI/Proto-UI/issues/new?template=prototype-proposal.md)
-- [Good First Issue：prototype](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aprototype)
-- [编写一个定制的单体原型](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/)
-- [原型作者检查清单](/zh-cn/build/prototypes/checklist/)
+语义边界已经决定，但实现可能仍是 F3–F5。熟悉组件库、设计系统或框架的贡献者可以查看 [`help wanted`](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22help+wanted%22)，并确认 Issue 正文明确写出了：
 
-**提交 PR 前：** 说明交互行为、必要时解释原型边界、尽量附带预览或测试。
+- 已经决定的内容；
+- 贡献者可以决定的内容；
+- 不得在实现中改变的边界；
+- 是否已经允许开始实现；
+- 需要运行的验证。
 
----
+`help wanted` 不会覆盖 `needs maintainer design`。如果两者同时出现，应先等待 maintainer checkpoint。
 
-### Adapter（适配器）
+### Maintainer-guided
 
-这条路径关注的是**原型如何进入具体宿主**——契约映射、能力补全和宿主原生体验。
+新的 Base subject、Prototype admission、协议所有权和跨层架构工作需要先做 assessment 或 proposal。没有记录 maintainer checkpoint 时，不应直接提交实现 PR。
 
-**适合：** 框架维护者、平台工程师、熟悉 React / Vue / Web Components / Flutter / Qt / 平台原生 UI 技术的开发者
+## Spec 实体优先
 
-**常见任务：**
+开始改动前，先找到适用的 `P-*` 实体，并阅读它的 lifecycle、criteria、relations、sources 和 `T-*` evidence。
 
-- 为已有宿主补齐某类原型契约的承接能力
-- 改进已有原型在宿主侧的还原度
-- 为新宿主建立最小可工作的适配器
+权威顺序是：
 
-**从这里开始：**
+```text
+applicable spec entity
+→ internal contract for an uncataloged gap or explanation
+→ relevant dated record for current context
+→ implementation and tests as evidence
+→ README and website as reader projections
+```
 
-- [适配器提案 Issue 模板](https://github.com/Proto-UI/Proto-UI/issues/new?template=adapter-proposal.md)
-- [Good First Issue：adapter](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aadapter)
-- [Adapter 指南](/zh-cn/build/adapter-guide/)（施工中）
+如果实现、测试或文档与适用实体不一致，应把它当成 drift 调查，不要把当前代码默认为新的真相源。实体编写规则见 [spec catalog guide](https://github.com/Proto-UI/Proto-UI/blob/main/spec/README.md)。
 
-**提交 PR 前：** 确认宿主能力映射、如有回退策略需说明、跨宿主场景测试。
+## 当前开放的 Prototype 路径
 
----
+Proto UI 的 `P-*` 编目已经可以支撑完整的 Prototype 贡献路径。
 
-### Contracts / Tests（契约与测试）
+### 维护已有 Prototype
 
-这条路径关注的是**什么才算"真的支持了这个能力"**——验证原型被清楚定义、适配器真正承接了契约。
+适合修复已有行为、补回归测试、完善文档与 Demo，或解决 P/T、实现、导出和公开页面之间的 drift。
 
-**适合：** 关注语义边界、行为验证和契约一致性的工程师
+[阅读维护已有 Prototype 指南](/zh-cn/build/prototypes/maintaining-an-existing-prototype/)
 
-**常见任务：**
+### 从 Base 投射风格化 Prototype
 
-- 为已有能力补契约测试
-- 为已文档化的语义补最小验证
-- 找出现有原型 / 适配器中"不一致但还没被约束"的位置
+适合在已有 Base 协议上增加设计语言 props、token、rule 和视觉 anatomy。贡献者不得重新定义 Base 已经拥有的 value、event、focus、accessibility 或 host-capability 语义。新增公开 Prototype 必须同时进入官网可访问页面，供维护者通过真实 package export 交互预览。
 
-**从这里开始：**
+[阅读风格化投射指南](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)
 
-- [契约与测试](/zh-cn/build/contracts-and-tests/)（施工中）
-- [Good First Issue：automation](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Aautomation)
+### 实现已批准的 Base semantic slice
 
-**提交 PR 前：** 说明契约验证了什么、为什么边界画在这里、确保测试在改动前会失败。
+适合高级贡献者。独立主体、信息通路、负向边界、公共 API、P/T 图和验证范围必须先经过 maintainer checkpoint。完整 slice 包括官网页面与适用的 Web Component、React、Vue 预览，不能只交付源码和测试。
 
----
+[阅读已批准 Base slice 实现指南](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)
 
-### Docs / Demo（文档与示例）
+### 提出新的 Base subject
 
-这条路径关注的是**别人能不能看懂 Proto UI**——降低新用户和新贡献者的进入门槛。
+熟悉的组件名、目录名或风格库需求都不能单独证明一个 Base Prototype。Proposal 必须证明它是独立、跨宿主、可测试的协议主体，并拥有从 input fact 到 observable output 的信息通路。
 
-**适合：** 技术写作者、教育者、能把抽象概念转化为清晰文档 / 示例 / 图示 / Demo 的人
+[使用 Prototype Proposal 模板](https://github.com/Proto-UI/Proto-UI/issues/new?template=prototype-proposal.md)
 
-**常见任务：**
+## 官网预览是 Prototype 交付的一部分
 
-- 修订已有文档，让入口更顺
-- 为某个原型补最小示例
-- 把抽象概念转成更容易理解的 Demo
+每个新增公开 Prototype identity 或 anatomy family 都必须在同一 PR 中进入官网可访问页面，并使用真实 public package export 提供适用的 Web Component、React、Vue 预览。PR 需要附上维护者可以直接打开的本地路由；内部 Demo Matrix 不能替代这个页面。
 
-**从这里开始：**
+Demo 应尽量拟合 package 安装后的直接使用方式。自治 Prototype 应通过自己的 anatomy、trigger、state、event 和默认行为工作，不应依赖页面层为了让演示成立而额外增加的 owner 或 callback。只有没有自然 trigger，或公开 controls 本身就是演示对象时，才允许最小外部控制；例外必须只使用 public API，并说明哪些 orchestration 不会随 package 安装、需要消费者自行实现。
 
-- [文档需求 Issue 模板](https://github.com/Proto-UI/Proto-UI/issues/new?template=docs-request.md)
-- [Good First Issue：docs](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Adocs)
+## Adapter 路径暂不发布
 
-**提交 PR 前：** 说明改动解决了什么理解障碍或空白、确认页面在文档站点正确渲染。
+Module、Host Capability 和官方 Adapter profile 的编目仍在推进，相关架构和已知 drift 也还没有全部收口。因此当前不发布通用 Adapter 贡献指南，也不建议通过模仿现有实现来新增 Adapter。
 
----
+边界已经确认的 Adapter parity bug 仍可能开放给有经验的贡献者，但 Issue 必须明确适用实体、所有权层、预期行为和验证范围。新的 Adapter 仍属于 maintainer-guided research。
 
-### Community / Curation（社区与整理）
+## 从本地到 PR
 
-这条路径关注的是**把生态中的问题、讨论和共识接住**——让生态保持可导航、新人得到持续回应。
+当前 CI 基线是 Node.js 22，并使用 pnpm 10.32.1：
 
-**适合：** 社区组织者、善于归纳讨论 / 维护索引 / 帮别人把想法说清楚的人
+```sh
+corepack enable
+corepack pnpm@10.32.1 install --frozen-lockfile
+corepack pnpm@10.32.1 docs:dev
+```
 
-**常见任务：**
+基本流程：
 
-- 整理重复出现的问题
-- 维护 FAQ 或讨论索引
-- 把零散讨论沉淀成可引用的结论
-- 协助新贡献者找到入口
+1. 在 Issue 下说明准备参与，并确认 readiness。
+2. 从最新 `main` 创建短期分支。
+3. 先追踪 P/T 实体和实现证据，再开始修改。
+4. 保持 source of truth、实现、测试和受影响的公开投影一致。
+5. 先运行 focused test，再按改动运行 catalog、types、docs 或完整测试。
+6. 使用 `git commit --signoff` 提交。
+7. 在 PR 中写明精确验证命令、来源和 AI 辅助范围。
 
-**从这里开始：**
+详细命令、DCO 修复方式、第三方来源要求和验证矩阵见 [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md)。
 
-- [Good First Issue：community](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22+label%3Acommunity)
-- [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions)
+## 沟通
 
-**提交 PR 前：** 归纳你捕捉到的模式或共识、附上源讨论链接。
-
----
-
-## 新贡献者工作流
-
-1. 认领一个边界清晰的 [Good First Issue](https://github.com/Proto-UI/Proto-UI/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
-2. 开始前先在 issue 下留言
-3. 不确定边界时，在 issue 或 [Discussions](https://github.com/Proto-UI/Proto-UI/discussions) 里确认
-4. PR 尽量小——最小可讨论结果，而非一次性提交巨大改动
-5. 在 PR 描述里说明改了什么、为什么
-
-对于 Prototype 和 Adapter 的改动，最简单的预览方式是接入文档站点。在专门的调试工具成熟之前，这是最直接的反馈回路。
-
----
-
-## 较大改动先讨论
-
-以下情况建议先讨论再动手：
-
-- 准备新增一个宿主适配器
-- 准备扩展原型语法
-- 准备修改契约层的既有边界
-- 准备引入新的核心能力维度
-- 准备做较大范围的重构
-
-这些不是不能做，而是它们会比普通贡献更容易影响主线方向——先讨论远比先写完再解释轻松。
-
----
-
-## 关于提案接受
-
-提交提案不代表一定会被接受。维护者会根据当前优先级、边界判断和长期生态一致性来评估每个提案。如果你不确定某个想法是否合适，先到 [Discussions](https://github.com/Proto-UI/Proto-UI/discussions) 讨论，再提交正式提案。
+- [GitHub Issues](https://github.com/Proto-UI/Proto-UI/issues) 用于已经可以追踪的工作。
+- [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions) 用于尚未形成明确 Issue 的问题和想法。
+- [Discord](https://discord.gg/MrWQd7h34R) 可用于快速同步，但不是参与贡献的前提。影响实现边界的结论应回写到 Issue、Discussion、Spec 或 PR。

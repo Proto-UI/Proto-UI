@@ -1,0 +1,62 @@
+id: P-BRUTALIST-SELECT-VALUE
+type: prototype
+title: Brutalist Select Value inherits Base Select Value and renders committed-value text
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Select Value inherits Base Select Value display ownership and projects the committed-value render surface. The projection is limited to Base inheritance, the direct entry, and display-value render behavior; it adds no visual styling of its own.
+
+
+statement:
+  en: >-
+    Brutalist Select Value is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Select Value. It preserves inherited Base protocol semantics (displayValue state ownership) and adds only the direct prototype entry and the display-value render behavior; it contributes no visual styling, delegating surface effects to its parent Trigger.
+
+
+  zh-CN: >-
+    Brutalist Select Value 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Select Value 之上。它保留继承的 Base 协议语义（displayValue 状态归属），仅增加直接 prototype 入口与 display-value 渲染行为；自身不贡献视觉样式，将表面效果委托给父级 Trigger。
+
+
+criteria:
+  - id: P-BRUTALIST-SELECT-VALUE-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Select Value through `asSelectValue()` once and must not redefine Base displayValue protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asSelectValue()` 一次性继承 Base Select Value，不得重定义 Base 的 displayValue 协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-SELECT-VALUE-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-select-value`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-select-value`。
+  - id: P-BRUTALIST-SELECT-VALUE-DISPLAY-RENDER
+    text:
+      en: >-
+        The prototype renders the inherited Base `displayValue` state, whose precedence is selected `textValue`, selected raw `value`, then the Value's `placeholder`. Any non-empty display value is rendered as content; only an empty display value renders `null` (no content). The parent Trigger owns placeholder state styling, not placeholder text rendering.
+
+
+      zh-CN: >-
+        该 prototype 渲染继承的 Base `displayValue` 状态，其优先级为已选 `textValue`、已选原始 `value`、随后是 Value 的 `placeholder`。任何非空 display 值均渲染为内容；仅空 display 值渲染 `null`（无内容）。父级 Trigger 负责 placeholder 状态样式，而非 placeholder 文本渲染。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/select/value.proto.ts
+  - path: packages/prototypes/brutalist/test/select.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-SELECT-VALUE
+verifies: { tests: [T-BRUTALIST-SELECT-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Select Value projection with real public-API criteria (Base inheritance, direct entry, display-value render behavior) on rc.7. Not present in immutable rc.6.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, select]

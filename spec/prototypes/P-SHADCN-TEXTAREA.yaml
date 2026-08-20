@@ -1,0 +1,129 @@
+id: P-SHADCN-TEXTAREA
+type: prototype
+title: Shadcn Textarea Root inherits Base Textarea and adds the current rule surface
+status: draft
+since: 0.3.0-alpha.0
+summary: Shadcn Textarea Root is an unofficial Proto UI-maintained projection that inherits the host-mediated Base Textarea editor and adds the currently implemented field surface and state-driven presentation.
+statement:
+  zh-CN: >-
+    Shadcn Textarea Root 是 `P-BASE-TEXTAREA` 之上的 direct prototype，保留 Base Textarea 的 controlled/uncontrolled value、归一化 input/change/IME 事件、accessibility 投影、focus/blur 与唯一 host-owned 物理编辑器，并增加当前实现的 field 尺寸、边框、focus ring 与 disabled 呈现。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Textarea；`asChild` 明确不提供，其他差异统一记录为 compatibility differences。
+
+
+  en: >-
+    Shadcn Textarea Root is a direct prototype over `P-BASE-TEXTAREA`. It retains Base Textarea controlled and uncontrolled value, normalized input/change/IME events, accessibility projection, focus and blur, and the single host-owned physical editor while adding the currently implemented field dimensions, border, focus ring, and disabled presentation. Its compatibility baseline is the v4 new-york Textarea at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; `asChild` is explicitly unavailable, and all other divergences are tracked as compatibility differences.
+
+
+criteria:
+  - id: P-SHADCN-TEXTAREA-UPSTREAM-IDENTITY
+    text:
+      zh-CN: Shadcn Textarea 必须标记为 Proto UI 维护的非官方 shadcn/ui 衍生实现，并固定 upstream revision/path；本实体只治理 Proto UI 投射，不主张上游所有权或认证。
+      en: Shadcn Textarea must identify itself as an unofficial Proto UI-maintained shadcn/ui-derived implementation and pin its upstream revision and path; this entity governs only the Proto UI projection and claims neither upstream ownership nor endorsement.
+  - id: P-SHADCN-TEXTAREA-BASE-INHERITANCE
+    text:
+      zh-CN: '`shadcn-textarea-root` 必须通过 `inherits.prototypes` 指向 `P-BASE-TEXTAREA`，并通过 `asTextareaRoot()` 默认引入其 guarantee；若以 setup-only 负向补丁放弃或改写 Base 能力，必须在本实体中声明具体偏离和替代语义。'
+      en: '`shadcn-textarea-root` must point to `P-BASE-TEXTAREA` through `inherits.prototypes` and call `asTextareaRoot()` to introduce its guarantees by default; any setup-only negative patch that abandons or rewrites a Base capability must declare the exact deviation and replacement semantics in this entity.'
+    references:
+      prototypes:
+        - id: P-BASE-TEXTAREA
+          anchors:
+            [
+              P-BASE-TEXTAREA-PHYSICAL-TARGET,
+              P-BASE-TEXTAREA-VALUE-OWNERSHIP,
+              P-BASE-TEXTAREA-EVENTS-AND-IME,
+              P-BASE-TEXTAREA-A11Y-AND-FOCUS,
+            ]
+    dependsOn:
+      contracts: [C-AS-HOOK-0001, C-CORE-SYNTAX-0007]
+  - id: P-SHADCN-TEXTAREA-CURRENT-BASE-DEVIATIONS
+    text:
+      zh-CN: 当前实现不对 `asTextareaRoot()` 引入的 value ownership、事件归一化、IME、native props、accessibility 或 focus 施加负向补丁；新增 style rules 仅构成视觉增量。
+      en: The current implementation applies no negative patch to value ownership, event normalization, IME, native props, accessibility, or focus introduced by `asTextareaRoot()`; its added style rules are visual deltas only.
+  - id: P-SHADCN-TEXTAREA-DIRECT-ENTRY
+    text:
+      zh-CN: 当前 Root protocol 以 `shadcn-textarea-root` direct prototype 公开；本层不额外提供 authored asHook。
+      en: The current Root protocol is exposed as the `shadcn-textarea-root` direct prototype; this layer provides no additional authored asHook.
+    dependsOn:
+      contracts: [C-CORE-SYNTAX-0003]
+  - id: P-SHADCN-TEXTAREA-CURRENT-VISUAL-SURFACE
+    text:
+      zh-CN: Root 必须投射当前已实现的 field surface：`flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`。这些 tokens 是当前 passing surface，不表示与 upstream 精确一致。
+      en: Root must project the currently implemented field surface, `flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`. These tokens form the current passing surface and do not imply exact upstream parity.
+    dependsOn:
+      contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  - id: P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES
+    text:
+      zh-CN: focus、disabled 与 dark colorScheme 的视觉 rule 必须以继承的 Textarea state handle 或 host metadata 为条件。焦点环当前键控继承的 `focused`：`focusVisible` 在目标宿主上漏掉文本控件的指针聚焦（实测见 #438），而宿主自身的 `:focus-visible` 会匹配，因此键控 `focusVisible` 会使环在点击路径上不出现。这是临时安排，#438 使 `focusVisible` 与宿主判定对齐后即恢复，且行为不变，不得建立第二套 focus、disabled 或 theme truth，也不得依赖宿主 data attribute；具体 attribute 降级方式由 Adapter 拥有，不属于本投影的 guarantee。
+      en: Visual rules for focus, disabled, and the dark colorScheme must be conditioned on the inherited Textarea state handles or host metadata. The focus ring currently keys the inherited `focused` state, because `focusVisible` misses pointer focus on text controls in the target host while that host's own `:focus-visible` matches it (measured in #438), so keying `focusVisible` would leave the ring unpainted on the pointer path. This is a temporary arrangement: once #438 aligns `focusVisible` with the host determination, the rule returns to it with no behaviour change. Independently of which state the rule keys, it must not establish a second focus, disabled, or theme source of truth, and must not depend on a host data attribute; the concrete attribute lowering is owned by the Adapter and is not a guarantee of this projection.
+    dependsOn:
+      contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+    references:
+      prototypes:
+        - id: P-BASE-TEXTAREA
+          anchors: [P-BASE-TEXTAREA-A11Y-AND-FOCUS]
+  - id: P-SHADCN-TEXTAREA-CONTENTLESS
+    text:
+      zh-CN: 投影必须返回 contentless renderer。caller prototype 拥有自己的 renderer，因此继承 Base 的 contentless 保证必须在本层重新声明，authored children 不得成为第二个编辑面。
+      en: The projection must return a contentless renderer. A caller prototype owns its own renderer, so the inherited Base contentless guarantee must be restated at this layer, and authored children must never become a second editing surface.
+    references:
+      prototypes:
+        - id: P-BASE-TEXTAREA
+          anchors: [P-BASE-TEXTAREA-PRESENTATION-SURFACE, P-BASE-TEXTAREA-BOUNDARY]
+  - id: P-SHADCN-TEXTAREA-BOUNDARY
+    text:
+      zh-CN: 投影不得引入第二个编辑器、form workflow、validation message、auto-resize、rich text 或 announcement 协议。
+      en: The projection must introduce no second editor, form workflow, validation message, auto-resize, rich text, or announcement protocol.
+    references:
+      prototypes:
+        - id: P-BASE-TEXTAREA
+          anchors: [P-BASE-TEXTAREA-BOUNDARY]
+  - id: P-SHADCN-TEXTAREA-COMPATIBILITY-SUBSET
+    text:
+      zh-CN: 当前实体只声明已实现并测试的 inherited behavior 与视觉 surface；相对固定 upstream baseline 的全部差异必须集中在唯一 compatibility open question，并区分 intentional deviation 与 parity gap。
+      en: This entity claims only implemented and tested inherited behavior and visual surface; every difference from the pinned upstream baseline must be centralized in one compatibility open question and classified as an intentional deviation or parity gap.
+  - id: P-SHADCN-TEXTAREA-AS-CHILD-OMISSION
+    text:
+      zh-CN: upstream Root props 中的 `asChild` 依 `D-AS-CHILD-OMISSION-0001` 有意不进入 API，任何元素投射均不得被宣称为 Radix Slot 等价实现。
+      en: The `asChild` member of upstream Root props is intentionally omitted under `D-AS-CHILD-OMISSION-0001`; no element projection may be claimed as a Radix Slot equivalent.
+    dependsOn:
+      decisions: [D-AS-CHILD-OMISSION-0001]
+openQuestions:
+  - id: P-SHADCN-TEXTAREA-Q-UPSTREAM-DIFFERENCES
+    question:
+      zh-CN: 相较固定 shadcn/ui Textarea baseline，当前全部差异分别是有意偏离还是待实现 gap，应按什么顺序收敛？
+      en: Against the pinned shadcn/ui Textarea baseline, which current differences are intentional deviations versus implementation gaps, and in what order should the gaps converge?
+    context:
+      zh-CN: >-
+        已确定的 intentional deviation 有三项。`asChild` 依 `D-AS-CHILD-OMISSION-0001` 不提供。upstream 的 `field-sizing-content` 是 auto-resize，被本 issue 明确排除在范围外。upstream 的 `aria-invalid:*` 呈现不实现——Base Textarea 未投出 invalid state，若照搬会得到一个没有协议背书、纯由宿主 ARIA 属性驱动的呈现；这与 `P-SHADCN-BUTTON` 把 `aria-invalid` 选择器记为 compatibility difference 的既有处理一致。待实现或待评审差异包括 `placeholder:text-muted-foreground` 与 `md:text-sm`——两者都是 author channel 无法书写（`C-FEEDBACK-STYLE-0004` 禁止 tw token 含 `:`）且无法由 rule 降级产生的 variant，因为它们不对应任何 state；`data-slot`、className 与 native prop forwarding。`transition-[color,box-shadow]` 已按 upstream 精确实现，配合 `duration-150 ease-in-out`（upstream 未覆写时的 Tailwind 默认）。这些项目通过实现与测试前不得扩大 passing guarantee。
+
+
+      en: >-
+        Three intentional deviations are decided. `asChild` is omitted under `D-AS-CHILD-OMISSION-0001`. Upstream `field-sizing-content` is auto-resize, which this slice explicitly excludes. Upstream `aria-invalid:*` presentation is not implemented: Base Textarea projects no invalid state, so copying it would produce a presentation with no protocol backing, driven solely by a host-set ARIA attribute; this matches the existing treatment in `P-SHADCN-BUTTON`, which records `aria-invalid` selectors as a compatibility difference. Remaining implementation or review gaps include `placeholder:text-muted-foreground` and `md:text-sm` - both are variants the author channel cannot express, since `C-FEEDBACK-STYLE-0004` forbids `:` in tw tokens and neither corresponds to a state that rule lowering could emit - plus `data-slot` and className and native prop forwarding. `transition-[color,box-shadow]` is implemented exactly, paired with `duration-150 ease-in-out`, the Tailwind defaults upstream does not override. The passing guarantee must not expand until an item is implemented and tested.
+
+
+    blocks: [shadcn textarea parity roadmap]
+sources:
+  - path: packages/prototypes/shadcn/src/textarea/root.proto.ts
+  - path: packages/prototypes/shadcn/src/textarea/types.ts
+  - path: packages/prototypes/shadcn/test/textarea.test.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/textarea.tsx
+    label: shadcn/ui v4 new-york Textarea pinned baseline
+dependsOn:
+  contracts:
+    [
+      C-AS-HOOK-0001,
+      C-CORE-SYNTAX-0003,
+      C-CORE-SYNTAX-0007,
+      C-RULE-WHEN-0002,
+      C-RULE-INTENT-FEEDBACK-STYLE-0001,
+    ]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TEXTAREA
+      note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
+verifies: { tests: [T-SHADCN-TEXTAREA-0001] }
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the Shadcn Textarea projection with Base inheritance, restated contentless renderer, and centralized upstream differences.
+tags: [prototype, shadcn, textarea, root, upstream-derived, delta, compatibility, visual]

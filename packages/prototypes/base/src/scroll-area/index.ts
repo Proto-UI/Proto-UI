@@ -1,10 +1,6 @@
 import scrollAreaRoot from './root.proto';
 
 export type {
-  ScrollAreaCornerAsHookContract,
-  ScrollAreaCornerExposes,
-  ScrollAreaCornerProps,
-  ScrollAreaCornerStateHandles,
   ScrollAreaRootAsHookContract,
   ScrollAreaRootExposes,
   ScrollAreaRootProps,
@@ -28,6 +24,5 @@ export { asScrollAreaRoot, default as scrollAreaRoot } from './root.proto';
 export { asScrollAreaViewport, default as scrollAreaViewport } from './viewport.proto';
 export { asScrollAreaScrollbar, default as scrollAreaScrollbar } from './scrollbar.proto';
 export { asScrollAreaThumb, default as scrollAreaThumb } from './thumb.proto';
-export { asScrollAreaCorner, default as scrollAreaCorner } from './corner.proto';
 
 export default scrollAreaRoot;

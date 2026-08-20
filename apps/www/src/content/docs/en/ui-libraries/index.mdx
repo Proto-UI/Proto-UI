@@ -1,12 +1,12 @@
 ---
 title: 'UI Libraries'
-description: 'Browse the current UI libraries reconstructed on top of Proto UI.'
+description: 'Choose a component or icon library by visual language, use case, and provenance.'
 ---
 
-Proto UI does not expose a single component library. This section groups the current UI libraries that Proto UI reconstructs as prototype-driven outputs.
+import UiLibraryGallery from '@/components/UiLibraryGallery.astro';
 
-- `Base` is the protocol-first library closest to shared interaction semantics.
-- `Shadcn` is a reference library that stays as close as possible to the upstream shadcn/ui authoring and interaction model.
-- `Lucide` is an icon prototype library generated from `lucide-static` with per-icon import entries.
+Proto UI is not one component library. It is a foundation for choosing the visual language that fits your product while keeping reusable interaction protocols underneath.
 
-Choose a library first, then browse its entries.
+Compare the current libraries below. The previews show each library's visual direction; the credits distinguish the original design or icon source from the Proto UI prototype implementation.
+
+<UiLibraryGallery locale="en" />

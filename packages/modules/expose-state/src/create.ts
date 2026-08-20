@@ -22,7 +22,6 @@ export function createExposeStateModule(ctx: ModuleFactoryArgs): ExposeStateModu
         port: impl.port,
         hooks: {
           onInstancePhase: (p) => impl.onInstancePhase(p),
-          onProtoPhase: (p) => impl.onProtoPhase(p),
           afterRenderCommit: () => impl.afterRenderCommit(),
           dispose: () => impl.dispose(),
         },

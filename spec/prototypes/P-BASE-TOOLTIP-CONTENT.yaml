@@ -1,0 +1,64 @@
+id: P-BASE-TOOLTIP-CONTENT
+type: prototype
+title: Base Tooltip Content is a non-modal description surface
+status: draft
+since: 0.2.0-rc.7
+summary: Tooltip Content projects role tooltip and a stable identity through a portaled, anchored, transitional Overlay without acquiring focus or task interaction.
+statement:
+  zh-CN: Tooltip Content 是 Root 同域中至多一个的短文本描述 surface。它从 Root open 派生 Overlay 与 Transition presence，投射稳定 identity 和 `tooltip` role，以 Trigger Anatomy part 为 anchor，使用 renderer-owned Portal、fixed strategy 与 collision handling。Content 不移动、捕获或恢复焦点，不处理 outside press/focus dismissal；Escape 必须进入 Root 的统一 close request channel。Content hover 只为 WCAG hoverable 要求延续 close bridge，不允许可聚焦交互。
+  en: Tooltip Content is an optional, at-most-one short text description surface in the Root domain. It derives Overlay and Transition presence from Root open, projects a stable identity and the `tooltip` role, anchors to the Trigger Anatomy part, and uses a renderer-owned Portal, fixed strategy, and collision handling. Content does not move, trap, or restore focus and does not handle outside-press or focus-outside dismissal. Escape must enter Root's unified close request channel. Content hover extends only the close bridge required for WCAG hoverability and does not permit focusable interaction.
+criteria:
+  - id: P-BASE-TOOLTIP-CONTENT-SEMANTICS
+    text:
+      zh-CN: Content 必须投射稳定 id 与 `tooltip` role，并只从 Root open 派生 visibility。
+      en: Content must project a stable id and the `tooltip` role and derive visibility only from Root open.
+  - id: P-BASE-TOOLTIP-CONTENT-OVERLAY
+    text:
+      zh-CN: Content 必须消费 non-modal Overlay，禁用 outside press/focus dismissal 与焦点 entry/restore，并启用 Escape dismissal。
+      en: Content must consume a non-modal Overlay, disable outside-press and focus-outside dismissal plus focus entry and restoration, and enable Escape dismissal.
+  - id: P-BASE-TOOLTIP-CONTENT-ESCAPE
+    text:
+      zh-CN: Overlay Escape close 必须桥接为 Root `openChange` request；受控 Root 在 owner fact 仍为 open 时不得被 Overlay 建立第二套 open truth。
+      en: Overlay Escape close must bridge into a Root `openChange` request; while the owner fact remains open, a controlled Root must not allow Overlay to establish a second open truth.
+  - id: P-BASE-TOOLTIP-CONTENT-PRESENCE
+    text:
+      zh-CN: Content 必须以 `asTransition` 作为 Overlay Presence driver，并在 leave 完成后才执行 L1 detach。
+      en: Content must use `asTransition` as the Overlay Presence driver and perform L1 detach only after leave completes.
+  - id: P-BASE-TOOLTIP-CONTENT-HOVERABLE
+    text:
+      zh-CN: Content pointer enter/leave 必须发布 hover intent，使 Trigger 与 Content 间的移动由 close delay 衔接；该桥不得引入 focusable content。
+      en: Content pointer enter and leave must publish hover intent so close delay bridges movement between Trigger and Content; this bridge must not introduce focusable content.
+  - id: P-BASE-TOOLTIP-CONTENT-POSITION
+    text:
+      zh-CN: Content 必须接受 side、align、sideOffset、alignOffset、avoidCollisions 与 collisionPadding，默认 top/center/4/0/true/0，并以 Trigger PartView 作为 fixed anchored positioning target。
+      en: Content must accept side, align, sideOffset, alignOffset, avoidCollisions, and collisionPadding, defaulting to top, center, 4, 0, true, and 0, and use the Trigger PartView as its fixed anchored-positioning target.
+  - id: P-BASE-TOOLTIP-CONTENT-PORTAL-BOUNDARY
+    text:
+      zh-CN: Portal 必须保持 renderer-owned projection，不得另建无行为 Base Portal prototype；portal 不改变 logical Context/Anatomy ownership。
+      en: Portal must remain a renderer-owned projection and must not create a behaviorless Base Portal prototype; portaling does not change logical Context or Anatomy ownership.
+  - id: P-BASE-TOOLTIP-CONTENT-DEFERRED-ARROW
+    text:
+      zh-CN: Arrow geometry、arrow offset 与 collision-aware arrow feedback 不属于当前 Base Content 保证。
+      en: Arrow geometry, arrow offset, and collision-aware arrow feedback are not current Base Content guarantees.
+sources:
+  - path: packages/prototypes/base/src/tooltip/content.proto.ts
+  - path: packages/prototypes/base/test/tooltip.test.ts
+  - path: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
+    label: WAI-ARIA APG Tooltip Pattern
+dependsOn:
+  prototypes: [P-BASE-TOOLTIP]
+  contracts:
+    [
+      C-A11Y-0001,
+      C-AS-OVERLAY-0001,
+      C-AS-TRANSITION-0001,
+      C-ANCHORED-POSITIONING-0001,
+      C-LIFECYCLE-0008,
+    ]
+  decisions: [D-TOOLTIP-PROTOTYPE-BOUNDARY-0001]
+verifies: { tests: [T-BASE-TOOLTIP-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged Tooltip Content semantics, Escape bridge, hoverability, positioning, and Portal and Arrow boundaries.
+tags: [prototype, base, tooltip, content, overlay, transition, positioning]

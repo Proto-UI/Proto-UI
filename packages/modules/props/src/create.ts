@@ -34,6 +34,7 @@ export function createPropsModule<P extends PropsBaseType>(ctx: ModuleFactoryArg
         },
         hooks: {
           onProtoPhase: (p) => impl.onProtoPhase(p),
+          dispose: () => impl.dispose(),
         },
         port: {
           syncFromHost: () => impl.syncFromHost(),
@@ -43,7 +44,7 @@ export function createPropsModule<P extends PropsBaseType>(ctx: ModuleFactoryArg
         },
       };
     },
-  });
+  }) as PropsModule<P>;
 }
 
 export const PropsModuleDef = defineModule({

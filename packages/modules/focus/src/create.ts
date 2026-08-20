@@ -363,7 +363,9 @@ class FocusModuleImpl extends ModuleBase {
       : false;
 
     if (this.caps.has(FOCUS_SET_FOCUSABLE_CAP)) {
-      this.caps.get(FOCUS_SET_FOCUSABLE_CAP)(target, enabled);
+      this.caps.get(FOCUS_SET_FOCUSABLE_CAP)(target, enabled, {
+        programmatic: this.focusableDeclared && !this.focusableConfig.disabled,
+      });
       return;
     }
 

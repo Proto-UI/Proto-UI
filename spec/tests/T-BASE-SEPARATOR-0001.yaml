@@ -1,0 +1,66 @@
+id: T-BASE-SEPARATOR-0001
+type: test
+title: Base Separator behavior tests
+status: draft
+since: 0.2.0-rc.7
+summary: Web Component coverage for decorative hiding, semantic orientation, and non-interaction.
+cases:
+  - id: T-BASE-SEPARATOR-0001-CASE-TYPED-ORIENTATION
+    title: Public orientation handles preserve the horizontal and vertical literal union
+    covers:
+      - P-BASE-SEPARATOR-ORIENTATION
+    expectation: separator-public-state-preserves-orientation-literals
+  - id: T-BASE-SEPARATOR-0001-CASE-DEFAULTS
+    title: Separator defaults to decorative horizontal semantics without interaction
+    covers:
+      - P-BASE-SEPARATOR-ORIENTATION
+      - P-BASE-SEPARATOR-DECORATIVE
+      - P-BASE-SEPARATOR-NO-INTERACTION
+      - P-BASE-SEPARATOR-CONTENTLESS
+    expectation: decorative-horizontal-separator-hidden-without-focus
+  - id: T-BASE-SEPARATOR-0001-CASE-DYNAMIC-SEMANTICS
+    title: Separator updates semantic orientation and decorative tree state after mount
+    covers:
+      - P-BASE-SEPARATOR-ORIENTATION
+      - P-BASE-SEPARATOR-DECORATIVE
+      - P-BASE-SEPARATOR-SEMANTIC
+      - P-BASE-SEPARATOR-NO-INTERACTION
+    expectation: separator-projects-live-role-orientation-and-tree-state
+  - id: T-BASE-SEPARATOR-0001-CASE-DECORATIVE-ORIENTATION-OMISSION
+    title: Decorative mode omits orientation while semantic mode restores live horizontal and vertical projection
+    covers:
+      - P-BASE-SEPARATOR-ORIENTATION
+      - P-BASE-SEPARATOR-DECORATIVE
+      - P-BASE-SEPARATOR-SEMANTIC
+    expectation: decorative-separator-omits-semantic-orientation-and-restores-it-live
+implementations:
+  - id: prototypes-base-separator-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/separator.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-SEPARATOR-0001-CASE-TYPED-ORIENTATION
+      - T-BASE-SEPARATOR-0001-CASE-DEFAULTS
+      - T-BASE-SEPARATOR-0001-CASE-DYNAMIC-SEMANTICS
+      - T-BASE-SEPARATOR-0001-CASE-DECORATIVE-ORIENTATION-OMISSION
+    exercises:
+      - P-BASE-SEPARATOR
+verifies:
+  prototypes:
+    - id: P-BASE-SEPARATOR
+      anchors:
+        - P-BASE-SEPARATOR-ORIENTATION
+        - P-BASE-SEPARATOR-DECORATIVE
+        - P-BASE-SEPARATOR-SEMANTIC
+        - P-BASE-SEPARATOR-CONTENTLESS
+        - P-BASE-SEPARATOR-NO-INTERACTION
+exercises:
+  prototypes: [P-BASE-SEPARATOR]
+sources:
+  - path: packages/prototypes/base/test/separator.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable Separator protocol coverage.
+tags: [base, separator, test]

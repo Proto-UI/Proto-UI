@@ -2,9 +2,10 @@
 import config from 'virtual:starlight/user-config';
 import context from 'virtual:starlight/project-context';
 import { localizedUrl } from '../../utils/localizedUrl';
+import MobileMenuToggle from '@astrojs/starlight/components/MobileMenuToggle.astro';
 
 import LanguageSelect from './LanguageSelect.astro';
-import Search from '@astrojs/starlight/components/Search.astro';
+import Search from './Search.astro';
 import SiteTitle from './SiteTitle.astro';
 import SocialIcons from './SocialIcons.astro';
 
@@ -24,66 +25,78 @@ const localizedPath = (path: string) =>
 
 <div class="container-wrapper 3xl:fixed:px-0 px-6">
   <div
-    class="3xl:fixed:container flex h-(--header-height) items-center gap-2 **:data-[slot=separator]:!h-4"
+    class="3xl:fixed:container flex h-(--header-height) min-w-0 items-center gap-2 **:data-[slot=separator]:!h-4"
   >
-    <div class="title-wrapper sl-flex -ml-2">
+    <div class="title-wrapper sl-flex -ml-2 min-w-0">
       <SiteTitle />
     </div>
     <a
-      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5"
+      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-1.5 min-[65rem]:px-3 has-[>svg]:px-2.5 lg:inline-flex"
       data-slot="button"
       href={localizedPath('/start-here/what-you-saw/')}
     >
       Docs
     </a>
     <a
-      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5"
+      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-1.5 min-[65rem]:px-3 has-[>svg]:px-2.5 lg:inline-flex"
       data-slot="button"
       href={localizedPath('/ui-libraries/')}
     >
       Prototypes
     </a>
     <a
-      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5"
+      class="hidden items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 rounded-md gap-1.5 px-1.5 min-[65rem]:px-3 has-[>svg]:px-2.5 lg:inline-flex"
       data-slot="button"
       href={localizedPath('/whitepaper/component-as-protocol/')}
     >
       Whitepaper
     </a>
 
-    <div class="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
+    <div class="mr-12 ml-auto flex min-w-0 items-center justify-end gap-2 lg:mr-0 lg:flex-1">
       <div class="sl-flex print:hidden">
         {shouldRenderSearch && <Search />}
       </div>
-      <SocialIcons />
-      <div
-        data-orientation="vertical"
-        role="none"
-        data-slot="separator"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
-      >
+      <div class="hidden items-center gap-2 lg:flex">
+        <SocialIcons />
+        <div
+          data-orientation="vertical"
+          role="none"
+          data-slot="separator"
+          class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
+        >
+        </div>
       </div>
       <ThemeToggle />
-      <div
-        data-orientation="vertical"
-        role="none"
-        data-slot="separator"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
-      >
+      <div class="hidden min-w-0 items-center gap-2 md:flex">
+        <div
+          data-orientation="vertical"
+          role="none"
+          data-slot="separator"
+          class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
+        >
+        </div>
+        <LanguageSelect />
+        <div
+          data-orientation="vertical"
+          role="none"
+          data-slot="separator"
+          class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
+        >
+        </div>
+        <AdapterSelect />
       </div>
-
-      <LanguageSelect />
-
-      <div
-        data-orientation="vertical"
-        role="none"
-        data-slot="separator"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"
-      >
+      <div class="mobile-menu-control lg:hidden">
+        <MobileMenuToggle />
       </div>
-      <AdapterSelect />
     </div>
   </div>
 </div>
 
-<style></style>
+<style>
+  @media (max-width: 63.999rem) {
+    .mobile-menu-control :global(starlight-menu-button button) {
+      display: flex;
+      z-index: 60;
+    }
+  }
+</style>

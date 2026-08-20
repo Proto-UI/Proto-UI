@@ -1,0 +1,135 @@
+id: T-BRUTALIST-DROPDOWN-MENU-0001
+type: test
+title: Brutalist Dropdown Menu visual contract and public API tests
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Covers the Brutalist Dropdown Menu family public API against P-BRUTALIST-DROPDOWN-MENU criteria: trigger indicator props with hover/press/focus-visible/disabled interaction, content 150/100ms transition with side slide-in panel, and per-variant item active/destructive/disabled paired fills.
+
+
+cases:
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-1
+    title: Root direct entry and Base action-menu inheritance
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-BASE-INHERITANCE
+      - P-BRUTALIST-DROPDOWN-MENU-ENTRY
+    expectation: p-brutalist-dropdown-menu-root-entry-inheritance
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-2
+    title: Trigger indicator props, main-pair surface, and hover press focus-visible disabled interaction
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER-BASE-INHERITANCE
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER-ENTRY
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER-INDICATOR-PROP
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER-PAIR-INVARIANT
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER-INTERACTION
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER-VISUAL-GRAMMAR
+    expectation: p-brutalist-dropdown-menu-trigger-indicator-interaction
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-3
+    title: Content 150/100ms fade-zoom transition, side slide-in, and hard-shadowed panel
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-CONTENT-BASE-INHERITANCE
+      - P-BRUTALIST-DROPDOWN-MENU-CONTENT-ENTRY
+      - P-BRUTALIST-DROPDOWN-MENU-CONTENT-TRANSITION
+      - P-BRUTALIST-DROPDOWN-MENU-CONTENT-VISUAL-GRAMMAR
+    expectation: p-brutalist-dropdown-menu-content-transition-panel
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-4
+    title: Item default variant active/hovered/focused pair restores main fill
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-BASE-INHERITANCE
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-ENTRY
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-PROPS
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-DEFAULTS
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
+    expectation: p-brutalist-dropdown-menu-item-default-active-pair
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-5
+    title: Item destructive variant active pair keeps destructive fill
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-INTERACTION
+    expectation: p-brutalist-dropdown-menu-item-destructive-active-pair
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-7
+    title: Item destructive resting pair holds a measured contrast in Light and Dark
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
+    expectation: p-brutalist-dropdown-menu-item-destructive-resting-measured-pair
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-6
+    title: Item disabled pair never degrades to opacity-only muted-foreground
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-INTERACTION
+    expectation: p-brutalist-dropdown-menu-item-disabled-pair
+implementations:
+  - id: prototypes-brutalist-dropdown-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/dropdown.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-1
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-2
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-3
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-4
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-5
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-6
+    exercises:
+      - P-BASE-DROPDOWN-MENU
+      - P-BASE-DROPDOWN-MENU-CONTENT
+      - P-BASE-DROPDOWN-MENU-ITEM
+      - P-BASE-DROPDOWN-MENU-TRIGGER
+      - P-BRUTALIST-DROPDOWN-MENU
+      - P-BRUTALIST-DROPDOWN-MENU-CONTENT
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER
+  - id: prototypes-brutalist-theme-destructive-ink-contrast
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/theme.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-7
+    exercises:
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM
+    notes:
+      - >-
+        Measures the resting ink against `secondary-background`, the fill the resting row keeps, in both themes. Asserting the token name alone would pass again if the value returned to the `destructive` fill, which measured 1.41 to 1 on Light paper.
+
+
+      - >-
+        Also asserts that the `destructive` fill itself stays under the body-text floor on Light paper, so the fill and the ink cannot quietly collapse back into one token.
+
+
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-DROPDOWN-MENU
+    - id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER
+    - id: P-BRUTALIST-DROPDOWN-MENU-CONTENT
+    - id: P-BRUTALIST-DROPDOWN-MENU-ITEM
+exercises:
+  prototypes:
+    - P-BASE-DROPDOWN-MENU
+    - P-BASE-DROPDOWN-MENU-CONTENT
+    - P-BASE-DROPDOWN-MENU-ITEM
+    - P-BASE-DROPDOWN-MENU-TRIGGER
+    - P-BRUTALIST-DROPDOWN-MENU
+    - P-BRUTALIST-DROPDOWN-MENU-CONTENT
+    - P-BRUTALIST-DROPDOWN-MENU-ITEM
+    - P-BRUTALIST-DROPDOWN-MENU-TRIGGER
+revisions:
+  - version: 0.3.0-alpha.0
+    change: amended
+    summary: >-
+      Added CASE-7 and a second implementation so the destructive resting pair carries measured evidence rather than a token-name assertion. Light reads 8.02 to 1 and Dark reads 10.73 to 1 against `secondary-background`.
+
+
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dropdown Menu coverage mapped 1:1 to the rc.7 P criteria (root entry, trigger indicator+interaction, content transition, item default-active/destructive-active/disabled pairs). Not present in the immutable rc.6 snapshot.
+
+
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - dropdown

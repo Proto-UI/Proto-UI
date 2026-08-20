@@ -46,6 +46,7 @@ describe('adapter-vue: focus wiring', () => {
     await flushVue();
 
     expect(mounted.root?.tabIndex).toBe(-1);
+    expect(mounted.root?.hasAttribute('tabindex')).toBe(false);
 
     mounted.unmount();
   });

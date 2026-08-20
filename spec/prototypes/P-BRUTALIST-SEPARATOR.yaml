@@ -1,0 +1,43 @@
+id: P-BRUTALIST-SEPARATOR
+type: prototype
+title: Brutalist Separator protocol
+status: draft
+since: 0.2.0-rc.7
+summary: Brutalist Separator inherits Base semantics and projects orientation-aware hard-line geometry.
+statement:
+  en: Brutalist Separator borrows Base Separator orientation and decorative accessibility state, then projects a flat ink rule whose horizontal or vertical geometry follows the canonical orientation state.
+  zh-CN: Brutalist Separator 借用 Base Separator 的 orientation 与 decorative accessibility state，并根据 canonical orientation state 投影横向或纵向的平涂 ink 分隔线。
+criteria:
+  - id: P-BRUTALIST-SEPARATOR-BASE-INHERITANCE
+    text:
+      en: The projection must retain Base Separator orientation, decorative hiding, semantic role, and aria-orientation behavior.
+      zh-CN: 该投影必须保留 Base Separator 的 orientation、decorative hiding、semantic role 与 aria-orientation 行为。
+  - id: P-BRUTALIST-SEPARATOR-VISUAL-GRAMMAR
+    text:
+      en: The projection must render a flat foreground rule with consumer-owned length—horizontal full width and vertical full height, each with 2px thickness.
+      zh-CN: 该投影必须渲染平涂 foreground 分隔线并由消费布局决定长度：横向铺满宽度、纵向铺满高度，两者厚度均为 2px。
+  - id: P-BRUTALIST-SEPARATOR-DYNAMIC-GEOMETRY
+    text:
+      en: Geometry must follow the inherited canonical orientation state after mount through state selector projection.
+      zh-CN: mounted 后 geometry 必须通过 state selector projection 跟随继承的 canonical orientation state。
+sources:
+  - path: packages/prototypes/brutalist/src/separator/root.proto.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Introduced brutalist separator protocol.
+tags:
+  - prototype
+  - brutalist
+  - separator
+inherits:
+  prototypes:
+    - id: P-BASE-SEPARATOR
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+verifies:
+  tests:
+    - T-BRUTALIST-SEPARATOR-0001

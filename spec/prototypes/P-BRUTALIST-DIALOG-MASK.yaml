@@ -1,0 +1,82 @@
+id: P-BRUTALIST-DIALOG-MASK
+type: prototype
+title: Brutalist Dialog Mask inherits Base modal masking and projects a flat overlay without blur
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Dialog Mask inherits Base Dialog Mask open/transition ownership and projects a style-family visual API: a fixed full-viewport flat overlay fill with no blur and a fade transition. The projection is limited to Base inheritance, the direct entry, the Pick-only public boundary, the fade transition, and the flat overlay surface.
+
+
+statement:
+  en: >-
+    Brutalist Dialog Mask is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dialog Mask. It consumes inherited internal `open` state. Its declared TypeScript consumer boundary retains only the `passthrough` prop plus `transitionState`/`isPresent` exposes; Base Transition runtime plumbing may still be carried internally by an adapter. It adds only visual/style behavior: a fixed full-viewport `bg-overlay` fill with no backdrop blur and a 150ms enter/leave fade transition.
+
+
+  zh-CN: >-
+    Brutalist Dialog Mask 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dialog Mask 之上。它消费继承的内部 `open` 状态。其声明的 TypeScript 消费者边界仅保留 `passthrough` prop 与 `transitionState`/`isPresent` exposes；adapter 内部仍可携带 Base Transition runtime plumbing。它仅增加视觉/style 行为：固定全视口 `bg-overlay` 填充且无背景模糊，以及 150ms 进入/离开淡入淡出 transition。
+
+
+criteria:
+  - id: P-BRUTALIST-DIALOG-MASK-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Dialog Mask through `asDialogMask()` once and must not redefine Base open or transitionState protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asDialogMask()` 一次性继承 Base Dialog Mask，不得重定义 Base 的 open 或 transitionState 协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-DIALOG-MASK-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-dialog-mask`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-dialog-mask`。
+  - id: P-BRUTALIST-DIALOG-MASK-PUBLIC-BOUNDARY
+    text:
+      en: >-
+        The mask introduces no props of its own. Its declared TypeScript props retain only Base Dialog Mask `passthrough`, while its declared TypeScript exposes retain only `transitionState` and `isPresent`; inherited `open` remains an internal projected state handle. This consumer type boundary does not require an adapter to erase Base Transition runtime plumbing from its internal bridge object.
+
+
+      zh-CN: >-
+        mask 不引入自有 props；声明的 TypeScript props 仅保留 Base Dialog Mask 的 `passthrough`，声明的 TypeScript exposes 仅保留 `transitionState` 与 `isPresent`；继承的 `open` 仍是内部投射 state handle。该消费者类型边界不要求 adapter 从其内部 bridge object 中擦除 Base Transition runtime plumbing。
+
+
+  - id: P-BRUTALIST-DIALOG-MASK-TRANSITION
+    text:
+      en: >-
+        The mask configures its transition with `enterDuration: 150, leaveDuration: 150`. When open it applies `animate-in fade-in-0`; when open is false it applies `animate-out fade-out-0`. There is no zoom or slide component — only a flat fade.
+
+
+      zh-CN: >-
+        mask 将其 transition 配置为 `enterDuration: 150, leaveDuration: 150`。open 时应用 `animate-in fade-in-0`；open 为 false 时应用 `animate-out fade-out-0`。无 zoom 或 slide 分量——仅平面淡入淡出。
+
+
+  - id: P-BRUTALIST-DIALOG-MASK-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The surface uses `fixed inset-0 bg-overlay` — a fixed full-viewport overlay fill with no backdrop blur, no rounded corners, no border, and no shadow. It is a flat scrim, not a structural panel.
+
+
+      zh-CN: >-
+        表面使用 `fixed inset-0 bg-overlay`——固定全视口 overlay 填充，无背景模糊、无圆角、无边框、无阴影。它是平面遮罩，而非结构化面板。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/dialog/overlay.proto.ts
+  - path: packages/prototypes/brutalist/test/dialog.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-DIALOG-MASK
+verifies: { tests: [T-BRUTALIST-DIALOG-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dialog Mask projection with real public-API criteria (Base inheritance, direct entry, Pick passthrough, fade transition, flat no-blur overlay) on rc.7. Not present in immutable rc.6.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, dialog]

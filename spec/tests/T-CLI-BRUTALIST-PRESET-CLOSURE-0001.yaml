@@ -3,17 +3,32 @@ type: test
 title: CLI Brutalist preset source-closure tests
 status: draft
 since: 0.2.0-rc.7
-summary: Covers generated Brutalist style token manifest freshness and the CLI `init --prototypes brutalist` CSS-only preset (no `add` Brutalist component facade path).
+summary: Covers the package-owned Brutalist semantic theme manifest, generated CLI projection freshness, and the `init --prototypes brutalist` Light/Dark theme and style-token output.
 cases:
   - id: T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-GENERATED-MANIFEST
     title: generated Brutalist token manifest stays current with official source scan
-    covers: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-A]
+    covers:
+      - D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B
+      - D-CLI-BRUTALIST-PRESET-CLOSURE-0001-C
     expectation: brutalist-generated-manifest-current
+  - id: T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-THEME-MANIFEST
+    title: package theme modes keep identical keys and complete background/foreground pairs
+    covers:
+      - D-CLI-BRUTALIST-PRESET-CLOSURE-0001-A
+      - D-CLI-BRUTALIST-PRESET-CLOSURE-0001-C
+    expectation: brutalist-theme-manifest-pairs-and-projection
   - id: T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-INIT-PRESET
     title: init with Brutalist writes prefixed light/dark theme and token CSS
     covers: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B, D-CLI-BRUTALIST-PRESET-CLOSURE-0001-C]
     expectation: brutalist-init-writes-theme-and-token-css
 implementations:
+  - id: prototypes-brutalist-theme-manifest-test
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/theme.test.ts
+    required: true
+    consumesCases:
+      - T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-THEME-MANIFEST
   - id: cli-brutalist-preset-stale-check
     kind: workspace-check
     status: passing
@@ -30,10 +45,30 @@ implementations:
 verifies:
   decisions: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001]
 exercises:
-  prototypes: [P-BRUTALIST-BUTTON]
+  prototypes:
+    [
+      P-BRUTALIST-BUTTON,
+      P-BRUTALIST-BADGE,
+      P-BRUTALIST-CARD,
+      P-BRUTALIST-TOGGLE,
+      P-BRUTALIST-SWITCH,
+      P-BRUTALIST-TABS,
+      P-BRUTALIST-HOVER-CARD,
+      P-BRUTALIST-DROPDOWN-MENU,
+      P-BRUTALIST-SELECT,
+      P-BRUTALIST-DIALOG,
+      P-BRUTALIST-SCROLL-AREA,
+      P-BRUTALIST-SEPARATOR,
+      P-BRUTALIST-SKELETON,
+      P-BRUTALIST-TEXTAREA,
+    ]
 revisions:
   - version: 0.2.0-rc.7
     change: introduced
-    summary: >-
-      Introduced draft CLI Brutalist preset closure coverage on the rc.7 release train (Button-only foundation). Not present in the immutable rc.6 snapshot.
-
+    summary: Introduced draft CLI Brutalist preset closure coverage on the rc.7 release train (Button-only foundation). Not present in the immutable rc.6 snapshot.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Revised public Brutalist family/token closure coverage to exercise the complete 14-family surface, including Badge and Card.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added package theme key/pair coverage and generated semantic-theme projection freshness to the Brutalist preset closure.

@@ -1,39 +1,61 @@
 id: P-BRUTALIST-SCROLL-AREA
 type: prototype
-title: Brutalist Scroll Area protocol
+title: Brutalist Scroll Area inherits Base and projects a square structural frame
 status: draft
 since: 0.2.0-rc.7
-summary: Consumer-sized Neo-Brutalist visual shell over Base Scroll Area anatomy.
+summary: Brutalist Scroll Area preserves the Base scrolling domain and adds a square, high-contrast frame without owning consumer dimensions.
 statement:
-  en: Brutalist Scroll Area preserves the five-part Base shell and adds only square paper geometry and positioned Lavender/ink controls. It does not own portable viewport metrics or thumb dragging.
-  zh-CN: Brutalist Scroll Area 保留五 part Base shell，只增加方形 paper geometry 与定位后的 Lavender/ink controls；不拥有可移植 viewport metrics 或 thumb 拖拽。
+  zh-CN: Brutalist Scroll Area 是 Base Scroll Area 的 Neo-Brutalist design-language projection。Root 只增加 relative block、直角、粗前景边框和背景面；宽高由调用方布局决定。它不重定义宿主滚动事实、请求或 anatomy ownership。
+  en: Brutalist Scroll Area is a Neo-Brutalist design-language projection of Base Scroll Area. Root adds only a relative block, square corners, a thick foreground border, and background surface; consumer layout owns width and height. It does not redefine host scrolling facts, requests, or anatomy ownership.
 criteria:
   - id: P-BRUTALIST-SCROLL-AREA-BASE-INHERITANCE
     text:
-      en: Every part invokes its corresponding Base Scroll Area as-hook and adds no metrics, scroll synchronization, drag behavior, focus, or events.
-      zh-CN: 每个 part 调用对应 Base Scroll Area as-hook，且不新增 metrics、scroll synchronization、drag 行为、focus 或 event。
-  - id: P-BRUTALIST-SCROLL-AREA-VISUAL-SHELL
+      zh-CN: Root 必须通过 `asScrollAreaRoot()` 一次性继承 `P-BASE-SCROLL-AREA`，不得重定义 Base scroll domain 或 projection ownership。
+      en: Root must inherit `P-BASE-SCROLL-AREA` once through `asScrollAreaRoot()` and must not redefine the Base scroll domain or projection ownership.
+  - id: P-BRUTALIST-SCROLL-AREA-VISUAL-GRAMMAR
     text:
-      en: Root fills a consumer-sized host and clips overflow; Viewport fills Root and owns native overflow; vertical and horizontal Scrollbars are positioned on the right and bottom edges; Corner occupies the bottom-right 1rem square; all geometry remains square and flat.
-      zh-CN: Root 填满 consumer 提供尺寸的 host 并裁剪 overflow；Viewport 填满 Root 并拥有 native overflow；纵向与横向 Scrollbar 分别定位在右侧与底侧；Corner 占据右下角 1rem 方块；所有 geometry 保持方角和平涂。
+      zh-CN: Root 必须投射 `relative block overflow-hidden rounded-none border-2 border-foreground bg-background`，保持直角、结构性粗边框与平面填充。
+      en: Root must project `relative block overflow-hidden rounded-none border-2 border-foreground bg-background`, preserving square corners, a thick structural border, and flat fill.
+  - id: P-BRUTALIST-SCROLL-AREA-CONSUMER-SIZING
+    text:
+      zh-CN: Root 不得提供固定 width 或 height；Scroll Area 尺寸属于调用方 layout，而不是 design-language protocol。
+      en: Root must not provide a fixed width or height; Scroll Area dimensions belong to consumer layout rather than the design-language protocol.
+  - id: P-BRUTALIST-SCROLL-AREA-DEMO-RESPONSIVE-SIZING
+    text:
+      zh-CN: 参考 demo 作为 consumer layout，必须在 `w-full max-w-80` wrapper 内给 Root 使用 `h-48 w-full`；桌面宽度上限保持 20rem，在 320、360、375 与 390px viewport 下则随 preview content box 收缩，使完整 Root 与 visual scrollbar 留在 viewport 内，且不得引入 document-level horizontal overflow。Web Components、React 与 Vue 必须保持等价几何。
+      en: As consumer layout, the reference demo must give Root `h-48 w-full` inside a `w-full max-w-80` wrapper. The desktop width cap stays at 20rem, while 320, 360, 375, and 390px viewports shrink to the preview content box so the complete Root and visual scrollbar remain inside the viewport without document-level horizontal overflow. Web Components, React, and Vue must preserve equivalent geometry.
+  - id: P-BRUTALIST-SCROLL-AREA-TESTED-SURFACE
+    text:
+      zh-CN: 当前 passing surface 包含 Base anatomy/context family binding、Viewport composed preference、Scrollbar orientation styling、host-projected Thumb geometry 与 Move Gesture-backed Thumb drag；仍不包含 track page press 或完整 Drag and Drop。
+      en: The current passing surface includes Base Anatomy and Context family binding, Viewport composed preference, Scrollbar orientation styling, host-projected Thumb geometry, and Move Gesture-backed Thumb dragging; it still excludes track-page press and full Drag and Drop.
 sources:
   - path: packages/prototypes/brutalist/src/scroll-area/root.proto.ts
-revisions:
-  - version: 0.2.0-rc.7
-    change: introduced
-    summary: Introduced brutalist scroll area  protocol.
-tags:
-  - prototype
-  - brutalist
-  - scroll_area
+  - path: packages/prototypes/brutalist/test/scroll-area.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-scroll-area.demo.ts
+dependsOn:
+  contracts:
+    [
+      C-AS-HOOK-0001,
+      C-RULE-INTENT-FEEDBACK-STYLE-0001,
+      C-SCROLL-COMPOSED-CHROME-0001,
+      C-SCROLL-COMPOSED-CONTROL-0001,
+    ]
+  decisions: [D-SCROLL-PROJECTION-0001, D-SCROLL-COMPOSED-PROJECTION-0001]
 inherits:
   prototypes:
     - id: P-BASE-SCROLL-AREA
-dependsOn:
-  contracts:
-    - C-CORE-SYNTAX-0003
-    - C-AS-HOOK-0001
-    - C-RULE-INTENT-FEEDBACK-STYLE-0001
-verifies:
-  tests:
-    - T-BRUTALIST-SCROLL-AREA-0001
+verifies: { tests: [T-BRUTALIST-SCROLL-AREA-0001] }
+revisions:
+  - version: 0.2.0
+    change: revised
+    summary: Made the reference demo consumer sizing responsive up to the existing 20rem desktop cap so the complete Root and scrollbar remain available in phone preview frames.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Expanded the passing surface to Move Gesture-backed Thumb drag while retaining host-owned scroll facts and geometry.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Expanded the passing surface through host-projected passive Thumb geometry while keeping controls deferred.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the Brutalist root visual delta, consumer-owned sizing, and tested interaction boundary on rc.7.
+tags: [prototype, brutalist, neo-brutalist, scroll-area, visual, delta]

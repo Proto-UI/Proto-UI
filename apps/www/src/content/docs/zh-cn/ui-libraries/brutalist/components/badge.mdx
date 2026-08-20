@@ -1,0 +1,25 @@
+---
+title: Badge
+sidebar:
+  order: 3
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+Brutalist Badge 是没有 Base counterpart 的 direct styled-only 标签。
+
+## 契约
+
+- 每个 tone 都使用方角、`2px` ink 边框与小型硬阴影。
+- 公开 `tone` 为 `accent`、`info` 或 `danger`；每个 tone 都将平涂 fill 与对应 foreground 配对。
+- `outline` 是结构语法而不是 variant；Badge 不使用 pill 圆角、渐变、玻璃或柔光。
+- Badge 被动、无 role、不可聚焦，不拥有 status announcement、activation、pressed、selected、command 或 event channel。
+
+Badge 用于角色、环境等被动标签。动态 status 由 live-region owner 承担；导航属于 Link；激活属于 Button；pressed state 属于 Toggle。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-badge" initialRuntime="wc" />
+</div>

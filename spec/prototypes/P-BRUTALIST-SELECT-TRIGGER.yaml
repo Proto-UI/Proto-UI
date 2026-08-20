@@ -1,0 +1,112 @@
+id: P-BRUTALIST-SELECT-TRIGGER
+type: prototype
+title: Brutalist Select Trigger inherits Base Select Trigger and layers a hard-shadowed combobox command
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Select Trigger inherits Base Select Trigger interaction semantics and projects a style-family visual API: a constrained size enum, placeholder state styling, a chevron indicator, square geometry, hard offset shadows, and explicit interaction states.
+
+
+statement:
+  en: >-
+    Brutalist Select Trigger is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Select Trigger. It preserves inherited Base protocol semantics (open/disabled/hovered/focusVisible/pressed/placeholder state ownership) and adds only visual/style behavior: a `sm | default` size enum, placeholder-muted foreground, a trailing chevron icon, zero radius, black structural borders, hard offset shadows, and hover/press/focus/disabled interaction projection.
+
+
+  zh-CN: >-
+    Brutalist Select Trigger 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Select Trigger 之上。它保留继承的 Base 协议语义（open/disabled/hovered/focusVisible/pressed/placeholder 状态归属），仅增加视觉/style 行为：`sm | default` size 枚举、placeholder 弱化前景色、尾部 chevron 图标、零圆角、黑色结构边框、硬偏移阴影，以及 hover/press/focus/disabled 交互投射。
+
+
+criteria:
+  - id: P-BRUTALIST-SELECT-TRIGGER-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Select Trigger through `asSelectTrigger()` once and must not redefine Base open, disabled, hovered, focusVisible, pressed, or placeholder protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asSelectTrigger()` 一次性继承 Base Select Trigger，不得重定义 Base 的 open、disabled、hovered、focusVisible、pressed 或 placeholder 协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-SELECT-TRIGGER-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-select-trigger`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-select-trigger`。
+  - id: P-BRUTALIST-SELECT-TRIGGER-SIZE-PROP
+    text:
+      en: >-
+        Public `size` is the enum `sm | default` with default `default`. `default` maps to `h-9`; `sm` maps to `h-8`. There is no `lg` or `icon` size for Select Trigger.
+
+
+      zh-CN: >-
+        公开 `size` 为枚举 `sm | default`，默认 `default`。`default` 对应 `h-9`；`sm` 对应 `h-8`。Select Trigger 不提供 `lg` 或 `icon` 尺寸。
+
+
+  - id: P-BRUTALIST-SELECT-TRIGGER-DEFAULTS
+    text:
+      en: >-
+        When `size` is omitted or removed after mount, the prototype must restore `default`.
+
+
+      zh-CN: >-
+        当 `size` 缺省或在挂载后被移除时，prototype 必须恢复为 `default`。
+
+
+  - id: P-BRUTALIST-SELECT-TRIGGER-PLACEHOLDER-STATE
+    text:
+      en: >-
+        When the placeholder state is active, the trigger text shifts to `text-muted-foreground`; when a committed value is present the trigger renders the value text with normal foreground.
+
+
+      zh-CN: >-
+        当 placeholder 状态激活时，trigger 文本切换为 `text-muted-foreground`；当存在已提交值时，trigger 以正常前景渲染该值文本。
+
+
+  - id: P-BRUTALIST-SELECT-TRIGGER-CHEVRON
+    text:
+      en: >-
+        The trigger renders a trailing chevron icon (a 16×16 SVG path `m6 9 6 6 6-6`) after its slot, with `pointer-events-none` so the icon never captures pointer interaction.
+
+
+      zh-CN: >-
+        trigger 在其 slot 之后渲染尾部 chevron 图标（16×16 SVG 路径 `m6 9 6 6 6-6`），并设置 `pointer-events-none`，使图标永不捕获指针交互。
+
+
+  - id: P-BRUTALIST-SELECT-TRIGGER-INTERACTION
+    text:
+      en: >-
+        Hover lifts the control (`-1px,-1px` with deeper hard shadow). Press translates into the shadow axis and clears the shadow. Focus-visible applies a hard ring with offset. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry and the resting surface pair.
+
+
+      zh-CN: >-
+        Hover 抬升控件（`-1px,-1px` 并加深硬阴影）。Press 沿阴影轴压入并清除阴影。Focus-visible 使用带 offset 的硬 ring。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调，同时保留几何与静止表面色对。
+
+
+  - id: P-BRUTALIST-SELECT-TRIGGER-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The resting surface uses `rounded-none border-2 border-black bg-secondary-background px-3 py-2 text-sm shadow-[3px_3px_0_0_#000]` with zero radius, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        静止表面使用 `rounded-none border-2 border-black bg-secondary-background px-3 py-2 text-sm shadow-[3px_3px_0_0_#000]`，保持零圆角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/select/trigger.proto.ts
+  - path: packages/prototypes/brutalist/test/select.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-SELECT-TRIGGER
+verifies: { tests: [T-BRUTALIST-SELECT-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Select Trigger projection with real public-API criteria (size enum, defaults, placeholder state, chevron indicator, interaction, visual grammar) on rc.7. Not present in immutable rc.6.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, select]

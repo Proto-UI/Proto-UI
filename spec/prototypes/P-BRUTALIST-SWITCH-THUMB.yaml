@@ -1,0 +1,74 @@
+id: P-BRUTALIST-SWITCH-THUMB
+type: prototype
+title: Brutalist Switch Thumb inherits Base Switch Thumb and is the sole checked-movement mechanism
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Switch Thumb inherits Base Switch Thumb interaction semantics and projects a style-family visual API: a square indicator that is the sole checked-movement mechanism, translating along the x-axis and adopting a checked fill while the root padding stays symmetric and invariant.
+
+
+statement:
+  en: >-
+    Brutalist Switch Thumb is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Switch Thumb. It preserves inherited Base protocol semantics (checked/disabled) and adds only visual/style behavior: zero radius, black structural borders, a hard offset shadow, a symmetric root-mounted `translate-x-0` resting position, and a single checked movement that both translates the thumb (`translate-x-5`) and fills it (`bg-canary`). Movement lives on the thumb alone; the root never shifts padding.
+
+
+  zh-CN: >-
+    Brutalist Switch Thumb 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Switch Thumb 之上。它保留继承的 Base 协议语义（checked/disabled），仅增加视觉/style 行为：零圆角、黑色结构边框、硬偏移阴影、由 root 承载的对称 `translate-x-0` 静止位置，以及单一的 checked 移动——同时平移 thumb（`translate-x-5`）并填充（`bg-canary`）。移动仅存在于 thumb，root 从不偏移 padding。
+
+
+criteria:
+  - id: P-BRUTALIST-SWITCH-THUMB-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Switch Thumb through `asSwitchThumb()` once and must not redefine Base checked or disabled protocol semantics; press feedback remains on the root, not the thumb. Visual projection may only consume the projected `checked` handle.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asSwitchThumb()` 一次性继承 Base Switch Thumb，不得重定义 Base 的 checked 或 disabled 协议语义；press 反馈保留在 root 而非 thumb。视觉投射只能消费投影出的 `checked` handle。
+
+
+  - id: P-BRUTALIST-SWITCH-THUMB-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-switch-thumb` and is the only public Switch Thumb entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-switch-thumb`，且是本 foundation 切片中唯一公开的 Switch Thumb 入口。
+  - id: P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT
+    text:
+      en: >-
+        The thumb is the exclusive checked-movement mechanism for the family. Unchecked rests at `translate-x-0`. When `checked` the thumb applies `translate-x-5 bg-canary` — both the x-axis translation and the canary fill move together in one rule. The symmetric `px-0.5` track padding on the root must remain constant so no second movement source exists; combining checked geometry with a root padding shift is a defect this criterion guards against.
+
+
+      zh-CN: >-
+        thumb 是该 family 唯一的 checked 移动机制。未选中静止于 `translate-x-0`。当 `checked` 时 thumb 应用 `translate-x-5 bg-canary`——x 轴平移与 canary 填充同在一条规则中联动。root 上对称的 `px-0.5` track padding 必须保持恒定，确保不存在第二个移动来源；将 checked 几何与 root padding 偏移组合正是本准则所防御的缺陷。
+
+
+  - id: P-BRUTALIST-SWITCH-THUMB-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The thumb visual surface must preserve a square `size-5` block with `rounded-none`, a black structural `border-2 border-black`, a hard zero-blur offset shadow (`shadow-[3px_3px_0_0_#000]`), and a flat `bg-foreground` resting fill without gradients, glass, rounded corners, or soft elevation. The resting fill is ink; only the checked `bg-canary` overrides it.
+
+
+      zh-CN: >-
+        thumb 视觉表面必须保持直角 `size-5` 块（`rounded-none`）、黑色结构边框（`border-2 border-black`）、零模糊硬偏移阴影（`shadow-[3px_3px_0_0_#000]`）与平面 `bg-foreground` 静止填充，不得使用渐变、玻璃拟态、圆角或柔和高度阴影。静止填充为墨色，唯有 checked `bg-canary` 覆盖之。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/switch/thumb.proto.ts
+  - path: packages/prototypes/brutalist/src/switch/types.ts
+  - path: packages/prototypes/brutalist/test/switch.test.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-SWITCH-THUMB
+verifies: { tests: [T-BRUTALIST-SWITCH-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced the draft Brutalist Switch Thumb projection with real public-API criteria (single-movement invariant, checked canary fill, root-padding-symmetric guard) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, switch]

@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/adapter-react",
-  "version": "0.2.0-rc.7",
+  "version": "0.3.0-alpha.0",
   "private": false,
   "type": "module",
   "dependencies": {
@@ -16,12 +16,15 @@
     "@proto.ui/module-context": "workspace:*",
     "@proto.ui/module-feedback": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
     "@proto.ui/module-expose-state": "workspace:*",
     "@proto.ui/module-expose-state-web": "workspace:*",
     "@proto.ui/module-focus": "workspace:*",
     "@proto.ui/module-hit-participation": "workspace:*",
     "@proto.ui/module-overlay": "workspace:*",
     "@proto.ui/module-positioning": "workspace:*",
+    "@proto.ui/module-scroll": "workspace:*",
+    "@proto.ui/module-text-control": "workspace:*",
     "@proto.ui/module-props": "workspace:*",
     "@proto.ui/module-rule-expose-state-web": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*"

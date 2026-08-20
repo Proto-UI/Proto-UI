@@ -1,0 +1,25 @@
+---
+title: Badge
+sidebar:
+  order: 3
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+Brutalist Badge is a direct styled-only label with no Base counterpart.
+
+## Contract
+
+- Square geometry, `2px` ink border, and a small hard shadow in every tone.
+- Public `tone` is `accent`, `info`, or `danger`; each tone pairs its flat fill with the intended foreground.
+- `outline` is structural grammar, not a variant. Badge has no pill radius, gradient, glass, or glow.
+- Passive, roleless, and non-focusable: Badge owns no status announcement, activation, pressed, selected, command, or event channel.
+
+Use Badge for passive labels such as roles or environments. Dynamic status belongs to a live-region owner; navigation belongs to Link; activation belongs to Button; pressed state belongs to Toggle.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-badge" initialRuntime="wc" />
+</div>

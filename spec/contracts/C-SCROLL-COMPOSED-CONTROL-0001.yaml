@@ -1,0 +1,49 @@
+id: C-SCROLL-COMPOSED-CONTROL-0001
+type: contract
+title: Composed Scroll Thumb maps Move Gesture to host-owned scroll requests
+status: draft
+since: 0.2.0-rc.7
+summary: A composed Scrollbar owns the semantic control route while its Thumb is the Move Gesture hit subregion mapped to normalized host scroll requests.
+statement:
+  zh-CN: >-
+    在 composed projection 中，Scrollbar control route 必须为后代 Thumb 建立 Move Gesture session。Host 使用 Thumb-local press offset 与当前 track travel 把 samples 映射为 normalized `control-drag` request，驱动同一个宿主 scroll engine；Thumb 的最终位置必须继续从实际 surface facts 投射。Thumb 不因此成为第二个 scroll-state owner、独立 Event/Focus/A11y control 或 Drag and Drop source。
+
+
+  en: >-
+    In composed projection, the Scrollbar control route must establish a Move Gesture session for its descendant Thumb. The host combines Thumb-local press offset and current track travel to map samples into normalized `control-drag` requests against the same host scrolling engine; final Thumb position must continue to project from actual surface facts. Thumb does not thereby become a second scroll-state owner, independent Event, Focus, or accessibility control, or a Drag and Drop source.
+
+
+criteria:
+  - id: C-SCROLL-COMPOSED-CONTROL-0001-A
+    text:
+      zh-CN: Move session 必须绑定 family attachment 已解析的实际 Thumb target，并随 control replacement、projection change 或 surface dispose 更新/释放。
+      en: The Move session must bind the actual Thumb target resolved by the family attachment and update or release on control replacement, projection change, or surface disposal.
+  - id: C-SCROLL-COMPOSED-CONTROL-0001-B
+    text:
+      zh-CN: Drag start 必须保留 pointer 相对 Thumb 起点的 local press offset，从 Thumb 任意位置抓取都不得使当前位置跳变。
+      en: Drag start must retain the pointer's local press offset from the Thumb start so grabbing anywhere on the Thumb does not jump the current position.
+  - id: C-SCROLL-COMPOSED-CONTROL-0001-C
+    text:
+      zh-CN: Move/update/end 必须根据当下 track geometry 计算并 clamp `0…1` position，再通过 `control-drag` request 驱动宿主；Thumb 不得先行写入乐观 offset。
+      en: Move, update, and end must compute and clamp a `0…1` position from current track geometry and drive the host through a `control-drag` request; Thumb must not write an optimistic offset first.
+  - id: C-SCROLL-COMPOSED-CONTROL-0001-D
+    text:
+      zh-CN: 无 overflow、无 travel、Thumb 隐藏或 target 不可用时不得开始 drag；cancel 只终止 gesture ownership，不得伪造新的 scroll facts。
+      en: Drag must not start without overflow or travel, while Thumb is hidden, or when targets are unavailable; cancellation only terminates gesture ownership and must not fabricate new scroll facts.
+  - id: C-SCROLL-COMPOSED-CONTROL-0001-E
+    text:
+      zh-CN: Pointer-capable Thumb 仍是 Scrollbar route 的 hit subregion；本契约不授予 `role=scrollbar`、独立 Tab stop 或 Drag and Drop semantics。
+      en: A pointer-capable Thumb remains a hit subregion of the Scrollbar route; this contract grants no `role=scrollbar`, independent Tab stop, or Drag and Drop semantics.
+sources:
+  - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
+  - path: packages/adapters/base/src/gestures/web-move-gesture-host.ts
+dependsOn:
+  contracts: [C-MOVE-GESTURE-0001, C-SCROLL-COMPOSED-CHROME-0001]
+  decisions: [D-MOVE-GESTURE-0001, D-SCROLL-COMPOSED-PROJECTION-0001]
+verifies:
+  tests: [T-SCROLL-COMPOSED-CONTROL-0001]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added the first interactive composed-control contract through Move Gesture-backed Thumb drag.
+tags: [scroll, composed-control, thumb, move, drag]

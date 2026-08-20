@@ -13,6 +13,8 @@
       "@proto.ui/prototypes-base/*": ["packages/prototypes/base/src/*/index.ts"],
       "@proto.ui/prototypes-shadcn": ["packages/prototypes/shadcn/src/index.ts"],
       "@proto.ui/prototypes-shadcn/*": ["packages/prototypes/shadcn/src/*/index.ts"],
+      "@proto.ui/prototypes-brutalist": ["packages/prototypes/brutalist/src/index.ts"],
+      "@proto.ui/prototypes-brutalist/*": ["packages/prototypes/brutalist/src/*/index.ts"],
       "@proto.ui/prototypes-lucide": ["packages/prototypes/lucide/src/index.ts"],
       "@proto.ui/prototypes-lucide/manifest": [
         "packages/prototypes/lucide/src/manifest.generated.ts"

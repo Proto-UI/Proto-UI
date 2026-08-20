@@ -1,0 +1,258 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 600 760"
+  role="img"
+  aria-labelledby="information-flow-title information-flow-description"
+  preserveAspectRatio="xMidYMid meet"
+>
+  <title id="information-flow-title">Proto UI information flow model</title>
+  <desc id="information-flow-description">
+    Event carries information from User to Component, while feedback returns from Component to User.
+    Props carries information from Maker to Component, while expose returns from Component to Maker.
+    Context connects Other Component and Component in both directions. State, lifecycle, and meta
+    are internal Component dimensions rather than information channels.
+  </desc>
+
+  <defs>
+    <linearGradient id="diagram-background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220" />
+      <stop offset="1" stop-color="#111827" />
+    </linearGradient>
+
+    <marker
+      id="event-arrow"
+      viewBox="0 0 4 4"
+      markerWidth="4"
+      markerHeight="4"
+      refX="3.4"
+      refY="2"
+      orient="auto-start-reverse"
+      markerUnits="strokeWidth"
+    >
+      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#67e8f9" />
+    </marker>
+    <marker
+      id="feedback-arrow"
+      viewBox="0 0 4 4"
+      markerWidth="4"
+      markerHeight="4"
+      refX="3.4"
+      refY="2"
+      orient="auto-start-reverse"
+      markerUnits="strokeWidth"
+    >
+      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#f0abfc" />
+    </marker>
+    <marker
+      id="props-arrow"
+      viewBox="0 0 4 4"
+      markerWidth="4"
+      markerHeight="4"
+      refX="3.4"
+      refY="2"
+      orient="auto-start-reverse"
+      markerUnits="strokeWidth"
+    >
+      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#86efac" />
+    </marker>
+    <marker
+      id="expose-arrow"
+      viewBox="0 0 4 4"
+      markerWidth="4"
+      markerHeight="4"
+      refX="3.4"
+      refY="2"
+      orient="auto-start-reverse"
+      markerUnits="strokeWidth"
+    >
+      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#fdba74" />
+    </marker>
+    <marker
+      id="context-arrow"
+      viewBox="0 0 4 4"
+      markerWidth="4"
+      markerHeight="4"
+      refX="3.4"
+      refY="2"
+      orient="auto-start-reverse"
+      markerUnits="strokeWidth"
+    >
+      <path d="M 0 0 L 4 2 L 0 4 Z" fill="#c4b5fd" />
+    </marker>
+
+    <style>
+      .actor-label,
+      .component-label,
+      .dimension-label,
+      .dimension-heading {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+      }
+
+      .actor-label,
+      .component-label {
+        fill: #f8fafc;
+        font-size: 26px;
+        font-weight: 700;
+      }
+
+      .channel-label {
+        font-family: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+        font-size: 21px;
+        font-weight: 700;
+      }
+
+      .dimension-heading {
+        fill: #bfdbfe;
+        font-size: 20px;
+        font-weight: 650;
+        letter-spacing: 0.02em;
+      }
+
+      .dimension-label {
+        fill: #eff6ff;
+        font-size: 24px;
+        font-weight: 650;
+      }
+
+      .flow-line {
+        fill: none;
+        stroke-linecap: round;
+        stroke-width: 3;
+        vector-effect: non-scaling-stroke;
+      }
+
+      @media (max-width: 400px) {
+        .actor-label {
+          font-size: 29px;
+        }
+
+        .component-label,
+        .channel-label {
+          font-size: 30px;
+        }
+
+        .dimension-heading {
+          font-size: 28px;
+        }
+
+        .dimension-label {
+          font-size: 29px;
+        }
+      }
+    </style>
+  </defs>
+
+  <rect
+    x="8"
+    y="8"
+    width="584"
+    height="744"
+    rx="28"
+    fill="url(#diagram-background)"
+    stroke="#334155"
+    stroke-width="2"
+    vector-effect="non-scaling-stroke"
+  />
+
+  <g aria-label="User">
+    <rect x="32" y="68" width="166" height="134" rx="20" fill="#172033" stroke="#475569" />
+    <rect x="32" y="68" width="7" height="134" rx="3.5" fill="#38bdf8" />
+    <text class="actor-label" x="115" y="144" text-anchor="middle">User</text>
+  </g>
+
+  <g aria-label="Maker">
+    <rect x="32" y="286" width="166" height="134" rx="20" fill="#172033" stroke="#475569" />
+    <rect x="32" y="286" width="7" height="134" rx="3.5" fill="#4ade80" />
+    <text class="actor-label" x="115" y="362" text-anchor="middle">Maker</text>
+  </g>
+
+  <g aria-label="Other Component">
+    <rect x="32" y="514" width="166" height="156" rx="20" fill="#172033" stroke="#475569" />
+    <rect x="32" y="514" width="7" height="156" rx="3.5" fill="#a78bfa" />
+    <text class="actor-label" x="115" y="583" text-anchor="middle">
+      <tspan x="115" dy="0">Other</tspan>
+      <tspan x="115" dy="31">Component</tspan>
+    </text>
+  </g>
+
+  <g aria-label="Component and its internal dimensions">
+    <rect
+      x="386"
+      y="68"
+      width="182"
+      height="602"
+      rx="24"
+      fill="#10233d"
+      stroke="#60a5fa"
+      stroke-width="2"
+      vector-effect="non-scaling-stroke"
+    />
+    <text class="component-label" x="477" y="116" text-anchor="middle">Component</text>
+    <path
+      d="M 410 142 H 544"
+      fill="none"
+      stroke="#3b82f6"
+      stroke-width="1.5"
+      vector-effect="non-scaling-stroke"
+    />
+    <text class="dimension-heading" x="477" y="188" text-anchor="middle">
+      <tspan x="477" dy="0">Internal</tspan>
+      <tspan x="477" dy="26">dimensions</tspan>
+    </text>
+
+    <g aria-label="state">
+      <rect x="412" y="252" width="130" height="72" rx="18" fill="#1e3a5f" stroke="#3b82f6" />
+      <text class="dimension-label" x="477" y="297" text-anchor="middle">state</text>
+    </g>
+    <g aria-label="lifecycle">
+      <rect x="412" y="356" width="130" height="72" rx="18" fill="#1e3a5f" stroke="#3b82f6" />
+      <text class="dimension-label" x="477" y="401" text-anchor="middle">lifecycle</text>
+    </g>
+    <g aria-label="meta">
+      <rect x="412" y="460" width="130" height="72" rx="18" fill="#1e3a5f" stroke="#3b82f6" />
+      <text class="dimension-label" x="477" y="505" text-anchor="middle">meta</text>
+    </g>
+  </g>
+
+  <g aria-label="event from User to Component">
+    <text class="channel-label" x="292" y="98" text-anchor="middle" fill="#67e8f9">event</text>
+    <path class="flow-line" d="M 214 116 H 370" stroke="#67e8f9" marker-end="url(#event-arrow)" />
+  </g>
+
+  <g aria-label="feedback from Component to User">
+    <path
+      class="flow-line"
+      d="M 370 160 H 214"
+      stroke="#f0abfc"
+      marker-end="url(#feedback-arrow)"
+    />
+    <text class="channel-label" x="292" y="188" text-anchor="middle" fill="#f0abfc">feedback</text>
+  </g>
+
+  <g aria-label="props from Maker to Component">
+    <text class="channel-label" x="292" y="316" text-anchor="middle" fill="#86efac">props</text>
+    <path class="flow-line" d="M 214 334 H 370" stroke="#86efac" marker-end="url(#props-arrow)" />
+  </g>
+
+  <g aria-label="expose from Component to Maker">
+    <path class="flow-line" d="M 370 378 H 214" stroke="#fdba74" marker-end="url(#expose-arrow)" />
+    <text class="channel-label" x="292" y="406" text-anchor="middle" fill="#fdba74">expose</text>
+  </g>
+
+  <g aria-label="context between Other Component and Component">
+    <text class="channel-label" x="292" y="570" text-anchor="middle" fill="#c4b5fd">context</text>
+    <path
+      class="flow-line"
+      d="M 214 594 H 370"
+      stroke="#c4b5fd"
+      marker-start="url(#context-arrow)"
+      marker-end="url(#context-arrow)"
+    />
+  </g>
+</svg>

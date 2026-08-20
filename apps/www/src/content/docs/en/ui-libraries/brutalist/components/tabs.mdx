@@ -1,0 +1,15 @@
+---
+title: 'Brutalist Tabs'
+description: 'Hard-edged Tabs projection over Base Tabs'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+Tabs inherit Base selection, activation, and descendant-first panel focus-entry semantics while using square list/trigger geometry and hard shadows. The reference demo gives the Root a responsive stable width, so changing panels does not resize or recenter the widget.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
+</div>

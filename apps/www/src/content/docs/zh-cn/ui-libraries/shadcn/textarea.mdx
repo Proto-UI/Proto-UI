@@ -1,0 +1,14 @@
+---
+title: 'Textarea'
+description: '在 Proto UI 上重建的 shadcn textarea。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+这个条目展示 Proto UI 中当前的 `shadcn` textarea 实现。
+
+协议归 Base Textarea 所有：controlled 与 uncontrolled value、归一化的 input/change/IME 事件、`rows`、`maxLength`、`readOnly` 等 native props、accessibility 投影，以及 focus 与 blur。它只物化一个 host-owned 的多行编辑器，shadcn 层只增加呈现——field 尺寸、边框、focus ring 与 disabled 处理。
+
+投射是 contentless 的。authored children 不会成为第二个编辑器，本切片也不引入 form workflow、validation message、auto-resize 或富文本行为。
+
+<PrototypePreviewer demoId="demo-shadcn-textarea" initialRuntime="wc" />

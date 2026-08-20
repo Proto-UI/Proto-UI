@@ -1,12 +1,12 @@
 ---
 title: 'UI Libraries'
-description: '浏览当前基于 Proto UI 重构的 UI 库。'
+description: '按视觉风格、适用场景与来源选择组件库或图标库。'
 ---
 
-Proto UI 对外展示的不是一套单一组件库，而是一组建立在 Proto UI 原型体系之上的 UI 库。
+import UiLibraryGallery from '@/components/UiLibraryGallery.astro';
 
-- `Base` 更接近协议层本身，强调可复用的交互语义边界。
-- `Shadcn` 是参考型 UI 库，目标是在对应宿主中尽量贴近上游 shadcn/ui 的 API 与交互表现。
-- `Lucide` 是基于 `lucide-static` 生成的图标原型库，支持逐图标入口按需引入。
+Proto UI 不是一套单一组件库，而是一套让你在共用交互协议之上，按产品气质选择视觉语言的基础设施。
 
-先选择库，再进入具体条目查看。
+你可以在这里比较当前已有的库。预览区突出每种库的视觉方向，来源信息则明确区分原始设计或图标来源与 Proto UI 的原型实现。
+
+<UiLibraryGallery locale="zh-cn" />

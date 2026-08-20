@@ -6,6 +6,7 @@ import baseDialogDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-bas
 import shadcnDialogDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.demo';
 import baseHoverCardDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-base-hover-card.demo';
 import baseDropdownDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-base-dropdown-menu.demo';
+import baseTextareaDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-base-textarea.demo';
 
 function styleContains(el: Element | null, token: string): boolean {
   return (el?.getAttribute('data-pui-style') ?? '').split(/\s+/).includes(token);
@@ -27,6 +28,34 @@ async function completeTransitions(...elements: Array<HTMLElement | null>): Prom
 }
 
 describe('PrototypePreviewer demo-renderer / wc', () => {
+  it('keeps the Textarea demo ref on the boundary and projects visual classes to the control', async () => {
+    await loadPrototypes(['base-textarea-root']);
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const session = await renderDemo({ runtime: 'wc', demo: baseTextareaDemo as any, host });
+    await settle();
+
+    try {
+      const boundary = host.querySelector('wc-base-textarea-root') as HTMLElement | null;
+      const textarea = boundary?.querySelector('textarea') as HTMLTextAreaElement | null;
+
+      expect(boundary).not.toBeNull();
+      expect(boundary?.getAttribute('data-demo-ref')).toBe('textarea');
+      expect(boundary?.getAttribute('data-pui-root')).toBe('');
+      expect(boundary?.classList.contains('w-full')).toBe(false);
+      expect(boundary?.classList.contains('border-2')).toBe(false);
+      expect(textarea).not.toBeNull();
+      expect(textarea?.getAttribute('part')).toBe('control');
+      expect(textarea?.classList.contains('block')).toBe(true);
+      expect(textarea?.classList.contains('w-full')).toBe(true);
+      expect(textarea?.classList.contains('border-2')).toBe(true);
+      expect(textarea?.classList.contains('outline-none')).toBe(true);
+    } finally {
+      await session.destroy();
+      host.remove();
+    }
+  });
+
   it('renders the Base Dropdown demo with keyboard focus entry and portaled positioning', async () => {
     vi.useFakeTimers();
     await loadPrototypes([
@@ -117,7 +146,8 @@ describe('PrototypePreviewer demo-renderer / wc', () => {
 
     const root = host.querySelector('wc-shadcn-tabs-root') as HTMLElement | null;
     const list = host.querySelector('wc-shadcn-tabs-list') as HTMLElement | null;
-    const trigger = host.querySelector('wc-shadcn-tabs-trigger') as HTMLElement | null;
+    const triggers = Array.from(host.querySelectorAll('wc-shadcn-tabs-trigger')) as HTMLElement[];
+    const trigger = triggers[0] ?? null;
     const content = host.querySelector('wc-shadcn-tabs-content') as HTMLElement | null;
 
     expect(root).not.toBeNull();
@@ -132,8 +162,18 @@ describe('PrototypePreviewer demo-renderer / wc', () => {
     expect(styleContains(list, 'h-9')).toBe(true);
     expect(styleContains(trigger, 'rounded-md')).toBe(true);
     expect(styleContains(trigger, 'flex-1')).toBe(true);
+    expect(triggers[1]?.getAttribute('tabindex')).toBe('-1');
     expect(styleContains(content, 'flex-1')).toBe(true);
     expect(styleContains(content, 'outline-none')).toBe(true);
+
+    trigger?.focus();
+    trigger?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+    );
+    await settle();
+
+    expect(document.activeElement).toBe(triggers[1]);
+    expect(triggers[1]?.getAttribute('aria-selected')).toBe('true');
 
     await session.destroy();
     host.remove();

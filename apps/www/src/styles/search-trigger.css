@@ -1,82 +1,470 @@
+/*
+ * Search (Pagefind) experience — deliberate design layer.
+ *
+ * Lives in `@layer components` so it wins over Starlight's `@layer starlight.core`
+ * skin and Pagefind's default UI styles. Structure and semantics come from
+ * `apps/www/src/components/override/Search.astro`; this file is the visual
+ * system for the trigger, dialog, field, result hierarchy, and every state:
+ * idle, loading, empty, populated, load-more, and failure.
+ */
+
 @layer components {
   site-search {
+    display: contents;
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Trigger                                                            */
+  /* ------------------------------------------------------------------ */
+
+  /* Mobile (< md): icon-only square button. */
   site-search > button[data-open-modal] {
-    @apply inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 bg-surface text-foreground/70 dark:text-muted-foreground dark:bg-card relative h-8 w-full justify-start pl-2.5 font-normal shadow-none sm:pr-12 md:w-40 lg:w-56 xl:w-64 border border-border hover:bg-secondary/80;
+    @apply relative inline-flex h-8 w-8 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-surface text-foreground/70 outline-none transition-all select-none;
+    @apply hover:border-foreground/25 hover:bg-secondary/80 hover:text-foreground;
+    @apply focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
   }
+
+  /* Desktop (>= md): input-looking field with label and shortcut chip. */
+  @media (min-width: 48rem) {
+    site-search > button[data-open-modal] {
+      @apply w-40 justify-start pl-3 pr-2 text-sm font-normal shadow-none;
+      @apply lg:w-56 xl:w-64;
+    }
+  }
+
   site-search kbd {
     background-color: transparent;
   }
+
   site-search > button[data-open-modal] kbd {
     @apply ml-auto;
   }
 
   site-search kbd kbd {
-    @apply bg-white text-muted-foreground pointer-events-none flex h-5 items-center justify-center gap-1 rounded-sm border border-border/70 px-1 font-sans text-[0.7rem] font-medium select-none [&_svg:not([class*='size-'])]:size-3;
-  }
-  [data-theme='dark'] site-search kbd kbd {
-    @apply bg-muted border-border/40;
+    @apply pointer-events-none flex h-5 shrink-0 items-center justify-center gap-1 rounded-[5px] border border-border/70 bg-secondary/70 px-1.5 font-sans text-[0.7rem] font-medium text-muted-foreground select-none [&_svg:not([class*='size-'])]:size-3;
   }
 
-  /* Search dialog (Pagefind) flat styles */
+  /* ------------------------------------------------------------------ */
+  /* Dialog shell                                                       */
+  /* ------------------------------------------------------------------ */
+
   site-search dialog {
-    @apply bg-background text-foreground border border-border rounded-xl m-auto w-[min(90vw,40rem)] max-w-none max-h-[calc(100svh-4rem)];
+    @apply m-auto rounded-xl border border-border bg-background text-foreground shadow-2xl;
+    width: min(90vw, 42rem);
+    max-height: calc(100svh - 1rem);
   }
+
+  site-search dialog[open] {
+    display: flex;
+  }
+
+  site-search dialog::backdrop {
+    background: color-mix(in srgb, var(--color-foreground) 14%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  :root[data-theme='dark'] site-search dialog::backdrop {
+    background: color-mix(in srgb, var(--color-foreground) 7%, rgba(0, 0, 0, 0.55));
+  }
+
   site-search dialog .dialog-frame {
-    @apply w-full max-w-3xl mx-auto p-4 sm:p-6;
+    @apply flex w-full flex-col gap-3 p-4 sm:p-5;
   }
-  site-search dialog [data-close-modal] {
-    @apply text-muted-foreground text-sm font-medium;
+
+  @media (min-width: 48rem) {
+    site-search dialog {
+      max-height: calc(100svh - 4rem);
+    }
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Toolbar: title + close                                              */
+  /* ------------------------------------------------------------------ */
+
+  site-search dialog .search-toolbar {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  site-search dialog .search-toolbar__title {
+    @apply m-0 text-sm font-semibold text-foreground;
+  }
+
+  site-search dialog .search-toolbar__close {
+    @apply static inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-transparent px-2 text-sm font-medium text-muted-foreground outline-none transition-colors;
+    @apply hover:bg-secondary hover:text-foreground;
+    @apply focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
+  }
+
+  @media (min-width: 48rem) {
+    site-search dialog .search-toolbar__close-label {
+      display: none;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Search field                                                       */
+  /* ------------------------------------------------------------------ */
+
   site-search dialog .search-container {
     @apply w-full;
   }
+
+  /* Initialization state, before Pagefind mounts its form. */
+  site-search dialog .search-initializing {
+    @apply flex min-h-36 flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground;
+  }
+  site-search dialog .search-initializing[hidden] {
+    display: none;
+  }
+  site-search dialog .search-initializing__spinner {
+    @apply size-5 rounded-full border-2 border-border border-t-muted-foreground;
+    animation: search-spin 0.8s linear infinite;
+  }
+  @keyframes search-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    site-search dialog .search-initializing__spinner {
+      animation: none;
+    }
+  }
+
+  /* The Pagefind drawer (results) is a child of the form, so the input row is
+     kept pinned by giving the drawer its own scroll region. */
   site-search dialog .pagefind-ui__form {
-    @apply flex flex-col gap-3;
+    @apply flex w-full flex-col bg-background;
   }
-  site-search dialog .pagefind-ui__search-input {
-    @apply w-full rounded-md border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40;
-    padding-inline-start: calc(54px * var(--pagefind-ui-scale));
-    padding-inline-end: calc(70px * var(--pagefind-ui-scale));
-  }
-  site-search dialog .pagefind-ui__search-clear {
-    @apply text-xs text-muted-foreground hover:text-foreground;
-  }
+
   site-search dialog .pagefind-ui__drawer {
-    @apply border-t border-border/60 pt-3;
+    @apply mt-2 flex-col gap-3;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    max-height: min(62svh, 36rem);
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.25rem;
   }
+
+  /* Magnifier icon (replaces Pagefind's default glyph position). */
+  site-search dialog .pagefind-ui__form::before {
+    @apply pointer-events-none absolute z-10 block;
+    background-color: var(--color-muted-foreground);
+    /* centered inside the 2.75rem input */
+    top: 0.8125rem;
+    left: 0.875rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    opacity: 1;
+  }
+
+  site-search dialog .pagefind-ui__search-input {
+    @apply w-full rounded-lg border border-border bg-background text-[0.9375rem] font-normal text-foreground;
+    height: 2.75rem;
+    padding-inline-start: 2.75rem;
+    padding-inline-end: 3.5rem;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  site-search dialog .pagefind-ui__search-input::placeholder {
+    @apply text-muted-foreground;
+    opacity: 1;
+  }
+
+  site-search dialog .pagefind-ui__search-input:focus {
+    border-color: var(--color-ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ring) 35%, transparent);
+  }
+
+  site-search dialog .pagefind-ui__search-clear {
+    @apply absolute top-1 right-1 flex h-[calc(2.75rem_-_0.5rem)] w-10 items-center justify-center rounded-md;
+    padding: 0;
+    background-color: transparent;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
+    white-space: nowrap;
+  }
+  site-search dialog .pagefind-ui__search-clear:hover {
+    @apply bg-secondary;
+  }
+  site-search dialog .pagefind-ui__search-clear:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 1px;
+  }
+  site-search dialog .pagefind-ui__search-clear::before {
+    content: '';
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--color-muted-foreground);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m13.41 12 6.3-6.29a1 1 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1 1 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 .33 1.64 1 1 0 0 0 1.09-.22l6.29-6.3 6.29 6.3a1 1 0 0 0 1.64-.33 1 1 0 0 0-.22-1.09L13.41 12Z'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m13.41 12 6.3-6.29a1 1 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1 1 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 .33 1.64 1 1 0 0 0 1.09-.22l6.29-6.3 6.29 6.3a1 1 0 0 0 1.64-.33 1 1 0 0 0-.22-1.09L13.41 12Z'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+  site-search dialog .pagefind-ui__search-clear:hover::before {
+    background-color: var(--color-foreground);
+  }
+  /* Hidden while the input is empty (Pagefind toggles this class). */
+  site-search dialog .pagefind-ui__search-clear.pagefind-ui__suppressed {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Idle hint: shown until the first search happens                    */
+  /* ------------------------------------------------------------------ */
+
+  #starlight__search::after {
+    content: attr(data-hint);
+    display: none;
+    margin-top: 2.75rem;
+    padding-bottom: 1rem;
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+  #starlight__search:has(.pagefind-ui__drawer.pagefind-ui__hidden)::after {
+    display: block;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Status message: count / searching / empty                          */
+  /* ------------------------------------------------------------------ */
+
   site-search dialog .pagefind-ui__message {
-    @apply text-xs text-muted-foreground;
+    @apply m-0 flex items-center text-[0.8125rem] font-medium text-muted-foreground;
+    min-height: 0;
+    padding: 0.625rem 0;
   }
+
+  /* No results yet (searching or empty): centered, icon-led. */
+  site-search
+    dialog
+    .pagefind-ui__results-area:not(:has(.pagefind-ui__result))
+    .pagefind-ui__message {
+    @apply justify-center;
+    padding: 2.5rem 0;
+  }
+  site-search
+    dialog
+    .pagefind-ui__results-area:not(:has(.pagefind-ui__result))
+    .pagefind-ui__message::before {
+    content: '';
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-inline-end: 0.625rem;
+    background-color: var(--color-muted-foreground);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-linecap='round' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-linecap='round' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+
+  /* Loading skeletons, when Pagefind renders them. */
+  site-search dialog .pagefind-ui__loading {
+    @apply rounded-md;
+    background: color-mix(in srgb, var(--color-muted-foreground) 18%, transparent);
+    animation: search-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes search-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+    }
+    50% {
+      opacity: 0.9;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    site-search dialog .pagefind-ui__loading {
+      animation: none;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Result list and cards                                              */
+  /* ------------------------------------------------------------------ */
+
   site-search dialog .pagefind-ui__results {
-    @apply mt-2 flex flex-col gap-2;
+    @apply m-0 flex flex-col gap-2;
+    padding: 0.25rem 0 0.25rem;
   }
+
   site-search dialog .pagefind-ui__result {
-    @apply rounded-md border border-border/60 bg-background;
+    @apply overflow-hidden rounded-lg border border-border bg-card;
+    padding: 0;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
   }
-  site-search dialog .pagefind-ui__result-title {
-    @apply text-sm font-medium;
-    padding-inline-start: calc(3.5rem * var(--pagefind-ui-scale));
-    /* padding-inline-end: var(--sl-search-result-pad-inline-end); */
+  site-search dialog .pagefind-ui__result:hover {
+    border-color: color-mix(in srgb, var(--color-ring) 45%, var(--color-border));
   }
+  site-search dialog .pagefind-ui__result:focus-within {
+    border-color: var(--color-ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ring) 30%, transparent);
+  }
+
+  site-search dialog .pagefind-ui__result-inner {
+    gap: 0;
+  }
+
+  /* --- Page-level result --- */
+
+  site-search dialog .pagefind-ui__result-inner > .pagefind-ui__result-title {
+    @apply m-0;
+    padding: 0.75rem 0.875rem 0.625rem;
+    padding-inline-start: 2.5rem;
+    background-color: transparent;
+  }
+
+  /* Document icon (Starlight supplies the mask; we recolor it). */
+  site-search dialog .pagefind-ui__result-inner > .pagefind-ui__result-title::before {
+    inset-inline-start: 0.875rem;
+    width: 1.25rem;
+    background: var(--color-muted-foreground);
+    opacity: 0.85;
+  }
+
+  site-search dialog .pagefind-ui__result-inner > .pagefind-ui__result-title:hover,
+  site-search dialog .pagefind-ui__result-inner > .pagefind-ui__result-title:focus-within {
+    outline: none;
+    background-color: transparent;
+  }
+  site-search
+    dialog
+    .pagefind-ui__result-inner
+    > .pagefind-ui__result-title:hover
+    .pagefind-ui__result-link {
+    color: var(--color-foreground);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-foreground) 40%, transparent);
+    text-underline-offset: 3px;
+  }
+
   site-search dialog .pagefind-ui__result-link {
-    @apply text-foreground hover:text-foreground/80;
+    @apply text-[0.875rem] font-semibold text-foreground;
+    text-decoration: none;
   }
-  site-search dialog .pagefind-ui__result-excerpt {
-    @apply mt-1 text-xs text-muted-foreground;
-    padding-inline-start: calc(3.5rem * var(--pagefind-ui-scale));
+
+  /* Page-level excerpt. */
+  site-search dialog .pagefind-ui__result-inner > .pagefind-ui__result-excerpt {
+    @apply text-[0.8125rem] leading-relaxed text-muted-foreground;
+    margin: 0;
+    padding: 0 0.875rem 0.75rem;
+    padding-inline-start: 2.5rem;
+    overflow-wrap: anywhere;
   }
+
+  /* --- Nested section results --- */
+
   site-search dialog .pagefind-ui__result-nested {
-    @apply mt-2;
-    /* padding-inline-start: calc(3.5rem * var(--pagefind-ui-scale)); */
-    /* padding-inline-end: var(--sl-search-result-pad-inline-end); */
-    padding-block: var(--sl-search-result-nested-pad-block);
+    @apply relative;
+    padding: 0.75rem 0.875rem;
+    padding-inline-start: 2.5rem;
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
   }
-  site-search dialog .pagefind-ui__button {
-    @apply mt-3 w-full rounded-md border border-border bg-secondary text-secondary-foreground text-sm py-2 hover:bg-secondary/80;
+  site-search dialog .pagefind-ui__result-nested + .pagefind-ui__result-nested {
+    border-top-style: dashed;
   }
+  site-search dialog .pagefind-ui__result-nested:hover,
+  site-search dialog .pagefind-ui__result-nested:focus-within {
+    outline: none;
+    background-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-surface));
+  }
+
+  /* Nested results use plain content rows; suppress Starlight's tree guide. */
+  site-search dialog .pagefind-ui__result-nested::before {
+    content: none;
+    display: none;
+  }
+
+  site-search dialog .pagefind-ui__result-nested .pagefind-ui__result-title {
+    @apply m-0;
+    background-color: transparent;
+  }
+  site-search dialog .pagefind-ui__result-nested .pagefind-ui__result-link {
+    @apply text-[0.8125rem] font-medium text-foreground;
+  }
+  site-search dialog .pagefind-ui__result-nested:hover .pagefind-ui__result-link,
+  site-search dialog .pagefind-ui__result-nested:focus-within .pagefind-ui__result-link {
+    color: var(--color-foreground);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-foreground) 40%, transparent);
+    text-underline-offset: 3px;
+  }
+
+  site-search dialog .pagefind-ui__result-nested .pagefind-ui__result-excerpt {
+    @apply m-0 mt-0.5 text-xs leading-relaxed text-muted-foreground;
+    overflow-wrap: anywhere;
+  }
+
+  /* --- Result metadata tags --- */
+
+  site-search dialog .pagefind-ui__result-tags {
+    @apply m-0 flex list-none flex-wrap gap-1.5 border-t border-border bg-surface;
+    padding: 0.5rem 0.875rem;
+  }
+  site-search dialog .pagefind-ui__result-tag {
+    @apply rounded-md bg-muted px-2 py-0.5 text-[0.6875rem] text-muted-foreground;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Match highlights                                                   */
+  /* ------------------------------------------------------------------ */
+
   site-search dialog mark {
-    @apply bg-accent text-accent-foreground rounded-sm px-1;
+    @apply rounded-[0.25rem] px-0.5 font-semibold;
+    background-color: color-mix(in srgb, #f59e0b 22%, transparent);
+    color: var(--color-foreground);
+  }
+  :root[data-theme='dark'] site-search dialog mark {
+    background-color: color-mix(in srgb, #f59e0b 30%, transparent);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Load more                                                          */
+  /* ------------------------------------------------------------------ */
+
+  site-search dialog .pagefind-ui__button {
+    @apply mt-2.5 h-9 w-full rounded-md border border-border bg-secondary text-sm font-medium text-secondary-foreground outline-none transition-colors;
+    @apply hover:bg-secondary/75;
+    @apply focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Failure state                                                      */
+  /* ------------------------------------------------------------------ */
+
+  site-search dialog .search-failure {
+    @apply flex flex-col items-center gap-1.5 py-10 text-center;
+  }
+  site-search dialog .search-failure[hidden] {
+    display: none;
+  }
+  site-search dialog .search-failure__icon {
+    @apply mb-1 text-muted-foreground;
+  }
+  site-search dialog .search-failure__title {
+    @apply m-0 text-sm font-semibold text-foreground;
+  }
+  site-search dialog .search-failure__body {
+    @apply m-0 max-w-xs text-xs text-muted-foreground;
+  }
+  site-search dialog .search-failure__retry {
+    @apply mt-2 inline-flex h-8 items-center rounded-md border border-border bg-secondary px-3 text-sm font-medium text-secondary-foreground outline-none transition-colors;
+    @apply hover:bg-secondary/75;
+    @apply focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
+  }
+  site-search dialog .search-failure__retry:disabled {
+    @apply pointer-events-none opacity-50;
   }
 }

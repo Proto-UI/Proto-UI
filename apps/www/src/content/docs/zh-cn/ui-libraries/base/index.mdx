@@ -1,14 +1,21 @@
 ---
-title: '基础原型库'
-desp: '基础原型库'
-description: '基础原型库'
+title: 'Base 原型库'
+description: '无默认样式的基础原型库总览与交互预览。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
 
-当前页面用于展示更接近协议层的 base 原型。
+Base 不规定默认视觉，只提供可测试、可跨宿主迁移的交互语义。下方每张卡片只展示该原型的一个基础 Demo，用于快速了解当前覆盖范围与行为边界；这里不重复 API 文档或代码示例。
 
-在 base 层，原型应当停在可被广泛复用的交互语义边界上。以 dropdown-menu 为例，目前边界是：
+当前 catalog 中的 Base 原型仍处于 draft 生命周期，以下是现阶段可交互的官方预览，不代表已冻结的稳定 API 保证。
+
+## 已发布的 0.2 family inventory
+
+稳定版 0.2.0 package 导出了 16 个有意纳入文档的 component families：Button、Toggle、Switch、Tabs、Checkbox、Dialog、Dropdown Menu、Select、Hover Card、Tooltip、Transition、Separator、Scroll Area、Textarea、Live Region 与 Async Region。非组件的 `behaviors` 和 `tools` exports 属于 library utilities，不要求 component detail route。
+
+Package exports 与 CLI registry 是相关但不完全相同的 inventory。CLI 把 package 的 `dropdown` family 称为 `base-dropdown`；当前 `base-tabs` facade 没有包含可选 Indicator authoring surface；CLI 也没有 `base-scroll-area` facade，而是提供完整的 `brutalist-scroll-area` projection。这些差异会在相应 detail page 中明确说明，而不是被隐藏或误判为缺失 protocol。
+
+对于交互 family，Base 原型应停在可广泛复用的语义边界。以 Dropdown Menu 为例，目前边界是：
 
 - 浮层开合协作
 - collection 顺序与 item snapshot
@@ -18,3 +25,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 它在这一层不定义持久 selection，不内建 checkbox/radio item 语义，也不预先承诺 submenu anatomy。瞬时的 active 导航状态目前保持为内部实现，不作为 root 的正式公开 API。这些应当由上层原型库通过组合来补，而不是在 base 中先行固化。
 
 `select` 是当前用来验证另一条边界的探针：它仍然保持 protocol-first，但会把 `value` 呈现部件明确留在 family 内部。这个部件用于验证 Proto UI 在 value 类组件上的当前路径，也就是“选中值文本由原型自身定义，并通过显式 update 驱动重渲染”，而不是完全把值展示下放给宿主应用。
+
+`textarea` 用来验证 host-mediated native-control 边界：Root 拥有一个 logical multiline editor，renderer 保持 contentless，由 adapter 选择物理宿主目标。当前 Web profile 在 Web Component、React 与 Vue 中使用一个原生 textarea。它维持稳定的受控/非受控所有权，归一化 input/change/IME signal，保留 active editing session，在 composition 结束后恢复未被接纳的受控提案，并投影 property、focus 与 accessibility；它不声明 form submission、rich text、auto-resize、系统 editing chrome 或 live-region 语义。
+
+<PrototypeLibraryOverview library="base" locale="zh-cn" />

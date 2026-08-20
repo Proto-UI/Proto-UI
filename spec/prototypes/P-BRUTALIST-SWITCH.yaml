@@ -1,0 +1,99 @@
+id: P-BRUTALIST-SWITCH
+type: prototype
+title: Brutalist Switch Root inherits Base Switch and layers a square track surface
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Switch Root inherits Base Switch interaction semantics and projects a style-family visual API: a square track with symmetric padding, a fixed resting fill, a checked fill pair that swaps only the background, pressed feedback, and focus-visible/disabled projection.
+
+
+statement:
+  en: >-
+    Brutalist Switch Root is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Switch. It preserves inherited Base protocol semantics (checked/defaultChecked/disabled) and adds only visual/style behavior: zero radius, black structural borders, hard offset shadows, symmetric track padding that never swaps under state, a checked fill, pressed feedback, a focus-visible ring, and disabled de-emphasis.
+
+
+  zh-CN: >-
+    Brutalist Switch Root 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Switch 之上。它保留继承的 Base 协议语义（checked/defaultChecked/disabled），仅增加视觉/style 行为：零圆角、黑色结构边框、硬偏移阴影、在 state 下不变的对称 track 内边距、checked 填充、pressed 反馈、focus-visible ring 与 disabled 降阶。
+
+
+criteria:
+  - id: P-BRUTALIST-SWITCH-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Switch through `asSwitchRoot()` once and must not redefine Base checked, pressed, focus-visible, or disabled protocol semantics. Visual projection may only consume the projected state handles (`checked`, `disabled`, `focusVisible`, `pressed`).
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asSwitchRoot()` 一次性继承 Base Switch，不得重定义 Base 的 checked、pressed、focus-visible 或 disabled 协议语义；视觉投射只能消费投影出的 state handles（`checked`、`disabled`、`focusVisible`、`pressed`）。
+
+
+  - id: P-BRUTALIST-SWITCH-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-switch-root` and is the only public Switch Root entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-switch-root`，且是本 foundation 切片中唯一公开的 Switch Root 入口。
+  - id: P-BRUTALIST-SWITCH-CHECKED-PAIR-INVARIANT
+    text:
+      en: >-
+        When `checked` the root must apply `bg-sky` as a background-only fill. The root must never swap or shift its symmetric `px-0.5` track padding under any state — padding stays constant so the thumb alone carries movement. Checked is a fill change, never a geometry change.
+
+
+      zh-CN: >-
+        当 `checked` 时 root 必须应用 `bg-sky` 作为纯背景填充。root 在任何 state 下都不得交换或偏移其对称的 `px-0.5` track 内边距——内边距保持恒定，唯 thumb 承担移动。checked 是填充变化，绝非几何变化。
+
+
+  - id: P-BRUTALIST-SWITCH-INTERACTION
+    text:
+      en: >-
+        Press (`pressed` true) swaps the fill to `bg-coral` and clears the hard shadow with `shadow-none`. Focus-visible applies a hard ring with offset. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry and the symmetric padding.
+
+
+      zh-CN: >-
+        Press（`pressed` 为 true）将填充切换为 `bg-coral` 并以 `shadow-none` 清除硬阴影。Focus-visible 使用带 offset 的硬 ring。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调，同时保留几何与对称 padding。
+
+
+  - id: P-BRUTALIST-SWITCH-DEMO-NAMING
+    text:
+      en: >-
+        The reference demo must keep a visible caption inside each Switch root so inherited Base `nameFromContent` derives the same meaningful accessible name in Web Components, React, and Vue. The caption must remain visible, must not rely on a native label relationship that cannot target the custom-element host, and must follow the Switch activation path while disabled remains inert.
+
+      zh-CN: >-
+        参考 demo 必须把可见 caption 放在每个 Switch root 内，使继承的 Base `nameFromContent` 在 Web Components、React 与 Vue 中派生同一条有意义的 accessible name。Caption 必须保持可见，不得依赖无法指向 custom-element host 的原生 label 关系；点击 caption 必须沿 Switch activation path 生效，而 disabled 保持 inert。
+
+
+  - id: P-BRUTALIST-SWITCH-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The root track visual surface must preserve square corners (`rounded-none`), black structural borders (`border-2 border-black`), a hard zero-blur offset shadow (`shadow-[3px_3px_0_0_#000]`), and a flat `bg-secondary-background` resting fill without gradients, glass, rounded cards, or soft elevation. The resting fill is a fixed theme-token surface; only checked/pressed swap the fill.
+
+
+      zh-CN: >-
+        root track 视觉表面必须保持直角（`rounded-none`）、黑色结构边框（`border-2 border-black`）、零模糊硬偏移阴影（`shadow-[3px_3px_0_0_#000]`）与平面 `bg-secondary-background` 静止填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。静止填充为固定主题 token 表面，唯有 checked/pressed 切换填充。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/switch/root.proto.ts
+  - path: packages/prototypes/brutalist/src/switch/types.ts
+  - path: packages/prototypes/brutalist/test/switch.test.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-switch.demo.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-SWITCH
+verifies: { tests: [T-BRUTALIST-SWITCH-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced the draft Brutalist Switch Root projection with real public-API criteria (checked pair invariant, press feedback, no-padding-swap defect guard) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+  - version: 0.2.0
+    change: revised
+    summary: >-
+      Added the reference-demo accessible-name criterion: every visible caption stays inside its Switch root and is projected consistently through inherited Base name-from-content semantics.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, switch]

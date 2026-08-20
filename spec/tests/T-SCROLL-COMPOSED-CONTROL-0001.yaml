@@ -1,0 +1,59 @@
+id: T-SCROLL-COMPOSED-CONTROL-0001
+type: test
+title: Composed Scroll Thumb Move Gesture conformance
+status: draft
+since: 0.2.0-rc.7
+summary: Covers Thumb session binding, local press offset, normalized drag requests, no-overflow rejection, and bounded cleanup.
+cases:
+  - id: T-SCROLL-COMPOSED-CONTROL-0001-CASE-BINDING
+    title: Family-resolved Thumb receives one bounded Move Gesture lease
+    covers:
+      - C-SCROLL-COMPOSED-CONTROL-0001-A
+    expectation: composed-control-reconciles-the-thumb-move-lease-with-family-targets
+  - id: T-SCROLL-COMPOSED-CONTROL-0001-CASE-DRAG
+    title: Local press offset and current travel map movement to host scroll position
+    covers:
+      - C-SCROLL-COMPOSED-CONTROL-0001-B
+      - C-SCROLL-COMPOSED-CONTROL-0001-C
+    expectation: thumb-drag-produces-normalized-control-request-without-jump-or-optimistic-state
+  - id: T-SCROLL-COMPOSED-CONTROL-0001-CASE-GUARDS
+    title: Unavailable geometry rejects start and cancellation preserves host facts
+    covers:
+      - C-SCROLL-COMPOSED-CONTROL-0001-D
+      - C-SCROLL-COMPOSED-CONTROL-0001-E
+    expectation: no-overflow-and-disposal-do-not-create-false-drag-or-accessibility-semantics
+implementations:
+  - id: module-scroll-web-thumb-move-integration
+    kind: adapter-test
+    status: passing
+    path: packages/modules/scroll/test/web-scroll-host.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-COMPOSED-CONTROL-0001-CASE-BINDING
+      - T-SCROLL-COMPOSED-CONTROL-0001-CASE-DRAG
+      - T-SCROLL-COMPOSED-CONTROL-0001-CASE-GUARDS
+  - id: web-adapters-brutalist-scroll-area-move-journey
+    kind: adapter-test
+    status: passing
+    path: packages/web-conformance/test/brutalist-scroll-area-move.journey.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-COMPOSED-CONTROL-0001-CASE-BINDING
+      - T-SCROLL-COMPOSED-CONTROL-0001-CASE-DRAG
+      - T-SCROLL-COMPOSED-CONTROL-0001-CASE-GUARDS
+verifies:
+  contracts: [C-SCROLL-COMPOSED-CONTROL-0001]
+exercises:
+  hostCaps: [HC-MOVE-GESTURE-0001, HC-SCROLL-SURFACE-0001]
+  modules: [M-SCROLL-0001]
+  prototypes:
+    - P-BASE-SCROLL-AREA-SCROLLBAR
+    - P-BASE-SCROLL-AREA-THUMB
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added one shared official Web-adapter journey for the Brutalist Scroll Area Thumb control.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable coverage for the first Move Gesture-backed Scroll composed control.
+tags: [test, scroll, thumb, move, drag]

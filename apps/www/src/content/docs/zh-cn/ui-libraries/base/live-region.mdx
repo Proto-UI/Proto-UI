@@ -1,0 +1,42 @@
+---
+title: 'Live Region'
+desp: 'Live Region base prototype'
+description: 'Live Region base prototype'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-live-region-root` 是一个窄异步无障碍原语，投射受治理的 ARIA live-region 语义，不声明交互通路。
+
+<div>
+  <PrototypePreviewer demoId="demo-base-live-region" initialRuntime="wc" />
+</div>
+
+它从两个 props 推导 `role`、`aria-live` 与 `aria-atomic`：
+
+- `politeness`：`polite`（默认）投射 `role=status` + `aria-live=polite`；`assertive` 投射 `role=alert` + `aria-live=assertive`
+- `atomic`：`true`（默认）投射 `aria-atomic=true`；`false` 投射 `aria-atomic=false`
+
+Authored 子内容即为播报载荷。原型不声明 focus、event、command、selection 或 accessible-name override 通路；exposes surface 为空。
+
+## 当前 v0 边界
+
+`base-live-region-root` 目前包含：
+
+- polite/assertive role 与 aria-live 投射
+- atomic aria-atomic 投射
+- mounted prop 变更同步更新全部三个 attribute
+- prop 转换中保留 authored 子内容
+
+不包含：
+
+- `aria-relevant` 粒度控制
+- announcement 定时器或替换状态机
+- accessible-name override
+- focus、event、command 或 selection 通路
+
+## 参考
+
+- 契约：[C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
+- 源码：[packages/prototypes/base/src/live-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/live-region)
+- 测试：[live-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/live-region.test.ts)

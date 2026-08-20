@@ -1,0 +1,74 @@
+id: P-BRUTALIST-DROPDOWN-MENU-CONTENT
+type: prototype
+title: Brutalist Dropdown Menu Content inherits Base menu overlay and layers a hard-shadowed transition panel
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Dropdown Menu Content inherits Base Dropdown Menu overlay behavior and projects a style-family visual API: a max-height-constrained Brutalist panel, a 150ms enter / 100ms leave transition with fade-zoom open animation and side-based slide-in.
+
+
+statement:
+  en: >-
+    Brutalist Dropdown Menu Content is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dropdown Menu Content. It preserves inherited Base protocol semantics (open state, side prop, transition state) and adds only visual/style behavior: a max-height-constrained Brutalist panel with square corners, black borders, hard offset shadows, a 150/100ms transition via `asTransition`, fade-zoom open/close animations, and side-based slide-in.
+
+
+  zh-CN: >-
+    Brutalist Dropdown Menu Content 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dropdown Menu Content 之上。它保留继承的 Base 协议语义（open state、side prop、transition state），仅增加视觉/style 行为：受最大高度约束的 Brutalist 面板（直角、黑色边框、硬偏移阴影）、经 `asTransition` 的 150/100ms 过渡、fade-zoom 开合动画以及按方向的 slide-in。
+
+
+criteria:
+  - id: P-BRUTALIST-DROPDOWN-MENU-CONTENT-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Dropdown Menu Content through `asDropdownContent()` once and must not redefine Base open, side, or transition protocol semantics. It must consume the projected `open` state handle, the projected `side` prop, and the `asTransition.transitionState` for animation framing.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asDropdownContent()` 一次性继承 Base Dropdown Menu Content，不得重定义 Base 的 open、side 或 transition 协议语义；必须消费投影出的 `open` state handle、`side` prop 与 `asTransition.transitionState` 以构成动画。
+
+
+  - id: P-BRUTALIST-DROPDOWN-MENU-CONTENT-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-dropdown-content` and is the only public Dropdown Menu Content entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-dropdown-content`，且是本 foundation 切片中唯一公开的 Dropdown Menu Content 入口。
+  - id: P-BRUTALIST-DROPDOWN-MENU-CONTENT-TRANSITION
+    text:
+      en: >-
+        The content must configure `asTransition` with `enterDuration: 150` and `leaveDuration: 100`. When `transitionState` is `entering` or `entered` it applies `animate-in fade-in-0 zoom-in-95`; when `open` is false it applies `animate-out fade-out-0 zoom-out-95`. Side-based slide-in is applied alongside the open animation: `bottom` → `slide-in-from-top-2`, `top` → `slide-in-from-bottom-2`, `left` → `slide-in-from-right-2`, `right` → `slide-in-from-left-2`.
+
+
+      zh-CN: >-
+        content 必须将 `asTransition` 配置为 `enterDuration: 150` 与 `leaveDuration: 100`。当 `transitionState` 为 `entering` 或 `entered` 时应用 `animate-in fade-in-0 zoom-in-95`；当 `open` 为 false 时应用 `animate-out fade-out-0 zoom-out-95`。开启动画之外再按方向施加 slide-in：`bottom` → `slide-in-from-top-2`、`top` → `slide-in-from-bottom-2`、`left` → `slide-in-from-right-2`、`right` → `slide-in-from-left-2`。
+
+
+  - id: P-BRUTALIST-DROPDOWN-MENU-CONTENT-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The content projects a Brutalist panel via `BRUTALIST_PANEL_TOKENS` (`rounded-none border-2 border-black shadow-[3px_3px_0_0_#000] bg-secondary-background text-foreground`) at `z-50 max-h-[var(--proto-ui-available-height)] min-w-32 overflow-x-hidden overflow-y-auto p-1 outline-none transition-none duration-150`, preserving square corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        content 通过 `BRUTALIST_PANEL_TOKENS`（`rounded-none border-2 border-black shadow-[3px_3px_0_0_#000] bg-secondary-background text-foreground`）以 `z-50 max-h-[var(--proto-ui-available-height)] min-w-32 overflow-x-hidden overflow-y-auto p-1 outline-none transition-none duration-150` 投射 Brutalist 面板，保持直角、黑色结构边框、零模糊硬偏移阴影与平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/dropdown/content.proto.ts
+  - path: packages/prototypes/brutalist/src/dropdown/types.ts
+  - path: packages/prototypes/brutalist/test/dropdown.test.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-DROPDOWN-MENU-CONTENT
+verifies: { tests: [T-BRUTALIST-DROPDOWN-MENU-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dropdown Menu Content projection with real public-API criteria (Base inheritance, entry, 150/100ms transition with fade-zoom and side slide-in, panel visual grammar) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, dropdown]

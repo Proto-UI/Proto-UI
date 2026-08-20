@@ -1,14 +1,21 @@
 ---
 title: 'Base Library'
-desp: 'Base prototype library'
-description: 'Base prototype library'
+description: 'Overview and interactive previews for the unstyled Base prototype library.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
 
-This page showcases the plain protocol-first base prototypes.
+Base prescribes no default visual language. It provides testable interaction semantics that can move across hosts. Each card below shows one basic demo for quick browsing; API documentation and code examples stay on the individual prototype pages.
 
-At the base layer, a prototype should stop at interaction semantics that are broadly reusable. For dropdown-menu, that boundary is:
+The Base entities currently remain in the draft catalog lifecycle. These previews describe the current official working surface, not a frozen stable API guarantee.
+
+## Released 0.2 family inventory
+
+The stable 0.2.0 package exports 16 intentionally documented component families: Button, Toggle, Switch, Tabs, Checkbox, Dialog, Dropdown Menu, Select, Hover Card, Tooltip, Transition, Separator, Scroll Area, Textarea, Live Region, and Async Region. Non-component `behaviors` and `tools` exports are library utilities and do not require component detail routes.
+
+Package exports and the CLI registry are related but not identical inventories. The CLI calls the package's `dropdown` family `base-dropdown`; its `base-tabs` facade currently omits the optional Indicator authoring surface; and it has no `base-scroll-area` facade, while exposing the complete `brutalist-scroll-area` projection. Those differences are stated on the affected detail pages instead of being hidden or treated as missing protocols.
+
+For interactive families, the Base prototype should stop at semantics that are broadly reusable. For Dropdown Menu, that boundary is:
 
 - overlay open/close coordination
 - collection ordering and item snapshots
@@ -18,3 +25,7 @@ At the base layer, a prototype should stop at interaction semantics that are bro
 It does not, at this layer, define persistent selection, checkbox/radio item semantics, or submenu anatomy. The transient active navigation state is kept internal for now instead of being committed as root API. Those should be composed above base prototypes instead of being precommitted here.
 
 `select` is the current probe for a slightly different boundary: it still stays protocol-first, but it explicitly keeps a `value` presentation part inside the family. That part is used to validate Proto UI's current value-class component path, where selected text is owned by the prototype and refreshed through explicit update-driven re-render instead of being pushed entirely to the host app.
+
+`textarea` exercises a host-mediated native-control boundary: Root owns one logical multiline editor while its renderer stays contentless, and the adapter selects the physical host target. The current Web profile uses one native textarea across Web Component, React, and Vue. It keeps controlled/uncontrolled ownership stable, normalizes input/change/IME signals, preserves the active editing session, restores unaccepted controlled proposals after composition, and projects properties, focus, and accessibility without claiming form submission, rich text, auto-resize, system editing chrome, or live-region semantics.
+
+<PrototypeLibraryOverview library="base" locale="en" />

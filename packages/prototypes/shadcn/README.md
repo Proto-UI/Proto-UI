@@ -22,7 +22,7 @@ Prototype library package intended to be consumed together with Proto UI adapter
 ## Install
 
 ```bash
-npm install @proto.ui/prototypes-shadcn@0.2.0-rc.0
+npm install @proto.ui/prototypes-shadcn@0.3.0-alpha.0
 ```
 
 ## Family Imports
@@ -39,6 +39,8 @@ The root package export remains available for compatibility. Shadcn families do 
 ## Internal Structure
 
 - `src/button/`
+- `src/component-presets.ts`
+- `src/component-presets.types.ts`
 - `src/dialog/`
 - `src/dropdown/`
 - `src/hover-card/`

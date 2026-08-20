@@ -96,6 +96,190 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('registers the promoted Brutalist families and both Textarea projections', () => {
+    const brutalistIds = Object.keys(COMPONENT_REGISTRY)
+      .filter((id) => id.startsWith('brutalist-'))
+      .sort();
+    expect(brutalistIds).toEqual([
+      'brutalist-badge',
+      'brutalist-button',
+      'brutalist-card',
+      'brutalist-dialog',
+      'brutalist-dropdown',
+      'brutalist-hover-card',
+      'brutalist-scroll-area',
+      'brutalist-select',
+      'brutalist-separator',
+      'brutalist-skeleton',
+      'brutalist-switch',
+      'brutalist-tabs',
+      'brutalist-textarea',
+      'brutalist-toggle',
+    ]);
+    expect(COMPONENT_REGISTRY['brutalist-badge']).toMatchObject({
+      packageName: '@proto.ui/prototypes-brutalist',
+      importPath: '@proto.ui/prototypes-brutalist/badge',
+      stylePreset: 'brutalist',
+      items: [
+        {
+          prototypeImport: 'brutalistBadgeRoot',
+          reactExport: 'BrutalistBadgeRoot',
+          elementName: 'proto-ui-brutalist-badge',
+        },
+      ],
+    });
+    expect(COMPONENT_REGISTRY['brutalist-card']).toMatchObject({
+      packageName: '@proto.ui/prototypes-brutalist',
+      importPath: '@proto.ui/prototypes-brutalist/card',
+      stylePreset: 'brutalist',
+      items: [
+        {
+          prototypeImport: 'brutalistCardRoot',
+          reactExport: 'BrutalistCardRoot',
+          elementName: 'proto-ui-brutalist-card-root',
+        },
+        {
+          prototypeImport: 'brutalistCardHeader',
+          reactExport: 'BrutalistCardHeader',
+          elementName: 'proto-ui-brutalist-card-header',
+        },
+        {
+          prototypeImport: 'brutalistCardContent',
+          reactExport: 'BrutalistCardContent',
+          elementName: 'proto-ui-brutalist-card-content',
+        },
+        {
+          prototypeImport: 'brutalistCardFooter',
+          reactExport: 'BrutalistCardFooter',
+          elementName: 'proto-ui-brutalist-card-footer',
+        },
+      ],
+    });
+    expect(COMPONENT_REGISTRY['base-textarea']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/textarea',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'textareaRoot',
+          reactExport: 'BaseTextareaRoot',
+          elementName: 'proto-ui-base-textarea',
+        },
+      ],
+    });
+    expect(COMPONENT_REGISTRY['brutalist-textarea']).toMatchObject({
+      packageName: '@proto.ui/prototypes-brutalist',
+      importPath: '@proto.ui/prototypes-brutalist/textarea',
+      stylePreset: 'brutalist',
+      items: [
+        {
+          prototypeImport: 'brutalistTextareaRoot',
+          reactExport: 'BrutalistTextareaRoot',
+          elementName: 'proto-ui-brutalist-textarea',
+        },
+      ],
+    });
+
+    const react = renderHostIndex('react', ['base-textarea', 'brutalist-textarea']);
+    expect(react).toContain("import { textareaRoot } from '@proto.ui/prototypes-base/textarea';");
+    expect(react).toContain(
+      "import { brutalistTextareaRoot } from '@proto.ui/prototypes-brutalist/textarea';"
+    );
+    expect(react).toContain('export const BaseTextareaRoot = adapt(textareaRoot);');
+    expect(react).toContain('export const BrutalistTextareaRoot = adapt(brutalistTextareaRoot);');
+
+    for (const adapter of ['react', 'vue', 'wc'] as const) {
+      const source = renderHostIndex(adapter, brutalistIds);
+      for (const id of brutalistIds) {
+        const entry = COMPONENT_REGISTRY[id];
+        expect(source).toContain(entry.importPath);
+        for (const item of entry.items) {
+          expect(source).toContain(item.prototypeImport);
+          const exportName =
+            adapter === 'react'
+              ? item.reactExport
+              : adapter === 'vue'
+                ? item.vueExport
+                : item.wcExport;
+          expect(source).toContain(exportName);
+        }
+      }
+    }
+  });
+
+  it('registers Base Live Region and Async Region public facades', () => {
+    expect(COMPONENT_REGISTRY['base-live-region']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/live-region',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'liveRegionRoot',
+          reactExport: 'BaseLiveRegionRoot',
+          vueExport: 'BaseLiveRegionRoot',
+          wcExport: 'BaseLiveRegionRootElement',
+          elementName: 'proto-ui-base-live-region',
+        },
+      ],
+    });
+    expect(COMPONENT_REGISTRY['base-async-region']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/async-region',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'asyncRegionRoot',
+          reactExport: 'BaseAsyncRegionRoot',
+          vueExport: 'BaseAsyncRegionRoot',
+          wcExport: 'BaseAsyncRegionRootElement',
+          elementName: 'proto-ui-base-async-region',
+        },
+      ],
+    });
+  });
+
+  it('materializes Base Live Region and Async Region facades for every adapter', () => {
+    const componentIds = ['base-live-region', 'base-async-region'];
+
+    for (const host of ['react', 'vue'] as const) {
+      const source = renderHostIndex(host, componentIds);
+      expect(source).toContain(
+        `import { liveRegionRoot } from '@proto.ui/prototypes-base/live-region';`
+      );
+      expect(source).toContain(
+        `import { asyncRegionRoot } from '@proto.ui/prototypes-base/async-region';`
+      );
+      expect(source).toContain('export const BaseLiveRegionRoot = adapt(liveRegionRoot);');
+      expect(source).toContain('export const BaseAsyncRegionRoot = adapt(asyncRegionRoot);');
+    }
+
+    const wc = renderHostIndex('wc', componentIds);
+    expect(wc).toContain(
+      `export const BaseLiveRegionRootElement = AdaptToWebComponent(liveRegionRoot, { registerAs: 'proto-ui-base-live-region' });`
+    );
+    expect(wc).toContain(
+      `export const BaseAsyncRegionRootElement = AdaptToWebComponent(asyncRegionRoot, { registerAs: 'proto-ui-base-async-region' });`
+    );
+
+    const root = renderRootIndex({
+      react: componentIds,
+      vue: componentIds,
+      wc: componentIds,
+    });
+    expect(root).toContain(
+      `export { BaseLiveRegionRoot as ReactBaseLiveRegionRoot } from './react';`
+    );
+    expect(root).toContain(
+      `export { BaseAsyncRegionRoot as ReactBaseAsyncRegionRoot } from './react';`
+    );
+    expect(root).toContain(`export { BaseLiveRegionRoot as VueBaseLiveRegionRoot } from './vue';`);
+    expect(root).toContain(
+      `export { BaseAsyncRegionRoot as VueBaseAsyncRegionRoot } from './vue';`
+    );
+    expect(root).toContain(`export { BaseLiveRegionRootElement } from './wc';`);
+    expect(root).toContain(`export { BaseAsyncRegionRootElement } from './wc';`);
+  });
+
   it('materializes the replaceable shadcn Switch Thumb preset for every adapter', () => {
     const react = renderHostIndex('react', ['shadcn-switch']);
     expect(react).toContain('export const ShadcnSwitchRoot = adapt(shadcnSwitchRoot);');
@@ -251,7 +435,7 @@ describe('@proto.ui/cli', () => {
     expect(tokensCss).toContain(`[data-pui-style~="px-0.5"]`);
     expect(tokensCss).toContain(`data-[checked]:translate-x-[calc(100%_-_2px)]"])[data-checked]`);
     expect(tokensCss).toContain('--pui-translate-x: calc(100% - 2px);');
-    expect(tokensCss).not.toContain(`data-[checked]:pl-5"])[data-checked]`);
+    expect(tokensCss).toContain(`data-[checked]:bg-sky"])[data-checked]`);
     expect(tokensCss).not.toContain(`data-[checked]:pl-[20px]"])[data-checked]`);
     expect(tokensCss).toContain(`data-[checked]:bg-primary"])[data-checked]`);
     expect(tokensCss).toContain(`data-[selected]:bg-background"])[data-selected]`);
@@ -432,6 +616,112 @@ describe('@proto.ui/cli', () => {
     expect(theme).toContain('--pui-coral: #FECDD3');
     expect(theme).toContain('--pui-sky: #BAE6FD');
     expect(theme).toContain('--pui-radius-sm: 2px');
+  });
+
+  it('allows Brutalist add with styles disabled and emits an actionable ownership note', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-styles-disabled', {
+      name: 'pui-cli-brutalist-styles-disabled',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+    const configPath = path.join(cwd, 'proto-ui/config.json');
+    const packagePath = path.join(cwd, 'package.json');
+    const configBefore = await fs.readFile(configPath, 'utf8');
+    const packageBefore = await fs.readFile(packagePath, 'utf8');
+
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('styles are disabled');
+    expect(result.stdout).toContain('complete brutalist --pui-* token set');
+    await expect(fs.readFile(configPath, 'utf8')).resolves.not.toBe(configBefore);
+    await expect(fs.readFile(packagePath, 'utf8')).resolves.toBe(packageBefore);
+    await expect(
+      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.ts'), 'utf8')
+    ).resolves.toContain('brutalistButton');
+  });
+
+  it('rejects Brutalist add under the Shadcn preset without mutating project state', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-preset-mismatch', {
+      name: 'pui-cli-brutalist-preset-mismatch',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-install']).status).toBe(0);
+    const configPath = path.join(cwd, 'proto-ui/config.json');
+    const packagePath = path.join(cwd, 'package.json');
+    const configBefore = await fs.readFile(configPath, 'utf8');
+    const packageBefore = await fs.readFile(packagePath, 'utf8');
+
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('brutalist-button');
+    expect(result.stderr).toContain('requires the brutalist style preset');
+    expect(result.stderr).toContain('shadcn');
+    await expect(fs.readFile(configPath, 'utf8')).resolves.toBe(configBefore);
+    await expect(fs.readFile(packagePath, 'utf8')).resolves.toBe(packageBefore);
+    await expect(
+      fs.stat(path.join(cwd, 'proto-ui/components/react/index.ts'))
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('adds Brutalist under the matching enabled preset', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-preset-match', {
+      name: 'pui-cli-brutalist-preset-match',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(
+      runCli(cwd, ['init', '--no-interactive', '--no-install', '--prototypes', 'brutalist']).status
+    ).toBe(0);
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(0);
+    await expect(
+      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.ts'), 'utf8')
+    ).resolves.toContain('brutalistButton');
+  });
+
+  it('rejects a missing enabled preset before mutating project state', async () => {
+    const cwd = await createTempProject('pui-cli-brutalist-preset-missing', {
+      name: 'pui-cli-brutalist-preset-missing',
+      private: true,
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-install']).status).toBe(0);
+    const configPath = path.join(cwd, 'proto-ui/config.json');
+    const config = JSON.parse(await fs.readFile(configPath, 'utf8'));
+    config.styles.preset = null;
+    await fs.writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
+    const configBefore = await fs.readFile(configPath, 'utf8');
+
+    const result = runCli(cwd, ['add', 'react', 'brutalist-button', '--no-install']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('requires the brutalist style preset');
+    expect(result.stderr).toContain('enables no preset');
+    await expect(fs.readFile(configPath, 'utf8')).resolves.toBe(configBefore);
+    await expect(
+      fs.stat(path.join(cwd, 'proto-ui/components/react/index.ts'))
+    ).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
   it('fails fast when the required React runtime is missing', async () => {

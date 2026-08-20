@@ -16,6 +16,7 @@ const reactRoots = new WeakMap<
 >();
 const reactComponentCache = new WeakMap<object, Map<string, any>>();
 const vueComponentCache = new WeakMap<object, Map<string, any>>();
+const wcSurfaceProps = new WeakMap<HTMLElement, Record<string, unknown>>();
 
 function getScopedComponentCache<T extends object>(
   cache: WeakMap<object, Map<string, T>>,
@@ -77,9 +78,16 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
 
   const el = document.createElement(wcName);
   instances.push(el);
-  if (node.className) el.className = node.className;
   if (node.ref) el.setAttribute('data-demo-ref', node.ref);
-  if (node.props) setElementProps(el, node.props);
+  const surfaceProps = {
+    surfaceClassName: node.className,
+    surfaceStyle: node.surfaceStyle,
+  };
+  wcSurfaceProps.set(el, surfaceProps);
+  setElementProps(el, {
+    ...(node.props ?? {}),
+    ...surfaceProps,
+  });
   parent.appendChild(el);
 
   const kids = node.children ?? [];
@@ -128,7 +136,7 @@ async function renderDemoWc(opt: DemoRenderOptions): Promise<DemoRenderResult> {
       const el = refs[ref] as DemoInstance &
         HTMLElement & { setProps?(v: Record<string, unknown>): void; update?(): void };
       if (!el) return;
-      el.setProps?.(next);
+      el.setProps?.({ ...next, ...(wcSurfaceProps.get(el) ?? {}) });
       el.update?.();
     },
   };
@@ -206,7 +214,8 @@ async function renderDemoReact(opt: DemoRenderOptions): Promise<DemoRenderResult
         else componentRefs.delete(node.ref!);
       };
     }
-    if (node.className) mergedProps.hostClassName = node.className;
+    if (node.className) mergedProps.surfaceClassName = node.className;
+    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
     return React.createElement(Component, mergedProps as Record<string, unknown>, ...kids);
   }
 
@@ -342,7 +351,8 @@ async function renderDemoVue(opt: DemoRenderOptions): Promise<DemoRenderResult> 
         if (el) componentRefs.set(node.ref!, el as DemoInstance);
       };
     }
-    if (node.className) mergedProps.hostClass = node.className;
+    if (node.className) mergedProps.surfaceClass = node.className;
+    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
     return Vue.h(Component, mergedProps, () => kids);
   }
 

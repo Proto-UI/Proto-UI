@@ -1,5 +1,15 @@
-import { createCapsWiring, type LogicalInstanceToken } from '@proto.ui/adapter-base';
-import { HOST_ELEMENT_CAP, type EffectsPort, type FocusRequestOptions } from '@proto.ui/core';
+import {
+  cancelWebEventDefaultAction,
+  createCapsWiring,
+  createWebMoveGestureHost,
+  type LogicalInstanceToken,
+} from '@proto.ui/adapter-base';
+import {
+  HOST_ELEMENT_CAP,
+  type EffectsPort,
+  type FocusRequestOptions,
+  type ScrollProjectionPreference,
+} from '@proto.ui/core';
 import {
   createDomOrderObserver,
   ANATOMY_GET_PROTO_CAP,
@@ -21,12 +31,11 @@ import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module
 import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
-  type EventDefaultActionCancelRequest,
-  EVENT_EMIT_CAP,
   EVENT_GLOBAL_TARGET_CAP,
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
-import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import {
   FOCUS_BLUR_CAP,
   FOCUS_INSTANCE_TOKEN_CAP,
@@ -63,7 +72,13 @@ import {
 } from '@proto.ui/module-expose-state-web';
 import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/module-rule-expose-state-web';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import type { PropsBaseType } from '@proto.ui/types';
+import {
+  createWebTextControlHost,
+  TEXT_CONTROL_HOST_CAP,
+  TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+} from '@proto.ui/module-text-control';
 
 import {
   clearProtoParentProjection,
@@ -112,7 +127,7 @@ export function createVueOwnerModules<Props extends PropsBaseType>(
 
   return createCapsWiring()
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
-    .use('event', [[EVENT_EMIT_CAP, emit]])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
@@ -120,7 +135,7 @@ export function createVueOwnerModules<Props extends PropsBaseType>(
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },
@@ -177,6 +192,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
   effectsPort: EffectsPort;
   getMeta: (key: string) => unknown;
   exposeStateWebMode?: ExposeStateWebMode;
+  scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
@@ -194,6 +210,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     effectsPort,
     getMeta,
     exposeStateWebMode,
+    scrollProjection,
     setExposes,
   } = args;
 
@@ -210,7 +227,13 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     };
   };
 
+  const physicalControl = () => args.getCurrentElement() as HTMLTextAreaElement | null;
+
   return createCapsWiring()
+    .use('text-control', [
+      [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
+      [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [[EFFECTS_CAP, effectsPort]])
     .use('a11y', [
@@ -224,16 +247,9 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     .use('event', [
       [EVENT_ROOT_TARGET_CAP, () => router.rootTarget],
       [EVENT_GLOBAL_TARGET_CAP, () => router.globalTarget],
-      [
-        EVENT_CANCEL_DEFAULT_ACTION_CAP,
-        ({ event }: EventDefaultActionCancelRequest) => {
-          if (typeof (event as Event | undefined)?.preventDefault === 'function') {
-            (event as Event).preventDefault();
-          }
-        },
-      ],
-      [EVENT_EMIT_CAP, emit],
+      [EVENT_CANCEL_DEFAULT_ACTION_CAP, cancelWebEventDefaultAction],
     ])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
@@ -242,9 +258,9 @@ export function createVueModules<Props extends PropsBaseType>(args: {
       [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, isNativelyFocusable],
       [
         FOCUS_SET_FOCUSABLE_CAP,
-        (target: HTMLElement, enabled: boolean) => {
+        (target: HTMLElement, enabled: boolean, options?: { programmatic?: boolean }) => {
           const surface = getLogicalTriggerSurfaceRoot(instanceToken);
-          target.tabIndex = enabled && (!surface || surface === target) ? 0 : -1;
+          projectFocusable(target, enabled && (!surface || surface === target), options);
         },
       ],
       [
@@ -271,7 +287,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },
@@ -323,6 +339,15 @@ export function createVueModules<Props extends PropsBaseType>(args: {
       [BOUNDARY_HOST_BRIDGE_CAP, createWebBoundaryHostBridge()],
     ])
     .use('positioning', [[ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()]])
+    .use('scroll', [
+      [
+        SCROLL_SURFACE_HOST_CAP,
+        createWebScrollSurfaceHost(el, {
+          moveGestureHost: createWebMoveGestureHost(),
+          preference: scrollProjection,
+        }),
+      ],
+    ])
     .use('overlay', () => [
       [HOST_ELEMENT_CAP, el],
       [OVERLAY_GLOBAL_MOUNT_CAP, createVueOverlayGlobalMount(instanceToken)],
@@ -356,5 +381,19 @@ function isNativelyFocusable(el: HTMLElement): boolean {
   if (tag === 'a') {
     return el.hasAttribute('href');
   }
+
   return false;
+}
+function projectFocusable(
+  target: HTMLElement,
+  enabled: boolean,
+  options?: { programmatic?: boolean }
+): void {
+  if (enabled) {
+    target.setAttribute('tabindex', '0');
+  } else if (options?.programmatic || isNativelyFocusable(target)) {
+    target.setAttribute('tabindex', '-1');
+  } else {
+    target.removeAttribute('tabindex');
+  }
 }

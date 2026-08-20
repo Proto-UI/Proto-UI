@@ -1,0 +1,74 @@
+id: HC-SCROLL-SURFACE-0001
+type: host-cap
+title: Host attaches and maintains a scroll surface session
+status: draft
+since: 0.2.0-rc.7
+summary: The host resolves a logical scroll surface to its current target, attaches a bounded session, reports facts and support, applies requests, and projects system or composed chrome participation.
+statement:
+  zh-CN: >-
+    Scroll Surface host capability 必须为 logical surface 解析当前宿主 target/controller，建立有界 session，报告 projection support 与 scroll facts，应用 scroll requests，并在 detach/dispose 时释放 observer、listener、gesture ownership 与其他宿主资源。它可以使用 Web overflow/observers、Flutter Scrollable/ScrollController 或其他平台机制，但不得向 prototype author 暴露这些对象。
+
+
+  en: >-
+    The Scroll Surface host capability must resolve the current host target or controller for a logical surface, attach a bounded session, report projection support and scroll facts, apply scroll requests, and release observers, listeners, gesture ownership, and other host resources on detach or disposal. It may use Web overflow and observers, Flutter Scrollable and ScrollController, or other platform mechanisms, but must not expose those objects to prototype authors.
+
+
+criteria:
+  - id: HC-SCROLL-SURFACE-0001-A
+    text:
+      zh-CN: Host-cap 必须报告 `system` 与 `composed` projection 支持，并返回最终 resolved projection 或明确拒绝原因。
+      en: The host capability must report support for `system` and `composed` projection and return either the resolved projection or an explicit rejection reason.
+  - id: HC-SCROLL-SURFACE-0001-B
+    text:
+      zh-CN: Host-cap 必须在 layout-ready 后报告初始 facts，并在 scroll activity 或 relevant geometry 改变时更新 facts。
+      en: The host capability must report initial facts after layout readiness and update facts when scrolling activity or relevant geometry changes.
+  - id: HC-SCROLL-SURFACE-0001-C
+    text:
+      zh-CN: Host-cap 必须应用经过验证的 scroll requests，并将 clamping、direction、physics 与 input integration 委托给宿主规则。
+      en: The host capability must apply validated scroll requests while delegating clamping, direction, physics, and input integration to host rules.
+  - id: HC-SCROLL-SURFACE-0001-D
+    text:
+      zh-CN: Session disposal 必须释放 observer、listener、pointer/gesture ownership 与 target references；迟到 callback 不得更新当前 logical facts。
+      en: Session disposal must release observers, listeners, pointer or gesture ownership, and target references; late callbacks must not update current logical facts.
+  - id: HC-SCROLL-SURFACE-0001-E
+    text:
+      zh-CN: Host-cap 必须把 scroll semantics 交给宿主 accessibility projection，并不得要求所有宿主支持相同原生结构。
+      en: The host capability must hand scroll semantics to host accessibility projection without requiring every host to support the same native structure.
+  - id: HC-SCROLL-SURFACE-0001-F
+    text:
+      zh-CN: composed attachment 存在时，host-cap 必须从 surface facts 与宿主本地 track geometry 投射 passive Thumb size/offset，并在 attachment 更新或 dispose 时恢复其占用的宿主样式与 observer。
+      en: When a composed attachment exists, the host capability must project passive Thumb size and offset from surface facts and host-local track geometry and restore owned host styles and observers when the attachment updates or disposes.
+  - id: HC-SCROLL-SURFACE-0001-G
+    text:
+      zh-CN: composed control 存在时，host-cap 必须通过 `HC-MOVE-GESTURE-0001` 取得 Thumb 的有界移动会话，使用当前 track geometry 映射 normalized `control-drag` request，并在 replacement、projection change 或 dispose 时释放 gesture lease。
+      en: When a composed control exists, the host capability must obtain a bounded Thumb movement session through `HC-MOVE-GESTURE-0001`, map current track geometry to normalized `control-drag` requests, and release the gesture lease on replacement, projection change, or disposal.
+satisfies:
+  contracts:
+    - C-SCROLL-0001
+    - C-SCROLL-COMPOSED-CONTROL-0001
+requires:
+  hostCaps:
+    - HC-MOVE-GESTURE-0001
+relates:
+  hostCaps:
+    - HC-A11Y-0001
+verifies:
+  tests:
+    - T-SCROLL-0001
+    - T-SCROLL-COMPOSED-CHROME-0001
+    - T-SCROLL-COMPOSED-CONTROL-0001
+sources:
+  - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
+  - path: packages/modules/scroll/src/caps.ts
+  - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added Move Gesture-backed composed Thumb control mapping and bounded cleanup.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added passive composed chrome geometry projection and cleanup to the bounded surface lease.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Drafted the cross-host capability for bounded scroll sessions, facts, requests, projection support, and cleanup.
+tags: [scroll, host-capability, session, projection]

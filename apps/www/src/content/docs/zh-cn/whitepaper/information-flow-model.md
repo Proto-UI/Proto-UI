@@ -102,6 +102,8 @@ Proto UI 将这种观察方式称为**信息通路模型**。
 
 如果按信息交换的方向来看，Proto UI 的几项核心能力会自然地出现。
 
+![](/diagrams/information-flow-model.svg)
+
 ### User ↔ Component
 
 用户和组件之间的关系，至少包含两个方向：

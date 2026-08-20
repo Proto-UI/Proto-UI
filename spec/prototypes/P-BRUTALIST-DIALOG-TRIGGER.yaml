@@ -1,0 +1,82 @@
+id: P-BRUTALIST-DIALOG-TRIGGER
+type: prototype
+title: Brutalist Dialog Trigger inherits Base trigger behavior and layers a fixed sky command surface
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Dialog Trigger inherits Base Dialog Trigger interaction semantics and projects a style-family visual API: a fixed sky fill pair, square geometry, hard offset shadows, and explicit interaction states. There is no variant prop — it was removed as inert.
+
+
+statement:
+  en: >-
+    Brutalist Dialog Trigger is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dialog Trigger. It preserves inherited Base protocol semantics (open/disabled/hovered/focusVisible/pressed state ownership) and adds only visual/style behavior: a fixed `bg-sky` with `text-sky-foreground` surface, zero radius, black structural borders, hard offset shadows, bold uppercase typography, and hover/press/focus/disabled interaction projection. The variant prop was removed as inert and is not part of the public API.
+
+
+  zh-CN: >-
+    Brutalist Dialog Trigger 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dialog Trigger 之上。它保留继承的 Base 协议语义（open/disabled/hovered/focusVisible/pressed 状态归属），仅增加视觉/style 行为：固定 `bg-sky` 与 `text-sky-foreground` 表面、零圆角、黑色结构边框、硬偏移阴影、加粗大写排版，以及 hover/press/focus/disabled 交互投射。variant prop 已因无效移除，不属于公开 API。
+
+
+criteria:
+  - id: P-BRUTALIST-DIALOG-TRIGGER-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Dialog Trigger through `asDialogTrigger()` once and must not redefine Base open, disabled, hovered, focusVisible, or pressed protocol semantics. Visual projection may only consume the projected state handles.
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asDialogTrigger()` 一次性继承 Base Dialog Trigger，不得重定义 Base 的 open、disabled、hovered、focusVisible 或 pressed 协议语义；视觉投射只能消费投影出的 state handles。
+
+
+  - id: P-BRUTALIST-DIALOG-TRIGGER-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-dialog-trigger`.
+      zh-CN: 直接 prototype 入口名为 `brutalist-dialog-trigger`。
+  - id: P-BRUTALIST-DIALOG-TRIGGER-PAIR-INVARIANT
+    text:
+      en: >-
+        The trigger surface must co-select its fill and foreground as a fixed pair: `bg-sky` with `text-sky-foreground`. This pair is not theme-variable at the fill level; no rule may replace the foreground with a theme-global text token independently of its background.
+
+
+      zh-CN: >-
+        trigger 表面必须将填充与前景作为固定色对同时选择：`bg-sky` 与 `text-sky-foreground`。该色对在填充层面不随主题变化；任何规则都不得在脱离背景的情况下用主题全局文本 token 覆盖前景。
+
+
+  - id: P-BRUTALIST-DIALOG-TRIGGER-INTERACTION
+    text:
+      en: >-
+        Hover lifts the control (`-1px,-1px` with deeper hard shadow). Press translates into the shadow axis and clears the shadow. Focus-visible applies a hard ring with offset. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry and the sky surface pair.
+
+
+      zh-CN: >-
+        Hover 抬升控件（`-1px,-1px` 并加深硬阴影）。Press 沿阴影轴压入并清除阴影。Focus-visible 使用带 offset 的硬 ring。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调，同时保留几何与 sky 表面色对。
+
+
+  - id: P-BRUTALIST-DIALOG-TRIGGER-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The surface uses `rounded-none border-2 border-black h-10 px-4 gap-2 font-bold uppercase text-sm shadow-[3px_3px_0_0_#000]`, preserving square corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        表面使用 `rounded-none border-2 border-black h-10 px-4 gap-2 font-bold uppercase text-sm shadow-[3px_3px_0_0_#000]`，保持直角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/dialog/trigger.proto.ts
+  - path: packages/prototypes/brutalist/test/dialog.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-DIALOG-TRIGGER
+verifies: { tests: [T-BRUTALIST-DIALOG-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dialog Trigger projection with real public-API criteria (Base inheritance, direct entry, fixed sky pair invariant, interaction, visual grammar; variant prop removed) on rc.7. Not present in immutable rc.6.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, dialog]

@@ -1,0 +1,52 @@
+id: P-BASE-LIVE-REGION
+type: prototype
+title: Base Live Region protocol
+status: draft
+since: 0.2.0-rc.7
+summary: Base Live Region defines governed ARIA live-region semantics (role, aria-live, aria-atomic) without interaction; authored child content is the announcement payload.
+statement:
+  zh-CN: Base Live Region 仅拥有 politeness（polite/assertive）与 atomic 语义；polite 投射 role=status + aria-live=polite，assertive 投射 role=alert + aria-live=assertive，atomic 默认 true 并投射 aria-atomic。authored 子内容为播报载荷；不声明 focus、event、command、selection 或 accessible-name override。
+  en: Base Live Region owns only politeness (polite/assertive) and atomic semantics; polite projects role=status + aria-live=polite, assertive projects role=alert + aria-live=assertive, atomic defaults true and projects aria-atomic. Authored child content is the announcement payload; no focus, event, command, selection, or accessible-name override is declared.
+criteria:
+  - id: P-BASE-LIVE-REGION-POLITENESS
+    text:
+      zh-CN: politeness 必须默认为 polite 并支持 assertive。
+      en: politeness must default to polite and support assertive.
+  - id: P-BASE-LIVE-REGION-ATOMIC
+    text:
+      zh-CN: atomic 必须默认为 true 并支持 false。
+      en: atomic must default to true and support false.
+  - id: P-BASE-LIVE-REGION-SEMANTICS
+    text:
+      zh-CN: politeness=polite 必须投射 role=status + aria-live=polite；politeness=assertive 必须投射 role=alert + aria-live=assertive；atomic 必须投射 aria-atomic。
+      en: politeness=polite must project role=status + aria-live=polite; politeness=assertive must project role=alert + aria-live=assertive; atomic must project aria-atomic.
+  - id: P-BASE-LIVE-REGION-DYNAMIC
+    text:
+      zh-CN: mounted prop 变更必须同步更新 role、aria-live 与 aria-atomic。
+      en: Mounted prop changes must synchronously update role, aria-live, and aria-atomic.
+  - id: P-BASE-LIVE-REGION-CONTENT
+    text:
+      zh-CN: authored 子内容必须作为播报载荷保留，不得被 prop 转换清除。
+      en: Authored child content must be preserved as the announcement payload and must not be cleared by prop transitions.
+  - id: P-BASE-LIVE-REGION-NO-INTERACTION
+    text:
+      zh-CN: Live Region 不得声明 focus、tab stop、event、command、activation、selection 或 accessible-name override 通路；exposes surface 必须为空。
+      en: Live Region must declare no focus, tab-stop, event, command, activation, selection, or accessible-name override channel; the exposes surface must be empty.
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-PROPS-0001
+    - C-STATE-0001
+    - C-AS-HOOK-0001
+    - C-A11Y-0001
+    - C-ASYNC-A11Y-0001
+verifies:
+  tests: [T-BASE-LIVE-REGION-0001]
+sources:
+  - path: packages/prototypes/base/src/live-region/root.proto.ts
+  - path: packages/prototypes/base/src/live-region/types.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Introduced the Base Live Region protocol as a narrow async accessibility primitive.
+tags: [prototype, base, live-region, a11y]

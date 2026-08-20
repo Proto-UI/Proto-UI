@@ -1,9 +1,15 @@
-import { createCapsWiring, type LogicalInstanceToken } from '@proto.ui/adapter-base';
+import {
+  cancelWebEventDefaultAction,
+  createCapsWiring,
+  createWebMoveGestureHost,
+  type LogicalInstanceToken,
+} from '@proto.ui/adapter-base';
 import {
   HOST_ELEMENT_CAP,
   type EffectsPort,
   type FocusEntryConfig,
   type FocusRequestOptions,
+  type ScrollProjectionPreference,
 } from '@proto.ui/core';
 import {
   createDomOrderObserver,
@@ -26,16 +32,16 @@ import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module
 import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
-  type EventDefaultActionCancelRequest,
-  EVENT_EMIT_CAP,
   EVENT_GLOBAL_TARGET_CAP,
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
-import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import {
   createExposeStateWebNameMap,
   createExposeStateWebNativeVariantPolicy,
   EXPOSE_STATE_WEB_MAP_CAP,
+  EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP,
   EXPOSE_STATE_WEB_MODE_CAP,
 } from '@proto.ui/module-expose-state-web';
 import {
@@ -65,9 +71,16 @@ import {
   ANCHORED_POSITION_HOST_CAP,
   createFloatingUiAnchoredPositionHost,
 } from '@proto.ui/module-positioning';
+import {
+  createWebTextControlHost,
+  TEXT_CONTROL_HOST_CAP,
+  TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+  type WebTextControl,
+} from '@proto.ui/module-text-control';
 import { type RawPropsSource, RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/module-rule-expose-state-web';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import { type PropsBaseType } from '@proto.ui/types';
 
 import {
@@ -82,6 +95,7 @@ import {
 } from '../platform/instance-tree';
 
 const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
+const WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
 
 function resolveWebComponentTriggerSurface(
   root: HTMLElement,
@@ -116,6 +130,7 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   el: HTMLElement;
   instanceToken: LogicalInstanceToken;
   rawPropsSource: RawPropsSource<Props>;
+  textControlTarget: WebTextControl | null;
   getMeta: (key: string) => unknown;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
@@ -132,6 +147,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
 ) {
   const { el, instanceToken, rawPropsSource, getMeta, setExposes } = args;
   const getTriggerSurface = () => {
+    if (args.textControlTarget) return args.textControlTarget;
     const target = getLogicalTriggerSurfaceRoot(instanceToken);
     const surface = resolveWebComponentTriggerSurface(el, target);
     return surface?.isConnected ? surface : null;
@@ -144,7 +160,16 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   queueMicrotask(() => queueMicrotask(normalizeOwnedSurface));
   // The custom element is the persistent owner shell, so semantic and
   // expose-state projection remain valid while its internal view is absent.
+  const physicalControl = () => args.textControlTarget;
+
   return createCapsWiring()
+    .use('text-control', [
+      [
+        TEXT_CONTROL_HOST_CAP,
+        createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
+      ],
+      [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('a11y', [
       [
@@ -154,9 +179,9 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
         ),
       ],
     ])
-    .use('event', [
+    .use('expose-event', [
       [
-        EVENT_EMIT_CAP,
+        EXPOSE_EVENT_SINK_CAP,
         (key: string, payload?: unknown, options?: Record<string, unknown>) => {
           el.dispatchEvent(
             new CustomEvent(key, {
@@ -176,7 +201,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },
@@ -237,11 +262,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   };
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
+  textControlTarget: WebTextControl | null;
   getMeta: (key: string) => unknown;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
     allowStringVar?: boolean;
   };
+  scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
@@ -257,6 +284,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     effectsPort,
     getMeta,
     exposeStateWebMode,
+    scrollProjection,
     setExposes,
   } = args;
 
@@ -279,31 +307,39 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       offSurface();
     };
   };
+  const physicalControl = () => args.textControlTarget;
+  // Keep canonical instance-facing state markers on the custom-element
+  // boundary while mirroring only the generated selector context needed by
+  // translated feedback.style tokens on a split presentation surface.
+  const presentationSurface = args.textControlTarget ?? el;
 
   return createCapsWiring()
+    .use('text-control', [
+      [
+        TEXT_CONTROL_HOST_CAP,
+        createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
+      ],
+      [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [[EFFECTS_CAP, effectsPort]])
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
-        createWebA11yProjector(getConnectedTriggerSurface, (listener) =>
-          subscribeLogicalTriggerSurface(instanceToken, listener)
+        createWebA11yProjector(
+          () => physicalControl() ?? getConnectedTriggerSurface(),
+          (listener) => subscribeLogicalTriggerSurface(instanceToken, listener)
         ),
       ],
     ])
     .use('event', [
       [EVENT_ROOT_TARGET_CAP, () => router.rootTarget],
       [EVENT_GLOBAL_TARGET_CAP, () => router.globalTarget],
+      [EVENT_CANCEL_DEFAULT_ACTION_CAP, cancelWebEventDefaultAction],
+    ])
+    .use('expose-event', [
       [
-        EVENT_CANCEL_DEFAULT_ACTION_CAP,
-        ({ event }: EventDefaultActionCancelRequest) => {
-          if (typeof (event as Event | undefined)?.preventDefault === 'function') {
-            (event as Event).preventDefault();
-          }
-        },
-      ],
-      [
-        EVENT_EMIT_CAP,
+        EXPOSE_EVENT_SINK_CAP,
         (key: string, payload?: unknown, options?: Record<string, unknown>) => {
           const ev = new CustomEvent(key, {
             detail: payload,
@@ -319,13 +355,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
       [FOCUS_TARGET_READY_CAP, subscribeFocusTarget],
-      [FOCUS_ROOT_TARGET_CAP, getTriggerSurface],
+      [FOCUS_ROOT_TARGET_CAP, () => physicalControl() ?? getTriggerSurface()],
       [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, (target: HTMLElement) => isNativelyFocusable(target)],
       [
         FOCUS_SET_FOCUSABLE_CAP,
-        (target: HTMLElement, enabled: boolean) => {
-          const surface = getLogicalTriggerSurfaceRoot(instanceToken);
-          target.tabIndex = enabled && (!surface || surface === target) ? 0 : -1;
+        (target: HTMLElement, enabled: boolean, options?: { programmatic?: boolean }) => {
+          const surface = physicalControl() ?? getLogicalTriggerSurfaceRoot(instanceToken);
+          projectFocusable(target, enabled && (!surface || surface === target), options);
         },
       ],
       [
@@ -336,12 +372,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         FOCUS_SET_ENTRY_FOCUSABLE_CAP,
         (target: HTMLElement, config: FocusEntryConfig, enabled: boolean) => {
           if (!enabled) {
-            target.tabIndex = -1;
+            projectFocusable(target, false);
             return;
           }
 
           const resolved = resolveFocusEntryTarget(target, config);
-          target.tabIndex = resolved === target ? 0 : -1;
+          projectFocusable(target, resolved === target);
         },
       ],
       [
@@ -367,7 +403,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     ])
     .use('expose-state', [
       [
-        EXPOSE_STATE_SET_EXPOSES_CAP,
+        EXPOSES_RECORD_SINK_CAP,
         (record: Record<string, unknown>) => {
           setExposes(record ?? {});
         },
@@ -376,6 +412,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('expose-state-web', () => [
       [HOST_ELEMENT_CAP, el],
       [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
+      [
+        EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP,
+        () => (presentationSurface === el ? [] : [presentationSurface]),
+      ],
       ...(exposeStateWebMode ? [[EXPOSE_STATE_WEB_MODE_CAP, exposeStateWebMode] as const] : []),
     ])
     .use('context', [
@@ -419,6 +459,15 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [BOUNDARY_HOST_BRIDGE_CAP, createWebBoundaryHostBridge()],
     ])
     .use('positioning', [[ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()]])
+    .use('scroll', [
+      [
+        SCROLL_SURFACE_HOST_CAP,
+        createWebScrollSurfaceHost(el, {
+          moveGestureHost: createWebMoveGestureHost(),
+          preference: scrollProjection,
+        }),
+      ],
+    ])
     .use('overlay', () => [
       [HOST_ELEMENT_CAP, el],
       [
@@ -493,6 +542,20 @@ function isNativelyFocusable(el: HTMLElement): boolean {
     return el.hasAttribute('href');
   }
   return false;
+}
+
+function projectFocusable(
+  target: HTMLElement,
+  enabled: boolean,
+  options?: { programmatic?: boolean }
+): void {
+  if (enabled) {
+    target.setAttribute('tabindex', '0');
+  } else if (options?.programmatic || isNativelyFocusable(target)) {
+    target.setAttribute('tabindex', '-1');
+  } else {
+    target.removeAttribute('tabindex');
+  }
 }
 
 function resolveFocusEntryTarget(

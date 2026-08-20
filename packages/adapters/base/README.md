@@ -13,13 +13,14 @@ Adapter foundation package used to translate Proto UI contracts into concrete ho
 ## Install
 
 ```bash
-npm install @proto.ui/adapter-base@0.2.0-rc.7
+npm install @proto.ui/adapter-base@0.3.0-alpha.0
 ```
 
 ## Internal Structure
 
 - `src/events/`
 - `src/gate/`
+- `src/gestures/`
 - `src/host/`
 - `src/index.ts`
 - `src/lifecycle/`

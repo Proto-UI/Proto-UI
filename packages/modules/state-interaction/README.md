@@ -13,7 +13,7 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-state-interaction@0.0.1
+npm install @proto.ui/module-state-interaction@0.3.0-alpha.0
 ```
 
 ## Internal Structure
@@ -26,6 +26,7 @@ npm install @proto.ui/module-state-interaction@0.0.1
 
 - `@proto.ui/core`
 - `@proto.ui/module-base`
+- `@proto.ui/module-event`
 - `@proto.ui/module-state`
 
 ## License

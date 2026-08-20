@@ -67,6 +67,8 @@ implementations:
     path: packages/adapters/react/test/tabs.test.ts
     required: true
     consumesCases:
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-AUTOMATIC
+      - T-BASE-TABS-LIST-0001-CASE-TAB-SEQUENTIAL
       - T-BASE-TABS-LIST-0001-CASE-A11Y-LABEL
     exercises:
       - P-BASE-TABS-LIST
@@ -76,6 +78,8 @@ implementations:
     path: packages/adapters/vue/test/tabs.test.ts
     required: true
     consumesCases:
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-AUTOMATIC
+      - T-BASE-TABS-LIST-0001-CASE-TAB-SEQUENTIAL
       - T-BASE-TABS-LIST-0001-CASE-A11Y-LABEL
     exercises:
       - P-BASE-TABS-LIST
@@ -108,6 +112,9 @@ revisions:
   - version: 0.1.3
     change: refined
     summary: Added coverage that vertical Tabs List delegates arrow-key roving navigation to Focus Roving.
+  - version: 0.1.4
+    change: refined
+    summary: Added regression coverage that inactive Web trigger surfaces retain tabindex minus one for arrow-key focus movement.
 tags:
   - prototype
   - base

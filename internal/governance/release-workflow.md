@@ -39,6 +39,16 @@ A V entity becomes `active` only after npm packages, the Git tag, and the spec s
 - the 40-character release commit SHA
 - the `sha256` spec snapshot digest
 
+### 2.3 Prerelease Stages
+
+Prerelease suffixes communicate stabilization stage rather than generic internal build order:
+
+- `alpha` admits reviewed architecture changes, top-level API changes, and new features. It is not an API or feature freeze.
+- `beta` begins after core scope and major APIs converge, shifting the train toward integration, compatibility, and defect correction. A new breaking direction requires an explicit decision about returning to alpha.
+- `rc` is reserved for a build maintainers believe can be promoted directly to the corresponding stable release after final verification or blocker fixes. Do not use rc while architectural rewrites, top-level breaking API changes, or new core features remain planned.
+
+Every published stage still requires an exact V entity, complete globally aligned package set, tag, dist-tag, and immutable snapshot evidence.
+
 ## 3. Preparation
 
 1. Create a topic branch from current `main`.
@@ -111,7 +121,7 @@ This checklist turns the policy above into the required sequence for each releas
 2. Update root `VERSION`, create the new `draft` V entity, and align the launch-governance release line.
 3. Run `node scripts/release/stamp-version.mjs` so all public package manifests use the exact version, then refresh the lockfile with the repository-declared pnpm version.
 4. Update both release notes and run `pnpm release:bom`. Update package-local documentation that ships in the tarball when it refers to its own version.
-5. Regenerate spec-derived projections with `pnpm spec:docs:agent` and review the entity graph affected by the new V entity.
+5. Generate the Git-ignored local Agent projection with `pnpm spec:docs:agent` and review the entity graph affected by the new V entity; do not add the disposable projection to the commit.
 6. Run `pnpm release:rehearse`, `pnpm check:agent-doc`, and `git diff --check` before committing.
 7. Open a Draft PR that states the release scope, checks, package count, and the fact that no publication has occurred.
 
@@ -155,7 +165,7 @@ Create a new topic branch from the latest `origin/main`; do not reuse the prepar
 4. change release notes from draft wording to published wording
 5. update the bilingual repository status, exact prerelease trial commands, release links, and current-release CI/CD prose
 6. add a dated record containing the workflow, npm, tag, GitHub Release, and snapshot facts
-7. regenerate spec-derived projections and run `check:release-version`, `release:assets:check`, `check:agent-doc`, type checks, and the documentation build
+7. generate and review the Git-ignored local Agent projection, then run `check:release-version`, `release:assets:check`, `check:agent-doc`, type checks, and the documentation build
 8. after the evidence PR merges, replace the GitHub Release body with the merged English `internal/releases/<version>/release-notes.md` and verify that the public page no longer carries pre-publication draft wording; do not publish this mutable prose update before review, and do not replace or regenerate the immutable snapshot assets
 
 The evidence PR does not bump `VERSION` or package manifests and does not republish packages. Its purpose is to make repository truth match already immutable external facts. Only after it merges may the release be described in the catalog as `active` and in public documentation as the current reproducible prerelease.

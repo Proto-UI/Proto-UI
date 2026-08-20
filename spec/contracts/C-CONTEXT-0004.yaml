@@ -30,6 +30,10 @@ criteria:
     text:
       zh-CN: Context 不得被硬编码为某个宿主的 DOM tree、React Context 或 Vue provide/inject 语义。
       en: Context must not be hard-coded to a specific host's DOM tree, React Context, or Vue provide/inject semantics.
+  - id: C-CONTEXT-0004-E
+    text:
+      zh-CN: Module-internal 协调器可以把 nearest provider identity 作为 opaque scope token 使用，但该 token 不属于 Context value，也不得暴露给 prototype author。
+      en: A module-internal coordinator may use nearest-provider identity as an opaque scope token, but that token is not part of the Context value and must not be exposed to prototype authors.
 sources:
   - path: internal/contracts/context/with-tree.v0.md
     sections:
@@ -40,10 +44,16 @@ sources:
   - path: packages/modules/context/src/caps.ts
     sections:
       - CONTEXT_PARENT_CAP
+  - path: packages/modules/context/src/types.ts
+    sections:
+      - ContextPort.resolveScope
 dependsOn:
   contracts:
     - C-CONTEXT-0002
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Allowed opaque nearest-provider identity for bounded module-internal coordination without weakening JSON values.
   - version: 0.1.0
     change: introduced
     summary: Captured scope ancestry and nearest-provider resolution without requiring all hosts to be tree-shaped.

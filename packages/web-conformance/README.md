@@ -10,4 +10,4 @@ Run the category with:
 corepack pnpm@10.32.1 test:web-conformance
 ```
 
-Vitest's root include also collects these files, so `test:runtime` and the default `test` workflow enforce them. The cataloged test contract is [`T-WEB-SHADCN-DIALOG-JOURNEY-0001`](../../spec/tests/T-WEB-SHADCN-DIALOG-JOURNEY-0001.yaml).
+Vitest's root include also collects these files, so `test:runtime` and the default `test` workflow enforce them. Cataloged coverage includes [`T-WEB-SHADCN-DIALOG-JOURNEY-0001`](../../spec/tests/T-WEB-SHADCN-DIALOG-JOURNEY-0001.yaml) and [`T-SCROLL-COMPOSED-CONTROL-0001`](../../spec/tests/T-SCROLL-COMPOSED-CONTROL-0001.yaml).

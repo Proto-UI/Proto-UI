@@ -1,0 +1,71 @@
+id: T-BASE-ASYNC-REGION-0001
+type: test
+title: Base Async Region behavior tests
+status: draft
+since: 0.2.0-rc.7
+summary: Web Component coverage for aria-busy projection, busy expose handle, mounted transitions, content preservation, and non-interaction.
+cases:
+  - id: T-BASE-ASYNC-REGION-0001-CASE-TYPED-BUSY
+    title: Public busy handles preserve the boolean type across exposes and state surfaces
+    covers:
+      - P-BASE-ASYNC-REGION-BUSY
+    expectation: async-region-public-handles-preserve-boolean-busy
+  - id: T-BASE-ASYNC-REGION-0001-CASE-DEFAULTS
+    title: Async Region defaults to not-busy with governed busy expose and no interaction
+    covers:
+      - P-BASE-ASYNC-REGION-BUSY
+      - P-BASE-ASYNC-REGION-NO-INTERACTION
+    expectation: not-busy-default-with-governed-busy-expose-and-no-interaction
+  - id: T-BASE-ASYNC-REGION-0001-CASE-BUSY-TRUE
+    title: busy=true projects aria-busy true
+    covers:
+      - P-BASE-ASYNC-REGION-BUSY
+    expectation: busy-true-projects-aria-busy-true
+  - id: T-BASE-ASYNC-REGION-0001-CASE-DYNAMIC-BUSY
+    title: Mounted prop transitions update aria-busy and the busy expose handle synchronously
+    covers:
+      - P-BASE-ASYNC-REGION-BUSY
+      - P-BASE-ASYNC-REGION-DYNAMIC
+    expectation: mounted-prop-transitions-update-aria-busy-and-expose-handle
+  - id: T-BASE-ASYNC-REGION-0001-CASE-CONTENT-PRESERVATION
+    title: Authored descendants and focus are preserved on prop-only transitions
+    covers:
+      - P-BASE-ASYNC-REGION-CONTENT
+      - P-BASE-ASYNC-REGION-DYNAMIC
+    expectation: authored-descendants-preserved-on-prop-only-transitions
+implementations:
+  - id: prototypes-base-async-region-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/async-region.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-ASYNC-REGION-0001-CASE-TYPED-BUSY
+      - T-BASE-ASYNC-REGION-0001-CASE-DEFAULTS
+      - T-BASE-ASYNC-REGION-0001-CASE-BUSY-TRUE
+      - T-BASE-ASYNC-REGION-0001-CASE-DYNAMIC-BUSY
+      - T-BASE-ASYNC-REGION-0001-CASE-CONTENT-PRESERVATION
+    exercises:
+      - P-BASE-ASYNC-REGION
+verifies:
+  prototypes:
+    - id: P-BASE-ASYNC-REGION
+      anchors:
+        - P-BASE-ASYNC-REGION-BUSY
+        - P-BASE-ASYNC-REGION-DYNAMIC
+        - P-BASE-ASYNC-REGION-CONTENT
+        - P-BASE-ASYNC-REGION-NO-INTERACTION
+  contracts:
+    - id: C-ASYNC-A11Y-0001
+      anchors:
+        - C-ASYNC-A11Y-0001-D
+        - C-ASYNC-A11Y-0001-E
+exercises:
+  prototypes: [P-BASE-ASYNC-REGION]
+sources:
+  - path: packages/prototypes/base/test/async-region.test.ts
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added executable Async Region protocol coverage.
+tags: [base, async-region, a11y, test]

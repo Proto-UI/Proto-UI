@@ -9,12 +9,10 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Scroll Area 在 Base Scroll Area anatomy（Root / Viewport / Scrollbar / Thumb / Corner）之上投影方形纸面与高对比 Lavender/ink 滚动控件。可移植 viewport metrics 与 thumb 拖拽归属由后续 behavior PR 提供。
+Brutalist Scroll Area 保留 Base 的宿主滚动面、归一化 viewport facts、orientation 与已解析 projection。它偏好 composed chrome，并增加方形 paper 表面和高对比 Lavender/ink 控件。家族级 host session 会根据实际 scroll facts 连续投射 Thumb 尺寸与位置，并把 Thumb 上的 pointer 拖动映射回归一化 scroll request。抓取 Thumb 不会创建第二份 scroll state，也不会使其成为独立 focus/ARIA control。track page press 与完整 Drag and Drop 仍不属于当前 passing guarantee。
 
-适用于 ChatUI 会话历史、列表、命令结果、日志与密集 SaaS 面板。外层布局必须给 Root 明确尺寸。
+用于 ChatUI conversation history、会话列表、命令结果、日志和密集 SaaS 面板。外围 layout 必须给 Root 明确尺寸。参考 demo 保留 12rem 高度，并把响应式宽度上限设为 20rem：桌面 composition 不变，同时完整 Root 与 visual scrollbar 在手机 preview frame 内保持可见。
 
-<div style="--pui-background:#f4f1ea;--pui-foreground:#000;--pui-lavender:#DDD6FE;background:#f4f1ea;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:1rem;">
-  <div style="height:12rem;width:20rem;">
-    <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
-  </div>
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
 </div>

@@ -1,0 +1,46 @@
+id: T-BRUTALIST-SKELETON-0001
+type: test
+title: Brutalist Skeleton visual contract tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers direct styled-only ownership, passive contentless behavior, and the tested Neo-Brutalist visual grammar.
+cases:
+  - id: T-BRUTALIST-SKELETON-0001-CASE-DIRECT-OWNERSHIP
+    title: Styled-only Skeleton materializes directly without a Base Skeleton hook
+    covers:
+      - P-BRUTALIST-SKELETON-DIRECT-OWNERSHIP
+    expectation: brutalist-skeleton-has-no-base-skeleton-as-hook
+  - id: T-BRUTALIST-SKELETON-0001-CASE-VISUAL-ONLY
+    title: Visual-only placeholder is passive and contentless with Brutalist grammar and consumer-owned size
+    covers:
+      - P-BRUTALIST-SKELETON-VISUAL-ONLY
+      - P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
+      - P-BRUTALIST-SKELETON-CONSUMER-SIZE
+    expectation: brutalist-skeleton-hidden-static-surface-with-consumer-owned-size
+implementations:
+  - id: prototypes-brutalist-skeleton-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/skeleton.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SKELETON-0001-CASE-DIRECT-OWNERSHIP
+      - T-BRUTALIST-SKELETON-0001-CASE-VISUAL-ONLY
+    exercises:
+      - P-BRUTALIST-SKELETON
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-SKELETON
+exercises:
+  prototypes:
+    - P-BRUTALIST-SKELETON
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added draft Brutalist skeleton prototype coverage.
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - skeleton

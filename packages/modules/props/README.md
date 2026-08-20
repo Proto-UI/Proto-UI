@@ -13,12 +13,11 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-props@0.0.1
+npm install @proto.ui/module-props@0.3.0-alpha.0
 ```
 
 ## Internal Structure
 
-- `src/.DS_Store`
 - `src/caps.ts`
 - `src/create.ts`
 - `src/impl.ts`

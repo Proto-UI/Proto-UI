@@ -54,12 +54,25 @@ criteria:
     text:
       zh-CN: a11y role 可以引用静态字符串或 state handle；当交互对象的 role 由受治理状态切换时，adapter 投射必须随 state 更新。
       en: A11y role may reference a static string or a state handle; when an interaction object's role changes through governed state, adapter projection must update with that state.
+  - id: C-A11Y-0001-K
+    text:
+      zh-CN: 对于可包含多个 IDREF 的 relation，原型可以声明追加投影；adapter 必须保留宿主已有且不由该 semantic object 拥有的 relation 目标，并只更新或移除自身拥有的目标。
+      en: For relations that accept multiple IDREFs, a prototype may declare additive projection; the adapter must preserve existing host relation targets not owned by that semantic object and update or remove only its own targets.
+  - id: C-A11Y-0001-L
+    text:
+      zh-CN: a11y semantic tree behavior 可以引用 state handle；投影 snapshot 必须解析为 boolean，并在 mounted 后随 state 更新，且 semantic hiding 不得误改宿主布局可见性。
+      en: A11y semantic tree behavior may reference state handles; projected snapshots must resolve to booleans and update with state after mount, while semantic hiding must not alter host layout visibility.
+  - id: C-A11Y-0001-M
+    text:
+      zh-CN: Web adapter 投影字符串 a11y state 时，空字符串必须移除对应宿主 attribute，并在恢复非空值后重新投影。
+      en: When the Web adapter projects a string a11y state, an empty string must remove the corresponding host attribute, and a later non-empty value must restore it.
 sources:
   - path: internal/records/2026-06-30-a11y-module-planning-for-button.zh-CN.md
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/create.ts
   - path: packages/modules/a11y/src/web.ts
   - path: packages/runtime/test/contract/a11y.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts
   - path: https://www.w3.org/TR/accname-1.2/
     label: W3C Accessible Name and Description Computation
   - path: https://www.w3.org/TR/wai-aria-1.2/
@@ -87,6 +100,9 @@ revisions:
   - version: 0.1.2
     change: refined
     summary: Allowed semantic roles to reference state handles for governed dynamic role projection.
+  - version: 0.2.0-rc.7
+    change: refined
+    summary: Added additive relation projection, state-backed semantic tree behavior, and optional Web a11y state omission.
 tags:
   - a11y
   - accessibility

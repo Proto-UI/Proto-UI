@@ -1,35 +1,40 @@
 id: P-BRUTALIST-SCROLL-AREA-THUMB
 type: prototype
-title: Brutalist Scroll Area Thumb protocol
+title: Brutalist Scroll Area Thumb projects foreground feedback
 status: draft
 since: 0.2.0-rc.7
-summary: Brutalist Scroll Area Thumb protocol for the Proto UI framework.
+summary: Brutalist Thumb inherits host-projected geometry and the family Move hit-subregion role while adding a square foreground fill.
 statement:
-  en: Brutalist Scroll Area Thumb protocol. This draft entity catalogs the protocol surface.
-  zh-CN: Brutalist Scroll Area Thumb protocol。该 draft entity 编目协议面。
+  zh-CN: Brutalist Thumb 是 composed Scrollbar 内的直角前景反馈面。它继承 Base Thumb 的无独立语义边界与 Move Gesture 命中子区域角色；尺寸、位移与 drag mapping 由家族级 host session 持续管理。
+  en: Brutalist Thumb is a square foreground feedback surface inside a composed Scrollbar. It inherits the Base Thumb no-independent-semantics boundary and Move Gesture hit-subregion role; size, offset, and drag mapping remain continuously managed by the family-level host session.
 criteria:
-  - id: P-BRUTALIST-SCROLL-AREA-THUMB-CATALOGED
+  - id: P-BRUTALIST-SCROLL-AREA-THUMB-BASE-INHERITANCE
     text:
-      en: The protocol is cataloged for traceability.
-      zh-CN: 该协议已编目以便追溯。
+      zh-CN: Thumb 必须通过 `asScrollAreaThumb()` 继承 Base anatomy identity、无独立语义边界与 host-managed Move 命中子区域角色。
+      en: Thumb must inherit Base anatomy identity, the no-independent-semantics boundary, and the host-managed Move hit-subregion role through `asScrollAreaThumb()`.
+  - id: P-BRUTALIST-SCROLL-AREA-THUMB-SURFACE
+    text:
+      zh-CN: Thumb 必须投射 `relative h-full w-full rounded-none bg-lavender-foreground` 作为交叉轴填充，并允许 host session 通过专用 CSS variables/transform 覆盖主轴 geometry；该样式本身不取得 pointer interaction ownership，Move binding 仍属于 host session。填充必须取 Scrollbar track 那个固定 lavender accent 的配对前景，而不是主题全局 foreground，否则 track 不随主题翻转时 thumb 会失去对比度。
+      en: Thumb must project `relative h-full w-full rounded-none bg-lavender-foreground` for cross-axis fill and allow the host session to override primary-axis geometry through dedicated CSS variables and transform; the style itself acquires no pointer-interaction ownership, which remains in the host-session Move binding. The fill must resolve the paired foreground of the Scrollbar track's fixed lavender accent rather than the theme-global foreground, because the track does not flip with the theme and the Thumb would otherwise lose contrast against it.
 sources:
   - path: packages/prototypes/brutalist/src/scroll-area/thumb.proto.ts
-revisions:
-  - version: 0.2.0-rc.7
-    change: introduced
-    summary: Introduced brutalist scroll area thumb protocol.
-tags:
-  - prototype
-  - brutalist
-  - scroll_area
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001, C-SCROLL-COMPOSED-CONTROL-0001]
 inherits:
   prototypes:
     - id: P-BASE-SCROLL-AREA-THUMB
-dependsOn:
-  contracts:
-    - C-CORE-SYNTAX-0003
-    - C-AS-HOOK-0001
-    - C-RULE-INTENT-FEEDBACK-STYLE-0001
-verifies:
-  tests:
-    - T-BRUTALIST-SCROLL-AREA-0001
+verifies: { tests: [T-BRUTALIST-SCROLL-AREA-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Inherited the host-managed Move hit-subregion role without adding independent Thumb semantics.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Replaced the full-track flex placeholder with host-projected passive Thumb geometry.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the square foreground Thumb feedback surface and explicit no-drag guarantee.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Resolved the Thumb fill from the lavender track's paired foreground instead of the theme-global foreground.
+tags: [prototype, brutalist, scroll-area, thumb, feedback, move, visual]

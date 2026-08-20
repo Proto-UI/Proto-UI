@@ -1,0 +1,33 @@
+---
+title: 'Tooltip'
+desp: 'Tooltip'
+description: 'Tooltip 与 Tooltip Group 基础原型'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+Base Tooltip 由 Root、Trigger 与 Content 组成；Tooltip Group 是同族的相邻协议，用于在多个 Root 间共享 delay defaults、warm window 与 active owner coordination。
+
+- 首次 pointer hover 在 `openDelay` 后打开，反向移动会取消 pending task。
+- keyboard focus 立即打开，不等待 pointer delay。
+- `closeDelay` 让指针可以从 Trigger 移入 Content；Content 本身不得包含可聚焦交互。
+- Trigger 只在 open 时以 additive `aria-describedby` 引用 `role="tooltip"` 的 Content。
+- Escape 进入 Root 的统一 close request channel。
+- Group warm window 内切换到 sibling Tooltip 时立即打开；前一个非受控 Tooltip 同步结束感知 presence，不保留可见退场重叠，`skipDelay` 到期后恢复首次延迟。
+
+当前 Portal 由 Content 的 Overlay/renderer projection 持有，不单独提供 Base Portal 原型。Arrow 需要受治理的 geometry/positioning 通道，暂不属于当前 Base 保证。
+
+<PrototypePreviewer
+  demoId="demo-base-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>
+
+## 建议验收路径
+
+1. 把指针移入 `Account`，确认约 500ms 后出现 Tooltip；提前移出时不应闪现。
+2. Tooltip 打开后快速移到 `Notifications`，确认 sibling 在 warm window 内立即打开，且前一个立即消失、没有双 Tooltip 可见重叠。
+3. 等两个 Tooltip 都关闭超过 700ms，再次 hover，确认恢复 500ms 延迟。
+4. 使用 Tab 聚焦 Trigger，确认立即打开；按 Escape 后关闭且焦点仍留在 Trigger。
+5. 在工具栏切换 Web Components、React 与 Vue，重复上述交互。

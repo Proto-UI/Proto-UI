@@ -20,7 +20,8 @@ export type StatePort = {
 
   /**
    * Emit a disconnect event to all watchers of this state slot.
-   * Intended for unmount/dispose and for interaction modules.
+   * Intended for terminal disposal or an explicit semantic-source disconnect.
+   * Repeatable view detachment must preserve instance-owned State resources.
    */
   disconnect(handle: OwnedStateHandle<any>): void;
 

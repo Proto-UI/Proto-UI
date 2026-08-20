@@ -1,0 +1,52 @@
+id: P-BASE-TOOLTIP-GROUP
+type: prototype
+title: Base Tooltip Group coordinates delay warmth and active ownership
+status: draft
+since: 0.2.0-rc.7
+summary: Tooltip Group is an adjacent family protocol that shares delays, allows warm sibling opening, restores delayed opening after cooldown, and coordinates one active Tooltip.
+statement:
+  zh-CN: Tooltip Group 通过独立 Group Context 协调其后代 Tooltip Root，但不成为单个 Tooltip Anatomy 的 part。Group 提供 openDelay、closeDelay 与 skipDelay defaults；第一个 pointer Tooltip 经过 openDelay，已有 Tooltip 打开或刚关闭后的 warm window 内 sibling 可立即打开，最后一个 active Tooltip 关闭并经过 skipDelay 后恢复 cold。新 Tooltip 成为 active 时，Group 通知其它已打开 Root 进入各自 request channel 关闭；受控 owner 仍保留最终 open authority。
+  en: Tooltip Group coordinates descendant Tooltip Roots through a separate Group Context but is not a part of an individual Tooltip Anatomy. Group provides openDelay, closeDelay, and skipDelay defaults. The first pointer Tooltip honors openDelay, a sibling may open immediately while another Tooltip is open or during the warm window after closure, and the group returns to cold after the last active Tooltip closes and skipDelay elapses. When a new Tooltip becomes active, Group tells other open Roots to close through their own request channels; a controlled owner retains final open authority.
+criteria:
+  - id: P-BASE-TOOLTIP-GROUP-CONTEXT
+    text:
+      zh-CN: Group 必须提供独立于单 Tooltip Context 的 Group Context，并且不得 claim Tooltip Anatomy role。
+      en: Group must provide a Group Context separate from an individual Tooltip Context and must not claim a Tooltip Anatomy role.
+  - id: P-BASE-TOOLTIP-GROUP-DELAYS
+    text:
+      zh-CN: Group 必须接受 `openDelay`、`closeDelay`、`skipDelay`，默认 700ms/100ms/300ms；Root 显式 delay props 必须覆盖 Group defaults。
+      en: Group must accept `openDelay`, `closeDelay`, and `skipDelay`, defaulting to 700ms, 100ms, and 300ms; explicit Root delay props must override Group defaults.
+  - id: P-BASE-TOOLTIP-GROUP-WARMTH
+    text:
+      zh-CN: active 或 cooldown warm window 内的 sibling pointer open 必须为 0ms；最后一个 active 关闭后的 skipDelay 到期时必须恢复 cold openDelay。
+      en: Sibling pointer opening must be 0ms during the active or cooldown warm window; cold openDelay must return when skipDelay expires after the last active Tooltip closes.
+  - id: P-BASE-TOOLTIP-GROUP-ACTIVE-OWNER
+    text:
+      zh-CN: 新 Root 成为 active 时，其它 open Root 必须通过各自 request channel 请求关闭；Group 不得直接改写受控 owner fact。
+      en: When a new Root becomes active, other open Roots must request closure through their own request channels; Group must not directly mutate a controlled owner fact.
+  - id: P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF
+    text:
+      zh-CN: 非受控 sibling handoff 必须在同一次协调后的 view reconciliation 中使前一个 Content 结束感知 presence，不得保留可见的 leave duration；普通关闭仍可运行其 Transition。受控 owner 仅接收关闭请求，并保留最终 open authority。
+      en: An uncontrolled sibling handoff must end the previous Content's perceptual presence in the view reconciliation following the same coordination and must not preserve a visible leave duration; ordinary closure may still run its Transition. A controlled owner only receives a close request and retains final open authority.
+  - id: P-BASE-TOOLTIP-GROUP-NO-NEW-MODULE
+    text:
+      zh-CN: 当前 Group 语义必须由现有 Context 与 Delay 能力表达，不得仅为 Tooltip 新增专用 core/module substrate。
+      en: Current Group semantics must be expressed through existing Context and Delay capabilities and must not introduce a Tooltip-specific core or module substrate.
+sources:
+  - path: packages/prototypes/base/src/tooltip/group.proto.ts
+  - path: packages/prototypes/base/src/tooltip/root.proto.ts
+  - path: packages/prototypes/base/test/tooltip.test.ts
+  - path: https://base-ui.com/react/components/tooltip
+    label: Base UI Tooltip Provider
+  - path: https://www.radix-ui.com/primitives/docs/components/tooltip#provider
+    label: Radix UI Tooltip Provider
+dependsOn:
+  contracts: [C-CONTEXT-0001, C-DELAY-0001]
+  decisions: [D-TOOLTIP-PROTOTYPE-BOUNDARY-0001]
+relates: { prototypes: [P-BASE-TOOLTIP] }
+verifies: { tests: [T-BASE-TOOLTIP-GROUP-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged shared delay defaults, warm-window behavior, and active Tooltip coordination.
+tags: [prototype, base, tooltip, group, delay, context]

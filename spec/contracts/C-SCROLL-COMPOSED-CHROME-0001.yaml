@@ -1,0 +1,60 @@
+id: C-SCROLL-COMPOSED-CHROME-0001
+type: contract
+title: Composed scroll chrome projects passive geometry from host facts
+status: draft
+since: 0.2.0-rc.7
+summary: A composed chrome session binds authored Scrollbar and Thumb parts to one host-owned surface and projects passive size and position feedback without duplicating scroll state.
+statement:
+  zh-CN: >-
+    当 Scroll surface 的 resolved projection 为 `composed` 时，Scroll module 必须在同一 Context family scope 内把 Viewport、方向性 Scrollbar 与其后代 Thumb 绑定到一个有界 host attachment。Host 使用 surface 的 normalized position 与 visible ratio 加上宿主本地 track geometry 计算 Thumb extent/offset，并直接更新宿主 paint/style sink。本 geometry contract 自身不授予 Thumb 拖拽、独立 focus 或 scrollbar widget semantics；交互能力由 `C-SCROLL-COMPOSED-CONTROL-0001` 另行约束。
+
+
+  en: >-
+    When a Scroll surface resolves to `composed`, the Scroll module must bind the Viewport, directional Scrollbar, and its descendant Thumb within the same Context family scope to one bounded host attachment. The host combines normalized surface position and visible ratio with host-local track geometry to calculate Thumb extent and offset, updating the host paint or style sink directly. This geometry contract grants no Thumb dragging, independent focus, or scrollbar-widget semantics by itself; interaction is governed separately by `C-SCROLL-COMPOSED-CONTROL-0001`.
+
+
+criteria:
+  - id: C-SCROLL-COMPOSED-CHROME-0001-A
+    text:
+      zh-CN: composed attachment 必须由 Context provider scope、Viewport surface、Anatomy Scrollbar→Thumb relation 与 orientation 共同解析，不得按全局 DOM selector 或偶然 sibling order 绑定。
+      en: The composed attachment must resolve from the Context provider scope, Viewport surface, Anatomy Scrollbar-to-Thumb relation, and orientation, rather than from global DOM selectors or accidental sibling order.
+  - id: C-SCROLL-COMPOSED-CHROME-0001-B
+    text:
+      zh-CN: portable facts 只需提供 normalized position 与 visible ratio；track extent、padding、minimum Thumb extent 与最终 pixel offset 属于 host-local geometry。
+      en: Portable facts need provide only normalized position and visible ratio; track extent, padding, minimum Thumb extent, and final pixel offset are host-local geometry.
+  - id: C-SCROLL-COMPOSED-CHROME-0001-C
+    text:
+      zh-CN: 对可表示且 overflow 的轴，host 必须使 Thumb extent 与 visible ratio 成比例并设置最小可见长度，使 Thumb offset 在可用 travel 范围内随 normalized position 单调移动。
+      en: For a representable overflowing axis, the host must make Thumb extent proportional to visible ratio with a minimum visible length and move Thumb offset monotonically with normalized position within available travel.
+  - id: C-SCROLL-COMPOSED-CHROME-0001-D
+    text:
+      zh-CN: 无 overflow、track 无可用 extent 或无法表示 range 时，host 必须隐藏或不绘制 Thumb，而不得展示占满 track 的伪反馈。
+      en: When there is no overflow, no available track extent, or the range cannot be represented, the host must hide or omit Thumb painting rather than show false full-track feedback.
+  - id: C-SCROLL-COMPOSED-CHROME-0001-E
+    text:
+      zh-CN: scroll、surface/content/track resize、orientation 或 part replacement 必须刷新投影；detach、replacement 与 dispose 必须恢复或释放被 session 占用的宿主资源和样式。
+      en: Scroll, surface or content or track resize, orientation, and part replacement must refresh projection; detach, replacement, and disposal must restore or release host resources and styles owned by the session.
+  - id: C-SCROLL-COMPOSED-CHROME-0001-F
+    text:
+      zh-CN: Geometry projection 不得使 Thumb 获得独立 focus 或 `role=scrollbar`；任何 pointer control guarantee 必须来自独立的 composed-control 契约，Viewport 继续保留宿主原生滚动输入。
+      en: Geometry projection must not grant the Thumb independent focus or `role=scrollbar`; any pointer-control guarantee must come from a separate composed-control contract, while the Viewport retains host-native scrolling input.
+sources:
+  - path: packages/core/src/scroll.ts
+  - path: packages/modules/scroll/src/caps.ts
+  - path: packages/modules/scroll/src/impl.ts
+  - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
+dependsOn:
+  contracts:
+    - C-SCROLL-0001
+    - C-CONTEXT-0009
+    - C-ANATOMY-0001
+  decisions:
+    - D-SCROLL-COMPOSED-PROJECTION-0001
+verifies:
+  tests:
+    - T-SCROLL-COMPOSED-CHROME-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Defined the passive composed chrome family attachment and geometry projection contract.
+tags: [scroll, composed-chrome, thumb, geometry, host-projection]

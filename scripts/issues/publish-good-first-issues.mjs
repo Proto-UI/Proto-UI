@@ -296,6 +296,10 @@ function printDryRun(seed, issues, args) {
   }
 
   console.log(`Good First Issue dry-run: ${issues.length} issue(s) selected`);
+  if (seed.status === 'retired') {
+    console.log(`Campaign status: retired`);
+    console.log(`Reason: ${seed.retiredReason ?? 'This seed must not be published.'}`);
+  }
   console.log('');
   for (const issue of issues) {
     console.log(`- ${issue.id}`);
@@ -323,6 +327,14 @@ function main() {
   if (args.dryRun) {
     printDryRun(seed, issues, args);
     return;
+  }
+
+  if (seed.status === 'retired') {
+    throw new Error(
+      `Refusing to publish retired campaign "${seed.campaign ?? args.source}": ${
+        seed.retiredReason ?? 'create a reviewed active seed first'
+      }`
+    );
   }
 
   const repo = args.repo ?? inferRepo();

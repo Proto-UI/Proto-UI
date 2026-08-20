@@ -19,6 +19,9 @@ export const ROOT_DIR = resolve(__dirname, '..', '..');
 const PACKAGES_DIR = join(ROOT_DIR, 'packages');
 const ROOT_LICENSE = join(ROOT_DIR, 'LICENSE');
 const ROOT_README = join(ROOT_DIR, 'README.md');
+const PACKAGE_MANAGER = JSON.parse(
+  readFileSync(join(ROOT_DIR, 'package.json'), 'utf8')
+).packageManager;
 
 // Windows resolves `pnpm` / `npm` as `.cmd` shims; Node 18.20+ refuses to spawn
 // `.cmd` without a shell (CVE-2024-27980 mitigation), so we opt into shell:true
@@ -299,7 +302,7 @@ export function buildPrerequisitePackages(packages) {
   if (buildable.length === 0) return [];
   const args = ['build:packages'];
   for (const pkg of buildable) args.push('--package', pkg.name);
-  const result = spawnSync('pnpm', args, {
+  const result = spawnSync('corepack', [PACKAGE_MANAGER, ...args], {
     cwd: ROOT_DIR,
     encoding: 'utf8',
     shell: IS_WINDOWS,

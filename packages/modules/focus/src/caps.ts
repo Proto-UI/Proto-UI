@@ -9,7 +9,11 @@ export type FocusTargetReadySubscriber = (listener: () => void) => () => void;
 
 export type FocusIsNativelyFocusable = (target: HTMLElement) => boolean;
 
-export type FocusSetFocusable = (target: HTMLElement, enabled: boolean) => void;
+export type FocusSetFocusable = (
+  target: HTMLElement,
+  enabled: boolean,
+  options?: { programmatic?: boolean }
+) => void;
 
 export type FocusRequestFocus = (
   target: HTMLElement,

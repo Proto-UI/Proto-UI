@@ -1,35 +1,44 @@
 id: P-BRUTALIST-SCROLL-AREA-SCROLLBAR
 type: prototype
-title: Brutalist Scroll Area Scrollbar protocol
+title: Brutalist Scroll Area Scrollbar projects a lavender directional track
 status: draft
 since: 0.2.0-rc.7
-summary: Brutalist Scroll Area Scrollbar protocol for the Proto UI framework.
+summary: Brutalist Scrollbar inherits Base orientation and adds a square lavender track with structural borders selected by axis.
 statement:
-  en: Brutalist Scroll Area Scrollbar protocol. This draft entity catalogs the protocol surface.
-  zh-CN: Brutalist Scroll Area Scrollbar protocol。该 draft entity 编目协议面。
+  zh-CN: Brutalist Scrollbar 只投射 composed control 的视觉 track：lavender 平面填充、直角与前景结构边框。vertical 贴合 Root 右侧并使用左边框和固定宽度，horizontal 贴合 Root 底部并使用上边框和固定高度；它不取得 offset ownership。
+  en: >-
+    Brutalist Scrollbar projects only the visual track of a composed control: flat lavender fill, square geometry, and foreground structural borders. Vertical attaches to the right edge of Root with a left border and fixed width while horizontal attaches to the bottom edge with a top border and fixed height; it does not acquire offset ownership.
+
+
 criteria:
-  - id: P-BRUTALIST-SCROLL-AREA-SCROLLBAR-CATALOGED
+  - id: P-BRUTALIST-SCROLL-AREA-SCROLLBAR-BASE-INHERITANCE
     text:
-      en: The protocol is cataloged for traceability.
-      zh-CN: 该协议已编目以便追溯。
+      zh-CN: Scrollbar 必须通过 `asScrollAreaScrollbar()` 继承 Base orientation 与 anatomy identity。
+      en: Scrollbar must inherit Base orientation and anatomy identity through `asScrollAreaScrollbar()`.
+  - id: P-BRUTALIST-SCROLL-AREA-SCROLLBAR-TRACK
+    text:
+      zh-CN: 基础 track 必须投射 `flex select-none touch-none bg-lavender p-0.5`，不得引入圆角、渐变或柔和阴影。
+      en: The base track must project `flex select-none touch-none bg-lavender p-0.5` without rounded corners, gradients, or soft shadows.
+  - id: P-BRUTALIST-SCROLL-AREA-SCROLLBAR-ORIENTATION
+    text:
+      zh-CN: vertical 必须投射 `absolute right-0 top-0 h-full w-4 border-l-2 border-foreground`；horizontal 必须投射 `absolute bottom-0 left-0 h-4 w-full border-t-2 border-foreground`，使 track 保持在 Root 的可见 chrome 层，并让 inline axis 与 Thumb geometry 一致。
+      en: Vertical must project `absolute right-0 top-0 h-full w-4 border-l-2 border-foreground`; horizontal must project `absolute bottom-0 left-0 h-4 w-full border-t-2 border-foreground`, keeping the track in Root's visible chrome layer while aligning its inline axis with Thumb geometry.
 sources:
   - path: packages/prototypes/brutalist/src/scroll-area/scrollbar.proto.ts
-revisions:
-  - version: 0.2.0-rc.7
-    change: introduced
-    summary: Introduced brutalist scroll area scrollbar protocol.
-tags:
-  - prototype
-  - brutalist
-  - scroll_area
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
 inherits:
   prototypes:
     - id: P-BASE-SCROLL-AREA-SCROLLBAR
-dependsOn:
-  contracts:
-    - C-CORE-SYNTAX-0003
-    - C-AS-HOOK-0001
-    - C-RULE-INTENT-FEEDBACK-STYLE-0001
-verifies:
-  tests:
-    - T-BRUTALIST-SCROLL-AREA-0001
+verifies: { tests: [T-BRUTALIST-SCROLL-AREA-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Kept horizontal track flow on the inline axis for host-projected Thumb geometry.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Positioned directional tracks against Root so composed chrome remains visible without entering Viewport flow.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the lavender directional track visual delta without expanding scroll ownership.
+tags: [prototype, brutalist, scroll-area, scrollbar, visual, delta]

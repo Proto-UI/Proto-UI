@@ -1,0 +1,75 @@
+id: P-BASE-TOOLTIP
+type: prototype
+title: Base Tooltip is a supplementary description protocol
+status: draft
+since: 0.2.0-rc.7
+summary: Tooltip Root owns controlled or uncontrolled visibility, cancellable pointer delays, immediate focus intent, disabled state, and the request channel shared by Trigger and Content.
+statement:
+  zh-CN: >-
+    Base Tooltip 为 Trigger 提供简短、补充且非任务必需的文本描述。Root 是 open fact、controlled ownership、disabled、delay configuration、interaction intent 与 request sequencing 的唯一 owner。pointer hover open 经过可取消 open delay，keyboard focus open 不得等待 pointer delay，close 经过 close delay；所有 intent 与 methods 都进入统一 `openChange` request channel。Tooltip 不承载可聚焦或完成任务所需的内容，此类场景必须选择 Popover 或 non-modal Dialog。
+
+
+  en: >-
+    Base Tooltip provides a short, supplementary, non-essential text description for its Trigger. Root is the sole owner of the open fact, controlled ownership, disabled state, delay configuration, interaction intent, and request sequencing. Pointer-hover opening passes through a cancellable open delay, keyboard-focus opening must not wait for the pointer delay, and closing passes through the close delay. All intent and methods enter one `openChange` request channel. Tooltip does not carry focusable content or content required to complete a task; those cases must use Popover or a non-modal Dialog.
+
+
+anatomy:
+  family: base-tooltip
+  roles:
+    root: { cardinality: { min: 1, max: 1 } }
+    trigger: { cardinality: { min: 0, max: 1 } }
+    content: { cardinality: { min: 0, max: 1 } }
+  relations:
+    - { kind: contains, parent: root, child: trigger }
+    - { kind: contains, parent: root, child: content }
+criteria:
+  - id: P-BASE-TOOLTIP-PURPOSE
+    text:
+      zh-CN: Tooltip 必须只提供简短、补充且非任务必需的描述；Content 不得包含可聚焦交互。
+      en: Tooltip must provide only a short, supplementary, non-essential description, and Content must contain no focusable interaction.
+  - id: P-BASE-TOOLTIP-ROOT-OWNER
+    text:
+      zh-CN: Root 必须唯一持有 open、controlled ownership、disabled、delay、interaction 与 request sequencing facts。
+      en: Root must uniquely own open state, controlled ownership, disabled state, delay, interaction, and request sequencing facts.
+  - id: P-BASE-TOOLTIP-PROPS
+    text:
+      zh-CN: Root 必须接受 `open`、`defaultOpen`、`disabled`、`openDelay` 与 `closeDelay`；提供 `open` 时进入受控模式。
+      en: Root must accept `open`, `defaultOpen`, `disabled`, `openDelay`, and `closeDelay`; providing `open` selects controlled mode.
+  - id: P-BASE-TOOLTIP-REQUESTS
+    text:
+      zh-CN: Root 必须 expose `open`、`openTooltip`、`close`、`toggle` 与 `openChange`；受控 request 不得覆盖 owner 提供的 open fact。
+      en: Root must expose `open`, `openTooltip`, `close`, `toggle`, and `openChange`; a controlled request must not replace the owner-provided open fact.
+  - id: P-BASE-TOOLTIP-DELAYS
+    text:
+      zh-CN: standalone pointer open/close 默认延时必须为 700ms/100ms；focus open 必须为 0ms；反向 intent、disabled 与 dispose 必须取消 pending Delay task。
+      en: Standalone pointer open and close delays must default to 700ms and 100ms; focus opening must be 0ms; reverse intent, disabled state, and disposal must cancel a pending Delay task.
+  - id: P-BASE-TOOLTIP-DISABLED
+    text:
+      zh-CN: disabled 必须取消 pending intent、关闭非受控 Tooltip、向受控 owner 请求关闭，并拒绝新的交互或 method open request。
+      en: Disabled state must cancel pending intent, close an uncontrolled Tooltip, request closure from a controlled owner, and reject new interaction or method open requests.
+  - id: P-BASE-TOOLTIP-ANATOMY-CONTEXT
+    text:
+      zh-CN: Root、Trigger、Content 必须使用 canonical Anatomy；Root 必须通过同域 Context 发布 open、ownership、delay、interaction 与 request facts。
+      en: Root, Trigger, and Content must use canonical Anatomy, and Root must publish open, ownership, delay, interaction, and request facts through same-domain Context.
+  - id: P-BASE-TOOLTIP-INDEPENDENCE
+    text:
+      zh-CN: Tooltip 不得通过消费 Hover Card 或其它 Base prototype-specific hook 获得自身语义。
+      en: Tooltip must not obtain its semantics by consuming Hover Card or another Base prototype-specific hook.
+sources:
+  - path: packages/prototypes/base/src/tooltip/root.proto.ts
+  - path: packages/prototypes/base/src/tooltip/shared.ts
+  - path: packages/prototypes/base/test/tooltip.test.ts
+  - path: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
+    label: WAI-ARIA APG Tooltip Pattern
+  - path: https://www.radix-ui.com/primitives/docs/components/tooltip
+    label: Radix UI Tooltip
+dependsOn:
+  contracts:
+    [C-ANATOMY-0002, C-CONTEXT-0001, C-DELAY-0001, C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001]
+  decisions: [D-TOOLTIP-PROTOTYPE-BOUNDARY-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+verifies: { tests: [T-BASE-TOOLTIP-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged Tooltip Root ownership, immediate focus opening, delayed pointer intent, and controlled requests.
+tags: [prototype, base, tooltip, accessibility, delay]

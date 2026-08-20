@@ -34,6 +34,7 @@ export function createContextModule(ctx: ModuleFactoryArgs): ContextModule {
         },
         port: {
           setCallbackDispatcher: (dispatch) => impl.setCallbackDispatcher(dispatch),
+          resolveScope: (key, consumer) => impl.resolveScope(key, consumer),
           dumpProviders: () => impl.portDumpProviders(),
           dumpSubscriptions: () => impl.portDumpSubscriptions(),
           dumpCallbackQueue: () => impl.portDumpCallbackQueue(),

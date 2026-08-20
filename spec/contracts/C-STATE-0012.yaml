@@ -3,14 +3,14 @@ type: contract
 title: State views are bound to instance lifecycle
 status: draft
 since: 0.1.0
-summary: State views remain usable while the instance is alive and become invalid after dispose.
+summary: State views and watchers survive repeatable view epochs while the instance is alive and become invalid after terminal disposal.
 statement:
   zh-CN: >-
-    State view 必须绑定到组件实例生命周期。实例仍然存活时，包括 `unmounted` callback 执行期间，允许符合 phase 规则的 view 操作；实例 dispose 后，所有 state view API 与 watch registration 都必须不可继续使用。
+    State view 与 watcher 必须绑定到组件 instance lifetime，而不是单个 host-view mount epoch。实例仍然存活时，包括 detached epoch 与 `unmounted` callback 执行期间，允许符合 phase 规则的 view 操作并保留当前 value 与 registration；terminal dispose 后，所有 state view API 与 watch registration 都必须不可继续使用。
 
 
   en: >-
-    State views must be bound to the component instance lifecycle. While the instance is still alive, including during the `unmounted` callback, view operations that satisfy phase rules are allowed; after instance dispose, all state view APIs and watch registrations must no longer be usable.
+    State views and watchers must be bound to the component instance lifetime rather than one host-view mount epoch. While the instance remains alive, including detached epochs and execution of the `unmounted` callback, phase-valid view operations remain available and retain the current value and registrations; after terminal disposal, all state view APIs and watch registrations must no longer be usable.
 
 
 criteria:
@@ -20,8 +20,8 @@ criteria:
       en: While the instance is alive, state view APIs must remain available according to phase rules.
   - id: C-STATE-0012-B
     text:
-      zh-CN: '`unmounted` callback 执行期间实例仍被视为存活；符合 runtime phase 的 state 操作必须允许。'
-      en: During the `unmounted` callback, the instance is still considered alive; state operations valid in the runtime phase must be allowed.
+      zh-CN: repeatable view detach 与 `unmounted` callback 执行期间实例仍被视为存活；当前 state value、view identity 与 watcher registration 必须保留，符合 runtime phase 的 state 操作必须允许。
+      en: During repeatable view detachment and execution of the `unmounted` callback, the instance is still considered alive; current state values, view identities, and watcher registrations must be retained, and state operations valid in the runtime phase must be allowed.
   - id: C-STATE-0012-C
     text:
       zh-CN: 实例 dispose 后调用 `get()`、`setDefault(...)`、`set(...)` 或 `watch(...)` 必须失败。
@@ -51,7 +51,11 @@ dependsOn:
   contracts:
     - C-STATE-0004
     - C-LIFECYCLE-0004
+    - C-LIFECYCLE-0006
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Bound State resources to instance lifetime across repeatable view epochs and reserved invalidation for terminal disposal.
   - version: 0.1.0
     change: introduced
     summary: Captured lifecycle safety for state views and watchers.

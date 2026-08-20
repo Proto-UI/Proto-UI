@@ -1,0 +1,42 @@
+---
+title: 'Async Region'
+desp: 'Async Region base prototype'
+description: 'Async Region base prototype'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-async-region-root` is a narrow async accessibility primitive that projects governed `aria-busy` state and exposes the busy handle.
+
+<div>
+  <PrototypePreviewer demoId="demo-base-async-region" initialRuntime="wc" />
+</div>
+
+It owns a single `busy` prop (default `false`) that projects `aria-busy` and is exposed as the sole state handle:
+
+- `busy=false` (default) projects `aria-busy=false`
+- `busy=true` projects `aria-busy=true`
+
+Authored descendants and focus are preserved on prop-only transitions. The prototype declares no role, accessible name, loading timers, replacement state machine, announcements, action, event, command, or chat semantics.
+
+## Current v0 Boundary
+
+`base-async-region-root` currently includes:
+
+- governed aria-busy projection from the busy prop
+- busy state handle exposed via `getExposes().busy`
+- mounted prop transitions that update aria-busy and the expose handle synchronously
+- authored descendant and focus preservation across prop transitions
+
+It does not include:
+
+- role or accessible-name projection
+- loading timers or replacement state machines
+- announcement behavior (compose with Live Region at the application layer)
+- action, event, command, or chat semantics
+
+## References
+
+- Contract: [C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
+- Source: [packages/prototypes/base/src/async-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/async-region)
+- Test: [async-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/async-region.test.ts)

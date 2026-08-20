@@ -1,0 +1,24 @@
+---
+title: 'Brutalist Switch'
+description: '机械式 Switch 状态与交互合约'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+# Switch
+
+外壳固定，方形 thumb 是执行件。
+
+- Off：paper 轨道、ink thumb。
+- On：天空蓝轨道、金丝雀黄 thumb；位置仍是 checked 主信号。
+- Pressed：轨道切换为珊瑚红并移除硬阴影，释放后回弹。
+- Focus：硬轮廓；Disabled：降低强调但保留结构。
+
+每个 runtime-neutral demo 示例都把可见 caption 放在 Switch root 内。继承的 Base `nameFromContent` 投射因此能在 Web Components、React 与 Vue 中从同一段可见文本派生 accessible name；示例既不需要 host-specific `aria-label`，也不需要无法指向 custom-element host 的原生 `<label for>` 关系。Caption 属于 Switch control surface，因此点击 caption 会沿 Switch activation path 生效，而 disabled 示例保持 inert。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
+</div>

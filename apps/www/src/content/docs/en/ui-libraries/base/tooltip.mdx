@@ -1,0 +1,33 @@
+---
+title: 'Tooltip'
+desp: 'Tooltip'
+description: 'Tooltip and Tooltip Group base prototypes'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+Base Tooltip consists of Root, Trigger, and Content. Tooltip Group is an adjacent protocol in the same family and shares delay defaults, the warm window, and active-owner coordination across Roots.
+
+- Initial pointer hover opens after `openDelay`, while reverse movement cancels the pending task.
+- Keyboard focus opens immediately without waiting for the pointer delay.
+- `closeDelay` lets the pointer move from Trigger into Content; Content itself must contain no focusable interaction.
+- Trigger additively references the `role="tooltip"` Content through `aria-describedby` only while open.
+- Escape enters Root's unified close request channel.
+- Moving to a sibling during the Group warm window opens it immediately; the previous uncontrolled Tooltip ends perceptual presence without a visible exit overlap, and initial delay returns after `skipDelay`.
+
+Portal is currently owned by Content's Overlay and renderer projection rather than a separate Base Portal prototype. Arrow remains outside the current Base guarantee until a governed geometry and positioning channel exists.
+
+<PrototypePreviewer
+  demoId="demo-base-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>
+
+## Suggested acceptance path
+
+1. Hover `Account` and confirm Tooltip appears after about 500ms; leaving early must not flash it.
+2. With the first Tooltip open, move quickly to `Notifications`; the warm sibling should open immediately and the previous Tooltip should disappear with no visible overlap.
+3. Let both remain closed for more than 700ms, then hover again and confirm the 500ms delay returns.
+4. Use Tab to focus a Trigger and confirm immediate opening; Escape should close it while retaining Trigger focus.
+5. Switch among Web Components, React, and Vue in the toolbar and repeat the interaction.

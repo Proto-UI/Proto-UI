@@ -268,6 +268,7 @@ describe('prototypes/base: tabs', () => {
 
     expect(triggerA.tabIndex).toBe(0);
     expect(triggerB.tabIndex).toBe(-1);
+    expect(triggerB.getAttribute('tabindex')).toBe('-1');
 
     triggerA.focus();
     // T-BASE-TABS-TRIGGER-0001-CASE-KEYBOARD

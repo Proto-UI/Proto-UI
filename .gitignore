@@ -137,6 +137,9 @@ dist
 # Generated workspace spec dataset
 apps/workspace/public/spec-workspace.json
 
+# Generated local Agent spec projection
+internal/agent/PROJECT-UNDERSTANDING.zh-CN.md
+
 # Generated docs style presets
 apps/www/src/styles/proto-ui-tokens.generated.css
 apps/www/src/styles/shadcn-theme.css

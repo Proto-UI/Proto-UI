@@ -1,0 +1,171 @@
+id: A-REACT-18-19-0001
+type: adapter
+title: Official React 18.2-19 Web Adapter profile
+status: active
+since: 0.2.0-rc.7
+summary: The official React Web Adapter owns the Runtime lifecycle boundary and translates React 18.2 through 19 props and Web input into required semantic modules.
+adapterProfile:
+  package: '@proto.ui/adapter-react'
+  target:
+    platform: web
+    runtime:
+      name: react
+      versionRange: '>=18.2.0 <20'
+statement:
+  zh-CN: >-
+    该 profile 表示 `@proto.ui/adapter-react` 在 Web platform 上面向 React `>=18.2.0 <20` 的 official translation identity。当前已编目的 Props slice 固定安装 required Props Module，以稳定 `RawPropsSource` 读取经过 Adapter 分类的 component props，在 React effect 中发送 snapshot invalidation，并由 runtime sync point 完成语义 diff 与 watcher dispatch。`autoUpdateOnPropsChange` 是 profile render policy，不属于 Props host capability。Event slice 固定安装 required Event Module，通过共用 Web router 把 native input 翻译为 root/global Proto event stream，按 logical interaction owner 路由 semantic event，在 view lifecycle 中启用或禁用 delivery，并把 default-action request 翻译为 DOM `preventDefault()`。Lifecycle slice 由一个 React component owner 持有一个 RuntimeSession，将内部 view attach/detach 与 StrictMode replay 翻译为 repeatable mount epoch，将 terminal owner teardown 翻译为 dispose，并透传结构化 lifecycle diagnostics；Lifecycle 是 Runtime 与 Adapter 的执行协议，不虚构对应 Module 或 host-cap。State slice 使用 standard Runtime 固定安装的 required State Module；其 value 与 watcher 属于 instance lifetime，mutation 不隐式触发 React render，且纯内存语义不要求 Adapter 提供 State host-cap。Expose core slice 同样由 standard Runtime 固定安装；forwarded ref 通过 `getExposes()` 提供 detached App Maker record，递归 callable 自动进入 instance callback scope，registry 跨 repeatable view epoch 保留且 core 不要求直接 host-cap。Expose State slice 将 internal State handle 降权为稳定、只读、同源的 external handle，并通过 Adapter 提供的 complete record sink 发布到同一 forwarded ref；sink rebind/terminal disposal 清理旧 record，DOM/CSS mirror 不属于该 baseline。 Expose Event slice 将 shared-key declaration 与 outward registry/emit bridge 组合，并通过 Adapter 提供的 host-neutral signal sink 映射为当前 `onXxx` callback；listener props 不进入 Proto raw props，declaration metadata 不进入 forwarded-ref `getExposes()` record，repeatable view epoch 保留 registration。
+
+
+  en: >-
+    This profile is the official translation identity of `@proto.ui/adapter-react` for React `>=18.2.0 <20` on the Web platform. Its currently cataloged Props slice installs the required Props Module, exposes Adapter-classified component props through a stable `RawPropsSource`, sends snapshot invalidation from a React effect, and leaves semantic diffing and watcher dispatch to runtime synchronization points. `autoUpdateOnPropsChange` is a profile render policy rather than part of the Props host capability. Its Event slice installs the required Event module, uses the shared Web router to translate native input into root and global Proto event streams, routes semantic events by logical interaction owner, enables or disables delivery with the view lifecycle, and translates default-action requests to DOM `preventDefault()`. Its Lifecycle slice lets one React component owner retain one RuntimeSession, translates internal view attachment, detachment, and StrictMode replay into repeatable mount epochs, maps terminal owner teardown to disposal, and forwards structured lifecycle diagnostics. Lifecycle is a Runtime-to-Adapter execution protocol and does not invent a corresponding Module or host capability. Its State slice uses the required State module installed by the standard Runtime; values and watchers belong to instance lifetime, mutation does not implicitly render React output, and the in-memory semantics require no State host capability from the Adapter. Its Expose core slice is likewise installed by the standard Runtime; the forwarded ref provides detached App Maker records through `getExposes()`, recursively callable values automatically enter the instance callback scope, the registry survives repeatable view epochs, and the core requires no direct host capability. Its Expose State slice attenuates internal State handles into stable, read-only, same-source external handles and publishes them to the same forwarded ref through an Adapter-provided complete-record sink; sink rebinding and terminal disposal clear old records, while DOM or CSS mirroring is outside this baseline. Its Expose Event slice composes shared-key declaration with the outward registry and emit bridge, then maps the host-neutral signal sink to the current `onXxx` callback; listener props do not enter Proto raw props, declaration metadata does not enter the forwarded-ref `getExposes()` record, and registrations survive repeatable view epochs.
+
+
+criteria:
+  - id: A-REACT-18-19-0001-A
+    text:
+      zh-CN: Profile identity 必须对应 `@proto.ui/adapter-react` 与 peer range `react >=18.2.0 <20`，不得被表述为所有 React 版本或非 Web host 的保证。
+      en: The profile identity must correspond to `@proto.ui/adapter-react` and peer range `react >=18.2.0 <20` and must not be represented as a guarantee for every React version or a non-Web host.
+  - id: A-REACT-18-19-0001-B
+    text:
+      zh-CN: Adapter 必须把 Props Module 作为 required Module 接入，并以 translated capability 提供 `HC-PROPS-SOURCE-0001`。
+      en: The Adapter must wire the Props Module as required and provide `HC-PROPS-SOURCE-0001` as a translated capability.
+  - id: A-REACT-18-19-0001-C
+    text:
+      zh-CN: 默认 Props normalization 必须剥离 `children`、class/style presentation fields 与函数型 `onXxx` listeners，同时允许显式 `getProps` option 替换分类策略。
+      en: Default Props normalization must exclude `children`, class and style presentation fields, and function-valued `onXxx` listeners while allowing an explicit `getProps` option to replace the classification policy.
+  - id: A-REACT-18-19-0001-D
+    text:
+      zh-CN: React effect 只能在规范化 snapshot 发生浅层变化时发送 invalidation；是否自动调用 runtime update 由 `autoUpdateOnPropsChange` profile policy 决定，notification 自身不得被解释为 render commit。
+      en: The React effect may send invalidation only when the normalized snapshot changes shallowly; automatic runtime update is controlled by the `autoUpdateOnPropsChange` profile policy, and the notification itself must not be interpreted as a render commit.
+  - id: A-REACT-18-19-0001-E
+    text:
+      zh-CN: Adapter 必须把 Event Module 作为 required Module 接入，并以 translated capability 提供 `HC-EVENT-BINDING-0001` 与 `HC-DEFAULT-ACTION-0001`；这些关系不得把 DOM `EventTarget` 写成跨宿主保证。
+      en: The Adapter must wire the Event module as required and provide `HC-EVENT-BINDING-0001` and `HC-DEFAULT-ACTION-0001` as translated capabilities; these relations must not turn DOM `EventTarget` into a cross-host guarantee.
+  - id: A-REACT-18-19-0001-F
+    text:
+      zh-CN: React view wiring 必须把 host input 翻译为当前支持的 root/global Event type，按 logical owner 路由 semantic event，并在 unmount 后停止旧 root 的 delivery。
+      en: React view wiring must translate host input into currently supported root and global Event types, route semantic events by logical owner, and stop delivery from the old root after unmount.
+  - id: A-REACT-18-19-0001-G
+    text:
+      zh-CN: 一个 React component lifecycle owner 必须持有一个 Proto RuntimeSession；内部 view detach/remount 与 StrictMode replay 必须推进 repeatable mount epoch，而 terminal owner teardown 必须且只能 dispose 该 instance 一次。
+      en: One React component lifecycle owner must retain one Proto RuntimeSession; internal view detach/remount and StrictMode replay must advance repeatable mount epochs, while terminal owner teardown must dispose that instance exactly once.
+  - id: A-REACT-18-19-0001-H
+    text:
+      zh-CN: Adapter diagnostics 必须透传 Runtime 的 structured lifecycle event stream；deprecated CP0-CP10 只允许作为有损兼容投影，且该协议不得被建模为 Module support 或 host-cap provision。
+      en: Adapter diagnostics must forward Runtime's structured lifecycle event stream; deprecated CP0-CP10 checkpoints may exist only as a lossy compatibility projection, and this protocol must not be modeled as Module support or host-capability provision.
+  - id: A-REACT-18-19-0001-I
+    text:
+      zh-CN: React owner 必须在 created callbacks 后按最新 ViewIntent 调和首次及后续 view epoch，在首次 commit 与 view effects 一致前保持新 root 隐藏，并让 terminal teardown 权限高于 desired presence。
+      en: The React owner must reconcile the latest ViewIntent into initial and subsequent view epochs after created callbacks, keep a new root hidden until its first commit and view effects are coherent, and let terminal teardown authority override desired presence.
+  - id: A-REACT-18-19-0001-J
+    text:
+      zh-CN: Adapter 必须通过 standard Runtime 接入 required State Module，跨 repeatable view epoch 保留其 instance-owned value 与 watcher；State mutation 不得绕过显式 Adapter update 触发 React render，且 profile 不得虚构 State host-cap。
+      en: The Adapter must wire the required State module through the standard Runtime and retain its instance-owned values and watchers across repeatable view epochs; State mutation must not bypass explicit Adapter update to render React output, and the profile must not invent a State host capability.
+  - id: A-REACT-18-19-0001-K
+    text:
+      zh-CN: Adapter 必须通过 standard Runtime 接入 required Expose core Module，以 forwarded ref `getExposes()` 向 App Maker 返回 detached record，跨 repeatable view epoch 保留 registry，并让 record 中的 JavaScript callable 自动进入所属 instance callback scope；profile 不得虚构 core Expose host-cap。
+      en: The Adapter must wire the required Expose core module through the standard Runtime, return a detached App Maker record from forwarded-ref `getExposes()`, preserve the registry across repeatable view epochs, and automatically enter the owning instance callback scope for JavaScript callables in that record; the profile must not invent a core Expose host capability.
+  - id: A-REACT-18-19-0001-L
+    text:
+      zh-CN: Adapter 必须接入 required Expose State Module，并以 translated capability 提供 `HC-EXPOSES-RECORD-SINK-0001`；forwarded ref 中的 state 必须是稳定、只读、同源 external handle，跨 repeatable view epoch 保留，sink replacement/removal 与 terminal disposal 必须清理旧 record，且该关系不得暗含 DOM/CSS projection。
+      en: The Adapter must wire the required Expose State module and provide `HC-EXPOSES-RECORD-SINK-0001` as a translated capability; State entries on the forwarded ref must be stable, read-only, same-source external handles retained across repeatable view epochs, sink replacement or removal and terminal disposal must clear old records, and this relation must not imply DOM or CSS projection.
+  - id: A-REACT-18-19-0001-M
+    text:
+      zh-CN: Adapter 必须接入 required Expose Event semantic Module，并以 translated capability 提供 `HC-EXPOSE-EVENT-SINK-0001`；合法 emission 映射到当前 `onXxx` callback，listener props 不得进入 Proto raw props，declaration metadata 不得进入 `getExposes()`，且该关系不得被解释为 Event input routing。
+      en: The Adapter must wire the required Expose Event semantic Module and provide `HC-EXPOSE-EVENT-SINK-0001` as a translated capability; valid emissions map to the current `onXxx` callback, listener props must not enter Proto raw props, declaration metadata must not enter `getExposes()`, and this relation must not be interpreted as Event input routing.
+supports:
+  modules:
+    - id: M-PROPS-0001
+      role: required-module
+      note: Props is required for the standard Maker-to-Component configuration channel.
+    - id: M-EVENT-0001
+      role: required-module
+      note: Event is installed for the standard User-to-Component interaction channel; host binding is only required for scopes with registrations.
+    - id: M-STATE-0001
+      role: required-module
+      note: State is the host-neutral instance memory baseline and requires no Adapter-provided host capability.
+    - id: M-EXPOSE-0001
+      role: required-module
+      note: Expose core provides the standard Component-to-App-Maker registry and directly requires no Adapter-provided host capability.
+    - id: M-EXPOSE-STATE-0001
+      role: required-module
+      note: Expose State finalizes the complete outward record and attenuates internal State handles before Adapter publication.
+    - id: M-EXPOSE-EVENT-0001
+      role: required-module
+      note: The standalone Expose Event module owns the Component-to-App-Maker outward-signal bridge and receives its sink through expose-event wiring.
+provides:
+  hostCaps:
+    - id: HC-PROPS-SOURCE-0001
+      role: translated-capability
+      note: React props are classified and exposed as a stable readable source with effect-driven invalidation.
+    - id: HC-EVENT-BINDING-0001
+      role: translated-capability
+      note: The shared Web router translates DOM input into Adapter-owned root and global Proto event streams.
+    - id: HC-DEFAULT-ACTION-0001
+      role: translated-capability
+      note: Default-action cancellation requests are translated to preventDefault when the native DOM event supports it.
+    - id: HC-EXPOSES-RECORD-SINK-0001
+      role: translated-capability
+      note: React receives classified translation snapshots, filters declaration descriptors, and returns detached public records through forwarded-ref getExposes.
+    - id: HC-EXPOSE-EVENT-SINK-0001
+      role: translated-capability
+      note: React maps validated outward signal keys to the current onXxx callback props.
+relates:
+  decisions:
+    - D-ADAPTER-PROFILE-0001
+verifies:
+  tests:
+    - T-ADAPTER-PROFILE-0001
+    - T-PROPS-0012
+    - T-EVENT-0003
+    - T-LIFECYCLE-0003
+    - T-LIFECYCLE-0005
+    - T-LIFECYCLE-0006
+    - T-STATE-0005
+    - T-EXPOSE-0002
+    - T-EXPOSE-STATE-0002
+    - T-EXPOSE-EVENT-0002
+sources:
+  - path: packages/adapters/react/package.json
+  - path: packages/adapters/react/src/adapt.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/react/test/contract/props-host-source.v0.contract.test.ts
+  - path: packages/adapters/react/test/framework-contract.test.ts
+  - path: packages/adapters/base/src/events/web-event-router.ts
+  - path: packages/adapters/react/test/event.test.ts
+  - path: packages/adapters/react/test/event-routing.test.ts
+  - path: packages/adapters/react/src/runtime/session.ts
+  - path: packages/adapters/react/test/contract/lifecycle-events.v1.contract.test.ts
+  - path: packages/adapters/react/test/lifecycle-repeatable-mount.test.ts
+  - path: packages/adapters/react/test/lifecycle-strict-replay.test.ts
+  - path: packages/adapters/react/test/lifecycle-view-intent.test.ts
+  - path: packages/adapters/react/test/contract/state-runtime.v0.contract.test.ts
+  - path: packages/adapters/base/src/host/exposes.ts
+  - path: packages/adapters/react/test/expose.test.ts
+  - path: packages/adapters/react/test/expose-event.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Migrated the outward signal sink from Event wiring to the standalone Expose Event Module.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required Expose Event support, translated signal sink provision, onXxx mapping, listener-prop filtering, and declaration-record exclusion.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required Expose State composition, finalized-record sink provision, stable read-only external handles, and sink lifecycle criteria.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required host-neutral Expose core support, forwarded-ref record access, instance-lifetime preservation, and automatic callback-scope translation.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required host-neutral State Module support, instance-lifetime preservation, explicit-render behavior, and no-host-cap criteria.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Cataloged lifecycle ownership, repeatable mount epochs, structured diagnostics, and ViewIntent reconciliation without inventing a Lifecycle Module or host capability.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added required Event Module support, translated scoped Event binding, Default Action provision, lifecycle routing criteria, and conformance evidence.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the official React 18.2-19 profile identity and its required Props translation slice.
+tags: [adapter, react, web, props, event, lifecycle, state, expose, official]

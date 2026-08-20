@@ -289,6 +289,35 @@ describe('context-module: contract v0 (with-tree)', () => {
     expect(consumer.read(KEY).value).toBe(10);
   });
 
+  it('CTX-MOD-V0-1520: internal scope resolution returns nearest provider identity', () => {
+    const parentMap = new Map<any, any>();
+    const getParent = (i: unknown) => parentMap.get(i) ?? null;
+    const outerToken = { id: 'outer' };
+    const innerToken = { id: 'inner' };
+    const consumerToken = { id: 'consumer' };
+    parentMap.set(innerToken, outerToken);
+    parentMap.set(consumerToken, innerToken);
+
+    const outer = new ContextModuleImpl(
+      makeCaps({ instanceToken: outerToken, getParent }) as any,
+      'proto-outer'
+    );
+    const inner = new ContextModuleImpl(
+      makeCaps({ instanceToken: innerToken, getParent }) as any,
+      'proto-inner'
+    );
+    const consumer = new ContextModuleImpl(
+      makeCaps({ instanceToken: consumerToken, getParent }) as any,
+      'proto-consumer'
+    );
+    outer.provide(KEY, { value: 1 });
+    inner.provide(KEY, { value: 2 });
+
+    expect(consumer.resolveScope(KEY)).toBe(innerToken);
+    expect(consumer.resolveScope(KEY, innerToken)).toBe(innerToken);
+    expect(consumer.resolveScope(KEY)).not.toEqual({ value: 2 });
+  });
+
   it('CTX-MOD-V0-1600: provider removal leads to disconnected reads', () => {
     const parentMap = new Map<any, any>();
     const getParent = (i: unknown) => parentMap.get(i) ?? null;

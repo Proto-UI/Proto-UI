@@ -1,4 +1,8 @@
-import type { Prototype } from '@proto.ui/core';
+import {
+  getModuleDeclaration,
+  type Prototype,
+  type ScrollProjectionPreference,
+} from '@proto.ui/core';
 import type {
   CommitSignal,
   RuntimeCheckpoint,
@@ -17,6 +21,10 @@ import {
   scheduleAfterWebLayout,
 } from '@proto.ui/adapter-base';
 import type { ExposeStateWebMode } from '@proto.ui/module-expose-state-web';
+import {
+  resolveWebTextControlLocalName,
+  TEXT_CONTROL_DECLARATION,
+} from '@proto.ui/module-text-control';
 import {
   createZIndexOverlayLayerScheduler,
   type OverlayPort,
@@ -67,8 +75,10 @@ export type ReactAdapterProps<Props extends PropsBaseType> = Props &
     children?: any;
     className?: string;
     hostClassName?: string;
+    surfaceClassName?: string;
     style?: any;
     hostStyle?: any;
+    surfaceStyle?: any;
     [key: `on${string}`]: unknown;
   };
 
@@ -82,6 +92,7 @@ export interface ReactAdapterOptions<Props extends PropsBaseType> {
     onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
   };
   exposeStateWebMode?: ExposeStateWebMode;
+  scrollProjection?: ScrollProjectionPreference;
   autoUpdateOnPropsChange?: boolean;
   rootTag?: string;
   overlayLayer?:
@@ -96,7 +107,16 @@ type ReactRuntimeInput = ReactRuntime | { React: ReactRuntime };
 function defaultGetProps<Props extends PropsBaseType>(
   props: ReactAdapterProps<Props>
 ): Partial<Props> {
-  const { children, className, hostClassName, style, hostStyle, ...rest } = (props ?? {}) as any;
+  const {
+    children,
+    className,
+    hostClassName,
+    surfaceClassName,
+    style,
+    hostStyle,
+    surfaceStyle,
+    ...rest
+  } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(rest)) {
     if (isFrameworkEventProp(key, value)) continue;
@@ -139,8 +159,18 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
     const exposeStateWebMode = opt.exposeStateWebMode;
+    const scrollProjection = opt.scrollProjection;
     const autoUpdate = opt.autoUpdateOnPropsChange ?? true;
-    const rootTag = opt.rootTag ?? 'div';
+    const textControl = getModuleDeclaration(proto, TEXT_CONTROL_DECLARATION)?.config;
+    const textControlRootTag = textControl
+      ? resolveWebTextControlLocalName(textControl)
+      : undefined;
+    if (textControlRootTag && opt.rootTag && opt.rootTag !== textControlRootTag) {
+      throw new Error(
+        `[React Adapter] text-control declaration conflicts with rootTag: ${opt.rootTag}`
+      );
+    }
+    const rootTag = textControlRootTag ?? opt.rootTag ?? 'div';
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
       (typeof opt.overlayLayer.baseZIndex !== 'undefined' ||
@@ -277,6 +307,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             setCommitVersion(commitVersionRef.current);
           },
           onAfterUnmount: () => {
+            scopedExposesReaderRef.current.invalidate();
+            invokeInCallbackScopeRef.current = null;
             hostSessionRef.current = null;
             controllerRef.current = null;
             exposesRef.current = {};
@@ -379,6 +411,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           effectsPort,
           getMeta,
           exposeStateWebMode,
+          scrollProjection,
           setExposes: (record) => {
             exposesRef.current = record;
           },
@@ -487,8 +520,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             rootTag,
             {
               ref: rootRef as { current: HTMLElement | null },
-              className: mergeHostClassName([props.hostClassName, props.className]),
-              style: mergeHostStyle([props.hostStyle, props.style]),
+              className: mergeHostClassName([
+                props.surfaceClassName,
+                props.hostClassName,
+                props.className,
+              ]),
+              style: mergeHostStyle([props.surfaceStyle, props.hostStyle, props.style]),
               'data-pui-root': '',
               [PUI_VIEW_PENDING_ATTR]: viewReadyRef.current ? undefined : '',
               'data-pui-style': serializeStyleTokens(hostTokens),

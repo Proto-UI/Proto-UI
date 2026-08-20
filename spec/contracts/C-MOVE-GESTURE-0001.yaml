@@ -1,0 +1,49 @@
+id: C-MOVE-GESTURE-0001
+type: contract
+title: Move Gesture provides one bounded continuous-movement session
+status: draft
+since: 0.2.0-rc.7
+summary: A host-recognized primary contact produces one start, ordered move samples, and exactly one end or cancel outcome with bounded ownership and cleanup.
+statement:
+  zh-CN: >-
+    Move Gesture host binding 必须把一个可解析 target 与 axis/activation hint 绑定为有界 session。宿主接受 primary contact 后发出一次 start、零到多次有序 move，并最终发出一次 end 或 cancel。Samples 使用宿主本地 position、delta 与 totalDelta；session replacement、target detach、host cancellation、ownership loss 与 dispose 必须终止旧会话并释放资源。该契约不授予 Drag and Drop、领域 value 或 accessibility widget semantics。
+
+
+  en: >-
+    A Move Gesture host binding must bind one resolvable target plus axis and activation hints into a bounded session. After the host accepts a primary contact it emits one start, zero or more ordered moves, and eventually exactly one end or cancel. Samples use host-local position, delta, and totalDelta; session replacement, target detach, host cancellation, ownership loss, and disposal must terminate the old session and release resources. This contract grants no Drag and Drop, domain-value, or accessibility-widget semantics.
+
+
+criteria:
+  - id: C-MOVE-GESTURE-0001-A
+    text:
+      zh-CN: 一个 binding 同时最多拥有一个已接受的 primary-contact session；非 primary 或并发 contact 不得夺取当前所有权。
+      en: One binding may own at most one accepted primary-contact session at a time; non-primary or concurrent contacts must not steal current ownership.
+  - id: C-MOVE-GESTURE-0001-B
+    text:
+      zh-CN: 已接受会话必须按 start → move* → (end | cancel) 顺序回调，且 end 与 cancel 对同一会话互斥。
+      en: An accepted session must callback in start, zero or more moves, then either end or cancel order, with end and cancel mutually exclusive for the same session.
+  - id: C-MOVE-GESTURE-0001-C
+    text:
+      zh-CN: 每个 sample 必须包含当前 host-local position、相对上一 sample 的 delta、相对 start 的 totalDelta、输入种类与 timestamp；这些值不得写入作者 State。
+      en: Every sample must contain current host-local position, delta from the previous sample, totalDelta from start, input kind, and timestamp; these values must not be written into author State.
+  - id: C-MOVE-GESTURE-0001-D
+    text:
+      zh-CN: target replacement、detach、host cancel、ownership loss 与 dispose 必须产生明确 cancel reason，并释放 capture/recognizer、observer、listener、target reference 与宿主样式。
+      en: Target replacement, detach, host cancellation, ownership loss, and disposal must produce an explicit cancel reason and release capture or recognizer ownership, observers, listeners, target references, and host styles.
+  - id: C-MOVE-GESTURE-0001-E
+    text:
+      zh-CN: Axis 与 activation 只作为宿主识别 hint；Move 不得由此推导 Scroll、Slider、Resize、Drop 或 A11y 语义。
+      en: Axis and activation are host-recognition hints only; Move must not derive Scroll, Slider, Resize, Drop, or accessibility semantics from them.
+sources:
+  - path: packages/core/src/move.ts
+  - path: packages/adapters/base/src/gestures/web-move-gesture-host.ts
+dependsOn:
+  knowledge: [K-MOVE-GESTURE-0001]
+  decisions: [D-MOVE-GESTURE-0001]
+verifies:
+  tests: [T-MOVE-GESTURE-0001]
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Defined the first bounded immediate Move Gesture lifecycle and cancellation guarantees.
+tags: [move, gesture, session, lifecycle, cancellation]

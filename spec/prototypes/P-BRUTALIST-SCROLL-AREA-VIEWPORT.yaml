@@ -1,35 +1,42 @@
 id: P-BRUTALIST-SCROLL-AREA-VIEWPORT
 type: prototype
-title: Brutalist Scroll Area Viewport protocol
+title: Brutalist Scroll Area Viewport prefers composed Web projection
 status: draft
 since: 0.2.0-rc.7
-summary: Brutalist Scroll Area Viewport protocol for the Proto UI framework.
+summary: Brutalist Viewport inherits the Base host-owned surface and adds full-size overflow styling plus a composed projection preference.
 statement:
-  en: Brutalist Scroll Area Viewport protocol. This draft entity catalogs the protocol surface.
-  zh-CN: Brutalist Scroll Area Viewport protocol。该 draft entity 编目协议面。
+  zh-CN: Brutalist Viewport 保留 Base Viewport 的归一化 facts 与 host-mediated requests，并为可绘制的 Brutalist scrollbar 请求 composed projection。该 preference 不把 Web DOM 变成 prototype 依赖；不支持 composed chrome 的宿主仍可按 capability contract 降级。
+  en: Brutalist Viewport retains Base Viewport normalized facts and host-mediated requests and asks for composed projection so Brutalist scrollbar chrome can be drawn. This preference does not make Web DOM a prototype dependency; a host without composed chrome may fall back under the capability contract.
 criteria:
-  - id: P-BRUTALIST-SCROLL-AREA-VIEWPORT-CATALOGED
+  - id: P-BRUTALIST-SCROLL-AREA-VIEWPORT-BASE-INHERITANCE
     text:
-      en: The protocol is cataloged for traceability.
-      zh-CN: 该协议已编目以便追溯。
+      zh-CN: Viewport 必须通过 `asScrollAreaViewport()` 继承 `P-BASE-SCROLL-AREA-VIEWPORT`，且不得复制 Base scroll facts。
+      en: Viewport must inherit `P-BASE-SCROLL-AREA-VIEWPORT` through `asScrollAreaViewport()` and must not duplicate Base scroll facts.
+  - id: P-BRUTALIST-SCROLL-AREA-VIEWPORT-COMPOSED-PREFERENCE
+    text:
+      zh-CN: >-
+        Viewport 必须通过特权 `asScrollSurface().configure({ projection: 'composed' })` 表达 design-language preference，由 host adapter 解析能力与 fallback。
+
+
+      en: >-
+        Viewport must express its design-language preference through privileged `asScrollSurface().configure({ projection: 'composed' })`, leaving capability resolution and fallback to the host adapter.
+
+
+  - id: P-BRUTALIST-SCROLL-AREA-VIEWPORT-SURFACE
+    text:
+      zh-CN: Viewport 必须投射 `block h-full w-full overflow-auto rounded-none`，填满调用方提供的 Root 尺寸并保持直角。
+      en: Viewport must project `block h-full w-full overflow-auto rounded-none`, filling the consumer-provided Root dimensions while retaining square corners.
 sources:
   - path: packages/prototypes/brutalist/src/scroll-area/viewport.proto.ts
-revisions:
-  - version: 0.2.0-rc.7
-    change: introduced
-    summary: Introduced brutalist scroll area viewport protocol.
-tags:
-  - prototype
-  - brutalist
-  - scroll_area
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-AS-SCROLL-SURFACE-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-SCROLL-PROJECTION-0001]
 inherits:
   prototypes:
     - id: P-BASE-SCROLL-AREA-VIEWPORT
-dependsOn:
-  contracts:
-    - C-CORE-SYNTAX-0003
-    - C-AS-HOOK-0001
-    - C-RULE-INTENT-FEEDBACK-STYLE-0001
-verifies:
-  tests:
-    - T-BRUTALIST-SCROLL-AREA-0001
+verifies: { tests: [T-BRUTALIST-SCROLL-AREA-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Cataloged the composed projection preference and full-size square Viewport surface.
+tags: [prototype, brutalist, scroll-area, viewport, composed-projection, visual]

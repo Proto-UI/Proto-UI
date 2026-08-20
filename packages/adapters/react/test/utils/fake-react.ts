@@ -28,6 +28,7 @@ type FakeContext<T> = {
 let CURRENT: HookInstance | null = null;
 const OWNED_STYLE_KEYS = new WeakMap<HTMLElement, Set<string>>();
 const OWNED_ATTR_KEYS = new WeakMap<HTMLElement, Set<string>>();
+const HAS_AUTHORED_CHILDREN = new WeakMap<HTMLElement, boolean>();
 const WRAPPED_UPDATE = Symbol('fake-react-wrapped-update');
 
 export function createFakeReactRuntime(
@@ -344,7 +345,15 @@ function applyProps(el: HTMLElement, props: Record<string, any>) {
 }
 
 function renderChildren(parent: HTMLElement, children: any[]) {
-  parent.replaceChildren(...(children.flat().map(renderChild).filter(Boolean) as Node[]));
+  const nodes = children.flat().map(renderChild).filter(Boolean) as Node[];
+  // A textarea's defaultValue is represented by a native fallback text node,
+  // not by authored React children. Preserve it across host-only rerenders,
+  // but still clear children that the fake React render previously authored.
+  const hadAuthoredChildren = HAS_AUTHORED_CHILDREN.get(parent) ?? false;
+  const hasAuthoredChildren = nodes.length > 0;
+  HAS_AUTHORED_CHILDREN.set(parent, hasAuthoredChildren);
+  if (parent instanceof HTMLTextAreaElement && !hasAuthoredChildren && !hadAuthoredChildren) return;
+  parent.replaceChildren(...nodes);
 }
 
 function renderChild(child: any): Node | null {

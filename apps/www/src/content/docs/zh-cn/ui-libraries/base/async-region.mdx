@@ -1,0 +1,42 @@
+---
+title: 'Async Region'
+desp: 'Async Region base prototype'
+description: 'Async Region base prototype'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-async-region-root` 是一个窄异步无障碍原语，投射受治理的 `aria-busy` 状态并暴露 busy handle。
+
+<div>
+  <PrototypePreviewer demoId="demo-base-async-region" initialRuntime="wc" />
+</div>
+
+它仅拥有单个 `busy` prop（默认 `false`），投射 `aria-busy` 并作为唯一的 state handle 暴露：
+
+- `busy=false`（默认）投射 `aria-busy=false`
+- `busy=true` 投射 `aria-busy=true`
+
+Authored 后代与焦点在 prop-only 转换中保留。原型不声明 role、accessible name、loading 定时器、替换状态机、announcement、action、event、command 或聊天语义。
+
+## 当前 v0 边界
+
+`base-async-region-root` 目前包含：
+
+- 从 busy prop 受治理投射 aria-busy
+- 通过 `getExposes().busy` 暴露 busy state handle
+- mounted prop 变更同步更新 aria-busy 与 expose handle
+- prop 转换中保留 authored 后代与焦点
+
+不包含：
+
+- role 或 accessible-name 投射
+- loading 定时器或替换状态机
+- announcement 行为（在应用层组合 Live Region 实现）
+- action、event、command 或聊天语义
+
+## 参考
+
+- 契约：[C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
+- 源码：[packages/prototypes/base/src/async-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/async-region)
+- 测试：[async-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/async-region.test.ts)

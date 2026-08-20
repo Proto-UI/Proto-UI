@@ -1,55 +1,20 @@
 ---
+import { renderBrutalistThemeCss } from '../../../../packages/prototypes/brutalist/src/theme';
 
+const themeCss = renderBrutalistThemeCss({
+  variablePrefix: 'pui-',
+  darkSelector: ":root.dark,\n:root[data-theme='dark'],\n.dark,\n[data-theme='dark']",
+});
 ---
 
-<style is:global>
-  :root {
-    --pui-radius: 0;
-    --pui-background: #f5f5f5;
-    --pui-foreground: #171717;
-    --pui-border: #000000;
-    --pui-ring: #ddd6fe;
-    --pui-main: #fef08a;
-    --pui-main-foreground: #000000;
-    --pui-secondary-background: #ffffff;
-    --pui-destructive: #fecdd3;
-    --pui-destructive-foreground: #000000;
-    --pui-overlay: rgba(0, 0, 0, 0.75);
-    --pui-canary: #fef08a;
-    --pui-canary-foreground: #000000;
-    --pui-mint: #a7f3d0;
-    --pui-mint-foreground: #000000;
-    --pui-lavender: #ddd6fe;
-    --pui-lavender-foreground: #000000;
-    --pui-coral: #fecdd3;
-    --pui-coral-foreground: #000000;
-    --pui-sky: #bae6fd;
-    --pui-sky-foreground: #000000;
-  }
+<style is:inline set:html={themeCss}></style>
 
-  :root.dark,
-  :root[data-theme='dark'],
-  .dark,
-  [data-theme='dark'] {
-    --pui-background: #171717;
-    --pui-foreground: #f5f5f5;
-    --pui-border: #000000;
-    --pui-ring: #ddd6fe;
-    --pui-main: #fef08a;
-    --pui-main-foreground: #000000;
-    --pui-secondary-background: #262626;
-    --pui-destructive: #fecdd3;
-    --pui-destructive-foreground: #000000;
-    --pui-overlay: rgba(0, 0, 0, 0.85);
-    --pui-canary: #fef08a;
-    --pui-canary-foreground: #000000;
-    --pui-mint: #a7f3d0;
-    --pui-mint-foreground: #000000;
-    --pui-lavender: #ddd6fe;
-    --pui-lavender-foreground: #000000;
-    --pui-coral: #fecdd3;
-    --pui-coral-foreground: #000000;
-    --pui-sky: #bae6fd;
-    --pui-sky-foreground: #000000;
+<style is:global>
+  .brutalist-demo-frame {
+    padding: 1rem;
+    color: var(--pui-foreground);
+    background: var(--pui-background);
+    border: 2px solid var(--pui-border);
+    box-shadow: 3px 3px 0 var(--pui-foreground);
   }
 </style>

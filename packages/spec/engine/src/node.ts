@@ -146,6 +146,7 @@ const RELATION_TARGET_TYPES = {
   contracts: 'contract',
   prototypes: 'prototype',
   modules: 'module',
+  adapters: 'adapter',
   decisions: 'decision',
   hostCaps: 'host-cap',
   tests: 'test',

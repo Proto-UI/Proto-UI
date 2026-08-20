@@ -1,0 +1,71 @@
+id: T-BASE-SCROLL-AREA-0001
+type: test
+title: Base Scroll Area domain and anatomy tests
+status: draft
+since: 0.2.0-rc.7
+summary: Covers the Viewport-owned host surface, normalized facts, system default, family scope, orientation, and host-projected composed-control anatomy.
+cases:
+  - id: T-BASE-SCROLL-AREA-0001-CASE-VIEWPORT
+    title: Viewport publishes normalized host-independent scrolling facts
+    covers:
+      - P-BASE-SCROLL-AREA-SEMANTIC-DOMAIN
+      - P-BASE-SCROLL-AREA-ANATOMY
+      - P-BASE-SCROLL-AREA-VIEWPORT-SURFACE-OWNER
+      - P-BASE-SCROLL-AREA-VIEWPORT-NORMALIZED-FACTS
+      - P-BASE-SCROLL-AREA-VIEWPORT-A11Y-NEUTRALITY
+    expectation: base-scroll-area-viewport-publishes-normalized-system-projection
+  - id: T-BASE-SCROLL-AREA-0001-CASE-CONTROLS
+    title: Scrollbar owns orientation while Thumb retains no independent control semantics
+    covers:
+      - P-BASE-SCROLL-AREA-SCROLLBAR-ORIENTATION
+      - P-BASE-SCROLL-AREA-SCROLLBAR-NOT-OFFSET-OWNER
+      - P-BASE-SCROLL-AREA-THUMB-NO-INDEPENDENT-SEMANTICS
+      - P-BASE-SCROLL-AREA-THUMB-NOT-GEOMETRY-OWNER
+      - P-BASE-SCROLL-AREA-THUMB-PASSIVE-PROJECTION
+      - P-BASE-SCROLL-AREA-FAMILY-SESSION
+    expectation: base-scroll-area-controls-do-not-duplicate-host-scroll-ownership
+implementations:
+  - id: prototypes-base-scroll-area-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/scroll-area.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-SCROLL-AREA-0001-CASE-VIEWPORT
+      - T-BASE-SCROLL-AREA-0001-CASE-CONTROLS
+    exercises:
+      - P-BASE-SCROLL-AREA
+      - P-BASE-SCROLL-AREA-VIEWPORT
+      - P-BASE-SCROLL-AREA-SCROLLBAR
+      - P-BASE-SCROLL-AREA-THUMB
+verifies:
+  prototypes:
+    - id: P-BASE-SCROLL-AREA
+      anchors:
+        - P-BASE-SCROLL-AREA-SEMANTIC-DOMAIN
+        - P-BASE-SCROLL-AREA-ANATOMY
+    - id: P-BASE-SCROLL-AREA-VIEWPORT
+      anchors:
+        - P-BASE-SCROLL-AREA-VIEWPORT-SURFACE-OWNER
+        - P-BASE-SCROLL-AREA-VIEWPORT-NORMALIZED-FACTS
+    - id: P-BASE-SCROLL-AREA-SCROLLBAR
+      anchors: [P-BASE-SCROLL-AREA-SCROLLBAR-ORIENTATION]
+    - id: P-BASE-SCROLL-AREA-THUMB
+      anchors: [P-BASE-SCROLL-AREA-THUMB-NO-INDEPENDENT-SEMANTICS]
+exercises:
+  prototypes:
+    - P-BASE-SCROLL-AREA
+    - P-BASE-SCROLL-AREA-VIEWPORT
+    - P-BASE-SCROLL-AREA-SCROLLBAR
+    - P-BASE-SCROLL-AREA-THUMB
+revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Reframed Thumb coverage around no independent control semantics while interaction moved to T-SCROLL-COMPOSED-CONTROL-0001.
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added family scope and host-projected passive Thumb geometry coverage.
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Added Base Scroll Area host-surface and control-boundary coverage.
+tags: [test, prototype, base, scroll-area, host-projection]

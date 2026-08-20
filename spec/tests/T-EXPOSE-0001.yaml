@@ -58,6 +58,7 @@ cases:
       - C-EXPOSE-0007-C
       - C-EXPOSE-0007-D
       - C-EXPOSE-0007-E
+      - C-EXPOSE-0007-F
     expectation: classified-value-method
   - id: T-EXPOSE-0001-CASE-LIFECYCLE
     title: Expose entries are scoped to instance lifecycle
@@ -66,6 +67,7 @@ cases:
       - C-EXPOSE-0008-B
       - C-EXPOSE-0008-C
       - C-EXPOSE-0008-D
+      - C-EXPOSE-0008-E
     expectation: lifecycle-cleanup
 implementations:
   - id: expose-surface-fixture
@@ -103,6 +105,20 @@ implementations:
     kind: runtime-test
     status: passing
     path: packages/runtime/test/contract/as-hook.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0001-CASE-VALUE-METHOD
+  - id: runtime-expose-instance-lifecycle-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/expose-lifecycle.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0001-CASE-LIFECYCLE
+  - id: adapter-base-expose-callback-scope-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/contract/expose-record.v0.contract.test.ts
     required: true
     consumesCases:
       - T-EXPOSE-0001-CASE-VALUE-METHOD
@@ -156,13 +172,18 @@ verifies:
         - C-EXPOSE-0007-C
         - C-EXPOSE-0007-D
         - C-EXPOSE-0007-E
+        - C-EXPOSE-0007-F
     - id: C-EXPOSE-0008
       anchors:
         - C-EXPOSE-0008-A
         - C-EXPOSE-0008-B
         - C-EXPOSE-0008-C
         - C-EXPOSE-0008-D
+        - C-EXPOSE-0008-E
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Added callback-scope and repeatable-view-lifecycle evidence, including terminal invalidation and specialized-surface inheritance.
   - version: 0.1.0
     change: introduced
     summary: Added expose channel test entity and shared fixture mapping.

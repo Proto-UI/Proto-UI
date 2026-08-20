@@ -13,7 +13,7 @@ Core package for defining prototypes, handles, template primitives, and protocol
 ## Install
 
 ```bash
-npm install @proto.ui/core@0.2.0-rc.7
+npm install @proto.ui/core@0.3.0-alpha.0
 ```
 
 ## Internal Structure
@@ -33,11 +33,14 @@ npm install @proto.ui/core@0.2.0-rc.7
 - `src/index.ts`
 - `src/internal.ts`
 - `src/module/`
+- `src/move.ts`
 - `src/overlay.ts`
 - `src/positioning.ts`
 - `src/prototype.ts`
+- `src/scroll.ts`
 - `src/spec/`
 - `src/state.ts`
+- `src/text-control.ts`
 
 ## Related Internal Packages
 

@@ -24,6 +24,10 @@ declare module 'virtual:starlight/user-config' {
   export default config;
 }
 
+declare module 'virtual:starlight/pagefind-config' {
+  export const pagefindUserConfig: Record<string, unknown>;
+}
+
 declare module 'hast' {
   export type Properties = Record<string, unknown>;
 

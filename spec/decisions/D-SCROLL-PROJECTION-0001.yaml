@@ -1,0 +1,64 @@
+id: D-SCROLL-PROJECTION-0001
+type: decision
+title: Scroll defaults to host-owned engines with system or composed chrome
+status: draft
+since: 0.2.0-rc.7
+summary: Proto UI keeps scrolling engines host-owned by default and lets adapters resolve system or authored scrollbar chrome without equating composed chrome with synthesized scrolling.
+statement:
+  zh-CN: >-
+    Proto UI 第一阶段的 Scroll projection 必须默认由宿主拥有 scrolling engine、input integration、physics、惯性与 overscroll。Scrollbar chrome 独立协商为 `system` 或 `composed`；`composed` 可以继续使用宿主原生 scrolling engine，不得被解释为由 Proto UI 完全模拟滚动。跨宿主契约采用 `auto | system | composed` preference，并由 adapter profile、Scroll module 与 host capability 共同解析最终 projection。
+
+
+  en: >-
+    Proto UI's initial Scroll projection must keep the scrolling engine, input integration, physics, inertia, and overscroll host-owned by default. Scrollbar chrome is negotiated independently as `system` or `composed`; `composed` may continue using the host-native scrolling engine and must not be interpreted as fully synthesized scrolling. The cross-host contract uses an `auto | system | composed` preference resolved by the adapter profile, Scroll module, and host capability.
+
+
+criteria:
+  - id: D-SCROLL-PROJECTION-0001-A
+    text:
+      zh-CN: 第一阶段所有 conforming projection 必须使用 host-owned scrolling engine；完全 synthesized engine 保留为后续独立决策。
+      en: Every initial conforming projection must use a host-owned scrolling engine; a fully synthesized engine remains a separate future decision.
+  - id: D-SCROLL-PROJECTION-0001-B
+    text:
+      zh-CN: '`system` 表示宿主投影 scrolling engine 与 scrollbar chrome；`composed` 表示宿主投影 scrolling engine 而 authored parts 投影 scrollbar chrome。'
+      en: '`system` means the host projects both the scrolling engine and scrollbar chrome; `composed` means the host projects the scrolling engine while authored parts project scrollbar chrome.'
+  - id: D-SCROLL-PROJECTION-0001-C
+    text:
+      zh-CN: '`auto` 必须通过 adapter preference、authored control presence/requirement 与 host support 解析为一个可观察的 resolved projection。'
+      en: '`auto` must resolve from adapter preference, authored-control presence or requirement, and host support into one observable resolved projection.'
+  - id: D-SCROLL-PROJECTION-0001-D
+    text:
+      zh-CN: preference 可以降级；required projection 不得静默降级，并必须在宿主不支持时产生结构化诊断。
+      en: A preference may fall back; a required projection must not silently fall back and must produce a structured diagnostic when unsupported by the host.
+  - id: D-SCROLL-PROJECTION-0001-E
+    text:
+      zh-CN: projection preference 默认属于 adapter profile/session，而不是普通 Scroll Area maker prop。
+      en: Projection preference belongs to the adapter profile or session by default rather than to an ordinary Scroll Area maker prop.
+openQuestions:
+  - id: D-SCROLL-PROJECTION-0001-Q-INSTANCE-OVERRIDE
+    question:
+      zh-CN: 是否需要逐实例覆盖 projection preference；若需要，它应通过何种 environment/configuration 输入表达？
+      en: Is a per-instance projection-preference override needed, and if so through which environment or configuration input should it be expressed?
+    blocks: [scroll-instance-projection-override]
+  - id: D-SCROLL-PROJECTION-0001-Q-COMPOUND-MATERIALIZATION
+    question:
+      zh-CN: adapter/compiler 如何允许多个 logical Scroll Area parts 折叠到一个宿主 native widget，同时保持 logical identity？
+      en: How may an adapter or compiler collapse multiple logical Scroll Area parts into one native host widget while preserving logical identity?
+    blocks: [compound-native-scroll-projection]
+sources:
+  - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
+dependsOn:
+  knowledge:
+    - K-SCROLL-0001
+relates:
+  contracts:
+    - C-SCROLL-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+  decisions:
+    - D-SCROLL-COMPOSED-PROJECTION-0001
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: Selected host-owned scrolling engines with independently negotiated system or composed chrome for the initial Scroll domain.
+tags: [scroll, projection, adapter, host-capability]

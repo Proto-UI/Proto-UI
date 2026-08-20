@@ -124,7 +124,23 @@ implementations:
 verifies:
   contracts:
     - id: C-LIFECYCLE-0008
+  adapters:
+    - id: A-REACT-18-19-0001
+      since: 0.2.0-rc.7
+      anchors:
+        - A-REACT-18-19-0001-I
+    - id: A-VUE-3-0001
+      since: 0.2.0-rc.7
+      anchors:
+        - A-VUE-3-0001-I
+    - id: A-WEB-COMPONENT-0001
+      since: 0.2.0-rc.7
+      anchors:
+        - A-WEB-COMPONENT-0001-I
 revisions:
+  - version: 0.2.0-rc.7
+    change: revised
+    summary: Linked ViewIntent reconciliation conformance to the official Adapter profile criteria.
   - version: 0.1.0
     change: introduced
     summary: Planned cross-layer L1 ViewIntent conformance coverage.

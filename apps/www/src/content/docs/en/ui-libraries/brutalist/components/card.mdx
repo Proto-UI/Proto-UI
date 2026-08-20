@@ -1,0 +1,25 @@
+---
+title: Card
+sidebar:
+  order: 4
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+Brutalist Card is a direct styled-only grouping surface with no Base counterpart.
+
+## Contract
+
+- The public surface is deliberately limited to Root, Header, Content, and Footer.
+- Root is a passive square paper panel with a `2px` ink frame and hard offset shadow; it has no role, focus, activation, or selection mode.
+- Header and Footer own directional ink separators and layout; Content owns horizontal spacing. Separator ink resolves the theme foreground, the same structural color as the Root frame, so a theme change repaints both together.
+- Title and description are ordinary content. Actions compose Button or Link children, which retain their own semantics.
+
+Use Card for passive visual grouping. Selection, disclosure, navigation, and activation belong to their corresponding protocols rather than Card modes.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-card" initialRuntime="wc" />
+</div>

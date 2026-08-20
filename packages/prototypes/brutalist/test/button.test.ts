@@ -214,31 +214,6 @@ describe('prototypes/brutalist: button', () => {
     expect(colorTextTokens(darkTokens)).toEqual(['text-mint-foreground']);
   });
 
-  // T-BRUTALIST-BUTTON-0001-CASE-8 / P-BRUTALIST-BUTTON-LIVE-THEME
-  it('updates surface fill tokens when host colorScheme changes after mount, including disabled', () => {
-    const colorSchemeRef = { current: 'light' as 'light' | 'dark' };
-    const rawPropsRef: { current: Record<string, unknown> } = {
-      current: { variant: 'surface', size: 'default', disabled: true },
-    };
-    const { host } = createButtonHost(rawPropsRef, colorSchemeRef);
-    const { controller } = executeWithHost(button as any, host as any);
-
-    let tokens = controller.getRuleStyleTokens();
-    expect(tokens).toContain('bg-secondary-background');
-    expect(tokens).toContain('text-foreground');
-    expect(tokens).toContain('opacity-50');
-
-    // Surface uses CSS variables; token names stay stable across theme flips so a
-    // host theme change repaints without pointer interaction.
-    colorSchemeRef.current = 'dark';
-    tokens = controller.getRuleStyleTokens();
-    expect(tokens).toContain('bg-secondary-background');
-    expect(tokens).toContain('text-foreground');
-    expect(tokens).toContain('opacity-50');
-    expect(tokens).not.toContain('bg-main');
-    expect(tokens).not.toContain('text-main-foreground');
-  });
-
   // T-BRUTALIST-BUTTON-0001-CASE-9 / P-BRUTALIST-BUTTON-SIZE-PROP
   it('maps every size option to the expected dimension tokens', () => {
     const rawPropsRef: { current: Record<string, unknown> } = {

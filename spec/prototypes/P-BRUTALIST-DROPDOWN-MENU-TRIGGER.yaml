@@ -1,0 +1,94 @@
+id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER
+type: prototype
+title: Brutalist Dropdown Menu Trigger inherits Base Dropdown Trigger and layers an indicator-capable command surface
+status: draft
+since: 0.2.0-rc.7
+summary: >-
+  Brutalist Dropdown Menu Trigger inherits Base menu-button Trigger semantics and projects a style-family visual API: a main accent paired fill, an optional trailing indicator icon, and hover/press/focus-visible/disabled interaction states.
+
+
+statement:
+  en: >-
+    Brutalist Dropdown Menu Trigger is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dropdown Menu Trigger. It preserves inherited Base protocol semantics (hover, press, focus-visible, disabled) and adds only visual/style behavior: a `bg-main` paired `text-main-foreground` surface, an optional trailing indicator icon with configurable shape/size/stroke-width, square geometry, hard offset shadows, hover lift, press sink, focus-visible hard ring, and disabled emphasis reduction.
+
+
+  zh-CN: >-
+    Brutalist Dropdown Menu Trigger 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dropdown Menu Trigger 之上。它保留继承的 Base 协议语义（hover、press、focus-visible、disabled），仅增加视觉/style 行为：`bg-main` 配对 `text-main-foreground` 表面、可配置形状/尺寸/描边宽度的可选尾部指示图标、直角几何、硬偏移阴影、hover 抬升、press 压入、focus-visible 硬 ring 与 disabled 降低强调。
+
+
+criteria:
+  - id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER-BASE-INHERITANCE
+    text:
+      en: >-
+        The prototype must inherit Base Dropdown Menu Trigger through `asDropdownTrigger()` once and must not redefine Base hover, press, focus-visible, or disabled protocol semantics. Visual projection may only consume the projected state handles (`hovered`, `pressed`, `focusVisible`, `disabled`).
+
+
+      zh-CN: >-
+        该 prototype 必须通过 `asDropdownTrigger()` 一次性继承 Base Dropdown Menu Trigger，不得重定义 Base 的 hover、press、focus-visible 或 disabled 协议语义；视觉投射只能消费投影出的 state handles（`hovered`、`pressed`、`focusVisible`、`disabled`）。
+
+
+  - id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-dropdown-trigger` and is the only public Dropdown Menu Trigger entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-dropdown-trigger`，且是本 foundation 切片中唯一公开的 Dropdown Menu Trigger 入口。
+  - id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER-INDICATOR-PROP
+    text:
+      en: >-
+        Public indicator props are: `indicator` boolean with default `false`; `indicatorIcon` enum `chevron-down | chevrons-up-down` with default `chevron-down`; `indicatorSize` number with default `16`; `indicatorStrokeWidth` number with default `2`. When `indicator` is not `false` the trigger renders the chosen icon after its default slot at the configured size and stroke-width; unknown `indicatorIcon` values fall back to `chevron-down`, and non-positive `indicatorSize`/`indicatorStrokeWidth` fall back to `16` and `2`.
+
+
+      zh-CN: >-
+        公开 indicator props 为：`indicator` 布尔，默认 `false`；`indicatorIcon` 枚举 `chevron-down | chevrons-up-down`，默认 `chevron-down`；`indicatorSize` 数值，默认 `16`；`indicatorStrokeWidth` 数值，默认 `2`。当 `indicator` 不为 `false` 时，trigger 在其默认 slot 之后以配置的尺寸与描边宽度渲染所选图标；未知的 `indicatorIcon` 值回退到 `chevron-down`，非正的 `indicatorSize`/`indicatorStrokeWidth` 回退到 `16` 与 `2`。
+
+
+  - id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER-PAIR-INVARIANT
+    text:
+      en: >-
+        The base fill must co-select its foreground: the trigger uses `bg-main` with `text-main-foreground` (with `border-2 border-black` and a hard `shadow-[3px_3px_0_0_#000]`). No rule may replace the fill's foreground with a theme-global text token independently of its background.
+
+
+      zh-CN: >-
+        基础填充必须同时选择其前景：trigger 使用 `bg-main` 与 `text-main-foreground`（配 `border-2 border-black` 与硬阴影 `shadow-[3px_3px_0_0_#000]`）。任何规则都不得在脱离背景的情况下用主题全局文本 token 覆盖填充前景。
+
+
+  - id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER-INTERACTION
+    text:
+      en: >-
+        Hover lifts the trigger (`-translate-x-px -translate-y-px` with `shadow-[4px_4px_0_0_#000]`). Press sinks it (`translate-x-px translate-y-px shadow-none`). Focus-visible applies a hard ring (`outline-none ring-2 ring-ring ring-offset-2 ring-offset-background`). Disabled reduces emphasis with `pointer-events-none` and `opacity-50` while preserving geometry and the base fill pair.
+
+
+      zh-CN: >-
+        Hover 抬升 trigger（`-translate-x-px -translate-y-px` 配 `shadow-[4px_4px_0_0_#000]`）。Press 压入（`translate-x-px translate-y-px shadow-none`）。Focus-visible 使用硬 ring（`outline-none ring-2 ring-ring ring-offset-2 ring-offset-background`）。Disabled 以 `pointer-events-none` 与 `opacity-50` 降低强调，同时保留几何与基础填充色对。
+
+
+  - id: P-BRUTALIST-DROPDOWN-MENU-TRIGGER-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The visual surface must preserve square corners (`rounded-none`), black structural borders (`border-2 border-black`), hard zero-blur offset shadows, flat theme-token fills, and bold uppercase centered typography (`inline-flex items-center justify-center gap-2 font-bold uppercase select-none`) without gradients, glass, rounded cards, or soft elevation.
+
+
+      zh-CN: >-
+        视觉表面必须保持直角（`rounded-none`）、黑色结构边框（`border-2 border-black`）、零模糊硬偏移阴影、平面主题 token 填充与粗体大写居中排版（`inline-flex items-center justify-center gap-2 font-bold uppercase select-none`），不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/dropdown/trigger.proto.ts
+  - path: packages/prototypes/brutalist/src/dropdown/types.ts
+  - path: packages/prototypes/brutalist/test/dropdown.test.ts
+  - path: packages/prototypes/brutalist/src/style.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-DROPDOWN-MENU-TRIGGER
+verifies: { tests: [T-BRUTALIST-DROPDOWN-MENU-0001] }
+revisions:
+  - version: 0.2.0-rc.7
+    change: introduced
+    summary: >-
+      Introduced draft Brutalist Dropdown Menu Trigger projection with real public-API criteria (Base inheritance, entry, indicator props, main pair invariant, interaction states, visual grammar) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
+
+tags: [prototype, brutalist, neo-brutalist, visual, delta, dropdown]
