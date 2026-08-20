@@ -60,7 +60,9 @@ function synchronizeAdapterSelects(doc: Document, adapter: RuntimeId): void {
   for (const select of selects) {
     if (!supportsAdapter(select, adapter) || select.value === adapter) continue;
     select.value = adapter;
-    select.dispatchEvent(new Event('change', { bubbles: true }));
+    if (select.closest('[data-previewer-id]')) {
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
   }
 }
 
