@@ -1,0 +1,37 @@
+{
+  "name": "@proto.ui/adapter-gpui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "protoUi.release.scan": false,
+  "description": "Spike: TypeScript-hosted GPUI bridge adapter for Proto UI (discussion draft, see issue #466)",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../../../scripts/build/public-packages.mjs --package @proto.ui/adapter-gpui",
+    "test": "echo 'spike: covered by workspace vitest run'"
+  },
+  "dependencies": {
+    "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
+    "@proto.ui/module-expose-state": "workspace:*",
+    "@proto.ui/module-focus": "workspace:*",
+    "@proto.ui/module-props": "workspace:*"
+  },
+  "devDependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/hooks": "workspace:*",
+    "@proto.ui/runtime": "workspace:*",
+    "@proto.ui/prototypes-base": "workspace:*"
+  }
+}
