@@ -101,6 +101,20 @@ function pushOverrideWarning(
   warnings.push(`[Focus] ${owner}.${field} overridden: ${String(prev)} -> ${String(next)}`);
 }
 
+/**
+ * Reads the UA's own :focus-visible decision for an element, when the
+ * environment exposes it. Returns false outside real browsers (jsdom/happy-dom)
+ * so tests and SSR keep the modality-only heuristic.
+ */
+function readNativeFocusVisible(el: unknown): boolean {
+  if (!el || typeof (el as Element).matches !== 'function') return false;
+  try {
+    return (el as Element).matches(':focus-visible');
+  } catch {
+    return false;
+  }
+}
+
 class FocusModuleImpl extends ModuleBase {
   private focusableConfig: FocusableConfig = DEFAULT_FOCUSABLE_CONFIG;
   private focusableDeclared = false;
@@ -453,7 +467,13 @@ class FocusModuleImpl extends ModuleBase {
         'reason: focus.pointer.down => focusVisible'
       );
     });
-    this.eventPort.on('host:focus', () => {
+    this.eventPort.on('host:focus', (ev: any) => {
+      // UA heuristics decide :focus-visible on the newly focused element; the
+      // modality heuristic alone misses pointer focus on host-mediated text
+      // controls (issue #438). OR both signals when a real element is known.
+      if (readNativeFocusVisible(ev?.target ?? ev?.nativeEvent?.target)) {
+        this.keyboardModality = true;
+      }
       if (!this.focusableDeclared || this.focusableConfig.disabled) return;
       this.setFocusState(this.focusedOwned, true, 'reason: focus.host:focus => focused');
       this.setFocusState(
