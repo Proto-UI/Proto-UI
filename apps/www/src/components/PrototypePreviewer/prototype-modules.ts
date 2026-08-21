@@ -370,6 +370,18 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
       await import('../../../../../packages/prototypes/base/src/checkbox/indicator.proto');
     registerPrototype('base-checkbox-indicator', mod.default);
   },
+  'base-radio-group-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/radio-group');
+    registerPrototype('base-radio-group-root', mod.radioGroupRoot);
+  },
+  'base-radio-group-item': async () => {
+    const mod = await import('@proto.ui/prototypes-base/radio-group');
+    registerPrototype('base-radio-group-item', mod.radioGroupItem);
+  },
+  'base-radio-group-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-base/radio-group');
+    registerPrototype('base-radio-group-indicator', mod.radioGroupIndicator);
+  },
   'base-transition': async () => {
     const mod =
       await import('../../../../../packages/prototypes/base/src/transition/transition.proto');

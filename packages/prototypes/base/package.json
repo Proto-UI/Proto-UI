@@ -74,6 +74,11 @@
       "import": "./dist/tabs/index.js",
       "default": "./dist/tabs/index.js"
     },
+    "./radio-group": {
+      "types": "./dist/radio-group/index.d.ts",
+      "import": "./dist/radio-group/index.js",
+      "default": "./dist/radio-group/index.js"
+    },
     "./toggle": {
       "types": "./dist/toggle/index.d.ts",
       "import": "./dist/toggle/index.js",

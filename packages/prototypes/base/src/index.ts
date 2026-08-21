@@ -8,6 +8,7 @@ export { default as transition } from './transition';
 export * from './switch';
 export * from './checkbox';
 export * from './tabs';
+export * from './radio-group';
 export * from './dropdown';
 export * from './select';
 export * from './hover-card';

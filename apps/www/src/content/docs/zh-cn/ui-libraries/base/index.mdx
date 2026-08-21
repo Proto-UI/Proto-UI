@@ -26,6 +26,8 @@ Package exports 与 CLI registry 是相关但不完全相同的 inventory。CLI 
 
 `select` 是当前用来验证另一条边界的探针：它仍然保持 protocol-first，但会把 `value` 呈现部件明确留在 family 内部。这个部件用于验证 Proto UI 在 value 类组件上的当前路径，也就是“选中值文本由原型自身定义，并通过显式 update 驱动重渲染”，而不是完全把值展示下放给宿主应用。
 
+`radio-group` 用来验证组级单选所有权，而不是复用 Checkbox 的 item-local toggle 所有权，也不提前声明原生表单行为。Root 保留空值与无法匹配的值；Collection 与 Focus Roving 协作完成 selected-or-first 入口和循环键盘移动；Item 派生 radio 状态；Indicator 只作为视觉后代。
+
 `textarea` 用来验证 host-mediated native-control 边界：Root 拥有一个 logical multiline editor，renderer 保持 contentless，由 adapter 选择物理宿主目标。当前 Web profile 在 Web Component、React 与 Vue 中使用一个原生 textarea。它维持稳定的受控/非受控所有权，归一化 input/change/IME signal，保留 active editing session，在 composition 结束后恢复未被接纳的受控提案，并投影 property、focus 与 accessibility；它不声明 form submission、rich text、auto-resize、系统 editing chrome 或 live-region 语义。
 
 <PrototypeLibraryOverview library="base" locale="zh-cn" />

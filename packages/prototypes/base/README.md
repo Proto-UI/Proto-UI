@@ -23,6 +23,7 @@ Prefer anatomy-family subpaths so consumers and generated facades do not load un
 ```ts
 import button, { asButton } from '@proto.ui/prototypes-base/button';
 import { selectRoot, selectTrigger } from '@proto.ui/prototypes-base/select';
+import { radioGroupRoot, radioGroupItem } from '@proto.ui/prototypes-base/radio-group';
 ```
 
 The root package export remains available for compatibility. Compound anatomy parts share one family subpath. Shared authoring capabilities are available through `transition`, `tools`, and `behaviors` subpaths.
@@ -38,6 +39,7 @@ The root package export remains available for compatibility. Compound anatomy pa
 - `src/hover-card/`
 - `src/index.ts`
 - `src/live-region/`
+- `src/radio-group/`
 - `src/scroll-area/`
 - `src/select/`
 - `src/separator/`
@@ -55,6 +57,12 @@ The root package export remains available for compatibility. Compound anatomy pa
 - Behavior correctness must not depend on microtask timing or any other host thread-model assumption.
 - Behavior correctness must not depend on event bubbling/capturing order. If one keyboard event must only trigger one navigation step, use an explicit event-local guard and document it.
 - It is acceptable to consume normalized keyboard data such as `event.detail.key`. Avoid reading host-specific `event.target` details unless the behavior contract explicitly requires it.
+
+## Radio Group Boundary
+
+- Root is the sole selected-value owner; Items derive checked and effective-disabled state and only request selection.
+- Focus Roving owns selected-or-first entry, wrapped both-axis arrows, Home/End, and disabled-item skipping. Space selects; Enter does not.
+- Indicator is passive visual feedback. Native radio inputs, form behavior, public orientation/loop, Toolbar rules, and Shadcn/Radix compatibility remain outside this draft slice.
 
 ## Select Interaction Notes
 

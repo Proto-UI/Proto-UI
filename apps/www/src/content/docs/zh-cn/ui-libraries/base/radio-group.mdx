@@ -1,0 +1,72 @@
+---
+title: 'Radio Group'
+desp: 'Base 单选组协议'
+description: '带 roving focus、可跨宿主投影的无样式单选组协议。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-radio-group` 是用于从一组可见选项中选择一个值的 draft Base 协议。Root 是唯一的选中值所有者；Item 从 Root 派生 `checked` 与有效 `disabled` 状态；Indicator 只负责呈现这些事实。
+
+<PrototypePreviewer
+  demoId="demo-base-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+/>
+
+## Family 部件
+
+- `radio-group-root`：持有受控或非受控 `value`、Collection 顺序、roving focus、组级 disabled 状态与 `radiogroup` 可访问对象
+- `radio-group-item`：提供一个值，投影一个可聚焦的 `radio`，只请求选择而不持有 checked 状态
+- `radio-group-indicator`：从最近的 Item 派生 checked 与 disabled 事实；不拥有焦点、激活、事件或控件语义
+
+Anatomy 刻意保持精简。`radiogroup` 本身已经同时承担语义分组和焦点集合，再增加 List 部件不会形成独立的信息路径。
+
+## 值所有权
+
+非受控组使用 `defaultValue` 指定初值，受控组使用 `value`。非受控请求被接纳后，Root 先更新状态，再准确发送一次 `valueChange`。受控请求只发送候选值，不制造临时 checked 状态；下一次 `value` prop 更新仍是唯一权威。
+
+空值和无法匹配的值都会被保留，不会静默改选第一项。移除、禁用或改名当前选中 Item 也不会重写 Root 值；之后重新加入匹配 Item 时，其 checked 派生状态会恢复。
+
+Item 值应当非空且在组内唯一。即使错误地写入重复值，也只有第一个匹配 Item 可以被标记为 checked，并且指向歧义值的请求会被拒绝。
+
+## 键盘与焦点
+
+普通 Tab 顺序中只保留一个 enabled Item：优先使用已选且可用的 Item，否则使用第一个 enabled Item。单纯进入组内焦点不会凭空创建选择。
+
+当编程式聚焦或键盘导航已经确定 current Item 后，无关 Root 更新会保留该 tab stop；受控 `value` 更新只改变 checked 状态，不会窃取当前焦点。
+
+- **Space** 选择当前聚焦且可用的 Item，并阻止页面滚动。
+- **Right / Down** 聚焦并选择下一个 enabled Item。
+- **Left / Up** 聚焦并选择上一个 enabled Item。
+- **Home / End** 聚焦并选择第一个或最后一个 enabled Item。
+- 方向键导航会循环，并跳过 disabled Item。
+- 在未来的 Toolbar 专用协议之外，**Enter** 不执行选择。
+- `focusSelf()` 只进行编程式聚焦，不改变选择。
+
+指针激活只在成功 commit 后聚焦并选择目标；取消输入不会选择。
+
+## 可访问性
+
+Root 投影 `role="radiogroup"`、动态 disabled 状态，并把 `a11yLabel` 用作显式可访问名称。App Maker 必须通过 `a11yLabel` 或等价宿主投影提供有意义的组名。
+
+每个 Item 投影 `role="radio"`、布尔 `aria-checked`、有效 `aria-disabled`，名称来自内容。Indicator 只提供视觉反馈，不能生成第二个 radio 对象。
+
+## 当前边界
+
+首个切片明确**不包含**：
+
+- `name`、form owner、提交、重置、校验、`required` 或 hidden/native input
+- 原生 `<input type="radio">` 的事件与分组等价行为
+- 公开的 `orientation` 或 `loop` 配置
+- Toolbar 专用方向键行为
+- Label 或 Description 部件
+- Shadcn/Radix 兼容性声明
+
+这些能力需要独立的宿主或语义契约，本层不会用局部模拟冒充支持。
+
+## 参考
+
+- Catalog：[P-BASE-RADIO-GROUP](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-RADIO-GROUP.yaml)
+- 源码：[packages/prototypes/base/src/radio-group](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/radio-group)
+- 测试：[radio-group.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/radio-group.test.ts)

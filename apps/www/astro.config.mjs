@@ -295,6 +295,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/checkbox',
                 },
                 {
+                  label: 'Radio Group',
+                  translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
+                  slug: 'ui-libraries/base/radio-group',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',

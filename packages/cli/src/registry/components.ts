@@ -692,6 +692,24 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     },
   ]),
 
+  'base-radio-group': baseCompound('base-radio-group', 'Base Radio Group', [
+    {
+      prototypeImport: 'radioGroupRoot',
+      exportBaseName: 'BaseRadioGroupRoot',
+      elementName: 'proto-ui-base-radio-group-root',
+    },
+    {
+      prototypeImport: 'radioGroupItem',
+      exportBaseName: 'BaseRadioGroupItem',
+      elementName: 'proto-ui-base-radio-group-item',
+    },
+    {
+      prototypeImport: 'radioGroupIndicator',
+      exportBaseName: 'BaseRadioGroupIndicator',
+      elementName: 'proto-ui-base-radio-group-indicator',
+    },
+  ]),
+
   'base-dropdown': baseCompound('base-dropdown', 'base Dropdown', [
     {
       prototypeImport: 'dropdownRoot',

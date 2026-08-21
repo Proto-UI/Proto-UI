@@ -250,6 +250,12 @@ function runInstance(inst: HookInstance) {
 }
 
 function syncHost(inst: HookInstance) {
+  if (
+    inst.rootEl?.parentNode === inst.hostEl &&
+    inst.hostEl.childNodes.length === 1
+  ) {
+    return;
+  }
   inst.hostEl.replaceChildren(...(inst.rootEl ? [inst.rootEl] : []));
 }
 
@@ -346,13 +352,13 @@ function applyProps(el: HTMLElement, props: Record<string, any>) {
 
 function renderChildren(parent: HTMLElement, children: any[]) {
   const nodes = children.flat().map(renderChild).filter(Boolean) as Node[];
-  // A textarea's defaultValue is represented by a native fallback text node,
-  // not by authored React children. Preserve it across host-only rerenders,
-  // but still clear children that the fake React render previously authored.
+  // Preserve host-owned content when React did not author children: this covers both
+  // native fallback content and independently mounted compound adapter parts.
+  // A transition from authored children to none still clears the prior React children.
   const hadAuthoredChildren = HAS_AUTHORED_CHILDREN.get(parent) ?? false;
   const hasAuthoredChildren = nodes.length > 0;
   HAS_AUTHORED_CHILDREN.set(parent, hasAuthoredChildren);
-  if (parent instanceof HTMLTextAreaElement && !hasAuthoredChildren && !hadAuthoredChildren) return;
+  if (!hasAuthoredChildren && !hadAuthoredChildren) return;
   parent.replaceChildren(...nodes);
 }
 
