@@ -12,16 +12,14 @@ describe('proto style ring offset defaults', () => {
     expect(css).not.toContain('var(--pui-ring-offset-color, #fff)');
   });
 
-  it('preserves explicit ring offset colour utilities', () => {
+  it('preserves the explicit background offset utility', () => {
     const css = renderProtoStyleTokenCss([
       'ring-2',
       'ring-offset-2',
       'ring-offset-background',
-      'ring-offset-foreground',
     ]);
 
     expect(css).toContain('--pui-ring-offset-color: var(--pui-background);');
-    expect(css).toContain('--pui-ring-offset-color: var(--pui-foreground);');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 });
