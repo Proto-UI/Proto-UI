@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/skill-handoff.schema.json",
+  "title": "Proto UI skill handoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "entrypoint",
+    "fromId",
+    "nextSkillId",
+    "artifacts",
+    "humanGates",
+    "notes"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.skill-handoff" },
+    "entrypoint": { "enum": ["development", "maintenance"] },
+    "fromId": { "type": "string", "pattern": "^pui-[a-z0-9-]+$" },
+    "nextSkillId": {
+      "oneOf": [{ "type": "string", "pattern": "^pui-[a-z0-9-]+$" }, { "type": "null" }]
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "reference"],
+        "properties": {
+          "type": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "reference": { "type": "string", "minLength": 1, "maxLength": 1000 },
+          "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "humanGates": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+    },
+    "notes": { "type": "array", "items": { "type": "string", "maxLength": 1000 } }
+  }
+}

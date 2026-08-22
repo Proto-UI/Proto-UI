@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Assess'
+  short_description: 'Run a bounded comprehension self-assessment'
+  default_prompt: 'Use $pui-assess to assess my current Proto UI comprehension without granting write authority.'
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Inspect Pull Requests'
+  short_description: 'Inspect one bounded pull-request slice.'
+  default_prompt: 'Use $pui-pr to inspect one bounded Proto UI pull-request slice without writing.'
+policy:
+  allow_implicit_invocation: false

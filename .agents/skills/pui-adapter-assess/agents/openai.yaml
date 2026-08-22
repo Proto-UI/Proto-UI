@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Adapter Assess'
+  short_description: 'Assess one adapter question read-only'
+  default_prompt: 'Use $pui-adapter-assess to assess this bounded Adapter question without making changes.'
+
+policy:
+  allow_implicit_invocation: false

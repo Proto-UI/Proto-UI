@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Contract'
+  short_description: 'Maintain a governed readable contract'
+  default_prompt: 'Use $pui-contract to maintain this readable contract without creating shadow authority.'
+
+policy:
+  allow_implicit_invocation: false

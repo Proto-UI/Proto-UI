@@ -4,7 +4,7 @@ Phase 0 evaluates autonomous discovery before building a scheduler, controller, 
 
 ## Phase 0.1 execution surface
 
-The repository-scoped Skill at [`.agents/skills/proto-ui-autonomous-maintenance/SKILL.md`](../../../.agents/skills/proto-ui-autonomous-maintenance/SKILL.md) routes one eligible protocol stage at a time. It does not replace this workflow or project authority. Independent Observer, Verifier, and remediation-review roles still require fresh task contexts.
+The repository-scoped [`pui-maintain` entry skill](../../../.agents/skills/pui-maintain/SKILL.md) routes one eligible protocol stage at a time and lazy-loads only the required stage skill. It does not replace this workflow or project authority. Independent Observer, Verifier, and remediation-review roles still require fresh task contexts. A supported no-finding result, an independently rejected finding after human disposition, or a blocked terminal result is synchronized through `pui-record`; accepted remediation still goes through independent review and `pui-maintenance-close`.
 
 Machine-readable experiment state lives in [`runs.yaml`](./runs.yaml). Candidate discovery, control, and targeted follow-up work lives in [`mission-queue.yaml`](./mission-queue.yaml). Run `corepack pnpm@10.32.1 check:autonomous-maintenance` after changing packets, run state, or the queue.
 

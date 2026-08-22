@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Diagnose CI Evidence'
+  short_description: 'Trace one bounded CI failure.'
+  default_prompt: 'Use $pui-ci to diagnose one bounded Proto UI workflow failure without rerunning or editing.'
+policy:
+  allow_implicit_invocation: false

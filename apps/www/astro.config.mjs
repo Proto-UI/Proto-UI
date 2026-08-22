@@ -608,10 +608,41 @@ export default defineConfig({
               translations: { en: 'Contracts & Tests', 'zh-CN': '契约与测试' },
               slug: 'build/contracts-and-tests',
             },
+          ],
+        },
+        {
+          label: 'Contribute',
+          translations: { en: 'Contribute', 'zh-CN': '参与贡献' },
+          items: [
             {
-              label: 'Contribute',
-              translations: { en: 'Contribute', 'zh-CN': '参与贡献' },
-              slug: 'build/contribute',
+              label: 'Overview',
+              translations: { en: 'Overview', 'zh-CN': '概览' },
+              slug: 'contribute',
+            },
+            {
+              label: 'Collaboration model',
+              translations: { en: 'Collaboration model', 'zh-CN': '协作模型' },
+              slug: 'contribute/collaboration',
+            },
+            {
+              label: 'Deliver a change',
+              translations: { en: 'Deliver a change', 'zh-CN': '交付一个改动' },
+              slug: 'contribute/deliver',
+            },
+            {
+              label: 'Contributor Agents',
+              translations: { en: 'Contributor Agents', 'zh-CN': '贡献者 Agent' },
+              slug: 'contribute/agents',
+            },
+            {
+              label: 'Agent Skill Catalog',
+              translations: { en: 'Agent Skill Catalog', 'zh-CN': 'Agent Skill 目录' },
+              slug: 'contribute/skills',
+            },
+            {
+              label: 'Agent Automation',
+              translations: { en: 'Agent Automation', 'zh-CN': 'Agent 自动化' },
+              slug: 'contribute/automation',
             },
           ],
         },

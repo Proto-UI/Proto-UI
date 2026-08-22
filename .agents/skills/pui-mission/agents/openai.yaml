@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Freeze Maintenance Mission'
+  short_description: 'Freeze one bounded maintenance mission.'
+  default_prompt: 'Use $pui-mission to freeze one explicitly selected Proto UI maintenance mission.'
+policy:
+  allow_implicit_invocation: false

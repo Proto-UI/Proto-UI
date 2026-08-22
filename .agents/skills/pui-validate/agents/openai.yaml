@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Validate'
+  short_description: 'Run proportional checks and report evidence'
+  default_prompt: 'Use $pui-validate to validate this Proto UI change proportionally.'
+
+policy:
+  allow_implicit_invocation: false

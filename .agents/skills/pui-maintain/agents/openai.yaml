@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Maintenance'
+  short_description: 'Route one governed maintenance transition'
+  default_prompt: 'Use $pui-maintain to continue the next eligible maintenance transition.'
+
+policy:
+  allow_implicit_invocation: true

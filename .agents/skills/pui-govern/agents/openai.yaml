@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Audit Collaboration State'
+  short_description: 'Audit one collaboration-governance slice.'
+  default_prompt: 'Use $pui-govern to audit one bounded Proto UI collaboration-governance slice without writing.'
+policy:
+  allow_implicit_invocation: false

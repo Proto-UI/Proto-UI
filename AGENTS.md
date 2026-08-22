@@ -4,13 +4,25 @@ This file is the entry point for agents working in this repository. Keep it shor
 
 ## Start here
 
-1. Read the user request and inspect the affected workspace before editing.
+1. Read the user request and inspect the affected workspace before editing. For ordinary repository development, enter through `$pui-dev`. For governed autonomous maintenance, enter through `$pui-maintain`.
 2. Find related entities under `spec/**`; follow their relations and status rather than searching only by filename.
 3. Read relevant recent records under `internal/records/**` for short-term direction and engineering context.
 4. Use `internal/contracts/**` for explanation and for subjects that have not yet been cataloged in spec. Treat it as a transitional fallback, not a competing source of truth.
 5. Inspect implementation, tests, public documentation, and package surfaces that realize the relevant entities.
 
 For a snapshot-centered overview of the project, run `corepack pnpm@10.32.1 spec:docs:agent` and read the locally generated `internal/agent/PROJECT-UNDERSTANDING.zh-CN.md`. The generated snapshot is intentionally Git-ignored. For entity authoring and governance, read `spec/README.md`.
+
+## Skill composition
+
+Proto UI development skills are small state transitions, not full-project manuals. `internal/agent-operations/skills.yaml` is the composition index. Entry skills choose one transition, resolve it with `pnpm agent:skill -- <leaf-id>`, and load only the returned path; do not preload every `.agents/skills/**/SKILL.md`. Validate each leaf handoff with `pnpm agent:skill -- --handoff <handoff.json>` before loading at most one next leaf.
+
+Ordinary work starts with `$pui-dev`. If no current assessment exists, it routes through the lazy `pui-assess` leaf and derives only an unsigned U0/C1 orientation result before selecting work. It then composes authority tracing, semantic shaping, entity or implementation work, evidence, documentation, validation, and independent review as needed. Autonomous-maintenance runs start with `$pui-maintain` and preserve the recorded Observer, Verifier, Remediator, Reviewer, non-remediation record, and closure boundaries.
+
+Every skill instruction is written in English. Communicate with the user in the language the user currently uses, while keeping paths, entity IDs, API names, and code identifiers canonical.
+
+Read `internal/agent-operations/contributor-agents.md` before selecting work autonomously. A comprehension assessment only limits which task classes an Agent may attempt. It never grants GitHub permission. Effective capability is the intersection of live platform permission, Discord or Poppy trust when relevant, verified comprehension, task risk, a fresh task probe, and current human authorization.
+
+An Agent may propose only a ready, bounded, unclaimed item with explicit acceptance and validation boundaries. Posting the claim is a separate mutation. Returning no eligible work is correct. Never manufacture a task, bypass `needs maintainer design`, or treat a high assessment score as semantic approval.
 
 ## Authority and conflicts
 
@@ -87,7 +99,7 @@ corepack pnpm@10.32.1 test
 
 Choose verification proportional to the change:
 
-- Agent/documentation-only changes: run `check:agent-doc`, generate the local Agent project understanding when its snapshot needs inspection, and validate referenced paths.
+- Agent/documentation-only changes: run `check:agent-operations`, `check:agent-doc`, generate the local Agent project understanding when its snapshot needs inspection, and validate referenced paths.
 - Spec changes: run the relevant spec/schema/graph tests, `check:prototype-catalog` when prototypes are involved, regenerate projections, then run type checks.
 - Runtime, module, adapter, or prototype behavior changes: run focused tests first, then the relevant workspace-wide checks.
 - Release-governance changes: run the release checks documented under `internal/governance/**`.
@@ -102,3 +114,4 @@ Generated files must be changed through their generator. `internal/agent/PROJECT
 - Use exact repository paths and entity IDs when making traceability claims.
 - State uncertainty explicitly when the catalog is incomplete.
 - Update this guide when repository-wide working rules change; put detailed domain knowledge in the closest scoped README or spec entity instead.
+- Do not infer permission to comment, label, assign, commit, push, approve, merge, publish, release, or change repository settings. A mutation also requires the registered leaf/task-class match, exact scope, trusted subject and attestation, fresh probe, current human authorization, and any global idempotency control required by policy. Perform external writes only when every condition holds.

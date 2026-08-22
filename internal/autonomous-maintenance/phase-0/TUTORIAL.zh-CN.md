@@ -115,7 +115,7 @@ focused contract/browser evidence。
 新开一个 Codex task，在同一仓库中发送：
 
 ```text
-Use $proto-ui-autonomous-maintenance to run the Observer stage for
+Use $pui-observe to run the Observer stage for
 internal/autonomous-maintenance/phase-0/missions/<mission>.md.
 
 Remain read-only and stop after the Observer report.
@@ -142,7 +142,7 @@ Observer 没有被告知一个已知文档 bug。它从 `C-PROPS-0009`、实现�
 不要在 Observer task 中继续验证。新开 task，只传递 candidate finding、仓库和 [`prompts/verifier.md`](./prompts/verifier.md)：
 
 ```text
-Use $proto-ui-autonomous-maintenance to verify this candidate finding.
+Use $pui-verify to verify this candidate finding.
 
 Finding:
 <paste finding or provide its repository path>
@@ -208,7 +208,7 @@ Remediator 可以在语义批准后修改仓库。推荐顺序：
 可以在控制任务中发送：
 
 ```text
-Use $proto-ui-autonomous-maintenance to remediate the accepted finding at
+Use $pui-remediate to remediate the accepted finding at
 internal/autonomous-maintenance/phase-0/findings/<finding>.md.
 
 Follow the approved semantic scope and update the remediation review packet.
@@ -242,7 +242,7 @@ corepack pnpm@10.32.1 check:autonomous-review
 新开 task，传递 finding、packet、baseline、仓库和 actual diff，使用 [`prompts/review-synthesizer.md`](./prompts/review-synthesizer.md)：
 
 ```text
-Use $proto-ui-autonomous-maintenance to independently review this remediation.
+Use $pui-maintenance-review to independently review this remediation.
 
 Finding: <path>
 Packet: <path>
@@ -282,7 +282,7 @@ corepack pnpm@10.32.1 check:autonomous-maintenance
 在独立审查已经记录后，可以在控制任务中发送：
 
 ```text
-Use $proto-ui-autonomous-maintenance to perform the Close stage for
+Use $pui-maintenance-close to perform the Close stage for
 <finding ID>. Do not commit or push; return the concentrated integration
 decision packet when closure checks pass.
 ```
@@ -305,6 +305,8 @@ decision packet when closure checks pass.
 - 为什么剩余差异属于允许的 host-specific behavior、draft uncertainty 或非问题；
 - validation floor 的实际结果；
 - Observer 没有创建 tracked mutation。
+
+Observer 停止后，由控制者在新的状态转换中使用 `$pui-record`。它只在完整授权和 task probe 覆盖下同步 mission、queue 与 run ledger。这个转换不要求 remediation review，因为没有发生修复；它也不能拿来绕过已接受 finding 的独立复核。Verifier 判定 finding 不成立并取得人工 disposition 后，使用同一个终态转换记录 rejected outcome。
 
 不要为了提高 finding 数量，把以下内容包装成问题：
 

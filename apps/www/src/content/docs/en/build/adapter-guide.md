@@ -50,4 +50,4 @@ A trustworthy exemplar needs:
 5. target-specific commit, event, projection, and diagnostics behavior; and
 6. conformance evidence that separates portable semantics from host mechanics.
 
-Until then, choose a Prototype, docs, demo, Module slice, or bounded bug through [How to Contribute](/en/build/contribute/) and use [Contracts & Tests](/en/build/contracts-and-tests/) to design evidence.
+Until then, choose a ready Prototype, docs, demo, Module slice, or bounded bug through [Contribute](/en/contribute/) and use [Contracts & Tests](/en/build/contracts-and-tests/) to design evidence.

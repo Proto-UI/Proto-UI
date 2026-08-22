@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Adapter'
+  short_description: 'Implement one approved adapter realization'
+  default_prompt: 'Use $pui-adapter to implement this explicitly approved Adapter realization slice.'
+
+policy:
+  allow_implicit_invocation: false

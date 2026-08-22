@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Regression'
+  short_description: 'Reproduce and repair a governed regression'
+  default_prompt: 'Use $pui-regression to repair this bounded Proto UI regression.'
+
+policy:
+  allow_implicit_invocation: false

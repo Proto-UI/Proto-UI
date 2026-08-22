@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Remediate'
+  short_description: 'Repair one accepted maintenance finding'
+  default_prompt: 'Use $pui-remediate to repair this accepted maintenance finding.'
+
+policy:
+  allow_implicit_invocation: false

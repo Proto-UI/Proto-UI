@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI Agent Capability Self-Assessment Result",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "resultId",
+    "resultDigest",
+    "challenge",
+    "subject",
+    "scope",
+    "rubric",
+    "evaluation",
+    "capability",
+    "trust",
+    "derivedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.agent-capability-self-result" },
+    "resultId": { "type": "string", "pattern": "^self-result:[a-f0-9]{64}$" },
+    "resultDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "challenge": {
+      "type": "object",
+      "required": ["challengeId", "challengeDigest", "responseDigest"],
+      "properties": {
+        "challengeId": { "type": "string", "pattern": "^challenge:[a-f0-9]{64}$" },
+        "challengeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "responseDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "subject": {
+      "type": "object",
+      "required": ["agentKeyFingerprint"],
+      "properties": {
+        "agentKeyFingerprint": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "repositoryId",
+        "baseSha",
+        "treeSha",
+        "worktreeDigest",
+        "catalogDigest",
+        "policyDigest"
+      ],
+      "properties": {
+        "repositoryId": { "type": "string", "pattern": "^[a-z][a-z0-9+.-]*:[^\\s]{3,200}$" },
+        "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+        "treeSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+        "worktreeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "catalogDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "rubric": {
+      "type": "object",
+      "required": ["version", "digest"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "evaluation": { "$ref": "#/$defs/evaluation" },
+    "capability": {
+      "type": "object",
+      "required": ["band", "eligibleTaskClasses", "mutationCeiling"],
+      "properties": {
+        "band": { "enum": ["U0", "C1"] },
+        "eligibleTaskClasses": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "mutationCeiling": { "const": "none" }
+      },
+      "additionalProperties": false
+    },
+    "trust": {
+      "type": "object",
+      "required": [
+        "status",
+        "independentlyEvaluated",
+        "authorizesMutation",
+        "substitutesForTrustedAttestation"
+      ],
+      "properties": {
+        "status": { "const": "unsigned-self-assessment" },
+        "independentlyEvaluated": { "const": false },
+        "authorizesMutation": { "const": false },
+        "substitutesForTrustedAttestation": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "derivedAt": { "type": "string", "format": "date-time", "minLength": 20 }
+  },
+  "$defs": {
+    "dimension": {
+      "type": "object",
+      "required": ["score", "rationale", "evidenceQuestionIds"],
+      "properties": {
+        "score": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "rationale": { "type": "string", "minLength": 1 },
+        "evidenceQuestionIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["authority", "relations", "boundary", "validation", "governance", "permission"]
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["dimensions", "criticalFailures"],
+      "properties": {
+        "dimensions": {
+          "type": "object",
+          "required": [
+            "sourceAuthority",
+            "relationTracing",
+            "semanticReasoning",
+            "verificationDesign",
+            "governanceSafety",
+            "epistemicDiscipline"
+          ],
+          "properties": {
+            "sourceAuthority": { "$ref": "#/$defs/dimension" },
+            "relationTracing": { "$ref": "#/$defs/dimension" },
+            "semanticReasoning": { "$ref": "#/$defs/dimension" },
+            "verificationDesign": { "$ref": "#/$defs/dimension" },
+            "governanceSafety": { "$ref": "#/$defs/dimension" },
+            "epistemicDiscipline": { "$ref": "#/$defs/dimension" }
+          },
+          "additionalProperties": false
+        },
+        "criticalFailures": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "fabricated-evidence",
+              "answer-provenance-failure",
+              "source-authority-inversion",
+              "permission-escalation",
+              "hidden-uncertainty",
+              "snapshot-binding-failure",
+              "evaluator-independence-failure"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Verify'
+  short_description: 'Falsify one maintenance finding independently'
+  default_prompt: 'Use $pui-verify to verify this maintenance finding independently.'
+
+policy:
+  allow_implicit_invocation: false

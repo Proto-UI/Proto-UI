@@ -53,4 +53,4 @@ Proto UI 通过 Adapter profile 实体及其指向 Module、host capability 与�
 
 Package availability 与 entity lifecycle 彼此独立。Proto UI 0.2.0 是已经发布的稳定生态版本（`V-PROTO-UI-0008`），当前工作区则可以包含此后的 draft entity 与 draft 0.3.0-alpha.0 train。兼容性判断必须同时读取发行身份、profile lifecycle、精确 relation 与可执行证据。
 
-底层协议模型见[核心规范](/zh-cn/specifications/core/)；实现与参与路径见 [Build / 参与贡献](/zh-cn/build/contribute/)。
+底层协议模型见[核心规范](/zh-cn/specifications/core/)；实现与参与路径见[参与贡献](/zh-cn/contribute/)。

@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI Agent Task Probe",
+  "type": "object",
+  "required": ["payload", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "kind",
+        "probeId",
+        "subject",
+        "repository",
+        "task",
+        "scope",
+        "authorization",
+        "validity"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "proto-ui.agent-task-probe" },
+        "probeId": { "type": "string", "pattern": "^probe:[a-f0-9]{64}$" },
+        "subject": {
+          "type": "object",
+          "required": ["agentKeyFingerprint"],
+          "properties": {
+            "agentKeyFingerprint": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "repository": {
+          "type": "object",
+          "required": [
+            "repositoryId",
+            "baseSha",
+            "headSha",
+            "treeSha",
+            "worktreeDigest",
+            "diffDigest",
+            "entityGraphDigest"
+          ],
+          "properties": {
+            "repositoryId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9+.-]*:[^\\s]{3,200}$"
+            },
+            "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+            "headSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+            "treeSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+            "worktreeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "diffDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "entityGraphDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "additionalProperties": false
+        },
+        "task": {
+          "type": "object",
+          "required": [
+            "taskId",
+            "updatedAt",
+            "leafId",
+            "taskClass",
+            "mutation",
+            "risk",
+            "executionMode"
+          ],
+          "properties": {
+            "taskId": { "type": "string", "minLength": 1, "maxLength": 240 },
+            "updatedAt": { "type": "string", "format": "date-time", "minLength": 20 },
+            "leafId": { "type": "string", "pattern": "^pui-[a-z0-9-]+$" },
+            "taskClass": { "$ref": "#/$defs/mutationTaskClass" },
+            "mutation": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "risk": { "enum": ["low", "medium", "high"] },
+            "executionMode": { "enum": ["automatic", "attended-human"] }
+          },
+          "additionalProperties": false
+        },
+        "scope": { "$ref": "#/$defs/mutationScope" },
+        "authorization": {
+          "type": "object",
+          "required": [
+            "capabilityAssessmentId",
+            "capabilityAttestationDigest",
+            "permissionSnapshotDigest",
+            "humanAuthorizationDigest"
+          ],
+          "properties": {
+            "capabilityAssessmentId": {
+              "type": "string",
+              "pattern": "^assessment:[a-f0-9]{64}$"
+            },
+            "capabilityAttestationDigest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "permissionSnapshotDigest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "humanAuthorizationDigest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "validity": {
+          "type": "object",
+          "required": ["issuedAt", "notBefore", "expiresAt", "singleUse"],
+          "properties": {
+            "issuedAt": { "type": "string", "format": "date-time", "minLength": 20 },
+            "notBefore": { "type": "string", "format": "date-time", "minLength": 20 },
+            "expiresAt": { "type": "string", "format": "date-time", "minLength": 20 },
+            "singleUse": { "const": true }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "signature": { "$ref": "#/$defs/signature" }
+  },
+  "allOf": [
+    {
+      "not": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "task": {
+                "properties": {
+                  "executionMode": { "const": "automatic" }
+                },
+                "required": ["executionMode"]
+              },
+              "scope": {
+                "properties": {
+                  "allowedOperations": {
+                    "contains": { "const": "external-github-metadata" }
+                  }
+                },
+                "required": ["allowedOperations"]
+              }
+            },
+            "required": ["task", "scope"]
+          }
+        },
+        "required": ["payload"]
+      }
+    }
+  ],
+  "$defs": {
+    "mutationScope": {
+      "type": "object",
+      "required": [
+        "authorityAnchors",
+        "acceptance",
+        "exclusions",
+        "affectedSurfaces",
+        "allowedPaths",
+        "allowedOperations",
+        "evidence",
+        "stopConditions",
+        "humanGates",
+        "ownershipDigest",
+        "linkedWorkDigest"
+      ],
+      "properties": {
+        "authorityAnchors": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "acceptance": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "exclusions": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "affectedSurfaces": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "allowedPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "required": ["path", "mode"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+              },
+              "mode": { "enum": ["exact", "tree"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "allowedOperations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "create",
+              "modify",
+              "delete",
+              "rename",
+              "external-github-metadata",
+              "tracked-maintenance-state"
+            ]
+          }
+        },
+        "evidence": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "stopConditions": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "humanGates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "ownershipDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "linkedWorkDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "mutationTaskClass": {
+      "enum": [
+        "claim-work-item",
+        "release-own-claim",
+        "update-tracked-maintenance-state",
+        "maintain-docs",
+        "maintain-contract-projection",
+        "repair-bounded-regression",
+        "implement-governed-tests",
+        "author-approved-spec",
+        "implement-approved-module",
+        "implement-approved-host-capability",
+        "implement-approved-adapter-slice",
+        "implement-approved-prototype",
+        "shape-semantic-decision",
+        "coordinate-cross-domain-change",
+        "prepare-release-state",
+        "audit-release-evidence"
+      ]
+    },
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "keyId", "canonicalization", "value"],
+      "properties": {
+        "algorithm": { "const": "Ed25519" },
+        "keyId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{3,120}$" },
+        "canonicalization": { "const": "RFC8785" },
+        "value": { "type": "string", "pattern": "^[A-Za-z0-9+/]{86}==$" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

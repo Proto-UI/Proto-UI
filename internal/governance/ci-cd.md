@@ -1,8 +1,8 @@
-# Proto UI CI/CD Guide
+# Proto UI CI/CD guide
 
 This document describes the repository's GitHub Actions workflows and how they relate to global exact-version and launch-package governance.
 
-The current published prerelease release train is `0.2.0-rc.7` under the npm `next` channel.
+Release identity comes from the applicable `V-*` entity and immutable release evidence. Do not hard-code a current version in this guide.
 
 ## Workflows
 
@@ -12,8 +12,9 @@ The current published prerelease release train is `0.2.0-rc.7` under the npm `ne
 | Release Packages | `.github/workflows/release-packages.yml` | Manual release scan, stage rehearsal, or full-set publication |
 | Release Cadence | `.github/workflows/release-cadence.yml` | Periodic reminder based on the latest `v*` release tag |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request routing experiment |
+| RepoSteward Portfolio Shadow Trial | `.github/workflows/reposteward-portfolio-shadow.yml` | Manual read-only external portfolio experiment |
 
-## CI Workflow (`ci.yml`)
+## CI workflow (`ci.yml`)
 
 CI runs for pull requests, pushes to `main`, and manual dispatch. In addition to type and test checks, `check-version-governance` verifies that:
 
@@ -24,7 +25,11 @@ CI runs for pull requests, pushes to `main`, and manual dispatch. In addition to
 
 Every new numeric version must therefore be a reviewed release train; a package-local bump cannot bypass the gate.
 
+Repository policy requires the relevant CI evidence before merge. GitHub rulesets and required-check configuration are external controls and must be audited separately. A green convention is not the same as a platform-enforced merge gate. The dated collaboration forensics record documents the observed configuration and known gaps.
+
 `public_package_plan` derives the affected public package graph from the pull request diff. Package changes select the changed package, its reverse consumers, and every upstream public dependency required to build that set. Repository-wide build, release, lockfile, manifest, or workflow changes select all public packages. The resulting build job validates the generated manifests, produces JavaScript plus declaration artifacts, runs native ESM import smokes, and enforces representative gzip budgets. Release-stage and isolated-consumer jobs may skip a pull request whose affected public package graph is empty; the full set still runs on `main` and manual dispatch.
+
+`release-consumer-react` additionally builds tarballs for every public package and installs the current declared release closure in a temporary React + Vite project outside the monorepo. The gate prevents `@proto.ui/*` from falling back to the npm registry or workspace sources, validates every non-wildcard export target in staged manifests, then verifies CLI facade generation, TypeScript, a production build, and baseline runtime behavior. Before expanding the full fixture, it generates only Shadcn Button and checks that the final Rollup module graph contains no other Base/Shadcn prototype family. This is a family-boundary assertion rather than a fixed bundle-size budget.
 
 ## Agent Operations Shadow workflow (`agent-operations-shadow.yml`)
 
@@ -32,9 +37,9 @@ This daily or manually dispatched Phase A experiment collects a bounded snapshot
 
 The workflow has read-only `contents`, `issues`, and `pull-requests` permissions, disables persisted checkout credentials, and runs Codex with the `:read-only` permission profile and `drop-sudo`. It does not run from pull-request events, post comments, change labels, create branches or pull requests, or authorize integration. Any future GitHub write permission requires a separate reviewed policy change and an explicit maintainer decision under `internal/agent-operations/**`.
 
-`release-consumer-react` additionally builds tarballs for every public package and installs the current declared release closure in a temporary React + Vite project outside the monorepo. The gate prevents `@proto.ui/*` from falling back to the npm registry or workspace sources, validates every non-wildcard export target in staged manifests, then verifies CLI facade generation, TypeScript, a production build, and baseline runtime behavior. Before expanding the full fixture, it generates only Shadcn Button and checks that the final Rollup module graph contains no other Base/Shadcn prototype family. This is a family-boundary assertion rather than a fixed bundle-size budget.
+Ordinary Contributor Agents use the lazy skill registry under `internal/agent-operations/skills.yaml`; it is not part of the scheduled shadow workflow. `$pui-dev` routes ordinary development, while `$pui-maintain` routes the separate autonomous-maintenance protocol.
 
-## Release Workflow (`release-packages.yml`)
+## Release workflow (`release-packages.yml`)
 
 The workflow is triggered manually through `workflow_dispatch`.
 
@@ -48,16 +53,16 @@ The workflow is triggered manually through `workflow_dispatch`.
 
 The workflow does not accept ad hoc `version`, `tag`, or `only` inputs. Version and dist-tag come from reviewed repository state: prereleases use `next`, while stable releases use `latest`.
 
-### Safety Rules
+### Safety rules
 
 - `publish-all` is allowed only on `main`.
 - `publish-all` requires the `workspace` profile; `launch` is for product-scope audit and rehearsal only.
-- Real publication is protected by the GitHub `npm` environment and npm Trusted Publishing through OIDC.
+- Real publication selects the GitHub `npm` environment and uses npm Trusted Publishing through OIDC. Environment reviewers, branch restrictions, and administrator bypass are external configuration; verify them immediately before a release instead of inferring protection from the workflow file.
 - `stage` and `publish-all` fail before package staging unless every public package identity is already readable from the npm registry. The check cannot inspect private Trusted Publisher settings, which remain a maintainer responsibility.
 - Concurrency prevents overlapping release runs for the same ref.
 - The workflow creates `v<version>` only after every public package publishes successfully.
 
-## Launch Governance And The Publish Set
+## Launch governance and the publish set
 
 `internal/governance/launch-package-governance.json` defines priorities for the launch product promise, documentation, and smoke coverage.
 
@@ -67,17 +72,17 @@ The workflow does not accept ad hoc `version`, `tag`, or `only` inputs. Version 
 
 These tiers do not control the real npm publish set. Global exact-version governance requires the `workspace` profile to publish every public `@proto.ui/*` package together.
 
-## Suggested Release Runbook
+## Suggested release runbook
 
 1. Create or update the draft V entity and align `VERSION` plus package manifests in one PR.
 2. Regenerate and review the release BOM and notes, then run `pnpm release:assets:check`.
 3. For every newly named public package, publish a clearly non-release bootstrap version and configure its Trusted Publisher before the release rehearsal.
 4. Run `pnpm release:rehearse` for the complete sequential non-publishing gate. CI keeps the same checks split into parallel jobs for feedback speed.
 5. Review the launch product scope and isolated React plus multi-host CLI tarball consumer results.
-6. After merge to `main`, run `publish-all` with the `workspace` profile.
-7. Verify the GitHub release/spec-snapshot evidence and promote the V entity to `active` in a follow-up PR.
+6. After merge to `main`, obtain the current human release approval and run `publish-all` with the `workspace` profile.
+7. In a separate evidence change, verify registry, tag, GitHub Release, assets, workflow head, deployment, and spec-snapshot digests before promoting the V entity according to its approved lifecycle.
 
-## Local Shortcuts
+## Local shortcuts
 
 - `pnpm check:release-version`
 - `pnpm release:bom`

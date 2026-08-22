@@ -71,6 +71,7 @@ The older [`internal/contracts/**`](internal/contracts/) documents are being pro
 For contributors and Agents:
 
 - [Agent repository guide](AGENTS.md)
+- [Composable Agent skills](internal/agent-operations/contributor-agents.md)
 - [Spec catalog guide](spec/README.md)
 - Generated project understanding: run `corepack pnpm@10.32.1 spec:docs:agent`, then read the Git-ignored local file documented in [AGENTS.md](AGENTS.md)
 - [Contributing guide](CONTRIBUTING.md)
@@ -131,6 +132,12 @@ Roadmap direction is recorded under [`internal/records/**`](internal/records/); 
 - **Email:** guangliang2018@foxmail.com
 
 Contributions to protocols, tests, Adapters, Prototype libraries, documentation, and consumer evidence are welcome.
+
+Give this one line to your Agent to enter the contribution flow:
+
+```text
+Read AGENTS.md, then use $pui-dev to assess your current capability and permissions and select at most one eligible unclaimed task. Stay read-only unless a trusted attestation, an exact live task probe, platform permission, and current human authorization all permit the next leaf; otherwise return the proposal and missing gate.
+```
 
 ## License
 

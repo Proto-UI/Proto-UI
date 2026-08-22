@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI Agent Capability Challenge",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "challengeId",
+    "challengeDigest",
+    "subject",
+    "scope",
+    "validity",
+    "questions",
+    "responseContract"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.agent-capability-challenge" },
+    "challengeId": { "type": "string", "pattern": "^challenge:[a-f0-9]{64}$" },
+    "challengeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "subject": {
+      "type": "object",
+      "required": ["agentKeyFingerprint"],
+      "properties": {
+        "agentKeyFingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "repositoryId",
+        "assessmentMode",
+        "snapshotMode",
+        "baseSha",
+        "treeSha",
+        "worktreeDigest",
+        "catalogDigest",
+        "policyDigest",
+        "generatorDigest",
+        "nonceDigest"
+      ],
+      "properties": {
+        "repositoryId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9+.-]*:[^\\s]{3,200}$"
+        },
+        "assessmentMode": { "enum": ["self-assessment", "independent"] },
+        "snapshotMode": { "enum": ["worktree", "committed-clean"] },
+        "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+        "treeSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+        "worktreeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "catalogDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "generatorDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "nonceDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "validity": {
+      "type": "object",
+      "required": ["issuedAt", "expiresAt"],
+      "properties": {
+        "issuedAt": { "type": "string", "format": "date-time", "minLength": 20 },
+        "expiresAt": { "type": "string", "format": "date-time", "minLength": 20 }
+      },
+      "additionalProperties": false
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["id", "dimensions", "prompt", "requiredEvidence"],
+        "properties": {
+          "id": {
+            "enum": ["authority", "relations", "boundary", "validation", "governance", "permission"]
+          },
+          "dimensions": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "source-authority",
+                "relation-tracing",
+                "semantic-reasoning",
+                "verification-design",
+                "governance-safety",
+                "epistemic-discipline"
+              ]
+            }
+          },
+          "prompt": { "type": "string", "minLength": 20 },
+          "requiredEvidence": {
+            "type": "array",
+            "minItems": 4,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 2 }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "responseContract": {
+      "type": "object",
+      "required": [
+        "format",
+        "schema",
+        "requiredPerQuestion",
+        "selfAssessmentCeiling",
+        "independentEvaluationRequiredAbove"
+      ],
+      "properties": {
+        "format": { "const": "json" },
+        "schema": {
+          "const": "internal/agent-operations/schemas/capability-response.schema.json"
+        },
+        "requiredPerQuestion": {
+          "const": ["answer", "evidence", "unknowns", "humanGates"]
+        },
+        "selfAssessmentCeiling": { "const": "C1" },
+        "independentEvaluationRequiredAbove": { "const": "C1" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "scope": {
+            "properties": { "assessmentMode": { "const": "independent" } },
+            "required": ["assessmentMode"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope": {
+            "properties": { "snapshotMode": { "const": "committed-clean" } }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Prototype'
+  short_description: 'Maintain or deliver an approved component slice'
+  default_prompt: 'Use $pui-prototype to handle this governed Prototype or component slice.'
+
+policy:
+  allow_implicit_invocation: false

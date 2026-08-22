@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Docs'
+  short_description: 'Project governed facts into human documentation'
+  default_prompt: 'Use $pui-docs to update the affected Proto UI documentation.'
+
+policy:
+  allow_implicit_invocation: false

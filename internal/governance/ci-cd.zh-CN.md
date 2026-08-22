@@ -2,7 +2,7 @@
 
 本文说明仓库内 GitHub Actions 工作流的职责，以及它们与全局精确版本和首发 package 治理的关系。
 
-当前已发布的 prerelease release train 为 `0.2.0-rc.7`，使用 npm `next` channel。
+发布身份来自适用的 `V-*` 实体与不可变发布证据。本指南不硬编码当前版本。
 
 ## 工作流总览
 
@@ -12,6 +12,7 @@
 | Release Packages | `.github/workflows/release-packages.yml` | 手动执行 release scan、stage 彩排或全量发布 |
 | Release Cadence | `.github/workflows/release-cadence.yml` | 定期检查距最近 `v*` release 的时间并提醒维护者 |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR 路由实验 |
+| RepoSteward Portfolio Shadow Trial | `.github/workflows/reposteward-portfolio-shadow.yml` | 手动触发的只读外部 portfolio 实验 |
 
 ## CI 工作流（`ci.yml`）
 
@@ -24,7 +25,11 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 
 任何新数字版本都必须先成为受评审的 release train，不能通过局部 package 改版绕过。
 
+仓库政策要求合并前取得相关 CI 证据。GitHub ruleset 与 required check 配置属于外部控制，必须单独审计；约定上的绿色状态不等于平台强制的合并门禁。带日期的协作取证记录保存调查时观察到的配置和已知缺口。
+
 `public_package_plan` 会根据 pull request diff 推导受影响的公开 package 图。package 变化会选中改动 package、它的反向消费者，以及构建该集合所需的全部上游公开依赖；仓库级构建、release、lockfile、manifest 或 workflow 变化则选中全部公开 package。后续 build job 会检查生成式 manifest、产出 JavaScript 与声明文件、执行原生 ESM import smoke，并检查代表性 gzip 预算。如果 PR 的受影响公开 package 图为空，release stage 与隔离 consumer job 可以跳过；`main` 与手动触发仍运行全量集合。
+
+`release-consumer-react` 会从当前源码构建全部公开 package tarball，并在 monorepo 外的临时 React + Vite 项目中安装当前发布依赖闭包。该门禁禁止 `@proto.ui/*` 回退到 npm registry 或 workspace 源码，验证 staged manifest 的全部非通配 export target，并验证 CLI facade 生成、TypeScript、production build 和基础运行时行为。在扩展完整 fixture 前，它还会先只生成 Shadcn Button，并检查最终 Rollup module graph 不包含其他 Base/Shadcn prototype family；这是一项 family 边界检测，不是固定 bundle 大小预算。
 
 ## Agent Operations Shadow 工作流（`agent-operations-shadow.yml`）
 
@@ -32,7 +37,7 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 
 该工作流对 `contents`、`issues` 与 `pull-requests` 只有读取权限，禁用 checkout credential 持久化，并让 Codex 使用 `:read-only` permission profile 和 `drop-sudo`。它不响应 PR 事件，不发布评论、不修改 label、不创建分支或 PR，也不授权 integration。未来若增加 GitHub 写权限，必须通过 `internal/agent-operations/**` 下的独立策略变更接受评审，并取得维护者的明确决定。
 
-`release-consumer-react` 进一步从当前源码构建全部公开 package tarball，并在 monorepo 外的临时 React + Vite 项目中安装当前发布依赖闭包。该门禁禁止 `@proto.ui/*` 回退到 npm registry 或 workspace 源码，验证 staged manifest 的全部非通配 export target，并验证 CLI facade 生成、TypeScript、production build 和基础运行时行为。在扩展完整 fixture 前，它还会先只生成 Shadcn Button，并检查最终 Rollup module graph 不包含其他 Base/Shadcn prototype family；这是一项 family 边界检测，不是固定 bundle 大小预算。
+普通 Contributor Agent 使用 `internal/agent-operations/skills.yaml` 下的懒加载 skill registry，不属于定时 shadow workflow。`$pui-dev` 负责普通开发，`$pui-maintain` 负责独立的自治维护协议。
 
 ## 发布工作流（`release-packages.yml`）
 
@@ -52,7 +57,7 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 
 - `publish-all` 仅允许在 `main` 上运行。
 - `publish-all` 必须使用 `workspace` profile；`launch` 只用于产品范围审计和彩排。
-- 真实发布由 GitHub `npm` environment 审批与 npm Trusted Publishing OIDC 保护。
+- 真实发布会选择 GitHub `npm` environment，并使用 npm Trusted Publishing OIDC。Environment reviewer、分支限制和管理员 bypass 均属于外部配置；发布前必须现场核验，不能仅凭 workflow 文件推断这些保护存在。
 - `stage` 与 `publish-all` 在 package 暂存前检查全部公开 package identity 均已可从 npm registry 读取；该检查无法读取私有的 Trusted Publisher 设置，后者仍由维护者负责核对。
 - 同一 ref 上启用并发互斥，避免重叠发布任务。
 - 全部公开 package 发布成功后才创建 `v<version>` tag。
@@ -74,8 +79,8 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 3. 对每个首次出现的公开 package 名称，先发布明确不属于正式发行的 bootstrap 版本，并配置 Trusted Publisher。
 4. 运行 `pnpm release:rehearse`，完成整套顺序执行的不发布门禁。CI 为了缩短反馈时间，仍将同一组检查拆成并行 job。
 5. 审阅 launch 产品范围，以及隔离 React 与 CLI 多宿主 tarball consumer 结果。
-6. 合入 `main` 后，用 `workspace` profile 运行 `publish-all`。
-7. 发布成功后核对 GitHub release/spec snapshot 证据，再通过后续 PR 将 V 实体转为 `active`。
+6. 合入 `main` 后，取得当前人工发布批准，再用 `workspace` profile 运行 `publish-all`。
+7. 在单独的证据变更中核验 registry、tag、GitHub Release、assets、workflow head、deployment 与 spec snapshot digest，然后按已批准的生命周期推进 V 实体。
 
 ## 本地快捷命令
 

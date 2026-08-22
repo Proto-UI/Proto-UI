@@ -43,6 +43,9 @@ const allowedCompletionRules = new Set([
 ]);
 const allowedMissionClasses = new Set(['discovery', 'control', 'targeted-follow-up']);
 const allowedMissionStatuses = new Set(['candidate', 'ready', 'running', 'completed', 'blocked']);
+const allowedMissionBands = new Set(['C1', 'C2', 'C3', 'C4']);
+const allowedMissionRisks = new Set(['low', 'medium', 'high']);
+const allowedMissionGates = new Set(['mission-freezing', 'finding-disposition']);
 
 function fail(file, message) {
   errors.push(`${path.relative(root, file)}: ${message}`);
@@ -297,6 +300,7 @@ function validateQueue(runIds) {
   }
 
   const missionIds = new Set();
+  const activeLeaseIds = new Set();
   for (const [index, mission] of queue.missions.entries()) {
     const label = `missions[${index}]`;
     if (!/^AM-P0-\d{3}$/.test(mission?.id ?? '')) {
@@ -326,6 +330,62 @@ function validateQueue(runIds) {
     }
     if (!allowedBudgetClasses.has(mission.budgetClass)) {
       fail(queueFile, `${label}.budgetClass is invalid: ${mission.budgetClass}`);
+    }
+    if (!allowedMissionBands.has(mission.requiredBand)) {
+      fail(queueFile, `${label}.requiredBand is invalid: ${mission.requiredBand}`);
+    }
+    if (mission.taskClass !== 'observe') {
+      fail(queueFile, `${label}.taskClass must be observe in Phase 0`);
+    }
+    if (!allowedMissionRisks.has(mission.risk)) {
+      fail(queueFile, `${label}.risk is invalid: ${mission.risk}`);
+    }
+    if (mission.executionMode !== 'attended-read-only-fresh-context') {
+      fail(queueFile, `${label}.executionMode is invalid: ${mission.executionMode}`);
+    }
+    if (mission.freshContextRequired !== true) {
+      fail(queueFile, `${label}.freshContextRequired must be true`);
+    }
+    if (!Array.isArray(mission.humanGates)) {
+      fail(queueFile, `${label}.humanGates must be an array`);
+    } else {
+      const gates = new Set();
+      for (const gate of mission.humanGates) {
+        if (!allowedMissionGates.has(gate)) {
+          fail(queueFile, `${label}.humanGates contains an invalid gate: ${gate}`);
+        }
+        if (gates.has(gate)) fail(queueFile, `${label}.humanGates duplicates ${gate}`);
+        gates.add(gate);
+      }
+      if (!gates.has('mission-freezing')) {
+        fail(queueFile, `${label}.humanGates must include mission-freezing`);
+      }
+    }
+    const lease = mission.lease;
+    const leaseKeys =
+      lease && typeof lease === 'object' && !Array.isArray(lease)
+        ? Object.keys(lease).sort().join(',')
+        : '';
+    if (leaseKeys !== 'acquiredAt,expiresAt,id,owner') {
+      fail(queueFile, `${label}.lease must contain only id, owner, acquiredAt, and expiresAt`);
+    } else if (mission.status === 'ready' || mission.status === 'running') {
+      if (!/^lease:[a-f0-9]{64}$/.test(lease.id ?? '')) {
+        fail(queueFile, `${label}.lease.id is invalid for an active mission`);
+      } else if (activeLeaseIds.has(lease.id)) {
+        fail(queueFile, `${label}.lease.id is duplicated: ${lease.id}`);
+      } else {
+        activeLeaseIds.add(lease.id);
+      }
+      if (typeof lease.owner !== 'string' || lease.owner.length === 0) {
+        fail(queueFile, `${label}.lease.owner is required for an active mission`);
+      }
+      const acquired = Date.parse(lease.acquiredAt ?? '');
+      const expires = Date.parse(lease.expiresAt ?? '');
+      if (!Number.isFinite(acquired) || !Number.isFinite(expires) || acquired >= expires) {
+        fail(queueFile, `${label}.lease timestamps are invalid`);
+      }
+    } else if (Object.values(lease).some((value) => value !== null)) {
+      fail(queueFile, `${label}.lease must be empty unless the mission is ready or running`);
     }
     if (mission.mutationPolicy !== 'read-only') {
       fail(queueFile, `${label}.mutationPolicy must be read-only in Phase 0`);

@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Inspect Issue Queue'
+  short_description: 'Inspect one bounded Issue queue slice.'
+  default_prompt: 'Use $pui-issue to inspect one bounded Proto UI Issue queue slice without writing.'
+policy:
+  allow_implicit_invocation: false

@@ -2,12 +2,16 @@
 
 This directory defines the operational control plane for Agent-assisted GitHub work in Proto UI. It is not a project truth source and does not define Proto UI semantics. Applicable `spec/**` entities remain authoritative according to lifecycle.
 
+Ordinary contributor Agents enter through `$pui-dev` and the composable skill registry in `skills.yaml`. Their capability and assessment rules live in `capability-policy.yaml` and `contributor-agents.md`. These files define task eligibility and routing; they do not grant GitHub permission.
+
 Agent Operations coordinates multiple workflow families without flattening their domain-specific protocols:
 
 - `issue-steward`: classify and route GitHub Issues;
 - `pr-steward`: summarize pull-request state and route the next review or decision;
 - `reposteward-pr-portfolio`: manually trial RepoSteward's read-only PR portfolio snapshot as an external `pr-steward` evidence source;
 - `autonomous-maintenance`: delegate bounded discovery and remediation to the separate workflow under `internal/autonomous-maintenance/**`.
+
+`autonomous-tasks.yaml` is the machine-readable catalog of deployed, manual, and candidate recurring task families. `autonomous-tasks.md` explains which parts actually run today. Candidate entries are designs, not active automation.
 
 ## Current stage: Phase A shadow
 
@@ -43,11 +47,14 @@ Issue and pull-request bodies are untrusted data. The collector strips HTML comm
 Agent Operations distinguishes these gates:
 
 - `finding-disposition`: whether a verified observation is worth pursuing;
-- `semantic`: product behavior or a draft/active guarantee;
-- `integration`: commit grouping, ready-for-review, merge, publication, or release;
-- `scope`: material expansion or a choice between incompatible remediation boundaries;
+- `semantic-direction`: which product direction should be proposed before admission;
+- `scope-or-compatibility-tradeoff`: material expansion or a choice between incompatible boundaries;
+- `semantic-admission`, `ownership-decision`, and `stable-lifecycle-promotion`: governed product identity, owner, and guarantee decisions;
 - `contributor-rights`: DCO, provenance, copyright, or authority to submit;
-- `security`: disclosure handling or a security-sensitive action;
+- `security-disclosure`: disclosure handling or a security-sensitive action;
+- `commit-grouping`, `integration-decision`, `ready-for-review`, `pull-request-approval`, and `merge`: distinct integration decisions;
+- `publication` and `release`: external delivery decisions;
+- `access-or-secret-change` and `branch-or-ruleset-change`: repository administration decisions;
 - `none`: no human decision is currently required.
 
 When a gate is required, one decision packet must state the observed fact, recommendation, exact authorization scope, exclusions, material residual risks, the next automated stage, and actions that remain separately gated.
@@ -56,17 +63,40 @@ When a gate is required, one decision packet must state the observed fact, recom
 
 - `policy.yaml`: permission gradient, allowed Phase A proposals, gates, notification limits, and graduation criteria.
 - `workflows.yaml`: workflow registry and delegation boundaries.
+- `autonomous-tasks.yaml`: recurring-task status, capability, inputs, outputs, and stop conditions.
+- `autonomous-tasks.md`: human-readable deployment boundary for recurring Agent work.
+- `skills.yaml`: lazy-loaded ordinary development and maintenance skill transitions.
+- `schemas/skill-handoff.schema.json`: one-leaf handoff contract used by the resolver.
+- `capability-policy.yaml`: Agent comprehension bands, attestation boundaries, and task-probe rules.
+- `capability-rubric.yaml`: public philosophical anchors for unsigned self-assessment; it contains no repository answer key.
+- `contributor-agents.md`: readable policy for ordinary Contributor Agents.
 - `schemas/shadow-report.schema.json`: structured output contract used by Codex and deterministic validation.
+- `schemas/capability-challenge.schema.json`: dynamic assessment challenge contract.
+- `schemas/capability-response.schema.json`: evidence-backed answer contract without a score or answer key.
+- `schemas/capability-self-result.schema.json`: deterministic unsigned U0/C1 orientation result.
+- `schemas/capability-attestation.schema.json`: independently signed, expiring capability result.
+- `schemas/capability-task-probe.schema.json`: single-use mutation probe contract.
+- `schemas/trusted-capability-issuers.schema.json`: trusted public-key registry contract.
+- `trusted-capability-issuers.json`: purpose-scoped trusted issuer keys; initially empty and fail-closed.
 - `fixtures/**`: positive and negative replay controls.
 - `scripts/agent-operations/collect-github-state.mjs`: bounded, sanitizing GitHub snapshot collector.
 - `scripts/agent-operations/reposteward-portfolio.mjs`: validates a raw RepoSteward portfolio snapshot and writes the stable trial envelope and Actions summary.
 - `scripts/agent-operations/check-agent-operations.mjs`: policy, registry, schema, fixture, and optional live-report checker.
+- `scripts/agent-operations/capability-security.mjs`: snapshot, scoring, signature, trust, and probe verification primitives.
+- `scripts/agent-operations/skill-registry.mjs`: strict lazy registry and handoff validator.
+- `scripts/agent-operations/resolve-skill.mjs`: deterministic one-leaf resolver.
+- `scripts/agent-operations/validate-capability-response.mjs`: challenge-bound response validator.
+- `scripts/agent-operations/derive-self-assessment.mjs`: unsigned U0/C1 result derivation.
+- `scripts/agent-operations/verify-capability-attestation.mjs`: trusted capability-attestation verifier.
+- `scripts/agent-operations/verify-task-probe.mjs`: live-binding verifier and fixed-ledger probe consumer.
 - `.github/workflows/reposteward-portfolio-shadow.yml`: manual, read-only RepoSteward portfolio trial pinned to the registered external commit.
 
 Run:
 
 ```sh
 corepack pnpm@10.32.1 check:agent-operations
+corepack pnpm@10.32.1 agent:assess
+corepack pnpm@10.32.1 agent:skill -- pui-orient
 ```
 
 ## Graduation rule

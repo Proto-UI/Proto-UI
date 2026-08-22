@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Release Prep'
+  short_description: 'Prepare a gated release candidate state'
+  default_prompt: 'Use $pui-release-prep to prepare the reviewed release candidate state.'
+
+policy:
+  allow_implicit_invocation: false

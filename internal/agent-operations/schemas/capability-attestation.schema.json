@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI Agent Capability Attestation",
+  "type": "object",
+  "required": ["payload", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "kind",
+        "assessmentId",
+        "challenge",
+        "subject",
+        "scope",
+        "evaluation",
+        "capability",
+        "validity"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "proto-ui.agent-capability-attestation" },
+        "assessmentId": { "type": "string", "pattern": "^assessment:[a-f0-9]{64}$" },
+        "challenge": {
+          "type": "object",
+          "required": ["challengeId", "challengeDigest", "nonceDigest", "responseDigest"],
+          "properties": {
+            "challengeId": { "type": "string", "pattern": "^challenge:[a-f0-9]{64}$" },
+            "challengeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "nonceDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "responseDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "additionalProperties": false
+        },
+        "subject": {
+          "type": "object",
+          "required": ["agentKeyFingerprint", "runtimeAttestation"],
+          "properties": {
+            "agentKeyFingerprint": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "runtimeAttestation": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": { "status": { "const": "unavailable" } },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": ["status", "provider", "proofDigest", "verifiedAt", "expiresAt"],
+                  "properties": {
+                    "status": { "const": "verified" },
+                    "provider": { "type": "string", "minLength": 1, "maxLength": 120 },
+                    "proofDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                    "verifiedAt": { "type": "string", "format": "date-time" },
+                    "expiresAt": { "type": "string", "format": "date-time" }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "modelClaim": { "type": ["string", "null"], "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "scope": {
+          "type": "object",
+          "required": [
+            "repositoryId",
+            "snapshotMode",
+            "baseSha",
+            "treeSha",
+            "worktreeDigest",
+            "catalogDigest",
+            "policyDigest",
+            "generatorDigest"
+          ],
+          "properties": {
+            "repositoryId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9+.-]*:[^\\s]{3,200}$"
+            },
+            "snapshotMode": { "const": "committed-clean" },
+            "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+            "treeSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+            "worktreeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "catalogDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "generatorDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "additionalProperties": false
+        },
+        "evaluation": {
+          "type": "object",
+          "required": [
+            "evaluatorId",
+            "evaluatorVersion",
+            "rubricVersion",
+            "method",
+            "dimensions",
+            "criticalFailures"
+          ],
+          "properties": {
+            "evaluatorId": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "evaluatorVersion": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "rubricVersion": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "method": { "enum": ["independent-agent", "human-reviewed", "hybrid"] },
+            "dimensions": {
+              "type": "object",
+              "required": [
+                "sourceAuthority",
+                "relationTracing",
+                "semanticReasoning",
+                "verificationDesign",
+                "governanceSafety",
+                "epistemicDiscipline"
+              ],
+              "properties": {
+                "sourceAuthority": { "$ref": "#/$defs/dimensionScore" },
+                "relationTracing": { "$ref": "#/$defs/dimensionScore" },
+                "semanticReasoning": { "$ref": "#/$defs/dimensionScore" },
+                "verificationDesign": { "$ref": "#/$defs/dimensionScore" },
+                "governanceSafety": { "$ref": "#/$defs/dimensionScore" },
+                "epistemicDiscipline": { "$ref": "#/$defs/dimensionScore" }
+              },
+              "additionalProperties": false
+            },
+            "criticalFailures": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "fabricated-evidence",
+                  "answer-provenance-failure",
+                  "source-authority-inversion",
+                  "permission-escalation",
+                  "hidden-uncertainty",
+                  "snapshot-binding-failure",
+                  "evaluator-independence-failure"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "capability": {
+          "type": "object",
+          "required": ["band", "eligibleTaskClasses", "forbiddenActionClasses"],
+          "properties": {
+            "band": { "enum": ["C1", "C2", "C3", "C4"] },
+            "eligibleTaskClasses": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/taskClass" }
+            },
+            "forbiddenActionClasses": {
+              "type": "array",
+              "minItems": 17,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/alwaysHumanAction" }
+            },
+            "limitations": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          },
+          "additionalProperties": false
+        },
+        "permissionObservation": {
+          "type": "object",
+          "description": "Historical observation only; never authorizes an action.",
+          "properties": {
+            "githubRelationship": { "type": "string", "minLength": 1 },
+            "discordTrust": { "type": "string", "minLength": 1 },
+            "observedAt": { "type": "string", "format": "date-time", "minLength": 20 }
+          },
+          "additionalProperties": false
+        },
+        "validity": {
+          "type": "object",
+          "required": ["issuedAt", "notBefore", "expiresAt", "invalidationTriggers"],
+          "properties": {
+            "issuedAt": { "type": "string", "format": "date-time", "minLength": 20 },
+            "notBefore": { "type": "string", "format": "date-time", "minLength": 20 },
+            "expiresAt": { "type": "string", "format": "date-time", "minLength": 20 },
+            "invalidationTriggers": {
+              "type": "array",
+              "minItems": 7,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "expiry",
+                  "signature-failure",
+                  "untrusted-or-revoked-issuer",
+                  "subject-mismatch",
+                  "challenge-mismatch",
+                  "repository-snapshot-drift",
+                  "policy-change"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "signature": { "$ref": "#/$defs/signature" }
+  },
+  "$defs": {
+    "dimensionScore": {
+      "type": "object",
+      "required": ["score", "evidence"],
+      "properties": {
+        "score": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "taskClass": {
+      "enum": [
+        "observe",
+        "verify",
+        "trace",
+        "propose-classification",
+        "claim-work-item",
+        "release-own-claim",
+        "update-tracked-maintenance-state",
+        "maintain-docs",
+        "maintain-contract-projection",
+        "repair-bounded-regression",
+        "implement-governed-tests",
+        "author-approved-spec",
+        "implement-approved-module",
+        "implement-approved-host-capability",
+        "implement-approved-adapter-slice",
+        "implement-approved-prototype",
+        "review-candidate-change",
+        "review-maintenance-remediation",
+        "shape-semantic-decision",
+        "coordinate-cross-domain-change",
+        "prepare-release-state",
+        "audit-release-evidence"
+      ]
+    },
+    "alwaysHumanAction": {
+      "enum": [
+        "finding-disposition",
+        "semantic-direction",
+        "scope-or-compatibility-tradeoff",
+        "semantic-admission",
+        "ownership-decision",
+        "stable-lifecycle-promotion",
+        "contributor-rights",
+        "security-disclosure",
+        "commit-grouping",
+        "integration-decision",
+        "ready-for-review",
+        "pull-request-approval",
+        "merge",
+        "publication",
+        "release",
+        "access-or-secret-change",
+        "branch-or-ruleset-change"
+      ]
+    },
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "keyId", "canonicalization", "value"],
+      "properties": {
+        "algorithm": { "const": "Ed25519" },
+        "keyId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{3,120}$" },
+        "canonicalization": { "const": "RFC8785" },
+        "value": { "type": "string", "pattern": "^[A-Za-z0-9+/]{86}==$" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

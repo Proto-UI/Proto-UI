@@ -45,6 +45,21 @@ humanGates:
   - contributor-rights
   - security
   - none
+canonicalHumanGateMapping:
+  finding-disposition:
+    - finding-disposition
+  semantic:
+    - semantic-direction
+    - semantic-admission
+  integration:
+    - integration-decision
+  scope:
+    - scope-or-compatibility-tradeoff
+  contributor-rights:
+    - contributor-rights
+  security:
+    - security-disclosure
+  none: []
 alwaysHuman:
   - stable-spec-promotion
   - issue-close-or-reopen
