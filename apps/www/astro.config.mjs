@@ -2,12 +2,14 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import starlight from '@astrojs/starlight';
+import remarkDirective from 'remark-directive';
 
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
+import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
 
 const PROTO_UI_PREFIX = '@proto.ui/';
 const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url));
@@ -753,6 +755,7 @@ export default defineConfig({
     mdx(),
   ],
   markdown: {
+    remarkPlugins: [remarkDirective, remarkConceptDirective],
     rehypePlugins: [rehypeEnhancedImage],
   },
   vite: {
