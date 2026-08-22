@@ -6,6 +6,7 @@ Agent Operations coordinates multiple workflow families without flattening their
 
 - `issue-steward`: classify and route GitHub Issues;
 - `pr-steward`: summarize pull-request state and route the next review or decision;
+- `reposteward-pr-portfolio`: manually trial RepoSteward's read-only PR portfolio snapshot as an external `pr-steward` evidence source;
 - `autonomous-maintenance`: delegate bounded discovery and remediation to the separate workflow under `internal/autonomous-maintenance/**`.
 
 ## Current stage: Phase A shadow
@@ -19,6 +20,8 @@ Phase A does not:
 - approve, merge, publish, release, or promote a stable guarantee;
 - treat an Agent classification as a maintainer decision;
 - reuse `internal/autonomous-maintenance/phase-0/runs.yaml` as a GitHub event ledger.
+
+The RepoSteward portfolio trial is narrower than the scheduled native shadow workflow. It is manually dispatched, installs one commit-pinned external engine, reads open pull-request facts, and uploads the raw snapshot plus a validated Proto UI envelope. It does not run a Coding Harness, Docker, RepoSteward Issue-to-PR preparation, CI repair, submission, merge, or release commands. An incomplete upstream snapshot remains a successful observable result when its errors are preserved; it must not be presented as a complete portfolio fact.
 
 The live GitHub repository remains the source for Issue and pull-request state. Phase A artifacts are experimental observations with bounded retention, not a second issue tracker.
 
@@ -56,7 +59,9 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `schemas/shadow-report.schema.json`: structured output contract used by Codex and deterministic validation.
 - `fixtures/**`: positive and negative replay controls.
 - `scripts/agent-operations/collect-github-state.mjs`: bounded, sanitizing GitHub snapshot collector.
+- `scripts/agent-operations/reposteward-portfolio.mjs`: validates a raw RepoSteward portfolio snapshot and writes the stable trial envelope and Actions summary.
 - `scripts/agent-operations/check-agent-operations.mjs`: policy, registry, schema, fixture, and optional live-report checker.
+- `.github/workflows/reposteward-portfolio-shadow.yml`: manual, read-only RepoSteward portfolio trial pinned to the registered external commit.
 
 Run:
 

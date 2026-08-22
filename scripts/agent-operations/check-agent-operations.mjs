@@ -22,6 +22,15 @@ const invalidFixtureFile = path.join(
 );
 const promptFile = path.join(root, '.github/codex/prompts/agent-operations-shadow.md');
 const workflowFile = path.join(root, '.github/workflows/agent-operations-shadow.yml');
+const repoStewardWorkflowFile = path.join(
+  root,
+  '.github/workflows/reposteward-portfolio-shadow.yml'
+);
+const repoStewardSchemaFile = path.join(
+  operationsDirectory,
+  'schemas/reposteward-portfolio-envelope.schema.json'
+);
+const REPOSTEWARD_COMMIT = 'e5db7d3496ef15072135533c5b9f4da91084b553';
 const errors = [];
 
 function parseArgs(argv) {
@@ -137,7 +146,12 @@ function validateRegistry() {
     fail(registryFile, 'workflows must be an array');
     return;
   }
-  const expected = new Set(['issue-steward', 'pr-steward', 'autonomous-maintenance']);
+  const expected = new Set([
+    'issue-steward',
+    'pr-steward',
+    'reposteward-pr-portfolio',
+    'autonomous-maintenance',
+  ]);
   const seen = new Set();
   for (const [index, workflow] of registry.workflows.entries()) {
     const label = `workflows[${index}]`;
@@ -157,6 +171,26 @@ function validateRegistry() {
       if (workflow.status !== 'shadow') fail(registryFile, `${label}.status must be shadow`);
       if (workflow.mutationPolicy !== 'proposal-only') {
         fail(registryFile, `${label}.mutationPolicy must be proposal-only`);
+      }
+    }
+    if (workflow?.id === 'reposteward-pr-portfolio') {
+      if (workflow.status !== 'manual-shadow-trial') {
+        fail(registryFile, `${label}.status must be manual-shadow-trial`);
+      }
+      if (!sameMembers(workflow.triggerClasses, ['manual-dispatch'])) {
+        fail(registryFile, `${label}.triggerClasses must contain only manual-dispatch`);
+      }
+      if (workflow.mutationPolicy !== 'read-only-artifact') {
+        fail(registryFile, `${label}.mutationPolicy must be read-only-artifact`);
+      }
+      if (workflow.externalEngine?.repository !== 'tiammomo/RepoSteward') {
+        fail(registryFile, `${label}.externalEngine.repository is invalid`);
+      }
+      if (workflow.externalEngine?.commit !== REPOSTEWARD_COMMIT) {
+        fail(registryFile, `${label}.externalEngine.commit must match the reviewed pin`);
+      }
+      if (workflow.externalEngine?.command !== 'portfolio inspect') {
+        fail(registryFile, `${label}.externalEngine.command must be portfolio inspect`);
       }
     }
   }
@@ -195,6 +229,88 @@ function validateSchema() {
     )
   ) {
     fail(schemaFile, 'proposed actions must be blocked by shadow policy');
+  }
+}
+
+function validateRepoStewardTrial() {
+  const schema = readJson(repoStewardSchemaFile);
+  if (schema) {
+    if (schema.properties?.schemaVersion?.const !== 1) {
+      fail(repoStewardSchemaFile, 'schemaVersion must be const 1');
+    }
+    if (schema.properties?.trialVersion?.const !== '2026-08-22.manual-shadow') {
+      fail(repoStewardSchemaFile, 'trialVersion must remain fixed for this trial');
+    }
+    if (schema.properties?.mode?.const !== 'manual-shadow') {
+      fail(repoStewardSchemaFile, 'mode must be manual-shadow');
+    }
+    if (schema.properties?.engine?.properties?.commit?.const !== REPOSTEWARD_COMMIT) {
+      fail(repoStewardSchemaFile, 'engine commit must match the reviewed pin');
+    }
+    if (schema.properties?.writeOperationsPerformed?.const !== 0) {
+      fail(repoStewardSchemaFile, 'writeOperationsPerformed must be const zero');
+    }
+  }
+
+  const workflow = readYaml(repoStewardWorkflowFile);
+  if (!workflow) return;
+  const permissions = workflow.permissions;
+  for (const permission of ['contents', 'pull-requests', 'checks', 'statuses']) {
+    if (permissions?.[permission] !== 'read') {
+      fail(repoStewardWorkflowFile, `${permission} permission must be read`);
+    }
+  }
+  const source = fs.readFileSync(repoStewardWorkflowFile, 'utf8');
+  for (const forbidden of [
+    'contents: write',
+    'issues: write',
+    'pull-requests: write',
+    'checks: write',
+    'statuses: write',
+    'pull_request_target',
+    'reposteward prepare',
+    'reposteward repair',
+    'reposteward submit',
+    'reposteward merge',
+  ]) {
+    if (source.includes(forbidden)) {
+      fail(repoStewardWorkflowFile, `forbidden manual shadow capability: ${forbidden}`);
+    }
+  }
+  if (Object.hasOwn(workflow.on ?? {}, 'schedule')) {
+    fail(repoStewardWorkflowFile, 'RepoSteward trial must not be scheduled before graduation');
+  }
+  if (!Object.hasOwn(workflow.on ?? {}, 'workflow_dispatch')) {
+    fail(repoStewardWorkflowFile, 'RepoSteward trial must use workflow_dispatch');
+  }
+  if (!source.includes(`REPOSTEWARD_COMMIT: ${REPOSTEWARD_COMMIT}`)) {
+    fail(repoStewardWorkflowFile, 'RepoSteward commit env must match the reviewed pin');
+  }
+  if (
+    !source.includes(
+      'git -C "${REPOSTEWARD_SOURCE}" fetch --depth 1 origin "${REPOSTEWARD_COMMIT}"'
+    )
+  ) {
+    fail(repoStewardWorkflowFile, 'RepoSteward source fetch must use the commit pin');
+  }
+  if (
+    !source.includes(
+      'test "$(git -C "${REPOSTEWARD_SOURCE}" rev-parse HEAD)" = "${REPOSTEWARD_COMMIT}"'
+    )
+  ) {
+    fail(repoStewardWorkflowFile, 'RepoSteward checkout must verify the exact source commit');
+  }
+  if (!source.includes('uv sync --project "${REPOSTEWARD_SOURCE}" --frozen --no-dev')) {
+    fail(repoStewardWorkflowFile, 'RepoSteward dependencies must use the reviewed lockfile');
+  }
+  if (!source.includes('persist-credentials: false')) {
+    fail(repoStewardWorkflowFile, 'checkout must not persist Git credentials');
+  }
+  if (!source.includes('portfolio inspect Proto-UI/Proto-UI')) {
+    fail(repoStewardWorkflowFile, 'workflow must run only the registered portfolio target');
+  }
+  if (!source.includes('scripts/agent-operations/reposteward-portfolio.mjs')) {
+    fail(repoStewardWorkflowFile, 'workflow must validate the raw snapshot before upload');
   }
 }
 
@@ -279,6 +395,7 @@ try {
 validatePolicy();
 validateRegistry();
 validateSchema();
+validateRepoStewardTrial();
 validateFixtures();
 validatePromptAndWorkflow();
 validateLiveReport(args);

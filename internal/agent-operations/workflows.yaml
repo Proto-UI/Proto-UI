@@ -33,6 +33,21 @@ workflows:
       - contributor-rights
       - security
       - integration
+  - id: reposteward-pr-portfolio
+    status: manual-shadow-trial
+    triggerClasses:
+      - manual-dispatch
+    inputKinds:
+      - pull-request-portfolio
+    implementationPath: .github/workflows/reposteward-portfolio-shadow.yml
+    outputSchemaPath: internal/agent-operations/schemas/reposteward-portfolio-envelope.schema.json
+    mutationPolicy: read-only-artifact
+    humanGates:
+      - integration
+    externalEngine:
+      repository: tiammomo/RepoSteward
+      commit: e5db7d3496ef15072135533c5b9f4da91084b553
+      command: portfolio inspect
   - id: autonomous-maintenance
     status: manual-phase-0.1
     triggerClasses:
