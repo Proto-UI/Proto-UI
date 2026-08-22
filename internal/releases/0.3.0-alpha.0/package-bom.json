@@ -5,7 +5,7 @@
   "npmDistTag": "next",
   "packageVersionPolicy": "exact",
   "packageScope": "public-@proto.ui",
-  "packageCount": 40,
+  "packageCount": 41,
   "packages": [
     {
       "name": "@proto.ui/cli",
@@ -114,19 +114,37 @@
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
     },
     {
+      "name": "@proto.ui/module-expose-event",
+      "version": "0.3.0-alpha.0",
+      "path": "packages/modules/expose-event",
+      "releaseRole": "internal-or-dependency-directed",
+      "publishOrder": 13,
+      "internalDependencies": [
+        "@proto.ui/core",
+        "@proto.ui/module-base",
+        "@proto.ui/module-expose",
+        "@proto.ui/types"
+      ]
+    },
+    {
       "name": "@proto.ui/module-event",
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/event",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 13,
-      "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
+      "publishOrder": 14,
+      "internalDependencies": [
+        "@proto.ui/core",
+        "@proto.ui/module-base",
+        "@proto.ui/module-expose-event",
+        "@proto.ui/types"
+      ]
     },
     {
       "name": "@proto.ui/module-as-trigger",
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/as-trigger",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 14,
+      "publishOrder": 15,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/module-event"]
     },
     {
@@ -134,7 +152,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/boundary",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 15,
+      "publishOrder": 16,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-base",
@@ -147,7 +165,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/hit-participation",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 16,
+      "publishOrder": 17,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
     },
     {
@@ -155,7 +173,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/overlay",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 17,
+      "publishOrder": 18,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-anatomy",
@@ -171,7 +189,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/presence",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 18,
+      "publishOrder": 19,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
     },
     {
@@ -179,7 +197,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/props",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 19,
+      "publishOrder": 20,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
     },
     {
@@ -187,7 +205,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/state",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 20,
+      "publishOrder": 21,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
     },
     {
@@ -195,7 +213,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/a11y",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 21,
+      "publishOrder": 22,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/module-state"]
     },
     {
@@ -203,7 +221,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/expose-state",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 22,
+      "publishOrder": 23,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-base",
@@ -217,7 +235,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/expose-state-web",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 23,
+      "publishOrder": 24,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-base",
@@ -230,7 +248,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/focus",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 24,
+      "publishOrder": 25,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-base",
@@ -244,7 +262,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/rule",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 25,
+      "publishOrder": 26,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-base",
@@ -260,7 +278,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/rule-expose-state-web",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 26,
+      "publishOrder": 27,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-base",
@@ -275,7 +293,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/rule-meta",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 27,
+      "publishOrder": 28,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/module-rule"]
     },
     {
@@ -283,7 +301,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/scroll",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 28,
+      "publishOrder": 29,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-anatomy",
@@ -298,7 +316,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/state-accessibility",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 29,
+      "publishOrder": 30,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/module-state"]
     },
     {
@@ -306,7 +324,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/state-interaction",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 30,
+      "publishOrder": 31,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-base",
@@ -319,7 +337,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/test-sys",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 31,
+      "publishOrder": 32,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
     },
     {
@@ -327,7 +345,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/modules/text-control",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 32,
+      "publishOrder": 33,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/types"]
     },
     {
@@ -335,7 +353,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/prototypes/base",
       "releaseRole": "launch-commitment",
-      "publishOrder": 33,
+      "publishOrder": 34,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/hooks", "@proto.ui/module-text-control"]
     },
     {
@@ -343,7 +361,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/prototypes/brutalist",
       "releaseRole": "launch-commitment",
-      "publishOrder": 34,
+      "publishOrder": 35,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/hooks",
@@ -356,7 +374,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/prototypes/shadcn",
       "releaseRole": "launch-commitment",
-      "publishOrder": 35,
+      "publishOrder": 36,
       "internalDependencies": ["@proto.ui/core", "@proto.ui/prototypes-base"]
     },
     {
@@ -364,7 +382,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/runtime",
       "releaseRole": "internal-or-dependency-directed",
-      "publishOrder": 36,
+      "publishOrder": 37,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/hooks",
@@ -377,6 +395,7 @@
         "@proto.ui/module-context",
         "@proto.ui/module-event",
         "@proto.ui/module-expose",
+        "@proto.ui/module-expose-event",
         "@proto.ui/module-expose-state",
         "@proto.ui/module-expose-state-web",
         "@proto.ui/module-feedback",
@@ -403,7 +422,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/adapters/base",
       "releaseRole": "public-non-launch-commitment",
-      "publishOrder": 37,
+      "publishOrder": 38,
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-expose-state",
@@ -416,7 +435,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/adapters/react",
       "releaseRole": "launch-commitment",
-      "publishOrder": 38,
+      "publishOrder": 39,
       "internalDependencies": [
         "@proto.ui/adapter-base",
         "@proto.ui/core",
@@ -427,6 +446,7 @@
         "@proto.ui/module-boundary",
         "@proto.ui/module-context",
         "@proto.ui/module-event",
+        "@proto.ui/module-expose-event",
         "@proto.ui/module-expose-state",
         "@proto.ui/module-expose-state-web",
         "@proto.ui/module-feedback",
@@ -448,7 +468,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/adapters/vue",
       "releaseRole": "launch-commitment",
-      "publishOrder": 39,
+      "publishOrder": 40,
       "internalDependencies": [
         "@proto.ui/adapter-base",
         "@proto.ui/core",
@@ -459,6 +479,7 @@
         "@proto.ui/module-boundary",
         "@proto.ui/module-context",
         "@proto.ui/module-event",
+        "@proto.ui/module-expose-event",
         "@proto.ui/module-expose-state",
         "@proto.ui/module-expose-state-web",
         "@proto.ui/module-feedback",
@@ -480,7 +501,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/adapters/web-component",
       "releaseRole": "launch-commitment",
-      "publishOrder": 40,
+      "publishOrder": 41,
       "internalDependencies": [
         "@proto.ui/adapter-base",
         "@proto.ui/core",
@@ -491,6 +512,7 @@
         "@proto.ui/module-boundary",
         "@proto.ui/module-context",
         "@proto.ui/module-event",
+        "@proto.ui/module-expose-event",
         "@proto.ui/module-expose-state",
         "@proto.ui/module-expose-state-web",
         "@proto.ui/module-feedback",

@@ -41,6 +41,7 @@ const colorVars = new Set([
   'border',
   'destructive',
   'destructive-foreground',
+  'destructive-ink',
   'foreground',
   'input',
   'muted',
@@ -637,7 +638,7 @@ function colorValue(name: string, opacity?: string): string {
 
 function ringShadow(): string[] {
   return [
-    '--pui-ring-offset-shadow: 0 0 0 var(--pui-ring-offset-width, 0px) var(--pui-ring-offset-color, #fff);',
+    '--pui-ring-offset-shadow: 0 0 0 var(--pui-ring-offset-width, 0px) var(--pui-ring-offset-color, var(--pui-background));',
     '--pui-ring-shadow: var(--pui-ring-inset,) 0 0 0 calc(var(--pui-ring-width, 0px) + var(--pui-ring-offset-width, 0px)) var(--pui-ring-color, var(--pui-ring));',
     ...composedShadow(),
   ];

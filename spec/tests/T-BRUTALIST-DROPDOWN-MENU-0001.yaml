@@ -47,6 +47,11 @@ cases:
       - P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
       - P-BRUTALIST-DROPDOWN-MENU-ITEM-INTERACTION
     expectation: p-brutalist-dropdown-menu-item-destructive-active-pair
+  - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-7
+    title: Item destructive resting pair holds a measured contrast in Light and Dark
+    covers:
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
+    expectation: p-brutalist-dropdown-menu-item-destructive-resting-measured-pair
   - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-6
     title: Item disabled pair never degrades to opacity-only muted-foreground
     covers:
@@ -75,6 +80,24 @@ implementations:
       - P-BRUTALIST-DROPDOWN-MENU-CONTENT
       - P-BRUTALIST-DROPDOWN-MENU-ITEM
       - P-BRUTALIST-DROPDOWN-MENU-TRIGGER
+  - id: prototypes-brutalist-theme-destructive-ink-contrast
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/theme.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-7
+    exercises:
+      - P-BRUTALIST-DROPDOWN-MENU-ITEM
+    notes:
+      - >-
+        Measures the resting ink against `secondary-background`, the fill the resting row keeps, in both themes. Asserting the token name alone would pass again if the value returned to the `destructive` fill, which measured 1.41 to 1 on Light paper.
+
+
+      - >-
+        Also asserts that the `destructive` fill itself stays under the body-text floor on Light paper, so the fill and the ink cannot quietly collapse back into one token.
+
+
 verifies:
   prototypes:
     - id: P-BRUTALIST-DROPDOWN-MENU
@@ -92,6 +115,12 @@ exercises:
     - P-BRUTALIST-DROPDOWN-MENU-ITEM
     - P-BRUTALIST-DROPDOWN-MENU-TRIGGER
 revisions:
+  - version: 0.3.0-alpha.0
+    change: amended
+    summary: >-
+      Added CASE-7 and a second implementation so the destructive resting pair carries measured evidence rather than a token-name assertion. Light reads 8.02 to 1 and Dark reads 10.73 to 1 against `secondary-background`.
+
+
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

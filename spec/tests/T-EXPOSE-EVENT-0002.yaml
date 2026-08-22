@@ -63,6 +63,12 @@ cases:
     covers:
       - M-EXPOSE-EVENT-0001-F
     expectation: legacy-event-emit-token-is-a-source-compatible-alias
+  - id: T-EXPOSE-EVENT-0002-CASE-WIRING-MIGRATION
+    title: Legacy Event-target sink wiring fails with an Expose Event migration diagnostic
+    covers:
+      - M-EXPOSE-EVENT-0001-A
+      - M-EVENT-0001-H
+    expectation: source-import-alias-remains-but-wiring-target-must-be-expose-event
 implementations:
   - id: expose-event-surface-fixture
     kind: fixture
@@ -78,10 +84,10 @@ implementations:
     required: true
     consumesCases:
       - T-EXPOSE-EVENT-0002-CASE-PAYLOAD
-  - id: module-event-outward-bridge-contract
+  - id: module-expose-event-outward-bridge-contract
     kind: module-test
     status: passing
-    path: packages/modules/event/test/impl-spec.test.ts
+    path: packages/modules/expose-event/test/impl-spec.test.ts
     required: true
     consumesCases:
       - T-EXPOSE-EVENT-0002-CASE-SURFACE
@@ -120,6 +126,7 @@ implementations:
       - T-EXPOSE-EVENT-0002-CASE-DECLARATION
       - T-EXPOSE-EVENT-0002-CASE-VALIDATION
       - T-EXPOSE-EVENT-0002-CASE-SINK
+      - T-EXPOSE-EVENT-0002-CASE-WIRING-MIGRATION
   - id: runtime-expose-event-lifecycle-contract
     kind: runtime-test
     status: passing
@@ -202,6 +209,9 @@ verifies:
       anchors:
         - A-WEB-COMPONENT-0001-M
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Moved Module bridge, shared-registry validation, current-sink, and legacy-token evidence into the standalone Expose Event package.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added semantic ownership, declaration transport and public filtering, canonical sink, lifetime, official Adapter translation, and compatibility evidence.

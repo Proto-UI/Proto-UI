@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
 import type { RuntimeHost } from '../../src';
 import { executeWithHost } from '../../src';
-import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-event';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { isExposeEventDeclaration } from '@proto.ui/module-expose';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 
@@ -22,7 +22,7 @@ function createMockHost() {
       task();
     },
     onRuntimeReady(wiring) {
-      wiring.attach('event', [
+      wiring.attach('expose-event', [
         [
           EXPOSE_EVENT_SINK_CAP,
           (key: string, payload: unknown, options: unknown) => {
@@ -92,5 +92,22 @@ describe('runtime contract: expose-event (v0)', () => {
     const { host, emitted } = createMockHost();
     expect(() => executeWithHost(P as any, host as any)).not.toThrow();
     expect(emitted).toEqual([]);
+  });
+
+  it('rejects legacy sink wiring on the Event module with a migration diagnostic', () => {
+    const P: Prototype<any> = {
+      name: 'x-expose-event-legacy-wiring',
+      setup() {
+        return (r) => [r.el('div', 'ok')];
+      },
+    };
+    const { host } = createMockHost();
+    host.onRuntimeReady = (wiring) => {
+      wiring.attach('event', [[EXPOSE_EVENT_SINK_CAP, () => undefined]]);
+    };
+
+    expect(() => executeWithHost(P as any, host as any)).toThrow(
+      /wired to the expose-event module, not event/i
+    );
   });
 });

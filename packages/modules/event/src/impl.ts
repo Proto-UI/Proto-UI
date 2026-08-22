@@ -6,7 +6,7 @@ import { ModuleBase } from '@proto.ui/module-base';
 
 import type { EventDispatch, EventInternalCallback } from './types';
 import { EventKernel } from './kernel';
-import type { EventListenerToken, EventTypeV0, ExposeEventSpec } from '@proto.ui/types';
+import type { EventListenerToken, EventTypeV0 } from '@proto.ui/types';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   EVENT_GLOBAL_TARGET_CAP,
@@ -67,7 +67,6 @@ export class EventModuleImpl extends ModuleBase {
   private lastDispatch: EventDispatch | null = null;
   private isBound = false;
 
-  private exposedEvents = new Map<string, ExposeEventSpec | undefined>();
   private internalCallbacks = new Map<string, EventInternalCallback>();
 
   constructor(caps: CapsVaultView, prototypeName: string) {
@@ -210,47 +209,6 @@ export class EventModuleImpl extends ModuleBase {
     this.kernel.offById(id);
   }
 
-  registerExposeEvent(key: string, spec?: ExposeEventSpec) {
-    this.ensureSetup('def.expose.event');
-    if (typeof key !== 'string' || !key) {
-      throw eventInvalidArg(`[Event] expose.event requires a non-empty string key.`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    if (this.exposedEvents.has(key)) {
-      throw eventInvalidArg(`[Event] duplicate expose.event key: ${key}`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    this.exposedEvents.set(key, spec);
-  }
-
-  emit(key: string, payload?: any, options?: Record<string, unknown>) {
-    this.ensureRuntime('rt.expose.emit');
-    if (typeof key !== 'string' || !key) {
-      throw eventInvalidArg(`[Event] emit requires a non-empty string key.`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    if (!this.exposedEvents.has(key)) {
-      throw eventInvalidArg(`[Event] emit for unregistered expose.event key: ${key}`, {
-        prototypeName: this.prototypeName,
-        key,
-      });
-    }
-    if (!this.caps.has(EXPOSE_EVENT_SINK_CAP)) return;
-    const sink = this.caps.get(EXPOSE_EVENT_SINK_CAP);
-    if (!sink) return;
-    try {
-      sink(key, payload, options);
-    } catch {
-      // v0: ignore host errors to keep module stable
-    }
-  }
-
   // -------------------------
   // runtime port
   // -------------------------
@@ -356,12 +314,18 @@ export class EventModuleImpl extends ModuleBase {
       this.isBound = false;
       this.overriddenRootTarget = null;
       this.overriddenSemanticRootTarget = null;
-      this.exposedEvents.clear();
       this.internalCallbacks.clear();
     }
   }
 
   protected override onCapsEpoch(_epoch: number): void {
+    if (this.caps.has(EXPOSE_EVENT_SINK_CAP)) {
+      throw eventInvalidArg(
+        `[Event] EXPOSE_EVENT_SINK_CAP must be wired to the expose-event module, not event.`,
+        { prototypeName: this.prototypeName, targetModule: 'expose-event' }
+      );
+    }
+
     // Targets might change. If already bound and we have a dispatch,
     // rebind immediately to avoid stale listeners.
     if (!this.isBound) return;

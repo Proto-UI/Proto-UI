@@ -13,6 +13,7 @@
   "devDependencies": {
     "@proto.ui/module-as-trigger": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
     "@proto.ui/runtime": "workspace:*",
     "@proto.ui/adapter-web-component": "workspace:*",

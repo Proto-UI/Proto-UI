@@ -62,7 +62,7 @@ sources:
       - Definition API
       - Emit API
       - Runtime Semantics
-  - path: packages/modules/event/src/impl.ts
+  - path: packages/modules/expose-event/src/impl.ts
     sections:
       - registerExposeEvent
       - emit
@@ -74,11 +74,13 @@ dependsOn:
   contracts:
     - C-EXPOSE-0005
     - C-EXPOSE-0008
-    - C-EVENT-0002
 explains:
   decisions:
     - D-EXPOSE-EVENT-NAMING-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Removed the physical Event-contract dependency after the outward-signal bridge became a standalone Module.
   - version: 0.2.0-rc.7
     change: revised
     summary: Distinguished Adapter translation metadata from App Maker record values and aligned outward-signal registration with instance lifetime.

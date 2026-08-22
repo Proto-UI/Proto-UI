@@ -16,6 +16,7 @@
     "@proto.ui/module-context": "workspace:*",
     "@proto.ui/module-feedback": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
     "@proto.ui/module-expose-state": "workspace:*",
     "@proto.ui/module-expose-state-web": "workspace:*",
     "@proto.ui/module-focus": "workspace:*",

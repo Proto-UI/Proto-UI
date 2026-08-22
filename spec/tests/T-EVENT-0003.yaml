@@ -59,10 +59,10 @@ cases:
       - A-WEB-COMPONENT-0001-E
     expectation: cancelable-dom-event-receives-prevent-default
   - id: T-EVENT-0003-CASE-EXPOSE-BOUNDARY
-    title: Expose Event registry and emission remain outside the Event channel author surface
+    title: Expose Event implementation and wiring remain outside the Event Module
     covers:
       - M-EVENT-0001-H
-    expectation: co-located-expose-bridge-does-not-create-run-event-api
+    expectation: event-facade-and-wiring-exclude-the-standalone-expose-event-bridge
 implementations:
   - id: module-event-boundary-types
     kind: workspace-check
@@ -83,6 +83,13 @@ implementations:
       - T-EVENT-0003-CASE-REBIND-CLEANUP
       - T-EVENT-0003-CASE-BIND-TARGET-PREFLIGHT
       - T-EVENT-0003-CASE-DEFAULT-ACTION-REQUEST
+  - id: module-event-expose-wiring-migration-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/event/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-EXPOSE-BOUNDARY
   - id: runtime-required-event-module
     kind: runtime-test
     status: passing
@@ -198,6 +205,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Rebinding and disposal evidence exercises Event lifecycle guarantees.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Updated the Expose Event separation case for the standalone package, Event-only facade, and dedicated wiring target.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added Event Module, host-neutral binding, default-action, official Adapter profile, lifecycle, and Expose-boundary conformance mappings.
