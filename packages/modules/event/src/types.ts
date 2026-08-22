@@ -1,7 +1,11 @@
 // packages/modules/event/src/types.ts
 import type { ModuleInstance } from '@proto.ui/core';
 import type { ModulePort } from '@proto.ui/core';
-import { EventListenerToken, EventTypeV0 } from '@proto.ui/types';
+import {
+  EventListenerToken,
+  EventTypeV0,
+  type HostEventListenerOptions as EventListenerOptions,
+} from '@proto.ui/types';
 
 /** @deprecated Import ExposeEventFacade from @proto.ui/module-expose-event. */
 export type { ExposeEventFacade } from '@proto.ui/module-expose-event';

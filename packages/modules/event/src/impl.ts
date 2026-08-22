@@ -241,7 +241,27 @@ export class EventModuleImpl extends ModuleBase {
 
     this.lastDispatch = dispatch;
 
-    this.kernel.bindAll(dispatch, (kind, type) => {
+    // Portable default-action control (HC-DEFAULT-ACTION-0001): prototype
+    // callbacks receive ev.control and request prevention through it. The
+    // facade is local to this module instance; no native function crosses a
+    // host boundary. Raw payload preventDefault remains an escape hatch.
+
+    const dispatchWithControl: EventDispatch = (id, ev) => {
+      const detail = ev?.detail ?? ev;
+      if (detail && typeof detail === 'object') {
+        let prevented = false;
+        (detail as any).control = {
+          requestDefaultActionPrevention: (options?: { reason?: string; source?: string }) => {
+            if (prevented) return;
+            prevented = true;
+            this.requestDefaultActionPrevented(ev, options);
+          },
+        };
+      }
+      dispatch(id, ev);
+    };
+
+    this.kernel.bindAll(dispatchWithControl, (kind, type) => {
       if (kind === 'global') return global as EventTarget;
       const target =
         this.overriddenRootTarget ??

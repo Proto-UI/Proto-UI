@@ -32,7 +32,32 @@ export type ExtensionEventType = `host:${string}`;
 
 export type EventTypeV0 = CoreEventType | OptionalEventType | ExtensionEventType;
 
-export type EventListenerOptions = any;
+/**
+ * Listener options for `host:*` extension events only. This is deliberately
+ * host-shaped: portable semantic registrations (the CORE/OPTIONAL types) do
+ * not accept DOM capture/passive/once options — see C-EVENT-0002.
+ */
+export type HostEventListenerOptions = AddEventListenerOptions;
+
+export type EventListenerOptions = HostEventListenerOptions;
+
+export type DefaultActionRequestOptions = Readonly<{
+  /** Machine-readable cause, e.g. `button.space-activation`. */
+  reason?: string;
+  /** Owning prototype or module, e.g. `base-button`. */
+  source?: string;
+}>;
+
+/**
+ * Portable default-action control handed to prototype event callbacks.
+ * Requests are tied to the current interaction sample; the adapter projects
+ * them through HC-DEFAULT-ACTION-0001 instead of a raw native function.
+ * Raw `preventDefault`/`stopPropagation` on the payload remain host escape
+ * hatches and must not be depended on by portable prototype code.
+ */
+export type ProtoEventControl = Readonly<{
+  requestDefaultActionPrevention(options?: DefaultActionRequestOptions): void;
+}>;
 
 export type ProtoEventPayload = {
   type: CoreEventType | OptionalEventType;
@@ -41,6 +66,7 @@ export type ProtoEventPayload = {
   nativeEvent?: unknown;
   preventDefault?: () => void;
   stopPropagation?: () => void;
+  control?: ProtoEventControl;
 };
 
 export type ExposeEventSpec = {

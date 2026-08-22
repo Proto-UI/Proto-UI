@@ -290,4 +290,50 @@ describe('EventModuleImpl (contract-ish)', () => {
     const diags = impl.getDiagnostics();
     expect(diags[0].label).toBe('asButton: commit');
   });
+
+  // #466 third pass: installation is transactional across attachment
+  // failures. A throwing Nth addEventListener must roll back every earlier
+  // attachment, leave all registrations logically unbound, and allow a clean
+  // explicit retry.
+  it('bind(): rolls back earlier attachments when a later one throws', () => {
+    const sys = createSysCaps();
+    const good = new FakeEventTarget();
+    let globalCalls = 0;
+    const bad = {
+      addEventListener: () => {
+        throw new Error('host refused attachment');
+      },
+      removeEventListener: () => {},
+      count: () => 0,
+    };
+
+    const caps = makeCaps({
+      sys,
+      getRootTarget: () => good as any,
+      getGlobalTarget: () => {
+        globalCalls += 1;
+        return globalCalls === 1 ? (bad as any) : (good as any);
+      },
+    });
+    const impl = new EventModuleImpl(caps, 'p-x');
+
+    sys.__setExecPhase('setup');
+    impl.on('press.commit' as any); // attaches to `good`
+    impl.onGlobal('key.down' as any); // attachment throws on `bad`
+
+    sys.__setExecPhase('callback');
+    const { calls, dispatch } = makeDispatch();
+
+    expect(() => impl.bind(dispatch)).toThrowError(/host refused attachment/);
+
+    // Rollback: the first listener must be gone, so no callback can fire.
+    good.dispatch('press.commit', { ok: true });
+    expect(calls).toEqual([]);
+
+    // Every registration is logically unbound; retry installs cleanly.
+    impl.bind(dispatch);
+    expect((impl as any).isBound).toBe(true);
+    good.dispatch('press.commit', { ok: true });
+    expect(calls.length).toBe(1);
+  });
 });

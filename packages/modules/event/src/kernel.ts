@@ -122,15 +122,43 @@ export class EventKernel {
       pending.push({ registration: r, target, wrapper });
     }
 
-    for (const { registration, target, wrapper } of pending) {
-      target.addEventListener(
-        registration.type as any,
-        wrapper as any,
-        registration.options as any
-      );
+    // HC-EVENT-0001 / #466 third pass: installation is transactional across
+    // attachment failures, not only target-resolution failures. If any
+    // addEventListener throws, every attachment made for this plan is rolled
+    // back before the error propagates, so no partial listener set survives.
+    const attached: Array<{
+      registration: Reg;
+      target: EventTarget;
+      wrapper: (ev: any) => void;
+    }> = [];
 
-      registration.wrapper = wrapper;
-      registration.boundTarget = target;
+    try {
+      for (const { registration, target, wrapper } of pending) {
+        target.addEventListener(
+          registration.type as any,
+          wrapper as any,
+          registration.options as any
+        );
+
+        attached.push({ registration, target, wrapper });
+        registration.wrapper = wrapper;
+        registration.boundTarget = target;
+      }
+    } catch (error) {
+      for (const { registration, target, wrapper } of attached) {
+        try {
+          target.removeEventListener(
+            registration.type as any,
+            wrapper as any,
+            registration.options as any
+          );
+        } catch {
+          // Removal failure during rollback must not mask the original error.
+        }
+        registration.wrapper = undefined;
+        registration.boundTarget = undefined;
+      }
+      throw error;
     }
   }
 
