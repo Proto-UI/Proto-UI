@@ -6,6 +6,7 @@ import { loadDemo } from './demo-modules';
 import { renderDemo } from './demo-renderer';
 import { collectPrototypeIds } from './demo-types';
 import type { RuntimeId } from './runtimes/registry';
+import { refreshCodePanel } from './code-panel-client';
 
 interface PreviewerOptions {
   root: HTMLElement;
@@ -45,8 +46,8 @@ export function initPreviewer(options: PreviewerOptions) {
     const html = codeHighlights[runtime];
     if (!html) return;
     codeContent.innerHTML = html;
-    // 通知 CodePanel 重新计算折叠/展开状态
-    document.dispatchEvent(new CustomEvent('proto-adapter:change'));
+    const shell = codeContent.closest<HTMLElement>('[data-code-shell]');
+    if (shell) refreshCodePanel(shell, { reset: true });
   }
 
   // 初始化下拉

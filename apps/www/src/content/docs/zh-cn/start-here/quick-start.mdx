@@ -4,7 +4,38 @@ description: '通过 npm latest 稳定版本初始化 Proto UI 0.2.0 并添加�
 ---
 
 import DocStageNotice from '@/components/DocStageNotice.astro';
+import CodeExample from '@/components/CodeExample.astro';
 import { Aside } from '@astrojs/starlight/components';
+
+export const buttonHostFiles = /** @type {const} */ ({
+  react: [
+    {
+      name: 'install.sh',
+      lang: 'bash',
+      code: 'npx @proto.ui/cli@latest add react shadcn-button',
+    },
+    {
+      name: 'src/App.tsx',
+      lang: 'tsx',
+      code: `import { ShadcnButton } from '../proto-ui/components/react';
+
+export function App() {
+  return <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>;
+}`,
+    },
+  ],
+  wc: [
+    {
+      name: 'install.sh',
+      lang: 'bash',
+      code: 'npx @proto.ui/cli@latest add wc shadcn-button',
+    },
+    {
+      name: 'src/main.ts',
+      lang: 'typescript',
+      code: `import '../proto-ui/components/wc';
+
+document.body.innerHTML = '<proto-ui-shadcn-button variant="outline">Proto UI 0.2.0</proto-ui-shadcn-button>';`, }, ], });
 
 <DocStageNotice
   title="Proto UI 0.2.0 已通过 npm latest 发布。"
@@ -75,31 +106,17 @@ import './styles/proto-ui-style.css';
 
 如果入口文件位于其他位置，请调整相对路径。应用未主动选择主题时，生成的 Shadcn theme 会跟随 `prefers-color-scheme`。在根元素设置 `data-theme="light"` / `data-theme="dark"`，或使用兼容的 `.light` / `.dark` class，可以覆盖系统偏好。
 
-## 添加组件
+## 添加并导入组件
 
-为 React 添加官方 Shadcn Button facade：
+请按应用实际使用的 host 添加官方 Shadcn Button facade。下面把 React 与 Web Components 各自的 CLI 命令和应用入口放在同一个示例中；支持当前站点 Adapter 偏好时，示例会以该 host 作为初始页签。
 
-```bash
-npx @proto.ui/cli@latest add react shadcn-button
-```
+<CodeExample
+  files={buttonHostFiles}
+  initialHost="react"
+  label="在 React 或 Web Components 中添加并使用 Shadcn Button"
+/>
 
-命令会检查 React runtime，在需要时安装 `@proto.ui/adapter-react@0.2.0` 与 `@proto.ui/prototypes-shadcn@0.2.0`，并生成 `proto-ui/components/react/index.ts`。
-
-Vue 项目把 `react` 换成 `vue`；Web Components 项目使用 `wc`。同一个组件也可以分别为多个 host 生成。
-
-## 导入生成的组件
-
-在常见的 `src/App.tsx` 中，通过相对路径导入生成的 React host 入口：
-
-```tsx
-import { ShadcnButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>;
-}
-```
-
-这里有意使用相对路径：不同应用并不共享同一套路径别名与目录层级。生成的 facade 会保留 Prototype 声明的 props、事件 listener 与 ref/expose surface，因此受支持的值可以获得 TypeScript 补全，非法 prop 会被类型检查拒绝。
+命令会安装匹配的 Adapter 与 `@proto.ui/prototypes-shadcn@0.2.0`，并在 `proto-ui/components/` 下生成 host 入口。Vue 项目在同一命令中使用 `vue`。这里有意使用相对路径：不同应用并不共享同一套路径别名与目录层级。生成的 facade 会保留 Prototype 声明的 props、事件 listener 与 ref/expose surface。
 
 ## 按组件继续接入
 

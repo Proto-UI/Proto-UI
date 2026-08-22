@@ -1,12 +1,26 @@
 ---
 import { AdapterIds } from './runtimes/registry';
-import { PREFERRED_KEY, DEFAULT_ADAPTER } from '../override/AdapterSelect.astro';
+import {
+  DEFAULT_ADAPTER,
+  PREFERRED_ADAPTER_EVENT,
+  PREFERRED_ADAPTER_KEY,
+} from '../adapter-preference';
+const adapterIdsJson = JSON.stringify(AdapterIds);
 ---
 
-<script is:inline define:vars={{ PREFERRED_KEY, DEFAULT_ADAPTER, AdapterIds }}>
+<script
+  is:inline
+  define:vars={{
+    PREFERRED_ADAPTER_KEY,
+    PREFERRED_ADAPTER_EVENT,
+    DEFAULT_ADAPTER,
+    adapterIdsJson,
+  }}
+>
   (function () {
     if (window.__protoAdapterPanelInit === '1') return;
     window.__protoAdapterPanelInit = '1';
+    var supportedAdapters = JSON.parse(adapterIdsJson);
 
     function showPanel(adapter) {
       document.querySelectorAll('[data-adapter-panel]').forEach(function (el) {
@@ -14,12 +28,14 @@ import { PREFERRED_KEY, DEFAULT_ADAPTER } from '../override/AdapterSelect.astro'
       });
     }
 
+    function isSupported(adapter) {
+      return supportedAdapters.indexOf(adapter) !== -1;
+    }
+
     function getPreferred() {
       try {
-        let SelectedAdapter = localStorage.getItem(PREFERRED_KEY);
-        return SelectedAdapter && AdapterIds.indexOf(SelectedAdapter) !== -1
-          ? SelectedAdapter
-          : DEFAULT_ADAPTER;
+        let SelectedAdapter = localStorage.getItem(PREFERRED_ADAPTER_KEY);
+        return SelectedAdapter && isSupported(SelectedAdapter) ? SelectedAdapter : DEFAULT_ADAPTER;
       } catch (e) {
         return DEFAULT_ADAPTER;
       }
@@ -35,8 +51,9 @@ import { PREFERRED_KEY, DEFAULT_ADAPTER } from '../override/AdapterSelect.astro'
       syncPreferredPanel();
     }
 
-    document.addEventListener('proto-adapter:change', function (e) {
-      showPanel(e.detail.adapter);
+    document.addEventListener(PREFERRED_ADAPTER_EVENT, function (event) {
+      var adapter = event && event.detail && event.detail.adapter;
+      if (isSupported(adapter)) showPanel(adapter);
     });
   })();
 </script>

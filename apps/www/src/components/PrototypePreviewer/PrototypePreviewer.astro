@@ -1,32 +1,14 @@
 ---
-import { codeToHtml } from 'shiki';
 import type { RuntimeId } from './runtimes/registry';
 import AdapterSelect from '../override/AdapterSelect.astro';
 import { AdapterIds } from './runtimes/registry';
 import CodePanel from './CodePanel.astro';
-import type { CodeLang } from './CodePanel.astro';
+import { highlightCode, type CodeLang } from './code-highlight';
 
 function codeLangForRuntime(runtime: RuntimeId): CodeLang {
   if (runtime === 'vue') return 'vue';
   if (runtime === 'react') return 'tsx';
   return 'html';
-}
-
-async function highlightWithShiki(raw: string, langId: CodeLang): Promise<string> {
-  let html = await codeToHtml(raw, {
-    lang: langId,
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-  });
-  const safeRaw = raw.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  html = html.replace(
-    /<pre class="([^"]*)"/,
-    '<pre class="proto-previewer__code m-0 text-[0.8125rem] leading-6 whitespace-pre $1"'
-  );
-  html = html.replace(/<code([^>]*)>/, `<code$1 data-raw-code="${safeRaw}">`);
-  return html;
 }
 
 interface Props {
@@ -124,7 +106,7 @@ const effectiveCode = autoCodeMap ? autoCodeMap[initialRuntime] : codeSnippet;
 const highlights: Record<string, string> = {};
 if (autoCodeMap) {
   for (const [runtime, raw] of Object.entries(autoCodeMap)) {
-    highlights[runtime] = await highlightWithShiki(raw, codeLangForRuntime(runtime as RuntimeId));
+    highlights[runtime] = await highlightCode(raw, codeLangForRuntime(runtime as RuntimeId));
   }
 }
 
