@@ -17,12 +17,12 @@ Use built-in fields where GitHub already owns the fact. Do not copy repository, 
 | Area | single select | Owning repository surface | deterministic label projection or maintainer |
 | Effort | single select | Reviewable size and uncertainty | contributor proposal, maintainer confirmation |
 | Priority | single select | Relative queue order | maintainer |
-| Required capability | single select | Minimum verified Agent comprehension band | maintainer |
+| Required capability | single select | Minimum autonomous Agent comprehension band | maintainer |
 | Mutation ceiling | single select | Largest permitted action class | maintainer |
 | Evidence state | single select | Progress of required executable and review evidence | deterministic projection or reviewer |
 | Claim owner | text | Stable contributor or Agent subject identifier | authorized claim transition |
 | Claim expires | date | End of the current lease | authorized claim transition |
-| Risk | single select | Operational risk used by routing and probes | maintainer |
+| Risk | single select | Operational risk used by routing and review | maintainer |
 | Iteration | iteration | Planning window | maintainer |
 
 Field options are governed catalogs. Renaming or adding an option is a policy change, not an ad hoc board edit. Work type, area, and effort mirror canonical labels; automation must map one canonical label to one field value and report duplicates instead of guessing.
@@ -42,7 +42,7 @@ Intake -> Shaping -> Ready -> Claimed -> In progress -> Review -> Accepted -> Do
 - New items may enter `Intake` deterministically.
 - A maintainer moves an item from `Shaping` to `Ready` after scope, exclusions, authority, implementation authorization, acceptance, and validation are explicit.
 - An authorized claim moves one `Ready` item to `Claimed` and records owner and expiry atomically.
-- Work may enter `In progress` only while the claim is current and the task probe still matches live state.
+- Work may enter `In progress` only while the claim, scope, repository revision, authorization, and live task state still match.
 - A contributor may propose `Review`; the maintainer-owned ready-for-review gate remains separate.
 - Independent acceptance permits `Accepted`. Merge or closure may permit `Done`.
 - Any state may move to `Blocked` when its recorded prerequisite becomes false. Unblocking returns to the last justified state, never to a more advanced state.

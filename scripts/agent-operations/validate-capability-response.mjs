@@ -2,7 +2,7 @@ import {
   digestJson,
   validateCapabilityResponse,
   validateChallenge,
-} from './capability-security.mjs';
+} from './assessment-runtime.mjs';
 import { parseNamedArgs, readAssessmentInputs } from './assessment-io.mjs';
 
 const args = parseNamedArgs(

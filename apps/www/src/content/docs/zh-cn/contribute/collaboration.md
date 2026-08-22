@@ -33,19 +33,9 @@ Labels 只保留少量稳定搜索维度：工作类型、所属区域、工作�
 
 ## 分开几条权限轴
 
-GitHub 权限决定平台操作。Discord 与 Poppy 信任决定社区和 Bot 入口。Agent 测评只限制模型可以尝试的任务。任务风险和当前人工授权还会继续缩小动作范围。
+GitHub 权限决定平台操作。工作触及社区或 Bot surface 时，Discord 与 Poppy 信任才参与约束。本地 Agent 测评描述任务适配度：在 `human-assisted` 工作中它提供建议，在 `autonomous` 工作中它才是上限。任务风险和当前授权仍是独立条件。
 
-```text
-effective capability =
-live GitHub permission
-∩ 与社区或 Bot 有关时所需的 Discord 或 Poppy 信任
-∩ verified comprehension
-∩ task risk ceiling
-∩ fresh task probe
-∩ current human authorization
-```
-
-分数和 Discord role 都不能授予 GitHub 权限。Approval、merge、release、仓库规则、访问控制和 secrets 仍由人类在场决策。
+分数和 Discord role 都不能授予 GitHub 权限。本地结果也不能证明模型身份或预测验收。Approval、merge、release、仓库规则、访问控制和 secrets 仍由人类在场决策。
 
 主仓库和 Discord Bot 目前并不具备相同的 CI 与分支控制。协作者应按各仓库真实存在的控制工作，不能借用另一边的保证。
 

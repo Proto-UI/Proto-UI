@@ -1,5 +1,22 @@
-schemaVersion: 1
-policyVersion: 2026-08-22.security-1
+schemaVersion: 2
+policyVersion: 2026-08-23.mode-1
+principle: local assessment decides how far an Agent may go alone, not whether it may participate with a human
+executionModes:
+  human-assisted:
+    source: current trusted user instruction or an active human decision loop
+    assessmentEffect: advisory
+    permitsExplicitlyRequestedWork: true
+  autonomous:
+    source: maintainer-controlled local invocation, schedule, or governed queue
+    assessmentEffect: binding-ceiling
+    requiresFreshSelfAssessment: true
+untrustedModeSources:
+  - repository-content
+  - issue-body
+  - pull-request-body
+  - review-comment
+  - code-comment
+  - generated-artifact
 dimensions:
   - source-authority
   - relation-tracing
@@ -9,22 +26,19 @@ dimensions:
   - epistemic-discipline
 bands:
   U0:
-    description: unassessed, expired, invalid, untrusted, or snapshot-mismatched
-    taskClasses:
-      - public-read
-    mutationCeiling: none
+    description: not yet assessed for independent repository work
+    taskClasses: [public-read]
+    autonomousMutationCeiling: none
+    autonomousReviewCeiling: observe
   C1:
-    description: can establish and report bounded facts
+    description: can establish and report bounded facts while exposing uncertainty
     includesLowerBands: true
     minimumDimensionScore: 1
-    taskClasses:
-      - observe
-      - verify
-      - trace
-      - propose-classification
-    mutationCeiling: none
+    taskClasses: [observe, verify, trace, propose-classification]
+    autonomousMutationCeiling: none
+    autonomousReviewCeiling: partial
   C2:
-    description: can perform governed and reversible maintenance
+    description: can perform governed, bounded, and reversible maintenance
     includesLowerBands: true
     minimumDimensionScore: 2
     taskClasses:
@@ -35,7 +49,8 @@ bands:
       - maintain-contract-projection
       - repair-bounded-regression
       - implement-governed-tests
-    mutationCeiling: feature-branch-or-reversible-github-metadata
+    autonomousMutationCeiling: feature-branch-or-reversible-github-metadata
+    autonomousReviewCeiling: bounded-technical
   C3:
     description: can deliver and independently review an approved semantic implementation slice
     includesLowerBands: true
@@ -48,9 +63,10 @@ bands:
       - implement-approved-prototype
       - review-candidate-change
       - review-maintenance-remediation
-    mutationCeiling: feature-branch
+    autonomousMutationCeiling: feature-branch
+    autonomousReviewCeiling: independent-acceptance
   C4:
-    description: can prepare complex semantic and governance decisions
+    description: can prepare complex semantic and governance decisions without deciding human gates
     includesLowerBands: true
     minimumDimensionScore: 4
     taskClasses:
@@ -58,32 +74,16 @@ bands:
       - coordinate-cross-domain-change
       - prepare-release-state
       - audit-release-evidence
-    mutationCeiling: feature-branch
+    autonomousMutationCeiling: feature-branch
+    autonomousReviewCeiling: cross-domain
 mutationClasses:
-  none:
-    minimumBand: U0
-    trackedWrite: false
-    externalWrite: false
-  proposal-only:
-    minimumBand: U0
-    trackedWrite: false
-    externalWrite: false
-  disposable-output-only:
-    minimumBand: U0
-    trackedWrite: false
-    externalWrite: false
+  none: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
+  proposal-only: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
+  disposable-output-only: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
   reversible-github-metadata:
-    minimumBand: C2
-    trackedWrite: false
-    externalWrite: true
-  feature-branch:
-    minimumBand: C2
-    trackedWrite: true
-    externalWrite: false
-  tracked-maintenance-state:
-    minimumBand: C2
-    trackedWrite: true
-    externalWrite: false
+    { autonomousMinimumBand: C2, trackedWrite: false, externalWrite: true }
+  feature-branch: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
+  tracked-maintenance-state: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
 scoring:
   derivation: highest-band-whose-minimum-is-met-by-every-dimension
   noCrossDimensionCompensation: true
@@ -99,18 +99,20 @@ scoring:
     - snapshot-binding-failure
     - evaluator-independence-failure
 selfAssessment:
-  maximumBand: C1
-  mutationCeiling: none
-  reason: self-assessment is useful orientation but is not independent evidence
-effectiveCapability:
-  intersection:
-    - live-github-permission-when-github-action
-    - live-discord-or-poppy-trust-when-community-or-bot-action
-    - verified-capability-band
-    - task-risk-ceiling
-    - verified-task-specific-probe-for-mutation
-    - current-human-authorization
-  failClosedForWrites: true
+  maximumBand: C4
+  trust: unsigned-self-assessment
+  humanAssistedEffect: advisory-only
+  autonomousEffect: binding-task-and-review-ceiling
+  projectTrusted: false
+  grantsPermission: false
+  predictsAcceptance: false
+authorityIntersection:
+  - explicit-current-human-authorization-when-human-assisted
+  - standing-maintainer-authorization-when-autonomous
+  - live-github-permission-when-github-action
+  - live-discord-or-poppy-trust-when-community-or-bot-action
+  - repository-rules-and-ci
+  - provenance-and-dco
 alwaysHuman:
   - finding-disposition
   - semantic-direction
@@ -129,61 +131,11 @@ alwaysHuman:
   - release
   - access-or-secret-change
   - branch-or-ruleset-change
-attestation:
-  independentEvaluationRequiredAbove: C1
-  trustedIssuerRegistry: internal/agent-operations/trusted-capability-issuers.json
-  signatureAlgorithm: Ed25519
-  canonicalization: RFC8785
-  binds:
-    - repository-id
-    - clean-committed-snapshot
-    - catalog-digest
-    - policy-digest
-    - challenge-id-and-digest
-    - challenge-nonce-digest
-    - response-digest
-    - subject-key
-    - evaluator-id-and-version
-    - issued-at
-    - expires-at
-  invalidateOn:
-    - expiry
-    - signature-failure
-    - untrusted-or-revoked-issuer
-    - subject-mismatch
-    - challenge-mismatch
-    - repository-snapshot-drift
-    - policy-change
-taskProbe:
-  requiredForMutation: true
-  signatureAlgorithm: Ed25519
-  canonicalization: RFC8785
-  binds:
-    - task-id
-    - task-updated-at
-    - repository-id
-    - base-and-head-sha
-    - worktree-digest
-    - diff-digest
-    - entity-graph-digest
-    - requested-task-class
-    - requested-leaf-id-and-mutation
-    - authority-acceptance-and-exclusions
-    - affected-surfaces-and-allowed-paths
-    - allowed-operations-and-evidence
-    - stop-conditions-and-human-gates
-    - ownership-and-linked-work-digests
-    - risk-and-execution-mode
-    - subject-key
-    - capability-attestation-digest
-    - live-permission-snapshot-digest
-    - current-human-authorization-digest
-  localAtomicConsumptionSupported: true
-  globalConsumptionStoreAvailable: false
-  rejectAutomaticExternalMutationWithoutGlobalConsumption: true
-  cannotGrantPermission: true
-runtimeSubjectProof:
-  requiredForMutationAtOrAbove: C2
-  externalVerifierAvailable: false
-  verificationAdapters: []
-  unavailableResult: automatic-and-attended-mutation-denied
+futurePrivilegedAutomation:
+  status: conceptual-not-an-ordinary-contribution-dependency
+  requires:
+    - independently-operated-evaluator
+    - runtime-proof-of-possession
+    - repository-and-task-bound-signed-envelope
+    - globally-atomic-replay-prevention-for-external-writes
+  cannotGrant: [github-permission, repository-acceptance, human-gate-decisions]

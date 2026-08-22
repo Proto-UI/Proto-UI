@@ -7,7 +7,9 @@ compositionRules:
   - resolve exactly one leaf for the current transition
   - load only the resolved loadPath
   - pass explicit artifacts through a validated handoff
-  - revalidate capability and task state before mutation
+  - treat assessment as advice in human-assisted mode
+  - enforce the fresh self-assessed ceiling before every autonomous transition
+  - revalidate live permission and current authorization at every external action
   - stop at human gates
   - never infer integration or publication authority
 skills:
@@ -15,7 +17,7 @@ skills:
     entrypoints: [development, maintenance]
     loadPath: .agents/skills/pui-assess/SKILL.md
     transition: unassessed context -> snapshot-bound read-only self-result
-    minimumBand: U0
+    autonomousMinimumBand: U0
     taskClass: public-read
     mutation: none
     requires: [request-context]
@@ -24,7 +26,7 @@ skills:
     entrypoints: [development, maintenance]
     loadPath: .agents/skills/pui-orient/SKILL.md
     transition: unknown context -> effective capability envelope
-    minimumBand: U0
+    autonomousMinimumBand: U0
     taskClass: public-read
     mutation: none
     requires: [request-context]
@@ -33,7 +35,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-select/SKILL.md
     transition: unbounded request -> read-only work-item proposal or explicit no-work result
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: propose-classification
     mutation: none
     requires: [request-context, capability-envelope]
@@ -42,25 +44,25 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-claim/SKILL.md
     transition: authorized selection proposal -> one posted claim or fail-closed no-write result
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: claim-work-item
     mutation: reversible-github-metadata
-    requires: [capability-envelope, work-item-proposal, mutation-authorization, task-probe]
+    requires: [capability-envelope, work-item-proposal, mutation-authorization]
     produces: [mutation-receipt, bounded-subject]
   - id: pui-unclaim
     entrypoints: [development]
     loadPath: .agents/skills/pui-unclaim/SKILL.md
     transition: owned current claim -> released claim with mutation receipt
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: release-own-claim
     mutation: reversible-github-metadata
-    requires: [capability-envelope, claim-receipt, mutation-authorization, task-probe]
+    requires: [capability-envelope, claim-receipt, mutation-authorization]
     produces: [mutation-receipt]
   - id: pui-trace
     entrypoints: [development]
     loadPath: .agents/skills/pui-trace/SKILL.md
     transition: bounded subject -> authority and evidence map
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: trace
     mutation: none
     requires: [bounded-subject]
@@ -69,7 +71,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-brainstorm/SKILL.md
     transition: semantic uncertainty -> maintainer decision packet
-    minimumBand: C4
+    autonomousMinimumBand: C4
     taskClass: shape-semantic-decision
     mutation: proposal-only
     requires: [authority-map, bounded-question]
@@ -78,7 +80,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-spec/SKILL.md
     transition: approved semantic scope -> governed spec graph change
-    minimumBand: C3
+    autonomousMinimumBand: C3
     taskClass: author-approved-spec
     mutation: feature-branch
     requires: [authority-map, semantic-authorization]
@@ -87,7 +89,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-contract/SKILL.md
     transition: governed fact or accepted gap -> readable contract projection
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: maintain-contract-projection
     mutation: feature-branch
     requires: [authority-map, projection-authorization]
@@ -96,7 +98,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-module/SKILL.md
     transition: approved Module slice -> portable implementation and evidence
-    minimumBand: C3
+    autonomousMinimumBand: C3
     taskClass: implement-approved-module
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
@@ -105,7 +107,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-host/SKILL.md
     transition: approved host responsibility -> capability realization and evidence
-    minimumBand: C3
+    autonomousMinimumBand: C3
     taskClass: implement-approved-host-capability
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
@@ -114,7 +116,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-adapter/SKILL.md
     transition: approved Adapter realization scope -> bounded implementation handoff
-    minimumBand: C3
+    autonomousMinimumBand: C3
     taskClass: implement-approved-adapter-slice
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
@@ -123,7 +125,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-adapter-assess/SKILL.md
     transition: bounded Adapter question -> read-only assessment packet
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: observe
     mutation: none
     requires: [authority-map, bounded-question]
@@ -132,7 +134,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-prototype/SKILL.md
     transition: governed component slice -> coherent Prototype delivery
-    minimumBand: C3
+    autonomousMinimumBand: C3
     taskClass: implement-approved-prototype
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
@@ -141,7 +143,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-regression/SKILL.md
     transition: governed failing behavior -> restored guarantee and regression evidence
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: repair-bounded-regression
     mutation: feature-branch
     requires: [authority-map, reproduction, implementation-authorization]
@@ -150,7 +152,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-test/SKILL.md
     transition: governed behavior -> executable evidence
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: implement-governed-tests
     mutation: feature-branch
     requires: [authority-map, governed-behavior, implementation-authorization]
@@ -159,7 +161,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-docs/SKILL.md
     transition: governed repository fact -> human-readable projection
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: maintain-docs
     mutation: feature-branch
     requires: [authority-map, documentation-scope, implementation-authorization]
@@ -168,7 +170,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-validate/SKILL.md
     transition: candidate change -> proportional evidence report
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: verify
     mutation: disposable-output-only
     requires: [authority-map, candidate-change]
@@ -177,7 +179,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-review/SKILL.md
     transition: candidate change -> independent acceptance report
-    minimumBand: C3
+    autonomousMinimumBand: C3
     taskClass: review-candidate-change
     mutation: none
     requires: [authority-map, candidate-change, evidence-report]
@@ -186,7 +188,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-issue/SKILL.md
     transition: bounded issue portfolio -> read-only issue operations report
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: observe
     mutation: none
     requires: [capability-envelope, github-snapshot]
@@ -195,7 +197,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-pr/SKILL.md
     transition: bounded pull-request portfolio -> read-only pull-request operations report
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: observe
     mutation: none
     requires: [capability-envelope, github-snapshot]
@@ -204,7 +206,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-ci/SKILL.md
     transition: bounded workflow question -> CI evidence map
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: trace
     mutation: none
     requires: [repository-snapshot, workflow-snapshot]
@@ -213,7 +215,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-govern/SKILL.md
     transition: bounded governance question -> repository governance map
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: trace
     mutation: none
     requires: [repository-snapshot, governance-question]
@@ -222,7 +224,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-deploy/SKILL.md
     transition: bounded deployment question -> deployment evidence report
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: verify
     mutation: none
     requires: [authority-map, deployment-snapshot]
@@ -231,7 +233,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-deps/SKILL.md
     transition: bounded dependency question -> dependency evidence map
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: trace
     mutation: none
     requires: [repository-snapshot, bounded-question]
@@ -240,7 +242,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-release-prep/SKILL.md
     transition: approved release intent -> reviewable candidate state
-    minimumBand: C4
+    autonomousMinimumBand: C4
     taskClass: prepare-release-state
     mutation: feature-branch
     requires: [release-authorization, authority-map]
@@ -249,7 +251,7 @@ skills:
     entrypoints: [development]
     loadPath: .agents/skills/pui-release-audit/SKILL.md
     transition: completed publication -> reconciled immutable evidence
-    minimumBand: C4
+    autonomousMinimumBand: C4
     taskClass: audit-release-evidence
     mutation: feature-branch
     requires: [publication-evidence, authority-map, implementation-authorization]
@@ -258,7 +260,7 @@ skills:
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-observe/SKILL.md
     transition: bounded mission -> finding or no-finding report
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: observe
     mutation: none
     requires: [maintenance-mission, capability-envelope]
@@ -267,16 +269,16 @@ skills:
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-mission/SKILL.md
     transition: selected maintenance candidate -> frozen bounded mission and lease
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: update-tracked-maintenance-state
     mutation: tracked-maintenance-state
-    requires: [capability-envelope, mission-candidate, mutation-authorization, task-probe]
+    requires: [capability-envelope, mission-candidate, mutation-authorization]
     produces: [maintenance-mission, mutation-receipt]
   - id: pui-verify
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-verify/SKILL.md
     transition: candidate finding -> independent classification
-    minimumBand: C1
+    autonomousMinimumBand: C1
     taskClass: verify
     mutation: none
     requires: [maintenance-mission, observation-report]
@@ -285,16 +287,16 @@ skills:
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-remediate/SKILL.md
     transition: accepted finding -> bounded remediation packet and change
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: repair-bounded-regression
     mutation: feature-branch
-    requires: [verification-report, semantic-authorization, mutation-authorization, task-probe]
+    requires: [verification-report, semantic-authorization, mutation-authorization]
     produces: [candidate-change, remediation-packet]
   - id: pui-maintenance-review
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-maintenance-review/SKILL.md
     transition: remediation -> independent technical verdict
-    minimumBand: C3
+    autonomousMinimumBand: C3
     taskClass: review-maintenance-remediation
     mutation: none
     requires: [candidate-change, remediation-packet, evidence-report]
@@ -303,17 +305,17 @@ skills:
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-maintenance-close/SKILL.md
     transition: reviewed remediation -> synchronized run closure
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: update-tracked-maintenance-state
     mutation: tracked-maintenance-state
-    requires: [review-report, evidence-report, mutation-authorization, task-probe]
+    requires: [review-report, evidence-report, mutation-authorization]
     produces: [maintenance-state-receipt]
   - id: pui-record
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-record/SKILL.md
     transition: terminal maintenance outcome -> synchronized run record
-    minimumBand: C2
+    autonomousMinimumBand: C2
     taskClass: update-tracked-maintenance-state
     mutation: tracked-maintenance-state
-    requires: [maintenance-outcome, mutation-authorization, task-probe]
+    requires: [maintenance-outcome, mutation-authorization]
     produces: [maintenance-state-receipt]

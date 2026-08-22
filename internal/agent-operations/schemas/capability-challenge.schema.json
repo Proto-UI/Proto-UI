@@ -123,8 +123,8 @@
         "requiredPerQuestion": {
           "const": ["answer", "evidence", "unknowns", "humanGates"]
         },
-        "selfAssessmentCeiling": { "const": "C1" },
-        "independentEvaluationRequiredAbove": { "const": "C1" }
+        "selfAssessmentCeiling": { "const": "C4" },
+        "independentEvaluationRequiredAbove": { "const": "none-for-local-self-governance" }
       },
       "additionalProperties": false
     }

@@ -7,17 +7,17 @@ description: Route one eligible transition in Proto UI's governed autonomous-mai
 
 Route one stage without collapsing independence or human gates.
 
-Read `internal/agent-operations/skills.yaml` as routing metadata. Do not preload maintenance leaves or guess their paths. Select one leaf ID, run `pnpm agent:skill -- <leaf-id>`, and load only the returned `loadPath`. Validate its handoff with `pnpm agent:skill -- --handoff <handoff.json>` before loading at most one next leaf.
+Read `internal/agent-operations/skills.yaml` as routing metadata. Do not preload maintenance leaves or guess their paths. Select one leaf ID, run `pnpm agent:skill -- <leaf-id> --mode autonomous --mode-source <maintainer-invocation|schedule|governed-queue>`, and load the returned `loadPath` only when `blocked` is false. Validate its handoff with `pnpm agent:skill -- --handoff <handoff.json>` before loading at most one next leaf.
 
 ## Read current state
 
-1. Resolve `pui-orient` first and retain its current capability envelope. Resolve `pui-assess` and then `pui-orient` again when the assessment is absent, invalid, expired, or snapshot-mismatched.
+1. Establish `executionMode: autonomous`. Resolve `pui-orient` first and retain its current envelope. Resolve `pui-assess` and then `pui-orient` again when the local self-result is absent, expired, or snapshot-mismatched.
 2. Read `AGENTS.md`, `internal/autonomous-maintenance/README.md`, and `internal/autonomous-maintenance/phase-0/README.md` completely.
 3. Inspect the run ledger, relevant mission and packets, baseline, and worktree state.
-4. Determine the next eligible transition from recorded state, the capability envelope, and explicit authorization.
+4. Determine the next eligible transition from recorded state, the fresh self-assessed task and review ceiling, the mission boundary, and standing or explicit maintainer authorization.
 5. Treat `spec/**` as project authority and `internal/autonomous-maintenance/**` as procedure.
 
-Before any mutation, run the repository mutation-envelope verifier for the exact leaf and scope. It validates the attested clean baseline, current worktree and diff, task class, capability, live permission, human authorization, subject binding, and fresh run-bound probe together. Stop without writing when any input is absent, stale, untrusted, replayed, narrower than the requested mutation, or dependent on an unavailable global consumer.
+Before any transition, enforce the local autonomous ceiling and re-read the mission lease, current worktree, task state, and authorization. Before an external write, also re-read the target and live platform permission. Stop without writing when the result is stale, the task exceeds the ceiling, the mission is unleased or changed, the operation exceeds the frozen scope, or a human gate is reached. A self-assessment never grants permission.
 
 ## Route exactly one transition
 
@@ -27,7 +27,7 @@ Before any mutation, run the repository mutation-envelope verifier for the exact
 - resolve `pui-verify` in a fresh context for one candidate finding;
 - resolve `pui-record` after an independently rejected finding receives its required human disposition;
 - request finding disposition and semantic direction as separate human decisions;
-- resolve `pui-remediate` only for an accepted finding with approved scope and a valid mutation envelope and probe;
+- resolve `pui-remediate` only for an accepted finding with approved scope within the current autonomous ceiling;
 - resolve `pui-maintenance-review` in a fresh context for the actual remediation;
 - resolve `pui-maintenance-close` only after adequate independent review, required validation, and revalidation of its complete maintenance-state mutation surface.
 

@@ -10,7 +10,7 @@ The machine registry at `internal/agent-operations/skills.yaml` is the source fo
 The entrypoint chooses one leaf ID. The resolver returns its one registered file:
 
 ```sh
-pnpm agent:skill -- pui-trace
+pnpm agent:skill -- pui-trace --mode human-assisted --mode-source current-user
 ```
 
 The leaf returns a structured handoff. The entrypoint validates it before resolving the next leaf:
@@ -25,8 +25,8 @@ A handoff carries typed artifacts and at most one next skill. A terminal handoff
 
 | Skill         | One transition                                                           |
 | ------------- | ------------------------------------------------------------------------ |
-| `pui-assess`  | Unassessed context to an unsigned U0/C1 comprehension result             |
-| `pui-orient`  | Unknown context to the effective capability envelope                     |
+| `pui-assess`  | Unassessed context to an unsigned U0-C4 local task-fit result            |
+| `pui-orient`  | Unknown context to a mode-aware contribution envelope                    |
 | `pui-select`  | Unbounded request to one read-only work proposal or no-work result       |
 | `pui-claim`   | Authorized proposal to one posted claim or a fail-closed no-write result |
 | `pui-unclaim` | One owned claim to a recorded release                                    |
@@ -94,8 +94,8 @@ These leaves are read-only. A diagnosis or proposal does not authorize its repai
 | `pui-maintenance-close` | Reviewed remediation to synchronized closure |
 | `pui-record` | Supported non-remediation terminal outcome to a synchronized run record |
 
-## Capability is a ceiling
+## Capability is a ceiling when the Agent works alone
 
-C1 covers bounded read-only facts. C2 covers governed reversible work. C3 covers approved semantic implementation and independent review. C4 covers complex semantic, cross-domain, and release preparation. The exact policy is machine-readable.
+C1 covers bounded facts. C2 covers governed reversible work. C3 covers approved semantic implementation and independent review. C4 covers complex semantic, cross-domain, and release preparation. The registry calls each leaf's threshold `autonomousMinimumBand` because it applies when an Agent chooses or advances work alone.
 
-The band is only one condition. Live platform permission, relevant Discord or Poppy trust, task risk, an exact probe, current human authorization, and always-human gates can reduce the permitted action. None can increase another.
+During `human-assisted` work, the same result is advice. It changes scope, validation, review depth, and stated limitations, but it does not block a task the current user requested. Live platform permission, relevant Discord or Poppy trust, current authorization, repository rules, and human gates remain separate in both modes.

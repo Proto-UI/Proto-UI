@@ -2,11 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  loadCapabilityPolicy,
-  loadTrustedIssuerRegistry,
-  validateChallenge,
-} from './capability-security.mjs';
+import { loadCapabilityPolicy, validateChallenge } from './assessment-runtime.mjs';
 import { loadSkillRegistry } from './skill-registry.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -109,8 +105,8 @@ for (const catalogPath of publicSkillCatalogs) {
 
 for (const readmePath of [resolve(root, 'README.md'), resolve(root, 'README.zh-CN.md')]) {
   const readme = readFileSync(readmePath, 'utf8');
-  if (!readme.includes('Stay read-only unless a trusted attestation')) {
-    fail(readmePath + ': Agent entry must fail closed before mutation');
+  if (!readme.includes('Record human-assisted mode when I am directing the work')) {
+    fail(readmePath + ': Agent entry must carry the trusted execution mode');
   }
 }
 
@@ -121,8 +117,8 @@ const capabilityProjections = [
 ];
 for (const projectionPath of capabilityProjections) {
   const projection = readFileSync(projectionPath, 'utf8');
-  if (!projection.includes('Discord or Poppy trust when the action touches those surfaces')) {
-    fail(projectionPath + ': Discord or Poppy trust must be conditional on the affected surface');
+  if (!projection.includes('human-assisted') || !projection.includes('autonomous')) {
+    fail(projectionPath + ': both execution modes must be explained');
   }
 }
 for (const projectionPath of [
@@ -130,8 +126,8 @@ for (const projectionPath of [
   resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/collaboration.md'),
 ]) {
   const projection = readFileSync(projectionPath, 'utf8');
-  if (!projection.includes('与社区或 Bot 有关时所需的 Discord 或 Poppy 信任')) {
-    fail(projectionPath + ': Discord/Poppy 限定条件缺失');
+  if (!projection.includes('human-assisted') || !projection.includes('autonomous')) {
+    fail(projectionPath + ': 两种执行模式缺失');
   }
 }
 
@@ -140,10 +136,12 @@ const agentPolicy = readFileSync(
   'utf8'
 );
 if (
-  !agentPolicy.includes('maximumBand: C1') ||
-  !agentPolicy.includes('cannotGrantPermission: true')
+  !agentPolicy.includes('maximumBand: C4') ||
+  !agentPolicy.includes('grantsPermission: false') ||
+  !agentPolicy.includes('humanAssistedEffect: advisory-only') ||
+  !agentPolicy.includes('autonomousEffect: binding-task-and-review-ceiling')
 ) {
-  fail('capability policy must cap self-assessment and forbid permission grants.');
+  fail('capability policy must distinguish advisory collaboration from autonomous ceilings.');
 }
 try {
   const parsedPolicy = loadCapabilityPolicy(
@@ -167,9 +165,7 @@ for (const schemaName of [
   'capability-challenge.schema.json',
   'capability-response.schema.json',
   'capability-self-result.schema.json',
-  'capability-attestation.schema.json',
-  'capability-task-probe.schema.json',
-  'trusted-capability-issuers.schema.json',
+  'review-packet.schema.json',
 ]) {
   JSON.parse(readFileSync(resolve(root, 'internal/agent-operations/schemas', schemaName), 'utf8'));
 }
@@ -183,16 +179,13 @@ const challenge = JSON.parse(
 );
 try {
   validateChallenge(challenge);
-  loadTrustedIssuerRegistry(
-    resolve(root, 'internal/agent-operations/trusted-capability-issuers.json')
-  );
 } catch (error) {
-  fail('capability security artifact validation failed: ' + error.message);
+  fail('capability assessment artifact validation failed: ' + error.message);
 }
 if (
   challenge.kind !== 'proto-ui.agent-capability-challenge' ||
   challenge.questions?.length < 6 ||
-  challenge.responseContract?.selfAssessmentCeiling !== 'C1'
+  challenge.responseContract?.selfAssessmentCeiling !== 'C4'
 ) {
   fail('capability challenge generator returned an invalid contract.');
 }

@@ -4,7 +4,7 @@ import {
   deriveSelfAssessmentResult,
   loadCapabilityPolicy,
   loadCapabilityRubric,
-} from './capability-security.mjs';
+} from './assessment-runtime.mjs';
 import { parseNamedArgs, readAssessmentInputs } from './assessment-io.mjs';
 
 const defaultRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));

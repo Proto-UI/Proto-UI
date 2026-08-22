@@ -13,7 +13,8 @@ import {
   loadCapabilityPolicy,
   loadCapabilityRubric,
   validateCapabilityResponse,
-} from '../capability-security.mjs';
+  validateSelfAssessmentResult,
+} from '../assessment-runtime.mjs';
 
 const root = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = loadCapabilityPolicy(
@@ -65,8 +66,8 @@ function makeChallenge() {
       format: 'json',
       schema: 'internal/agent-operations/schemas/capability-response.schema.json',
       requiredPerQuestion: ['answer', 'evidence', 'unknowns', 'humanGates'],
-      selfAssessmentCeiling: 'C1',
-      independentEvaluationRequiredAbove: 'C1',
+      selfAssessmentCeiling: 'C4',
+      independentEvaluationRequiredAbove: 'none-for-local-self-governance',
     },
   };
   challenge.challengeDigest = computeChallengeDigest(challenge);
@@ -113,7 +114,7 @@ test('response template is challenge-bound and intentionally incomplete', () => 
   assert.throws(() => validateCapabilityResponse(template, challenge), /submittedAt/);
 });
 
-test('self scores derive only unsigned U0 or C1 with no mutation ceiling', () => {
+test('self scores derive the full unsigned U0-C4 autonomous recommendation', () => {
   const challenge = makeChallenge();
   const response = makeResponse(challenge);
   const u0 = deriveSelfAssessmentResult({
@@ -124,20 +125,32 @@ test('self scores derive only unsigned U0 or C1 with no mutation ceiling', () =>
     policy,
   });
   assert.equal(u0.capability.band, 'U0');
-  const capped = deriveSelfAssessmentResult({
+  const high = deriveSelfAssessmentResult({
+    challenge,
+    response,
+    evaluation: makeEvaluation(4),
+    rubric,
+    policy,
+  });
+  assert.equal(high.capability.band, 'C4');
+  assert.equal(high.capability.autonomousTaskCeiling, 'C4');
+  assert.equal(high.capability.autonomousReviewCeiling, 'cross-domain');
+  assert.equal(high.trust.projectTrusted, false);
+  assert.equal(high.trust.grantsPermission, false);
+  assert.equal(high.trust.predictsAcceptance, false);
+  assert.equal(high.validity.expiresAt, challenge.validity.expiresAt);
+  assert.equal(computeSelfAssessmentResultDigest(high), high.resultDigest);
+  high.evaluation.dimensions.sourceAuthority.score = 0;
+  assert.notEqual(computeSelfAssessmentResultDigest(high), high.resultDigest);
+
+  const critical = deriveSelfAssessmentResult({
     challenge,
     response,
     evaluation: makeEvaluation(4, ['hidden-uncertainty']),
     rubric,
     policy,
   });
-  assert.equal(capped.capability.band, 'C1');
-  assert.equal(capped.capability.mutationCeiling, 'none');
-  assert.equal(capped.trust.authorizesMutation, false);
-  assert.equal(capped.trust.substitutesForTrustedAttestation, false);
-  assert.equal(computeSelfAssessmentResultDigest(capped), capped.resultDigest);
-  capped.evaluation.dimensions.sourceAuthority.score = 0;
-  assert.notEqual(computeSelfAssessmentResultDigest(capped), capped.resultDigest);
+  assert.equal(critical.capability.band, 'C1');
 });
 
 test('bundle stdin validates a response and derives a deterministic self result', () => {
@@ -195,4 +208,24 @@ test('self evaluation rejects an uncataloged critical failure', () => {
       }),
     /unknown critical failure/
   );
+});
+
+test('self-result verification rejects forged bands, task classes, and digests', () => {
+  const challenge = makeChallenge();
+  const response = makeResponse(challenge);
+  const result = deriveSelfAssessmentResult({
+    challenge,
+    response,
+    evaluation: makeEvaluation(1),
+    rubric,
+    policy,
+  });
+  assert.equal(validateSelfAssessmentResult(result, policy), result);
+  const forgedBand = structuredClone(result);
+  forgedBand.capability.band = 'C4';
+  assert.throws(() => validateSelfAssessmentResult(forgedBand, policy), /digest mismatch/);
+  const forgedTasks = structuredClone(result);
+  forgedTasks.capability.eligibleTaskClasses.push('implement-approved-module');
+  forgedTasks.resultDigest = computeSelfAssessmentResultDigest(forgedTasks);
+  assert.throws(() => validateSelfAssessmentResult(forgedTasks, policy), /task classes/);
 });

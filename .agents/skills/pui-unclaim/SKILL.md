@@ -5,10 +5,10 @@ description: Release one current Proto UI work-item claim when it expired, becam
 
 # Release one claim
 
-1. Require a current `pui-orient` envelope that permits the exact reversible GitHub mutation at C2 or higher.
+1. Require a current `pui-orient` envelope. In autonomous mode the release must be within the fresh C2-or-higher ceiling; in human-assisted mode the assessment remains advisory.
 2. Read the original claim receipt, current issue, recent comments, linked work, assignee, and Project claim state when available.
-3. Require one explicit release reason: expiry, changed boundary, invalidated task probe, blocking dependency, stopped work, or completed handoff.
-4. Revalidate live GitHub permission, current authorization, and a fresh task-specific probe bound to the claim and requested release action.
+3. Require one explicit release reason: expiry, changed boundary, invalidated task state, blocking dependency, stopped work, or completed handoff.
+4. Revalidate live GitHub permission, current authorization, claim ownership, target version, and the idempotency key for the requested release action.
 5. Post exactly one release notice and clear only claim metadata that the current contributor owns and is authorized to change.
 6. Return a mutation receipt containing the claim identity, release reason, observed pre-state, resulting state, timestamp, and any bounded handoff.
 

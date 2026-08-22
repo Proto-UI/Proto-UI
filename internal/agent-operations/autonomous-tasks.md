@@ -8,7 +8,7 @@ The Issue and pull-request observers run as a read-only shadow workflow on a sch
 
 The pull-request portfolio observer is a narrower manual trial of an external engine. Its errors remain part of the result. It cannot prepare, repair, submit, approve, or merge a pull request.
 
-Autonomous maintenance is still a manual protocol. `pui-mission` defines the candidate-to-frozen transition, but that write remains blocked until trusted subject proof, an exact probe, and a globally atomic lease service exist. A maintainer currently freezes one mission and starts each fresh Agent context outside an autonomous controller. There is no scheduler, callback service, or globally atomic lease service for that state machine.
+Autonomous maintenance is still a manual protocol. `pui-mission` defines the candidate-to-frozen transition. A maintainer currently freezes one mission and starts each fresh Agent context outside an autonomous controller. There is no scheduler, callback service, or globally atomic lease service for that state machine, so competing runners and automatic external writes remain unavailable.
 
 ## What is only a candidate
 
@@ -31,7 +31,7 @@ A recurring Agent task needs more than a cron expression. It must have:
 - a callback or ledger update that is idempotent;
 - an owner who can disable it and inspect its residual risk.
 
-Local probe-consumption files cannot coordinate separate clones or runners. Until a global atomic consumer or a service-side idempotency mechanism exists, recurring tasks remain read-only. High-risk work, semantic decisions, integration, publication, access, secrets, and repository rules always stop for a human.
+Local state cannot coordinate separate clones or runners. Until a global atomic consumer or service-side idempotency mechanism exists, recurring external writes remain read-only. Local autonomous work may proceed inside its fresh self-assessed ceiling, frozen scope, and current lease. High-risk work, semantic decisions, integration, publication, access, secrets, and repository rules always stop for a human.
 
 ## Maintenance transition
 

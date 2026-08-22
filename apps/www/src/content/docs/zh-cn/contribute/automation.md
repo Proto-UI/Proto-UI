@@ -13,7 +13,7 @@ PR portfolio trial 只由人工触发，而且只读。外部引擎返回不完�
 
 ## 仍由人启动的部分
 
-自治维护已经有 mission queue 和状态协议，但没有 scheduler 或 controller。`pui-mission` 定义了从候选到冻结任务的转换；在可信主体证明和全局 lease 服务缺失时，这项写操作仍会被拦截。维护者目前要在自治控制器之外冻结一项 mission，再启动 Observer；需要核验时另开一个新的 Verifier 上下文，并在后续阶段之间记录人工决定。
+自治维护已经有 mission queue 和状态协议，但没有 scheduler 或 controller。维护者目前要在自治控制器之外冻结一项 mission，再启动 Observer；需要核验时另开一个新的 Verifier 上下文，并在后续阶段之间记录人工决定。每次自治转换都必须处于最新本地任务与复核上限内，并遵守记录下来的 mission lease。
 
 No-finding 是合法结果。`pui-record` 可以收口证据充分的 no-finding、被拒绝 finding 和 blocked 终态。已经接受并实施的修复仍须独立复核，之后才能使用 `pui-maintenance-close`。
 
@@ -23,8 +23,8 @@ No-finding 是合法结果。`pui-record` 可以收口证据充分的 no-finding
 
 ## 为什么写操作仍须有人在场
 
-本地单次消费账本无法阻止同一 probe 在另一个 clone 或 runner 中再次使用。自动修改外部状态需要全局原子消费服务，或平台侧幂等键。执行时还必须证明 Agent 主体和可信签发者。
+本地账本无法阻止同一外部动作在另一个 clone 或 runner 中再次执行。自动修改外部状态需要全局原子消费服务或平台侧幂等键，还要能把正在运行的进程和它出示的授权绑定起来。
 
-这些控制完成前，周期任务保持只读。语义决定、approval、merge、publication、release、访问、secret 和仓库规则始终停下来交给人。
+这些控制完成前，周期性的外部写操作保持只读。普通本地自治工作仍可在测得的上限和已记录范围内推进。语义决定、approval、merge、publication、release、访问、secret 和仓库规则始终停下来交给人。
 
 准确任务目录位于 `internal/agent-operations/autonomous-tasks.yaml`，维护协议仍由 `internal/autonomous-maintenance/**` 管理。

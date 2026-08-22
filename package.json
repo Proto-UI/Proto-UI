@@ -64,8 +64,6 @@
     "agent:assess:evaluation": "node scripts/agent-operations/create-self-evaluation.mjs",
     "agent:assess:validate": "node scripts/agent-operations/validate-capability-response.mjs",
     "agent:assess:self-result": "node scripts/agent-operations/derive-self-assessment.mjs",
-    "agent:verify-attestation": "node scripts/agent-operations/verify-capability-attestation.mjs",
-    "agent:verify-task-probe": "node scripts/agent-operations/verify-task-probe.mjs",
     "spec:docs:agent": "tsx scripts/spec/generate-agent-project-understanding.mjs",
     "check:agent-doc": "tsx scripts/spec/generate-agent-project-understanding.mjs --check",
     "check:release-version": "node scripts/release/check-version-governance.mjs",

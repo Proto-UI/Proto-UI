@@ -6,11 +6,11 @@ description: Close one technically complete Proto UI autonomous-maintenance tran
 # Close a maintenance transition
 
 1. Require an adequate independent review, complete validation, and no blocking residual risk.
-2. Require a current `pui-orient` envelope, explicit authorization for the complete maintenance-state update, and a fresh probe covering every finding, packet, mission, queue, and ledger path that may change.
+2. Require a current autonomous envelope, a fresh C2-or-higher ceiling, and explicit or standing authorization covering every finding, packet, mission, queue, and ledger path that may change.
 3. Read `AGENTS.md`, the autonomous-maintenance procedure, all run artifacts, and current ledger state.
 4. Run the deterministic autonomous-maintenance checks before closure.
 5. Synchronize finding status, packet, mission, run IDs, baselines, classifications, completion rule, metrics, and ledger. Record unknown metrics as null.
-6. Convert only bounded residual risks with an external oracle into candidate missions when that queue mutation is included in the authorization and probe.
+6. Convert only bounded residual risks with an external oracle into candidate missions when that queue mutation is separately authorized and lease-safe.
 7. Record the explicit integration decision after it occurs. Keep commit grouping, merge, publication, and release separately gated.
 8. Return closure evidence, the exact changed maintenance-state paths, and the next eligible transition.
 

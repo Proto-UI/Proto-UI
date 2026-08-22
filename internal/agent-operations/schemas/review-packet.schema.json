@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI review packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "repositoryId",
+    "pullRequest",
+    "baseSha",
+    "headSha",
+    "observedAt",
+    "scope",
+    "affectedEntities",
+    "affectedSurfaces",
+    "findings",
+    "validation",
+    "previousFindings",
+    "limitations",
+    "unknowns",
+    "humanGates",
+    "recommendedAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.review-packet" },
+    "repositoryId": { "type": "string", "minLength": 4 },
+    "pullRequest": { "type": "integer", "minimum": 1 },
+    "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "headSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "scope": { "$ref": "#/$defs/strings" },
+    "affectedEntities": { "$ref": "#/$defs/strings" },
+    "affectedSurfaces": { "$ref": "#/$defs/strings" },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "validation": { "$ref": "#/$defs/strings" },
+    "previousFindings": { "$ref": "#/$defs/strings" },
+    "limitations": { "$ref": "#/$defs/strings" },
+    "unknowns": { "$ref": "#/$defs/strings" },
+    "humanGates": { "$ref": "#/$defs/strings" },
+    "recommendedAction": { "enum": ["APPROVE", "REQUEST_CHANGES", "COMMENT", "ABSTAIN"] }
+  },
+  "$defs": {
+    "strings": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "confidence",
+        "file",
+        "line",
+        "authority",
+        "observed",
+        "expected",
+        "impact",
+        "fix"
+      ],
+      "properties": {
+        "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "file": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "authority": { "type": "string", "minLength": 1 },
+        "observed": { "type": "string", "minLength": 1 },
+        "expected": { "type": "string", "minLength": 1 },
+        "impact": { "type": "string", "minLength": 1 },
+        "fix": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -5,11 +5,11 @@ description: Record one authorized non-remediation terminal outcome in Proto UI'
 
 # Record a maintenance outcome
 
-1. Require a current capability envelope, explicit authorization for every maintenance-state path, and a fresh probe for `update-tracked-maintenance-state`.
+1. Require a current autonomous envelope, a fresh C2-or-higher ceiling, and explicit or standing authorization for every maintenance-state path.
 2. Accept only a supported no-finding result, a fresh independent classification followed by the required human disposition, or a blocked result whose missing oracle and completion rule are recorded.
 3. Read the maintenance procedure, mission, raw report, finding when present, queue, and run ledger completely.
 4. Run deterministic maintenance checks before writing.
-5. Synchronize only the terminal classification, evidence references, completion rule, mission state, queue state, and run ledger fields covered by the probe. Record unknown metrics as null.
+5. Synchronize only the authorized terminal classification, evidence references, completion rule, mission state, queue state, and run ledger fields after rechecking the target version and lease. Record unknown metrics as null.
 6. Return a receipt containing the prior state, resulting state, exact changed paths, evidence, residual risk, and next eligible transition.
 
 Do not require a remediation review for a non-remediation outcome. Do not use this transition to avoid review when a finding was accepted or a repair occurred. Do not create a follow-up mission unless its separate queue mutation and human gate are authorized.

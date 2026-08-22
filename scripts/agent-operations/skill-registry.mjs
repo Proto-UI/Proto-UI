@@ -9,6 +9,11 @@ const ARTIFACT = /^[a-z][a-z0-9-]*$/;
 const DIGEST = /^sha256:[a-f0-9]{64}$/;
 const BAND_ORDER = ['U0', 'C1', 'C2', 'C3', 'C4'];
 const ENTRYPOINTS = ['development', 'maintenance'];
+const EXECUTION_MODES = ['human-assisted', 'autonomous'];
+const MODE_SOURCES = {
+  'human-assisted': new Set(['current-user', 'active-human-loop']),
+  autonomous: new Set(['maintainer-invocation', 'schedule', 'governed-queue']),
+};
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -106,7 +111,7 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
         'entrypoints',
         'loadPath',
         'transition',
-        'minimumBand',
+        'autonomousMinimumBand',
         'taskClass',
         'mutation',
         'requires',
@@ -145,19 +150,22 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
       typeof skill.transition === 'string' && skill.transition.includes('->'),
       `${label}.transition must describe one state change`
     );
-    assert(BAND_ORDER.includes(skill.minimumBand), `${label}.minimumBand is not defined by policy`);
+    assert(
+      BAND_ORDER.includes(skill.autonomousMinimumBand),
+      `${label}.autonomousMinimumBand is not defined by policy`
+    );
     const taskBand = taskClassBands.get(skill.taskClass);
     assert(taskBand, `${label}.taskClass is not defined by capability policy`);
     assert(
-      BAND_ORDER.indexOf(skill.minimumBand) >= BAND_ORDER.indexOf(taskBand),
-      `${label}.minimumBand cannot be lower than task class ${skill.taskClass}`
+      BAND_ORDER.indexOf(skill.autonomousMinimumBand) >= BAND_ORDER.indexOf(taskBand),
+      `${label}.autonomousMinimumBand cannot be lower than task class ${skill.taskClass}`
     );
-    const mutationBand = policy.mutationClasses?.[skill.mutation]?.minimumBand;
+    const mutationBand = policy.mutationClasses?.[skill.mutation]?.autonomousMinimumBand;
     assert(mutationBand, `${label}.mutation is not a policy mutation class`);
-    assert(BAND_ORDER.includes(mutationBand), `${label}.mutation minimumBand is invalid`);
+    assert(BAND_ORDER.includes(mutationBand), `${label}.mutation autonomousMinimumBand is invalid`);
     assert(
-      BAND_ORDER.indexOf(skill.minimumBand) >= BAND_ORDER.indexOf(mutationBand),
-      `${label}.minimumBand is below mutation class ${skill.mutation}`
+      BAND_ORDER.indexOf(skill.autonomousMinimumBand) >= BAND_ORDER.indexOf(mutationBand),
+      `${label}.autonomousMinimumBand is below mutation class ${skill.mutation}`
     );
     assertStringList(skill.requires, `${label}.requires`, { nonempty: true });
     assertStringList(skill.produces, `${label}.produces`, { nonempty: true });
@@ -203,6 +211,8 @@ export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
       'schemaVersion',
       'kind',
       'entrypoint',
+      'executionMode',
+      'executionModeSource',
       'fromId',
       'nextSkillId',
       'artifacts',
@@ -214,6 +224,8 @@ export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
   assert(handoff.schemaVersion === 1, 'handoff.schemaVersion must be 1');
   assert(handoff.kind === 'proto-ui.skill-handoff', 'handoff.kind is invalid');
   assert(Object.hasOwn(registry.entrypoints, handoff.entrypoint), 'handoff.entrypoint is invalid');
+  assert(EXECUTION_MODES.includes(handoff.executionMode), 'handoff.executionMode is invalid');
+  establishExecutionMode(handoff.executionMode, handoff.executionModeSource);
   assert(ID.test(handoff.fromId ?? ''), 'handoff.fromId is invalid');
   const fromLeaf = registry.byId.get(handoff.fromId);
   const expectedEntrypoint = registry.entrypoints[handoff.entrypoint];
@@ -295,6 +307,55 @@ export function resolveSkill(id, registry = loadSkillRegistry()) {
   const skill = registry.byId.get(id);
   assert(skill, `unknown skill id: ${id}`);
   return skill;
+}
+
+export function establishExecutionMode(requestedMode, source) {
+  assert(EXECUTION_MODES.includes(requestedMode), 'execution mode is invalid');
+  assert(
+    MODE_SOURCES[requestedMode].has(source),
+    `execution mode ${requestedMode} cannot be established from ${source}`
+  );
+  return requestedMode;
+}
+
+export function evaluateSkillEligibility(skill, { executionMode, selfAssessment = null } = {}) {
+  assert(EXECUTION_MODES.includes(executionMode), 'execution mode is invalid');
+  if (executionMode === 'human-assisted') {
+    return {
+      eligible: true,
+      assessmentEffect: 'advisory',
+      reason:
+        'current human direction governs task choice; assessment calibrates review and evidence',
+    };
+  }
+  if (['pui-orient', 'pui-assess'].includes(skill.id)) {
+    return {
+      eligible: true,
+      assessmentEffect: 'bootstrap',
+      reason: 'orientation and local assessment establish the autonomous ceiling',
+    };
+  }
+  const band = selfAssessment?.capability?.band;
+  const validKind = selfAssessment?.kind === 'proto-ui.agent-capability-self-result';
+  const validated = selfAssessment?.validated === true;
+  const fresh = selfAssessment?.fresh === true;
+  if (!validKind || !validated || !fresh || !BAND_ORDER.includes(band)) {
+    return {
+      eligible: false,
+      assessmentEffect: 'binding-ceiling',
+      reason: 'autonomous work requires a fresh local self-assessment',
+    };
+  }
+  const eligible =
+    BAND_ORDER.indexOf(band) >= BAND_ORDER.indexOf(skill.autonomousMinimumBand) &&
+    selfAssessment.capability.eligibleTaskClasses?.includes(skill.taskClass);
+  return {
+    eligible,
+    assessmentEffect: 'binding-ceiling',
+    reason: eligible
+      ? 'skill is within the fresh self-assessed autonomous ceiling'
+      : `skill exceeds the ${band} autonomous ceiling`,
+  };
 }
 
 export const skillRegistryRoot = DEFAULT_ROOT;

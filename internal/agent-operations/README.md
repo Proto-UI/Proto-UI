@@ -67,28 +67,24 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `autonomous-tasks.md`: human-readable deployment boundary for recurring Agent work.
 - `skills.yaml`: lazy-loaded ordinary development and maintenance skill transitions.
 - `schemas/skill-handoff.schema.json`: one-leaf handoff contract used by the resolver.
-- `capability-policy.yaml`: Agent comprehension bands, attestation boundaries, and task-probe rules.
+- `capability-policy.yaml`: execution modes, local comprehension bands, autonomous ceilings, and human gates.
 - `capability-rubric.yaml`: public philosophical anchors for unsigned self-assessment; it contains no repository answer key.
 - `contributor-agents.md`: readable policy for ordinary Contributor Agents.
 - `schemas/shadow-report.schema.json`: structured output contract used by Codex and deterministic validation.
 - `schemas/capability-challenge.schema.json`: dynamic assessment challenge contract.
 - `schemas/capability-response.schema.json`: evidence-backed answer contract without a score or answer key.
-- `schemas/capability-self-result.schema.json`: deterministic unsigned U0/C1 orientation result.
-- `schemas/capability-attestation.schema.json`: independently signed, expiring capability result.
-- `schemas/capability-task-probe.schema.json`: single-use mutation probe contract.
-- `schemas/trusted-capability-issuers.schema.json`: trusted public-key registry contract.
-- `trusted-capability-issuers.json`: purpose-scoped trusted issuer keys; initially empty and fail-closed.
+- `schemas/capability-self-result.schema.json`: deterministic unsigned U0-C4 local task-fit result.
+- `schemas/review-packet.schema.json`: revision-bound local review evidence contract.
 - `fixtures/**`: positive and negative replay controls.
 - `scripts/agent-operations/collect-github-state.mjs`: bounded, sanitizing GitHub snapshot collector.
 - `scripts/agent-operations/reposteward-portfolio.mjs`: validates a raw RepoSteward portfolio snapshot and writes the stable trial envelope and Actions summary.
 - `scripts/agent-operations/check-agent-operations.mjs`: policy, registry, schema, fixture, and optional live-report checker.
-- `scripts/agent-operations/capability-security.mjs`: snapshot, scoring, signature, trust, and probe verification primitives.
+- `scripts/agent-operations/assessment-runtime.mjs`: snapshot, challenge, response, self-result integrity, and local scoring primitives.
 - `scripts/agent-operations/skill-registry.mjs`: strict lazy registry and handoff validator.
 - `scripts/agent-operations/resolve-skill.mjs`: deterministic one-leaf resolver.
 - `scripts/agent-operations/validate-capability-response.mjs`: challenge-bound response validator.
-- `scripts/agent-operations/derive-self-assessment.mjs`: unsigned U0/C1 result derivation.
-- `scripts/agent-operations/verify-capability-attestation.mjs`: trusted capability-attestation verifier.
-- `scripts/agent-operations/verify-task-probe.mjs`: live-binding verifier and fixed-ledger probe consumer.
+- `scripts/agent-operations/derive-self-assessment.mjs`: unsigned U0-C4 task-fit result derivation.
+- `scripts/agent-operations/review-runtime.mjs`: review binding, stale-head, ceiling, and submission checks.
 - `.github/workflows/reposteward-portfolio-shadow.yml`: manual, read-only RepoSteward portfolio trial pinned to the registered external commit.
 
 Run:
@@ -96,7 +92,7 @@ Run:
 ```sh
 corepack pnpm@10.32.1 check:agent-operations
 corepack pnpm@10.32.1 agent:assess
-corepack pnpm@10.32.1 agent:skill -- pui-orient
+corepack pnpm@10.32.1 agent:skill -- pui-orient --mode human-assisted --mode-source current-user
 ```
 
 ## Graduation rule

@@ -264,19 +264,9 @@ An Agent may prepare or audit these phases within its capability. It may not pub
 
 ## Contributor permissions
 
-GitHub permission, Discord trust, Agent comprehension, task risk, and human authorization are separate.
+GitHub permission, Discord trust, Agent comprehension, task risk, and human authorization answer different questions. A score cannot grant GitHub permission or predict acceptance. Discord or Poppy trust matters only when work touches those community or Bot surfaces.
 
-```text
-effective capability =
-live GitHub permission
-∩ live Discord or Poppy trust when the action touches those surfaces
-∩ verified comprehension
-∩ task risk ceiling
-∩ fresh task probe
-∩ current human authorization
-```
-
-A score cannot grant GitHub permission. Read-only work may inspect and report. Triage supports reversible metadata within policy. Write supports feature branches and the contributor's own PR, not direct pushes to `main`. Maintain still obeys review and release gates. Admin, access, secrets, application installation, rulesets, and branch protection remain attended human work.
+Read-only work may inspect and report. Triage supports reversible metadata within policy. Write supports feature branches and the contributor's own PR, not direct pushes to `main`. Maintain still obeys review and release gates. Admin, access, secrets, application installation, rulesets, and branch protection remain attended human work.
 
 The Discord Bot's Community, Contributor, and Trusted levels are an entry and trust axis. They are not GitHub contributor roles.
 
@@ -284,11 +274,13 @@ The Discord Bot's Community, Contributor, and Trusted levels are an entry and tr
 
 Agents start with `AGENTS.md` and `$pui-dev`. The entry skill reads the machine registry and loads one atomic skill at a time. Leaf skills are lazy and remain out of context until the current state transition requires them.
 
-The resolver is deterministic: `pnpm agent:skill -- <leaf-id>` returns one registered path, and `pnpm agent:skill -- --handoff <handoff.json>` validates the completed leaf before resolving at most one next step.
+The resolver is deterministic: `pnpm agent:skill -- <leaf-id> --mode <execution-mode> --mode-source <trusted-source>` returns one eligible registered path or a blocked result, and `pnpm agent:skill -- --handoff <handoff.json>` validates the completed leaf before resolving at most one next step.
 
-If the Agent has no current result, `pui-assess` generates a dynamic repository challenge. The Agent completes the response, validates it, fills the public dimension rubric, and derives an unsigned U0/C1 self-result. Strong dimensions do not compensate for weak ones, and a critical failure limits the result. Self-assessment never authorizes a mutation.
+`pui-orient` records `human-assisted` when a current user is directing the work. Local assessment then helps the Agent narrow claims, add tests, request review, and state limitations; a low score does not block the work the user requested. `autonomous` is reserved for a maintainer-controlled invocation, schedule, or governed queue. In that mode a fresh unsigned U0-C4 self-result is a binding ceiling on task and review class.
 
-Higher bands require an independent, versioned, expiring attestation bound to the clean assessed baseline, exact challenge and response, and a verifiable Agent subject. Every mutation also needs a probe bound to the exact leaf, task class, allowed scope, current worktree and diff, live permission, ownership, linked work, and human authorization. If the trusted issuer, subject proof, required global consumer, or any binding is unavailable, the Agent remains read-only.
+Assessment never grants permission. Ordinary local edits, tests, signed-off commits, authorized branch pushes, own-PR updates, and review responses do not depend on an online issuer. External writes still require explicit or standing authorization and a live credential. Semantic admission, compatibility choices, PR approval, merge, publication, release, access, and repository rules stay with people.
+
+For review, bind evidence to the repository, PR, base SHA, and head SHA. A new push makes the old packet stale. CI success is useful evidence, but it is not an approval. An Agent must not approve its own work.
 
 The full Agent policy is in `internal/agent-operations/contributor-agents.md`. The human-readable skill catalog is on the documentation site. Autonomous-maintenance experiments use `$pui-maintain` and its separate independence protocol; supported no-finding and rejected outcomes close through `pui-record`, not a fake remediation review.
 

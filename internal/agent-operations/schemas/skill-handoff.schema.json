@@ -8,6 +8,8 @@
     "schemaVersion",
     "kind",
     "entrypoint",
+    "executionMode",
+    "executionModeSource",
     "fromId",
     "nextSkillId",
     "artifacts",
@@ -18,6 +20,16 @@
     "schemaVersion": { "const": 1 },
     "kind": { "const": "proto-ui.skill-handoff" },
     "entrypoint": { "enum": ["development", "maintenance"] },
+    "executionMode": { "enum": ["human-assisted", "autonomous"] },
+    "executionModeSource": {
+      "enum": [
+        "current-user",
+        "active-human-loop",
+        "maintainer-invocation",
+        "schedule",
+        "governed-queue"
+      ]
+    },
     "fromId": { "type": "string", "pattern": "^pui-[a-z0-9-]+$" },
     "nextSkillId": {
       "oneOf": [{ "type": "string", "pattern": "^pui-[a-z0-9-]+$" }, { "type": "null" }]

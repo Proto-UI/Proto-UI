@@ -15,9 +15,10 @@ taskFamilies:
     trigger: scheduled-or-manual
     entrypoint: pui-dev
     skill: pui-issue
-    requiredBand: C1
+    autonomousMinimumBand: C1
     taskClass: observe
-    executionMode: automatic-read-only
+    executionMode: autonomous
+    operationMode: automatic-read-only
     input: bounded-open-issue-snapshot
     output: validated-routing-proposals
     mutation: none
@@ -31,9 +32,10 @@ taskFamilies:
     trigger: scheduled-or-manual
     entrypoint: pui-dev
     skill: pui-pr
-    requiredBand: C1
+    autonomousMinimumBand: C1
     taskClass: observe
-    executionMode: automatic-read-only
+    executionMode: autonomous
+    operationMode: automatic-read-only
     input: bounded-open-pull-request-snapshot
     output: validated-routing-proposals
     mutation: none
@@ -47,9 +49,10 @@ taskFamilies:
     trigger: manual
     entrypoint: pui-dev
     skill: pui-pr
-    requiredBand: C1
+    autonomousMinimumBand: C1
     taskClass: observe
-    executionMode: attended-read-only
+    executionMode: autonomous
+    operationMode: attended-read-only
     input: bounded-pull-request-portfolio
     output: validated-external-engine-envelope
     mutation: none
@@ -62,9 +65,10 @@ taskFamilies:
     trigger: manual
     entrypoint: pui-dev
     skill: pui-ci
-    requiredBand: C1
+    autonomousMinimumBand: C1
     taskClass: trace
-    executionMode: attended-read-only
+    executionMode: autonomous
+    operationMode: attended-read-only
     input: bounded-workflow-run-and-revision
     output: failure-owner-and-evidence-report
     mutation: none
@@ -77,9 +81,10 @@ taskFamilies:
     trigger: manual-or-proposed-schedule
     entrypoint: pui-dev
     skill: pui-govern
-    requiredBand: C1
+    autonomousMinimumBand: C1
     taskClass: trace
-    executionMode: read-only
+    executionMode: autonomous
+    operationMode: read-only
     input: bounded-repository-collaboration-snapshot
     output: taxonomy-and-state-drift-report
     mutation: none
@@ -92,9 +97,10 @@ taskFamilies:
     trigger: manual
     entrypoint: pui-dev
     skill: pui-deploy
-    requiredBand: C1
+    autonomousMinimumBand: C1
     taskClass: verify
-    executionMode: attended-read-only
+    executionMode: autonomous
+    operationMode: attended-read-only
     input: bounded-revision-and-delivery-surface
     output: deployment-evidence-report
     mutation: none
@@ -107,9 +113,10 @@ taskFamilies:
     trigger: manual-or-proposed-schedule
     entrypoint: pui-dev
     skill: pui-deps
-    requiredBand: C1
+    autonomousMinimumBand: C1
     taskClass: trace
-    executionMode: read-only
+    executionMode: autonomous
+    operationMode: read-only
     input: bounded-manifest-lockfile-and-advisory-snapshot
     output: dependency-impact-report
     mutation: none
@@ -122,9 +129,10 @@ taskFamilies:
     trigger: explicit-maintainer-task
     entrypoint: pui-maintain
     skill: pui-observe
-    requiredBand: mission-defined
+    autonomousMinimumBand: mission-defined
     taskClass: observe
-    executionMode: attended-read-only-fresh-context
+    executionMode: autonomous
+    operationMode: attended-read-only-fresh-context
     input: frozen-bounded-mission
     output: finding-or-no-finding-report
     mutation: none
@@ -138,25 +146,27 @@ taskFamilies:
     trigger: explicit-maintainer-task
     entrypoint: pui-maintain
     skill: pui-mission
-    requiredBand: C2
+    autonomousMinimumBand: C2
     taskClass: update-tracked-maintenance-state
-    executionMode: attended-mutation
+    executionMode: autonomous
+    operationMode: attended-mutation
     input: one-maintainer-selected-candidate
     output: frozen-mission-and-global-lease
     mutation: tracked-maintenance-state
     stopConditions:
       - candidate-not-ready-or-already-leased
-      - capability-or-runtime-subject-proof-unavailable
+      - fresh-local-ceiling-below-task-class
       - global-lease-service-unavailable
-      - authorization-or-probe-mismatch
+      - authorization-scope-or-target-version-mismatch
   - id: maintenance-verifier
     status: manual-protocol
     trigger: explicit-maintainer-task
     entrypoint: pui-maintain
     skill: pui-verify
-    requiredBand: mission-defined
+    autonomousMinimumBand: mission-defined
     taskClass: verify
-    executionMode: attended-read-only-fresh-context
+    executionMode: autonomous
+    operationMode: attended-read-only-fresh-context
     input: one-candidate-finding-and-raw-evidence
     output: independent-classification
     mutation: none

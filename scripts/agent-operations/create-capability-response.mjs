@@ -1,4 +1,4 @@
-import { createCapabilityResponseTemplate } from './capability-security.mjs';
+import { createCapabilityResponseTemplate } from './assessment-runtime.mjs';
 import { parseNamedArgs, readJsonInput } from './assessment-io.mjs';
 
 const args = parseNamedArgs(process.argv.slice(2), new Set(['--challenge']));

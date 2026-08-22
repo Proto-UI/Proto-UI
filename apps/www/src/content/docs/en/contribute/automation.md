@@ -13,7 +13,7 @@ The pull-request portfolio trial is manual and read-only. It preserves incomplet
 
 ## What remains manual
 
-Autonomous maintenance has a real mission queue and a state protocol, but no scheduler or controller. `pui-mission` defines the candidate-to-frozen transition, but it remains blocked without trusted subject proof and a global lease service. A maintainer currently freezes one mission outside an autonomous controller, starts the Observer, starts a fresh Verifier when needed, records human decisions, and starts later stages.
+Autonomous maintenance has a real mission queue and a state protocol, but no scheduler or controller. A maintainer currently freezes one mission outside an autonomous controller, starts the Observer, starts a fresh Verifier when needed, records human decisions, and starts later stages. Each autonomous transition must stay inside the fresh local task and review ceiling and the recorded mission lease.
 
 A no-finding result is valid. `pui-record` closes supported no-finding, rejected-finding, and blocked terminal outcomes. Accepted remediation still requires independent review before `pui-maintenance-close`.
 
@@ -23,8 +23,8 @@ The machine catalog also defines bounded read-only candidates for CI failure dia
 
 ## Why writes remain attended
 
-A local single-use ledger cannot prevent the same probe from being consumed in another clone or runner. Automatic external mutation therefore needs a globally atomic consumer or a service-side idempotency key. Subject identity and the trusted issuer must also be verifiable at execution time.
+A local ledger cannot prevent the same external action from running in another clone. Automatic external mutation therefore needs a globally atomic consumer or a service-side idempotency key, plus a way to bind the running process to the authorization it presents.
 
-Until those controls exist, recurring tasks stay read-only. Semantic decisions, approval, merge, publication, release, access, secrets, and repository rules always stop for a human.
+Until those controls exist, recurring external writes stay read-only. Ordinary local autonomous work may still proceed within its measured ceiling and recorded scope. Semantic decisions, approval, merge, publication, release, access, secrets, and repository rules always stop for a human.
 
 The exact catalog is `internal/agent-operations/autonomous-tasks.yaml`. The maintenance procedure remains under `internal/autonomous-maintenance/**`.

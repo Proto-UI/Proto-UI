@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadCapabilityRubric } from './capability-security.mjs';
+import { loadCapabilityRubric } from './assessment-runtime.mjs';
 import { parseNamedArgs } from './assessment-io.mjs';
 
 const defaultRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));

@@ -306,7 +306,7 @@ decision packet when closure checks pass.
 - validation floor 的实际结果；
 - Observer 没有创建 tracked mutation。
 
-Observer 停止后，由控制者在新的状态转换中使用 `$pui-record`。它只在完整授权和 task probe 覆盖下同步 mission、queue 与 run ledger。这个转换不要求 remediation review，因为没有发生修复；它也不能拿来绕过已接受 finding 的独立复核。Verifier 判定 finding 不成立并取得人工 disposition 后，使用同一个终态转换记录 rejected outcome。
+Observer 停止后，由控制者在新的状态转换中使用 `$pui-record`。它只在最新本地自主上限、完整授权、当前 lease、目标版本与准确变更范围一致时同步 mission、queue 与 run ledger。这个转换不要求 remediation review，因为没有发生修复；它也不能拿来绕过已接受 finding 的独立复核。Verifier 判定 finding 不成立并取得人工 disposition 后，使用同一个终态转换记录 rejected outcome。
 
 不要为了提高 finding 数量，把以下内容包装成问题：
 

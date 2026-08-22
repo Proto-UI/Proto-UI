@@ -14,6 +14,7 @@
     "evaluation",
     "capability",
     "trust",
+    "validity",
     "derivedAt"
   ],
   "properties": {
@@ -71,15 +72,45 @@
     "evaluation": { "$ref": "#/$defs/evaluation" },
     "capability": {
       "type": "object",
-      "required": ["band", "eligibleTaskClasses", "mutationCeiling"],
+      "required": [
+        "band",
+        "eligibleTaskClasses",
+        "recommendedTaskClasses",
+        "recommendedReviewClasses",
+        "autonomousTaskCeiling",
+        "autonomousReviewCeiling",
+        "autonomousMutationCeiling"
+      ],
       "properties": {
-        "band": { "enum": ["U0", "C1"] },
+        "band": { "enum": ["U0", "C1", "C2", "C3", "C4"] },
         "eligibleTaskClasses": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true
         },
-        "mutationCeiling": { "const": "none" }
+        "recommendedTaskClasses": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "recommendedReviewClasses": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "autonomousTaskCeiling": { "enum": ["U0", "C1", "C2", "C3", "C4"] },
+        "autonomousReviewCeiling": {
+          "enum": [
+            "observe",
+            "partial",
+            "bounded-technical",
+            "independent-acceptance",
+            "cross-domain"
+          ]
+        },
+        "autonomousMutationCeiling": {
+          "enum": ["none", "feature-branch-or-reversible-github-metadata", "feature-branch"]
+        }
       },
       "additionalProperties": false
     },
@@ -88,14 +119,27 @@
       "required": [
         "status",
         "independentlyEvaluated",
-        "authorizesMutation",
-        "substitutesForTrustedAttestation"
+        "projectTrusted",
+        "cryptographicallyTrusted",
+        "grantsPermission",
+        "predictsAcceptance"
       ],
       "properties": {
         "status": { "const": "unsigned-self-assessment" },
         "independentlyEvaluated": { "const": false },
-        "authorizesMutation": { "const": false },
-        "substitutesForTrustedAttestation": { "const": false }
+        "projectTrusted": { "const": false },
+        "cryptographicallyTrusted": { "const": false },
+        "grantsPermission": { "const": false },
+        "predictsAcceptance": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "validity": {
+      "type": "object",
+      "required": ["derivedAt", "expiresAt"],
+      "properties": {
+        "derivedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
       },
       "additionalProperties": false
     },

@@ -1,6 +1,6 @@
 ---
 name: pui-assess
-description: Run Proto UI's dynamic comprehension assessment and derive an unsigned, read-only self-result. Use when an Agent has no current capability result, the bound repository snapshot changed, or task selection needs a fresh comprehension ceiling. Do not use a self-result as trusted attestation or mutation authority.
+description: Run Proto UI's dynamic comprehension assessment and derive an unsigned local task-fit result. Use when an Agent needs review calibration or a fresh autonomous task and review ceiling. Do not use a self-result as identity, permission, or acceptance evidence.
 ---
 
 # Assess Proto UI comprehension
@@ -15,9 +15,9 @@ Produce one snapshot-bound orientation result without publishing an answer key o
 
 The response is dynamic because the challenge binds a repository snapshot, nonce, subject, sampled entities, policy, and generator. Never search for or invent a static answer file.
 
-A self-result can derive only U0 or C1 and has no mutation ceiling. It does not satisfy a trusted-attestation check, cannot substitute for live permission or human authorization, and cannot justify a claim or repository write. If independent assessment is required, return the validated challenge and response for a separately authorized evaluator; do not emulate an issuer or claim that one exists.
+A self-result can derive U0 through C4 without cross-dimension compensation. It is unsigned and project-untrusted. In `human-assisted` mode it is advisory only; in `autonomous` mode its task, review, and mutation recommendations are binding self-governance ceilings. It never establishes identity, grants live permission, decides a human gate, or predicts acceptance.
 
-Return the challenge ID, response digest, self-result band, critical failures, snapshot binding, explicit limitations, and the next eligible read-only transition.
+Return the challenge ID, response digest, self-assessed band, recommended task and review classes, autonomous ceilings, critical failures, snapshot binding, explicit limitations, and one next transition permitted by the current mode.
 
 Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-assess`, the registered capability-envelope artifact, and at most one `nextSkillId`.
 

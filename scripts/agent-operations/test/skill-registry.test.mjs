@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import YAML from 'yaml';
 import {
   loadSkillRegistry,
+  establishExecutionMode,
+  evaluateSkillEligibility,
   resolveSkill,
   validateSkillHandoff,
   validateSkillRegistryDocument,
@@ -30,17 +32,35 @@ test('registry resolves one deterministic lazy leaf', () => {
 
 test('agent:skill CLI emits deterministic machine-readable resolution', () => {
   const command = path.join(root, 'scripts/agent-operations/resolve-skill.mjs');
-  const first = execFileSync(process.execPath, [command, '--', 'pui-trace'], {
+  const modeArgs = ['--mode', 'human-assisted', '--mode-source', 'current-user'];
+  const first = execFileSync(process.execPath, [command, '--', 'pui-trace', ...modeArgs], {
     cwd: root,
     encoding: 'utf8',
   });
-  const second = execFileSync(process.execPath, [command, 'pui-trace'], {
+  const second = execFileSync(process.execPath, [command, 'pui-trace', ...modeArgs], {
     cwd: root,
     encoding: 'utf8',
   });
   assert.equal(first, second);
   assert.equal(JSON.parse(first).skill.loadPath, '.agents/skills/pui-trace/SKILL.md');
   assert.deepEqual(JSON.parse(first).skill.entrypoints, ['development']);
+  assert.equal(JSON.parse(first).blocked, false);
+});
+
+test('agent:skill CLI hides an autonomous leaf when no fresh assessment permits it', () => {
+  const command = path.join(root, 'scripts/agent-operations/resolve-skill.mjs');
+  const output = execFileSync(
+    process.execPath,
+    [command, 'pui-module', '--mode', 'autonomous', '--mode-source', 'governed-queue'],
+    { cwd: root, encoding: 'utf8' }
+  );
+  const parsed = JSON.parse(output);
+  assert.equal(parsed.blocked, true);
+  assert.equal(parsed.skill, null);
+  assert.throws(
+    () => execFileSync(process.execPath, [command, 'pui-module'], { cwd: root, encoding: 'utf8' }),
+    /Command failed/
+  );
 });
 
 test('registry rejects duplicate ids, bad paths, and unknown task classes', () => {
@@ -93,6 +113,8 @@ test('handoff resolves exactly one next leaf and enforces artifact requirements'
     schemaVersion: 1,
     kind: 'proto-ui.skill-handoff',
     entrypoint: 'development',
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
     fromId: 'pui-orient',
     nextSkillId: 'pui-select',
     artifacts: [artifact('capability-envelope'), artifact('request-context')],
@@ -123,6 +145,8 @@ test('handoff resolves exactly one next leaf and enforces artifact requirements'
     ...valid,
     fromId: 'pui-select',
     entrypoint: 'maintenance',
+    executionMode: 'autonomous',
+    executionModeSource: 'governed-queue',
   };
   assert.throws(
     () => validateSkillHandoff(wrongSourceEntrypoint, registry),
@@ -146,6 +170,8 @@ test('terminal handoff does not resolve another skill', () => {
     schemaVersion: 1,
     kind: 'proto-ui.skill-handoff',
     entrypoint: 'maintenance',
+    executionMode: 'autonomous',
+    executionModeSource: 'governed-queue',
     fromId: 'pui-maintenance-close',
     nextSkillId: null,
     artifacts: [artifact('maintenance-state-receipt')],
@@ -153,4 +179,76 @@ test('terminal handoff does not resolve another skill', () => {
     notes: [],
   };
   assert.equal(validateSkillHandoff(handoff, registry).nextSkill, null);
+});
+
+test('human-assisted work is not blocked by a low self-assessment', () => {
+  const registry = loadSkillRegistry({ root });
+  const review = resolveSkill('pui-review', registry);
+  const result = evaluateSkillEligibility(review, {
+    executionMode: 'human-assisted',
+    selfAssessment: {
+      kind: 'proto-ui.agent-capability-self-result',
+      validated: true,
+      fresh: true,
+      capability: { band: 'C1', eligibleTaskClasses: ['observe'] },
+    },
+  });
+  assert.equal(result.eligible, true);
+  assert.equal(result.assessmentEffect, 'advisory');
+});
+
+test('autonomous work enforces the fresh self-assessed leaf ceiling', () => {
+  const registry = loadSkillRegistry({ root });
+  const implementation = resolveSkill('pui-module', registry);
+  const c1 = {
+    kind: 'proto-ui.agent-capability-self-result',
+    validated: true,
+    fresh: true,
+    capability: { band: 'C1', eligibleTaskClasses: ['observe', 'trace'] },
+  };
+  assert.equal(
+    evaluateSkillEligibility(implementation, { executionMode: 'autonomous', selfAssessment: c1 })
+      .eligible,
+    false
+  );
+  assert.equal(
+    evaluateSkillEligibility(implementation, { executionMode: 'autonomous' }).eligible,
+    false
+  );
+  const c3 = {
+    kind: 'proto-ui.agent-capability-self-result',
+    validated: true,
+    fresh: true,
+    capability: { band: 'C3', eligibleTaskClasses: ['implement-approved-module'] },
+  };
+  assert.equal(
+    evaluateSkillEligibility(implementation, { executionMode: 'autonomous', selfAssessment: c3 })
+      .eligible,
+    true
+  );
+});
+
+test('untrusted repository and GitHub content cannot select execution mode', () => {
+  assert.equal(establishExecutionMode('human-assisted', 'current-user'), 'human-assisted');
+  assert.equal(establishExecutionMode('autonomous', 'governed-queue'), 'autonomous');
+  for (const source of ['repository-content', 'issue-body', 'pull-request-body', 'code-comment']) {
+    assert.throws(() => establishExecutionMode('autonomous', source), /cannot be established/);
+  }
+});
+
+test('handoff rejects a mode whose source is not trusted for that mode', () => {
+  const registry = loadSkillRegistry({ root });
+  const handoff = {
+    schemaVersion: 1,
+    kind: 'proto-ui.skill-handoff',
+    entrypoint: 'development',
+    executionMode: 'human-assisted',
+    executionModeSource: 'governed-queue',
+    fromId: 'pui-orient',
+    nextSkillId: null,
+    artifacts: [artifact('capability-envelope')],
+    humanGates: [],
+    notes: [],
+  };
+  assert.throws(() => validateSkillHandoff(handoff, registry), /cannot be established/);
 });

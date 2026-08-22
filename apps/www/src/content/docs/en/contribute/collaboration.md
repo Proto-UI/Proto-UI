@@ -33,19 +33,9 @@ A claim must agree with current comments, assignment, linked work, and Project s
 
 ## Separate the authority axes
 
-GitHub permission controls platform operations. Discord and Poppy trust control community and Bot entrypoints. An Agent assessment limits the tasks a model may attempt. Task risk and current human approval constrain the action again.
+GitHub permission controls platform operations. Discord and Poppy trust matter when work touches community or Bot surfaces. A local Agent assessment measures task fit: it is advice in `human-assisted` work and a ceiling in `autonomous` work. Task risk and current authorization remain separate.
 
-```text
-effective capability =
-live GitHub permission
-∩ live Discord or Poppy trust when the action touches those surfaces
-∩ verified comprehension
-∩ task risk ceiling
-∩ fresh task probe
-∩ current human authorization
-```
-
-No score or Discord role grants GitHub permission. Approval, merge, release, repository rules, access, and secrets remain attended human decisions.
+No score or Discord role grants GitHub permission. No local result proves model identity or predicts acceptance. Approval, merge, release, repository rules, access, and secrets remain attended human decisions.
 
 The main repository and the Discord Bot do not yet have the same CI and branch controls. Contributors should describe the controls that actually exist in each repository instead of borrowing guarantees from the other one.
 

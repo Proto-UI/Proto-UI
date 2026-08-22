@@ -101,20 +101,9 @@ Audit a milestone before closing it and after reopening linked work. A closed mi
 
 Do not flatten separate authority axes into one contributor level.
 
-GitHub Read, Triage, Write, Maintain, and Admin determine what the current credential can do on GitHub. Discord Community, Contributor, and Trusted determine which community and Poppy paths are available. Agent comprehension limits which task classes the Agent may attempt. Task risk and current human authorization limit the action further.
+GitHub Read, Triage, Write, Maintain, and Admin determine what the current credential can do on GitHub. Discord Community, Contributor, and Trusted determine which community and Poppy paths are available. Local Agent comprehension is advisory while a person directs the work and a binding task and review ceiling when the Agent works alone. Task risk and current authorization remain separate.
 
-The effective capability is:
-
-```text
-live GitHub permission
-∩ live Discord or Poppy trust when the action touches those surfaces
-∩ verified Agent comprehension
-∩ task risk ceiling
-∩ fresh task-specific probe
-∩ current human authorization
-```
-
-The result can only become smaller. An assessment cannot grant repository permission.
+An assessment cannot grant repository permission, prove runtime identity, or predict acceptance. External writes require current authorization, live permission, an exact target and scope, and idempotency appropriate to the platform.
 
 Read-only contributors may inspect and report. Triage permission may support reversible metadata work. Write permission supports feature branches and the contributor's own pull request, never a direct push to protected main. Maintain permission may perform repository operations only within current policy and review gates. Admin operations, access, secrets, applications, rulesets, and branch protection remain attended human work.
 
