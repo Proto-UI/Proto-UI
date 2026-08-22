@@ -132,6 +132,10 @@ Module、Host Capability 与 Adapter 的系统编目会根据真实消费证据�
 
 欢迎参与协议、测试、Adapter、Prototype library、文档和消费证据建设。
 
+## 社区
+
+Proto UI 认可并支持 [LINUX DO](https://linux.do/) 社区。
+
 ## License
 
 MIT

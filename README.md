@@ -132,6 +132,10 @@ Roadmap direction is recorded under [`internal/records/**`](internal/records/); 
 
 Contributions to protocols, tests, Adapters, Prototype libraries, documentation, and consumer evidence are welcome.
 
+## Community
+
+Proto UI recognizes and supports the [LINUX DO](https://linux.do/) community.
+
 ## License
 
 MIT
