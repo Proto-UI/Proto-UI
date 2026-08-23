@@ -9,6 +9,7 @@ import { parse as parseYaml } from 'yaml';
 import {
   authorizeReviewSubmission,
   computeReviewInputDigest,
+  computeReviewPacketDigest,
   decideReviewRun,
   evaluateReviewEligibility,
   inspectReviewRevision,
@@ -16,6 +17,8 @@ import {
   validateReviewInputSnapshot,
   validateReviewPacket,
   validateReviewPacketEligibility,
+  verifyLiveReviewInput,
+  verifyReconciliation,
 } from '../review-runtime.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
@@ -74,6 +77,7 @@ function packet(overrides = {}, input = reviewInput()) {
     },
     reconciliation: {
       priorReviewedHeadSha: null,
+      priorPacketDigest: null,
       resolvedFindingIds: [],
       openFindingIds: [],
       newFindingIds: [],
@@ -187,11 +191,17 @@ test('review packet requires real scope, evidence accounting, and finding reconc
     fix: 'Restore the governed boundary',
   };
   const input = reviewInput();
+  const priorPacket = {
+    ...packet({}, reviewInput()),
+    headSha: sha('9'),
+    findings: [{ ...finding, id: 'F-0' }],
+  };
   const valid = packet(
     {
       findings: [finding],
       reconciliation: {
         priorReviewedHeadSha: sha('9'),
+        priorPacketDigest: computeReviewPacketDigest(priorPacket),
         resolvedFindingIds: ['F-0'],
         openFindingIds: [],
         newFindingIds: ['F-1'],
@@ -200,7 +210,106 @@ test('review packet requires real scope, evidence accounting, and finding reconc
     input
   );
   assert.equal(validateReviewPacket(valid, input), valid);
+  assert.equal(verifyReconciliation(valid, priorPacket), true);
   assert.equal(validateReviewInputSnapshot(input), input);
+
+  const boundTo = (prior) =>
+    packet(
+      {
+        reconciliation: {
+          ...valid.reconciliation,
+          priorPacketDigest: computeReviewPacketDigest(prior),
+        },
+      },
+      input
+    );
+  const digestMismatch = { ...priorPacket, recommendedAction: 'COMMENT' };
+  assert.throws(
+    () => verifyReconciliation(valid, digestMismatch),
+    /does not match the recorded priorPacketDigest/
+  );
+  const differentRepository = {
+    ...priorPacket,
+    repositoryId: 'github.com:Proto-UI/Other',
+  };
+  assert.throws(
+    () => verifyReconciliation(boundTo(differentRepository), differentRepository),
+    /different repository/
+  );
+  const differentPullRequest = { ...priorPacket, pullRequest: 999 };
+  assert.throws(
+    () => verifyReconciliation(boundTo(differentPullRequest), differentPullRequest),
+    /different pull request/
+  );
+  const differentHead = { ...priorPacket, headSha: sha('8') };
+  assert.throws(
+    () => verifyReconciliation(boundTo(differentHead), differentHead),
+    /does not match priorReviewedHeadSha/
+  );
+
+  // Finding state transitions must be real against the prior packet's findings.
+  const resolvedAbsentFromPrior = packet(
+    {
+      reconciliation: {
+        ...valid.reconciliation,
+        priorPacketDigest: computeReviewPacketDigest(priorPacket),
+        resolvedFindingIds: ['F-9'],
+      },
+    },
+    input
+  );
+  assert.throws(
+    () => verifyReconciliation(resolvedAbsentFromPrior, priorPacket),
+    /resolved reconciliation references a finding absent from the prior packet/
+  );
+  const openAbsentFromPrior = packet(
+    {
+      reconciliation: {
+        ...valid.reconciliation,
+        priorPacketDigest: computeReviewPacketDigest(priorPacket),
+        newFindingIds: [],
+        openFindingIds: ['F-1'],
+      },
+    },
+    input
+  );
+  assert.throws(
+    () => verifyReconciliation(openAbsentFromPrior, priorPacket),
+    /open reconciliation references a finding absent from the prior packet/
+  );
+  const newAlreadyInPrior = packet(
+    {
+      findings: [{ ...finding, id: 'F-0' }],
+      reconciliation: {
+        ...valid.reconciliation,
+        resolvedFindingIds: [],
+        openFindingIds: [],
+        newFindingIds: ['F-0'],
+      },
+    },
+    input
+  );
+  assert.throws(
+    () => verifyReconciliation(newAlreadyInPrior, priorPacket),
+    /new reconciliation reuses a finding id/
+  );
+  const unboundIncremental = packet(
+    {
+      findings: [finding],
+      reconciliation: {
+        priorReviewedHeadSha: sha('9'),
+        priorPacketDigest: null,
+        resolvedFindingIds: ['F-0'],
+        openFindingIds: [],
+        newFindingIds: ['F-1'],
+      },
+    },
+    input
+  );
+  assert.throws(
+    () => validateReviewPacket(unboundIncremental, input),
+    /must bind both the prior head and the prior packet digest/
+  );
   assert.throws(() => validateReviewPacket(packet({ scope: [] }, input), input), /scope/);
   assert.throws(
     () =>
@@ -321,8 +430,7 @@ test('review submission needs live authorization and never derives approval from
   const base = {
     packet: packet({ recommendedAction: 'APPROVE' }, input),
     input,
-    currentBaseSha: input.baseSha,
-    currentHeadSha: input.headSha,
+    liveInput: structuredClone(input),
     executionMode: 'human-assisted',
     credentialCanReview: true,
     reviewer: 'agent',
@@ -366,15 +474,145 @@ test('review submission needs live authorization and never derives approval from
       .allowed,
     false
   );
-  assert.equal(
-    authorizeReviewSubmission({
-      ...base,
-      packet: packet({ recommendedAction: 'COMMENT', limitations: [] }, input),
-      currentHeadSha: sha('d'),
-      explicitAuthorization: true,
-    }).allowed,
-    false
+});
+
+test('submission preflight re-collects live canonical input and rejects drift and forged identities', () => {
+  const input = reviewInput();
+  const base = {
+    packet: packet({ recommendedAction: 'COMMENT', limitations: [] }, input),
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'human-assisted',
+    explicitAuthorization: true,
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+  };
+
+  // A new reply on the same head changes the canonical input digest: submission must reject.
+  const driftedLiveInput = reviewInput({
+    replies: [
+      {
+        id: 'r1',
+        threadId: 't1',
+        updatedAt: '2026-08-23T01:00:00.000Z',
+        author: 'maintainer',
+        body: 'New question on the same head',
+      },
+    ],
+  });
+  assert.throws(
+    () => authorizeReviewSubmission({ ...base, liveInput: driftedLiveInput }),
+    /live canonical review input does not match/
   );
+  assert.equal(verifyLiveReviewInput(base.packet, base.liveInput), true);
+  assert.throws(
+    () => verifyLiveReviewInput(base.packet, driftedLiveInput),
+    /live canonical review input does not match/
+  );
+
+  // A CI rerun with a new check run also changes the digest.
+  const rerunChecks = reviewInput({
+    checks: [
+      {
+        name: 'test',
+        status: 'COMPLETED',
+        conclusion: 'SUCCESS',
+        completedAt: '2026-08-23T02:00:00.000Z',
+        detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/2',
+      },
+    ],
+  });
+  assert.throws(
+    () => authorizeReviewSubmission({ ...base, liveInput: rerunChecks }),
+    /live canonical review input does not match/
+  );
+
+  // Live input must bind to the same repository and pull request.
+  const differentPullRequest = reviewInput({ pullRequest: 999 });
+  assert.throws(
+    () => verifyLiveReviewInput(base.packet, differentPullRequest),
+    /different repository or pull request/
+  );
+
+  // Reviewer and author identities must come from the trusted live context.
+  assert.throws(() => authorizeReviewSubmission({ ...base, reviewer: '' }), /viewer identity/);
+  assert.throws(
+    () => authorizeReviewSubmission({ ...base, pullRequestAuthor: undefined }),
+    /pull-request author identity/
+  );
+
+  // Staleness is derived from the live revision, never from caller-supplied SHAs.
+  const pushedLiveInput = { ...structuredClone(input), headSha: sha('d') };
+  assert.throws(
+    () => authorizeReviewSubmission({ ...base, liveInput: pushedLiveInput }),
+    /live canonical review input does not match/
+  );
+});
+
+test('runtime validation matches the review-packet JSON Schema for types and timestamps', () => {
+  const input = reviewInput();
+  const finding = {
+    id: 'F-1',
+    severity: 'P1',
+    confidence: 'high',
+    file: 'scripts/example.mjs',
+    line: 10,
+    authority: 'AGENTS.md',
+    observed: 'Observed drift',
+    expected: 'Expected governed behavior',
+    impact: 'Review result is misleading',
+    fix: 'Restore the governed boundary',
+  };
+  for (const [field, value] of [
+    ['file', 123],
+    ['authority', { source: 'AGENTS.md' }],
+    ['observed', ['drift']],
+    ['expected', false],
+    ['impact', 0],
+    ['fix', null],
+    ['id', ''],
+  ]) {
+    const invalidFinding = packet({ findings: [{ ...finding, [field]: value }] }, input);
+    assert.throws(
+      () => validateReviewPacket(invalidFinding, input),
+      new RegExp(`finding\\.${field}`),
+      `expected finding.${field} to be rejected`
+    );
+  }
+
+  for (const observedAt of [0, 'August 23, 2026', '2026/08/23', '2026-08-23']) {
+    assert.throws(
+      () => validateReviewPacket(packet({ observedAt }, input), input),
+      /observedAt/,
+      `expected observedAt ${String(observedAt)} to be rejected`
+    );
+  }
+  assert.doesNotThrow(() =>
+    validateReviewPacket(packet({ observedAt: '2026-08-23T00:00:00+08:00' }, input), input)
+  );
+  assert.doesNotThrow(() =>
+    validateReviewPacket(packet({ observedAt: '2026-08-23T00:00:00.123456Z' }, input), input)
+  );
+
+  const looseReplyTimestamp = reviewInput({
+    replies: [
+      {
+        id: 'r1',
+        threadId: 't1',
+        updatedAt: '2026-08-23 00:00 UTC',
+        author: 'maintainer',
+        body: 'Loose timestamp',
+      },
+    ],
+  });
+  assert.throws(() => validateReviewInputSnapshot(looseReplyTimestamp), /reply updatedAt/);
+  const epochThreadUpdate = reviewInput({
+    threads: [{ id: 't1', isResolved: true, updatedAt: 1755907200000 }],
+  });
+  assert.throws(() => validateReviewInputSnapshot(epochThreadUpdate), /thread updatedAt/);
+  assert.throws(() => validateReviewPacket(packet({ observedAt: 0 }, input), input), /observedAt/);
 });
 
 test('agent:review CLI validates and inspects the same packet contract used by the skill', () => {
@@ -451,6 +689,7 @@ test('agent:review CLI validates and inspects the same packet contract used by t
     );
     assert.equal(inspection.run.duplicate, true);
     assert.equal(inspection.revision.stale, false);
+    assert.equal(inspection.reconciliationBound, null);
 
     const eligibility = JSON.parse(
       execFileSync(
@@ -492,6 +731,30 @@ test('agent:review CLI validates and inspects the same packet contract used by t
           { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
         ),
       /Command failed/
+    );
+    assert.throws(
+      () =>
+        execFileSync(
+          process.execPath,
+          [
+            command,
+            'authorize-submission',
+            '--packet',
+            packetPath,
+            '--input',
+            inputPath,
+            '--reviewer',
+            'forged-login',
+            '--pr-author',
+            'forged-author',
+            '--credential',
+            'can-review',
+            '--ci-conclusion',
+            'success',
+          ],
+          { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+        ),
+      /unexpected option/
     );
   } finally {
     rmSync(directory, { recursive: true, force: true });

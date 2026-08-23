@@ -85,8 +85,9 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `scripts/agent-operations/resolve-skill.mjs`: deterministic one-leaf resolver.
 - `scripts/agent-operations/validate-capability-response.mjs`: challenge-bound response validator.
 - `scripts/agent-operations/derive-self-assessment.mjs`: unsigned U0-C4 task-fit result derivation.
-- `scripts/agent-operations/review-runtime.mjs`: canonical review-input hashing, packet binding, stale-head, ceiling, and submission checks.
-- `scripts/agent-operations/review-packet.mjs`: CLI used by `pui-review` to hash input, validate, inspect, classify, and preflight a review packet against its handoff.
+- `scripts/agent-operations/review-runtime.mjs`: canonical review-input hashing, packet binding, prior-packet reconciliation binding, strict schema-matched validation, and submission checks.
+- `scripts/agent-operations/collect-live-review-input.mjs`: live GitHub collection of the canonical review input plus viewer identity, permission, and CI state at the submission boundary.
+- `scripts/agent-operations/review-packet.mjs`: CLI used by `pui-review` to hash input, validate, inspect, classify, and preflight a review packet against its handoff; submission preflight re-collects the canonical input live and derives identities from that context.
 - `.github/workflows/reposteward-portfolio-shadow.yml`: manual, read-only RepoSteward portfolio trial pinned to the registered external commit.
 
 Run:

@@ -131,13 +131,44 @@
     "reconciliation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["priorReviewedHeadSha", "resolvedFindingIds", "openFindingIds", "newFindingIds"],
+      "required": [
+        "priorReviewedHeadSha",
+        "priorPacketDigest",
+        "resolvedFindingIds",
+        "openFindingIds",
+        "newFindingIds"
+      ],
       "properties": {
         "priorReviewedHeadSha": { "anyOf": [{ "$ref": "#/$defs/sha" }, { "type": "null" }] },
+        "priorPacketDigest": {
+          "anyOf": [{ "type": "string", "pattern": "^[a-f0-9]{64}$" }, { "type": "null" }]
+        },
         "resolvedFindingIds": { "$ref": "#/$defs/strings" },
         "openFindingIds": { "$ref": "#/$defs/strings" },
         "newFindingIds": { "$ref": "#/$defs/strings" }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "priorPacketDigest": { "type": "null" } }
+          },
+          "then": {
+            "properties": { "priorReviewedHeadSha": { "type": "null" } }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "priorReviewedHeadSha": { "type": "string" }
+            }
+          },
+          "then": {
+            "properties": {
+              "priorPacketDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            }
+          }
+        }
+      ]
     }
   }
 }

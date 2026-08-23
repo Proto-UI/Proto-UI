@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import { execFileSync } from 'node:child_process';
 import process from 'node:process';
 import {
   collectRepositorySnapshot,
@@ -17,7 +16,9 @@ import {
   validateReviewInputSnapshot,
   validateReviewPacket,
   validateReviewPacketEligibility,
+  verifyReconciliation,
 } from './review-runtime.mjs';
+import { collectLiveReviewInput, summarizeLiveChecks } from './collect-live-review-input.mjs';
 import { loadSkillRegistry, skillRegistryRoot, validateSkillHandoff } from './skill-registry.mjs';
 
 function usage() {
@@ -25,28 +26,52 @@ function usage() {
     'Usage:',
     '  pnpm agent:review -- input-digest --input <review-input.json>',
     '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>]',
-    '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>]',
+    '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
-    '  pnpm agent:review -- authorize-submission --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] --authorization explicit-current-user --credential can-review --reviewer <login> --pr-author <login> [--ci-conclusion <value>]',
+    '  pnpm agent:review -- authorize-submission --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] --authorization explicit-current-user',
+    '',
+    'authorize-submission re-collects the canonical review input live from GitHub and derives the viewer identity, pull-request author, credential permission, and CI conclusion from that live context; caller-provided identities are never accepted.',
   ].join('\n');
 }
+
+const COMMANDS = ['input-digest', 'validate', 'inspect', 'eligibility', 'authorize-submission'];
+const ALLOWED_OPTIONS = new Map([
+  ['input-digest', new Set(['--input'])],
+  ['validate', new Set(['--packet', '--input', '--handoff', '--assessment'])],
+  [
+    'inspect',
+    new Set([
+      '--packet',
+      '--input',
+      '--handoff',
+      '--assessment',
+      '--current-base',
+      '--current-head',
+      '--prior-head',
+      '--seen-keys',
+      '--prior-packet',
+    ]),
+  ],
+  ['eligibility', new Set(['--handoff', '--review-class', '--assessment'])],
+  [
+    'authorize-submission',
+    new Set(['--packet', '--input', '--handoff', '--assessment', '--authorization']),
+  ],
+]);
 
 function parse(argv) {
   if (argv[0] === '--') argv = argv.slice(1);
   const command = argv.shift();
-  if (
-    !['input-digest', 'validate', 'inspect', 'eligibility', 'authorize-submission'].includes(
-      command
-    )
-  ) {
-    throw new Error(usage());
-  }
+  if (!COMMANDS.includes(command)) throw new Error(usage());
   if (argv.length % 2 !== 0) throw new Error(usage());
   const args = new Map();
+  const allowed = ALLOWED_OPTIONS.get(command);
   for (let index = 0; index < argv.length; index += 2) {
     const name = argv[index];
     const value = argv[index + 1];
-    if (!name.startsWith('--') || value === undefined || args.has(name)) throw new Error(usage());
+    if (!allowed.has(name))
+      throw new Error(`unexpected option for ${command}: ${name}\n${usage()}`);
+    if (value === undefined || args.has(name)) throw new Error(usage());
     args.set(name, value);
   }
   return { command, args };
@@ -96,30 +121,6 @@ function validateExecution(args, packet, policy) {
   return { handoff, eligibility };
 }
 
-function readLivePullRequestRevision(packet) {
-  const match = packet.repositoryId.match(/^github\.com:([^/]+)\/([^/]+)$/);
-  if (!match) throw new Error('review submission requires a github.com repositoryId');
-  const [, owner, repository] = match;
-  const raw = execFileSync(
-    'gh',
-    [
-      'pr',
-      'view',
-      String(packet.pullRequest),
-      '--repo',
-      `${owner}/${repository}`,
-      '--json',
-      'baseRefOid,headRefOid',
-    ],
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
-  );
-  const revision = JSON.parse(raw);
-  if (!revision.baseRefOid || !revision.headRefOid) {
-    throw new Error('live pull-request revision is incomplete');
-  }
-  return { currentBaseSha: revision.baseRefOid, currentHeadSha: revision.headRefOid };
-}
-
 try {
   const { command, args } = parse(process.argv.slice(2));
   let output;
@@ -154,6 +155,15 @@ try {
       .split(',')
       .map((key) => key.trim())
       .filter(Boolean);
+    let reconciliationBound = null;
+    if (packet.reconciliation.priorPacketDigest !== null) {
+      const priorPath = args.get('--prior-packet');
+      if (!priorPath)
+        throw new Error('--prior-packet is required when the packet reconciles a prior review');
+      const priorPacket = JSON.parse(fs.readFileSync(priorPath, 'utf8'));
+      verifyReconciliation(packet, priorPacket);
+      reconciliationBound = true;
+    }
     output = {
       key: reviewPacketKey(packet, input),
       revision: inspectReviewRevision(
@@ -166,6 +176,7 @@ try {
       run: decideReviewRun(packet, input, seenKeys),
       executionMode: execution.handoff.executionMode,
       eligibility: execution.eligibility,
+      reconciliationBound,
     };
   } else if (command === 'eligibility') {
     const handoff = loadReviewHandoff(args.get('--handoff'));
@@ -188,22 +199,32 @@ try {
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
     const execution = validateExecution(args, packet, policy);
-    const liveRevision =
-      execution.handoff.executionMode === 'human-assisted'
-        ? readLivePullRequestRevision(packet)
-        : { currentBaseSha: null, currentHeadSha: null };
-    output = authorizeReviewSubmission({
-      packet,
-      input,
-      ...liveRevision,
-      executionMode: execution.handoff.executionMode,
-      explicitAuthorization: args.get('--authorization') === 'explicit-current-user',
-      credentialCanReview: args.get('--credential') === 'can-review',
-      reviewer: args.get('--reviewer'),
-      pullRequestAuthor: args.get('--pr-author'),
-      recommendedAction: packet.recommendedAction,
-      ciConclusion: args.get('--ci-conclusion') ?? 'unknown',
-    });
+    if (execution.handoff.executionMode === 'human-assisted') {
+      const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest);
+      output = authorizeReviewSubmission({
+        packet,
+        input,
+        liveInput: live.input,
+        executionMode: execution.handoff.executionMode,
+        explicitAuthorization: args.get('--authorization') === 'explicit-current-user',
+        credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
+        reviewer: live.viewerLogin,
+        pullRequestAuthor: live.authorLogin,
+        ciConclusion: summarizeLiveChecks(live.input.checks),
+      });
+    } else {
+      output = authorizeReviewSubmission({
+        packet,
+        input,
+        liveInput: null,
+        executionMode: 'autonomous',
+        explicitAuthorization: args.get('--authorization') === 'explicit-current-user',
+        credentialCanReview: false,
+        reviewer: '',
+        pullRequestAuthor: '',
+        ciConclusion: 'unknown',
+      });
+    }
   }
   process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
 } catch (error) {

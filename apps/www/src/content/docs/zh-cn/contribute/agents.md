@@ -35,11 +35,11 @@ pnpm agent:assess:self-result -- --challenge <challenge.json> --response <respon
 
 推荐链路是 `pui-dev -> pui-orient -> pui-pr -> pui-trace -> 必要时 pui-validate -> 新上下文 pui-review`。
 
-Review packet 要写明仓库、PR、base/head SHA、review class、精确输入 digest、范围、相关实体、验证、发现、限制、未知项和人类闸门。这个 digest 必须从 body、commits、replies、threads、checks 和外部证据的规范化快照重新计算，不能信任调用方填写的十六进制字符串。验证要记录实际命令与结果，以及没有运行的检查和原因；旧 finding ID 要区分为已解决、仍开放或新发现。出现新提交后，旧 packet 就过期；同一 head 上回复、thread、checks 或证据变化也会生成新的输入 digest，完全没有变化的 packet 才是重复。Packet 校验与提交预检还会重新核对模式、review class 上限、最强允许建议和必填限制。CI 通过只是证据，不代表批准。测评不会派生批准，Agent 也不能批准自己的工作。
+Review packet 要写明仓库、PR、base/head SHA、review class、精确输入 digest、范围、相关实体、验证、发现、限制、未知项和人类闸门。这个 digest 必须从 body、commits、replies、threads、checks 和外部证据的规范化快照重新计算，不能信任调用方填写的十六进制字符串。验证要记录实际命令与结果，以及没有运行的检查和原因；增量复核必须通过 `priorPacketDigest` 绑定上一份 packet，并核对仓库、PR、prior head 和每个 finding 的真实状态转换；未绑定或对不上的 reconciliation 一律校验失败。出现新提交后，旧 packet 就过期；同一 head 上回复、thread、checks 或证据变化也会生成新的输入 digest，完全没有变化的 packet 才是重复。Packet 校验与提交预检还会重新核对模式、review class 上限、最强允许建议和必填限制。CI 通过只是证据，不代表批准。测评不会派生批准，Agent 也不能批准自己的工作。
 
 自治 review classes 从事实与 CI 开始，逐步覆盖文档与链接、测试、bounded regression、受治理实现切片、跨域语义，以及治理或发布证据。在 `human-assisted` 模式中，这些类别只调整复核深度和限制说明，不会挡住用户要求的 review。
 
-本地复核始终可以进行。低档位 Agent 在有人协作时可以给出部分复核或明确的 `ABSTAIN`，同时说明自己没覆盖什么。把结论提交到 GitHub 是另一个 human-assisted 动作，需要你的明确授权和真实可用的权限；自治运行必须先停止。最后的预检会再次读取实时 base/head，期间出现新 push 时必须拒绝旧 packet。
+本地复核始终可以进行。低档位 Agent 在有人协作时可以给出部分复核或明确的 `ABSTAIN`，同时说明自己没覆盖什么。把结论提交到 GitHub 是另一个 human-assisted 动作，需要你的明确授权和真实可用的权限；自治运行必须先停止。提交边界的最终预检会从 GitHub 实时重新采集完整的规范化输入（body、commits、replies、threads、checks）并比对 digest；同时从该实时上下文派生查看者身份、PR 作者与凭据权限，不信任调用方自报的字符串；期间出现新 push 或任何输入漂移时必须拒绝旧 packet。
 
 ## 谨慎选择任务
 

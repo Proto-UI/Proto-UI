@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 const SHA = /^[a-f0-9]{40,64}$/;
 const HEX64 = /^[a-f0-9]{64}$/;
+const RFC3339 = /^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$/;
 const BANDS = ['U0', 'C1', 'C2', 'C3', 'C4'];
 const RECOMMENDATIONS = ['APPROVE', 'REQUEST_CHANGES', 'COMMENT', 'ABSTAIN'];
 const REVIEW_CLASSES = [
@@ -64,7 +65,10 @@ function validateStrings(value, label, { min = 0 } = {}) {
 
 function validateTimestamp(value, label, { nullable = false } = {}) {
   if (nullable && value === null) return;
-  assert(typeof value === 'string' && Number.isFinite(Date.parse(value)), `${label} is invalid`);
+  assert(
+    typeof value === 'string' && RFC3339.test(value) && Number.isFinite(Date.parse(value)),
+    `${label} is invalid`
+  );
 }
 
 function validateInputItems(items, fields, label, validator) {
@@ -233,12 +237,26 @@ function validateValidation(validation) {
 function validateReconciliation(reconciliation, findingIds) {
   exactKeys(
     reconciliation,
-    ['priorReviewedHeadSha', 'resolvedFindingIds', 'openFindingIds', 'newFindingIds'],
+    [
+      'priorReviewedHeadSha',
+      'priorPacketDigest',
+      'resolvedFindingIds',
+      'openFindingIds',
+      'newFindingIds',
+    ],
     'review packet reconciliation'
   );
   assert(
     reconciliation.priorReviewedHeadSha === null || SHA.test(reconciliation.priorReviewedHeadSha),
     'priorReviewedHeadSha is invalid'
+  );
+  assert(
+    reconciliation.priorPacketDigest === null || HEX64.test(reconciliation.priorPacketDigest),
+    'priorPacketDigest is invalid'
+  );
+  assert(
+    (reconciliation.priorReviewedHeadSha === null) === (reconciliation.priorPacketDigest === null),
+    'incremental reconciliation must bind both the prior head and the prior packet digest'
   );
   for (const field of ['resolvedFindingIds', 'openFindingIds', 'newFindingIds']) {
     validateStrings(reconciliation[field], `reconciliation.${field}`);
@@ -269,6 +287,60 @@ function validateReconciliation(reconciliation, findingIds) {
     currentStates.size === findingIds.size && [...findingIds].every((id) => currentStates.has(id)),
     'each current finding must be reconciled exactly once as open or new'
   );
+}
+
+export function computeReviewPacketDigest(priorPacket) {
+  assert(
+    priorPacket && typeof priorPacket === 'object' && !Array.isArray(priorPacket),
+    'prior review packet is invalid'
+  );
+  return digest(priorPacket);
+}
+
+export function verifyReconciliation(packet, priorPacket) {
+  assert(
+    packet && typeof packet.reconciliation === 'object',
+    'review packet reconciliation is invalid'
+  );
+  assert(
+    HEX64.test(packet.reconciliation.priorPacketDigest),
+    'packet records no prior packet digest'
+  );
+  assert(
+    priorPacket && typeof priorPacket === 'object' && !Array.isArray(priorPacket),
+    'a prior review packet is required'
+  );
+  assert(
+    computeReviewPacketDigest(priorPacket) === packet.reconciliation.priorPacketDigest,
+    'the provided prior review packet does not match the recorded priorPacketDigest'
+  );
+  assert(
+    priorPacket.repositoryId === packet.repositoryId,
+    'the prior review packet targets a different repository'
+  );
+  assert(
+    priorPacket.pullRequest === packet.pullRequest,
+    'the prior review packet targets a different pull request'
+  );
+  assert(
+    priorPacket.headSha === packet.reconciliation.priorReviewedHeadSha,
+    'the prior review packet head does not match priorReviewedHeadSha'
+  );
+  assert(Array.isArray(priorPacket.findings), 'the prior review packet has no findings array');
+  const priorIds = new Set(priorPacket.findings.map((finding) => finding.id));
+  assert(
+    packet.reconciliation.resolvedFindingIds.every((id) => priorIds.has(id)),
+    'resolved reconciliation references a finding absent from the prior packet'
+  );
+  assert(
+    packet.reconciliation.openFindingIds.every((id) => priorIds.has(id)),
+    'open reconciliation references a finding absent from the prior packet'
+  );
+  assert(
+    packet.reconciliation.newFindingIds.every((id) => !priorIds.has(id)),
+    'new reconciliation reuses a finding id already present in the prior packet'
+  );
+  return true;
 }
 
 export function validateReviewPacket(packet, input) {
@@ -318,7 +390,7 @@ export function validateReviewPacket(packet, input) {
     packet.reviewInputDigest === computeReviewInputDigest(input),
     'reviewInputDigest does not match the canonical input snapshot'
   );
-  assert(Number.isFinite(Date.parse(packet.observedAt)), 'observedAt is invalid');
+  validateTimestamp(packet.observedAt, 'observedAt');
   assert(REVIEW_CLASSES.includes(packet.reviewClass), 'reviewClass is invalid');
   validateStrings(packet.scope, 'scope', { min: 1 });
   validateStrings(packet.affectedEntities, 'affectedEntities');
@@ -344,9 +416,13 @@ export function validateReviewPacket(packet, input) {
       'impact',
       'fix',
     ];
+    const stringFields = ['id', 'file', 'authority', 'observed', 'expected', 'impact', 'fix'];
     exactKeys(finding, fields, 'finding');
-    for (const field of fields) {
-      assert(finding[field] !== undefined && finding[field] !== '', `finding.${field} is required`);
+    for (const field of stringFields) {
+      assert(
+        typeof finding[field] === 'string' && finding[field].length > 0,
+        `finding.${field} must be a non-empty string`
+      );
     }
     assert(!findingIds.has(finding.id), `finding id is duplicated: ${finding.id}`);
     findingIds.add(finding.id);
@@ -445,11 +521,24 @@ export function validateReviewPacketEligibility(packet, eligibility, executionMo
   return packet;
 }
 
+export function verifyLiveReviewInput(packet, freshInput) {
+  validateReviewInputSnapshot(freshInput);
+  assert(
+    freshInput.repositoryId === packet.repositoryId &&
+      freshInput.pullRequest === packet.pullRequest,
+    'live review input targets a different repository or pull request'
+  );
+  assert(
+    computeReviewInputDigest(freshInput) === packet.reviewInputDigest,
+    'live canonical review input does not match the recorded reviewInputDigest'
+  );
+  return true;
+}
+
 export function authorizeReviewSubmission({
   packet,
   input,
-  currentBaseSha,
-  currentHeadSha,
+  liveInput,
   executionMode,
   explicitAuthorization,
   credentialCanReview,
@@ -462,10 +551,19 @@ export function authorizeReviewSubmission({
     return { allowed: false, reason: 'review submission requires a new human-assisted run' };
   }
   validateReviewPacket(packet, input);
-  const revision = inspectReviewRevision(packet, input, currentHeadSha, null, currentBaseSha);
+  verifyLiveReviewInput(packet, liveInput);
+  const revision = inspectReviewRevision(packet, input, liveInput.headSha, null, liveInput.baseSha);
   if (revision.stale) {
     return { allowed: false, reason: 'review packet is stale at the submission boundary' };
   }
+  assert(
+    typeof reviewer === 'string' && reviewer.length > 0,
+    'live viewer identity is required for submission'
+  );
+  assert(
+    typeof pullRequestAuthor === 'string' && pullRequestAuthor.length > 0,
+    'live pull-request author identity is required for submission'
+  );
   const recommendedAction = packet.recommendedAction;
   assert(RECOMMENDATIONS.includes(recommendedAction), 'recommendedAction is invalid');
   if (!explicitAuthorization)
