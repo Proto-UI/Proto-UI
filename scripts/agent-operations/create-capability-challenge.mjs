@@ -10,14 +10,7 @@ import {
 } from './assessment-runtime.mjs';
 
 const defaultRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
-const allowedArgs = new Set([
-  '--repo-root',
-  '--locale',
-  '--minutes',
-  '--repository-id',
-  '--subject-key-fingerprint',
-  '--assessment-mode',
-]);
+const allowedArgs = new Set(['--repo-root', '--locale', '--minutes', '--repository-id']);
 const args = new Map();
 const cliArgs = process.argv.slice(2);
 if (cliArgs[0] === '--') cliArgs.shift();
@@ -35,19 +28,7 @@ const lifetimeMinutes = Number(args.get('--minutes') ?? '60');
 if (!Number.isInteger(lifetimeMinutes) || lifetimeMinutes < 5 || lifetimeMinutes > 240) {
   throw new Error('--minutes must be an integer between 5 and 240');
 }
-const assessmentMode = args.get('--assessment-mode') ?? 'self-assessment';
-if (!['independent', 'self-assessment'].includes(assessmentMode)) {
-  throw new Error('--assessment-mode must be independent or self-assessment');
-}
-const suppliedSubjectFingerprint = args.get('--subject-key-fingerprint');
-if (suppliedSubjectFingerprint && !/^sha256:[a-f0-9]{64}$/.test(suppliedSubjectFingerprint)) {
-  throw new Error('--subject-key-fingerprint must use sha256:<64 lowercase hex>');
-}
-if (assessmentMode === 'independent' && !suppliedSubjectFingerprint) {
-  throw new Error('independent assessment requires an explicit stable --subject-key-fingerprint');
-}
-const subjectFingerprint =
-  suppliedSubjectFingerprint ?? `sha256:${sha256('ephemeral-self-assessment\0', randomBytes(32))}`;
+const assessmentSessionId = `session:${sha256('local-self-assessment\0', randomBytes(32))}`;
 
 function walk(directory) {
   return readdirSync(directory)
@@ -71,7 +52,6 @@ const entities = specFiles
 if (entities.length < 3) throw new Error('The spec catalog has too few identifiable entities');
 
 const snapshot = collectRepositorySnapshot(root, {
-  assessmentMode,
   repositoryId: args.get('--repository-id'),
 });
 const nonce = randomBytes(32);
@@ -143,15 +123,19 @@ const questionData = [
   ['governance', ['governance-safety', 'epistemic-discipline'], messages.governance],
   ['permission', ['governance-safety', 'semantic-reasoning'], messages.permission],
 ];
-const challengeId = `challenge:${sha256(nonce, snapshot.repositoryId, subjectFingerprint, issuedAt.toISOString())}`;
+const challengeId = `challenge:${sha256(
+  nonce,
+  snapshot.repositoryId,
+  assessmentSessionId,
+  issuedAt.toISOString()
+)}`;
 const challenge = {
   schemaVersion: 1,
   kind: 'proto-ui.agent-capability-challenge',
   challengeId,
-  subject: { agentKeyFingerprint: subjectFingerprint },
+  subject: { assessmentSessionId },
   scope: {
     repositoryId: snapshot.repositoryId,
-    assessmentMode,
     snapshotMode: snapshot.snapshotMode,
     baseSha: snapshot.baseSha,
     treeSha: snapshot.treeSha,
@@ -173,7 +157,7 @@ const challenge = {
     schema: 'internal/agent-operations/schemas/capability-response.schema.json',
     requiredPerQuestion: ['answer', 'evidence', 'unknowns', 'humanGates'],
     selfAssessmentCeiling: 'C4',
-    independentEvaluationRequiredAbove: 'none-for-local-self-governance',
+    externalEvaluationRequired: false,
   },
 };
 challenge.challengeDigest = computeChallengeDigest(challenge);

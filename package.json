@@ -59,6 +59,7 @@
     "check:autonomous-maintenance": "node scripts/autonomous-maintenance/check-review-packets.mjs && node scripts/autonomous-maintenance/check-runs.mjs && node --test scripts/autonomous-maintenance/test/*.test.mjs",
     "check:agent-operations": "node scripts/agent-operations/check-agent-operations.mjs && node scripts/agent-operations/check-contributor-skills.mjs && node --test scripts/agent-operations/test/*.test.mjs",
     "agent:skill": "node scripts/agent-operations/resolve-skill.mjs",
+    "agent:review": "node scripts/agent-operations/review-packet.mjs",
     "agent:assess": "node scripts/agent-operations/create-capability-challenge.mjs",
     "agent:assess:response": "node scripts/agent-operations/create-capability-response.mjs",
     "agent:assess:evaluation": "node scripts/agent-operations/create-self-evaluation.mjs",

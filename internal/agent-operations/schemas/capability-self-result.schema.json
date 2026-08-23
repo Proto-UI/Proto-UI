@@ -13,6 +13,7 @@
     "rubric",
     "evaluation",
     "capability",
+    "modeEffects",
     "trust",
     "validity",
     "derivedAt"
@@ -34,9 +35,9 @@
     },
     "subject": {
       "type": "object",
-      "required": ["agentKeyFingerprint"],
+      "required": ["assessmentSessionId"],
       "properties": {
-        "agentKeyFingerprint": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+        "assessmentSessionId": { "type": "string", "pattern": "^session:[a-f0-9]{64}$" }
       },
       "additionalProperties": false
     },
@@ -48,7 +49,8 @@
         "treeSha",
         "worktreeDigest",
         "catalogDigest",
-        "policyDigest"
+        "policyDigest",
+        "generatorDigest"
       ],
       "properties": {
         "repositoryId": { "type": "string", "pattern": "^[a-z][a-z0-9+.-]*:[^\\s]{3,200}$" },
@@ -56,7 +58,8 @@
         "treeSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
         "worktreeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "catalogDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "generatorDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       },
       "additionalProperties": false
     },
@@ -95,17 +98,27 @@
         },
         "recommendedReviewClasses": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "enum": [
+              "review-facts-and-ci",
+              "review-docs-and-links",
+              "review-tests",
+              "review-bounded-regression",
+              "review-governed-implementation-slice",
+              "review-cross-domain-semantics",
+              "review-governance-and-release-evidence"
+            ]
+          },
           "uniqueItems": true
         },
         "autonomousTaskCeiling": { "enum": ["U0", "C1", "C2", "C3", "C4"] },
         "autonomousReviewCeiling": {
           "enum": [
-            "observe",
-            "partial",
-            "bounded-technical",
-            "independent-acceptance",
-            "cross-domain"
+            "none",
+            "review-docs-and-links",
+            "review-bounded-regression",
+            "review-governed-implementation-slice",
+            "review-governance-and-release-evidence"
           ]
         },
         "autonomousMutationCeiling": {
@@ -114,22 +127,42 @@
       },
       "additionalProperties": false
     },
+    "modeEffects": {
+      "type": "object",
+      "required": [
+        "humanAssisted",
+        "autonomous",
+        "advisoryInHumanAssistedMode",
+        "bindingForAutonomousSelection"
+      ],
+      "properties": {
+        "humanAssisted": { "const": "advisory" },
+        "autonomous": { "const": "binding-ceiling" },
+        "advisoryInHumanAssistedMode": { "const": true },
+        "bindingForAutonomousSelection": { "const": true }
+      },
+      "additionalProperties": false
+    },
     "trust": {
       "type": "object",
       "required": [
         "status",
+        "selfAssessed",
         "independentlyEvaluated",
         "projectTrusted",
         "cryptographicallyTrusted",
         "grantsPermission",
+        "grantsAcceptanceAuthority",
         "predictsAcceptance"
       ],
       "properties": {
         "status": { "const": "unsigned-self-assessment" },
+        "selfAssessed": { "const": true },
         "independentlyEvaluated": { "const": false },
         "projectTrusted": { "const": false },
         "cryptographicallyTrusted": { "const": false },
         "grantsPermission": { "const": false },
+        "grantsAcceptanceAuthority": { "const": false },
         "predictsAcceptance": { "const": false }
       },
       "additionalProperties": false
@@ -196,8 +229,7 @@
               "source-authority-inversion",
               "permission-escalation",
               "hidden-uncertainty",
-              "snapshot-binding-failure",
-              "evaluator-independence-failure"
+              "snapshot-binding-failure"
             ]
           },
           "uniqueItems": true

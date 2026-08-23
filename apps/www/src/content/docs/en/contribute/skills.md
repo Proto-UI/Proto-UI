@@ -53,12 +53,12 @@ A handoff carries typed artifacts and at most one next skill. A terminal handoff
 
 ## Build evidence and reader projections
 
-| Skill          | One transition                                       |
-| -------------- | ---------------------------------------------------- |
-| `pui-test`     | Governed behavior to executable evidence             |
-| `pui-docs`     | Governed repository fact to human documentation      |
-| `pui-validate` | Candidate change to a proportional evidence report   |
-| `pui-review`   | Candidate change to an independent acceptance report |
+| Skill          | One transition                                                           |
+| -------------- | ------------------------------------------------------------------------ |
+| `pui-test`     | Governed behavior to executable evidence                                 |
+| `pui-docs`     | Governed repository fact to human documentation                          |
+| `pui-validate` | Candidate change to a proportional evidence report                       |
+| `pui-review`   | Candidate change to a revision-bound packet at one declared review class |
 
 ## Inspect repository operations
 
@@ -96,6 +96,6 @@ These leaves are read-only. A diagnosis or proposal does not authorize its repai
 
 ## Capability is a ceiling when the Agent works alone
 
-C1 covers bounded facts. C2 covers governed reversible work. C3 covers approved semantic implementation and independent review. C4 covers complex semantic, cross-domain, and release preparation. The registry calls each leaf's threshold `autonomousMinimumBand` because it applies when an Agent chooses or advances work alone.
+C1 covers bounded facts plus factual or documentation review. C2 adds test and bounded-regression review. C3 adds approved semantic implementation and governed-slice review. C4 adds cross-domain semantics, governance evidence, and release preparation. `pui-review` declares one review class, and the local result lists the classes the Agent may take unattended. The registry calls a leaf's threshold `autonomousMinimumBand` because it applies when an Agent chooses or advances work alone.
 
 During `human-assisted` work, the same result is advice. It changes scope, validation, review depth, and stated limitations, but it does not block a task the current user requested. Live platform permission, relevant Discord or Poppy trust, current authorization, repository rules, and human gates remain separate in both modes.

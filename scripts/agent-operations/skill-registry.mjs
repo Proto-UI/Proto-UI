@@ -278,6 +278,13 @@ export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
       'handoff.notes contains an invalid note'
     );
 
+  if (handoff.executionMode === 'autonomous' && gates.size > 0) {
+    assert(
+      handoff.nextSkillId === null,
+      'autonomous handoff must stop when a human gate is pending'
+    );
+  }
+
   if (handoff.nextSkillId === null) return { handoff, nextSkill: null };
   assert(
     handoff.nextSkillId !== handoff.fromId,

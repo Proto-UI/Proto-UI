@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI Review Input Snapshot",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "repositoryId",
+    "pullRequest",
+    "baseSha",
+    "headSha",
+    "pullRequestBody",
+    "commits",
+    "replies",
+    "threads",
+    "checks",
+    "externalEvidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.review-input" },
+    "repositoryId": { "type": "string", "minLength": 4 },
+    "pullRequest": { "type": "integer", "minimum": 1 },
+    "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "headSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "pullRequestBody": { "type": "string" },
+    "commits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sha", "message"],
+        "properties": {
+          "sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+          "message": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "replies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "threadId", "updatedAt", "author", "body"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "threadId": { "type": "string", "minLength": 1 },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "author": { "type": "string", "minLength": 1 },
+          "body": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "threads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "isResolved", "updatedAt"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "isResolved": { "type": "boolean" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status", "conclusion", "completedAt", "detailsUrl"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "minLength": 1 },
+          "conclusion": { "type": ["string", "null"] },
+          "completedAt": { "type": ["string", "null"], "format": "date-time" },
+          "detailsUrl": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "externalEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "locator", "digest"],
+        "properties": {
+          "kind": { "type": "string", "minLength": 1 },
+          "locator": { "type": "string", "minLength": 1 },
+          "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -178,12 +178,12 @@ skills:
   - id: pui-review
     entrypoints: [development]
     loadPath: .agents/skills/pui-review/SKILL.md
-    transition: candidate change -> independent acceptance report
-    autonomousMinimumBand: C3
-    taskClass: review-candidate-change
+    transition: candidate change -> revision-bound review packet within a declared review class
+    autonomousMinimumBand: C1
+    taskClass: review-local
     mutation: none
-    requires: [authority-map, candidate-change, evidence-report]
-    produces: [review-report]
+    requires: [authority-map, candidate-change, evidence-report, review-input]
+    produces: [review-packet]
   - id: pui-issue
     entrypoints: [development]
     loadPath: .agents/skills/pui-issue/SKILL.md
@@ -201,7 +201,7 @@ skills:
     taskClass: observe
     mutation: none
     requires: [capability-envelope, github-snapshot]
-    produces: [pull-request-report]
+    produces: [pull-request-report, review-input]
   - id: pui-ci
     entrypoints: [development]
     loadPath: .agents/skills/pui-ci/SKILL.md

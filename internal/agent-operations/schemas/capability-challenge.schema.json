@@ -20,11 +20,11 @@
     "challengeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "subject": {
       "type": "object",
-      "required": ["agentKeyFingerprint"],
+      "required": ["assessmentSessionId"],
       "properties": {
-        "agentKeyFingerprint": {
+        "assessmentSessionId": {
           "type": "string",
-          "pattern": "^sha256:[a-f0-9]{64}$"
+          "pattern": "^session:[a-f0-9]{64}$"
         }
       },
       "additionalProperties": false
@@ -33,7 +33,6 @@
       "type": "object",
       "required": [
         "repositoryId",
-        "assessmentMode",
         "snapshotMode",
         "baseSha",
         "treeSha",
@@ -48,7 +47,6 @@
           "type": "string",
           "pattern": "^[a-z][a-z0-9+.-]*:[^\\s]{3,200}$"
         },
-        "assessmentMode": { "enum": ["self-assessment", "independent"] },
         "snapshotMode": { "enum": ["worktree", "committed-clean"] },
         "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
         "treeSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
@@ -113,7 +111,7 @@
         "schema",
         "requiredPerQuestion",
         "selfAssessmentCeiling",
-        "independentEvaluationRequiredAbove"
+        "externalEvaluationRequired"
       ],
       "properties": {
         "format": { "const": "json" },
@@ -124,29 +122,10 @@
           "const": ["answer", "evidence", "unknowns", "humanGates"]
         },
         "selfAssessmentCeiling": { "const": "C4" },
-        "independentEvaluationRequiredAbove": { "const": "none-for-local-self-governance" }
+        "externalEvaluationRequired": { "const": false }
       },
       "additionalProperties": false
     }
   },
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "scope": {
-            "properties": { "assessmentMode": { "const": "independent" } },
-            "required": ["assessmentMode"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "scope": {
-            "properties": { "snapshotMode": { "const": "committed-clean" } }
-          }
-        }
-      }
-    }
-  ],
   "additionalProperties": false
 }

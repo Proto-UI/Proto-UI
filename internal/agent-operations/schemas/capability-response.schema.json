@@ -18,11 +18,11 @@
     "challengeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "subject": {
       "type": "object",
-      "required": ["agentKeyFingerprint"],
+      "required": ["assessmentSessionId"],
       "properties": {
-        "agentKeyFingerprint": {
+        "assessmentSessionId": {
           "type": "string",
-          "pattern": "^sha256:[a-f0-9]{64}$"
+          "pattern": "^session:[a-f0-9]{64}$"
         }
       },
       "additionalProperties": false

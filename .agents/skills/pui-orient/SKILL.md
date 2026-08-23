@@ -15,7 +15,7 @@ Produce a current working envelope; do not perform the target change.
 6. Read a local self-result when available. In `human-assisted` mode use it only to calibrate confidence, scope, review depth, validation, and escalation. In `autonomous` mode require a fresh snapshot-bound result and enforce its task and review ceiling.
 7. Classify task risk and required human gates independently from model comprehension and platform permission. A score never increases actual permission or predicts acceptance.
 
-Return a compact envelope containing `executionMode`, its trusted source, observed facts, unknowns, self-assessed band and freshness, advisory adjustments, autonomous ceilings, actual permissions, human gates, stale inputs, and the next eligible skill. Stop only when autonomous work exceeds its ceiling, a human gate is reached, or the requested action lacks actual authorization.
+Return a compact envelope containing `executionMode`, its trusted source, mode evidence, observed facts, unknowns, self-assessed band and freshness, advisory adjustments, autonomous ceilings, actual permissions, human gates, stale inputs, and the next eligible skill. Mode evidence distinguishes an explicit current task or active human loop from a maintainer invocation, schedule, queue, or standing authorization. Stop only when autonomous work exceeds its ceiling, a human gate is reached, or the requested action lacks actual authorization.
 
 ## Explicit handoff
 

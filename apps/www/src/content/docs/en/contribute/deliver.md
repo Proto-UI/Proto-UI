@@ -31,6 +31,6 @@ A new push invalidates stale review. Merge only the reviewed revision after requ
 
 Release preparation creates reviewable repository state. Publication is a separate, attended operation from governed `main`. A later evidence change verifies registry, tag, GitHub Release, assets, snapshot digests, workflow head, and deployments.
 
-An Agent may prepare or audit a release within its verified capability. It may not publish, tag, activate a stable lifecycle, merge, or recover a partial release without current human authorization.
+With an active contributor, an Agent may prepare or audit release work under current human decisions. When unattended, it must stay inside its fresh local autonomous ceiling. Neither mode lets it publish, tag, activate a stable lifecycle, merge, or recover a partial release without current human authorization.
 
 Exact commands and contribution requirements live in [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md).

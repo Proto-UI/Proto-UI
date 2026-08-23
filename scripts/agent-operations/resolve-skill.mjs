@@ -9,13 +9,14 @@ import {
 } from './skill-registry.mjs';
 import {
   collectRepositorySnapshot,
+  isSelfAssessmentFresh,
   loadCapabilityPolicy,
   validateSelfAssessmentResult,
 } from './assessment-runtime.mjs';
 import { skillRegistryRoot } from './skill-registry.mjs';
 
 function usage() {
-  return 'Usage: pnpm agent:skill -- <leaf-id> [--mode human-assisted|autonomous --mode-source <trusted-source>] [--assessment <result.json>] | --handoff <handoff.json> [--assessment <result.json>]\n';
+  return 'Usage: pnpm agent:skill -- <leaf-id> --mode human-assisted|autonomous --mode-source <trusted-source> [--assessment <result.json>] | --handoff <handoff.json> [--assessment <result.json>]\n';
 }
 
 function parse(argv) {
@@ -31,7 +32,8 @@ function parse(argv) {
   if (modeSourceIndex >= 0) args.executionModeSource = argv[modeSourceIndex + 1];
   if (assessmentIndex >= 0) args.assessmentPath = argv[assessmentIndex + 1];
   if (
-    (args.handoffPath || (args.id && modeIndex >= 0 && modeSourceIndex >= 0)) &&
+    ((args.handoffPath && modeIndex < 0 && modeSourceIndex < 0) ||
+      (args.id && modeIndex >= 0 && modeSourceIndex >= 0)) &&
     ![handoffIndex, modeIndex, modeSourceIndex, assessmentIndex].some(
       (i) => i >= 0 && !argv[i + 1]
     ) &&
@@ -46,17 +48,16 @@ try {
   const registry = loadSkillRegistry();
   let skill;
   let terminal = false;
+  let handoff = null;
   if (args.handoffPath) {
-    const handoff = JSON.parse(fs.readFileSync(args.handoffPath, 'utf8'));
+    handoff = JSON.parse(fs.readFileSync(args.handoffPath, 'utf8'));
     const result = validateSkillHandoff(handoff, registry);
     skill = result.nextSkill;
     terminal = skill === null;
   } else {
     skill = resolveSkill(args.id, registry);
   }
-  const executionMode =
-    args.executionMode ??
-    (args.handoffPath ? JSON.parse(fs.readFileSync(args.handoffPath, 'utf8')).executionMode : null);
+  const executionMode = args.executionMode ?? handoff?.executionMode ?? null;
   if (args.executionMode) establishExecutionMode(args.executionMode, args.executionModeSource);
   let selfAssessment = null;
   if (args.assessmentPath) {
@@ -66,25 +67,23 @@ try {
     );
     validateSelfAssessmentResult(result, policy);
     const snapshot = collectRepositorySnapshot(skillRegistryRoot, {
-      assessmentMode: 'self-assessment',
       repositoryId: result.scope?.repositoryId,
     });
-    const bindings = [
-      'repositoryId',
-      'baseSha',
-      'treeSha',
-      'worktreeDigest',
-      'catalogDigest',
-      'policyDigest',
-    ];
-    const fresh =
-      result.kind === 'proto-ui.agent-capability-self-result' &&
-      Date.now() <= Date.parse(result.validity?.expiresAt) &&
-      bindings.every((key) => result.scope?.[key] === snapshot[key]);
+    const fresh = isSelfAssessmentFresh(result, snapshot);
     selfAssessment = { ...result, fresh, validated: true };
   }
-  const eligibility =
-    executionMode && skill
+  const directAutonomousTransition =
+    !args.handoffPath &&
+    executionMode === 'autonomous' &&
+    skill &&
+    !['pui-orient', 'pui-assess'].includes(skill.id);
+  const eligibility = directAutonomousTransition
+    ? {
+        eligible: false,
+        assessmentEffect: 'binding-ceiling',
+        reason: 'autonomous transitions must arrive through a validated pui-orient handoff',
+      }
+    : executionMode && skill
       ? evaluateSkillEligibility(skill, { executionMode, selfAssessment })
       : null;
   const blocked = eligibility?.eligible === false;

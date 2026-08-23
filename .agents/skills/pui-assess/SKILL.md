@@ -15,7 +15,7 @@ Produce one snapshot-bound orientation result without publishing an answer key o
 
 The response is dynamic because the challenge binds a repository snapshot, nonce, subject, sampled entities, policy, and generator. Never search for or invent a static answer file.
 
-A self-result can derive U0 through C4 without cross-dimension compensation. It is unsigned and project-untrusted. In `human-assisted` mode it is advisory only; in `autonomous` mode its task, review, and mutation recommendations are binding self-governance ceilings. It never establishes identity, grants live permission, decides a human gate, or predicts acceptance.
+A self-result can derive U0 through C4 without cross-dimension compensation. It is an unsigned, session-scoped self-assessment, not a runtime identity. It explicitly records that `human-assisted` use is advisory and `autonomous` selection is ceiling-bound. It never grants live permission, decides a human gate, or predicts acceptance.
 
 Return the challenge ID, response digest, self-assessed band, recommended task and review classes, autonomous ceilings, critical failures, snapshot binding, explicit limitations, and one next transition permitted by the current mode.
 

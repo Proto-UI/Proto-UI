@@ -24,7 +24,7 @@ const QUESTION_IDS = [
 const BANDS = ['U0', 'C1', 'C2', 'C3', 'C4'];
 const HEX64 = /^[a-f0-9]{64}$/;
 const GIT_SHA = /^[a-f0-9]{40,64}$/;
-const FINGERPRINT = /^sha256:[a-f0-9]{64}$/;
+const SESSION_ID = /^session:[a-f0-9]{64}$/;
 const REPOSITORY_ID = /^[a-z][a-z0-9+.-]*:\S{3,200}$/;
 
 function fail(message) {
@@ -126,8 +126,15 @@ function parseCapabilityPolicy(source) {
       policy.mutationClasses['tracked-maintenance-state']?.trackedWrite === true &&
       policy.executionModes?.['human-assisted']?.assessmentEffect === 'advisory' &&
       policy.executionModes?.autonomous?.assessmentEffect === 'binding-ceiling' &&
+      isObject(policy.reviewClasses) &&
+      Object.values(policy.reviewClasses).every((reviewClass) =>
+        BANDS.includes(reviewClass?.autonomousMinimumBand)
+      ) &&
       policy.selfAssessment?.maximumBand === 'C4' &&
-      policy.selfAssessment?.grantsPermission === false,
+      policy.selfAssessment?.advisoryInHumanAssistedMode === true &&
+      policy.selfAssessment?.bindingForAutonomousSelection === true &&
+      policy.selfAssessment?.grantsPermission === false &&
+      policy.selfAssessment?.grantsAcceptanceAuthority === false,
     'capability policy mutation classes are incomplete'
   );
   Object.defineProperty(policy, '__digest', { value: sha256(source), enumerable: false });
@@ -190,7 +197,6 @@ export function loadCapabilityRubric(path) {
       'permission-escalation',
       'hidden-uncertainty',
       'snapshot-binding-failure',
-      'evaluator-independence-failure',
     ],
     [],
     'capability rubric criticalFailures'
@@ -254,20 +260,10 @@ function hashWorktreePaths(root, paths) {
   return hash.digest('hex');
 }
 
-export function collectRepositorySnapshot(
-  root,
-  { assessmentMode = 'independent', repositoryId } = {}
-) {
-  requireCondition(
-    ['independent', 'self-assessment'].includes(assessmentMode),
-    'assessmentMode is invalid'
-  );
+export function collectRepositorySnapshot(root, { repositoryId } = {}) {
   const resolvedRoot = resolve(root);
   const status = git(resolvedRoot, ['status', '--porcelain=v1', '--untracked-files=all']).trim();
   const clean = status.length === 0;
-  if (assessmentMode === 'independent' && !clean) {
-    fail('Independent capability challenges require a clean committed worktree');
-  }
 
   const baseSha = git(resolvedRoot, ['rev-parse', 'HEAD']).trim();
   const treeSha = git(resolvedRoot, ['rev-parse', 'HEAD^{tree}']).trim();
@@ -290,10 +286,10 @@ export function collectRepositorySnapshot(
     resolvedRoot,
     'scripts/agent-operations/create-capability-challenge.mjs'
   );
+  const rubricPath = resolve(resolvedRoot, 'internal/agent-operations/capability-rubric.yaml');
 
   return {
     repositoryId: repositoryId ?? deriveRepositoryId(resolvedRoot),
-    assessmentMode,
     snapshotMode,
     baseSha,
     treeSha,
@@ -318,6 +314,15 @@ export function collectRepositorySnapshot(
           )
         )
       : sha256(readFileSync(generatorPath)),
+    rubricDigest: clean
+      ? sha256(
+          readCommittedPath(
+            resolvedRoot,
+            baseSha,
+            'internal/agent-operations/capability-rubric.yaml'
+          )
+        )
+      : sha256(readFileSync(rubricPath)),
     clean,
   };
 }
@@ -404,16 +409,15 @@ export function validateChallenge(challenge, { now = Date.now() } = {}) {
     'challenge digest mismatch'
   );
 
-  exactKeys(challenge.subject, ['agentKeyFingerprint'], [], 'challenge.subject');
+  exactKeys(challenge.subject, ['assessmentSessionId'], [], 'challenge.subject');
   requireCondition(
-    FINGERPRINT.test(challenge.subject.agentKeyFingerprint),
-    'challenge subject fingerprint is invalid'
+    SESSION_ID.test(challenge.subject.assessmentSessionId),
+    'challenge assessment session is invalid'
   );
   exactKeys(
     challenge.scope,
     [
       'repositoryId',
-      'assessmentMode',
       'snapshotMode',
       'baseSha',
       'treeSha',
@@ -431,19 +435,9 @@ export function validateChallenge(challenge, { now = Date.now() } = {}) {
     'challenge repositoryId is invalid'
   );
   requireCondition(
-    ['self-assessment', 'independent'].includes(challenge.scope.assessmentMode),
-    'challenge assessmentMode is invalid'
-  );
-  requireCondition(
     ['worktree', 'committed-clean'].includes(challenge.scope.snapshotMode),
     'challenge snapshotMode is invalid'
   );
-  if (challenge.scope.assessmentMode === 'independent') {
-    requireCondition(
-      challenge.scope.snapshotMode === 'committed-clean',
-      'independent challenge must bind a clean committed snapshot'
-    );
-  }
   for (const key of ['baseSha', 'treeSha'])
     requireCondition(GIT_SHA.test(challenge.scope[key]), `challenge.scope.${key} is invalid`);
   for (const key of [
@@ -495,7 +489,7 @@ export function validateChallenge(challenge, { now = Date.now() } = {}) {
       'schema',
       'requiredPerQuestion',
       'selfAssessmentCeiling',
-      'independentEvaluationRequiredAbove',
+      'externalEvaluationRequired',
     ],
     [],
     'challenge.responseContract'
@@ -514,8 +508,7 @@ export function validateChallenge(challenge, { now = Date.now() } = {}) {
     'self-assessment ceiling must be C4'
   );
   requireCondition(
-    challenge.responseContract.independentEvaluationRequiredAbove ===
-      'none-for-local-self-governance',
+    challenge.responseContract.externalEvaluationRequired === false,
     'local self-governance must not require an external evaluator'
   );
   return challenge;
@@ -546,9 +539,9 @@ export function validateCapabilityResponse(response, challenge) {
       response.challengeDigest === challenge.challengeDigest,
     'capability response challenge binding mismatch'
   );
-  exactKeys(response.subject, ['agentKeyFingerprint'], [], 'capability response subject');
+  exactKeys(response.subject, ['assessmentSessionId'], [], 'capability response subject');
   requireCondition(
-    response.subject.agentKeyFingerprint === challenge.subject.agentKeyFingerprint,
+    response.subject.assessmentSessionId === challenge.subject.assessmentSessionId,
     'capability response subject mismatch'
   );
   const submittedAt = parseTimestamp(response.submittedAt, 'capability response submittedAt');
@@ -607,7 +600,7 @@ export function createCapabilityResponseTemplate(challenge) {
     kind: 'proto-ui.agent-capability-response',
     challengeId: challenge.challengeId,
     challengeDigest: challenge.challengeDigest,
-    subject: { agentKeyFingerprint: challenge.subject.agentKeyFingerprint },
+    subject: { assessmentSessionId: challenge.subject.assessmentSessionId },
     submittedAt: '',
     answers: challenge.questions.map((question) => ({
       questionId: question.id,
@@ -665,10 +658,6 @@ export function computeSelfAssessmentResultDigest(result) {
 
 export function deriveSelfAssessmentResult({ challenge, response, evaluation, rubric, policy }) {
   validateChallenge(challenge);
-  requireCondition(
-    challenge.scope.assessmentMode === 'self-assessment',
-    'an unsigned self result requires a self-assessment challenge'
-  );
   validateCapabilityResponse(response, challenge);
   validateSelfEvaluation(evaluation, rubric, policy);
   const derived = deriveCapabilityBand(evaluation, policy);
@@ -679,7 +668,7 @@ export function deriveSelfAssessmentResult({ challenge, response, evaluation, ru
     responseDigest: digestJson(response),
     rubricVersion: rubric.rubricVersion,
     rubricDigest: rubric.__digest,
-    subject: challenge.subject.agentKeyFingerprint,
+    subject: challenge.subject.assessmentSessionId,
     evaluation,
   };
   const result = {
@@ -691,7 +680,7 @@ export function deriveSelfAssessmentResult({ challenge, response, evaluation, ru
       challengeDigest: challenge.challengeDigest,
       responseDigest: digestJson(response),
     },
-    subject: { agentKeyFingerprint: challenge.subject.agentKeyFingerprint },
+    subject: { assessmentSessionId: challenge.subject.assessmentSessionId },
     scope: {
       repositoryId: challenge.scope.repositoryId,
       baseSha: challenge.scope.baseSha,
@@ -699,6 +688,7 @@ export function deriveSelfAssessmentResult({ challenge, response, evaluation, ru
       worktreeDigest: challenge.scope.worktreeDigest,
       catalogDigest: challenge.scope.catalogDigest,
       policyDigest: challenge.scope.policyDigest,
+      generatorDigest: challenge.scope.generatorDigest,
     },
     rubric: { version: rubric.rubricVersion, digest: rubric.__digest },
     evaluation,
@@ -706,17 +696,25 @@ export function deriveSelfAssessmentResult({ challenge, response, evaluation, ru
       band,
       eligibleTaskClasses: [...allowedTaskClasses(policy, band)],
       recommendedTaskClasses: [...allowedTaskClasses(policy, band)],
-      recommendedReviewClasses: [policy.bands[band].autonomousReviewCeiling],
+      recommendedReviewClasses: [...allowedReviewClasses(policy, band)],
       autonomousTaskCeiling: band,
       autonomousReviewCeiling: policy.bands[band].autonomousReviewCeiling,
       autonomousMutationCeiling: policy.bands[band].autonomousMutationCeiling,
     },
+    modeEffects: {
+      humanAssisted: 'advisory',
+      autonomous: 'binding-ceiling',
+      advisoryInHumanAssistedMode: true,
+      bindingForAutonomousSelection: true,
+    },
     trust: {
       status: 'unsigned-self-assessment',
+      selfAssessed: true,
       independentlyEvaluated: false,
       projectTrusted: false,
       cryptographicallyTrusted: false,
       grantsPermission: false,
+      grantsAcceptanceAuthority: false,
       predictsAcceptance: false,
     },
     validity: {
@@ -743,6 +741,7 @@ export function validateSelfAssessmentResult(result, policy) {
       'rubric',
       'evaluation',
       'capability',
+      'modeEffects',
       'trust',
       'validity',
       'derivedAt',
@@ -764,6 +763,64 @@ export function validateSelfAssessmentResult(result, policy) {
     'self result digest mismatch'
   );
   exactKeys(
+    result.challenge,
+    ['challengeId', 'challengeDigest', 'responseDigest'],
+    [],
+    'self result challenge'
+  );
+  requireCondition(
+    /^challenge:[a-f0-9]{64}$/.test(result.challenge.challengeId) &&
+      HEX64.test(result.challenge.challengeDigest) &&
+      HEX64.test(result.challenge.responseDigest),
+    'self result challenge binding is invalid'
+  );
+  exactKeys(result.subject, ['assessmentSessionId'], [], 'self result subject');
+  requireCondition(
+    SESSION_ID.test(result.subject.assessmentSessionId),
+    'self result assessment session is invalid'
+  );
+  exactKeys(
+    result.scope,
+    [
+      'repositoryId',
+      'baseSha',
+      'treeSha',
+      'worktreeDigest',
+      'catalogDigest',
+      'policyDigest',
+      'generatorDigest',
+    ],
+    [],
+    'self result scope'
+  );
+  requireCondition(
+    REPOSITORY_ID.test(result.scope.repositoryId),
+    'self result repository is invalid'
+  );
+  requireCondition(
+    GIT_SHA.test(result.scope.baseSha) && GIT_SHA.test(result.scope.treeSha),
+    'self result Git binding is invalid'
+  );
+  for (const key of ['worktreeDigest', 'catalogDigest', 'policyDigest', 'generatorDigest']) {
+    requireCondition(HEX64.test(result.scope[key]), `self result scope.${key} is invalid`);
+  }
+  if (policy.__digest) {
+    requireCondition(result.scope.policyDigest === policy.__digest, 'self result policy is stale');
+  }
+  exactKeys(result.rubric, ['version', 'digest'], [], 'self result rubric');
+  nonEmptyString(result.rubric.version, 'self result rubric version');
+  requireCondition(HEX64.test(result.rubric.digest), 'self result rubric digest is invalid');
+  const expectedResultId = `self-result:${digestJson({
+    challengeId: result.challenge.challengeId,
+    challengeDigest: result.challenge.challengeDigest,
+    responseDigest: result.challenge.responseDigest,
+    rubricVersion: result.rubric.version,
+    rubricDigest: result.rubric.digest,
+    subject: result.subject.assessmentSessionId,
+    evaluation: result.evaluation,
+  })}`;
+  requireCondition(result.resultId === expectedResultId, 'self result ID is not derived');
+  exactKeys(
     result.capability,
     [
       'band',
@@ -780,10 +837,15 @@ export function validateSelfAssessmentResult(result, policy) {
   const derivedBand = deriveCapabilityBand(result.evaluation, policy);
   requireCondition(result.capability.band === derivedBand, 'self result band was not derived');
   const expectedTasks = [...allowedTaskClasses(policy, derivedBand)];
+  const expectedReviews = [...allowedReviewClasses(policy, derivedBand)];
   requireCondition(
     canonicalize(result.capability.eligibleTaskClasses) === canonicalize(expectedTasks) &&
       canonicalize(result.capability.recommendedTaskClasses) === canonicalize(expectedTasks),
     'self result task classes do not match policy'
+  );
+  requireCondition(
+    canonicalize(result.capability.recommendedReviewClasses) === canonicalize(expectedReviews),
+    'self result review classes do not match policy'
   );
   requireCondition(
     result.capability.autonomousTaskCeiling === derivedBand &&
@@ -794,13 +856,28 @@ export function validateSelfAssessmentResult(result, policy) {
     'self result ceilings do not match policy'
   );
   exactKeys(
+    result.modeEffects,
+    ['humanAssisted', 'autonomous', 'advisoryInHumanAssistedMode', 'bindingForAutonomousSelection'],
+    [],
+    'self result modeEffects'
+  );
+  requireCondition(
+    result.modeEffects.humanAssisted === 'advisory' &&
+      result.modeEffects.autonomous === 'binding-ceiling' &&
+      result.modeEffects.advisoryInHumanAssistedMode === true &&
+      result.modeEffects.bindingForAutonomousSelection === true,
+    'self result mode effects are invalid'
+  );
+  exactKeys(
     result.trust,
     [
       'status',
+      'selfAssessed',
       'independentlyEvaluated',
       'projectTrusted',
       'cryptographicallyTrusted',
       'grantsPermission',
+      'grantsAcceptanceAuthority',
       'predictsAcceptance',
     ],
     [],
@@ -808,10 +885,12 @@ export function validateSelfAssessmentResult(result, policy) {
   );
   requireCondition(
     result.trust.status === 'unsigned-self-assessment' &&
+      result.trust.selfAssessed === true &&
       result.trust.independentlyEvaluated === false &&
       result.trust.projectTrusted === false &&
       result.trust.cryptographicallyTrusted === false &&
       result.trust.grantsPermission === false &&
+      result.trust.grantsAcceptanceAuthority === false &&
       result.trust.predictsAcceptance === false,
     'self result trust boundary is invalid'
   );
@@ -844,4 +923,31 @@ export function allowedTaskClasses(policy, band) {
     for (const taskClass of policy.bands[candidate].taskClasses) allowed.add(taskClass);
   }
   return allowed;
+}
+
+export function allowedReviewClasses(policy, band) {
+  const allowed = new Set();
+  for (const [reviewClass, definition] of Object.entries(policy.reviewClasses)) {
+    if (BANDS.indexOf(definition.autonomousMinimumBand) <= BANDS.indexOf(band)) {
+      allowed.add(reviewClass);
+    }
+  }
+  return allowed;
+}
+
+export function isSelfAssessmentFresh(result, snapshot, now = Date.now()) {
+  const bindings = [
+    'repositoryId',
+    'baseSha',
+    'treeSha',
+    'catalogDigest',
+    'policyDigest',
+    'generatorDigest',
+  ];
+  return (
+    result?.kind === 'proto-ui.agent-capability-self-result' &&
+    now <= Date.parse(result.validity?.expiresAt) &&
+    bindings.every((key) => result.scope?.[key] === snapshot?.[key]) &&
+    result.rubric?.digest === snapshot?.rubricDigest
+  );
 }

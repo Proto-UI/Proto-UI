@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -47,7 +48,7 @@ test('agent:skill CLI emits deterministic machine-readable resolution', () => {
   assert.equal(JSON.parse(first).blocked, false);
 });
 
-test('agent:skill CLI hides an autonomous leaf when no fresh assessment permits it', () => {
+test('agent:skill CLI requires autonomous non-bootstrap transitions to arrive by handoff', () => {
   const command = path.join(root, 'scripts/agent-operations/resolve-skill.mjs');
   const output = execFileSync(
     process.execPath,
@@ -57,10 +58,27 @@ test('agent:skill CLI hides an autonomous leaf when no fresh assessment permits 
   const parsed = JSON.parse(output);
   assert.equal(parsed.blocked, true);
   assert.equal(parsed.skill, null);
+  assert.match(parsed.eligibility.reason, /validated pui-orient handoff/);
   assert.throws(
     () => execFileSync(process.execPath, [command, 'pui-module'], { cwd: root, encoding: 'utf8' }),
     /Command failed/
   );
+});
+
+test('human-assisted CLI routes complex implementation and review without an assessment file', () => {
+  const command = path.join(root, 'scripts/agent-operations/resolve-skill.mjs');
+  for (const id of ['pui-module', 'pui-review']) {
+    const output = JSON.parse(
+      execFileSync(
+        process.execPath,
+        [command, id, '--mode', 'human-assisted', '--mode-source', 'current-user'],
+        { cwd: root, encoding: 'utf8' }
+      )
+    );
+    assert.equal(output.blocked, false);
+    assert.equal(output.skill.id, id);
+    assert.equal(output.eligibility.assessmentEffect, 'advisory');
+  }
 });
 
 test('registry rejects duplicate ids, bad paths, and unknown task classes', () => {
@@ -200,6 +218,7 @@ test('human-assisted work is not blocked by a low self-assessment', () => {
 test('autonomous work enforces the fresh self-assessed leaf ceiling', () => {
   const registry = loadSkillRegistry({ root });
   const implementation = resolveSkill('pui-module', registry);
+  const regression = resolveSkill('pui-regression', registry);
   const c1 = {
     kind: 'proto-ui.agent-capability-self-result',
     validated: true,
@@ -208,6 +227,11 @@ test('autonomous work enforces the fresh self-assessed leaf ceiling', () => {
   };
   assert.equal(
     evaluateSkillEligibility(implementation, { executionMode: 'autonomous', selfAssessment: c1 })
+      .eligible,
+    false
+  );
+  assert.equal(
+    evaluateSkillEligibility(regression, { executionMode: 'autonomous', selfAssessment: c1 })
       .eligible,
     false
   );
@@ -223,6 +247,17 @@ test('autonomous work enforces the fresh self-assessed leaf ceiling', () => {
   };
   assert.equal(
     evaluateSkillEligibility(implementation, { executionMode: 'autonomous', selfAssessment: c3 })
+      .eligible,
+    true
+  );
+  const c2 = {
+    kind: 'proto-ui.agent-capability-self-result',
+    validated: true,
+    fresh: true,
+    capability: { band: 'C2', eligibleTaskClasses: ['repair-bounded-regression'] },
+  };
+  assert.equal(
+    evaluateSkillEligibility(regression, { executionMode: 'autonomous', selfAssessment: c2 })
       .eligible,
     true
   );
@@ -251,4 +286,85 @@ test('handoff rejects a mode whose source is not trusted for that mode', () => {
     notes: [],
   };
   assert.throws(() => validateSkillHandoff(handoff, registry), /cannot be established/);
+});
+
+test('autonomous handoff stops at a human gate and a new human-assisted run may continue', () => {
+  const registry = loadSkillRegistry({ root });
+  const handoff = {
+    schemaVersion: 1,
+    kind: 'proto-ui.skill-handoff',
+    entrypoint: 'development',
+    executionMode: 'autonomous',
+    executionModeSource: 'governed-queue',
+    fromId: 'pui-orient',
+    nextSkillId: 'pui-select',
+    artifacts: [artifact('capability-envelope'), artifact('request-context')],
+    humanGates: ['semantic-direction'],
+    notes: [],
+  };
+  assert.throws(() => validateSkillHandoff(handoff, registry), /must stop/);
+  assert.equal(validateSkillHandoff({ ...handoff, nextSkillId: null }, registry).nextSkill, null);
+  const humanRun = {
+    ...handoff,
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    humanGates: [],
+  };
+  assert.equal(validateSkillHandoff(humanRun, registry).nextSkill.id, 'pui-select');
+});
+
+test('handoff mode cannot be overridden by CLI flags', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'pui-handoff-mode-'));
+  const handoffPath = path.join(directory, 'handoff.json');
+  const command = path.join(root, 'scripts/agent-operations/resolve-skill.mjs');
+  try {
+    fs.writeFileSync(
+      handoffPath,
+      JSON.stringify({
+        schemaVersion: 1,
+        kind: 'proto-ui.skill-handoff',
+        entrypoint: 'development',
+        executionMode: 'autonomous',
+        executionModeSource: 'governed-queue',
+        fromId: 'pui-orient',
+        nextSkillId: null,
+        artifacts: [artifact('capability-envelope')],
+        humanGates: [],
+        notes: [],
+      })
+    );
+    assert.throws(
+      () =>
+        execFileSync(
+          process.execPath,
+          [
+            command,
+            '--handoff',
+            handoffPath,
+            '--mode',
+            'human-assisted',
+            '--mode-source',
+            'current-user',
+          ],
+          { cwd: root, encoding: 'utf8' }
+        ),
+      /Command failed/
+    );
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('schedules, queues, and standing text cannot impersonate an active human loop', () => {
+  for (const source of [
+    'schedule',
+    'governed-queue',
+    'maintainer-invocation',
+    'standing-authorization',
+  ]) {
+    assert.throws(() => establishExecutionMode('human-assisted', source), /cannot be established/);
+  }
+  assert.equal(establishExecutionMode('autonomous', 'schedule'), 'autonomous');
+  assert.equal(establishExecutionMode('autonomous', 'governed-queue'), 'autonomous');
+  assert.equal(establishExecutionMode('autonomous', 'maintainer-invocation'), 'autonomous');
 });

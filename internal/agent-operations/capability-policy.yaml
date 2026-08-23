@@ -1,5 +1,5 @@
 schemaVersion: 2
-policyVersion: 2026-08-23.mode-1
+policyVersion: 2026-08-23.mode-2
 principle: local assessment decides how far an Agent may go alone, not whether it may participate with a human
 executionModes:
   human-assisted:
@@ -29,14 +29,14 @@ bands:
     description: not yet assessed for independent repository work
     taskClasses: [public-read]
     autonomousMutationCeiling: none
-    autonomousReviewCeiling: observe
+    autonomousReviewCeiling: none
   C1:
     description: can establish and report bounded facts while exposing uncertainty
     includesLowerBands: true
     minimumDimensionScore: 1
-    taskClasses: [observe, verify, trace, propose-classification]
+    taskClasses: [observe, verify, trace, propose-classification, review-local]
     autonomousMutationCeiling: none
-    autonomousReviewCeiling: partial
+    autonomousReviewCeiling: review-docs-and-links
   C2:
     description: can perform governed, bounded, and reversible maintenance
     includesLowerBands: true
@@ -50,7 +50,7 @@ bands:
       - repair-bounded-regression
       - implement-governed-tests
     autonomousMutationCeiling: feature-branch-or-reversible-github-metadata
-    autonomousReviewCeiling: bounded-technical
+    autonomousReviewCeiling: review-bounded-regression
   C3:
     description: can deliver and independently review an approved semantic implementation slice
     includesLowerBands: true
@@ -61,10 +61,9 @@ bands:
       - implement-approved-host-capability
       - implement-approved-adapter-slice
       - implement-approved-prototype
-      - review-candidate-change
       - review-maintenance-remediation
     autonomousMutationCeiling: feature-branch
-    autonomousReviewCeiling: independent-acceptance
+    autonomousReviewCeiling: review-governed-implementation-slice
   C4:
     description: can prepare complex semantic and governance decisions without deciding human gates
     includesLowerBands: true
@@ -75,7 +74,22 @@ bands:
       - prepare-release-state
       - audit-release-evidence
     autonomousMutationCeiling: feature-branch
-    autonomousReviewCeiling: cross-domain
+    autonomousReviewCeiling: review-governance-and-release-evidence
+reviewClasses:
+  review-facts-and-ci:
+    autonomousMinimumBand: C1
+  review-docs-and-links:
+    autonomousMinimumBand: C1
+  review-tests:
+    autonomousMinimumBand: C2
+  review-bounded-regression:
+    autonomousMinimumBand: C2
+  review-governed-implementation-slice:
+    autonomousMinimumBand: C3
+  review-cross-domain-semantics:
+    autonomousMinimumBand: C4
+  review-governance-and-release-evidence:
+    autonomousMinimumBand: C4
 mutationClasses:
   none: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
   proposal-only: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
@@ -97,14 +111,16 @@ scoring:
     - permission-escalation
     - hidden-uncertainty
     - snapshot-binding-failure
-    - evaluator-independence-failure
 selfAssessment:
   maximumBand: C4
   trust: unsigned-self-assessment
   humanAssistedEffect: advisory-only
   autonomousEffect: binding-task-and-review-ceiling
   projectTrusted: false
+  advisoryInHumanAssistedMode: true
+  bindingForAutonomousSelection: true
   grantsPermission: false
+  grantsAcceptanceAuthority: false
   predictsAcceptance: false
 authorityIntersection:
   - explicit-current-human-authorization-when-human-assisted

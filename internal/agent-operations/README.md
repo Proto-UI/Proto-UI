@@ -74,6 +74,7 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `schemas/capability-challenge.schema.json`: dynamic assessment challenge contract.
 - `schemas/capability-response.schema.json`: evidence-backed answer contract without a score or answer key.
 - `schemas/capability-self-result.schema.json`: deterministic unsigned U0-C4 local task-fit result.
+- `schemas/review-input.schema.json`: canonical body, revision, discussion, check, and evidence snapshot used for review hashing.
 - `schemas/review-packet.schema.json`: revision-bound local review evidence contract.
 - `fixtures/**`: positive and negative replay controls.
 - `scripts/agent-operations/collect-github-state.mjs`: bounded, sanitizing GitHub snapshot collector.
@@ -84,7 +85,8 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `scripts/agent-operations/resolve-skill.mjs`: deterministic one-leaf resolver.
 - `scripts/agent-operations/validate-capability-response.mjs`: challenge-bound response validator.
 - `scripts/agent-operations/derive-self-assessment.mjs`: unsigned U0-C4 task-fit result derivation.
-- `scripts/agent-operations/review-runtime.mjs`: review binding, stale-head, ceiling, and submission checks.
+- `scripts/agent-operations/review-runtime.mjs`: canonical review-input hashing, packet binding, stale-head, ceiling, and submission checks.
+- `scripts/agent-operations/review-packet.mjs`: CLI used by `pui-review` to hash input, validate, inspect, classify, and preflight a review packet against its handoff.
 - `.github/workflows/reposteward-portfolio-shadow.yml`: manual, read-only RepoSteward portfolio trial pinned to the registered external commit.
 
 Run:
@@ -93,6 +95,8 @@ Run:
 corepack pnpm@10.32.1 check:agent-operations
 corepack pnpm@10.32.1 agent:assess
 corepack pnpm@10.32.1 agent:skill -- pui-orient --mode human-assisted --mode-source current-user
+corepack pnpm@10.32.1 agent:review -- input-digest --input <review-input.json>
+corepack pnpm@10.32.1 agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json>
 ```
 
 ## Graduation rule

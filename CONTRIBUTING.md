@@ -260,7 +260,7 @@ Release preparation and publication are separate:
 3. Publication runs manually from governed `main` through the release workflow.
 4. A separate evidence change verifies registry, channel, integrity, tag, GitHub Release, assets, snapshot digest, workflow head, and deployments.
 
-An Agent may prepare or audit these phases within its capability. It may not publish, tag, activate stable lifecycle, merge, or recover a partial release without current human authorization.
+In `human-assisted` mode an Agent may prepare or audit these phases under current human decisions. In `autonomous` mode it must stay within its fresh local task and review ceilings. Neither mode allows the Agent to publish, tag, activate stable lifecycle, merge, or recover a partial release without current human authorization.
 
 ## Contributor permissions
 
@@ -280,7 +280,7 @@ The resolver is deterministic: `pnpm agent:skill -- <leaf-id> --mode <execution-
 
 Assessment never grants permission. Ordinary local edits, tests, signed-off commits, authorized branch pushes, own-PR updates, and review responses do not depend on an online issuer. External writes still require explicit or standing authorization and a live credential. Semantic admission, compatibility choices, PR approval, merge, publication, release, access, and repository rules stay with people.
 
-For review, bind evidence to the repository, PR, base SHA, and head SHA. A new push makes the old packet stale. CI success is useful evidence, but it is not an approval. An Agent must not approve its own work.
+For review, bind evidence to the repository, PR, base SHA, head SHA, declared review class, and a digest of the exact replies, threads, checks, and evidence inspected. A new push makes the old packet stale; new same-head input permits a new packet, while an unchanged packet is a duplicate. CI success is useful evidence, but it is not an approval. Assessment never derives approval, and an Agent must not approve its own work.
 
 The full Agent policy is in `internal/agent-operations/contributor-agents.md`. The human-readable skill catalog is on the documentation site. Autonomous-maintenance experiments use `$pui-maintain` and its separate independence protocol; supported no-finding and rejected outcomes close through `pui-record`, not a fake remediation review.
 

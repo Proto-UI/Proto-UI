@@ -10,6 +10,7 @@ import {
   computeSelfAssessmentResultDigest,
   createCapabilityResponseTemplate,
   deriveSelfAssessmentResult,
+  isSelfAssessmentFresh,
   loadCapabilityPolicy,
   loadCapabilityRubric,
   validateCapabilityResponse,
@@ -23,7 +24,7 @@ const policy = loadCapabilityPolicy(
 const rubric = loadCapabilityRubric(
   resolve(root, 'internal/agent-operations/capability-rubric.yaml')
 );
-const subject = `sha256:${'b'.repeat(64)}`;
+const subject = `session:${'b'.repeat(64)}`;
 const now = Date.now();
 
 function makeChallenge() {
@@ -39,10 +40,9 @@ function makeChallenge() {
     schemaVersion: 1,
     kind: 'proto-ui.agent-capability-challenge',
     challengeId: `challenge:${'c'.repeat(64)}`,
-    subject: { agentKeyFingerprint: subject },
+    subject: { assessmentSessionId: subject },
     scope: {
       repositoryId: 'github.com:Proto-UI/Proto-UI',
-      assessmentMode: 'self-assessment',
       snapshotMode: 'worktree',
       baseSha: 'a'.repeat(40),
       treeSha: 'a'.repeat(40),
@@ -67,7 +67,7 @@ function makeChallenge() {
       schema: 'internal/agent-operations/schemas/capability-response.schema.json',
       requiredPerQuestion: ['answer', 'evidence', 'unknowns', 'humanGates'],
       selfAssessmentCeiling: 'C4',
-      independentEvaluationRequiredAbove: 'none-for-local-self-governance',
+      externalEvaluationRequired: false,
     },
   };
   challenge.challengeDigest = computeChallengeDigest(challenge);
@@ -134,9 +134,15 @@ test('self scores derive the full unsigned U0-C4 autonomous recommendation', () 
   });
   assert.equal(high.capability.band, 'C4');
   assert.equal(high.capability.autonomousTaskCeiling, 'C4');
-  assert.equal(high.capability.autonomousReviewCeiling, 'cross-domain');
+  assert.equal(high.capability.autonomousReviewCeiling, 'review-governance-and-release-evidence');
+  assert(high.capability.recommendedReviewClasses.includes('review-facts-and-ci'));
+  assert(high.capability.recommendedReviewClasses.includes('review-cross-domain-semantics'));
+  assert.equal(high.modeEffects.advisoryInHumanAssistedMode, true);
+  assert.equal(high.modeEffects.bindingForAutonomousSelection, true);
+  assert.equal(high.trust.selfAssessed, true);
   assert.equal(high.trust.projectTrusted, false);
   assert.equal(high.trust.grantsPermission, false);
+  assert.equal(high.trust.grantsAcceptanceAuthority, false);
   assert.equal(high.trust.predictsAcceptance, false);
   assert.equal(high.validity.expiresAt, challenge.validity.expiresAt);
   assert.equal(computeSelfAssessmentResultDigest(high), high.resultDigest);
@@ -228,4 +234,50 @@ test('self-result verification rejects forged bands, task classes, and digests',
   forgedTasks.capability.eligibleTaskClasses.push('implement-approved-module');
   forgedTasks.resultDigest = computeSelfAssessmentResultDigest(forgedTasks);
   assert.throws(() => validateSelfAssessmentResult(forgedTasks, policy), /task classes/);
+  const forgedReviews = structuredClone(result);
+  forgedReviews.capability.recommendedReviewClasses.push('review-cross-domain-semantics');
+  forgedReviews.resultDigest = computeSelfAssessmentResultDigest(forgedReviews);
+  assert.throws(() => validateSelfAssessmentResult(forgedReviews, policy), /review classes/);
+  const forgedMode = structuredClone(result);
+  forgedMode.modeEffects.bindingForAutonomousSelection = false;
+  forgedMode.resultDigest = computeSelfAssessmentResultDigest(forgedMode);
+  assert.throws(() => validateSelfAssessmentResult(forgedMode, policy), /mode effects/);
+  const forgedAuthority = structuredClone(result);
+  forgedAuthority.trust.grantsAcceptanceAuthority = true;
+  forgedAuthority.resultDigest = computeSelfAssessmentResultDigest(forgedAuthority);
+  assert.throws(() => validateSelfAssessmentResult(forgedAuthority, policy), /trust boundary/);
+});
+
+test('assessment freshness survives bounded worktree edits but not authority or runtime drift', () => {
+  const challenge = makeChallenge();
+  const response = makeResponse(challenge);
+  const result = deriveSelfAssessmentResult({
+    challenge,
+    response,
+    evaluation: makeEvaluation(2),
+    rubric,
+    policy,
+  });
+  const snapshot = {
+    ...result.scope,
+    worktreeDigest: 'f'.repeat(64),
+    rubricDigest: result.rubric.digest,
+  };
+  assert.equal(isSelfAssessmentFresh(result, snapshot, now), true);
+  assert.equal(
+    isSelfAssessmentFresh(result, { ...snapshot, catalogDigest: 'e'.repeat(64) }, now),
+    false
+  );
+  assert.equal(
+    isSelfAssessmentFresh(result, { ...snapshot, generatorDigest: 'd'.repeat(64) }, now),
+    false
+  );
+  assert.equal(
+    isSelfAssessmentFresh(result, { ...snapshot, rubricDigest: 'c'.repeat(64) }, now),
+    false
+  );
+  assert.equal(
+    isSelfAssessmentFresh(result, snapshot, Date.parse(result.validity.expiresAt) + 1),
+    false
+  );
 });

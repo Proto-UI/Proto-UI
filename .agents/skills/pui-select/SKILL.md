@@ -9,7 +9,7 @@ description: Select at most one eligible Proto UI work item and return a read-on
 2. Read `CONTRIBUTING.md` and inspect the live issue queue, assignees, recent comments, linked pull requests, labels, milestones, and Project fields when available.
 3. Reject work that is unassessed, ambiguous, design-blocked, oversized, missing acceptance or validation boundaries, beyond capability or permission, already owned, actively claimed, or linked to active implementation.
 4. Select at most one smallest ready item with a fixed expected result, explicit exclusions, evidence boundary, risk, required capability, and permission ceiling. Returning no eligible item is correct.
-5. In autonomous mode, reject any item whose task class exceeds the fresh self-assessed ceiling. In human-assisted mode, report low confidence and stronger review needs without blocking the user's selected work.
+5. In autonomous mode, reject any item whose task class exceeds the fresh self-assessed ceiling. For review work, also require one declared review class present in `recommendedReviewClasses`. In human-assisted mode, report low confidence and stronger review needs without blocking the user's selected work.
 6. Return raw selection facts, a copy-ready claim proposal, planned evidence, expiry, unknowns, and the exact authorization and live permission required by `pui-claim`.
 
 Remain read-only. Do not comment, label, assign, claim, edit, close, create a branch, or mutate Project state. A proposal never changes readiness or grants implementation authority.

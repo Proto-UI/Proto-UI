@@ -131,6 +131,35 @@ for (const projectionPath of [
   }
 }
 
+const bilingualAgentSemantics = [
+  {
+    path: resolve(root, 'apps/www/src/content/docs/en/contribute/agents.md'),
+    required: [
+      'It does not block the work you explicitly requested.',
+      'hard ceiling on the task and review classes',
+      'reviewInputDigest',
+      'Assessment never derives approval',
+    ],
+  },
+  {
+    path: resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/agents.md'),
+    required: [
+      '它不会挡住你明确要求的工作。',
+      '任务类别和复核类别的硬上限',
+      '输入 digest',
+      '测评不会派生批准',
+    ],
+  },
+];
+for (const { path: projectionPath, required } of bilingualAgentSemantics) {
+  const projection = readFileSync(projectionPath, 'utf8');
+  for (const phrase of required) {
+    if (!projection.includes(phrase)) {
+      fail(projectionPath + ': mode/review semantics are missing: ' + phrase);
+    }
+  }
+}
+
 const agentPolicy = readFileSync(
   resolve(root, 'internal/agent-operations/capability-policy.yaml'),
   'utf8'
@@ -149,11 +178,27 @@ try {
   );
   if (
     parsedPolicy.bands?.C1?.minimumDimensionScore !== 1 ||
+    !parsedPolicy.bands?.C1?.taskClasses?.includes('review-local') ||
     !parsedPolicy.bands?.C2?.taskClasses?.includes('release-own-claim') ||
-    !parsedPolicy.bands?.C2?.taskClasses?.includes('update-tracked-maintenance-state')
+    !parsedPolicy.bands?.C2?.taskClasses?.includes('update-tracked-maintenance-state') ||
+    parsedPolicy.reviewClasses?.['review-facts-and-ci']?.autonomousMinimumBand !== 'C1' ||
+    parsedPolicy.reviewClasses?.['review-bounded-regression']?.autonomousMinimumBand !== 'C2' ||
+    parsedPolicy.reviewClasses?.['review-governance-and-release-evidence']
+      ?.autonomousMinimumBand !== 'C4' ||
+    ![
+      'semantic-admission',
+      'ownership-decision',
+      'scope-or-compatibility-tradeoff',
+      'pull-request-approval',
+      'merge',
+      'publication',
+      'release',
+      'access-or-secret-change',
+      'branch-or-ruleset-change',
+    ].every((gate) => parsedPolicy.alwaysHuman?.includes(gate))
   ) {
     fail(
-      'capability policy must derive C1 from non-zero scores and cover governed C2 metadata transitions.'
+      'capability policy must cover review ceilings, governed C2 transitions, and always-human gates.'
     );
   }
 } catch (error) {
@@ -165,6 +210,7 @@ for (const schemaName of [
   'capability-challenge.schema.json',
   'capability-response.schema.json',
   'capability-self-result.schema.json',
+  'review-input.schema.json',
   'review-packet.schema.json',
 ]) {
   JSON.parse(readFileSync(resolve(root, 'internal/agent-operations/schemas', schemaName), 'utf8'));
@@ -185,7 +231,8 @@ try {
 if (
   challenge.kind !== 'proto-ui.agent-capability-challenge' ||
   challenge.questions?.length < 6 ||
-  challenge.responseContract?.selfAssessmentCeiling !== 'C4'
+  challenge.responseContract?.selfAssessmentCeiling !== 'C4' ||
+  challenge.responseContract?.externalEvaluationRequired !== false
 ) {
   fail('capability challenge generator returned an invalid contract.');
 }
