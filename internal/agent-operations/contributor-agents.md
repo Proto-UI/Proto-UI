@@ -73,6 +73,10 @@ Any later head makes the packet stale. Review the incremental range from the pri
 
 Local review is always allowed. A low band in `human-assisted` mode produces a partial review or `ABSTAIN` with explicit limitations. Autonomous review declares one of the policy review classes and stays within the fresh cumulative class list. Packet validation and submission preflight recompute that class ceiling from the validated handoff and assessment, rejecting a changed class, over-strong recommendation, or missing limitation. Submission preflight re-collects the whole canonical review input live from GitHub and compares its digest, so any drift on the same head fails closed; it also derives the viewer identity, pull-request author, and credential permission from that live context instead of caller-provided strings. GitHub review submission requires a new human-assisted run and separate current user authorization.
 
+## Evidence discipline
+
+Evidence follows six standing principles. Assertions bind to rendered output, not to internal state facts alone. States are probed pairwise so that verdicts rest on transitions and deltas, not isolated snapshots. Observing or changing a surface obligates re-verifying every surface anchored to, composed with, or layered above it. Every expected value cites its authority, whether a spec anchor or an upstream reference, and an observable behavior without a cited authority is itself a finding. Expectations are scoped per design-language family and never transfer across families without a fresh citation. Any boundary that depends on a live external system is exercised against that system before it is trusted.
+
 ## Handoff and zero trust
 
 A skill handoff is lazy workflow and evidence transfer, not an authorization credential. It carries `executionMode`, its trusted source, the producing leaf, artifact references, human gates, and at most one next leaf. Revalidate live facts at the action boundary instead of trusting a stale packet.

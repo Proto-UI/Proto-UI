@@ -19,7 +19,16 @@ description: Independently review a Proto UI change against current authority, a
 
 Return adequate, incomplete, misleading, or `ABSTAIN`. Route semantic or integration choices to the appropriate human gate.
 
-Never submit an approval or merge. Do not otherwise change GitHub state or fix the change unless the user separately authorizes that action. Immediately before a review write, run `pnpm agent:review -- authorize-submission --packet <path> --input <review-input-path> --handoff <validated-handoff-path> [--assessment <result-path>] --authorization explicit-current-user`. The preflight re-collects the whole canonical review input live from GitHub with `gh`, compares its digest against `reviewInputDigest`, and derives the viewer identity, pull-request author, credential permission, and CI conclusion from that live context; caller-provided identities and permissions are never accepted, so any drift in body, commits, replies, threads, or checks fails closed. It then recomputes the execution mode, review ceiling, packet recommendation, limitations, and input digest; a stale packet fails, and autonomous mode must stop and start a new human-assisted run. Never issue the independent verdict for work produced in the same context.
+## Evidence discipline
+
+1. Findings bind to rendered output: geometry, paint, positioning, and screen evidence; state facts alone do not substantiate an observed behavior.
+2. Probe adjacent states pairwise and reason about their deltas; the review target is transitions, not snapshots.
+3. Re-assert every surface anchored to or composed with an affected surface before closing a finding.
+4. Every expected value cites its authority (spec anchor or upstream reference); unattributed observable behavior is a finding by itself.
+5. Expectations are family-scoped and never transfer across design languages without a fresh citation.
+6. Submission boundaries that touch live systems are exercised against those systems before they are trusted.
+
+Never submit an approval or merge. Do not otherwise change GitHub state or fix the change unless the user separately authorizes that action. Immediately before a review write, run `pnpm agent:review -- authorize-submission --packet <path> --input <review-input-path> --handoff <validated-handoff-path> [--assessment <result-path>] [--external-evidence-file <evidence.json>] --authorization explicit-current-user`. The preflight re-collects the whole canonical review input live from GitHub with `gh`, compares its digest against `reviewInputDigest`, and derives the viewer identity, pull-request author, credential permission, and CI conclusion from that live context; caller-provided identities and permissions are never accepted, so any drift in body, commits, replies, threads, or checks fails closed; a pagination overflow in any live connection also fails closed. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check. It then recomputes the execution mode, review ceiling, packet recommendation, limitations, and input digest; a stale packet fails, and autonomous mode must stop and start a new human-assisted run. Never issue the independent verdict for work produced in the same context.
 
 ## Explicit handoff
 

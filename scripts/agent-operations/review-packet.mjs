@@ -28,9 +28,11 @@ function usage() {
     '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>]',
     '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
-    '  pnpm agent:review -- authorize-submission --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] --authorization explicit-current-user',
+    '  pnpm agent:review -- authorize-submission --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization explicit-current-user',
     '',
-    'authorize-submission re-collects the canonical review input live from GitHub and derives the viewer identity, pull-request author, credential permission, and CI conclusion from that live context; caller-provided identities are never accepted.',
+    'authorize-submission re-collects the canonical review input live from GitHub and derives the viewer identity, pull-request author, credential permission, and CI conclusion from that live context; caller-provided identities are never accepted. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
+    '',
+    '  pnpm agent:review:smoke -- <repositoryId> <pullRequest>   # exercise the live collector against the real GitHub GraphQL schema',
   ].join('\n');
 }
 
@@ -55,7 +57,14 @@ const ALLOWED_OPTIONS = new Map([
   ['eligibility', new Set(['--handoff', '--review-class', '--assessment'])],
   [
     'authorize-submission',
-    new Set(['--packet', '--input', '--handoff', '--assessment', '--authorization']),
+    new Set([
+      '--packet',
+      '--input',
+      '--handoff',
+      '--assessment',
+      '--authorization',
+      '--external-evidence-file',
+    ]),
   ],
 ]);
 
@@ -200,7 +209,18 @@ try {
     );
     const execution = validateExecution(args, packet, policy);
     if (execution.handoff.executionMode === 'human-assisted') {
-      const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest);
+      const externalEvidencePath = args.get('--external-evidence-file');
+      let externalEvidence = [];
+      if (externalEvidencePath) {
+        const parsed = JSON.parse(fs.readFileSync(externalEvidencePath, 'utf8'));
+        if (!Array.isArray(parsed)) {
+          throw new Error('--external-evidence-file must contain a JSON array');
+        }
+        externalEvidence = parsed;
+      }
+      const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
+        externalEvidence,
+      });
       output = authorizeReviewSubmission({
         packet,
         input,
