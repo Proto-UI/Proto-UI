@@ -144,12 +144,19 @@ export function validateReviewInputSnapshot(input) {
     ['name', 'status', 'conclusion', 'completedAt', 'detailsUrl'],
     'review input checks',
     (item) => {
-      for (const field of ['name', 'status', 'detailsUrl']) {
+      for (const field of ['name', 'status']) {
         assert(
           typeof item[field] === 'string' && item[field].length > 0,
           `check ${field} is invalid`
         );
       }
+      // CheckRun.detailsUrl and StatusContext.targetUrl are nullable in the
+      // GitHub GraphQL schema; a check without a details link is valid input.
+      assert(
+        item.detailsUrl === null ||
+          (typeof item.detailsUrl === 'string' && item.detailsUrl.length > 0),
+        'check detailsUrl is invalid'
+      );
       assert(
         item.conclusion === null ||
           (typeof item.conclusion === 'string' && item.conclusion.length > 0),

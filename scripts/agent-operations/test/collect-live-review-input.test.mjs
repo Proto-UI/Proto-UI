@@ -170,6 +170,32 @@ test('live collector passes external evidence through verbatim and validates its
   );
 });
 
+test('live collector accepts nullable check detail links from both context kinds', () => {
+  const nullableUrls = payload();
+  nullableUrls.data.repository.pullRequest.headRef.target.statusCheckRollup.contexts.nodes = [
+    {
+      __typename: 'CheckRun',
+      name: 'test',
+      status: 'COMPLETED',
+      conclusion: 'SUCCESS',
+      completedAt: '2026-08-23T06:00:00Z',
+      detailsUrl: null,
+    },
+    {
+      __typename: 'StatusContext',
+      context: 'legacy-ci',
+      state: 'SUCCESS',
+      targetUrl: null,
+      createdAt: '2026-08-23T06:00:00Z',
+    },
+  ];
+  const result = buildLiveReviewInput(nullableUrls, 'github.com:Proto-UI/Proto-UI', 487, []);
+  assert.equal(result.input.checks.length, 2);
+  assert.equal(result.input.checks[0].detailsUrl, null);
+  assert.equal(result.input.checks[1].detailsUrl, null);
+  assert.equal(summarizeLiveChecks(result.input.checks), 'success');
+});
+
 test('check context normalization matches both connection node kinds', () => {
   assert.deepEqual(
     normalizeCheck({

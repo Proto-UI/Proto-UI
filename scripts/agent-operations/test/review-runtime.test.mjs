@@ -615,6 +615,25 @@ test('runtime validation matches the review-packet JSON Schema for types and tim
   assert.throws(() => validateReviewPacket(packet({ observedAt: 0 }, input), input), /observedAt/);
 });
 
+test('review input validation accepts nullable check details links but rejects empty ones', () => {
+  const withCheck = (detailsUrl) =>
+    reviewInput({
+      checks: [
+        {
+          name: 'test',
+          status: 'COMPLETED',
+          conclusion: 'SUCCESS',
+          completedAt: '2026-08-23T00:00:00.000Z',
+          detailsUrl,
+        },
+      ],
+    });
+
+  assert.doesNotThrow(() => validateReviewInputSnapshot(withCheck(null)));
+  assert.throws(() => validateReviewInputSnapshot(withCheck('')), /check detailsUrl/);
+  assert.throws(() => validateReviewInputSnapshot(withCheck(undefined)), /check detailsUrl/);
+});
+
 test('agent:review CLI validates and inspects the same packet contract used by the skill', () => {
   const directory = mkdtempSync(path.join(tmpdir(), 'pui-review-packet-'));
   const packetPath = path.join(directory, 'packet.json');

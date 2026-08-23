@@ -74,7 +74,7 @@
           "status": { "type": "string", "minLength": 1 },
           "conclusion": { "type": ["string", "null"] },
           "completedAt": { "type": ["string", "null"], "format": "date-time" },
-          "detailsUrl": { "type": "string", "minLength": 1 }
+          "detailsUrl": { "type": ["string", "null"], "minLength": 1 }
         },
         "additionalProperties": false
       }
