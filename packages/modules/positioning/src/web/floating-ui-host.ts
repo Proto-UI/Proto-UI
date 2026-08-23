@@ -32,6 +32,40 @@ function isElement(value: unknown): value is HTMLElement {
   return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
 }
 
+/**
+ * Anchored geometry excludes the anchor's own CSS translation. Interaction
+ * transforms (hover lift, press-down) are decoration of the anchor surface;
+ * anchored surfaces must track layout position, so a state transform must
+ * never re-position the floating element.
+ */
+function virtualReferenceFor(anchor: HTMLElement) {
+  return {
+    getBoundingClientRect(): DOMRect {
+      const rect = anchor.getBoundingClientRect();
+      let dx = 0;
+      let dy = 0;
+      const transform =
+        typeof getComputedStyle === 'function' ? getComputedStyle(anchor).transform : 'none';
+      if (transform && transform !== 'none' && typeof DOMMatrixReadOnly !== 'undefined') {
+        const matrix = new DOMMatrixReadOnly(transform);
+        dx = matrix.m41;
+        dy = matrix.m42;
+      }
+      return {
+        x: rect.x - dx,
+        y: rect.y - dy,
+        left: rect.left - dx,
+        top: rect.top - dy,
+        right: rect.right - dx,
+        bottom: rect.bottom - dy,
+        width: rect.width,
+        height: rect.height,
+        toJSON: () => ({}),
+      } as DOMRect;
+    },
+  };
+}
+
 function middlewareFor(config: AnchoredPositionConfig): Middleware[] {
   const middleware: Middleware[] = [
     offset({ mainAxis: config.sideOffset, crossAxis: config.alignOffset }),
@@ -70,7 +104,7 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
       const position = async () => {
         const { anchor, floating, config } = connection;
         if (disposed || !isElement(anchor) || !isElement(floating)) return;
-        const result = await computePosition(anchor, floating, {
+        const result = await computePosition(virtualReferenceFor(anchor), floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
           middleware: middlewareFor(config),

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AnchoredPositionConfig } from '@proto.ui/core';
 import { createFloatingUiAnchoredPositionHost } from '../src';
 
@@ -81,6 +81,61 @@ describe('module-positioning: Floating UI host', () => {
     expect(floating.style.left).toBe('110px');
     expect(floating.style.top).toBe('82px');
     expect(floating.dataset).toMatchObject({ side: 'top', align: 'end' });
+    lease.dispose();
+  });
+
+  it('excludes the anchor own CSS translation from anchored geometry', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+    const transformSpy = vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      transform: 'matrix(1, 0, 0, 1, -1, -1)',
+    } as CSSStyleDeclaration);
+
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+    });
+    await flush();
+
+    // The -1/-1 translation (hover lift) must not leak into the floating position.
+    expect(floating.style.left).toBe('101px');
+    expect(floating.style.top).toBe('125px');
+    transformSpy.mockRestore();
+    lease.dispose();
+  });
+
+  it('re-recomputes with the current translation each update', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+    let transform = 'matrix(1, 0, 0, 1, 0, 0)';
+    const transformSpy = vi
+      .spyOn(window, 'getComputedStyle')
+      .mockImplementation(() => ({ transform }) as CSSStyleDeclaration);
+
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+    });
+    await flush();
+    expect(floating.style.left).toBe('100px');
+    expect(floating.style.top).toBe('124px');
+
+    // Browser getBoundingClientRect shifts by (-3, -3), but virtual reference backs it out
+    transform = 'matrix(1, 0, 0, 1, -3, -3)';
+    setRect(anchor, rect(97, 97, 50, 20));
+    lease.requestUpdate();
+    await flush();
+    expect(floating.style.left).toBe('100px');
+    expect(floating.style.top).toBe('124px');
+    transformSpy.mockRestore();
     lease.dispose();
   });
 
