@@ -194,6 +194,28 @@ describe('proto style css renderer', () => {
     expect(css).toContain('transition-property: none;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
+  it('emits explicit duration and ease overrides after transition utilities so they win the cascade', () => {
+    const css = renderProtoStyleTokenCss([
+      'duration-200',
+      'ease-in-out',
+      'transition-all',
+      'transition-colors',
+    ]);
+
+    const transitionAll = css.indexOf('[data-pui-style~="transition-all"]');
+    const transitionColors = css.indexOf('[data-pui-style~="transition-colors"]');
+    const duration = css.indexOf('[data-pui-style~="duration-200"]');
+    const ease = css.indexOf('[data-pui-style~="ease-in-out"]');
+
+    expect(transitionAll).toBeGreaterThan(-1);
+    expect(duration).toBeGreaterThan(transitionAll);
+    expect(duration).toBeGreaterThan(transitionColors);
+    expect(ease).toBeGreaterThan(transitionAll);
+    expect(ease).toBeGreaterThan(transitionColors);
+    expect(css).toContain('transition-duration: 150ms;');
+    expect(css).toContain('transition-duration: 200ms;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
 
   it('renders state-driven spacing translations used by the Switch thumb', () => {
     const css = renderProtoStyleTokenCss([
