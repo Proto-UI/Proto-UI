@@ -107,7 +107,19 @@ describe.sequential('ring offset browser regressions', () => {
         await applyColorScheme(page, 'dark');
         await focusDropdownTrigger(page, previewer);
 
-        const sample = await ringOffsetSample(page);
+        // The trigger runs `transition-colors`: on the theme flip its
+        // background-color animates over 150ms while the ring offset colour,
+        // resolved through custom properties, snaps immediately. Poll until the
+        // two painted colours agree instead of sampling a mid-transition frame.
+        let sample = await ringOffsetSample(page);
+        for (
+          let attempt = 0;
+          sample.offset.join() !== sample.background.join() && attempt < 60;
+          attempt += 1
+        ) {
+          await page.waitForTimeout(15);
+          sample = await ringOffsetSample(page);
+        }
         expect(sample.focusVisible, `${runtime}/focus-visible`).toBe(true);
         expect(sample.explicitOffsetColor, `${runtime}/implicit-offset`).toBe('');
         expect(sample.offsetShadow, `${runtime}/offset-shadow`).not.toBe('none');
