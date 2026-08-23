@@ -136,11 +136,21 @@ const staticUtilities: Record<string, string[]> = {
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],
-  'transition-[color,box-shadow]': ['transition-property: color, box-shadow;'],
-  'transition-opacity': ['transition-property: opacity;'],
+  'transition-[color,box-shadow]': [
+    'transition-property: color, box-shadow;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
+  'transition-opacity': [
+    'transition-property: opacity;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
   'transition-none': ['transition-property: none;'],
   'transition-colors': [
     'transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
   ],
   'duration-150': ['transition-duration: 150ms;', '--pui-animation-duration: 150ms;'],
   'duration-200': ['transition-duration: 200ms;', '--pui-animation-duration: 200ms;'],
