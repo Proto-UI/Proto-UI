@@ -115,7 +115,7 @@ const dropdownTrigger = definePrototype<ShadcnDropdownTriggerProps, ShadcnDropdo
 
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px bg-muted text-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
 
     def.rule({

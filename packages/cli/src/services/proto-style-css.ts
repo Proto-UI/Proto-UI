@@ -131,7 +131,11 @@ const staticUtilities: Record<string, string[]> = {
   'slide-in-from-left-2': ['--pui-translate-x: -0.5rem;'],
   'slide-in-from-right-2': ['--pui-translate-x: 0.5rem;'],
   'slide-in-from-top-2': ['--pui-translate-y: -0.5rem;'],
-  'transition-all': ['transition-property: all;'],
+  'transition-all': [
+    'transition-property: all;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
   'transition-[color,box-shadow]': ['transition-property: color, box-shadow;'],
   'transition-opacity': ['transition-property: opacity;'],
   'transition-none': ['transition-property: none;'],
