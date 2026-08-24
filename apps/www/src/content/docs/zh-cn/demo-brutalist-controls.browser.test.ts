@@ -213,6 +213,7 @@ type TextareaFocusSnapshot = {
   active: boolean;
   focused: boolean;
   focusVisible: boolean;
+  nativeFocusVisible: boolean;
   hostFocused: boolean;
   hostFocusVisible: boolean;
   surfaceFocusVisible: boolean;
@@ -239,6 +240,7 @@ async function wcTextareaFocusSnapshot(previewer: Locator): Promise<TextareaFocu
       active: document.activeElement === textarea,
       focused: exposes.focused.get(),
       focusVisible: exposes.focusVisible.get(),
+      nativeFocusVisible: textarea.matches(':focus-visible'),
       hostFocused: host.hasAttribute('data-focused'),
       hostFocusVisible: host.hasAttribute('data-focus-visible'),
       surfaceFocusVisible: textarea.hasAttribute('data-focus-visible'),
@@ -635,12 +637,22 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         const pointer = await wcTextareaFocusSnapshot(previewer);
         expect(pointer.active, `${colorScheme}/pointer active target`).toBe(true);
         expect(pointer.focused, `${colorScheme}/pointer focused expose`).toBe(true);
-        expect(pointer.focusVisible, `${colorScheme}/pointer focusVisible expose`).toBe(false);
-        expect(pointer.hostFocusVisible, `${colorScheme}/pointer host marker`).toBe(false);
-        expect(pointer.surfaceFocusVisible, `${colorScheme}/pointer surface marker`).toBe(false);
-        expect(pointer.boxShadow, `${colorScheme}/modality-specific ring`).not.toBe(
-          keyboard.boxShadow
+        expect(pointer.focusVisible, `${colorScheme}/pointer focusVisible expose`).toBe(
+          pointer.nativeFocusVisible
         );
+        expect(pointer.hostFocusVisible, `${colorScheme}/pointer host marker`).toBe(
+          pointer.nativeFocusVisible
+        );
+        expect(pointer.surfaceFocusVisible, `${colorScheme}/pointer surface marker`).toBe(
+          pointer.nativeFocusVisible
+        );
+        if (pointer.nativeFocusVisible) {
+          expect(pointer.boxShadow, `${colorScheme}/host-derived ring`).toBe(keyboard.boxShadow);
+        } else {
+          expect(pointer.boxShadow, `${colorScheme}/host-derived no-ring`).not.toBe(
+            keyboard.boxShadow
+          );
+        }
         await textarea.evaluate((element) => (element as HTMLTextAreaElement).blur());
       }
     } finally {
