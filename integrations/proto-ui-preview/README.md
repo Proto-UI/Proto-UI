@@ -7,8 +7,11 @@ Each PR receives one isolated Cloudflare Pages project named
 closing the PR deletes the entire project.
 
 The preview is not public. Its trusted Pages `_worker.js` asks Poppy to authorize
-every asset request. GitHub OAuth grants access only to the PR author or an active
-member of the Proto-UI organization.
+every asset request. GitHub OAuth grants access only to the PR author, a current
+requested or non-dismissed recorded reviewer, or an active member of the Proto-UI
+organization. Reviewer and membership eligibility is re-read while a browser
+session is active, so a dismissed review or removed pending assignment can revoke
+access without waiting for the session cookie to expire.
 
 ## Data flow
 
@@ -186,7 +189,7 @@ For acceptance, verify all of the following:
 
 1. PR #462's fork build gets no secrets and uploads the expected artifact.
 2. Direct navigation to its Pages URL redirects to Poppy GitHub OAuth.
-3. The PR author and an active Proto-UI organization member can enter; an
+3. The PR author, a current recorded reviewer, and an active Proto-UI organization member can enter; an
    unrelated GitHub account receives no preview session.
 4. Synchronizing the PR replaces the deployment and updates the same comment.
 5. A failed build invalidates the current head's preview instead of leaving a

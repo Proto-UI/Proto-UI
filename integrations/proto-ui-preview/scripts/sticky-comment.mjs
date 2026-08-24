@@ -2,6 +2,8 @@
 
 import process from "node:process";
 
+import { ownedMarkerComments } from "./sticky-comment-lib.mjs";
+
 const token = process.env.GITHUB_TOKEN || "";
 const [owner, repo] = (process.env.GITHUB_REPOSITORY || "").split("/");
 const pr = Number(process.env.PREVIEW_PR);
@@ -19,7 +21,7 @@ const states = {
   ready: {
     heading: "✅ Preview ready",
     detail: `[Open the contributor preview](${origin})`,
-    note: "GitHub sign-in is required. Access is limited to the PR author and active Proto-UI organization members.",
+    note: "GitHub sign-in is required. Access is limited to the PR author, recorded reviewers, and active Proto-UI organization members; eligibility is rechecked while browsing.",
   },
   failed: {
     heading: "❌ Preview deployment failed",
@@ -78,9 +80,10 @@ for (let page = 1; page <= 20; page += 1) {
   if (batch.length < 100) break;
   if (page === 20) throw new Error("refusing to comment before all existing comments are searched");
 }
-const matches = comments.filter(
-  (comment) => comment.user?.type === "Bot" && comment.body?.includes(marker),
-);
+// Match GitHub Actions' stable numeric bot identity rather than every Bot.
+// The marker is public, so trusting user.type alone would let an unrelated App
+// make Poppy edit or delete its comment.
+const matches = ownedMarkerComments(comments, marker);
 if (matches.length === 0) {
   await github(`/issues/${pr}/comments`, { method: "POST", body: JSON.stringify({ body }) });
   console.log(`Created the preview comment for PR #${pr}.`);
