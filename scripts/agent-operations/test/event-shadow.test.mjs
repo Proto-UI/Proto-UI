@@ -270,6 +270,27 @@ test('bounded replay state fails closed instead of growing without limit', () =>
   );
 });
 
+test('bounded cursor state fails closed instead of emitting an oversized next state', () => {
+  const referencedDeliveryKey = 'c'.repeat(64);
+  const cursor = {
+    deliveryKey: referencedDeliveryKey,
+    updatedAt: '2026-08-24T12:00:00.000Z',
+    headSha: 'd'.repeat(40),
+  };
+  const state = {
+    ...emptyState(),
+    seenDeliveryKeys: [referencedDeliveryKey],
+    objectCursors: Object.fromEntries(
+      Array.from({ length: 10_000 }, (_, index) => [`pull-request:${index + 10_001}`, cursor])
+    ),
+  };
+
+  assert.throws(
+    () => evaluateEventShadow({ envelope: normalize(), policy, state }),
+    /object cursor state capacity is exhausted/i
+  );
+});
+
 test('envelope, receipt, and replay-state validators reject forged boundaries', () => {
   const envelope = normalize();
   const result = evaluateEventShadow({ envelope, policy, state: emptyState() });

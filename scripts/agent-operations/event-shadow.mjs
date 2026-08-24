@@ -661,6 +661,12 @@ export function evaluateEventShadow({ envelope, policy, state }) {
   }
 
   const cursor = nextState.objectCursors[objectKey];
+  if (!cursor) {
+    assert(
+      Object.keys(nextState.objectCursors).length < MAX_EVENT_STATE_ENTRIES,
+      'object cursor state capacity is exhausted; reconcile or rotate state before admitting work'
+    );
+  }
   if (cursor) {
     const incoming = Date.parse(envelope.revision.updatedAt);
     const current = Date.parse(cursor.updatedAt);
