@@ -25,5 +25,12 @@ describe('shadcn Dropdown Item evidence text', () => {
       'Button #454 is a related component observation, not measured evidence for Dropdown Item'
     );
     expect(text['zh-CN']).toContain('Button #454 仅是相邻组件观察');
+
+    const testEntity = workspace.entities.find(
+      (candidate) => candidate.id === 'T-SHADCN-DROPDOWN-MENU-ITEM-0001'
+    );
+    const note = testEntity?.implementations?.[0]?.notes?.[0];
+    expect(note).toContain('Button #454 is only a related component observation');
+    expect(note).toContain('not measured evidence for Dropdown Item');
   });
 });

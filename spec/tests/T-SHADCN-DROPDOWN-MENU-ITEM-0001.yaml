@@ -39,15 +39,10 @@ implementations:
         T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-PROPS-STYLES-AND-COMPATIBILITY,
       ]
     exercises: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]
-    notes: [
-        Positive tests cover collection focus entry,
-        item selection closing the menu,
-        base tokens,
-        and destructive surface; remaining gaps stay centralized.,
-        The destructive surface assertion is projection evidence only; without a docs instance,
-        cross-runtime rendered evidence,
-        and this surface's own contrast measurement it stays render-undemonstrated; Button, #454 is only a related observation.,
-      ]
+    notes:
+      - >-
+        Positive tests cover collection focus entry, item selection closing the menu, base tokens, and the destructive surface; remaining gaps stay centralized. The destructive assertion is projection evidence only: without a docs instance, cross-runtime rendered evidence, and this surface's own contrast measurement it stays render-undemonstrated. Button #454 is only a related component observation, not measured evidence for Dropdown Item.
+
 verifies:
   prototypes:
     - id: P-SHADCN-DROPDOWN-MENU-ITEM
