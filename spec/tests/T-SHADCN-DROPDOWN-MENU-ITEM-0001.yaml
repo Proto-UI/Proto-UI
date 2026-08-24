@@ -23,6 +23,7 @@ cases:
         P-SHADCN-DROPDOWN-MENU-ITEM-CURRENT-VISUAL-SURFACE,
         P-SHADCN-DROPDOWN-MENU-ITEM-STATE-DRIVEN-STYLES,
         P-SHADCN-DROPDOWN-MENU-ITEM-COMPATIBILITY-SUBSET,
+        P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-EVIDENCE-BOUNDARY,
         P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION,
       ]
     expectation: shadcn-dropdown-item-current-variants-and-command-styles
@@ -38,13 +39,14 @@ implementations:
         T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-PROPS-STYLES-AND-COMPATIBILITY,
       ]
     exercises: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]
-    notes:
-      [
+    notes: [
         Positive tests cover collection focus entry,
         item selection closing the menu,
         base tokens,
         and destructive surface; remaining gaps stay centralized.,
-        The destructive surface assertion is projection evidence only; without a docs instance and cross-runtime rendered evidence it stays render-undemonstrated (#454 contrast is adopted-upstream behavior evidence).,
+        The destructive surface assertion is projection evidence only; without a docs instance,
+        cross-runtime rendered evidence,
+        and this surface's own contrast measurement it stays render-undemonstrated; Button, #454 is only a related observation.,
       ]
 verifies:
   prototypes:
@@ -59,6 +61,7 @@ verifies:
           P-SHADCN-DROPDOWN-MENU-ITEM-CURRENT-VISUAL-SURFACE,
           P-SHADCN-DROPDOWN-MENU-ITEM-STATE-DRIVEN-STYLES,
           P-SHADCN-DROPDOWN-MENU-ITEM-COMPATIBILITY-SUBSET,
+          P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-EVIDENCE-BOUNDARY,
           P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION,
         ]
 exercises:
