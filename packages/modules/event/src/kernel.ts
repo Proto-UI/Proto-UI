@@ -12,7 +12,8 @@ type Reg = {
   type: EventTypeV0;
   options?: HostEventListenerOptions;
 
-  wrapper?: (ev: any) => void;
+  wrapper?: (event: unknown) => void;
+  deactivate?: () => void;
   boundTarget?: EventTarget;
 };
 
@@ -65,6 +66,7 @@ export class EventKernel {
       if (r.id !== id) continue;
 
       if (r.wrapper && r.boundTarget) {
+        r.deactivate?.();
         r.boundTarget.removeEventListener(r.type as any, r.wrapper as any, r.options as any);
       }
 
@@ -84,6 +86,7 @@ export class EventKernel {
       if (!matchReg(r, kind, type, options)) continue;
 
       if (r.wrapper && r.boundTarget) {
+        r.deactivate?.();
         r.boundTarget.removeEventListener(r.type as any, r.wrapper as any, r.options as any);
       }
 
@@ -110,16 +113,24 @@ export class EventKernel {
     const pending: Array<{
       registration: Reg;
       target: EventTarget;
-      wrapper: (ev: any) => void;
+      wrapper: (event: unknown) => void;
+      deactivate: () => void;
     }> = [];
 
     for (const r of this.regs) {
       if (r.wrapper && r.boundTarget) continue;
 
       const target = getTarget(r.kind, r.type);
-      const wrapper = (ev: unknown) => dispatch(r.id, ev, r.type);
+      let active = true;
+      const wrapper = (event: unknown) => {
+        if (!active) return;
+        dispatch(r.id, event, r.type);
+      };
+      const deactivate = () => {
+        active = false;
+      };
 
-      pending.push({ registration: r, target, wrapper });
+      pending.push({ registration: r, target, wrapper, deactivate });
     }
 
     // HC-EVENT-0001 / #466 third pass: installation is transactional across
@@ -129,23 +140,28 @@ export class EventKernel {
     const attached: Array<{
       registration: Reg;
       target: EventTarget;
-      wrapper: (ev: any) => void;
+      wrapper: (event: unknown) => void;
+      deactivate: () => void;
     }> = [];
 
     try {
-      for (const { registration, target, wrapper } of pending) {
+      for (const { registration, target, wrapper, deactivate } of pending) {
         target.addEventListener(
           registration.type as any,
           wrapper as any,
           registration.options as any
         );
 
-        attached.push({ registration, target, wrapper });
+        attached.push({ registration, target, wrapper, deactivate });
         registration.wrapper = wrapper;
+        registration.deactivate = deactivate;
         registration.boundTarget = target;
       }
     } catch (error) {
-      for (const { registration, target, wrapper } of attached) {
+      for (const { registration, target, wrapper, deactivate } of attached) {
+        // Fail closed before attempting physical removal. If removal throws,
+        // a surviving host callback is inert and cannot dispatch.
+        deactivate();
         try {
           target.removeEventListener(
             registration.type as any,
@@ -156,6 +172,7 @@ export class EventKernel {
           // Removal failure during rollback must not mask the original error.
         }
         registration.wrapper = undefined;
+        registration.deactivate = undefined;
         registration.boundTarget = undefined;
       }
       throw error;
@@ -165,9 +182,13 @@ export class EventKernel {
   unbindAll() {
     for (const r of this.regs) {
       if (!r.wrapper || !r.boundTarget) continue;
-      r.boundTarget.removeEventListener(r.type as any, r.wrapper as any, r.options as any);
+      const target = r.boundTarget;
+      const wrapper = r.wrapper;
+      r.deactivate?.();
       r.wrapper = undefined;
+      r.deactivate = undefined;
       r.boundTarget = undefined;
+      target.removeEventListener(r.type as any, wrapper as any, r.options as any);
     }
   }
 

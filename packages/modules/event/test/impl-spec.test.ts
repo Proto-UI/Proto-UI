@@ -291,6 +291,59 @@ describe('EventModuleImpl (contract-ish)', () => {
     expect(diags[0].label).toBe('asButton: commit');
   });
 
+  it('keeps a rollback-surviving physical listener inert when removal throws', () => {
+    const sys = createSysCaps();
+    const rootListeners: Array<(event: unknown) => void> = [];
+    const root = {
+      addEventListener: (_type: string, callback: (event: unknown) => void) => {
+        rootListeners.push(callback);
+      },
+      removeEventListener: () => {
+        throw new Error('host refused rollback removal');
+      },
+      fire: (event: unknown) => {
+        for (const callback of rootListeners) callback(event);
+      },
+    };
+    const recoveredGlobal = new FakeEventTarget();
+    let firstGlobal = true;
+    const failedGlobal = {
+      addEventListener: () => {
+        throw new Error('host refused attachment');
+      },
+      removeEventListener: () => {},
+    };
+    const caps = makeCaps({
+      sys,
+      getRootTarget: () => root as any,
+      getGlobalTarget: () => (firstGlobal ? (failedGlobal as any) : (recoveredGlobal as any)),
+    });
+    const impl = new EventModuleImpl(caps, 'p-x');
+
+    sys.__setExecPhase('setup');
+    impl.on('press.commit' as any);
+    impl.onGlobal('key.down' as any);
+    sys.__setExecPhase('callback');
+    const { calls, dispatch } = makeDispatch();
+
+    // Original attachment failure is preserved; rollback removal failure does
+    // not replace it, and every registration reports logically unbound.
+    expect(() => impl.bind(dispatch)).toThrowError(/host refused attachment/);
+    expect(impl.getDiagnostics().every((entry) => entry.bound === false)).toBe(true);
+
+    // The host retained the physical callback, but its active gate was revoked
+    // before removal, so it cannot dispatch.
+    root.fire({ type: 'press.commit' });
+    expect(calls).toEqual([]);
+
+    // Explicit retry installs one active wrapper. Firing invokes both the old
+    // inert callback and the new active callback, yielding one dispatch only.
+    firstGlobal = false;
+    impl.bind(dispatch);
+    root.fire({ type: 'press.commit' });
+    expect(calls).toHaveLength(1);
+  });
+
   // #466 third pass: installation is transactional across attachment
   // failures. A throwing Nth addEventListener must roll back every earlier
   // attachment, leave all registrations logically unbound, and allow a clean

@@ -97,17 +97,17 @@ implementations:
       - T-EVENT-0003-CASE-REQUIRED-CONDITIONAL-BINDING
       - T-EVENT-0003-CASE-REBIND-CLEANUP
       - T-EVENT-0003-CASE-BIND-TARGET-PREFLIGHT
-      - T-EVENT-0003-CASE-TRANSACTIONAL-ROLLBACK
-      - T-EVENT-0003-CASE-PORTABLE-PAYLOAD
-      - T-EVENT-0003-CASE-HOST-OPTIONS-BOUNDARY
       - T-EVENT-0003-CASE-DEFAULT-ACTION-REQUEST
-  - id: module-event-expose-wiring-migration-contract
+  - id: module-event-impl-spec-contract
     kind: module-test
     status: passing
     path: packages/modules/event/test/impl-spec.test.ts
     required: true
     consumesCases:
       - T-EVENT-0003-CASE-EXPOSE-BOUNDARY
+      - T-EVENT-0003-CASE-TRANSACTIONAL-ROLLBACK
+      - T-EVENT-0003-CASE-PORTABLE-PAYLOAD
+      - T-EVENT-0003-CASE-HOST-OPTIONS-BOUNDARY
   - id: runtime-required-event-module
     kind: runtime-test
     status: passing
@@ -182,6 +182,7 @@ verifies:
         - M-EVENT-0001-G
         - M-EVENT-0001-H
         - M-EVENT-0001-I
+        - M-EVENT-0001-J
   hostCaps:
     - id: HC-EVENT-BINDING-0001
       anchors:
