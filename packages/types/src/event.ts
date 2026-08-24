@@ -55,8 +55,8 @@ export type DefaultActionRequestOptions = Readonly<{
  * Portable default-action control handed to prototype event callbacks.
  * Requests are tied to the current interaction sample; the adapter projects
  * them through HC-DEFAULT-ACTION-0001 instead of a raw native function.
- * Raw `preventDefault`/`stopPropagation` on the payload remain host escape
- * hatches and must not be depended on by portable prototype code.
+ * Portable payloads never carry native preventDefault/stopPropagation methods;
+ * raw native methods are available only to explicit `host:*` extension callbacks.
  */
 export type ProtoEventControl = Readonly<{
   requestDefaultActionPrevention(options?: DefaultActionRequestOptions): void;
