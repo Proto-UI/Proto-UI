@@ -17,7 +17,7 @@ Agent Operations coordinates multiple workflow families without flattening their
 
 Phase A is read-only with respect to GitHub and tracked repository files during a run. It collects a bounded snapshot of open Issues and pull requests, gives that untrusted snapshot to a sandboxed Agent, validates the structured proposal, and preserves the snapshot and report as workflow artifacts.
 
-The default repository workflow runs once per hour at minute 17 UTC and may also be dispatched manually. The hourly cadence changes observation frequency only: it does not authorize comments, reviews, labels, assignment, code changes, approval, or merge.
+The default repository workflow runs once per hour at minute 17 UTC and may also be dispatched manually. The hourly schedule is a reconciliation fallback rather than the primary wakeup path: the reviewed direction for Agent Operations is webhook / event-driven invocation (#485 discussion), and a bounded periodic sweep covers events that an event-driven path can miss, such as failed deliveries or gaps while a listener is redeployed. The hourly cadence changes observation frequency only: it does not authorize comments, reviews, labels, assignment, code changes, approval, or merge. It stays distinct from the manually dispatched RepoSteward portfolio trial recorded in #483, which is not a scheduled reconciliation.
 
 Phase A does not:
 
