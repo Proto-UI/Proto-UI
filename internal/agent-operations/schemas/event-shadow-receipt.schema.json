@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/event-shadow-receipt.schema.json",
+  "title": "Proto UI Event shadow admission receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "policyVersion",
+    "envelopeDigest",
+    "deliveryKey",
+    "objectKey",
+    "outcome",
+    "reason",
+    "nextStage",
+    "requiresLiveRevalidation",
+    "mutationAuthorized",
+    "writeOperationsPerformed"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.event-shadow-receipt" },
+    "policyVersion": { "const": "2026-08-24.event-shadow" },
+    "envelopeDigest": { "$ref": "#/$defs/digest" },
+    "deliveryKey": { "$ref": "#/$defs/digest" },
+    "objectKey": { "type": "string", "pattern": "^pull-request:[1-9][0-9]*$" },
+    "outcome": {
+      "enum": [
+        "ADMITTED",
+        "DUPLICATE",
+        "UNSUPPORTED",
+        "SELF_ECHO",
+        "OUT_OF_ORDER",
+        "AMBIGUOUS_ORDER"
+      ]
+    },
+    "reason": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "nextStage": { "enum": ["none", "collect-live-state", "reconcile-live-state"] },
+    "requiresLiveRevalidation": { "type": "boolean" },
+    "mutationAuthorized": { "const": false },
+    "writeOperationsPerformed": { "const": 0 }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "ADMITTED" } } },
+      "then": {
+        "properties": {
+          "nextStage": { "const": "collect-live-state" },
+          "requiresLiveRevalidation": { "const": true }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": { "enum": ["DUPLICATE", "UNSUPPORTED", "SELF_ECHO"] }
+        }
+      },
+      "then": {
+        "properties": {
+          "nextStage": { "const": "none" },
+          "requiresLiveRevalidation": { "const": false }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "outcome": { "enum": ["OUT_OF_ORDER", "AMBIGUOUS_ORDER"] } }
+      },
+      "then": {
+        "properties": {
+          "nextStage": { "const": "reconcile-live-state" },
+          "requiresLiveRevalidation": { "const": true }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

@@ -31,6 +31,25 @@ The RepoSteward portfolio trial is narrower than the scheduled native shadow wor
 
 The live GitHub repository remains the source for Issue and pull-request state. Phase A artifacts are experimental observations with bounded retention, not a second issue tracker.
 
+## Event shadow contract, not a deployed listener
+
+`event-shadow.yaml` defines the first contract-only slice of the intended event-driven path. It does not register a webhook, deploy a listener or controller, receive a GitHub token, run a Coding Harness, or change the current scheduled workflow. The scheduled shadow remains the only automatic repository workflow described here.
+
+The Event shadow runtime authenticates the exact raw request bytes with `X-Hub-Signature-256`, then binds the delivery to runtime-supplied repository, hook, installation, and dedicated-Agent identity anchors. Its normalized envelope contains identity and revision facts, not Issue bodies, pull-request bodies, comments, patches, commit messages, or filenames. An external contributor or fork may wake read-only collection; neither identity grants action authority.
+
+The current allowlist covers selected `pull_request` lifecycle actions for offline shadow replay. A unique delivery key stops replay. A per-pull-request cursor detects older or tied revisions, but it does not pretend GitHub deliveries have a total order. Those cases return `reconcile-live-state`. An admitted event returns only `collect-live-state`; it is permission to observe again, not permission to review or mutate.
+
+The CLI accepts a captured raw delivery, deployment-bound public trust anchors, and optional prior state. The webhook secret must come from a named environment variable. It prints a pure `nextState`; it does not persist or consume that state, so a future controller must provide the globally consistent store and atomic lease before deployment.
+
+```sh
+corepack pnpm@10.32.1 agent:event-shadow -- replay \
+  --delivery <raw-delivery.json> \
+  --trust <deployment-trust.json> \
+  --state <prior-state.json>
+```
+
+Every envelope and receipt fixes `mutationAuthorized` to `false` and `writeOperationsPerformed` to `0`. The normalized envelope is not a portable authentication credential: a consumer that does not trust the process boundary must retain the signed raw delivery and reproduce normalization. Listener deployment, controller ownership, harness selection, durable replay storage, a maintainer inbox, standing authorization, review actions, required checks, and merge remain separate decisions.
+
 ## Execution boundary
 
 The hourly scheduled and manually dispatched workflow in `.github/workflows/agent-operations-shadow.yml` uses this sequence:
@@ -64,6 +83,7 @@ When a gate is required, one decision packet must state the observed fact, recom
 ## Files
 
 - `policy.yaml`: permission gradient, allowed Phase A proposals, gates, notification limits, and graduation criteria.
+- `event-shadow.yaml`: contract-only webhook authenticity, allowlist, replay, ordering, and zero-write boundary; it is not a deployed workflow registry entry.
 - `workflows.yaml`: workflow registry and delegation boundaries.
 - `autonomous-tasks.yaml`: recurring-task status, capability, inputs, outputs, and stop conditions.
 - `autonomous-tasks.md`: human-readable deployment boundary for recurring Agent work.
@@ -78,6 +98,8 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `schemas/capability-self-result.schema.json`: deterministic unsigned U0-C4 local task-fit result.
 - `schemas/review-input.schema.json`: canonical body, revision, discussion, check, and evidence snapshot used for review hashing.
 - `schemas/review-packet.schema.json`: revision-bound local review evidence contract.
+- `schemas/event-envelope.schema.json`: authenticated, identity-only GitHub delivery envelope.
+- `schemas/event-shadow-{delivery,trust,state,receipt}.schema.json`: raw replay input, deployment trust anchors, controller-owned state, and deterministic no-write outcome contracts.
 - `fixtures/**`: positive and negative replay controls.
 - `scripts/agent-operations/collect-github-state.mjs`: bounded, sanitizing GitHub snapshot collector.
 - `scripts/agent-operations/reposteward-portfolio.mjs`: validates a raw RepoSteward portfolio snapshot and writes the stable trial envelope and Actions summary.
@@ -90,6 +112,8 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `scripts/agent-operations/review-runtime.mjs`: canonical review-input hashing, packet binding, prior-packet reconciliation binding, strict schema-matched validation, and submission checks.
 - `scripts/agent-operations/collect-live-review-input.mjs`: live GitHub collection of the canonical review input plus viewer identity, permission, and CI state at the submission boundary.
 - `scripts/agent-operations/review-packet.mjs`: CLI used by `pui-review` to hash input, validate, inspect, classify, and preflight a review packet against its handoff; submission preflight re-collects the canonical input live and derives identities from that context.
+- `scripts/agent-operations/event-shadow.mjs`: HMAC verification, normalized envelope, allowlist, replay, and revision-order primitives.
+- `scripts/agent-operations/event-shadow-cli.mjs`: offline replay CLI that emits an envelope, receipt, and pure next state without persistence or network access.
 - `.github/workflows/reposteward-portfolio-shadow.yml`: manual, read-only RepoSteward portfolio trial pinned to the registered external commit.
 
 Run:
@@ -100,6 +124,7 @@ corepack pnpm@10.32.1 agent:assess
 corepack pnpm@10.32.1 agent:skill -- pui-orient --mode human-assisted --mode-source current-user
 corepack pnpm@10.32.1 agent:review -- input-digest --input <review-input.json>
 corepack pnpm@10.32.1 agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json>
+corepack pnpm@10.32.1 agent:event-shadow -- replay --delivery <raw-delivery.json> --trust <deployment-trust.json>
 ```
 
 ## Graduation rule

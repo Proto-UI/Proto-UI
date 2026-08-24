@@ -9,6 +9,11 @@ import {
   ROUTES,
   validateShadowReport,
 } from './lib.mjs';
+import {
+  EVENT_SHADOW_VERSION,
+  MAX_EVENT_PAYLOAD_BYTES,
+  MAX_EVENT_STATE_ENTRIES,
+} from './event-shadow.mjs';
 
 const root = process.cwd();
 const operationsDirectory = path.join(root, 'internal/agent-operations');
@@ -30,6 +35,15 @@ const repoStewardSchemaFile = path.join(
   operationsDirectory,
   'schemas/reposteward-portfolio-envelope.schema.json'
 );
+const eventShadowPolicyFile = path.join(operationsDirectory, 'event-shadow.yaml');
+const eventShadowSchemaFiles = [
+  'event-envelope.schema.json',
+  'event-shadow-receipt.schema.json',
+  'event-shadow-state.schema.json',
+  'event-shadow-delivery.schema.json',
+  'event-shadow-trust.schema.json',
+].map((name) => path.join(operationsDirectory, 'schemas', name));
+const eventShadowCliFile = path.join(root, 'scripts/agent-operations/event-shadow-cli.mjs');
 const REPOSTEWARD_COMMIT = 'e5db7d3496ef15072135533c5b9f4da91084b553';
 const errors = [];
 
@@ -314,6 +328,127 @@ function validateRepoStewardTrial() {
   }
 }
 
+function validateEventShadowContract() {
+  const policy = readYaml(eventShadowPolicyFile);
+  if (policy) {
+    if (policy.schemaVersion !== 1) fail(eventShadowPolicyFile, 'schemaVersion must be 1');
+    if (policy.policyVersion !== EVENT_SHADOW_VERSION) {
+      fail(eventShadowPolicyFile, `policyVersion must be ${EVENT_SHADOW_VERSION}`);
+    }
+    if (policy.status !== 'contract-only-not-deployed') {
+      fail(eventShadowPolicyFile, 'status must remain contract-only-not-deployed');
+    }
+    if (policy.architecture?.durableControllerEvidence !== 'absent') {
+      fail(eventShadowPolicyFile, 'durable controller evidence must remain absent');
+    }
+    if (policy.authenticity?.algorithm !== 'hmac-sha256') {
+      fail(eventShadowPolicyFile, 'authenticity algorithm must be hmac-sha256');
+    }
+    if (policy.authenticity?.rawBodyRequired !== true) {
+      fail(eventShadowPolicyFile, 'raw webhook bytes must be required');
+    }
+    if (policy.payload?.maximumBytes !== MAX_EVENT_PAYLOAD_BYTES) {
+      fail(eventShadowPolicyFile, `payload maximum must be ${MAX_EVENT_PAYLOAD_BYTES}`);
+    }
+    if (policy.deduplication?.maximumStateEntries !== MAX_EVENT_STATE_ENTRIES) {
+      fail(eventShadowPolicyFile, `state maximum must be ${MAX_EVENT_STATE_ENTRIES}`);
+    }
+    if (policy.payload?.authoredContentIncludedInEnvelope !== false) {
+      fail(eventShadowPolicyFile, 'authored content must not enter the event envelope');
+    }
+    if (
+      !sameMembers(policy.allowlist?.pull_request, [
+        'opened',
+        'reopened',
+        'synchronize',
+        'ready_for_review',
+        'converted_to_draft',
+        'edited',
+        'closed',
+      ])
+    ) {
+      fail(
+        eventShadowPolicyFile,
+        'pull_request allowlist does not match the reviewed shadow slice'
+      );
+    }
+    if (policy.forks?.actorAuthority !== 'none' || policy.forks?.mutationAuthority !== 'none') {
+      fail(eventShadowPolicyFile, 'fork or actor identity must not grant authority');
+    }
+    if (policy.ordering?.githubTotalOrderAssumed !== false) {
+      fail(eventShadowPolicyFile, 'GitHub delivery order must not be treated as a total order');
+    }
+    if (policy.mutation?.authorized !== false || policy.mutation?.writeOperationsPerformed !== 0) {
+      fail(eventShadowPolicyFile, 'Event shadow must authorize and perform zero mutations');
+    }
+    if (policy.graduation?.requiresSeparateMaintainerDecision !== true) {
+      fail(eventShadowPolicyFile, 'graduation must require a separate maintainer decision');
+    }
+  }
+
+  for (const schemaFile of eventShadowSchemaFiles) {
+    const schema = readJson(schemaFile);
+    if (!schema) continue;
+    if (schema.type !== 'object' || schema.additionalProperties !== false) {
+      fail(schemaFile, 'top-level schema must be a closed object');
+    }
+  }
+  const envelopeSchema = readJson(eventShadowSchemaFiles[0]);
+  if (envelopeSchema) {
+    if (envelopeSchema.properties?.eventShadowVersion?.const !== EVENT_SHADOW_VERSION) {
+      fail(eventShadowSchemaFiles[0], 'eventShadowVersion must match policy');
+    }
+    if (envelopeSchema.properties?.authenticated?.const !== true) {
+      fail(eventShadowSchemaFiles[0], 'authenticated must be const true');
+    }
+    if (envelopeSchema.properties?.mutationAuthorized?.const !== false) {
+      fail(eventShadowSchemaFiles[0], 'mutationAuthorized must be const false');
+    }
+    if (envelopeSchema.properties?.writeOperationsPerformed?.const !== 0) {
+      fail(eventShadowSchemaFiles[0], 'writeOperationsPerformed must be const zero');
+    }
+  }
+  const receiptSchema = readJson(eventShadowSchemaFiles[1]);
+  if (receiptSchema) {
+    if (receiptSchema.properties?.policyVersion?.const !== EVENT_SHADOW_VERSION) {
+      fail(eventShadowSchemaFiles[1], 'receipt policyVersion must match policy');
+    }
+    if (receiptSchema.properties?.mutationAuthorized?.const !== false) {
+      fail(eventShadowSchemaFiles[1], 'receipt mutationAuthorized must be const false');
+    }
+    if (receiptSchema.properties?.writeOperationsPerformed?.const !== 0) {
+      fail(eventShadowSchemaFiles[1], 'receipt writeOperationsPerformed must be const zero');
+    }
+  }
+
+  if (!fs.existsSync(eventShadowCliFile)) {
+    fail(eventShadowCliFile, 'file does not exist');
+  } else {
+    const source = fs.readFileSync(eventShadowCliFile, 'utf8');
+    for (const forbidden of [
+      'GITHUB_TOKEN',
+      'fetch(',
+      'writeFile',
+      'pull_request_target',
+      'contents: write',
+      'pull-requests: write',
+    ]) {
+      if (source.includes(forbidden)) {
+        fail(eventShadowCliFile, `forbidden Event shadow capability: ${forbidden}`);
+      }
+    }
+    if (!source.includes('process.env[args.secretEnv]')) {
+      fail(eventShadowCliFile, 'webhook secret must come from the named environment variable');
+    }
+    if (!source.includes('internal/agent-operations/event-shadow.yaml')) {
+      fail(eventShadowCliFile, 'CLI must load the repository canonical Event shadow policy');
+    }
+    if (source.includes("option === '--policy'")) {
+      fail(eventShadowCliFile, 'CLI must not accept a caller-selected policy');
+    }
+  }
+}
+
 function validateFixtures() {
   const valid = readJson(validFixtureFile);
   if (valid) {
@@ -396,6 +531,7 @@ validatePolicy();
 validateRegistry();
 validateSchema();
 validateRepoStewardTrial();
+validateEventShadowContract();
 validateFixtures();
 validatePromptAndWorkflow();
 validateLiveReport(args);
