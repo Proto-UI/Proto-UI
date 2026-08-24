@@ -1,12 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
-import {
+import * as tooltipPackage from '../src/tooltip';
+
+const {
   BrutalistTooltipContent,
+  BrutalistTooltipGroup,
   BrutalistTooltipRoot,
   BrutalistTooltipTrigger,
-} from '../src/tooltip';
+} = tooltipPackage;
 
+const TooltipGroupElement = AdaptToWebComponent(BrutalistTooltipGroup);
 const TooltipRootElement = AdaptToWebComponent(BrutalistTooltipRoot);
 const TooltipTriggerElement = AdaptToWebComponent(BrutalistTooltipTrigger);
 const TooltipContentElement = AdaptToWebComponent(BrutalistTooltipContent);
@@ -24,6 +28,63 @@ afterEach(() => {
 });
 
 describe('prototypes/brutalist: tooltip', () => {
+  it('publishes the complete four-entry Tooltip package surface with a transparent Trigger', async () => {
+    vi.useFakeTimers();
+    expect(Object.keys(tooltipPackage).sort()).toEqual([
+      'BrutalistTooltipContent',
+      'BrutalistTooltipGroup',
+      'BrutalistTooltipRoot',
+      'BrutalistTooltipTrigger',
+    ]);
+
+    const root = new TooltipRootElement();
+    const trigger = new TooltipTriggerElement();
+    root.append(trigger);
+    document.body.append(root);
+    await flush();
+    expect(Object.keys(trigger.getExposes()).sort()).toEqual([
+      'disabled',
+      'focusSelf',
+      'focusVisible',
+      'focused',
+      'hovered',
+    ]);
+    expect(trigger.getAttribute('data-pui-style')).toBeNull();
+  });
+
+  it('preserves Base Group timing and same-domain warm intent across sibling Tooltips', async () => {
+    vi.useFakeTimers();
+    const group = new TooltipGroupElement();
+    const rootA = new TooltipRootElement();
+    const triggerA = new TooltipTriggerElement();
+    const contentA = new TooltipContentElement();
+    const rootB = new TooltipRootElement();
+    const triggerB = new TooltipTriggerElement();
+    const contentB = new TooltipContentElement();
+    setElementProps(group, { openDelay: 50, closeDelay: 0, skipDelay: 300 });
+    rootA.append(triggerA, contentA);
+    rootB.append(triggerB, contentB);
+    group.append(rootA, rootB);
+    document.body.append(group);
+    await flush();
+
+    triggerA.dispatchEvent(new Event('pointerenter'));
+    await vi.advanceTimersByTimeAsync(49);
+    expect(rootA.getExposes().open.get()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(rootA.getExposes().open.get()).toBe(true);
+
+    triggerA.dispatchEvent(new Event('pointerleave'));
+    await flush();
+    expect(rootA.getExposes().open.get()).toBe(false);
+
+    // The shared Group remains warm, so the sibling opens without the cold delay.
+    triggerB.dispatchEvent(new Event('pointerenter'));
+    await flush();
+    expect(rootB.getExposes().open.get()).toBe(true);
+    expect(contentB.getAttribute('role')).toBe('tooltip');
+  });
+
   it('inherits the current Base interaction and accessibility protocol with a visual-only delta', async () => {
     vi.useFakeTimers();
     const root = new TooltipRootElement();
