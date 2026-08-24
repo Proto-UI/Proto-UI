@@ -3,6 +3,9 @@
 const PREVIEW_PR = __POPPY_PREVIEW_PR__;
 const PREVIEW_PROJECT = __POPPY_PREVIEW_PROJECT__;
 const CONTROL_PLANE = __POPPY_CONTROL_PLANE__;
+const PREVIEW_HEAD_SHA = __POPPY_PREVIEW_HEAD_SHA__;
+const PREVIEW_RUN_ID = __POPPY_PREVIEW_RUN_ID__;
+const PREVIEW_RUN_ATTEMPT = __POPPY_PREVIEW_RUN_ATTEMPT__;
 const SESSION_COOKIE = "__Host-poppy-preview";
 const CANONICAL_ORIGIN = `https://${PREVIEW_PROJECT}.pages.dev`;
 
@@ -11,6 +14,12 @@ function securityHeaders(headers = new Headers()) {
   headers.set("Referrer-Policy", "no-referrer");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  headers.set("Content-Security-Policy", "worker-src 'none'; child-src 'none'");
+  // This response header is evaluated when an artifact is fetched as a
+  // Service Worker script. The deliberately unrelated scope makes every
+  // artifact registration fail even in browsers that do not enforce CSP's
+  // worker-src directive consistently.
+  headers.set("Service-Worker-Allowed", "/__poppy/no-service-workers");
   return headers;
 }
 
@@ -104,6 +113,9 @@ async function exchangeTicket(request, env) {
       ticket,
       pr: PREVIEW_PR,
       project: PREVIEW_PROJECT,
+      head_sha: PREVIEW_HEAD_SHA,
+      run_id: PREVIEW_RUN_ID,
+      run_attempt: PREVIEW_RUN_ATTEMPT,
     });
   } catch {
     return temporarilyUnavailable();
@@ -140,6 +152,9 @@ async function serveAuthorized(request, env) {
       session,
       pr: PREVIEW_PR,
       project: PREVIEW_PROJECT,
+      head_sha: PREVIEW_HEAD_SHA,
+      run_id: PREVIEW_RUN_ID,
+      run_attempt: PREVIEW_RUN_ATTEMPT,
     });
   } catch {
     return temporarilyUnavailable();

@@ -6,7 +6,10 @@ const template = await readFile(new URL("../templates/pages-worker.js", import.m
 const source = template
   .replace("__POPPY_PREVIEW_PR__", "462")
   .replace("__POPPY_PREVIEW_PROJECT__", JSON.stringify("poppy-proto-ui-pr-462"))
-  .replace("__POPPY_CONTROL_PLANE__", JSON.stringify("https://poppy.example"));
+  .replace("__POPPY_CONTROL_PLANE__", JSON.stringify("https://poppy.example"))
+  .replace("__POPPY_PREVIEW_HEAD_SHA__", JSON.stringify("a".repeat(40)))
+  .replace("__POPPY_PREVIEW_RUN_ID__", "100")
+  .replace("__POPPY_PREVIEW_RUN_ATTEMPT__", "2");
 const worker = (await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`)).default;
 const edgeSecret = "e".repeat(48);
 
@@ -47,6 +50,9 @@ test("a one-time ticket becomes a host-only secure session", async () => {
     assert.match(body.ticket, /^[tu]{32}$/);
     assert.equal(body.pr, 462);
     assert.equal(body.project, "poppy-proto-ui-pr-462");
+    assert.equal(body.head_sha, "a".repeat(40));
+    assert.equal(body.run_id, 100);
+    assert.equal(body.run_attempt, 2);
     return Response.json({
       session: "s".repeat(48),
       return: body.ticket.startsWith("u") ? "//evil.example" : "/guide",
@@ -89,6 +95,9 @@ test("an authorized asset is served without forwarding the session cookie", asyn
       session: "s".repeat(48),
       pr: 462,
       project: "poppy-proto-ui-pr-462",
+      head_sha: "a".repeat(40),
+      run_id: 100,
+      run_attempt: 2,
     });
     return Response.json({ authorized: true });
   };
@@ -112,6 +121,8 @@ test("an authorized asset is served without forwarding the session cookie", asyn
     assert.equal(assetRequest.headers.get("cookie"), null);
     assert.equal(result.headers.get("cache-control"), "private, no-store");
     assert.match(result.headers.get("x-robots-tag"), /noindex/);
+    assert.match(result.headers.get("content-security-policy"), /worker-src 'none'/);
+    assert.equal(result.headers.get("service-worker-allowed"), "/__poppy/no-service-workers");
   } finally {
     globalThis.fetch = originalFetch;
   }

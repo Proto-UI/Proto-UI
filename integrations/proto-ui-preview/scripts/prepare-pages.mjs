@@ -90,9 +90,15 @@ const output = path.resolve(args.get("output") ?? "");
 const pr = Number(args.get("pr"));
 const project = args.get("project") ?? "";
 const controlPlane = new URL(args.get("control-plane") ?? "");
+const headSHA = args.get("head-sha") ?? "";
+const runID = Number(args.get("run-id"));
+const runAttempt = Number(args.get("run-attempt"));
 
 if (!Number.isSafeInteger(pr) || pr < 1) fail("PR number must be a positive integer");
 if (project !== `poppy-proto-ui-pr-${pr}`) fail("project name does not match the PR number");
+if (!/^[0-9a-f]{40}$/.test(headSHA)) fail("head SHA must be a full lowercase SHA-1");
+if (!Number.isSafeInteger(runID) || runID < 1) fail("run ID must be a positive integer");
+if (!Number.isSafeInteger(runAttempt) || runAttempt < 1) fail("run attempt must be a positive integer");
 if (controlPlane.protocol !== "https:" || controlPlane.username || controlPlane.password) {
   fail("control plane must be an HTTPS origin without credentials");
 }
@@ -112,7 +118,10 @@ let worker = await readFile(templatePath, "utf8");
 worker = worker
   .replace("__POPPY_PREVIEW_PR__", String(pr))
   .replace("__POPPY_PREVIEW_PROJECT__", JSON.stringify(project))
-  .replace("__POPPY_CONTROL_PLANE__", JSON.stringify(controlPlane.origin));
+  .replace("__POPPY_CONTROL_PLANE__", JSON.stringify(controlPlane.origin))
+  .replace("__POPPY_PREVIEW_HEAD_SHA__", JSON.stringify(headSHA))
+  .replace("__POPPY_PREVIEW_RUN_ID__", String(runID))
+  .replace("__POPPY_PREVIEW_RUN_ATTEMPT__", String(runAttempt));
 if (worker.includes("__POPPY_")) fail("trusted worker template contains an unresolved placeholder");
 await writeFile(path.join(output, "_worker.js"), worker, { mode: 0o644 });
 

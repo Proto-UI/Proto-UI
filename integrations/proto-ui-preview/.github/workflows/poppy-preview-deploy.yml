@@ -1,0 +1,380 @@
+name: Poppy preview deploy
+
+on:
+  workflow_run:
+    workflows: ["Poppy preview build"]
+    types: [completed]
+
+# workflow_run executes from the trusted default branch. Never check out the
+# pull-request head in this workflow and never execute anything from its artifact.
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: poppy-preview-deploy-${{ github.event.workflow_run.display_title || github.event.workflow_run.id }}
+  cancel-in-progress: true
+
+jobs:
+  report-failed-build:
+    name: Report a failed PR build
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion != 'success' &&
+      github.event.workflow_run.repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      POPPY_CONTROL_PLANE: https://poppy-proto-ui.chenyejin2004.workers.dev
+
+    steps:
+      - name: Check out trusted reporting code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Bind the failed run to its still-current pull request
+        id: resolve
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = Number(context.payload.workflow_run.id);
+            const { data: run } = await github.rest.actions.getWorkflowRun({
+              owner, repo, run_id: runId,
+            });
+            const { data: workflow } = await github.rest.actions.getWorkflow({
+              owner, repo, workflow_id: run.workflow_id,
+            });
+            if (run.event !== "pull_request" || run.conclusion === "success" ||
+                run.repository.full_name !== `${owner}/${repo}` ||
+                workflow.path !== ".github/workflows/poppy-preview-build.yml") {
+              core.setFailed(`Refusing unrelated failed run ${runId}`);
+              return;
+            }
+            const title = /^Poppy preview build PR #([1-9][0-9]*)$/.exec(run.display_title || "");
+            if (!title) {
+              core.notice(`Run ${runId} has no trusted PR number in its display title; leaving status in Actions only.`);
+              core.setOutput("report", "false");
+              return;
+            }
+            const number = Number(title[1]);
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: number });
+            const associated = (run.pull_requests || []).find((item) => item.number === number);
+            if (pr.state !== "open" || !associated || associated.head?.sha !== pr.head.sha ||
+                associated.head?.repo?.id !== pr.head.repo?.id) {
+              core.notice(`Failed run ${runId} is stale or cannot be bound exactly; leaving the current preview unchanged.`);
+              core.setOutput("report", "false");
+              return;
+            }
+            core.setOutput("report", "true");
+            core.setOutput("pr", String(pr.number));
+            core.setOutput("head_sha", pr.head.sha);
+            core.setOutput("author_login", pr.user.login);
+            core.setOutput("author_id", String(pr.user.id));
+            core.setOutput("project", `poppy-proto-ui-pr-${pr.number}`);
+            core.setOutput("run_id", String(runId));
+            core.setOutput("run_attempt", String(run.run_attempt));
+
+      - name: Revoke any older ready state for this head
+        if: steps.resolve.outputs.report == 'true'
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_AUTHOR: ${{ steps.resolve.outputs.author_login }}
+          PREVIEW_AUTHOR_ID: ${{ steps.resolve.outputs.author_id }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_ORIGIN: ""
+          PREVIEW_DEPLOYMENT_ID: ""
+          PREVIEW_RUN_ID: ${{ steps.resolve.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ steps.resolve.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs failed
+
+      - name: Maintain the sticky failure comment
+        if: steps.resolve.outputs.report == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_ORIGIN: ""
+          PREVIEW_STATUS: failed
+          PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ steps.resolve.outputs.run_id }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
+
+  deploy:
+    name: Publish contributor-only preview
+    if: >-
+      (github.event.workflow_run.event == 'pull_request' ||
+      github.event.workflow_run.event == 'workflow_dispatch') &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      POPPY_CONTROL_PLANE: https://poppy-proto-ui.chenyejin2004.workers.dev
+
+    steps:
+      - name: Check out trusted deployment code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Resolve and verify run, PR, head, and artifact
+        id: resolve
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = Number(context.payload.workflow_run.id);
+            const expectedRepo = `${owner}/${repo}`;
+
+            const { data: run } = await github.rest.actions.getWorkflowRun({
+              owner, repo, run_id: runId,
+            });
+            if (!["pull_request", "workflow_dispatch"].includes(run.event) || run.conclusion !== "success") {
+              core.setFailed(`Refusing run ${runId}: unexpected event or conclusion`);
+              return;
+            }
+            if (run.repository.full_name !== expectedRepo) {
+              core.setFailed(`Refusing run ${runId}: unexpected base repository`);
+              return;
+            }
+            const { data: workflow } = await github.rest.actions.getWorkflow({
+              owner, repo, workflow_id: run.workflow_id,
+            });
+            if (workflow.path !== ".github/workflows/poppy-preview-build.yml") {
+              core.setFailed(`Refusing run ${runId}: artifact came from ${workflow.path}`);
+              return;
+            }
+
+            if (run.event === "workflow_dispatch") {
+              const { data: repository } = await github.rest.repos.get({ owner, repo });
+              if (run.head_repository?.id !== run.repository.id || run.head_branch !== repository.default_branch) {
+                core.setFailed(`Refusing run ${runId}: manual build did not execute from the trusted default branch`);
+                return;
+              }
+            }
+
+            const artifacts = await github.paginate(
+              github.rest.actions.listWorkflowRunArtifacts,
+              { owner, repo, run_id: runId, per_page: 100 },
+            );
+            const artifactPattern = /^poppy-preview-([1-9][0-9]*)-([0-9a-f]{40})-([1-9][0-9]*)$/;
+            const matches = artifacts.flatMap((artifact) => {
+              const match = artifactPattern.exec(artifact.name);
+              return match && !artifact.expired && Number(match[3]) === run.run_attempt
+                ? [{ artifact, prNumber: Number(match[1]), headSHA: match[2], runAttempt: Number(match[3]) }]
+                : [];
+            });
+            if (matches.length !== 1) {
+              core.setFailed(`Refusing run ${runId}: expected exactly one valid non-expired Poppy artifact`);
+              return;
+            }
+            const candidate = matches[0];
+            if (!Number.isSafeInteger(candidate.prNumber) || candidate.prNumber < 1) {
+              core.setFailed(`Refusing run ${runId}: malformed artifact PR number`);
+              return;
+            }
+            if (candidate.artifact.size_in_bytes > 500 * 1024 * 1024) {
+              core.setFailed(`Refusing run ${runId}: artifact exceeds the 500 MiB safety limit`);
+              return;
+            }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: candidate.prNumber,
+            });
+            if (pr.state !== "open" || pr.head.sha !== candidate.headSHA) {
+              core.setFailed(`Refusing run ${runId}: artifact no longer matches the live open PR head`);
+              return;
+            }
+            if (run.event === "pull_request") {
+              const associations = run.pull_requests || [];
+              const associated = associations.length === 0 || associations.some((item) => item.number === pr.number);
+              if (!associated || !run.head_repository?.id || pr.head.repo?.id !== run.head_repository.id ||
+                  (run.head_branch && run.head_branch !== pr.head.ref)) {
+                core.setFailed(`Refusing run ${runId}: workflow run is not bound to this PR head repository`);
+                return;
+              }
+            }
+
+            core.setOutput("pr", String(pr.number));
+            core.setOutput("head_sha", pr.head.sha);
+            core.setOutput("author_login", pr.user.login);
+            core.setOutput("author_id", String(pr.user.id));
+            core.setOutput("artifact_id", String(candidate.artifact.id));
+            core.setOutput("project", `poppy-proto-ui-pr-${pr.number}`);
+            core.setOutput("run_id", String(runId));
+            core.setOutput("run_attempt", String(candidate.runAttempt));
+
+      - name: Mark the current head as building in Poppy
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_AUTHOR: ${{ steps.resolve.outputs.author_login }}
+          PREVIEW_AUTHOR_ID: ${{ steps.resolve.outputs.author_id }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_ORIGIN: ""
+          PREVIEW_DEPLOYMENT_ID: ""
+          PREVIEW_RUN_ID: ${{ steps.resolve.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ steps.resolve.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs building
+
+      - name: Download only the verified artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          artifact-ids: ${{ steps.resolve.outputs.artifact_id }}
+          path: .poppy/artifact
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.resolve.outputs.run_id }}
+
+      - name: Prepare a sanitized Pages bundle and trusted gate
+        env:
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node integrations/proto-ui-preview/scripts/prepare-pages.mjs \
+            --source .poppy/artifact \
+            --output .poppy/site \
+            --pr "$PREVIEW_PR" \
+            --project "$PREVIEW_PROJECT" \
+            --control-plane "$POPPY_CONTROL_PLANE" \
+            --head-sha "${{ steps.resolve.outputs.head_sha }}" \
+            --run-id "${{ steps.resolve.outputs.run_id }}" \
+            --run-attempt "${{ steps.resolve.outputs.run_attempt }}"
+
+      - name: Create or reuse the per-PR Pages project
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/cloudflare-pages.mjs ensure "$PREVIEW_PROJECT"
+
+      - name: Install integrity-locked trusted deployment tooling
+        shell: bash
+        run: npm ci --prefix integrations/proto-ui-preview --ignore-scripts
+
+      - name: Set the Pages gate secret
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          POPPY_PREVIEW_EDGE_SECRET: ${{ secrets.POPPY_PREVIEW_EDGE_SECRET }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$POPPY_PREVIEW_EDGE_SECRET"
+          printf '%s' "$POPPY_PREVIEW_EDGE_SECRET" | \
+            ./integrations/proto-ui-preview/node_modules/.bin/wrangler pages secret put POPPY_PREVIEW_EDGE_SECRET \
+              --project-name "$PREVIEW_PROJECT"
+
+      - name: Deploy to Cloudflare Pages
+        id: publish
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_RUN_ID: ${{ steps.resolve.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ steps.resolve.outputs.run_attempt }}
+        shell: bash
+        run: |
+          set +e
+          ./integrations/proto-ui-preview/node_modules/.bin/wrangler pages deploy .poppy/site \
+            --project-name "$PREVIEW_PROJECT" \
+            --branch main \
+            --commit-hash "$PREVIEW_SHA" \
+            --commit-message "Poppy preview PR #$PREVIEW_PR run $PREVIEW_RUN_ID attempt $PREVIEW_RUN_ATTEMPT" \
+            --commit-dirty=true
+          result=$?
+          set -e
+          echo "exit_code=$result" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve the deployed origin
+        if: steps.publish.outputs.exit_code == '0'
+        id: deployed
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_DEPLOY_MARKER: "Poppy preview PR #${{ steps.resolve.outputs.pr }} run ${{ steps.resolve.outputs.run_id }} attempt ${{ steps.resolve.outputs.run_attempt }}"
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/cloudflare-pages.mjs latest "$PREVIEW_PROJECT" "$PREVIEW_SHA" "$PREVIEW_DEPLOY_MARKER"
+
+      - name: Report the ready deployment to Poppy
+        id: ready
+        if: always() && steps.publish.outputs.exit_code == '0' && steps.deployed.outcome == 'success'
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_AUTHOR: ${{ steps.resolve.outputs.author_login }}
+          PREVIEW_AUTHOR_ID: ${{ steps.resolve.outputs.author_id }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_ORIGIN: ${{ steps.deployed.outputs.origin }}
+          PREVIEW_DEPLOYMENT_ID: ${{ steps.deployed.outputs.deployment_id }}
+          PREVIEW_RUN_ID: ${{ steps.resolve.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ steps.resolve.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs ready
+
+      - name: Report a failed deployment to Poppy
+        if: >-
+          always() && steps.resolve.outputs.pr != '' &&
+          (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' ||
+          steps.ready.outcome != 'success')
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_AUTHOR: ${{ steps.resolve.outputs.author_login }}
+          PREVIEW_AUTHOR_ID: ${{ steps.resolve.outputs.author_id }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_ORIGIN: ""
+          PREVIEW_DEPLOYMENT_ID: ""
+          PREVIEW_RUN_ID: ${{ steps.resolve.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ steps.resolve.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs failed
+
+      - name: Maintain the sticky PR comment
+        if: always() && steps.resolve.outputs.pr != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
+          PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
+          PREVIEW_ORIGIN: ${{ steps.deployed.outputs.origin }}
+          PREVIEW_STATUS: ${{ steps.ready.outcome == 'success' && 'ready' || 'failed' }}
+          PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ steps.resolve.outputs.run_id }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
+
+      - name: Fail the workflow when publishing failed
+        if: >-
+          always() &&
+          (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' ||
+          steps.ready.outcome != 'success')
+        shell: bash
+        run: exit 1

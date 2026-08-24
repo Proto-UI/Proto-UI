@@ -109,8 +109,8 @@ Configure Poppy with the same `POPPY_PREVIEW_EDGE_SECRET` and
 | Endpoint | Contract |
 | --- | --- |
 | `GET /preview/auth/github?pr=<n>&return=<url>` | Starts OAuth. `return` is the requested absolute URL on the exact recorded `https://poppy-proto-ui-pr-<n>.pages.dev` origin; reserved `/__poppy/*` paths are rejected. On success Poppy redirects to `/__poppy/session?ticket=...&return=<clean-path-and-query>`. |
-| `POST /api/preview/exchange` | Requires `X-Poppy-Preview-Edge-Secret`. Exchanges `{ticket, pr, project}` once and returns `{session, return, expires_at}` (`expires_in` is also accepted by the Worker). |
-| `POST /api/preview/authorize` | Requires the same edge-secret header. Checks `{session, pr, project}` and returns `{authorized: true}` or `{allowed: true}` only while the PR is open and the user is eligible. |
+| `POST /api/preview/exchange` | Requires `X-Poppy-Preview-Edge-Secret`. Exchanges `{ticket, pr, project, head_sha, run_id, run_attempt}` once and returns `{session, return, expires_at}` (`expires_in` is also accepted by the Worker). |
+| `POST /api/preview/authorize` | Requires the same edge-secret header. Checks the session plus the same immutable head/run tuple and returns `{authorized: true}` or `{allowed: true}` only while that exact deployment record is Ready, the PR is open, and the user is eligible. |
 | `POST /api/preview/deployments` | Requires `X-Poppy-Signature-256: sha256=<HMAC(raw body)>`. Accepts the deployment lifecycle payload described below. |
 
 Deployment lifecycle payloads use stable snake-case fields:
@@ -159,6 +159,13 @@ re-run, and `deployment_id` may be empty when no deployment became ready.
   `Secure; HttpOnly; SameSite=Lax; Path=/`. The OAuth ticket is one-time and
   short-lived. Poppy re-authorizes every asset request and can revoke a session
   immediately when a PR closes or membership changes.
+- Artifact responses set both `Content-Security-Policy: worker-src 'none'` and a
+  deliberately unrelated `Service-Worker-Allowed` scope. Pull-request code
+  cannot install a persistent Service Worker that bypasses later authorization
+  or intercepts `/__poppy/session`.
+- The trusted workflow must receive Poppy's `building` acknowledgement before
+  touching Cloudflare. A failed `ready` acknowledgement produces a failed card
+  and failed workflow; Cloudflare success alone can never publish Ready.
 - Every response is `private, no-store` and carries `X-Robots-Tag:
   noindex, nofollow, noarchive`. The Pages origin has no unguarded route.
 - Cloudflare's deployment-specific hash hostnames are redirected to the one

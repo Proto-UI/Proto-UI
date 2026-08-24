@@ -23,12 +23,17 @@ test("the sanitizer strips untrusted Pages controls and injects the trusted gate
       "--pr", "462",
       "--project", "poppy-proto-ui-pr-462",
       "--control-plane", "https://poppy.example",
+      "--head-sha", "a".repeat(40),
+      "--run-id", "100",
+      "--run-attempt", "2",
     ], { cwd: process.cwd(), encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.equal(await readFile(path.join(output, "index.html"), "utf8"), "<h1>preview</h1>");
     const worker = await readFile(path.join(output, "_worker.js"), "utf8");
     assert.doesNotMatch(worker, /untrusted worker ran/);
     assert.match(worker, /poppy-proto-ui-pr-462/);
+    assert.match(worker, /a{40}/);
+    assert.match(worker, /PREVIEW_RUN_ID = 100/);
     await assert.rejects(readFile(path.join(output, "_routes.json")));
   } finally {
     await rm(root, { recursive: true, force: true });
