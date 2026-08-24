@@ -33,10 +33,13 @@ function isElement(value: unknown): value is HTMLElement {
 }
 
 /**
- * Anchored geometry excludes the anchor's own CSS translation. Interaction
+ * Anchored geometry may exclude the anchor's own CSS translation. Interaction
  * transforms (hover lift, press-down) are decoration of the anchor surface;
- * anchored surfaces must track layout position, so a state transform must
- * never re-position the floating element.
+ * when the consumer opts in via `excludeAnchorTranslation`, anchored surfaces
+ * track layout position instead of the rendered surface. By default the host
+ * measures the anchor's actual rendered geometry, so legitimate translations
+ * (centering, application animation) keep floating placement where the user
+ * sees the anchor.
  */
 function virtualReferenceFor(anchor: HTMLElement) {
   return {
@@ -64,6 +67,10 @@ function virtualReferenceFor(anchor: HTMLElement) {
       } as DOMRect;
     },
   };
+}
+
+function positionReference(anchor: HTMLElement, config: AnchoredPositionConfig) {
+  return config.excludeAnchorTranslation === true ? virtualReferenceFor(anchor) : anchor;
 }
 
 function middlewareFor(config: AnchoredPositionConfig): Middleware[] {
@@ -104,7 +111,7 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
       const position = async () => {
         const { anchor, floating, config } = connection;
         if (disposed || !isElement(anchor) || !isElement(floating)) return;
-        const result = await computePosition(virtualReferenceFor(anchor), floating, {
+        const result = await computePosition(positionReference(anchor, config), floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
           middleware: middlewareFor(config),
