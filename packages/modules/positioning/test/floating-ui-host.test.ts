@@ -118,9 +118,10 @@ describe('module-positioning: Floating UI host', () => {
     document.body.append(anchor, floating);
     setRect(anchor, rect(101, 101, 50, 20));
     setRect(floating, rect(0, 0, 40, 10));
-    const transformSpy = vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-      transform: 'matrix(1, 0, 0, 1, -1, -1)',
-    } as CSSStyleDeclaration);
+    let transform = 'matrix(1, 0, 0, 1, -1, -1)';
+    const transformSpy = vi
+      .spyOn(window, 'getComputedStyle')
+      .mockImplementation(() => ({ transform }) as CSSStyleDeclaration);
 
     // Hover-lift decoration: rendered rect shifted by (-1,-1); the opt-in backs
     // the translation out so placement tracks the layout position.
@@ -134,12 +135,14 @@ describe('module-positioning: Floating UI host', () => {
     expect(floating.style.left).toBe('102px');
     expect(floating.style.top).toBe('126px');
 
-    // Recomputes with the current translation on each update while opted in.
-    setRect(anchor, rect(98, 98, 50, 20));
+    // Fixed layout point is (102,102). Change both the computed matrix and
+    // rendered rect; a cached first matrix would produce (99,100) and fail.
+    transform = 'matrix(1, 0, 0, 1, -4, -3)';
+    setRect(anchor, rect(98, 99, 50, 20));
     lease.requestUpdate();
     await flush();
-    expect(floating.style.left).toBe('99px');
-    expect(floating.style.top).toBe('123px');
+    expect(floating.style.left).toBe('102px');
+    expect(floating.style.top).toBe('126px');
     transformSpy.mockRestore();
     lease.dispose();
   });
