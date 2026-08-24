@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { definePrototype, type DefHandle, type TextControlPatch } from '@proto.ui/core';
+import {
+  definePrototype,
+  type DefHandle,
+  type FocusRequestOptions,
+  type TextControlPatch,
+} from '@proto.ui/core';
 import { asFocusable, asTextControl } from '@proto.ui/hooks';
 import { declareTextControl } from '@proto.ui/module-text-control';
 import { AdaptToWebComponent, setElementProps, type WebComponentAdapterElement } from '../src';
@@ -49,6 +54,9 @@ const focusTextareaPrototype = definePrototype({
     focusable.configure({ disabled: false });
     def.expose.state('focused', focusable.focused);
     def.expose.state('focusVisible', focusable.focusVisible);
+    def.expose.method('focusSelf', (options: FocusRequestOptions | undefined) =>
+      focusable.focusSelf(options)
+    );
     const sync = (props: Readonly<ControlProps>) => {
       control.sync({
         valueMode: 'uncontrolled',
@@ -204,5 +212,95 @@ describe('adapter-web-component text control', () => {
     const countAfterDispose = projectedFocusCount;
     remountedTextarea.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     expect(projectedFocusCount).toBe(countAfterDispose);
+  });
+
+  it('breaks the host focus path when the focusin bridge is intercepted', async () => {
+    // End-to-end failing-before evidence: the bridge is load-bearing.
+    // Native focus/blur do not bubble from the physical control, so without
+    // the bridge the boundary never sees focus projection. Intercepting the
+    // bubbling focusin before it reaches the custom-element boundary
+    // simulates the pre-fix world: focus lands on the control (activeElement
+    // changes), but the boundary receives no projected event and states stay
+    // false.
+    const shell = document.createElement('x-wc-text-control-focus') as WebComponentAdapterElement<
+      typeof focusTextareaPrototype
+    >;
+    setElementProps(shell, { defaultValue: '', placeholder: 'Write', rows: 4 });
+    let projectedFocusCount = 0;
+    shell.addEventListener('focus', () => {
+      projectedFocusCount += 1;
+    });
+    document.body.appendChild(shell);
+    await flush();
+
+    const textarea = shell.querySelector('textarea');
+    if (!textarea) throw new Error('physical textarea was not materialized');
+    const exposes = shell.getExposes() as {
+      focused: { get(): boolean };
+      focusVisible: { get(): boolean };
+    };
+
+    // Swallow the bridge signal: focusin on the control never reaches the
+    // boundary, so the bridge never re-dispatches focus/blur.
+    const swallowFocusIn = (e: FocusEvent) => {
+      if (e.target === textarea) e.stopImmediatePropagation();
+    };
+    document.addEventListener('focusin', swallowFocusIn, true);
+    try {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      textarea.focus();
+      await flush();
+      expect(document.activeElement).toBe(textarea);
+      expect(projectedFocusCount).toBe(0);
+      expect(exposes.focused.get()).toBe(false);
+      expect(exposes.focusVisible.get()).toBe(false);
+      expect(shell.hasAttribute('data-focus-visible')).toBe(false);
+    } finally {
+      document.removeEventListener('focusin', swallowFocusIn, true);
+    }
+
+    // After unblocking, the bridge path restores.
+    textarea.blur();
+    await flush();
+    textarea.focus();
+    await flush();
+    expect(exposes.focused.get()).toBe(true);
+
+    shell.remove();
+  });
+
+  it('projects focusSelf bidirectionally between host method and physical control', async () => {
+    const shell = document.createElement('x-wc-text-control-focus') as WebComponentAdapterElement<
+      typeof focusTextareaPrototype
+    >;
+    setElementProps(shell, { defaultValue: '', placeholder: 'Write', rows: 4 });
+    document.body.appendChild(shell);
+    await flush();
+
+    const textarea = shell.querySelector('textarea');
+    if (!textarea) throw new Error('physical textarea was not materialized');
+    const exposes = shell.getExposes() as {
+      focused: { get(): boolean };
+      focusSelf: (options?: { reason?: string }) => void;
+    };
+
+    // focusSelf focuses the physical control and syncs the focused state.
+    exposes.focusSelf({ reason: 'programmatic' });
+    await flush();
+    expect(document.activeElement).toBe(textarea);
+    expect(exposes.focused.get()).toBe(true);
+
+    // Blur un-syncs.
+    textarea.blur();
+    await flush();
+    expect(exposes.focused.get()).toBe(false);
+
+    // focusSelf re-focuses after blur.
+    exposes.focusSelf({ reason: 'programmatic' });
+    await flush();
+    expect(document.activeElement).toBe(textarea);
+    expect(exposes.focused.get()).toBe(true);
+
+    shell.remove();
   });
 });
