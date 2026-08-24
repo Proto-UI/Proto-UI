@@ -380,6 +380,9 @@ describe('prototypes/base: radio group', () => {
     root.append(item);
     document.body.append(root);
     await flushReconciliation();
+    // App Maker expose records contain state/value/method surfaces only.
+    // `valueChange` and `select` remain declared expose events and are covered
+    // by the behavioral event tests above; declarations are not record entries.
 
     expect(Object.keys(root.getExposes()).sort()).toEqual([
       'count',
@@ -393,7 +396,6 @@ describe('prototypes/base: radio group', () => {
       'getCollectionItems',
       'requestValue',
       'value',
-      'valueChange',
     ]);
     expect(Object.keys(item.getExposes()).sort()).toEqual([
       '__collectionItem',
@@ -409,7 +411,6 @@ describe('prototypes/base: radio group', () => {
       'getCollectionItem',
       'hovered',
       'pressed',
-      'select',
     ]);
     expect(Object.keys(indicator.getExposes()).sort()).toEqual([
       'checked',
