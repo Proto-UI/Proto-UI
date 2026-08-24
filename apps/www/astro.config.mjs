@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import starlight from '@astrojs/starlight';
 import remarkDirective from 'remark-directive';
+import starlightLlmsTxt from 'starlight-llms-txt';
 
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'node:fs';
@@ -76,6 +77,13 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Proto UI',
+      plugins: [
+        starlightLlmsTxt({
+          description:
+            'Proto UI is an open-source project exploring unified human-computer interaction protocols across platforms, frameworks, and interaction media.',
+          rawContent: true,
+        }),
+      ],
       expressiveCode: {
         styleOverrides: {
           borderRadius: 'calc(0.75rem - 1px)',

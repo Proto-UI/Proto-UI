@@ -37,6 +37,7 @@
     "astro": "^5.6.1",
     "sharp": "^0.34.2",
     "shiki": "^3.22.0",
+    "starlight-llms-txt": "0.7.0",
     "tailwindcss": "^4.1.11",
     "remark-directive": "^4.0.0",
     "unist-util-visit": "^5.0.0",
