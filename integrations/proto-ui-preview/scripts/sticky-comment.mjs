@@ -21,7 +21,7 @@ const states = {
   ready: {
     heading: "✅ Preview ready",
     detail: `[Open the contributor preview](${origin})`,
-    note: "GitHub sign-in is required. Access is limited to the PR author, recorded reviewers, and active Proto-UI organization members; eligibility is rechecked while browsing.",
+    note: "GitHub sign-in is required. Access is limited to the PR author, live recorded reviewers, active Proto-UI organization members, and current-head users explicitly invited by a maintainer through Poppy; mutable eligibility is rechecked while browsing.",
   },
   failed: {
     heading: "❌ Preview deployment failed",
