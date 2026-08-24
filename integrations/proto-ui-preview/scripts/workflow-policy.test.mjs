@@ -31,3 +31,7 @@ test("the trusted Worker is bound to the exact workflow run tuple", () => {
     assert.match(workflow, new RegExp(argument));
   }
 });
+
+test("the secret-bearing deploy installs only production dependencies", () => {
+  assert.match(workflow, /npm ci --prefix integrations\/proto-ui-preview --omit=dev --ignore-scripts/);
+});

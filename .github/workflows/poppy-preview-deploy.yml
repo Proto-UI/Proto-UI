@@ -270,7 +270,7 @@ jobs:
 
       - name: Install integrity-locked trusted deployment tooling
         shell: bash
-        run: npm ci --prefix integrations/proto-ui-preview --ignore-scripts
+        run: npm ci --prefix integrations/proto-ui-preview --omit=dev --ignore-scripts
 
       - name: Set the Pages gate secret
         env:

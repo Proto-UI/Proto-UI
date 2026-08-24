@@ -8,7 +8,10 @@
   "scripts": {
     "test": "node --test scripts/*.test.mjs"
   },
-  "devDependencies": {
+  "dependencies": {
     "wrangler": "4.125.0"
+  },
+  "devDependencies": {
+    "playwright-core": "1.58.2"
   }
 }
