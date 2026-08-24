@@ -37,7 +37,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const runId = Number(context.payload.workflow_run?.id || context.payload.inputs?.build_run_id);
+            const runId = Number(context.payload.workflow_run?.id || context.payload.client_payload?.build_run_id);
             const expectedRepo = `${owner}/${repo}`;
             const { data: run } = await github.rest.actions.getWorkflowRun({
               owner, repo, run_id: runId,
@@ -119,7 +119,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const runId = Number(context.payload.workflow_run?.id || context.payload.inputs?.build_run_id);
+            const runId = Number(context.payload.workflow_run?.id || context.payload.client_payload?.build_run_id);
             const { data: run } = await github.rest.actions.getWorkflowRun({
               owner, repo, run_id: runId,
             });
@@ -245,7 +245,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const runId = Number(context.payload.workflow_run?.id || context.payload.inputs?.build_run_id);
+            const runId = Number(context.payload.workflow_run?.id || context.payload.client_payload?.build_run_id);
             const expectedRepo = `${owner}/${repo}`;
 
             const { data: run } = await github.rest.actions.getWorkflowRun({

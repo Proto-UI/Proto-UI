@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 const script = new URL('./cloudflare-pages.mjs', import.meta.url);
+const scriptPath = fileURLToPath(script);
 
 function runWithPreload(source) {
   return spawnSync(
@@ -10,7 +12,7 @@ function runWithPreload(source) {
     [
       '--import',
       `data:text/javascript,${encodeURIComponent(source)}`,
-      script.pathname,
+      scriptPath,
       'ensure',
       'poppy-proto-ui-pr-42',
     ],

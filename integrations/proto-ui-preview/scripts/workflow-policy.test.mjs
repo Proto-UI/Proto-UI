@@ -72,6 +72,8 @@ test('trusted installation bootstraps every already-open or draft PR', () => {
   assert.match(bootstrap, /event_type: "poppy_preview_build_completed"/);
   assert.match(workflow, /repository_dispatch:\s+types: \[poppy_preview_build_completed\]/);
   assert.doesNotMatch(workflow, /^  workflow_dispatch:/m);
+  assert.match(workflow, /context\.payload\.client_payload\?\.build_run_id/);
+  assert.doesNotMatch(workflow, /context\.payload\.inputs\?\.build_run_id/);
   assert.match(bootstrap, /state: "open"/);
   assert.match(bootstrap, /github\.paginate\(github\.rest\.pulls\.list/);
   assert.match(bootstrap, /workflow_id: "poppy-preview-build\.yml"/);
