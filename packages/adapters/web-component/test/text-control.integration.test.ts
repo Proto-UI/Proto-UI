@@ -165,7 +165,7 @@ describe('adapter-web-component text control', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
     textarea.focus();
     expect(document.activeElement).toBe(textarea);
-    expect(projectedFocusCount).toBe(1);
+    expect(projectedFocusCount).toBe(0);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(true);
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
@@ -181,7 +181,7 @@ describe('adapter-web-component text control', () => {
     textarea.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
     textarea.focus();
     expect(document.activeElement).toBe(textarea);
-    expect(projectedFocusCount).toBe(2);
+    expect(projectedFocusCount).toBe(0);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(false);
     expect(shell.hasAttribute('data-focus-visible')).toBe(false);
@@ -202,7 +202,7 @@ describe('adapter-web-component text control', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
     remountedTextarea.focus();
     expect(document.activeElement).toBe(remountedTextarea);
-    expect(projectedFocusCount).toBe(countAfterDetach + 1);
+    expect(projectedFocusCount).toBe(countAfterDetach);
     expect(remountedExposes.focused.get()).toBe(true);
     expect(remountedExposes.focusVisible.get()).toBe(true);
     remountedTextarea.blur();

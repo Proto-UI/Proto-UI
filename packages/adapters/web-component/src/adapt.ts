@@ -353,15 +353,16 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._applier = applier;
         let disposeFocusBridge: (() => void) | null = null;
         if (this._textControlTarget) {
-          // Native focus/blur do not bubble from the physical text control, so
-          // project them onto the custom-element boundary where host-bound
-          // focus listeners are attached.
+          // Native focus/blur do not bubble from the physical text control.
+          // Route the trusted physical event through the adapter-private host
+          // ingress: Proto focus facts update without emitting a second public
+          // native-looking event from the custom-element boundary.
           const control = this._textControlTarget;
-          const onFocusIn = (e: FocusEvent) => {
-            if (e.target === control) thisEl.dispatchEvent(new FocusEvent('focus'));
+          const onFocusIn = (event: FocusEvent) => {
+            if (event.target === control) router.dispatchHostRootEvent('focus', event);
           };
-          const onFocusOut = (e: FocusEvent) => {
-            if (e.target === control) thisEl.dispatchEvent(new FocusEvent('blur'));
+          const onFocusOut = (event: FocusEvent) => {
+            if (event.target === control) router.dispatchHostRootEvent('blur', event);
           };
           thisEl.addEventListener('focusin', onFocusIn);
           thisEl.addEventListener('focusout', onFocusOut);

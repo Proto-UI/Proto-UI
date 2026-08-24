@@ -90,6 +90,7 @@ implementations:
     notes:
       - Intercepts the native control focusin before it reaches the boundary to prove that focus still lands physically while logical focused/focusVisible projection breaks without the bridge signal.
       - Calls the exposed focusSelf method and proves that the physical control becomes active and the logical focused state synchronizes back; physical blur and refocus cover the reverse direction.
+      - Routes physical focus through adapter-private ingress; document/boundary listeners observe no second public focus event while Proto focused/focusVisible facts still update.
     exercises:
       - P-BASE-TEXTAREA
   - id: docs-browser-brutalist-textarea-focus
@@ -125,6 +126,9 @@ sources:
   - path: packages/adapters/web-component/test/text-control.integration.test.ts
   - path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Kept physical text-control focus projection inside adapter-private ingress and added negative evidence that no second public boundary focus event is emitted.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added explicit bridge-absence failure evidence and bidirectional focusSelf-to-physical-control synchronization coverage for the Web Component textarea.

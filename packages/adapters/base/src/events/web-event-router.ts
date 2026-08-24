@@ -444,6 +444,10 @@ export function createWebProtoEventRouter(opt: {
     /** Inject these into EVENT_*_TARGET_CAP */
     rootTarget: rootProxy as EventTarget,
     globalTarget: globalProxy as EventTarget,
+    /** Adapter-private ingress for a trusted physical host target. */
+    dispatchHostRootEvent(type: string, event: Event) {
+      rootProxy.__dispatchHost(type, event);
+    },
 
     dispose() {
       if (activeRouterByRoot.get(rootEl) === routerIdentity) activeRouterByRoot.delete(rootEl);
@@ -571,6 +575,13 @@ function createProxyTarget(args: {
       return args.protoBus.dispatchEvent(ev);
     },
 
+    /** Private adapter ingress; does not emit another public DOM event. */
+    __dispatchHost(type: string, event: Event) {
+      for (const listener of hostListeners) {
+        if (listener.type !== type) continue;
+        listener.wrapped?.(event);
+      }
+    },
     // best-effort cleanup (not required by EventTarget)
     __dispose() {
       // 主动解绑所有已懒绑定的 host listener，避免残留
