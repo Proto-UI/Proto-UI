@@ -1,0 +1,14 @@
+{
+  "name": "poppy-proto-ui-preview-integration",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test scripts/*.test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.125.0"
+  }
+}
