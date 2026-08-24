@@ -14,22 +14,43 @@ if (!/^poppy-proto-ui-pr-[1-9][0-9]*$/.test(project || "")) {
 const api = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(account)}/pages`;
 
 async function request(pathname, init = {}, allowNotFound = false) {
-  const result = await fetch(`${api}${pathname}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...init.headers,
-    },
-    signal: AbortSignal.timeout(30_000),
-  });
-  if (allowNotFound && result.status === 404) return null;
-  const envelope = await result.json().catch(() => null);
-  if (!result.ok || envelope?.success !== true) {
+  const attempts = 5;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    let result;
+    try {
+      result = await fetch(`${api}${pathname}`, {
+        ...init,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(init.body ? { "Content-Type": "application/json" } : {}),
+          ...init.headers,
+        },
+        signal: AbortSignal.timeout(30_000),
+      });
+    } catch (error) {
+      if (attempt === attempts) throw error;
+      await retryDelay(attempt);
+      continue;
+    }
+    if (allowNotFound && result.status === 404) return null;
+    const envelope = await result.json().catch(() => null);
+    if (result.ok && envelope?.success === true) return envelope.result;
+
+    const retryable = result.status === 429 || result.status >= 500;
+    if (retryable && attempt < attempts) {
+      const retryAfter = Number.parseInt(result.headers.get("retry-after") || "", 10);
+      await retryDelay(attempt, Number.isFinite(retryAfter) ? retryAfter * 1000 : 0);
+      continue;
+    }
     const errors = JSON.stringify(envelope?.errors || []).slice(0, 1000);
     throw new Error(`Cloudflare Pages API ${init.method || "GET"} ${pathname} failed (${result.status}): ${errors}`);
   }
-  return envelope.result;
+  throw new Error(`Cloudflare Pages API ${init.method || "GET"} ${pathname} exhausted retries`);
+}
+
+async function retryDelay(attempt, minimum = 0) {
+  const exponential = Math.min(8_000, 500 * (2 ** (attempt - 1)));
+  await new Promise((resolve) => setTimeout(resolve, Math.max(minimum, exponential)));
 }
 
 async function ensureProject() {

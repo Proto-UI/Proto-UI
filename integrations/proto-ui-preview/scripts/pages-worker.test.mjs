@@ -128,6 +128,42 @@ test("an authorized asset is served without forwarding the session cookie", asyn
   }
 });
 
+test("authorized Astro routes fall back to their explicit directory index", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => Response.json({ authorized: true });
+  const paths = [];
+  try {
+    const result = await worker.fetch(
+      new Request("https://poppy-proto-ui-pr-462.pages.dev/guide", {
+        headers: { Cookie: `__Host-poppy-preview=${"s".repeat(48)}` },
+      }),
+      {
+        POPPY_PREVIEW_EDGE_SECRET: edgeSecret,
+        ASSETS: { fetch(request) {
+          paths.push(new URL(request.url).pathname);
+          return new URL(request.url).pathname === "/guide/index.html"
+            ? new Response("guide")
+            : new Response("missing", { status: 404 });
+        } },
+      },
+    );
+    assert.equal(result.status, 200);
+    assert.equal(await result.text(), "guide");
+    assert.deepEqual(paths, ["/guide", "/guide/index.html"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("the public readiness probe verifies the deployed index without exposing it", async () => {
+  const result = await worker.fetch(
+    new Request("https://poppy-proto-ui-pr-462.pages.dev/__poppy/assets-ready"),
+    { ASSETS: { fetch() { return new Response("private html"); } } },
+  );
+  assert.equal(result.status, 204);
+  assert.equal(await result.text(), "");
+});
+
 test("a transient control-plane failure does not clear the session or loop OAuth", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response("offline", { status: 503 });

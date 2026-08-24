@@ -4,6 +4,16 @@ on:
   workflow_run:
     workflows: ["Poppy preview build"]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Trusted completed Poppy preview build run
+        required: true
+        type: number
+      build_succeeded:
+        description: Routing hint; the deploy workflow rechecks the run
+        required: true
+        type: boolean
 
 # workflow_run executes from the trusted default branch. Never check out the
 # pull-request head in this workflow and never execute anything from its artifact.
@@ -16,10 +26,11 @@ jobs:
   resolve-deploy:
     name: Bind the successful build to a live pull request
     if: >-
-      (github.event.workflow_run.event == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' && inputs.build_succeeded) ||
+      ((github.event.workflow_run.event == 'pull_request' ||
       github.event.workflow_run.event == 'workflow_dispatch') &&
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.repository.full_name == github.repository
+      github.event.workflow_run.repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -37,7 +48,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const runId = Number(context.payload.workflow_run.id);
+            const runId = Number(context.payload.workflow_run?.id || context.payload.inputs?.build_run_id);
             const expectedRepo = `${owner}/${repo}`;
             const { data: run } = await github.rest.actions.getWorkflowRun({
               owner, repo, run_id: runId,
@@ -96,10 +107,11 @@ jobs:
   report-failed-build:
     name: Report a failed PR build
     if: >-
-      (github.event.workflow_run.event == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' && !inputs.build_succeeded) ||
+      ((github.event.workflow_run.event == 'pull_request' ||
       github.event.workflow_run.event == 'workflow_dispatch') &&
       github.event.workflow_run.conclusion != 'success' &&
-      github.event.workflow_run.repository.full_name == github.repository
+      github.event.workflow_run.repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -121,7 +133,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const runId = Number(context.payload.workflow_run.id);
+            const runId = Number(context.payload.workflow_run?.id || context.payload.inputs?.build_run_id);
             const { data: run } = await github.rest.actions.getWorkflowRun({
               owner, repo, run_id: runId,
             });
@@ -247,7 +259,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const runId = Number(context.payload.workflow_run.id);
+            const runId = Number(context.payload.workflow_run?.id || context.payload.inputs?.build_run_id);
             const expectedRepo = `${owner}/${repo}`;
 
             const { data: run } = await github.rest.actions.getWorkflowRun({
@@ -429,9 +441,28 @@ jobs:
         shell: bash
         run: node integrations/proto-ui-preview/scripts/cloudflare-pages.mjs latest "$PREVIEW_PROJECT" "$PREVIEW_SHA" "$PREVIEW_DEPLOY_MARKER"
 
+      - name: Verify the deployed Pages assets are reachable
+        if: steps.publish.outputs.exit_code == '0' && steps.deployed.outcome == 'success'
+        id: assets-ready
+        env:
+          PREVIEW_ORIGIN: ${{ steps.deployed.outputs.origin }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for _ in {1..12}; do
+            status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+              --max-time 10 "$PREVIEW_ORIGIN/__poppy/assets-ready" || true)"
+            if [ "$status" = 204 ]; then exit 0; fi
+            sleep 5
+          done
+          echo "Pages asset readiness probe did not become healthy" >&2
+          exit 1
+
       - name: Report the ready deployment to Poppy
         id: ready
-        if: always() && steps.publish.outputs.exit_code == '0' && steps.deployed.outcome == 'success'
+        if: >-
+          always() && steps.publish.outputs.exit_code == '0' &&
+          steps.deployed.outcome == 'success' && steps.assets-ready.outcome == 'success'
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
           PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
@@ -450,7 +481,7 @@ jobs:
         if: >-
           always() && steps.resolve.outputs.pr != '' &&
           (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' ||
-          steps.ready.outcome != 'success')
+          steps.assets-ready.outcome != 'success' || steps.ready.outcome != 'success')
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
           PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
@@ -483,6 +514,6 @@ jobs:
         if: >-
           always() &&
           (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' ||
-          steps.ready.outcome != 'success')
+          steps.assets-ready.outcome != 'success' || steps.ready.outcome != 'success')
         shell: bash
         run: exit 1

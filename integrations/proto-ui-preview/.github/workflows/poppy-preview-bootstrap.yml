@@ -12,8 +12,10 @@ on:
       - integrations/proto-ui-preview/**
 
 # This workflow runs only trusted default-branch code. It dispatches the
-# secret-free build workflow; it never checks out or executes a pull-request
-# head and receives none of the preview deployment secrets.
+# secret-free build workflow, waits for its immutable run, then explicitly
+# dispatches the trusted deploy workflow. GitHub suppresses workflow_run events
+# that descend from GITHUB_TOKEN, so relying on that event would strand every
+# bootstrap build. Neither this job nor the build receives deployment secrets.
 permissions:
   actions: write
   contents: read
@@ -37,6 +39,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const startedAt = Date.now() - 5_000;
             const { data: repository } = await github.rest.repos.get({ owner, repo });
             if (context.ref !== `refs/heads/${repository.default_branch}`) {
               core.setFailed("Bootstrap must execute from the trusted default branch");
@@ -67,7 +70,48 @@ jobs:
               });
               core.info(`Enqueued Poppy preview build for PR #${pull.number}${pull.draft ? " (draft)" : ""}.`);
             }
+
+            const pending = new Map(pulls.map((pull) => [
+              `Poppy preview build PR #${pull.number}`,
+              pull.number,
+            ]));
+            const completed = [];
+            const deadline = Date.now() + 8 * 60_000;
+            while (pending.size > 0 && Date.now() < deadline) {
+              const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+                owner,
+                repo,
+                workflow_id: "poppy-preview-build.yml",
+                event: "workflow_dispatch",
+                per_page: 100,
+              });
+              for (const run of runs) {
+                if (Date.parse(run.created_at) < startedAt || run.status !== "completed") continue;
+                const pr = pending.get(run.display_title);
+                if (!pr) continue;
+                completed.push({ pr, id: run.id, conclusion: run.conclusion });
+                pending.delete(run.display_title);
+              }
+              if (pending.size > 0) await new Promise((resolve) => setTimeout(resolve, 5_000));
+            }
+            if (pending.size > 0) {
+              core.setFailed(`Timed out waiting for bootstrap builds: ${[...pending.values()].join(", ")}`);
+              return;
+            }
+            for (const run of completed) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: "poppy-preview-deploy.yml",
+                ref: repository.default_branch,
+                inputs: {
+                  build_run_id: String(run.id),
+                  build_succeeded: String(run.conclusion === "success"),
+                },
+              });
+              core.info(`Enqueued trusted deployment for PR #${run.pr} from build ${run.id} (${run.conclusion}).`);
+            }
             core.summary
               .addHeading("Poppy preview bootstrap")
-              .addRaw(`Enqueued ${pulls.length} open or draft pull request(s).`)
+              .addRaw(`Built and enqueued deployment convergence for ${pulls.length} open or draft pull request(s).`)
               .write();

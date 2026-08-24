@@ -171,7 +171,7 @@ async function serveAuthorized(request, env) {
   assetHeaders.delete("Authorization");
   assetHeaders.delete("X-Poppy-Preview-Edge-Secret");
   const assetRequest = new Request(request, { headers: assetHeaders });
-  const asset = await env.ASSETS.fetch(assetRequest);
+  const asset = await fetchAsset(env, assetRequest);
   const headers = securityHeaders(new Headers(asset.headers));
   headers.delete("Set-Cookie");
   return new Response(asset.body, {
@@ -181,12 +181,32 @@ async function serveAuthorized(request, env) {
   });
 }
 
+async function fetchAsset(env, request) {
+  let asset = await env.ASSETS.fetch(request);
+  if (asset.status !== 404 || request.method !== "GET") return asset;
+
+  // Pages' advanced-mode ASSETS binding does not consistently apply the
+  // platform's directory-index routing. Astro emits /route/index.html, so
+  // resolve those paths explicitly before returning a genuine 404.
+  const url = new URL(request.url);
+  if (url.pathname.endsWith("/")) url.pathname += "index.html";
+  else if (!url.pathname.split("/").at(-1)?.includes(".")) url.pathname += "/index.html";
+  else return asset;
+  return env.ASSETS.fetch(new Request(url, request));
+}
+
+async function assetHealth(env) {
+  const probe = await env.ASSETS.fetch(new Request(`${CANONICAL_ORIGIN}/index.html`));
+  return response(null, { status: probe.ok ? 204 : 503 });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.origin !== CANONICAL_ORIGIN) {
       return redirect(`${CANONICAL_ORIGIN}${url.pathname}${url.search}`, 308);
     }
+    if (url.pathname === "/__poppy/assets-ready") return assetHealth(env);
     if (url.pathname === "/__poppy/session") return exchangeTicket(request, env);
     return serveAuthorized(request, env);
   },
