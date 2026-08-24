@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: "poppy-preview-deploy-Poppy preview build PR #${{ github.event.pull_request.number }}"
+  group: poppy-preview-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:

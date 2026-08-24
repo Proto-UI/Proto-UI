@@ -12,11 +12,87 @@ permissions:
   contents: read
   pull-requests: write
 
-concurrency:
-  group: poppy-preview-deploy-${{ github.event.workflow_run.display_title || github.event.workflow_run.id }}
-  cancel-in-progress: true
-
 jobs:
+  resolve-deploy:
+    name: Bind the successful build to a live pull request
+    if: >-
+      (github.event.workflow_run.event == 'pull_request' ||
+      github.event.workflow_run.event == 'workflow_dispatch') &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      pr: ${{ steps.resolve.outputs.pr }}
+
+    steps:
+      # This job receives no deployment secrets. Its only purpose is to derive
+      # a stable PR-number lock from GitHub API state instead of trusting the
+      # workflow run title, which pull-request code can change.
+      - name: Resolve the immutable PR lock key
+        id: resolve
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const runId = Number(context.payload.workflow_run.id);
+            const expectedRepo = `${owner}/${repo}`;
+            const { data: run } = await github.rest.actions.getWorkflowRun({
+              owner, repo, run_id: runId,
+            });
+            if (!["pull_request", "workflow_dispatch"].includes(run.event) || run.conclusion !== "success" ||
+                run.repository.full_name !== expectedRepo) {
+              core.setFailed(`Refusing unrelated run ${runId}`);
+              return;
+            }
+            const { data: workflow } = await github.rest.actions.getWorkflow({
+              owner, repo, workflow_id: run.workflow_id,
+            });
+            if (workflow.path !== ".github/workflows/poppy-preview-build.yml") {
+              core.setFailed(`Refusing run ${runId}: artifact came from ${workflow.path}`);
+              return;
+            }
+            if (run.event === "workflow_dispatch") {
+              const { data: repository } = await github.rest.repos.get({ owner, repo });
+              if (run.head_repository?.id !== run.repository.id || run.head_branch !== repository.default_branch) {
+                core.setFailed(`Refusing run ${runId}: manual build did not execute from the trusted default branch`);
+                return;
+              }
+            }
+            const artifacts = await github.paginate(
+              github.rest.actions.listWorkflowRunArtifacts,
+              { owner, repo, run_id: runId, per_page: 100 },
+            );
+            const pattern = /^poppy-preview-([1-9][0-9]*)-([0-9a-f]{40})-([1-9][0-9]*)$/;
+            const matches = artifacts.flatMap((artifact) => {
+              const match = pattern.exec(artifact.name);
+              return match && !artifact.expired && Number(match[3]) === run.run_attempt
+                ? [{ artifact, pr: Number(match[1]), sha: match[2] }]
+                : [];
+            });
+            if (matches.length !== 1) {
+              core.setFailed(`Refusing run ${runId}: expected exactly one valid Poppy artifact`);
+              return;
+            }
+            const candidate = matches[0];
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: candidate.pr });
+            if (pr.state !== "open" || pr.head.sha !== candidate.sha) {
+              core.setFailed(`Refusing run ${runId}: artifact no longer matches the live open PR head`);
+              return;
+            }
+            if (run.event === "pull_request") {
+              const associations = run.pull_requests || [];
+              const associated = associations.length === 0 || associations.some((item) => item.number === pr.number);
+              if (!associated || !run.head_repository?.id || pr.head.repo?.id !== run.head_repository.id ||
+                  (run.head_branch && run.head_branch !== pr.head.ref)) {
+                core.setFailed(`Refusing run ${runId}: workflow run is not bound to this PR head repository`);
+                return;
+              }
+            }
+            core.setOutput("pr", String(pr.number));
+
   report-failed-build:
     name: Report a failed PR build
     if: >-
@@ -113,13 +189,19 @@ jobs:
 
   deploy:
     name: Publish contributor-only preview
-    if: >-
-      (github.event.workflow_run.event == 'pull_request' ||
-      github.event.workflow_run.event == 'workflow_dispatch') &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.repository.full_name == github.repository
+    needs: resolve-deploy
+    if: needs.resolve-deploy.outputs.pr != ''
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    # The key comes from live GitHub API state in the secret-free resolver, not
+    # from display_title or any other pull-request-controlled string. A close
+    # workflow uses this exact group with cancel-in-progress=true, while a late
+    # deploy waits and then fails its second live-state check instead of
+    # canceling cleanup and resurrecting a closed preview.
+    concurrency:
+      group: poppy-preview-pr-${{ needs.resolve-deploy.outputs.pr }}
+      cancel-in-progress: false
 
     env:
       POPPY_CONTROL_PLANE: https://poppy-proto-ui.chenyejin2004.workers.dev

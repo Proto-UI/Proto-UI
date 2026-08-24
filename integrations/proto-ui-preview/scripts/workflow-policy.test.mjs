@@ -16,6 +16,13 @@ const bootstrap = await readFile(
   new URL("../../../.github/workflows/poppy-preview-bootstrap.yml", import.meta.url),
   "utf8",
 ));
+const close = await readFile(
+  new URL("../.github/workflows/poppy-preview-close.yml", import.meta.url),
+  "utf8",
+).catch(() => readFile(
+  new URL("../../../.github/workflows/poppy-preview-close.yml", import.meta.url),
+  "utf8",
+));
 
 test("Poppy revokes the previous ready state before Cloudflare publication", () => {
   const buildingStart = workflow.indexOf("- name: Mark the current head as building in Poppy");
@@ -50,4 +57,14 @@ test("trusted installation bootstraps every already-open or draft PR", () => {
   assert.match(bootstrap, /workflow_id: "poppy-preview-build\.yml"/);
   assert.match(bootstrap, /inputs: \{ pr_number: String\(pull\.number\) \}/);
   assert.doesNotMatch(bootstrap, /\$\{\{\s*secrets\./);
+});
+
+test("deployment and close serialize on an API-derived PR key", () => {
+  assert.doesNotMatch(workflow, /^concurrency:/m);
+  assert.match(workflow, /resolve-deploy:[\s\S]*outputs:\s+pr: \$\{\{ steps\.resolve\.outputs\.pr \}\}/);
+  assert.match(workflow, /workflow\.path !== "\.github\/workflows\/poppy-preview-build\.yml"/);
+  assert.match(workflow, /deploy:[\s\S]*needs: resolve-deploy[\s\S]*group: poppy-preview-pr-\$\{\{ needs\.resolve-deploy\.outputs\.pr \}\}[\s\S]*cancel-in-progress: false/);
+  assert.match(close, /^concurrency:\s+group: poppy-preview-pr-\$\{\{ github\.event\.pull_request\.number \}\}\s+cancel-in-progress: true/m);
+  assert.doesNotMatch(workflow, /group:.*display_title/);
+  assert.doesNotMatch(close, /display_title/);
 });
