@@ -2,8 +2,8 @@ name: Agent Operations Shadow
 
 on:
   schedule:
-    # Daily at an off-peak minute. Phase A only uploads read-only artifacts.
-    - cron: '17 3 * * *'
+    # Hourly at minute 17. Phase A remains read-only and only uploads validated artifacts.
+    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       kind:
