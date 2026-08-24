@@ -10,6 +10,7 @@ import { declareTextControl } from '@proto.ui/module-text-control';
 import { AdaptToWebComponent, setElementProps, type WebComponentAdapterElement } from '../src';
 
 const moduleInputValues: string[] = [];
+const projectedHostFocusTypes: string[] = [];
 type ControlProps = { defaultValue?: string; placeholder?: string; rows?: number };
 
 const textareaPrototype = definePrototype({
@@ -57,6 +58,12 @@ const focusTextareaPrototype = definePrototype({
     def.expose.method('focusSelf', (options: FocusRequestOptions | undefined) =>
       focusable.focusSelf(options)
     );
+    def.event.on('host:focus', (_run, event) => {
+      projectedHostFocusTypes.push(String(event?.type));
+    });
+    def.event.on('host:blur', (_run, event) => {
+      projectedHostFocusTypes.push(String(event?.type));
+    });
     const sync = (props: Readonly<ControlProps>) => {
       control.sync({
         valueMode: 'uncontrolled',
@@ -140,6 +147,7 @@ describe('adapter-web-component text control', () => {
   });
 
   it('projects native text-control focus across modality, remount, and teardown', async () => {
+    projectedHostFocusTypes.length = 0;
     const shell = document.createElement('x-wc-text-control-focus') as WebComponentAdapterElement<
       typeof focusTextareaPrototype
     >;
@@ -166,6 +174,7 @@ describe('adapter-web-component text control', () => {
     textarea.focus();
     expect(document.activeElement).toBe(textarea);
     expect(projectedFocusCount).toBe(0);
+    expect(projectedHostFocusTypes).toEqual(['focus']);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(true);
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
@@ -173,6 +182,7 @@ describe('adapter-web-component text control', () => {
 
     textarea.blur();
     expect(document.activeElement).not.toBe(textarea);
+    expect(projectedHostFocusTypes).toEqual(['focus', 'blur']);
     expect(exposes.focused.get()).toBe(false);
     expect(exposes.focusVisible.get()).toBe(false);
     expect(shell.hasAttribute('data-focus-visible')).toBe(false);
