@@ -1,0 +1,68 @@
+name: Poppy preview security
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/poppy-preview-*.yml
+      - integrations/proto-ui-preview/**
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/poppy-preview-*.yml
+      - integrations/proto-ui-preview/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: poppy-preview-security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-boundary:
+    name: Preview trust-boundary tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out the reviewed integration
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: integrations/proto-ui-preview/package-lock.json
+
+      - name: Install the integrity-locked test dependencies
+        shell: bash
+        run: npm ci --prefix integrations/proto-ui-preview --ignore-scripts
+
+      - name: Run the edge, lifecycle, browser, and lockstep suite
+        shell: bash
+        run: npm test --prefix integrations/proto-ui-preview
+
+      - name: Install checksum-verified actionlint 1.7.7
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive=actionlint_1.7.7_linux_amd64.tar.gz
+          curl --fail --show-error --silent --location --retry 3 \
+            "https://github.com/rhysd/actionlint/releases/download/v1.7.7/$archive" \
+            --output "$RUNNER_TEMP/$archive"
+          printf '%s  %s\n' \
+            '023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757' \
+            "$RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar --extract --gzip --file "$RUNNER_TEMP/$archive" --directory "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -version
+
+      - name: Lint installed and reviewed workflow copies
+        shell: bash
+        run: >-
+          "$RUNNER_TEMP/actionlint"
+          .github/workflows/poppy-preview-*.yml
+          integrations/proto-ui-preview/.github/workflows/*.yml
+

@@ -23,6 +23,13 @@ const close = await readFile(
   new URL("../../../.github/workflows/poppy-preview-close.yml", import.meta.url),
   "utf8",
 ));
+const build = await readFile(
+  new URL("../.github/workflows/poppy-preview-build.yml", import.meta.url),
+  "utf8",
+).catch(() => readFile(
+  new URL("../../../.github/workflows/poppy-preview-build.yml", import.meta.url),
+  "utf8",
+));
 
 test("Poppy revokes the previous ready state before Cloudflare publication", () => {
   const buildingStart = workflow.indexOf("- name: Mark the current head as building in Poppy");
@@ -55,8 +62,22 @@ test("trusted installation bootstraps every already-open or draft PR", () => {
   assert.match(bootstrap, /state: "open"/);
   assert.match(bootstrap, /github\.paginate\(github\.rest\.pulls\.list/);
   assert.match(bootstrap, /workflow_id: "poppy-preview-build\.yml"/);
-  assert.match(bootstrap, /inputs: \{ pr_number: String\(pull\.number\) \}/);
+  assert.match(bootstrap, /inputs: \{[\s\S]*pr_number: String\(pull\.number\)/);
+  assert.match(bootstrap, /expected_head_sha: pull\.head\.sha/);
   assert.doesNotMatch(bootstrap, /\$\{\{\s*secrets\./);
+});
+
+test("failed trusted dispatches revoke only their immutable live head", () => {
+  assert.match(build, /expected_head_sha:[\s\S]*required: true/);
+  assert.match(build, /pr\.head\.sha !== expectedHead/);
+  assert.match(build, /name: poppy-preview-binding-\$\{\{ steps\.pr\.outputs\.number \}\}-\$\{\{ steps\.pr\.outputs\.sha \}\}-\$\{\{ github\.run_attempt \}\}/);
+  assert.ok(
+    build.indexOf("- name: Upload the immutable build binding") < build.indexOf("- name: Check out the exact pull request head"),
+    "binding must exist before pull-request code executes",
+  );
+  assert.match(workflow, /report-failed-build:[\s\S]*github\.event\.workflow_run\.event == 'workflow_dispatch'/);
+  assert.match(workflow, /poppy-preview-binding-\(\[1-9\]\[0-9\]\*\)-\(\[0-9a-f\]\{40\}\)-\(\[1-9\]\[0-9\]\*\)/);
+  assert.match(workflow, /pr\.head\.sha !== candidate\.sha/);
 });
 
 test("deployment and close serialize on an API-derived PR key", () => {
@@ -67,4 +88,24 @@ test("deployment and close serialize on an API-derived PR key", () => {
   assert.match(close, /^concurrency:\s+group: poppy-preview-pr-\$\{\{ github\.event\.pull_request\.number \}\}\s+cancel-in-progress: true/m);
   assert.doesNotMatch(workflow, /group:.*display_title/);
   assert.doesNotMatch(close, /display_title/);
+});
+
+test("installed workflows remain byte-identical to reviewed templates", async (t) => {
+  const names = [
+    "poppy-preview-bootstrap.yml",
+    "poppy-preview-build.yml",
+    "poppy-preview-close.yml",
+    "poppy-preview-deploy.yml",
+  ];
+  const repositoryRoot = new URL("../../../.github/workflows/", import.meta.url);
+  const installed = await readFile(new URL(names[0], repositoryRoot), "utf8").catch(() => null);
+  if (installed === null) {
+    t.skip("integration source repository has no installed workflow copies");
+    return;
+  }
+  for (const name of names) {
+    const template = await readFile(new URL(`../.github/workflows/${name}`, import.meta.url), "utf8");
+    const root = await readFile(new URL(name, repositoryRoot), "utf8");
+    assert.equal(root, template, `${name} drifted from its reviewed template`);
+  }
 });

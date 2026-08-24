@@ -96,7 +96,8 @@ jobs:
   report-failed-build:
     name: Report a failed PR build
     if: >-
-      github.event.workflow_run.event == 'pull_request' &&
+      (github.event.workflow_run.event == 'pull_request' ||
+      github.event.workflow_run.event == 'workflow_dispatch') &&
       github.event.workflow_run.conclusion != 'success' &&
       github.event.workflow_run.repository.full_name == github.repository
     runs-on: ubuntu-latest
@@ -127,26 +128,51 @@ jobs:
             const { data: workflow } = await github.rest.actions.getWorkflow({
               owner, repo, workflow_id: run.workflow_id,
             });
-            if (run.event !== "pull_request" || run.conclusion === "success" ||
+            if (!["pull_request", "workflow_dispatch"].includes(run.event) || run.conclusion === "success" ||
                 run.repository.full_name !== `${owner}/${repo}` ||
                 workflow.path !== ".github/workflows/poppy-preview-build.yml") {
               core.setFailed(`Refusing unrelated failed run ${runId}`);
               return;
             }
-            const title = /^Poppy preview build PR #([1-9][0-9]*)$/.exec(run.display_title || "");
-            if (!title) {
-              core.notice(`Run ${runId} has no trusted PR number in its display title; leaving status in Actions only.`);
+            if (run.event === "workflow_dispatch") {
+              const { data: repository } = await github.rest.repos.get({ owner, repo });
+              if (run.head_repository?.id !== run.repository.id || run.head_branch !== repository.default_branch) {
+                core.setFailed(`Refusing failed run ${runId}: manual build did not execute from the trusted default branch`);
+                return;
+              }
+            }
+            const artifacts = await github.paginate(
+              github.rest.actions.listWorkflowRunArtifacts,
+              { owner, repo, run_id: runId, per_page: 100 },
+            );
+            const pattern = /^poppy-preview-binding-([1-9][0-9]*)-([0-9a-f]{40})-([1-9][0-9]*)$/;
+            const matches = artifacts.flatMap((artifact) => {
+              const match = pattern.exec(artifact.name);
+              return match && !artifact.expired && Number(match[3]) === run.run_attempt
+                ? [{ pr: Number(match[1]), sha: match[2], attempt: Number(match[3]) }]
+                : [];
+            });
+            if (matches.length !== 1) {
+              core.notice(`Failed run ${runId} has no unique immutable PR binding; leaving status in Actions only.`);
               core.setOutput("report", "false");
               return;
             }
-            const number = Number(title[1]);
+            const candidate = matches[0];
+            const number = candidate.pr;
             const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: number });
-            const associated = (run.pull_requests || []).find((item) => item.number === number);
-            if (pr.state !== "open" || !associated || associated.head?.sha !== pr.head.sha ||
-                associated.head?.repo?.id !== pr.head.repo?.id) {
+            if (pr.state !== "open" || pr.head.sha !== candidate.sha) {
               core.notice(`Failed run ${runId} is stale or cannot be bound exactly; leaving the current preview unchanged.`);
               core.setOutput("report", "false");
               return;
+            }
+            if (run.event === "pull_request") {
+              const associated = (run.pull_requests || []).find((item) => item.number === number);
+              if (!associated || associated.head?.sha !== pr.head.sha ||
+                  associated.head?.repo?.id !== pr.head.repo?.id) {
+                core.notice(`Failed run ${runId} is not associated with the live PR head; leaving the current preview unchanged.`);
+                core.setOutput("report", "false");
+                return;
+              }
             }
             core.setOutput("report", "true");
             core.setOutput("pr", String(pr.number));
@@ -155,7 +181,7 @@ jobs:
             core.setOutput("author_id", String(pr.user.id));
             core.setOutput("project", `poppy-proto-ui-pr-${pr.number}`);
             core.setOutput("run_id", String(runId));
-            core.setOutput("run_attempt", String(run.run_attempt));
+            core.setOutput("run_attempt", String(candidate.attempt));
 
       - name: Revoke any older ready state for this head
         if: steps.resolve.outputs.report == 'true'

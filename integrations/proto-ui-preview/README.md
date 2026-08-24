@@ -54,6 +54,7 @@ The resulting paths must be exactly:
 - `.github/workflows/poppy-preview-bootstrap.yml`
 - `.github/workflows/poppy-preview-deploy.yml`
 - `.github/workflows/poppy-preview-close.yml`
+- `.github/workflows/poppy-preview-security.yml`
 
 When these trusted files first reach `main`—or are later upgraded—the bootstrap
 workflow enumerates every already-open pull request, including drafts and forks,
@@ -74,6 +75,7 @@ job to its minimum permissions:
 | bootstrap | trusted `main` workflow installation/update | `actions: write`, `contents: read`, `pull-requests: read` | none |
 | deploy | `workflow_run` | `actions: read`, `contents: read`, `pull-requests: write` | Cloudflare and Poppy |
 | cleanup | `pull_request_target: closed` | `contents: read`, `pull-requests: write` | Cloudflare and Poppy |
+| security | preview integration changes on PR or `main` | `contents: read` | none |
 
 ## Repository secrets
 
@@ -191,7 +193,9 @@ branch:
 
 ```bash
 gh workflow run poppy-preview-build.yml \
-  --repo Proto-UI/Proto-UI --ref main -f pr_number=462
+  --repo Proto-UI/Proto-UI --ref main \
+  -f pr_number=462 \
+  -f expected_head_sha="$(gh pr view 462 --repo Proto-UI/Proto-UI --json headRefOid --jq .headRefOid)"
 ```
 
 After this integration reaches the default branch, open or update a disposable

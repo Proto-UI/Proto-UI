@@ -60,7 +60,10 @@ jobs:
                 repo,
                 workflow_id: "poppy-preview-build.yml",
                 ref: repository.default_branch,
-                inputs: { pr_number: String(pull.number) },
+                inputs: {
+                  pr_number: String(pull.number),
+                  expected_head_sha: pull.head.sha,
+                },
               });
               core.info(`Enqueued Poppy preview build for PR #${pull.number}${pull.draft ? " (draft)" : ""}.`);
             }
