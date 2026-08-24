@@ -39,6 +39,20 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 
 普通 Contributor Agent 使用 `internal/agent-operations/skills.yaml` 下的懒加载 skill registry，不属于定时 shadow workflow。`$pui-dev` 负责普通开发，`$pui-maintain` 负责独立的自治维护协议。
 
+## 私有贡献者预览工作流（`poppy-preview-*.yml`）
+
+五条 workflow 共同实现 Poppy/Cloudflare 私有预览边界：
+
+| Workflow | 触发 | 权限 / 外部边界 |
+| --- | --- | --- |
+| `poppy-preview-build.yml` | `pull_request` 与受信 bootstrap 的 `workflow_dispatch` | `contents: read`，无仓库或外部部署 secrets；构建 exact PR head，上传不受信 artifact 与 Actions 控制的 head binding。 |
+| `poppy-preview-bootstrap.yml` | trusted default-branch 安装/更新或手动触发 | `actions: write`、`contents: read`、`pull-requests: read`；枚举 live PR，并携 exact expected head 调度 secret-free build。 |
+| `poppy-preview-deploy.yml` | build 完成的 `workflow_run` | trusted default-branch code，`actions: read`、`contents: read`、`pull-requests: write`；复核 live PR/head/workflow/artifact，不执行贡献者代码地净化，部署 Cloudflare，向私有 Poppy 报告 lifecycle，并更新唯一 sticky comment。 |
+| `poppy-preview-close.yml` | `pull_request_target: closed` | trusted default-branch cleanup，`contents: read`、`pull-requests: write`；删除每 PR Cloudflare project，并向 Poppy 报告 Closed。 |
+| `poppy-preview-security.yml` | preview workflow/integration 在 PR 或 `main` 变化 | 只读 Node 22 证据 lane；运行 sanitizer/Worker/lifecycle/browser focused tests、固定 checksum 的 actionlint、installed/template workflow byte-for-byte lockstep。它是仓库 CI 证据，但**当前不是平台 required status check**。 |
+
+贡献者 artifact 永不获得 Cloudflare/Poppy secrets。Deploy/cleanup 只执行 trusted repository code，并调用私有外部 control-plane API；exact endpoint、tuple binding、access policy 与 post-merge E2E 要求记录在 `integrations/proto-ui-preview/README.md`。合并前绿色检查不能端到端证明 default-branch `workflow_run`、bootstrap、live OAuth identities、failure convergence 或 close cleanup；这些仍是 post-merge production acceptance gates。
+
 ## 发布工作流（`release-packages.yml`）
 
 该工作流仅通过 `workflow_dispatch` 手动触发。

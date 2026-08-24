@@ -39,6 +39,20 @@ The workflow has read-only `contents`, `issues`, and `pull-requests` permissions
 
 Ordinary Contributor Agents use the lazy skill registry under `internal/agent-operations/skills.yaml`; it is not part of the scheduled shadow workflow. `$pui-dev` routes ordinary development, while `$pui-maintain` routes the separate autonomous-maintenance protocol.
 
+## Private contributor preview workflows (`poppy-preview-*.yml`)
+
+Five workflows implement the private Poppy/Cloudflare preview boundary:
+
+| Workflow | Trigger | Permissions / external boundary |
+| --- | --- | --- |
+| `poppy-preview-build.yml` | `pull_request` and trusted `workflow_dispatch` bootstrap | `contents: read`; no repository or external deployment secrets; builds the exact PR head and uploads an untrusted artifact plus an Actions-controlled head binding. |
+| `poppy-preview-bootstrap.yml` | trusted default-branch installation/update or manual dispatch | `actions: write`, `contents: read`, `pull-requests: read`; enumerates live PRs and dispatches the secret-free build with an exact expected head. |
+| `poppy-preview-deploy.yml` | completed build `workflow_run` | trusted default-branch code with `actions: read`, `contents: read`, `pull-requests: write`; validates live PR/head/workflow/artifacts, sanitizes without executing contributor code, deploys to Cloudflare, reports lifecycle to private Poppy, and updates one sticky comment. |
+| `poppy-preview-close.yml` | `pull_request_target: closed` | trusted default-branch cleanup with `contents: read`, `pull-requests: write`; deletes the per-PR Cloudflare project and reports Closed to Poppy. |
+| `poppy-preview-security.yml` | preview-workflow/integration changes on PR or `main` | read-only Node 22 evidence lane; runs the focused sanitizer/Worker/lifecycle/browser tests, pinned-checksum actionlint, and byte-for-byte installed/template workflow lockstep. It is repository CI evidence but is **not currently configured as a platform-required status check**. |
+
+Contributor artifacts never receive Cloudflare/Poppy secrets. Deploy/cleanup consume trusted repository code and private external control-plane APIs; exact endpoint, tuple binding, access policy, and post-merge E2E requirements are documented in `integrations/proto-ui-preview/README.md`. Merge-time green checks cannot prove default-branch `workflow_run`, bootstrap, live OAuth identities, failure convergence, or close cleanup end to end; these remain post-merge production acceptance gates.
+
 ## Release workflow (`release-packages.yml`)
 
 The workflow is triggered manually through `workflow_dispatch`.
