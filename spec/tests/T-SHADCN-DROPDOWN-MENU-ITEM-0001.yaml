@@ -44,6 +44,7 @@ implementations:
         item selection closing the menu,
         base tokens,
         and destructive surface; remaining gaps stay centralized.,
+        The destructive surface assertion is projection evidence only; without a docs instance and cross-runtime rendered evidence it stays render-undemonstrated (#454 contrast is adopted-upstream behavior evidence).,
       ]
 verifies:
   prototypes:
@@ -64,6 +65,11 @@ exercises:
   prototypes: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]
 revisions:
   [
+    {
+      version: 0.3.0-alpha.0,
+      change: refined,
+      summary: Recorded the destructive surface as projection-covered but render-undemonstrated on the owning Item test entity.,
+    },
     {
       version: 0.2.0-rc.0,
       change: introduced,

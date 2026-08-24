@@ -49,7 +49,7 @@ implementations:
       - T-SHADCN-BUTTON-0001-CASE-COMPATIBILITY-SUBSET
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
-      - Positive tests cover only the current Proto UI guarantee; asChild omission is governed by D-AS-CHILD-OMISSION-0001. The pinned compatibility baseline and the later stable official source for the intentionally adopted destructive recipe remain distinct catalog evidence, so the recipe adoption does not widen the parity claim. The destructive Dropdown Item's existing token assertion is projection evidence only; without a docs instance and cross-runtime rendered evidence it remains render-undemonstrated. Remaining upstream gaps stay bounded by declared prop enums, source review, and the single catalog-visible compatibility question.
+      - Positive tests cover only the current Proto UI guarantee; asChild omission is governed by D-AS-CHILD-OMISSION-0001. The pinned compatibility baseline and the later stable official source for the intentionally adopted destructive recipe remain distinct catalog evidence, so the recipe adoption does not widen the parity claim. Remaining upstream gaps stay bounded by declared prop enums, source review, and the single catalog-visible compatibility question.
 verifies:
   prototypes:
     - id: P-SHADCN-BUTTON
@@ -71,5 +71,5 @@ revisions:
     summary: Added delta-style Shadcn Button coverage for reversible Base inheritance, current visual API, intentional asChild omission, environment styling, and centralized upstream compatibility differences.
   - version: 0.3.0-alpha.0
     change: revised
-    summary: Updated compatibility evidence mapping to keep the historical pinned baseline distinct from later adopted recipe evidence and to record destructive Dropdown Item as projection-covered but render-undemonstrated.
+    summary: Updated compatibility evidence mapping to keep the historical pinned baseline distinct from later adopted recipe evidence.
 tags: [prototype, shadcn, button, delta, compatibility, test]

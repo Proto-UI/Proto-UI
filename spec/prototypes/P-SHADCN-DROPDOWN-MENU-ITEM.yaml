@@ -55,6 +55,10 @@ criteria:
     text:
       zh-CN: 当前 behavior、props 与 surface 之外的全部差异集中在唯一 compatibility open question。
       en: All differences beyond current behavior, props, and surface are centralized in one compatibility open question.
+  - id: P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-EVIDENCE-BOUNDARY
+    text:
+      zh-CN: destructive variant 的现有 token 断言只是 projection-covered 的投影证据；在文档实例与跨运行时渲染证据落地前，该 surface 保持 render-undemonstrated。#454 的对比度实测是 adopted-upstream behavior evidence，不构成 Proto UI 意外 parity gap 或本地 palette remediation requirement。
+      en: The destructive variant's existing token assertion is projection evidence only; without a docs instance and cross-runtime rendered evidence the surface remains render-undemonstrated. The measured contrast from #454 is adopted-upstream behavior evidence, not an unexpected Proto UI parity gap or a local palette remediation requirement.
   - id: P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION
     text:
       zh-CN: upstream Item props 中的 `asChild` 依共享决策有意省略。
@@ -77,6 +81,7 @@ openQuestions:
 
     blocks: [shadcn dropdown item parity roadmap]
 sources:
+  - path: packages/prototypes/shadcn/test/dropdown.test.ts
   - path: packages/prototypes/shadcn/src/dropdown/item.proto.ts
   - path: packages/prototypes/shadcn/src/dropdown/types.ts
   - path: packages/prototypes/shadcn/test/dropdown.test.ts
@@ -101,6 +106,9 @@ inherits:
       note: Default inherited menu-item protocol; explicit setup-time negative patches must be declared.
 verifies: { tests: [T-SHADCN-DROPDOWN-MENU-ITEM-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Recorded the destructive surface's evidence boundary on the owning Item entity as projection-covered but render-undemonstrated, with #454 contrast retained as adopted-upstream evidence.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced Shadcn Dropdown Menu Item delta cataloging with Base inheritance, visual props, state styles, asChild omission, and centralized differences.
