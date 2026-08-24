@@ -5,7 +5,10 @@ import test from "node:test";
 const workflow = await readFile(
   new URL("../.github/workflows/poppy-preview-deploy.yml", import.meta.url),
   "utf8",
-);
+).catch(() => readFile(
+  new URL("../../../.github/workflows/poppy-preview-deploy.yml", import.meta.url),
+  "utf8",
+));
 
 test("Poppy revokes the previous ready state before Cloudflare publication", () => {
   const buildingStart = workflow.indexOf("- name: Mark the current head as building in Poppy");
