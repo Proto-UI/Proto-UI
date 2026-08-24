@@ -33,7 +33,7 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 
 ## Agent Operations Shadow 工作流（`agent-operations-shadow.yml`）
 
-这项 Phase A 实验每天定时或由维护者手动触发。它会采集有上限的开放 Issue 与 PR 快照；在配置了 `OPENAI_API_KEY` 时执行只读结构化分析、校验结果，并以 14 天保留期上传输入和报告。没有配置密钥时，工作流只保留有边界的输入快照。
+这项 Phase A 实验当前在 UTC 每小时第 17 分钟自动运行，也可由维护者手动触发。它会采集有上限的开放 Issue 与 PR 快照；在配置了 `OPENAI_API_KEY` 时执行只读结构化分析、校验结果，并以 14 天保留期上传输入和报告。没有配置密钥时，工作流只保留有边界的输入快照。hourly 是当前已部署的自动触发方式；event-driven invocation 是未来目标架构，当前仓库状态没有其部署证据。
 
 该工作流对 `contents`、`issues` 与 `pull-requests` 只有读取权限，禁用 checkout credential 持久化，并让 Codex 使用 `:read-only` permission profile 和 `drop-sudo`。它不响应 PR 事件，不发布评论、不修改 label、不创建分支或 PR，也不授权 integration。未来若增加 GitHub 写权限，必须通过 `internal/agent-operations/**` 下的独立策略变更接受评审，并取得维护者的明确决定。
 

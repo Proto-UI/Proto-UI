@@ -33,7 +33,7 @@ Repository policy requires the relevant CI evidence before merge. GitHub ruleset
 
 ## Agent Operations Shadow workflow (`agent-operations-shadow.yml`)
 
-This daily or manually dispatched Phase A experiment collects a bounded snapshot of open Issues and pull requests, runs a read-only structured analysis when `OPENAI_API_KEY` is configured, validates the result, and uploads the input and report with 14-day retention. If the key is absent, the workflow preserves only the bounded input snapshot.
+This Phase A experiment runs hourly at minute 17 UTC or by maintainer manual dispatch. It collects a bounded snapshot of open Issues and pull requests, runs a read-only structured analysis when `OPENAI_API_KEY` is configured, validates the result, and uploads the input and report with 14-day retention. If the key is absent, the workflow preserves only the bounded input snapshot. Hourly is the current automatic trigger; event-driven invocation is intended future architecture and is not deployed or evidenced by this repository state.
 
 The workflow has read-only `contents`, `issues`, and `pull-requests` permissions, disables persisted checkout credentials, and runs Codex with the `:read-only` permission profile and `drop-sudo`. It does not run from pull-request events, post comments, change labels, create branches or pull requests, or authorize integration. Any future GitHub write permission requires a separate reviewed policy change and an explicit maintainer decision under `internal/agent-operations/**`.
 
