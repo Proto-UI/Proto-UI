@@ -51,6 +51,14 @@ criteria:
         content 通过 `BRUTALIST_PANEL_TOKENS`（`rounded-none border-2 border-black shadow-[3px_3px_0_0_#000] bg-secondary-background text-foreground`）以 `z-50 max-h-[var(--proto-ui-available-height)] min-w-32 overflow-x-hidden overflow-y-auto p-1 outline-none transition-none duration-150` 投射 Brutalist 面板，保持直角、黑色结构边框、零模糊硬偏移阴影与平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
 
 
+  - id: P-BRUTALIST-DROPDOWN-MENU-CONTENT-ANCHOR-TRANSFORM
+    text:
+      en: >-
+        The prototype must default `excludeAnchorTranslation` to true so the anchored menu tracks the Trigger's layout position instead of its decorative hover-lift and press transforms; apps may still override the prop per instance.
+
+      zh-CN: >-
+        该 prototype 必须将 `excludeAnchorTranslation` 默认为 true，使锚定菜单跟随 Trigger 的布局位置而非其装饰性 hover-lift 与 press transform；应用仍可按实例覆盖该 prop。
+
 sources:
   - path: packages/prototypes/brutalist/src/dropdown/content.proto.ts
   - path: packages/prototypes/brutalist/src/dropdown/types.ts
@@ -65,6 +73,11 @@ inherits:
     - id: P-BASE-DROPDOWN-MENU-CONTENT
 verifies: { tests: [T-BRUTALIST-DROPDOWN-MENU-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: >-
+      Anchored menus to the Trigger's layout position by defaulting excludeAnchorTranslation to true, excluding decorative hover-lift and press transforms from menu geometry.
+
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

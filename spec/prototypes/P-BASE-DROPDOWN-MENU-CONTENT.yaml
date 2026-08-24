@@ -26,8 +26,8 @@ criteria:
       en: Content must bind `asTransition` as the sole Overlay Presence driver, retain the leaving view after logical close, and perform L1 detach only after closed; perceptual enter and leave animation must not interpolate geometric properties written by Overlay positioning.
   - id: P-BASE-DROPDOWN-MENU-CONTENT-POSITION
     text:
-      zh-CN: Content 必须接受 side、align、sideOffset、alignOffset、avoidCollisions 与 collisionPadding；默认 bottom、center、4、0、true、0，并把运行时更新提交给 Overlay positioning policy。
-      en: Content must accept side, align, sideOffset, alignOffset, avoidCollisions, and collisionPadding; defaults are bottom, center, 4, 0, true, and 0, and runtime updates must be submitted to Overlay positioning policy.
+      zh-CN: Content 必须接受 side、align、sideOffset、alignOffset、avoidCollisions、collisionPadding 与 excludeAnchorTranslation；默认 bottom、center、4、0、true、0、false，并把运行时更新提交给 Overlay positioning policy。excludeAnchorTranslation 为 false 时定位必须基于 Trigger 的实际渲染几何。
+      en: Content must accept side, align, sideOffset, alignOffset, avoidCollisions, collisionPadding, and excludeAnchorTranslation; defaults are bottom, center, 4, 0, true, 0, and false, and runtime updates must be submitted to Overlay positioning policy. With excludeAnchorTranslation false, positioning must use the Trigger's actual rendered geometry.
   - id: P-BASE-DROPDOWN-MENU-CONTENT-ANCHOR-PORTAL
     text:
       zh-CN: Content mounted 后必须注册同域 Trigger PartView；Overlay 必须把解析出的当前 Trigger target 同时用作 position anchor 与 inside Boundary region，使一次 Trigger pointer activation 只产生一次 toggle request。Content 使用 clipping-ancestor collision boundary、visual viewport root、flip/shift、fixed strategy 与 renderer-owned Portal，同时保持 logical Context/Anatomy ownership。
@@ -60,6 +60,9 @@ dependsOn:
     ]
 verifies: { tests: [T-BASE-DROPDOWN-MENU-CONTENT-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added the excludeAnchorTranslation positioning prop (default false) so design languages with decorative trigger transforms can opt into layout-position anchoring.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged Content semantics, focus navigation, dismissal, Transition presence, positioning, and Portal ownership.

@@ -46,6 +46,7 @@ const DEFAULT_CONFIG: OverlayConfig = Object.freeze({
   avoidCollisions: true,
   collisionBoundary: 'clippingAncestors',
   collisionPadding: 0,
+  excludeAnchorTranslation: false,
   entry: 'content',
   restore: 'trigger',
   portal: false,
@@ -423,6 +424,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.patchValue('avoidCollisions', patch.avoidCollisions);
     this.patchValue('collisionBoundary', patch.collisionBoundary);
     this.patchValue('collisionPadding', patch.collisionPadding);
+    this.patchValue('excludeAnchorTranslation', patch.excludeAnchorTranslation);
     this.patchValue('entry', patch.entry);
     this.patchValue('restore', patch.restore);
     this.patchValue('portal', patch.portal);
@@ -457,6 +459,7 @@ export class OverlayModuleImpl extends ModuleBase {
     assign('avoidCollisions', patch.avoidCollisions);
     assign('collisionBoundary', patch.collisionBoundary);
     assign('collisionPadding', patch.collisionPadding);
+    assign('excludeAnchorTranslation', patch.excludeAnchorTranslation);
     if (this.viewActive) this.syncAnchoredPosition();
   }
 
@@ -533,6 +536,7 @@ export class OverlayModuleImpl extends ModuleBase {
         avoidCollisions: this.config.avoidCollisions,
         collisionBoundary: this.config.collisionBoundary,
         collisionPadding: this.config.collisionPadding,
+        excludeAnchorTranslation: this.config.excludeAnchorTranslation,
       },
     });
   }

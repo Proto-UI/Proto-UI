@@ -72,6 +72,8 @@ export type DropdownContentProps = TransitionProps & {
   alignOffset?: number;
   avoidCollisions?: boolean;
   collisionPadding?: number;
+  // P-BASE-DROPDOWN-MENU-CONTENT-ANCHOR-TRANSFORM
+  excludeAnchorTranslation?: boolean;
 };
 
 export type DropdownContentExposes = TransitionExposes & {
