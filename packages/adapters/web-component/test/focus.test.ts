@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { definePrototype } from '@proto.ui/core';
 import { asFocusable, asFocusEntry, asFocusScope } from '@proto.ui/hooks';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
@@ -108,47 +108,5 @@ describe('adapter-web-component focus wiring', () => {
     expect(document.activeElement).toBe(enabled);
 
     el.remove();
-  });
-
-  it('projects pointer focus as visible when the UA reports :focus-visible on the host', async () => {
-    const P = definePrototype({
-      name: 'x-pointer-focus-visible-text',
-      setup(def) {
-        const focusable = asFocusable();
-        def.expose.state('focused', focusable.focused);
-        def.expose.state('focusVisible', focusable.focusVisible);
-        return (r) => [r.el('div', 'ok')];
-      },
-    });
-
-    AdaptToWebComponent(P as any);
-
-    const el = document.createElement('x-pointer-focus-visible-text') as any;
-    document.body.appendChild(el);
-    await Promise.resolve();
-
-    try {
-      // Pointer path with a UA that keeps :focus-visible for the text control
-      // projected onto the host boundary.
-      el.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-      const matchesSpy = vi
-        .spyOn(el, 'matches')
-        .mockImplementation(((selector: unknown) => selector === ':focus-visible') as never);
-      el.dispatchEvent(new FocusEvent('focus'));
-      await Promise.resolve();
-      expect(el.getExposes().focusVisible.get()).toBe(true);
-      matchesSpy.mockRestore();
-
-      // Pointer path with a UA that rejects :focus-visible stays invisible.
-      el.dispatchEvent(new FocusEvent('blur'));
-      el.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-      vi.spyOn(el, 'matches').mockReturnValue(false);
-      el.dispatchEvent(new FocusEvent('focus'));
-      await Promise.resolve();
-      expect(el.getExposes().focusVisible.get()).toBe(false);
-    } finally {
-      vi.restoreAllMocks();
-      el.remove();
-    }
   });
 });

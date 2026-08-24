@@ -468,17 +468,16 @@ class FocusModuleImpl extends ModuleBase {
       );
     });
     this.eventPort.on('host:focus', (ev: any) => {
-      // UA heuristics decide :focus-visible on the newly focused element; the
-      // modality heuristic alone misses pointer focus on host-mediated text
-      // controls (issue #438). OR both signals when a real element is known.
-      if (readNativeFocusVisible(ev?.target ?? ev?.nativeEvent?.target)) {
-        this.keyboardModality = true;
-      }
+      // Native :focus-visible is target-local evidence for this focus event.
+      // It augments the modality decision but must never mutate the global
+      // modality latch: a later adjacent target may legitimately be invisible.
+      const currentFocusVisible =
+        this.keyboardModality || readNativeFocusVisible(ev?.nativeEvent?.target ?? ev?.target);
       if (!this.focusableDeclared || this.focusableConfig.disabled) return;
       this.setFocusState(this.focusedOwned, true, 'reason: focus.host:focus => focused');
       this.setFocusState(
         this.focusVisibleOwned,
-        this.keyboardModality,
+        currentFocusVisible,
         'reason: focus.host:focus => focusVisible'
       );
       this.setFocusState(this.activeOwned, true, 'reason: focus.host:focus => active');

@@ -212,13 +212,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         // the host's call, so the assertion reads the host rather than assuming.
         expect(focused.nativeFocusVisible, `${runtime}/native`).toBe(true);
 
-        if (!focused.focusProjected) {
-          // Web Components does not project text-control focus onto the host
-          // yet, so no ring can paint. That gap is #395, fixed by #426; this
-          // case starts covering wc automatically once that lands.
-          expect(focused.boxShadow, `${runtime}/unprojected`).toBe(resting.boxShadow);
-          continue;
-        }
+        expect(focused.focusProjected, `${runtime}/projection`).toBe(true);
 
         expect(focused.boxShadow, `${runtime}/focused`).not.toBe(resting.boxShadow);
 
