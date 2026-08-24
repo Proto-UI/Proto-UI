@@ -17,7 +17,9 @@
     "objectCursors": {
       "type": "object",
       "maxProperties": 10000,
-      "propertyNames": { "pattern": "^pull-request:[1-9][0-9]*$" },
+      "propertyNames": {
+        "pattern": "^repository:[1-9][0-9]*:pull-request:[1-9][0-9]*$"
+      },
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,

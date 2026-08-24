@@ -24,7 +24,10 @@
     "policyVersion": { "const": "2026-08-24.event-shadow" },
     "envelopeDigest": { "$ref": "#/$defs/digest" },
     "deliveryKey": { "$ref": "#/$defs/digest" },
-    "objectKey": { "type": "string", "pattern": "^pull-request:[1-9][0-9]*$" },
+    "objectKey": {
+      "type": "string",
+      "pattern": "^repository:[1-9][0-9]*:pull-request:[1-9][0-9]*$"
+    },
     "outcome": {
       "enum": [
         "ADMITTED",

@@ -37,7 +37,7 @@ deduplication:
   maximumStateEntries: 10000
 ordering:
   githubTotalOrderAssumed: false
-  objectCursor: pull-request-updated-at-and-head-sha
+  objectCursor: repository-id-pull-request-number-updated-at-and-head-sha
   outOfOrderAction: reconcile-live-state
   tiedOrderAction: reconcile-live-state
 outputs:

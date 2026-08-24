@@ -44,7 +44,7 @@ signed raw GitHub delivery
 
 签名只证明收到的 raw delivery 与 secret 对应，不能证明 authored content 正确，不能授予 GitHub permission，也不能代替 live state。外部 contributor 与 fork 可以触发观察，但其 actor identity 没有 semantic、review 或 mutation authority。Dedicated Agent 的 self echo 被确定性丢弃。
 
-Delivery key 绑定 hook ID 与 GitHub delivery GUID。相同 key 是 replay；不同 delivery 不能仅因 payload digest 相同而被当作重复。逐 PR cursor 使用 `updated_at` 与 head SHA 检测明显旧事件；相同时间不能建立 total order，因此必须回到 GitHub live state reconciliation，而不是猜测先后。
+Delivery key 绑定 hook ID 与 GitHub delivery GUID。相同 key 是 replay；不同 delivery 不能仅因 payload digest 相同而被当作重复。逐 PR cursor 的 key 同时绑定 repository ID 与 PR number，避免复用 state 时让不同仓库的同号 PR 相互污染；cursor 再使用 `updated_at` 与 head SHA 检测明显旧事件。相同时间不能建立 total order，因此必须回到 GitHub live state reconciliation，而不是猜测先后。
 
 Envelope 本身不是可跨信任边界携带的签名凭证。未来 controller 若把 raw delivery、envelope、receipt 或 state 分开传输，必须原子保存原始签名输入，并在消费边界重放 normalization 或增加独立的服务签名。当前实现没有全局 state store、service lease、delivery acknowledgement、dead letter、retry controller 或 kill switch，因而不能宣称已经防止跨 runner replay。
 

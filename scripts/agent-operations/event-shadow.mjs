@@ -7,6 +7,7 @@ export const MAX_EVENT_STATE_ENTRIES = 10_000;
 const DELIVERY_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SHA = /^[0-9a-f]{40}$/;
 const DIGEST = /^[0-9a-f]{64}$/;
+const OBJECT_KEY = /^repository:[1-9][0-9]*:pull-request:[1-9][0-9]*$/;
 const OUTCOMES = new Set([
   'ADMITTED',
   'DUPLICATE',
@@ -78,6 +79,10 @@ function digest(value) {
     ? value
     : Buffer.from(JSON.stringify(canonicalize(value)), 'utf8');
   return createHash('sha256').update(bytes).digest('hex');
+}
+
+function objectKeyForEnvelope(envelope) {
+  return `repository:${envelope.repository?.id}:${envelope.object?.kind}:${envelope.object?.number}`;
 }
 
 function exactKeys(value, expected, label, issues) {
@@ -475,7 +480,7 @@ function validateState(state) {
     `objectCursors exceeds ${MAX_EVENT_STATE_ENTRIES} entries`
   );
   for (const [key, cursor] of Object.entries(state.objectCursors)) {
-    assert(/^pull-request:[1-9][0-9]*$/.test(key), `object cursor key is invalid: ${key}`);
+    assert(OBJECT_KEY.test(key), `object cursor key is invalid: ${key}`);
     assert(isObject(cursor), `object cursor ${key} must be an object`);
     assert(
       Object.keys(cursor).sort().join('\0') ===
@@ -522,7 +527,7 @@ function makeReceipt(envelope, outcome, reason, nextStage, requiresLiveRevalidat
     policyVersion: EVENT_SHADOW_VERSION,
     envelopeDigest: digest(envelope),
     deliveryKey: envelope.delivery.key,
-    objectKey: `${envelope.object.kind}:${envelope.object.number}`,
+    objectKey: objectKeyForEnvelope(envelope),
     outcome,
     reason,
     nextStage,
@@ -559,7 +564,7 @@ export function validateEventShadowReceipt(receipt) {
   if (receipt.policyVersion !== EVENT_SHADOW_VERSION) issues.push('policyVersion is invalid');
   if (!DIGEST.test(receipt.envelopeDigest ?? '')) issues.push('envelopeDigest is invalid');
   if (!DIGEST.test(receipt.deliveryKey ?? '')) issues.push('deliveryKey is invalid');
-  if (!/^pull-request:[1-9][0-9]*$/.test(receipt.objectKey ?? '')) {
+  if (!OBJECT_KEY.test(receipt.objectKey ?? '')) {
     issues.push('objectKey is invalid');
   }
   if (!OUTCOMES.has(receipt.outcome)) issues.push('outcome is invalid');
@@ -607,7 +612,7 @@ export function validateEventShadowBinding(envelope, receipt) {
   if (receipt.deliveryKey !== envelope.delivery?.key) {
     issues.push('receipt deliveryKey does not bind the event envelope');
   }
-  if (receipt.objectKey !== `${envelope.object?.kind}:${envelope.object?.number}`) {
+  if (receipt.objectKey !== objectKeyForEnvelope(envelope)) {
     issues.push('receipt objectKey does not bind the event envelope');
   }
   return issues;
@@ -619,7 +624,7 @@ export function evaluateEventShadow({ envelope, policy, state }) {
   validatePolicy(policy);
   validateState(state);
 
-  const objectKey = `${envelope.object.kind}:${envelope.object.number}`;
+  const objectKey = objectKeyForEnvelope(envelope);
   const deliveryKey = envelope.delivery.key;
   if (state.seenDeliveryKeys.includes(deliveryKey)) {
     return {

@@ -107,7 +107,7 @@ function signedDelivery({
       'x-github-delivery': deliveryId,
       'x-github-event': event,
       'x-github-hook-id': String(hookId),
-      'x-github-hook-installation-target-id': String(repository.id),
+      'x-github-hook-installation-target-id': String(payload.repository.id),
       'x-github-hook-installation-target-type': 'repository',
       'x-hub-signature-256': computeWebhookSignature(rawBody, signatureSecret),
     },
@@ -259,6 +259,51 @@ test('delivery identity prevents replay while preserving a pure next state', () 
   assert.deepEqual(replay.nextState, first.nextState);
 });
 
+test('ordering cursors remain isolated when one state observes matching PR numbers', () => {
+  const firstEnvelope = normalize({
+    payload: pullRequestPayload({
+      pull_request: { updated_at: '2026-08-24T13:00:00Z' },
+    }),
+  });
+  const first = evaluateEventShadow({ envelope: firstEnvelope, policy, state: emptyState() });
+  const secondRepository = {
+    id: 840178062,
+    node_id: 'R_other',
+    full_name: 'Proto-UI/other-repository',
+  };
+  const secondDelivery = signedDelivery({
+    deliveryId: '22222222-3333-4444-8555-666666666666',
+    hookId: 9002,
+    payload: pullRequestPayload({
+      repository: secondRepository,
+      installation: { id: 7002 },
+      pull_request: {
+        id: 223504,
+        updated_at: '2026-08-24T12:00:00Z',
+        base: { repo: secondRepository },
+        head: { repo: secondRepository },
+      },
+    }),
+  });
+  const secondEnvelope = normalizeGithubWebhook({
+    ...secondDelivery,
+    secret,
+    trust: {
+      repositoryId: secondRepository.id,
+      repositoryFullName: secondRepository.full_name,
+      hookIds: [9002],
+      installationIds: [7002],
+    },
+  });
+  const second = evaluateEventShadow({ envelope: secondEnvelope, policy, state: first.nextState });
+
+  assert.equal(second.receipt.outcome, 'ADMITTED');
+  assert.deepEqual(Object.keys(second.nextState.objectCursors).sort(), [
+    `repository:${repository.id}:pull-request:504`,
+    `repository:${secondRepository.id}:pull-request:504`,
+  ]);
+});
+
 test('bounded replay state fails closed instead of growing without limit', () => {
   const state = emptyState();
   state.seenDeliveryKeys = Array.from({ length: 10_000 }, (_, index) =>
@@ -281,7 +326,10 @@ test('bounded cursor state fails closed instead of emitting an oversized next st
     ...emptyState(),
     seenDeliveryKeys: [referencedDeliveryKey],
     objectCursors: Object.fromEntries(
-      Array.from({ length: 10_000 }, (_, index) => [`pull-request:${index + 10_001}`, cursor])
+      Array.from({ length: 10_000 }, (_, index) => [
+        `repository:${repository.id}:pull-request:${index + 10_001}`,
+        cursor,
+      ])
     ),
   };
 
@@ -325,7 +373,7 @@ test('envelope, receipt, and replay-state validators reject forged boundaries', 
         state: {
           ...emptyState(),
           objectCursors: {
-            'pull-request:504': {
+            [`repository:${repository.id}:pull-request:504`]: {
               deliveryKey: 'not-a-digest',
               updatedAt: 'not-a-date',
               headSha: 'not-a-sha',
