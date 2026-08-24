@@ -41,7 +41,7 @@ pull_request_target: closed -> delete the whole Pages project -> mark closed
 ## Install in `Proto-UI/Proto-UI`
 
 Keep this directory in the target repository at
-`integrations/proto-ui-preview/`, then copy its three workflow templates into
+`integrations/proto-ui-preview/`, then copy its workflow templates into
 the repository workflow directory:
 
 ```bash
@@ -51,8 +51,14 @@ cp integrations/proto-ui-preview/.github/workflows/*.yml .github/workflows/
 The resulting paths must be exactly:
 
 - `.github/workflows/poppy-preview-build.yml`
+- `.github/workflows/poppy-preview-bootstrap.yml`
 - `.github/workflows/poppy-preview-deploy.yml`
 - `.github/workflows/poppy-preview-close.yml`
+
+When these trusted files first reach `main`—or are later upgraded—the bootstrap
+workflow enumerates every already-open pull request, including drafts and forks,
+and dispatches the same live-PR/head-validated secret-free build. Existing PRs
+therefore do not have to wait for a new commit or a manual maintainer action.
 
 The deploy and cleanup workflows intentionally execute the scripts from this
 directory after checking out trusted repository code. Do not change them to
@@ -65,6 +71,7 @@ job to its minimum permissions:
 | Workflow | Trigger | Effective permissions | Secrets |
 | --- | --- | --- | --- |
 | build | `pull_request` | `contents: read` | none |
+| bootstrap | trusted `main` workflow installation/update | `actions: write`, `contents: read`, `pull-requests: read` | none |
 | deploy | `workflow_run` | `actions: read`, `contents: read`, `pull-requests: write` | Cloudflare and Poppy |
 | cleanup | `pull_request_target: closed` | `contents: read`, `pull-requests: write` | Cloudflare and Poppy |
 

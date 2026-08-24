@@ -9,6 +9,13 @@ const workflow = await readFile(
   new URL("../../../.github/workflows/poppy-preview-deploy.yml", import.meta.url),
   "utf8",
 ));
+const bootstrap = await readFile(
+  new URL("../.github/workflows/poppy-preview-bootstrap.yml", import.meta.url),
+  "utf8",
+).catch(() => readFile(
+  new URL("../../../.github/workflows/poppy-preview-bootstrap.yml", import.meta.url),
+  "utf8",
+));
 
 test("Poppy revokes the previous ready state before Cloudflare publication", () => {
   const buildingStart = workflow.indexOf("- name: Mark the current head as building in Poppy");
@@ -34,4 +41,13 @@ test("the trusted Worker is bound to the exact workflow run tuple", () => {
 
 test("the secret-bearing deploy installs only production dependencies", () => {
   assert.match(workflow, /npm ci --prefix integrations\/proto-ui-preview --omit=dev --ignore-scripts/);
+});
+
+test("trusted installation bootstraps every already-open or draft PR", () => {
+  assert.match(bootstrap, /push:\s+branches: \[main\]/);
+  assert.match(bootstrap, /state: "open"/);
+  assert.match(bootstrap, /github\.paginate\(github\.rest\.pulls\.list/);
+  assert.match(bootstrap, /workflow_id: "poppy-preview-build\.yml"/);
+  assert.match(bootstrap, /inputs: \{ pr_number: String\(pull\.number\) \}/);
+  assert.doesNotMatch(bootstrap, /\$\{\{\s*secrets\./);
 });
