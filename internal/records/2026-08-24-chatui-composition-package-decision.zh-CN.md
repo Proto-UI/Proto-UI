@@ -2,7 +2,9 @@
 
 日期：2026-08-24
 
-状态：维护者在 #500 选择方案 A 后的 implementation-readiness checkpoint。本文记录当前方向，不是 spec source of truth；不授权 public release、CLI `add`、stable lifecycle promotion 或把 #341 的旧代码整体迁移。
+状态：维护者在 #500 选择方案 A 后的 **design-only / implementation-readiness criteria checkpoint**。本文记录当前方向与未来实现就绪判定标准，不是 spec source of truth；它**不授权创建或实现 `@proto.ui/compositions-chatui` 或任何 Message/Code Block 实现**。它也不授权 public release、CLI `add`、stable lifecycle promotion 或把 #341 的旧代码整体迁移。任何后续实现仍须另行取得维护者授权。
+
+设计/研究与实现授权在 `internal/governance/collaboration-model.md` 中明确分离：本 record 只捕获已选定的 ownership 边界与就绪门，不缩小、不推定、也不代理实现授权。
 
 ## 决定
 
