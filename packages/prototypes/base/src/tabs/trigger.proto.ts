@@ -256,11 +256,14 @@ function setupTabsTrigger(def: DefHandle<TabsTriggerProps, TabsTriggerExposes>):
 
   def.event.onGlobal('key.down', (_run, ev) => {
     // P-BASE-TABS-TRIGGER-KEYBOARD-ACTIVATION
-    const detail = ev?.detail;
+    const detail = ev;
     if (disabled.get()) return;
     if (!focused.get()) return;
     if (detail?.key !== ' ') return;
-    detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: 'tabs.space-activation',
+      source: 'base-tabs-trigger',
+    });
   });
 
   def.event.on('pointer.enter', () => {

@@ -82,11 +82,11 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   // HC-DEFAULT-ACTION-0001: prevention is requested through the portable
   // control facade, never through a raw host preventDefault function.
   def.event.onGlobal('key.down', (_run, ev) => {
-    const detail = ev?.detail;
+    const detail = ev;
     if (disabled.get()) return;
     if (!focused.get()) return;
     if (detail?.key !== ' ') return;
-    detail?.control?.requestDefaultActionPrevention({
+    ev.control.requestDefaultActionPrevention({
       reason: 'button.space-activation',
       source: 'base-button',
     });

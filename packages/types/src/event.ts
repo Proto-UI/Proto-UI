@@ -27,19 +27,22 @@ export const OPTIONAL_EVENT_TYPES = [
 ] as const;
 
 export type OptionalEventType = (typeof OPTIONAL_EVENT_TYPES)[number];
+export type SemanticEventType = CoreEventType | OptionalEventType;
 
 export type ExtensionEventType = `host:${string}`;
 
-export type EventTypeV0 = CoreEventType | OptionalEventType | ExtensionEventType;
+export type EventTypeV0 = SemanticEventType | ExtensionEventType;
 
 /**
  * Listener options for `host:*` extension events only. This is deliberately
  * host-shaped: portable semantic registrations (the CORE/OPTIONAL types) do
  * not accept DOM capture/passive/once options — see C-EVENT-0002.
  */
-export type HostEventListenerOptions = AddEventListenerOptions;
-
-export type EventListenerOptions = HostEventListenerOptions;
+export type HostEventListenerOptions = Readonly<{
+  capture?: boolean;
+  once?: boolean;
+  passive?: boolean;
+}>;
 
 export type DefaultActionRequestOptions = Readonly<{
   /** Machine-readable cause, e.g. `button.space-activation`. */
@@ -59,15 +62,21 @@ export type ProtoEventControl = Readonly<{
   requestDefaultActionPrevention(options?: DefaultActionRequestOptions): void;
 }>;
 
-export type ProtoEventPayload = {
-  type: CoreEventType | OptionalEventType;
+/**
+ * Immutable, data-only view constructed for one portable Event callback.
+ * It never aliases or mutates a native event/detail object. `control` is live
+ * only during the synchronous callback invocation that receives this view.
+ */
+export type ProtoEventPayload = Readonly<{
+  type: EventTypeV0;
   key?: string;
-  target?: unknown;
-  nativeEvent?: unknown;
-  preventDefault?: () => void;
-  stopPropagation?: () => void;
-  control?: ProtoEventControl;
-};
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  altKey?: boolean;
+  shiftKey?: boolean;
+  repeat?: boolean;
+  control: ProtoEventControl;
+}>;
 
 export type ExposeEventSpec = {
   payload?: 'void' | 'any' | 'json';

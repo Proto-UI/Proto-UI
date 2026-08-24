@@ -61,9 +61,12 @@ export function setupDialogCommand(
 
   def.event.onGlobal('key.down', (_run, ev) => {
     // P-BASE-DIALOG-TRIGGER-COMMAND, P-BASE-DIALOG-CLOSE-COMMAND
-    const detail = ev?.detail;
+    const detail = ev;
     if (disabled.get() || !focused.get() || detail?.key !== ' ') return;
-    detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: `${reasonPrefix}.space-activation`,
+      source: reasonPrefix,
+    });
   });
   def.event.on('pointer.enter', () => {
     // P-BASE-DIALOG-TRIGGER-COMMAND, P-BASE-DIALOG-CLOSE-COMMAND

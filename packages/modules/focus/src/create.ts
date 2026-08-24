@@ -484,17 +484,16 @@ class FocusModuleImpl extends ModuleBase {
         return;
       }
 
-      const detail = ev?.detail;
-      if (detail?.key !== 'Tab') return;
+      if (ev.key !== 'Tab') return;
 
       const entry = this.createCenterEntry();
       if (!entry || !FOCUS_CENTER.isTopActiveScope(entry)) return;
 
-      this.eventPort.requestDefaultActionPrevented(ev, {
+      ev.control.requestDefaultActionPrevention({
         reason: 'focus.scope.trap',
         source: this.prototypeName,
       });
-      FOCUS_CENTER.focusInScope(entry, detail?.shiftKey ? 'prev' : 'next');
+      FOCUS_CENTER.focusInScope(entry, ev.shiftKey ? 'prev' : 'next');
     });
   }
 
@@ -504,7 +503,7 @@ class FocusModuleImpl extends ModuleBase {
 
     this.eventPort.onGlobal('key.down', (ev) => {
       if (!this.rovingDeclared) return;
-      const op = this.resolveRovingKeyOperation(ev?.detail);
+      const op = this.resolveRovingKeyOperation(ev);
       if (!op) return;
 
       const entry = this.createCenterEntry();
@@ -513,7 +512,7 @@ class FocusModuleImpl extends ModuleBase {
       const handled = FOCUS_CENTER.focusInRoving(entry, op, { requireFocusedMember: true });
       if (!handled) return;
 
-      this.eventPort.requestDefaultActionPrevented(ev, {
+      ev.control.requestDefaultActionPrevention({
         reason: 'focus.roving.keyboard',
         source: this.prototypeName,
       });

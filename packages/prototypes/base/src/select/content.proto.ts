@@ -279,7 +279,7 @@ function setupSelectContent(
   def.event.onGlobal('key.down', (run, ev) => {
     if (store.run !== run) return;
     const ctx = readContext(run);
-    if (!ctx?.open || ctx.disabled || ev?.detail?.key !== 'Tab') return;
+    if (!ctx?.open || ctx.disabled || ev?.key !== 'Tab') return;
     if (!getNavigationEntries(run).some((entry: any) => entry.focused)) return;
     requestSelectOpen(run, { open: false, reason: 'tab', focusReason: 'keyboard' });
   });

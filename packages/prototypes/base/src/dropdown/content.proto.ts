@@ -269,7 +269,7 @@ function setupDropdownContent(
     const ctx = readContext(run);
     if (!ctx) return;
     if (!ctx.open || ctx.disabled) return;
-    const key = ev?.detail?.key;
+    const key = ev?.key;
     if (key !== 'Tab') return;
     if (!getNavigationEntries(run).some((entry: any) => entry.focused)) return;
     // P-BASE-DROPDOWN-MENU-CONTENT-DISMISS: do not prevent host traversal.

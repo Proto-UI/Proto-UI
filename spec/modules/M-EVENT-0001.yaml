@@ -48,8 +48,16 @@ criteria:
       en: '`EventFacade` must contain only the Event-channel-owned `EventChannelFacade`. Event-package exports of `ExposeEventFacade`, `EXPOSE_EVENT_SINK_CAP`, and legacy `EVENT_EMIT_CAP` may exist only as deprecated source re-exports; Adapters must wire the sink to `expose-event`, and legacy `event` wiring must produce a migration diagnostic rather than masquerade as Expose Event support.'
   - id: M-EVENT-0001-I
     text:
-      zh-CN: 一次 runtime binding attempt 必须在添加该次 attempt 的任何 host listener 前，为全部当前未绑定 registration 解析 target；若 target resolution 失败，该次 attempt 不得新增 host listener，target 可用后显式 bind retry 必须能够重试完整 registration set。该准则不要求失败后由 capability epoch 自动 retry，也不规定 listener attachment 或 cleanup 自身抛错时的事务语义；explicit unbind 后不得仅因 capability epoch 重新绑定。
-      en: A runtime binding attempt must resolve targets for every currently unbound registration before adding any host listener for that attempt; if target resolution fails, the attempt must add no host listener, and an explicit bind retry must be able to retry the complete registration set after targets become available. This criterion does not require automatic retry on a capability epoch after failure and does not define transactional semantics when listener attachment or cleanup itself throws; an explicit unbind must not rebind solely because of a capability epoch.
+      zh-CN: 一次 runtime binding attempt 必须在添加该次 attempt 的任何 host listener 前，为全部当前未绑定 registration 解析 target；若 target resolution 失败，该次 attempt 不得新增 host listener，target 可用后显式 bind retry 必须能够重试完整 registration set。该准则不要求失败后由 capability epoch 自动 retry；explicit unbind 后不得仅因 capability epoch 重新绑定。listener attachment 或 cleanup 抛错时的事务语义由 M-EVENT-0001-J 定义。
+      en: A runtime binding attempt must resolve targets for every currently unbound registration before adding any host listener for that attempt; if target resolution fails, the attempt must add no host listener, and an explicit bind retry must be able to retry the complete registration set after targets become available. This criterion does not require automatic retry on a capability epoch after failure; an explicit unbind must not rebind solely because of a capability epoch. Transactional semantics when listener attachment or cleanup throws are defined by M-EVENT-0001-J.
+  - id: M-EVENT-0001-J
+    text:
+      zh-CN: >-
+        listener attachment 失败时，runtime 必须回滚本次 binding attempt 已建立的全部 host listener，并保证每个受影响 registration 保持逻辑 unbound（diagnostics 记为 unbound），显式 bind retry 能完整重装。cleanup/unbind 必须幂等：重复 cleanup 不得遗留 listener。rollback 的 removeEventListener 自身失败不得掩盖原始 attachment 错误，并必须 fail closed（不得让部分 listener 视为已绑定）。portable 事件 callback 收到的是 data-only、immutable 的新 view，不得 alias 或修改 host event/detail；default-action control 仅在当前同步 callback window 内有效，window 结束后调用须 fail closed；同一 host sample 的多次 default-action request 在宿主边界去重。semantic（非 host:*）registration 不得携带 DOM listener options。宿主绑定事件保持 raw host event。
+
+      en: >-
+        When listener attachment fails, the runtime must roll back every host listener already attached by that binding attempt, keep each affected registration logically unbound (reported as unbound in diagnostics), and let an explicit bind retry reinstall the full set. Cleanup/unbind must be idempotent: repeated cleanup must not leave listeners behind. A rollback removeEventListener failure must not mask the original attachment error and must fail closed (no partial listener set may be treated as bound). A portable event callback receives a new, immutable, data-only view and must never alias or mutate the host event/detail; the default-action control is live only for the current synchronous callback window, and a call after the window must fail closed; multiple default-action requests for the same host sample are deduplicated at the host boundary. Semantic (non-host:*) registrations must not carry DOM listener options. Host-bound events stay raw host events.
+
 satisfies:
   contracts:
     - C-EVENT-0001
@@ -116,6 +124,10 @@ openQuestions:
       en: The current Runtime installs the Event module and every official Web profile supports it; because no host cap is needed without registrations, package installation and an actual host requirement are not equivalent.
     blocks: [configurable-runtime-module-selection, adapter-module-omission-diagnostics]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Defined transactional attach rollback with fail-closed unbound state, idempotent cleanup, immutable data-only portable payload with window-bounded and deduplicated default-action control, and semantic registration options rejection.
+
   - version: 0.3.0-alpha.0
     change: revised
     summary: Removed the Expose Event implementation and composite facade from Event while retaining only deprecated source re-exports for migration.

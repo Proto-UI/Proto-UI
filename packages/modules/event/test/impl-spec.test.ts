@@ -295,6 +295,148 @@ describe('EventModuleImpl (contract-ish)', () => {
   // failures. A throwing Nth addEventListener must roll back every earlier
   // attachment, leave all registrations logically unbound, and allow a clean
   // explicit retry.
+  it('dispatches an immutable data-only payload with a synchronous control window', () => {
+    const sys = createSysCaps();
+    const root = new FakeEventTarget();
+    const prevented: unknown[] = [];
+    const caps = makeCaps({
+      sys,
+      getRootTarget: () => root as any,
+      getGlobalTarget: () => root as any,
+      cancelDefaultAction: (request: unknown) => prevented.push(request),
+    });
+    const impl = new EventModuleImpl(caps, 'p-x');
+    sys.__setExecPhase('setup');
+    const token = impl.on('press.commit' as any); // portable semantic event
+
+    sys.__setExecPhase('callback');
+    let received: any = null;
+    let inWindow: (() => void) | null = null;
+    let afterWindow: (() => void) | null = null;
+    impl.bind((id, ev) => {
+      if (id === (token as any).id) {
+        received = ev as any;
+        // A request made inside the synchronous window flows to the host cap.
+        (ev as any)?.control?.requestDefaultActionPrevention({
+          reason: 'in-window',
+          source: 'p-x',
+        });
+        // A saved facade later must fail closed.
+        afterWindow = () =>
+          (ev as any)?.control?.requestDefaultActionPrevention({ reason: 'late' });
+        inWindow = null;
+      }
+    });
+
+    // frozen input detail must never be mutated
+    const frozen = Object.freeze({ detail: Object.freeze({ key: ' ', shiftKey: true }) });
+    root.dispatch('press.commit', frozen as any);
+
+    expect(received).toBeDefined();
+    expect(Object.isFrozen(received)).toBe(true);
+    expect(received.type).toBe('press.commit');
+    expect(received.key).toBe(' ');
+    expect(received.shiftKey).toBe(true);
+    // the raw event is a new object, not an alias of the input
+    expect(received).not.toBe(frozen);
+
+    expect(prevented).toHaveLength(1);
+    expect((prevented[0] as any).reason).toBe('in-window');
+
+    // using a saved facade after the window fails closed
+    expect(() => afterWindow?.()).toThrow(/outside its callback window/);
+    expect(prevented).toHaveLength(1);
+  });
+
+  it('rejects listener options on portable semantic registrations but allows host extensions', () => {
+    const sys = createSysCaps();
+    const root = new FakeEventTarget();
+    const caps = makeCaps({
+      sys,
+      getRootTarget: () => root as any,
+      getGlobalTarget: () => root as any,
+    });
+    const impl = new EventModuleImpl(caps, 'p-x');
+    sys.__setExecPhase('setup');
+    // portable semantic registration with options must fail
+    expect(() => impl.on('press.commit' as any, { capture: true })).toThrow(
+      /only valid for host\:/
+    );
+    // host extension registration with options is allowed
+    expect(() => impl.on('host:click', { capture: true })).not.toThrow();
+  });
+
+  it('keeps cleanup idempotent and reports logically unbound after rollback', () => {
+    const sys = createSysCaps();
+    const good = new FakeEventTarget();
+    let removeCalls = 0;
+    const bad = {
+      addEventListener: () => {
+        throw new Error('refused');
+      },
+      removeEventListener: () => {},
+      count: () => 0,
+    };
+    let globalFirst = true;
+    const caps = makeCaps({
+      sys,
+      getRootTarget: () => good as any,
+      getGlobalTarget: () => (globalFirst ? (bad as any) : (good as any)),
+    });
+    const impl = new EventModuleImpl(caps, 'p-x');
+    sys.__setExecPhase('setup');
+    impl.on('press.commit' as any); // root -> good
+    impl.onGlobal('key.down' as any); // first global -> bad throws
+    sys.__setExecPhase('callback');
+    const { dispatch } = makeDispatch();
+    expect(() => impl.bind(dispatch)).toThrow(/refused/);
+
+    // Rollback removed the earlier 'good' root listener, so nothing is bound.
+    good.dispatch('press.commit', { ok: true });
+    // Retry installs cleanly now that global resolves.
+    globalFirst = false;
+    impl.bind(dispatch);
+    expect((impl as any).isBound).toBe(true);
+    good.dispatch('press.commit', { ok: true });
+
+    // unbind twice is idempotent and fails closed to unbound.
+    impl.unbind();
+    impl.unbind();
+    expect((impl as any).isBound).toBe(false);
+    good.dispatch('press.commit', { ok: true });
+  });
+
+  it('deduplicates default-action requests across registrations for one sample', () => {
+    const sys = createSysCaps();
+    const root = new FakeEventTarget();
+    const prevented: unknown[] = [];
+    const caps = makeCaps({
+      sys,
+      getRootTarget: () => root as any,
+      getGlobalTarget: () => root as any,
+      cancelDefaultAction: (request: unknown) => prevented.push(request),
+    });
+    const impl = new EventModuleImpl(caps, 'p-x');
+    sys.__setExecPhase('setup');
+    const t1 = impl.on('press.commit' as any);
+    const t2 = impl.on('press.commit' as any);
+
+    sys.__setExecPhase('callback');
+    const samples: unknown[] = [];
+    impl.bind((id, ev) => {
+      if (id === (t1 as any).id || id === (t2 as any).id) {
+        samples.push(ev);
+        (ev as any).control.requestDefaultActionPrevention({ reason: 'same' });
+      }
+    });
+
+    const sample = { detail: { key: ' ' } };
+    root.dispatch('press.commit', sample as any);
+
+    // one raw sample => one host request, regardless of registration count
+    expect(prevented).toHaveLength(1);
+  });
+
   it('bind(): rolls back earlier attachments when a later one throws', () => {
     const sys = createSysCaps();
     const good = new FakeEventTarget();

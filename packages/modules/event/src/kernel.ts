@@ -1,5 +1,5 @@
 // packages/modules/event/src/kernel.ts
-import { EventTypeV0 } from '@proto.ui/types';
+import type { EventTypeV0, HostEventListenerOptions } from '@proto.ui/types';
 import type { EventDiag, EventDispatch } from './types';
 
 type TargetKind = 'root' | 'global';
@@ -10,7 +10,7 @@ type Reg = {
 
   kind: TargetKind;
   type: EventTypeV0;
-  options?: EventListenerOptions;
+  options?: HostEventListenerOptions;
 
   wrapper?: (ev: any) => void;
   boundTarget?: EventTarget;
@@ -117,7 +117,7 @@ export class EventKernel {
       if (r.wrapper && r.boundTarget) continue;
 
       const target = getTarget(r.kind, r.type);
-      const wrapper = (ev: any) => dispatch(r.id, ev);
+      const wrapper = (ev: unknown) => dispatch(r.id, ev, r.type);
 
       pending.push({ registration: r, target, wrapper });
     }

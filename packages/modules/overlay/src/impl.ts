@@ -161,7 +161,7 @@ export class OverlayModuleImpl extends ModuleBase {
       this.escapeSamplingInstalled = true;
       this.eventPort.onGlobal('key.down', (event) => {
         if (!this.isOpen() || !this.config.closeOnEscape) return;
-        if (event?.detail?.key !== 'Escape') return;
+        if (event.key !== 'Escape') return;
         this.close('escape');
       });
     }

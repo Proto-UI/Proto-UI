@@ -247,11 +247,11 @@ export class BoundaryModuleImpl extends ModuleBase {
     if (this.observingPointerDown) return;
     this.observingPointerDown = true;
     this.eventPort.onGlobal('host:pointerdown', (nativeEvent) => {
-      this.notify({
-        type: 'pointerdown',
-        target: nativeEvent?.target,
-        nativeEvent,
-      });
+      const target =
+        nativeEvent && typeof nativeEvent === 'object' && 'target' in nativeEvent
+          ? (nativeEvent as { target?: unknown }).target
+          : undefined;
+      this.notify({ type: 'pointerdown', target, nativeEvent });
     });
   }
 

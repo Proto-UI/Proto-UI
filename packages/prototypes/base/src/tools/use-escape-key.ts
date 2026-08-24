@@ -20,7 +20,7 @@ export const useEscapeKey = defineHook<
 
     def.event.onGlobal('key.down', (run, ev) => {
       if (api.store.enabled === false) return;
-      const key = ev?.detail?.key;
+      const key = ev?.key;
       if (key !== 'Escape') return;
 
       const onEscape = api.store.onEscape as
