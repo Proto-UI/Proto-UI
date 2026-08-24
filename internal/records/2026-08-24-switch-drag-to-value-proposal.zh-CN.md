@@ -18,13 +18,13 @@
 - 受控模式：controlled 时 root 仅 emit `checkedChange`，不本地落位（`P-BASE-SWITCH-CONTROLLED-EMITS-NEXT`）。
 - 手势宿主绑定：adapters/base `web-move-gesture-host.ts`，三 runtime runtime modules 已注册。
 
-## 信息通路（candidate）
+## 信息通路（candidate，受 substrate 决策阻塞）
 
 ```
 pointer.down on track/root（disabled 抑制，维持现有 pressed 视觉）
-  → 绑定 MoveGesture session（axis: horizontal, activation: threshold）
-    → 未达激活阈值：行为等同今天的普通按压
-    → 达到阈值：gesture activated
+  → 当前 HC-MOVE-GESTURE 只能立即接受 session（axis: horizontal, activation: immediate）
+    → pointerdown 即 preventDefault/capture/start；尚无 pending/threshold 阶段
+    → **决策缺口**：必须先定义 immediate Move 与 asTrigger press/tap 的仲裁，或另行批准 D/C/HC/T-MOVE threshold extension
         → provisional position = clamp(sample.x − trackRect.left − thumbInset, [0, travel])
           （trackRect 于 session start 时测量一次，host-local；
             输出为中性 progress ∈ [0,1]，经样式投影缝投射为临时 paint output）
@@ -37,17 +37,18 @@ pointer.down on track/root（disabled 抑制，维持现有 pressed 视觉）
 
 ## 六个 checkpoint 重点的设计回应
 
-### 1. Press/tap 仲裁
+### 1. Press/tap 仲裁（未决 substrate gate）
 
-- Root 保持唯一 activation owner。drag policy 不引入第二个 activation 语义：它在既有 `pressed` 生命周期之上观察 samples，只在**达到激活阈值后**声明"本次按压升级为 drag"，并从该时刻起抑制本次手势的 `press.commit` 翻转路径。
-- 纯 tap（未达阈值即 up）走今天完全相同的 `press.commit` 翻转，不进入 drag 决策。
-- 实现形态上，policy 与 root 的接合点是"提交请求通道"与"pressed 视觉状态"，而不是新的 pointer 监听面——避免双监听竞争。
+当前 Move host 在 `pointerdown` 立即接受、preventDefault、capture 并发出 start；因此不能保证"阈值以下保持今天 tap 路径"。在任何 Switch implementation 前必须单独选择并批准：
 
-### 2. Activation threshold
+- **路径 A：immediate-session composition**——定义 Move start 后如何保留 asTrigger press、何时将 native pointerup 解释为 tap、如何保证 Move capture/preventDefault 不吞掉 press.commit，以及 drag 后如何抑制双重 toggle；或
+- **路径 B：threshold/arbitration extension**——新增 D/C/HC/T-MOVE 语义，使 host 在 pending 阶段不接受/捕获，越过阈值才 start，未越过则把 tap 交回 Trigger。
 
-- 候选定义：沿轨道轴位移 ≥ 一个 host 中立常量（如 4px 等效值）或按住超过短时限后仍移动即激活；具体值留实现校准（见 falsification）。
-- 阈值是 policy 常量而非 author prop（首轮）；author 可见的公共面不变。
-- 阈值前后的可观测差异只有 thumb 是否跟手；`pressed` 视觉两态皆保持。
+Root 仍是唯一 activation owner；但在 A/B 被批准前，本文不宣称任一 carrier 已存在，也不授权 Switch implementation。
+
+### 2. Activation threshold（仅候选，不是现有 guarantee）
+
+沿轴位移阈值（如 4px）、时间、速度与恰等阈值的判定都属于上述 gate。它们既不是 `HC-MOVE-GESTURE-0001` 当前 surface，也不是可直接写进 Switch policy 的稳定常量。proposal 只列出需要验证的参数，不绑定 public/API carrier。
 
 ### 3. Provisional host-local position
 
@@ -79,7 +80,7 @@ Space/Enter 激活路径、focus 管理、`aria-checked`、role 全部不动。�
 
 ## 载体形态（candidate，checkpoint 裁定）
 
-倾向：**base switch 域内的专用 asHook**（如 `useSwitchDragPolicy`，消费 `HC-MOVE-GESTURE-0001` cap），随 `P-BASE-SWITCH` 域演进；不建通用 drag-to-value module/API。理由：checkpoint 明确禁止预设通用原语；且第二消费者的职责恰是验证 Move substrate 够不够用，而不是立刻抽象它。
+载体形态保持未决。只有在路径 A（immediate composition）或路径 B（Move threshold/arbitration extension）通过独立 checkpoint 后，才可评估 Switch-domain asHook。本文不再预设 `useSwitchDragPolicy` 能直接消费当前 Move cap 完成仲裁，也不建通用 drag-to-value API。
 
 ## 跨宿主假设与 fallback
 
