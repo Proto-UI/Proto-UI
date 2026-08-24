@@ -7,6 +7,27 @@ AdaptToWebComponent(dropdownTrigger as any);
 AdaptToWebComponent(dropdownContent as any);
 AdaptToWebComponent(dropdownItem as any);
 
+const rect = (x: number, y: number, width: number, height: number): DOMRect =>
+  ({
+    x,
+    y,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    width,
+    height,
+    toJSON: () => ({}),
+  }) as DOMRect;
+
+function setRect(element: HTMLElement, value: DOMRect): void {
+  element.getBoundingClientRect = () => value;
+  Object.defineProperties(element, {
+    offsetWidth: { configurable: true, get: () => value.width },
+    offsetHeight: { configurable: true, get: () => value.height },
+  });
+}
+
 async function flush(): Promise<void> {
   await Promise.resolve();
   await Promise.resolve();
@@ -380,6 +401,42 @@ describe('prototypes/base: dropdown-menu', () => {
     await settle();
 
     expect(root.getExposes().open.get()).toBe(false);
+  });
+
+  it('uses rendered anchor geometry by default and forwards the explicit translation policy', async () => {
+    vi.useFakeTimers();
+    const { root, trigger, content } = createMenu({
+      content: { sideOffset: 0, align: 'start', avoidCollisions: false },
+    });
+    setRect(trigger, rect(101, 101, 50, 20));
+    setRect(content, rect(0, 0, 40, 10));
+    const nativeGetComputedStyle = window.getComputedStyle;
+    const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+      if (element === trigger)
+        return { transform: 'matrix(1, 0, 0, 1, -1, -1)' } as CSSStyleDeclaration;
+      return nativeGetComputedStyle(element);
+    });
+    trigger.click();
+    await settle();
+
+    // Base default false: actual rendered rect drives placement.
+    expect(content.style.left).toBe('101px');
+    expect(content.style.top).toBe('121px');
+
+    // Per-instance opt-in forwards through Prototype -> Overlay -> host.
+    content.setProps({
+      sideOffset: 0,
+      align: 'start',
+      avoidCollisions: false,
+      excludeAnchorTranslation: true,
+    });
+    root.getExposes().close('test.policy-override');
+    await settle();
+    trigger.click();
+    await settle();
+    expect(content.style.left).toBe('102px');
+    expect(content.style.top).toBe('122px');
+    styleSpy.mockRestore();
   });
 
   it('portals, positions from Trigger, and retains leave presence through Transition', async () => {

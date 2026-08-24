@@ -6,7 +6,9 @@ import { dropdownContent, dropdownItem, dropdownRoot, dropdownTrigger } from '..
 
 type DropdownRootElement = WebComponentAdapterElement<typeof dropdownRoot>;
 type DropdownTriggerElement = WebComponentAdapterElement<typeof dropdownTrigger>;
-type DropdownContentElement = WebComponentAdapterElement<typeof dropdownContent>;
+type DropdownContentElement = WebComponentAdapterElement<typeof dropdownContent> & {
+  setProps(next: Record<string, unknown>): void;
+};
 type DropdownItemElement = WebComponentAdapterElement<typeof dropdownItem> & {
   setProps(next: Record<string, unknown>): void;
 };
@@ -15,6 +17,27 @@ AdaptToWebComponent(dropdownRoot);
 AdaptToWebComponent(dropdownTrigger);
 AdaptToWebComponent(dropdownContent);
 AdaptToWebComponent(dropdownItem);
+
+const rect = (x: number, y: number, width: number, height: number): DOMRect =>
+  ({
+    x,
+    y,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    width,
+    height,
+    toJSON: () => ({}),
+  }) as DOMRect;
+
+function setRect(element: HTMLElement, value: DOMRect): void {
+  element.getBoundingClientRect = () => value;
+  Object.defineProperties(element, {
+    offsetWidth: { configurable: true, get: () => value.width },
+    offsetHeight: { configurable: true, get: () => value.height },
+  });
+}
 
 async function flush(): Promise<void> {
   for (let index = 0; index < 4; index += 1) await Promise.resolve();
@@ -64,6 +87,41 @@ afterEach(async () => {
 });
 
 describe('prototypes/brutalist: dropdown menu', () => {
+  it('defaults decorative Trigger translation exclusion on and permits a per-instance opt-out', async () => {
+    vi.useFakeTimers();
+    const { root, trigger, content } = createDropdown({
+      content: { sideOffset: 0, align: 'start', avoidCollisions: false },
+    });
+    setRect(trigger, rect(99, 99, 50, 20));
+    setRect(content, rect(0, 0, 40, 10));
+    const nativeGetComputedStyle = window.getComputedStyle;
+    const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+      if (element === trigger)
+        return { transform: 'matrix(1, 0, 0, 1, -1, -1)' } as CSSStyleDeclaration;
+      return nativeGetComputedStyle(element);
+    });
+    trigger.click();
+    await settle();
+
+    // Brutalist default true: hover-lift decoration is backed out to layout (100,100).
+    expect(content.style.left).toBe('100px');
+    expect(content.style.top).toBe('120px');
+
+    content.setProps({
+      sideOffset: 0,
+      align: 'start',
+      avoidCollisions: false,
+      excludeAnchorTranslation: false,
+    });
+    root.getExposes().close('test.policy-override');
+    await settle();
+    trigger.click();
+    await settle();
+    expect(content.style.left).toBe('99px');
+    expect(content.style.top).toBe('119px');
+    styleSpy.mockRestore();
+  });
+
   it('projects the direct Root entry and inherited menu ownership', async () => {
     // T-BRUTALIST-DROPDOWN-MENU-0001-CASE-1
     vi.useFakeTimers();

@@ -19,6 +19,7 @@ const SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 const TABS_ROUTE = '/en/ui-libraries/brutalist/components/tabs/';
 const SCROLL_AREA_ROUTE = '/en/ui-libraries/brutalist/components/scroll-area/';
 const TEXTAREA_ROUTE = '/en/ui-libraries/brutalist/components/textarea/';
+const DROPDOWN_ROUTE = '/en/ui-libraries/brutalist/components/dropdown-menu/';
 const GEOMETRY_EPSILON = 0.5;
 
 const COLOR_SCHEMES = ['light', 'dark'] as const;
@@ -418,6 +419,66 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         expect(Math.abs(after!.width - before!.width), runtime).toBeLessThanOrEqual(
           GEOMETRY_EPSILON
         );
+      }
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it('keeps Dropdown placement fixed while Trigger hover and press transforms change', async () => {
+    const { context, page, previewer } = await openRoute(DROPDOWN_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+    try {
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 5);
+        const trigger = previewer.locator('[data-pui-root]').nth(1);
+        await trigger.click();
+        await expect.poll(() => page.getByRole('menu').count(), { message: runtime }).toBe(1);
+        await page.waitForTimeout(200);
+        const hoverMenu = await page.getByRole('menu').boundingBox();
+        const hoverTransform = await trigger.evaluate(
+          (element) => getComputedStyle(element).transform
+        );
+        expect(hoverMenu, runtime).not.toBeNull();
+
+        await page.mouse.move(5, 5);
+        await page.waitForTimeout(200);
+        const restMenu = await page.getByRole('menu').boundingBox();
+        const restTransform = await trigger.evaluate(
+          (element) => getComputedStyle(element).transform
+        );
+        expect(restMenu, runtime).not.toBeNull();
+        expect(restTransform, `${runtime}/rest-vs-hover-transform`).not.toBe(hoverTransform);
+        expect(Math.abs(restMenu!.x - hoverMenu!.x), `${runtime}/rest-x`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+        expect(Math.abs(restMenu!.y - hoverMenu!.y), `${runtime}/rest-y`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+
+        const triggerBox = await trigger.boundingBox();
+        if (!triggerBox) throw new Error(`${runtime}: Dropdown Trigger has no rendered bounds.`);
+        await page.mouse.move(
+          triggerBox.x + triggerBox.width / 2,
+          triggerBox.y + triggerBox.height / 2
+        );
+        await page.mouse.down();
+        await page.waitForTimeout(200);
+        const pressedMenu = await page.getByRole('menu').boundingBox();
+        const pressedTransform = await trigger.evaluate(
+          (element) => getComputedStyle(element).transform
+        );
+        expect(pressedMenu, runtime).not.toBeNull();
+        expect(pressedTransform, `${runtime}/pressed-vs-rest-transform`).not.toBe(restTransform);
+        expect(Math.abs(pressedMenu!.x - hoverMenu!.x), `${runtime}/pressed-x`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+        expect(Math.abs(pressedMenu!.y - hoverMenu!.y), `${runtime}/pressed-y`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+        await page.mouse.up();
       }
     } finally {
       await context.close();
