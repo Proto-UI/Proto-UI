@@ -221,7 +221,6 @@ jobs:
             core.setOutput("run_attempt", String(candidate.runAttempt));
 
       - name: Mark the current head as building in Poppy
-        continue-on-error: true
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
           PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
@@ -256,7 +255,10 @@ jobs:
             --output .poppy/site \
             --pr "$PREVIEW_PR" \
             --project "$PREVIEW_PROJECT" \
-            --control-plane "$POPPY_CONTROL_PLANE"
+            --control-plane "$POPPY_CONTROL_PLANE" \
+            --head-sha "${{ steps.resolve.outputs.head_sha }}" \
+            --run-id "${{ steps.resolve.outputs.run_id }}" \
+            --run-attempt "${{ steps.resolve.outputs.run_attempt }}"
 
       - name: Create or reuse the per-PR Pages project
         env:
@@ -320,6 +322,7 @@ jobs:
         run: node integrations/proto-ui-preview/scripts/cloudflare-pages.mjs latest "$PREVIEW_PROJECT" "$PREVIEW_SHA" "$PREVIEW_DEPLOY_MARKER"
 
       - name: Report the ready deployment to Poppy
+        id: ready
         if: always() && steps.publish.outputs.exit_code == '0' && steps.deployed.outcome == 'success'
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
@@ -338,7 +341,8 @@ jobs:
       - name: Report a failed deployment to Poppy
         if: >-
           always() && steps.resolve.outputs.pr != '' &&
-          (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success')
+          (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' ||
+          steps.ready.outcome != 'success')
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
           PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
@@ -362,7 +366,7 @@ jobs:
           PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
           PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
           PREVIEW_ORIGIN: ${{ steps.deployed.outputs.origin }}
-          PREVIEW_STATUS: ${{ steps.deployed.outcome == 'success' && 'ready' || 'failed' }}
+          PREVIEW_STATUS: ${{ steps.ready.outcome == 'success' && 'ready' || 'failed' }}
           PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ steps.resolve.outputs.run_id }}
         shell: bash
         run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
@@ -370,6 +374,7 @@ jobs:
       - name: Fail the workflow when publishing failed
         if: >-
           always() &&
-          (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success')
+          (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' ||
+          steps.ready.outcome != 'success')
         shell: bash
         run: exit 1
