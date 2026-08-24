@@ -19,6 +19,7 @@ const SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 const TABS_ROUTE = '/en/ui-libraries/brutalist/components/tabs/';
 const SCROLL_AREA_ROUTE = '/en/ui-libraries/brutalist/components/scroll-area/';
 const TEXTAREA_ROUTE = '/en/ui-libraries/brutalist/components/textarea/';
+const TOOLTIP_ROUTE = '/en/ui-libraries/brutalist/components/tooltip/';
 const GEOMETRY_EPSILON = 0.5;
 
 const COLOR_SCHEMES = ['light', 'dark'] as const;
@@ -418,6 +419,32 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         expect(Math.abs(after!.width - before!.width), runtime).toBeLessThanOrEqual(
           GEOMETRY_EPSILON
         );
+      }
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it('composes the transparent Tooltip Group across Web Components, React, and Vue', async () => {
+    const { context, page, previewer } = await openRoute(TOOLTIP_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
+        const roots = previewer.locator('[data-pui-root]');
+        expect(await roots.count(), runtime).toBe(7);
+        expect(await roots.nth(0).getAttribute('data-pui-root'), runtime).toBe('');
+        expect(
+          await previewer.getByText('Hover or focus for details', { exact: true }).count(),
+          runtime
+        ).toBe(1);
+        expect(
+          await previewer.getByText('Move to the second trigger', { exact: true }).count(),
+          runtime
+        ).toBe(1);
       }
     } finally {
       await context.close();
