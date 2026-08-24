@@ -43,7 +43,7 @@ const selected = states[status];
 if (!selected) throw new Error(`invalid comment status: ${status}`);
 
 const body = `${marker}
-## 🌱 Poppy Preview
+## 🐱 Poppy Preview
 
 ${selected.heading} · \`${shortSHA || "unknown SHA"}\`
 
