@@ -62,12 +62,28 @@ const BRUTALIST_FAMILIES = new Set([
   'tabs',
   'textarea',
   'toggle',
+  'tooltip',
 ]);
 
 test('prototype packages expose side-effect-free family entry points', () => {
   assertFamilyExports(BASE_ROOT, BASE_FAMILIES);
   assertFamilyExports(SHADCN_ROOT, SHADCN_FAMILIES);
   assertFamilyExports(BRUTALIST_ROOT, BRUTALIST_FAMILIES);
+});
+
+test('Brutalist Tooltip exports only the reviewed root and family subpath', () => {
+  const manifest = JSON.parse(readFileSync(join(BRUTALIST_ROOT, 'package.json'), 'utf8'));
+  assert.deepEqual(manifest.exports['./tooltip'], {
+    types: './dist/tooltip/index.d.ts',
+    import: './dist/tooltip/index.js',
+    default: './dist/tooltip/index.js',
+  });
+  assert.equal(
+    Object.keys(manifest.exports).some(
+      (key) => key.includes('/src') || key.startsWith('./tooltip/')
+    ),
+    false
+  );
 });
 
 test('Base component families do not import sibling component families', () => {

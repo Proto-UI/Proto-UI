@@ -19,8 +19,8 @@ const SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 const TABS_ROUTE = '/en/ui-libraries/brutalist/components/tabs/';
 const SCROLL_AREA_ROUTE = '/en/ui-libraries/brutalist/components/scroll-area/';
 const TEXTAREA_ROUTE = '/en/ui-libraries/brutalist/components/textarea/';
-const DROPDOWN_ROUTE = '/en/ui-libraries/brutalist/components/dropdown-menu/';
 const TOOLTIP_ROUTE = '/en/ui-libraries/brutalist/components/tooltip/';
+const DROPDOWN_ROUTE = '/en/ui-libraries/brutalist/components/dropdown-menu/';
 const GEOMETRY_EPSILON = 0.5;
 
 const COLOR_SCHEMES = ['light', 'dark'] as const;
@@ -520,6 +520,12 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           GEOMETRY_EPSILON
         );
         await page.mouse.up();
+      }
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
   it('composes the transparent Tooltip Group across Web Components, React, and Vue', async () => {
     const { context, page, previewer } = await openRoute(TOOLTIP_ROUTE, {
       width: 1440,
@@ -528,19 +534,57 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
 
     try {
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 5);
         const roots = previewer.locator('[data-pui-root]');
-        expect(await roots.count(), runtime).toBe(7);
+        expect(await roots.count(), runtime).toBe(5);
         expect(await roots.nth(0).getAttribute('data-pui-root'), runtime).toBe('');
-        expect(
-          await previewer.getByText('Hover or focus for details', { exact: true }).count(),
-          runtime
-        ).toBe(1);
-        expect(
-          await previewer.getByText('Move to the second trigger', { exact: true }).count(),
-          runtime
-        ).toBe(1);
- (feat(brutalist): complete Tooltip family with transparent Group entry)
+        await expect.poll(() => page.getByRole('tooltip').count(), { message: runtime }).toBe(2);
+        for (let index = 0; index < 2; index += 1) {
+          const tooltip = page.getByRole('tooltip').nth(index);
+          const paint = await tooltip.evaluate((element) => {
+            const style = getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            return {
+              text: element.textContent,
+              tabIndex: (element as HTMLElement).tabIndex,
+              interactive: element.querySelectorAll('a,button,input,select,textarea,[tabindex]')
+                .length,
+              borderRadius: style.borderRadius,
+              borderWidth: style.borderTopWidth,
+              backgroundColor: style.backgroundColor,
+              color: style.color,
+              boxShadow: style.boxShadow,
+              fontFamily: style.fontFamily,
+              fontSize: style.fontSize,
+              fontWeight: style.fontWeight,
+              textTransform: style.textTransform,
+              paddingInline: style.paddingInline,
+              paddingBlock: style.paddingBlock,
+              width: rect.width,
+              height: rect.height,
+            };
+          });
+          expect(paint.text, runtime).toContain(
+            index === 0
+              ? 'Portable Base behavior, Brutalist visual grammar'
+              : 'Group preserves the shared warm-delay domain'
+          );
+          expect(paint.tabIndex, runtime).toBe(-1);
+          expect(paint.interactive, runtime).toBe(0);
+          expect(paint.borderRadius, runtime).toBe('0px');
+          expect(paint.borderWidth, runtime).toBe('2px');
+          expect(paint.backgroundColor, runtime).not.toBe('rgba(0, 0, 0, 0)');
+          expect(paint.color, runtime).not.toBe(paint.backgroundColor);
+          expect(paint.boxShadow, runtime).toContain('4px 4px 0px');
+          expect(paint.fontFamily.toLowerCase(), runtime).toContain('mono');
+          expect(paint.fontSize, runtime).toBe('12px');
+          expect(Number(paint.fontWeight), runtime).toBeGreaterThanOrEqual(700);
+          expect(paint.textTransform, runtime).toBe('uppercase');
+          expect(paint.paddingInline, runtime).toBe('12px');
+          expect(paint.paddingBlock, runtime).toBe('8px');
+          expect(paint.width, runtime).toBeGreaterThan(20);
+          expect(paint.height, runtime).toBeGreaterThan(20);
+        }
       }
     } finally {
       await context.close();

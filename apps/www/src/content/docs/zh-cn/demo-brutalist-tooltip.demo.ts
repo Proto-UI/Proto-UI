@@ -1,6 +1,7 @@
 const tooltip = (label: string, content: string) => ({
   kind: 'proto' as const,
   prototypeId: 'brutalist-tooltip-root',
+  props: { open: true, openDelay: 0, closeDelay: 0 },
   children: [
     {
       kind: 'proto' as const,

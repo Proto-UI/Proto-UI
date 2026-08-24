@@ -40,6 +40,20 @@ cases:
       - P-BRUTALIST-TOOLTIP-TRIGGER-PURE-INHERITANCE
       - P-BRUTALIST-TOOLTIP-TRIGGER-ZERO-DELTA
     expectation: package-surface-has-four-real-entries-and-transparent-trigger-keeps-exact-base-exposes
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-CONTENT-INTERACTION-BOUNDARY
+    title: Content remains supplementary and non-focusable and teardown removes the owned describedBy relation
+    covers:
+      - P-BASE-TOOLTIP-TRIGGER-DESCRIPTION
+      - P-BASE-TOOLTIP-CONTENT-SEMANTICS
+      - P-BASE-TOOLTIP-CONTENT-HOVERABLE
+      - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
+    expectation: content-teardown-cleans-owned-description-and-rendered-tooltip-has-no-focusable-task-interaction
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-RENDERED-VISUAL
+    title: Both controlled-open Tooltips render the exact Content grammar across WC React and Vue
+    covers:
+      - P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
+      - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
+    expectation: rendered-content-has-square-border-inverse-colors-hard-shadow-monospace-uppercase-spacing-and-nonzero-geometry
 implementations:
   - id: prototypes-brutalist-tooltip-projection
     kind: module-test
@@ -50,6 +64,7 @@ implementations:
       - T-BRUTALIST-TOOLTIP-0001-CASE-INHERITANCE
       - T-BRUTALIST-TOOLTIP-0001-CASE-GROUP-TRANSPARENT-ENTRY
       - T-BRUTALIST-TOOLTIP-0001-CASE-PACKAGE-SURFACE
+      - T-BRUTALIST-TOOLTIP-0001-CASE-CONTENT-INTERACTION-BOUNDARY
     exercises:
       - P-BASE-TOOLTIP
       - P-BASE-TOOLTIP-GROUP
@@ -67,6 +82,8 @@ implementations:
     consumesCases:
       - T-BRUTALIST-TOOLTIP-0001-CASE-GROUP-TRANSPARENT-ENTRY
       - T-BRUTALIST-TOOLTIP-0001-CASE-PACKAGE-SURFACE
+      - T-BRUTALIST-TOOLTIP-0001-CASE-CONTENT-INTERACTION-BOUNDARY
+      - T-BRUTALIST-TOOLTIP-0001-CASE-RENDERED-VISUAL
     exercises:
       - P-BRUTALIST-TOOLTIP
       - P-BRUTALIST-TOOLTIP-GROUP
@@ -91,5 +108,5 @@ exercises:
 revisions:
   - version: 0.3.0-alpha.0
     change: revised
-    summary: Completed executable four-entry package, transparent Group/Trigger, shared warm-delay, and current-Base behavior coverage.
+    summary: Completed executable four-entry package, transparent Group/Trigger, shared warm-delay, Content teardown/non-focusable interaction boundary, exact built export/CLI negative gates, and rendered three-runtime visual coverage.
 tags: [test, brutalist, visual, tooltip, interaction, accessibility]

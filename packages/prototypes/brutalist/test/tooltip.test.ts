@@ -85,6 +85,28 @@ describe('prototypes/brutalist: tooltip', () => {
     expect(contentB.getAttribute('role')).toBe('tooltip');
   });
 
+  it('cleans owned describedBy on Content teardown and keeps rendered Content supplementary', async () => {
+    vi.useFakeTimers();
+    const root = new TooltipRootElement();
+    const trigger = new TooltipTriggerElement();
+    const content = new TooltipContentElement();
+    setElementProps(root, { openDelay: 0, closeDelay: 0 });
+    root.append(trigger, content);
+    document.body.append(root);
+    await flush();
+
+    trigger.dispatchEvent(new Event('pointerenter'));
+    await flush();
+    expect(trigger.getAttribute('aria-describedby')).toBe(content.id);
+    expect(content.getAttribute('role')).toBe('tooltip');
+    expect(content.hasAttribute('tabindex')).toBe(false);
+    expect(content.querySelector('a,button,input,select,textarea,[tabindex]')).toBeNull();
+
+    content.remove();
+    await flush();
+    expect(trigger.hasAttribute('aria-describedby')).toBe(false);
+  });
+
   it('inherits the current Base interaction and accessibility protocol with a visual-only delta', async () => {
     vi.useFakeTimers();
     const root = new TooltipRootElement();
