@@ -180,6 +180,16 @@ describe('adapter-web-component text control', () => {
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
     expect(textarea.hasAttribute('data-focus-visible')).toBe(true);
 
+    // Same-target modality input resamples the current physical target even
+    // though no second focus event fires.
+    textarea.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+    expect(exposes.focusVisible.get()).toBe(true);
+    matchesSpy.mockReturnValue(false);
+    textarea.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+    expect(exposes.focusVisible.get()).toBe(false);
+    expect(shell.hasAttribute('data-focus-visible')).toBe(false);
+    expect(textarea.hasAttribute('data-focus-visible')).toBe(false);
+
     // Native true is target-local. After blur, an adjacent native-false focus
     // without another pointer event must not inherit the prior target result.
     textarea.blur();

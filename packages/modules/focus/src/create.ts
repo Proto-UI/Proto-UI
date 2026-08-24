@@ -128,6 +128,8 @@ class FocusModuleImpl extends ModuleBase {
   private readonly warnings: string[] = [];
   private didAutoFocus = false;
   private keyboardModality = false;
+  private currentHostFocusTarget: unknown = null;
+  private hostFocusTargetGeneration = 0;
   private hostEventsWired = false;
   private scopeEventsWired = false;
   private rovingEventsWired = false;
@@ -452,40 +454,56 @@ class FocusModuleImpl extends ModuleBase {
     this.syncCenter();
   }
 
+  private readHostFocusTarget(event: any): unknown {
+    return event?.nativeEvent?.target ?? event?.target ?? null;
+  }
+
+  private invalidateHostFocusTarget(): void {
+    this.currentHostFocusTarget = null;
+    this.hostFocusTargetGeneration += 1;
+  }
+
+  private resampleCurrentFocusVisible(reason: string): void {
+    if (!this.focusableDeclared || this.focusableConfig.disabled) return;
+    if (!this.focusedOwned.get()) return;
+    const generation = this.hostFocusTargetGeneration;
+    const target = this.currentHostFocusTarget;
+    const next = this.keyboardModality || readNativeFocusVisible(target);
+    if (generation !== this.hostFocusTargetGeneration || target !== this.currentHostFocusTarget) {
+      return;
+    }
+    this.setFocusState(this.focusVisibleOwned, next, reason);
+  }
+
   private wireHostFocusEvents(): void {
     if (this.hostEventsWired) return;
     this.hostEventsWired = true;
 
     this.eventPort.onGlobal('key.down', () => {
       this.keyboardModality = true;
+      this.resampleCurrentFocusVisible('reason: focus.key.down => focusVisible resample');
     });
     this.eventPort.on('pointer.down', () => {
       this.keyboardModality = false;
-      this.setFocusState(
-        this.focusVisibleOwned,
-        false,
-        'reason: focus.pointer.down => focusVisible'
-      );
+      this.resampleCurrentFocusVisible('reason: focus.pointer.down => focusVisible resample');
     });
     this.eventPort.on('host:focus', (ev: any) => {
-      // Native :focus-visible is target-local evidence for this focus event.
-      // It augments the modality decision but must never mutate the global
-      // modality latch: a later adjacent target may legitimately be invisible.
-      const currentFocusVisible =
-        this.keyboardModality || readNativeFocusVisible(ev?.nativeEvent?.target ?? ev?.target);
       if (!this.focusableDeclared || this.focusableConfig.disabled) return;
+      this.currentHostFocusTarget = this.readHostFocusTarget(ev);
+      this.hostFocusTargetGeneration += 1;
       this.setFocusState(this.focusedOwned, true, 'reason: focus.host:focus => focused');
-      this.setFocusState(
-        this.focusVisibleOwned,
-        currentFocusVisible,
-        'reason: focus.host:focus => focusVisible'
-      );
+      this.resampleCurrentFocusVisible('reason: focus.host:focus => focusVisible');
       this.setFocusState(this.activeOwned, true, 'reason: focus.host:focus => active');
       this.setFocusState(this.hasFocusedOwned, true, 'reason: focus.host:focus => hasFocused');
       const entry = this.createCenterEntry();
       if (entry) FOCUS_CENTER.noteFocused(entry);
     });
-    this.eventPort.on('host:blur', () => {
+    this.eventPort.on('host:blur', (ev: any) => {
+      const target = this.readHostFocusTarget(ev);
+      if (this.currentHostFocusTarget && target && target !== this.currentHostFocusTarget) {
+        return;
+      }
+      this.invalidateHostFocusTarget();
       this.setFocusState(this.focusedOwned, false, 'reason: focus.host:blur => focused');
       this.setFocusState(this.focusVisibleOwned, false, 'reason: focus.host:blur => focusVisible');
       this.setFocusState(this.activeOwned, false, 'reason: focus.host:blur => active');
@@ -1131,6 +1149,7 @@ class FocusModuleImpl extends ModuleBase {
     super.onInstancePhase(phase);
     if (phase === 'disposing') {
       this.clearPendingFocus();
+      this.invalidateHostFocusTarget();
       const self = this.getSelfToken();
       if (self) FOCUS_CENTER.remove(self);
     }
@@ -1150,6 +1169,7 @@ class FocusModuleImpl extends ModuleBase {
       return;
     }
     if (phase !== 'detached') return;
+    this.invalidateHostFocusTarget();
     const self = this.getSelfToken();
     if (self) FOCUS_CENTER.detach(self);
     // `detached` ends only the current host view epoch. Keep the latest
