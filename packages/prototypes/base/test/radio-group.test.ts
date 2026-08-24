@@ -398,7 +398,6 @@ describe('prototypes/base: radio group', () => {
       'value',
     ]);
     expect(Object.keys(item.getExposes()).sort()).toEqual([
-      '__collectionItem',
       'checked',
       'collectionFirst',
       'collectionIndex',
@@ -408,7 +407,6 @@ describe('prototypes/base: radio group', () => {
       'focusSelf',
       'focusVisible',
       'focused',
-      'getCollectionItem',
       'hovered',
       'pressed',
     ]);

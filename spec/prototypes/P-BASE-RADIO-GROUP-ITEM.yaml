@@ -2,13 +2,15 @@ id: P-BASE-RADIO-GROUP-ITEM
 type: prototype
 title: Base Radio Group Item is the radio choice and selection requester
 status: draft
-since: 0.2.0-rc.7
+since: 0.3.0-alpha.0
 summary: Base Radio Group Item is one authored radio choice that registers in root Collection order, derives checked and effective-disabled facts from Root context, participates in selected-or-first roving focus, and requests selection through Space or successful primary pointer commit.
 statement:
   zh-CN: >-
     Base Radio Group Item 是 `base-radio-group` anatomy family 中可重复的 radio choice。Item 必须 author 唯一 non-empty value；checked 仅表示该 Item 是 Root value 的 canonical match，effective disabled 是 item disabled 与 group disabled 的并集。Item 组合 Collection Item、Focusable、Trigger 与 A11y，但不拥有 selection。Space 与成功 primary pointer commit 请求 Root selection；Enter、cancelled pointer 与 disabled Item 不得选择。
+
   en: >-
     Base Radio Group Item is a repeatable radio choice in the `base-radio-group` anatomy family. Each Item must author a unique non-empty value; checked only means that Item is the canonical match for Root value, and effective disabled is the union of item and group disabled. Item composes Collection Item, Focusable, Trigger, and A11y without owning selection. Space and successful primary pointer commit request Root selection; Enter, cancelled pointer, and disabled Items do not select.
+
 criteria:
   - id: P-BASE-RADIO-GROUP-ITEM-IDENTITY
     text:
@@ -18,8 +20,10 @@ criteria:
     text:
       zh-CN: >-
         Item public props 必须是 required `value: string` 与 optional `disabled?: boolean`；默认 disabled=false，合法 authoring value 必须 non-empty 且在同一 Root 中唯一。
+
       en: >-
         Item public props must be required `value: string` plus optional `disabled?: boolean`; disabled defaults to false, and valid authoring values are non-empty and unique within one Root.
+
     dependsOn:
       contracts: [C-PROPS-0001]
   - id: P-BASE-RADIO-GROUP-ITEM-DERIVED-CHECKED
@@ -82,7 +86,8 @@ criteria:
       en: Item has no name/form/required/native input/submission/reset/validation, Label/Description, orientation/loop, position/set-size, or visual variant/size/class props.
 sources:
   - path: docs/superpowers/specs/2026-08-12-base-radio-group-semantic-design.md
-    sections: [Item behavior, Focus and keyboard model, Accessibility, Form and native-control boundary]
+    sections:
+      [Item behavior, Focus and keyboard model, Accessibility, Form and native-control boundary]
   - path: packages/prototypes/base/src/radio-group/item.proto.ts
     sections: [readActivationEvent, setupRadioGroupItem, asRadioGroupItem, base-radio-group-item]
   - path: packages/prototypes/base/src/radio-group/types.ts
@@ -127,7 +132,7 @@ references:
 verifies:
   tests: [T-BASE-RADIO-GROUP-ITEM-0001]
 revisions:
-  - version: 0.2.0-rc.7
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft Base Radio Group Item choice, activation, effective-disabled, and roving-focus protocol.
 tags: [prototype, base, radio-group, item, collection, focus, trigger, accessibility]

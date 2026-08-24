@@ -24,9 +24,7 @@ function getKeyboardEvent(event: unknown): KeyboardEvent | null {
   return native instanceof KeyboardEvent ? native : null;
 }
 
-function setupRadioGroupItem(
-  def: DefHandle<RadioGroupItemProps, RadioGroupItemExposes>
-): void {
+function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemExposes>): void {
   asTrigger();
   const focusable = asFocusable<RadioGroupItemProps>();
   focusable.configure({ disabled: false });
@@ -35,6 +33,7 @@ function setupRadioGroupItem(
   collectionItem.configure({
     family: RADIO_GROUP_FAMILY,
     role: 'item',
+    exposeSnapshotMethodKey: '__collectionSnapshot',
     getMeta: (run) => ({
       instanceId,
       value: run.props.get().value ?? '',

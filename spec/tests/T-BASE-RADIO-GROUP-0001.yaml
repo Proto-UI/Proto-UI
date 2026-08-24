@@ -2,7 +2,7 @@ id: T-BASE-RADIO-GROUP-0001
 type: test
 title: Base Radio Group root protocol contract tests
 status: draft
-since: 0.2.0-rc.7
+since: 0.3.0-alpha.0
 summary: Executable coverage for Base Radio Group root ownership, controlled and uncontrolled request semantics, canonical duplicate safety, structural preservation, selected-or-first roving navigation, accessible radiogroup projection, independent domains, exact APIs, and deferred boundaries.
 cases:
   - id: T-BASE-RADIO-GROUP-0001-CASE-ANATOMY-AND-SURFACE
@@ -111,7 +111,7 @@ verifies:
 exercises:
   prototypes: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP-INDICATOR]
 revisions:
-  - version: 0.2.0-rc.7
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced executable root protocol evidence for value ownership, canonical checked safety, roving navigation, accessibility, and deferred boundaries.
 tags: [prototype, base, radio-group, root, test]

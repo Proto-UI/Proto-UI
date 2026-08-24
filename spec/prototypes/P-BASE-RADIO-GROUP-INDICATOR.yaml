@@ -2,13 +2,15 @@ id: P-BASE-RADIO-GROUP-INDICATOR
 type: prototype
 title: Base Radio Group Indicator is passive derived visual feedback
 status: draft
-since: 0.2.0-rc.7
+since: 0.3.0-alpha.0
 summary: Base Radio Group Indicator is an optional repeatable Item child that derives checked and effective-disabled facts from the nearest Item context without creating another radio, focus stop, action, state owner, layout service, or announcement object.
 statement:
   zh-CN: >-
     Base Radio Group Indicator 是 `base-radio-group` anatomy family 中 Item 内可选且可重复的视觉 feedback part。它只消费最近 Item context 的 checked 与 effective disabled facts，并允许宿主模板据此渲染。Indicator 不创建 role=radio、tab stop、selection/activation、live announcement、layout measurement 或独立状态所有权。
+
   en: >-
     Base Radio Group Indicator is an optional and repeatable visual-feedback part inside an Item in the `base-radio-group` anatomy family. It only consumes the nearest Item context checked and effective-disabled facts for host rendering. Indicator creates no role=radio, tab stop, selection/activation path, live announcement, layout measurement, or independent state ownership.
+
 criteria:
   - id: P-BASE-RADIO-GROUP-INDICATOR-IDENTITY
     text:
@@ -87,7 +89,7 @@ references:
 verifies:
   tests: [T-BASE-RADIO-GROUP-INDICATOR-0001]
 revisions:
-  - version: 0.2.0-rc.7
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft passive repeatable Base Radio Group Indicator protocol with Item-derived checked and disabled facts.
 tags: [prototype, base, radio-group, indicator, anatomy, context, accessibility]

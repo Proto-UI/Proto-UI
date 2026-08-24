@@ -2,7 +2,7 @@ id: T-BASE-RADIO-GROUP-INDICATOR-0001
 type: test
 title: Base Radio Group Indicator protocol contract tests
 status: draft
-since: 0.2.0-rc.7
+since: 0.3.0-alpha.0
 summary: Executable coverage for optional repeatable Radio Group Indicators, nearest-Item checked and effective-disabled derivation, exact empty props and read-only derived exposes, passive accessibility, and absence of selection, focus, layout, presence, and visual ownership.
 cases:
   - id: T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-IDENTITY-AND-REPEATABILITY
@@ -54,7 +54,7 @@ verifies:
 exercises:
   prototypes: [P-BASE-RADIO-GROUP-INDICATOR, P-BASE-RADIO-GROUP-ITEM]
 revisions:
-  - version: 0.2.0-rc.7
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced executable Indicator evidence for repeatable nearest-Item state derivation and passive presentation-only boundaries.
 tags: [prototype, base, radio-group, indicator, test]

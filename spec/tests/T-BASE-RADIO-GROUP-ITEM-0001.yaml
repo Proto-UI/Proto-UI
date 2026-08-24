@@ -2,7 +2,7 @@ id: T-BASE-RADIO-GROUP-ITEM-0001
 type: test
 title: Base Radio Group Item protocol contract tests
 status: draft
-since: 0.2.0-rc.7
+since: 0.3.0-alpha.0
 summary: Executable coverage for Radio Group Item authoring, derived checked and effective-disabled facts, exact exposure, Space and primary pointer activation, Enter and cancellation no-ops, roving navigation selection, radio accessibility projection, dynamic synchronization, and deferred form and visual boundaries.
 cases:
   - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-IDENTITY-AND-SURFACE
@@ -67,7 +67,7 @@ verifies:
 exercises:
   prototypes: [P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP]
 revisions:
-  - version: 0.2.0-rc.7
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced executable Item evidence for derived state, activation, roving selection, radio accessibility, and excluded form/visual APIs.
 tags: [prototype, base, radio-group, item, test]
