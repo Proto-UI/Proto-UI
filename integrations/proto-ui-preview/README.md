@@ -45,17 +45,17 @@ The resulting paths must be exactly:
 - `.github/workflows/poppy-preview-close.yml`
 - `.github/workflows/poppy-preview-security.yml`
 
-When these trusted files first reach `main`—or are later upgraded—the bootstrap workflow enumerates every already-open pull request, including drafts and forks, and dispatches the same live-PR/head-validated secret-free build. Existing PRs therefore do not have to wait for a new commit or a manual maintainer action.
+When these trusted files reach `main`—or are later upgraded—the push-only bootstrap workflow enumerates every already-open pull request, including drafts and forks, and dispatches the same live-PR/head-validated secret-free build. Existing PRs therefore do not have to wait for a new commit or a manual maintainer action.
 
-The deploy and cleanup workflows intentionally execute the scripts from this directory after checking out trusted repository code. Do not change them to check out `pull_request.head.sha`.
+The deploy and cleanup workflows intentionally execute the scripts from this directory after checking out trusted repository code. Do not change them to check out `pull_request.head.sha`. Bootstrap uses `repository_dispatch` to converge secret-free manual builds because GitHub permits that GITHUB_TOKEN event to start another run while loading the deploy workflow exclusively from the default branch; the secret-bearing deploy workflow has no `workflow_dispatch` entry.
 
 In **Settings → Actions → General → Workflow permissions**, allow GitHub Actions to create and update pull-request comments. The workflow YAML still narrows each job to its minimum permissions:
 
 | Workflow | Trigger | Effective permissions | Secrets |
 | --- | --- | --- | --- |
 | build | `pull_request` | `contents: read` | none |
-| bootstrap | trusted `main` workflow installation/update | `actions: write`, `contents: read`, `pull-requests: read` | none |
-| deploy | `workflow_run` | `actions: read`, `contents: read`, `pull-requests: write` | Cloudflare and Poppy |
+| bootstrap | trusted `main` workflow installation/update (`push` only) | `actions: write`, `contents: write`, `pull-requests: read` | none |
+| deploy | build `workflow_run` or `poppy_preview_build_completed` `repository_dispatch` (default-branch workflow code only) | `actions: read`, `contents: read`, `pull-requests: write` | Cloudflare and Poppy |
 | cleanup | `pull_request_target: closed` | `contents: read`, `pull-requests: write` | Cloudflare and Poppy |
 | security | preview integration changes on PR or `main` | `contents: read` | none |
 

@@ -67,6 +67,11 @@ test('the secret-bearing deploy installs only production dependencies', () => {
 
 test('trusted installation bootstraps every already-open or draft PR', () => {
   assert.match(bootstrap, /push:\s+branches: \[main\]/);
+  assert.doesNotMatch(bootstrap, /^  workflow_dispatch:/m);
+  assert.match(bootstrap, /POST \/repos\/\{owner\}\/\{repo\}\/dispatches/);
+  assert.match(bootstrap, /event_type: "poppy_preview_build_completed"/);
+  assert.match(workflow, /repository_dispatch:\s+types: \[poppy_preview_build_completed\]/);
+  assert.doesNotMatch(workflow, /^  workflow_dispatch:/m);
   assert.match(bootstrap, /state: "open"/);
   assert.match(bootstrap, /github\.paginate\(github\.rest\.pulls\.list/);
   assert.match(bootstrap, /workflow_id: "poppy-preview-build\.yml"/);

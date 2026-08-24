@@ -1,7 +1,6 @@
 name: Poppy preview bootstrap
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -18,7 +17,7 @@ on:
 # bootstrap build. Neither this job nor the build receives deployment secrets.
 permissions:
   actions: write
-  contents: read
+  contents: write
   pull-requests: read
 
 concurrency:
@@ -99,14 +98,13 @@ jobs:
               return;
             }
             for (const run of completed) {
-              await github.rest.actions.createWorkflowDispatch({
+              await github.request("POST /repos/{owner}/{repo}/dispatches", {
                 owner,
                 repo,
-                workflow_id: "poppy-preview-deploy.yml",
-                ref: repository.default_branch,
-                inputs: {
-                  build_run_id: String(run.id),
-                  build_succeeded: String(run.conclusion === "success"),
+                event_type: "poppy_preview_build_completed",
+                client_payload: {
+                  build_run_id: run.id,
+                  build_succeeded: run.conclusion === "success",
                 },
               });
               core.info(`Enqueued trusted deployment for PR #${run.pr} from build ${run.id} (${run.conclusion}).`);
