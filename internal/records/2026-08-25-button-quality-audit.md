@@ -34,10 +34,10 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 | Package | Shadcn `./button` | exported | `@proto.ui/prototypes-shadcn/button` — types + import + default |
 | Package | Brutalist `./button` | exported | `@proto.ui/prototypes-brutalist/button` — types + import + default |
 | Build | All packages | 41/41 | `build:packages` complete |
-| CLI | shadcn-button | registered + tested | `packages/cli/src/registry/components.ts:212`; exercised in `packages/cli/test/cli.test.ts` |
-| CLI | brutalist-button | registered + tested | `packages/cli/src/registry/components.ts:414`; exercised in `packages/cli/test/cli.test.ts` |
+| CLI | shadcn-button | registered + smoke-tested | `packages/cli/src/registry/components.ts:212`; exercised in release consumer smoke |
+| CLI | brutalist-button | registered | `packages/cli/src/registry/components.ts:414`; not in release consumer smoke RELEASE_ROOTS |
 | Docs | Button demos | 12 files | `apps/www/src/content/docs/demo_components/button/` (12 demo files) |
-| Consumer | Release smoke | covers exports | `packages/cli/test/cli.test.ts` installs packed artifacts and verifies component resolution including button |
+| Consumer | Release smoke | Base + Shadcn only | `scripts/release/consumer-smoke-cli.mjs` installs packed artifacts for Base and Shadcn; Brutalist is not in RELEASE_ROOTS |
 | Browser | Brutalist journey | passing | Brutalist control browser test exercises Button in WC/React/Vue |
 | Types | Workspace | clean | 0 errors / 0 warnings / 0 hints |
 
@@ -48,4 +48,4 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 
 ## Conclusion
 
-The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), consumer verification, browser journeys, and docs. The two remaining gaps are evidence-boundary issues (Base-level browser journey and WCAG contrast), not semantic defects. The CLI add path and built-consumer export verification are already covered by existing release smoke tests.
+The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), consumer verification, browser journeys, and docs. The three remaining gaps are: (1) Base-level browser journey, (2) WCAG contrast evidence, (3) Brutalist Button built-consumer export verification (release smoke does not include Brutalist in RELEASE_ROOTS). None are semantic defects.
