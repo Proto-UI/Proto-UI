@@ -163,6 +163,7 @@ const staticUtilities: Record<string, string[]> = {
   'font-mono': [
     'font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;',
   ],
+  'text-current': ['color: currentColor;'],
   uppercase: ['text-transform: uppercase;'],
   'leading-6': ['line-height: 1.5rem;'],
   'leading-relaxed': ['line-height: 1.625;'],
@@ -207,6 +208,7 @@ const staticUtilities: Record<string, string[]> = {
   'right-full': ['right: 100%;'],
   'top-auto': ['top: auto;'],
   'opacity-70': ['opacity: 0.7;'],
+  'opacity-0': ['opacity: 0;'],
   'opacity-100': ['opacity: 1;'],
   'opacity-50': ['opacity: 0.5;'],
   'ring-inset': ['--pui-ring-inset: inset;'],

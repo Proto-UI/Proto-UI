@@ -1061,6 +1061,9 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/hooks':
+        specifier: workspace:*
+        version: link:../../hooks
       '@proto.ui/prototypes-base':
         specifier: workspace:*
         version: link:../base

@@ -104,6 +104,7 @@ describe('@proto.ui/cli', () => {
       'brutalist-badge',
       'brutalist-button',
       'brutalist-card',
+      'brutalist-checkbox',
       'brutalist-dialog',
       'brutalist-dropdown',
       'brutalist-hover-card',

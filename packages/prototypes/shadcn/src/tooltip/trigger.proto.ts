@@ -12,7 +12,7 @@ const tooltipTrigger = definePrototype<ShadcnTooltipTriggerProps, ShadcnTooltipT
     def.feedback.style.use(tw('inline-flex cursor-pointer outline-none'));
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-80')),
+      intent: (i) => i.feedback.style.use(tw('opacity-70')),
     });
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),
