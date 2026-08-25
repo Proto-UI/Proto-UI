@@ -47,7 +47,7 @@ The public Brutalist Design Contract page presents one unqualified rest/hover/pr
 
 Define named surface/control categories with explicit defaults and permitted exceptions:
 
-1. **Interactive control** (Button, Toggle, Tabs, Dialog Trigger, Dropdown Menu Trigger, Select Trigger): 3px rest, hover lift -1px + deepen to 4px, press sink +1px + shadow-none. Exceptions: active/inactive and selected/unselected gating.
+1. **Interactive control** (Button, Toggle, Tabs, Dialog Trigger, Dropdown Menu Trigger, Select Trigger): 3px rest, hover lift -1px + deepen to 4px, press sink +1px + shadow-none. Exceptions: active/inactive and selected/unselected gating. Active Toggle preserves a 2px inset ink frame (shadow-[inset_0_0_0_2px_#000]) during press; only the outer elevation clears, not the inset frame (P-BRUTALIST-TOGGLE-ACTIVE-SIGNAL).
 2. **Hover Card Trigger**: 3px rest, hover lift -1px + deepen to 4px (same as interactive control), no press sink.
 3. **Dialog Close Icon**: 3px rest, hover color swap + shadow deepen, no lift, no press sink.
 4. **Binary control** (Switch): 3px rest, no hover lift, press color swap + shadow-none. Exception: thumb retains its own 3px.
