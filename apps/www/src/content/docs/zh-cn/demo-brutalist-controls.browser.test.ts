@@ -551,6 +551,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
                 .length,
               borderRadius: style.borderRadius,
               borderWidth: style.borderTopWidth,
+              borderColor: style.borderTopColor,
               backgroundColor: style.backgroundColor,
               color: style.color,
               boxShadow: style.boxShadow,
@@ -573,8 +574,23 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           expect(paint.interactive, runtime).toBe(0);
           expect(paint.borderRadius, runtime).toBe('0px');
           expect(paint.borderWidth, runtime).toBe('2px');
-          expect(paint.backgroundColor, runtime).not.toBe('rgba(0, 0, 0, 0)');
-          expect(paint.color, runtime).not.toBe(paint.backgroundColor);
+          // Bind exact colors to the resolved theme tokens per P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR.
+          const resolved = await page.evaluate(() => {
+            const probe = document.createElement('div');
+            probe.style.color = 'var(--pui-foreground)';
+            probe.style.backgroundColor = 'var(--pui-background)';
+            document.body.appendChild(probe);
+            const style = getComputedStyle(probe);
+            const result = {
+              foreground: style.color,
+              background: style.backgroundColor,
+            };
+            probe.remove();
+            return result;
+          });
+          expect(paint.backgroundColor, runtime).toBe(resolved.foreground);
+          expect(paint.color, runtime).toBe(resolved.background);
+          expect(paint.borderColor, runtime).toBe(resolved.foreground);
           expect(paint.boxShadow, runtime).toContain('4px 4px 0px');
           expect(paint.fontFamily.toLowerCase(), runtime).toContain('mono');
           expect(paint.fontSize, runtime).toBe('12px');

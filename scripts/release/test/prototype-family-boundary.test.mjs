@@ -86,6 +86,33 @@ test('Brutalist Tooltip exports only the reviewed root and family subpath', () =
   );
 });
 
+test('built Brutalist Tooltip root and subpath expose the exact four entries', async () => {
+  const { pathToFileURL } = await import('node:url');
+  const distRoot = join(BRUTALIST_ROOT, 'dist');
+  const rootModule = await import(pathToFileURL(join(distRoot, 'index.js')).href);
+  const tooltipModule = await import(pathToFileURL(join(distRoot, 'tooltip', 'index.js')).href);
+  const expected = [
+    'BrutalistTooltipGroup',
+    'BrutalistTooltipRoot',
+    'BrutalistTooltipTrigger',
+    'BrutalistTooltipContent',
+  ];
+  for (const name of expected) {
+    assert.ok(rootModule[name], `root barrel must export ${name}`);
+    assert.ok(tooltipModule[name], `./tooltip subpath must export ${name}`);
+  }
+  // Root barrel may export other Brutalist families; assert the four Tooltip entries are present.
+  for (const name of expected) {
+    assert.ok(rootModule[name], `root barrel must export ${name}`);
+  }
+  const tooltipKeys = Object.keys(tooltipModule).filter((k) => k.startsWith('Brutalist'));
+  assert.deepEqual(
+    tooltipKeys.sort(),
+    expected.sort(),
+    './tooltip subpath must expose only the four Tooltip entries'
+  );
+});
+
 test('Base component families do not import sibling component families', () => {
   for (const file of listTypeScriptFiles(join(BASE_ROOT, 'src'))) {
     const sourceFamily = relative(join(BASE_ROOT, 'src'), file).split(sep)[0];
