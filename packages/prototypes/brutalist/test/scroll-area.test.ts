@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
@@ -179,11 +179,15 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(viewport.hasAttribute('data-focus-visible')).toBe(false);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi
+      .spyOn(viewport, 'matches')
+      .mockImplementation((selector: string) => selector === ':focus-visible');
     viewport.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
 
     // The fact comes from Base; this layer only paints from it.
     expect(viewport.hasAttribute('data-focus-visible')).toBe(true);
     expect(viewport.getExposes().focusVisible.get()).toBe(true);
+    matchesSpy.mockRestore();
   });
 });
