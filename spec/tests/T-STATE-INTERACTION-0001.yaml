@@ -29,7 +29,7 @@ cases:
   - id: T-STATE-INTERACTION-0001-CASE-FOCUS-VISIBLE-NATIVE-EQUALITY
     title: Focus-visible follows the host native result when supported, falling back to modality only when the target is not measurable
     covers:
-      - C-STATE-INTERACTION-0002-G
+      - C-STATE-INTERACTION-0002-A
     expectation: focus-visible-equals-native-result-when-supported-modality-fallback-when-unsupported
   - id: T-STATE-INTERACTION-0001-CASE-SHARED-SUBJECT
     title: Interaction state identity is shared for the same interaction subject
@@ -50,7 +50,7 @@ implementations:
       - T-STATE-INTERACTION-0001-CASE-EVENT-WIRING
       - T-STATE-INTERACTION-0001-CASE-CALLBACK-ORDER
       - T-STATE-INTERACTION-0001-CASE-DISABLED-GATE
-      - T-STATE-INTERACTION-0001-CASE-FOCUS-VISIBLE-MODALITY
+      - T-STATE-INTERACTION-0001-CASE-FOCUS-VISIBLE-NATIVE-EQUALITY
       - T-STATE-INTERACTION-0001-CASE-SHARED-SUBJECT
   - id: module-event-internal-listener-order-contract
     kind: module-test
@@ -71,7 +71,7 @@ verifies:
         - C-STATE-INTERACTION-0002-D
         - C-STATE-INTERACTION-0002-E
         - C-STATE-INTERACTION-0002-F
-        - C-STATE-INTERACTION-0002-G
+
     - id: C-STATE-INTERACTION-0003
       anchors:
         - C-STATE-INTERACTION-0003-A
