@@ -185,4 +185,7 @@ export type {
   BrutalistDialogCloseAsHookContract,
 } from './dialog';
 
-export { BrutalistCheckboxRoot, BrutalistCheckboxIndicator } from './checkbox';
+export {
+  BrutalistCheckboxRoot as brutalistCheckboxRoot,
+  BrutalistCheckboxIndicator as brutalistCheckboxIndicator,
+} from './checkbox';

@@ -30,7 +30,7 @@ const checkboxIndicator = definePrototype<
       intent: (i) => i.feedback.style.use(tw('opacity-100')),
     });
     def.rule({
-      when: (w) => w.state(checked).eq(false),
+      when: (w) => w.all(w.state(checked).eq(false), w.state(indeterminate).eq(false)),
       intent: (i) => i.feedback.style.use(tw('opacity-0')),
     });
   },
