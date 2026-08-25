@@ -28,10 +28,11 @@ criteria:
   - id: P-BRUTALIST-CHECKBOX-INDICATOR-VISUAL-GRAMMAR
     text:
       en: >-
-        The indicator must be fully opaque (`opacity-100`) when `checked` is true and fully transparent (`opacity-0`) when `checked` is false. No transition, gradient, or animation is applied.
+        The indicator must be fully opaque (`opacity-100`) when `checked` is true or `indeterminate` is true. The indicator must be fully transparent (`opacity-0`) only when both `checked` is false and `indeterminate` is false. No transition, gradient, or animation is applied.
+
 
       zh-CN: >-
-        indicator 在 `checked` 为 true 时必须完全不透明（`opacity-100`），在 `checked` 为 false 时必须完全透明（`opacity-0`）。不应用任何 transition、gradient 或 animation。
+        indicator 在 `checked` 为 true 或 `indeterminate` 为 true 时必须完全不透明（`opacity-100`）。仅在 `checked` 和 `indeterminate` 同时为 false 时才完全透明（`opacity-0`）。不应用任何 transition、gradient 或 animation。
 
 
 sources:

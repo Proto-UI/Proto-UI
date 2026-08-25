@@ -34,7 +34,11 @@ describe('prototypes/shadcn: scroll-area', () => {
 
     const root = document.createElement(ShadcnScrollAreaRoot.name) as any;
     const viewport = document.createElement(ShadcnScrollAreaViewport.name) as any;
+    const scrollbar = document.createElement(ShadcnScrollAreaScrollbar.name) as any;
+    const thumb = document.createElement(ShadcnScrollAreaThumb.name) as any;
     root.appendChild(viewport);
+    root.appendChild(scrollbar);
+    scrollbar.appendChild(thumb);
     document.body.appendChild(root);
     await settle();
 
@@ -42,5 +46,9 @@ describe('prototypes/shadcn: scroll-area', () => {
     expect(styleContains(root, 'overflow-hidden')).toBe(true);
     expect(styleContains(viewport, 'h-full')).toBe(true);
     expect(styleContains(viewport, 'w-full')).toBe(true);
+    expect(styleContains(scrollbar, 'absolute')).toBe(true);
+    expect(styleContains(scrollbar, 'flex')).toBe(true);
+    expect(styleContains(thumb, 'rounded-full')).toBe(true);
+    expect(styleContains(thumb, 'bg-border')).toBe(true);
   });
 });
