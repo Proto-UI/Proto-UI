@@ -17,18 +17,23 @@ const api = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(
 async function request(pathname, init = {}, allowNotFound = false, retryMode = 'safe') {
   const attempts = 5;
   const deadline = Date.now() + 60_000;
+  const fetchWithBudget = async (pathname, init) => {
+    const remaining = Math.max(0, deadline - Date.now());
+    if (remaining <= 0) throw new Error('Cloudflare Pages API retry deadline exhausted');
+    return fetch(`${api}${pathname}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+        ...init.headers,
+      },
+      signal: AbortSignal.timeout(Math.min(30_000, remaining)),
+    });
+  };
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     let result;
     try {
-      result = await fetch(`${api}${pathname}`, {
-        ...init,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          ...(init.body ? { 'Content-Type': 'application/json' } : {}),
-          ...init.headers,
-        },
-        signal: AbortSignal.timeout(30_000),
-      });
+      result = await fetchWithBudget(pathname, init);
     } catch (error) {
       if (retryMode !== 'safe' || attempt === attempts) throw error;
       await retryDelay(attempt, 0, deadline);
