@@ -183,10 +183,18 @@ export {
   ShadcnTooltipRoot,
   ShadcnTooltipTrigger,
   ShadcnTooltipContent,
+  shadcnTooltipGroup,
+  shadcnTooltipRoot,
+  shadcnTooltipTrigger,
+  shadcnTooltipContent,
 } from './tooltip';
 export {
   ShadcnScrollAreaRoot,
   ShadcnScrollAreaViewport,
   ShadcnScrollAreaScrollbar,
   ShadcnScrollAreaThumb,
+  shadcnScrollAreaRoot,
+  shadcnScrollAreaViewport,
+  shadcnScrollAreaScrollbar,
+  shadcnScrollAreaThumb,
 } from './scroll-area';
