@@ -353,6 +353,50 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     },
   ]),
 
+  'shadcn-tooltip': shadcnCompound('shadcn-tooltip', 'shadcn Tooltip', [
+    {
+      prototypeImport: 'shadcnTooltipGroup',
+      exportBaseName: 'ShadcnTooltipGroup',
+      elementName: 'proto-ui-shadcn-tooltip-group',
+    },
+    {
+      prototypeImport: 'shadcnTooltipRoot',
+      exportBaseName: 'ShadcnTooltipRoot',
+      elementName: 'proto-ui-shadcn-tooltip-root',
+    },
+    {
+      prototypeImport: 'shadcnTooltipTrigger',
+      exportBaseName: 'ShadcnTooltipTrigger',
+      elementName: 'proto-ui-shadcn-tooltip-trigger',
+    },
+    {
+      prototypeImport: 'shadcnTooltipContent',
+      exportBaseName: 'ShadcnTooltipContent',
+      elementName: 'proto-ui-shadcn-tooltip-content',
+    },
+  ]),
+  'shadcn-scroll-area': shadcnCompound('shadcn-scroll-area', 'shadcn Scroll Area', [
+    {
+      prototypeImport: 'shadcnScrollAreaRoot',
+      exportBaseName: 'ShadcnScrollAreaRoot',
+      elementName: 'proto-ui-shadcn-scroll-area-root',
+    },
+    {
+      prototypeImport: 'shadcnScrollAreaViewport',
+      exportBaseName: 'ShadcnScrollAreaViewport',
+      elementName: 'proto-ui-shadcn-scroll-area-viewport',
+    },
+    {
+      prototypeImport: 'shadcnScrollAreaScrollbar',
+      exportBaseName: 'ShadcnScrollAreaScrollbar',
+      elementName: 'proto-ui-shadcn-scroll-area-scrollbar',
+    },
+    {
+      prototypeImport: 'shadcnScrollAreaThumb',
+      exportBaseName: 'ShadcnScrollAreaThumb',
+      elementName: 'proto-ui-shadcn-scroll-area-thumb',
+    },
+  ]),
   'shadcn-dialog': shadcnCompound(
     'shadcn-dialog',
     'shadcn Dialog',
@@ -411,6 +455,18 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     SHADCN_COMPONENT_PRESET_RECIPES['shadcn-dialog']
   ),
 
+  'brutalist-checkbox': brutalistCompound('brutalist-checkbox', 'Brutalist Checkbox', [
+    {
+      prototypeImport: 'brutalistCheckboxRoot',
+      exportBaseName: 'BrutalistCheckboxRoot',
+      elementName: 'proto-ui-brutalist-checkbox-root',
+    },
+    {
+      prototypeImport: 'brutalistCheckboxIndicator',
+      exportBaseName: 'BrutalistCheckboxIndicator',
+      elementName: 'proto-ui-brutalist-checkbox-indicator',
+    },
+  ]),
   'brutalist-button': brutalist(
     'brutalist-button',
     'Brutalist Button',

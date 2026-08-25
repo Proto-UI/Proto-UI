@@ -17,12 +17,16 @@ const checkboxIndicator = definePrototype<
         '[brutalist-checkbox-indicator] asCheckboxIndicator must project Indicator state handles.'
       );
     }
-    const { checked } = state;
+    const { checked, indeterminate } = state;
 
     def.feedback.style.use(tw(INDICATOR_BASE_TOKENS));
 
     def.rule({
       when: (w) => w.state(checked).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-100')),
+    });
+    def.rule({
+      when: (w) => w.state(indeterminate).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-100')),
     });
     def.rule({

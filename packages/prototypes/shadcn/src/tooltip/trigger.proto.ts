@@ -8,7 +8,7 @@ const tooltipTrigger = definePrototype<ShadcnTooltipTriggerProps, ShadcnTooltipT
     const trigger = asTooltipTrigger();
     const state = trigger.stateHandles;
     if (!state) throw new Error('[shadcn-tooltip-trigger] missing Tooltip Trigger state handles.');
-    const { hovered, focusVisible } = state;
+    const { hovered, focused, focusVisible } = state;
     def.feedback.style.use(tw('inline-flex cursor-pointer outline-none'));
     def.rule({
       when: (w) => w.state(hovered).eq(true),

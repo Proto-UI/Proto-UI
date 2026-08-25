@@ -43,6 +43,7 @@ describe('prototypes/brutalist: checkbox', () => {
     await settle();
 
     expect(root.getExposes().checked.get()).toBe(false);
+    expect(styleContains(root, 'bg-main')).toBe(true);
 
     root.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
@@ -77,6 +78,7 @@ describe('prototypes/brutalist: checkbox', () => {
     setElementProps(root, { checked: true });
     await settle();
     expect(root.getExposes().checked.get()).toBe(true);
+    expect(styleContains(root, 'data-[checked]:bg-foreground')).toBe(true);
     expect(styleContains(indicator, 'data-[checked]:opacity-100')).toBe(true);
   });
 });
