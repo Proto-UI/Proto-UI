@@ -26,12 +26,11 @@ cases:
       - C-STATE-INTERACTION-0002-B
       - C-STATE-INTERACTION-0002-F
     expectation: disabled-gates-transient-interaction-state
-  - id: T-STATE-INTERACTION-0001-CASE-FOCUS-VISIBLE-MODALITY
-    title: Focus-visible interaction state follows keyboard and pointer modality
+  - id: T-STATE-INTERACTION-0001-CASE-FOCUS-VISIBLE-NATIVE-EQUALITY
+    title: Focus-visible follows the host native result when supported, falling back to modality only when the target is not measurable
     covers:
-      - C-STATE-INTERACTION-0002-A
       - C-STATE-INTERACTION-0002-G
-    expectation: pointer-modality-clears-focus-visible
+    expectation: focus-visible-equals-native-result-when-supported-modality-fallback-when-unsupported
   - id: T-STATE-INTERACTION-0001-CASE-SHARED-SUBJECT
     title: Interaction state identity is shared for the same interaction subject
     covers:
@@ -90,6 +89,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Exercises root/global target binding used by interaction state wiring.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Reconciled stale modality case with the native-focus-visible equality boundary from #438.
   - version: 0.1.0
     change: introduced
     summary: Added interaction state event wiring and shared subject test entity.

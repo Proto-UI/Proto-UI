@@ -106,12 +106,15 @@ function pushOverrideWarning(
  * environment exposes it. Returns false outside real browsers (jsdom/happy-dom)
  * so tests and SSR keep the modality-only heuristic.
  */
-function readNativeFocusVisible(el: unknown): boolean {
-  if (!el || typeof (el as Element).matches !== 'function') return false;
+type NativeFocusVisibleResult = { supported: boolean; value: boolean };
+
+function readNativeFocusVisible(el: unknown): NativeFocusVisibleResult {
+  if (!el || typeof (el as Element).matches !== 'function')
+    return { supported: false, value: false };
   try {
-    return (el as Element).matches(':focus-visible');
+    return { supported: true, value: (el as Element).matches(':focus-visible') };
   } catch {
-    return false;
+    return { supported: false, value: false };
   }
 }
 
@@ -468,7 +471,8 @@ class FocusModuleImpl extends ModuleBase {
     if (!this.focusedOwned.get()) return;
     const generation = this.hostFocusTargetGeneration;
     const target = this.currentHostFocusTarget;
-    const next = this.keyboardModality || readNativeFocusVisible(target);
+    const native = readNativeFocusVisible(target);
+    const next = native.supported ? native.value : this.keyboardModality;
     if (generation !== this.hostFocusTargetGeneration || target !== this.currentHostFocusTarget) {
       return;
     }
