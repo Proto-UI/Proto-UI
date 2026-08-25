@@ -53,3 +53,29 @@ test('project creation reconciles a committed mutation after transport loss with
   assert.match(result.stdout, /Reconciled existing Pages project/);
   assert.doesNotMatch(result.stderr, /duplicate create POST/);
 });
+
+test('request-level deadline: script fails when retry deadline is exhausted by excessive Retry-After', () => {
+  const preload = `
+    let fakeNow = 1_000_000;
+    Date.now = () => fakeNow;
+    const originalSetTimeout = setTimeout;
+    globalThis.setTimeout = (fn, ms) => {
+      fakeNow += (ms || 0);
+      return originalSetTimeout(fn, 0);
+    };
+    globalThis.fetch = async (input, init = {}) => {
+      const url = new URL(String(input));
+      const method = init.method || "GET";
+      if (url.pathname.endsWith("/pages/projects/poppy-proto-ui-pr-42") && method === "GET") {
+        return new Response("", { status: 429, headers: { "retry-after": "999999" } });
+      }
+      throw new Error("unexpected " + method + " " + url.pathname);
+    };
+  `;
+
+  const result = runWithPreload(preload);
+  // Script should exit non-zero — the retry deadline should be exhausted
+  // before any second fetch can start.
+  assert.notEqual(result.status, 0, 'script should fail when deadline is exhausted');
+  assert.match(result.stderr + result.stdout, /deadline exhausted/i);
+});
