@@ -34,6 +34,7 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 | Package | Shadcn `./button` | exported | `@proto.ui/prototypes-shadcn/button` — types + import + default |
 | Package | Brutalist `./button` | exported | `@proto.ui/prototypes-brutalist/button` — types + import + default |
 | Build | All packages | 41/41 | `build:packages` complete |
+| CLI | base-button | registered + smoke-tested | `packages/cli/src/registry/components.ts:654`; exercised in React add path in release consumer smoke |
 | CLI | shadcn-button | registered + smoke-tested | `packages/cli/src/registry/components.ts:212`; exercised in release consumer smoke |
 | CLI | brutalist-button | registered | `packages/cli/src/registry/components.ts:414`; not in release consumer smoke RELEASE_ROOTS |
 | Docs | Button demos | 12 demo files + 3 demo scripts | `demo_components/button/` (12 files), `demo-base-button.demo.ts`, `demo-shadcn-button.demo.ts`, `demo-brutalist-button.demo.ts` |
