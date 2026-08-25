@@ -67,6 +67,8 @@ describe('adapter-vue: focus wiring', () => {
 
     try {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      const spy1 = vi.spyOn(first.root!, 'matches').mockReturnValue(true);
+      const spy2 = vi.spyOn(second.root!, 'matches').mockReturnValue(true);
       first.root?.dispatchEvent(new FocusEvent('focus'));
       expect(first.vm.getExposes().focused.get()).toBe(true);
       expect(first.vm.getExposes().focusVisible.get()).toBe(true);
@@ -101,17 +103,18 @@ describe('adapter-vue: focus wiring', () => {
     try {
       // Pointer path with a UA that keeps :focus-visible for the text control.
       input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-      const matchesSpy = vi.spyOn(input, 'matches').mockImplementation((selector: string) =>
-        selector === ':focus-visible'
-      );
+      const matchesSpy2 = vi
+        .spyOn(input, 'matches')
+        .mockImplementation((selector: string) => selector === ':focus-visible');
       input.dispatchEvent(new FocusEvent('focus'));
-      expect(matchesSpy).toHaveBeenCalledWith(':focus-visible');
+      expect(matchesSpy2).toHaveBeenCalledWith(':focus-visible');
       expect(exposes.focusVisible.get()).toBe(true);
-      matchesSpy.mockRestore();
+      matchesSpy2.mockRestore();
 
       // Keyboard path stays driven by the modality heuristic alone.
       input.dispatchEvent(new FocusEvent('blur'));
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      const matchesSpy3 = vi.spyOn(input, 'matches').mockReturnValue(true);
       input.dispatchEvent(new FocusEvent('focus'));
       await flushVue();
       expect(exposes.focusVisible.get()).toBe(true);

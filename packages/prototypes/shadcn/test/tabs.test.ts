@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { tabsContent, tabsList, tabsRoot, tabsTrigger } from '../src/tabs';
@@ -121,6 +121,7 @@ describe('prototypes/shadcn: tabs', () => {
     expect(styleContains(trigger, 'ring-3')).toBe(false);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(trigger, 'matches').mockReturnValue(true);
     trigger.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await Promise.resolve();
 

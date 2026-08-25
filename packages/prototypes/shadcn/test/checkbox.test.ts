@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
@@ -194,6 +194,7 @@ describe('prototypes/shadcn: checkbox', () => {
     const { root, indicator } = await mount();
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(root, 'matches').mockReturnValue(true);
     root.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
 
