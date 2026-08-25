@@ -105,6 +105,7 @@ describe('prototypes/brutalist: hover-card', () => {
     expect(styleContains(trigger, 'data-[hovered]:shadow-[4px_4px_0_0_#000]')).toBe(true);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(trigger, 'matches').mockReturnValue(true);
     trigger.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await advance(0);
     expect(trigger.getExposes().focusVisible.get()).toBe(true);

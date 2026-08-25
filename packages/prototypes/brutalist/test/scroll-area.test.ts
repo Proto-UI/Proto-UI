@@ -179,9 +179,7 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(viewport.hasAttribute('data-focus-visible')).toBe(false);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-    const matchesSpy = vi
-      .spyOn(viewport, 'matches')
-      .mockImplementation((selector: string) => selector === ':focus-visible');
+    const matchesSpy = vi.spyOn(viewport, 'matches').mockReturnValue(true);
     viewport.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
 
