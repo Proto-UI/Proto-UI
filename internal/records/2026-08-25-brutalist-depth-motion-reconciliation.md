@@ -48,7 +48,7 @@ Define named surface/control categories with explicit defaults and permitted exc
 1. **Interactive control** (Button, Toggle, Tabs, Dialog Trigger, Dropdown Menu Trigger, Select Trigger): 3px rest, hover lift -1px + deepen to 4px, press sink +1px + shadow-none. Exceptions: active/inactive and selected/unselected gating.
 2. **Hover Card Trigger**: 3px rest, hover lift -1px + deepen to 4px (same as interactive control), no press sink.
 3. **Dialog Close Icon**: 3px rest, hover color swap + shadow deepen, no lift, no press sink.
-4. **Binary control** (Switch, Checkbox): 3px rest, no hover lift, press color swap + shadow-none. Exception: thumb retains its own 3px.
+4. **Binary control** (Switch): 3px rest, no hover lift, press color swap + shadow-none. Exception: thumb retains its own 3px.
 5. **Editable surface** (Textarea): 3px rest, focus ring only, no hover lift or press.
 6. **Panel** (Card): 6px rest (larger panel depth), no interaction motion.
 7. **Passive label** (Badge): 2px rest (smaller), no interaction motion.
