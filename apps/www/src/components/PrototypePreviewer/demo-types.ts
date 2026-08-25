@@ -9,7 +9,9 @@ export type DemoNode =
   | DemoTextNode
   | {
       kind: 'box';
+      tag?: string;
       className?: string;
+      props?: Record<string, unknown>;
       ref?: string;
       children?: DemoChild[];
     }
