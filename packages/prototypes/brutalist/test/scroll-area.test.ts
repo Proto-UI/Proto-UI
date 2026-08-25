@@ -197,6 +197,9 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(scrollbar.getExposes()).toBeTruthy();
     expect(styleContains(scrollbar, 'flex')).toBe(true);
     expect(styleContains(scrollbar, 'touch-none')).toBe(true);
+    expect(styleContains(scrollbar, 'select-none')).toBe(true);
+    expect(styleContains(scrollbar, 'bg-lavender')).toBe(true);
+    expect(styleContains(scrollbar, 'p-0.5')).toBe(true);
   });
 
   it('thumb inherits Base and projects surface tokens', async () => {
