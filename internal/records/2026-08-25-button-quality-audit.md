@@ -38,13 +38,12 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 | CLI | brutalist-button | registered | `packages/cli/src/registry/components.ts:414`; not in release consumer smoke RELEASE_ROOTS |
 | Docs | Button demos | 12 files | `apps/www/src/content/docs/demo_components/button/` (12 demo files) |
 | Consumer | Release smoke | Base + Shadcn only | `scripts/release/consumer-smoke-cli.mjs` installs packed artifacts for Base and Shadcn; Brutalist is not in RELEASE_ROOTS |
-| Browser | Brutalist journey | passing | Brutalist control browser test exercises Button in WC/React/Vue |
 | Types | Workspace | clean | 0 errors / 0 warnings / 0 hints |
 
 ## Gaps found
 
 1. **No dedicated browser journey for Base Button.** The Brutalist browser journey exercises Button in WC/React/Vue but through the Brutalist projection, not the Base prototype directly. A Base-level browser journey would prove the semantic owner's adapter parity independently of any design-language projection.
-2. **No WCAG contrast evidence for Button.** The Brutalist Button uses `bg-main`/`text-main-foreground` and the Shadcn Button uses `bg-primary`/`text-primary-foreground` but no automated contrast ratio evidence exists in the test suite.
+2. **No automated WCAG contrast-ratio test for Button.** The Brutalist Button uses `bg-main`/`text-main-foreground` and the Shadcn Button uses `bg-primary`/`text-primary-foreground` but no automated contrast-ratio test exists in the test suite (manual contrast was measured and retained in P-SHADCN-BUTTON from #454).
 
 ## Conclusion
 
