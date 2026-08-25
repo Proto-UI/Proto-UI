@@ -186,4 +186,52 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(viewport.hasAttribute('data-focus-visible')).toBe(true);
     expect(viewport.getExposes().focusVisible.get()).toBe(true);
   });
+
+  it('scrollbar inherits Base and projects orientation geometry', async () => {
+    const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
+    const scrollbar = document.createElement(BrutalistScrollAreaScrollbar.name) as any;
+    root.appendChild(scrollbar);
+    document.body.appendChild(root);
+    await flush();
+
+    expect(scrollbar.getExposes()).toBeTruthy();
+    expect(styleContains(scrollbar, 'flex')).toBe(true);
+    expect(styleContains(scrollbar, 'touch-none')).toBe(true);
+  });
+
+  it('thumb inherits Base and projects surface tokens', async () => {
+    const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
+    const scrollbar = document.createElement(BrutalistScrollAreaScrollbar.name) as any;
+    const thumb = document.createElement(BrutalistScrollAreaThumb.name) as any;
+    root.appendChild(scrollbar);
+    scrollbar.appendChild(thumb);
+    document.body.appendChild(root);
+    await flush();
+
+    expect(thumb.getExposes()).toBeTruthy();
+    expect(styleContains(thumb, 'rounded-none')).toBe(true);
+    expect(styleContains(thumb, 'bg-lavender-foreground')).toBe(true);
+  });
+
+  it('viewport inherits Base and configures composed projection', async () => {
+    const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
+    const viewport = document.createElement(BrutalistScrollAreaViewport.name) as any;
+    root.appendChild(viewport);
+    document.body.appendChild(root);
+    await flush();
+
+    expect(viewport.getExposes()).toBeTruthy();
+    expect(styleContains(viewport, 'h-full')).toBe(true);
+    expect(styleContains(viewport, 'w-full')).toBe(true);
+  });
+
+  it('root inherits Base Scroll Area Root', async () => {
+    const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
+    document.body.appendChild(root);
+    await flush();
+
+    expect(root.getExposes()).toBeTruthy();
+    expect(styleContains(root, 'relative')).toBe(true);
+    expect(styleContains(root, 'overflow-hidden')).toBe(true);
+  });
 });

@@ -25,6 +25,30 @@ cases:
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT-FOCUS-RING
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT-SURFACE
     expectation: p-brutalist-scroll-area-viewport-rings-inside-its-own-box
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-SCROLLBAR-INHERITANCE
+    title: Scrollbar inherits Base Scrollbar and projects orientation geometry
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-BASE-INHERITANCE
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-TRACK
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-ORIENTATION
+    expectation: p-brutalist-scroll-area-scrollbar-inheritance
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-THUMB-INHERITANCE
+    title: Thumb inherits Base Thumb and projects surface tokens
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-THUMB-BASE-INHERITANCE
+    expectation: p-brutalist-scroll-area-thumb-inheritance
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-INHERITANCE
+    title: Viewport inherits Base Viewport and configures composed projection
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-BASE-INHERITANCE
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-COMPOSED-PREFERENCE
+    expectation: p-brutalist-scroll-area-viewport-composed-preference
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-ROOT-INHERITANCE
+    title: Root inherits Base Scroll Area Root
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-BASE-INHERITANCE
+    expectation: p-brutalist-scroll-area-root-inheritance
+
 implementations:
   - id: prototypes-brutalist-scroll-area-contract
     kind: module-test
@@ -34,10 +58,17 @@ implementations:
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-1
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-SCROLLBAR-INHERITANCE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-THUMB-INHERITANCE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-INHERITANCE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-ROOT-INHERITANCE
     exercises:
       - P-BASE-SCROLL-AREA
       - P-BASE-SCROLL-AREA-SCROLLBAR
       - P-BASE-SCROLL-AREA-THUMB
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR
+      - P-BRUTALIST-SCROLL-AREA-THUMB
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT
       - P-BASE-SCROLL-AREA-VIEWPORT
       - P-BRUTALIST-SCROLL-AREA
       - P-BRUTALIST-SCROLL-AREA-SCROLLBAR
@@ -71,6 +102,10 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-SCROLLBAR-INHERITANCE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-THUMB-INHERITANCE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-INHERITANCE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-ROOT-INHERITANCE
     exercises:
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT
       - P-BASE-SCROLL-AREA-VIEWPORT
