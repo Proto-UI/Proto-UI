@@ -36,7 +36,8 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 | Build | All packages | 41/41 | `build:packages` complete |
 | CLI | shadcn-button | registered + smoke-tested | `packages/cli/src/registry/components.ts:212`; exercised in release consumer smoke |
 | CLI | brutalist-button | registered | `packages/cli/src/registry/components.ts:414`; not in release consumer smoke RELEASE_ROOTS |
-| Docs | Button demos | 12 files | `apps/www/src/content/docs/demo_components/button/` (12 demo files) |
+| Docs | Button demos | 12 demo files + 3 demo scripts | `demo_components/button/` (12 files), `demo-base-button.demo.ts`, `demo-shadcn-button.demo.ts`, `demo-brutalist-button.demo.ts` |
+| Docs | Button pages | 6 pages | Base/Shadcn/Brutalist button.mdx in en + zh-cn |
 | Consumer | Release smoke | Base + Shadcn only | `scripts/release/consumer-smoke-cli.mjs` installs packed artifacts for Base and Shadcn; Brutalist is not in RELEASE_ROOTS |
 | Types | Workspace | clean | 0 errors / 0 warnings / 0 hints |
 
