@@ -377,7 +377,8 @@ function resolveKnownAsHookStateHandles(node) {
     hookName === 'asDialogClose' ||
     hookName === 'asDropdownTrigger' ||
     hookName === 'asSelectTrigger' ||
-    hookName === 'asHoverCardTrigger'
+    hookName === 'asHoverCardTrigger' ||
+    hookName === 'asTooltipTrigger'
   ) {
     return new Map(COMMAND_STATE_VARIANTS);
   }
@@ -427,6 +428,13 @@ function resolveKnownAsHookStateHandles(node) {
     return new Map([
       ['focused', 'data-[focused]'],
       ['focusVisible', 'data-[focus-visible]'],
+    ]);
+  }
+
+  if (hookName === 'asScrollAreaScrollbar') {
+    return new Map([
+      ['orientation', 'data-[orientation]'],
+      ['disabled', 'data-[disabled]'],
     ]);
   }
 
