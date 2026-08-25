@@ -1,0 +1,74 @@
+id: T-BRUTALIST-CHECKBOX-0001
+type: test
+title: Brutalist Checkbox visual, interaction, and inheritance tests
+status: draft
+since: 0.3.0-alpha.1
+summary: >-
+  Covers the Brutalist Checkbox public API (root checked fill swap, indicator opacity visibility, press/focus/disabled) against P-BRUTALIST-CHECKBOX and P-BRUTALIST-CHECKBOX-INDICATOR criteria.
+
+
+cases:
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-1
+    title: Direct entry and Base Checkbox inheritance for root and indicator
+    covers:
+      - P-BRUTALIST-CHECKBOX-ENTRY
+      - P-BRUTALIST-CHECKBOX-BASE-INHERITANCE
+      - P-BRUTALIST-CHECKBOX-INDICATOR-ENTRY
+      - P-BRUTALIST-CHECKBOX-INDICATOR-BASE-INHERITANCE
+    expectation: p-brutalist-checkbox-entry-inheritance
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-2
+    title: Checked swaps fill to foreground; unchecked restores main fill
+    covers:
+      - P-BRUTALIST-CHECKBOX-VISUAL-GRAMMAR
+    expectation: p-brutalist-checkbox-checked-fill-swap
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-3
+    title: Indicator opacity follows checked state
+    covers:
+      - P-BRUTALIST-CHECKBOX-INDICATOR-VISUAL-GRAMMAR
+    expectation: p-brutalist-checkbox-indicator-opacity
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-4
+    title: Press clears shadow; focus-visible applies ring; disabled de-emphasizes
+    covers:
+      - P-BRUTALIST-CHECKBOX-INTERACTION
+    expectation: p-brutalist-checkbox-interaction
+
+implementations:
+  - id: prototypes-brutalist-checkbox-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/checkbox.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-CHECKBOX-0001-CASE-1
+      - T-BRUTALIST-CHECKBOX-0001-CASE-2
+      - T-BRUTALIST-CHECKBOX-0001-CASE-3
+      - T-BRUTALIST-CHECKBOX-0001-CASE-4
+    exercises:
+      - P-BASE-CHECKBOX
+      - P-BASE-CHECKBOX-INDICATOR
+      - P-BRUTALIST-CHECKBOX
+      - P-BRUTALIST-CHECKBOX-INDICATOR
+
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-CHECKBOX
+    - id: P-BRUTALIST-CHECKBOX-INDICATOR
+
+exercises:
+  prototypes:
+    - P-BASE-CHECKBOX
+    - P-BASE-CHECKBOX-INDICATOR
+    - P-BRUTALIST-CHECKBOX
+    - P-BRUTALIST-CHECKBOX-INDICATOR
+
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced draft Brutalist Checkbox coverage.
+
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - checkbox

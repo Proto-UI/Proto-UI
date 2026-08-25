@@ -1,0 +1,52 @@
+id: P-BRUTALIST-CHECKBOX-INDICATOR
+type: prototype
+title: Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects opacity visibility
+status: draft
+since: 0.3.0-alpha.1
+summary: >-
+  Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects a simple opacity-based visibility model: fully opaque when checked, fully transparent when unchecked.
+
+
+statement:
+  en: >-
+    Brutalist Checkbox Indicator is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Checkbox Indicator. It preserves inherited Base protocol semantics and adds only visual/style behavior: opacity-100 when checked, opacity-0 when unchecked.
+
+
+  zh-CN: >-
+    Brutalist Checkbox Indicator 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Checkbox Indicator 之上。它保留继承的 Base 协议语义，仅增加视觉/style 行为：checked 时 opacity-100，unchecked 时 opacity-0。
+
+
+criteria:
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-BASE-INHERITANCE
+    text:
+      en: The prototype must inherit Base Checkbox Indicator through `asCheckboxIndicator()` once and must not redefine Base checked or indeterminate protocol semantics.
+      zh-CN: 该 prototype 必须通过 `asCheckboxIndicator()` 一次性继承 Base Checkbox Indicator，不得重定义 Base 的 checked 或 indeterminate 协议语义。
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-ENTRY
+    text:
+      en: The direct prototype entry name is `brutalist-checkbox-indicator` and is the only public Checkbox Indicator entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 `brutalist-checkbox-indicator`，且是本 foundation 切片中唯一公开的 Checkbox Indicator 入口。
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The indicator must be fully opaque (`opacity-100`) when `checked` is true and fully transparent (`opacity-0`) when `checked` is false. No transition, gradient, or animation is applied.
+
+      zh-CN: >-
+        indicator 在 `checked` 为 true 时必须完全不透明（`opacity-100`），在 `checked` 为 false 时必须完全透明（`opacity-0`）。不应用任何 transition、gradient 或 animation。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/checkbox/indicator.proto.ts
+  - path: packages/prototypes/brutalist/src/checkbox/types.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-CHECKBOX-INDICATOR
+verifies: { tests: [T-BRUTALIST-CHECKBOX-0001] }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the draft Brutalist Checkbox Indicator projection.
+tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox, indicator]
