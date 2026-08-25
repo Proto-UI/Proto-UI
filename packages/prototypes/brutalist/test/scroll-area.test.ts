@@ -195,6 +195,8 @@ describe('prototypes/brutalist: scroll-area', () => {
     await flush();
 
     expect(scrollbar.getExposes()).toBeTruthy();
+    // Base inheritance: scrollbar exposes orientation from Base asScrollAreaScrollbar
+    expect(scrollbar.getExposes().orientation?.get()).toBeTruthy();
     expect(styleContains(scrollbar, 'flex')).toBe(true);
     expect(styleContains(scrollbar, 'touch-none')).toBe(true);
     expect(styleContains(scrollbar, 'select-none')).toBe(true);
@@ -212,6 +214,8 @@ describe('prototypes/brutalist: scroll-area', () => {
     await flush();
 
     expect(thumb.getExposes()).toBeTruthy();
+    // Base inheritance: thumb has no independent exposes (anatomy-only, Move hit-subregion is host-projected)
+    expect(Object.keys(thumb.getExposes())).toEqual([]);
     expect(styleContains(thumb, 'rounded-none')).toBe(true);
     expect(styleContains(thumb, 'bg-lavender-foreground')).toBe(true);
   });
@@ -226,6 +230,10 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(viewport.getExposes()).toBeTruthy();
     expect(styleContains(viewport, 'h-full')).toBe(true);
     expect(styleContains(viewport, 'w-full')).toBe(true);
+    // Composed projection is configured via asScrollSurface().configure({ projection: 'composed' })
+    // The host-observable effect (native scrollbar hidden, composed chrome visible)
+    // requires a browser journey to verify; unit test confirms the viewport exists and
+    // has the composed surface tokens.
   });
 
   it('root inherits Base Scroll Area Root', async () => {
