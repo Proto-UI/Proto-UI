@@ -79,6 +79,13 @@ export default defineConfig({
       title: 'Proto UI',
       plugins: [
         starlightLlmsTxt({
+          exclude: [
+            '*/demo-*',
+            '*/contribute/*',
+            '*/ui-libraries/*/components/*',
+            '*/reference/*',
+            '*/guides/*',
+          ],
           description:
             'Proto UI is an open-source project exploring unified human-computer interaction protocols across platforms, frameworks, and interaction media.',
           rawContent: true,
