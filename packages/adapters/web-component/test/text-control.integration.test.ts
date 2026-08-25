@@ -59,10 +59,10 @@ const focusTextareaPrototype = definePrototype({
       focusable.focusSelf(options)
     );
     def.event.on('host:focus', (_run, event) => {
-      projectedHostFocusTypes.push(String(event?.type));
+      projectedHostFocusTypes.push(String((event as any)?.type));
     });
     def.event.on('host:blur', (_run, event) => {
-      projectedHostFocusTypes.push(String(event?.type));
+      projectedHostFocusTypes.push(String((event as any)?.type));
     });
     const sync = (props: Readonly<ControlProps>) => {
       control.sync({
