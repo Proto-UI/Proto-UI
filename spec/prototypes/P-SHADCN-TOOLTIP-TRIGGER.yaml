@@ -1,0 +1,25 @@
+id: P-SHADCN-TOOLTIP-TRIGGER
+type: prototype
+title: shadcn Tooltip Trigger inherits Base Tooltip Trigger
+status: draft
+since: 0.3.0-alpha.1
+summary: shadcn Tooltip Trigger inherits Base Tooltip Trigger and projects hover/focus/press visual feedback.
+statement:
+  en: shadcn Tooltip Trigger is a draft projection preserving Base Trigger semantics with hover opacity, focus-visible ring, and press scale feedback.
+  zh-CN: shadcn Tooltip Trigger 是 draft 投射，保留 Base Trigger 语义，增加 hover 透明度、focus-visible ring 与 press 缩放反馈。
+criteria:
+  - id: P-SHADCN-TOOLTIP-TRIGGER-ENTRY
+    text:
+      en: The direct prototype entry name is shadcn-tooltip-trigger.
+      zh-CN: 直接 prototype 入口名为 shadcn-tooltip-trigger。
+sources:
+  - path: packages/prototypes/shadcn/src/tooltip/trigger.proto.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP-TRIGGER
+verifies: { tests: [T-SHADCN-TOOLTIP-0001] }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced.
+tags: [prototype, shadcn, visual, delta, tooltip, trigger]

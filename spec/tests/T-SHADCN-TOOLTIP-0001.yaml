@@ -1,0 +1,60 @@
+id: T-SHADCN-TOOLTIP-0001
+type: test
+title: shadcn Tooltip visual, interaction, and inheritance tests
+status: draft
+since: 0.3.0-alpha.1
+summary: Covers shadcn Tooltip public API against P-SHADCN-TOOLTIP criteria.
+cases:
+  - id: T-SHADCN-TOOLTIP-0001-CASE-1
+    title: Direct entry and Base Tooltip inheritance
+    covers:
+      - P-SHADCN-TOOLTIP-ENTRY
+      - P-SHADCN-TOOLTIP-BASE-INHERITANCE
+      - P-SHADCN-TOOLTIP-GROUP-ENTRY
+      - P-SHADCN-TOOLTIP-TRIGGER-ENTRY
+      - P-SHADCN-TOOLTIP-CONTENT-ENTRY
+    expectation: p-shadcn-tooltip-entry-inheritance
+  - id: T-SHADCN-TOOLTIP-0001-CASE-2
+    title: Content visual grammar is rounded popover
+    covers:
+      - P-SHADCN-TOOLTIP-VISUAL-GRAMMAR
+    expectation: p-shadcn-tooltip-visual-grammar
+implementations:
+  - id: prototypes-shadcn-tooltip-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/tooltip.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-TOOLTIP-0001-CASE-1
+      - T-SHADCN-TOOLTIP-0001-CASE-2
+    exercises:
+      - P-BASE-TOOLTIP
+      - P-BASE-TOOLTIP-GROUP
+      - P-BASE-TOOLTIP-TRIGGER
+      - P-BASE-TOOLTIP-CONTENT
+      - P-SHADCN-TOOLTIP
+      - P-SHADCN-TOOLTIP-GROUP
+      - P-SHADCN-TOOLTIP-TRIGGER
+      - P-SHADCN-TOOLTIP-CONTENT
+verifies:
+  prototypes:
+    - id: P-SHADCN-TOOLTIP
+    - id: P-SHADCN-TOOLTIP-GROUP
+    - id: P-SHADCN-TOOLTIP-TRIGGER
+    - id: P-SHADCN-TOOLTIP-CONTENT
+exercises:
+  prototypes:
+    - P-BASE-TOOLTIP
+    - P-BASE-TOOLTIP-GROUP
+    - P-BASE-TOOLTIP-TRIGGER
+    - P-BASE-TOOLTIP-CONTENT
+    - P-SHADCN-TOOLTIP
+    - P-SHADCN-TOOLTIP-GROUP
+    - P-SHADCN-TOOLTIP-TRIGGER
+    - P-SHADCN-TOOLTIP-CONTENT
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced.
+tags: [test, shadcn, visual, tooltip]

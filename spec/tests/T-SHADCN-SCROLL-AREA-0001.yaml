@@ -1,0 +1,56 @@
+id: T-SHADCN-SCROLL-AREA-0001
+type: test
+title: shadcn Scroll Area visual, interaction, and inheritance tests
+status: draft
+since: 0.3.0-alpha.1
+summary: Covers shadcn Scroll Area public API.
+cases:
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-1
+    title: Direct entry and Base Scroll Area inheritance
+    covers:
+      - P-SHADCN-SCROLL-AREA-ENTRY
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-ENTRY
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR-ENTRY
+      - P-SHADCN-SCROLL-AREA-THUMB-ENTRY
+    expectation: p-shadcn-scroll-area-entry-inheritance
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-2
+    title: Root visual grammar
+    covers:
+      - P-SHADCN-SCROLL-AREA-VISUAL-GRAMMAR
+    expectation: p-shadcn-scroll-area-visual-grammar
+implementations:
+  - id: prototypes-shadcn-scroll-area-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/scroll-area.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-SCROLL-AREA-0001-CASE-1
+      - T-SHADCN-SCROLL-AREA-0001-CASE-2
+    exercises:
+      - P-BASE-SCROLL-AREA
+      - P-BASE-SCROLL-AREA-VIEWPORT
+      - P-BASE-SCROLL-AREA-SCROLLBAR
+      - P-BASE-SCROLL-AREA-THUMB
+      - P-SHADCN-SCROLL-AREA
+      - P-SHADCN-SCROLL-AREA-VIEWPORT
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR
+      - P-SHADCN-SCROLL-AREA-THUMB
+verifies:
+  prototypes:
+    - id: P-SHADCN-SCROLL-AREA
+    - id: P-SHADCN-SCROLL-AREA-VIEWPORT
+    - id: P-SHADCN-SCROLL-AREA-SCROLLBAR
+    - id: P-SHADCN-SCROLL-AREA-THUMB
+exercises:
+  prototypes:
+    - P-BASE-SCROLL-AREA
+    - P-BASE-SCROLL-AREA-VIEWPORT
+    - P-BASE-SCROLL-AREA-SCROLLBAR
+    - P-BASE-SCROLL-AREA-THUMB
+    - P-SHADCN-SCROLL-AREA
+    - P-SHADCN-SCROLL-AREA-VIEWPORT
+    - P-SHADCN-SCROLL-AREA-SCROLLBAR
+    - P-SHADCN-SCROLL-AREA-THUMB
+revisions: [{ version: 0.3.0-alpha.1, change: introduced, summary: Introduced. }]
+tags: [test, shadcn, visual, scroll-area]

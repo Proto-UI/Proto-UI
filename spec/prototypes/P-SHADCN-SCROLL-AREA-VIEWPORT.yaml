@@ -1,0 +1,19 @@
+id: P-SHADCN-SCROLL-AREA-VIEWPORT
+type: prototype
+title: shadcn Scroll Area Viewport inherits Base Scroll Area Viewport
+status: draft
+since: 0.3.0-alpha.1
+summary: shadcn Scroll Area Viewport inherits Base and projects h-full w-full rounded-[inherit].
+statement:
+  en: shadcn Scroll Area Viewport is a draft projection with h-full w-full rounded-[inherit].
+  zh-CN: shadcn Scroll Area Viewport 是 draft 投射，使用 h-full w-full rounded-[inherit]。
+criteria:
+  - id: P-SHADCN-SCROLL-AREA-VIEWPORT-ENTRY
+    text:
+      { en: Entry name is shadcn-scroll-area-viewport, zh-CN: 入口名为 shadcn-scroll-area-viewport }
+sources:
+  - path: packages/prototypes/shadcn/src/scroll-area/viewport.proto.ts
+inherits: { prototypes: [{ id: P-BASE-SCROLL-AREA-VIEWPORT }] }
+verifies: { tests: [T-SHADCN-SCROLL-AREA-0001] }
+revisions: [{ version: 0.3.0-alpha.1, change: introduced, summary: Introduced. }]
+tags: [prototype, shadcn, visual, scroll-area, viewport]

@@ -1,0 +1,48 @@
+id: P-SHADCN-TOOLTIP
+type: prototype
+title: shadcn Tooltip Root inherits Base Tooltip and layers a rounded popover surface
+status: draft
+since: 0.3.0-alpha.1
+summary: >-
+  shadcn Tooltip Root inherits Base Tooltip interaction semantics and projects a rounded popover visual surface: rounded-md border, bg-popover, shadow-md, text-popover-foreground.
+
+
+statement:
+  en: >-
+    shadcn Tooltip Root is a draft Proto UI-maintained shadcn design-language projection over Base Tooltip. It preserves inherited Base protocol semantics and adds only visual/style behavior: rounded corners, border, popover background, shadow, and popover-foreground text.
+
+  zh-CN: >-
+    shadcn Tooltip Root 是 Proto UI 维护的 draft shadcn design-language 投射，建立在 Base Tooltip 之上。它保留继承的 Base 协议语义，仅增加视觉/style 行为：圆角、边框、popover 背景、阴影与 popover-foreground 文本。
+
+
+criteria:
+  - id: P-SHADCN-TOOLTIP-BASE-INHERITANCE
+    text:
+      en: The prototype must inherit Base Tooltip through asTooltipRoot() once and must not redefine Base protocol semantics.
+      zh-CN: 该 prototype 必须通过 asTooltipRoot() 一次性继承 Base Tooltip，不得重定义 Base 协议语义。
+  - id: P-SHADCN-TOOLTIP-ENTRY
+    text:
+      en: The direct prototype entry name is shadcn-tooltip-root and is the only public Tooltip Root entry in this foundation slice.
+      zh-CN: 直接 prototype 入口名为 shadcn-tooltip-root，且是本 foundation 切片中唯一公开的 Tooltip Root 入口。
+  - id: P-SHADCN-TOOLTIP-VISUAL-GRAMMAR
+    text:
+      en: >-
+        The content visual surface must preserve rounded corners (rounded-md), border (border), popover background (bg-popover), shadow (shadow-md), and popover-foreground text (text-popover-foreground) without gradients or glass effects.
+
+      zh-CN: >-
+        content 视觉表面必须保持圆角（rounded-md）、边框（border）、popover 背景（bg-popover）、阴影（shadow-md）与 popover-foreground 文本（text-popover-foreground），不得使用渐变或玻璃效果。
+
+
+sources:
+  - path: packages/prototypes/shadcn/src/tooltip/root.proto.ts
+  - path: packages/prototypes/shadcn/src/tooltip/content.proto.ts
+  - path: packages/prototypes/shadcn/src/tooltip/types.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP
+verifies: { tests: [T-SHADCN-TOOLTIP-0001] }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the draft shadcn Tooltip projection.
+tags: [prototype, shadcn, visual, delta, tooltip]

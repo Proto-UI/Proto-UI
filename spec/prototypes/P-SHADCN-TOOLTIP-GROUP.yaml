@@ -1,0 +1,25 @@
+id: P-SHADCN-TOOLTIP-GROUP
+type: prototype
+title: shadcn Tooltip Group inherits Base Tooltip Group
+status: draft
+since: 0.3.0-alpha.1
+summary: shadcn Tooltip Group inherits Base Tooltip Group and renders inline-flex.
+statement:
+  en: shadcn Tooltip Group is a draft projection that preserves Base Tooltip Group semantics and renders inline-flex.
+  zh-CN: shadcn Tooltip Group 是 draft 投射，保留 Base Tooltip Group 语义，渲染为 inline-flex。
+criteria:
+  - id: P-SHADCN-TOOLTIP-GROUP-ENTRY
+    text:
+      en: The direct prototype entry name is shadcn-tooltip-group.
+      zh-CN: 直接 prototype 入口名为 shadcn-tooltip-group。
+sources:
+  - path: packages/prototypes/shadcn/src/tooltip/group.proto.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP-GROUP
+verifies: { tests: [T-SHADCN-TOOLTIP-0001] }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced.
+tags: [prototype, shadcn, visual, delta, tooltip, group]

@@ -1,0 +1,25 @@
+id: P-SHADCN-TOOLTIP-CONTENT
+type: prototype
+title: shadcn Tooltip Content inherits Base Tooltip Content
+status: draft
+since: 0.3.0-alpha.1
+summary: shadcn Tooltip Content inherits Base Tooltip Content and projects rounded popover surface.
+statement:
+  en: shadcn Tooltip Content is a draft projection preserving Base Content semantics with rounded-md, border, bg-popover, shadow-md, and text-popover-foreground.
+  zh-CN: shadcn Tooltip Content 是 draft 投射，保留 Base Content 语义，使用 rounded-md、border、bg-popover、shadow-md 与 text-popover-foreground。
+criteria:
+  - id: P-SHADCN-TOOLTIP-CONTENT-ENTRY
+    text:
+      en: The direct prototype entry name is shadcn-tooltip-content.
+      zh-CN: 直接 prototype 入口名为 shadcn-tooltip-content。
+sources:
+  - path: packages/prototypes/shadcn/src/tooltip/content.proto.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP-CONTENT
+verifies: { tests: [T-SHADCN-TOOLTIP-0001] }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced.
+tags: [prototype, shadcn, visual, delta, tooltip, content]

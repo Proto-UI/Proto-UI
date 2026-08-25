@@ -178,3 +178,15 @@ export type {
 } from './dialog/types';
 export { ShadcnTextareaRoot, shadcnTextareaRoot } from './textarea';
 export type { ShadcnTextareaRootProps, ShadcnTextareaRootExposes } from './textarea';
+export {
+  ShadcnTooltipGroup,
+  ShadcnTooltipRoot,
+  ShadcnTooltipTrigger,
+  ShadcnTooltipContent,
+} from './tooltip';
+export {
+  ShadcnScrollAreaRoot,
+  ShadcnScrollAreaViewport,
+  ShadcnScrollAreaScrollbar,
+  ShadcnScrollAreaThumb,
+} from './scroll-area';
