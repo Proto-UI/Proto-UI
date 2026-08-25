@@ -64,12 +64,8 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
     return;
   }
   if (node.kind === 'box') {
-    const el = document.createElement(node.tag ?? 'div');
+    const el = document.createElement('div');
     if (node.className) el.className = node.className;
-    if (node.props)
-      for (const [k, v] of Object.entries(node.props)) {
-        if (v != null) el.setAttribute(k, String(v));
-      }
     if (node.ref) el.setAttribute('data-demo-ref', node.ref);
     parent.appendChild(el);
     const kids = node.children ?? [];
@@ -195,7 +191,7 @@ async function renderDemoReact(opt: DemoRenderOptions): Promise<DemoRenderResult
     if (node.kind === 'box') {
       const kids = (node.children ?? []).map((child) => renderNode(child));
       return React.createElement(
-        node.tag ?? 'div',
+        'div',
         { className: node.className, 'data-demo-ref': node.ref },
         ...kids
       );

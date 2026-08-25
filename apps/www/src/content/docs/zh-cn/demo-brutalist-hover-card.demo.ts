@@ -8,14 +8,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-hover-card-trigger',
-        children: [
-          {
-            kind: 'box',
-            tag: 'a',
-            props: { href: '#hover-card-target', tabIndex: 0, className: 'cursor-pointer' },
-            children: ['Hover preview'],
-          },
-        ],
+        className: 'cursor-pointer underline',
+        children: ['Hover preview'],
       },
       {
         kind: 'proto',
