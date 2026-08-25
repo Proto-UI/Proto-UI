@@ -9,7 +9,7 @@ summary: >-
 
 statement:
   en: >-
-    Brutalist Checkbox Indicator is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Checkbox Indicator. It preserves inherited Base protocol semantics and adds only visual/style behavior: opacity-100 when checked, opacity-0 when unchecked.
+    Brutalist Checkbox Indicator is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Checkbox Indicator. It preserves inherited Base protocol semantics and adds only visual/style behavior: opacity-100 when checked or indeterminate, opacity-0 only when both unchecked and non-indeterminate.
 
 
   zh-CN: >-
