@@ -358,27 +358,22 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           // ingress: Proto focus facts update without emitting a second public
           // native-looking event from the custom-element boundary.
           const control = this._textControlTarget;
-          const projectFocus = (type: 'focus' | 'blur', nativeEvent: FocusEvent) => {
-            const normalized = new FocusEvent(type, {
-              relatedTarget: nativeEvent.relatedTarget,
-            });
-            Object.defineProperty(normalized, 'nativeEvent', {
-              value: nativeEvent,
-              enumerable: false,
-            });
-            router.dispatchHostRootEvent(type, normalized);
+          // Bind native focus/blur directly on the known control so the
+          // callback receives the real DOM event object with target/currentTarget
+          // intact. The private transport preserves both the declared type and
+          // the physical event identity without dispatching a second public
+          // boundary event.
+          const onFocus = (event: FocusEvent) => {
+            if (event.target === control) router.dispatchHostRootEvent('focus', event);
           };
-          const onFocusIn = (event: FocusEvent) => {
-            if (event.target === control) projectFocus('focus', event);
+          const onBlur = (event: FocusEvent) => {
+            if (event.target === control) router.dispatchHostRootEvent('blur', event);
           };
-          const onFocusOut = (event: FocusEvent) => {
-            if (event.target === control) projectFocus('blur', event);
-          };
-          thisEl.addEventListener('focusin', onFocusIn);
-          thisEl.addEventListener('focusout', onFocusOut);
+          control.addEventListener('focus', onFocus);
+          control.addEventListener('blur', onBlur);
           disposeFocusBridge = () => {
-            thisEl.removeEventListener('focusin', onFocusIn);
-            thisEl.removeEventListener('focusout', onFocusOut);
+            control.removeEventListener('focus', onFocus);
+            control.removeEventListener('blur', onBlur);
           };
         }
 

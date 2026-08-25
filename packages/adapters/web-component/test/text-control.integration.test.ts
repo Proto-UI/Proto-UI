@@ -252,10 +252,10 @@ describe('adapter-web-component text control', () => {
 
     // Swallow the bridge signal: focusin on the control never reaches the
     // boundary, so the bridge never re-dispatches focus/blur.
-    const swallowFocusIn = (e: FocusEvent) => {
+    const swallowFocus = (e: FocusEvent) => {
       if (e.target === textarea) e.stopImmediatePropagation();
     };
-    document.addEventListener('focusin', swallowFocusIn, true);
+    textarea.addEventListener('focus', swallowFocus, true);
     try {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
       textarea.focus();
@@ -266,7 +266,7 @@ describe('adapter-web-component text control', () => {
       expect(exposes.focusVisible.get()).toBe(false);
       expect(shell.hasAttribute('data-focus-visible')).toBe(false);
     } finally {
-      document.removeEventListener('focusin', swallowFocusIn, true);
+      textarea.removeEventListener('focus', swallowFocus, true);
     }
 
     // After unblocking, the bridge path restores.
