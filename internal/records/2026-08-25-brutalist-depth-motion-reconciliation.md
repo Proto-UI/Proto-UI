@@ -26,6 +26,8 @@ The public Brutalist Design Contract page presents one unqualified rest/hover/pr
 | Dropdown Content   | `3px 3px 0 0 #000`                  | P-BRUTALIST-DROPDOWN-MENU-CONTENT |
 | Select Content     | `3px 3px 0 0 #000`                  | P-BRUTALIST-SELECT-CONTENT        |
 | Hover Card Content | `3px 3px 0 0 #000`                  | P-BRUTALIST-HOVER-CARD-CONTENT    |
+| Dropdown Menu Item | none                                | P-BRUTALIST-DROPDOWN-MENU-ITEM    |
+| Select Item        | none                                | P-BRUTALIST-SELECT-ITEM           |
 
 ### Motion (hover/press)
 
