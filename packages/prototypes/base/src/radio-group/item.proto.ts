@@ -16,14 +16,6 @@ import type {
   RadioGroupItemProps,
 } from './types';
 
-function getKeyboardEvent(event: unknown): KeyboardEvent | null {
-  const detail = (event as CustomEvent | undefined)?.detail ?? event;
-  if (detail instanceof KeyboardEvent) return detail;
-  if (!detail || typeof detail !== 'object') return null;
-  const native = (detail as { nativeEvent?: unknown }).nativeEvent;
-  return native instanceof KeyboardEvent ? native : null;
-}
-
 function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemExposes>): void {
   asTrigger();
   const focusable = asFocusable<RadioGroupItemProps>();
@@ -154,14 +146,17 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
   });
 
   def.event.onGlobal('key.down', (_run, event) => {
-    if (disabled.get() || !focused.get() || event?.detail?.key !== ' ') return;
-    event.detail.preventDefault?.();
+    if (disabled.get() || !focused.get() || event?.key !== ' ') return;
+    event.control.requestDefaultActionPrevention({
+      reason: 'radio-item.space-activation',
+      source: 'base-radio-group-item',
+    });
   });
 
   def.event.on('press.commit', (run, event) => {
     pressed.set(false, 'reason: radio item press commit => pressed reset');
     if (disabled.get()) return;
-    if (getKeyboardEvent(event)?.key === 'Enter') return;
+    if (event?.key === 'Enter') return;
     setCurrent(run);
     requestSelection(run);
   });
