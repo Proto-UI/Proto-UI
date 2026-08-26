@@ -35,8 +35,9 @@ describe.sequential('Brutalist Button browser regressions', () => {
   for (const runtime of RUNTIMES) {
     it(`renders a Button with square corners and hard shadow in ${runtime}`, async () => {
       const previewer = await openRoute(page, baseUrl, BUTTON_ROUTE, BUTTON_DEMO_ID);
-      await selectRuntime(page, previewer, runtime, '.host > [data-pui-root]', 5);
-      const button = previewer.locator('.host > [data-pui-root]').first();
+      // The demo has 9 buttons inside a box wrapper, so use descendant selector
+      await selectRuntime(page, previewer, runtime, '.host [data-pui-root]', 9);
+      const button = previewer.locator('.host [data-pui-root]').first();
       await button.waitFor({ state: 'visible' });
       const style = await button.evaluate((el) => {
         const cs = getComputedStyle(el);
@@ -53,8 +54,8 @@ describe.sequential('Brutalist Button browser regressions', () => {
 
     it(`preserves disabled state visually in ${runtime}`, async () => {
       const previewer = await openRoute(page, baseUrl, BUTTON_ROUTE, BUTTON_DEMO_ID);
-      await selectRuntime(page, previewer, runtime, '.host > [data-pui-root]', 5);
-      const disabled = previewer.locator('.host > [data-pui-root][data-disabled]').first();
+      await selectRuntime(page, previewer, runtime, '.host [data-pui-root]', 9);
+      const disabled = previewer.locator('.host [data-pui-root][data-disabled]').first();
       await disabled.waitFor({ state: 'visible' });
       const opacity = await disabled.evaluate((el) => getComputedStyle(el).opacity);
       expect(Number(opacity)).toBeLessThan(1);
