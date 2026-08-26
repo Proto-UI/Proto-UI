@@ -49,4 +49,4 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 
 ## Conclusion
 
-The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), consumer verification, browser journeys, and docs. The three remaining gaps are: (1) Base-level browser journey, (2) WCAG contrast evidence, (3) Brutalist Button built-consumer export verification (release smoke does not include Brutalist in RELEASE_ROOTS). None are semantic defects.
+The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), consumer verification, browser journeys, and docs. The two remaining gaps are: (1) Base-level browser journey (no dedicated Base Button browser test), (2) automated WCAG contrast-ratio test (manual contrast was measured and retained in P-SHADCN-BUTTON from #454; only the automated test is missing). None are semantic defects.
