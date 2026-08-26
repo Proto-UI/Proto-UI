@@ -230,3 +230,81 @@ describe('module-text-control web bridge', () => {
     textarea.remove();
   });
 });
+
+describe('module-text-control single-line web bridge', () => {
+  it('resolves an input element for single-line declaration', () => {
+    const input = document.createElement('input');
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: {
+        valueMode: 'uncontrolled',
+        defaultValue: 'initial',
+        placeholder: 'Search',
+        required: true,
+        name: 'query',
+        inputMode: 'search',
+        enterKeyHint: 'search',
+      },
+      onEvent() {},
+    });
+
+    expect(input.value).toBe('initial');
+    expect(input.placeholder).toBe('Search');
+    expect(input.required).toBe(true);
+    expect(input.name).toBe('query');
+    expect(input.inputMode).toBe('search');
+    expect(input.enterKeyHint).toBe('search');
+
+    lease.dispose();
+  });
+
+  it('canonicalizes CR/LF to LF in event values and snapshots', () => {
+    const input = document.createElement('input');
+    const events: TextControlEvent[] = [];
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent(event) {
+        events.push(event);
+      },
+    });
+
+    // Input elements strip \r\n, so test canonicalization with a textarea
+    const textarea = document.createElement('textarea');
+    const textareaEvents: TextControlEvent[] = [];
+    const textareaLease = createWebTextControlHost(() => textarea).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent(event) {
+        textareaEvents.push(event);
+      },
+    });
+
+    textarea.value = 'hello\r\nworld';
+    textarea.dispatchEvent(new InputEvent('input', { bubbles: true }));
+
+    expect(textareaEvents.length).toBeGreaterThan(0);
+    const last = textareaEvents[textareaEvents.length - 1];
+    expect(last.value).toBe('hello\nworld');
+
+    expect(textareaLease.snapshot()?.value).toBe('hello\nworld');
+    textareaLease.dispose();
+    lease.dispose();
+  });
+
+  it('does not apply rows or wrap to an input element', () => {
+    const input = document.createElement('input');
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: {
+        valueMode: 'uncontrolled',
+        defaultValue: 'test',
+        rows: 4,
+        wrap: 'hard',
+      } as any,
+      onEvent() {},
+    });
+
+    // input has no rows or wrap properties
+    expect((input as any).rows).toBeUndefined();
+    expect((input as any).wrap).toBeUndefined();
+    expect(input.value).toBe('test');
+    lease.dispose();
+  });
+});

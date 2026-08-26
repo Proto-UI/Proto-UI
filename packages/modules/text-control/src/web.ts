@@ -1,21 +1,24 @@
-import type { TextControlEvent, TextControlPatch, TextControlSnapshot } from '@proto.ui/core';
+import {
+  canonicalizeLineEndings,
+  type TextControlEvent,
+  type TextControlPatch,
+  type TextControlSnapshot,
+} from '@proto.ui/core';
 import type { TextControlHost, TextControlHostConnection, TextControlHostLease } from './caps';
 import type { TextControlDeclaration } from './declaration';
 
-export type WebTextControl = HTMLTextAreaElement;
-export type WebTextControlLocalName = 'textarea';
+export type WebTextControl = HTMLTextAreaElement | HTMLInputElement;
+export type WebTextControlLocalName = 'textarea' | 'input';
 
 export function resolveWebTextControlLocalName(
   declaration: TextControlDeclaration
 ): WebTextControlLocalName {
-  if (
-    declaration.content !== 'plain-text' ||
-    declaration.lineMode !== 'multiline' ||
-    declaration.engine !== 'host'
-  ) {
+  if (declaration.content !== 'plain-text' || declaration.engine !== 'host') {
     throw new Error('[TextControl] unsupported Web text-control declaration.');
   }
-  return 'textarea';
+  if (declaration.lineMode === 'single') return 'input';
+  if (declaration.lineMode === 'multiline') return 'textarea';
+  throw new Error('[TextControl] unsupported Web text-control declaration.');
 }
 
 export function createWebTextControlHost(
@@ -25,7 +28,7 @@ export function createWebTextControlHost(
   return {
     attach(connection) {
       const target = getTarget();
-      if (!target) throw new Error('[TextControl] physical web textarea target is unavailable.');
+      if (!target) throw new Error('[TextControl] physical web target is unavailable.');
       return attachTarget(target, connection, options);
     },
   };
@@ -53,7 +56,7 @@ function attachTarget(
     connection.onEvent(
       Object.freeze({
         type,
-        value: target.value,
+        value: canonicalizeLineEndings(target.value),
         composing,
         data: inputEvent?.data ?? compositionEvent?.data ?? null,
         inputType: inputEvent?.inputType ?? null,
@@ -81,7 +84,7 @@ function attachTarget(
       valueProjectionDeferred = applyPatch(target, patch, !composing);
     },
     snapshot(): TextControlSnapshot {
-      return Object.freeze({ value: target.value, composing });
+      return Object.freeze({ value: canonicalizeLineEndings(target.value), composing });
     },
     dispose() {
       if (disposed) return;
@@ -109,7 +112,11 @@ function applyPatch(
   if (typeof patch.disabled === 'boolean') target.disabled = patch.disabled;
   if (typeof patch.readOnly === 'boolean') target.readOnly = patch.readOnly;
   if (typeof patch.placeholder === 'string') target.placeholder = patch.placeholder;
-  if (typeof patch.rows === 'number' && Number.isFinite(patch.rows)) {
+  if (
+    typeof patch.rows === 'number' &&
+    Number.isFinite(patch.rows) &&
+    target instanceof HTMLTextAreaElement
+  ) {
     target.rows = Math.max(1, Math.trunc(patch.rows));
   }
   if (typeof patch.required === 'boolean') target.required = patch.required;
@@ -128,14 +135,28 @@ function applyPatch(
     if (maxLength < 0) target.removeAttribute('maxlength');
     else target.maxLength = maxLength;
   }
-  if (patch.wrap === 'soft' || patch.wrap === 'hard') target.wrap = patch.wrap;
+  if (patch.wrap === 'soft' || patch.wrap === 'hard') {
+    if (target instanceof HTMLTextAreaElement) target.wrap = patch.wrap;
+  }
+  // Single-line specific properties (HTMLInputElement only)
+  if (typeof patch.type === 'string' && target instanceof HTMLInputElement) {
+    target.type = patch.type;
+  }
+  if (typeof patch.inputMode === 'string' && target instanceof HTMLInputElement) {
+    target.inputMode = patch.inputMode;
+  }
+  if (typeof patch.enterKeyHint === 'string') {
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+      target.enterKeyHint = patch.enterKeyHint as HTMLInputElement['enterKeyHint'];
+    }
+  }
   return valueProjectionDeferred;
 }
 
 function replaceValuePreservingEditingSession(target: WebTextControl, value: string): void {
-  const selectionStart = target.selectionStart;
-  const selectionEnd = target.selectionEnd;
-  const selectionDirection = target.selectionDirection;
+  const selectionStart = target.selectionStart ?? 0;
+  const selectionEnd = target.selectionEnd ?? 0;
+  const selectionDirection = target.selectionDirection ?? 'none';
   const scrollTop = target.scrollTop;
   const scrollLeft = target.scrollLeft;
   target.value = value;

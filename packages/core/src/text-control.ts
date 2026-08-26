@@ -5,6 +5,17 @@ import type { Unsubscribe } from './state';
 export type TextControlValueMode = 'controlled' | 'uncontrolled';
 export type TextControlWrap = 'soft' | 'hard';
 
+export type TextControlLineMode = 'single' | 'multiline';
+export type TextControlInputMode =
+  | 'none'
+  | 'text'
+  | 'decimal'
+  | 'numeric'
+  | 'tel'
+  | 'search'
+  | 'email'
+  | 'url';
+
 export type TextControlPatch = Readonly<{
   valueMode?: TextControlValueMode;
   value?: string;
@@ -19,7 +30,19 @@ export type TextControlPatch = Readonly<{
   minLength?: number;
   maxLength?: number;
   wrap?: TextControlWrap;
+  inputMode?: TextControlInputMode;
+  enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
+  type?: string;
 }>;
+
+/**
+ * Canonicalize CR/LF line endings to LF at the Text Control module boundary
+ * before comparison, state projection, snapshots, and outward payloads.
+ * Web DOM sanitization alone is not sufficient.
+ */
+export function canonicalizeLineEndings(value: string): string {
+  return value.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
 
 export type TextControlEventType =
   | 'input'
