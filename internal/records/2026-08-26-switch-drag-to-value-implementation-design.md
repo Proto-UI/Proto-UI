@@ -23,8 +23,8 @@ When the user presses the Switch root (the thumb is not an independent event tar
 The Switch root maps horizontal movement to a checked/unchecked value:
 
 - Track total deltaX from session start
-- If |deltaX| exceeds the threshold (e.g., half the track width), set checked to the direction of movement
-- On Move session end (pointerup), commit the final value via `checkedChange`
+- If |deltaX| exceeds the threshold (e.g., half the track width), store a candidate value (not checked) for commit on release
+- On Move session end (pointerup), execute the existing controlled/uncontrolled commit branches once with the candidate value via `checkedChange`. The candidate value is separate from `checked` truth during movement, so cancel can preserve the pre-drag value.
 
 ### 3. Click suppression after activated drag
 
@@ -36,7 +36,7 @@ All Move cancel reasons (host-cancel, lost-ownership, target-detached, target-re
 
 ### 5. Continuous provisional-position channel
 
-During drag before release, the algorithm must project continuous progress to the thumb ("thumb-follows-finger"). The current thumb consumes only the root's boolean `checked` context. A host-local provisional progress/paint channel, separate from checked truth, is needed while the Move session is active. This can be implemented as a non-enumerable `__dragProgress` property on the root that the thumb reads during active drag.
+During drag before release, the algorithm must project continuous progress to the thumb ("thumb-follows-finger"). The current thumb consumes only the root's boolean `checked` context. A host-local provisional progress/paint channel, separate from checked truth, is needed while the Move session is active. This requires an explicit observable adapter/prototype projection seam: the root must expose a `dragProgress` state handle that the thumb subscribes to through an extended SWITCH_CONTEXT, triggering style reevaluation in WC/React/Vue. A non-enumerable property on the root alone cannot reach the thumb (which is a separate prototype subscribing only to SWITCH_CONTEXT) or trigger style reevaluation.
 
 ### 7. Existing click behavior preserved
 
