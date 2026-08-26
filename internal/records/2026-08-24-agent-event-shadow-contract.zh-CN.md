@@ -4,9 +4,11 @@
 
 关联：Issue #504、PR #485、PR #487、Issue #486
 
+当前实施授权：Issue #504 的 [maintainer decision](https://github.com/Proto-UI/Proto-UI/issues/504#issuecomment-5404591367)
+
 ## 这份记录解决什么
 
-PR #485 的维护者讨论已经选择 webhook / event-driven 作为预期主路径，并保留定时 shadow 作为 reconciliation。Issue #504 把这条方向拆成多个 transition。本记录只描述第一个 Event shadow transition 的实现和边界，不把后续 controller、review 写入或 merge 设计写成既成事实。
+PR #485 的维护者讨论已经选择 webhook / event-driven 作为预期主路径，并保留定时 shadow 作为 reconciliation。Issue #504 把这条方向拆成多个 transition。维护者随后正式准入本记录描述的 E0：它可以在最终 controller/runtime 和部署 owner 确定之前落地。本记录只描述这个 Event shadow transition 的实现和边界，不把后续 controller、review 写入或 merge 设计写成既成事实。
 
 这个主题不属于 Proto UI 产品语义，`spec/**` 当前也没有对应实体。现行机器边界仍由 `internal/agent-operations/policy.yaml`、`workflows.yaml` 与 `capability-policy.yaml` 管理。日期化记录只保存这次工程方向和观察，不能覆盖这些文件。
 
@@ -26,7 +28,7 @@ signed raw GitHub delivery
 
 它不部署 listener，不创建 queue，不运行 Agent，不读取 GitHub write credential，也不修改 GitHub。`ADMITTED` 只表示应当重新采集 live state；`OUT_OF_ORDER` 与 `AMBIGUOUS_ORDER` 只表示应当 reconciliation。Event、sender、fork、CI 或模型输出都不能把这两个结果升级成 mutation authorization。
 
-当前 contract-only allowlist 仅覆盖 `pull_request` 的 `opened`、`reopened`、`synchronize`、`ready_for_review`、`converted_to_draft`、`edited` 与 `closed`。这是离线 shadow/replay 的输入边界，不是已部署订阅，也不是未来生产 allowlist 的最终批准。Review、comment、thread 与 check 事件要在各自输入、成本和 reconciliation 契约明确后单独加入。
+当前 contract-only allowlist 仅覆盖 `pull_request` 的 `opened`、`reopened`、`synchronize`、`ready_for_review`、`converted_to_draft`、`edited` 与 `closed`。维护者已批准这组精确输入作为 E0 边界；`edited` 只能触发重新读取 live state，任何 authored content 都不是可信 authority。这仍是离线 shadow/replay 的输入边界，不是已部署订阅，也不是未来生产 allowlist 的最终批准。Review、comment、thread 与 check 事件要在各自输入、成本和 reconciliation 契约明确后单独加入。
 
 ## 机器工件
 
@@ -69,6 +71,12 @@ Envelope 本身不是可跨信任边界携带的签名凭证。未来 controller
 node --test scripts/agent-operations/test/event-shadow.test.mjs
 corepack pnpm@10.32.1 check:agent-operations
 ```
+
+## 已授权但不属于 E0
+
+维护者允许后续 transition 继续实现有界的 no-write automation，包括持久化与恢复、确定性 relevance/direction admission、现有 review packet 管道、私有 maintainer inbox、扩展后的只读事件输入，以及只读 GitHub App 的实现与证据。它们没有进入本次 E0；为保持审查单元清晰，应由后续 transition 分别建立当前范围、验收边界和独立复核。
+
+其中 E1 的输出边界已经明确：direction admission 可以进入 private maintainer inbox，但不能发布 GitHub comment、review 或 check。仓库内容、事件 payload、actor identity、评估分数或模型输出都不能改变这个限制。
 
 ## 仍然需要单独决定
 
