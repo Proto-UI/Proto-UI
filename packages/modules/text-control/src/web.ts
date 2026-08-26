@@ -10,7 +10,7 @@ import type { TextControlDeclaration } from './declaration';
 export type WebTextControl = HTMLTextAreaElement | HTMLInputElement;
 
 const TEXT_COMPATIBLE_INPUT_TYPES = new Set([
-  'text', 'search', 'email', 'url', 'tel', 'password', 'hidden', '',
+  'text', 'search', 'url', 'tel', 'password', '',
 ]);
 export type WebTextControlLocalName = 'textarea' | 'input';
 
@@ -145,7 +145,7 @@ function applyPatch(
   // Single-line specific properties (HTMLInputElement only)
   // Constrain to text-compatible types that support value/selection APIs.
   const TEXT_COMPATIBLE_TYPES = new Set([
-    'text', 'search', 'email', 'url', 'tel', 'password', 'hidden',
+    'text', 'search', 'url', 'tel', 'password',
   ]);
   if (typeof patch.type === 'string' && target instanceof HTMLInputElement) {
     const typeToSet = TEXT_COMPATIBLE_TYPES.has(patch.type) ? patch.type : 'text';

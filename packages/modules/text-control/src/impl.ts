@@ -161,9 +161,14 @@ export class TextControlModuleImpl extends ModuleBase {
   }
 
   private receive(event: TextControlEvent): void {
-    this.composing = event.composing;
-    if (this.valueMode === 'uncontrolled' && event.type === 'input') {
-      this.value = canonicalizeLineEndings(event.value);
+    // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
+    const canonicalEvent: TextControlEvent = Object.freeze({
+      ...event,
+      value: canonicalizeLineEndings(event.value),
+    });
+    this.composing = canonicalEvent.composing;
+    if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {
+      this.value = canonicalEvent.value;
     }
 
     const runInCallback = this.caps.has(TEXT_CONTROL_RUN_IN_CALLBACK_CAP)
@@ -173,7 +178,7 @@ export class TextControlModuleImpl extends ModuleBase {
       const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
       if (!run) return;
       for (const listener of this.listeners) {
-        if (listener.type === event.type) listener.callback(run, event);
+        if (listener.type === canonicalEvent.type) listener.callback(run, canonicalEvent);
       }
     });
 
