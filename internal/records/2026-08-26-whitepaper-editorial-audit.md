@@ -32,7 +32,7 @@ IDs: `<page-abbr>#<n>`; pages: CAP=component-as-protocol, IFM=information-flow-m
 | IFM#1 | IFM | 先从“使用者”切分组件关系 | zh+en | Actors: User, Maker, Other Component | proto-specific | K-COMPONENT-ACTOR-0001 | draft |
 | IFM#2 | IFM | 什么是信息通路？ | zh+en | Channels derived from who exchanges information, not API enumeration | proto-specific | K-INFORMATION-CHANNEL-0001; C-CORE-CHANNEL-0001 | draft |
 | IFM#3 | IFM | User ↔ Component | zh+en | event = User→Component; feedback = Component→User | proto-specific | C-EVENT-0001; C-FEEDBACK-0001 | draft |
-| IFM#4 | IFM | Maker ↔ Component | zh+en | props = Maker→Component; expose = Component→Maker | proto-specific | C-PROPS-0001 (.md, no machine status); C-EXPOSE-0001 | draft/partial |
+| IFM#4 | IFM | Maker ↔ Component | zh+en | props = Maker→Component; expose = Component→Maker | proto-specific | C-PROPS-0001 (.md, no machine status); C-EXPOSE-0001 | active |
 | IFM#5 | IFM | Other Component ↔ Component | zh+en | context is the inter-component environmental channel | proto-specific | C-CONTEXT-0001 | draft |
 | IFM#6 | IFM | 为什么这些能力不是随意枚举 | zh+en | Five capabilities are derived, canonical | proto-specific | C-CORE-CHANNEL-0001 + per-channel contracts | draft |
 | IFM#7 | IFM | 信息通路并不等于组件的全部 | zh+en | state/lifecycle/meta are non-channel internal dimensions | proto-specific | M-STATE-0001; C-LIFECYCLE-0001..0007; **meta: no entity found** | gap |
@@ -53,7 +53,7 @@ IDs: `<page-abbr>#<n>`; pages: CAP=component-as-protocol, IFM=information-flow-m
 | TL#4 | TL | `host` 通路默认不在跨平台主承诺内 | zh+en | host flow excluded from core commitment | proto-specific | same gap as IFM#8 | gap |
 | DC#1 | DC | 取舍顺序 | zh+en | semantic consistency > User > Maker > Author experience | proto-specific | K-DESIGN-TRADEOFF-0001 | draft |
 | DC#2 | DC | 不把自己做成框架 | zh+en | No business integration / final composition / framework scheduling | proto-specific | K-PROTOTYPE-COMPOSITION-0001 | draft |
-| DC#3 | DC | 可序列化是长期方向约束 | zh+en | Protocol layer prefers serializable expression by default | proto-specific | C-RULE-0003; C-PROPS-0003; C-DELAY-0001-K | draft |
+| DC#3 | DC | 可序列化是长期方向约束 | zh+en | Protocol layer prefers serializable expression by default | proto-specific | C-RULE-0003; C-PROPS-0003; C-DELAY-0001-J | draft |
 | DC#4 | DC | 宿主特有能力作为强宿主相关能力 | zh+en | Host-specific capabilities isolated from core axis | proto-specific | HC-* family; K-HOST-SURFACE-ROLES-0001 | draft |
 | EP#1 | EP | 第一阶段：先在 Web 站稳 | zh+en | v0 axis = Web hosts | temporary-impl/planning | V-PROTO-UI-* (versions only) | n/a |
 | EP#2 | EP | 第二阶段：原生宿主；工业级保障 | zh+en | v1 native expansion, industrial-grade QA aspiration | temporary-impl/planning | none | n/a |
