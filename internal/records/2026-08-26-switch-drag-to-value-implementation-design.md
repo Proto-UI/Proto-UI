@@ -6,13 +6,15 @@ Non-normative record. Authorized by #498 maintainer checkpoint. Does not create 
 
 The Move substrate (C-MOVE-GESTURE-0001) is immediate-only: pointerdown → accept → preventDefault → capture → start. There is no threshold activation. The Switch must use immediate Move with commit-on-release semantic.
 
+**Authorization status:** The immediate-Move substrate choice is a design recommendation in this record, not an authorized decision. A maintainer checkpoint must confirm the substrate choice before implementation begins. The Base Switch spec admission for drag-to-value behavior is a separate checkpoint that depends on the substrate decision.
+
 ## Proposed implementation
 
 ### 1. Immediate Move session on thumb pointerdown
 
-When the user presses the thumb:
+When the user presses the Switch root (the thumb is not an independent event target per P-BASE-SWITCH-THUMB-NOT-TARGET):
 
-1. Immediately start a Move session (no threshold)
+1. The root starts a Move session on pointerdown (the root owns the gesture, not the thumb)
 2. The Move session provides samples (deltaX/deltaY) to the Switch root
 3. If the movement is below a threshold before release, treat as a click (press.commit)
 
@@ -24,11 +26,19 @@ The Switch root maps horizontal movement to a checked/unchecked value:
 - If |deltaX| exceeds the threshold (e.g., half the track width), set checked to the direction of movement
 - On Move session end (pointerup), commit the final value via `checkedChange`
 
-### 3. Cancel handling
+### 3. Click suppression after activated drag
+
+For an activated Web drag, the pointer sequence can still produce a native `click`, and `createWebEventRouter` unconditionally maps routed native clicks to `press.commit`. Without suppression, the Move end would commit the drag value and the follow-up `press.commit` would toggle it again. The design needs an explicit activated-drag flag that suppresses the next `press.commit` when the Move session committed a value.
+
+### 4. Cancel handling
 
 All Move cancel reasons (host-cancel, lost-ownership, target-detached, target-replaced, disposed) result in a no-op: no value change. The Switch keeps its pre-drag checked state.
 
-### 4. Existing click behavior preserved
+### 5. Continuous provisional-position channel
+
+During drag before release, the algorithm must project continuous progress to the thumb ("thumb-follows-finger"). The current thumb consumes only the root's boolean `checked` context. A host-local provisional progress/paint channel, separate from checked truth, is needed while the Move session is active. This can be implemented as a non-enumerable `__dragProgress` property on the root that the thumb reads during active drag.
+
+### 7. Existing click behavior preserved
 
 Small movements (< threshold) that end before exceeding the drag threshold trigger the existing `press.commit` path, which toggles checked. This means:
 
