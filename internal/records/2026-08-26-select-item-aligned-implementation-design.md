@@ -4,7 +4,7 @@ Non-normative record. Authorized by #496 maintainer checkpoint. Does not create 
 
 ## Current state
 
-Base Select Content uses M-POSITIONING-0001 / HC-ANCHORED-POSITIONING-0001 with static `side`, `align`, `sideOffset`, and `alignOffset` props. The content is positioned relative to the trigger, not aligned to a specific selected item.
+Base Select Content uses M-POSITIONING-0001 / HC-ANCHORED-POSITION-0001 with static `side`, `align`, `sideOffset`, and `alignOffset` props. The content is positioned relative to the trigger, not aligned to a specific selected item.
 
 shadcn/ui's Select positions the content so the selected item aligns with the trigger, creating a "flip" effect where the selected item appears at the trigger position.
 
@@ -25,13 +25,13 @@ When `position === 'item-aligned'`, the Content computes a dynamic `sideOffset` 
 
 ### 2. Dynamic offset computation in positioning host
 
-Per C-ANCHORED-POSITIONING-0001-A, prototype authors and generic modules must not measure host geometry; measurement belongs to the Anchored Position host capability. The positioning host (HC-ANCHORED-POSITIONING-0001) should be extended to:
+Per C-ANCHORED-POSITIONING-0001-A, prototype authors and generic modules must not measure host geometry; measurement belongs to the Anchored Position host capability. The positioning host (HC-ANCHORED-POSITION-0001) should be extended to:
 
 1. Measure the selected item's offset from the Content's top edge
 2. Measure the trigger's height and the selected item's height
 3. Compute the negative offset locally
 
-This keeps geometry measurement in the host capability. The Root's index and the item height (uniform item height assumption). The offset is:
+This keeps geometry measurement in the host capability. The Content does not measure items or report offsets; the positioning host resolves everything locally when `position === 'item-aligned'`.'s index and the item height (uniform item height assumption). The offset is:
 
 ```
 // The floating origin must shift UP (negative) so the selected item
@@ -70,6 +70,14 @@ This requires a new context value: `selectedItemOffset: number` that the Content
 - New criterion in P-BASE-SELECT-CONTENT for the dynamic offset behavior
 - Test case verifying the offset math
 - Browser test verifying visual alignment across WC/React/Vue
+
+## Placement, collision, and fallback behavior
+
+- When `side='top'`, the offset direction reverses (content appears above trigger)
+- Collision flip: Floating UI's `flip` middleware handles viewport collision automatically
+- Variable-height items: the positioning host measures actual item heights, not assumes uniform
+- Unmatched/empty selection: fall back to `popper` positioning (no item to align)
+- Late-selected-item: re-position on selection change while open
 
 ## Open questions
 
