@@ -20,9 +20,9 @@ The root starts a Move session on pointerdown (the root owns the gesture, not th
 
 On Move session end:
 
-- If the session committed a drag value: suppress the next `press.commit` via a one-shot flag
+- If the session committed a drag value: suppress the next **pointer-generated** `press.commit` only — correlate the suppression to the drag session's pointer identity (pointerId), not a generic one-shot flag. This prevents an unrelated keyboard Space/Enter activation during the suppression window from being swallowed.
 - If below threshold: allow `press.commit` to proceed normally
-- The flag is cleared after one `press.commit`, on next pointerdown, or after a timeout (e.g., 300ms) to prevent a stale flag from suppressing a later Space/Enter activation after synchronous disable/replacement
+- The suppression is cleared when the drag's pointer release event is received (the click that the browser synthesizes from the same pointer session), or on next pointerdown, or after a bounded timeout (e.g., 300ms) only as a safety net for edge cases where the synthesized click never arrives (e.g., host swallowed it). The timeout does not gate keyboard activation — a keyboard `press.commit` during the window proceeds normally because it has a different pointer identity (none).
 
 ### 3. Focus preservation
 
