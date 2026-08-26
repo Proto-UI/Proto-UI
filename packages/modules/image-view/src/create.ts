@@ -61,13 +61,14 @@ export class ImageViewModuleImpl extends ModuleBase {
 
   private sync(next: ImageViewPatch): void {
     this.sys.ensureCallback('imageView.sync');
+    let firstSource = false;
     if (!this.initialized) {
-      this.source = next.source ?? '';
       this.alternativeText = next.alternativeText ?? '';
       this.fit = next.fit ?? 'contain';
       this.initialized = true;
+      firstSource = true;
     }
-    const sourceChanged = typeof next.source === 'string' && next.source !== this.source;
+    const sourceChanged = firstSource ? (!!next.source) : (typeof next.source === 'string' && next.source !== this.source);
     this.patch = Object.freeze({ ...this.patch, ...next });
     if (typeof next.source === 'string') this.source = next.source;
     if (typeof next.alternativeText === 'string') this.alternativeText = next.alternativeText;
@@ -101,6 +102,7 @@ export class ImageViewModuleImpl extends ModuleBase {
   }
 
   dispose(): void {
+    this.disposeLease();
     this.listeners = [];
   }
 
@@ -109,7 +111,8 @@ export class ImageViewModuleImpl extends ModuleBase {
   }
 
   private attachLease(): void {
-    if (!this.host || this.lease || !this.declared) return;
+    if (!this.host || !this.declared) return;
+    if (this.lease) { this.lease.dispose(); this.lease = null; }
     this.lease = this.host.attach({
       patch: this.patch,
       onStatusChange: (change) => this.receive(change),
@@ -138,6 +141,8 @@ export class ImageViewModuleImpl extends ModuleBase {
   private receive(change: ImageViewStatusChange): void {
     // Only accept status from current generation
     if (change.source !== this.source) return;
+    // Also check generation to prevent A→B→A stale completions
+    if (this.generation !== (change as any).generation) return;
     const previousStatus = this.loadingStatus;
     this.loadingStatus = change.status;
     const runInCallback = this.caps.has(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)

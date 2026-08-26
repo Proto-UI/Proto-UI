@@ -54,7 +54,7 @@ cases:
 implementations:
   - id: module-image-view-impl-contract
     kind: module-test
-    status: passing
+    status: pending
     path: packages/modules/image-view/test/impl-spec.test.ts
     required: true
     consumesCases:

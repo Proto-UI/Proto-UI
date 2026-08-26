@@ -11,6 +11,18 @@ function setupImageRoot(def: DefHandle<ImageRootProps, ImageRootExposes>): void 
   def.expose.state('source', source);
   def.expose.state('loadingStatus', loadingStatus);
   def.expose.state('fit', fit);
+
+  def.props.define({
+    source: { type: 'string' },
+    alternativeText: { type: 'string' },
+    fit: { type: 'string' },
+    defaultSource: { type: 'string' },
+  });
+
+  def.props.watchAll((_run, next) => {
+    source.set(next.source ?? '', 'reason: image source prop sync');
+    fit.set(next.fit ?? 'contain', 'reason: image fit prop sync');
+  });
 }
 
 export const asImageRoot = defineAsHook<ImageRootProps, ImageRootExposes, {}>({
