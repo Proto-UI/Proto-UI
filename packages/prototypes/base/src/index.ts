@@ -30,3 +30,4 @@ export * from './live-region';
 export { default as liveRegionRoot } from './live-region';
 export * from './async-region';
 export { default as asyncRegionRoot } from './async-region';
+export * from './image';
