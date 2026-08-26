@@ -22,9 +22,13 @@ On Move session end:
 
 - If the session committed a drag value: suppress the next `press.commit` via a one-shot flag
 - If below threshold: allow `press.commit` to proceed normally
-- The flag is cleared after one `press.commit` or on next pointerdown
+- The flag is cleared after one `press.commit`, on next pointerdown, or after a timeout (e.g., 300ms) to prevent a stale flag from suppressing a later Space/Enter activation after synchronous disable/replacement
 
-### 3. Provisional progress channel
+### 3. Focus preservation
+
+Immediate Move calls `preventDefault()` on accepted pointerdown, while current Switch `pointer.down` does not focus itself. The design must add a focus-preservation path (call `focusSelf()` before starting the Move session, or choose a substrate that preserves native focus). Browser evidence must verify focus is retained.
+
+### 4. Provisional progress channel
 
 During drag, the root must project continuous progress to the thumb. Per C-CONTEXT-0009-D and P-BASE-SWITCH-CONTEXT-VALUE, State handles are prohibited in context values. Use JSON-compatible snapshots (`number | null`) for `dragProgress` in SWITCH_CONTEXT, not State handles. **Note:** Extending SWITCH_CONTEXT with a new carrier is a cross-adapter projection/ownership decision that requires a separate maintainer checkpoint.
 
@@ -38,7 +42,7 @@ Per P-BASE-SWITCH-DISABLED-SUPPRESS-ACTIVATION and P-BASE-SWITCH-DISABLED-CLEAR-
 
 ### 5. Cancel handling
 
-All Move cancel reasons (host-cancel, lost-ownership, target-detached, target-replaced, disposed) result in a no-op: no value change. The candidate value is discarded.
+All Move cancel reasons (host-cancel, lost-ownership, target-detached, target-replaced, disposed) result in: (1) no value change — candidate discarded, (2) `dragProgress` reset to `null` so the thumb returns to checked truth, (3) suppression flag cleared.
 
 ### 6. Existing click behavior preserved
 
