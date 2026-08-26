@@ -43,25 +43,33 @@ This pair appears in Brutalist components where `border-2 border-black` is used 
 
 ### Affected call sites (Dark theme only)
 
-Components where `border-black` appears directly on `bg-background` or `bg-card` without a contrasting fill:
+The shared token groups `BRUTALIST_CONTROL_TOKENS` and `BRUTALIST_PANEL_TOKENS` both pair `border-black` with `bg-secondary-background` (#262626 in Dark, ratio 1.39:1). These tokens are used by multiple interactive surfaces:
 
-- **Card** (`P-BRUTALIST-CARD`): uses `border-2 border-black` on `bg-card` (#262626). Ratio 1.39:1. If the Card frame is a required structural boundary, this fails SC 1.4.11 in Dark theme.
-- **Button at rest**: uses `border-2 border-transparent` at rest, `border-black` only when selected/hovered. When selected, fill is `bg-main` (18.05:1 PASS). At rest, border is transparent — no contrast requirement.
-- **Dialog Content**: uses `border-2 border-black` on `bg-popover` (#262626). Ratio 1.39:1. If the Dialog frame is a required structural boundary, this fails SC 1.4.11 in Dark theme.
+**Control tokens** (`BRUTALIST_CONTROL_TOKENS = border-2 border-black + bg-secondary-background`):
+- **Toggle**: default, sm, lg variants all use `BRUTALIST_CONTROL_TOKENS`. If the border is a required structural boundary, fails SC 1.4.11 in Dark.
+- **Button (surface variant)**: variants using `BRUTALIST_CONTROL_TOKENS` directly. Button at rest uses `border-transparent` (no contrast requirement); selected/hovered uses `border-black` on `bg-main` (18.05:1 PASS).
+- **Select Trigger, Switch Root**: if these use `BRUTALIST_CONTROL_TOKENS`, same 1.39:1 ratio in Dark.
 
-### Not affected
+**Panel tokens** (`BRUTALIST_PANEL_TOKENS = border-2 border-black + bg-secondary-background`):
+- **Dialog Content**: panel uses `BRUTALIST_PANEL_TOKENS`. Ratio 1.39:1 in Dark. If panel frame is a required structural boundary, fails SC 1.4.11.
+- **Dropdown Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
+- **Hover Card Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
+- **Select Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
 
-All components using `border-black` on `bg-main`, `bg-primary`, or accent fills (canary, lavender, mint, coral) pass SC 1.4.11 at 14-18:1 in both themes.
+**Not affected**:
+- **Card** (`P-BRUTALIST-CARD`): uses `border-2 border-foreground` (not `border-black`) on `bg-background`. Ratio 16.44:1 in both themes. PASS.
+- All components using `border-black` on `bg-main`, `bg-primary`, or accent fills (canary, lavender, mint, coral) pass SC 1.4.11 at 14-18:1 in both themes.
+- Button at rest uses `border-transparent` — no contrast requirement.
 
 ## Conclusion
 
 1. **Text contrast**: no failures in either theme.
-2. **Non-text contrast**: two call sites potentially fail SC 1.4.11 in Dark theme (Card frame on bg-card, Dialog Content frame on bg-popover). Both use `border-2 border-black` at 1.39:1 against their dark surface.
+2. **Non-text contrast**: multiple shared-token call sites potentially fail SC 1.4.11 in Dark theme. `BRUTALIST_CONTROL_TOKENS` and `BRUTALIST_PANEL_TOKENS` both pair `border-black` with `bg-secondary-background` (#262626 in Dark, 1.39:1). Affected: Toggle, Dialog/Dropdown/Hover Card/Select Content panels. Card is NOT affected (uses `border-foreground` at 16.44:1).
 3. **Perceptual**: black hard shadows on dark background are decorative and do not trigger SC 1.4.11.
 4. **Light theme**: all pairs pass.
 
 ## Recommended next steps (not authorized in this record)
 
 - Per-call-site classification with rendered evidence for each Brutalist component.
-- Component-specific Dark palette proposals for Card and Dialog Content where the frame border is a required structural boundary.
+- Component-specific Dark palette proposals for shared-token control/panel surfaces where `border-black` on `bg-secondary-background` is a required structural boundary.
 - Automated contrast-ratio test in the test suite.
