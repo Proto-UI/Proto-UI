@@ -31,17 +31,25 @@ The public Brutalist Design Contract page presents one unqualified rest/hover/pr
 
 ### Motion (hover/press)
 
-| Surface     | Hover                       | Press                   | Exception                |
-| ----------- | --------------------------- | ----------------------- | ------------------------ |
-| Button      | lift -1px, deepen 4px       | sink +1px, shadow-none  | —                        |
-| Badge       | —                           | —                       | no interaction states    |
-| Card        | —                           | —                       | no interaction states    |
-| Skeleton    | —                           | —                       | no interaction states    |
-| Toggle      | lift -1px (inactive only)   | sink +1px, shadow-none  | active stays at rest     |
-| Tabs        | lift -1px (unselected only) | sink +1px, shadow-none  | selected stays at rest   |
-| Switch      | no hover visual             | color swap, shadow-none | thumb retains 3px shadow |
-| Textarea    | — (focus ring only)         | —                       | no hover lift or press   |
-| Scroll Area | —                           | —                       | scroll chrome, no lift   |
+| Surface | Hover | Press | Exception |
+| --- | --- | --- | --- |
+| Button | lift -1px, deepen 4px | sink +1px, shadow-none | — |
+| Badge | — | — | no interaction states |
+| Card | — | — | no interaction states |
+| Skeleton | — | — | no interaction states |
+| Toggle | lift -1px (inactive only) | sink +1px, shadow-none | active stays at rest |
+| Tabs | lift -1px (unselected only) | sink +1px, shadow-none | selected stays at rest |
+| Switch | no hover visual | color swap, shadow-none | thumb retains 3px shadow |
+| Textarea | — (focus ring only) | — | no hover lift or press |
+| Scroll Area | — | — | scroll chrome, no lift |
+| Dialog Trigger | lift -1px (inactive only) | sink +1px, shadow-none | active stays at rest |
+| Dropdown Trigger | lift -1px (inactive only) | sink +1px, shadow-none | active stays at rest |
+| Select Trigger | lift -1px (inactive only) | sink +1px, shadow-none | active stays at rest |
+| Hover Card Trigger | lift -1px | — | no press state |
+| Dialog Close Icon | — | — | color swap, no lift |
+| Content panels | — | — | positioned by adapter |
+| Flat items | — | — | bg change, no lift |
+| Separator | — | — | no interaction states |
 
 ## Proposed resolution: typed grammar
 
