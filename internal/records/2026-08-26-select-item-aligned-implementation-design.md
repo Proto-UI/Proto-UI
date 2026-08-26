@@ -1,90 +1,46 @@
 # Select item-aligned positioning implementation design
 
-Non-normative record. Authorized by #496 maintainer checkpoint. Does not create a stable spec guarantee or authorize merge.
+Non-normative record. Refs #496. This is an unauthorized proposal — #496 has no implementation checkpoint. Does not create a stable spec guarantee or authorize merge.
 
-## Current state
+## Proposed API
 
-Base Select Content uses M-POSITIONING-0001 / HC-ANCHORED-POSITION-0001 with static `side`, `align`, `sideOffset`, and `alignOffset` props. The content is positioned relative to the trigger, not aligned to a specific selected item.
+Extend the existing Content `position` prop (`'popper' | 'item-aligned'`, already in Shadcn Select) to Base Select Content. When `position === 'item-aligned'`, the positioning host (HC-ANCHORED-POSITION-0001) resolves the selected item's offset locally.
 
-shadcn/ui's Select positions the content so the selected item aligns with the trigger, creating a "flip" effect where the selected item appears at the trigger position.
+## Host-local geometry measurement
 
-## Proposed implementation
+Per C-ANCHORED-POSITIONING-0001-A, prototype authors and generic modules must not measure host geometry. All measurement stays in the positioning host:
 
-### 1. Extend the existing Content `position` prop
+1. The host measures the selected item's offset from the Content's top edge
+2. The host measures the trigger's height and the selected item's height
+3. The host computes the negative offset: `-(selectedItemOffsetFromTop + triggerHeight/2 + itemHeight/2)`
+4. The host applies this offset when `position === 'item-aligned'`
 
-The Shadcn Select Content already exposes `position: 'item-aligned' | 'popper'` (P-SHADCN-SELECT-CONTENT-POSITION-PROP). The Base Select Content should adopt this same prop instead of introducing a competing Root-level `itemAlignment` API:
+The prototype does not measure items, report offsets, or add context values.
 
-```typescript
-interface SelectContentProps {
-  // ... existing props
-  position?: 'popper' | 'item-aligned'; // default 'popper'
-}
-```
+## Placement, collision, and fallback
 
-When `position === 'item-aligned'`, the Content computes a dynamic `sideOffset` based on the selected item's position within the Content.
-
-### 2. Dynamic offset computation in positioning host
-
-Per C-ANCHORED-POSITIONING-0001-A, prototype authors and generic modules must not measure host geometry; measurement belongs to the Anchored Position host capability. The positioning host (HC-ANCHORED-POSITION-0001) should be extended to:
-
-1. Measure the selected item's offset from the Content's top edge
-2. Measure the trigger's height and the selected item's height
-3. Compute the negative offset locally
-
-This keeps geometry measurement in the host capability. The Content does not measure items or report offsets; the positioning host resolves everything locally when `position === 'item-aligned'`.'s index and the item height (uniform item height assumption). The offset is:
-
-```
-// The floating origin must shift UP (negative) so the selected item
-// overlaps the trigger position, not farther below it.
-dynamicSideOffset = -(selectedItemOffsetFromTop + triggerHeight / 2 + itemHeight / 2)
-```
-
-This requires measuring:
-
-1. The selected item's offset from the Content's top edge
-2. The trigger's height
-3. The selected item's height
-
-The result is a negative offset that pulls the Content up so the selected item aligns with the trigger.
-
-This offset is passed through the existing `sideOffset` prop to the Content's positioning host.
-
-### 3. Content lifecycle
-
-The Content needs to:
-
-1. Measure its items' heights after mount
-2. Report the selected item's offset to the Root
-3. The Root updates the `sideOffset` on reposition
-
-This requires a new context value: `selectedItemOffset: number` that the Content reports and the Root consumes.
-
-### 4. Projection opt-in
-
-- Base Select: `itemAlignment` defaults to `'none'` (backward compatible)
-- Shadcn Select: defaults to `'selected'` (matching upstream)
-- Brutalist Select: defaults to `'selected'` (matching design language)
-
-### Evidence needed
-
-- New criterion in P-BASE-SELECT-CONTENT for the dynamic offset behavior
-- Test case verifying the offset math
-- Browser test verifying visual alignment across WC/React/Vue
-
-## Placement, collision, and fallback behavior
-
-- When `side='top'`, the offset direction reverses (content appears above trigger)
-- Collision flip: Floating UI's `flip` middleware handles viewport collision automatically
-- Variable-height items: the positioning host measures actual item heights, not assumes uniform
-- Unmatched/empty selection: fall back to `popper` positioning (no item to align)
+- When `side='top'`, the offset direction reverses
+- Collision flip: Floating UI's `flip` middleware handles viewport collision
+- Variable-height items: the host measures actual heights, not uniform
+- Unmatched/empty selection: fall back to `popper` positioning
 - Late-selected-item: re-position on selection change while open
 
-## Open questions
+## Projection defaults
 
-1. Should item-aligned positioning work with variable item heights, or assume uniform?
-2. Should the offset be computed on every open, or cached after first measurement?
-3. What happens if the selected item is not in the viewport (long lists)?
+- Base Select Content: `position` defaults to `'popper'` (backward compatible)
+- Shadcn Select Content: already defaults to `'item-aligned'` (matching upstream)
+- Brutalist Select Content: inherits Base `'popper'` default (no semantic positioning without separate authorization)
+
+## Implementation ordering
+
+Shadcn currently registers its `item-aligned` default before `asSelectContent()`. To add Base's `popper` default without overriding Shadcn, Base must register its default after the asHook call, or use a different precedence mechanism. A no-prop regression test must verify Shadcn's existing `item-aligned` default is preserved.
+
+## Evidence needed
+
+- New criterion in P-BASE-SELECT-CONTENT for the `position` prop and item-aligned behavior
+- Test case verifying the offset math in the positioning host
+- Browser test verifying visual alignment across WC/React/Vue
 
 ## Status
 
-This is a design record, not an implementation. Implementation requires a maintainer checkpoint to admit the new prop and behavior to the Base Select spec.
+This is an unauthorized proposal. Implementation requires a maintainer checkpoint to admit the `position` prop to Base Select Content and confirm the host-local measurement approach.
