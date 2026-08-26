@@ -42,9 +42,9 @@ The public Brutalist Design Contract page presents one unqualified rest/hover/pr
 | Switch | no hover visual | color swap, shadow-none | thumb retains 3px shadow |
 | Textarea | — (focus ring only) | — | no hover lift or press |
 | Scroll Area | — | — | scroll chrome, no lift |
-| Dialog Trigger | lift -1px (inactive only) | sink +1px, shadow-none | active stays at rest |
-| Dropdown Trigger | lift -1px (inactive only) | sink +1px, shadow-none | active stays at rest |
-| Select Trigger | lift -1px (inactive only) | sink +1px, shadow-none | active stays at rest |
+| Dialog Trigger | lift -1px | sink +1px, shadow-none | no active gate |
+| Dropdown Trigger | lift -1px | sink +1px, shadow-none | no active gate |
+| Select Trigger | lift -1px | sink +1px, shadow-none | no active gate |
 | Hover Card Trigger | lift -1px | — | no press state |
 | Dialog Close Icon | — | — | color swap, no lift |
 | Content panels | — | — | positioned by adapter |
