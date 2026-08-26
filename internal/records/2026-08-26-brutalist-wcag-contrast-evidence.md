@@ -17,7 +17,7 @@ Non-normative record. Refs #469. Does not create a stable spec guarantee or auth
 | bg-main / text-main-foreground | 18.05 PASS | 18.05 PASS |
 | bg-card / text-card-foreground | 17.93 PASS | 13.88 PASS |
 | bg-popover / text-popover-foreground | 17.93 PASS | 13.88 PASS |
-| bg-muted / text-muted-foreground | 11.54 PASS | 6.99 PASS |
+| bg-muted / text-muted-foreground | 6.20 PASS | 6.99 PASS |
 
 No text contrast failures in either theme.
 
@@ -47,7 +47,8 @@ The shared token groups `BRUTALIST_CONTROL_TOKENS` and `BRUTALIST_PANEL_TOKENS` 
 
 **Control tokens** (`BRUTALIST_CONTROL_TOKENS = border-2 border-black + bg-secondary-background`):
 - **Toggle**: default, sm, lg variants all use `BRUTALIST_CONTROL_TOKENS`. If the border is a required structural boundary, fails SC 1.4.11 in Dark.
-- **Button (surface variant)**: variants using `BRUTALIST_CONTROL_TOKENS` directly. Button at rest uses `border-transparent` (no contrast requirement); selected/hovered uses `border-black` on `bg-main` (18.05:1 PASS).
+- **Button (surface variant)**: surface variant uses `BRUTALIST_STRUCTURE_TOKENS` (includes `border-black`) plus `bg-secondary-background`. Border is persistent. Ratio 1.39:1 in Dark.
+- **Button (default variant)**: at rest uses `border-transparent`; selected/hovered uses `border-black` on `bg-main` (18.05:1 PASS).
 - **Select Trigger, Switch Root**: if these use `BRUTALIST_CONTROL_TOKENS`, same 1.39:1 ratio in Dark.
 
 **Panel tokens** (`BRUTALIST_PANEL_TOKENS = border-2 border-black + bg-secondary-background`):
@@ -55,6 +56,8 @@ The shared token groups `BRUTALIST_CONTROL_TOKENS` and `BRUTALIST_PANEL_TOKENS` 
 - **Dropdown Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
 - **Hover Card Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
 - **Select Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
+- **Tabs Content**: applies `BRUTALIST_PANEL_TOKENS`. Same ratio.
+- **Tabs List**: directly applies border-black/bg-secondary-background. Same ratio.
 
 **Not affected**:
 - **Card** (`P-BRUTALIST-CARD`): uses `border-2 border-foreground` (not `border-black`) on `bg-background`. Ratio 16.44:1 in both themes. PASS.
