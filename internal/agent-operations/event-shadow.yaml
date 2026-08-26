@@ -10,6 +10,7 @@ authenticity:
   algorithm: hmac-sha256
   rawBodyRequired: true
   signatureHeader: X-Hub-Signature-256
+  transportHeadersAuthenticated: false
   requiredTrustAnchors:
     - repository-id-and-name
     - hook-id
@@ -32,7 +33,8 @@ forks:
   actorAuthority: none
   mutationAuthority: none
 deduplication:
-  identity: hook-id-plus-github-delivery-id
+  identity: trusted-repository-id-plus-authenticated-raw-body-digest
+  transportHeaderRewriteAction: duplicate
   requiredStore: globally-consistent-controller-store
   maximumStateEntries: 10000
 ordering:

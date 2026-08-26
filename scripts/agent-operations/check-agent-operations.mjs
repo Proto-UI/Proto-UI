@@ -347,11 +347,21 @@ function validateEventShadowContract() {
     if (policy.authenticity?.rawBodyRequired !== true) {
       fail(eventShadowPolicyFile, 'raw webhook bytes must be required');
     }
+    if (policy.authenticity?.transportHeadersAuthenticated !== false) {
+      fail(eventShadowPolicyFile, 'GitHub raw-body HMAC must not claim to authenticate headers');
+    }
     if (policy.payload?.maximumBytes !== MAX_EVENT_PAYLOAD_BYTES) {
       fail(eventShadowPolicyFile, `payload maximum must be ${MAX_EVENT_PAYLOAD_BYTES}`);
     }
     if (policy.deduplication?.maximumStateEntries !== MAX_EVENT_STATE_ENTRIES) {
       fail(eventShadowPolicyFile, `state maximum must be ${MAX_EVENT_STATE_ENTRIES}`);
+    }
+    if (
+      policy.deduplication?.identity !==
+        'trusted-repository-id-plus-authenticated-raw-body-digest' ||
+      policy.deduplication?.transportHeaderRewriteAction !== 'duplicate'
+    ) {
+      fail(eventShadowPolicyFile, 'replay identity must not depend on unauthenticated headers');
     }
     if (policy.payload?.authoredContentIncludedInEnvelope !== false) {
       fail(eventShadowPolicyFile, 'authored content must not enter the event envelope');
@@ -400,6 +410,9 @@ function validateEventShadowContract() {
     }
     if (envelopeSchema.properties?.authenticated?.const !== true) {
       fail(eventShadowSchemaFiles[0], 'authenticated must be const true');
+    }
+    if (envelopeSchema.properties?.transportHeadersAuthenticated?.const !== false) {
+      fail(eventShadowSchemaFiles[0], 'transportHeadersAuthenticated must be const false');
     }
     if (envelopeSchema.properties?.mutationAuthorized?.const !== false) {
       fail(eventShadowSchemaFiles[0], 'mutationAuthorized must be const false');

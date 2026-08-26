@@ -147,6 +147,7 @@ test('normalization authenticates raw bytes and excludes authored content', () =
   assert.equal(envelope.revision.headSha, 'b'.repeat(40));
   assert.equal(envelope.source.isFork, true);
   assert.equal(envelope.sender.login, 'external-contributor');
+  assert.equal(envelope.transportHeadersAuthenticated, false);
   assert.equal(envelope.untrustedContentIncluded, false);
   assert.equal(JSON.stringify(envelope).includes('approve this PR'), false);
   assert.equal(envelope.writeOperationsPerformed, 0);
@@ -259,6 +260,77 @@ test('delivery identity prevents replay while preserving a pure next state', () 
   assert.deepEqual(replay.nextState, first.nextState);
 });
 
+test('unauthenticated transport header rewrites cannot re-key the same signed body', () => {
+  const original = normalizeGithubWebhook({
+    ...signedDelivery(),
+    secret,
+    trust: { ...trust, hookIds: [9001, 9002] },
+  });
+  const first = evaluateEventShadow({ envelope: original, policy, state: emptyState() });
+  const rewritten = normalizeGithubWebhook({
+    ...signedDelivery({
+      deliveryId: '22222222-3333-4444-8555-666666666666',
+      hookId: 9002,
+    }),
+    secret,
+    trust: { ...trust, hookIds: [9001, 9002] },
+  });
+
+  assert.notEqual(rewritten.delivery.id, original.delivery.id);
+  assert.notEqual(rewritten.hook.id, original.hook.id);
+  assert.equal(rewritten.delivery.payloadDigest, original.delivery.payloadDigest);
+  assert.equal(rewritten.delivery.key, original.delivery.key);
+  const replay = evaluateEventShadow({ envelope: rewritten, policy, state: first.nextState });
+  assert.equal(replay.receipt.outcome, 'DUPLICATE');
+  assert.deepEqual(replay.nextState, first.nextState);
+
+  const changedBody = normalize({
+    deliveryId: '33333333-4444-4555-8666-777777777777',
+    payload: pullRequestPayload({ action: 'edited' }),
+  });
+  assert.notEqual(changedBody.delivery.payloadDigest, original.delivery.payloadDigest);
+  assert.notEqual(changedBody.delivery.key, original.delivery.key);
+});
+
+test('schema-valid replay keys are canonicalized without mutating caller state', () => {
+  const envelope = normalize();
+  const cursorDeliveryKey = 'f'.repeat(64);
+  const state = {
+    ...emptyState(),
+    seenDeliveryKeys: [cursorDeliveryKey, envelope.delivery.key, '0'.repeat(64)],
+    objectCursors: {
+      [`repository:${repository.id}:pull-request:505`]: {
+        deliveryKey: cursorDeliveryKey,
+        updatedAt: '2026-08-24T12:00:00.000Z',
+        headSha: 'd'.repeat(40),
+      },
+    },
+  };
+  const before = structuredClone(state);
+  const result = evaluateEventShadow({ envelope, policy, state });
+
+  assert.deepEqual(state, before);
+  assert.equal(result.receipt.outcome, 'DUPLICATE');
+  assert.deepEqual(
+    result.nextState.seenDeliveryKeys,
+    [...result.nextState.seenDeliveryKeys].sort()
+  );
+  assert.equal(result.nextState.seenDeliveryKeys.length, 3);
+  assert.equal(
+    result.nextState.objectCursors[`repository:${repository.id}:pull-request:505`].deliveryKey,
+    cursorDeliveryKey
+  );
+  assert.throws(
+    () =>
+      evaluateEventShadow({
+        envelope,
+        policy,
+        state: { ...emptyState(), seenDeliveryKeys: ['a'.repeat(64), 'a'.repeat(64)] },
+      }),
+    /duplicated/i
+  );
+});
+
 test('ordering cursors remain isolated when one state observes matching PR numbers', () => {
   const firstEnvelope = normalize({
     payload: pullRequestPayload({
@@ -305,12 +377,36 @@ test('ordering cursors remain isolated when one state observes matching PR numbe
 });
 
 test('bounded replay state fails closed instead of growing without limit', () => {
+  const existingEnvelope = normalize();
   const state = emptyState();
-  state.seenDeliveryKeys = Array.from({ length: 10_000 }, (_, index) =>
-    index.toString(16).padStart(64, '0')
-  ).sort();
+  state.seenDeliveryKeys = [
+    existingEnvelope.delivery.key,
+    ...Array.from({ length: 9_999 }, (_, index) => index.toString(16).padStart(64, '0')),
+  ]
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .reverse();
+  while (state.seenDeliveryKeys.length < 10_000) {
+    state.seenDeliveryKeys.push(
+      (state.seenDeliveryKeys.length + 10_001).toString(16).padStart(64, '0')
+    );
+  }
+
+  const duplicate = evaluateEventShadow({ envelope: existingEnvelope, policy, state });
+  assert.equal(duplicate.receipt.outcome, 'DUPLICATE');
+  assert.deepEqual(
+    duplicate.nextState.seenDeliveryKeys,
+    [...duplicate.nextState.seenDeliveryKeys].sort()
+  );
   assert.throws(
-    () => evaluateEventShadow({ envelope: normalize(), policy, state }),
+    () =>
+      evaluateEventShadow({
+        envelope: normalize({
+          deliveryId: '44444444-5555-4666-8777-888888888888',
+          payload: pullRequestPayload({ action: 'edited' }),
+        }),
+        policy,
+        state,
+      }),
     /capacity is exhausted/i
   );
 });
@@ -349,6 +445,13 @@ test('envelope, receipt, and replay-state validators reject forged boundaries', 
       mutationAuthorized: true,
     }).join('\n'),
     /target id|mutationAuthorized/i
+  );
+  assert.match(
+    validateEventEnvelope({
+      ...envelope,
+      delivery: { ...envelope.delivery, key: 'f'.repeat(64) },
+    }).join('\n'),
+    /delivery key does not bind/i
   );
   assert.match(
     validateEventShadowBinding(envelope, {

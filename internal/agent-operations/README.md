@@ -35,11 +35,11 @@ The live GitHub repository remains the source for Issue and pull-request state. 
 
 `event-shadow.yaml` defines the first contract-only slice of the intended event-driven path. It does not register a webhook, deploy a listener or controller, receive a GitHub token, run a Coding Harness, or change the current scheduled workflow. The scheduled shadow remains the only automatic repository workflow described here.
 
-The Event shadow runtime authenticates the exact raw request bytes with `X-Hub-Signature-256`, then binds the delivery to runtime-supplied repository, hook, installation, and dedicated-Agent identity anchors. Its normalized envelope contains identity and revision facts, not Issue bodies, pull-request bodies, comments, patches, commit messages, or filenames. An external contributor or fork may wake read-only collection; neither identity grants action authority.
+The Event shadow runtime authenticates the exact raw request bytes with `X-Hub-Signature-256`, then cross-checks declared transport headers and payload identities against runtime-supplied repository, hook, installation, and dedicated-Agent anchors. GitHub's raw-body HMAC does not authenticate those headers, so they remain transport claims and never grant authority. Its normalized envelope contains identity and revision facts, not Issue bodies, pull-request bodies, comments, patches, commit messages, or filenames. An external contributor or fork may wake read-only collection; neither identity grants action authority.
 
-The current allowlist covers selected `pull_request` lifecycle actions for offline shadow replay. A unique delivery key stops replay. A per-pull-request cursor detects older or tied revisions, but it does not pretend GitHub deliveries have a total order. Those cases return `reconcile-live-state`. An admitted event returns only `collect-live-state`; it is permission to observe again, not permission to review or mutate.
+The current allowlist covers selected `pull_request` lifecycle actions for offline shadow replay. The replay key binds the trusted repository ID to the authenticated raw-body digest instead of unauthenticated delivery or hook headers. Rewriting those headers therefore cannot re-key the same signed body; byte-identical deliveries collapse to one observation, which is safe because E0 can only request a fresh live read. A per-pull-request cursor detects older or tied revisions, but it does not pretend GitHub deliveries have a total order. Those cases return `reconcile-live-state`. An admitted event returns only `collect-live-state`; it is permission to observe again, not permission to review or mutate.
 
-The CLI accepts a captured raw delivery, deployment-bound public trust anchors, and optional prior state. The webhook secret must come from a named environment variable. It prints a pure `nextState`; it does not persist or consume that state, so a future controller must provide the globally consistent store and atomic lease before deployment.
+The CLI accepts a captured raw delivery, deployment-bound public trust anchors, and optional prior state. The webhook secret must come from a named environment variable. Schema-valid unique delivery keys may arrive in any order; the runtime canonicalizes them before producing its pure `nextState`. It does not persist or consume that state, so a future controller must provide the globally consistent store and atomic lease before deployment.
 
 ```sh
 corepack pnpm@10.32.1 agent:event-shadow -- replay \
@@ -48,7 +48,7 @@ corepack pnpm@10.32.1 agent:event-shadow -- replay \
   --state <prior-state.json>
 ```
 
-Every envelope and receipt fixes `mutationAuthorized` to `false` and `writeOperationsPerformed` to `0`. The normalized envelope is not a portable authentication credential: a consumer that does not trust the process boundary must retain the signed raw delivery and reproduce normalization. Listener deployment, controller ownership, harness selection, durable replay storage, a maintainer inbox, standing authorization, review actions, required checks, and merge remain separate decisions.
+Every envelope and receipt fixes `mutationAuthorized` to `false` and `writeOperationsPerformed` to `0`. The normalized envelope is not a portable authentication credential: a consumer that does not trust the process boundary must retain the signed raw body and reproduce normalization. If a future controller needs delivery GUID or hook-header provenance across another trust boundary, its trusted ingress must atomically capture and independently authenticate the exact headers with that body. Listener deployment, controller ownership, harness selection, durable replay storage, a maintainer inbox, standing authorization, review actions, required checks, and merge remain separate decisions.
 
 ## Execution boundary
 
@@ -98,7 +98,7 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `schemas/capability-self-result.schema.json`: deterministic unsigned U0-C4 local task-fit result.
 - `schemas/review-input.schema.json`: canonical body, revision, discussion, check, and evidence snapshot used for review hashing.
 - `schemas/review-packet.schema.json`: revision-bound local review evidence contract.
-- `schemas/event-envelope.schema.json`: authenticated, identity-only GitHub delivery envelope.
+- `schemas/event-envelope.schema.json`: raw-body-authenticated, identity-only GitHub delivery envelope with explicit unauthenticated-header provenance.
 - `schemas/event-shadow-{delivery,trust,state,receipt}.schema.json`: raw replay input, deployment trust anchors, controller-owned state, and deterministic no-write outcome contracts.
 - `fixtures/**`: positive and negative replay controls.
 - `scripts/agent-operations/collect-github-state.mjs`: bounded, sanitizing GitHub snapshot collector.

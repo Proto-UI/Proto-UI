@@ -18,6 +18,7 @@
     "object",
     "revision",
     "source",
+    "transportHeadersAuthenticated",
     "untrustedContentIncluded",
     "mutationAuthorized",
     "writeOperationsPerformed"
@@ -59,13 +60,20 @@
       "required": ["id", "key", "event", "action", "payloadDigest"],
       "properties": {
         "id": {
+          "description": "GitHub transport claim retained for observation; the raw-body HMAC does not authenticate this header.",
           "type": "string",
           "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
         },
-        "key": { "$ref": "#/$defs/digest" },
+        "key": {
+          "description": "Domain-separated digest of the trusted repository ID and authenticated raw-body digest; independent of transport headers.",
+          "$ref": "#/$defs/digest"
+        },
         "event": { "const": "pull_request" },
         "action": { "type": "string", "minLength": 1, "maxLength": 80 },
-        "payloadDigest": { "$ref": "#/$defs/digest" }
+        "payloadDigest": {
+          "description": "SHA-256 digest of the exact raw body whose GitHub HMAC was verified before parsing.",
+          "$ref": "#/$defs/digest"
+        }
       }
     },
     "sender": {
@@ -138,6 +146,10 @@
           }
         }
       ]
+    },
+    "transportHeadersAuthenticated": {
+      "description": "GitHub's webhook HMAC authenticates only the raw body, not captured transport headers.",
+      "const": false
     },
     "untrustedContentIncluded": { "const": false },
     "mutationAuthorized": { "const": false },

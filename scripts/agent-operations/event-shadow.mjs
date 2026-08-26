@@ -255,7 +255,8 @@ export function normalizeGithubWebhook({ rawBody, headers, secret, trust, observ
     };
   }
 
-  const key = digest(`github-webhook\0${hookId}\0${deliveryId.toLowerCase()}`);
+  const payloadDigest = digest(rawBody);
+  const key = digest(`github-webhook-body\0${repositoryId}\0${payloadDigest}`);
   return {
     schemaVersion: 1,
     kind: 'proto-ui.agent-event-envelope',
@@ -279,7 +280,7 @@ export function normalizeGithubWebhook({ rawBody, headers, secret, trust, observ
       key,
       event,
       action: payload.action,
-      payloadDigest: digest(rawBody),
+      payloadDigest,
     },
     sender: {
       id: senderId,
@@ -298,6 +299,7 @@ export function normalizeGithubWebhook({ rawBody, headers, secret, trust, observ
       updatedAt,
     },
     source,
+    transportHeadersAuthenticated: false,
     untrustedContentIncluded: false,
     mutationAuthorized: false,
     writeOperationsPerformed: 0,
@@ -322,6 +324,7 @@ export function validateEventEnvelope(envelope) {
       'object',
       'revision',
       'source',
+      'transportHeadersAuthenticated',
       'untrustedContentIncluded',
       'mutationAuthorized',
       'writeOperationsPerformed',
@@ -370,12 +373,12 @@ export function validateEventEnvelope(envelope) {
   if (!DIGEST.test(envelope.delivery?.payloadDigest ?? ''))
     issues.push('payload digest is invalid');
   if (
-    isPositiveInteger(envelope.hook?.id) &&
-    DELIVERY_ID.test(envelope.delivery?.id ?? '') &&
+    isPositiveInteger(envelope.repository?.id) &&
+    DIGEST.test(envelope.delivery?.payloadDigest ?? '') &&
     envelope.delivery?.key !==
-      digest(`github-webhook\0${envelope.hook.id}\0${envelope.delivery.id.toLowerCase()}`)
+      digest(`github-webhook-body\0${envelope.repository.id}\0${envelope.delivery.payloadDigest}`)
   ) {
-    issues.push('delivery key does not bind hook and delivery identity');
+    issues.push('delivery key does not bind repository and authenticated raw body');
   }
   if (
     typeof envelope.delivery?.action !== 'string' ||
@@ -435,6 +438,9 @@ export function validateEventEnvelope(envelope) {
   } else {
     issues.push('source completeness is invalid');
   }
+  if (envelope.transportHeadersAuthenticated !== false) {
+    issues.push('transportHeadersAuthenticated must be false');
+  }
   if (envelope.untrustedContentIncluded !== false) {
     issues.push('untrustedContentIncluded must be false');
   }
@@ -467,12 +473,6 @@ function validateState(state) {
   assert(
     new Set(state.seenDeliveryKeys).size === state.seenDeliveryKeys.length,
     'seen delivery keys are duplicated'
-  );
-  assert(
-    state.seenDeliveryKeys.every(
-      (value, index, values) => index === 0 || values[index - 1] < value
-    ),
-    'seen delivery keys must be sorted'
   );
   assert(isObject(state.objectCursors), 'objectCursors must be an object');
   assert(
@@ -624,20 +624,23 @@ export function evaluateEventShadow({ envelope, policy, state }) {
   validatePolicy(policy);
   validateState(state);
 
+  const canonicalState = structuredClone(state);
+  canonicalState.seenDeliveryKeys = [...canonicalState.seenDeliveryKeys].sort();
+
   const objectKey = objectKeyForEnvelope(envelope);
   const deliveryKey = envelope.delivery.key;
-  if (state.seenDeliveryKeys.includes(deliveryKey)) {
+  if (canonicalState.seenDeliveryKeys.includes(deliveryKey)) {
     return {
       receipt: makeReceipt(envelope, 'DUPLICATE', 'delivery-key-already-consumed', 'none', false),
-      nextState: structuredClone(state),
+      nextState: canonicalState,
     };
   }
   assert(
-    state.seenDeliveryKeys.length < MAX_EVENT_STATE_ENTRIES,
+    canonicalState.seenDeliveryKeys.length < MAX_EVENT_STATE_ENTRIES,
     'event shadow state capacity is exhausted; reconcile or rotate state before admitting work'
   );
 
-  const nextState = structuredClone(state);
+  const nextState = canonicalState;
   nextState.seenDeliveryKeys = [...nextState.seenDeliveryKeys, deliveryKey].sort();
   const actions = policy.allowlist[envelope.delivery.event];
   if (!actions?.includes(envelope.delivery.action)) {

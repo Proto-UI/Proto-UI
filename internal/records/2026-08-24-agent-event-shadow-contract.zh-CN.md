@@ -42,13 +42,13 @@ signed raw GitHub delivery
 
 ## 零信任边界
 
-签名验证使用 request body 的原始 bytes、webhook secret 和 `X-Hub-Signature-256`，并以 constant-time comparison 检查 HMAC-SHA256。验证发生在 JSON 解析之前。Runtime 随后交叉检查 header target、payload repository、hook ID 与 GitHub App installation ID。
+签名验证使用 request body 的原始 bytes、webhook secret 和 `X-Hub-Signature-256`，并以 constant-time comparison 检查 HMAC-SHA256。验证发生在 JSON 解析之前。Runtime 随后交叉检查 header target、payload repository、hook ID 与 GitHub App installation ID。GitHub 的 raw-body HMAC 不覆盖 transport headers，因此这些 header 只是待交叉检查的 transport claim，不能成为 authority。
 
 签名只证明收到的 raw delivery 与 secret 对应，不能证明 authored content 正确，不能授予 GitHub permission，也不能代替 live state。外部 contributor 与 fork 可以触发观察，但其 actor identity 没有 semantic、review 或 mutation authority。Dedicated Agent 的 self echo 被确定性丢弃。
 
-Delivery key 绑定 hook ID 与 GitHub delivery GUID。相同 key 是 replay；不同 delivery 不能仅因 payload digest 相同而被当作重复。逐 PR cursor 的 key 同时绑定 repository ID 与 PR number，避免复用 state 时让不同仓库的同号 PR 相互污染；cursor 再使用 `updated_at` 与 head SHA 检测明显旧事件。相同时间不能建立 total order，因此必须回到 GitHub live state reconciliation，而不是猜测先后。
+Delivery key 绑定受信 repository ID 与已经通过 HMAC 的 raw-body digest，不依赖未被该 HMAC 覆盖的 delivery GUID 或 hook header。保持 body 与签名不变而重写 transport headers 仍然命中同一个 replay key；byte-identical delivery 会折叠成一次观察，因为 E0 最多只能要求重新读取 live state。逐 PR cursor 的 key 同时绑定 repository ID 与 PR number，避免复用 state 时让不同仓库的同号 PR 相互污染；cursor 再使用 `updated_at` 与 head SHA 检测明显旧事件。相同时间不能建立 total order，因此必须回到 GitHub live state reconciliation，而不是猜测先后。
 
-Envelope 本身不是可跨信任边界携带的签名凭证。未来 controller 若把 raw delivery、envelope、receipt 或 state 分开传输，必须原子保存原始签名输入，并在消费边界重放 normalization 或增加独立的服务签名。当前实现没有全局 state store、service lease、delivery acknowledgement、dead letter、retry controller 或 kill switch，因而不能宣称已经防止跨 runner replay。
+Envelope 本身不是可跨信任边界携带的签名凭证。未来 controller 若把 raw delivery、envelope、receipt 或 state 分开传输，必须原子保存原始签名输入，并在消费边界重放 normalization 或增加独立的服务签名。若它还需要跨边界信任 delivery GUID 或 hook header 的来源，受信 ingress 必须把 exact headers 与 raw body 原子捕获并另行认证；重放 GitHub 的 raw-body HMAC 本身做不到这一点。当前实现没有全局 state store、service lease、delivery acknowledgement、dead letter、retry controller 或 kill switch，因而不能宣称已经防止跨 runner replay。
 
 ## 可执行证据
 
@@ -59,7 +59,8 @@ Envelope 本身不是可跨信任边界携带的签名凭证。未来 controller
 - repository、hook、installation 与重复 case-insensitive header 的 fail-closed；
 - external fork 只进入 read-only collection；
 - unsupported action 与 dedicated-Agent self echo；
-- delivery replay；
+- delivery replay，以及保持签名 body 不变时 transport header 重写不能重新生成 replay key；
+- schema-valid 的无序 replay state 会被确定性规范化；
 - 明显乱序与无法建立顺序的同时间事件；
 - forged envelope、receipt 与 state 边界；
 - CLI 第一次 replay 与 duplicate replay；
