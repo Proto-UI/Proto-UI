@@ -8,7 +8,7 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-hover-card-trigger',
-        className: 'cursor-pointer underline',
+        className: 'cursor-pointer',
         children: ['Hover preview'],
       },
       {
