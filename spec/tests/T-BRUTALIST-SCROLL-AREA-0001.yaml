@@ -35,18 +35,17 @@ cases:
   - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-THUMB-INHERITANCE
     title: Thumb inherits Base Thumb and projects surface tokens
     covers:
-      - P-BRUTALIST-SCROLL-AREA-THUMB-BASE-INHERITANCE
+      - P-BRUTALIST-SCROLL-AREA-THUMB-SURFACE
     expectation: p-brutalist-scroll-area-thumb-inheritance
   - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-INHERITANCE
     title: Viewport inherits Base Viewport and configures composed projection
     covers:
-      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-BASE-INHERITANCE
-      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-COMPOSED-PREFERENCE
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-SURFACE
     expectation: p-brutalist-scroll-area-viewport-composed-preference
   - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-ROOT-INHERITANCE
     title: Root inherits Base Scroll Area Root
     covers:
-      - P-BRUTALIST-SCROLL-AREA-BASE-INHERITANCE
+      - P-BRUTALIST-SCROLL-AREA-VISUAL-GRAMMAR
     expectation: p-brutalist-scroll-area-root-inheritance
 
 implementations:
@@ -78,6 +77,11 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-1
+    exercises:
+      - P-BASE-SCROLL-AREA
+      - P-BASE-SCROLL-AREA-SCROLLBAR
+      - P-BASE-SCROLL-AREA-THUMB
+      - P-BRUTALIST-SCROLL-AREA
   - id: www-brutalist-scroll-area-demo-layout
     kind: workspace-check
     status: passing
@@ -85,6 +89,8 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-2
+    exercises:
+      - P-BRUTALIST-SCROLL-AREA
   - id: www-brutalist-scroll-area-focus-ring-browser
     kind: runtime-test
     status: passing
@@ -92,6 +98,8 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+    exercises:
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT
     notes:
       - Reads the computed box-shadow in Web Components, React, and Vue, in both schemes, and requires one inset layer with zero offsets and a positive spread. That shape is the four-sided claim; an outward layer would be clipped by the Root and is asserted absent.
       - The demo gained a row wider than the Viewport so the same surface scrolls both ways, and the case scrolls each axis while the ring is up.
