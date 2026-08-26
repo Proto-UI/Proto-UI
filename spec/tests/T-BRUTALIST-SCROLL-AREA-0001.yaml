@@ -78,7 +78,6 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-1
-    exercises:
   - id: www-brutalist-scroll-area-demo-layout
     kind: workspace-check
     status: passing
@@ -86,7 +85,6 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-2
-    exercises:
   - id: www-brutalist-scroll-area-focus-ring-browser
     kind: runtime-test
     status: passing
@@ -94,7 +92,6 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
-    exercises:
     notes:
       - Reads the computed box-shadow in Web Components, React, and Vue, in both schemes, and requires one inset layer with zero offsets and a positive spread. That shape is the four-sided claim; an outward layer would be clipped by the Root and is asserted absent.
       - The demo gained a row wider than the Viewport so the same surface scrolls both ways, and the case scrolls each axis while the ring is up.
