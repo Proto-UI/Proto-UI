@@ -55,6 +55,11 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
   if (typeof snapshot.role !== 'undefined') el.removeAttribute('role');
   if (snapshot.name) el.removeAttribute('aria-label');
   if (snapshot.description) el.removeAttribute('aria-description');
+  if (typeof snapshot.level !== 'undefined') el.removeAttribute('aria-level');
+
+  if (typeof snapshot.level !== 'undefined') {
+    setOptionalAttr(el, 'aria-level', String(snapshot.level));
+  }
 
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {
     if (Object.prototype.hasOwnProperty.call(snapshot.states, key)) el.removeAttribute(attr);
@@ -113,6 +118,10 @@ export function applyWebA11ySnapshot(
     } else {
       el.removeAttribute('aria-description');
     }
+  }
+
+  if (typeof snapshot.level !== 'undefined') {
+    setOptionalAttr(el, 'aria-level', String(snapshot.level));
   }
 
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {

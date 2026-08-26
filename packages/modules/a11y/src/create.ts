@@ -82,6 +82,11 @@ class A11yModuleImpl extends ModuleBase {
       this.ir.tree = { ...(this.ir.tree ?? {}), ...patch };
       this.applyProjection();
     },
+    level: (value: number | State<number>) => {
+      this.ensureSetup('def.a11y.level');
+      this.ir.level = value;
+      this.applyProjection();
+    },
   };
 
   readonly port: A11yPort = {
@@ -95,6 +100,7 @@ class A11yModuleImpl extends ModuleBase {
       actions: new Map(this.ir.actions),
       relations: new Map(this.ir.relations),
       tree: this.ir.tree ? { ...this.ir.tree } : undefined,
+      level: this.ir.level,
     }),
   };
 
@@ -189,6 +195,13 @@ class A11yModuleImpl extends ModuleBase {
       this.stateWatchOffs.push(off);
     }
 
+    if (isState(this.ir.level)) {
+      const off = watchState(this.statePort, this.ir.level, () => {
+        this.applyProjection();
+      });
+      this.stateWatchOffs.push(off);
+    }
+
     this.stateWatchesInstalled = true;
   }
 
@@ -229,6 +242,7 @@ class A11yModuleImpl extends ModuleBase {
       relations,
       ...(Object.keys(relationModes).length ? { relationModes } : {}),
       tree,
+      level: isState(this.ir.level) ? (this.ir.level.get() as number) : this.ir.level,
     };
   }
 
