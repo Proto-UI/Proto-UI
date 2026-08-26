@@ -10,24 +10,36 @@ shadcn/ui's Select positions the content so the selected item aligns with the tr
 
 ## Proposed implementation
 
-### 1. Add `itemAlignment` prop to Select Root
+### 1. Extend the existing Content `position` prop
+
+The Shadcn Select Content already exposes `position: 'item-aligned' | 'popper'` (P-SHADCN-SELECT-CONTENT-POSITION-PROP). The Base Select Content should adopt this same prop instead of introducing a competing Root-level `itemAlignment` API:
 
 ```typescript
-interface SelectRootProps {
+interface SelectContentProps {
   // ... existing props
-  itemAlignment?: 'none' | 'selected'; // default 'none'
+  position?: 'popper' | 'item-aligned'; // default 'popper'
 }
 ```
 
-When `itemAlignment === 'selected'`, the Root computes a dynamic `sideOffset` based on the selected item's position within the Content and passes it to the Content's positioning config.
+When `position === 'item-aligned'`, the Content computes a dynamic `sideOffset` based on the selected item's position within the Content.
 
 ### 2. Dynamic offset computation
 
 The Root tracks the selected item's index and the item height (uniform item height assumption). The offset is:
 
 ```
-dynamicSideOffset = baseSideOffset + (selectedItemIndex * itemHeight)
+// The floating origin must shift UP (negative) so the selected item
+// overlaps the trigger position, not farther below it.
+dynamicSideOffset = -(selectedItemOffsetFromTop + triggerHeight / 2 - itemHeight / 2)
 ```
+
+This requires measuring:
+
+1. The selected item's offset from the Content's top edge
+2. The trigger's height
+3. The selected item's height
+
+The result is a negative offset that pulls the Content up so the selected item aligns with the trigger.
 
 This offset is passed through the existing `sideOffset` prop to the Content's positioning host.
 
