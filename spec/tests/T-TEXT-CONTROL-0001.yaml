@@ -77,12 +77,12 @@ implementations:
     path: packages/modules/text-control/test/web.test.ts
     required: true
     consumesCases:
-      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-TARGET
       - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
       - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
     exercises:
-      - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
+    notes:
+      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', inputMode/enterKeyHint/type projection, and CR/LF canonicalization through the web bridge. Cross-adapter single-line materialization and module-boundary canonicalization through TextControlModuleImpl are covered by impl-spec.test.ts and adapter integration tests.
   - id: module-text-control-value-reconciliation
     kind: module-test
     status: passing

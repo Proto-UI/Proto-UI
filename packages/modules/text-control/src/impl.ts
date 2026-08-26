@@ -98,6 +98,8 @@ export class TextControlModuleImpl extends ModuleBase {
       ...this.patch,
       ...next,
       valueMode: this.valueMode ?? 'uncontrolled',
+      value: typeof next.value === "string" ? canonicalizeLineEndings(next.value) : this.patch.value,
+      defaultValue: typeof next.defaultValue === 'string' ? canonicalizeLineEndings(next.defaultValue) : next.defaultValue,
     });
     if (this.valueMode === 'controlled') this.value = canonicalizeLineEndings(this.patch.value ?? '');
     this.syncLease();
