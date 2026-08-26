@@ -10,7 +10,7 @@ import type {
   TextControlSnapshot,
   TextControlValueMode,
 } from '@proto.ui/core';
-import { getModuleDeclaration } from '@proto.ui/core';
+import { canonicalizeLineEndings, getModuleDeclaration } from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import type { PropsBaseType } from '@proto.ui/types';
 import {
@@ -91,7 +91,7 @@ export class TextControlModuleImpl extends ModuleBase {
     this.sys.ensureCallback('textControl.sync');
     if (!this.initialized) {
       this.valueMode = next.valueMode ?? 'uncontrolled';
-      this.value = this.valueMode === 'controlled' ? (next.value ?? '') : (next.defaultValue ?? '');
+      this.value = this.valueMode === 'controlled' ? canonicalizeLineEndings(next.value ?? '') : canonicalizeLineEndings(next.defaultValue ?? '');
       this.initialized = true;
     }
     this.patch = Object.freeze({
@@ -99,12 +99,12 @@ export class TextControlModuleImpl extends ModuleBase {
       ...next,
       valueMode: this.valueMode ?? 'uncontrolled',
     });
-    if (this.valueMode === 'controlled') this.value = this.patch.value ?? '';
+    if (this.valueMode === 'controlled') this.value = canonicalizeLineEndings(this.patch.value ?? '');
     this.syncLease();
   }
 
   snapshot(): TextControlSnapshot | null {
-    return this.declared ? Object.freeze({ value: this.value, composing: this.composing }) : null;
+    return this.declared ? Object.freeze({ value: canonicalizeLineEndings(this.value), composing: this.composing }) : null;
   }
 
   protected override onCapsEpoch(): void {
@@ -163,7 +163,7 @@ export class TextControlModuleImpl extends ModuleBase {
   private receive(event: TextControlEvent): void {
     this.composing = event.composing;
     if (this.valueMode === 'uncontrolled' && event.type === 'input') {
-      this.value = event.value;
+      this.value = canonicalizeLineEndings(event.value);
     }
 
     const runInCallback = this.caps.has(TEXT_CONTROL_RUN_IN_CALLBACK_CAP)

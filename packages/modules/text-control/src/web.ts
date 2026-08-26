@@ -8,6 +8,10 @@ import type { TextControlHost, TextControlHostConnection, TextControlHostLease }
 import type { TextControlDeclaration } from './declaration';
 
 export type WebTextControl = HTMLTextAreaElement | HTMLInputElement;
+
+const TEXT_COMPATIBLE_INPUT_TYPES = new Set([
+  'text', 'search', 'email', 'url', 'tel', 'password', 'hidden', '',
+]);
 export type WebTextControlLocalName = 'textarea' | 'input';
 
 export function resolveWebTextControlLocalName(
@@ -139,8 +143,13 @@ function applyPatch(
     if (target instanceof HTMLTextAreaElement) target.wrap = patch.wrap;
   }
   // Single-line specific properties (HTMLInputElement only)
+  // Constrain to text-compatible types that support value/selection APIs.
+  const TEXT_COMPATIBLE_TYPES = new Set([
+    'text', 'search', 'email', 'url', 'tel', 'password', 'hidden',
+  ]);
   if (typeof patch.type === 'string' && target instanceof HTMLInputElement) {
-    target.type = patch.type;
+    const typeToSet = TEXT_COMPATIBLE_TYPES.has(patch.type) ? patch.type : 'text';
+    target.type = typeToSet;
   }
   if (typeof patch.inputMode === 'string' && target instanceof HTMLInputElement) {
     target.inputMode = patch.inputMode;
@@ -154,6 +163,14 @@ function applyPatch(
 }
 
 function replaceValuePreservingEditingSession(target: WebTextControl, value: string): void {
+  // Guard: some input types (file, checkbox, radio, etc.) throw on value assignment
+  // or do not support setSelectionRange. Only restore selection for text-compatible types.
+  const isTextCompatible = target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLInputElement && TEXT_COMPATIBLE_INPUT_TYPES.has(target.type));
+  if (!isTextCompatible) {
+    target.value = value;
+    return;
+  }
   const selectionStart = target.selectionStart ?? 0;
   const selectionEnd = target.selectionEnd ?? 0;
   const selectionDirection = target.selectionDirection ?? 'none';
