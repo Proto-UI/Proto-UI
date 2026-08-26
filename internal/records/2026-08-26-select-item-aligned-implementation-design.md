@@ -33,7 +33,11 @@ The prototype does not measure items, report offsets, or add context values.
 
 ## Implementation ordering
 
-Shadcn currently registers its `item-aligned` default before `asSelectContent()`. To add Base's `popper` default without overriding Shadcn, Base must register its default after the asHook call, or use a different precedence mechanism. A no-prop regression test must verify Shadcn's existing `item-aligned` default is preserved.
+`PropsKernel.setDefaults()` is latest-first, so registering Base `popper` after `asSelectContent()` overrides Shadcn's earlier `item-aligned`. Shadcn must reapply `item-aligned` after inherited setup. A no-prop regression test must verify Shadcn's existing `item-aligned` default is preserved when Base adds `popper`.
+
+## Scroll-before-measure
+
+With `overflow-y-auto` and the current `preventScroll: true` focus path, an offscreen selected item remains clipped. The host must scroll the selected item into view before measuring/placing it, or fall back to `popper` positioning if the item is not scrollable into view.
 
 ## Evidence needed
 
