@@ -29,7 +29,7 @@ implementations:
   - id: runtime-rule-intent-contract
     kind: runtime-test
     status: planned
-    path: packages/runtime/test/contract/rule.intent.v0.contract.test.ts
+    path: packages/runtime/test/contract/rule.matrix.intent.v0.contract.test.ts
     required: true
     consumesCases:
       - T-RULE-INTENT-0001-CASE-RECORDS-OPS

@@ -34,7 +34,7 @@ implementations:
   - id: runtime-rule-when-expression-contract
     kind: runtime-test
     status: planned
-    path: packages/runtime/test/contract/rule.when.expression.v0.contract.test.ts
+    path: packages/runtime/test/contract/rule.matrix.when.v0.contract.test.ts
     required: true
     consumesCases:
       - T-RULE-WHEN-0001-CASE-PURITY

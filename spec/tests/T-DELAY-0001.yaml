@@ -71,7 +71,7 @@ implementations:
   - id: delay-runtime-fixture
     kind: fixture
     status: planned
-    path: packages/spec/fixtures/src/delay/runtime-delay.ts
+    path: packages/runtime/test/contract/delay.v0.contract.test.ts
     required: true
     consumesCases:
       - T-DELAY-0001-CASE-MINIMUM-DELAY

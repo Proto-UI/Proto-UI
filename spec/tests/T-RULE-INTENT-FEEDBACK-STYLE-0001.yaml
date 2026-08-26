@@ -56,7 +56,7 @@ implementations:
   - id: runtime-rule-feedback-style-contract
     kind: runtime-test
     status: planned
-    path: packages/runtime/test/contract/rule.feedback-style.v0.contract.test.ts
+    path: packages/runtime/test/contract/feedback.style.setup-only.v0.contract.test.ts
     required: true
     consumesCases:
       - T-RULE-INTENT-FEEDBACK-STYLE-0001-CASE-HANDLE-CONSTRAINTS

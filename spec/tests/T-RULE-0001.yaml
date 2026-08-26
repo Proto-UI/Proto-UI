@@ -46,7 +46,7 @@ implementations:
   - id: runtime-rule-declaration-contract
     kind: runtime-test
     status: planned
-    path: packages/runtime/test/contract/rule.declaration.v0.contract.test.ts
+    path: packages/runtime/test/contract/rule.meta.v0.contract.test.ts
     required: true
     consumesCases:
       - T-RULE-0001-CASE-SETUP-ONLY
@@ -55,7 +55,7 @@ implementations:
   - id: module-rule-ir-contract
     kind: module-test
     status: planned
-    path: packages/modules/rule/test/contract/rule-ir.v0.contract.test.ts
+    path: packages/runtime/test/contract/rule.matrix.combine.v0.contract.test.ts
     required: true
     consumesCases:
       - T-RULE-0001-CASE-SPEC-RECORDING
