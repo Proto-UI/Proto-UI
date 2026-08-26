@@ -23,14 +23,20 @@ interface SelectContentProps {
 
 When `position === 'item-aligned'`, the Content computes a dynamic `sideOffset` based on the selected item's position within the Content.
 
-### 2. Dynamic offset computation
+### 2. Dynamic offset computation in positioning host
 
-The Root tracks the selected item's index and the item height (uniform item height assumption). The offset is:
+Per C-ANCHORED-POSITIONING-0001-A, prototype authors and generic modules must not measure host geometry; measurement belongs to the Anchored Position host capability. The positioning host (HC-ANCHORED-POSITIONING-0001) should be extended to:
+
+1. Measure the selected item's offset from the Content's top edge
+2. Measure the trigger's height and the selected item's height
+3. Compute the negative offset locally
+
+This keeps geometry measurement in the host capability. The Root's index and the item height (uniform item height assumption). The offset is:
 
 ```
 // The floating origin must shift UP (negative) so the selected item
 // overlaps the trigger position, not farther below it.
-dynamicSideOffset = -(selectedItemOffsetFromTop + triggerHeight / 2 - itemHeight / 2)
+dynamicSideOffset = -(selectedItemOffsetFromTop + triggerHeight / 2 + itemHeight / 2)
 ```
 
 This requires measuring:
