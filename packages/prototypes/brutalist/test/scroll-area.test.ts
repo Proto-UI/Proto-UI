@@ -201,6 +201,10 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(styleContains(scrollbar, 'touch-none')).toBe(true);
     expect(styleContains(scrollbar, 'select-none')).toBe(true);
     expect(styleContains(scrollbar, 'bg-lavender')).toBe(true);
+    // Hook-dependent: without asScrollAreaScrollbar, the scrollbar would not have orientation state
+    expect(scrollbar.getExposes().orientation?.get()).toBeTruthy();
+    // Verify default orientation is vertical
+    expect(scrollbar.getExposes().orientation?.get()).toBe('vertical');
     expect(styleContains(scrollbar, 'p-0.5')).toBe(true);
   });
 
@@ -242,6 +246,8 @@ describe('prototypes/brutalist: scroll-area', () => {
     await flush();
 
     expect(root.getExposes()).toBeTruthy();
+    // Hook-dependent: without asScrollAreaRoot, the root would have no exposes at all
+    expect(root.getAttribute('data-pui-style')).not.toBeNull();
     expect(styleContains(root, 'relative')).toBe(true);
     expect(styleContains(root, 'overflow-hidden')).toBe(true);
   });
