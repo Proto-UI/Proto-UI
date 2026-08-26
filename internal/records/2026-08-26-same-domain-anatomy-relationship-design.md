@@ -17,7 +17,7 @@ Disclosure/Collapsible/Accordion Trigger→Content needs a same-domain opaque re
 
 This design record does not propose to replace `def.a11y.relation()` with a new API. Instead, it proposes:
 1. The existing a11y relation API continues to project the Web ARIA attribute (string target).
-2. The structured part matching (family, role, match key) is handled by the anatomy module, which resolves the correct part ID at mount time and feeds it to the a11y relation target state.
+2. The structured part matching (family, role, match key) is preserved through the anatomy module. Per D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-D, the Web adapter generates stable, unique host IDs from the structured relationship — the anatomy module does not precompute host IDs. The a11y relation target state receives the adapter-generated ID, not a precomputed string.
 3. The detach-aware behavior is a host-capability concern: the web adapter removes the ARIA attribute when the target element is absent, regardless of whether the string ID is still set.
 
 This approach is compatible with D-A11Y-PART-RELATIONSHIP-PROJECTION-0001 because:
@@ -30,12 +30,13 @@ This approach is compatible with D-A11Y-PART-RELATIONSHIP-PROJECTION-0001 becaus
 
 The second Codex finding identifies a real gap: Content cannot directly clear Trigger's `aria-controls` because the `contentId` state is private to the Trigger. The proposed resolution:
 
-1. The family root (e.g., TabsRoot) owns a shared context with part-presence fields.
-2. When Content mounts, it notifies the root via context (e.g., `contentPresent.set(true)`).
-3. When Content detaches (L1), it notifies the root (`contentPresent.set(false)`).
-4. The Trigger observes `contentPresent` and adjusts its relation target:
-   - `contentPresent === true`: relation target = contentId (restores aria-controls)
-   - `contentPresent === false`: relation target = empty string (removes aria-controls)
+1. The family root (e.g., TabsRoot) owns a shared context with a per-match-key presence map (e.g., `Record<string, boolean>` keyed by protocol match key). This supports repeatable Trigger/Content pairs where each pair is matched by `value`.
+2. When Content mounts, it notifies the root via context (e.g., `contentPresent.set(matchKey, true)`).
+3. When Content detaches (L1), it notifies the root (`contentPresent.set(matchKey, false)`).
+4. The Trigger observes its own match key in `contentPresent` and adjusts its relation target:
+   - `contentPresent[myMatchKey] === true`: relation target = contentId (restores aria-controls)
+   - `contentPresent[myMatchKey] === false`: relation target = empty string (removes aria-controls)
+   This per-key tracking ensures a Trigger only restores aria-controls when its matched Content is present, not when any Content mounts.
 5. This is a root-mediated presence propagation, not a direct Content→Trigger write.
 
 This approach is compatible with C-ANATOMY-0001 (anatomy is not an information channel) because the presence field is structural metadata, not arbitrary data.
