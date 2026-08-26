@@ -1,6 +1,6 @@
 # Button quality audit — 2026-08-25
 
-Non-normative record. Authorized by #505. Does not create a stable spec guarantee, public API, release gate, or package change.
+Non-normative record. Refs #505. This record is a non-normative audit authorized by the #503 library-quality profile proposal. Does not create a stable spec guarantee, public API, release gate, or package change.
 
 ## Baseline
 
@@ -44,7 +44,7 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 
 ## Gaps found
 
-1. **No dedicated browser journey for Base Button.** The Brutalist browser journey exercises Button in WC/React/Vue but through the Brutalist projection, not the Base prototype directly. A Base-level browser journey would prove the semantic owner's adapter parity independently of any design-language projection.
+1. **No dedicated browser journey for Base Button.** No dedicated Button browser journey exists for Base, Shadcn, or Brutalist. The existing `demo-brutalist-controls.browser.test.ts` covers Switch, Tabs, Scroll Area, Textarea, and Dropdown, but not Button. A Button browser journey would prove the visual grammar, interaction states, and adapter parity across WC/React/Vue.
 2. **No automated WCAG contrast-ratio test for Button.** The Brutalist Button uses `bg-main`/`text-main-foreground` and the Shadcn Button uses `bg-primary`/`text-primary-foreground` but no automated contrast-ratio test exists in the test suite (manual contrast was measured and retained in P-SHADCN-BUTTON from #454).
 
 ## Conclusion
