@@ -8,7 +8,7 @@ The Move substrate (C-MOVE-GESTURE-0001) is immediate-only. The proposed approac
 
 ## Carrier admission gap
 
-Move is currently wired only through `SCROLL_SURFACE_HOST_CAP`. Switch Root has no admitted `MoveGestureHost`/asHook carrier. `D-MOVE-GESTURE-0001-B` forbids reconstructing Move from prototype pointer events. The carrier must be admitted and wired before directing Switch implementation to consume Move.
+Move is currently wired only through `SCROLL_SURFACE_HOST_CAP`. Switch Root has no admitted `MoveGestureHost`/asHook carrier. `D-MOVE-GESTURE-0001-B` forbids reconstructing Move from prototype pointer events. The carrier must be admitted and wired before directing Switch implementation to consume Move. Additionally, a host-local click-suppression/arbitration operation must be admitted so the host can correlate drag-pointer identity and suppress only the synthesized click from the same pointer session, without exposing pointer identity to the prototype (per HC-MOVE-GESTURE-0001-C).
 
 ## Proposed implementation (subject to checkpoint)
 
@@ -20,9 +20,9 @@ The root starts a Move session on pointerdown (the root owns the gesture, not th
 
 On Move session end:
 
-- If the session committed a drag value: suppress the next **pointer-generated** `press.commit` only — correlate the suppression to the drag session's pointer identity (pointerId), not a generic one-shot flag. This prevents an unrelated keyboard Space/Enter activation during the suppression window from being swallowed.
+- If the session committed a drag value: suppress the next pointer-synthesized click via a **host-local arbitration seam** — the host-level MoveGestureHost binding correlates the drag session's pointer identity internally (per its own native event identity) and suppresses only the click synthesized from the same pointer session. Per `HC-MOVE-GESTURE-0001-C`, pointer/contact identity must not be exposed to prototype authors; the Switch root therefore cannot perform this correlation itself and must delegate it to the host. The host exposes only a boolean "drag-suppress-next-click" operation, not raw pointer identity.
 - If below threshold: allow `press.commit` to proceed normally
-- The suppression is cleared when the drag's pointer release event is received (the click that the browser synthesizes from the same pointer session), or on next pointerdown, or after a bounded timeout (e.g., 300ms) only as a safety net for edge cases where the synthesized click never arrives (e.g., host swallowed it). The timeout does not gate keyboard activation — a keyboard `press.commit` during the window proceeds normally because it has a different pointer identity (none).
+- The suppression is cleared when the host receives the pointer release event (the click the browser synthesizes from the same pointer session), or on next pointerdown, or after a bounded timeout (e.g., 300ms) as a safety net for edge cases where the synthesized click never arrives (e.g., host swallowed it). The timeout does not gate keyboard activation — a keyboard `press.commit` during the window proceeds normally because it has no pointer identity and the host arbitration seam does not suppress non-pointer events.
 
 ### 3. Focus preservation
 
