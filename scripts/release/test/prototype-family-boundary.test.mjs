@@ -88,23 +88,13 @@ test('Brutalist Tooltip exports only the reviewed root and family subpath', () =
 
 test('built Brutalist Tooltip root and subpath expose the exact four entries', async () => {
   const { pathToFileURL } = await import('node:url');
-  const { existsSync } = await import('node:fs');
   const { execSync } = await import('node:child_process');
-  const distRootPath = join(BRUTALIST_ROOT, 'dist', 'index.js');
-  const distTooltipPath = join(BRUTALIST_ROOT, 'dist', 'tooltip', 'index.js');
-  if (!existsSync(distRootPath) || !existsSync(distTooltipPath)) {
-    // Build the brutalist package if dist is missing
-    try {
-      execSync('corepack pnpm@10.32.1 --filter @proto.ui/prototypes-brutalist build', {
-        cwd: ROOT_DIR,
-        stdio: 'pipe',
-        timeout: 60_000,
-      });
-    } catch {
-      // If build fails, skip the test
-      return;
-    }
-  }
+  // Always rebuild to validate current source, never stale dist artifacts.
+  execSync('corepack pnpm@10.32.1 --filter @proto.ui/prototypes-brutalist build', {
+    cwd: ROOT_DIR,
+    stdio: 'pipe',
+    timeout: 60_000,
+  });
   const distRoot = join(BRUTALIST_ROOT, 'dist');
   const rootModule = await import(pathToFileURL(join(distRoot, 'index.js')).href);
   const tooltipModule = await import(pathToFileURL(join(distRoot, 'tooltip', 'index.js')).href);
