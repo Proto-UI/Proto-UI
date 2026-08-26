@@ -7,7 +7,8 @@
   "dependencies": {
     "@proto.ui/core": "workspace:*",
     "@proto.ui/hooks": "workspace:*",
-    "@proto.ui/module-text-control": "workspace:*"
+    "@proto.ui/module-text-control": "workspace:*",
+    "@proto.ui/module-image-view": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/module-anatomy": "workspace:*",

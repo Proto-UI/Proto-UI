@@ -683,6 +683,18 @@ importers:
         specifier: workspace:*
         version: link:../../types
 
+  packages/modules/image-view:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
+
   packages/modules/overlay:
     dependencies:
       '@proto.ui/core':
@@ -892,6 +904,9 @@ importers:
       '@proto.ui/hooks':
         specifier: workspace:*
         version: link:../../hooks
+      '@proto.ui/module-image-view':
+        specifier: workspace:*
+        version: link:../../modules/image-view
       '@proto.ui/module-text-control':
         specifier: workspace:*
         version: link:../../modules/text-control

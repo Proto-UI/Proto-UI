@@ -21,7 +21,8 @@ criteria:
   - id: C-IMAGE-VIEW-0001-C
     text:
       zh-CN: a11y 采用显式二分输入：informative 必须有 non-empty alternativeText；decorative 明确排除语义内容。矛盾/缺失输入属于 authoring diagnostic 并 fail closed，不由 adapter 猜测。
-      en: A11y uses explicit binary input: informative requires non-empty alternativeText; decorative explicitly excludes semantic content. Contradictory or missing input is an authoring diagnostic and fails closed; the adapter must not guess.
+      en: >-
+        A11y uses explicit binary input: informative requires non-empty alternativeText; decorative explicitly excludes semantic content. Contradictory or missing input is an authoring diagnostic and fails closed; the adapter must not guess.
   - id: C-IMAGE-VIEW-0001-D
     text:
       zh-CN: 首次同步确定 controlled 或 uncontrolled ownership 后，该模式必须保持稳定；controlled source 变更只构成 proposal，并在 callback boundary 后恢复 owner source。
@@ -29,7 +30,8 @@ criteria:
   - id: C-IMAGE-VIEW-0001-E
     text:
       zh-CN: Generation-bound lease：新 source 必须先建立新 generation 与 loading 状态，再启动 host work；replacement、detach/rematerialize、physical-target replacement、dispose 必须使旧 lease/generation terminal。旧 completion 不得再改当前 state 或发 outward signal；当前 generation 的 terminal completion 最多接受一次。
-      en: Generation-bound lease: a new source must first establish a new generation and loading state before starting host work; replacement, detach/rematerialize, physical-target replacement, and disposal must make the old lease/generation terminal. A stale completion from an old generation must not change the current state or emit an outward signal; the current generation's terminal completion is accepted at most once.
+      en: >-
+        Generation-bound lease: a new source must first establish a new generation and loading state before starting host work; replacement, detach/rematerialize, physical-target replacement, and disposal must make the old lease/generation terminal. A stale completion from an old generation must not change the current state or emit an outward signal; the current generation's terminal completion is accepted at most once.
   - id: C-IMAGE-VIEW-0001-F
     text:
       zh-CN: loadingStatus (idle|loading|loaded|error) 与 loadingStatusChange transition 是唯一的状态/transition surface。进入 loaded 或 error 是 terminal evidence。v0 不公开同义的 load/error 事件。

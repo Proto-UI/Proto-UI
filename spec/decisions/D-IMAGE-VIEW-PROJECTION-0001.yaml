@@ -21,7 +21,8 @@ criteria:
   - id: D-IMAGE-VIEW-PROJECTION-0001-C
     text:
       zh-CN: a11y 采用显式二分输入：informative 必须有 non-empty alternativeText；decorative 明确排除语义内容。矛盾/缺失输入属于 authoring diagnostic 并 fail closed。
-      en: A11y uses explicit binary input: informative requires non-empty alternativeText; decorative explicitly excludes semantic content. Contradictory or missing input is an authoring diagnostic and fails closed.
+      en: >-
+        A11y uses explicit binary input: informative requires non-empty alternativeText; decorative explicitly excludes semantic content. Contradictory or missing input is an authoring diagnostic and fails closed.
   - id: D-IMAGE-VIEW-PROJECTION-0001-D
     text:
       zh-CN: loadingStatus (idle|loading|loaded|error) 与 loadingStatusChange transition 是唯一的状态/transition surface；v0 不公开同义的 load/error 事件。

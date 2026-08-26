@@ -17,11 +17,13 @@ criteria:
   - id: P-BASE-IMAGE-SOURCE
     text:
       zh-CN: source 必须是 opaque URI string；source 变更必须创建新 generation。
-      en: source must be an opaque URI string; a source change must create a new generation.
+      en: >-
+        source must be an opaque URI string; a source change must create a new generation.
   - id: P-BASE-IMAGE-ALT-TEXT
     text:
       zh-CN: alternativeText 必须遵守 a11y 二分输入：informative 时 non-empty，decorative 时显式排除语义内容。
-      en: 'alternativeText must obey the a11y binary input: non-empty when informative, explicitly excluded when decorative.'
+      en: >-
+        alternativeText must obey the a11y binary input: non-empty when informative, explicitly excluded when decorative.
   - id: P-BASE-IMAGE-FIT
     text:
       zh-CN: fit 必须是 `contain | cover | fill` 之一；默认为 `contain` + center。
