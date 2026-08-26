@@ -1,6 +1,6 @@
 # Button quality audit — 2026-08-25
 
-Non-normative record. Refs #505. This record is a non-normative audit authorized by the #503 library-quality profile proposal. Does not create a stable spec guarantee, public API, release gate, or package change.
+Non-normative record. Refs #505. This record is a non-normative audit authorized by the maintainer checkpoint at #503 issuecomment-5420062799. Does not create a stable spec guarantee, public API, release gate, or package change.
 
 ## Baseline
 
@@ -49,4 +49,4 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 
 ## Conclusion
 
-The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), consumer verification, browser journeys, and docs. The two remaining gaps are: (1) Base-level browser journey (no dedicated Base Button browser test), (2) automated WCAG contrast-ratio test (manual contrast was measured and retained in P-SHADCN-BUTTON from #454; only the automated test is missing). None are semantic defects.
+The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), and docs. Gaps remain in browser journey coverage (no dedicated Button browser journey for Base, Shadcn, or Brutalist) and consumer verification (Brutalist not in release consumer smoke). The two remaining gaps are: (1) Base-level browser journey (no dedicated Base Button browser test), (2) automated WCAG contrast-ratio test (manual contrast was measured and retained in P-SHADCN-BUTTON from #454; only the automated test is missing). None are semantic defects.
