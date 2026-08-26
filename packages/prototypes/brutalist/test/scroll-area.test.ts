@@ -50,6 +50,9 @@ describe('prototypes/brutalist: scroll-area', () => {
     await flush();
     expect(styleContains(el, 'rounded-none')).toBe(true);
     expect(styleContains(el, 'border-2')).toBe(true);
+    expect(styleContains(el, 'block')).toBe(true);
+    expect(styleContains(el, 'border-foreground')).toBe(true);
+    expect(styleContains(el, 'bg-background')).toBe(true);
 
     const thumb = document.createElement('brutalist-scroll-area-thumb') as any;
     document.body.appendChild(thumb);
@@ -217,11 +220,10 @@ describe('prototypes/brutalist: scroll-area', () => {
     document.body.appendChild(root);
     await flush();
 
-    expect(thumb.getExposes()).toBeTruthy();
-    // Base inheritance: thumb has no independent exposes (anatomy-only, Move hit-subregion is host-projected)
-    expect(Object.keys(thumb.getExposes())).toEqual([]);
     expect(styleContains(thumb, 'rounded-none')).toBe(true);
     expect(styleContains(thumb, 'bg-lavender-foreground')).toBe(true);
+    expect(styleContains(thumb, 'relative')).toBe(true);
+    expect(Object.keys(thumb.getExposes())).toEqual([]);
   });
 
   it('viewport inherits Base and configures composed projection', async () => {
@@ -234,10 +236,10 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(viewport.getExposes()).toBeTruthy();
     expect(styleContains(viewport, 'h-full')).toBe(true);
     expect(styleContains(viewport, 'w-full')).toBe(true);
-    // Composed projection is configured via asScrollSurface().configure({ projection: 'composed' })
-    // The host-observable effect (native scrollbar hidden, composed chrome visible)
-    // requires a browser journey to verify; unit test confirms the viewport exists and
-    // has the composed surface tokens.
+    expect(styleContains(viewport, 'block')).toBe(true);
+    expect(styleContains(viewport, 'overflow-auto')).toBe(true);
+    expect(styleContains(viewport, 'rounded-none')).toBe(true);
+    expect(styleContains(viewport, 'outline-none')).toBe(true);
   });
 
   it('root inherits Base Scroll Area Root', async () => {

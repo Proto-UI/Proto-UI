@@ -82,6 +82,9 @@ implementations:
       - P-BASE-SCROLL-AREA-SCROLLBAR
       - P-BASE-SCROLL-AREA-THUMB
       - P-BRUTALIST-SCROLL-AREA
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR
+      - P-BRUTALIST-SCROLL-AREA-THUMB
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT
   - id: www-brutalist-scroll-area-demo-layout
     kind: workspace-check
     status: passing
