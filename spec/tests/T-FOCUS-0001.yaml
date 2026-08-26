@@ -91,7 +91,9 @@ cases:
   - id: T-FOCUS-0001-CASE-FOCUS-VISIBLE-NATIVE-EQUALITY
     title: Focus-visible equals the host native result when supported, falling back to modality only when the target is not measurable
     covers:
-      - C-AS-FOCUSABLE-0001-E
+      - C-AS-FOCUSABLE-0001-C
+    notes:
+      - Native :focus-visible equality is governed by the state-backed observed handles criterion (C-AS-FOCUSABLE-0001-C), not the disabled-rejects-focus criterion (C-AS-FOCUSABLE-0001-E).
     expectation: focus-visible-equals-native-result-when-supported-modality-fallback-when-unsupported
 
 implementations:

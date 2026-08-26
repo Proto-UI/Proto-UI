@@ -35,6 +35,11 @@ cases:
       - C-STATE-INTERACTION-0003-C
       - C-STATE-INTERACTION-0003-D
     expectation: shared-interaction-state-reference
+  - id: T-STATE-INTERACTION-0001-CASE-FOCUS-FACTS-NOT-OWNED
+    title: focused and focusVisible are not runtime-managed by state-interaction wiring
+    covers:
+      - C-STATE-INTERACTION-0002-G
+    expectation: focus-facts-not-owned-by-state-interaction
 implementations:
   - id: runtime-state-interaction-event-wiring-contract
     kind: runtime-test
@@ -46,6 +51,7 @@ implementations:
       - T-STATE-INTERACTION-0001-CASE-CALLBACK-ORDER
       - T-STATE-INTERACTION-0001-CASE-DISABLED-GATE
       - T-STATE-INTERACTION-0001-CASE-SHARED-SUBJECT
+      - T-STATE-INTERACTION-0001-CASE-FOCUS-FACTS-NOT-OWNED
   - id: module-event-internal-listener-order-contract
     kind: module-test
     status: passing
