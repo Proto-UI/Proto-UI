@@ -44,9 +44,10 @@ Vertical: Base Button → Shadcn Button → Brutalist Button → Web Component /
 
 ## Gaps found
 
-1. **No dedicated browser journey for Base Button.** No dedicated Button browser journey exists for Base, Shadcn, or Brutalist. The existing `demo-brutalist-controls.browser.test.ts` covers Switch, Tabs, Scroll Area, Textarea, and Dropdown, but not Button. A Button browser journey would prove the visual grammar, interaction states, and adapter parity across WC/React/Vue.
-2. **No automated WCAG contrast-ratio test for Button.** The Brutalist Button uses `bg-main`/`text-main-foreground` and the Shadcn Button uses `bg-primary`/`text-primary-foreground` but no automated contrast-ratio test exists in the test suite (manual contrast was measured and retained in P-SHADCN-BUTTON from #454).
+1. **No dedicated Button browser journey for any surface.** No dedicated Button browser journey exists for Base, Shadcn, or Brutalist. The existing `demo-brutalist-controls.browser.test.ts` covers Switch, Tabs, Scroll Area, Textarea, and Dropdown, but not Button. A Button browser journey would prove the visual grammar, interaction states, and adapter parity across WC/React/Vue.
+2. **No Brutalist consumer verification.** Brutalist Button is not in release consumer smoke `RELEASE_ROOTS`; only Base and Shadcn are consumer-verified.
+3. **No automated WCAG contrast-ratio test for Button.** The Brutalist Button uses `bg-main`/`text-main-foreground` and the Shadcn Button uses `bg-primary`/`text-primary-foreground` but no automated contrast-ratio test exists in the test suite (manual contrast was measured and retained in P-SHADCN-BUTTON from #454).
 
 ## Conclusion
 
-The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), and docs. Gaps remain in browser journey coverage (no dedicated Button browser journey for Base, Shadcn, or Brutalist) and consumer verification (Brutalist not in release consumer smoke). The two remaining gaps are: (1) Base-level browser journey (no dedicated Base Button browser test), (2) automated WCAG contrast-ratio test (manual contrast was measured and retained in P-SHADCN-BUTTON from #454; only the automated test is missing). None are semantic defects.
+The Button vertical is well-covered across spec, source, unit tests, package exports, CLI registry (including smoke tests), and docs. Three remaining gaps: (1) no dedicated Button browser journey for Base, Shadcn, or Brutalist; (2) no Brutalist consumer verification (Brutalist not in release consumer smoke); (3) no automated WCAG contrast-ratio test (manual contrast was measured and retained in P-SHADCN-BUTTON from #454; only the automated test is missing). None are semantic defects.
