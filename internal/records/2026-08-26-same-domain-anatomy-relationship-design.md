@@ -30,13 +30,15 @@ This approach is compatible with D-A11Y-PART-RELATIONSHIP-PROJECTION-0001 becaus
 
 The second Codex finding identifies a real gap: Content cannot directly clear Trigger's `aria-controls` because the `contentId` state is private to the Trigger. The proposed resolution:
 
-1. The family root (e.g., TabsRoot) owns a shared context with a per-match-key presence map (e.g., `Record<string, boolean>` keyed by protocol match key). This supports repeatable Trigger/Content pairs where each pair is matched by `value`.
-2. When Content mounts, it notifies the root via context (e.g., `contentPresent.set(matchKey, true)`).
-3. When Content detaches (L1), it notifies the root (`contentPresent.set(matchKey, false)`).
+1. The family root (e.g., TabsRoot) owns a shared context with a per-match-key presence set (e.g., `Record<string, Set<instanceId>>` keyed by protocol match key). This retains instance multiplicity: if two Content instances share a match key, both are tracked. Per `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-D`, the Web adapter resolves duplicate/ambiguous presence at projection time — the root does not collapse it to a single boolean. The Trigger checks whether the set is non-empty (at least one matching Content is present), and the adapter handles duplicate-instance fallback.
+2. When Content mounts, it adds its instance ID to the set: `contentPresent.get(matchKey).add(instanceId)`.
+3. When Content detaches (L1), it removes its instance ID: `contentPresent.get(matchKey).delete(instanceId)`.
 4. The Trigger observes its own match key in `contentPresent` and adjusts its relation target:
    - `contentPresent[myMatchKey] === true`: relation target = contentId (restores aria-controls)
    - `contentPresent[myMatchKey] === false`: relation target = empty string (removes aria-controls)
    This per-key tracking ensures a Trigger only restores aria-controls when its matched Content is present, not when any Content mounts.
+
+   **Pre-commit timing**: the presence signal must be set before the mount render/commit, not in a mounted callback. The runtime performs mount commit before invoking mounted callbacks, so a post-mount presence update leaves the newly committed panel temporarily without the reciprocal IDREF. The Content must notify the root of its presence during the setup/mount-preparation phase, before the first render commit.
 5. This is a root-mediated presence propagation, not a direct Content→Trigger write.
 
 This approach is compatible with C-ANATOMY-0001 (anatomy is not an information channel) because the presence field is structural metadata, not arbitrary data.
