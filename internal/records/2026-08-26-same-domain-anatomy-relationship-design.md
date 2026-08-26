@@ -11,6 +11,35 @@ Disclosure/Collapsible/Accordion Trigger→Content needs a same-domain opaque re
 4. Restores the same reserved ID and ARIA IDREF on rematerialization
 5. Clears the relation and reservation on terminal disposal
 
+## Reconciliation with existing governance
+
+`D-A11Y-PART-RELATIONSHIP-PROJECTION-0001` (draft) already governs anatomy part relationships. Criteria B-D require structured part matching based on anatomy family, part role, same-domain scope, and protocol match keys — not precomputed string IDs. The existing `def.a11y.relation()` API with string/State targets is the current Web projection mechanism but does not carry the structured part semantics (family, role, match key) that the decision requires.
+
+This design record does not propose to replace `def.a11y.relation()` with a new API. Instead, it proposes:
+1. The existing a11y relation API continues to project the Web ARIA attribute (string target).
+2. The structured part matching (family, role, match key) is handled by the anatomy module, which resolves the correct part ID at mount time and feeds it to the a11y relation target state.
+3. The detach-aware behavior is a host-capability concern: the web adapter removes the ARIA attribute when the target element is absent, regardless of whether the string ID is still set.
+
+This approach is compatible with D-A11Y-PART-RELATIONSHIP-PROJECTION-0001 because:
+- The cross-platform semantic relationship is still expressed via anatomy (family, role, match key).
+- The Web adapter still projects to ARIA attributes using stable host identifiers.
+- The adapter does not guess component-specific structure.
+- The detach-aware behavior is an adapter-level concern, not a protocol-level change.
+
+## Presence propagation
+
+The second Codex finding identifies a real gap: Content cannot directly clear Trigger's `aria-controls` because the `contentId` state is private to the Trigger. The proposed resolution:
+
+1. The family root (e.g., TabsRoot) owns a shared context with part-presence fields.
+2. When Content mounts, it notifies the root via context (e.g., `contentPresent.set(true)`).
+3. When Content detaches (L1), it notifies the root (`contentPresent.set(false)`).
+4. The Trigger observes `contentPresent` and adjusts its relation target:
+   - `contentPresent === true`: relation target = contentId (restores aria-controls)
+   - `contentPresent === false`: relation target = empty string (removes aria-controls)
+5. This is a root-mediated presence propagation, not a direct Content→Trigger write.
+
+This approach is compatible with C-ANATOMY-0001 (anatomy is not an information channel) because the presence field is structural metadata, not arbitrary data.
+
 ## Current pattern
 
 Tabs, Dialog, Dropdown, Select, and Hover Card all use `def.a11y.relation()` with string ID targets:
