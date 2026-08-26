@@ -53,9 +53,11 @@ Define named surface/control categories with explicit defaults and permitted exc
 4. **Binary control** (Switch): 3px rest, no hover lift, press color swap + shadow-none. Exception: thumb retains its own 3px.
 5. **Editable surface** (Textarea): 3px rest, focus ring only, no hover lift or press.
 6. **Panel** (Card): 6px rest (larger panel depth), no interaction motion.
-7. **Passive label** (Badge): 2px rest (smaller), no interaction motion.
-8. **Loading placeholder** (Skeleton): 2px rest (smaller), no interaction motion.
-9. **Chrome** (Separator, Scroll Area): no rest shadow, no interaction motion.
+7. **Content panel** (Dialog Content, Dropdown Content, Select Content, Hover Card Content): 3px rest (`shadow-[3px_3px_0_0_#000]`), no interaction motion (positioned by adapter, not self-elevating).
+8. **Flat interactive item** (Dropdown Menu Item, Select Item): no resting shadow, hover/active visual feedback via background change, no lift or press depth.
+9. **Passive label** (Badge): 2px rest (smaller), no interaction motion.
+10. **Loading placeholder** (Skeleton): 2px rest (smaller), no interaction motion.
+11. **Chrome** (Separator, Scroll Area): no rest shadow, no interaction motion.
 
 ## Next steps
 
