@@ -52,6 +52,15 @@ implementations:
       - T-ADAPTER-TYPES-0001-CASE-PROPS
       - T-ADAPTER-TYPES-0001-CASE-EVENTS
       - T-ADAPTER-TYPES-0001-CASE-EXPOSES
+  - id: adapter-vue2-public-types
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/types.test.ts
+    required: false
+    consumesCases:
+      - T-ADAPTER-TYPES-0001-CASE-PROPS
+      - T-ADAPTER-TYPES-0001-CASE-EVENTS
+      - T-ADAPTER-TYPES-0001-CASE-EXPOSES
   - id: adapter-web-component-public-types
     kind: adapter-test
     status: passing

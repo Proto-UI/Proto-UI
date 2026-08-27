@@ -1,7 +1,7 @@
 import { formatCode } from '@/utils/conversionUtils';
 import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/registry';
 
-export const codeMap: Record<RuntimeId, Record<string, string>> = {
+export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
   wc: {
     'demo-base-hover-card': formatCode(`
 <wc-base-hover-card-root class="relative inline-flex items-start">

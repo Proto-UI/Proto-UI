@@ -196,7 +196,7 @@ async function fetchAsset(env, request) {
 }
 
 async function assetHealth(env) {
-  const probe = await env.ASSETS.fetch(new Request(`${CANONICAL_ORIGIN}/index.html`));
+  const probe = await env.ASSETS.fetch(new Request(`${CANONICAL_ORIGIN}/`));
   return response(null, { status: probe.ok ? 204 : 503 });
 }
 

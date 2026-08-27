@@ -23,6 +23,7 @@ cases:
       - M-STATE-0001-E
       - A-REACT-18-19-0001-J
       - A-VUE-3-0001-J
+      - A-VUE-2-0001-J
       - A-WEB-COMPONENT-0001-J
     expectation: official-adapters-expose-required-state-runtime
   - id: T-STATE-0005-CASE-INSTANCE-LIFETIME
@@ -52,6 +53,7 @@ cases:
       - M-STATE-0001-D
       - A-REACT-18-19-0001-J
       - A-VUE-3-0001-J
+      - A-VUE-2-0001-J
       - A-WEB-COMPONENT-0001-J
     expectation: state-mutation-does-not-render-until-adapter-update
 implementations:
@@ -117,6 +119,14 @@ implementations:
     consumesCases:
       - T-STATE-0005-CASE-REQUIRED-SUPPORT
       - T-STATE-0005-CASE-EXPLICIT-RENDER
+  - id: adapter-vue2-state-runtime
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/expose.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-REQUIRED-SUPPORT
+      - T-STATE-0005-CASE-EXPLICIT-RENDER
   - id: adapter-web-component-state-runtime
     kind: adapter-test
     status: passing
@@ -151,6 +161,10 @@ verifies:
     - id: A-VUE-3-0001
       anchors:
         - A-VUE-3-0001-J
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-J
     - id: A-WEB-COMPONENT-0001
       anchors:
         - A-WEB-COMPONENT-0001-J
@@ -173,6 +187,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Exercises instance-lifetime preservation across repeatable view epochs and terminal invalidation.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added official Vue 2 required-State and explicit-render evidence.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added State Module, required official Adapter support, no-host-cap, explicit-render, capability-view, compatibility-bridge, and instance-lifecycle conformance mappings.

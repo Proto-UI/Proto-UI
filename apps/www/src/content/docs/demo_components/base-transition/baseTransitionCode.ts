@@ -26,7 +26,7 @@ const cssSnippet = `
 }
 `.trim();
 
-export const codeMap: Record<RuntimeId, Record<string, string>> = {
+export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
   wc: {
     'demo-base-transition-command': formatCode(`
 <wc-base-transition open appear class="transition-wrapper">

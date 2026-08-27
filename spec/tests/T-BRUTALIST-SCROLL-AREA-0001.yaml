@@ -55,6 +55,8 @@ implementations:
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT
       - P-BRUTALIST-SCROLL-AREA-SCROLLBAR
       - P-BRUTALIST-SCROLL-AREA-THUMB
+    notes:
+      - The shared journey is mandatory for Web Components, React, Vue, and Vue 2.
   - id: www-brutalist-scroll-area-demo-layout
     kind: workspace-check
     status: passing
@@ -94,6 +96,9 @@ exercises:
     - P-BRUTALIST-SCROLL-AREA-THUMB
     - P-BRUTALIST-SCROLL-AREA-VIEWPORT
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added Vue 2 to the mandatory shared Web Adapter Move journey.
   - version: 0.2.0
     change: revised
     summary: Added a responsive reference-demo sizing guard for the complete Root and scrollbar at phone widths while retaining the 20rem desktop cap.
