@@ -7,6 +7,7 @@ import {
   validateSelfAssessmentResult,
 } from './assessment-runtime.mjs';
 import {
+  authorizePullRequestMerge,
   authorizeReviewSubmission,
   computeReviewInputDigest,
   decideReviewRun,
@@ -18,8 +19,18 @@ import {
   validateReviewPacketEligibility,
   verifyReconciliation,
 } from './review-runtime.mjs';
-import { collectLiveReviewInput, summarizeLiveChecks } from './collect-live-review-input.mjs';
-import { loadSkillRegistry, skillRegistryRoot, validateSkillHandoff } from './skill-registry.mjs';
+import {
+  collectLiveReviewInput,
+  submitGitHubMerge,
+  submitGitHubReview,
+  summarizeLiveChecks,
+} from './collect-live-review-input.mjs';
+import {
+  evaluateSkillEligibility,
+  loadSkillRegistry,
+  skillRegistryRoot,
+  validateSkillHandoff,
+} from './skill-registry.mjs';
 
 function usage() {
   return [
@@ -28,15 +39,23 @@ function usage() {
     '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>]',
     '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
-    '  pnpm agent:review -- authorize-submission --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization explicit-current-user',
+    '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
+    '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
     '',
-    'authorize-submission re-collects the canonical review input live from GitHub and derives the viewer identity, pull-request author, credential permission, and CI conclusion from that live context; caller-provided identities are never accepted. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
+    'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
     '',
     '  pnpm agent:review:smoke -- <repositoryId> <pullRequest>   # exercise the live collector against the real GitHub GraphQL schema',
   ].join('\n');
 }
 
-const COMMANDS = ['input-digest', 'validate', 'inspect', 'eligibility', 'authorize-submission'];
+const COMMANDS = [
+  'input-digest',
+  'validate',
+  'inspect',
+  'eligibility',
+  'submit-review',
+  'merge-pull-request',
+];
 const ALLOWED_OPTIONS = new Map([
   ['input-digest', new Set(['--input'])],
   ['validate', new Set(['--packet', '--input', '--handoff', '--assessment'])],
@@ -56,7 +75,18 @@ const ALLOWED_OPTIONS = new Map([
   ],
   ['eligibility', new Set(['--handoff', '--review-class', '--assessment'])],
   [
-    'authorize-submission',
+    'submit-review',
+    new Set([
+      '--packet',
+      '--input',
+      '--handoff',
+      '--assessment',
+      '--authorization',
+      '--external-evidence-file',
+    ]),
+  ],
+  [
+    'merge-pull-request',
     new Set([
       '--packet',
       '--input',
@@ -117,6 +147,17 @@ function loadReviewHandoff(path) {
   return result.handoff;
 }
 
+function loadIntegrationHandoff(path) {
+  if (!path) throw new Error('--handoff is required');
+  const registry = loadSkillRegistry();
+  const handoff = JSON.parse(fs.readFileSync(path, 'utf8'));
+  const result = validateSkillHandoff(handoff, registry);
+  if (result.nextSkill?.id !== 'pui-integrate') {
+    throw new Error('handoff must select pui-integrate');
+  }
+  return result;
+}
+
 function validateExecution(args, packet, policy) {
   const handoff = loadReviewHandoff(args.get('--handoff'));
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
@@ -127,7 +168,55 @@ function validateExecution(args, packet, policy) {
     policy,
   });
   validateReviewPacketEligibility(packet, eligibility, handoff.executionMode);
-  return { handoff, eligibility };
+  return { handoff, eligibility, selfAssessment };
+}
+
+function validateIntegrationExecution(args, packet, policy) {
+  const routed = loadIntegrationHandoff(args.get('--handoff'));
+  const selfAssessment = loadAssessment(args.get('--assessment'), policy);
+  const reviewEligibility = evaluateReviewEligibility({
+    executionMode: routed.handoff.executionMode,
+    reviewClass: packet.reviewClass,
+    selfAssessment,
+    policy,
+  });
+  validateReviewPacketEligibility(packet, reviewEligibility, routed.handoff.executionMode);
+  const skillEligibility = evaluateSkillEligibility(routed.nextSkill, {
+    executionMode: routed.handoff.executionMode,
+    selfAssessment,
+  });
+  if (!skillEligibility.eligible) {
+    throw new Error(skillEligibility.reason);
+  }
+  return {
+    handoff: routed.handoff,
+    reviewEligibility,
+    selfAssessment,
+    skillEligibility,
+  };
+}
+
+function readExternalEvidence(args) {
+  const externalEvidencePath = args.get('--external-evidence-file');
+  if (!externalEvidencePath) return [];
+  const parsed = JSON.parse(fs.readFileSync(externalEvidencePath, 'utf8'));
+  if (!Array.isArray(parsed)) {
+    throw new Error('--external-evidence-file must contain a JSON array');
+  }
+  return parsed;
+}
+
+function renderReviewBody(packet) {
+  const prefix = `Reviewed exact head \`${packet.headSha}\`.`;
+  if (packet.findings.length === 0) return prefix;
+  return [
+    prefix,
+    '',
+    ...packet.findings.map(
+      (finding) =>
+        `- **[${finding.severity}] ${finding.id}** (${finding.file}:${finding.line}) ${finding.observed} Expected: ${finding.expected} Fix: ${finding.fix}`
+    ),
+  ].join('\n');
 }
 
 try {
@@ -201,49 +290,98 @@ try {
       selfAssessment,
       policy,
     });
-  } else {
+  } else if (command === 'submit-review') {
     const input = readInput(args.get('--input'));
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
     const execution = validateExecution(args, packet, policy);
-    if (execution.handoff.executionMode === 'human-assisted') {
-      const externalEvidencePath = args.get('--external-evidence-file');
-      let externalEvidence = [];
-      if (externalEvidencePath) {
-        const parsed = JSON.parse(fs.readFileSync(externalEvidencePath, 'utf8'));
-        if (!Array.isArray(parsed)) {
-          throw new Error('--external-evidence-file must contain a JSON array');
-        }
-        externalEvidence = parsed;
-      }
-      const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
-        externalEvidence,
-      });
-      output = authorizeReviewSubmission({
-        packet,
-        input,
-        liveInput: live.input,
-        executionMode: execution.handoff.executionMode,
-        explicitAuthorization: args.get('--authorization') === 'explicit-current-user',
-        credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
-        reviewer: live.viewerLogin,
-        pullRequestAuthor: live.authorLogin,
-        ciConclusion: summarizeLiveChecks(live.input.checks),
-      });
+    const externalEvidence = readExternalEvidence(args);
+    const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
+      externalEvidence,
+    });
+    const authorization = authorizeReviewSubmission({
+      packet,
+      input,
+      liveInput: live.input,
+      executionMode: execution.handoff.executionMode,
+      executionModeSource: execution.handoff.executionModeSource,
+      authorizationId: args.get('--authorization'),
+      policy,
+      selfAssessment: execution.selfAssessment,
+      credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
+      reviewer: live.viewerLogin,
+      pullRequestAuthor: live.authorLogin,
+      ciConclusion: summarizeLiveChecks(live.input.checks, {
+        repositoryId: packet.repositoryId,
+        trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
+        trustedSource: policy.trustedCiEvidence?.source,
+        trustedCheckNames: policy.trustedCiEvidence?.checkNames,
+        trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
+        trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
+      }),
+    });
+    if (!authorization.allowed) {
+      output = authorization;
     } else {
-      output = authorizeReviewSubmission({
-        packet,
-        input,
-        liveInput: null,
-        executionMode: 'autonomous',
-        explicitAuthorization: args.get('--authorization') === 'explicit-current-user',
-        credentialCanReview: false,
-        reviewer: '',
-        pullRequestAuthor: '',
-        ciConclusion: 'unknown',
+      const receipt = submitGitHubReview(packet.repositoryId, packet.pullRequest, {
+        commitId: packet.headSha,
+        event: authorization.recommendedAction,
+        body: renderReviewBody(packet),
       });
+      output = {
+        ...authorization,
+        submitted: true,
+        receipt,
+      };
+    }
+  } else {
+    const input = readInput(args.get('--input'));
+    const packet = readPacket(args.get('--packet'), input);
+    const policy = loadCapabilityPolicy(
+      new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
+    );
+    const execution = validateIntegrationExecution(args, packet, policy);
+    const externalEvidence = readExternalEvidence(args);
+    const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
+      externalEvidence,
+    });
+    const authorization = authorizePullRequestMerge({
+      packet,
+      input,
+      liveInput: live.input,
+      executionMode: execution.handoff.executionMode,
+      executionModeSource: execution.handoff.executionModeSource,
+      authorizationId: args.get('--authorization'),
+      policy,
+      selfAssessment: execution.selfAssessment,
+      credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
+      actor: live.viewerLogin,
+      pullRequestAuthor: live.authorLogin,
+      ciConclusion: summarizeLiveChecks(live.input.checks, {
+        repositoryId: packet.repositoryId,
+        trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
+        trustedSource: policy.trustedCiEvidence?.source,
+        trustedCheckNames: policy.trustedCiEvidence?.checkNames,
+        trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
+        trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
+      }),
+      mergeable: live.mergeable,
+      mergeStateStatus: live.mergeStateStatus,
+    });
+    if (!authorization.allowed) {
+      output = authorization;
+    } else {
+      const receipt = submitGitHubMerge(packet.repositoryId, packet.pullRequest, {
+        headSha: authorization.headSha,
+        mergeMethod: authorization.mergeMethod,
+      });
+      output = {
+        ...authorization,
+        submitted: true,
+        receipt,
+      };
     }
   }
   process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);

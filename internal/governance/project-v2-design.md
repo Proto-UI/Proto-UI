@@ -70,7 +70,7 @@ Expiry automation may flag a stale claim. It must not delete a human's work, rea
 
 ## Human gates
 
-The complete always-human gate catalog lives in `internal/agent-operations/capability-policy.yaml`. Project fields may display the next gate, but cannot satisfy it. Semantic admission, ownership, compatibility tradeoffs, contributor rights, security handling, integration, approval, merge, publication, release, access, secrets, and repository rule changes stay attended.
+The default human-gate catalog lives in `internal/agent-operations/capability-policy.yaml`. Project fields may display the next gate, but cannot satisfy it. Semantic admission, ownership, compatibility tradeoffs, contributor rights, security handling, publication, release, access, secrets, and repository rule changes stay attended. Approval or merge may proceed unattended only through an exact active standing authorization whose live evidence and repository rules already resolve that bounded action; Project state alone never supplies that authorization.
 
 ## Rollout
 
@@ -80,7 +80,7 @@ The complete always-human gate catalog lives in `internal/agent-operations/capab
 4. Import a bounded set of live items and compare every projected value with its source.
 5. Enable deterministic intake and evidence projections in shadow mode. Preserve proposed writes as artifacts.
 6. Review idempotency, concurrency, rollback, stale-claim, and permission evidence.
-7. Enable one reversible write class after an explicit maintainer decision. Keep semantic and integration transitions manual.
+7. Enable one reversible write class after an explicit maintainer decision. Keep semantic and integration transitions manual unless a separately reviewed standing authorization fixes the exact action, evidence, permission, idempotency, and rollback boundary.
 8. Audit drift and false transitions before adding another write class.
 
 Rollback disables the writer, preserves its ledger, and restores only values whose last writer and prior value are proven. Unknown provenance requires manual repair.
