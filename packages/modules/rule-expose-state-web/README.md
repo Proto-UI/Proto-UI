@@ -20,6 +20,7 @@ npm install @proto.ui/module-rule-expose-state-web@0.3.0-alpha.0
 
 - `src/caps.ts`
 - `src/create.ts`
+- `src/generated/`
 - `src/index.ts`
 - `src/types.ts`
 
