@@ -65,4 +65,27 @@ This is the test component for vue
   />
 </div>
 
+<div data-adapter-panel="vue2" style="display:none;">
+  This is the button component for vue2
+  <PrototypePreviewer
+    demoId="demo-button"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button', codeMap)}
+  />
+
+This is the test component for vue2
+
+  <PrototypePreviewer
+    demoId="demo-button"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button', codeMap)}
+  />
+</div>
+
 <AdapterPanelScript />

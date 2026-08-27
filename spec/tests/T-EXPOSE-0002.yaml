@@ -28,6 +28,7 @@ cases:
       - M-EXPOSE-0001-E
       - A-REACT-18-19-0001-K
       - A-VUE-3-0001-K
+      - A-VUE-2-0001-K
       - A-WEB-COMPONENT-0001-K
     expectation: required-official-adapter-support
   - id: T-EXPOSE-0002-CASE-LIFECYCLE
@@ -47,6 +48,7 @@ cases:
       - C-EXPOSE-0007-F
       - A-REACT-18-19-0001-K
       - A-VUE-3-0001-K
+      - A-VUE-2-0001-K
       - A-WEB-COMPONENT-0001-K
     expectation: recursive-callback-scoped-callables
   - id: T-EXPOSE-0002-CASE-AS-HOOK
@@ -127,6 +129,15 @@ implementations:
       - T-EXPOSE-0002-CASE-PROFILE
       - T-EXPOSE-0002-CASE-LIFECYCLE
       - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
+  - id: adapter-vue2-expose-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/expose.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-PROFILE
+      - T-EXPOSE-0002-CASE-LIFECYCLE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
   - id: adapter-web-component-expose-contract
     kind: adapter-test
     status: passing
@@ -182,10 +193,17 @@ verifies:
     - id: A-VUE-3-0001
       anchors:
         - A-VUE-3-0001-K
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-K
     - id: A-WEB-COMPONENT-0001
       anchors:
         - A-WEB-COMPONENT-0001-K
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added official Vue 2 public-instance Expose and terminal-callable evidence.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added Expose core Module and official Adapter profile conformance mapping.

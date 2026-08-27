@@ -170,4 +170,6 @@ export type DemoRenderOptions = {
   runtime: RuntimeId;
   demo: DemoSpec;
   host: HTMLElement;
+  /** Returns false once the caller has switched away or been destroyed. */
+  isCurrent?: () => boolean;
 };
