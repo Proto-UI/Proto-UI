@@ -32,7 +32,6 @@ export type TextControlPatch = Readonly<{
   wrap?: TextControlWrap;
   inputMode?: TextControlInputMode;
   enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
-  type?: string;
 }>;
 
 /**

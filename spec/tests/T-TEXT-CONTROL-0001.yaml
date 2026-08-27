@@ -10,11 +10,6 @@ cases:
     covers:
       - C-TEXT-CONTROL-0001-A
     expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
-  - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-TARGET
-    title: Host-neutral static requirements materialize one input for single-line across Web Component, React, and Vue adapters on the Web host
-    covers:
-      - C-TEXT-CONTROL-0001-A
-    expectation: semantic-single-line-requirement-resolves-to-one-web-input-before-render
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
     title: Portable patches project single-line properties (inputMode, enterKeyHint, type) on an HTMLInputElement
     covers:

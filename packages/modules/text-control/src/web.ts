@@ -142,15 +142,6 @@ function applyPatch(
   if (patch.wrap === 'soft' || patch.wrap === 'hard') {
     if (target instanceof HTMLTextAreaElement) target.wrap = patch.wrap;
   }
-  // Single-line specific properties (HTMLInputElement only)
-  // Constrain to text-compatible types that support value/selection APIs.
-  const TEXT_COMPATIBLE_TYPES = new Set([
-    'text', 'search', 'url', 'tel', 'password',
-  ]);
-  if (typeof patch.type === 'string' && target instanceof HTMLInputElement) {
-    const typeToSet = TEXT_COMPATIBLE_TYPES.has(patch.type) ? patch.type : 'text';
-    target.type = typeToSet;
-  }
   if (typeof patch.inputMode === 'string' && target instanceof HTMLInputElement) {
     target.inputMode = patch.inputMode;
   }
