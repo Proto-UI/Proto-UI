@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type {
   DemoChild,
@@ -17,6 +19,21 @@ const checkboxDemo = checkboxDefinition as DemoSpec;
 const scrollAreaDemo = scrollAreaDefinition as DemoSpec;
 const tooltipDemo = tooltipDefinition as DemoSpec;
 type PrototypeDemoNode = Extract<DemoNode, { kind: 'proto' }>;
+
+const documentationRoot = resolve(process.cwd(), 'apps/www/src/content/docs');
+const publicPageSources = [
+  'en/ui-libraries/shadcn/tooltip.mdx',
+  'zh-cn/ui-libraries/shadcn/tooltip.mdx',
+  'en/ui-libraries/shadcn/scroll-area.mdx',
+  'zh-cn/ui-libraries/shadcn/scroll-area.mdx',
+  'en/ui-libraries/brutalist/components/checkbox.mdx',
+  'zh-cn/ui-libraries/brutalist/components/checkbox.mdx',
+].map((path) => readFileSync(resolve(documentationRoot, path), 'utf8'));
+const sidebarSource = readFileSync(resolve(process.cwd(), 'apps/www/astro.config.mjs'), 'utf8');
+const overviewSource = readFileSync(
+  resolve(process.cwd(), 'apps/www/src/components/PrototypeLibraryOverview.astro'),
+  'utf8'
+);
 
 const EXPECTED_PROTOTYPES = {
   'shadcn-scroll-area-root': 'shadcn-scroll-area-root',
@@ -58,6 +75,27 @@ function isPrototype(node: DemoNode, prototypeId: string): node is PrototypeDemo
 }
 
 describe('draft coverage-matrix documentation demos', () => {
+  it('publishes every page through navigation and the full public runtime default', () => {
+    for (const slug of [
+      'ui-libraries/shadcn/tooltip',
+      'ui-libraries/shadcn/scroll-area',
+      'ui-libraries/brutalist/components/checkbox',
+    ]) {
+      expect(sidebarSource).toContain(`slug: '${slug}'`);
+    }
+    for (const demoId of [
+      'demo-shadcn-tooltip',
+      'demo-shadcn-scroll-area',
+      'demo-brutalist-checkbox',
+    ]) {
+      expect(overviewSource).toContain(`demoId: '${demoId}'`);
+    }
+    for (const source of publicPageSources) {
+      expect(source).not.toContain('hasCode={true}');
+      expect(source).not.toContain('runtimes=');
+    }
+  });
+
   it('composes Scroll Area as Root -> Viewport + oriented Scrollbar -> Thumb', () => {
     const nodes = collectNodes(scrollAreaDemo.root);
     const root = nodes.find(

@@ -15,6 +15,7 @@ const ROOT_BASE_TOKENS = [
   'border-2',
   'border-black',
   'bg-main',
+  'text-main-foreground',
   'shadow-[3px_3px_0_0_#000]',
   'outline-none',
   'select-none',

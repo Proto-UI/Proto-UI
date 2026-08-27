@@ -51,6 +51,7 @@ describe('prototypes/brutalist: checkbox', () => {
 
     expect(root.getExposes().checked.get()).toBe(false);
     expect(styleContains(root, 'bg-main')).toBe(true);
+    expect(styleContains(root, 'text-main-foreground')).toBe(true);
 
     root.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
@@ -96,6 +97,7 @@ describe('prototypes/brutalist: checkbox', () => {
     await settle();
     expect(root.getExposes().checked.get()).toBe(false);
     expect(root.getExposes().indeterminate.get()).toBe(true);
+    expect(styleContains(root, 'text-main-foreground')).toBe(true);
     expect(styleContains(indicator, 'data-[indeterminate]:opacity-100')).toBe(true);
     expect(glyphPaths(indicator)).toEqual([DASH_PATH]);
 

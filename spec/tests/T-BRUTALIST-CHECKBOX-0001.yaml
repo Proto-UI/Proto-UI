@@ -17,7 +17,7 @@ cases:
       - P-BRUTALIST-CHECKBOX-INDICATOR-BASE-INHERITANCE
     expectation: p-brutalist-checkbox-entry-inheritance
   - id: T-BRUTALIST-CHECKBOX-0001-CASE-2
-    title: Checked swaps fill to foreground; unchecked restores main fill
+    title: Resting and mixed states use paired main ink; checked swaps to foreground fill
     covers:
       - P-BRUTALIST-CHECKBOX-VISUAL-GRAMMAR
     expectation: p-brutalist-checkbox-checked-fill-swap

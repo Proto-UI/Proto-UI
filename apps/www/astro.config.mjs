@@ -386,6 +386,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/separator',
                 },
                 {
+                  label: 'Scroll Area',
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/shadcn/scroll-area',
+                },
+                {
                   label: 'Switch',
                   translations: { en: 'Switch', 'zh-CN': 'Switch' },
                   slug: 'ui-libraries/shadcn/switch',
@@ -399,6 +404,11 @@ export default defineConfig({
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/shadcn/textarea',
+                },
+                {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/shadcn/tooltip',
                 },
                 {
                   label: 'Toggle',
@@ -442,6 +452,12 @@ export default defineConfig({
                   label: 'Card',
                   translations: { en: 'Card', 'zh-CN': 'Card' },
                   slug: 'ui-libraries/brutalist/components/card',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/brutalist/components/checkbox',
                   badge: inProgressBadge,
                 },
                 {

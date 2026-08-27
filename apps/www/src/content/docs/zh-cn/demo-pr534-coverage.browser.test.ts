@@ -24,6 +24,16 @@ const NARROW_WIDTH = 320;
 const GEOMETRY_EPSILON = 0.5;
 const MIN_NON_TEXT_CONTRAST = 3;
 const EVIDENCE_DIRECTORY = resolve(process.cwd(), '.codex', 'pr534-browser-evidence');
+const requestedRuntime = process.env.PROTO_UI_PR534_BROWSER_RUNTIME;
+const TEST_RUNTIMES = requestedRuntime
+  ? RUNTIMES.filter((runtime) => runtime === requestedRuntime)
+  : RUNTIMES;
+
+if (requestedRuntime && TEST_RUNTIMES.length === 0) {
+  throw new Error(
+    `PROTO_UI_PR534_BROWSER_RUNTIME must be one of ${RUNTIMES.join(', ')}; received ${requestedRuntime}.`
+  );
+}
 
 type ElementGeometry = {
   x: number;
@@ -71,6 +81,16 @@ async function expectNarrowLayout(
       NARROW_WIDTH + GEOMETRY_EPSILON
     );
   }
+}
+
+async function expectPublicPreviewerControls(previewer: Locator, label: string): Promise<void> {
+  expect(
+    await previewer
+      .locator('select.adapter-select option')
+      .evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value)),
+    `${label}/public-runtimes`
+  ).toEqual([...RUNTIMES]);
+  expect(await previewer.locator('[data-code-shell]').count(), `${label}/empty-code-panel`).toBe(0);
 }
 
 async function changedPixelCount(before: Buffer, after: Buffer): Promise<number> {
@@ -156,7 +176,8 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
 
     try {
       await previewer.scrollIntoViewIfNeeded();
-      for (const runtime of RUNTIMES) {
+      await expectPublicPreviewerControls(previewer, 'scroll-area');
+      for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-demo-ref="scrollViewport"]', 1);
 
         const viewport = previewer.locator('[data-demo-ref="scrollViewport"]');
@@ -246,11 +267,8 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
           horizontalTrackBox.width
         );
 
+        await verticalThumb.hover();
         const verticalDragStart = await geometry(verticalThumb, `${runtime}/vertical-drag-start`);
-        await page.mouse.move(
-          verticalDragStart.x + verticalDragStart.width / 2,
-          verticalDragStart.y + verticalDragStart.height / 2
-        );
         await page.mouse.down();
         await page.mouse.move(
           verticalDragStart.x + verticalDragStart.width / 2,
@@ -267,13 +285,10 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
           { timeout: 10_000 }
         );
 
+        await horizontalThumb.hover();
         const horizontalDragStart = await geometry(
           horizontalThumb,
           `${runtime}/horizontal-drag-start`
-        );
-        await page.mouse.move(
-          horizontalDragStart.x + horizontalDragStart.width / 2,
-          horizontalDragStart.y + horizontalDragStart.height / 2
         );
         await page.mouse.down();
         await page.mouse.move(
@@ -282,8 +297,39 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
           { steps: 4 }
         );
         await page.mouse.up();
-        await page.waitForFunction(
-          () => {
+        try {
+          await page.waitForFunction(
+            () => {
+              const surface = document.querySelector<HTMLElement>(
+                '[data-previewer-id] [data-demo-ref="scrollViewport"]'
+              );
+              const vertical = document.querySelector<HTMLElement>(
+                '[data-previewer-id] [data-demo-ref="verticalThumb"]'
+              );
+              const horizontal = document.querySelector<HTMLElement>(
+                '[data-previewer-id] [data-demo-ref="horizontalThumb"]'
+              );
+              return (
+                !!surface &&
+                !!vertical &&
+                !!horizontal &&
+                surface.scrollLeft > 0 &&
+                surface.scrollTop > 0 &&
+                surface.hasAttribute('data-scroll-horizontal-can-scroll-before') &&
+                surface.hasAttribute('data-scroll-vertical-can-scroll-before') &&
+                Number.parseFloat(
+                  vertical.style.getPropertyValue('--proto-ui-scroll-thumb-offset')
+                ) > 0 &&
+                Number.parseFloat(
+                  horizontal.style.getPropertyValue('--proto-ui-scroll-thumb-offset')
+                ) > 0
+              );
+            },
+            undefined,
+            { timeout: 20_000 }
+          );
+        } catch (error) {
+          const diagnostics = await page.evaluate(() => {
             const surface = document.querySelector<HTMLElement>(
               '[data-previewer-id] [data-demo-ref="scrollViewport"]'
             );
@@ -293,24 +339,21 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
             const horizontal = document.querySelector<HTMLElement>(
               '[data-previewer-id] [data-demo-ref="horizontalThumb"]'
             );
-            return (
-              !!surface &&
-              !!vertical &&
-              !!horizontal &&
-              surface.scrollLeft > 0 &&
-              surface.scrollTop > 0 &&
-              surface.hasAttribute('data-scroll-horizontal-can-scroll-before') &&
-              surface.hasAttribute('data-scroll-vertical-can-scroll-before') &&
-              Number.parseFloat(vertical.style.getPropertyValue('--proto-ui-scroll-thumb-offset')) >
-                0 &&
-              Number.parseFloat(
-                horizontal.style.getPropertyValue('--proto-ui-scroll-thumb-offset')
-              ) > 0
-            );
-          },
-          undefined,
-          { timeout: 20_000 }
-        );
+            return {
+              scrollLeft: surface?.scrollLeft,
+              scrollTop: surface?.scrollTop,
+              horizontalBefore: surface?.hasAttribute('data-scroll-horizontal-can-scroll-before'),
+              verticalBefore: surface?.hasAttribute('data-scroll-vertical-can-scroll-before'),
+              verticalOffset: vertical?.style.getPropertyValue('--proto-ui-scroll-thumb-offset'),
+              horizontalOffset: horizontal?.style.getPropertyValue(
+                '--proto-ui-scroll-thumb-offset'
+              ),
+            };
+          });
+          throw new Error(`${runtime}/composed-drag diagnostics: ${JSON.stringify(diagnostics)}`, {
+            cause: error,
+          });
+        }
 
         await expectNarrowLayout(page, runtime, [
           root,
@@ -339,7 +382,8 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
 
     try {
       await previewer.scrollIntoViewIfNeeded();
-      for (const runtime of RUNTIMES) {
+      await expectPublicPreviewerControls(previewer, 'tooltip');
+      for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-demo-ref="accountTrigger"]', 1);
 
         const triggers = previewer.locator(
@@ -439,7 +483,8 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
 
     try {
       await previewer.scrollIntoViewIfNeeded();
-      for (const runtime of RUNTIMES) {
+      await expectPublicPreviewerControls(previewer, 'checkbox');
+      for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[role="checkbox"]', 6);
         await page.waitForFunction(
           () =>
@@ -502,10 +547,30 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
 
         const checkbox = checkboxes.first();
         const row = checkbox.locator('xpath=..');
+        const mixedCheckbox = checkboxes.nth(2);
+        const mixedRow = mixedCheckbox.locator('xpath=..');
         await row.scrollIntoViewIfNeeded();
         for (const colorScheme of COLOR_SCHEMES) {
           const label = `${runtime}/${colorScheme}`;
           await applyColorScheme(page, colorScheme);
+
+          expect(await mixedCheckbox.getAttribute('aria-checked'), `${label}/mixed-aria`).toBe(
+            'mixed'
+          );
+          expect(
+            await mixedCheckbox.locator('svg path').getAttribute('d'),
+            `${label}/mixed-glyph`
+          ).toBe('M5 12h14');
+          expect(
+            await foregroundBackgroundContrast(mixedCheckbox),
+            `${label}/mixed-glyph-contrast`
+          ).toBeGreaterThanOrEqual(MIN_NON_TEXT_CONTRAST);
+          await mixedRow.screenshot({
+            path: evidencePath(runtime, colorScheme, 'mixed'),
+            animations: 'disabled',
+            caret: 'hide',
+            scale: 'css',
+          });
 
           if ((await checkbox.getAttribute('aria-checked')) !== 'false') {
             await checkbox.click();
