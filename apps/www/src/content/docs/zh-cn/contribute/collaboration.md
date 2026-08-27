@@ -35,7 +35,7 @@ Labels 只保留少量稳定搜索维度：工作类型、所属区域、工作�
 
 GitHub 权限决定平台操作。工作触及社区或 Bot surface 时，Discord 与 Poppy 信任才参与约束。本地 Agent 测评描述任务适配度：在 `human-assisted` 工作中它提供建议，在 `autonomous` 工作中它才是上限。任务风险和当前授权仍是独立条件。
 
-分数和 Discord role 都不能授予 GitHub 权限。本地结果也不能证明模型身份或预测验收。Approval、merge、release、仓库规则、访问控制和 secrets 仍由人类在场决策。
+分数和 Discord role 都不能授予 GitHub 权限。本地结果也不能证明模型身份或预测验收。Approval 与 merge 需要当前用户或精确 active standing authorization，并继续受实时仓库规则约束；本地 schedule 只有窄范围 review 与 exact-head integration scope。Release、仓库规则、访问控制和 secrets 仍由人类在场决策。
 
 主仓库和 Discord Bot 目前并不具备相同的 CI 与分支控制。协作者应按各仓库真实存在的控制工作，不能借用另一边的保证。
 
