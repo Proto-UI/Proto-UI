@@ -114,7 +114,7 @@ export class ImageViewModuleImpl extends ModuleBase {
     if (!this.host || !this.declared) return;
     if (this.lease) { this.lease.dispose(); this.lease = null; }
     this.lease = this.host.attach({
-      patch: this.patch,
+      patch: this.effectivePatch(),
       onStatusChange: (change) => this.receive(change),
     });
   }
@@ -141,8 +141,8 @@ export class ImageViewModuleImpl extends ModuleBase {
   private receive(change: ImageViewStatusChange): void {
     // Only accept status from current generation
     if (change.source !== this.source) return;
-    // Also check generation to prevent A→B→A stale completions
-    if (this.generation !== (change as any).generation) return;
+    // Reject if already terminal for this generation
+    if (this.loadingStatus === 'loaded' || this.loadingStatus === 'error') return;
     const previousStatus = this.loadingStatus;
     this.loadingStatus = change.status;
     const runInCallback = this.caps.has(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)
