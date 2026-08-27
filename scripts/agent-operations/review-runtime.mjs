@@ -823,12 +823,25 @@ export function authorizeReviewSubmission({
   };
 }
 
+function latestReviewStates(input) {
+  const reviews = input.reviews
+    .filter((review) => ['APPROVED', 'CHANGES_REQUESTED'].includes(review.state))
+    .toSorted((left, right) => {
+      const leftKey = `${left.submittedAt ?? ''}:${left.id}`;
+      const rightKey = `${right.submittedAt ?? ''}:${right.id}`;
+      return leftKey.localeCompare(rightKey);
+    });
+  const states = new Map();
+  for (const review of reviews) states.set(review.author, review.state);
+  return states;
+}
+
 function latestHeadReviewStates(input) {
   const reviews = input.reviews
     .filter(
       (review) =>
         review.commitSha === input.headSha &&
-        ['APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'].includes(review.state)
+        ['APPROVED', 'CHANGES_REQUESTED'].includes(review.state)
     )
     .toSorted((left, right) => {
       const leftKey = `${left.submittedAt ?? ''}:${left.id}`;
@@ -934,12 +947,13 @@ export function authorizePullRequestMerge({
     return { allowed: false, reason: 'GitHub does not report the exact head as merge-ready' };
   }
 
-  const reviewStates = latestHeadReviewStates(liveInput);
-  const activeChangeRequest = [...reviewStates.values()].includes('CHANGES_REQUESTED');
+  const effectiveReviewStates = latestReviewStates(liveInput);
+  const activeChangeRequest = [...effectiveReviewStates.values()].includes('CHANGES_REQUESTED');
   if (activeChangeRequest) {
-    return { allowed: false, reason: 'the exact head still has an active change request' };
+    return { allowed: false, reason: 'the pull request still has an active change request' };
   }
-  const independentApproval = [...reviewStates.entries()].some(
+  const headReviewStates = latestHeadReviewStates(liveInput);
+  const independentApproval = [...headReviewStates.entries()].some(
     ([reviewer, state]) => state === 'APPROVED' && reviewer !== pullRequestAuthor
   );
   if (!independentApproval) {

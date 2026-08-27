@@ -166,6 +166,44 @@ test('merge authorization fails closed on unresolved review, CI, state, or permi
   assert.throws(() => scheduledMerge({ liveInput: drifted }), /canonical review input/);
 });
 
+test('an active change request remains effective across heads until its reviewer supersedes it', () => {
+  const blocked = reviewInput({
+    reviews: [
+      {
+        id: 'PRR_changes_old_head',
+        author: 'blocking-reviewer',
+        state: 'CHANGES_REQUESTED',
+        commitSha: sha('c'),
+        submittedAt: '2026-08-27T05:00:00.000Z',
+        body: 'Blocking on an earlier head',
+      },
+      {
+        id: 'PRR_approved_current_head',
+        author: 'independent-reviewer',
+        state: 'APPROVED',
+        commitSha: sha('b'),
+        submittedAt: '2026-08-27T06:00:00.000Z',
+        body: 'Approved exact head',
+      },
+    ],
+  });
+  assert.match(
+    scheduledMerge({ input: blocked, packet: packet(blocked) }).reason,
+    /change request/
+  );
+
+  const superseded = structuredClone(blocked);
+  superseded.reviews.push({
+    id: 'PRR_blocker_approved_current_head',
+    author: 'blocking-reviewer',
+    state: 'APPROVED',
+    commitSha: sha('b'),
+    submittedAt: '2026-08-27T07:00:00.000Z',
+    body: 'Prior request is resolved; approved exact head',
+  });
+  assert.equal(scheduledMerge({ input: superseded, packet: packet(superseded) }).allowed, true);
+});
+
 test('spec changes may be mechanically merged only after an independent exact-head approval', () => {
   const input = reviewInput({
     changedFiles: [

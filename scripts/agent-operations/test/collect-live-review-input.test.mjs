@@ -364,22 +364,25 @@ test('pull-request merge binds GitHub integration to the inspected exact head', 
   );
 
   let attempt = 0;
-  const reconciled = submitGitHubMerge(
-    'github.com:Proto-UI/Proto-UI',
-    487,
-    { headSha: sha('b'), mergeMethod: 'squash' },
-    () => {
-      attempt += 1;
-      if (attempt === 1) throw new Error('connection closed after write');
-      return JSON.stringify({
-        merged: true,
-        head: { sha: sha('b') },
-        merge_commit_sha: sha('c'),
-      });
-    }
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        'github.com:Proto-UI/Proto-UI',
+        487,
+        { headSha: sha('b'), mergeMethod: 'squash' },
+        () => {
+          attempt += 1;
+          if (attempt === 1) throw new Error('connection closed after write');
+          return JSON.stringify({
+            merged: true,
+            head: { sha: sha('b') },
+            merge_commit_sha: sha('c'),
+          });
+        }
+      ),
+    /cannot be attributed; do not retry blindly/
   );
-  assert.equal(reconciled.reconciled, true);
-  assert.equal(reconciled.headSha, sha('b'));
+  assert.equal(attempt, 2);
 });
 
 test('live collector fails closed when the REST changed-file list is incomplete', () => {

@@ -26,11 +26,11 @@ Canonical `review-input` 升级为 v3，把 check provider、repository、workfl
 新增 `proto-ui-scheduled-merge-v1` 与 `pui-integrate`。它只负责执行已经解决的 integration，不制造批准：
 
 - canonical input 与 clean `APPROVE` packet 必须在 merge 边界保持一致；
-- exact head 必须有至少一名非 PR author reviewer 的有效批准，且不能有 active exact-head `CHANGES_REQUESTED`；
+- exact head 必须有至少一名非 PR author reviewer 的有效批准；任一 reviewer 在整个 PR 上最新的非 dismissed review 若仍为 `CHANGES_REQUESTED`，都继续阻止合入，直到该 reviewer 以新 review supersede 或该 review 被 dismiss；
 - 所有 review thread 必须 resolved，可信 CI 必须成功，目标 base 固定为 `main`；
 - GitHub 必须实时返回 `MERGEABLE` 与 `CLEAN`，credential 必须具有写权限；
 - merge method 固定为 `squash`，唯一写入 primitive 把 `sha` 固定为已审 head，不允许 force、admin bypass 或后续未绑定的 `gh pr merge`；
-- 写入结果未知时只允许一次 live reconciliation，不得盲目重试。
+- 写入结果未知时只允许一次 live reconciliation，不得盲目重试；即便 reconciliation 发现相同 head 已被合入，只要无法证明该 mutation 与固定的 squash method 来自本次调用，就必须保持 unattributed/unknown，不能制造成功 receipt。
 
 spec 实体改动仍不能由 scheduled Agent 自动提交 `APPROVE`。如果 exact head 已由独立维护者批准，`pui-integrate` 可以机械执行 merge；这消除的是批准之后重复点击 merge 的门，不是语义 admission 门。
 

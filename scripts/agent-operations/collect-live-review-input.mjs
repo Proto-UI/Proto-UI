@@ -414,15 +414,17 @@ export function submitGitHubMerge(
         live.head?.sha === headSha &&
         /^[a-f0-9]{40,64}$/.test(live.merge_commit_sha ?? '')
       ) {
-        return {
-          merged: true,
-          reconciled: true,
-          mergeCommitSha: live.merge_commit_sha,
-          headSha,
-          mergeMethod,
-        };
+        throw new Error(
+          `merge outcome is ambiguous after live reconciliation: ${live.merge_commit_sha} merged the inspected head, but this invocation and ${mergeMethod} method cannot be attributed; do not retry blindly`
+        );
       }
-    } catch {
+    } catch (reconciliationError) {
+      if (
+        reconciliationError instanceof Error &&
+        reconciliationError.message.startsWith('merge outcome is ambiguous')
+      ) {
+        throw reconciliationError;
+      }
       // The original mutation outcome remains authoritative when reconciliation also fails.
     }
     throw new Error(`merge outcome was not confirmed; do not retry blindly (${error.message})`);
