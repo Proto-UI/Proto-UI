@@ -3,7 +3,7 @@ import PrototypePreviewer from './PrototypePreviewer.astro';
 import DialogDemoStyles from './DialogDemoStyles.astro';
 import TransitionDemoStyles from './TransitionDemoStyles.astro';
 import { getAvailableDemos } from './demo-modules';
-import { AdapterIds, type RuntimeId } from './runtimes/registry';
+import { InternalAdapterIds, type RuntimeId } from './runtimes/registry';
 
 type DemoGroup = {
   id: string;
@@ -15,6 +15,7 @@ const runtimeLabels: Record<RuntimeId, string> = {
   wc: 'Web Components',
   react: 'React',
   vue: 'Vue',
+  vue2: 'Vue 2',
 };
 
 const groupLabels: Record<string, string> = {
@@ -37,7 +38,7 @@ function getGroupId(id: string) {
 }
 
 const demos = getAvailableDemos().sort((a, b) => a.localeCompare(b));
-const runtimes = AdapterIds as RuntimeId[];
+const runtimes = InternalAdapterIds;
 const groups = demos.reduce<DemoGroup[]>((result, demoId) => {
   const groupId = getGroupId(demoId);
   let group = result.find((item) => item.id === groupId);
@@ -106,6 +107,7 @@ function getPreviewerClass(demoId: string) {
                       demoId={demoId}
                       initialRuntime={runtime}
                       runtimes={[runtime]}
+                      allowExperimentalRuntimes
                       toolbar={false}
                       codePanel={false}
                       class={getPreviewerClass(demoId)}

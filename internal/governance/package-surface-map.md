@@ -218,7 +218,16 @@ Primary audience:
 - `Maker`
 - `Prototype Author` validating Vue output
 
-### 7.3 `@proto.ui/adapter-web-component`
+### 7.3 `@proto.ui/adapter-vue2`
+
+Translates Proto UI prototypes into Vue 2.6 component options for Vue `>=2.6.0 <2.7`. It is a separate official Adapter from `@proto.ui/adapter-vue`; neither package is a compatibility alias for the other.
+
+Primary audience:
+
+- `Maker` maintaining Vue 2.6 applications
+- `Prototype Author` validating Vue 2 output
+
+### 7.4 `@proto.ui/adapter-web-component`
 
 Translates Proto UI prototypes into Web Components.
 
