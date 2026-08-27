@@ -387,7 +387,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await browser?.close();
   await stopServer();
-});
+}, 60_000);
 
 describe.sequential('Base control documentation browser regressions', () => {
   it('keeps Textarea demo output surfaces readable in both themes and all runtimes', async () => {

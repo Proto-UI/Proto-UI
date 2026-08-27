@@ -5,7 +5,7 @@
   "npmDistTag": "next",
   "packageVersionPolicy": "exact",
   "packageScope": "public-@proto.ui",
-  "packageCount": 41,
+  "packageCount": 42,
   "packages": [
     {
       "name": "@proto.ui/cli",
@@ -497,11 +497,44 @@
       ]
     },
     {
+      "name": "@proto.ui/adapter-vue2",
+      "version": "0.3.0-alpha.0",
+      "path": "packages/adapters/vue2",
+      "releaseRole": "launch-commitment",
+      "publishOrder": 41,
+      "internalDependencies": [
+        "@proto.ui/adapter-base",
+        "@proto.ui/core",
+        "@proto.ui/hooks",
+        "@proto.ui/module-a11y",
+        "@proto.ui/module-anatomy",
+        "@proto.ui/module-as-trigger",
+        "@proto.ui/module-boundary",
+        "@proto.ui/module-context",
+        "@proto.ui/module-event",
+        "@proto.ui/module-expose-event",
+        "@proto.ui/module-expose-state",
+        "@proto.ui/module-expose-state-web",
+        "@proto.ui/module-feedback",
+        "@proto.ui/module-focus",
+        "@proto.ui/module-hit-participation",
+        "@proto.ui/module-overlay",
+        "@proto.ui/module-positioning",
+        "@proto.ui/module-props",
+        "@proto.ui/module-rule-expose-state-web",
+        "@proto.ui/module-rule-meta",
+        "@proto.ui/module-scroll",
+        "@proto.ui/module-text-control",
+        "@proto.ui/runtime",
+        "@proto.ui/types"
+      ]
+    },
+    {
       "name": "@proto.ui/adapter-web-component",
       "version": "0.3.0-alpha.0",
       "path": "packages/adapters/web-component",
       "releaseRole": "launch-commitment",
-      "publishOrder": 41,
+      "publishOrder": 42,
       "internalDependencies": [
         "@proto.ui/adapter-base",
         "@proto.ui/core",

@@ -1,0 +1,77 @@
+{
+  "name": "@proto.ui/adapter-vue2",
+  "version": "0.3.0-alpha.0",
+  "type": "module",
+  "dependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/hooks": "workspace:*",
+    "@proto.ui/runtime": "workspace:*",
+    "@proto.ui/types": "workspace:*",
+    "@proto.ui/adapter-base": "workspace:*",
+    "@proto.ui/module-anatomy": "workspace:*",
+    "@proto.ui/module-as-trigger": "workspace:*",
+    "@proto.ui/module-a11y": "workspace:*",
+    "@proto.ui/module-boundary": "workspace:*",
+    "@proto.ui/module-context": "workspace:*",
+    "@proto.ui/module-feedback": "workspace:*",
+    "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
+    "@proto.ui/module-expose-state": "workspace:*",
+    "@proto.ui/module-expose-state-web": "workspace:*",
+    "@proto.ui/module-focus": "workspace:*",
+    "@proto.ui/module-hit-participation": "workspace:*",
+    "@proto.ui/module-overlay": "workspace:*",
+    "@proto.ui/module-positioning": "workspace:*",
+    "@proto.ui/module-scroll": "workspace:*",
+    "@proto.ui/module-text-control": "workspace:*",
+    "@proto.ui/module-props": "workspace:*",
+    "@proto.ui/module-rule-expose-state-web": "workspace:*",
+    "@proto.ui/module-rule-meta": "workspace:*"
+  },
+  "devDependencies": {
+    "@proto.ui/prototypes-base": "workspace:*",
+    "vue": "2.6.14"
+  },
+  "peerDependencies": {
+    "vue": ">=2.6.0 <2.7"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "description": "Translates Proto UI prototypes into Vue 2.6 component options for official Web Adapter use.",
+  "license": "MIT",
+  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/adapters/vue2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proto-UI/Proto-UI.git",
+    "directory": "packages/adapters/vue2"
+  },
+  "bugs": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "proto-ui",
+    "proto",
+    "ui",
+    "adapter",
+    "vue2",
+    "vue-2.6",
+    "vue"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/adapter-vue2",
+    "prepack": "pnpm run build"
+  },
+  "private": false
+}
