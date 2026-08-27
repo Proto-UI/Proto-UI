@@ -215,7 +215,16 @@ Proto UI 的 package surface 可以大致理解为以下几层：
 - `Maker`
 - 需要验证 Vue 产物的 `Prototype Author`
 
-### 7.3 `@proto.ui/adapter-web-component`
+### 7.3 `@proto.ui/adapter-vue2`
+
+负责把 Proto UI prototype 翻译成面向 Vue `>=2.6.0 <2.7` 的 Vue 2.6 component options。它与 `@proto.ui/adapter-vue` 是两个独立 official Adapter，彼此都不是对方的兼容别名。
+
+它主要面向：
+
+- 维护 Vue 2.6 应用的 `Maker`
+- 需要验证 Vue 2 产物的 `Prototype Author`
+
+### 7.4 `@proto.ui/adapter-web-component`
 
 负责把 Proto UI prototype 翻译成 Web Component。
 
