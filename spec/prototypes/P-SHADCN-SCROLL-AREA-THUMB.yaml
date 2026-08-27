@@ -11,7 +11,10 @@ criteria:
   - id: P-SHADCN-SCROLL-AREA-THUMB-ENTRY
     text: { en: Entry name is shadcn-scroll-area-thumb, zh-CN: 入口名为 shadcn-scroll-area-thumb }
 sources:
+  - path: internal/records/2026-08-28-shadcn-tooltip-scroll-area-provenance.zh-CN.md
   - path: packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/scroll-area.tsx
+    label: shadcn/ui v4 new-york Scroll Area pinned provenance baseline
 inherits: { prototypes: [{ id: P-BASE-SCROLL-AREA-THUMB }] }
 verifies: { tests: [T-SHADCN-SCROLL-AREA-0001] }
 revisions: [{ version: 0.3.0-alpha.0, change: introduced, summary: Introduced. }]

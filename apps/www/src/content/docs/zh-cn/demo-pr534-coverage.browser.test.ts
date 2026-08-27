@@ -25,23 +25,12 @@ const GEOMETRY_EPSILON = 0.5;
 const MIN_NON_TEXT_CONTRAST = 3;
 const EVIDENCE_DIRECTORY = resolve(process.cwd(), '.codex', 'pr534-browser-evidence');
 
-type RuntimeErrorLog = string[];
-
 type ElementGeometry = {
   x: number;
   y: number;
   width: number;
   height: number;
 };
-
-function captureRuntimeErrors(page: Page): RuntimeErrorLog {
-  const errors: RuntimeErrorLog = [];
-  page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
-  page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`console.error: ${message.text()}`);
-  });
-  return errors;
-}
 
 async function geometry(locator: Locator, label: string): Promise<ElementGeometry> {
   const box = await locator.boundingBox();
@@ -153,11 +142,15 @@ afterAll(async () => {
 
 describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
   it('mounts shadcn Scroll Area with one native two-axis surface in every runtime', async () => {
-    const { context, page, previewer } = await openRoute(browser, baseUrl, SCROLL_AREA_ROUTE, {
-      width: NARROW_WIDTH,
-      height: 844,
-    });
-    const runtimeErrors = captureRuntimeErrors(page);
+    const { context, page, previewer, runtimeErrors } = await openRoute(
+      browser,
+      baseUrl,
+      SCROLL_AREA_ROUTE,
+      {
+        width: NARROW_WIDTH,
+        height: 844,
+      }
+    );
 
     try {
       await previewer.scrollIntoViewIfNeeded();
@@ -331,11 +324,15 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
   }, 240_000);
 
   it('mounts shadcn Tooltip with focus ARIA, portal presence, and Escape dismissal', async () => {
-    const { context, page, previewer } = await openRoute(browser, baseUrl, TOOLTIP_ROUTE, {
-      width: NARROW_WIDTH,
-      height: 844,
-    });
-    const runtimeErrors = captureRuntimeErrors(page);
+    const { context, page, previewer, runtimeErrors } = await openRoute(
+      browser,
+      baseUrl,
+      TOOLTIP_ROUTE,
+      {
+        width: NARROW_WIDTH,
+        height: 844,
+      }
+    );
 
     try {
       await previewer.scrollIntoViewIfNeeded();
@@ -426,11 +423,15 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
   }, 240_000);
 
   it('mounts Brutalist Checkbox state and records Light/Dark pointer frame sequences', async () => {
-    const { context, page, previewer } = await openRoute(browser, baseUrl, CHECKBOX_ROUTE, {
-      width: NARROW_WIDTH,
-      height: 844,
-    });
-    const runtimeErrors = captureRuntimeErrors(page);
+    const { context, page, previewer, runtimeErrors } = await openRoute(
+      browser,
+      baseUrl,
+      CHECKBOX_ROUTE,
+      {
+        width: NARROW_WIDTH,
+        height: 844,
+      }
+    );
 
     try {
       await previewer.scrollIntoViewIfNeeded();

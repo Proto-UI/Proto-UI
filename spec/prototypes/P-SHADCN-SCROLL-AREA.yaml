@@ -14,7 +14,10 @@ criteria:
     text:
       { en: Root must have relative overflow-hidden, zh-CN: root 必须有 relative overflow-hidden }
 sources:
+  - path: internal/records/2026-08-28-shadcn-tooltip-scroll-area-provenance.zh-CN.md
   - path: packages/prototypes/shadcn/src/scroll-area/root.proto.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/scroll-area.tsx
+    label: shadcn/ui v4 new-york Scroll Area pinned provenance baseline
 inherits: { prototypes: [{ id: P-BASE-SCROLL-AREA }] }
 verifies: { tests: [T-SHADCN-SCROLL-AREA-0001] }
 revisions: [{ version: 0.3.0-alpha.0, change: introduced, summary: Introduced. }]

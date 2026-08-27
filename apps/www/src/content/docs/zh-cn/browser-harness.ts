@@ -19,6 +19,8 @@ export type RuntimeId = (typeof RUNTIMES)[number];
 export const COLOR_SCHEMES = ['light', 'dark'] as const;
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
+export type RuntimeErrorLog = string[];
+
 let devServer: ChildProcess | null = null;
 let serverOutput = '';
 
@@ -188,13 +190,23 @@ export async function openRoute(
   baseUrl: string,
   route: string,
   viewport: Readonly<{ width: number; height: number }>
-): Promise<{ context: BrowserContext; page: Page; previewer: Locator }> {
+): Promise<{
+  context: BrowserContext;
+  page: Page;
+  previewer: Locator;
+  runtimeErrors: RuntimeErrorLog;
+}> {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
+  const runtimeErrors: RuntimeErrorLog = [];
+  page.on('pageerror', (error) => runtimeErrors.push(`pageerror: ${error.message}`));
+  page.on('console', (message) => {
+    if (message.type() === 'error') runtimeErrors.push(`console.error: ${message.text()}`);
+  });
   await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
   const previewer = page.locator('[data-previewer-id]').first();
   await previewer.waitFor({ state: 'visible' });
-  return { context, page, previewer };
+  return { context, page, previewer, runtimeErrors };
 }
 
 export function runtimeSelectTrigger(previewer: Locator): Locator {
