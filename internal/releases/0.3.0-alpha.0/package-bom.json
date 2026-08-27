@@ -5,7 +5,7 @@
   "npmDistTag": "next",
   "packageVersionPolicy": "exact",
   "packageScope": "public-@proto.ui",
-  "packageCount": 42,
+  "packageCount": 43,
   "packages": [
     {
       "name": "@proto.ui/cli",
@@ -515,7 +515,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/adapters/vue2",
       "releaseRole": "launch-commitment",
-      "publishOrder": 41,
+      "publishOrder": 42,
       "internalDependencies": [
         "@proto.ui/adapter-base",
         "@proto.ui/core",
@@ -548,7 +548,7 @@
       "version": "0.3.0-alpha.0",
       "path": "packages/adapters/web-component",
       "releaseRole": "launch-commitment",
-      "publishOrder": 42,
+      "publishOrder": 43,
       "internalDependencies": [
         "@proto.ui/adapter-base",
         "@proto.ui/core",
