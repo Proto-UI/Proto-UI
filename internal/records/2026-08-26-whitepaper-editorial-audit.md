@@ -1,7 +1,7 @@
 # Proto UI Whitepaper Editorial Audit (Issue #478)
 
 Date: 2026-08-26 · Scope: 8 pages × zh-cn/en under `apps/www/src/content/docs/{zh-cn,en}/whitepaper/` · Spec source of truth: `spec/**`
-Status legend: **active** / **draft** / *(no governing entity)*
+Status legend: **active (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes)** / **draft** / *(no governing entity)*
 
 ---
 
@@ -21,18 +21,18 @@ IDs: `<page-abbr>#<n>`; pages: CAP=component-as-protocol, IFM=information-flow-m
 
 | claim_id | page | heading | locale | summary | class | spec_entity_id | status |
 |---|---|---|---|---|---|---|---|
-| CAP#1 | CAP | 组件并不只存在于代码里 | zh+en | A component is first a stable interactive subject, not its implementation | proto-specific | K-COMPONENT-INTERACTION-0001 | draft |
+| CAP#1 | CAP | 组件并不只存在于代码里 | zh+en | A component is first a stable interactive (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes) subject, not its implementation | proto-specific | K-COMPONENT-INTERACTION-0001 | draft |
 | CAP#2 | CAP | 组件的预期，往往先于实现而存在 | zh+en | Reproducibility (还原度) implies components exist apart from implementations | general-theory | — | — |
 | CAP#3 | CAP | 原型不是漂浮的能力清单 | zh+en | Prototype needs root attachment; acts on itself | proto-specific | K-COMPONENT-INTERACTION-0001; cf. C-AS-HOOK-0001 | draft |
 | CAP#4 | CAP | 可抽象，不等于已经成为协议 | zh+en | Only part of a component is promotable to protocol layer | general-theory | — | — |
-| CAP#5 | CAP | 为什么这里会出现“协议”这个词？ | zh+en | Protocol = describable/translatable/constrainable interactive contract | general-theory | — | — |
+| CAP#5 | CAP | 为什么这里会出现“协议”这个词？ | zh+en | Protocol = describable/translatable/constrainable interactive (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes) contract | general-theory | — | — |
 | CAP#6 | CAP | Prototype / Adapter / Host 定义 | zh+en | Three concept definitions | proto-specific | D-ADAPTER-PROFILE-0001; A-*-0001; K-HOST-SURFACE-ROLES-0001 | mixed |
-| CAP#7 | CAP | 三者之间的关系 | zh+en | Prototype + Adapter = component implementation in Host | proto-specific | D-ADAPTER-PROFILE-0001 | active |
+| CAP#7 | CAP | 三者之间的关系 | zh+en | Prototype + Adapter = component implementation in Host | proto-specific | D-ADAPTER-PROFILE-0001 | active (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes) |
 | CAP#8 | CAP | 原型可以开放，协议可以稳定 | zh+en | Community splits open; official base prototypes maintained like a protocol | proto-specific | no single governance entity | gap |
 | IFM#1 | IFM | 先从“使用者”切分组件关系 | zh+en | Actors: User, Maker, Other Component | proto-specific | K-COMPONENT-ACTOR-0001 | draft |
 | IFM#2 | IFM | 什么是信息通路？ | zh+en | Channels derived from who exchanges information, not API enumeration | proto-specific | K-INFORMATION-CHANNEL-0001; C-CORE-CHANNEL-0001 | draft |
 | IFM#3 | IFM | User ↔ Component | zh+en | event = User→Component; feedback = Component→User | proto-specific | C-EVENT-0001; C-FEEDBACK-0001 | draft |
-| IFM#4 | IFM | Maker ↔ Component | zh+en | props = Maker→Component; expose = Component→Maker | proto-specific | C-PROPS-0001 (.md, no machine status); C-EXPOSE-0001 | active |
+| IFM#4 | IFM | Maker ↔ Component | zh+en | props = Maker→Component; expose = Component→Maker | proto-specific | C-PROPS-0001 (.md, no machine status); C-EXPOSE-0001 | active (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes) |
 | IFM#5 | IFM | Other Component ↔ Component | zh+en | context is the inter-component environmental channel | proto-specific | C-CONTEXT-0001 | draft |
 | IFM#6 | IFM | 为什么这些能力不是随意枚举 | zh+en | Five capabilities are derived, canonical | proto-specific | C-CORE-CHANNEL-0001 + per-channel contracts | draft |
 | IFM#7 | IFM | 信息通路并不等于组件的全部 | zh+en | state/lifecycle/meta are non-channel internal dimensions | proto-specific | M-STATE-0001; C-LIFECYCLE-0001..0007; **meta: no entity found** | gap |
@@ -48,8 +48,8 @@ IDs: `<page-abbr>#<n>`; pages: CAP=component-as-protocol, IFM=information-flow-m
 | ES#4 | ES | event / lifecycle 一致性 | zh+en | Same interaction responsibility; lifecycle order preserved | proto-specific | C-EVENT-0007; C-LIFECYCLE-0002 | draft |
 | ES#5 | ES | 跨平台一致性由原型规则决定 | zh+en | Medium-appropriate forms allowed within prototype-declared boundaries | proto-specific | no direct entity | gap |
 | TL#1 | TL | 翻译层不只是语法转换 | zh+en | Translation maps *and fills in* missing host capability (WC context, Styler) | proto-specific | HC-* family; A-*-0001 | mixed |
-| TL#2 | TL | Adapter 与 Compiler | zh+en | Two translation forms share one semantic baseline; Adapter is main path | mixed | A-*-0001 active; **Compiler has no entity — direction only** | partial |
-| TL#3 | TL | 翻译为什么可能有损 | zh+en | Lossy translation normal; core semantics must survive | general + proto framing | D-ADAPTER-PROFILE-0001 | active |
+| TL#2 | TL | Adapter 与 Compiler | zh+en | Two translation forms share one semantic baseline; Adapter is main path | mixed | A-*-0001 active (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes); **Compiler has no entity — direction only** | partial |
+| TL#3 | TL | 翻译为什么可能有损 | zh+en | Lossy translation normal; core semantics must survive | general + proto framing | D-ADAPTER-PROFILE-0001 | active (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes) |
 | TL#4 | TL | `host` 通路默认不在跨平台主承诺内 | zh+en | host flow excluded from core commitment | proto-specific | same gap as IFM#8 | gap |
 | DC#1 | DC | 取舍顺序 | zh+en | semantic consistency > User > Maker > Author experience | proto-specific | K-DESIGN-TRADEOFF-0001 | draft |
 | DC#2 | DC | 不把自己做成框架 | zh+en | No business integration / final composition / framework scheduling | proto-specific | K-PROTOTYPE-COMPOSITION-0001 | draft |
@@ -105,14 +105,14 @@ Also: every EN page carries a stray `desp:` frontmatter key — trivial cleanup.
 
 1. **“使用者” scope (IFM)**: ZH heading frames User/Maker/Other Component collectively as 使用者; EN renders "through 'users'". Since Maker is precisely not a user, both blur the taxonomy the section establishes; EN slightly more misleading. Reword both to “关系对象 / relation targets”.
 2. **ES#3 strength**: ZH “所谓的‘像素级一致’” hedges more than EN "what people call 'pixel-level consistency'". Given the claim is unsupported (§5), align both to the weaker hedge.
-3. **CAP “会成立的交互主体”** rendered "an interactive subject that can actually stand up as one" obscures the ZH sense of coming-to-stand-in-a-host-over-time, which foreshadows ES. Suggest "an interactive subject that comes to stand in a host".
+3. **CAP “会成立的交互主体”** rendered "an interactive (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes) subject that can actually stand up as one" obscures the ZH sense of coming-to-stand-in-a-host-over-time, which foreshadows ES. Suggest "an interactive (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes) subject that comes to stand in a host".
 No other argument-changing drift found; FAQ Q5–Q10 translations are semantically faithful.
 
 ## 8. Prose/Spec Contradictions (with evidence)
 
 1. **Channel completeness**: IFM#6 presents {event, feedback, props, expose, context} as *the* derived core set. C-CORE-CHANNEL-0001 (“Core portable channels are identity-derived and protocol-governed”, draft) and C-RULE-0001 (“Rule is not an information channel”) show the governed catalog is larger with explicit exclusions. Soften or link.
 2. **PB#4 vs C-ANATOMY-0009**: “Anatomy may read only capabilities explicitly exposed by same-domain parts through Expose” means parts do participate in Expose-mediated relations without being independent prototypes. PB's “单独让它 expose 能力” prohibition needs scoping (“author-facing direct syntax”) to avoid contradicting the anatomy domain.
-3. **ES#3 vs adapter profiles**: A-REACT-18-19-0001 / A-VUE-3-0001 / A-WEB-COMPONENT-0001 (all active) contain module support/omission and lifecycle relations but no visual-identity criterion. The strictest promise has the weakest governance.
+3. **ES#3 vs adapter profiles**: A-REACT-18-19-0001 / A-VUE-3-0001 / A-WEB-COMPONENT-0001 (all active (YAML entity spec/contracts/C-PROPS-0001.yaml, not the .md contract notes)) contain module support/omission and lifecycle relations but no visual-identity criterion. The strictest promise has the weakest governance.
 4. **TL Compiler**: “翻译层目前主要有两种典型形态” overstates — only Adapter exists as governed identity (A-*, D-ADAPTER-PROFILE-0001). Should read “Adapter 是当前唯一受治理的形态，Compiler 是方向”. 
 
 ## 9. Recommended Rewrite Sequence (bounded)
