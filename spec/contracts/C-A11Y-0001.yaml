@@ -66,6 +66,12 @@ criteria:
     text:
       zh-CN: Web adapter 投影字符串 a11y state 时，空字符串必须移除对应宿主 attribute，并在恢复非空值后重新投影。
       en: When the Web adapter projects a string a11y state, an empty string must remove the corresponding host attribute, and a later non-empty value must restore it.
+  - id: C-A11Y-0001-LEVEL
+    text:
+      zh-CN: >-
+        a11y 语义对象可以携带一个 portable heading level (1-6)；Web adapter 将其投影为 aria-level。level 为 1-6 的正整数；0、负数、分数、NaN 和 Infinity 无效并在 fail closed 下被拒绝。
+      en: >-
+        The a11y semantic object may carry a portable heading level (1-6); the Web adapter projects it as aria-level. level is a positive integer in the range 1-6; 0, negatives, fractions, NaN, and Infinity are invalid and rejected under fail closed.
 sources:
   - path: internal/records/2026-06-30-a11y-module-planning-for-button.zh-CN.md
   - path: packages/modules/a11y/src/types.ts

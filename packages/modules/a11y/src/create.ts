@@ -84,6 +84,11 @@ class A11yModuleImpl extends ModuleBase {
     },
     level: (value: number | State<number>) => {
       this.ensureSetup('def.a11y.level');
+      if (typeof value === 'number') {
+        if (!Number.isInteger(value) || value < 1 || value > 6) {
+          throw new Error('[A11y] level must be an integer in range 1-6');
+        }
+      }
       this.ir.level = value;
       this.applyProjection();
     },
