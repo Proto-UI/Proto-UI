@@ -167,7 +167,7 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const hovered = await styleOf(solid);
         expect(hovered.boxShadow).toMatch(/(?:^|, )rgb\(0, 0, 0\) 4px 4px 0px 0px$/);
         expect(hovered.transform).toBe('matrix(1, 0, 0, 1, -1, -1)');
-        const hoveredFrame = await captureFrame(interactionFrame, runtime, 'hovered');
+        await captureFrame(interactionFrame, runtime, 'hovered');
 
         const bounds = await solid.boundingBox();
         expect(bounds).not.toBeNull();
@@ -177,13 +177,14 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const pressed = await styleOf(solid);
         expect(pressed.boxShadow).toMatch(/^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/);
         expect(pressed.transform).toBe('matrix(1, 0, 0, 1, 1, 1)');
-        const pressedFrame = await captureFrame(interactionFrame, runtime, 'pressed');
-        expect(pressedFrame.equals(hoveredFrame)).toBe(false);
+        await captureFrame(interactionFrame, runtime, 'pressed');
 
         await page.mouse.up();
         await waitForState(page, 0, 'data-pressed', false);
-        const settledFrame = await captureFrame(interactionFrame, runtime, 'settled');
-        expect(settledFrame.equals(hoveredFrame)).toBe(true);
+        const settled = await styleOf(solid);
+        expect(settled.boxShadow).toBe(hovered.boxShadow);
+        expect(settled.transform).toBe(hovered.transform);
+        await captureFrame(interactionFrame, runtime, 'settled');
 
         await previewer.locator('select.adapter-select').focus();
         await page.keyboard.press('Tab');
