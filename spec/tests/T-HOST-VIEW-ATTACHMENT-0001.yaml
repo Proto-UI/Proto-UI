@@ -74,6 +74,17 @@ implementations:
       - C-HOST-VIEW-ATTACHMENT-0001
     notes:
       - Readiness is resolved through the nearest detached ancestor, so an instance whose own view attached inside a closed overlay still reports not ready.
+  - id: adapter-vue2-previewer-dialog-readiness
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/previewer-dialog.demo.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-READINESS-ANCESTRY
+    exercises:
+      - C-HOST-VIEW-ATTACHMENT-0001
+    notes:
+      - The Vue 2 Previewer keeps closed overlay children mounted under the detached host and ignores terminally disposed view epochs.
   - id: web-adapters-shadcn-select-controlled-value
     kind: adapter-test
     status: passing
@@ -87,7 +98,7 @@ implementations:
       - P-BASE-SELECT-VALUE
     notes:
       - A fixture rather than a documentation demo, because the published Select demo has no control that drives `value` from outside. It never opens the Content, so the authored labels it resolves can only come from children that mounted and registered while detached.
-      - Covers the controlled-update path in Web Components, React, and Vue. Verified red on the pre-fix sources, where the React and Vue labels stayed at the raw value `react` instead of the authored `React`.
+      - Covers the controlled-update path in Web Components, React, Vue, and Vue 2. The Vue 2 case also proves authored labels register before Content has ever opened.
   - id: www-select-first-paint-browser
     kind: runtime-test
     status: passing
@@ -100,7 +111,7 @@ implementations:
       - C-HOST-VIEW-ATTACHMENT-0001
       - P-BASE-SELECT-VALUE
     notes:
-      - Reads a real browser in all three runtimes with the popup never opened, counting detached hosts, registered items, and mounted roots.
+      - Reads a real browser in all four official Web runtimes with the popup never opened, counting detached hosts, registered items, and mounted roots.
 verifies:
   contracts:
     - id: C-HOST-VIEW-ATTACHMENT-0001
@@ -120,9 +131,13 @@ sources:
   - path: packages/adapters/web-component/test/lifecycle-view-intent.test.ts
   - path: packages/adapters/vue/test/dialog.test.ts
   - path: packages/adapters/vue/test/previewer-dialog.demo.test.ts
+  - path: packages/adapters/vue2/test/previewer-dialog.demo.test.ts
   - path: packages/web-conformance/test/shadcn-select-controlled-value.journey.test.ts
   - path: apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added Vue 2 detached-child registration, Previewer readiness, and four-runtime browser coverage.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added executable coverage for the detached view attribute, its meaning, its exclusion, child mounting, and ancestry-aware readiness.
