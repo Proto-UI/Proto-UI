@@ -1,24 +1,24 @@
-import { AdapterIds, type RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { AdapterIds, type PublicRuntimeId } from './PrototypePreviewer/runtimes/registry';
 
 export const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
-export const DEFAULT_ADAPTER: RuntimeId = 'wc';
+export const DEFAULT_ADAPTER: PublicRuntimeId = 'wc';
 export const PREFERRED_ADAPTER_EVENT = 'proto-adapter:change';
 
 export type PreferredAdapterChangeDetail = Readonly<{
-  adapter: RuntimeId;
+  adapter: PublicRuntimeId;
 }>;
 
-export function isRuntimeId(value: unknown): value is RuntimeId {
-  return typeof value === 'string' && AdapterIds.includes(value);
+export function isRuntimeId(value: unknown): value is PublicRuntimeId {
+  return typeof value === 'string' && AdapterIds.includes(value as PublicRuntimeId);
 }
 
 const initializedDocuments = new WeakSet<Document>();
 
-function supportsAdapter(select: HTMLSelectElement, adapter: RuntimeId): boolean {
+function supportsAdapter(select: HTMLSelectElement, adapter: PublicRuntimeId): boolean {
   return Array.from(select.options).some((option) => option.value === adapter);
 }
 
-function preferredAdapter(doc: Document): RuntimeId | null {
+function preferredAdapter(doc: Document): PublicRuntimeId | null {
   try {
     const stored = doc.defaultView?.localStorage.getItem(PREFERRED_ADAPTER_KEY);
     return isRuntimeId(stored) ? stored : null;
@@ -41,21 +41,22 @@ function initializeAdapterSelect(select: HTMLSelectElement): void {
   }
 
   select.addEventListener('change', () => {
-    if (!isRuntimeId(select.value)) return;
+    const adapter = select.value;
+    if (!isRuntimeId(adapter)) return;
     try {
-      select.ownerDocument.defaultView?.localStorage.setItem(PREFERRED_ADAPTER_KEY, select.value);
+      select.ownerDocument.defaultView?.localStorage.setItem(PREFERRED_ADAPTER_KEY, adapter);
     } catch {
       // Storage can be unavailable without disabling the in-document preference channel.
     }
     select.ownerDocument.dispatchEvent(
       new CustomEvent<PreferredAdapterChangeDetail>(PREFERRED_ADAPTER_EVENT, {
-        detail: { adapter: select.value },
+        detail: { adapter },
       })
     );
   });
 }
 
-function synchronizeAdapterSelects(doc: Document, adapter: RuntimeId): void {
+function synchronizeAdapterSelects(doc: Document, adapter: PublicRuntimeId): void {
   const selects = doc.querySelectorAll<HTMLSelectElement>('[data-adapter-select] select');
   for (const select of selects) {
     if (!supportsAdapter(select, adapter) || select.value === adapter) continue;

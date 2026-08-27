@@ -99,7 +99,7 @@ export function scanMdxAst(tree: Root, filePath: string): ScannedBlock[] {
     if (el.type !== 'mdxJsxFlowElement') return;
 
     const adapterPanel = getAttribute(el, 'data-adapter-panel') as RuntimeId | undefined;
-    if (!adapterPanel || !AdapterIds.includes(adapterPanel)) return;
+    if (!adapterPanel || !AdapterIds.includes(adapterPanel as (typeof AdapterIds)[number])) return;
 
     const previewerProps = findPrototypePreviewerInChildren(el);
     if (!previewerProps?.demoId && !previewerProps?.prototypeId) return;

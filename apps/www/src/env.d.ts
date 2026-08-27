@@ -1,5 +1,10 @@
 /// <reference types="astro/client" />
+/// <reference types="astro/astro-jsx" />
 /// <reference types="vite/client" />
+
+declare namespace JSX {
+  interface IntrinsicElements extends astroHTML.JSX.IntrinsicElements {}
+}
 
 declare module '*.astro' {
   const AstroComponent: any;

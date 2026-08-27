@@ -1,24 +1,26 @@
 import type { RuntimeAPI } from './registry';
 import { createVueAdapter, type VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
-import type * as VueTypes from 'vue';
+import { claimHostMount, releaseHostMount } from './host-mount';
 
 // 使用 esm.sh 的 ESM 版本懒加载 Vue
 // 也可以替换成本地的 "vue"
 const VUE_SOURCE = 'https://esm.sh/vue@3';
 
 // 异步加载 Vue
-export async function loadVue(): Promise<typeof VueTypes> {
-  // const Vue = await import(/* @vite-ignore */ VUE_SOURCE) as Promise<typeof VueTypes>
-  const Vue = (await import(/* @vite-ignore */ VUE_SOURCE)) as typeof VueTypes;
+export async function loadVue(): Promise<VueRuntimeModule> {
+  const Vue = (await import(/* @vite-ignore */ VUE_SOURCE)) as VueRuntimeModule;
   return Vue;
 }
 
-// 保存各宿主节点对应的 Vue app 实例（避免重复创建）
 type VueApp = {
+  mount: (host: HTMLElement) => unknown;
   unmount: () => void;
 };
 
-const vueApps = new WeakMap<HTMLElement, VueApp>();
+type VueRuntimeModule = AdapterVueRuntime & {
+  createApp: (component: unknown, props?: Record<string, unknown>) => VueApp;
+  reactive: <T extends object>(target: T) => T;
+};
 
 /**
  * Vue 运行时实现：
@@ -26,41 +28,27 @@ const vueApps = new WeakMap<HTMLElement, VueApp>();
  * - 使用 Proto UI 的 createVueAdapter() 适配 Prototype
  * - 维护宿主 app 的 mount / unmount 生命周期
  */
-export const runtime: RuntimeAPI = {
-  id: 'vue',
-  label: 'Vue',
+export function createVueRuntime(load = loadVue): RuntimeAPI {
+  return {
+    id: 'vue',
+    label: 'Vue',
 
-  async mount(host, prototype, options) {
-    // 防止重复渲染
-    const existingApp = vueApps.get(host);
-    if (existingApp) {
-      existingApp.unmount();
-      vueApps.delete(host);
-    }
+    async mount(host, prototype, options) {
+      const lease = claimHostMount(host);
+      const Vue = await load();
+      if (!lease.isCurrent()) return;
 
-    // 确保容器干净
-    host.innerHTML = '';
-    const Vue = await loadVue();
+      const Component = createVueAdapter(Vue as unknown as AdapterVueRuntime)(prototype);
+      const app = Vue.createApp(Component, options?.props ?? {}) as VueApp;
+      if (!lease.commit(() => app.unmount())) return;
 
-    // 通过适配器获得 Vue 组件
-    const Component = createVueAdapter(Vue as unknown as AdapterVueRuntime)(prototype);
+      app.mount(host);
+    },
 
-    // 创建 Vue 应用实例
-    const app = Vue.createApp(Component, options?.props ?? {});
+    unmount(host) {
+      releaseHostMount(host);
+    },
+  };
+}
 
-    // 挂载到宿主元素
-    app.mount(host);
-
-    // 保存 app 实例
-    vueApps.set(host, app);
-  },
-
-  async unmount(host) {
-    const app = vueApps.get(host);
-    if (app) {
-      app.unmount();
-      vueApps.delete(host);
-    }
-    host.innerHTML = '';
-  },
-};
+export const runtime = createVueRuntime();
