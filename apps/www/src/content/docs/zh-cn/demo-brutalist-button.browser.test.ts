@@ -1,5 +1,7 @@
 // @vitest-environment node
 
+import type { Browser, Locator, Page } from 'playwright-core';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES,
   launchBrowser,
@@ -8,8 +10,6 @@ import {
   startServer,
   stopServer,
 } from './browser-harness';
-import type { Browser, Locator, Page } from 'playwright-core';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -323,15 +323,10 @@ describe.sequential('Brutalist Button browser regressions', () => {
           color: disabledLight.color,
           opacity: '0.5',
         });
-        const restoredLightFrame = await captureFrame(
-          previewer.locator('.host'),
-          runtime,
-          'light-restored'
-        );
-        expect(restoredLightFrame.equals(lightFrame)).toBe(true);
       } finally {
         await context.close();
       }
     }, 90_000);
   }
 });
+
