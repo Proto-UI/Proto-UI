@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
@@ -24,4 +26,17 @@ export function createRuntimeTestPlan(rawArgs) {
       args: ['--no-file-parallelism', ...BROWSER_SUITES],
     },
   ];
+}
+
+export function createVitestInvocation(
+  root,
+  args,
+  executable = process.execPath,
+  platform = process.platform
+) {
+  const pathApi = platform === 'win32' ? path.win32 : path.posix;
+  return {
+    executable,
+    args: [pathApi.join(root, 'node_modules', 'vitest', 'vitest.mjs'), 'run', ...args],
+  };
 }

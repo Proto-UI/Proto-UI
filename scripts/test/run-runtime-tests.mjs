@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { createRuntimeTestPlan, createVitestInvocation } from './runtime-test-plan.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Astro dev compiles a route on first request, so a suite probing a cold route
@@ -128,16 +128,12 @@ async function stopServer() {
 
 async function runVitest(args, baseUrl) {
   return new Promise((resolve, reject) => {
-    // spawn() does not go through a shell, so resolve the workspace binary
-    // rather than relying on node_modules/.bin being on PATH.
-    const vitestBin = path.join(
-      root,
-      'node_modules',
-      '.bin',
-      process.platform === 'win32' ? 'vitest.cmd' : 'vitest'
-    );
+    // Execute Vitest's ESM entry through the current Node binary. Spawning a
+    // .cmd shim without a shell fails with EINVAL on Node 22 for Windows, and
+    // enabling a shell would add quoting and command-injection ambiguity.
+    const invocation = createVitestInvocation(root, args);
     const env = baseUrl ? { ...process.env, PROTO_UI_BROWSER_BASE_URL: baseUrl } : process.env;
-    const child = spawn(vitestBin, ['run', ...args], {
+    const child = spawn(invocation.executable, invocation.args, {
       cwd: root,
       env,
       stdio: 'inherit',

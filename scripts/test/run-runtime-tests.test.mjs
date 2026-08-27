@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { BROWSER_SUITES, createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import {
+  BROWSER_SUITES,
+  createRuntimeTestPlan,
+  createVitestInvocation,
+} from './runtime-test-plan.mjs';
 
 describe('runtime test plan', () => {
   it('preserves focused Vitest arguments without starting the documentation server', () => {
@@ -28,5 +32,15 @@ describe('runtime test plan', () => {
         args: ['--no-file-parallelism', ...BROWSER_SUITES],
       },
     ]);
+  });
+
+  it('runs Vitest through Node instead of a Windows command shim', () => {
+    assert.deepEqual(
+      createVitestInvocation('D:\\Proto-UI', ['packages/core/test'], 'C:\\node.exe', 'win32'),
+      {
+        executable: 'C:\\node.exe',
+        args: ['D:\\Proto-UI\\node_modules\\vitest\\vitest.mjs', 'run', 'packages/core/test'],
+      }
+    );
   });
 });
