@@ -30,12 +30,12 @@ This approach is compatible with D-A11Y-PART-RELATIONSHIP-PROJECTION-0001 becaus
 
 The second Codex finding identifies a real gap: Content cannot directly clear Trigger's `aria-controls` because the `contentId` state is private to the Trigger. The proposed resolution:
 
-1. The family root (e.g., TabsRoot) owns a shared context with a per-match-key presence set (e.g., `Record<string, Set<instanceId>>` keyed by protocol match key). This retains instance multiplicity: if two Content instances share a match key, both are tracked. Per `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-D`, the Web adapter resolves duplicate/ambiguous presence at projection time — the root does not collapse it to a single boolean. The Trigger checks whether the set is non-empty (at least one matching Content is present), and the adapter handles duplicate-instance fallback.
-2. When Content mounts, it adds its instance ID to the set: `contentPresent.get(matchKey).add(instanceId)`.
-3. When Content detaches (L1), it removes its instance ID: `contentPresent.get(matchKey).delete(instanceId)`.
+1. The family root (e.g., TabsRoot) owns a shared context with a per-match-key presence set (e.g., `Record<string, string[]> (JSON-compatible array of instance IDs per match key)` keyed by protocol match key). This retains instance multiplicity: if two Content instances share a match key, both are tracked. Per `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-D`, the Web adapter resolves duplicate/ambiguous presence at projection time — the root does not collapse it to a single boolean. The Trigger checks whether the set is non-empty (at least one matching Content is present), and the adapter handles duplicate-instance fallback.
+2. When Content mounts, it adds its instance ID to the set: `contentPresent[matchKey] = [...(contentPresent[matchKey] ?? []), instanceId]`.
+3. When Content detaches (L1), it removes its instance ID: `contentPresent[matchKey] = contentPresent[matchKey]?.filter(id => id !== instanceId) ?? []`.
 4. The Trigger observes its own match key in `contentPresent` and adjusts its relation target:
-   - `contentPresent[myMatchKey] === true`: relation target = contentId (restores aria-controls)
-   - `contentPresent[myMatchKey] === false`: relation target = empty string (removes aria-controls)
+   - `contentPresent[myMatchKey]?.length > 0`: relation target = contentId (restores aria-controls)
+   - `contentPresent[myMatchKey]?.length === 0`: relation target = empty string (removes aria-controls)
    This per-key tracking ensures a Trigger only restores aria-controls when its matched Content is present, not when any Content mounts.
 
    **Pre-commit timing**: the presence signal must be set before the mount render/commit, not in a mounted callback. The runtime performs mount commit before invoking mounted callbacks, so a post-mount presence update leaves the newly committed panel temporarily without the reciprocal IDREF. The Content must notify the root of its presence during the setup/mount-preparation phase, before the first render commit.
@@ -111,3 +111,8 @@ This is an unauthorized proposal. Implementation requires:
 2. Contract amendment or new contract
 3. Tabs migration with test evidence
 4. Disclosure/Collapsible/Accordion implementation (separate, after both prerequisites merge)
+
+
+## Adapter-visible structured relationship
+
+The Trigger should not collapse presence to boolean/string before projection. Instead, the structured family/role/match-key identity should remain available at the adapter projection layer. The adapter resolves the structured relationship to concrete host IDs and handles duplicate/missing match ambiguity. The Trigger observes a simplified non-empty check, but the adapter projection path retains the full structured carrier for fail-closed duplicate handling.
