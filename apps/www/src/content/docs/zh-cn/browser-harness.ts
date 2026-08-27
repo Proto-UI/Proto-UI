@@ -5,6 +5,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
+import path from 'node:path';
 import {
   chromium,
   type Browser,
@@ -21,6 +22,37 @@ export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 let devServer: ChildProcess | null = null;
 let serverOutput = '';
+let styleGeneration: Promise<void> | null = null;
+
+/**
+ * Rebuild the CLI and regenerate the website style projection before Astro
+ * starts. The long-lived server is still a direct Node child for reliable
+ * teardown; only this short-lived prerequisite goes through Corepack.
+ */
+export async function generateProtoUiStyle(): Promise<void> {
+  styleGeneration ??= new Promise<void>((resolve, reject) => {
+    const appsWwwRoot = path.join(process.cwd(), 'apps', 'www');
+    const corepackCli = path.join(
+      path.dirname(process.execPath),
+      'node_modules',
+      'corepack',
+      'dist',
+      'corepack.js'
+    );
+    const child = spawn(
+      process.execPath,
+      [corepackCli, 'pnpm@10.32.1', 'run', 'generate:proto-ui-style'],
+      { cwd: appsWwwRoot, env: process.env, stdio: 'inherit' }
+    );
+    child.on('error', reject);
+    child.on('exit', (code, signal) => {
+      if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));
+      else if (code !== 0) reject(new Error(`Proto UI style generation exited with code ${code}.`));
+      else resolve();
+    });
+  });
+  return styleGeneration;
+}
 
 async function availablePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -40,8 +72,26 @@ async function availablePort(): Promise<number> {
 }
 
 export async function chromeExecutable(): Promise<string> {
+  const windowsCandidates =
+    process.platform === 'win32'
+      ? [
+          path.join(
+            process.env.PROGRAMFILES ?? 'C:\\Program Files',
+            'Google/Chrome/Application/chrome.exe'
+          ),
+          path.join(
+            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
+            'Google/Chrome/Application/chrome.exe'
+          ),
+          path.join(
+            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
+            'Microsoft/Edge/Application/msedge.exe'
+          ),
+        ]
+      : [];
   const candidates = [
     process.env.CHROME_PATH,
+    ...windowsCandidates,
     '/usr/bin/google-chrome',
     '/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
@@ -85,22 +135,13 @@ function recordServerOutput(chunk: Buffer): void {
 
 async function spawnServer(readyRoute: string): Promise<string> {
   const port = await availablePort();
-  const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+  const appsWwwRoot = path.join(process.cwd(), 'apps', 'www');
+  const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
   devServer = spawn(
-    executable,
-    [
-      'pnpm@10.32.1',
-      '--filter',
-      'apps-www',
-      'dev',
-      '--host',
-      '127.0.0.1',
-      '--port',
-      String(port),
-      '--strictPort',
-    ],
+    process.execPath,
+    [astroCli, 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
     {
-      cwd: process.cwd(),
+      cwd: appsWwwRoot,
       detached: process.platform !== 'win32',
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -121,6 +162,8 @@ export async function startServer(readyRoute: string): Promise<string> {
     return externalBaseUrl;
   }
 
+  await generateProtoUiStyle();
+
   // availablePort() releases the socket before the child binds it, so two
   // browser suites running in parallel can be handed the same port and
   // --strictPort kills the loser. Retry on a fresh port instead.
@@ -140,14 +183,26 @@ export async function startServer(readyRoute: string): Promise<string> {
 
 export async function stopServer(): Promise<void> {
   if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
+  // Astro is the direct child, so Windows does not point at a transient shell.
   const signalTarget = process.platform === 'win32' ? devServer.pid : -devServer.pid;
-  process.kill(signalTarget, 'SIGTERM');
+  try {
+    process.kill(signalTarget, 'SIGTERM');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+    return;
+  }
 
   const exited = await Promise.race([
     new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
   ]);
-  if (!exited && devServer.exitCode === null) process.kill(signalTarget, 'SIGKILL');
+  if (!exited && devServer.exitCode === null) {
+    try {
+      process.kill(signalTarget, 'SIGKILL');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+    }
+  }
 }
 
 export async function launchBrowser(): Promise<Browser> {

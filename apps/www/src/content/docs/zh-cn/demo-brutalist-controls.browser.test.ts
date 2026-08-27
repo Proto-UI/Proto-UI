@@ -3,6 +3,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
+import path from 'node:path';
 import {
   chromium,
   type Browser,
@@ -11,6 +12,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { generateProtoUiStyle } from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -66,8 +68,26 @@ async function availablePort(): Promise<number> {
 }
 
 async function chromeExecutable(): Promise<string> {
+  const windowsCandidates =
+    process.platform === 'win32'
+      ? [
+          path.join(
+            process.env.PROGRAMFILES ?? 'C:\\Program Files',
+            'Google/Chrome/Application/chrome.exe'
+          ),
+          path.join(
+            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
+            'Google/Chrome/Application/chrome.exe'
+          ),
+          path.join(
+            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
+            'Microsoft/Edge/Application/msedge.exe'
+          ),
+        ]
+      : [];
   const candidates = [
     process.env.CHROME_PATH,
+    ...windowsCandidates,
     '/usr/bin/google-chrome',
     '/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
@@ -116,23 +136,16 @@ async function startServer(): Promise<string> {
     return externalBaseUrl;
   }
 
+  await generateProtoUiStyle();
+
   const port = await availablePort();
-  const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+  const appsWwwRoot = path.join(process.cwd(), 'apps', 'www');
+  const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
   devServer = spawn(
-    executable,
-    [
-      'pnpm@10.32.1',
-      '--filter',
-      'apps-www',
-      'dev',
-      '--host',
-      '127.0.0.1',
-      '--port',
-      String(port),
-      '--strictPort',
-    ],
+    process.execPath,
+    [astroCli, 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
     {
-      cwd: process.cwd(),
+      cwd: appsWwwRoot,
       detached: process.platform !== 'win32',
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -149,13 +162,24 @@ async function startServer(): Promise<string> {
 async function stopServer(): Promise<void> {
   if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
   const signalTarget = process.platform === 'win32' ? devServer.pid : -devServer.pid;
-  process.kill(signalTarget, 'SIGTERM');
+  try {
+    process.kill(signalTarget, 'SIGTERM');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+    return;
+  }
 
   const exited = await Promise.race([
     new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
   ]);
-  if (!exited && devServer.exitCode === null) process.kill(signalTarget, 'SIGKILL');
+  if (!exited && devServer.exitCode === null) {
+    try {
+      process.kill(signalTarget, 'SIGKILL');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+    }
+  }
 }
 
 async function openRoute(
