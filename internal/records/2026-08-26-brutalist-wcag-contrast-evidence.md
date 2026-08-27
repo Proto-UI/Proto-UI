@@ -27,7 +27,7 @@ No text contrast failures in either theme.
 | --- | --- | --- | --- |
 | border-black on bg-background | 19.26 PASS | **1.17 FAIL** | Depends on call site |
 | border-black on bg-main | 18.05 PASS | 18.05 PASS | Required indicator — PASS |
-| border-black on bg-card | 21.00 PASS | **1.39 FAIL** | Depends on call site |
+| border-black on bg-secondary-background | 21.00 PASS | **1.39 FAIL** | Depends on call site |
 
 ### Classification per #469 corrected baseline
 
