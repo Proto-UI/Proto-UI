@@ -29,6 +29,8 @@ cases:
       - A-REACT-18-19-0001-F
       - A-VUE-3-0001-E
       - A-VUE-3-0001-F
+      - A-VUE-2-0001-E
+      - A-VUE-2-0001-F
       - A-WEB-COMPONENT-0001-E
       - A-WEB-COMPONENT-0001-F
     expectation: adapter-owned-event-routing-delivers-declared-types-to-the-owning-scope
@@ -56,6 +58,7 @@ cases:
       - HC-DEFAULT-ACTION-0001-B
       - A-REACT-18-19-0001-E
       - A-VUE-3-0001-E
+      - A-VUE-2-0001-E
       - A-WEB-COMPONENT-0001-E
     expectation: cancelable-dom-event-receives-prevent-default
   - id: T-EVENT-0003-CASE-TRANSACTIONAL-ROLLBACK
@@ -143,6 +146,14 @@ implementations:
     consumesCases:
       - T-EVENT-0003-CASE-SCOPED-TRANSLATION
       - T-EVENT-0003-CASE-REBIND-CLEANUP
+  - id: adapter-vue2-event-binding
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/event.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-SCOPED-TRANSLATION
+      - T-EVENT-0003-CASE-REBIND-CLEANUP
   - id: adapter-web-component-event-binding
     kind: adapter-test
     status: passing
@@ -205,6 +216,11 @@ verifies:
       anchors:
         - A-VUE-3-0001-E
         - A-VUE-3-0001-F
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-E
+        - A-VUE-2-0001-F
     - id: A-WEB-COMPONENT-0001
       anchors:
         - A-WEB-COMPONENT-0001-E
@@ -224,6 +240,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Rebinding and disposal evidence exercises Event lifecycle guarantees.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added official Vue 2 Event wiring, commit-gate, and cleanup evidence.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Updated the Expose Event separation case for the standalone package, Event-only facade, and dedicated wiring target.

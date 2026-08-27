@@ -58,6 +58,15 @@ implementations:
       - T-LIFECYCLE-0005-CASE-INTERNAL-CONDITIONAL-VIEW
       - T-LIFECYCLE-0005-CASE-TERMINAL-OWNER-TEARDOWN
       - T-LIFECYCLE-0005-CASE-HOST-BINDING-REVOKED
+  - id: adapter-vue2-lifecycle-ownership
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/lifecycle.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0005-CASE-OWNER-ONE-INSTANCE
+      - T-LIFECYCLE-0005-CASE-INTERNAL-CONDITIONAL-VIEW
+      - T-LIFECYCLE-0005-CASE-TERMINAL-OWNER-TEARDOWN
   - id: adapter-react-strict-replay
     kind: adapter-test
     status: passing
@@ -94,11 +103,18 @@ verifies:
       since: 0.2.0-rc.7
       anchors:
         - A-VUE-3-0001-G
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-G
     - id: A-WEB-COMPONENT-0001
       since: 0.2.0-rc.7
       anchors:
         - A-WEB-COMPONENT-0001-G
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added Vue 2 keep-alive view-epoch and terminal-owner evidence.
   - version: 0.2.0-rc.7
     change: revised
     summary: Linked lifecycle ownership conformance to the official Adapter profile criteria.

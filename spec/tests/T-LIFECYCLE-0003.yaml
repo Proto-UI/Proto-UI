@@ -69,6 +69,13 @@ implementations:
     required: true
     consumesCases:
       - T-LIFECYCLE-0003-CASE-ADAPTER-EVENT-TRACE
+  - id: adapter-vue2-lifecycle-events
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/lifecycle.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0003-CASE-ADAPTER-EVENT-TRACE
   - id: adapter-web-component-lifecycle-events
     kind: adapter-test
     status: passing
@@ -95,11 +102,18 @@ verifies:
       since: 0.2.0-rc.7
       anchors:
         - A-VUE-3-0001-H
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-H
     - id: A-WEB-COMPONENT-0001
       since: 0.2.0-rc.7
       anchors:
         - A-WEB-COMPONENT-0001-H
 revisions:
+  - version: 0.3.0-alpha.0
+    change: implemented
+    summary: Added structured lifecycle event evidence for the official Vue 2 Adapter.
   - version: 0.2.0-rc.7
     change: implemented
     summary: Added structured lifecycle event trace coverage for all three official Adapter profiles.
