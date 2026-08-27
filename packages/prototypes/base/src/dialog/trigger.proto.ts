@@ -51,7 +51,7 @@ function setupDialogTrigger(def: DefHandle<DialogTriggerProps, DialogTriggerExpo
     // P-BASE-DIALOG-TRIGGER-REQUEST, P-BASE-DIALOG-TRIGGER-DISABLED
     const ctx = run.context.read(DIALOG_CONTEXT);
     if (command.disabled.get()) return;
-    const openFocusReason: DialogOpenFocusReason = ev?.detail?.key ? 'keyboard' : 'pointer';
+    const openFocusReason: DialogOpenFocusReason = ev?.key ? 'keyboard' : 'pointer';
     requestDialogOpen(run, !ctx.open, 'trigger.press', openFocusReason);
   });
 }

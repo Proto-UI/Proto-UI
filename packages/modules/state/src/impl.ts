@@ -3,7 +3,12 @@ import type { SystemCaps } from '@proto.ui/module-base';
 import type { StateEvent, StateSetReason } from '@proto.ui/types';
 
 import { StateKernel } from './kernel';
-import type { InternalStateWatchCallback, StateFacade, StatePort } from './types';
+import type {
+  InternalStateWatchCallback,
+  StateCallbackDispatcher,
+  StateFacade,
+  StatePort,
+} from './types';
 
 function opOf(semantic: string, method: string) {
   return `state(${semantic}).${method}`;
@@ -37,6 +42,7 @@ export class StateModuleImpl {
    * the correct ctx for the current "set chain".
    */
   private ctxStack: unknown[] = [];
+  private callbackDispatcher: StateCallbackDispatcher | null = null;
 
   constructor(private readonly sys: SystemCaps) {}
 
@@ -78,6 +84,18 @@ export class StateModuleImpl {
     return this.ctxStack.length ? this.ctxStack[this.ctxStack.length - 1] : undefined;
   }
 
+  private dispatchWatcher<V>(
+    cb: InternalStateWatchCallback<V>,
+    ctx: unknown,
+    event: StateEvent<V>
+  ): void {
+    if (this.callbackDispatcher) {
+      this.callbackDispatcher((callbackCtx) => cb(callbackCtx, event));
+      return;
+    }
+    cb(ctx, event);
+  }
+
   // -----------------------
   // watcher plumbing
   // -----------------------
@@ -92,7 +110,7 @@ export class StateModuleImpl {
       const ctx = this.currentCtx();
       // Snapshot for safety if callbacks mutate watcher sets
       const list = Array.from(watchers);
-      for (const cb of list) cb(ctx, e);
+      for (const cb of list) this.dispatchWatcher(cb, ctx, e);
     });
 
     this.kernelOffById.set(id, off);
@@ -139,7 +157,7 @@ export class StateModuleImpl {
     const e: StateEvent<any> = { type: 'disconnect', reason: 'unmount' };
     const ctx = this.currentCtx();
     const list = Array.from(watchers);
-    for (const cb of list) cb(ctx, e);
+    for (const cb of list) this.dispatchWatcher(cb, ctx, e);
   }
 
   // -----------------------
@@ -184,6 +202,10 @@ export class StateModuleImpl {
   // -----------------------
 
   readonly port: StatePort = {
+    setCallbackDispatcher: (dispatch) => {
+      this.callbackDispatcher = dispatch;
+    },
+
     watch: (handle, cb) => {
       this.ensureAlive(`state.port.watch`);
       return this.addWatcher(handle, cb);

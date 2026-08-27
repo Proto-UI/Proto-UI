@@ -404,6 +404,32 @@ function resolveKnownAsHookStateHandles(node) {
     ]);
   }
 
+  if (hookName === 'asCheckboxRoot') {
+    return new Map([
+      ['checked', 'data-[checked]'],
+      ['indeterminate', 'data-[indeterminate]'],
+      ['disabled', 'data-[disabled]'],
+      ['hovered', 'data-[hovered]'],
+      ['focused', 'data-[focused]'],
+      ['focusVisible', 'data-[focus-visible]'],
+      ['pressed', 'data-[pressed]'],
+    ]);
+  }
+
+  if (hookName === 'asCheckboxIndicator') {
+    return new Map([
+      ['checked', 'data-[checked]'],
+      ['indeterminate', 'data-[indeterminate]'],
+    ]);
+  }
+
+  if (hookName === 'asScrollAreaViewport') {
+    return new Map([
+      ['focused', 'data-[focused]'],
+      ['focusVisible', 'data-[focus-visible]'],
+    ]);
+  }
+
   if (hookName === 'asSwitchRoot') {
     return new Map([
       ['checked', 'data-[checked]'],

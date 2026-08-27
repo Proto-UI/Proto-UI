@@ -1,0 +1,14 @@
+---
+title: 'Checkbox'
+description: 'Shadcn checkbox reconstructed on Proto UI.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+This entry shows the current `shadcn` checkbox implementation in Proto UI.
+
+Base Checkbox owns the protocol: controlled and uncontrolled `checked` and `indeterminate`, activation from pointer and Space, the effective disabled state, focus, and the `checkbox` role with its `mixed` accessible state. Root and Indicator are the whole anatomy, and the shadcn layer adds presentation only — the box, its fill, the focus ring, and the disabled treatment.
+
+The Indicator is derived. It reads `checked` and `indeterminate` from the nearest Base Checkbox, picks the tick or the dash, and owns no value, focus, or event of its own. Mixed reads before checked, so a checkbox that is both never paints a tick.
+
+<PrototypePreviewer demoId="demo-shadcn-checkbox" initialRuntime="wc" />

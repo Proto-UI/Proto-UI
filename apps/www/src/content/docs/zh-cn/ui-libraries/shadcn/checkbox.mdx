@@ -1,0 +1,14 @@
+---
+title: 'Checkbox'
+description: '在 Proto UI 上重建的 shadcn checkbox。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+这个条目展示 Proto UI 中当前的 `shadcn` checkbox 实现。
+
+协议归 Base Checkbox 所有：controlled 与 uncontrolled 的 `checked` 与 `indeterminate`、指针与 Space 的 activation、生效的 disabled 状态、focus，以及带 `mixed` 可访问状态的 `checkbox` role。anatomy 只有 Root 与 Indicator，shadcn 层只增加呈现——方框、填充、focus ring 与 disabled 处理。
+
+Indicator 是派生的。它从最近的 Base Checkbox 读 `checked` 与 `indeterminate`，据此选择勾号或横线，自身不拥有任何 value、focus 或 event。mixed 先于 checked 读取，因此同时成立时不会画出勾号。
+
+<PrototypePreviewer demoId="demo-shadcn-checkbox" initialRuntime="wc" />

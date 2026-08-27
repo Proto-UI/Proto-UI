@@ -12,6 +12,19 @@ missions:
       - cross-Adapter observable behavior
       - focused contract and browser evidence
     budgetClass: large
+    requiredBand: C3
+    taskClass: observe
+    risk: medium
+    executionMode: attended-read-only-fresh-context
+    freshContextRequired: true
+    humanGates:
+      - mission-freezing
+      - finding-disposition
+    lease:
+      id: null
+      owner: null
+      acquiredAt: null
+      expiresAt: null
     mutationPolicy: read-only
     source: phase-0-evaluation-plan
 
@@ -27,6 +40,18 @@ missions:
       - recent audit record
       - complete mapped executable evidence
     budgetClass: medium
+    requiredBand: C2
+    taskClass: observe
+    risk: medium
+    executionMode: attended-read-only-fresh-context
+    freshContextRequired: true
+    humanGates:
+      - mission-freezing
+    lease:
+      id: null
+      owner: null
+      acquiredAt: null
+      expiresAt: null
     mutationPolicy: read-only
     source: phase-0-evaluation-plan
 
@@ -42,6 +67,18 @@ missions:
       - independent finding classifications
       - overlap and contradiction analysis
     budgetClass: medium
+    requiredBand: C2
+    taskClass: observe
+    risk: medium
+    executionMode: attended-read-only-fresh-context
+    freshContextRequired: true
+    humanGates:
+      - mission-freezing
+    lease:
+      id: null
+      owner: null
+      acquiredAt: null
+      expiresAt: null
     mutationPolicy: read-only
     source: phase-0-evaluation-plan
     blockedBy: first eligible future discovery run
@@ -58,5 +95,18 @@ missions:
       - case coverage
       - required passing implementation consumption
     budgetClass: medium
+    requiredBand: C3
+    taskClass: observe
+    risk: medium
+    executionMode: attended-read-only-fresh-context
+    freshContextRequired: true
+    humanGates:
+      - mission-freezing
+      - finding-disposition
+    lease:
+      id: null
+      owner: null
+      acquiredAt: null
+      expiresAt: null
     mutationPolicy: read-only
     source: AM-P0-001-F1

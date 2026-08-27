@@ -24,7 +24,8 @@ describe('runtime test plan', () => {
       },
       {
         needsServer: true,
-        args: BROWSER_SUITES,
+        // Sequential, because every suite drives the same dev server.
+        args: ['--no-file-parallelism', ...BROWSER_SUITES],
       },
     ]);
   });

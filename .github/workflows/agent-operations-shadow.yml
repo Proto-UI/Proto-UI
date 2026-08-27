@@ -1,0 +1,144 @@
+name: Agent Operations Shadow
+
+on:
+  schedule:
+    # Hourly at minute 17. Phase A remains read-only and only uploads validated artifacts.
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: GitHub work item class to observe
+        required: true
+        type: choice
+        default: both
+        options:
+          - both
+          - issues
+          - prs
+      limit:
+        description: Maximum combined items to observe (1-100)
+        required: true
+        type: string
+        default: '50'
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: agent-operations-shadow-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  shadow:
+    if: github.repository == 'Proto-UI/Proto-UI'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SNAPSHOT_PATH: agent-operations-snapshot.json
+      REPORT_PATH: agent-operations-shadow-report.json
+      SCAN_KIND: ${{ github.event.inputs.kind || 'both' }}
+      SCAN_LIMIT: ${{ github.event.inputs.limit || '50' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare pnpm@10.32.1 --activate
+
+      - name: Install validation dependencies
+        run: corepack pnpm@10.32.1 install --frozen-lockfile
+
+      - name: Validate Agent Operations policy
+        run: corepack pnpm@10.32.1 check:agent-operations
+
+      - name: Collect bounded GitHub snapshot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node scripts/agent-operations/collect-github-state.mjs \
+            --repo "${GITHUB_REPOSITORY}" \
+            --kind "${SCAN_KIND}" \
+            --limit "${SCAN_LIMIT}" \
+            --output "${SNAPSHOT_PATH}"
+
+      - name: Detect Agent credential
+        id: credential
+        env:
+          AGENT_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${AGENT_API_KEY}" ]]; then
+            echo 'available=true' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'available=false' >> "${GITHUB_OUTPUT}"
+            echo 'OPENAI_API_KEY is not configured; preserving the snapshot without Agent analysis.' >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+      - name: Run read-only shadow analysis
+        id: shadow_analysis
+        if: steps.credential.outputs.available == 'true'
+        uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          codex-version: '0.138.0'
+          prompt-file: .github/codex/prompts/agent-operations-shadow.md
+          output-file: ${{ env.REPORT_PATH }}
+          output-schema-file: internal/agent-operations/schemas/shadow-report.schema.json
+          codex-args: '["--ephemeral"]'
+          permission-profile: ':read-only'
+          safety-strategy: drop-sudo
+
+      - name: Validate shadow report against snapshot
+        if: steps.credential.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          node scripts/agent-operations/check-agent-operations.mjs \
+            --report "${REPORT_PATH}" \
+            --snapshot "${SNAPSHOT_PATH}"
+
+      - name: Summarize completed shadow run
+        if: steps.credential.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          node -e '
+            const fs = require("node:fs");
+            const report = JSON.parse(fs.readFileSync(process.env.REPORT_PATH, "utf8"));
+            const lines = [
+              "## Agent Operations shadow result",
+              "",
+              `- Run: \`${report.runId}\``,
+              `- Analyzed: ${report.summary.analyzedCount}`,
+              `- Human decisions proposed: ${report.summary.decisionsRequired}`,
+              `- GitHub writes performed: ${report.writeOperationsPerformed}`,
+            ];
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+          '
+
+      - name: Upload bounded input snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-operations-shadow-input-${{ github.run_id }}
+          path: ${{ env.SNAPSHOT_PATH }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload validated shadow report
+        if: always() && steps.credential.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-operations-shadow-report-${{ github.run_id }}
+          path: ${{ env.REPORT_PATH }}
+          if-no-files-found: error
+          retention-days: 14

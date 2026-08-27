@@ -53,4 +53,4 @@ Use these labels precisely:
 
 Package availability and entity lifecycle are separate. Proto UI 0.2.0 is a published stable ecosystem release (`V-PROTO-UI-0008`), while the current workspace can contain later draft entities and the draft 0.3.0-alpha.0 train. Always combine the release identity, profile lifecycle, exact relations, and executable evidence before making a compatibility claim.
 
-For the underlying protocol model, read [Core](/en/specifications/core/). For implementation and contribution paths, continue to [Build / Contribute](/en/build/contribute/).
+For the underlying protocol model, read [Core](/en/specifications/core/). For implementation and contribution paths, continue to [Contribute](/en/contribute/).

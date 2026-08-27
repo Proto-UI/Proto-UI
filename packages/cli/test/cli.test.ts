@@ -207,6 +207,37 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('registers the Base Radio Group compound facade', () => {
+    expect(COMPONENT_REGISTRY['base-radio-group']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/radio-group',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'radioGroupRoot',
+          reactExport: 'BaseRadioGroupRoot',
+          vueExport: 'BaseRadioGroupRoot',
+          wcExport: 'BaseRadioGroupRootElement',
+          elementName: 'proto-ui-base-radio-group-root',
+        },
+        {
+          prototypeImport: 'radioGroupItem',
+          reactExport: 'BaseRadioGroupItem',
+          vueExport: 'BaseRadioGroupItem',
+          wcExport: 'BaseRadioGroupItemElement',
+          elementName: 'proto-ui-base-radio-group-item',
+        },
+        {
+          prototypeImport: 'radioGroupIndicator',
+          reactExport: 'BaseRadioGroupIndicator',
+          vueExport: 'BaseRadioGroupIndicator',
+          wcExport: 'BaseRadioGroupIndicatorElement',
+          elementName: 'proto-ui-base-radio-group-indicator',
+        },
+      ],
+    });
+  });
+
   it('registers Base Live Region and Async Region public facades', () => {
     expect(COMPONENT_REGISTRY['base-live-region']).toMatchObject({
       packageName: '@proto.ui/prototypes-base',

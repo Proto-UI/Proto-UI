@@ -1,0 +1,138 @@
+id: P-BASE-RADIO-GROUP-ITEM
+type: prototype
+title: Base Radio Group Item is the radio choice and selection requester
+status: draft
+since: 0.3.0-alpha.0
+summary: Base Radio Group Item is one authored radio choice that registers in root Collection order, derives checked and effective-disabled facts from Root context, participates in selected-or-first roving focus, and requests selection through Space or successful primary pointer commit.
+statement:
+  zh-CN: >-
+    Base Radio Group Item 是 `base-radio-group` anatomy family 中可重复的 radio choice。Item 必须 author 唯一 non-empty value；checked 仅表示该 Item 是 Root value 的 canonical match，effective disabled 是 item disabled 与 group disabled 的并集。Item 组合 Collection Item、Focusable、Trigger 与 A11y，但不拥有 selection。Space 与成功 primary pointer commit 请求 Root selection；Enter、cancelled pointer 与 disabled Item 不得选择。
+
+  en: >-
+    Base Radio Group Item is a repeatable radio choice in the `base-radio-group` anatomy family. Each Item must author a unique non-empty value; checked only means that Item is the canonical match for Root value, and effective disabled is the union of item and group disabled. Item composes Collection Item, Focusable, Trigger, and A11y without owning selection. Space and successful primary pointer commit request Root selection; Enter, cancelled pointer, and disabled Items do not select.
+
+criteria:
+  - id: P-BASE-RADIO-GROUP-ITEM-IDENTITY
+    text:
+      zh-CN: '`base-radio-group-item` 与 `asRadioGroupItem()` 是同一个 Item protocol 的 direct 与 authored-asHook entries，并在最近 Radio Group Root anatomy domain 内声明 item role。'
+      en: '`base-radio-group-item` and `asRadioGroupItem()` are direct and authored-asHook entries of one Item protocol and claim the item role in the nearest Radio Group Root anatomy domain.'
+  - id: P-BASE-RADIO-GROUP-ITEM-REQUIRED-VALUE
+    text:
+      zh-CN: >-
+        Item public props 必须是 required `value: string` 与 optional `disabled?: boolean`；默认 disabled=false，合法 authoring value 必须 non-empty 且在同一 Root 中唯一。
+
+      en: >-
+        Item public props must be required `value: string` plus optional `disabled?: boolean`; disabled defaults to false, and valid authoring values are non-empty and unique within one Root.
+
+    dependsOn:
+      contracts: [C-PROPS-0001]
+  - id: P-BASE-RADIO-GROUP-ITEM-DERIVED-CHECKED
+    text:
+      zh-CN: Item 不接受 checked/defaultChecked；checked 只能从 Root value 与 canonical Collection identity 派生，重复 value 最多使第一项 checked。
+      en: Item accepts no checked/defaultChecked prop; checked is derived only from Root value and canonical Collection identity, and duplicate values can check at most the first Item.
+    dependsOn:
+      prototypes: [P-BASE-RADIO-GROUP]
+  - id: P-BASE-RADIO-GROUP-ITEM-EFFECTIVE-DISABLED
+    text:
+      zh-CN: effective disabled 为 item disabled OR group disabled；它必须同步到 Collection disabled、Focusable disabled、Trigger disabled 与 a11y disabled，并阻止 focus、keyboard/pointer activation 与 selection request。
+      en: Effective disabled is item disabled OR group disabled; it must synchronize Collection disabled, Focusable disabled, Trigger disabled, and a11y disabled while blocking focus, keyboard/pointer activation, and selection requests.
+  - id: P-BASE-RADIO-GROUP-ITEM-EXACT-EXPOSES
+    text:
+      zh-CN: Item 仅 expose checked、disabled、collectionIndex/Total/First/Last、focused/focusVisible/focusSelf、hovered/pressed 与 select；不 expose value 或内部 context/trigger handle。
+      en: Item exposes only checked, disabled, collectionIndex/Total/First/Last, focused/focusVisible/focusSelf, hovered/pressed, and select; it does not expose value or internal context/trigger handles.
+    dependsOn:
+      contracts: [C-EXPOSE-STATE-0001]
+  - id: P-BASE-RADIO-GROUP-ITEM-SELECT-REQUEST
+    text:
+      zh-CN: select() 与有效 activation 只能向最近 Root 请求本 Item value；accepted request 不在 Item 本地直接写 checked，也不移动焦点。
+      en: select() and valid activation may only request this Item value from the nearest Root; an accepted request does not write checked locally or move focus.
+  - id: P-BASE-RADIO-GROUP-ITEM-SPACE-ACTIVATION
+    text:
+      zh-CN: 未 disable Item 聚焦时，未修饰 Space keyboard activation 必须 prevent default 并请求一次 selection；Enter 是 no-op，keyboard cancel 不得选择。
+      en: On a focused enabled Item, unmodified Space keyboard activation must prevent default and request selection once; Enter is a no-op, and keyboard cancellation does not select.
+    dependsOn:
+      contracts: [C-AS-TRIGGER-0001, C-EVENT-TYPE-0001]
+  - id: P-BASE-RADIO-GROUP-ITEM-POINTER-ACTIVATION
+    text:
+      zh-CN: 只有成功 primary pointer commit 请求 selection；pointer down 必须 focus Item，pointer up 才提交，cancel/secondary/non-primary input 不得选择。
+      en: Only a successful primary pointer commit requests selection; pointer down focuses the Item, pointer up commits, and cancelled, secondary, or non-primary input does not select.
+    dependsOn:
+      contracts: [C-AS-TRIGGER-0001, C-EVENT-TYPE-0002]
+  - id: P-BASE-RADIO-GROUP-ITEM-ROVING-PARTICIPATION
+    text:
+      zh-CN: enabled Item 必须注册 selected/current 事实；checked enabled Item 优先成为 tabindex=0，否则第一 enabled Item 成为 entry，disabled Item 永远为 -1。
+      en: Enabled Items must register selected/current facts; the checked enabled Item is preferred for tabindex=0, otherwise the first enabled Item is entry, and disabled Items are always -1.
+    dependsOn:
+      contracts: [C-AS-FOCUS-ROVING-0001, C-AS-FOCUSABLE-0001]
+      prototypes: [P-BASE-RADIO-GROUP]
+  - id: P-BASE-RADIO-GROUP-ITEM-NAVIGATION-SELECTION
+    text:
+      zh-CN: Focus Roving next/prev/Home/End 导航成功聚焦目标 Item 后，该 target Item 必须请求 selection；group disabled 时导航与 selection 都无效。
+      en: After Focus Roving next/previous/Home/End navigation successfully focuses a target Item, that target Item must request selection; navigation and selection are inert while the group is disabled.
+  - id: P-BASE-RADIO-GROUP-ITEM-A11Y-RADIO
+    text:
+      zh-CN: Item 必须投影 role=radio、checked、effective-disabled 与 roving tabindex；其可访问名称来自 authored content/host labeling，不创建 nested native radio 或另一个 selectable control。
+      en: Item must project role=radio, checked, effective-disabled, and roving tabindex; its accessible name comes from authored content/host labeling, with no nested native radio or second selectable control.
+    dependsOn:
+      contracts: [C-A11Y-0001]
+      decisions: [D-A11Y-SEMANTIC-DOMAIN-0001]
+  - id: P-BASE-RADIO-GROUP-ITEM-DYNAMIC-SYNCHRONIZATION
+    text:
+      zh-CN: Item value/disabled prop、Root value/disabled prop 与 Collection 顺序变化必须同步 checked/effective-disabled/roving/a11y 状态；结构变化自身不得发送 valueChange。
+      en: Item value/disabled props, Root value/disabled props, and Collection-order changes must synchronize checked/effective-disabled/roving/a11y state; structural changes alone must not emit valueChange.
+  - id: P-BASE-RADIO-GROUP-ITEM-NO-FORM-OR-VISUAL-API
+    text:
+      zh-CN: Item 不包含 name/form/required/native input/submission/reset/validation、Label/Description、orientation/loop、position/set-size 或视觉 variant/size/class props。
+      en: Item has no name/form/required/native input/submission/reset/validation, Label/Description, orientation/loop, position/set-size, or visual variant/size/class props.
+sources:
+  - path: docs/superpowers/specs/2026-08-12-base-radio-group-semantic-design.md
+    sections:
+      [Item behavior, Focus and keyboard model, Accessibility, Form and native-control boundary]
+  - path: packages/prototypes/base/src/radio-group/item.proto.ts
+    sections: [readActivationEvent, setupRadioGroupItem, asRadioGroupItem, base-radio-group-item]
+  - path: packages/prototypes/base/src/radio-group/types.ts
+    sections: [RadioGroupItemProps, RadioGroupItemExposes]
+  - path: packages/prototypes/base/test/radio-group.test.ts
+    sections:
+      - selects with Space and pointer commit but not Enter or canceled pointer input
+      - wraps both arrow axes, supports Home and End, and skips disabled items
+      - preserves value across structural churn and selected-item disablement
+      - publishes only the approved root, item, and indicator protocol surfaces
+dependsOn:
+  contracts:
+    - C-ANATOMY-0001
+    - C-ANATOMY-0004
+    - C-ANATOMY-0005
+    - C-ANATOMY-0008
+    - C-CONTEXT-0002
+    - C-CONTEXT-0006
+    - C-CONTEXT-0007
+    - C-PROPS-0001
+    - C-STATE-0001
+    - C-EXPOSE-STATE-0001
+    - C-AS-COLLECTION-ITEM-0001
+    - C-AS-FOCUSABLE-0001
+    - C-AS-FOCUS-ROVING-0001
+    - C-AS-TRIGGER-0001
+    - C-EVENT-TYPE-0001
+    - C-EVENT-TYPE-0002
+    - C-A11Y-0001
+  prototypes: [P-BASE-RADIO-GROUP]
+  modules: [M-COLLECTION-0001, M-A11Y-0001, M-EVENT-0001]
+  decisions:
+    - D-BASE-PROTOTYPE-INDEPENDENCE-0001
+    - D-FOCUS-ROVING-NAVIGATION-OWNERSHIP-0001
+    - D-A11Y-SEMANTIC-DOMAIN-0001
+requires:
+  hostCaps: [HC-A11Y-0001]
+relates:
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
+references:
+  prototypes: [P-BASE-RADIO-GROUP, P-BASE-CHECKBOX, P-BASE-TABS-TRIGGER]
+verifies:
+  tests: [T-BASE-RADIO-GROUP-ITEM-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the draft Base Radio Group Item choice, activation, effective-disabled, and roving-focus protocol.
+tags: [prototype, base, radio-group, item, collection, focus, trigger, accessibility]

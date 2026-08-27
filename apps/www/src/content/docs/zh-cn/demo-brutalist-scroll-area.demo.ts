@@ -19,6 +19,11 @@ export default {
                 className: 'flex flex-col gap-2 p-3',
                 children: [
                   { kind: 'box', children: ['Scrollable conversation content.'] },
+                  {
+                    kind: 'box',
+                    className: 'w-[520px] whitespace-nowrap',
+                    children: ['A row wider than the viewport, so this surface scrolls both ways.'],
+                  },
                   { kind: 'box', children: ['Row 2'] },
                   { kind: 'box', children: ['Row 3'] },
                   { kind: 'box', children: ['Row 4'] },
@@ -47,6 +52,19 @@ export default {
                 kind: 'proto',
                 prototypeId: 'brutalist-scroll-area-thumb',
                 ref: 'thumb',
+              },
+            ],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-scroll-area-scrollbar',
+            ref: 'scrollbarHorizontal',
+            props: { orientation: 'horizontal' },
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'brutalist-scroll-area-thumb',
+                ref: 'thumbHorizontal',
               },
             ],
           },

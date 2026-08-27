@@ -3,7 +3,7 @@ type: test
 title: Brutalist Scroll Area visual and documentation layout contract tests
 status: draft
 since: 0.2.0-rc.7
-summary: Covers the current Neo-Brutalist visual grammar, Base anatomy inheritance, orientation, composed projection preference, host-projected Thumb geometry, Move Gesture-backed dragging, and responsive reference-demo consumer sizing.
+summary: Covers the current Neo-Brutalist visual grammar, Base anatomy inheritance, orientation, composed projection preference, host-projected Thumb geometry, Move Gesture-backed dragging, the inward Viewport focus ring, and responsive reference-demo consumer sizing.
 cases:
   - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-1
     title: P-BRUTALIST-SCROLL-AREA retains Base semantics and projects the Brutalist visual grammar
@@ -19,6 +19,12 @@ cases:
       - P-BRUTALIST-SCROLL-AREA-CONSUMER-SIZING
       - P-BRUTALIST-SCROLL-AREA-DEMO-RESPONSIVE-SIZING
     expectation: p-brutalist-scroll-area-responsive-demo-sizing
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+    title: The focused Viewport carries an inward ring the Root cannot clip
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-FOCUS-RING
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-SURFACE
+    expectation: p-brutalist-scroll-area-viewport-rings-inside-its-own-box
 implementations:
   - id: prototypes-brutalist-scroll-area-contract
     kind: module-test
@@ -27,6 +33,7 @@ implementations:
     required: true
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-1
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
     exercises:
       - P-BASE-SCROLL-AREA
       - P-BASE-SCROLL-AREA-SCROLLBAR
@@ -57,6 +64,20 @@ implementations:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-2
     exercises:
       - P-BRUTALIST-SCROLL-AREA
+  - id: www-brutalist-scroll-area-focus-ring-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+    exercises:
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT
+      - P-BASE-SCROLL-AREA-VIEWPORT
+    notes:
+      - Reads the computed box-shadow in Web Components, React, and Vue, in both schemes, and requires one inset layer with zero offsets and a positive spread. That shape is the four-sided claim; an outward layer would be clipped by the Root and is asserted absent.
+      - The demo gained a row wider than the Viewport so the same surface scrolls both ways, and the case scrolls each axis while the ring is up.
+      - Viewport bounds are compared before focus, after focus, and after scrolling, so the ring cannot be paid for with a geometry shift.
 verifies:
   prototypes:
     - id: P-BRUTALIST-SCROLL-AREA

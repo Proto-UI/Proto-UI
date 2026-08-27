@@ -1,3 +1,4 @@
+import { PUI_VIEW_DETACHED_ATTR } from '@proto.ui/adapter-base';
 import { describe, expect, it, vi } from 'vitest';
 import { VueAny } from './utils/vue';
 
@@ -33,7 +34,9 @@ async function waitForDialogAbsent(text: string, timeoutMs = 1_000) {
     const element = Array.from(document.body.querySelectorAll('[data-transition-state]')).find(
       (candidate) => candidate.textContent?.includes(text)
     );
-    if (!element) return true;
+    // Closed overlay content stays mounted and detached, so absence means the
+    // content is gone or sitting inside a detached subtree.
+    if (!element || element.closest(`[${PUI_VIEW_DETACHED_ATTR}]`)) return true;
     await new Promise<void>((resolve) => setTimeout(resolve, 10));
   }
   return false;
@@ -45,6 +48,19 @@ function findExactText(root: ParentNode, text: string): HTMLElement | null {
       (element) => element.textContent?.trim() === text
     ) ?? null
   );
+}
+
+// Controls authored under a closed overlay mount while it is detached and are
+// moved into the committed template when it becomes present, so their a11y
+// projection lands a tick after the content reports its transition state.
+async function waitForExactText(root: ParentNode, text: string, timeoutMs = 1_000) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    const element = findExactText(root, text);
+    if (element) return element;
+    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+  }
+  return null;
 }
 
 describe('PrototypePreviewer demo-renderer / vue dialog', () => {
@@ -78,7 +94,7 @@ describe('PrototypePreviewer demo-renderer / vue dialog', () => {
       trigger?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       expect(await waitForDialogPresent('Confirm Action')).not.toBeNull();
 
-      const close = findExactText(document.body, 'Cancel');
+      const close = await waitForExactText(document.body, 'Cancel');
       expect(close).not.toBeNull();
       close?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       expect(await waitForDialogAbsent('Confirm Action')).toBe(true);

@@ -21,6 +21,18 @@ describe('core template svg primitives (v0)', () => {
     });
   });
 
+  it('lets a decorative glyph hide its root from the accessibility tree', () => {
+    const { svg } = createRendererPrimitives();
+
+    const node = svg.root({ viewBox: '0 0 24 24', 'aria-hidden': 'true' });
+
+    expect(node.props['aria-hidden']).toBe('true');
+    // Only the root hides a drawing, so the leaves keep rejecting it.
+    expect(() => svg.path({ d: 'M0 0', 'aria-hidden': 'true' } as any)).toThrow(
+      "[Template][SVG] path does not support prop 'aria-hidden'."
+    );
+  });
+
   it('rejects unknown svg props', () => {
     const { svg } = createRendererPrimitives();
     expect(() => svg.path({ d: 'M0 0', foo: 'x' } as any)).toThrow(

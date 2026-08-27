@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Release Audit'
+  short_description: 'Reconcile immutable publication evidence'
+  default_prompt: 'Use $pui-release-audit to audit an already completed publication.'
+
+policy:
+  allow_implicit_invocation: false

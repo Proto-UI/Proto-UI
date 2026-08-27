@@ -147,4 +147,43 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(thumb.getAttribute('role')).toBeNull();
     expect(thumb.tabIndex).toBe(-1);
   });
+  it('rings the focused Viewport inside its own box', async () => {
+    // T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+    const root = document.createElement('brutalist-scroll-area-root') as any;
+    const viewport = document.createElement('brutalist-scroll-area-viewport') as any;
+    setMetrics(viewport, {
+      clientWidth: 200,
+      scrollWidth: 200,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    root.append(viewport);
+    document.body.append(root);
+    await flush();
+
+    // The Root clips outward drawing, so the ring has to be inset.
+    for (const token of [
+      'data-[focus-visible]:ring-2',
+      'data-[focus-visible]:ring-ring',
+      'data-[focus-visible]:ring-inset',
+      'data-[focus-visible]:ring-offset-0',
+    ]) {
+      expect(
+        styleContains(viewport, token),
+        `${token} :: ${viewport.getAttribute('data-pui-style')}`
+      ).toBe(true);
+    }
+    // The shared Brutalist focus tokens draw outward and would be clipped.
+    expect(styleContains(viewport, 'data-[focus-visible]:ring-offset-2')).toBe(false);
+    // At rest the box carries no ring.
+    expect(viewport.hasAttribute('data-focus-visible')).toBe(false);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    viewport.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    await flush();
+
+    // The fact comes from Base; this layer only paints from it.
+    expect(viewport.hasAttribute('data-focus-visible')).toBe(true);
+    expect(viewport.getExposes().focusVisible.get()).toBe(true);
+  });
 });

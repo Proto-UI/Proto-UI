@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Claim'
+  short_description: 'Post one approved work-item claim'
+  default_prompt: 'Use $pui-claim to post this already selected and authorized work-item claim.'
+
+policy:
+  allow_implicit_invocation: false

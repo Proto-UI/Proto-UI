@@ -1,0 +1,72 @@
+---
+title: 'Radio Group'
+desp: 'Base single-selection group protocol'
+description: 'A host-neutral, accessible single-selection group with roving focus.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-radio-group` is a draft Base protocol for choosing one value from a visible set. The Root is the sole selected-value owner; Items derive `checked` and effective `disabled` state from it, and Indicators only render those facts.
+
+<PrototypePreviewer
+  demoId="demo-base-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+/>
+
+## Family Parts
+
+- `radio-group-root`: owns controlled or uncontrolled `value`, Collection order, roving focus, group disabled state, and the `radiogroup` accessibility object
+- `radio-group-item`: contributes one value, projects one focusable `radio`, and requests selection without owning checked state
+- `radio-group-indicator`: derives checked and disabled facts from its nearest Item; it has no focus, activation, event, or control semantics
+
+The anatomy is deliberately small. The `radiogroup` is already both the semantic group and the focus collection, so an extra List part would not carry an independent protocol.
+
+## Value Ownership
+
+Use `defaultValue` for an uncontrolled initial selection or `value` for a controlled group. Accepted uncontrolled requests update Root state and emit `valueChange` once. Controlled requests emit the proposed value but do not create temporary checked state; the next `value` prop remains authoritative.
+
+Empty and unmatched values are preserved. They produce no checked Item rather than silently selecting the first option. Removing, disabling, or changing the selected Item also leaves the Root value intact; adding a matching Item later restores its derived checked state.
+
+Item values should be non-empty and unique. If duplicate values are authored, only the first matching Item can be checked and a request for that ambiguous value is rejected.
+
+## Keyboard and Focus
+
+Exactly one enabled Item participates in normal Tab order: the checked enabled Item, otherwise the first enabled Item. Plain focus entry does not invent a selection.
+
+Once focus or keyboard navigation establishes the current Item, unrelated Root updates preserve that tab stop. A controlled `value` update changes checked state without stealing current focus.
+
+- **Space** selects the focused enabled Item and prevents page scrolling.
+- **Right / Down** focus and select the next enabled Item.
+- **Left / Up** focus and select the previous enabled Item.
+- **Home / End** focus and select the first or last enabled Item.
+- Arrow movement wraps and skips disabled Items.
+- **Enter** does not select outside a future Toolbar-specific protocol.
+- `focusSelf()` moves focus programmatically without changing selection.
+
+Pointer activation focuses and selects only after a successful commit. Canceled input does not select.
+
+## Accessibility
+
+Root projects `role="radiogroup"`, dynamic disabled state, and `a11yLabel` as its explicit accessible name. App Makers must provide a meaningful group name through `a11yLabel` or an equivalent host projection.
+
+Each Item projects `role="radio"`, boolean `aria-checked`, effective `aria-disabled`, and a content-derived name. Indicator is visual feedback only and must not create a second radio object.
+
+## Current Boundary
+
+This first slice intentionally does **not** include:
+
+- `name`, form owner, submission, reset, validation, `required`, or hidden/native inputs
+- native `<input type="radio">` event and grouping parity
+- public `orientation` or `loop` configuration
+- Toolbar-specific arrow behavior
+- Label or Description parts
+- Shadcn/Radix compatibility claims
+
+Those concerns require separate host or semantic contracts; they are not approximated here.
+
+## References
+
+- Catalog: [P-BASE-RADIO-GROUP](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-RADIO-GROUP.yaml)
+- Source: [packages/prototypes/base/src/radio-group](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/radio-group)
+- Tests: [radio-group.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/radio-group.test.ts)

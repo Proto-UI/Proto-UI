@@ -1,0 +1,175 @@
+id: P-BASE-RADIO-GROUP
+type: prototype
+title: Base Radio Group is a group-owned single-selection protocol
+status: draft
+since: 0.3.0-alpha.0
+summary: Base Radio Group owns one selected protocol value, ordered radio items, selected-or-first roving focus, group disabled state, and the radiogroup accessibility object without claiming native form behavior.
+statement:
+  zh-CN: >-
+    Base Radio Group 是 `base-radio-group` anatomy family 的 root 与唯一 selected-value owner。Root 以 Collection 顺序协调 Item，以 Focus Roving 提供双轴循环键盘移动，并投影一个具名 `radiogroup` 对象。Item 只能请求 selection 并从 Root 派生 checked/effective-disabled；空值、无法匹配值、结构变化和受控 props 都不会被静默改写。第一轮不声明原生 radio、form、Toolbar、orientation 或 loop API。
+
+  en: >-
+    Base Radio Group is the root and sole selected-value owner of the `base-radio-group` anatomy family. Root coordinates Items in Collection order, provides both-axis wrapped keyboard movement through Focus Roving, and projects one named `radiogroup` object. Items may only request selection and derive checked/effective-disabled facts from Root; empty or unmatched values, structural changes, and controlled props are never silently rewritten. The first pass does not claim native radio, form, Toolbar, orientation, or loop APIs.
+
+anatomy:
+  family: base-radio-group
+  roles:
+    root:
+      cardinality: { min: 1, max: 1 }
+      summary:
+        zh-CN: 唯一 value owner、Collection/Focus Roving owner、context provider 与 radiogroup 对象。
+        en: Sole value owner, Collection and Focus Roving owner, context provider, and radiogroup object.
+    item:
+      cardinality: { min: 1, max: 100 }
+      summary:
+        zh-CN: 可重复的 radio choice；有效 authoring 至少一个，runtime 结构变化可暂时为零。
+        en: Repeatable radio choice; valid authoring has at least one while runtime structural churn may transiently reach zero.
+    indicator:
+      cardinality: { min: 0, max: '*' }
+      summary:
+        zh-CN: Item 内可选且可重复的视觉状态 consumer。
+        en: Optional and repeatable visual state consumer inside an Item.
+  relations:
+    - { kind: contains, parent: root, child: item }
+    - { kind: contains, parent: item, child: indicator }
+criteria:
+  - id: P-BASE-RADIO-GROUP-IDENTITY-AND-AUTHORING
+    text:
+      zh-CN: '`base-radio-group-root` 与 `asRadioGroupRoot()` 是同一个 Radio Group root protocol 的 direct 与 authored-asHook entries；Radio 语义由 Item 实现，不创建 standalone Base Radio root。'
+      en: '`base-radio-group-root` and `asRadioGroupRoot()` are the direct and authored-asHook entries of one Radio Group root protocol; Radio semantics are realized by Item and no standalone Base Radio root is created.'
+  - id: P-BASE-RADIO-GROUP-SOLE-VALUE-OWNER
+    text:
+      zh-CN: Root 是同域唯一 selected-value owner；Item 不得持有 checked/defaultChecked，Checkbox、Tabs 或 Select protocol 也不得作为 Radio Group 核心语义依赖。
+      en: Root is the sole selected-value owner in its domain; Items must not own checked/defaultChecked, and Checkbox, Tabs, or Select protocols must not supply Radio Group core semantics.
+    dependsOn:
+      decisions: [D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  - id: P-BASE-RADIO-GROUP-EXACT-PROPS
+    text:
+      zh-CN: 'Root props 仅为 `value?: string`、`defaultValue?: string`、`disabled?: boolean` 与 `a11yLabel?: string`；默认 defaultValue/a11yLabel 为空字符串且 disabled 为 false，不包含 callback、form、required、orientation、loop 或视觉 props。'
+      en: 'Root props are exactly `value?: string`, `defaultValue?: string`, `disabled?: boolean`, and `a11yLabel?: string`; defaultValue/a11yLabel default to the empty string and disabled defaults to false, with no callback, form, required, orientation, loop, or visual props.'
+    dependsOn:
+      contracts: [C-PROPS-0001]
+  - id: P-BASE-RADIO-GROUP-EXACT-EXPOSES
+    text:
+      zh-CN: Root 仅 expose value、disabled、Collection count/items、valueChange、requestValue 与 focusFirst/focusLast/focusNext/focusPrev/focusSelected；private Context 或协调通路不得成为 public family export/expose。
+      en: Root exposes only value, disabled, Collection count/items, valueChange, requestValue, and focusFirst/focusLast/focusNext/focusPrev/focusSelected; private Context or coordination channels must not become public family exports/exposes.
+    dependsOn:
+      contracts: [C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001]
+  - id: P-BASE-RADIO-GROUP-UNCONTROLLED-REQUEST
+    text:
+      zh-CN: 非受控 Root 接纳新的 enabled unique Item value 时，必须先更新 value 与派生 checked 状态，再准确发送一次 valueChange。
+      en: When an uncontrolled Root accepts a new enabled unique Item value, it must update value and derived checked state before emitting exactly one valueChange.
+  - id: P-BASE-RADIO-GROUP-CONTROLLED-REQUEST
+    text:
+      zh-CN: 受控 Root 对有效新请求只发送一次候选 valueChange，不制造临时 checked；只有之后的 value prop 更新可以改变最终 value/checked。
+      en: A controlled Root emits one proposed valueChange for a valid new request without creating temporary checked state; only a later value prop update may change final value/checked.
+  - id: P-BASE-RADIO-GROUP-REQUEST-REJECTION
+    text:
+      zh-CN: requestValue 必须拒绝并保持无 signal 的 disabled Root、空值、missing value、disabled Item、already-selected value 与 duplicate-ambiguous value；它本身不移动焦点。
+      en: requestValue must reject disabled Root, empty, missing, disabled-Item, already-selected, and duplicate-ambiguous values without a signal, and it does not move focus.
+  - id: P-BASE-RADIO-GROUP-CANONICAL-CHECKED-SAFETY
+    text:
+      zh-CN: 最多一个 Item checked；只有 Collection 顺序中第一个 non-empty value 等于 Root value 的 Item 可以 checked，重复 authoring 的歧义请求必须拒绝。
+      en: At most one Item is checked; only the first Item in Collection order whose non-empty value equals Root value may be checked, and ambiguous requests under duplicate authoring must be rejected.
+  - id: P-BASE-RADIO-GROUP-EMPTY-AND-UNMATCHED
+    text:
+      zh-CN: 空的或无法匹配的受控/非受控 value 必须原样保留并产生零个 checked Item，不得静默选择第一项。
+      en: Empty or unmatched controlled/uncontrolled values must be preserved with zero checked Items and must not silently select the first Item.
+  - id: P-BASE-RADIO-GROUP-STRUCTURAL-PRESERVATION
+    text:
+      zh-CN: 移除、重新加入、改名或禁用 selected Item 不得重写 Root value 或发送 valueChange；之后重新出现 matching Item 时 checked 必须由同一 value 恢复。
+      en: Removing, re-adding, renaming, or disabling the selected Item must not rewrite Root value or emit valueChange; a matching Item added later restores checked from that same value.
+  - id: P-BASE-RADIO-GROUP-DISABLED-SELECTION
+    text:
+      zh-CN: selected Item 可以在变为 effective-disabled 后继续 checked，但必须退出 roving eligibility；后续 enabled Item 的有效请求可以替换 Root value。
+      en: A selected Item may remain checked after becoming effectively disabled but must leave roving eligibility; a later valid request from an enabled Item may replace Root value.
+  - id: P-BASE-RADIO-GROUP-CONTEXT-FACTS
+    text:
+      zh-CN: Root context 只发布 value、controlled、group disabled、canonical selected Item identity 与 current roving Item identity 等 JSON facts；selection 通过同域 Root requestValue，而不是 Context command bus。
+      en: Root context publishes only JSON facts for value, controlledness, group disabled, canonical selected Item identity, and current roving Item identity; selection uses same-domain Root requestValue rather than a Context command bus.
+    dependsOn:
+      contracts: [C-CONTEXT-0001, C-CONTEXT-0006, C-CONTEXT-0007]
+  - id: P-BASE-RADIO-GROUP-COLLECTION-AND-ROVING
+    text:
+      zh-CN: Root 必须拥有 Item Collection 与 Focus Roving，固定使用 arrow navigation、both axes、loop=true 与 selected-or-first entry；各独立 anatomy domain 不得共享 value、current 或 collection state。
+      en: Root must own the Item Collection and Focus Roving with arrow navigation, both axes, loop=true, and selected-or-first entry; independent anatomy domains must not share value, current, or collection state.
+    dependsOn:
+      contracts: [C-AS-COLLECTION-0001, C-AS-FOCUS-ROVING-0001]
+      decisions: [D-FOCUS-ROVING-NAVIGATION-OWNERSHIP-0001]
+  - id: P-BASE-RADIO-GROUP-FOCUS-ENTRY
+    text:
+      zh-CN: 普通 Tab entry 必须聚焦 checked enabled Item，否则聚焦第一 enabled Item；entry 与 programmatic focusSelf 不得凭空选择，且 Web 同时只有一个 enabled Item 为 tabindex=0。已经 programmatic 或 navigation 选定的 current Item 必须在无关 Root prop 更新中保持，value prop 更新不得窃取当前焦点。
+      en: Normal Tab entry must focus the checked enabled Item or otherwise the first enabled Item; entry and programmatic focusSelf must not invent selection, and only one enabled Item has tabindex=0 on Web. A current Item established by programmatic focus or navigation must survive unrelated Root prop updates, and a value prop update must not steal current focus.
+  - id: P-BASE-RADIO-GROUP-KEYBOARD-NAVIGATION
+    text:
+      zh-CN: Right/Down 选择下一 enabled Item，Left/Up 选择上一 enabled Item，Home/End 选择首/末 enabled Item；移动循环并跳过 disabled Item，且由 Focus Roving 拥有 default prevention。
+      en: Right/Down select the next enabled Item, Left/Up select the previous enabled Item, and Home/End select the first/last enabled Item; movement wraps, skips disabled Items, and Focus Roving owns default prevention.
+  - id: P-BASE-RADIO-GROUP-A11Y-GROUP
+    text:
+      zh-CN: Root 必须投影一个 role=radiogroup 对象、动态 disabled 与 non-empty a11yLabel 显式名称；App Maker 必须提供有意义的名称，第一轮不投影 required、invalid、orientation、set position 或 raw aria props。
+      en: Root must project one role=radiogroup object, dynamic disabled state, and a non-empty a11yLabel as its explicit name; App Makers must provide a meaningful name, while required, invalid, orientation, set position, and raw aria props are not projected in the first pass.
+    dependsOn:
+      contracts: [C-A11Y-0001]
+      decisions: [D-A11Y-SEMANTIC-DOMAIN-0001]
+  - id: P-BASE-RADIO-GROUP-DEFERRED-BOUNDARIES
+    text:
+      zh-CN: 第一轮不包含 name/form owner/submission/reset/validation/required/hidden 或 native input、Toolbar 规则、公开 orientation/loop、Label/Description、视觉参数或 Shadcn/Radix 兼容性声明。
+      en: The first pass excludes name/form owner/submission/reset/validation/required/hidden or native inputs, Toolbar rules, public orientation/loop, Label/Description, visual parameters, and Shadcn/Radix compatibility claims.
+sources:
+  - path: docs/superpowers/specs/2026-08-12-base-radio-group-semantic-design.md
+    sections:
+      [
+        Decision,
+        Selection and structural invariants,
+        Focus and keyboard model,
+        Accessibility,
+        Form and native-control boundary,
+      ]
+  - path: packages/prototypes/base/src/radio-group/root.proto.ts
+    sections:
+      [canonicalSelectedItem, resolveCurrentItemId, setupRadioGroupRoot, base-radio-group-root]
+  - path: packages/prototypes/base/src/radio-group/shared.ts
+    sections: [RadioGroupContextValue, registerRadioGroupCoordinator, RADIO_GROUP_FAMILY]
+  - path: packages/prototypes/base/src/radio-group/types.ts
+    sections: [RadioGroupRootProps, RadioGroupRootExposes]
+  - path: packages/prototypes/base/test/radio-group.test.ts
+    sections:
+      - preserves empty and unmatched values without inventing a selection
+      - owns uncontrolled requests and emits one accepted change per new selection
+      - signals controlled requests without mutating final checked state
+      - contains duplicate authoring to one checked item and rejects ambiguous requests
+      - preserves value across structural churn and selected-item disablement
+      - preserves programmatic current focus across unrelated root updates
+      - wraps both arrow axes, supports Home and End, and skips disabled items
+      - keeps independent groups and omits deferred form and layout APIs
+dependsOn:
+  contracts:
+    - C-ANATOMY-0001
+    - C-ANATOMY-0002
+    - C-ANATOMY-0004
+    - C-CONTEXT-0001
+    - C-CONTEXT-0006
+    - C-CONTEXT-0007
+    - C-PROPS-0001
+    - C-STATE-0001
+    - C-EXPOSE-STATE-0001
+    - C-EXPOSE-EVENT-0001
+    - C-AS-COLLECTION-0001
+    - C-AS-FOCUS-ROVING-0001
+    - C-A11Y-0001
+  modules: [M-COLLECTION-0001, M-A11Y-0001, M-EVENT-0001]
+  decisions:
+    - D-BASE-PROTOTYPE-INDEPENDENCE-0001
+    - D-FOCUS-ROVING-NAVIGATION-OWNERSHIP-0001
+    - D-A11Y-SEMANTIC-DOMAIN-0001
+requires:
+  hostCaps: [HC-A11Y-0001]
+references:
+  prototypes: [P-BASE-CHECKBOX, P-BASE-TABS, P-BASE-SELECT]
+verifies:
+  tests: [T-BASE-RADIO-GROUP-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the draft Base Radio Group root protocol with group-owned value, canonical checked safety, and selected-or-first roving focus.
+tags: [prototype, base, radio-group, anatomy, selection, focus, accessibility]

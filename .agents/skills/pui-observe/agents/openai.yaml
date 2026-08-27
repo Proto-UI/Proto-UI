@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Observe'
+  short_description: 'Run one read-only maintenance observation'
+  default_prompt: 'Use $pui-observe to run this bounded maintenance observation.'
+
+policy:
+  allow_implicit_invocation: false

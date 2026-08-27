@@ -26,6 +26,8 @@ It does not, at this layer, define persistent selection, checkbox/radio item sem
 
 `select` is the current probe for a slightly different boundary: it still stays protocol-first, but it explicitly keeps a `value` presentation part inside the family. That part is used to validate Proto UI's current value-class component path, where selected text is owned by the prototype and refreshed through explicit update-driven re-render instead of being pushed entirely to the host app.
 
+`radio-group` validates group-owned single selection without borrowing Checkbox's item-local toggle ownership or claiming native form behavior. Root preserves empty and unmatched values, Collection and Focus Roving coordinate selected-or-first entry and wrapped keyboard movement, Items derive their radio state, and Indicators remain visual-only descendants.
+
 `textarea` exercises a host-mediated native-control boundary: Root owns one logical multiline editor while its renderer stays contentless, and the adapter selects the physical host target. The current Web profile uses one native textarea across Web Component, React, and Vue. It keeps controlled/uncontrolled ownership stable, normalizes input/change/IME signals, preserves the active editing session, restores unaccepted controlled proposals after composition, and projects properties, focus, and accessibility without claiming form submission, rich text, auto-resize, system editing chrome, or live-region semantics.
 
 <PrototypeLibraryOverview library="base" locale="en" />

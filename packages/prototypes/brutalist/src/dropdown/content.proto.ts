@@ -11,6 +11,10 @@ const dropdownContent = definePrototype<
   setup(def) {
     // P-BRUTALIST-DROPDOWN-MENU-CONTENT-BASE-INHERITANCE
     const dropdown = asDropdownContent();
+    // P-BRUTALIST-DROPDOWN-MENU-CONTENT-ANCHOR-TRANSFORM
+    // The Brutalist trigger carries decorative hover-lift / press transforms;
+    // anchored menus track the trigger's layout position instead.
+    def.props.setDefaults({ excludeAnchorTranslation: true });
     // P-BRUTALIST-DROPDOWN-MENU-CONTENT-TRANSITION
     dropdown.asTransition.configure({ enterDuration: 150, leaveDuration: 100 });
     const { open } = dropdown.stateHandles;

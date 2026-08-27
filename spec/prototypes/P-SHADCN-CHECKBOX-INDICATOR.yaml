@@ -1,0 +1,105 @@
+id: P-SHADCN-CHECKBOX-INDICATOR
+type: prototype
+title: Shadcn Checkbox Indicator inherits the Base indicator and adds its current glyph surface
+status: draft
+since: 0.3.0-alpha.0
+summary: Shadcn Checkbox Indicator inherits the Base context-driven indicator protocol and adds the currently implemented glyph box, tick, and dash presentation.
+statement:
+  zh-CN: >-
+    Shadcn Checkbox Indicator 是 `P-BASE-CHECKBOX-INDICATOR` 之上的 direct anatomy part。它继续从最近的同域 Checkbox context 派生 checked/indeterminate display state，不拥有 value、activation、focus 或 event 语义，并增加当前实现的 glyph box 与勾号/横线呈现。固定 upstream Shadcn wrapper 把 Indicator 作为内部结构、并把 `size-3.5` 放在其中的 icon 上，而 Proto UI 当前把 Indicator 公开为可组合原型、由它自身承载 glyph box；该差异与 token parity 集中记录为 compatibility differences。
+
+
+  en: >-
+    Shadcn Checkbox Indicator is a direct anatomy part over `P-BASE-CHECKBOX-INDICATOR`. It continues to derive checked and indeterminate display state from the nearest same-domain Checkbox context, owns no value, activation, focus, or event semantics, and adds the currently implemented glyph box with its tick and dash presentation. The pinned upstream Shadcn wrapper keeps Indicator internal and puts `size-3.5` on the icon inside it, while Proto UI currently exposes Indicator as a composable prototype that carries the glyph box itself; that difference and token parity are centralized as compatibility differences.
+
+
+criteria:
+  - id: P-SHADCN-CHECKBOX-INDICATOR-UPSTREAM-IDENTITY
+    text:
+      zh-CN: Indicator 必须沿用 Shadcn Checkbox 固定 revision/path 作为比较基线，并明确本实体只治理 Proto UI 的非官方 anatomy projection。
+      en: Indicator must use the pinned Shadcn Checkbox revision and path as its comparison baseline and identify this entity as governing only Proto UI's unofficial anatomy projection.
+  - id: P-SHADCN-CHECKBOX-INDICATOR-BASE-INHERITANCE
+    text:
+      zh-CN: '`shadcn-checkbox-indicator` 必须通过 `inherits.prototypes` 指向 `P-BASE-CHECKBOX-INDICATOR` 并调用 `asCheckboxIndicator()`；任何 setup-only 负向补丁必须声明具体偏离和替代语义。'
+      en: '`shadcn-checkbox-indicator` must point to `P-BASE-CHECKBOX-INDICATOR` through `inherits.prototypes` and call `asCheckboxIndicator()`; any setup-only negative patch must declare the exact deviation and replacement semantics.'
+    dependsOn:
+      contracts: [C-AS-HOOK-0001, C-CORE-SYNTAX-0007]
+  - id: P-SHADCN-CHECKBOX-INDICATOR-CURRENT-BASE-DEVIATIONS
+    text:
+      zh-CN: 当前实现不反转 inherited context、indicator role 或无独立交互语义等 Base guarantee；新增 tokens 与 glyph 仅构成视觉增量。
+      en: The current implementation reverses none of the inherited Base guarantees for context, indicator role, or absence of independent interaction semantics; added tokens and the glyph are visual deltas only.
+  - id: P-SHADCN-CHECKBOX-INDICATOR-DIRECT-ENTRY
+    text:
+      zh-CN: 当前 Indicator protocol 以 `shadcn-checkbox-indicator` direct prototype 公开；本层不额外提供 authored asHook。
+      en: The current Indicator protocol is exposed as the `shadcn-checkbox-indicator` direct prototype; this layer provides no additional authored asHook.
+    dependsOn:
+      contracts: [C-CORE-SYNTAX-0003]
+  - id: P-SHADCN-CHECKBOX-INDICATOR-CONTEXT-DERIVED
+    text:
+      zh-CN: Indicator 必须继续作为最近同域 Checkbox context 的派生呈现，不得拥有 checked 或 indeterminate 的 source of truth、activation route、focus target、event target 或 a11y control syntax，也不得镜像 Root props。可聚焦的 checkbox 每个实例只有 Root 一个，glyph 不进入可访问对象树。
+      en: Indicator must remain a derived presentation of the nearest same-domain Checkbox context and must not own a checked or indeterminate source of truth, an activation route, a focus target, an event target, or a11y control syntax, and must not mirror Root props. Each instance has exactly one focusable checkbox, the Root, and the glyph does not enter the accessibility tree.
+    references:
+      prototypes:
+        - id: P-BASE-CHECKBOX-INDICATOR
+          anchors:
+            [
+              P-BASE-CHECKBOX-INDICATOR-CONTEXT-SUBSCRIBE,
+              P-BASE-CHECKBOX-INDICATOR-NO-VALUE-OWNER,
+              P-BASE-CHECKBOX-INDICATOR-NO-INDETERMINATE-OWNER,
+              P-BASE-CHECKBOX-INDICATOR-NO-FOCUS-TARGET,
+              P-BASE-CHECKBOX-INDICATOR-PRESENTATIONAL-A11Y,
+            ]
+  - id: P-SHADCN-CHECKBOX-INDICATOR-GLYPH-SELECTION
+    text:
+      zh-CN: glyph 必须由派生状态选出，indeterminate 先于 checked 读取，因此两者同时成立时画出横线而非勾号，与 Base 把 accessible checked 解析为 `mixed` 一致。两者都为 false 时不画 glyph。重复更新必须复用同一个 glyph 元素，不得叠加第二个。
+      en: The glyph must be selected from the derived states, reading indeterminate before checked, so a checkbox that is both paints the dash rather than the tick, matching how Base resolves the accessible checked state to `mixed`. Neither state paints no glyph. Repeated updates must reuse the same glyph element and must never stack a second one.
+    references:
+      prototypes:
+        - id: P-BASE-CHECKBOX
+          anchors: [P-BASE-CHECKBOX-A11Y-MIXED]
+  - id: P-SHADCN-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
+    text:
+      zh-CN: Indicator 必须投射当前已实现的 glyph box：`flex size-3.5 items-center justify-center transition-none`，glyph 以 `currentColor` 描边，因此 Root 在 checked 与 mixed 下设定的 `text-primary-foreground` 直接生效。`size-3.5` 是 14px，恰好等于 16px border-box 方框减去 1px 边框后的 content box。这些是当前 passing surface，不表示与 upstream 精确一致。
+      en: Indicator must project the currently implemented glyph box, `flex size-3.5 items-center justify-center transition-none`, with the glyph stroked in `currentColor` so the `text-primary-foreground` that Root sets when checked or mixed applies directly. `size-3.5` is 14px, exactly the content box left by a 16px border-box with a 1px border. These form the current passing surface and do not imply exact upstream parity.
+    dependsOn:
+      contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  - id: P-SHADCN-CHECKBOX-INDICATOR-COMPATIBILITY-SUBSET
+    text:
+      zh-CN: 当前实体只声明已测试的 inherited indicator behavior 与视觉 surface；公开组合模型和 upstream token 的全部差异必须集中在唯一 compatibility open question。
+      en: This entity claims only tested inherited indicator behavior and visual surface; all differences in public composition and upstream tokens must remain centralized in one compatibility open question.
+openQuestions:
+  - id: P-SHADCN-CHECKBOX-INDICATOR-Q-UPSTREAM-DIFFERENCES
+    question:
+      zh-CN: 当前公开 Indicator anatomy part 与固定 upstream 内部 Indicator 在组合、居中机制与 glyph 归属上应如何对齐？
+      en: How should the current public Indicator anatomy part align with the pinned upstream internal Indicator in composition, centering mechanism, and glyph ownership?
+    context:
+      zh-CN: >-
+        upstream 不单独导出 Indicator，而是在 `Checkbox` wrapper 内固定创建一个，className 为 `grid place-content-center text-current transition-none`，并在其中放一个 `size-3.5` 的 lucide `CheckIcon`；它没有 mixed glyph。Proto UI 当前公开 `shadcn-checkbox-indicator`，用 `flex items-center justify-center` 居中而非 `grid place-content-center`——后两个 utility 不在 style closure 内，而本切片只被批准新增 `rounded-[4px]` 与 `3.5` 两个精确闭包。`size-3.5` 落在 Indicator 自身而非其中的 icon 上，因为 renderer 的 SVG factory 不接受 style handle；两种写法画出的 glyph box 都是 14px。glyph 由本原型的 renderer 直接绘制，未取用 `@proto.ui/prototypes-lucide`。公开 composition 是否保留、是否改用 Lucide glyph、以及 `grid place-content-center` 是否值得为其扩展 closure，仍是待评审问题；具体 parity 通过实现与测试前不得宣称。
+
+
+      en: >-
+        Upstream does not export Indicator separately; its `Checkbox` wrapper creates one internally with the className `grid place-content-center text-current transition-none` and places a `size-3.5` lucide `CheckIcon` inside it, with no mixed glyph. Proto UI currently exposes `shadcn-checkbox-indicator` and centers with `flex items-center justify-center` rather than `grid place-content-center`, because neither of those two utilities is in the style closure and this slice was approved to add exactly two exact closures, `rounded-[4px]` and `3.5`. `size-3.5` sits on the Indicator itself rather than on an icon inside it, because the renderer's SVG factory accepts no style handle; both spellings paint a 14px glyph box. The glyph is drawn by this prototype's own renderer and does not consume `@proto.ui/prototypes-lucide`. Whether the public composition remains, whether the glyph should move to Lucide, and whether `grid place-content-center` is worth a closure extension are pending review; exact parity must not be claimed before implementation and tests.
+
+
+    blocks: [shadcn checkbox parity roadmap]
+sources:
+  - path: packages/prototypes/shadcn/src/checkbox/indicator.proto.ts
+  - path: packages/prototypes/shadcn/src/checkbox/types.ts
+  - path: packages/prototypes/shadcn/test/checkbox.test.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/checkbox.tsx
+    label: shadcn/ui v4 new-york Checkbox Indicator pinned baseline
+dependsOn:
+  contracts:
+    [C-AS-HOOK-0001, C-CORE-SYNTAX-0003, C-CORE-SYNTAX-0007, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
+  prototypes: [P-SHADCN-CHECKBOX]
+inherits:
+  prototypes:
+    - id: P-BASE-CHECKBOX-INDICATOR
+      note: Default inherited indicator protocol; explicit setup-time negative-patch criteria may override individual guarantees.
+verifies: { tests: [T-SHADCN-CHECKBOX-0001] }
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the Shadcn Checkbox Indicator projection with derived glyph selection and centralized upstream differences.
+tags: [prototype, shadcn, checkbox, indicator, upstream-derived, delta, compatibility, visual]

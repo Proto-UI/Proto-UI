@@ -38,6 +38,10 @@ criteria:
     text:
       zh-CN: collision detection 与 Portal 不得合并为同一策略；inline floating 使用实际 clipping ancestors，Portal 可改变宿主 containing/clipping context，但 logical owner 必须保持不变。
       en: Collision detection and Portal must not be merged into one policy; an inline floating target uses its actual clipping ancestors, while Portal may change its host containing and clipping context without changing its logical owner.
+  - id: C-ANCHORED-POSITIONING-0001-G
+    text:
+      zh-CN: host 默认必须基于 anchor 的实际渲染几何定位；只有 config 显式声明 `excludeAnchorTranslation` 时才允许从测量中扣除 anchor 自身 CSS translation（matrix m41/m42），以排除 hover lift、press 等交互装饰位移。合法布局 translation（如居中、应用动画）不得被默认抵消。
+      en: The host must position against the anchor's actual rendered geometry by default; only when the config explicitly declares `excludeAnchorTranslation` may it subtract the anchor's own CSS translation (matrix m41/m42) from the measurement to exclude decorative interaction offsets such as hover lift or press-down. Legitimate layout translations (centering, application animation) must not be cancelled by default.
 sources:
   - path: packages/core/src/positioning.ts
   - path: packages/modules/positioning/src/impl.ts
@@ -49,6 +53,9 @@ verifies:
   tests:
     - T-ANCHORED-POSITIONING-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Made rendered-anchor geometry the positioning default and added the explicit excludeAnchorTranslation opt-in for decorative interaction transforms.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Defined host-mediated anchored geometry, collision defaults, output projection, Portal separation, and bounded observation lifetime.

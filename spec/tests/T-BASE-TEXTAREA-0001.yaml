@@ -3,7 +3,7 @@ type: test
 title: Base Textarea protocol tests
 status: draft
 since: 0.2.0-rc.7
-summary: Web Component coverage for one contentless Web textarea profile, shared direct/asHook static requirements, stable value ownership, normalized edit and IME events, native property and accessibility projection, physical focus, and the bounded expose surface.
+summary: Web Component and browser coverage for one contentless Web textarea profile, shared direct/asHook static requirements, stable value ownership, normalized edit and IME events, native property and accessibility projection, physical focus across input modalities and view epochs, and the bounded expose surface.
 cases:
   - id: T-BASE-TEXTAREA-0001-CASE-PHYSICAL-SURFACE
     title: Root materializes one contentless native textarea with the complete initial property surface
@@ -43,6 +43,13 @@ cases:
       - P-BASE-TEXTAREA-PHYSICAL-TARGET
       - P-BASE-TEXTAREA-PRESENTATION-SURFACE
     expectation: base-textarea-visual-and-focus-surface-is-the-single-physical-editor
+  - id: T-BASE-TEXTAREA-0001-CASE-WC-FOCUS-BRIDGE
+    title: Web Component physical focus projects bidirectionally through one native textarea across keyboard, pointer, focusSelf, remount, and teardown, and the path fails when the bridge signal is intercepted
+    covers:
+      - P-BASE-TEXTAREA-PHYSICAL-TARGET
+      - P-BASE-TEXTAREA-A11Y-AND-FOCUS
+      - P-BASE-TEXTAREA-PRESENTATION-SURFACE
+    expectation: wc-native-textarea-focus-bridges-bidirectionally-to-one-logical-boundary-with-an-explicit-bridge-absence-failure-control-and-no-leaks-or-extra-tab-stops
   - id: T-BASE-TEXTAREA-0001-CASE-AUTHORING-SURFACE
     title: Direct and asHook entries expose the same bounded Textarea protocol and static requirements
     covers:
@@ -73,6 +80,30 @@ implementations:
       - T-BASE-TEXTAREA-0001-CASE-PRESENTATION-SURFACE
     exercises:
       - P-BASE-TEXTAREA
+  - id: adapter-web-component-textarea-focus-bridge
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/text-control.integration.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-TEXTAREA-0001-CASE-WC-FOCUS-BRIDGE
+    notes:
+      - Intercepts the native control focusin before it reaches the boundary to prove that focus still lands physically while logical focused/focusVisible projection breaks without the bridge signal.
+      - Calls the exposed focusSelf method and proves that the physical control becomes active and the logical focused state synchronizes back; physical blur and refocus cover the reverse direction.
+      - Routes physical focus through adapter-private ingress; document/boundary listeners observe no second public focus event while Proto focused/focusVisible facts still update.
+      - Normalizes the private callback payload to declared `focus` / `blur` types while retaining the original physical `focusin` / `focusout` event only as private nativeEvent context.
+    exercises:
+      - P-BASE-TEXTAREA
+  - id: docs-browser-brutalist-textarea-focus
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-TEXTAREA-0001-CASE-WC-FOCUS-BRIDGE
+    exercises:
+      - P-BASE-TEXTAREA
+      - P-BRUTALIST-TEXTAREA
 verifies:
   prototypes:
     - id: P-BASE-TEXTAREA
@@ -93,7 +124,21 @@ exercises:
 sources:
   - path: packages/prototypes/base/test/textarea.test.ts
   - path: packages/adapters/web-component/test/previewer.demo-renderer.test.ts
+  - path: packages/adapters/web-component/test/text-control.integration.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Normalized private text-control focus ingress to declared focus/blur callback types while retaining physical focusin/focusout only as native context.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Kept physical text-control focus projection inside adapter-private ingress and added negative evidence that no second public boundary focus event is emitted.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added explicit bridge-absence failure evidence and bidirectional focusSelf-to-physical-control synchronization coverage for the Web Component textarea.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added real native keyboard and pointer focus, remount, teardown, exposed-state, DOM-marker, and browser ring evidence for the Web Component physical textarea.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added host-neutral direct/asHook static requirement coverage.

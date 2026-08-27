@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "2026-08-20.phase-a",
+  "mode": "shadow",
+  "runId": "AO-SHADOW-20260820T123456Z-fedcba98",
+  "generatedAt": "2026-08-20T12:35:00.000Z",
+  "snapshot": {
+    "repository": "Proto-UI/Proto-UI",
+    "digest": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+    "itemCount": 1
+  },
+  "summary": {
+    "analyzedCount": 1,
+    "decisionsRequired": 0,
+    "routeCounts": {
+      "needs-author": 0,
+      "needs-maintainer": 0,
+      "agent-eligible": 1,
+      "blocked": 0,
+      "observing": 0,
+      "no-action": 0
+    }
+  },
+  "items": [
+    {
+      "kind": "issue",
+      "number": 1,
+      "title": "Invalid fixture that claims a GitHub write",
+      "recommendedRoute": "agent-eligible",
+      "confidence": 1,
+      "rationale": "This fixture must be rejected.",
+      "evidence": ["It claims that an action executed during Phase A."],
+      "humanGate": "none",
+      "decisionPacket": null,
+      "proposedActions": [
+        {
+          "type": "state-label",
+          "value": "agent:eligible",
+          "rationale": "Negative control.",
+          "execution": "executed"
+        }
+      ]
+    }
+  ],
+  "warnings": [],
+  "writeOperationsPerformed": 1
+}

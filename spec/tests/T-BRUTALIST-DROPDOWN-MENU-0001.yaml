@@ -31,6 +31,7 @@ cases:
       - P-BRUTALIST-DROPDOWN-MENU-CONTENT-ENTRY
       - P-BRUTALIST-DROPDOWN-MENU-CONTENT-TRANSITION
       - P-BRUTALIST-DROPDOWN-MENU-CONTENT-VISUAL-GRAMMAR
+      - P-BRUTALIST-DROPDOWN-MENU-CONTENT-ANCHOR-TRANSFORM
     expectation: p-brutalist-dropdown-menu-content-transition-panel
   - id: T-BRUTALIST-DROPDOWN-MENU-0001-CASE-4
     title: Item default variant active/hovered/focused pair restores main fill
@@ -79,6 +80,17 @@ implementations:
       - P-BRUTALIST-DROPDOWN-MENU
       - P-BRUTALIST-DROPDOWN-MENU-CONTENT
       - P-BRUTALIST-DROPDOWN-MENU-ITEM
+      - P-BRUTALIST-DROPDOWN-MENU-TRIGGER
+  - id: docs-browser-brutalist-dropdown-anchor-geometry
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DROPDOWN-MENU-0001-CASE-3
+    exercises:
+      - P-BASE-DROPDOWN-MENU-CONTENT
+      - P-BRUTALIST-DROPDOWN-MENU-CONTENT
       - P-BRUTALIST-DROPDOWN-MENU-TRIGGER
   - id: prototypes-brutalist-theme-destructive-ink-contrast
     kind: module-test

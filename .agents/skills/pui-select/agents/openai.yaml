@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Select'
+  short_description: 'Propose one eligible work item read-only'
+  default_prompt: 'Use $pui-select to propose one eligible Proto UI work item without posting a claim.'
+
+policy:
+  allow_implicit_invocation: false

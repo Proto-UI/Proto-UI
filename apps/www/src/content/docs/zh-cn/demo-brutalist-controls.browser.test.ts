@@ -19,6 +19,7 @@ const SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 const TABS_ROUTE = '/en/ui-libraries/brutalist/components/tabs/';
 const SCROLL_AREA_ROUTE = '/en/ui-libraries/brutalist/components/scroll-area/';
 const TEXTAREA_ROUTE = '/en/ui-libraries/brutalist/components/textarea/';
+const DROPDOWN_ROUTE = '/en/ui-libraries/brutalist/components/dropdown-menu/';
 const GEOMETRY_EPSILON = 0.5;
 
 const COLOR_SCHEMES = ['light', 'dark'] as const;
@@ -208,6 +209,46 @@ async function applyColorScheme(page: Page, colorScheme: ColorScheme): Promise<v
     { timeout: 10_000 }
   );
 }
+type TextareaFocusSnapshot = {
+  active: boolean;
+  focused: boolean;
+  focusVisible: boolean;
+  hostFocused: boolean;
+  hostFocusVisible: boolean;
+  surfaceFocusVisible: boolean;
+  hostTabIndex: string | null;
+  surfaceTabIndex: number;
+  textareaCount: number;
+  boxShadow: string;
+};
+
+async function wcTextareaFocusSnapshot(previewer: Locator): Promise<TextareaFocusSnapshot> {
+  return previewer.evaluate((root) => {
+    const host = root.querySelector<HTMLElement>('.host [data-pui-root]');
+    const textarea = root.querySelector<HTMLTextAreaElement>('textarea');
+    if (!host || !textarea) throw new Error('Web Component Textarea projection is missing.');
+    const exposes = (
+      host as HTMLElement & {
+        getExposes(): {
+          focused: { get(): boolean };
+          focusVisible: { get(): boolean };
+        };
+      }
+    ).getExposes();
+    return {
+      active: document.activeElement === textarea,
+      focused: exposes.focused.get(),
+      focusVisible: exposes.focusVisible.get(),
+      hostFocused: host.hasAttribute('data-focused'),
+      hostFocusVisible: host.hasAttribute('data-focus-visible'),
+      surfaceFocusVisible: textarea.hasAttribute('data-focus-visible'),
+      hostTabIndex: host.getAttribute('tabindex'),
+      surfaceTabIndex: textarea.tabIndex,
+      textareaCount: root.querySelectorAll('textarea').length,
+      boxShadow: getComputedStyle(textarea).boxShadow,
+    };
+  });
+}
 
 /**
  * Resolves each demo surface's text colour and nearest opaque backdrop through a
@@ -276,6 +317,78 @@ async function demoSurfaceContrast(
     },
     { scope, refs }
   );
+}
+
+type ViewportRing = {
+  focusVisible: boolean;
+  layers: string[];
+  insetLayers: string[];
+  bounds: { x: number; y: number; width: number; height: number };
+  scrollTop: number;
+  scrollLeft: number;
+};
+
+/**
+ * Splits the Viewport box-shadow into layers and keeps the inset ones. An inset
+ * layer with zero offsets and a positive spread is what "visible on all four
+ * sides" means in computed-style terms; an outward layer would be clipped by the
+ * Root and is what this projection must not produce.
+ */
+/**
+ * Waits for a keypress to actually move the surface, however loaded the run is.
+ * Comparing against the position before the press means the case never has to
+ * reset the surface, which the composed projection owns rather than the test.
+ */
+async function waitForScrollBeyond(
+  page: Page,
+  axis: 'scrollTop' | 'scrollLeft',
+  from: number
+): Promise<void> {
+  await page.waitForFunction(
+    ({ property, previous }) => {
+      const viewport = document.querySelector<HTMLElement>(
+        '[data-previewer-id] [data-demo-ref="scrollViewport"]'
+      );
+      return (viewport?.[property] ?? 0) > previous;
+    },
+    { property: axis, previous: from },
+    { timeout: 10_000 }
+  );
+}
+
+async function viewportRing(page: Page): Promise<ViewportRing> {
+  return page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(
+      '[data-previewer-id] [data-demo-ref="scrollViewport"]'
+    );
+    if (!viewport) throw new Error('The Brutalist Scroll Area demo must render its Viewport.');
+
+    const shadow = getComputedStyle(viewport).boxShadow;
+    const parts: string[] = [];
+    let depth = 0;
+    let current = '';
+    for (const char of shadow === 'none' ? '' : shadow) {
+      if (char === '(') depth += 1;
+      if (char === ')') depth -= 1;
+      if (char === ',' && depth === 0) {
+        parts.push(current.trim());
+        current = '';
+        continue;
+      }
+      current += char;
+    }
+    if (current.trim()) parts.push(current.trim());
+
+    const rect = viewport.getBoundingClientRect();
+    return {
+      focusVisible: viewport.hasAttribute('data-focus-visible'),
+      layers: parts,
+      insetLayers: parts.filter((layer) => layer.includes('inset')),
+      bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      scrollTop: viewport.scrollTop,
+      scrollLeft: viewport.scrollLeft,
+    };
+  });
 }
 
 beforeAll(async () => {
@@ -352,6 +465,66 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     }
   }, 90_000);
 
+  it('keeps Dropdown placement fixed while Trigger hover and press transforms change', async () => {
+    const { context, page, previewer } = await openRoute(DROPDOWN_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+    try {
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 5);
+        const trigger = previewer.locator('[data-pui-root]').nth(1);
+        await trigger.click();
+        await expect.poll(() => page.getByRole('menu').count(), { message: runtime }).toBe(1);
+        await page.waitForTimeout(200);
+        const hoverMenu = await page.getByRole('menu').boundingBox();
+        const hoverTransform = await trigger.evaluate(
+          (element) => getComputedStyle(element).transform
+        );
+        expect(hoverMenu, runtime).not.toBeNull();
+
+        await page.mouse.move(5, 5);
+        await page.waitForTimeout(200);
+        const restMenu = await page.getByRole('menu').boundingBox();
+        const restTransform = await trigger.evaluate(
+          (element) => getComputedStyle(element).transform
+        );
+        expect(restMenu, runtime).not.toBeNull();
+        expect(restTransform, `${runtime}/rest-vs-hover-transform`).not.toBe(hoverTransform);
+        expect(Math.abs(restMenu!.x - hoverMenu!.x), `${runtime}/rest-x`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+        expect(Math.abs(restMenu!.y - hoverMenu!.y), `${runtime}/rest-y`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+
+        const triggerBox = await trigger.boundingBox();
+        if (!triggerBox) throw new Error(`${runtime}: Dropdown Trigger has no rendered bounds.`);
+        await page.mouse.move(
+          triggerBox.x + triggerBox.width / 2,
+          triggerBox.y + triggerBox.height / 2
+        );
+        await page.mouse.down();
+        await page.waitForTimeout(200);
+        const pressedMenu = await page.getByRole('menu').boundingBox();
+        const pressedTransform = await trigger.evaluate(
+          (element) => getComputedStyle(element).transform
+        );
+        expect(pressedMenu, runtime).not.toBeNull();
+        expect(pressedTransform, `${runtime}/pressed-vs-rest-transform`).not.toBe(restTransform);
+        expect(Math.abs(pressedMenu!.x - hoverMenu!.x), `${runtime}/pressed-x`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+        expect(Math.abs(pressedMenu!.y - hoverMenu!.y), `${runtime}/pressed-y`).toBeLessThanOrEqual(
+          GEOMETRY_EPSILON
+        );
+        await page.mouse.up();
+      }
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
   it('contains Scroll Area and its scrollbar at 320px without document overflow', async () => {
     const viewportWidth = 320;
     const { context, page, previewer } = await openRoute(SCROLL_AREA_ROUTE, {
@@ -389,6 +562,89 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
 
       expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(GEOMETRY_EPSILON);
     } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it('projects one native WC Textarea focus target and its Brutalist ring by modality', async () => {
+    const { context, page, previewer } = await openRoute(TEXTAREA_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      await selectRuntime(page, previewer, 'wc', 'textarea', 1);
+      const runtimeSelect = previewer.locator('select.adapter-select');
+      const textarea = previewer.locator('textarea');
+
+      const initial = await wcTextareaFocusSnapshot(previewer);
+      expect(initial.textareaCount).toBe(1);
+      expect(initial.hostTabIndex).toBeNull();
+      expect(initial.surfaceTabIndex).toBe(0);
+
+      for (const colorScheme of COLOR_SCHEMES) {
+        await applyColorScheme(page, colorScheme);
+        await runtimeSelect.focus();
+        await page.keyboard.press('Tab');
+        await page.waitForFunction(
+          () => {
+            const root = document.querySelector<HTMLElement>(
+              '[data-previewer-id] .host [data-pui-root]'
+            );
+            return (
+              root?.hasAttribute('data-focused') === true && root.hasAttribute('data-focus-visible')
+            );
+          },
+          undefined,
+          { timeout: 10_000 }
+        );
+
+        const keyboard = await wcTextareaFocusSnapshot(previewer);
+        expect(keyboard.active, `${colorScheme}/keyboard active target`).toBe(true);
+        expect(keyboard.focused, `${colorScheme}/keyboard focused expose`).toBe(true);
+        expect(keyboard.focusVisible, `${colorScheme}/keyboard focusVisible expose`).toBe(true);
+        expect(keyboard.hostFocused, `${colorScheme}/keyboard host focused marker`).toBe(true);
+        expect(keyboard.hostFocusVisible, `${colorScheme}/keyboard host marker`).toBe(true);
+        expect(keyboard.surfaceFocusVisible, `${colorScheme}/keyboard surface marker`).toBe(true);
+
+        expect(keyboard.boxShadow, `${colorScheme}/physical ring inner edge`).toContain(
+          '0px 0px 0px 2px'
+        );
+        expect(keyboard.boxShadow, `${colorScheme}/physical ring outer edge`).toContain(
+          '0px 0px 0px 4px'
+        );
+        await textarea.evaluate((element) => (element as HTMLTextAreaElement).blur());
+        await page.waitForFunction(
+          () =>
+            !document
+              .querySelector<HTMLElement>('[data-previewer-id] .host [data-pui-root]')
+              ?.hasAttribute('data-focused')
+        );
+        const blurred = await wcTextareaFocusSnapshot(previewer);
+        expect(blurred.focused, `${colorScheme}/blur focused expose`).toBe(false);
+        expect(blurred.focusVisible, `${colorScheme}/blur focusVisible expose`).toBe(false);
+
+        await textarea.click();
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector<HTMLElement>('[data-previewer-id] .host [data-pui-root]')
+              ?.hasAttribute('data-focused') === true
+        );
+        const pointer = await wcTextareaFocusSnapshot(previewer);
+        expect(pointer.active, `${colorScheme}/pointer active target`).toBe(true);
+        expect(pointer.focused, `${colorScheme}/pointer focused expose`).toBe(true);
+        expect(pointer.focusVisible, `${colorScheme}/pointer focusVisible expose`).toBe(false);
+        expect(pointer.hostFocusVisible, `${colorScheme}/pointer host marker`).toBe(false);
+        expect(pointer.surfaceFocusVisible, `${colorScheme}/pointer surface marker`).toBe(false);
+        expect(pointer.boxShadow, `${colorScheme}/modality-specific ring`).not.toBe(
+          keyboard.boxShadow
+        );
+        await textarea.evaluate((element) => (element as HTMLTextAreaElement).blur());
+      }
+    } finally {
+      await applyColorScheme(page, 'light');
       await context.close();
     }
   }, 90_000);
@@ -505,4 +761,81 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       await context.close();
     }
   }, 120_000);
+  it('rings the focused Scroll Area inside its own box, in both themes and all runtimes', async () => {
+    const { context, page, previewer } = await openRoute(SCROLL_AREA_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, '[data-demo-ref="scrollbar"]', 1);
+        for (const scheme of COLOR_SCHEMES) {
+          await applyColorScheme(page, scheme);
+          const label = `${runtime}/${scheme}`;
+
+          const resting = await viewportRing(page);
+          expect(resting.focusVisible, `${label}/resting-focus`).toBe(false);
+          expect(resting.insetLayers, `${label}/resting-ring`).toHaveLength(0);
+
+          await previewer.locator('select.adapter-select').focus();
+          await page.keyboard.press('Tab');
+          await page.waitForFunction(
+            () =>
+              document
+                .querySelector('[data-previewer-id] [data-demo-ref="scrollViewport"]')
+                ?.hasAttribute('data-focus-visible') === true,
+            undefined,
+            { timeout: 10_000 }
+          );
+
+          const focused = await viewportRing(page);
+          // Exactly one inset layer, drawn from the theme ring.
+          expect(focused.insetLayers, `${label}/inset-count`).toHaveLength(1);
+          // Zero offsets with a positive spread is the whole border box, so the
+          // ring shows on all four sides rather than only where it is not clipped.
+          expect(focused.insetLayers[0], `${label}/inset-shape`).toMatch(
+            /^\S.*\s0px 0px 0px [1-9]\d*px inset$/
+          );
+          // Every other composed layer draws nothing, so no outward ring exists
+          // for the Root to clip. `ring-offset-0` collapses the offset layer and
+          // the Viewport declares no shadow of its own.
+          for (const layer of focused.layers.filter((entry) => !entry.includes('inset'))) {
+            expect(layer, `${label}/outward`).toMatch(/(?:0px 0px 0px 0px$|^rgba\(0, 0, 0, 0\))/);
+          }
+
+          // Taking focus must not move or resize the surface.
+          expect(focused.bounds, `${label}/geometry`).toEqual(resting.bounds);
+
+          // Both axes still scroll while the ring is up. Scrolling is smooth and
+          // this run shares one dev server, so wait on the position rather than
+          // on a fixed delay that a loaded run can outlast.
+          await page.keyboard.press('ArrowDown');
+          await waitForScrollBeyond(page, 'scrollTop', focused.scrollTop);
+          await page.keyboard.press('ArrowRight');
+          await waitForScrollBeyond(page, 'scrollLeft', focused.scrollLeft);
+
+          const scrolled = await viewportRing(page);
+          expect(scrolled.insetLayers, `${label}/ring-after-scroll`).toEqual(focused.insetLayers);
+          expect(scrolled.bounds, `${label}/geometry-after-scroll`).toEqual(resting.bounds);
+
+          // Blur so the next scheme starts from a resting surface. The scroll
+          // position is left where it is: selectRuntime remounts the demo
+          // between runtimes, and four arrow presses stay well inside the
+          // surface, so nothing here needs to drive the scroll offset back.
+          await page.mouse.click(5, 5);
+          await page.waitForFunction(
+            () =>
+              document
+                .querySelector('[data-previewer-id] [data-demo-ref="scrollViewport"]')
+                ?.hasAttribute('data-focused') === false,
+            undefined,
+            { timeout: 10_000 }
+          );
+        }
+      }
+    } finally {
+      await context.close();
+    }
+  }, 240_000);
 });

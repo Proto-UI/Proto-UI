@@ -11,6 +11,8 @@ export type ScrollAreaRootAsHookContract = {};
 export interface ScrollAreaViewportProps {}
 
 export type ScrollAreaViewportExposes = {
+  focused: ExposeState<boolean>;
+  focusVisible: ExposeState<boolean>;
   scrollAxes: ExposeState<string>;
   scrolling: ExposeState<boolean>;
   scrollProjection: ExposeState<string>;
@@ -24,9 +26,15 @@ export type ScrollAreaViewportExposes = {
   canScrollDown: ExposeState<boolean>;
 };
 
-export type ScrollAreaViewportStateHandles = {};
+export type ScrollAreaViewportStateHandles = {
+  focused: State<boolean>;
+  focusVisible: State<boolean>;
+};
 
-export type ScrollAreaViewportAsHookContract = {};
+/** Styled projections read the focus facts of the surface; they install none. */
+export type ScrollAreaViewportAsHookContract = {
+  state: ScrollAreaViewportStateHandles;
+};
 
 export interface ScrollAreaScrollbarProps {
   orientation?: 'horizontal' | 'vertical';

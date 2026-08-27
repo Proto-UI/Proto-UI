@@ -24,6 +24,19 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(invoke).toHaveBeenCalledOnce();
   });
 
+  it('keeps collection coordination entries on the internal channel', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const snapshot = reader.read({
+      __collectionItem: () => ({ value: 'a' }),
+      __collectionSnapshot: () => ({ index: 0 }),
+      checked: true,
+    });
+
+    expect(snapshot).toEqual({ checked: true });
+    expect(Object.hasOwn(snapshot, '__collectionItem')).toBe(false);
+    expect(Object.hasOwn(snapshot, '__collectionSnapshot')).toBe(false);
+  });
+
   it('preserves the owning receiver when projecting nested methods', () => {
     const invoke = vi.fn((call: () => void) => call());
     const reader = createScopedExposesReader(() => invoke);

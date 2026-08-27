@@ -6,7 +6,13 @@ import { ModuleBase } from '@proto.ui/module-base';
 
 import type { EventDispatch, EventInternalCallback } from './types';
 import { EventKernel } from './kernel';
-import type { EventListenerToken, EventTypeV0 } from '@proto.ui/types';
+import type {
+  EventListenerToken,
+  EventTypeV0,
+  HostEventListenerOptions,
+  ProtoEventControl,
+  ProtoEventPayload,
+} from '@proto.ui/types';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   EVENT_GLOBAL_TARGET_CAP,
@@ -39,6 +45,36 @@ const OPTIONAL_EVENT_TYPES = [
   'change',
   'context.menu',
 ] as const;
+
+const PORTABLE_EVENT_FIELDS = [
+  'key',
+  'ctrlKey',
+  'metaKey',
+  'altKey',
+  'shiftKey',
+  'repeat',
+] as const;
+
+function eventDataSource(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== 'object') return {};
+  const detail = (raw as { detail?: unknown }).detail;
+  if (detail && typeof detail === 'object') return detail as Record<string, unknown>;
+  return raw as Record<string, unknown>;
+}
+
+function createPortableEventPayload(
+  type: EventTypeV0,
+  raw: unknown,
+  control: ProtoEventControl
+): ProtoEventPayload {
+  const source = eventDataSource(raw);
+  const payload: Record<string, unknown> = { type, control };
+  for (const field of PORTABLE_EVENT_FIELDS) {
+    const value = source[field];
+    if (typeof value === 'string' || typeof value === 'boolean') payload[field] = value;
+  }
+  return Object.freeze(payload) as ProtoEventPayload;
+}
 
 function isValidEventType(type: any): type is EventTypeV0 {
   if (typeof type !== 'string' || !type) return false;
@@ -98,7 +134,7 @@ export class EventModuleImpl extends ModuleBase {
     id: string,
     kind: 'root' | 'global',
     type: EventTypeV0,
-    options?: any
+    options?: HostEventListenerOptions
   ): EventListenerToken {
     const meta = {
       kind,
@@ -153,6 +189,7 @@ export class EventModuleImpl extends ModuleBase {
   on(type: EventTypeV0, options?: any): EventListenerToken {
     this.ensureSetup('def.event.on');
     this.guardArgs(type);
+    this.guardListenerOptions(type, options);
     const id = this.kernel.on('root', type, options);
     return this.makeToken(id, 'root', type, options);
   }
@@ -160,6 +197,7 @@ export class EventModuleImpl extends ModuleBase {
   onGlobal(type: EventTypeV0, options?: any): EventListenerToken {
     this.ensureSetup('def.event.onGlobal');
     this.guardArgs(type);
+    this.guardListenerOptions(type, options);
     const id = this.kernel.on('global', type, options);
     return this.makeToken(id, 'global', type, options);
   }
@@ -167,6 +205,7 @@ export class EventModuleImpl extends ModuleBase {
   onInternal(type: EventTypeV0, cb: EventInternalCallback, options?: any): EventListenerToken {
     this.ensureSetup('event.port.on');
     this.guardArgs(type);
+    this.guardListenerOptions(type, options);
     if (typeof cb !== 'function') {
       throw eventInvalidArg(`[Event] internal listener requires a callback.`, {
         prototypeName: this.prototypeName,
@@ -185,6 +224,7 @@ export class EventModuleImpl extends ModuleBase {
   ): EventListenerToken {
     this.ensureSetup('event.port.onGlobal');
     this.guardArgs(type);
+    this.guardListenerOptions(type, options);
     if (typeof cb !== 'function') {
       throw eventInvalidArg(`[Event] internal global listener requires a callback.`, {
         prototypeName: this.prototypeName,
@@ -241,7 +281,40 @@ export class EventModuleImpl extends ModuleBase {
 
     this.lastDispatch = dispatch;
 
-    this.kernel.bindAll(dispatch, (kind, type) => {
+    // Construct a fresh immutable data-only view for every portable callback.
+    // Host-bound `host:*` extensions intentionally keep the raw host event.
+    // Each portable control is live only during its synchronous callback.
+    // Requests from multiple registrations for the same host sample are
+    // deduplicated at the host boundary.
+    const preventedSamples = new WeakSet<object>();
+    const dispatchWithControl: EventDispatch = (id, raw, type) => {
+      if (!type) throw eventInvalidArg('[Event] dispatch requires a registered event type.');
+      if (String(type).startsWith('host:')) {
+        dispatch(id, raw);
+        return;
+      }
+      let active = true;
+      const control: ProtoEventControl = Object.freeze({
+        requestDefaultActionPrevention: (options) => {
+          if (!active) {
+            throw eventInvalidArg('[Event] default-action control is outside its callback window.');
+          }
+          if (raw && typeof raw === 'object') {
+            if (preventedSamples.has(raw)) return;
+            preventedSamples.add(raw);
+          }
+          this.requestDefaultActionPrevented(raw, options);
+        },
+      });
+      const payload = createPortableEventPayload(type, raw, control);
+      try {
+        dispatch(id, payload);
+      } finally {
+        active = false;
+      }
+    };
+
+    this.kernel.bindAll(dispatchWithControl, (kind, type) => {
       if (kind === 'global') return global as EventTarget;
       const target =
         this.overriddenRootTarget ??
@@ -340,6 +413,15 @@ export class EventModuleImpl extends ModuleBase {
   // -------------------------
   // helpers
   // -------------------------
+
+  private guardListenerOptions(type: EventTypeV0, options?: HostEventListenerOptions) {
+    if (!String(type).startsWith('host:') && typeof options !== 'undefined') {
+      throw eventInvalidArg('[Event] listener options are only valid for host:* extensions.', {
+        prototypeName: this.prototypeName,
+        type,
+      });
+    }
+  }
 
   private guardArgs(type: EventTypeV0) {
     if (!isValidEventType(type)) {

@@ -76,6 +76,45 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
+  it('renders the exact box and glyph geometry used by Shadcn Checkbox', () => {
+    const css = renderProtoStyleTokenCss(['rounded-[4px]', 'size-4', 'size-3.5']);
+
+    // The theme-derived `rounded-sm` is 6px and `size-3` is 12px. On a 16px box
+    // both are visible, so the projection needs these two exact values.
+    expect(css).toContain('border-radius: 4px;');
+    expect(css).toContain('width: 0.875rem;');
+    expect(css).toContain('height: 0.875rem;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
+  it('resets composed custom properties inside the layer, below every token rule', () => {
+    const css = renderProtoStyleTokenCss(['ring-2', 'shadow-[3px_3px_0_0_#000]', 'translate-x-0']);
+
+    const layerAt = css.indexOf('@layer proto-ui {');
+    const resetAt = css.indexOf(':where([data-pui-style]) {');
+    const firstTokenAt = css.indexOf(':where([data-pui-style~=');
+
+    // Inside the layer, because the unlayered baseline would outrank every
+    // token rule and no ring could paint at all.
+    expect(layerAt).toBeGreaterThanOrEqual(0);
+    expect(resetAt).toBeGreaterThan(layerAt);
+    // First in the layer, because a token rule is `:where()` too and only
+    // source order puts it on top.
+    expect(resetAt).toBeLessThan(firstTokenAt);
+
+    // `initial` restores the guaranteed-invalid value, so the fallback declared
+    // next to each `var()` stays the one place the default is written.
+    for (const property of [
+      '--pui-ring-offset-shadow',
+      '--pui-ring-shadow',
+      '--pui-shadow',
+      '--pui-translate-x',
+      '--pui-scale-x',
+    ]) {
+      expect(css.slice(resetAt, firstTokenAt)).toContain(`${property}: initial;`);
+    }
+  });
+
   it('renders directional separator borders in the theme foreground', () => {
     const css = renderProtoStyleTokenCss(['border-b-2', 'border-t-2', 'border-foreground']);
 
@@ -153,6 +192,28 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('scale: var(--pui-enter-scale');
     expect(css).toContain('--pui-animation-duration: 200ms;');
     expect(css).toContain('transition-property: none;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+  it('emits explicit duration and ease overrides after transition utilities so they win the cascade', () => {
+    const css = renderProtoStyleTokenCss([
+      'duration-200',
+      'ease-in-out',
+      'transition-all',
+      'transition-colors',
+    ]);
+
+    const transitionAll = css.indexOf('[data-pui-style~="transition-all"]');
+    const transitionColors = css.indexOf('[data-pui-style~="transition-colors"]');
+    const duration = css.indexOf('[data-pui-style~="duration-200"]');
+    const ease = css.indexOf('[data-pui-style~="ease-in-out"]');
+
+    expect(transitionAll).toBeGreaterThan(-1);
+    expect(duration).toBeGreaterThan(transitionAll);
+    expect(duration).toBeGreaterThan(transitionColors);
+    expect(ease).toBeGreaterThan(transitionAll);
+    expect(ease).toBeGreaterThan(transitionColors);
+    expect(css).toContain('transition-duration: 150ms;');
+    expect(css).toContain('transition-duration: 200ms;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 

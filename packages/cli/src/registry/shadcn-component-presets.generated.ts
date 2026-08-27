@@ -22,4 +22,14 @@ export const SHADCN_COMPONENT_PRESET_RECIPES = {
     'elementName': 'proto-ui-shadcn-dialog-content',
     'omissionAttribute': 'data-pui-no-default-close',
   },
+  'shadcn-checkbox': {
+    'kind': 'replaceable-default-part',
+    'placement': 'direct-child',
+    'exportName': 'ShadcnCheckbox',
+    'rootPrototype': 'shadcnCheckboxRoot',
+    'defaultPartPrototype': 'shadcnCheckboxIndicator',
+    'inputName': 'indicator',
+    'elementName': 'proto-ui-shadcn-checkbox',
+    'omissionAttribute': 'data-pui-no-default-indicator',
+  },
 } as const;

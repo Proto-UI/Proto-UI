@@ -1,0 +1,60 @@
+id: T-BASE-RADIO-GROUP-INDICATOR-0001
+type: test
+title: Base Radio Group Indicator protocol contract tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Executable coverage for optional repeatable Radio Group Indicators, nearest-Item checked and effective-disabled derivation, exact empty props and read-only derived exposes, passive accessibility, and absence of selection, focus, layout, presence, and visual ownership.
+cases:
+  - id: T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-IDENTITY-AND-REPEATABILITY
+    title: Optional repeatable Indicators claim the Item-contained role without creating another control
+    covers:
+      - P-BASE-RADIO-GROUP-INDICATOR-IDENTITY
+      - P-BASE-RADIO-GROUP-INDICATOR-REPEATABLE
+    expectation: radio-group-indicators-are-repeatable-item-contained-consumers
+  - id: T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-CONTEXT-DERIVATION
+    title: Indicator derives checked and effective-disabled facts from the nearest Item context
+    covers:
+      - P-BASE-RADIO-GROUP-INDICATOR-DERIVED-FACTS
+    expectation: radio-group-indicator-synchronizes-nearest-item-facts
+  - id: T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-EXACT-SURFACE
+    title: Indicator has empty props and exposes only checked disabled and isChecked
+    covers:
+      - P-BASE-RADIO-GROUP-INDICATOR-EMPTY-PROPS
+      - P-BASE-RADIO-GROUP-INDICATOR-EXACT-EXPOSES
+    expectation: radio-group-indicator-public-surface-remains-derived-and-read-only
+  - id: T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-PASSIVE-BOUNDARIES
+    title: Indicator remains roleless non-focusable non-interactive and owns no layout or visual policy
+    covers:
+      - P-BASE-RADIO-GROUP-INDICATOR-PASSIVE-A11Y
+      - P-BASE-RADIO-GROUP-INDICATOR-NO-LAYOUT-OWNERSHIP
+    expectation: radio-group-indicator-remains-passive-and-presentation-neutral
+implementations:
+  - id: prototypes-base-radio-group-indicator-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-IDENTITY-AND-REPEATABILITY
+      - T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-CONTEXT-DERIVATION
+      - T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-EXACT-SURFACE
+      - T-BASE-RADIO-GROUP-INDICATOR-0001-CASE-PASSIVE-BOUNDARIES
+    exercises: [P-BASE-RADIO-GROUP-INDICATOR, P-BASE-RADIO-GROUP-ITEM]
+    notes:
+      - Uses two real Indicator instances under one Item to prove repeatability and shared nearest-Item derivation.
+      - Exact expose keys plus a11y and host absence assertions defend passive boundaries.
+verifies:
+  prototypes:
+    - id: P-BASE-RADIO-GROUP-INDICATOR
+      anchors:
+        - P-BASE-RADIO-GROUP-INDICATOR-DERIVED-FACTS
+        - P-BASE-RADIO-GROUP-INDICATOR-EXACT-EXPOSES
+        - P-BASE-RADIO-GROUP-INDICATOR-PASSIVE-A11Y
+        - P-BASE-RADIO-GROUP-INDICATOR-NO-LAYOUT-OWNERSHIP
+exercises:
+  prototypes: [P-BASE-RADIO-GROUP-INDICATOR, P-BASE-RADIO-GROUP-ITEM]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced executable Indicator evidence for repeatable nearest-Item state derivation and passive presentation-only boundaries.
+tags: [prototype, base, radio-group, indicator, test]

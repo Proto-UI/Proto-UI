@@ -1,0 +1,137 @@
+id: P-SHADCN-CHECKBOX
+type: prototype
+title: Shadcn Checkbox Root inherits Base Checkbox and adds the current rule surface
+status: draft
+since: 0.3.0-alpha.0
+summary: Shadcn Checkbox Root is an unofficial Proto UI-maintained projection that inherits the Base Checkbox value, activation, and accessibility protocol and adds the currently implemented box, fill, ring, and disabled presentation.
+statement:
+  zh-CN: >-
+    Shadcn Checkbox Root 是 `P-BASE-CHECKBOX` 之上的 direct prototype，保留 Base Checkbox 的 controlled/uncontrolled `checked` 与 `indeterminate`、activation、生效 disabled 状态、focus 与 `checkbox` role 及其 `mixed` 可访问状态，并增加当前实现的方框尺寸、圆角、边框、填充、focus ring 与 disabled 呈现。admitted anatomy 只有 Root 与 Indicator。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Checkbox；`asChild` 明确不提供，其他差异统一记录为 compatibility differences。
+
+
+  en: >-
+    Shadcn Checkbox Root is a direct prototype over `P-BASE-CHECKBOX`. It retains Base Checkbox controlled and uncontrolled `checked` and `indeterminate`, activation, the effective disabled state, focus, and the `checkbox` role with its `mixed` accessible state, while adding the currently implemented box dimensions, radius, border, fill, focus ring, and disabled presentation. Root and Indicator are the only admitted anatomy. Its compatibility baseline is the v4 new-york Checkbox at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; `asChild` is explicitly unavailable, and all other divergences are tracked as compatibility differences.
+
+
+criteria:
+  - id: P-SHADCN-CHECKBOX-UPSTREAM-IDENTITY
+    text:
+      zh-CN: Shadcn Checkbox 必须标记为 Proto UI 维护的非官方 shadcn/ui 衍生实现，并固定 upstream revision/path；本实体只治理 Proto UI 投射，不主张上游所有权或认证。
+      en: Shadcn Checkbox must identify itself as an unofficial Proto UI-maintained shadcn/ui-derived implementation and pin its upstream revision and path; this entity governs only the Proto UI projection and claims neither upstream ownership nor endorsement.
+  - id: P-SHADCN-CHECKBOX-BASE-INHERITANCE
+    text:
+      zh-CN: '`shadcn-checkbox-root` 必须通过 `inherits.prototypes` 指向 `P-BASE-CHECKBOX`，并通过 `asCheckboxRoot()` 默认引入其 guarantee；若以 setup-only 负向补丁放弃或改写 Base 能力，必须在本实体中声明具体偏离和替代语义。'
+      en: '`shadcn-checkbox-root` must point to `P-BASE-CHECKBOX` through `inherits.prototypes` and call `asCheckboxRoot()` to introduce its guarantees by default; any setup-only negative patch that abandons or rewrites a Base capability must declare the exact deviation and replacement semantics in this entity.'
+    references:
+      prototypes:
+        - id: P-BASE-CHECKBOX
+          anchors:
+            [
+              P-BASE-CHECKBOX-ROOT-SEMANTIC-OWNER,
+              P-BASE-CHECKBOX-CONTROLLED-CHECKED,
+              P-BASE-CHECKBOX-ACTIVATION-FLIPS-CHECKED,
+              P-BASE-CHECKBOX-ACCESSIBLE-ROLE,
+            ]
+    dependsOn:
+      contracts: [C-AS-HOOK-0001, C-CORE-SYNTAX-0007]
+  - id: P-SHADCN-CHECKBOX-CURRENT-BASE-DEVIATIONS
+    text:
+      zh-CN: 当前实现不对 `asCheckboxRoot()` 引入的 checked/indeterminate 所有权、activation、disabled、focus 或 accessibility 施加负向补丁；新增 style rules 仅构成视觉增量。
+      en: The current implementation applies no negative patch to the checked and indeterminate ownership, activation, disabled state, focus, or accessibility introduced by `asCheckboxRoot()`; its added style rules are visual deltas only.
+  - id: P-SHADCN-CHECKBOX-DIRECT-ENTRY
+    text:
+      zh-CN: 当前 Root protocol 以 `shadcn-checkbox-root` direct prototype 公开；本层不额外提供 authored asHook。
+      en: The current Root protocol is exposed as the `shadcn-checkbox-root` direct prototype; this layer provides no additional authored asHook.
+    dependsOn:
+      contracts: [C-CORE-SYNTAX-0003]
+  - id: P-SHADCN-CHECKBOX-CURRENT-VISUAL-SURFACE
+    text:
+      zh-CN: Root 必须投射当前已实现的方框：`size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none`。`rounded-[4px]` 与 `size-3.5` 依赖 style compiler 中两个精确闭包，不得以主题派生的 `rounded-sm`（6px）或 `size-3`（12px）近似替代——16px 方框上这两处都是可见差异。这些 tokens 是当前 passing surface，不表示与 upstream 精确一致。
+      en: Root must project the currently implemented box, `size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none`. `rounded-[4px]` and `size-3.5` rely on two exact style-compiler closures and must not be approximated by the theme-derived `rounded-sm` (6px) or by `size-3` (12px); on a 16px box both are visible differences. These tokens form the current passing surface and do not imply exact upstream parity.
+    dependsOn:
+      contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
+      decisions: [D-WEB-STYLE-BASELINE-0001]
+  - id: P-SHADCN-CHECKBOX-STATE-DRIVEN-STYLES
+    text:
+      zh-CN: checked、indeterminate、focus-visible、disabled 与 dark colorScheme 的视觉 rule 必须以继承的 Checkbox state handle 或 host metadata 为条件，不得建立第二套 value、focus、disabled 或 theme truth，也不得依赖宿主 data attribute。每条 rule 的 when 必须只用 `eq` 与 `all`：`any` 不进入 web 降级，会把填充留在 runtime plan 上并使方框晚一帧才着色。填充由 checked 与 indeterminate 两条同 token 的 rule 分别投出。
+      en: Visual rules for checked, indeterminate, focus-visible, disabled, and the dark colorScheme must be conditioned on the inherited Checkbox state handles or host metadata, must not establish a second value, focus, disabled, or theme source of truth, and must not depend on a host data attribute. Every rule's `when` must use only `eq` and `all`, since `any` does not reach the web lowering and which would leave the fill on the runtime plan and colour the box one frame late. The fill is projected by two same-token rules, one for checked and one for indeterminate.
+    dependsOn:
+      contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+    references:
+      prototypes:
+        - id: P-BASE-CHECKBOX
+          anchors: [P-BASE-CHECKBOX-CHECKED-EXPOSE, P-BASE-CHECKBOX-INDETERMINATE-STATE]
+  - id: P-SHADCN-CHECKBOX-DARK-TINT-GUARD
+    text:
+      zh-CN: dark colorScheme 的 `bg-input/30` 只适用于未填充的方框，其 when 必须同时要求 `checked` 与 `indeterminate` 为 false。缺少任一门槛，该 tint 会与 checked 或 mixed 的 `bg-primary` 同时命中，填充与 tint 便按 rule 顺序相争。
+      en: The dark colorScheme `bg-input/30` applies to the unfilled box only, and its `when` must require both `checked` and `indeterminate` to be false. Without either guard the tint also lands on a checked or mixed box, and the fill and the tint then race on rule order.
+    dependsOn:
+      contracts: [C-RULE-WHEN-0002]
+  - id: P-SHADCN-CHECKBOX-ADMITTED-ANATOMY
+    text:
+      zh-CN: 投影的 admitted anatomy 只有 Root 与 Indicator。不得引入 Label、Group、HiddenInput 或任何外部 sibling styling hook；未被本切片内 selector 消费的样式 hook 不得发布。
+      en: The projection admits Root and Indicator only. It must introduce no Label, Group, HiddenInput, or external sibling styling hook, and must publish no styling hook that no selector inside this slice consumes.
+    references:
+      prototypes:
+        - id: P-BASE-CHECKBOX
+          anchors: [P-BASE-CHECKBOX-ANATOMY-FAMILY, P-BASE-CHECKBOX-FAMILY-ROLES]
+  - id: P-SHADCN-CHECKBOX-BOUNDARY
+    text:
+      zh-CN: 投影不得引入第二个 value、event、focus、activation、form 或 accessibility owner，也不得引入 form submission、validation message、toggle、radio group 或 switch 语义。
+      en: The projection must introduce no second value, event, focus, activation, form, or accessibility owner, and no form submission, validation message, toggle, radio-group, or switch semantics.
+    references:
+      prototypes:
+        - id: P-BASE-CHECKBOX
+          anchors:
+            [P-BASE-CHECKBOX-FORM-INTEGRATION-DEFERRED, P-BASE-CHECKBOX-NO-VISUAL-VARIANT-CORE]
+  - id: P-SHADCN-CHECKBOX-COMPATIBILITY-SUBSET
+    text:
+      zh-CN: 当前实体只声明已实现并测试的 inherited behavior 与视觉 surface；相对固定 upstream baseline 的全部差异必须集中在唯一 compatibility open question，并区分 intentional deviation 与 parity gap。
+      en: This entity claims only implemented and tested inherited behavior and visual surface; every difference from the pinned upstream baseline must be centralized in one compatibility open question and classified as an intentional deviation or parity gap.
+  - id: P-SHADCN-CHECKBOX-AS-CHILD-OMISSION
+    text:
+      zh-CN: upstream Root props 中的 `asChild` 依 `D-AS-CHILD-OMISSION-0001` 有意不进入 API，任何元素投射均不得被宣称为 Radix Slot 等价实现。
+      en: The `asChild` member of upstream Root props is intentionally omitted under `D-AS-CHILD-OMISSION-0001`; no element projection may be claimed as a Radix Slot equivalent.
+    dependsOn:
+      decisions: [D-AS-CHILD-OMISSION-0001]
+openQuestions:
+  - id: P-SHADCN-CHECKBOX-Q-UPSTREAM-DIFFERENCES
+    question:
+      zh-CN: 相较固定 shadcn/ui Checkbox baseline，当前全部差异分别是有意偏离还是待实现 gap，应按什么顺序收敛？
+      en: Against the pinned shadcn/ui Checkbox baseline, which current differences are intentional deviations versus implementation gaps, and in what order should the gaps converge?
+    context:
+      zh-CN: >-
+        有意偏离有五项。`asChild` 依 `D-AS-CHILD-OMISSION-0001` 不提供。upstream 的三个 `aria-invalid:*` 呈现不实现——Base Checkbox 未投出 invalid state，也不拥有 Field/Form，照搬会得到一个没有协议背书、纯由宿主 ARIA 属性驱动的呈现；这与 `P-SHADCN-BUTTON` 的既有处理一致。upstream 的 `peer` 不发布：本切片没有任何 selector 消费它。upstream 的 `text-current` 不实现：CSS 本就继承 `color`，Root 在 checked 下已设 `text-primary-foreground`。indeterminate 呈现是本投射新增的——固定 baseline 只有 `data-[state=checked]:*`，没有任何 mixed 视觉，而 Base 投出 `indeterminate` 且验收要求它有可执行证据，因此 mixed 复用 checked 的 primary fill、由 Indicator 的 minus glyph 区分。dark tint 的机制也随之不同：upstream 用无门槛的 `dark:bg-input/30` 加一条 `dark:data-[state=checked]:bg-primary` 重新压回填充，本投射改为给 tint 加 `not-[data-checked]:not-[data-indeterminate]` 两个门槛，因为 upstream 那条重压只覆盖 checked，mixed 会漏。待实现或待评审差异包括 `transition-shadow`（只影响过渡曲线）、`data-slot`、className 与 native prop forwarding，以及 Indicator 的居中机制与 glyph 归属（见 `P-SHADCN-CHECKBOX-INDICATOR`）。这些项目通过实现与测试前不得扩大 passing guarantee。
+
+
+      en: >-
+        Five intentional deviations are decided. `asChild` is omitted under `D-AS-CHILD-OMISSION-0001`. The three upstream `aria-invalid:*` presentations are not implemented: Base Checkbox projects no invalid state and owns no Field or Form, so copying them would produce a presentation with no protocol backing, driven solely by a host-set ARIA attribute; this matches the existing treatment in `P-SHADCN-BUTTON`. Upstream `peer` is not published, because no selector inside this slice consumes it. Upstream `text-current` is not implemented, because CSS already inherits `color` and Root sets `text-primary-foreground` when checked. The indeterminate presentation is added by this projection: the pinned baseline carries only `data-[state=checked]:*` and no mixed visual at all, while Base projects `indeterminate` and the acceptance list requires executable evidence for it, so mixed reuses the checked primary fill and is separated by the Indicator minus glyph. The dark tint mechanism differs as a consequence: upstream pairs an unguarded `dark:bg-input/30` with a `dark:data-[state=checked]:bg-primary` that pushes the fill back on top, whereas this projection guards the tint with `not-[data-checked]:not-[data-indeterminate]`, because the upstream re-assertion covers checked only and would miss mixed. Remaining implementation or review gaps include `transition-shadow`, which affects the transition curve only, plus `data-slot`, className and native prop forwarding, and the Indicator centering mechanism and glyph ownership recorded in `P-SHADCN-CHECKBOX-INDICATOR`. The passing guarantee must not expand until an item is implemented and tested.
+
+
+    blocks: [shadcn checkbox parity roadmap]
+sources:
+  - path: packages/prototypes/shadcn/src/checkbox/root.proto.ts
+  - path: packages/prototypes/shadcn/src/checkbox/types.ts
+  - path: packages/prototypes/shadcn/test/checkbox.test.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/checkbox.tsx
+    label: shadcn/ui v4 new-york Checkbox pinned baseline
+dependsOn:
+  contracts:
+    [
+      C-AS-HOOK-0001,
+      C-CORE-SYNTAX-0003,
+      C-CORE-SYNTAX-0007,
+      C-RULE-WHEN-0002,
+      C-RULE-INTENT-FEEDBACK-STYLE-0001,
+    ]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-CHECKBOX
+      note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
+verifies: { tests: [T-SHADCN-CHECKBOX-0001] }
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the Shadcn Checkbox projection with Base inheritance, a guarded dark tint, and centralized upstream differences.
+tags: [prototype, shadcn, checkbox, root, upstream-derived, delta, compatibility, visual]

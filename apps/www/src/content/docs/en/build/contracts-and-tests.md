@@ -120,4 +120,4 @@ Use Node.js 22 and the repository-pinned pnpm 10.32.1 through Corepack. `test` a
 - Editing generated projections by hand creates drift; change the entity or generator.
 - Running only the full suite makes ownership failures harder to diagnose; keep focused commands in the PR.
 
-Continue to [Runtime Architecture](/en/build/runtime-architecture/), [Module & Extension Architecture](/en/build/module-extension-architecture/), or [How to Contribute](/en/build/contribute/) for the delivery workflow.
+Continue to [Runtime Architecture](/en/build/runtime-architecture/), [Module & Extension Architecture](/en/build/module-extension-architecture/), or [Deliver a change](/en/contribute/deliver/) for the contribution workflow.

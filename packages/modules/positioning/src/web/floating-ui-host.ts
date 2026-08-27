@@ -32,6 +32,47 @@ function isElement(value: unknown): value is HTMLElement {
   return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
 }
 
+/**
+ * Anchored geometry may exclude the anchor's own CSS translation. Interaction
+ * transforms (hover lift, press-down) are decoration of the anchor surface;
+ * when the consumer opts in via `excludeAnchorTranslation`, anchored surfaces
+ * track layout position instead of the rendered surface. By default the host
+ * measures the anchor's actual rendered geometry, so legitimate translations
+ * (centering, application animation) keep floating placement where the user
+ * sees the anchor.
+ */
+function virtualReferenceFor(anchor: HTMLElement) {
+  return {
+    getBoundingClientRect(): DOMRect {
+      const rect = anchor.getBoundingClientRect();
+      let dx = 0;
+      let dy = 0;
+      const transform =
+        typeof getComputedStyle === 'function' ? getComputedStyle(anchor).transform : 'none';
+      if (transform && transform !== 'none' && typeof DOMMatrixReadOnly !== 'undefined') {
+        const matrix = new DOMMatrixReadOnly(transform);
+        dx = matrix.m41;
+        dy = matrix.m42;
+      }
+      return {
+        x: rect.x - dx,
+        y: rect.y - dy,
+        left: rect.left - dx,
+        top: rect.top - dy,
+        right: rect.right - dx,
+        bottom: rect.bottom - dy,
+        width: rect.width,
+        height: rect.height,
+        toJSON: () => ({}),
+      } as DOMRect;
+    },
+  };
+}
+
+function positionReference(anchor: HTMLElement, config: AnchoredPositionConfig) {
+  return config.excludeAnchorTranslation === true ? virtualReferenceFor(anchor) : anchor;
+}
+
 function middlewareFor(config: AnchoredPositionConfig): Middleware[] {
   const middleware: Middleware[] = [
     offset({ mainAxis: config.sideOffset, crossAxis: config.alignOffset }),
@@ -70,7 +111,7 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
       const position = async () => {
         const { anchor, floating, config } = connection;
         if (disposed || !isElement(anchor) || !isElement(floating)) return;
-        const result = await computePosition(anchor, floating, {
+        const result = await computePosition(positionReference(anchor, config), floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
           middleware: middlewareFor(config),

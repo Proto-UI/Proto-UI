@@ -1,143 +1,196 @@
 # Contributing to Proto UI
 
-Thanks for your interest in Proto UI. The project welcomes contributions from first-time contributors, experienced framework and component-library authors, and people working toward core protocol design.
+Proto UI accepts work from first-time contributors, experienced implementers, documentation authors, researchers, and people working on the protocol itself. This is the canonical human workflow for choosing, claiming, developing, validating, and submitting a change.
 
-This document is the primary human contribution workflow. It explains how to choose work, find the applicable source of truth, develop locally, validate a change, and open a pull request. Project semantics remain governed by the applicable entities under [`spec/**`](./spec/).
+Product semantics remain governed by the applicable entities under `spec/**`. The detailed collaboration policy lives in `internal/governance/collaboration-model.md`. Agents have a separate entry in `AGENTS.md`.
 
-## Before you start
+## Choose work that is ready
 
-Choose work by both **effort** and **readiness**:
+Effort and readiness are separate.
 
-- **Starter**: an F1–F2 task with a fixed expected result and little Proto UI domain judgment. These may carry the `good first issue` label.
-- **Contributor-ready**: the semantic boundary is already decided, but implementation may still require substantial work or repository knowledge. Look for `help wanted` issues whose body says implementation may begin and which are not blocked by `needs maintainer design`.
-- **Maintainer-guided**: the work still contains protocol, ownership, admission, or architecture decisions. Start with an assessment or proposal and wait for the recorded maintainer checkpoint before implementation.
+| Readiness | Meaning | How to proceed |
+| --- | --- | --- |
+| Starter | The result is fixed and requires little Proto UI judgment | Claim the bounded task and follow its acceptance criteria |
+| Contributor-ready | Semantics are decided, although implementation may be substantial | Confirm the scope, evidence, and allowed decisions before starting |
+| Maintainer-guided | Admission, ownership, compatibility, public surface, or architecture is unsettled | Investigate or propose; wait for a recorded checkpoint before implementation |
 
-An empty `good first issue` queue does not mean that contributions are closed. Experienced contributors should also review bounded `help wanted` work. Conversely, `help wanted` does not override an issue that still requires maintainer design.
+Fibonacci effort labels estimate the size and uncertainty of a reviewable change. They do not mean that implementation is authorized. Unassessed work needs investigation. Work marked as needing a split should become smaller coherent issues before anyone claims it.
 
-Comment on the issue before starting. If an issue does not state what is decided, what the contributor may decide, and whether implementation is authorized, ask for that boundary to be clarified first.
+`help wanted` does not override `needs maintainer design`. Research direction does not authorize production implementation. An empty starter queue is normal; do not manufacture a contribution just to stay busy.
 
-## Source of truth
+## Find the source of truth
 
-Proto UI is **spec-entity first**:
+Before editing:
 
-1. Find the applicable entity under [`spec/**`](./spec/) and read its status, version, criteria, relations, sources, and mapped tests.
-2. `active` describes a current guarantee. `draft` is the current cataloged direction but is not a stable public guarantee. Follow deprecation and removal metadata when present.
-3. Use [`internal/contracts/**`](./internal/contracts/) only for explanation or an uncataloged gap. A legacy contract never overrides an applicable spec entity.
-4. Use relevant dated files under [`internal/records/**`](./internal/records/) for current engineering context. Records are non-normative.
-5. Treat implementation, tests, package README files, and website content as evidence and projections. A mismatch with the applicable entity is drift to resolve, not an implicit spec amendment.
+1. Find the applicable entities under `spec/**`. Read lifecycle, criteria, relations, revisions, sources, open questions, and mapped tests.
+2. Treat `active` as a current guarantee. Treat `draft` as cataloged direction, not a stable public promise. Follow deprecation and removal metadata.
+3. Use `internal/contracts/**` for explanation or an uncataloged gap. It cannot override an applicable entity.
+4. Use dated files under `internal/records/**` for observations and current engineering context. Records are not normative.
+5. Treat implementation and tests as evidence. A mismatch with an applicable entity is drift, not an implicit amendment.
+6. Treat README files, package prose, demos, and the website as reader projections.
 
-Read the [spec catalog authoring guide](./spec/README.md) before editing an entity. Do not create an empty entity merely to mirror a component name, directory, package, or capability count.
+Read `spec/README.md` before authoring an entity. Do not create an entity merely because a component name, file, package, token, or capability count exists. Model one coherent semantic slice with executable evidence.
 
-## Current contribution paths
+When sources genuinely conflict, stop and state the exact contradiction. Do not choose the most convenient source in silence.
 
-### Maintain an existing Prototype
+## Use GitHub surfaces for one job each
 
-Suitable work includes focused bug fixes, regression coverage, docs and demos, public export corrections, and resolving drift among an existing `P-*` entity, its `T-*` evidence, implementation, and public projections.
+Use Discussions for questions and ideas that do not yet have a task boundary. A decision that changes implementation scope must move to an Issue, spec entity, dated record, or pull request.
 
-Start with the [existing Prototype maintenance guide](./apps/www/src/content/docs/en/build/prototypes/maintaining-an-existing-prototype.md).
+Use an Issue for one trackable outcome. An implementation-ready Issue states:
 
-### Project Base into a design language
+- the problem or outcome;
+- applicable authority and lifecycle;
+- what is already decided;
+- what the contributor may decide;
+- exclusions;
+- whether implementation may start;
+- acceptance and validation boundaries;
+- required human gates.
 
-This path is available only when the Base `P-*`/`T-*` boundary already exists and the issue records the design-language scope. The derived Prototype may add presentation, design-language props, and rules; it must not silently create a competing state, event, focus, accessibility, or host-capability owner.
+Use a pull request for one reviewable integration unit. Use Actions for machine evidence. Use review for independent judgment. Passing tests and receiving approval answer different questions.
 
-Start with the [design-language projection guide](./apps/www/src/content/docs/en/build/prototypes/projecting-base-into-a-design-language.md).
+Milestones represent a release outcome or an independent program with completion conditions. They are not a Kanban status. A closed milestone with open work, or an open milestone with no remaining work, needs an audit.
 
-### Implement an approved Base semantic slice
+The planned organization Project will become the operating board across repositories. Project fields will carry workflow position, readiness, priority, claim expiry, evidence progress, required Agent comprehension, and permission ceiling. Labels will remain stable searchable properties for work type, area, effort, readiness, and risk. The Project must never become a second product specification. Its field schema, transitions, synchronization, idempotency, rollback, and rollout gates are defined in `internal/governance/project-v2-design.md`.
 
-This is usually an advanced implementation contribution. Begin only after a maintainer checkpoint has approved the independent subject, information paths, negative boundary, exact public surface, `P-*`/`T-*` plan, and required cross-host evidence.
+Until the Project is operational, Issue state, comments, assignees, linked pull requests, and maintainer checkpoints are the live coordination record.
 
-Start with the [approved Base slice implementation guide](./apps/www/src/content/docs/en/build/prototypes/implementing-an-approved-base-slice.md).
+## Claim work
 
-### Propose a new Base subject
+Before claiming an Issue, inspect:
 
-A familiar component name is not enough to justify a Base Prototype. A proposal must establish an independently addressable, cross-host, testable protocol subject with an owned input-fact-to-observable-output path. Use the Prototype proposal template and wait for a maintainer checkpoint before implementation.
+- assignee and recent comments;
+- linked open pull requests or branches;
+- readiness and effort;
+- applicable milestone and Project fields when available;
+- acceptance criteria and exclusions;
+- required review and validation.
 
-### Docs, demos, and community work
+Record your intended scope, planned evidence, and when the claim should be released if work does not start or continue. Revalidate immediately before implementation. Release the claim when the boundary changes, the task becomes blocked, or you stop.
 
-Documentation, translation, demo quality, accessibility examples, issue triage, and contributor guidance are welcome. Explain the reader or contributor obstacle being removed and verify public pages when they change.
+An assignee is the current responsible person, but it is not the only occupation signal. Comments and linked work may show an active claim that has not been mirrored into assignment metadata.
 
-### Website preview requirement for Prototype work
+## Set up the repository
 
-Every new public Prototype identity or anatomy family must be added to a navigable page on the Proto UI website in the same coherent change. The page must consume the real public package export, show the important approved states or behavior, and provide the applicable Web Component, React, and Vue previews. Include the local website route in the pull request so maintainers can review the contribution interactively. The development-only Demo Matrix is useful supplementary evidence, but it does not replace the public website page.
-
-Website demos should approximate what a developer gets after installing the package. Prefer the Prototype's own anatomy, triggers, state, events, and defaults; do not add page-only orchestration merely to make a demo appear functional. For example, a Dialog demo should normally open through its Dialog Trigger, not through an unrelated Button callback that calls a Dialog expose.
-
-Minimal external control is acceptable only when the Prototype has no natural trigger by design, or when its documented public controls are themselves the behavior under demonstration. Toast-style invocation and direct Transition controls are typical exceptions. Keep that orchestration outside the Prototype, use only public APIs, and identify it in the demo source and pull request as demo-only code that consumers must recreate. An exception must not hide a missing anatomy part, ownership error, or Adapter drift.
-
-For maintenance work, update the existing website page whenever public behavior, states, anatomy, styling, or usage changes. A tests-only or internal refactor does not require a new page when the current preview remains accurate.
-
-### Adapter work is not yet a documented contribution path
-
-The Module, Host Capability, and official Adapter-profile catalog is still being completed. Until the relevant entities and architecture are cataloged and known drift is reconciled, Proto UI does not publish a general Adapter authoring guide or imply that a new Adapter can be implemented by analogy.
-
-Specific Adapter parity bugs may still be opened for contribution when an issue identifies the applicable entities, the owning layer, the expected behavior, and the exact validation boundary. New Adapter proposals remain maintainer-guided research unless the issue explicitly states otherwise.
-
-## Local development
-
-The CI baseline is Node.js 22. Use the pnpm version declared in `package.json` through Corepack.
+Use Node.js 22 and the pnpm version declared in `package.json`.
 
 ```sh
 corepack enable
 corepack pnpm@10.32.1 install --frozen-lockfile
 ```
 
-Useful local entry points:
+Create a short-lived branch from current `main`. Preserve unrelated worktree changes. Never edit generated artifacts by hand.
+
+For the public docs and demos:
 
 ```sh
 corepack pnpm@10.32.1 docs:dev
-corepack pnpm@10.32.1 workspace:dev
+```
+
+For a local Agent-oriented catalog projection:
+
+```sh
 corepack pnpm@10.32.1 spec:docs:agent
 ```
 
-`spec:docs:agent` generates `internal/agent/PROJECT-UNDERSTANDING.zh-CN.md` as a disposable, Git-ignored local projection. Do not add that file to a commit.
+The generated `internal/agent/PROJECT-UNDERSTANDING.zh-CN.md` is disposable and Git-ignored.
 
-The repository pre-commit hook formats staged supported files through `lint-staged`. You can run the formatter explicitly with `corepack pnpm@10.32.1 format`, but keep unrelated formatting changes out of the pull request.
+## Dependencies and generated files
 
-## Development workflow
+New dependencies are discouraged and must be discussed in an Issue before a pull request.
 
-1. Claim or discuss an issue and confirm its readiness.
-2. Fork the repository if needed and create a short-lived topic branch from current `main`.
-3. Trace the applicable entity chain before editing: knowledge/decision → contract or Prototype → Module/Host Capability where applicable → Adapter profile → test → implementation/docs.
-4. Make the smallest coherent change that keeps the source of truth and affected projections aligned.
-5. Add or update executable coverage when a normative rule or observable behavior changes.
-6. Run focused checks first, followed by the proportional repository checks below.
-7. Commit with a DCO sign-off and open a pull request using the repository template.
+Generated files must be changed through their generator. When a check reports generated drift, update the governing source or generator and regenerate; do not hand-edit the projection. Keep unrelated user or generated changes out of the pull request.
 
-## Proportional validation
+## Deliver one coherent change
 
-| Change | Minimum expected validation |
-| --- | --- |
-| Docs or contributor guidance | `corepack pnpm@10.32.1 docs:build`; validate referenced repository paths; run `check:agent-doc` when Agent projection inputs change |
-| Existing Prototype behavior | Focused Vitest file, relevant `T-*` mapping, `check:prototype-catalog`, `check:types`, and `docs:build` plus the existing website route when the public behavior or presentation changes |
-| Design-language projection | Focused Base and derived Prototype tests, `check:styles:preset`, `check:component-presets` when applicable, `check:prototype-catalog`, `check:types`, `docs:build`, and manual review of the new website route |
-| Approved Base semantic slice | Focused P/T/module/Adapter evidence required by the issue, `check:prototype-catalog`, regenerated projections, `check:types`, the proportional full `test` suite, `docs:build`, and manual review of the new website route |
-| Package or public export surface | Focused tests plus `build:packages`, `check:package-manifests`, and relevant consumer or docs smoke |
+A fast change still needs one reviewable claim. Keep the authority, implementation, tests, generated projections, package surfaces, and affected public pages together when they realize the same semantic slice.
 
-Run a focused test with Vitest, for example:
+A normal delivery loop is:
 
-```sh
-corepack pnpm@10.32.1 vitest run packages/prototypes/base/test/separator.test.ts
-```
+1. Confirm the issue boundary and implementation authorization.
+2. Trace authority, relations, consumers, negative boundaries, and evidence.
+3. Add or identify focused evidence at the owning layer.
+4. Implement the smallest complete slice.
+5. Update generated projections through their generators.
+6. Update public documentation when the reader or consumer surface changes.
+7. Run focused checks before broader checks.
+8. Review the actual diff against the original boundary.
+9. Sign off each human-authored commit.
+10. Open a pull request with exact evidence and provenance.
 
-The repository-wide checks are:
+Stop and return to a maintainer checkpoint if implementation reveals a new semantic identity, owner, public API, compatibility decision, Host Capability, dependency, or lifecycle change.
+
+### Prototype and component work
+
+Maintaining an existing Prototype is available when expected behavior is already governed. Add a regression at the owning layer and keep exports, CLI surfaces, tests, and public pages coherent.
+
+A new Base slice requires a recorded checkpoint covering the independent subject, information ownership, negative boundary, public surface, P/T evidence graph, and host prerequisites.
+
+A design-language projection inherits Base semantics and owns only the approved presentation and compatibility delta. It must not take ownership of state, event, focus, accessibility, dismissal, or host behavior already owned elsewhere.
+
+Every new public Prototype identity or anatomy family needs a reachable website page in the same change. The page consumes the real public package export and provides the applicable runtime previews.
+
+### Module and Host Capability work
+
+A Module owns portable semantics. Keep its author-facing facade, privilege-bearing port, declared dependencies, missing-capability behavior, and resource lifetime explicit.
+
+A Host Capability expresses the smallest host responsibility required by portable semantics. Define availability, failure, replacement, cleanup, and realization fidelity. Do not leak raw host or framework objects into portable state.
+
+New Module or Host Capability identities remain maintainer decisions.
+
+### Adapter work
+
+Adapter profile work is cataloged one reviewed Module slice at a time. Positive support, explicit omission, Host Capability provision, lifecycle translation, and executable evidence must stay honest.
+
+An uncataloged Module is not implicitly supported or unsupported. Do not generate a complete matrix from package imports or directory structure.
+
+A new Adapter proposal authorizes research by default. Implementation begins only after maintainers approve target scope, lifecycle, compatibility, dependencies, semantic ownership, and evidence.
+
+### Contract and spec work
+
+Use a readable legacy contract only for explanation or an explicitly accepted uncataloged gap. It must state current authority and migration status. Stabilized semantics should move into spec entities rather than leaving a permanent shadow contract.
+
+A spec brainstorm produces a decision packet, not an entity or implementation. Separate facts, alternatives, recommendation, negative boundary, evidence plan, and the smallest required human decision.
+
+## Validate proportionally
+
+Run the smallest test that proves the affected rule, then expand along the affected graph.
+
+Common checks include:
 
 ```sh
 corepack pnpm@10.32.1 check:prototype-catalog
+corepack pnpm@10.32.1 check:agent-operations
+corepack pnpm@10.32.1 check:agent-doc
+corepack pnpm@10.32.1 check:public-docs
+corepack pnpm@10.32.1 test:public-docs
 corepack pnpm@10.32.1 check:types
 corepack pnpm@10.32.1 test
+corepack pnpm@10.32.1 docs:build
 ```
 
-Record the exact commands and any manual verification in the pull request. Do not claim a check that was not run.
+Choose checks by the surfaces reached:
 
-## Contribution license
+| Change | Minimum evidence |
+| --- | --- |
+| Documentation only | Links and paths, public-doc checks, affected routes, docs types or build |
+| Spec graph | Schema and relation checks, affected catalog checks, generated projections, focused executable evidence |
+| Runtime, Module, Adapter, or Prototype behavior | Failing-before focused test, affected integration tests, types, catalog, consumer or docs evidence |
+| Package or CLI surface | Build, manifest and budget checks, affected consumer smoke |
+| Release governance | Release scan, assets, rehearsal or stage checks named by the release workflow |
+
+Run generators before their corresponding `--check` mode. Record exact commands and results. State what did not run and why.
+
+Machine checks do not approve semantics. A manual preview does not replace an executable regression. A review approval does not prove the checked revision passed. Keep these evidence types separate.
+
+## Contribution license, provenance, and DCO
 
 Proto UI is currently licensed under the [MIT License](./LICENSE). You retain the copyright in contributions you create. By submitting a contribution, you represent that you have the right to provide it under the repository's current license. This policy does not require a copyright assignment.
 
 Third-party material remains subject to its original license, attribution, notice, and other applicable requirements. Your contribution must identify and preserve those obligations.
 
-## Developer Certificate of Origin
-
-All new contributions, including documentation and small changes, must comply with the [Developer Certificate of Origin 1.1](./DCO.md). Every human-authored commit entering a pull request needs a valid sign-off trailer. A pull request checkbox or comment does not replace commit sign-off.
+Every human-authored commit must comply with the [Developer Certificate of Origin 1.1](./DCO.md) and needs its own valid `Signed-off-by` trailer. A pull request checkbox or comment does not replace commit sign-off.
 
 Create a signed-off commit with:
 
@@ -168,28 +221,75 @@ Signed-off-by: Contributor Name <email@example.com>
 
 The name and email must represent the person making the certification. A DCO sign-off is different from a cryptographic GPG or SSH commit signature. Do not copy another person's trailer or ask a maintainer to sign on your behalf. See the [contribution provenance policy](./internal/governance/contribution-provenance.md) for the individual remediation process for already-published unsigned commits.
 
-Proto UI does not install hooks or change contributor Git configuration to add sign-offs automatically. The sign-off must be intentional.
+The sign-off certifies the right to submit the contribution. It does not replace license review or source disclosure. Read the [contribution provenance policy](./internal/governance/contribution-provenance.md) before opening a pull request, and disclose:
 
-## Contribution provenance
+- third-party source, version or commit, license, material used, and required attribution;
+- material AI assistance, its scope, human review, and any third-party or private material provided to it;
+- employer or client ownership considerations when relevant;
+- exact validation performed.
 
-Read the [contribution provenance policy](./internal/governance/contribution-provenance.md) before opening a pull request. Disclose material that was copied, adapted, generated, or otherwise constrained, including:
+Do not copy code from an upstream project merely because its behavior is useful. Establish license and provenance before adapting it.
 
-- code copied or rewritten from another project;
-- third-party design systems that were referenced or ported;
-- external images, icons, fonts, test data, and documentation;
-- substantial AI-generated or AI-transformed content; and
-- contributions that an employer or client may own or restrict.
+## Pull request and acceptance
 
-Disclosure helps reviewers verify rights and required attribution; it does not itself establish that material may be submitted.
+The pull request should contain:
 
-## Dependencies and generated files
+- linked Issue or decision context;
+- applicable entities, lifecycle, criteria, and tests;
+- what was decided before the PR and what the PR decided;
+- exclusions and residual risks;
+- source-of-truth alignment;
+- provenance and DCO state;
+- focused, broader, manual, and omitted validation;
+- public preview route when relevant.
 
-New dependencies are discouraged and must be discussed in an issue before a pull request.
+Reviewers check the governed boundary, not only whether CI is green. They verify ownership, negative boundaries, cross-layer consumers, compatibility, public projections, provenance, and evidence truthfulness.
 
-Generated files must be changed through their generator. When a check reports generated drift, update the governing source or generator and regenerate; do not hand-edit the projection. Keep unrelated user or generated changes out of the pull request.
+A new push invalidates stale acceptance. Resolve every review thread. Merge only the reviewed revision after the required checks pass.
+
+## Regression, deployment, and release
+
+A regression repair restores an already governed guarantee. It begins with a minimal reproduction and evidence that fails for the intended reason. If expected behavior is unclear, the task is semantic shaping rather than a bug fix.
+
+Preview deployment is inspection evidence for one revision. It does not grant merge permission. Production deployment is an external fact and should be tied to the merged revision and monitored for regressions.
+
+Release preparation and publication are separate:
+
+1. Maintainers choose the exact global version and stage.
+2. A reviewable candidate aligns Version identity, manifests, lockfile, notes, bill of materials, snapshot inputs, rehearsal, and dry-run evidence.
+3. Publication runs manually from governed `main` through the release workflow.
+4. A separate evidence change verifies registry, channel, integrity, tag, GitHub Release, assets, snapshot digest, workflow head, and deployments.
+
+In `human-assisted` mode an Agent may prepare or audit these phases under current human decisions. In `autonomous` mode it must stay within its fresh local task and review ceilings. A narrowly standing-authorized Agent may mechanically merge an exact approved PR through `pui-integrate`; neither mode may publish, tag, activate stable lifecycle, or recover a partial release without current human authorization.
+
+## Contributor permissions
+
+GitHub permission, Discord trust, Agent comprehension, task risk, and human authorization answer different questions. A score cannot grant GitHub permission or predict acceptance. Discord or Poppy trust matters only when work touches those community or Bot surfaces.
+
+Read-only work may inspect and report. Triage supports reversible metadata within policy. Write supports feature branches and the contributor's own PR, not direct pushes to `main`. Maintain still obeys review and release gates. Admin, access, secrets, application installation, rulesets, and branch protection remain attended human work.
+
+The Discord Bot's Community, Contributor, and Trusted levels are an entry and trust axis. They are not GitHub contributor roles.
+
+## Agents
+
+Agents start with `AGENTS.md` and `$pui-dev`. The entry skill reads the machine registry and loads one atomic skill at a time. Leaf skills are lazy and remain out of context until the current state transition requires them.
+
+The resolver is deterministic: `pnpm agent:skill -- <leaf-id> --mode <execution-mode> --mode-source <trusted-source>` returns one eligible registered path or a blocked result, and `pnpm agent:skill -- --handoff <handoff.json>` validates the completed leaf before resolving at most one next step.
+
+`pui-orient` records `human-assisted` when a current user is directing the work. Local assessment then helps the Agent narrow claims, add tests, request review, and state limitations; a low score does not block the work the user requested. `autonomous` is reserved for a maintainer-controlled invocation, schedule, or governed queue. In that mode a fresh unsigned U0-C4 self-result is a binding ceiling on task and review class.
+
+Assessment never grants permission. Ordinary local edits, tests, signed-off commits, authorized branch pushes, own-PR updates, and review responses do not depend on an online issuer. External writes still require explicit or active standing authorization and a live credential. Semantic admission and compatibility choices stay with people; publication, release, access, and repository rules remain attended. The active local standing scopes may submit bounded review dispositions and mechanically merge an already independently approved exact head without another per-action prompt.
+
+For review, bind evidence to the repository, PR, base ref name, base SHA, head SHA, declared review class, and a digest of the exact PR state, draft state, current and previous changed-file paths, existing reviews, top-level conversation comments, replies, threads, check provider/repository/workflow-name/workflow-path provenance, checks, and evidence inspected. A new push or base retargeting makes the old packet stale; new same-head input permits a new packet, while an unchanged packet is a duplicate. CI success is useful evidence, but it is not an approval. Assessment never derives approval, and an Agent must not approve its own work. An authorized review write must use `submit-review` with `commit_id` bound to the packet head. An authorized integration must use `pui-integrate` and `merge-pull-request`, which rechecks independent approval, trusted CI, resolved threads, GitHub readiness, and sends `sha` equal to that exact head. Do not separate either preflight from a later unbound GitHub write.
+
+The maintainer-controlled local Codex schedule has two active standing scopes. `proto-ui-scheduled-review-v1` allows complete, finding-backed `REQUEST_CHANGES`, and allows `APPROVE` only when trusted live CI succeeds and no current or previous changed-file path identifies a YAML entity under `spec/{contracts,prototypes,modules,adapters,decisions,host-caps,tests,versions,knowledge}`. `proto-ui-scheduled-merge-v1` allows an exact-head squash merge only after a clean packet, independent approval, no active change request, resolved threads, trusted CI, live permission, and GitHub `MERGEABLE`/`CLEAN` state. These scopes apply to one local runner; wider concurrency still requires service-side leases and stronger runtime attribution.
+
+The full Agent policy is in `internal/agent-operations/contributor-agents.md`. The human-readable skill catalog is on the documentation site. Autonomous-maintenance experiments use `$pui-maintain` and its separate independence protocol; supported no-finding and rejected outcomes close through `pui-record`, not a fake remediation review.
 
 ## Communication
 
-- GitHub Issues are the primary tracked entry point.
-- [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions) is appropriate for questions and ideas that do not yet have a bounded issue.
-- [Discord](https://discord.gg/MrWQd7h34R) is available for quick synchronization, but joining it is not required to contribute. Decisions that affect implementation scope should be recorded back in an Issue, Discussion, spec entity, or pull request.
+- [GitHub Issues](https://github.com/Proto-UI/Proto-UI/issues) hold bounded work.
+- [GitHub Discussions](https://github.com/Proto-UI/Proto-UI/discussions) holds questions and ideas before they have an implementation boundary.
+- [Discord](https://discord.gg/MrWQd7h34R) is useful for quick coordination.
+
+Record implementation-changing conclusions back in the Issue, Discussion, spec entity, dated record, or pull request.

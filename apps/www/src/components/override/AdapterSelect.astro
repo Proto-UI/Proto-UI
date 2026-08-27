@@ -1,8 +1,4 @@
 ---
-export const PREFERRED_KEY = 'preferred-prototypes-adapter';
-import { AdapterIds } from '../PrototypePreviewer/runtimes/registry';
-export const DEFAULT_ADAPTER = 'wc';
-
 interface Props {
   id?: string;
 }
@@ -17,7 +13,7 @@ const options = [
 ];
 ---
 
-<div class="adapter-select-wrapper relative inline-flex items-center">
+<div class="adapter-select-wrapper relative inline-flex items-center" data-adapter-select>
   <label class="sr-only" for={id}>选择适配器</label>
   <select
     id={id}
@@ -28,43 +24,11 @@ const options = [
   >
     {options.map((opt) => <option value={opt.value}>{opt.label}</option>)}
   </select>
-  <script is:inline define:vars={{ PREFERRED_KEY, DEFAULT_ADAPTER, AdapterIds }}>
-    (function () {
-      function initAdapterSelect(select) {
-        if (select.dataset.adapterSelectInitialized === 'true') return;
+  <script>
+    import { initAdapterSelects } from '../adapter-preference';
 
-        try {
-          var selectedAdapter = localStorage.getItem(PREFERRED_KEY);
-          if (selectedAdapter && AdapterIds.indexOf(selectedAdapter) !== -1) {
-            select.value = selectedAdapter;
-          }
-        } catch (e) {}
-
-        select.dataset.adapterSelectInitialized = 'true';
-        select.addEventListener('change', function () {
-          try {
-            localStorage.setItem(PREFERRED_KEY, select.value);
-          } catch (e) {}
-
-          document.querySelectorAll('select[data-adapter-select]').forEach(function (otherSelect) {
-            otherSelect.value = select.value;
-          });
-          document.dispatchEvent(
-            new CustomEvent('proto-adapter:change', { detail: { adapter: select.value } })
-          );
-        });
-      }
-
-      function initAdapterSelects() {
-        document.querySelectorAll('select[data-adapter-select]').forEach(initAdapterSelect);
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAdapterSelects, { once: true });
-      } else {
-        initAdapterSelects();
-      }
-    })();
+    initAdapterSelects(document);
+    document.addEventListener('astro:page-load', () => initAdapterSelects(document));
   </script>
   <svg
     class="adapter-select-arrow absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-foreground opacity-60 transition-opacity w-4 h-4"

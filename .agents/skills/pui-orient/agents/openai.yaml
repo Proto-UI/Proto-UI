@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Orient'
+  short_description: 'Establish repository and capability context'
+  default_prompt: 'Use $pui-orient to establish my current Proto UI working context.'
+
+policy:
+  allow_implicit_invocation: false

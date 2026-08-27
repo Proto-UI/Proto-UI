@@ -1,0 +1,134 @@
+id: T-HOST-VIEW-ATTACHMENT-0001
+type: test
+title: Host view attachment tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Covers the single detached attribute name, its exactly-when-not-present meaning, the exclusion its own projection provides, authored children still mounting while detached, and readiness accounting for ancestry.
+cases:
+  - id: T-HOST-VIEW-ATTACHMENT-0001-CASE-ATTRIBUTE-IDENTITY
+    title: Every adapter marks a not-present view with the same attribute
+    covers:
+      - C-HOST-VIEW-ATTACHMENT-0001-A
+      - C-HOST-VIEW-ATTACHMENT-0001-B
+    expectation: one-detached-attribute-name-across-web-component-react-and-vue
+  - id: T-HOST-VIEW-ATTACHMENT-0001-CASE-INTENT-EXACTNESS
+    title: The attribute appears and disappears with view intent alone
+    covers:
+      - C-HOST-VIEW-ATTACHMENT-0001-B
+    expectation: detached-attribute-tracks-view-intent-in-both-directions
+  - id: T-HOST-VIEW-ATTACHMENT-0001-CASE-EXCLUSION-PROJECTION
+    title: The attribute's own projection takes the subtree out of paint
+    covers:
+      - C-HOST-VIEW-ATTACHMENT-0001-C
+    expectation: detached-subtree-is-excluded-without-a-styled-projection-rule
+  - id: T-HOST-VIEW-ATTACHMENT-0001-CASE-CHILDREN-MOUNT
+    title: Authored children mount and register while the view is not present
+    covers:
+      - C-HOST-VIEW-ATTACHMENT-0001-D
+    expectation: authored-children-initialize-and-register-inside-a-detached-view
+  - id: T-HOST-VIEW-ATTACHMENT-0001-CASE-READINESS-ANCESTRY
+    title: An instance inside a detached subtree does not report its view ready
+    covers:
+      - C-HOST-VIEW-ATTACHMENT-0001-E
+    expectation: view-readiness-accounts-for-a-detached-ancestor
+implementations:
+  - id: adapter-base-view-visibility
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/view-visibility.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-EXCLUSION-PROJECTION
+    exercises:
+      - C-HOST-VIEW-ATTACHMENT-0001
+    notes:
+      - Installs the shared rule and reads the computed display, so the exclusion is measured where the contract puts it rather than in a styled prototype.
+  - id: adapter-web-component-lifecycle-view-intent
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/lifecycle-view-intent.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-INTENT-EXACTNESS
+    exercises:
+      - C-HOST-VIEW-ATTACHMENT-0001
+    notes:
+      - Drives view intent in both directions, which is the half of criterion B that a closed-only observation cannot reach.
+  - id: adapter-vue-dialog-detached-mask
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/dialog.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-ATTRIBUTE-IDENTITY
+    exercises:
+      - C-HOST-VIEW-ATTACHMENT-0001
+  - id: adapter-vue-previewer-dialog-readiness
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/previewer-dialog.demo.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-READINESS-ANCESTRY
+    exercises:
+      - C-HOST-VIEW-ATTACHMENT-0001
+    notes:
+      - Readiness is resolved through the nearest detached ancestor, so an instance whose own view attached inside a closed overlay still reports not ready.
+  - id: web-adapters-shadcn-select-controlled-value
+    kind: adapter-test
+    status: passing
+    path: packages/web-conformance/test/shadcn-select-controlled-value.journey.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-CHILDREN-MOUNT
+    exercises:
+      - C-HOST-VIEW-ATTACHMENT-0001
+      - P-BASE-SELECT
+      - P-BASE-SELECT-VALUE
+    notes:
+      - A fixture rather than a documentation demo, because the published Select demo has no control that drives `value` from outside. It never opens the Content, so the authored labels it resolves can only come from children that mounted and registered while detached.
+      - Covers the controlled-update path in Web Components, React, and Vue. Verified red on the pre-fix sources, where the React and Vue labels stayed at the raw value `react` instead of the authored `React`.
+  - id: www-select-first-paint-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-ATTRIBUTE-IDENTITY
+      - T-HOST-VIEW-ATTACHMENT-0001-CASE-CHILDREN-MOUNT
+    exercises:
+      - C-HOST-VIEW-ATTACHMENT-0001
+      - P-BASE-SELECT-VALUE
+    notes:
+      - Reads a real browser in all three runtimes with the popup never opened, counting detached hosts, registered items, and mounted roots.
+verifies:
+  contracts:
+    - id: C-HOST-VIEW-ATTACHMENT-0001
+      anchors:
+        - C-HOST-VIEW-ATTACHMENT-0001-A
+        - C-HOST-VIEW-ATTACHMENT-0001-B
+        - C-HOST-VIEW-ATTACHMENT-0001-C
+        - C-HOST-VIEW-ATTACHMENT-0001-D
+        - C-HOST-VIEW-ATTACHMENT-0001-E
+exercises:
+  prototypes:
+    - P-BASE-SELECT
+    - P-BASE-SELECT-VALUE
+sources:
+  - path: packages/adapters/base/src/host/view-visibility.ts
+  - path: packages/adapters/base/test/view-visibility.test.ts
+  - path: packages/adapters/web-component/test/lifecycle-view-intent.test.ts
+  - path: packages/adapters/vue/test/dialog.test.ts
+  - path: packages/adapters/vue/test/previewer-dialog.demo.test.ts
+  - path: packages/web-conformance/test/shadcn-select-controlled-value.journey.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added executable coverage for the detached view attribute, its meaning, its exclusion, child mounting, and ancestry-aware readiness.
+tags:
+  - test
+  - adapter
+  - host-projection
+  - view-intent
+  - overlay

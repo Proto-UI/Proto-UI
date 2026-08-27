@@ -3,7 +3,7 @@ type: test
 title: Base Scroll Area domain and anatomy tests
 status: draft
 since: 0.2.0-rc.7
-summary: Covers the Viewport-owned host surface, normalized facts, system default, family scope, orientation, and host-projected composed-control anatomy.
+summary: Covers the Viewport-owned host surface, normalized facts, keyboard focus facts and sequential-navigation participation, system default, family scope, orientation, and host-projected composed-control anatomy.
 cases:
   - id: T-BASE-SCROLL-AREA-0001-CASE-VIEWPORT
     title: Viewport publishes normalized host-independent scrolling facts
@@ -14,6 +14,13 @@ cases:
       - P-BASE-SCROLL-AREA-VIEWPORT-NORMALIZED-FACTS
       - P-BASE-SCROLL-AREA-VIEWPORT-A11Y-NEUTRALITY
     expectation: base-scroll-area-viewport-publishes-normalized-system-projection
+  - id: T-BASE-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+    title: Viewport owns the focus facts of the scrolling surface and joins sequential navigation only when it can scroll
+    covers:
+      - P-BASE-SCROLL-AREA-VIEWPORT-KEYBOARD-FOCUS
+      - P-BASE-SCROLL-AREA-VIEWPORT-NAV-PARTICIPATION
+      - P-BASE-SCROLL-AREA-VIEWPORT-A11Y-NEUTRALITY
+    expectation: base-scroll-area-viewport-joins-sequential-navigation-only-while-scrollable
   - id: T-BASE-SCROLL-AREA-0001-CASE-CONTROLS
     title: Scrollbar owns orientation while Thumb retains no independent control semantics
     covers:
@@ -32,6 +39,7 @@ implementations:
     required: true
     consumesCases:
       - T-BASE-SCROLL-AREA-0001-CASE-VIEWPORT
+      - T-BASE-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
       - T-BASE-SCROLL-AREA-0001-CASE-CONTROLS
     exercises:
       - P-BASE-SCROLL-AREA
@@ -48,6 +56,8 @@ verifies:
       anchors:
         - P-BASE-SCROLL-AREA-VIEWPORT-SURFACE-OWNER
         - P-BASE-SCROLL-AREA-VIEWPORT-NORMALIZED-FACTS
+        - P-BASE-SCROLL-AREA-VIEWPORT-KEYBOARD-FOCUS
+        - P-BASE-SCROLL-AREA-VIEWPORT-NAV-PARTICIPATION
     - id: P-BASE-SCROLL-AREA-SCROLLBAR
       anchors: [P-BASE-SCROLL-AREA-SCROLLBAR-ORIENTATION]
     - id: P-BASE-SCROLL-AREA-THUMB

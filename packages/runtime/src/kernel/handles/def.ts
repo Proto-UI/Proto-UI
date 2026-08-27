@@ -1,9 +1,19 @@
 // packages/runtime/src/kernel/handles/def.ts
-import { type DefHandle, type RunHandle, type StyleHandle } from '@proto.ui/core';
+import {
+  type DefHandle,
+  type ProtoEventCallback,
+  type RunHandle,
+  type StyleHandle,
+} from '@proto.ui/core';
 import { getAsHookRuntime } from '@proto.ui/core/internal';
 import { illegalPhase } from '../guard';
 import type { RuleSpec, RuleFacade } from '@proto.ui/module-rule';
-import type { ExposeEventSpec, PropsBaseType } from '@proto.ui/types';
+import type {
+  EventTypeV0,
+  ExposeEventSpec,
+  HostEventListenerOptions,
+  PropsBaseType,
+} from '@proto.ui/types';
 import type { ModuleOrchestratorFacadeView } from '../../orchestrator/module-orchestrator/types';
 import type { FeedbackFacade } from '@proto.ui/module-feedback';
 import type { PropsFacade } from '@proto.ui/module-props';
@@ -214,9 +224,13 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
     },
 
     event: {
-      on: (type, cb, options) => {
+      on: ((
+        type: EventTypeV0,
+        cb: ProtoEventCallback<P, unknown>,
+        options?: HostEventListenerOptions
+      ) => {
         ensureSetup(`def.event.on`);
-        const token = eventFacade.on(type, options);
+        const token = eventFacade.on(type as `host:${string}`, options);
         eventCallbacks.register((token as any).id, cb);
         const off = () => {
           const id = (token as any)?.id;
@@ -226,11 +240,15 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         };
         recordCaptured(def, 'event', { token, off });
         return token;
-      },
+      }) as DefHandle<P>['event']['on'],
 
-      onGlobal: (type, cb, options) => {
+      onGlobal: ((
+        type: EventTypeV0,
+        cb: ProtoEventCallback<P, unknown>,
+        options?: HostEventListenerOptions
+      ) => {
         ensureSetup(`def.event.onGlobal`);
-        const token = eventFacade.onGlobal(type, options);
+        const token = eventFacade.onGlobal(type as `host:${string}`, options);
         eventCallbacks.register((token as any).id, cb);
         const off = () => {
           const id = (token as any)?.id;
@@ -240,7 +258,7 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         };
         recordCaptured(def, 'event', { token, off });
         return token;
-      },
+      }) as DefHandle<P>['event']['onGlobal'],
 
       off: (token) => {
         ensureSetup(`def.event.off`);

@@ -3,7 +3,7 @@ type: test
 title: Shadcn Button delta protocol contract tests
 status: draft
 since: 0.2.0-rc.0
-summary: Covers Shadcn Button's first-class reversible Base inheritance, current absence of Base-behavior reversals, direct entry, visual API, intentional asChild omission, and centralized upstream compatibility boundary.
+summary: Covers Shadcn Button's first-class reversible Base inheritance, current absence of Base-behavior reversals, direct entry, visual API, intentional asChild omission, and the centralized upstream compatibility boundary including pinned-baseline versus adopted-recipe evidence.
 cases:
   - id: T-SHADCN-BUTTON-0001-CASE-IDENTITY-AND-INHERITANCE
     title: Shadcn Button is a direct unofficial projection that inherits Base Button
@@ -30,7 +30,7 @@ cases:
       - P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
     expectation: shadcn-button-dark-meta-projects-visual-deltas
   - id: T-SHADCN-BUTTON-0001-CASE-COMPATIBILITY-SUBSET
-    title: intentional asChild omission and remaining upstream gaps stay outside the passing claim
+    title: pinned baseline, adopted recipe evidence, and undemonstrated render branches stay outside passing parity claims
     covers:
       - P-SHADCN-BUTTON-COMPATIBILITY-SUBSET
       - P-SHADCN-BUTTON-AS-CHILD-OMISSION
@@ -49,7 +49,7 @@ implementations:
       - T-SHADCN-BUTTON-0001-CASE-COMPATIBILITY-SUBSET
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
-      - Positive tests cover only the current Proto UI guarantee; asChild omission is governed by D-AS-CHILD-OMISSION-0001, while remaining upstream gaps are covered through declared prop enums, source review, and the single catalog-visible compatibility question.
+      - Positive tests cover only the current Proto UI guarantee; asChild omission is governed by D-AS-CHILD-OMISSION-0001. The pinned compatibility baseline and the later stable official source for the intentionally adopted destructive recipe remain distinct catalog evidence, so the recipe adoption does not widen the parity claim. Remaining upstream gaps stay bounded by declared prop enums, source review, and the single catalog-visible compatibility question.
 verifies:
   prototypes:
     - id: P-SHADCN-BUTTON
@@ -69,4 +69,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added delta-style Shadcn Button coverage for reversible Base inheritance, current visual API, intentional asChild omission, environment styling, and centralized upstream compatibility differences.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Updated compatibility evidence mapping to keep the historical pinned baseline distinct from later adopted recipe evidence.
 tags: [prototype, shadcn, button, delta, compatibility, test]

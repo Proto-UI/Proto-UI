@@ -1,9 +1,10 @@
+import { shadcnCheckboxComponentPreset } from './checkbox/preset';
 import { shadcnDialogComponentPreset } from './dialog/preset';
 import { shadcnSwitchComponentPreset } from './switch/preset';
 import type { ShadcnComponentPresetRecipe } from './component-presets.types';
 
 export type { ShadcnComponentPresetRecipe } from './component-presets.types';
-export { shadcnDialogComponentPreset, shadcnSwitchComponentPreset };
+export { shadcnCheckboxComponentPreset, shadcnDialogComponentPreset, shadcnSwitchComponentPreset };
 
 /**
  * Aggregate surface for prototype-library-owned composition recipes.
@@ -16,6 +17,7 @@ export { shadcnDialogComponentPreset, shadcnSwitchComponentPreset };
 export const shadcnComponentPresets = {
   'shadcn-switch': shadcnSwitchComponentPreset,
   'shadcn-dialog': shadcnDialogComponentPreset,
+  'shadcn-checkbox': shadcnCheckboxComponentPreset,
 } as const satisfies Record<string, ShadcnComponentPresetRecipe>;
 
 export default shadcnComponentPresets;

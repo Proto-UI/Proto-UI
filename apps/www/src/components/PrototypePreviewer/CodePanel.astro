@@ -1,38 +1,33 @@
 ---
-import { codeToHtml } from 'shiki';
+import { highlightCode, type CodeLang } from './code-highlight';
 
-export type CodeLang = 'tsx' | 'vue' | 'html' | 'javascript';
+export type { CodeLang } from './code-highlight';
 
 interface Props {
   code: string | undefined;
   lang?: CodeLang;
-}
-const { code, lang = 'tsx' } = Astro.props;
-
-async function highlightWithShiki(raw: string | undefined, langId: CodeLang): Promise<string> {
-  if (!raw) return '';
-  let html = await codeToHtml(raw, {
-    lang: langId,
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-  });
-  const safeRaw = raw.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  html = html.replace(
-    /<pre class="([^"]*)"/,
-    '<pre class="proto-previewer__code m-0 text-[0.8125rem] leading-6 whitespace-pre $1"'
-  );
-  html = html.replace(/<code([^>]*)>/, `<code$1 data-raw-code="${safeRaw}">`);
-  return html;
+  id?: string;
+  labelledBy?: string;
+  hidden?: boolean;
+  fileIndex?: number;
 }
 
-const highlighted = await highlightWithShiki(code, lang);
+const { code, lang = 'tsx', id, labelledBy, hidden, fileIndex } = Astro.props;
+const highlighted = await highlightCode(code, lang);
 ---
 
-<figure class="relative" data-code-shell>
+<figure
+  id={id}
+  class="relative min-w-0 max-w-full"
+  role={labelledBy ? 'tabpanel' : undefined}
+  aria-labelledby={labelledBy}
+  hidden={hidden}
+  data-code-file-panel={labelledBy ? '' : undefined}
+  data-code-file-index={fileIndex}
+  data-code-shell
+>
   <div
-    class="group relative max-h-24 min-h-12 overflow-hidden p-2 border-t border-border bg-muted data-[code-expanded=true]:max-h-none data-[code-expanded=true]:overflow-visible"
+    class="group relative min-w-0 max-w-full max-h-24 min-h-12 overflow-hidden p-2 border-t border-border bg-muted data-[code-expanded=true]:max-h-none data-[code-expanded=true]:overflow-visible"
     data-code-inner
   >
     <button
@@ -69,7 +64,7 @@ const highlighted = await highlightWithShiki(code, lang);
     </button>
 
     <div
-      class="[&_.shiki]:!bg-muted dark:[&_.shiki_span]:![color:var(--shiki-dark)] max-h-36 group-data-[code-expanded=false]:select-none group-data-[code-expanded=true]:overflow-y-auto"
+      class="[&_.shiki]:!bg-muted dark:[&_.shiki_span]:![color:var(--shiki-dark)] min-w-0 max-w-full overflow-x-auto max-h-36 group-data-[code-expanded=false]:select-none group-data-[code-expanded=true]:overflow-y-auto"
       data-code-content
       set:html={highlighted}
     />
@@ -94,89 +89,8 @@ const highlighted = await highlightWithShiki(code, lang);
 </figure>
 
 <script>
-  (function () {
-    document.querySelectorAll<HTMLElement>('[data-code-shell]').forEach((shell) => {
-      if (shell.dataset.codeInit === '1') return;
-      shell.dataset.codeInit = '1';
+  import { initCodePanels } from './code-panel-client';
 
-      const panel = shell.querySelector('[data-code-inner]') as HTMLElement | null;
-      const toggle = shell.querySelector('[data-code-toggle]') as HTMLButtonElement | null;
-      const copyBtn = shell.querySelector('[data-copy]') as HTMLButtonElement | null;
-      const copyText = shell.querySelector('[data-copy-text]') as HTMLElement | null;
-
-      function setExpanded(expanded: boolean) {
-        if (shell) shell.dataset.codeExpanded = expanded ? 'true' : 'false';
-        if (panel) panel.dataset.codeExpanded = expanded ? 'true' : 'false';
-        if (toggle) {
-          toggle.setAttribute('aria-expanded', String(expanded));
-        }
-      }
-
-      const content = shell.querySelector('[data-code-content]') as HTMLElement | null;
-      setExpanded(false);
-
-      function syncToggleFromCollapsedClip() {
-        if (!content || !panel) return;
-        if (shell.dataset.codeExpanded === 'true') return;
-        const pr = panel.getBoundingClientRect();
-        if (pr.height < 8) return;
-
-        const epsilon = 2;
-        const pre = content.querySelector('.proto-previewer__code') as HTMLElement | null;
-        const fullH = pre?.scrollHeight ?? content.scrollHeight;
-        const visibleH = content.clientHeight;
-        const exceedsCollapsedCap = fullH > visibleH + epsilon;
-        if (!exceedsCollapsedCap) {
-          setExpanded(true);
-        } else {
-          setExpanded(false);
-        }
-      }
-
-      function scheduleSync() {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(syncToggleFromCollapsedClip);
-        });
-      }
-
-      scheduleSync();
-
-      if (typeof ResizeObserver !== 'undefined' && panel) {
-        const ro = new ResizeObserver(() => scheduleSync());
-        ro.observe(panel);
-      }
-
-      document.addEventListener('proto-adapter:change', scheduleSync);
-
-      if (toggle) {
-        toggle.addEventListener('click', () => {
-          const expanded = shell.dataset.codeExpanded === 'true';
-          setExpanded(!expanded);
-        });
-      }
-
-      if (copyBtn && copyText) {
-        const copyIconHtml = copyText.innerHTML;
-        const checkIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4.5"><path d="M20 6 9 17l-5-5"/></svg>`;
-
-        copyBtn.addEventListener('click', async () => {
-          const currentCodeEl = shell.querySelector(
-            '.proto-previewer__code code'
-          ) as HTMLElement | null;
-          const text = currentCodeEl?.dataset.rawCode ?? currentCodeEl?.textContent ?? '';
-          try {
-            await navigator.clipboard.writeText(text);
-            copyText.innerHTML = checkIconHtml;
-            setTimeout(() => {
-              copyText.innerHTML = copyIconHtml;
-            }, 1500);
-          } catch {
-            copyText.innerHTML = copyIconHtml;
-          }
-        });
-      }
-    });
-  })();
+  initCodePanels(document);
+  document.addEventListener('astro:page-load', () => initCodePanels(document));
 </script>
-
-<template id="proto-previewer-theme-icons"> </template>

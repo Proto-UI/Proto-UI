@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI Agent Capability Response",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "challengeId",
+    "challengeDigest",
+    "subject",
+    "submittedAt",
+    "answers"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.agent-capability-response" },
+    "challengeId": { "type": "string", "pattern": "^challenge:[a-f0-9]{64}$" },
+    "challengeDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "subject": {
+      "type": "object",
+      "required": ["assessmentSessionId"],
+      "properties": {
+        "assessmentSessionId": {
+          "type": "string",
+          "pattern": "^session:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "submittedAt": { "type": "string", "format": "date-time", "minLength": 20 },
+    "answers": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["questionId", "answer", "evidence", "unknowns", "humanGates"],
+        "properties": {
+          "questionId": {
+            "enum": ["authority", "relations", "boundary", "validation", "governance", "permission"]
+          },
+          "answer": { "type": "string", "minLength": 1 },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["source", "locator", "observation"],
+              "properties": {
+                "source": { "type": "string", "minLength": 1 },
+                "locator": { "type": "string", "minLength": 1 },
+                "observation": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "unknowns": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "humanGates": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

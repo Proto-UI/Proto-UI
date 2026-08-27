@@ -58,6 +58,21 @@ cases:
       - A-VUE-3-0001-E
       - A-WEB-COMPONENT-0001-E
     expectation: cancelable-dom-event-receives-prevent-default
+  - id: T-EVENT-0003-CASE-TRANSACTIONAL-ROLLBACK
+    title: Failed attachment rolls back prior listeners, keeps registrations unbound, and retries the full plan
+    covers:
+      - M-EVENT-0001-J
+    expectation: attachment-failure-rolls-back-and-keeps-diagnostics-unbound-then-retries-complete
+  - id: T-EVENT-0003-CASE-PORTABLE-PAYLOAD
+    title: Portable callbacks receive an immutable data-only view whose control is window-bounded and deduplicated
+    covers:
+      - M-EVENT-0001-J
+    expectation: immutable-data-only-payload-with-synchronous-window-bounded-and-deduplicated-default-action-control
+  - id: T-EVENT-0003-CASE-HOST-OPTIONS-BOUNDARY
+    title: Semantic registrations reject DOM listener options while host extensions stay raw host events
+    covers:
+      - M-EVENT-0001-J
+    expectation: semantic-registration-rejects-options-and-portable-payload-awaits-host-extensions
   - id: T-EVENT-0003-CASE-EXPOSE-BOUNDARY
     title: Expose Event implementation and wiring remain outside the Event Module
     covers:
@@ -83,13 +98,16 @@ implementations:
       - T-EVENT-0003-CASE-REBIND-CLEANUP
       - T-EVENT-0003-CASE-BIND-TARGET-PREFLIGHT
       - T-EVENT-0003-CASE-DEFAULT-ACTION-REQUEST
-  - id: module-event-expose-wiring-migration-contract
+  - id: module-event-impl-spec-contract
     kind: module-test
     status: passing
     path: packages/modules/event/test/impl-spec.test.ts
     required: true
     consumesCases:
       - T-EVENT-0003-CASE-EXPOSE-BOUNDARY
+      - T-EVENT-0003-CASE-TRANSACTIONAL-ROLLBACK
+      - T-EVENT-0003-CASE-PORTABLE-PAYLOAD
+      - T-EVENT-0003-CASE-HOST-OPTIONS-BOUNDARY
   - id: runtime-required-event-module
     kind: runtime-test
     status: passing
@@ -164,6 +182,7 @@ verifies:
         - M-EVENT-0001-G
         - M-EVENT-0001-H
         - M-EVENT-0001-I
+        - M-EVENT-0001-J
   hostCaps:
     - id: HC-EVENT-BINDING-0001
       anchors:

@@ -11,6 +11,11 @@ function setupSelectValue(def: DefHandle<SelectValueProps, SelectValueExposes>) 
   const displayValue = def.state.string('displayValue', '');
   def.expose.state('displayValue', displayValue);
   let mounted = false;
+  // A context update can resolve the selected text before this view is mounted,
+  // in which case the render that would have shown it is suppressed. Remember
+  // that so mounting can flush it, or the host keeps painting the earlier value
+  // while the exposed state already reads the resolved one.
+  let renderMissed = false;
 
   const computeDisplayValue = (run: any) => {
     const ctx = run.context.read(SELECT_CONTEXT);
@@ -21,7 +26,9 @@ function setupSelectValue(def: DefHandle<SelectValueProps, SelectValueExposes>) 
     const nextValue = computeDisplayValue(run);
     if (nextValue === displayValue.get()) return;
     displayValue.set(nextValue, 'reason: select value display sync');
-    if (requestRender && mounted) run.update();
+    if (!requestRender) return;
+    if (mounted) run.update();
+    else renderMissed = true;
   };
 
   def.context.subscribe(SELECT_CONTEXT, (run) => syncDisplayValue(run, true));
@@ -29,6 +36,10 @@ function setupSelectValue(def: DefHandle<SelectValueProps, SelectValueExposes>) 
   def.lifecycle.onMounted((run) => {
     syncDisplayValue(run, false);
     mounted = true;
+    if (renderMissed) {
+      renderMissed = false;
+      run.update();
+    }
   });
   def.props.watch(['placeholder'], (run) => syncDisplayValue(run, true));
   def.lifecycle.onUnmounted(() => {

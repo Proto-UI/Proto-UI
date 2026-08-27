@@ -317,4 +317,4 @@ Proto UI 当然可以在未来逐步放宽某些约束，
 - 如果你想继续澄清边界与常见疑问：前往 [FAQ](/zh-cn/whitepaper/faq/)
 - 如果你想查阅正式契约：前往 [Specifications / 规范导读](/zh-cn/specifications/introduction/)
 - 如果你想理解实现层如何承接这些原则：前往 [Build / 概览](/zh-cn/build/)
-- 如果你已经想尝试参与原型或适配器建设：前往 [Build / 参与贡献](/zh-cn/build/contribute/)
+- 如果你想参与 Prototype 或 Adapter 建设：前往[参与贡献](/zh-cn/contribute/)

@@ -55,6 +55,8 @@ export function createOverlayModule(ctx: ModuleFactoryArgs): OverlayModule {
           registerContent: (target) => impl.registerContent(target),
           updatePosition: (patch) => impl.updatePosition(patch),
           setViewActive: (active) => impl.setViewActive(active),
+          markPresenceBound: () => impl.markPresenceBound(),
+          hasPresenceBinding: () => impl.hasPresenceBinding(),
           reconcileViewResourcesAfterCallback: () => impl.reconcileViewResourcesAfterCallback(),
         },
       };

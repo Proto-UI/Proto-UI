@@ -102,11 +102,14 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
 
   // P-BASE-TOGGLE-KEYBOARD-ACTIVATION, P-BASE-TOGGLE-KEYBOARD-SPACE-PREVENT-DEFAULT
   def.event.onGlobal('key.down', (_run, ev) => {
-    const detail = ev?.detail;
+    const detail = ev;
     if (disabled.get()) return;
     if (!focused.get()) return;
     if (detail?.key !== ' ') return;
-    detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: 'toggle.space-activation',
+      source: 'base-toggle',
+    });
   });
 
   // P-BASE-TOGGLE-POINTER-HOVER

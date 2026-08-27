@@ -1,0 +1,112 @@
+name: RepoSteward Portfolio Shadow Trial
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_digest:
+        description: Optional prior snapshot digest to compare before consuming the result
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: read
+  statuses: read
+
+concurrency:
+  group: reposteward-portfolio-shadow-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  portfolio:
+    if: github.repository == 'Proto-UI/Proto-UI'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      REPOSTEWARD_COMMIT: e5db7d3496ef15072135533c5b9f4da91084b553
+      REPOSTEWARD_RAW_PATH: reposteward-portfolio.json
+      REPOSTEWARD_ENVELOPE_PATH: reposteward-portfolio-envelope.json
+      REPOSTEWARD_SOURCE: ${{ runner.temp }}/reposteward/source
+      REPOSTEWARD_CONFIG_PATH: ${{ runner.temp }}/reposteward/project.toml
+      XDG_CONFIG_HOME: ${{ runner.temp }}/reposteward/config
+      XDG_STATE_HOME: ${{ runner.temp }}/reposteward/state
+      XDG_DATA_HOME: ${{ runner.temp }}/reposteward/data
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: '0.11.3'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install commit-pinned RepoSteward from its lockfile
+        run: |
+          set -euo pipefail
+          git init "${REPOSTEWARD_SOURCE}"
+          git -C "${REPOSTEWARD_SOURCE}" remote add origin https://github.com/tiammomo/RepoSteward.git
+          git -C "${REPOSTEWARD_SOURCE}" fetch --depth 1 origin "${REPOSTEWARD_COMMIT}"
+          git -C "${REPOSTEWARD_SOURCE}" checkout --detach FETCH_HEAD
+          test "$(git -C "${REPOSTEWARD_SOURCE}" rev-parse HEAD)" = "${REPOSTEWARD_COMMIT}"
+          uv sync --project "${REPOSTEWARD_SOURCE}" --frozen --no-dev
+
+      - name: Create ephemeral read-only trial configuration
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "${REPOSTEWARD_CONFIG_PATH}")"
+          uv run --project "${REPOSTEWARD_SOURCE}" --no-sync reposteward init \
+            --login "${GITHUB_ACTOR}" \
+            --git-name Proto-UI-Agent-Operations \
+            --git-email "${GITHUB_ACTOR}@users.noreply.github.com"
+          uv run --project "${REPOSTEWARD_SOURCE}" --no-sync reposteward repo add Proto-UI/Proto-UI \
+            --path "${REPOSTEWARD_CONFIG_PATH}" \
+            --mode maintainer
+
+      - name: Collect RepoSteward PR portfolio
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EXPECTED_DIGEST: ${{ github.event.inputs.expected_digest }}
+        run: |
+          set -euo pipefail
+          args=(
+            --config "${REPOSTEWARD_CONFIG_PATH}"
+            portfolio inspect Proto-UI/Proto-UI
+            --format json
+          )
+          if [[ -n "${EXPECTED_DIGEST}" ]]; then
+            args+=(--expected-digest "${EXPECTED_DIGEST}")
+          fi
+          uv run --project "${REPOSTEWARD_SOURCE}" --no-sync reposteward "${args[@]}" > "${REPOSTEWARD_RAW_PATH}"
+
+      - name: Validate and summarize trial output
+        run: |
+          set -euo pipefail
+          node scripts/agent-operations/reposteward-portfolio.mjs \
+            --input "${REPOSTEWARD_RAW_PATH}" \
+            --output "${REPOSTEWARD_ENVELOPE_PATH}" \
+            --summary "${GITHUB_STEP_SUMMARY}" \
+            --engine-commit "${REPOSTEWARD_COMMIT}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --run-attempt "${GITHUB_RUN_ATTEMPT}" \
+            --generated-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Upload read-only trial evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reposteward-portfolio-shadow-${{ github.run_id }}
+          path: |
+            ${{ env.REPOSTEWARD_RAW_PATH }}
+            ${{ env.REPOSTEWARD_ENVELOPE_PATH }}
+          if-no-files-found: error
+          retention-days: 14

@@ -1,6 +1,8 @@
 export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
 ]);
 
@@ -15,7 +17,11 @@ export function createRuntimeTestPlan(rawArgs) {
     },
     {
       needsServer: true,
-      args: BROWSER_SUITES,
+      // One dev server compiles for every suite, so running the files in
+      // parallel makes them queue behind each other and blow their own
+      // readiness timeouts. Measured on five suites: 75s sequential against
+      // 102s parallel, with the parallel run intermittently timing out.
+      args: ['--no-file-parallelism', ...BROWSER_SUITES],
     },
   ];
 }

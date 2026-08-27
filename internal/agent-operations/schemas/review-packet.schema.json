@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proto UI review packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "repositoryId",
+    "pullRequest",
+    "baseSha",
+    "headSha",
+    "reviewInputDigest",
+    "observedAt",
+    "reviewClass",
+    "scope",
+    "affectedEntities",
+    "affectedSurfaces",
+    "findings",
+    "validation",
+    "reconciliation",
+    "limitations",
+    "unknowns",
+    "humanGates",
+    "recommendedAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.review-packet" },
+    "repositoryId": { "type": "string", "minLength": 4 },
+    "pullRequest": { "type": "integer", "minimum": 1 },
+    "baseSha": { "$ref": "#/$defs/sha" },
+    "headSha": { "$ref": "#/$defs/sha" },
+    "reviewInputDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "reviewClass": {
+      "enum": [
+        "review-facts-and-ci",
+        "review-docs-and-links",
+        "review-tests",
+        "review-bounded-regression",
+        "review-governed-implementation-slice",
+        "review-cross-domain-semantics",
+        "review-governance-and-release-evidence"
+      ]
+    },
+    "scope": { "$ref": "#/$defs/nonEmptyStrings" },
+    "affectedEntities": { "$ref": "#/$defs/strings" },
+    "affectedSurfaces": { "$ref": "#/$defs/nonEmptyStrings" },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "validation": { "$ref": "#/$defs/validation" },
+    "reconciliation": { "$ref": "#/$defs/reconciliation" },
+    "limitations": { "$ref": "#/$defs/strings" },
+    "unknowns": { "$ref": "#/$defs/strings" },
+    "humanGates": { "$ref": "#/$defs/strings" },
+    "recommendedAction": { "enum": ["APPROVE", "REQUEST_CHANGES", "COMMENT", "ABSTAIN"] }
+  },
+  "$defs": {
+    "sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "strings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "severity",
+        "confidence",
+        "file",
+        "line",
+        "authority",
+        "observed",
+        "expected",
+        "impact",
+        "fix"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "file": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "authority": { "type": "string", "minLength": 1 },
+        "observed": { "type": "string", "minLength": 1 },
+        "expected": { "type": "string", "minLength": 1 },
+        "impact": { "type": "string", "minLength": 1 },
+        "fix": { "type": "string", "minLength": 1 }
+      }
+    },
+    "validationCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "exitCode", "result"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "exitCode": { "type": "integer" },
+        "result": { "type": "string", "minLength": 1 }
+      }
+    },
+    "skippedCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check", "reason"],
+      "properties": {
+        "check": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands", "checksNotRun"],
+      "properties": {
+        "commands": { "type": "array", "items": { "$ref": "#/$defs/validationCommand" } },
+        "checksNotRun": { "type": "array", "items": { "$ref": "#/$defs/skippedCheck" } }
+      },
+      "anyOf": [
+        { "properties": { "commands": { "minItems": 1 } } },
+        { "properties": { "checksNotRun": { "minItems": 1 } } }
+      ]
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "priorReviewedHeadSha",
+        "priorPacketDigest",
+        "resolvedFindingIds",
+        "openFindingIds",
+        "newFindingIds"
+      ],
+      "properties": {
+        "priorReviewedHeadSha": { "anyOf": [{ "$ref": "#/$defs/sha" }, { "type": "null" }] },
+        "priorPacketDigest": {
+          "anyOf": [{ "type": "string", "pattern": "^[a-f0-9]{64}$" }, { "type": "null" }]
+        },
+        "resolvedFindingIds": { "$ref": "#/$defs/strings" },
+        "openFindingIds": { "$ref": "#/$defs/strings" },
+        "newFindingIds": { "$ref": "#/$defs/strings" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "priorPacketDigest": { "type": "null" } }
+          },
+          "then": {
+            "properties": { "priorReviewedHeadSha": { "type": "null" } }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "priorReviewedHeadSha": { "type": "string" }
+            }
+          },
+          "then": {
+            "properties": {
+              "priorPacketDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

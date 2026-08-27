@@ -3,14 +3,14 @@ type: contract
 title: State watch is setup-only auxiliary observation
 status: draft
 since: 0.1.0
-summary: '`watch` observes non-owned or not-fully-owned state changes, but it is not a reactive rendering system.'
+summary: '`watch` observes non-owned or not-fully-owned state changes in the owning runtime callback scope, but it is not a reactive rendering system.'
 statement:
   zh-CN: >-
-    State `watch(...)` 是 setup-only 的辅助 observation 能力，用于观察 borrowed 或 observed state 的变化。它不属于 owned view，不建立 render dependency，不隐式触发 update，也不得被解释为 Proto UI 的响应式渲染系统。
+    State `watch(...)` 是 setup-only 的辅助 observation 能力，用于观察 borrowed 或 observed state 的变化。watch callback 在 runtime 执行时必须进入所属 instance 的 callback scope，并接收当前 invocation 的 `run handle`，包括由 privileged State port 在 kernel idle 时发起的 mutation。它不属于 owned view，不建立 render dependency，不隐式触发 update，也不得被解释为 Proto UI 的响应式渲染系统。
 
 
   en: >-
-    State `watch(...)` is a setup-only auxiliary observation capability for observing borrowed or observed state changes. It is not part of the owned view, does not establish render dependencies, does not implicitly trigger update, and must not be interpreted as Proto UI's reactive rendering system.
+    State `watch(...)` is a setup-only auxiliary observation capability for observing borrowed or observed state changes. When a watch callback executes at runtime, it must enter the owning instance's callback scope and receive the current invocation's `run handle`, including for mutations initiated through the privileged State port while the kernel is idle. It is not part of the owned view, does not establish render dependencies, does not implicitly trigger update, and must not be interpreted as Proto UI's reactive rendering system.
 
 
 criteria:
@@ -34,6 +34,14 @@ criteria:
     text:
       zh-CN: watch registration 必须绑定到组件实例生命周期，并在实例 dispose 时清理。
       en: Watch registrations must be bound to the component instance lifecycle and cleaned up when the instance is disposed.
+  - id: C-STATE-0010-F
+    text:
+      zh-CN: watch callback 必须在所属 instance 的 runtime callback scope 中执行，并把绑定到当前 callback invocation 的 `run handle` 作为第一个参数；即使 mutation 来自 privileged State port 且 kernel 原本处于 idle，也不得以 unknown phase 或过期 context 直接调用 callback。
+      en: Watch callbacks must execute in the owning instance's runtime callback scope and receive the `run handle` bound to the current callback invocation as their first argument; even when a mutation comes from the privileged State port while the kernel was idle, the callback must not be invoked directly in an unknown phase or with stale context.
+  - id: C-STATE-0010-G
+    text:
+      zh-CN: watcher dispatch 完成后，runtime 必须恢复 dispatch 前的 phase；callback 内通过当前 `run handle` 执行的合法 state mutation 必须保持可用，但不得把 callback phase 泄漏到后续 idle 工作。
+      en: After watcher dispatch completes, the runtime must restore the phase that preceded dispatch; phase-valid state mutations through the current `run handle` must remain available inside the callback, without leaking callback phase into subsequent idle work.
 sources:
   - path: internal/contracts/state/state-watch.v0.md
     sections:
@@ -46,12 +54,19 @@ sources:
       - lifecycle
 dependsOn:
   contracts:
+    - id: C-CORE-SYNTAX-0002
+      anchors:
+        - C-CORE-SYNTAX-0002-E
+        - C-CORE-SYNTAX-0002-F
     - C-STATE-0007
     - C-STATE-0008
     - C-STATE-0009
     - C-STATE-0004
     - C-STATE-0005
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Projected current-run callback-scope binding and phase restoration onto State watcher dispatch, including privileged idle-phase mutations.
   - version: 0.1.0
     change: introduced
     summary: Captured setup-only watch as auxiliary observation, not reactive rendering.

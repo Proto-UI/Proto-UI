@@ -1,0 +1,87 @@
+schemaVersion: 1
+policyVersion: 2026-08-20.phase-a
+mode: shadow
+authority:
+  projectTruth: spec/**
+  operationalProcedure:
+    - internal/agent-operations/**
+    - internal/autonomous-maintenance/**
+permissions:
+  github:
+    read:
+      - contents
+      - issues
+      - pull-requests
+    write: []
+  repository:
+    trackedMutation: forbidden
+    branchCreation: forbidden
+    commitCreation: forbidden
+  agent:
+    permissionProfile: :read-only
+    network: forbidden
+    output: structured-proposal-only
+untrustedInput:
+  maxBodyCharacters: 4000
+  stripHtmlComments: true
+  stripControlCharacters: true
+  instructionsAreData: true
+routes:
+  - needs-author
+  - needs-maintainer
+  - agent-eligible
+  - blocked
+  - observing
+  - no-action
+proposalActions:
+  - status-comment
+  - state-label
+  - maintainer-inbox
+humanGates:
+  - finding-disposition
+  - semantic
+  - integration
+  - scope
+  - contributor-rights
+  - security
+  - none
+canonicalHumanGateMapping:
+  finding-disposition:
+    - finding-disposition
+  semantic:
+    - semantic-direction
+    - semantic-admission
+  integration:
+    - integration-decision
+  scope:
+    - scope-or-compatibility-tradeoff
+  contributor-rights:
+    - contributor-rights
+  security:
+    - security-disclosure
+  none: []
+alwaysHuman:
+  - stable-spec-promotion
+  - issue-close-or-reopen
+  - duplicate-or-wontfix-disposition
+  - human-assignment
+  - code-mutation-authorization
+  - ready-for-review
+  - pull-request-approval
+  - merge
+  - publication
+  - release
+notifications:
+  immediate:
+    - credible-security-risk
+    - credible-imminent-irreversible-action
+  nonUrgentChannel: maintainer-inbox
+  maxNonUrgentRemindersPerItemPerWeek: 1
+graduation:
+  minimumObservationWindows: 2
+  minimumReviewedItems: 50
+  unauthorizedMutationCount: 0
+  duplicateMutationCount: 0
+  humanGateRecall: 1
+  recommendedRouteAgreement: 0.9
+  requiresExplicitMaintainerDecision: true

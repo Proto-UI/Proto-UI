@@ -81,7 +81,7 @@ function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes
     // P-BASE-DROPDOWN-MENU-ITEM-SELECT, P-BASE-DROPDOWN-MENU-ITEM-DISABLED
     if (command.disabled.get()) return;
     const ctx = run.context.read(DROPDOWN_CONTEXT);
-    const reason: DropdownFocusReason = ev?.detail?.key ? 'keyboard' : 'pointer';
+    const reason: DropdownFocusReason = ev?.key ? 'keyboard' : 'pointer';
     const value = run.props.get().value ?? '';
     updateActiveValue(run);
     run.expose.emit('select', { value, reason });

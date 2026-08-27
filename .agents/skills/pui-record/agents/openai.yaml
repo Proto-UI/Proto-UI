@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Record Maintenance Outcome'
+  short_description: 'Synchronize one terminal maintenance result.'
+  default_prompt: 'Use $pui-record to close one authorized non-remediation maintenance outcome.'
+policy:
+  allow_implicit_invocation: false

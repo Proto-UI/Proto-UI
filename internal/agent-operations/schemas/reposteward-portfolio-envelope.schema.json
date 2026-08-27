@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/agent-operations/reposteward-portfolio-envelope-v1.json",
+  "title": "RepoSteward portfolio shadow trial envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "trialVersion",
+    "mode",
+    "generatedAt",
+    "repository",
+    "engine",
+    "githubRun",
+    "snapshot",
+    "writeOperationsPerformed"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "trialVersion": { "const": "2026-08-22.manual-shadow" },
+    "mode": { "const": "manual-shadow" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "repository": { "const": "Proto-UI/Proto-UI" },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "command"],
+      "properties": {
+        "repository": { "const": "tiammomo/RepoSteward" },
+        "commit": { "const": "e5db7d3496ef15072135533c5b9f4da91084b553" },
+        "command": { "const": "portfolio inspect" }
+      }
+    },
+    "githubRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "attempt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "attempt": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "digest",
+        "expectedDigest",
+        "matchesExpectedDigest",
+        "complete",
+        "pullRequestCount",
+        "draftPullRequestCount",
+        "overlappingPairCount",
+        "overlappingFileCount",
+        "incompletePullRequestCount",
+        "errorCount"
+      ],
+      "properties": {
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "expectedDigest": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "matchesExpectedDigest": { "type": ["boolean", "null"] },
+        "complete": { "type": "boolean" },
+        "pullRequestCount": { "type": "integer", "minimum": 0 },
+        "draftPullRequestCount": { "type": "integer", "minimum": 0 },
+        "overlappingPairCount": { "type": "integer", "minimum": 0 },
+        "overlappingFileCount": { "type": "integer", "minimum": 0 },
+        "incompletePullRequestCount": { "type": "integer", "minimum": 0 },
+        "errorCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "writeOperationsPerformed": { "const": 0 }
+  }
+}

@@ -9,7 +9,16 @@ import type {
 
 export type InternalStateWatchCallback<V> = (ctx: unknown, e: StateEvent<V>) => void;
 
+export type StateCallbackDispatcher = (fn: (ctx: unknown) => void) => void;
+
 export type StatePort = {
+  /**
+   * Runtime-owned bridge that dispatches watch callbacks in the owning
+   * instance's callback scope, including mutations initiated by privileged
+   * module ports while the kernel itself is otherwise idle.
+   */
+  setCallbackDispatcher(dispatch: StateCallbackDispatcher): void;
+
   /**
    * Internal watch API (ctx is opaque to state-module; runtime injects it).
    *

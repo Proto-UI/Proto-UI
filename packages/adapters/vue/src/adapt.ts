@@ -15,6 +15,7 @@ import {
   createViewEpochOwner,
   createWebProtoEventRouter,
   installViewVisibilityRule,
+  PUI_VIEW_DETACHED_ATTR,
   PUI_VIEW_PENDING_ATTR,
   type ProtoAdapterExposes,
   type ProtoAdapterProps,
@@ -404,7 +405,9 @@ export function createVueAdapter(runtime: VueRuntime) {
               }
               fn();
             },
-            isViewReady: () => viewReady,
+            // A child of a detached ancestor still mounts and attaches its own
+            // view, so readiness has to consult the subtree, not just this host.
+            isViewReady: () => viewReady && !rootRef.value?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             getCurrentElement: () => rootRef.value,
             subscribeTargetReady: (listener) => {
               focusTargetReadyListeners.add(listener);
@@ -443,7 +446,10 @@ export function createVueAdapter(runtime: VueRuntime) {
         runtime.onMounted(() => {
           const rootEl = rootRef.value;
           if (rootEl) installViewVisibilityRule(rootEl.ownerDocument);
-          initSession();
+          // A detached host is mounted now, so reaching this hook no longer
+          // means the view should attach. Leave that to the presence watcher,
+          // or the first real open finds `lastInitRoot` already claimed.
+          if (shouldExist.value) initSession();
           runtime.nextTick().then(notifyFocusTargetReady);
         });
         runtime.onUpdated?.(() => {
@@ -476,6 +482,10 @@ export function createVueAdapter(runtime: VueRuntime) {
               if (owner.hasView) void owner.detachView();
               hostTokens.value = [];
               viewReady = false;
+              // The host element survives a detach now, so the same element has
+              // to be able to initialize a second time. Without this the reopen
+              // path skips initSession and binds against a disposed router.
+              lastInitRoot = null;
             }
           },
           { flush: 'post' }
@@ -503,11 +513,23 @@ export function createVueAdapter(runtime: VueRuntime) {
         });
 
         return () => {
-          if (!shouldExist.value) return null;
+          const present = shouldExist.value;
+          const overlayPort = owner.session?.caps.getPort<OverlayPort>('overlay');
+          // Overlay content is detached, not unmounted, when it is not present:
+          // the host element and the authored children stay put so collection
+          // members keep registering, and the shared detached rule takes them
+          // out of paint, a11y, and tab order. Prototypes that drive presence
+          // directly through `lifecycle.setPresent`, such as Tabs Content, keep
+          // unmounting.
+          const detached = !present && overlayPort?.hasPresenceBinding() === true;
+          if (!present && !detached) return null;
+
           const slotNodes = ctx.slots.default ? ctx.slots.default() : null;
-          const rendered = renderTemplateToVue(runtime, renderChildren.value, {
-            slot: slotNodes as any,
-          });
+          // Without a view there is no template to place the slot into, so the
+          // authored children stand in for it.
+          const rendered = present
+            ? renderTemplateToVue(runtime, renderChildren.value, { slot: slotNodes as any })
+            : slotNodes;
 
           const content = runtime.h(
             rootTag,
@@ -518,14 +540,14 @@ export function createVueAdapter(runtime: VueRuntime) {
               class: mergeHostClass([props.surfaceClass, props.hostClass, ctx.attrs.class]),
               style: mergeHostStyle([props.surfaceStyle, props.hostStyle, ctx.attrs.style]),
               'data-pui-root': '',
+              [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: viewReady ? undefined : '',
               'data-pui-style': serializeStyleTokens(hostTokens.value),
               'data-demo-ref': ctx.attrs['data-demo-ref'] as string | undefined,
             },
             rendered as any
           );
-          const overlayPort = owner.session?.caps.getPort<OverlayPort>('overlay');
-          if (overlayPort?.getConfig().portal === true && runtime.Teleport) {
+          if (present && overlayPort?.getConfig().portal === true && runtime.Teleport) {
             return runtime.h(runtime.Teleport, { to: 'body' }, [content]);
           }
           return content;

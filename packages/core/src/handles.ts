@@ -1,8 +1,10 @@
 // packages/core/src/handles.ts
 import {
   EventListenerToken,
-  EventListenerOptions,
-  EventTypeV0,
+  ExtensionEventType,
+  HostEventListenerOptions,
+  ProtoEventPayload,
+  SemanticEventType,
   ExposeEventSpec,
   JsonObject,
   ContextKey,
@@ -248,16 +250,18 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
   rule: (spec: RuleSpec<Props>) => RuleHandle;
 
   event: {
+    on(type: SemanticEventType, cb: ProtoEventCallback<Props>): EventListenerToken;
     on(
-      type: EventTypeV0,
-      cb: ProtoEventCallback<Props>,
-      options?: EventListenerOptions
+      type: ExtensionEventType,
+      cb: ProtoEventCallback<Props, unknown>,
+      options?: HostEventListenerOptions
     ): EventListenerToken;
     off(token: EventListenerToken): void;
+    onGlobal(type: SemanticEventType, cb: ProtoEventCallback<Props>): EventListenerToken;
     onGlobal(
-      type: EventTypeV0,
-      cb: ProtoEventCallback<Props>,
-      options?: EventListenerOptions
+      type: ExtensionEventType,
+      cb: ProtoEventCallback<Props, unknown>,
+      options?: HostEventListenerOptions
     ): EventListenerToken;
   };
 
@@ -363,7 +367,10 @@ export type RawWatchCallback<P extends PropsBaseType> = (
   info: WatchInfo<P & PropsBaseType>
 ) => void;
 
-export type ProtoEventCallback<P extends PropsBaseType> = (run: RunHandle<P>, ev: any) => void;
+export type ProtoEventCallback<P extends PropsBaseType, E = ProtoEventPayload> = (
+  run: RunHandle<P>,
+  ev: E
+) => void;
 
 export type StateWatchCallback<V, P extends PropsBaseType> = (
   run: RunHandle<P>,

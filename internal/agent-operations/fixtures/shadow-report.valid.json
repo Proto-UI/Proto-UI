@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "2026-08-20.phase-a",
+  "mode": "shadow",
+  "runId": "AO-SHADOW-20260820T123456Z-01234567",
+  "generatedAt": "2026-08-20T12:35:00.000Z",
+  "snapshot": {
+    "repository": "Proto-UI/Proto-UI",
+    "digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "itemCount": 2
+  },
+  "summary": {
+    "analyzedCount": 2,
+    "decisionsRequired": 1,
+    "routeCounts": {
+      "needs-author": 1,
+      "needs-maintainer": 1,
+      "agent-eligible": 0,
+      "blocked": 0,
+      "observing": 0,
+      "no-action": 0
+    }
+  },
+  "items": [
+    {
+      "kind": "issue",
+      "number": 456,
+      "title": "Example issue requiring a semantic decision",
+      "recommendedRoute": "needs-maintainer",
+      "confidence": 0.93,
+      "rationale": "The report presents two incompatible shared-default choices and explicitly asks maintainers to choose.",
+      "evidence": [
+        "The body describes a shared default affecting multiple consumers.",
+        "The requested outcome cannot be derived from an active catalog guarantee in the snapshot."
+      ],
+      "humanGate": "semantic",
+      "decisionPacket": {
+        "observedFact": "The current shared fallback and three local call sites lead to different possible remediation boundaries.",
+        "recommendation": "Choose the theme-relative shared fallback before authorizing implementation.",
+        "authorizationScope": "Approval would authorize one bounded proposal and its focused cross-runtime evidence.",
+        "exclusions": [
+          "No merge, release, or stable guarantee promotion is authorized.",
+          "Unrelated focus-ring composition behavior remains outside scope."
+        ],
+        "residualRisks": [
+          "The snapshot does not prove that every downstream consumer uses the same surface token."
+        ],
+        "nextAutomatedStage": "Reclassify the approved scope for a separately authorized implementation task.",
+        "separatelyGatedActions": [
+          "Code mutation",
+          "Ready-for-review transition",
+          "Merge",
+          "Publication or release"
+        ]
+      },
+      "proposedActions": [
+        {
+          "type": "state-label",
+          "value": "agent:needs-maintainer",
+          "rationale": "The item cannot progress without a semantic choice.",
+          "execution": "blocked-by-shadow-policy"
+        },
+        {
+          "type": "maintainer-inbox",
+          "value": "Queue the decision packet in the non-urgent digest.",
+          "rationale": "No imminent irreversible action is described.",
+          "execution": "blocked-by-shadow-policy"
+        }
+      ]
+    },
+    {
+      "kind": "pull-request",
+      "number": 451,
+      "title": "Example pull request waiting on author evidence",
+      "recommendedRoute": "needs-author",
+      "confidence": 0.88,
+      "rationale": "The pull request declares validation but the snapshot lacks the requested evidence update.",
+      "evidence": ["The latest review requests an author-owned evidence correction."],
+      "humanGate": "none",
+      "decisionPacket": null,
+      "proposedActions": [
+        {
+          "type": "status-comment",
+          "value": "Waiting for the requested author evidence update.",
+          "rationale": "This would summarize existing review state without making a new disposition.",
+          "execution": "blocked-by-shadow-policy"
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "Fixture content is synthetic and must not be treated as a live repository decision."
+  ],
+  "writeOperationsPerformed": 0
+}

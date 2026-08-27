@@ -34,7 +34,7 @@ export const useTypeaheadNavigation = defineHook<any, {}, {}, TypeaheadNavigatio
 
       def.event.onGlobal('key.down', (run, ev) => {
         if (!options.isEnabled(run)) return;
-        const detail = ev?.detail;
+        const detail = ev;
         const key = detail?.key;
         if (typeof key !== 'string' || key.length !== 1) return;
         if (detail?.ctrlKey || detail?.metaKey || detail?.altKey) return;

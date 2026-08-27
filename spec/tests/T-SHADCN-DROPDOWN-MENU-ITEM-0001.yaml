@@ -23,6 +23,7 @@ cases:
         P-SHADCN-DROPDOWN-MENU-ITEM-CURRENT-VISUAL-SURFACE,
         P-SHADCN-DROPDOWN-MENU-ITEM-STATE-DRIVEN-STYLES,
         P-SHADCN-DROPDOWN-MENU-ITEM-COMPATIBILITY-SUBSET,
+        P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-EVIDENCE-BOUNDARY,
         P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION,
       ]
     expectation: shadcn-dropdown-item-current-variants-and-command-styles
@@ -39,12 +40,9 @@ implementations:
       ]
     exercises: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]
     notes:
-      [
-        Positive tests cover collection focus entry,
-        item selection closing the menu,
-        base tokens,
-        and destructive surface; remaining gaps stay centralized.,
-      ]
+      - >-
+        Positive tests cover collection focus entry, item selection closing the menu, base tokens, and the destructive surface; remaining gaps stay centralized. The destructive assertion is projection evidence only: without a docs instance, cross-runtime rendered evidence, and this surface's own contrast measurement it stays render-undemonstrated. Button #454 is only a related component observation, not measured evidence for Dropdown Item.
+
 verifies:
   prototypes:
     - id: P-SHADCN-DROPDOWN-MENU-ITEM
@@ -58,12 +56,18 @@ verifies:
           P-SHADCN-DROPDOWN-MENU-ITEM-CURRENT-VISUAL-SURFACE,
           P-SHADCN-DROPDOWN-MENU-ITEM-STATE-DRIVEN-STYLES,
           P-SHADCN-DROPDOWN-MENU-ITEM-COMPATIBILITY-SUBSET,
+          P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-EVIDENCE-BOUNDARY,
           P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION,
         ]
 exercises:
   prototypes: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]
 revisions:
   [
+    {
+      version: 0.3.0-alpha.0,
+      change: refined,
+      summary: Recorded the destructive surface as projection-covered but render-undemonstrated on the owning Item test entity.,
+    },
     {
       version: 0.2.0-rc.0,
       change: introduced,

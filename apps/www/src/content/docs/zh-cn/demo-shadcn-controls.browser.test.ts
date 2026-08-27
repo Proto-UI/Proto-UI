@@ -13,11 +13,79 @@ import {
 } from './browser-harness';
 
 const TEXTAREA_ROUTE = '/en/ui-libraries/shadcn/textarea/';
+const CHECKBOX_ROUTE = '/en/ui-libraries/shadcn/checkbox/';
+
+/** The demo order: unchecked, checked, mixed, disabled, and a focus target. */
+const UNCHECKED = 0;
+const CHECKED = 1;
+const MIXED = 2;
+const DISABLED = 3;
+const FOCUS_TARGET = 4;
+const CHECKBOX_COUNT = 5;
 
 /** Upstream transitions exactly these two properties, at the Tailwind defaults. */
 const TRANSITION_PROPERTY = 'color, box-shadow';
 const TRANSITION_DURATION = '0.15s';
 const TRANSITION_TIMING = 'cubic-bezier(0.4, 0, 0.2, 1)';
+
+type BoxPaint = {
+  background: string;
+  alpha: number;
+  rootFocusable: boolean;
+  focusableInside: number;
+  glyphs: number;
+};
+
+/**
+ * Reads each Checkbox box as it is actually painted. The theme emits oklch, so
+ * the colour is resolved through a canvas rather than compared as a string.
+ */
+async function boxPaints(page: Page): Promise<BoxPaint[]> {
+  return page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) throw new Error('Canvas 2D context is required to resolve painted colours.');
+
+    const boxes = [...document.querySelectorAll('[data-previewer-id] [role="checkbox"]')];
+    return boxes.map((box) => {
+      context.clearRect(0, 0, 1, 1);
+      context.fillStyle = 'rgba(0,0,0,0)';
+      context.fillStyle = getComputedStyle(box).backgroundColor;
+      context.fillRect(0, 0, 1, 1);
+      const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
+
+      return {
+        background: `${r},${g},${b}`,
+        alpha: a / 255,
+        // The Root is the only node the projection may put in tab order.
+        rootFocusable: (box as HTMLElement).tabIndex >= 0,
+        focusableInside: [...box.querySelectorAll('*')].filter(
+          (node) => (node as HTMLElement).tabIndex >= 0
+        ).length,
+        glyphs: box.querySelectorAll('svg').length,
+      };
+    });
+  });
+}
+
+/**
+ * The Indicator glyph is a derived render, so it lands one turn after the Roots
+ * that `selectRuntime` waits on. Measured settle after the Roots exist is 1ms in
+ * Web Components, 3ms in Vue, and 10ms in React, which is why the wait is here
+ * rather than in the shared readiness helper.
+ */
+async function waitForGlyphs(page: Page): Promise<void> {
+  await page.waitForFunction(
+    (expected) =>
+      [...document.querySelectorAll('[data-previewer-id] [role="checkbox"]')]
+        .map((box) => box.querySelectorAll('svg').length)
+        .join(',') === expected,
+    '0,1,1,1,0',
+    { timeout: 10_000 }
+  );
+}
 
 let browser: Browser;
 let baseUrl = '';
@@ -90,10 +158,12 @@ beforeAll(async () => {
   browser = await launchBrowser();
 }, 150_000);
 
+// Two more cases mean two more contexts to close, and teardown outgrew the
+// default 10s hook budget.
 afterAll(async () => {
   await browser?.close();
   await stopServer();
-});
+}, 60_000);
 
 describe.sequential('shadcn control documentation browser regressions', () => {
   it('transitions only colour and box-shadow at the upstream duration and easing', async () => {
@@ -198,6 +268,85 @@ describe.sequential('shadcn control documentation browser regressions', () => {
 
         await applyColorScheme(page, 'light');
         expect((await editorStyle(page)).backgroundAlpha, `${runtime}/light-after`).toBe(0);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 180_000);
+  it('paints the dark tint on the unfilled box only, in all runtimes', async () => {
+    const { context, page, previewer } = await openRoute(browser, baseUrl, CHECKBOX_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', CHECKBOX_COUNT);
+
+        await applyColorScheme(page, 'light');
+        const light = await boxPaints(page);
+        // The resting box declares no fill of its own in either scheme.
+        expect(light[UNCHECKED].alpha, `${runtime}/light-resting`).toBe(0);
+        expect(light[CHECKED].alpha, `${runtime}/light-checked`).toBeGreaterThan(0);
+        expect(light[MIXED].background, `${runtime}/light-mixed`).toBe(light[CHECKED].background);
+
+        await applyColorScheme(page, 'dark');
+        const dark = await boxPaints(page);
+        // The tint is what the guard keeps, so it has to be visible somewhere.
+        expect(dark[UNCHECKED].alpha, `${runtime}/dark-resting`).toBeGreaterThan(0);
+        // And it must not reach either filled box. Both carry the fill and the
+        // tint as tokens, so only the resolved paint separates them.
+        expect(dark[CHECKED].background, `${runtime}/dark-checked`).not.toBe(
+          dark[UNCHECKED].background
+        );
+        expect(dark[MIXED].background, `${runtime}/dark-mixed`).toBe(dark[CHECKED].background);
+        expect(dark[MIXED].alpha, `${runtime}/dark-mixed-alpha`).toBe(dark[CHECKED].alpha);
+
+        await applyColorScheme(page, 'light');
+        expect((await boxPaints(page))[UNCHECKED].alpha, `${runtime}/light-after`).toBe(0);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 180_000);
+
+  it('gives each Checkbox one focusable control and keeps the glyph unnamed', async () => {
+    const { context, page, previewer } = await openRoute(browser, baseUrl, CHECKBOX_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', CHECKBOX_COUNT);
+        await waitForGlyphs(page);
+
+        const paints = await boxPaints(page);
+        expect(paints, `${runtime}/count`).toHaveLength(CHECKBOX_COUNT);
+        for (const [index, paint] of paints.entries()) {
+          // The Indicator is presentational, so it must never join tab order.
+          expect(paint.focusableInside, `${runtime}/inside-${index}`).toBe(0);
+        }
+        for (const index of [UNCHECKED, CHECKED, MIXED, FOCUS_TARGET]) {
+          expect(paints[index].rootFocusable, `${runtime}/root-focusable-${index}`).toBe(true);
+        }
+        // Base takes a disabled checkbox out of tab order, and the projection
+        // must not hand it back.
+        expect(paints[DISABLED].rootFocusable, `${runtime}/disabled-focusable`).toBe(false);
+        expect(paints[CHECKED].glyphs, `${runtime}/checked-glyph`).toBe(1);
+        expect(paints[MIXED].glyphs, `${runtime}/mixed-glyph`).toBe(1);
+        expect(paints[UNCHECKED].glyphs, `${runtime}/unchecked-glyph`).toBe(0);
+
+        // The glyph hides its own root, so the checkbox is the only node the
+        // accessibility tree reports for each instance.
+        const boxes = previewer.getByRole('checkbox');
+        for (let index = 0; index < CHECKBOX_COUNT; index += 1) {
+          const snapshot = await boxes.nth(index).ariaSnapshot();
+          expect(snapshot.match(/^\s*- /gm) ?? [], `${runtime}/aria-${index}`).toHaveLength(1);
+          expect(snapshot, `${runtime}/aria-role-${index}`).toContain('checkbox');
+        }
       }
     } finally {
       await context.close();

@@ -22,6 +22,11 @@ cases:
     covers:
       - C-ANCHORED-POSITIONING-0001-E
     expectation: anchored-host-lease-exists-only-for-live-overlay-view
+  - id: T-ANCHORED-POSITIONING-0001-CASE-ANCHOR-TRANSLATION
+    title: Host keeps rendered anchor geometry by default and excludes anchor translation only on explicit opt-in
+    covers:
+      - C-ANCHORED-POSITIONING-0001-G
+    expectation: rendered-geometry-by-default-with-opt-in-translation-exclusion
   - id: T-ANCHORED-POSITIONING-0001-CASE-PORTAL
     title: Hover Card uses Portal separately from positioning and preserves its logical compound protocol
     covers:
@@ -36,6 +41,7 @@ implementations:
     consumesCases:
       - T-ANCHORED-POSITIONING-0001-CASE-OFFSET
       - T-ANCHORED-POSITIONING-0001-CASE-COLLISION
+      - T-ANCHORED-POSITIONING-0001-CASE-ANCHOR-TRANSLATION
   - id: runtime-overlay-positioning-contract
     kind: runtime-test
     status: passing
@@ -60,6 +66,7 @@ verifies:
         - C-ANCHORED-POSITIONING-0001-D
         - C-ANCHORED-POSITIONING-0001-E
         - C-ANCHORED-POSITIONING-0001-F
+        - C-ANCHORED-POSITIONING-0001-G
 exercises:
   modules: [M-POSITIONING-0001]
   hostCaps: [HC-ANCHORED-POSITION-0001]

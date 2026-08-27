@@ -116,6 +116,9 @@ export function createScopedExposesReader(
     seen: WeakMap<object, unknown>
   ): void {
     for (const [key, value] of Object.entries(source)) {
+      // Collection anatomy coordination remains available to internal PartView
+      // consumers but is never part of the App Maker expose record.
+      if (key.startsWith('__collection')) continue;
       if (!isAppMakerExposeRecordEntry(value)) continue;
       defineEntry(target, key, wrapValue(value, source, seen));
     }

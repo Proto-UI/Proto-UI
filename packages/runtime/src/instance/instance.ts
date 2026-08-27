@@ -15,7 +15,7 @@ import { ExposeStateWebModuleDef } from '@proto.ui/module-expose-state-web';
 import { RuleExposeStateWebModuleDef } from '@proto.ui/module-rule-expose-state-web';
 import { RuleMetaModuleDef } from '@proto.ui/module-rule-meta';
 import { RuleModuleDef } from '@proto.ui/module-rule';
-import { StateModuleDef } from '@proto.ui/module-state';
+import { StateModuleDef, type StatePort } from '@proto.ui/module-state';
 import { StateInteractionModuleDef } from '@proto.ui/module-state-interaction';
 import { StateAccessibilityModuleDef } from '@proto.ui/module-state-accessibility';
 import { A11yModuleDef } from '@proto.ui/module-a11y';
@@ -138,6 +138,10 @@ export function createRuntimeInstance<P extends PropsBaseType>(
     (p) => kernel.setPhase(p as any),
     moduleHub
   );
+  const statePort = moduleHub.getPort<StatePort>('state');
+  statePort?.setCallbackDispatcher?.((fn) => {
+    callbackScope.runNoSync(kernel.run, () => fn(kernel.run));
+  });
   const contextPort = moduleHub.getPort<ContextPort>('context');
   contextPort?.setCallbackDispatcher?.((fn) => {
     callbackScope.runNoSync(kernel.run, () => fn(kernel.run));

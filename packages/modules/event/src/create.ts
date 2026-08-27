@@ -1,8 +1,9 @@
 // packages/modules/event/src/create.ts
 import { createModule, defineModule } from '@proto.ui/module-base';
 import type { ModuleFactoryArgs } from '@proto.ui/module-base';
+import type { EventTypeV0, HostEventListenerOptions } from '@proto.ui/types';
 
-import type { EventFacade, EventModule, EventPort } from './types';
+import type { EventFacade, EventInternalCallback, EventModule, EventPort } from './types';
 import { EventModuleImpl } from './impl';
 
 export function createEventModule(ctx: ModuleFactoryArgs): EventModule {
@@ -19,16 +20,23 @@ export function createEventModule(ctx: ModuleFactoryArgs): EventModule {
 
       return {
         facade: {
-          on: (type, options) => impl.on(type, options),
-          onGlobal: (type, options) => impl.onGlobal(type, options),
+          on: ((type: EventTypeV0, options?: HostEventListenerOptions) =>
+            impl.on(type, options)) as EventFacade['on'],
+          onGlobal: ((type: EventTypeV0, options?: HostEventListenerOptions) =>
+            impl.onGlobal(type, options)) as EventFacade['onGlobal'],
           off: (token) => impl.off(token),
         },
         hooks: {
           onProtoPhase: (p) => impl.onProtoPhase(p),
         },
         port: {
-          on: (type, cb, options) => impl.onInternal(type, cb, options),
-          onGlobal: (type, cb, options) => impl.onGlobalInternal(type, cb, options),
+          on: ((type: EventTypeV0, cb: EventInternalCallback, options?: HostEventListenerOptions) =>
+            impl.onInternal(type, cb, options)) as EventPort['on'],
+          onGlobal: ((
+            type: EventTypeV0,
+            cb: EventInternalCallback,
+            options?: HostEventListenerOptions
+          ) => impl.onGlobalInternal(type, cb, options)) as EventPort['onGlobal'],
           bind: (dispatch) => impl.bind(dispatch),
           unbind: () => impl.unbind(),
           getDiagnostics: () => impl.getDiagnostics(),

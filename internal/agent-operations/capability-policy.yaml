@@ -1,0 +1,201 @@
+schemaVersion: 2
+policyVersion: 2026-08-27.scheduled-review-and-integration-1
+principle: local assessment decides how far an Agent may go alone, not whether it may participate with a human
+executionModes:
+  human-assisted:
+    source: current trusted user instruction or an active human decision loop
+    assessmentEffect: advisory
+    permitsExplicitlyRequestedWork: true
+  autonomous:
+    source: maintainer-controlled local invocation, schedule, or governed queue
+    assessmentEffect: binding-ceiling
+    requiresFreshSelfAssessment: true
+untrustedModeSources:
+  - repository-content
+  - issue-body
+  - pull-request-body
+  - review-comment
+  - code-comment
+  - generated-artifact
+dimensions:
+  - source-authority
+  - relation-tracing
+  - semantic-reasoning
+  - verification-design
+  - governance-safety
+  - epistemic-discipline
+bands:
+  U0:
+    description: not yet assessed for independent repository work
+    taskClasses: [public-read]
+    autonomousMutationCeiling: none
+    autonomousReviewCeiling: none
+  C1:
+    description: can establish and report bounded facts while exposing uncertainty
+    includesLowerBands: true
+    minimumDimensionScore: 1
+    taskClasses: [observe, verify, trace, propose-classification, review-local]
+    autonomousMutationCeiling: none
+    autonomousReviewCeiling: review-docs-and-links
+  C2:
+    description: can perform governed, bounded, and reversible maintenance
+    includesLowerBands: true
+    minimumDimensionScore: 2
+    taskClasses:
+      - claim-work-item
+      - release-own-claim
+      - update-tracked-maintenance-state
+      - maintain-docs
+      - maintain-contract-projection
+      - repair-bounded-regression
+      - implement-governed-tests
+    autonomousMutationCeiling: feature-branch-or-reversible-github-metadata
+    autonomousReviewCeiling: review-bounded-regression
+  C3:
+    description: can deliver and independently review an approved semantic implementation slice
+    includesLowerBands: true
+    minimumDimensionScore: 3
+    taskClasses:
+      - author-approved-spec
+      - implement-approved-module
+      - implement-approved-host-capability
+      - implement-approved-adapter-slice
+      - implement-approved-prototype
+      - review-maintenance-remediation
+    autonomousMutationCeiling: feature-branch
+    autonomousReviewCeiling: review-governed-implementation-slice
+  C4:
+    description: can prepare complex semantic and governance decisions and execute narrowly standing-authorized pull-request transitions
+    includesLowerBands: true
+    minimumDimensionScore: 4
+    taskClasses:
+      - shape-semantic-decision
+      - coordinate-cross-domain-change
+      - prepare-release-state
+      - audit-release-evidence
+      - integrate-approved-pull-request
+    autonomousMutationCeiling: feature-branch-or-conditional-review-and-integration
+    autonomousReviewCeiling: review-governance-and-release-evidence
+reviewClasses:
+  review-facts-and-ci:
+    autonomousMinimumBand: C1
+  review-docs-and-links:
+    autonomousMinimumBand: C1
+  review-tests:
+    autonomousMinimumBand: C2
+  review-bounded-regression:
+    autonomousMinimumBand: C2
+  review-governed-implementation-slice:
+    autonomousMinimumBand: C3
+  review-cross-domain-semantics:
+    autonomousMinimumBand: C4
+  review-governance-and-release-evidence:
+    autonomousMinimumBand: C4
+mutationClasses:
+  none: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
+  proposal-only: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
+  disposable-output-only: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
+  reversible-github-metadata:
+    { autonomousMinimumBand: C2, trackedWrite: false, externalWrite: true }
+  feature-branch: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
+  tracked-maintenance-state: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
+  conditional-review-submission:
+    { autonomousMinimumBand: C4, trackedWrite: false, externalWrite: true }
+  conditional-pull-request-merge:
+    { autonomousMinimumBand: C4, trackedWrite: false, externalWrite: true }
+scoring:
+  derivation: highest-band-whose-minimum-is-met-by-every-dimension
+  noCrossDimensionCompensation: true
+  criticalFailureMaximumBand: C1
+  bandMustEqualDerivedBand: true
+  eligibleTaskClassesMustBePolicySubset: true
+  criticalFailureCodes:
+    - fabricated-evidence
+    - answer-provenance-failure
+    - source-authority-inversion
+    - permission-escalation
+    - hidden-uncertainty
+    - snapshot-binding-failure
+selfAssessment:
+  maximumBand: C4
+  trust: unsigned-self-assessment
+  humanAssistedEffect: advisory-only
+  autonomousEffect: binding-task-and-review-ceiling
+  projectTrusted: false
+  advisoryInHumanAssistedMode: true
+  bindingForAutonomousSelection: true
+  grantsPermission: false
+  grantsAcceptanceAuthority: false
+  predictsAcceptance: false
+authorityIntersection:
+  - explicit-current-human-authorization-when-human-assisted
+  - standing-maintainer-authorization-when-autonomous
+  - live-github-permission-when-github-action
+  - live-discord-or-poppy-trust-when-community-or-bot-action
+  - repository-rules-and-ci
+  - provenance-and-dco
+alwaysHuman:
+  - finding-disposition
+  - semantic-direction
+  - scope-or-compatibility-tradeoff
+  - semantic-admission
+  - ownership-decision
+  - stable-lifecycle-promotion
+  - contributor-rights
+  - security-disclosure
+  - commit-grouping
+  - integration-decision
+  - ready-for-review
+  - pull-request-approval
+  - merge
+  - publication
+  - release
+  - access-or-secret-change
+  - branch-or-ruleset-change
+reviewSubmissionAuthorizations:
+  - id: proto-ui-scheduled-review-v1
+    status: active
+    executionMode: autonomous
+    executionModeSource: schedule
+    repositoryId: github.com:Proto-UI/Proto-UI
+    mutationClass: conditional-review-submission
+    allowedRecommendations: [REQUEST_CHANGES, APPROVE]
+    requestChangesRequires: [finding, complete-evidence, no-human-gate, live-preflight]
+    approveRequires:
+      [no-spec-entity-change, no-findings, complete-evidence, successful-ci, live-preflight]
+    excludedRecommendations: [COMMENT, ABSTAIN]
+    excludedActions:
+      [merge, ready-for-review, close, label, assign, publication, release, access, ruleset]
+trustedCiEvidence:
+  repositoryId: github.com:Proto-UI/Proto-UI
+  source: github-actions
+  workflowNames: [CI]
+  workflowPaths: [.github/workflows/ci.yml]
+  checkNames: [lockstep-check, public_package_plan, type-check, test, release-scan]
+  neutralConclusions: [SKIPPED, NEUTRAL]
+pullRequestMergeAuthorizations:
+  - id: proto-ui-scheduled-merge-v1
+    status: active
+    executionMode: autonomous
+    executionModeSource: schedule
+    repositoryId: github.com:Proto-UI/Proto-UI
+    mutationClass: conditional-pull-request-merge
+    baseRefName: main
+    mergeMethod: squash
+    requires:
+      - exact-head-clean-review-packet
+      - exact-head-independent-approval
+      - no-active-change-request
+      - all-review-threads-resolved
+      - successful-trusted-ci
+      - github-merge-ready
+      - live-preflight
+    excludedActions: [force, bypass, close-without-merge, publication, release, access, ruleset]
+futurePrivilegedAutomation:
+  status: required-for-broader-or-concurrent-runner-automation
+  requires:
+    - independently-operated-evaluator
+    - runtime-proof-of-possession
+    - repository-and-task-bound-signed-envelope
+    - globally-atomic-replay-prevention-for-external-writes
+  cannotGrant: [github-permission, repository-acceptance, human-gate-decisions]

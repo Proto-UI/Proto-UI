@@ -2,6 +2,7 @@ export { default as button } from './button';
 export { default as shadcnButton } from './button';
 export {
   default as componentPresets,
+  shadcnCheckboxComponentPreset,
   shadcnDialogComponentPreset,
   shadcnComponentPresets,
   shadcnSwitchComponentPreset,
@@ -9,6 +10,9 @@ export {
 } from './component-presets';
 export { default as toggle } from './toggle';
 export { default as shadcnToggle } from './toggle';
+export { checkboxRoot, checkboxIndicator } from './checkbox';
+export { default as shadcnCheckboxRoot } from './checkbox/root.proto';
+export { default as shadcnCheckboxIndicator } from './checkbox/indicator.proto';
 export { switchRoot, switchThumb } from './switch';
 export { default as shadcnSwitchRoot } from './switch/root.proto';
 export { default as shadcnSwitchThumb } from './switch/thumb.proto';
@@ -67,6 +71,16 @@ export type {
   ShadcnToggleStateHandles,
   ShadcnToggleAsHookContract,
 } from './toggle/types';
+export type {
+  ShadcnCheckboxRootProps,
+  ShadcnCheckboxRootExposes,
+  ShadcnCheckboxRootStateHandles,
+  ShadcnCheckboxRootAsHookContract,
+  ShadcnCheckboxIndicatorProps,
+  ShadcnCheckboxIndicatorExposes,
+  ShadcnCheckboxIndicatorStateHandles,
+  ShadcnCheckboxIndicatorAsHookContract,
+} from './checkbox/types';
 export type {
   ShadcnSwitchRootProps,
   ShadcnSwitchRootExposes,

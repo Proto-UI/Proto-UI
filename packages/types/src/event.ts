@@ -27,21 +27,56 @@ export const OPTIONAL_EVENT_TYPES = [
 ] as const;
 
 export type OptionalEventType = (typeof OPTIONAL_EVENT_TYPES)[number];
+export type SemanticEventType = CoreEventType | OptionalEventType;
 
 export type ExtensionEventType = `host:${string}`;
 
-export type EventTypeV0 = CoreEventType | OptionalEventType | ExtensionEventType;
+export type EventTypeV0 = SemanticEventType | ExtensionEventType;
 
-export type EventListenerOptions = any;
+/**
+ * Listener options for `host:*` extension events only. This is deliberately
+ * host-shaped: portable semantic registrations (the CORE/OPTIONAL types) do
+ * not accept DOM capture/passive/once options — see C-EVENT-0002.
+ */
+export type HostEventListenerOptions = Readonly<{
+  capture?: boolean;
+  once?: boolean;
+  passive?: boolean;
+}>;
 
-export type ProtoEventPayload = {
-  type: CoreEventType | OptionalEventType;
+export type DefaultActionRequestOptions = Readonly<{
+  /** Machine-readable cause, e.g. `button.space-activation`. */
+  reason?: string;
+  /** Owning prototype or module, e.g. `base-button`. */
+  source?: string;
+}>;
+
+/**
+ * Portable default-action control handed to prototype event callbacks.
+ * Requests are tied to the current interaction sample; the adapter projects
+ * them through HC-DEFAULT-ACTION-0001 instead of a raw native function.
+ * Portable payloads never carry native preventDefault/stopPropagation methods;
+ * raw native methods are available only to explicit `host:*` extension callbacks.
+ */
+export type ProtoEventControl = Readonly<{
+  requestDefaultActionPrevention(options?: DefaultActionRequestOptions): void;
+}>;
+
+/**
+ * Immutable, data-only view constructed for one portable Event callback.
+ * It never aliases or mutates a native event/detail object. `control` is live
+ * only during the synchronous callback invocation that receives this view.
+ */
+export type ProtoEventPayload = Readonly<{
+  type: EventTypeV0;
   key?: string;
-  target?: unknown;
-  nativeEvent?: unknown;
-  preventDefault?: () => void;
-  stopPropagation?: () => void;
-};
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  altKey?: boolean;
+  shiftKey?: boolean;
+  repeat?: boolean;
+  control: ProtoEventControl;
+}>;
 
 export type ExposeEventSpec = {
   payload?: 'void' | 'any' | 'json';

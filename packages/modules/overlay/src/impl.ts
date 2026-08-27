@@ -46,6 +46,7 @@ const DEFAULT_CONFIG: OverlayConfig = Object.freeze({
   avoidCollisions: true,
   collisionBoundary: 'clippingAncestors',
   collisionPadding: 0,
+  excludeAnchorTranslation: false,
   entry: 'content',
   restore: 'trigger',
   portal: false,
@@ -100,6 +101,7 @@ function pushOverrideWarning(warnings: string[], field: string, prev: unknown, n
 
 export class OverlayModuleImpl extends ModuleBase {
   private config: OverlayConfig = DEFAULT_CONFIG;
+  private presenceBound = false;
   private readonly prototypeName: string;
   private readonly warnings: string[] = [];
   private readonly boundary: BoundaryHandle<any>;
@@ -160,7 +162,7 @@ export class OverlayModuleImpl extends ModuleBase {
       this.escapeSamplingInstalled = true;
       this.eventPort.onGlobal('key.down', (event) => {
         if (!this.isOpen() || !this.config.closeOnEscape) return;
-        if (event?.detail?.key !== 'Escape') return;
+        if (event.key !== 'Escape') return;
         this.close('escape');
       });
     }
@@ -326,6 +328,14 @@ export class OverlayModuleImpl extends ModuleBase {
     this.boundary.setStackActive(false);
   }
 
+  markPresenceBound(): void {
+    this.presenceBound = true;
+  }
+
+  hasPresenceBinding(): boolean {
+    return this.presenceBound;
+  }
+
   setViewActive(active: boolean): void {
     if (Object.is(this.viewActive, active)) {
       return;
@@ -414,6 +424,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.patchValue('avoidCollisions', patch.avoidCollisions);
     this.patchValue('collisionBoundary', patch.collisionBoundary);
     this.patchValue('collisionPadding', patch.collisionPadding);
+    this.patchValue('excludeAnchorTranslation', patch.excludeAnchorTranslation);
     this.patchValue('entry', patch.entry);
     this.patchValue('restore', patch.restore);
     this.patchValue('portal', patch.portal);
@@ -448,6 +459,7 @@ export class OverlayModuleImpl extends ModuleBase {
     assign('avoidCollisions', patch.avoidCollisions);
     assign('collisionBoundary', patch.collisionBoundary);
     assign('collisionPadding', patch.collisionPadding);
+    assign('excludeAnchorTranslation', patch.excludeAnchorTranslation);
     if (this.viewActive) this.syncAnchoredPosition();
   }
 
@@ -524,6 +536,7 @@ export class OverlayModuleImpl extends ModuleBase {
         avoidCollisions: this.config.avoidCollisions,
         collisionBoundary: this.config.collisionBoundary,
         collisionPadding: this.config.collisionPadding,
+        excludeAnchorTranslation: this.config.excludeAnchorTranslation,
       },
     });
   }

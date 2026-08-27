@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Development'
+  short_description: 'Compose the governed development skill chain'
+  default_prompt: 'Use $pui-dev to route this work through the smallest valid Proto UI skill chain.'
+
+policy:
+  allow_implicit_invocation: true

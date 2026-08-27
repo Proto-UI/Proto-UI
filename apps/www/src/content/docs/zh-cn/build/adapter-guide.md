@@ -50,4 +50,4 @@ Official Adapter profile 按 Module slice 逐步编目。未列出的 Module 属
 5. target-specific commit、event、projection 与 diagnostics behavior；
 6. 能区分 portable semantics 与 host mechanics 的 conformance evidence。
 
-在此之前，请通过[参与贡献](/zh-cn/build/contribute/)选择 Prototype、docs、demo、Module slice 或 bounded bug，并用[契约与测试](/zh-cn/build/contracts-and-tests/)设计 evidence。
+在此之前，请通过[参与贡献](/zh-cn/contribute/)选择已经就绪的 Prototype、docs、demo、Module slice 或 bounded bug，并用[契约与测试](/zh-cn/build/contracts-and-tests/)设计 evidence。

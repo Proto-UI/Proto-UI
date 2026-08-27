@@ -1,0 +1,128 @@
+id: T-SHADCN-CHECKBOX-0001
+type: test
+title: Shadcn Checkbox delta protocol contract tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Covers Checkbox Root and Indicator identity, Base inheritance, the five required presentations, the guarded dark tint, derived glyph selection, and the slice boundary.
+cases:
+  - id: T-SHADCN-CHECKBOX-0001-CASE-EXPORTS
+    title: Root and Indicator are direct unofficial projections reachable through exact package entries
+    covers:
+      [
+        P-SHADCN-CHECKBOX-UPSTREAM-IDENTITY,
+        P-SHADCN-CHECKBOX-DIRECT-ENTRY,
+        P-SHADCN-CHECKBOX-COMPATIBILITY-SUBSET,
+        P-SHADCN-CHECKBOX-INDICATOR-UPSTREAM-IDENTITY,
+        P-SHADCN-CHECKBOX-INDICATOR-DIRECT-ENTRY,
+        P-SHADCN-CHECKBOX-INDICATOR-COMPATIBILITY-SUBSET,
+      ]
+    expectation: shadcn-checkbox-direct-entries-are-exported-once
+  - id: T-SHADCN-CHECKBOX-0001-CASE-DEFAULT
+    title: Root projects the resting box and Indicator paints no glyph
+    covers:
+      [
+        P-SHADCN-CHECKBOX-CURRENT-VISUAL-SURFACE,
+        P-SHADCN-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE,
+        P-SHADCN-CHECKBOX-INDICATOR-GLYPH-SELECTION,
+      ]
+    expectation: shadcn-checkbox-projects-the-resting-box-without-a-glyph
+  - id: T-SHADCN-CHECKBOX-0001-CASE-CHECKED
+    title: Activation fills the box and paints the tick
+    covers:
+      [
+        P-SHADCN-CHECKBOX-BASE-INHERITANCE,
+        P-SHADCN-CHECKBOX-CURRENT-BASE-DEVIATIONS,
+        P-SHADCN-CHECKBOX-INDICATOR-CONTEXT-DERIVED,
+      ]
+    expectation: shadcn-checkbox-fills-and-ticks-when-activation-checks-it
+  - id: T-SHADCN-CHECKBOX-0001-CASE-INDETERMINATE
+    title: A mixed value fills the box and paints the dash
+    covers: [P-SHADCN-CHECKBOX-STATE-DRIVEN-STYLES, P-SHADCN-CHECKBOX-INDICATOR-GLYPH-SELECTION]
+    expectation: shadcn-checkbox-fills-and-dashes-while-the-value-is-mixed
+  - id: T-SHADCN-CHECKBOX-0001-CASE-MIXED-PRECEDENCE
+    title: Checked and indeterminate together keep the mixed presentation
+    covers: [P-SHADCN-CHECKBOX-STATE-DRIVEN-STYLES, P-SHADCN-CHECKBOX-INDICATOR-GLYPH-SELECTION]
+    expectation: shadcn-checkbox-keeps-the-mixed-glyph-when-both-states-hold
+  - id: T-SHADCN-CHECKBOX-0001-CASE-DISABLED
+    title: A disabled checkbox keeps its mixed value and rejects activation and focus
+    covers: [P-SHADCN-CHECKBOX-CURRENT-BASE-DEVIATIONS, P-SHADCN-CHECKBOX-STATE-DRIVEN-STYLES]
+    expectation: shadcn-checkbox-disabled-rejects-activation-and-focus
+  - id: T-SHADCN-CHECKBOX-0001-CASE-FOCUS-VISIBLE
+    title: The focus-visible ring lowers onto the Root alone
+    covers: [P-SHADCN-CHECKBOX-STATE-DRIVEN-STYLES, P-SHADCN-CHECKBOX-INDICATOR-CONTEXT-DERIVED]
+    expectation: shadcn-checkbox-rings-the-root-and-not-the-indicator
+  - id: T-SHADCN-CHECKBOX-0001-CASE-WEB-STATE-EVIDENCE
+    title: Every state rule reaches the web style projection as conditional presentation
+    covers: [P-SHADCN-CHECKBOX-STATE-DRIVEN-STYLES, P-SHADCN-CHECKBOX-DARK-TINT-GUARD]
+    expectation: shadcn-checkbox-state-rules-lower-to-conditional-web-presentation
+  - id: T-SHADCN-CHECKBOX-0001-CASE-NO-SECOND-OWNER
+    title: The projection adds no second value, event, focus, activation, or accessibility owner
+    covers:
+      [
+        P-SHADCN-CHECKBOX-BOUNDARY,
+        P-SHADCN-CHECKBOX-ADMITTED-ANATOMY,
+        P-SHADCN-CHECKBOX-INDICATOR-CONTEXT-DERIVED,
+      ]
+    expectation: shadcn-checkbox-keeps-one-owner-per-fact
+  - id: T-SHADCN-CHECKBOX-0001-CASE-GLYPH-IDENTITY
+    title: Repeated updates reuse one glyph element
+    covers: [P-SHADCN-CHECKBOX-INDICATOR-GLYPH-SELECTION]
+    expectation: shadcn-checkbox-mounts-exactly-one-glyph-across-updates
+  - id: T-SHADCN-CHECKBOX-0001-CASE-DARK-CROSS-PRODUCT
+    title: The dark tint paints the unfilled box only, in every runtime
+    covers: [P-SHADCN-CHECKBOX-DARK-TINT-GUARD]
+    expectation: shadcn-checkbox-dark-tint-never-replaces-a-fill
+  - id: T-SHADCN-CHECKBOX-0001-CASE-SINGLE-FOCUSABLE
+    title: Each checkbox exposes one focusable control and keeps the glyph out of the accessibility tree
+    covers: [P-SHADCN-CHECKBOX-ADMITTED-ANATOMY, P-SHADCN-CHECKBOX-INDICATOR-CONTEXT-DERIVED]
+    expectation: shadcn-checkbox-exposes-one-focusable-checkbox-per-instance
+implementations:
+  - id: prototypes-shadcn-checkbox-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/checkbox.test.ts
+    required: true
+    consumesCases:
+      [
+        T-SHADCN-CHECKBOX-0001-CASE-EXPORTS,
+        T-SHADCN-CHECKBOX-0001-CASE-DEFAULT,
+        T-SHADCN-CHECKBOX-0001-CASE-CHECKED,
+        T-SHADCN-CHECKBOX-0001-CASE-INDETERMINATE,
+        T-SHADCN-CHECKBOX-0001-CASE-MIXED-PRECEDENCE,
+        T-SHADCN-CHECKBOX-0001-CASE-DISABLED,
+        T-SHADCN-CHECKBOX-0001-CASE-FOCUS-VISIBLE,
+        T-SHADCN-CHECKBOX-0001-CASE-WEB-STATE-EVIDENCE,
+        T-SHADCN-CHECKBOX-0001-CASE-NO-SECOND-OWNER,
+        T-SHADCN-CHECKBOX-0001-CASE-GLYPH-IDENTITY,
+      ]
+    exercises:
+      &id001 [
+        P-SHADCN-CHECKBOX,
+        P-SHADCN-CHECKBOX-INDICATOR,
+        P-BASE-CHECKBOX,
+        P-BASE-CHECKBOX-INDICATOR,
+      ]
+    notes:
+      - Positive tests cover only the current Proto UI guarantee; asChild omission, aria-invalid presentation, the omitted peer hook, and remaining parity gaps are bounded by the decision, declared surface, and centralized compatibility questions.
+      - The web-state case asserts Adapter lowering of the six condition-driven rules on the Web Component host. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited checked, indeterminate, disabled, and focus state handles.
+      - The absence case asserts portable facts only. Indicator publishes no focus handle, no event, no a11y control syntax, and no way to write what it derives; the web `tabIndex` value is deliberately not written as a cross-host contract.
+  - id: prototypes-shadcn-checkbox-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts
+    required: true
+    consumesCases:
+      [T-SHADCN-CHECKBOX-0001-CASE-DARK-CROSS-PRODUCT, T-SHADCN-CHECKBOX-0001-CASE-SINGLE-FOCUSABLE]
+    exercises: *id001
+    notes:
+      - Reads computed backgrounds across the unchecked, checked, and mixed cross-product in both schemes and in Web Components, React, and Vue.
+      - This case pins the painted outcome; it is not the failing evidence for the guard. Measured with the guard removed, it still passes, because the fill selector carries an attribute selector while an unguarded tint selector is entirely `:where()`, so the fill wins on specificity whatever the rule order. The evidence that fails without the guard is at the token layer, in the module test and in the CLI scanner test.
+      - The glyph is a derived render and lands one turn after the Roots that readiness waits on, measured at 1ms in Web Components, 3ms in Vue, and 10ms in React, so this suite waits for the glyph counts before it measures.
+      - Resolves colours through a canvas, because the theme emits oklch and lab values that no string comparison can order.
+      - Asserts one focusable checkbox per instance and no glyph node in the accessibility tree, which is the host-level form of the Indicator having no focus target and no a11y control syntax.
+verifies:
+  prototypes:
+    - id: P-SHADCN-CHECKBOX
+    - id: P-SHADCN-CHECKBOX-INDICATOR
+exercises:
+  prototypes: *id001

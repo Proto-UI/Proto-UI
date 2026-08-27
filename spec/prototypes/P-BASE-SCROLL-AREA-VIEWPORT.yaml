@@ -3,10 +3,10 @@ type: prototype
 title: Base Scroll Area Viewport owns the logical scroll surface
 status: draft
 since: 0.2.0-rc.7
-summary: Viewport is the single semantic owner of the Scroll Area surface and exposes normalized host-independent scrolling facts.
+summary: Viewport is the single semantic owner of the Scroll Area surface, exposing normalized host-independent scrolling facts and the keyboard focus facts of the surface that actually scrolls.
 statement:
-  zh-CN: Viewport 通过特权 `asScrollSurface` 将 prototype instance 绑定到宿主滚动能力，默认允许双轴并请求 auto projection。它只 expose 归一化位置、可见比例、可滚方向、scrolling 与已解析 projection，不泄露 DOM target 或精确像素 geometry。
-  en: Viewport binds the prototype instance to host scrolling through the privileged `asScrollSurface`, allowing both axes and requesting auto projection by default. It exposes only normalized position, visible ratios, available directions, scrolling state, and the resolved projection, without leaking a DOM target or exact pixel geometry.
+  zh-CN: Viewport 通过特权 `asScrollSurface` 将 prototype instance 绑定到宿主滚动能力，默认允许双轴并请求 auto projection。它只 expose 归一化位置、可见比例、可滚方向、scrolling 与已解析 projection，不泄露 DOM target 或精确像素 geometry。作为实际滚动 surface，它同时通过既有 `asFocusable` 拥有 `focused` 与 `focusVisible`，并在存在可滚方向时才参与顺序导航；它仍然保持 role-neutral。
+  en: Viewport binds the prototype instance to host scrolling through the privileged `asScrollSurface`, allowing both axes and requesting auto projection by default. It exposes only normalized position, visible ratios, available directions, scrolling state, and the resolved projection, without leaking a DOM target or exact pixel geometry. As the actual scrolling surface it also owns `focused` and `focusVisible` through the existing `asFocusable`, joining sequential navigation only while a scrollable direction exists, and it stays role-neutral throughout.
 criteria:
   - id: P-BASE-SCROLL-AREA-VIEWPORT-AUTHORING-ENTRIES
     text:
@@ -28,10 +28,22 @@ criteria:
     text:
       zh-CN: Viewport 必须把 Scroll Area Context scope 与 Anatomy Scrollbar/Thumb roles 声明给同一个 `asScrollSurface` handle，使 composed chrome 共享 surface lease 与 facts。
       en: Viewport must declare the Scroll Area Context scope and Anatomy Scrollbar and Thumb roles to the same `asScrollSurface` handle so composed chrome shares the surface lease and facts.
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-KEYBOARD-FOCUS
+    text:
+      zh-CN: Viewport 是实际的滚动 surface，因此必须通过既有 `asFocusable` 拥有 `focused` 与 `focusVisible` 两个标准 focus fact，并且是 Scroll Area 中唯一安装 focus domain 的 anatomy part。下游 styled prototype 只消费这两个 fact，不得重复安装。
+      en: Viewport is the actual scrolling surface, so it must own the standard `focused` and `focusVisible` focus facts through the existing `asFocusable`, and it must be the only Scroll Area anatomy part that installs a focus domain. Downstream styled prototypes consume those facts and must not install a second one.
+    dependsOn:
+      contracts: [C-AS-FOCUSABLE-0001]
+  - id: P-BASE-SCROLL-AREA-VIEWPORT-NAV-PARTICIPATION
+    text:
+      zh-CN: 顺序导航参与度必须由既有的四个可滚方向 fact 驱动——任一为真时 `auto`，全部为假时 `none`——因为一个无处可滚的 surface 是个空 tab stop。geometry 尚未到达时按 `none`，fact 到达后同步。参与度变化只影响后续顺序导航，不得 blur 当前 focus owner。可滚性不得以名为 `focusable` 的公开 state 表示：Focus 模块的 `focusable` 是另一个事实域。
+      en: Sequential-navigation participation must be driven by the existing four scrollable-direction facts, `auto` while any is true and `none` while all are false, because a surface with nowhere to scroll is an empty tab stop. It is `none` before geometry arrives and syncs once the facts do. A participation change affects only subsequent sequential navigation and must never blur the current focus owner. Scrollability must not be published as a state named `focusable`, which is a different fact domain in the Focus module.
+    dependsOn:
+      contracts: [C-AS-FOCUSABLE-0001]
   - id: P-BASE-SCROLL-AREA-VIEWPORT-A11Y-NEUTRALITY
     text:
-      zh-CN: Scroll Area 本身没有专用 ARIA widget role；Viewport 不得仅因可滚动而伪造 region、scrollbar 或 application role。需要 accessible name 或 landmark 时由调用方依据内容语义组合。
-      en: Scroll Area has no dedicated ARIA widget role; Viewport must not invent region, scrollbar, or application solely because it scrolls. Consumers compose an accessible name or landmark when content semantics require one.
+      zh-CN: Scroll Area 本身没有专用 ARIA widget role；Viewport 不得仅因可滚动或可聚焦而伪造 region、scrollbar 或 application role。需要 accessible name 或 landmark 时由调用方依据内容语义组合。
+      en: Scroll Area has no dedicated ARIA widget role; Viewport must not invent region, scrollbar, or application solely because it scrolls or takes focus. Consumers compose an accessible name or landmark when content semantics require one.
 sources:
   - path: packages/prototypes/base/src/scroll-area/viewport.proto.ts
   - path: packages/modules/scroll/src/impl.ts
@@ -41,14 +53,23 @@ sources:
 dependsOn:
   prototypes: [P-BASE-SCROLL-AREA]
   contracts:
-    [C-AS-SCROLL-SURFACE-0001, C-SCROLL-0001, C-SCROLL-COMPOSED-CHROME-0001, C-EXPOSE-STATE-0001]
+    [
+      C-AS-SCROLL-SURFACE-0001,
+      C-AS-FOCUSABLE-0001,
+      C-SCROLL-0001,
+      C-SCROLL-COMPOSED-CHROME-0001,
+      C-EXPOSE-STATE-0001,
+    ]
   hostCaps: [HC-SCROLL-SURFACE-0001]
 verifies: { tests: [T-BASE-SCROLL-AREA-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Gave the Viewport the standard focus facts and tied sequential-navigation participation to the scrollable directions.
   - version: 0.2.0-rc.7
     change: revised
     summary: Bound authored composed controls to the Viewport surface through Context scope and Anatomy roles.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged Viewport ownership, normalized facts, host-mediated requests, and role-neutral accessibility.
-tags: [prototype, base, scroll-area, viewport, host-projection, accessibility]
+tags: [prototype, base, scroll-area, viewport, host-projection, accessibility, focus]

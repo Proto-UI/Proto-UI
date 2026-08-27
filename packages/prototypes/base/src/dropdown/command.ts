@@ -62,9 +62,12 @@ export function setupDropdownCommand(
   };
 
   def.event.on('key.down', (_run, ev) => {
-    const detail = ev?.detail;
+    const detail = ev;
     if (disabled.get() || !focused.get() || detail?.key !== ' ') return;
-    detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: `${reasonPrefix}.space-activation`,
+      source: reasonPrefix,
+    });
   });
   def.event.on('pointer.enter', () => {
     if (!disabled.get()) hovered.set(true, `reason: ${reasonPrefix} pointer.enter`);

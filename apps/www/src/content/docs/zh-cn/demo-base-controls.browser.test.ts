@@ -19,6 +19,12 @@ const COLOR_SCHEMES = ['light', 'dark'] as const;
 type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 const TEXTAREA_ROUTE = '/en/ui-libraries/base/textarea/';
+const SCROLL_AREA_ROUTE = '/en/ui-libraries/base/scroll-area/';
+
+/** The demo order: one surface that overflows, one that fits its content. */
+const SCROLLING = 0;
+const FITTING = 1;
+const VIEWPORT_SELECTOR = '[data-pui-scroll-projection]';
 const TEXTAREA_DEMO_SCOPE = '[data-demo-id="demo-base-textarea"]';
 const TEXTAREA_OUTPUT_SURFACES = ['stateLabel', 'eventLog', 'help'] as const;
 const MIN_TEXT_CONTRAST = 4.5;
@@ -293,6 +299,82 @@ async function demoTextContrast(
   );
 }
 
+type ViewportFacts = {
+  tabIndexAttribute: string | null;
+  role: string | null;
+  focused: boolean;
+  focusVisible: boolean;
+  canScroll: boolean;
+  scrollTop: number;
+  focusableInRoot: number;
+};
+
+/** Reads both Viewports the way a keyboard user meets them. */
+async function viewportFacts(page: Page): Promise<ViewportFacts[]> {
+  return page.evaluate((selector) => {
+    const viewports = [
+      ...document.querySelectorAll<HTMLElement>(`[data-previewer-id] ${selector}`),
+    ];
+    return viewports.map((viewport) => {
+      const root = viewport.closest<HTMLElement>(
+        '[data-pui-root]:not([data-pui-scroll-projection])'
+      );
+      return {
+        tabIndexAttribute: viewport.getAttribute('tabindex'),
+        role: viewport.getAttribute('role'),
+        focused: viewport.hasAttribute('data-focused'),
+        focusVisible: viewport.hasAttribute('data-focus-visible'),
+        canScroll:
+          viewport.hasAttribute('data-scroll-vertical-can-scroll-after') ||
+          viewport.hasAttribute('data-scroll-vertical-can-scroll-before'),
+        scrollTop: viewport.scrollTop,
+        focusableInRoot: [...(root ?? viewport).querySelectorAll<HTMLElement>('*')].filter(
+          (node) => node.tabIndex >= 0
+        ).length,
+      };
+    });
+  }, VIEWPORT_SELECTOR);
+}
+
+/** Adds or removes content so the fitting surface crosses the overflow boundary. */
+async function setFittingContent(page: Page, rows: number): Promise<void> {
+  await page.evaluate(
+    ({ selector, rows: count }) => {
+      const viewport = document.querySelectorAll<HTMLElement>(`[data-previewer-id] ${selector}`)[1];
+      if (!viewport) throw new Error('The Base Scroll Area demo must render two Viewports.');
+      const list = viewport.firstElementChild;
+      if (!list) throw new Error('The fitting Viewport must render its content list.');
+      list.querySelectorAll('[data-test-row]').forEach((row) => row.remove());
+      for (let index = 0; index < count; index += 1) {
+        const row = document.createElement('div');
+        row.setAttribute('data-test-row', '');
+        row.textContent = `Added row ${index + 1}`;
+        list.append(row);
+      }
+    },
+    { selector: VIEWPORT_SELECTOR, rows }
+  );
+}
+
+/**
+ * Waits on the scroll fact rather than on the tab stop. The fact is published
+ * with or without the focus slice, so a missing tab stop fails on the assertion
+ * that names it instead of on a readiness timeout that does not.
+ */
+async function waitForCanScroll(page: Page, index: number, expected: boolean): Promise<void> {
+  await page.waitForFunction(
+    ({ selector, index: at, expected: want }) => {
+      const viewport = document.querySelectorAll<HTMLElement>(`[data-previewer-id] ${selector}`)[
+        at
+      ];
+      if (!viewport) return false;
+      return viewport.hasAttribute('data-scroll-vertical-can-scroll-after') === want;
+    },
+    { selector: VIEWPORT_SELECTOR, index, expected },
+    { timeout: 10_000 }
+  );
+}
+
 beforeAll(async () => {
   baseUrl = await startServer();
   browser = await chromium.launch({
@@ -369,4 +451,149 @@ describe.sequential('Base control documentation browser regressions', () => {
       await context.close();
     }
   }, 180_000);
+  it('gives a tab stop only to the Viewport that can scroll, in all runtimes', async () => {
+    const { context, page, previewer } = await openRoute(SCROLL_AREA_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, VIEWPORT_SELECTOR, 2);
+        await waitForCanScroll(page, SCROLLING, true);
+
+        const facts = await viewportFacts(page);
+        expect(facts, `${runtime}/count`).toHaveLength(2);
+        expect(facts[SCROLLING].canScroll, `${runtime}/scrolling-can-scroll`).toBe(true);
+        expect(facts[FITTING].canScroll, `${runtime}/fitting-can-scroll`).toBe(false);
+
+        // A surface with nowhere to scroll would be an empty tab stop.
+        expect(facts[SCROLLING].tabIndexAttribute, `${runtime}/scrolling-tabindex`).toBe('0');
+        expect(facts[FITTING].tabIndexAttribute, `${runtime}/fitting-tabindex`).toBe('-1');
+
+        for (const [index, viewport] of facts.entries()) {
+          // Taking focus is not a reason to invent a widget role.
+          expect(viewport.role, `${runtime}/role-${index}`).toBeNull();
+        }
+        // One tab stop per scrolling Scroll Area, and it is the Viewport. A
+        // second focusable node inside the same Root would be a duplicate stop.
+        expect(facts[SCROLLING].focusableInRoot, `${runtime}/scrolling-stops`).toBe(1);
+        expect(facts[FITTING].focusableInRoot, `${runtime}/fitting-stops`).toBe(0);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 240_000);
+
+  it('follows content between scrollable and not, in all runtimes', async () => {
+    const { context, page, previewer } = await openRoute(SCROLL_AREA_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, VIEWPORT_SELECTOR, 2);
+        await waitForCanScroll(page, FITTING, false);
+        expect(
+          (await viewportFacts(page))[FITTING].tabIndexAttribute,
+          `${runtime}/fitting-before`
+        ).toBe('-1');
+
+        await setFittingContent(page, 12);
+        await waitForCanScroll(page, FITTING, true);
+        expect((await viewportFacts(page))[FITTING].tabIndexAttribute, `${runtime}/grown`).toBe(
+          '0'
+        );
+
+        await setFittingContent(page, 0);
+        await waitForCanScroll(page, FITTING, false);
+        expect((await viewportFacts(page))[FITTING].tabIndexAttribute, `${runtime}/shrunk`).toBe(
+          '-1'
+        );
+      }
+    } finally {
+      await context.close();
+    }
+  }, 240_000);
+
+  it('separates keyboard entry from pointer entry on the Viewport, in all runtimes', async () => {
+    const { context, page, previewer } = await openRoute(SCROLL_AREA_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, VIEWPORT_SELECTOR, 2);
+        await waitForCanScroll(page, SCROLLING, true);
+
+        await previewer.locator('select.adapter-select').focus();
+        await page.keyboard.press('Tab');
+        await page.waitForTimeout(200);
+
+        const keyboard = (await viewportFacts(page))[SCROLLING];
+        expect(keyboard.focused, `${runtime}/keyboard-focused`).toBe(true);
+        expect(keyboard.focusVisible, `${runtime}/keyboard-focus-visible`).toBe(true);
+
+        await page.mouse.click(5, 5);
+        await previewer
+          .locator(VIEWPORT_SELECTOR)
+          .first()
+          .click({ position: { x: 8, y: 8 } });
+        await page.waitForTimeout(100);
+
+        const pointer = (await viewportFacts(page))[SCROLLING];
+        expect(pointer.focused, `${runtime}/pointer-focused`).toBe(true);
+        expect(pointer.focusVisible, `${runtime}/pointer-focus-visible`).toBe(false);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 240_000);
+
+  it('keeps keyboard and wheel scrolling on the Viewport, in all runtimes', async () => {
+    const { context, page, previewer } = await openRoute(SCROLL_AREA_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      for (const runtime of RUNTIMES) {
+        await selectRuntime(page, previewer, runtime, VIEWPORT_SELECTOR, 2);
+        await waitForCanScroll(page, SCROLLING, true);
+
+        const viewport = previewer.locator(VIEWPORT_SELECTOR).first();
+        await previewer.locator('select.adapter-select').focus();
+        await page.keyboard.press('Tab');
+        await page.waitForTimeout(100);
+
+        for (const key of ['ArrowDown', 'PageDown', 'End']) {
+          const before = (await viewportFacts(page))[SCROLLING].scrollTop;
+          await page.keyboard.press(key);
+          await page.waitForTimeout(200);
+          const after = (await viewportFacts(page))[SCROLLING].scrollTop;
+          expect(after, `${runtime}/${key}`).toBeGreaterThan(before);
+        }
+
+        await page.keyboard.press('Home');
+        await page.waitForTimeout(200);
+        expect((await viewportFacts(page))[SCROLLING].scrollTop, `${runtime}/Home`).toBe(0);
+
+        await viewport.hover();
+        await page.mouse.wheel(0, 120);
+        await page.waitForTimeout(200);
+        expect(
+          (await viewportFacts(page))[SCROLLING].scrollTop,
+          `${runtime}/wheel`
+        ).toBeGreaterThan(0);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 240_000);
 });

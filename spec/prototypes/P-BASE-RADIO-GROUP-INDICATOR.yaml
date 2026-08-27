@@ -1,0 +1,95 @@
+id: P-BASE-RADIO-GROUP-INDICATOR
+type: prototype
+title: Base Radio Group Indicator is passive derived visual feedback
+status: draft
+since: 0.3.0-alpha.0
+summary: Base Radio Group Indicator is an optional repeatable Item child that derives checked and effective-disabled facts from the nearest Item context without creating another radio, focus stop, action, state owner, layout service, or announcement object.
+statement:
+  zh-CN: >-
+    Base Radio Group Indicator 是 `base-radio-group` anatomy family 中 Item 内可选且可重复的视觉 feedback part。它只消费最近 Item context 的 checked 与 effective disabled facts，并允许宿主模板据此渲染。Indicator 不创建 role=radio、tab stop、selection/activation、live announcement、layout measurement 或独立状态所有权。
+
+  en: >-
+    Base Radio Group Indicator is an optional and repeatable visual-feedback part inside an Item in the `base-radio-group` anatomy family. It only consumes the nearest Item context checked and effective-disabled facts for host rendering. Indicator creates no role=radio, tab stop, selection/activation path, live announcement, layout measurement, or independent state ownership.
+
+criteria:
+  - id: P-BASE-RADIO-GROUP-INDICATOR-IDENTITY
+    text:
+      zh-CN: '`base-radio-group-indicator` 与 `asRadioGroupIndicator()` 是同一个 Indicator protocol 的 direct 与 authored-asHook entries，并在最近 Radio Group Item 内声明 indicator role。'
+      en: '`base-radio-group-indicator` and `asRadioGroupIndicator()` are direct and authored-asHook entries of one Indicator protocol and claim the indicator role inside the nearest Radio Group Item.'
+  - id: P-BASE-RADIO-GROUP-INDICATOR-EMPTY-PROPS
+    text:
+      zh-CN: Indicator public props 必须为空，不接受 checked、disabled、value、forceMount、label、variant、size 或 class props。
+      en: Indicator public props must be empty and accept no checked, disabled, value, forceMount, label, variant, size, or class props.
+    dependsOn:
+      contracts: [C-PROPS-0001]
+  - id: P-BASE-RADIO-GROUP-INDICATOR-DERIVED-FACTS
+    text:
+      zh-CN: Indicator 的 checked 与 disabled 必须分别等于最近 Item context 的 canonical checked 与 effective disabled，并实时同步 Root/Item props 与结构变化。
+      en: Indicator checked and disabled must equal the nearest Item context canonical checked and effective disabled facts and synchronize live with Root/Item prop and structural changes.
+    dependsOn:
+      contracts: [C-CONTEXT-0002, C-CONTEXT-0006, C-CONTEXT-0007]
+      prototypes: [P-BASE-RADIO-GROUP-ITEM]
+  - id: P-BASE-RADIO-GROUP-INDICATOR-EXACT-EXPOSES
+    text:
+      zh-CN: Indicator 只 expose checked、disabled 与只读 convenience method isChecked；它不 expose value、focus、hover/pressed、select、event 或 command。
+      en: Indicator exposes only checked, disabled, and the read-only convenience method isChecked; it exposes no value, focus, hover/pressed, select, event, or command surfaces.
+    dependsOn:
+      contracts: [C-EXPOSE-STATE-0001]
+  - id: P-BASE-RADIO-GROUP-INDICATOR-REPEATABLE
+    text:
+      zh-CN: 每个 Item 可含零个或多个 Indicator；多个 Indicator 必须消费相同最近 Item facts，不得创建额外 control/state owner。
+      en: Each Item may contain zero or multiple Indicators; repeatable Indicators consume the same nearest Item facts and must not create another control or state owner.
+  - id: P-BASE-RADIO-GROUP-INDICATOR-PASSIVE-A11Y
+    text:
+      zh-CN: Indicator 必须是 roleless、non-focusable 且没有 radio/checked/selected/live-region/activation a11y control；Item 自己是唯一 radio accessibility object。
+      en: Indicator must be roleless, non-focusable, and have no radio/checked/selected/live-region/activation accessibility control; Item is the sole radio accessibility object.
+    dependsOn:
+      contracts: [C-A11Y-0001]
+      decisions: [D-A11Y-SEMANTIC-DOMAIN-0001]
+  - id: P-BASE-RADIO-GROUP-INDICATOR-NO-LAYOUT-OWNERSHIP
+    text:
+      zh-CN: Indicator 不测量 Item rect、不自动定位、不处理 presence/animation，也不声明视觉 tokens；宿主模板与 styled prototype 拥有 presentation。
+      en: Indicator does not measure Item rectangles, auto-position, manage presence/animation, or declare visual tokens; host templates and styled prototypes own presentation.
+sources:
+  - path: docs/superpowers/specs/2026-08-12-base-radio-group-semantic-design.md
+    sections: [Decision, Item behavior, Accessibility]
+  - path: packages/prototypes/base/src/radio-group/indicator.proto.ts
+    sections: [setupRadioGroupIndicator, asRadioGroupIndicator, base-radio-group-indicator]
+  - path: packages/prototypes/base/src/radio-group/types.ts
+    sections: [RadioGroupIndicatorProps, RadioGroupIndicatorExposes]
+  - path: packages/prototypes/base/test/radio-group.test.ts
+    sections:
+      - derives repeatable indicators without creating another control object
+      - publishes only the approved root, item, and indicator protocol surfaces
+      - keeps independent groups and omits deferred form and layout APIs
+dependsOn:
+  contracts:
+    - C-ANATOMY-0001
+    - C-ANATOMY-0004
+    - C-ANATOMY-0005
+    - C-ANATOMY-0008
+    - C-CONTEXT-0002
+    - C-CONTEXT-0006
+    - C-CONTEXT-0007
+    - C-PROPS-0001
+    - C-STATE-0001
+    - C-EXPOSE-STATE-0001
+    - C-A11Y-0001
+  prototypes: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM]
+  modules: [M-A11Y-0001]
+  decisions:
+    - D-BASE-PROTOTYPE-INDEPENDENCE-0001
+    - D-A11Y-SEMANTIC-DOMAIN-0001
+requires:
+  hostCaps: [HC-A11Y-0001]
+relates:
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
+references:
+  prototypes: [P-BASE-RADIO-GROUP-ITEM, P-BASE-CHECKBOX-INDICATOR, P-BASE-TABS-INDICATOR]
+verifies:
+  tests: [T-BASE-RADIO-GROUP-INDICATOR-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the draft passive repeatable Base Radio Group Indicator protocol with Item-derived checked and disabled facts.
+tags: [prototype, base, radio-group, indicator, anatomy, context, accessibility]

@@ -3,17 +3,8 @@ import { asFocusable, asTrigger } from '@proto.ui/hooks';
 import { CHECKBOX_CONTEXT, CHECKBOX_FAMILY } from './shared';
 import type { CheckboxRootAsHookContract, CheckboxRootExposes, CheckboxRootProps } from './types';
 
-function getKeyboardEventFromProtoEvent(ev: unknown): KeyboardEvent | null {
-  const detail = (ev as CustomEvent | undefined)?.detail ?? ev;
-  if (detail instanceof KeyboardEvent) return detail;
-  if (!detail || typeof detail !== 'object') return null;
-  const native = (detail as { nativeEvent?: unknown }).nativeEvent;
-  return native instanceof KeyboardEvent ? native : null;
-}
-
-function isEnterKeyboardCommit(ev: unknown): boolean {
-  const native = getKeyboardEventFromProtoEvent(ev);
-  return native?.key === 'Enter';
+function isEnterKeyboardCommit(ev: { key?: unknown } | undefined): boolean {
+  return ev?.key === 'Enter';
 }
 
 function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes>): void {
@@ -174,11 +165,14 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
   // P-BASE-CHECKBOX-KEYBOARD-SPACE-ACTIVATION, P-BASE-CHECKBOX-KEYBOARD-ENTER-NOT-ACTIVATION
   // P-BASE-CHECKBOX-KEYBOARD-SPACE-PREVENT-DEFAULT
   def.event.onGlobal('key.down', (_run, ev) => {
-    const detail = ev?.detail;
+    const detail = ev;
     if (disabled.get()) return;
     if (!focused.get()) return;
     if (detail?.key !== ' ') return;
-    detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: 'checkbox.space-activation',
+      source: 'base-checkbox',
+    });
   });
 
   // P-BASE-CHECKBOX-POINTER-HOVER

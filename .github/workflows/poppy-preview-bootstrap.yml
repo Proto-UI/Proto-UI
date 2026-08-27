@@ -1,0 +1,115 @@
+name: Poppy preview bootstrap
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/poppy-preview-bootstrap.yml
+      - .github/workflows/poppy-preview-build.yml
+      - .github/workflows/poppy-preview-deploy.yml
+      - .github/workflows/poppy-preview-close.yml
+      - integrations/proto-ui-preview/**
+
+# This workflow runs only trusted default-branch code. It dispatches the
+# secret-free build workflow, waits for its immutable run, then explicitly
+# dispatches the trusted deploy workflow. GitHub suppresses workflow_run events
+# that descend from GITHUB_TOKEN, so relying on that event would strand every
+# bootstrap build. Neither this job nor the build receives deployment secrets.
+permissions:
+  actions: write
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: poppy-preview-bootstrap
+  cancel-in-progress: true
+
+jobs:
+  dispatch-open-pull-requests:
+    name: Enqueue every open and draft PR
+    if: github.repository == 'Proto-UI/Proto-UI'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Dispatch the trusted build for every live PR
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const startedAt = Date.now() - 5_000;
+            const { data: repository } = await github.rest.repos.get({ owner, repo });
+            if (context.ref !== `refs/heads/${repository.default_branch}`) {
+              core.setFailed("Bootstrap must execute from the trusted default branch");
+              return;
+            }
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: "open",
+              sort: "created",
+              direction: "asc",
+              per_page: 100,
+            });
+            for (const pull of pulls) {
+              if (!Number.isSafeInteger(pull.number) || pull.number < 1) {
+                core.setFailed("GitHub returned an invalid pull request number");
+                return;
+              }
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: "poppy-preview-build.yml",
+                ref: repository.default_branch,
+                inputs: {
+                  pr_number: String(pull.number),
+                  expected_head_sha: pull.head.sha,
+                },
+              });
+              core.info(`Enqueued Poppy preview build for PR #${pull.number}${pull.draft ? " (draft)" : ""}.`);
+            }
+
+            const pending = new Map(pulls.map((pull) => [
+              `Poppy preview build PR #${pull.number}`,
+              pull.number,
+            ]));
+            const completed = [];
+            const deadline = Date.now() + 8 * 60_000;
+            while (pending.size > 0 && Date.now() < deadline) {
+              const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+                owner,
+                repo,
+                workflow_id: "poppy-preview-build.yml",
+                event: "workflow_dispatch",
+                per_page: 100,
+              });
+              for (const run of runs) {
+                if (Date.parse(run.created_at) < startedAt || run.status !== "completed") continue;
+                const pr = pending.get(run.display_title);
+                if (!pr) continue;
+                completed.push({ pr, id: run.id, conclusion: run.conclusion });
+                pending.delete(run.display_title);
+              }
+              if (pending.size > 0) await new Promise((resolve) => setTimeout(resolve, 5_000));
+            }
+            if (pending.size > 0) {
+              core.setFailed(`Timed out waiting for bootstrap builds: ${[...pending.values()].join(", ")}`);
+              return;
+            }
+            for (const run of completed) {
+              await github.request("POST /repos/{owner}/{repo}/dispatches", {
+                owner,
+                repo,
+                event_type: "poppy_preview_build_completed",
+                client_payload: {
+                  build_run_id: run.id,
+                  build_succeeded: run.conclusion === "success",
+                },
+              });
+              core.info(`Enqueued trusted deployment for PR #${run.pr} from build ${run.id} (${run.conclusion}).`);
+            }
+            core.summary
+              .addHeading("Poppy preview bootstrap")
+              .addRaw(`Built and enqueued deployment convergence for ${pulls.length} open or draft pull request(s).`)
+              .write();

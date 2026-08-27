@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import starlight from '@astrojs/starlight';
 import remarkDirective from 'remark-directive';
+import starlightLlmsTxt from 'starlight-llms-txt';
 
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'node:fs';
@@ -76,6 +77,20 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Proto UI',
+      plugins: [
+        starlightLlmsTxt({
+          exclude: [
+            '*/demo-*',
+            '*/contribute/*',
+            '*/ui-libraries/*/components/*',
+            '*/reference/*',
+            '*/guides/*',
+          ],
+          description:
+            'Proto UI is an open-source project exploring unified human-computer interaction protocols across platforms, frameworks, and interaction media.',
+          rawContent: true,
+        }),
+      ],
       expressiveCode: {
         styleOverrides: {
           borderRadius: 'calc(0.75rem - 1px)',
@@ -295,6 +310,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/checkbox',
                 },
                 {
+                  label: 'Radio Group',
+                  translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
+                  slug: 'ui-libraries/base/radio-group',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
@@ -334,6 +354,11 @@ export default defineConfig({
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/shadcn/button',
+                },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/shadcn/checkbox',
                 },
                 {
                   label: 'Dialog',
@@ -603,10 +628,41 @@ export default defineConfig({
               translations: { en: 'Contracts & Tests', 'zh-CN': '契约与测试' },
               slug: 'build/contracts-and-tests',
             },
+          ],
+        },
+        {
+          label: 'Contribute',
+          translations: { en: 'Contribute', 'zh-CN': '参与贡献' },
+          items: [
             {
-              label: 'Contribute',
-              translations: { en: 'Contribute', 'zh-CN': '参与贡献' },
-              slug: 'build/contribute',
+              label: 'Overview',
+              translations: { en: 'Overview', 'zh-CN': '概览' },
+              slug: 'contribute',
+            },
+            {
+              label: 'Collaboration model',
+              translations: { en: 'Collaboration model', 'zh-CN': '协作模型' },
+              slug: 'contribute/collaboration',
+            },
+            {
+              label: 'Deliver a change',
+              translations: { en: 'Deliver a change', 'zh-CN': '交付一个改动' },
+              slug: 'contribute/deliver',
+            },
+            {
+              label: 'Contributor Agents',
+              translations: { en: 'Contributor Agents', 'zh-CN': '贡献者 Agent' },
+              slug: 'contribute/agents',
+            },
+            {
+              label: 'Agent Skill Catalog',
+              translations: { en: 'Agent Skill Catalog', 'zh-CN': 'Agent Skill 目录' },
+              slug: 'contribute/skills',
+            },
+            {
+              label: 'Agent Automation',
+              translations: { en: 'Agent Automation', 'zh-CN': 'Agent 自动化' },
+              slug: 'contribute/automation',
             },
           ],
         },

@@ -1,0 +1,136 @@
+name: Poppy preview build
+# Quote the value: in plain YAML a space followed by `#` starts a comment,
+# which would collapse every run title to the same string and break the
+# per-PR deployment concurrency key.
+run-name: "Poppy preview build PR #${{ inputs.pr_number || github.event.pull_request.number }}"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Open pull request number to bootstrap or rebuild
+        required: true
+        type: number
+      expected_head_sha:
+        description: Full live PR head SHA recorded by the trusted dispatcher
+        required: true
+        type: string
+
+# This workflow deliberately has no write permission and no access to repository
+# secrets. It is safe to run the repository's build for a pull request from a
+# fork, but its artifact must still be treated as attacker-controlled input.
+permissions:
+  contents: read
+
+concurrency:
+  group: poppy-preview-build-${{ inputs.pr_number || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build docs preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Resolve the live pull request without trusting input metadata
+        id: pr
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          REQUESTED_PR: ${{ inputs.pr_number || github.event.pull_request.number }}
+          EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha || github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const number = Number(process.env.REQUESTED_PR);
+            const expectedHead = String(process.env.EXPECTED_HEAD_SHA || "").trim();
+            if (!Number.isSafeInteger(number) || number < 1) {
+              core.setFailed("A positive PR number is required");
+              return;
+            }
+            if (!/^[0-9a-f]{40}$/.test(expectedHead)) {
+              core.setFailed("A full expected PR head SHA is required");
+              return;
+            }
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: number,
+            });
+            if (pr.state !== "open" || !pr.head.repo || !/^[0-9a-f]{40}$/.test(pr.head.sha) ||
+                pr.head.sha !== expectedHead) {
+              core.setFailed(`PR #${number} is not an open, buildable pull request`);
+              return;
+            }
+            core.setOutput("number", String(pr.number));
+            core.setOutput("repository", pr.head.repo.full_name);
+            core.setOutput("sha", pr.head.sha);
+
+      - name: Create the immutable build binding marker
+        env:
+          PREVIEW_PR: ${{ steps.pr.outputs.number }}
+          PREVIEW_SHA: ${{ steps.pr.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 0700 "$RUNNER_TEMP/poppy-preview-binding"
+          printf '%s\n' "PR=$PREVIEW_PR" "HEAD=$PREVIEW_SHA" > \
+            "$RUNNER_TEMP/poppy-preview-binding/binding.txt"
+
+      # The failed workflow_run path trusts only this Actions-controlled name,
+      # never its contents. It is uploaded before any PR code executes, so a
+      # failed/cancelled site build can still revoke the exact current head.
+      - name: Upload the immutable build binding
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: poppy-preview-binding-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/poppy-preview-binding/binding.txt
+          if-no-files-found: error
+          retention-days: 2
+
+      - name: Check out the exact pull request head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: ${{ steps.pr.outputs.repository }}
+          ref: ${{ steps.pr.outputs.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Enable the pinned pnpm release
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare pnpm@10.32.1 --activate
+          pnpm --version
+
+      - name: Install dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: Build apps-www
+        shell: bash
+        run: pnpm --filter apps-www build
+
+      - name: Verify the preview artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d apps/www/dist
+          test -f apps/www/dist/index.html
+          test -n "$(find apps/www/dist -type f -print -quit)"
+
+      - name: Upload the untrusted static artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: poppy-preview-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}-${{ github.run_attempt }}
+          path: apps/www/dist/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 3

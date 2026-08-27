@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PUI_VIEW_DETACHED_ATTR } from '@proto.ui/adapter-base';
 import { definePrototype } from '@proto.ui/core';
 
 import {
@@ -97,7 +98,9 @@ describe('adapter-vue: dialog integration', () => {
 
     try {
       const host = mounted.host;
-      expect(host.querySelector('div')).toBeNull();
+      const mask = host.querySelector('div');
+      expect(mask).not.toBeNull();
+      expect(mask?.hasAttribute(PUI_VIEW_DETACHED_ATTR)).toBe(true);
 
       const exposes = mounted.vm.getExposes();
       expect(exposes.transitionState?.get?.()).toBe('closed');

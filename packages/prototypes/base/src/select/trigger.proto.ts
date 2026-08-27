@@ -43,7 +43,7 @@ function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExpo
   def.event.on('press.commit', (run, ev) => {
     if (command.disabled.get()) return;
     const ctx = run.context.read(SELECT_CONTEXT);
-    const key = ev?.detail?.key;
+    const key = ev?.key;
     if (key === 'Enter' || key === ' ') {
       requestSelectOpen(run, {
         open: true,
@@ -63,9 +63,12 @@ function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExpo
 
   def.event.on('key.down', (run, ev) => {
     if (command.disabled.get()) return;
-    const key = ev?.detail?.key;
+    const key = ev?.key;
     if (key !== 'ArrowDown' && key !== 'ArrowUp') return;
-    ev?.detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: 'select.arrow-open',
+      source: 'base-select-trigger',
+    });
     const ctx = run.context.read(SELECT_CONTEXT);
     if (ctx.open) return;
     requestSelectOpen(run, {

@@ -42,6 +42,7 @@ export type OverlayConfigPatch = Readonly<{
   avoidCollisions?: boolean;
   collisionBoundary?: AnchoredCollisionBoundary;
   collisionPadding?: number;
+  excludeAnchorTranslation?: boolean;
   entry?: OverlayFocusEntry;
   restore?: OverlayFocusRestore;
   portal?: boolean;
@@ -67,6 +68,7 @@ export type OverlayConfig = Readonly<{
   avoidCollisions: boolean;
   collisionBoundary: AnchoredCollisionBoundary;
   collisionPadding: number;
+  excludeAnchorTranslation: boolean;
   entry: OverlayFocusEntry;
   restore: OverlayFocusRestore;
   portal: boolean;
@@ -87,6 +89,7 @@ export type OverlayPositionPatch = Readonly<
     | 'avoidCollisions'
     | 'collisionBoundary'
     | 'collisionPadding'
+    | 'excludeAnchorTranslation'
   >
 >;
 

@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Audit Deployment Evidence'
+  short_description: 'Audit one deployment evidence slice.'
+  default_prompt: 'Use $pui-deploy to verify one bounded Proto UI deployment evidence slice without changing delivery state.'
+policy:
+  allow_implicit_invocation: false

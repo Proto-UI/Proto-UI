@@ -1,18 +1,29 @@
 // packages/modules/event/src/types.ts
 import type { ModuleInstance } from '@proto.ui/core';
 import type { ModulePort } from '@proto.ui/core';
-import { EventListenerToken, EventTypeV0 } from '@proto.ui/types';
+import type {
+  EventListenerToken,
+  EventTypeV0,
+  ExtensionEventType,
+  HostEventListenerOptions,
+  ProtoEventPayload,
+  SemanticEventType,
+} from '@proto.ui/types';
 
 /** @deprecated Import ExposeEventFacade from @proto.ui/module-expose-event. */
 export type { ExposeEventFacade } from '@proto.ui/module-expose-event';
 
-export type EventDispatch = (id: string, ev: any) => void;
-export type EventInternalCallback = (ev: any) => void;
+export type EventDispatch = (id: string, ev: unknown, type?: EventTypeV0) => void;
+export type SemanticEventInternalCallback = (ev: ProtoEventPayload) => void;
+export type HostEventInternalCallback = (ev: unknown) => void;
+export type EventInternalCallback = (ev: unknown) => void;
 
 export type EventChannelFacade = {
   // --- setup-only registration (opaque to module) ---
-  on(type: EventTypeV0, options?: EventListenerOptions): EventListenerToken;
-  onGlobal(type: EventTypeV0, options?: EventListenerOptions): EventListenerToken;
+  on(type: SemanticEventType): EventListenerToken;
+  on(type: ExtensionEventType, options?: HostEventListenerOptions): EventListenerToken;
+  onGlobal(type: SemanticEventType): EventListenerToken;
+  onGlobal(type: ExtensionEventType, options?: HostEventListenerOptions): EventListenerToken;
 
   /** precise removal */
   off(token: EventListenerToken): void;
@@ -32,15 +43,17 @@ export type EventPort = ModulePort & {
    * These callbacks are dispatched by runtime before prototype-author callbacks
    * for the same event dispatch pass.
    */
+  on(type: SemanticEventType, cb: SemanticEventInternalCallback): EventListenerToken;
   on(
-    type: EventTypeV0,
-    cb: EventInternalCallback,
-    options?: EventListenerOptions
+    type: ExtensionEventType,
+    cb: HostEventInternalCallback,
+    options?: HostEventListenerOptions
   ): EventListenerToken;
+  onGlobal(type: SemanticEventType, cb: SemanticEventInternalCallback): EventListenerToken;
   onGlobal(
-    type: EventTypeV0,
-    cb: EventInternalCallback,
-    options?: EventListenerOptions
+    type: ExtensionEventType,
+    cb: HostEventInternalCallback,
+    options?: HostEventListenerOptions
   ): EventListenerToken;
 
   /**

@@ -1,7 +1,10 @@
+import { installViewVisibilityRule, PUI_VIEW_DETACHED_ATTR } from '@proto.ui/adapter-base';
+
 const HOST_DISPLAY_STYLE_ID = 'proto-ui-wc-host-display';
 const HOST_DISPLAY_CLASS = 'pui-host-root';
 const PUI_STYLE_ATTR = 'data-pui-style';
-export const PUI_VIEW_DETACHED_ATTR = 'data-pui-view-detached';
+
+export { PUI_VIEW_DETACHED_ATTR };
 
 const RULES_BY_DOCUMENT = new WeakMap<Document, boolean>();
 
@@ -59,8 +62,10 @@ export function installDefaultHostDisplay(el: HTMLElement): HostDisplayControlle
 function ensureDefaultHostDisplayRule(doc: Document) {
   if (RULES_BY_DOCUMENT.get(doc)) return;
 
+  installViewVisibilityRule(doc);
+
   const styleEl = getOrCreateStyleElement(doc);
-  styleEl.textContent = `${styleEl.textContent ?? ''}\n:where(.${HOST_DISPLAY_CLASS}) { display: block; }\n:where([${PUI_VIEW_DETACHED_ATTR}]) { display: none !important; }\n`;
+  styleEl.textContent = `${styleEl.textContent ?? ''}\n:where(.${HOST_DISPLAY_CLASS}) { display: block; }\n`;
   RULES_BY_DOCUMENT.set(doc, true);
 }
 

@@ -78,13 +78,18 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   // P-BASE-BUTTON-ACCESSIBLE-NAME, P-BASE-BUTTON-CONTENT-LABEL-SOURCE
   def.a11y.nameFromContent();
 
-  // P-BASE-BUTTON-KEYBOARD-ACTIVATION, P-BASE-BUTTON-KEYBOARD-SPACE-PREVENT-DEFAULT
+  // P-BASE-BUTTON-KEYBOARD-ACTIVATION, P-BASE-BUTTON-KEYBOARD-SPACE-PREVENT-DEFAULT,
+  // HC-DEFAULT-ACTION-0001: prevention is requested through the portable
+  // control facade, never through a raw host preventDefault function.
   def.event.onGlobal('key.down', (_run, ev) => {
-    const detail = ev?.detail;
+    const detail = ev;
     if (disabled.get()) return;
     if (!focused.get()) return;
     if (detail?.key !== ' ') return;
-    detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: 'button.space-activation',
+      source: 'base-button',
+    });
   });
 
   // P-BASE-BUTTON-POINTER-HOVER

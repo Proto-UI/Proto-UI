@@ -5,7 +5,11 @@ import { definePrototype } from '@proto.ui/core';
 import type { RuntimeHost } from '@proto.ui/runtime';
 import { executeWithHost } from '@proto.ui/runtime';
 import type { FocusPort } from '@proto.ui/module-focus';
-import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import {
+  EVENT_CANCEL_DEFAULT_ACTION_CAP,
+  EVENT_GLOBAL_TARGET_CAP,
+  EVENT_ROOT_TARGET_CAP,
+} from '@proto.ui/module-event';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
@@ -22,6 +26,7 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
   const globalTarget = new EventTarget();
   const emitted: string[] = [];
   const a11ySnapshots: A11ySemanticObjectSnapshot[] = [];
+  const decisions: Array<{ reason?: string; source?: string }> = [];
   let exposes: Record<string, any> | null = null;
 
   const host: RuntimeHost<any> = {
@@ -37,6 +42,10 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
       wiring.attach('event', [
         [EVENT_ROOT_TARGET_CAP, () => rootTarget],
         [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
+        [
+          EVENT_CANCEL_DEFAULT_ACTION_CAP,
+          (request: { reason?: string; source?: string }) => decisions.push(request),
+        ],
       ]);
       wiring.attach('expose-event', [[EXPOSE_EVENT_SINK_CAP, (key: string) => emitted.push(key)]]);
       wiring.attach('as-trigger', [
@@ -68,6 +77,9 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
     },
     getA11ySnapshot() {
       return a11ySnapshots.at(-1);
+    },
+    getDecisions() {
+      return decisions;
     },
   };
 }
@@ -165,22 +177,26 @@ describe('prototypes/base: asButton', () => {
     ctx.rootTarget.dispatchEvent(new CustomEvent('host:focus'));
     expect(exposes.focused.get()).toBe(true);
 
-    let prevented = false;
+    // HC-DEFAULT-ACTION-0001: the prototype requests prevention through the
+    // portable control facade; the host observes the request through its
+    // cancel-default-action cap, not through a fabricated raw preventDefault.
     ctx.globalTarget.dispatchEvent(
       new CustomEvent('key.down', {
         detail: {
           key: ' ',
           target: ctx.rootTarget,
-          preventDefault: () => {
-            prevented = true;
-          },
         },
       })
     );
 
-    expect(prevented).toBe(true);
+    expect(ctx.getDecisions()).toEqual([
+      {
+        reason: 'button.space-activation',
+        source: 'base-button',
+        event: expect.anything(),
+      },
+    ]);
   });
-
   it('keeps base-button and asButton aligned as Button authoring entries', () => {
     // T-BASE-BUTTON-0001-CASE-AUTHORING-ENTRIES
     // T-BASE-BUTTON-0001-CASE-DEFERRED-SURFACES

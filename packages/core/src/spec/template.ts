@@ -35,6 +35,12 @@ export type SvgRootProps = SvgSharedProps & {
   viewBox: string;
   width?: SvgScalar;
   height?: SvgScalar;
+  /**
+   * A decorative glyph needs a way to stay out of the accessibility tree. The
+   * root is where it belongs, because it hides the whole drawing, and every
+   * adapter already passes svg props through verbatim.
+   */
+  'aria-hidden'?: SvgScalar;
 };
 
 export type SvgGroupProps = SvgSharedProps;
@@ -272,6 +278,7 @@ const SVG_ALLOWED_KEYS: Record<SvgTemplateTag, ReadonlyArray<string>> = {
     'viewBox',
     'width',
     'height',
+    'aria-hidden',
     'fill',
     'stroke',
     'strokeWidth',

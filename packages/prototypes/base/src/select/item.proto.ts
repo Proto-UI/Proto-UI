@@ -112,7 +112,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     if (command.disabled.get()) return;
     const ctx = readContext(run);
     if (!ctx) return;
-    const reason: SelectFocusReason = ev?.detail?.key ? 'keyboard' : 'pointer';
+    const reason: SelectFocusReason = ev?.key ? 'keyboard' : 'pointer';
     const ownValue = run.props.get().value ?? '';
     const ownTextValue = run.props.get().textValue || ownValue;
     updateActiveValue(run);

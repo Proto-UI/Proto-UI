@@ -1,0 +1,330 @@
+schemaVersion: 2
+registryVersion: 2026-08-27.integration-1
+entrypoints:
+  development: pui-dev
+  maintenance: pui-maintain
+compositionRules:
+  - resolve exactly one leaf for the current transition
+  - load only the resolved loadPath
+  - pass explicit artifacts through a validated handoff
+  - treat assessment as advice in human-assisted mode
+  - enforce the fresh self-assessed ceiling before every autonomous transition
+  - revalidate live permission and current authorization at every external action
+  - stop at human gates
+  - never infer integration or publication authority
+skills:
+  - id: pui-assess
+    entrypoints: [development, maintenance]
+    loadPath: .agents/skills/pui-assess/SKILL.md
+    transition: unassessed context -> snapshot-bound read-only self-result
+    autonomousMinimumBand: U0
+    taskClass: public-read
+    mutation: none
+    requires: [request-context]
+    produces: [capability-envelope]
+  - id: pui-orient
+    entrypoints: [development, maintenance]
+    loadPath: .agents/skills/pui-orient/SKILL.md
+    transition: unknown context -> effective capability envelope
+    autonomousMinimumBand: U0
+    taskClass: public-read
+    mutation: none
+    requires: [request-context]
+    produces: [capability-envelope]
+  - id: pui-select
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-select/SKILL.md
+    transition: unbounded request -> read-only work-item proposal or explicit no-work result
+    autonomousMinimumBand: C1
+    taskClass: propose-classification
+    mutation: none
+    requires: [request-context, capability-envelope]
+    produces: [work-item-proposal]
+  - id: pui-claim
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-claim/SKILL.md
+    transition: authorized selection proposal -> one posted claim or fail-closed no-write result
+    autonomousMinimumBand: C2
+    taskClass: claim-work-item
+    mutation: reversible-github-metadata
+    requires: [capability-envelope, work-item-proposal, mutation-authorization]
+    produces: [mutation-receipt, bounded-subject]
+  - id: pui-unclaim
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-unclaim/SKILL.md
+    transition: owned current claim -> released claim with mutation receipt
+    autonomousMinimumBand: C2
+    taskClass: release-own-claim
+    mutation: reversible-github-metadata
+    requires: [capability-envelope, claim-receipt, mutation-authorization]
+    produces: [mutation-receipt]
+  - id: pui-trace
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-trace/SKILL.md
+    transition: bounded subject -> authority and evidence map
+    autonomousMinimumBand: C1
+    taskClass: trace
+    mutation: none
+    requires: [bounded-subject]
+    produces: [authority-map]
+  - id: pui-brainstorm
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-brainstorm/SKILL.md
+    transition: semantic uncertainty -> maintainer decision packet
+    autonomousMinimumBand: C4
+    taskClass: shape-semantic-decision
+    mutation: proposal-only
+    requires: [authority-map, bounded-question]
+    produces: [decision-packet]
+  - id: pui-spec
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-spec/SKILL.md
+    transition: approved semantic scope -> governed spec graph change
+    autonomousMinimumBand: C3
+    taskClass: author-approved-spec
+    mutation: feature-branch
+    requires: [authority-map, semantic-authorization]
+    produces: [candidate-change]
+  - id: pui-contract
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-contract/SKILL.md
+    transition: governed fact or accepted gap -> readable contract projection
+    autonomousMinimumBand: C2
+    taskClass: maintain-contract-projection
+    mutation: feature-branch
+    requires: [authority-map, projection-authorization]
+    produces: [candidate-change]
+  - id: pui-module
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-module/SKILL.md
+    transition: approved Module slice -> portable implementation and evidence
+    autonomousMinimumBand: C3
+    taskClass: implement-approved-module
+    mutation: feature-branch
+    requires: [authority-map, implementation-authorization]
+    produces: [candidate-change]
+  - id: pui-host
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-host/SKILL.md
+    transition: approved host responsibility -> capability realization and evidence
+    autonomousMinimumBand: C3
+    taskClass: implement-approved-host-capability
+    mutation: feature-branch
+    requires: [authority-map, implementation-authorization]
+    produces: [candidate-change]
+  - id: pui-adapter
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-adapter/SKILL.md
+    transition: approved Adapter realization scope -> bounded implementation handoff
+    autonomousMinimumBand: C3
+    taskClass: implement-approved-adapter-slice
+    mutation: feature-branch
+    requires: [authority-map, implementation-authorization]
+    produces: [candidate-change]
+  - id: pui-adapter-assess
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-adapter-assess/SKILL.md
+    transition: bounded Adapter question -> read-only assessment packet
+    autonomousMinimumBand: C1
+    taskClass: observe
+    mutation: none
+    requires: [authority-map, bounded-question]
+    produces: [assessment-packet]
+  - id: pui-prototype
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-prototype/SKILL.md
+    transition: governed component slice -> coherent Prototype delivery
+    autonomousMinimumBand: C3
+    taskClass: implement-approved-prototype
+    mutation: feature-branch
+    requires: [authority-map, implementation-authorization]
+    produces: [candidate-change]
+  - id: pui-regression
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-regression/SKILL.md
+    transition: governed failing behavior -> restored guarantee and regression evidence
+    autonomousMinimumBand: C2
+    taskClass: repair-bounded-regression
+    mutation: feature-branch
+    requires: [authority-map, reproduction, implementation-authorization]
+    produces: [candidate-change]
+  - id: pui-test
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-test/SKILL.md
+    transition: governed behavior -> executable evidence
+    autonomousMinimumBand: C2
+    taskClass: implement-governed-tests
+    mutation: feature-branch
+    requires: [authority-map, governed-behavior, implementation-authorization]
+    produces: [candidate-change]
+  - id: pui-docs
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-docs/SKILL.md
+    transition: governed repository fact -> human-readable projection
+    autonomousMinimumBand: C2
+    taskClass: maintain-docs
+    mutation: feature-branch
+    requires: [authority-map, documentation-scope, implementation-authorization]
+    produces: [candidate-change]
+  - id: pui-validate
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-validate/SKILL.md
+    transition: candidate change -> proportional evidence report
+    autonomousMinimumBand: C1
+    taskClass: verify
+    mutation: disposable-output-only
+    requires: [authority-map, candidate-change]
+    produces: [evidence-report]
+  - id: pui-review
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-review/SKILL.md
+    transition: candidate change -> revision-bound review packet within a declared review class
+    autonomousMinimumBand: C1
+    taskClass: review-local
+    mutation: none
+    requires: [authority-map, candidate-change, evidence-report, review-input]
+    produces: [review-packet]
+  - id: pui-integrate
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-integrate/SKILL.md
+    transition: approved exact-head pull request -> rule-compliant integration receipt
+    autonomousMinimumBand: C4
+    taskClass: integrate-approved-pull-request
+    mutation: conditional-pull-request-merge
+    requires: [review-packet, review-input, mutation-authorization]
+    produces: [mutation-receipt]
+  - id: pui-issue
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-issue/SKILL.md
+    transition: bounded issue portfolio -> read-only issue operations report
+    autonomousMinimumBand: C1
+    taskClass: observe
+    mutation: none
+    requires: [capability-envelope, github-snapshot]
+    produces: [issue-report]
+  - id: pui-pr
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-pr/SKILL.md
+    transition: bounded pull-request portfolio -> read-only pull-request operations report
+    autonomousMinimumBand: C1
+    taskClass: observe
+    mutation: none
+    requires: [capability-envelope, github-snapshot]
+    produces: [pull-request-report, review-input]
+  - id: pui-ci
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-ci/SKILL.md
+    transition: bounded workflow question -> CI evidence map
+    autonomousMinimumBand: C1
+    taskClass: trace
+    mutation: none
+    requires: [repository-snapshot, workflow-snapshot]
+    produces: [ci-report]
+  - id: pui-govern
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-govern/SKILL.md
+    transition: bounded governance question -> repository governance map
+    autonomousMinimumBand: C1
+    taskClass: trace
+    mutation: none
+    requires: [repository-snapshot, governance-question]
+    produces: [governance-report]
+  - id: pui-deploy
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-deploy/SKILL.md
+    transition: bounded deployment question -> deployment evidence report
+    autonomousMinimumBand: C1
+    taskClass: verify
+    mutation: none
+    requires: [authority-map, deployment-snapshot]
+    produces: [deployment-report]
+  - id: pui-deps
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-deps/SKILL.md
+    transition: bounded dependency question -> dependency evidence map
+    autonomousMinimumBand: C1
+    taskClass: trace
+    mutation: none
+    requires: [repository-snapshot, bounded-question]
+    produces: [dependency-report]
+  - id: pui-release-prep
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-release-prep/SKILL.md
+    transition: approved release intent -> reviewable candidate state
+    autonomousMinimumBand: C4
+    taskClass: prepare-release-state
+    mutation: feature-branch
+    requires: [release-authorization, authority-map]
+    produces: [candidate-change]
+  - id: pui-release-audit
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-release-audit/SKILL.md
+    transition: completed publication -> reconciled immutable evidence
+    autonomousMinimumBand: C4
+    taskClass: audit-release-evidence
+    mutation: feature-branch
+    requires: [publication-evidence, authority-map, implementation-authorization]
+    produces: [candidate-change, reconciliation-report]
+  - id: pui-observe
+    entrypoints: [maintenance]
+    loadPath: .agents/skills/pui-observe/SKILL.md
+    transition: bounded mission -> finding or no-finding report
+    autonomousMinimumBand: C1
+    taskClass: observe
+    mutation: none
+    requires: [maintenance-mission, capability-envelope]
+    produces: [observation-report, maintenance-outcome]
+  - id: pui-mission
+    entrypoints: [maintenance]
+    loadPath: .agents/skills/pui-mission/SKILL.md
+    transition: selected maintenance candidate -> frozen bounded mission and lease
+    autonomousMinimumBand: C2
+    taskClass: update-tracked-maintenance-state
+    mutation: tracked-maintenance-state
+    requires: [capability-envelope, mission-candidate, mutation-authorization]
+    produces: [maintenance-mission, mutation-receipt]
+  - id: pui-verify
+    entrypoints: [maintenance]
+    loadPath: .agents/skills/pui-verify/SKILL.md
+    transition: candidate finding -> independent classification
+    autonomousMinimumBand: C1
+    taskClass: verify
+    mutation: none
+    requires: [maintenance-mission, observation-report]
+    produces: [verification-report, decision-packet, maintenance-outcome]
+  - id: pui-remediate
+    entrypoints: [maintenance]
+    loadPath: .agents/skills/pui-remediate/SKILL.md
+    transition: accepted finding -> bounded remediation packet and change
+    autonomousMinimumBand: C2
+    taskClass: repair-bounded-regression
+    mutation: feature-branch
+    requires: [verification-report, semantic-authorization, mutation-authorization]
+    produces: [candidate-change, remediation-packet]
+  - id: pui-maintenance-review
+    entrypoints: [maintenance]
+    loadPath: .agents/skills/pui-maintenance-review/SKILL.md
+    transition: remediation -> independent technical verdict
+    autonomousMinimumBand: C3
+    taskClass: review-maintenance-remediation
+    mutation: none
+    requires: [candidate-change, remediation-packet, evidence-report]
+    produces: [review-report]
+  - id: pui-maintenance-close
+    entrypoints: [maintenance]
+    loadPath: .agents/skills/pui-maintenance-close/SKILL.md
+    transition: reviewed remediation -> synchronized run closure
+    autonomousMinimumBand: C2
+    taskClass: update-tracked-maintenance-state
+    mutation: tracked-maintenance-state
+    requires: [review-report, evidence-report, mutation-authorization]
+    produces: [maintenance-state-receipt]
+  - id: pui-record
+    entrypoints: [maintenance]
+    loadPath: .agents/skills/pui-record/SKILL.md
+    transition: terminal maintenance outcome -> synchronized run record
+    autonomousMinimumBand: C2
+    taskClass: update-tracked-maintenance-state
+    mutation: tracked-maintenance-state
+    requires: [maintenance-outcome, mutation-authorization]
+    produces: [maintenance-state-receipt]

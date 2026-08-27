@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Trace'
+  short_description: 'Trace authority through entities and evidence'
+  default_prompt: 'Use $pui-trace to map the authority and evidence for this change.'
+
+policy:
+  allow_implicit_invocation: false

@@ -6,11 +6,11 @@ since: 0.2.0-rc.0
 summary: Shadcn Button is an unofficial Proto UI-maintained projection that inherits Base Button by default, may declare setup-time negative patches explicitly, and adds a pinned, currently partial shadcn/ui visual API without duplicating Base semantics.
 statement:
   zh-CN: >-
-    Shadcn Button 是在 `P-BASE-BUTTON` 之上提供 shadcn/ui Button 外观与 API 投射的 direct prototype。当前协议保留 Base Button 的 command、activation、focus、disabled、a11y 与 outward-signal 行为，并新增六种 `variant`、四种 `size`、由 Button interaction state 驱动的视觉反馈，以及 outline 与 destructive 在 dark color scheme 下的样式增量。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Button；`asChild` 是明确不提供的 API，其他未对齐项统一记录为 compatibility differences。
+    Shadcn Button 是在 `P-BASE-BUTTON` 之上提供 shadcn/ui Button 外观与 API 投射的 direct prototype。当前协议保留 Base Button 的 command、activation、focus、disabled、a11y 与 outward-signal 行为，并新增六种 `variant`、四种 `size`、由 Button interaction state 驱动的视觉反馈，以及 outline 与 destructive 在 dark color scheme 下的样式增量。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Button；当前 destructive 的 tinted visual recipe 另有意采用较新的官方 recipe 作为视觉来源证据，但该采用不移动整体兼容比较基线，也不扩大 current passing guarantee。`asChild` 是明确不提供的 API，其他未对齐项统一记录为 compatibility differences。
 
 
   en: >-
-    Shadcn Button is a direct prototype that projects the shadcn/ui Button API and appearance over `P-BASE-BUTTON`. The current protocol retains Base Button command, activation, focus, disabled, accessibility, and outward-signal behavior while adding six `variant` values, four `size` values, visual feedback driven by Button interaction state, and dark-color-scheme styling deltas for outline and destructive variants. Its compatibility baseline is the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; `asChild` is explicitly unavailable, and every other divergence is tracked as a compatibility difference.
+    Shadcn Button is a direct prototype that projects the shadcn/ui Button API and appearance over `P-BASE-BUTTON`. The current protocol retains Base Button command, activation, focus, disabled, accessibility, and outward-signal behavior while adding six `variant` values, four `size` values, visual feedback driven by Button interaction state, and dark-color-scheme styling deltas for outline and destructive variants. Its compatibility baseline is the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; the current tinted destructive visual recipe separately records an intentional adoption of a later official recipe as visual-source evidence, without advancing the overall compatibility baseline or widening the current passing guarantee. `asChild` is explicitly unavailable, and every other divergence is tracked as a compatibility difference.
 
 
 criteria:
@@ -79,8 +79,8 @@ criteria:
       contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
   - id: P-SHADCN-BUTTON-COMPATIBILITY-SUBSET
     text:
-      zh-CN: 当前实体只声明已测试的 variant、size、disabled 与 style behavior；对固定 upstream baseline 的所有差异必须集中维护在唯一 compatibility open question 中，并区分 intentional deviation 与尚未实现的 parity gap。
-      en: This entity claims only the tested variant, size, disabled, and style behavior; every difference from the pinned upstream baseline must be maintained in one centralized compatibility open question and classified as either an intentional deviation or an unimplemented parity gap.
+      zh-CN: 当前实体只声明已测试的 variant、size、disabled 与 style behavior；固定历史兼容比较基线与后来有意采用的官方 recipe 证据必须分开记录。对固定 baseline 的差异必须集中维护在唯一 compatibility open question 中，并区分 intentional deviation 与尚未实现的 parity gap；采用较新视觉 recipe 不得被解释为整体 compatibility baseline 前移或 current passing guarantee 扩大。
+      en: This entity claims only the tested variant, size, disabled, and style behavior; the pinned historical compatibility baseline and evidence for later intentionally adopted official recipes must remain distinct. Every difference from the pinned baseline must be maintained in one centralized compatibility open question and classified as either an intentional deviation or an unimplemented parity gap; adopting a newer visual recipe must not be interpreted as advancing the overall compatibility baseline or widening the current passing guarantee.
   - id: P-SHADCN-BUTTON-AS-CHILD-OMISSION
     text:
       zh-CN: upstream `asChild` 依 `D-AS-CHILD-OMISSION-0001` 有意不进入 Shadcn Button API；透明保留 content slot 不得被宣称为 Radix Slot 或 `asChild` 等价实现。
@@ -90,11 +90,17 @@ criteria:
 openQuestions:
   - id: P-SHADCN-BUTTON-Q-UPSTREAM-DIFFERENCES
     question:
-      zh-CN: 相较固定的 shadcn/ui Button baseline，当前全部差异分别是有意偏离还是待实现 gap，以及待实现项应按什么顺序收敛？
-      en: Against the pinned shadcn/ui Button baseline, which current differences are intentional deviations versus implementation gaps, and in what order should the implementation gaps converge?
+      zh-CN: 固定的历史 shadcn/ui Button 兼容比较基线与后来有意采用的官方视觉 recipe 应如何同时记录，当前其余差异分别是有意偏离还是待实现 gap，以及待实现项应按什么顺序收敛？
+      en: How should the pinned historical shadcn/ui Button compatibility baseline coexist with later intentionally adopted official visual recipes, which remaining differences are intentional deviations versus implementation gaps, and in what order should those gaps converge?
     context:
-      zh-CN: 已确定的 intentional deviation 是不提供 `asChild`，且透明 slot 不等价于 Radix Slot。当前待实现/待评审差异至少包括 className 与 native button prop forwarding、aria-invalid styling、nested SVG sizing、xs/icon-xs/icon-sm/icon-lg sizes，以及现有 size 和 visual token 与 upstream 的精确差异。current passing guarantee 在这些项目实现并通过测试前不得扩大。
-      en: The decided intentional deviation is omission of `asChild`, and the transparent slot is not a Radix Slot equivalent. Current implementation or review gaps include at least className and native-button prop forwarding, aria-invalid styling, nested-SVG sizing, xs/icon-xs/icon-sm/icon-lg sizes, and exact differences between current size and visual tokens and upstream. The current passing guarantee must not expand until an item is implemented and tested.
+      zh-CN: >-
+        固定的历史兼容比较基线仍是 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Button；它没有被静默前移。当前 destructive 的 `bg-destructive/10 text-destructive`、hover `bg-destructive/20`、dark `bg-destructive/20` / `dark:hover:bg-destructive/30` recipe 则是有意采用较新官方设计，稳定来源证据固定到 shadcn-ui/ui revision `1773ecfeeb4a04366978d353e69b5c7ded78dcb2` 的 `apps/v4/registry/styles/style-maia.css`。这一来源只解释当前视觉 recipe，不扩大整体 upstream parity claim。#454 的对比度实测保留为 adopted-upstream behavior evidence，不构成 Proto UI 意外 parity gap、本地 palette remediation requirement 或 Proto UI 自有的 4.5:1 guarantee。
+
+
+      en: >-
+        The pinned historical compatibility baseline remains the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; it has not been silently advanced. The current destructive recipe—`bg-destructive/10 text-destructive`, hover `bg-destructive/20`, dark `bg-destructive/20`, and `dark:hover:bg-destructive/30`—is instead an intentional adoption of a later official design, with stable source evidence pinned to shadcn-ui/ui revision `1773ecfeeb4a04366978d353e69b5c7ded78dcb2` at `apps/v4/registry/styles/style-maia.css`. That source explains the current visual recipe only and does not widen the overall upstream parity claim. The measured contrast from #454 is retained as adopted-upstream behavior evidence; it is not an accidental Proto UI parity gap, a local palette remediation requirement, or a Proto UI-owned 4.5:1 guarantee. The decided intentional deviation still includes omission of `asChild`, and the transparent slot is not a Radix Slot equivalent. Current implementation or review gaps include at least className and native-button prop forwarding, aria-invalid styling, nested-SVG sizing, xs/icon-xs/icon-sm/icon-lg sizes, and exact differences between current size and other visual tokens and the pinned baseline. The current passing guarantee must not expand until an item is implemented and tested.
+
+
     blocks: [shadcn button parity roadmap]
 sources:
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
@@ -102,7 +108,9 @@ sources:
   - path: packages/prototypes/shadcn/src/button/types.ts
   - path: packages/prototypes/shadcn/test/button.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/button.tsx
-    label: shadcn/ui v4 new-york Button pinned baseline
+    label: shadcn/ui v4 new-york Button pinned historical compatibility baseline
+  - path: https://github.com/shadcn-ui/ui/blob/1773ecfeeb4a04366978d353e69b5c7ded78dcb2/apps/v4/registry/styles/style-maia.css
+    label: shadcn/ui later official maia Button style adopted as destructive visual recipe evidence; does not advance the pinned compatibility baseline
 dependsOn:
   contracts:
     [
@@ -125,4 +133,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced the delta-style Shadcn Button catalog template with reversible Base inheritance, pinned upstream identity, current visual API guarantees, intentional asChild omission, and centralized compatibility differences.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Distinguished the pinned historical compatibility baseline from the later intentionally adopted destructive visual recipe and retained contrast as adopted-upstream evidence.
 tags: [prototype, shadcn, button, upstream-derived, delta, compatibility, visual]

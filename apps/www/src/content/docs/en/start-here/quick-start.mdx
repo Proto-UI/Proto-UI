@@ -4,7 +4,38 @@ description: 'Initialize Proto UI 0.2.0 and add a component from the stable npm 
 ---
 
 import DocStageNotice from '@/components/DocStageNotice.astro';
+import CodeExample from '@/components/CodeExample.astro';
 import { Aside } from '@astrojs/starlight/components';
+
+export const buttonHostFiles = /** @type {const} */ ({
+  react: [
+    {
+      name: 'install.sh',
+      lang: 'bash',
+      code: 'npx @proto.ui/cli@latest add react shadcn-button',
+    },
+    {
+      name: 'src/App.tsx',
+      lang: 'tsx',
+      code: `import { ShadcnButton } from '../proto-ui/components/react';
+
+export function App() {
+  return <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>;
+}`,
+    },
+  ],
+  wc: [
+    {
+      name: 'install.sh',
+      lang: 'bash',
+      code: 'npx @proto.ui/cli@latest add wc shadcn-button',
+    },
+    {
+      name: 'src/main.ts',
+      lang: 'typescript',
+      code: `import '../proto-ui/components/wc';
+
+document.body.innerHTML = '<proto-ui-shadcn-button variant="outline">Proto UI 0.2.0</proto-ui-shadcn-button>';`, }, ], });
 
 <DocStageNotice
   title="Proto UI 0.2.0 is available from npm latest."
@@ -76,31 +107,17 @@ import './styles/proto-ui-style.css';
 
 Adjust the relative path if your entry file is elsewhere. When the application has not selected a theme, the generated Shadcn theme follows `prefers-color-scheme`. Set `data-theme="light"` / `data-theme="dark"` on the root element, or use the compatible `.light` / `.dark` classes, to override the system preference.
 
-## Add a component
+## Add and import a component
 
-Add the official Shadcn Button facade for React:
+Add the official Shadcn Button facade for the host your application uses. The example keeps the CLI command and application entry together for React and Web Components; its initial host follows the site-wide Adapter preference when supported.
 
-```bash
-npx @proto.ui/cli@latest add react shadcn-button
-```
+<CodeExample
+  files={buttonHostFiles}
+  initialHost="react"
+  label="Add and use Shadcn Button in React or Web Components"
+/>
 
-The command checks that the React runtime exists, installs `@proto.ui/adapter-react@0.2.0` and `@proto.ui/prototypes-shadcn@0.2.0` when needed, and generates `proto-ui/components/react/index.ts`.
-
-For Vue, replace `react` with `vue`; for Web Components, use `wc`. The same component can be generated for more than one host.
-
-## Import the generated component
-
-From a typical `src/App.tsx`, import the generated React host entry with a relative path:
-
-```tsx
-import { ShadcnButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>;
-}
-```
-
-The relative import is intentional: applications do not share one path-alias setup or directory depth. Generated facades preserve the Prototype's declared props, event listeners, and ref/expose surface, so supported values receive TypeScript completion and invalid props are rejected.
+The command installs the matching Adapter and `@proto.ui/prototypes-shadcn@0.2.0`, then generates the host entry under `proto-ui/components/`. Vue projects use `vue` in the same command. The relative imports are intentional: applications do not share one path-alias setup or directory depth. Generated facades preserve the Prototype's declared props, event listeners, and ref/expose surface.
 
 ## Continue one component at a time
 

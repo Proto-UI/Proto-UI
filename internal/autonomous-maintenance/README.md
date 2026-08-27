@@ -6,6 +6,6 @@ Applicable `spec/**` entities remain authoritative according to lifecycle. `inte
 
 ## Current stage
 
-The current experiment is Phase 0.1: manually triggered runs using the repository-scoped `proto-ui-autonomous-maintenance` Skill. Observer and Verifier stages remain read-only. Its purpose is to test whether an Agent can discover previously unknown, reproducible, valuable maintenance findings without being given a known bug, while preserving independent verification, governed remediation, measurable run state, and explicit semantic and integration decisions.
+The current experiment is Phase 0.1: manually triggered runs routed by the repository-scoped `$pui-maintain` entry skill. Its lazy stage skills keep Observer and Verifier read-only, preserve independent verification and remediation review, and retain explicit semantic and integration decisions. `pui-record` synchronizes supported no-finding, rejected-finding, and blocked terminal outcomes without pretending that remediation review occurred.
 
 See [`phase-0/README.md`](./phase-0/README.md) for the run protocol.

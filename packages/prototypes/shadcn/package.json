@@ -33,6 +33,11 @@
       "import": "./dist/button/index.js",
       "default": "./dist/button/index.js"
     },
+    "./checkbox": {
+      "types": "./dist/checkbox/index.d.ts",
+      "import": "./dist/checkbox/index.js",
+      "default": "./dist/checkbox/index.js"
+    },
     "./component-presets": {
       "types": "./dist/component-presets.d.ts",
       "import": "./dist/component-presets.js",

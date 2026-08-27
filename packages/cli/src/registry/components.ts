@@ -225,6 +225,24 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     'ShadcnTextareaRoot'
   ),
 
+  'shadcn-checkbox': shadcnCompound(
+    'shadcn-checkbox',
+    'shadcn Checkbox',
+    [
+      {
+        prototypeImport: 'shadcnCheckboxRoot',
+        exportBaseName: 'ShadcnCheckboxRoot',
+        elementName: 'proto-ui-shadcn-checkbox-root',
+      },
+      {
+        prototypeImport: 'shadcnCheckboxIndicator',
+        exportBaseName: 'ShadcnCheckboxIndicator',
+        elementName: 'proto-ui-shadcn-checkbox-indicator',
+      },
+    ],
+    SHADCN_COMPONENT_PRESET_RECIPES['shadcn-checkbox']
+  ),
+
   'shadcn-switch': shadcnCompound(
     'shadcn-switch',
     'shadcn Switch',
@@ -671,6 +689,24 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
       prototypeImport: 'tabsContent',
       exportBaseName: 'BaseTabsContent',
       elementName: 'proto-ui-base-tabs-content',
+    },
+  ]),
+
+  'base-radio-group': baseCompound('base-radio-group', 'Base Radio Group', [
+    {
+      prototypeImport: 'radioGroupRoot',
+      exportBaseName: 'BaseRadioGroupRoot',
+      elementName: 'proto-ui-base-radio-group-root',
+    },
+    {
+      prototypeImport: 'radioGroupItem',
+      exportBaseName: 'BaseRadioGroupItem',
+      elementName: 'proto-ui-base-radio-group-item',
+    },
+    {
+      prototypeImport: 'radioGroupIndicator',
+      exportBaseName: 'BaseRadioGroupIndicator',
+      elementName: 'proto-ui-base-radio-group-indicator',
     },
   ]),
 

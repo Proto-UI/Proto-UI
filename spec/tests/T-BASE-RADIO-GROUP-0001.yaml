@@ -1,0 +1,117 @@
+id: T-BASE-RADIO-GROUP-0001
+type: test
+title: Base Radio Group root protocol contract tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Executable coverage for Base Radio Group root ownership, controlled and uncontrolled request semantics, canonical duplicate safety, structural preservation, selected-or-first roving navigation, accessible radiogroup projection, independent domains, exact APIs, and deferred boundaries.
+cases:
+  - id: T-BASE-RADIO-GROUP-0001-CASE-ANATOMY-AND-SURFACE
+    title: Radio Group declares one root with repeatable Items and Indicators and publishes only approved root APIs
+    covers:
+      - P-BASE-RADIO-GROUP-IDENTITY-AND-AUTHORING
+      - P-BASE-RADIO-GROUP-SOLE-VALUE-OWNER
+      - P-BASE-RADIO-GROUP-EXACT-PROPS
+      - P-BASE-RADIO-GROUP-EXACT-EXPOSES
+    expectation: radio-group-anatomy-and-public-root-surface-remain-exact
+  - id: T-BASE-RADIO-GROUP-0001-CASE-UNCONTROLLED
+    title: Uncontrolled valid requests update one canonical checked Item and emit once
+    covers:
+      - P-BASE-RADIO-GROUP-UNCONTROLLED-REQUEST
+      - P-BASE-RADIO-GROUP-CANONICAL-CHECKED-SAFETY
+      - P-BASE-RADIO-GROUP-REQUEST-REJECTION
+    expectation: radio-group-uncontrolled-valid-request-commits-once
+  - id: T-BASE-RADIO-GROUP-0001-CASE-CONTROLLED
+    title: Controlled requests signal a proposal without temporary checked state
+    covers:
+      - P-BASE-RADIO-GROUP-CONTROLLED-REQUEST
+      - P-BASE-RADIO-GROUP-CONTEXT-FACTS
+    expectation: radio-group-controlled-request-does-not-mutate-final-state
+  - id: T-BASE-RADIO-GROUP-0001-CASE-EMPTY-DUPLICATE-AND-STRUCTURE
+    title: Empty unmatched duplicate and structural churn scenarios preserve root value without ambiguous selection
+    covers:
+      - P-BASE-RADIO-GROUP-EMPTY-AND-UNMATCHED
+      - P-BASE-RADIO-GROUP-CANONICAL-CHECKED-SAFETY
+      - P-BASE-RADIO-GROUP-STRUCTURAL-PRESERVATION
+      - P-BASE-RADIO-GROUP-DISABLED-SELECTION
+    expectation: radio-group-preserves-value-and-rejects-ambiguous-selection
+  - id: T-BASE-RADIO-GROUP-0001-CASE-ROVING
+    title: Selected-or-first focus entry and both-axis wrapped navigation skip disabled Items
+    covers:
+      - P-BASE-RADIO-GROUP-COLLECTION-AND-ROVING
+      - P-BASE-RADIO-GROUP-FOCUS-ENTRY
+      - P-BASE-RADIO-GROUP-KEYBOARD-NAVIGATION
+    expectation: radio-group-roving-selects-targets-and-skips-disabled-items
+  - id: T-BASE-RADIO-GROUP-0001-CASE-A11Y-INDEPENDENCE-AND-BOUNDARIES
+    title: Independent named radiogroups project exact accessibility state and omit deferred APIs
+    covers:
+      - P-BASE-RADIO-GROUP-A11Y-GROUP
+      - P-BASE-RADIO-GROUP-DEFERRED-BOUNDARIES
+      - P-BASE-RADIO-GROUP-COLLECTION-AND-ROVING
+    expectation: radio-groups-remain-independent-named-and-boundary-complete
+implementations:
+  - id: prototypes-base-radio-group-root-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-RADIO-GROUP-0001-CASE-ANATOMY-AND-SURFACE
+      - T-BASE-RADIO-GROUP-0001-CASE-UNCONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-CONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-EMPTY-DUPLICATE-AND-STRUCTURE
+      - T-BASE-RADIO-GROUP-0001-CASE-ROVING
+      - T-BASE-RADIO-GROUP-0001-CASE-A11Y-INDEPENDENCE-AND-BOUNDARIES
+    exercises: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP-INDICATOR]
+    notes:
+      - Uses real prototype runtime instances and host-rendered accessibility projections.
+      - Public-surface and deferred-boundary criteria are protected by exact key and absence assertions.
+  - id: adapter-web-component-radio-group-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-RADIO-GROUP-0001-CASE-UNCONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-CONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-ROVING
+      - T-BASE-RADIO-GROUP-0001-CASE-A11Y-INDEPENDENCE-AND-BOUNDARIES
+    exercises: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP-INDICATOR]
+  - id: adapter-react-radio-group-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-RADIO-GROUP-0001-CASE-UNCONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-CONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-ROVING
+      - T-BASE-RADIO-GROUP-0001-CASE-A11Y-INDEPENDENCE-AND-BOUNDARIES
+    exercises: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP-INDICATOR]
+  - id: adapter-vue-radio-group-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-RADIO-GROUP-0001-CASE-UNCONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-CONTROLLED
+      - T-BASE-RADIO-GROUP-0001-CASE-ROVING
+      - T-BASE-RADIO-GROUP-0001-CASE-A11Y-INDEPENDENCE-AND-BOUNDARIES
+    exercises: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP-INDICATOR]
+verifies:
+  prototypes:
+    - id: P-BASE-RADIO-GROUP
+      anchors:
+        - P-BASE-RADIO-GROUP-SOLE-VALUE-OWNER
+        - P-BASE-RADIO-GROUP-CONTROLLED-REQUEST
+        - P-BASE-RADIO-GROUP-CANONICAL-CHECKED-SAFETY
+        - P-BASE-RADIO-GROUP-KEYBOARD-NAVIGATION
+        - P-BASE-RADIO-GROUP-A11Y-GROUP
+        - P-BASE-RADIO-GROUP-DEFERRED-BOUNDARIES
+exercises:
+  prototypes: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP-INDICATOR]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced executable root protocol evidence for value ownership, canonical checked safety, roving navigation, accessibility, and deferred boundaries.
+tags: [prototype, base, radio-group, root, test]

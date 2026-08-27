@@ -50,7 +50,7 @@ function setupDropdownTrigger(def: DefHandle<DropdownTriggerProps, DropdownTrigg
     // P-BASE-DROPDOWN-MENU-TRIGGER-REQUEST, P-BASE-DROPDOWN-MENU-TRIGGER-DISABLED
     if (command.disabled.get()) return;
     const ctx = run.context.read(DROPDOWN_CONTEXT);
-    const key = ev?.detail?.key;
+    const key = ev?.key;
     const focusReason = key ? 'keyboard' : 'pointer';
     if (key === 'Enter' || key === ' ') {
       requestDropdownOpen(run, true, 'trigger.press', 'keyboard', 'first');
@@ -61,9 +61,12 @@ function setupDropdownTrigger(def: DefHandle<DropdownTriggerProps, DropdownTrigg
 
   def.event.on('key.down', (run, ev) => {
     if (command.disabled.get()) return;
-    const key = ev?.detail?.key;
+    const key = ev?.key;
     if (key !== 'ArrowDown' && key !== 'ArrowUp') return;
-    ev?.detail?.preventDefault?.();
+    ev.control.requestDefaultActionPrevention({
+      reason: 'dropdown.arrow-open',
+      source: 'base-dropdown-trigger',
+    });
 
     const ctx = run.context.read(DROPDOWN_CONTEXT);
     const entry = key === 'ArrowUp' ? 'last' : 'first';

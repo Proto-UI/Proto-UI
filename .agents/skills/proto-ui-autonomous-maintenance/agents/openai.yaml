@@ -1,4 +1,0 @@
-interface:
-  display_name: 'Proto UI Autonomous Maintenance'
-  short_description: 'Run governed autonomous maintenance stages'
-  default_prompt: 'Use $proto-ui-autonomous-maintenance to continue the next eligible stage of the current maintenance run.'

@@ -40,6 +40,7 @@ function setupDropdownContent(
     alignOffset: { type: 'number', empty: 'fallback' },
     avoidCollisions: { type: 'boolean', empty: 'fallback' },
     collisionPadding: { type: 'number', empty: 'fallback' },
+    excludeAnchorTranslation: { type: 'boolean', empty: 'fallback' },
   });
   def.props.setDefaults({
     side: 'bottom',
@@ -48,6 +49,7 @@ function setupDropdownContent(
     alignOffset: 0,
     avoidCollisions: true,
     collisionPadding: 0,
+    excludeAnchorTranslation: false,
   });
 
   const contentId = def.state.string('dropdownContentId', '');
@@ -84,6 +86,7 @@ function setupDropdownContent(
     avoidCollisions: true,
     collisionBoundary: 'clippingAncestors',
     collisionPadding: 0,
+    excludeAnchorTranslation: false,
     portal: true,
     modal: false,
     layerRole: 'dropdown-menu-content',
@@ -188,6 +191,7 @@ function setupDropdownContent(
       collisionPadding: props.collisionPadding,
       strategy: 'fixed',
       collisionBoundary: 'clippingAncestors',
+      excludeAnchorTranslation: props.excludeAnchorTranslation,
     });
   };
 
@@ -200,7 +204,15 @@ function setupDropdownContent(
   };
 
   def.props.watch(
-    ['side', 'align', 'sideOffset', 'alignOffset', 'avoidCollisions', 'collisionPadding'],
+    [
+      'side',
+      'align',
+      'sideOffset',
+      'alignOffset',
+      'avoidCollisions',
+      'collisionPadding',
+      'excludeAnchorTranslation',
+    ],
     (run) => syncPosition(run)
   );
 
@@ -269,7 +281,7 @@ function setupDropdownContent(
     const ctx = readContext(run);
     if (!ctx) return;
     if (!ctx.open || ctx.disabled) return;
-    const key = ev?.detail?.key;
+    const key = ev?.key;
     if (key !== 'Tab') return;
     if (!getNavigationEntries(run).some((entry: any) => entry.focused)) return;
     // P-BASE-DROPDOWN-MENU-CONTENT-DISMISS: do not prevent host traversal.

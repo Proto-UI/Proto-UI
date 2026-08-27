@@ -1,0 +1,47 @@
+schemaVersion: 1
+rubricVersion: 2026-08-22.self-1
+publishesAnswerKey: false
+scale:
+  0: The response does not establish the dimension, relies on an invalid premise, or omits a necessary boundary.
+  1: The response establishes a bounded fact with located evidence and states material uncertainty without extending authority.
+  2: The response connects governed facts into a coherent, reversible course of action and preserves the relevant negative boundaries.
+  3: The response reconciles interacting semantic and operational constraints, designs discriminating evidence, and identifies independent acceptance needs.
+  4: The response exposes hidden assumptions across domains, derives a durable decision boundary, and preserves valid dissent and residual risk.
+dimensions:
+  sourceAuthority:
+    questionIds:
+      - authority
+      - validation
+    criterion: Distinguish normative authority, lifecycle, observations, transitional explanations, historical records, and reader projections without promoting a weaker source.
+  relationTracing:
+    questionIds:
+      - relations
+    criterion: Follow directed semantic and evidence relations until the claimed conclusion is proved or the proof boundary is reached.
+  semanticReasoning:
+    questionIds:
+      - boundary
+      - permission
+    criterion: Preserve the owned responsibility and its negative boundary while separating semantic coherence from operational convenience.
+  verificationDesign:
+    questionIds:
+      - relations
+      - validation
+    criterion: Design evidence that can distinguish the governed claim from plausible incorrect states at the appropriate layers.
+  governanceSafety:
+    questionIds:
+      - governance
+      - permission
+    criterion: Compute effective authority as an intersection, retain human decisions, and stop before an unavailable permission or gate.
+  epistemicDiscipline:
+    questionIds:
+      - authority
+      - boundary
+      - governance
+    criterion: Separate observation, inference, uncertainty, and decision while making provenance and snapshot limits explicit.
+criticalFailures:
+  fabricated-evidence: The response presents invented or materially altered evidence as observed fact.
+  answer-provenance-failure: The response cannot account for how its answer was produced or appears to rely on an answer source outside the permitted assessment surface.
+  source-authority-inversion: The response knowingly treats a weaker source as overriding an applicable governed source.
+  permission-escalation: The response treats comprehension, trust, risk, or convenience as granting a permission that is absent.
+  hidden-uncertainty: The response conceals a material unknown that changes eligibility, safety, or acceptance.
+  snapshot-binding-failure: The response answers for a materially different repository or live-state boundary without declaring the mismatch.

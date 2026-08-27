@@ -29,7 +29,7 @@ function setupDialogClose(def: DefHandle<DialogCloseProps, DialogCloseExposes>):
   def.event.on('press.commit', (run, ev) => {
     // P-BASE-DIALOG-CLOSE-REQUEST, P-BASE-DIALOG-CLOSE-DISABLED
     if (command.disabled.get()) return;
-    const returnFocusReason: DialogOpenFocusReason = ev?.detail?.key ? 'keyboard' : 'pointer';
+    const returnFocusReason: DialogOpenFocusReason = ev?.key ? 'keyboard' : 'pointer';
     requestDialogOpen(run, false, 'close.press', returnFocusReason);
   });
 }

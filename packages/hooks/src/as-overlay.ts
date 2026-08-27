@@ -13,6 +13,7 @@ type OverlayFacade = {
 
 type OverlayPort = {
   setViewActive(active: boolean): void;
+  markPresenceBound(): void;
   reconcileViewResourcesAfterCallback(): void;
 };
 
@@ -112,6 +113,7 @@ const installOverlay = definePrivilegedAsHook<PropsBaseType, OverlayHandle<Props
         }
 
         presenceBinding = binding;
+        port.markPresenceBound();
         port.setViewActive(binding.present.get());
         offPresence = binding.present.watch((_run, event) => {
           if (event.type !== 'next') return;

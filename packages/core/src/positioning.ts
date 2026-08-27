@@ -12,6 +12,16 @@ export type AnchoredPositionConfig = Readonly<{
   avoidCollisions: boolean;
   collisionBoundary: AnchoredCollisionBoundary;
   collisionPadding: number;
+  /**
+   * When true, the host ignores the anchor element's own CSS translation
+   * (matrix m41/m42) when measuring anchored geometry. Interaction
+   * decorations such as hover lift or press-down are then excluded from
+   * floating placement. When false or omitted, the host positions against
+   * the anchor's actual rendered geometry, which is the default: legitimate
+   * translations (centering, application animation) must keep placing the
+   * floating element where the user sees the anchor.
+   */
+  excludeAnchorTranslation?: boolean;
 }>;
 
 export type AnchoredPositionSnapshot = Readonly<{

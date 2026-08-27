@@ -120,4 +120,4 @@ corepack pnpm@10.32.1 test
 - 手工修改 generated projection 会制造 drift；应修改 entity 或 generator。
 - 只运行 full suite 会让 ownership failure 更难诊断；PR 中应保留 focused command。
 
-接下来阅读 [Runtime 架构](/zh-cn/build/runtime-architecture/)、[模块与扩展架构](/zh-cn/build/module-extension-architecture/)，或前往[参与贡献](/zh-cn/build/contribute/)查看交付流程。
+接下来阅读 [Runtime 架构](/zh-cn/build/runtime-architecture/)、[模块与扩展架构](/zh-cn/build/module-extension-architecture/)，或前往[交付一个改动](/zh-cn/contribute/deliver/)查看贡献流程。

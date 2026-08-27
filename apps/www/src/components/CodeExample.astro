@@ -1,0 +1,197 @@
+---
+import CodePanel from './PrototypePreviewer/CodePanel.astro';
+import { AdapterIds, type RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { isRuntimeId } from './adapter-preference';
+import type { CodeExampleProps } from './code-example-types';
+
+export type { CodeExampleFile, CodeExampleProps, CodeExamplesByHost } from './code-example-types';
+
+interface Props extends CodeExampleProps {}
+
+const { files, initialHost, label = 'Code example', class: className = '' } = Astro.props;
+
+for (const host of Object.keys(files)) {
+  if (!isRuntimeId(host)) throw new Error(`[CodeExample] Unsupported host "${host}".`);
+}
+
+const hosts = AdapterIds.filter(
+  (host): host is RuntimeId => isRuntimeId(host) && files[host] !== undefined
+);
+if (hosts.length === 0) throw new Error('[CodeExample] At least one supported host is required.');
+
+for (const host of hosts) {
+  const hostFiles = files[host];
+  if (!hostFiles?.length)
+    throw new Error(`[CodeExample] Host "${host}" requires at least one file.`);
+  const names = new Set<string>();
+  for (const file of hostFiles) {
+    if (!file.name.trim()) throw new Error(`[CodeExample] Host "${host}" has a blank filename.`);
+    if (names.has(file.name)) {
+      throw new Error(`[CodeExample] Host "${host}" has duplicate filename "${file.name}".`);
+    }
+    names.add(file.name);
+  }
+}
+
+if (initialHost && !hosts.includes(initialHost)) {
+  throw new Error(`[CodeExample] initialHost "${initialHost}" is not present in files.`);
+}
+
+const activeHost = initialHost ?? hosts[0];
+const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
+---
+
+<section
+  class:list={['code-example', className]}
+  data-code-example
+  data-initial-host={activeHost}
+  aria-label={label}
+>
+  <div class="code-example__strip">
+    <div class="code-example__tabs" role="tablist" aria-label="Host" data-code-host-tabs>
+      {
+        hosts.map((host, hostIndex) => {
+          const selected = host === activeHost;
+          return (
+            <button
+              id={`${instanceId}-host-tab-${hostIndex}`}
+              type="button"
+              role="tab"
+              data-code-host-tab
+              data-code-host={host}
+              aria-controls={`${instanceId}-host-panel-${hostIndex}`}
+              aria-selected={selected}
+              tabindex={selected ? 0 : -1}
+            >
+              {host === 'wc' ? 'Web Components' : host === 'react' ? 'React' : 'Vue'}
+            </button>
+          );
+        })
+      }
+    </div>
+  </div>
+
+  {
+    hosts.map((host, hostIndex) => {
+      const hostFiles = files[host] ?? [];
+      const hostSelected = host === activeHost;
+      return (
+        <section
+          id={`${instanceId}-host-panel-${hostIndex}`}
+          class="code-example__host-panel"
+          role="tabpanel"
+          data-code-host-panel
+          data-code-host={host}
+          aria-labelledby={`${instanceId}-host-tab-${hostIndex}`}
+          hidden={!hostSelected}
+        >
+          <div class="code-example__strip code-example__strip--files">
+            <div
+              class="code-example__tabs"
+              role="tablist"
+              aria-label={`Files for ${host}`}
+              data-code-file-tabs
+            >
+              {hostFiles.map((file, fileIndex) => (
+                <button
+                  id={`${instanceId}-${hostIndex}-file-tab-${fileIndex}`}
+                  type="button"
+                  role="tab"
+                  data-code-file-tab
+                  data-code-file-index={fileIndex}
+                  aria-controls={`${instanceId}-${hostIndex}-file-panel-${fileIndex}`}
+                  aria-selected={fileIndex === 0}
+                  tabindex={fileIndex === 0 ? 0 : -1}
+                >
+                  {file.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          {hostFiles.map((file, fileIndex) => (
+            <CodePanel
+              id={`${instanceId}-${hostIndex}-file-panel-${fileIndex}`}
+              labelledBy={`${instanceId}-${hostIndex}-file-tab-${fileIndex}`}
+              hidden={fileIndex !== 0}
+              fileIndex={fileIndex}
+              code={file.code}
+              lang={file.lang}
+            />
+          ))}
+        </section>
+      );
+    })
+  }
+</section>
+
+<script>
+  import { initCodeExamples } from './code-example-client';
+
+  initCodeExamples(document);
+  document.addEventListener('astro:page-load', () => initCodeExamples(document));
+</script>
+
+<style>
+  .code-example,
+  .code-example__host-panel,
+  :global([data-code-example] [data-code-file-panel]) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .code-example {
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in oklch, var(--color-muted) 20%, transparent);
+  }
+
+  .code-example__host-panel[hidden],
+  :global([data-code-example] [data-code-file-panel][hidden]) {
+    display: none;
+  }
+
+  .code-example__strip {
+    max-width: 100%;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .code-example__strip--files {
+    background: color-mix(in oklch, var(--color-muted) 45%, transparent);
+  }
+
+  .code-example__tabs {
+    display: flex;
+    width: max-content;
+    min-width: 100%;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem;
+  }
+
+  .code-example__tabs button {
+    flex: none;
+    border: 0;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    background: transparent;
+    color: var(--color-muted-foreground);
+    font: inherit;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .code-example__tabs button[aria-selected='true'] {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--color-foreground) 12%, transparent);
+  }
+
+  .code-example__tabs button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+</style>

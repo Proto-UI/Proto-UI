@@ -1,0 +1,55 @@
+id: C-HOST-VIEW-ATTACHMENT-0001
+type: contract
+title: A not-present view is detached rather than removed, and says so on the host
+status: draft
+since: 0.3.0-alpha.0
+summary: Adapters project a not-present view intent as a detached host that keeps its authored children, and mark that state with a single cross-adapter attribute so the condition is observable instead of inferred.
+statement:
+  zh-CN: >-
+    View intent 为 not-present 时，adapter 必须投射为 detached 而非移除：宿主元素与其 authored children 留在树上，并由共享的 `data-pui-view-detached` attribute 标记该状态。该 attribute 是跨 adapter 的 view-attachment 证据面，不引入新的语义域，也不改变 boundary 与 surface 的角色划分。Detached 子树不参与绘制、accessibility tree 与 tab 顺序，这一点由 attribute 对应的 `display: none` 投影达成，而不依赖每个 styled projection 自行处理。Authored children 的存在性与该实例 view 的生命周期解耦：children 照常初始化并向所属 collection 注册，因此依赖 collection 的信息通路在 view 从未 attach 过时也能解析。
+
+
+  en: >-
+    When a view intent is not present, an adapter must project it as detached rather than removed: the host element and its authored children stay in the tree, and the shared `data-pui-view-detached` attribute marks that state. The attribute is a cross-adapter view-attachment evidence surface; it introduces no new semantic domain and does not change the boundary and surface roles. A detached subtree takes no part in painting, the accessibility tree, or the tab order, achieved through the projection attached to that attribute rather than by each styled projection handling it. The existence of authored children is decoupled from that instance's view lifecycle: children initialize and register with their owning collection as usual, so collection-backed information channels resolve even when the view has never attached.
+
+
+criteria:
+  - id: C-HOST-VIEW-ATTACHMENT-0001-A
+    text:
+      zh-CN: 所有 adapter 必须使用同一个 `data-pui-view-detached` attribute 名，其常量由 adapter-base 单一提供；adapter 不得各自定义等价 attribute 或以私有属性表达同一状态。
+      en: Every adapter must use the same `data-pui-view-detached` attribute name from a single constant provided by adapter-base; an adapter must not define an equivalent attribute of its own or express the same state through a private property.
+  - id: C-HOST-VIEW-ATTACHMENT-0001-B
+    text:
+      zh-CN: 该 attribute 出现当且仅当该实例的 view intent 为 not-present；它不得被用来表达尚未就绪、隐藏、禁用或任何其它状态。
+      en: The attribute is present exactly when that instance's view intent is not present; it must not be reused to express not-yet-ready, hidden, disabled, or any other state.
+  - id: C-HOST-VIEW-ATTACHMENT-0001-C
+    text:
+      zh-CN: Detached 子树必须被排除在绘制、accessibility tree 与 tab 顺序之外，且该排除由 attribute 自身的投影达成；styled projection 不得为达成这一点各自补写规则。
+      en: A detached subtree must be excluded from painting, the accessibility tree, and the tab order, and that exclusion must come from the projection attached to the attribute itself rather than from rules each styled projection adds.
+  - id: C-HOST-VIEW-ATTACHMENT-0001-D
+    text:
+      zh-CN: Authored children 在 view not-present 时仍须挂载并完成各自的初始化与 collection 注册；adapter 不得以 view 未 attach 为由跳过它们。
+      en: Authored children must still mount and complete their own initialization and collection registration while the view is not present; an adapter must not skip them on the grounds that the view has not attached.
+  - id: C-HOST-VIEW-ATTACHMENT-0001-E
+    text:
+      zh-CN: View readiness 必须考虑祖先：位于 detached 子树内的实例不得报告自身 view 已就绪，即使它自己的 view 已 attach。
+      en: View readiness must account for ancestry, so an instance inside a detached subtree must not report its own view as ready even when its own view has attached.
+sources:
+  - path: packages/adapters/base/src/host/view-visibility.ts
+  - path: packages/adapters/web-component/src/adapt.ts
+  - path: packages/adapters/react/src/adapt.ts
+  - path: packages/adapters/vue/src/adapt.ts
+verifies: { tests: [T-HOST-VIEW-ATTACHMENT-0001] }
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+  knowledge:
+    - K-HOST-SURFACE-ROLES-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: >-
+      Promoted the detached-view marker to a cross-adapter contract. Web Components already kept a not-present host in the tree while React and Vue removed it, so collection-backed channels such as Select Value resolved differently by runtime on first paint.
+
+
+tags: [adapter, host-projection, view-intent, attachment, overlay]

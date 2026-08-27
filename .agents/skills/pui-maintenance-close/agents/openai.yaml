@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Maintenance Close'
+  short_description: 'Close a reviewed maintenance transition'
+  default_prompt: 'Use $pui-maintenance-close to close this reviewed maintenance transition.'
+
+policy:
+  allow_implicit_invocation: false

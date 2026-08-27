@@ -17,9 +17,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // can exceed its own hook timeout and fall back to spawning its own server.
 // Warm every route the suites wait on.
 const READY_ROUTES = [
+  '/en/ui-libraries/base/scroll-area/',
   '/en/ui-libraries/base/textarea/',
   '/en/ui-libraries/brutalist/components/switch/',
   '/en/ui-libraries/brutalist/components/tabs/',
+  '/en/ui-libraries/shadcn/checkbox/',
+  '/en/ui-libraries/shadcn/dropdown-menu/',
+  '/en/ui-libraries/shadcn/switch/',
   '/en/ui-libraries/shadcn/textarea/',
 ];
 const READY_TIMEOUT_MS = 180_000;

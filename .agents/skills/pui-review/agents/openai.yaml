@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Review'
+  short_description: 'Review a change independently against authority'
+  default_prompt: 'Use $pui-review to review this Proto UI change independently.'
+
+policy:
+  allow_implicit_invocation: false

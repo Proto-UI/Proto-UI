@@ -3,7 +3,7 @@ type: test
 title: State watch, event, and lifecycle tests
 status: draft
 since: 0.1.0
-summary: Module and runtime tests for setup-only watch registration, StateEvent delivery, deterministic ordering, and lifecycle cleanup.
+summary: Module and runtime tests for setup-only watch registration, callback-scope binding, StateEvent delivery, deterministic ordering, and lifecycle cleanup.
 cases:
   - id: T-STATE-0004-CASE-WATCH-SETUP-ONLY
     title: Watch registration is setup-only and absent from owned views
@@ -40,6 +40,15 @@ cases:
       - C-STATE-0012-A
       - C-STATE-0012-B
     expectation: alive-instance-view-use
+  - id: T-STATE-0004-CASE-CALLBACK-SCOPE
+    title: Privileged State mutations dispatch watchers in the current runtime callback scope
+    covers:
+      - C-CORE-SYNTAX-0002-E
+      - C-CORE-SYNTAX-0002-F
+      - C-STATE-0010-F
+      - C-STATE-0010-G
+      - M-STATE-0001-B
+    expectation: current-run-callback-scope-and-phase-restoration
 implementations:
   - id: module-state-port-watch-contract
     kind: module-test
@@ -75,8 +84,19 @@ implementations:
     consumesCases:
       - T-STATE-0004-CASE-DISCONNECT-CLEANUP
       - T-STATE-0004-CASE-LIFECYCLE-ALIVE
+  - id: runtime-state-phase-guard-contract
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/state-phase-guards.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0004-CASE-CALLBACK-SCOPE
 verifies:
   contracts:
+    - id: C-CORE-SYNTAX-0002
+      anchors:
+        - C-CORE-SYNTAX-0002-E
+        - C-CORE-SYNTAX-0002-F
     - id: C-STATE-0004
       anchors:
         - C-STATE-0004-D
@@ -86,6 +106,8 @@ verifies:
         - C-STATE-0010-B
         - C-STATE-0010-C
         - C-STATE-0010-E
+        - C-STATE-0010-F
+        - C-STATE-0010-G
     - id: C-STATE-0011
       anchors:
         - C-STATE-0011-A
@@ -107,6 +129,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Exercises watch callbacks as state-change records that do not themselves schedule render or update.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added runtime evidence for current-run State watcher callback binding and phase restoration after privileged mutations.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added direct evidence that State values and watchers survive repeatable detach and disconnect only on terminal disposal.

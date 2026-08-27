@@ -37,6 +37,8 @@ export type OverlayPort = {
   registerContent(target: unknown): void;
   updatePosition(patch: OverlayPositionPatch): void;
   setViewActive(active: boolean): void;
+  markPresenceBound(): void;
+  hasPresenceBinding(): boolean;
   reconcileViewResourcesAfterCallback(): void;
 };
 

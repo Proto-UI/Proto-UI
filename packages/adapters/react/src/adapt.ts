@@ -16,6 +16,7 @@ import {
   createViewEpochOwner,
   createWebProtoEventRouter,
   installViewVisibilityRule,
+  PUI_VIEW_DETACHED_ATTR,
   PUI_VIEW_PENDING_ATTR,
   type ProtoAdapterProps,
   scheduleAfterWebLayout,
@@ -356,6 +357,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
       runtime.useLayoutEffect(() => {
         if (!shouldExist) {
+          const detachedEl = rootRef.current;
+          if (detachedEl) installViewVisibilityRule(detachedEl.ownerDocument);
           eventGateRef.current?.disable?.();
           if (ownerRef.current?.hasView) void ownerRef.current.detachView();
           setHostTokens([]);
@@ -423,7 +426,10 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             }
             fn();
           },
-          isViewReady: () => viewReadyRef.current,
+          // A child of a detached ancestor still mounts and attaches its own
+          // view, so readiness has to consult the subtree, not just this host.
+          isViewReady: () =>
+            viewReadyRef.current && !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
           getCurrentElement: () => rootRef.current,
           subscribeTargetReady: (listener) => {
             focusTargetReadyListenersRef.current.add(listener);
@@ -514,25 +520,35 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           ? document.body
           : null;
 
-      const content = !shouldExist
-        ? null
-        : runtime.createElement(
-            rootTag,
-            {
-              ref: rootRef as { current: HTMLElement | null },
-              className: mergeHostClassName([
-                props.surfaceClassName,
-                props.hostClassName,
-                props.className,
-              ]),
-              style: mergeHostStyle([props.surfaceStyle, props.hostStyle, props.style]),
-              'data-pui-root': '',
-              [PUI_VIEW_PENDING_ATTR]: viewReadyRef.current ? undefined : '',
-              'data-pui-style': serializeStyleTokens(hostTokens),
-              'data-demo-ref': props['data-demo-ref' as keyof typeof props] as string | undefined,
-            },
-            ...renderedChildren
-          );
+      // Overlay content is detached, not unmounted, when it is not present: the
+      // host element and the authored children stay put so collection members
+      // keep registering, and the shared detached rule takes them out of paint,
+      // a11y, and tab order. Prototypes that drive presence directly through
+      // `lifecycle.setPresent`, such as Tabs Content, keep unmounting.
+      const detached = !shouldExist && overlayPort?.hasPresenceBinding() === true;
+      const content =
+        !shouldExist && !detached
+          ? null
+          : runtime.createElement(
+              rootTag,
+              {
+                ref: rootRef as { current: HTMLElement | null },
+                className: mergeHostClassName([
+                  props.surfaceClassName,
+                  props.hostClassName,
+                  props.className,
+                ]),
+                style: mergeHostStyle([props.surfaceStyle, props.hostStyle, props.style]),
+                'data-pui-root': '',
+                [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
+                [PUI_VIEW_PENDING_ATTR]: viewReadyRef.current ? undefined : '',
+                'data-pui-style': serializeStyleTokens(hostTokens),
+                'data-demo-ref': props['data-demo-ref' as keyof typeof props] as string | undefined,
+              },
+              // Without a view there is no template to place the slot into, so the
+              // authored children stand in for it.
+              ...(shouldExist ? renderedChildren : [props.children])
+            );
       const projectedContent = portalContainer
         ? runtime.createPortal!(content, portalContainer)
         : content;

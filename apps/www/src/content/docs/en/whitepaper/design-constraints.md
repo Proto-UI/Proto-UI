@@ -317,4 +317,4 @@ You can keep reading according to your goal:
 - If you want to clarify boundaries and common questions, go to [FAQ](/en/whitepaper/faq/)
 - If you want to read the formal contract, go to [Specifications / Introduction](/en/specifications/introduction/)
 - If you want to understand how the implementation layer carries these principles, go to [Build / Overview](/en/build/)
-- If you already want to participate in building prototypes or adapters, go to [Build / Contribute](/en/build/contribute/)
+- If you want to participate in building prototypes or adapters, go to [Contribute](/en/contribute/)

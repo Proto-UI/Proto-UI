@@ -1,0 +1,73 @@
+id: T-BASE-RADIO-GROUP-ITEM-0001
+type: test
+title: Base Radio Group Item protocol contract tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Executable coverage for Radio Group Item authoring, derived checked and effective-disabled facts, exact exposure, Space and primary pointer activation, Enter and cancellation no-ops, roving navigation selection, radio accessibility projection, dynamic synchronization, and deferred form and visual boundaries.
+cases:
+  - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-IDENTITY-AND-SURFACE
+    title: Item requires one authored value and publishes only approved derived and interaction APIs
+    covers:
+      - P-BASE-RADIO-GROUP-ITEM-IDENTITY
+      - P-BASE-RADIO-GROUP-ITEM-REQUIRED-VALUE
+      - P-BASE-RADIO-GROUP-ITEM-EXACT-EXPOSES
+    expectation: radio-group-item-authoring-and-public-surface-remain-exact
+  - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-DERIVED-STATE
+    title: Item derives canonical checked and effective-disabled facts from Root and Collection identity
+    covers:
+      - P-BASE-RADIO-GROUP-ITEM-DERIVED-CHECKED
+      - P-BASE-RADIO-GROUP-ITEM-EFFECTIVE-DISABLED
+      - P-BASE-RADIO-GROUP-ITEM-DYNAMIC-SYNCHRONIZATION
+    expectation: radio-group-item-derives-and-synchronizes-root-owned-facts
+  - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-KEYBOARD-AND-POINTER
+    title: Space and successful primary pointer commit request selection while Enter and cancellation do not
+    covers:
+      - P-BASE-RADIO-GROUP-ITEM-SELECT-REQUEST
+      - P-BASE-RADIO-GROUP-ITEM-SPACE-ACTIVATION
+      - P-BASE-RADIO-GROUP-ITEM-POINTER-ACTIVATION
+    expectation: radio-group-item-activation-requests-selection-only-on-approved-commit
+  - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-ROVING-SELECTION
+    title: Enabled Items participate in selected-or-first roving focus and navigation-selected target requests
+    covers:
+      - P-BASE-RADIO-GROUP-ITEM-ROVING-PARTICIPATION
+      - P-BASE-RADIO-GROUP-ITEM-NAVIGATION-SELECTION
+      - P-BASE-RADIO-GROUP-ITEM-EFFECTIVE-DISABLED
+    expectation: radio-group-item-roving-focus-selects-only-enabled-targets
+  - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-A11Y-AND-BOUNDARIES
+    title: Item is the sole radio object and omits native form and visual ownership
+    covers:
+      - P-BASE-RADIO-GROUP-ITEM-A11Y-RADIO
+      - P-BASE-RADIO-GROUP-ITEM-NO-FORM-OR-VISUAL-API
+    expectation: radio-group-item-projects-one-radio-without-form-or-visual-apis
+implementations:
+  - id: prototypes-base-radio-group-item-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-RADIO-GROUP-ITEM-0001-CASE-IDENTITY-AND-SURFACE
+      - T-BASE-RADIO-GROUP-ITEM-0001-CASE-DERIVED-STATE
+      - T-BASE-RADIO-GROUP-ITEM-0001-CASE-KEYBOARD-AND-POINTER
+      - T-BASE-RADIO-GROUP-ITEM-0001-CASE-ROVING-SELECTION
+      - T-BASE-RADIO-GROUP-ITEM-0001-CASE-A11Y-AND-BOUNDARIES
+    exercises: [P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP]
+    notes:
+      - Uses real Trigger, Collection, Focusable, Focus Roving, Context, and A11y module integration.
+      - Negative Enter, cancelled pointer, exact API, native input, and form assertions defend excluded surfaces.
+verifies:
+  prototypes:
+    - id: P-BASE-RADIO-GROUP-ITEM
+      anchors:
+        - P-BASE-RADIO-GROUP-ITEM-DERIVED-CHECKED
+        - P-BASE-RADIO-GROUP-ITEM-EFFECTIVE-DISABLED
+        - P-BASE-RADIO-GROUP-ITEM-SPACE-ACTIVATION
+        - P-BASE-RADIO-GROUP-ITEM-POINTER-ACTIVATION
+        - P-BASE-RADIO-GROUP-ITEM-A11Y-RADIO
+exercises:
+  prototypes: [P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced executable Item evidence for derived state, activation, roving selection, radio accessibility, and excluded form/visual APIs.
+tags: [prototype, base, radio-group, item, test]

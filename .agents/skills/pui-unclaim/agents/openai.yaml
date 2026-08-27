@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Proto UI: Release Claim'
+  short_description: 'Release one owned work-item claim safely.'
+  default_prompt: 'Use $pui-unclaim to release my current Proto UI work-item claim.'
+policy:
+  allow_implicit_invocation: false

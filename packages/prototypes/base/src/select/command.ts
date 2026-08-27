@@ -68,8 +68,11 @@ export function setupSelectCommand(
   };
 
   def.event.on('key.down', (_run, ev) => {
-    if (disabled.get() || !focused.get() || ev?.detail?.key !== ' ') return;
-    ev.detail.preventDefault?.();
+    if (disabled.get() || !focused.get() || ev?.key !== ' ') return;
+    ev.control.requestDefaultActionPrevention({
+      reason: `${reasonPrefix}.space-activation`,
+      source: reasonPrefix,
+    });
   });
   def.event.on('pointer.enter', () => {
     if (!disabled.get()) hovered.set(true, `reason: ${reasonPrefix} pointer.enter`);

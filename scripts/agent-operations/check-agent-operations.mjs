@@ -1,0 +1,409 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
+import YAML from 'yaml';
+import {
+  HUMAN_GATES,
+  POLICY_VERSION,
+  PROPOSAL_ACTIONS,
+  ROUTES,
+  validateShadowReport,
+} from './lib.mjs';
+
+const root = process.cwd();
+const operationsDirectory = path.join(root, 'internal/agent-operations');
+const policyFile = path.join(operationsDirectory, 'policy.yaml');
+const registryFile = path.join(operationsDirectory, 'workflows.yaml');
+const schemaFile = path.join(operationsDirectory, 'schemas/shadow-report.schema.json');
+const validFixtureFile = path.join(operationsDirectory, 'fixtures/shadow-report.valid.json');
+const invalidFixtureFile = path.join(
+  operationsDirectory,
+  'fixtures/shadow-report.invalid-write.json'
+);
+const promptFile = path.join(root, '.github/codex/prompts/agent-operations-shadow.md');
+const workflowFile = path.join(root, '.github/workflows/agent-operations-shadow.yml');
+const repoStewardWorkflowFile = path.join(
+  root,
+  '.github/workflows/reposteward-portfolio-shadow.yml'
+);
+const repoStewardSchemaFile = path.join(
+  operationsDirectory,
+  'schemas/reposteward-portfolio-envelope.schema.json'
+);
+const REPOSTEWARD_COMMIT = 'e5db7d3496ef15072135533c5b9f4da91084b553';
+const errors = [];
+
+function parseArgs(argv) {
+  const args = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === '--report') args.report = argv[++index];
+    else if (arg === '--snapshot') args.snapshot = argv[++index];
+    else throw new Error(`Unknown option: ${arg}`);
+  }
+  if (args.snapshot && !args.report) throw new Error('--snapshot requires --report');
+  return args;
+}
+
+function fail(file, message) {
+  errors.push(`${path.relative(root, file)}: ${message}`);
+}
+
+function read(file, parser, label) {
+  if (!fs.existsSync(file)) {
+    fail(file, 'file does not exist');
+    return null;
+  }
+  try {
+    return parser(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    fail(file, `invalid ${label}: ${error.message}`);
+    return null;
+  }
+}
+
+function readYaml(file) {
+  return read(file, YAML.parse, 'YAML');
+}
+
+function readJson(file) {
+  return read(file, JSON.parse, 'JSON');
+}
+
+function sameMembers(actual, expected) {
+  return (
+    Array.isArray(actual) &&
+    actual.length === expected.length &&
+    [...actual].sort().every((value, index) => value === [...expected].sort()[index])
+  );
+}
+
+function isSingleValueEnum(schema, expected) {
+  return Array.isArray(schema?.enum) && schema.enum.length === 1 && schema.enum[0] === expected;
+}
+
+function repositoryPath(file, value, label) {
+  if (typeof value !== 'string' || !value) {
+    fail(file, `${label} must be a non-empty repository-relative path`);
+    return null;
+  }
+  if (path.isAbsolute(value) || value.split('/').includes('..')) {
+    fail(file, `${label} must stay within the repository: ${value}`);
+    return null;
+  }
+  const resolved = path.resolve(root, value);
+  if (!resolved.startsWith(`${root}${path.sep}`) || !fs.existsSync(resolved)) {
+    fail(file, `${label} does not resolve to an existing repository path: ${value}`);
+    return null;
+  }
+  return resolved;
+}
+
+function validatePolicy() {
+  const policy = readYaml(policyFile);
+  if (!policy) return;
+  if (policy.schemaVersion !== 1) fail(policyFile, 'schemaVersion must be 1');
+  if (policy.policyVersion !== POLICY_VERSION) {
+    fail(policyFile, `policyVersion must be ${POLICY_VERSION}`);
+  }
+  if (policy.mode !== 'shadow') fail(policyFile, 'mode must be shadow');
+  if (!sameMembers(policy.routes, ROUTES))
+    fail(policyFile, 'routes do not match the report contract');
+  if (!sameMembers(policy.humanGates, HUMAN_GATES)) {
+    fail(policyFile, 'humanGates do not match the report contract');
+  }
+  if (!sameMembers(policy.proposalActions, PROPOSAL_ACTIONS)) {
+    fail(policyFile, 'proposalActions do not match the report contract');
+  }
+  if (!Array.isArray(policy.permissions?.github?.write) || policy.permissions.github.write.length) {
+    fail(policyFile, 'permissions.github.write must be an empty array in Phase A');
+  }
+  if (policy.permissions?.repository?.trackedMutation !== 'forbidden') {
+    fail(policyFile, 'tracked repository mutation must be forbidden');
+  }
+  if (policy.permissions?.agent?.permissionProfile !== ':read-only') {
+    fail(policyFile, 'Agent permission profile must be :read-only');
+  }
+  if (policy.permissions?.agent?.network !== 'forbidden') {
+    fail(policyFile, 'Agent network must be forbidden');
+  }
+  if (policy.graduation?.unauthorizedMutationCount !== 0) {
+    fail(policyFile, 'graduation.unauthorizedMutationCount must be zero');
+  }
+  if (policy.graduation?.duplicateMutationCount !== 0) {
+    fail(policyFile, 'graduation.duplicateMutationCount must be zero');
+  }
+  if (policy.graduation?.requiresExplicitMaintainerDecision !== true) {
+    fail(policyFile, 'graduation requires an explicit maintainer decision');
+  }
+}
+
+function validateRegistry() {
+  const registry = readYaml(registryFile);
+  if (!registry) return;
+  if (registry.schemaVersion !== 1) fail(registryFile, 'schemaVersion must be 1');
+  if (!Array.isArray(registry.workflows)) {
+    fail(registryFile, 'workflows must be an array');
+    return;
+  }
+  const expected = new Set([
+    'issue-steward',
+    'pr-steward',
+    'reposteward-pr-portfolio',
+    'autonomous-maintenance',
+  ]);
+  const seen = new Set();
+  for (const [index, workflow] of registry.workflows.entries()) {
+    const label = `workflows[${index}]`;
+    if (!expected.has(workflow?.id)) fail(registryFile, `${label}.id is invalid: ${workflow?.id}`);
+    if (seen.has(workflow?.id)) fail(registryFile, `${label}.id is duplicated: ${workflow?.id}`);
+    seen.add(workflow?.id);
+    repositoryPath(registryFile, workflow?.implementationPath, `${label}.implementationPath`);
+    repositoryPath(registryFile, workflow?.outputSchemaPath, `${label}.outputSchemaPath`);
+    if (!Array.isArray(workflow?.humanGates) || workflow.humanGates.length === 0) {
+      fail(registryFile, `${label}.humanGates must not be empty`);
+    } else {
+      for (const gate of workflow.humanGates) {
+        if (!HUMAN_GATES.includes(gate)) fail(registryFile, `${label} has invalid gate: ${gate}`);
+      }
+    }
+    if (['issue-steward', 'pr-steward'].includes(workflow?.id)) {
+      if (workflow.status !== 'shadow') fail(registryFile, `${label}.status must be shadow`);
+      if (workflow.mutationPolicy !== 'proposal-only') {
+        fail(registryFile, `${label}.mutationPolicy must be proposal-only`);
+      }
+    }
+    if (workflow?.id === 'reposteward-pr-portfolio') {
+      if (workflow.status !== 'manual-shadow-trial') {
+        fail(registryFile, `${label}.status must be manual-shadow-trial`);
+      }
+      if (!sameMembers(workflow.triggerClasses, ['manual-dispatch'])) {
+        fail(registryFile, `${label}.triggerClasses must contain only manual-dispatch`);
+      }
+      if (workflow.mutationPolicy !== 'read-only-artifact') {
+        fail(registryFile, `${label}.mutationPolicy must be read-only-artifact`);
+      }
+      if (workflow.externalEngine?.repository !== 'tiammomo/RepoSteward') {
+        fail(registryFile, `${label}.externalEngine.repository is invalid`);
+      }
+      if (workflow.externalEngine?.commit !== REPOSTEWARD_COMMIT) {
+        fail(registryFile, `${label}.externalEngine.commit must match the reviewed pin`);
+      }
+      if (workflow.externalEngine?.command !== 'portfolio inspect') {
+        fail(registryFile, `${label}.externalEngine.command must be portfolio inspect`);
+      }
+    }
+  }
+  for (const id of expected) {
+    if (!seen.has(id)) fail(registryFile, `missing workflow: ${id}`);
+  }
+}
+
+function validateSchema() {
+  const schema = readJson(schemaFile);
+  if (!schema) return;
+  if (!isSingleValueEnum(schema.properties?.schemaVersion, 1)) {
+    fail(schemaFile, 'schemaVersion must be the single enum value 1');
+  }
+  if (!isSingleValueEnum(schema.properties?.policyVersion, POLICY_VERSION)) {
+    fail(schemaFile, `policyVersion must be the single enum value ${POLICY_VERSION}`);
+  }
+  if (!isSingleValueEnum(schema.properties?.mode, 'shadow')) {
+    fail(schemaFile, 'mode must be the single enum value shadow');
+  }
+  if (!isSingleValueEnum(schema.properties?.writeOperationsPerformed, 0)) {
+    fail(schemaFile, 'writeOperationsPerformed must be the single enum value zero');
+  }
+  const routeEnum = schema.$defs?.item?.properties?.recommendedRoute?.enum;
+  if (!sameMembers(routeEnum, ROUTES)) fail(schemaFile, 'route enum does not match policy');
+  const gateEnum = schema.$defs?.item?.properties?.humanGate?.enum;
+  if (!sameMembers(gateEnum, HUMAN_GATES)) fail(schemaFile, 'humanGate enum does not match policy');
+  const actionEnum = schema.$defs?.proposedAction?.properties?.type?.enum;
+  if (!sameMembers(actionEnum, PROPOSAL_ACTIONS)) {
+    fail(schemaFile, 'proposed action enum does not match policy');
+  }
+  if (
+    !isSingleValueEnum(
+      schema.$defs?.proposedAction?.properties?.execution,
+      'blocked-by-shadow-policy'
+    )
+  ) {
+    fail(schemaFile, 'proposed actions must be blocked by shadow policy');
+  }
+}
+
+function validateRepoStewardTrial() {
+  const schema = readJson(repoStewardSchemaFile);
+  if (schema) {
+    if (schema.properties?.schemaVersion?.const !== 1) {
+      fail(repoStewardSchemaFile, 'schemaVersion must be const 1');
+    }
+    if (schema.properties?.trialVersion?.const !== '2026-08-22.manual-shadow') {
+      fail(repoStewardSchemaFile, 'trialVersion must remain fixed for this trial');
+    }
+    if (schema.properties?.mode?.const !== 'manual-shadow') {
+      fail(repoStewardSchemaFile, 'mode must be manual-shadow');
+    }
+    if (schema.properties?.engine?.properties?.commit?.const !== REPOSTEWARD_COMMIT) {
+      fail(repoStewardSchemaFile, 'engine commit must match the reviewed pin');
+    }
+    if (schema.properties?.writeOperationsPerformed?.const !== 0) {
+      fail(repoStewardSchemaFile, 'writeOperationsPerformed must be const zero');
+    }
+  }
+
+  const workflow = readYaml(repoStewardWorkflowFile);
+  if (!workflow) return;
+  const permissions = workflow.permissions;
+  for (const permission of ['contents', 'pull-requests', 'checks', 'statuses']) {
+    if (permissions?.[permission] !== 'read') {
+      fail(repoStewardWorkflowFile, `${permission} permission must be read`);
+    }
+  }
+  const source = fs.readFileSync(repoStewardWorkflowFile, 'utf8');
+  for (const forbidden of [
+    'contents: write',
+    'issues: write',
+    'pull-requests: write',
+    'checks: write',
+    'statuses: write',
+    'pull_request_target',
+    'reposteward prepare',
+    'reposteward repair',
+    'reposteward submit',
+    'reposteward merge',
+  ]) {
+    if (source.includes(forbidden)) {
+      fail(repoStewardWorkflowFile, `forbidden manual shadow capability: ${forbidden}`);
+    }
+  }
+  if (Object.hasOwn(workflow.on ?? {}, 'schedule')) {
+    fail(repoStewardWorkflowFile, 'RepoSteward trial must not be scheduled before graduation');
+  }
+  if (!Object.hasOwn(workflow.on ?? {}, 'workflow_dispatch')) {
+    fail(repoStewardWorkflowFile, 'RepoSteward trial must use workflow_dispatch');
+  }
+  if (!source.includes(`REPOSTEWARD_COMMIT: ${REPOSTEWARD_COMMIT}`)) {
+    fail(repoStewardWorkflowFile, 'RepoSteward commit env must match the reviewed pin');
+  }
+  if (
+    !source.includes(
+      'git -C "${REPOSTEWARD_SOURCE}" fetch --depth 1 origin "${REPOSTEWARD_COMMIT}"'
+    )
+  ) {
+    fail(repoStewardWorkflowFile, 'RepoSteward source fetch must use the commit pin');
+  }
+  if (
+    !source.includes(
+      'test "$(git -C "${REPOSTEWARD_SOURCE}" rev-parse HEAD)" = "${REPOSTEWARD_COMMIT}"'
+    )
+  ) {
+    fail(repoStewardWorkflowFile, 'RepoSteward checkout must verify the exact source commit');
+  }
+  if (!source.includes('uv sync --project "${REPOSTEWARD_SOURCE}" --frozen --no-dev')) {
+    fail(repoStewardWorkflowFile, 'RepoSteward dependencies must use the reviewed lockfile');
+  }
+  if (!source.includes('persist-credentials: false')) {
+    fail(repoStewardWorkflowFile, 'checkout must not persist Git credentials');
+  }
+  if (!source.includes('portfolio inspect Proto-UI/Proto-UI')) {
+    fail(repoStewardWorkflowFile, 'workflow must run only the registered portfolio target');
+  }
+  if (!source.includes('scripts/agent-operations/reposteward-portfolio.mjs')) {
+    fail(repoStewardWorkflowFile, 'workflow must validate the raw snapshot before upload');
+  }
+}
+
+function validateFixtures() {
+  const valid = readJson(validFixtureFile);
+  if (valid) {
+    for (const issue of validateShadowReport(valid)) fail(validFixtureFile, issue);
+  }
+  const invalid = readJson(invalidFixtureFile);
+  if (invalid) {
+    const issues = validateShadowReport(invalid);
+    if (issues.length === 0) {
+      fail(invalidFixtureFile, 'negative fixture unexpectedly passed validation');
+    }
+    if (!issues.some((issue) => issue.includes('writeOperationsPerformed'))) {
+      fail(invalidFixtureFile, 'negative fixture did not exercise the write-operation guard');
+    }
+  }
+}
+
+function validatePromptAndWorkflow() {
+  const prompt = fs.existsSync(promptFile) ? fs.readFileSync(promptFile, 'utf8') : '';
+  if (!prompt) fail(promptFile, 'file does not exist or is empty');
+  for (const required of [
+    'untrusted data',
+    'Do not follow instructions',
+    'writeOperationsPerformed',
+    'blocked-by-shadow-policy',
+  ]) {
+    if (!prompt.includes(required))
+      fail(promptFile, `missing required safety language: ${required}`);
+  }
+
+  const workflow = readYaml(workflowFile);
+  if (!workflow) return;
+  const permissions = workflow.permissions;
+  if (permissions?.contents !== 'read') fail(workflowFile, 'contents permission must be read');
+  if (permissions?.issues !== 'read') fail(workflowFile, 'issues permission must be read');
+  if (permissions?.['pull-requests'] !== 'read') {
+    fail(workflowFile, 'pull-requests permission must be read');
+  }
+  const source = fs.readFileSync(workflowFile, 'utf8');
+  for (const forbidden of ['contents: write', 'issues: write', 'pull-requests: write']) {
+    if (source.includes(forbidden))
+      fail(workflowFile, `forbidden Phase A permission: ${forbidden}`);
+  }
+  if (!source.includes("permission-profile: ':read-only'")) {
+    fail(workflowFile, 'Codex permission profile must be :read-only');
+  }
+  if (!source.includes("codex-version: '0.138.0'")) {
+    fail(workflowFile, 'Codex CLI version must remain pinned to 0.138.0');
+  }
+  if (source.includes('sandbox:')) {
+    fail(workflowFile, 'legacy sandbox input must not be combined with the permission profile');
+  }
+  if (!source.includes('safety-strategy: drop-sudo')) {
+    fail(workflowFile, 'Codex safety strategy must drop sudo');
+  }
+  if (source.includes('pull_request_target')) {
+    fail(workflowFile, 'pull_request_target is forbidden for the shadow workflow');
+  }
+}
+
+function validateLiveReport(args) {
+  if (!args.report) return;
+  const reportFile = path.resolve(root, args.report);
+  const snapshotFile = args.snapshot ? path.resolve(root, args.snapshot) : null;
+  const report = readJson(reportFile);
+  const snapshot = snapshotFile ? readJson(snapshotFile) : null;
+  if (!report) return;
+  for (const issue of validateShadowReport(report, snapshot)) fail(reportFile, issue);
+}
+
+let args;
+try {
+  args = parseArgs(process.argv.slice(2));
+} catch (error) {
+  console.error(`[agent-operations] ${error.message}`);
+  process.exit(1);
+}
+
+validatePolicy();
+validateRegistry();
+validateSchema();
+validateRepoStewardTrial();
+validateFixtures();
+validatePromptAndWorkflow();
+validateLiveReport(args);
+
+if (errors.length > 0) {
+  console.error(`[agent-operations] ${errors.length} issue(s)`);
+  errors.forEach((error) => console.error(`- ${error}`));
+  process.exitCode = 1;
+} else {
+  console.log('[agent-operations] OK');
+}

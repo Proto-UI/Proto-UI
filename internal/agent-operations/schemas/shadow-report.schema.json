@@ -1,0 +1,191 @@
+{
+  "title": "Proto UI Agent Operations shadow report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "mode",
+    "runId",
+    "generatedAt",
+    "snapshot",
+    "summary",
+    "items",
+    "warnings",
+    "writeOperationsPerformed"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "policyVersion": { "type": "string", "enum": ["2026-08-20.phase-a"] },
+    "mode": { "type": "string", "enum": ["shadow"] },
+    "runId": {
+      "type": "string",
+      "pattern": "^AO-SHADOW-[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}$"
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "digest", "itemCount"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "itemCount": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analyzedCount", "decisionsRequired", "routeCounts"],
+      "properties": {
+        "analyzedCount": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "decisionsRequired": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "routeCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "needs-author",
+            "needs-maintainer",
+            "agent-eligible",
+            "blocked",
+            "observing",
+            "no-action"
+          ],
+          "properties": {
+            "needs-author": { "type": "integer", "minimum": 0 },
+            "needs-maintainer": { "type": "integer", "minimum": 0 },
+            "agent-eligible": { "type": "integer", "minimum": 0 },
+            "blocked": { "type": "integer", "minimum": 0 },
+            "observing": { "type": "integer", "minimum": 0 },
+            "no-action": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/item" }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+    },
+    "writeOperationsPerformed": { "type": "integer", "enum": [0] }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "number",
+        "title",
+        "recommendedRoute",
+        "confidence",
+        "rationale",
+        "evidence",
+        "humanGate",
+        "decisionPacket",
+        "proposedActions"
+      ],
+      "properties": {
+        "kind": { "enum": ["issue", "pull-request"] },
+        "number": { "type": "integer", "minimum": 1 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "recommendedRoute": {
+          "enum": [
+            "needs-author",
+            "needs-maintainer",
+            "agent-eligible",
+            "blocked",
+            "observing",
+            "no-action"
+          ]
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "rationale": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+        },
+        "humanGate": {
+          "enum": [
+            "finding-disposition",
+            "semantic",
+            "integration",
+            "scope",
+            "contributor-rights",
+            "security",
+            "none"
+          ]
+        },
+        "decisionPacket": {
+          "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/decisionPacket" }]
+        },
+        "proposedActions": {
+          "type": "array",
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/proposedAction" }
+        }
+      }
+    },
+    "decisionPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedFact",
+        "recommendation",
+        "authorizationScope",
+        "exclusions",
+        "residualRisks",
+        "nextAutomatedStage",
+        "separatelyGatedActions"
+      ],
+      "properties": {
+        "observedFact": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "recommendation": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "authorizationScope": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "exclusions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+        },
+        "residualRisks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+        },
+        "nextAutomatedStage": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "separatelyGatedActions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+        }
+      }
+    },
+    "proposedAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value", "rationale", "execution"],
+      "properties": {
+        "type": { "enum": ["status-comment", "state-label", "maintainer-inbox"] },
+        "value": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "rationale": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "execution": {
+          "type": "string",
+          "enum": ["blocked-by-shadow-policy"]
+        }
+      }
+    }
+  }
+}
