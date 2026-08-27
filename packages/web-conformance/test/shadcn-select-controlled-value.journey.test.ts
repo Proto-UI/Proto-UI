@@ -3,6 +3,7 @@ import { createPortal, flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import * as Vue from 'vue';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { Vue2Any } from '../../adapters/vue2/test/utils/vue2';
 
 import { renderDemo } from '../../../apps/www/src/components/PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../../../apps/www/src/components/PrototypePreviewer/prototype-modules';
@@ -26,7 +27,14 @@ vi.mock('../../../apps/www/src/components/PrototypePreviewer/runtimes/vue-runtim
   loadVue: vi.fn(async () => Vue),
 }));
 
-const WEB_ADAPTERS = ['wc', 'react', 'vue'] as const satisfies readonly RuntimeId[];
+vi.mock('../../../apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime', async () => {
+  const actual = await vi.importActual<
+    typeof import('../../../apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime')
+  >('../../../apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime');
+  return { ...actual, loadVue2: vi.fn(async () => Vue2Any) };
+});
+
+const WEB_ADAPTERS = ['wc', 'react', 'vue', 'vue2'] as const satisfies readonly RuntimeId[];
 const SELECT_PROTOTYPES = [
   'shadcn-select-root',
   'shadcn-select-trigger',
@@ -100,6 +108,7 @@ const controlledSelectFixture: DemoSpec = {
 async function settle(): Promise<void> {
   await Promise.resolve();
   await Vue.nextTick();
+  await Vue2Any.nextTick();
   await Promise.resolve();
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   await Promise.resolve();

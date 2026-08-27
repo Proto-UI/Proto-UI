@@ -299,3 +299,11 @@ Operational constraints:
 - New packages never auto-enter launch: they must be added to governance and explicitly decided
 
 This keeps launch scope governance explicit and enforceable while still leaving room for hard launch additions (for example packages needed by `input` work that introduces new modules or lower-level APIs).
+
+---
+
+## 12. `0.3.0-alpha.0` Adapter Extension
+
+The `0.3.0-alpha.0` train admits `@proto.ui/adapter-vue2` as an official host-specific Adapter and launch-commitment package. This is a later alpha release-line decision; it does not rewrite the frozen `v0.2.0-rc.0` package list above.
+
+The admission requires the same public manifest, exact-version, package build, registry identity, conformance, and release evidence as the existing official Adapters. Repository preparation may proceed before the npm identity exists, but publication must fail closed until identity bootstrap and Trusted Publisher configuration are complete.

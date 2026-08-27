@@ -1,0 +1,30 @@
+import { createInstanceTreeMarkers, releaseWebTriggerSurface } from '@proto.ui/adapter-base';
+
+export const {
+  PROTO_INSTANCE: __VUE2_PROTO_INSTANCE,
+  createLogicalInstance,
+  bindLogicalParent,
+  markProtoInstance,
+  unbindProtoInstance,
+  setProtoParent,
+  clearProtoParentProjection,
+  getProtoParent,
+  getPrototypeByInstance,
+  getLogicalParent,
+  getLogicalRoot,
+  getLogicalPrototype,
+  mergeLogicalTriggerGroup,
+  getLogicalTriggerGroupAnchor,
+  setLogicalEventRouteOwner,
+  getLogicalEventRouteOwner,
+  getLogicalEventRouteSurfaceForTarget,
+  resolveLogicalTriggerEventRouteForTarget,
+  getLogicalTriggerSurfaceOwner,
+  getLogicalTriggerSurfaceRoot,
+  subscribeLogicalTriggerSurface,
+  getLogicalEventTarget,
+  bindLogicalEventTarget,
+  unbindLogicalEventTarget,
+} = createInstanceTreeMarkers('@proto.ui/adapter-vue2/__proto_instance', {
+  releaseTriggerSurface: releaseWebTriggerSurface,
+});
