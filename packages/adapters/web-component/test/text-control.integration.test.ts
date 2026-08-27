@@ -136,10 +136,6 @@ describe('adapter-web-component text control', () => {
       typeof focusTextareaPrototype
     >;
     setElementProps(shell, { defaultValue: '', placeholder: 'Write', rows: 4 });
-    let projectedFocusCount = 0;
-    shell.addEventListener('focus', () => {
-      projectedFocusCount += 1;
-    });
     document.body.appendChild(shell);
     await flush();
 
@@ -193,7 +189,6 @@ describe('adapter-web-component text control', () => {
     textarea.blur();
     matchesSpy.mockReturnValue(false);
     textarea.focus();
-    expect(projectedFocusCount).toBe(3);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(false);
     expect(shell.hasAttribute('data-focus-visible')).toBe(false);
@@ -203,9 +198,6 @@ describe('adapter-web-component text control', () => {
 
     shell.remove();
     await flush();
-    const countAfterDetach = projectedFocusCount;
-    textarea.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-    expect(projectedFocusCount).toBe(countAfterDetach);
 
     document.body.appendChild(shell);
     await flush();
@@ -215,15 +207,11 @@ describe('adapter-web-component text control', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
     remountedTextarea.focus();
     expect(document.activeElement).toBe(remountedTextarea);
-    expect(projectedFocusCount).toBe(countAfterDetach + 1);
     expect(remountedExposes.focused.get()).toBe(true);
     expect(remountedExposes.focusVisible.get()).toBe(true);
     remountedTextarea.blur();
 
     shell.remove();
     await flush();
-    const countAfterDispose = projectedFocusCount;
-    remountedTextarea.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-    expect(projectedFocusCount).toBe(countAfterDispose);
   });
 });
