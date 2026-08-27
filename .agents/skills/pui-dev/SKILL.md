@@ -37,13 +37,14 @@ Load only the skill needed for the current transition. The list below is routing
 - select `pui-docs` as a separate transition for reader projections;
 - select `pui-validate` after a technical change;
 - use a fresh context with `pui-review` when independent acceptance is required;
+- use `pui-integrate` after `pui-review` only for an exact-head clean packet under separate current-user or active standing merge authorization;
 - use `pui-release-prep` and `pui-release-audit` only for their separate gated release phases.
 
 Pass only registered artifacts through the validated handoff. Return a terminal handoff when there is no eligible next transition.
 
 ## Stop at a gate
 
-Stop when product semantics, ownership, public surface, compatibility, lifecycle promotion, contributor rights, security, integration, publication, or release requires a human decision. Present one decision packet with the exact authorization requested and the actions it would not authorize.
+Stop when product semantics, ownership, public surface, compatibility, lifecycle promotion, contributor rights, security, integration, publication, or release requires a human decision and no exact active standing authorization resolves that bounded action. Present one decision packet with the exact authorization requested and the actions it would not authorize.
 
 An autonomous handoff with a pending human gate is terminal. After the human decision, continue through a newly oriented human-assisted run or a separately authorized autonomous run; do not relabel the old handoff.
 
