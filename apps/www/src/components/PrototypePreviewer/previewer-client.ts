@@ -5,8 +5,11 @@ import { loadPrototype, loadPrototypes } from './prototype-modules';
 import { loadDemo } from './demo-modules';
 import { renderDemo } from './demo-renderer';
 import { collectPrototypeIds } from './demo-types';
+import { releaseHostMount } from './runtimes/host-mount';
 import type { RuntimeId } from './runtimes/registry';
 import { refreshCodePanel } from './code-panel-client';
+
+const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 
 interface PreviewerOptions {
   root: HTMLElement;
@@ -30,6 +33,18 @@ export function initPreviewer(options: PreviewerOptions) {
 
   const host = root.querySelector('.host') as HTMLElement;
   const select = root.querySelector('select') as HTMLSelectElement | null;
+
+  function preferredRuntime(): RuntimeId {
+    try {
+      const preferred = localStorage.getItem(PREFERRED_ADAPTER_KEY) as RuntimeId | null;
+      if (preferred && runtimeList.includes(preferred)) return preferred;
+    } catch {
+      // localStorage is optional (for example, in privacy-restricted embeds).
+    }
+    return initialRuntime;
+  }
+
+  const selectedInitialRuntime = preferredRuntime();
 
   let current: { id: string; api: any } | null = null;
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
@@ -62,9 +77,10 @@ export function initPreviewer(options: PreviewerOptions) {
             wc: 'Web Components',
             react: 'React',
             vue: 'Vue',
+            vue2: 'Vue 2',
           } as Record<string, string>
         )[id] || id;
-      if (id === initialRuntime) opt.selected = true;
+      if (id === selectedInitialRuntime) opt.selected = true;
       select.appendChild(opt);
     }
   }
@@ -105,6 +121,9 @@ export function initPreviewer(options: PreviewerOptions) {
   async function switchTo(id: string) {
     if (destroyed) return;
     const myVersion = ++version;
+    // Invalidate a runtime that is still awaiting its loader before this
+    // switch reaches the next runtime's mount() call.
+    releaseHostMount(host);
     if (select) select.disabled = true;
 
     try {
@@ -126,7 +145,9 @@ export function initPreviewer(options: PreviewerOptions) {
           runtime: id as RuntimeId,
           demo,
           host,
+          isCurrent: () => !destroyed && myVersion === version,
         });
+        if (destroyed || myVersion !== version) return;
         currentDemo = { id, destroy };
         updateCodePanel(id as RuntimeId);
         dispatch('runtime:changed', { id });
@@ -150,10 +171,12 @@ export function initPreviewer(options: PreviewerOptions) {
       if (myVersion !== version || destroyed) return;
 
       await api.mount(host, proto, { props: demoProps });
+      if (destroyed || myVersion !== version) return;
       current = { id, api };
       updateCodePanel(id as RuntimeId);
       dispatch('runtime:changed', { id });
     } catch (err) {
+      if (destroyed || myVersion !== version) return;
       // 如果是原型未找到的错误，不需要重试（动态加载应该已经处理了）
       // 旧的重试逻辑已被更可靠的动态加载机制取代
 
@@ -173,10 +196,20 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   // 首次挂载（统一走 runtime 生命周期，避免 WC 单走一套）
-  switchTo(initialRuntime).then(() => dispatch('previewer:mounted', { runtime: initialRuntime }));
+  switchTo(selectedInitialRuntime).then(() =>
+    dispatch('previewer:mounted', { runtime: selectedInitialRuntime })
+  );
 
-  // 切换事件
-  if (select) select.addEventListener('change', () => switchTo(select.value));
+  // AdapterSelect synchronizes all selector instances and broadcasts the selected
+  // runtime. Listen on document so the page-level selector also remounts every
+  // compatible previewer; previewer-local selector changes use the same path.
+  const onAdapterChange = (event: Event) => {
+    const id = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
+    if (typeof id !== 'string' || !runtimeList.includes(id as RuntimeId)) return;
+    if (select) select.value = id;
+    void switchTo(id);
+  };
+  document.addEventListener('proto-adapter:change', onAdapterChange);
 
   // 对外控制（调试/父组件可用）
   (root as any).__previewer__ = {
@@ -198,6 +231,8 @@ export function initPreviewer(options: PreviewerOptions) {
     destroy: async () => {
       destroyed = true;
       version++;
+      releaseHostMount(host);
+      document.removeEventListener('proto-adapter:change', onAdapterChange);
       if (currentDemo) await currentDemo.destroy();
       if (current?.api?.unmount) await current.api.unmount(host);
       host.innerHTML = '';

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { initAdapterSelects } from '../adapter-preference';
+import { initAdapterSelects, isRuntimeId } from '../adapter-preference';
 
 const adapterSelect = (id: string) => `
   <div data-adapter-select>
@@ -8,11 +8,18 @@ const adapterSelect = (id: string) => `
       <option value="wc">Web Components</option>
       <option value="react">React</option>
       <option value="vue">Vue</option>
+      <option value="vue2">Vue 2</option>
     </select>
   </div>
 `;
 
 describe('documentation adapter selector', () => {
+  it('recognizes every public Vue runtime and rejects unknown ids', () => {
+    expect(isRuntimeId('vue2')).toBe(true);
+    expect(isRuntimeId('vue')).toBe(true);
+    expect(isRuntimeId('svelte')).toBe(false);
+  });
+
   beforeEach(() => {
     localStorage.clear();
     document.body.innerHTML = `${adapterSelect('adapter-desktop')}${adapterSelect('adapter-mobile')}`;

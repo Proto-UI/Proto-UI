@@ -122,6 +122,12 @@ describe('adapter profile schema', () => {
         peerName: 'react',
       },
       {
+        id: 'A-VUE-2-0001',
+        packagePath: 'packages/adapters/vue2/package.json',
+        runtimeName: 'vue',
+        peerName: 'vue',
+      },
+      {
         id: 'A-VUE-3-0001',
         packagePath: 'packages/adapters/vue/package.json',
         runtimeName: 'vue',

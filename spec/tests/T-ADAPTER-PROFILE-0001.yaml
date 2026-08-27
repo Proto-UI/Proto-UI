@@ -67,6 +67,14 @@ verifies:
         - A-REACT-18-19-0001-E
         - A-REACT-18-19-0001-L
         - A-REACT-18-19-0001-M
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-A
+        - A-VUE-2-0001-B
+        - A-VUE-2-0001-E
+        - A-VUE-2-0001-L
+        - A-VUE-2-0001-M
     - id: A-VUE-3-0001
       anchors:
         - A-VUE-3-0001-A
@@ -87,6 +95,9 @@ sources:
   - path: packages/spec/fixtures/test/adapter-profile-schema.test.ts
   - path: packages/spec/graph/test/adapter-profile.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added exact package, runtime, Module, host-capability, and executable evidence alignment for the official Vue 2.6 profile.
   - version: 0.2.0-rc.7
     change: revised
     summary: Extended official profile fixture coverage to required Expose Event support and translated outward-signal sink provision.

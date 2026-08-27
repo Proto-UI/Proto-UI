@@ -1,0 +1,140 @@
+id: A-VUE-2-0001
+type: adapter
+title: Official Vue 2.6 Web Adapter profile
+status: active
+since: 0.3.0-alpha.0
+summary: The official Vue 2.6 Web Adapter owns the Runtime lifecycle boundary and translates Vue 2 props, attrs, events, and public-instance exposes into required semantic modules.
+adapterProfile:
+  package: '@proto.ui/adapter-vue2'
+  target:
+    platform: web
+    runtime:
+      name: vue
+      versionRange: '>=2.6.0 <2.7'
+statement:
+  zh-CN: >-
+    该 profile 表示 `@proto.ui/adapter-vue2` 在 Web platform 上面向 Vue `>=2.6.0 <2.7` 的 official translation identity。一个 Vue 2 component owner 持有 Proto RuntimeSession，并把 props 与 attrs、DOM input、Vue lifecycle、component public instance 和 Vue event listener 翻译到 required Props、Event、State、Expose core、Expose State 与 Expose Event Module。当前编目只覆盖已有 executable evidence 的 slice；其它 Module 未出现时表示 uncataloged，不得推断为支持或不支持。
+
+  en: >-
+    This profile is the official translation identity of `@proto.ui/adapter-vue2` for Vue `>=2.6.0 <2.7` on the Web platform. A Vue 2 component owner retains the Proto RuntimeSession and translates props and attrs, DOM input, Vue lifecycle, the component public instance, and Vue event listeners into the required Props, Event, State, Expose core, Expose State, and Expose Event modules. The current catalog is limited to slices with executable evidence; every other Module remains uncataloged rather than implicitly supported or unsupported.
+
+criteria:
+  - id: A-VUE-2-0001-A
+    text:
+      zh-CN: Profile identity 必须对应 `@proto.ui/adapter-vue2` 与 peer range `vue >=2.6.0 <2.7`，不得被表述为 Vue 3、所有 Vue 版本或非 Web host 的保证。
+      en: The profile identity must correspond to `@proto.ui/adapter-vue2` and peer range `vue >=2.6.0 <2.7`; it must not be represented as a guarantee for Vue 3, every Vue version, or a non-Web host.
+  - id: A-VUE-2-0001-B
+    text:
+      zh-CN: Adapter 必须把 Props Module 作为 required Module 接入，并以 translated capability 提供 `HC-PROPS-SOURCE-0001`。
+      en: The Adapter must wire the Props module as required and provide `HC-PROPS-SOURCE-0001` as a translated capability.
+  - id: A-VUE-2-0001-C
+    text:
+      zh-CN: 默认 Props normalization 必须合并 Vue 2 props 与 attrs，剥离 presentation fields 与函数型 `onXxx` listeners，并允许显式 `getProps` option 替换分类策略。
+      en: Default Props normalization must combine Vue 2 props and attrs, exclude presentation fields and function-valued `onXxx` listeners, and allow an explicit `getProps` option to replace classification.
+  - id: A-VUE-2-0001-D
+    text:
+      zh-CN: Host input change 只能使 snapshot 失效；Vue 2 update boundary 中的同步可以派发 watcher，但 Props invalidation 本身不得被解释为 Proto render commit。
+      en: A host-input change may only invalidate the snapshot; synchronization at a Vue 2 update boundary may dispatch watchers, but Props invalidation alone must not be interpreted as a Proto render commit.
+  - id: A-VUE-2-0001-E
+    text:
+      zh-CN: Adapter 必须把 Event Module 作为 required Module 接入，并以 translated capability 提供 `HC-EVENT-BINDING-0001` 与 `HC-DEFAULT-ACTION-0001`。
+      en: The Adapter must wire the Event module as required and provide `HC-EVENT-BINDING-0001` and `HC-DEFAULT-ACTION-0001` as translated capabilities.
+  - id: A-VUE-2-0001-F
+    text:
+      zh-CN: Vue 2 view wiring 必须在 commit boundary 后把 host input 翻译为当前支持的 root/global Event type，并在 unmount 后停止旧 root delivery。
+      en: Vue 2 view wiring must translate host input into supported root and global Event types after the commit boundary and stop delivery from an old root after unmount.
+  - id: A-VUE-2-0001-G
+    text:
+      zh-CN: 一个 Vue 2 component lifecycle owner 必须持有一个 RuntimeSession；activated/deactivated 形成 repeatable mount epoch，terminal destroy 必须且只能 dispose instance 一次。
+      en: One Vue 2 component lifecycle owner must retain one RuntimeSession; activated and deactivated form repeatable mount epochs, while terminal destroy must dispose the instance exactly once.
+  - id: A-VUE-2-0001-H
+    text:
+      zh-CN: Adapter diagnostics 必须透传 Runtime structured lifecycle events；该 Runtime-to-Adapter 执行协议不得虚构 Lifecycle Module 或 host capability。
+      en: Adapter diagnostics must forward structured Runtime lifecycle events; this Runtime-to-Adapter execution protocol must not invent a Lifecycle module or host capability.
+  - id: A-VUE-2-0001-I
+    text:
+      zh-CN: Vue 2 owner 必须按最新 ViewIntent 调和 view epoch，并让 terminal teardown 权限高于 desired presence。
+      en: The Vue 2 owner must reconcile view epochs from the latest ViewIntent and let terminal teardown authority override desired presence.
+  - id: A-VUE-2-0001-J
+    text:
+      zh-CN: Adapter 必须通过 standard Runtime 接入 required State Module，跨 repeatable view epoch 保留 instance-owned state；State mutation 不得隐式触发 Vue render，且 profile 不得虚构 State host-cap。
+      en: The Adapter must wire the required State module through the standard Runtime, retain instance-owned state across repeatable view epochs, avoid implicit Vue rendering from State mutation, and not invent a State host capability.
+  - id: A-VUE-2-0001-K
+    text:
+      zh-CN: Adapter 必须通过 standard Runtime 接入 required Expose core Module，以 component public instance `getExposes()` 返回 detached record，保持 callable identity，并在 terminal disposal 后使已保存 callable 失效。
+      en: The Adapter must wire the required Expose core module through the standard Runtime, return a detached record from component-public-instance `getExposes()`, preserve callable identity, and invalidate held callables after terminal disposal.
+  - id: A-VUE-2-0001-L
+    text:
+      zh-CN: Adapter 必须接入 required Expose State Module，并以 translated capability 提供 `HC-EXPOSES-RECORD-SINK-0001`；public instance state 必须是稳定、只读、同源 external handle，且 terminal disposal 必须清理旧 record。
+      en: The Adapter must wire the required Expose State module and provide `HC-EXPOSES-RECORD-SINK-0001` as a translated capability; public-instance state must be a stable, read-only, same-source external handle and terminal disposal must clear the old record.
+  - id: A-VUE-2-0001-M
+    text:
+      zh-CN: Adapter 必须接入 required Expose Event Module，并以 translated capability 提供 `HC-EXPOSE-EVENT-SINK-0001`；合法 emission 映射到 Vue 2 event listener 与当前 typed `onXxx` listener，listener attrs 不得进入 Proto raw props。
+      en: The Adapter must wire the required Expose Event module and provide `HC-EXPOSE-EVENT-SINK-0001` as a translated capability; valid emissions map to Vue 2 event listeners and current typed `onXxx` listeners, while listener attrs stay outside Proto raw props.
+supports:
+  modules:
+    - id: M-PROPS-0001
+      role: required-module
+      note: Vue 2 props and attrs provide the standard Maker-to-Component configuration channel.
+    - id: M-EVENT-0001
+      role: required-module
+      note: Event is installed for the standard User-to-Component interaction channel.
+    - id: M-STATE-0001
+      role: required-module
+      note: State is host-neutral instance memory and requires no Adapter-provided host capability.
+    - id: M-EXPOSE-0001
+      role: required-module
+      note: Expose core owns the component-public-instance record and callback scope.
+    - id: M-EXPOSE-STATE-0001
+      role: required-module
+      note: Expose State finalizes and attenuates the outward record before Adapter publication.
+    - id: M-EXPOSE-EVENT-0001
+      role: required-module
+      note: Expose Event owns the outward-signal bridge and receives its sink through expose-event wiring.
+provides:
+  hostCaps:
+    - id: HC-PROPS-SOURCE-0001
+      role: translated-capability
+      note: Vue 2 props and attrs are classified into a readable source with update-driven invalidation.
+    - id: HC-EVENT-BINDING-0001
+      role: translated-capability
+      note: The shared Web router translates DOM input into Adapter-owned Proto event streams after Vue 2 commit.
+    - id: HC-DEFAULT-ACTION-0001
+      role: translated-capability
+      note: Default-action cancellation is translated to preventDefault when supported by the DOM event.
+    - id: HC-EXPOSES-RECORD-SINK-0001
+      role: translated-capability
+      note: Vue 2 publishes detached exposes through component-public-instance getExposes.
+    - id: HC-EXPOSE-EVENT-SINK-0001
+      role: translated-capability
+      note: Vue 2 maps validated outward signals to event and typed onXxx listeners.
+relates:
+  decisions:
+    - D-ADAPTER-PROFILE-0001
+verifies:
+  tests:
+    - T-ADAPTER-PROFILE-0001
+    - T-PROPS-0012
+    - T-EVENT-0003
+    - T-LIFECYCLE-0003
+    - T-LIFECYCLE-0005
+    - T-LIFECYCLE-0006
+    - T-STATE-0005
+    - T-EXPOSE-0002
+    - T-EXPOSE-STATE-0002
+    - T-EXPOSE-EVENT-0002
+sources:
+  - path: packages/adapters/vue2/package.json
+  - path: packages/adapters/vue2/src/adapt.ts
+  - path: packages/adapters/vue2/src/runtime/modules.ts
+  - path: packages/adapters/vue2/src/runtime/session.ts
+  - path: packages/adapters/vue2/test/props-update.test.ts
+  - path: packages/adapters/vue2/test/event.test.ts
+  - path: packages/adapters/vue2/test/lifecycle.test.ts
+  - path: packages/adapters/vue2/test/expose.test.ts
+  - path: packages/adapters/vue2/test/types.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Admitted the official Vue 2.6 Web Adapter profile with reviewed Props, Event, lifecycle, State, Expose, and host-capability translation evidence.
+tags: [adapter, vue2, vue, web, props, event, lifecycle, state, expose, official]
