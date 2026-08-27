@@ -31,6 +31,6 @@ description: '让一个受治理的完整切片经过实现、证据、审阅、
 
 发布准备形成可审阅的仓库状态。真正 publication 从受治理的 `main` 单独执行，并保持人类在场。随后再通过 evidence change 核验 registry、tag、GitHub Release、assets、snapshot digest、workflow head 和 deployment。
 
-有人持续协作时，Agent 可以在当前人类决定下准备或审计发布工作；无人值守时，它必须遵守最新本地自治上限。两种模式都不能让 Agent 自行 publish、tag、激活稳定生命周期、merge 或恢复部分失败的 release。
+有人持续协作时，Agent 可以在当前人类决定下准备或审计发布工作；无人值守时，它必须遵守最新本地自治上限。Standing-authorized Agent 可以通过 `pui-integrate` 机械合并 exact 且已独立批准的 PR；两种模式都不能让 Agent 自行 publish、tag、激活稳定生命周期或恢复部分失败的 release。
 
 精确命令和提交要求见 [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md)。
