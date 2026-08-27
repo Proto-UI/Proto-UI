@@ -1,0 +1,28 @@
+---
+title: 'Scroll Area'
+description: '在 Base 滚动协议之上组合的 shadcn Scroll Area 草案原型。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+这个草案条目覆盖 shadcn Scroll Area 家族：Root、Viewport、Scrollbar 与 Thumb。
+
+真实宿主滚动面、逻辑位置、归一化 viewport facts、orientation 与 scroll request 均由 Base Scroll Area 所有。shadcn 层不会创建第二份 scroll state；它只提供裁切 Root、圆角 Viewport、细窄的定向 track 与圆角 Thumb，再由 Base 家族 session 把真实宿主测量结果投射到这套 composed chrome。
+
+示例有意在两个方向制造 overflow。两个 Scrollbar 都只是同一个 Viewport 外围的视觉控制：拖动 Thumb 会映射回归一化宿主滚动请求，而 wheel、touch 与 keyboard 的原生行为仍由宿主表面所有。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>
+
+## 建议验收路径
+
+1. 使用滚轮或触控板纵向滚动，确认 vertical Thumb 跟随原生位置。
+2. 横向滚动，确认 horizontal Thumb 跟随同一个 Viewport，而不是另一份状态。
+3. 分别拖动两个 Thumb，确认内容沿对应方向移动。
+4. 在 Web Components、React 与 Vue 间切换并重复检查。
+
+相关 catalog entities 目前仍为 `draft`，因此本页描述的是当前已编目的方向，而不是稳定兼容性保证。

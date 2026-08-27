@@ -534,6 +534,46 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/checkbox');
     registerPrototype('shadcn-checkbox-indicator', mod.shadcnCheckboxIndicator);
   },
+  'shadcn-scroll-area-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-root', mod.shadcnScrollAreaRoot);
+  },
+  'shadcn-scroll-area-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-viewport', mod.shadcnScrollAreaViewport);
+  },
+  'shadcn-scroll-area-scrollbar': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-scrollbar', mod.shadcnScrollAreaScrollbar);
+  },
+  'shadcn-scroll-area-thumb': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-thumb', mod.shadcnScrollAreaThumb);
+  },
+  'shadcn-tooltip-group': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-group', mod.shadcnTooltipGroup);
+  },
+  'shadcn-tooltip-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-root', mod.shadcnTooltipRoot);
+  },
+  'shadcn-tooltip-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-trigger', mod.shadcnTooltipTrigger);
+  },
+  'shadcn-tooltip-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-content', mod.shadcnTooltipContent);
+  },
+  'brutalist-checkbox-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/checkbox');
+    registerPrototype('brutalist-checkbox-root', mod.brutalistCheckboxRoot);
+  },
+  'brutalist-checkbox-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/checkbox');
+    registerPrototype('brutalist-checkbox-indicator', mod.brutalistCheckboxIndicator);
+  },
   'shadcn-textarea-root': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/textarea');
     registerPrototype('shadcn-textarea-root', mod.default);

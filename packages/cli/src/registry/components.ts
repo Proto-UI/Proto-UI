@@ -455,18 +455,6 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     SHADCN_COMPONENT_PRESET_RECIPES['shadcn-dialog']
   ),
 
-  'brutalist-checkbox': brutalistCompound('brutalist-checkbox', 'Brutalist Checkbox', [
-    {
-      prototypeImport: 'brutalistCheckboxRoot',
-      exportBaseName: 'BrutalistCheckboxRoot',
-      elementName: 'proto-ui-brutalist-checkbox-root',
-    },
-    {
-      prototypeImport: 'brutalistCheckboxIndicator',
-      exportBaseName: 'BrutalistCheckboxIndicator',
-      elementName: 'proto-ui-brutalist-checkbox-indicator',
-    },
-  ]),
   'brutalist-button': brutalist(
     'brutalist-button',
     'Brutalist Button',

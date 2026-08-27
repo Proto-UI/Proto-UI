@@ -1,0 +1,29 @@
+---
+title: 'Tooltip'
+description: 'Draft shadcn Tooltip presentation over the Base Tooltip protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+This draft entry covers Tooltip Group, Root, Trigger, and Content in the shadcn family.
+
+Base Tooltip owns controlled and uncontrolled open state, pointer delays, keyboard opening, dismissal, `aria-describedby`, perceptual presence, and positioned Content. Group owns the shared warm window and active sibling coordination. The shadcn layer adds only the Trigger feedback and compact popover-like Content surface.
+
+Content remains non-focusable and non-essential; it must not contain interactive controls. Arrow is deliberately absent because the current governed family does not expose an Arrow geometry or positioning channel. The demo contains two Roots so the initial delay and Group warm-window transition can be exercised rather than merely inspected as static styling.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>
+
+## Suggested acceptance path
+
+1. Hover `Account` and confirm it opens after about 500ms; leave early and confirm no flash appears.
+2. Move quickly to `Notifications` and confirm the warm sibling opens immediately with no visible overlap.
+3. Wait more than 700ms, hover again, and confirm the initial delay returns.
+4. Tab to a Trigger for immediate opening, then press Escape and confirm focus remains on the Trigger.
+5. Repeat across Web Components, React, and Vue.
+
+The related catalog entities are `draft`; this is the current cataloged direction, not yet a stable guarantee.

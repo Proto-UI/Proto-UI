@@ -20,7 +20,11 @@ describe('runtime test plan', () => {
     assert.deepEqual(createRuntimeTestPlan([]), [
       {
         needsServer: false,
-        args: BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
+        args: [
+          '--minWorkers=1',
+          '--maxWorkers=4',
+          ...BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
+        ],
       },
       {
         needsServer: true,

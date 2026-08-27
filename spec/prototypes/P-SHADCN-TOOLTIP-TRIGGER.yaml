@@ -12,8 +12,19 @@ criteria:
     text:
       en: The direct prototype entry name is shadcn-tooltip-trigger.
       zh-CN: 直接 prototype 入口名为 shadcn-tooltip-trigger。
+  - id: P-SHADCN-TOOLTIP-TRIGGER-STATE-DRIVEN-VISUALS
+    text:
+      en: >-
+        Trigger must derive hover opacity and focus-visible ring feedback from inherited Base handles, and press scale-[0.98] feedback from the runtime-managed official pressed interaction slot; it must not author a button role or activation event.
+
+
+      zh-CN: >-
+        Trigger 必须从继承的 Base handles 派生 hover 透明度与 focus-visible ring，并从 runtime 管理的官方 pressed interaction slot 派生 scale-[0.98] 按压反馈；不得 author button role 或 activation event。
+
+
 sources:
   - path: packages/prototypes/shadcn/src/tooltip/trigger.proto.ts
+  - path: packages/prototypes/shadcn/test/tooltip.test.ts
 inherits:
   prototypes:
     - id: P-BASE-TOOLTIP-TRIGGER

@@ -1,0 +1,33 @@
+---
+title: 'Checkbox'
+description: '覆盖在 Base Checkbox 协议之上的 Brutalist Checkbox 草案呈现。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个草案条目覆盖 Brutalist Checkbox Root 与 Indicator。
+
+controlled/uncontrolled `checked` 与 `indeterminate`、生效的 disabled 状态、pointer 与 Space activation、focus，以及包含 `aria-checked="mixed"` 的可访问 `checkbox` role 均由 Base Checkbox 所有。Brutalist 层只拥有呈现：方形几何、硬质 ink border、偏移 shadow、明确 fill 与各状态样式。
+
+Indicator 从最近的 Root 派生 checked 与 indeterminate 可见性，不拥有独立 value、focus、event 或 accessibility surface。真实 package export 会渲染紧凑的硬线勾号或横杠，并让 indeterminate 在视觉上优先于 checked。`@proto.ui/prototypes-brutalist` 仍是公开 package 与 release unit，而这个 draft Checkbox 家族没有公开的 `proto-ui add` registry 入口。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+## 建议验收路径
+
+1. 分别用 pointer 与 Space 操作 unchecked、checked 和 mixed 示例。
+2. 确认 disabled 示例不能改变。
+3. 用 Tab 聚焦最后一个示例，确认出现硬质 focus-visible 处理，且焦点不会移动到 Indicator。
+4. 在 Web Components、React 与 Vue 间重复上述检查。
+
+相关 catalog entities 仍为 `draft`，因此本页记录的是当前方向，而不是稳定的 Checkbox 家族保证。

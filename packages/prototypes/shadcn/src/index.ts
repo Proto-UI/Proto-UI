@@ -201,7 +201,7 @@ export type {
   ShadcnTooltipContentProps,
   ShadcnTooltipContentExposes,
   ShadcnTooltipContentAsHookContract,
-} from './tooltip/types';
+} from './tooltip';
 export {
   ShadcnScrollAreaRoot,
   ShadcnScrollAreaViewport,
@@ -225,4 +225,4 @@ export type {
   ShadcnScrollAreaThumbProps,
   ShadcnScrollAreaThumbExposes,
   ShadcnScrollAreaThumbAsHookContract,
-} from './scroll-area/types';
+} from './scroll-area';

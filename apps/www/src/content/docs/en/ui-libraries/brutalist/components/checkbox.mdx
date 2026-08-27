@@ -1,0 +1,33 @@
+---
+title: 'Checkbox'
+description: 'Draft Brutalist Checkbox presentation over the Base Checkbox protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft entry covers Brutalist Checkbox Root and Indicator.
+
+Base Checkbox owns controlled and uncontrolled `checked` and `indeterminate`, the effective disabled state, pointer and Space activation, focus, and the accessible `checkbox` role including `aria-checked="mixed"`. The Brutalist layer owns presentation only: square geometry, a hard ink border, offset shadow, decisive fill, and state styling.
+
+Indicator derives checked and indeterminate visibility from the nearest Root and has no independent value, focus, event, or accessibility surface. The real package export renders a compact hard-stroke tick or bar and gives indeterminate visual precedence over checked. `@proto.ui/prototypes-brutalist` remains a public package and release unit, while this draft Checkbox family has no public `proto-ui add` registry entry.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-checkbox"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+    hasCode={true}
+  />
+</div>
+
+## Suggested acceptance path
+
+1. Activate the unchecked, checked, and mixed examples with pointer and Space.
+2. Confirm the disabled example cannot change.
+3. Tab to the final example and confirm the hard focus-visible treatment appears without moving focus to Indicator.
+4. Repeat across Web Components, React, and Vue.
+
+The related catalog entities are `draft`, so this page records current direction rather than a stable Checkbox-family guarantee.

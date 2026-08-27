@@ -1,0 +1,29 @@
+---
+title: 'Tooltip'
+description: '覆盖在 Base Tooltip 协议之上的 shadcn Tooltip 草案呈现。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+这个草案条目覆盖 shadcn 家族中的 Tooltip Group、Root、Trigger 与 Content。
+
+controlled/uncontrolled open state、pointer delays、keyboard opening、dismissal、`aria-describedby`、感知 presence 与 Content positioning 均由 Base Tooltip 所有；Group 负责共享 warm window 与 active sibling coordination。shadcn 层只增加 Trigger feedback 和紧凑的 popover 风格 Content 表面。
+
+Content 继续保持不可聚焦且非必要，不得放入交互控件。示例刻意没有 Arrow，因为当前受治理家族尚未暴露 Arrow geometry 或 positioning channel。demo 包含两个 Root，因此可以实际验收首次延迟与 Group warm-window transition，而不只是查看静态样式。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>
+
+## 建议验收路径
+
+1. hover `Account`，确认约 500ms 后打开；提前离开时不应闪现。
+2. 快速移动到 `Notifications`，确认 warm sibling 立即打开且没有双 Tooltip 可见重叠。
+3. 等待超过 700ms 后再次 hover，确认恢复首次延迟。
+4. 用 Tab 聚焦 Trigger，确认立即打开；按 Escape 关闭后焦点仍留在 Trigger。
+5. 在 Web Components、React 与 Vue 间重复上述检查。
+
+相关 catalog entities 仍为 `draft`；这里记录的是当前已编目的方向，尚不是稳定保证。

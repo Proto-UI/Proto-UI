@@ -1,0 +1,28 @@
+---
+title: 'Scroll Area'
+description: 'Draft shadcn Scroll Area prototypes composed over the Base scrolling protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+This draft entry covers the shadcn Scroll Area family: Root, Viewport, Scrollbar, and Thumb.
+
+Base Scroll Area owns the actual host scrolling surface, logical position, normalized viewport facts, orientation, and scroll requests. The shadcn layer does not create another scroll state. It supplies the clipped Root, rounded Viewport, slim oriented tracks, and rounded Thumb, then lets the Base family session project real host measurements into that composed chrome.
+
+The example intentionally overflows in both directions. Its two Scrollbars are visual controls around the same Viewport: dragging a Thumb maps back to a normalized host scroll request, while native wheel, touch, and keyboard behavior remain owned by the host surface.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-scroll-area"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue']}
+  hasCode={true}
+/>
+
+## Suggested acceptance path
+
+1. Scroll vertically with a wheel or trackpad and confirm the vertical Thumb follows the native position.
+2. Scroll horizontally and confirm the horizontal Thumb follows the same Viewport rather than a second state.
+3. Drag each Thumb and confirm content moves in the matching orientation.
+4. Switch among Web Components, React, and Vue and repeat the checks.
+
+Because the related catalog entities are still `draft`, this page describes the current cataloged direction rather than a stable compatibility guarantee.

@@ -1,19 +1,16 @@
 id: P-SHADCN-TOOLTIP
 type: prototype
-title: shadcn Tooltip Root inherits Base Tooltip and layers a rounded popover surface
+title: shadcn Tooltip Root inherits Base Tooltip coordination
 status: draft
 since: 0.3.0-alpha.0
-summary: >-
-  shadcn Tooltip Root inherits Base Tooltip interaction semantics and projects a rounded popover visual surface: rounded-md border, bg-popover, shadow-md, text-popover-foreground.
-
-
+summary: shadcn Tooltip Root inherits Base Tooltip coordination without taking over part-owned presentation.
 statement:
   en: >-
-    shadcn Tooltip Root is a draft Proto UI-maintained shadcn design-language projection over Base Tooltip. It preserves inherited Base protocol semantics and adds only visual/style behavior: rounded corners, border, popover background, shadow, and popover-foreground text.
+    shadcn Tooltip Root is a draft Proto UI-maintained shadcn design-language projection over Base Tooltip. It preserves inherited open, delay, disabled, and request coordination without adding a competing visual or interaction owner; Group, Trigger, and Content keep their direct part responsibilities.
 
 
   zh-CN: >-
-    shadcn Tooltip Root 是 Proto UI 维护的 draft shadcn design-language 投射，建立在 Base Tooltip 之上。它保留继承的 Base 协议语义，仅增加视觉/style 行为：圆角、边框、popover 背景、阴影与 popover-foreground 文本。
+    shadcn Tooltip Root 是 Proto UI 维护的 draft shadcn design-language 投射，建立在 Base Tooltip 之上。它保留继承的 open、delay、disabled 与 request 协调，不增加相互竞争的视觉或交互 owner；Group、Trigger 与 Content 继续持有各自的直接 part 职责。
 
 
 criteria:
@@ -25,19 +22,8 @@ criteria:
     text:
       en: The direct prototype entry name is shadcn-tooltip-root and is the only public Tooltip Root entry in this foundation slice.
       zh-CN: 直接 prototype 入口名为 shadcn-tooltip-root，且是本 foundation 切片中唯一公开的 Tooltip Root 入口。
-  - id: P-SHADCN-TOOLTIP-VISUAL-GRAMMAR
-    text:
-      en: >-
-        The content visual surface must preserve rounded corners (rounded-md), border (border), popover background (bg-popover), shadow (shadow-md), and popover-foreground text (text-popover-foreground) without gradients or glass effects.
-
-
-      zh-CN: >-
-        content 视觉表面必须保持圆角（rounded-md）、边框（border）、popover 背景（bg-popover）、阴影（shadow-md）与 popover-foreground 文本（text-popover-foreground），不得使用渐变或玻璃效果。
-
-
 sources:
   - path: packages/prototypes/shadcn/src/tooltip/root.proto.ts
-  - path: packages/prototypes/shadcn/src/tooltip/content.proto.ts
   - path: packages/prototypes/shadcn/src/tooltip/types.ts
 inherits:
   prototypes:

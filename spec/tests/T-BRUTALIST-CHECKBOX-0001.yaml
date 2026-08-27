@@ -4,7 +4,7 @@ title: Brutalist Checkbox visual, interaction, and inheritance tests
 status: draft
 since: 0.3.0-alpha.0
 summary: >-
-  Covers the Brutalist Checkbox public API (root checked fill swap, indicator opacity visibility, press/focus/disabled) against P-BRUTALIST-CHECKBOX and P-BRUTALIST-CHECKBOX-INDICATOR criteria.
+  Covers the Brutalist Checkbox public API (root checked fill swap, derived Indicator tick/bar and opacity visibility, press/focus/disabled) against P-BRUTALIST-CHECKBOX and P-BRUTALIST-CHECKBOX-INDICATOR criteria.
 
 
 cases:
@@ -22,10 +22,10 @@ cases:
       - P-BRUTALIST-CHECKBOX-VISUAL-GRAMMAR
     expectation: p-brutalist-checkbox-checked-fill-swap
   - id: T-BRUTALIST-CHECKBOX-0001-CASE-3
-    title: Indicator opacity follows checked state
+    title: Indicator glyph and opacity follow checked and indeterminate state
     covers:
       - P-BRUTALIST-CHECKBOX-INDICATOR-VISUAL-GRAMMAR
-    expectation: p-brutalist-checkbox-indicator-opacity
+    expectation: p-brutalist-checkbox-indicator-glyph-opacity
   - id: T-BRUTALIST-CHECKBOX-0001-CASE-4
     title: Press clears shadow; focus-visible applies ring; disabled de-emphasizes
     covers:

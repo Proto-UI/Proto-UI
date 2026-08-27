@@ -96,6 +96,63 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('registers the exact shadcn Tooltip and Scroll Area family facades', () => {
+    const families = [
+      {
+        id: 'shadcn-tooltip',
+        label: 'shadcn Tooltip',
+        importPath: '@proto.ui/prototypes-shadcn/tooltip',
+        parts: ['Group', 'Root', 'Trigger', 'Content'],
+      },
+      {
+        id: 'shadcn-scroll-area',
+        label: 'shadcn Scroll Area',
+        importPath: '@proto.ui/prototypes-shadcn/scroll-area',
+        parts: ['Root', 'Viewport', 'Scrollbar', 'Thumb'],
+      },
+    ] as const;
+
+    for (const family of families) {
+      const familyName = family.id === 'shadcn-tooltip' ? 'Tooltip' : 'ScrollArea';
+      const items = family.parts.map((part) => ({
+        prototypeImport: `shadcn${familyName}${part}`,
+        reactExport: `Shadcn${familyName}${part}`,
+        vueExport: `Shadcn${familyName}${part}`,
+        wcExport: `Shadcn${familyName}${part}Element`,
+        elementName: `proto-ui-${family.id}-${part.toLowerCase()}`,
+      }));
+
+      expect(COMPONENT_REGISTRY[family.id]).toEqual({
+        id: family.id,
+        label: family.label,
+        packageName: '@proto.ui/prototypes-shadcn',
+        importPath: family.importPath,
+        stylePreset: 'shadcn',
+        items,
+        preset: undefined,
+      });
+
+      for (const host of ['react', 'vue', 'wc'] as const) {
+        const source = renderHostIndex(host, [family.id]);
+        const imports = items
+          .map((item) => item.prototypeImport)
+          .sort()
+          .join(', ');
+        expect(source).toContain(`import { ${imports} } from '${family.importPath}';`);
+
+        for (const item of items) {
+          const exportName =
+            host === 'react' ? item.reactExport : host === 'vue' ? item.vueExport : item.wcExport;
+          const expected =
+            host === 'wc'
+              ? `export const ${exportName} = AdaptToWebComponent(${item.prototypeImport}, { registerAs: '${item.elementName}' });`
+              : `export const ${exportName} = adapt(${item.prototypeImport});`;
+          expect(source).toContain(expected);
+        }
+      }
+    }
+  });
+
   it('registers the promoted Brutalist families and both Textarea projections', () => {
     const brutalistIds = Object.keys(COMPONENT_REGISTRY)
       .filter((id) => id.startsWith('brutalist-'))
@@ -104,7 +161,6 @@ describe('@proto.ui/cli', () => {
       'brutalist-badge',
       'brutalist-button',
       'brutalist-card',
-      'brutalist-checkbox',
       'brutalist-dialog',
       'brutalist-dropdown',
       'brutalist-hover-card',
@@ -117,6 +173,9 @@ describe('@proto.ui/cli', () => {
       'brutalist-textarea',
       'brutalist-toggle',
     ]);
+    // The draft Checkbox package subpath is intentionally not admitted to the
+    // public `proto-ui add` registry by #384.
+    expect(COMPONENT_REGISTRY).not.toHaveProperty('brutalist-checkbox');
     expect(COMPONENT_REGISTRY['brutalist-badge']).toMatchObject({
       packageName: '@proto.ui/prototypes-brutalist',
       importPath: '@proto.ui/prototypes-brutalist/badge',

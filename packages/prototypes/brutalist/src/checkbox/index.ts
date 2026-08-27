@@ -6,6 +6,8 @@ export {
 export type {
   BrutalistCheckboxRootProps,
   BrutalistCheckboxRootExposes,
+  BrutalistCheckboxRootAsHookContract,
   BrutalistCheckboxIndicatorProps,
   BrutalistCheckboxIndicatorExposes,
+  BrutalistCheckboxIndicatorAsHookContract,
 } from './types';

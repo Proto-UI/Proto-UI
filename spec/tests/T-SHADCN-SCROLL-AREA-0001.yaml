@@ -18,6 +18,17 @@ cases:
     covers:
       - P-SHADCN-SCROLL-AREA-VISUAL-GRAMMAR
     expectation: p-shadcn-scroll-area-visual-grammar
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-3
+    title: Inherited composed two-axis controls and lifecycle guards
+    covers:
+      - P-BASE-SCROLL-AREA-PROJECTION-CHOICE
+      - P-BASE-SCROLL-AREA-FAMILY-SESSION
+      - P-BASE-SCROLL-AREA-VIEWPORT-COMPOSED-BINDING
+      - P-BASE-SCROLL-AREA-VIEWPORT-NAV-PARTICIPATION
+      - P-BASE-SCROLL-AREA-SCROLLBAR-HOST-CONTROL
+      - P-BASE-SCROLL-AREA-THUMB-PASSIVE-PROJECTION
+      - P-BASE-SCROLL-AREA-THUMB-MOVE-HIT-SUBREGION
+    expectation: p-shadcn-scroll-area-inherited-composed-lifecycle
 implementations:
   - id: prototypes-shadcn-scroll-area-contract
     kind: module-test
@@ -27,6 +38,7 @@ implementations:
     consumesCases:
       - T-SHADCN-SCROLL-AREA-0001-CASE-1
       - T-SHADCN-SCROLL-AREA-0001-CASE-2
+      - T-SHADCN-SCROLL-AREA-0001-CASE-3
     exercises:
       - P-BASE-SCROLL-AREA
       - P-BASE-SCROLL-AREA-VIEWPORT

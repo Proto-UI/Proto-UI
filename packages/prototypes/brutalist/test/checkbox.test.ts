@@ -32,6 +32,13 @@ function createCheckbox(props: Record<string, unknown> = {}) {
   return { root, indicator };
 }
 
+function glyphPaths(indicator: HTMLElement): string[] {
+  return [...indicator.querySelectorAll('svg path')].map((path) => path.getAttribute('d') ?? '');
+}
+
+const CHECK_PATH = 'm20 6-11 11-5-5';
+const DASH_PATH = 'M5 12h14';
+
 afterEach(async () => {
   document.body.replaceChildren();
   await flush();
@@ -69,16 +76,34 @@ describe('prototypes/brutalist: checkbox', () => {
     expect(styleContains(root, 'data-[disabled]:pointer-events-none')).toBe(true);
   });
 
-  it('indicator opacity follows checked state', async () => {
+  it('indicator visibility and glyph follow checked and indeterminate state', async () => {
     const { root, indicator } = createCheckbox({ defaultChecked: false });
     await settle();
 
     expect(styleContains(indicator, 'opacity-0')).toBe(true);
+    expect(glyphPaths(indicator)).toEqual([]);
 
     setElementProps(root, { checked: true });
     await settle();
     expect(root.getExposes().checked.get()).toBe(true);
     expect(styleContains(root, 'data-[checked]:bg-foreground')).toBe(true);
+    expect(styleContains(root, 'data-[checked]:text-background')).toBe(true);
     expect(styleContains(indicator, 'data-[checked]:opacity-100')).toBe(true);
+    expect(glyphPaths(indicator)).toEqual([CHECK_PATH]);
+    expect(indicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+
+    setElementProps(root, { checked: false, indeterminate: true });
+    await settle();
+    expect(root.getExposes().checked.get()).toBe(false);
+    expect(root.getExposes().indeterminate.get()).toBe(true);
+    expect(styleContains(indicator, 'data-[indeterminate]:opacity-100')).toBe(true);
+    expect(glyphPaths(indicator)).toEqual([DASH_PATH]);
+
+    setElementProps(root, { checked: true, indeterminate: true });
+    await settle();
+    expect(root.getExposes().checked.get()).toBe(true);
+    expect(root.getExposes().indeterminate.get()).toBe(true);
+    expect(glyphPaths(indicator)).toEqual([DASH_PATH]);
+    expect(indicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
   });
 });

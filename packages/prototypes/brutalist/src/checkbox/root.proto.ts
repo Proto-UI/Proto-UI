@@ -37,7 +37,7 @@ const checkboxRoot = definePrototype<BrutalistCheckboxRootProps, BrutalistCheckb
 
     def.rule({
       when: (w) => w.state(checked).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-foreground text-main')),
+      intent: (i) => i.feedback.style.use(tw('bg-foreground text-background')),
     });
     def.rule({
       when: (w) => w.state(pressed).eq(true),

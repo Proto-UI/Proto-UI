@@ -5,10 +5,14 @@ export { default as ShadcnTooltipContent, default as shadcnTooltipContent } from
 export type {
   ShadcnTooltipGroupProps,
   ShadcnTooltipGroupExposes,
+  ShadcnTooltipGroupAsHookContract,
   ShadcnTooltipRootProps,
   ShadcnTooltipRootExposes,
+  ShadcnTooltipRootAsHookContract,
   ShadcnTooltipTriggerProps,
   ShadcnTooltipTriggerExposes,
+  ShadcnTooltipTriggerAsHookContract,
   ShadcnTooltipContentProps,
   ShadcnTooltipContentExposes,
+  ShadcnTooltipContentAsHookContract,
 } from './types';

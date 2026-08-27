@@ -11,10 +11,14 @@ export { default as ShadcnScrollAreaThumb, default as shadcnScrollAreaThumb } fr
 export type {
   ShadcnScrollAreaRootProps,
   ShadcnScrollAreaRootExposes,
+  ShadcnScrollAreaRootAsHookContract,
   ShadcnScrollAreaViewportProps,
   ShadcnScrollAreaViewportExposes,
+  ShadcnScrollAreaViewportAsHookContract,
   ShadcnScrollAreaScrollbarProps,
   ShadcnScrollAreaScrollbarExposes,
+  ShadcnScrollAreaScrollbarAsHookContract,
   ShadcnScrollAreaThumbProps,
   ShadcnScrollAreaThumbExposes,
+  ShadcnScrollAreaThumbAsHookContract,
 } from './types';

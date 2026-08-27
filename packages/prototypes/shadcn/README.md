@@ -46,13 +46,16 @@ The root package export remains available for compatibility. Shadcn families do 
 - `src/hover-card/`
 - `src/index.ts`
 - `src/select/`
+- `src/scroll-area/`
 - `src/switch/`
 - `src/tabs/`
+- `src/tooltip/`
 - `src/toggle/`
 
 ## Related Internal Packages
 
 - `@proto.ui/core`
+- `@proto.ui/hooks`
 - `@proto.ui/prototypes-base`
 
 ## License

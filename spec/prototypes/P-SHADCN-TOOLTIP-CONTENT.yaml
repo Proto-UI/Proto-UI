@@ -12,8 +12,19 @@ criteria:
     text:
       en: The direct prototype entry name is shadcn-tooltip-content.
       zh-CN: 直接 prototype 入口名为 shadcn-tooltip-content。
+  - id: P-SHADCN-TOOLTIP-CONTENT-VISUAL-GRAMMAR
+    text:
+      en: >-
+        Content must project z-50, overflow-hidden, rounded-md, border, bg-popover, px-3, py-1.5, text-xs, text-popover-foreground, and shadow-md without moving that surface responsibility to Root.
+
+
+      zh-CN: >-
+        Content 必须投射 z-50、overflow-hidden、rounded-md、border、bg-popover、px-3、py-1.5、text-xs、text-popover-foreground 与 shadow-md，且不得把该视觉表面职责转移给 Root。
+
+
 sources:
   - path: packages/prototypes/shadcn/src/tooltip/content.proto.ts
+  - path: packages/prototypes/shadcn/test/tooltip.test.ts
 inherits:
   prototypes:
     - id: P-BASE-TOOLTIP-CONTENT

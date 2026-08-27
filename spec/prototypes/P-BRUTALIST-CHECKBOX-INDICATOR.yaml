@@ -1,19 +1,19 @@
 id: P-BRUTALIST-CHECKBOX-INDICATOR
 type: prototype
-title: Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects opacity visibility
+title: Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects a derived glyph
 status: draft
 since: 0.3.0-alpha.0
 summary: >-
-  Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects a simple opacity-based visibility model: fully opaque when checked, fully transparent when unchecked.
+  Brutalist Checkbox Indicator inherits Base Checkbox Indicator and renders a derived hard-stroke tick when checked, a bar when indeterminate, and no glyph when ordinarily unchecked.
 
 
 statement:
   en: >-
-    Brutalist Checkbox Indicator is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Checkbox Indicator. It preserves inherited Base protocol semantics and adds only visual/style behavior: opacity-100 when checked or indeterminate, opacity-0 only when both unchecked and non-indeterminate.
+    Brutalist Checkbox Indicator is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Checkbox Indicator. It preserves inherited Base protocol semantics and adds only visual/style behavior: an accessibility-hidden hard-stroke tick when checked, a bar when indeterminate, no glyph when ordinarily unchecked, and matching opacity visibility.
 
 
   zh-CN: >-
-    Brutalist Checkbox Indicator 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Checkbox Indicator 之上。它保留继承的 Base 协议语义，仅增加视觉/style 行为：checked 时 opacity-100，unchecked 时 opacity-0。
+    Brutalist Checkbox Indicator 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Checkbox Indicator 之上。它保留继承的 Base 协议语义，仅增加视觉/style 行为：checked 时渲染从无障碍树隐藏的硬线勾号，indeterminate 时渲染横杠，普通 unchecked 时不渲染 glyph，并同步投射 opacity 可见性。
 
 
 criteria:
@@ -28,11 +28,11 @@ criteria:
   - id: P-BRUTALIST-CHECKBOX-INDICATOR-VISUAL-GRAMMAR
     text:
       en: >-
-        The indicator must be fully opaque (`opacity-100`) when `checked` is true or `indeterminate` is true. The indicator must be fully transparent (`opacity-0`) only when both `checked` is false and `indeterminate` is false. No transition, gradient, or animation is applied.
+        The indicator must render exactly one accessibility-hidden hard-stroke tick when `checked` is true, exactly one hard bar when `indeterminate` is true, and no glyph when both are false; indeterminate takes precedence when both values are true. It must be fully opaque (`opacity-100`) for checked or indeterminate and fully transparent (`opacity-0`) only when both values are false. No transition, gradient, or animation is applied.
 
 
       zh-CN: >-
-        indicator 在 `checked` 为 true 或 `indeterminate` 为 true 时必须完全不透明（`opacity-100`）。仅在 `checked` 和 `indeterminate` 同时为 false 时才完全透明（`opacity-0`）。不应用任何 transition、gradient 或 animation。
+        indicator 在 `checked` 为 true 时必须恰好渲染一个从无障碍树隐藏的硬线勾号，在 `indeterminate` 为 true 时必须恰好渲染一个硬横杠，两者同时为 true 时 indeterminate 优先；两者同时为 false 时不得渲染 glyph。checked 或 indeterminate 时必须完全不透明（`opacity-100`），仅在两者同时为 false 时完全透明（`opacity-0`）。不应用任何 transition、gradient 或 animation。
 
 
 sources:

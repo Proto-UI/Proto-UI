@@ -3,6 +3,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-pr534-coverage.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts',
@@ -16,7 +17,13 @@ export function createRuntimeTestPlan(rawArgs) {
   return [
     {
       needsServer: false,
-      args: BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
+      // Bound process fan-out so a large core count cannot starve the 5s
+      // fixture timeouts or the CLI subprocess tests on developer machines.
+      args: [
+        '--minWorkers=1',
+        '--maxWorkers=4',
+        ...BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
+      ],
     },
     {
       needsServer: true,

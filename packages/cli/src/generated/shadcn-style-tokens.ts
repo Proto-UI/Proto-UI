@@ -7,6 +7,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   '-translate-x-1/2',
   '-translate-y-1/2',
   'absolute',
+  'active:not-[data-disabled]:scale-[0.98]',
   'animate-in',
   'animate-out',
   'backdrop-blur-xs',

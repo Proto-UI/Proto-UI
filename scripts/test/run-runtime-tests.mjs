@@ -28,6 +28,9 @@ const READY_ROUTES = [
   '/en/ui-libraries/shadcn/textarea/',
   '/zh-cn/',
   '/zh-cn/internal/demo-matrix/',
+  '/zh-cn/ui-libraries/brutalist/components/checkbox/',
+  '/zh-cn/ui-libraries/shadcn/scroll-area/',
+  '/zh-cn/ui-libraries/shadcn/tooltip/',
 ];
 const READY_TIMEOUT_MS = 180_000;
 
@@ -35,6 +38,7 @@ const testPlan = createRuntimeTestPlan(process.argv.slice(2));
 let devServer = null;
 let serverOutput = '';
 let shuttingDown = false;
+let styleGeneration = null;
 
 function recordOutput(chunk) {
   serverOutput = `${serverOutput}${chunk.toString()}`.slice(-20_000);
@@ -74,24 +78,41 @@ async function waitForServer(url) {
   throw new Error(`Timed out waiting for ${url}.\n${serverOutput}`);
 }
 
+async function generateProtoUiStyle() {
+  styleGeneration ??= new Promise((resolve, reject) => {
+    const appsWwwRoot = path.join(root, 'apps', 'www');
+    const corepackCli = path.join(
+      path.dirname(process.execPath),
+      'node_modules',
+      'corepack',
+      'dist',
+      'corepack.js'
+    );
+    const child = spawn(
+      process.execPath,
+      [corepackCli, 'pnpm@10.32.1', 'run', 'generate:proto-ui-style'],
+      { cwd: appsWwwRoot, env: process.env, stdio: 'inherit' }
+    );
+    child.on('error', reject);
+    child.on('exit', (code, signal) => {
+      if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));
+      else if (code !== 0) reject(new Error(`Proto UI style generation exited with code ${code}.`));
+      else resolve();
+    });
+  });
+  return styleGeneration;
+}
+
 async function startServer() {
+  await generateProtoUiStyle();
   const port = await availablePort();
-  const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+  const appsWwwRoot = path.join(root, 'apps', 'www');
+  const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
   devServer = spawn(
-    executable,
-    [
-      'pnpm@10.32.1',
-      '--filter',
-      'apps-www',
-      'dev',
-      '--host',
-      '127.0.0.1',
-      '--port',
-      String(port),
-      '--strictPort',
-    ],
+    process.execPath,
+    [astroCli, 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
     {
-      cwd: root,
+      cwd: appsWwwRoot,
       detached: process.platform !== 'win32',
       shell: process.platform === 'win32',
       env: process.env,
@@ -145,16 +166,10 @@ async function stopServer() {
 
 async function runVitest(args, baseUrl) {
   return new Promise((resolve, reject) => {
-    // spawn() does not go through a shell, so resolve the workspace binary
-    // rather than relying on node_modules/.bin being on PATH.
-    const vitestBin = path.join(
-      root,
-      'node_modules',
-      '.bin',
-      process.platform === 'win32' ? 'vitest.cmd' : 'vitest'
-    );
+    // Invoke Vitest through Node so Windows never has to spawn a .cmd shim.
+    const vitestBin = path.join(root, 'node_modules', 'vitest', 'vitest.mjs');
     const env = baseUrl ? { ...process.env, PROTO_UI_BROWSER_BASE_URL: baseUrl } : process.env;
-    const child = spawn(vitestBin, ['run', ...args], {
+    const child = spawn(process.execPath, [vitestBin, 'run', ...args], {
       cwd: root,
       env,
       shell: process.platform === 'win32',

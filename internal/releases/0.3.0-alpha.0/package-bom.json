@@ -375,7 +375,7 @@
       "path": "packages/prototypes/shadcn",
       "releaseRole": "launch-commitment",
       "publishOrder": 36,
-      "internalDependencies": ["@proto.ui/core", "@proto.ui/prototypes-base"]
+      "internalDependencies": ["@proto.ui/core", "@proto.ui/hooks", "@proto.ui/prototypes-base"]
     },
     {
       "name": "@proto.ui/runtime",

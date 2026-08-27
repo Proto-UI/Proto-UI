@@ -34,11 +34,11 @@ criteria:
   - id: P-BRUTALIST-CHECKBOX-VISUAL-GRAMMAR
     text:
       en: >-
-        The root visual surface must preserve square corners (`rounded-none`), black structural borders (`border-2 border-black`), a hard zero-blur offset shadow (`shadow-[3px_3px_0_0_#000]`), and a flat `bg-main` resting fill without gradients, glass, rounded cards, or soft elevation. Checked swaps the fill to `bg-foreground text-main`; pressed clears the shadow with `shadow-none`.
+        The root visual surface must preserve square corners (`rounded-none`), black structural borders (`border-2 border-black`), a hard zero-blur offset shadow (`shadow-[3px_3px_0_0_#000]`), and a flat `bg-main` resting fill without gradients, glass, rounded cards, or soft elevation. Checked swaps to the paired `bg-foreground text-background` fill/ink tokens so its derived glyph keeps non-text contrast in both Light and Dark; pressed clears the shadow with `shadow-none`.
 
 
       zh-CN: >-
-        root 视觉表面必须保持直角（`rounded-none`）、黑色结构边框（`border-2 border-black`）、零模糊硬偏移阴影（`shadow-[3px_3px_0_0_#000]`）与平面 `bg-main` 静止填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。Checked 将填充切换为 `bg-foreground text-main`；pressed 以 `shadow-none` 清除阴影。
+        root 视觉表面必须保持直角（`rounded-none`）、黑色结构边框（`border-2 border-black`）、零模糊硬偏移阴影（`shadow-[3px_3px_0_0_#000]`）与平面 `bg-main` 静止填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。Checked 切换为配对的 `bg-foreground text-background` 填充/前景 token，使派生 glyph 在 Light 与 Dark 中都保持非文本对比度；pressed 以 `shadow-none` 清除阴影。
 
 
   - id: P-BRUTALIST-CHECKBOX-INTERACTION

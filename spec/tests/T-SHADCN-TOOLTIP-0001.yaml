@@ -17,8 +17,26 @@ cases:
   - id: T-SHADCN-TOOLTIP-0001-CASE-2
     title: Content visual grammar is rounded popover
     covers:
-      - P-SHADCN-TOOLTIP-VISUAL-GRAMMAR
+      - P-SHADCN-TOOLTIP-CONTENT-VISUAL-GRAMMAR
     expectation: p-shadcn-tooltip-visual-grammar
+  - id: T-SHADCN-TOOLTIP-0001-CASE-3
+    title: Trigger visual feedback is state-driven without activation ownership
+    covers:
+      - P-SHADCN-TOOLTIP-TRIGGER-STATE-DRIVEN-VISUALS
+    expectation: p-shadcn-tooltip-trigger-state-driven-visuals
+  - id: T-SHADCN-TOOLTIP-0001-CASE-4
+    title: Inherited delay cancellation, disabled teardown, and disposal safety
+    covers:
+      - P-BASE-TOOLTIP-DELAYS
+      - P-BASE-TOOLTIP-DISABLED
+    expectation: p-shadcn-tooltip-inherited-delay-disposal
+  - id: T-SHADCN-TOOLTIP-0001-CASE-5
+    title: Inherited warm sibling handoff keeps one active owner
+    covers:
+      - P-BASE-TOOLTIP-GROUP-WARMTH
+      - P-BASE-TOOLTIP-GROUP-ACTIVE-OWNER
+      - P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF
+    expectation: p-shadcn-tooltip-inherited-warm-handoff
 implementations:
   - id: prototypes-shadcn-tooltip-contract
     kind: module-test
@@ -28,6 +46,9 @@ implementations:
     consumesCases:
       - T-SHADCN-TOOLTIP-0001-CASE-1
       - T-SHADCN-TOOLTIP-0001-CASE-2
+      - T-SHADCN-TOOLTIP-0001-CASE-3
+      - T-SHADCN-TOOLTIP-0001-CASE-4
+      - T-SHADCN-TOOLTIP-0001-CASE-5
     exercises:
       - P-BASE-TOOLTIP
       - P-BASE-TOOLTIP-GROUP

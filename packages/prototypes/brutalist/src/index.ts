@@ -186,6 +186,16 @@ export type {
 } from './dialog';
 
 export {
-  BrutalistCheckboxRoot as brutalistCheckboxRoot,
-  BrutalistCheckboxIndicator as brutalistCheckboxIndicator,
+  BrutalistCheckboxRoot,
+  BrutalistCheckboxIndicator,
+  brutalistCheckboxRoot,
+  brutalistCheckboxIndicator,
+} from './checkbox';
+export type {
+  BrutalistCheckboxRootProps,
+  BrutalistCheckboxRootExposes,
+  BrutalistCheckboxRootAsHookContract,
+  BrutalistCheckboxIndicatorProps,
+  BrutalistCheckboxIndicatorExposes,
+  BrutalistCheckboxIndicatorAsHookContract,
 } from './checkbox';
