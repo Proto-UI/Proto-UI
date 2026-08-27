@@ -1,6 +1,7 @@
 import type { RuntimeAPI } from './registry';
 import { createReactAdapter } from '@proto.ui/adapter-react';
 import type * as ReactTypes from 'react';
+import { claimHostMount, releaseHostMount } from './host-mount';
 
 // 我们不直接 import React，而是用 esm.sh 的 ESM 版本懒加载
 // 也可以替换成本地的 "react" / "react-dom/client"（若打包策略允许）
@@ -20,14 +21,10 @@ export async function loadReact(): Promise<{
   return { React, ReactDOM };
 }
 
-// 保存各宿主节点对应的 React root（避免重复创建）
-// 不能使用 ReturnType<ReactDOMTypes['createRoot']>，因为 ReactDOMTypes 仅为类型命名空间
 type ReactRoot = {
   unmount: () => void;
   render: (element: React.ReactElement) => void;
 };
-
-const reactRoots = new WeakMap<HTMLElement, ReactRoot>();
 
 /**
  * React 运行时实现：
@@ -35,41 +32,29 @@ const reactRoots = new WeakMap<HTMLElement, ReactRoot>();
  * - 使用 Proto UI 的 createReactAdapter() 适配 Prototype
  * - 维护宿主 root 的 mount / unmount 生命周期
  */
-export const runtime: RuntimeAPI = {
-  id: 'react',
-  label: 'React',
+export function createReactRuntime(load = loadReact): RuntimeAPI {
+  return {
+    id: 'react',
+    label: 'React',
 
-  async mount(host, prototype, options) {
-    // 防止重复渲染
-    const existingRoot = reactRoots.get(host);
-    if (existingRoot) {
-      existingRoot.unmount();
-      reactRoots.delete(host);
-    }
+    async mount(host, prototype, options) {
+      const lease = claimHostMount(host);
+      const { React, ReactDOM } = await load();
+      if (!lease.isCurrent()) return;
 
-    // 确保容器干净
-    host.innerHTML = '';
+      const adapter = createReactAdapter(React as any);
+      const Component = adapter(prototype);
+      const root = ReactDOM.createRoot(host) as ReactRoot;
+      if (!lease.commit(() => root.unmount())) return;
 
-    const [{ React, ReactDOM }] = await Promise.all([loadReact()]);
-    const adapter = createReactAdapter(React as any);
+      // 不使用 StrictMode，避免开发模式双重渲染。
+      root.render(React.createElement(Component, options?.props ?? {}));
+    },
 
-    // 通过适配器获得 React 组件
-    const Component = adapter(prototype);
-    const root = ReactDOM.createRoot(host);
+    unmount(host) {
+      releaseHostMount(host);
+    },
+  };
+}
 
-    // 保存 root 实例
-    reactRoots.set(host, root);
-
-    // 渲染（不使用 StrictMode，避免开发模式双重渲染）
-    root.render(React.createElement(Component, options?.props ?? {}));
-  },
-
-  async unmount(host) {
-    const root = reactRoots.get(host);
-    if (root) {
-      root.unmount();
-      reactRoots.delete(host);
-    }
-    host.innerHTML = '';
-  },
-};
+export const runtime = createReactRuntime();

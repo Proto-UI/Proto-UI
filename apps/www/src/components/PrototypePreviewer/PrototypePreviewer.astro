@@ -1,12 +1,16 @@
 ---
-import type { RuntimeId } from './runtimes/registry';
+import {
+  AdapterIds,
+  InternalAdapterIds,
+  selectRuntimeIds,
+  type RuntimeId,
+} from './runtimes/registry';
 import AdapterSelect from '../override/AdapterSelect.astro';
-import { AdapterIds } from './runtimes/registry';
 import CodePanel from './CodePanel.astro';
 import { highlightCode, type CodeLang } from './code-highlight';
 
 function codeLangForRuntime(runtime: RuntimeId): CodeLang {
-  if (runtime === 'vue') return 'vue';
+  if (runtime === 'vue' || runtime === 'vue2') return 'vue';
   if (runtime === 'react') return 'tsx';
   return 'html';
 }
@@ -18,13 +22,15 @@ interface Props {
   props?: Record<string, unknown>; // 传给原型适配后组件的 props
   class?: string;
   toolbar?: boolean; // 是否渲染运行时切换 UI，默认 true
-  runtimes?: RuntimeId[]; // 可选的运行时列表，默认 ['wc','react','vue']
+  runtimes?: RuntimeId[]; // 可选的运行时列表，默认使用全部 public AdapterIds
   loader?: string; // 动态导入路径，例如 './demo-inline'
   /** 可选：展示的代码片段，提供后显示 Preview | Code 标签页 */
   code?: string;
   hasCode?: boolean;
   codePanel?: boolean;
   lazy?: boolean; // 进入视口附近后再加载 demo 与原型模块
+  /** Allows internal validation pages to opt into runtimes outside the public adapter set. */
+  allowExperimentalRuntimes?: boolean;
 }
 
 function assertJsonLike(value: unknown, path: string[] = []) {
@@ -69,7 +75,7 @@ const codeMapModules = import.meta.glob('../../content/docs/demo_components/**/*
 
 function findCodeMapForDemo(targetDemoId: string): Partial<Record<RuntimeId, string>> | undefined {
   for (const mod of Object.values(codeMapModules)) {
-    const map = (mod as { codeMap?: Record<RuntimeId, Record<string, string>> }).codeMap;
+    const map = (mod as { codeMap?: Partial<Record<RuntimeId, Record<string, string>>> }).codeMap;
     if (!map) continue;
     const hasDemo = Object.values(map).some((runtimeMap) => targetDemoId in runtimeMap);
     if (!hasDemo) continue;
@@ -91,17 +97,23 @@ const {
   props: protoProps = {},
   class: className = '',
   toolbar = true,
-  runtimes = AdapterIds,
+  runtimes,
   loader,
   code: codeSnippet,
   hasCode = false,
   codePanel = true,
   lazy = false,
+  allowExperimentalRuntimes = false,
 } = Astro.props;
 
+const permittedRuntimes = allowExperimentalRuntimes ? InternalAdapterIds : AdapterIds;
+const effectiveRuntimes = selectRuntimeIds(runtimes, permittedRuntimes);
+const effectiveInitialRuntime = effectiveRuntimes.includes(initialRuntime)
+  ? initialRuntime
+  : effectiveRuntimes[0]!;
 const autoCodeMap = demoId && codePanel ? findCodeMapForDemo(demoId) : undefined;
 const effectiveHasCode = codePanel && (hasCode || !!autoCodeMap || !!codeSnippet);
-const effectiveCode = autoCodeMap ? autoCodeMap[initialRuntime] : codeSnippet;
+const effectiveCode = autoCodeMap ? autoCodeMap[effectiveInitialRuntime] : codeSnippet;
 
 const highlights: Record<string, string> = {};
 if (autoCodeMap) {
@@ -128,9 +140,9 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
   data-previewer-id={rid}
   data-prototype-id={prototypeId || ''}
   data-demo-id={demoId || ''}
-  data-initial-runtime={initialRuntime}
+  data-initial-runtime={effectiveInitialRuntime}
   data-props={JSON.stringify(protoProps)}
-  data-runtimes={JSON.stringify(runtimes)}
+  data-runtimes={JSON.stringify(effectiveRuntimes)}
   data-loader={loader || ''}
   data-code-map={autoCodeMap ? JSON.stringify(autoCodeMap) : ''}
   data-code-highlights={Object.keys(highlights).length ? JSON.stringify(highlights) : ''}
@@ -161,7 +173,11 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
     </div>
   </div>
 
-  {effectiveHasCode && <CodePanel code={effectiveCode} lang={codeLangForRuntime(initialRuntime)} />}
+  {
+    effectiveHasCode && (
+      <CodePanel code={effectiveCode} lang={codeLangForRuntime(effectiveInitialRuntime)} />
+    )
+  }
 
   <style>
     .proto-previewer {
@@ -267,7 +283,7 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
 
   <script>
     import type { RuntimeId } from './runtimes/registry';
-    const defaultRuntimeIds: RuntimeId[] = ['wc', 'react', 'vue'];
+    const defaultRuntimeIds: RuntimeId[] = ['wc', 'react', 'vue', 'vue2'];
 
     async function mount(root: HTMLElement) {
       if (root.dataset.inited === '1' || root.dataset.mounting === '1') return;

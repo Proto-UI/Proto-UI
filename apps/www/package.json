@@ -23,6 +23,7 @@
     "@pagefind/default-ui": "^1.3.0",
     "@proto.ui/adapter-react": "workspace:*",
     "@proto.ui/adapter-vue": "workspace:*",
+    "@proto.ui/adapter-vue2": "workspace:*",
     "@proto.ui/adapter-web-component": "workspace:*",
     "@proto.ui/core": "workspace:*",
     "@proto.ui/module-presence": "workspace:*",

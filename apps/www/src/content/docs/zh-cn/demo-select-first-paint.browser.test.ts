@@ -5,6 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Locator } from 'playwright-core';
 import { RUNTIMES, launchBrowser, openRoute, startServer, stopServer } from './browser-harness';
 
+const SELECT_RUNTIMES = [...RUNTIMES, 'vue2'] as const;
+
 const SELECT_ROUTE = '/en/ui-libraries/brutalist/components/select/';
 
 /** The demo preselects `paper`, whose authored label is `Paper`. */
@@ -93,7 +95,7 @@ describe.sequential('Select first paint with the popup never opened', () => {
 
     try {
       await previewer.scrollIntoViewIfNeeded();
-      for (const runtime of RUNTIMES) {
+      for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
         const closed = await readClosedSelect(page);
 
@@ -121,7 +123,7 @@ describe.sequential('Select first paint with the popup never opened', () => {
 
     try {
       await previewer.scrollIntoViewIfNeeded();
-      for (const runtime of RUNTIMES) {
+      for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
         const closed = await readClosedSelect(page);
 
