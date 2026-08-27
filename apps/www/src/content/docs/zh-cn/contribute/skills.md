@@ -53,12 +53,13 @@ Handoff 携带有类型的产物，最多指向一个下个 skill。终态 hando
 
 ## 建立证据与读者文档
 
-| Skill          | 完成的一次转换                                          |
-| -------------- | ------------------------------------------------------- |
-| `pui-test`     | 从受治理行为得到可执行证据                              |
-| `pui-docs`     | 从仓库事实得到人类文档                                  |
-| `pui-validate` | 从候选改动得到相称的验证报告                            |
-| `pui-review`   | 按一个声明的 review class 生成与 revision 绑定的 packet |
+| Skill           | 完成的一次转换                                            |
+| --------------- | --------------------------------------------------------- |
+| `pui-test`      | 从受治理行为得到可执行证据                                |
+| `pui-docs`      | 从仓库事实得到人类文档                                    |
+| `pui-validate`  | 从候选改动得到相称的验证报告                              |
+| `pui-review`    | 按一个声明的 review class 生成与 revision 绑定的 packet   |
+| `pui-integrate` | 从已批准 exact-head PR 得到受仓库规则约束的 merge receipt |
 
 ## 检查仓库协作面
 
@@ -96,6 +97,6 @@ Handoff 携带有类型的产物，最多指向一个下个 skill。终态 hando
 
 ## Agent 独自工作时，能力档位就是上限
 
-C1 适合处理有边界的事实，以及事实或文档复核；C2 增加测试与 bounded-regression 复核；C3 增加已批准的语义实现和受治理切片复核；C4 增加跨域语义、治理证据与发布准备。`pui-review` 每次声明一个 review class，本地结果列出 Agent 无人值守时可以承担的类别。注册表把叶子的门槛叫作 `autonomousMinimumBand`，因为它只在 Agent 自己选择或推进任务时作为硬上限。
+C1 适合处理有边界的事实，以及事实或文档复核；C2 增加测试与 bounded-regression 复核；C3 增加已批准的语义实现和受治理切片复核；C4 增加跨域语义、治理证据、发布准备，以及 standing-authorized exact-head integration。`pui-review` 每次声明一个 review class，本地结果列出 Agent 无人值守时可以承担的类别。注册表把叶子的门槛叫作 `autonomousMinimumBand`，因为它只在 Agent 自己选择或推进任务时作为硬上限。
 
 在 `human-assisted` 模式中，同一份结果只是建议。它会改变工作范围、验证强度、复核深度和限制说明，但不会挡住当前用户明确要求的任务。两种模式都仍受 GitHub 实时权限、相关 surface 的 Discord 或 Poppy 信任、当前授权、仓库规则和人类闸门约束。
