@@ -32,6 +32,7 @@ type ElementGeometry = {
   height: number;
 };
 
+
 async function geometry(locator: Locator, label: string): Promise<ElementGeometry> {
   const box = await locator.boundingBox();
   if (!box) throw new Error(`${label}: expected visible rendered geometry.`);
@@ -149,6 +150,7 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
       {
         width: NARROW_WIDTH,
         height: 844,
+
       }
     );
 
@@ -331,6 +333,7 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
       {
         width: NARROW_WIDTH,
         height: 844,
+
       }
     );
 
@@ -430,6 +433,7 @@ describe.sequential('PR #534 coverage-matrix browser acceptance', () => {
       {
         width: NARROW_WIDTH,
         height: 844,
+
       }
     );
 

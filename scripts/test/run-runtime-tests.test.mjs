@@ -36,6 +36,20 @@ describe('Corepack CLI resolution', () => {
       candidates[1]
     );
   });
+  it('resolves a PATH shim to the installed Corepack module', () => {
+    const shim = '/home/test/.fnm/bin/corepack';
+    const moduleEntry =
+      '/home/test/.fnm/node-versions/v24/lib/node_modules/corepack/dist/corepack.js';
+    assert.equal(
+      resolveCorepackCli('/usr/bin/node', {
+        platform: 'linux',
+        pathEnv: '/home/test/.fnm/bin',
+        fileExists: (candidate) => candidate === shim || candidate === moduleEntry,
+        realpath: (candidate) => (candidate === shim ? moduleEntry : candidate),
+      }),
+      moduleEntry
+    );
+  });
 
   it('reports every attempted layout when Corepack is unavailable', () => {
     assert.throws(
