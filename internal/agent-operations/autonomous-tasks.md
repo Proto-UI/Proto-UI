@@ -8,6 +8,10 @@ The Issue and pull-request observers run as a read-only shadow workflow on a sch
 
 The pull-request portfolio observer is a narrower manual trial of an external engine. Its errors remain part of the result. It cannot prepare, repair, submit, approve, or merge a pull request.
 
+The maintainer also operates one local Codex scheduled task for `Proto-UI/Proto-UI`. It is not the repository Phase A workflow. The active standing scope `proto-ui-scheduled-review-v1` allows complete, finding-backed `REQUEST_CHANGES`, and allows `APPROVE` only for a clean packet whose trusted repository CI is successful and whose canonical changed-file set contains no current or previous path for a YAML entity in the nine `spec/**` entity collections. The companion `proto-ui-scheduled-merge-v1` scope allows the task to squash-merge an exact head only after a clean packet, an independent exact-head approval, no active change request, resolved review threads, trusted CI, live write permission, and GitHub `MERGEABLE`/`CLEAN` state all agree.
+
+The repository does not pretend that a caller-provided desktop task name is authentication. A local process holding the GitHub credential could bypass repository scripts entirely, so the effective safety boundary is the maintained standing policy together with live credential permission, canonical input reconciliation, exact-head API writes, single-runner operation, and GitHub repository rules. Strong runtime identity and a global lease remain necessary before widening these writes to multiple or concurrent runners.
+
 Autonomous maintenance is still a manual protocol. `pui-mission` defines the candidate-to-frozen transition. A maintainer currently freezes one mission and starts each fresh Agent context outside an autonomous controller. There is no scheduler, callback service, or globally atomic lease service for that state machine, so competing runners and automatic external writes remain unavailable.
 
 ## What is only a candidate
@@ -31,7 +35,7 @@ A recurring Agent task needs more than a cron expression. It must have:
 - a callback or ledger update that is idempotent;
 - an owner who can disable it and inspect its residual risk.
 
-Local state cannot coordinate separate clones or runners. Until a global atomic consumer or service-side idempotency mechanism exists, recurring external writes remain read-only. Local autonomous work may proceed inside its fresh self-assessed ceiling, frozen scope, and current lease. High-risk work, semantic decisions, integration, publication, access, secrets, and repository rules always stop for a human.
+Local state cannot coordinate separate clones or runners. The active review and merge scopes therefore apply only to the maintainer's single local scheduled runner and use live canonical reconciliation plus exact-head writes. Broader or concurrent runners require a service-side lease, stronger runtime attribution, and globally atomic replay protection. Semantic admission that lacks an independent approval, publication, release, access, secrets, and repository rules still stop for a human.
 
 ## Maintenance transition
 
