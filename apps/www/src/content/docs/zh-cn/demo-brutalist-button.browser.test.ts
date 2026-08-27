@@ -1,5 +1,7 @@
 // @vitest-environment node
 
+import type { Browser } from 'playwright-core';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES,
   launchBrowser,
@@ -256,3 +258,4 @@ describe.sequential('Brutalist Button browser regressions', () => {
     }, 90_000);
   }
 });
+
