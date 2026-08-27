@@ -23,7 +23,7 @@
     "externalEvidence"
   ],
   "properties": {
-    "schemaVersion": { "const": 2 },
+    "schemaVersion": { "const": 3 },
     "kind": { "const": "proto-ui.review-input" },
     "repositoryId": { "type": "string", "minLength": 4 },
     "pullRequest": { "type": "integer", "minimum": 1 },
@@ -126,13 +126,27 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "status", "conclusion", "completedAt", "detailsUrl"],
+        "required": [
+          "name",
+          "status",
+          "conclusion",
+          "completedAt",
+          "detailsUrl",
+          "source",
+          "repository",
+          "workflowName",
+          "workflowPath"
+        ],
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "status": { "type": "string", "minLength": 1 },
           "conclusion": { "type": ["string", "null"] },
           "completedAt": { "type": ["string", "null"], "format": "date-time" },
-          "detailsUrl": { "type": ["string", "null"], "minLength": 1 }
+          "detailsUrl": { "type": ["string", "null"], "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "repository": { "type": ["string", "null"], "minLength": 1 },
+          "workflowName": { "type": ["string", "null"], "minLength": 1 },
+          "workflowPath": { "type": ["string", "null"], "minLength": 1 }
         },
         "additionalProperties": false
       }

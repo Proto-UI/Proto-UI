@@ -31,13 +31,13 @@ The RepoSteward portfolio trial is narrower than the scheduled native shadow wor
 
 The live GitHub repository remains the source for Issue and pull-request state. Phase A artifacts are experimental observations with bounded retention, not a second issue tracker.
 
-## Maintainer-controlled local review schedule
+## Maintainer-controlled local review and integration schedule
 
-The Codex desktop task `proto-ui` is separate from the Phase A GitHub Actions workflow. It runs in the maintainer's local project and records the intended standing scope `proto-ui-scheduled-review-v1`, whose status is `pending-runtime-identity`. Codex does not currently expose a task/run identity that can be verified at the submission boundary, and a caller-provided task ID is not proof. The task therefore remains read-only: it may produce a fresh review and a maintainer decision package, but every `REQUEST_CHANGES` or `APPROVE` recommendation must be sent to the maintainer rather than submitted to GitHub.
+The Codex desktop task `proto-ui` is separate from the Phase A GitHub Actions workflow. It runs in the maintainer's local project with two active standing scopes. `proto-ui-scheduled-review-v1` permits complete, finding-backed `REQUEST_CHANGES`, and permits `APPROVE` only for a clean packet with successful trusted repository CI when no current or previous changed-file path identifies a YAML entity under the nine `spec/**` entity collections. `proto-ui-scheduled-merge-v1` permits an exact-head squash merge only after a clean packet, an independent exact-head approval, no active change request, resolved review threads, trusted CI, live permission, and GitHub `MERGEABLE`/`CLEAN` state all agree.
 
-The intended future scope would allow complete, finding-backed `REQUEST_CHANGES`, and `APPROVE` only for a clean packet with successful live checks when no current or previous changed-file path identifies a YAML entity under the nine `spec/**` entity collections. That scope is not executable authority until repository-and-task-bound runtime identity is implemented and reviewed.
+The local repository cannot authenticate a Codex task name, and a process holding the live GitHub credential could bypass these scripts. Task-name proof is therefore not presented as a security boundary. The effective boundary is the reviewed standing policy intersected with the live credential, a fresh C4 ceiling, canonical input reconciliation, exact-head API writes, single-runner operation, and GitHub repository rules. Strong runtime attribution, service-side leases, and atomic replay protection remain prerequisites for broader or concurrent runners.
 
-The pending authorization does not change `.github/workflows/agent-operations-shadow.yml`, `policy.yaml`, or the Phase A token boundary. It does not authorize `COMMENT` reviews, merge, ready-for-review, close, labels, assignment, publication, release, access, secrets, or rulesets. The separately human-authorized `submit-review` path binds PR state, base ref name, revision, changed files, existing reviews, top-level conversation comments, threaded discussions, checks, viewer identity, author identity, permission, and canonical input digest. Its Review API write carries `commit_id` equal to the reviewed packet head and verifies that value in the receipt. A stale, retargeted, incomplete, duplicate, self-authored, draft, closed, permission-unknown, or commit-mismatched target fails closed.
+These authorizations do not change `.github/workflows/agent-operations-shadow.yml`, `policy.yaml`, or the Phase A token boundary. Review authorization excludes `COMMENT`, `ABSTAIN`, spec-entity approval, ready-for-review, and unrelated GitHub mutations. Merge authorization cannot manufacture approval or bypass a blocked PR; it fixes the base to `main` and method to `squash`. Publication, release, access, secrets, and rulesets remain excluded. The mutation commands bind review `commit_id` or merge `sha` to the inspected packet head and fail closed on stale, retargeted, incomplete, duplicate, self-reviewed, unresolved, permission-unknown, CI-unknown, or non-clean state.
 
 ## Execution boundary
 
@@ -62,7 +62,7 @@ Agent Operations distinguishes these gates:
 - `semantic-admission`, `ownership-decision`, and `stable-lifecycle-promotion`: governed product identity, owner, and guarantee decisions;
 - `contributor-rights`: DCO, provenance, copyright, or authority to submit;
 - `security-disclosure`: disclosure handling or a security-sensitive action;
-- `commit-grouping`, `integration-decision`, `ready-for-review`, `pull-request-approval`, and `merge`: distinct integration decisions;
+- `commit-grouping`, `integration-decision`, `ready-for-review`, `pull-request-approval`, and `merge`: distinct integration decisions unless an exact active standing authorization resolves only the named mechanical action;
 - `publication` and `release`: external delivery decisions;
 - `access-or-secret-change` and `branch-or-ruleset-change`: repository administration decisions;
 - `none`: no human decision is currently required.
@@ -84,8 +84,9 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `schemas/capability-challenge.schema.json`: dynamic assessment challenge contract.
 - `schemas/capability-response.schema.json`: evidence-backed answer contract without a score or answer key.
 - `schemas/capability-self-result.schema.json`: deterministic unsigned U0-C4 local task-fit result.
-- `schemas/review-input.schema.json`: canonical v2 PR state, base ref name, changed-file, review, top-level conversation comment, threaded discussion, check, and evidence snapshot used for review hashing and spec-entity classification.
+- `schemas/review-input.schema.json`: canonical v3 PR state, base ref name, changed-file, review, conversation, check provider/repository/workflow-name/workflow-path provenance, check result, and evidence snapshot used for review hashing, trusted-CI evidence, and spec-entity classification.
 - `schemas/review-packet.schema.json`: revision-bound local review evidence contract.
+- `.agents/skills/pui-integrate/SKILL.md`: exact-head integration transition after independent approval and repository-rule readiness.
 - `fixtures/**`: positive and negative replay controls.
 - `scripts/agent-operations/collect-github-state.mjs`: bounded, sanitizing GitHub snapshot collector.
 - `scripts/agent-operations/reposteward-portfolio.mjs`: validates a raw RepoSteward portfolio snapshot and writes the stable trial envelope and Actions summary.
@@ -97,7 +98,7 @@ When a gate is required, one decision packet must state the observed fact, recom
 - `scripts/agent-operations/derive-self-assessment.mjs`: unsigned U0-C4 task-fit result derivation.
 - `scripts/agent-operations/review-runtime.mjs`: canonical review-input hashing, packet binding, prior-packet reconciliation binding, strict schema-matched validation, and submission checks.
 - `scripts/agent-operations/collect-live-review-input.mjs`: live GitHub collection of the canonical review input plus viewer identity, permission, and CI state at the submission boundary.
-- `scripts/agent-operations/review-packet.mjs`: CLI used by `pui-review` to hash input, validate, inspect, classify, and submit a review packet against its handoff; `submit-review` re-collects the canonical input live, derives identities from that context, and performs one Review API write bound to the packet head through `commit_id`.
+- `scripts/agent-operations/review-packet.mjs`: CLI used by `pui-review` and `pui-integrate` to hash input, validate, inspect, submit one exact-head review disposition, or perform one exact-head merge after a fresh live preflight.
 - `.github/workflows/reposteward-portfolio-shadow.yml`: manual, read-only RepoSteward portfolio trial pinned to the registered external commit.
 
 Run:
@@ -109,8 +110,9 @@ corepack pnpm@10.32.1 agent:skill -- pui-orient --mode human-assisted --mode-sou
 corepack pnpm@10.32.1 agent:review -- input-digest --input <review-input.json>
 corepack pnpm@10.32.1 agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json>
 corepack pnpm@10.32.1 agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --authorization explicit-current-user
+corepack pnpm@10.32.1 agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --authorization explicit-current-user
 ```
 
 ## Graduation rule
 
-Phase A must not gain GitHub write permissions merely because the workflow runs successfully. Moving that workflow to assistive writes requires a separate reviewed change with recorded shadow evidence, zero unauthorized or duplicate mutations, complete human-gate recall on the gold fixtures, and an explicit maintainer decision defining the newly allowed action set. The pending local `proto-ui` authorization intent cannot be used to widen the Phase A workflow.
+Phase A must not gain GitHub write permissions merely because the workflow runs successfully. Moving that workflow to assistive writes requires a separate reviewed change with recorded shadow evidence, zero unauthorized or duplicate mutations, complete human-gate recall on the gold fixtures, and an explicit maintainer decision defining the newly allowed action set. The local `proto-ui` standing scopes cannot be used to widen the Phase A workflow.

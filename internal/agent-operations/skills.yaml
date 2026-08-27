@@ -1,5 +1,5 @@
 schemaVersion: 2
-registryVersion: 2026-08-22.runtime-1
+registryVersion: 2026-08-27.integration-1
 entrypoints:
   development: pui-dev
   maintenance: pui-maintain
@@ -184,6 +184,15 @@ skills:
     mutation: none
     requires: [authority-map, candidate-change, evidence-report, review-input]
     produces: [review-packet]
+  - id: pui-integrate
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-integrate/SKILL.md
+    transition: approved exact-head pull request -> rule-compliant integration receipt
+    autonomousMinimumBand: C4
+    taskClass: integrate-approved-pull-request
+    mutation: conditional-pull-request-merge
+    requires: [review-packet, review-input, mutation-authorization]
+    produces: [mutation-receipt]
   - id: pui-issue
     entrypoints: [development]
     loadPath: .agents/skills/pui-issue/SKILL.md

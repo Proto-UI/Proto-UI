@@ -65,9 +65,9 @@ test('agent:skill CLI requires autonomous non-bootstrap transitions to arrive by
   );
 });
 
-test('human-assisted CLI routes complex implementation and review without an assessment file', () => {
+test('human-assisted CLI routes complex implementation, review, and integration without an assessment file', () => {
   const command = path.join(root, 'scripts/agent-operations/resolve-skill.mjs');
-  for (const id of ['pui-module', 'pui-review']) {
+  for (const id of ['pui-module', 'pui-review', 'pui-integrate']) {
     const output = JSON.parse(
       execFileSync(
         process.execPath,
@@ -196,6 +196,43 @@ test('terminal handoff does not resolve another skill', () => {
     notes: [],
   };
   assert.equal(validateSkillHandoff(handoff, registry).nextSkill, null);
+});
+
+test('a review handoff can route one separately authorized exact-head integration', () => {
+  const registry = loadSkillRegistry({ root });
+  const handoff = {
+    schemaVersion: 1,
+    kind: 'proto-ui.skill-handoff',
+    entrypoint: 'development',
+    executionMode: 'autonomous',
+    executionModeSource: 'schedule',
+    fromId: 'pui-review',
+    nextSkillId: 'pui-integrate',
+    artifacts: [
+      artifact('review-packet'),
+      artifact('review-input'),
+      artifact('mutation-authorization'),
+    ],
+    humanGates: [],
+    notes: [],
+  };
+  assert.equal(validateSkillHandoff(handoff, registry).nextSkill.id, 'pui-integrate');
+  const integration = resolveSkill('pui-integrate', registry);
+  assert.equal(
+    evaluateSkillEligibility(integration, {
+      executionMode: 'autonomous',
+      selfAssessment: {
+        kind: 'proto-ui.agent-capability-self-result',
+        validated: true,
+        fresh: true,
+        capability: {
+          band: 'C4',
+          eligibleTaskClasses: ['integrate-approved-pull-request'],
+        },
+      },
+    }).eligible,
+    true
+  );
 });
 
 test('human-assisted work is not blocked by a low self-assessment', () => {

@@ -53,12 +53,13 @@ A handoff carries typed artifacts and at most one next skill. A terminal handoff
 
 ## Build evidence and reader projections
 
-| Skill          | One transition                                                           |
-| -------------- | ------------------------------------------------------------------------ |
-| `pui-test`     | Governed behavior to executable evidence                                 |
-| `pui-docs`     | Governed repository fact to human documentation                          |
-| `pui-validate` | Candidate change to a proportional evidence report                       |
-| `pui-review`   | Candidate change to a revision-bound packet at one declared review class |
+| Skill           | One transition                                                           |
+| --------------- | ------------------------------------------------------------------------ |
+| `pui-test`      | Governed behavior to executable evidence                                 |
+| `pui-docs`      | Governed repository fact to human documentation                          |
+| `pui-validate`  | Candidate change to a proportional evidence report                       |
+| `pui-review`    | Candidate change to a revision-bound packet at one declared review class |
+| `pui-integrate` | Approved exact-head pull request to a rule-compliant merge receipt       |
 
 ## Inspect repository operations
 
@@ -96,6 +97,6 @@ These leaves are read-only. A diagnosis or proposal does not authorize its repai
 
 ## Capability is a ceiling when the Agent works alone
 
-C1 covers bounded facts plus factual or documentation review. C2 adds test and bounded-regression review. C3 adds approved semantic implementation and governed-slice review. C4 adds cross-domain semantics, governance evidence, and release preparation. `pui-review` declares one review class, and the local result lists the classes the Agent may take unattended. The registry calls a leaf's threshold `autonomousMinimumBand` because it applies when an Agent chooses or advances work alone.
+C1 covers bounded facts plus factual or documentation review. C2 adds test and bounded-regression review. C3 adds approved semantic implementation and governed-slice review. C4 adds cross-domain semantics, governance evidence, release preparation, and narrowly standing-authorized exact-head integration. `pui-review` declares one review class, and the local result lists the classes the Agent may take unattended. The registry calls a leaf's threshold `autonomousMinimumBand` because it applies when an Agent chooses or advances work alone.
 
 During `human-assisted` work, the same result is advice. It changes scope, validation, review depth, and stated limitations, but it does not block a task the current user requested. Live platform permission, relevant Discord or Poppy trust, current authorization, repository rules, and human gates remain separate in both modes.

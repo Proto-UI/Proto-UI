@@ -1,4 +1,5 @@
 import process from 'node:process';
+import { loadCapabilityPolicy } from './assessment-runtime.mjs';
 import { collectLiveReviewInput, summarizeLiveChecks } from './collect-live-review-input.mjs';
 import { reviewChangesSpecEntities } from './review-runtime.mjs';
 
@@ -15,6 +16,9 @@ try {
   if (!Number.isInteger(pullRequest) || pullRequest < 1) throw new Error(usage());
 
   const live = collectLiveReviewInput(repositoryId, pullRequest);
+  const policy = loadCapabilityPolicy(
+    new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
+  );
   process.stdout.write(
     `${JSON.stringify(
       {
@@ -27,6 +31,8 @@ try {
         baseRefName: live.input.baseRefName,
         baseSha: live.input.baseSha,
         headSha: live.input.headSha,
+        mergeable: live.mergeable,
+        mergeStateStatus: live.mergeStateStatus,
         changedFiles: live.input.changedFiles.length,
         changesSpecEntities: reviewChangesSpecEntities(live.input),
         commits: live.input.commits.length,
@@ -35,7 +41,14 @@ try {
         replies: live.input.replies.length,
         threads: live.input.threads.length,
         checks: live.input.checks.length,
-        ciConclusion: summarizeLiveChecks(live.input.checks),
+        ciConclusion: summarizeLiveChecks(live.input.checks, {
+          repositoryId,
+          trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
+          trustedSource: policy.trustedCiEvidence?.source,
+          trustedCheckNames: policy.trustedCiEvidence?.checkNames,
+          trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
+          trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
+        }),
         viewerLogin: live.viewerLogin,
         viewerPermission: live.viewerPermission,
         authorLogin: live.authorLogin,

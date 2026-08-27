@@ -126,7 +126,7 @@
             "none",
             "feature-branch-or-reversible-github-metadata",
             "feature-branch",
-            "feature-branch-or-conditional-review-submission"
+            "feature-branch-or-conditional-review-and-integration"
           ]
         }
       },
