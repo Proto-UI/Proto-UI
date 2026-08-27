@@ -28,7 +28,6 @@ cases:
   - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-SCROLLBAR-SURFACE
     title: Scrollbar projects the Brutalist visual surface and orientation geometry
     covers:
-      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-BASE-INHERITANCE
       - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-TRACK
       - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-ORIENTATION
     expectation: p-brutalist-scroll-area-scrollbar-visual-surface
