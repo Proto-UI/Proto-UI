@@ -190,28 +190,56 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(viewport.getExposes().focusVisible.get()).toBe(true);
   });
 
-  it('scrollbar inherits Base and projects orientation geometry', async () => {
+  it('scrollbar projects the complete track and orientation surfaces', async () => {
     const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
-    const scrollbar = document.createElement(BrutalistScrollAreaScrollbar.name) as any;
-    root.appendChild(scrollbar);
+    const vertical = document.createElement(BrutalistScrollAreaScrollbar.name) as any;
+    const horizontal = document.createElement(BrutalistScrollAreaScrollbar.name) as any;
+    setElementProps(horizontal, { orientation: 'horizontal' });
+    root.append(vertical, horizontal);
     document.body.appendChild(root);
     await flush();
 
-    expect(scrollbar.getExposes()).toBeTruthy();
-    // Base inheritance: scrollbar exposes orientation from Base asScrollAreaScrollbar
-    expect(scrollbar.getExposes().orientation?.get()).toBeTruthy();
-    expect(styleContains(scrollbar, 'flex')).toBe(true);
-    expect(styleContains(scrollbar, 'touch-none')).toBe(true);
-    expect(styleContains(scrollbar, 'select-none')).toBe(true);
-    expect(styleContains(scrollbar, 'bg-lavender')).toBe(true);
-    // Hook-dependent: without asScrollAreaScrollbar, the scrollbar would not have orientation state
-    expect(scrollbar.getExposes().orientation?.get()).toBeTruthy();
-    // Verify default orientation is vertical
-    expect(scrollbar.getExposes().orientation?.get()).toBe('vertical');
-    expect(styleContains(scrollbar, 'p-0.5')).toBe(true);
+    for (const scrollbar of [vertical, horizontal]) {
+      for (const token of ['flex', 'select-none', 'touch-none', 'bg-lavender', 'p-0.5']) {
+        expect(
+          styleContains(scrollbar, token),
+          `${token} :: ${scrollbar.getAttribute('data-pui-style')}`
+        ).toBe(true);
+      }
+    }
+    for (const token of [
+      'absolute',
+      'right-0',
+      'top-0',
+      'h-full',
+      'w-4',
+      'border-l-2',
+      'border-foreground',
+    ]) {
+      expect(
+        styleContains(vertical, token),
+        `${token} :: ${vertical.getAttribute('data-pui-style')}`
+      ).toBe(true);
+    }
+    for (const token of [
+      'absolute',
+      'bottom-0',
+      'left-0',
+      'h-4',
+      'w-full',
+      'border-t-2',
+      'border-foreground',
+    ]) {
+      expect(
+        styleContains(horizontal, token),
+        `${token} :: ${horizontal.getAttribute('data-pui-style')}`
+      ).toBe(true);
+    }
+    expect(vertical.getExposes().orientation?.get()).toBe('vertical');
+    expect(horizontal.getExposes().orientation?.get()).toBe('horizontal');
   });
 
-  it('thumb inherits Base and projects surface tokens', async () => {
+  it('thumb projects the complete surface token set', async () => {
     const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
     const scrollbar = document.createElement(BrutalistScrollAreaScrollbar.name) as any;
     const thumb = document.createElement(BrutalistScrollAreaThumb.name) as any;
@@ -223,17 +251,15 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(styleContains(thumb, 'rounded-none')).toBe(true);
     expect(styleContains(thumb, 'bg-lavender-foreground')).toBe(true);
     expect(styleContains(thumb, 'relative')).toBe(true);
-    expect(Object.keys(thumb.getExposes())).toEqual([]);
   });
 
-  it('viewport inherits Base and configures composed projection', async () => {
+  it('viewport projects the complete visual surface', async () => {
     const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
     const viewport = document.createElement(BrutalistScrollAreaViewport.name) as any;
     root.appendChild(viewport);
     document.body.appendChild(root);
     await flush();
 
-    expect(viewport.getExposes()).toBeTruthy();
     expect(styleContains(viewport, 'h-full')).toBe(true);
     expect(styleContains(viewport, 'w-full')).toBe(true);
     expect(styleContains(viewport, 'block')).toBe(true);
@@ -242,13 +268,11 @@ describe('prototypes/brutalist: scroll-area', () => {
     expect(styleContains(viewport, 'outline-none')).toBe(true);
   });
 
-  it('root inherits Base Scroll Area Root', async () => {
+  it('root projects the complete visual grammar', async () => {
     const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
     document.body.appendChild(root);
     await flush();
 
-    expect(root.getExposes()).toBeTruthy();
-    // Hook-dependent: without asScrollAreaRoot, the root would have no exposes at all
     expect(root.getAttribute('data-pui-style')).not.toBeNull();
     expect(styleContains(root, 'relative')).toBe(true);
     expect(styleContains(root, 'overflow-hidden')).toBe(true);

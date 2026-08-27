@@ -132,6 +132,17 @@ describe('prototypes/shadcn: checkbox', () => {
     expect(root.hasAttribute('data-checked')).toBe(true);
     expect(indicator.hasAttribute('data-checked')).toBe(true);
     expect(glyphPaths(indicator)).toEqual([CHECK_PATH]);
+    // The checked presentation remains derived: it does not acquire a role,
+    // writable value, focus/event surface, or second activation owner.
+    expect(Object.keys(indicator.getExposes()).sort()).toEqual([
+      'checked',
+      'indeterminate',
+      'isChecked',
+      'isIndeterminate',
+    ]);
+    expect(indicator.hasAttribute('role')).toBe(false);
+    expect(indicator.hasAttribute('aria-checked')).toBe(false);
+    expect(root.getAttribute('role')).toBe('checkbox');
     // The Root already carries the role and the checked state, so the glyph
     // would only add an unnamed node to the accessibility tree.
     expect(indicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
