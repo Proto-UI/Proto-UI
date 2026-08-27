@@ -103,10 +103,14 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
         runtime,
         demo,
         host: hostEl,
+        isCurrent: () => !destroyed && currentVersion === version,
       });
+
+      if (destroyed || currentVersion !== version) return;
 
       active = { runtime, demoId, destroy };
     } catch (error) {
+      if (destroyed || currentVersion !== version) return;
       hostEl.innerHTML = '';
       const pre = document.createElement('pre');
       pre.textContent =

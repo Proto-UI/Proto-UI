@@ -41,6 +41,17 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs', codeMap)}
+  />
+</div>
+
 <AdapterPanelScript />
 
 ## Content mount policy

@@ -403,7 +403,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await browser?.close();
   await stopServer();
-});
+}, 60_000);
 
 describe.sequential('Brutalist control documentation browser regressions', () => {
   it('gives every Switch a non-empty accessible name in all runtimes', async () => {

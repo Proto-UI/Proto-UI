@@ -111,6 +111,14 @@ implementations:
       - T-LIFECYCLE-0006-CASE-REPEATABLE-DETACH
       - T-LIFECYCLE-0006-CASE-LATEST-INTENT
       - T-LIFECYCLE-0006-CASE-REVEAL-BARRIER
+  - id: adapter-vue2-view-intent-dialog-journey
+    kind: adapter-test
+    status: passing
+    path: packages/web-conformance/test/shadcn-dialog.journey.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0006-CASE-REPEATABLE-DETACH
+      - T-LIFECYCLE-0006-CASE-LATEST-INTENT
   - id: adapter-web-component-view-intent
     kind: adapter-test
     status: passing
@@ -133,11 +141,18 @@ verifies:
       since: 0.2.0-rc.7
       anchors:
         - A-VUE-3-0001-I
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-I
     - id: A-WEB-COMPONENT-0001
       since: 0.2.0-rc.7
       anchors:
         - A-WEB-COMPONENT-0001-I
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added Vue 2 latest-intent and repeatable-detach journey evidence.
   - version: 0.2.0-rc.7
     change: revised
     summary: Linked ViewIntent reconciliation conformance to the official Adapter profile criteria.

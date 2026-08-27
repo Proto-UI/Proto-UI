@@ -1,6 +1,6 @@
 ---
 import CodePanel from './PrototypePreviewer/CodePanel.astro';
-import { AdapterIds, type RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { AdapterIds } from './PrototypePreviewer/runtimes/registry';
 import { isRuntimeId } from './adapter-preference';
 import type { CodeExampleProps } from './code-example-types';
 
@@ -14,9 +14,7 @@ for (const host of Object.keys(files)) {
   if (!isRuntimeId(host)) throw new Error(`[CodeExample] Unsupported host "${host}".`);
 }
 
-const hosts = AdapterIds.filter(
-  (host): host is RuntimeId => isRuntimeId(host) && files[host] !== undefined
-);
+const hosts = AdapterIds.filter((host) => files[host] !== undefined);
 if (hosts.length === 0) throw new Error('[CodeExample] At least one supported host is required.');
 
 for (const host of hosts) {
