@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import textareaRoot, { shadcnTextareaRoot } from '../src/textarea';
+import type { ShadcnTextareaRootProps } from '../src/textarea';
+
+type HasAsChild<Props> = 'asChild' extends keyof Props ? true : false;
 
 AdaptToWebComponent(textareaRoot);
 
@@ -64,6 +67,26 @@ describe('prototypes/shadcn: textarea', () => {
     // T-SHADCN-TEXTAREA-0001-CASE-EXPORTS
     expect(shadcnTextareaRoot).toBe(textareaRoot);
     expect(textareaRoot.name).toBe('shadcn-textarea-root');
+  });
+
+  it('omits asChild from public props and keeps the Base-owned editor', async () => {
+    // T-SHADCN-TEXTAREA-0001-CASE-AS-CHILD-OMISSION
+    expectTypeOf<HasAsChild<ShadcnTextareaRootProps>>().toEqualTypeOf<false>();
+
+    const el = document.createElement('shadcn-textarea-root');
+    const candidate = document.createElement('div');
+    candidate.contentEditable = 'true';
+    candidate.dataset.asChildCandidate = '';
+    setElementProps(el, { asChild: true } as any);
+    el.appendChild(candidate);
+    document.body.appendChild(el);
+    await flush();
+
+    expect(el.isConnected).toBe(true);
+    expect(el.contains(candidate)).toBe(false);
+    expect(control(el).tagName).toBe('TEXTAREA');
+    expect(el.querySelectorAll('textarea, input, [contenteditable]')).toHaveLength(1);
+    el.remove();
   });
 
   it('materializes exactly one host-owned editor with inherited value and accessibility', async () => {

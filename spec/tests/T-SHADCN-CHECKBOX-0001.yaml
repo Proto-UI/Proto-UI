@@ -3,7 +3,7 @@ type: test
 title: Shadcn Checkbox delta protocol contract tests
 status: draft
 since: 0.3.0-alpha.0
-summary: Covers Checkbox Root and Indicator identity, Base inheritance, the five required presentations, the guarded dark tint, derived glyph selection, and the slice boundary.
+summary: Covers Checkbox Root and Indicator identity, Base inheritance, the five required presentations, the guarded dark tint, derived glyph selection, the intentional asChild omission, and the slice boundary.
 cases:
   - id: T-SHADCN-CHECKBOX-0001-CASE-EXPORTS
     title: Root and Indicator are direct unofficial projections reachable through exact package entries
@@ -17,6 +17,14 @@ cases:
         P-SHADCN-CHECKBOX-INDICATOR-COMPATIBILITY-SUBSET,
       ]
     expectation: shadcn-checkbox-direct-entries-are-exported-once
+  - id: T-SHADCN-CHECKBOX-0001-CASE-INDICATOR-INHERITANCE
+    title: Indicator installs the Base Indicator hook exactly once
+    covers: [P-SHADCN-CHECKBOX-INDICATOR-BASE-INHERITANCE]
+    expectation: shadcn-checkbox-indicator-installs-its-base-hook-exactly-once
+  - id: T-SHADCN-CHECKBOX-0001-CASE-AS-CHILD-OMISSION
+    title: Root omits asChild from public props and keeps element ownership
+    covers: [P-SHADCN-CHECKBOX-AS-CHILD-OMISSION]
+    expectation: shadcn-checkbox-root-does-not-expose-or-emulate-as-child
   - id: T-SHADCN-CHECKBOX-0001-CASE-DEFAULT
     title: Root projects the resting box and Indicator paints no glyph
     covers:
@@ -87,6 +95,8 @@ implementations:
     consumesCases:
       [
         T-SHADCN-CHECKBOX-0001-CASE-EXPORTS,
+        T-SHADCN-CHECKBOX-0001-CASE-INDICATOR-INHERITANCE,
+        T-SHADCN-CHECKBOX-0001-CASE-AS-CHILD-OMISSION,
         T-SHADCN-CHECKBOX-0001-CASE-DEFAULT,
         T-SHADCN-CHECKBOX-0001-CASE-CHECKED,
         T-SHADCN-CHECKBOX-0001-CASE-INDETERMINATE,
@@ -105,7 +115,7 @@ implementations:
         P-BASE-CHECKBOX-INDICATOR,
       ]
     notes:
-      - Positive tests cover only the current Proto UI guarantee; asChild omission, aria-invalid presentation, the omitted peer hook, and remaining parity gaps are bounded by the decision, declared surface, and centralized compatibility questions.
+      - The asChild omission case checks both the exported props type and the host-observable element owner; aria-invalid presentation, the omitted peer hook, and remaining parity gaps stay bounded by the declared surface and centralized compatibility questions.
       - The web-state case asserts Adapter lowering of the six condition-driven rules on the Web Component host. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited checked, indeterminate, disabled, and focus state handles.
       - The absence case asserts portable facts only. Indicator publishes no focus handle, no event, no a11y control syntax, and no way to write what it derives; the web `tabIndex` value is deliberately not written as a cross-host contract.
   - id: prototypes-shadcn-checkbox-browser
@@ -128,3 +138,10 @@ verifies:
     - id: P-SHADCN-CHECKBOX-INDICATOR
 exercises:
   prototypes: *id001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added draft Shadcn Checkbox Root and Indicator projection coverage.
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added exact-once Indicator Base-hook evidence and mutation-sensitive public-type and runtime evidence for the intentional asChild omission.

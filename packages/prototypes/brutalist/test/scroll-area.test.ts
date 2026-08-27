@@ -1,12 +1,71 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { executeWithHost, type RuntimeHost } from '@proto.ui/runtime';
+import {
+  ANATOMY_GET_PROTO_CAP,
+  ANATOMY_INSTANCE_TOKEN_CAP,
+  ANATOMY_PARENT_CAP,
+  ANATOMY_ROOT_TARGET_CAP,
+} from '@proto.ui/module-anatomy';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
+import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import { FOCUS_ROOT_TARGET_CAP, FOCUS_SET_FOCUSABLE_CAP } from '@proto.ui/module-focus';
 import {
   BrutalistScrollAreaRoot,
   BrutalistScrollAreaViewport,
   BrutalistScrollAreaScrollbar,
   BrutalistScrollAreaThumb,
 } from '../src/scroll-area';
+
+type HookedPrototype = {
+  name: string;
+  __asHooks?: ReadonlyArray<{ name: string; mode?: string }>;
+};
+
+function expectSingleAsHook(prototype: HookedPrototype, hookName: string): void {
+  const matchingHooks = (prototype.__asHooks ?? []).filter((hook) => hook.name === hookName);
+  expect(matchingHooks, `${prototype.name} must inherit ${hookName} exactly once`).toEqual([
+    expect.objectContaining({ name: hookName, mode: 'once' }),
+  ]);
+}
+
+function executeForHookTrace(prototype: HookedPrototype): () => void | Promise<void> {
+  const instance = new EventTarget();
+  const globalTarget = new EventTarget();
+  const host: RuntimeHost<any> = {
+    prototypeName: `${prototype.name}-hook-trace`,
+    getRawProps: () => ({}),
+    commit(_children, signal) {
+      signal?.done();
+    },
+    schedule(task) {
+      task();
+    },
+    onRuntimeReady(wiring) {
+      wiring.attach('anatomy', [
+        [ANATOMY_INSTANCE_TOKEN_CAP, instance],
+        [ANATOMY_PARENT_CAP, () => null],
+        [ANATOMY_GET_PROTO_CAP, () => prototype],
+        [ANATOMY_ROOT_TARGET_CAP, () => instance],
+      ]);
+      wiring.attach('context', [
+        [CONTEXT_INSTANCE_TOKEN_CAP, instance],
+        [CONTEXT_PARENT_CAP, () => null],
+      ]);
+      wiring.attach('event', [
+        [EVENT_ROOT_TARGET_CAP, () => instance],
+        [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
+      ]);
+      wiring.attach('focus', [
+        [FOCUS_ROOT_TARGET_CAP, () => instance],
+        [FOCUS_SET_FOCUSABLE_CAP, () => undefined],
+      ]);
+    },
+  };
+  const { invokeUnmounted } = executeWithHost(prototype as any, host);
+  return invokeUnmounted;
+}
 
 AdaptToWebComponent(BrutalistScrollAreaRoot as any);
 AdaptToWebComponent(BrutalistScrollAreaViewport as any);
@@ -44,6 +103,29 @@ afterEach(async () => {
 });
 
 describe('prototypes/brutalist: scroll-area', () => {
+  it('inherits every Base Scroll Area anatomy hook exactly once', async () => {
+    // T-BRUTALIST-SCROLL-AREA-0001-CASE-BASE-INHERITANCE
+    const prototypes = [
+      BrutalistScrollAreaRoot,
+      BrutalistScrollAreaScrollbar,
+      BrutalistScrollAreaThumb,
+      BrutalistScrollAreaViewport,
+    ] as HookedPrototype[];
+    const unmount = prototypes.map(executeForHookTrace);
+
+    try {
+      expectSingleAsHook(BrutalistScrollAreaRoot as HookedPrototype, 'as-scroll-area-root');
+      expectSingleAsHook(
+        BrutalistScrollAreaScrollbar as HookedPrototype,
+        'as-scroll-area-scrollbar'
+      );
+      expectSingleAsHook(BrutalistScrollAreaThumb as HookedPrototype, 'as-scroll-area-thumb');
+      expectSingleAsHook(BrutalistScrollAreaViewport as HookedPrototype, 'as-scroll-area-viewport');
+    } finally {
+      await Promise.all(unmount.map((dispose) => dispose()));
+    }
+  });
+
   it('projects the Brutalist visual grammar', async () => {
     const el = document.createElement('brutalist-scroll-area-root') as any;
     document.body.appendChild(el);
@@ -82,6 +164,19 @@ describe('prototypes/brutalist: scroll-area', () => {
     scrollbar.remove();
     horizontalScrollbar.remove();
     thumb.remove();
+  });
+
+  it('requests the composed Viewport projection through the host', async () => {
+    // T-BRUTALIST-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
+    const root = document.createElement(BrutalistScrollAreaRoot.name) as any;
+    const viewport = document.createElement(BrutalistScrollAreaViewport.name) as any;
+    root.appendChild(viewport);
+    document.body.appendChild(root);
+    await flush();
+
+    // This is the host-resolved outcome of the privileged design-language
+    // preference, not a claim that Web DOM owns the portable scroll protocol.
+    expect(viewport.dataset.puiScrollProjection).toBe('composed');
   });
 
   it('projects composed Thumb geometry through the Scroll Area family session', async () => {
