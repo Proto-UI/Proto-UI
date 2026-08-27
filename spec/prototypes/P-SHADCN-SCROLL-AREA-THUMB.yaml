@@ -2,7 +2,7 @@ id: P-SHADCN-SCROLL-AREA-THUMB
 type: prototype
 title: shadcn Scroll Area Thumb inherits Base Scroll Area Thumb
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: shadcn Scroll Area Thumb inherits Base and projects rounded-full bg-border.
 statement:
   en: shadcn Scroll Area Thumb is a draft projection with relative flex-1 rounded-full bg-border.
@@ -14,5 +14,5 @@ sources:
   - path: packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts
 inherits: { prototypes: [{ id: P-BASE-SCROLL-AREA-THUMB }] }
 verifies: { tests: [T-SHADCN-SCROLL-AREA-0001] }
-revisions: [{ version: 0.3.0-alpha.1, change: introduced, summary: Introduced. }]
+revisions: [{ version: 0.3.0-alpha.0, change: introduced, summary: Introduced. }]
 tags: [prototype, shadcn, visual, scroll-area, thumb]

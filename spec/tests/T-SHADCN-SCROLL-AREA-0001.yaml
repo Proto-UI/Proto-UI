@@ -2,7 +2,7 @@ id: T-SHADCN-SCROLL-AREA-0001
 type: test
 title: shadcn Scroll Area visual, interaction, and inheritance tests
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: Covers shadcn Scroll Area public API.
 cases:
   - id: T-SHADCN-SCROLL-AREA-0001-CASE-1
@@ -52,5 +52,5 @@ exercises:
     - P-SHADCN-SCROLL-AREA-VIEWPORT
     - P-SHADCN-SCROLL-AREA-SCROLLBAR
     - P-SHADCN-SCROLL-AREA-THUMB
-revisions: [{ version: 0.3.0-alpha.1, change: introduced, summary: Introduced. }]
+revisions: [{ version: 0.3.0-alpha.0, change: introduced, summary: Introduced. }]
 tags: [test, shadcn, visual, scroll-area]

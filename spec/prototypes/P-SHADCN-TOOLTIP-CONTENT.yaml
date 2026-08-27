@@ -2,7 +2,7 @@ id: P-SHADCN-TOOLTIP-CONTENT
 type: prototype
 title: shadcn Tooltip Content inherits Base Tooltip Content
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: shadcn Tooltip Content inherits Base Tooltip Content and projects rounded popover surface.
 statement:
   en: shadcn Tooltip Content is a draft projection preserving Base Content semantics with rounded-md, border, bg-popover, shadow-md, and text-popover-foreground.
@@ -19,7 +19,7 @@ inherits:
     - id: P-BASE-TOOLTIP-CONTENT
 verifies: { tests: [T-SHADCN-TOOLTIP-0001] }
 revisions:
-  - version: 0.3.0-alpha.1
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced.
 tags: [prototype, shadcn, visual, delta, tooltip, content]

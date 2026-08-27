@@ -2,7 +2,7 @@ id: T-BRUTALIST-CHECKBOX-0001
 type: test
 title: Brutalist Checkbox visual, interaction, and inheritance tests
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: >-
   Covers the Brutalist Checkbox public API (root checked fill swap, indicator opacity visibility, press/focus/disabled) against P-BRUTALIST-CHECKBOX and P-BRUTALIST-CHECKBOX-INDICATOR criteria.
 
@@ -62,7 +62,7 @@ exercises:
     - P-BRUTALIST-CHECKBOX-INDICATOR
 
 revisions:
-  - version: 0.3.0-alpha.1
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced draft Brutalist Checkbox coverage.
 

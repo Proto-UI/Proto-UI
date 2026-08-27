@@ -2,7 +2,7 @@ id: P-BRUTALIST-CHECKBOX-INDICATOR
 type: prototype
 title: Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects opacity visibility
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: >-
   Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects a simple opacity-based visibility model: fully opaque when checked, fully transparent when unchecked.
 
@@ -47,7 +47,7 @@ inherits:
     - id: P-BASE-CHECKBOX-INDICATOR
 verifies: { tests: [T-BRUTALIST-CHECKBOX-0001] }
 revisions:
-  - version: 0.3.0-alpha.1
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft Brutalist Checkbox Indicator projection.
 tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox, indicator]

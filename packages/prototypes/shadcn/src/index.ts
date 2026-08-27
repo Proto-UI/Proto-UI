@@ -188,6 +188,20 @@ export {
   shadcnTooltipTrigger,
   shadcnTooltipContent,
 } from './tooltip';
+export type {
+  ShadcnTooltipGroupProps,
+  ShadcnTooltipGroupExposes,
+  ShadcnTooltipGroupAsHookContract,
+  ShadcnTooltipRootProps,
+  ShadcnTooltipRootExposes,
+  ShadcnTooltipRootAsHookContract,
+  ShadcnTooltipTriggerProps,
+  ShadcnTooltipTriggerExposes,
+  ShadcnTooltipTriggerAsHookContract,
+  ShadcnTooltipContentProps,
+  ShadcnTooltipContentExposes,
+  ShadcnTooltipContentAsHookContract,
+} from './tooltip/types';
 export {
   ShadcnScrollAreaRoot,
   ShadcnScrollAreaViewport,
@@ -198,3 +212,17 @@ export {
   shadcnScrollAreaScrollbar,
   shadcnScrollAreaThumb,
 } from './scroll-area';
+export type {
+  ShadcnScrollAreaRootProps,
+  ShadcnScrollAreaRootExposes,
+  ShadcnScrollAreaRootAsHookContract,
+  ShadcnScrollAreaViewportProps,
+  ShadcnScrollAreaViewportExposes,
+  ShadcnScrollAreaViewportAsHookContract,
+  ShadcnScrollAreaScrollbarProps,
+  ShadcnScrollAreaScrollbarExposes,
+  ShadcnScrollAreaScrollbarAsHookContract,
+  ShadcnScrollAreaThumbProps,
+  ShadcnScrollAreaThumbExposes,
+  ShadcnScrollAreaThumbAsHookContract,
+} from './scroll-area/types';

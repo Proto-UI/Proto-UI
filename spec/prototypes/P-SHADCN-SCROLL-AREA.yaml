@@ -2,7 +2,7 @@ id: P-SHADCN-SCROLL-AREA
 type: prototype
 title: shadcn Scroll Area Root inherits Base Scroll Area
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: shadcn Scroll Area Root inherits Base Scroll Area and projects relative overflow-hidden.
 statement:
   en: shadcn Scroll Area Root is a draft projection preserving Base Scroll Area semantics with relative overflow-hidden visual surface.
@@ -17,5 +17,5 @@ sources:
   - path: packages/prototypes/shadcn/src/scroll-area/root.proto.ts
 inherits: { prototypes: [{ id: P-BASE-SCROLL-AREA }] }
 verifies: { tests: [T-SHADCN-SCROLL-AREA-0001] }
-revisions: [{ version: 0.3.0-alpha.1, change: introduced, summary: Introduced. }]
+revisions: [{ version: 0.3.0-alpha.0, change: introduced, summary: Introduced. }]
 tags: [prototype, shadcn, visual, scroll-area]

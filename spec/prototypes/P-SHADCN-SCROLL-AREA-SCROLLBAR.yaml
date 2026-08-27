@@ -2,7 +2,7 @@ id: P-SHADCN-SCROLL-AREA-SCROLLBAR
 type: prototype
 title: shadcn Scroll Area Scrollbar inherits Base Scroll Area Scrollbar
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: shadcn Scroll Area Scrollbar inherits Base and projects flex touch-none select-none.
 statement:
   en: shadcn Scroll Area Scrollbar is a draft projection with flex touch-none select-none transition-colors.
@@ -18,5 +18,5 @@ sources:
   - path: packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts
 inherits: { prototypes: [{ id: P-BASE-SCROLL-AREA-SCROLLBAR }] }
 verifies: { tests: [T-SHADCN-SCROLL-AREA-0001] }
-revisions: [{ version: 0.3.0-alpha.1, change: introduced, summary: Introduced. }]
+revisions: [{ version: 0.3.0-alpha.0, change: introduced, summary: Introduced. }]
 tags: [prototype, shadcn, visual, scroll-area, scrollbar]

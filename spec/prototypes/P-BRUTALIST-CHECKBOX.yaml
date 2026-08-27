@@ -2,7 +2,7 @@ id: P-BRUTALIST-CHECKBOX
 type: prototype
 title: Brutalist Checkbox Root inherits Base Checkbox and layers a square check surface
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: >-
   Brutalist Checkbox Root inherits Base Checkbox interaction semantics and projects a square visual surface: zero radius, black structural borders, hard offset shadow, flat resting fill, checked fill swap, pressed shadow removal, focus-visible ring, and disabled de-emphasis.
 
@@ -22,8 +22,10 @@ criteria:
       en: >-
         The prototype must inherit Base Checkbox through `asCheckboxRoot()` once and must not redefine Base checked, pressed, focus-visible, or disabled protocol semantics. Visual projection may only consume the projected state handles (`checked`, `disabled`, `focusVisible`, `pressed`).
 
+
       zh-CN: >-
         该 prototype 必须通过 `asCheckboxRoot()` 一次性继承 Base Checkbox，不得重定义 Base 的 checked、pressed、focus-visible 或 disabled 协议语义；视觉投射只能消费投影出的 state handles。
+
 
   - id: P-BRUTALIST-CHECKBOX-ENTRY
     text:
@@ -34,13 +36,16 @@ criteria:
       en: >-
         The root visual surface must preserve square corners (`rounded-none`), black structural borders (`border-2 border-black`), a hard zero-blur offset shadow (`shadow-[3px_3px_0_0_#000]`), and a flat `bg-main` resting fill without gradients, glass, rounded cards, or soft elevation. Checked swaps the fill to `bg-foreground text-main`; pressed clears the shadow with `shadow-none`.
 
+
       zh-CN: >-
         root 视觉表面必须保持直角（`rounded-none`）、黑色结构边框（`border-2 border-black`）、零模糊硬偏移阴影（`shadow-[3px_3px_0_0_#000]`）与平面 `bg-main` 静止填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。Checked 将填充切换为 `bg-foreground text-main`；pressed 以 `shadow-none` 清除阴影。
+
 
   - id: P-BRUTALIST-CHECKBOX-INTERACTION
     text:
       en: >-
         Focus-visible applies a hard ring with offset. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry.
+
 
       zh-CN: >-
         Focus-visible 使用带 offset 的硬 ring。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调，同时保留几何。
@@ -59,7 +64,7 @@ inherits:
     - id: P-BASE-CHECKBOX
 verifies: { tests: [T-BRUTALIST-CHECKBOX-0001] }
 revisions:
-  - version: 0.3.0-alpha.1
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft Brutalist Checkbox Root projection.
 tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox]

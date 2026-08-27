@@ -2,7 +2,7 @@ id: P-SHADCN-TOOLTIP
 type: prototype
 title: shadcn Tooltip Root inherits Base Tooltip and layers a rounded popover surface
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: >-
   shadcn Tooltip Root inherits Base Tooltip interaction semantics and projects a rounded popover visual surface: rounded-md border, bg-popover, shadow-md, text-popover-foreground.
 
@@ -10,6 +10,7 @@ summary: >-
 statement:
   en: >-
     shadcn Tooltip Root is a draft Proto UI-maintained shadcn design-language projection over Base Tooltip. It preserves inherited Base protocol semantics and adds only visual/style behavior: rounded corners, border, popover background, shadow, and popover-foreground text.
+
 
   zh-CN: >-
     shadcn Tooltip Root 是 Proto UI 维护的 draft shadcn design-language 投射，建立在 Base Tooltip 之上。它保留继承的 Base 协议语义，仅增加视觉/style 行为：圆角、边框、popover 背景、阴影与 popover-foreground 文本。
@@ -29,6 +30,7 @@ criteria:
       en: >-
         The content visual surface must preserve rounded corners (rounded-md), border (border), popover background (bg-popover), shadow (shadow-md), and popover-foreground text (text-popover-foreground) without gradients or glass effects.
 
+
       zh-CN: >-
         content 视觉表面必须保持圆角（rounded-md）、边框（border）、popover 背景（bg-popover）、阴影（shadow-md）与 popover-foreground 文本（text-popover-foreground），不得使用渐变或玻璃效果。
 
@@ -42,7 +44,7 @@ inherits:
     - id: P-BASE-TOOLTIP
 verifies: { tests: [T-SHADCN-TOOLTIP-0001] }
 revisions:
-  - version: 0.3.0-alpha.1
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft shadcn Tooltip projection.
 tags: [prototype, shadcn, visual, delta, tooltip]

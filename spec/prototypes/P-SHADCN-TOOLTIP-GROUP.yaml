@@ -2,7 +2,7 @@ id: P-SHADCN-TOOLTIP-GROUP
 type: prototype
 title: shadcn Tooltip Group inherits Base Tooltip Group
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: shadcn Tooltip Group inherits Base Tooltip Group and renders inline-flex.
 statement:
   en: shadcn Tooltip Group is a draft projection that preserves Base Tooltip Group semantics and renders inline-flex.
@@ -19,7 +19,7 @@ inherits:
     - id: P-BASE-TOOLTIP-GROUP
 verifies: { tests: [T-SHADCN-TOOLTIP-0001] }
 revisions:
-  - version: 0.3.0-alpha.1
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced.
 tags: [prototype, shadcn, visual, delta, tooltip, group]

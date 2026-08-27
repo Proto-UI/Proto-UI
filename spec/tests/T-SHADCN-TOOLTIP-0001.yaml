@@ -2,7 +2,7 @@ id: T-SHADCN-TOOLTIP-0001
 type: test
 title: shadcn Tooltip visual, interaction, and inheritance tests
 status: draft
-since: 0.3.0-alpha.1
+since: 0.3.0-alpha.0
 summary: Covers shadcn Tooltip public API against P-SHADCN-TOOLTIP criteria.
 cases:
   - id: T-SHADCN-TOOLTIP-0001-CASE-1
@@ -54,7 +54,7 @@ exercises:
     - P-SHADCN-TOOLTIP-TRIGGER
     - P-SHADCN-TOOLTIP-CONTENT
 revisions:
-  - version: 0.3.0-alpha.1
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced.
 tags: [test, shadcn, visual, tooltip]
