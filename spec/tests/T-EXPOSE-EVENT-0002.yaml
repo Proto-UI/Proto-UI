@@ -56,6 +56,7 @@ cases:
       - M-EXPOSE-EVENT-0001-I
       - A-REACT-18-19-0001-M
       - A-VUE-3-0001-M
+      - A-VUE-2-0001-M
       - A-WEB-COMPONENT-0001-M
     expectation: official-adapters-provide-profile-specific-outward-carriers
   - id: T-EXPOSE-EVENT-0002-CASE-COMPATIBILITY
@@ -150,6 +151,13 @@ implementations:
     consumesCases:
       - T-EXPOSE-EVENT-0002-CASE-DECLARATION
       - T-EXPOSE-EVENT-0002-CASE-PROFILES
+  - id: adapter-vue2-expose-event-contract
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/event.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-PROFILES
   - id: adapter-web-component-expose-event-contract
     kind: adapter-test
     status: passing
@@ -205,10 +213,17 @@ verifies:
     - id: A-VUE-3-0001
       anchors:
         - A-VUE-3-0001-M
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-M
     - id: A-WEB-COMPONENT-0001
       anchors:
         - A-WEB-COMPONENT-0001-M
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added official Vue 2 outward-signal translation evidence.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Moved Module bridge, shared-registry validation, current-sink, and legacy-token evidence into the standalone Expose Event package.

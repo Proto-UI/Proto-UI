@@ -3,10 +3,10 @@ type: version
 title: Proto UI 0.3.0-alpha.0
 status: draft
 since: 0.3.0-alpha.0
-summary: First 0.3 alpha release train, opening a globally exact 41-package prerelease identity for reviewed architecture, API, and prototype evolution.
+summary: First 0.3 alpha release train, opening a globally exact 42-package prerelease identity for reviewed architecture, API, Adapter, and prototype evolution.
 statement:
-  en: Proto UI 0.3.0-alpha.0 is one draft ecosystem release identity shared exactly by all 41 public @proto.ui packages and the corresponding future immutable spec snapshot.
-  zh-CN: Proto UI 0.3.0-alpha.0 是由全部 41 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行身份。
+  en: Proto UI 0.3.0-alpha.0 is one draft ecosystem release identity shared exactly by all 42 public @proto.ui packages and the corresponding future immutable spec snapshot.
+  zh-CN: Proto UI 0.3.0-alpha.0 是由全部 42 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行身份。
 release:
   version: 0.3.0-alpha.0
   channel: prerelease
@@ -25,16 +25,16 @@ criteria:
       zh-CN: 本 draft 实体可以治理已对齐的 0.3.0-alpha.0 manifest、发行物料与 catalog 引用，但不得声称 npm 发布、Git tag、GitHub prerelease、next channel 激活或不可变 snapshot 证据已经存在。
   - id: V-PROTO-UI-0009-IDENTITY
     text:
-      en: Before publication, VERSION, all 41 public @proto.ui package manifests, staged internal dependency versions, and the spec snapshot must be prepared at 0.3.0-alpha.0 exactly.
-      zh-CN: 发布前，VERSION、全部 41 个公开 @proto.ui package manifest、暂存发布包的内部依赖版本以及 spec snapshot 必须统一准备为 0.3.0-alpha.0。
+      en: Before publication, VERSION, all 42 public @proto.ui package manifests, staged internal dependency versions, and the spec snapshot must be prepared at 0.3.0-alpha.0 exactly.
+      zh-CN: 发布前，VERSION、全部 42 个公开 @proto.ui package manifest、暂存发布包的内部依赖版本以及 spec snapshot 必须统一准备为 0.3.0-alpha.0。
   - id: V-PROTO-UI-0009-ALPHA-SCOPE
     text:
       en: This train may carry reviewed architecture, top-level API, and new prototype changes and therefore must be presented as alpha rather than a release candidate or stable compatibility promise.
       zh-CN: 本 release train 可以承载经过评审的架构、顶层 API 与新 Prototype 变化，因此必须以 alpha 呈现，不能被描述为 release candidate 或 stable compatibility 承诺。
   - id: V-PROTO-UI-0009-NEW-PACKAGE
     text:
-      en: Publication remains blocked until the new @proto.ui/module-expose-event npm identity exists, is configured for the protected release workflow, and passes registry readiness without receiving latest or next during bootstrap.
-      zh-CN: 在新的 @proto.ui/module-expose-event npm identity 已建立、已配置受保护 release workflow，且 bootstrap 未占用 latest 或 next 并通过 registry readiness 前，真实发布保持 blocked。
+      en: Publication remains blocked until the new @proto.ui/module-expose-event and @proto.ui/adapter-vue2 npm identities exist, are configured for the protected release workflow, and pass registry readiness without receiving latest or next during bootstrap.
+      zh-CN: 在新的 @proto.ui/module-expose-event 与 @proto.ui/adapter-vue2 npm identity 已建立、已配置受保护 release workflow，且 bootstrap 未占用 latest 或 next 并通过 registry readiness 前，真实发布保持 blocked。
   - id: V-PROTO-UI-0009-PUBLICATION
     text:
       en: The entity may become active only after all packages in its reviewed release BOM exist at 0.3.0-alpha.0, their next tags point to it, the v0.3.0-alpha.0 tag resolves to the publication commit, and immutable snapshot evidence exists.
@@ -48,6 +48,9 @@ sources:
   - path: internal/records/2026-08-16-expose-event-npm-identity-bootstrap.zh-CN.md
 openQuestions: []
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Expanded the reviewed draft train to 42 public packages by admitting the official Vue 2.6 Adapter while keeping its npm identity and publication evidence pending.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Opened the first 0.3 alpha train and expanded its reviewed public workspace to 41 packages with the standalone Expose Event Module while keeping publication evidence pending.

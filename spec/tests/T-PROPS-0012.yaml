@@ -21,6 +21,7 @@ cases:
     covers:
       - A-REACT-18-19-0001-B
       - A-VUE-3-0001-B
+      - A-VUE-2-0001-B
       - A-WEB-COMPONENT-0001-B
     expectation: official-adapters-wire-required-props-and-translated-source-capability
   - id: T-PROPS-0012-CASE-SOURCE-SNAPSHOT
@@ -38,6 +39,7 @@ cases:
       - HC-PROPS-SOURCE-0001-C
       - A-REACT-18-19-0001-D
       - A-VUE-3-0001-D
+      - A-VUE-2-0001-D
       - A-WEB-COMPONENT-0001-C
     expectation: notification-does-not-dispatch-until-runtime-sync
   - id: T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
@@ -45,6 +47,7 @@ cases:
     covers:
       - A-REACT-18-19-0001-C
       - A-VUE-3-0001-C
+      - A-VUE-2-0001-C
     expectation: default-filtering-and-explicit-get-props-replacement-are-executable
   - id: T-PROPS-0012-CASE-DIRECT-APPLY
     title: Direct runtime apply uses the Props kernel without becoming a host capability
@@ -129,6 +132,17 @@ implementations:
     required: true
     consumesCases:
       - T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
+  - id: adapter-vue2-props-translation
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/props-update.test.ts
+    required: true
+    notes:
+      - Supporting attrs classification and typed-listener exclusion evidence is in packages/adapters/vue2/test/expose.test.ts and packages/adapters/vue2/test/event.test.ts.
+    consumesCases:
+      - T-PROPS-0012-CASE-ADAPTER-WIRING
+      - T-PROPS-0012-CASE-INVALIDATION
+      - T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
   - id: adapter-web-component-props-normalization
     kind: adapter-test
     status: passing
@@ -182,6 +196,12 @@ verifies:
         - A-VUE-3-0001-B
         - A-VUE-3-0001-C
         - A-VUE-3-0001-D
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-B
+        - A-VUE-2-0001-C
+        - A-VUE-2-0001-D
     - id: A-WEB-COMPONENT-0001
       anchors:
         - A-WEB-COMPONENT-0001-B
@@ -202,6 +222,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Direct apply remains distinct from render scheduling and host-source invalidation.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added official Vue 2 Props wiring, normalization, and update-boundary evidence.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added Props Module, host-source, official Adapter profile evidence, and direct-push boundary conformance mappings.
