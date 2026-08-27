@@ -122,7 +122,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: strengthened
     summary: >-
-      Added cross-runtime browser evidence for exact visual and interaction projections plus direct host-theme Light/Dark/Light repaint, including disabled surface repaint and in-memory multi-frame image comparisons.
+      Added cross-runtime browser evidence for exact visual and interaction projections plus direct host-theme Light/Dark/Light repaint, including disabled surface repaint, optional fixed-region captures, and computed-token and DOM-identity transition assertions.
 
 
   - version: 0.2.0-rc.7
