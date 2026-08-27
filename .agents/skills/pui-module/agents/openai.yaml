@@ -1,7 +1,7 @@
 interface:
   display_name: 'Proto UI Module'
-  short_description: 'Implement one approved semantic module slice'
-  default_prompt: 'Use $pui-module to implement this approved Module slice.'
+  short_description: 'Implement one governed semantic module slice'
+  default_prompt: 'Use $pui-module to implement this governed Module slice.'
 
 policy:
   allow_implicit_invocation: false

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-export const POLICY_VERSION = '2026-08-20.phase-a';
+export const POLICY_VERSION = '2026-08-27.agent-forward-intake-1';
 export const ROUTES = [
   'needs-author',
   'needs-maintainer',
@@ -10,12 +10,8 @@ export const ROUTES = [
   'no-action',
 ];
 export const HUMAN_GATES = [
-  'finding-disposition',
-  'semantic',
-  'integration',
-  'scope',
-  'contributor-rights',
-  'security',
+  'unresolved-product-direction',
+  'privileged-or-irreversible-operation',
   'none',
 ];
 export const PROPOSAL_ACTIONS = ['status-comment', 'state-label', 'maintainer-inbox'];
@@ -199,16 +195,16 @@ function validateDecisionPacket(errors, packet, path) {
   const keys = [
     'observedFact',
     'recommendation',
-    'authorizationScope',
+    'decisionScope',
     'exclusions',
     'residualRisks',
     'nextAutomatedStage',
-    'separatelyGatedActions',
+    'privilegedOrIrreversibleActionsOutsideScope',
   ];
   add(errors, object(packet), path, 'must be an object');
   if (!object(packet)) return;
   onlyKeys(errors, packet, path, keys);
-  for (const key of ['observedFact', 'recommendation', 'authorizationScope']) {
+  for (const key of ['observedFact', 'recommendation', 'decisionScope']) {
     add(
       errors,
       nonEmptyString(packet[key], 1000),
@@ -227,10 +223,15 @@ function validateDecisionPacket(errors, packet, path) {
     min: 1,
     max: 8,
   });
-  validateStringArray(errors, packet.separatelyGatedActions, `${path}.separatelyGatedActions`, {
-    min: 1,
-    max: 10,
-  });
+  validateStringArray(
+    errors,
+    packet.privilegedOrIrreversibleActionsOutsideScope,
+    `${path}.privilegedOrIrreversibleActionsOutsideScope`,
+    {
+      min: 1,
+      max: 10,
+    }
+  );
 }
 
 export function validateShadowReport(report, snapshot = null) {

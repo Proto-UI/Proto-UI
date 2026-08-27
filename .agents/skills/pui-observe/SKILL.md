@@ -7,11 +7,11 @@ description: Execute one bounded read-only Proto UI autonomous-maintenance obser
 
 1. Read `AGENTS.md`, the autonomous-maintenance procedure, selected mission, Observer prompt, run ledger, and baseline completely.
 2. Record starting SHA and worktree state.
-3. Remain read-only for tracked files and external systems.
+3. Keep observation non-mutating so the evidence can feed an independent verifier without contaminating the baseline.
 4. Follow only the mission's bounded oracle and completion rule.
 5. Prefer one falsifiable finding over a list of suspicions. Preserve raw evidence and exact reproduction steps.
 6. Record an explicit no-finding result when the oracle does not support a finding.
-7. Stop with the Observer report. Do not classify acceptance, verify, repair, or update semantic authority.
+7. Finish with an Observer report that routes automatically to a fresh verifier when a finding exists, or to recorded closure for a supported no-finding result.
 
 Return a copy-ready handoff for a fresh `pui-verify` context when a finding exists.
 

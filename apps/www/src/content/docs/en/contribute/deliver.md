@@ -3,13 +3,13 @@ title: 'Deliver a change'
 description: 'Take one governed slice through implementation, evidence, review, deployment, and release.'
 ---
 
-Fast delivery means short feedback loops, not skipped gates.
+Fast delivery means each piece of trustworthy evidence immediately unlocks the next automated step.
 
 ## Before editing
 
 Start from current `main` on a short-lived branch. Trace the applicable spec lifecycle, criteria, relations, implementation, tests, generated projections, package surfaces, and public docs.
 
-If the work reveals a new semantic identity, owner, public API, compatibility decision, Host Capability, dependency, or lifecycle change, stop. Return to the Issue and ask for the smallest missing decision.
+If the work reveals a new semantic identity, owner, public API, compatibility decision, Host Capability, dependency, or lifecycle change, make that scope explicit, keep unsettled guarantees draft, and continue with the bounded implementation and evidence that remain reversible. Escalate only when the repository has no direction for a materially incompatible product choice; ask for that smallest missing choice while the rest of the work continues.
 
 ## Build one coherent slice
 
@@ -21,16 +21,16 @@ Use `git commit --signoff`. The pull request must disclose third-party sources a
 
 ## Acceptance and regression
 
-Machine checks show that deterministic evidence passed. Review decides whether the change matches its governed boundary. Preview deployment lets maintainers inspect one delivered revision. These are different forms of evidence.
+Machine checks show that deterministic evidence passed. Independent review decides whether the change matches its governed boundary. Preview deployment exposes one delivered revision for inspection. These are complementary forms of evidence, and each feeds the next transition without adding a blanket approval pause.
 
 A regression fix begins with behavior that fails for the governed reason. If expected behavior is unclear, the work is a semantic question rather than a bug fix.
 
-A new push invalidates stale review. Merge only the reviewed revision after required checks pass and every review thread is resolved.
+A new push triggers live reconciliation and a fresh exact-head review. Under the active standing authorizations, an independent Agent may recheck, submit finding-backed `REQUEST_CHANGES`, approve an eligible clean exact head, and pass an independently approved head to `pui-integrate`. The merge command binds the reviewed SHA and proceeds only after trusted checks pass, active change requests are cleared, review threads are resolved, live permission is confirmed, and repository rules report a clean mergeable state.
 
 ## Release
 
 Release preparation creates reviewable repository state. Publication is a separate, attended operation from governed `main`. A later evidence change verifies registry, tag, GitHub Release, assets, snapshot digests, workflow head, and deployments.
 
-With an active contributor, an Agent may prepare or audit release work under current human decisions. When unattended, it must stay inside its fresh local autonomous ceiling. A standing-authorized Agent may mechanically merge an exact independently approved PR through `pui-integrate`; neither mode may publish, tag, activate a stable lifecycle, or recover a partial release without current human authorization.
+Agents may prepare, validate, review, and integrate release-candidate repository changes through the same evidence-bound transitions, whether directed by a current user or operating under an active standing authorization. Publication, tag creation, stable-lifecycle activation, and partial-release recovery remain attended because they are privileged or difficult to reverse; require current human authorization at that final delivery boundary.
 
 Exact commands and contribution requirements live in [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md).

@@ -11,8 +11,9 @@
 
 ## Scope boundary
 
-- What was already decided by the issue or maintainer checkpoint?
-- What did this pull request decide?
+- What applicable authority or accepted Issue direction governs this slice?
+- What bounded choices did this pull request make within that authority?
+- Is an `unresolved-product-direction` or `privileged-or-irreversible-operation` decision still required? Default: none.
 - What intentionally remains out of scope?
 
 ## Source-of-truth alignment
@@ -39,15 +40,28 @@ Select every applicable item. Original, third-party, AI-assisted, and employer o
 
 ### AI assistance
 
-<!-- Tool or model category, scope of assistance, human review, and any third-party or private source material provided to it. Remove if not applicable. -->
+<!-- Tool or model category, scope of assistance, independent review and verification, and any third-party or private source material provided to it. Remove if not applicable. -->
 
 ## DCO
 
-Every human-authored commit in this PR must have a valid DCO sign-off. Prefer a `Signed-off-by` trailer on the commit itself; an unsigned published commit may instead be covered by an individual remediation commit from its original author.
+Every commit in this PR must satisfy the repository DCO policy with a valid sign-off from its responsible author. Prefer a `Signed-off-by` trailer on the commit itself; an unsigned published commit may instead be covered by an individual remediation commit from its original author.
 
 This checkbox is only a reminder; it does not replace commit sign-off.
 
 - [ ] I have checked the DCO status of this PR.
+
+## Review and automation readiness
+
+Update this section as the pull request advances. Automation re-collects live state and does not trust these declarations as authorization.
+
+- Intended next transition: claim / review / review response / recheck / ready-for-review / exact-head integration
+- [ ] The current scope and changed-file inventory are complete.
+- [ ] DCO and source provenance are current for the exact head.
+- [ ] Required focused and trusted repository CI evidence is current, or pending checks are listed below.
+- [ ] Review is independent of the pull-request author; no self-approval is requested.
+- [ ] Existing findings and review threads are reconciled against the current head.
+- [ ] No unresolved product direction remains, or the one required decision is linked above.
+- Standing scope or mutation receipt, when applicable:
 
 ## Prototype website preview
 

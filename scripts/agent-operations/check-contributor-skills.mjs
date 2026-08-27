@@ -105,8 +105,13 @@ for (const catalogPath of publicSkillCatalogs) {
 
 for (const readmePath of [resolve(root, 'README.md'), resolve(root, 'README.zh-CN.md')]) {
   const readme = readFileSync(readmePath, 'utf8');
-  if (!readme.includes('Record human-assisted mode when I am directing the work')) {
-    fail(readmePath + ': Agent entry must carry the trusted execution mode');
+  if (
+    !readme.includes('Treat my current request as the bounded working scope') ||
+    !readme.includes(
+      'Pause only for an unresolved product-direction choice or a privileged or irreversible operation'
+    )
+  ) {
+    fail(readmePath + ': Agent entry must carry bounded authority and attended-decision semantics');
   }
 }
 
@@ -182,6 +187,10 @@ try {
   const scheduledMergeAuthorization = parsedPolicy.pullRequestMergeAuthorizations?.find(
     (authorization) => authorization.id === 'proto-ui-scheduled-merge-v1'
   );
+  const scheduledCollaborationAuthorization =
+    parsedPolicy.collaborationMutationAuthorizations?.find(
+      (authorization) => authorization.id === 'proto-ui-scheduled-collaboration-v1'
+    );
   if (
     parsedPolicy.bands?.C1?.minimumDimensionScore !== 1 ||
     !parsedPolicy.bands?.C1?.taskClasses?.includes('review-local') ||
@@ -193,16 +202,55 @@ try {
       ?.autonomousMinimumBand !== 'C4' ||
     parsedPolicy.mutationClasses?.['conditional-review-submission']?.externalWrite !== true ||
     parsedPolicy.mutationClasses?.['conditional-review-submission']?.autonomousMinimumBand !==
-      'C4' ||
+      'C2' ||
     parsedPolicy.mutationClasses?.['conditional-pull-request-merge']?.externalWrite !== true ||
     parsedPolicy.mutationClasses?.['conditional-pull-request-merge']?.autonomousMinimumBand !==
-      'C4' ||
+      'C2' ||
+    parsedPolicy.mutationClasses?.['reversible-github-collaboration']?.externalWrite !== true ||
+    parsedPolicy.mutationClasses?.['reversible-github-collaboration']?.autonomousMinimumBand !==
+      'C2' ||
+    scheduledCollaborationAuthorization?.status !== 'active' ||
+    scheduledCollaborationAuthorization?.executionModeSource !== 'schedule' ||
+    scheduledCollaborationAuthorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
+    scheduledCollaborationAuthorization?.mutationClass !== 'reversible-github-collaboration' ||
+    ![
+      'update-governed-issue-or-pull-request-metadata',
+      'update-pull-request-branch-at-expected-head',
+      'mark-exact-head-ready-for-review',
+      'request-independent-review',
+      'resolve-fixed-review-thread',
+      'rerun-exact-trusted-workflow',
+      'post-bounded-reconciliation-comment',
+    ].every((action) => scheduledCollaborationAuthorization?.allowedActions?.includes(action)) ||
+    ![
+      'purpose-bound-request-digest',
+      'live-preflight',
+      'one-mutation-maximum',
+      'one-reconciliation-without-blind-retry',
+      'verified-receipt',
+    ].every((requirement) =>
+      scheduledCollaborationAuthorization?.requires?.includes(requirement)
+    ) ||
     scheduledReviewAuthorization?.status !== 'active' ||
     scheduledReviewAuthorization?.executionModeSource !== 'schedule' ||
     scheduledReviewAuthorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
     scheduledReviewAuthorization?.mutationClass !== 'conditional-review-submission' ||
-    !['REQUEST_CHANGES', 'APPROVE'].every((action) =>
+    !['COMMENT', 'REQUEST_CHANGES', 'APPROVE'].every((action) =>
       scheduledReviewAuthorization?.allowedRecommendations?.includes(action)
+    ) ||
+    ![
+      'successful-trusted-ci',
+      'successful-trusted-dco-status',
+      'complete-commit-contributor-platform-identities',
+      'independent-from-pr-author-and-commit-contributors',
+    ].every((requirement) =>
+      scheduledReviewAuthorization?.approveRequires?.includes(requirement)
+    ) ||
+    ![
+      'complete-commit-contributor-platform-identities',
+      'independent-from-pr-author-and-commit-contributors',
+    ].every((requirement) =>
+      scheduledReviewAuthorization?.requestChangesRequires?.includes(requirement)
     ) ||
     scheduledMergeAuthorization?.status !== 'active' ||
     scheduledMergeAuthorization?.executionModeSource !== 'schedule' ||
@@ -210,26 +258,31 @@ try {
     scheduledMergeAuthorization?.mutationClass !== 'conditional-pull-request-merge' ||
     scheduledMergeAuthorization?.baseRefName !== 'main' ||
     scheduledMergeAuthorization?.mergeMethod !== 'squash' ||
-    !parsedPolicy.bands?.C4?.taskClasses?.includes('integrate-approved-pull-request') ||
+    ![
+      'exact-head-approval-independent-from-pr-author-and-commit-contributors',
+      'complete-commit-contributor-platform-identities',
+      'known-exact-head-approval-reviewer',
+      'successful-trusted-ci',
+      'successful-trusted-dco-status',
+    ].every((requirement) => scheduledMergeAuthorization?.requires?.includes(requirement)) ||
+    !parsedPolicy.bands?.C2?.taskClasses?.includes('integrate-reviewed-pull-request') ||
+    !parsedPolicy.bands?.C2?.taskClasses?.includes('maintain-collaboration-state') ||
     parsedPolicy.trustedCiEvidence?.source !== 'github-actions' ||
     !parsedPolicy.trustedCiEvidence?.workflowNames?.includes('CI') ||
     !parsedPolicy.trustedCiEvidence?.workflowPaths?.includes('.github/workflows/ci.yml') ||
     !parsedPolicy.trustedCiEvidence?.checkNames?.includes('test') ||
-    ![
-      'finding-disposition',
-      'semantic-admission',
-      'ownership-decision',
-      'scope-or-compatibility-tradeoff',
-      'pull-request-approval',
-      'merge',
-      'publication',
-      'release',
-      'access-or-secret-change',
-      'branch-or-ruleset-change',
-    ].every((gate) => parsedPolicy.alwaysHuman?.includes(gate))
+    parsedPolicy.trustedDcoEvidence?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
+    parsedPolicy.trustedDcoEvidence?.checkName !== 'DCO' ||
+    parsedPolicy.trustedDcoEvidence?.source !== 'dco' ||
+    parsedPolicy.trustedDcoEvidence?.providerId !== 'MDM6QXBwMTg2MQ==' ||
+    parsedPolicy.trustedDcoEvidence?.detailsUrl !== 'https://probot.github.io/apps/dco/' ||
+    !['unresolved-product-direction', 'privileged-or-irreversible-operation'].every((gate) =>
+      parsedPolicy.attendedDecisionClasses?.includes(gate)
+    ) ||
+    parsedPolicy.attendedDecisionClasses?.length !== 2
   ) {
     fail(
-      'capability policy must cover review ceilings, governed C2 transitions, and always-human gates.'
+      'capability policy must cover review ceilings, governed C2 transitions, and the two attended decision classes.'
     );
   }
 } catch (error) {
@@ -243,6 +296,8 @@ for (const schemaName of [
   'capability-self-result.schema.json',
   'review-input.schema.json',
   'review-packet.schema.json',
+  'collaboration-request.schema.json',
+  'collaboration-receipt.schema.json',
 ]) {
   JSON.parse(readFileSync(resolve(root, 'internal/agent-operations/schemas', schemaName), 'utf8'));
 }

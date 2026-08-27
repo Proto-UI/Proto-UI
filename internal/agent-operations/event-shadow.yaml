@@ -54,7 +54,7 @@ mutation:
     - collect-live-state
     - reconcile-live-state
 graduation:
-  requiresSeparateMaintainerDecision: true
+  attendedDecisionClass: privileged-or-irreversible-operation
   remainsOutOfScope:
     - listener-deployment
     - controller-or-queue-deployment

@@ -1,5 +1,5 @@
 schemaVersion: 1
-registryVersion: 2026-08-20.phase-a
+registryVersion: 2026-08-27.agent-forward-intake-1
 workflows:
   - id: issue-steward
     status: shadow
@@ -12,11 +12,8 @@ workflows:
     outputSchemaPath: internal/agent-operations/schemas/shadow-report.schema.json
     mutationPolicy: proposal-only
     humanGates:
-      - semantic
-      - scope
-      - contributor-rights
-      - security
-      - integration
+      - unresolved-product-direction
+      - privileged-or-irreversible-operation
   - id: pr-steward
     status: shadow
     triggerClasses:
@@ -28,11 +25,8 @@ workflows:
     outputSchemaPath: internal/agent-operations/schemas/shadow-report.schema.json
     mutationPolicy: proposal-only
     humanGates:
-      - semantic
-      - scope
-      - contributor-rights
-      - security
-      - integration
+      - unresolved-product-direction
+      - privileged-or-irreversible-operation
   - id: reposteward-pr-portfolio
     status: manual-shadow-trial
     triggerClasses:
@@ -43,21 +37,22 @@ workflows:
     outputSchemaPath: internal/agent-operations/schemas/reposteward-portfolio-envelope.schema.json
     mutationPolicy: read-only-artifact
     humanGates:
-      - integration
+      - unresolved-product-direction
+      - privileged-or-irreversible-operation
     externalEngine:
       repository: tiammomo/RepoSteward
       commit: e5db7d3496ef15072135533c5b9f4da91084b553
       command: portfolio inspect
   - id: autonomous-maintenance
-    status: manual-phase-0.1
+    status: governed-phase-0.1
     triggerClasses:
       - explicit-maintainer-task
+      - governed-maintenance-queue
     inputKinds:
       - bounded-maintenance-mission
     implementationPath: internal/autonomous-maintenance/phase-0/README.md
     outputSchemaPath: internal/autonomous-maintenance/phase-0/runs.yaml
     mutationPolicy: delegated-protocol
     humanGates:
-      - finding-disposition
-      - semantic
-      - integration
+      - unresolved-product-direction
+      - privileged-or-irreversible-operation

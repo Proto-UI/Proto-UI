@@ -75,7 +75,7 @@ test('rejects a report that claims a write or a mismatched snapshot identity', (
   });
   const report = {
     schemaVersion: 1,
-    policyVersion: '2026-08-20.phase-a',
+    policyVersion: '2026-08-27.agent-forward-intake-1',
     mode: 'shadow',
     runId: expectedRunId(snapshot),
     generatedAt: '2026-08-20T12:35:00.000Z',

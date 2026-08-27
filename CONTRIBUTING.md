@@ -12,11 +12,11 @@ Effort and readiness are separate.
 | --- | --- | --- |
 | Starter | The result is fixed and requires little Proto UI judgment | Claim the bounded task and follow its acceptance criteria |
 | Contributor-ready | Semantics are decided, although implementation may be substantial | Confirm the scope, evidence, and allowed decisions before starting |
-| Maintainer-guided | Admission, ownership, compatibility, public surface, or architecture is unsettled | Investigate or propose; wait for a recorded checkpoint before implementation |
+| Decision-needed | Existing authority leaves a material semantic, ownership, compatibility, public-guarantee, or lifecycle choice open | Continue research, draft evidence, and reversible prototypes; request one focused product-direction decision before committing to the unresolved choice |
 
-Fibonacci effort labels estimate the size and uncertainty of a reviewable change. They do not mean that implementation is authorized. Unassessed work needs investigation. Work marked as needing a split should become smaller coherent issues before anyone claims it.
+Fibonacci effort labels estimate the size and uncertainty of a reviewable change; they are not permission levels. Unassessed work starts with investigation, and work marked as needing a split becomes smaller coherent slices that Agents can claim independently.
 
-`help wanted` does not override `needs maintainer design`. Research direction does not authorize production implementation. An empty starter queue is normal; do not manufacture a contribution just to stay busy.
+`needs semantic decision` identifies one unresolved product choice; it does not block research, executable evidence, or other governed slices. Ready work may proceed at any priority—P0/P1/P2 orders attention and never acts as an authorization gate.
 
 ## Find the source of truth
 
@@ -46,7 +46,7 @@ Use an Issue for one trackable outcome. An implementation-ready Issue states:
 - exclusions;
 - whether implementation may start;
 - acceptance and validation boundaries;
-- required human gates.
+- any genuinely unresolved product direction or privileged/irreversible operation; default to `none`.
 
 Use a pull request for one reviewable integration unit. Use Actions for machine evidence. Use review for independent judgment. Passing tests and receiving approval answer different questions.
 
@@ -54,7 +54,7 @@ Milestones represent a release outcome or an independent program with completion
 
 The planned organization Project will become the operating board across repositories. Project fields will carry workflow position, readiness, priority, claim expiry, evidence progress, required Agent comprehension, and permission ceiling. Labels will remain stable searchable properties for work type, area, effort, readiness, and risk. The Project must never become a second product specification. Its field schema, transitions, synchronization, idempotency, rollback, and rollout gates are defined in `internal/governance/project-v2-design.md`.
 
-Until the Project is operational, Issue state, comments, assignees, linked pull requests, and maintainer checkpoints are the live coordination record.
+Until the Project is operational, Issue state, comments, assignees, linked pull requests, review receipts, and current decisions are the live coordination record.
 
 ## Claim work
 
@@ -67,7 +67,7 @@ Before claiming an Issue, inspect:
 - acceptance criteria and exclusions;
 - required review and validation.
 
-Record your intended scope, planned evidence, and when the claim should be released if work does not start or continue. Revalidate immediately before implementation. Release the claim when the boundary changes, the task becomes blocked, or you stop.
+Record your intended scope, planned evidence, and lease. When the live item is ready and unclaimed, post the claim and begin; release it automatically when the lease expires without activity or when the boundary changes.
 
 An assignee is the current responsible person, but it is not the only occupation signal. Comments and linked work may show an active claim that has not been mirrored into assignment metadata.
 
@@ -108,7 +108,7 @@ A fast change still needs one reviewable claim. Keep the authority, implementati
 
 A normal delivery loop is:
 
-1. Confirm the issue boundary and implementation authorization.
+1. Confirm the issue boundary and whether either of the two decision classes is actually present.
 2. Trace authority, relations, consumers, negative boundaries, and evidence.
 3. Add or identify focused evidence at the owning layer.
 4. Implement the smallest complete slice.
@@ -119,15 +119,15 @@ A normal delivery loop is:
 9. Sign off each human-authored commit.
 10. Open a pull request with exact evidence and provenance.
 
-Stop and return to a maintainer checkpoint if implementation reveals a new semantic identity, owner, public API, compatibility decision, Host Capability, dependency, or lifecycle change.
+If implementation reveals an authority gap, continue the governed parts and raise one focused decision only for the new semantic identity, owner, public guarantee, compatibility choice, Host Capability contract, or lifecycle admission that existing sources cannot decide.
 
 ### Prototype and component work
 
 Maintaining an existing Prototype is available when expected behavior is already governed. Add a regression at the owning layer and keep exports, CLI surfaces, tests, and public pages coherent.
 
-A new Base slice requires a recorded checkpoint covering the independent subject, information ownership, negative boundary, public surface, P/T evidence graph, and host prerequisites.
+A new Base slice may begin as a draft with its subject, information ownership, negative boundary, public surface, P/T evidence graph, and host prerequisites made explicit. Stable admission waits only when one of those product choices remains unresolved.
 
-A design-language projection inherits Base semantics and owns only the approved presentation and compatibility delta. It must not take ownership of state, event, focus, accessibility, dismissal, or host behavior already owned elsewhere.
+A design-language projection inherits Base semantics and owns only the governed presentation and compatibility delta. It must not take ownership of state, event, focus, accessibility, dismissal, or host behavior already owned elsewhere.
 
 Every new public Prototype identity or anatomy family needs a reachable website page in the same change. The page consumes the real public package export and provides the applicable runtime previews.
 
@@ -137,7 +137,7 @@ A Module owns portable semantics. Keep its author-facing facade, privilege-beari
 
 A Host Capability expresses the smallest host responsibility required by portable semantics. Define availability, failure, replacement, cleanup, and realization fidelity. Do not leak raw host or framework objects into portable state.
 
-New Module or Host Capability identities remain maintainer decisions.
+Agents may develop draft Module or Host Capability identities with evidence. Activating a genuinely new public guarantee requires one independent product-direction decision.
 
 ### Adapter work
 
@@ -145,13 +145,13 @@ Adapter profile work is cataloged one reviewed Module slice at a time. Positive 
 
 An uncataloged Module is not implicitly supported or unsupported. Do not generate a complete matrix from package imports or directory structure.
 
-A new Adapter proposal authorizes research by default. Implementation begins only after maintainers approve target scope, lifecycle, compatibility, dependencies, semantic ownership, and evidence.
+A new Adapter proposal starts with research and a reversible vertical slice. When existing authority determines target scope, lifecycle, compatibility, dependencies, semantic ownership, and evidence, implementation proceeds automatically; only unresolved official identity or stable-conformance choices need a product-direction decision.
 
 ### Contract and spec work
 
 Use a readable legacy contract only for explanation or an explicitly accepted uncataloged gap. It must state current authority and migration status. Stabilized semantics should move into spec entities rather than leaving a permanent shadow contract.
 
-A spec brainstorm produces a decision packet, not an entity or implementation. Separate facts, alternatives, recommendation, negative boundary, evidence plan, and the smallest required human decision.
+A spec brainstorm may produce draft entities, executable probes, and a decision packet. Separate facts, alternatives, recommendation, negative boundary, and evidence plan; ask only for the smallest product choice that evidence cannot settle.
 
 ## Validate proportionally
 
@@ -255,18 +255,18 @@ Preview deployment is inspection evidence for one revision. It does not grant me
 
 Release preparation and publication are separate:
 
-1. Maintainers choose the exact global version and stage.
+1. Project authority records the exact global version and stage.
 2. A reviewable candidate aligns Version identity, manifests, lockfile, notes, bill of materials, snapshot inputs, rehearsal, and dry-run evidence.
 3. Publication runs manually from governed `main` through the release workflow.
 4. A separate evidence change verifies registry, channel, integrity, tag, GitHub Release, assets, snapshot digest, workflow head, and deployments.
 
-In `human-assisted` mode an Agent may prepare or audit these phases under current human decisions. In `autonomous` mode it must stay within its fresh local task and review ceilings. A narrowly standing-authorized Agent may mechanically merge an exact approved PR through `pui-integrate`; neither mode may publish, tag, activate stable lifecycle, or recover a partial release without current human authorization.
+An Agent may prepare and audit every release phase within its current task and review ceiling, and active standing scope may mechanically merge an exact approved PR through `pui-integrate`. Publication, tagging, stable lifecycle activation, and partial-release recovery remain one explicit privileged operation backed by the recorded release decision and live permission.
 
 ## Contributor permissions
 
 GitHub permission, Discord trust, Agent comprehension, task risk, and human authorization answer different questions. A score cannot grant GitHub permission or predict acceptance. Discord or Poppy trust matters only when work touches those community or Bot surfaces.
 
-Read-only work may inspect and report. Triage supports reversible metadata within policy. Write supports feature branches and the contributor's own PR, not direct pushes to `main`. Maintain still obeys review and release gates. Admin, access, secrets, application installation, rulesets, and branch protection remain attended human work.
+Read-only work may inspect and report. Triage supports reversible metadata within policy. Write supports feature branches and owned or explicitly authorized PR branches. Maintain can review and exact-head merge under active policy while still respecting independent evidence and release boundaries. Direct pushes to protected `main`, admin, access, secrets, application installation, rulesets, and branch protection remain privileged operations.
 
 The Discord Bot's Community, Contributor, and Trusted levels are an entry and trust axis. They are not GitHub contributor roles.
 
@@ -278,11 +278,11 @@ The resolver is deterministic: `pnpm agent:skill -- <leaf-id> --mode <execution-
 
 `pui-orient` records `human-assisted` when a current user is directing the work. Local assessment then helps the Agent narrow claims, add tests, request review, and state limitations; a low score does not block the work the user requested. `autonomous` is reserved for a maintainer-controlled invocation, schedule, or governed queue. In that mode a fresh unsigned U0-C4 self-result is a binding ceiling on task and review class.
 
-Assessment never grants permission. Ordinary local edits, tests, signed-off commits, authorized branch pushes, own-PR updates, and review responses do not depend on an online issuer. External writes still require explicit or active standing authorization and a live credential. Semantic admission and compatibility choices stay with people; publication, release, access, and repository rules remain attended. The active local standing scopes may submit bounded review dispositions and mechanically merge an already independently approved exact head without another per-action prompt.
+Assessment calibrates autonomous scope; the current user or active standing policy supplies authorization. Ordinary local edits, tests, signed-off commits, authorized branch pushes, PR updates, review responses, ready-for-review, review dispositions, and exact-head integration continue without an online issuer or per-action prompt. `pui-collaborate` owns exact-target reversible collaboration updates, while `pui-review` and `pui-integrate` retain their stronger revision-bound disposition and merge primitives. Only unresolved product direction and privileged or irreversible operations stop for an attended decision.
 
-For review, bind evidence to the repository, PR, base ref name, base SHA, head SHA, declared review class, and a digest of the exact PR state, draft state, current and previous changed-file paths, existing reviews, top-level conversation comments, replies, threads, check provider/repository/workflow-name/workflow-path provenance, checks, and evidence inspected. A new push or base retargeting makes the old packet stale; new same-head input permits a new packet, while an unchanged packet is a duplicate. CI success is useful evidence, but it is not an approval. Assessment never derives approval, and an Agent must not approve its own work. An authorized review write must use `submit-review` with `commit_id` bound to the packet head. An authorized integration must use `pui-integrate` and `merge-pull-request`, which rechecks independent approval, trusted CI, resolved threads, GitHub readiness, and sends `sha` equal to that exact head. Do not separate either preflight from a later unbound GitHub write.
+For review, bind evidence to the repository, PR, base/head, PR author, full commit messages, every commit author/committer platform identity, changed files, reviews, conversations, check source/provider/repository/workflow provenance, checks, and evidence inspected through the canonical v4 digest. A new push or base retargeting makes the old packet stale; new same-head input permits a new packet, while an unchanged packet is a duplicate. CI success is useful evidence, but it is not an approval; DCO success proves sign-off status, not source/license provenance. Assessment never derives approval. `APPROVE` and `REQUEST_CHANGES` require a reviewer login distinct from the PR author and every commit author/committer login, with unavailable contributor identity failing closed. An authorized review write uses `submit-review` with `commit_id` bound to the packet head. An authorized integration uses `pui-integrate` and `merge-pull-request`, which separately rechecks trusted CI, trusted DCO, active review state, resolved threads, GitHub readiness, and sends `sha` equal to that exact head. Do not separate either preflight from a later unbound GitHub write.
 
-The maintainer-controlled local Codex schedule has two active standing scopes. `proto-ui-scheduled-review-v1` allows complete, finding-backed `REQUEST_CHANGES`, and allows `APPROVE` only when trusted live CI succeeds and no current or previous changed-file path identifies a YAML entity under `spec/{contracts,prototypes,modules,adapters,decisions,host-caps,tests,versions,knowledge}`. `proto-ui-scheduled-merge-v1` allows an exact-head squash merge only after a clean packet, independent approval, no active change request, resolved threads, trusted CI, live permission, and GitHub `MERGEABLE`/`CLEAN` state. These scopes apply to one local runner; wider concurrency still requires service-side leases and stronger runtime attribution.
+The local Codex schedule has two active standing scopes. `proto-ui-scheduled-review-v1` submits evidence-backed non-blocking `COMMENT`, finding-backed `REQUEST_CHANGES`, and clean `APPROVE` dispositions; spec paths are classified but only an unresolved semantic delta creates a decision boundary. `proto-ui-scheduled-merge-v1` performs exact-head squash integration after a clean packet, platform-contributor-independent approval, no active change request, resolved threads, separately trusted CI and DCO status, live permission, and GitHub `MERGEABLE`/`CLEAN` state. These scopes apply to one local runner; wider concurrency adds service-side leases and stronger runtime attribution without narrowing single-runner work.
 
 The full Agent policy is in `internal/agent-operations/contributor-agents.md`. The human-readable skill catalog is on the documentation site. Autonomous-maintenance experiments use `$pui-maintain` and its separate independence protocol; supported no-finding and rejected outcomes close through `pui-record`, not a fake remediation review.
 

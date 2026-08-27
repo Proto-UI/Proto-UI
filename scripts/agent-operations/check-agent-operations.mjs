@@ -44,6 +44,26 @@ const eventShadowSchemaFiles = [
   'event-shadow-trust.schema.json',
 ].map((name) => path.join(operationsDirectory, 'schemas', name));
 const eventShadowCliFile = path.join(root, 'scripts/agent-operations/event-shadow-cli.mjs');
+const collaborationRequestSchemaFile = path.join(
+  operationsDirectory,
+  'schemas/collaboration-request.schema.json'
+);
+const collaborationReceiptSchemaFile = path.join(
+  operationsDirectory,
+  'schemas/collaboration-receipt.schema.json'
+);
+const collaborationRuntimeFile = path.join(
+  root,
+  'scripts/agent-operations/collaboration-runtime.mjs'
+);
+const collaborationCollectorFile = path.join(
+  root,
+  'scripts/agent-operations/collect-live-collaboration-state.mjs'
+);
+const collaborationCliFile = path.join(root, 'scripts/agent-operations/collaboration-packet.mjs');
+const capabilityPolicyFile = path.join(operationsDirectory, 'capability-policy.yaml');
+const autonomousTasksFile = path.join(operationsDirectory, 'autonomous-tasks.yaml');
+const packageFile = path.join(root, 'package.json');
 const REPOSTEWARD_COMMIT = 'e5db7d3496ef15072135533c5b9f4da91084b553';
 const errors = [];
 
@@ -130,7 +150,7 @@ function validatePolicy() {
     fail(policyFile, 'proposalActions do not match the report contract');
   }
   if (!Array.isArray(policy.permissions?.github?.write) || policy.permissions.github.write.length) {
-    fail(policyFile, 'permissions.github.write must be an empty array in Phase A');
+    fail(policyFile, 'permissions.github.write must be an empty array in the shadow intake lane');
   }
   if (policy.permissions?.repository?.trackedMutation !== 'forbidden') {
     fail(policyFile, 'tracked repository mutation must be forbidden');
@@ -147,8 +167,8 @@ function validatePolicy() {
   if (policy.graduation?.duplicateMutationCount !== 0) {
     fail(policyFile, 'graduation.duplicateMutationCount must be zero');
   }
-  if (policy.graduation?.requiresExplicitMaintainerDecision !== true) {
-    fail(policyFile, 'graduation requires an explicit maintainer decision');
+  if (policy.graduation?.activationMode !== 'evidence-backed-policy-change') {
+    fail(policyFile, 'graduation must use an evidence-backed policy change');
   }
 }
 
@@ -391,8 +411,11 @@ function validateEventShadowContract() {
     if (policy.mutation?.authorized !== false || policy.mutation?.writeOperationsPerformed !== 0) {
       fail(eventShadowPolicyFile, 'Event shadow must authorize and perform zero mutations');
     }
-    if (policy.graduation?.requiresSeparateMaintainerDecision !== true) {
-      fail(eventShadowPolicyFile, 'graduation must require a separate maintainer decision');
+    if (policy.graduation?.attendedDecisionClass !== 'privileged-or-irreversible-operation') {
+      fail(
+        eventShadowPolicyFile,
+        'deploying the Event shadow must remain a privileged-or-irreversible-operation'
+      );
     }
   }
 
@@ -459,6 +482,143 @@ function validateEventShadowContract() {
     if (source.includes("option === '--policy'")) {
       fail(eventShadowCliFile, 'CLI must not accept a caller-selected policy');
     }
+  }
+}
+
+function validateCollaborationContract() {
+  const expectedActions = [
+    'update-governed-issue-or-pull-request-metadata',
+    'update-pull-request-branch-at-expected-head',
+    'mark-exact-head-ready-for-review',
+    'request-independent-review',
+    'resolve-fixed-review-thread',
+    'rerun-exact-trusted-workflow',
+    'post-bounded-reconciliation-comment',
+  ];
+  const requestSchema = readJson(collaborationRequestSchemaFile);
+  const receiptSchema = readJson(collaborationReceiptSchemaFile);
+  for (const [file, schema] of [
+    [collaborationRequestSchemaFile, requestSchema],
+    [collaborationReceiptSchemaFile, receiptSchema],
+  ]) {
+    if (!schema) continue;
+    if (schema.type !== 'object' || schema.additionalProperties !== false) {
+      fail(file, 'top-level schema must be a closed object');
+    }
+    if (schema.properties?.schemaVersion?.const !== 1) {
+      fail(file, 'schemaVersion must be const 1');
+    }
+  }
+  if (requestSchema) {
+    if (requestSchema.properties?.kind?.const !== 'proto-ui.collaboration-request') {
+      fail(collaborationRequestSchemaFile, 'kind must bind the collaboration request');
+    }
+    if (!sameMembers(requestSchema.properties?.action?.enum, expectedActions)) {
+      fail(collaborationRequestSchemaFile, 'action enum must match the active collaboration scope');
+    }
+    if (requestSchema.properties?.humanGates?.const?.length !== 0) {
+      fail(
+        collaborationRequestSchemaFile,
+        'collaboration requests must carry zero attended decisions'
+      );
+    }
+  }
+  if (receiptSchema) {
+    if (receiptSchema.properties?.kind?.const !== 'proto-ui.collaboration-receipt') {
+      fail(collaborationReceiptSchemaFile, 'kind must bind the collaboration receipt');
+    }
+    if (!sameMembers(receiptSchema.$defs?.action?.enum, expectedActions)) {
+      fail(collaborationReceiptSchemaFile, 'action enum must match the active collaboration scope');
+    }
+    if (!sameMembers(receiptSchema.properties?.mutationCount?.enum, [0, 1])) {
+      fail(collaborationReceiptSchemaFile, 'receipt must cap mutationCount at one');
+    }
+    if (!sameMembers(receiptSchema.properties?.reconciliationCount?.enum, [0, 1])) {
+      fail(collaborationReceiptSchemaFile, 'receipt must cap reconciliationCount at one');
+    }
+  }
+
+  const policy = readYaml(capabilityPolicyFile);
+  const authorization = policy?.collaborationMutationAuthorizations?.find(
+    (candidate) => candidate.id === 'proto-ui-scheduled-collaboration-v1'
+  );
+  if (
+    authorization?.status !== 'active' ||
+    authorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
+    authorization?.mutationClass !== 'reversible-github-collaboration' ||
+    !sameMembers(authorization?.allowedActions, expectedActions)
+  ) {
+    fail(capabilityPolicyFile, 'active collaboration authorization is incomplete');
+  }
+  for (const requirement of [
+    'purpose-bound-request-digest',
+    'live-preflight',
+    'one-mutation-maximum',
+    'one-reconciliation-without-blind-retry',
+    'verified-receipt',
+  ]) {
+    if (!authorization?.requires?.includes(requirement)) {
+      fail(capabilityPolicyFile, `collaboration authorization is missing ${requirement}`);
+    }
+  }
+
+  const tasks = readYaml(autonomousTasksFile);
+  const task = tasks?.taskFamilies?.find(
+    (candidate) => candidate.id === 'maintainer-collaboration-continuation'
+  );
+  if (
+    task?.status !== 'deployed-local-conditional-write' ||
+    task?.skill !== 'pui-collaborate' ||
+    task?.input !== 'purpose-bound-collaboration-request-v1' ||
+    task?.output !== 'validated-collaboration-receipt-v1' ||
+    task?.authorization !== 'proto-ui-scheduled-collaboration-v1'
+  ) {
+    fail(
+      autonomousTasksFile,
+      'deployed collaboration task is not bound to its request and receipt'
+    );
+  }
+
+  for (const file of [collaborationRuntimeFile, collaborationCollectorFile, collaborationCliFile]) {
+    if (!fs.existsSync(file)) fail(file, 'file does not exist');
+  }
+  if (fs.existsSync(collaborationRuntimeFile)) {
+    const source = fs.readFileSync(collaborationRuntimeFile, 'utf8');
+    for (const required of [
+      'validateCollaborationRequest',
+      'validateCollaborationHandoffBinding',
+      'authorizeCollaborationMutation',
+      'validateCollaborationReceipt',
+      'request.requestDigest === computeCollaborationRequestDigest(request)',
+    ]) {
+      if (!source.includes(required))
+        fail(collaborationRuntimeFile, `missing runtime guard: ${required}`);
+    }
+  }
+  if (fs.existsSync(collaborationCollectorFile)) {
+    const source = fs.readFileSync(collaborationCollectorFile, 'utf8');
+    if (!source.includes('outcome is ambiguous after one live reconciliation')) {
+      fail(collaborationCollectorFile, 'unknown outcomes must stop after one reconciliation');
+    }
+    if (!source.includes('expected_head_sha: request.target.headSha')) {
+      fail(collaborationCollectorFile, 'update-branch must bind expected_head_sha');
+    }
+  }
+  if (fs.existsSync(collaborationCliFile)) {
+    const source = fs.readFileSync(collaborationCliFile, 'utf8');
+    if (!source.includes('capability-policy.yaml') || source.includes("option === '--policy'")) {
+      fail(
+        collaborationCliFile,
+        'CLI must load the canonical policy without a caller policy override'
+      );
+    }
+  }
+  const packageDocument = readJson(packageFile);
+  if (
+    packageDocument?.scripts?.['agent:collaborate'] !==
+    'node scripts/agent-operations/collaboration-packet.mjs'
+  ) {
+    fail(packageFile, 'agent:collaborate must expose the registered collaboration CLI');
   }
 }
 
@@ -545,6 +705,7 @@ validateRegistry();
 validateSchema();
 validateRepoStewardTrial();
 validateEventShadowContract();
+validateCollaborationContract();
 validateFixtures();
 validatePromptAndWorkflow();
 validateLiveReport(args);

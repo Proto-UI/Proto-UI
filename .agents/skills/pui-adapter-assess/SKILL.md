@@ -10,7 +10,7 @@ description: Assess one bounded Proto UI Adapter question without changing repos
 3. Classify the question as new-Adapter research, catalog readiness, compatibility assessment, support or omission evidence, capability-fidelity assessment, or implementation readiness. Do not move between classes silently.
 4. Inspect real translation behavior and executable evidence. Distinguish observed support, explicit omission, uncataloged scope, implementation attachment, and faithful realization.
 5. Identify target and runtime range, lifecycle ownership, failure behavior, dependency implications, portable-semantic gaps, incompatible host behavior, and evidence still needed.
-6. Return a read-only assessment packet containing facts, unknowns, recommendation, exclusions, residual risks, one proposed next registered leaf, and exact human gates. Do not load that next leaf.
+6. Return a read-only assessment packet containing facts, unknowns, recommendation, exclusions, residual risks, and one eligible next registered leaf. Use the schema's gate field only for an unresolved Adapter identity/semantics/compatibility choice or a privileged operation; otherwise route governed parity, evidence, and implementation work forward immediately. Do not load that next leaf.
 
 Remain read-only. Do not create a support matrix from packages or dependencies, infer conformance from source attachment, edit catalog entities, or authorize implementation.
 

@@ -5,9 +5,9 @@ description: '先区分维护、组合、设计语言投射与新的 Base semant
 
 Proto UI 提供 Prototype authoring API，不代表贡献者应该频繁增加新的协议身份。更稳妥的起点是：
 
-> 先找到适用的 `P-*` / `T-*` 实体，再判断问题属于维护、组合、设计语言投射，还是一个尚待批准的新 Base semantic subject。
+> 先找到适用的 `P-*` / `T-*` 实体，再判断问题属于维护、组合、设计语言投射，还是一个真正全新 Base semantic identity 的 candidate。
 
-这是一篇边界判断指南，不是新 Prototype 的实施授权。新的 Base subject 必须先经过 proposal 和 maintainer checkpoint；只有边界、公共 API、P/T 图与证据范围获批后，才进入[实现已批准的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)。
+这是一篇边界判断指南。已有受治理 subject 直接进入维护、投射或实现。对于全新的 Base subject，唯一未决语义决定是 Proto UI 是否准入这个独立 identity；research、candidate P/T graph、draft entity、实现探针和 executable evidence 都可以先推进，并为这项决定提供依据。准入前把 candidate 明确保持为 draft，之后沿[实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)继续交付。
 
 ## 先确认你面对的是哪类工作
 
@@ -64,10 +64,10 @@ Proto UI 提供 Prototype authoring API，不代表贡献者应该频繁增加�
 1. 是否已有适用的 P/T，可以按 maintenance 处理？
 2. 是否只是宿主或框架层的 composition？
 3. 是否只是已有 Base 语义上的 design-language delta？
-4. 如果真是新 Base subject，Issue 是否已经记录 maintainer checkpoint？
+4. 如果真是新 Base subject，Issue 是否已记录 admission 决定，或者当前工作是否明确标记为 candidate draft？
 5. lifecycle、criteria、relations、sources 与 evidence 是否都已经明确？
 
-前四步没有走完，就不应从“先建一个原型文件”开始。
+前三个答案会让已有受治理工作直接进入对应路径。如果只剩 Base admission 未决，就从 candidate graph、draft entity、实现探针和证据开始，而不是把新 identity 提前写成已经受治理。
 
 ## Lifecycle 提醒
 
@@ -76,5 +76,5 @@ Proto UI 提供 Prototype authoring API，不代表贡献者应该频繁增加�
 ## 下一步
 
 - 想理解单体 authoring entry 的结构，读[编写一个定制的单体原型](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/)
-- 已有获批的复合边界，读[编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
+- 已有受治理或候选复合边界，读[编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
 - 主要目标是新的设计语言，读[基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)

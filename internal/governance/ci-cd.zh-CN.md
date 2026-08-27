@@ -11,7 +11,7 @@
 | CI | `.github/workflows/ci.yml` | PR 与主干的类型、测试、spec 和全局版本门禁 |
 | Release Packages | `.github/workflows/release-packages.yml` | 手动执行 release scan、stage 彩排或全量发布 |
 | Release Cadence | `.github/workflows/release-cadence.yml` | 定期检查距最近 `v*` release 的时间并提醒维护者 |
-| Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR 路由实验 |
+| Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR intake/reconciliation lane |
 | RepoSteward Portfolio Shadow Trial | `.github/workflows/reposteward-portfolio-shadow.yml` | 手动触发的只读外部 portfolio 实验 |
 
 ## CI 工作流（`ci.yml`）
@@ -33,11 +33,11 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 
 ## Agent Operations Shadow 工作流（`agent-operations-shadow.yml`）
 
-这项 Phase A 实验当前在 UTC 每小时第 17 分钟自动运行，也可由维护者手动触发。它会采集有上限的开放 Issue 与 PR 快照；在配置了 `OPENAI_API_KEY` 时执行只读结构化分析、校验结果，并以 14 天保留期上传输入和报告。没有配置密钥时，工作流只保留有边界的输入快照。hourly 是当前已部署的自动触发方式；event-driven invocation 是未来目标架构，当前仓库状态没有其部署证据。
+这条 Phase A intake 与 reconciliation lane 当前在 UTC 每小时第 17 分钟自动运行，也可由维护者手动触发。它会采集有上限的开放 Issue 与 PR 快照；在配置了 `OPENAI_API_KEY` 时执行只读结构化分析、校验结果，并以 14 天保留期上传输入和报告。没有配置密钥时，工作流保留有边界的输入快照。hourly 是当前已部署的自动触发方式；event-driven invocation 是未来目标架构，当前仓库状态没有其部署证据。
 
-该工作流对 `contents`、`issues` 与 `pull-requests` 只有读取权限，禁用 checkout credential 持久化，并让 Codex 使用 `:read-only` permission profile 和 `drop-sudo`。它不响应 PR 事件，不发布评论、不修改 label、不创建分支或 PR，也不授权 integration。未来若增加 GitHub 写权限，必须通过 `internal/agent-operations/**` 下的独立策略变更接受评审，并取得维护者的明确决定。
+该工作流对 `contents`、`issues` 与 `pull-requests` 只有读取权限，禁用 checkout credential 持久化，并让 Codex 使用 `:read-only` permission profile 和 `drop-sudo`。这些控制约束的是本条 ingestion credential：工作流负责观察与 reconciliation，自身不发布评论、不修改 label、不创建分支、不提交 review，也不集成 PR。它们不是 Contributor Agent 或本地 review/integration schedule 的全局能力上限。
 
-普通 Contributor Agent 使用 `internal/agent-operations/skills.yaml` 下的懒加载 skill registry，不属于定时 shadow workflow。`$pui-dev` 负责普通开发，`$pui-maintain` 负责独立的自治维护协议。
+普通 Contributor Agent 使用 `internal/agent-operations/skills.yaml` 下的懒加载 skill registry，不属于定时 shadow workflow。`$pui-dev` 负责普通开发，`$pui-maintain` 负责独立的自治维护协议。依据现有 standing authorization，符合条件的独立 Agent 可以把已核对的 live state 继续推进到 recheck、有 finding 支撑的 `REQUEST_CHANGES`、clean exact-head `APPROVE`，以及在独立批准后的 exact-head merge。每次写入仍需匹配授权、可信证据、fresh canonical input、实时 credential 权限，并与 review state 和仓库规则一致。人类决策只保留给未决产品方向和特权或不可逆操作；扩大本工作流自身 token、变更访问或 secrets、publication 与 release 均属于这一边界。
 
 ## 私有贡献者预览工作流（`poppy-preview-*.yml`）
 
@@ -93,8 +93,8 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 3. 对每个首次出现的公开 package 名称，先发布明确不属于正式发行的 bootstrap 版本，并配置 Trusted Publisher。
 4. 运行 `pnpm release:rehearse`，完成整套顺序执行的不发布门禁。CI 为了缩短反馈时间，仍将同一组检查拆成并行 job。
 5. 审阅 launch 产品范围，以及隔离 React 与 CLI 多宿主 tarball consumer 结果。
-6. 合入 `main` 后，取得当前人工发布批准，再用 `workspace` profile 运行 `publish-all`。
-7. 在单独的证据变更中核验 registry、tag、GitHub Release、assets、workflow head、deployment 与 spec snapshot digest，然后按已批准的生命周期推进 V 实体。
+6. 合入 `main` 后，记录当前 privileged publication authorization，再用 `workspace` profile 运行 `publish-all`。
+7. 在单独的证据变更中核验 registry、tag、GitHub Release、assets、workflow head、deployment 与 spec snapshot digest，然后按受治理 lifecycle 推进 V 实体。
 
 ## 本地快捷命令
 

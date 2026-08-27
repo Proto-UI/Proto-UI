@@ -7,14 +7,24 @@ import {
   submitGitHubMerge,
   submitGitHubReview,
   summarizeLiveChecks,
+  summarizeLiveDco,
 } from '../collect-live-review-input.mjs';
 
 const sha = (letter) => letter.repeat(40);
 const repositoryId = 'github.com:Proto-UI/Proto-UI';
 const trustedProvenance = {
+  providerId: 'APP_github_actions',
   repository: 'Proto-UI/Proto-UI',
   workflowName: 'CI',
   workflowPath: '.github/workflows/ci.yml',
+};
+const trustedDcoOptions = {
+  repositoryId,
+  trustedRepositoryId: repositoryId,
+  trustedCheckName: 'DCO',
+  trustedSource: 'dco',
+  trustedProviderId: 'MDM6QXBwMTg2MQ==',
+  trustedDetailsUrl: 'https://probot.github.io/apps/dco/',
 };
 const trustedOptions = {
   repositoryId,
@@ -50,7 +60,24 @@ function payload(overrides = {}) {
           headRefOid: sha('b'),
           author: { login: 'contributor' },
           commits: {
-            nodes: [{ commit: { oid: sha('b'), messageHeadline: 'Bounded change' } }],
+            nodes: [
+              {
+                commit: {
+                  oid: sha('b'),
+                  message: 'Bounded change\n\nSigned-off-by: Contributor <contributor@example.com>',
+                  author: {
+                    name: 'Contributor',
+                    email: 'contributor@example.com',
+                    user: { login: 'contributor' },
+                  },
+                  committer: {
+                    name: 'GitHub',
+                    email: 'noreply@github.com',
+                    user: { login: 'web-flow' },
+                  },
+                },
+              },
+            ],
             pageInfo: { hasNextPage: false },
           },
           reviews: {
@@ -110,7 +137,7 @@ function payload(overrides = {}) {
                       completedAt: '2026-08-23T06:00:00Z',
                       detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
                       checkSuite: {
-                        app: { slug: 'github-actions' },
+                        app: { id: 'APP_github_actions', slug: 'github-actions' },
                         repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
                         workflowRun: {
                           file: { path: '.github/workflows/ci.yml' },
@@ -152,6 +179,21 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   assert.equal(result.mergeable, 'MERGEABLE');
   assert.equal(result.mergeStateStatus, 'CLEAN');
   assert.equal(result.input.commits.length, 1);
+  assert.equal(result.input.pullRequestAuthor, 'contributor');
+  assert.deepEqual(result.input.commits[0], {
+    sha: sha('b'),
+    message: 'Bounded change\n\nSigned-off-by: Contributor <contributor@example.com>',
+    author: {
+      login: 'contributor',
+      name: 'Contributor',
+      email: 'contributor@example.com',
+    },
+    committer: {
+      login: 'web-flow',
+      name: 'GitHub',
+      email: 'noreply@github.com',
+    },
+  });
   assert.equal(result.input.pullRequestState, 'OPEN');
   assert.equal(result.input.isDraft, false);
   assert.equal(result.input.baseRefName, 'main');
@@ -181,7 +223,7 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   assert.equal(result.input.checks[1].name, 'legacy-ci');
   assert.equal(result.input.checks[1].status, 'COMPLETED');
   assert.equal(result.input.checks[1].conclusion, 'FAILURE');
-  assert.equal(summarizeLiveChecks(result.input.checks), 'failure');
+  assert.equal(summarizeLiveChecks(result.input.checks, trustedOptions), 'success');
   assert.deepEqual(result.input.externalEvidence, []);
 });
 
@@ -209,6 +251,19 @@ test('live collector derives thread time from comments and never fabricates time
     () => buildLiveReviewInput(empty, 'github.com:Proto-UI/Proto-UI', 487, [], changedFiles),
     /no comment timestamps/
   );
+});
+
+test('live collector preserves unavailable review identity as null', () => {
+  const deletedReviewer = payload();
+  deletedReviewer.data.repository.pullRequest.reviews.nodes[0].author = null;
+  const result = buildLiveReviewInput(
+    deletedReviewer,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(result.input.reviews[0].author, null);
 });
 
 test('live collector fails closed on pagination truncation for every connection', () => {
@@ -469,6 +524,7 @@ test('check context normalization matches both connection node kinds', () => {
       completedAt: null,
       detailsUrl: 'https://example.com',
       source: 'unknown-check-run',
+      providerId: null,
       repository: null,
       workflowName: null,
       workflowPath: null,
@@ -489,11 +545,66 @@ test('check context normalization matches both connection node kinds', () => {
       completedAt: '2026-08-23T06:00:00Z',
       detailsUrl: null,
       source: 'status-context',
+      providerId: null,
       repository: null,
       workflowName: null,
       workflowPath: null,
     }
   );
+});
+
+test('trusted DCO status requires the exact check, app provider, repository, and URL', () => {
+  const trustedDco = {
+    name: 'DCO',
+    status: 'COMPLETED',
+    conclusion: 'SUCCESS',
+    completedAt: '2026-08-23T06:00:00Z',
+    detailsUrl: 'https://probot.github.io/apps/dco/',
+    source: 'dco',
+    providerId: 'MDM6QXBwMTg2MQ==',
+    repository: 'Proto-UI/Proto-UI',
+    workflowName: null,
+    workflowPath: null,
+  };
+  assert.equal(summarizeLiveDco([trustedDco], trustedDcoOptions), 'success');
+  assert.equal(
+    summarizeLiveDco([{ ...trustedDco, conclusion: 'FAILURE' }], trustedDcoOptions),
+    'failure'
+  );
+  const trustedCi = {
+    name: 'test',
+    status: 'COMPLETED',
+    conclusion: 'SUCCESS',
+    completedAt: '2026-08-23T06:00:00Z',
+    detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+    source: 'github-actions',
+    ...trustedProvenance,
+  };
+  const failedDco = { ...trustedDco, conclusion: 'FAILURE' };
+  assert.equal(summarizeLiveChecks([trustedCi, failedDco], trustedOptions), 'success');
+  assert.equal(summarizeLiveDco([trustedCi, failedDco], trustedDcoOptions), 'failure');
+  assert.equal(
+    summarizeLiveDco(
+      [{ ...trustedDco, status: 'IN_PROGRESS', conclusion: null }],
+      trustedDcoOptions
+    ),
+    'unknown'
+  );
+  for (const [field, value] of [
+    ['name', 'DCO lookalike'],
+    ['source', 'github-actions'],
+    ['providerId', 'APP_lookalike'],
+    ['repository', 'fork/Proto-UI'],
+    ['detailsUrl', 'https://example.com/dco'],
+    ['workflowName', 'CI'],
+    ['workflowPath', '.github/workflows/ci.yml'],
+  ]) {
+    assert.equal(
+      summarizeLiveDco([{ ...trustedDco, [field]: value }], trustedDcoOptions),
+      'unknown',
+      `${field} drift must not be trusted as DCO status evidence`
+    );
+  }
 });
 
 test('live check summary accepts neutral terminal conclusions but not pending checks', () => {
@@ -517,7 +628,7 @@ test('live check summary accepts neutral terminal conclusions but not pending ch
           status: 'IN_PROGRESS',
           conclusion: null,
           completedAt: null,
-          detailsUrl: null,
+          detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/2',
           source: 'github-actions',
           ...trustedProvenance,
         },
@@ -539,6 +650,7 @@ test('external success cannot substitute for trusted repository CI evidence', ()
           completedAt: '2026-08-23T06:00:00Z',
           detailsUrl: 'https://vercel.com/example',
           source: 'vercel',
+          providerId: 'APP_vercel',
           repository: 'Proto-UI/Proto-UI',
           workflowName: null,
           workflowPath: null,

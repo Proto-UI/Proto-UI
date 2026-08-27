@@ -9,10 +9,11 @@ description: Release one current Proto UI work-item claim when it expired, becam
 2. Read the original claim receipt, current issue, recent comments, linked work, assignee, and Project claim state when available.
 3. Require one explicit release reason: expiry, changed boundary, invalidated task state, blocking dependency, stopped work, or completed handoff.
 4. Revalidate live GitHub permission, current authorization, claim ownership, target version, and the idempotency key for the requested release action.
-5. Post exactly one release notice and clear only claim metadata that the current contributor owns and is authorized to change.
-6. Return a mutation receipt containing the claim identity, release reason, observed pre-state, resulting state, timestamp, and any bounded handoff.
+5. Post exactly one request-bound release notice and clear only claim metadata that the current contributor owns and is authorized to change.
+6. After a timeout or other unknown write outcome, reconcile the exact claim and release marker once. Attribute success only when the intended owned metadata is released; otherwise return the reconciled terminal result and never retry blindly.
+7. Return a mutation receipt containing the claim identity, release reason, observed pre-state, resulting state, timestamp, and any bounded handoff.
 
-Stop without writing when ownership, permission, authorization, or live state is uncertain. Do not change readiness, semantics, labels, milestone, another contributor's assignment, or implementation scope.
+An ownership, permission, authorization, or live-state mismatch returns an exact no-action receipt for recollection. The release boundary preserves readiness, semantics, labels, milestone, every other contributor's assignment, and implementation scope.
 
 ## Explicit handoff
 

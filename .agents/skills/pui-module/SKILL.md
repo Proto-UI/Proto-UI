@@ -1,11 +1,11 @@
 ---
 name: pui-module
-description: Implement or extend one approved Proto UI Module semantic slice. Use when Module ownership, facade and port boundary, dependencies, resource lifetime, Host Capability plan, Runtime registration, Adapter evidence, and validation scope are already governed. Do not use to admit a new Module or decide ownership.
+description: Implement or extend one governed Proto UI Module semantic slice. Use when Module ownership, facade and port boundary, dependencies, resource lifetime, Host Capability plan, Runtime registration, Adapter evidence, and validation scope are fixed by current authority. Do not use to admit a new Module or decide ownership.
 ---
 
 # Implement a Module slice
 
-1. Require `pui-orient`, `pui-trace`, and recorded approval for the complete slice.
+1. Require `pui-orient`, `pui-trace`, and current-user or standing authorization for the complete governed slice.
 2. Read the applicable knowledge, decision, contract, Module, Host Capability, Adapter, and test entities plus current Runtime and implementation.
 3. Preserve the separation between author-facing facade, privilege-bearing port, and host realization.
 4. Implement the smallest portable semantic owner and explicit dependency graph. Define missing-capability behavior and the full resource lifetime.
@@ -13,7 +13,7 @@ description: Implement or extend one approved Proto UI Module semantic slice. Us
 6. Identify any required spec-entity or public-projection transition in the handoff without loading another skill.
 7. Record the focused Module, Runtime, Adapter, graph, projection, and type validation boundary for a later `pui-validate` transition.
 
-Stop if the work needs a new identity, public registration shape, ownership migration, portable baseline, dependency, or host fact not present in the approval. Do not pass raw host objects into portable state or infer conformance from source inspection.
+Route to an attended product-direction decision only when the work needs a new identity, public registration shape, ownership migration, portable baseline, dependency, or host fact that current authority does not decide. Do not pass raw host objects into portable state or infer conformance from source inspection.
 
 ## Explicit handoff
 

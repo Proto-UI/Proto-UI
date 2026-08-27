@@ -106,4 +106,4 @@ Shadcn Button 是 Base projection 的紧凑例子：
 
 - [维护已有 Prototype](/zh-cn/build/prototypes/maintaining-an-existing-prototype/)
 - [从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)
-- [实现已批准的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)
+- [实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)
