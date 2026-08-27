@@ -35,7 +35,7 @@ A claim must agree with current comments, assignment, linked work, and Project s
 
 GitHub permission controls platform operations. Discord and Poppy trust matter when work touches community or Bot surfaces. A local Agent assessment measures task fit: it is advice in `human-assisted` work and a ceiling in `autonomous` work. Task risk and current authorization remain separate.
 
-No score or Discord role grants GitHub permission. No local result proves model identity or predicts acceptance. Approval, merge, release, repository rules, access, and secrets remain attended human decisions.
+No score or Discord role grants GitHub permission. No local result proves model identity or predicts acceptance. Approval and merge require current-user or exact active standing authorization plus live repository enforcement; the local schedule has narrow review and exact-head integration scopes. Release, repository rules, access, and secrets remain attended human decisions.
 
 The main repository and the Discord Bot do not yet have the same CI and branch controls. Contributors should describe the controls that actually exist in each repository instead of borrowing guarantees from the other one.
 
