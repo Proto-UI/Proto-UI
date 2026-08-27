@@ -45,8 +45,8 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-button',
-        props: { disabled: true },
-        children: ['Disabled'],
+        props: { disabled: true, variant: 'surface' },
+        children: ['Disabled surface'],
       },
     ],
   },

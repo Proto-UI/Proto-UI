@@ -19,6 +19,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const READY_ROUTES = [
   '/en/ui-libraries/base/scroll-area/',
   '/en/ui-libraries/base/textarea/',
+  '/en/ui-libraries/brutalist/components/button/',
   '/en/ui-libraries/brutalist/components/switch/',
   '/en/ui-libraries/brutalist/components/tabs/',
   '/en/ui-libraries/shadcn/checkbox/',

@@ -89,6 +89,23 @@ implementations:
       - T-BRUTALIST-BUTTON-0001-CASE-8
     exercises:
       - P-BRUTALIST-BUTTON
+  - id: www-brutalist-button-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-BUTTON-0001-CASE-5
+      - T-BRUTALIST-BUTTON-0001-CASE-6
+      - T-BRUTALIST-BUTTON-0001-CASE-7
+      - T-BRUTALIST-BUTTON-0001-CASE-8
+    exercises:
+      - P-BASE-BUTTON
+      - P-BRUTALIST-BUTTON
+    notes:
+      - Exercises Web Components, React, and Vue in Chromium against exact square-border, hard-shadow, hover, press, focus-visible, and disabled projections.
+      - Compares in-memory screenshots across hover/press/settled and Light/Dark/Light frames while also asserting computed values, so an instant or stale visual projection cannot pass on metadata alone.
+      - Drives the mounted host theme API directly and proves both enabled and disabled theme-dependent surfaces repaint without a remount, media-query change, or pointer interaction, while the solid accent pair remains invariant.
 verifies:
   prototypes:
     - id: P-BRUTALIST-BUTTON
@@ -96,7 +113,17 @@ exercises:
   prototypes:
     - P-BASE-BUTTON
     - P-BRUTALIST-BUTTON
+sources:
+  - path: packages/prototypes/brutalist/test/button.test.ts
+  - path: packages/prototypes/brutalist/test/button-live-theme.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: >-
+      Added cross-runtime browser evidence for exact visual and interaction projections plus direct host-theme Light/Dark/Light repaint, including disabled surface repaint and in-memory multi-frame image comparisons.
+
+
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-
