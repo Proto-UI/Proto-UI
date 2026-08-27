@@ -20,7 +20,7 @@ export function createRuntimeTestPlan(rawArgs) {
       // provided; on high-core machines that minimum can exceed maxWorkers.
       args: [
         '--minWorkers=1',
-        '--maxWorkers=4',
+        '--maxWorkers=2',
         ...BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
       ],
     },

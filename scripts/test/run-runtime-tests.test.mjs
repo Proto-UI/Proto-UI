@@ -22,7 +22,7 @@ describe('runtime test plan', () => {
         needsServer: false,
         args: [
           '--minWorkers=1',
-          '--maxWorkers=4',
+          '--maxWorkers=2',
           ...BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
         ],
       },
