@@ -3,6 +3,7 @@
 // suites still carry their own and can migrate once their PRs land.
 
 import { spawn, type ChildProcess } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
@@ -24,6 +25,17 @@ let devServer: ChildProcess | null = null;
 let serverOutput = '';
 let styleGeneration: Promise<void> | null = null;
 
+function resolveCorepackCli(): string {
+  const nodeBin = path.dirname(process.execPath);
+  const suffix = ['node_modules', 'corepack', 'dist', 'corepack.js'];
+  const candidates = [path.join(nodeBin, ...suffix), path.resolve(nodeBin, '..', 'lib', ...suffix)];
+  const resolved = candidates.find((candidate) => existsSync(candidate));
+  if (resolved) return resolved;
+  throw new Error(
+    `Unable to locate Corepack for ${process.execPath}. Tried:\n${candidates.join('\n')}`
+  );
+}
+
 /**
  * Rebuild the CLI and regenerate the website style projection before Astro
  * starts. The long-lived server is still a direct Node child for reliable
@@ -32,13 +44,7 @@ let styleGeneration: Promise<void> | null = null;
 export async function generateProtoUiStyle(): Promise<void> {
   styleGeneration ??= new Promise<void>((resolve, reject) => {
     const appsWwwRoot = path.join(process.cwd(), 'apps', 'www');
-    const corepackCli = path.join(
-      path.dirname(process.execPath),
-      'node_modules',
-      'corepack',
-      'dist',
-      'corepack.js'
-    );
+    const corepackCli = resolveCorepackCli();
     const child = spawn(
       process.execPath,
       [corepackCli, 'pnpm@10.32.1', 'run', 'generate:proto-ui-style'],

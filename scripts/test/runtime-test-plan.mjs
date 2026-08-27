@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+
 export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
@@ -6,6 +9,21 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
 ]);
+
+export function corepackCliCandidates(nodeExecutable = process.execPath) {
+  const nodeBin = path.dirname(nodeExecutable);
+  const suffix = ['node_modules', 'corepack', 'dist', 'corepack.js'];
+  return [path.join(nodeBin, ...suffix), path.resolve(nodeBin, '..', 'lib', ...suffix)];
+}
+
+export function resolveCorepackCli(nodeExecutable = process.execPath, exists = existsSync) {
+  const candidates = corepackCliCandidates(nodeExecutable);
+  const resolved = candidates.find((candidate) => exists(candidate));
+  if (resolved) return resolved;
+  throw new Error(
+    `Unable to locate Corepack for ${nodeExecutable}. Tried:\n${candidates.join('\n')}`
+  );
+}
 
 export function createRuntimeTestPlan(rawArgs) {
   const args = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;

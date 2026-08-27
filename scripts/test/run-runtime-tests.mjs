@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { createRuntimeTestPlan, resolveCorepackCli } from './runtime-test-plan.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Astro dev compiles a route on first request, so a suite probing a cold route
@@ -76,13 +76,7 @@ async function waitForServer(url) {
 async function generateProtoUiStyle() {
   styleGeneration ??= new Promise((resolve, reject) => {
     const appsWwwRoot = path.join(root, 'apps', 'www');
-    const corepackCli = path.join(
-      path.dirname(process.execPath),
-      'node_modules',
-      'corepack',
-      'dist',
-      'corepack.js'
-    );
+    const corepackCli = resolveCorepackCli();
     const child = spawn(
       process.execPath,
       [corepackCli, 'pnpm@10.32.1', 'run', 'generate:proto-ui-style'],
