@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
@@ -135,6 +135,17 @@ test('self scores derive the full unsigned U0-C4 autonomous recommendation', () 
   assert.equal(high.capability.band, 'C4');
   assert.equal(high.capability.autonomousTaskCeiling, 'C4');
   assert.equal(high.capability.autonomousReviewCeiling, 'review-governance-and-release-evidence');
+  const selfResultSchema = JSON.parse(
+    readFileSync(
+      resolve(root, 'internal/agent-operations/schemas/capability-self-result.schema.json'),
+      'utf8'
+    )
+  );
+  assert(
+    selfResultSchema.properties.capability.properties.autonomousMutationCeiling.enum.includes(
+      high.capability.autonomousMutationCeiling
+    )
+  );
   assert(high.capability.recommendedReviewClasses.includes('review-facts-and-ci'));
   assert(high.capability.recommendedReviewClasses.includes('review-cross-domain-semantics'));
   assert.equal(high.modeEffects.advisoryInHumanAssistedMode, true);

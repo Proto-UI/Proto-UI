@@ -7,23 +7,48 @@
     "kind",
     "repositoryId",
     "pullRequest",
+    "pullRequestState",
+    "isDraft",
+    "baseRefName",
     "baseSha",
     "headSha",
     "pullRequestBody",
+    "changedFiles",
     "commits",
+    "reviews",
+    "comments",
     "replies",
     "threads",
     "checks",
     "externalEvidence"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 3 },
     "kind": { "const": "proto-ui.review-input" },
     "repositoryId": { "type": "string", "minLength": 4 },
     "pullRequest": { "type": "integer", "minimum": 1 },
+    "pullRequestState": { "enum": ["OPEN", "CLOSED", "MERGED"] },
+    "isDraft": { "type": "boolean" },
+    "baseRefName": { "type": "string", "minLength": 1 },
     "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
     "headSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
     "pullRequestBody": { "type": "string" },
+    "changedFiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "previousPath", "status"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "previousPath": { "type": ["string", "null"], "minLength": 1 },
+          "status": {
+            "enum": ["added", "removed", "modified", "renamed", "copied", "changed", "unchanged"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "commits": {
       "type": "array",
       "items": {
@@ -32,6 +57,39 @@
         "properties": {
           "sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
           "message": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "author", "state", "commitSha", "submittedAt", "body"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "author": { "type": "string", "minLength": 1 },
+          "state": { "type": "string", "minLength": 1 },
+          "commitSha": {
+            "type": ["string", "null"],
+            "pattern": "^[a-f0-9]{40,64}$"
+          },
+          "submittedAt": { "type": ["string", "null"], "format": "date-time" },
+          "body": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "comments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "author", "body", "updatedAt"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "author": { "type": "string", "minLength": 1 },
+          "body": { "type": "string" },
+          "updatedAt": { "type": "string", "format": "date-time" }
         },
         "additionalProperties": false
       }
@@ -68,13 +126,27 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "status", "conclusion", "completedAt", "detailsUrl"],
+        "required": [
+          "name",
+          "status",
+          "conclusion",
+          "completedAt",
+          "detailsUrl",
+          "source",
+          "repository",
+          "workflowName",
+          "workflowPath"
+        ],
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "status": { "type": "string", "minLength": 1 },
           "conclusion": { "type": ["string", "null"] },
           "completedAt": { "type": ["string", "null"], "format": "date-time" },
-          "detailsUrl": { "type": ["string", "null"], "minLength": 1 }
+          "detailsUrl": { "type": ["string", "null"], "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "repository": { "type": ["string", "null"], "minLength": 1 },
+          "workflowName": { "type": ["string", "null"], "minLength": 1 },
+          "workflowPath": { "type": ["string", "null"], "minLength": 1 }
         },
         "additionalProperties": false
       }
