@@ -18,15 +18,33 @@ const BUTTON_SELECTOR = '.host [data-pui-root]';
 const BUTTON_COUNT = 9;
 const VIEWPORT = { width: 1440, height: 900 } as const;
 const EVIDENCE_DIR = process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
-const ACCENT_PAIRS = [
-  { backgroundColor: 'rgb(254, 240, 138)', color: 'rgb(0, 0, 0)' },
-  { backgroundColor: 'rgb(167, 243, 208)', color: 'rgb(0, 0, 0)' },
-  { backgroundColor: 'rgb(221, 214, 254)', color: 'rgb(0, 0, 0)' },
-  { backgroundColor: 'rgb(254, 205, 211)', color: 'rgb(0, 0, 0)' },
-  { backgroundColor: 'rgb(186, 230, 253)', color: 'rgb(0, 0, 0)' },
+const ACCENT_TOKEN_PAIRS = [
+  { background: '--pui-main', foreground: '--pui-main-foreground' },
+  { background: '--pui-mint', foreground: '--pui-mint-foreground' },
+  { background: '--pui-lavender', foreground: '--pui-lavender-foreground' },
+  { background: '--pui-coral', foreground: '--pui-coral-foreground' },
+  { background: '--pui-sky', foreground: '--pui-sky-foreground' },
 ] as const;
+const SURFACE_TOKEN_PAIR = {
+  background: '--pui-secondary-background',
+  foreground: '--pui-foreground',
+} as const;
+const DESTRUCTIVE_TOKEN_PAIR = {
+  background: '--pui-destructive',
+  foreground: '--pui-destructive-foreground',
+} as const;
 
 type HostTheme = 'light' | 'dark';
+
+type ThemeTokenPair = Readonly<{
+  background: `--pui-${string}`;
+  foreground: `--pui-${string}`;
+}>;
+
+type ColorPair = Readonly<{
+  backgroundColor: string;
+  color: string;
+}>;
 
 type ButtonStyle = Readonly<{
   backgroundColor: string;
@@ -79,6 +97,58 @@ async function styleOf(button: Locator): Promise<ButtonStyle> {
       transform: style.transform,
     };
   });
+}
+
+function colorPairOf(style: ButtonStyle): ColorPair {
+  return { backgroundColor: style.backgroundColor, color: style.color };
+}
+
+function geometryOf(style: ButtonStyle) {
+  return {
+    borderColor: style.borderColor,
+    borderRadius: style.borderRadius,
+    borderStyle: style.borderStyle,
+    borderWidth: style.borderWidth,
+    boxShadow: style.boxShadow,
+    transform: style.transform,
+  };
+}
+
+async function resolvedTokenPairs(
+  page: Page,
+  tokenPairs: readonly ThemeTokenPair[]
+): Promise<ColorPair[]> {
+  return page.evaluate((pairs) => {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const probe = document.createElement('span');
+    probe.style.position = 'fixed';
+    probe.style.pointerEvents = 'none';
+    probe.style.visibility = 'hidden';
+    document.body.append(probe);
+
+    try {
+      return pairs.map(({ background, foreground }) => {
+        if (!rootStyle.getPropertyValue(background).trim()) {
+          throw new Error(`Theme token ${background} is unavailable.`);
+        }
+        if (!rootStyle.getPropertyValue(foreground).trim()) {
+          throw new Error(`Theme token ${foreground} is unavailable.`);
+        }
+        probe.style.setProperty('background-color', `var(${background})`, 'important');
+        probe.style.setProperty('color', `var(${foreground})`, 'important');
+        const style = getComputedStyle(probe);
+        return { backgroundColor: style.backgroundColor, color: style.color };
+      });
+    } finally {
+      probe.remove();
+    }
+  }, tokenPairs);
+}
+
+async function resolvedTokenPair(page: Page, tokenPair: ThemeTokenPair): Promise<ColorPair> {
+  const [resolved] = await resolvedTokenPairs(page, [tokenPair]);
+  if (!resolved) throw new Error('Expected one resolved theme token pair.');
+  return resolved;
 }
 
 async function captureFrame(locator: Locator, runtime: string, frame: string): Promise<Buffer> {
@@ -146,9 +216,11 @@ describe.sequential('Brutalist Button browser regressions', () => {
         };
         const solid = buttons.nth(0);
         const surface = buttons.nth(5);
+        const destructive = buttons.nth(6);
         const disabledSurface = buttons.nth(8);
         const interactionFrame = previewer.locator('.host');
         expect(await surface.textContent()).toContain('Surface');
+        expect(await destructive.textContent()).toContain('Destructive');
         expect(await disabledSurface.textContent()).toContain('Disabled');
 
         const resting = await styleOf(solid);
@@ -198,16 +270,18 @@ describe.sequential('Brutalist Button browser regressions', () => {
         expect(disabledLight.pointerEvents).toBe('none');
 
         const accentsLight = await Promise.all(
-          ACCENT_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+          ACCENT_TOKEN_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
         );
         const surfaceLight = await styleOf(surface);
-        expect(
-          accentsLight.map(({ backgroundColor, color }) => ({ backgroundColor, color }))
-        ).toEqual(ACCENT_PAIRS);
-        expect(surfaceLight.backgroundColor).toBe('rgb(255, 255, 255)');
-        expect(surfaceLight.color).toBe('rgb(23, 23, 23)');
-        expect(disabledLight.backgroundColor).toBe(surfaceLight.backgroundColor);
-        expect(disabledLight.color).toBe(surfaceLight.color);
+        const destructiveLight = await styleOf(destructive);
+        const expectedAccentsLight = await resolvedTokenPairs(page, ACCENT_TOKEN_PAIRS);
+        const expectedSurfaceLight = await resolvedTokenPair(page, SURFACE_TOKEN_PAIR);
+        const expectedDestructiveLight = await resolvedTokenPair(page, DESTRUCTIVE_TOKEN_PAIR);
+        expect(accentsLight.map(colorPairOf)).toEqual(expectedAccentsLight);
+        expect(colorPairOf(surfaceLight)).toEqual(expectedSurfaceLight);
+        expect(colorPairOf(destructiveLight)).toEqual(expectedDestructiveLight);
+        expect(colorPairOf(disabledLight)).toEqual(expectedSurfaceLight);
+        expect(geometryOf(disabledLight)).toEqual(geometryOf(surfaceLight));
         const lightFrame = await captureFrame(previewer.locator('.host'), runtime, 'light');
 
         // Drive the host API directly: this is a live host-theme transition,
@@ -215,30 +289,35 @@ describe.sequential('Brutalist Button browser regressions', () => {
         await setHostTheme(page, 'dark');
         await assertOriginalButtons(`${runtime}/dark identity`);
         const accentsDark = await Promise.all(
-          ACCENT_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+          ACCENT_TOKEN_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
         );
         const surfaceDark = await styleOf(surface);
+        const destructiveDark = await styleOf(destructive);
         const disabledDark = await styleOf(disabledSurface);
-        expect(
-          accentsDark.map(({ backgroundColor, color }) => ({ backgroundColor, color }))
-        ).toEqual(ACCENT_PAIRS);
-        expect(surfaceDark.backgroundColor).toBe('rgb(38, 38, 38)');
-        expect(surfaceDark.color).toBe('rgb(245, 245, 245)');
-        expect(disabledDark.backgroundColor).toBe(surfaceDark.backgroundColor);
-        expect(disabledDark.color).toBe(surfaceDark.color);
+        const expectedAccentsDark = await resolvedTokenPairs(page, ACCENT_TOKEN_PAIRS);
+        const expectedSurfaceDark = await resolvedTokenPair(page, SURFACE_TOKEN_PAIR);
+        const expectedDestructiveDark = await resolvedTokenPair(page, DESTRUCTIVE_TOKEN_PAIR);
+        expect(accentsDark.map(colorPairOf)).toEqual(expectedAccentsDark);
+        expect(accentsDark.map(colorPairOf)).toEqual(accentsLight.map(colorPairOf));
+        expect(colorPairOf(surfaceDark)).toEqual(expectedSurfaceDark);
+        expect(colorPairOf(surfaceDark)).not.toEqual(colorPairOf(surfaceLight));
+        expect(colorPairOf(destructiveDark)).toEqual(expectedDestructiveDark);
+        expect(colorPairOf(disabledDark)).toEqual(expectedSurfaceDark);
+        expect(geometryOf(disabledDark)).toEqual(geometryOf(surfaceDark));
         const darkFrame = await captureFrame(previewer.locator('.host'), runtime, 'dark');
         expect(darkFrame.equals(lightFrame)).toBe(false);
 
         await setHostTheme(page, 'light');
         await assertOriginalButtons(`${runtime}/restored-light identity`);
         const accentsRestored = await Promise.all(
-          ACCENT_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+          ACCENT_TOKEN_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
         );
         expect(accentsRestored).toEqual(accentsLight);
         expect(await styleOf(surface)).toMatchObject({
           backgroundColor: surfaceLight.backgroundColor,
           color: surfaceLight.color,
         });
+        expect(colorPairOf(await styleOf(destructive))).toEqual(colorPairOf(destructiveLight));
         expect(await styleOf(disabledSurface)).toMatchObject({
           backgroundColor: disabledLight.backgroundColor,
           color: disabledLight.color,
