@@ -104,8 +104,8 @@ implementations:
       - P-BRUTALIST-BUTTON
     notes:
       - Exercises Web Components, React, and Vue in Chromium against exact square-border, hard-shadow, hover, press, focus-visible, and disabled projections.
-      - Compares in-memory screenshots across hover/press/settled and Light/Dark/Light frames while also asserting computed values, so an instant or stale visual projection cannot pass on metadata alone.
-      - Drives the mounted host theme API directly and proves both enabled and disabled theme-dependent surfaces repaint without a remount, media-query change, or pointer interaction, while the solid accent pair remains invariant.
+      - Compares a fixed host-region screenshot across hover/press/settled and Light/Dark/Light frames while also asserting computed values, so element-crop movement, an instant projection, or stale presentation cannot pass on metadata alone.
+      - Retains handles for all nine mounted Buttons across both host-theme transitions, checks every solid accent background/foreground pair, and proves enabled and disabled theme-dependent surfaces repaint without a remount, media-query change, or pointer interaction.
 verifies:
   prototypes:
     - id: P-BRUTALIST-BUTTON

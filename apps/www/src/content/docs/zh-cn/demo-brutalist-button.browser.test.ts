@@ -18,6 +18,13 @@ const BUTTON_SELECTOR = '.host [data-pui-root]';
 const BUTTON_COUNT = 9;
 const VIEWPORT = { width: 1440, height: 900 } as const;
 const EVIDENCE_DIR = process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
+const ACCENT_PAIRS = [
+  { backgroundColor: 'rgb(254, 240, 138)', color: 'rgb(0, 0, 0)' },
+  { backgroundColor: 'rgb(167, 243, 208)', color: 'rgb(0, 0, 0)' },
+  { backgroundColor: 'rgb(221, 214, 254)', color: 'rgb(0, 0, 0)' },
+  { backgroundColor: 'rgb(254, 205, 211)', color: 'rgb(0, 0, 0)' },
+  { backgroundColor: 'rgb(186, 230, 253)', color: 'rgb(0, 0, 0)' },
+] as const;
 
 type HostTheme = 'light' | 'dark';
 
@@ -127,9 +134,20 @@ describe.sequential('Brutalist Button browser regressions', () => {
 
         const buttons = previewer.locator(BUTTON_SELECTOR);
         await expect(buttons.count()).resolves.toBe(BUTTON_COUNT);
+        const originalButtons = await buttons.elementHandles();
+        expect(originalButtons).toHaveLength(BUTTON_COUNT);
+        const assertOriginalButtons = async (phase: string): Promise<void> => {
+          const identities = await Promise.all(
+            originalButtons.map((original, index) =>
+              buttons.nth(index).evaluate((current, initial) => current === initial, original)
+            )
+          );
+          expect(identities, phase).toEqual(Array(BUTTON_COUNT).fill(true));
+        };
         const solid = buttons.nth(0);
         const surface = buttons.nth(5);
         const disabledSurface = buttons.nth(8);
+        const interactionFrame = previewer.locator('.host');
         expect(await surface.textContent()).toContain('Surface');
         expect(await disabledSurface.textContent()).toContain('Disabled');
 
@@ -149,7 +167,7 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const hovered = await styleOf(solid);
         expect(hovered.boxShadow).toMatch(/(?:^|, )rgb\(0, 0, 0\) 4px 4px 0px 0px$/);
         expect(hovered.transform).toBe('matrix(1, 0, 0, 1, -1, -1)');
-        const hoveredFrame = await captureFrame(solid, runtime, 'hovered');
+        const hoveredFrame = await captureFrame(interactionFrame, runtime, 'hovered');
 
         const bounds = await solid.boundingBox();
         expect(bounds).not.toBeNull();
@@ -159,12 +177,12 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const pressed = await styleOf(solid);
         expect(pressed.boxShadow).toMatch(/^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/);
         expect(pressed.transform).toBe('matrix(1, 0, 0, 1, 1, 1)');
-        const pressedFrame = await captureFrame(solid, runtime, 'pressed');
+        const pressedFrame = await captureFrame(interactionFrame, runtime, 'pressed');
         expect(pressedFrame.equals(hoveredFrame)).toBe(false);
 
         await page.mouse.up();
         await waitForState(page, 0, 'data-pressed', false);
-        const settledFrame = await captureFrame(solid, runtime, 'settled');
+        const settledFrame = await captureFrame(interactionFrame, runtime, 'settled');
         expect(settledFrame.equals(hoveredFrame)).toBe(true);
 
         await previewer.locator('select.adapter-select').focus();
@@ -179,10 +197,13 @@ describe.sequential('Brutalist Button browser regressions', () => {
         expect(disabledLight.opacity).toBe('0.5');
         expect(disabledLight.pointerEvents).toBe('none');
 
-        const solidLight = await styleOf(solid);
+        const accentsLight = await Promise.all(
+          ACCENT_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+        );
         const surfaceLight = await styleOf(surface);
-        expect(solidLight.backgroundColor).toBe('rgb(254, 240, 138)');
-        expect(solidLight.color).toBe('rgb(0, 0, 0)');
+        expect(
+          accentsLight.map(({ backgroundColor, color }) => ({ backgroundColor, color }))
+        ).toEqual(ACCENT_PAIRS);
         expect(surfaceLight.backgroundColor).toBe('rgb(255, 255, 255)');
         expect(surfaceLight.color).toBe('rgb(23, 23, 23)');
         expect(disabledLight.backgroundColor).toBe(surfaceLight.backgroundColor);
@@ -192,11 +213,15 @@ describe.sequential('Brutalist Button browser regressions', () => {
         // Drive the host API directly: this is a live host-theme transition,
         // not a colorScheme prop, media query, remount, or pointer refresh.
         await setHostTheme(page, 'dark');
-        const solidDark = await styleOf(solid);
+        await assertOriginalButtons(`${runtime}/dark identity`);
+        const accentsDark = await Promise.all(
+          ACCENT_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+        );
         const surfaceDark = await styleOf(surface);
         const disabledDark = await styleOf(disabledSurface);
-        expect(solidDark.backgroundColor).toBe(solidLight.backgroundColor);
-        expect(solidDark.color).toBe(solidLight.color);
+        expect(
+          accentsDark.map(({ backgroundColor, color }) => ({ backgroundColor, color }))
+        ).toEqual(ACCENT_PAIRS);
         expect(surfaceDark.backgroundColor).toBe('rgb(38, 38, 38)');
         expect(surfaceDark.color).toBe('rgb(245, 245, 245)');
         expect(disabledDark.backgroundColor).toBe(surfaceDark.backgroundColor);
@@ -205,6 +230,11 @@ describe.sequential('Brutalist Button browser regressions', () => {
         expect(darkFrame.equals(lightFrame)).toBe(false);
 
         await setHostTheme(page, 'light');
+        await assertOriginalButtons(`${runtime}/restored-light identity`);
+        const accentsRestored = await Promise.all(
+          ACCENT_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+        );
+        expect(accentsRestored).toEqual(accentsLight);
         expect(await styleOf(surface)).toMatchObject({
           backgroundColor: surfaceLight.backgroundColor,
           color: surfaceLight.color,
