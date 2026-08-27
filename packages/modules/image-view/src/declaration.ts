@@ -8,6 +8,7 @@ import {
 export type ImageViewDeclaration = Readonly<{
   source: string;
   alternativeText: string;
+  a11yMode: 'informative' | 'decorative';
   fit: 'contain' | 'cover' | 'fill';
 }>;
 

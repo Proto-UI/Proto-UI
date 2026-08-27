@@ -1,47 +1,88 @@
-import { createModule, defineModule, ModuleBase } from '@proto.ui/module-base';
-import type { ModuleFactoryArgs } from '@proto.ui/module-base';
-import type { ImageViewPatch, ImageViewSnapshot, ImageViewStatus, ImageViewStatusChange, Unsubscribe } from '@proto.ui/core';
+import type {
+  ImageViewA11yMode,
+  ImageViewFit,
+  ImageViewHandle,
+  ImageViewPatch,
+  ImageViewSnapshot,
+  ImageViewStatus,
+  ImageViewStatusChange,
+  MountPhase,
+  PrototypeModuleDeclaration,
+  RunHandle,
+} from '@proto.ui/core';
 import { getModuleDeclaration } from '@proto.ui/core';
-import { IMAGE_VIEW_HOST_CAP, IMAGE_VIEW_RUN_IN_CALLBACK_CAP, type ImageViewHost, type ImageViewHostLease } from './caps';
-import { IMAGE_VIEW_DECLARATION } from './declaration';
-import type { ImageViewFacade, ImageViewModule, ImageViewPort } from './types';
+import {
+  createModule,
+  defineModule,
+  ModuleBase,
+  type ModuleFactoryArgs,
+} from '@proto.ui/module-base';
 import type { PropsBaseType } from '@proto.ui/types';
+import {
+  IMAGE_VIEW_HOST_CAP,
+  IMAGE_VIEW_RUN_IN_CALLBACK_CAP,
+  type ImageViewHost,
+  type ImageViewHostCompletion,
+  type ImageViewHostLease,
+} from './caps';
+import { IMAGE_VIEW_DECLARATION, type ImageViewDeclaration } from './declaration';
+import type { ImageViewFacade, ImageViewModule, ImageViewPort } from './types';
 
 const EMPTY_PATCH: ImageViewPatch = Object.freeze({});
 
 type Listener = {
-  callback: (event: ImageViewStatusChange) => void;
+  callback: (run: RunHandle<PropsBaseType>, event: ImageViewStatusChange) => void;
 };
 
 export class ImageViewModuleImpl extends ModuleBase {
   private readonly prototypeName: string;
-  private readonly supported: boolean;
+  private readonly declaration: ImageViewDeclaration | null;
   private declared = false;
   private initialized = false;
+  private requestedSource = '';
   private source = '';
   private alternativeText = '';
-  private fit: 'contain' | 'cover' | 'fill' = 'contain';
+  private a11yMode: ImageViewA11yMode = 'informative';
+  private fit: ImageViewFit = 'contain';
   private loadingStatus: ImageViewStatus = 'idle';
   private generation = 0;
   private patch: ImageViewPatch = EMPTY_PATCH;
   private listeners: Listener[] = [];
   private host: ImageViewHost | null = null;
   private lease: ImageViewHostLease | null = null;
+  private attachmentEpoch = 0;
+  private lastHostedGeneration: number | null = null;
+  private lastDiagnostic = '';
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
     prototypeName: string,
-    declarations: readonly import('@proto.ui/core').PrototypeModuleDeclaration[]
+    declarations: readonly PrototypeModuleDeclaration[]
   ) {
     super(caps);
     this.prototypeName = prototypeName;
-    this.supported = declarations.some(
-      (d) => d.token === IMAGE_VIEW_DECLARATION
-    );
+    this.declaration =
+      getModuleDeclaration({ modules: declarations }, IMAGE_VIEW_DECLARATION)?.config ?? null;
+    if (this.declaration) {
+      this.requestedSource = this.declaration.source;
+      this.alternativeText = this.declaration.alternativeText;
+      this.a11yMode = this.declaration.a11yMode;
+      this.fit = this.declaration.fit;
+      this.source = this.validatedSource();
+      this.refreshHost();
+    }
   }
 
-  declare<P extends PropsBaseType>(): import('@proto.ui/core').ImageViewHandle<P> {
-    if (!this.supported) throw new Error('[ImageView] module not declared for this prototype');
+  declare<P extends PropsBaseType>(): ImageViewHandle<P> {
+    this.sys.ensureSetup('imageView.declare');
+    if (!this.declaration) {
+      throw new Error(
+        `[ImageView] ${this.prototypeName} requires a static image-view declaration.`
+      );
+    }
+    if (this.declared) {
+      throw new Error(`[ImageView] ${this.prototypeName} may declare one image view.`);
+    }
     this.declared = true;
     return {
       on: (type, callback) => this.on(type, callback),
@@ -50,48 +91,66 @@ export class ImageViewModuleImpl extends ModuleBase {
     };
   }
 
-  private on(type: 'loadingStatusChange', callback: (event: ImageViewStatusChange) => void): Unsubscribe {
-    const listener: Listener = { callback };
-    this.listeners.push(listener);
+  private on<P extends PropsBaseType>(
+    type: 'loadingStatusChange',
+    callback: (run: RunHandle<P>, event: ImageViewStatusChange) => void
+  ): () => void {
+    this.sys.ensureSetup('imageView.on');
+    const listener: Listener = {
+      callback: callback as (run: RunHandle<PropsBaseType>, event: ImageViewStatusChange) => void,
+    };
+    this.listeners = this.listeners.concat(listener);
     return () => {
-      const idx = this.listeners.indexOf(listener);
-      if (idx >= 0) this.listeners.splice(idx, 1);
+      this.listeners = this.listeners.filter((candidate) => candidate !== listener);
     };
   }
 
   private sync(next: ImageViewPatch): void {
     this.sys.ensureCallback('imageView.sync');
-    let firstSource = false;
+    const { loadingStatus: _moduleOwnedStatus, ...portableNext } = next;
+    this.patch = Object.freeze({ ...this.patch, ...portableNext });
+
     if (!this.initialized) {
-      this.alternativeText = next.alternativeText ?? '';
-      this.fit = next.fit ?? 'contain';
+      this.requestedSource = portableNext.source ?? this.requestedSource;
+      this.alternativeText = portableNext.alternativeText ?? this.alternativeText;
+      this.a11yMode = portableNext.a11yMode ?? this.a11yMode;
+      this.fit = portableNext.fit ?? this.fit;
       this.initialized = true;
-      firstSource = true;
+    } else {
+      if (typeof portableNext.source === 'string') this.requestedSource = portableNext.source;
+      if (typeof portableNext.alternativeText === 'string') {
+        this.alternativeText = portableNext.alternativeText;
+      }
+      if (portableNext.a11yMode) this.a11yMode = portableNext.a11yMode;
+      if (portableNext.fit) this.fit = portableNext.fit;
     }
-    const sourceChanged = firstSource ? (!!next.source) : (typeof next.source === 'string' && next.source !== this.source);
-    this.patch = Object.freeze({ ...this.patch, ...next });
-    if (typeof next.source === 'string') this.source = next.source;
-    if (typeof next.alternativeText === 'string') this.alternativeText = next.alternativeText;
-    if (typeof next.fit === 'string') this.fit = next.fit;
-    if (sourceChanged) {
-      this.generation++;
-      this.loadingStatus = 'loading';
+
+    const source = this.validatedSource();
+    if (source !== this.source) {
+      this.source = source;
+      this.generation += 1;
+      this.transition(source ? 'loading' : 'idle');
     }
     this.syncLease();
   }
 
   snapshot(): ImageViewSnapshot | null {
     return this.declared
-      ? Object.freeze({ source: this.source, loadingStatus: this.loadingStatus, fit: this.fit })
+      ? Object.freeze({
+          source: this.source,
+          loadingStatus: this.loadingStatus,
+          fit: this.fit,
+        })
       : null;
   }
 
   protected override onCapsEpoch(): void {
+    this.disposeLease();
     this.refreshHost();
     this.attachLease();
   }
 
-  override onMountPhase(phase: import('@proto.ui/core').MountPhase, epoch: number): void {
+  override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
     if (phase === 'mounted') {
       this.refreshHost();
@@ -104,6 +163,7 @@ export class ImageViewModuleImpl extends ModuleBase {
   dispose(): void {
     this.disposeLease();
     this.listeners = [];
+    this.declared = false;
   }
 
   private refreshHost(): void {
@@ -111,15 +171,42 @@ export class ImageViewModuleImpl extends ModuleBase {
   }
 
   private attachLease(): void {
-    if (!this.host || !this.declared) return;
-    if (this.lease) { this.lease.dispose(); this.lease = null; }
-    this.lease = this.host.attach({
-      patch: this.effectivePatch(),
-      onStatusChange: (change) => this.receive(change),
+    this.disposeLease();
+    if (!this.host || !this.declared || this.mountPhase !== 'mounted') return;
+
+    if (this.source && this.lastHostedGeneration === this.generation) {
+      this.generation += 1;
+      this.transition('loading');
+    }
+
+    const host = this.host;
+    const generation = this.generation;
+    const attachmentEpoch = ++this.attachmentEpoch;
+    const initialPatch = this.effectivePatch();
+    this.lastHostedGeneration = generation;
+    const lease = host.attach({
+      generation,
+      patch: initialPatch,
+      onStatusChange: (change) => this.receive(change, attachmentEpoch),
     });
+
+    if (
+      attachmentEpoch !== this.attachmentEpoch ||
+      this.host !== host ||
+      this.mountPhase !== 'mounted'
+    ) {
+      lease.dispose();
+      return;
+    }
+
+    this.lease = lease;
+    if (generation !== this.generation || initialPatch.loadingStatus !== this.loadingStatus) {
+      this.syncLease();
+    }
   }
 
   private disposeLease(): void {
+    this.attachmentEpoch += 1;
     this.lease?.dispose();
     this.lease = null;
   }
@@ -128,32 +215,72 @@ export class ImageViewModuleImpl extends ModuleBase {
     return Object.freeze({
       ...this.patch,
       source: this.source,
-      alternativeText: this.alternativeText,
+      alternativeText: this.a11yMode === 'decorative' ? '' : this.alternativeText,
+      a11yMode: this.a11yMode,
       fit: this.fit,
       loadingStatus: this.loadingStatus,
     });
   }
 
   private syncLease(): void {
-    this.lease?.update(this.effectivePatch());
+    if (!this.lease) return;
+    this.lastHostedGeneration = this.generation;
+    this.lease.update({
+      generation: this.generation,
+      patch: this.effectivePatch(),
+    });
   }
 
-  private receive(change: ImageViewStatusChange): void {
-    // Only accept status from current generation
-    if (change.source !== this.source) return;
-    // Reject if already terminal for this generation
+  private receive(change: ImageViewHostCompletion, attachmentEpoch: number): void {
+    if (attachmentEpoch !== this.attachmentEpoch) return;
+    if (change.generation !== this.generation) return;
+    if (!this.source) return;
     if (this.loadingStatus === 'loaded' || this.loadingStatus === 'error') return;
-    const previousStatus = this.loadingStatus;
-    this.loadingStatus = change.status;
+    this.transition(change.status);
+    this.syncLease();
+  }
+
+  private transition(status: ImageViewStatus): void {
+    if (status === this.loadingStatus) return;
+    const event: ImageViewStatusChange = Object.freeze({
+      source: this.source,
+      previousStatus: this.loadingStatus,
+      status,
+    });
+    this.loadingStatus = status;
+
     const runInCallback = this.caps.has(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)
       ? this.caps.get(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)
       : (callback: () => void) => callback();
     runInCallback(() => {
-      for (const listener of this.listeners) {
-        listener.callback({ ...change, previousStatus });
-      }
+      const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
+      if (!run) return;
+      for (const listener of [...this.listeners]) listener.callback(run, event);
     });
-    this.syncLease();
+  }
+
+  private validatedSource(): string {
+    if (!this.requestedSource) {
+      this.lastDiagnostic = '';
+      return '';
+    }
+    const hasAlternative = this.alternativeText.trim().length > 0;
+    const valid =
+      (this.a11yMode === 'informative' && hasAlternative) ||
+      (this.a11yMode === 'decorative' && !hasAlternative);
+    if (valid) {
+      this.lastDiagnostic = '';
+      return this.requestedSource;
+    }
+
+    const diagnostic = `${this.a11yMode}:${this.requestedSource}:${this.alternativeText}`;
+    if (diagnostic !== this.lastDiagnostic) {
+      this.lastDiagnostic = diagnostic;
+      console.warn(
+        `[ImageView] ${this.prototypeName} rejected contradictory or missing accessibility input; source failed closed to idle.`
+      );
+    }
+    return '';
   }
 }
 

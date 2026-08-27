@@ -1,8 +1,13 @@
-import type { ModuleInstance, ModulePort } from '@proto.ui/core';
-import type { ImageViewPatch, ImageViewSnapshot, ImageViewHandle, ImageViewStatus, ImageViewStatusChange } from '@proto.ui/core';
+import type {
+  ImageViewHandle,
+  ImageViewSnapshot,
+  ModuleInstance,
+  ModulePort,
+} from '@proto.ui/core';
+import type { PropsBaseType } from '@proto.ui/types';
 
 export type ImageViewFacade = {
-  declare<P = unknown>(): ImageViewHandle<P>;
+  declare<P extends PropsBaseType = PropsBaseType>(): ImageViewHandle<P>;
 };
 
 export type ImageViewPort = ModulePort & {

@@ -42,6 +42,7 @@ npm install @proto.ui/runtime@0.3.0-alpha.0
 - `@proto.ui/module-feedback`
 - `@proto.ui/module-focus`
 - `@proto.ui/module-hit-participation`
+- `@proto.ui/module-image-view`
 - `@proto.ui/module-overlay`
 - `@proto.ui/module-positioning`
 - `@proto.ui/module-presence`

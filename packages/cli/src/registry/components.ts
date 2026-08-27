@@ -780,7 +780,6 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   ]),
 
   'base-separator': base('base-separator', 'Base Separator', 'separatorRoot', 'BaseSeparatorRoot'),
-  'base-image': base('base-image', 'Base Image', 'imageRoot', 'BaseImageRoot'),
   'base-live-region': base(
     'base-live-region',
     'Base Live Region',

@@ -34,6 +34,7 @@
     "@proto.ui/module-feedback",
     "@proto.ui/module-focus",
     "@proto.ui/module-hit-participation",
+    "@proto.ui/module-image-view",
     "@proto.ui/module-overlay",
     "@proto.ui/module-positioning",
     "@proto.ui/module-presence",

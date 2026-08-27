@@ -2,13 +2,17 @@ id: C-IMAGE-VIEW-0001
 type: contract
 title: Image View projects one host-owned image presentation target
 status: draft
-since: 0.2.0
+since: 0.3.0-alpha.0
 summary: Image View binds one semantically declared host-owned image presentation target to stable source ownership, portable property patches, generation-bound lease lifecycle, and normalized loading status transitions.
 statement:
   zh-CN: >-
     Image View 必须通过 prototype 的静态 declaration 在首次 render 前声明 plain image presentation requirement（opaque URI source），由 adapter 选择物理 image target，并通过 portable patch、loadingStatus fact 与 loadingStatusChange transition 投影 image presentation 协议。source 变更必须创建新 generation 与 loading 状态；replacement、detach/rematerialize、dispose 必须使旧 generation 的 lease terminal。旧 generation 的 stale completion 不得改变当前 state 或发出 outward signal。
+
+
   en: >-
     Image View must declare a plain image presentation requirement (opaque URI source) before first render, let the adapter select the physical image target, and project the image presentation protocol through portable patches, loadingStatus facts, and loadingStatusChange transitions. A source change must create a new generation and loading state; replacement, detach/rematerialize, and disposal must make the old generation's lease terminal. A stale completion from an old generation must not change the current state or emit an outward signal.
+
+
 criteria:
   - id: C-IMAGE-VIEW-0001-A
     text:
@@ -16,22 +20,26 @@ criteria:
       en: A static declaration must express only the plain image presentation requirement (opaque URI source); the adapter selects the physical image target before first render.
   - id: C-IMAGE-VIEW-0001-B
     text:
-      zh-CN: Portable patch 必须投影 source、alternativeText、fit (contain|cover|fill) 与 loadingStatus；source 变更不得重置已加载的 uncontrolled alternativeText 或 fit，除非显式 patch。
-      en: The portable patch must project source, alternativeText, fit (contain|cover|fill), and loadingStatus; a source change must not reset an already-loaded uncontrolled alternativeText or fit unless explicitly patched.
+      zh-CN: Portable patch 必须投影 source、a11yMode、alternativeText、fit (contain|cover|fill) 与 module-owned loadingStatus；source 变更不得重置 alternativeText、a11yMode 或 fit，除非显式 patch。
+      en: The portable patch must project source, a11yMode, alternativeText, fit (contain|cover|fill), and module-owned loadingStatus; a source change must not reset alternativeText, a11yMode, or fit unless explicitly patched.
   - id: C-IMAGE-VIEW-0001-C
     text:
       zh-CN: a11y 采用显式二分输入：informative 必须有 non-empty alternativeText；decorative 明确排除语义内容。矛盾/缺失输入属于 authoring diagnostic 并 fail closed，不由 adapter 猜测。
       en: >-
         A11y uses explicit binary input: informative requires non-empty alternativeText; decorative explicitly excludes semantic content. Contradictory or missing input is an authoring diagnostic and fails closed; the adapter must not guess.
+
+
   - id: C-IMAGE-VIEW-0001-D
     text:
-      zh-CN: 首次同步确定 controlled 或 uncontrolled ownership 后，该模式必须保持稳定；controlled source 变更只构成 proposal，并在 callback boundary 后恢复 owner source。
-      en: The first synchronization must establish stable controlled or uncontrolled ownership; a controlled source change is only a proposal, and the owner source must be restored after the callback boundary.
+      zh-CN: Base Image 首次同步必须确定 controlled 或 uncontrolled source ownership 并保持稳定；controlled 模式跟随 source，uncontrolled 模式只捕获首次 defaultSource，Host 不拥有 source mutation channel。
+      en: Base Image's first synchronization must establish stable controlled or uncontrolled source ownership; controlled mode follows source, uncontrolled mode captures only the initial defaultSource, and the Host owns no source mutation channel.
   - id: C-IMAGE-VIEW-0001-E
     text:
-      zh-CN: Generation-bound lease：新 source 必须先建立新 generation 与 loading 状态，再启动 host work；replacement、detach/rematerialize、physical-target replacement、dispose 必须使旧 lease/generation terminal。旧 completion 不得再改当前 state 或发 outward signal；当前 generation 的 terminal completion 最多接受一次。
+      zh-CN: Generation-bound lease：新 source 必须先建立新 generation 与 loading 状态，再启动 host work；每次 host update 与 completion 必须携带不可变 generation identity。replacement、detach/rematerialize、physical-target replacement、dispose 必须使旧 lease/generation terminal。旧 completion 不得再改当前 state 或发 outward signal；当前 generation 的 terminal completion 最多接受一次。
       en: >-
-        Generation-bound lease: a new source must first establish a new generation and loading state before starting host work; replacement, detach/rematerialize, physical-target replacement, and disposal must make the old lease/generation terminal. A stale completion from an old generation must not change the current state or emit an outward signal; the current generation's terminal completion is accepted at most once.
+        Generation-bound lease: a new source must first establish a new generation and loading state before starting host work; every host update and completion must carry an immutable generation identity. Replacement, detach/rematerialize, physical-target replacement, and disposal must make the old lease/generation terminal. A stale completion from an old generation must not change the current state or emit an outward signal; the current generation's terminal completion is accepted at most once.
+
+
   - id: C-IMAGE-VIEW-0001-F
     text:
       zh-CN: loadingStatus (idle|loading|loaded|error) 与 loadingStatusChange transition 是唯一的状态/transition surface。进入 loaded 或 error 是 terminal evidence。v0 不公开同义的 load/error 事件。
@@ -45,7 +53,7 @@ criteria:
       zh-CN: Target listener 与 host reference 必须受 generation lease 约束并在 detach/dispose 时撤销；旧 generation 的事件必须在 lease boundary 内停止传播。
       en: Target listeners and host references must be bounded by the generation lease and revoked on detach or disposal; events from an old generation must stop at the lease boundary.
 sources:
-  - path: packages/modules/image-view/src/impl.ts
+  - path: packages/modules/image-view/src/create.ts
   - path: packages/prototypes/base/src/image/root.proto.ts
 dependsOn:
   decisions:
@@ -55,10 +63,12 @@ dependsOn:
     - C-MODULE-DECLARATION-0001
     - C-AS-HOOK-0001
 revisions:
-  - version: 0.2.0
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: >-
       Introduced the focused Image View host boundary for one host-owned image presentation target with generation-bound lease, loadingStatus/transition surfaces, and explicit a11y binary input.
+
+
 tags:
   - image
   - host-translation

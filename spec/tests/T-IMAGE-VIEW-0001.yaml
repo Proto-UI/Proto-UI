@@ -2,7 +2,7 @@ id: T-IMAGE-VIEW-0001
 type: test
 title: Image View declaration, module, and fake-host contract tests
 status: draft
-since: 0.2.0
+since: 0.3.0-alpha.0
 summary: Covers host-neutral image presentation requirements, portable property projection, a11y binary input, generation-bound lease lifecycle, loading status transitions, stale completion rejection, replacement visual clearing, and lease cleanup.
 cases:
   - id: T-IMAGE-VIEW-0001-CASE-DECLARATION
@@ -11,7 +11,7 @@ cases:
       - C-IMAGE-VIEW-0001-A
     expectation: semantic-image-requirement-resolves-to-one-host-target-before-render
   - id: T-IMAGE-VIEW-0001-CASE-PROPERTIES
-    title: Portable patches project source, alternativeText, fit, and loadingStatus
+    title: Portable patches project source, a11yMode, alternativeText, fit, and loadingStatus
     covers:
       - C-IMAGE-VIEW-0001-B
     expectation: portable-image-properties-project-live
@@ -54,7 +54,7 @@ cases:
 implementations:
   - id: module-image-view-impl-contract
     kind: module-test
-    status: pending
+    status: passing
     path: packages/modules/image-view/test/impl-spec.test.ts
     required: true
     consumesCases:
@@ -92,10 +92,12 @@ exercises:
 sources:
   - path: packages/modules/image-view/test/impl-spec.test.ts
 revisions:
-  - version: 0.2.0
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: >-
       Added focused Image View host and module conformance coverage with fake-host evidence for synchronous completion, equal-source update, replacement, stale completion, detach/rematerialize, dispose, terminal-once, and transition ordering.
+
+
 tags:
   - image
   - test

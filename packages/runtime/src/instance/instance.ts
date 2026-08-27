@@ -31,8 +31,8 @@ import { PositioningModuleDef } from '@proto.ui/module-positioning';
 import { ScrollModuleDef } from '@proto.ui/module-scroll';
 import { PresenceModuleDef } from '@proto.ui/module-presence';
 import { __RUN_TEST_SYS, TestSysModuleDef, type TestSysPort } from '@proto.ui/module-test-sys';
-import { TextControlModuleDef } from "@proto.ui/module-text-control";
-import { ImageViewModuleDef } from "@proto.ui/module-image-view";
+import { TextControlModuleDef } from '@proto.ui/module-text-control';
+import { ImageViewModuleDef } from '@proto.ui/module-image-view';
 
 import type { ModuleOrchestrator } from '../orchestrator/module-orchestrator';
 import { RuntimeModuleOrchestrator } from '../orchestrator/module-orchestrator';

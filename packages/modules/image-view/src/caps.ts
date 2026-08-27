@@ -1,13 +1,26 @@
 import { cap } from '@proto.ui/core';
-import type { ImageViewPatch, ImageViewStatusChange } from '@proto.ui/core';
+import type { ImageViewPatch } from '@proto.ui/core';
+
+export type ImageViewGeneration = number;
+
+export type ImageViewHostUpdate = Readonly<{
+  generation: ImageViewGeneration;
+  patch: ImageViewPatch;
+}>;
+
+export type ImageViewHostCompletion = Readonly<{
+  generation: ImageViewGeneration;
+  status: 'loaded' | 'error';
+}>;
 
 export type ImageViewHostConnection = Readonly<{
+  generation: ImageViewGeneration;
   patch: ImageViewPatch;
-  onStatusChange(change: ImageViewStatusChange): void;
+  onStatusChange(change: ImageViewHostCompletion): void;
 }>;
 
 export type ImageViewHostLease = Readonly<{
-  update(patch: ImageViewPatch): void;
+  update(update: ImageViewHostUpdate): void;
   snapshot(): import('@proto.ui/core').ImageViewSnapshot;
   dispose(): void;
 }>;

@@ -2,13 +2,17 @@ id: P-BASE-IMAGE
 type: prototype
 title: Base Image Root is a host-owned image presentation target
 status: draft
-since: 0.2.0
-summary: Base Image Root declares a portable image presentation requirement and projects source, alternativeText, fit, and loadingStatus through the Image View module.
+since: 0.3.0-alpha.0
+summary: Base Image Root declares a portable image presentation requirement and projects source, explicit a11y mode, alternativeText, fit, and loadingStatus through the Image View module.
 statement:
   zh-CN: >-
-    Base Image Root 是 Proto UI 维护的 draft Base prototype，声明一个 portable image presentation requirement（opaque URI source）。它通过 Image View module 将 source、alternativeText、fit 与 loadingStatus 投影到 host-owned image target；root 自身不拥有 native loading、caching 或 rendering 行为。`base-image-root` direct prototype 与 `asImageRoot` authored asHook 是同一 image presentation protocol 的两个 authoring entries。
+    Base Image Root 是 Proto UI 维护的 draft Base prototype，声明一个 portable image presentation requirement（opaque URI source）。它通过 Image View module 将 source、显式 a11y mode、alternativeText、fit 与 loadingStatus 投影到 host-owned image target；root 自身不拥有 native loading、caching 或 rendering 行为。`base-image-root` direct prototype 与 `asImageRoot` authored asHook 是同一 image presentation protocol 的两个 authoring entries。
+
+
   en: >-
-    Base Image Root is a Proto UI-maintained draft Base prototype that declares a portable image presentation requirement (opaque URI source). It projects source, alternativeText, fit, and loadingStatus through the Image View module to a host-owned image target; the root itself does not own native loading, caching, or rendering behavior. The `base-image-root` direct prototype and `asImageRoot` authored asHook are two authoring entries of the same image presentation protocol.
+    Base Image Root is a Proto UI-maintained draft Base prototype that declares a portable image presentation requirement (opaque URI source). It projects source, explicit a11y mode, alternativeText, fit, and loadingStatus through the Image View module to a host-owned image target; the root itself does not own native loading, caching, or rendering behavior. The `base-image-root` direct prototype and `asImageRoot` authored asHook are two authoring entries of the same image presentation protocol.
+
+
 criteria:
   - id: P-BASE-IMAGE-DECLARATION
     text:
@@ -19,11 +23,15 @@ criteria:
       zh-CN: source 必须是 opaque URI string；source 变更必须创建新 generation。
       en: >-
         source must be an opaque URI string; a source change must create a new generation.
+
+
   - id: P-BASE-IMAGE-ALT-TEXT
     text:
       zh-CN: alternativeText 必须遵守 a11y 二分输入：informative 时 non-empty，decorative 时显式排除语义内容。
       en: >-
         alternativeText must obey the a11y binary input: non-empty when informative, explicitly excluded when decorative.
+
+
   - id: P-BASE-IMAGE-FIT
     text:
       zh-CN: fit 必须是 `contain | cover | fill` 之一；默认为 `contain` + center。
@@ -41,8 +49,10 @@ dependsOn:
   modules: [M-IMAGE-VIEW-0001]
 verifies: { tests: [T-IMAGE-VIEW-0001] }
 revisions:
-  - version: 0.2.0
+  - version: 0.3.0-alpha.0
     change: introduced
     summary: >-
-      Introduced the draft Base Image Root prototype with portable image presentation criteria (source, alternativeText, fit, loadingStatus) on the 0.2.0 release train.
+      Introduced the draft Base Image Root prototype with portable image presentation criteria (source, a11yMode, alternativeText, fit, loadingStatus) on the 0.3.0-alpha.0 release train.
+
+
 tags: [prototype, base, image]
