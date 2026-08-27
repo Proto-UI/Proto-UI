@@ -145,7 +145,7 @@ const PACKAGE_RULES = {
     capability: 'multiline text-control host protocol',
     purpose:
       'Owns the host boundary for a semantic plain-text/multiline/host-owned editing requirement: stable controlled or uncontrolled value ownership, normalized input/change/IME composition events, live property projection, and physical focus access. Adapters select the physical host editor; the current Web profile resolves the requirement to `HTMLTextAreaElement`.',
-    role: 'Adapter-facing dependency used by Base Textarea and the official Web Component, React, and Vue adapters.',
+    role: 'Adapter-facing dependency used by Base Textarea and the official Web Component, React, Vue, and Vue 2 adapters.',
     // Contributor-authored README documents the host-boundary contract, non-goals,
     // exports, and the draft rc.7 publication status; preserve it.
     preserveReadme: true,
@@ -153,6 +153,15 @@ const PACKAGE_RULES = {
   },
   '@proto.ui/adapter-react': adapterRule('React'),
   '@proto.ui/adapter-vue': adapterRule('Vue'),
+  '@proto.ui/adapter-vue2': {
+    ...adapterRule('Vue 2.6'),
+    description:
+      'Translates Proto UI prototypes into Vue 2.6 component options for official Web Adapter use.',
+    purpose:
+      'Translates Proto UI prototypes into Vue 2.6 component options that run through the Proto UI Adapter contracts.',
+    preserveReadme: true,
+    extraKeywords: ['vue', 'vue2'],
+  },
   '@proto.ui/adapter-web-component': adapterRule('Web Components'),
   '@proto.ui/cli': {
     description:
