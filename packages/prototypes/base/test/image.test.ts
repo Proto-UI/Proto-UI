@@ -146,7 +146,7 @@ describe('prototypes/base: image', () => {
     });
   });
 
-  it('preserves initial ownership, validates fit, and fails closed on contradictory a11y', () => {
+  it('keeps an initially uncontrolled source stable across later source props', () => {
     const ctx = createImageHost({
       defaultSource: 'image:default',
       a11yMode: 'decorative',
@@ -188,6 +188,37 @@ describe('prototypes/base: image', () => {
     });
     expect(ctx.getExposes().source.get()).toBe('');
     expect(ctx.getExposes().loadingStatus.get()).toBe('idle');
+  });
+
+  it('follows source updates when the initial source is controlled', () => {
+    const ctx = createImageHost({
+      source: 'image:controlled-a',
+      defaultSource: 'image:ignored-default',
+      a11yMode: 'informative',
+      alternativeText: 'Controlled A',
+      fit: 'contain',
+    } satisfies ImageRootProps);
+    const result = executeWithHost(imageRoot as Prototype<any>, ctx.host);
+    ctx.bindRuntime(result.invokeInCallbackScope);
+    const record = ctx.records[0];
+    expect(record.connection.patch.source).toBe('image:controlled-a');
+
+    ctx.setRawProps({
+      source: 'image:controlled-b',
+      defaultSource: 'image:replacement-default',
+      a11yMode: 'informative',
+      alternativeText: 'Controlled B',
+      fit: 'cover',
+    });
+    result.controller.applyRawProps(ctx.host.getRawProps());
+
+    expect(record.updates.at(-1)?.patch).toMatchObject({
+      source: 'image:controlled-b',
+      alternativeText: 'Controlled B',
+      fit: 'cover',
+      loadingStatus: 'loading',
+    });
+    expect(ctx.getExposes().source.get()).toBe('image:controlled-b');
   });
 
   it('can consume the same protocol through asImageRoot without anatomy materialization', () => {

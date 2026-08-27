@@ -61,7 +61,6 @@ implementations:
       - T-IMAGE-VIEW-0001-CASE-DECLARATION
       - T-IMAGE-VIEW-0001-CASE-PROPERTIES
       - T-IMAGE-VIEW-0001-CASE-A11Y
-      - T-IMAGE-VIEW-0001-CASE-OWNERSHIP
       - T-IMAGE-VIEW-0001-CASE-GENERATION-LEASE
       - T-IMAGE-VIEW-0001-CASE-STATUS-TRANSITION
       - T-IMAGE-VIEW-0001-CASE-REPLACEMENT
@@ -70,6 +69,13 @@ implementations:
     exercises:
       - M-IMAGE-VIEW-0001
       - HC-IMAGE-VIEW-0001
+  - id: base-image-ownership-runtime-contract
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/image.test.ts
+    required: true
+    consumesCases:
+      - T-IMAGE-VIEW-0001-CASE-OWNERSHIP
 verifies:
   contracts:
     - id: C-IMAGE-VIEW-0001
@@ -91,7 +97,14 @@ exercises:
     - P-BASE-IMAGE
 sources:
   - path: packages/modules/image-view/test/impl-spec.test.ts
+  - path: packages/prototypes/base/test/image.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: >-
+      Registered Base Image runtime evidence for both stable uncontrolled ownership and controlled source updates, and added retained-visual replacement, declared-source loading, and callback-scope failure coverage.
+
+
   - version: 0.3.0-alpha.0
     change: introduced
     summary: >-

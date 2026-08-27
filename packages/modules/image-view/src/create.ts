@@ -69,6 +69,10 @@ export class ImageViewModuleImpl extends ModuleBase {
       this.a11yMode = this.declaration.a11yMode;
       this.fit = this.declaration.fit;
       this.source = this.validatedSource();
+      if (this.source) {
+        this.generation = 1;
+        this.loadingStatus = 'loading';
+      }
       this.refreshHost();
     }
   }
@@ -242,6 +246,17 @@ export class ImageViewModuleImpl extends ModuleBase {
 
   private transition(status: ImageViewStatus): void {
     if (status === this.loadingStatus) return;
+    const currentRun = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
+    if (
+      this.listeners.length > 0 &&
+      !currentRun &&
+      !this.caps.has(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)
+    ) {
+      throw new Error(
+        `[ImageView] ${this.prototypeName} requires IMAGE_VIEW_RUN_IN_CALLBACK_CAP to dispatch loadingStatusChange outside callback scope.`
+      );
+    }
+
     const event: ImageViewStatusChange = Object.freeze({
       source: this.source,
       previousStatus: this.loadingStatus,
@@ -249,13 +264,23 @@ export class ImageViewModuleImpl extends ModuleBase {
     });
     this.loadingStatus = status;
 
-    const runInCallback = this.caps.has(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)
-      ? this.caps.get(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)
-      : (callback: () => void) => callback();
-    runInCallback(() => {
-      const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
-      if (!run) return;
+    const dispatch = (run: RunHandle<PropsBaseType>) => {
       for (const listener of [...this.listeners]) listener.callback(run, event);
+    };
+    if (currentRun) {
+      dispatch(currentRun);
+      return;
+    }
+    if (this.listeners.length === 0) return;
+
+    this.caps.get(IMAGE_VIEW_RUN_IN_CALLBACK_CAP)(() => {
+      const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
+      if (!run) {
+        throw new Error(
+          `[ImageView] ${this.prototypeName} received an invalid IMAGE_VIEW_RUN_IN_CALLBACK_CAP implementation that did not enter callback scope.`
+        );
+      }
+      dispatch(run);
     });
   }
 

@@ -52,6 +52,7 @@ type HostRecord = {
   connection: ImageViewHostConnection;
   updates: ImageViewHostUpdate[];
   disposed: number;
+  visualSource: string;
 };
 
 function createFakeHost(
@@ -61,12 +62,24 @@ function createFakeHost(
   const records: HostRecord[] = [];
   const host: ImageViewHost = {
     attach(connection) {
-      const record: HostRecord = { connection, updates: [], disposed: 0 };
+      const record: HostRecord = {
+        connection,
+        updates: [],
+        disposed: 0,
+        visualSource:
+          connection.patch.loadingStatus === 'loaded' ? (connection.patch.source ?? '') : '',
+      };
       records.push(record);
       onAttach?.(record);
       const lease: ImageViewHostLease = {
         update(update) {
           record.updates.push(update);
+          const source = update.patch.source ?? connection.patch.source ?? '';
+          if (!source || update.patch.loadingStatus === 'idle') record.visualSource = '';
+          if (update.patch.loadingStatus === 'loading' && source !== record.visualSource) {
+            record.visualSource = '';
+          }
+          if (update.patch.loadingStatus === 'loaded') record.visualSource = source;
           onUpdate?.(record, update);
         },
         snapshot: () => ({
@@ -93,7 +106,15 @@ function complete(
   record.connection.onStatusChange({ generation, status });
 }
 
-function createHarness(host: ImageViewHost | null = createFakeHost().host) {
+function createHarness(
+  host: ImageViewHost | null = createFakeHost().host,
+  declaration = declareImageView({
+    source: '',
+    alternativeText: '',
+    a11yMode: 'informative',
+    fit: 'contain',
+  })
+) {
   const sys = createSystemCaps();
   const vault = new CapsVault();
   vault.attachBase([[SYS_CAP, sys]]);
@@ -101,14 +122,7 @@ function createHarness(host: ImageViewHost | null = createFakeHost().host) {
   const module = createImageViewModule({
     init: {
       prototypeName: 'x-image',
-      declarations: [
-        declareImageView({
-          source: '',
-          alternativeText: '',
-          a11yMode: 'informative',
-          fit: 'contain',
-        }),
-      ],
+      declarations: [declaration],
     },
     caps: vault,
     deps: {
@@ -143,6 +157,37 @@ describe('module-image-view', () => {
       },
     });
     expect(JSON.stringify(declaration)).not.toMatch(/HTML|img|Web/);
+  });
+
+  it('starts a valid non-empty declared source as a loading generation', () => {
+    const fake = createFakeHost();
+    const harness = createHarness(
+      fake.host,
+      declareImageView({
+        source: 'image:declared',
+        alternativeText: 'Declared image',
+        a11yMode: 'informative',
+        fit: 'cover',
+      })
+    );
+    const image = harness.module.facade.declare();
+
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+
+    expect(fake.records[0].connection).toMatchObject({
+      generation: 1,
+      patch: {
+        source: 'image:declared',
+        loadingStatus: 'loading',
+        alternativeText: 'Declared image',
+        fit: 'cover',
+      },
+    });
+    expect(image.snapshot()).toEqual({
+      source: 'image:declared',
+      loadingStatus: 'loading',
+      fit: 'cover',
+    });
   });
 
   it('establishes loading before host work and accepts synchronous completion', () => {
@@ -239,6 +284,42 @@ describe('module-image-view', () => {
     complete(fake.records[0], 'loaded', secondA.generation);
     expect(image.snapshot()?.loadingStatus).toBe('loaded');
     expect(events.filter((event) => event.status === 'error')).toEqual([]);
+  });
+
+  it('clears a retained completed visual immediately when replacing its source', () => {
+    const fake = createFakeHost();
+    const harness = createHarness(fake.host);
+    const image = harness.module.facade.declare();
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    harness.sys.phase = 'callback';
+
+    image.sync({ source: 'image:a', a11yMode: 'informative', alternativeText: 'A' });
+    complete(fake.records[0], 'loaded');
+    expect(fake.records[0].visualSource).toBe('image:a');
+
+    image.sync({ source: 'image:b', alternativeText: 'B' });
+
+    expect(fake.records[0].updates.at(-1)?.patch).toMatchObject({
+      source: 'image:b',
+      loadingStatus: 'loading',
+    });
+    expect(fake.records[0].visualSource).toBe('');
+  });
+
+  it('fails clearly instead of dropping listeners when async completion lacks callback scope', () => {
+    const fake = createFakeHost();
+    const harness = createHarness(fake.host);
+    const image = harness.module.facade.declare();
+    image.on('loadingStatusChange', () => {});
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    harness.sys.phase = 'callback';
+    image.sync({ source: 'image:a', a11yMode: 'informative', alternativeText: 'A' });
+    harness.sys.phase = 'setup';
+
+    expect(() => complete(fake.records[0], 'loaded')).toThrowError(
+      /IMAGE_VIEW_RUN_IN_CALLBACK_CAP/
+    );
+    expect(image.snapshot()?.loadingStatus).toBe('loading');
   });
 
   it('fails closed for invalid a11y input and projects decorative input explicitly', () => {
