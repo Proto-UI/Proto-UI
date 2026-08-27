@@ -155,13 +155,21 @@ test("authorized Astro routes fall back to their explicit directory index", asyn
   }
 });
 
-test("the public readiness probe verifies the deployed index without exposing it", async () => {
+test("the public readiness probe follows Pages' canonical root route without exposing it", async () => {
+  const paths = [];
   const result = await worker.fetch(
     new Request("https://poppy-proto-ui-pr-462.pages.dev/__poppy/assets-ready"),
-    { ASSETS: { fetch() { return new Response("private html"); } } },
+    { ASSETS: { fetch(request) {
+      const pathname = new URL(request.url).pathname;
+      paths.push(pathname);
+      return pathname === "/"
+        ? new Response("private html")
+        : new Response(null, { status: 308, headers: { Location: "/" } });
+    } } },
   );
   assert.equal(result.status, 204);
   assert.equal(await result.text(), "");
+  assert.deepEqual(paths, ["/"]);
 });
 
 test("a transient control-plane failure does not clear the session or loop OAuth", async () => {

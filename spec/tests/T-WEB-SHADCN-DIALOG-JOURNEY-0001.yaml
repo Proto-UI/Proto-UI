@@ -19,7 +19,7 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-G
       - C-AS-FOCUS-SCOPE-0002-H
       - C-AS-FOCUS-SCOPE-0002-I
-    expectation: wc-react-and-vue-reject-outer-close-blank-hits-and-pass-one-real-demo-dom-journey-without-duplicate-focus-surfaces-or-page-focus-loss
+    expectation: wc-react-vue-and-vue2-reject-outer-close-blank-hits-and-pass-one-real-demo-dom-journey-without-duplicate-focus-surfaces-or-page-focus-loss
     notes:
       - Shared Web host observations are a necessary but insufficient signal of cross-host semantic consistency because an adapter also supplies the host capabilities being observed.
       - The journey deliberately consumes the website demo definition instead of reconstructing a simplified adapter-specific fixture.
@@ -51,6 +51,15 @@ implementations:
     exercises: [P-SHADCN-DIALOG-TRIGGER, P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON]
     notes:
       - The vue parameter is mandatory in the shared official Web adapter matrix.
+  - id: web-conformance-shadcn-dialog-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/web-conformance/test/shadcn-dialog.journey.test.ts
+    required: true
+    consumesCases: [T-WEB-SHADCN-DIALOG-JOURNEY-0001-CASE-SHARED-DOM]
+    exercises: [P-SHADCN-DIALOG-TRIGGER, P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON]
+    notes:
+      - The vue2 parameter is mandatory in the shared official Web adapter matrix.
 verifies:
   contracts:
     - id: C-AS-TRIGGER-0001
@@ -79,6 +88,9 @@ exercises:
     - P-SHADCN-DIALOG-CONTENT
     - P-SHADCN-BUTTON
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added Vue 2 to the mandatory shared official Web Adapter Dialog journey.
   - version: 0.2.0-rc.6
     change: introduced
     summary: Added the first shared scenario-level DOM conformance journey required for WC, React, and Vue.
