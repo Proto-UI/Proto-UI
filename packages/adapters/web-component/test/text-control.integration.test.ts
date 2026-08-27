@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { definePrototype, type DefHandle, type TextControlPatch } from '@proto.ui/core';
+import {
+  definePrototype,
+  type DefHandle,
+  type FocusRequestOptions,
+  type TextControlPatch,
+} from '@proto.ui/core';
 import { asFocusable, asTextControl } from '@proto.ui/hooks';
 import { declareTextControl } from '@proto.ui/module-text-control';
 import { AdaptToWebComponent, setElementProps, type WebComponentAdapterElement } from '../src';
@@ -49,6 +54,9 @@ const focusTextareaPrototype = definePrototype({
     focusable.configure({ disabled: false });
     def.expose.state('focused', focusable.focused);
     def.expose.state('focusVisible', focusable.focusVisible);
+    def.expose.method('focusSelf', (options: FocusRequestOptions | undefined) =>
+      focusable.focusSelf(options)
+    );
     const sync = (props: Readonly<ControlProps>) => {
       control.sync({
         valueMode: 'uncontrolled',
@@ -136,6 +144,10 @@ describe('adapter-web-component text control', () => {
       typeof focusTextareaPrototype
     >;
     setElementProps(shell, { defaultValue: '', placeholder: 'Write', rows: 4 });
+    let projectedFocusCount = 0;
+    shell.addEventListener('focus', () => {
+      projectedFocusCount += 1;
+    });
     document.body.appendChild(shell);
     await flush();
 
@@ -153,6 +165,7 @@ describe('adapter-web-component text control', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
     textarea.focus();
     expect(document.activeElement).toBe(textarea);
+    expect(projectedFocusCount).toBe(0);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(true);
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
@@ -169,6 +182,7 @@ describe('adapter-web-component text control', () => {
     const matchesSpy = vi.spyOn(textarea, 'matches').mockReturnValue(true);
     textarea.focus();
     expect(document.activeElement).toBe(textarea);
+    expect(projectedFocusCount).toBe(0);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(true);
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
@@ -198,6 +212,9 @@ describe('adapter-web-component text control', () => {
 
     shell.remove();
     await flush();
+    const countAfterDetach = projectedFocusCount;
+    textarea.dispatchEvent(new FocusEvent('focus'));
+    expect(projectedFocusCount).toBe(countAfterDetach);
 
     document.body.appendChild(shell);
     await flush();
@@ -207,10 +224,97 @@ describe('adapter-web-component text control', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
     remountedTextarea.focus();
     expect(document.activeElement).toBe(remountedTextarea);
+    expect(projectedFocusCount).toBe(0);
     expect(remountedExposes.focused.get()).toBe(true);
     expect(remountedExposes.focusVisible.get()).toBe(true);
     remountedTextarea.blur();
 
+    shell.remove();
+    await flush();
+  });
+  it('breaks the host focus path when the focus bridge is intercepted', async () => {
+    const shell = document.createElement('x-wc-text-control-focus') as WebComponentAdapterElement<
+      typeof focusTextareaPrototype
+    >;
+    setElementProps(shell, { defaultValue: '', placeholder: 'Write', rows: 4 });
+    let projectedFocusCount = 0;
+    shell.addEventListener('focus', () => {
+      projectedFocusCount += 1;
+    });
+    document.body.appendChild(shell);
+    await flush();
+
+    const textarea = shell.querySelector('textarea');
+    if (!textarea) throw new Error('physical textarea was not materialized');
+    const exposes = shell.getExposes() as {
+      focused: { get(): boolean };
+      focusVisible: { get(): boolean };
+    };
+
+    // Stop the private focus signal before it reaches the adapter listener.
+    const swallowFocus = (event: FocusEvent) => {
+      if (event.target === textarea) event.stopImmediatePropagation();
+    };
+    textarea.addEventListener('focus', swallowFocus, true);
+    try {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      textarea.focus();
+      await flush();
+      expect(document.activeElement).toBe(textarea);
+      expect(projectedFocusCount).toBe(0);
+      expect(exposes.focused.get()).toBe(false);
+      expect(exposes.focusVisible.get()).toBe(false);
+      expect(shell.hasAttribute('data-focus-visible')).toBe(false);
+    } finally {
+      textarea.removeEventListener('focus', swallowFocus, true);
+    }
+
+    // After unblocking, the private bridge restores logical focus projection.
+    textarea.blur();
+    await flush();
+    textarea.focus();
+    await flush();
+    expect(exposes.focused.get()).toBe(true);
+    expect(projectedFocusCount).toBe(0);
+
+    textarea.blur();
+    shell.remove();
+    await flush();
+  });
+
+  it('projects focusSelf bidirectionally between host method and physical control', async () => {
+    const shell = document.createElement('x-wc-text-control-focus') as WebComponentAdapterElement<
+      typeof focusTextareaPrototype
+    >;
+    setElementProps(shell, { defaultValue: '', placeholder: 'Write', rows: 4 });
+    document.body.appendChild(shell);
+    await flush();
+
+    const textarea = shell.querySelector('textarea');
+    if (!textarea) throw new Error('physical textarea was not materialized');
+    const exposes = shell.getExposes() as {
+      focused: { get(): boolean };
+      focusSelf: (options?: FocusRequestOptions) => void;
+    };
+
+    // focusSelf focuses the physical control and syncs the focused state.
+    exposes.focusSelf({ reason: 'programmatic' });
+    await flush();
+    expect(document.activeElement).toBe(textarea);
+    expect(exposes.focused.get()).toBe(true);
+
+    // Blur un-syncs.
+    textarea.blur();
+    await flush();
+    expect(exposes.focused.get()).toBe(false);
+
+    // focusSelf re-focuses after blur.
+    exposes.focusSelf({ reason: 'programmatic' });
+    await flush();
+    expect(document.activeElement).toBe(textarea);
+    expect(exposes.focused.get()).toBe(true);
+
+    textarea.blur();
     shell.remove();
     await flush();
   });
