@@ -116,7 +116,7 @@ export function validateReviewInputSnapshot(input) {
     ],
     'review input'
   );
-  assert(input.schemaVersion === 2, 'review input schemaVersion is invalid');
+  assert(input.schemaVersion === 3, 'review input schemaVersion is invalid');
   assert(input.kind === 'proto-ui.review-input', 'review input kind is invalid');
   assert(
     typeof input.repositoryId === 'string' && input.repositoryId.length > 3,
@@ -219,7 +219,17 @@ export function validateReviewInputSnapshot(input) {
   );
   validateInputItems(
     input.checks,
-    ['name', 'status', 'conclusion', 'completedAt', 'detailsUrl'],
+    [
+      'name',
+      'status',
+      'conclusion',
+      'completedAt',
+      'detailsUrl',
+      'source',
+      'repository',
+      'workflowName',
+      'workflowPath',
+    ],
     'review input checks',
     (item) => {
       for (const field of ['name', 'status']) {
@@ -240,6 +250,13 @@ export function validateReviewInputSnapshot(input) {
           (typeof item.conclusion === 'string' && item.conclusion.length > 0),
         'check conclusion is invalid'
       );
+      assert(typeof item.source === 'string' && item.source.length > 0, 'check source is invalid');
+      for (const field of ['repository', 'workflowName', 'workflowPath']) {
+        assert(
+          item[field] === null || (typeof item[field] === 'string' && item[field].length > 0),
+          `check ${field} is invalid`
+        );
+      }
       validateTimestamp(item.completedAt, 'check completedAt', { nullable: true });
     }
   );
@@ -640,6 +657,30 @@ export function verifyLiveReviewInput(packet, freshInput) {
   return true;
 }
 
+function standingAuthorizationMatches(
+  authorization,
+  { executionMode, executionModeSource, repositoryId }
+) {
+  return (
+    authorization?.status === 'active' &&
+    authorization.executionMode === executionMode &&
+    authorization.executionModeSource === executionModeSource &&
+    authorization.repositoryId === repositoryId
+  );
+}
+
+function assessmentAllowsMutation(selfAssessment, policy, mutationClass) {
+  const requiredBand = policy?.mutationClasses?.[mutationClass]?.autonomousMinimumBand;
+  const actualBand = selfAssessment?.capability?.band;
+  return (
+    selfAssessment?.fresh === true &&
+    selfAssessment?.validated === true &&
+    BANDS.includes(requiredBand) &&
+    BANDS.includes(actualBand) &&
+    BANDS.indexOf(actualBand) >= BANDS.indexOf(requiredBand)
+  );
+}
+
 export function authorizeReviewSubmission({
   packet,
   input,
@@ -678,21 +719,24 @@ export function authorizeReviewSubmission({
   const standingAuthorization = policy?.reviewSubmissionAuthorizations?.find(
     (authorization) => authorization.id === authorizationId
   );
-  const pendingScheduledReview =
-    executionMode === 'autonomous' &&
-    executionModeSource === 'schedule' &&
-    standingAuthorization?.status === 'pending-runtime-identity';
-  if (pendingScheduledReview) {
-    return {
-      allowed: false,
-      humanReviewRequired: true,
-      reason: 'scheduled review submission awaits trusted runtime identity',
-      recommendedAction,
-    };
+  const activeStandingAuthorization = standingAuthorizationMatches(standingAuthorization, {
+    executionMode,
+    executionModeSource,
+    repositoryId: packet.repositoryId,
+  });
+  if (
+    activeStandingAuthorization &&
+    (!assessmentAllowsMutation(selfAssessment, policy, standingAuthorization.mutationClass) ||
+      !evaluateReviewEligibility({
+        executionMode,
+        selfAssessment,
+        reviewClass: packet.reviewClass,
+        policy,
+      }).eligible)
+  ) {
+    return { allowed: false, reason: 'review submission exceeds the autonomous ceiling' };
   }
-  // No autonomous review-write path may become active until the runtime can prove
-  // a repository-and-task-bound identity at this submission boundary.
-  if (!explicitCurrentUser) {
+  if (!explicitCurrentUser && !activeStandingAuthorization) {
     return { allowed: false, reason: 'review submission authorization is unavailable' };
   }
   if (!credentialCanReview)
@@ -709,6 +753,12 @@ export function authorizeReviewSubmission({
   }
   if (recommendedAction === 'ABSTAIN') {
     return { allowed: false, reason: 'ABSTAIN is not a GitHub review submission' };
+  }
+  if (
+    activeStandingAuthorization &&
+    !standingAuthorization.allowedRecommendations?.includes(recommendedAction)
+  ) {
+    return { allowed: false, reason: 'review recommendation is outside standing authorization' };
   }
   if (
     liveInput.reviews.some(
@@ -741,6 +791,14 @@ export function authorizeReviewSubmission({
     }
   }
   if (recommendedAction === 'APPROVE') {
+    if (activeStandingAuthorization && reviewChangesSpecEntities(liveInput)) {
+      return {
+        allowed: false,
+        humanReviewRequired: true,
+        reason: 'spec entity changes require independent maintainer approval',
+        recommendedAction,
+      };
+    }
     const unresolvedHumanGates = packet.humanGates.filter(
       (gate) => gate !== 'pull-request-approval'
     );
@@ -761,5 +819,153 @@ export function authorizeReviewSubmission({
     reason: 'authorized review submission',
     recommendedAction,
     ciConclusion,
+    authorizationId,
+  };
+}
+
+function latestReviewStates(input) {
+  const reviews = input.reviews
+    .filter((review) => ['APPROVED', 'CHANGES_REQUESTED'].includes(review.state))
+    .toSorted((left, right) => {
+      const leftKey = `${left.submittedAt ?? ''}:${left.id}`;
+      const rightKey = `${right.submittedAt ?? ''}:${right.id}`;
+      return leftKey.localeCompare(rightKey);
+    });
+  const states = new Map();
+  for (const review of reviews) states.set(review.author, review.state);
+  return states;
+}
+
+function latestHeadReviewStates(input) {
+  const reviews = input.reviews
+    .filter(
+      (review) =>
+        review.commitSha === input.headSha &&
+        ['APPROVED', 'CHANGES_REQUESTED'].includes(review.state)
+    )
+    .toSorted((left, right) => {
+      const leftKey = `${left.submittedAt ?? ''}:${left.id}`;
+      const rightKey = `${right.submittedAt ?? ''}:${right.id}`;
+      return leftKey.localeCompare(rightKey);
+    });
+  const states = new Map();
+  for (const review of reviews) states.set(review.author, review.state);
+  return states;
+}
+
+export function authorizePullRequestMerge({
+  packet,
+  input,
+  liveInput,
+  executionMode,
+  executionModeSource,
+  authorizationId,
+  policy,
+  selfAssessment,
+  credentialCanMerge,
+  actor,
+  pullRequestAuthor,
+  ciConclusion,
+  mergeable,
+  mergeStateStatus,
+}) {
+  assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
+  validateReviewPacket(packet, input);
+  verifyLiveReviewInput(packet, liveInput);
+  const revision = inspectReviewRevision(packet, input, liveInput.headSha, null, liveInput.baseSha);
+  if (revision.stale) {
+    return { allowed: false, reason: 'review packet is stale at the merge boundary' };
+  }
+  assert(typeof actor === 'string' && actor.length > 0, 'live actor identity is required');
+  assert(
+    typeof pullRequestAuthor === 'string' && pullRequestAuthor.length > 0,
+    'live pull-request author identity is required'
+  );
+
+  const explicitCurrentUser =
+    executionMode === 'human-assisted' &&
+    ['current-user', 'active-human-loop'].includes(executionModeSource) &&
+    authorizationId === 'explicit-current-user';
+  const standingAuthorization = policy?.pullRequestMergeAuthorizations?.find(
+    (authorization) => authorization.id === authorizationId
+  );
+  const activeStandingAuthorization = standingAuthorizationMatches(standingAuthorization, {
+    executionMode,
+    executionModeSource,
+    repositoryId: packet.repositoryId,
+  });
+  if (
+    activeStandingAuthorization &&
+    !assessmentAllowsMutation(selfAssessment, policy, standingAuthorization.mutationClass)
+  ) {
+    return { allowed: false, reason: 'pull-request merge exceeds the autonomous ceiling' };
+  }
+  if (!explicitCurrentUser && !activeStandingAuthorization) {
+    return { allowed: false, reason: 'pull-request merge authorization is unavailable' };
+  }
+  if (!credentialCanMerge) {
+    return { allowed: false, reason: 'live credential cannot merge pull requests' };
+  }
+  if (liveInput.pullRequestState !== 'OPEN') {
+    return { allowed: false, reason: 'pull request is not open' };
+  }
+  if (liveInput.isDraft) return { allowed: false, reason: 'draft pull request cannot be merged' };
+
+  const expectedBaseRefName = activeStandingAuthorization
+    ? standingAuthorization.baseRefName
+    : 'main';
+  if (liveInput.baseRefName !== expectedBaseRefName) {
+    return { allowed: false, reason: 'pull request targets an unauthorized base branch' };
+  }
+  if (packet.recommendedAction !== 'APPROVE') {
+    return { allowed: false, reason: 'merge requires a clean APPROVE review packet' };
+  }
+  const resolvedByAuthorization = new Set([
+    'commit-grouping',
+    'integration-decision',
+    'pull-request-approval',
+    'merge',
+  ]);
+  const unresolvedHumanGates = packet.humanGates.filter(
+    (gate) => !resolvedByAuthorization.has(gate)
+  );
+  if (
+    packet.findings.length > 0 ||
+    packet.limitations.length > 0 ||
+    packet.unknowns.length > 0 ||
+    unresolvedHumanGates.length > 0
+  ) {
+    return { allowed: false, reason: 'merge requires a complete clean review packet' };
+  }
+  if (ciConclusion !== 'success') {
+    return { allowed: false, reason: 'merge requires successful trusted live checks' };
+  }
+  if (liveInput.threads.some((thread) => thread.isResolved !== true)) {
+    return { allowed: false, reason: 'merge requires every review thread to be resolved' };
+  }
+  if (mergeable !== 'MERGEABLE' || mergeStateStatus !== 'CLEAN') {
+    return { allowed: false, reason: 'GitHub does not report the exact head as merge-ready' };
+  }
+
+  const effectiveReviewStates = latestReviewStates(liveInput);
+  const activeChangeRequest = [...effectiveReviewStates.values()].includes('CHANGES_REQUESTED');
+  if (activeChangeRequest) {
+    return { allowed: false, reason: 'the pull request still has an active change request' };
+  }
+  const headReviewStates = latestHeadReviewStates(liveInput);
+  const independentApproval = [...headReviewStates.entries()].some(
+    ([reviewer, state]) => state === 'APPROVED' && reviewer !== pullRequestAuthor
+  );
+  if (!independentApproval) {
+    return { allowed: false, reason: 'the exact head lacks an independent approval' };
+  }
+
+  return {
+    allowed: true,
+    reason: 'authorized exact-head pull-request merge',
+    authorizationId,
+    headSha: liveInput.headSha,
+    mergeMethod: activeStandingAuthorization ? standingAuthorization.mergeMethod : 'squash',
+    actor,
   };
 }

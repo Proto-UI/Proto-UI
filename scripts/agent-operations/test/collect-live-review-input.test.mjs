@@ -4,11 +4,25 @@ import {
   assertNoTruncation,
   buildLiveReviewInput,
   normalizeCheck,
+  submitGitHubMerge,
   submitGitHubReview,
   summarizeLiveChecks,
 } from '../collect-live-review-input.mjs';
 
 const sha = (letter) => letter.repeat(40);
+const repositoryId = 'github.com:Proto-UI/Proto-UI';
+const trustedProvenance = {
+  repository: 'Proto-UI/Proto-UI',
+  workflowName: 'CI',
+  workflowPath: '.github/workflows/ci.yml',
+};
+const trustedOptions = {
+  repositoryId,
+  trustedRepositoryId: repositoryId,
+  trustedSource: 'github-actions',
+  trustedWorkflowNames: ['CI'],
+  trustedWorkflowPaths: ['.github/workflows/ci.yml'],
+};
 const changedFiles = [
   { filename: 'packages/core/src/index.ts', previous_filename: null, status: 'modified' },
   {
@@ -27,6 +41,8 @@ function payload(overrides = {}) {
         pullRequest: {
           state: 'OPEN',
           isDraft: false,
+          mergeable: 'MERGEABLE',
+          mergeStateStatus: 'CLEAN',
           changedFiles: changedFiles.length,
           body: 'Bounded target',
           baseRefName: 'main',
@@ -93,6 +109,14 @@ function payload(overrides = {}) {
                       conclusion: 'SUCCESS',
                       completedAt: '2026-08-23T06:00:00Z',
                       detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+                      checkSuite: {
+                        app: { slug: 'github-actions' },
+                        repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
+                        workflowRun: {
+                          file: { path: '.github/workflows/ci.yml' },
+                          workflow: { name: 'CI' },
+                        },
+                      },
                     },
                     {
                       __typename: 'StatusContext',
@@ -125,6 +149,8 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   assert.equal(result.viewerLogin, 'reviewer');
   assert.equal(result.viewerPermission, 'WRITE');
   assert.equal(result.authorLogin, 'contributor');
+  assert.equal(result.mergeable, 'MERGEABLE');
+  assert.equal(result.mergeStateStatus, 'CLEAN');
   assert.equal(result.input.commits.length, 1);
   assert.equal(result.input.pullRequestState, 'OPEN');
   assert.equal(result.input.isDraft, false);
@@ -296,6 +322,69 @@ test('review submission binds the GitHub Review API write to the inspected commi
   );
 });
 
+test('pull-request merge binds GitHub integration to the inspected exact head', () => {
+  const calls = [];
+  const result = submitGitHubMerge(
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    { headSha: sha('b'), mergeMethod: 'squash' },
+    (command, args, options) => {
+      calls.push({ command, args, options });
+      return JSON.stringify({
+        sha: sha('c'),
+        merged: true,
+        message: 'Pull Request successfully merged',
+      });
+    }
+  );
+  assert.deepEqual(JSON.parse(calls[0].options.input), {
+    sha: sha('b'),
+    merge_method: 'squash',
+  });
+  assert.deepEqual(calls[0].args.slice(0, 5), [
+    'api',
+    '--method',
+    'PUT',
+    'repos/Proto-UI/Proto-UI/pulls/487/merge',
+    '--input',
+  ]);
+  assert.equal(result.headSha, sha('b'));
+  assert.equal(result.mergeCommitSha, sha('c'));
+  assert.equal(result.reconciled, false);
+
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        'github.com:Proto-UI/Proto-UI',
+        487,
+        { headSha: sha('b'), mergeMethod: 'squash' },
+        () => JSON.stringify({ merged: false, message: 'Head branch was modified' })
+      ),
+    /merge was rejected/
+  );
+
+  let attempt = 0;
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        'github.com:Proto-UI/Proto-UI',
+        487,
+        { headSha: sha('b'), mergeMethod: 'squash' },
+        () => {
+          attempt += 1;
+          if (attempt === 1) throw new Error('connection closed after write');
+          return JSON.stringify({
+            merged: true,
+            head: { sha: sha('b') },
+            merge_commit_sha: sha('c'),
+          });
+        }
+      ),
+    /cannot be attributed; do not retry blindly/
+  );
+  assert.equal(attempt, 2);
+});
+
 test('live collector fails closed when the REST changed-file list is incomplete', () => {
   const truncated = payload();
   truncated.data.repository.pullRequest.changedFiles = changedFiles.length + 1;
@@ -331,7 +420,7 @@ test('live collector passes external evidence through verbatim and validates its
   );
 });
 
-test('live collector accepts nullable check detail links from both context kinds', () => {
+test('live collector accepts nullable check links without treating them as trusted CI evidence', () => {
   const nullableUrls = payload();
   nullableUrls.data.repository.pullRequest.headRef.target.statusCheckRollup.contexts.nodes = [
     {
@@ -360,7 +449,7 @@ test('live collector accepts nullable check detail links from both context kinds
   assert.equal(result.input.checks.length, 2);
   assert.equal(result.input.checks[0].detailsUrl, null);
   assert.equal(result.input.checks[1].detailsUrl, null);
-  assert.equal(summarizeLiveChecks(result.input.checks), 'success');
+  assert.equal(summarizeLiveChecks(result.input.checks), 'unknown');
 });
 
 test('check context normalization matches both connection node kinds', () => {
@@ -379,6 +468,10 @@ test('check context normalization matches both connection node kinds', () => {
       conclusion: null,
       completedAt: null,
       detailsUrl: 'https://example.com',
+      source: 'unknown-check-run',
+      repository: null,
+      workflowName: null,
+      workflowPath: null,
     }
   );
   assert.deepEqual(
@@ -395,6 +488,10 @@ test('check context normalization matches both connection node kinds', () => {
       conclusion: null,
       completedAt: '2026-08-23T06:00:00Z',
       detailsUrl: null,
+      source: 'status-context',
+      repository: null,
+      workflowName: null,
+      workflowPath: null,
     }
   );
 });
@@ -405,20 +502,118 @@ test('live check summary accepts neutral terminal conclusions but not pending ch
     status: 'COMPLETED',
     conclusion,
     completedAt: '2026-08-23T06:00:00Z',
-    detailsUrl: null,
+    detailsUrl:
+      conclusion === 'SUCCESS' ? 'https://github.com/Proto-UI/Proto-UI/actions/runs/1' : null,
+    source: 'github-actions',
+    ...trustedProvenance,
   }));
-  assert.equal(summarizeLiveChecks(successCompatible), 'success');
+  assert.equal(summarizeLiveChecks(successCompatible, trustedOptions), 'success');
   assert.equal(
-    summarizeLiveChecks([
-      ...successCompatible,
-      {
-        name: 'pending',
-        status: 'IN_PROGRESS',
-        conclusion: null,
-        completedAt: null,
-        detailsUrl: null,
-      },
-    ]),
+    summarizeLiveChecks(
+      [
+        ...successCompatible,
+        {
+          name: 'pending',
+          status: 'IN_PROGRESS',
+          conclusion: null,
+          completedAt: null,
+          detailsUrl: null,
+          source: 'github-actions',
+          ...trustedProvenance,
+        },
+      ],
+      trustedOptions
+    ),
+    'unknown'
+  );
+});
+
+test('external success cannot substitute for trusted repository CI evidence', () => {
+  assert.equal(
+    summarizeLiveChecks(
+      [
+        {
+          name: 'Vercel',
+          status: 'COMPLETED',
+          conclusion: 'SUCCESS',
+          completedAt: '2026-08-23T06:00:00Z',
+          detailsUrl: 'https://vercel.com/example',
+          source: 'vercel',
+          repository: 'Proto-UI/Proto-UI',
+          workflowName: null,
+          workflowPath: null,
+        },
+        {
+          name: 'test',
+          status: 'COMPLETED',
+          conclusion: 'SKIPPED',
+          completedAt: '2026-08-23T06:00:00Z',
+          detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+          source: 'github-actions',
+          ...trustedProvenance,
+        },
+      ],
+      trustedOptions
+    ),
+    'unknown'
+  );
+  const options = {
+    ...trustedOptions,
+    trustedCheckNames: ['test'],
+  };
+  const neutralRepositoryTest = {
+    name: 'test',
+    status: 'COMPLETED',
+    conclusion: 'SKIPPED',
+    completedAt: '2026-08-23T06:00:00Z',
+    detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+    source: 'github-actions',
+    ...trustedProvenance,
+  };
+  const unrelatedRepositorySuccess = {
+    ...neutralRepositoryTest,
+    name: 'Build docs preview',
+    conclusion: 'SUCCESS',
+    workflowName: 'Poppy preview build',
+    workflowPath: '.github/workflows/poppy-preview-build.yml',
+  };
+  assert.equal(
+    summarizeLiveChecks([neutralRepositoryTest, unrelatedRepositorySuccess], options),
+    'unknown'
+  );
+  assert.equal(
+    summarizeLiveChecks(
+      [neutralRepositoryTest, { ...neutralRepositoryTest, conclusion: 'SUCCESS' }],
+      options
+    ),
+    'success'
+  );
+  assert.equal(
+    summarizeLiveChecks(
+      [
+        neutralRepositoryTest,
+        {
+          ...neutralRepositoryTest,
+          conclusion: 'SUCCESS',
+          repository: 'fork/Proto-UI',
+        },
+      ],
+      options
+    ),
+    'unknown'
+  );
+  assert.equal(
+    summarizeLiveChecks(
+      [
+        neutralRepositoryTest,
+        {
+          ...neutralRepositoryTest,
+          conclusion: 'SUCCESS',
+          workflowPath: '.github/workflows/lookalike.yml',
+        },
+      ],
+      options
+    ),
     'unknown'
   );
 });

@@ -23,6 +23,8 @@ query($owner: String!, $name: String!, $number: Int!) {
     pullRequest(number: $number) {
       state
       isDraft
+      mergeable
+      mergeStateStatus
       changedFiles
       body
       baseRefName
@@ -59,7 +61,21 @@ query($owner: String!, $name: String!, $number: Int!) {
               contexts(first: 100) {
                 nodes {
                   __typename
-                  ... on CheckRun { name status conclusion completedAt detailsUrl }
+                  ... on CheckRun {
+                    name
+                    status
+                    conclusion
+                    completedAt
+                    detailsUrl
+                    checkSuite {
+                      app { slug }
+                      repository { nameWithOwner }
+                      workflowRun {
+                        file { path }
+                        workflow { name }
+                      }
+                    }
+                  }
                   ... on StatusContext { context state targetUrl createdAt }
                 }
                 pageInfo { hasNextPage }
@@ -96,6 +112,10 @@ export function normalizeCheck(node) {
       conclusion: node.conclusion ?? null,
       completedAt: node.completedAt,
       detailsUrl: node.detailsUrl,
+      source: node.checkSuite?.app?.slug ?? 'unknown-check-run',
+      repository: node.checkSuite?.repository?.nameWithOwner ?? null,
+      workflowName: node.checkSuite?.workflowRun?.workflow?.name ?? null,
+      workflowPath: node.checkSuite?.workflowRun?.file?.path ?? null,
     };
   }
   const terminal = TERMINAL_CHECK_STATES.has(node.state);
@@ -105,16 +125,54 @@ export function normalizeCheck(node) {
     conclusion: terminal ? node.state : null,
     completedAt: node.createdAt,
     detailsUrl: node.targetUrl,
+    source: 'status-context',
+    repository: null,
+    workflowName: null,
+    workflowPath: null,
   };
 }
 
-export function summarizeLiveChecks(checks) {
+function repositoryName(repositoryId) {
+  return repositoryId?.match(/^github\.com:([^/]+\/[^/]+)$/)?.[1] ?? null;
+}
+
+function repositoryActionsPrefix(repositoryId) {
+  const repository = repositoryName(repositoryId);
+  return repository ? `https://github.com/${repository}/actions/runs/` : null;
+}
+
+export function summarizeLiveChecks(checks, options = {}) {
   if (!Array.isArray(checks) || checks.length === 0) return 'unknown';
   if (checks.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
-  const allGreen = checks.every(
+  const allReady = checks.every(
     (check) => check.status === 'COMPLETED' && SUCCESSFUL_CONCLUSIONS.has(check.conclusion)
   );
-  return allGreen ? 'success' : 'unknown';
+  const actionsPrefix = repositoryActionsPrefix(options.repositoryId);
+  const trustedSource = options.trustedSource ?? 'github-actions';
+  const trustedRepository = repositoryName(options.trustedRepositoryId ?? options.repositoryId);
+  const trustedCheckNames = new Set(options.trustedCheckNames ?? []);
+  const trustedWorkflowNames = new Set(options.trustedWorkflowNames ?? []);
+  const trustedWorkflowPaths = new Set(options.trustedWorkflowPaths ?? []);
+  const hasTrustedRepositorySuccess = checks.some((check) => {
+    if (check.conclusion !== 'SUCCESS' || typeof check.detailsUrl !== 'string') return false;
+    const isRepositoryAction = actionsPrefix
+      ? check.detailsUrl.startsWith(actionsPrefix)
+      : /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\//.test(check.detailsUrl);
+    const nameIsTrusted = trustedCheckNames.size === 0 || trustedCheckNames.has(check.name);
+    const workflowIsTrusted =
+      trustedWorkflowNames.size === 0 || trustedWorkflowNames.has(check.workflowName);
+    const workflowPathIsTrusted =
+      trustedWorkflowPaths.size === 0 || trustedWorkflowPaths.has(check.workflowPath);
+    return (
+      check.source === trustedSource &&
+      check.repository === trustedRepository &&
+      isRepositoryAction &&
+      nameIsTrusted &&
+      workflowIsTrusted &&
+      workflowPathIsTrusted
+    );
+  });
+  return allReady && hasTrustedRepositorySuccess ? 'success' : 'unknown';
 }
 
 export function parseRepositoryId(repositoryId) {
@@ -201,7 +259,7 @@ export function buildLiveReviewInput(
   const checks = (checkContexts?.nodes ?? []).map(normalizeCheck);
 
   const input = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     kind: 'proto-ui.review-input',
     repositoryId,
     pullRequest,
@@ -245,6 +303,8 @@ export function buildLiveReviewInput(
     viewerLogin: payload.data.viewer.login,
     viewerPermission: payload.data.repository.viewerPermission,
     authorLogin: pullRequestPayload.author?.login,
+    mergeable: pullRequestPayload.mergeable,
+    mergeStateStatus: pullRequestPayload.mergeStateStatus,
   };
 }
 
@@ -301,6 +361,85 @@ export function submitGitHubReview(
     state: response.state,
     commitId: response.commit_id,
     url: response.html_url ?? null,
+  };
+}
+
+export function submitGitHubMerge(
+  repositoryId,
+  pullRequest,
+  { headSha, mergeMethod },
+  runner = execFileSync
+) {
+  const { owner, name } = parseRepositoryId(repositoryId);
+  if (!Number.isInteger(pullRequest) || pullRequest < 1) {
+    throw new Error('merge pull request is invalid');
+  }
+  if (!/^[a-f0-9]{40,64}$/.test(headSha)) {
+    throw new Error('merge head SHA is invalid');
+  }
+  if (!['merge', 'squash', 'rebase'].includes(mergeMethod)) {
+    throw new Error('merge method is invalid');
+  }
+
+  let response;
+  try {
+    response = JSON.parse(
+      runner(
+        'gh',
+        [
+          'api',
+          '--method',
+          'PUT',
+          `repos/${owner}/${name}/pulls/${pullRequest}/merge`,
+          '--input',
+          '-',
+        ],
+        {
+          encoding: 'utf8',
+          input: JSON.stringify({ sha: headSha, merge_method: mergeMethod }),
+          stdio: ['pipe', 'pipe', 'pipe'],
+        }
+      )
+    );
+  } catch (error) {
+    try {
+      const live = JSON.parse(
+        runner('gh', ['api', `repos/${owner}/${name}/pulls/${pullRequest}`], {
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        })
+      );
+      if (
+        live.merged === true &&
+        live.head?.sha === headSha &&
+        /^[a-f0-9]{40,64}$/.test(live.merge_commit_sha ?? '')
+      ) {
+        throw new Error(
+          `merge outcome is ambiguous after live reconciliation: ${live.merge_commit_sha} merged the inspected head, but this invocation and ${mergeMethod} method cannot be attributed; do not retry blindly`
+        );
+      }
+    } catch (reconciliationError) {
+      if (
+        reconciliationError instanceof Error &&
+        reconciliationError.message.startsWith('merge outcome is ambiguous')
+      ) {
+        throw reconciliationError;
+      }
+      // The original mutation outcome remains authoritative when reconciliation also fails.
+    }
+    throw new Error(`merge outcome was not confirmed; do not retry blindly (${error.message})`);
+  }
+
+  if (response.merged !== true || !/^[a-f0-9]{40,64}$/.test(response.sha ?? '')) {
+    throw new Error(`merge was rejected: ${response.message ?? 'receipt is incomplete'}`);
+  }
+  return {
+    merged: true,
+    reconciled: false,
+    mergeCommitSha: response.sha,
+    headSha,
+    mergeMethod,
+    message: response.message ?? null,
   };
 }
 

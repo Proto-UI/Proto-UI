@@ -1,5 +1,5 @@
 schemaVersion: 2
-policyVersion: 2026-08-27.scheduled-review-runtime-identity-pending-1
+policyVersion: 2026-08-27.scheduled-review-and-integration-1
 principle: local assessment decides how far an Agent may go alone, not whether it may participate with a human
 executionModes:
   human-assisted:
@@ -65,7 +65,7 @@ bands:
     autonomousMutationCeiling: feature-branch
     autonomousReviewCeiling: review-governed-implementation-slice
   C4:
-    description: can prepare complex semantic and governance decisions without deciding human gates
+    description: can prepare complex semantic and governance decisions and execute narrowly standing-authorized pull-request transitions
     includesLowerBands: true
     minimumDimensionScore: 4
     taskClasses:
@@ -73,7 +73,8 @@ bands:
       - coordinate-cross-domain-change
       - prepare-release-state
       - audit-release-evidence
-    autonomousMutationCeiling: feature-branch-or-conditional-review-submission
+      - integrate-approved-pull-request
+    autonomousMutationCeiling: feature-branch-or-conditional-review-and-integration
     autonomousReviewCeiling: review-governance-and-release-evidence
 reviewClasses:
   review-facts-and-ci:
@@ -99,6 +100,8 @@ mutationClasses:
   feature-branch: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
   tracked-maintenance-state: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
   conditional-review-submission:
+    { autonomousMinimumBand: C4, trackedWrite: false, externalWrite: true }
+  conditional-pull-request-merge:
     { autonomousMinimumBand: C4, trackedWrite: false, externalWrite: true }
 scoring:
   derivation: highest-band-whose-minimum-is-met-by-every-dimension
@@ -151,8 +154,7 @@ alwaysHuman:
   - branch-or-ruleset-change
 reviewSubmissionAuthorizations:
   - id: proto-ui-scheduled-review-v1
-    status: pending-runtime-identity
-    blockedBy: repository-and-task-bound-runtime-identity
+    status: active
     executionMode: autonomous
     executionModeSource: schedule
     repositoryId: github.com:Proto-UI/Proto-UI
@@ -164,8 +166,33 @@ reviewSubmissionAuthorizations:
     excludedRecommendations: [COMMENT, ABSTAIN]
     excludedActions:
       [merge, ready-for-review, close, label, assign, publication, release, access, ruleset]
+trustedCiEvidence:
+  repositoryId: github.com:Proto-UI/Proto-UI
+  source: github-actions
+  workflowNames: [CI]
+  workflowPaths: [.github/workflows/ci.yml]
+  checkNames: [lockstep-check, public_package_plan, type-check, test, release-scan]
+  neutralConclusions: [SKIPPED, NEUTRAL]
+pullRequestMergeAuthorizations:
+  - id: proto-ui-scheduled-merge-v1
+    status: active
+    executionMode: autonomous
+    executionModeSource: schedule
+    repositoryId: github.com:Proto-UI/Proto-UI
+    mutationClass: conditional-pull-request-merge
+    baseRefName: main
+    mergeMethod: squash
+    requires:
+      - exact-head-clean-review-packet
+      - exact-head-independent-approval
+      - no-active-change-request
+      - all-review-threads-resolved
+      - successful-trusted-ci
+      - github-merge-ready
+      - live-preflight
+    excludedActions: [force, bypass, close-without-merge, publication, release, access, ruleset]
 futurePrivilegedAutomation:
-  status: required-for-broader-or-multi-runner-automation
+  status: required-for-broader-or-concurrent-runner-automation
   requires:
     - independently-operated-evaluator
     - runtime-proof-of-possession

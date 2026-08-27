@@ -31,7 +31,7 @@ const digest = (letter) => letter.repeat(64);
 
 function reviewInput(overrides = {}) {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     kind: 'proto-ui.review-input',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
     pullRequest: 487,
@@ -60,6 +60,10 @@ function reviewInput(overrides = {}) {
         conclusion: 'SUCCESS',
         completedAt: '2026-08-23T00:00:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+        source: 'github-actions',
+        repository: 'Proto-UI/Proto-UI',
+        workflowName: 'CI',
+        workflowPath: '.github/workflows/ci.yml',
       },
     ],
     externalEvidence: [],
@@ -170,6 +174,10 @@ test('review packet binds revision and input state and supports incremental reco
         conclusion: 'FAILURE',
         completedAt: '2026-08-23T00:01:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+        source: 'github-actions',
+        repository: 'Proto-UI/Proto-UI',
+        workflowName: 'CI',
+        workflowPath: '.github/workflows/ci.yml',
       },
       {
         name: 'test',
@@ -177,12 +185,32 @@ test('review packet binds revision and input state and supports incremental reco
         conclusion: 'SUCCESS',
         completedAt: '2026-08-23T00:00:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+        source: 'github-actions',
+        repository: 'Proto-UI/Proto-UI',
+        workflowName: 'CI',
+        workflowPath: '.github/workflows/ci.yml',
       },
     ],
   });
   assert.equal(
     computeReviewInputDigest(tiedChecks),
     computeReviewInputDigest({ ...tiedChecks, checks: [...tiedChecks.checks].reverse() })
+  );
+  assert.notEqual(
+    computeReviewInputDigest(tiedChecks),
+    computeReviewInputDigest({
+      ...tiedChecks,
+      checks: tiedChecks.checks.map((check, index) =>
+        index === 0
+          ? {
+              ...check,
+              source: 'vercel',
+              workflowName: null,
+              workflowPath: null,
+            }
+          : check
+      ),
+    })
   );
   assert.notEqual(
     computeReviewInputDigest(reordered),
@@ -219,7 +247,7 @@ test('canonical review input is insensitive to top-level comment connection orde
   );
 });
 
-test('review input v2 binds changed files and classifies only spec entity YAML paths', () => {
+test('review input v3 binds changed files and check provenance while classifying spec entities', () => {
   const ordinary = reviewInput();
   assert.equal(reviewChangesSpecEntities(ordinary), false);
   assert.equal(
@@ -518,7 +546,7 @@ test('human-assisted review remains open while autonomous review obeys the exact
   );
 });
 
-test('review submission preserves explicit authorization and fails closed while scheduled runtime identity is pending', () => {
+test('review submission preserves explicit authorization and activates the bounded scheduled scope', () => {
   const input = reviewInput();
   const base = {
     packet: packet(
@@ -621,8 +649,6 @@ test('review submission preserves explicit authorization and fails closed while 
     ...base,
     executionMode: 'autonomous',
     executionModeSource: 'schedule',
-    // Public task and authorization identifiers are caller-controlled evidence, not identity.
-    executionTaskId: 'proto-ui',
     authorizationId: 'proto-ui-scheduled-review-v1',
     selfAssessment: assessment('C4', Object.keys(policy.reviewClasses)),
   };
@@ -630,33 +656,11 @@ test('review submission preserves explicit authorization and fails closed while 
     ...scheduledBase,
     packet: requestChangesPacket,
   });
-  assert.equal(requestChanges.allowed, false);
-  assert.equal(requestChanges.humanReviewRequired, true);
-  assert.equal(
-    requestChanges.reason,
-    'scheduled review submission awaits trusted runtime identity'
-  );
+  assert.equal(requestChanges.allowed, true);
   assert.equal(requestChanges.recommendedAction, 'REQUEST_CHANGES');
   const scheduledApproval = authorizeReviewSubmission(scheduledBase);
-  assert.equal(scheduledApproval.allowed, false);
-  assert.equal(scheduledApproval.humanReviewRequired, true);
-  assert.equal(
-    scheduledApproval.reason,
-    'scheduled review submission awaits trusted runtime identity'
-  );
+  assert.equal(scheduledApproval.allowed, true);
   assert.equal(scheduledApproval.recommendedAction, 'APPROVE');
-  const forgedActivePolicy = structuredClone(policy);
-  const forgedActiveAuthorization = forgedActivePolicy.reviewSubmissionAuthorizations.find(
-    (authorization) => authorization.id === 'proto-ui-scheduled-review-v1'
-  );
-  forgedActiveAuthorization.status = 'active';
-  delete forgedActiveAuthorization.blockedBy;
-  const forgedActiveApproval = authorizeReviewSubmission({
-    ...scheduledBase,
-    policy: forgedActivePolicy,
-  });
-  assert.equal(forgedActiveApproval.allowed, false);
-  assert.equal(forgedActiveApproval.reason, 'review submission authorization is unavailable');
   const reviewEligibleC3 = assessment('C3', [
     'review-facts-and-ci',
     'review-docs-and-links',
@@ -718,7 +722,7 @@ test('review submission preserves explicit authorization and fails closed while 
     ),
   });
   assert.equal(duplicateApproval.allowed, false);
-  assert.equal(duplicateApproval.humanReviewRequired, true);
+  assert.equal(duplicateApproval.duplicate, true);
 
   const specInput = reviewInput({
     changedFiles: [
@@ -776,6 +780,32 @@ test('review submission preserves explicit authorization and fails closed while 
     }).allowed,
     false
   );
+});
+
+test('an active scheduled standing authorization can submit an exact-head review disposition', () => {
+  const input = reviewInput();
+  const activePolicy = structuredClone(policy);
+  const authorization = activePolicy.reviewSubmissionAuthorizations.find(
+    (candidate) => candidate.id === 'proto-ui-scheduled-review-v1'
+  );
+  authorization.status = 'active';
+  delete authorization.blockedBy;
+  const approval = authorizeReviewSubmission({
+    packet: packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input),
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'autonomous',
+    executionModeSource: 'schedule',
+    authorizationId: 'proto-ui-scheduled-review-v1',
+    policy: activePolicy,
+    selfAssessment: assessment('C4', Object.keys(activePolicy.reviewClasses)),
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+  });
+  assert.equal(approval.allowed, true);
+  assert.equal(approval.recommendedAction, 'APPROVE');
 });
 
 test('submission preflight re-collects live canonical input and rejects drift and forged identities', () => {
@@ -846,6 +876,10 @@ test('submission preflight re-collects live canonical input and rejects drift an
         conclusion: 'SUCCESS',
         completedAt: '2026-08-23T02:00:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/2',
+        source: 'github-actions',
+        repository: 'Proto-UI/Proto-UI',
+        workflowName: 'CI',
+        workflowPath: '.github/workflows/ci.yml',
       },
     ],
   });
@@ -950,6 +984,10 @@ test('review input validation accepts nullable check details links but rejects e
           conclusion: 'SUCCESS',
           completedAt: '2026-08-23T00:00:00.000Z',
           detailsUrl,
+          source: 'github-actions',
+          repository: 'Proto-UI/Proto-UI',
+          workflowName: 'CI',
+          workflowPath: '.github/workflows/ci.yml',
         },
       ],
     });

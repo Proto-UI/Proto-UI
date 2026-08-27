@@ -179,6 +179,9 @@ try {
   const scheduledReviewAuthorization = parsedPolicy.reviewSubmissionAuthorizations?.find(
     (authorization) => authorization.id === 'proto-ui-scheduled-review-v1'
   );
+  const scheduledMergeAuthorization = parsedPolicy.pullRequestMergeAuthorizations?.find(
+    (authorization) => authorization.id === 'proto-ui-scheduled-merge-v1'
+  );
   if (
     parsedPolicy.bands?.C1?.minimumDimensionScore !== 1 ||
     !parsedPolicy.bands?.C1?.taskClasses?.includes('review-local') ||
@@ -191,14 +194,27 @@ try {
     parsedPolicy.mutationClasses?.['conditional-review-submission']?.externalWrite !== true ||
     parsedPolicy.mutationClasses?.['conditional-review-submission']?.autonomousMinimumBand !==
       'C4' ||
-    scheduledReviewAuthorization?.status !== 'pending-runtime-identity' ||
-    scheduledReviewAuthorization?.blockedBy !== 'repository-and-task-bound-runtime-identity' ||
+    parsedPolicy.mutationClasses?.['conditional-pull-request-merge']?.externalWrite !== true ||
+    parsedPolicy.mutationClasses?.['conditional-pull-request-merge']?.autonomousMinimumBand !==
+      'C4' ||
+    scheduledReviewAuthorization?.status !== 'active' ||
     scheduledReviewAuthorization?.executionModeSource !== 'schedule' ||
     scheduledReviewAuthorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
     scheduledReviewAuthorization?.mutationClass !== 'conditional-review-submission' ||
     !['REQUEST_CHANGES', 'APPROVE'].every((action) =>
       scheduledReviewAuthorization?.allowedRecommendations?.includes(action)
     ) ||
+    scheduledMergeAuthorization?.status !== 'active' ||
+    scheduledMergeAuthorization?.executionModeSource !== 'schedule' ||
+    scheduledMergeAuthorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
+    scheduledMergeAuthorization?.mutationClass !== 'conditional-pull-request-merge' ||
+    scheduledMergeAuthorization?.baseRefName !== 'main' ||
+    scheduledMergeAuthorization?.mergeMethod !== 'squash' ||
+    !parsedPolicy.bands?.C4?.taskClasses?.includes('integrate-approved-pull-request') ||
+    parsedPolicy.trustedCiEvidence?.source !== 'github-actions' ||
+    !parsedPolicy.trustedCiEvidence?.workflowNames?.includes('CI') ||
+    !parsedPolicy.trustedCiEvidence?.workflowPaths?.includes('.github/workflows/ci.yml') ||
+    !parsedPolicy.trustedCiEvidence?.checkNames?.includes('test') ||
     ![
       'finding-disposition',
       'semantic-admission',

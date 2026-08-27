@@ -305,3 +305,11 @@ release note 与 launch messaging 应明确区分：
 - 首发产品承诺范围可被 CI 与 release scan 直接执行
 - `input` 这类可能引入新 module 或底层 API 的项可以逐个决策上车
 - 首发范围扩展是“显式治理动作”，而不是“仓库里出现了就默认发布”
+
+---
+
+## 12. `0.3.0-alpha.0` Adapter 扩展
+
+`0.3.0-alpha.0` release train 接纳 `@proto.ui/adapter-vue2` 作为 official host-specific Adapter 与 launch-commitment package。这是后续 alpha release line 的决定，不会改写上文已冻结的 `v0.2.0-rc.0` package 名单。
+
+该 admission 要求它与既有 official Adapter 一样通过公开 manifest、精确版本、package build、registry identity、conformance 与 release evidence。仓库准备可以先于 npm identity 完成，但真实发布必须在 identity bootstrap 与 Trusted Publisher 配置完成前 fail closed。

@@ -45,6 +45,8 @@ criteria:
 explains:
   adapters:
     - A-REACT-18-19-0001
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
     - A-VUE-3-0001
     - A-WEB-COMPONENT-0001
 relates:
@@ -63,6 +65,9 @@ sources:
   - path: packages/spec/schema/src/index.ts
   - path: packages/spec/engine/src/node.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Admitted the official Vue 2.6 Web Adapter profile under the same identity, relation, lifecycle, and evidence requirements.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added first-class official Adapter profile identities and graph relations for Module support, omission, and host-capability provision.

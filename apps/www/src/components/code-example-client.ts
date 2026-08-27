@@ -5,10 +5,10 @@ import {
   type PreferredAdapterChangeDetail,
 } from './adapter-preference';
 import { refreshCodePanel } from './PrototypePreviewer/code-panel-client';
-import type { RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import type { PublicRuntimeId } from './PrototypePreviewer/runtimes/registry';
 
 interface CodeExampleController {
-  syncGlobalHost(host: RuntimeId): void;
+  syncGlobalHost(host: PublicRuntimeId): void;
 }
 
 const controllers = new WeakMap<HTMLElement, CodeExampleController>();
@@ -65,7 +65,7 @@ function installHorizontalActivation(
   });
 }
 
-function storedHost(): RuntimeId | null {
+function storedHost(): PublicRuntimeId | null {
   try {
     const value = localStorage.getItem(PREFERRED_ADAPTER_KEY);
     return isRuntimeId(value) ? value : null;
@@ -108,7 +108,7 @@ function initCodeExample(root: HTMLElement): void {
 
   installHorizontalActivation(hostList, (tab) => selectHost(tab, true));
 
-  function tabForHost(host: RuntimeId): HTMLButtonElement | undefined {
+  function tabForHost(host: PublicRuntimeId): HTMLButtonElement | undefined {
     return hostTabs.find((tab) => tab.dataset.codeHost === host);
   }
 
