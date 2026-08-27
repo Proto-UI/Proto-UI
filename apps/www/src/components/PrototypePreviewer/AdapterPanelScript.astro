@@ -22,9 +22,28 @@ const adapterIdsJson = JSON.stringify(AdapterIds);
     window.__protoAdapterPanelInit = '1';
     var supportedAdapters = JSON.parse(adapterIdsJson);
 
-    function showPanel(adapter) {
+    function pageAdapters() {
+      var found = {};
       document.querySelectorAll('[data-adapter-panel]').forEach(function (el) {
-        el.style.display = el.getAttribute('data-adapter-panel') === adapter ? '' : 'none';
+        found[el.getAttribute('data-adapter-panel')] = true;
+      });
+      return found;
+    }
+
+    function resolveAdapter(adapter) {
+      var available = pageAdapters();
+      if (!Object.keys(available).length) return adapter;
+      if (available[adapter]) return adapter;
+      if (available[DEFAULT_ADAPTER]) return DEFAULT_ADAPTER;
+      return Object.keys(available)[0];
+    }
+
+    function showPanel(adapter) {
+      var panels = document.querySelectorAll('[data-adapter-panel]');
+      if (!panels.length) return;
+      var effective = resolveAdapter(adapter);
+      panels.forEach(function (el) {
+        el.style.display = el.getAttribute('data-adapter-panel') === effective ? '' : 'none';
       });
     }
 

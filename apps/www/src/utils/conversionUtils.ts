@@ -15,13 +15,14 @@ export function formatCode(code: string) {
 export const getCode = (
   runtime: RuntimeId,
   demoId: string,
-  codeMap: Record<RuntimeId, Record<string, string>>
+  codeMap: Partial<Record<RuntimeId, Record<string, string>>>
 ): string => {
-  const code = codeMap[runtime][demoId];
+  const runtimeMap = codeMap[runtime] ?? {};
+  const code = runtimeMap[demoId];
   if (!code) {
     throw new Error(
       `[ButtonDemo] 未找到 demo: runtime="${runtime}", demoId="${demoId}"。` +
-        `codeMap 中该 runtime 仅支持: ${Object.keys(codeMap[runtime] ?? {}).join(', ') || '(无)'}`
+        `codeMap 中该 runtime 仅支持: ${Object.keys(runtimeMap).join(', ') || '(无)'}`
     );
   }
   return code;

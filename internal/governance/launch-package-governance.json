@@ -5,6 +5,7 @@
   "launchCommitmentPackages": [
     "@proto.ui/adapter-react",
     "@proto.ui/adapter-vue",
+    "@proto.ui/adapter-vue2",
     "@proto.ui/adapter-web-component",
     "@proto.ui/cli",
     "@proto.ui/prototypes-base",
