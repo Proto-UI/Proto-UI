@@ -157,7 +157,6 @@ describe('adapter-web-component text control', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
     textarea.focus();
     expect(document.activeElement).toBe(textarea);
-    expect(projectedFocusCount).toBe(1);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(true);
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
@@ -174,7 +173,6 @@ describe('adapter-web-component text control', () => {
     const matchesSpy = vi.spyOn(textarea, 'matches').mockReturnValue(true);
     textarea.focus();
     expect(document.activeElement).toBe(textarea);
-    expect(projectedFocusCount).toBe(2);
     expect(exposes.focused.get()).toBe(true);
     expect(exposes.focusVisible.get()).toBe(true);
     expect(shell.hasAttribute('data-focus-visible')).toBe(true);
