@@ -44,6 +44,18 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
+<div data-adapter-panel="vue2" style="display:none;">
+  这是 vue2 的 tabs 组件
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs', codeMap)}
+  />
+</div>
+
 <AdapterPanelScript />
 
 ## Content mount 策略

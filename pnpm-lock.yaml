@@ -99,6 +99,9 @@ importers:
       '@proto.ui/adapter-vue':
         specifier: workspace:*
         version: link:../../packages/adapters/vue
+      '@proto.ui/adapter-vue2':
+        specifier: workspace:*
+        version: link:../../packages/adapters/vue2
       '@proto.ui/adapter-web-component':
         specifier: workspace:*
         version: link:../../packages/adapters/web-component
@@ -372,6 +375,88 @@ importers:
       vue:
         specifier: ^3.5.13
         version: 3.5.31(typescript@5.9.3)
+
+  packages/adapters/vue2:
+    dependencies:
+      '@proto.ui/adapter-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/hooks':
+        specifier: workspace:*
+        version: link:../../hooks
+      '@proto.ui/module-a11y':
+        specifier: workspace:*
+        version: link:../../modules/a11y
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../../modules/anatomy
+      '@proto.ui/module-as-trigger':
+        specifier: workspace:*
+        version: link:../../modules/as-trigger
+      '@proto.ui/module-boundary':
+        specifier: workspace:*
+        version: link:../../modules/boundary
+      '@proto.ui/module-context':
+        specifier: workspace:*
+        version: link:../../modules/context
+      '@proto.ui/module-event':
+        specifier: workspace:*
+        version: link:../../modules/event
+      '@proto.ui/module-expose-event':
+        specifier: workspace:*
+        version: link:../../modules/expose-event
+      '@proto.ui/module-expose-state':
+        specifier: workspace:*
+        version: link:../../modules/expose-state
+      '@proto.ui/module-expose-state-web':
+        specifier: workspace:*
+        version: link:../../modules/expose-state-web
+      '@proto.ui/module-feedback':
+        specifier: workspace:*
+        version: link:../../modules/feedback
+      '@proto.ui/module-focus':
+        specifier: workspace:*
+        version: link:../../modules/focus
+      '@proto.ui/module-hit-participation':
+        specifier: workspace:*
+        version: link:../../modules/hit-participation
+      '@proto.ui/module-overlay':
+        specifier: workspace:*
+        version: link:../../modules/overlay
+      '@proto.ui/module-positioning':
+        specifier: workspace:*
+        version: link:../../modules/positioning
+      '@proto.ui/module-props':
+        specifier: workspace:*
+        version: link:../../modules/props
+      '@proto.ui/module-rule-expose-state-web':
+        specifier: workspace:*
+        version: link:../../modules/rule-expose-state-web
+      '@proto.ui/module-rule-meta':
+        specifier: workspace:*
+        version: link:../../modules/rule-meta
+      '@proto.ui/module-scroll':
+        specifier: workspace:*
+        version: link:../../modules/scroll
+      '@proto.ui/module-text-control':
+        specifier: workspace:*
+        version: link:../../modules/text-control
+      '@proto.ui/runtime':
+        specifier: workspace:*
+        version: link:../../runtime
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
+    devDependencies:
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../../prototypes/base
+      vue:
+        specifier: 2.6.14
+        version: 2.6.14
 
   packages/adapters/web-component:
     dependencies:
@@ -4132,6 +4217,10 @@ packages:
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
 
+  vue@2.6.14:
+    resolution: {integrity: sha512-x2284lgYvjOMj3Za7kqzRcUSxBboHqtgRE2zlos1qWaOye5yUmHn42LB1250NJBLRwEcdrB0JRwyPTEPhfQjiQ==}
+    deprecated: Vue 2 has reached EOL and is no longer actively maintained. See https://v2.vuejs.org/eol/ for more details.
+
   vue@3.5.31:
     resolution: {integrity: sha512-iV/sU9SzOlmA/0tygSmjkEN6Jbs3nPoIPFhCMLD2STrjgOU8DX7ZtzMhg4ahVwf5Rp9KoFzcXeB1ZrVbLBp5/Q==}
     peerDependencies:
@@ -7577,6 +7666,8 @@ snapshots:
   vscode-nls@5.2.0: {}
 
   vscode-uri@3.1.0: {}
+
+  vue@2.6.14: {}
 
   vue@3.5.31(typescript@5.9.3):
     dependencies:

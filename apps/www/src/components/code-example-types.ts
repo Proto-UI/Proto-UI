@@ -1,5 +1,5 @@
 import type { CodeLang } from './PrototypePreviewer/code-highlight';
-import type { RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import type { PublicRuntimeId } from './PrototypePreviewer/runtimes/registry';
 
 export type CodeExampleFile = Readonly<{
   name: string;
@@ -7,11 +7,11 @@ export type CodeExampleFile = Readonly<{
   code: string;
 }>;
 
-export type CodeExamplesByHost = Partial<Record<RuntimeId, readonly CodeExampleFile[]>>;
+export type CodeExamplesByHost = Partial<Record<PublicRuntimeId, readonly CodeExampleFile[]>>;
 
 export interface CodeExampleProps {
   files: CodeExamplesByHost;
-  initialHost?: RuntimeId;
+  initialHost?: PublicRuntimeId;
   label?: string;
   class?: string;
 }
