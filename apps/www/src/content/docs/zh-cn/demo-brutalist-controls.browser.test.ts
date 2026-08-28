@@ -594,6 +594,11 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     };
 
     try {
+      expect(
+        await previewer
+          .locator('select.adapter-select option')
+          .evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value))
+      ).toEqual([...RUNTIMES]);
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
         const roots = previewer.locator('[data-pui-root]');
