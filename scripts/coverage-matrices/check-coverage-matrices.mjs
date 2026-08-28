@@ -12,6 +12,46 @@ const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'remove
 const INTERACTIVE_SOURCE_PATTERNS = Object.freeze([
   /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(/i,
 ]);
+
+function collectNativeEventAttributeNames() {
+  const libDomPath = path.join(path.dirname(ts.getDefaultLibFilePath({})), 'lib.dom.d.ts');
+  const sourceFile = ts.createSourceFile(
+    libDomPath,
+    fs.readFileSync(libDomPath, 'utf8'),
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const names = new Set();
+  const containsFunctionType = (node) => {
+    let found = false;
+    const visit = (child) => {
+      if (found) return;
+      if (ts.isFunctionTypeNode(child)) found = true;
+      else ts.forEachChild(child, visit);
+    };
+    visit(node);
+    return found;
+  };
+  const visit = (node) => {
+    if (
+      ts.isPropertySignature(node) &&
+      ts.isIdentifier(node.name) &&
+      /^on[a-z]/u.test(node.name.text) &&
+      node.type &&
+      containsFunctionType(node.type)
+    ) {
+      names.add(node.name.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return names;
+}
+
+// Lowercase inline HTML handlers must be real DOM event attributes. Camel-cased
+// JSX component callbacks remain open-ended because application components can
+// define their own `onXxx` semantic events.
+const NATIVE_EVENT_ATTRIBUTE_NAMES = collectNativeEventAttributeNames();
 const DOGFOODED_EVIDENCE_LABELS = Object.freeze([
   'Build:',
   'Browser:',
@@ -62,10 +102,10 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
   }),
   'apps/www/src/components/LucideIconGallery.astro': Object.freeze({
-    categories: Object.freeze(['prototype-package']),
+    specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
-    categories: Object.freeze(['prototype-package']),
+    specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
 });
 const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
@@ -791,7 +831,8 @@ function astContainsJsxEventHandler(content) {
     if (
       ts.isJsxAttribute(node) &&
       ts.isIdentifier(node.name) &&
-      /^on(?:[A-Z][A-Za-z0-9_$]*|[a-z][a-z0-9]*)$/u.test(node.name.text)
+      (/^on[A-Z][A-Za-z0-9_$]*$/u.test(node.name.text) ||
+        NATIVE_EVENT_ATTRIBUTE_NAMES.has(node.name.text))
     ) {
       found = true;
       return;
@@ -885,9 +926,11 @@ function discoverWebsiteInteractiveSources(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'www', 'src');
   const contentRoot = path.join(sourceRoot, 'content', 'docs');
   return walkFiles(sourceRoot)
-    .filter((absolutePath) => /\.(?:astro|[cm]?[jt]sx?)$/.test(absolutePath))
+    .filter((absolutePath) => /\.(?:astro|vue|svelte|[cm]?[jt]sx?)$/.test(absolutePath))
     .filter((absolutePath) => !absolutePath.startsWith(`${contentRoot}${path.sep}`))
-    .concat(walkFiles(contentRoot).filter((absolutePath) => /\.mdx?$/.test(absolutePath)))
+    .concat(
+      walkFiles(contentRoot).filter((absolutePath) => /\.(?:mdx?|vue|svelte)$/.test(absolutePath))
+    )
     .concat(
       walkFiles(contentRoot).filter((absolutePath) => /\.demo\.[cm]?[jt]sx?$/.test(absolutePath))
     )
@@ -978,16 +1021,35 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier) {
   const resolvedPath = path
     .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), specifier))
     .replaceAll('\\', '/');
-  if (!/^packages\/prototypes\/(?:base|shadcn|brutalist)\/src(?:\/|$)/u.test(resolvedPath)) {
-    return null;
+  if (/^packages\/prototypes\/[^/]+\/src(?:\/|$)/u.test(resolvedPath)) {
+    return { category: 'prototype-internal', resolvedPath };
   }
-  return { category: 'prototype-internal', resolvedPath };
+  if (/^packages\/adapters\/[^/]+\/src(?:\/|$)/u.test(resolvedPath)) {
+    return { category: 'adapter-internal', resolvedPath };
+  }
+  if (/^packages\/modules\/[^/]+\/src(?:\/|$)/u.test(resolvedPath)) {
+    return { category: 'module-internal', resolvedPath };
+  }
+  if (/^packages\/core\/src(?:\/|$)/u.test(resolvedPath)) {
+    return { category: 'core-internal', resolvedPath };
+  }
+  if (/^packages\/runtime\/src(?:\/|$)/u.test(resolvedPath)) {
+    return { category: 'runtime-internal', resolvedPath };
+  }
+  return null;
 }
 
 function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport) {
   const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
   if (!allowance) return false;
   if (allowance.specifiers?.includes(specifier)) return true;
+  if (
+    allowance.specifierPrefixes?.some(
+      (prefix) => specifier === prefix || specifier.startsWith(`${prefix}/`)
+    )
+  ) {
+    return true;
+  }
   if (allowance.categories?.includes(guardedImport.category)) return true;
   return allowance.resolvedPaths?.includes(guardedImport.resolvedPath) ?? false;
 }

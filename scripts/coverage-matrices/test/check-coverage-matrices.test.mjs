@@ -451,6 +451,44 @@ test('detects lowercase native event attributes without an event-name allowlist'
   }
 });
 
+test('does not classify ordinary lowercase on-prefixed component props as events', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [relativePath, content] of [
+    ['apps/www/src/components/OnlyCard.astro', '<Card only={true} />'],
+    ['apps/www/src/components/OnceCard.tsx', '<Card once="session" />'],
+    ['apps/www/src/components/OngoingCard.vue', '<template><Card ongoing="yes" /></template>'],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('discovers interactive Vue and Svelte website components', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [relativePath, content] of [
+    [
+      'apps/www/src/components/NewControl.vue',
+      '<template><button onblur="close()">Close</button></template>',
+    ],
+    ['apps/www/src/content/docs/NewControl.svelte', '<button ondblclick="open()">Open</button>'],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  const message = validationMessage(root);
+  for (const relativePath of [
+    'apps/www/src/components/NewControl.vue',
+    'apps/www/src/content/docs/NewControl.svelte',
+  ]) {
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
+});
+
 test('does not confuse comparisons and ordinary onXxx variables with JSX handlers', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -642,6 +680,31 @@ test('rejects adapter and implementation-internal imports outside the website al
         '<style>{renderBrutalistThemeCss()}</style>',
       ].join('\n'),
     ],
+    [
+      'apps/www/src/components/LucideInternalEscape.ts',
+      '../../../../packages/prototypes/lucide/src/icon/icon.proto',
+      "import { asLucideIcon } from '../../../../packages/prototypes/lucide/src/icon/icon.proto';",
+    ],
+    [
+      'apps/www/src/components/CoreInternalEscape.ts',
+      '../../../../packages/core/src/index',
+      "import { definePrototype } from '../../../../packages/core/src/index';",
+    ],
+    [
+      'apps/www/src/components/RuntimeInternalEscape.ts',
+      '../../../../packages/runtime/src/index',
+      "import { createRuntimeSession } from '../../../../packages/runtime/src/index';",
+    ],
+    [
+      'apps/www/src/components/ModuleInternalEscape.ts',
+      '../../../../packages/modules/overlay/src/index',
+      "import { overlay } from '../../../../packages/modules/overlay/src/index';",
+    ],
+    [
+      'apps/www/src/components/AdapterInternalEscape.ts',
+      '../../../../packages/adapters/react/src/index',
+      "import { adapter } from '../../../../packages/adapters/react/src/index';",
+    ],
   ];
   for (const [sourcePath, , content] of cases) {
     const absolutePath = path.join(root, sourcePath);
@@ -657,6 +720,45 @@ test('rejects adapter and implementation-internal imports outside the website al
       )
     );
   }
+});
+
+test('restricts Lucide component allowances to the Lucide package family', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const sourcePath of [
+    'apps/www/src/components/LucideIconGallery.astro',
+    'apps/www/src/components/StaticLucideIcon.astro',
+  ]) {
+    const absolutePath = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      ['---', "import { basePrototypes } from '@proto.ui/prototypes-base';", '---'].join('\n')
+    );
+  }
+  const message = validationMessage(root);
+  assert.match(
+    message,
+    /raw Proto UI import `@proto\.ui\/prototypes-base` in `apps\/www\/src\/components\/LucideIconGallery\.astro`/
+  );
+  assert.match(
+    message,
+    /raw Proto UI import `@proto\.ui\/prototypes-base` in `apps\/www\/src\/components\/StaticLucideIcon\.astro`/
+  );
+});
+
+test('accepts Lucide package root and subpath imports in reviewed Lucide components', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [sourcePath, specifier] of [
+    ['apps/www/src/components/LucideIconGallery.astro', '@proto.ui/prototypes-lucide'],
+    ['apps/www/src/components/StaticLucideIcon.astro', '@proto.ui/prototypes-lucide/check'],
+  ]) {
+    const absolutePath = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, ['---', `import icon from '${specifier}';`, '---'].join('\n'));
+  }
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('accepts reviewed demo raw imports and ignores import-looking code strings', () => {
