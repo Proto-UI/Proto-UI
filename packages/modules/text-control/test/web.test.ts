@@ -473,7 +473,6 @@ describe('module-text-control single-line web bridge', () => {
       input.remove();
     }
   });
-
   it('canonicalizes CR/LF to LF in event values and snapshots', () => {
     const input = document.createElement('input');
     const events: TextControlEvent[] = [];
