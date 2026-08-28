@@ -141,6 +141,55 @@ function validWebsiteRow(overrides = {}) {
   };
 }
 
+function validSelfHostedWebsiteEvidence(overrides = {}) {
+  return Object.entries({
+    Commit: '0123456789abcdef0123456789abcdef01234567',
+    Environment: 'Node.js 22 and Chromium on CI',
+    Routes: '`/en/` and `/zh-cn/`',
+    Build: '`internal/website/evidence/s14/build.log`',
+    Browser: '`internal/website/evidence/s14/browser-results.json`',
+    Accessibility: '`internal/website/evidence/s14/accessibility-results.json`',
+    Screenshot: '`internal/website/evidence/s14/home-desktop.png`',
+    'Multi-frame': '`internal/website/evidence/s14/navigation-frames.json`',
+    Commands:
+      '`corepack pnpm@10.32.1 --filter @proto-ui/www build` and `corepack pnpm@10.32.1 test`',
+    Results: '`internal/website/evidence/s14/results.json`',
+    ...overrides,
+  })
+    .map(([label, value]) => `${label}: ${value}`)
+    .join('\n');
+}
+
+function writeSelfHostedWebsiteArtifacts(root) {
+  const artifactRoot = path.join(root, 'internal/website/evidence/s14');
+  const onePixelPng = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+    'base64'
+  );
+  fs.mkdirSync(artifactRoot, { recursive: true });
+  fs.writeFileSync(path.join(artifactRoot, 'build.log'), 'build completed\n', 'utf8');
+  fs.writeFileSync(path.join(artifactRoot, 'browser-results.json'), '{"passed":true}\n', 'utf8');
+  fs.writeFileSync(
+    path.join(artifactRoot, 'accessibility-results.json'),
+    '{"violations":[]}\n',
+    'utf8'
+  );
+  fs.writeFileSync(path.join(artifactRoot, 'home-desktop.png'), onePixelPng);
+  fs.writeFileSync(path.join(artifactRoot, 'navigation-before.png'), onePixelPng);
+  fs.writeFileSync(path.join(artifactRoot, 'navigation-after.png'), onePixelPng);
+  fs.writeFileSync(
+    path.join(artifactRoot, 'navigation-frames.json'),
+    JSON.stringify({
+      frames: [
+        'internal/website/evidence/s14/navigation-before.png',
+        'internal/website/evidence/s14/navigation-after.png',
+      ],
+    }),
+    'utf8'
+  );
+  fs.writeFileSync(path.join(artifactRoot, 'results.json'), '{"passed":true}\n', 'utf8');
+}
+
 function validHarnessRow(overrides = {}) {
   return {
     ID: 'harness.transcript.viewport',
@@ -804,6 +853,166 @@ test('keeps real MDX handler markup visible after Markdown code removal', () => 
   );
 });
 
+test('detects Astro client hydration directives in live MDX markup', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const hydratedSources = ['load', 'visible', 'idle', 'only'].map(
+    (directive) => `apps/www/src/content/docs/hydrated-${directive}.mdx`
+  );
+  for (const relativePath of hydratedSources) {
+    const directive = path.basename(relativePath, '.mdx').replace('hydrated-', '');
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(
+      sourcePath,
+      [
+        "import ExternalWidget from '@example/widget';",
+        '',
+        `<ExternalWidget client:${directive}${directive === 'only' ? '="react"' : ''} />`,
+      ].join('\n')
+    );
+  }
+  const examplePath = 'apps/www/src/content/docs/hydration-example.mdx';
+  const exampleSource = path.join(root, examplePath);
+  fs.writeFileSync(
+    exampleSource,
+    [
+      '# Hydration example',
+      '',
+      '```mdx',
+      '<ExternalWidget client:load />',
+      '```',
+      '',
+      '{"<ExternalWidget client:visible />"}',
+      '{/* <ExternalWidget client:idle /> */}',
+    ].join('\n')
+  );
+
+  const message = validationMessage(root);
+  for (const relativePath of hydratedSources) {
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
+  assert.ok(!message.includes(`interactive website source \`${examplePath}\` is not bound`));
+});
+
+test('detects bounded DOM focus, scroll, ARIA, and class-state mutations', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    ['blur-owner.ts', 'element.blur();'],
+    ['focus-owner.ts', 'element.focus();'],
+    ['scroll-by-owner.ts', 'element.scrollBy({ top: 1 });'],
+    ['scroll-into-view-owner.ts', 'element.scrollIntoView({ block: "nearest" });'],
+    ['scroll-to-owner.ts', 'element.scrollTo({ top: 1 });'],
+    ['aria-set-owner.ts', "element.setAttribute('aria-expanded', 'true');"],
+    ['aria-toggle-owner.ts', "element.toggleAttribute('aria-hidden');"],
+    ['aria-remove-owner.ts', "element.removeAttribute('aria-expanded');"],
+    ['class-add-owner.ts', "element.classList.add('is-open');"],
+    ['class-remove-owner.ts', "element.classList.remove('is-open');"],
+    ['class-replace-owner.ts', "element.classList.replace('closed', 'open');"],
+    ['class-toggle-owner.ts', "element.classList.toggle('is-open');"],
+    ['typed-owner.ts', 'const control: HTMLButtonElement = getControl(); control.focus();'],
+    [
+      'queried-owner.ts',
+      "const control = document.querySelector('button'); control?.scrollIntoView();",
+    ],
+  ];
+  for (const [fileName, content] of cases) {
+    const relativePath = `apps/www/src/content/docs/${fileName}`;
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, `export function ownState(element) { ${content} }`);
+  }
+  const examplePath = 'apps/www/src/content/docs/dom-mutation-examples.ts';
+  fs.writeFileSync(
+    path.join(root, examplePath),
+    [
+      'export const focusExample = "element.focus()";',
+      'export const scrollExample = `element.scrollIntoView()`;',
+      'export const ariaExample = "element.setAttribute(\'aria-expanded\', true)";',
+      'export const classExample = "element.classList.toggle(\'open\')";',
+    ].join('\n')
+  );
+
+  const message = validationMessage(root);
+  for (const [fileName] of cases) {
+    const relativePath = `apps/www/src/content/docs/${fileName}`;
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
+  assert.ok(!message.includes(`interactive website source \`${examplePath}\` is not bound`));
+});
+
+test('does not infer DOM ownership from generic receiver method names', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = 'apps/www/src/content/docs/generic-methods.ts';
+  const absolutePath = path.join(root, sourcePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    [
+      'searchIndex.blur();',
+      'searchIndex.focus();',
+      'searchIndex.scrollBy();',
+      'searchIndex.scrollIntoView();',
+      'searchIndex.scrollTo();',
+      "metadata.setAttribute('aria-label', 'result');",
+      "metadata.toggleAttribute('aria-hidden');",
+      "metadata.removeAttribute('aria-expanded');",
+      "model.classList.add('one');",
+      "model.classList.remove('one');",
+      "model.classList.replace('one', 'two');",
+      "model.classList.toggle('two');",
+    ].join('\n')
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('detects DOM mutations in live MDX ESM while excluding authored examples', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const livePath = 'apps/www/src/content/docs/live-restore.mdx';
+  const liveSource = path.join(root, livePath);
+  fs.mkdirSync(path.dirname(liveSource), { recursive: true });
+  fs.writeFileSync(
+    liveSource,
+    ['export function restore(element) {', '  element.focus();', '}', '', '# Restore'].join('\n')
+  );
+  const liveAriaPath = 'apps/www/src/content/docs/live-aria-reset.mdx';
+  fs.writeFileSync(
+    path.join(root, liveAriaPath),
+    [
+      'export function reset(element) {',
+      "  element.removeAttribute('aria-expanded');",
+      '}',
+      '',
+      '# Reset',
+    ].join('\n')
+  );
+  const examplePath = 'apps/www/src/content/docs/dom-authored-examples.mdx';
+  fs.writeFileSync(
+    path.join(root, examplePath),
+    [
+      '# DOM examples',
+      '',
+      'Inline `element.focus()` is prose.',
+      '',
+      '```ts',
+      'export function example(element) { element.blur(); }',
+      '```',
+      '',
+      '{"element.scrollIntoView()"}',
+      '{/* element.scrollTo() */}',
+    ].join('\n')
+  );
+
+  const message = validationMessage(root);
+  assert.ok(message.includes(`interactive website source \`${livePath}\` is not bound`));
+  assert.ok(message.includes(`interactive website source \`${liveAriaPath}\` is not bound`));
+  assert.ok(!message.includes(`interactive website source \`${examplePath}\` is not bound`));
+});
+
 test('rejects adapter and implementation-internal imports outside the website allowlist', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -928,6 +1137,38 @@ test('rejects adapter and implementation-internal imports outside the website al
       )
     );
   }
+});
+
+test('resolves the configured Website source alias before enforcing the consumer wall', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const configPath = path.join(root, 'apps/www/astro.config.mjs');
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
+  fs.writeFileSync(
+    configPath,
+    [
+      "import { fileURLToPath } from 'node:url';",
+      "export default { vite: { resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } } } };",
+    ].join('\n')
+  );
+  const sourcePath = 'apps/www/src/components/AliasEscape.ts';
+  const absolutePath = path.join(root, sourcePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    [
+      "import { localHelper } from '@/utils/local-helper';",
+      "import { createRuntimeSession } from '@/../../../packages/runtime/src/index';",
+    ].join('\n')
+  );
+
+  const message = validationMessage(root);
+  assert.ok(
+    message.includes(
+      `raw Proto UI import \`@/../../../packages/runtime/src/index\` in \`${sourcePath}\` escapes the website consumer-wall allowlist`
+    )
+  );
+  assert.doesNotMatch(message, /@\/utils\/local-helper.*escapes the website consumer-wall/);
 });
 
 test('rejects raw Proto UI imports outside the Harness bootstrap allowlist', () => {
@@ -1150,6 +1391,54 @@ test('rejects guarded Sass module directives in standalone and embedded styles',
   }
 });
 
+test('inspects every target in a Sass multi-target import', () => {
+  const root = createRoot();
+  const cases = [
+    [
+      'apps/www/src/styles/MultiTargetEscape.scss',
+      '@import url("./base"), "@proto.ui/runtime/styles";',
+      '@proto.ui/runtime/styles',
+    ],
+    [
+      'apps/agent-harness/src/run/MultiTargetEscape.scss',
+      '@import url("./base"), "@proto.ui/runtime/styles";',
+      '@proto.ui/runtime/styles',
+    ],
+    [
+      'apps/www/src/components/MultiTargetEscape.astro',
+      '<style lang="scss">@import "./base", "@proto.ui/prototypes-base/theme";</style>',
+      '@proto.ui/prototypes-base/theme',
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    { websiteBindings: [['apps/www/src/components/MultiTargetEscape.astro', ['www.shell.search']]] }
+  );
+
+  const message = validationMessage(root);
+  for (const [relativePath, , specifier] of cases.filter(([relativePath]) =>
+    relativePath.startsWith('apps/www/')
+  )) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${relativePath}\` escapes the website consumer-wall allowlist`
+      )
+    );
+  }
+  assert.ok(
+    message.includes(
+      'raw Proto UI import `@proto.ui/runtime/styles` in `apps/agent-harness/src/run/MultiTargetEscape.scss` escapes the Harness consumer-wall allowlist'
+    )
+  );
+});
+
 test('ignores Sass and Less line-comment directives', () => {
   const root = createRoot();
   const componentPath = 'apps/www/src/components/CommentedStyle.astro';
@@ -1211,6 +1500,29 @@ test('rejects a conflicting source binding for a static website component with o
     validationMessage(root),
     /website component source `apps\/www\/src\/components\/override\/SiteTitle\.astro` has direct matrix owner `www\.shell\.site-title` outside source binding owner\(s\).*`www\.shell\.search`/
   );
+});
+
+test('requires static Markdown and MDX website routes to have a matrix classification', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const routes = [
+    ['apps/www/src/pages/release-notes.md', '# Release notes\n\nStatic route.'],
+    ['apps/www/src/pages/about.mdx', '# About\n\nAuthored MDX route.'],
+  ];
+  for (const [relativePath, content] of routes) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+
+  const message = validationMessage(root);
+  for (const [relativePath] of routes) {
+    assert.ok(
+      message.includes(
+        `website component source \`${relativePath}\` is not classified by a matrix row`
+      )
+    );
+  }
 });
 
 test('excludes component test and spec fixtures from static classification', () => {
@@ -1577,6 +1889,50 @@ test('rejects stable website states backed by non-active catalog entities', () =
   );
 });
 
+test('rejects removed catalog entities from every shipped Website state', () => {
+  const cases = [
+    {
+      State: 'ready',
+    },
+    {
+      State: 'self-hosted',
+    },
+    {
+      ID: 'www.shell.site-title',
+      Path: '`apps/www/src/components/override/SiteTitle.astro`',
+      'Target class': 'native/static',
+      State: 'native/static',
+      'Dependency and owner': 'No Proto UI dependency; owner: website team',
+      'Escape or exemption': 'Reason: native semantics remain the complete information path',
+      'Re-review or removal issue': '#420 if application-owned interaction is introduced',
+    },
+    {
+      ID: 'www.demo.brutalist-theme-style',
+      Path: '`apps/www/src/components/BrutalistPageStyle.astro`',
+      'Target class': 'infrastructure-exempt',
+      State: 'infrastructure-exempt',
+      'Dependency and owner': 'No Proto UI dependency; owner: website demos',
+      'Escape or exemption': 'Reason: static theme infrastructure remains bounded to demos',
+      'Re-review or removal issue': '#420 if the theme gains interaction state',
+    },
+  ];
+
+  for (const overrides of cases) {
+    const root = createRoot();
+    writeValidMatrices(root, {
+      'Proto UI chain': 'P-REMOVED-BUTTON',
+      Lifecycle: 'P-REMOVED-BUTTON=removed',
+      ...overrides,
+    });
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        `shipped website State \`${overrides.State}\` must not consume removed catalog entities: \`P-REMOVED-BUTTON\``
+      )
+    );
+  }
+});
+
 test('rejects a stable website state that removes every catalog identity from its chain', () => {
   const root = createRoot();
   writeValidMatrices(root, {
@@ -1601,6 +1957,234 @@ test('rejects a stable website state backed only by an active Adapter profile', 
     validationMessage(root),
     /website State ready requires an active Prototype or Module semantic owner.*Adapter profile alone is insufficient/
   );
+});
+
+test('rejects self-hosted website rows backed only by prose evidence', () => {
+  const root = createRoot();
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: 'Browser checks passed',
+  });
+
+  assert.match(
+    validationMessage(root),
+    /self-hosted rows must bind an exact internal\/website\/evidence\/\*\* path in Evidence/
+  );
+});
+
+test('rejects self-hosted website evidence without every closeout dimension', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const absoluteEvidencePath = path.join(root, evidencePath);
+  fs.mkdirSync(path.dirname(absoluteEvidencePath), { recursive: true });
+  fs.writeFileSync(absoluteEvidencePath, 'Build: passed\n', 'utf8');
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+  });
+
+  const message = validationMessage(root);
+  assert.match(message, /self-hosted evidence record .* missing required `Accessibility:` label/);
+  assert.match(message, /self-hosted evidence record .* missing required `Screenshot:` label/);
+  assert.match(message, /self-hosted evidence record .* missing required `Multi-frame:` label/);
+});
+
+test('rejects self-hosted website evidence without an exact commit SHA', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const absoluteEvidencePath = path.join(root, evidencePath);
+  fs.mkdirSync(path.dirname(absoluteEvidencePath), { recursive: true });
+  fs.writeFileSync(
+    absoluteEvidencePath,
+    validSelfHostedWebsiteEvidence({ Commit: 'not-an-exact-sha' }),
+    'utf8'
+  );
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+  });
+
+  assert.match(
+    validationMessage(root),
+    /self-hosted evidence record .* must bind Commit to an exact 40-character Git SHA/
+  );
+});
+
+test('rejects a missing self-hosted website evidence artifact', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/missing-closeout.md';
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+  });
+
+  assert.ok(
+    validationMessage(root).includes(
+      `Evidence references missing repository path \`${evidencePath}\``
+    )
+  );
+});
+
+test('rejects empty acceptance dimensions in self-hosted website evidence', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const absoluteEvidencePath = path.join(root, evidencePath);
+  fs.mkdirSync(path.dirname(absoluteEvidencePath), { recursive: true });
+  fs.writeFileSync(
+    absoluteEvidencePath,
+    validSelfHostedWebsiteEvidence({ Screenshot: '—' }),
+    'utf8'
+  );
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+  });
+
+  assert.match(
+    validationMessage(root),
+    /self-hosted evidence record .* required `Screenshot:` label must have a meaningful value/
+  );
+});
+
+test('rejects vacuous self-hosted website evidence labels without reproducible artifacts', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const absoluteEvidencePath = path.join(root, evidencePath);
+  fs.mkdirSync(path.dirname(absoluteEvidencePath), { recursive: true });
+  fs.writeFileSync(
+    absoluteEvidencePath,
+    validSelfHostedWebsiteEvidence({
+      Routes: 'ok',
+      Build: 'ok',
+      Browser: 'ok',
+      Accessibility: 'ok',
+      Screenshot: 'ok',
+      'Multi-frame': 'ok',
+      Commands: 'ok',
+      Results: 'ok',
+    }),
+    'utf8'
+  );
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+  });
+
+  const message = validationMessage(root);
+  assert.match(message, /Routes: must name at least one exact `\/route\/`/);
+  assert.match(message, /Commands: must name at least one executable command in inline code/);
+  for (const label of [
+    'Build:',
+    'Browser:',
+    'Accessibility:',
+    'Screenshot:',
+    'Multi-frame:',
+    'Results:',
+  ]) {
+    assert.ok(
+      message.includes(
+        `${label} must bind an exact retained artifact under internal/website/evidence/**`
+      )
+    );
+  }
+});
+
+test('rejects mislabeled screenshots and canonically duplicate multi-frame manifests', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const absoluteEvidencePath = path.join(root, evidencePath);
+  writeSelfHostedWebsiteArtifacts(root);
+  fs.writeFileSync(
+    path.join(root, 'internal/website/evidence/s14/home-desktop.png'),
+    'not an image',
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(root, 'internal/website/evidence/s14/navigation-frames.json'),
+    JSON.stringify({
+      frames: [
+        'internal/website/evidence/s14/navigation-before.png',
+        'internal/website/evidence/s14/nested/../navigation-before.png',
+      ],
+    }),
+    'utf8'
+  );
+  fs.writeFileSync(absoluteEvidencePath, validSelfHostedWebsiteEvidence(), 'utf8');
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+  });
+
+  const message = validationMessage(root);
+  assert.match(message, /Screenshot: retained artifact must be a recognized image file/);
+  assert.match(
+    message,
+    /Multi-frame: JSON manifest must retain at least two canonically distinct frame paths/
+  );
+});
+
+test('rejects fake images and traversal in multi-frame manifests', () => {
+  for (const mode of ['fake-images', 'traversal']) {
+    const root = createRoot();
+    const evidencePath = 'internal/website/evidence/s14/closeout.md';
+    writeSelfHostedWebsiteArtifacts(root);
+    const manifestPath = path.join(root, 'internal/website/evidence/s14/navigation-frames.json');
+    if (mode === 'fake-images') {
+      fs.writeFileSync(
+        path.join(root, 'internal/website/evidence/s14/navigation-before.png'),
+        'fake before',
+        'utf8'
+      );
+      fs.writeFileSync(
+        path.join(root, 'internal/website/evidence/s14/navigation-after.png'),
+        'fake after',
+        'utf8'
+      );
+    } else {
+      const outsidePath = path.join(root, 'internal/website/outside.png');
+      fs.copyFileSync(
+        path.join(root, 'internal/website/evidence/s14/navigation-after.png'),
+        outsidePath
+      );
+      fs.writeFileSync(
+        manifestPath,
+        JSON.stringify({
+          frames: [
+            'internal/website/evidence/s14/navigation-before.png',
+            'internal/website/evidence/s14/../../outside.png',
+          ],
+        }),
+        'utf8'
+      );
+    }
+    fs.writeFileSync(path.join(root, evidencePath), validSelfHostedWebsiteEvidence(), 'utf8');
+    writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+    const message = validationMessage(root);
+    if (mode === 'fake-images') {
+      assert.match(message, /Multi-frame: JSON manifest frame must be a recognized image file/);
+    } else {
+      assert.match(
+        message,
+        /Multi-frame: JSON manifest frame must be an existing retained artifact under internal\/website\/evidence\/\*\*/
+      );
+    }
+  }
+});
+
+test('accepts reproducible multi-dimensional evidence for a self-hosted website row', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const absoluteEvidencePath = path.join(root, evidencePath);
+  fs.mkdirSync(path.dirname(absoluteEvidencePath), { recursive: true });
+  writeSelfHostedWebsiteArtifacts(root);
+  fs.writeFileSync(absoluteEvidencePath, validSelfHostedWebsiteEvidence(), 'utf8');
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+  });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('requires the raw-runtime row to inventory every shipped active Adapter profile', () => {
@@ -2196,6 +2780,35 @@ test('requires newly exported Harness user-facing surfaces to have a matrix disp
     validationMessage(root),
     /Harness user-facing source `apps\/agent-harness\/src\/run\/NewRunSummary\.tsx` is not classified by a matrix row or Source-scan binding/
   );
+});
+
+test('discovers exported Harness surfaces rendered with React.createElement', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/agent-harness/src/run/ClassicRunSummary.ts',
+      "import * as React from 'react'; export function ClassicRunSummary() { return React.createElement('section', null, 'Run summary'); }",
+    ],
+    [
+      'apps/agent-harness/src/run/AliasedRunSummary.js',
+      "import { createElement as h } from 'react'; export const AliasedRunSummary = () => h('section', null, 'Run summary');",
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+
+  const message = validationMessage(root);
+  for (const [relativePath] of cases) {
+    assert.ok(
+      message.includes(
+        `Harness user-facing source \`${relativePath}\` is not classified by a matrix row or Source-scan binding`
+      )
+    );
+  }
 });
 
 test('allows an exported Harness surface to reuse a row through an explicit source binding', () => {

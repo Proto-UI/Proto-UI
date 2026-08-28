@@ -38,6 +38,44 @@ describe('runtime test plan', () => {
     );
   });
 
+  it('lets an exact single browser suite use its standalone server', () => {
+    const suite = BROWSER_SUITES[0];
+
+    for (const filter of [suite, `./${suite}`, path.resolve(suite)]) {
+      for (const args of [[filter], ['--reporter=dot', filter], [filter, '--reporter=dot']]) {
+        assert.deepEqual(createRuntimeTestPlan(args), [
+          {
+            needsServer: false,
+            args,
+          },
+        ]);
+      }
+    }
+  });
+
+  it('keeps an option with a potentially separate value fail-safe shared', () => {
+    const suite = BROWSER_SUITES[0];
+    const args = ['--reporter', 'dot', suite];
+
+    assert.deepEqual(createRuntimeTestPlan(args), [
+      {
+        needsServer: true,
+        args: ['--no-file-parallelism', ...args],
+      },
+    ]);
+  });
+
+  it('keeps multiple exact browser suites behind the shared server', () => {
+    const filters = BROWSER_SUITES.slice(0, 2);
+
+    assert.deepEqual(createRuntimeTestPlan(filters), [
+      {
+        needsServer: true,
+        args: ['--no-file-parallelism', ...filters],
+      },
+    ]);
+  });
+
   it('shares one documentation server for a broad filter that can select browser suites', () => {
     for (const filter of [
       'apps/www/src/content/docs/zh-cn',

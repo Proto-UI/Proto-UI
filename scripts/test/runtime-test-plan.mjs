@@ -75,13 +75,24 @@ export function createRuntimeTestPlan(rawArgs) {
     const positionalFilters = args
       .filter((argument) => !argument.startsWith('-'))
       .map(normalizeTestFilter);
-    // Vitest accepts file filters after options. Treat a leading option as
-    // ambiguous (its following token may be an option value) and pay the
-    // small cost of a shared server instead of risking concurrent browser
-    // suites that each start Astro against the same data store.
-    const hasLeadingOption = args[0].startsWith('-');
-    if (positionalFilters.length === 0 || hasLeadingOption) {
+    // Vitest accepts file filters after options. `--name=value` is
+    // self-contained, but an option without `=` may consume the following
+    // token. Keep that ambiguous form behind the shared server instead of
+    // mistaking an option value for an exact browser-suite filter.
+    const hasAmbiguousOptionValue = args.some(
+      (argument) => argument.startsWith('-') && !argument.includes('=')
+    );
+    if (positionalFilters.length === 0 || hasAmbiguousOptionValue) {
       return [{ needsServer: true, args: ['--no-file-parallelism', ...args] }];
+    }
+
+    const selectsExactlyOneBrowserSuite =
+      positionalFilters.length === 1 && BROWSER_SUITES.includes(positionalFilters[0]);
+    if (selectsExactlyOneBrowserSuite) {
+      // Every browser suite can start and warm its own documentation server.
+      // Keep that focused path standalone so it does not wait for the shared
+      // runner's full cross-suite READY_ROUTES inventory.
+      return [{ needsServer: false, args }];
     }
 
     const canSelectBrowserSuite = positionalFilters.some((argument) =>

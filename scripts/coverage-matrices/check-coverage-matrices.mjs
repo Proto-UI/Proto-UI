@@ -10,6 +10,12 @@ const TARGET_CLASS_TOTAL_HEADERS = ['Target class', 'Count'];
 const END_MARKER = '<!-- coverage-matrix:end -->';
 const CATALOG_ID_PATTERN = /\b(?:A|C|D|HC|K|M|P|T|V)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*\b/g;
 const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
+const WEBSITE_SHIPPED_STATES = Object.freeze([
+  'self-hosted',
+  'ready',
+  'native/static',
+  'infrastructure-exempt',
+]);
 const INTERACTIVE_SOURCE_PATTERNS = Object.freeze([
   /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(/i,
   /\b[A-Za-z_$][\w$]*\.on[a-z][A-Za-z0-9_$]*\s*=/u,
@@ -66,6 +72,19 @@ const DOGFOODED_RECORD_LABELS = Object.freeze([
   'Commit:',
   'Environment:',
   'Fixtures:',
+  'Commands:',
+  'Results:',
+]);
+const SELF_HOSTED_WEBSITE_EVIDENCE_ROOT = 'internal/website/evidence/';
+const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
+  'Commit:',
+  'Environment:',
+  'Routes:',
+  'Build:',
+  'Browser:',
+  'Accessibility:',
+  'Screenshot:',
+  'Multi-frame:',
   'Commands:',
   'Results:',
 ]);
@@ -866,9 +885,12 @@ function astContainsJsxEventHandler(content) {
     if (found) return;
     if (
       ts.isJsxAttribute(node) &&
-      ts.isIdentifier(node.name) &&
-      (/^on[A-Z][A-Za-z0-9_$]*$/u.test(node.name.text) ||
-        NATIVE_EVENT_ATTRIBUTE_NAMES.has(node.name.text))
+      ((ts.isIdentifier(node.name) &&
+        (/^on[A-Z][A-Za-z0-9_$]*$/u.test(node.name.text) ||
+          NATIVE_EVENT_ATTRIBUTE_NAMES.has(node.name.text))) ||
+        (ts.isJsxNamespacedName(node.name) &&
+          node.name.namespace.text === 'client' &&
+          /^(?:idle|load|media|only|visible)$/u.test(node.name.name.text)))
     ) {
       found = true;
       return;
@@ -879,6 +901,93 @@ function astContainsJsxEventHandler(content) {
   return found;
 }
 
+function unwrapTypeScriptExpression(expression) {
+  let current = expression;
+  while (
+    ts.isParenthesizedExpression(current) ||
+    ts.isNonNullExpression(current) ||
+    ts.isAsExpression(current) ||
+    ts.isTypeAssertionExpression(current) ||
+    ts.isSatisfiesExpression(current)
+  ) {
+    current = current.expression;
+  }
+  return current;
+}
+
+function isDomTypeNode(typeNode, sourceFile) {
+  if (!typeNode) return false;
+  return /(?:^|[^A-Za-z0-9_$])(?:Document|Element|HTMLElement|HTML[A-Za-z0-9]*Element|SVGElement|Window)(?:[^A-Za-z0-9_$]|$)/u.test(
+    typeNode.getText(sourceFile)
+  );
+}
+
+function domReceiverIdentifiers(sourceFile) {
+  const identifiers = new Set(['document', 'window']);
+  let changed;
+  do {
+    changed = false;
+    const visit = (node) => {
+      if (
+        (ts.isParameter(node) || ts.isVariableDeclaration(node)) &&
+        ts.isIdentifier(node.name) &&
+        (isDomTypeNode(node.type, sourceFile) ||
+          (ts.isParameter(node) && /^(?:el|element)$/u.test(node.name.text)) ||
+          (ts.isVariableDeclaration(node) &&
+            node.initializer &&
+            isDomReceiverExpression(node.initializer, sourceFile, identifiers))) &&
+        !identifiers.has(node.name.text)
+      ) {
+        identifiers.add(node.name.text);
+        changed = true;
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sourceFile);
+  } while (changed);
+  return identifiers;
+}
+
+function isDomAcquisitionCall(expression, sourceFile, receiverIdentifiers) {
+  const candidate = unwrapTypeScriptExpression(expression);
+  if (!ts.isCallExpression(candidate) || !ts.isPropertyAccessExpression(candidate.expression)) {
+    return false;
+  }
+  const method = candidate.expression.name.text;
+  if (!/^(?:closest|createElement|getElementById|querySelector)$/u.test(method)) {
+    return false;
+  }
+  return isDomReceiverExpression(candidate.expression.expression, sourceFile, receiverIdentifiers);
+}
+
+function isDomReceiverExpression(expression, sourceFile, receiverIdentifiers) {
+  const candidate = unwrapTypeScriptExpression(expression);
+  if (ts.isIdentifier(candidate)) return receiverIdentifiers.has(candidate.text);
+  if (isDomAcquisitionCall(candidate, sourceFile, receiverIdentifiers)) return true;
+  if (!ts.isPropertyAccessExpression(candidate)) return false;
+
+  const owner = unwrapTypeScriptExpression(candidate.expression);
+  if (
+    /^(?:body|documentElement|activeElement)$/u.test(candidate.name.text) &&
+    ts.isIdentifier(owner) &&
+    owner.text === 'document'
+  ) {
+    return true;
+  }
+  if (
+    /^(?:currentTarget|target)$/u.test(candidate.name.text) &&
+    ts.isIdentifier(owner) &&
+    /^(?:e|event)$/u.test(owner.text)
+  ) {
+    return true;
+  }
+  return (
+    candidate.name.text === 'current' &&
+    ts.isIdentifier(owner) &&
+    /(?:Element|Node|Ref)$/u.test(owner.text)
+  );
+}
+
 function astContainsInteractiveRuntime(content) {
   const sourceFile = ts.createSourceFile(
     'website-source.tsx',
@@ -887,6 +996,7 @@ function astContainsInteractiveRuntime(content) {
     true,
     ts.ScriptKind.TSX
   );
+  const receiverIdentifiers = domReceiverIdentifiers(sourceFile);
   let found = false;
   const visit = (node) => {
     if (found) return;
@@ -904,6 +1014,38 @@ function astContainsInteractiveRuntime(content) {
       if (
         method === 'addEventListener' ||
         ((owner === 'customElements' || owner.endsWith('.customElements')) && method === 'define')
+      ) {
+        found = true;
+        return;
+      }
+      if (
+        /^(?:blur|focus|scrollBy|scrollIntoView|scrollTo)$/u.test(method) &&
+        isDomReceiverExpression(node.expression.expression, sourceFile, receiverIdentifiers)
+      ) {
+        found = true;
+        return;
+      }
+      if (
+        (method === 'setAttribute' ||
+          method === 'toggleAttribute' ||
+          method === 'removeAttribute') &&
+        isDomReceiverExpression(node.expression.expression, sourceFile, receiverIdentifiers) &&
+        node.arguments.length > 0 &&
+        ts.isStringLiteralLike(node.arguments[0]) &&
+        /^aria-/u.test(node.arguments[0].text)
+      ) {
+        found = true;
+        return;
+      }
+      if (
+        ts.isPropertyAccessExpression(node.expression.expression) &&
+        node.expression.expression.name.text === 'classList' &&
+        isDomReceiverExpression(
+          node.expression.expression.expression,
+          sourceFile,
+          receiverIdentifiers
+        ) &&
+        /^(?:add|remove|replace|toggle)$/u.test(method)
       ) {
         found = true;
         return;
@@ -977,8 +1119,65 @@ function jsxOpeningTagCandidates(content) {
   return candidates;
 }
 
+function maskStringsInMdxBraceExpressions(content) {
+  const characters = [...content];
+  let braceDepth = 0;
+  let quote = null;
+  let escaped = false;
+  let lineComment = false;
+  let blockComment = false;
+  for (let index = 0; index < characters.length; index += 1) {
+    const character = characters[index];
+    if (lineComment) {
+      if (character === '\n' || character === '\r') lineComment = false;
+      else characters[index] = ' ';
+      continue;
+    }
+    if (blockComment) {
+      if (character === '*' && characters[index + 1] === '/') {
+        characters[index] = ' ';
+        characters[index + 1] = ' ';
+        index += 1;
+        blockComment = false;
+      } else if (character !== '\n' && character !== '\r') {
+        characters[index] = ' ';
+      }
+      continue;
+    }
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === quote) quote = null;
+      if (character !== '\n' && character !== '\r') characters[index] = ' ';
+      continue;
+    }
+    if (braceDepth > 0 && (character === '"' || character === "'" || character === '`')) {
+      quote = character;
+      characters[index] = ' ';
+      continue;
+    }
+    if (braceDepth > 0 && character === '/' && characters[index + 1] === '/') {
+      lineComment = true;
+      characters[index] = ' ';
+      characters[index + 1] = ' ';
+      index += 1;
+      continue;
+    }
+    if (braceDepth > 0 && character === '/' && characters[index + 1] === '*') {
+      blockComment = true;
+      characters[index] = ' ';
+      characters[index + 1] = ' ';
+      index += 1;
+      continue;
+    }
+    if (character === '{') braceDepth += 1;
+    else if (character === '}' && braceDepth > 0) braceDepth -= 1;
+  }
+  return characters.join('');
+}
+
 function markupSourceForJsxFallback(content, absolutePath) {
-  if (/\.mdx?$/i.test(absolutePath)) return content;
+  if (/\.mdx?$/i.test(absolutePath)) return maskStringsInMdxBraceExpressions(content);
   if (!/\.(?:astro|vue|svelte)$/i.test(absolutePath)) return null;
 
   let markup = content;
@@ -1035,7 +1234,7 @@ function containsFrameworkTemplateEventDirective(candidate, absolutePath) {
 }
 
 function containsJsxEventHandler(content, absolutePath) {
-  if (astContainsJsxEventHandler(content)) return true;
+  if (!/\.mdx?$/i.test(absolutePath) && astContainsJsxEventHandler(content)) return true;
 
   if (
     /\.(?:astro|vue|svelte)$/i.test(absolutePath) &&
@@ -1064,6 +1263,7 @@ function containsInteractiveSource(content, absolutePath) {
     return astContainsInteractiveRuntime(content) || containsJsxEventHandler(content, absolutePath);
   }
   return (
+    (/\.mdx?$/i.test(absolutePath) && astContainsInteractiveRuntime(content)) ||
     INTERACTIVE_SOURCE_PATTERNS.some((pattern) => pattern.test(content)) ||
     containsJsxEventHandler(content, absolutePath)
   );
@@ -1093,12 +1293,17 @@ function discoverWebsiteInteractiveSources(rootDir) {
 
 function discoverWebsiteComponentSources(rootDir) {
   const websiteSourceRoot = path.join(rootDir, 'apps', 'www', 'src');
+  const pagesRoot = path.join(websiteSourceRoot, 'pages');
   return ['components', 'pages']
     .flatMap((directory) => {
       const absoluteRoot = path.join(websiteSourceRoot, directory);
       return fs.existsSync(absoluteRoot) ? walkFiles(absoluteRoot) : [];
     })
-    .filter((absolutePath) => /\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath))
+    .filter(
+      (absolutePath) =>
+        /\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath) ||
+        (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath))
+    )
     .filter(
       (absolutePath) =>
         !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath)
@@ -1115,16 +1320,55 @@ function astContainsExportedUserFacingComponent(content, absolutePath) {
     true,
     /.jsx$/i.test(absolutePath) ? ts.ScriptKind.JSX : ts.ScriptKind.TSX
   );
-  let containsJsx = false;
+  const reactNamespaceNames = new Set();
+  const reactCreateElementNames = new Set();
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== 'react'
+    ) {
+      continue;
+    }
+    const importClause = statement.importClause;
+    if (importClause?.name) reactNamespaceNames.add(importClause.name.text);
+    if (importClause?.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
+      reactNamespaceNames.add(importClause.namedBindings.name.text);
+    }
+    if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+      for (const element of importClause.namedBindings.elements) {
+        if ((element.propertyName ?? element.name).text === 'createElement') {
+          reactCreateElementNames.add(element.name.text);
+        }
+      }
+    }
+  }
+
+  let containsRenderedSurface = false;
   const visit = (node) => {
     if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node)) {
-      containsJsx = true;
+      containsRenderedSurface = true;
       return;
+    }
+    if (ts.isCallExpression(node)) {
+      if (
+        ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.expression) &&
+        reactNamespaceNames.has(node.expression.expression.text) &&
+        node.expression.name.text === 'createElement'
+      ) {
+        containsRenderedSurface = true;
+        return;
+      }
+      if (ts.isIdentifier(node.expression) && reactCreateElementNames.has(node.expression.text)) {
+        containsRenderedSurface = true;
+        return;
+      }
     }
     ts.forEachChild(node, visit);
   };
   visit(sourceFile);
-  if (!containsJsx) return false;
+  if (!containsRenderedSurface) return false;
 
   return sourceFile.statements.some(
     (statement) =>
@@ -1141,10 +1385,10 @@ function astContainsExportedUserFacingComponent(content, absolutePath) {
 function discoverHarnessUserFacingSources(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
   return walkFiles(sourceRoot)
-    .filter((absolutePath) => /\.[jt]sx$/i.test(absolutePath))
+    .filter((absolutePath) => /\.[jt]sx?$/i.test(absolutePath))
     .filter(
       (absolutePath) =>
-        !/\.(?:browser\.)?(?:test|spec|stories)\.[jt]sx$/i.test(absolutePath) &&
+        !/\.(?:browser\.)?(?:test|spec|stories)\.[jt]sx?$/i.test(absolutePath) &&
         !absolutePath.startsWith(path.join(sourceRoot, 'proto-ui') + path.sep)
     )
     .filter((absolutePath) => {
@@ -1237,12 +1481,28 @@ function styleModuleSpecifiers(content) {
     if (!/^@(?:import|use|forward)\b/iu.test(content.slice(index))) {
       continue;
     }
-    const match = content
-      .slice(index)
-      .match(/^@(?:import|use|forward)\b\s+(?:url\(\s*)?(?:(['"])([^'"]+)\1|([^'"\s;)]+))/iu);
-    if (match) {
-      specifiers.push(match[2] ?? match[3]);
-      index += match[0].length - 1;
+    const directive = content.slice(index).match(/^@(import|use|forward)\b\s+/iu);
+    if (directive) {
+      const targetPattern =
+        /^(?:url\(\s*(?:(['"])([^'"]+)\1|([^'"\s)]+))\s*\)|(?:(['"])([^'"]+)\4|([^'"\s;,)]+)))/u;
+      const firstTarget = content.slice(index + directive[0].length).match(targetPattern);
+      if (!firstTarget) continue;
+      const targetValue = (target) => target[2] ?? target[3] ?? target[5] ?? target[6];
+      specifiers.push(targetValue(firstTarget));
+      let consumedLength = directive[0].length + firstTarget[0].length;
+      if (directive[1].toLowerCase() === 'import') {
+        while (true) {
+          const comma = content.slice(index + consumedLength).match(/^\s*,\s*/u);
+          if (!comma) break;
+          const additionalTarget = content
+            .slice(index + consumedLength + comma[0].length)
+            .match(targetPattern);
+          if (!additionalTarget) break;
+          specifiers.push(targetValue(additionalTarget));
+          consumedLength += comma[0].length + additionalTarget[0].length;
+        }
+      }
+      index += consumedLength - 1;
     }
   }
   return specifiers;
@@ -1269,7 +1529,17 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
   return scriptModuleSpecifiers(source, absolutePath);
 }
 
-function guardedWebsiteImport(rootDir, sourcePath, specifier) {
+function configuredWebsiteSourceAliasRoot(rootDir) {
+  const configPath = path.join(rootDir, 'apps', 'www', 'astro.config.mjs');
+  if (!fs.existsSync(configPath)) return null;
+  const configSource = fs.readFileSync(configPath, 'utf8');
+  const match = configSource.match(
+    /\balias\s*:\s*\{[\s\S]*?['"]@['"]\s*:\s*fileURLToPath\s*\(\s*new URL\s*\(\s*['"]([^'"]+)['"]\s*,\s*import\.meta\.url\s*\)\s*\)/u
+  );
+  return match ? path.resolve(path.dirname(configPath), match[1]) : null;
+}
+
+function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAliasRoot) {
   if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
     return { category: 'adapter-package', resolvedPath: null };
   }
@@ -1285,10 +1555,17 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier) {
   if (/^@proto\.ui\/runtime(?:\/|$)/u.test(specifier)) {
     return { category: 'runtime-package', resolvedPath: null };
   }
-  if (!specifier.startsWith('.')) return null;
+  const websiteAliasPrefix = '@/';
+  const isWebsiteSourceAlias = websiteSourceAliasRoot && specifier.startsWith(websiteAliasPrefix);
+  if (!specifier.startsWith('.') && !isWebsiteSourceAlias) return null;
 
   const resolvedPath = path
-    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), specifier))
+    .relative(
+      rootDir,
+      isWebsiteSourceAlias
+        ? path.resolve(websiteSourceAliasRoot, specifier.slice(websiteAliasPrefix.length))
+        : path.resolve(rootDir, path.dirname(sourcePath), specifier)
+    )
     .replaceAll('\\', '/');
   if (/^packages\/prototypes\/[^/]+\/src(?:\/|$)/u.test(resolvedPath)) {
     return { category: 'prototype-internal', resolvedPath };
@@ -1349,10 +1626,16 @@ function discoverWebsiteRawImports(rootDir) {
     )
     .filter((absolutePath) => !/\.(?:browser\.)?(?:test|spec)\.[cm]?[jt]sx?$/i.test(absolutePath));
   const rawImports = [];
+  const websiteSourceAliasRoot = configuredWebsiteSourceAliasRoot(rootDir);
   for (const absolutePath of candidates) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
     for (const specifier of moduleSpecifiersForWebsiteSource(absolutePath)) {
-      const guardedImport = guardedWebsiteImport(rootDir, sourcePath, specifier);
+      const guardedImport = guardedWebsiteImport(
+        rootDir,
+        sourcePath,
+        specifier,
+        websiteSourceAliasRoot
+      );
       if (guardedImport) rawImports.push({ sourcePath, specifier, ...guardedImport });
     }
   }
@@ -1530,18 +1813,200 @@ function requireLabels(value, labels, context, issues) {
 function requireMeaningfulLabels(value, labels, context, issues) {
   const nextLabelPattern = labels.map(escapeRegularExpression).join('|');
   for (const label of labels) {
-    const match = value.match(
-      new RegExp(
-        `\\b${escapeRegularExpression(label)}[ \\t]*(.*?)(?=;|\\b(?:${nextLabelPattern})[ \\t]*|[\\r\\n]|$)`,
-        'i'
-      )
-    );
+    const match = value.match(labelValuePattern(label, nextLabelPattern));
     if (!match) {
       issues.push(`${context}: missing required \`${label}\` label`);
     } else if (!isMeaningful(match[1])) {
       issues.push(`${context}: required \`${label}\` label must have a meaningful value`);
     }
   }
+}
+
+function labelValuePattern(label, nextLabelPattern) {
+  return new RegExp(
+    `\\b${escapeRegularExpression(label)}[ \\t]*(.*?)(?=;|\\b(?:${nextLabelPattern})[ \\t]*|[\\r\\n]|$)`,
+    'i'
+  );
+}
+
+function evidenceRecordLabelValue(record, label) {
+  const nextLabelPattern = SELF_HOSTED_WEBSITE_RECORD_LABELS.map(escapeRegularExpression).join('|');
+  return record.match(labelValuePattern(label, nextLabelPattern))?.[1].trim() ?? '';
+}
+
+function inlineCodeValues(value) {
+  return [...value.matchAll(/`([^`\r\n]+)`/g)].map((match) => match[1].trim());
+}
+
+function readFileSignature(absolutePath, length = 12) {
+  if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) return false;
+  const descriptor = fs.openSync(absolutePath, 'r');
+  const signature = Buffer.alloc(length);
+  try {
+    return signature.subarray(0, fs.readSync(descriptor, signature, 0, length, 0));
+  } finally {
+    fs.closeSync(descriptor);
+  }
+}
+
+function hasImageFileSignature(absolutePath) {
+  const signature = readFileSignature(absolutePath);
+  if (!signature) return false;
+  if (signature.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'))) return true;
+  if (signature.subarray(0, 3).equals(Buffer.from('ffd8ff', 'hex'))) return true;
+  if (signature.subarray(0, 6).toString('ascii') === 'GIF87a') return true;
+  if (signature.subarray(0, 6).toString('ascii') === 'GIF89a') return true;
+  return (
+    signature.subarray(0, 4).toString('ascii') === 'RIFF' &&
+    signature.subarray(8, 12).toString('ascii') === 'WEBP'
+  );
+}
+
+function hasVideoFileSignature(absolutePath) {
+  const signature = readFileSignature(absolutePath);
+  if (!signature) return false;
+  return (
+    signature.subarray(0, 4).equals(Buffer.from('1a45dfa3', 'hex')) ||
+    signature.subarray(4, 8).toString('ascii') === 'ftyp'
+  );
+}
+
+function canonicalRetainedEvidenceFile(rootDir, repositoryPath) {
+  if (typeof repositoryPath !== 'string') return null;
+  const evidenceRoot = path.resolve(rootDir, SELF_HOSTED_WEBSITE_EVIDENCE_ROOT);
+  const absolutePath = path.resolve(rootDir, repositoryPath);
+  const relativePath = path.relative(evidenceRoot, absolutePath);
+  if (!relativePath || relativePath.startsWith('..') || path.isAbsolute(relativePath)) return null;
+  if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) return null;
+
+  const canonicalRoot = fs.realpathSync.native(evidenceRoot);
+  const canonicalPath = fs.realpathSync.native(absolutePath);
+  const canonicalRelativePath = path.relative(canonicalRoot, canonicalPath);
+  if (
+    !canonicalRelativePath ||
+    canonicalRelativePath.startsWith('..') ||
+    path.isAbsolute(canonicalRelativePath)
+  ) {
+    return null;
+  }
+  return canonicalPath;
+}
+
+function validateRetainedEvidenceArtifacts(record, context, rootDir, issues) {
+  const artifactLabels = [
+    'Build:',
+    'Browser:',
+    'Accessibility:',
+    'Screenshot:',
+    'Multi-frame:',
+    'Results:',
+  ];
+  const artifactsByLabel = new Map();
+  for (const label of artifactLabels) {
+    const value = evidenceRecordLabelValue(record, label);
+    const artifactPaths = explicitRepositoryPaths(value).filter((repositoryPath) =>
+      repositoryPath.startsWith(SELF_HOSTED_WEBSITE_EVIDENCE_ROOT)
+    );
+    artifactsByLabel.set(label, artifactPaths);
+    if (artifactPaths.length === 0) {
+      issues.push(
+        `${context}: ${label} must bind an exact retained artifact under internal/website/evidence/**`
+      );
+      continue;
+    }
+    for (const repositoryPath of artifactPaths) {
+      const absolutePath = path.resolve(rootDir, repositoryPath);
+      if (!fs.existsSync(absolutePath)) {
+        issues.push(`${context}: ${label} retained artifact does not exist: ${repositoryPath}`);
+      } else if (!fs.statSync(absolutePath).isFile()) {
+        issues.push(`${context}: ${label} retained artifact must be a file: ${repositoryPath}`);
+      } else if (fs.statSync(absolutePath).size === 0) {
+        issues.push(`${context}: ${label} retained artifact must not be empty: ${repositoryPath}`);
+      }
+    }
+  }
+
+  for (const repositoryPath of artifactsByLabel.get('Screenshot:') ?? []) {
+    const absolutePath = path.resolve(rootDir, repositoryPath);
+    if (
+      !/\.(?:gif|jpe?g|png|webp)$/i.test(repositoryPath) ||
+      !hasImageFileSignature(absolutePath)
+    ) {
+      issues.push(
+        `${context}: Screenshot: retained artifact must be a recognized image file: ${repositoryPath}`
+      );
+    }
+  }
+
+  for (const repositoryPath of artifactsByLabel.get('Multi-frame:') ?? []) {
+    const absolutePath = path.resolve(rootDir, repositoryPath);
+    if (/\.(?:mkv|mov|mp4|webm)$/i.test(repositoryPath)) {
+      if (!hasVideoFileSignature(absolutePath)) {
+        issues.push(
+          `${context}: Multi-frame: retained video artifact has an unrecognized signature: ${repositoryPath}`
+        );
+      }
+      continue;
+    }
+    if (!/\.json$/i.test(repositoryPath) || !fs.existsSync(absolutePath)) {
+      issues.push(
+        `${context}: Multi-frame: retained artifact must be a recognized video or JSON frame manifest: ${repositoryPath}`
+      );
+      continue;
+    }
+    try {
+      const manifest = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+      if (!Array.isArray(manifest.frames) || manifest.frames.length < 2) {
+        issues.push(
+          `${context}: Multi-frame: JSON manifest must retain at least two distinct frame paths: ${repositoryPath}`
+        );
+        continue;
+      }
+      const canonicalFrames = new Set();
+      for (const framePath of manifest.frames) {
+        const canonicalFrame = canonicalRetainedEvidenceFile(rootDir, framePath);
+        if (!canonicalFrame) {
+          issues.push(
+            `${context}: Multi-frame: JSON manifest frame must be an existing retained artifact under internal/website/evidence/**: ${String(framePath)}`
+          );
+          continue;
+        }
+        canonicalFrames.add(
+          process.platform === 'win32' ? canonicalFrame.toLowerCase() : canonicalFrame
+        );
+        if (!hasImageFileSignature(canonicalFrame)) {
+          issues.push(
+            `${context}: Multi-frame: JSON manifest frame must be a recognized image file: ${String(framePath)}`
+          );
+        }
+      }
+      if (canonicalFrames.size < 2) {
+        issues.push(
+          `${context}: Multi-frame: JSON manifest must retain at least two canonically distinct frame paths: ${repositoryPath}`
+        );
+      }
+    } catch {
+      issues.push(`${context}: Multi-frame: JSON frame manifest is invalid: ${repositoryPath}`);
+    }
+  }
+}
+
+function validateSelfHostedWebsiteEvidenceRecord(record, context, rootDir, issues) {
+  const routes = inlineCodeValues(evidenceRecordLabelValue(record, 'Routes:')).filter((value) =>
+    /^\/(?:[A-Za-z0-9._~!$&'()*+,;=:@%-]+\/)*[A-Za-z0-9._~!$&'()*+,;=:@%-]*$/u.test(value)
+  );
+  if (routes.length === 0) {
+    issues.push(`${context}: Routes: must name at least one exact \`/route/\` in inline code`);
+  }
+
+  const commands = inlineCodeValues(evidenceRecordLabelValue(record, 'Commands:')).filter((value) =>
+    /^(?:corepack\s+)?(?:bun|node|npm|pnpm(?:@[^\s]+)?|yarn)(?:\s|$)/u.test(value)
+  );
+  if (commands.length === 0) {
+    issues.push(`${context}: Commands: must name at least one executable command in inline code`);
+  }
+
+  validateRetainedEvidenceArtifacts(record, context, rootDir, issues);
 }
 
 function validateMainRows(config, table, relativePath, rootDir, catalogEntries, issues) {
@@ -1695,6 +2160,19 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       }
     }
 
+    if (config.kind === 'website' && WEBSITE_SHIPPED_STATES.includes(state)) {
+      const removedChainEntities = chainIds.filter(
+        (entityId) => catalogEntries.get(entityId)?.status === 'removed'
+      );
+      if (removedChainEntities.length > 0) {
+        issues.push(
+          `${context}: shipped website State \`${state}\` must not consume removed catalog entities: ${removedChainEntities
+            .map((entityId) => `\`${entityId}\``)
+            .join(', ')}`
+        );
+      }
+    }
+
     if (config.kind === 'website' && (state === 'ready' || state === 'self-hosted')) {
       if (chainIds.length === 0) {
         issues.push(
@@ -1726,6 +2204,43 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     }
     if (!isMeaningful(record.Evidence)) {
       issues.push(`${context}: Evidence must name a baseline, executable check, or evidence path`);
+    }
+    if (config.kind === 'website' && state === 'self-hosted') {
+      const evidencePaths = explicitRepositoryPaths(record.Evidence).filter((repositoryPath) =>
+        repositoryPath.startsWith(SELF_HOSTED_WEBSITE_EVIDENCE_ROOT)
+      );
+      if (evidencePaths.length === 0) {
+        issues.push(
+          `${context}: self-hosted rows must bind an exact internal/website/evidence/** path in Evidence`
+        );
+      }
+      for (const repositoryPath of evidencePaths) {
+        const absoluteEvidencePath = path.resolve(rootDir, repositoryPath);
+        if (!fs.existsSync(absoluteEvidencePath)) continue;
+        if (!fs.statSync(absoluteEvidencePath).isFile()) {
+          issues.push(`${context}: self-hosted evidence path must be a file: ${repositoryPath}`);
+          continue;
+        }
+        const evidenceRecord = fs.readFileSync(absoluteEvidencePath, 'utf8');
+        requireMeaningfulLabels(
+          evidenceRecord,
+          SELF_HOSTED_WEBSITE_RECORD_LABELS,
+          `${context} self-hosted evidence record ${repositoryPath}`,
+          issues
+        );
+        const evidenceCommit = evidenceRecord.match(/\bCommit:\s*([^\r\n;|]*)/i)?.[1].trim();
+        if (evidenceCommit && !/^[0-9a-f]{40}$/i.test(evidenceCommit)) {
+          issues.push(
+            `${context} self-hosted evidence record ${repositoryPath} must bind Commit to an exact 40-character Git SHA`
+          );
+        }
+        validateSelfHostedWebsiteEvidenceRecord(
+          evidenceRecord,
+          `${context} self-hosted evidence record ${repositoryPath}`,
+          rootDir,
+          issues
+        );
+      }
     }
     if (config.kind === 'agent-harness' && state === 'dogfooded') {
       const removedChainEntities = chainIds.filter(
@@ -1961,6 +2476,7 @@ function validateWebsiteSourceBindings(
   issues
 ) {
   const bindings = parseSourceBindings(lines, afterIndex, relativePath, issues);
+  const interactiveSources = new Set(discoverWebsiteInteractiveSources(rootDir));
   for (const [sourcePath, binding] of bindings) {
     if (!fs.existsSync(path.resolve(rootDir, sourcePath))) {
       issues.push(
@@ -1985,7 +2501,6 @@ function validateWebsiteSourceBindings(
       );
       continue;
     }
-
     if (directOwners.length === 1 && binding) {
       const directId = directOwners[0].id;
       const boundIds = [...new Set(binding.ownerIds)].sort();
@@ -2015,7 +2530,7 @@ function validateWebsiteSourceBindings(
     }
   }
 
-  for (const sourcePath of discoverWebsiteInteractiveSources(rootDir)) {
+  for (const sourcePath of interactiveSources) {
     const directOwners = matrixResult.sourceOwners.get(sourcePath) ?? [];
     const binding = bindings.get(sourcePath);
     if (directOwners.length === 0 && !binding) {
