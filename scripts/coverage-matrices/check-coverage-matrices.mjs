@@ -1004,14 +1004,36 @@ function domReceiverBindings(sourceFile) {
     bindingsByName.set(name, bindings);
   };
   const collect = (node) => {
-    if ((ts.isParameter(node) || ts.isVariableDeclaration(node)) && ts.isIdentifier(node.name)) {
-      addBinding(
-        node.name.text,
-        node,
-        node.initializer ? unwrapTypeScriptExpression(node.initializer) : null,
-        isDomTypeNode(node.type, sourceFile) ||
-          (ts.isParameter(node) && /^(?:el|element)$/u.test(node.name.text))
-      );
+    if (ts.isParameter(node) || ts.isVariableDeclaration(node)) {
+      const bindings = [];
+      if (ts.isIdentifier(node.name)) {
+        bindings.push({
+          name: node.name.text,
+          intrinsicallyDom: isDomTypeNode(node.type, sourceFile),
+        });
+      } else if (ts.isObjectBindingPattern(node.name) && node.initializer) {
+        for (const element of node.name.elements) {
+          if (!ts.isBindingElement(element) || !ts.isIdentifier(element.name)) continue;
+          const propertyName = element.propertyName ?? element.name;
+          bindings.push({
+            name: element.name.text,
+            intrinsicallyDom:
+              ts.isIdentifier(propertyName) &&
+              propertyName.text === 'current' &&
+              ts.isIdentifier(node.initializer) &&
+              /(?:Element|Node|Ref)$/u.test(node.initializer.text),
+          });
+        }
+      }
+      for (const binding of bindings) {
+        addBinding(
+          binding.name,
+          node,
+          node.initializer ? unwrapTypeScriptExpression(node.initializer) : null,
+          binding.intrinsicallyDom ||
+            (ts.isParameter(node) && /^(?:el|element)$/u.test(binding.name))
+        );
+      }
     }
     if (
       ts.isBinaryExpression(node) &&
@@ -1406,6 +1428,7 @@ function containsInteractiveSource(content, absolutePath) {
 function discoverWebsiteInteractiveSources(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'www', 'src');
   const contentRoot = path.join(sourceRoot, 'content', 'docs');
+  const publicRoot = path.join(rootDir, 'apps', 'www', 'public');
   return walkFiles(sourceRoot)
     .filter((absolutePath) => /\.(?:astro|vue|svelte|[cm]?[jt]sx?)$/.test(absolutePath))
     .filter((absolutePath) => !absolutePath.startsWith(`${contentRoot}${path.sep}`))
@@ -1413,6 +1436,7 @@ function discoverWebsiteInteractiveSources(rootDir) {
       walkFiles(contentRoot).filter((absolutePath) => /\.(?:mdx?|vue|svelte)$/.test(absolutePath))
     )
     .concat(walkFiles(contentRoot).filter((absolutePath) => /\.[cm]?[jt]sx?$/.test(absolutePath)))
+    .concat(walkFiles(publicRoot).filter((absolutePath) => /\.[cm]?[jt]sx?$/.test(absolutePath)))
     .filter(
       (absolutePath, index, files) =>
         files.indexOf(absolutePath) === index &&
@@ -1429,11 +1453,22 @@ function discoverWebsiteComponentSources(rootDir) {
   const websiteSourceRoot = path.join(rootDir, 'apps', 'www', 'src');
   const componentsRoot = path.join(websiteSourceRoot, 'components');
   const pagesRoot = path.join(websiteSourceRoot, 'pages');
+  const contentRoot = path.join(websiteSourceRoot, 'content', 'docs');
   return ['components', 'pages']
     .flatMap((directory) => {
       const absoluteRoot = path.join(websiteSourceRoot, directory);
       return fs.existsSync(absoluteRoot) ? walkFiles(absoluteRoot) : [];
     })
+    .concat(
+      walkFiles(contentRoot).filter(
+        (absolutePath) =>
+          /\.[jt]sx?$/i.test(absolutePath) &&
+          astContainsExportedUserFacingComponent(
+            fs.readFileSync(absolutePath, 'utf8'),
+            absolutePath
+          )
+      )
+    )
     .filter((absolutePath) => {
       if (/\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath)) return true;
       if (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath)) {
@@ -1751,8 +1786,81 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
 function containsHarnessForbiddenStateMachine(content, absolutePath) {
   return (
     astContainsInteractiveRuntime(content) ||
-    astContainsNativeJsxEventHandler(content, absolutePath)
+    astContainsNativeJsxEventHandler(content, absolutePath) ||
+    astContainsHarnessRenderAction(content)
   );
+}
+
+function astContainsHarnessRenderAction(content) {
+  const sourceFile = ts.createSourceFile(
+    'harness-source.tsx',
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const actionNames = new Set([
+    'approve',
+    'createSession',
+    'deleteArtifact',
+    'deny',
+    'navigate',
+    'patch',
+    'removeSession',
+    'retry',
+    'send',
+    'stop',
+    'upload',
+  ]);
+  const isActionCall = (node) =>
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    actionNames.has(node.expression.text);
+  const containsActionCall = (root) => {
+    let found = false;
+    const visit = (node) => {
+      if (found) return;
+      if (isActionCall(node)) {
+        found = true;
+        return;
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(root);
+    return found;
+  };
+  const componentName = (node) => {
+    for (let current = node.parent; current; current = current.parent) {
+      if (ts.isFunctionDeclaration(current) || ts.isClassDeclaration(current)) {
+        return current.name?.text ?? '';
+      }
+      if (ts.isVariableDeclaration(current) && ts.isIdentifier(current.name)) {
+        return current.name.text;
+      }
+    }
+    return '';
+  };
+  let found = false;
+  const visit = (node) => {
+    if (found) return;
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+      if (
+        node.expression.text === 'useEffect' &&
+        node.arguments[0] &&
+        containsActionCall(node.arguments[0])
+      ) {
+        found = true;
+        return;
+      }
+      if (isActionCall(node) && /^[A-Z]/u.test(componentName(node))) {
+        found = true;
+        return;
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return found;
 }
 
 function discoverHarnessForbiddenStateMachineSources(rootDir) {
@@ -1783,20 +1891,42 @@ function scriptModuleSpecifiers(source, fileName) {
   const addLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) specifiers.push(node.text);
   };
+  const addGlobArgument = (node) => {
+    if (ts.isArrayLiteralExpression(node)) {
+      for (const element of node.elements) addLiteral(element);
+    } else {
+      addLiteral(node);
+    }
+  };
   const visit = (node) => {
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
       addLiteral(node.moduleSpecifier);
-    } else if (
-      ts.isCallExpression(node) &&
-      (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
-        (ts.isIdentifier(node.expression) && node.expression.text === 'require'))
-    ) {
-      addLiteral(node.arguments[0]);
+    } else if (ts.isCallExpression(node)) {
+      const callee = node.expression;
+      const isImportMetaGlob =
+        ts.isPropertyAccessExpression(callee) &&
+        /^(?:glob|globEager)$/u.test(callee.name.text) &&
+        ts.isMetaProperty(callee.expression) &&
+        callee.expression.keywordToken === ts.SyntaxKind.ImportKeyword;
+      if (isImportMetaGlob) {
+        addGlobArgument(node.arguments[0]);
+      } else if (
+        callee.kind === ts.SyntaxKind.ImportKeyword ||
+        (ts.isIdentifier(callee) && callee.text === 'require')
+      ) {
+        addLiteral(node.arguments[0]);
+      }
     }
     ts.forEachChild(node, visit);
   };
   visit(sourceFile);
   return specifiers;
+}
+
+function externalScriptModuleSpecifiers(content) {
+  return [
+    ...content.matchAll(/<script\b[^>]*\bsrc\s*=\s*(?:(['"])([^'"]+)\1|([^\s"'=<>`]+))/giu),
+  ].map((match) => match[2] ?? match[3]);
 }
 
 function embeddedScriptSegments(content) {
@@ -1895,6 +2025,7 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
   }
   if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
     return [
+      ...externalScriptModuleSpecifiers(content),
       ...embeddedScriptSegments(content).flatMap((segment) =>
         scriptModuleSpecifiers(segment, absolutePath)
       ),
@@ -1917,6 +2048,19 @@ function configuredWebsiteSourceAliasRoot(rootDir) {
 
 function importSpecifierWithoutViteSuffix(specifier) {
   return specifier.replace(/[?#].*$/u, '');
+}
+
+function canonicalImportTarget(absolutePath) {
+  if (/[?*{}\[\]]/u.test(absolutePath)) return absolutePath;
+  let existing = absolutePath;
+  const suffix = [];
+  while (!fs.existsSync(existing)) {
+    const parent = path.dirname(existing);
+    if (parent === existing) return absolutePath;
+    suffix.unshift(path.basename(existing));
+    existing = parent;
+  }
+  return path.join(fs.realpathSync(existing), ...suffix);
 }
 
 function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAliasRoot) {
@@ -1948,8 +2092,15 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAlias
     .relative(
       rootDir,
       isWebsiteSourceAlias
-        ? path.resolve(websiteSourceAliasRoot, classifiedSpecifier.slice(websiteAliasPrefix.length))
-        : path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier)
+        ? canonicalImportTarget(
+            path.resolve(
+              websiteSourceAliasRoot,
+              classifiedSpecifier.slice(websiteAliasPrefix.length)
+            )
+          )
+        : canonicalImportTarget(
+            path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier)
+          )
     )
     .replaceAll('\\', '/');
   if (/^packages\/prototypes\/[^/]+\/src(?:\/|$)/u.test(resolvedPath)) {
@@ -1977,9 +2128,11 @@ function guardedHarnessImport(rootDir, sourcePath, specifier) {
     return { category: 'proto-ui-package', resolvedPath: null };
   }
   if (!classifiedSpecifier.startsWith('.')) return null;
-
   const resolvedPath = path
-    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier))
+    .relative(
+      rootDir,
+      canonicalImportTarget(path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier))
+    )
     .replaceAll('\\', '/');
   if (/^packages\/.+\/src(?:\/|$)/u.test(resolvedPath)) {
     return { category: 'package-internal', resolvedPath };
@@ -2005,8 +2158,10 @@ function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport) {
 function discoverWebsiteRawImports(rootDir) {
   const websiteRoot = path.join(rootDir, 'apps', 'www');
   const sourceRoot = path.join(websiteRoot, 'src');
+  const publicRoot = path.join(websiteRoot, 'public');
   const configPath = path.join(websiteRoot, 'astro.config.mjs');
   const candidates = walkFiles(sourceRoot)
+    .concat(walkFiles(publicRoot))
     .concat(fs.existsSync(configPath) ? [configPath] : [])
     .filter((absolutePath) =>
       /\.(?:astro|mdx?|[cm]?[jt]sx?|css|less|s[ac]ss|vue|svelte)$/i.test(absolutePath)
@@ -2868,8 +3023,10 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
   for (const row of table.rows) {
     const context = `${relativePath}:${row.line}`;
     const sourcePaths = explicitRepositoryPaths(row.cells[0]);
-    if (sourcePaths.length !== 1 || !sourcePaths[0].startsWith('apps/www/src/')) {
-      issues.push(`${context}: source binding must name exactly one \`apps/www/src/**\` path`);
+    if (sourcePaths.length !== 1 || !/^apps\/www\/(?:src|public)\//u.test(sourcePaths[0])) {
+      issues.push(
+        `${context}: source binding must name exactly one \`apps/www/src/**\` or \`apps/www/public/**\` path`
+      );
       continue;
     }
     const sourcePath = sourcePaths[0];

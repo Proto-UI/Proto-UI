@@ -3914,3 +3914,136 @@ test('guards the privileged hooks package in Website consumers', () => {
     /raw Proto UI import `@proto\.ui\/hooks` in `apps\/www\/src\/components\/HookEscape\.ts`/
   );
 });
+
+test('detects destructured DOM receivers in Website interactions', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/content/docs/destructured-focus.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function focusCurrent(inputRef) { const { current: input } = inputRef; input.focus(); }',
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/content\/docs\/destructured-focus\.ts` is not bound/
+  );
+});
+
+test('rejects Agent actions from Harness render effects', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/AutoApprove.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function AutoApprove({ id }) { useEffect(() => approve(id), [id]); return <main>Run</main>; }',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    { harnessBindings: [[relativePath, ['harness.transcript.viewport']]] }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/AutoApprove\.tsx` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('scans executable Website scripts under public assets', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/public/raw-navigation.js';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, 'window.addEventListener("keydown", navigate);', 'utf8');
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/public\/raw-navigation\.js` is not bound/
+  );
+});
+
+test('inspects Vite glob imports at the Website consumer wall', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/GlobEscape.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export const modules = import.meta.glob("../../../../packages/runtime/src/**");',
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `\.\.\/\.\.\/\.\.\/\.\.\/packages\/runtime\/src\/\*\*` in `apps\/www\/src\/components\/GlobEscape\.ts`/
+  );
+});
+
+test('discovers static components co-located with Website documentation', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/content/docs/Callout.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function Callout() { return <aside>Note</aside>; }',
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /website component source `apps\/www\/src\/content\/docs\/Callout\.tsx` is not classified/
+  );
+});
+
+test('inspects external Astro script src module paths', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/ExternalScriptEscape.astro';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    '<script src="../../../../packages/runtime/src/index.ts"></script>',
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `\.\.\/\.\.\/\.\.\/\.\.\/packages\/runtime\/src\/index\.ts` in `apps\/www\/src\/components\/ExternalScriptEscape\.astro`/
+  );
+});
+
+test('canonicalizes symlinked Website import targets', () => {
+  const root = createRoot();
+  const runtimeRoot = path.join(root, 'packages', 'runtime', 'src');
+  const symlinkRoot = path.join(root, 'apps', 'www', 'src', 'vendor');
+  const sourcePath = 'apps/www/src/components/SymlinkEscape.ts';
+  fs.mkdirSync(runtimeRoot, { recursive: true });
+  fs.mkdirSync(symlinkRoot, { recursive: true });
+  fs.writeFileSync(path.join(runtimeRoot, 'escape.ts'), 'export const escape = true;', 'utf8');
+  fs.symlinkSync(runtimeRoot, path.join(symlinkRoot, 'runtime'), 'dir');
+  const absoluteSourcePath = path.join(root, sourcePath);
+  fs.mkdirSync(path.dirname(absoluteSourcePath), { recursive: true });
+  fs.writeFileSync(
+    absoluteSourcePath,
+    'import { escape } from "../vendor/runtime/escape";',
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `\.\.\/vendor\/runtime\/escape` in `apps\/www\/src\/components\/SymlinkEscape\.ts`/
+  );
+});
