@@ -40,6 +40,9 @@ vi.mock('../site-shadcn-controls', () => ({
   setSelectValue: (root: HTMLElement, value: string) => {
     root.dataset.value = value;
   },
+  setSiteSelectDisabled: (root: HTMLElement, disabled: boolean) => {
+    root.dataset.disabled = String(disabled);
+  },
 }));
 
 import { initPreviewer } from './previewer-client';
@@ -126,6 +129,10 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
   it('routes a projected selection through one page-level remount path', async () => {
     const root = createProjectedPreviewerRoot();
     const select = root.querySelector('[data-adapter-select-root]') as SiteSelectRoot;
+    let resolveRemount: (() => void) | undefined;
+    const remount = new Promise<void>((resolve) => {
+      resolveRemount = resolve;
+    });
 
     initPreviewer({
       root,
@@ -138,6 +145,7 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
       expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
     );
     runtimeSpies.mount.mockClear();
+    runtimeSpies.mount.mockImplementation((id: string) => (id === 'vue2' ? remount : undefined));
 
     select.dispatchEvent(
       new CustomEvent('valueChange', { detail: { value: 'vue2' }, bubbles: true })
@@ -146,7 +154,10 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     await vi.waitFor(() =>
       expect(runtimeSpies.mount).toHaveBeenCalledWith('vue2', expect.anything())
     );
+    expect(select.dataset.disabled).toBe('true');
     expect(runtimeSpies.mount).toHaveBeenCalledTimes(1);
+    resolveRemount?.();
+    await vi.waitFor(() => expect(select.dataset.disabled).toBe('false'));
     await (root as any).__previewer__.destroy();
   });
 

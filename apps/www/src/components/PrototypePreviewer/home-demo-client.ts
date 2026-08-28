@@ -6,6 +6,7 @@ import type { RuntimeId } from './runtimes/registry';
 import {
   initSiteShadcnControls,
   selectValue,
+  setSiteSelectDisabled,
   setSelectValue,
   type SiteSelectRoot,
 } from '../site-shadcn-controls';
@@ -32,10 +33,6 @@ const DEFAULT_RUNTIME_OPTIONS: RuntimeOption[] = [
   { id: 'react', label: 'React' },
   { id: 'vue', label: 'Vue' },
 ];
-
-function setSelectDisabled(select: SiteSelectRoot, disabled: boolean): void {
-  select.setProps?.({ disabled });
-}
 
 function populateSelect(
   select: SiteSelectRoot,
@@ -98,8 +95,8 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   async function renderCurrent(runtime: RuntimeId, demoId: string) {
     if (destroyed) return;
     const currentVersion = ++version;
-    setSelectDisabled(runtimeSelectEl, true);
-    setSelectDisabled(demoSelectEl, true);
+    setSiteSelectDisabled(runtimeSelectEl, true);
+    setSiteSelectDisabled(demoSelectEl, true);
 
     try {
       if (active) {
@@ -137,8 +134,8 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
       console.error(error);
     } finally {
       if (!destroyed && currentVersion === version) {
-        setSelectDisabled(runtimeSelectEl, false);
-        setSelectDisabled(demoSelectEl, false);
+        setSiteSelectDisabled(runtimeSelectEl, false);
+        setSiteSelectDisabled(demoSelectEl, false);
       }
     }
   }

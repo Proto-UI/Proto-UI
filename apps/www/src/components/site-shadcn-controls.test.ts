@@ -1,8 +1,10 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   initSiteShadcnControls,
   registerSiteShadcnControls,
   selectValue,
+  setSiteSelectDisabled,
+  setSelectValue,
   type SiteSelectRoot,
 } from './site-shadcn-controls';
 
@@ -66,6 +68,40 @@ describe('site Shadcn control bridge', () => {
     expect(customElements.get('wc-shadcn-button')).toBeDefined();
     expect(button.getAttribute('role')).toBe('button');
     expect(button.getAttribute('data-pui-style')).toContain('bg-transparent');
+  });
+
+  it.each([
+    {
+      label: 'disabled then value',
+      update: (root: SiteSelectRoot) => {
+        setSiteSelectDisabled(root, true);
+        setSelectValue(root, 'vue');
+      },
+    },
+    {
+      label: 'value then disabled',
+      update: (root: SiteSelectRoot) => {
+        setSelectValue(root, 'vue');
+        setSiteSelectDisabled(root, true);
+      },
+    },
+    {
+      label: 'repeated value while disabled',
+      update: (root: SiteSelectRoot) => {
+        setSiteSelectDisabled(root, true);
+        setSelectValue(root, 'vue');
+        setSelectValue(root, 'vue');
+      },
+    },
+  ])('replays one merged Select prop bag for $label', async ({ update }) => {
+    const root = document.createElement('div') as SiteSelectRoot;
+    root.setProps = vi.fn();
+
+    update(root);
+    await settle();
+
+    expect(root.setProps).toHaveBeenCalledTimes(1);
+    expect(root.setProps).toHaveBeenLastCalledWith({ value: 'vue', disabled: true });
   });
 
   it('retains content text as the accessible source for projected icon buttons', async () => {

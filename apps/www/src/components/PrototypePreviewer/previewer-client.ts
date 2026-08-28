@@ -11,6 +11,7 @@ import { refreshCodePanel } from './code-panel-client';
 import {
   initSiteShadcnControls,
   selectValue,
+  setSiteSelectDisabled,
   setSelectValue,
   type SiteSelectRoot,
 } from '../site-shadcn-controls';
@@ -50,7 +51,7 @@ export function initPreviewer(options: PreviewerOptions) {
     else if (nativeSelect) nativeSelect.value = value;
   };
   const setSelectDisabled = (disabled: boolean) => {
-    if (selectRoot) selectRoot.setProps?.({ disabled });
+    if (selectRoot) setSiteSelectDisabled(selectRoot, disabled);
     else if (nativeSelect) nativeSelect.disabled = disabled;
   };
 

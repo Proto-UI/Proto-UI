@@ -27,6 +27,9 @@ export type SiteSelectRoot = HTMLElement & {
   setProps?: (props: Record<string, unknown>) => void;
 };
 
+const siteSelectProps = new WeakMap<SiteSelectRoot, Record<string, unknown>>();
+const pendingSelectReplays = new WeakSet<SiteSelectRoot>();
+
 /**
  * Projected Button hosts receive the browser's native `MouseEvent` and then
  * the Button protocol's outward `CustomEvent("click")`. Site consumers own
@@ -57,9 +60,28 @@ export function selectValue(root: SiteSelectRoot): string {
   return typeof value === 'string' ? value : '';
 }
 
+function updateSelectProps(root: SiteSelectRoot, props: Record<string, unknown>): void {
+  const nextProps = { ...siteSelectProps.get(root), ...props };
+  siteSelectProps.set(root, nextProps);
+  setElementProps(root, nextProps);
+  if (pendingSelectReplays.has(root)) return;
+  pendingSelectReplays.add(root);
+  // Resolve the latest merged bag when the replay runs. Value and disabled
+  // are commonly updated in the same turn while a preview remount locks the
+  // control, and the adapter's setProps replaces rather than merges raw props.
+  queueMicrotask(() => {
+    pendingSelectReplays.delete(root);
+    const currentProps = siteSelectProps.get(root);
+    if (currentProps) root.setProps?.(currentProps);
+  });
+}
+
 export function setSelectValue(root: SiteSelectRoot, value: string): void {
-  setElementProps(root, { value });
-  queueMicrotask(() => root.setProps?.({ value }));
+  updateSelectProps(root, { value });
+}
+
+export function setSiteSelectDisabled(root: SiteSelectRoot, disabled: boolean): void {
+  updateSelectProps(root, { disabled });
 }
 
 function applyProps(element: HTMLElement, props: Record<string, unknown>): void {
@@ -87,7 +109,7 @@ function initializeSelect(root: SiteSelectRoot): void {
     // is intentionally not used as an authoring input. Keep the SSR seed in a
     // separate data attribute that the runtime will not overwrite.
     const value = root.dataset.siteInitialValue ?? '';
-    applyProps(root, {
+    updateSelectProps(root, {
       value,
       disabled: root.dataset.disabled === 'true',
       closeOnSelect: true,
