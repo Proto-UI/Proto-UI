@@ -413,6 +413,52 @@ test('does not accept a prose path mention as an interactive source binding', ()
   );
 });
 
+test('requires a grouped binding to name every direct owner across exemption classes', () => {
+  const root = createRoot();
+  const website = MATRIX_CONFIGS[0];
+  const sharedSource = 'apps/www/src/components/SharedPreviewClient.ts';
+  const sourcePath = path.join(root, sharedSource);
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, 'addEventListener("click", () => {})');
+
+  const websiteRows = rowsWithRequiredIds(website, validWebsiteRow(), validWebsiteRow);
+  websiteRows[0] = validWebsiteRow({
+    ID: 'www.demo.runtime-select',
+    Path: `\`${sharedSource}\``,
+  });
+  websiteRows[1] = validWebsiteRow({
+    ID: 'www.demo.prototype-previewer',
+    Path: `\`${sharedSource}\``,
+    'Target class': 'infrastructure-exempt',
+    State: 'infrastructure-exempt',
+    'Proto UI chain': 'Website-owned preview infrastructure',
+    Lifecycle: 'No catalog entity required',
+    'Dependency and owner': 'owner: website team',
+    'Escape or exemption':
+      'Reason: raw preview mounting remains bounded demonstration infrastructure',
+    'Re-review or removal issue': '#420 if the preview owns user-facing selection semantics',
+  });
+  writeMatrix(root, website, websiteRows, {
+    extraText: [
+      '## Source-scan bindings',
+      '',
+      '| Interactive or integration source | Owning matrix row |',
+      '| --- | --- |',
+      `| \`${sharedSource}\` | grouped row \`www.demo.runtime-select\` |`,
+    ].join('\n'),
+  });
+  writeMatrix(
+    root,
+    MATRIX_CONFIGS[1],
+    rowsWithRequiredIds(MATRIX_CONFIGS[1], validHarnessRow(), validHarnessRow)
+  );
+
+  assert.match(
+    validationMessage(root),
+    /grouped binding .* must name exactly the matrix Path owners \(www\.demo\.prototype-previewer, www\.demo\.runtime-select\)/
+  );
+});
+
 test('rejects uncataloged entity IDs and stale lifecycle reporting', () => {
   const root = createRoot();
   writeValidMatrices(root, {

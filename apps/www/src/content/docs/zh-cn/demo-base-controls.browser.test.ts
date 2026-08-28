@@ -12,7 +12,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { generateProtoUiStyle } from './browser-harness';
+import { generateProtoUiStyle, resolveBrowserHarnessRoots } from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -117,7 +117,7 @@ function recordServerOutput(chunk: Buffer): void {
 
 async function spawnServer(): Promise<string> {
   const port = await availablePort();
-  const appsWwwRoot = path.join(process.cwd(), 'apps', 'www');
+  const { appsWwwRoot } = resolveBrowserHarnessRoots();
   const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
   devServer = spawn(
     process.execPath,
