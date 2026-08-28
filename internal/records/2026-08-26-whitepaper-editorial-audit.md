@@ -26,7 +26,7 @@ IDs: `<page-abbr>#<n>`; pages: CAP=component-as-protocol, IFM=information-flow-m
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | CAP#1 | CAP | 组件并不只存在于代码里 | zh+en | A component is first a stable interactive subject, not its implementation | proto-specific | K-COMPONENT-INTERACTION-0001 | draft |
 | CAP#2 | CAP | 组件的预期，往往先于实现而存在 | zh+en | Reproducibility (还原度) implies components exist apart from implementations | general-theory | — | — |
-| CAP#3 | CAP | 原型不是漂浮的能力清单 | zh+en | Prototype needs root attachment; acts on itself | proto-specific | K-COMPONENT-INTERACTION-0001; cf. C-AS-HOOK-0001 | draft |
+| CAP#3 | CAP | 原型不是漂浮的能力清单 | zh+en | Prototype needs root attachment; acts on itself | proto-specific | K-COMPONENT-INTERACTION-0001; C-TEMPLATE-0001; C-TEMPLATE-0002; cf. C-AS-HOOK-0001 only as the exceptional subjectless form attached to its caller | draft |
 | CAP#4 | CAP | 可抽象，不等于已经成为协议 | zh+en | Only part of a component is promotable to protocol layer | general-theory | — | — |
 | CAP#5 | CAP | 为什么这里会出现“协议”这个词？ | zh+en | Protocol = describable/translatable/constrainable interactive contract | general-theory | — | — |
 | CAP#6a | CAP | Prototype 定义 | zh+en | Prototype is a stable, describable interaction definition that must continue to identify an interactive subject | proto-specific | K-COMPONENT-INTERACTION-0001-C (interactive-subject aspect only) | partial (draft) |
@@ -52,14 +52,16 @@ IDs: `<page-abbr>#<n>`; pages: CAP=component-as-protocol, IFM=information-flow-m
 | ES#3 | ES | feedback 一致性（Web 宿主） | zh+en | Among Web hosts, target near pixel-level identity | temporary-impl (aspirational) | none — A-\*-0001 have no such criterion | contradiction-risk |
 | ES#4 | ES | event / lifecycle 一致性 | zh+en | Portable interaction intent and relative lifecycle order are preserved across hosts | proto-specific | C-EVENT-TYPE-0001; C-EVENT-TYPE-0002; C-LIFECYCLE-0002 | draft |
 | ES#5 | ES | 跨平台一致性由原型规则决定 | zh+en | Medium-appropriate forms allowed within prototype-declared boundaries | proto-specific | no direct entity | gap |
-| TL#1 | TL | 翻译层不只是语法转换 | zh+en | Translation maps and fills in missing host capability (WC context, Styler) | proto-specific | HC-\* family; A-\*-0001 | mixed |
+| TL#1a | TL | 翻译层不只是语法转换 | zh+en | Official Adapter profiles catalog reviewed Module translation and the provision of cataloged host capabilities | proto-specific | D-ADAPTER-PROFILE-0001; A-REACT-18-19-0001; A-VUE-2-0001; A-VUE-3-0001; A-WEB-COMPONENT-0001 | active |
+| TL#1b | TL | 翻译层不只是语法转换 | zh+en | Web Components Context bridging and cross-host Styler completion are offered as concrete capability-filling examples | proto-specific | no profile lists Context or Feedback/Styler under `supports` or `omits`, and no current HC-\* entity catalogs Context or styling capability | gap |
 | TL#2 | TL | Adapter 与 Compiler | zh+en | Two translation forms share one semantic baseline; Adapter is main path | mixed | A-\*-0001 active; **Compiler has no entity — direction only** | partial |
 | TL#3 | TL | 翻译为什么可能有损 | zh+en | Lossy translation may occur while core semantics must survive | general + proto framing | Adapter-profile requirements: D-ADAPTER-PROFILE-0001 (active); tradeoffs: K-DESIGN-TRADEOFF-0001-B/C (draft); general loss boundary: no entity found | mixed (active + draft + gap) |
 | TL#4 | TL | `host` 通路默认不在跨平台主承诺内 | zh+en | Host/environment exchange is excluded from the core portability commitment by default | proto-specific | K-COMPONENT-ACTOR-0001-D; K-INFORMATION-CHANNEL-0001-D; C-CORE-CHANNEL-0001-D | draft |
 | DC#1 | DC | 取舍顺序 | zh+en | semantic consistency > User > Maker > Author experience | proto-specific | K-DESIGN-TRADEOFF-0001 | draft |
 | DC#2 | DC | 不把自己做成框架 | zh+en | Proto UI excludes prototype-level final composition from the core template language and additionally states that it does not own business integration, framework-level scheduling, or host-specific high-level UI organization | proto-specific | prototype composition: K-PROTOTYPE-COMPOSITION-0001; broader framework exclusions: no entity found | mixed (draft + gap) |
 | DC#3 | DC | 可序列化是长期方向约束 | zh+en | Protocol layer prefers serializable expression by default | proto-specific | K-DESIGN-TRADEOFF-0001-D (draft direction); C-PROPS-0003 (active Props rule); C-RULE-0003 and C-DELAY-0001-J (draft rules/exceptions) | mixed (active + draft) |
-| DC#4 | DC | 宿主特有能力作为强宿主相关能力 | zh+en | Host-specific capabilities isolated from core axis | proto-specific | HC-\* family; K-HOST-SURFACE-ROLES-0001 | draft |
+| DC#4a | DC | 宿主特有能力作为强宿主相关能力 | zh+en | Host-specific capabilities as a class are isolated from the core axis | proto-specific | no governing entity found; HC-\* entities govern individual capability interfaces, while K-HOST-SURFACE-ROLES-0001 governs only boundary/surface roles | gap |
+| DC#4b | DC | 宿主特有能力作为强宿主相关能力 | zh+en | Host/environment-related channels are outside the core portability guarantee by default | proto-specific | K-COMPONENT-ACTOR-0001-D; K-INFORMATION-CHANNEL-0001-D; C-CORE-CHANNEL-0001-D | draft |
 | EP#1 | EP | 第一阶段：先在 Web 站稳 | zh+en | v0 axis = Web hosts | temporary-impl/planning | V-PROTO-UI-\* (versions only) | n/a |
 | EP#2 | EP | 第二阶段：原生宿主；工业级保障 | zh+en | v1 native expansion, industrial-grade QA aspiration | temporary-impl/planning | none | n/a |
 | EP#3 | EP | 从覆盖宿主到影响宿主选择 | zh+en | Long-term direction, explicitly non-committal | general-theory | none | n/a |
@@ -132,7 +134,7 @@ Each step is independently shippable as a PR touching only `apps/www/src/content
 
 | # | Step | Type | Pages | Notes |
 | --- | --- | --- | --- | --- |
-| R1 | Terminology alignment: information flow→channel (EN); add the scoped Maker→App Maker mapping at Props/Expose endpoints; remove `desp:`; unify fidelity vocabulary | editorial | all 16 files | Do not globally rename the general Maker actor. |
+| R1 | Terminology alignment: information flow→channel (EN); add the scoped Maker→App Maker mapping at Props/Expose endpoints; remove `desp:`; unify fidelity vocabulary | editorial + source-trace maintenance | all 16 files; matching `spec/**` source metadata | Do not globally rename the general Maker actor. When a renamed heading is listed in a catalog entity's `sources.sections`, update that exact section string in the same PR; current owners include K-COMPONENT-ACTOR-0001, K-INFORMATION-CHANNEL-0001, C-CORE-CHANNEL-0001, and C-STATE-0001. |
 | R2 | Reading-order convergence: align the sidebar to design-constraints → faq → evolution-path, add an FAQ → evolution-path next-step footer, and remove the evolution-path → FAQ back-link so evolution-path can close the sequence | editorial | FAQ/EP footers, `apps/www/astro.config.mjs` | DC already links to FAQ; CAP and the first-six-page footer chain need no change |
 | R3 | Deduplicate: compress FAQ Q4–Q8 to summaries linking PB/ES; single authoritative `host`-direction statement + pointers | editorial | PB, ES, TL, DC, FAQ | Preserve the draft lifecycle of the `host` exclusion. |
 | R4 | Weaken unsupported absolutes: pixel-level marked aspirational/non-normative; PB#4 scoped to author-facing syntax; TL Compiler reworded direction-only; CAP#7 formula softened or separately governed | editorial wording | ES, PB, TL, CAP | No governed meaning change. |
