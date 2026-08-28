@@ -1,78 +1,97 @@
 # Brutalist WCAG contrast evidence — 2026-08-26
 
-Non-normative record. Refs #469. Does not create a stable spec guarantee or authorize merge.
+Non-normative record. Refs #469. Does not create a stable spec guarantee, change an entity lifecycle, or authorize merge.
 
 ## Baseline
 
 - `main` commit: `259aeb77`
-- Theme source: `packages/cli/src/generated/brutalist-theme.ts`
-- Tokens source: `packages/prototypes/brutalist/src/style.ts`
-- Method: WCAG 2.2 SC 1.4.3 (text, ≥4.5:1), SC 1.4.11 (non-text, ≥3:0)
+- Theme source: `packages/prototypes/brutalist/src/theme.ts`
+- Shared-token source: `packages/prototypes/brutalist/src/style.ts`
+- Call-site sources: the Brutalist prototype recipes named below at the recorded commit
+- Method: WCAG 2.2 SC 1.4.3 (text, ≥4.5:1) and SC 1.4.11 (non-text, ≥3.0:1), using relative luminance from the resolved hex colors
 
-## Text contrast (SC 1.4.3) — all PASS
+This is a source audit. A pair is classified at each implemented call site because the same color can be text, a required state indicator, a redundant indicator, or decoration depending on how the prototype uses it.
 
-| Pair | Light | Dark |
-| --- | --- | --- |
-| bg-background / text-foreground | 16.44 PASS | 16.44 PASS |
-| bg-main / text-main-foreground | 18.05 PASS | 18.05 PASS |
-| bg-card / text-card-foreground | 17.93 PASS | 13.88 PASS |
-| bg-popover / text-popover-foreground | 17.93 PASS | 13.88 PASS |
-| bg-muted / text-muted-foreground | 6.20 PASS | 6.99 PASS |
+## Implemented text pairs (SC 1.4.3)
 
-No text contrast failures in either theme.
-
-## Non-text contrast (SC 1.4.11) — classification required
-
-| Pair | Light | Dark | Classification |
+| Implemented pair | Representative recipes | Light | Dark |
 | --- | --- | --- | --- |
-| border-black on bg-background | 19.26 PASS | **1.17 FAIL** | Depends on call site |
-| border-black on bg-main | 18.05 PASS | 18.05 PASS | Required indicator — PASS |
-| border-black on bg-secondary-background | 21.00 PASS | **1.39 FAIL** | Depends on call site |
+| bg-background / text-foreground | unfilled page-level surfaces | 16.44 PASS | 16.44 PASS |
+| bg-main / text-main-foreground | accent controls and active menu rows | 18.05 PASS | 18.05 PASS |
+| bg-secondary-background / text-foreground | shared panels, Toggle, surface Button, Dropdown resting row | 17.93 PASS | 13.88 PASS |
+| bg-secondary-background / text-muted-foreground | Select Trigger placeholder; disabled Dropdown row | 7.81 PASS | 10.21 PASS |
+| bg-secondary-background / text-destructive-ink | destructive Dropdown resting row | 8.02 PASS | 10.73 PASS |
+| bg-destructive / text-destructive-foreground | destructive Button and active Dropdown row | 14.89 PASS | 14.89 PASS |
 
-### Classification per #469 corrected baseline
+The implemented text pairs measured above pass in both themes. This conclusion is limited to these audited recipes; it is not a claim that every future Brutalist token combination passes.
 
-Per the corrected audit comment on #469: `border-black` or a black hard shadow measuring below 3:1 against the page does **not** make every call site a WCAG 1.4.11 failure. The criterion applies only to visual information required to identify a component or state, against the actual adjacent colors.
+## Non-text pairs (SC 1.4.11)
 
-**Dark theme — border-black (#000) on bg-background (#171717) = 1.17:1**
+| Pair | Light | Dark | Source-level significance |
+| --- | --- | --- | --- |
+| border-black on bg-background | 19.26 PASS | **1.17 FAIL** | Directly used by the unselected Tabs Trigger hover state |
+| border-black on bg-main | 18.05 PASS | 18.05 PASS | Accent control boundary and selected-state indicator |
+| border-black on bg-secondary-background | 21.00 PASS | **1.39 FAIL** | Control and panel boundaries; inventory below |
+| bg-main against bg-secondary-background | **1.16 FAIL** | 13.00 PASS | Light menu focus/active fill |
+| bg-destructive against bg-secondary-background | **1.41 FAIL** | 10.73 PASS | Light destructive-menu focus/active fill |
 
-This pair appears in Brutalist components where `border-2 border-black` is used directly on a surface with `bg-background`. Classification:
+The failing ratios do not automatically make every consumer a conformance failure. Each call site still needs rendered evidence showing which adjacent color is relevant and whether another ≥3:1 visual cue conveys the same component or state.
 
-1. **Required component/state indicator**: When `border-black` is the sole visual boundary distinguishing a control from its surroundings (e.g., a Button at rest with transparent fill on dark background, or a Card frame), the 1.17:1 ratio fails SC 1.4.11.
-2. **Decorative/structural**: When the component has a contrasting fill (e.g., `bg-main` canary yellow), `border-black` measures 18.05:1 against that fill — the boundary is clearly visible. The border against the page background is decorative in this case.
-3. **Hard shadow** (`shadow-[3px_3px_0_0_#000]`): A black hard shadow on dark background is decorative — it does not convey component identity or state. SC 1.4.11 applies only to required indicators.
+## Dark border call-site inventory
 
-### Affected call sites (Dark theme only)
+### `border-black` on `bg-background` — 1.17:1
 
-The shared token groups `BRUTALIST_CONTROL_TOKENS` and `BRUTALIST_PANEL_TOKENS` both pair `border-black` with `bg-secondary-background` (#262626 in Dark, ratio 1.39:1). These tokens are used by multiple interactive surfaces:
+- `packages/prototypes/brutalist/src/tabs/trigger.proto.ts` directly adds `bg-background border-black` while an unselected, unpressed Trigger is hovered. This is the concrete 1.17:1 state call site governed by `P-BRUTALIST-TABS-TRIGGER-INTERACTION`; Button and Card are not examples of this pair.
 
-**Control tokens** (`BRUTALIST_CONTROL_TOKENS = border-2 border-black + bg-secondary-background`):
-- **Toggle**: default, sm, lg variants all use `BRUTALIST_CONTROL_TOKENS`. If the border is a required structural boundary, fails SC 1.4.11 in Dark.
-- **Button (surface variant)**: surface variant uses `BRUTALIST_STRUCTURE_TOKENS` (includes `border-black`) plus `bg-secondary-background`. Border is persistent. Ratio 1.39:1 in Dark.
-- **Button (default variant)**: at rest uses `border-transparent`; selected/hovered uses `border-black` on `bg-main` (18.05:1 PASS).
-- **Select Trigger, Switch Root**: if these use `BRUTALIST_CONTROL_TOKENS`, same 1.39:1 ratio in Dark.
+### `border-black` on `bg-secondary-background` — 1.39:1
 
-**Panel tokens** (`BRUTALIST_PANEL_TOKENS = border-2 border-black + bg-secondary-background`):
-- **Dialog Content**: panel uses `BRUTALIST_PANEL_TOKENS`. Ratio 1.39:1 in Dark. If panel frame is a required structural boundary, fails SC 1.4.11.
-- **Dropdown Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
-- **Hover Card Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
-- **Select Content**: same `BRUTALIST_PANEL_TOKENS`. Same ratio.
-- **Tabs Content**: applies `BRUTALIST_PANEL_TOKENS`. Same ratio.
-- **Tabs List**: directly applies border-black/bg-secondary-background. Same ratio.
+Shared-token consumers and direct recipes are tracked separately so changing one constant cannot be mistaken for complete remediation.
 
-**Not affected**:
-- **Card** (`P-BRUTALIST-CARD`): uses `border-2 border-foreground` (not `border-black`) on `bg-background`. Ratio 16.44:1 in both themes. PASS.
-- All components using `border-black` on `bg-main`, `bg-primary`, or accent fills (canary, lavender, mint, coral) pass SC 1.4.11 at 14-18:1 in both themes.
-- Button at rest uses `border-transparent` — no contrast requirement.
+| Ownership | Source call sites | Remediation boundary |
+| --- | --- | --- |
+| `BRUTALIST_CONTROL_TOKENS` | Toggle | A shared-control-token change reaches Toggle only |
+| `BRUTALIST_STRUCTURE_TOKENS` plus direct fill | surface Button | Requires a Button recipe change or an explicit refactor into a shared control token |
+| Direct control recipe | Select Trigger | Requires a Select Trigger recipe change or refactor |
+| Direct control recipe | Switch Root | Requires a Switch Root recipe change or refactor |
+| `BRUTALIST_PANEL_TOKENS` | Dialog Content, Dropdown Content, Hover Card Content, Select Content, Tabs Content | A panel-token change reaches these five panels |
+| Direct panel recipe | Tabs List | Requires a Tabs List recipe change or refactor |
+
+For each control or panel, a 1.39:1 black boundary fails if that boundary is required to identify the component against its adjacent fill or surroundings and no independent ≥3:1 cue supplies the boundary. The record does not pre-classify all panel frames as decorative.
+
+`P-BRUTALIST-CARD` is not in this inventory: Card uses `border-foreground` on `bg-background`, which is 16.44:1 in both themes.
+
+## Stateful hard-shadow classification
+
+Hard shadows cannot be categorically excluded from SC 1.4.11 because some recipes change them with state.
+
+| Call site | Stateful use | Classification at this baseline |
+| --- | --- | --- |
+| Button | 3px at rest, 4px on hover, removed on press | The shadow change is stateful. Hover and press also translate the control, while the component retains its fill and border, so the black shadow is a redundant state cue in the current recipe. Rendered evidence must confirm that those independent cues remain perceivable. |
+| Tabs Trigger | selected-and-not-pressed adds a 3px shadow; press removes it | The shadow is stateful but redundant with the selected `bg-main`/`border-black` pair and the press movement in the current recipe. It must be reclassified if those independent cues change. |
+| Shared panels and other static shells | fixed 3px shadow | Structural decoration only where it does not identify the component or communicate state; the border/fill boundary is classified separately. |
+
+Thus a low-contrast black shadow against the Dark page is not counted as the sole failure for the two audited interactive recipes, but its state ownership is retained instead of being erased from the audit.
+
+## Light menu-state failures
+
+The Light theme has real SC 1.4.11 failures even though its black borders pass:
+
+- `packages/prototypes/brutalist/src/dropdown/item.proto.ts` uses `outline-none`. Keyboard focus/active changes a default row from white `bg-secondary-background` to `bg-main` at 1.16:1, and a destructive row to `bg-destructive` at 1.41:1. Neither fill reaches 3:1 against the surrounding white panel, and the recipe supplies no alternate focus outline.
+- `packages/prototypes/brutalist/src/select/item.proto.ts` also uses `outline-none`. An unselected focused item relies on the same 1.16:1 `bg-main` change. A selected item additionally renders a check mark, but that does not repair the missing focus indication for an unselected item.
+
+These are required focus-state indicators, not decorative fills, so they fail SC 1.4.11 in Light. The same fills pass against the Dark panel (13.00:1 and 10.73:1 respectively).
 
 ## Conclusion
 
-1. **Text contrast**: no failures in either theme.
-2. **Non-text contrast**: multiple shared-token call sites potentially fail SC 1.4.11 in Dark theme. `BRUTALIST_CONTROL_TOKENS` and `BRUTALIST_PANEL_TOKENS` both pair `border-black` with `bg-secondary-background` (#262626 in Dark, 1.39:1). Affected: Toggle, Dialog/Dropdown/Hover Card/Select Content panels. Card is NOT affected (uses `border-foreground` at 16.44:1).
-3. **Perceptual**: black hard shadows on dark background are decorative and do not trigger SC 1.4.11.
-4. **Light theme**: all pairs pass.
+1. The audited implemented text recipes pass SC 1.4.3 in both themes.
+2. Dark has low-contrast black boundaries on the exact control and panel call sites inventoried above, plus the 1.17:1 Tabs Trigger hover pair. Final required-versus-redundant classification needs rendered adjacent-color evidence per component.
+3. Button and Tabs Trigger hard shadows are stateful but currently redundant with other state cues; static shadows are decorative only at call sites where they carry no component or state information.
+4. Light Dropdown and Select item focus fills fail SC 1.4.11 because their 1.16:1/1.41:1 changes are the only focus indicators.
+5. Shared-token remediation alone is incomplete: surface Button, Select Trigger, Switch Root, and Tabs List are direct recipes that require separate changes or an explicit refactor.
 
 ## Recommended next steps (not authorized in this record)
 
-- Per-call-site classification with rendered evidence for each Brutalist component.
-- Component-specific Dark palette proposals for shared-token control/panel surfaces where `border-black` on `bg-secondary-background` is a required structural boundary.
-- Automated contrast-ratio test in the test suite.
+- Capture rendered Light/Dark evidence for every affected control and panel, including rest, hover, keyboard focus, selected, and pressed states.
+- Add a ≥3:1 focus indicator for Light Dropdown and Select items without relying on the low-contrast fill alone.
+- Decide Dark boundary colors per component, or deliberately refactor the direct recipes into governed shared tokens before changing the shared tokens.
+- Add executable contrast checks for the resolved theme pairs and browser assertions for state indicators; keep per-call-site classification in the evidence rather than inferring it from token names.
