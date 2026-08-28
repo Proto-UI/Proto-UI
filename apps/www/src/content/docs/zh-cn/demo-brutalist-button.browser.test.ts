@@ -151,6 +151,32 @@ async function resolvedTokenPair(page: Page, tokenPair: ThemeTokenPair): Promise
   return resolved;
 }
 
+async function resolvedTokenColors(
+  page: Page,
+  tokens: readonly `--pui-${string}`[]
+): Promise<string[]> {
+  return page.evaluate((colorTokens) => {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const probe = document.createElement('span');
+    probe.style.position = 'fixed';
+    probe.style.pointerEvents = 'none';
+    probe.style.visibility = 'hidden';
+    document.body.append(probe);
+
+    try {
+      return colorTokens.map((token) => {
+        if (!rootStyle.getPropertyValue(token).trim()) {
+          throw new Error(`Theme token ${token} is unavailable.`);
+        }
+        probe.style.setProperty('color', `var(${token})`, 'important');
+        return getComputedStyle(probe).color;
+      });
+    } finally {
+      probe.remove();
+    }
+  }, tokens);
+}
+
 async function captureFrame(locator: Locator, runtime: string, frame: string): Promise<Buffer> {
   if (!EVIDENCE_DIR) return locator.screenshot();
   await mkdir(EVIDENCE_DIR, { recursive: true });
@@ -262,8 +288,17 @@ describe.sequential('Brutalist Button browser regressions', () => {
         await page.keyboard.press('Tab');
         await waitForState(page, 0, 'data-focus-visible', true);
         const focused = await styleOf(solid);
-        expect(focused.boxShadow).toContain('0px 0px 0px 2px');
-        expect(focused.boxShadow).toContain('0px 0px 0px 4px');
+        const [ringOffsetColor, ringColor] = await resolvedTokenColors(page, [
+          '--pui-background',
+          '--pui-ring',
+        ]);
+        if (!ringOffsetColor || !ringColor) {
+          throw new Error('Expected resolved focus ring and ring-offset colors.');
+        }
+        expect(ringOffsetColor).not.toMatch(/^(?:transparent|rgba\([^)]*, 0\))$/);
+        expect(ringColor).not.toMatch(/^(?:transparent|rgba\([^)]*, 0\))$/);
+        expect(focused.boxShadow).toContain(`${ringOffsetColor} 0px 0px 0px 2px`);
+        expect(focused.boxShadow).toContain(`${ringColor} 0px 0px 0px 4px`);
 
         expect(await disabledSurface.getAttribute('data-disabled')).not.toBeNull();
         const disabledLight = await styleOf(disabledSurface);
@@ -278,6 +313,11 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const expectedAccentsLight = await resolvedTokenPairs(page, ACCENT_TOKEN_PAIRS);
         const expectedSurfaceLight = await resolvedTokenPair(page, SURFACE_TOKEN_PAIR);
         const expectedDestructiveLight = await resolvedTokenPair(page, DESTRUCTIVE_TOKEN_PAIR);
+        expect(
+          [...accentsLight, surfaceLight, destructiveLight, disabledLight].map(
+            ({ backgroundImage }) => backgroundImage
+          )
+        ).toEqual(Array(8).fill('none'));
         expect(accentsLight.map(colorPairOf)).toEqual(expectedAccentsLight);
         expect(colorPairOf(surfaceLight)).toEqual(expectedSurfaceLight);
         expect(colorPairOf(destructiveLight)).toEqual(expectedDestructiveLight);
@@ -298,11 +338,17 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const expectedAccentsDark = await resolvedTokenPairs(page, ACCENT_TOKEN_PAIRS);
         const expectedSurfaceDark = await resolvedTokenPair(page, SURFACE_TOKEN_PAIR);
         const expectedDestructiveDark = await resolvedTokenPair(page, DESTRUCTIVE_TOKEN_PAIR);
+        expect(
+          [...accentsDark, surfaceDark, destructiveDark, disabledDark].map(
+            ({ backgroundImage }) => backgroundImage
+          )
+        ).toEqual(Array(8).fill('none'));
         expect(accentsDark.map(colorPairOf)).toEqual(expectedAccentsDark);
         expect(accentsDark.map(colorPairOf)).toEqual(accentsLight.map(colorPairOf));
         expect(colorPairOf(surfaceDark)).toEqual(expectedSurfaceDark);
         expect(colorPairOf(surfaceDark)).not.toEqual(colorPairOf(surfaceLight));
         expect(colorPairOf(destructiveDark)).toEqual(expectedDestructiveDark);
+        expect(colorPairOf(destructiveDark)).not.toEqual(colorPairOf(destructiveLight));
         expect(colorPairOf(disabledDark)).toEqual(expectedSurfaceDark);
         expect(geometryOf(disabledDark)).toEqual(geometryOf(surfaceDark));
         const darkFrame = await captureFrame(previewer.locator('.host'), runtime, 'dark');

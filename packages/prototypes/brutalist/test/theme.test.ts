@@ -67,6 +67,16 @@ describe('prototypes/brutalist: canonical theme manifest', () => {
     }
   });
 
+  it('uses a theme-relative destructive fill while preserving its foreground pair', () => {
+    expect(BRUTALIST_THEME.light.destructive).not.toBe(BRUTALIST_THEME.dark.destructive);
+    for (const mode of [BRUTALIST_THEME.light, BRUTALIST_THEME.dark]) {
+      expect(mode['destructive-foreground']).toBe('#000000');
+      expect(
+        contrastRatio(mode.destructive, mode['destructive-foreground'])
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   it('uses a theme-relative focus ring with at least 3:1 adjacent-color contrast', () => {
     for (const mode of [BRUTALIST_THEME.light, BRUTALIST_THEME.dark]) {
       expect(mode.ring).toBe(mode.foreground);
