@@ -1197,6 +1197,22 @@ test('requires new static website components to have a matrix classification', (
   );
 });
 
+test('rejects a conflicting source binding for a static website component with one direct owner', () => {
+  const root = createRoot();
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [['apps/www/src/components/override/SiteTitle.astro', ['www.shell.search']]],
+    }
+  );
+  assert.match(
+    validationMessage(root),
+    /website component source `apps\/www\/src\/components\/override\/SiteTitle\.astro` has direct matrix owner `www\.shell\.site-title` outside source binding owner\(s\).*`www\.shell\.search`/
+  );
+});
+
 test('excludes component test and spec fixtures from static classification', () => {
   const root = createRoot();
   writeValidMatrices(root);

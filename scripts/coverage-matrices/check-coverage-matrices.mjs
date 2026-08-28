@@ -1985,6 +1985,16 @@ function validateWebsiteSourceBindings(
       );
       continue;
     }
+
+    if (directOwners.length === 1 && binding) {
+      const directId = directOwners[0].id;
+      const boundIds = [...new Set(binding.ownerIds)].sort();
+      if (!boundIds.includes(directId)) {
+        issues.push(
+          `${relativePath}:${binding.line}: website component source \`${sourcePath}\` has direct matrix owner \`${directId}\` outside source binding owner(s) ${boundIds.map((id) => `\`${id}\``).join(', ')}; include the direct owner in the grouped binding`
+        );
+      }
+    }
     if (directOwners.length > 1) {
       const directIds = [...new Set(directOwners.map(({ id }) => id))].sort();
       if (!binding) {
