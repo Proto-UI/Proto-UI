@@ -83,7 +83,19 @@ function normalizedBundleModuleId(id) {
 /** @returns {WebsiteBundlePlugin} */
 function websiteBundleGraphPlugin() {
   let isClientBuild = false;
-  return {
+  /**
+   * @type {{
+   *   name: string;
+   *   apply: 'build';
+   *   configResolved: (config: { build: { ssr?: unknown } }) => void;
+   *   generateBundle: (
+   *     this: { emitFile: (asset: { type: 'asset'; fileName: string; source: string }) => void },
+   *     options: unknown,
+   *     bundle: Record<string, any>
+   *   ) => void;
+   * }}
+   */
+  const plugin = {
     name: 'proto-ui-website-bundle-graph',
     apply: 'build',
     configResolved(config) {
@@ -114,6 +126,7 @@ function websiteBundleGraphPlugin() {
       });
     },
   };
+  return plugin;
 }
 
 const inProgressBadge = {

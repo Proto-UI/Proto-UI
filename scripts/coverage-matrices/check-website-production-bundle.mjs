@@ -20,6 +20,8 @@ const REVIEWED_NULL_FACADE_RUNTIME_MODULES = new Set([
   'apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime.ts',
 ]);
 const REQUIRED_ADAPTER_FAMILIES = Object.freeze(['react', 'vue', 'vue2']);
+const REVIEWED_WEB_COMPONENT_HOST_MODULE =
+  'apps/www/src/components/PrototypePreviewer/wc-registry.ts';
 
 export class WebsiteProductionBundleValidationError extends Error {
   constructor(issues) {
@@ -55,6 +57,26 @@ function forbiddenFrameworkFamily(moduleId) {
     /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-(react|vue|vue2)(?:\/|$)/u
   );
   return packagedAdapterMatch?.[1] ?? null;
+}
+
+function isWebComponentAdapterModule(moduleId) {
+  const normalized = moduleIdWithoutQuery(moduleId);
+  return (
+    /(?:^|\/)packages\/adapters\/web-component(?:\/|$)/u.test(normalized) ||
+    /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-web-component(?:\/|$)/u.test(
+      normalized
+    )
+  );
+}
+
+function isProtoUiAdapterModule(moduleId) {
+  const normalized = moduleIdWithoutQuery(moduleId);
+  return (
+    /(?:^|\/)packages\/adapters\/[a-z0-9-]+(?:\/|$)/u.test(normalized) ||
+    /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(
+      normalized
+    )
+  );
 }
 
 function reviewedNullFacadeRuntimeModule(chunk) {
@@ -182,7 +204,7 @@ export function collectWebsiteProductionBundleIssues({
   }
   const shellRoots = chunks.filter(
     (chunk) =>
-      (chunk.isEntry || chunk.isDynamicEntry) &&
+      chunk.isEntry &&
       !APPROVED_DEMONSTRATION_ENTRY_FACADES.has(chunk.facadeModuleId) &&
       !REVIEWED_DEMONSTRATION_RUNTIME_FACADES.has(chunk.facadeModuleId) &&
       reviewedNullFacadeRuntimeModule(chunk) === null
@@ -207,6 +229,22 @@ export function collectWebsiteProductionBundleIssues({
         `approved demonstration entry \`${demoRoot.facadeModuleId}\` is orphaned from shell or route-owned entry reachability`
       );
     }
+  }
+
+  const hasProvenWebComponentDemonstrationHost = routeOwnedDemoRoots.some((demoRoot) => {
+    const moduleIds = [...closure(chunksByFileName, demoRoot.fileName, ['imports'])].flatMap(
+      (fileName) => chunksByFileName.get(fileName)?.moduleIds ?? []
+    );
+    return (
+      moduleIds.some(
+        (moduleId) => moduleIdWithoutQuery(moduleId) === REVIEWED_WEB_COMPONENT_HOST_MODULE
+      ) && moduleIds.some(isWebComponentAdapterModule)
+    );
+  });
+  if (!hasProvenWebComponentDemonstrationHost) {
+    issues.push(
+      'production bundle graph has no route-owned demonstration entry with static module-level evidence for both the reviewed Web Component facade registry and Web Component Adapter'
+    );
   }
 
   const forbiddenModulesByChunk = new Map();
@@ -237,13 +275,17 @@ export function collectWebsiteProductionBundleIssues({
   for (const shellRoot of shellRoots) {
     const leakedModules = new Set();
     for (const fileName of closure(chunksByFileName, shellRoot.fileName, ['imports'])) {
-      for (const moduleId of forbiddenModulesByChunk.get(fileName) ?? [])
-        leakedModules.add(moduleId);
+      const chunk = chunksByFileName.get(fileName);
+      for (const moduleId of chunk?.moduleIds ?? []) {
+        if (forbiddenFrameworkFamily(moduleId) !== null || isProtoUiAdapterModule(moduleId)) {
+          leakedModules.add(moduleId);
+        }
+      }
     }
     if (leakedModules.size > 0) {
       const shellIdentity = shellRoot.facadeModuleId ?? `<null facade: ${shellRoot.fileName}>`;
       issues.push(
-        `Website shell entry \`${shellIdentity}\` statically reaches forbidden React/Vue module(s): ${[...leakedModules].sort().join(', ')}`
+        `Website shell entry \`${shellIdentity}\` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): ${[...leakedModules].sort().join(', ')}`
       );
     }
   }
@@ -268,7 +310,11 @@ export function collectWebsiteProductionBundleIssues({
 export function validateWebsiteProductionBundle(options = {}) {
   const issues = collectWebsiteProductionBundleIssues(options);
   if (issues.length > 0) throw new WebsiteProductionBundleValidationError(issues);
-  return { shellRuntime: 'web-component', isolatedDemonstrationRuntimes: 3 };
+  return {
+    shellRuntime: 'native/static',
+    primaryDemonstrationHost: 'web-component',
+    isolatedDemonstrationRuntimes: 3,
+  };
 }
 
 function isMainModule() {
@@ -282,7 +328,7 @@ if (isMainModule()) {
   try {
     const result = validateWebsiteProductionBundle();
     console.log(
-      `[website-production-bundle] OK (${result.shellRuntime} shell; ${result.isolatedDemonstrationRuntimes} isolated demonstration runtimes)`
+      `[website-production-bundle] OK (${result.shellRuntime} shell; ${result.primaryDemonstrationHost} primary demonstration host; ${result.isolatedDemonstrationRuntimes} isolated demonstration runtimes)`
     );
   } catch (error) {
     if (error instanceof WebsiteProductionBundleValidationError) {

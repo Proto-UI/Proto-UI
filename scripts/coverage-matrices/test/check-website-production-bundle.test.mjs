@@ -48,8 +48,15 @@ function graphFixture() {
       chunk('_astro/home-demo.js', {
         isEntry: true,
         facadeModuleId: HOME_DEMO_FACADE,
-        imports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+        imports: ['_astro/wc-host.js', '_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
         moduleIds: ['apps/www/src/components/PrototypePreviewer/home-demo-client.ts'],
+      }),
+      chunk('_astro/wc-host.js', {
+        name: 'wc-host',
+        moduleIds: [
+          'apps/www/src/components/PrototypePreviewer/wc-registry.ts?used',
+          'packages/adapters/web-component/src/adapt.ts?used',
+        ],
       }),
       chunk('_astro/react.js', {
         name: 'react-runtime',
@@ -83,9 +90,69 @@ function graphFixture() {
 
 test('accepts module-proven demo runtimes isolated from shell static closures', () => {
   assert.deepEqual(validateWebsiteProductionBundle({ graph: graphFixture() }), {
-    shellRuntime: 'web-component',
+    shellRuntime: 'native/static',
+    primaryDemonstrationHost: 'web-component',
     isolatedDemonstrationRuntimes: 3,
   });
+});
+
+test('rejects a graph without route-owned Web Component host provenance', () => {
+  const graph = graphFixture();
+  graph.chunks.find((candidate) => candidate.fileName === '_astro/home-demo.js').imports =
+    graph.chunks
+      .find((candidate) => candidate.fileName === '_astro/home-demo.js')
+      .imports.filter((fileName) => fileName !== '_astro/wc-host.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).includes(
+      'production bundle graph has no route-owned demonstration entry with static module-level evidence for both the reviewed Web Component facade registry and Web Component Adapter'
+    )
+  );
+});
+
+test('does not mistake an orphaned WC runtime for primary host provenance', () => {
+  const graph = graphFixture();
+  graph.chunks.find((candidate) => candidate.fileName === '_astro/home-demo.js').imports =
+    graph.chunks
+      .find((candidate) => candidate.fileName === '_astro/home-demo.js')
+      .imports.filter((fileName) => fileName !== '_astro/wc-host.js');
+  graph.chunks.push(
+    chunk('_astro/wc-runtime.js', {
+      isDynamicEntry: true,
+      facadeModuleId: 'apps/www/src/components/PrototypePreviewer/runtimes/wc-runtime.ts',
+      moduleIds: [
+        'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+        'packages/adapters/web-component/src/adapt.ts',
+      ],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('no route-owned demonstration entry with static module-level evidence')
+    )
+  );
+});
+
+test('requires registry and Adapter provenance in the same route-owned demo closure', () => {
+  const graph = graphFixture();
+  graph.chunks.find((candidate) => candidate.fileName === '_astro/wc-host.js').moduleIds = [
+    'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+  ];
+  graph.chunks.push(
+    chunk('_astro/second-demo.js', {
+      isEntry: true,
+      facadeModuleId:
+        'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts',
+      moduleIds: ['packages/adapters/web-component/src/adapt.ts'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('no route-owned demonstration entry with static module-level evidence')
+    )
+  );
 });
 
 test('rejects renamed or inlined framework modules in a shell chunk', () => {
@@ -105,6 +172,22 @@ test('rejects renamed or inlined framework modules in a shell chunk', () => {
   assert.ok(
     issues.includes(
       'forbidden framework chunk `_astro/innocent-helper.js` is not statically owned by an approved demonstration entry'
+    )
+  );
+});
+
+test('rejects Web Component Adapter evidence inside the native/static shell closure', () => {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/shell-wc.js', {
+      moduleIds: ['packages/adapters/web-component/src/adapt.ts?used'],
+    })
+  );
+  graph.chunks[0].imports.push('_astro/shell-wc.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('Proto UI Adapter module(s)')
     )
   );
 });

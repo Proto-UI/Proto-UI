@@ -992,9 +992,10 @@ function domReceiverBindings(sourceFile) {
     }
     return sourceFile;
   };
-  const addBinding = (name, node, initializer, intrinsicallyDom) => {
+  const addBinding = (name, node, initializer, intrinsicallyDom, destructuredProperties = null) => {
     const bindings = bindingsByName.get(name) ?? [];
     bindings.push({
+      destructuredProperties,
       initializer,
       intrinsicallyDom,
       node,
@@ -1003,37 +1004,48 @@ function domReceiverBindings(sourceFile) {
     });
     bindingsByName.set(name, bindings);
   };
+  const collectBindingName = (
+    name,
+    node,
+    initializer,
+    intrinsicallyDom,
+    destructuredProperties = []
+  ) => {
+    if (ts.isIdentifier(name)) {
+      addBinding(
+        name.text,
+        node,
+        initializer,
+        intrinsicallyDom,
+        destructuredProperties.length > 0 ? destructuredProperties : null
+      );
+      return;
+    }
+    if (!ts.isObjectBindingPattern(name)) return;
+    for (const element of name.elements) {
+      if (element.dotDotDotToken) continue;
+      const property = element.propertyName ?? element.name;
+      if (!ts.isIdentifier(property) && !ts.isStringLiteralLike(property)) continue;
+      collectBindingName(
+        element.name,
+        element,
+        initializer,
+        intrinsicallyDom,
+        destructuredProperties.concat(property.text)
+      );
+    }
+  };
   const collect = (node) => {
     if (ts.isParameter(node) || ts.isVariableDeclaration(node)) {
-      const bindings = [];
-      if (ts.isIdentifier(node.name)) {
-        bindings.push({
-          name: node.name.text,
-          intrinsicallyDom: isDomTypeNode(node.type, sourceFile),
-        });
-      } else if (ts.isObjectBindingPattern(node.name) && node.initializer) {
-        for (const element of node.name.elements) {
-          if (!ts.isBindingElement(element) || !ts.isIdentifier(element.name)) continue;
-          const propertyName = element.propertyName ?? element.name;
-          bindings.push({
-            name: element.name.text,
-            intrinsicallyDom:
-              ts.isIdentifier(propertyName) &&
-              propertyName.text === 'current' &&
-              ts.isIdentifier(node.initializer) &&
-              /(?:Element|Node|Ref)$/u.test(node.initializer.text),
-          });
-        }
-      }
-      for (const binding of bindings) {
-        addBinding(
-          binding.name,
-          node,
-          node.initializer ? unwrapTypeScriptExpression(node.initializer) : null,
-          binding.intrinsicallyDom ||
-            (ts.isParameter(node) && /^(?:el|element)$/u.test(binding.name))
-        );
-      }
+      collectBindingName(
+        node.name,
+        node,
+        node.initializer ? unwrapTypeScriptExpression(node.initializer) : null,
+        isDomTypeNode(node.type, sourceFile) ||
+          (ts.isParameter(node) &&
+            ts.isIdentifier(node.name) &&
+            /^(?:el|element)$/u.test(node.name.text))
+      );
     }
     if (
       ts.isBinaryExpression(node) &&
@@ -1057,6 +1069,34 @@ function domReceiverBindings(sourceFile) {
         if (binding.intrinsicallyDom) return true;
         if (!binding.initializer || visitedBindings.has(binding)) return false;
         visitedBindings.add(binding);
+        if (binding.destructuredProperties) {
+          const owner = unwrapTypeScriptExpression(binding.initializer);
+          const propertyChain = binding.destructuredProperties;
+          const lastProperty = propertyChain.at(-1);
+          const ownerProperty =
+            propertyChain.at(-2) ??
+            (ts.isIdentifier(owner) || ts.isPropertyAccessExpression(owner)
+              ? owner.getText(sourceFile)
+              : '');
+          if (lastProperty === 'current' && /(?:Element|Node|Ref)$/u.test(ownerProperty)) {
+            return true;
+          }
+          if (
+            /^(?:body|documentElement|activeElement)$/u.test(lastProperty) &&
+            ts.isIdentifier(owner) &&
+            owner.text === 'document'
+          ) {
+            return true;
+          }
+          if (
+            /^(?:currentTarget|target)$/u.test(lastProperty) &&
+            ts.isIdentifier(owner) &&
+            /^(?:e|ev|event)$/u.test(owner.text)
+          ) {
+            return true;
+          }
+          return false;
+        }
         return isDomReceiverExpression(
           binding.initializer,
           sourceFile,
@@ -1794,94 +1834,394 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
   return found;
 }
 
-function containsHarnessForbiddenStateMachine(content, absolutePath) {
-  return (
-    astContainsInteractiveRuntime(content) ||
-    astContainsNativeJsxEventHandler(content, absolutePath) ||
-    astContainsHarnessRenderAction(content)
-  );
-}
-
-function astContainsHarnessRenderAction(content) {
+function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
   const sourceFile = ts.createSourceFile(
-    'harness-source.tsx',
+    absolutePath,
     content,
     ts.ScriptTarget.Latest,
     true,
-    ts.ScriptKind.TSX
+    /\.jsx$/i.test(absolutePath)
+      ? ts.ScriptKind.JSX
+      : /\.js$/i.test(absolutePath)
+        ? ts.ScriptKind.JS
+        : /\.ts$/i.test(absolutePath)
+          ? ts.ScriptKind.TS
+          : ts.ScriptKind.TSX
   );
-  const actionNames = new Set([
-    'approve',
-    'createSession',
-    'deleteArtifact',
-    'deny',
-    'navigate',
-    'patch',
-    'removeSession',
-    'retry',
-    'send',
-    'stop',
-    'upload',
-  ]);
-  const isActionCall = (node) => {
-    if (!ts.isCallExpression(node)) return false;
-    if (ts.isIdentifier(node.expression)) return actionNames.has(node.expression.text);
+  const effectNames = new Set(['useEffect', 'useInsertionEffect', 'useLayoutEffect']);
+  const reactNamespaceNames = new Set();
+  const reactCreateElementNames = new Set();
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== 'react'
+    ) {
+      continue;
+    }
+    const importClause = statement.importClause;
+    if (importClause?.name) reactNamespaceNames.add(importClause.name.text);
+    if (importClause?.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
+      reactNamespaceNames.add(importClause.namedBindings.name.text);
+    }
+    if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+      for (const element of importClause.namedBindings.elements) {
+        const importedName = (element.propertyName ?? element.name).text;
+        if (/^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(importedName)) {
+          effectNames.add(element.name.text);
+        }
+        if (importedName === 'createElement') reactCreateElementNames.add(element.name.text);
+      }
+    }
+  }
+
+  const effectAliasEdges = [];
+  const collectEffectAliases = (node) => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+      const initializer = unwrapTypeScriptExpression(node.initializer);
+      if (
+        ts.isPropertyAccessExpression(initializer) &&
+        ts.isIdentifier(initializer.expression) &&
+        reactNamespaceNames.has(initializer.expression.text) &&
+        /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(initializer.name.text)
+      ) {
+        effectNames.add(node.name.text);
+      } else if (ts.isIdentifier(initializer)) {
+        effectAliasEdges.push([node.name.text, initializer.text]);
+      }
+    }
+    if (
+      ts.isBindingElement(node) &&
+      ts.isIdentifier(node.name) &&
+      node.propertyName &&
+      (ts.isIdentifier(node.propertyName) || ts.isStringLiteralLike(node.propertyName)) &&
+      /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(node.propertyName.text) &&
+      ts.isVariableDeclaration(node.parent?.parent) &&
+      ts.isIdentifier(node.parent.parent.initializer) &&
+      reactNamespaceNames.has(node.parent.parent.initializer.text)
+    ) {
+      effectNames.add(node.name.text);
+    }
+    ts.forEachChild(node, collectEffectAliases);
+  };
+  collectEffectAliases(sourceFile);
+  let effectAliasesChanged = true;
+  while (effectAliasesChanged) {
+    effectAliasesChanged = false;
+    for (const [alias, sourceName] of effectAliasEdges) {
+      if (!effectNames.has(alias) && effectNames.has(sourceName)) {
+        effectNames.add(alias);
+        effectAliasesChanged = true;
+      }
+    }
+  }
+
+  const isAgentActionVerbName = (name) =>
+    /^(?:approve|delete|deny|navigate|patch|retry|send|stop|upload)(?:[A-Z0-9_$].*)?$/u.test(name);
+  const hasAgentActionOwnerProvenance = (owner) =>
+    /(?:action|agent|api|approval|client|command|props|request|run|service|tool)/iu.test(owner);
+  const bindingElementOwnerProvenance = (bindingElement) => {
+    const ownerParts = [];
+    let current = bindingElement;
+    while (ts.isBindingElement(current)) {
+      const parentPattern = current.parent;
+      const declaration = parentPattern?.parent;
+      if (ts.isBindingElement(declaration)) {
+        const ownerName = declaration.propertyName ?? declaration.name;
+        if (ts.isIdentifier(ownerName) || ts.isStringLiteralLike(ownerName)) {
+          ownerParts.unshift(ownerName.text);
+        }
+        current = declaration;
+        continue;
+      }
+      if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+        ownerParts.unshift(declaration.initializer.getText(sourceFile));
+      } else if (ts.isParameter(declaration)) {
+        ownerParts.unshift('props');
+      }
+      break;
+    }
+    return ownerParts.join('.');
+  };
+  const agentActionAliases = new Set();
+  const agentActionOwners = new Set();
+  const aliasEdges = [];
+  const bindingElementComesFromParameter = (bindingElement) => {
+    let declaration = bindingElement.parent?.parent;
+    while (ts.isBindingElement(declaration)) declaration = declaration.parent?.parent;
+    return ts.isParameter(declaration);
+  };
+  const collectActionAliases = (node) => {
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteralLike(node.moduleSpecifier) &&
+      hasAgentActionOwnerProvenance(node.moduleSpecifier.text)
+    ) {
+      const importClause = node.importClause;
+      if (importClause?.name) agentActionOwners.add(importClause.name.text);
+      if (importClause?.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
+        agentActionOwners.add(importClause.namedBindings.name.text);
+      }
+    }
+    if (
+      ts.isParameter(node) &&
+      ts.isIdentifier(node.name) &&
+      hasAgentActionOwnerProvenance(node.name.text)
+    ) {
+      agentActionOwners.add(node.name.text);
+    }
+    if (
+      ts.isBindingElement(node) &&
+      ts.isIdentifier(node.name) &&
+      bindingElementComesFromParameter(node) &&
+      hasAgentActionOwnerProvenance(node.name.text)
+    ) {
+      agentActionOwners.add(node.name.text);
+    }
+    if (ts.isImportSpecifier(node)) {
+      const importedName = (node.propertyName ?? node.name).text;
+      const importDeclaration = node.parent?.parent?.parent;
+      const moduleSpecifier =
+        ts.isImportDeclaration(importDeclaration) &&
+        ts.isStringLiteralLike(importDeclaration.moduleSpecifier)
+          ? importDeclaration.moduleSpecifier.text
+          : '';
+      if (isAgentActionVerbName(importedName) && hasAgentActionOwnerProvenance(moduleSpecifier)) {
+        agentActionAliases.add(node.name.text);
+      }
+    }
+    if (
+      ts.isBindingElement(node) &&
+      ts.isIdentifier(node.name) &&
+      (ts.isIdentifier(node.propertyName ?? node.name) ||
+        ts.isStringLiteralLike(node.propertyName ?? node.name)) &&
+      isAgentActionVerbName((node.propertyName ?? node.name).text) &&
+      hasAgentActionOwnerProvenance(bindingElementOwnerProvenance(node))
+    ) {
+      agentActionAliases.add(node.name.text);
+    }
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+      const initializer = unwrapTypeScriptExpression(node.initializer);
+      if (ts.isIdentifier(initializer)) {
+        aliasEdges.push([node.name.text, initializer.text]);
+      } else if (ts.isPropertyAccessExpression(initializer)) {
+        aliasEdges.push([node.name.text, initializer.name.text]);
+        if (
+          isAgentActionVerbName(initializer.name.text) &&
+          qualifiedActionOwnerHasProvenance(initializer.expression)
+        ) {
+          agentActionAliases.add(node.name.text);
+        }
+      } else if (
+        ts.isElementAccessExpression(initializer) &&
+        ts.isStringLiteralLike(initializer.argumentExpression) &&
+        isAgentActionVerbName(initializer.argumentExpression.text) &&
+        qualifiedActionOwnerHasProvenance(initializer.expression)
+      ) {
+        agentActionAliases.add(node.name.text);
+      }
+    }
+    ts.forEachChild(node, collectActionAliases);
+  };
+  collectActionAliases(sourceFile);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [alias, sourceName] of aliasEdges) {
+      if (!agentActionAliases.has(alias) && agentActionAliases.has(sourceName)) {
+        agentActionAliases.add(alias);
+        changed = true;
+      }
+    }
+  }
+  function qualifiedActionOwnerHasProvenance(expression) {
+    let candidate = unwrapTypeScriptExpression(expression);
+    while (ts.isPropertyAccessExpression(candidate) || ts.isElementAccessExpression(candidate)) {
+      candidate = unwrapTypeScriptExpression(candidate.expression);
+    }
+    return ts.isIdentifier(candidate) && agentActionOwners.has(candidate.text);
+  }
+  const isAgentActionExpression = (expression) => {
+    const candidate = unwrapTypeScriptExpression(expression);
+    if (ts.isIdentifier(candidate)) return agentActionAliases.has(candidate.text);
+    if (ts.isPropertyAccessExpression(candidate)) {
+      return (
+        isAgentActionVerbName(candidate.name.text) &&
+        qualifiedActionOwnerHasProvenance(candidate.expression)
+      );
+    }
     return (
-      ts.isPropertyAccessExpression(node.expression) && actionNames.has(node.expression.name.text)
+      ts.isElementAccessExpression(candidate) &&
+      ts.isStringLiteralLike(candidate.argumentExpression) &&
+      isAgentActionVerbName(candidate.argumentExpression.text) &&
+      qualifiedActionOwnerHasProvenance(candidate.expression)
     );
+  };
+  const isAgentActionCall = (node) => {
+    if (!ts.isCallExpression(node)) return false;
+    return isAgentActionExpression(node.expression);
+  };
+  const executionPathContainsAgentAction = (root) => {
+    let found = false;
+    const callableBindings = new Map();
+    const executionNode =
+      ts.isArrowFunction(root) || ts.isFunctionExpression(root) ? root.body : root;
+    const collectCallableBindings = (node, collectionRoot = executionNode) => {
+      if (
+        ts.isVariableDeclaration(node) &&
+        ts.isIdentifier(node.name) &&
+        node.initializer &&
+        (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))
+      ) {
+        callableBindings.set(node.name.text, node.initializer);
+      }
+      if (ts.isFunctionDeclaration(node) && node.name && node.body) {
+        callableBindings.set(node.name.text, node);
+      }
+      if (node !== collectionRoot && ts.isFunctionLike(node)) return;
+      ts.forEachChild(node, (child) => collectCallableBindings(child, collectionRoot));
+    };
+    collectCallableBindings(executionNode);
+    const visitedCallables = new Set();
+    const visit = (node, executionRoot = root) => {
+      if (found) return;
+      if (isAgentActionCall(node)) {
+        found = true;
+        return;
+      }
+      if (node !== executionRoot && ts.isFunctionLike(node)) return;
+      if (ts.isCallExpression(node)) {
+        const callee = unwrapTypeScriptExpression(node.expression);
+        if (ts.isArrowFunction(callee) || ts.isFunctionExpression(callee)) {
+          visit(callee.body, callee.body);
+          if (found) return;
+        }
+        if (ts.isIdentifier(callee)) {
+          const callable = callableBindings.get(callee.text);
+          if (callable && !visitedCallables.has(callable)) {
+            visitedCallables.add(callable);
+            visit(callable.body, callable.body);
+            if (found) return;
+          }
+        }
+      }
+      ts.forEachChild(node, (child) => visit(child, executionRoot));
+    };
+    visit(executionNode, executionNode);
+    return found;
   };
   const isEffectCall = (node) => {
     if (!ts.isCallExpression(node)) return false;
-    const callee = node.expression;
+    const expression = unwrapTypeScriptExpression(node.expression);
+    if (ts.isIdentifier(expression)) return effectNames.has(expression.text);
     return (
-      (ts.isIdentifier(callee) || ts.isPropertyAccessExpression(callee)) &&
-      /^(?:useEffect|useLayoutEffect)$/u.test(callee.name?.text ?? callee.text)
+      ts.isPropertyAccessExpression(expression) &&
+      ts.isIdentifier(expression.expression) &&
+      reactNamespaceNames.has(expression.expression.text) &&
+      /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(expression.name.text)
     );
   };
-  const containsActionCall = (root) => {
-    let found = false;
+
+  let found = false;
+  const visitEffects = (node) => {
+    if (found) return;
+    if (
+      isEffectCall(node) &&
+      node.arguments[0] &&
+      (isAgentActionExpression(node.arguments[0]) ||
+        executionPathContainsAgentAction(node.arguments[0]))
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, visitEffects);
+  };
+  visitEffects(sourceFile);
+  if (found) return true;
+
+  const containsRenderedSurface = (root) => {
+    let rendered = false;
     const visit = (node) => {
-      if (found) return;
-      if (isActionCall(node)) {
-        found = true;
+      if (rendered) return;
+      if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node)) {
+        rendered = true;
+        return;
+      }
+      if (ts.isCallExpression(node)) {
+        const expression = unwrapTypeScriptExpression(node.expression);
+        if (
+          (ts.isPropertyAccessExpression(expression) &&
+            ts.isIdentifier(expression.expression) &&
+            reactNamespaceNames.has(expression.expression.text) &&
+            expression.name.text === 'createElement') ||
+          (ts.isIdentifier(expression) && reactCreateElementNames.has(expression.text))
+        ) {
+          rendered = true;
+          return;
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(root);
+    return rendered;
+  };
+  const exportedFunctionLikes = [];
+  const collectRenderedFunctionLikes = (root) => {
+    const visit = (node) => {
+      if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+        if (containsRenderedSurface(node)) exportedFunctionLikes.push(node);
         return;
       }
       ts.forEachChild(node, visit);
     };
     visit(root);
-    return found;
   };
-  const componentName = (node) => {
-    for (let current = node.parent; current; current = current.parent) {
-      if (ts.isFunctionDeclaration(current) || ts.isClassDeclaration(current)) {
-        return current.name?.text ?? '';
-      }
-      if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
-        const declaration = current.parent;
-        return ts.isVariableDeclaration(declaration) && ts.isIdentifier(declaration.name)
-          ? declaration.name.text
-          : '';
+  for (const statement of sourceFile.statements) {
+    if (ts.isExportAssignment(statement)) {
+      collectRenderedFunctionLikes(statement.expression);
+      continue;
+    }
+    const exported = statement.modifiers?.some(
+      (modifier) =>
+        modifier.kind === ts.SyntaxKind.ExportKeyword ||
+        modifier.kind === ts.SyntaxKind.DefaultKeyword
+    );
+    if (!exported) continue;
+    if (
+      ts.isFunctionDeclaration(statement) &&
+      statement.body &&
+      containsRenderedSurface(statement)
+    ) {
+      exportedFunctionLikes.push(statement);
+    }
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (declaration.initializer) collectRenderedFunctionLikes(declaration.initializer);
       }
     }
-    return '';
-  };
-  let found = false;
-  const visit = (node) => {
-    if (found) return;
-    if (ts.isCallExpression(node)) {
-      if (isEffectCall(node) && node.arguments[0] && containsActionCall(node.arguments[0])) {
+  }
+  for (const functionLike of exportedFunctionLikes) {
+    const visitRender = (node) => {
+      if (found) return;
+      if (node !== functionLike && ts.isFunctionLike(node)) return;
+      if (isAgentActionCall(node)) {
         found = true;
         return;
       }
-      if (isActionCall(node) && /^[A-Z]/u.test(componentName(node))) {
-        found = true;
-        return;
-      }
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(sourceFile);
-  return found;
+      ts.forEachChild(node, visitRender);
+    };
+    visitRender(functionLike);
+    if (found) return true;
+  }
+  return false;
+}
+
+function containsHarnessForbiddenStateMachine(content, absolutePath) {
+  return (
+    astContainsInteractiveRuntime(content) ||
+    astContainsNativeJsxEventHandler(content, absolutePath) ||
+    astContainsHarnessRenderOrEffectAction(content, absolutePath)
+  );
 }
 
 function discoverHarnessForbiddenStateMachineSources(rootDir) {
@@ -1917,13 +2257,6 @@ function scriptModuleSpecifiers(source, fileName) {
   const addLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) specifiers.push(node.text);
   };
-  const addGlobArgument = (node) => {
-    if (ts.isArrayLiteralExpression(node)) {
-      for (const element of node.elements) addLiteral(element);
-    } else {
-      addLiteral(node);
-    }
-  };
   const visit = (node) => {
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
       addLiteral(node.moduleSpecifier);
@@ -1934,11 +2267,10 @@ function scriptModuleSpecifiers(source, fileName) {
         /^(?:glob|globEager)$/u.test(callee.name.text) &&
         ts.isMetaProperty(callee.expression) &&
         callee.expression.keywordToken === ts.SyntaxKind.ImportKeyword;
-      if (isImportMetaGlob) {
-        addGlobArgument(node.arguments[0]);
-      } else if (
-        callee.kind === ts.SyntaxKind.ImportKeyword ||
-        (ts.isIdentifier(callee) && callee.text === 'require')
+      if (
+        !isImportMetaGlob &&
+        (callee.kind === ts.SyntaxKind.ImportKeyword ||
+          (ts.isIdentifier(callee) && callee.text === 'require'))
       ) {
         addLiteral(node.arguments[0]);
       }
@@ -1953,6 +2285,38 @@ function externalScriptModuleSpecifiers(content) {
   return [
     ...content.matchAll(/<script\b[^>]*\bsrc\s*=\s*(?:(['"])([^'"]+)\1|([^\s"'=<>`]+))/giu),
   ].map((match) => match[2] ?? match[3]);
+}
+
+function scriptViteGlobPatternGroups(source, fileName) {
+  const sourceFile = ts.createSourceFile(
+    fileName,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const groups = [];
+  const literalPatterns = (node) => {
+    if (ts.isStringLiteralLike(node)) return [node.text];
+    if (!ts.isArrayLiteralExpression(node)) return [];
+    return node.elements.filter(ts.isStringLiteralLike).map((element) => element.text);
+  };
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      node.expression.name.text === 'glob' &&
+      ts.isMetaProperty(node.expression.expression) &&
+      node.expression.expression.keywordToken === ts.SyntaxKind.ImportKeyword &&
+      node.arguments[0]
+    ) {
+      const patterns = literalPatterns(node.arguments[0]);
+      if (patterns.length > 0) groups.push(patterns);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return groups;
 }
 
 function embeddedScriptSegments(content) {
@@ -2062,6 +2426,18 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
   return scriptModuleSpecifiers(source, absolutePath);
 }
 
+function viteGlobPatternGroupsForWebsiteSource(absolutePath) {
+  const content = fs.readFileSync(absolutePath, 'utf8');
+  if (/\.(?:css|less|s[ac]ss)$/i.test(absolutePath)) return [];
+  if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
+    return embeddedScriptSegments(content).flatMap((segment) =>
+      scriptViteGlobPatternGroups(segment, absolutePath)
+    );
+  }
+  const source = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
+  return scriptViteGlobPatternGroups(source, absolutePath);
+}
+
 function configuredWebsiteSourceAliasRoot(rootDir) {
   const configPath = path.join(rootDir, 'apps', 'www', 'astro.config.mjs');
   if (!fs.existsSync(configPath)) return null;
@@ -2087,6 +2463,52 @@ function canonicalImportTarget(absolutePath) {
     existing = parent;
   }
   return path.join(fs.realpathSync(existing), ...suffix);
+}
+
+function viteGlobTargets(rootDir, sourcePath, patterns, { aliasRoot = null, viteRoot }) {
+  const sourceDirectory = path.dirname(path.resolve(rootDir, sourcePath));
+  const targets = new Map();
+  const expandPattern = (authoredPattern) => {
+    const pattern = authoredPattern.startsWith('!') ? authoredPattern.slice(1) : authoredPattern;
+    let absolutePattern = null;
+    if (aliasRoot && pattern.startsWith('@/')) {
+      absolutePattern = path.resolve(aliasRoot, pattern.slice(2));
+    } else if (pattern.startsWith('.')) {
+      absolutePattern = path.resolve(sourceDirectory, pattern);
+    } else if (pattern.startsWith('/')) {
+      absolutePattern = path.resolve(viteRoot, `.${pattern}`);
+    }
+    if (!absolutePattern) return [];
+
+    return fs
+      .globSync(absolutePattern.replaceAll('\\', '/'))
+      .map((matchedPath) => path.resolve(matchedPath))
+      .filter((matchedPath) => fs.existsSync(matchedPath) && fs.statSync(matchedPath).isFile());
+  };
+  const positivePatterns = patterns.filter((pattern) => !pattern.startsWith('!'));
+  const negativePatterns = patterns.filter((pattern) => pattern.startsWith('!'));
+  for (const authoredPattern of positivePatterns) {
+    for (const matchedPath of expandPattern(authoredPattern)) {
+      targets.set(matchedPath, authoredPattern);
+    }
+  }
+  for (const authoredPattern of negativePatterns) {
+    for (const matchedPath of expandPattern(authoredPattern)) {
+      targets.delete(matchedPath);
+    }
+  }
+  return [...targets].map(([absolutePath, authoredPattern]) => ({
+    absolutePath,
+    authoredPattern,
+  }));
+}
+
+function relativeImportSpecifier(sourcePath, rootDir, targetPath) {
+  let specifier = path
+    .relative(path.dirname(path.resolve(rootDir, sourcePath)), targetPath)
+    .replaceAll('\\', '/');
+  if (!specifier.startsWith('.')) specifier = `./${specifier}`;
+  return specifier;
 }
 
 function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAliasRoot) {
@@ -2206,6 +2628,26 @@ function discoverWebsiteRawImports(rootDir) {
       );
       if (guardedImport) rawImports.push({ sourcePath, specifier, ...guardedImport });
     }
+    for (const patterns of viteGlobPatternGroupsForWebsiteSource(absolutePath)) {
+      for (const target of viteGlobTargets(rootDir, sourcePath, patterns, {
+        aliasRoot: websiteSourceAliasRoot,
+        viteRoot: websiteRoot,
+      })) {
+        const guardedImport = guardedWebsiteImport(
+          rootDir,
+          sourcePath,
+          relativeImportSpecifier(sourcePath, rootDir, target.absolutePath),
+          websiteSourceAliasRoot
+        );
+        if (guardedImport) {
+          rawImports.push({
+            sourcePath,
+            specifier: target.authoredPattern,
+            ...guardedImport,
+          });
+        }
+      }
+    }
   }
   return rawImports;
 }
@@ -2221,6 +2663,7 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
 
 function discoverHarnessRawImports(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
+  const harnessRoot = path.join(rootDir, 'apps', 'agent-harness');
   const candidates = walkFiles(sourceRoot)
     .filter((absolutePath) => /\.(?:[cm]?[jt]sx?|css|less|s[ac]ss)$/i.test(absolutePath))
     .filter((absolutePath) => !/\.(?:browser\.)?(?:test|spec)\.[cm]?[jt]sx?$/i.test(absolutePath));
@@ -2230,6 +2673,24 @@ function discoverHarnessRawImports(rootDir) {
     for (const specifier of moduleSpecifiersForWebsiteSource(absolutePath)) {
       const guardedImport = guardedHarnessImport(rootDir, sourcePath, specifier);
       if (guardedImport) rawImports.push({ sourcePath, specifier, ...guardedImport });
+    }
+    for (const patterns of viteGlobPatternGroupsForWebsiteSource(absolutePath)) {
+      for (const target of viteGlobTargets(rootDir, sourcePath, patterns, {
+        viteRoot: harnessRoot,
+      })) {
+        const guardedImport = guardedHarnessImport(
+          rootDir,
+          sourcePath,
+          relativeImportSpecifier(sourcePath, rootDir, target.absolutePath)
+        );
+        if (guardedImport) {
+          rawImports.push({
+            sourcePath,
+            specifier: target.authoredPattern,
+            ...guardedImport,
+          });
+        }
+      }
     }
   }
   return rawImports;
@@ -2803,16 +3264,18 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       }
       for (const repositoryPath of evidencePaths) {
         const absoluteEvidencePath = path.resolve(rootDir, repositoryPath);
-        const canonicalEvidencePath = canonicalRetainedEvidenceFile(rootDir, repositoryPath);
-        if (!canonicalEvidencePath) {
-          if (fs.existsSync(absoluteEvidencePath)) {
+        const retainedEvidencePath = canonicalRetainedEvidenceFile(rootDir, repositoryPath);
+        if (!retainedEvidencePath) {
+          if (!fs.existsSync(absoluteEvidencePath)) {
+            issues.push(`${context}: self-hosted evidence path does not exist: ${repositoryPath}`);
+          } else {
             issues.push(
               `${context}: self-hosted evidence path must resolve within internal/website/evidence/**: ${repositoryPath}`
             );
           }
           continue;
         }
-        const evidenceRecord = fs.readFileSync(canonicalEvidencePath, 'utf8');
+        const evidenceRecord = fs.readFileSync(retainedEvidencePath, 'utf8');
         requireMeaningfulLabels(
           evidenceRecord,
           SELF_HOSTED_WEBSITE_RECORD_LABELS,
@@ -3069,13 +3532,16 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
   for (const row of table.rows) {
     const context = `${relativePath}:${row.line}`;
     const sourcePaths = explicitRepositoryPaths(row.cells[0]);
-    if (sourcePaths.length !== 1 || !/^apps\/www\/(?:src|public)\//u.test(sourcePaths[0])) {
+    const sourcePath = sourcePaths[0];
+    const isWebsiteSource = sourcePath?.startsWith('apps/www/src/');
+    const isPublicExecutable =
+      sourcePath?.startsWith('apps/www/public/') && /\.(?:cjs|js|mjs)$/iu.test(sourcePath);
+    if (sourcePaths.length !== 1 || (!isWebsiteSource && !isPublicExecutable)) {
       issues.push(
-        `${context}: source binding must name exactly one \`apps/www/src/**\` or \`apps/www/public/**\` path`
+        `${context}: source binding must name exactly one \`apps/www/src/**\` path or executable \`apps/www/public/**/*.{js,mjs,cjs}\` path`
       );
       continue;
     }
-    const sourcePath = sourcePaths[0];
     if (bindings.has(sourcePath)) {
       issues.push(
         `${context}: duplicate source binding for \`${sourcePath}\` (first declared on line ${bindings.get(sourcePath).line})`

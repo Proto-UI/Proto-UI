@@ -10,7 +10,7 @@ The #420 comment policy requires website consumers to use merged, stable Proto U
 
 The adapter foundation is narrower than the prototype inventory. `D-ADAPTER-PROFILE-0001`, `A-WEB-COMPONENT-0001`, `A-REACT-18-19-0001`, `A-VUE-3-0001`, `A-VUE-2-0001`, and `T-ADAPTER-PROFILE-0001` are `active`. Specialized A11y, Collection, Scroll, Text Control, and Positioning support/capability slices are not cataloged in those profiles, so this ledger must not treat their absence as support.
 
-For the website only, the primary Proto UI production host is the generated Web Component facade. React and Vue runtimes may appear in reviewed raw-adapter demonstrations, but must not enter the documentation shell or ordinary website controls. This website choice is not a cross-project host policy.
+At M0, the documentation shell and ordinary controls remain native/static or explicitly governed legacy/infrastructure surfaces while their candidate prototypes are draft. The reviewed demonstration boundary uses its raw Web Component registry and Adapter as the primary demonstrated host; React and Vue runtimes may appear only in isolated raw-adapter demonstrations and must not enter the documentation shell. This website choice is not a cross-project host policy.
 
 ## Reading the matrix
 
@@ -146,7 +146,7 @@ The matrix rows remain authoritative. These bindings make non-row helper and int
 | Dimension | Required acceptance artifact | M0 status | Current evidence or gap | Proposed checkpoint |
 | --- | --- | --- | --- | --- |
 | Production build | Clean production build log from Node 22 and the pinned pnpm version | not captured | No build was run for this ledger snapshot | S14: build and retain the log with commit SHA |
-| Bundle inventory and host boundary | Chunk inventory proving generated WC facade is the primary website host and no accidental React/Vue shell runtime exists | not captured | Source boundaries were scanned; no production bundle was generated or inspected | S14: bundle manifest assertion and shell-runtime negative check |
+| Bundle inventory and host boundary | Chunk inventory proving the M0 shell remains native/static, the reviewed demo entry statically owns its raw WC registry and Adapter, and no accidental React/Vue shell runtime exists | not captured | Source boundaries were scanned; no production bundle was generated or inspected | S14: bundle manifest assertion, demo-host provenance, and shell-runtime negative check |
 | Keyboard-only order and activation | Recorded path through shell, search, docs controls, gallery, and previews using Tab, Shift+Tab, arrows, Enter, Space, Escape, Home, and End where applicable | partial | Raw handler ownership was identified in source; no browser run or recording exists | S7 through S13: per-surface keyboard checkpoints; S14: end-to-end replay |
 | Accessible names, roles, states, and live announcements | Accessibility tree snapshots plus announcement observations for each interactive state | partial | ARIA mutations and live-status code were inventoried; no assistive-technology evidence exists | S8 through S13: semantic snapshots; S14: aggregate audit |
 | JavaScript disabled | Browser captures proving content, navigation, locale access, code, and documented fallbacks at zero client JavaScript | not captured | Strategies are requirements in the matrix, not observed behavior | S3: WC light-DOM proof; S14: whole-site no-JS route set |
@@ -191,7 +191,7 @@ The M0 checker and its normal CI wiring must enforce all of the following before
 3. Inventory drift fails on unmapped components/scripts and on matrix rows whose declared evidence paths no longer exist. Renames require an explicit ID migration decision rather than silent ID churn.
 4. Every `blocked` or `research` row links an Issue and names its owner. Every native or infrastructure disposition states its reason, owner, and concrete re-review trigger.
 5. Every raw consumer-wall escape links a removal/formalization Issue. Raw prototype, adapter, runtime, or theme imports are limited to a reviewed demonstration/integration allowlist.
-6. The generated Web Component facade is asserted as the primary website control host. Production bundle checks reject accidental React or Vue runtimes in the shell while permitting isolated, lazy demonstration chunks.
+6. At M0, production bundle checks assert a native/static shell with no Proto UI Adapter, React, or Vue runtime in its static closure. They separately require the route-owned demonstration entry to prove its reviewed raw Web Component registry and Adapter as the primary demonstration host, while permitting isolated lazy React/Vue demonstration chunks. #420 owns any later generated-facade shell cutover after the relevant prototype lifecycle gates close.
 7. Static analysis rejects new app-owned keyboard, focus, scroll, dismissal, selection, or ARIA state machines in ordinary website controls unless an explicit reviewed matrix disposition covers the exact path.
 8. WC SSR/light-DOM fixtures exercise pre-upgrade, post-upgrade, no-JS, repeated mount, remount, and dispose behavior. Adapter-specific raw demos remain separate from ordinary website consumer proof.
 9. Normal CI runs the checker, import-boundary checks, production build, bundle assertions, focused browser fixtures, and negative fixtures that prove each rule fails for a deliberate violation.
