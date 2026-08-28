@@ -5,9 +5,116 @@ import { pathToFileURL } from 'node:url';
 const TOTAL_HEADERS = ['State', 'Count'];
 const TARGET_CLASS_TOTAL_HEADERS = ['Target class', 'Count'];
 const END_MARKER = '<!-- coverage-matrix:end -->';
-const CATALOG_ID_PATTERN = /\b(?:P|T|M|HC|A|D)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*\b/g;
+const CATALOG_ID_PATTERN = /\b(?:A|C|D|HC|K|M|P|T|V)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*\b/g;
+const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
 const INTERACTIVE_SOURCE_PATTERN =
   /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(|\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input)\s*=/;
+const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
+  'www.shell.site-title': Object.freeze(['apps/www/src/components/override/SiteTitle.astro']),
+  'www.shell.skip-link': Object.freeze(['apps/www/astro.config.mjs']),
+  'www.shell.primary-nav': Object.freeze(['apps/www/src/components/override/Header.astro']),
+  'www.shell.social-links': Object.freeze(['apps/www/src/components/override/SocialIcons.astro']),
+  'www.shell.header-separators': Object.freeze(['apps/www/src/components/override/Header.astro']),
+  'www.shell.page-layout': Object.freeze([
+    'apps/www/src/components/override/PageFrame.astro',
+    'apps/www/src/components/override/TwoColumnContent.astro',
+    'apps/www/src/components/override/ContentPanel.astro',
+  ]),
+  'www.shell.page-title': Object.freeze(['apps/www/src/components/override/PageTitle.astro']),
+  'www.shell.footer': Object.freeze(['apps/www/astro.config.mjs']),
+  'www.shell.pagination': Object.freeze(['apps/www/astro.config.mjs']),
+  'www.shell.hero-actions': Object.freeze([
+    'apps/www/src/components/override/Hero.astro',
+    'apps/www/src/components/override/pattern/LinkButton.astro',
+  ]),
+  'www.docs.spec-contract-preview': Object.freeze([
+    'apps/www/src/components/SpecContractPreview.astro',
+  ]),
+  'www.docs.api-table': Object.freeze(['apps/www/src/components/ApiPropsTable.astro']),
+  'www.docs.stage-notice': Object.freeze(['apps/www/src/components/DocStageNotice.astro']),
+  'www.docs.phase-badge': Object.freeze(['apps/www/src/components/SpecPhaseBadge.astro']),
+  'www.docs.entity-links': Object.freeze(['apps/www/src/components/SpecEntityLinks.astro']),
+  'www.gallery.lucide-card-grid': Object.freeze([
+    'apps/www/src/components/LucideIconGallery.astro',
+  ]),
+  'www.gallery.ui-library-cards': Object.freeze(['apps/www/src/components/UiLibraryGallery.astro']),
+  'www.gallery.prototype-library-cards': Object.freeze([
+    'apps/www/src/components/PrototypeLibraryOverview.astro',
+  ]),
+  'www.icons.static-lucide': Object.freeze(['apps/www/src/components/StaticLucideIcon.astro']),
+  'www.demo.brutalist-theme-style': Object.freeze([
+    'apps/www/src/components/BrutalistPageStyle.astro',
+  ]),
+  'www.content.document-semantics': Object.freeze([
+    'apps/www/src/components/override/MarkdownContent.astro',
+  ]),
+  'www.content.draft-notice': Object.freeze(['apps/www/astro.config.mjs']),
+});
+
+const WEBSITE_NON_INTERACTIVE_EXPECTATIONS = Object.freeze({
+  ...Object.fromEntries(
+    [
+      'www.shell.site-title',
+      'www.shell.skip-link',
+      'www.shell.page-layout',
+      'www.shell.page-title',
+      'www.shell.footer',
+      'www.shell.pagination',
+      'www.docs.spec-contract-preview',
+      'www.docs.api-table',
+      'www.docs.stage-notice',
+      'www.docs.entity-links',
+      'www.gallery.lucide-card-grid',
+      'www.gallery.ui-library-cards',
+      'www.gallery.prototype-library-cards',
+      'www.content.document-semantics',
+      'www.content.draft-notice',
+    ].map((id) => [id, Object.freeze({ targetClass: 'native/static', state: 'native/static' })])
+  ),
+  'www.shell.primary-nav': Object.freeze({
+    targetClass: 'site-composition',
+    state: 'research',
+  }),
+  'www.shell.social-links': Object.freeze({
+    targetClass: 'site-composition',
+    state: 'research',
+  }),
+  'www.shell.header-separators': Object.freeze({
+    targetClass: 'official-prototype',
+    state: 'blocked',
+  }),
+  'www.shell.hero-actions': Object.freeze({
+    targetClass: 'site-composition',
+    state: 'research',
+  }),
+  'www.docs.phase-badge': Object.freeze({
+    targetClass: 'official-prototype',
+    state: 'blocked',
+  }),
+  'www.icons.static-lucide': Object.freeze({
+    targetClass: 'official-prototype',
+    state: 'blocked',
+  }),
+  'www.demo.brutalist-theme-style': Object.freeze({
+    targetClass: 'infrastructure-exempt',
+    state: 'infrastructure-exempt',
+  }),
+});
+
+const websiteNonInteractivePathIds = Object.keys(WEBSITE_NON_INTERACTIVE_PATHS).sort();
+const websiteNonInteractiveExpectationIds = Object.keys(
+  WEBSITE_NON_INTERACTIVE_EXPECTATIONS
+).sort();
+if (
+  websiteNonInteractivePathIds.length !== websiteNonInteractiveExpectationIds.length ||
+  websiteNonInteractivePathIds.some(
+    (id, index) => id !== websiteNonInteractiveExpectationIds[index]
+  )
+) {
+  throw new Error(
+    'Website non-interactive path and class/state manifests must contain identical surface IDs'
+  );
+}
 
 const WEBSITE_HEADERS = [
   'ID',
@@ -70,7 +177,18 @@ export const MATRIX_CONFIGS = Object.freeze([
     ],
     ownerHeaders: ['Current owner', 'Dependency and owner'],
     existingPathHeaders: ['Path', 'Evidence'],
-    requiredIds: ['www.shell.primary-nav', 'www.icons.static-lucide'],
+    requiredIds: ['www.shell.primary-nav', 'www.docs.phase-badge', 'www.icons.static-lucide'],
+    requiredCatalogIdsByRow: Object.freeze({
+      'www.demo.raw-adapter-runtimes': Object.freeze([
+        'A-WEB-COMPONENT-0001',
+        'A-REACT-18-19-0001',
+        'A-VUE-3-0001',
+        'A-VUE-2-0001',
+      ]),
+    }),
+    requiredRepositoryPathsByRow: Object.freeze({
+      ...WEBSITE_NON_INTERACTIVE_PATHS,
+    }),
     inheritedSurfaceManifests: Object.freeze([
       Object.freeze({
         source: '@astrojs/starlight@0.35.3',
@@ -92,6 +210,16 @@ export const MATRIX_CONFIGS = Object.freeze([
           'www.docs.expressive-code-copy-feedback',
           'www.docs.expressive-code-scroll-focus',
         ]),
+      }),
+    ]),
+    nonInteractiveSurfaceManifests: Object.freeze([
+      Object.freeze({
+        source: 'repository-owned non-interactive website projections',
+        entries: Object.freeze(
+          Object.entries(WEBSITE_NON_INTERACTIVE_EXPECTATIONS).map(([id, expectation]) =>
+            Object.freeze({ id, ...expectation })
+          )
+        ),
       }),
     ]),
     classStateRequirements: {
@@ -220,7 +348,15 @@ function formatHeaders(headers) {
   return `| ${headers.join(' | ')} |`;
 }
 
-function parseTable(lines, fromIndex, toIndex, expectedHeaders, label, issues) {
+function parseTable(
+  lines,
+  fromIndex,
+  toIndex,
+  expectedHeaders,
+  label,
+  issues,
+  { requireContiguous = false } = {}
+) {
   let headerIndex = -1;
   for (let index = fromIndex; index < toIndex; index += 1) {
     if (lines[index].trim().startsWith('|')) {
@@ -260,14 +396,31 @@ function parseTable(lines, fromIndex, toIndex, expectedHeaders, label, issues) {
   }
 
   const rows = [];
+  let tableInterrupted = false;
   for (let index = headerIndex + 2; index < toIndex; index += 1) {
     const line = lines[index];
     if (!line.trim()) {
-      if (rows.length > 0) break;
+      const hasLaterContent = lines.slice(index + 1, toIndex).some((entry) => entry.trim());
+      if (!requireContiguous || !hasLaterContent) break;
+      if (!tableInterrupted) {
+        issues.push(
+          `${label}: line ${index + 1} interrupts the matrix; data rows must remain contiguous through ${END_MARKER}`
+        );
+        tableInterrupted = true;
+      }
       continue;
     }
     if (!line.trim().startsWith('|')) {
-      if (rows.length > 0) break;
+      if (!requireContiguous) {
+        if (rows.length > 0) break;
+        continue;
+      }
+      if (!tableInterrupted) {
+        issues.push(
+          `${label}: line ${index + 1} interrupts the matrix; data rows must remain contiguous through ${END_MARKER}`
+        );
+        tableInterrupted = true;
+      }
       continue;
     }
     const cells = parseMarkdownRow(line);
@@ -292,8 +445,57 @@ function includesIssue(value) {
   return /(^|\D)#\d+\b/.test(value);
 }
 
+function labeledValue(value, labelPattern) {
+  return value.match(new RegExp(`\\b(?:${labelPattern})\\s*:\\s*([^;|]+)`, 'i'))?.[1].trim();
+}
+
+function includesConcreteOwnerLabel(value) {
+  const owner = labeledValue(value, 'owners?');
+  return owner !== undefined && isMeaningful(owner);
+}
+
+function includesSubstantiveReasonLabel(value) {
+  const reason = labeledValue(value, 'reason');
+  if (reason === undefined || !isMeaningful(reason)) return false;
+  return (reason.match(/[A-Za-z0-9][A-Za-z0-9/-]*/g) ?? []).length >= 4;
+}
+
+function includesBoundedLimitOrTrigger(escapeOrExemption, reReviewOrRemoval) {
+  const policyText = `${escapeOrExemption} ${reReviewOrRemoval}`;
+  const limit = labeledValue(policyText, 'limit');
+  return (
+    (limit !== undefined && isMeaningful(limit)) ||
+    /\b(?:if|when|whenever|until|unless)\s+[^.;|]{3,}/i.test(policyText) ||
+    /\blimited to\s+[^.;|]{3,}/i.test(policyText) ||
+    /\bon\b[^.;|]{0,80}\b(?:change|selection|upgrade|addition|removal|expansion|adoption|introduction|extraction)\b/i.test(
+      policyText
+    )
+  );
+}
+
 function includesForbiddenClassification(value) {
   return /\b(?:unknown|unclassified)\b/i.test(value);
+}
+
+function escapeRegularExpression(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function reportsCatalogEntityStatus(value, entityId, status) {
+  const directAssociation = new RegExp(
+    `\\b${escapeRegularExpression(entityId)}\\s*=\\s*${escapeRegularExpression(status)}\\b`,
+    'i'
+  );
+  if (directAssociation.test(value)) return true;
+
+  const entityPattern = new RegExp(`\\b${escapeRegularExpression(entityId)}\\b`, 'i');
+  return value.split(';').some((clause) => {
+    if (!entityPattern.test(clause)) return false;
+    const reportedStatuses = CATALOG_STATUSES.filter((candidate) =>
+      new RegExp(`\\b${candidate}\\b`, 'i').test(clause)
+    );
+    return reportedStatuses.length === 1 && reportedStatuses[0] === status;
+  });
 }
 
 function explicitRepositoryPaths(value) {
@@ -373,6 +575,7 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       targetClassCounts: new Map(),
       seenIds: new Map(),
       sourceOwners: new Map(),
+      rowDispositions: new Map(),
     };
   }
   const seenIds = new Map();
@@ -381,6 +584,12 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     config.allowedTargetClasses.map((targetClass) => [targetClass, 0])
   );
   const sourceOwners = new Map();
+  const rowDispositions = new Map();
+  const nonInteractiveEntries = new Map(
+    (config.nonInteractiveSurfaceManifests ?? []).flatMap((manifest) =>
+      manifest.entries.map((entry) => [entry.id, entry])
+    )
+  );
 
   for (const row of table.rows) {
     const record = rowRecord(config.headers, row.cells);
@@ -405,6 +614,7 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     } else {
       seenIds.set(id, row.line);
     }
+    rowDispositions.set(id, { targetClass, state });
 
     if (!config.allowedTargetClasses.includes(targetClass)) {
       issues.push(
@@ -447,6 +657,19 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       }
     }
 
+    const boundRepositoryPaths = new Set(
+      (config.existingPathHeaders ?? []).flatMap((header) =>
+        explicitRepositoryPaths(record[header])
+      )
+    );
+    for (const requiredRepositoryPath of config.requiredRepositoryPathsByRow?.[id] ?? []) {
+      if (!boundRepositoryPaths.has(requiredRepositoryPath)) {
+        issues.push(
+          `${context}: matrix row \`${id}\` must bind repository path \`${requiredRepositoryPath}\` as an exact code span in Path or Evidence`
+        );
+      }
+    }
+
     const referencedIds = [...new Set(recordText.match(CATALOG_ID_PATTERN) ?? [])];
     for (const entityId of referencedIds) {
       if (!catalogEntries.has(entityId)) {
@@ -456,6 +679,13 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
 
     const lifecycleText = config.kind === 'website' ? record.Lifecycle : record['Proto UI chain'];
     const chainIds = [...new Set(record['Proto UI chain'].match(CATALOG_ID_PATTERN) ?? [])];
+    for (const requiredEntityId of config.requiredCatalogIdsByRow?.[id] ?? []) {
+      if (!chainIds.includes(requiredEntityId)) {
+        issues.push(
+          `${context}: matrix row \`${id}\` must inventory catalog entity \`${requiredEntityId}\` in Proto UI chain`
+        );
+      }
+    }
     const referencedStatuses = new Set(
       chainIds.map((entityId) => catalogEntries.get(entityId)?.status).filter(Boolean)
     );
@@ -464,6 +694,31 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
         issues.push(
           `${context}: ${config.kind === 'website' ? 'Lifecycle' : 'Proto UI chain'} must report catalog status \`${catalogStatus}\` for referenced entities`
         );
+      }
+    }
+    for (const entityId of chainIds) {
+      const catalogStatus = catalogEntries.get(entityId)?.status;
+      if (catalogStatus && !reportsCatalogEntityStatus(lifecycleText, entityId, catalogStatus)) {
+        issues.push(
+          `${context}: ${config.kind === 'website' ? 'Lifecycle' : 'Proto UI chain'} must associate catalog entity \`${entityId}\` with status \`${catalogStatus}\``
+        );
+      }
+    }
+
+    if (config.kind === 'website' && (state === 'ready' || state === 'self-hosted')) {
+      if (chainIds.length === 0) {
+        issues.push(
+          `${context}: website State \`${state}\` must inventory at least one catalog entity in Proto UI chain`
+        );
+      } else {
+        const nonActiveEntity = chainIds
+          .map((entityId) => [entityId, catalogEntries.get(entityId)?.status ?? 'uncataloged'])
+          .find(([, status]) => status !== 'active');
+        if (nonActiveEntity) {
+          issues.push(
+            `${context}: website State \`${state}\` requires every catalog entity in Proto UI chain to be active; received \`${nonActiveEntity[0]}\` (${nonActiveEntity[1]})`
+          );
+        }
       }
     }
 
@@ -485,15 +740,53 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
 
     const exemptLike =
       config.exemptTargetClasses.includes(targetClass) || config.exemptStates.includes(state);
+    if (
+      config.kind === 'website' &&
+      (targetClass === 'native/static' || state === 'native/static') &&
+      !nonInteractiveEntries.has(id)
+    ) {
+      issues.push(
+        `${context}: native/static website row \`${id}\` must be registered in a non-interactive surface manifest`
+      );
+    }
+    const nonInteractiveExpectation = nonInteractiveEntries.get(id);
+    if (
+      config.kind === 'website' &&
+      nonInteractiveExpectation &&
+      (targetClass !== nonInteractiveExpectation.targetClass ||
+        state !== nonInteractiveExpectation.state)
+    ) {
+      issues.push(
+        `${context}: non-interactive manifest row \`${id}\` must use Target class \`${nonInteractiveExpectation.targetClass}\` and State \`${nonInteractiveExpectation.state}\``
+      );
+    }
     const escapeOrExemption = record['Escape or exemption'];
     const reReviewOrRemoval = record['Re-review or removal issue'];
     if (exemptLike) {
       if (!isMeaningful(escapeOrExemption)) {
         issues.push(`${context}: exempt/native rows must state a reason in Escape or exemption`);
       }
+      if (!includesConcreteOwnerLabel(record['Dependency and owner'])) {
+        issues.push(
+          `${context}: exempt/native rows must give the \`owner:\` or \`owners:\` label a concrete value in Dependency and owner`
+        );
+      }
+      if (!includesSubstantiveReasonLabel(escapeOrExemption)) {
+        issues.push(
+          `${context}: exempt/native rows must give the \`reason:\` label a substantive explanation in Escape or exemption`
+        );
+      }
       if (!isMeaningful(reReviewOrRemoval)) {
         issues.push(
           `${context}: exempt/native rows must state a re-review trigger in Re-review or removal issue`
+        );
+      }
+      if (!includesIssue(reReviewOrRemoval)) {
+        issues.push(`${context}: exempt/native rows must link re-review or removal as #<issue>`);
+      }
+      if (!includesBoundedLimitOrTrigger(escapeOrExemption, reReviewOrRemoval)) {
+        issues.push(
+          `${context}: exempt/native rows must state a bounded \`limit:\` or conditional trigger`
         );
       }
     } else if (isMeaningful(escapeOrExemption) && !includesIssue(reReviewOrRemoval)) {
@@ -523,23 +816,31 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     }
   }
 
-  const inheritedIds = new Map(
-    (config.inheritedSurfaceManifests ?? []).flatMap((manifest) =>
-      manifest.ids.map((id) => [id, manifest.source])
-    )
-  );
-  for (const requiredId of [...(config.requiredIds ?? []), ...inheritedIds.keys()]) {
+  const manifestedIds = new Map([
+    ...(config.inheritedSurfaceManifests ?? []).flatMap((manifest) =>
+      manifest.ids.map((id) => [id, `inherited manifest ${manifest.source}`])
+    ),
+    ...(config.nonInteractiveSurfaceManifests ?? []).flatMap((manifest) =>
+      manifest.entries.map((entry) => [entry.id, `non-interactive manifest ${manifest.source}`])
+    ),
+  ]);
+  for (const requiredId of new Set([
+    ...(config.requiredIds ?? []),
+    ...Object.keys(config.requiredCatalogIdsByRow ?? {}),
+    ...Object.keys(config.requiredRepositoryPathsByRow ?? {}),
+    ...manifestedIds.keys(),
+  ])) {
     if (!seenIds.has(requiredId)) {
-      const inheritedSource = inheritedIds.has(requiredId)
-        ? ` from inherited manifest ${inheritedIds.get(requiredId)}`
+      const manifestSource = manifestedIds.has(requiredId)
+        ? ` from ${manifestedIds.get(requiredId)}`
         : '';
       issues.push(
-        `${relativePath}: required inventory surface ID \`${requiredId}\` is missing${inheritedSource}`
+        `${relativePath}: required inventory surface ID \`${requiredId}\` is missing${manifestSource}`
       );
     }
   }
 
-  return { stateCounts, targetClassCounts, seenIds, sourceOwners };
+  return { stateCounts, targetClassCounts, seenIds, sourceOwners, rowDispositions };
 }
 
 function parseSourceBindings(lines, afterIndex, relativePath, issues) {
@@ -565,7 +866,8 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
     tableEnd,
     ['Interactive or integration source', 'Owning matrix row'],
     `${relativePath} Source-scan bindings`,
-    issues
+    issues,
+    { requireContiguous: true }
   );
   const bindings = new Map();
   if (!table) return bindings;
@@ -628,11 +930,33 @@ function validateWebsiteSourceBindings(
       continue;
     }
 
-    if (directOwners.length === 1 && binding) {
+    const directIds = [...new Set(directOwners.map(({ id }) => id))];
+    const effectiveOwnerIds = binding?.ownerIds ?? directIds;
+    const hasNonNativeOwner = effectiveOwnerIds.some((ownerId) => {
+      const disposition = matrixResult.rowDispositions.get(ownerId);
+      return (
+        disposition &&
+        (disposition.targetClass !== 'native/static' || disposition.state !== 'native/static')
+      );
+    });
+    const hasNativeDirectOwner = directIds.some((ownerId) => {
+      const disposition = matrixResult.rowDispositions.get(ownerId);
+      return disposition?.targetClass === 'native/static' && disposition.state === 'native/static';
+    });
+    if ((hasNativeDirectOwner || directOwners.length === 0) && !hasNonNativeOwner) {
       issues.push(
-        `${relativePath}: interactive website source \`${sourcePath}\` is already owned by matrix row \`${directOwners[0].id}\`; use the direct Path or the explicit binding, not both`
+        `${relativePath}: interactive website source \`${sourcePath}\` is owned only by native/static rows; bind it to the non-native interaction owner or reclassify the surface`
       );
       continue;
+    }
+
+    if (directOwners.length === 1 && binding) {
+      if (!hasNativeDirectOwner) {
+        issues.push(
+          `${relativePath}: interactive website source \`${sourcePath}\` is already owned by matrix row \`${directOwners[0].id}\`; use the direct Path or the explicit binding, not both`
+        );
+        continue;
+      }
     }
 
     if (directOwners.length > 1) {
@@ -643,7 +967,7 @@ function validateWebsiteSourceBindings(
         );
         continue;
       }
-      const directIds = [...new Set(directOwners.map(({ id }) => id))].sort();
+      directIds.sort();
       const boundIds = [...binding.ownerIds].sort();
       if (
         directIds.length !== boundIds.length ||
@@ -839,7 +1163,8 @@ function validateMatrixFile(rootDir, config, catalogEntries, issues) {
     endIndex,
     config.headers,
     `${config.relativePath} ${config.kind} matrix`,
-    issues
+    issues,
+    { requireContiguous: true }
   );
   const matrixResult = validateMainRows(
     config,

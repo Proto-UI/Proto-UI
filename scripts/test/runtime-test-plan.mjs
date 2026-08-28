@@ -1,14 +1,23 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-export const BROWSER_SUITES = Object.freeze([
-  'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
-]);
+const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const BROWSER_SUITE_ROOT = path.join(REPOSITORY_ROOT, 'apps', 'www', 'src', 'content', 'docs');
+
+function discoverBrowserSuites(directory) {
+  const suites = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const absolutePath = path.join(directory, entry.name);
+    if (entry.isDirectory()) suites.push(...discoverBrowserSuites(absolutePath));
+    else if (entry.isFile() && /\.browser\.test\.[cm]?[jt]sx?$/.test(entry.name)) {
+      suites.push(path.relative(REPOSITORY_ROOT, absolutePath).replaceAll('\\', '/'));
+    }
+  }
+  return suites.sort();
+}
+
+export const BROWSER_SUITES = Object.freeze(discoverBrowserSuites(BROWSER_SUITE_ROOT));
 
 export function corepackCliCandidates(nodeExecutable = process.execPath) {
   const nodeBin = path.dirname(nodeExecutable);
@@ -25,10 +34,7 @@ export function resolveCorepackCli(nodeExecutable = process.execPath, exists = e
   );
 }
 
-export function createRuntimeTestPlan(rawArgs) {
-  const args = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;
-  if (args.length > 0) return [{ needsServer: false, args }];
-
+function fullRuntimeTestPlan(forwardedArgs = []) {
   return [
     {
       needsServer: false,
@@ -39,6 +45,7 @@ export function createRuntimeTestPlan(rawArgs) {
       args: [
         '--minWorkers=1',
         '--maxWorkers=2',
+        ...forwardedArgs,
         ...BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
       ],
     },
@@ -48,7 +55,42 @@ export function createRuntimeTestPlan(rawArgs) {
       // parallel makes them queue behind each other and blow their own
       // readiness timeouts. Measured on five suites: 75s sequential against
       // 102s parallel, with the parallel run intermittently timing out.
-      args: ['--no-file-parallelism', ...BROWSER_SUITES],
+      args: ['--no-file-parallelism', ...forwardedArgs, ...BROWSER_SUITES],
     },
   ];
+}
+
+function normalizeTestFilter(argument) {
+  const absoluteFilter = path.resolve(REPOSITORY_ROOT, argument);
+  const relativeFilter = path.relative(REPOSITORY_ROOT, absoluteFilter);
+  if (!relativeFilter.startsWith('..') && !path.isAbsolute(relativeFilter)) {
+    return relativeFilter.replaceAll('\\', '/');
+  }
+  return argument.replaceAll('\\', '/').replace(/^\.\//, '');
+}
+
+export function createRuntimeTestPlan(rawArgs) {
+  const args = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;
+  if (args.length > 0) {
+    const positionalFilters = args
+      .filter((argument) => !argument.startsWith('-'))
+      .map(normalizeTestFilter);
+    // Vitest accepts file filters after options. Treat a leading option as
+    // ambiguous (its following token may be an option value) and pay the
+    // small cost of a shared server instead of risking concurrent browser
+    // suites that each start Astro against the same data store.
+    const hasLeadingOption = args[0].startsWith('-');
+    if (positionalFilters.length === 0 || hasLeadingOption) {
+      return [{ needsServer: true, args: ['--no-file-parallelism', ...args] }];
+    }
+
+    const canSelectBrowserSuite = positionalFilters.some((argument) =>
+      BROWSER_SUITES.some((suite) => suite.includes(argument) || argument.includes(suite))
+    );
+    if (canSelectBrowserSuite) {
+      return [{ needsServer: true, args: ['--no-file-parallelism', ...args] }];
+    }
+    return [{ needsServer: false, args }];
+  }
+  return fullRuntimeTestPlan();
 }

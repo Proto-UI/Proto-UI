@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import { describe, it } from 'node:test';
 
 import {
@@ -35,6 +36,40 @@ describe('runtime test plan', () => {
         },
       ]
     );
+  });
+
+  it('shares one documentation server for a broad filter that can select browser suites', () => {
+    for (const filter of [
+      'apps/www/src/content/docs/zh-cn',
+      './apps/www/src/content/docs/zh-cn',
+      path.resolve('apps/www/src/content/docs/zh-cn'),
+    ]) {
+      assert.deepEqual(createRuntimeTestPlan([filter]), [
+        {
+          needsServer: true,
+          args: ['--no-file-parallelism', filter],
+        },
+      ]);
+    }
+  });
+
+  it('detects a broad browser filter after Vitest options', () => {
+    const args = ['scripts', '--reporter=dot', 'apps/www/src/content/docs/zh-cn'];
+    assert.deepEqual(createRuntimeTestPlan(args), [
+      {
+        needsServer: true,
+        args: ['--no-file-parallelism', ...args],
+      },
+    ]);
+  });
+
+  it('keeps browser suites isolated when only Vitest options are forwarded', () => {
+    assert.deepEqual(createRuntimeTestPlan(['--reporter=dot']), [
+      {
+        needsServer: true,
+        args: ['--no-file-parallelism', '--reporter=dot'],
+      },
+    ]);
   });
 
   it('isolates browser suites behind one shared documentation server in a full run', () => {
