@@ -60,6 +60,14 @@ function collectNativeEventAttributeNames() {
 // JSX component callbacks remain open-ended because application components can
 // define their own `onXxx` semantic events.
 const NATIVE_EVENT_ATTRIBUTE_NAMES = collectNativeEventAttributeNames();
+const GOVERNED_DOM_STATE_PROPERTY_NAMES = new Set([
+  'scrollLeft',
+  'scrollTop',
+  'selectionDirection',
+  'selectionEnd',
+  'selectionStart',
+  'value',
+]);
 const DOGFOODED_EVIDENCE_LABELS = Object.freeze([
   'Build:',
   'Browser:',
@@ -1152,13 +1160,27 @@ function astContainsInteractiveRuntime(content) {
         return;
       }
     }
-    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
-      const eventProperty = ts.isPropertyAccessExpression(node.left)
-        ? node.left.name.text
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      node.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+    ) {
+      const assignedProperty = ts.isPropertyAccessExpression(node.left)
+        ? { name: node.left.name.text, receiver: node.left.expression }
         : ts.isElementAccessExpression(node.left) &&
             ts.isStringLiteralLike(node.left.argumentExpression)
-          ? node.left.argumentExpression.text
+          ? { name: node.left.argumentExpression.text, receiver: node.left.expression }
           : null;
+      if (
+        assignedProperty &&
+        GOVERNED_DOM_STATE_PROPERTY_NAMES.has(assignedProperty.name) &&
+        isDomReceiverExpression(assignedProperty.receiver, sourceFile, receiverBindings, node)
+      ) {
+        found = true;
+        return;
+      }
+      const eventProperty =
+        node.operatorToken.kind === ts.SyntaxKind.EqualsToken ? assignedProperty?.name : null;
       if (eventProperty && NATIVE_EVENT_ATTRIBUTE_NAMES.has(eventProperty)) {
         found = true;
         return;
@@ -2619,20 +2641,26 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
         );
       }
       for (const repositoryPath of implementationPaths) {
-        if (!fs.existsSync(path.resolve(rootDir, repositoryPath))) {
+        const absoluteImplementationPath = path.resolve(rootDir, repositoryPath);
+        if (!fs.existsSync(absoluteImplementationPath)) {
           issues.push(
             `${context}: dogfooded implementation path does not exist: ${repositoryPath}`
+          );
+        } else if (!fs.statSync(absoluteImplementationPath).isFile()) {
+          issues.push(
+            `${context}: dogfooded implementation path must be a file: ${repositoryPath}`
           );
         }
       }
       const harnessImplementationPaths = implementationPaths.filter(
         (repositoryPath) =>
           repositoryPath.startsWith('apps/agent-harness/') &&
-          fs.existsSync(path.resolve(rootDir, repositoryPath))
+          fs.existsSync(path.resolve(rootDir, repositoryPath)) &&
+          fs.statSync(path.resolve(rootDir, repositoryPath)).isFile()
       );
       if (harnessImplementationPaths.length === 0) {
         issues.push(
-          `${context}: dogfooded rows must bind at least one existing implementation path under apps/agent-harness/`
+          `${context}: dogfooded rows must bind at least one existing implementation file under apps/agent-harness/`
         );
       }
       const evidencePaths = explicitRepositoryPaths(record.Evidence).filter((repositoryPath) =>

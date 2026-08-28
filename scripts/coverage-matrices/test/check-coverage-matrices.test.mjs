@@ -2906,7 +2906,40 @@ test('requires a dogfooded implementation path under the Harness application roo
   );
   assert.match(
     validationMessage(root),
-    /dogfooded rows must bind at least one existing implementation path under apps\/agent-harness\//
+    /dogfooded rows must bind at least one existing implementation file under apps\/agent-harness\//
+  );
+});
+
+test('requires dogfooded Harness implementation paths to bind regular files', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run';
+  const evidencePath = 'internal/agent-harness/evidence/m1/run.md';
+  fs.mkdirSync(path.join(root, implementationPath), { recursive: true });
+  fs.mkdirSync(path.dirname(path.join(root, evidencePath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: 0123456789abcdef0123456789abcdef01234567\nEnvironment: fixture\nFixtures: run\nCommands: pnpm test\nResults: passed\n',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+
+  const message = validationMessage(root);
+  assert.match(message, /dogfooded implementation path must be a file/);
+  assert.match(
+    message,
+    /dogfooded rows must bind at least one existing implementation file under apps\/agent-harness\//
   );
 });
 
@@ -3225,6 +3258,52 @@ test('rejects forbidden interaction state machines in ordinary Harness sources',
   }
 });
 
+test('rejects governed DOM state property assignments on bounded receivers', () => {
+  const cases = [
+    ['ScrollTop', 'scrollTop', '+=', false],
+    ['ScrollLeft', 'scrollLeft', '=', true],
+    ['InputValue', 'value', '=', false],
+    ['SelectionStart', 'selectionStart', '=', true],
+    ['SelectionEnd', 'selectionEnd', '=', false],
+    ['SelectionDirection', 'selectionDirection', '=', true],
+  ];
+  for (const [stem, property, operator, elementAccess] of cases) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${stem}.ts`;
+    const absolutePath = path.join(root, relativePath);
+    const propertyAccess = elementAccess ? `["${property}"]` : `.${property}`;
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `const element = document.querySelector("input"); element${propertyAccess} ${operator} next;`,
+      'utf8'
+    );
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+    assert.ok(
+      validationMessage(root).includes(
+        `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+      ),
+      `${property} assignment must remain protected by the Harness forbidden-state scan`
+    );
+  }
+});
+
+test('does not treat domain-model property assignments as DOM state machines', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/DomainState.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function update(model) { model.value = "ready"; model.scrollTop += 1; model.selectionStart = 0; }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
 test('rejects bounded event receiver aliases and native JSX handler spreads in every script extension', () => {
   for (const extension of ['js', 'jsx', 'ts', 'tsx']) {
     for (const [stem, content] of [
@@ -3507,7 +3586,7 @@ test('ignores Harness tests, strings, comments, and semantic component callbacks
       '// element.focus(); new MutationObserver(fn);',
       'const onKeyDown = requestAction;',
       'const handlers = { onKeyDown };',
-      'export const Safe = () => <ProtoButton {...handlers}>Run</ProtoButton>;',
+      'export const Safe = () => <><ProtoButton {...handlers}>Run</ProtoButton><Composer onSubmit={send} /><Button onPress={approve} /></>;',
       'export function Shadowed() {',
       '  const handlers = { role: "button" };',
       '  return <div {...handlers}>Static</div>;',

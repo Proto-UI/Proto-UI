@@ -62,6 +62,54 @@ const protoUiSourcePlugin = {
   resolveId: resolveProtoUiSource,
 };
 
+/** @param {string | null} id */
+function normalizedBundleModuleId(id) {
+  if (id === null) return null;
+  const withoutNullPrefix = id.startsWith('\0') ? `virtual:${id.slice(1)}` : id;
+  const queryIndex = withoutNullPrefix.indexOf('?');
+  const filePart = queryIndex === -1 ? withoutNullPrefix : withoutNullPrefix.slice(0, queryIndex);
+  const queryPart = queryIndex === -1 ? '' : withoutNullPrefix.slice(queryIndex);
+  const normalizedFilePart = path.isAbsolute(filePart)
+    ? path.relative(repositoryRoot, filePart).replaceAll('\\', '/')
+    : filePart.replaceAll('\\', '/');
+  return `${normalizedFilePart}${queryPart}`;
+}
+
+function websiteBundleGraphPlugin() {
+  let isClientBuild = false;
+  return {
+    name: 'proto-ui-website-bundle-graph',
+    apply: 'build',
+    configResolved(config) {
+      isClientBuild = !config.build.ssr;
+    },
+    generateBundle(_options, bundle) {
+      if (!isClientBuild) return;
+      const chunks = Object.values(bundle)
+        .filter((output) => output.type === 'chunk')
+        .map((chunk) => ({
+          fileName: chunk.fileName.replaceAll('\\', '/'),
+          name: chunk.name,
+          isEntry: chunk.isEntry,
+          isDynamicEntry: chunk.isDynamicEntry,
+          facadeModuleId: normalizedBundleModuleId(chunk.facadeModuleId),
+          imports: [...chunk.imports].map((id) => id.replaceAll('\\', '/')).sort(),
+          dynamicImports: [...chunk.dynamicImports].map((id) => id.replaceAll('\\', '/')).sort(),
+          moduleIds: Object.keys(chunk.modules)
+            .map((id) => normalizedBundleModuleId(id))
+            .filter((id) => id !== null)
+            .sort(),
+        }))
+        .sort((left, right) => left.fileName.localeCompare(right.fileName));
+      this.emitFile({
+        type: 'asset',
+        fileName: 'proto-ui-bundle-graph.json',
+        source: `${JSON.stringify({ version: 1, chunks }, null, 2)}\n`,
+      });
+    },
+  };
+}
+
 const inProgressBadge = {
   text: { en: 'WIP', 'zh-CN': '施工中' },
   class:
@@ -824,7 +872,7 @@ export default defineConfig({
       // 允许 dev server 读取到仓库根（否则访问 workspace 包会被拦）
       fs: { allow: ['../..'] },
     },
-    plugins: [protoUiSourcePlugin, tailwindcss()],
+    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],
     optimizeDeps: {
       exclude: [
         '@proto.ui/core',
