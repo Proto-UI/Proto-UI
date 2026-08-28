@@ -1050,35 +1050,38 @@ function embeddedScriptSegments(content) {
 }
 
 function styleModuleSpecifiers(content) {
-  const withoutComments = content.replace(/\/\*[\s\S]*?\*\//gu, '');
   const specifiers = [];
   let quote = null;
   let escaped = false;
-  let blockDepth = 0;
-  for (let index = 0; index < withoutComments.length; index += 1) {
-    const character = withoutComments[index];
+  let inComment = false;
+  for (let index = 0; index < content.length; index += 1) {
+    const character = content[index];
     if (quote) {
       if (escaped) escaped = false;
       else if (character === '\\') escaped = true;
       else if (character === quote) quote = null;
       continue;
     }
+    if (inComment) {
+      if (character === '*' && content[index + 1] === '/') {
+        inComment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (character === '/' && content[index + 1] === '*') {
+      inComment = true;
+      index += 1;
+      continue;
+    }
     if (character === '"' || character === "'") {
       quote = character;
       continue;
     }
-    if (character === '{') {
-      blockDepth += 1;
+    if (content.slice(index, index + 7).toLowerCase() !== '@import') {
       continue;
     }
-    if (character === '}' && blockDepth > 0) {
-      blockDepth -= 1;
-      continue;
-    }
-    if (blockDepth > 0 || withoutComments.slice(index, index + 7).toLowerCase() !== '@import') {
-      continue;
-    }
-    const match = withoutComments
+    const match = content
       .slice(index)
       .match(/^@import\b\s+(?:url\(\s*)?(?:(['"])([^'"]+)\1|([^'"\s;)]+))/iu);
     if (match) specifiers.push(match[2] ?? match[3]);

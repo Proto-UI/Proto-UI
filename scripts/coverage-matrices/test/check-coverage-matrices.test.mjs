@@ -863,6 +863,48 @@ test('ignores import-looking CSS strings and comments in embedded style blocks',
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
+test('rejects guarded imports nested in embedded Sass and Less style blocks', () => {
+  const root = createRoot();
+  const cases = [
+    [
+      'apps/www/src/components/NestedStyleEscape.vue',
+      '<style lang="scss">.scope { @import "@proto.ui/runtime/styles.css"; }</style>',
+      '@proto.ui/runtime/styles.css',
+    ],
+    [
+      'apps/www/src/components/NestedStyleEscape.svelte',
+      '<style lang="less">.scope { @import "@proto.ui/module-overlay/styles.css"; }</style>',
+      '@proto.ui/module-overlay/styles.css',
+    ],
+    [
+      'apps/www/src/components/CommentMarkerStyleEscape.vue',
+      '<style lang="scss">$marker: "/*"; @import "@proto.ui/runtime/marker.css"; /* trailing comment */</style>',
+      '@proto.ui/runtime/marker.css',
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: cases.map(([relativePath]) => [relativePath, ['www.shell.search']]),
+    }
+  );
+  const message = validationMessage(root);
+  for (const [relativePath, , specifier] of cases) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${relativePath}\` escapes the website consumer-wall allowlist`
+      )
+    );
+  }
+});
+
 test('requires new static website components to have a matrix classification', () => {
   const root = createRoot();
   writeValidMatrices(root);
