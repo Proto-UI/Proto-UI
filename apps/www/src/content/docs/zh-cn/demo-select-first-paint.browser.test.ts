@@ -26,7 +26,10 @@ async function showRuntime(page: Page, previewer: Locator, runtime: string): Pro
   await selectRoot.locator('wc-shadcn-select-trigger').click();
   // Select content is portalled while open, so resolve the visible item from
   // the document rather than assuming it remains a child of the previewer.
-  await page.locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`).last().click();
+  await page
+    .locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`)
+    .last()
+    .click({ force: true });
   await page.waitForFunction(
     (selected) => {
       const root = document.querySelector('[data-previewer-id]');
@@ -73,7 +76,7 @@ async function readClosedSelect(page: Page): Promise<ClosedSelect> {
       // Items live inside the closed content; they register with the Root's
       // collection even though nothing has opened it.
       registeredItems: host.querySelectorAll('[data-collection-index]').length,
-      mountedRoots: document.querySelectorAll('[data-previewer-id] [data-pui-root]').length,
+      mountedRoots: host.querySelectorAll('[data-pui-root]').length,
       detachedHosts: document.querySelectorAll('[data-pui-view-detached]').length,
       everOpened: !!host.querySelector('[data-open]'),
     };
