@@ -4096,3 +4096,53 @@ test('rejects dogfooded Harness evidence symlinks escaping the retained root', (
     /dogfooded evidence path must resolve within internal\/agent-harness\/evidence\/\*\*/
   );
 });
+
+test('discovers module-suffixed exported Harness components', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/SessionView.mjs';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import * as React from 'react'; export function SessionView() { return React.createElement('main', null, 'Session'); }",
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /Harness user-facing source `apps\/agent-harness\/src\/run\/SessionView\.mjs` is not classified/
+  );
+});
+
+test('discovers interactions in co-located Astro components', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/content/docs/Picker.astro';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, '<button onClick="pick()">Pick</button>', 'utf8');
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/content\/docs\/Picker\.astro` is not bound/
+  );
+});
+
+test('discovers spread event handlers on native Website elements', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/SpreadControl.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'const handlers = { onClick: activate }; export function SpreadControl() { return <button {...handlers}>Open</button>; }',
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/components\/SpreadControl\.tsx` is not bound/
+  );
+});

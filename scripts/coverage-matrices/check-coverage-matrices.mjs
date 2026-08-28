@@ -1390,8 +1390,12 @@ function containsFrameworkTemplateEventDirective(candidate, absolutePath) {
 }
 
 function containsJsxEventHandler(content, absolutePath) {
-  if (!/\.mdx?$/i.test(absolutePath) && astContainsJsxEventHandler(content)) return true;
-
+  if (
+    !/\.mdx?$/i.test(absolutePath) &&
+    (astContainsJsxEventHandler(content) || astContainsNativeJsxEventHandler(content, absolutePath))
+  ) {
+    return true;
+  }
   if (
     /\.(?:astro|vue|svelte)$/i.test(absolutePath) &&
     embeddedScriptSegments(content).some((segment) => astContainsJsxEventHandler(segment))
@@ -1433,7 +1437,9 @@ function discoverWebsiteInteractiveSources(rootDir) {
     .filter((absolutePath) => /\.(?:astro|vue|svelte|[cm]?[jt]sx?)$/.test(absolutePath))
     .filter((absolutePath) => !absolutePath.startsWith(`${contentRoot}${path.sep}`))
     .concat(
-      walkFiles(contentRoot).filter((absolutePath) => /\.(?:mdx?|vue|svelte)$/.test(absolutePath))
+      walkFiles(contentRoot).filter((absolutePath) =>
+        /\.(?:astro|mdx?|vue|svelte)$/i.test(absolutePath)
+      )
     )
     .concat(walkFiles(contentRoot).filter((absolutePath) => /\.[cm]?[jt]sx?$/.test(absolutePath)))
     .concat(walkFiles(publicRoot).filter((absolutePath) => /\.[cm]?[jt]sx?$/.test(absolutePath)))
@@ -1613,10 +1619,10 @@ function astContainsExportedUserFacingComponent(content, absolutePath) {
 function discoverHarnessUserFacingSources(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
   return walkFiles(sourceRoot)
-    .filter((absolutePath) => /\.[jt]sx?$/i.test(absolutePath))
+    .filter((absolutePath) => /\.[cm]?[jt]sx?$/i.test(absolutePath))
     .filter(
       (absolutePath) =>
-        !/\.(?:browser\.)?(?:test|spec|stories)\.[jt]sx?$/i.test(absolutePath) &&
+        !/\.(?:browser\.)?(?:test|spec|stories)\.[cm]?[jt]sx?$/i.test(absolutePath) &&
         !absolutePath.startsWith(path.join(sourceRoot, 'proto-ui') + path.sep)
     )
     .filter((absolutePath) => {
@@ -2790,12 +2796,16 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       }
       for (const repositoryPath of evidencePaths) {
         const absoluteEvidencePath = path.resolve(rootDir, repositoryPath);
-        if (!fs.existsSync(absoluteEvidencePath)) continue;
-        if (!fs.statSync(absoluteEvidencePath).isFile()) {
-          issues.push(`${context}: self-hosted evidence path must be a file: ${repositoryPath}`);
+        const canonicalEvidencePath = canonicalRetainedEvidenceFile(rootDir, repositoryPath);
+        if (!canonicalEvidencePath) {
+          if (fs.existsSync(absoluteEvidencePath)) {
+            issues.push(
+              `${context}: self-hosted evidence path must resolve within internal/website/evidence/**: ${repositoryPath}`
+            );
+          }
           continue;
         }
-        const evidenceRecord = fs.readFileSync(absoluteEvidencePath, 'utf8');
+        const evidenceRecord = fs.readFileSync(canonicalEvidencePath, 'utf8');
         requireMeaningfulLabels(
           evidenceRecord,
           SELF_HOSTED_WEBSITE_RECORD_LABELS,
