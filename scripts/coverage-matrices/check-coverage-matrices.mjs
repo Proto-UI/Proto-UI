@@ -11,7 +11,6 @@ const CATALOG_ID_PATTERN = /\b(?:A|C|D|HC|K|M|P|T|V)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*
 const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
 const INTERACTIVE_SOURCE_PATTERNS = Object.freeze([
   /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(/i,
-  /\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input|submit)\s*=/i,
 ]);
 const DOGFOODED_EVIDENCE_LABELS = Object.freeze([
   'Build:',
@@ -31,6 +30,7 @@ const DOGFOODED_RECORD_LABELS = Object.freeze([
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/PrototypePreviewer/demo-renderer.ts': Object.freeze({
     specifiers: Object.freeze([
+      '@proto.ui/core',
       '@proto.ui/adapter-web-component',
       '@proto.ui/adapter-react',
       '@proto.ui/adapter-vue',
@@ -38,7 +38,10 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/PrototypePreviewer/wc-registry.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/adapter-web-component']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/registry.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-react']),
@@ -57,6 +60,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'apps/www/src/components/BrutalistPageStyle.astro': Object.freeze({
     resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
+  }),
+  'apps/www/src/components/LucideIconGallery.astro': Object.freeze({
+    categories: Object.freeze(['prototype-package']),
+  }),
+  'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
+    categories: Object.freeze(['prototype-package']),
   }),
 });
 const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
@@ -363,6 +372,7 @@ export const MATRIX_CONFIGS = Object.freeze([
       'native/static',
       'infrastructure-exempt',
     ],
+    allowedDifficulties: Object.freeze(['F1', 'F2', 'F3', 'F4', 'F5']),
     ownerHeaders: ['Current owner', 'Dependency and owner'],
     existingPathHeaders: ['Path', 'Evidence'],
     requiredIds: WEBSITE_SURFACE_IDS,
@@ -781,7 +791,7 @@ function astContainsJsxEventHandler(content) {
     if (
       ts.isJsxAttribute(node) &&
       ts.isIdentifier(node.name) &&
-      /^on[A-Z][A-Za-z0-9_$]*$/u.test(node.name.text)
+      /^on(?:[A-Z][A-Za-z0-9_$]*|[a-z][a-z0-9]*)$/u.test(node.name.text)
     ) {
       found = true;
       return;
@@ -948,11 +958,20 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
 }
 
 function guardedWebsiteImport(rootDir, sourcePath, specifier) {
-  if (/^@proto\.ui\/adapter-(?:react|vue|vue2|web-component)(?:\/|$)/u.test(specifier)) {
+  if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
     return { category: 'adapter-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/prototypes-(?:base|shadcn|brutalist)(?:\/|$)/u.test(specifier)) {
+  if (/^@proto\.ui\/prototypes-[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
     return { category: 'prototype-package', resolvedPath: null };
+  }
+  if (/^@proto\.ui\/module-[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
+    return { category: 'module-package', resolvedPath: null };
+  }
+  if (/^@proto\.ui\/core(?:\/|$)/u.test(specifier)) {
+    return { category: 'core-package', resolvedPath: null };
+  }
+  if (/^@proto\.ui\/runtime(?:\/|$)/u.test(specifier)) {
+    return { category: 'runtime-package', resolvedPath: null };
   }
   if (!specifier.startsWith('.')) return null;
 
@@ -1210,6 +1229,12 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       );
     } else {
       stateCounts.set(state, (stateCounts.get(state) ?? 0) + 1);
+    }
+    const difficulty = stripInlineCode(record.Difficulty);
+    if (config.allowedDifficulties && !config.allowedDifficulties.includes(difficulty)) {
+      issues.push(
+        `${context}: unsupported Difficulty \`${difficulty}\`; allowed: ${config.allowedDifficulties.join(', ')}`
+      );
     }
 
     const requiredState = config.classStateRequirements?.[targetClass];

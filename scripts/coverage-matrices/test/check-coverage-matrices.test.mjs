@@ -429,6 +429,28 @@ test('detects JSX interaction handlers without an event-name allowlist', () => {
   }
 });
 
+test('detects lowercase native event attributes without an event-name allowlist', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [relativePath, attribute] of [
+    ['apps/www/src/components/BlurControl.astro', 'onblur'],
+    ['apps/www/src/content/docs/focus-control.mdx', 'onfocus'],
+    ['apps/www/src/components/DoubleClickControl.astro', 'ondblclick'],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, `<input ${attribute}="validate()" />`);
+  }
+  const message = validationMessage(root);
+  for (const relativePath of [
+    'apps/www/src/components/BlurControl.astro',
+    'apps/www/src/content/docs/focus-control.mdx',
+    'apps/www/src/components/DoubleClickControl.astro',
+  ]) {
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
+});
+
 test('does not confuse comparisons and ordinary onXxx variables with JSX handlers', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -574,6 +596,31 @@ test('rejects adapter and implementation-internal imports outside the website al
       'apps/www/src/components/BrutalistPackageEscape.ts',
       '@proto.ui/prototypes-brutalist',
       "import { brutalistPrototypes } from '@proto.ui/prototypes-brutalist';",
+    ],
+    [
+      'apps/www/src/components/LucidePackageEscape.ts',
+      '@proto.ui/prototypes-lucide',
+      "import { icon } from '@proto.ui/prototypes-lucide';",
+    ],
+    [
+      'apps/www/src/components/CorePackageEscape.ts',
+      '@proto.ui/core',
+      "import { definePrototype } from '@proto.ui/core';",
+    ],
+    [
+      'apps/www/src/components/RuntimePackageEscape.ts',
+      '@proto.ui/runtime',
+      "import { createRuntimeSession } from '@proto.ui/runtime';",
+    ],
+    [
+      'apps/www/src/components/ModulePackageEscape.ts',
+      '@proto.ui/module-overlay',
+      "import { overlay } from '@proto.ui/module-overlay';",
+    ],
+    [
+      'apps/www/src/components/AdapterBasePackageEscape.ts',
+      '@proto.ui/adapter-base',
+      "import { adapter } from '@proto.ui/adapter-base';",
     ],
     [
       'apps/www/src/components/BaseInternalEscape.tsx',
@@ -1020,6 +1067,15 @@ test('rejects vague exemptions without structured owner, reason, limit, and issu
   assert.match(message, /must give the `reason:` label a substantive explanation/);
   assert.match(message, /must state a bounded `limit:` or conditional trigger/);
   assert.match(message, /must link re-review or removal as #<issue>/);
+});
+
+test('rejects Website difficulty values outside F1 through F5', () => {
+  const root = createRoot();
+  writeValidMatrices(root, { Difficulty: 'F13' });
+  assert.match(
+    validationMessage(root),
+    /unsupported Difficulty `F13`; allowed: F1, F2, F3, F4, F5/
+  );
 });
 
 test('rejects empty exemption labels and issue-only re-review text', () => {
