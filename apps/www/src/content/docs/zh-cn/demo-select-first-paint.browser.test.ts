@@ -72,10 +72,10 @@ async function readClosedSelect(page: Page): Promise<ClosedSelect> {
       displayValue: value?.getAttribute('data-display-value') ?? null,
       // Items live inside the closed content; they register with the Root's
       // collection even though nothing has opened it.
-      registeredItems: document.querySelectorAll('[data-collection-index]').length,
+      registeredItems: host.querySelectorAll('[data-collection-index]').length,
       mountedRoots: document.querySelectorAll('[data-previewer-id] [data-pui-root]').length,
       detachedHosts: document.querySelectorAll('[data-pui-view-detached]').length,
-      everOpened: !!document.querySelector('[data-open]'),
+      everOpened: !!host.querySelector('[data-open]'),
     };
   });
 }
