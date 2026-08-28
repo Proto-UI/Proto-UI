@@ -99,6 +99,41 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
     expect(el.getAttribute('aria-orientation')).toBe('horizontal');
   });
 
+  it('A11Y-WC-0150: projects valid state-backed heading levels and rejects invalid updates', () => {
+    // T-A11Y-0001-CASE-HEADING-LEVEL
+    const P = definePrototype({
+      name: 'x-a11y-wc-heading-level',
+      setup(def) {
+        const level = def.state.numberDiscrete('heading.level', 2);
+        def.a11y.level(level);
+        def.expose.method('setLevel', (value: number) =>
+          level.set(value, 'reason: update heading level')
+        );
+        return (r) => r.el('div', 'Heading');
+      },
+    });
+
+    if (!customElements.get(P.name)) {
+      customElements.define(
+        P.name,
+        AdaptToWebComponent(P, { register: false, registerAs: P.name })
+      );
+    }
+
+    const el = document.createElement(P.name) as HTMLElement & {
+      getExposes(): { setLevel(value: number): void };
+    };
+    document.body.appendChild(el);
+    expect(el.getAttribute('aria-level')).toBe('2');
+
+    el.getExposes().setLevel(6);
+    expect(el.getAttribute('aria-level')).toBe('6');
+
+    expect(() => el.getExposes().setLevel(0)).toThrow(/level must be an integer in range 1-6/);
+    expect(el.getAttribute('aria-level')).toBe('6');
+    el.remove();
+  });
+
   it('A11Y-WC-0200: projects dynamic tree state without changing layout visibility', () => {
     // T-A11Y-0001-CASE-DYNAMIC-TREE
     const P: Prototype<{ decorative?: boolean }> = definePrototype({

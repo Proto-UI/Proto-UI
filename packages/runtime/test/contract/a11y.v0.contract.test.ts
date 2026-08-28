@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { A11ySemanticObjectSnapshot, Prototype } from '@proto.ui/core';
-import { definePrototype } from '@proto.ui/core';
+import type { A11ySemanticObjectSnapshot, OwnedStateHandle, Prototype } from '@proto.ui/core';
+import { defineAsHook, definePrototype } from '@proto.ui/core';
 import { A11Y_PROJECT_CAP, type A11yPort } from '@proto.ui/module-a11y';
 import { executeWithHost, type RuntimeHost } from '../../src';
 
@@ -39,6 +39,103 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
 }
 
 describe('runtime contract: a11y (v0)', () => {
+  it.each([1, 2, 3, 4, 5, 6])('A11Y-0060: accepts portable heading level %s', (level) => {
+    // T-A11Y-0001-CASE-HEADING-LEVEL
+    const P = definePrototype({
+      name: `x-a11y-heading-level-${level}`,
+      setup(def) {
+        def.a11y.level(level);
+      },
+    });
+
+    const result = executeWithHost(P as any, createHost().host as any);
+    expect(result.caps.getPort<A11yPort>('a11y')?.getSnapshot().level).toBe(level);
+  });
+
+  it.each([0, -1, 1.5, 7, Number.NaN, Number.POSITIVE_INFINITY])(
+    'A11Y-0061: rejects invalid static portable heading level %s',
+    (level) => {
+      // T-A11Y-0001-CASE-HEADING-LEVEL
+      const P = definePrototype({
+        name: 'x-a11y-invalid-static-heading-level',
+        setup(def) {
+          def.a11y.level(level);
+        },
+      });
+
+      expect(() => executeWithHost(P as any, createHost().host as any)).toThrow(
+        /level must be an integer in range 1-6/
+      );
+    }
+  );
+
+  it.each([0, -1, 1.5, 7, Number.NaN, Number.POSITIVE_INFINITY])(
+    'A11Y-0062: rejects invalid initial state-backed heading level %s',
+    (initialLevel) => {
+      // T-A11Y-0001-CASE-HEADING-LEVEL
+      const P = definePrototype({
+        name: 'x-a11y-invalid-initial-state-heading-level',
+        setup(def) {
+          const level = def.state.numberDiscrete('heading.level', initialLevel);
+          def.a11y.level(level);
+        },
+      });
+
+      expect(() => executeWithHost(P as any, createHost().host as any)).toThrow(
+        /level must be an integer in range 1-6/
+      );
+    }
+  );
+
+  it.each([0, -1, 1.5, 7, Number.NaN, Number.POSITIVE_INFINITY])(
+    'A11Y-0063: rejects invalid state-backed heading level update %s before projection',
+    (invalidLevel) => {
+      // T-A11Y-0001-CASE-HEADING-LEVEL
+      let level!: OwnedStateHandle<number>;
+      const P = definePrototype({
+        name: 'x-a11y-state-heading-level-update',
+        setup(def) {
+          level = def.state.numberDiscrete('heading.level', 2);
+          def.a11y.level(level);
+        },
+      });
+
+      const ctx = createHost();
+      const result = executeWithHost(P as any, ctx.host as any);
+      expect(ctx.snapshots.at(-1)?.level).toBe(2);
+
+      expect(() =>
+        result.invokeInCallbackScope(() => level.set(invalidLevel, 'reason: invalid heading level'))
+      ).toThrow(/level must be an integer in range 1-6/);
+      expect(ctx.snapshots.at(-1)?.level).toBe(2);
+
+      result.invokeInCallbackScope(() => level.set(3, 'reason: valid heading level'));
+      expect(ctx.snapshots.at(-1)?.level).toBe(3);
+    }
+  );
+
+  it('A11Y-0064: captures a11y.tree declarations in an asHook result', () => {
+    let result: any;
+    const asSemanticTree = defineAsHook({
+      name: 'as-semantic-tree',
+      setup(def) {
+        def.a11y.tree({ mergeChildren: true });
+      },
+    });
+    const P = definePrototype({
+      name: 'x-a11y-tree-as-hook-capture',
+      setup() {
+        result = asSemanticTree();
+      },
+    });
+
+    executeWithHost(P as any, createHost().host as any);
+    expect(result.context).toEqual({
+      op: 'a11y.tree',
+      patch: { mergeChildren: true },
+    });
+  });
+
   it('A11Y-0050: role may follow a state-backed semantic fact', () => {
     let role!: { set(value: string, reason?: string): void };
     const P = definePrototype({

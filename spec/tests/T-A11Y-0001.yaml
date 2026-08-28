@@ -68,6 +68,13 @@ cases:
       - HC-A11Y-0001-A
       - HC-A11Y-0001-B
     expectation: web-a11y-live-atomic-busy-projection
+  - id: T-A11Y-0001-CASE-HEADING-LEVEL
+    title: Portable heading levels accept 1-6, reject invalid static and state-backed values, and project to aria-level on Web
+    covers:
+      - C-A11Y-0001-LEVEL
+      - HC-A11Y-0001-A
+      - HC-A11Y-0001-B
+    expectation: portable-heading-level-validation-and-web-projection
 implementations:
   - id: runtime-a11y-contract
     kind: runtime-test
@@ -77,6 +84,7 @@ implementations:
     consumesCases:
       - T-A11Y-0001-CASE-DYNAMIC-ROLE
       - T-A11Y-0001-CASE-IR
+      - T-A11Y-0001-CASE-HEADING-LEVEL
   - id: base-button-a11y-contract
     kind: module-test
     status: passing
@@ -95,6 +103,7 @@ implementations:
       - T-A11Y-0001-CASE-DYNAMIC-TREE
       - T-A11Y-0001-CASE-OPTIONAL-STATE
       - T-A11Y-0001-CASE-LIVE-ATOMIC-BUSY
+      - T-A11Y-0001-CASE-HEADING-LEVEL
 verifies:
   contracts:
     - id: C-A11Y-0001
@@ -112,6 +121,7 @@ verifies:
         - C-A11Y-0001-K
         - C-A11Y-0001-L
         - C-A11Y-0001-M
+        - C-A11Y-0001-LEVEL
     - id: C-ASYNC-A11Y-0001
       since: 0.2.0-rc.7
       anchors:
@@ -134,6 +144,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: refined
     summary: Added additive relation ownership, dynamic semantic tree projection, optional Web state omission, and live/atomic/busy Web projection coverage.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added executable runtime and Web coverage for portable heading-level validation and aria-level projection.
 tags:
   - a11y
   - accessibility

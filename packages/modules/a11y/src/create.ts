@@ -84,11 +84,7 @@ class A11yModuleImpl extends ModuleBase {
     },
     level: (value: number | State<number>) => {
       this.ensureSetup('def.a11y.level');
-      if (typeof value === 'number') {
-        if (!Number.isInteger(value) || value < 1 || value > 6) {
-          throw new Error('[A11y] level must be an integer in range 1-6');
-        }
-      }
+      resolveA11yLevel(value);
       this.ir.level = value;
       this.applyProjection();
     },
@@ -237,6 +233,9 @@ class A11yModuleImpl extends ModuleBase {
         )
       : undefined;
 
+    const level =
+      typeof this.ir.level === 'undefined' ? undefined : resolveA11yLevel(this.ir.level);
+
     return {
       id: isState(this.ir.id) ? (this.ir.id.get() as string | null | undefined) : this.ir.id,
       role: isState(this.ir.role) ? (this.ir.role.get() as A11yRole) : this.ir.role,
@@ -247,7 +246,7 @@ class A11yModuleImpl extends ModuleBase {
       relations,
       ...(Object.keys(relationModes).length ? { relationModes } : {}),
       tree,
-      level: isState(this.ir.level) ? (this.ir.level.get() as number) : this.ir.level,
+      level,
     };
   }
 
@@ -269,6 +268,14 @@ function isState(value: unknown): value is State<unknown> {
   return (
     !!value && typeof value === 'object' && typeof (value as State<unknown>).get === 'function'
   );
+}
+
+function resolveA11yLevel(value: number | State<number>): number {
+  const level = isState(value) ? value.get() : value;
+  if (!Number.isInteger(level) || level < 1 || level > 6) {
+    throw new Error('[A11y] level must be an integer in range 1-6');
+  }
+  return level;
 }
 
 function cloneTextAlternative(

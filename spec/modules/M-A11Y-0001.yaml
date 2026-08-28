@@ -18,10 +18,11 @@ sources:
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
 revisions:
-  - version: 0.2.0
+  - version: 0.3.0-alpha.0
     change: revised
     summary: >-
       Added portable heading-level (1-6) support with fail-closed validation. The a11y module now accepts a level value and projects it as aria-level on the Web profile. Invalid levels (0, negatives, fractions, NaN, Infinity) are rejected.
+
 
   - version: 0.1.0
     change: introduced

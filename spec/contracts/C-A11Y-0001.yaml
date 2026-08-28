@@ -70,8 +70,12 @@ criteria:
     text:
       zh-CN: >-
         a11y 语义对象可以携带一个 portable heading level (1-6)；Web adapter 将其投影为 aria-level。level 为 1-6 的正整数；0、负数、分数、NaN 和 Infinity 无效并在 fail closed 下被拒绝。
+
+
       en: >-
         The a11y semantic object may carry a portable heading level (1-6); the Web adapter projects it as aria-level. level is a positive integer in the range 1-6; 0, negatives, fractions, NaN, and Infinity are invalid and rejected under fail closed.
+
+
 sources:
   - path: internal/records/2026-06-30-a11y-module-planning-for-button.zh-CN.md
   - path: packages/modules/a11y/src/types.ts
@@ -109,6 +113,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: refined
     summary: Added additive relation projection, state-backed semantic tree behavior, and optional Web a11y state omission.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added portable heading-level semantics with fail-closed validation and Web aria-level projection.
 tags:
   - a11y
   - accessibility
