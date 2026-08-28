@@ -11,15 +11,26 @@ cases:
       - C-TEXT-CONTROL-0001-A
     expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
-    title: Portable patches project single-line properties (inputMode, enterKeyHint, type) on an HTMLInputElement
+    title: Portable patches project single-line properties (inputMode and enterKeyHint) on an HTMLInputElement
     covers:
       - C-TEXT-CONTROL-0001-B
     expectation: portable-single-line-properties-project-on-web-input
   - id: T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
-    title: CR and CRLF line endings are canonicalized to LF at the module boundary in events, snapshots, and listener payloads
+    title: CR and CRLF line endings are canonicalized by line mode at the module boundary in patches, events, snapshots, and listener payloads
     covers:
       - C-TEXT-CONTROL-0001-I
-    expectation: cr-lf-canonicalized-to-lf-before-comparison-snapshot-and-outward-payload
+    expectation: multiline-retains-canonical-lf-and-single-line-removes-lf-before-host-state-snapshot-and-outward-payload
+  - id: T-TEXT-CONTROL-0001-CASE-MODE-COMPATIBILITY
+    title: Retained declarations reject mode-incompatible patches
+    covers:
+      - C-TEXT-CONTROL-0001-B
+    expectation: single-line-rejects-rows-wrap-and-multiline-rejects-single-line-hints
+  - id: T-TEXT-CONTROL-0001-CASE-PATCH-PRESERVATION
+    title: Omitted fields retain the latest complete patch across unrelated updates and lease rebinding
+    covers:
+      - C-TEXT-CONTROL-0001-B
+      - C-TEXT-CONTROL-0001-G
+    expectation: unrelated-sync-retains-default-value-and-complete-host-patch
   - id: T-TEXT-CONTROL-0001-CASE-PROPERTIES
     title: Portable patches project every supported native textarea property and defaultValue update
     covers:
@@ -77,7 +88,7 @@ implementations:
     exercises:
       - HC-TEXT-CONTROL-0001
     notes:
-      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', inputMode/enterKeyHint/type projection, and CR/LF canonicalization through the web bridge. Cross-adapter single-line materialization and module-boundary canonicalization through TextControlModuleImpl are covered by impl-spec.test.ts and adapter integration tests.
+      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input' and inputMode/enterKeyHint projection through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
   - id: module-text-control-value-reconciliation
     kind: module-test
     status: passing
@@ -86,6 +97,9 @@ implementations:
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-VALUE-AND-IME
       - T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
+      - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
+      - T-TEXT-CONTROL-0001-CASE-MODE-COMPATIBILITY
+      - T-TEXT-CONTROL-0001-CASE-PATCH-PRESERVATION
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
@@ -168,10 +182,12 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added focused Text Control host and cross-adapter conformance coverage.
-  - version: 0.2.0
+  - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Added single-line (input) cases, CR/LF canonicalization case (criterion I), and single-line web-contract implementation mapping.
+      Added single-line input cases, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
+
+
 tags:
   - text-control
   - textarea

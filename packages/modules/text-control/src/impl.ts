@@ -6,11 +6,12 @@ import type {
   TextControlEvent,
   TextControlEventType,
   TextControlHandle,
+  TextControlLineMode,
   TextControlPatch,
   TextControlSnapshot,
   TextControlValueMode,
 } from '@proto.ui/core';
-import { canonicalizeLineEndings, getModuleDeclaration } from '@proto.ui/core';
+import { canonicalizeTextControlValue, getModuleDeclaration } from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import type { PropsBaseType } from '@proto.ui/types';
 import {
@@ -20,6 +21,7 @@ import {
   type TextControlHostLease,
 } from './caps';
 import { TEXT_CONTROL_DECLARATION } from './declaration';
+import type { TextControlDeclaration } from './declaration';
 
 const EMPTY_PATCH: TextControlPatch = Object.freeze({});
 
@@ -31,7 +33,7 @@ type Listener = {
 export class TextControlModuleImpl extends ModuleBase {
   private readonly prototypeName: string;
   private readonly supported: boolean;
-  private readonly declaration: import('./declaration').TextControlDeclaration | null = null;
+  private readonly declaration: TextControlDeclaration | null;
   private declared = false;
   private initialized = false;
   private valueMode: TextControlValueMode | null = null;
@@ -49,9 +51,9 @@ export class TextControlModuleImpl extends ModuleBase {
   ) {
     super(caps);
     this.prototypeName = prototypeName;
-    this.supported = Boolean(
-      getModuleDeclaration({ modules: declarations }, TEXT_CONTROL_DECLARATION)
-    );
+    const declaration = getModuleDeclaration({ modules: declarations }, TEXT_CONTROL_DECLARATION);
+    this.declaration = declaration?.config ?? null;
+    this.supported = this.declaration !== null;
     if (this.supported) this.refreshHost();
   }
 
@@ -92,31 +94,45 @@ export class TextControlModuleImpl extends ModuleBase {
     this.sys.ensureCallback('textControl.sync');
     // Reject mode-incompatible fields at runtime
     if (this.declaration) {
-      if (this.declaration.lineMode === 'single' && (typeof next.rows === 'number' || next.wrap !== undefined)) {
+      if (
+        this.declaration.lineMode === 'single' &&
+        (typeof next.rows === 'number' || next.wrap !== undefined)
+      ) {
         throw new Error('[TextControl] rows/wrap are not compatible with single-line mode');
       }
-      if (this.declaration.lineMode === 'multiline' && (typeof next.inputMode === 'string' || typeof next.enterKeyHint === 'string')) {
-        throw new Error('[TextControl] inputMode/enterKeyHint are not compatible with multiline mode');
+      if (
+        this.declaration.lineMode === 'multiline' &&
+        (typeof next.inputMode === 'string' || typeof next.enterKeyHint === 'string')
+      ) {
+        throw new Error(
+          '[TextControl] inputMode/enterKeyHint are not compatible with multiline mode'
+        );
       }
     }
     if (!this.initialized) {
       this.valueMode = next.valueMode ?? 'uncontrolled';
-      this.value = this.valueMode === 'controlled' ? canonicalizeLineEndings(next.value ?? '') : canonicalizeLineEndings(next.defaultValue ?? '');
+      this.value =
+        this.valueMode === 'controlled'
+          ? this.canonicalize(next.value ?? '')
+          : this.canonicalize(next.defaultValue ?? '');
       this.initialized = true;
     }
     this.patch = Object.freeze({
       ...this.patch,
       ...next,
       valueMode: this.valueMode ?? 'uncontrolled',
-      value: typeof next.value === "string" ? canonicalizeLineEndings(next.value) : this.patch.value,
-      defaultValue: typeof next.defaultValue === 'string' ? canonicalizeLineEndings(next.defaultValue) : next.defaultValue,
+      value: typeof next.value === 'string' ? this.canonicalize(next.value) : this.patch.value,
+      defaultValue:
+        typeof next.defaultValue === 'string'
+          ? this.canonicalize(next.defaultValue)
+          : this.patch.defaultValue,
     });
-    if (this.valueMode === 'controlled') this.value = canonicalizeLineEndings(this.patch.value ?? '');
+    if (this.valueMode === 'controlled') this.value = this.canonicalize(this.patch.value ?? '');
     this.syncLease();
   }
 
   snapshot(): TextControlSnapshot | null {
-    return this.declared ? Object.freeze({ value: canonicalizeLineEndings(this.value), composing: this.composing }) : null;
+    return this.declared ? Object.freeze({ value: this.value, composing: this.composing }) : null;
   }
 
   protected override onCapsEpoch(): void {
@@ -176,7 +192,7 @@ export class TextControlModuleImpl extends ModuleBase {
     // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
     const canonicalEvent: TextControlEvent = Object.freeze({
       ...event,
-      value: canonicalizeLineEndings(event.value),
+      value: this.canonicalize(event.value),
     });
     this.composing = canonicalEvent.composing;
     if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {
@@ -199,5 +215,10 @@ export class TextControlModuleImpl extends ModuleBase {
       ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
     if (!mustRestoreControlledValue) return;
     queueMicrotask(() => this.syncLease());
+  }
+
+  private canonicalize(value: string): string {
+    const lineMode: TextControlLineMode = this.declaration?.lineMode ?? 'multiline';
+    return canonicalizeTextControlValue(value, lineMode);
   }
 }

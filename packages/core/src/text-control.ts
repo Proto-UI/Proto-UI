@@ -43,6 +43,16 @@ export function canonicalizeLineEndings(value: string): string {
   return value.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
+/**
+ * Normalize a Text Control value to the portable line-mode domain. Single-line
+ * controls remove normalized line feeds so module state cannot diverge from a
+ * host editor whose value-sanitization algorithm strips them.
+ */
+export function canonicalizeTextControlValue(value: string, lineMode: TextControlLineMode): string {
+  const normalized = canonicalizeLineEndings(value);
+  return lineMode === 'single' ? normalized.replace(/\n/g, '') : normalized;
+}
+
 export type TextControlEventType =
   | 'input'
   | 'change'
