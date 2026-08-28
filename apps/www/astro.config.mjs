@@ -75,6 +75,12 @@ function normalizedBundleModuleId(id) {
   return `${normalizedFilePart}${queryPart}`;
 }
 
+/** @typedef {{ type: 'chunk'; fileName: string; name: string; isEntry: boolean; isDynamicEntry: boolean; facadeModuleId: string | null; imports: string[]; dynamicImports: string[]; modules: Record<string, unknown> }} BundleChunk */
+/** @typedef {{ type: 'asset'; fileName: string; source: string | Uint8Array }} BundleAsset */
+/** @typedef {BundleChunk | BundleAsset} BundleOutput */
+/** @typedef {{ emitFile: (asset: { type: 'asset'; fileName: string; source: string }) => string }} BundlePluginContext */
+/** @typedef {{ name: string; apply: 'build'; configResolved: (config: { build: { ssr?: boolean | string } }) => void; generateBundle: (this: BundlePluginContext, options: unknown, bundle: Record<string, BundleOutput>) => void }} WebsiteBundlePlugin */
+/** @returns {WebsiteBundlePlugin} */
 function websiteBundleGraphPlugin() {
   let isClientBuild = false;
   return {
