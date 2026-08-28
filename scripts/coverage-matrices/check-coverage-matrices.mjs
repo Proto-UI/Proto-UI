@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { specEntitySchema } from '@proto.ui/spec-schema';
 import ts from 'typescript';
 import { parse as parseYaml } from 'yaml';
 
@@ -514,6 +515,7 @@ export const MATRIX_CONFIGS = Object.freeze([
       'infrastructure-exempt': 'infrastructure-exempt',
     },
     stateClassRequirements: {
+      'app-local-proto': 'app-local-proto',
       'native/static': 'native/static',
       'infrastructure-exempt': 'infrastructure-exempt',
     },
@@ -572,7 +574,9 @@ function isMeaningful(value) {
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
     .replace(/[*_~]/g, '')
     .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/[.!?。！？:;，、]+$/u, '')
+    .trim();
   return ![
     '',
     '-',
@@ -773,14 +777,31 @@ function walkFiles(directory) {
   return files;
 }
 
-function loadCatalogEntries(rootDir) {
+function loadCatalogEntries(rootDir, issues) {
   const entries = new Map();
   for (const absolutePath of walkFiles(path.join(rootDir, 'spec'))) {
     if (!absolutePath.endsWith('.yaml')) continue;
     const content = fs.readFileSync(absolutePath, 'utf8');
-    const id = content.match(/^id:\s*([^\s#]+)\s*$/m)?.[1];
-    const status = content.match(/^status:\s*([^\s#]+)\s*$/m)?.[1];
-    if (id && status) entries.set(id, { absolutePath, status });
+    const relativePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
+    let document;
+    try {
+      document = parseYaml(content);
+    } catch (error) {
+      issues.push(`${relativePath}: catalog YAML could not be parsed: ${error.message}`);
+      continue;
+    }
+
+    const idResult = specEntitySchema.shape.id.safeParse(document?.id);
+    const statusResult = specEntitySchema.shape.status.safeParse(document?.status);
+    if (!idResult.success) {
+      issues.push(`${relativePath}: catalog id is invalid or missing`);
+      continue;
+    }
+    if (!statusResult.success) {
+      issues.push(`${relativePath}: catalog status is invalid`);
+      continue;
+    }
+    entries.set(idResult.data, { absolutePath, status: statusResult.data });
   }
   return entries;
 }
@@ -809,7 +830,14 @@ function stripMarkdownCode(content) {
 }
 
 function sourceTextForInteractionScan(absolutePath) {
-  const content = fs.readFileSync(absolutePath, 'utf8');
+  const content = fs
+    .readFileSync(absolutePath, 'utf8')
+    .replace(/<script\b([^>]*)>[\s\S]*?<\/script\s*>/giu, (script, attributes) => {
+      const type =
+        attributes.match(/\btype\s*=\s*(?:(["'])(.*?)\1|([^\s"'=<>`]+))/iu)?.[2] ??
+        attributes.match(/\btype\s*=\s*([^\s"'=<>`]+)/iu)?.[1];
+      return /^application\/(?:ld\+)?json$/iu.test(type ?? '') ? '' : script;
+    });
   if (!/\.mdx?$/i.test(absolutePath)) return content;
   // Documentation examples contain literal event-listener snippets. They are
   // authored text, not website state machines; real MDX script/handler markup
@@ -836,6 +864,53 @@ function astContainsJsxEventHandler(content) {
     ) {
       found = true;
       return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return found;
+}
+
+function astContainsInteractiveRuntime(content) {
+  const sourceFile = ts.createSourceFile(
+    'website-source.tsx',
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  let found = false;
+  const visit = (node) => {
+    if (found) return;
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'addEventListener'
+    ) {
+      found = true;
+      return;
+    }
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const owner = node.expression.expression.getText(sourceFile);
+      const method = node.expression.name.text;
+      if (
+        method === 'addEventListener' ||
+        ((owner === 'customElements' || owner.endsWith('.customElements')) && method === 'define')
+      ) {
+        found = true;
+        return;
+      }
+    }
+    if (ts.isNewExpression(node)) {
+      const constructorName = ts.isIdentifier(node.expression)
+        ? node.expression.text
+        : ts.isPropertyAccessExpression(node.expression)
+          ? node.expression.name.text
+          : node.expression.getText(sourceFile);
+      if (/^(?:Intersection|Mutation|Resize)Observer$/u.test(constructorName)) {
+        found = true;
+        return;
+      }
     }
     ts.forEachChild(node, visit);
   };
@@ -965,6 +1040,9 @@ function containsJsxEventHandler(content, absolutePath) {
 }
 
 function containsInteractiveSource(content, absolutePath) {
+  if (/\.[cm]?[jt]sx?$/i.test(absolutePath)) {
+    return astContainsInteractiveRuntime(content) || containsJsxEventHandler(content, absolutePath);
+  }
   return (
     INTERACTIVE_SOURCE_PATTERNS.some((pattern) => pattern.test(content)) ||
     containsJsxEventHandler(content, absolutePath)
@@ -980,13 +1058,11 @@ function discoverWebsiteInteractiveSources(rootDir) {
     .concat(
       walkFiles(contentRoot).filter((absolutePath) => /\.(?:mdx?|vue|svelte)$/.test(absolutePath))
     )
-    .concat(
-      walkFiles(contentRoot).filter((absolutePath) => /\.demo\.[cm]?[jt]sx?$/.test(absolutePath))
-    )
+    .concat(walkFiles(contentRoot).filter((absolutePath) => /\.[cm]?[jt]sx?$/.test(absolutePath)))
     .filter(
       (absolutePath, index, files) =>
         files.indexOf(absolutePath) === index &&
-        !/\.(?:test|browser\.test)\.[cm]?[jt]sx?$/.test(absolutePath)
+        !/\.(?:browser\.)?(?:test|spec)\.[cm]?[jt]sx?$/.test(absolutePath)
     )
     .filter((absolutePath) =>
       containsInteractiveSource(sourceTextForInteractionScan(absolutePath), absolutePath)
@@ -1549,6 +1625,16 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
           );
         }
       }
+      const harnessImplementationPaths = implementationPaths.filter(
+        (repositoryPath) =>
+          repositoryPath.startsWith('apps/agent-harness/') &&
+          fs.existsSync(path.resolve(rootDir, repositoryPath))
+      );
+      if (harnessImplementationPaths.length === 0) {
+        issues.push(
+          `${context}: dogfooded rows must bind at least one existing implementation path under apps/agent-harness/`
+        );
+      }
       const evidencePaths = explicitRepositoryPaths(record.Evidence).filter((repositoryPath) =>
         repositoryPath.startsWith('internal/agent-harness/evidence/')
       );
@@ -1645,13 +1731,13 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
         issues
       );
     } else {
-      requireLabels(
+      requireMeaningfulLabels(
         record['App state and semantic events'],
         ['App state:', 'Events:'],
         `${context}: App state and semantic events`,
         issues
       );
-      requireLabels(
+      requireMeaningfulLabels(
         record['Production host and equivalence evidence'],
         ['Host:', 'WC:', 'React:', 'Vue:'],
         `${context}: Production host and equivalence evidence`,
@@ -2073,7 +2159,7 @@ function validateMatrixFile(rootDir, config, catalogEntries, issues) {
 
 export function collectCoverageMatrixIssues({ rootDir = process.cwd() } = {}) {
   const issues = [];
-  const catalogEntries = loadCatalogEntries(rootDir);
+  const catalogEntries = loadCatalogEntries(rootDir, issues);
   for (const config of MATRIX_CONFIGS) {
     validateMatrixFile(rootDir, config, catalogEntries, issues);
   }

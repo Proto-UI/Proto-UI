@@ -411,6 +411,73 @@ test('includes interactive authored demo controllers in the website source scan'
   );
 });
 
+test('includes content-local JavaScript and TypeScript interactions in the website scan', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [relativePath, content] of [
+    [
+      'apps/www/src/content/docs/Widget.tsx',
+      'export const Widget = () => <button onClick={() => {}} />;',
+    ],
+    ['apps/www/src/content/docs/behavior.js', 'host.addEventListener("click", activate);'],
+    [
+      'apps/www/src/content/docs/registry.ts',
+      'window.customElements.define("x-fixture", FixtureElement);',
+    ],
+    [
+      'apps/www/src/content/docs/observer.ts',
+      'const observer = new window.MutationObserver(update);',
+    ],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  const message = validationMessage(root);
+  for (const relativePath of [
+    'apps/www/src/content/docs/Widget.tsx',
+    'apps/www/src/content/docs/behavior.js',
+    'apps/www/src/content/docs/registry.ts',
+    'apps/www/src/content/docs/observer.ts',
+  ]) {
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
+});
+
+test('ignores interactive-looking source snippets stored as content data', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/content/docs/demo_components/example/exampleCode.ts';
+  const sourcePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    'export const codeMap = { wc: `<script>host.addEventListener("click", activate)</script>`, react: `<button onClick={() => activate()} />` };'
+  );
+  writeValidMatrices(root);
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('ignores inert JSON data scripts during interaction discovery', () => {
+  const root = createRoot();
+  const cases = [
+    [
+      'apps/www/src/content/docs/StructuredData.astro',
+      '<script type="application/ld+json">{"@type":"WebSite"}</script>',
+    ],
+    [
+      'apps/www/src/content/docs/data.mdx',
+      '<script type="application/json">{"fixture":true}</script>',
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  writeValidMatrices(root);
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
 test('detects camel-cased JSX event handler props in the website source scan', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -1201,6 +1268,34 @@ test('rejects uncataloged entity IDs and stale lifecycle reporting', () => {
   assert.match(message, /Lifecycle must report catalog status `draft`/);
 });
 
+test('loads quoted catalog scalars and the governed default draft status', () => {
+  const quotedRoot = createRoot();
+  fs.writeFileSync(
+    path.join(quotedRoot, 'spec', 'fixtures', 'quoted.yaml'),
+    'id: "P-QUOTED-BUTTON"\ntype: "fixture"\nstatus: "active"\n',
+    'utf8'
+  );
+  writeValidMatrices(quotedRoot, {
+    'Proto UI chain': 'P-QUOTED-BUTTON',
+    Lifecycle: 'P-QUOTED-BUTTON=active',
+  });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: quotedRoot }), { matrixCount: 2 });
+
+  const defaultRoot = createRoot();
+  fs.writeFileSync(
+    path.join(defaultRoot, 'spec', 'fixtures', 'default-status.yaml'),
+    'id: P-DEFAULT-BUTTON\ntype: fixture\n',
+    'utf8'
+  );
+  writeValidMatrices(defaultRoot, {
+    'Proto UI chain': 'P-DEFAULT-BUTTON',
+    Lifecycle: 'P-DEFAULT-BUTTON=draft',
+    State: 'blocked',
+    'Dependency and owner': '#420; owner: website team',
+  });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: defaultRoot }), { matrixCount: 2 });
+});
+
 test('binds every website lifecycle status to its exact catalog entity', () => {
   const root = createRoot();
   writeValidMatrices(root, {
@@ -1563,6 +1658,47 @@ test('requires website and Harness policy labels on every row', () => {
   }
 });
 
+test('rejects empty Harness state, event, host, and equivalence values', () => {
+  const root = createRoot();
+  writeValidMatrices(
+    root,
+    {},
+    {
+      'App state and semantic events': 'App state:; Events:',
+      'Production host and equivalence evidence': 'Host:; WC:; React:; Vue:',
+    }
+  );
+  const message = validationMessage(root);
+  for (const label of ['App state:', 'Events:', 'Host:', 'WC:', 'React:', 'Vue:']) {
+    assert.ok(message.includes(`required \`${label}\` label must have a meaningful value`));
+  }
+});
+
+test('rejects punctuated placeholder values in Harness policy labels', () => {
+  const root = createRoot();
+  writeValidMatrices(
+    root,
+    {},
+    {
+      'App state and semantic events': 'App state: none.; Events: n/a.',
+      'Production host and equivalence evidence': 'Host: none.; WC: n/a.; React: none.; Vue: n/a.',
+    }
+  );
+  const message = validationMessage(root);
+  for (const label of ['App state:', 'Events:', 'Host:', 'WC:', 'React:', 'Vue:']) {
+    assert.ok(message.includes(`required \`${label}\` label must have a meaningful value`));
+  }
+});
+
+test('requires app-local-proto state to retain the app-local target class', () => {
+  const root = createRoot();
+  writeValidMatrices(root, {}, { 'Target class': 'composition', State: 'app-local-proto' });
+  assert.match(
+    validationMessage(root),
+    /State `app-local-proto` requires Target class `app-local-proto`, received `composition`/
+  );
+});
+
 test('requires owner and evidence cells to name concrete ownership and evidence', () => {
   const root = createRoot();
   writeValidMatrices(root, { 'Current owner': '—', Evidence: 'TBD' });
@@ -1628,6 +1764,40 @@ test('allows an app-local prototype row to advance to dogfooded with implementat
     }
   );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('requires a dogfooded implementation path under the Harness application root', () => {
+  const root = createRoot();
+  const implementationPath = 'spec/fixtures/not-harness.ts';
+  const evidencePath = 'internal/agent-harness/evidence/m1/wrong-root.md';
+  for (const [repositoryPath, content] of [
+    [implementationPath, 'fixture'],
+    [
+      evidencePath,
+      'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: abc123\nEnvironment: fixture\nFixtures: wrong root\nCommands: pnpm test\nResults: passed\n',
+    ],
+  ]) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+  assert.match(
+    validationMessage(root),
+    /dogfooded rows must bind at least one existing implementation path under apps\/agent-harness\//
+  );
 });
 
 test('rejects dogfooded Harness rows that consume removed catalog entities', () => {
