@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { definePrototype } from '@proto.ui/core';
-import { asFocusScope } from '@proto.ui/hooks';
+import { asFocusable, asFocusScope } from '@proto.ui/hooks';
 
 import { asButton } from '../../../prototypes/base/src/button';
 import { createMountedVueAdapter, flushVue } from './utils/vue';
@@ -67,6 +67,8 @@ describe('adapter-vue: focus wiring', () => {
 
     try {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      const spy1 = vi.spyOn(first.root!, 'matches').mockReturnValue(true);
+      const spy2 = vi.spyOn(second.root!, 'matches').mockReturnValue(true);
       first.root?.dispatchEvent(new FocusEvent('focus'));
       expect(first.vm.getExposes().focused.get()).toBe(true);
       expect(first.vm.getExposes().focusVisible.get()).toBe(true);
@@ -79,6 +81,54 @@ describe('adapter-vue: focus wiring', () => {
     } finally {
       second.unmount();
       first.unmount();
+    }
+  });
+
+  it('projects pointer focus as visible when the UA reports :focus-visible on text controls', async () => {
+    const proto = definePrototype({
+      name: 'vue-pointer-focus-visible-text',
+      setup(def) {
+        const focusable = asFocusable();
+        def.expose.state('focused', focusable.focused);
+        def.expose.state('focusVisible', focusable.focusVisible);
+        return (r) => [r.el('input')];
+      },
+    });
+
+    const mounted = createMountedVueAdapter(proto);
+    await flushVue();
+    const input = mounted.root!;
+    const exposes = mounted.vm.getExposes();
+
+    try {
+      // Pointer path with a UA that keeps :focus-visible for the text control.
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      const matchesSpy2 = vi
+        .spyOn(input, 'matches')
+        .mockImplementation((selector: string) => selector === ':focus-visible');
+      input.dispatchEvent(new FocusEvent('focus'));
+      expect(matchesSpy2).toHaveBeenCalledWith(':focus-visible');
+      expect(exposes.focusVisible.get()).toBe(true);
+      matchesSpy2.mockRestore();
+
+      // Keyboard path stays driven by the modality heuristic alone.
+      input.dispatchEvent(new FocusEvent('blur'));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      const matchesSpy3 = vi.spyOn(input, 'matches').mockReturnValue(true);
+      input.dispatchEvent(new FocusEvent('focus'));
+      await flushVue();
+      expect(exposes.focusVisible.get()).toBe(true);
+
+      // Pointer path with a UA that rejects :focus-visible stays invisible.
+      input.dispatchEvent(new FocusEvent('blur'));
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      vi.spyOn(input, 'matches').mockReturnValue(false);
+      input.dispatchEvent(new FocusEvent('focus'));
+      await flushVue();
+      expect(exposes.focusVisible.get()).toBe(false);
+    } finally {
+      vi.restoreAllMocks();
+      mounted.unmount();
     }
   });
 });

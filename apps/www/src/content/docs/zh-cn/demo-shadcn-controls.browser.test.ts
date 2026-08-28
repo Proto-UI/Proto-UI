@@ -97,6 +97,7 @@ type EditorStyle = {
   transitionDuration: string;
   transitionTimingFunction: string;
   focusProjected: boolean;
+  focusVisibleProjected: boolean;
   nativeFocusVisible: boolean;
 };
 
@@ -123,9 +124,39 @@ async function editorStyle(page: Page): Promise<EditorStyle> {
       transitionDuration: style.transitionDuration,
       transitionTimingFunction: style.transitionTimingFunction,
       focusProjected: editor.hasAttribute('data-focused'),
+      focusVisibleProjected: editor.hasAttribute('data-focus-visible'),
       nativeFocusVisible: editor.matches(':focus-visible'),
     };
   });
+}
+
+async function focusEditorWithRealTab(page: Page): Promise<void> {
+  const prepared = await page.evaluate(() => {
+    const editor = document.querySelector<HTMLTextAreaElement>('[data-previewer-id] textarea');
+    if (!editor) return false;
+    const candidates = Array.from(
+      document.querySelectorAll<HTMLElement>('a[href],button,input,select,textarea,[tabindex]')
+    ).filter((element) => {
+      const style = getComputedStyle(element);
+      return (
+        !element.hasAttribute('disabled') &&
+        element.tabIndex >= 0 &&
+        style.display !== 'none' &&
+        style.visibility !== 'hidden'
+      );
+    });
+    const index = candidates.indexOf(editor);
+    if (index <= 0) return false;
+    candidates[index - 1]!.focus();
+    return document.activeElement === candidates[index - 1];
+  });
+  if (!prepared) throw new Error('Unable to prepare the real Tab predecessor for the Textarea.');
+  await page.keyboard.press('Tab');
+  const active = await page.evaluate(() => {
+    const editor = document.querySelector('[data-previewer-id] textarea');
+    return document.activeElement === editor;
+  });
+  if (!active) throw new Error('Real Tab traversal did not reach the Shadcn Textarea editor.');
 }
 
 /**
@@ -203,44 +234,57 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         await applyColorScheme(page, 'light');
 
         const resting = await editorStyle(page);
+
+        // Real click path: portable focusVisible must equal the physical host
+        // result. Ring expectations are derived from that measurement.
         await previewer.locator('textarea').first().click();
         await page.waitForTimeout(400);
-        const focused = await editorStyle(page);
-
-        // A text control matches :focus-visible on pointer focus in this host,
-        // which is what upstream keys the ring on. Whether every UA agrees is
-        // the host's call, so the assertion reads the host rather than assuming.
-        expect(focused.nativeFocusVisible, `${runtime}/native`).toBe(true);
-
-        if (!focused.focusProjected) {
-          // Web Components does not project text-control focus onto the host
-          // yet, so no ring can paint. That gap is #395, fixed by #426; this
-          // case starts covering wc automatically once that lands.
-          expect(focused.boxShadow, `${runtime}/unprojected`).toBe(resting.boxShadow);
-          continue;
+        const pointer = await editorStyle(page);
+        expect(pointer.focusProjected, `${runtime}/pointer-focused`).toBe(true);
+        expect(pointer.focusVisibleProjected, `${runtime}/pointer-equality`).toBe(
+          pointer.nativeFocusVisible
+        );
+        if (pointer.nativeFocusVisible) {
+          expect(pointer.boxShadow, `${runtime}/pointer-ring`).not.toBe(resting.boxShadow);
+        } else {
+          expect(pointer.boxShadow, `${runtime}/pointer-no-ring`).toBe(resting.boxShadow);
         }
 
-        expect(focused.boxShadow, `${runtime}/focused`).not.toBe(resting.boxShadow);
-
-        // Re-run both directions and require a frame strictly between the two
-        // endpoints, which is what distinguishes an animation from a jump.
         await page.mouse.click(5, 5);
-        const leaving = await runTransition(
-          page,
-          focused.boxShadow,
-          resting.boxShadow,
-          `${runtime}/blur`
-        );
-        expect(leaving.sawIntermediate, `${runtime}/blur-animated`).toBe(true);
+        if (pointer.nativeFocusVisible) {
+          const pointerLeaving = await runTransition(
+            page,
+            pointer.boxShadow,
+            resting.boxShadow,
+            `${runtime}/pointer-blur`
+          );
+          expect(pointerLeaving.sawIntermediate, `${runtime}/pointer-blur-animated`).toBe(true);
+        }
 
-        await previewer.locator('textarea').first().click();
-        const entering = await runTransition(
-          page,
-          resting.boxShadow,
-          focused.boxShadow,
-          `${runtime}/focus`
+        // Real keyboard path: Tab traversal must reach the editor, and the
+        // projected state must again equal the current native target result.
+        await focusEditorWithRealTab(page);
+        const keyboard = await editorStyle(page);
+        expect(keyboard.focusProjected, `${runtime}/keyboard-focused`).toBe(true);
+        expect(keyboard.focusVisibleProjected, `${runtime}/keyboard-equality`).toBe(
+          keyboard.nativeFocusVisible
         );
-        expect(entering.sawIntermediate, `${runtime}/focus-animated`).toBe(true);
+        if (keyboard.nativeFocusVisible) {
+          expect(keyboard.boxShadow, `${runtime}/keyboard-ring`).not.toBe(resting.boxShadow);
+        } else {
+          expect(keyboard.boxShadow, `${runtime}/keyboard-no-ring`).toBe(resting.boxShadow);
+        }
+
+        await page.mouse.click(5, 5);
+        await page.waitForTimeout(400);
+        const keyboardBlurred = await editorStyle(page);
+        expect(keyboardBlurred.focusProjected, `${runtime}/keyboard-blurred-focused`).toBe(false);
+        expect(keyboardBlurred.focusVisibleProjected, `${runtime}/keyboard-blurred-visible`).toBe(
+          false
+        );
+        expect(keyboardBlurred.boxShadow, `${runtime}/keyboard-blurred-ring`).toBe(
+          resting.boxShadow
+        );
       }
     } finally {
       await context.close();

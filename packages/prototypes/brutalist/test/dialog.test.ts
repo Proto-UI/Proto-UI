@@ -152,6 +152,7 @@ describe('prototypes/brutalist: dialog', () => {
     trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(trigger, 'matches').mockReturnValue(true);
     trigger.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().focusVisible.get()).toBe(true);

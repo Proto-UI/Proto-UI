@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { definePrototype } from '@proto.ui/core';
-import { asFocusEntry, asFocusScope } from '@proto.ui/hooks';
+import { asFocusable, asFocusEntry, asFocusScope } from '@proto.ui/hooks';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
 import { asButton } from '../../../prototypes/base/src/button';
 
