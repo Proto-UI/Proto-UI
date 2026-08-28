@@ -57,6 +57,9 @@ if (!Array.isArray(demos) || demos.length === 0) {
 }
 
 const initialDemo = demos.find((demo) => demo.id === initialDemoId) ?? demos[0];
+const instanceToken = Math.random().toString(36).slice(2);
+const pickerLabelId = `${id}-picker-label-${instanceToken}`;
+const runtimeLabelId = `${id}-runtime-label-${instanceToken}`;
 ---
 
 <section
@@ -77,7 +80,7 @@ const initialDemo = demos.find((demo) => demo.id === initialDemoId) ?? demos[0];
 
       <div class="home-demo-previewer__toolbar">
         <div class="home-demo-previewer__control">
-          <label class="home-demo-previewer__label">{pickerLabel}</label>
+          <label id={pickerLabelId} class="home-demo-previewer__label">{pickerLabel}</label>
           <div class="home-demo-previewer__select-wrap">
             <wc-shadcn-select-root
               data-site-select-root
@@ -85,7 +88,10 @@ const initialDemo = demos.find((demo) => demo.id === initialDemoId) ?? demos[0];
               data-home-demo-select="demo"
               data-site-initial-value={initialDemo.id}
             >
-              <wc-shadcn-select-trigger class="home-demo-previewer__select">
+              <wc-shadcn-select-trigger
+                class="home-demo-previewer__select"
+                aria-labelledby={pickerLabelId}
+              >
                 <wc-shadcn-select-value data-placeholder={pickerLabel}></wc-shadcn-select-value>
               </wc-shadcn-select-trigger>
               <wc-shadcn-select-content data-position="popper" data-align="start"
@@ -95,7 +101,7 @@ const initialDemo = demos.find((demo) => demo.id === initialDemoId) ?? demos[0];
         </div>
 
         <div class="home-demo-previewer__control">
-          <label class="home-demo-previewer__label">{runtimeLabel}</label>
+          <label id={runtimeLabelId} class="home-demo-previewer__label">{runtimeLabel}</label>
           <div class="home-demo-previewer__select-wrap">
             <wc-shadcn-select-root
               data-site-select-root
@@ -103,7 +109,10 @@ const initialDemo = demos.find((demo) => demo.id === initialDemoId) ?? demos[0];
               data-home-demo-select="runtime"
               data-site-initial-value={initialRuntime}
             >
-              <wc-shadcn-select-trigger class="home-demo-previewer__select">
+              <wc-shadcn-select-trigger
+                class="home-demo-previewer__select"
+                aria-labelledby={runtimeLabelId}
+              >
                 <wc-shadcn-select-value data-placeholder={runtimeLabel}></wc-shadcn-select-value>
               </wc-shadcn-select-trigger>
               <wc-shadcn-select-content data-position="popper" data-align="start"

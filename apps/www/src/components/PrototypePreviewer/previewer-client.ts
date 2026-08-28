@@ -65,6 +65,7 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   const selectedInitialRuntime = preferredRuntime();
+  const nativeSelectUsesPagePreference = Boolean(nativeSelect?.closest('[data-adapter-select]'));
 
   let current: { id: string; api: any } | null = null;
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
@@ -106,10 +107,9 @@ export function initPreviewer(options: PreviewerOptions) {
       content?.appendChild(item);
     }
     initSiteShadcnControls(selectRoot);
-    const selected = readSelectValue();
-    writeSelectValue(
-      runtimeList.includes(selected as RuntimeId) ? selected : selectedInitialRuntime
-    );
+    // AdapterSelect has an SSR `wc` seed. The preference-adjusted runtime is
+    // authoritative for both the first mount and the visible selector.
+    writeSelectValue(selectedInitialRuntime);
   } else if (nativeSelect) {
     nativeSelect.innerHTML = '';
     for (const id of runtimeList) {
@@ -254,10 +254,7 @@ export function initPreviewer(options: PreviewerOptions) {
     writeSelectValue(id);
     void switchTo(id);
   };
-  if (selectRoot) {
-    selectRoot.addEventListener('valueChange', onSelectChange);
-    selectRoot.addEventListener('change', onSelectChange);
-  } else if (nativeSelect) {
+  if (nativeSelect && !nativeSelectUsesPagePreference) {
     nativeSelect.addEventListener('change', onSelectChange);
   }
 
@@ -296,10 +293,7 @@ export function initPreviewer(options: PreviewerOptions) {
       host.innerHTML = '';
       current = null;
       currentDemo = null;
-      if (selectRoot) {
-        selectRoot.removeEventListener('valueChange', onSelectChange);
-        selectRoot.removeEventListener('change', onSelectChange);
-      } else if (nativeSelect) {
+      if (nativeSelect && !nativeSelectUsesPagePreference) {
         nativeSelect.removeEventListener('change', onSelectChange);
       }
     },

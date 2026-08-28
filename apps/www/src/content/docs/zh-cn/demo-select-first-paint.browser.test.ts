@@ -77,7 +77,7 @@ async function readClosedSelect(page: Page): Promise<ClosedSelect> {
       // collection even though nothing has opened it.
       registeredItems: host.querySelectorAll('[data-collection-index]').length,
       mountedRoots: host.querySelectorAll('[data-pui-root]').length,
-      detachedHosts: document.querySelectorAll('[data-pui-view-detached]').length,
+      detachedHosts: host.querySelectorAll('[data-pui-view-detached]').length,
       everOpened: !!host.querySelector('[data-open]'),
     };
   });

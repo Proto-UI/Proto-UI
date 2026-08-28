@@ -24,6 +24,10 @@ describe('site Shadcn control bridge', () => {
     root.dataset.siteInitialValue = 'react';
 
     const trigger = document.createElement('wc-shadcn-select-trigger');
+    const label = document.createElement('span');
+    label.id = 'runtime-label';
+    label.textContent = 'Runtime';
+    trigger.setAttribute('aria-labelledby', label.id);
     const value = document.createElement('wc-shadcn-select-value');
     value.dataset.placeholder = 'Runtime';
     trigger.append(value);
@@ -36,7 +40,7 @@ describe('site Shadcn control bridge', () => {
     content.append(item);
 
     root.append(trigger, content);
-    document.body.append(root);
+    document.body.append(label, root);
     initSiteShadcnControls(document);
     await settle();
 
@@ -45,6 +49,7 @@ describe('site Shadcn control bridge', () => {
     expect(item.getAttribute('role')).toBe('option');
     expect(item.getAttribute('aria-selected')).toBe('true');
     expect(value.textContent).toBe('React');
+    expect(trigger.getAttribute('aria-labelledby')).toBe('runtime-label');
   });
 
   it('registers the Shadcn Button projection for site actions', async () => {
@@ -61,5 +66,19 @@ describe('site Shadcn control bridge', () => {
     expect(customElements.get('wc-shadcn-button')).toBeDefined();
     expect(button.getAttribute('role')).toBe('button');
     expect(button.getAttribute('data-pui-style')).toContain('bg-transparent');
+  });
+
+  it('retains content text as the accessible source for projected icon buttons', async () => {
+    const button = document.createElement('wc-shadcn-button');
+    button.dataset.siteShadcnButton = '1';
+    button.setAttribute('aria-label', 'Copy code');
+    button.innerHTML = '<svg aria-hidden="true"></svg><span class="sr-only">Copy code</span>';
+    document.body.append(button);
+
+    initSiteShadcnControls(document);
+    await settle();
+
+    expect(button.hasAttribute('aria-label')).toBe(false);
+    expect(button.querySelector('.sr-only')?.textContent).toBe('Copy code');
   });
 });

@@ -1,3 +1,5 @@
+import { isSiteButtonActivation } from '../site-shadcn-controls';
+
 export interface RefreshCodePanelOptions {
   readonly reset?: boolean;
 }
@@ -42,14 +44,16 @@ function initCodePanel(shell: HTMLElement): void {
   const copyButton = shell.querySelector<HTMLElement>('[data-copy]');
   const copyText = shell.querySelector<HTMLElement>('[data-copy-text]');
 
-  toggle?.addEventListener('click', () => {
+  toggle?.addEventListener('click', (event) => {
+    if (!isSiteButtonActivation(event)) return;
     setExpanded(shell, shell.dataset.codeExpanded !== 'true');
   });
 
   if (copyButton && copyText) {
     const copyIconHtml = copyText.innerHTML;
     const checkIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4.5"><path d="M20 6 9 17l-5-5"/></svg>`;
-    copyButton.addEventListener('click', async () => {
+    copyButton.addEventListener('click', async (event) => {
+      if (!isSiteButtonActivation(event)) return;
       const code = shell.querySelector<HTMLElement>('.proto-previewer__code code');
       const text = code?.dataset.rawCode ?? code?.textContent ?? '';
       try {

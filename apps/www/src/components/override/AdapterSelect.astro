@@ -4,6 +4,7 @@ interface Props {
 }
 
 const { id = 'adapter-select' } = Astro.props;
+const labelId = `${id}-label-${Math.random().toString(36).slice(2)}`;
 
 // 适配器选项
 const options = [
@@ -15,15 +16,15 @@ const options = [
 ---
 
 <div class="adapter-select-wrapper relative inline-flex items-center" data-adapter-select>
-  <span class="sr-only">选择适配器</span>
+  <span id={labelId} class="sr-only">选择适配器</span>
   <wc-shadcn-select-root
     id={id}
     data-site-select-root
     data-adapter-select-root
     data-site-initial-value="wc"
-    aria-label="选择适配器"
   >
     <wc-shadcn-select-trigger
+      aria-labelledby={labelId}
       data-size="sm"
       class="adapter-select inline-flex h-8 min-w-36 items-center justify-between rounded-md border-transparent bg-transparent px-3 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
     >

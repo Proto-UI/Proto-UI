@@ -35,10 +35,11 @@ localeOptions.forEach((opt) => {
 
 const selectedLocale =
   localeOptions.find((option) => option.isCurrent)?.value ?? currentLocale ?? locales[0] ?? '';
+const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
 ---
 
 <div class="language-select-wrapper relative inline-flex items-center" data-language-select>
-  <span class="sr-only">选择语言 / Select Language</span>
+  <span id={labelId} class="sr-only">选择语言 / Select Language</span>
   <wc-shadcn-select-root
     data-site-select-root
     data-language-select-root
@@ -47,6 +48,7 @@ const selectedLocale =
     data-site-initial-value={selectedLocale}
   >
     <wc-shadcn-select-trigger
+      aria-labelledby={labelId}
       data-size="sm"
       class="language-select inline-flex h-8 min-w-24 items-center justify-between rounded-md border-transparent bg-transparent px-3 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
     >

@@ -41,6 +41,10 @@
         btn.replaceChildren(icon);
         // 无障碍文案与 pressed 状态
         const isDark = theme === 'dark';
+        const accessibleText = document.createElement('span');
+        accessibleText.className = 'sr-only';
+        accessibleText.textContent = isDark ? 'Switch to light theme' : 'Switch to dark theme';
+        btn.append(accessibleText);
         btn.setAttribute('aria-pressed', String(isDark));
         btn.setAttribute(
           'aria-label',
@@ -61,7 +65,8 @@
     render(current());
 
     // 点击切换
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (event) => {
+      if (!(event instanceof CustomEvent)) return;
       window.StarlightTheme.toggle();
     });
 

@@ -27,6 +27,19 @@ export type SiteSelectRoot = HTMLElement & {
   setProps?: (props: Record<string, unknown>) => void;
 };
 
+/**
+ * Projected Button hosts receive the browser's native `MouseEvent` and then
+ * the Button protocol's outward `CustomEvent("click")`. Site consumers own
+ * the outward signal, while native buttons retain their ordinary click path.
+ */
+export function isSiteButtonActivation(event: Event): boolean {
+  const currentTarget = event.currentTarget;
+  return (
+    !(currentTarget instanceof HTMLElement && currentTarget.localName === 'wc-shadcn-button') ||
+    event instanceof CustomEvent
+  );
+}
+
 export function registerSiteShadcnControls(): void {
   for (const [tagName, prototype] of siteProjections) {
     if (customElements.get(tagName)) continue;

@@ -120,6 +120,7 @@ const activeManager =
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
         </svg>
       </span>
+      <span class="sr-only">Copy command</span>
     </wc-shadcn-button>
   </div>
 
@@ -190,14 +191,16 @@ const activeManager =
       }
 
       tabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
+        tab.addEventListener('click', (event) => {
+          if (!(event instanceof CustomEvent)) return;
           const nextManager = tab.dataset.managerTab;
           if (!nextManager) return;
           setActiveManager(nextManager);
         });
       });
 
-      copyButton.addEventListener('click', async () => {
+      copyButton.addEventListener('click', async (event) => {
+        if (!(event instanceof CustomEvent)) return;
         try {
           await navigator.clipboard.writeText(getCommandNode()?.textContent ?? '');
           copyIcon.innerHTML = successIcon;
