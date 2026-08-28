@@ -20,11 +20,11 @@ criteria:
   - id: P-BRUTALIST-CHECKBOX-BASE-INHERITANCE
     text:
       en: >-
-        The prototype must inherit Base Checkbox through `asCheckboxRoot()` once and must not redefine Base checked, pressed, focus-visible, or disabled protocol semantics. Visual projection may only consume the projected state handles (`checked`, `disabled`, `focusVisible`, `pressed`).
+        The prototype must inherit Base Checkbox through `asCheckboxRoot()` once and must not redefine Base checked, indeterminate, pressed, focus-visible, or disabled protocol semantics. Visual projection may only consume the projected state handles (`checked`, `indeterminate`, `disabled`, `focusVisible`, `pressed`).
 
 
       zh-CN: >-
-        该 prototype 必须通过 `asCheckboxRoot()` 一次性继承 Base Checkbox，不得重定义 Base 的 checked、pressed、focus-visible 或 disabled 协议语义；视觉投射只能消费投影出的 state handles。
+        该 prototype 必须通过 `asCheckboxRoot()` 一次性继承 Base Checkbox，不得重定义 Base 的 checked、indeterminate、pressed、focus-visible 或 disabled 协议语义；视觉投射只能消费投影出的 `checked`、`indeterminate`、`disabled`、`focusVisible` 与 `pressed` state handles。
 
 
   - id: P-BRUTALIST-CHECKBOX-ENTRY
