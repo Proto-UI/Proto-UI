@@ -60,17 +60,32 @@ For each control or panel, a 1.39:1 black boundary fails if that boundary is req
 
 `P-BRUTALIST-CARD` is not in this inventory: Card uses `border-foreground` on `bg-background`, which is 16.44:1 in both themes.
 
+### Dark parent-child boundaries — 1.39:1 externally
+
+Same-element recipes are not the whole boundary inventory. These child borders are externally adjacent to a `bg-secondary-background` parent in Dark:
+
+| Child call site | Parent surface | Independent inner cue |
+| --- | --- | --- |
+| unchecked Switch Thumb `border-black` | Switch Root | `bg-foreground` against the black border is 19.26:1; checked also moves and changes to `bg-canary` |
+| selected Tabs Trigger `border-black` | Tabs List | the inner `bg-main`/black boundary is 18.05:1 and the selected label also gains fill |
+| Dialog Close Icon `border-black` | Dialog Content | the inner canary/coral fill against black is ≥14.89:1 |
+
+The exterior edge is 1.39:1 in each case. The contrasting inner fill may make that edge redundant, but rendered per-call-site evidence must confirm that the child remains identifiable and that its required states do not depend on the low-contrast exterior edge. These direct child recipes remain separate from shared panel-token remediation.
+
 ## Stateful hard-shadow classification
 
 Hard shadows cannot be categorically excluded from SC 1.4.11 because some recipes change them with state.
 
 | Call site | Stateful use | Classification at this baseline |
 | --- | --- | --- |
-| Button | 3px at rest, 4px on hover, removed on press | The shadow change is stateful. Hover and press also translate the control, while the component retains its fill and border, so the black shadow is a redundant state cue in the current recipe. Rendered evidence must confirm that those independent cues remain perceivable. |
-| Tabs Trigger | selected-and-not-pressed adds a 3px shadow; press removes it | The shadow is stateful but redundant with the selected `bg-main`/`border-black` pair and the press movement in the current recipe. It must be reclassified if those independent cues change. |
+| Button, Toggle, Dialog Trigger, Dropdown Trigger, Select Trigger | 3px at rest, 4px on hover, removed on press where the recipe exposes pressed | Hover/press also translate these controls, and each retains a fill/border boundary. The shadow is a redundant state cue only if rendered evidence confirms those independent cues remain perceivable. |
+| Tabs Trigger | selected-and-not-pressed adds a 3px shadow; unselected hover adds 4px; press removes it | The selected fill/border and hover/press movement are independent cues. Rendered evidence must still classify each state, including the Dark 1.17:1 hover border. |
+| Switch Root | 3px at rest, removed on press | Press also changes the fill to coral. The shadow is a redundant press cue only if the rendered fill change and control boundary remain perceivable. |
+| Hover Card Trigger | 3px at rest, 4px with translation on hover | Translation is an independent hover cue; rendered evidence must retain this call site rather than treating the shell as static. |
+| Dialog Close Icon | 3px at rest, 4px on hover while canary changes to coral | This call site has no translation rule. The fill and child boundary must be evaluated against Dialog Content before classifying the shadow change as redundant. |
 | Shared panels and other static shells | fixed 3px shadow | Structural decoration only where it does not identify the component or communicate state; the border/fill boundary is classified separately. |
 
-Thus a low-contrast black shadow against the Dark page is not counted as the sole failure for the two audited interactive recipes, but its state ownership is retained instead of being erased from the audit.
+Thus a low-contrast black shadow against the Dark page is not automatically counted as the sole failure, but every stateful consumer remains in the rendered-evidence scope instead of being erased from the audit.
 
 ## Light menu-state failures
 
@@ -85,13 +100,13 @@ These are required focus-state indicators, not decorative fills, so they fail SC
 
 1. The audited implemented text recipes pass SC 1.4.3 in both themes.
 2. Dark has low-contrast black boundaries on the exact control and panel call sites inventoried above, plus the 1.17:1 Tabs Trigger hover pair. Final required-versus-redundant classification needs rendered adjacent-color evidence per component.
-3. Button and Tabs Trigger hard shadows are stateful but currently redundant with other state cues; static shadows are decorative only at call sites where they carry no component or state information.
+3. Hard-shadow state ownership spans Button, Toggle, Select/Dialog/Dropdown triggers, Tabs Trigger, Switch Root, Hover Card Trigger, and Dialog Close Icon. Redundancy must be confirmed per rendered call site; static shadows are decorative only where they carry no component or state information.
 4. Light Dropdown and Select item focus fills fail SC 1.4.11 because their 1.16:1/1.41:1 changes are the only focus indicators.
 5. Shared-token remediation alone is incomplete: surface Button, Select Trigger, Switch Root, and Tabs List are direct recipes that require separate changes or an explicit refactor.
 
 ## Recommended next steps (not authorized in this record)
 
-- Capture rendered Light/Dark evidence for every affected control and panel, including rest, hover, keyboard focus, selected, and pressed states.
+- Capture rendered Light/Dark evidence for every affected control, child boundary, and panel, including rest, hover, keyboard focus, selected, and pressed states.
 - Add a ≥3:1 focus indicator for Light Dropdown and Select items without relying on the low-contrast fill alone.
 - Decide Dark boundary colors per component, or deliberately refactor the direct recipes into governed shared tokens before changing the shared tokens.
 - Add executable contrast checks for the resolved theme pairs and browser assertions for state indicators; keep per-call-site classification in the evidence rather than inferring it from token names.
