@@ -26,7 +26,7 @@ type RingOffsetSample = {
 };
 
 async function focusDropdownTrigger(page: Page, previewer: Locator): Promise<void> {
-  await previewer.locator('select.adapter-select').focus();
+  await previewer.locator('.adapter-select').focus();
   await page.keyboard.press('Tab');
   await page.waitForFunction(
     () => {

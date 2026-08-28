@@ -181,15 +181,22 @@ async function selectRuntime(
   readySelector: string,
   expectedCount: number
 ): Promise<void> {
-  await previewer.locator('select.adapter-select').selectOption(runtime);
+  const selectRoot = previewer.locator('[data-adapter-select-root]');
+  await selectRoot.locator('wc-shadcn-select-trigger').click();
+  await page
+    .locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`)
+    .last()
+    .click({ force: true });
   await page.waitForFunction(
     ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
       const root = document.querySelector<HTMLElement>('[data-previewer-id]');
-      const select = root?.querySelector<HTMLSelectElement>('select.adapter-select');
+      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
       const host = root?.querySelector<HTMLElement>('.host');
       const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!root || !select || !host || select.value !== selectedRuntime) return false;
-      if (root.querySelectorAll(selector).length !== count || !firstRoot) return false;
+      if (!root || !select || !host || select.getAttribute('data-value') !== selectedRuntime) {
+        return false;
+      }
+      if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
       if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
       if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
       // React owns neither a custom element nor a Vue app root. The host tag is
@@ -531,7 +538,7 @@ describe.sequential('Base control documentation browser regressions', () => {
         await selectRuntime(page, previewer, runtime, VIEWPORT_SELECTOR, 2);
         await waitForCanScroll(page, SCROLLING, true);
 
-        await previewer.locator('select.adapter-select').focus();
+        await previewer.locator('.adapter-select').focus();
         await page.keyboard.press('Tab');
         await page.waitForTimeout(200);
 
@@ -568,7 +575,7 @@ describe.sequential('Base control documentation browser regressions', () => {
         await waitForCanScroll(page, SCROLLING, true);
 
         const viewport = previewer.locator(VIEWPORT_SELECTOR).first();
-        await previewer.locator('select.adapter-select').focus();
+        await previewer.locator('.adapter-select').focus();
         await page.keyboard.press('Tab');
         await page.waitForTimeout(100);
 

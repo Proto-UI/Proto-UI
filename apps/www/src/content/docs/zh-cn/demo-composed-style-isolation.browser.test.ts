@@ -96,7 +96,7 @@ async function switchShadows(page: Page): Promise<SwitchShadows> {
 
 /** Real keyboard focus, so the ring comes from the host's own focus-visible determination. */
 async function focusFirstSwitch(page: Page, previewer: Locator): Promise<void> {
-  await previewer.locator('select.adapter-select').focus();
+  await previewer.locator('.adapter-select').focus();
   await page.keyboard.press('Tab');
   await page.waitForFunction(
     () =>
