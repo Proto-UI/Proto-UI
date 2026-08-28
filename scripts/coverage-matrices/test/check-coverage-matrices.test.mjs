@@ -2558,7 +2558,7 @@ test('allows an app-local prototype row to advance to dogfooded with implementat
     fs.writeFileSync(
       absolutePath,
       repositoryPath === evidencePath
-        ? 'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: abc123\nEnvironment: fixture\nFixtures: tool invocation\nCommands: pnpm test\nResults: passed\n'
+        ? 'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: 0123456789abcdef0123456789abcdef01234567\nEnvironment: fixture\nFixtures: tool invocation\nCommands: pnpm test\nResults: passed\n'
         : 'fixture',
       'utf8'
     );
@@ -2936,4 +2936,192 @@ test('accepts an optional Total row and verifies it against the matrix size', ()
   });
   writeMatrix(correctedRoot, MATRIX_CONFIGS[1], harnessRows);
   assert.deepEqual(validateCoverageMatrices({ rootDir: correctedRoot }), { matrixCount: 2 });
+});
+
+test('loads catalog entities from both YAML extensions', () => {
+  const root = createRoot();
+  const catalogPath = path.join(root, 'spec', 'fixtures', 'YmlEntity.yml');
+  fs.mkdirSync(path.dirname(catalogPath), { recursive: true });
+  fs.writeFileSync(catalogPath, 'id: P-YML-ENTITY\nstatus: active\n', 'utf8');
+  writeValidMatrices(root, {
+    'Proto UI chain': 'P-YML-ENTITY',
+    Lifecycle: 'P-YML-ENTITY=active',
+  });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('rejects guarded Less imports with option lists', () => {
+  const root = createRoot();
+  for (const [relativePath, content] of [
+    ['apps/www/src/styles/Optioned.less', '@import (reference) "@proto.ui/runtime/styles.less";'],
+    [
+      'apps/agent-harness/src/run/Optioned.less',
+      '@import (reference, once) "@proto.ui/runtime/styles.less";',
+    ],
+  ]) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(root);
+
+  const message = validationMessage(root);
+  assert.ok(
+    message.includes(
+      'raw Proto UI import `@proto.ui/runtime/styles.less` in `apps/www/src/styles/Optioned.less`'
+    )
+  );
+  assert.ok(
+    message.includes(
+      'raw Proto UI import `@proto.ui/runtime/styles.less` in `apps/agent-harness/src/run/Optioned.less`'
+    )
+  );
+});
+
+test('rejects forbidden Harness interaction sources outside infrastructure disposition', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/RawState.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function ownState(element) { window.addEventListener("keydown", () => {}); element.focus(); }',
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /forbidden Harness interaction source `apps\/agent-harness\/src\/run\/RawState\.ts` must bind an explicit matrix owner/
+  );
+});
+
+test('reuses a planned Harness row from its plain-text Path', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/app/AppShell.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function AppShell() { return <section>Harness</section>; }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: relativePath });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('ignores indented Markdown code examples during interaction and import scans', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/content/docs/indented-examples.mdx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    [
+      '# Examples',
+      '',
+      '    import "@proto.ui/runtime/styles";',
+      '    button.addEventListener("click", activate);',
+    ].join('\n'),
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('classifies exported factory-rendered Website components', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/FactorySurface.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import * as React from 'react'; export function FactorySurface() { return React.createElement('section', null, 'Surface'); }",
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /website component source `apps\/www\/src\/components\/FactorySurface\.ts` is not classified by a matrix row/
+  );
+});
+
+test('requires exact commit SHAs in dogfooded Harness evidence records', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const evidencePath = 'internal/agent-harness/evidence/m1/tool-invocation.md';
+  for (const [repositoryPath, content] of [
+    [implementationPath, 'fixture'],
+    [
+      evidencePath,
+      'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: latest\nEnvironment: fixture\nFixtures: tool invocation\nCommands: pnpm test\nResults: passed\n',
+    ],
+  ]) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /dogfooded evidence record .* must bind Commit to an exact 40-character Git SHA/
+  );
+});
+
+test('requires named owners on blocked and research rows', () => {
+  const root = createRoot();
+  writeValidMatrices(root, {}, { State: 'research', 'Dependency and owner': '#515' });
+
+  assert.match(
+    validationMessage(root),
+    /research rows must give the `owner:` or `owners:` label a concrete value in Dependency and owner/
+  );
+});
+
+test('classifies Vite query imports by their base specifier', () => {
+  const root = createRoot();
+  for (const [relativePath, content] of [
+    [
+      'apps/www/src/components/QueryImport.astro',
+      '---\nimport value from "@proto.ui/runtime?raw";\n---\n<div>{value}</div>',
+    ],
+    [
+      'apps/agent-harness/src/run/QueryImport.ts',
+      'import value from "@proto.ui/adapter-react?url"; export const query = value;',
+    ],
+  ]) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(root);
+
+  const message = validationMessage(root);
+  assert.ok(
+    message.includes(
+      'raw Proto UI import `@proto.ui/runtime?raw` in `apps/www/src/components/QueryImport.astro`'
+    )
+  );
+  assert.ok(
+    message.includes(
+      'raw Proto UI import `@proto.ui/adapter-react?url` in `apps/agent-harness/src/run/QueryImport.ts`'
+    )
+  );
 });

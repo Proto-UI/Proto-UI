@@ -784,13 +784,26 @@ function reportsCatalogEntityStatus(value, entityId, status) {
 
 function explicitRepositoryPaths(value) {
   const paths = [];
-  for (const match of value.matchAll(/`([^`\r\n]+)`/g)) {
+  for (const match of String(value ?? '').matchAll(/`([^`\r\n]+)`/g)) {
     const candidate = match[1].trim().replaceAll('\\', '/');
     if (!/^(?:apps|packages|scripts|spec|internal)\//.test(candidate)) continue;
     if (/[?*{}\[\]]/.test(candidate) || candidate.split('/').includes('..')) continue;
     paths.push(candidate);
   }
-  return paths;
+  return [...new Set(paths)];
+}
+
+function matrixPathReferences(value) {
+  const paths = explicitRepositoryPaths(value);
+  for (const match of String(value ?? '').matchAll(
+    /(?<![`A-Za-z0-9_./-])((?:apps|packages|scripts|spec|internal)\/[A-Za-z0-9][A-Za-z0-9._/-]*[A-Za-z0-9_])/gu
+  )) {
+    const candidate = match[1];
+    if (!/[?*{}\[\]]/.test(candidate) && !candidate.split('/').includes('..')) {
+      paths.push(candidate);
+    }
+  }
+  return [...new Set(paths)];
 }
 
 function walkFiles(directory) {
@@ -807,7 +820,7 @@ function walkFiles(directory) {
 function loadCatalogEntries(rootDir, issues) {
   const entries = new Map();
   for (const absolutePath of walkFiles(path.join(rootDir, 'spec'))) {
-    if (!absolutePath.endsWith('.yaml')) continue;
+    if (!/\.(?:yaml|yml)$/i.test(absolutePath)) continue;
     const content = fs.readFileSync(absolutePath, 'utf8');
     const relativePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
     let document;
@@ -843,6 +856,7 @@ function stripMarkdownCode(content) {
         fence = { character: fenceRun[0], length: fenceRun.length };
         return '';
       }
+      if (!fence && /^(?: {4}|\t)/u.test(line)) return '';
       if (!fence) return line;
 
       const closingRun = line.match(/^[ \t]*(`+|~+)[ \t]*$/u)?.[1];
@@ -1299,14 +1313,21 @@ function discoverWebsiteComponentSources(rootDir) {
       const absoluteRoot = path.join(websiteSourceRoot, directory);
       return fs.existsSync(absoluteRoot) ? walkFiles(absoluteRoot) : [];
     })
-    .filter(
-      (absolutePath) =>
+    .filter((absolutePath) => {
+      if (
         /\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath) ||
         (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath))
-    )
+      ) {
+        return true;
+      }
+      return (
+        /\.[jt]sx?$/i.test(absolutePath) &&
+        astContainsExportedUserFacingComponent(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
+      );
+    })
     .filter(
       (absolutePath) =>
-        !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath)
+        !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[jt]sx?)$/i.test(absolutePath)
     )
     .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
     .sort();
@@ -1401,6 +1422,22 @@ function discoverHarnessUserFacingSources(rootDir) {
     .sort();
 }
 
+function discoverHarnessForbiddenInteractionSources(rootDir) {
+  const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
+  return walkFiles(sourceRoot)
+    .filter((absolutePath) => /\.[jt]sx?$/i.test(absolutePath))
+    .filter(
+      (absolutePath) =>
+        !/\.(?:browser\.)?(?:test|spec|stories)\.[jt]sx?$/i.test(absolutePath) &&
+        !absolutePath.startsWith(path.join(sourceRoot, 'proto-ui') + path.sep)
+    )
+    .filter((absolutePath) =>
+      containsInteractiveSource(sourceTextForInteractionScan(absolutePath), absolutePath)
+    )
+    .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
+    .sort();
+}
+
 function scriptModuleSpecifiers(source, fileName) {
   const sourceFile = ts.createSourceFile(
     fileName,
@@ -1485,11 +1522,17 @@ function styleModuleSpecifiers(content) {
     if (directive) {
       const targetPattern =
         /^(?:url\(\s*(?:(['"])([^'"]+)\1|([^'"\s)]+))\s*\)|(?:(['"])([^'"]+)\4|([^'"\s;,)]+)))/u;
-      const firstTarget = content.slice(index + directive[0].length).match(targetPattern);
+      const directiveTailOffset =
+        directive[1].toLowerCase() === 'import'
+          ? (content.slice(index + directive[0].length).match(/^\([^)]*\)\s*/u)?.[0].length ?? 0)
+          : 0;
+      const firstTarget = content
+        .slice(index + directive[0].length + directiveTailOffset)
+        .match(targetPattern);
       if (!firstTarget) continue;
       const targetValue = (target) => target[2] ?? target[3] ?? target[5] ?? target[6];
       specifiers.push(targetValue(firstTarget));
-      let consumedLength = directive[0].length + firstTarget[0].length;
+      let consumedLength = directive[0].length + directiveTailOffset + firstTarget[0].length;
       if (directive[1].toLowerCase() === 'import') {
         while (true) {
           const comma = content.slice(index + consumedLength).match(/^\s*,\s*/u);
@@ -1540,31 +1583,33 @@ function configuredWebsiteSourceAliasRoot(rootDir) {
 }
 
 function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAliasRoot) {
-  if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
+  const baseSpecifier = specifier.split(/[?#]/u, 1)[0];
+  if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
     return { category: 'adapter-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/prototypes-[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
+  if (/^@proto\.ui\/prototypes-[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
     return { category: 'prototype-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/module-[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
+  if (/^@proto\.ui\/module-[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
     return { category: 'module-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/core(?:\/|$)/u.test(specifier)) {
+  if (/^@proto\.ui\/core(?:\/|$)/u.test(baseSpecifier)) {
     return { category: 'core-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/runtime(?:\/|$)/u.test(specifier)) {
+  if (/^@proto\.ui\/runtime(?:\/|$)/u.test(baseSpecifier)) {
     return { category: 'runtime-package', resolvedPath: null };
   }
   const websiteAliasPrefix = '@/';
-  const isWebsiteSourceAlias = websiteSourceAliasRoot && specifier.startsWith(websiteAliasPrefix);
-  if (!specifier.startsWith('.') && !isWebsiteSourceAlias) return null;
+  const isWebsiteSourceAlias =
+    websiteSourceAliasRoot && baseSpecifier.startsWith(websiteAliasPrefix);
+  if (!baseSpecifier.startsWith('.') && !isWebsiteSourceAlias) return null;
 
   const resolvedPath = path
     .relative(
       rootDir,
       isWebsiteSourceAlias
-        ? path.resolve(websiteSourceAliasRoot, specifier.slice(websiteAliasPrefix.length))
-        : path.resolve(rootDir, path.dirname(sourcePath), specifier)
+        ? path.resolve(websiteSourceAliasRoot, baseSpecifier.slice(websiteAliasPrefix.length))
+        : path.resolve(rootDir, path.dirname(sourcePath), baseSpecifier)
     )
     .replaceAll('\\', '/');
   if (/^packages\/prototypes\/[^/]+\/src(?:\/|$)/u.test(resolvedPath)) {
@@ -1586,13 +1631,14 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAlias
 }
 
 function guardedHarnessImport(rootDir, sourcePath, specifier) {
-  if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
+  const baseSpecifier = specifier.split(/[?#]/u, 1)[0];
+  if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
     return { category: 'proto-ui-package', resolvedPath: null };
   }
-  if (!specifier.startsWith('.')) return null;
+  if (!baseSpecifier.startsWith('.')) return null;
 
   const resolvedPath = path
-    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), specifier))
+    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), baseSpecifier))
     .replaceAll('\\', '/');
   if (/^packages\/.+\/src(?:\/|$)/u.test(resolvedPath)) {
     return { category: 'package-internal', resolvedPath };
@@ -2094,7 +2140,7 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     const governedSourcePrefix =
       config.kind === 'website' ? 'apps/www/src/' : 'apps/agent-harness/src/';
     if (config.kind === 'website' || config.kind === 'agent-harness') {
-      for (const repositoryPath of explicitRepositoryPaths(record.Path)) {
+      for (const repositoryPath of matrixPathReferences(record.Path)) {
         if (!repositoryPath.startsWith(governedSourcePrefix)) continue;
         const owners = sourceOwners.get(repositoryPath) ?? [];
         owners.push({ id, line: row.line });
@@ -2112,11 +2158,12 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       }
     }
 
-    const boundRepositoryPaths = new Set(
-      (config.existingPathHeaders ?? []).flatMap((header) =>
+    const boundRepositoryPaths = new Set([
+      ...matrixPathReferences(record.Path),
+      ...(config.existingPathHeaders ?? []).flatMap((header) =>
         explicitRepositoryPaths(record[header])
-      )
-    );
+      ),
+    ]);
     for (const requiredRepositoryPath of config.requiredRepositoryPathsByRow?.[id] ?? []) {
       if (!boundRepositoryPaths.has(requiredRepositoryPath)) {
         issues.push(
@@ -2253,7 +2300,7 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
             .join(', ')}`
         );
       }
-      const implementationPaths = explicitRepositoryPaths(record.Path);
+      const implementationPaths = matrixPathReferences(record.Path);
       if (implementationPaths.length === 0) {
         issues.push(
           `${context}: dogfooded rows must bind at least one exact repository implementation path in Path`
@@ -2296,6 +2343,12 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
           `${context} dogfooded evidence record ${repositoryPath}`,
           issues
         );
+        const evidenceCommit = evidenceRecord.match(/\bCommit:\s*([^\r\n;|]*)/i)?.[1].trim();
+        if (evidenceCommit && !/^[0-9a-f]{40}$/i.test(evidenceCommit)) {
+          issues.push(
+            `${context} dogfooded evidence record ${repositoryPath} must bind Commit to an exact 40-character Git SHA`
+          );
+        }
       }
       requireMeaningfulLabels(record.Evidence, DOGFOODED_EVIDENCE_LABELS, context, issues);
     }
@@ -2306,6 +2359,14 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     ) {
       issues.push(
         `${context}: ${state} rows must link a dependency as #<issue> in Dependency and owner`
+      );
+    }
+    if (
+      (state === 'blocked' || state === 'research') &&
+      !includesConcreteOwnerLabel(record['Dependency and owner'])
+    ) {
+      issues.push(
+        `${context}: ${state} rows must give the \`owner:\` or \`owners:\` label a concrete value in Dependency and owner`
       );
     }
 
@@ -2704,6 +2765,31 @@ function validateHarnessSourceBindings(
           `${relativePath}:${binding.line}: grouped binding for Harness source \`${sourcePath}\` must name exactly the matrix Path owners (${directIds.join(', ')})`
         );
       }
+    }
+  }
+  for (const sourcePath of discoverHarnessForbiddenInteractionSources(rootDir)) {
+    const directIds = [
+      ...new Set((matrixResult.sourceOwners.get(sourcePath) ?? []).map(({ id }) => id)),
+    ];
+    const binding = bindings.get(sourcePath);
+    const ownerIds = binding?.ownerIds ?? directIds;
+    if (ownerIds.length === 0) {
+      issues.push(
+        `${relativePath}: forbidden Harness interaction source \`${sourcePath}\` must bind an explicit matrix owner with an infrastructure-exempt disposition`
+      );
+      continue;
+    }
+    const hasOnlyInfrastructureOwners = ownerIds.every((ownerId) => {
+      const disposition = matrixResult.rowDispositions.get(ownerId);
+      return (
+        disposition?.targetClass === 'infrastructure-exempt' &&
+        disposition.state === 'infrastructure-exempt'
+      );
+    });
+    if (!hasOnlyInfrastructureOwners) {
+      issues.push(
+        `${relativePath}: forbidden Harness interaction source \`${sourcePath}\` requires every owner to use Target class \`infrastructure-exempt\` and State \`infrastructure-exempt\``
+      );
     }
   }
 }
