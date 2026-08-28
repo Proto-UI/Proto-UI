@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import ts from 'typescript';
 import { parse as parseYaml } from 'yaml';
 
 const TOTAL_HEADERS = ['State', 'Count'];
@@ -8,8 +9,10 @@ const TARGET_CLASS_TOTAL_HEADERS = ['Target class', 'Count'];
 const END_MARKER = '<!-- coverage-matrix:end -->';
 const CATALOG_ID_PATTERN = /\b(?:A|C|D|HC|K|M|P|T|V)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*\b/g;
 const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
-const INTERACTIVE_SOURCE_PATTERN =
-  /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(|\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input|submit)\s*=/i;
+const INTERACTIVE_SOURCE_PATTERNS = Object.freeze([
+  /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(/i,
+  /\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input|submit)\s*=/i,
+]);
 const DOGFOODED_EVIDENCE_LABELS = Object.freeze([
   'Build:',
   'Browser:',
@@ -25,6 +28,37 @@ const DOGFOODED_RECORD_LABELS = Object.freeze([
   'Commands:',
   'Results:',
 ]);
+const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
+  'apps/www/src/components/PrototypePreviewer/demo-renderer.ts': Object.freeze({
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/adapter-react',
+      '@proto.ui/adapter-vue',
+      '@proto.ui/adapter-vue2',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/wc-registry.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-react']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/runtimes/vue-runtime.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-vue']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-vue2']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/runtimes/wc-runtime.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/prototype-modules.ts': Object.freeze({
+    categories: Object.freeze(['prototype-package', 'prototype-internal']),
+  }),
+  'apps/www/src/components/BrutalistPageStyle.astro': Object.freeze({
+    resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
+  }),
+});
 const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   'www.shell.site-title': Object.freeze(['apps/www/src/components/override/SiteTitle.astro']),
   'www.shell.skip-link': Object.freeze(['apps/www/astro.config.mjs']),
@@ -393,6 +427,10 @@ export const MATRIX_CONFIGS = Object.freeze([
       'native/static': 'native/static',
       'infrastructure-exempt': 'infrastructure-exempt',
     },
+    stateClassRequirements: {
+      'native/static': 'native/static',
+      'infrastructure-exempt': 'infrastructure-exempt',
+    },
     exemptTargetClasses: ['native/static', 'infrastructure-exempt'],
     exemptStates: ['native/static', 'infrastructure-exempt'],
   }),
@@ -422,6 +460,10 @@ export const MATRIX_CONFIGS = Object.freeze([
     ownerHeaders: ['Current owner', 'Target owner', 'Dependency and owner'],
     requiredIds: AGENT_HARNESS_SURFACE_IDS,
     classStateRequirements: {
+      'native/static': 'native/static',
+      'infrastructure-exempt': 'infrastructure-exempt',
+    },
+    stateClassRequirements: {
       'native/static': 'native/static',
       'infrastructure-exempt': 'infrastructure-exempt',
     },
@@ -693,13 +735,140 @@ function loadCatalogEntries(rootDir) {
   return entries;
 }
 
+function stripMarkdownCode(content) {
+  let fence = null;
+  const withoutFences = content
+    .split(/\r?\n/)
+    .map((line) => {
+      const fenceRun = line.match(/^[ \t]*(`{3,}|~{3,})/u)?.[1];
+      if (!fence && fenceRun) {
+        fence = { character: fenceRun[0], length: fenceRun.length };
+        return '';
+      }
+      if (!fence) return line;
+
+      const closingRun = line.match(/^[ \t]*(`+|~+)[ \t]*$/u)?.[1];
+      if (closingRun && closingRun[0] === fence.character && closingRun.length >= fence.length) {
+        fence = null;
+      }
+      return '';
+    })
+    .join('\n');
+
+  return withoutFences.replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/gu, '');
+}
+
 function sourceTextForInteractionScan(absolutePath) {
   const content = fs.readFileSync(absolutePath, 'utf8');
-  if (!/\.mdx?$/.test(absolutePath)) return content;
+  if (!/\.mdx?$/i.test(absolutePath)) return content;
   // Documentation examples contain literal event-listener snippets. They are
   // authored text, not website state machines; real MDX script/handler markup
-  // remains visible after fenced code is removed.
-  return content.replace(/^\s*```[^\r\n]*[\r\n][\s\S]*?^\s*```\s*$/gm, '');
+  // remains visible after Markdown fences and inline code spans are removed.
+  return stripMarkdownCode(content);
+}
+
+function astContainsJsxEventHandler(content) {
+  const sourceFile = ts.createSourceFile(
+    'website-source.tsx',
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  let found = false;
+  const visit = (node) => {
+    if (found) return;
+    if (
+      ts.isJsxAttribute(node) &&
+      ts.isIdentifier(node.name) &&
+      /^on[A-Z][A-Za-z0-9_$]*$/u.test(node.name.text)
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return found;
+}
+
+function jsxOpeningTagCandidates(content) {
+  const candidates = [];
+  for (let start = 0; start < content.length; start += 1) {
+    if (content[start] !== '<' || !/[A-Za-z]/u.test(content[start + 1] ?? '')) continue;
+
+    let braceDepth = 0;
+    let quote = null;
+    let escaped = false;
+    for (let cursor = start + 2; cursor < content.length; cursor += 1) {
+      const character = content[cursor];
+      if (quote) {
+        if (escaped) escaped = false;
+        else if (character === '\\') escaped = true;
+        else if (character === quote) quote = null;
+        continue;
+      }
+      if (character === '"' || character === "'" || character === '`') {
+        quote = character;
+        continue;
+      }
+      if (character === '{') {
+        braceDepth += 1;
+        continue;
+      }
+      if (character === '}' && braceDepth > 0) {
+        braceDepth -= 1;
+        continue;
+      }
+      if (character === '<' && braceDepth === 0) break;
+      if (character === '>' && braceDepth === 0) {
+        candidates.push(content.slice(start, cursor + 1));
+        start = cursor;
+        break;
+      }
+    }
+  }
+  return candidates;
+}
+
+function markupSourceForJsxFallback(content, absolutePath) {
+  if (/\.mdx?$/i.test(absolutePath)) return content;
+  if (!/\.(?:astro|vue|svelte)$/i.test(absolutePath)) return null;
+
+  let markup = content;
+  if (/\.astro$/i.test(absolutePath)) {
+    markup = markup.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/u, '');
+  }
+  return markup.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/giu, '');
+}
+
+function containsJsxEventHandler(content, absolutePath) {
+  if (astContainsJsxEventHandler(content)) return true;
+
+  if (
+    /\.(?:astro|vue|svelte)$/i.test(absolutePath) &&
+    embeddedScriptSegments(content).some((segment) => astContainsJsxEventHandler(segment))
+  ) {
+    return true;
+  }
+
+  const markupSource = markupSourceForJsxFallback(content, absolutePath);
+  if (markupSource === null) return false;
+
+  // Mixed markup sources are not a single TypeScript syntax tree, so parse
+  // each real template opening-tag candidate independently after excluding
+  // frontmatter and script regions. The scanner tracks expressions and quotes.
+  return jsxOpeningTagCandidates(markupSource).some((candidate) => {
+    const selfClosingCandidate = candidate.replace(/\/?\s*>$/u, ' />');
+    return astContainsJsxEventHandler(selfClosingCandidate);
+  });
+}
+
+function containsInteractiveSource(content, absolutePath) {
+  return (
+    INTERACTIVE_SOURCE_PATTERNS.some((pattern) => pattern.test(content)) ||
+    containsJsxEventHandler(content, absolutePath)
+  );
 }
 
 function discoverWebsiteInteractiveSources(rootDir) {
@@ -718,10 +887,120 @@ function discoverWebsiteInteractiveSources(rootDir) {
         !/\.(?:test|browser\.test)\.[cm]?[jt]sx?$/.test(absolutePath)
     )
     .filter((absolutePath) =>
-      INTERACTIVE_SOURCE_PATTERN.test(sourceTextForInteractionScan(absolutePath))
+      containsInteractiveSource(sourceTextForInteractionScan(absolutePath), absolutePath)
     )
     .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
     .sort();
+}
+
+function scriptModuleSpecifiers(source, fileName) {
+  const sourceFile = ts.createSourceFile(
+    fileName,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const specifiers = [];
+  const addLiteral = (node) => {
+    if (node && ts.isStringLiteralLike(node)) specifiers.push(node.text);
+  };
+  const visit = (node) => {
+    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+      addLiteral(node.moduleSpecifier);
+    } else if (
+      ts.isCallExpression(node) &&
+      (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+        (ts.isIdentifier(node.expression) && node.expression.text === 'require'))
+    ) {
+      addLiteral(node.arguments[0]);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return specifiers;
+}
+
+function embeddedScriptSegments(content) {
+  const segments = [];
+  const frontmatter = content.match(/^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/u);
+  if (frontmatter) segments.push(frontmatter[1]);
+  for (const match of content.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/giu)) {
+    segments.push(match[1]);
+  }
+  return segments;
+}
+
+function moduleSpecifiersForWebsiteSource(absolutePath) {
+  const content = fs.readFileSync(absolutePath, 'utf8');
+  if (/\.(?:css|less|s[ac]ss)$/i.test(absolutePath)) {
+    return [...content.matchAll(/@import\s+(?:url\(\s*)?(['"])([^'"]+)\1\s*\)?/giu)].map(
+      (match) => match[2]
+    );
+  }
+  if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
+    return embeddedScriptSegments(content).flatMap((segment) =>
+      scriptModuleSpecifiers(segment, absolutePath)
+    );
+  }
+  const source = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
+  return scriptModuleSpecifiers(source, absolutePath);
+}
+
+function guardedWebsiteImport(rootDir, sourcePath, specifier) {
+  if (/^@proto\.ui\/adapter-(?:react|vue|vue2|web-component)(?:\/|$)/u.test(specifier)) {
+    return { category: 'adapter-package', resolvedPath: null };
+  }
+  if (/^@proto\.ui\/prototypes-(?:base|shadcn|brutalist)(?:\/|$)/u.test(specifier)) {
+    return { category: 'prototype-package', resolvedPath: null };
+  }
+  if (!specifier.startsWith('.')) return null;
+
+  const resolvedPath = path
+    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), specifier))
+    .replaceAll('\\', '/');
+  if (!/^packages\/prototypes\/(?:base|shadcn|brutalist)\/src(?:\/|$)/u.test(resolvedPath)) {
+    return null;
+  }
+  return { category: 'prototype-internal', resolvedPath };
+}
+
+function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport) {
+  const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
+  if (!allowance) return false;
+  if (allowance.specifiers?.includes(specifier)) return true;
+  if (allowance.categories?.includes(guardedImport.category)) return true;
+  return allowance.resolvedPaths?.includes(guardedImport.resolvedPath) ?? false;
+}
+
+function discoverWebsiteRawImports(rootDir) {
+  const websiteRoot = path.join(rootDir, 'apps', 'www');
+  const sourceRoot = path.join(websiteRoot, 'src');
+  const configPath = path.join(websiteRoot, 'astro.config.mjs');
+  const candidates = walkFiles(sourceRoot)
+    .concat(fs.existsSync(configPath) ? [configPath] : [])
+    .filter((absolutePath) =>
+      /\.(?:astro|mdx?|[cm]?[jt]sx?|css|less|s[ac]ss|vue|svelte)$/i.test(absolutePath)
+    )
+    .filter((absolutePath) => !/\.(?:browser\.)?(?:test|spec)\.[cm]?[jt]sx?$/i.test(absolutePath));
+  const rawImports = [];
+  for (const absolutePath of candidates) {
+    const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
+    for (const specifier of moduleSpecifiersForWebsiteSource(absolutePath)) {
+      const guardedImport = guardedWebsiteImport(rootDir, sourcePath, specifier);
+      if (guardedImport) rawImports.push({ sourcePath, specifier, ...guardedImport });
+    }
+  }
+  return rawImports;
+}
+
+function validateWebsiteRawImports(rootDir, relativePath, issues) {
+  for (const rawImport of discoverWebsiteRawImports(rootDir)) {
+    if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
+    issues.push(
+      `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist`
+    );
+  }
 }
 
 function lockedReference(entry) {
@@ -939,6 +1218,12 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
         `${context}: Target class \`${targetClass}\` requires State \`${requiredState}\`, received \`${state}\``
       );
     }
+    const requiredTargetClass = config.stateClassRequirements?.[state];
+    if (requiredTargetClass && targetClass !== requiredTargetClass) {
+      issues.push(
+        `${context}: State \`${state}\` requires Target class \`${requiredTargetClass}\`, received \`${targetClass}\``
+      );
+    }
 
     if (config.kind === 'website') {
       for (const repositoryPath of explicitRepositoryPaths(record.Path)) {
@@ -1040,6 +1325,16 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       issues.push(`${context}: Evidence must name a baseline, executable check, or evidence path`);
     }
     if (config.kind === 'agent-harness' && state === 'dogfooded') {
+      const removedChainEntities = chainIds.filter(
+        (entityId) => catalogEntries.get(entityId)?.status === 'removed'
+      );
+      if (removedChainEntities.length > 0) {
+        issues.push(
+          `${context}: dogfooded rows must not consume removed catalog entities: ${removedChainEntities
+            .map((entityId) => `\`${entityId}\``)
+            .join(', ')}`
+        );
+      }
       const implementationPaths = explicitRepositoryPaths(record.Path);
       if (implementationPaths.length === 0) {
         issues.push(
@@ -1534,6 +1829,7 @@ function validateMatrixFile(rootDir, config, catalogEntries, issues) {
       issues
     );
   } else {
+    validateWebsiteRawImports(rootDir, config.relativePath, issues);
     validateWebsiteSourceBindings(
       rootDir,
       config.relativePath,

@@ -23,6 +23,7 @@ function createRoot() {
     ['P-ACTIVE-BUTTON', 'active'],
     ['P-BASE-BUTTON', 'draft'],
     ['P-BASE-SCROLL-AREA', 'draft'],
+    ['P-REMOVED-BUTTON', 'removed'],
     ['A-WEB-COMPONENT-0001', 'active'],
     ['A-REACT-18-19-0001', 'active'],
     ['A-VUE-3-0001', 'active'],
@@ -408,6 +409,240 @@ test('detects form submission handlers in the website source scan', () => {
     validationMessage(root),
     /interactive website source `apps\/www\/src\/components\/NewForm\.tsx` is not bound/
   );
+});
+
+test('detects JSX interaction handlers without an event-name allowlist', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const handler of ['onBlur', 'onFocus', 'onDoubleClick', 'onMouseDown']) {
+    const sourcePath = path.join(root, 'apps', 'www', 'src', 'components', `${handler}Control.tsx`);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, `export const Control = () => <button ${handler}={() => {}} />;`);
+  }
+  const message = validationMessage(root);
+  for (const handler of ['onBlur', 'onFocus', 'onDoubleClick', 'onMouseDown']) {
+    assert.ok(
+      message.includes(
+        `interactive website source \`apps/www/src/components/${handler}Control.tsx\` is not bound`
+      )
+    );
+  }
+});
+
+test('does not confuse comparisons and ordinary onXxx variables with JSX handlers', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(root, 'apps', 'www', 'src', 'components', 'comparison.tsx');
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    [
+      'const a = 1;',
+      'const b = 2;',
+      'const lower = a < b;',
+      'let onDoubleClick = () => {};',
+      'export const result = lower ? onDoubleClick : undefined;',
+    ].join('\n')
+  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not treat JSX-looking TypeScript strings as executable handlers', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [fileName, content] of [
+    [
+      'single-quoted-example.ts',
+      "export const example = '<button onDoubleClick={handler}>Example</button>';",
+    ],
+    ['template-example.tsx', 'export const example = `<button onBlur={handler}>Example</button>`;'],
+  ]) {
+    const sourcePath = path.join(root, 'apps', 'www', 'src', 'components', fileName);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not treat JSX-looking Astro frontmatter strings as template handlers', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [fileName, declaration] of [
+    [
+      'single-quoted-example.astro',
+      "const example = '<button onDoubleClick={handler}>Example</button>';",
+    ],
+    ['template-example.astro', 'const example = `<button onBlur={handler}>Example</button>`;'],
+  ]) {
+    const sourcePath = path.join(root, 'apps', 'www', 'src', 'components', fileName);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, ['---', declaration, '---', '<p>{example}</p>'].join('\n'));
+  }
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('ignores inline and backtick/tilde-fenced MDX examples during interaction scanning', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(root, 'apps', 'www', 'src', 'content', 'docs', 'examples.mdx');
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    [
+      '# Event examples',
+      '',
+      'Inline `onBlur={handler}` and `onFocus={handler}` examples are prose.',
+      '',
+      '```tsx',
+      '<button onDoubleClick={handler}>Example</button>',
+      '```',
+      '',
+      '~~~tsx',
+      '<button onMouseDown={handler}>Example</button>',
+      '~~~~',
+    ].join('\n')
+  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('keeps real MDX handler markup visible after Markdown code removal', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(
+    root,
+    'apps',
+    'www',
+    'src',
+    'content',
+    'docs',
+    'interactive-example.mdx'
+  );
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    [
+      'Inline `onBlur={example}` is prose.',
+      '',
+      '~~~tsx',
+      '<button onFocus={example}>Fenced example</button>',
+      '~~~',
+      '',
+      '<button onBlur={() => runDemo()}>Live MDX control</button>',
+    ].join('\n')
+  );
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/content\/docs\/interactive-example\.mdx` is not bound/
+  );
+});
+
+test('rejects adapter and implementation-internal imports outside the website allowlist', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/www/src/components/ReactEscape.tsx',
+      '@proto.ui/adapter-react',
+      "import { createReactAdapter } from '@proto.ui/adapter-react';",
+    ],
+    [
+      'apps/www/src/components/VueEscape.tsx',
+      '@proto.ui/adapter-vue',
+      "import { createVueAdapter } from '@proto.ui/adapter-vue';",
+    ],
+    [
+      'apps/www/src/components/Vue2Escape.tsx',
+      '@proto.ui/adapter-vue2',
+      "import { createVue2Adapter } from '@proto.ui/adapter-vue2';",
+    ],
+    [
+      'apps/www/src/components/WebComponentEscape.ts',
+      '@proto.ui/adapter-web-component',
+      "import { createWebComponentAdapter } from '@proto.ui/adapter-web-component';",
+    ],
+    [
+      'apps/www/src/components/BasePackageEscape.ts',
+      '@proto.ui/prototypes-base',
+      "import { basePrototypes } from '@proto.ui/prototypes-base';",
+    ],
+    [
+      'apps/www/src/components/ShadcnPackageEscape.ts',
+      '@proto.ui/prototypes-shadcn',
+      "import { shadcnPrototypes } from '@proto.ui/prototypes-shadcn';",
+    ],
+    [
+      'apps/www/src/components/BrutalistPackageEscape.ts',
+      '@proto.ui/prototypes-brutalist',
+      "import { brutalistPrototypes } from '@proto.ui/prototypes-brutalist';",
+    ],
+    [
+      'apps/www/src/components/BaseInternalEscape.tsx',
+      '../../../../packages/prototypes/base/src/button/root.proto',
+      "import { root } from '../../../../packages/prototypes/base/src/button/root.proto';",
+    ],
+    [
+      'apps/www/src/components/ShadcnInternalEscape.tsx',
+      '../../../../packages/prototypes/shadcn/src/button/root.proto',
+      "import { root } from '../../../../packages/prototypes/shadcn/src/button/root.proto';",
+    ],
+    [
+      'apps/www/src/components/BrutalistInternalEscape.astro',
+      '../../../../packages/prototypes/brutalist/src/theme',
+      [
+        '---',
+        "import { renderBrutalistThemeCss } from '../../../../packages/prototypes/brutalist/src/theme';",
+        '---',
+        '<style>{renderBrutalistThemeCss()}</style>',
+      ].join('\n'),
+    ],
+  ];
+  for (const [sourcePath, , content] of cases) {
+    const absolutePath = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content);
+  }
+
+  const message = validationMessage(root);
+  for (const [sourcePath, specifier] of cases) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${sourcePath}\` escapes the website consumer-wall allowlist`
+      )
+    );
+  }
+});
+
+test('accepts reviewed demo raw imports and ignores import-looking code strings', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [sourcePath, content] of [
+    [
+      'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts',
+      "import { createReactAdapter } from '@proto.ui/adapter-react';",
+    ],
+    [
+      'apps/www/src/components/PrototypePreviewer/prototype-modules.ts',
+      "export const load = () => import('../../../../../packages/prototypes/base/src/button/root.proto');",
+    ],
+    [
+      'apps/www/src/components/BrutalistPageStyle.astro',
+      [
+        '---',
+        "import { renderBrutalistThemeCss } from '../../../../packages/prototypes/brutalist/src/theme';",
+        '---',
+        '<style is:inline set:html={renderBrutalistThemeCss()} />',
+      ].join('\n'),
+    ],
+    [
+      'apps/www/src/components/CodeExample.ts',
+      "export const example = `import { createVueAdapter } from '@proto.ui/adapter-vue';`;",
+    ],
+  ]) {
+    const absolutePath = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content);
+  }
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('binds inherited surface manifests to the resolved dependency version', () => {
@@ -963,6 +1198,19 @@ test('rejects stale explicit website paths and terminal class/state mismatches',
   const message = validationMessage(root);
   assert.match(message, /Path references missing repository path/);
   assert.match(message, /Target class `native\/static` requires State `native\/static`/);
+
+  const reverseRoot = createRoot();
+  writeValidMatrices(reverseRoot, {
+    'Target class': 'official-prototype',
+    State: 'infrastructure-exempt',
+    'Dependency and owner': 'owner: website team',
+    'Escape or exemption': 'Reason: temporary website infrastructure boundary',
+    'Re-review or removal issue': '#420 when the boundary changes',
+  });
+  assert.match(
+    validationMessage(reverseRoot),
+    /State `infrastructure-exempt` requires Target class `infrastructure-exempt`, received `official-prototype`/
+  );
 });
 
 test('allows an app-local prototype row to advance to dogfooded with implementation evidence', () => {
@@ -994,6 +1242,41 @@ test('allows an app-local prototype row to advance to dogfooded with implementat
     }
   );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('rejects dogfooded Harness rows that consume removed catalog entities', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/RemovedButton.tsx';
+  const evidencePath = 'internal/agent-harness/evidence/m1/removed-button.md';
+  for (const [repositoryPath, content] of [
+    [implementationPath, 'fixture'],
+    [
+      evidencePath,
+      'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: abc123\nEnvironment: fixture\nFixtures: removed button\nCommands: pnpm test\nResults: passed\n',
+    ],
+  ]) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Removed Button prototype',
+      'Target class': 'app-local-proto',
+      'Proto UI chain': 'P-REMOVED-BUTTON removed',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+  assert.match(
+    validationMessage(root),
+    /dogfooded rows must not consume removed catalog entities: `P-REMOVED-BUTTON`/
+  );
 });
 
 test('rejects dogfooded Harness rows without real multi-dimensional evidence', () => {
