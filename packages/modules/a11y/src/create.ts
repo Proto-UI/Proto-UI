@@ -140,6 +140,11 @@ class A11yModuleImpl extends ModuleBase {
   private installStateWatches(): void {
     if (this.stateWatchesInstalled) return;
 
+    // setDefault() is setup-only and intentionally does not emit. Revalidate
+    // the retained value before installing any watches so a pre-watch mutation
+    // cannot leave invalid semantic IR on a host without a native projector.
+    if (isState(this.ir.level)) resolveA11yLevel(this.ir.level);
+
     for (const binding of this.ir.states.values()) {
       const off = this.statePort.watch(binding.handle as any, () => {
         this.applyProjection();

@@ -200,6 +200,24 @@ describe('runtime contract: a11y (v0)', () => {
     ).toThrow(/level must be an integer in range 1-6/);
   });
 
+  it('A11Y-0067: rejects a non-emitting invalid level before installing a cap-less watch', () => {
+    const P = definePrototype({
+      name: 'x-a11y-capless-invalid-heading-level-before-watch',
+      setup(def) {
+        const level = def.state.numberDiscrete('heading.level', 2);
+        def.a11y.level(level);
+        level.setDefault(0);
+      },
+    });
+
+    const ctx = createHost();
+    delete (ctx.host as Partial<RuntimeHost<any>>).onRuntimeReady;
+
+    expect(() => executeWithHost(P as any, ctx.host as any)).toThrow(
+      /level must be an integer in range 1-6/
+    );
+  });
+
   it('A11Y-0050: role may follow a state-backed semantic fact', () => {
     let role!: { set(value: string, reason?: string): void };
     const P = definePrototype({
