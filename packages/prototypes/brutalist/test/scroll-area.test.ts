@@ -301,6 +301,16 @@ describe('prototypes/brutalist: scroll-area', () => {
           `${token} :: ${scrollbar.getAttribute('data-pui-style')}`
         ).toBe(true);
       }
+      const tokens = (scrollbar.getAttribute('data-pui-style') ?? '').split(/\s+/);
+      const prohibitedDecorations = tokens.filter((token) =>
+        /(?:^|:)(?:rounded(?!-none(?:$|:))|bg-(?:gradient|linear|radial|conic)|(?:from|via|to)-|shadow(?!-none(?:$|:)))/.test(
+          token
+        )
+      );
+      expect(
+        prohibitedDecorations,
+        `Scrollbar track must stay square, flat, and shadow-free: ${tokens.join(' ')}`
+      ).toEqual([]);
     }
     for (const token of [
       'absolute',
