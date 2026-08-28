@@ -10,7 +10,6 @@ const tooltip = (label: string, content: string) => ({
     {
       kind: 'proto' as const,
       prototypeId: 'brutalist-tooltip-content',
-      surfaceStyle: { '--pui-background': '#f4f1ea', '--pui-foreground': '#000' },
       children: [content],
     },
   ],

@@ -535,7 +535,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     const expectTooltipPaint = async (
       tooltip: Locator,
       expectedText: string,
-      runtime: RuntimeId
+      frame: string
     ): Promise<void> => {
       const paint = await tooltip.evaluate((element) => {
         const style = getComputedStyle(element);
@@ -560,42 +560,48 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           height: rect.height,
         };
       });
-      expect(paint.text, runtime).toContain(expectedText);
-      expect(paint.tabIndex, runtime).toBe(-1);
-      expect(paint.interactive, runtime).toBe(0);
-      expect(paint.borderRadius, runtime).toBe('0px');
-      expect(paint.borderWidth, runtime).toBe('2px');
-      // Bind exact colors to the Content surface's own theme tokens, including its portal root.
-      const resolved = await tooltip.evaluate((element) => {
-        const style = getComputedStyle(element);
-        const probe = document.createElement('div');
-        probe.style.color = style.getPropertyValue('--pui-foreground');
-        probe.style.backgroundColor = style.getPropertyValue('--pui-background');
-        document.body.appendChild(probe);
-        const probeStyle = getComputedStyle(probe);
-        const result = {
-          foreground: probeStyle.color,
-          background: probeStyle.backgroundColor,
-          declaredForeground: style.getPropertyValue('--pui-foreground').trim(),
-          declaredBackground: style.getPropertyValue('--pui-background').trim(),
+      expect(paint.text, frame).toContain(expectedText);
+      expect(paint.tabIndex, frame).toBe(-1);
+      expect(paint.interactive, frame).toBe(0);
+      expect(paint.borderRadius, frame).toBe('0px');
+      expect(paint.borderWidth, frame).toBe('2px');
+      // The preview frame and the renderer-owned body portal must resolve one shared theme.
+      const resolved = await page.evaluate(() => {
+        const boundary = document.querySelector('[data-brutalist-tooltip-theme-boundary]');
+        if (!(boundary instanceof HTMLElement)) {
+          throw new Error('The Tooltip page must expose its shared theme boundary.');
+        }
+        const readPaint = (parent: HTMLElement) => {
+          const probe = document.createElement('div');
+          probe.style.color = 'var(--pui-foreground)';
+          probe.style.backgroundColor = 'var(--pui-background)';
+          parent.appendChild(probe);
+          const style = getComputedStyle(probe);
+          const result = {
+            foreground: style.color,
+            background: style.backgroundColor,
+          };
+          probe.remove();
+          return result;
         };
-        probe.remove();
-        return result;
+        return {
+          boundary: readPaint(boundary),
+          portal: readPaint(document.body),
+        };
       });
-      expect(resolved.declaredForeground, runtime).toBe('#000');
-      expect(resolved.declaredBackground, runtime).toBe('#f4f1ea');
-      expect(paint.backgroundColor, runtime).toBe(resolved.foreground);
-      expect(paint.color, runtime).toBe(resolved.background);
-      expect(paint.borderColor, runtime).toBe(resolved.foreground);
-      expect(paint.boxShadow, runtime).toContain('4px 4px 0px');
-      expect(paint.fontFamily.toLowerCase(), runtime).toContain('mono');
-      expect(paint.fontSize, runtime).toBe('12px');
-      expect(Number(paint.fontWeight), runtime).toBeGreaterThanOrEqual(700);
-      expect(paint.textTransform, runtime).toBe('uppercase');
-      expect(paint.paddingInline, runtime).toBe('12px');
-      expect(paint.paddingBlock, runtime).toBe('8px');
-      expect(paint.width, runtime).toBeGreaterThan(20);
-      expect(paint.height, runtime).toBeGreaterThan(20);
+      expect(resolved.boundary, frame).toEqual(resolved.portal);
+      expect(paint.backgroundColor, frame).toBe(resolved.boundary.foreground);
+      expect(paint.color, frame).toBe(resolved.boundary.background);
+      expect(paint.borderColor, frame).toBe(resolved.boundary.foreground);
+      expect(paint.boxShadow, frame).toContain('4px 4px 0px');
+      expect(paint.fontFamily.toLowerCase(), frame).toContain('mono');
+      expect(paint.fontSize, frame).toBe('12px');
+      expect(Number(paint.fontWeight), frame).toBeGreaterThanOrEqual(700);
+      expect(paint.textTransform, frame).toBe('uppercase');
+      expect(paint.paddingInline, frame).toBe('12px');
+      expect(paint.paddingBlock, frame).toBe('8px');
+      expect(paint.width, frame).toBeGreaterThan(20);
+      expect(paint.height, frame).toBeGreaterThan(20);
     };
 
     try {
@@ -605,6 +611,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           .evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value))
       ).toEqual([...RUNTIMES]);
       for (const runtime of RUNTIMES) {
+        await applyColorScheme(page, 'light');
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
         const roots = previewer.locator('[data-pui-root]');
         expect(await roots.count(), runtime).toBe(7);
@@ -623,7 +630,13 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await expectTooltipPaint(
           firstTooltip,
           'Portable Base behavior, Brutalist visual grammar',
-          runtime
+          `${runtime}/light`
+        );
+        await applyColorScheme(page, 'dark');
+        await expectTooltipPaint(
+          firstTooltip,
+          'Portable Base behavior, Brutalist visual grammar',
+          `${runtime}/dark-repaint`
         );
         const firstTooltipId = await firstTooltip.getAttribute('id');
         expect(firstTooltipId, runtime).toBeTruthy();
@@ -654,7 +667,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await expectTooltipPaint(
           secondTooltip,
           'Group preserves the shared warm-delay domain',
-          runtime
+          `${runtime}/dark-warm-owner`
         );
 
         const secondTooltipId = await secondTooltip.getAttribute('id');
