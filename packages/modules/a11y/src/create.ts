@@ -197,7 +197,8 @@ class A11yModuleImpl extends ModuleBase {
     }
 
     if (isState(this.ir.level)) {
-      const off = watchState(this.statePort, this.ir.level, () => {
+      const off = this.statePort.watch(this.ir.level as any, () => {
+        resolveA11yLevel(this.ir.level!);
         this.applyProjection();
       });
       this.stateWatchOffs.push(off);

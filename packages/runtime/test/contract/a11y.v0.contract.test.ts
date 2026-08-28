@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import type { A11ySemanticObjectSnapshot, OwnedStateHandle, Prototype } from '@proto.ui/core';
+import type {
+  A11ySemanticObjectSnapshot,
+  OwnedStateHandle,
+  Prototype,
+  State,
+} from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
+import { asScrollSurface } from '@proto.ui/hooks';
 import { A11Y_PROJECT_CAP, type A11yPort } from '@proto.ui/module-a11y';
 import { executeWithHost, type RuntimeHost } from '../../src';
 
@@ -134,6 +140,64 @@ describe('runtime contract: a11y (v0)', () => {
       op: 'a11y.tree',
       patch: { mergeChildren: true },
     });
+  });
+
+  it('A11Y-0065: accepts a borrowed heading level from an authored asHook', () => {
+    const asHeadingLevel = defineAsHook<
+      Record<string, never>,
+      Record<string, never>,
+      { level: State<number> }
+    >({
+      name: 'as-heading-level',
+      setup(def) {
+        def.state.numberDiscrete('level', 2);
+      },
+    });
+    const P = definePrototype({
+      name: 'x-a11y-borrowed-heading-level',
+      setup(def) {
+        const level = asHeadingLevel().getState?.('level');
+        if (!level) throw new Error('missing borrowed heading level');
+        def.a11y.level(level);
+      },
+    });
+
+    const ctx = createHost();
+    expect(() => executeWithHost(P as any, ctx.host as any)).not.toThrow();
+    expect(ctx.snapshots.at(-1)?.level).toBe(2);
+  });
+
+  it('A11Y-0065A: accepts an observed heading level from another module', () => {
+    const P = definePrototype({
+      name: 'x-a11y-observed-heading-level',
+      setup(def) {
+        const scroll = asScrollSurface();
+        def.a11y.level(scroll.horizontal.visibleRatio);
+      },
+    });
+
+    const ctx = createHost();
+    expect(() => executeWithHost(P as any, ctx.host as any)).not.toThrow();
+    expect(ctx.snapshots.at(-1)?.level).toBe(1);
+  });
+
+  it('A11Y-0066: rejects invalid heading level updates without a host projector', () => {
+    let level!: OwnedStateHandle<number>;
+    const P = definePrototype({
+      name: 'x-a11y-capless-heading-level',
+      setup(def) {
+        level = def.state.numberDiscrete('heading.level', 2);
+        def.a11y.level(level);
+      },
+    });
+
+    const ctx = createHost();
+    delete (ctx.host as Partial<RuntimeHost<any>>).onRuntimeReady;
+    const result = executeWithHost(P as any, ctx.host as any);
+
+    expect(() =>
+      result.invokeInCallbackScope(() => level.set(0, 'reason: invalid heading level'))
+    ).toThrow(/level must be an integer in range 1-6/);
   });
 
   it('A11Y-0050: role may follow a state-backed semantic fact', () => {
