@@ -658,6 +658,21 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           (await secondTrigger.getAttribute('aria-describedby'))?.split(/\s+/),
           runtime
         ).toContain(secondTooltipId);
+
+        // Closing the final owner must unmount Content and remove its owned IDREF token.
+        await page.mouse.move(0, 0);
+        await expect
+          .poll(
+            async () => ({
+              total: await page.getByRole('tooltip').count(),
+              secondOwnsDescription:
+                (await secondTrigger.getAttribute('aria-describedby'))
+                  ?.split(/\s+/)
+                  .includes(secondTooltipId!) ?? false,
+            }),
+            { message: `${runtime}/final-owner-teardown` }
+          )
+          .toEqual({ total: 0, secondOwnsDescription: false });
       }
     } finally {
       await context.close();
