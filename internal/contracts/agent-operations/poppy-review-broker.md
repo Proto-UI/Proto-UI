@@ -1,16 +1,19 @@
 # Poppy review broker
 
-Status: transitional readable projection; P0 implementation and P1 shadow candidate. This document is not a standing authorization, a product contract, or evidence that a rollout phase has graduated.
+Status: transitional readable projection for active P0 implementation and the P1 shadow candidate. Runtime capability ceilings and current authorization determine which transition may execute.
 
-## Authority and coverage
+## Governed sources and provenance
 
-No `spec/**` entity owns this repository-operations boundary. The current machine-readable authorities remain:
+No `spec/**` entity yet owns this repository-operations boundary. Until it is cataloged, the current machine-enforced sources are:
 
 - `internal/agent-operations/schemas/review-input.schema.json` and `scripts/agent-operations/review-runtime.mjs` for canonical review-input v3 and its digest;
 - `internal/agent-operations/schemas/review-packet.schema.json` for review-packet v1;
 - `internal/agent-operations/capability-policy.yaml` and `scripts/agent-operations/review-packet.mjs` for the repository-side review ceiling and live preflight;
-- `internal/records/2026-08-27-scheduled-review-and-integration-activation.zh-CN.md` for the latest local-runner direction;
-- [Issue #557](https://github.com/Proto-UI/Proto-UI/issues/557) for the accepted Poppy implementation and P0-to-P3 graduation checkpoint.
+
+Direction and acceptance provenance remain intentionally non-normative:
+
+- `internal/records/2026-08-27-scheduled-review-and-integration-activation.zh-CN.md` records the latest local-runner direction but cannot redefine the boundary;
+- [Issue #557](https://github.com/Proto-UI/Proto-UI/issues/557) tracks the accepted implementation plan and P0-to-P3 evidence, but its mutable discussion is not contract authority.
 
 The accepted uncataloged gap is the external controller boundary: GitHub event admission, a trusted analyzer invocation, one-time workload attribution, server-side concurrency and replay control, live recollection, a deterministic applier, durable receipts, and operator kill switches. Its implementation lives in the separately operated `Proto-UI/dcbot` repository. Repository text, PR content, model output, a task name, and a public authorization ID remain data rather than proof of this boundary.
 
@@ -27,7 +30,9 @@ The callback secret authenticates only this envelope. It is independent from the
 
 ## Durable write boundary designed for later phases
 
-Before live recollection, Poppy must hold one expiring server-side lease for the repository and pull request so overlapping callbacks cannot race different inputs or dispositions. Before any Review API request, Poppy must atomically verify the processing admission and live kill switches, consume the nonce, and insert an `unknown` write-ahead receipt for the policy-version/installation/repository/PR/base/head/input/reviewer/disposition tuple. Success, deterministic failure, and unknown remote outcome then finalize that receipt and the admission together. An unknown outcome is terminal for automatic retry; reconciliation may mark it successful only after finding the same Poppy reviewer, exact commit, disposition, and receipt marker live.
+Before live recollection, Poppy must hold one expiring server-side lease for the repository and pull request so overlapping callbacks cannot race different inputs or dispositions. Every lease acquisition receives a monotonic fencing generation. A worker renews the lease before the review-write boundary; the transaction that inserts the write-ahead receipt must atomically verify the current lease owner, fencing generation, unexpired lease, processing admission, and live kill switches before consuming the nonce.
+
+The `unknown` write-ahead receipt binds policy version, installation, repository, PR, base, head, canonical input digest, canonical review-packet digest, exact rendered Review API request-body digest, reviewer, and disposition. The rendered body carries the immutable receipt marker and packet digest. Success, deterministic failure, and unknown remote outcome finalize that receipt and the admission together under the same fencing generation. An unknown outcome is terminal for automatic retry; reconciliation may mark it successful only after finding the same Poppy reviewer, exact commit, disposition, receipt marker, packet digest, and exact live review-body digest. A stale or expired worker cannot insert, finalize, or reconcile a receipt after another generation owns the lease.
 
 All writes carry `commit_id` equal to the reviewed head. A `spec/**` path is not by itself a human gate; a material unresolved product or lifecycle direction is. Clean approval also requires every applicable review thread to be resolved and live DCO/provenance evidence to succeed. External success statuses do not prove trusted CI: approval requires a successful allowlisted `Proto-UI/Proto-UI` GitHub Actions check from unchanged trusted `CI` / `.github/workflows/ci.yml`, with provider, repository, workflow name, workflow path, details URL, and outcome included in review-input v3.
 
@@ -41,17 +46,17 @@ Disabling a higher level cannot disable audit or reconciliation of an already un
 
 ## Current graduation state
 
-| Phase | State | Remaining evidence |
+| Phase | State | Next activation evidence |
 | --- | --- | --- |
-| P0 capability proof | In implementation | Review the dcbot contract, strict fixtures, storage transactions, GitHub API schema smoke, and exact minimum App manifest. |
-| P1 event-driven shadow | Not activated | Deploy the separately authenticated analyzer workload/queue with independent callback and model credentials, avoid an `Actions: write` expansion, deploy with review writes disabled, and collect stale/replay/fork/concurrency/permission-loss evidence. |
-| P2 `REQUEST_CHANGES` | Closed | Prove process-level analyzer/applier credential separation, exact-head write and unknown-outcome reconciliation, and reliable resolution of only Poppy's persisted blocking review on a disposable PR. If own-review resolution cannot be proved, use a separately reviewed required-check design. |
-| P3 clean `APPROVE` | Closed | Review P2 observations, prove meaningful App approval under the live ruleset, and activate the narrower approval switch separately. |
+| P0 capability proof | Implementation active | Complete the dcbot contract, strict fixtures, storage transactions, GitHub API schema smoke, and exact minimum App manifest. |
+| P1 event-driven shadow | Deployment candidate | Deploy the separately authenticated analyzer workload/queue with independent callback and model credentials, keep review writes disabled, and collect stale/replay/fork/concurrency/permission-loss evidence without expanding `Actions: write`. |
+| P2 `REQUEST_CHANGES` | Activation path defined | Demonstrate process-level analyzer/applier credential separation, exact-head write and unknown-outcome reconciliation, and reliable resolution of only Poppy's persisted blocking review on a disposable PR. A separately reviewed required-check design remains the ready fallback if own-review resolution is unavailable. |
+| P3 clean `APPROVE` | Activation path defined | Apply P2 observations, demonstrate meaningful App approval under the live ruleset, and activate the narrower approval switch independently. |
 
-The authorized minimum App surface is `Pull requests: write` plus read-only Issues, Checks, Commit statuses, Actions, Contents, and Organization members. No Issues, Checks, Contents, Actions, Administration, Members, merge, release, branch, or ruleset write is implied. P1 remains read-only in behavior even if an installed permission is present for later phases; the persisted and runtime switches still decide whether any review mutation can cross the applier boundary.
+The authorized minimum App surface is `Pull requests: write` plus read-only Issues, Checks, Commit statuses, Actions, Contents, and Organization members. This focused surface gives Poppy the review capability it needs while adjacent write capabilities continue through their owning controllers. P1 remains read-only in behavior even if an installed permission is present for later phases; the persisted and runtime switches decide when a review mutation can cross the applier boundary.
 
-The current Poppy service also hosts unrelated Qwen-backed Discord features. Merely keeping the review package free of model calls is not yet proof that the applier process receives no analyzer credential. P2 therefore remains closed until deployment evidence shows a real process/credential boundary or an equivalently reviewed isolation mechanism.
+The current Poppy service also hosts unrelated Qwen-backed Discord features. P2 activation evidence therefore demonstrates that the applier process receives no analyzer credential through a real process/credential boundary or an equivalently reviewed isolation mechanism.
 
-## Explicit exclusions
+## Adjacent capability routing
 
-This projection does not authorize merge, ready-for-review, close, comment, label, assignment, publication, release, access, secrets, branch protection, rulesets, contributor-code execution with secrets, or dismissal of another reviewer's review. It also does not replace the existing local review and integration policy on `main`; the two controllers must not run concurrently as independent writers until a single server-side lease coordinates them.
+This broker advances exact-head review dispositions. Merge, ready-for-review, close, comment, label, assignment, publication, release, access, secrets, branch protection, rulesets, and dismissal of another reviewer's review continue through their existing authorized controllers; contributor code never receives secrets. The local review/integration controller and Poppy share one server-side lease before either becomes a writer, giving the project one coordinated automation path instead of competing writers.
