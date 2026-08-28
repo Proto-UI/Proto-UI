@@ -19,6 +19,7 @@ cases:
     title: The Web bridge accepts only text-compatible HTMLInputElement targets for a single-line plain-text declaration
     covers:
       - C-TEXT-CONTROL-0001-A
+      - C-TEXT-CONTROL-0001-F
     expectation: non-text-input-types-fail-before-listener-installation-or-value-projection
   - id: T-TEXT-CONTROL-0001-CASE-OWNING-REALM
     title: Text controls normalize editing payloads across target realms, event realms, adoption, and documents without a Window
