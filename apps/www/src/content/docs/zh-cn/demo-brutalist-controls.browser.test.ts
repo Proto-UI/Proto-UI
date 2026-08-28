@@ -69,6 +69,11 @@ async function availablePort(): Promise<number> {
 async function chromeExecutable(): Promise<string> {
   const candidates = [
     process.env.CHROME_PATH,
+    process.env.LOCALAPPDATA
+      ? `${process.env.LOCALAPPDATA}/Google/Chrome/Application/chrome.exe`
+      : undefined,
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
     '/usr/bin/google-chrome',
     '/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
@@ -135,6 +140,7 @@ async function startServer(): Promise<string> {
     {
       cwd: process.cwd(),
       detached: process.platform !== 'win32',
+      shell: process.platform === 'win32',
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
@@ -149,7 +155,20 @@ async function startServer(): Promise<string> {
 
 async function stopServer(): Promise<void> {
   if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
-  const signalTarget = process.platform === 'win32' ? devServer.pid : -devServer.pid;
+  const pid = devServer.pid;
+  if (process.platform === 'win32') {
+    await new Promise<void>((resolve) => {
+      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
+      killer.once('error', () => resolve());
+      killer.once('exit', () => resolve());
+    });
+    return;
+  }
+
+  const signalTarget = -pid;
   process.kill(signalTarget, 'SIGTERM');
 
   const exited = await Promise.race([

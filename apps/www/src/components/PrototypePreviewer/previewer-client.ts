@@ -70,6 +70,7 @@ export function initPreviewer(options: PreviewerOptions) {
 
   let current: { id: string; api: any } | null = null;
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
+  let requestedRuntime: RuntimeId | null = null;
   let version = 0;
   let destroyed = false;
 
@@ -163,8 +164,18 @@ export function initPreviewer(options: PreviewerOptions) {
     return loaderPromise;
   }
 
-  async function switchTo(id: string) {
+  async function switchTo(id: string, options: { force?: boolean } = {}) {
     if (destroyed) return;
+    const runtime = id as RuntimeId;
+    const activeRuntime = current?.id ?? currentDemo?.id ?? null;
+    if (
+      !options.force &&
+      (requestedRuntime === runtime || (requestedRuntime === null && activeRuntime === runtime))
+    ) {
+      writeSelectValue(runtime);
+      return;
+    }
+    requestedRuntime = runtime;
     const myVersion = ++version;
     // Invalidate a runtime that is still awaiting its loader before this
     // switch reaches the next runtime's mount() call.
@@ -177,7 +188,9 @@ export function initPreviewer(options: PreviewerOptions) {
         await currentDemo.destroy();
         currentDemo = null;
       }
-      if (current?.api?.unmount) await current.api.unmount(host);
+      const previous = current;
+      current = null;
+      if (previous?.api?.unmount) await previous.api.unmount(host);
       else host.innerHTML = '';
 
       if (demoId) {
@@ -187,15 +200,15 @@ export function initPreviewer(options: PreviewerOptions) {
         await loadPrototypes(Array.from(ids));
 
         const { destroy } = await renderDemo({
-          runtime: id as RuntimeId,
+          runtime,
           demo,
           host,
           isCurrent: () => !destroyed && myVersion === version,
         });
         if (destroyed || myVersion !== version) return;
         currentDemo = { id, destroy };
-        updateCodePanel(id as RuntimeId);
-        dispatch('runtime:changed', { id });
+        updateCodePanel(runtime);
+        dispatch('runtime:changed', { id: runtime });
         return;
       }
 
@@ -208,7 +221,7 @@ export function initPreviewer(options: PreviewerOptions) {
 
       // 并行加载：运行时 API + 原型对象引用
       const [api, proto] = await Promise.all([
-        runtimeLoaders[id as RuntimeId](),
+        runtimeLoaders[runtime](),
         Promise.resolve().then(() => getPrototype(prototypeId)),
       ]);
 
@@ -218,8 +231,8 @@ export function initPreviewer(options: PreviewerOptions) {
       await api.mount(host, proto, { props: demoProps });
       if (destroyed || myVersion !== version) return;
       current = { id, api };
-      updateCodePanel(id as RuntimeId);
-      dispatch('runtime:changed', { id });
+      updateCodePanel(runtime);
+      dispatch('runtime:changed', { id: runtime });
     } catch (err) {
       if (destroyed || myVersion !== version) return;
       // 如果是原型未找到的错误，不需要重试（动态加载应该已经处理了）
@@ -236,7 +249,12 @@ export function initPreviewer(options: PreviewerOptions) {
       console.error(err);
       dispatch('error', { error: err });
     } finally {
-      if (myVersion === version && !destroyed) setPreviewerSelectDisabled(false);
+      if (myVersion === version && !destroyed) {
+        requestedRuntime = null;
+        setPreviewerSelectDisabled(false);
+      } else if (requestedRuntime === runtime && myVersion !== version) {
+        requestedRuntime = null;
+      }
     }
   }
 
@@ -278,8 +296,8 @@ export function initPreviewer(options: PreviewerOptions) {
   (root as any).__previewer__ = {
     switchRuntime: (id: string) => switchTo(id),
     reload: () => {
-      if (current) return switchTo(current.id);
-      if (currentDemo) return switchTo(currentDemo.id);
+      if (current) return switchTo(current.id, { force: true });
+      if (currentDemo) return switchTo(currentDemo.id, { force: true });
       return null;
     },
     getCurrentRuntime: () => current?.id ?? currentDemo?.id ?? null,

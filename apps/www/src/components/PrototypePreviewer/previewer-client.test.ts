@@ -221,6 +221,94 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     root.remove();
   });
 
+  it('does not remount when duplicate adapter events target the active runtime', async () => {
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
+    );
+    runtimeSpies.mount.mockClear();
+
+    document.dispatchEvent(new CustomEvent('proto-adapter:change', { detail: { adapter: 'wc' } }));
+    await Promise.resolve();
+    expect(runtimeSpies.mount).not.toHaveBeenCalled();
+
+    await (root as any).__previewer__.reload();
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
+    );
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
+  it('lets a newer adapter event replace an in-flight runtime request', async () => {
+    let resolveVue2Mount: (() => void) | undefined;
+    const vue2Mount = new Promise<void>((resolve) => {
+      resolveVue2Mount = resolve;
+    });
+    runtimeSpies.mount.mockImplementation((id: string) => (id === 'vue2' ? vue2Mount : undefined));
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
+    );
+
+    document.dispatchEvent(
+      new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
+    );
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('vue2', expect.anything())
+    );
+
+    document.dispatchEvent(new CustomEvent('proto-adapter:change', { detail: { adapter: 'wc' } }));
+    resolveVue2Mount?.();
+
+    await vi.waitFor(() => expect(runtimeSpies.mount).toHaveBeenCalledTimes(3));
+    expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc');
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
+  it('clears the active runtime before a failed remount', async () => {
+    runtimeSpies.mount.mockImplementation((id: string) => {
+      if (id === 'vue2') throw new Error('vue2 failed');
+    });
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
+    );
+
+    document.dispatchEvent(
+      new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
+    );
+    await vi.waitFor(() => expect(root.textContent).toContain('[Preview Error]'));
+    expect((root as any).__previewer__.getCurrentRuntime()).toBeNull();
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
   it('invalidates the host before every switch and terminal destroy', async () => {
     const root = createPreviewerRoot();
     const host = root.querySelector<HTMLElement>('.host')!;

@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Locator } from 'playwright-core';
 import { RUNTIMES, launchBrowser, openRoute, startServer, stopServer } from './browser-harness';
 
-const SELECT_RUNTIMES = [...RUNTIMES, 'vue2'] as const;
+const SELECT_RUNTIMES = RUNTIMES;
 
 const SELECT_ROUTE = '/en/ui-libraries/brutalist/components/select/';
 

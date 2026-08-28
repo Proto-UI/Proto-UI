@@ -8,6 +8,6 @@ tableOfContents: false
 
 import DemoMatrix from '@/components/PrototypePreviewer/DemoMatrix.astro';
 
-这个页面用于快速检查当前所有组件 demo 在各个适配器下是否仍然能正常挂载与交互。它不会出现在左侧导航里。
+这个页面是 Proto UI 官网的可执行 parity loop：当前所有 demo 会在 Web Components、React、Vue 与 Vue 2 四个官方适配器下同时挂载，便于在同一个页面发现跨适配器差异。浏览器 smoke 会验证完整挂载数、错误回退、全局适配器切换，以及 320px 窄屏的零溢出布局。它不会出现在左侧导航里。
 
 <DemoMatrix />

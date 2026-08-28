@@ -13,10 +13,10 @@ export function isRuntimeId(value: unknown): value is PublicRuntimeId {
   return typeof value === 'string' && AdapterIds.includes(value as PublicRuntimeId);
 }
 
+type AdapterSelectControl = HTMLSelectElement | SiteSelectRoot;
+
 const initializedDocuments = new WeakSet<Document>();
 const lastKnownAdapterValues = new WeakMap<AdapterSelectControl, string>();
-
-type AdapterSelectControl = HTMLSelectElement | SiteSelectRoot;
 
 function isNativeSelect(control: AdapterSelectControl): control is HTMLSelectElement {
   return control instanceof HTMLSelectElement;
@@ -51,6 +51,7 @@ function preferredAdapter(doc: Document): PublicRuntimeId | null {
     return null;
   }
 }
+
 function initializeAdapterSelect(select: AdapterSelectControl): void {
   if (select.dataset.adapterSelectInit === '1') return;
   select.dataset.adapterSelectInit = '1';
