@@ -1,118 +1,97 @@
 # Same-domain anatomy-part relationship design
 
-Non-normative record. Refs #549, #388. This is an unauthorized proposal — #549 has no maintainer checkpoint beyond the #388 Checkpoint A approval that authorized prerequisite work. Does not create a stable spec guarantee or authorize merge.
+Non-normative record. Refs #549 and #388. This record catalogs a candidate design for the accepted prerequisite; it does not amend `spec/**`, add a public API, describe an implemented capability, create a stable guarantee, or authorize merge by itself.
 
-## Problem
+## Problem and governing direction
 
-Disclosure/Collapsible/Accordion Trigger→Content needs a same-domain opaque relationship that:
-1. Declares a logical Trigger→Content identity at setup time
-2. Survives L1 detach (Content not materialized)
-3. Removes Web ARIA IDREF (`aria-controls`/`aria-labelledby`) while Content is detached
-4. Restores the same reserved ID and ARIA IDREF on rematerialization
-5. Clears the relation and reservation on terminal disposal
+Disclosure, Collapsible, Accordion, and Tabs need a reusable same-domain relationship in which one logical part refers to another, for example Trigger `controls` Content. The relationship must:
 
-## Reconciliation with existing governance
+1. be declared from anatomy family, source and target roles, same-domain scope, relation semantic, and a protocol match key;
+2. preserve target identity across L1 detach while removing host IDREF projection when no target view is materialized;
+3. restore the same reserved host identity before a rematerialized target is revealed;
+4. fail closed for zero or multiple matches instead of guessing; and
+5. release runtime records, observers, host attributes, and reserved identity on terminal disposal.
 
-`D-A11Y-PART-RELATIONSHIP-PROJECTION-0001` (draft) already governs anatomy part relationships. Criteria B-D require structured part matching based on anatomy family, part role, same-domain scope, and protocol match keys — not precomputed string IDs. The existing `def.a11y.relation()` API with string/State targets is the current Web projection mechanism but does not carry the structured part semantics (family, role, match key) that the decision requires.
+The applicable draft authority is `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001`. In particular, criteria B–D require a structured relationship carrier and leave stable, unique host-ID generation plus missing/duplicate/dynamic fallback to the Web adapter. Existing `def.a11y.relation()` accepts only a string or `State<string>` target. Existing `AnatomyClaimDecl` contains only `role` and optional `profile`, and `AnatomyRelation` currently expresses only `contains`. None of those existing surfaces can carry the proposed semantics today.
 
-This design record does not propose to replace `def.a11y.relation()` with a new API. Instead, it proposes:
-1. The existing a11y relation API continues to project the Web ARIA attribute (string target).
-2. The structured part matching (family, role, match key) is preserved through the anatomy module. Per D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-D, the Web adapter generates stable, unique host IDs from the structured relationship — the anatomy module does not precompute host IDs. The a11y relation target state receives the adapter-generated ID, not a precomputed string.
-3. The detach-aware behavior is a host-capability concern: the web adapter removes the ARIA attribute when the target element is absent, regardless of whether the string ID is still set.
+## Candidate structured carrier — not an existing API
 
-This approach is compatible with D-A11Y-PART-RELATIONSHIP-PROJECTION-0001 because:
-- The cross-platform semantic relationship is still expressed via anatomy (family, role, match key).
-- The Web adapter still projects to ARIA attributes using stable host identifiers.
-- The adapter does not guess component-specific structure.
-- The detach-aware behavior is an adapter-level concern, not a protocol-level change.
+A future catalog amendment must admit a typed relationship declaration. Exact syntax remains an implementation choice, but the runtime carrier must preserve at least:
 
-## Presence propagation
+- anatomy family and opaque same-domain scope identity;
+- source part instance identity and source role;
+- relation semantic such as `controls` or `labelledBy`;
+- target role;
+- protocol match key, kept distinct from host ID; and
+- the source and target view epochs needed to reject stale projection work.
 
-The second Codex finding identifies a real gap: Content cannot directly clear Trigger's `aria-controls` because the `contentId` state is private to the Trigger. The proposed resolution:
+Illustrative names such as `def.a11y.partRelation(...)`, an extended anatomy claim, or a module-internal declaration type are not current APIs and must not be implemented from this record without first updating the governing contract/schema and public types. The current string-based `def.a11y.relation()` remains the legacy projection surface; an adapter-generated host ID must not be written back into a prototype-owned `State<string>` merely to imitate the structured carrier.
 
-1. The family root (e.g., TabsRoot) owns a shared context with a per-match-key presence set (e.g., `Record<string, string[]> (JSON-compatible array of instance IDs per match key)` keyed by protocol match key). This retains instance multiplicity: if two Content instances share a match key, both are tracked. Per `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-D`, the Web adapter resolves duplicate/ambiguous presence at projection time — the root does not collapse it to a single boolean. The Trigger checks whether the set is non-empty (at least one matching Content is present), and the adapter handles duplicate-instance fallback.
-2. When Content mounts, it adds its instance ID to the set: `contentPresent[matchKey] = [...(contentPresent[matchKey] ?? []), instanceId]`.
-3. When Content detaches (L1), it removes its instance ID: `contentPresent[matchKey] = contentPresent[matchKey]?.filter(id => id !== instanceId) ?? []`.
-4. The Trigger observes its own match key in `contentPresent` and adjusts its relation target:
-   - `contentPresent[myMatchKey]?.length > 0`: relation target = contentId (restores aria-controls)
-   - `contentPresent[myMatchKey]?.length === 0`: relation target = empty string (removes aria-controls)
-   This per-key tracking ensures a Trigger only restores aria-controls when its matched Content is present, not when any Content mounts.
+## Runtime/A11y projection ownership and presence
 
-   **Pre-commit timing**: the presence signal must be set before the mount render/commit, not in a mounted callback. The runtime performs mount commit before invoking mounted callbacks, so a post-mount presence update leaves the newly committed panel temporarily without the reciprocal IDREF. The Content must notify the root of its presence during the setup/mount-preparation phase, before the first render commit.
-5. This is a root-mediated presence propagation, not a direct Content→Trigger write.
+Presence must not be stored in portable Tabs/Disclosure Context. `C-ANATOMY-0001` also forbids treating Anatomy as an instance registry, so Anatomy cannot own the relationship table. The candidate needs a separately governed Runtime/A11y relationship-projection service that consumes only Anatomy-provided structural declarations, opaque same-domain scope, and module-internal target-readiness signals. That service, not Anatomy, owns the bounded relationship lease entries:
 
-This approach is compatible with C-ANATOMY-0001 (anatomy is not an information channel) because the presence field is structural metadata, not arbitrary data.
+1. Every claimed source or target is retained as a distinct opaque instance entry. Multiplicity is never collapsed to a boolean or a single value-keyed slot.
+2. Match keys are fields on entries, not property names on a plain JavaScript object. An internal `Map` or equivalent entry list therefore treats unrestricted strings such as `__proto__` and `constructor` as ordinary data without prototype-key hazards. No such registry is serialized into portable Context.
+3. Target materialization is derived from the module-internal target binding for the current view epoch. L1 detach marks that instance unavailable for projection but does not delete its logical instance or reserved adapter identity.
+4. Target replacement, detach, rematerialization, and terminal disposal invalidate stale epoch work and notify the adapter-facing relationship projection lease. Anatomy remains the structural/domain source and never becomes the owner of these retained relationship instances.
 
-## Current pattern
+This is a bounded projection service at the Runtime/A11y boundary, not an Anatomy registry or a general information channel. Prototype authors receive neither registry access nor host targets, host IDs, framework keys, or raw geometry.
 
-Tabs, Dialog, Dropdown, Select, and Hover Card all use `def.a11y.relation()` with string ID targets:
+## Matching, duplicates, and dynamic re-keying
 
-```ts
-// Tabs Trigger
-def.a11y.relation('controls', { target: contentId });
+For each source relationship, the adapter-facing resolver filters entries by the same opaque domain scope, target role, and exact protocol match key:
 
-// Tabs Content
-def.a11y.relation('labelledBy', { target: triggerId });
-```
+- exactly one logical target and one current materialized target view: project the reserved host ID;
+- no logical match, no materialized view, or a stale epoch: remove the source IDREF and retain only any still-valid logical reservation;
+- multiple logical or materialized matches: remove the source IDREF, emit a bounded diagnostic, and do not choose by DOM order, registration order, prototype name, or value escaping.
 
-The ID is derived from the family root ID and is stable across mount/unmount cycles. However, when the Content target is detached (L1), the `aria-controls` attribute still points to the non-existent ID. The Web adapter projects the relation unconditionally.
+Match keys may change while an instance is mounted. A retained declaration therefore needs an atomic re-key operation: remove the instance from its previous match tuple and insert it under the new tuple as one registry transaction, then invalidate both old-key and new-key projections. Equality is checked before publishing the change. This prevents recursive no-op updates and ensures no Trigger temporarily observes the same instance under both keys. Duplicate ambiguity remains visible as multiplicity and is resolved only by the adapter's fail-closed rule.
 
-## Proposed approach
+No unconditional `ContextCenter.update()` loop is part of this design. If an admitted implementation uses any subscription callback, it must suppress an unchanged structured snapshot and must not synchronously write the same source that triggered the callback.
 
-### 1. Reserved identity
+## Host identity and projection lifecycle
 
-The family root reserves a stable part ID at setup time (e.g., `createPartId(rootId, 'content')`). This ID is the logical identity of the Content part, independent of whether it is currently materialized.
+The Web adapter, not Anatomy and not prototype State, owns the mapping from a logical target-instance identity to a stable unique host ID.
 
-### 2. Detach-aware relation projection
+- First materialization: reserve or retrieve the target instance's host ID, assign it to the target, and project matching source IDREFs.
+- L1 detach: remove source IDREF attributes while retaining the logical relationship and reserved target-instance identity.
+- Rematerialization: bind the new target view epoch to the same logical target instance and reserved host ID, then restore reciprocal IDREFs.
+- Terminal disposal: the relationship registry removes the instance entry; the adapter clears owned attributes and releases its reservation. No `State<string>.set(null)` is prescribed. Empty string remains valid only for existing optional string projections, not as the ownership mechanism for this structured relationship.
 
-The a11y web projector already calls `clearWebA11ySnapshot` on the old target and `applyWebA11ySnapshot` on the new target during target changes. The proposed change:
+The current runtime invokes mounted callbacks after the mount render/commit, so `onMounted` cannot satisfy before-reveal restoration. An admitted design needs an explicit adapter/runtime pre-commit integration seam: once current source/target bindings for the new view epoch exist, relationship matching, target ID assignment, and source IDREF projection must complete before that epoch's host commit becomes visible. Existing `subscribeTargets` is evidence of module-internal readiness notification, not proof that this pre-commit ordering already exists. Detach/dispose must revoke the seam and all observers.
 
-- When the Content target is detached, the relation target resolves to `null` or empty string.
-- The web projector's `setOptionalAttr(el, 'aria-controls', null)` removes the attribute.
-- The logical relationship (stored in module state) is preserved — it still points to the reserved ID.
-- On rematerialization, the Content target receives the same reserved ID.
-- The relation target resolves back to the reserved ID string.
-- `aria-controls` is restored in the same committed view epoch.
+## Tabs migration boundary
 
-### 3. Implementation path
+Tabs is migration evidence and a second consumer, not the source of a Tabs-only patch. Today Tabs derives strings with `createTabsPartId()` and sends them through `def.a11y.relation()`. Migration would instead declare reciprocal structured relationships:
 
-The relation target is already a `State<string>` (dynamic). The Content part's lifecycle sets the target ID state:
-- On mount: `contentIdState.set(reservedId)`
-- On detach (L1): `contentIdState.set('')` — empty string causes `setOptionalAttr` to remove the attribute
-- On rematerialization: `contentIdState.set(reservedId)` — restores the attribute
-- On terminal disposal: `contentIdState.set(null)` and the relation is cleared
+- Trigger(value=x) `controls` Content(value=x);
+- Content(value=x) `labelledBy` Trigger(value=x).
 
-### 4. Tabs migration evidence
+Root continues to own selection facts through Context, but Context gains no presence table or host identifier. Trigger and Content value changes drive the atomic runtime re-key described above. Inactive lazy Content demonstrates L1 detach/rematerialization; duplicate and missing values demonstrate adapter fail-closed behavior. Existing Tabs string IDs remain current implementation evidence until the structured capability and migration are admitted and landed together.
 
-Tabs already uses this pattern partially:
-- `tabs/trigger.proto.ts`: `def.a11y.relation('controls', { target: contentId })` where `contentId` is a `State<string>` derived from context
-- `tabs/content.proto.ts`: `def.a11y.relation('labelledBy', { target: triggerId })` where `triggerId` is a `State<string>` derived from context
+## Required catalog and schema work
 
-The migration: ensure that when Content is detached (unmounted/L1), the context sets the relation target state to empty string, causing the web adapter to remove `aria-controls`. On rematerialization, the context restores the ID.
+Before implementation, the accepted prerequisite must be projected into machine-governed authority. At minimum:
 
-### 5. Contract amendment
+- refine or promote `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001` into the appropriate contract and criteria;
+- extend the core Anatomy/A11y declaration and IR schemas with the structured carrier rather than pretending current `AnatomyClaimDecl`, `AnatomyRelation`, or `def.a11y.relation()` already supports it;
+- define a separately governed Runtime/A11y relationship-projection service as owner of the scoped lease table, atomic re-keying, target epochs, diagnostics, and cleanup, while keeping Anatomy limited to structured declaration, domain scope, and readiness signals under `C-ANATOMY-0001`;
+- define the adapter capability for ID reservation, pre-commit projection, and fail-closed zero/multiple matching; and
+- revise Tabs prototype/test mappings plus the reusable Disclosure/Collapsible/Accordion prerequisite mapping without changing unrelated stable guarantees.
 
-Propose amending `C-ANATOMY-0001` (or adding `C-ANATOMY-0011`) to govern:
-- Same-domain opaque relationship declaration via `def.a11y.relation()`
-- L1 detach behavior: logical identity survives, Web ARIA IDREF removed while detached
-- Rematerialization: same reserved ID assigned before reveal, ARIA restored in same view epoch
-- Terminal disposal: relation and reservation cleared
+All new or revised entities remain governed by their declared lifecycle status. This record cannot turn a draft decision into an active guarantee.
 
-## Evidence needed
+## Executable evidence
 
-- New or amended contract criterion for detach-aware relation projection
-- Tabs migration test verifying aria-controls is removed during L1 detach and restored on rematerialization
-- Browser test verifying the pattern works across WC/React/Vue
+- Schema/type tests reject incomplete or host-specific declarations and prove protocol match keys are not host IDs.
+- Runtime/module tests cover independent same-family domains, zero/one/multiple matches, arbitrary string keys including `__proto__` and `constructor`, target replacement, stale epochs, detach/rematerialization, and terminal disposal.
+- Re-key tests change a mounted target from value A to B and prove one atomic removal/insertion, no reentrant dispatch, old-source IDREF removal, new-source restoration, and duplicate ambiguity preservation.
+- Pre-commit tests prove a rematerialized target receives its reserved ID and reciprocal relationships before reveal; a mounted callback-only implementation must fail this test.
+- Web adapter tests prove unique stable ID ownership, missing/duplicate fail-closed behavior, attribute cleanup, reservation reuse across L1 detach, and release on terminal disposal.
+- Tabs migration tests cover reciprocal Trigger/Content relationships for lazy and `keepMounted` Content without adding presence or IDs to `TABS_CONTEXT`.
+- Browser evidence exercises the Web Component, React, Vue 3, and active Vue 2 adapters separately. Disclosure/Collapsible/Accordion remain outside this prerequisite implementation slice except as future consumers of the admitted reusable contract.
 
 ## Status
 
-This is an unauthorized proposal. Implementation requires:
-1. A maintainer checkpoint accepting the detach-aware relation approach
-2. Contract amendment or new contract
-3. Tabs migration with test evidence
-4. Disclosure/Collapsible/Accordion implementation (separate, after both prerequisites merge)
-
-
-## Adapter-visible structured relationship
-
-The Trigger should not collapse presence to boolean/string before projection. Instead, the structured family/role/match-key identity should remain available at the adapter projection layer. The adapter resolves the structured relationship to concrete host IDs and handles duplicate/missing match ambiguity. The Trigger observes a simplified non-empty check, but the adapter projection path retains the full structured carrier for fail-closed duplicate handling.
+This remains a non-normative design record. Implementation may proceed only after the structured declaration, ownership, pre-commit seam, adapter capability, and test mappings are reconciled in `spec/**` under the #549/#388 authority. Until then, no public same-domain relationship API exists, existing string-based relation behavior remains current implementation evidence, and this proposal must not be presented as a completed or stable guarantee.
