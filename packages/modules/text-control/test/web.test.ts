@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { TextControlEvent } from '@proto.ui/core';
-import { createWebTextControlHost } from '../src/web';
+import { createWebTextControlHost, resolveWebTextControlLocalName } from '../src/web';
 
 describe('module-text-control web bridge', () => {
   it('projects the supported textarea properties and live updates', () => {
@@ -232,6 +232,19 @@ describe('module-text-control web bridge', () => {
 });
 
 describe('module-text-control single-line web bridge', () => {
+  it('resolves declarations to their physical Web editor local names', () => {
+    expect(
+      resolveWebTextControlLocalName({ content: 'plain-text', lineMode: 'single', engine: 'host' })
+    ).toBe('input');
+    expect(
+      resolveWebTextControlLocalName({
+        content: 'plain-text',
+        lineMode: 'multiline',
+        engine: 'host',
+      })
+    ).toBe('textarea');
+  });
+
   it('resolves an input element for single-line declaration', () => {
     const input = document.createElement('input');
     const lease = createWebTextControlHost(() => input).attach({
@@ -266,50 +279,51 @@ describe('module-text-control single-line web bridge', () => {
     lease.dispose();
   });
 
-  it('projects and preserves selection for an input created in another realm', () => {
-    const iframe = document.createElement('iframe');
-    document.body.appendChild(iframe);
-    const foreignDocument = iframe.contentDocument;
-    if (!foreignDocument) throw new Error('iframe document is unavailable');
-    const input = foreignDocument.createElement('input');
-    expect(input.ownerDocument.defaultView).not.toBe(window);
-    foreignDocument.body.appendChild(input);
-    const lease = createWebTextControlHost(() => input).attach({
-      patch: {
+  it('projects and preserves selection when the current-realm constructor does not own the input', () => {
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    vi.stubGlobal('HTMLInputElement', class CurrentRealmHTMLInputElement {});
+    expect(input instanceof HTMLInputElement).toBe(false);
+    try {
+      const lease = createWebTextControlHost(() => input).attach({
+        patch: {
+          valueMode: 'controlled',
+          value: '0123456789',
+          inputMode: 'search',
+          enterKeyHint: 'search',
+        },
+        onEvent() {},
+      });
+      input.focus();
+      input.setSelectionRange(3, 7, 'forward');
+
+      lease.update({
         valueMode: 'controlled',
-        value: '0123456789',
-        inputMode: 'search',
-        enterKeyHint: 'search',
-      },
-      onEvent() {},
-    });
-    input.focus();
-    input.setSelectionRange(3, 7, 'forward');
+        value: 'short',
+        inputMode: 'numeric',
+        enterKeyHint: 'next',
+      });
+      expect({
+        value: input.value,
+        start: input.selectionStart,
+        end: input.selectionEnd,
+        direction: input.selectionDirection,
+        inputMode: input.inputMode,
+        enterKeyHint: input.enterKeyHint,
+      }).toEqual({
+        value: 'short',
+        start: 3,
+        end: 5,
+        direction: 'forward',
+        inputMode: 'numeric',
+        enterKeyHint: 'next',
+      });
 
-    lease.update({
-      valueMode: 'controlled',
-      value: 'short',
-      inputMode: 'numeric',
-      enterKeyHint: 'next',
-    });
-    expect({
-      value: input.value,
-      start: input.selectionStart,
-      end: input.selectionEnd,
-      direction: input.selectionDirection,
-      inputMode: input.inputMode,
-      enterKeyHint: input.enterKeyHint,
-    }).toEqual({
-      value: 'short',
-      start: 3,
-      end: 5,
-      direction: 'forward',
-      inputMode: 'numeric',
-      enterKeyHint: 'next',
-    });
-
-    lease.dispose();
-    iframe.remove();
+      lease.dispose();
+    } finally {
+      vi.unstubAllGlobals();
+      input.remove();
+    }
   });
 
   it('canonicalizes CR/LF to LF in event values and snapshots', () => {
