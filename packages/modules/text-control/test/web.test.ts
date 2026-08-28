@@ -325,6 +325,66 @@ describe('module-text-control single-line web bridge', () => {
       input.remove();
     }
   });
+  it('reads input and composition payloads from the target realm', () => {
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    const foreignDocument = iframe.contentDocument;
+    const foreignWindow = foreignDocument?.defaultView;
+    if (!foreignDocument || !foreignWindow) throw new Error('iframe document is unavailable');
+    const input = foreignDocument.createElement('input');
+    foreignDocument.body.appendChild(input);
+    const events: TextControlEvent[] = [];
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent(event) {
+        events.push(event);
+      },
+    });
+
+    input.value = 'foreign';
+    const foreignCompositionEvent = (type: string, data: string) => {
+      const event = new foreignWindow.CompositionEvent(type, { bubbles: true });
+      Object.defineProperty(event, 'data', { value: data });
+      return event;
+    };
+    input.dispatchEvent(foreignCompositionEvent('compositionstart', 'あ'));
+    const foreignInputEvent = new foreignWindow.InputEvent('input', {
+      bubbles: true,
+      isComposing: true,
+    });
+    Object.defineProperties(foreignInputEvent, {
+      data: { value: 'あ' },
+      inputType: { value: 'insertText' },
+    });
+    input.dispatchEvent(foreignInputEvent);
+    input.dispatchEvent(foreignCompositionEvent('compositionend', 'あ'));
+
+    expect(events).toHaveLength(3);
+    expect(events[0]).toMatchObject({
+      type: 'compositionstart',
+      value: 'foreign',
+      composing: true,
+      data: 'あ',
+      inputType: null,
+    });
+    expect(events[1]).toMatchObject({
+      type: 'input',
+      value: 'foreign',
+      composing: true,
+      data: 'あ',
+      inputType: 'insertText',
+    });
+    expect(events[2]).toMatchObject({
+      type: 'compositionend',
+      value: 'foreign',
+      composing: false,
+      data: 'あ',
+      inputType: null,
+    });
+
+    lease.dispose();
+    iframe.remove();
+  });
 
   it('canonicalizes CR/LF to LF in event values and snapshots', () => {
     const input = document.createElement('input');

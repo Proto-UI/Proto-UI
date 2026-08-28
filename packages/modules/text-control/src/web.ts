@@ -58,8 +58,9 @@ function attachTarget(
     if (disposed) return;
     if (options.stopPropagation) event.stopPropagation();
     const type = event.type as TextControlEvent['type'];
-    const inputEvent = event instanceof InputEvent ? event : null;
-    const compositionEvent = event instanceof CompositionEvent ? event : null;
+    const inputEvent = type === 'input' && 'inputType' in event ? (event as InputEvent) : null;
+    const compositionEvent =
+      type.startsWith('composition') && 'data' in event ? (event as CompositionEvent) : null;
     if (type === 'compositionstart') composing = true;
     if (inputEvent?.isComposing) composing = true;
     if (type === 'compositionend') composing = false;
