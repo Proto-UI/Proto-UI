@@ -110,6 +110,13 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
 });
+const HARNESS_RAW_IMPORT_ALLOWLIST = Object.freeze({
+  // M0 authorizes only the React Adapter entry. Any prototype/facade entry
+  // must be admitted here exactly in the same change that approves it.
+  'apps/agent-harness/src/proto-ui/bootstrap.tsx': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-react']),
+  }),
+});
 const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   'www.shell.site-title': Object.freeze(['apps/www/src/components/override/SiteTitle.astro']),
   'www.shell.skip-link': Object.freeze(['apps/www/astro.config.mjs']),
@@ -902,15 +909,17 @@ function astContainsInteractiveRuntime(content) {
         return;
       }
     }
-
-    if (
-      ts.isBinaryExpression(node) &&
-      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
-      ts.isPropertyAccessExpression(node.left) &&
-      /^on[a-z][A-Za-z0-9_$]*$/u.test(node.left.name.text)
-    ) {
-      found = true;
-      return;
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+      const eventProperty = ts.isPropertyAccessExpression(node.left)
+        ? node.left.name.text
+        : ts.isElementAccessExpression(node.left) &&
+            ts.isStringLiteralLike(node.left.argumentExpression)
+          ? node.left.argumentExpression.text
+          : null;
+      if (eventProperty && NATIVE_EVENT_ATTRIBUTE_NAMES.has(eventProperty)) {
+        found = true;
+        return;
+      }
     }
     if (ts.isNewExpression(node)) {
       const constructorName = ts.isIdentifier(node.expression)
@@ -1098,6 +1107,56 @@ function discoverWebsiteComponentSources(rootDir) {
     .sort();
 }
 
+function astContainsExportedUserFacingComponent(content, absolutePath) {
+  const sourceFile = ts.createSourceFile(
+    absolutePath,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    /.jsx$/i.test(absolutePath) ? ts.ScriptKind.JSX : ts.ScriptKind.TSX
+  );
+  let containsJsx = false;
+  const visit = (node) => {
+    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node)) {
+      containsJsx = true;
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  if (!containsJsx) return false;
+
+  return sourceFile.statements.some(
+    (statement) =>
+      ts.isExportAssignment(statement) ||
+      ts.isExportDeclaration(statement) ||
+      statement.modifiers?.some(
+        (modifier) =>
+          modifier.kind === ts.SyntaxKind.ExportKeyword ||
+          modifier.kind === ts.SyntaxKind.DefaultKeyword
+      )
+  );
+}
+
+function discoverHarnessUserFacingSources(rootDir) {
+  const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
+  return walkFiles(sourceRoot)
+    .filter((absolutePath) => /\.[jt]sx$/i.test(absolutePath))
+    .filter(
+      (absolutePath) =>
+        !/\.(?:browser\.)?(?:test|spec|stories)\.[jt]sx$/i.test(absolutePath) &&
+        !absolutePath.startsWith(path.join(sourceRoot, 'proto-ui') + path.sep)
+    )
+    .filter((absolutePath) => {
+      const relativeToSource = path.relative(sourceRoot, absolutePath).replaceAll('\\', '/');
+      const isRoutedOrPageLevel = /^(?:pages|routes)\//u.test(relativeToSource);
+      const content = fs.readFileSync(absolutePath, 'utf8');
+      return isRoutedOrPageLevel || astContainsExportedUserFacingComponent(content, absolutePath);
+    })
+    .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
+    .sort();
+}
+
 function scriptModuleSpecifiers(source, fileName) {
   const sourceFile = ts.createSourceFile(
     fileName,
@@ -1141,12 +1200,17 @@ function styleModuleSpecifiers(content) {
   let quote = null;
   let escaped = false;
   let inComment = false;
+  let inLineComment = false;
   for (let index = 0; index < content.length; index += 1) {
     const character = content[index];
     if (quote) {
       if (escaped) escaped = false;
       else if (character === '\\') escaped = true;
       else if (character === quote) quote = null;
+      continue;
+    }
+    if (inLineComment) {
+      if (character === '\n' || character === '\r') inLineComment = false;
       continue;
     }
     if (inComment) {
@@ -1161,17 +1225,25 @@ function styleModuleSpecifiers(content) {
       index += 1;
       continue;
     }
+    if (character === '/' && content[index + 1] === '/') {
+      inLineComment = true;
+      index += 1;
+      continue;
+    }
     if (character === '"' || character === "'") {
       quote = character;
       continue;
     }
-    if (content.slice(index, index + 7).toLowerCase() !== '@import') {
+    if (!/^@(?:import|use|forward)\b/iu.test(content.slice(index))) {
       continue;
     }
     const match = content
       .slice(index)
-      .match(/^@import\b\s+(?:url\(\s*)?(?:(['"])([^'"]+)\1|([^'"\s;)]+))/iu);
-    if (match) specifiers.push(match[2] ?? match[3]);
+      .match(/^@(?:import|use|forward)\b\s+(?:url\(\s*)?(?:(['"])([^'"]+)\1|([^'"\s;)]+))/iu);
+    if (match) {
+      specifiers.push(match[2] ?? match[3]);
+      index += match[0].length - 1;
+    }
   }
   return specifiers;
 }
@@ -1236,6 +1308,21 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier) {
   return null;
 }
 
+function guardedHarnessImport(rootDir, sourcePath, specifier) {
+  if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(specifier)) {
+    return { category: 'proto-ui-package', resolvedPath: null };
+  }
+  if (!specifier.startsWith('.')) return null;
+
+  const resolvedPath = path
+    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), specifier))
+    .replaceAll('\\', '/');
+  if (/^packages\/.+\/src(?:\/|$)/u.test(resolvedPath)) {
+    return { category: 'package-internal', resolvedPath };
+  }
+  return null;
+}
+
 function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport) {
   const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
   if (!allowance) return false;
@@ -1277,6 +1364,32 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
     if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
     issues.push(
       `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist`
+    );
+  }
+}
+
+function discoverHarnessRawImports(rootDir) {
+  const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
+  const candidates = walkFiles(sourceRoot)
+    .filter((absolutePath) => /\.(?:[cm]?[jt]sx?|css|less|s[ac]ss)$/i.test(absolutePath))
+    .filter((absolutePath) => !/\.(?:browser\.)?(?:test|spec)\.[cm]?[jt]sx?$/i.test(absolutePath));
+  const rawImports = [];
+  for (const absolutePath of candidates) {
+    const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
+    for (const specifier of moduleSpecifiersForWebsiteSource(absolutePath)) {
+      const guardedImport = guardedHarnessImport(rootDir, sourcePath, specifier);
+      if (guardedImport) rawImports.push({ sourcePath, specifier, ...guardedImport });
+    }
+  }
+  return rawImports;
+}
+
+function validateHarnessRawImports(rootDir, relativePath, issues) {
+  for (const rawImport of discoverHarnessRawImports(rootDir)) {
+    const allowance = HARNESS_RAW_IMPORT_ALLOWLIST[rawImport.sourcePath];
+    if (allowance?.specifiers?.includes(rawImport.specifier)) continue;
+    issues.push(
+      `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the Harness consumer-wall allowlist`
     );
   }
 }
@@ -1513,9 +1626,11 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       );
     }
 
-    if (config.kind === 'website') {
+    const governedSourcePrefix =
+      config.kind === 'website' ? 'apps/www/src/' : 'apps/agent-harness/src/';
+    if (config.kind === 'website' || config.kind === 'agent-harness') {
       for (const repositoryPath of explicitRepositoryPaths(record.Path)) {
-        if (!repositoryPath.startsWith('apps/www/src/')) continue;
+        if (!repositoryPath.startsWith(governedSourcePrefix)) continue;
         const owners = sourceOwners.get(repositoryPath) ?? [];
         owners.push({ id, line: row.line });
         sourceOwners.set(repositoryPath, owners);
@@ -1951,6 +2066,123 @@ function validateWebsiteSourceBindings(
   }
 }
 
+function parseHarnessSourceBindings(lines, afterIndex, relativePath, issues) {
+  const headingIndexes = findExactLineIndexes(lines, '## Source-scan bindings').filter(
+    (index) => index > afterIndex
+  );
+  if (headingIndexes.length === 0) return new Map();
+  if (headingIndexes.length !== 1) {
+    issues.push(
+      `${relativePath}: expected at most one \`## Source-scan bindings\` heading after ${END_MARKER}; found ${headingIndexes.length}`
+    );
+    return new Map();
+  }
+
+  const headingIndex = headingIndexes[0];
+  const nextHeadingOffset = lines
+    .slice(headingIndex + 1)
+    .findIndex((line) => /^#{1,6}\s+/.test(line.trim()));
+  const tableEnd = nextHeadingOffset === -1 ? lines.length : headingIndex + 1 + nextHeadingOffset;
+  const table = parseTable(
+    lines,
+    headingIndex + 1,
+    tableEnd,
+    ['Interactive or integration source', 'Owning matrix row'],
+    `${relativePath} Source-scan bindings`,
+    issues,
+    { requireContiguous: true }
+  );
+  const bindings = new Map();
+  if (!table) return bindings;
+
+  for (const row of table.rows) {
+    const context = `${relativePath}:${row.line}`;
+    const sourcePaths = explicitRepositoryPaths(row.cells[0]);
+    if (sourcePaths.length !== 1 || !sourcePaths[0].startsWith('apps/agent-harness/src/')) {
+      issues.push(
+        `${context}: source binding must name exactly one \`apps/agent-harness/src/**\` path`
+      );
+      continue;
+    }
+    const sourcePath = sourcePaths[0];
+    if (bindings.has(sourcePath)) {
+      issues.push(
+        `${context}: duplicate source binding for \`${sourcePath}\` (first declared on line ${bindings.get(sourcePath).line})`
+      );
+      continue;
+    }
+    const ownerIds = [...row.cells[1].matchAll(/`(harness\.[a-z0-9.-]+)`/g)].map(
+      (match) => match[1]
+    );
+    if (ownerIds.length === 0) {
+      issues.push(`${context}: source binding must name at least one owning matrix row ID`);
+      continue;
+    }
+    bindings.set(sourcePath, { line: row.line, ownerIds: [...new Set(ownerIds)] });
+  }
+  return bindings;
+}
+
+function validateHarnessSourceBindings(
+  rootDir,
+  relativePath,
+  lines,
+  afterIndex,
+  matrixResult,
+  issues
+) {
+  const bindings = parseHarnessSourceBindings(lines, afterIndex, relativePath, issues);
+  for (const [sourcePath, binding] of bindings) {
+    if (!fs.existsSync(path.resolve(rootDir, sourcePath))) {
+      issues.push(
+        `${relativePath}:${binding.line}: source binding references missing path \`${sourcePath}\``
+      );
+    }
+    for (const ownerId of binding.ownerIds) {
+      if (!matrixResult.seenIds.has(ownerId)) {
+        issues.push(
+          `${relativePath}:${binding.line}: source binding references missing matrix row \`${ownerId}\``
+        );
+      }
+    }
+  }
+
+  for (const sourcePath of discoverHarnessUserFacingSources(rootDir)) {
+    const directOwners = matrixResult.sourceOwners.get(sourcePath) ?? [];
+    const directIds = [...new Set(directOwners.map(({ id }) => id))].sort();
+    const binding = bindings.get(sourcePath);
+    if (directIds.length === 0 && !binding) {
+      issues.push(
+        `${relativePath}: Harness user-facing source \`${sourcePath}\` is not classified by a matrix row or Source-scan binding`
+      );
+      continue;
+    }
+    if (directIds.length === 1 && binding) {
+      issues.push(
+        `${relativePath}:${binding.line}: Harness user-facing source \`${sourcePath}\` is already owned by matrix row \`${directIds[0]}\`; use the direct Path or the explicit binding, not both`
+      );
+      continue;
+    }
+    if (directIds.length > 1) {
+      if (!binding) {
+        issues.push(
+          `${relativePath}: Harness user-facing source \`${sourcePath}\` appears in multiple matrix Path cells (${directIds.join(', ')}); add one explicit grouped binding naming exactly those rows`
+        );
+        continue;
+      }
+      const boundIds = [...binding.ownerIds].sort();
+      if (
+        directIds.length !== boundIds.length ||
+        directIds.some((ownerId, index) => ownerId !== boundIds[index])
+      ) {
+        issues.push(
+          `${relativePath}:${binding.line}: grouped binding for Harness source \`${sourcePath}\` must name exactly the matrix Path owners (${directIds.join(', ')})`
+        );
+      }
+    }
+  }
+}
+
 function validateTotals(config, lines, afterIndex, actualCounts, relativePath, issues) {
   const totalHeadingIndexes = findExactLineIndexes(lines, '## State totals').filter(
     (index) => index > afterIndex
@@ -2153,6 +2385,15 @@ function validateMatrixFile(rootDir, config, catalogEntries, issues) {
       endIndex,
       matrixResult.targetClassCounts,
       config.relativePath,
+      issues
+    );
+    validateHarnessRawImports(rootDir, config.relativePath, issues);
+    validateHarnessSourceBindings(
+      rootDir,
+      config.relativePath,
+      lines,
+      endIndex,
+      matrixResult,
       issues
     );
   } else {

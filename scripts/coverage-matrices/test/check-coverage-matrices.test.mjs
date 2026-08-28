@@ -286,7 +286,7 @@ function writeValidMatrices(
   root,
   websiteOverrides = {},
   harnessOverrides = {},
-  { websiteBindings = [] } = {}
+  { websiteBindings = [], harnessBindings = [] } = {}
 ) {
   const extraText = [
     '## Source-scan bindings',
@@ -308,7 +308,22 @@ function writeValidMatrices(
   writeMatrix(
     root,
     MATRIX_CONFIGS[1],
-    rowsWithRequiredIds(MATRIX_CONFIGS[1], validHarnessRow(harnessOverrides), validHarnessRow)
+    rowsWithRequiredIds(MATRIX_CONFIGS[1], validHarnessRow(harnessOverrides), validHarnessRow),
+    {
+      extraText:
+        harnessBindings.length === 0
+          ? ''
+          : [
+              '## Source-scan bindings',
+              '',
+              '| Interactive or integration source | Owning matrix row |',
+              '| --- | --- |',
+              ...harnessBindings.map(
+                ([sourcePath, ownerIds]) =>
+                  `| \`${sourcePath}\` | ${ownerIds.map((ownerId) => `\`${ownerId}\``).join(', ')} |`
+              ),
+            ].join('\n'),
+    }
   );
 }
 
@@ -439,6 +454,26 @@ test('includes content-local JavaScript and TypeScript interactions in the websi
     'apps/www/src/content/docs/behavior.js',
     'apps/www/src/content/docs/registry.ts',
     'apps/www/src/content/docs/observer.ts',
+  ]) {
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
+});
+
+test('detects DOM event-property assignments in website helpers', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [relativePath, content] of [
+    ['apps/www/src/content/docs/click-property.ts', 'button.onclick = activate;'],
+    ['apps/www/src/content/docs/key-property.js', 'window.onkeydown = handleKey;'],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  const message = validationMessage(root);
+  for (const relativePath of [
+    'apps/www/src/content/docs/click-property.ts',
+    'apps/www/src/content/docs/key-property.js',
   ]) {
     assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
   }
@@ -895,6 +930,98 @@ test('rejects adapter and implementation-internal imports outside the website al
   }
 });
 
+test('rejects raw Proto UI imports outside the Harness bootstrap allowlist', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const bootstrapSource = 'apps/agent-harness/src/proto-ui/bootstrap.tsx';
+  const forbiddenImports = [
+    [
+      'apps/agent-harness/src/run/UnsafeRuntimeConsumer.tsx',
+      '@proto.ui/runtime',
+      "import { createRuntimeSession } from '@proto.ui/runtime';",
+    ],
+    [
+      'apps/agent-harness/src/run/UnsafeAdapterConsumer.tsx',
+      '@proto.ui/adapter-react',
+      "import { createReactAdapter } from '@proto.ui/adapter-react';",
+    ],
+    [
+      'apps/agent-harness/src/run/UnsafePrototypeConsumer.tsx',
+      '@proto.ui/prototypes-base/button',
+      "import { button } from '@proto.ui/prototypes-base/button';",
+    ],
+    [
+      'apps/agent-harness/src/run/UnsafeInternalConsumer.tsx',
+      '../../../../packages/runtime/src/index',
+      "import { createRuntimeSession } from '../../../../packages/runtime/src/index';",
+    ],
+    [
+      'apps/agent-harness/src/run/UnsafeHooksConsumer.tsx',
+      '@proto.ui/hooks',
+      "import { hook } from '@proto.ui/hooks';",
+    ],
+    [
+      'apps/agent-harness/src/run/UnsafeHooksInternalConsumer.tsx',
+      '../../../../packages/hooks/src/index',
+      "import { hook } from '../../../../packages/hooks/src/index';",
+    ],
+    [
+      'apps/agent-harness/src/run/unsafe-theme.scss',
+      '@proto.ui/prototypes-brutalist/theme',
+      "@use '@proto.ui/prototypes-brutalist/theme';",
+    ],
+  ];
+  for (const [relativePath, , content] of [
+    ...forbiddenImports,
+    [
+      bootstrapSource,
+      '@proto.ui/adapter-react',
+      "import { createReactAdapter } from '@proto.ui/adapter-react';",
+    ],
+  ]) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content);
+  }
+
+  const message = validationMessage(root);
+  for (const [sourcePath, specifier] of forbiddenImports) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${sourcePath}\` escapes the Harness consumer-wall allowlist`
+      )
+    );
+  }
+  assert.doesNotMatch(message, /bootstrap\.tsx.*escapes the Harness consumer-wall allowlist/);
+});
+
+test('allows only the reviewed Adapter entry at the Harness bootstrap boundary', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const bootstrapSource = 'apps/agent-harness/src/proto-ui/bootstrap.tsx';
+  const absolutePath = path.join(root, bootstrapSource);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    [
+      "import { createReactAdapter } from '@proto.ui/adapter-react';",
+      "import { definePrototype } from '@proto.ui/core';",
+    ].join('\n')
+  );
+
+  const message = validationMessage(root);
+  assert.ok(
+    message.includes(
+      `raw Proto UI import \`@proto.ui/core\` in \`${bootstrapSource}\` escapes the Harness consumer-wall allowlist`
+    )
+  );
+  assert.ok(
+    !message.includes(
+      `raw Proto UI import \`@proto.ui/adapter-react\` in \`${bootstrapSource}\` escapes the Harness consumer-wall allowlist`
+    )
+  );
+});
+
 test('rejects guarded imports from embedded component style blocks', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -986,6 +1113,76 @@ test('rejects guarded imports nested in embedded Sass and Less style blocks', ()
       )
     );
   }
+});
+
+test('rejects guarded Sass module directives in standalone and embedded styles', () => {
+  const root = createRoot();
+  const cases = [
+    [
+      'apps/www/src/styles/ModuleEscape.scss',
+      '@use "@proto.ui/runtime/styles" as runtime;',
+      '@proto.ui/runtime/styles',
+    ],
+    [
+      'apps/www/src/components/ForwardEscape.astro',
+      '<style lang="scss">@forward "@proto.ui/prototypes-base/theme";</style>',
+      '@proto.ui/prototypes-base/theme',
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    { websiteBindings: [['apps/www/src/components/ForwardEscape.astro', ['www.shell.search']]] }
+  );
+  const message = validationMessage(root);
+  for (const [relativePath, , specifier] of cases) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${relativePath}\` escapes the website consumer-wall allowlist`
+      )
+    );
+  }
+});
+
+test('ignores Sass and Less line-comment directives', () => {
+  const root = createRoot();
+  const componentPath = 'apps/www/src/components/CommentedStyle.astro';
+  for (const [relativePath, content] of [
+    ['apps/www/src/styles/Commented.scss', '// @use "@proto.ui/runtime/styles";'],
+    [
+      componentPath,
+      '<style lang="less">// @import "@proto.ui/module-overlay/styles.css";\n.safe { color: red; }</style>',
+    ],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  writeValidMatrices(root, {}, {}, { websiteBindings: [[componentPath, ['www.shell.search']]] });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not confuse an unquoted URL protocol with a Sass line comment', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/styles/UrlThenModule.scss';
+  const sourcePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    '@import url(https://cdn.example/x.css); @use "@proto.ui/runtime/styles" as runtime;'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `@proto\.ui\/runtime\/styles` in `apps\/www\/src\/styles\/UrlThenModule\.scss` escapes the website consumer-wall allowlist/
+  );
 });
 
 test('requires new static website components to have a matrix classification', () => {
@@ -1965,6 +2162,61 @@ test('protects every authoritative Harness baseline row from deletion', () => {
     validationMessage(root),
     /required inventory surface ID `harness\.composer\.root` is missing/
   );
+});
+
+test('requires newly exported Harness user-facing surfaces to have a matrix disposition', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relativePath = 'apps/agent-harness/src/run/NewRunSummary.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function NewRunSummary() { return <section>Run summary</section>; }',
+    'utf8'
+  );
+
+  assert.match(
+    validationMessage(root),
+    /Harness user-facing source `apps\/agent-harness\/src\/run\/NewRunSummary\.tsx` is not classified by a matrix row or Source-scan binding/
+  );
+});
+
+test('allows an exported Harness surface to reuse a row through an explicit source binding', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/NewRunSummary.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function NewRunSummary() { return <section>Run summary</section>; }',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      harnessBindings: [[relativePath, ['harness.transcript.viewport']]],
+    }
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('accepts a Harness user-facing source directly owned by a matrix Path', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/RunSummary.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function RunSummary() { return <section>Run summary</section>; }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('protects every authoritative Website baseline row from deletion', () => {

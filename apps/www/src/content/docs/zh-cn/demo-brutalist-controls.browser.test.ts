@@ -1,7 +1,6 @@
 // @vitest-environment node
 
 import { spawn, type ChildProcess } from 'node:child_process';
-import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import {
@@ -12,7 +11,11 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { generateProtoUiStyle, resolveBrowserHarnessRoots } from './browser-harness';
+import {
+  chromeExecutable,
+  generateProtoUiStyle,
+  resolveBrowserHarnessRoots,
+} from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -65,47 +68,6 @@ async function availablePort(): Promise<number> {
       server.close((error) => (error ? reject(error) : resolve(address.port)));
     });
   });
-}
-
-async function chromeExecutable(): Promise<string> {
-  const windowsCandidates =
-    process.platform === 'win32'
-      ? [
-          path.join(
-            process.env.PROGRAMFILES ?? 'C:\\Program Files',
-            'Google/Chrome/Application/chrome.exe'
-          ),
-          path.join(
-            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
-            'Google/Chrome/Application/chrome.exe'
-          ),
-          path.join(
-            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
-            'Microsoft/Edge/Application/msedge.exe'
-          ),
-        ]
-      : [];
-  const candidates = [
-    process.env.CHROME_PATH,
-    ...windowsCandidates,
-    '/usr/bin/google-chrome',
-    '/bin/google-chrome',
-    '/usr/bin/google-chrome-stable',
-    '/usr/bin/chromium',
-    '/usr/bin/chromium-browser',
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  ].filter((candidate): candidate is string => Boolean(candidate));
-
-  for (const candidate of candidates) {
-    try {
-      await access(candidate);
-      return candidate;
-    } catch {
-      // Try the next standard Chrome/Chromium location.
-    }
-  }
-
-  throw new Error('Chrome/Chromium is required; set CHROME_PATH to its executable.');
 }
 
 async function waitForServer(url: string): Promise<void> {

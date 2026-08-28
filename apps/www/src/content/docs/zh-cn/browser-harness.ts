@@ -87,26 +87,35 @@ async function availablePort(): Promise<number> {
   });
 }
 
-export async function chromeExecutable(): Promise<string> {
+export function resolveBrowserExecutableCandidates(
+  platform: NodeJS.Platform = process.platform,
+  env: Readonly<Record<string, string | undefined>> = process.env
+): string[] {
   const windowsCandidates =
-    process.platform === 'win32'
+    platform === 'win32'
       ? [
-          path.join(
-            process.env.PROGRAMFILES ?? 'C:\\Program Files',
+          ...(env.LOCALAPPDATA
+            ? [
+                path.win32.join(env.LOCALAPPDATA, 'Google/Chrome/Application/chrome.exe'),
+                path.win32.join(env.LOCALAPPDATA, 'Microsoft/Edge/Application/msedge.exe'),
+              ]
+            : []),
+          path.win32.join(
+            env.PROGRAMFILES ?? 'C:\\Program Files',
             'Google/Chrome/Application/chrome.exe'
           ),
-          path.join(
-            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
+          path.win32.join(
+            env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
             'Google/Chrome/Application/chrome.exe'
           ),
-          path.join(
-            process.env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
+          path.win32.join(
+            env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
             'Microsoft/Edge/Application/msedge.exe'
           ),
         ]
       : [];
-  const candidates = [
-    process.env.CHROME_PATH,
+  return [
+    env.CHROME_PATH,
     ...windowsCandidates,
     '/usr/bin/google-chrome',
     '/bin/google-chrome',
@@ -115,6 +124,10 @@ export async function chromeExecutable(): Promise<string> {
     '/usr/bin/chromium-browser',
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   ].filter((candidate): candidate is string => Boolean(candidate));
+}
+
+export async function chromeExecutable(): Promise<string> {
+  const candidates = resolveBrowserExecutableCandidates();
 
   for (const candidate of candidates) {
     try {
