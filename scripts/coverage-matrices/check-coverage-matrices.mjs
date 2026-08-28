@@ -12,6 +12,7 @@ const CATALOG_ID_PATTERN = /\b(?:A|C|D|HC|K|M|P|T|V)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*
 const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
 const INTERACTIVE_SOURCE_PATTERNS = Object.freeze([
   /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(/i,
+  /\b[A-Za-z_$][\w$]*\.on[a-z][A-Za-z0-9_$]*\s*=/u,
 ]);
 
 function collectNativeEventAttributeNames() {
@@ -900,6 +901,16 @@ function astContainsInteractiveRuntime(content) {
         found = true;
         return;
       }
+    }
+
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      ts.isPropertyAccessExpression(node.left) &&
+      /^on[a-z][A-Za-z0-9_$]*$/u.test(node.left.name.text)
+    ) {
+      found = true;
+      return;
     }
     if (ts.isNewExpression(node)) {
       const constructorName = ts.isIdentifier(node.expression)

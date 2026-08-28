@@ -542,6 +542,22 @@ test('detects lowercase native event attributes without an event-name allowlist'
   }
 });
 
+test('discovers DOM event-property assignments in the website source scan', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relativePath = 'apps/www/src/components/EventPropertyControl.ts';
+  const sourcePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    "const button = document.querySelector('button'); button.onclick = () => {};"
+  );
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/components\/EventPropertyControl\.ts` is not bound/
+  );
+});
+
 test('does not classify ordinary lowercase on-prefixed component props as events', () => {
   const root = createRoot();
   const cases = [
