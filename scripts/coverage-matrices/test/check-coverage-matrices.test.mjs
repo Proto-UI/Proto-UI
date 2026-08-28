@@ -4047,3 +4047,52 @@ test('canonicalizes symlinked Website import targets', () => {
     /raw Proto UI import `\.\.\/vendor\/runtime\/escape` in `apps\/www\/src\/components\/SymlinkEscape\.ts`/
   );
 });
+
+test('scans handwritten sources beside generated Harness facades', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/proto-ui/manual.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, 'document.querySelector("button")?.focus();', 'utf8');
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/proto-ui\/manual\.ts` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('rejects dogfooded Harness evidence symlinks escaping the retained root', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const evidencePath = 'internal/agent-harness/evidence/m1/proof.md';
+  const outsidePath = 'internal/contracts/proof.md';
+  fs.mkdirSync(path.join(root, 'apps/agent-harness/src/run'), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), 'fixture', 'utf8');
+  fs.mkdirSync(path.dirname(path.join(root, outsidePath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, outsidePath),
+    'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: 0123456789abcdef0123456789abcdef01234567\nEnvironment: fixture\nFixtures: proof\nCommands: pnpm test\nResults: passed\n',
+    'utf8'
+  );
+  fs.mkdirSync(path.dirname(path.join(root, evidencePath)), { recursive: true });
+  fs.symlinkSync(path.join(root, outsidePath), path.join(root, evidencePath));
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /dogfooded evidence path must resolve within internal\/agent-harness\/evidence\/\*\*/
+  );
+});

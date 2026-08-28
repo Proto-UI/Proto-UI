@@ -1460,14 +1460,19 @@ function discoverWebsiteComponentSources(rootDir) {
       return fs.existsSync(absoluteRoot) ? walkFiles(absoluteRoot) : [];
     })
     .concat(
-      walkFiles(contentRoot).filter(
-        (absolutePath) =>
+      walkFiles(contentRoot).filter((absolutePath) => {
+        const content = fs.readFileSync(absolutePath, 'utf8');
+        if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
+          return /<[A-Za-z]/u.test(markupSourceForJsxFallback(content, absolutePath) ?? '');
+        }
+        return (
           /\.[jt]sx?$/i.test(absolutePath) &&
           astContainsExportedUserFacingComponent(
             fs.readFileSync(absolutePath, 'utf8'),
             absolutePath
           )
-      )
+        );
+      })
     )
     .filter((absolutePath) => {
       if (/\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath)) return true;
@@ -1834,8 +1839,11 @@ function astContainsHarnessRenderAction(content) {
       if (ts.isFunctionDeclaration(current) || ts.isClassDeclaration(current)) {
         return current.name?.text ?? '';
       }
-      if (ts.isVariableDeclaration(current) && ts.isIdentifier(current.name)) {
-        return current.name.text;
+      if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
+        const declaration = current.parent;
+        return ts.isVariableDeclaration(declaration) && ts.isIdentifier(declaration.name)
+          ? declaration.name.text
+          : '';
       }
     }
     return '';
@@ -1867,11 +1875,16 @@ function discoverHarnessForbiddenStateMachineSources(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
   return walkFiles(sourceRoot)
     .filter((absolutePath) => /\.[cm]?[jt]sx?$/i.test(absolutePath))
-    .filter(
-      (absolutePath) =>
+    .filter((absolutePath) => {
+      const relativePath = path.relative(sourceRoot, absolutePath).replaceAll('\\', '/');
+      const isGeneratedFacade = relativePath.startsWith('proto-ui/components/');
+      const isReviewedBootstrap = relativePath === 'proto-ui/bootstrap.tsx';
+      return (
         !/\.(?:browser\.)?(?:test|spec|stories)\.[cm]?[jt]sx?$/i.test(absolutePath) &&
-        !absolutePath.startsWith(path.join(sourceRoot, 'proto-ui') + path.sep)
-    )
+        !isGeneratedFacade &&
+        !isReviewedBootstrap
+      );
+    })
     .filter((absolutePath) =>
       containsHarnessForbiddenStateMachine(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
     )
@@ -2419,9 +2432,13 @@ function hasVideoFileSignature(absolutePath) {
   );
 }
 
-function canonicalRetainedEvidenceFile(rootDir, repositoryPath) {
+function canonicalRetainedEvidenceFile(
+  rootDir,
+  repositoryPath,
+  evidenceRootRelative = SELF_HOSTED_WEBSITE_EVIDENCE_ROOT
+) {
   if (typeof repositoryPath !== 'string') return null;
-  const evidenceRoot = path.resolve(rootDir, SELF_HOSTED_WEBSITE_EVIDENCE_ROOT);
+  const evidenceRoot = path.resolve(rootDir, evidenceRootRelative);
   const absolutePath = path.resolve(rootDir, repositoryPath);
   const relativePath = path.relative(evidenceRoot, absolutePath);
   if (!relativePath || relativePath.startsWith('..') || path.isAbsolute(relativePath)) return null;
@@ -2848,11 +2865,23 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
         );
       }
       for (const repositoryPath of evidencePaths) {
-        if (!fs.existsSync(path.resolve(rootDir, repositoryPath))) {
-          issues.push(`${context}: dogfooded evidence path does not exist: ${repositoryPath}`);
+        const absoluteEvidencePath = path.resolve(rootDir, repositoryPath);
+        const retainedEvidencePath = canonicalRetainedEvidenceFile(
+          rootDir,
+          repositoryPath,
+          'internal/agent-harness/evidence/'
+        );
+        if (!retainedEvidencePath) {
+          if (!fs.existsSync(absoluteEvidencePath)) {
+            issues.push(`${context}: dogfooded evidence path does not exist: ${repositoryPath}`);
+          } else {
+            issues.push(
+              `${context}: dogfooded evidence path must resolve within internal/agent-harness/evidence/**: ${repositoryPath}`
+            );
+          }
           continue;
         }
-        const evidenceRecord = fs.readFileSync(path.resolve(rootDir, repositoryPath), 'utf8');
+        const evidenceRecord = fs.readFileSync(retainedEvidencePath, 'utf8');
         requireMeaningfulLabels(
           evidenceRecord,
           DOGFOODED_RECORD_LABELS,
