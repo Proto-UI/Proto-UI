@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import YAML from 'yaml';
 import { validateForwardReviewIndependence } from './evidence-state.mjs';
+import { computeReviewedContentDigest } from './reviewed-content-digest.mjs';
 
 const root = process.cwd();
 const reviewDirectory = path.join(root, 'internal/autonomous-maintenance/phase-0/reviews');
@@ -631,6 +632,29 @@ function validateReview(file) {
     packetSchema,
     errors
   );
+  if (
+    packetSchema === 'forward' &&
+    metadata.stage !== 'proposal' &&
+    metadata.reviewStatus === 'completed' &&
+    /^[0-9a-f]{40}$/.test(metadata.baselineCommit ?? '') &&
+    Array.isArray(metadata.changeInventory?.exactPaths)
+  ) {
+    try {
+      const expectedDigest = computeReviewedContentDigest({
+        root,
+        baseline: metadata.baselineCommit,
+        head: 'HEAD',
+        exactPaths: metadata.changeInventory.exactPaths,
+        reviewPath: path.relative(root, file).replaceAll('\\', '/'),
+        headPacketContent: content,
+      });
+      if (metadata.changeInventory.reviewedContentDigest !== expectedDigest) {
+        fail(errors, file, 'reviewed-content digest does not match the completed packet content');
+      }
+    } catch (error) {
+      fail(errors, file, `could not recompute reviewed-content digest: ${error.message}`);
+    }
+  }
 
   for (const category of ['direct', 'indirect', 'excluded', 'unknown']) {
     if (!Array.isArray(metadata.affectedSurfaces?.[category])) {

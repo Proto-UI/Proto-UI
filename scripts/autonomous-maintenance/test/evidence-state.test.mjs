@@ -243,6 +243,22 @@ test('accepts an explicit pending review with no fabricated reviewer history', (
   assert.deepEqual(validateForwardReviewIndependence(review), []);
 });
 
+test('rejects a revision-required packet whose independent review is still pending', () => {
+  const review = validForwardReview();
+  review.reviewStatus = 'revision-required';
+  review.independentReview.status = 'pending';
+  review.independentReview.reviewer = null;
+  review.independentReview.reviewedContentDigest = null;
+  review.independentReview.decision = null;
+  review.independentReview.history = [];
+
+  assert.ok(
+    validateForwardReviewIndependence(review).includes(
+      'revision-required must reflect an incomplete, misleading, or blocked review'
+    )
+  );
+});
+
 test('rejects self-review and a current status that contradicts history', () => {
   const review = validForwardReview();
   review.independentReview.status = 'incomplete';

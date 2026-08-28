@@ -596,6 +596,19 @@ export function validateForwardReviewIndependence(metadata) {
     return errors;
   }
 
+  if (metadata.reviewStatus === 'ready-for-independent-review' && review.status !== 'pending') {
+    errors.push('ready-for-independent-review requires pending independentReview status');
+  }
+  if (
+    metadata.reviewStatus === 'revision-required' &&
+    !['incomplete', 'misleading', 'blocked'].includes(review.status)
+  ) {
+    errors.push('revision-required must reflect an incomplete, misleading, or blocked review');
+  }
+  if (metadata.reviewStatus === 'completed' && review.status !== 'adequate') {
+    errors.push('completed reviewStatus requires adequate independentReview status');
+  }
+
   if (review.status === 'pending') {
     if (review.reviewer !== null) {
       errors.push('pending independentReview requires a null reviewer');
@@ -691,18 +704,5 @@ export function validateForwardReviewIndependence(metadata) {
       'adequate independentReview must bind the current changeInventory.reviewedContentDigest'
     );
   }
-  if (metadata.reviewStatus === 'ready-for-independent-review' && review.status !== 'pending') {
-    errors.push('ready-for-independent-review requires pending independentReview status');
-  }
-  if (
-    metadata.reviewStatus === 'revision-required' &&
-    !['incomplete', 'misleading', 'blocked'].includes(review.status)
-  ) {
-    errors.push('revision-required must reflect an incomplete, misleading, or blocked review');
-  }
-  if (metadata.reviewStatus === 'completed' && review.status !== 'adequate') {
-    errors.push('completed reviewStatus requires adequate independentReview status');
-  }
-
   return errors;
 }

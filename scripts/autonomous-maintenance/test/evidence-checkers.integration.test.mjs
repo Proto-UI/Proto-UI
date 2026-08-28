@@ -6,7 +6,10 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import YAML from 'yaml';
-import { computeReviewedContentDigest } from '../reviewed-content-digest.mjs';
+import {
+  canonicalizeReviewPacket,
+  computeReviewedContentDigest,
+} from '../reviewed-content-digest.mjs';
 
 const testDirectory = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(testDirectory, '..', '..', '..');
@@ -42,6 +45,24 @@ function writeRunLedger(root, run) {
     YAML.stringify({ schemaVersion: 2, runs: [run] })
   );
 }
+
+test('review packet canonicalization preserves historical review digests', () => {
+  const packet = markdownMetadata('Digest history fixture', {
+    changeInventory: { reviewedContentDigest: `sha256:${'a'.repeat(64)}` },
+    independentReview: {
+      reviewedContentDigest: `sha256:${'a'.repeat(64)}`,
+      history: [
+        { round: 1, reviewedContentDigest: `sha256:${'b'.repeat(64)}` },
+        { round: 2, reviewedContentDigest: `sha256:${'a'.repeat(64)}` },
+      ],
+    },
+  });
+  const historicalMutation = packet.replace(`sha256:${'b'.repeat(64)}`, `sha256:${'c'.repeat(64)}`);
+  const currentMutation = packet.replaceAll(`sha256:${'a'.repeat(64)}`, `sha256:${'d'.repeat(64)}`);
+
+  assert.notEqual(canonicalizeReviewPacket(packet), canonicalizeReviewPacket(historicalMutation));
+  assert.equal(canonicalizeReviewPacket(packet), canonicalizeReviewPacket(currentMutation));
+});
 
 function createFixture(t, { remediation = 'modify' } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-maintenance-check-'));
@@ -511,6 +532,37 @@ test('review checker accepts independent v2 identities and rejects self-review',
   assert.equal(negative.status, 1);
   assert.match(negative.stderr, /must differ from remediationAuthor\.actorId/);
   assert.match(negative.stderr, /must differ from remediationAuthor\.taskId/);
+});
+
+test('review checker recomputes completed packet digests before integration eligibility', (t) => {
+  const fixture = createFixture(t);
+  fixture.review.integrationEligibility = {
+    status: 'pending',
+    exactHead: 'pending',
+    trustedCi: 'pending',
+    independentReview: 'satisfied',
+    livePermission: 'pending',
+    dcoOrProvenance: 'pending',
+    repositoryRules: 'pending',
+    idempotency: 'pending',
+    evidence: [],
+  };
+  const staleDigest = `sha256:${'f'.repeat(64)}`;
+  fixture.review.changeInventory.reviewedContentDigest = staleDigest;
+  fixture.review.independentReview.reviewedContentDigest = staleDigest;
+  fixture.review.independentReview.history[0].reviewedContentDigest = staleDigest;
+  writeFile(
+    fixture.root,
+    fixture.reviewPath,
+    markdownMetadata('AM-P0-004-F1 remediation review packet', fixture.review, fixture.sections)
+  );
+
+  const result = spawnSync(process.execPath, [reviewChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /reviewed-content digest does not match/);
 });
 
 for (const remediation of ['delete', 'rename']) {

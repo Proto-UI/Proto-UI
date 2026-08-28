@@ -605,6 +605,195 @@ test('update-branch no-op is bound to the exact base and rejects an unrelated st
   assert.equal(satisfied.outcome, 'no-op');
 });
 
+test('update-branch polls until both the new head and its ancestry are visible', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'update-pull-request-branch-at-expected-head',
+    target: {
+      kind: 'pull-request',
+      number: 509,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      baseSha: BASE,
+    },
+    expected: { containsBaseSha: false },
+    desired: { containsBaseSha: true },
+    rationale: 'Bring the exact branch head up to the exact current base.',
+  });
+  const current = {
+    kind: 'pull-request',
+    number: 509,
+    nodeId: 'PR_node',
+    url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+    state: 'OPEN',
+    authorLogin: 'contributor',
+    updatedAt: UPDATED_AT,
+    headSha: HEAD,
+    baseSha: BASE,
+    containsBaseSha: false,
+    maintainerCanModify: true,
+  };
+  const preState = { ...metadataLive(), action: request.action, current };
+  const states = [
+    preState,
+    {
+      ...preState,
+      current: {
+        ...current,
+        headSha: NEXT_HEAD,
+        containsBaseSha: false,
+      },
+    },
+    {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: {
+        ...current,
+        updatedAt: '2026-08-27T01:00:10.000Z',
+        headSha: NEXT_HEAD,
+        containsBaseSha: true,
+      },
+    },
+  ];
+  let reads = 0;
+  const waits = [];
+  const result = applyGitHubCollaborationMutation(request, preState, {
+    runner() {
+      return JSON.stringify({ message: 'Updating pull request branch.' });
+    },
+    collectState() {
+      return states[reads++];
+    },
+    asyncVerificationAttempts: 3,
+    asyncVerificationDelayMs: 25,
+    wait(delayMs) {
+      waits.push(delayMs);
+    },
+  });
+
+  assert.equal(reads, 3);
+  assert.deepEqual(waits, [25, 25]);
+  assert.equal(result.mutationCount, 1);
+  assert.equal(result.reconciliationCount, 0);
+  assert.equal(result.postState.current.headSha, NEXT_HEAD);
+});
+
+test('update-branch stops bounded polling when base or pull-request state changes', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'update-pull-request-branch-at-expected-head',
+    target: {
+      kind: 'pull-request',
+      number: 509,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      baseSha: BASE,
+    },
+    expected: { containsBaseSha: false },
+    desired: { containsBaseSha: true },
+    rationale: 'Bring the exact branch head up to the exact current base.',
+  });
+  const current = {
+    kind: 'pull-request',
+    number: 509,
+    nodeId: 'PR_node',
+    url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+    state: 'OPEN',
+    authorLogin: 'contributor',
+    updatedAt: UPDATED_AT,
+    headSha: HEAD,
+    baseSha: BASE,
+    containsBaseSha: false,
+    maintainerCanModify: true,
+  };
+  const preState = { ...metadataLive(), action: request.action, current };
+
+  for (const drift of [{ baseSha: 'd'.repeat(40) }, { state: 'CLOSED' }]) {
+    let reads = 0;
+    let waits = 0;
+    assert.throws(
+      () =>
+        applyGitHubCollaborationMutation(request, preState, {
+          runner() {
+            return JSON.stringify({ message: 'Updating pull request branch.' });
+          },
+          collectState() {
+            reads += 1;
+            return { ...preState, current: { ...current, ...drift } };
+          },
+          asyncVerificationAttempts: 3,
+          asyncVerificationDelayMs: 25,
+          wait() {
+            waits += 1;
+          },
+        }),
+      /bounded post-write verification polling.*do not retry blindly/
+    );
+    assert.equal(reads, 1);
+    assert.equal(waits, 0);
+  }
+});
+
+test('update-branch polling stops at the configured maximum without another write', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'update-pull-request-branch-at-expected-head',
+    target: {
+      kind: 'pull-request',
+      number: 509,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      baseSha: BASE,
+    },
+    expected: { containsBaseSha: false },
+    desired: { containsBaseSha: true },
+    rationale: 'Bring the exact branch head up to the exact current base.',
+  });
+  const current = {
+    kind: 'pull-request',
+    number: 509,
+    nodeId: 'PR_node',
+    url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+    state: 'OPEN',
+    authorLogin: 'contributor',
+    updatedAt: UPDATED_AT,
+    headSha: HEAD,
+    baseSha: BASE,
+    containsBaseSha: false,
+    maintainerCanModify: true,
+  };
+  const preState = { ...metadataLive(), action: request.action, current };
+  let writes = 0;
+  let reads = 0;
+  let waits = 0;
+
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(request, preState, {
+        runner() {
+          writes += 1;
+          return JSON.stringify({ message: 'Updating pull request branch.' });
+        },
+        collectState() {
+          reads += 1;
+          return preState;
+        },
+        asyncVerificationAttempts: 3,
+        asyncVerificationDelayMs: 25,
+        wait() {
+          waits += 1;
+        },
+      }),
+    /bounded post-write verification polling.*do not retry blindly/
+  );
+  assert.equal(writes, 1);
+  assert.equal(reads, 3);
+  assert.equal(waits, 2);
+});
+
 test('update-branch allows the acting pull-request author when maintainer edits are disabled', () => {
   const base = metadataRequest();
   const request = seal({

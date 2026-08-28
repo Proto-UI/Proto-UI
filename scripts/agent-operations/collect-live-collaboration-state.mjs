@@ -456,6 +456,38 @@ function platformObject(request, raw, postState) {
   };
 }
 
+function waitSynchronously(delayMs) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
+}
+
+function collectVerifiedPostWriteState(request, runner, collectState, options) {
+  const isAsynchronousBranchUpdate =
+    request.action === 'update-pull-request-branch-at-expected-head';
+  const maxAttempts = isAsynchronousBranchUpdate ? (options.asyncVerificationAttempts ?? 12) : 1;
+  const delayMs = options.asyncVerificationDelayMs ?? 1_000;
+  const wait = options.wait ?? waitSynchronously;
+  let postState;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    postState = collectState(request, { runner });
+    if (desiredCollaborationStateSatisfied(request, postState)) return postState;
+    const current = postState.current;
+    const canStillConverge =
+      isAsynchronousBranchUpdate &&
+      current.state === 'OPEN' &&
+      current.baseSha === request.target.baseSha;
+    if (!canStillConverge || attempt === maxAttempts) break;
+    wait(delayMs);
+  }
+
+  const verification = isAsynchronousBranchUpdate
+    ? 'bounded post-write verification polling'
+    : 'the single post-write read';
+  throw new Error(
+    `${request.action} returned but the desired state was not verified by ${verification}; do not retry blindly`
+  );
+}
+
 export function applyGitHubCollaborationMutation(request, preState, options = {}) {
   validateCollaborationRequest(request);
   if (desiredCollaborationStateSatisfied(request, preState)) {
@@ -504,12 +536,7 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     );
   }
 
-  const postState = collectState(request, { runner });
-  if (!desiredCollaborationStateSatisfied(request, postState)) {
-    throw new Error(
-      `${request.action} returned but the desired state was not verified by the single post-write read; do not retry blindly`
-    );
-  }
+  const postState = collectVerifiedPostWriteState(request, runner, collectState, options);
   return {
     mutationCount: 1,
     reconciliationCount: 0,

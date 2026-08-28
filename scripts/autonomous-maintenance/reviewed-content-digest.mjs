@@ -5,16 +5,20 @@ import YAML from 'yaml';
 const digestSentinel = `sha256:${'0'.repeat(64)}`;
 const digestDomain = 'proto-ui-autonomous-maintenance-reviewed-content-v1';
 
-function canonicalizeDigestFields(value) {
-  if (Array.isArray(value)) return value.map(canonicalizeDigestFields);
-  if (!value || typeof value !== 'object') return value;
+function sentinelDigest(record) {
+  if (record && typeof record === 'object' && Object.hasOwn(record, 'reviewedContentDigest')) {
+    record.reviewedContentDigest = digestSentinel;
+  }
+}
 
-  return Object.fromEntries(
-    Object.entries(value).map(([key, entry]) => [
-      key,
-      key === 'reviewedContentDigest' ? digestSentinel : canonicalizeDigestFields(entry),
-    ])
-  );
+function canonicalizeDigestFields(value) {
+  const canonical = structuredClone(value);
+  sentinelDigest(canonical.changeInventory);
+  sentinelDigest(canonical.independentReview);
+  if (Array.isArray(canonical.independentReview?.history)) {
+    sentinelDigest(canonical.independentReview.history.at(-1));
+  }
+  return canonical;
 }
 
 export function canonicalizeReviewPacket(content) {
@@ -63,7 +67,14 @@ function updateField(hash, label, value) {
   hash.update(value, 'utf8');
 }
 
-export function computeReviewedContentDigest({ root, baseline, head, exactPaths, reviewPath }) {
+export function computeReviewedContentDigest({
+  root,
+  baseline,
+  head,
+  exactPaths,
+  reviewPath,
+  headPacketContent,
+}) {
   const normalizedPaths = [...exactPaths].sort();
   const reviewedPaths = normalizedPaths.filter((entry) => entry !== reviewPath);
   const patch = execFileSync(
@@ -84,7 +95,7 @@ export function computeReviewedContentDigest({ root, baseline, head, exactPaths,
     { cwd: root, maxBuffer: 64 * 1024 * 1024 }
   );
 
-  const headPacket = readCommitPath(root, head, reviewPath);
+  const headPacket = headPacketContent ?? readCommitPath(root, head, reviewPath);
   if (headPacket === null) {
     throw new Error(`exact head does not contain review packet: ${reviewPath}`);
   }
