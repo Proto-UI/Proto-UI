@@ -3882,3 +3882,35 @@ test('classifies Vite query imports by their base specifier', () => {
     )
   );
 });
+
+test('rejects forbidden third-party Harness UI package imports', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/RadixDialog.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import * as Dialog from '@radix-ui/react-dialog'; export const primitive = Dialog.Root;",
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /forbidden third-party Harness UI package `@radix-ui\/react-dialog`/
+  );
+});
+
+test('guards the privileged hooks package in Website consumers', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/HookEscape.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, "import { useContext } from '@proto.ui/hooks';", 'utf8');
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `@proto\.ui\/hooks` in `apps\/www\/src\/components\/HookEscape\.ts`/
+  );
+});

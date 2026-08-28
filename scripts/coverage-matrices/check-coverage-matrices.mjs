@@ -137,6 +137,17 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
 });
+
+const HARNESS_FORBIDDEN_UI_PACKAGE_PATTERNS = Object.freeze([
+  /^@(?:assistant-ui|chakra-ui|chatscope|headlessui|mui|radix-ui)\//u,
+  /^@floating-ui\//u,
+  /^(?:cmdk|react-dropzone|react-resizable|react-select|react-virtualized|react-virtuoso|react-window)$/u,
+]);
+
+function isForbiddenHarnessUiPackage(specifier) {
+  const baseSpecifier = importSpecifierWithoutViteSuffix(specifier);
+  return HARNESS_FORBIDDEN_UI_PACKAGE_PATTERNS.some((pattern) => pattern.test(baseSpecifier));
+}
 const HARNESS_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // M0 authorizes only the React Adapter entry. Any prototype/facade entry
   // must be admitted here exactly in the same change that approves it.
@@ -1925,6 +1936,9 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAlias
   if (/^@proto\.ui\/runtime(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'runtime-package', resolvedPath: null };
   }
+  if (/^@proto\.ui\/hooks(?:\/|$)/u.test(classifiedSpecifier)) {
+    return { category: 'hooks-package', resolvedPath: null };
+  }
   const websiteAliasPrefix = '@/';
   const isWebsiteSourceAlias =
     websiteSourceAliasRoot && classifiedSpecifier.startsWith(websiteAliasPrefix);
@@ -1953,11 +1967,12 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAlias
   if (/^packages\/runtime\/src(?:\/|$)/u.test(resolvedPath)) {
     return { category: 'runtime-internal', resolvedPath };
   }
-  return null;
 }
-
 function guardedHarnessImport(rootDir, sourcePath, specifier) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
+  if (isForbiddenHarnessUiPackage(classifiedSpecifier)) {
+    return { category: 'forbidden-third-party-package', resolvedPath: null };
+  }
   if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'proto-ui-package', resolvedPath: null };
   }
@@ -2041,6 +2056,12 @@ function discoverHarnessRawImports(rootDir) {
 
 function validateHarnessRawImports(rootDir, relativePath, issues) {
   for (const rawImport of discoverHarnessRawImports(rootDir)) {
+    if (rawImport.category === 'forbidden-third-party-package') {
+      issues.push(
+        `${relativePath}: forbidden third-party Harness UI package \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\``
+      );
+      continue;
+    }
     const allowance = HARNESS_RAW_IMPORT_ALLOWLIST[rawImport.sourcePath];
     if (allowance?.specifiers?.includes(rawImport.specifier)) continue;
     issues.push(
