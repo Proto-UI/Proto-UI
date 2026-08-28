@@ -12,7 +12,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 controlled/uncontrolled `checked` 与 `indeterminate`、生效的 disabled 状态、pointer 与 Space activation、focus，以及包含 `aria-checked="mixed"` 的可访问 `checkbox` role 均由 Base Checkbox 所有。Brutalist 层只拥有呈现：方形几何、硬质 ink border、偏移 shadow、明确 fill 与各状态样式。
 
-Indicator 从最近的 Root 派生 checked 与 indeterminate 可见性，不拥有独立 value、focus、event 或 accessibility surface。真实 package export 会渲染紧凑的硬线勾号或横杠，并让 indeterminate 在视觉上优先于 checked。该 family 可从 `@proto.ui/prototypes-brutalist/checkbox` 导入，也可通过 `proto-ui add brutalist-checkbox` 添加。
+Indicator 从最近的 Root 派生 checked 与 indeterminate 可见性，不拥有独立 value、focus、event 或 accessibility surface。真实 package export 会渲染紧凑的硬线勾号或横杠，并让 indeterminate 在视觉上优先于 checked。从 `@proto.ui/prototypes-brutalist/checkbox` 导入该 family。
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-checkbox" initialRuntime="wc" />
