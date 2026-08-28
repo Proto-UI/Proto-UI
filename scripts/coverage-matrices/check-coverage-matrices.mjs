@@ -784,24 +784,23 @@ function reportsCatalogEntityStatus(value, entityId, status) {
 
 function explicitRepositoryPaths(value) {
   const paths = [];
-  for (const match of String(value ?? '').matchAll(/`([^`\r\n]+)`/g)) {
+  for (const match of value.matchAll(/`([^`\r\n]+)`/g)) {
     const candidate = match[1].trim().replaceAll('\\', '/');
     if (!/^(?:apps|packages|scripts|spec|internal)\//.test(candidate)) continue;
     if (/[?*{}\[\]]/.test(candidate) || candidate.split('/').includes('..')) continue;
     paths.push(candidate);
   }
-  return [...new Set(paths)];
+  return paths;
 }
 
-function matrixPathReferences(value) {
+function repositoryPathsFromMatrixPath(value) {
   const paths = explicitRepositoryPaths(value);
-  for (const match of String(value ?? '').matchAll(
-    /(?<![`A-Za-z0-9_./-])((?:apps|packages|scripts|spec|internal)\/[A-Za-z0-9][A-Za-z0-9._/-]*[A-Za-z0-9_])/gu
-  )) {
-    const candidate = match[1];
-    if (!/[?*{}\[\]]/.test(candidate) && !candidate.split('/').includes('..')) {
-      paths.push(candidate);
-    }
+  const candidate = value.trim().replaceAll('\\', '/');
+  if (
+    /^(?:apps|packages|scripts|spec|internal)\/[A-Za-z0-9._@+()/-]+$/u.test(candidate) &&
+    !candidate.split('/').includes('..')
+  ) {
+    paths.push(candidate);
   }
   return [...new Set(paths)];
 }
@@ -820,7 +819,7 @@ function walkFiles(directory) {
 function loadCatalogEntries(rootDir, issues) {
   const entries = new Map();
   for (const absolutePath of walkFiles(path.join(rootDir, 'spec'))) {
-    if (!/\.(?:yaml|yml)$/i.test(absolutePath)) continue;
+    if (!/\.ya?ml$/i.test(absolutePath)) continue;
     const content = fs.readFileSync(absolutePath, 'utf8');
     const relativePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
     let document;
@@ -848,6 +847,23 @@ function loadCatalogEntries(rootDir, issues) {
 
 function stripMarkdownCode(content) {
   let fence = null;
+  const mdxBlockTags = [];
+  const updateMdxBlockTags = (visibleLine) => {
+    for (const match of visibleLine.matchAll(
+      /<\s*(\/?)\s*([A-Za-z][\w:.-]*)\b[^>]*?(\/?)\s*>|<\s*(\/?)\s*>/gu
+    )) {
+      const isFragment = match[4] !== undefined;
+      const closing = isFragment ? match[4] === '/' : match[1] === '/';
+      const tag = isFragment ? '<>' : match[2];
+      const selfClosing = !isFragment && match[3] === '/';
+      if (closing) {
+        const matchingIndex = mdxBlockTags.lastIndexOf(tag);
+        if (matchingIndex >= 0) mdxBlockTags.splice(matchingIndex);
+      } else if (!selfClosing) {
+        mdxBlockTags.push(tag);
+      }
+    }
+  };
   const withoutFences = content
     .split(/\r?\n/)
     .map((line) => {
@@ -856,8 +872,19 @@ function stripMarkdownCode(content) {
         fence = { character: fenceRun[0], length: fenceRun.length };
         return '';
       }
-      if (!fence && /^(?: {4}|\t)/u.test(line)) return '';
-      if (!fence) return line;
+      if (!fence) {
+        const visibleLine = line.replace(/(?<!`)(`+)(?!`)[^\r\n]*?(?<!`)\1(?!`)/gu, '');
+        if (mdxBlockTags.length > 0) {
+          updateMdxBlockTags(visibleLine);
+          return line;
+        }
+
+        if (/^(?: {4}|\t)/u.test(line)) return '';
+
+        const trimmedLine = visibleLine.trimStart();
+        if (/^<(?:[A-Za-z]|>)/u.test(trimmedLine)) updateMdxBlockTags(visibleLine);
+        return line;
+      }
 
       const closingRun = line.match(/^[ \t]*(`+|~+)[ \t]*$/u)?.[1];
       if (closingRun && closingRun[0] === fence.character && closingRun.length >= fence.length) {
@@ -936,33 +963,76 @@ function isDomTypeNode(typeNode, sourceFile) {
   );
 }
 
-function domReceiverIdentifiers(sourceFile) {
-  const identifiers = new Set(['document', 'window']);
-  let changed;
-  do {
-    changed = false;
-    const visit = (node) => {
-      if (
-        (ts.isParameter(node) || ts.isVariableDeclaration(node)) &&
-        ts.isIdentifier(node.name) &&
-        (isDomTypeNode(node.type, sourceFile) ||
-          (ts.isParameter(node) && /^(?:el|element)$/u.test(node.name.text)) ||
-          (ts.isVariableDeclaration(node) &&
-            node.initializer &&
-            isDomReceiverExpression(node.initializer, sourceFile, identifiers))) &&
-        !identifiers.has(node.name.text)
-      ) {
-        identifiers.add(node.name.text);
-        changed = true;
+function domReceiverBindings(sourceFile) {
+  const bindingsByName = new Map();
+  const lexicalScope = (node) => {
+    for (let current = node.parent; current; current = current.parent) {
+      if (ts.isBlock(current) || ts.isFunctionLike(current) || ts.isSourceFile(current)) {
+        return current;
       }
-      ts.forEachChild(node, visit);
-    };
-    visit(sourceFile);
-  } while (changed);
-  return identifiers;
+    }
+    return sourceFile;
+  };
+  const addBinding = (name, node, initializer, intrinsicallyDom) => {
+    const bindings = bindingsByName.get(name) ?? [];
+    bindings.push({
+      initializer,
+      intrinsicallyDom,
+      node,
+      position: node.getStart(sourceFile),
+      scope: lexicalScope(node),
+    });
+    bindingsByName.set(name, bindings);
+  };
+  const collect = (node) => {
+    if ((ts.isParameter(node) || ts.isVariableDeclaration(node)) && ts.isIdentifier(node.name)) {
+      addBinding(
+        node.name.text,
+        node,
+        node.initializer ? unwrapTypeScriptExpression(node.initializer) : null,
+        isDomTypeNode(node.type, sourceFile) ||
+          (ts.isParameter(node) && /^(?:el|element)$/u.test(node.name.text))
+      );
+    }
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      ts.isIdentifier(node.left)
+    ) {
+      addBinding(node.left.text, node, unwrapTypeScriptExpression(node.right), false);
+    }
+    ts.forEachChild(node, collect);
+  };
+  collect(sourceFile);
+
+  const isIdentifierDomReceiver = (name, useNode, visitedBindings = new Set()) => {
+    const usePosition = useNode.getStart(sourceFile);
+    const bindings = bindingsByName.get(name) ?? [];
+    for (let scope = lexicalScope(useNode); scope; scope = lexicalScope(scope)) {
+      const binding = bindings
+        .filter((entry) => entry.scope === scope && entry.position < usePosition)
+        .sort((left, right) => right.position - left.position)[0];
+      if (binding) {
+        if (binding.intrinsicallyDom) return true;
+        if (!binding.initializer || visitedBindings.has(binding)) return false;
+        visitedBindings.add(binding);
+        return isDomReceiverExpression(
+          binding.initializer,
+          sourceFile,
+          receiverBindings,
+          binding.node,
+          visitedBindings
+        );
+      }
+      if (ts.isSourceFile(scope)) break;
+    }
+    return name === 'document' || name === 'window';
+  };
+  const receiverBindings = { isIdentifierDomReceiver };
+  return receiverBindings;
 }
 
-function isDomAcquisitionCall(expression, sourceFile, receiverIdentifiers) {
+function isDomAcquisitionCall(expression, sourceFile, receiverBindings, useNode, visitedBindings) {
   const candidate = unwrapTypeScriptExpression(expression);
   if (!ts.isCallExpression(candidate) || !ts.isPropertyAccessExpression(candidate.expression)) {
     return false;
@@ -971,13 +1041,29 @@ function isDomAcquisitionCall(expression, sourceFile, receiverIdentifiers) {
   if (!/^(?:closest|createElement|getElementById|querySelector)$/u.test(method)) {
     return false;
   }
-  return isDomReceiverExpression(candidate.expression.expression, sourceFile, receiverIdentifiers);
+  return isDomReceiverExpression(
+    candidate.expression.expression,
+    sourceFile,
+    receiverBindings,
+    useNode,
+    visitedBindings
+  );
 }
 
-function isDomReceiverExpression(expression, sourceFile, receiverIdentifiers) {
+function isDomReceiverExpression(
+  expression,
+  sourceFile,
+  receiverBindings,
+  useNode = expression,
+  visitedBindings = new Set()
+) {
   const candidate = unwrapTypeScriptExpression(expression);
-  if (ts.isIdentifier(candidate)) return receiverIdentifiers.has(candidate.text);
-  if (isDomAcquisitionCall(candidate, sourceFile, receiverIdentifiers)) return true;
+  if (ts.isIdentifier(candidate)) {
+    return receiverBindings.isIdentifierDomReceiver(candidate.text, useNode, visitedBindings);
+  }
+  if (isDomAcquisitionCall(candidate, sourceFile, receiverBindings, useNode, visitedBindings)) {
+    return true;
+  }
   if (!ts.isPropertyAccessExpression(candidate)) return false;
 
   const owner = unwrapTypeScriptExpression(candidate.expression);
@@ -991,7 +1077,7 @@ function isDomReceiverExpression(expression, sourceFile, receiverIdentifiers) {
   if (
     /^(?:currentTarget|target)$/u.test(candidate.name.text) &&
     ts.isIdentifier(owner) &&
-    /^(?:e|event)$/u.test(owner.text)
+    /^(?:e|ev|event)$/u.test(owner.text)
   ) {
     return true;
   }
@@ -1010,7 +1096,7 @@ function astContainsInteractiveRuntime(content) {
     true,
     ts.ScriptKind.TSX
   );
-  const receiverIdentifiers = domReceiverIdentifiers(sourceFile);
+  const receiverBindings = domReceiverBindings(sourceFile);
   let found = false;
   const visit = (node) => {
     if (found) return;
@@ -1034,7 +1120,7 @@ function astContainsInteractiveRuntime(content) {
       }
       if (
         /^(?:blur|focus|scrollBy|scrollIntoView|scrollTo)$/u.test(method) &&
-        isDomReceiverExpression(node.expression.expression, sourceFile, receiverIdentifiers)
+        isDomReceiverExpression(node.expression.expression, sourceFile, receiverBindings, node)
       ) {
         found = true;
         return;
@@ -1043,7 +1129,7 @@ function astContainsInteractiveRuntime(content) {
         (method === 'setAttribute' ||
           method === 'toggleAttribute' ||
           method === 'removeAttribute') &&
-        isDomReceiverExpression(node.expression.expression, sourceFile, receiverIdentifiers) &&
+        isDomReceiverExpression(node.expression.expression, sourceFile, receiverBindings, node) &&
         node.arguments.length > 0 &&
         ts.isStringLiteralLike(node.arguments[0]) &&
         /^aria-/u.test(node.arguments[0].text)
@@ -1057,7 +1143,8 @@ function astContainsInteractiveRuntime(content) {
         isDomReceiverExpression(
           node.expression.expression.expression,
           sourceFile,
-          receiverIdentifiers
+          receiverBindings,
+          node
         ) &&
         /^(?:add|remove|replace|toggle)$/u.test(method)
       ) {
@@ -1307,6 +1394,7 @@ function discoverWebsiteInteractiveSources(rootDir) {
 
 function discoverWebsiteComponentSources(rootDir) {
   const websiteSourceRoot = path.join(rootDir, 'apps', 'www', 'src');
+  const componentsRoot = path.join(websiteSourceRoot, 'components');
   const pagesRoot = path.join(websiteSourceRoot, 'pages');
   return ['components', 'pages']
     .flatMap((directory) => {
@@ -1314,14 +1402,13 @@ function discoverWebsiteComponentSources(rootDir) {
       return fs.existsSync(absoluteRoot) ? walkFiles(absoluteRoot) : [];
     })
     .filter((absolutePath) => {
-      if (
-        /\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath) ||
-        (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath))
-      ) {
+      if (/\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath)) return true;
+      if (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath)) {
         return true;
       }
       return (
-        /\.[jt]sx?$/i.test(absolutePath) &&
+        absolutePath.startsWith(`${componentsRoot}${path.sep}`) &&
+        /\.[jt]s$/i.test(absolutePath) &&
         astContainsExportedUserFacingComponent(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
       );
     })
@@ -1334,12 +1421,19 @@ function discoverWebsiteComponentSources(rootDir) {
 }
 
 function astContainsExportedUserFacingComponent(content, absolutePath) {
+  const scriptKind = /\.jsx$/i.test(absolutePath)
+    ? ts.ScriptKind.JSX
+    : /\.js$/i.test(absolutePath)
+      ? ts.ScriptKind.JS
+      : /\.ts$/i.test(absolutePath)
+        ? ts.ScriptKind.TS
+        : ts.ScriptKind.TSX;
   const sourceFile = ts.createSourceFile(
     absolutePath,
     content,
     ts.ScriptTarget.Latest,
     true,
-    /.jsx$/i.test(absolutePath) ? ts.ScriptKind.JSX : ts.ScriptKind.TSX
+    scriptKind
   );
   const reactNamespaceNames = new Set();
   const reactCreateElementNames = new Set();
@@ -1365,42 +1459,82 @@ function astContainsExportedUserFacingComponent(content, absolutePath) {
     }
   }
 
-  let containsRenderedSurface = false;
-  const visit = (node) => {
-    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node)) {
-      containsRenderedSurface = true;
-      return;
-    }
-    if (ts.isCallExpression(node)) {
-      if (
-        ts.isPropertyAccessExpression(node.expression) &&
-        ts.isIdentifier(node.expression.expression) &&
-        reactNamespaceNames.has(node.expression.expression.text) &&
-        node.expression.name.text === 'createElement'
-      ) {
-        containsRenderedSurface = true;
+  const containsRenderedSurface = (root) => {
+    let found = false;
+    const visit = (node) => {
+      if (found) return;
+      if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node) || ts.isJsxFragment(node)) {
+        found = true;
         return;
       }
-      if (ts.isIdentifier(node.expression) && reactCreateElementNames.has(node.expression.text)) {
-        containsRenderedSurface = true;
-        return;
+      if (ts.isCallExpression(node)) {
+        if (
+          ts.isPropertyAccessExpression(node.expression) &&
+          ts.isIdentifier(node.expression.expression) &&
+          reactNamespaceNames.has(node.expression.expression.text) &&
+          node.expression.name.text === 'createElement'
+        ) {
+          found = true;
+          return;
+        }
+        if (ts.isIdentifier(node.expression) && reactCreateElementNames.has(node.expression.text)) {
+          found = true;
+          return;
+        }
       }
-    }
-    ts.forEachChild(node, visit);
+      ts.forEachChild(node, visit);
+    };
+    visit(root);
+    return found;
   };
-  visit(sourceFile);
-  if (!containsRenderedSurface) return false;
 
-  return sourceFile.statements.some(
-    (statement) =>
-      ts.isExportAssignment(statement) ||
-      ts.isExportDeclaration(statement) ||
-      statement.modifiers?.some(
-        (modifier) =>
-          modifier.kind === ts.SyntaxKind.ExportKeyword ||
-          modifier.kind === ts.SyntaxKind.DefaultKeyword
-      )
-  );
+  const renderedLocalNames = new Set();
+  for (const statement of sourceFile.statements) {
+    if (
+      (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) &&
+      statement.name &&
+      containsRenderedSurface(statement)
+    ) {
+      renderedLocalNames.add(statement.name.text);
+    }
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (
+          ts.isIdentifier(declaration.name) &&
+          declaration.initializer &&
+          containsRenderedSurface(declaration.initializer)
+        ) {
+          renderedLocalNames.add(declaration.name.text);
+        }
+      }
+    }
+  }
+
+  return sourceFile.statements.some((statement) => {
+    const directlyExported = statement.modifiers?.some(
+      (modifier) =>
+        modifier.kind === ts.SyntaxKind.ExportKeyword ||
+        modifier.kind === ts.SyntaxKind.DefaultKeyword
+    );
+    if (directlyExported && containsRenderedSurface(statement)) return true;
+    if (ts.isExportAssignment(statement)) {
+      return (
+        containsRenderedSurface(statement.expression) ||
+        (ts.isIdentifier(statement.expression) && renderedLocalNames.has(statement.expression.text))
+      );
+    }
+    if (
+      ts.isExportDeclaration(statement) &&
+      !statement.moduleSpecifier &&
+      statement.exportClause &&
+      ts.isNamedExports(statement.exportClause)
+    ) {
+      return statement.exportClause.elements.some((element) =>
+        renderedLocalNames.has((element.propertyName ?? element.name).text)
+      );
+    }
+    return false;
+  });
 }
 
 function discoverHarnessUserFacingSources(rootDir) {
@@ -1422,17 +1556,183 @@ function discoverHarnessUserFacingSources(rootDir) {
     .sort();
 }
 
-function discoverHarnessForbiddenInteractionSources(rootDir) {
+function astContainsNativeJsxEventHandler(content, absolutePath) {
+  const sourceFile = ts.createSourceFile(
+    absolutePath,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    /\.jsx$/i.test(absolutePath) ? ts.ScriptKind.JSX : ts.ScriptKind.TSX
+  );
+  const reactNamespaceNames = new Set();
+  const reactCreateElementNames = new Set();
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== 'react'
+    ) {
+      continue;
+    }
+    const importClause = statement.importClause;
+    if (importClause?.name) reactNamespaceNames.add(importClause.name.text);
+    if (importClause?.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
+      reactNamespaceNames.add(importClause.namedBindings.name.text);
+    }
+    if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+      for (const element of importClause.namedBindings.elements) {
+        if ((element.propertyName ?? element.name).text === 'createElement') {
+          reactCreateElementNames.add(element.name.text);
+        }
+      }
+    }
+  }
+  const isNativeEventName = (name) =>
+    /^on[A-Z][A-Za-z0-9_$]*$/u.test(name) || NATIVE_EVENT_ATTRIBUTE_NAMES.has(name);
+  const objectLiteralHasNativeEvent = (objectLiteral) =>
+    objectLiteral.properties.some((property) => {
+      if (
+        !ts.isPropertyAssignment(property) &&
+        !ts.isMethodDeclaration(property) &&
+        !ts.isShorthandPropertyAssignment(property)
+      ) {
+        return false;
+      }
+      const name = property.name;
+      return (
+        (ts.isIdentifier(name) || ts.isStringLiteralLike(name)) && isNativeEventName(name.text)
+      );
+    });
+  const objectBindings = new Map();
+  const lexicalScope = (node) => {
+    for (let current = node.parent; current; current = current.parent) {
+      if (ts.isBlock(current) || ts.isFunctionLike(current) || ts.isSourceFile(current)) {
+        return current;
+      }
+    }
+    return sourceFile;
+  };
+  const collectObjectBindings = (node) => {
+    if ((ts.isVariableDeclaration(node) || ts.isParameter(node)) && ts.isIdentifier(node.name)) {
+      const bindings = objectBindings.get(node.name.text) ?? [];
+      bindings.push({
+        initializer: node.initializer ? unwrapTypeScriptExpression(node.initializer) : null,
+        node,
+        position: node.getStart(sourceFile),
+        scope: lexicalScope(node),
+      });
+      objectBindings.set(node.name.text, bindings);
+    }
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      ts.isIdentifier(node.left)
+    ) {
+      const bindings = objectBindings.get(node.left.text) ?? [];
+      bindings.push({
+        initializer: unwrapTypeScriptExpression(node.right),
+        node,
+        position: node.getStart(sourceFile),
+        scope: lexicalScope(node),
+      });
+      objectBindings.set(node.left.text, bindings);
+    }
+    ts.forEachChild(node, collectObjectBindings);
+  };
+  collectObjectBindings(sourceFile);
+  const expressionHasNativeEventObject = (expression, useNode, visitedBindings = new Set()) => {
+    const candidate = unwrapTypeScriptExpression(expression);
+    if (ts.isObjectLiteralExpression(candidate)) return objectLiteralHasNativeEvent(candidate);
+    if (!ts.isIdentifier(candidate)) return false;
+
+    const bindings = objectBindings.get(candidate.text) ?? [];
+    const usePosition = useNode.getStart(sourceFile);
+    for (let scope = lexicalScope(useNode); scope; scope = lexicalScope(scope)) {
+      const binding = bindings
+        .filter((entry) => entry.scope === scope && entry.position < usePosition)
+        .sort((left, right) => right.position - left.position)[0];
+      if (binding) {
+        if (!binding.initializer || visitedBindings.has(binding)) return false;
+        visitedBindings.add(binding);
+        return expressionHasNativeEventObject(binding.initializer, binding.node, visitedBindings);
+      }
+      if (ts.isSourceFile(scope)) break;
+    }
+    return false;
+  };
+  let found = false;
+  const visit = (node) => {
+    if (found) return;
+    if (ts.isJsxAttribute(node) && ts.isIdentifier(node.name)) {
+      const element = node.parent?.parent;
+      const tagName =
+        (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) &&
+        ts.isIdentifier(element.tagName)
+          ? element.tagName.text
+          : null;
+      if (tagName && /^[a-z]/u.test(tagName) && isNativeEventName(node.name.text)) {
+        found = true;
+        return;
+      }
+    }
+    if (ts.isJsxSpreadAttribute(node)) {
+      const element = node.parent?.parent;
+      const tagName =
+        (ts.isJsxOpeningElement(element) || ts.isJsxSelfClosingElement(element)) &&
+        ts.isIdentifier(element.tagName)
+          ? element.tagName.text
+          : null;
+      if (
+        tagName &&
+        /^[a-z]/u.test(tagName) &&
+        expressionHasNativeEventObject(node.expression, node)
+      ) {
+        found = true;
+        return;
+      }
+    }
+    if (ts.isCallExpression(node) && node.arguments.length >= 2) {
+      const isReactCreateElement =
+        (ts.isPropertyAccessExpression(node.expression) &&
+          ts.isIdentifier(node.expression.expression) &&
+          reactNamespaceNames.has(node.expression.expression.text) &&
+          node.expression.name.text === 'createElement') ||
+        (ts.isIdentifier(node.expression) && reactCreateElementNames.has(node.expression.text));
+      const intrinsicTag = node.arguments[0];
+      const props = node.arguments[1];
+      if (
+        isReactCreateElement &&
+        ts.isStringLiteralLike(intrinsicTag) &&
+        expressionHasNativeEventObject(props, node)
+      ) {
+        found = true;
+        return;
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return found;
+}
+
+function containsHarnessForbiddenStateMachine(content, absolutePath) {
+  return (
+    astContainsInteractiveRuntime(content) ||
+    astContainsNativeJsxEventHandler(content, absolutePath)
+  );
+}
+
+function discoverHarnessForbiddenStateMachineSources(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
   return walkFiles(sourceRoot)
-    .filter((absolutePath) => /\.[jt]sx?$/i.test(absolutePath))
+    .filter((absolutePath) => /\.[cm]?[jt]sx?$/i.test(absolutePath))
     .filter(
       (absolutePath) =>
-        !/\.(?:browser\.)?(?:test|spec|stories)\.[jt]sx?$/i.test(absolutePath) &&
+        !/\.(?:browser\.)?(?:test|spec|stories)\.[cm]?[jt]sx?$/i.test(absolutePath) &&
         !absolutePath.startsWith(path.join(sourceRoot, 'proto-ui') + path.sep)
     )
     .filter((absolutePath) =>
-      containsInteractiveSource(sourceTextForInteractionScan(absolutePath), absolutePath)
+      containsHarnessForbiddenStateMachine(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
     )
     .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
     .sort();
@@ -1582,34 +1882,38 @@ function configuredWebsiteSourceAliasRoot(rootDir) {
   return match ? path.resolve(path.dirname(configPath), match[1]) : null;
 }
 
+function importSpecifierWithoutViteSuffix(specifier) {
+  return specifier.replace(/[?#].*$/u, '');
+}
+
 function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAliasRoot) {
-  const baseSpecifier = specifier.split(/[?#]/u, 1)[0];
-  if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
+  const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
+  if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'adapter-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/prototypes-[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
+  if (/^@proto\.ui\/prototypes-[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'prototype-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/module-[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
+  if (/^@proto\.ui\/module-[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'module-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/core(?:\/|$)/u.test(baseSpecifier)) {
+  if (/^@proto\.ui\/core(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'core-package', resolvedPath: null };
   }
-  if (/^@proto\.ui\/runtime(?:\/|$)/u.test(baseSpecifier)) {
+  if (/^@proto\.ui\/runtime(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'runtime-package', resolvedPath: null };
   }
   const websiteAliasPrefix = '@/';
   const isWebsiteSourceAlias =
-    websiteSourceAliasRoot && baseSpecifier.startsWith(websiteAliasPrefix);
-  if (!baseSpecifier.startsWith('.') && !isWebsiteSourceAlias) return null;
+    websiteSourceAliasRoot && classifiedSpecifier.startsWith(websiteAliasPrefix);
+  if (!classifiedSpecifier.startsWith('.') && !isWebsiteSourceAlias) return null;
 
   const resolvedPath = path
     .relative(
       rootDir,
       isWebsiteSourceAlias
-        ? path.resolve(websiteSourceAliasRoot, baseSpecifier.slice(websiteAliasPrefix.length))
-        : path.resolve(rootDir, path.dirname(sourcePath), baseSpecifier)
+        ? path.resolve(websiteSourceAliasRoot, classifiedSpecifier.slice(websiteAliasPrefix.length))
+        : path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier)
     )
     .replaceAll('\\', '/');
   if (/^packages\/prototypes\/[^/]+\/src(?:\/|$)/u.test(resolvedPath)) {
@@ -1631,14 +1935,14 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAlias
 }
 
 function guardedHarnessImport(rootDir, sourcePath, specifier) {
-  const baseSpecifier = specifier.split(/[?#]/u, 1)[0];
-  if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(baseSpecifier)) {
+  const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
+  if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'proto-ui-package', resolvedPath: null };
   }
-  if (!baseSpecifier.startsWith('.')) return null;
+  if (!classifiedSpecifier.startsWith('.')) return null;
 
   const resolvedPath = path
-    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), baseSpecifier))
+    .relative(rootDir, path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier))
     .replaceAll('\\', '/');
   if (/^packages\/.+\/src(?:\/|$)/u.test(resolvedPath)) {
     return { category: 'package-internal', resolvedPath };
@@ -2101,7 +2405,12 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     } else {
       seenIds.set(id, row.line);
     }
-    rowDispositions.set(id, { targetClass, state });
+    rowDispositions.set(id, {
+      targetClass,
+      state,
+      sourcePaths: repositoryPathsFromMatrixPath(record.Path),
+      escapeOrExemption: record['Escape or exemption'],
+    });
 
     if (!config.allowedTargetClasses.includes(targetClass)) {
       issues.push(
@@ -2140,7 +2449,11 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     const governedSourcePrefix =
       config.kind === 'website' ? 'apps/www/src/' : 'apps/agent-harness/src/';
     if (config.kind === 'website' || config.kind === 'agent-harness') {
-      for (const repositoryPath of matrixPathReferences(record.Path)) {
+      const matrixSourcePaths =
+        config.kind === 'agent-harness'
+          ? repositoryPathsFromMatrixPath(record.Path)
+          : explicitRepositoryPaths(record.Path);
+      for (const repositoryPath of matrixSourcePaths) {
         if (!repositoryPath.startsWith(governedSourcePrefix)) continue;
         const owners = sourceOwners.get(repositoryPath) ?? [];
         owners.push({ id, line: row.line });
@@ -2158,12 +2471,11 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       }
     }
 
-    const boundRepositoryPaths = new Set([
-      ...matrixPathReferences(record.Path),
-      ...(config.existingPathHeaders ?? []).flatMap((header) =>
+    const boundRepositoryPaths = new Set(
+      (config.existingPathHeaders ?? []).flatMap((header) =>
         explicitRepositoryPaths(record[header])
-      ),
-    ]);
+      )
+    );
     for (const requiredRepositoryPath of config.requiredRepositoryPathsByRow?.[id] ?? []) {
       if (!boundRepositoryPaths.has(requiredRepositoryPath)) {
         issues.push(
@@ -2300,7 +2612,7 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
             .join(', ')}`
         );
       }
-      const implementationPaths = matrixPathReferences(record.Path);
+      const implementationPaths = repositoryPathsFromMatrixPath(record.Path);
       if (implementationPaths.length === 0) {
         issues.push(
           `${context}: dogfooded rows must bind at least one exact repository implementation path in Path`
@@ -2767,28 +3079,38 @@ function validateHarnessSourceBindings(
       }
     }
   }
-  for (const sourcePath of discoverHarnessForbiddenInteractionSources(rootDir)) {
-    const directIds = [
-      ...new Set((matrixResult.sourceOwners.get(sourcePath) ?? []).map(({ id }) => id)),
-    ];
-    const binding = bindings.get(sourcePath);
-    const ownerIds = binding?.ownerIds ?? directIds;
-    if (ownerIds.length === 0) {
+
+  for (const sourcePath of discoverHarnessForbiddenStateMachineSources(rootDir)) {
+    const directOwnerIds = (matrixResult.sourceOwners.get(sourcePath) ?? []).map(({ id }) => id);
+    const boundOwnerIds = bindings.get(sourcePath)?.ownerIds ?? [];
+    const ownerIds = [...new Set([...directOwnerIds, ...boundOwnerIds])].sort();
+    const hasExactInfrastructureDisposition =
+      ownerIds.length > 0 &&
+      ownerIds.every((ownerId) => {
+        const disposition = matrixResult.rowDispositions.get(ownerId);
+        const exactLimit = labeledValue(disposition?.escapeOrExemption ?? '', 'limit');
+        return (
+          disposition?.targetClass === 'infrastructure-exempt' &&
+          disposition?.state === 'infrastructure-exempt' &&
+          disposition.sourcePaths.includes(sourcePath) &&
+          exactLimit !== undefined &&
+          ((disposition.sourcePaths.length === 1 &&
+            /\bthis exact (?:source|file)\b/iu.test(exactLimit)) ||
+            repositoryPathsFromMatrixPath(exactLimit).includes(sourcePath))
+        );
+      });
+    if (!hasExactInfrastructureDisposition) {
+      const dispositionSummary =
+        ownerIds.length === 0
+          ? 'no matrix owner'
+          : ownerIds
+              .map((ownerId) => {
+                const disposition = matrixResult.rowDispositions.get(ownerId);
+                return `${ownerId} (${disposition?.targetClass ?? 'missing'}/${disposition?.state ?? 'missing'})`;
+              })
+              .join(', ');
       issues.push(
-        `${relativePath}: forbidden Harness interaction source \`${sourcePath}\` must bind an explicit matrix owner with an infrastructure-exempt disposition`
-      );
-      continue;
-    }
-    const hasOnlyInfrastructureOwners = ownerIds.every((ownerId) => {
-      const disposition = matrixResult.rowDispositions.get(ownerId);
-      return (
-        disposition?.targetClass === 'infrastructure-exempt' &&
-        disposition.state === 'infrastructure-exempt'
-      );
-    });
-    if (!hasOnlyInfrastructureOwners) {
-      issues.push(
-        `${relativePath}: forbidden Harness interaction source \`${sourcePath}\` requires every owner to use Target class \`infrastructure-exempt\` and State \`infrastructure-exempt\``
+        `${relativePath}: Harness source \`${sourcePath}\` contains a forbidden interaction or DOM state machine; only an exact infrastructure-exempt/infrastructure-exempt matrix disposition is permitted (received ${dispositionSummary})`
       );
     }
   }

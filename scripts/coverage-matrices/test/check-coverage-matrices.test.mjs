@@ -822,6 +822,35 @@ test('ignores inline and backtick/tilde-fenced MDX examples during interaction s
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
+test('ignores four-space and tab-indented Markdown code examples', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(
+    root,
+    'apps',
+    'www',
+    'src',
+    'content',
+    'docs',
+    'indented-examples.mdx'
+  );
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    [
+      '# Indented examples',
+      '',
+      '    button.addEventListener("click", runExample);',
+      '    import "@proto.ui/runtime";',
+      '',
+      '\telement.focus();',
+      '\timport "@proto.ui/prototypes-base";',
+    ].join('\n')
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
 test('keeps real MDX handler markup visible after Markdown code removal', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -850,6 +879,58 @@ test('keeps real MDX handler markup visible after Markdown code removal', () => 
   assert.match(
     validationMessage(root),
     /interactive website source `apps\/www\/src\/content\/docs\/interactive-example\.mdx` is not bound/
+  );
+});
+
+test('keeps indented live handlers inside nested MDX JSX visible', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(
+    root,
+    'apps',
+    'www',
+    'src',
+    'content',
+    'docs',
+    'nested-interactive-example.mdx'
+  );
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    [
+      '# Live nested control',
+      '',
+      '<section>',
+      '    <button onClick={runDemo}>Run</button>',
+      '</section>',
+    ].join('\n')
+  );
+
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/content\/docs\/nested-interactive-example\.mdx` is not bound/
+  );
+});
+
+test('keeps nested same-tag MDX depth before classifying later indented live markup', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relativePath = 'apps/www/src/content/docs/nested-same-tag-interactive.mdx';
+  const sourcePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    [
+      '<section>',
+      '  <section>',
+      '  </section>',
+      '    <button onClick={runDemo}>Run</button>',
+      '</section>',
+    ].join('\n')
+  );
+
+  assert.ok(
+    validationMessage(root).includes(`interactive website source \`${relativePath}\` is not bound`)
   );
 });
 
@@ -940,6 +1021,53 @@ test('detects bounded DOM focus, scroll, ARIA, and class-state mutations', () =>
     assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
   }
   assert.ok(!message.includes(`interactive website source \`${examplePath}\` is not bound`));
+});
+
+test('follows post-declaration DOM receiver assignments without leaking inner scopes', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const livePath = 'apps/www/src/content/docs/assigned-dom-receiver.ts';
+  const safePath = 'apps/www/src/content/docs/scoped-dom-receiver.ts';
+  for (const [relativePath, content] of [
+    [livePath, "let element; element = document.querySelector('button'); element.focus();"],
+    [
+      safePath,
+      "let element = model; function inspect() { element = document.querySelector('button'); } element.focus();",
+    ],
+  ]) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+
+  const message = validationMessage(root);
+  assert.ok(message.includes(`interactive website source \`${livePath}\` is not bound`));
+  assert.ok(!message.includes(`interactive website source \`${safePath}\` is not bound`));
+});
+
+test('does not let function-like parameters hide later outer DOM receiver uses', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/www/src/content/docs/dom-after-function-parameter.ts',
+      "const control = document.querySelector('button'); function inspect(control) { control.focus(); } control.focus();",
+    ],
+    [
+      'apps/www/src/content/docs/dom-after-arrow-parameter.ts',
+      "const control = document.querySelector('button'); const inspect = (control) => control.focus(); control.focus();",
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+
+  const message = validationMessage(root);
+  for (const [relativePath] of cases) {
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
 });
 
 test('does not infer DOM ownership from generic receiver method names', () => {
@@ -1139,6 +1267,37 @@ test('rejects adapter and implementation-internal imports outside the website al
   }
 });
 
+test('classifies Vite import suffixes before enforcing exact Website allowances', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/www/src/components/PrototypePreviewer/demo-renderer.ts',
+      '@proto.ui/core?raw',
+      "import { definePrototype } from '@proto.ui/core?raw';",
+    ],
+    [
+      'apps/www/src/components/InternalQueryEscape.ts',
+      '../../../../packages/runtime/src/index#fixture',
+      "import { createRuntimeSession } from '../../../../packages/runtime/src/index#fixture';",
+    ],
+  ];
+  for (const [relativePath, , content] of cases) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+
+  const message = validationMessage(root);
+  for (const [relativePath, specifier] of cases) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${relativePath}\` escapes the website consumer-wall allowlist`
+      )
+    );
+  }
+});
+
 test('resolves the configured Website source alias before enforcing the consumer wall', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -1261,6 +1420,37 @@ test('allows only the reviewed Adapter entry at the Harness bootstrap boundary',
       `raw Proto UI import \`@proto.ui/adapter-react\` in \`${bootstrapSource}\` escapes the Harness consumer-wall allowlist`
     )
   );
+});
+
+test('classifies Vite import suffixes before enforcing exact Harness allowances', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/agent-harness/src/proto-ui/bootstrap.tsx',
+      '@proto.ui/adapter-react?worker',
+      "import { createReactAdapter } from '@proto.ui/adapter-react?worker';",
+    ],
+    [
+      'apps/agent-harness/src/run/InternalHashEscape.ts',
+      '../../../../packages/runtime/src/index#fixture',
+      "import { createRuntimeSession } from '../../../../packages/runtime/src/index#fixture';",
+    ],
+  ];
+  for (const [relativePath, , content] of cases) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+
+  const message = validationMessage(root);
+  for (const [relativePath, specifier] of cases) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${relativePath}\` escapes the Harness consumer-wall allowlist`
+      )
+    );
+  }
 });
 
 test('rejects guarded imports from embedded component style blocks', () => {
@@ -1484,6 +1674,66 @@ test('requires new static website components to have a matrix classification', (
     validationMessage(root),
     /website component source `apps\/www\/src\/components\/StaticSurface\.astro` is not classified by a matrix row/
   );
+});
+
+test('discovers exported Website components rendered through React factories in JS and TS', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/www/src/components/ClassicSurface.js',
+      "import React from 'react'; export function ClassicSurface() { return React.createElement('section', null, 'Classic'); }",
+    ],
+    [
+      'apps/www/src/components/AliasedSurface.ts',
+      "import { createElement as h } from 'react'; export const AliasedSurface = () => h('section', null, 'Aliased');",
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+
+  const message = validationMessage(root);
+  for (const [relativePath] of cases) {
+    assert.ok(
+      message.includes(
+        `website component source \`${relativePath}\` is not classified by a matrix row`
+      ),
+      `${relativePath} must remain protected by the Website component scan`
+    );
+  }
+});
+
+test('does not classify non-exported or non-React JavaScript factories as Website components', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/www/src/components/PrivateFactory.js',
+      "import * as React from 'react'; function PrivateFactory() { return React.createElement('section'); }",
+    ],
+    [
+      'apps/www/src/components/LocalFactory.ts',
+      "const createElement = (name) => ({ name }); export function makeDescriptor() { return createElement('section'); }",
+    ],
+    [
+      'apps/www/src/components/ExportedData.ts',
+      "import React from 'react'; export const metadata = { renderer: React };",
+    ],
+    [
+      'apps/www/src/components/PrivateReactFactory.js',
+      "import React from 'react'; const PrivateSurface = () => React.createElement('section'); export const metadata = { kind: 'data' };",
+    ],
+  ];
+  for (const [relativePath, content] of cases) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('rejects a conflicting source binding for a static website component with one direct owner', () => {
@@ -1812,7 +2062,7 @@ test('rejects uncataloged entity IDs and stale lifecycle reporting', () => {
 test('loads quoted catalog scalars and the governed default draft status', () => {
   const quotedRoot = createRoot();
   fs.writeFileSync(
-    path.join(quotedRoot, 'spec', 'fixtures', 'quoted.yaml'),
+    path.join(quotedRoot, 'spec', 'fixtures', 'quoted.yml'),
     'id: "P-QUOTED-BUTTON"\ntype: "fixture"\nstatus: "active"\n',
     'utf8'
   );
@@ -2258,6 +2508,17 @@ test('requires an issue for every blocked or research row', () => {
   assert.match(validationMessage(root), /research rows must link a dependency as #<issue>/);
 });
 
+test('requires a concrete dependency owner for every blocked or research row', () => {
+  for (const state of ['blocked', 'research']) {
+    const root = createRoot();
+    writeValidMatrices(root, {}, { State: state, 'Dependency and owner': '#519' });
+    assert.match(
+      validationMessage(root),
+      new RegExp(`${state} rows must give the .*label a concrete value`)
+    );
+  }
+});
+
 test('requires reasons and re-review triggers for native and infrastructure exemptions', () => {
   const root = createRoot();
   writeValidMatrices(root, {
@@ -2579,6 +2840,42 @@ test('allows an app-local prototype row to advance to dogfooded with implementat
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
+test('requires dogfooded Harness evidence to bind an exact 40-character Git SHA', () => {
+  for (const commit of ['latest', 'abc123']) {
+    const root = createRoot();
+    const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+    const evidencePath = 'internal/agent-harness/evidence/m1/tool-invocation.md';
+    for (const [repositoryPath, content] of [
+      [implementationPath, 'fixture'],
+      [
+        evidencePath,
+        `Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: ${commit}\nEnvironment: fixture\nFixtures: tool invocation\nCommands: pnpm test\nResults: passed\n`,
+      ],
+    ]) {
+      const absolutePath = path.join(root, repositoryPath);
+      fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+      fs.writeFileSync(absolutePath, content, 'utf8');
+    }
+    writeValidMatrices(
+      root,
+      {},
+      {
+        ID: 'harness.run.tool-invocation',
+        'Target owner': 'Harness app-local Tool Invocation prototype',
+        'Target class': 'app-local-proto',
+        State: 'dogfooded',
+        Path: `\`${implementationPath}\``,
+        Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+        'Dependency and owner': 'No blocker; owner: Harness application',
+      }
+    );
+    assert.match(
+      validationMessage(root),
+      /dogfooded evidence record .* must bind Commit to an exact 40-character Git SHA/
+    );
+  }
+});
+
 test('requires a dogfooded implementation path under the Harness application root', () => {
   const root = createRoot();
   const implementationPath = 'spec/fixtures/not-harness.ts';
@@ -2587,7 +2884,7 @@ test('requires a dogfooded implementation path under the Harness application roo
     [implementationPath, 'fixture'],
     [
       evidencePath,
-      'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: abc123\nEnvironment: fixture\nFixtures: wrong root\nCommands: pnpm test\nResults: passed\n',
+      'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: 0123456789abcdef0123456789abcdef01234567\nEnvironment: fixture\nFixtures: wrong root\nCommands: pnpm test\nResults: passed\n',
     ],
   ]) {
     const absolutePath = path.join(root, repositoryPath);
@@ -2621,7 +2918,7 @@ test('rejects dogfooded Harness rows that consume removed catalog entities', () 
     [implementationPath, 'fixture'],
     [
       evidencePath,
-      'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: abc123\nEnvironment: fixture\nFixtures: removed button\nCommands: pnpm test\nResults: passed\n',
+      'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: 0123456789abcdef0123456789abcdef01234567\nEnvironment: fixture\nFixtures: removed button\nCommands: pnpm test\nResults: passed\n',
     ],
   ]) {
     const absolutePath = path.join(root, repositoryPath);
@@ -2848,6 +3145,387 @@ test('accepts a Harness user-facing source directly owned by a matrix Path', () 
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
+test('accepts a planned Harness source directly owned by an exact plain-text matrix Path', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/app/AppShell.tsx';
+  const absolutePath = path.join(root, relativePath);
+  writeValidMatrices(root, {}, { ID: 'harness.shell.frame', Path: relativePath });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function AppShell() { return <main>Harness</main>; }',
+    'utf8'
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not treat prose containing a Harness path as a direct matrix Path owner', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/app/AppShell.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function AppShell() { return <main>Harness</main>; }',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.shell.frame',
+      Path: `Planned implementation: ${relativePath}`,
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /Harness user-facing source `apps\/agent-harness\/src\/app\/AppShell\.tsx` is not classified/
+  );
+});
+
+test('rejects forbidden interaction state machines in ordinary Harness sources', () => {
+  const cases = [
+    ['RawKeyboard.tsx', 'export const RawKeyboard = () => <div onKeyDown={() => {}}>x</div>;'],
+    [
+      'RawCreateElement.ts',
+      "import { createElement as h } from 'react'; export const Raw = () => h('div', { onPointerDown: dismiss });",
+    ],
+    ['Listener.ts', 'window.addEventListener("pointerdown", dismiss);'],
+    ['Focus.ts', 'const element = document.querySelector("button"); element?.focus();'],
+    ['Scroll.ts', 'const element = document.querySelector("main"); element?.scrollIntoView();'],
+    [
+      'Aria.ts',
+      'const element = document.querySelector("button"); element?.setAttribute("aria-expanded", "true");',
+    ],
+    [
+      'ClassMutation.ts',
+      'const element = document.querySelector("div"); element?.classList.toggle("open");',
+    ],
+    ['Observer.ts', 'const observer = new ResizeObserver(reflow);'],
+  ];
+
+  for (const [fileName, content] of cases) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${fileName}`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+    assert.ok(
+      validationMessage(root).includes(
+        `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+      )
+    );
+  }
+});
+
+test('rejects bounded event receiver aliases and native JSX handler spreads in every script extension', () => {
+  for (const extension of ['js', 'jsx', 'ts', 'tsx']) {
+    for (const [stem, content] of [
+      ['CurrentTargetFocus', 'export function focusCurrent(ev) { ev.currentTarget.focus(); }'],
+      [
+        'NativeHandlerSpread',
+        'const onKeyDown = () => {}; const handlers = { onKeyDown }; export const Raw = () => <div {...handlers}>raw</div>;',
+      ],
+    ]) {
+      const root = createRoot();
+      const relativePath = `apps/agent-harness/src/run/${stem}.${extension}`;
+      const absolutePath = path.join(root, relativePath);
+      fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+      fs.writeFileSync(absolutePath, content, 'utf8');
+      writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+      assert.ok(
+        validationMessage(root).includes(
+          `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+        ),
+        `${relativePath} must remain protected by the Harness forbidden-state scan`
+      );
+    }
+  }
+});
+
+test('follows lexical aliases for native JSX handler spread objects', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/AliasedNativeHandlers.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'const onKeyDown = run; const handlers = { onKeyDown }; const alias = handlers; export const Raw = () => <div {...alias}>raw</div>;',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.ok(
+    validationMessage(root).includes(
+      `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+    )
+  );
+});
+
+test('follows plain identifier assignment flow for native JSX handler spreads', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/AssignedNativeHandlers.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'const onKeyDown = run; let handlers; handlers = { onKeyDown }; export const Raw = () => <div {...handlers}>raw</div>;',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.ok(
+    validationMessage(root).includes(
+      `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+    )
+  );
+});
+
+test('does not treat compound, property, or inner-scope assignments as outer object bindings', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/NonPlainAssignments.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    [
+      'const onKeyDown = run;',
+      'let compound = {}; compound ||= { onKeyDown };',
+      'let property = {}; property.handlers = { onKeyDown };',
+      'let scoped = {}; function mutate() { scoped = { onKeyDown }; }',
+      'export const Safe = () => <><div {...compound}/><div {...property}/><div {...scoped}/></>;',
+    ].join('\n'),
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not let function-like parameters hide later outer native handler spreads', () => {
+  for (const extension of ['js', 'jsx', 'ts', 'tsx']) {
+    for (const [stem, shadowDeclaration] of [
+      ['Function', 'function Safe(handlers) { return <div {...handlers}>safe</div>; }'],
+      ['Arrow', 'const Safe = (handlers) => <div {...handlers}>safe</div>;'],
+    ]) {
+      const root = createRoot();
+      const relativePath = `apps/agent-harness/src/run/OuterHandlersAfter${stem}.${extension}`;
+      const absolutePath = path.join(root, relativePath);
+      fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+      fs.writeFileSync(
+        absolutePath,
+        `const onKeyDown = run; const handlers = { onKeyDown }; ${shadowDeclaration} export const Raw = () => <div {...handlers}>raw</div>;`,
+        'utf8'
+      );
+      writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+      assert.ok(
+        validationMessage(root).includes(
+          `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+        ),
+        `${relativePath} must resolve the outer handler binding after the function-like shadow`
+      );
+    }
+  }
+});
+
+test('lets a function parameter shadow an outer native handler object', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/ShadowedNativeHandlers.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'const onKeyDown = run; const handlers = { onKeyDown }; export function Safe(handlers) { return <div {...handlers}>safe</div>; }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not permit a forbidden Harness state machine merely because it is bound to any row', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/RawKeyboardHelper.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, 'document.onkeydown = handleKeyDown;', 'utf8');
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      harnessBindings: [[relativePath, ['harness.transcript.viewport']]],
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/RawKeyboardHelper\.ts` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('allows bounded interaction mechanics only for an exact infrastructure-exempt Harness disposition', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/infrastructure/viewport-engine.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, 'const observer = new ResizeObserver(reflow);', 'utf8');
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.infrastructure.viewport-engine',
+      Path: `\`${relativePath}\``,
+      'Target class': 'infrastructure-exempt',
+      State: 'infrastructure-exempt',
+      'Proto UI chain': 'No catalog entity required by the infrastructure exemption',
+      'Dependency and owner': '#533; owner: Harness infrastructure owner',
+      'Escape or exemption':
+        'Reason: bounded viewport observation is infrastructure; limit: this exact source only',
+      'Re-review or removal issue': '#533 if it owns surrounding controls or focus behavior',
+    }
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not let an infrastructure binding exempt a forbidden unrelated source', () => {
+  const root = createRoot();
+  const exemptPath = 'apps/agent-harness/src/infrastructure/viewport-engine.ts';
+  const rawPath = 'apps/agent-harness/src/run/raw-focus.ts';
+  fs.mkdirSync(path.join(root, 'apps', 'agent-harness', 'src', 'run'), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, rawPath),
+    'export function focusCurrent(ev) { ev.currentTarget.focus(); }',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.infrastructure.viewport-engine',
+      Path: `\`${exemptPath}\``,
+      'Target class': 'infrastructure-exempt',
+      State: 'infrastructure-exempt',
+      'Proto UI chain': 'No catalog entity required by the infrastructure exemption',
+      'Dependency and owner': '#533; owner: Harness infrastructure owner',
+      'Escape or exemption':
+        'Reason: bounded viewport observation is infrastructure; limit: this exact source only',
+      'Re-review or removal issue': '#533 if it owns surrounding controls or focus behavior',
+    },
+    {
+      harnessBindings: [[rawPath, ['harness.infrastructure.viewport-engine']]],
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/raw-focus\.ts` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('requires a source-exact limit before an infrastructure row exempts forbidden mechanics', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/infrastructure/viewport-engine.ts';
+  fs.mkdirSync(path.dirname(path.join(root, relativePath)), { recursive: true });
+  fs.writeFileSync(path.join(root, relativePath), 'new ResizeObserver(reflow);', 'utf8');
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.infrastructure.viewport-engine',
+      Path: `\`${relativePath}\``,
+      'Target class': 'infrastructure-exempt',
+      State: 'infrastructure-exempt',
+      'Proto UI chain': 'No catalog entity required by the infrastructure exemption',
+      'Dependency and owner': '#533; owner: Harness infrastructure owner',
+      'Escape or exemption': 'Reason: bounded viewport observation is infrastructure only',
+      'Re-review or removal issue': '#533 when the viewport policy changes',
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/infrastructure\/viewport-engine\.ts` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('does not apply this-exact-source infrastructure prose to multiple Path sources', () => {
+  const root = createRoot();
+  const sourcePaths = [
+    'apps/agent-harness/src/infrastructure/viewport-engine.ts',
+    'apps/agent-harness/src/infrastructure/focus-engine.ts',
+  ];
+  for (const relativePath of sourcePaths) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, 'new ResizeObserver(reflow);', 'utf8');
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.infrastructure.viewport-engine',
+      Path: sourcePaths.map((sourcePath) => `\`${sourcePath}\``).join(', '),
+      'Target class': 'infrastructure-exempt',
+      State: 'infrastructure-exempt',
+      'Proto UI chain': 'No catalog entity required by the infrastructure exemption',
+      'Dependency and owner': '#533; owner: Harness infrastructure owner',
+      'Escape or exemption':
+        'Reason: bounded viewport observation is infrastructure; limit: this exact source only',
+      'Re-review or removal issue': '#533 when the viewport policy changes',
+    }
+  );
+
+  const message = validationMessage(root);
+  for (const relativePath of sourcePaths) {
+    assert.ok(
+      message.includes(
+        `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+      )
+    );
+  }
+});
+
+test('ignores Harness tests, strings, comments, and semantic component callbacks', () => {
+  const root = createRoot();
+  const sourceRoot = path.join(root, 'apps', 'agent-harness', 'src', 'run');
+  fs.mkdirSync(sourceRoot, { recursive: true });
+  fs.writeFileSync(
+    path.join(sourceRoot, 'Safe.tsx'),
+    [
+      'const example = "element.scrollIntoView(); window.addEventListener(\\"keydown\\", fn)";',
+      '// element.focus(); new MutationObserver(fn);',
+      'const onKeyDown = requestAction;',
+      'const handlers = { onKeyDown };',
+      'export const Safe = () => <ProtoButton {...handlers}>Run</ProtoButton>;',
+      'export function Shadowed() {',
+      '  const handlers = { role: "button" };',
+      '  return <div {...handlers}>Static</div>;',
+      '}',
+      'export function DomainModel(model) { model.currentTarget.focus(); }',
+    ].join('\n'),
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(sourceRoot, 'RawKeyboard.test.tsx'),
+    'export const Fixture = () => <div onKeyDown={() => {}}>fixture</div>;',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: '`apps/agent-harness/src/run/Safe.tsx`' });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
 test('protects every authoritative Website baseline row from deletion', () => {
   const root = createRoot();
   const website = MATRIX_CONFIGS[0];
@@ -2993,7 +3671,7 @@ test('rejects forbidden Harness interaction sources outside infrastructure dispo
 
   assert.match(
     validationMessage(root),
-    /forbidden Harness interaction source `apps\/agent-harness\/src\/run\/RawState\.ts` must bind an explicit matrix owner/
+    /Harness source `apps\/agent-harness\/src\/run\/RawState\.ts` contains a forbidden interaction or DOM state machine/
   );
 });
 
