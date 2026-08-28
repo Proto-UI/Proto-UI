@@ -10,7 +10,7 @@ function setExpanded(shell: HTMLElement, expanded: boolean): void {
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
   if (panel) panel.dataset.codeExpanded = String(expanded);
   shell
-    .querySelector<HTMLButtonElement>('[data-code-toggle]')
+    .querySelector<HTMLElement>('[data-code-toggle]')
     ?.setAttribute('aria-expanded', String(expanded));
 }
 
@@ -38,8 +38,8 @@ function initCodePanel(shell: HTMLElement): void {
   setExpanded(shell, false);
 
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
-  const toggle = shell.querySelector<HTMLButtonElement>('[data-code-toggle]');
-  const copyButton = shell.querySelector<HTMLButtonElement>('[data-copy]');
+  const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]');
+  const copyButton = shell.querySelector<HTMLElement>('[data-copy]');
   const copyText = shell.querySelector<HTMLElement>('[data-copy-text]');
 
   toggle?.addEventListener('click', () => {

@@ -30,7 +30,10 @@ const highlighted = await highlightCode(code, lang);
     class="group relative min-w-0 max-w-full max-h-24 min-h-12 overflow-hidden p-2 border-t border-border bg-muted data-[code-expanded=true]:max-h-none data-[code-expanded=true]:overflow-visible"
     data-code-inner
   >
-    <button
+    <wc-shadcn-button
+      data-site-shadcn-button
+      data-variant="outline"
+      data-size="icon"
       type="button"
       class="absolute top-2 right-2 size-8 items-center justify-center text-xs font-medium border border-border rounded-md bg-background/90 text-foreground cursor-pointer opacity-80 transition-colors duration-150 hover:opacity-100 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 hidden group-data-[code-expanded=true]:inline-flex"
       title="Copy code"
@@ -61,7 +64,7 @@ const highlighted = await highlightCode(code, lang);
           ></path>
         </svg>
       </span>
-    </button>
+    </wc-shadcn-button>
 
     <div
       class="[&_.shiki]:!bg-muted dark:[&_.shiki_span]:![color:var(--shiki-dark)] min-w-0 max-w-full overflow-x-auto max-h-36 group-data-[code-expanded=false]:select-none group-data-[code-expanded=true]:overflow-y-auto"
@@ -76,7 +79,10 @@ const highlighted = await highlightCode(code, lang);
     >
     </div>
 
-    <button
+    <wc-shadcn-button
+      data-site-shadcn-button
+      data-variant="outline"
+      data-size="sm"
       type="button"
       class="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-10 py-1.5 px-4 text-[0.8125rem] font-medium rounded-lg border border-border bg-background text-foreground cursor-pointer inline-flex items-center gap-1.5 shadow-sm transition-colors duration-150 hover:bg-muted group-data-[code-expanded=true]:hidden"
       data-code-toggle
@@ -84,13 +90,18 @@ const highlighted = await highlightCode(code, lang);
       aria-label="展开代码"
     >
       View code
-    </button>
+    </wc-shadcn-button>
   </div>
 </figure>
 
 <script>
+  import { initSiteShadcnControls } from '../site-shadcn-controls';
   import { initCodePanels } from './code-panel-client';
 
+  initSiteShadcnControls(document);
   initCodePanels(document);
-  document.addEventListener('astro:page-load', () => initCodePanels(document));
+  document.addEventListener('astro:page-load', () => {
+    initSiteShadcnControls(document);
+    initCodePanels(document);
+  });
 </script>

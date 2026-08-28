@@ -1,7 +1,7 @@
 ---
 title: 'Button'
 desp: 'Prototype: Button'
-description: 'Prototype: Button'
+description: 'A Shadcn-styled button projected through Proto UI adapters.'
 ---
 
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
@@ -9,17 +9,9 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import { codeMap } from '@/content/docs/demo_components/button/buttonCode';
 import { getCode } from '@/utils/conversionUtils';
 
+The Button prototype keeps one canonical demo per supported runtime. Use the adapter selector in the page chrome to compare the same semantic surface across implementations.
+
 <div data-adapter-panel="wc">
-  This is the button component for wc
-  <PrototypePreviewer
-    demoId="demo-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button', codeMap)}
-  />
-  This is the test component for wc
   <PrototypePreviewer
     demoId="demo-button"
     initialRuntime="wc"
@@ -31,7 +23,6 @@ import { getCode } from '@/utils/conversionUtils';
 </div>
 
 <div data-adapter-panel="react" style="display:none;">
-  This is the button component for react
   <PrototypePreviewer
     demoId="demo-button"
     initialRuntime="react"
@@ -43,18 +34,6 @@ import { getCode } from '@/utils/conversionUtils';
 </div>
 
 <div data-adapter-panel="vue" style="display:none;">
-  This is the button component for vue
-  <PrototypePreviewer
-    demoId="demo-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button', codeMap)}
-  />
-
-This is the test component for vue
-
   <PrototypePreviewer
     demoId="demo-button"
     initialRuntime="vue"
@@ -66,18 +45,6 @@ This is the test component for vue
 </div>
 
 <div data-adapter-panel="vue2" style="display:none;">
-  This is the button component for vue2
-  <PrototypePreviewer
-    demoId="demo-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button', codeMap)}
-  />
-
-This is the test component for vue2
-
   <PrototypePreviewer
     demoId="demo-button"
     initialRuntime="vue2"

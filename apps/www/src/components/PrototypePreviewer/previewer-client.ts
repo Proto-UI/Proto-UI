@@ -8,6 +8,12 @@ import { collectPrototypeIds } from './demo-types';
 import { releaseHostMount } from './runtimes/host-mount';
 import type { RuntimeId } from './runtimes/registry';
 import { refreshCodePanel } from './code-panel-client';
+import {
+  initSiteShadcnControls,
+  selectValue,
+  setSelectValue,
+  type SiteSelectRoot,
+} from '../site-shadcn-controls';
 
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 
@@ -32,7 +38,21 @@ export function initPreviewer(options: PreviewerOptions) {
   root.dataset.inited = '1';
 
   const host = root.querySelector('.host') as HTMLElement;
-  const select = root.querySelector('select') as HTMLSelectElement | null;
+  const selectRoot = root.querySelector<SiteSelectRoot>(
+    '[data-adapter-select-root], wc-shadcn-select-root'
+  );
+  const nativeSelect = root.querySelector<HTMLSelectElement>('select');
+
+  const readSelectValue = () =>
+    selectRoot ? selectValue(selectRoot) : (nativeSelect?.value ?? initialRuntime);
+  const writeSelectValue = (value: string) => {
+    if (selectRoot) setSelectValue(selectRoot, value);
+    else if (nativeSelect) nativeSelect.value = value;
+  };
+  const setSelectDisabled = (disabled: boolean) => {
+    if (selectRoot) selectRoot.setProps?.({ disabled });
+    else if (nativeSelect) nativeSelect.disabled = disabled;
+  };
 
   function preferredRuntime(): RuntimeId {
     try {
@@ -65,9 +85,33 @@ export function initPreviewer(options: PreviewerOptions) {
     if (shell) refreshCodePanel(shell, { reset: true });
   }
 
-  // 初始化下拉
-  if (select) {
-    select.innerHTML = '';
+  // Populate the shared Shadcn Select composition while retaining a native
+  // fallback for the isolated unit-test harness and third-party embeds.
+  if (selectRoot) {
+    const content = selectRoot.querySelector<HTMLElement>('wc-shadcn-select-content');
+    content?.replaceChildren();
+    for (const id of runtimeList) {
+      const item = document.createElement('wc-shadcn-select-item');
+      item.dataset.value = id;
+      item.dataset.textValue =
+        (
+          {
+            wc: 'Web Components',
+            react: 'React',
+            vue: 'Vue',
+            vue2: 'Vue 2',
+          } as Record<string, string>
+        )[id] || id;
+      item.textContent = item.dataset.textValue;
+      content?.appendChild(item);
+    }
+    initSiteShadcnControls(selectRoot);
+    const selected = readSelectValue();
+    writeSelectValue(
+      runtimeList.includes(selected as RuntimeId) ? selected : selectedInitialRuntime
+    );
+  } else if (nativeSelect) {
+    nativeSelect.innerHTML = '';
     for (const id of runtimeList) {
       const opt = document.createElement('option');
       opt.value = id;
@@ -81,7 +125,7 @@ export function initPreviewer(options: PreviewerOptions) {
           } as Record<string, string>
         )[id] || id;
       if (id === selectedInitialRuntime) opt.selected = true;
-      select.appendChild(opt);
+      nativeSelect.appendChild(opt);
     }
   }
 
@@ -124,7 +168,7 @@ export function initPreviewer(options: PreviewerOptions) {
     // Invalidate a runtime that is still awaiting its loader before this
     // switch reaches the next runtime's mount() call.
     releaseHostMount(host);
-    if (select) select.disabled = true;
+    setSelectDisabled(true);
 
     try {
       // 卸载旧 runtime / demo
@@ -191,7 +235,7 @@ export function initPreviewer(options: PreviewerOptions) {
       console.error(err);
       dispatch('error', { error: err });
     } finally {
-      if (myVersion === version && !destroyed && select) select.disabled = false;
+      if (myVersion === version && !destroyed) setSelectDisabled(false);
     }
   }
 
@@ -203,10 +247,24 @@ export function initPreviewer(options: PreviewerOptions) {
   // AdapterSelect synchronizes all selector instances and broadcasts the selected
   // runtime. Listen on document so the page-level selector also remounts every
   // compatible previewer; previewer-local selector changes use the same path.
+  const onSelectChange = (event: Event) => {
+    const detail = (event as CustomEvent<{ value?: unknown }>).detail;
+    const id = typeof detail?.value === 'string' ? detail.value : readSelectValue();
+    if (!runtimeList.includes(id as RuntimeId)) return;
+    writeSelectValue(id);
+    void switchTo(id);
+  };
+  if (selectRoot) {
+    selectRoot.addEventListener('valueChange', onSelectChange);
+    selectRoot.addEventListener('change', onSelectChange);
+  } else if (nativeSelect) {
+    nativeSelect.addEventListener('change', onSelectChange);
+  }
+
   const onAdapterChange = (event: Event) => {
     const id = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
     if (typeof id !== 'string' || !runtimeList.includes(id as RuntimeId)) return;
-    if (select) select.value = id;
+    writeSelectValue(id);
     void switchTo(id);
   };
   document.addEventListener('proto-adapter:change', onAdapterChange);
@@ -238,6 +296,12 @@ export function initPreviewer(options: PreviewerOptions) {
       host.innerHTML = '';
       current = null;
       currentDemo = null;
+      if (selectRoot) {
+        selectRoot.removeEventListener('valueChange', onSelectChange);
+        selectRoot.removeEventListener('change', onSelectChange);
+      } else if (nativeSelect) {
+        nativeSelect.removeEventListener('change', onSelectChange);
+      }
     },
   };
 

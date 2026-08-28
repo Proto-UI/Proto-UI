@@ -3,6 +3,12 @@ import { renderDemo } from './demo-renderer';
 import { collectPrototypeIds } from './demo-types';
 import { loadPrototypes } from './prototype-modules';
 import type { RuntimeId } from './runtimes/registry';
+import {
+  initSiteShadcnControls,
+  selectValue,
+  setSelectValue,
+  type SiteSelectRoot,
+} from '../site-shadcn-controls';
 
 type DemoOption = {
   id: string;
@@ -27,13 +33,36 @@ const DEFAULT_RUNTIME_OPTIONS: RuntimeOption[] = [
   { id: 'vue', label: 'Vue' },
 ];
 
+function setSelectDisabled(select: SiteSelectRoot, disabled: boolean): void {
+  select.setProps?.({ disabled });
+}
+
+function populateSelect(
+  select: SiteSelectRoot,
+  options: Array<{ id: string; label: string }>,
+  selected: string
+): void {
+  const content = select.querySelector<HTMLElement>('wc-shadcn-select-content');
+  if (!content) return;
+  content.replaceChildren();
+  for (const option of options) {
+    const item = document.createElement('wc-shadcn-select-item');
+    item.dataset.value = option.id;
+    item.dataset.textValue = option.label;
+    item.textContent = option.label;
+    content.appendChild(item);
+  }
+  setSelectValue(select, selected);
+  initSiteShadcnControls(select);
+}
+
 export function initHomeDemoPreviewer(root: HTMLElement) {
   if (root.dataset.inited === '1') return;
   root.dataset.inited = '1';
 
   const host = root.querySelector<HTMLElement>('[data-home-demo-host]');
-  const runtimeSelect = root.querySelector<HTMLSelectElement>('[data-home-demo-runtime]');
-  const demoSelect = root.querySelector<HTMLSelectElement>('[data-home-demo-picker]');
+  const runtimeSelect = root.querySelector<SiteSelectRoot>('[data-home-demo-runtime]');
+  const demoSelect = root.querySelector<SiteSelectRoot>('[data-home-demo-picker]');
 
   if (!host || !runtimeSelect || !demoSelect) {
     console.error('[HomeDemoPreviewer] missing required elements.');
@@ -58,23 +87,9 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     return;
   }
 
-  demoSelectEl.innerHTML = '';
-  for (const option of demoOptions) {
-    const el = document.createElement('option');
-    el.value = option.id;
-    el.textContent = option.label;
-    if (option.id === initialDemoId) el.selected = true;
-    demoSelectEl.appendChild(el);
-  }
-
-  runtimeSelectEl.innerHTML = '';
-  for (const option of runtimeOptions) {
-    const el = document.createElement('option');
-    el.value = option.id;
-    el.textContent = option.label;
-    if (option.id === initialRuntime) el.selected = true;
-    runtimeSelectEl.appendChild(el);
-  }
+  initSiteShadcnControls(root);
+  populateSelect(demoSelectEl, demoOptions, initialDemoId);
+  populateSelect(runtimeSelectEl, runtimeOptions, initialRuntime);
 
   let active: ActiveRender | null = null;
   let version = 0;
@@ -83,8 +98,8 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   async function renderCurrent(runtime: RuntimeId, demoId: string) {
     if (destroyed) return;
     const currentVersion = ++version;
-    runtimeSelectEl.disabled = true;
-    demoSelectEl.disabled = true;
+    setSelectDisabled(runtimeSelectEl, true);
+    setSelectDisabled(demoSelectEl, true);
 
     try {
       if (active) {
@@ -122,17 +137,26 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
       console.error(error);
     } finally {
       if (!destroyed && currentVersion === version) {
-        runtimeSelectEl.disabled = false;
-        demoSelectEl.disabled = false;
+        setSelectDisabled(runtimeSelectEl, false);
+        setSelectDisabled(demoSelectEl, false);
       }
     }
   }
 
-  const renderFromInputs = () =>
-    renderCurrent(runtimeSelectEl.value as RuntimeId, demoSelectEl.value);
+  const renderFromInputs = (event: Event, changed: SiteSelectRoot) => {
+    const detail = (event as CustomEvent<{ value?: unknown }>).detail;
+    const value = typeof detail?.value === 'string' ? detail.value : selectValue(changed);
+    setSelectValue(changed, value);
+    renderCurrent(
+      (changed === runtimeSelectEl ? value : selectValue(runtimeSelectEl)) as RuntimeId,
+      changed === demoSelectEl ? value : selectValue(demoSelectEl)
+    );
+  };
 
-  demoSelectEl.addEventListener('change', renderFromInputs);
-  runtimeSelectEl.addEventListener('change', renderFromInputs);
+  const onDemoChange = (event: Event) => renderFromInputs(event, demoSelectEl);
+  const onRuntimeChange = (event: Event) => renderFromInputs(event, runtimeSelectEl);
+  demoSelectEl.addEventListener('valueChange', onDemoChange);
+  runtimeSelectEl.addEventListener('valueChange', onRuntimeChange);
 
   renderCurrent(initialRuntime, initialDemoId);
 
@@ -142,6 +166,8 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
       version += 1;
       Promise.resolve(active?.destroy?.()).finally(() => {
         active = null;
+        demoSelectEl.removeEventListener('valueChange', onDemoChange);
+        runtimeSelectEl.removeEventListener('valueChange', onRuntimeChange);
         observer.disconnect();
       });
     }

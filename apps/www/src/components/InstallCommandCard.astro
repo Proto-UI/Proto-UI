@@ -76,7 +76,10 @@ const activeManager =
     <div class="install-command-card__managers" aria-label="Package manager">
       {
         normalizedEntries.map((entry) => (
-          <button
+          <wc-shadcn-button
+            data-site-shadcn-button
+            data-variant="ghost"
+            data-size="sm"
             type="button"
             class:list={[
               'install-command-card__manager',
@@ -86,12 +89,15 @@ const activeManager =
             aria-pressed={entry.manager === activeManager ? 'true' : 'false'}
           >
             {entry.manager}
-          </button>
+          </wc-shadcn-button>
         ))
       }
     </div>
 
-    <button
+    <wc-shadcn-button
+      data-site-shadcn-button
+      data-variant="ghost"
+      data-size="icon"
       type="button"
       class="install-command-card__copy"
       title="Copy command"
@@ -114,7 +120,7 @@ const activeManager =
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
         </svg>
       </span>
-    </button>
+    </wc-shadcn-button>
   </div>
 
   {
@@ -139,9 +145,9 @@ const activeManager =
       if (card.dataset.installCommandInit === '1') return;
       card.dataset.installCommandInit = '1';
 
-      const copyButton = card.querySelector<HTMLButtonElement>('[data-copy-button]');
+      const copyButton = card.querySelector<HTMLElement>('[data-copy-button]');
       const copyIcon = card.querySelector<HTMLElement>('[data-copy-icon]');
-      const tabs = Array.from(card.querySelectorAll<HTMLButtonElement>('[data-manager-tab]'));
+      const tabs = Array.from(card.querySelectorAll<HTMLElement>('[data-manager-tab]'));
       const panels = Array.from(card.querySelectorAll<HTMLElement>('[data-command-panel]'));
       if (!copyButton || !copyIcon || tabs.length === 0 || panels.length === 0) return;
 
@@ -204,6 +210,13 @@ const activeManager =
       });
     });
   })();
+</script>
+
+<script>
+  import { initSiteShadcnControls } from './site-shadcn-controls';
+
+  initSiteShadcnControls(document);
+  document.addEventListener('astro:page-load', () => initSiteShadcnControls(document));
 </script>
 
 <style>
