@@ -138,15 +138,16 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
 });
 
-const HARNESS_FORBIDDEN_UI_PACKAGE_PATTERNS = Object.freeze([
-  /^@(?:assistant-ui|chakra-ui|chatscope|headlessui|mui|radix-ui)\//u,
-  /^@floating-ui\//u,
-  /^(?:cmdk|react-dropzone|react-resizable|react-select|react-virtualized|react-virtuoso|react-window)$/u,
+const HARNESS_ALLOWED_EXTERNAL_PACKAGE_PATTERNS = Object.freeze([
+  /^react(?:$|\/)/u,
+  /^react-dom(?:$|\/)/u,
 ]);
 
 function isForbiddenHarnessUiPackage(specifier) {
   const baseSpecifier = importSpecifierWithoutViteSuffix(specifier);
-  return HARNESS_FORBIDDEN_UI_PACKAGE_PATTERNS.some((pattern) => pattern.test(baseSpecifier));
+  if (baseSpecifier.startsWith('@proto.ui/') || baseSpecifier.startsWith('node:')) return false;
+  if (baseSpecifier.startsWith('.') || baseSpecifier.startsWith('/')) return false;
+  return !HARNESS_ALLOWED_EXTERNAL_PACKAGE_PATTERNS.some((pattern) => pattern.test(baseSpecifier));
 }
 const HARNESS_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // M0 authorizes only the React Adapter entry. Any prototype/facade entry
@@ -1512,7 +1513,7 @@ function discoverWebsiteComponentSources(rootDir) {
           return /<[A-Za-z]/u.test(markupSourceForJsxFallback(content, absolutePath) ?? '');
         }
         return (
-          /\.[jt]sx?$/i.test(absolutePath) &&
+          /\.[cm]?[jt]sx?$/i.test(absolutePath) &&
           astContainsExportedUserFacingComponent(
             fs.readFileSync(absolutePath, 'utf8'),
             absolutePath
@@ -1527,7 +1528,7 @@ function discoverWebsiteComponentSources(rootDir) {
       }
       return (
         absolutePath.startsWith(`${componentsRoot}${path.sep}`) &&
-        /\.[jt]s$/i.test(absolutePath) &&
+        /\.[cm]?[jt]s$/i.test(absolutePath) &&
         astContainsExportedUserFacingComponent(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
       );
     })
@@ -1660,11 +1661,16 @@ function discoverHarnessUserFacingSources(rootDir) {
   const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
   return walkFiles(sourceRoot)
     .filter((absolutePath) => /\.[cm]?[jt]sx?$/i.test(absolutePath))
-    .filter(
-      (absolutePath) =>
+    .filter((absolutePath) => {
+      const relativePath = path.relative(sourceRoot, absolutePath).replaceAll('\\', '/');
+      const isGeneratedFacade = relativePath.startsWith('proto-ui/components/');
+      const isReviewedBootstrap = relativePath === 'proto-ui/bootstrap.tsx';
+      return (
         !/\.(?:browser\.)?(?:test|spec|stories)\.[cm]?[jt]sx?$/i.test(absolutePath) &&
-        !absolutePath.startsWith(path.join(sourceRoot, 'proto-ui') + path.sep)
-    )
+        !isGeneratedFacade &&
+        !isReviewedBootstrap
+      );
+    })
     .filter((absolutePath) => {
       const relativeToSource = path.relative(sourceRoot, absolutePath).replaceAll('\\', '/');
       const isRoutedOrPageLevel = /^(?:pages|routes)\//u.test(relativeToSource);

@@ -4656,3 +4656,26 @@ test('detects qualified actions in React and layout effects', () => {
     /Harness source `apps\/agent-harness\/src\/run\/QualifiedApprove\.tsx` contains a forbidden interaction or DOM state machine/
   );
 });
+
+test('rejects unreviewed third-party Harness UI dependencies by default', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/UnreviewedPrimitive.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import { useSelect } from '@ariakit/react'; import Downshift from 'downshift'; import { useForm } from 'react-hook-form'; import { useVirtualizer } from '@tanstack/react-virtual';",
+    'utf8'
+  );
+  writeValidMatrices(root);
+
+  const message = validationMessage(root);
+  for (const specifier of [
+    '@ariakit/react',
+    'downshift',
+    'react-hook-form',
+    '@tanstack/react-virtual',
+  ]) {
+    assert.ok(message.includes(`forbidden third-party Harness UI package \`${specifier}\``));
+  }
+});
