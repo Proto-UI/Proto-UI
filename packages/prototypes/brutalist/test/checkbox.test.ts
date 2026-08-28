@@ -87,8 +87,12 @@ describe('prototypes/brutalist: checkbox', () => {
     setElementProps(root, { checked: true });
     await settle();
     expect(root.getExposes().checked.get()).toBe(true);
-    expect(styleContains(root, 'data-[checked]:bg-foreground')).toBe(true);
-    expect(styleContains(root, 'data-[checked]:text-background')).toBe(true);
+    expect(root.hasAttribute('data-checked')).toBe(true);
+    expect(root.hasAttribute('data-indeterminate')).toBe(false);
+    expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:bg-foreground')).toBe(true);
+    expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:text-background')).toBe(
+      true
+    );
     expect(styleContains(indicator, 'data-[checked]:opacity-100')).toBe(true);
     expect(glyphPaths(indicator)).toEqual([CHECK_PATH]);
     expect(indicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
@@ -105,6 +109,12 @@ describe('prototypes/brutalist: checkbox', () => {
     await settle();
     expect(root.getExposes().checked.get()).toBe(true);
     expect(root.getExposes().indeterminate.get()).toBe(true);
+    expect(root.hasAttribute('data-checked')).toBe(true);
+    expect(root.hasAttribute('data-indeterminate')).toBe(true);
+    expect(styleContains(root, 'bg-main')).toBe(true);
+    expect(styleContains(root, 'text-main-foreground')).toBe(true);
+    expect(styleContains(root, 'data-[checked]:bg-foreground')).toBe(false);
+    expect(styleContains(root, 'data-[checked]:text-background')).toBe(false);
     expect(glyphPaths(indicator)).toEqual([DASH_PATH]);
     expect(indicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
   });

@@ -32,12 +32,12 @@ const checkboxRoot = definePrototype<BrutalistCheckboxRootProps, BrutalistCheckb
         '[brutalist-checkbox-root] asCheckboxRoot must project Checkbox root state handles.'
       );
     }
-    const { checked, disabled, focusVisible, pressed } = state;
+    const { checked, indeterminate, disabled, focusVisible, pressed } = state;
 
     def.feedback.style.use(tw(ROOT_BASE_TOKENS));
 
     def.rule({
-      when: (w) => w.state(checked).eq(true),
+      when: (w) => w.all(w.state(checked).eq(true), w.state(indeterminate).eq(false)),
       intent: (i) => i.feedback.style.use(tw('bg-foreground text-background')),
     });
     def.rule({
