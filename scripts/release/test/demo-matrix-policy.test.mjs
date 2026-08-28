@@ -27,5 +27,5 @@ test('Demo Matrix renders every adapter side by side for each demo', async () =>
   assert.match(source, /initialRuntime=\{runtime\}/);
   assert.match(source, /runtimes=\{\[runtime\]\}/);
   assert.match(source, /toolbar=\{false\}/);
-  assert.match(source, /grid-template-columns: repeat\(3, minmax\(15rem, 1fr\)\)/);
+  assert.match(source, /grid-template-columns: repeat\(auto-fit, minmax\(15rem, 1fr\)\)/);
 });
