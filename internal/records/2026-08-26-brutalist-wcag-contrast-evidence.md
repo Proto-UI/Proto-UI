@@ -8,7 +8,7 @@ Non-normative record. Refs #469. Does not create a stable spec guarantee, change
 - Theme source: `packages/prototypes/brutalist/src/theme.ts`
 - Shared-token source: `packages/prototypes/brutalist/src/style.ts`
 - Call-site sources: the Brutalist prototype recipes named below at the recorded commit
-- Method: WCAG 2.2 SC 1.4.3 (text, ≥4.5:1) and SC 1.4.11 (non-text, ≥3.0:1), using relative luminance from the resolved sRGB colors. Alpha overlays are composited in sRGB against the implemented theme background before luminance is calculated.
+- Method: WCAG 2.2 SC 1.4.3 (text, ≥4.5:1) and SC 1.4.11 (non-text, ≥3.0:1), using relative luminance from the resolved sRGB colors. Opaque recipe pairs are measured directly. Alpha-overlay call sites are bounded across possible backdrop pixels unless rendered evidence establishes the actual pixels; compositing against the theme background alone is only an illustrative source scenario, not an implemented call-site measurement.
 - Source cross-check: the audited theme, Tabs, Dialog, Badge, Skeleton, Textarea, and Scroll Area recipe paths are unchanged between `259aeb77` and remediation parent `4afe9273`.
 
 For reproducibility, each 8-bit sRGB channel `c` is normalized to `s = c / 255`, linearized as `s / 12.92` when `s <= 0.04045` and `((s + 0.055) / 1.055) ^ 2.4` otherwise, then combined as `0.2126 R + 0.7152 G + 0.0722 B`. The reported ratio is `(L_lighter + 0.05) / (L_darker + 0.05)`, rounded to two decimals only after calculation.
@@ -85,14 +85,16 @@ The exterior edge is 1.39:1 in each case. The contrasting inner fill may make th
 
 The Dialog composition has a distinct external adjacency. In `apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts`, `brutalist-dialog-mask` is authored immediately before `brutalist-dialog-content`. The Mask paints `bg-overlay`; the later fixed Content paints its `border-black` panel over that mask. Treating the page background or the panel's own fill as the only neighbor omits the exterior edge.
 
-For each mode, the overlay channel is `0 * alpha + background * (1 - alpha)` before applying the WCAG luminance formula:
+Mask and Content are portaled fixed overlays. The mask therefore composites over the documentation pixels beneath the portal, not one uniform theme-background color. `PrototypePreviewer.astro` itself uses a mixed preview background and the preview can contain authored content, so the earlier theme-background-only values were illustrative scenarios rather than measured call-site ratios.
 
-| Mode | Overlay over theme background | black border / overlay | panel fill / overlay | black border / panel fill | Source classification |
+Source-level bounds are still possible. For a black overlay, each composited channel is the backdrop channel multiplied by `1 - alpha`. Across every possible 8-bit backdrop pixel:
+
+| Mode | Overlay channel bounds | black border / overlay bound | panel fill / overlay bound | black border / panel fill | Source classification |
 | --- | --- | --- | --- | --- | --- |
-| Light | `rgba(0,0,0,.75)` over `#f5f5f5` → `rgb(61.25,61.25,61.25)` | **1.94 FAIL** | 10.82 PASS | 21.00 PASS | The exterior border edge is low contrast, but the white panel fill independently distinguishes the panel from the overlay. The border is redundant for this audited Light composition. |
-| Dark | `rgba(0,0,0,.85)` over `#171717` → `rgb(3.45,3.45,3.45)` | **1.02 FAIL** | **1.36 FAIL** | **1.39 FAIL** | Neither the exterior edge, inner edge, nor panel-fill/overlay boundary reaches 3:1. Source evidence cannot classify the panel frame as redundant; if that boundary is required to identify the modal surface, this call site needs remediation. |
+| Light (`alpha=.75`) | `0..63.75` per channel | **1.00..2.02 FAIL** | **10.41..21.00 PASS** | 21.00 PASS | The white panel fill distinguishes the panel from every possible composited backdrop in this bound, but the exact exterior-border ratio is backdrop-dependent. The low exterior edge is redundant only for the bounded fill geometry, not because the earlier 1.94 scenario was a rendered measurement. |
+| Dark (`alpha=.85`) | `0..38.25` per channel | **1.00..1.39 FAIL** | **1.00..1.39 FAIL** | **1.39 FAIL** | No source-level edge reaches 3:1 for any possible backdrop in this bound. If the modal boundary is required to identify the surface, the call site needs remediation. |
 
-This corrects any blanket claim that black borders pass throughout Light and adds the actual Dark overlay neighbor. Rendered evidence must preserve the mask/content paint order and must not substitute an opaque page background for the composited overlay.
+Rendered evidence must preserve the mask/content paint order and sample multiple perimeter pixels in each theme, reporting the observed minimum and maximum rather than substituting an opaque page background or one theme-background scenario for the composited backdrop.
 
 ### Dark `border-foreground` on fixed accent fills
 
@@ -100,12 +102,12 @@ This corrects any blanket claim that black borders pass throughout Light and add
 
 | Source call site | Inner pair in Dark | Candidate independent boundary | Source classification |
 | --- | --- | --- | --- |
-| `packages/prototypes/brutalist/src/badge/root.proto.ts` accent/info/danger tones | foreground/canary 1.07:1; foreground/sky 1.22:1; foreground/coral 1.29:1 | the accent fills themselves are 12.71–15.41:1 against `bg-background` and 10.73–13.00:1 against `bg-secondary-background`; the outer foreground edge is 16.44:1 or 13.88:1 against those surfaces | The passive label remains identifiable from its fill and outer edge; the low inner border edge is redundant in the audited contexts. |
-| `packages/prototypes/brutalist/src/skeleton/root.proto.ts` | foreground/lavender 1.27:1 | lavender is 12.91:1 against `bg-background` and 10.90:1 against `bg-secondary-background`; the prototype is accessibility-hidden and carries no interaction state | The low inner edge is decorative; the placeholder silhouette remains independently visible. |
+| `packages/prototypes/brutalist/src/badge/root.proto.ts` accent/info/danger tones | foreground/canary 1.07:1; foreground/sky 1.22:1; foreground/coral 1.29:1 | the accent fills would be 12.71–15.41:1 against `bg-background` and 10.73–13.00:1 against `bg-secondary-background`; the outer foreground edge would be 16.44:1 or 13.88:1 against those surfaces | Badge does not own its parent fill. Those candidate edges pass only when the rendered parent supplies one of the measured surfaces; an accent-colored or authored parent can remove both cues. Classification remains conditional on sampled consumer pixels. |
+| `packages/prototypes/brutalist/src/skeleton/root.proto.ts` | foreground/lavender 1.27:1 | lavender would be 12.91:1 against `bg-background` and 10.90:1 against `bg-secondary-background`; the prototype is accessibility-hidden and carries no interaction state | Skeleton does not own its parent fill. Accessibility-hidden status does not prove the visible silhouette is decorative at every call site, and a pale authored parent can remove the candidate outer cue. Classification remains conditional on rendered consumer pixels. |
 | `packages/prototypes/brutalist/src/textarea/root.proto.ts` | foreground/lavender 1.27:1 | an outer foreground edge would be 16.44:1 against `bg-background` or 13.88:1 against `bg-secondary-background`, while lavender would be 12.91:1 or 10.90:1 against those surfaces | The Textarea recipe does not own its parent fill. Source evidence therefore cannot assume either outer neighbor or classify the low inner edge as redundant; the rendered composition must sample the actual exterior pixels. |
 | `packages/prototypes/brutalist/src/scroll-area/scrollbar.proto.ts`, vertical or horizontal | foreground/lavender 1.27:1 | if the one-sided border adjoins Root's `bg-background`, that edge is 16.44:1 and lavender/Root is 12.91:1 | The track overlays authored viewport content, so the exterior pixels are not guaranteed to be Root fill. Redundancy remains unresolved until rendered evidence samples representative content behind both orientations. |
 
-These classifications are bounded to the implemented adjacencies above. They do not turn `border-foreground` on arbitrary pale surfaces into a generally safe pair, and a composition that changes the outer neighbor must be measured again.
+These candidate boundaries are not implemented parent guarantees. Badge, Skeleton, and Textarea do not own their parent fill, while Scrollbar overlays authored viewport content. Each rendered composition must sample its actual exterior pixels; none of these rows turns `border-foreground` on an arbitrary pale surface into a generally safe or pre-classified decorative pair.
 
 ## Stateful hard-shadow classification
 
@@ -135,8 +137,8 @@ These are required focus-state indicators, not decorative fills, so they fail SC
 
 1. The audited implemented text recipes pass SC 1.4.3 in both themes.
 2. Dark has low-contrast black boundaries on the exact control and panel call sites inventoried above. The hovered Tabs Trigger has two failing border edges (1.17:1 inner and 1.39:1 outer) plus only 1.18:1 fill separation from its List; both sides belong in rendered state evidence.
-3. Dialog Content's actual exterior neighbor is the composited overlay. Its black exterior edge is 1.94:1 in Light and 1.02:1 in Dark. The Light panel fill independently passes at 10.82:1; the Dark panel fill/overlay boundary is only 1.36:1 and cannot establish redundancy from source evidence alone.
-4. Dark `border-foreground` has low inner contrast against fixed canary, sky, coral, and lavender fills. Badge's passive accent label and the accessibility-hidden Skeleton have independently classifiable fill silhouettes, but Textarea does not own its parent fill and Scrollbar may overlay authored viewport content. Those latter exterior edges remain rendered-evidence questions rather than being omitted or pre-classified as redundant.
+3. Dialog Content's actual exterior neighbor is the backdrop-dependent composited overlay. Source bounds prove the Light black edge remains below 3:1 while the white panel fill remains above 3:1, and prove every audited Dark panel edge remains below 3:1; exact call-site ratios require rendered perimeter sampling and must not reuse the earlier theme-background scenarios as measurements.
+4. Dark `border-foreground` has low inner contrast against fixed canary, sky, coral, and lavender fills. Badge, Skeleton, and Textarea do not own their parent fill, and Scrollbar may overlay authored viewport content. Their candidate outer cues remain conditional rendered-evidence questions rather than being omitted or pre-classified as passing, redundant, or decorative.
 5. Hard-shadow state ownership spans Button, Toggle, Select/Dialog/Dropdown triggers, Tabs Trigger, Switch Root, Hover Card Trigger, and Dialog Close Icon. Redundancy must be confirmed per rendered call site; static shadows are decorative only where they carry no component or state information.
 6. Light Dropdown and Select item focus fills fail SC 1.4.11 because their 1.16:1/1.41:1 changes are the only focus indicators.
 7. Shared-token remediation alone is incomplete: surface Button, Select Trigger, Switch Root, and Tabs List are direct recipes that require separate changes or an explicit refactor.
