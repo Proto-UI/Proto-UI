@@ -14,6 +14,7 @@ export function isRuntimeId(value: unknown): value is PublicRuntimeId {
 }
 
 const initializedDocuments = new WeakSet<Document>();
+const lastKnownAdapterValues = new WeakMap<AdapterSelectControl, string>();
 
 type AdapterSelectControl = HTMLSelectElement | SiteSelectRoot;
 
@@ -50,25 +51,31 @@ function preferredAdapter(doc: Document): PublicRuntimeId | null {
     return null;
   }
 }
-
 function initializeAdapterSelect(select: AdapterSelectControl): void {
   if (select.dataset.adapterSelectInit === '1') return;
   select.dataset.adapterSelectInit = '1';
 
   const stored = preferredAdapter(select.ownerDocument);
+  let initialValue = readControlValue(select);
   if (stored && supportsAdapter(select, stored)) {
     writeControlValue(select, stored);
+    initialValue = stored;
   } else if (supportsAdapter(select, DEFAULT_ADAPTER)) {
     writeControlValue(select, DEFAULT_ADAPTER);
+    initialValue = DEFAULT_ADAPTER;
   } else if (isNativeSelect(select) && select.options.length > 0) {
     select.selectedIndex = 0;
+    initialValue = select.value;
   }
+  lastKnownAdapterValues.set(select, initialValue);
 
   const handleChange = (event: Event) => {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const adapter = typeof detail?.value === 'string' ? detail.value : readControlValue(select);
     if (!isRuntimeId(adapter)) return;
-    if (readControlValue(select) === adapter) return;
+    const previousValue = lastKnownAdapterValues.get(select) ?? readControlValue(select);
+    if (!isNativeSelect(select) && previousValue === adapter) return;
+    lastKnownAdapterValues.set(select, adapter);
     writeControlValue(select, adapter);
     try {
       select.ownerDocument.defaultView?.localStorage.setItem(PREFERRED_ADAPTER_KEY, adapter);
@@ -93,8 +100,13 @@ function synchronizeAdapterSelects(doc: Document, adapter: PublicRuntimeId): voi
     ),
   ];
   for (const select of selects) {
-    if (!supportsAdapter(select, adapter) || readControlValue(select) === adapter) continue;
+    if (!supportsAdapter(select, adapter)) continue;
+    if (readControlValue(select) === adapter) {
+      lastKnownAdapterValues.set(select, adapter);
+      continue;
+    }
     writeControlValue(select, adapter);
+    lastKnownAdapterValues.set(select, adapter);
     if (select.closest('[data-previewer-id]')) {
       select.dispatchEvent(new Event('change', { bubbles: true }));
     }

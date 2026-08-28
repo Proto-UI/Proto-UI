@@ -188,13 +188,18 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
       // Storage is optional; the in-document synchronization still applies.
     }
     runtimeSelectEl.ownerDocument.dispatchEvent(
-      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: value } })
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, {
+        detail: { adapter: value, source: runtimeSelectEl },
+      })
     );
+    renderFromInputs(event, runtimeSelectEl);
   };
   const onAdapterChange = (event: Event) => {
-    const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
+    const detail = (event as CustomEvent<{ adapter?: unknown; source?: EventTarget }>).detail;
+    const adapter = detail?.adapter;
     if (typeof adapter !== 'string' || !runtimeOptions.some((option) => option.id === adapter))
       return;
+    if (detail?.source === runtimeSelectEl) return;
     if (selectValue(runtimeSelectEl) === adapter) return;
     setSelectValue(runtimeSelectEl, adapter);
     void renderCurrent(adapter as RuntimeId, selectValue(demoSelectEl));
