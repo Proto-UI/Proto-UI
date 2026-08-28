@@ -254,7 +254,62 @@ describe('module-text-control single-line web bridge', () => {
     expect(input.inputMode).toBe('search');
     expect(input.enterKeyHint).toBe('search');
 
+    lease.update({
+      valueMode: 'uncontrolled',
+      defaultValue: 'initial',
+      inputMode: undefined,
+      enterKeyHint: undefined,
+    });
+    expect(input.inputMode).toBe('');
+    expect(input.enterKeyHint).toBe('');
+
     lease.dispose();
+  });
+
+  it('projects and preserves selection for an input created in another realm', () => {
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    const foreignDocument = iframe.contentDocument;
+    if (!foreignDocument) throw new Error('iframe document is unavailable');
+    const input = foreignDocument.createElement('input');
+    expect(input.ownerDocument.defaultView).not.toBe(window);
+    foreignDocument.body.appendChild(input);
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: {
+        valueMode: 'controlled',
+        value: '0123456789',
+        inputMode: 'search',
+        enterKeyHint: 'search',
+      },
+      onEvent() {},
+    });
+    input.focus();
+    input.setSelectionRange(3, 7, 'forward');
+
+    lease.update({
+      valueMode: 'controlled',
+      value: 'short',
+      inputMode: 'numeric',
+      enterKeyHint: 'next',
+    });
+    expect({
+      value: input.value,
+      start: input.selectionStart,
+      end: input.selectionEnd,
+      direction: input.selectionDirection,
+      inputMode: input.inputMode,
+      enterKeyHint: input.enterKeyHint,
+    }).toEqual({
+      value: 'short',
+      start: 3,
+      end: 5,
+      direction: 'forward',
+      inputMode: 'numeric',
+      enterKeyHint: 'next',
+    });
+
+    lease.dispose();
+    iframe.remove();
   });
 
   it('canonicalizes CR/LF to LF in event values and snapshots', () => {

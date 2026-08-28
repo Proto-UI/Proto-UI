@@ -2,6 +2,8 @@ export type {
   TextControlEvent,
   TextControlEventType,
   TextControlHandle,
+  TextControlInputMode,
+  TextControlLineMode,
   TextControlPatch,
   TextControlSnapshot,
   TextControlValueMode,

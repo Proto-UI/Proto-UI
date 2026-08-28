@@ -11,10 +11,16 @@ cases:
       - C-TEXT-CONTROL-0001-A
     expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
-    title: Portable patches project single-line properties (inputMode and enterKeyHint) on an HTMLInputElement
+    title: Portable patches project and clear single-line properties (inputMode and enterKeyHint) on an HTMLInputElement
     covers:
       - C-TEXT-CONTROL-0001-B
-    expectation: portable-single-line-properties-project-on-web-input
+    expectation: portable-single-line-properties-project-and-clear-on-web-input
+  - id: T-TEXT-CONTROL-0001-CASE-OWNING-REALM
+    title: A text control created by another Window keeps live projection and editing-session preservation
+    covers:
+      - C-TEXT-CONTROL-0001-B
+      - C-TEXT-CONTROL-0001-G
+    expectation: owning-realm-input-projects-properties-and-preserves-selection-across-controlled-value-update
   - id: T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
     title: CR and CRLF line endings are canonicalized by line mode at the module boundary in patches, events, snapshots, and listener payloads
     covers:
@@ -84,11 +90,12 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
+      - T-TEXT-CONTROL-0001-CASE-OWNING-REALM
       - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
     exercises:
       - HC-TEXT-CONTROL-0001
     notes:
-      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input' and inputMode/enterKeyHint projection through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
+      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', live inputMode/enterKeyHint projection and clearing, and owning-realm editing-session preservation through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
   - id: module-text-control-value-reconciliation
     kind: module-test
     status: passing
@@ -185,7 +192,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Added single-line input cases, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
+      Added single-line input projection and clearing, owning-realm editing-session coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
 
 
 tags:

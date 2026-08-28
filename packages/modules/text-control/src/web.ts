@@ -9,9 +9,15 @@ import type { TextControlDeclaration } from './declaration';
 
 export type WebTextControl = HTMLTextAreaElement | HTMLInputElement;
 
-const TEXT_COMPATIBLE_INPUT_TYPES = new Set([
-  'text', 'search', 'url', 'tel', 'password', '',
-]);
+function isWebInput(target: WebTextControl): target is HTMLInputElement {
+  return target.localName === 'input';
+}
+
+function isWebTextArea(target: WebTextControl): target is HTMLTextAreaElement {
+  return target.localName === 'textarea';
+}
+
+const TEXT_COMPATIBLE_INPUT_TYPES = new Set(['text', 'search', 'url', 'tel', 'password', '']);
 export type WebTextControlLocalName = 'textarea' | 'input';
 
 export function resolveWebTextControlLocalName(
@@ -116,11 +122,7 @@ function applyPatch(
   if (typeof patch.disabled === 'boolean') target.disabled = patch.disabled;
   if (typeof patch.readOnly === 'boolean') target.readOnly = patch.readOnly;
   if (typeof patch.placeholder === 'string') target.placeholder = patch.placeholder;
-  if (
-    typeof patch.rows === 'number' &&
-    Number.isFinite(patch.rows) &&
-    target instanceof HTMLTextAreaElement
-  ) {
+  if (typeof patch.rows === 'number' && Number.isFinite(patch.rows) && isWebTextArea(target)) {
     target.rows = Math.max(1, Math.trunc(patch.rows));
   }
   if (typeof patch.required === 'boolean') target.required = patch.required;
@@ -140,15 +142,13 @@ function applyPatch(
     else target.maxLength = maxLength;
   }
   if (patch.wrap === 'soft' || patch.wrap === 'hard') {
-    if (target instanceof HTMLTextAreaElement) target.wrap = patch.wrap;
+    if (isWebTextArea(target)) target.wrap = patch.wrap;
   }
-  if (typeof patch.inputMode === 'string' && target instanceof HTMLInputElement) {
-    target.inputMode = patch.inputMode;
+  if (isWebInput(target)) {
+    target.inputMode = patch.inputMode ?? '';
   }
-  if (typeof patch.enterKeyHint === 'string') {
-    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
-      target.enterKeyHint = patch.enterKeyHint as HTMLInputElement['enterKeyHint'];
-    }
+  if (isWebInput(target) || isWebTextArea(target)) {
+    target.enterKeyHint = patch.enterKeyHint ?? '';
   }
   return valueProjectionDeferred;
 }
@@ -156,8 +156,8 @@ function applyPatch(
 function replaceValuePreservingEditingSession(target: WebTextControl, value: string): void {
   // Guard: some input types (file, checkbox, radio, etc.) throw on value assignment
   // or do not support setSelectionRange. Only restore selection for text-compatible types.
-  const isTextCompatible = target instanceof HTMLTextAreaElement ||
-    (target instanceof HTMLInputElement && TEXT_COMPATIBLE_INPUT_TYPES.has(target.type));
+  const isTextCompatible =
+    isWebTextArea(target) || (isWebInput(target) && TEXT_COMPATIBLE_INPUT_TYPES.has(target.type));
   if (!isTextCompatible) {
     target.value = value;
     return;
