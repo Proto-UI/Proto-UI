@@ -4146,3 +4146,26 @@ test('discovers spread event handlers on native Website elements', () => {
     /interactive website source `apps\/www\/src\/components\/SpreadControl\.tsx` is not bound/
   );
 });
+
+test('detects qualified actions in React and layout effects', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/QualifiedApprove.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function QualifiedApprove({ id }) { React.useEffect(() => actions.approve(id), [id]); useLayoutEffect(() => actions.send(id), [id]); return <main>Run</main>; }',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    { harnessBindings: [[relativePath, ['harness.transcript.viewport']]] }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/QualifiedApprove\.tsx` contains a forbidden interaction or DOM state machine/
+  );
+});

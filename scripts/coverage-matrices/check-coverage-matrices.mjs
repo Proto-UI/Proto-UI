@@ -1823,10 +1823,21 @@ function astContainsHarnessRenderAction(content) {
     'stop',
     'upload',
   ]);
-  const isActionCall = (node) =>
-    ts.isCallExpression(node) &&
-    ts.isIdentifier(node.expression) &&
-    actionNames.has(node.expression.text);
+  const isActionCall = (node) => {
+    if (!ts.isCallExpression(node)) return false;
+    if (ts.isIdentifier(node.expression)) return actionNames.has(node.expression.text);
+    return (
+      ts.isPropertyAccessExpression(node.expression) && actionNames.has(node.expression.name.text)
+    );
+  };
+  const isEffectCall = (node) => {
+    if (!ts.isCallExpression(node)) return false;
+    const callee = node.expression;
+    return (
+      (ts.isIdentifier(callee) || ts.isPropertyAccessExpression(callee)) &&
+      /^(?:useEffect|useLayoutEffect)$/u.test(callee.name?.text ?? callee.text)
+    );
+  };
   const containsActionCall = (root) => {
     let found = false;
     const visit = (node) => {
@@ -1857,12 +1868,8 @@ function astContainsHarnessRenderAction(content) {
   let found = false;
   const visit = (node) => {
     if (found) return;
-    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
-      if (
-        node.expression.text === 'useEffect' &&
-        node.arguments[0] &&
-        containsActionCall(node.arguments[0])
-      ) {
+    if (ts.isCallExpression(node)) {
+      if (isEffectCall(node) && node.arguments[0] && containsActionCall(node.arguments[0])) {
         found = true;
         return;
       }
