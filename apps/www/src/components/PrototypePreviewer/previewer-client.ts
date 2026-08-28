@@ -50,7 +50,7 @@ export function initPreviewer(options: PreviewerOptions) {
     if (selectRoot) setSelectValue(selectRoot, value);
     else if (nativeSelect) nativeSelect.value = value;
   };
-  const setSelectDisabled = (disabled: boolean) => {
+  const setPreviewerSelectDisabled = (disabled: boolean) => {
     if (selectRoot) setSiteSelectDisabled(selectRoot, disabled);
     else if (nativeSelect) nativeSelect.disabled = disabled;
   };
@@ -169,7 +169,7 @@ export function initPreviewer(options: PreviewerOptions) {
     // Invalidate a runtime that is still awaiting its loader before this
     // switch reaches the next runtime's mount() call.
     releaseHostMount(host);
-    setSelectDisabled(true);
+    setPreviewerSelectDisabled(true);
 
     try {
       // 卸载旧 runtime / demo
@@ -236,7 +236,7 @@ export function initPreviewer(options: PreviewerOptions) {
       console.error(err);
       dispatch('error', { error: err });
     } finally {
-      if (myVersion === version && !destroyed) setSelectDisabled(false);
+      if (myVersion === version && !destroyed) setPreviewerSelectDisabled(false);
     }
   }
 
@@ -255,7 +255,14 @@ export function initPreviewer(options: PreviewerOptions) {
     writeSelectValue(id);
     void switchTo(id);
   };
-  if (nativeSelect && !nativeSelectUsesPagePreference) {
+  // AdapterSelect already broadcasts a single document-level preference event
+  // for its valueChange. Listening to that root as well would remount twice;
+  // retain the local path only for isolated custom-select embeddings that do
+  // not participate in the shared adapter preference bridge.
+  const usesSharedAdapterSelect = selectRoot?.hasAttribute('data-adapter-select-root') ?? false;
+  if (selectRoot && !usesSharedAdapterSelect) {
+    selectRoot.addEventListener('valueChange', onSelectChange);
+  } else if (nativeSelect && !nativeSelectUsesPagePreference) {
     nativeSelect.addEventListener('change', onSelectChange);
   }
 
@@ -294,7 +301,9 @@ export function initPreviewer(options: PreviewerOptions) {
       host.innerHTML = '';
       current = null;
       currentDemo = null;
-      if (nativeSelect && !nativeSelectUsesPagePreference) {
+      if (selectRoot && !usesSharedAdapterSelect) {
+        selectRoot.removeEventListener('valueChange', onSelectChange);
+      } else if (nativeSelect && !nativeSelectUsesPagePreference) {
         nativeSelect.removeEventListener('change', onSelectChange);
       }
     },

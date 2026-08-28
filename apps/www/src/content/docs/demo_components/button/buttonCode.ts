@@ -71,10 +71,10 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
   <wc-shadcn-button disabled>Disabled</wc-shadcn-button>
 </div>
     `),
-    'demo-Secondray': formatCode(`
+    'demo-button-secondary-example': formatCode(`
 <div class="flex flex-wrap items-center justify-center gap-3">
   <wc-shadcn-button>Default</wc-shadcn-button>
-  <wc-shadcn-button variant="secondary">Secondary2</wc-shadcn-button>
+  <wc-shadcn-button variant="secondary">Secondary</wc-shadcn-button>
   <wc-shadcn-button variant="outline">Outline</wc-shadcn-button>
 </div>
     `),
@@ -216,14 +216,14 @@ export function DemoButtonDemo() {
   );
 }
     `),
-    'demo-Secondray': formatCode(`
+    'demo-button-secondary-example': formatCode(`
 import { ShadcnButton } from '../proto-ui/components/react';
 
-export function DemoSecondrayDemo() {
+export function DemoButtonSecondaryExampleDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
       <ShadcnButton>Default</ShadcnButton>
-      <ShadcnButton variant="secondary">Secondary2</ShadcnButton>
+      <ShadcnButton variant="secondary">Secondary</ShadcnButton>
       <ShadcnButton variant="outline">Outline</ShadcnButton>
     </div>
   );
@@ -359,7 +359,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
   </div>
 </template>
     `),
-    'demo-Secondray': formatCode(`
+    'demo-button-secondary-example': formatCode(`
 <script setup lang="ts">
 import { ShadcnButton } from '../proto-ui/components/vue';
 </script>
@@ -367,7 +367,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
     <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton variant="secondary">Secondary2</ShadcnButton>
+    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
     <ShadcnButton variant="outline">Outline</ShadcnButton>
   </div>
 </template>
@@ -562,11 +562,11 @@ export default {
 };
 </script>
     `),
-    'demo-Secondray': formatCode(`
+    'demo-button-secondary-example': formatCode(`
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
     <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton variant="secondary">Secondary2</ShadcnButton>
+    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
     <ShadcnButton variant="outline">Outline</ShadcnButton>
   </div>
 </template>

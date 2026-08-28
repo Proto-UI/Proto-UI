@@ -43,6 +43,42 @@ export function isSiteButtonActivation(event: Event): boolean {
   );
 }
 
+type SelectValueChangeDetail = {
+  reason?: unknown;
+};
+
+type SelectCloseExposes = {
+  open?: { get?: () => unknown };
+  requestOpen?: (request: {
+    open: false;
+    reason: string;
+    focusReason: 'programmatic' | 'keyboard' | 'pointer';
+  }) => unknown;
+};
+
+function closeSelectAfterValueChange(root: SiteSelectRoot): void {
+  if (root.dataset.siteShadcnCloseOnSelectInitialized === '1') return;
+  root.dataset.siteShadcnCloseOnSelectInitialized = '1';
+
+  root.addEventListener('valueChange', (event: Event) => {
+    const detail = (event as CustomEvent<SelectValueChangeDetail>).detail;
+    const focusReason =
+      detail?.reason === 'keyboard' || detail?.reason === 'pointer'
+        ? detail.reason
+        : 'programmatic';
+
+    // Select content is portaled out of the root. The item can therefore
+    // commit a value before the root's anatomy lookup sees the close request.
+    // Submit the public request synchronously while the root is still enabled:
+    // site-owned valueChange listeners may disable the Select before a queued
+    // close could be accepted.
+    if (!root.isConnected) return;
+    const exposes = root.getExposes?.() as SelectCloseExposes | undefined;
+    if (exposes?.open?.get?.() !== true) return;
+    exposes.requestOpen?.({ open: false, reason: 'item.select', focusReason });
+  });
+}
+
 export function registerSiteShadcnControls(): void {
   for (const [tagName, prototype] of siteProjections) {
     if (customElements.get(tagName)) continue;
@@ -143,6 +179,7 @@ function initializeSelect(root: SiteSelectRoot): void {
     });
   });
 
+  closeSelectAfterValueChange(root);
   root.dataset.siteShadcnInitialized = '1';
 }
 

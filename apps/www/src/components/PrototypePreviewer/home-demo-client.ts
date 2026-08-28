@@ -3,6 +3,7 @@ import { renderDemo } from './demo-renderer';
 import { collectPrototypeIds } from './demo-types';
 import { loadPrototypes } from './prototype-modules';
 import type { RuntimeId } from './runtimes/registry';
+import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from '../adapter-preference';
 import {
   initSiteShadcnControls,
   selectValue,
@@ -32,8 +33,17 @@ const DEFAULT_RUNTIME_OPTIONS: RuntimeOption[] = [
   { id: 'wc', label: 'Web Components' },
   { id: 'react', label: 'React' },
   { id: 'vue', label: 'Vue' },
+  { id: 'vue2', label: 'Vue 2' },
 ];
 
+function readPreferredRuntime(runtimeOptions: RuntimeOption[]): RuntimeId | null {
+  try {
+    const stored = localStorage.getItem(PREFERRED_ADAPTER_KEY);
+    return runtimeOptions.some((option) => option.id === stored) ? (stored as RuntimeId) : null;
+  } catch {
+    return null;
+  }
+}
 function populateSelect(
   select: SiteSelectRoot,
   options: Array<{ id: string; label: string }>,
@@ -75,9 +85,14 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     : DEFAULT_RUNTIME_OPTIONS;
 
   const initialDemoId = root.dataset.initialDemoId || demoOptions[0]?.id || '';
-  const initialRuntime = (root.dataset.initialRuntime ||
+  const configuredRuntime = (root.dataset.initialRuntime ||
     runtimeOptions[0]?.id ||
     'wc') as RuntimeId;
+  const initialRuntime =
+    readPreferredRuntime(runtimeOptions) ??
+    (runtimeOptions.some((option) => option.id === configuredRuntime)
+      ? configuredRuntime
+      : (runtimeOptions[0]?.id as RuntimeId));
 
   if (!demoOptions.length) {
     console.error('[HomeDemoPreviewer] no demos configured.');
@@ -92,7 +107,11 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   let version = 0;
   let destroyed = false;
 
-  async function renderCurrent(runtime: RuntimeId, demoId: string) {
+  async function renderCurrent(
+    runtime: RuntimeId,
+    demoId: string,
+    focusTarget?: HTMLElement | null
+  ) {
     if (destroyed) return;
     const currentVersion = ++version;
     setSiteSelectDisabled(runtimeSelectEl, true);
@@ -136,6 +155,12 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
       if (!destroyed && currentVersion === version) {
         setSiteSelectDisabled(runtimeSelectEl, false);
         setSiteSelectDisabled(demoSelectEl, false);
+        if (
+          focusTarget?.isConnected &&
+          (document.activeElement === document.body || document.activeElement == null)
+        ) {
+          focusTarget.focus();
+        }
       }
     }
   }
@@ -144,16 +169,39 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(changed);
     setSelectValue(changed, value);
+    const focusTarget = changed.querySelector<HTMLElement>('wc-shadcn-select-trigger');
     renderCurrent(
       (changed === runtimeSelectEl ? value : selectValue(runtimeSelectEl)) as RuntimeId,
-      changed === demoSelectEl ? value : selectValue(demoSelectEl)
+      changed === demoSelectEl ? value : selectValue(demoSelectEl),
+      focusTarget
     );
   };
 
   const onDemoChange = (event: Event) => renderFromInputs(event, demoSelectEl);
-  const onRuntimeChange = (event: Event) => renderFromInputs(event, runtimeSelectEl);
+  const onRuntimeChange = (event: Event) => {
+    const detail = (event as CustomEvent<{ value?: unknown }>).detail;
+    const value = typeof detail?.value === 'string' ? detail.value : selectValue(runtimeSelectEl);
+    try {
+      localStorage.setItem(PREFERRED_ADAPTER_KEY, value);
+    } catch {
+      // Storage is optional; the in-document synchronization still applies.
+    }
+    runtimeSelectEl.ownerDocument.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: value } })
+    );
+    renderFromInputs(event, runtimeSelectEl);
+  };
+  const onAdapterChange = (event: Event) => {
+    const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
+    if (typeof adapter !== 'string' || !runtimeOptions.some((option) => option.id === adapter))
+      return;
+    if (selectValue(runtimeSelectEl) === adapter) return;
+    setSelectValue(runtimeSelectEl, adapter);
+    void renderCurrent(adapter as RuntimeId, selectValue(demoSelectEl));
+  };
   demoSelectEl.addEventListener('valueChange', onDemoChange);
   runtimeSelectEl.addEventListener('valueChange', onRuntimeChange);
+  runtimeSelectEl.ownerDocument.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
 
   renderCurrent(initialRuntime, initialDemoId);
 
@@ -165,6 +213,7 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
         active = null;
         demoSelectEl.removeEventListener('valueChange', onDemoChange);
         runtimeSelectEl.removeEventListener('valueChange', onRuntimeChange);
+        runtimeSelectEl.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
         observer.disconnect();
       });
     }

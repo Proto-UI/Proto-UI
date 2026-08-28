@@ -5,6 +5,7 @@
 
 <wc-shadcn-button
   data-site-shadcn-button
+  data-theme-toggle
   data-variant="ghost"
   data-size="icon"
   class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 group/toggle extend-touch-target size-8"
@@ -26,8 +27,9 @@
 
 <script is:inline>
   (function () {
-    const btn = document.currentScript.previousElementSibling;
+    const btn = document.querySelector('[data-theme-toggle]');
     const tmpl = document.getElementById('starlight-theme-icons');
+    if (!btn) return;
 
     function iconFor(theme) {
       if (!tmpl) return null;
@@ -65,6 +67,9 @@
     render(current());
 
     // 点击切换
+    // The Web Component adapter emits an untrusted projected click signal in
+    // addition to the browser's trusted native click. Handle the projection
+    // only so pointer activation toggles the theme exactly once.
     btn.addEventListener('click', (event) => {
       if (!(event instanceof CustomEvent)) return;
       window.StarlightTheme.toggle();

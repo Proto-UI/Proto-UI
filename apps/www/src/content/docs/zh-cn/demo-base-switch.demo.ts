@@ -15,6 +15,7 @@ export default {
             prototypeId: 'base-switch-thumb',
             className: 'block size-5 rounded-full border bg-white',
           },
+          { kind: 'box', className: 'sr-only', children: ['Email alerts'] },
         ],
       },
       {
@@ -28,6 +29,7 @@ export default {
             prototypeId: 'base-switch-thumb',
             className: 'block size-5 rounded-full border bg-white',
           },
+          { kind: 'box', className: 'sr-only', children: ['Release alerts'] },
         ],
       },
     ],

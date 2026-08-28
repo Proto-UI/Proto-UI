@@ -192,7 +192,7 @@ const activeManager =
 
       tabs.forEach((tab) => {
         tab.addEventListener('click', (event) => {
-          if (!(event instanceof CustomEvent)) return;
+          if (tab.matches('wc-shadcn-button') && !(event instanceof CustomEvent)) return;
           const nextManager = tab.dataset.managerTab;
           if (!nextManager) return;
           setActiveManager(nextManager);
@@ -200,7 +200,7 @@ const activeManager =
       });
 
       copyButton.addEventListener('click', async (event) => {
-        if (!(event instanceof CustomEvent)) return;
+        if (copyButton.matches('wc-shadcn-button') && !(event instanceof CustomEvent)) return;
         try {
           await navigator.clipboard.writeText(getCommandNode()?.textContent ?? '');
           copyIcon.innerHTML = successIcon;

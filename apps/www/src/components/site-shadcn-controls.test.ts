@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   initSiteShadcnControls,
   registerSiteShadcnControls,
+  setSelectValue,
   selectValue,
   setSiteSelectDisabled,
-  setSelectValue,
   type SiteSelectRoot,
 } from './site-shadcn-controls';
 
@@ -52,6 +52,112 @@ describe('site Shadcn control bridge', () => {
     expect(item.getAttribute('aria-selected')).toBe('true');
     expect(value.textContent).toBe('React');
     expect(trigger.getAttribute('aria-labelledby')).toBe('runtime-label');
+  });
+
+  it('closes a portaled Select after item commit and restores trigger focus', async () => {
+    const root = document.createElement('wc-shadcn-select-root') as SiteSelectRoot;
+    root.dataset.siteSelectRoot = '1';
+    root.dataset.siteShadcnInitialized = '1';
+
+    const trigger = document.createElement('wc-shadcn-select-trigger');
+    const value = document.createElement('wc-shadcn-select-value');
+    trigger.append(value);
+
+    const content = document.createElement('wc-shadcn-select-content');
+    const react = document.createElement('wc-shadcn-select-item');
+    react.dataset.value = 'react';
+    react.dataset.textValue = 'React';
+    react.textContent = 'React';
+    const vue = document.createElement('wc-shadcn-select-item');
+    vue.dataset.value = 'vue';
+    vue.dataset.textValue = 'Vue';
+    vue.textContent = 'Vue';
+    content.append(react, vue);
+    root.append(trigger, content);
+    document.body.append(root);
+
+    initSiteShadcnControls(document);
+    await settle();
+    trigger.click();
+    await settle();
+    expect(root.getExposes?.().open?.get?.()).toBe(true);
+
+    const requestValue = root.getExposes?.().requestValue as
+      | ((request: { value: string; textValue: string; reason: 'pointer' }) => boolean)
+      | undefined;
+    expect(requestValue?.({ value: 'vue', textValue: 'Vue', reason: 'pointer' })).toBe(true);
+    await settle();
+    expect(selectValue(root)).toBe('vue');
+    expect(root.getExposes?.().open?.get?.()).toBe(false);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('closes before a valueChange owner update can disable the Select', async () => {
+    const root = document.createElement('wc-shadcn-select-root') as SiteSelectRoot;
+    root.dataset.siteSelectRoot = '1';
+    root.dataset.siteShadcnInitialized = '1';
+
+    const trigger = document.createElement('wc-shadcn-select-trigger');
+    trigger.append(document.createElement('wc-shadcn-select-value'));
+    const content = document.createElement('wc-shadcn-select-content');
+    const item = document.createElement('wc-shadcn-select-item');
+    item.dataset.value = 'react';
+    item.dataset.textValue = 'React';
+    item.textContent = 'React';
+    content.append(item);
+    root.append(trigger, content);
+    document.body.append(root);
+
+    initSiteShadcnControls(document);
+    await settle();
+    trigger.click();
+    await settle();
+    root.addEventListener('valueChange', () => root.setProps?.({ disabled: true }));
+
+    const requestValue = root.getExposes?.().requestValue as
+      | ((request: { value: string; textValue: string; reason: 'pointer' }) => boolean)
+      | undefined;
+    expect(requestValue?.({ value: 'react', textValue: 'React', reason: 'pointer' })).toBe(true);
+    await settle();
+
+    expect(root.getExposes?.().open?.get?.()).toBe(false);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('preserves the selected value while async remounts toggle disabled', async () => {
+    const root = document.createElement('wc-shadcn-select-root') as SiteSelectRoot;
+    root.dataset.siteSelectRoot = '1';
+    root.dataset.siteInitialValue = 'react';
+
+    const trigger = document.createElement('wc-shadcn-select-trigger');
+    trigger.append(document.createElement('wc-shadcn-select-value'));
+    const content = document.createElement('wc-shadcn-select-content');
+    const react = document.createElement('wc-shadcn-select-item');
+    react.dataset.value = 'react';
+    react.dataset.textValue = 'React';
+    react.textContent = 'React';
+    const vue = document.createElement('wc-shadcn-select-item');
+    vue.dataset.value = 'vue';
+    vue.dataset.textValue = 'Vue';
+    vue.textContent = 'Vue';
+    content.append(react, vue);
+    root.append(trigger, content);
+    document.body.append(root);
+
+    initSiteShadcnControls(document);
+    await settle();
+    setSelectValue(root, 'vue');
+    setSiteSelectDisabled(root, true);
+    await settle();
+
+    expect(selectValue(root)).toBe('vue');
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+
+    setSiteSelectDisabled(root, false);
+    await settle();
+    expect(selectValue(root)).toBe('vue');
+    expect(trigger.getAttribute('aria-disabled')).toBe('false');
   });
 
   it('registers the Shadcn Button projection for site actions', async () => {

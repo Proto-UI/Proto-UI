@@ -45,6 +45,7 @@ const {
     { id: 'wc', label: 'Web Components' },
     { id: 'react', label: 'React' },
     { id: 'vue', label: 'Vue' },
+    { id: 'vue2', label: 'Vue 2' },
   ],
   id = 'home-demo-previewer',
   class: className = '',
@@ -203,10 +204,8 @@ const runtimeLabelId = `${id}-runtime-label-${instanceToken}`;
     line-height: 1.3;
     font-weight: 600;
     color: var(--color-foreground);
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    overflow: hidden;
+    display: block;
+    overflow: visible;
   }
 
   .home-demo-previewer__toolbar {
