@@ -171,6 +171,13 @@ function writeMatrix(
   rows,
   { headers = config.headers, totalsText, targetClassTotalsText, extraText = '' } = {}
 ) {
+  const defaultWebsiteBindings = [
+    '## Source-scan bindings',
+    '',
+    '| Interactive or integration source | Owning matrix row |',
+    '| --- | --- |',
+    '| `apps/www/src/components/override/Header.astro` | `www.shell.primary-nav`, `www.shell.header-separators` |',
+  ].join('\n');
   const absolutePath = path.join(root, config.relativePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(
@@ -188,7 +195,7 @@ function writeMatrix(
         ? (targetClassTotalsText ?? targetClassTotals(config, rows))
         : '',
       '',
-      extraText,
+      extraText || (config.kind === 'website' ? defaultWebsiteBindings : ''),
       '',
     ].join('\n'),
     'utf8'
@@ -275,11 +282,28 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
   ];
 }
 
-function writeValidMatrices(root, websiteOverrides = {}, harnessOverrides = {}) {
+function writeValidMatrices(
+  root,
+  websiteOverrides = {},
+  harnessOverrides = {},
+  { websiteBindings = [] } = {}
+) {
+  const extraText = [
+    '## Source-scan bindings',
+    '',
+    '| Interactive or integration source | Owning matrix row |',
+    '| --- | --- |',
+    '| `apps/www/src/components/override/Header.astro` | `www.shell.primary-nav`, `www.shell.header-separators` |',
+    ...websiteBindings.map(
+      ([sourcePath, ownerIds]) =>
+        `| \`${sourcePath}\` | ${ownerIds.map((ownerId) => `\`${ownerId}\``).join(', ')} |`
+    ),
+  ].join('\n');
   writeMatrix(
     root,
     MATRIX_CONFIGS[0],
-    rowsWithRequiredIds(MATRIX_CONFIGS[0], validWebsiteRow(websiteOverrides), validWebsiteRow)
+    rowsWithRequiredIds(MATRIX_CONFIGS[0], validWebsiteRow(websiteOverrides), validWebsiteRow),
+    { extraText }
   );
   writeMatrix(
     root,
@@ -453,16 +477,24 @@ test('detects lowercase native event attributes without an event-name allowlist'
 
 test('does not classify ordinary lowercase on-prefixed component props as events', () => {
   const root = createRoot();
-  writeValidMatrices(root);
-  for (const [relativePath, content] of [
+  const cases = [
     ['apps/www/src/components/OnlyCard.astro', '<Card only={true} />'],
     ['apps/www/src/components/OnceCard.tsx', '<Card once="session" />'],
     ['apps/www/src/components/OngoingCard.vue', '<template><Card ongoing="yes" /></template>'],
-  ]) {
+  ];
+  for (const [relativePath, content] of cases) {
     const sourcePath = path.join(root, relativePath);
     fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
     fs.writeFileSync(sourcePath, content);
   }
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: cases.map(([relativePath]) => [relativePath, ['www.shell.search']]),
+    }
+  );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
@@ -489,6 +521,37 @@ test('discovers interactive Vue and Svelte website components', () => {
   }
 });
 
+test('detects Vue and Svelte template event directives', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [relativePath, content] of [
+    [
+      'apps/www/src/components/VueShortControl.vue',
+      '<template><button @click="open" /></template>',
+    ],
+    [
+      'apps/www/src/components/VueLongControl.vue',
+      '<template><button v-on:click.prevent="open" /></template>',
+    ],
+    [
+      'apps/www/src/content/docs/SvelteControl.svelte',
+      '<button on:click|preventDefault={open}>Open</button>',
+    ],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, content);
+  }
+  const message = validationMessage(root);
+  for (const relativePath of [
+    'apps/www/src/components/VueShortControl.vue',
+    'apps/www/src/components/VueLongControl.vue',
+    'apps/www/src/content/docs/SvelteControl.svelte',
+  ]) {
+    assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
+  }
+});
+
 test('does not confuse comparisons and ordinary onXxx variables with JSX handlers', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -503,6 +566,14 @@ test('does not confuse comparisons and ordinary onXxx variables with JSX handler
       'let onDoubleClick = () => {};',
       'export const result = lower ? onDoubleClick : undefined;',
     ].join('\n')
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [['apps/www/src/components/comparison.tsx', ['www.shell.search']]],
+    }
   );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
@@ -521,6 +592,14 @@ test('does not treat JSX-looking TypeScript strings as executable handlers', () 
     fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
     fs.writeFileSync(sourcePath, content);
   }
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [['apps/www/src/components/template-example.tsx', ['www.shell.search']]],
+    }
+  );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
@@ -538,6 +617,17 @@ test('does not treat JSX-looking Astro frontmatter strings as template handlers'
     fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
     fs.writeFileSync(sourcePath, ['---', declaration, '---', '<p>{example}</p>'].join('\n'));
   }
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [
+        ['apps/www/src/components/single-quoted-example.astro', ['www.shell.search']],
+        ['apps/www/src/components/template-example.astro', ['www.shell.search']],
+      ],
+    }
+  );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
@@ -720,6 +810,84 @@ test('rejects adapter and implementation-internal imports outside the website al
       )
     );
   }
+});
+
+test('rejects guarded imports from embedded component style blocks', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const [relativePath, specifier] of [
+    ['apps/www/src/components/AstroStyleEscape.astro', '@proto.ui/prototypes-base/styles.css'],
+    ['apps/www/src/components/VueStyleEscape.vue', '@proto.ui/runtime/styles.css'],
+    ['apps/www/src/components/SvelteStyleEscape.svelte', '@proto.ui/module-overlay/styles.css'],
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, `<style>@import "${specifier}";</style>`);
+  }
+  const message = validationMessage(root);
+  for (const [relativePath, specifier] of [
+    ['apps/www/src/components/AstroStyleEscape.astro', '@proto.ui/prototypes-base/styles.css'],
+    ['apps/www/src/components/VueStyleEscape.vue', '@proto.ui/runtime/styles.css'],
+    ['apps/www/src/components/SvelteStyleEscape.svelte', '@proto.ui/module-overlay/styles.css'],
+  ]) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${relativePath}\` escapes the website consumer-wall allowlist`
+      )
+    );
+  }
+});
+
+test('ignores import-looking CSS strings and comments in embedded style blocks', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/StyleExamples.astro';
+  const sourcePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(
+    sourcePath,
+    [
+      '<style>',
+      '/* @import "@proto.ui/prototypes-base/comment.css"; */',
+      '.example::before { content: "@import \'@proto.ui/runtime/string.css\'"; }',
+      '</style>',
+    ].join('\n')
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [[relativePath, ['www.shell.search']]],
+    }
+  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('requires new static website components to have a matrix classification', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(root, 'apps', 'www', 'src', 'components', 'StaticSurface.astro');
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, '<h2>Help</h2><a href="/docs">Docs</a><details>More</details>');
+  assert.match(
+    validationMessage(root),
+    /website component source `apps\/www\/src\/components\/StaticSurface\.astro` is not classified by a matrix row/
+  );
+});
+
+test('excludes component test and spec fixtures from static classification', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  for (const relativePath of [
+    'apps/www/src/components/Widget.test.astro',
+    'apps/www/src/components/Widget.spec.vue',
+    'apps/www/src/components/Widget.test.svelte',
+  ]) {
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, '<div>Fixture only</div>');
+  }
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('restricts Lucide component allowances to the Lucide package family', () => {
@@ -1178,6 +1346,24 @@ test('rejects Website difficulty values outside F1 through F5', () => {
     validationMessage(root),
     /unsupported Difficulty `F13`; allowed: F1, F2, F3, F4, F5/
   );
+});
+
+test('rejects empty Website host and rendering strategy values', () => {
+  const root = createRoot();
+  writeValidMatrices(root, { 'WC host and SSR/no-JS strategy': 'WC:; SSR:; no-JS:' });
+  const message = validationMessage(root);
+  for (const label of ['WC:', 'SSR:', 'no-JS:']) {
+    assert.ok(message.includes(`required \`${label}\` label must have a meaningful value`));
+  }
+});
+
+test('does not let an empty Website strategy consume the next required label', () => {
+  const root = createRoot();
+  writeValidMatrices(root, {
+    'WC host and SSR/no-JS strategy':
+      'WC: SSR: meaningful light DOM remains; no-JS: native link remains',
+  });
+  assert.match(validationMessage(root), /required `WC:` label must have a meaningful value/);
 });
 
 test('rejects empty exemption labels and issue-only re-review text', () => {

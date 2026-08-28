@@ -893,6 +893,52 @@ function markupSourceForJsxFallback(content, absolutePath) {
   return markup.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/giu, '');
 }
 
+function openingTagAttributeSyntax(candidate) {
+  let syntax = '';
+  let quote = null;
+  let braceDepth = 0;
+  let escaped = false;
+  for (const character of candidate) {
+    if (quote) {
+      syntax += ' ';
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === '"' || character === "'" || character === '`') {
+      quote = character;
+      syntax += ' ';
+      continue;
+    }
+    if (character === '{') {
+      braceDepth += 1;
+      syntax += ' ';
+      continue;
+    }
+    if (character === '}' && braceDepth > 0) {
+      braceDepth -= 1;
+      syntax += ' ';
+      continue;
+    }
+    syntax += braceDepth > 0 ? ' ' : character;
+  }
+  return syntax;
+}
+
+function containsFrameworkTemplateEventDirective(candidate, absolutePath) {
+  const syntax = openingTagAttributeSyntax(candidate);
+  if (/\.vue$/i.test(absolutePath)) {
+    return /(?:^|\s)(?:@[A-Za-z][\w:-]*|v-on:[A-Za-z][\w:-]*)(?:\.[A-Za-z][\w-]*)*(?=\s|=|\/?\s*>)/u.test(
+      syntax
+    );
+  }
+  if (/\.svelte$/i.test(absolutePath)) {
+    return /(?:^|\s)on:[A-Za-z][\w-]*(?:\|[A-Za-z][\w-]*)*(?=\s|=|\/?\s*>)/u.test(syntax);
+  }
+  return false;
+}
+
 function containsJsxEventHandler(content, absolutePath) {
   if (astContainsJsxEventHandler(content)) return true;
 
@@ -911,7 +957,10 @@ function containsJsxEventHandler(content, absolutePath) {
   // frontmatter and script regions. The scanner tracks expressions and quotes.
   return jsxOpeningTagCandidates(markupSource).some((candidate) => {
     const selfClosingCandidate = candidate.replace(/\/?\s*>$/u, ' />');
-    return astContainsJsxEventHandler(selfClosingCandidate);
+    return (
+      astContainsJsxEventHandler(selfClosingCandidate) ||
+      containsFrameworkTemplateEventDirective(candidate, absolutePath)
+    );
   });
 }
 
@@ -941,6 +990,22 @@ function discoverWebsiteInteractiveSources(rootDir) {
     )
     .filter((absolutePath) =>
       containsInteractiveSource(sourceTextForInteractionScan(absolutePath), absolutePath)
+    )
+    .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
+    .sort();
+}
+
+function discoverWebsiteComponentSources(rootDir) {
+  const websiteSourceRoot = path.join(rootDir, 'apps', 'www', 'src');
+  return ['components', 'pages']
+    .flatMap((directory) => {
+      const absoluteRoot = path.join(websiteSourceRoot, directory);
+      return fs.existsSync(absoluteRoot) ? walkFiles(absoluteRoot) : [];
+    })
+    .filter((absolutePath) => /\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath))
+    .filter(
+      (absolutePath) =>
+        !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath)
     )
     .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
     .sort();
@@ -984,17 +1049,59 @@ function embeddedScriptSegments(content) {
   return segments;
 }
 
+function styleModuleSpecifiers(content) {
+  const withoutComments = content.replace(/\/\*[\s\S]*?\*\//gu, '');
+  const specifiers = [];
+  let quote = null;
+  let escaped = false;
+  let blockDepth = 0;
+  for (let index = 0; index < withoutComments.length; index += 1) {
+    const character = withoutComments[index];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === quote) quote = null;
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '{') {
+      blockDepth += 1;
+      continue;
+    }
+    if (character === '}' && blockDepth > 0) {
+      blockDepth -= 1;
+      continue;
+    }
+    if (blockDepth > 0 || withoutComments.slice(index, index + 7).toLowerCase() !== '@import') {
+      continue;
+    }
+    const match = withoutComments
+      .slice(index)
+      .match(/^@import\b\s+(?:url\(\s*)?(?:(['"])([^'"]+)\1|([^'"\s;)]+))/iu);
+    if (match) specifiers.push(match[2] ?? match[3]);
+  }
+  return specifiers;
+}
+
+function embeddedStyleSegments(content) {
+  return [...content.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/giu)].map((match) => match[1]);
+}
+
 function moduleSpecifiersForWebsiteSource(absolutePath) {
   const content = fs.readFileSync(absolutePath, 'utf8');
   if (/\.(?:css|less|s[ac]ss)$/i.test(absolutePath)) {
-    return [...content.matchAll(/@import\s+(?:url\(\s*)?(['"])([^'"]+)\1\s*\)?/giu)].map(
-      (match) => match[2]
-    );
+    return styleModuleSpecifiers(content);
   }
   if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
-    return embeddedScriptSegments(content).flatMap((segment) =>
-      scriptModuleSpecifiers(segment, absolutePath)
-    );
+    return [
+      ...embeddedScriptSegments(content).flatMap((segment) =>
+        scriptModuleSpecifiers(segment, absolutePath)
+      ),
+      ...embeddedStyleSegments(content).flatMap(styleModuleSpecifiers),
+    ];
   }
   const source = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
   return scriptModuleSpecifiers(source, absolutePath);
@@ -1218,9 +1325,13 @@ function requireLabels(value, labels, context, issues) {
 }
 
 function requireMeaningfulLabels(value, labels, context, issues) {
+  const nextLabelPattern = labels.map(escapeRegularExpression).join('|');
   for (const label of labels) {
     const match = value.match(
-      new RegExp(`\\b${escapeRegularExpression(label)}[ \\t]*([^;\\r\\n]*)`, 'i')
+      new RegExp(
+        `\\b${escapeRegularExpression(label)}[ \\t]*(.*?)(?=;|\\b(?:${nextLabelPattern})[ \\t]*|[\\r\\n]|$)`,
+        'i'
+      )
     );
     if (!match) {
       issues.push(`${context}: missing required \`${label}\` label`);
@@ -1524,7 +1635,7 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     }
 
     if (config.kind === 'website') {
-      requireLabels(
+      requireMeaningfulLabels(
         record['WC host and SSR/no-JS strategy'],
         ['WC:', 'SSR:', 'no-JS:'],
         `${context}: WC host and SSR/no-JS strategy`,
@@ -1645,6 +1756,35 @@ function validateWebsiteSourceBindings(
       if (!matrixResult.seenIds.has(ownerId)) {
         issues.push(
           `${relativePath}:${binding.line}: source binding references missing matrix row \`${ownerId}\``
+        );
+      }
+    }
+  }
+
+  for (const sourcePath of discoverWebsiteComponentSources(rootDir)) {
+    const directOwners = matrixResult.sourceOwners.get(sourcePath) ?? [];
+    const binding = bindings.get(sourcePath);
+    if (directOwners.length === 0 && !binding) {
+      issues.push(
+        `${relativePath}: website component source \`${sourcePath}\` is not classified by a matrix row`
+      );
+      continue;
+    }
+    if (directOwners.length > 1) {
+      const directIds = [...new Set(directOwners.map(({ id }) => id))].sort();
+      if (!binding) {
+        issues.push(
+          `${relativePath}: website component source \`${sourcePath}\` appears in multiple matrix Path cells (${directIds.join(', ')}); add one explicit grouped binding naming exactly those rows`
+        );
+        continue;
+      }
+      const boundIds = [...binding.ownerIds].sort();
+      if (
+        directIds.length !== boundIds.length ||
+        directIds.some((ownerId, index) => ownerId !== boundIds[index])
+      ) {
+        issues.push(
+          `${relativePath}:${binding.line}: grouped binding for component \`${sourcePath}\` must name exactly the matrix Path owners (${directIds.join(', ')})`
         );
       }
     }

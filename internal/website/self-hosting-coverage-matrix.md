@@ -121,16 +121,23 @@ The matrix rows remain authoritative. These bindings make non-row helper and int
 | `apps/www/src/components/LucideIconGallery.astro` | grouped rows `www.gallery.lucide-search`, `www.gallery.lucide-load-more`, `www.gallery.lucide-card-grid`, `www.gallery.lucide-dialog`, `www.gallery.lucide-copy`, and `www.gallery.lucide-lazy-loader` |
 | `apps/www/src/components/PrototypeLoader.astro` | `www.demo.prototype-previewer` |
 | `apps/www/src/components/LanguageRedirect.astro` | `www.route.root-locale-redirect` |
+| `apps/www/src/components/PageTitle.astro` | `www.shell.page-title` |
 | `apps/www/src/components/override/Hero.astro` | grouped rows `www.shell.hero-actions` and `www.shell.hero-hash-scroll` |
+| `apps/www/src/components/override/Header.astro` | grouped rows `www.shell.primary-nav` and `www.shell.header-separators` |
 | `apps/www/src/components/override/PageFrame.astro` | grouped interaction owners `www.shell.mobile-menu-toggle`, `www.shell.mobile-menu-panel`, and `www.docs.wiki-term`; `www.shell.page-layout` owns only the static landmark/layout projection |
 | `apps/www/src/components/override/Search.astro` | grouped rows `www.search.launcher`, `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure`, and `www.search.pagefind-engine` |
+| `apps/www/src/components/override/Select.astro` | `www.shell.language-select` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel` |
 | `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | grouped rows `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, and `www.demo.code-panel` |
+| `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` |
+| `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` |
 | `apps/www/src/components/PrototypePreviewer/AdapterPanelScript.astro` | `www.demo.runtime-select` |
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | grouped rows `www.demo.prototype-previewer` and `www.demo.runtime-select` |
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | grouped rows `www.demo.prototype-previewer`, `www.demo.runtime-select`, and `www.demo.lazy-mount-observer` |
+| `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` |
 | `apps/www/src/components/override/TableOfContents/TableOfContents.astro` | `www.shell.table-of-contents` |
+| `apps/www/src/components/override/TableOfContents/TableOfContentsList.astro` | `www.shell.table-of-contents` |
 
 ## M0 evidence baseline
 
