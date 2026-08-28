@@ -16,11 +16,12 @@ cases:
       - C-TEXT-CONTROL-0001-B
     expectation: portable-single-line-properties-project-and-clear-on-web-input
   - id: T-TEXT-CONTROL-0001-CASE-OWNING-REALM
-    title: A text control created by another Window keeps live projection and editing-session preservation
+    title: Text controls normalize editing payloads across target realms, event realms, adoption, and documents without a Window
     covers:
       - C-TEXT-CONTROL-0001-B
+      - C-TEXT-CONTROL-0001-C
       - C-TEXT-CONTROL-0001-G
-    expectation: owning-realm-input-projects-properties-and-preserves-selection-across-controlled-value-update
+    expectation: text-control-projects-properties-normalizes-realm-independent-editing-payloads-and-preserves-selection
   - id: T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
     title: CR and CRLF line endings are canonicalized by line mode at the module boundary in patches, events, snapshots, and listener payloads
     covers:
@@ -95,7 +96,7 @@ implementations:
     exercises:
       - HC-TEXT-CONTROL-0001
     notes:
-      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', live inputMode/enterKeyHint projection and clearing, and owning-realm editing-session preservation through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
+      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', live inputMode/enterKeyHint projection and clearing, realm-independent InputEvent/CompositionEvent normalization across adoption and documents without a Window, and owning-realm editing-session preservation through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
   - id: module-text-control-value-reconciliation
     kind: module-test
     status: passing
@@ -192,7 +193,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Added single-line input projection and clearing, owning-realm editing-session coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
+      Added single-line input projection and clearing, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
 
 
 tags:

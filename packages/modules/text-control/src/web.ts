@@ -58,18 +58,27 @@ function attachTarget(
     if (disposed) return;
     if (options.stopPropagation) event.stopPropagation();
     const type = event.type as TextControlEvent['type'];
-    const inputEvent = event instanceof InputEvent ? event : null;
-    const compositionEvent = event instanceof CompositionEvent ? event : null;
+    const editingEvent = event as Event & {
+      readonly data?: unknown;
+      readonly inputType?: unknown;
+      readonly isComposing?: unknown;
+    };
+    const carriesData = type === 'input' || type.startsWith('composition');
+    const data = carriesData && typeof editingEvent.data === 'string' ? editingEvent.data : null;
+    const inputType =
+      type === 'input' && typeof editingEvent.inputType === 'string'
+        ? editingEvent.inputType
+        : null;
     if (type === 'compositionstart') composing = true;
-    if (inputEvent?.isComposing) composing = true;
+    if (type === 'input' && editingEvent.isComposing === true) composing = true;
     if (type === 'compositionend') composing = false;
     connection.onEvent(
       Object.freeze({
         type,
         value: canonicalizeLineEndings(target.value),
         composing,
-        data: inputEvent?.data ?? compositionEvent?.data ?? null,
-        inputType: inputEvent?.inputType ?? null,
+        data,
+        inputType,
       })
     );
     if (type === 'compositionend' && valueProjectionDeferred) {

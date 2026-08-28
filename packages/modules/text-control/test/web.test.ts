@@ -137,6 +137,154 @@ describe('module-text-control web bridge', () => {
     expect(seen).toHaveLength(5);
   });
 
+  it('reads editing payloads independently of target and event realms', () => {
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    const targetDocument = iframe.contentDocument;
+    const targetView = iframe.contentWindow;
+    expect(targetDocument).not.toBeNull();
+    expect(targetView).not.toBeNull();
+    if (!targetDocument || !targetView) throw new Error('iframe realm is unavailable');
+    const targetRealm = targetView as unknown as Pick<
+      typeof globalThis,
+      'CompositionEvent' | 'InputEvent'
+    >;
+    const originalTargetCompositionEvent = targetRealm.CompositionEvent;
+    const originalTargetInputEvent = targetRealm.InputEvent;
+    class TargetRealmCompositionEvent extends Event {
+      readonly data: string | null;
+      constructor(type: string, init: CompositionEventInit = {}) {
+        super(type, init);
+        this.data = init.data ?? null;
+      }
+    }
+    class TargetRealmInputEvent extends Event {
+      readonly data: string | null;
+      readonly inputType: string;
+      readonly isComposing: boolean;
+      constructor(type: string, init: InputEventInit = {}) {
+        super(type, init);
+        this.data = init.data ?? null;
+        this.inputType = init.inputType ?? '';
+        this.isComposing = init.isComposing ?? false;
+      }
+    }
+    Object.defineProperties(targetView, {
+      CompositionEvent: { configurable: true, value: TargetRealmCompositionEvent },
+      InputEvent: { configurable: true, value: TargetRealmInputEvent },
+    });
+    expect(targetRealm.CompositionEvent).not.toBe(CompositionEvent);
+    expect(targetRealm.InputEvent).not.toBe(InputEvent);
+
+    const input = targetDocument.createElement('input');
+    targetDocument.body.appendChild(input);
+    const seen: TextControlEvent[] = [];
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent: (event) => seen.push(event),
+    });
+
+    const compositionStart = new targetRealm.CompositionEvent('compositionstart', {
+      bubbles: true,
+      data: '編',
+    });
+    const inputEvent = new targetRealm.InputEvent('input', {
+      bubbles: true,
+      data: '中',
+      inputType: 'insertCompositionText',
+      isComposing: true,
+    });
+    input.dispatchEvent(compositionStart);
+    input.value = '編集中';
+    input.dispatchEvent(inputEvent);
+
+    input.value = 'other realm';
+    const otherRealmInput = new InputEvent('input', {
+      bubbles: true,
+      data: '他',
+      inputType: 'insertText',
+      isComposing: false,
+    });
+    expect(otherRealmInput instanceof targetRealm.InputEvent).toBe(false);
+    input.dispatchEvent(otherRealmInput);
+
+    document.adoptNode(input);
+    document.body.appendChild(input);
+    expect(input.ownerDocument).toBe(document);
+    const adoptedComposition = new CompositionEvent('compositionupdate', { bubbles: true });
+    Object.defineProperty(adoptedComposition, 'data', { value: 'adopted' });
+    input.dispatchEvent(adoptedComposition);
+
+    expect(seen).toEqual([
+      {
+        type: 'compositionstart',
+        value: '',
+        composing: true,
+        data: '編',
+        inputType: null,
+      },
+      {
+        type: 'input',
+        value: '編集中',
+        composing: true,
+        data: '中',
+        inputType: 'insertCompositionText',
+      },
+      {
+        type: 'input',
+        value: 'other realm',
+        composing: true,
+        data: '他',
+        inputType: 'insertText',
+      },
+      {
+        type: 'compositionupdate',
+        value: 'other realm',
+        composing: true,
+        data: 'adopted',
+        inputType: null,
+      },
+    ]);
+
+    lease.dispose();
+    Object.defineProperties(targetView, {
+      CompositionEvent: { configurable: true, value: originalTargetCompositionEvent },
+      InputEvent: { configurable: true, value: originalTargetInputEvent },
+    });
+    iframe.remove();
+  });
+
+  it('reads editing payloads when the target document has no Window', () => {
+    const targetDocument = document.implementation.createHTMLDocument('detached');
+    expect(targetDocument.defaultView).toBeNull();
+    const input = targetDocument.createElement('input');
+    const seen: TextControlEvent[] = [];
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent: (event) => seen.push(event),
+    });
+
+    input.value = 'detached';
+    input.dispatchEvent(
+      new InputEvent('input', {
+        data: 'd',
+        inputType: 'insertText',
+        isComposing: true,
+      })
+    );
+
+    expect(seen).toEqual([
+      {
+        type: 'input',
+        value: 'detached',
+        composing: true,
+        data: 'd',
+        inputType: 'insertText',
+      },
+    ]);
+    lease.dispose();
+  });
+
   it('preserves cursor and selection across host patches and controlled restoration', () => {
     const textarea = document.createElement('textarea');
     document.body.appendChild(textarea);
