@@ -68,6 +68,7 @@ function initializeAdapterSelect(select: AdapterSelectControl): void {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const adapter = typeof detail?.value === 'string' ? detail.value : readControlValue(select);
     if (!isRuntimeId(adapter)) return;
+    if (readControlValue(select) === adapter) return;
     writeControlValue(select, adapter);
     try {
       select.ownerDocument.defaultView?.localStorage.setItem(PREFERRED_ADAPTER_KEY, adapter);

@@ -61,4 +61,10 @@ const options = [
   .adapter-select-wrapper wc-shadcn-select-trigger {
     min-width: 9rem;
   }
+
+  /* Keep server-rendered chrome compact until the custom elements upgrade so
+     the projected option list never flashes inline in the header. */
+  .adapter-select-wrapper wc-shadcn-select-content:not(:defined) {
+    display: none;
+  }
 </style>

@@ -74,6 +74,10 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
   .language-select-wrapper wc-shadcn-select-trigger {
     min-width: 6rem;
   }
+
+  .language-select-wrapper wc-shadcn-select-content:not(:defined) {
+    display: none;
+  }
 </style>
 
 <script>

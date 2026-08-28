@@ -181,6 +181,7 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   const onRuntimeChange = (event: Event) => {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(runtimeSelectEl);
+    if (!runtimeOptions.some((option) => option.id === value)) return;
     try {
       localStorage.setItem(PREFERRED_ADAPTER_KEY, value);
     } catch {
@@ -189,7 +190,6 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     runtimeSelectEl.ownerDocument.dispatchEvent(
       new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: value } })
     );
-    renderFromInputs(event, runtimeSelectEl);
   };
   const onAdapterChange = (event: Event) => {
     const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
