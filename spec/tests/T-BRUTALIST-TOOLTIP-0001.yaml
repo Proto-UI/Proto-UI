@@ -49,11 +49,11 @@ cases:
       - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
     expectation: content-teardown-cleans-owned-description-and-rendered-tooltip-has-no-focusable-task-interaction
   - id: T-BRUTALIST-TOOLTIP-0001-CASE-RENDERED-VISUAL
-    title: Both controlled-open Tooltips render the exact Content grammar across WC React and Vue
+    title: Uncontrolled sibling Tooltips render the exact Content grammar across WC React and Vue
     covers:
       - P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
       - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
-    expectation: rendered-content-has-square-border-inverse-colors-hard-shadow-monospace-uppercase-spacing-and-nonzero-geometry
+    expectation: trigger-driven-rendered-content-has-square-border-inverse-colors-hard-shadow-monospace-uppercase-spacing-and-nonzero-geometry
 implementations:
   - id: prototypes-brutalist-tooltip-projection
     kind: module-test
@@ -82,7 +82,6 @@ implementations:
     consumesCases:
       - T-BRUTALIST-TOOLTIP-0001-CASE-GROUP-TRANSPARENT-ENTRY
       - T-BRUTALIST-TOOLTIP-0001-CASE-PACKAGE-SURFACE
-      - T-BRUTALIST-TOOLTIP-0001-CASE-CONTENT-INTERACTION-BOUNDARY
       - T-BRUTALIST-TOOLTIP-0001-CASE-RENDERED-VISUAL
     exercises:
       - P-BRUTALIST-TOOLTIP

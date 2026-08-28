@@ -4,7 +4,7 @@ import type { BrutalistTooltipGroupExposes, BrutalistTooltipGroupProps } from '.
 
 /**
  * Transparent design-language entry: Base owns timing, context, and same-domain
- * intent aggregation. Brutalist owns only the stable package identity and adds
+ * intent aggregation. Brutalist owns only the cataloged draft package identity and adds
  * no props, state, events, accessibility, or visual surface.
  */
 export const BrutalistTooltipGroup = definePrototype<
