@@ -43,7 +43,35 @@ function createRoot() {
   }
   fs.writeFileSync(
     path.join(root, 'pnpm-lock.yaml'),
-    "lockfileVersion: '9.0'\nimporters:\n  apps/www:\n    dependencies:\n      '@astrojs/starlight':\n        specifier: ^0.35.2\n        version: 0.35.3(astro@5.18.1)\npackages:\n  '@expressive-code/core@0.41.7': {}\n  '@expressive-code/plugin-frames@0.41.7': {}\n",
+    `lockfileVersion: '9.0'
+importers:
+  apps/www:
+    dependencies:
+      '@astrojs/starlight':
+        specifier: ^0.35.2
+        version: 0.35.3(astro@5.18.1)
+packages:
+  '@expressive-code/core@0.41.7': {}
+  '@expressive-code/plugin-frames@0.41.7': {}
+snapshots:
+  '@astrojs/starlight@0.35.3(astro@5.18.1)':
+    dependencies:
+      astro-expressive-code: 0.41.7(astro@5.18.1)
+  'astro-expressive-code@0.41.7(astro@5.18.1)':
+    dependencies:
+      rehype-expressive-code: 0.41.7
+  'rehype-expressive-code@0.41.7':
+    dependencies:
+      expressive-code: 0.41.7
+  'expressive-code@0.41.7':
+    dependencies:
+      '@expressive-code/core': 0.41.7
+      '@expressive-code/plugin-frames': 0.41.7
+  '@expressive-code/core@0.41.7': {}
+  '@expressive-code/plugin-frames@0.41.7':
+    dependencies:
+      '@expressive-code/core': 0.41.7
+`,
     'utf8'
   );
   temporaryRoots.push(root);
@@ -370,6 +398,18 @@ test('detects camel-cased JSX event handler props in the website source scan', (
   );
 });
 
+test('detects form submission handlers in the website source scan', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(root, 'apps', 'www', 'src', 'components', 'NewForm.tsx');
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, 'export const NewForm = () => <form onSubmit={() => {}} />;');
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/components\/NewForm\.tsx` is not bound/
+  );
+});
+
 test('binds inherited surface manifests to the resolved dependency version', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -406,13 +446,70 @@ test('binds inherited transitive Expressive Code surfaces to package versions', 
     lockfilePath,
     fs
       .readFileSync(lockfilePath, 'utf8')
-      .replace('@expressive-code/plugin-frames@0.41.7', '@expressive-code/plugin-frames@0.42.0'),
+      .replace(
+        "'@expressive-code/plugin-frames': 0.41.7",
+        "'@expressive-code/plugin-frames': 0.42.0"
+      ),
     'utf8'
   );
   assert.match(
     validationMessage(root),
     /inherited manifest .*@expressive-code\/plugin-frames@0\.41\.7.* must match resolved @expressive-code\/plugin-frames@0\.42\.0/
   );
+});
+
+test('ignores transitive Expressive Code versions reachable only from another workspace', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  fs.writeFileSync(
+    path.join(root, 'pnpm-lock.yaml'),
+    `lockfileVersion: '9.0'
+importers:
+  apps/www:
+    dependencies:
+      '@astrojs/starlight':
+        specifier: ^0.35.2
+        version: 0.35.3(astro@5.18.1)
+  apps/unrelated:
+    dependencies:
+      expressive-code:
+        specifier: ^0.42.0
+        version: 0.42.0
+packages:
+  '@expressive-code/core@0.41.7': {}
+  '@expressive-code/core@0.42.0': {}
+  '@expressive-code/plugin-frames@0.41.7': {}
+  '@expressive-code/plugin-frames@0.42.0': {}
+snapshots:
+  '@astrojs/starlight@0.35.3(astro@5.18.1)':
+    dependencies:
+      astro-expressive-code: 0.41.7(astro@5.18.1)
+  'astro-expressive-code@0.41.7(astro@5.18.1)':
+    dependencies:
+      rehype-expressive-code: 0.41.7
+  'rehype-expressive-code@0.41.7':
+    dependencies:
+      expressive-code: 0.41.7
+  'expressive-code@0.41.7':
+    dependencies:
+      '@expressive-code/core': 0.41.7
+      '@expressive-code/plugin-frames': 0.41.7
+  '@expressive-code/core@0.41.7': {}
+  '@expressive-code/plugin-frames@0.41.7':
+    dependencies:
+      '@expressive-code/core': 0.41.7
+  'expressive-code@0.42.0':
+    dependencies:
+      '@expressive-code/core': 0.42.0
+      '@expressive-code/plugin-frames': 0.42.0
+  '@expressive-code/core@0.42.0': {}
+  '@expressive-code/plugin-frames@0.42.0':
+    dependencies:
+      '@expressive-code/core': 0.42.0
+`,
+    'utf8'
+  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('rejects client interaction added to a native/static manifest source', () => {
@@ -956,6 +1053,47 @@ test('rejects a dogfooded evidence file without reproducible record fields', () 
   assert.match(message, /dogfooded evidence record .* missing required `Commands:` label/);
 });
 
+test('rejects empty required values in dogfooded matrix and evidence records', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const evidencePath = 'internal/agent-harness/evidence/m1/tool-invocation.md';
+  for (const [repositoryPath, content] of [
+    [implementationPath, 'fixture'],
+    [
+      evidencePath,
+      'Build:\nBrowser:\nAccessibility:\nLifecycle:\nDesign:\nCommit:\nEnvironment:\nFixtures:\nCommands:\nResults:\n',
+    ],
+  ]) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build:; Browser:; Accessibility:; Lifecycle:; Design:; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+  const message = validationMessage(root);
+  assert.match(
+    message,
+    /dogfooded evidence record .* required `Commit:` label must have a meaningful value/
+  );
+  assert.match(
+    message,
+    /dogfooded evidence record .* required `Results:` label must have a meaningful value/
+  );
+  assert.match(message, /required `Build:` label must have a meaningful value/);
+  assert.match(message, /required `Design:` label must have a meaningful value/);
+});
+
 test('protects every authoritative Harness baseline row from deletion', () => {
   const root = createRoot();
   const harness = MATRIX_CONFIGS[1];
@@ -971,6 +1109,26 @@ test('protects every authoritative Harness baseline row from deletion', () => {
   assert.match(
     validationMessage(root),
     /required inventory surface ID `harness\.composer\.root` is missing/
+  );
+});
+
+test('protects every authoritative Website baseline row from deletion', () => {
+  const root = createRoot();
+  const website = MATRIX_CONFIGS[0];
+  const websiteRows = rowsWithRequiredIds(
+    website,
+    validWebsiteRow({ ID: 'www.docs.code-panel-expand' }),
+    validWebsiteRow
+  ).filter((row) => row.ID !== 'www.docs.code-panel-expand');
+  writeMatrix(root, website, websiteRows);
+  writeMatrix(
+    root,
+    MATRIX_CONFIGS[1],
+    rowsWithRequiredIds(MATRIX_CONFIGS[1], validHarnessRow(), validHarnessRow)
+  );
+  assert.match(
+    validationMessage(root),
+    /required inventory surface ID `www\.docs\.code-panel-expand` is missing/
   );
 });
 

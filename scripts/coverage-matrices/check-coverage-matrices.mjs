@@ -9,7 +9,7 @@ const END_MARKER = '<!-- coverage-matrix:end -->';
 const CATALOG_ID_PATTERN = /\b(?:A|C|D|HC|K|M|P|T|V)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*\b/g;
 const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
 const INTERACTIVE_SOURCE_PATTERN =
-  /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(|\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input)\s*=/i;
+  /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(|\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input|submit)\s*=/i;
 const DOGFOODED_EVIDENCE_LABELS = Object.freeze([
   'Build:',
   'Browser:',
@@ -169,6 +169,78 @@ const AGENT_HARNESS_HEADERS = [
   'Re-review or removal issue',
 ];
 
+const WEBSITE_SURFACE_IDS = Object.freeze([
+  'www.shell.site-title',
+  'www.shell.skip-link',
+  'www.shell.primary-nav',
+  'www.shell.social-links',
+  'www.shell.header-separators',
+  'www.shell.theme-toggle',
+  'www.shell.theme-provider',
+  'www.shell.language-select',
+  'www.shell.adapter-select',
+  'www.shell.mobile-menu-toggle',
+  'www.shell.mobile-menu-panel',
+  'www.shell.mobile-theme-select',
+  'www.shell.sidebar-navigation',
+  'www.shell.page-layout',
+  'www.shell.page-title',
+  'www.shell.table-of-contents',
+  'www.shell.mobile-table-of-contents',
+  'www.shell.footer',
+  'www.shell.pagination',
+  'www.shell.hero-actions',
+  'www.shell.hero-hash-scroll',
+  'www.search.launcher',
+  'www.search.dialog',
+  'www.search.input-results',
+  'www.search.loading-failure',
+  'www.search.pagefind-engine',
+  'www.docs.code-example-host-tabs',
+  'www.docs.code-example-file-tabs',
+  'www.docs.code-panel-copy',
+  'www.docs.code-panel-expand',
+  'www.docs.expressive-code-copy-feedback',
+  'www.docs.expressive-code-scroll-focus',
+  'www.docs.install-manager-tabs',
+  'www.docs.install-copy',
+  'www.docs.wiki-term',
+  'www.docs.spec-contract-preview',
+  'www.docs.api-table',
+  'www.docs.stage-notice',
+  'www.docs.phase-badge',
+  'www.docs.entity-links',
+  'www.gallery.lucide-search',
+  'www.gallery.lucide-load-more',
+  'www.gallery.lucide-card-grid',
+  'www.gallery.lucide-dialog',
+  'www.gallery.lucide-copy',
+  'www.gallery.lucide-lazy-loader',
+  'www.gallery.ui-library-cards',
+  'www.gallery.prototype-library-cards',
+  'www.icons.static-lucide',
+  'www.demo.prototype-previewer',
+  'www.demo.runtime-select',
+  'www.demo.authored-controllers',
+  'www.demo.home-demo-select',
+  'www.demo.code-panel',
+  'www.demo.demo-matrix',
+  'www.demo.raw-adapter-runtimes',
+  'www.demo.lazy-mount-observer',
+  'www.demo.brutalist-theme-style',
+  'www.route.root-locale-redirect',
+  'www.route.locale-middleware',
+  'www.route.content-collections',
+  'www.route.astro-starlight',
+  'www.build.markdown-mdx',
+  'www.build.pagefind-index',
+  'www.build.shiki',
+  'www.build.sitemap',
+  'www.build.style-generation',
+  'www.content.document-semantics',
+  'www.content.draft-notice',
+]);
+
 const AGENT_HARNESS_SURFACE_IDS = Object.freeze([
   'harness.shell.frame',
   'harness.shell.brand',
@@ -259,7 +331,7 @@ export const MATRIX_CONFIGS = Object.freeze([
     ],
     ownerHeaders: ['Current owner', 'Dependency and owner'],
     existingPathHeaders: ['Path', 'Evidence'],
-    requiredIds: ['www.shell.primary-nav', 'www.docs.phase-badge', 'www.icons.static-lucide'],
+    requiredIds: WEBSITE_SURFACE_IDS,
     requiredCatalogIdsByRow: Object.freeze({
       'www.demo.raw-adapter-runtimes': Object.freeze([
         'A-WEB-COMPONENT-0001',
@@ -293,6 +365,10 @@ export const MATRIX_CONFIGS = Object.freeze([
       }),
       Object.freeze({
         source: '@expressive-code/core@0.41.7 and @expressive-code/plugin-frames@0.41.7',
+        dependencyRoot: Object.freeze({
+          importer: 'apps/www',
+          packageName: '@astrojs/starlight',
+        }),
         dependencies: Object.freeze([
           Object.freeze({ packageName: '@expressive-code/core', version: '0.41.7' }),
           Object.freeze({ packageName: '@expressive-code/plugin-frames', version: '0.41.7' }),
@@ -648,11 +724,66 @@ function discoverWebsiteInteractiveSources(rootDir) {
     .sort();
 }
 
+function lockedReference(entry) {
+  return typeof entry === 'string' ? entry : entry?.version;
+}
+
+function importerDependencyReference(lockfile, importer, packageName) {
+  const importerRecord = lockfile?.importers?.[importer];
+  for (const dependencyKind of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+    const reference = lockedReference(importerRecord?.[dependencyKind]?.[packageName]);
+    if (reference) return reference;
+  }
+  return undefined;
+}
+
+function lockedSemanticVersion(reference) {
+  return String(reference ?? '').match(/^([0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
+}
+
+function transitivePackageVersions(lockfile, dependencyRoot, targetPackageName) {
+  const rootReference = importerDependencyReference(
+    lockfile,
+    dependencyRoot.importer,
+    dependencyRoot.packageName
+  );
+  if (!rootReference) return [];
+
+  const versions = new Set();
+  const pending = [{ packageName: dependencyRoot.packageName, reference: rootReference }];
+  const visited = new Set();
+  while (pending.length > 0) {
+    const current = pending.pop();
+    const snapshotKey = `${current.packageName}@${current.reference}`;
+    if (visited.has(snapshotKey)) continue;
+    visited.add(snapshotKey);
+
+    if (current.packageName === targetPackageName) {
+      const version = lockedSemanticVersion(current.reference);
+      if (version) versions.add(version);
+    }
+
+    const snapshot = lockfile?.snapshots?.[snapshotKey];
+    if (!snapshot) continue;
+    for (const dependencyKind of ['dependencies', 'optionalDependencies']) {
+      for (const [packageName, entry] of Object.entries(snapshot[dependencyKind] ?? {})) {
+        const reference = lockedReference(entry);
+        if (reference) pending.push({ packageName, reference });
+      }
+    }
+  }
+  return [...versions].sort();
+}
+
 function validateInheritedDependencyVersions(rootDir, config, issues) {
   const dependencies = (config.inheritedSurfaceManifests ?? [])
     .flatMap((manifest) =>
       (manifest.dependencies ?? (manifest.dependency ? [manifest.dependency] : [])).map(
-        (dependency) => ({ source: manifest.source, ...dependency })
+        (dependency) => ({
+          source: manifest.source,
+          dependencyRoot: manifest.dependencyRoot,
+          ...dependency,
+        })
       )
     )
     .filter(({ packageName }) => packageName);
@@ -666,29 +797,41 @@ function validateInheritedDependencyVersions(rootDir, config, issues) {
     return;
   }
   const lockfile = parseYaml(fs.readFileSync(lockfilePath, 'utf8'));
-  for (const { importer, packageName, source, version } of dependencies) {
-    const lockedReference = importer
-      ? lockfile?.importers?.[importer]?.dependencies?.[packageName]?.version
+  for (const { dependencyRoot, importer, packageName, source, version } of dependencies) {
+    const importerVersion = importer
+      ? lockedSemanticVersion(importerDependencyReference(lockfile, importer, packageName))
       : undefined;
-    const importerVersion = String(lockedReference ?? '').match(/^([0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
+    const transitiveVersions = dependencyRoot
+      ? transitivePackageVersions(lockfile, dependencyRoot, packageName)
+      : [];
     const packageVersions = importer
       ? []
-      : [
-          ...new Set(
-            Object.keys(lockfile?.packages ?? {}).flatMap((packageKey) => {
-              const prefix = `${packageName}@`;
-              if (!packageKey.startsWith(prefix)) return [];
-              const resolvedVersion = packageKey
-                .slice(prefix.length)
-                .match(/^([0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
-              return resolvedVersion ? [resolvedVersion] : [];
-            })
-          ),
-        ];
-    const resolvedVersions = importerVersion ? [importerVersion] : packageVersions;
+      : dependencyRoot
+        ? []
+        : [
+            ...new Set(
+              Object.keys(lockfile?.packages ?? {}).flatMap((packageKey) => {
+                const prefix = `${packageName}@`;
+                if (!packageKey.startsWith(prefix)) return [];
+                const resolvedVersion = lockedSemanticVersion(packageKey.slice(prefix.length));
+                return resolvedVersion ? [resolvedVersion] : [];
+              })
+            ),
+          ];
+    const resolvedVersions = importerVersion
+      ? [importerVersion]
+      : dependencyRoot
+        ? transitiveVersions
+        : packageVersions;
     if (resolvedVersions.length === 0) {
       issues.push(
-        `${config.relativePath}: cannot resolve inherited dependency ${packageName} from pnpm-lock.yaml ${importer ? `importer ${importer}` : 'packages'}`
+        `${config.relativePath}: cannot resolve inherited dependency ${packageName} from pnpm-lock.yaml ${
+          importer
+            ? `importer ${importer}`
+            : dependencyRoot
+              ? `${dependencyRoot.packageName} reachable from importer ${dependencyRoot.importer}`
+              : 'packages'
+        }`
       );
       continue;
     }
@@ -710,6 +853,19 @@ function requireLabels(value, labels, context, issues) {
   for (const label of labels) {
     if (!value.includes(label)) {
       issues.push(`${context}: missing required \`${label}\` label`);
+    }
+  }
+}
+
+function requireMeaningfulLabels(value, labels, context, issues) {
+  for (const label of labels) {
+    const match = value.match(
+      new RegExp(`\\b${escapeRegularExpression(label)}[ \\t]*([^;\\r\\n]*)`, 'i')
+    );
+    if (!match) {
+      issues.push(`${context}: missing required \`${label}\` label`);
+    } else if (!isMeaningful(match[1])) {
+      issues.push(`${context}: required \`${label}\` label must have a meaningful value`);
     }
   }
 }
@@ -911,14 +1067,14 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
           continue;
         }
         const evidenceRecord = fs.readFileSync(path.resolve(rootDir, repositoryPath), 'utf8');
-        requireLabels(
+        requireMeaningfulLabels(
           evidenceRecord,
           DOGFOODED_RECORD_LABELS,
           `${context} dogfooded evidence record ${repositoryPath}`,
           issues
         );
       }
-      requireLabels(record.Evidence, DOGFOODED_EVIDENCE_LABELS, context, issues);
+      requireMeaningfulLabels(record.Evidence, DOGFOODED_EVIDENCE_LABELS, context, issues);
     }
 
     if (
