@@ -3112,6 +3112,66 @@ test('requires newly exported Harness user-facing surfaces to have a matrix disp
   );
 });
 
+test('inventories handwritten Harness components beside generated proto-ui facades', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relativePath = 'apps/agent-harness/src/proto-ui/components/manual.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function ManualSurface() { return <section>Manual</section>; }',
+    'utf8'
+  );
+
+  assert.ok(
+    validationMessage(root).includes(
+      `Harness user-facing source \`${relativePath}\` is not classified by a matrix row or Source-scan binding`
+    )
+  );
+});
+
+test('scans forbidden mechanics in handwritten files beside generated Harness facades', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/proto-ui/components/manual-action.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function ManualAction() { document.addEventListener("selectionchange", sync); return <section>Manual</section>; }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.ok(
+    validationMessage(root).includes(
+      `Harness source \`${relativePath}\` contains a forbidden interaction or DOM state machine`
+    )
+  );
+});
+
+test('excludes only exact CLI-generated Harness facade indexes', () => {
+  const root = createRoot();
+  const generatedPaths = [
+    'apps/agent-harness/src/proto-ui/components/index.ts',
+    'apps/agent-harness/src/proto-ui/components/react/index.ts',
+    'apps/agent-harness/src/proto-ui/components/vue/index.ts',
+    'apps/agent-harness/src/proto-ui/components/wc/index.ts',
+  ];
+  for (const relativePath of generatedPaths) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      "import React from 'react'; export function GeneratedFacade() { document.addEventListener('selectionchange', sync); return React.createElement('section'); }",
+      'utf8'
+    );
+  }
+  writeValidMatrices(root);
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
 test('discovers exported Harness surfaces rendered with React.createElement', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -4310,21 +4370,67 @@ test('follows directly invoked local callbacks on an effect execution path', () 
   );
 });
 
-test('rejects forbidden third-party Harness UI package imports', () => {
+test('rejects third-party Harness packages outside the reviewed allowlist', () => {
+  for (const specifier of [
+    '@ariakit/react',
+    '@radix-ui/react-dialog',
+    '@tanstack/react-virtual',
+    'downshift',
+    'react-dom',
+    'react-hook-form',
+    'react-select',
+    'react?raw',
+    'unknown-ui-runtime',
+  ]) {
+    const root = createRoot();
+    const relativePath = 'apps/agent-harness/src/run/ExternalOwner.ts';
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, `import owner from '${specifier}'; void owner;`, 'utf8');
+    writeValidMatrices(root);
+    assert.ok(
+      validationMessage(root).includes(`forbidden third-party Harness UI package \`${specifier}\``),
+      `${specifier} must not bypass the reviewed Harness package boundary`
+    );
+  }
+});
+
+test('allows only exact reviewed React and Node builtin imports in Harness sources', () => {
   const root = createRoot();
-  const relativePath = 'apps/agent-harness/src/run/RadixDialog.tsx';
+  const relativePath = 'apps/agent-harness/src/services/reviewed-imports.ts';
   const absolutePath = path.join(root, relativePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(
     absolutePath,
-    "import * as Dialog from '@radix-ui/react-dialog'; export const primitive = Dialog.Root;",
+    "import React from 'react'; import path from 'node:path'; void React; void path;",
     'utf8'
   );
   writeValidMatrices(root);
-  assert.match(
-    validationMessage(root),
-    /forbidden third-party Harness UI package `@radix-ui\/react-dialog`/
-  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('enforces the Harness package allowlist across script and style import forms', () => {
+  const cases = [
+    ['StaticImport.ts', "import owner from 'downshift'; void owner;"],
+    ['Reexport.ts', "export { useSelect } from 'downshift';"],
+    ['DynamicImport.ts', "void import('downshift');"],
+    ['CommonJs.cjs', "void require('downshift');"],
+    ['ExternalOwner.css', "@import 'downshift';"],
+  ];
+  for (const [fileName, content] of cases) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${fileName}`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.ok(
+      validationMessage(root).includes(
+        `forbidden third-party Harness UI package \`downshift\` in \`${relativePath}\``
+      ),
+      `${fileName} must not bypass the reviewed Harness package boundary`
+    );
+  }
 });
 
 test('guards the privileged hooks package in Website consumers', () => {
@@ -4489,6 +4595,26 @@ test('discovers exported Harness surfaces across Node module extensions', () => 
     assert.ok(
       validationMessage(root).includes(
         `Harness user-facing source \`${relativePath}\` is not classified`
+      )
+    );
+  }
+});
+
+test('discovers exported Website components across Node module extensions', () => {
+  for (const extension of ['mjs', 'cjs', 'mts', 'cts']) {
+    const root = createRoot();
+    const relativePath = `apps/www/src/components/ModuleSurface.${extension}`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      "import React from 'react'; export function ModuleSurface() { return React.createElement('section', null, 'Website'); }",
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.ok(
+      validationMessage(root).includes(
+        `website component source \`${relativePath}\` is not classified by a matrix row`
       )
     );
   }

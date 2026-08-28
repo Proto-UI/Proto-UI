@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { builtinModules } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { specEntitySchema } from '@proto.ui/spec-schema';
@@ -138,16 +139,30 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
 });
 
-const HARNESS_ALLOWED_EXTERNAL_PACKAGE_PATTERNS = Object.freeze([
-  /^react(?:$|\/)/u,
-  /^react-dom(?:$|\/)/u,
+const HARNESS_REVIEWED_THIRD_PARTY_SCRIPT_IMPORTS = new Set(['react']);
+const HARNESS_GENERATED_FACADE_SOURCE_PATHS = new Set([
+  'proto-ui/components/index.ts',
+  'proto-ui/components/react/index.ts',
+  'proto-ui/components/vue/index.ts',
+  'proto-ui/components/wc/index.ts',
 ]);
+const NODE_BUILTIN_SPECIFIERS = new Set(
+  builtinModules.map((specifier) => specifier.replace(/^node:/u, ''))
+);
 
-function isForbiddenHarnessUiPackage(specifier) {
-  const baseSpecifier = importSpecifierWithoutViteSuffix(specifier);
-  if (baseSpecifier.startsWith('@proto.ui/') || baseSpecifier.startsWith('node:')) return false;
-  if (baseSpecifier.startsWith('.') || baseSpecifier.startsWith('/')) return false;
-  return !HARNESS_ALLOWED_EXTERNAL_PACKAGE_PATTERNS.some((pattern) => pattern.test(baseSpecifier));
+function isReviewedHarnessThirdPartyPackage(sourcePath, specifier) {
+  return (
+    /\.[cm]?[jt]sx?$/iu.test(sourcePath) &&
+    HARNESS_REVIEWED_THIRD_PARTY_SCRIPT_IMPORTS.has(specifier)
+  );
+}
+
+function isNodeBuiltinSpecifier(specifier) {
+  return NODE_BUILTIN_SPECIFIERS.has(specifier.replace(/^node:/u, '').split('/')[0]);
+}
+
+function isGeneratedHarnessFacadeSource(relativeToHarnessSource) {
+  return HARNESS_GENERATED_FACADE_SOURCE_PATHS.has(relativeToHarnessSource);
 }
 const HARNESS_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // M0 authorizes only the React Adapter entry. Any prototype/facade entry
@@ -1522,19 +1537,19 @@ function discoverWebsiteComponentSources(rootDir) {
       })
     )
     .filter((absolutePath) => {
-      if (/\.(?:astro|vue|svelte|[jt]sx)$/i.test(absolutePath)) return true;
+      if (/\.(?:astro|vue|svelte|[cm]?[jt]sx)$/i.test(absolutePath)) return true;
       if (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath)) {
         return true;
       }
       return (
         absolutePath.startsWith(`${componentsRoot}${path.sep}`) &&
-        /\.[cm]?[jt]s$/i.test(absolutePath) &&
+        /\.[cm]?[jt]sx?$/i.test(absolutePath) &&
         astContainsExportedUserFacingComponent(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
       );
     })
     .filter(
       (absolutePath) =>
-        !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[jt]sx?)$/i.test(absolutePath)
+        !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[cm]?[jt]sx?)$/i.test(absolutePath)
     )
     .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
     .sort();
@@ -1663,12 +1678,9 @@ function discoverHarnessUserFacingSources(rootDir) {
     .filter((absolutePath) => /\.[cm]?[jt]sx?$/i.test(absolutePath))
     .filter((absolutePath) => {
       const relativePath = path.relative(sourceRoot, absolutePath).replaceAll('\\', '/');
-      const isGeneratedFacade = relativePath.startsWith('proto-ui/components/');
-      const isReviewedBootstrap = relativePath === 'proto-ui/bootstrap.tsx';
       return (
         !/\.(?:browser\.)?(?:test|spec|stories)\.[cm]?[jt]sx?$/i.test(absolutePath) &&
-        !isGeneratedFacade &&
-        !isReviewedBootstrap
+        !isGeneratedHarnessFacadeSource(relativePath)
       );
     })
     .filter((absolutePath) => {
@@ -2236,7 +2248,7 @@ function discoverHarnessForbiddenStateMachineSources(rootDir) {
     .filter((absolutePath) => /\.[cm]?[jt]sx?$/i.test(absolutePath))
     .filter((absolutePath) => {
       const relativePath = path.relative(sourceRoot, absolutePath).replaceAll('\\', '/');
-      const isGeneratedFacade = relativePath.startsWith('proto-ui/components/');
+      const isGeneratedFacade = isGeneratedHarnessFacadeSource(relativePath);
       const isReviewedBootstrap = relativePath === 'proto-ui/bootstrap.tsx';
       return (
         !/\.(?:browser\.)?(?:test|spec|stories)\.[cm]?[jt]sx?$/i.test(absolutePath) &&
@@ -2575,13 +2587,18 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAlias
 }
 function guardedHarnessImport(rootDir, sourcePath, specifier) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
-  if (isForbiddenHarnessUiPackage(classifiedSpecifier)) {
-    return { category: 'forbidden-third-party-package', resolvedPath: null };
-  }
   if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'proto-ui-package', resolvedPath: null };
   }
-  if (!classifiedSpecifier.startsWith('.')) return null;
+  if (!classifiedSpecifier.startsWith('.')) {
+    if (
+      isNodeBuiltinSpecifier(classifiedSpecifier) ||
+      isReviewedHarnessThirdPartyPackage(sourcePath, specifier)
+    ) {
+      return null;
+    }
+    return { category: 'forbidden-third-party-package', resolvedPath: null };
+  }
   const resolvedPath = path
     .relative(
       rootDir,
