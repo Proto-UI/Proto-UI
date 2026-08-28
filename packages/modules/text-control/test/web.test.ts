@@ -427,6 +427,99 @@ describe('module-text-control single-line web bridge', () => {
     lease.dispose();
   });
 
+  it.each(['text', 'search', 'url', 'tel', 'password'])(
+    'projects values through the text-compatible input type %s',
+    (type) => {
+      const input = document.createElement('input');
+      input.type = type;
+      const lease = createWebTextControlHost(() => input).attach({
+        patch: { valueMode: 'controlled', value: 'initial' },
+        onEvent() {},
+      });
+
+      expect(input.value).toBe('initial');
+      lease.update({ valueMode: 'controlled', value: 'updated' });
+      expect(input.value).toBe('updated');
+      lease.dispose();
+    }
+  );
+
+  it.each(['file', 'checkbox'])('rejects the non-text input type %s before projection', (type) => {
+    const input = document.createElement('input');
+    input.type = type;
+    const valueBeforeAttach = input.value;
+    const onEvent = vi.fn();
+
+    expect(() =>
+      createWebTextControlHost(() => input).attach({
+        patch: { valueMode: 'controlled', value: 'plain text' },
+        onEvent,
+      })
+    ).toThrow(`[TextControl] unsupported Web input type "${type}".`);
+    expect(input.value).toBe(valueBeforeAttach);
+    input.dispatchEvent(new InputEvent('input'));
+    expect(onEvent).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when a leased input mutates to a non-text type', () => {
+    const input = document.createElement('input');
+    const onEvent = vi.fn();
+    const lease = createWebTextControlHost(() => input, { stopPropagation: true }).attach({
+      patch: { valueMode: 'controlled', value: 'initial' },
+      onEvent,
+    });
+
+    input.type = 'checkbox';
+    const event = new InputEvent('input', { bubbles: true });
+    const stopPropagation = vi.spyOn(event, 'stopPropagation');
+    expect(() => input.dispatchEvent(event)).toThrow(
+      '[TextControl] unsupported Web input type "checkbox".'
+    );
+    expect(stopPropagation).toHaveBeenCalledOnce();
+    expect(onEvent).not.toHaveBeenCalled();
+    expect(() => lease.snapshot()).toThrow('[TextControl] unsupported Web input type "checkbox".');
+    expect(() => lease.update({ valueMode: 'controlled', value: 'updated' })).toThrow(
+      '[TextControl] unsupported Web input type "checkbox".'
+    );
+    lease.dispose();
+  });
+
+  it('revalidates deferred composition restoration after the owner callback', () => {
+    const input = document.createElement('input');
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'controlled', value: 'owner' },
+      onEvent(event) {
+        if (event.type === 'compositionend') input.type = 'file';
+      },
+    });
+    input.dispatchEvent(new CompositionEvent('compositionstart'));
+    input.value = 'candidate';
+    lease.update({ valueMode: 'controlled', value: 'next owner' });
+
+    expect(() => input.dispatchEvent(new CompositionEvent('compositionend'))).toThrow(
+      '[TextControl] unsupported Web input type "file".'
+    );
+    expect(input.value).toBe('');
+    lease.dispose();
+  });
+
+  it('does not restore a deferred value after the owner callback disposes the lease', () => {
+    const input = document.createElement('input');
+    let lease: ReturnType<ReturnType<typeof createWebTextControlHost>['attach']>;
+    lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'controlled', value: 'owner' },
+      onEvent(event) {
+        if (event.type === 'compositionend') lease.dispose();
+      },
+    });
+    input.dispatchEvent(new CompositionEvent('compositionstart'));
+    input.value = 'candidate';
+    lease.update({ valueMode: 'controlled', value: 'next owner' });
+    input.dispatchEvent(new CompositionEvent('compositionend'));
+
+    expect(input.value).toBe('candidate');
+  });
+
   it('projects and preserves selection when the current-realm constructor does not own the input', () => {
     const input = document.createElement('input');
     document.body.appendChild(input);

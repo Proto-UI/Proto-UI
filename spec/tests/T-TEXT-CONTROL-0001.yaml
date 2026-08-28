@@ -15,6 +15,11 @@ cases:
     covers:
       - C-TEXT-CONTROL-0001-B
     expectation: portable-single-line-properties-project-and-clear-on-web-input
+  - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-TARGET-COMPATIBILITY
+    title: The Web bridge accepts only text-compatible HTMLInputElement targets for a single-line plain-text declaration
+    covers:
+      - C-TEXT-CONTROL-0001-A
+    expectation: non-text-input-types-fail-before-listener-installation-or-value-projection
   - id: T-TEXT-CONTROL-0001-CASE-OWNING-REALM
     title: Text controls normalize editing payloads across target realms, event realms, adoption, and documents without a Window
     covers:
@@ -91,6 +96,7 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-TARGET-COMPATIBILITY
       - T-TEXT-CONTROL-0001-CASE-OWNING-REALM
       - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
     exercises:
@@ -193,7 +199,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Added single-line input projection and clearing, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
+      Added single-line input projection and clearing, text-compatible target validation, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
 
 
 tags:

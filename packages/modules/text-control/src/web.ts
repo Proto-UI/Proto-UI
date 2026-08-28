@@ -17,7 +17,7 @@ function isWebTextArea(target: WebTextControl): target is HTMLTextAreaElement {
   return target.localName === 'textarea';
 }
 
-const TEXT_COMPATIBLE_INPUT_TYPES = new Set(['text', 'search', 'url', 'tel', 'password', '']);
+const TEXT_COMPATIBLE_INPUT_TYPES = new Set(['text', 'search', 'url', 'tel', 'password']);
 export type WebTextControlLocalName = 'textarea' | 'input';
 
 export function resolveWebTextControlLocalName(
@@ -49,6 +49,7 @@ function attachTarget(
   connection: TextControlHostConnection,
   options: Readonly<{ stopPropagation?: boolean }>
 ): TextControlHostLease {
+  assertTextCompatibleTarget(target);
   let patch = connection.patch;
   let composing = false;
   let disposed = false;
@@ -57,6 +58,7 @@ function attachTarget(
   const emit = (event: Event) => {
     if (disposed) return;
     if (options.stopPropagation) event.stopPropagation();
+    assertTextCompatibleTarget(target);
     const type = event.type as TextControlEvent['type'];
     const editingEvent = event as Event & {
       readonly data?: unknown;
@@ -81,7 +83,9 @@ function attachTarget(
         inputType,
       })
     );
+    if (disposed) return;
     if (type === 'compositionend' && valueProjectionDeferred) {
+      assertTextCompatibleTarget(target);
       valueProjectionDeferred = applyPatch(target, patch, true);
     }
   };
@@ -99,10 +103,12 @@ function attachTarget(
   return {
     update(next) {
       if (disposed) return;
+      assertTextCompatibleTarget(target);
       patch = next;
       valueProjectionDeferred = applyPatch(target, patch, !composing);
     },
     snapshot(): TextControlSnapshot {
+      assertTextCompatibleTarget(target);
       return Object.freeze({ value: canonicalizeLineEndings(target.value), composing });
     },
     dispose() {
@@ -111,6 +117,12 @@ function attachTarget(
       for (const type of eventTypes) target.removeEventListener(type, emit);
     },
   };
+}
+
+function assertTextCompatibleTarget(target: WebTextControl): void {
+  if (isWebInput(target) && !TEXT_COMPATIBLE_INPUT_TYPES.has(target.type)) {
+    throw new Error(`[TextControl] unsupported Web input type "${target.type}".`);
+  }
 }
 
 function applyPatch(
