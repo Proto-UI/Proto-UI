@@ -41,6 +41,11 @@ function createRoot() {
       if (!fs.existsSync(absolutePath)) fs.writeFileSync(absolutePath, '', 'utf8');
     }
   }
+  fs.writeFileSync(
+    path.join(root, 'pnpm-lock.yaml'),
+    "lockfileVersion: '9.0'\nimporters:\n  apps/www:\n    dependencies:\n      '@astrojs/starlight':\n        specifier: ^0.35.2\n        version: 0.35.3(astro@5.18.1)\n",
+    'utf8'
+  );
   temporaryRoots.push(root);
   return root;
 }
@@ -323,6 +328,54 @@ test('rejects an interactive website source that is not bound to the matrix', ()
   assert.match(
     validationMessage(root),
     /interactive website source `apps\/www\/src\/components\/NewControl\.astro` is not bound/
+  );
+});
+
+test('includes interactive authored demo controllers in the website source scan', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(
+    root,
+    'apps',
+    'www',
+    'src',
+    'content',
+    'docs',
+    'demo-new-control.demo.ts'
+  );
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, 'host.addEventListener("click", () => api.call("demo", "open"));');
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/content\/docs\/demo-new-control\.demo\.ts` is not bound/
+  );
+});
+
+test('binds inherited surface manifests to the resolved dependency version', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  fs.writeFileSync(
+    path.join(root, 'pnpm-lock.yaml'),
+    "lockfileVersion: '9.0'\nimporters:\n  apps/www:\n    dependencies:\n      '@astrojs/starlight':\n        specifier: ^0.35.2\n        version: 0.35.4(astro@5.18.1)\n",
+    'utf8'
+  );
+  assert.match(
+    validationMessage(root),
+    /inherited manifest @astrojs\/starlight@0\.35\.3 must match resolved @astrojs\/starlight@0\.35\.4/
+  );
+});
+
+test('fails closed when an inherited dependency is absent from the lockfile importer', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  fs.writeFileSync(
+    path.join(root, 'pnpm-lock.yaml'),
+    "lockfileVersion: '9.0'\nimporters:\n  apps/www:\n    dependencies: {}\n",
+    'utf8'
+  );
+  assert.match(
+    validationMessage(root),
+    /cannot resolve inherited dependency @astrojs\/starlight from pnpm-lock\.yaml importer apps\/www/
   );
 });
 

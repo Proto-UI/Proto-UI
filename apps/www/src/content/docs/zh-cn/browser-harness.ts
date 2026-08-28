@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   chromium,
   type Browser,
@@ -24,6 +25,16 @@ export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 let devServer: ChildProcess | null = null;
 let serverOutput = '';
 let styleGeneration: Promise<void> | null = null;
+
+export function resolveBrowserHarnessRoots(moduleUrl = import.meta.url): {
+  repoRoot: string;
+  appsWwwRoot: string;
+} {
+  const appsWwwRoot = path.resolve(fileURLToPath(new URL('../../../../', moduleUrl)));
+  return { appsWwwRoot, repoRoot: path.resolve(appsWwwRoot, '..', '..') };
+}
+
+const { appsWwwRoot } = resolveBrowserHarnessRoots();
 
 function resolveCorepackCli(): string {
   const nodeBin = path.dirname(process.execPath);
@@ -43,7 +54,6 @@ function resolveCorepackCli(): string {
  */
 export async function generateProtoUiStyle(): Promise<void> {
   styleGeneration ??= new Promise<void>((resolve, reject) => {
-    const appsWwwRoot = path.join(process.cwd(), 'apps', 'www');
     const corepackCli = resolveCorepackCli();
     const child = spawn(
       process.execPath,
@@ -141,7 +151,6 @@ function recordServerOutput(chunk: Buffer): void {
 
 async function spawnServer(readyRoute: string): Promise<string> {
   const port = await availablePort();
-  const appsWwwRoot = path.join(process.cwd(), 'apps', 'www');
   const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
   devServer = spawn(
     process.execPath,

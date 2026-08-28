@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { parse as parseYaml } from 'yaml';
 
 const TOTAL_HEADERS = ['State', 'Count'];
 const TARGET_CLASS_TOTAL_HEADERS = ['Target class', 'Count'];
@@ -192,6 +193,11 @@ export const MATRIX_CONFIGS = Object.freeze([
     inheritedSurfaceManifests: Object.freeze([
       Object.freeze({
         source: '@astrojs/starlight@0.35.3',
+        dependency: Object.freeze({
+          importer: 'apps/www',
+          packageName: '@astrojs/starlight',
+          version: '0.35.3',
+        }),
         ids: Object.freeze([
           'www.shell.skip-link',
           'www.shell.mobile-menu-toggle',
@@ -548,16 +554,50 @@ function discoverWebsiteInteractiveSources(rootDir) {
     .filter((absolutePath) => /\.(?:astro|[cm]?[jt]sx?)$/.test(absolutePath))
     .filter((absolutePath) => !absolutePath.startsWith(`${contentRoot}${path.sep}`))
     .concat(walkFiles(contentRoot).filter((absolutePath) => /\.mdx?$/.test(absolutePath)))
+    .concat(
+      walkFiles(contentRoot).filter((absolutePath) => /\.demo\.[cm]?[jt]sx?$/.test(absolutePath))
+    )
     .filter(
       (absolutePath, index, files) =>
         files.indexOf(absolutePath) === index &&
-        !/\.(?:test|browser\.test|demo)\.[cm]?[jt]sx?$/.test(absolutePath)
+        !/\.(?:test|browser\.test)\.[cm]?[jt]sx?$/.test(absolutePath)
     )
     .filter((absolutePath) =>
       INTERACTIVE_SOURCE_PATTERN.test(sourceTextForInteractionScan(absolutePath))
     )
     .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
     .sort();
+}
+
+function validateInheritedDependencyVersions(rootDir, config, issues) {
+  const dependencies = (config.inheritedSurfaceManifests ?? [])
+    .map((manifest) => ({ source: manifest.source, ...manifest.dependency }))
+    .filter(({ packageName }) => packageName);
+  if (dependencies.length === 0) return;
+
+  const lockfilePath = path.join(rootDir, 'pnpm-lock.yaml');
+  if (!fs.existsSync(lockfilePath)) {
+    issues.push(
+      `${config.relativePath}: pnpm-lock.yaml is required to validate inherited surfaces`
+    );
+    return;
+  }
+  const lockfile = parseYaml(fs.readFileSync(lockfilePath, 'utf8'));
+  for (const { importer, packageName, source, version } of dependencies) {
+    const lockedReference = lockfile?.importers?.[importer]?.dependencies?.[packageName]?.version;
+    const resolvedVersion = String(lockedReference ?? '').match(/^([0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
+    if (!resolvedVersion) {
+      issues.push(
+        `${config.relativePath}: cannot resolve inherited dependency ${packageName} from pnpm-lock.yaml importer ${importer}`
+      );
+      continue;
+    }
+    if (resolvedVersion !== version || source !== `${packageName}@${version}`) {
+      issues.push(
+        `${config.relativePath}: inherited manifest ${source} must match resolved ${packageName}@${resolvedVersion}`
+      );
+    }
+  }
 }
 
 function requireLabels(value, labels, context, issues) {
@@ -1130,6 +1170,7 @@ function validateTargetClassTotals(config, lines, afterIndex, actualCounts, rela
 }
 
 function validateMatrixFile(rootDir, config, catalogEntries, issues) {
+  validateInheritedDependencyVersions(rootDir, config, issues);
   const absolutePath = path.join(rootDir, config.relativePath);
   if (!fs.existsSync(absolutePath)) {
     issues.push(
