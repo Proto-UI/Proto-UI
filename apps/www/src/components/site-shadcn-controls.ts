@@ -22,8 +22,14 @@ const siteProjections = [
   ['wc-shadcn-select-item', shadcnSelectItem],
 ] as const;
 
+export type SiteSelectExposes = {
+  [key: string]: unknown;
+  open?: { get?: () => unknown };
+  value?: { get?: () => unknown };
+};
+
 export type SiteSelectRoot = HTMLElement & {
-  getExposes?: () => Record<string, unknown>;
+  getExposes?: () => SiteSelectExposes;
   setProps?: (props: Record<string, unknown>) => void;
 };
 
