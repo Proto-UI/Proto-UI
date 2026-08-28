@@ -43,7 +43,7 @@ function createRoot() {
   }
   fs.writeFileSync(
     path.join(root, 'pnpm-lock.yaml'),
-    "lockfileVersion: '9.0'\nimporters:\n  apps/www:\n    dependencies:\n      '@astrojs/starlight':\n        specifier: ^0.35.2\n        version: 0.35.3(astro@5.18.1)\n",
+    "lockfileVersion: '9.0'\nimporters:\n  apps/www:\n    dependencies:\n      '@astrojs/starlight':\n        specifier: ^0.35.2\n        version: 0.35.3(astro@5.18.1)\npackages:\n  '@expressive-code/core@0.41.7': {}\n  '@expressive-code/plugin-frames@0.41.7': {}\n",
     'utf8'
   );
   temporaryRoots.push(root);
@@ -224,6 +224,13 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
             ? {
                 'Proto UI chain': requiredCatalogIds.join('; '),
                 Lifecycle: requiredCatalogIds.map((entry) => `${entry}=active`).join('; '),
+                ...(config.kind === 'website' &&
+                requiredCatalogIds.every((entry) => !/^(?:P|M)-/.test(entry))
+                  ? {
+                      State: 'research',
+                      'Dependency and owner': '#420; owner: website team',
+                    }
+                  : {}),
               }
             : {}),
           ...(requiredRepositoryPaths.length > 0
@@ -351,6 +358,18 @@ test('includes interactive authored demo controllers in the website source scan'
   );
 });
 
+test('detects camel-cased JSX event handler props in the website source scan', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(root, 'apps', 'www', 'src', 'components', 'NewControl.tsx');
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, 'export const NewControl = () => <button onClick={() => {}} />;');
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/components\/NewControl\.tsx` is not bound/
+  );
+});
+
 test('binds inherited surface manifests to the resolved dependency version', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -376,6 +395,23 @@ test('fails closed when an inherited dependency is absent from the lockfile impo
   assert.match(
     validationMessage(root),
     /cannot resolve inherited dependency @astrojs\/starlight from pnpm-lock\.yaml importer apps\/www/
+  );
+});
+
+test('binds inherited transitive Expressive Code surfaces to package versions', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const lockfilePath = path.join(root, 'pnpm-lock.yaml');
+  fs.writeFileSync(
+    lockfilePath,
+    fs
+      .readFileSync(lockfilePath, 'utf8')
+      .replace('@expressive-code/plugin-frames@0.41.7', '@expressive-code/plugin-frames@0.42.0'),
+    'utf8'
+  );
+  assert.match(
+    validationMessage(root),
+    /inherited manifest .*@expressive-code\/plugin-frames@0\.41\.7.* must match resolved @expressive-code\/plugin-frames@0\.42\.0/
   );
 });
 
@@ -536,6 +572,19 @@ test('rejects a stable website state that removes every catalog identity from it
   assert.match(
     validationMessage(root),
     /website State `self-hosted` must inventory at least one catalog entity in Proto UI chain/
+  );
+});
+
+test('rejects a stable website state backed only by an active Adapter profile', () => {
+  const root = createRoot();
+  writeValidMatrices(root, {
+    'Proto UI chain': 'A-WEB-COMPONENT-0001',
+    Lifecycle: 'A-WEB-COMPONENT-0001=active',
+    State: 'ready',
+  });
+  assert.match(
+    validationMessage(root),
+    /website State ready requires an active Prototype or Module semantic owner.*Adapter profile alone is insufficient/
   );
 });
 
@@ -821,6 +870,19 @@ test('rejects stale explicit website paths and terminal class/state mismatches',
 
 test('allows an app-local prototype row to advance to dogfooded with implementation evidence', () => {
   const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const evidencePath = 'internal/agent-harness/evidence/m1/tool-invocation.md';
+  for (const repositoryPath of [implementationPath, evidencePath]) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      repositoryPath === evidencePath
+        ? 'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: abc123\nEnvironment: fixture\nFixtures: tool invocation\nCommands: pnpm test\nResults: passed\n'
+        : 'fixture',
+      'utf8'
+    );
+  }
   writeValidMatrices(
     root,
     {},
@@ -829,11 +891,87 @@ test('allows an app-local prototype row to advance to dogfooded with implementat
       'Target owner': 'Harness app-local Tool Invocation prototype',
       'Target class': 'app-local-proto',
       State: 'dogfooded',
-      Evidence: 'apps/agent-harness/test/tool-invocation.browser.test.ts',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
       'Dependency and owner': 'No blocker; owner: Harness application',
     }
   );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('rejects dogfooded Harness rows without real multi-dimensional evidence', () => {
+  const root = createRoot();
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: '`apps/agent-harness/src/run/Missing.tsx`',
+      Evidence: 'shipped',
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+  const message = validationMessage(root);
+  assert.match(message, /dogfooded implementation path does not exist/);
+  assert.match(
+    message,
+    /dogfooded rows must bind an exact internal\/agent-harness\/evidence\/\*\* path/
+  );
+  for (const label of ['Build:', 'Browser:', 'Accessibility:', 'Lifecycle:', 'Design:']) {
+    assert.ok(message.includes(`missing required \`${label}\` label`));
+  }
+});
+
+test('rejects a dogfooded evidence file without reproducible record fields', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const evidencePath = 'internal/agent-harness/evidence/m1/tool-invocation.md';
+  for (const [repositoryPath, content] of [
+    [implementationPath, 'fixture'],
+    [evidencePath, 'Build: passed'],
+  ]) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+  const message = validationMessage(root);
+  assert.match(message, /dogfooded evidence record .* missing required `Browser:` label/);
+  assert.match(message, /dogfooded evidence record .* missing required `Commit:` label/);
+  assert.match(message, /dogfooded evidence record .* missing required `Commands:` label/);
+});
+
+test('protects every authoritative Harness baseline row from deletion', () => {
+  const root = createRoot();
+  const harness = MATRIX_CONFIGS[1];
+  const harnessRows = rowsWithRequiredIds(harness, validHarnessRow(), validHarnessRow).filter(
+    (row) => row.ID !== 'harness.composer.root'
+  );
+  writeMatrix(
+    root,
+    MATRIX_CONFIGS[0],
+    rowsWithRequiredIds(MATRIX_CONFIGS[0], validWebsiteRow(), validWebsiteRow)
+  );
+  writeMatrix(root, harness, harnessRows);
+  assert.match(
+    validationMessage(root),
+    /required inventory surface ID `harness\.composer\.root` is missing/
+  );
 });
 
 test('rejects totals that omit a state or disagree with matrix rows', () => {

@@ -218,6 +218,6 @@ When this file merges, #513 must be updated with a link to this matrix and the #
 4. Every exemption records reason, owner, limit, and re-review trigger.
 5. A temporary raw import or semantic escape records a removal issue and expiry/re-review trigger; bootstrap.tsx is the only initial raw Adapter exception.
 6. Removing a surface removes or closes its row and updates both totals tables.
-7. A row moves to dogfooded only with current build, browser, accessibility, lifecycle, and design-language evidence proportional to its contract.
+7. A row moves to dogfooded only when `Path` binds an existing implementation and `Evidence` binds an existing file under `internal/agent-harness/evidence/**` with explicit `Build:`, `Browser:`, `Accessibility:`, `Lifecycle:`, and `Design:` results proportional to its contract. The evidence file itself records those five dimensions plus exact `Commit:`, `Environment:`, `Fixtures:`, `Commands:`, and `Results:` fields.
 8. Reusable compositions/prototypes require real WC, React, and Vue fixtures where their approved contract claims those Adapters. React production success alone is not non-Web conformance evidence.
 9. The matrix never amends spec lifecycle or ownership. Catalog drift is reported and reconciled rather than silently reclassified.

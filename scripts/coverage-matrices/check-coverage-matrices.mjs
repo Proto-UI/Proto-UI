@@ -9,7 +9,22 @@ const END_MARKER = '<!-- coverage-matrix:end -->';
 const CATALOG_ID_PATTERN = /\b(?:A|C|D|HC|K|M|P|T|V)-[A-Z0-9]+(?:[.-][A-Z0-9]+)*\b/g;
 const CATALOG_STATUSES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
 const INTERACTIVE_SOURCE_PATTERN =
-  /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(|\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input)\s*=/;
+  /<script\b|\baddEventListener\s*\(|\bcustomElements\.define\s*\(|\b(?:Intersection|Mutation|Resize)Observer\s*\(|\bon(?:click|keydown|keyup|pointerdown|pointerup|change|input)\s*=/i;
+const DOGFOODED_EVIDENCE_LABELS = Object.freeze([
+  'Build:',
+  'Browser:',
+  'Accessibility:',
+  'Lifecycle:',
+  'Design:',
+]);
+const DOGFOODED_RECORD_LABELS = Object.freeze([
+  ...DOGFOODED_EVIDENCE_LABELS,
+  'Commit:',
+  'Environment:',
+  'Fixtures:',
+  'Commands:',
+  'Results:',
+]);
 const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   'www.shell.site-title': Object.freeze(['apps/www/src/components/override/SiteTitle.astro']),
   'www.shell.skip-link': Object.freeze(['apps/www/astro.config.mjs']),
@@ -154,6 +169,72 @@ const AGENT_HARNESS_HEADERS = [
   'Re-review or removal issue',
 ];
 
+const AGENT_HARNESS_SURFACE_IDS = Object.freeze([
+  'harness.shell.frame',
+  'harness.shell.brand',
+  'harness.shell.theme-control',
+  'harness.shell.mobile-navigation',
+  'harness.shell.resizable-panes',
+  'harness.sessions.list',
+  'harness.sessions.grouped-tree',
+  'harness.sessions.search',
+  'harness.sessions.create',
+  'harness.sessions.selection',
+  'harness.sessions.rename',
+  'harness.sessions.archive-delete',
+  'harness.sessions.state-indicator',
+  'harness.run.header',
+  'harness.run.status',
+  'harness.run.usage-summary',
+  'harness.run.stop-retry',
+  'harness.run.reasoning-trace',
+  'harness.run.agent-lanes',
+  'harness.run.tool-invocation',
+  'harness.run.approval-request',
+  'harness.run.questionnaire',
+  'harness.transcript.viewport',
+  'harness.transcript.follow-tail',
+  'harness.transcript.history-anchor',
+  'harness.transcript.windowing',
+  'harness.transcript.user-message',
+  'harness.transcript.assistant-message',
+  'harness.transcript.authored-content',
+  'harness.transcript.code-block',
+  'harness.transcript.attachment',
+  'harness.transcript.empty-loading-error',
+  'harness.transcript.live-feedback',
+  'harness.composer.root',
+  'harness.composer.input',
+  'harness.composer.actions',
+  'harness.composer.suggestions',
+  'harness.composer.attachments',
+  'harness.composer.file-intake',
+  'harness.composer.feedback',
+  'harness.workspace.plan-todo',
+  'harness.workspace.file-tree',
+  'harness.workspace.branch-checkpoints',
+  'harness.workspace.artifact-workspace',
+  'harness.workspace.artifact-tabs',
+  'harness.workspace.code-log',
+  'harness.workspace.static-diff',
+  'harness.workspace.image-artifact',
+  'harness.workspace.inspector',
+  'harness.workspace.artifact-actions',
+  'harness.workspace.empty',
+  'harness.future.terminal-chrome',
+  'harness.future.terminal-engine',
+  'harness.future.editor-chrome',
+  'harness.future.editor-engine',
+  'harness.future.preview-chrome',
+  'harness.future.preview-engine',
+  'harness.infrastructure.markdown',
+  'harness.infrastructure.syntax-highlighter',
+  'harness.infrastructure.diff-engine',
+  'harness.infrastructure.agent-backend',
+  'harness.infrastructure.react-bootstrap',
+  'harness.shared.icons',
+]);
+
 export const MATRIX_CONFIGS = Object.freeze([
   Object.freeze({
     kind: 'website',
@@ -212,6 +293,10 @@ export const MATRIX_CONFIGS = Object.freeze([
       }),
       Object.freeze({
         source: '@expressive-code/core@0.41.7 and @expressive-code/plugin-frames@0.41.7',
+        dependencies: Object.freeze([
+          Object.freeze({ packageName: '@expressive-code/core', version: '0.41.7' }),
+          Object.freeze({ packageName: '@expressive-code/plugin-frames', version: '0.41.7' }),
+        ]),
         ids: Object.freeze([
           'www.docs.expressive-code-copy-feedback',
           'www.docs.expressive-code-scroll-focus',
@@ -259,13 +344,7 @@ export const MATRIX_CONFIGS = Object.freeze([
       'infrastructure-exempt',
     ],
     ownerHeaders: ['Current owner', 'Target owner', 'Dependency and owner'],
-    requiredIds: [
-      'harness.shell.frame',
-      'harness.sessions.list',
-      'harness.sessions.grouped-tree',
-      'harness.sessions.selection',
-      'harness.workspace.branch-checkpoints',
-    ],
+    requiredIds: AGENT_HARNESS_SURFACE_IDS,
     classStateRequirements: {
       'native/static': 'native/static',
       'infrastructure-exempt': 'infrastructure-exempt',
@@ -571,7 +650,11 @@ function discoverWebsiteInteractiveSources(rootDir) {
 
 function validateInheritedDependencyVersions(rootDir, config, issues) {
   const dependencies = (config.inheritedSurfaceManifests ?? [])
-    .map((manifest) => ({ source: manifest.source, ...manifest.dependency }))
+    .flatMap((manifest) =>
+      (manifest.dependencies ?? (manifest.dependency ? [manifest.dependency] : [])).map(
+        (dependency) => ({ source: manifest.source, ...dependency })
+      )
+    )
     .filter(({ packageName }) => packageName);
   if (dependencies.length === 0) return;
 
@@ -584,17 +667,40 @@ function validateInheritedDependencyVersions(rootDir, config, issues) {
   }
   const lockfile = parseYaml(fs.readFileSync(lockfilePath, 'utf8'));
   for (const { importer, packageName, source, version } of dependencies) {
-    const lockedReference = lockfile?.importers?.[importer]?.dependencies?.[packageName]?.version;
-    const resolvedVersion = String(lockedReference ?? '').match(/^([0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
-    if (!resolvedVersion) {
+    const lockedReference = importer
+      ? lockfile?.importers?.[importer]?.dependencies?.[packageName]?.version
+      : undefined;
+    const importerVersion = String(lockedReference ?? '').match(/^([0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
+    const packageVersions = importer
+      ? []
+      : [
+          ...new Set(
+            Object.keys(lockfile?.packages ?? {}).flatMap((packageKey) => {
+              const prefix = `${packageName}@`;
+              if (!packageKey.startsWith(prefix)) return [];
+              const resolvedVersion = packageKey
+                .slice(prefix.length)
+                .match(/^([0-9]+\.[0-9]+\.[0-9]+)/)?.[1];
+              return resolvedVersion ? [resolvedVersion] : [];
+            })
+          ),
+        ];
+    const resolvedVersions = importerVersion ? [importerVersion] : packageVersions;
+    if (resolvedVersions.length === 0) {
       issues.push(
-        `${config.relativePath}: cannot resolve inherited dependency ${packageName} from pnpm-lock.yaml importer ${importer}`
+        `${config.relativePath}: cannot resolve inherited dependency ${packageName} from pnpm-lock.yaml ${importer ? `importer ${importer}` : 'packages'}`
       );
       continue;
     }
-    if (resolvedVersion !== version || source !== `${packageName}@${version}`) {
+    if (
+      resolvedVersions.length !== 1 ||
+      resolvedVersions[0] !== version ||
+      !source.includes(`${packageName}@${version}`)
+    ) {
       issues.push(
-        `${config.relativePath}: inherited manifest ${source} must match resolved ${packageName}@${resolvedVersion}`
+        `${config.relativePath}: inherited manifest ${source} must match resolved ${resolvedVersions
+          .map((resolvedVersion) => `${packageName}@${resolvedVersion}`)
+          .join(', ')}`
       );
     }
   }
@@ -760,6 +866,15 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
           );
         }
       }
+      const activeSemanticOwner = chainIds.find(
+        (entityId) =>
+          /^(?:P|M)-/.test(entityId) && catalogEntries.get(entityId)?.status === 'active'
+      );
+      if (!activeSemanticOwner) {
+        issues.push(
+          `${context}: website State ${state} requires an active Prototype or Module semantic owner in Proto UI chain; an Adapter profile alone is insufficient`
+        );
+      }
     }
 
     for (const header of config.ownerHeaders) {
@@ -767,6 +882,43 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
     }
     if (!isMeaningful(record.Evidence)) {
       issues.push(`${context}: Evidence must name a baseline, executable check, or evidence path`);
+    }
+    if (config.kind === 'agent-harness' && state === 'dogfooded') {
+      const implementationPaths = explicitRepositoryPaths(record.Path);
+      if (implementationPaths.length === 0) {
+        issues.push(
+          `${context}: dogfooded rows must bind at least one exact repository implementation path in Path`
+        );
+      }
+      for (const repositoryPath of implementationPaths) {
+        if (!fs.existsSync(path.resolve(rootDir, repositoryPath))) {
+          issues.push(
+            `${context}: dogfooded implementation path does not exist: ${repositoryPath}`
+          );
+        }
+      }
+      const evidencePaths = explicitRepositoryPaths(record.Evidence).filter((repositoryPath) =>
+        repositoryPath.startsWith('internal/agent-harness/evidence/')
+      );
+      if (evidencePaths.length === 0) {
+        issues.push(
+          `${context}: dogfooded rows must bind an exact internal/agent-harness/evidence/** path in Evidence`
+        );
+      }
+      for (const repositoryPath of evidencePaths) {
+        if (!fs.existsSync(path.resolve(rootDir, repositoryPath))) {
+          issues.push(`${context}: dogfooded evidence path does not exist: ${repositoryPath}`);
+          continue;
+        }
+        const evidenceRecord = fs.readFileSync(path.resolve(rootDir, repositoryPath), 'utf8');
+        requireLabels(
+          evidenceRecord,
+          DOGFOODED_RECORD_LABELS,
+          `${context} dogfooded evidence record ${repositoryPath}`,
+          issues
+        );
+      }
+      requireLabels(record.Evidence, DOGFOODED_EVIDENCE_LABELS, context, issues);
     }
 
     if (
