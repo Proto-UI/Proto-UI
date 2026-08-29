@@ -13,6 +13,7 @@ export default {
             kind: 'proto',
             prototypeId: 'shadcn-switch-thumb',
           },
+          { kind: 'box', className: 'sr-only', children: ['Email alerts'] },
         ],
       },
       {
@@ -24,6 +25,7 @@ export default {
             kind: 'proto',
             prototypeId: 'shadcn-switch-thumb',
           },
+          { kind: 'box', className: 'sr-only', children: ['Release alerts'] },
         ],
       },
       {
@@ -35,6 +37,7 @@ export default {
             kind: 'proto',
             prototypeId: 'shadcn-switch-thumb',
           },
+          { kind: 'box', className: 'sr-only', children: ['Archived alerts'] },
         ],
       },
     ],

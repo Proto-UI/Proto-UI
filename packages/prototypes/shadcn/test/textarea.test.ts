@@ -32,9 +32,9 @@ const SURFACE_TOKENS = [
  * portable guarantee of this projection.
  */
 const WEB_STATE_TOKENS = [
-  'data-[focused]:border-ring',
-  'data-[focused]:ring-ring/50',
-  'data-[focused]:ring-3',
+  'data-[focus-visible]:border-ring',
+  'data-[focus-visible]:ring-ring/50',
+  'data-[focus-visible]:ring-3',
   'data-[disabled]:cursor-not-allowed',
   'data-[disabled]:opacity-50',
   'dark:bg-input/30',

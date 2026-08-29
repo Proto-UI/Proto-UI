@@ -30,6 +30,10 @@ function disposeCurrent(state: HostMountState): void {
 
 function clearHost(host: HTMLElement): void {
   host.replaceChildren();
+  // Vue 3 marks its mount container with `data-v-app`. The marker is owned by
+  // the framework, not by the preview surface; clear it with the host lease so
+  // a later Vue 2/React mount cannot be mistaken for a Vue 3 app.
+  host.removeAttribute('data-v-app');
 }
 
 /**

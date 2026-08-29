@@ -1,8 +1,8 @@
 // @vitest-environment node
 
 import { spawn, type ChildProcess } from 'node:child_process';
+import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
-import path from 'node:path';
 import {
   chromium,
   type Browser,
@@ -11,11 +11,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  chromeExecutable,
-  generateProtoUiStyle,
-  resolveBrowserHarnessRoots,
-} from './browser-harness';
+import { choosePreviewRuntime, runtimeSelectTrigger } from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -70,6 +66,34 @@ async function availablePort(): Promise<number> {
   });
 }
 
+async function chromeExecutable(): Promise<string> {
+  const candidates = [
+    process.env.CHROME_PATH,
+    process.env.LOCALAPPDATA
+      ? `${process.env.LOCALAPPDATA}/Google/Chrome/Application/chrome.exe`
+      : undefined,
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+    '/usr/bin/google-chrome',
+    '/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  ].filter((candidate): candidate is string => Boolean(candidate));
+
+  for (const candidate of candidates) {
+    try {
+      await access(candidate);
+      return candidate;
+    } catch {
+      // Try the next standard Chrome/Chromium location.
+    }
+  }
+
+  throw new Error('Chrome/Chromium is required; set CHROME_PATH to its executable.');
+}
+
 async function waitForServer(url: string): Promise<void> {
   const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
@@ -98,17 +122,25 @@ async function startServer(): Promise<string> {
     return externalBaseUrl;
   }
 
-  await generateProtoUiStyle();
-
   const port = await availablePort();
-  const { appsWwwRoot } = resolveBrowserHarnessRoots();
-  const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
+  const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
   devServer = spawn(
-    process.execPath,
-    [astroCli, 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
+    executable,
+    [
+      'pnpm@10.32.1',
+      '--filter',
+      'apps-www',
+      'dev',
+      '--host',
+      '127.0.0.1',
+      '--port',
+      String(port),
+      '--strictPort',
+    ],
     {
-      cwd: appsWwwRoot,
+      cwd: process.cwd(),
       detached: process.platform !== 'win32',
+      shell: process.platform === 'win32',
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
@@ -123,25 +155,27 @@ async function startServer(): Promise<string> {
 
 async function stopServer(): Promise<void> {
   if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
-  const signalTarget = process.platform === 'win32' ? devServer.pid : -devServer.pid;
-  try {
-    process.kill(signalTarget, 'SIGTERM');
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+  const pid = devServer.pid;
+  if (process.platform === 'win32') {
+    await new Promise<void>((resolve) => {
+      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
+      killer.once('error', () => resolve());
+      killer.once('exit', () => resolve());
+    });
     return;
   }
+
+  const signalTarget = -pid;
+  process.kill(signalTarget, 'SIGTERM');
 
   const exited = await Promise.race([
     new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
   ]);
-  if (!exited && devServer.exitCode === null) {
-    try {
-      process.kill(signalTarget, 'SIGKILL');
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
-    }
-  }
+  if (!exited && devServer.exitCode === null) process.kill(signalTarget, 'SIGKILL');
 }
 
 async function openRoute(
@@ -163,15 +197,15 @@ async function selectRuntime(
   readySelector: string,
   expectedCount: number
 ): Promise<void> {
-  await previewer.locator('select.adapter-select').selectOption(runtime);
+  await choosePreviewRuntime(page, previewer, runtime);
   await page.waitForFunction(
     ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
       const root = document.querySelector<HTMLElement>('[data-previewer-id]');
-      const select = root?.querySelector<HTMLSelectElement>('select.adapter-select');
+      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
       const host = root?.querySelector<HTMLElement>('.host');
       const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!root || !select || !host || select.value !== selectedRuntime) return false;
-      if (root.querySelectorAll(selector).length !== count || !firstRoot) return false;
+      if (!root || !select || !host || select.dataset.value !== selectedRuntime) return false;
+      if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
       if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
       if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
       // React owns neither a custom element nor a Vue app root. The host tag is
@@ -199,6 +233,7 @@ type TextareaFocusSnapshot = {
   active: boolean;
   focused: boolean;
   focusVisible: boolean;
+  nativeFocusVisible: boolean;
   hostFocused: boolean;
   hostFocusVisible: boolean;
   surfaceFocusVisible: boolean;
@@ -225,6 +260,7 @@ async function wcTextareaFocusSnapshot(previewer: Locator): Promise<TextareaFocu
       active: document.activeElement === textarea,
       focused: exposes.focused.get(),
       focusVisible: exposes.focusVisible.get(),
+      nativeFocusVisible: textarea.matches(':focus-visible'),
       hostFocused: host.hasAttribute('data-focused'),
       hostFocusVisible: host.hasAttribute('data-focus-visible'),
       surfaceFocusVisible: textarea.hasAttribute('data-focus-visible'),
@@ -459,7 +495,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     try {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 5);
-        const trigger = previewer.locator('[data-pui-root]').nth(1);
+        const trigger = previewer.locator('.host [data-pui-root]').nth(1);
         await trigger.click();
         await expect.poll(() => page.getByRole('menu').count(), { message: runtime }).toBe(1);
         await page.waitForTimeout(200);
@@ -561,7 +597,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     try {
       await previewer.scrollIntoViewIfNeeded();
       await selectRuntime(page, previewer, 'wc', 'textarea', 1);
-      const runtimeSelect = previewer.locator('select.adapter-select');
+      const runtimeSelect = runtimeSelectTrigger(previewer);
       const textarea = previewer.locator('textarea');
 
       const initial = await wcTextareaFocusSnapshot(previewer);
@@ -621,12 +657,22 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         const pointer = await wcTextareaFocusSnapshot(previewer);
         expect(pointer.active, `${colorScheme}/pointer active target`).toBe(true);
         expect(pointer.focused, `${colorScheme}/pointer focused expose`).toBe(true);
-        expect(pointer.focusVisible, `${colorScheme}/pointer focusVisible expose`).toBe(false);
-        expect(pointer.hostFocusVisible, `${colorScheme}/pointer host marker`).toBe(false);
-        expect(pointer.surfaceFocusVisible, `${colorScheme}/pointer surface marker`).toBe(false);
-        expect(pointer.boxShadow, `${colorScheme}/modality-specific ring`).not.toBe(
-          keyboard.boxShadow
+        expect(pointer.focusVisible, `${colorScheme}/pointer focusVisible expose`).toBe(
+          pointer.nativeFocusVisible
         );
+        expect(pointer.hostFocusVisible, `${colorScheme}/pointer host marker`).toBe(
+          pointer.nativeFocusVisible
+        );
+        expect(pointer.surfaceFocusVisible, `${colorScheme}/pointer surface marker`).toBe(
+          pointer.nativeFocusVisible
+        );
+        if (pointer.nativeFocusVisible) {
+          expect(pointer.boxShadow, `${colorScheme}/host-derived ring`).toBe(keyboard.boxShadow);
+        } else {
+          expect(pointer.boxShadow, `${colorScheme}/host-derived no-ring`).not.toBe(
+            keyboard.boxShadow
+          );
+        }
         await textarea.evaluate((element) => (element as HTMLTextAreaElement).blur());
       }
     } finally {
@@ -764,7 +810,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           expect(resting.focusVisible, `${label}/resting-focus`).toBe(false);
           expect(resting.insetLayers, `${label}/resting-ring`).toHaveLength(0);
 
-          await previewer.locator('select.adapter-select').focus();
+          await runtimeSelectTrigger(previewer).focus();
           await page.keyboard.press('Tab');
           await page.waitForFunction(
             () =>

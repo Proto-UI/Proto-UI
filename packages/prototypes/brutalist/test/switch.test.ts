@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
@@ -101,6 +101,7 @@ describe('prototypes/brutalist: switch', () => {
     expect(root.getExposes().pressed.get()).toBe(false);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(root, 'matches').mockReturnValue(true);
     root.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
     expect(root.getExposes().focusVisible.get()).toBe(true);

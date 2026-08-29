@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { definePrototype } from '@proto.ui/core';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
@@ -195,6 +195,7 @@ describe('prototypes/base: scroll-area', () => {
     const { viewport } = await mountViewport(OVERFLOWING);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(viewport, 'matches').mockReturnValue(true);
     viewport.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
     expect(viewport.getExposes().focused.get()).toBe(true);
@@ -213,12 +214,14 @@ describe('prototypes/base: scroll-area', () => {
     const { viewport } = await mountViewport(OVERFLOWING);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(viewport, 'matches').mockReturnValue(true);
     viewport.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
     expect(viewport.getExposes().focused.get()).toBe(true);
     expect(viewport.getExposes().focusVisible.get()).toBe(true);
 
     viewport.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    matchesSpy.mockRestore();
     viewport.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     viewport.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();

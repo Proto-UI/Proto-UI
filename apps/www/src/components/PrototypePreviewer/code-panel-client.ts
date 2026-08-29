@@ -1,3 +1,5 @@
+import { isSiteButtonActivation } from '../site-shadcn-controls';
+
 export interface RefreshCodePanelOptions {
   readonly reset?: boolean;
 }
@@ -9,9 +11,11 @@ function setExpanded(shell: HTMLElement, expanded: boolean): void {
   shell.dataset.codeExpanded = String(expanded);
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
   if (panel) panel.dataset.codeExpanded = String(expanded);
-  shell
-    .querySelector<HTMLButtonElement>('[data-code-toggle]')
-    ?.setAttribute('aria-expanded', String(expanded));
+  const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]');
+  toggle?.setAttribute('aria-expanded', String(expanded));
+  if (toggle) toggle.hidden = expanded;
+  const copyButton = shell.querySelector<HTMLElement>('[data-copy]');
+  if (copyButton) copyButton.hidden = !expanded;
 }
 
 export function refreshCodePanel(shell: HTMLElement, options: RefreshCodePanelOptions = {}): void {
@@ -38,18 +42,20 @@ function initCodePanel(shell: HTMLElement): void {
   setExpanded(shell, false);
 
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
-  const toggle = shell.querySelector<HTMLButtonElement>('[data-code-toggle]');
-  const copyButton = shell.querySelector<HTMLButtonElement>('[data-copy]');
+  const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]');
+  const copyButton = shell.querySelector<HTMLElement>('[data-copy]');
   const copyText = shell.querySelector<HTMLElement>('[data-copy-text]');
 
-  toggle?.addEventListener('click', () => {
+  toggle?.addEventListener('click', (event) => {
+    if (!isSiteButtonActivation(event)) return;
     setExpanded(shell, shell.dataset.codeExpanded !== 'true');
   });
 
   if (copyButton && copyText) {
     const copyIconHtml = copyText.innerHTML;
     const checkIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4.5"><path d="M20 6 9 17l-5-5"/></svg>`;
-    copyButton.addEventListener('click', async () => {
+    copyButton.addEventListener('click', async (event) => {
+      if (!isSiteButtonActivation(event)) return;
       const code = shell.querySelector<HTMLElement>('.proto-previewer__code code');
       const text = code?.dataset.rawCode ?? code?.textContent ?? '';
       try {

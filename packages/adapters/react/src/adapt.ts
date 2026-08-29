@@ -144,6 +144,7 @@ function hasSameRawProps(
   );
 }
 
+const MAX_FOCUS_TARGET_RETRIES = 3;
 export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
   const runtime = normalizeRuntime(runtimeInput);
   const sharedOverlayLayerScheduler = createZIndexOverlayLayerScheduler();
@@ -206,10 +207,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const viewReadyRef = runtime.useRef(false);
       const focusTargetReadyListenersRef = runtime.useRef<Set<() => void>>(new Set());
       const focusTargetRetryScheduledRef = runtime.useRef(false);
+      const focusTargetRetryCountRef = runtime.useRef(0);
       const notifyFocusTargetReady = () => {
         const target = rootRef.current;
         if (!viewReadyRef.current || !target?.isConnected) return;
         for (const listener of Array.from(focusTargetReadyListenersRef.current)) listener();
+        if (target.ownerDocument.activeElement === target) focusTargetRetryCountRef.current = 0;
       };
 
       const controllerRef = runtime.useRef<RuntimeController | null>(null);
@@ -363,6 +366,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           if (ownerRef.current?.hasView) void ownerRef.current.detachView();
           setHostTokens([]);
           viewReadyRef.current = false;
+          focusTargetRetryCountRef.current = 0;
           return;
         }
 
@@ -436,13 +440,19 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             return () => focusTargetReadyListenersRef.current.delete(listener);
           },
           retryTargetReady: () => {
-            if (focusTargetRetryScheduledRef.current) return;
+            if (
+              focusTargetRetryScheduledRef.current ||
+              focusTargetRetryCountRef.current >= MAX_FOCUS_TARGET_RETRIES
+            ) {
+              return;
+            }
             focusTargetRetryScheduledRef.current = true;
+            focusTargetRetryCountRef.current += 1;
             scheduleAfterWebLayout(
               rootRef.current,
               () => {
-                notifyFocusTargetReady();
                 focusTargetRetryScheduledRef.current = false;
+                notifyFocusTargetReady();
               },
               schedule
             );
@@ -473,6 +483,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         ownerDisposalRef.current?.retain();
         return () => {
           viewReadyRef.current = false;
+          focusTargetRetryCountRef.current = 0;
           rootRef.current?.setAttribute(PUI_VIEW_PENDING_ATTR, '');
           void ownerRef.current?.detachView();
           ownerDisposalRef.current?.release();
@@ -483,6 +494,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         if (!pendingCommitRef.current) return;
         pendingCommitRef.current = false;
         viewReadyRef.current = true;
+        focusTargetRetryCountRef.current = 0;
         rootRef.current?.removeAttribute(PUI_VIEW_PENDING_ATTR);
         eventGateRef.current?.enable();
         notifyFocusTargetReady();

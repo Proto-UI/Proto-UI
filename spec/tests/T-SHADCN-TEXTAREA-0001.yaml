@@ -63,8 +63,8 @@ implementations:
     notes:
       - Drives light to dark and back in Web Components, React, and Vue without remounting the adapter. Static lowering of the colorScheme rule is what makes the repaint happen; a rule left on the default plan samples the scheme once and leaves stale presentation.
       - Asserts the transitioned property set is exactly `color, box-shadow` at the upstream duration and easing. The set matters beyond parity, because a wider set would also animate the background and make the colorScheme reads race the animation.
-      - Covers the pointer-focus ring in both directions and requires a frame strictly between the two endpoints, so an instant jump cannot pass. Web Components is asserted as unringed until #426 projects text-control focus; the case starts covering it automatically once that lands.
-      - The ring currently keys the inherited `focused` state rather than `focusVisible`, because the latter misses pointer focus on text controls in this host. That is tracked in #438; when it lands the rule returns to `focusVisible` and this coverage should stay green unchanged.
+      - Covers the real pointer-focus ring in both directions and requires a frame strictly between endpoints when the physical host reports focus-visible; WC, React, and Vue all require projected focus instead of a skip path.
+      - Real click and real Tab traversal snapshot the physical textarea native `:focus-visible` result together with projected `data-focus-visible` in every runtime and require equality. The ring endpoint is derived from that measured value. WC physical-control coverage additionally resamples same-target native true/false after modality input without requiring a second focus event and invalidates the sampler on blur/remount/teardown.
 verifies:
   prototypes:
     - id: P-SHADCN-TEXTAREA

@@ -121,6 +121,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   const getMeta = opt.getMeta ?? createDefaultMetaGetter();
   const exposeStateWebMode = opt.exposeStateWebMode;
   const scrollProjection = opt.scrollProjection;
+  const MAX_FOCUS_TARGET_RETRIES = 3;
+
   const hasCustomOverlayLayerConfig =
     !!opt.overlayLayer &&
     (typeof opt.overlayLayer.baseZIndex !== 'undefined' ||
@@ -146,6 +148,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _controller: RuntimeController | null = null;
     private _focusTargetReadyListeners = new Set<() => void>();
     private _focusTargetRetryScheduled = false;
+    private _focusTargetRetryCount = 0;
 
     private _root: Element | ShadowRoot;
     private _slotProjector: SlotProjector | null = null;
@@ -191,7 +194,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     connectedCallback() {
-      this._disconnectVersion += 1;
+      this._focusTargetRetryCount = 0;
 
       if (this._mountedOnce) {
         // Refresh the logical parent link after a synchronous DOM move.
@@ -414,13 +417,19 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               return () => this._focusTargetReadyListeners.delete(listener);
             },
             retryTargetReady: () => {
-              if (this._focusTargetRetryScheduled) return;
+              if (
+                this._focusTargetRetryScheduled ||
+                this._focusTargetRetryCount >= MAX_FOCUS_TARGET_RETRIES
+              ) {
+                return;
+              }
               this._focusTargetRetryScheduled = true;
+              this._focusTargetRetryCount += 1;
               scheduleAfterWebLayout(
                 this,
                 () => {
-                  this[NOTIFY_FOCUS_TARGET_READY]();
                   this._focusTargetRetryScheduled = false;
+                  this[NOTIFY_FOCUS_TARGET_READY]();
                 },
                 schedule
               );
@@ -519,6 +528,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     private [NOTIFY_FOCUS_TARGET_READY](): void {
       for (const listener of Array.from(this._focusTargetReadyListeners)) listener();
+      const active = this.ownerDocument.activeElement;
+      if (
+        active === this ||
+        this.contains(active) ||
+        (this.shadowRoot?.activeElement ?? null) !== null
+      ) {
+        this._focusTargetRetryCount = 0;
+      }
     }
 
     disconnectedCallback() {

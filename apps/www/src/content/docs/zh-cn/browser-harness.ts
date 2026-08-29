@@ -3,11 +3,8 @@
 // suites still carry their own and can migrate once their PRs land.
 
 import { spawn, type ChildProcess } from 'node:child_process';
-import { existsSync } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   chromium,
   type Browser,
@@ -16,7 +13,7 @@ import {
   type Page,
 } from 'playwright-core';
 
-export const RUNTIMES = ['wc', 'react', 'vue'] as const;
+export const RUNTIMES = ['wc', 'react', 'vue', 'vue2'] as const;
 export type RuntimeId = (typeof RUNTIMES)[number];
 
 export const COLOR_SCHEMES = ['light', 'dark'] as const;
@@ -24,51 +21,6 @@ export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 let devServer: ChildProcess | null = null;
 let serverOutput = '';
-let styleGeneration: Promise<void> | null = null;
-
-export function resolveBrowserHarnessRoots(moduleUrl = import.meta.url): {
-  repoRoot: string;
-  appsWwwRoot: string;
-} {
-  const appsWwwRoot = path.resolve(fileURLToPath(new URL('../../../../', moduleUrl)));
-  return { appsWwwRoot, repoRoot: path.resolve(appsWwwRoot, '..', '..') };
-}
-
-const { appsWwwRoot } = resolveBrowserHarnessRoots();
-
-function resolveCorepackCli(): string {
-  const nodeBin = path.dirname(process.execPath);
-  const suffix = ['node_modules', 'corepack', 'dist', 'corepack.js'];
-  const candidates = [path.join(nodeBin, ...suffix), path.resolve(nodeBin, '..', 'lib', ...suffix)];
-  const resolved = candidates.find((candidate) => existsSync(candidate));
-  if (resolved) return resolved;
-  throw new Error(
-    `Unable to locate Corepack for ${process.execPath}. Tried:\n${candidates.join('\n')}`
-  );
-}
-
-/**
- * Rebuild the CLI and regenerate the website style projection before Astro
- * starts. The long-lived server is still a direct Node child for reliable
- * teardown; only this short-lived prerequisite goes through Corepack.
- */
-export async function generateProtoUiStyle(): Promise<void> {
-  styleGeneration ??= new Promise<void>((resolve, reject) => {
-    const corepackCli = resolveCorepackCli();
-    const child = spawn(
-      process.execPath,
-      [corepackCli, 'pnpm@10.32.1', 'run', 'generate:proto-ui-style'],
-      { cwd: appsWwwRoot, env: process.env, stdio: 'inherit' }
-    );
-    child.on('error', reject);
-    child.on('exit', (code, signal) => {
-      if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));
-      else if (code !== 0) reject(new Error(`Proto UI style generation exited with code ${code}.`));
-      else resolve();
-    });
-  });
-  return styleGeneration;
-}
 
 async function availablePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -87,36 +39,14 @@ async function availablePort(): Promise<number> {
   });
 }
 
-export function resolveBrowserExecutableCandidates(
-  platform: NodeJS.Platform = process.platform,
-  env: Readonly<Record<string, string | undefined>> = process.env
-): string[] {
-  const windowsCandidates =
-    platform === 'win32'
-      ? [
-          ...(env.LOCALAPPDATA
-            ? [
-                path.win32.join(env.LOCALAPPDATA, 'Google/Chrome/Application/chrome.exe'),
-                path.win32.join(env.LOCALAPPDATA, 'Microsoft/Edge/Application/msedge.exe'),
-              ]
-            : []),
-          path.win32.join(
-            env.PROGRAMFILES ?? 'C:\\Program Files',
-            'Google/Chrome/Application/chrome.exe'
-          ),
-          path.win32.join(
-            env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
-            'Google/Chrome/Application/chrome.exe'
-          ),
-          path.win32.join(
-            env['PROGRAMFILES(X86)'] ?? 'C:\\Program Files (x86)',
-            'Microsoft/Edge/Application/msedge.exe'
-          ),
-        ]
-      : [];
-  return [
-    env.CHROME_PATH,
-    ...windowsCandidates,
+export async function chromeExecutable(): Promise<string> {
+  const candidates = [
+    process.env.CHROME_PATH,
+    process.env.LOCALAPPDATA
+      ? `${process.env.LOCALAPPDATA}/Google/Chrome/Application/chrome.exe`
+      : undefined,
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
     '/usr/bin/google-chrome',
     '/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
@@ -124,10 +54,6 @@ export function resolveBrowserExecutableCandidates(
     '/usr/bin/chromium-browser',
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   ].filter((candidate): candidate is string => Boolean(candidate));
-}
-
-export async function chromeExecutable(): Promise<string> {
-  const candidates = resolveBrowserExecutableCandidates();
 
   for (const candidate of candidates) {
     try {
@@ -164,13 +90,27 @@ function recordServerOutput(chunk: Buffer): void {
 
 async function spawnServer(readyRoute: string): Promise<string> {
   const port = await availablePort();
-  const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
+  const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
   devServer = spawn(
-    process.execPath,
-    [astroCli, 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
+    executable,
+    [
+      'pnpm@10.32.1',
+      '--filter',
+      'apps-www',
+      'dev',
+      '--host',
+      '127.0.0.1',
+      '--port',
+      String(port),
+      '--strictPort',
+    ],
     {
-      cwd: appsWwwRoot,
+      cwd: process.cwd(),
       detached: process.platform !== 'win32',
+      // Windows treats .cmd shims as shell scripts rather than executable
+      // images. Without this flag every browser suite fails before it can
+      // collect any evidence, which silently removes the matrix from CI.
+      shell: process.platform === 'win32',
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
@@ -189,8 +129,6 @@ export async function startServer(readyRoute: string): Promise<string> {
     await waitForServer(`${externalBaseUrl}${readyRoute}`);
     return externalBaseUrl;
   }
-
-  await generateProtoUiStyle();
 
   // availablePort() releases the socket before the child binds it, so two
   // browser suites running in parallel can be handed the same port and
@@ -211,26 +149,29 @@ export async function startServer(readyRoute: string): Promise<string> {
 
 export async function stopServer(): Promise<void> {
   if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
-  // Astro is the direct child, so Windows does not point at a transient shell.
-  const signalTarget = process.platform === 'win32' ? devServer.pid : -devServer.pid;
-  try {
-    process.kill(signalTarget, 'SIGTERM');
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+  const pid = devServer.pid;
+  if (process.platform === 'win32') {
+    // `corepack.cmd` runs through a cmd.exe wrapper. Killing only that shell
+    // leaves Astro/Vite descendants behind, so terminate the whole tree.
+    await new Promise<void>((resolve) => {
+      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
+      killer.once('error', () => resolve());
+      killer.once('exit', () => resolve());
+    });
     return;
   }
+
+  const signalTarget = -pid;
+  process.kill(signalTarget, 'SIGTERM');
 
   const exited = await Promise.race([
     new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
   ]);
-  if (!exited && devServer.exitCode === null) {
-    try {
-      process.kill(signalTarget, 'SIGKILL');
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
-    }
-  }
+  if (!exited && devServer.exitCode === null) process.kill(signalTarget, 'SIGKILL');
 }
 
 export async function launchBrowser(): Promise<Browser> {
@@ -255,6 +196,23 @@ export async function openRoute(
   return { context, page, previewer };
 }
 
+export function runtimeSelectTrigger(previewer: Locator): Locator {
+  return previewer.locator('[data-adapter-select-root] wc-shadcn-select-trigger');
+}
+
+/** Select one runtime through the same accessible composed control a reader uses. */
+export async function choosePreviewRuntime(
+  page: Page,
+  previewer: Locator,
+  runtime: RuntimeId
+): Promise<void> {
+  await runtimeSelectTrigger(previewer).click();
+  await page
+    .locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`)
+    .last()
+    .click({ force: true });
+}
+
 export async function selectRuntime(
   page: Page,
   previewer: Locator,
@@ -262,17 +220,20 @@ export async function selectRuntime(
   readySelector: string,
   expectedCount: number
 ): Promise<void> {
-  await previewer.locator('select.adapter-select').selectOption(runtime);
+  await choosePreviewRuntime(page, previewer, runtime);
   await page.waitForFunction(
     ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
       const root = document.querySelector<HTMLElement>('[data-previewer-id]');
-      const select = root?.querySelector<HTMLSelectElement>('select.adapter-select');
+      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
       const host = root?.querySelector<HTMLElement>('.host');
       const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!root || !select || !host || select.value !== selectedRuntime) return false;
-      if (root.querySelectorAll(selector).length !== count || !firstRoot) return false;
+      if (!root || !select || !host || select.dataset.value !== selectedRuntime) return false;
+      if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
       if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
       if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
+      if (selectedRuntime === 'vue2') {
+        return Boolean((firstRoot as HTMLElement & { __vue__?: unknown }).__vue__);
+      }
       // React owns neither a custom element nor a Vue app root. The host tag is
       // not always a div: a text-control Prototype roots on its native control.
       return !firstRoot.tagName.startsWith('WC-') && !host.hasAttribute('data-v-app');

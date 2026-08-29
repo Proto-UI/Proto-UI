@@ -14,6 +14,7 @@ export default {
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
             props: { name: 'bold', size: 16 },
           },
+          { kind: 'box', className: 'sr-only', children: ['Bold'] },
         ],
       },
       {
@@ -27,6 +28,7 @@ export default {
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
             props: { name: 'italic', size: 16 },
           },
+          { kind: 'box', className: 'sr-only', children: ['Italic'] },
         ],
       },
       {
@@ -40,6 +42,7 @@ export default {
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
             props: { name: 'underline', size: 16 },
           },
+          { kind: 'box', className: 'sr-only', children: ['Underline'] },
         ],
       },
       {
@@ -53,6 +56,7 @@ export default {
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
             props: { name: 'strikethrough', size: 16 },
           },
+          { kind: 'box', className: 'sr-only', children: ['Strikethrough'] },
         ],
       },
     ],

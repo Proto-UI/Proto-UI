@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Locator } from 'playwright-core';
 import { RUNTIMES, launchBrowser, openRoute, startServer, stopServer } from './browser-harness';
 
-const SELECT_RUNTIMES = [...RUNTIMES, 'vue2'] as const;
+const SELECT_RUNTIMES = RUNTIMES;
 
 const SELECT_ROUTE = '/en/ui-libraries/brutalist/components/select/';
 
@@ -22,13 +22,20 @@ const MOUNTED_ROOT_COUNT = 6;
  * timeout that says nothing about the label.
  */
 async function showRuntime(page: Page, previewer: Locator, runtime: string): Promise<void> {
-  await previewer.locator('select.adapter-select').selectOption(runtime);
+  const selectRoot = previewer.locator('[data-adapter-select-root]');
+  await selectRoot.locator('wc-shadcn-select-trigger').click();
+  // Select content is portalled while open, so resolve the visible item from
+  // the document rather than assuming it remains a child of the previewer.
+  await page
+    .locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`)
+    .last()
+    .click({ force: true });
   await page.waitForFunction(
     (selected) => {
       const root = document.querySelector('[data-previewer-id]');
-      const select = root?.querySelector<HTMLSelectElement>('select.adapter-select');
+      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
       const host = root?.querySelector('.host');
-      if (!host || select?.value !== selected) return false;
+      if (!host || select?.getAttribute('data-value') !== selected) return false;
       return Array.from(host.querySelectorAll('*')).some(
         (element) => element.getAttribute('role') === 'combobox'
       );
@@ -68,10 +75,10 @@ async function readClosedSelect(page: Page): Promise<ClosedSelect> {
       displayValue: value?.getAttribute('data-display-value') ?? null,
       // Items live inside the closed content; they register with the Root's
       // collection even though nothing has opened it.
-      registeredItems: document.querySelectorAll('[data-collection-index]').length,
-      mountedRoots: document.querySelectorAll('[data-previewer-id] [data-pui-root]').length,
-      detachedHosts: document.querySelectorAll('[data-pui-view-detached]').length,
-      everOpened: !!document.querySelector('[data-open]'),
+      registeredItems: host.querySelectorAll('[data-collection-index]').length,
+      mountedRoots: host.querySelectorAll('[data-pui-root]').length,
+      detachedHosts: host.querySelectorAll('[data-pui-view-detached]').length,
+      everOpened: !!host.querySelector('[data-open]'),
     };
   });
 }

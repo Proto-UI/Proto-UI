@@ -7,6 +7,7 @@ import {
   applyColorScheme,
   launchBrowser,
   openRoute,
+  runtimeSelectTrigger,
   selectRuntime,
   startServer,
   stopServer,
@@ -26,7 +27,7 @@ type RingOffsetSample = {
 };
 
 async function focusDropdownTrigger(page: Page, previewer: Locator): Promise<void> {
-  await previewer.locator('select.adapter-select').focus();
+  await runtimeSelectTrigger(previewer).focus();
   await page.keyboard.press('Tab');
   await page.waitForFunction(
     () => {

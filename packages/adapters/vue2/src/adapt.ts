@@ -122,6 +122,7 @@ type Vue2InternalState<Props extends PropsBaseType> = {
   lastInitRoot: HTMLElement | null;
   focusTargetReadyListeners: Set<() => void>;
   focusTargetRetryScheduled: boolean;
+  focusTargetRetryCount: number;
   propWatchDisposer: (() => void) | null;
 };
 
@@ -155,6 +156,8 @@ function shallowEqualHostProps(
     (key) => Object.prototype.hasOwnProperty.call(next, key) && Object.is(prev[key], next[key])
   );
 }
+
+const MAX_FOCUS_TARGET_RETRIES = 3;
 
 export function createVue2Adapter(runtime: Vue2Runtime) {
   const sharedOverlayLayerScheduler = createZIndexOverlayLayerScheduler();
@@ -231,6 +234,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         lastInitRoot: null,
         focusTargetReadyListeners: new Set(),
         focusTargetRetryScheduled: false,
+        focusTargetRetryCount: 0,
         propWatchDisposer: null,
       } as Vue2InternalState<Props>;
       state.scopedExposesReader = createScopedExposesReader(() => state.invoke);
@@ -640,13 +644,19 @@ function initSession<Props extends PropsBaseType>(
       return () => state.focusTargetReadyListeners.delete(listener);
     },
     retryTargetReady: () => {
-      if (state.focusTargetRetryScheduled) return;
+      if (
+        state.focusTargetRetryScheduled ||
+        state.focusTargetRetryCount >= MAX_FOCUS_TARGET_RETRIES
+      ) {
+        return;
+      }
       state.focusTargetRetryScheduled = true;
+      state.focusTargetRetryCount += 1;
       scheduleAfterWebLayout(
         getRootElement(vm),
         () => {
-          notifyFocusTargetReady(vm);
           state.focusTargetRetryScheduled = false;
+          notifyFocusTargetReady(vm);
         },
         targetOptions.schedule
       );
@@ -734,8 +744,8 @@ function finishPendingCommit(vm: any) {
   const state = getState(vm);
   if (!state.pendingCommit) return;
   state.pendingCommit = false;
-  setViewReady(vm, true);
-  getRootElement(vm)?.removeAttribute(PUI_VIEW_PENDING_ATTR);
+  state.viewReady = true;
+  state.focusTargetRetryCount = 0;
   state.eventGate?.enable();
   notifyFocusTargetReady(vm);
   state.pendingSignal?.done?.();
@@ -747,11 +757,13 @@ function notifyFocusTargetReady(vm: any) {
   const target = getRootElement(vm);
   if (!state.viewReady || !target?.isConnected) return;
   for (const listener of Array.from(state.focusTargetReadyListeners)) listener();
+  if (target.ownerDocument.activeElement === target) state.focusTargetRetryCount = 0;
 }
 
 function setViewReady(vm: any, value: boolean) {
   const state = getState(vm);
   state.viewReady = value;
+  state.focusTargetRetryCount = 0;
   setVmField(vm, '__puiViewReady', value);
   forceUpdate(vm);
 }
