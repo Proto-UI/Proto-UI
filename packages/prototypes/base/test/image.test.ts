@@ -94,6 +94,12 @@ function createImageHost(initialRaw: Record<string, unknown>) {
 
 describe('prototypes/base: image', () => {
   it('keeps the direct, named, and authored asHook entries aligned', () => {
+    expectTypeOf<ImageRootProps>().toEqualTypeOf<{
+      source?: string;
+      a11yMode?: ImageRootProps['a11yMode'];
+      alternativeText?: string;
+      fit?: ImageRootProps['fit'];
+    }>();
     expect(namedImageRoot).toBe(imageRoot);
     expect(imageRoot.modules).toEqual(asImageRoot.modules);
     expect(imageRoot.modules).toHaveLength(1);
@@ -146,54 +152,9 @@ describe('prototypes/base: image', () => {
     });
   });
 
-  it('keeps an initially uncontrolled source stable across later source props', () => {
-    const ctx = createImageHost({
-      defaultSource: 'image:default',
-      a11yMode: 'decorative',
-      alternativeText: '',
-      fit: 'contain',
-    } satisfies ImageRootProps);
-    const result = executeWithHost(imageRoot as Prototype<any>, ctx.host);
-    ctx.bindRuntime(result.invokeInCallbackScope);
-    const record = ctx.records[0];
-    expect(record.connection.patch.source).toBe('image:default');
-
-    ctx.setRawProps({
-      source: 'image:late-control',
-      defaultSource: 'image:replacement-default',
-      a11yMode: 'decorative',
-      alternativeText: '',
-      fit: 'not-a-fit',
-    });
-    result.controller.applyRawProps(ctx.host.getRawProps());
-
-    const update = record.updates.at(-1)!;
-    expect(update.patch).toMatchObject({
-      source: 'image:default',
-      fit: 'contain',
-      loadingStatus: 'loading',
-    });
-
-    ctx.setRawProps({
-      defaultSource: 'image:replacement-default',
-      a11yMode: 'decorative',
-      alternativeText: 'contradiction',
-      fit: 'fill',
-    });
-    result.controller.applyRawProps(ctx.host.getRawProps());
-    expect(record.updates.at(-1)?.patch).toMatchObject({
-      source: '',
-      loadingStatus: 'idle',
-      fit: 'fill',
-    });
-    expect(ctx.getExposes().source.get()).toBe('');
-    expect(ctx.getExposes().loadingStatus.get()).toBe('idle');
-  });
-
   it('follows source updates when the initial source is controlled', () => {
     const ctx = createImageHost({
       source: 'image:controlled-a',
-      defaultSource: 'image:ignored-default',
       a11yMode: 'informative',
       alternativeText: 'Controlled A',
       fit: 'contain',
@@ -205,7 +166,6 @@ describe('prototypes/base: image', () => {
 
     ctx.setRawProps({
       source: 'image:controlled-b',
-      defaultSource: 'image:replacement-default',
       a11yMode: 'informative',
       alternativeText: 'Controlled B',
       fit: 'cover',

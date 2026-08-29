@@ -12,7 +12,6 @@ import type { ImageRootExposes, ImageRootProps } from './types';
 function setupImageRoot(def: DefHandle<ImageRootProps, ImageRootExposes>) {
   def.props.define({
     source: { type: 'string', empty: 'fallback' },
-    defaultSource: { type: 'string', empty: 'fallback' },
     a11yMode: {
       type: 'enum',
       empty: 'fallback',
@@ -26,7 +25,6 @@ function setupImageRoot(def: DefHandle<ImageRootProps, ImageRootExposes>) {
     },
   });
   def.props.setDefaults({
-    defaultSource: '',
     a11yMode: 'informative',
     alternativeText: '',
     fit: 'contain',
@@ -48,9 +46,6 @@ function setupImageRoot(def: DefHandle<ImageRootProps, ImageRootExposes>) {
   def.expose.state('fit', fit);
   def.expose.event('loadingStatusChange', { payload: 'json' });
 
-  let sourceMode: 'controlled' | 'uncontrolled' | null = null;
-  let uncontrolledSource = '';
-
   const projectSnapshot = () => {
     const snapshot = image.snapshot();
     source.set(snapshot?.source ?? '', 'reason: image-view source snapshot');
@@ -62,13 +57,8 @@ function setupImageRoot(def: DefHandle<ImageRootProps, ImageRootExposes>) {
   };
 
   const sync = (props: Readonly<ImageRootProps>) => {
-    if (!sourceMode) {
-      sourceMode = typeof props.source === 'string' ? 'controlled' : 'uncontrolled';
-      uncontrolledSource = props.defaultSource ?? '';
-    }
-    const requestedSource = sourceMode === 'controlled' ? (props.source ?? '') : uncontrolledSource;
     image.sync({
-      source: requestedSource,
+      source: props.source ?? '',
       a11yMode: props.a11yMode ?? 'informative',
       alternativeText: props.alternativeText ?? '',
       fit: props.fit ?? 'contain',
@@ -77,9 +67,7 @@ function setupImageRoot(def: DefHandle<ImageRootProps, ImageRootExposes>) {
   };
 
   def.lifecycle.onCreated((run) => sync(run.props.get()));
-  def.props.watch(['source', 'defaultSource', 'a11yMode', 'alternativeText', 'fit'], (_run, next) =>
-    sync(next)
-  );
+  def.props.watch(['source', 'a11yMode', 'alternativeText', 'fit'], (_run, next) => sync(next));
 
   image.on('loadingStatusChange', (run, event) => {
     projectSnapshot();

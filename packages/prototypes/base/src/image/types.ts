@@ -10,7 +10,6 @@ import type {
 
 export interface ImageRootProps {
   source?: string;
-  defaultSource?: string;
   a11yMode?: ImageViewA11yMode;
   alternativeText?: string;
   fit?: ImageViewFit;

@@ -29,10 +29,6 @@ criteria:
         A11y uses explicit binary input: informative requires non-empty alternativeText; decorative explicitly excludes semantic content. Contradictory or missing input is an authoring diagnostic and fails closed; the adapter must not guess.
 
 
-  - id: C-IMAGE-VIEW-0001-D
-    text:
-      zh-CN: Base Image 首次同步必须确定 controlled 或 uncontrolled source ownership 并保持稳定；controlled 模式跟随 source，uncontrolled 模式只捕获首次 defaultSource，Host 不拥有 source mutation channel。
-      en: Base Image's first synchronization must establish stable controlled or uncontrolled source ownership; controlled mode follows source, uncontrolled mode captures only the initial defaultSource, and the Host owns no source mutation channel.
   - id: C-IMAGE-VIEW-0001-E
     text:
       zh-CN: Generation-bound lease：新 source 必须先建立新 generation 与 loading 状态，再启动 host work；每次 host update 与 completion 必须携带不可变 generation identity。replacement、detach/rematerialize、physical-target replacement、dispose 必须使旧 lease/generation terminal。旧 completion 不得再改当前 state 或发 outward signal；当前 generation 的 terminal completion 最多接受一次。
