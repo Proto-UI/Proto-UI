@@ -62,6 +62,15 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       await waitForHomeRuntime(page, 'wc');
       for (const runtime of RUNTIMES) {
         await chooseRuntime(page, home, runtime);
+        await expect
+          .poll(
+            () =>
+              home
+                .locator('[data-home-demo-runtime] wc-shadcn-select-trigger')
+                .evaluate((element) => document.activeElement === element),
+            { timeout: 10_000 }
+          )
+          .toBe(true);
         expect(
           await page
             .locator('wc-shadcn-select-root[data-adapter-select-root]')

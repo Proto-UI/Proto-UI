@@ -29,6 +29,12 @@ type ActiveRender = {
   destroy: () => Promise<void> | void;
 };
 
+type AdapterPreferenceDetail = {
+  adapter?: unknown;
+  source?: EventTarget | null;
+  focusTarget?: HTMLElement | null;
+};
+
 const DEFAULT_RUNTIME_OPTIONS: RuntimeOption[] = [
   { id: 'wc', label: 'Web Components' },
   { id: 'react', label: 'React' },
@@ -159,17 +165,41 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
           focusTarget?.isConnected &&
           (document.activeElement === document.body || document.activeElement == null)
         ) {
-          focusTarget.focus();
+          // The Select adapter applies the unlocked props on its next
+          // controller turn. Focusing in this same stack is ignored by the
+          // browser while the trigger is still disabled, leaving the local
+          // Runtime control on BODY after a remount. Restore after the
+          // unlock has committed, and re-check the render generation so a
+          // newer selection cannot steal focus.
+          await new Promise<void>((resolve) => {
+            const view = focusTarget.ownerDocument.defaultView;
+            if (view?.requestAnimationFrame) {
+              view.requestAnimationFrame(() => resolve());
+            } else {
+              queueMicrotask(resolve);
+            }
+          });
+          if (
+            !destroyed &&
+            currentVersion === version &&
+            focusTarget.isConnected &&
+            (document.activeElement === document.body || document.activeElement == null)
+          ) {
+            focusTarget.focus();
+          }
         }
       }
     }
   }
 
-  const renderFromInputs = (event: Event, changed: SiteSelectRoot) => {
+  const renderFromInputs = (
+    event: Event,
+    changed: SiteSelectRoot,
+    focusTarget = changed.querySelector<HTMLElement>('wc-shadcn-select-trigger')
+  ) => {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(changed);
     setSelectValue(changed, value);
-    const focusTarget = changed.querySelector<HTMLElement>('wc-shadcn-select-trigger');
     renderCurrent(
       (changed === runtimeSelectEl ? value : selectValue(runtimeSelectEl)) as RuntimeId,
       changed === demoSelectEl ? value : selectValue(demoSelectEl),
@@ -182,6 +212,7 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(runtimeSelectEl);
     if (!runtimeOptions.some((option) => option.id === value)) return;
+    const focusTarget = runtimeSelectEl.querySelector<HTMLElement>('wc-shadcn-select-trigger');
     try {
       localStorage.setItem(PREFERRED_ADAPTER_KEY, value);
     } catch {
@@ -189,20 +220,24 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     }
     runtimeSelectEl.ownerDocument.dispatchEvent(
       new CustomEvent(PREFERRED_ADAPTER_EVENT, {
-        detail: { adapter: value, source: runtimeSelectEl },
+        detail: { adapter: value, source: runtimeSelectEl, focusTarget },
       })
     );
-    renderFromInputs(event, runtimeSelectEl);
+    renderFromInputs(event, runtimeSelectEl, focusTarget);
   };
   const onAdapterChange = (event: Event) => {
-    const detail = (event as CustomEvent<{ adapter?: unknown; source?: EventTarget }>).detail;
+    const detail = (event as CustomEvent<AdapterPreferenceDetail>).detail;
     const adapter = detail?.adapter;
     if (typeof adapter !== 'string' || !runtimeOptions.some((option) => option.id === adapter))
       return;
     if (detail?.source === runtimeSelectEl) return;
     if (selectValue(runtimeSelectEl) === adapter) return;
     setSelectValue(runtimeSelectEl, adapter);
-    void renderCurrent(adapter as RuntimeId, selectValue(demoSelectEl));
+    void renderCurrent(
+      adapter as RuntimeId,
+      selectValue(demoSelectEl),
+      detail?.focusTarget ?? null
+    );
   };
   demoSelectEl.addEventListener('valueChange', onDemoChange);
   runtimeSelectEl.addEventListener('valueChange', onRuntimeChange);
