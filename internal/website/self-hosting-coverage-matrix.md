@@ -138,6 +138,10 @@ The matrix rows remain authoritative. These bindings make non-row helper and int
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` |
 | `apps/www/src/components/override/TableOfContents/TableOfContents.astro` | `www.shell.table-of-contents` |
 | `apps/www/src/components/override/TableOfContents/TableOfContentsList.astro` | `www.shell.table-of-contents` |
+| `apps/www/src/components/site-shadcn-controls.ts` | grouped rows `www.shell.adapter-select`, `www.shell.language-select`, and `www.shell.theme-toggle` |
+| `apps/www/src/content/docs/zh-cn/demo-base-select.demo.ts` | `www.demo.authored-controllers` |
+| `apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts` | `www.demo.authored-controllers` |
+| `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` |
 
 ## M0 evidence baseline
 
