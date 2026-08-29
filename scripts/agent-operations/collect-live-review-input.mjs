@@ -408,6 +408,7 @@ export function submitGitHubReview(
       'api',
       '--method',
       'GET',
+      '--paginate',
       `repos/${owner}/${name}/pulls/${pullRequest}/reviews?per_page=100`,
     ];
     try {

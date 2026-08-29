@@ -220,6 +220,66 @@ test('handoff artifacts bind the exact request digest and authorization scope', 
   );
 });
 
+test('ready-for-review handoff binds a digested validation-report artifact', () => {
+  const request = seal({
+    ...metadataRequest(),
+    action: 'mark-exact-head-ready-for-review',
+    target: {
+      kind: 'pull-request',
+      number: 509,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+    },
+    expected: { isDraft: true },
+    desired: { isDraft: false },
+    evidence: [
+      ...metadataRequest().evidence,
+      {
+        type: 'validation-report',
+        reference: 'artifact://validation/pr-509',
+        digest: `sha256:${'d'.repeat(64)}`,
+      },
+    ],
+  });
+  const artifacts = [
+    {
+      type: 'collaboration-request',
+      reference: 'artifact://collaboration/pr-509',
+      digest: `sha256:${request.requestDigest}`,
+    },
+    {
+      type: 'mutation-authorization',
+      reference: request.authorizationId,
+    },
+    {
+      type: 'validation-report',
+      reference: 'artifact://validation/pr-509',
+      digest: `sha256:${'d'.repeat(64)}`,
+    },
+  ];
+  const handoff = { artifacts };
+  assert.equal(validateCollaborationHandoffBinding(request, handoff), handoff);
+
+  const missingDigest = seal({
+    ...request,
+    evidence: [
+      ...request.evidence.slice(0, -1),
+      { type: 'validation-report', reference: 'artifact://validation/pr-509' },
+    ],
+  });
+  assert.throws(
+    () => validateCollaborationHandoffBinding(missingDigest, { artifacts }),
+    /validation-report requires a digest/
+  );
+
+  const forged = structuredClone({ artifacts });
+  forged.artifacts[2].digest = `sha256:${'c'.repeat(64)}`;
+  assert.throws(
+    () => validateCollaborationHandoffBinding(request, forged),
+    /validation-report artifact does not bind the ready-for-review evidence/
+  );
+});
+
 test('live preflight fails closed on a stale exact target without authorizing a write', () => {
   const request = metadataRequest();
   const decision = authorize(request, metadataLive({ updatedAt: '2026-08-27T01:00:01.000Z' }));
@@ -973,7 +1033,11 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
         desired: { isDraft: false },
         evidence: [
           ...base.evidence,
-          { type: 'validation-report', reference: 'artifact://validation/pr-509' },
+          {
+            type: 'validation-report',
+            reference: 'artifact://validation/pr-509',
+            digest: `sha256:${'0'.repeat(64)}`,
+          },
         ],
       }),
       before: {

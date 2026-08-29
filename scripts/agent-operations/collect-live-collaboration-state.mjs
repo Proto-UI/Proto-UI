@@ -1,6 +1,4 @@
-import { execFileSync } from 'node:child_process';
-
-import { parseRepositoryId } from './collect-live-review-input.mjs';
+import { assertNoTruncation, parseRepositoryId } from './collect-live-review-input.mjs';
 import {
   collaborationMarker,
   desiredCollaborationStateSatisfied,
@@ -27,9 +25,9 @@ query ProtoUiCollaborationThread($threadId: ID!) {
         state
         author { login }
         repository { nameWithOwner }
-      }
-      comments(last: 1) {
-        nodes { updatedAt }
+      comments(first: 100) {
+        nodes { databaseId updatedAt }
+        pageInfo { hasNextPage }
       }
     }
   }
@@ -307,16 +305,13 @@ export function collectLiveCollaborationState(request, options = {}) {
     };
   } else if (action === 'resolve-fixed-review-thread') {
     const payload = graphql(runner, THREAD_QUERY, { threadId: request.target.threadId });
-    const thread = payload?.data?.node;
-    const pull = thread?.pullRequest;
-    if (
-      thread?.id !== request.target.threadId ||
-      pull?.number !== request.target.number ||
-      repositoryIdFromNameWithOwner(pull?.repository?.nameWithOwner) !== request.repositoryId
-    ) {
-      throw new Error('live review thread does not belong to the exact pull request');
+    assertNoTruncation(thread.comments?.nodes, thread.comments?.pageInfo, 'thread comments');
+    const threadUpdates = (thread.comments?.nodes ?? [])
+      .map((comment) => comment.updatedAt)
+      .filter(Boolean);
+    if (threadUpdates.length === 0) {
+      throw new Error('live review thread carries no comment timestamps; re-collect before resolution');
     }
-    const latestComment = thread.comments?.nodes?.[0];
     current = {
       kind: 'review-thread',
       number: pull.number,
@@ -327,7 +322,7 @@ export function collectLiveCollaborationState(request, options = {}) {
       updatedAt: pull.updatedAt,
       headSha: pull.headRefOid,
       threadId: thread.id,
-      threadUpdatedAt: latestComment?.updatedAt ?? null,
+      threadUpdatedAt: threadUpdates.sort().at(-1),
       isResolved: thread.isResolved === true,
       isOutdated: thread.isOutdated === true,
     };

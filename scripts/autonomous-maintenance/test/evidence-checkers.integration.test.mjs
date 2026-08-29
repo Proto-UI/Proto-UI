@@ -281,6 +281,7 @@ function createFixture(t, { remediation = 'modify' } = {}) {
     head: provisionalHeadSha,
     exactPaths,
     reviewPath,
+    worktree: true,
   });
   review.changeInventory.reviewedContentDigest = contentDigest;
   review.independentReview.reviewedContentDigest = contentDigest;
@@ -456,7 +457,6 @@ test('run checker rejects baseline and a descendant that omits the remediation',
   assert.match(missingRemediation.stderr, /changed inventory does not match/);
   assert.match(missingRemediation.stderr, /src\/example\.js/);
 });
-
 test('run checker rejects a same-path mutation after independent review', (t) => {
   const fixture = createFixture(t);
   fixture.run.integration.exactHeadSha = fixture.postReviewMutationHead;

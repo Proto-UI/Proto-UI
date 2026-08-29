@@ -107,11 +107,19 @@ function validateEvidence(evidence, { required = false, purpose = 'collaboration
   }
 }
 
+
 function requireEvidenceType(evidence, type, purpose) {
   assert(
     evidence.some((artifact) => artifact.type === type),
     `${purpose} evidence of type ${type} is required`
   );
+}
+
+function requireEvidenceDigest(evidence, type, purpose) {
+  const artifact = evidence.find((entry) => entry.type === type);
+  assert(artifact, `${purpose} evidence of type ${type} is required`);
+  assert(DIGEST.test(artifact.digest ?? ''), `${purpose} evidence of type ${type} requires a digest`);
+  return artifact;
 }
 
 function validateCommonTarget(target, { head = true } = {}) {
@@ -164,7 +172,7 @@ function validateRequestAction(request) {
     exactKeys(desired, ['containsBaseSha'], 'request.desired');
     assert(expected.containsBaseSha === false, 'update-branch expected state must be behind');
     assert(desired.containsBaseSha === true, 'update-branch desired state must contain baseSha');
-  } else if (action === 'mark-exact-head-ready-for-review') {
+    } else if (action === 'mark-exact-head-ready-for-review') {
     validateCommonTarget(target);
     assert(target.kind === 'pull-request', 'ready-for-review target must be a pull request');
     exactKeys(expected, ['isDraft'], 'request.expected');
@@ -172,6 +180,7 @@ function validateRequestAction(request) {
     assert(expected.isDraft === true, 'ready-for-review expected state must be draft');
     assert(desired.isDraft === false, 'ready-for-review desired state must not be draft');
     requireEvidenceType(request.evidence, 'validation-report', 'ready-for-review validation');
+    requireEvidenceDigest(request.evidence, 'validation-report', 'ready-for-review validation');
   } else if (action === 'request-independent-review') {
     validateCommonTarget(target);
     assert(target.kind === 'pull-request', 'review-request target must be a pull request');
@@ -326,6 +335,27 @@ export function validateCollaborationHandoffBinding(
     authorizationArtifact.reference === request.authorizationId,
     'mutation-authorization artifact does not bind authorizationId'
   );
+  if (request.action === 'mark-exact-head-ready-for-review') {
+    const validationReport = request.evidence?.find(
+      (entry) => entry.type === 'validation-report'
+    );
+    assert(
+      validationReport && DIGEST.test(validationReport.digest ?? ''),
+      'ready-for-review requires validation-report evidence with a digest'
+    );
+    const validationArtifact = handoff.artifacts.find(
+      (artifact) => artifact.type === 'validation-report'
+    );
+    assert(
+      validationArtifact,
+      'collaboration handoff is missing the validation-report artifact'
+    );
+    assert(
+      validationArtifact.reference === validationReport.reference &&
+        validationArtifact.digest === validationReport.digest,
+      'validation-report artifact does not bind the ready-for-review evidence'
+    );
+  }
   if (handoff.executionMode === 'autonomous') {
     assert(
       selfAssessment?.kind === 'proto-ui.agent-capability-self-result' &&

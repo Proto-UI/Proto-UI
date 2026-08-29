@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import YAML from 'yaml';
 
 const digestSentinel = `sha256:${'0'.repeat(64)}`;
@@ -67,6 +69,27 @@ function updateField(hash, label, value) {
   hash.update(value, 'utf8');
 }
 
+function readWorktreePath(root, repositoryPath) {
+  try {
+    return readFileSync(resolve(root, repositoryPath), 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+function isUntrackedWorktreePath(root, repositoryPath) {
+  try {
+    const output = execFileSync(
+      'git',
+      ['ls-files', '--others', '--exclude-standard', '--', repositoryPath],
+      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+    ).trim();
+    return output.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function computeReviewedContentDigest({
   root,
   baseline,
@@ -74,28 +97,27 @@ export function computeReviewedContentDigest({
   exactPaths,
   reviewPath,
   headPacketContent,
+  worktree = false,
 }) {
   const normalizedPaths = [...exactPaths].sort();
   const reviewedPaths = normalizedPaths.filter((entry) => entry !== reviewPath);
-  const patch = execFileSync(
-    'git',
-    [
-      'diff',
-      '--binary',
-      '--full-index',
-      '--no-color',
-      '--no-ext-diff',
-      '--no-textconv',
-      '--no-renames',
-      baseline,
-      head,
-      '--',
-      ...reviewedPaths,
-    ],
-    { cwd: root, maxBuffer: 64 * 1024 * 1024 }
-  );
+  const diffArgs = [
+    'diff',
+    '--binary',
+    '--full-index',
+    '--no-color',
+    '--no-ext-diff',
+    '--no-textconv',
+    '--no-renames',
+    baseline,
+  ];
+  if (!worktree) diffArgs.push(head);
+  diffArgs.push('--', ...reviewedPaths);
+  const patch = execFileSync('git', diffArgs, { cwd: root, maxBuffer: 64 * 1024 * 1024 });
 
-  const headPacket = headPacketContent ?? readCommitPath(root, head, reviewPath);
+  const headPacket =
+    headPacketContent ??
+    (worktree ? readWorktreePath(root, reviewPath) : readCommitPath(root, head, reviewPath));
   if (headPacket === null) {
     throw new Error(`exact head does not contain review packet: ${reviewPath}`);
   }
@@ -105,6 +127,17 @@ export function computeReviewedContentDigest({
   updateField(hash, 'exact-paths', normalizedPaths.join('\0'));
   hash.update('\0reviewed-path-diff\0', 'utf8');
   hash.update(patch);
+  if (worktree) {
+    for (const reviewedPath of reviewedPaths) {
+      if (isUntrackedWorktreePath(root, reviewedPath)) {
+        updateField(
+          hash,
+          `worktree-untracked-content:${reviewedPath}`,
+          readWorktreePath(root, reviewedPath) ?? 'absent'
+        );
+      }
+    }
+  }
   updateField(hash, 'review-packet-path', reviewPath);
   updateField(
     hash,
@@ -116,7 +149,11 @@ export function computeReviewedContentDigest({
     'baseline-review-packet',
     baselinePacket === null ? 'absent' : canonicalizeReviewPacket(baselinePacket)
   );
-  updateField(hash, 'head-review-packet-mode', readCommitMode(root, head, reviewPath) ?? 'absent');
+  updateField(
+    hash,
+    'head-review-packet-mode',
+    readCommitMode(root, head, reviewPath) ?? (worktree ? 'worktree' : 'absent')
+  );
   updateField(hash, 'head-review-packet', canonicalizeReviewPacket(headPacket));
   return `sha256:${hash.digest('hex')}`;
 }

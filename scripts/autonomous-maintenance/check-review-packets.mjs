@@ -647,6 +647,7 @@ function validateReview(file) {
         exactPaths: metadata.changeInventory.exactPaths,
         reviewPath: path.relative(root, file).replaceAll('\\', '/'),
         headPacketContent: content,
+        worktree: true,
       });
       if (metadata.changeInventory.reviewedContentDigest !== expectedDigest) {
         fail(errors, file, 'reviewed-content digest does not match the completed packet content');
