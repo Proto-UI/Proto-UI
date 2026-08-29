@@ -21,6 +21,7 @@ const READY_ROUTES = [
   '/en/ui-libraries/base/textarea/',
   '/en/ui-libraries/brutalist/components/switch/',
   '/en/ui-libraries/brutalist/components/tabs/',
+  '/en/ui-libraries/brutalist/components/select/',
   '/en/ui-libraries/shadcn/checkbox/',
   '/en/ui-libraries/shadcn/dropdown-menu/',
   '/en/ui-libraries/shadcn/switch/',

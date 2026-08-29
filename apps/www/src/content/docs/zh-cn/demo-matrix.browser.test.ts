@@ -227,32 +227,21 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
         ).toBeLessThanOrEqual(1);
       }
 
+      const waitForAdapterBroadcast = () =>
+        page.evaluate(
+          () =>
+            new Promise<boolean>((resolve) => {
+              document.addEventListener('proto-adapter:change', () => resolve(true), {
+                once: true,
+              });
+            })
+        );
+      const vue2Broadcast = waitForAdapterBroadcast();
       await chooseGlobalAdapter(page, 'vue2');
-      await page.waitForFunction(
-        () =>
-          [
-            ...document.querySelectorAll<HTMLElement>(
-              '.demo-matrix__adapter[aria-label$="Vue 2"] .host'
-            ),
-          ].every(
-            (host) => host.childElementCount > 0 || host.textContent?.includes('[Preview Error]')
-          ),
-        undefined,
-        { timeout: 30_000 }
-      );
+      await vue2Broadcast;
+      const reactBroadcast = waitForAdapterBroadcast();
       await chooseGlobalAdapter(page, 'react');
-      await page.waitForFunction(
-        () =>
-          [
-            ...document.querySelectorAll<HTMLElement>(
-              '.demo-matrix__adapter[aria-label$="React"] .host'
-            ),
-          ].every(
-            (host) => host.childElementCount > 0 || host.textContent?.includes('[Preview Error]')
-          ),
-        undefined,
-        { timeout: 30_000 }
-      );
+      await reactBroadcast;
     } finally {
       await context.close();
     }

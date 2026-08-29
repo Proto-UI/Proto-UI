@@ -231,6 +231,9 @@ export async function selectRuntime(
       if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
       if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
       if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
+      if (selectedRuntime === 'vue2') {
+        return Boolean((firstRoot as HTMLElement & { __vue__?: unknown }).__vue__);
+      }
       // React owns neither a custom element nor a Vue app root. The host tag is
       // not always a div: a text-control Prototype roots on its native control.
       return !firstRoot.tagName.startsWith('WC-') && !host.hasAttribute('data-v-app');
