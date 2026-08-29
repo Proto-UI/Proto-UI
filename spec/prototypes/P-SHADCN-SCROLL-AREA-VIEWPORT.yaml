@@ -11,6 +11,10 @@ criteria:
   - id: P-SHADCN-SCROLL-AREA-VIEWPORT-ENTRY
     text:
       { en: Entry name is shadcn-scroll-area-viewport, zh-CN: 入口名为 shadcn-scroll-area-viewport }
+  - id: P-SHADCN-SCROLL-AREA-VIEWPORT-COMPOSED-PROJECTION
+    text:
+      en: The Viewport must opt into composed scroll projection so the authored Scrollbar and Thumb parts control both axes.
+      zh-CN: Viewport 必须选择 composed scroll projection，使已声明的 Scrollbar 与 Thumb part 控制两个轴。
 sources:
   - path: internal/records/2026-08-28-shadcn-tooltip-scroll-area-provenance.zh-CN.md
   - path: packages/prototypes/shadcn/src/scroll-area/viewport.proto.ts

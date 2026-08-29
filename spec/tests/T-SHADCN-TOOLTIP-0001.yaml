@@ -38,13 +38,13 @@ cases:
       - P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF
     expectation: p-shadcn-tooltip-inherited-warm-handoff
   - id: T-SHADCN-TOOLTIP-0001-CASE-BROWSER
-    title: Rendered tooltip visibility, portal ownership, contrast, and runtime behavior across WC, React, Vue, and Vue 2
+    title: Rendered focus-linked tooltip visibility and Escape dismissal across WC, React, Vue, and Vue 2
     covers:
-      - P-SHADCN-TOOLTIP-CONTENT-VISUAL-GRAMMAR
-      - P-SHADCN-TOOLTIP-TRIGGER-STATE-DRIVEN-VISUALS
-      - P-BASE-TOOLTIP-DISABLED
-      - P-BASE-TOOLTIP-GROUP-WARMTH
-    expectation: rendered-tooltip-cross-runtime-visibility-contrast-and-handoff
+      - P-BASE-TOOLTIP-TRIGGER-DESCRIPTION
+      - P-BASE-TOOLTIP-CONTENT-SEMANTICS
+      - P-BASE-TOOLTIP-CONTENT-OVERLAY
+      - P-BASE-TOOLTIP-CONTENT-ESCAPE
+    expectation: rendered-tooltip-cross-runtime-focus-description-and-dismissal
 implementations:
   - id: prototypes-shadcn-tooltip-contract
     kind: module-test
@@ -74,8 +74,9 @@ implementations:
     consumesCases:
       - T-SHADCN-TOOLTIP-0001-CASE-BROWSER
     exercises:
+      - P-BASE-TOOLTIP-TRIGGER
+      - P-BASE-TOOLTIP-CONTENT
       - P-SHADCN-TOOLTIP
-      - P-SHADCN-TOOLTIP-GROUP
       - P-SHADCN-TOOLTIP-TRIGGER
       - P-SHADCN-TOOLTIP-CONTENT
 verifies:
