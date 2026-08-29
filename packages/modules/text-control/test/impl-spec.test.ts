@@ -167,17 +167,13 @@ describe('module-text-control', () => {
     });
   });
 
-  it('retains the declaration and rejects mode-incompatible patches', () => {
+  it('retains the declaration and accepts common hints for both line modes', () => {
     const multiline = createHarness(true, 'multiline');
     const multilineControl = multiline.module.facade.declare();
     multiline.module.hooks.onMountPhase?.('mounted', 1);
     multiline.sys.phase = 'callback';
-    expect(() => multilineControl.sync({ inputMode: 'search' })).toThrow(
-      /not compatible with multiline/
-    );
-    expect(() => multilineControl.sync({ enterKeyHint: 'search' })).toThrow(
-      /not compatible with multiline/
-    );
+    expect(() => multilineControl.sync({ inputMode: 'search' })).not.toThrow();
+    expect(() => multilineControl.sync({ enterKeyHint: 'search' })).not.toThrow();
     expect(() => multilineControl.sync({ rows: 4, wrap: 'hard' })).not.toThrow();
 
     const single = createHarness(true, 'single');

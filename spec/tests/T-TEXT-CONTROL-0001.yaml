@@ -11,10 +11,10 @@ cases:
       - C-TEXT-CONTROL-0001-A
     expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
-    title: Portable patches project and clear single-line properties (inputMode and enterKeyHint) on an HTMLInputElement
+    title: Portable patches project common inputMode and enterKeyHint hints on input and textarea, plus the line-mode-specific fields
     covers:
       - C-TEXT-CONTROL-0001-B
-    expectation: portable-single-line-properties-project-and-clear-on-web-input
+    expectation: common-hints-project-on-single-line-and-multiline-web-controls
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-TARGET-COMPATIBILITY
     title: The Web bridge accepts only text-compatible HTMLInputElement targets for a single-line plain-text declaration
     covers:
@@ -103,7 +103,7 @@ implementations:
     exercises:
       - HC-TEXT-CONTROL-0001
     notes:
-      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', live inputMode/enterKeyHint projection and clearing, realm-independent InputEvent/CompositionEvent normalization across adoption and documents without a Window, and owning-realm editing-session preservation through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
+      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', common inputMode/enterKeyHint projection and clearing on both input and textarea, realm-independent InputEvent/CompositionEvent normalization across adoption and documents without a Window, and owning-realm editing-session preservation through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
   - id: module-text-control-value-reconciliation
     kind: module-test
     status: passing
@@ -200,7 +200,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Added single-line input projection and clearing, text-compatible target validation, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
+      Added single-line input projection and clearing, common inputMode/enterKeyHint projection to both Web controls, text-compatible target validation, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
 
 
 tags:

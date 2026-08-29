@@ -92,23 +92,13 @@ export class TextControlModuleImpl extends ModuleBase {
 
   private sync(next: TextControlPatch): void {
     this.sys.ensureCallback('textControl.sync');
-    // Reject mode-incompatible fields at runtime
-    if (this.declaration) {
-      if (
-        this.declaration.lineMode === 'single' &&
-        (typeof next.rows === 'number' || next.wrap !== undefined)
-      ) {
-        throw new Error('[TextControl] rows/wrap are not compatible with single-line mode');
-      }
-      if (
-        this.declaration.lineMode === 'multiline' &&
-        (typeof next.inputMode === 'string' || typeof next.enterKeyHint === 'string')
-      ) {
-        throw new Error(
-          '[TextControl] inputMode/enterKeyHint are not compatible with multiline mode'
-        );
-      }
+    if (
+      this.declaration?.lineMode === 'single' &&
+      (typeof next.rows === 'number' || next.wrap !== undefined)
+    ) {
+      throw new Error('[TextControl] rows/wrap are not compatible with single-line mode');
     }
+
     if (!this.initialized) {
       this.valueMode = next.valueMode ?? 'uncontrolled';
       this.value =

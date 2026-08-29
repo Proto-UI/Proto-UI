@@ -597,6 +597,21 @@ describe('module-text-control single-line web bridge', () => {
     textareaLease.dispose();
     lease.dispose();
   });
+  it('projects common input hints to a textarea', () => {
+    const textarea = document.createElement('textarea');
+    const lease = createWebTextControlHost(() => textarea).attach({
+      patch: {
+        valueMode: 'uncontrolled',
+        inputMode: 'email',
+        enterKeyHint: 'next',
+      },
+      onEvent() {},
+    });
+
+    expect(textarea.inputMode).toBe('email');
+    expect(textarea.enterKeyHint).toBe('next');
+    lease.dispose();
+  });
 
   it('does not apply rows or wrap to an input element', () => {
     const input = document.createElement('input');

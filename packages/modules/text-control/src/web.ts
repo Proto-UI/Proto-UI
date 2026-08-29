@@ -165,7 +165,7 @@ function applyPatch(
   if (patch.wrap === 'soft' || patch.wrap === 'hard') {
     if (isWebTextArea(target)) target.wrap = patch.wrap;
   }
-  if (isWebInput(target)) {
+  if (isWebInput(target) || isWebTextArea(target)) {
     target.inputMode = patch.inputMode ?? '';
   }
   if (isWebInput(target) || isWebTextArea(target)) {
