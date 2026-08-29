@@ -97,4 +97,22 @@ describe('Home demo runtime selector', () => {
     expect(demoLoader.renderDemo).toHaveBeenCalledTimes(2);
     expect(runtimeSelect.dataset.disabled).toBe('false');
   });
+
+  it('does not remount when the active demo or runtime is reselected', async () => {
+    const root = createHomeRoot();
+    initHomeDemoPreviewer(root);
+    await vi.waitFor(() => expect(demoLoader.renderDemo).toHaveBeenCalledTimes(1));
+
+    const runtimeSelect = root.querySelector<HTMLElement>('[data-home-demo-runtime]')!;
+    runtimeSelect.dispatchEvent(
+      new CustomEvent('valueChange', { detail: { value: 'wc' }, bubbles: true })
+    );
+    const demoSelect = root.querySelector<HTMLElement>('[data-home-demo-picker]')!;
+    demoSelect.dispatchEvent(
+      new CustomEvent('valueChange', { detail: { value: 'demo-one' }, bubbles: true })
+    );
+
+    await Promise.resolve();
+    expect(demoLoader.renderDemo).toHaveBeenCalledTimes(1);
+  });
 });
