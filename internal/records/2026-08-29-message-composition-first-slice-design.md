@@ -35,20 +35,20 @@ Root owns the layout track and the family context; each part renders its App-aut
 
 3. **Package-local vs new reusable composition-entity path.** First slice keeps part identity/anatomy package-local evidence. No new reusable composition-entity path, no new schema type, no catalog admission. **This is isolated as the one `needs semantic decision`:** if a second composition (Code Block, Composer) later cannot express itself package-locally and needs shared anatomy identity, a separately authorized reusable composition-entity path is the trigger; that decision is out of scope for this slice.
 
-4. **App content projection without host instance values.** Content is authored children (`r.slot()`, text, or app-supplied Proto parts) rendered natively by WC/React/Vue. Protocol Props/State/Context/Expose never carry DOM nodes, host instances, or framework keys. Streaming updates arrive as App-driven content re-render, not as composition-owned state.
+4. **App content projection without host instance values.** Content is authored children (`r.slot()`, text, or app-supplied Proto parts) rendered natively by all four official web adapters (WC/React/Vue/Vue 2). Protocol Props/State/Context/Expose never carry DOM nodes, host instances, or framework keys. Streaming updates arrive as App-driven content re-render, not as composition-owned state.
 
-5. **alignment / tone: props vs recipe vs both.** Both are plain typed composition props (`alignment` enum, `tone` enum) that resolve a package-local style recipe key. They are presentation inputs only — they never declare a message role, name, or state owner. `tone` is a recipe selector (`default` | `user` | `assistant` | `system`), not an Agent-domain fact; the App maps its own kind to the key it chooses.
+5. **alignment / tone: props vs recipe vs both.** These are plain typed composition props that resolve a package-local style recipe key. The complete bounded prop schema for the first slice is: `alignment: 'start' | 'end' | 'stretch'` (anchor the block to the leading or trailing edge, or full available width), `tone: 'default' | 'user' | 'assistant' | 'system'` (style-recipe selector, not an Agent-domain fact; the App maps its own kind to its chosen key), and `spacing: 'default' | 'compact'` (internal density; this replaces the earlier untyped "compact spacing" wording and is the only spacing key). These three keys are the entire composition prop surface; no other key is admitted without a separately governed addition. They declare no message role, name, or state owner.
 
-6. **Minimum a11y absence/positive evidence.** Root remains role-neutral (it must not invent `role=message`, `role=article`, `aria-live`, or an accessible name). Absence tests assert no message role/name/state owner is projected; positive tests assert App-authored text and links remain natively reachable. App-owned accessible naming is supplied by the App, never inferred by the composition.
+6. **Minimum a11y absence/positive evidence.** Root remains role-neutral (it must not invent `role=message`, `role=article`, `aria-live`, or an accessible name). App-owned role and accessible name are carried by an App-authored semantic wrapper — a native element or an App-owned Proto part — placed **outside** the composition and projected natively by each adapter; the composition must not strip, duplicate, or invent that wrapper. Positive evidence asserts the same App-authored wrapper reaches the accessibility tree with its role/name intact across all four adapters; absence evidence asserts the composition projects no message role/name/aria-live of its own.
 
 ## Acceptance mapping (from #516)
 
 - Anatomy + cardinality: resolved above; the reusable-path question is isolated as `needs semantic decision` (Q3).
-- Props carry only bounded layout/visual inputs (alignment/tone/compact spacing).
+- Props carry only the bounded layout/visual inputs enumerated in Q5 (`alignment`/`tone`/`spacing`).
 - App ownership of data/sender/status/streaming/actions/a11y stays explicit.
 - Package/private/release/CLI negatives match #500/#501.
 - No #341 wholesale copy; no `any`, placeholder criteria, TODO, or no-op entry.
-- WC/React/Vue evidence uses one source entry with real App-authored content (user text, assistant + Code Block, streaming update without transcript remount, failed+retry action, optional system presentation).
+- Four-adapter evidence (WC/React/Vue/Vue 2) uses one source entry with real App-authored content: user text, assistant plain-text, streaming update without transcript remount, failed + App-owned retry action, optional system presentation. A rich assistant message containing Code Block content is #517 cross-entry integration evidence, out of scope here, so the Message slice stays acceptable and verifiable without the separately gated Code Block entry.
 
 ## Non-goals (unchanged from #516)
 
