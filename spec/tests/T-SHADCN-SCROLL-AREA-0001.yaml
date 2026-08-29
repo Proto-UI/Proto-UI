@@ -29,6 +29,15 @@ cases:
       - P-BASE-SCROLL-AREA-THUMB-PASSIVE-PROJECTION
       - P-BASE-SCROLL-AREA-THUMB-MOVE-HIT-SUBREGION
     expectation: p-shadcn-scroll-area-inherited-composed-lifecycle
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-BROWSER
+    title: Rendered geometry, two-axis overflow, and runtime projection across WC, React, Vue, and Vue 2
+    covers:
+      - P-SHADCN-SCROLL-AREA-VISUAL-GRAMMAR
+      - P-BASE-SCROLL-AREA-PROJECTION-CHOICE
+      - P-BASE-SCROLL-AREA-VIEWPORT-COMPOSED-BINDING
+      - P-BASE-SCROLL-AREA-SCROLLBAR-HOST-CONTROL
+      - P-BASE-SCROLL-AREA-THUMB-PASSIVE-PROJECTION
+    expectation: rendered-scroll-area-cross-runtime-geometry-and-projection
 implementations:
   - id: prototypes-shadcn-scroll-area-contract
     kind: module-test
@@ -44,6 +53,18 @@ implementations:
       - P-BASE-SCROLL-AREA-VIEWPORT
       - P-BASE-SCROLL-AREA-SCROLLBAR
       - P-BASE-SCROLL-AREA-THUMB
+      - P-SHADCN-SCROLL-AREA
+      - P-SHADCN-SCROLL-AREA-VIEWPORT
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR
+      - P-SHADCN-SCROLL-AREA-THUMB
+  - id: pr534-scroll-area-browser-acceptance
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-pr534-coverage.browser.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-SCROLL-AREA-0001-CASE-BROWSER
+    exercises:
       - P-SHADCN-SCROLL-AREA
       - P-SHADCN-SCROLL-AREA-VIEWPORT
       - P-SHADCN-SCROLL-AREA-SCROLLBAR

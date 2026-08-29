@@ -31,6 +31,13 @@ cases:
     covers:
       - P-BRUTALIST-CHECKBOX-INTERACTION
     expectation: p-brutalist-checkbox-interaction
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-BROWSER
+    title: Rendered checkbox glyph, contrast, geometry, and state transitions across WC, React, Vue, and Vue 2
+    covers:
+      - P-BRUTALIST-CHECKBOX-VISUAL-GRAMMAR
+      - P-BRUTALIST-CHECKBOX-INDICATOR-VISUAL-GRAMMAR
+      - P-BRUTALIST-CHECKBOX-INTERACTION
+    expectation: rendered-brutalist-checkbox-cross-runtime-state-contrast-and-geometry
 
 implementations:
   - id: prototypes-brutalist-checkbox-contract
@@ -46,6 +53,16 @@ implementations:
     exercises:
       - P-BASE-CHECKBOX
       - P-BASE-CHECKBOX-INDICATOR
+      - P-BRUTALIST-CHECKBOX
+      - P-BRUTALIST-CHECKBOX-INDICATOR
+  - id: pr534-checkbox-browser-acceptance
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-pr534-coverage.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-CHECKBOX-0001-CASE-BROWSER
+    exercises:
       - P-BRUTALIST-CHECKBOX
       - P-BRUTALIST-CHECKBOX-INDICATOR
 
