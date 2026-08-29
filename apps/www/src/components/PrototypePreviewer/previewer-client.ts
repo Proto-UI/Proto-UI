@@ -252,8 +252,6 @@ export function initPreviewer(options: PreviewerOptions) {
       if (myVersion === version && !destroyed) {
         requestedRuntime = null;
         setPreviewerSelectDisabled(false);
-      } else if (requestedRuntime === runtime && myVersion !== version) {
-        requestedRuntime = null;
       }
     }
   }
