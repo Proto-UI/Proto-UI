@@ -307,7 +307,7 @@ export function initPreviewer(options: PreviewerOptions) {
         return;
       }
       Object.assign(demoProps, nextProps || {});
-      if (current) switchTo(current.id);
+      if (current) switchTo(current.id, { force: true });
     },
     destroy: async () => {
       destroyed = true;

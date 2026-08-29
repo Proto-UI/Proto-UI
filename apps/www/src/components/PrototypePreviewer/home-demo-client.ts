@@ -113,6 +113,9 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   let version = 0;
   let destroyed = false;
 
+  let lastRuntimeValue = selectValue(runtimeSelectEl);
+  let lastDemoValue = selectValue(demoSelectEl);
+
   async function renderCurrent(
     runtime: RuntimeId,
     demoId: string,
@@ -191,7 +194,6 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
       }
     }
   }
-
   const renderFromInputs = (
     event: Event,
     changed: SiteSelectRoot,
@@ -199,6 +201,10 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   ) => {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(changed);
+    const previousValue = changed === runtimeSelectEl ? lastRuntimeValue : lastDemoValue;
+    if (previousValue === value) return;
+    if (changed === runtimeSelectEl) lastRuntimeValue = value;
+    else lastDemoValue = value;
     setSelectValue(changed, value);
     renderCurrent(
       (changed === runtimeSelectEl ? value : selectValue(runtimeSelectEl)) as RuntimeId,
@@ -208,11 +214,13 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   };
 
   const onDemoChange = (event: Event) => renderFromInputs(event, demoSelectEl);
+
   const onRuntimeChange = (event: Event) => {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(runtimeSelectEl);
     if (!runtimeOptions.some((option) => option.id === value)) return;
     const focusTarget = runtimeSelectEl.querySelector<HTMLElement>('wc-shadcn-select-trigger');
+    if (lastRuntimeValue === value) return;
     try {
       localStorage.setItem(PREFERRED_ADAPTER_KEY, value);
     } catch {
@@ -231,7 +239,8 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     if (typeof adapter !== 'string' || !runtimeOptions.some((option) => option.id === adapter))
       return;
     if (detail?.source === runtimeSelectEl) return;
-    if (selectValue(runtimeSelectEl) === adapter) return;
+    if (lastRuntimeValue === adapter) return;
+    lastRuntimeValue = adapter;
     setSelectValue(runtimeSelectEl, adapter);
     void renderCurrent(
       adapter as RuntimeId,

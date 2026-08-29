@@ -11,9 +11,11 @@ function setExpanded(shell: HTMLElement, expanded: boolean): void {
   shell.dataset.codeExpanded = String(expanded);
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
   if (panel) panel.dataset.codeExpanded = String(expanded);
-  shell
-    .querySelector<HTMLElement>('[data-code-toggle]')
-    ?.setAttribute('aria-expanded', String(expanded));
+  const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]');
+  toggle?.setAttribute('aria-expanded', String(expanded));
+  if (toggle) toggle.hidden = expanded;
+  const copyButton = shell.querySelector<HTMLElement>('[data-copy]');
+  if (copyButton) copyButton.hidden = !expanded;
 }
 
 export function refreshCodePanel(shell: HTMLElement, options: RefreshCodePanelOptions = {}): void {
