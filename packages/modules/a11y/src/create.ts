@@ -202,8 +202,15 @@ class A11yModuleImpl extends ModuleBase {
     }
 
     if (isState(this.ir.level)) {
-      const off = this.statePort.watch(this.ir.level as any, () => {
-        resolveA11yLevel(this.ir.level!);
+      const levelHandle = this.ir.level as OwnedStateHandle<number>;
+      const off = this.statePort.watch(levelHandle, (_ctx, event) => {
+        try {
+          resolveA11yLevel(event.next);
+        } catch (error) {
+          this.statePort.setDefault(levelHandle, event.prev);
+          this.applyProjection();
+          throw error;
+        }
         this.applyProjection();
       });
       this.stateWatchOffs.push(off);
@@ -239,12 +246,15 @@ class A11yModuleImpl extends ModuleBase {
         )
       : undefined;
 
+    const role = isState(this.ir.role) ? (this.ir.role.get() as A11yRole) : this.ir.role;
     const level =
-      typeof this.ir.level === 'undefined' ? undefined : resolveA11yLevel(this.ir.level);
+      role === 'heading' && typeof this.ir.level !== 'undefined'
+        ? resolveA11yLevel(this.ir.level)
+        : undefined;
 
     return {
       id: isState(this.ir.id) ? (this.ir.id.get() as string | null | undefined) : this.ir.id,
-      role: isState(this.ir.role) ? (this.ir.role.get() as A11yRole) : this.ir.role,
+      role,
       name: resolveTextAlternative(this.ir.name),
       description: resolveTextAlternative(this.ir.description),
       states,

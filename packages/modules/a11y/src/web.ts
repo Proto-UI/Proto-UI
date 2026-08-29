@@ -57,7 +57,6 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
   if (snapshot.description) el.removeAttribute('aria-description');
   if (typeof snapshot.level !== 'undefined') el.removeAttribute('aria-level');
 
-
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {
     if (Object.prototype.hasOwnProperty.call(snapshot.states, key)) el.removeAttribute(attr);
   }
@@ -119,6 +118,8 @@ export function applyWebA11ySnapshot(
 
   if (typeof snapshot.level !== 'undefined') {
     setOptionalAttr(el, 'aria-level', String(snapshot.level));
+  } else if (typeof previousSnapshot?.level !== 'undefined') {
+    el.removeAttribute('aria-level');
   }
 
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {

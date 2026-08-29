@@ -50,6 +50,7 @@ describe('runtime contract: a11y (v0)', () => {
     const P = definePrototype({
       name: `x-a11y-heading-level-${level}`,
       setup(def) {
+        def.a11y.role('heading');
         def.a11y.level(level);
       },
     });
@@ -65,6 +66,7 @@ describe('runtime contract: a11y (v0)', () => {
       const P = definePrototype({
         name: 'x-a11y-invalid-static-heading-level',
         setup(def) {
+          def.a11y.role('heading');
           def.a11y.level(level);
         },
       });
@@ -83,6 +85,7 @@ describe('runtime contract: a11y (v0)', () => {
         name: 'x-a11y-invalid-initial-state-heading-level',
         setup(def) {
           const level = def.state.numberDiscrete('heading.level', initialLevel);
+          def.a11y.role('heading');
           def.a11y.level(level);
         },
       });
@@ -102,6 +105,7 @@ describe('runtime contract: a11y (v0)', () => {
         name: 'x-a11y-state-heading-level-update',
         setup(def) {
           level = def.state.numberDiscrete('heading.level', 2);
+          def.a11y.role('heading');
           def.a11y.level(level);
         },
       });
@@ -158,6 +162,7 @@ describe('runtime contract: a11y (v0)', () => {
       setup(def) {
         const level = asHeadingLevel().getState?.('level');
         if (!level) throw new Error('missing borrowed heading level');
+        def.a11y.role('heading');
         def.a11y.level(level);
       },
     });
@@ -172,6 +177,7 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-observed-heading-level',
       setup(def) {
         const scroll = asScrollSurface();
+        def.a11y.role('heading');
         def.a11y.level(scroll.horizontal.visibleRatio);
       },
     });
@@ -187,6 +193,7 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-capless-heading-level',
       setup(def) {
         level = def.state.numberDiscrete('heading.level', 2);
+        def.a11y.role('heading');
         def.a11y.level(level);
       },
     });
@@ -205,6 +212,7 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-capless-invalid-heading-level-before-watch',
       setup(def) {
         const level = def.state.numberDiscrete('heading.level', 2);
+        def.a11y.role('heading');
         def.a11y.level(level);
         level.setDefault(0);
       },

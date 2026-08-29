@@ -3,7 +3,7 @@ type: test
 title: A11y semantic object contract tests
 status: draft
 since: 0.1.0
-summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, and Web adapter projection.
+summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, Web adapter projection, portable heading-level validation, role coherence, target rebinding, and cross-adapter lifecycle behavior.
 cases:
   - id: T-A11Y-0001-CASE-DYNAMIC-ROLE
     title: A semantic role may follow a state-backed fact
@@ -69,12 +69,12 @@ cases:
       - HC-A11Y-0001-B
     expectation: web-a11y-live-atomic-busy-projection
   - id: T-A11Y-0001-CASE-HEADING-LEVEL
-    title: Portable heading levels accept 1-6, reject invalid static and state-backed values, and project to aria-level on Web
+    title: Portable heading levels accept 1-6, reject invalid values, stay coherent with heading role, and project through Web adapters
     covers:
       - C-A11Y-0001-LEVEL
       - HC-A11Y-0001-A
       - HC-A11Y-0001-B
-    expectation: portable-heading-level-validation-and-web-projection
+    expectation: portable-heading-level-validation-role-coherence-and-web-projection
 implementations:
   - id: runtime-a11y-contract
     kind: runtime-test
@@ -104,6 +104,33 @@ implementations:
       - T-A11Y-0001-CASE-OPTIONAL-STATE
       - T-A11Y-0001-CASE-LIVE-ATOMIC-BUSY
       - T-A11Y-0001-CASE-HEADING-LEVEL
+  - id: a11y-web-projector-heading-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/a11y/test/web.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
+  - id: react-a11y-heading-level-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/a11y-heading-level.integration.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
+  - id: vue-a11y-heading-level-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/a11y-heading-level.integration.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
 verifies:
   contracts:
     - id: C-A11Y-0001
