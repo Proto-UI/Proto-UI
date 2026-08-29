@@ -173,4 +173,68 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await context.close();
     }
   }, 180_000);
+
+  it('moves focus into the Base Dialog content in every runtime', async () => {
+    const { context, page } = await openRoute(browser, baseUrl, MATRIX_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    const runtimeLabels: Record<string, string> = {
+      wc: 'Web Components',
+      react: 'React',
+      vue: 'Vue',
+      vue2: 'Vue 2',
+    };
+
+    try {
+      await waitForMatrix(page);
+      const dialogRow = page.locator('#demo-base-dialog');
+
+      for (const runtime of RUNTIMES) {
+        const region = dialogRow.locator(
+          `.demo-matrix__adapter[aria-label="demo-base-dialog ${runtimeLabels[runtime]}"]`
+        );
+        const trigger = region.locator('[aria-haspopup="dialog"]');
+        await trigger.scrollIntoViewIfNeeded();
+        const contentId = await trigger.getAttribute('aria-controls');
+        expect(contentId, `${runtime} dialog controls`).toBeTruthy();
+        await trigger.click();
+
+        await page.waitForFunction(
+          (id) => {
+            const content = id ? document.getElementById(id) : null;
+            return Boolean(
+              content &&
+              getComputedStyle(content).display !== 'none' &&
+              document.activeElement &&
+              content.contains(document.activeElement)
+            );
+          },
+          contentId,
+          { timeout: 10_000 }
+        );
+
+        const cancel = page
+          .locator(`[id="${contentId}"] [data-pui-a11y-actions="activate"]`)
+          .first();
+        await cancel.click();
+        await page.waitForFunction(
+          (id) => {
+            const content = id ? document.getElementById(id) : null;
+            return !content || getComputedStyle(content).display === 'none';
+          },
+          contentId,
+          { timeout: 10_000 }
+        );
+        await expect
+          .poll(() => trigger.evaluate((element) => document.activeElement === element), {
+            timeout: 10_000,
+          })
+          .toBe(true);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 180_000);
 });

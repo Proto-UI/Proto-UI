@@ -419,8 +419,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               scheduleAfterWebLayout(
                 this,
                 () => {
-                  this[NOTIFY_FOCUS_TARGET_READY]();
                   this._focusTargetRetryScheduled = false;
+                  this[NOTIFY_FOCUS_TARGET_READY]();
                 },
                 schedule
               );

@@ -645,8 +645,8 @@ function initSession<Props extends PropsBaseType>(
       scheduleAfterWebLayout(
         getRootElement(vm),
         () => {
-          notifyFocusTargetReady(vm);
           state.focusTargetRetryScheduled = false;
+          notifyFocusTargetReady(vm);
         },
         targetOptions.schedule
       );

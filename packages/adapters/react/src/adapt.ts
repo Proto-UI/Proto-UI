@@ -441,8 +441,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             scheduleAfterWebLayout(
               rootRef.current,
               () => {
-                notifyFocusTargetReady();
                 focusTargetRetryScheduledRef.current = false;
+                notifyFocusTargetReady();
               },
               schedule
             );

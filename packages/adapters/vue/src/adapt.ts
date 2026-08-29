@@ -419,8 +419,8 @@ export function createVueAdapter(runtime: VueRuntime) {
               scheduleAfterWebLayout(
                 rootRef.value,
                 () => {
-                  notifyFocusTargetReady();
                   focusTargetRetryScheduled = false;
+                  notifyFocusTargetReady();
                 },
                 schedule
               );
