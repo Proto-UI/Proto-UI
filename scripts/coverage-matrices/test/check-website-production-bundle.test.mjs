@@ -192,6 +192,22 @@ test('rejects Web Component Adapter evidence inside the native/static shell clos
   );
 });
 
+test('allows the reviewed site Shadcn Web Component adapter in an approved shell closure', () => {
+  const graph = graphFixture();
+  graph.chunks[0].moduleIds.push('apps/www/src/components/site-shadcn-controls.ts');
+  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js');
+  graph.chunks.push(
+    chunk('_astro/site-shadcn-controls.js', {
+      moduleIds: [
+        'apps/www/src/components/site-shadcn-controls.ts',
+        'packages/adapters/web-component/src/adapt.ts?used',
+      ],
+    })
+  );
+
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+});
+
 test('treats an unproven null-facade entry as a shell root', () => {
   const graph = graphFixture();
   graph.chunks.push(

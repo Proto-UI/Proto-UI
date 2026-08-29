@@ -22,6 +22,7 @@ const REVIEWED_NULL_FACADE_RUNTIME_MODULES = new Set([
 const REQUIRED_ADAPTER_FAMILIES = Object.freeze(['react', 'vue', 'vue2']);
 const REVIEWED_WEB_COMPONENT_HOST_MODULE =
   'apps/www/src/components/PrototypePreviewer/wc-registry.ts';
+const REVIEWED_WEBSITE_CONTROL_MODULE = 'apps/www/src/components/site-shadcn-controls.ts';
 
 export class WebsiteProductionBundleValidationError extends Error {
   constructor(issues) {
@@ -74,6 +75,16 @@ function isProtoUiAdapterModule(moduleId) {
   return (
     /(?:^|\/)packages\/adapters\/[a-z0-9-]+(?:\/|$)/u.test(normalized) ||
     /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(
+      normalized
+    )
+  );
+}
+function isReviewedWebsiteControlAdapterModule(moduleId) {
+  const normalized = moduleIdWithoutQuery(moduleId);
+  return (
+    isWebComponentAdapterModule(moduleId) ||
+    /(?:^|\/)packages\/adapters\/base(?:\/|$)/u.test(normalized) ||
+    /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-base(?:\/|$)/u.test(
       normalized
     )
   );
@@ -273,13 +284,21 @@ export function collectWebsiteProductionBundleIssues({
   }
 
   for (const shellRoot of shellRoots) {
+    const shellClosure = closure(chunksByFileName, shellRoot.fileName, ['imports']);
+    const reviewedSiteControlShell = [...shellClosure].some((fileName) =>
+      (chunksByFileName.get(fileName)?.moduleIds ?? []).some(
+        (moduleId) => moduleIdWithoutQuery(moduleId) === REVIEWED_WEBSITE_CONTROL_MODULE
+      )
+    );
     const leakedModules = new Set();
-    for (const fileName of closure(chunksByFileName, shellRoot.fileName, ['imports'])) {
+    for (const fileName of shellClosure) {
       const chunk = chunksByFileName.get(fileName);
       for (const moduleId of chunk?.moduleIds ?? []) {
-        if (forbiddenFrameworkFamily(moduleId) !== null || isProtoUiAdapterModule(moduleId)) {
-          leakedModules.add(moduleId);
-        }
+        const isFrameworkModule = forbiddenFrameworkFamily(moduleId) !== null;
+        const isUnapprovedAdapter =
+          isProtoUiAdapterModule(moduleId) &&
+          !(reviewedSiteControlShell && isReviewedWebsiteControlAdapterModule(moduleId));
+        if (isFrameworkModule || isUnapprovedAdapter) leakedModules.add(moduleId);
       }
     }
     if (leakedModules.size > 0) {
