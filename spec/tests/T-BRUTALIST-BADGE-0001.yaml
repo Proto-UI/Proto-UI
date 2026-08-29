@@ -20,6 +20,13 @@ cases:
     covers:
       - P-BRUTALIST-BADGE-VISUAL-GRAMMAR
     expectation: p-brutalist-badge-visual-contract
+  - id: T-BRUTALIST-BADGE-0001-CASE-BROWSER
+    title: Rendered tones preserve passive square hard-shadow grammar across official runtimes
+    covers:
+      - P-BRUTALIST-BADGE-PASSIVE-BOUNDARY
+      - P-BRUTALIST-BADGE-TONES
+      - P-BRUTALIST-BADGE-VISUAL-GRAMMAR
+    expectation: rendered-brutalist-badge-cross-runtime-visual-grammar
 implementations:
   - id: prototypes-brutalist-badge-contract
     kind: module-test
@@ -30,6 +37,15 @@ implementations:
       - T-BRUTALIST-BADGE-0001-CASE-1
       - T-BRUTALIST-BADGE-0001-CASE-2
       - T-BRUTALIST-BADGE-0001-CASE-3
+    exercises:
+      - P-BRUTALIST-BADGE
+  - id: website-brutalist-remaining-browser-badge
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-BADGE-0001-CASE-BROWSER
     exercises:
       - P-BRUTALIST-BADGE
 verifies:

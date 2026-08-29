@@ -17,6 +17,12 @@ cases:
       - P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
       - P-BRUTALIST-SKELETON-CONSUMER-SIZE
     expectation: brutalist-skeleton-hidden-static-surface-with-consumer-owned-size
+  - id: T-BRUTALIST-SKELETON-0001-CASE-BROWSER
+    title: Rendered Skeleton stays hidden, contentless, square, and hard-shadowed across official runtimes
+    covers:
+      - P-BRUTALIST-SKELETON-VISUAL-ONLY
+      - P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
+    expectation: rendered-brutalist-skeleton-cross-runtime-visual-grammar
 implementations:
   - id: prototypes-brutalist-skeleton-contract
     kind: module-test
@@ -26,6 +32,15 @@ implementations:
     consumesCases:
       - T-BRUTALIST-SKELETON-0001-CASE-DIRECT-OWNERSHIP
       - T-BRUTALIST-SKELETON-0001-CASE-VISUAL-ONLY
+    exercises:
+      - P-BRUTALIST-SKELETON
+  - id: website-brutalist-remaining-browser-skeleton
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SKELETON-0001-CASE-BROWSER
     exercises:
       - P-BRUTALIST-SKELETON
 verifies:
