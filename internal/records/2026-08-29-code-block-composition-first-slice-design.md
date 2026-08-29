@@ -20,7 +20,7 @@ CodeBlock.Root
 └─ Content       (1)
 ```
 
-Root/Header/Content are ordinary anatomy parts (`def.anatomy.claim`), each rendering App-authored content through its own `r.slot()`. Header is one part with one anonymous slot; `Label/Metadata` and `Actions` are not separate named slots, and there is no second insertion point on Header. Content is the single required child part under Root.
+Root/Header/Content are ordinary anatomy parts (`def.anatomy.claim`), each rendering App-authored content through its own `r.slot()`. Header is one part with one anonymous slot; `Label/Metadata` and `Actions` are not separate named slots, and there is no second insertion point on Header. Content is the single required child part under Root. The package-local family declaration must encode `root: { min: 1, max: 1 }`, `header: { min: 0, max: 1 }`, `content: { min: 1, max: 1 }`, with `contains(root, header)` and `contains(root, content)` relations. Implementation evidence must inspect that declaration and exercise missing/duplicate Header and Content claims: invalid cardinality or containment must fail closed with diagnostics rather than allowing a merely node-shaped fixture to pass.
 
 ## Resolutions for the six authoring/rendering questions
 
@@ -28,7 +28,7 @@ Root/Header/Content are ordinary anatomy parts (`def.anatomy.claim`), each rende
 
 2. **`pre`/`code` projection without a neutral Base Code Block subject.** Content is DOM-agnostic structural layout; App-authored code text is projected as plain authored children. The composition never claims `<pre>`/`<code>` semantics, never declares a `code` role, and never declares a language fact. Non-Web semantic projection is deferred until an independently admitted domain exists; the first slice renders honest, natively-readable text.
 
-3. **Wrapping/overflow: style recipe vs host/profile decision.** The first-slice recipe is `wrap` only: long lines wrap inside Content, and the composition creates no scroll surface, no scrollbar, and performs no host measurement. Horizontal `nowrap` + scroll is **not** composition-owned — it is an App-owned Scroll Area capability that hosts or wraps Content, consistent with K-SCROLL-0001 and HC-SCROLL-SURFACE-0001. The composition does not specify how Content composes with an App-owned Scroll Area beyond rendering wrap-able content.
+3. **Wrapping/overflow: style recipe vs host/profile decision.** The first-slice recipe is whitespace-preserving `wrap` only: Content uses the portable equivalent of `white-space: pre-wrap` plus `overflow-wrap: anywhere`, preserving newlines and indentation while breaking unbounded tokens. The composition creates no scroll surface, no scrollbar, and performs no host measurement. Horizontal `nowrap` + scroll is **not** composition-owned — it is an App-owned Scroll Area capability that hosts or wraps Content, consistent with K-SCROLL-0001 and HC-SCROLL-SURFACE-0001. The composition does not specify how Content composes with an App-owned Scroll Area beyond rendering whitespace-preserving, wrap-able content. Evidence must include multiline indented text and an unbroken long token, asserting both whitespace fidelity and bounded wrapping without raw geometry ownership.
 
 4. **Serializable highlighted token trees.** The composition owns no token serialization. App-owned highlighting output is injected as authored children/text; the App owns the tokenizer and its data. The composition must render the resulting text without a second ownership claim, and must never carry a highlighted token tree in portable Props/State/Context/Expose.
 
@@ -46,10 +46,9 @@ First slice stays useful without built-in copy or highlighting. A copy control, 
 - Private/unreleased/no-CLI/no-docs negatives match #500/#501.
 - No Base Code Block export or P/T entity.
 - Code/language/highlight/copy/clipboard/async ownership stays outside the composition.
-- One source renders real App-authored code content in all four official web adapters (WC/React/Vue/Vue 2).
-- Long-line overflow/wrapping evidence is bounded and host-geometry-free.
-- Optional actions are authored Proto controls; re-render never executes them.
-- Positive tests mount every approved part; absence tests reject shadow state/event/a11y ownership.
+- One source renders real App-authored code content in all four official web adapters (WC/React/Vue/Vue 2), including multiline indentation and an unbroken long token.
+- Long-line overflow/wrapping evidence asserts whitespace preservation (`pre-wrap` semantics) and unbounded-token breaking (`overflow-wrap: anywhere`) without admitting a composition-owned scroll surface.
+- Anatomy evidence inspects the family declaration and Root-to-Header/Content containment, and includes fail-closed missing/duplicate Header and Content fixtures.
 - No #341 wholesale copy, `any`, placeholder criteria, TODO, or no-op entry.
 
 ## Non-goals (unchanged from #517)
