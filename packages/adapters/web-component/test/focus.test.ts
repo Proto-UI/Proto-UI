@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { definePrototype } from '@proto.ui/core';
+import { describe, expect, it, vi } from 'vitest';
+import { definePrototype, type FocusableHandle } from '@proto.ui/core';
 import { asFocusable, asFocusEntry, asFocusScope } from '@proto.ui/hooks';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
 import { asButton } from '../../../prototypes/base/src/button';
-
 describe('adapter-web-component focus wiring', () => {
   it('makes asButton host focusable and syncs focus/blur to exposes', () => {
     const P = definePrototype({
@@ -29,6 +28,45 @@ describe('adapter-web-component focus wiring', () => {
 
     el.blur();
     expect(exposes.focused.get()).toBe(false);
+  });
+
+  it('stops retrying focus when the target never accepts focus', async () => {
+    let focusable!: FocusableHandle;
+    const frames: Array<FrameRequestCallback> = [];
+    const P = definePrototype({
+      name: 'x-focus-retry-bound',
+      setup() {
+        focusable = asFocusable();
+        focusable.configure({ disabled: false });
+        return (r) => [r.el('div', 'ok')];
+      },
+    });
+
+    AdaptToWebComponent(P as any);
+    const el = document.createElement('x-focus-retry-bound') as any;
+    document.body.appendChild(el);
+    await Promise.resolve();
+    const focus = vi.spyOn(el, 'focus').mockImplementation(() => {});
+    const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+
+    try {
+      focusable.focus();
+      expect(frames).toHaveLength(1);
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        frames.shift()?.(0);
+        frames.shift()?.(0);
+        await Promise.resolve();
+      }
+      expect(focus).toHaveBeenCalledTimes(4);
+      expect(frames).toHaveLength(0);
+    } finally {
+      raf.mockRestore();
+      focus.mockRestore();
+      el.remove();
+    }
   });
 
   it('does not make focus-scope-only host focusable', () => {

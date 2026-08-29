@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { definePrototype } from '@proto.ui/core';
+import { definePrototype, type FocusableHandle } from '@proto.ui/core';
 import { asFocusable, asFocusScope } from '@proto.ui/hooks';
 
 import { asButton } from '../../../prototypes/base/src/button';
@@ -49,6 +49,41 @@ describe('adapter-vue: focus wiring', () => {
     expect(mounted.root?.hasAttribute('tabindex')).toBe(false);
 
     mounted.unmount();
+  });
+
+  it('stops retrying focus when the target never accepts focus', async () => {
+    let focusable!: FocusableHandle;
+    const frames: Array<FrameRequestCallback> = [];
+    const proto = definePrototype({
+      name: 'vue-focus-retry-bound',
+      setup() {
+        focusable = asFocusable();
+        focusable.configure({ disabled: false });
+        return (r) => [r.el('div', 'ok')];
+      },
+    });
+    const mounted = createMountedVueAdapter(proto);
+    await flushVue();
+    const focus = vi.spyOn(mounted.root!, 'focus').mockImplementation(() => {});
+    const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    try {
+      focusable.focus();
+      expect(frames).toHaveLength(1);
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        frames.shift()?.(0);
+        frames.shift()?.(0);
+        await flushVue();
+      }
+      expect(focus).toHaveBeenCalledTimes(4);
+      expect(frames).toHaveLength(0);
+    } finally {
+      raf.mockRestore();
+      focus.mockRestore();
+      mounted.unmount();
+    }
   });
 
   it('clears previous focus facts when another focusable receives host focus', async () => {
