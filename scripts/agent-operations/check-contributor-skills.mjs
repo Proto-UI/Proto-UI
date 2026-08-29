@@ -209,7 +209,10 @@ try {
     parsedPolicy.mutationClasses?.['reversible-github-collaboration']?.externalWrite !== true ||
     parsedPolicy.mutationClasses?.['reversible-github-collaboration']?.autonomousMinimumBand !==
       'C2' ||
-    scheduledCollaborationAuthorization?.status !== 'active' ||
+    scheduledCollaborationAuthorization?.status !== 'pending-runtime-identity' ||
+    !scheduledCollaborationAuthorization?.blockedBy?.includes(
+      'poppy-broker-verified-workload-identity'
+    ) ||
     scheduledCollaborationAuthorization?.executionModeSource !== 'schedule' ||
     scheduledCollaborationAuthorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
     scheduledCollaborationAuthorization?.mutationClass !== 'reversible-github-collaboration' ||
@@ -231,7 +234,8 @@ try {
     ].every((requirement) =>
       scheduledCollaborationAuthorization?.requires?.includes(requirement)
     ) ||
-    scheduledReviewAuthorization?.status !== 'active' ||
+    scheduledReviewAuthorization?.status !== 'pending-runtime-identity' ||
+    !scheduledReviewAuthorization?.blockedBy?.includes('poppy-broker-verified-workload-identity') ||
     scheduledReviewAuthorization?.executionModeSource !== 'schedule' ||
     scheduledReviewAuthorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
     scheduledReviewAuthorization?.mutationClass !== 'conditional-review-submission' ||
@@ -252,7 +256,8 @@ try {
     ].every((requirement) =>
       scheduledReviewAuthorization?.requestChangesRequires?.includes(requirement)
     ) ||
-    scheduledMergeAuthorization?.status !== 'active' ||
+    scheduledMergeAuthorization?.status !== 'pending-runtime-identity' ||
+    !scheduledMergeAuthorization?.blockedBy?.includes('poppy-broker-verified-workload-identity') ||
     scheduledMergeAuthorization?.executionModeSource !== 'schedule' ||
     scheduledMergeAuthorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
     scheduledMergeAuthorization?.mutationClass !== 'conditional-pull-request-merge' ||

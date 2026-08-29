@@ -26,6 +26,15 @@ const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
   readFileSync(path.join(root, 'internal/agent-operations/capability-policy.yaml'), 'utf8')
 );
+const activePolicy = structuredClone(policy);
+for (const authorization of [
+  ...(activePolicy.collaborationMutationAuthorizations ?? []),
+  ...(activePolicy.reviewSubmissionAuthorizations ?? []),
+  ...(activePolicy.pullRequestMergeAuthorizations ?? []),
+]) {
+  authorization.status = 'active';
+  delete authorization.blockedBy;
+}
 const sha = (letter) => letter.repeat(40);
 const digest = (letter) => letter.repeat(64);
 
@@ -770,7 +779,8 @@ test('review submission preserves explicit authorization and activates the bound
     executionMode: 'autonomous',
     executionModeSource: 'schedule',
     authorizationId: 'proto-ui-scheduled-review-v1',
-    selfAssessment: assessment('C4', Object.keys(policy.reviewClasses)),
+    policy: activePolicy,
+    selfAssessment: assessment('C4', Object.keys(activePolicy.reviewClasses)),
   };
   const requestChanges = authorizeReviewSubmission({
     ...scheduledBase,
@@ -793,7 +803,7 @@ test('review submission preserves explicit authorization and activates the bound
       executionMode: 'autonomous',
       selfAssessment: reviewEligibleC3,
       reviewClass: scheduledBase.packet.reviewClass,
-      policy,
+      policy: activePolicy,
     }).eligible,
     true
   );

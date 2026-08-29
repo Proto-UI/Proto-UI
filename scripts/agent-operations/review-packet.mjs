@@ -333,14 +333,23 @@ try {
     if (!authorization.allowed) {
       output = authorization;
     } else {
-      const receipt = submitGitHubReview(packet.repositoryId, packet.pullRequest, {
-        commitId: packet.headSha,
-        event: authorization.recommendedAction,
-        body: renderReviewBody(packet),
-      });
+      const receipt = submitGitHubReview(
+        packet.repositoryId,
+        packet.pullRequest,
+        {
+          commitId: packet.headSha,
+          event: authorization.recommendedAction,
+          body: renderReviewBody(packet),
+        },
+        undefined,
+        {
+          reviewerLogin: live.viewerLogin,
+          invocationId: `${packet.repositoryId}:${packet.pullRequest}:${packet.headSha}:${authorization.recommendedAction}`,
+        }
+      );
       output = {
         ...authorization,
-        submitted: true,
+        submitted: receipt.status === 'applied',
         receipt,
       };
     }

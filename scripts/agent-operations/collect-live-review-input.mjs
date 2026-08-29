@@ -366,7 +366,8 @@ export function submitGitHubReview(
   repositoryId,
   pullRequest,
   { commitId, event, body },
-  runner = execFileSync
+  runner = execFileSync,
+  { reviewerLogin = null, invocationId = `${commitId}:${event}:${body}` } = {}
 ) {
   const { owner, name } = parseRepositoryId(repositoryId);
   if (!Number.isInteger(pullRequest) || pullRequest < 1) {
@@ -380,36 +381,75 @@ export function submitGitHubReview(
   }
   if (typeof body !== 'string') throw new Error('review submission body is invalid');
 
-  const response = JSON.parse(
-    runner(
-      'gh',
-      [
-        'api',
-        '--method',
-        'POST',
-        `repos/${owner}/${name}/pulls/${pullRequest}/reviews`,
-        '--input',
-        '-',
-      ],
-      {
-        encoding: 'utf8',
-        input: JSON.stringify({ commit_id: commitId, event, body }),
-        stdio: ['pipe', 'pipe', 'pipe'],
-      }
-    )
-  );
-  if (response.commit_id !== commitId) {
-    throw new Error('submitted review commit does not match the inspected head');
-  }
   const expectedState = {
     APPROVE: 'APPROVED',
     REQUEST_CHANGES: 'CHANGES_REQUESTED',
     COMMENT: 'COMMENTED',
   }[event];
+  const postArgs = [
+    'api',
+    '--method',
+    'POST',
+    `repos/${owner}/${name}/pulls/${pullRequest}/reviews`,
+    '--input',
+    '-',
+  ];
+  let response;
+  try {
+    response = JSON.parse(
+      runner('gh', postArgs, {
+        encoding: 'utf8',
+        input: JSON.stringify({ commit_id: commitId, event, body }),
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
+    );
+  } catch (submissionError) {
+    const reconciliationArgs = [
+      'api',
+      '--method',
+      'GET',
+      `repos/${owner}/${name}/pulls/${pullRequest}/reviews?per_page=100`,
+    ];
+    try {
+      const reviews = JSON.parse(
+        runner('gh', reconciliationArgs, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+      );
+      const matches = Array.isArray(reviews)
+        ? reviews.filter(
+            (review) =>
+              review?.commit_id === commitId &&
+              review?.state === expectedState &&
+              review?.body === body &&
+              (reviewerLogin === null || review?.user?.login === reviewerLogin)
+          )
+        : [];
+      if (matches.length === 1) return reviewReceipt(matches[0], invocationId, true);
+    } catch {
+      // Preserve the explicit unknown outcome below; never retry the write.
+    }
+    return {
+      status: 'unknown',
+      reconciled: false,
+      invocationId,
+      commitId,
+      event,
+      error: submissionError instanceof Error ? submissionError.message : String(submissionError),
+    };
+  }
+  if (response.commit_id !== commitId) {
+    throw new Error('submitted review commit does not match the inspected head');
+  }
   if (!['number', 'string'].includes(typeof response.id) || response.state !== expectedState) {
     throw new Error('submitted review receipt is incomplete or has an unexpected state');
   }
+  return reviewReceipt(response, invocationId, false);
+}
+
+function reviewReceipt(response, invocationId, reconciled) {
   return {
+    status: 'applied',
+    reconciled,
+    invocationId,
     id: String(response.id),
     nodeId: response.node_id ?? null,
     state: response.state,

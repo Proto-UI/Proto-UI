@@ -48,7 +48,7 @@ taskFamilies:
       - unresolved-product-direction
       - privileged-or-irreversible-operation
   - id: maintainer-pull-request-review
-    status: deployed-local-conditional-write
+    status: blocked-runtime-identity
     trigger: codex-local-schedule
     entrypoint: pui-dev
     skill: pui-review
@@ -56,10 +56,10 @@ taskFamilies:
     taskClass: review-local
     reviewClass: content-specific-C1-through-C4
     executionMode: autonomous
-    operationMode: automatic-review-with-conditional-disposition
+    operationMode: automatic-read-only
     input: canonical-review-input-v4
-    output: review-packet-and-optional-submission-receipt
-    mutation: conditional-review-submission
+    output: review-packet-and-no-submission-receipt
+    mutation: none
     authorization: proto-ui-scheduled-review-v1
     stopConditions:
       - fresh-assessment-or-review-class-unavailable
@@ -73,17 +73,17 @@ taskFamilies:
       - privileged-or-irreversible-operation
       - duplicate-or-unknown-prior-submission-outcome
   - id: maintainer-pull-request-integration
-    status: deployed-local-conditional-write
+    status: blocked-runtime-identity
     trigger: codex-local-schedule
     entrypoint: pui-dev
     skill: pui-integrate
     autonomousMinimumBand: C2
     taskClass: integrate-reviewed-pull-request
     executionMode: autonomous
-    operationMode: automatic-exact-head-merge
-    input: clean-review-packet-and-canonical-review-input-v4
-    output: merge-receipt
-    mutation: conditional-pull-request-merge
+    operationMode: automatic-read-only
+    input: canonical-review-input-v4
+    output: no-merge-receipt
+    mutation: none
     authorization: proto-ui-scheduled-merge-v1
     stopConditions:
       - fresh-assessment-or-integration-class-unavailable
@@ -97,17 +97,17 @@ taskFamilies:
       - github-merge-state-not-clean
       - merge-receipt-unknown-after-one-reconciliation
   - id: maintainer-collaboration-continuation
-    status: deployed-local-conditional-write
+    status: blocked-runtime-identity
     trigger: codex-local-schedule-or-governed-queue
     entrypoint: pui-dev
     skill: pui-collaborate
     autonomousMinimumBand: C2
     taskClass: maintain-collaboration-state
     executionMode: autonomous
-    operationMode: automatic-exact-target-reversible-collaboration
+    operationMode: automatic-read-only
     input: purpose-bound-collaboration-request-v1
     output: validated-collaboration-receipt-v1
-    mutation: reversible-github-collaboration
+    mutation: none
     authorization: proto-ui-scheduled-collaboration-v1
     stopConditions:
       - fresh-assessment-unavailable

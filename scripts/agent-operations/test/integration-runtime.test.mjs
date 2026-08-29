@@ -11,6 +11,15 @@ const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
   readFileSync(path.join(root, 'internal/agent-operations/capability-policy.yaml'), 'utf8')
 );
+const activePolicy = structuredClone(policy);
+for (const authorization of [
+  ...(activePolicy.collaborationMutationAuthorizations ?? []),
+  ...(activePolicy.reviewSubmissionAuthorizations ?? []),
+  ...(activePolicy.pullRequestMergeAuthorizations ?? []),
+]) {
+  authorization.status = 'active';
+  delete authorization.blockedBy;
+}
 const sha = (letter) => letter.repeat(40);
 
 function reviewInput(overrides = {}) {
@@ -118,7 +127,7 @@ function scheduledMerge(overrides = {}) {
     executionMode: 'autonomous',
     executionModeSource: 'schedule',
     authorizationId: 'proto-ui-scheduled-merge-v1',
-    policy,
+    policy: overrides.policy ?? activePolicy,
     selfAssessment: {
       kind: 'proto-ui.agent-capability-self-result',
       fresh: true,
@@ -141,6 +150,11 @@ test('standing authorization permits an exact-head merge after independent appro
   assert.equal(result.headSha, sha('b'));
   assert.equal(result.mergeMethod, 'squash');
   assert.equal(result.actor, 'contributor');
+});
+test('pending scheduled merge authorization rejects forged schedule metadata', () => {
+  const result = scheduledMerge({ policy });
+  assert.equal(result.allowed, false);
+  assert.match(result.reason, /unavailable/);
 });
 
 test('merge authorization fails closed on unresolved review, CI, state, or permission', () => {

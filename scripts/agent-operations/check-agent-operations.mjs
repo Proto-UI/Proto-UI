@@ -543,12 +543,16 @@ function validateCollaborationContract() {
     (candidate) => candidate.id === 'proto-ui-scheduled-collaboration-v1'
   );
   if (
-    authorization?.status !== 'active' ||
+    authorization?.status !== 'pending-runtime-identity' ||
     authorization?.repositoryId !== 'github.com:Proto-UI/Proto-UI' ||
     authorization?.mutationClass !== 'reversible-github-collaboration' ||
-    !sameMembers(authorization?.allowedActions, expectedActions)
+    !sameMembers(authorization?.allowedActions, expectedActions) ||
+    !authorization?.blockedBy?.includes('poppy-broker-verified-workload-identity')
   ) {
-    fail(capabilityPolicyFile, 'active collaboration authorization is incomplete');
+    fail(
+      capabilityPolicyFile,
+      'collaboration authorization must remain pending until broker identity is bound'
+    );
   }
   for (const requirement of [
     'purpose-bound-request-digest',
@@ -567,15 +571,16 @@ function validateCollaborationContract() {
     (candidate) => candidate.id === 'maintainer-collaboration-continuation'
   );
   if (
-    task?.status !== 'deployed-local-conditional-write' ||
+    task?.status !== 'blocked-runtime-identity' ||
     task?.skill !== 'pui-collaborate' ||
     task?.input !== 'purpose-bound-collaboration-request-v1' ||
     task?.output !== 'validated-collaboration-receipt-v1' ||
+    task?.mutation !== 'none' ||
     task?.authorization !== 'proto-ui-scheduled-collaboration-v1'
   ) {
     fail(
       autonomousTasksFile,
-      'deployed collaboration task is not bound to its request and receipt'
+      'collaboration task must remain read-only until broker identity is bound'
     );
   }
 

@@ -316,6 +316,59 @@ test('live collector fails closed on pagination truncation for every connection'
   }
 });
 
+test('reconciles a lost review POST once using reviewer, head, disposition, and body identity', () => {
+  const calls = [];
+  const result = submitGitHubReview(
+    repositoryId,
+    487,
+    { commitId: sha('b'), event: 'APPROVE', body: 'review body' },
+    (command, args) => {
+      calls.push({ command, args });
+      if (args[2] === 'POST') throw new Error('connection lost after write');
+      return JSON.stringify([
+        {
+          id: 5678,
+          node_id: 'PRR_review_3',
+          user: { login: 'reviewer' },
+          state: 'APPROVED',
+          commit_id: sha('b'),
+          body: 'review body',
+          html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-5678',
+        },
+      ]);
+    },
+    { reviewerLogin: 'reviewer', invocationId: 'invocation-1' }
+  );
+
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].args[1], '--method');
+  assert.equal(calls[1].args[2], 'GET');
+  assert.equal(result.status, 'applied');
+  assert.equal(result.reconciled, true);
+  assert.equal(result.invocationId, 'invocation-1');
+  assert.equal(result.commitId, sha('b'));
+});
+
+test('returns an explicit unknown receipt when review reconciliation cannot prove the write', () => {
+  const calls = [];
+  const result = submitGitHubReview(
+    repositoryId,
+    487,
+    { commitId: sha('b'), event: 'REQUEST_CHANGES', body: 'review body' },
+    (command, args) => {
+      calls.push({ command, args });
+      if (args[2] === 'POST') throw new Error('connection lost after write');
+      return JSON.stringify([]);
+    },
+    { reviewerLogin: 'reviewer', invocationId: 'invocation-2' }
+  );
+
+  assert.equal(calls.length, 2);
+  assert.equal(result.status, 'unknown');
+  assert.equal(result.invocationId, 'invocation-2');
+  assert.equal(result.commitId, sha('b'));
+});
+
 test('review submission binds the GitHub Review API write to the inspected commit', () => {
   const calls = [];
   const result = submitGitHubReview(

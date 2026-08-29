@@ -157,7 +157,9 @@ attendedDecisionClasses:
   - privileged-or-irreversible-operation
 collaborationMutationAuthorizations:
   - id: proto-ui-scheduled-collaboration-v1
-    status: active
+    status: pending-runtime-identity
+    blockedBy:
+      - poppy-broker-verified-workload-identity
     executionMode: autonomous
     executionModeSource: schedule
     repositoryId: github.com:Proto-UI/Proto-UI
@@ -194,7 +196,9 @@ collaborationMutationAuthorizations:
       - provenance-exception
 reviewSubmissionAuthorizations:
   - id: proto-ui-scheduled-review-v1
-    status: active
+    status: pending-runtime-identity
+    blockedBy:
+      - poppy-broker-verified-workload-identity
     executionMode: autonomous
     executionModeSource: schedule
     repositoryId: github.com:Proto-UI/Proto-UI
@@ -238,7 +242,9 @@ trustedDcoEvidence:
   detailsUrl: https://probot.github.io/apps/dco/
 pullRequestMergeAuthorizations:
   - id: proto-ui-scheduled-merge-v1
-    status: active
+    status: pending-runtime-identity
+    blockedBy:
+      - poppy-broker-verified-workload-identity
     executionMode: autonomous
     executionModeSource: schedule
     repositoryId: github.com:Proto-UI/Proto-UI
