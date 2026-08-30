@@ -58,6 +58,7 @@ implementations:
   - id: website-brutalist-remaining-browser-hover-card
     kind: adapter-test
     status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
     required: true
     consumesCases:
       - T-BRUTALIST-HOVER-CARD-0001-CASE-BROWSER

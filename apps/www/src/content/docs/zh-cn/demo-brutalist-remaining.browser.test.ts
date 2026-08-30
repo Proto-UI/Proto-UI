@@ -1,10 +1,11 @@
 // @vitest-environment node
 
-import type { Browser, Locator } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   COLOR_SCHEMES,
   applyColorScheme,
+  RUNTIMES,
   choosePreviewRuntime,
   launchBrowser,
   openRoute,
@@ -20,7 +21,7 @@ const SKELETON_ROUTE = '/en/ui-libraries/brutalist/components/skeleton/';
 const TOGGLE_ROUTE = '/en/ui-libraries/brutalist/components/toggle/';
 const HOVER_CARD_ROUTE = '/en/ui-libraries/brutalist/components/hover-card/';
 const NARROW_VIEWPORT = { width: 320, height: 844 } as const;
-const BROWSER_RUNTIMES = ['wc', 'react', 'vue'] as const;
+const BROWSER_RUNTIMES = RUNTIMES;
 type BrowserRuntime = (typeof BROWSER_RUNTIMES)[number];
 const requestedRuntime = process.env.PROTO_UI_PR539_BROWSER_RUNTIME;
 const TEST_RUNTIMES = requestedRuntime
@@ -37,13 +38,21 @@ type SurfaceFacts = {
   role: string | null;
   tabIndex: number;
   borderWidth: string;
+  borderColor: string;
   borderRadius: string;
   backgroundColor: string;
+  color: string;
   boxShadow: string;
   display: string;
   flexDirection: string;
   fontFamily: string;
+  fontWeight: string;
   textTransform: string;
+  padding: string;
+  fontSize: string;
+  lineHeight: string;
+  pointerEvents: string;
+  opacity: string;
   width: string;
   height: string;
 };
@@ -56,15 +65,45 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
       role: element.getAttribute('role'),
       tabIndex: htmlElement.tabIndex,
       borderWidth: style.borderTopWidth,
+      borderColor: style.borderTopColor,
       borderRadius: style.borderTopLeftRadius,
       backgroundColor: style.backgroundColor,
+      color: style.color,
       boxShadow: style.boxShadow,
       display: style.display,
       flexDirection: style.flexDirection,
       fontFamily: style.fontFamily,
+      fontWeight: style.fontWeight,
       textTransform: style.textTransform,
+      padding: style.padding,
+      fontSize: style.fontSize,
+      lineHeight: style.lineHeight,
+      pointerEvents: style.pointerEvents,
+      opacity: style.opacity,
       width: style.width,
       height: style.height,
+    };
+  });
+}
+
+type SeparatorGeometry = {
+  orientation: string | null;
+  width: number;
+  height: number;
+  parentWidth: number;
+  parentHeight: number;
+};
+
+async function separatorGeometry(locator: Locator): Promise<SeparatorGeometry> {
+  return locator.evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const parentBox = element.parentElement?.getBoundingClientRect();
+    return {
+      orientation: element.getAttribute('data-orientation'),
+      width: box.width,
+      height: box.height,
+      parentWidth: parentBox?.width ?? 0,
+      parentHeight: parentBox?.height ?? 0,
     };
   });
 }
@@ -78,8 +117,30 @@ async function expectVisibility(locator: Locator, visible: boolean, label: strin
   expect(await locator.isVisible(), label).toBe(visible);
 }
 
+async function resolvedThemeColors(
+  page: Page,
+  property: 'backgroundColor' | 'color' | 'borderTopColor',
+  variables: readonly string[]
+): Promise<string[]> {
+  return page.evaluate(
+    ({ property: cssProperty, variables: customProperties }) => {
+      const probe = document.createElement('span');
+      probe.style.position = 'fixed';
+      probe.style.visibility = 'hidden';
+      document.body.appendChild(probe);
+      const values = customProperties.map((customProperty) => {
+        probe.style[cssProperty] = `var(${customProperty})`;
+        return getComputedStyle(probe)[cssProperty];
+      });
+      probe.remove();
+      return values;
+    },
+    { property, variables }
+  );
+}
+
 async function selectRuntimeWithDiagnostics(
-  page: import('playwright-core').Page,
+  page: Page,
   previewer: Locator,
   runtime: BrowserRuntime,
   readySelector: string,
@@ -147,16 +208,42 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               role: element.getAttribute('role'),
               tabIndex: (element as HTMLElement).tabIndex,
               borderWidth: style.borderTopWidth,
+              borderColor: style.borderTopColor,
               borderRadius: style.borderTopLeftRadius,
               backgroundColor: style.backgroundColor,
+              color: style.color,
               boxShadow: style.boxShadow,
               fontFamily: style.fontFamily,
               textTransform: style.textTransform,
             };
           })
         );
+        const expectedBackgrounds = await resolvedThemeColors(opened.page, 'backgroundColor', [
+          '--pui-canary',
+          '--pui-sky',
+          '--pui-coral',
+        ]);
+        const expectedForegrounds = await resolvedThemeColors(opened.page, 'color', [
+          '--pui-canary-foreground',
+          '--pui-sky-foreground',
+          '--pui-coral-foreground',
+        ]);
+        const [expectedBorder] = await resolvedThemeColors(opened.page, 'borderTopColor', [
+          '--pui-foreground',
+        ]);
 
-        expect(new Set(allFacts.map((surface) => surface.backgroundColor)).size, runtime).toBe(3);
+        expect(
+          allFacts.map((surface) => surface.backgroundColor),
+          `${runtime}/background-pairs`
+        ).toEqual(expectedBackgrounds);
+        expect(
+          allFacts.map((surface) => surface.color),
+          `${runtime}/foreground-pairs`
+        ).toEqual(expectedForegrounds);
+        expect(
+          allFacts.every((surface) => surface.borderColor === expectedBorder),
+          `${runtime}/border-pair`
+        ).toBe(true);
         for (const [index, surface] of allFacts.entries()) {
           const label = `${runtime}/badge-${index}`;
           expect(surface.role, `${label}/role`).toBeNull();
@@ -181,9 +268,16 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const card = roots(opened.previewer).first();
         const surface = await facts(card);
         expectHardFrame(surface, '6px', `${runtime}/card`);
+        const [expectedBackground, expectedForeground, expectedBorder] = await Promise.all([
+          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-background']),
+          resolvedThemeColors(opened.page, 'color', ['--pui-foreground']),
+          resolvedThemeColors(opened.page, 'borderTopColor', ['--pui-foreground']),
+        ]).then(([background, foreground, border]) => [background[0], foreground[0], border[0]]);
+        expect(surface.backgroundColor, `${runtime}/card/background`).toBe(expectedBackground);
+        expect(surface.color, `${runtime}/card/foreground`).toBe(expectedForeground);
+        expect(surface.borderColor, `${runtime}/card/border-color`).toBe(expectedBorder);
         expect(surface.display, `${runtime}/card/display`).toBe('flex');
         expect(surface.flexDirection, `${runtime}/card/direction`).toBe('column');
-        expect(surface.backgroundColor, `${runtime}/card/background`).not.toBe('rgba(0, 0, 0, 0)');
         expect(surface.role, `${runtime}/card/role`).toBeNull();
         expect(surface.tabIndex, `${runtime}/card/tabindex`).toBe(-1);
         expect(Number.parseFloat(surface.width), `${runtime}/card/width`).toBeGreaterThan(0);
@@ -195,9 +289,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
   }, 180_000);
 
   it('keeps Separator orientation and two-pixel hard-line geometry across themes', async () => {
-    const opened = await openRoute(browser, baseUrl, SEPARATOR_ROUTE, NARROW_VIEWPORT);
-    try {
-      for (const runtime of TEST_RUNTIMES) {
+    for (const runtime of TEST_RUNTIMES) {
+      const opened = await openRoute(browser, baseUrl, SEPARATOR_ROUTE, NARROW_VIEWPORT);
+      try {
         await selectRuntimeWithDiagnostics(
           opened.page,
           opened.previewer,
@@ -206,15 +300,70 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           2
         );
         const separators = roots(opened.previewer);
+        const dynamicSeparator = opened.previewer.locator(
+          '.host [data-demo-ref="dynamic-separator"]'
+        );
+        const before = await separatorGeometry(dynamicSeparator);
+        expect(before.orientation, `${runtime}/dynamic/before-orientation`).toBe('vertical');
+        expect(before.width, `${runtime}/dynamic/before-thickness`).toBe(2);
+        expect(
+          Math.abs(before.height - before.parentHeight),
+          `${runtime}/dynamic/before-length`
+        ).toBeLessThanOrEqual(0.5);
+        await opened.page.evaluate(() => {
+          document.querySelector('[data-previewer-id] .host')?.dispatchEvent(
+            new CustomEvent('proto-ui-test:separator-orientation', {
+              detail: { orientation: 'horizontal' },
+            })
+          );
+        });
+        await opened.page.waitForFunction(
+          () =>
+            document
+              .querySelector<HTMLElement>(
+                '[data-previewer-id] .host [data-demo-ref="dynamic-separator"]'
+              )
+              ?.getAttribute('data-orientation') === 'horizontal',
+          undefined,
+          { timeout: 10_000 }
+        );
+        const after = await separatorGeometry(dynamicSeparator);
+        expect(after.orientation, `${runtime}/dynamic/after-orientation`).toBe('horizontal');
+        expect(after.height, `${runtime}/dynamic/after-thickness`).toBe(2);
+        expect(
+          Math.abs(after.width - after.parentWidth),
+          `${runtime}/dynamic/after-length`
+        ).toBeLessThanOrEqual(0.5);
+        await opened.page.evaluate(() => {
+          document.querySelector('[data-previewer-id] .host')?.dispatchEvent(
+            new CustomEvent('proto-ui-test:separator-orientation', {
+              detail: { orientation: 'vertical' },
+            })
+          );
+        });
+        await opened.page.waitForFunction(
+          () =>
+            document
+              .querySelector<HTMLElement>(
+                '[data-previewer-id] .host [data-demo-ref="dynamic-separator"]'
+              )
+              ?.getAttribute('data-orientation') === 'vertical',
+          undefined,
+          { timeout: 10_000 }
+        );
         for (const colorScheme of COLOR_SCHEMES) {
           await applyColorScheme(opened.page, colorScheme);
           const allFacts = await separators.evaluateAll((elements) =>
             elements.map((element) => {
               const style = getComputedStyle(element);
+              const box = element.getBoundingClientRect();
+              const parentBox = element.parentElement?.getBoundingClientRect();
               return {
                 orientation: element.getAttribute('data-orientation'),
-                width: style.width,
-                height: style.height,
+                width: box.width,
+                height: box.height,
+                parentWidth: parentBox?.width ?? 0,
+                parentHeight: parentBox?.height ?? 0,
                 backgroundColor: style.backgroundColor,
               };
             })
@@ -223,26 +372,26 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             allFacts.map((surface) => surface.orientation),
             `${runtime}/${colorScheme}`
           ).toEqual(['horizontal', 'vertical']);
-          expect(allFacts[0].height, `${runtime}/${colorScheme}/horizontal-thickness`).toBe('2px');
+          expect(allFacts[0].height, `${runtime}/${colorScheme}/horizontal-thickness`).toBe(2);
           expect(
-            Number.parseFloat(allFacts[0].width),
+            Math.abs(allFacts[0].width - allFacts[0].parentWidth),
             `${runtime}/${colorScheme}/horizontal-length`
-          ).toBeGreaterThan(0);
-          expect(allFacts[1].width, `${runtime}/${colorScheme}/vertical-thickness`).toBe('2px');
+          ).toBeLessThanOrEqual(0.5);
+          expect(allFacts[1].width, `${runtime}/${colorScheme}/vertical-thickness`).toBe(2);
           expect(
-            Number.parseFloat(allFacts[1].height),
+            Math.abs(allFacts[1].height - allFacts[1].parentHeight),
             `${runtime}/${colorScheme}/vertical-length`
-          ).toBeGreaterThan(0);
+          ).toBeLessThanOrEqual(0.5);
           expect(
             allFacts.every((surface) => surface.backgroundColor !== 'rgba(0, 0, 0, 0)'),
             `${runtime}/${colorScheme}/ink`
           ).toBe(true);
         }
+      } finally {
+        await opened.context.close();
       }
-    } finally {
-      await opened.context.close();
     }
-  }, 180_000);
+  }, 240_000);
 
   it('keeps Skeleton contentless, hidden, and dimensioned by its consumer', async () => {
     const opened = await openRoute(browser, baseUrl, SKELETON_ROUTE, NARROW_VIEWPORT);
@@ -257,8 +406,8 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               role: element.getAttribute('role'),
               ariaHidden: element.getAttribute('aria-hidden'),
               tabIndex: (element as HTMLElement).tabIndex,
-              text: element.textContent,
               borderWidth: style.borderTopWidth,
+              borderColor: style.borderTopColor,
               borderRadius: style.borderTopLeftRadius,
               backgroundColor: style.backgroundColor,
               boxShadow: style.boxShadow,
@@ -267,15 +416,23 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             };
           })
         );
+        const [expectedBackground, expectedBorder] = await Promise.all([
+          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-lavender']),
+          resolvedThemeColors(opened.page, 'borderTopColor', ['--pui-foreground']),
+        ]).then(([background, border]) => [background[0], border[0]]);
+        expect(
+          await opened.previewer.locator('[data-demo-ref="skeleton-canary"]').count(),
+          `${runtime}/skeleton-content`
+        ).toBe(0);
         for (const [index, surface] of allFacts.entries()) {
           const label = `${runtime}/skeleton-${index}`;
           expect(surface.role, `${label}/role`).toBeNull();
           expect(surface.ariaHidden, `${label}/hidden`).toBe('true');
           expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
-          expect(surface.text, `${label}/content`).toBe('');
           expect(surface.borderWidth, `${label}/border`).toBe('2px');
+          expect(surface.borderColor, `${label}/border-color`).toBe(expectedBorder);
           expect(surface.borderRadius, `${label}/radius`).toBe('0px');
-          expect(surface.backgroundColor, `${label}/background`).not.toBe('rgba(0, 0, 0, 0)');
+          expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
           expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
           expect(Number.parseFloat(surface.width), `${label}/width`).toBeGreaterThan(0);
           expect(Number.parseFloat(surface.height), `${label}/height`).toBeGreaterThan(0);
@@ -303,9 +460,26 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               borderRadius: style.borderTopLeftRadius,
               boxShadow: style.boxShadow,
               backgroundColor: style.backgroundColor,
+              color: style.color,
             };
           })
         );
+        const [
+          expectedRestingBackground,
+          expectedRestingForeground,
+          expectedActiveBackground,
+          expectedActiveForeground,
+        ] = await Promise.all([
+          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-secondary-background']),
+          resolvedThemeColors(opened.page, 'color', ['--pui-foreground']),
+          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-main']),
+          resolvedThemeColors(opened.page, 'color', ['--pui-main-foreground']),
+        ]).then(([restingBackground, restingForeground, activeBackground, activeForeground]) => [
+          restingBackground[0],
+          restingForeground[0],
+          activeBackground[0],
+          activeForeground[0],
+        ]);
         expect(
           factsBefore.map((surface) => surface.pressed),
           runtime
@@ -314,6 +488,24 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           factsBefore.map((surface) => surface.disabled),
           runtime
         ).toEqual(['false', 'false', 'false', 'true']);
+        expect(
+          factsBefore.map((surface) => surface.backgroundColor),
+          `${runtime}/background-pairs`
+        ).toEqual([
+          expectedRestingBackground,
+          expectedActiveBackground,
+          expectedRestingBackground,
+          expectedRestingBackground,
+        ]);
+        expect(
+          factsBefore.map((surface) => surface.color),
+          `${runtime}/foreground-pairs`
+        ).toEqual([
+          expectedRestingForeground,
+          expectedActiveForeground,
+          expectedRestingForeground,
+          expectedRestingForeground,
+        ]);
         expect(
           new Set(factsBefore.map((surface) => surface.backgroundColor)).size,
           runtime
@@ -369,6 +561,25 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           .getByText('A square hard-shadowed preview panel.', { exact: true })
           .last();
         const triggerSurface = await facts(trigger);
+        const [expectedTriggerBackground] = await resolvedThemeColors(
+          opened.page,
+          'backgroundColor',
+          ['--pui-main']
+        );
+        const [expectedTriggerForeground] = await resolvedThemeColors(opened.page, 'color', [
+          '--pui-main-foreground',
+        ]);
+        expect(triggerSurface.backgroundColor, `${runtime}/hover-trigger/background`).toBe(
+          expectedTriggerBackground
+        );
+        expect(triggerSurface.color, `${runtime}/hover-trigger/foreground`).toBe(
+          expectedTriggerForeground
+        );
+        expect(triggerSurface.borderColor, `${runtime}/hover-trigger/border-color`).toBe(
+          'rgb(0, 0, 0)'
+        );
+        expect(triggerSurface.fontWeight, `${runtime}/hover-trigger/weight`).toBe('700');
+        expect(triggerSurface.textTransform, `${runtime}/hover-trigger/case`).toBe('uppercase');
         expectHardFrame(triggerSurface, '3px', `${runtime}/hover-trigger`);
         expect(triggerSurface.role, `${runtime}/hover-trigger/role`).toBeNull();
         expect(triggerSurface.tabIndex, `${runtime}/hover-trigger/tabindex`).toBeGreaterThanOrEqual(
@@ -378,7 +589,29 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         await trigger.hover();
         await expectVisibility(panelText, true, `${runtime}/hover-pointer-open`);
         const panel = panelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
-        expectHardFrame(await facts(panel), '3px', `${runtime}/hover-panel`);
+        const panelSurface = await facts(panel);
+        const [expectedPanelBackground] = await resolvedThemeColors(
+          opened.page,
+          'backgroundColor',
+          ['--pui-secondary-background']
+        );
+        const [expectedPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
+          '--pui-foreground',
+        ]);
+        expectHardFrame(panelSurface, '3px', `${runtime}/hover-panel`);
+        expect(panelSurface.backgroundColor, `${runtime}/hover-panel/background`).toBe(
+          expectedPanelBackground
+        );
+        expect(panelSurface.color, `${runtime}/hover-panel/foreground`).toBe(
+          expectedPanelForeground
+        );
+        expect(panelSurface.borderColor, `${runtime}/hover-panel/border-color`).toBe(
+          'rgb(0, 0, 0)'
+        );
+        expect(panelSurface.width, `${runtime}/hover-panel/width`).toBe('256px');
+        expect(panelSurface.padding, `${runtime}/hover-panel/padding`).toBe('16px');
+        expect(panelSurface.fontSize, `${runtime}/hover-panel/font-size`).toBe('14px');
+        expect(panelSurface.lineHeight, `${runtime}/hover-panel/line-height`).toBe('24px');
 
         await trigger.dispatchEvent('pointerleave');
         await expectVisibility(panelText, false, `${runtime}/hover-pointer-close`);

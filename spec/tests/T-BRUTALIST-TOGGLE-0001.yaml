@@ -80,6 +80,7 @@ implementations:
   - id: website-brutalist-remaining-browser-toggle
     kind: adapter-test
     status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
     required: true
     consumesCases:
       - T-BRUTALIST-TOGGLE-0001-CASE-BROWSER

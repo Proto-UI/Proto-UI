@@ -1,5 +1,20 @@
+import type { DemoSetupContext } from '../../../components/PrototypePreviewer/demo-types';
+
+function setupSeparatorDemo({ host, api }: DemoSetupContext) {
+  const onOrientationChange = (event: Event) => {
+    const orientation = (event as CustomEvent<{ orientation?: 'horizontal' | 'vertical' }>).detail
+      ?.orientation;
+    if (orientation === 'horizontal' || orientation === 'vertical') {
+      api.setProps('dynamic-separator', { orientation });
+    }
+  };
+  host.addEventListener('proto-ui-test:separator-orientation', onOrientationChange);
+  return () => host.removeEventListener('proto-ui-test:separator-orientation', onOrientationChange);
+}
+
 export default {
   type: 'demo',
+  setup: setupSeparatorDemo,
   root: {
     kind: 'box',
     className: 'flex flex-col gap-3',
@@ -15,6 +30,7 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-separator-root',
+            ref: 'dynamic-separator',
             props: { orientation: 'vertical' },
           },
           'Rule',
