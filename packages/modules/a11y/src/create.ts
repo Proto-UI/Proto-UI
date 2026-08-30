@@ -30,6 +30,7 @@ class A11yModuleImpl extends ModuleBase {
   private stateWatchesInstalled = false;
   private levelWatchOff: Unsubscribe | null = null;
   private levelWatchInstalled = false;
+  private levelWatchHandle: State<number> | null = null;
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
@@ -136,11 +137,11 @@ class A11yModuleImpl extends ModuleBase {
     }
     this.stateWatchesInstalled = false;
   }
-
   dispose(): void {
     this.disposeViews();
     this.levelWatchOff?.();
     this.levelWatchOff = null;
+    this.levelWatchHandle = null;
     this.levelWatchInstalled = false;
   }
 
@@ -222,11 +223,16 @@ class A11yModuleImpl extends ModuleBase {
    * the originating mutation instead of failing the next mount.
    */
   private installLevelWatch(): void {
-    if (this.levelWatchInstalled) return;
-    this.levelWatchInstalled = true;
-    if (!isState(this.ir.level)) return;
+    const nextHandle = isState(this.ir.level) ? (this.ir.level as State<number>) : null;
+    if (this.levelWatchInstalled && this.levelWatchHandle === nextHandle) return;
 
-    const levelHandle = this.ir.level;
+    this.levelWatchOff?.();
+    this.levelWatchOff = null;
+    this.levelWatchHandle = nextHandle;
+    this.levelWatchInstalled = true;
+    if (!nextHandle) return;
+
+    const levelHandle = nextHandle;
     // Observed handles own no default authority: roll back to the previous
     // value only when the source is writable, never by writing through it.
     const canRollback = typeof (levelHandle as OwnedStateHandle<number>).setDefault === 'function';

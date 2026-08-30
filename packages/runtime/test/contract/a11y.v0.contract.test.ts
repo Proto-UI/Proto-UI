@@ -275,6 +275,34 @@ describe('runtime contract: a11y (v0)', () => {
     await session.dispose();
   });
 
+  it('rebinds validation when the level source is replaced during setup', () => {
+    let first!: OwnedStateHandle<number>;
+    let second!: OwnedStateHandle<number>;
+    const P = definePrototype({
+      name: 'x-a11y-replaced-heading-level',
+      setup(def) {
+        first = def.state.numberDiscrete('first.heading.level', 2);
+        second = def.state.numberDiscrete('second.heading.level', 2);
+        def.a11y.role('heading');
+        def.a11y.level(first);
+        def.a11y.level(second);
+      },
+    });
+
+    const ctx = createHost();
+    const result = executeWithHost(P as any, ctx.host as any);
+    expect(ctx.snapshots.at(-1)?.level).toBe(2);
+
+    expect(() =>
+      result.invokeInCallbackScope(() => second.set(0, 'reason: invalid replacement level'))
+    ).toThrow(/level must be an integer in range 1-6/);
+    expect(second.get()).toBe(2);
+
+    result.invokeInCallbackScope(() => second.set(4, 'reason: replacement level'));
+    expect(ctx.snapshots.at(-1)?.level).toBe(4);
+    result.invokeUnmounted();
+  });
+
   it('A11Y-0066: rejects invalid heading level updates without a host projector', () => {
     let level!: OwnedStateHandle<number>;
     const P = definePrototype({
