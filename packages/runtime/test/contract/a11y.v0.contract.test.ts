@@ -8,7 +8,8 @@ import type {
 import { defineAsHook, definePrototype } from '@proto.ui/core';
 import { asScrollSurface } from '@proto.ui/hooks';
 import { A11Y_PROJECT_CAP, type A11yPort } from '@proto.ui/module-a11y';
-import { executeWithHost, type RuntimeHost } from '../../src';
+import { SCROLL_SURFACE_HOST_CAP, type ScrollSurfaceHostAttachment } from '@proto.ui/module-scroll';
+import { createRuntimeSession, executeWithHost, type RuntimeHost } from '../../src';
 
 function createHost(initialRaw: Record<string, unknown> = {}) {
   let raw = { ...initialRaw };
@@ -185,6 +186,93 @@ describe('runtime contract: a11y (v0)', () => {
     const ctx = createHost();
     expect(() => executeWithHost(P as any, ctx.host as any)).not.toThrow();
     expect(ctx.snapshots.at(-1)?.level).toBe(1);
+  });
+
+  it('does not mutate an observed heading level source when invalid', () => {
+    let emitFacts: ScrollSurfaceHostAttachment['onFacts'] | undefined;
+    let getVisibleRatio: (() => number) | undefined;
+    const P = definePrototype({
+      name: 'x-a11y-observed-heading-level-update',
+      setup(def) {
+        const scroll = asScrollSurface();
+        getVisibleRatio = () => scroll.getSnapshot().horizontal.visibleRatio;
+        def.a11y.role('heading');
+        def.a11y.level(scroll.horizontal.visibleRatio);
+      },
+    });
+
+    const ctx = createHost();
+    const previousReady = ctx.host.onRuntimeReady;
+    ctx.host.onRuntimeReady = (wiring) => {
+      previousReady?.(wiring);
+      wiring.attach('scroll', [
+        [
+          SCROLL_SURFACE_HOST_CAP,
+          {
+            support: { system: true, composed: false },
+            attach(connection: ScrollSurfaceHostAttachment) {
+              emitFacts = connection.onFacts;
+              return { update() {}, request() {}, dispose() {} };
+            },
+          },
+        ],
+      ]);
+    };
+
+    const result = executeWithHost(P as any, ctx.host as any);
+    if (!emitFacts || !getVisibleRatio) throw new Error('scroll test host did not attach');
+
+    expect(() =>
+      result.invokeInCallbackScope(() =>
+        emitFacts!({
+          axes: 'both',
+          horizontal: {
+            position: 0,
+            visibleRatio: 0.5,
+            canScrollBefore: false,
+            canScrollAfter: true,
+          },
+          vertical: {
+            position: 0,
+            visibleRatio: 1,
+            canScrollBefore: false,
+            canScrollAfter: false,
+          },
+          scrolling: false,
+          projection: 'system',
+        })
+      )
+    ).toThrow(/level must be an integer in range 1-6/);
+    expect(getVisibleRatio()).toBe(0.5);
+    result.invokeUnmounted();
+  });
+
+  it('validates state-backed heading levels before mount and across repeatable detach', async () => {
+    let level!: OwnedStateHandle<number>;
+    const P = definePrototype({
+      name: 'x-a11y-detached-heading-level',
+      setup(def) {
+        level = def.state.numberDiscrete('heading.level', 2);
+        def.a11y.role('heading');
+        def.a11y.level(level);
+      },
+    });
+
+    const ctx = createHost();
+    const session = createRuntimeSession(P as any, ctx.host as any);
+    expect(() =>
+      session.invokeInCallbackScope(() => level.set(0, 'reason: pre-mount invalid heading level'))
+    ).toThrow(/level must be an integer in range 1-6/);
+    expect(level.get()).toBe(2);
+
+    await session.mount();
+    await session.unmount();
+    expect(session.mountPhase).toBe('detached');
+    expect(() =>
+      session.invokeInCallbackScope(() => level.set(0, 'reason: detached invalid heading level'))
+    ).toThrow(/level must be an integer in range 1-6/);
+    expect(level.get()).toBe(2);
+    await session.dispose();
   });
 
   it('A11Y-0066: rejects invalid heading level updates without a host projector', () => {

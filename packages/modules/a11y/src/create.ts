@@ -28,6 +28,8 @@ class A11yModuleImpl extends ModuleBase {
   };
   private readonly stateWatchOffs: Unsubscribe[] = [];
   private stateWatchesInstalled = false;
+  private levelWatchOff: Unsubscribe | null = null;
+  private levelWatchInstalled = false;
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
@@ -86,6 +88,7 @@ class A11yModuleImpl extends ModuleBase {
       this.ensureSetup('def.a11y.level');
       resolveA11yLevel(value);
       this.ir.level = value;
+      this.installLevelWatch();
       this.applyProjection();
     },
   };
@@ -118,7 +121,7 @@ class A11yModuleImpl extends ModuleBase {
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
-    if (phase === 'detached') this.dispose();
+    if (phase === 'detached') this.disposeViews();
   }
 
   afterRenderCommit(): void {
@@ -126,11 +129,19 @@ class A11yModuleImpl extends ModuleBase {
     this.applyProjection();
   }
 
-  dispose(): void {
+  /** Remove view-scoped projection subscriptions; keep instance-scoped level validation. */
+  private disposeViews(): void {
     while (this.stateWatchOffs.length) {
       this.stateWatchOffs.pop()?.();
     }
     this.stateWatchesInstalled = false;
+  }
+
+  dispose(): void {
+    this.disposeViews();
+    this.levelWatchOff?.();
+    this.levelWatchOff = null;
+    this.levelWatchInstalled = false;
   }
 
   private ensureSetup(op: string): void {
@@ -201,22 +212,40 @@ class A11yModuleImpl extends ModuleBase {
       this.stateWatchOffs.push(off);
     }
 
-    if (isState(this.ir.level)) {
-      const levelHandle = this.ir.level as OwnedStateHandle<number>;
-      const off = this.statePort.watch(levelHandle, (_ctx, event) => {
+    this.installLevelWatch();
+    this.stateWatchesInstalled = true;
+  }
+
+  /**
+   * Instance-scoped level validation. The subscription survives repeatable
+   * view detach so an exposed or borrowed `set` to an invalid level throws at
+   * the originating mutation instead of failing the next mount.
+   */
+  private installLevelWatch(): void {
+    if (this.levelWatchInstalled) return;
+    this.levelWatchInstalled = true;
+    if (!isState(this.ir.level)) return;
+
+    const levelHandle = this.ir.level;
+    // Observed handles own no default authority: roll back to the previous
+    // value only when the source is writable, never by writing through it.
+    const canRollback = typeof (levelHandle as OwnedStateHandle<number>).setDefault === 'function';
+    this.levelWatchOff = this.statePort.watch(
+      levelHandle as OwnedStateHandle<number>,
+      (_ctx, event) => {
+        if (event.type === 'disconnect') return;
         try {
           resolveA11yLevel(event.next);
         } catch (error) {
-          this.statePort.setDefault(levelHandle, event.prev);
+          if (canRollback) {
+            this.statePort.setDefault(levelHandle as OwnedStateHandle<number>, event.prev);
+          }
           this.applyProjection();
           throw error;
         }
         this.applyProjection();
-      });
-      this.stateWatchOffs.push(off);
-    }
-
-    this.stateWatchesInstalled = true;
+      }
+    );
   }
 
   private getSnapshot(): A11ySemanticObjectSnapshot {
