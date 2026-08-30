@@ -40,6 +40,7 @@ sources:
   - path: packages/cli/src/services/proto-style-css.ts
   - path: apps/www/src/styles/global.css
   - path: apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro
+  - path: packages/prototypes/shadcn/src/button/button.proto.ts
   - path: packages/prototypes/shadcn/src/textarea/root.proto.ts
   - path: packages/prototypes/shadcn/src/hover-card/content.proto.ts
 dependsOn:
@@ -57,6 +58,7 @@ relates:
     - A-VUE-3-0001
     - A-VUE-2-0001
   prototypes:
+    - P-SHADCN-BUTTON
     - P-SHADCN-TEXTAREA
     - P-SHADCN-HOVER-CARD-CONTENT
 verifies:

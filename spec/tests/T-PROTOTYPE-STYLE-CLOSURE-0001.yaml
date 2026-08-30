@@ -37,7 +37,7 @@ cases:
 implementations:
   - id: cli-proto-style-css-native-surface-normalization
     kind: module-test
-    status: planned
+    status: passing
     path: packages/cli/test/proto-style-css.test.ts
     required: true
     consumesCases:
@@ -47,10 +47,10 @@ implementations:
       - C-PROTOTYPE-STYLE-CLOSURE-0001
       - D-WEB-SURFACE-NORMALIZATION-0001
     notes:
-      - The file exists, but assertions for the native form-control selector, declarations, layer order, and override boundary are not present yet, so this mapping remains planned.
+      - Asserts the exact zero-specificity native-control selector, required declarations, placement inside the Proto UI layer before token rules, absence of unscoped resets, and continued consumer cascade ownership.
   - id: www-prototype-style-closure-browser
     kind: runtime-test
-    status: planned
+    status: passing
     path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
     required: true
     consumesCases:
@@ -64,11 +64,14 @@ implementations:
       - A-REACT-18-19-0001
       - A-VUE-3-0001
       - A-VUE-2-0001
+      - P-SHADCN-BUTTON
       - P-SHADCN-TEXTAREA
       - P-SHADCN-HOVER-CARD-CONTENT
     notes:
-      - The planned real-browser fixture must load generated `proto-ui-style.css` without the landing page, Starlight, Tailwind Preflight, or `apps/www/src/styles/global.css`, then exercise Web Components, React, Vue 3, and Vue 2.
+      - The standalone apps/www/src/pages/en/test/style-isolation.astro route loads generated proto-ui-style.css without the landing page, Starlight, Tailwind Preflight, or apps/www/src/styles/global.css, then mounts real Web Components, React, Vue 3, and Vue 2 projections.
       - Theme activation and variables, inherited font choice, viewport, content, locale, outer fixture layout, and explicit surface class or style remain declared consumer inputs rather than hidden component CSS dependencies.
+      - Light and Dark computed-style assertions cover Shadcn Button, three default Textarea states, a separately consumer-overridden native Textarea, and portaled Hover Card Content; CSSOM assertions reject document-wide and bare native-control resets.
+      - Adjacent enabled/disabled Textarea paint, focus/blur transition endpoints, and Hover Card closed/open endpoints are driven in every Runtime so conditional styles and transition assets cannot be replaced by static mount evidence.
 verifies:
   contracts:
     - id: C-PROTOTYPE-STYLE-CLOSURE-0001
@@ -93,13 +96,19 @@ exercises:
     - A-VUE-3-0001
     - A-VUE-2-0001
   prototypes:
+    - P-SHADCN-BUTTON
     - P-SHADCN-TEXTAREA
     - P-SHADCN-HOVER-CARD-CONTENT
 sources:
   - path: packages/cli/src/services/proto-style-css.ts
   - path: packages/cli/test/proto-style-css.test.ts
+  - path: packages/prototypes/shadcn/src/button/button.proto.ts
   - path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
+  - path: apps/www/src/pages/en/test/style-isolation.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Marked generated-CSS and standalone four-runtime evidence passing after the scoped normalization and Prototype token repair.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added planned generated-CSS and four-runtime standalone browser coverage for Prototype style closure and scoped Web form-control normalization.

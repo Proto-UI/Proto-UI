@@ -71,3 +71,7 @@ verifies:
     - id: P-SHADCN-TEXTAREA
 exercises:
   prototypes: *id001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Required explicit foreground and vertical-resize evidence and linked standalone four-runtime computed-style coverage.

@@ -59,6 +59,9 @@ verifies:
 exercises:
   prototypes: [P-SHADCN-HOVER-CARD-CONTENT, P-BASE-HOVER-CARD-CONTENT]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Required explicit theme-border evidence and linked standalone four-runtime computed-style coverage.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added Shadcn Hover Card Content delta coverage.

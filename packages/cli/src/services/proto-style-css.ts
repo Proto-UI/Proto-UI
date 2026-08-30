@@ -308,6 +308,7 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
     '',
     '@layer proto-ui {',
     ...composedPropertyReset(),
+    ...nativeControlNormalization(),
   ];
 
   if (
@@ -706,6 +707,24 @@ function composedPropertyReset(): string[] {
   return [
     `  :where([${PUI_STYLE_ATTR}]) {`,
     ...properties.map((property) => `    --pui-${property}: initial;`),
+    '  }',
+    '',
+  ];
+}
+
+function nativeControlNormalization(): string[] {
+  return [
+    `  :where(button[${PUI_STYLE_ATTR}], input[${PUI_STYLE_ATTR}], select[${PUI_STYLE_ATTR}], textarea[${PUI_STYLE_ATTR}]) {`,
+    '    font: inherit;',
+    '    font-feature-settings: inherit;',
+    '    font-variation-settings: inherit;',
+    '    letter-spacing: inherit;',
+    '    color: inherit;',
+    '    margin: 0;',
+    '    padding: 0;',
+    '    border: 0;',
+    '    background: transparent;',
+    '    opacity: 1;',
     '  }',
     '',
   ];

@@ -43,6 +43,7 @@ criteria:
 sources:
   - path: packages/cli/src/services/proto-style-css.ts
   - path: packages/cli/test/proto-style-css.test.ts
+  - path: packages/prototypes/shadcn/src/button/button.proto.ts
   - path: packages/prototypes/shadcn/src/textarea/root.proto.ts
   - path: apps/www/src/styles/global.css
 refines:
@@ -61,6 +62,7 @@ relates:
     - A-VUE-3-0001
     - A-VUE-2-0001
   prototypes:
+    - P-SHADCN-BUTTON
     - P-SHADCN-TEXTAREA
 verifies:
   tests:
