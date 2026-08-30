@@ -92,23 +92,47 @@ describe('state-kernel.v0', () => {
     expect(h.get()).toBe(3);
   });
 
-  it('discards queued re-entrant transitions when a subscriber aborts an emit', () => {
+  it('preserves queued re-entrant transitions when a later subscriber aborts an emit', () => {
     const k = new StateKernel();
     const h = k.define('x', { kind: 'number.discrete' }, 0);
-    const seen: number[] = [];
+    const firstSeen: number[] = [];
+    const secondSeen: number[] = [];
 
     k.subscribe(h, (e: any) => {
       if (e?.type !== 'next') return;
-      seen.push(e.next);
-      if (e.next === 1) {
-        h.set(0);
-        throw new Error('reject transition');
-      }
+      firstSeen.push(e.next);
+      if (e.next === 1) h.set(2);
+    });
+    k.subscribe(h, (e: any) => {
+      if (e?.type !== 'next') return;
+      if (e.next === 1) throw new Error('reject transition');
+      secondSeen.push(e.next);
     });
 
     expect(() => h.set(1)).toThrow('reject transition');
-    h.set(2);
-    expect(seen).toEqual([1, 2]);
+    expect(firstSeen).toEqual([1, 2]);
+    expect(secondSeen).toEqual([2]);
     expect(h.get()).toBe(2);
+  });
+
+  it('rejects a pre-set validator before changing state or notifying subscribers', () => {
+    const k = new StateKernel();
+    const h = k.define('x', { kind: 'number.discrete' }, 2);
+    const seen: number[] = [];
+
+    k.beforeSet(h, (_prev, next) => {
+      if (next === 0) throw new Error('invalid state');
+    });
+    k.subscribe(h, (e: any) => {
+      if (e?.type === 'next') seen.push(e.next);
+    });
+
+    expect(() => h.set(0)).toThrow('invalid state');
+    expect(h.get()).toBe(2);
+    expect(seen).toEqual([]);
+
+    h.set(3);
+    expect(h.get()).toBe(3);
+    expect(seen).toEqual([3]);
   });
 });

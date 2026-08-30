@@ -224,9 +224,11 @@ class A11yModuleImpl extends ModuleBase {
   }
 
   /**
-   * Instance-scoped level validation. The subscription survives repeatable
-   * view detach so an exposed or borrowed `set` to an invalid level throws at
-   * the originating mutation instead of failing the next mount.
+   * Instance-scoped pre-commit level validation. When the state module
+   * exposes before-set validation, an invalid replacement rejects before
+   * the value is committed or any watcher is notified. Internal host-fact
+   * writes that bypass handle guards keep a post-commit rollback so the
+   * source is restored at the originating mutation.
    */
   private installLevelWatch(): void {
     const nextHandle = isState(this.ir.level) ? (this.ir.level as State<number>) : null;
@@ -238,26 +240,33 @@ class A11yModuleImpl extends ModuleBase {
     this.levelWatchInstalled = true;
     if (!nextHandle) return;
 
-    const levelHandle = nextHandle;
-    // Observed handles own no default authority: roll back to the previous
-    // value only when the source is writable, never by writing through it.
-    const canRollback = typeof (levelHandle as OwnedStateHandle<number>).setDefault === 'function';
-    this.levelWatchOff = this.statePort.watch(
-      levelHandle as OwnedStateHandle<number>,
-      (_ctx, event) => {
+    const levelHandle = nextHandle as OwnedStateHandle<number>;
+    const writable = typeof levelHandle.setDefault === 'function';
+
+    if (writable && this.statePort.beforeSet) {
+      // Owned/borrowed heading-level source: reject invalid values before the
+      // state commits or any watcher (including earlier-authored ones) runs.
+      const offValidator = this.statePort.beforeSet(levelHandle, (_prev, next) => {
+        resolveA11yLevel(next);
+      });
+      const offWatch = this.statePort.watch(levelHandle, (_ctx, event) => {
         if (event.type === 'disconnect') return;
-        try {
-          resolveA11yLevel(levelHandle.get());
-        } catch (error) {
-          if (canRollback) {
-            this.statePort.setDefault(levelHandle as OwnedStateHandle<number>, event.prev);
-          }
-          this.applyProjection();
-          throw error;
-        }
         this.applyProjection();
-      }
-    );
+      });
+      this.levelWatchOff = () => {
+        offValidator();
+        offWatch();
+      };
+      return;
+    }
+
+    // Observed (foreign-owned) source: the owning module keeps its own facts,
+    // so validate after the commit without vetoing or rolling the value back.
+    this.levelWatchOff = this.statePort.watch(levelHandle, (_ctx, event) => {
+      if (event.type === 'disconnect') return;
+      resolveA11yLevel(nextHandle.get());
+      this.applyProjection();
+    });
   }
 
   private getSnapshot(): A11ySemanticObjectSnapshot {

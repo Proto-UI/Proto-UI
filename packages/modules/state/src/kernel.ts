@@ -14,7 +14,12 @@ type StateRecord<V> = {
   spec: StateSpec;
   value: V;
   subscribers: Set<Subscriber<V>>;
+  beforeSet: Set<(prev: V, next: V) => void>;
 };
+
+class StateValidationFailure {
+  constructor(readonly error: unknown) {}
+}
 
 export class StateKernel {
   private nextId: StateId = 1;
@@ -23,6 +28,8 @@ export class StateKernel {
   // event queue to make re-entrant set deterministic
   private emitting = false;
   private pending: Array<() => void> = [];
+
+  private transactionSnapshot: Map<StateId, unknown> | null = null;
 
   /** Define a state and return an owned handle. */
   define<V>(name: string, spec: StateSpec, defaultValue: V): OwnedStateHandle<V> {
@@ -37,6 +44,7 @@ export class StateKernel {
       spec,
       value: defaultValue,
       subscribers: new Set(),
+      beforeSet: new Set(),
     };
     this.records.set(id, rec);
 
@@ -94,6 +102,14 @@ export class StateKernel {
     this.setDefaultById<V>(id, next);
   }
 
+  /** Register setup-time validation that runs before a value is committed. */
+  beforeSet<V>(handle: OwnedStateHandle<V>, validator: (prev: V, next: V) => void): () => void {
+    const id = this.getIdFromHandle(handle);
+    const rec = this.getRecord<V>(id);
+    rec.beforeSet.add(validator);
+    return () => rec.beforeSet.delete(validator);
+  }
+
   // ---- byId helpers ----
 
   private getById<V>(id: StateId): V {
@@ -111,6 +127,17 @@ export class StateKernel {
     const prev = rec.value;
     if (Object.is(prev, next)) return;
 
+    const isTransactionRoot = !this.emitting && !this.transactionSnapshot;
+
+    try {
+      for (const validator of rec.beforeSet) validator(prev, next);
+    } catch (error) {
+      if (this.emitting) throw new StateValidationFailure(error);
+      throw error;
+    }
+
+    if (isTransactionRoot) this.transactionSnapshot = this.snapshotValues();
+
     rec.value = next;
 
     const emit = () => {
@@ -125,20 +152,52 @@ export class StateKernel {
     }
 
     this.emitting = true;
-    try {
-      emit();
-      // flush any queued emits caused by re-entrant sets
-      while (this.pending.length) {
-        const task = this.pending.shift()!;
+    let failure: { error: unknown; validation: boolean } | null = null;
+
+    const invoke = (task: () => void): { error: unknown; validation: boolean } | null => {
+      try {
         task();
+        return null;
+      } catch (error) {
+        return {
+          error: error instanceof StateValidationFailure ? error.error : error,
+          validation: error instanceof StateValidationFailure,
+        };
       }
-    } catch (error) {
-      // A rejected subscriber aborts this dispatch window; do not replay
-      // re-entrant transitions after the caller has recovered and writes again.
-      this.pending.length = 0;
-      throw error;
+    };
+
+    try {
+      const first = invoke(emit);
+      if (first) failure = first;
+      // Drain re-entrant events even when a subscriber throws, so recorded
+      // transitions are not lost; stop only on a validation failure, which
+      // must roll the whole transaction back.
+      while (this.pending.length && !failure?.validation) {
+        const result = invoke(this.pending.shift()!);
+        if (result && !failure) failure = result;
+        else if (result?.validation && failure && !failure.validation) failure = result;
+      }
+      if (failure?.validation) {
+        this.restoreTransaction();
+        this.pending.length = 0;
+      }
+      if (failure) throw failure.error;
     } finally {
       this.emitting = false;
+      this.transactionSnapshot = null;
+    }
+  }
+  private snapshotValues(): Map<StateId, unknown> {
+    return new Map(
+      Array.from(this.records.entries(), ([id, record]) => [id, record.value] as const)
+    );
+  }
+
+  private restoreTransaction(): void {
+    if (!this.transactionSnapshot) return;
+    for (const [id, value] of this.transactionSnapshot) {
+      const record = this.records.get(id);
+      if (record) record.value = value;
     }
   }
   private getIdFromHandle(handle: OwnedStateHandle<any>): StateId {

@@ -359,6 +359,44 @@ describe('runtime contract: a11y (v0)', () => {
     );
   });
 
+  it('rejects invalid level before an earlier borrowed watcher observes it', () => {
+    let setLevel!: (value: number) => void;
+    let getLevel!: () => number;
+    const seen: number[] = [];
+    const asHeadingLevel = defineAsHook<
+      Record<string, never>,
+      Record<string, never>,
+      { level: State<number> }
+    >({
+      name: 'as-early-watcher-heading-level',
+      setup(def) {
+        def.state.numberDiscrete('level', 2);
+      },
+    });
+    const P = definePrototype({
+      name: 'x-a11y-early-watcher-heading-level',
+      setup(def) {
+        const level = asHeadingLevel().getState?.('level');
+        if (!level) throw new Error('missing early-watcher heading level');
+        setLevel = (value) => level.set(value, 'reason: invalid early-watcher level');
+        getLevel = () => level.get();
+        level.watch((_run, event) => {
+          if (event.type === 'next') seen.push(event.next);
+        });
+        def.a11y.role('heading');
+        def.a11y.level(level);
+      },
+    });
+
+    const result = executeWithHost(P as any, createHost().host as any);
+    expect(() => result.invokeInCallbackScope(() => setLevel(0))).toThrow(
+      /level must be an integer in range 1-6/
+    );
+    expect(getLevel()).toBe(2);
+    expect(seen).toEqual([]);
+    result.invokeUnmounted();
+  });
+
   it('A11Y-0066: rejects invalid heading level updates without a host projector', () => {
     let level!: OwnedStateHandle<number>;
     const P = definePrototype({

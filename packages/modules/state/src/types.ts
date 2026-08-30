@@ -28,6 +28,12 @@ export type StatePort = {
   watch<V>(handle: OwnedStateHandle<V>, cb: InternalStateWatchCallback<V>): Unsubscribe;
 
   /**
+   * Register setup-time validation that runs before a state value is committed
+   * or any watcher is notified.
+   */
+  beforeSet?<V>(handle: OwnedStateHandle<V>, validator: (prev: V, next: V) => void): Unsubscribe;
+
+  /**
    * Emit a disconnect event to all watchers of this state slot.
    * Intended for terminal disposal or an explicit semantic-source disconnect.
    * Repeatable view detachment must preserve instance-owned State resources.
