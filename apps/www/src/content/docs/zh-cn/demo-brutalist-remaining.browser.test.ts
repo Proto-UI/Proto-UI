@@ -215,6 +215,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             return {
               role: element.getAttribute('role'),
               tabIndex: (element as HTMLElement).tabIndex,
+              ariaSelected: element.getAttribute('aria-selected'),
+              ariaPressed: element.getAttribute('aria-pressed'),
+              ariaLive: element.getAttribute('aria-live'),
               borderWidth: style.borderTopWidth,
               borderColor: style.borderTopColor,
               borderRadius: style.borderTopLeftRadius,
@@ -239,7 +242,6 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const [expectedBorder] = await resolvedThemeColors(opened.page, 'borderTopColor', [
           '--pui-foreground',
         ]);
-
         expect(
           allFacts.map((surface) => surface.backgroundColor),
           `${runtime}/background-pairs`
@@ -256,6 +258,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           const label = `${runtime}/badge-${index}`;
           expect(surface.role, `${label}/role`).toBeNull();
           expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
+          expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
+          expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
+          expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
           expect(surface.borderWidth, `${label}/border`).toBe('2px');
           expect(surface.borderRadius, `${label}/radius`).toBe('0px');
           expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');

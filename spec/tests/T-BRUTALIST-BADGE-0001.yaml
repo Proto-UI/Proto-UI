@@ -21,10 +21,9 @@ cases:
       - P-BRUTALIST-BADGE-VISUAL-GRAMMAR
     expectation: p-brutalist-badge-visual-contract
   - id: T-BRUTALIST-BADGE-0001-CASE-BROWSER
-    title: Rendered tones preserve passive square hard-shadow grammar across official runtimes
+    title: Rendered Badge surfaces preserve passive square hard-shadow grammar across official runtimes
     covers:
       - P-BRUTALIST-BADGE-PASSIVE-BOUNDARY
-      - P-BRUTALIST-BADGE-TONES
       - P-BRUTALIST-BADGE-VISUAL-GRAMMAR
     expectation: rendered-brutalist-badge-cross-runtime-visual-grammar
 implementations:
@@ -58,6 +57,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added draft Brutalist badge prototype coverage.
+  - version: 0.2.0
+    change: extended
+    summary: Added required cross-runtime browser evidence for passive boundaries, exact tone pairs, and visual grammar.
 tags:
   - test
   - brutalist

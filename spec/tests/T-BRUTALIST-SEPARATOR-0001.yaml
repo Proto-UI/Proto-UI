@@ -55,6 +55,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added draft Brutalist separator prototype coverage.
+  - version: 0.2.0
+    change: extended
+    summary: Added required cross-runtime browser evidence for live orientation updates, consumer-fill geometry, and foreground ink.
 tags:
   - test
   - brutalist

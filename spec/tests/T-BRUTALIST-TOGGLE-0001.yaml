@@ -104,6 +104,9 @@ revisions:
     change: revised
     summary: >-
       Added executable coverage for the persistent non-color active frame and deterministic hover/press/active precedence.
+  - version: 0.2.0
+    change: extended
+    summary: Added required cross-runtime browser evidence for exact resting/active pairs, state re-projection, and structural borders.
 
 
 tags:
