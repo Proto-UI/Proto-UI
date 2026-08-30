@@ -241,7 +241,7 @@ class A11yModuleImpl extends ModuleBase {
       (_ctx, event) => {
         if (event.type === 'disconnect') return;
         try {
-          resolveA11yLevel(event.next);
+          resolveA11yLevel(levelHandle.get());
         } catch (error) {
           if (canRollback) {
             this.statePort.setDefault(levelHandle as OwnedStateHandle<number>, event.prev);

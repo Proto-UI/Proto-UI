@@ -303,6 +303,46 @@ describe('runtime contract: a11y (v0)', () => {
     result.invokeUnmounted();
   });
 
+  it('validates the live level after a reentrant source update', () => {
+    let setLevel!: (value: number) => void;
+    let getLevel!: () => number;
+    const asReentrantLevel = defineAsHook<
+      Record<string, never>,
+      Record<string, never>,
+      { level: State<number> }
+    >({
+      name: 'as-reentrant-heading-level',
+      setup(def) {
+        def.state.numberDiscrete('level', 2);
+      },
+    });
+    const P = definePrototype({
+      name: 'x-a11y-reentrant-heading-level',
+      setup(def) {
+        const level = asReentrantLevel().getState?.('level');
+        if (!level) throw new Error('missing reentrant heading level');
+        setLevel = (value) => level.set(value, 'reason: reentrant test level');
+        getLevel = () => level.get();
+        level.watch((_run, event) => {
+          if (event.type === 'next' && event.next === 3) {
+            level.set(0, 'reason: reentrant invalid level');
+          }
+        });
+        def.a11y.role('heading');
+        def.a11y.level(level);
+      },
+    });
+
+    const ctx = createHost();
+    const result = executeWithHost(P as any, ctx.host as any);
+    expect(ctx.snapshots.at(-1)?.level).toBe(2);
+    expect(() => result.invokeInCallbackScope(() => setLevel(3))).toThrow(
+      /level must be an integer in range 1-6/
+    );
+    expect(getLevel()).toBe(2);
+    result.invokeUnmounted();
+  });
+
   it('A11Y-0066: rejects invalid heading level updates without a host projector', () => {
     let level!: OwnedStateHandle<number>;
     const P = definePrototype({
