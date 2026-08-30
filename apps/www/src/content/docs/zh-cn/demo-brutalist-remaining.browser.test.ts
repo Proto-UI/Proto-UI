@@ -44,6 +44,13 @@ if (requestedRuntime && TEST_RUNTIMES.length === 0) {
 type SurfaceFacts = {
   role: string | null;
   tabIndex: number;
+  ariaSelected: string | null;
+  ariaPressed: string | null;
+  ariaLive: string | null;
+  ariaBusy: string | null;
+  hasActiveState: boolean;
+  hasPressedState: boolean;
+  hasSelectedState: boolean;
   borderWidth: string;
   borderColor: string;
   borderRadius: string;
@@ -71,6 +78,13 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
     return {
       role: element.getAttribute('role'),
       tabIndex: htmlElement.tabIndex,
+      ariaSelected: element.getAttribute('aria-selected'),
+      ariaPressed: element.getAttribute('aria-pressed'),
+      ariaLive: element.getAttribute('aria-live'),
+      ariaBusy: element.getAttribute('aria-busy'),
+      hasActiveState: element.hasAttribute('data-active'),
+      hasPressedState: element.hasAttribute('data-pressed'),
+      hasSelectedState: element.hasAttribute('data-selected'),
       borderWidth: style.borderTopWidth,
       borderColor: style.borderTopColor,
       borderRadius: style.borderTopLeftRadius,
@@ -292,6 +306,13 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(surface.flexDirection, `${runtime}/card/direction`).toBe('column');
         expect(surface.role, `${runtime}/card/role`).toBeNull();
         expect(surface.tabIndex, `${runtime}/card/tabindex`).toBe(-1);
+        expect(surface.ariaSelected, `${runtime}/card/aria-selected`).toBeNull();
+        expect(surface.ariaPressed, `${runtime}/card/aria-pressed`).toBeNull();
+        expect(surface.ariaLive, `${runtime}/card/aria-live`).toBeNull();
+        expect(surface.ariaBusy, `${runtime}/card/aria-busy`).toBeNull();
+        expect(surface.hasActiveState, `${runtime}/card/data-active`).toBe(false);
+        expect(surface.hasPressedState, `${runtime}/card/data-pressed`).toBe(false);
+        expect(surface.hasSelectedState, `${runtime}/card/data-selected`).toBe(false);
         expect(Number.parseFloat(surface.width), `${runtime}/card/width`).toBeGreaterThan(0);
         expect(Number.parseFloat(surface.height), `${runtime}/card/height`).toBeGreaterThan(0);
       }
@@ -427,6 +448,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             return {
               role: element.getAttribute('role'),
               ariaHidden: element.getAttribute('aria-hidden'),
+              ariaSelected: element.getAttribute('aria-selected'),
+              ariaPressed: element.getAttribute('aria-pressed'),
+              ariaLive: element.getAttribute('aria-live'),
+              ariaBusy: element.getAttribute('aria-busy'),
               tabIndex: (element as HTMLElement).tabIndex,
               borderWidth: style.borderTopWidth,
               borderColor: style.borderTopColor,
@@ -455,6 +480,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expect(surface.role, `${label}/role`).toBeNull();
           expect(surface.ariaHidden, `${label}/hidden`).toBe('true');
           expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
+          expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
+          expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
+          expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
+          expect(surface.ariaBusy, `${label}/aria-busy`).toBeNull();
           expect(surface.borderWidth, `${label}/border`).toBe('2px');
           expect(surface.borderColor, `${label}/border-color`).toBe(expectedBorder);
           expect(surface.borderRadius, `${label}/radius`).toBe('0px');
