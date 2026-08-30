@@ -204,6 +204,25 @@ describe('module-text-control', () => {
     expect(seen).toEqual(['xyz']);
   });
 
+  it('canonicalizes CR and CRLF in outward event data', () => {
+    const harness = createHarness(true, 'multiline');
+    const control = harness.module.facade.declare();
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    const seen: Array<string | null> = [];
+    control.on('compositionupdate', (_run, next) => seen.push(next.data));
+
+    const connection = harness.connectionBox.current;
+    if (!connection) throw new Error('text-control host connection was not attached');
+    harness.sys.phase = 'callback';
+    connection.onEvent({
+      ...event('compositionupdate', 'value'),
+      data: 'a\r\nb\rc',
+      inputType: 'insertCompositionText',
+    });
+
+    expect(seen).toEqual(['a\nb\nc']);
+  });
+
   it('preserves controlled composition and restores only after the IME boundary', async () => {
     const harness = createHarness();
     const control = harness.module.facade.declare();

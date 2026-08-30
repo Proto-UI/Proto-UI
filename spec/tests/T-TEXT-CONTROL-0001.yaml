@@ -37,7 +37,7 @@ cases:
     title: Retained declarations reject mode-incompatible patches
     covers:
       - C-TEXT-CONTROL-0001-B
-    expectation: single-line-rejects-rows-wrap-and-multiline-rejects-single-line-hints
+    expectation: single-line-rejects-rows-wrap-and-multiline-accepts-common-inputMode-and-enterKeyHint
   - id: T-TEXT-CONTROL-0001-CASE-PATCH-PRESERVATION
     title: Omitted fields retain the latest complete patch across unrelated updates and lease rebinding
     covers:

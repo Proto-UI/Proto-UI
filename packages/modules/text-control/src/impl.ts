@@ -183,6 +183,7 @@ export class TextControlModuleImpl extends ModuleBase {
     const canonicalEvent: TextControlEvent = Object.freeze({
       ...event,
       value: this.canonicalize(event.value),
+      data: typeof event.data === 'string' ? this.canonicalize(event.data) : event.data,
     });
     this.composing = canonicalEvent.composing;
     if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {

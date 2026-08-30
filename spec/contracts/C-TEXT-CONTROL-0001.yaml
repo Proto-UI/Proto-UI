@@ -36,8 +36,8 @@ criteria:
       en: Controlled composition must not restore an old value or disrupt the IME candidate or cursor; an unaccepted proposal may be restored only after the composition boundary completes.
   - id: C-TEXT-CONTROL-0001-F
     text:
-      zh-CN: Target listener 与 host reference 必须受 mount lease 约束并在 detach/dispose 时撤销；Web Component inner textarea 的原生事件必须在 wrapper boundary 内停止传播，再通过标准化 prototype event 发出。
-      en: Target listeners and host references must be bounded by a mount lease and revoked on detach or disposal; native events from a Web Component inner textarea must stop at the wrapper boundary and re-emerge only as normalized prototype events.
+      zh-CN: Target listener 与 host reference 必须受 mount lease 约束并在 detach/dispose 时撤销；Web Component inner textarea 或 inner input 的原生事件必须在 wrapper boundary 内停止传播，再通过标准化 prototype event 发出。
+      en: Target listeners and host references must be bounded by a mount lease and revoked on detach or disposal; native events from a Web Component inner textarea or inner input must stop at the wrapper boundary and re-emerge only as normalized prototype events.
   - id: C-TEXT-CONTROL-0001-G
     text:
       zh-CN: 宿主必须默认保留 selection、cursor、IME 与系统 editing chrome；普通 property patch 或未改变 value 的同步不得破坏 active editing session，controlled composition 期间的无关 patch 不得写回 owner value。
