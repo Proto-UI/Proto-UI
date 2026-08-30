@@ -46,7 +46,7 @@ implementations:
       - P-BRUTALIST-CARD-FOOTER
   - id: website-brutalist-remaining-browser-card
     kind: adapter-test
-    status: planned
+    status: passing
     path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
     required: true
     consumesCases:

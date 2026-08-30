@@ -4,7 +4,6 @@ import type { Browser, Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   COLOR_SCHEMES,
-  RUNTIMES,
   applyColorScheme,
   choosePreviewRuntime,
   launchBrowser,
@@ -21,14 +20,16 @@ const SKELETON_ROUTE = '/en/ui-libraries/brutalist/components/skeleton/';
 const TOGGLE_ROUTE = '/en/ui-libraries/brutalist/components/toggle/';
 const HOVER_CARD_ROUTE = '/en/ui-libraries/brutalist/components/hover-card/';
 const NARROW_VIEWPORT = { width: 320, height: 844 } as const;
+const BROWSER_RUNTIMES = ['wc', 'react', 'vue'] as const;
+type BrowserRuntime = (typeof BROWSER_RUNTIMES)[number];
 const requestedRuntime = process.env.PROTO_UI_PR539_BROWSER_RUNTIME;
 const TEST_RUNTIMES = requestedRuntime
-  ? RUNTIMES.filter((runtime) => runtime === requestedRuntime)
-  : RUNTIMES;
+  ? BROWSER_RUNTIMES.filter((runtime) => runtime === requestedRuntime)
+  : BROWSER_RUNTIMES;
 
 if (requestedRuntime && TEST_RUNTIMES.length === 0) {
   throw new Error(
-    `PROTO_UI_PR539_BROWSER_RUNTIME must be one of ${RUNTIMES.join(', ')}; received ${requestedRuntime}.`
+    `PROTO_UI_PR539_BROWSER_RUNTIME must be one of ${BROWSER_RUNTIMES.join(', ')}; received ${requestedRuntime}.`
   );
 }
 
@@ -75,6 +76,42 @@ function roots(previewer: Locator): Locator {
 async function expectVisibility(locator: Locator, visible: boolean, label: string): Promise<void> {
   await locator.waitFor({ state: visible ? 'visible' : 'hidden', timeout: 10_000 });
   expect(await locator.isVisible(), label).toBe(visible);
+}
+
+async function selectRuntimeWithDiagnostics(
+  page: import('playwright-core').Page,
+  previewer: Locator,
+  runtime: BrowserRuntime,
+  readySelector: string,
+  expectedCount: number
+): Promise<void> {
+  try {
+    await selectRuntime(page, previewer, runtime, readySelector, expectedCount);
+  } catch (error) {
+    const diagnostics = await page.evaluate(
+      ({ selector }) => {
+        const root = document.querySelector<HTMLElement>('[data-previewer-id]');
+        const host = root?.querySelector<HTMLElement>('.host');
+        const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
+        const select = root?.querySelector<HTMLSelectElement>('select.adapter-select');
+        return {
+          selected: root?.querySelector<HTMLElement>('[data-adapter-select-root]')?.dataset.value,
+          nativeSelected: select?.value,
+          disabled: select?.disabled,
+          rootCount: host?.querySelectorAll(selector).length ?? 0,
+          firstTag: firstRoot?.tagName ?? null,
+          hasVueApp: host?.hasAttribute('data-v-app') ?? false,
+          hasVue2Instance: Boolean((firstRoot as HTMLElement & { __vue__?: unknown })?.__vue__),
+          previewError:
+            root?.querySelector('[data-preview-error], [data-error]')?.textContent ?? null,
+        };
+      },
+      { selector: readySelector }
+    );
+    throw new Error(`selectRuntime(${runtime}) diagnostics: ${JSON.stringify(diagnostics)}`, {
+      cause: error,
+    });
+  }
 }
 
 function expectHardFrame(surface: SurfaceFacts, shadowOffset: string, label: string): void {
@@ -161,7 +198,13 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
     const opened = await openRoute(browser, baseUrl, SEPARATOR_ROUTE, NARROW_VIEWPORT);
     try {
       for (const runtime of TEST_RUNTIMES) {
-        await selectRuntime(opened.page, opened.previewer, runtime, '[data-pui-root]', 2);
+        await selectRuntimeWithDiagnostics(
+          opened.page,
+          opened.previewer,
+          runtime,
+          '[data-pui-root]',
+          2
+        );
         const separators = roots(opened.previewer);
         for (const colorScheme of COLOR_SCHEMES) {
           await applyColorScheme(opened.page, colorScheme);

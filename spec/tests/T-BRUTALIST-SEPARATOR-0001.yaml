@@ -38,7 +38,7 @@ implementations:
       - P-BASE-SEPARATOR
   - id: website-brutalist-remaining-browser-separator
     kind: adapter-test
-    status: planned
+    status: passing
     path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
     required: true
     consumesCases:
