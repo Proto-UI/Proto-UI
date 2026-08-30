@@ -34,6 +34,34 @@ const textareaPrototype = definePrototype({
   },
 });
 
+const singleLineValues: string[] = [];
+type SingleLineProps = { defaultValue?: string; placeholder?: string };
+
+const singleLinePrototype = definePrototype({
+  name: 'vue-text-control-input',
+  modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
+  setup(def: DefHandle<SingleLineProps>) {
+    def.props.define({
+      defaultValue: { type: 'string', empty: 'fallback' },
+      placeholder: { type: 'string', empty: 'fallback' },
+    });
+    const control = asTextControl<SingleLineProps, 'single'>();
+    control.on('input', (_run, event) => singleLineValues.push(event.value));
+    const sync = (props: Readonly<SingleLineProps>) => {
+      control.sync({
+        valueMode: 'uncontrolled',
+        defaultValue: props.defaultValue,
+        placeholder: props.placeholder,
+        inputMode: 'text',
+        enterKeyHint: 'search',
+      });
+    };
+    def.lifecycle.onCreated((run) => sync(run.props.get()));
+    def.props.watchAll((_run, next) => sync(next));
+    return () => null;
+  },
+});
+
 describe('adapter-vue text control', () => {
   it('materializes the declared textarea root, projects patches, and routes input', async () => {
     const mounted = createMountedVueAdapter(textareaPrototype, {
@@ -65,5 +93,33 @@ describe('adapter-vue text control', () => {
     expect(() => createVueAdapter(VueAny)(textareaPrototype, { rootTag: 'div' })).toThrow(
       /rootTag/
     );
+  });
+
+  it('materializes a single-line input with common hints and strips newlines', async () => {
+    singleLineValues.length = 0;
+    const mounted = createMountedVueAdapter(singleLinePrototype, {
+      defaultValue: 'initial',
+      placeholder: 'Search',
+      surfaceClass: 'surface-input outline-none',
+    });
+    await flushVue();
+    const input = mounted.root as HTMLInputElement;
+    expect(input.tagName.toLowerCase()).toBe('input');
+    expect(input.value).toBe('initial');
+    expect(input.defaultValue).toBe('initial');
+    expect(input.placeholder).toBe('Search');
+    expect(input.inputMode).toBe('text');
+    expect(input.enterKeyHint).toBe('search');
+    expect(input.classList.contains('surface-input')).toBe(true);
+    expect(input.classList.contains('outline-none')).toBe(true);
+
+    input.value = 'edited';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(singleLineValues).toEqual(['edited']);
+
+    input.value = 'no\nnewlines';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(singleLineValues).toEqual(['edited', 'nonewlines']);
+    mounted.unmount();
   });
 });

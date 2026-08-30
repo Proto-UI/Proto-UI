@@ -10,6 +10,13 @@ cases:
     covers:
       - C-TEXT-CONTROL-0001-A
     expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
+  - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
+    title: A single-line declaration materializes one input, projects common hints, and strips line breaks across Web Component, React, and Vue adapters
+    covers:
+      - C-TEXT-CONTROL-0001-A
+      - C-TEXT-CONTROL-0001-B
+      - C-TEXT-CONTROL-0001-I
+    expectation: single-line-requirement-resolves-to-one-web-input-projects-common-hints-and-canonicalizes-line-breaks
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
     title: Portable patches project common inputMode and enterKeyHint hints on input and textarea, plus the line-mode-specific fields
     covers:
@@ -125,6 +132,7 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
       - T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
       - T-TEXT-CONTROL-0001-CASE-PRESENTATION-SURFACE
     exercises:
@@ -137,6 +145,7 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
@@ -147,6 +156,7 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
