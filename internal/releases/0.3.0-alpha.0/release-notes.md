@@ -23,7 +23,7 @@ Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution 
 ## Image View
 
 - Adds the public `@proto.ui/module-image-view` package and admits it to the exact 43-package release identity as the host-mediated image presentation protocol used by Base Image and Runtime.
-- Covers generation-bound loading, stale completion rejection, replacement visual clearing, explicit accessibility mode, and controlled/uncontrolled Base Image source ownership with executable fake-host and runtime evidence.
+- Covers generation-bound loading, stale completion rejection, replacement visual clearing, explicit accessibility mode, and direct `source` projection with executable fake-host and runtime evidence.
 - Keeps the first `@proto.ui/module-image-view` npm identity bootstrap, protected release-workflow configuration, and registry readiness as explicit pre-publication gates; bootstrap must not claim `latest` or `next`.
 
 ## Official Vue 2 Adapter
