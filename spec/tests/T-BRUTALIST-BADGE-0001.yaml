@@ -60,6 +60,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: extended
     summary: Added required cross-runtime browser evidence for passive boundaries, exact tone pairs, and visual grammar.
+tags:
   - test
   - brutalist
   - neo-brutalist
