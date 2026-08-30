@@ -20,6 +20,14 @@ const SEPARATOR_ROUTE = '/en/ui-libraries/brutalist/components/separator/';
 const SKELETON_ROUTE = '/en/ui-libraries/brutalist/components/skeleton/';
 const TOGGLE_ROUTE = '/en/ui-libraries/brutalist/components/toggle/';
 const HOVER_CARD_ROUTE = '/en/ui-libraries/brutalist/components/hover-card/';
+const REMAINING_ROUTES = [
+  BADGE_ROUTE,
+  CARD_ROUTE,
+  SEPARATOR_ROUTE,
+  SKELETON_ROUTE,
+  TOGGLE_ROUTE,
+  HOVER_CARD_ROUTE,
+] as const;
 const NARROW_VIEWPORT = { width: 320, height: 844 } as const;
 const BROWSER_RUNTIMES = RUNTIMES;
 type BrowserRuntime = (typeof BROWSER_RUNTIMES)[number];
@@ -185,7 +193,7 @@ let browser: Browser;
 let baseUrl = '';
 
 beforeAll(async () => {
-  baseUrl = await startServer(BADGE_ROUTE);
+  baseUrl = await startServer(REMAINING_ROUTES);
   browser = await launchBrowser();
 }, 180_000);
 
