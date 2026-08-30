@@ -624,11 +624,8 @@ describe.sequential('Prototype style closure without Website CSS', () => {
           };
         }, runtime);
 
-      const expected = await readTokenPaint();
-      for (const runtime of RUNTIMES) {
-        const trigger = page.locator(`[data-demo-ref="hover-trigger-${runtime}"]`).first();
-        await trigger.hover();
-        await page.waitForFunction(
+      const waitForOpenEndpoint = async (runtime: (typeof RUNTIMES)[number]) =>
+        page.waitForFunction(
           (runtimeId) => {
             const boundary = document.querySelector<HTMLElement>(
               `[data-demo-ref="hover-content-${runtimeId}"]`
@@ -636,11 +633,28 @@ describe.sequential('Prototype style closure without Website CSS', () => {
             const surface = boundary?.hasAttribute('data-pui-style')
               ? boundary
               : boundary?.querySelector<HTMLElement>('[data-pui-style]');
-            return Boolean(surface && getComputedStyle(surface).opacity === '1');
+            if (!surface || getComputedStyle(surface).opacity !== '1') return false;
+
+            const enterAnimations = surface
+              .getAnimations()
+              .filter(
+                (animation) =>
+                  animation instanceof CSSAnimation && animation.animationName === 'pui-enter'
+              );
+            return (
+              enterAnimations.length > 0 &&
+              enterAnimations.every((animation) => animation.playState === 'finished')
+            );
           },
           runtime,
           { timeout: 20_000 }
         );
+
+      const expected = await readTokenPaint();
+      for (const runtime of RUNTIMES) {
+        const trigger = page.locator(`[data-demo-ref="hover-trigger-${runtime}"]`).first();
+        await trigger.hover();
+        await waitForOpenEndpoint(runtime);
 
         await page.mouse.move(2, 2);
         await page.waitForFunction(
@@ -662,21 +676,10 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         );
 
         await trigger.hover();
-        await page.waitForFunction(
-          (runtimeId) => {
-            const boundary = document.querySelector<HTMLElement>(
-              `[data-demo-ref="hover-content-${runtimeId}"]`
-            );
-            const surface = boundary?.hasAttribute('data-pui-style')
-              ? boundary
-              : boundary?.querySelector<HTMLElement>('[data-pui-style]');
-            return Boolean(surface && getComputedStyle(surface).opacity === '1');
-          },
-          runtime,
-          { timeout: 20_000 }
-        );
-        await page.waitForTimeout(60);
+        await waitForOpenEndpoint(runtime);
         const reopened = await readEndpoint(runtime);
+        await page.waitForTimeout(60);
+        expect(await readEndpoint(runtime), `${runtime}/reopened-stable-sample`).toEqual(reopened);
         expect(reopened, `${runtime}/reopened-stable-endpoint`).toEqual({
           present: true,
           opacity: '1',
