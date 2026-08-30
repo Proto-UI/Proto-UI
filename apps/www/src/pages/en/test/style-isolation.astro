@@ -1,0 +1,245 @@
+---
+import '../../../styles/proto-ui-style.css';
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Proto UI style isolation fixture</title>
+  </head>
+  <body>
+    <main>
+      <h1>Proto UI style isolation fixture</h1>
+      <p>
+        This route intentionally excludes Starlight, Tailwind Preflight, and the Website global
+        stylesheet.
+      </p>
+
+      <div class="fixture-grid">
+        {
+          ['wc', 'react', 'vue', 'vue2'].map((runtime) => (
+            <section class="fixture-runtime" data-runtime-card={runtime}>
+              <h2>{runtime}</h2>
+              <div data-runtime-host={runtime} />
+            </section>
+          ))
+        }
+      </div>
+    </main>
+
+    <div class="token-probes" aria-hidden="true">
+      <span data-token-probe="foreground"></span>
+      <span data-token-probe="border"></span>
+      <span data-token-probe="popover"></span>
+    </div>
+
+    <button data-unstyled-control type="button">Unstyled host control</button>
+
+    <script>
+      import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer';
+      import {
+        collectPrototypeIds,
+        type DemoSpec,
+      } from '../../../components/PrototypePreviewer/demo-types';
+      import { loadPrototypes } from '../../../components/PrototypePreviewer/prototype-modules';
+      import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/registry';
+
+      const runtimes: RuntimeId[] = ['wc', 'react', 'vue', 'vue2'];
+
+      function createDemo(runtime: RuntimeId): DemoSpec {
+        return {
+          type: 'demo',
+          root: {
+            kind: 'box',
+            className: 'fixture-stack',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-button',
+                ref: `button-${runtime}`,
+                props: { variant: 'outline', size: 'default' },
+                children: ['Standalone button'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-button',
+                ref: `button-override-${runtime}`,
+                className: 'consumer-override',
+                props: { variant: 'outline', size: 'default' },
+                children: ['Consumer override'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-editable-${runtime}`,
+                props: {
+                  defaultValue: 'Standalone editable',
+                  ariaLabel: 'Standalone editable',
+                  rows: 4,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-disabled-${runtime}`,
+                props: {
+                  defaultValue: 'Standalone disabled',
+                  disabled: true,
+                  ariaLabel: 'Standalone disabled',
+                  rows: 2,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-readonly-${runtime}`,
+                props: {
+                  defaultValue: 'Standalone readonly',
+                  readOnly: true,
+                  ariaLabel: 'Standalone readonly',
+                  rows: 2,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-hover-card-root',
+                ref: `hover-root-${runtime}`,
+                props: { defaultOpen: true, openDelay: 0, closeDelay: 0 },
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-hover-card-trigger',
+                    ref: `hover-trigger-${runtime}`,
+                    children: [`Hover trigger ${runtime}`],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-hover-card-content',
+                    ref: `hover-content-${runtime}`,
+                    props: { side: 'bottom', align: 'center' },
+                    children: [`Standalone hover content ${runtime}`],
+                  },
+                ],
+              },
+            ],
+          },
+        };
+      }
+
+      async function mountFixture(): Promise<void> {
+        const demos = new Map(runtimes.map((runtime) => [runtime, createDemo(runtime)]));
+        const prototypeIds = new Set<string>();
+        for (const demo of demos.values()) collectPrototypeIds(demo.root, prototypeIds);
+        await loadPrototypes([...prototypeIds]);
+
+        const cleanups: Array<() => Promise<void> | void> = [];
+        for (const runtime of runtimes) {
+          const host = document.querySelector<HTMLElement>(`[data-runtime-host="${runtime}"]`);
+          const demo = demos.get(runtime);
+          if (!host || !demo) throw new Error(`Missing style-isolation host for ${runtime}.`);
+          const result = await renderDemo({ runtime, demo, host });
+          cleanups.push(result.destroy);
+          host.dataset.mounted = 'true';
+        }
+
+        window.addEventListener(
+          'pagehide',
+          () => {
+            for (const destroy of cleanups.reverse()) void destroy();
+          },
+          { once: true }
+        );
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        document.documentElement.dataset.styleIsolationReady = 'true';
+      }
+
+      void mountFixture().catch((error: unknown) => {
+        const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
+        document.documentElement.dataset.styleIsolationError = message;
+        document.documentElement.dataset.styleIsolationReady = 'error';
+        console.error(error);
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    padding: 2rem;
+    background: var(--pui-background);
+    color: var(--pui-foreground);
+    font-family: 'Proto UI Isolation Consumer', sans-serif;
+  }
+
+  h1,
+  h2,
+  p {
+    margin: 0 0 1rem;
+  }
+
+  .fixture-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 20rem));
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .fixture-runtime,
+  [data-runtime-host],
+  .fixture-stack {
+    width: 20rem;
+  }
+
+  .fixture-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .consumer-override {
+    color: rgb(12 34 56);
+    font-family: 'Proto UI Explicit Consumer', serif;
+  }
+
+  .token-probes {
+    position: fixed;
+    inset: auto auto 0 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  [data-token-probe='foreground'] {
+    color: var(--pui-foreground);
+  }
+
+  [data-token-probe='border'] {
+    border: 1px solid var(--pui-border);
+  }
+
+  [data-token-probe='popover'] {
+    color: var(--pui-popover-foreground);
+    background: var(--pui-popover);
+  }
+
+  [data-unstyled-control] {
+    position: fixed;
+    inset: auto 0 0 auto;
+  }
+</style>

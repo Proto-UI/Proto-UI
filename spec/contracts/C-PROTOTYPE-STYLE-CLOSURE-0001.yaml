@@ -1,0 +1,75 @@
+id: C-PROTOTYPE-STYLE-CLOSURE-0001
+type: contract
+title: Prototype visual intent must close through Adapter style translation
+status: draft
+since: 0.3.0-alpha.0
+summary: A supported Prototype presentation must carry every Prototype-governed visual asset through Adapter and style translation without relying on documentation-site or consumer-global CSS for correctness.
+statement:
+  zh-CN: >-
+    当受支持的 Adapter/host profile 呈现一个 Prototype 时，该 Prototype 所治理的视觉意图及其匹配 style asset 必须经由 Prototype declaration、semantic style result、Adapter surface projection 与 host physical style translation 形成闭包。组件的正确默认外观、状态样式与过渡终态不得依赖落地页、Starlight、Tailwind Preflight、document-wide global reset 或其他未声明的 consumer stylesheet。Consumer 仍拥有外层 composition/layout、显式 normalized `surfaceClassName`/`surfaceClass` 与 `surfaceStyle` 覆盖、theme activation 与 variable value、font resource 与未被 Prototype 覆盖的 font-family 选择，以及 viewport、content、locale 等环境输入；style closure 不得借此安装 document-wide reset、改写无关宿主内容，或压过 consumer 的显式样式所有权。
+
+
+  en: >-
+    When a supported Adapter and host profile presents a Prototype, the visual intent governed by that Prototype and every matching style asset must form a closure through the Prototype declaration, semantic style result, Adapter surface projection, and host physical style translation. Correct default appearance, state styling, and transition endpoints must not depend on a landing page, Starlight, Tailwind Preflight, a document-wide global reset, or another undeclared consumer stylesheet. The consumer continues to own outer composition and layout, explicit normalized `surfaceClassName` or `surfaceClass` and `surfaceStyle` overrides, theme activation and variable values, font resources and any font-family choice not overridden by the Prototype, and environmental inputs such as viewport, content, and locale. Style closure must not use that boundary to install a document-wide reset, rewrite unrelated host content, or outrank explicit consumer styling ownership.
+
+
+criteria:
+  - id: C-PROTOTYPE-STYLE-CLOSURE-0001-A
+    text:
+      zh-CN: 对于某个 Adapter/host profile 声明支持的 Prototype visual intent，其所需 token rule、state/selector translation、keyframe、scoped host normalization 与其他匹配 style asset 必须都能从 Prototype 输入与该 profile 的 Adapter/style translation 产物中得到，不得由展示站点私下补齐。
+      en: For Prototype visual intent supported by an Adapter and host profile, every required token rule, state or selector translation, keyframe, scoped host normalization, and other matching style asset must be obtainable from the Prototype input and that profile's Adapter or style-translation output rather than being supplied privately by a showcase site.
+  - id: C-PROTOTYPE-STYLE-CLOSURE-0001-B
+    text:
+      zh-CN: 只加载官方生成 style artifact 的 standalone consumer 必须能够得到组件正确的默认外观、状态样式与稳定过渡终态；landing page、Starlight、Tailwind Preflight、全局 reset 或未声明 stylesheet 不得成为 conformance 前提。
+      en: A standalone consumer loading only the officially generated style artifact must obtain correct component defaults, state styling, and stable transition endpoints; a landing page, Starlight, Tailwind Preflight, a global reset, or an undeclared stylesheet must not be a conformance prerequisite.
+  - id: C-PROTOTYPE-STYLE-CLOSURE-0001-C
+    text:
+      zh-CN: 文档站与 demo 可以拥有外层容器布局，并可以像普通 consumer 一样显式传入 normalized surface class/style；这些输入必须保持可识别且可移除，不得用 site selector 修补 Prototype 或 Adapter/style translation 缺失的默认视觉语义。
+      en: Documentation and demo surfaces may own outer-container layout and may explicitly pass normalized surface class or style like any other consumer; those inputs must remain identifiable and removable and must not use site selectors to repair missing default visual semantics in a Prototype or Adapter or style translation.
+  - id: C-PROTOTYPE-STYLE-CLOSURE-0001-D
+    text:
+      zh-CN: Consumer 必须继续拥有 outer layout、显式 surface class/style、theme activation 与 variable value、font resource 与未被 Prototype 明确覆盖的 font-family，以及 viewport、content、locale 等环境输入；隔离测试不得把这些合法输入误判为组件 stylesheet 依赖。
+      en: The consumer must continue to own outer layout, explicit surface class or style, theme activation and variable values, font resources and font-family where not explicitly overridden by the Prototype, and environmental inputs such as viewport, content, and locale; isolation tests must not misclassify these legitimate inputs as component-stylesheet dependencies.
+  - id: C-PROTOTYPE-STYLE-CLOSURE-0001-E
+    text:
+      zh-CN: 为闭合 Prototype style 而新增的 host normalization 必须限制在 Adapter/style translation 所拥有的 presentation surface，不得安装 document-wide reset、修改未进入 style projection 的元素，或以不必要的 specificity/cascade precedence 阻止 Prototype token 与 consumer 显式覆盖。
+      en: Host normalization added to close Prototype styling must be scoped to presentation surfaces owned by Adapter or style translation; it must not install a document-wide reset, modify elements outside style projection, or use unnecessary specificity or cascade precedence that prevents Prototype tokens and explicit consumer overrides from winning.
+sources:
+  - path: internal/records/2026-08-02-host-surface-projection.zh-CN.md
+  - path: packages/adapters/base/src/host/surface-projection.ts
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: apps/www/src/styles/global.css
+  - path: apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro
+  - path: packages/prototypes/shadcn/src/textarea/root.proto.ts
+  - path: packages/prototypes/shadcn/src/hover-card/content.proto.ts
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+    - C-FEEDBACK-STYLE-0003
+    - C-FEEDBACK-STYLE-0004
+    - C-FEEDBACK-STYLE-0005
+relates:
+  decisions:
+    - D-WEB-STYLE-BASELINE-0001
+  adapters:
+    - A-WEB-COMPONENT-0001
+    - A-REACT-18-19-0001
+    - A-VUE-3-0001
+    - A-VUE-2-0001
+  prototypes:
+    - P-SHADCN-TEXTAREA
+    - P-SHADCN-HOVER-CARD-CONTENT
+verifies:
+  tests:
+    - T-PROTOTYPE-STYLE-CLOSURE-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Required Prototype-governed visual intent to close through Adapter and style translation while preserving explicit consumer styling and environmental inputs.
+tags:
+  - prototype
+  - adapter
+  - style
+  - translation
+  - isolation
+  - consumer-boundary

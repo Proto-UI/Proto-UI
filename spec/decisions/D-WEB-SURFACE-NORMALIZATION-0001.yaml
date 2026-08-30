@@ -1,0 +1,79 @@
+id: D-WEB-SURFACE-NORMALIZATION-0001
+type: decision
+title: Styled Web native form controls receive a scoped neutral normalization
+status: draft
+since: 0.3.0-alpha.0
+summary: Generated Web physical token CSS neutralizes user-agent form-control defaults only on styled Proto UI native surfaces, at zero specificity and below Prototype token rules.
+statement:
+  zh-CN: >-
+    Web physical token CSS 必须在 `@layer proto-ui` 内、所有 Prototype token rule 之前，以零 specificity selector `:where(button[data-pui-style], input[data-pui-style], select[data-pui-style], textarea[data-pui-style])` 为进入 Proto UI style projection 的原生表单控件提供中立 user-agent normalization。该 normalization 必须让 font shorthand、font feature/variation settings、letter spacing 与 color 继承，并把 margin、padding、border、background 与 opacity 复位到中立值；不得匹配没有 `data-pui-style` 的元素。其低 specificity 与 source order 必须允许后续 Prototype token rule 以及 consumer 显式 surface class/style 覆盖这些默认值。
+
+
+  en: >-
+    Web physical token CSS must provide a neutral user-agent normalization for native form controls that enter Proto UI style projection, using the zero-specificity selector `:where(button[data-pui-style], input[data-pui-style], select[data-pui-style], textarea[data-pui-style])` inside `@layer proto-ui` and before every Prototype token rule. The normalization must inherit the font shorthand, font feature and variation settings, letter spacing, and color, and reset margin, padding, border, background, and opacity to neutral values. It must not match elements without `data-pui-style`. Its low specificity and source order must allow subsequent Prototype token rules and explicit consumer surface class or style to override these defaults.
+
+
+criteria:
+  - id: D-WEB-SURFACE-NORMALIZATION-0001-A
+    text:
+      zh-CN: 生成的 Web physical token CSS 必须使用且只使用 `:where(button[data-pui-style], input[data-pui-style], select[data-pui-style], textarea[data-pui-style])` 作为这组原生表单控件 normalization 的 selector；整个 selector 的 specificity 必须为零。
+      en: Generated Web physical token CSS must use exactly `:where(button[data-pui-style], input[data-pui-style], select[data-pui-style], textarea[data-pui-style])` as the normalization selector for this native form-control set, and the whole selector must have zero specificity.
+  - id: D-WEB-SURFACE-NORMALIZATION-0001-B
+    text:
+      zh-CN: 该 rule 必须位于 `@layer proto-ui` 内且先于所有 Prototype token rule 输出，使相同 presentation surface 上的 token rule 可以按 source order 覆盖 normalization。
+      en: The rule must be emitted inside `@layer proto-ui` and before every Prototype token rule so token rules on the same presentation surface can override the normalization by source order.
+  - id: D-WEB-SURFACE-NORMALIZATION-0001-C
+    text:
+      zh-CN: >-
+        Normalization 必须声明 `font: inherit`、`font-feature-settings: inherit`、`font-variation-settings: inherit`、`letter-spacing: inherit` 与 `color: inherit`，并以 `margin: 0`、`padding: 0`、`border: 0`、`background: transparent`、`opacity: 1` 消除会干扰 Prototype visual intent 的 user-agent 控件默认值。
+
+
+      en: >-
+        The normalization must declare `font: inherit`, `font-feature-settings: inherit`, `font-variation-settings: inherit`, `letter-spacing: inherit`, and `color: inherit`, and remove user-agent control defaults that interfere with Prototype visual intent through `margin: 0`, `padding: 0`, `border: 0`, `background: transparent`, and `opacity: 1`.
+
+
+  - id: D-WEB-SURFACE-NORMALIZATION-0001-D
+    text:
+      zh-CN: 没有 `data-pui-style` 的 button、input、select、textarea 与其他宿主内容不得被该 rule 修改；该 decision 不授权裸 tag selector、universal selector、document-wide reset 或 theme stylesheet patch。
+      en: Buttons, inputs, selects, textareas, and other host content without `data-pui-style` must not be modified by this rule; this decision does not authorize bare tag selectors, universal selectors, a document-wide reset, or a theme-stylesheet patch.
+  - id: D-WEB-SURFACE-NORMALIZATION-0001-E
+    text:
+      zh-CN: Prototype token rule 与 consumer 显式 surface class/style 必须能够覆盖 normalization 中同名 property；生成器不得通过更高 specificity、`!important` 或更晚的重复 normalization 夺取这些 source 的所有权。
+      en: Prototype token rules and explicit consumer surface class or style must be able to override the same properties in the normalization; the generator must not take ownership away from those sources through higher specificity, `!important`, or a later duplicate normalization.
+sources:
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: packages/cli/test/proto-style-css.test.ts
+  - path: packages/prototypes/shadcn/src/textarea/root.proto.ts
+  - path: apps/www/src/styles/global.css
+refines:
+  contracts:
+    - id: C-PROTOTYPE-STYLE-CLOSURE-0001
+      anchors:
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-A
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-B
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-E
+relates:
+  decisions:
+    - D-WEB-STYLE-BASELINE-0001
+  adapters:
+    - A-WEB-COMPONENT-0001
+    - A-REACT-18-19-0001
+    - A-VUE-3-0001
+    - A-VUE-2-0001
+  prototypes:
+    - P-SHADCN-TEXTAREA
+verifies:
+  tests:
+    - T-PROTOTYPE-STYLE-CLOSURE-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Selected a generated, zero-specificity, data-pui-style-scoped native form-control normalization below Web Prototype token rules.
+tags:
+  - web
+  - style
+  - css
+  - form-control
+  - normalization
+  - compiler
+  - cascade

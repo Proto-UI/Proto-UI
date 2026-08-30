@@ -46,10 +46,11 @@ criteria:
       contracts: [C-CORE-SYNTAX-0003]
   - id: P-SHADCN-TEXTAREA-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: Root 必须投射当前已实现的 field surface：`flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`。这些 tokens 是当前 passing surface，不表示与 upstream 精确一致。
-      en: Root must project the currently implemented field surface, `flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`. These tokens form the current passing surface and do not imply exact upstream parity.
+      zh-CN: Root 必须投射当前 field surface：`flex min-h-16 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base text-foreground shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`。`resize-y` 与 `text-foreground` 是 Prototype 拥有的 intent；原生 editor 的 consumer font-family 继承由 scoped Web surface normalization 提供，不得依赖 Preflight 或文档站 reset。这些 tokens 是当前 passing surface，不表示与 upstream 精确一致。
+      en: Root must project the current field surface, `flex min-h-16 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base text-foreground shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`. `resize-y` and `text-foreground` are Prototype-owned intent; inheritance of the consumer font family by the native editor is supplied by scoped Web surface normalization and must not depend on Preflight or a documentation-site reset. These tokens form the current passing surface and do not imply exact upstream parity.
     dependsOn:
-      contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
+      contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001, C-PROTOTYPE-STYLE-CLOSURE-0001]
+      decisions: [D-WEB-SURFACE-NORMALIZATION-0001]
   - id: P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES
     text:
       zh-CN: focus、disabled 与 dark colorScheme 的视觉 rule 必须以继承的 Textarea state handle 或 host metadata 为条件。焦点环必须键控继承的 `focusVisible`：Focus 对文本控件的指针聚焦遵循宿主 `:focus-visible` 判定（#438），因此环在点击路径上的表现与 upstream 一致，不得建立第二套 focus、disabled 或 theme truth，也不得依赖宿主 data attribute；具体 attribute 降级方式由 Adapter 拥有，不属于本投影的 guarantee。
@@ -113,16 +114,21 @@ dependsOn:
       C-AS-HOOK-0001,
       C-CORE-SYNTAX-0003,
       C-CORE-SYNTAX-0007,
+      C-PROTOTYPE-STYLE-CLOSURE-0001,
       C-RULE-WHEN-0002,
       C-RULE-INTENT-FEEDBACK-STYLE-0001,
     ]
-  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
+  decisions:
+    [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001, D-WEB-SURFACE-NORMALIZATION-0001]
 inherits:
   prototypes:
     - id: P-BASE-TEXTAREA
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-TEXTAREA-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Closed the standalone field surface with explicit foreground and vertical-resize intent plus scoped Web native-control font inheritance.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Restored the focus ring to the inherited focusVisible state after #438 aligned Focus with the host :focus-visible determination for pointer-focused text controls.

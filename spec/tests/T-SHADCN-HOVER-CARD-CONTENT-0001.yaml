@@ -16,7 +16,7 @@ cases:
       ]
     expectation: shadcn-hover-card-content-inherits-base-overlay-transition
   - id: T-SHADCN-HOVER-CARD-CONTENT-0001-CASE-MOTION-SURFACE-AND-COMPATIBILITY
-    title: open and side state drive the current 200ms animated surface while parity gaps stay bounded
+    title: open and side state drive the current 200ms animated surface with an explicit theme border while parity gaps stay bounded
     covers:
       [
         P-SHADCN-HOVER-CARD-CONTENT-TRANSITION,
@@ -25,7 +25,7 @@ cases:
         P-SHADCN-HOVER-CARD-CONTENT-COMPATIBILITY-SUBSET,
         P-SHADCN-HOVER-CARD-CONTENT-AS-CHILD-OMISSION,
       ]
-    expectation: shadcn-hover-card-content-current-motion-position-with-bounded-parity
+    expectation: shadcn-hover-card-content-projects-its-theme-border-and-current-motion
 implementations:
   - id: prototypes-shadcn-hover-card-content-contract
     kind: module-test
@@ -40,6 +40,7 @@ implementations:
     exercises: [P-SHADCN-HOVER-CARD-CONTENT, P-BASE-HOVER-CARD-CONTENT]
     notes:
       - Positive tests cover detached presence, entering and leaving states, current surface and directional animations, fixed positioning, and hover bridge; remaining parity stays centralized.
+      - Surface-token coverage requires `border-border`; standalone light and dark four-runtime computed-style coverage is mapped by `T-PROTOTYPE-STYLE-CLOSURE-0001`.
 verifies:
   prototypes:
     - id: P-SHADCN-HOVER-CARD-CONTENT

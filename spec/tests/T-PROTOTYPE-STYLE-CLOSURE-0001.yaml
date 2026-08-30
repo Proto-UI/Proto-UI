@@ -1,0 +1,113 @@
+id: T-PROTOTYPE-STYLE-CLOSURE-0001
+type: test
+title: Prototype style closure and standalone Web runtime tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Maps generated-CSS assertions and a real-browser standalone fixture across all four official Web runtimes to Prototype style closure, scoped native-surface normalization, and consumer ownership boundaries.
+cases:
+  - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-NORMALIZATION
+    title: generated Web CSS emits the exact zero-specificity native-control normalization inside the Proto UI layer before token rules
+    covers:
+      - D-WEB-SURFACE-NORMALIZATION-0001-A
+      - D-WEB-SURFACE-NORMALIZATION-0001-B
+      - D-WEB-SURFACE-NORMALIZATION-0001-C
+    expectation: generated-web-css-contains-neutral-styled-form-control-rule-before-token-rules
+  - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-NORMALIZATION-SCOPE
+    title: normalization leaves unstyled host controls untouched and remains overridable by Prototype tokens and explicit consumer presentation
+    covers:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-E
+      - D-WEB-SURFACE-NORMALIZATION-0001-D
+      - D-WEB-SURFACE-NORMALIZATION-0001-E
+    expectation: normalization-is-data-pui-style-scoped-and-loses-to-owned-overrides
+  - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-STANDALONE-FOUR-RUNTIMES
+    title: standalone Web Components React Vue 3 and Vue 2 fixtures need only generated Proto UI styles for component correctness
+    covers:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-A
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-B
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-C
+    expectation: four-official-web-runtimes-render-prototype-styles-without-site-css-or-tailwind-preflight
+  - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CONSUMER-INPUTS
+    title: standalone coverage preserves explicit consumer presentation and environmental inputs without introducing a global reset
+    covers:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-D
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-E
+      - D-WEB-SURFACE-NORMALIZATION-0001-D
+      - D-WEB-SURFACE-NORMALIZATION-0001-E
+    expectation: consumer-layout-theme-font-content-and-surface-overrides-remain-owned-inputs
+implementations:
+  - id: cli-proto-style-css-native-surface-normalization
+    kind: module-test
+    status: planned
+    path: packages/cli/test/proto-style-css.test.ts
+    required: true
+    consumesCases:
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-NORMALIZATION
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-NORMALIZATION-SCOPE
+    exercises:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001
+      - D-WEB-SURFACE-NORMALIZATION-0001
+    notes:
+      - The file exists, but assertions for the native form-control selector, declarations, layer order, and override boundary are not present yet, so this mapping remains planned.
+  - id: www-prototype-style-closure-browser
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
+    required: true
+    consumesCases:
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-NORMALIZATION-SCOPE
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-STANDALONE-FOUR-RUNTIMES
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CONSUMER-INPUTS
+    exercises:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001
+      - D-WEB-SURFACE-NORMALIZATION-0001
+      - A-WEB-COMPONENT-0001
+      - A-REACT-18-19-0001
+      - A-VUE-3-0001
+      - A-VUE-2-0001
+      - P-SHADCN-TEXTAREA
+      - P-SHADCN-HOVER-CARD-CONTENT
+    notes:
+      - The planned real-browser fixture must load generated `proto-ui-style.css` without the landing page, Starlight, Tailwind Preflight, or `apps/www/src/styles/global.css`, then exercise Web Components, React, Vue 3, and Vue 2.
+      - Theme activation and variables, inherited font choice, viewport, content, locale, outer fixture layout, and explicit surface class or style remain declared consumer inputs rather than hidden component CSS dependencies.
+verifies:
+  contracts:
+    - id: C-PROTOTYPE-STYLE-CLOSURE-0001
+      anchors:
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-A
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-B
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-C
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-D
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-E
+  decisions:
+    - id: D-WEB-SURFACE-NORMALIZATION-0001
+      anchors:
+        - D-WEB-SURFACE-NORMALIZATION-0001-A
+        - D-WEB-SURFACE-NORMALIZATION-0001-B
+        - D-WEB-SURFACE-NORMALIZATION-0001-C
+        - D-WEB-SURFACE-NORMALIZATION-0001-D
+        - D-WEB-SURFACE-NORMALIZATION-0001-E
+exercises:
+  adapters:
+    - A-WEB-COMPONENT-0001
+    - A-REACT-18-19-0001
+    - A-VUE-3-0001
+    - A-VUE-2-0001
+  prototypes:
+    - P-SHADCN-TEXTAREA
+    - P-SHADCN-HOVER-CARD-CONTENT
+sources:
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: packages/cli/test/proto-style-css.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added planned generated-CSS and four-runtime standalone browser coverage for Prototype style closure and scoped Web form-control normalization.
+tags:
+  - test
+  - prototype
+  - adapter
+  - web
+  - style
+  - isolation
+  - browser

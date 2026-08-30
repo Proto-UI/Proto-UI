@@ -15,6 +15,46 @@ describe('proto style css renderer', () => {
     expect(css).not.toMatch(/(^|\n)::after\s*\{/);
   });
 
+  it('normalizes only styled native controls at zero specificity before token rules', () => {
+    // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-NORMALIZATION
+    // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-NORMALIZATION-SCOPE
+    const css = renderProtoStyleTokenCss([
+      'border',
+      'border-input',
+      'bg-background',
+      'p-2',
+      'text-foreground',
+    ]);
+    const selector =
+      ':where(button[data-pui-style], input[data-pui-style], select[data-pui-style], textarea[data-pui-style])';
+    const layerAt = css.indexOf('@layer proto-ui {');
+    const normalizationAt = css.indexOf(selector);
+    const firstTokenAt = css.indexOf(':where([data-pui-style~=');
+
+    expect(normalizationAt).toBeGreaterThan(layerAt);
+    expect(normalizationAt).toBeLessThan(firstTokenAt);
+
+    const normalization = css.slice(normalizationAt, firstTokenAt);
+    for (const declaration of [
+      'font: inherit;',
+      'font-feature-settings: inherit;',
+      'font-variation-settings: inherit;',
+      'letter-spacing: inherit;',
+      'color: inherit;',
+      'margin: 0;',
+      'padding: 0;',
+      'border: 0;',
+      'background: transparent;',
+      'opacity: 1;',
+    ]) {
+      expect(normalization).toContain(declaration);
+    }
+
+    expect(css).not.toMatch(/(^|\n)\s*(button|input|select|textarea)\s*(,|\{)/);
+    expect(css).not.toMatch(/(^|\n)\s*\*\s*(,|\{)/);
+    expect(css).not.toContain('!important');
+  });
+
   it('renders space-between layout utilities used by compound controls', () => {
     const css = renderProtoStyleTokenCss(['flex', 'justify-between']);
 
