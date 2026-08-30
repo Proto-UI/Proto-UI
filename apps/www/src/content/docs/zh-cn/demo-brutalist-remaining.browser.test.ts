@@ -299,6 +299,13 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           '[data-pui-root]',
           2
         );
+        await opened.page.waitForFunction(
+          () =>
+            document.querySelector<HTMLElement>('[data-previewer-id] .host')?.dataset
+              .separatorDemoReady === 'true',
+          undefined,
+          { timeout: 10_000 }
+        );
         const separators = roots(opened.previewer);
         const dynamicSeparator = opened.previewer.locator(
           '.host [data-demo-ref="dynamic-separator"]'
@@ -368,6 +375,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               };
             })
           );
+          const [expectedInk] = await resolvedThemeColors(opened.page, 'backgroundColor', [
+            '--pui-foreground',
+          ]);
           expect(
             allFacts.map((surface) => surface.orientation),
             `${runtime}/${colorScheme}`
@@ -383,7 +393,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             `${runtime}/${colorScheme}/vertical-length`
           ).toBeLessThanOrEqual(0.5);
           expect(
-            allFacts.every((surface) => surface.backgroundColor !== 'rgba(0, 0, 0, 0)'),
+            allFacts.every((surface) => surface.backgroundColor === expectedInk),
             `${runtime}/${colorScheme}/ink`
           ).toBe(true);
         }
@@ -411,6 +421,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               borderRadius: style.borderTopLeftRadius,
               backgroundColor: style.backgroundColor,
               boxShadow: style.boxShadow,
+              animationName: style.animationName,
+              animationDuration: style.animationDuration,
+              transitionProperty: style.transitionProperty,
+              transitionDuration: style.transitionDuration,
               width: style.width,
               height: style.height,
             };
@@ -433,6 +447,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expect(surface.borderColor, `${label}/border-color`).toBe(expectedBorder);
           expect(surface.borderRadius, `${label}/radius`).toBe('0px');
           expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
+          expect(surface.animationName, `${label}/animation`).toBe('none');
+          expect(surface.animationDuration, `${label}/animation-duration`).toBe('0s');
+          expect(surface.transitionProperty, `${label}/transition-property`).toBe('all');
+          expect(surface.transitionDuration, `${label}/transition-duration`).toBe('0s');
           expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
           expect(Number.parseFloat(surface.width), `${label}/width`).toBeGreaterThan(0);
           expect(Number.parseFloat(surface.height), `${label}/height`).toBeGreaterThan(0);
@@ -457,6 +475,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               pressed: element.getAttribute('aria-pressed'),
               disabled: element.getAttribute('aria-disabled'),
               borderWidth: style.borderTopWidth,
+              borderColor: style.borderTopColor,
               borderRadius: style.borderTopLeftRadius,
               boxShadow: style.boxShadow,
               backgroundColor: style.backgroundColor,
@@ -513,6 +532,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         for (const [index, surface] of factsBefore.entries()) {
           expect(surface.role, `${runtime}/toggle-${index}/role`).toBe('button');
           expect(surface.borderWidth, `${runtime}/toggle-${index}/border`).toBe('2px');
+          expect(surface.borderColor, `${runtime}/toggle-${index}/border-color`).toBe(
+            'rgb(0, 0, 0)'
+          );
           expect(surface.borderRadius, `${runtime}/toggle-${index}/radius`).toBe('0px');
           expect(surface.boxShadow, `${runtime}/toggle-${index}/shadow`).toContain(
             '3px 3px 0px 0px'
@@ -525,11 +547,26 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           await first.getAttribute('aria-pressed'),
           `${runtime}/first-enabled-after-first-click`
         ).toBe('true');
+        const firstActiveSurface = await facts(first);
+        expect(firstActiveSurface.backgroundColor, `${runtime}/after-first-click/background`).toBe(
+          expectedActiveBackground
+        );
+        expect(firstActiveSurface.color, `${runtime}/after-first-click/foreground`).toBe(
+          expectedActiveForeground
+        );
         await first.click();
         expect(
           await first.getAttribute('aria-pressed'),
           `${runtime}/first-enabled-after-second-click`
         ).toBe('false');
+        const firstRestingSurface = await facts(first);
+        expect(
+          firstRestingSurface.backgroundColor,
+          `${runtime}/after-second-click/background`
+        ).toBe(expectedRestingBackground);
+        expect(firstRestingSurface.color, `${runtime}/after-second-click/foreground`).toBe(
+          expectedRestingForeground
+        );
         const disabled = toggles.nth(3);
         expect(
           await disabled.evaluate((element) => getComputedStyle(element).pointerEvents),

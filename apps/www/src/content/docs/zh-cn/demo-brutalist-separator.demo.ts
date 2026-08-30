@@ -9,7 +9,11 @@ function setupSeparatorDemo({ host, api }: DemoSetupContext) {
     }
   };
   host.addEventListener('proto-ui-test:separator-orientation', onOrientationChange);
-  return () => host.removeEventListener('proto-ui-test:separator-orientation', onOrientationChange);
+  host.setAttribute('data-separator-demo-ready', 'true');
+  return () => {
+    host.removeEventListener('proto-ui-test:separator-orientation', onOrientationChange);
+    host.removeAttribute('data-separator-demo-ready');
+  };
 }
 
 export default {
