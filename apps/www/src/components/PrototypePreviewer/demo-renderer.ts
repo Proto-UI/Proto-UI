@@ -103,6 +103,9 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
   }
   if (node.kind === 'box') {
     const el = document.createElement('div');
+    for (const [name, value] of Object.entries(node.attrs ?? {})) {
+      el.setAttribute(name, value);
+    }
     if (node.className) el.className = node.className;
     if (node.ref) el.setAttribute('data-demo-ref', node.ref);
     parent.appendChild(el);
@@ -237,7 +240,7 @@ async function renderDemoReact(
       const kids = (node.children ?? []).map((child) => renderNode(child));
       return React.createElement(
         'div',
-        { className: node.className, 'data-demo-ref': node.ref },
+        { ...node.attrs, className: node.className, 'data-demo-ref': node.ref },
         ...kids
       );
     }
@@ -367,6 +370,7 @@ async function renderDemoVue(
       return Vue.h(
         'div',
         {
+          ...node.attrs,
           class: node.className,
           'data-demo-ref': node.ref,
           ref: node.ref
@@ -497,6 +501,7 @@ async function renderDemoVue2(
         {
           class: node.className,
           attrs: {
+            ...node.attrs,
             'data-demo-ref': node.ref,
           },
         },

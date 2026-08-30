@@ -5,11 +5,17 @@ export type DemoTextNode = {
   text: string;
 };
 
+export type DemoBoxAttrs = Readonly<Record<string, string>>;
+
+export type DemoSurfaceStyleEntry = string | Record<string, string>;
+export type DemoSurfaceStyle = DemoSurfaceStyleEntry | DemoSurfaceStyleEntry[];
+
 export type DemoNode =
   | DemoTextNode
   | {
       kind: 'box';
       className?: string;
+      attrs?: DemoBoxAttrs;
       ref?: string;
       children?: DemoChild[];
     }
@@ -17,7 +23,7 @@ export type DemoNode =
       kind: 'proto';
       prototypeId: string;
       className?: string;
-      surfaceStyle?: string | Record<string, string> | Array<Record<string, string>>;
+      surfaceStyle?: DemoSurfaceStyle;
       ref?: string;
       props?: Record<string, unknown>;
       children?: DemoChild[];
@@ -91,6 +97,24 @@ function assertClassName(value: unknown, path: string[]) {
   }
 }
 
+function assertBoxAttrs(value: unknown, path: string[]) {
+  if (value === undefined) return;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(
+      `[PrototypePreviewer] demo box attrs 必须是字符串属性对象。\n` +
+        `非法值位置: ${path.join('.')}`
+    );
+  }
+  for (const [name, attributeValue] of Object.entries(value as Record<string, unknown>)) {
+    if (!name || typeof attributeValue !== 'string') {
+      throw new Error(
+        `[PrototypePreviewer] demo box attrs 只支持非空名称与字符串值。\n` +
+          `非法值位置: ${[...path, name || '(empty)'].join('.')}`
+      );
+    }
+  }
+}
+
 export function assertDemoSpec(demo: DemoSpec) {
   if (!demo || typeof demo !== 'object' || demo.type !== 'demo') {
     throw new Error('[PrototypePreviewer] demo 格式错误：缺少 type="demo"。');
@@ -115,6 +139,7 @@ export function assertDemoSpec(demo: DemoSpec) {
     }
     if (node.kind === 'box') {
       assertClassName((node as any).className, [...path, 'className']);
+      assertBoxAttrs((node as any).attrs, [...path, 'attrs']);
       if ((node as any).surfaceStyle !== undefined) {
         assertJsonLike((node as any).surfaceStyle, [...path, 'surfaceStyle']);
       }

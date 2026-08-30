@@ -1,23 +1,46 @@
 // @vitest-environment node
 
-import type { Browser, Page } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RUNTIMES, launchBrowser, startServer, stopServer } from './browser-harness';
 
 const HOME_ROUTE = '/zh-cn/';
 const HOME_SELECTOR = '[data-home-demo-options]';
+const CONTROL_OPTION_LABELS = {
+  runtime: {
+    wc: 'Web Components',
+    react: 'React',
+    vue: 'Vue',
+    vue2: 'Vue 2',
+  },
+  family: { shadcn: 'Shadcn', brutalist: 'Brutalist' },
+  component: {
+    button: 'Button',
+    toggle: 'Toggle',
+    switch: 'Switch',
+    tabs: 'Tabs',
+    'hover-card': 'Hover Card',
+    'dropdown-menu': 'Dropdown Menu',
+    select: 'Select',
+    dialog: 'Dialog',
+    separator: 'Separator',
+    textarea: 'Textarea',
+  },
+} as const;
 
 async function waitForHomeRuntime(page: Page, runtime: string): Promise<void> {
   await page.waitForFunction(
     ({ homeSelector, selectedRuntime }) => {
       const root = document.querySelector<HTMLElement>(homeSelector);
-      const select = root?.querySelector<HTMLElement>('[data-home-demo-runtime]');
       const host = root?.querySelector<HTMLElement>('[data-home-demo-host]');
+      const scope = host?.querySelector<HTMLElement>('[data-projection-scope]');
       return (
-        select?.dataset.value === selectedRuntime &&
         root?.dataset.runnerState === 'ready' &&
+        root?.dataset.runnerRuntime === selectedRuntime &&
         host?.getAttribute('aria-busy') === 'false' &&
-        (host?.querySelector('[data-pui-root]') != null ||
+        scope?.dataset.projectionRuntime === selectedRuntime &&
+        scope?.dataset.projectionState === 'ready' &&
+        (scope?.querySelector('[data-projection-content] [data-pui-root]') != null ||
           host?.textContent?.includes('[Home Demo Error]') === true)
       );
     },
@@ -29,12 +52,30 @@ async function waitForHomeRuntime(page: Page, runtime: string): Promise<void> {
   expect(error, `${runtime} home demo`).not.toContain('[Home Demo Error]');
 }
 
-async function chooseRuntime(page: Page, root: ReturnType<Page['locator']>, runtime: string) {
-  await root.locator('[data-home-demo-runtime] wc-shadcn-select-trigger').click();
-  await page
-    .locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`)
-    .last()
-    .click({ force: true });
+async function portalControlledBy(page: Page, trigger: Locator): Promise<Locator> {
+  const controlledId = await trigger.getAttribute('aria-controls');
+  expect(controlledId, 'projection Select aria-controls').toBeTruthy();
+  const portal = page.locator(`[id=${JSON.stringify(controlledId)}]`);
+  await portal.waitFor({ state: 'visible', timeout: 10_000 });
+  return portal;
+}
+
+async function chooseProjectionControl(
+  page: Page,
+  root: Locator,
+  control: 'runtime' | 'family' | 'component',
+  value: string
+): Promise<void> {
+  const trigger = root.locator(`[data-projection-control="${control}"] [role="combobox"]`);
+  await trigger.click();
+  const portal = await portalControlledBy(page, trigger);
+  const optionLabel = (CONTROL_OPTION_LABELS[control] as Readonly<Record<string, string>>)[value];
+  if (!optionLabel) throw new Error(`Unknown ${control} projection option ${value}.`);
+  await portal.getByRole('option', { name: optionLabel, exact: true }).click({ force: true });
+}
+
+async function chooseRuntime(page: Page, root: Locator, runtime: string) {
+  await chooseProjectionControl(page, root, 'runtime', runtime);
   await waitForHomeRuntime(page, runtime);
 }
 
@@ -68,7 +109,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           .poll(
             () =>
               home
-                .locator('[data-home-demo-runtime] wc-shadcn-select-trigger')
+                .locator('[data-projection-control="runtime"] [role="combobox"]')
                 .evaluate((element) => document.activeElement === element),
             { timeout: 10_000 }
           )
@@ -83,12 +124,9 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       }
 
       await globalRoot.locator('wc-shadcn-select-trigger').click();
-      await page
-        .locator('wc-shadcn-select-item[data-value="vue"]:visible')
-        .last()
-        .click({ force: true });
+      await page.getByRole('option', { name: 'Vue', exact: true }).last().click({ force: true });
       await waitForHomeRuntime(page, 'vue');
-      expect(await home.locator('[data-home-demo-runtime]').getAttribute('data-value')).toBe('vue');
+      expect(await home.getAttribute('data-runner-runtime')).toBe('vue');
     } finally {
       await context.close();
     }
@@ -134,6 +172,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
             this instanceof HTMLElement &&
             this.hasAttribute(name) &&
             this.hasAttribute('data-pui-root') &&
+            this.closest('[data-projection-content]') != null &&
             host.contains(this);
           const samplesGuardRelease =
             name === 'data-pui-view-revealing' &&
@@ -141,6 +180,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
             this.hasAttribute(name) &&
             this.hasAttribute('data-home-react-reveal-sample') &&
             !this.hasAttribute('data-pui-view-pending') &&
+            this.closest('[data-projection-content]') != null &&
             host.contains(this);
           const result = removeAttribute.call(this, name);
           if (samplesReveal) {
@@ -224,7 +264,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(sample.visibilityTransitions).not.toContain('visibility');
       }
       const revealedRoots = await home
-        .locator('[data-home-react-reveal-sample]')
+        .locator('[data-projection-content] [data-home-react-reveal-sample]')
         .evaluateAll((roots) =>
           roots.map((root) => ({
             revealing: root.hasAttribute('data-pui-view-revealing'),
@@ -261,7 +301,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           const panel = root.querySelector<HTMLElement>('.home-demo-previewer__panel');
           const host = root.querySelector<HTMLElement>('[data-home-demo-host]');
           const trigger = root.querySelector<HTMLElement>(
-            '[data-home-demo-runtime] wc-shadcn-select-trigger'
+            '[data-projection-control="runtime"] [role="combobox"]'
           );
           if (!panel || !host || !trigger) throw new Error('Runtime Box geometry is incomplete.');
           const panelStyle = getComputedStyle(panel);
@@ -285,7 +325,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         for (const width of [1440, 390, 320]) {
           await page.setViewportSize({ width, height: 900 });
           const geometry = await readGeometry();
-          expect(geometry.panelRadius, `${colorScheme} ${width}px panel`).toBe('14px');
+          expect(geometry.panelRadius, `${colorScheme} ${width}px panel`).toBe('10px');
           expect(geometry.hostRadius, `${colorScheme} ${width}px host radius`).toBe('0px');
           expect(geometry.hostBorder, `${colorScheme} ${width}px host border`).toBe('0px');
           expect(geometry.hostShadow, `${colorScheme} ${width}px host shadow`).toBe('none');
@@ -300,16 +340,20 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
             items.map((item) => item.getAttribute('data-browser-runner-research-id'))
           );
         expect(researchIds).toEqual(['flutter-wasm', 'qt-wasm', 'gpui-wasm']);
-        const executableIds = await home
-          .locator('[data-home-demo-runtime] wc-shadcn-select-item')
-          .evaluateAll((items) => items.map((item) => item.getAttribute('data-value')));
-        expect(executableIds).toEqual([...RUNTIMES]);
+        const runtimeTrigger = home.locator(
+          '[data-projection-control="runtime"] [role="combobox"]'
+        );
+        await runtimeTrigger.click();
+        const runtimePortal = await portalControlledBy(page, runtimeTrigger);
+        const executableLabels = await runtimePortal.getByRole('option').allTextContents();
+        expect(executableLabels).toEqual(['Web Components', 'React', 'Vue', 'Vue 2']);
+        await page.keyboard.press('Escape');
 
         await page.setViewportSize({ width: 1440, height: 900 });
-        for (const selector of ['[data-home-demo-picker]', '[data-home-demo-runtime]']) {
-          const trigger = home.locator(`${selector} wc-shadcn-select-trigger`);
+        for (const control of ['component', 'runtime', 'family'] as const) {
+          const trigger = home.locator(`[data-projection-control="${control}"] [role="combobox"]`);
           const before = await trigger.boundingBox();
-          if (!before) throw new Error(`${selector} trigger must have geometry.`);
+          if (!before) throw new Error(`${control} trigger must have geometry.`);
           await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
           await page.mouse.down();
           await expect
@@ -324,9 +368,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           await page.keyboard.press('Escape');
         }
 
-        expect(await home.locator('[data-home-demo-runtime]').getAttribute('data-value')).toBe(
-          'wc'
-        );
+        expect(await home.getAttribute('data-runner-runtime')).toBe('wc');
       } finally {
         await context.close();
       }

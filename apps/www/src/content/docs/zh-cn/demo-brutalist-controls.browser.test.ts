@@ -11,7 +11,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { choosePreviewRuntime, runtimeSelectTrigger } from './browser-harness';
+import { runtimeSelectTrigger, selectRuntime as selectPreviewRuntime } from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -197,24 +197,7 @@ async function selectRuntime(
   readySelector: string,
   expectedCount: number
 ): Promise<void> {
-  await choosePreviewRuntime(page, previewer, runtime);
-  await page.waitForFunction(
-    ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
-      const root = document.querySelector<HTMLElement>('[data-previewer-id]');
-      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
-      const host = root?.querySelector<HTMLElement>('.host');
-      const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!root || !select || !host || select.dataset.value !== selectedRuntime) return false;
-      if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
-      if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
-      if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
-      // React owns neither a custom element nor a Vue app root. The host tag is
-      // not always a div: a text-control Prototype roots on its native control.
-      return !firstRoot.tagName.startsWith('WC-') && !host.hasAttribute('data-v-app');
-    },
-    { expectedCount, readySelector, runtime },
-    { timeout: 20_000 }
-  );
+  await selectPreviewRuntime(page, previewer, runtime, readySelector, expectedCount);
 }
 
 /**
@@ -245,7 +228,7 @@ type TextareaFocusSnapshot = {
 
 async function wcTextareaFocusSnapshot(previewer: Locator): Promise<TextareaFocusSnapshot> {
   return previewer.evaluate((root) => {
-    const host = root.querySelector<HTMLElement>('.host [data-pui-root]');
+    const host = root.querySelector<HTMLElement>('[data-projection-content] [data-pui-root]');
     const textarea = root.querySelector<HTMLTextAreaElement>('textarea');
     if (!host || !textarea) throw new Error('Web Component Textarea projection is missing.');
     const exposes = (
@@ -462,7 +445,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     try {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[role="tab"]', 2);
-        const root = previewer.locator('.host > [data-pui-root]').first();
+        const root = previewer.locator('[data-projection-content] > [data-pui-root]').first();
         const before = await root.boundingBox();
         expect(before, runtime).not.toBeNull();
 
@@ -495,7 +478,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     try {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 5);
-        const trigger = previewer.locator('.host [data-pui-root]').nth(1);
+        const trigger = previewer.locator('[data-projection-content] [data-pui-root]').nth(1);
         await trigger.click();
         await expect.poll(() => page.getByRole('menu').count(), { message: runtime }).toBe(1);
         await page.waitForTimeout(200);
@@ -558,7 +541,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     try {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-demo-ref="scrollbar"]', 1);
-        const root = previewer.locator('.host > div > [data-pui-root]').first();
+        const root = previewer.locator('[data-projection-content] [data-pui-root]').first();
         const scrollbar = previewer.locator('[data-demo-ref="scrollbar"]').first();
         const rootBox = await root.boundingBox();
         const scrollbarBox = await scrollbar.boundingBox();
@@ -612,7 +595,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await page.waitForFunction(
           () => {
             const root = document.querySelector<HTMLElement>(
-              '[data-previewer-id] .host [data-pui-root]'
+              '[data-previewer-id] [data-projection-content] [data-pui-root]'
             );
             return (
               root?.hasAttribute('data-focused') === true && root.hasAttribute('data-focus-visible')
@@ -640,7 +623,9 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await page.waitForFunction(
           () =>
             !document
-              .querySelector<HTMLElement>('[data-previewer-id] .host [data-pui-root]')
+              .querySelector<HTMLElement>(
+                '[data-previewer-id] [data-projection-content] [data-pui-root]'
+              )
               ?.hasAttribute('data-focused')
         );
         const blurred = await wcTextareaFocusSnapshot(previewer);
@@ -651,7 +636,9 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await page.waitForFunction(
           () =>
             document
-              .querySelector<HTMLElement>('[data-previewer-id] .host [data-pui-root]')
+              .querySelector<HTMLElement>(
+                '[data-previewer-id] [data-projection-content] [data-pui-root]'
+              )
               ?.hasAttribute('data-focused') === true
         );
         const pointer = await wcTextareaFocusSnapshot(previewer);

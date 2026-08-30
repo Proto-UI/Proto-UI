@@ -15,6 +15,12 @@ import {
 
 export const RUNTIMES = ['wc', 'react', 'vue', 'vue2'] as const;
 export type RuntimeId = (typeof RUNTIMES)[number];
+const RUNTIME_OPTION_LABELS: Readonly<Record<RuntimeId, string>> = {
+  wc: 'Web Components',
+  react: 'React',
+  vue: 'Vue',
+  vue2: 'Vue 2',
+};
 
 export const COLOR_SCHEMES = ['light', 'dark'] as const;
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
@@ -197,7 +203,11 @@ export async function openRoute(
 }
 
 export function runtimeSelectTrigger(previewer: Locator): Locator {
-  return previewer.locator('[data-adapter-select-root] wc-shadcn-select-trigger');
+  return previewer
+    .locator(
+      '[data-projection-control="runtime"] [role="combobox"], [data-adapter-select-root] wc-shadcn-select-trigger'
+    )
+    .first();
 }
 
 /** Select one runtime through the same accessible composed control a reader uses. */
@@ -206,11 +216,16 @@ export async function choosePreviewRuntime(
   previewer: Locator,
   runtime: RuntimeId
 ): Promise<void> {
-  await runtimeSelectTrigger(previewer).click();
-  await page
-    .locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`)
+  const trigger = runtimeSelectTrigger(previewer);
+  await trigger.click();
+  const controlledId = await trigger.getAttribute('aria-controls');
+  const options = controlledId
+    ? page.locator(`[id=${JSON.stringify(controlledId)}]`)
+    : page.locator('body');
+  await options
+    .getByRole('option', { name: RUNTIME_OPTION_LABELS[runtime], exact: true })
     .last()
-    .click({ force: true });
+    .click();
 }
 
 export async function selectRuntime(
@@ -224,19 +239,30 @@ export async function selectRuntime(
   await page.waitForFunction(
     ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
       const root = document.querySelector<HTMLElement>('[data-previewer-id]');
-      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
       const host = root?.querySelector<HTMLElement>('.host');
-      const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!root || !select || !host || select.dataset.value !== selectedRuntime) return false;
-      if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
+      const scope = root?.querySelector<HTMLElement>('[data-projection-scope]');
+      const legacySelect = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
+      const fixed = root?.dataset.projectionMode === 'fixed-family';
+      const content = fixed ? scope?.querySelector<HTMLElement>('[data-projection-content]') : host;
+      const selectedValue = fixed ? scope?.dataset.projectionRuntime : legacySelect?.dataset.value;
+      const firstRoot = content?.querySelector<HTMLElement>('[data-pui-root]');
+      if (!root || !host || !content || selectedValue !== selectedRuntime) return false;
+      if (fixed && scope?.dataset.projectionState !== 'ready') return false;
+      if (content.querySelectorAll(selector).length !== count || !firstRoot) return false;
       if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
-      if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
+      if (selectedRuntime === 'vue') {
+        return host.hasAttribute('data-v-app') || firstRoot.closest('[data-v-app]') != null;
+      }
       if (selectedRuntime === 'vue2') {
         return Boolean((firstRoot as HTMLElement & { __vue__?: unknown }).__vue__);
       }
       // React owns neither a custom element nor a Vue app root. The host tag is
       // not always a div: a text-control Prototype roots on its native control.
-      return !firstRoot.tagName.startsWith('WC-') && !host.hasAttribute('data-v-app');
+      return (
+        !firstRoot.tagName.startsWith('WC-') &&
+        !host.hasAttribute('data-v-app') &&
+        firstRoot.closest('[data-v-app]') == null
+      );
     },
     { expectedCount, readySelector, runtime },
     { timeout: 20_000 }
