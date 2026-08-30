@@ -24,9 +24,9 @@ cases:
       ]
     expectation: shadcn-textarea-materializes-exactly-one-host-owned-editor
   - id: T-SHADCN-TEXTAREA-0001-CASE-SURFACE
-    title: Root projects the current field surface
+    title: Root projects the closed field surface including foreground and vertical-resize intent
     covers: [P-SHADCN-TEXTAREA-CURRENT-VISUAL-SURFACE]
-    expectation: shadcn-textarea-projects-the-current-field-surface
+    expectation: shadcn-textarea-projects-foreground-and-vertical-resize-without-site-css
   - id: T-SHADCN-TEXTAREA-0001-CASE-CONTENTLESS
     title: Projection stays contentless and adds no second editing surface
     covers: [P-SHADCN-TEXTAREA-CONTENTLESS, P-SHADCN-TEXTAREA-BOUNDARY]
@@ -52,6 +52,7 @@ implementations:
     exercises: &id001 [P-SHADCN-TEXTAREA, P-BASE-TEXTAREA]
     notes:
       - Positive tests cover only the current Proto UI guarantee; asChild omission, auto-resize, aria-invalid presentation, and remaining parity gaps are bounded by the decision, declared surface, and centralized compatibility question.
+      - Surface-token coverage requires explicit `text-foreground` and `resize-y`; standalone four-runtime computed-style coverage is mapped by `T-PROTOTYPE-STYLE-CLOSURE-0001`.
       - The web-state case asserts Adapter lowering of the three condition-driven rules on the Web Component host, including the colorScheme rule. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited focus, disabled, and value state handles.
   - id: prototypes-shadcn-textarea-browser
     kind: runtime-test
@@ -70,3 +71,7 @@ verifies:
     - id: P-SHADCN-TEXTAREA
 exercises:
   prototypes: *id001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Required explicit foreground and vertical-resize evidence and linked standalone four-runtime computed-style coverage.

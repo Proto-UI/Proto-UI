@@ -18,7 +18,7 @@ const hoverCardContent = definePrototype<
     // P-SHADCN-HOVER-CARD-CONTENT-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
       tw(
-        'z-50 w-64 rounded-md border bg-popover p-4 text-sm text-popover-foreground shadow-md outline-none transition-none duration-200'
+        'z-50 w-64 rounded-md border border-border bg-popover p-4 text-sm text-popover-foreground shadow-md outline-none transition-none duration-200'
       )
     );
 
