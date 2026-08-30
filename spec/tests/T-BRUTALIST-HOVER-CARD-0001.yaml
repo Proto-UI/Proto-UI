@@ -83,10 +83,11 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Hover Card coverage mapped 1:1 to the rc.7 P criteria (root entry+inheritance, trigger pair+interaction, content transition+panel). Not present in the immutable rc.6 snapshot.
-  - version: 0.2.0
+
+
+  - version: 0.3.0-alpha.0
     change: extended
     summary: Added required cross-runtime browser evidence for trigger and panel visual grammar, dimensions, and typography.
-
 
 tags:
   - test

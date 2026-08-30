@@ -6,7 +6,6 @@ import {
   COLOR_SCHEMES,
   applyColorScheme,
   RUNTIMES,
-  choosePreviewRuntime,
   launchBrowser,
   openRoute,
   selectRuntime,
@@ -599,11 +598,12 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
     const opened = await openRoute(browser, baseUrl, HOVER_CARD_ROUTE, NARROW_VIEWPORT);
     try {
       for (const runtime of TEST_RUNTIMES) {
-        await choosePreviewRuntime(opened.page, opened.previewer, runtime);
-        await opened.page.waitForFunction(
-          () => document.querySelectorAll('[data-previewer-id] .host [data-pui-root]').length >= 2,
-          undefined,
-          { timeout: 20_000 }
+        await selectRuntimeWithDiagnostics(
+          opened.page,
+          opened.previewer,
+          runtime,
+          '[data-pui-root]',
+          3
         );
         const nodes = opened.previewer.locator('.host [data-pui-root]');
         const trigger = nodes.nth(1);
