@@ -139,6 +139,7 @@ sources:
   - path: packages/adapters/react/test/lifecycle-repeatable-mount.test.ts
   - path: packages/adapters/react/test/lifecycle-strict-replay.test.ts
   - path: packages/adapters/react/test/lifecycle-view-intent.test.ts
+  - path: packages/adapters/react/test/view-reveal-style.integration.test.ts
   - path: packages/adapters/react/test/contract/state-runtime.v0.contract.test.ts
   - path: packages/adapters/base/src/host/exposes.ts
   - path: packages/adapters/react/test/expose.test.ts
