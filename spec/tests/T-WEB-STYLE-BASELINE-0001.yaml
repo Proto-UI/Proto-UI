@@ -17,6 +17,14 @@ cases:
     title: CLI init places the baseline in physical token CSS rather than theme variables
     covers: [D-WEB-STYLE-BASELINE-0001-C]
     expectation: cli-init-keeps-box-model-baseline-in-token-css
+  - id: T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT
+    title: the scoped baseline stays inside the Proto UI layer before Prototype token rules
+    covers: [D-WEB-STYLE-BASELINE-0001-D]
+    expectation: generated-baseline-is-inside-proto-ui-layer-before-token-rules
+  - id: T-WEB-STYLE-BASELINE-0001-CASE-CASCADE-OWNERSHIP
+    title: the scoped Proto UI baseline loses to explicit presentation in a later named consumer layer
+    covers: [D-WEB-STYLE-BASELINE-0001-D]
+    expectation: proto-ui-layered-baseline-remains-below-explicit-consumer-layer
 implementations:
   - id: cli-proto-style-css-box-model-test
     kind: module-test
@@ -27,6 +35,7 @@ implementations:
       [
         T-WEB-STYLE-BASELINE-0001-CASE-SCOPED-BORDER-BOX,
         T-WEB-STYLE-BASELINE-0001-CASE-NO-GLOBAL-RESET,
+        T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT,
       ]
   - id: cli-init-box-model-output-test
     kind: module-test
@@ -37,13 +46,34 @@ implementations:
       [
         T-WEB-STYLE-BASELINE-0001-CASE-SCOPED-BORDER-BOX,
         T-WEB-STYLE-BASELINE-0001-CASE-STYLE-OUTPUT-OWNERSHIP,
+        T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT,
       ]
+  - id: www-prototype-style-closure-box-model-cascade-test
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
+    required: true
+    consumesCases: [T-WEB-STYLE-BASELINE-0001-CASE-CASCADE-OWNERSHIP]
+    exercises:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001
+      - D-WEB-SURFACE-NORMALIZATION-0001
+      - D-WEB-STYLE-BASELINE-0001
+    notes:
+      - The four-runtime Light and Dark fixture proves a base-layer content-box sentinel loses to the Proto UI baseline while an explicit later consumer content-box override wins.
 verifies:
   decisions:
     - id: D-WEB-STYLE-BASELINE-0001
       anchors:
-        [D-WEB-STYLE-BASELINE-0001-A, D-WEB-STYLE-BASELINE-0001-B, D-WEB-STYLE-BASELINE-0001-C]
+        [
+          D-WEB-STYLE-BASELINE-0001-A,
+          D-WEB-STYLE-BASELINE-0001-B,
+          D-WEB-STYLE-BASELINE-0001-C,
+          D-WEB-STYLE-BASELINE-0001-D,
+        ]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added generated and four-runtime evidence that the layered baseline stays below explicit named consumer presentation.
   - version: 0.2.0-rc.1
     change: introduced
     summary: Added generated CSS and CLI init coverage for the scoped Proto UI border-box baseline.

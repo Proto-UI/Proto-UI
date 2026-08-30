@@ -52,6 +52,7 @@ type TokenPaint = {
   border: string;
   inputBackground: string;
   inputBorder: string;
+  transparentBackground: string;
   popoverBackground: string;
   popoverForeground: string;
 };
@@ -67,6 +68,7 @@ async function readTokenPaint(): Promise<TokenPaint> {
     const background = style('background');
     const border = style('border');
     const input = style('input');
+    const transparent = style('transparent');
     const popover = style('popover');
     return {
       foreground: foreground.color,
@@ -74,6 +76,7 @@ async function readTokenPaint(): Promise<TokenPaint> {
       border: border.borderTopColor,
       inputBackground: input.backgroundColor,
       inputBorder: input.borderTopColor,
+      transparentBackground: transparent.backgroundColor,
       popoverBackground: popover.backgroundColor,
       popoverForeground: popover.color,
     };
@@ -228,6 +231,8 @@ describe.sequential('Prototype style closure without Website CSS', () => {
     expect(light.foreground, 'foreground theme delta').not.toBe(dark.foreground);
     expect(light.background, 'background theme delta').not.toBe(dark.background);
     expect(light.border, 'border theme delta').not.toBe(dark.border);
+    expect(light.inputBackground, 'input background theme delta').not.toBe(dark.inputBackground);
+    expect(light.inputBorder, 'input border theme delta').not.toBe(dark.inputBorder);
     expect(light.popoverBackground, 'popover theme delta').not.toBe(dark.popoverBackground);
     expect(light.popoverForeground, 'popover foreground theme delta').not.toBe(
       dark.popoverForeground
@@ -244,6 +249,8 @@ describe.sequential('Prototype style closure without Website CSS', () => {
     it(`keeps Textarea and Button presentation closed in ${colorScheme} mode`, async () => {
       // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-STANDALONE-FOUR-RUNTIMES
       // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CONSUMER-INPUTS
+      // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CASCADE-LAYER-OWNERSHIP
+      // T-WEB-STYLE-BASELINE-0001-CASE-CASCADE-OWNERSHIP
       await openStandaloneTheme(colorScheme);
       const expectedButton = await readTokenPaint();
 
@@ -289,6 +296,12 @@ describe.sequential('Prototype style closure without Website CSS', () => {
                   background: style.backgroundColor,
                   opacity: style.opacity,
                   cursor: style.cursor,
+                  margin: [
+                    style.marginTop,
+                    style.marginRight,
+                    style.marginBottom,
+                    style.marginLeft,
+                  ],
                   padding: [
                     style.paddingTop,
                     style.paddingRight,
@@ -376,6 +389,7 @@ describe.sequential('Prototype style closure without Website CSS', () => {
             background: string;
             opacity: string;
             cursor: string;
+            margin: string[];
             padding: string[];
             borderWidth: string[];
             borderStyle: string;
@@ -390,11 +404,17 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         expect(facts.textareas, `${runtime}/textarea-count`).toHaveLength(4);
         for (const textarea of facts.textareas) {
           const label = `${runtime}/${textarea.label}`;
-          expect(textarea.boxSizing, `${label}/box-sizing`).toBe('border-box');
           expect(textarea.resize, `${label}/resize`).toBe('vertical');
           if (textarea.label !== 'Standalone consumer override') {
+            expect(textarea.boxSizing, `${label}/box-sizing`).toBe('border-box');
             expect(textarea.fontFamily, `${label}/consumer-font`).toBe(facts.hostFont);
             expect(textarea.color, `${label}/foreground`).toBe(result.foreground);
+            expect(textarea.background, `${label}/background`).toBe(
+              colorScheme === 'dark'
+                ? expectedButton.inputBackground
+                : expectedButton.transparentBackground
+            );
+            expect(textarea.margin, `${label}/margin`).toEqual(['0px', '0px', '0px', '0px']);
             expect(textarea.padding, `${label}/padding`).toEqual(['8px', '12px', '8px', '12px']);
             expect(textarea.borderWidth, `${label}/border-width`).toEqual([
               '1px',
@@ -403,6 +423,7 @@ describe.sequential('Prototype style closure without Website CSS', () => {
               '1px',
             ]);
             expect(textarea.borderStyle, `${label}/border-style`).toBe('solid');
+            expect(textarea.borderColor, `${label}/border-color`).toBe(expectedButton.inputBorder);
           }
           expect(textarea.borderRadius, `${label}/radius`).toBe('8px');
           expect(textarea.minHeight, `${label}/min-height`).toBe('64px');
@@ -453,9 +474,11 @@ describe.sequential('Prototype style closure without Website CSS', () => {
           rows: 2,
           disabled: false,
           readOnly: false,
+          boxSizing: 'content-box',
           background: 'rgb(23, 45, 67)',
           color: 'rgb(210, 220, 230)',
           opacity: '0.75',
+          margin: ['4px', '6px', '4px', '6px'],
           padding: ['5px', '7px', '5px', '7px'],
           borderWidth: ['3px', '3px', '3px', '3px'],
           borderStyle: 'dashed',

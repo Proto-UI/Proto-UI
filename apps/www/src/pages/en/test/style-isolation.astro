@@ -1,5 +1,5 @@
 ---
-import '../../../styles/proto-ui-style.css';
+
 ---
 
 <!doctype html>
@@ -39,6 +39,7 @@ import '../../../styles/proto-ui-style.css';
       <span data-token-probe="background"></span>
       <span data-token-probe="border"></span>
       <span data-token-probe="input"></span>
+      <span data-token-probe="transparent"></span>
       <span data-token-probe="popover"></span>
     </div>
 
@@ -191,6 +192,10 @@ import '../../../styles/proto-ui-style.css';
 </html>
 
 <style is:global>
+  @layer base, proto-ui, consumer;
+
+  @import '../../../styles/proto-ui-style.css';
+
   :root {
     color-scheme: light;
   }
@@ -232,18 +237,35 @@ import '../../../styles/proto-ui-style.css';
     gap: 1rem;
   }
 
-  .consumer-override {
-    color: rgb(12 34 56);
-    font-family: 'Proto UI Explicit Consumer', serif;
+  @layer base {
+    textarea[data-pui-style] {
+      box-sizing: content-box;
+      margin: 11px;
+      padding: 19px;
+      border: 5px dotted rgb(190 20 30);
+      background: rgb(210 180 150);
+      color: rgb(15 120 70);
+      opacity: 0.25;
+      font-family: 'Proto UI Base Reset Sentinel', monospace;
+    }
   }
 
-  .consumer-native-override {
-    padding: 5px 7px;
-    border: 3px dashed rgb(89 67 45);
-    background-color: rgb(23 45 67);
-    color: rgb(210 220 230);
-    opacity: 0.75;
-    font-family: 'Proto UI Native Consumer Override', serif;
+  @layer consumer {
+    .consumer-override {
+      color: rgb(12 34 56);
+      font-family: 'Proto UI Explicit Consumer', serif;
+    }
+
+    .consumer-native-override {
+      box-sizing: content-box;
+      margin: 4px 6px;
+      padding: 5px 7px;
+      border: 3px dashed rgb(89 67 45);
+      background-color: rgb(23 45 67);
+      color: rgb(210 220 230);
+      opacity: 0.75;
+      font-family: 'Proto UI Native Consumer Override', serif;
+    }
   }
 
   .token-probes {
@@ -271,6 +293,10 @@ import '../../../styles/proto-ui-style.css';
   [data-token-probe='input'] {
     border: 1px solid var(--pui-input);
     background: color-mix(in oklab, var(--pui-input) 30%, transparent);
+  }
+
+  [data-token-probe='transparent'] {
+    background: transparent;
   }
 
   [data-token-probe='popover'] {

@@ -106,6 +106,22 @@ import './styles/proto-ui-style.css';
 
 如果入口文件位于其他位置，请调整相对路径。应用未主动选择主题时，生成的 Shadcn theme 会跟随 `prefers-color-scheme`。在根元素设置 `data-theme="light"` / `data-theme="dark"`，或使用兼容的 `.light` / `.dark` class，可以覆盖系统偏好。
 
+如果应用没有使用 CSS named cascade layers，保留上面的单次 import 即可。如果应用使用了 named layers，请改为在一个 CSS 入口中、任何 reset、Proto UI 或 consumer layer 首次声明之前建立完整顺序：
+
+```css
+/* src/app.css */
+@layer base, proto-ui, components, utilities;
+
+@import './reset.css' layer(base);
+@import './styles/proto-ui-style.css';
+@import './app-components.css' layer(components);
+@import './app-utilities.css' layer(utilities);
+```
+
+应用入口只需 import 一次 `app.css`，不要再分别导入这些 stylesheet。关键关系是 `reset/base < proto-ui < explicit consumer layers`。使用 Tailwind 或其他分层 reset 时，应在最早的 layer order statement 中把 `proto-ui` 放在其 base layer 之后、应用的 components 与 utilities layers 之前。
+
+Named layer 的顺序会在首次出现时固定。在包含相应声明的版本中，生成的 `@layer proto-ui;` 只有在该入口先加载时才能预留 Proto UI 自身 slot；它无法修复更早 stylesheet 已经建立的顺序。只要应用引入 named reset 或 consumer layers，上面的 host order statement 就仍然是必要的集成配置。
+
 ## 添加并导入组件
 
 请按应用实际使用的 host 添加官方 Shadcn Button facade。下面把 React 与 Web Components 各自的 CLI 命令和应用入口放在同一个示例中；支持当前站点 Adapter 偏好时，示例会以该 host 作为初始页签。

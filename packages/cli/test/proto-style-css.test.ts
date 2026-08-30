@@ -1,18 +1,46 @@
 import { describe, expect, it } from 'vitest';
 
-import { renderPrefixedThemeCss, renderProtoStyleTokenCss } from '../src/services/proto-style-css';
+import {
+  renderPrefixedThemeCss,
+  renderProtoStyleEntryCss,
+  renderProtoStyleTokenCss,
+} from '../src/services/proto-style-css';
 
 describe('proto style css renderer', () => {
   it('gives Proto UI styled elements a scoped border-box baseline without a global reset', () => {
+    // T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT
     const css = renderProtoStyleTokenCss(['h-6', 'w-11', 'border']);
-
-    expect(css).toContain(
-      `[data-pui-style],\n[data-pui-style]::before,\n[data-pui-style]::after {`
+    const layerAt = css.indexOf('@layer proto-ui {');
+    const baselineAt = css.indexOf(
+      `  [data-pui-style],\n  [data-pui-style]::before,\n  [data-pui-style]::after {`
     );
+    const firstTokenAt = css.indexOf(':where([data-pui-style~=');
+
+    expect(baselineAt).toBeGreaterThan(layerAt);
+    expect(baselineAt).toBeLessThan(firstTokenAt);
     expect(css).toContain('box-sizing: border-box;');
     expect(css).not.toMatch(/(^|\n)\*\s*,/);
     expect(css).not.toMatch(/(^|\n)::before\s*,/);
     expect(css).not.toMatch(/(^|\n)::after\s*\{/);
+  });
+
+  it('predeclares the Proto UI layer before generated entry imports', () => {
+    // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
+    const css = renderProtoStyleEntryCss({
+      themeImport: './shadcn-theme.css',
+      tokensImport: './proto-ui-tokens.generated.css',
+    });
+    const preludeAt = css.indexOf('@layer proto-ui;');
+    const themeImportAt = css.indexOf("@import './shadcn-theme.css';");
+    const tokensImportAt = css.indexOf("@import './proto-ui-tokens.generated.css';");
+    const declaredLayerSlots = [...css.matchAll(/@layer\s+([^;{]+)\s*;/g)].map((match) =>
+      match[1].trim()
+    );
+
+    expect(preludeAt).toBeGreaterThan(-1);
+    expect(preludeAt).toBeLessThan(themeImportAt);
+    expect(preludeAt).toBeLessThan(tokensImportAt);
+    expect(declaredLayerSlots).toEqual(['proto-ui']);
   });
 
   it('normalizes only styled native controls at zero specificity before token rules', () => {

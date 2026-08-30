@@ -19,6 +19,17 @@ cases:
       - D-WEB-SURFACE-NORMALIZATION-0001-D
       - D-WEB-SURFACE-NORMALIZATION-0001-E
     expectation: normalization-is-data-pui-style-scoped-and-loses-to-owned-overrides
+  - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
+    title: generated style entry reserves the Proto UI layer before its imports without claiming control over existing host layers
+    covers:
+      - D-WEB-SURFACE-NORMALIZATION-0001-F
+    expectation: generated-entry-predeclares-only-the-proto-ui-slot-before-imports
+  - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CASCADE-LAYER-OWNERSHIP
+    title: early host ordering keeps reset or base layers below Proto UI and explicit consumer layers above it
+    covers:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-E
+      - D-WEB-SURFACE-NORMALIZATION-0001-E
+    expectation: reset-base-below-proto-ui-below-explicit-consumer-layers
   - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-STANDALONE-FOUR-RUNTIMES
     title: standalone Web Components React Vue 3 and Vue 2 fixtures need only generated Proto UI styles for component correctness
     covers:
@@ -43,11 +54,23 @@ implementations:
     consumesCases:
       - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-NORMALIZATION
       - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-NORMALIZATION-SCOPE
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
     exercises:
       - C-PROTOTYPE-STYLE-CLOSURE-0001
       - D-WEB-SURFACE-NORMALIZATION-0001
     notes:
-      - Asserts the exact zero-specificity native-control selector, required declarations, placement inside the Proto UI layer before token rules, absence of unscoped resets, and continued consumer cascade ownership.
+      - Asserts the exact zero-specificity native-control selector, required declarations, placement inside the Proto UI layer before token rules, the generated entry slot before imports, absence of unscoped resets, and continued consumer cascade ownership.
+  - id: cli-init-proto-style-layer-slot
+    kind: module-test
+    status: passing
+    path: packages/cli/test/cli.test.ts
+    required: true
+    consumesCases:
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
+    exercises:
+      - D-WEB-SURFACE-NORMALIZATION-0001
+    notes:
+      - Asserts that CLI init writes the generated Proto UI layer slot before theme and token imports.
   - id: www-prototype-style-closure-browser
     kind: runtime-test
     status: passing
@@ -55,6 +78,7 @@ implementations:
     required: true
     consumesCases:
       - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-NORMALIZATION-SCOPE
+      - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CASCADE-LAYER-OWNERSHIP
       - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-STANDALONE-FOUR-RUNTIMES
       - T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CONSUMER-INPUTS
     exercises:
@@ -70,7 +94,8 @@ implementations:
     notes:
       - The standalone apps/www/src/pages/en/test/style-isolation.astro route loads generated proto-ui-style.css without the landing page, Starlight, Tailwind Preflight, or apps/www/src/styles/global.css, then mounts real Web Components, React, Vue 3, and Vue 2 projections.
       - Theme activation and variables, inherited font choice, viewport, content, locale, outer fixture layout, and explicit surface class or style remain declared consumer inputs rather than hidden component CSS dependencies.
-      - Light and Dark computed-style assertions cover Shadcn Button, three default Textarea states, a separately consumer-overridden native Textarea, and portaled Hover Card Content; CSSOM assertions reject document-wide and bare native-control resets.
+      - Light and Dark computed-style assertions cover Shadcn Button, exact default Textarea background and border token paint in three states, a separately consumer-overridden native Textarea, and portaled Hover Card Content; CSSOM assertions reject document-wide and bare native-control resets.
+      - A deliberately conflicting base-layer Textarea sentinel must lose to Proto UI defaults, while a later named consumer layer must retain margin, padding, border, background, color, opacity, font, and content-box ownership across all four runtimes.
       - Adjacent enabled/disabled Textarea paint, focus/blur transition endpoints, and Hover Card closed/open endpoints are driven in every Runtime so conditional styles and transition assets cannot be replaced by static mount evidence.
 verifies:
   contracts:
@@ -89,6 +114,7 @@ verifies:
         - D-WEB-SURFACE-NORMALIZATION-0001-C
         - D-WEB-SURFACE-NORMALIZATION-0001-D
         - D-WEB-SURFACE-NORMALIZATION-0001-E
+        - D-WEB-SURFACE-NORMALIZATION-0001-F
 exercises:
   adapters:
     - A-WEB-COMPONENT-0001
@@ -102,10 +128,14 @@ exercises:
 sources:
   - path: packages/cli/src/services/proto-style-css.ts
   - path: packages/cli/test/proto-style-css.test.ts
+  - path: packages/cli/test/cli.test.ts
   - path: packages/prototypes/shadcn/src/button/button.proto.ts
   - path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
   - path: apps/www/src/pages/en/test/style-isolation.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added generated layer-slot, exact Textarea paint, and base-to-Proto-to-consumer named-layer ownership evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Marked generated-CSS and standalone four-runtime evidence passing after the scoped normalization and Prototype token repair.
