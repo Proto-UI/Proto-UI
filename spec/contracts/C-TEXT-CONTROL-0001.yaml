@@ -20,8 +20,8 @@ criteria:
       en: A static declaration must express only the plain-text, line-mode (single or multiline), and host-owned-engine requirement; the adapter selects the physical editor before first render. The current Web profile resolves to one `HTMLInputElement` for single-line or one `HTMLTextAreaElement` for multiline, which belongs to adapter infrastructure rather than Template children.
   - id: C-TEXT-CONTROL-0001-B
     text:
-      zh-CN: Portable patch 必须投影 value、defaultValue、disabled、readOnly、required、name、placeholder、autoComplete、minLength、maxLength 与 common inputMode、enterKeyHint；multiline 模式还投影 rows 与 soft/hard wrap；single-line 模式还投影 type；原生 textarea.defaultValue 必须同步，而已编辑的 uncontrolled value 不得被后续 defaultValue 或其他 prop update 重置。
-      en: The portable patch must project value, defaultValue, disabled, readOnly, required, name, placeholder, autoComplete, minLength, maxLength, and the common inputMode and enterKeyHint hints; multiline mode also projects rows and soft/hard wrap, while single-line mode also projects type. Native textarea.defaultValue must stay synchronized without a later defaultValue or unrelated prop update resetting an edited uncontrolled value.
+      zh-CN: Portable patch 必须投影 value、defaultValue、disabled、readOnly、required、name、placeholder、autoComplete、minLength、maxLength 与 common inputMode、enterKeyHint；multiline 模式还投影 rows 与 soft/hard wrap；原生 textarea.defaultValue 必须同步，而已编辑的 uncontrolled value 不得被后续 defaultValue 或其他 prop update 重置。
+      en: The portable patch must project value, defaultValue, disabled, readOnly, required, name, placeholder, autoComplete, minLength, maxLength, and the common inputMode and enterKeyHint hints; multiline mode also projects rows and soft/hard wrap. Native textarea.defaultValue must stay synchronized without a later defaultValue or unrelated prop update resetting an edited uncontrolled value.
   - id: C-TEXT-CONTROL-0001-C
     text:
       zh-CN: input、change、compositionstart、compositionupdate 与 compositionend 必须按原生顺序标准化为 value、composing、data 与 inputType facts，不得把原生 Event object 作为 prototype event payload 泄漏。
@@ -82,7 +82,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Made the Text Control module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, exposed single-line type, and required CR/LF canonicalization at the module boundary. Single-line mode resolves to HTMLInputElement on the Web profile.
+      Made the Text Control module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, and required CR/LF canonicalization at the module boundary. Single-line mode resolves to HTMLInputElement on the Web profile.
 
 
 tags:

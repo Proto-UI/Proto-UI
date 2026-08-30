@@ -28,7 +28,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Made the module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, CR/LF canonicalization at the module boundary, and exposed single-line type alongside the existing multiline properties (rows, wrap).
+      Made the module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, and required CR/LF canonicalization at the module boundary. Single-line mode projects the shared shape, while multiline mode also projects rows and wrap.
 
 
 tags:

@@ -57,7 +57,10 @@ export class TextControlModuleImpl extends ModuleBase {
     if (this.supported) this.refreshHost();
   }
 
-  declare<P extends PropsBaseType>(): TextControlHandle<P> {
+  declare<
+    P extends PropsBaseType,
+    Mode extends TextControlLineMode = TextControlLineMode,
+  >(): TextControlHandle<P, Mode> {
     this.sys.ensureSetup('textControl.declare');
     if (!this.supported) {
       throw new Error(
