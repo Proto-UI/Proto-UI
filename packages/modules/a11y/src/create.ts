@@ -14,6 +14,7 @@ import type {
   OwnedStateHandle,
   Unsubscribe,
   MountPhase,
+  InstancePhase,
 } from '@proto.ui/core';
 import type { StatePort } from '@proto.ui/module-state';
 
@@ -128,6 +129,11 @@ class A11yModuleImpl extends ModuleBase {
   afterRenderCommit(): void {
     this.installStateWatches();
     this.applyProjection();
+  }
+
+  override onInstancePhase(phase: InstancePhase): void {
+    super.onInstancePhase(phase);
+    if (phase === 'alive' && isState(this.ir.level)) resolveA11yLevel(this.ir.level);
   }
 
   /** Remove view-scoped projection subscriptions; keep instance-scoped level validation. */

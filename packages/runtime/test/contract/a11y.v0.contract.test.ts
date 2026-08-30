@@ -343,6 +343,22 @@ describe('runtime contract: a11y (v0)', () => {
     result.invokeUnmounted();
   });
 
+  it('rejects a final invalid level before exposing a detached session', () => {
+    const P = definePrototype({
+      name: 'x-a11y-final-invalid-heading-level',
+      setup(def) {
+        const level = def.state.numberDiscrete('heading.level', 2);
+        def.a11y.role('heading');
+        def.a11y.level(level);
+        level.setDefault(0);
+      },
+    });
+
+    expect(() => createRuntimeSession(P as any, createHost().host as any)).toThrow(
+      /level must be an integer in range 1-6/
+    );
+  });
+
   it('A11Y-0066: rejects invalid heading level updates without a host projector', () => {
     let level!: OwnedStateHandle<number>;
     const P = definePrototype({

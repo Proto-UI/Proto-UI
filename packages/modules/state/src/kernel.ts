@@ -132,11 +132,15 @@ export class StateKernel {
         const task = this.pending.shift()!;
         task();
       }
+    } catch (error) {
+      // A rejected subscriber aborts this dispatch window; do not replay
+      // re-entrant transitions after the caller has recovered and writes again.
+      this.pending.length = 0;
+      throw error;
     } finally {
       this.emitting = false;
     }
   }
-
   private getIdFromHandle(handle: OwnedStateHandle<any>): StateId {
     const id = (handle as any).__stateId as StateId | undefined;
     if (!id) {

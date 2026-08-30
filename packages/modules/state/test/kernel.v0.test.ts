@@ -91,4 +91,24 @@ describe('state-kernel.v0', () => {
     expect(seq).toEqual([1, 2, 3]);
     expect(h.get()).toBe(3);
   });
+
+  it('discards queued re-entrant transitions when a subscriber aborts an emit', () => {
+    const k = new StateKernel();
+    const h = k.define('x', { kind: 'number.discrete' }, 0);
+    const seen: number[] = [];
+
+    k.subscribe(h, (e: any) => {
+      if (e?.type !== 'next') return;
+      seen.push(e.next);
+      if (e.next === 1) {
+        h.set(0);
+        throw new Error('reject transition');
+      }
+    });
+
+    expect(() => h.set(1)).toThrow('reject transition');
+    h.set(2);
+    expect(seen).toEqual([1, 2]);
+    expect(h.get()).toBe(2);
+  });
 });
