@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { installViewVisibilityRule, PUI_VIEW_DETACHED_ATTR, PUI_VIEW_PENDING_ATTR } from '../src';
+import {
+  installViewVisibilityRule,
+  PUI_VIEW_DETACHED_ATTR,
+  PUI_VIEW_PENDING_ATTR,
+  PUI_VIEW_REVEALING_ATTR,
+} from '../src';
 
 describe('adapter-base: view visibility', () => {
   afterEach(() => {
@@ -9,14 +14,25 @@ describe('adapter-base: view visibility', () => {
   it('keeps a pending host root hidden until the adapter reveals it', () => {
     const root = document.createElement('div');
     root.setAttribute(PUI_VIEW_PENDING_ATTR, '');
+    root.style.transition = 'all 5s ease';
+    root.style.animation = 'pulse 5s linear';
     document.body.appendChild(root);
 
     installViewVisibilityRule(document);
 
     expect(getComputedStyle(root).visibility).toBe('hidden');
+    expect(getComputedStyle(root).transition).toBe('none');
+    expect(getComputedStyle(root).animation).toBe('none');
 
+    root.setAttribute(PUI_VIEW_REVEALING_ATTR, '');
     root.removeAttribute(PUI_VIEW_PENDING_ATTR);
     expect(getComputedStyle(root).visibility).not.toBe('hidden');
+    expect(getComputedStyle(root).transition).toBe('none');
+    expect(getComputedStyle(root).animation).toBe('none');
+
+    root.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+    expect(getComputedStyle(root).transition).not.toBe('none');
+    expect(getComputedStyle(root).animation).not.toBe('none');
   });
 
   it('takes a detached host root and its subtree out of paint', () => {

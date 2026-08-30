@@ -101,6 +101,17 @@ implementations:
       - T-LIFECYCLE-0006-CASE-REPEATABLE-DETACH
       - T-LIFECYCLE-0006-CASE-LATEST-INTENT
       - T-LIFECYCLE-0006-CASE-REVEAL-BARRIER
+  - id: adapter-react-view-reveal-style-coherence
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/view-reveal-style.integration.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0006-CASE-REVEAL-BARRIER
+    exercises:
+      - A-REACT-18-19-0001
+    notes:
+      - Asserts that a new React host keeps data-pui-view-pending until rule-complete style tokens have reached a later DOM commit.
   - id: adapter-vue-initial-view-intent
     kind: adapter-test
     status: passing
@@ -150,6 +161,9 @@ verifies:
       anchors:
         - A-WEB-COMPONENT-0001-I
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added direct React DOM evidence that the reveal barrier includes the rule-complete style projection commit.
   - version: 0.3.0-alpha.0
     change: strengthened
     summary: Added Vue 2 latest-intent and repeatable-detach journey evidence.
