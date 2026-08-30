@@ -57,6 +57,11 @@ type SurfaceFacts = {
   backgroundColor: string;
   color: string;
   boxShadow: string;
+  outlineStyle: string;
+  outlineWidth: string;
+  outlineOffset: string;
+  transitionProperty: string;
+  transitionDuration: string;
   display: string;
   flexDirection: string;
   fontFamily: string;
@@ -90,6 +95,11 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
       borderRadius: style.borderTopLeftRadius,
       backgroundColor: style.backgroundColor,
       color: style.color,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: style.outlineWidth,
+      outlineOffset: style.outlineOffset,
+      transitionProperty: style.transitionProperty,
+      transitionDuration: style.transitionDuration,
       boxShadow: style.boxShadow,
       display: style.display,
       flexDirection: style.flexDirection,
@@ -617,6 +627,48 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           await disabled.evaluate((element) => getComputedStyle(element).opacity),
           `${runtime}/disabled-opacity`
         ).toBe('0.5');
+        await applyColorScheme(opened.page, 'dark');
+        const [
+          darkRestingBackground,
+          darkRestingForeground,
+          darkActiveBackground,
+          darkActiveForeground,
+        ] = await Promise.all([
+          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-secondary-background']),
+          resolvedThemeColors(opened.page, 'color', ['--pui-foreground']),
+          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-main']),
+          resolvedThemeColors(opened.page, 'color', ['--pui-main-foreground']),
+        ]).then(([restingBackground, restingForeground, activeBackground, activeForeground]) => [
+          restingBackground[0],
+          restingForeground[0],
+          activeBackground[0],
+          activeForeground[0],
+        ]);
+        const darkFacts = await toggles.evaluateAll((elements) =>
+          elements.map((element) => {
+            const style = getComputedStyle(element);
+            return { backgroundColor: style.backgroundColor, color: style.color };
+          })
+        );
+        expect(
+          darkFacts.map((surface) => surface.backgroundColor),
+          `${runtime}/dark/background-pairs`
+        ).toEqual([
+          darkRestingBackground,
+          darkActiveBackground,
+          darkRestingBackground,
+          darkRestingBackground,
+        ]);
+        expect(
+          darkFacts.map((surface) => surface.color),
+          `${runtime}/dark/foreground-pairs`
+        ).toEqual([
+          darkRestingForeground,
+          darkActiveForeground,
+          darkRestingForeground,
+          darkRestingForeground,
+        ]);
+        await applyColorScheme(opened.page, 'light');
       }
     } finally {
       await opened.context.close();
@@ -691,6 +743,15 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(panelSurface.padding, `${runtime}/hover-panel/padding`).toBe('16px');
         expect(panelSurface.fontSize, `${runtime}/hover-panel/font-size`).toBe('14px');
         expect(panelSurface.lineHeight, `${runtime}/hover-panel/line-height`).toBe('24px');
+        expect(panelSurface.outlineStyle, `${runtime}/hover-panel/outline-style`).toBe('solid');
+        expect(panelSurface.outlineWidth, `${runtime}/hover-panel/outline-width`).toBe('2px');
+        expect(panelSurface.outlineOffset, `${runtime}/hover-panel/outline-offset`).toBe('2px');
+        expect(panelSurface.transitionProperty, `${runtime}/hover-panel/transition-property`).toBe(
+          'none'
+        );
+        expect(panelSurface.transitionDuration, `${runtime}/hover-panel/transition-duration`).toBe(
+          '0.2s'
+        );
 
         await trigger.dispatchEvent('pointerleave');
         await expectVisibility(panelText, false, `${runtime}/hover-pointer-close`);
