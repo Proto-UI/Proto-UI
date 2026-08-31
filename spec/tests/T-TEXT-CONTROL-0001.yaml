@@ -6,12 +6,12 @@ since: 0.2.0-rc.7
 summary: Covers host-neutral static editing requirements, the Web single-line (input) and multiline (textarea) profiles, portable property projection, normalized events, CR/LF canonicalization, composition-safe value reconciliation, selection preservation, cross-adapter materialization, native-event containment, and lease cleanup.
 cases:
   - id: T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
-    title: Host-neutral static requirements materialize one textarea across Web Component, React, and Vue adapters on the Web host
+    title: Host-neutral static requirements materialize one textarea across Web Component, React, Vue 3, and Vue 2 adapters on the Web host
     covers:
       - C-TEXT-CONTROL-0001-A
     expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
-    title: A single-line declaration materializes one input, projects common hints, and strips line breaks across Web Component, React, and Vue adapters
+    title: A single-line declaration materializes one input, projects common hints, and strips line breaks across Web Component, React, Vue 3, and Vue 2 adapters
     covers:
       - C-TEXT-CONTROL-0001-A
       - C-TEXT-CONTROL-0001-B
@@ -160,6 +160,17 @@ implementations:
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
+  - id: adapter-vue2-text-control-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/textarea.integration.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
+    exercises:
+      - M-TEXT-CONTROL-0001
+      - HC-TEXT-CONTROL-0001
   - id: prototypes-base-textarea-value-reconciliation
     kind: module-test
     status: passing
@@ -199,6 +210,7 @@ sources:
   - path: packages/adapters/react/test/text-control.integration.test.ts
   - path: packages/adapters/vue/test/text-control.integration.test.ts
   - path: packages/adapters/web-component/test/text-control.integration.test.ts
+  - path: packages/adapters/vue2/test/textarea.integration.test.ts
   - path: packages/prototypes/base/test/textarea.test.ts
 revisions:
   - version: 0.2.0-rc.7
@@ -210,7 +222,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Added single-line input projection and clearing, common inputMode/enterKeyHint projection to both Web controls, text-compatible target validation, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, and line-mode value canonicalization evidence against criterion I.
+      Added single-line input projection and clearing, common inputMode/enterKeyHint projection to both Web controls, text-compatible target validation, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, line-mode value canonicalization, and cross-adapter single-line evidence across Web Component, React, Vue 3, and Vue 2.
 
 
 tags:

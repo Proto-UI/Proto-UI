@@ -78,6 +78,7 @@ import {
   createWebTextControlHost,
   TEXT_CONTROL_HOST_CAP,
   TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+  type WebTextControl,
 } from '@proto.ui/module-text-control';
 
 import {
@@ -239,8 +240,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       offSurface();
     };
   };
-
-  const physicalControl = () => args.getCurrentElement() as HTMLTextAreaElement | null;
+  const physicalControl = () => args.getCurrentElement() as WebTextControl | null;
 
   return createCapsWiring()
     .use('text-control', [

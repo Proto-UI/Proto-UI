@@ -17,7 +17,11 @@ function isWebTextArea(target: WebTextControl): target is HTMLTextAreaElement {
   return target.localName === 'textarea';
 }
 
-const TEXT_COMPATIBLE_INPUT_TYPES = new Set(['text', 'search', 'url', 'tel', 'password']);
+// `url` is intentionally excluded: the browser's URL value-sanitization algorithm
+// trims leading/trailing ASCII whitespace, which the module's plain-text
+// canonicalization does not mirror. Including it would let controlled restoration
+// repeatedly project a value the host cannot retain, violating C-TEXT-CONTROL-0001-I.
+const TEXT_COMPATIBLE_INPUT_TYPES = new Set(['text', 'search', 'tel', 'password']);
 export type WebTextControlLocalName = 'textarea' | 'input';
 
 export function resolveWebTextControlLocalName(

@@ -427,7 +427,7 @@ describe('module-text-control single-line web bridge', () => {
     lease.dispose();
   });
 
-  it.each(['text', 'search', 'url', 'tel', 'password'])(
+  it.each(['text', 'search', 'tel', 'password'])(
     'projects values through the text-compatible input type %s',
     (type) => {
       const input = document.createElement('input');
@@ -444,22 +444,25 @@ describe('module-text-control single-line web bridge', () => {
     }
   );
 
-  it.each(['file', 'checkbox'])('rejects the non-text input type %s before projection', (type) => {
-    const input = document.createElement('input');
-    input.type = type;
-    const valueBeforeAttach = input.value;
-    const onEvent = vi.fn();
+  it.each(['file', 'checkbox', 'url'])(
+    'rejects unsupported input type %s before projection',
+    (type) => {
+      const input = document.createElement('input');
+      input.type = type;
+      const valueBeforeAttach = input.value;
+      const onEvent = vi.fn();
 
-    expect(() =>
-      createWebTextControlHost(() => input).attach({
-        patch: { valueMode: 'controlled', value: 'plain text' },
-        onEvent,
-      })
-    ).toThrow(`[TextControl] unsupported Web input type "${type}".`);
-    expect(input.value).toBe(valueBeforeAttach);
-    input.dispatchEvent(new InputEvent('input'));
-    expect(onEvent).not.toHaveBeenCalled();
-  });
+      expect(() =>
+        createWebTextControlHost(() => input).attach({
+          patch: { valueMode: 'controlled', value: 'plain text' },
+          onEvent,
+        })
+      ).toThrow(`[TextControl] unsupported Web input type "${type}".`);
+      expect(input.value).toBe(valueBeforeAttach);
+      input.dispatchEvent(new InputEvent('input'));
+      expect(onEvent).not.toHaveBeenCalled();
+    }
+  );
 
   it('fails closed when a leased input mutates to a non-text type', () => {
     const input = document.createElement('input');

@@ -20,8 +20,8 @@ criteria:
       en: A prototype static declaration may express only portable editing requirements and must not contain a concrete host target name.
   - id: D-TEXT-CONTROL-PROJECTION-0001-B
     text:
-      zh-CN: Adapter/host capability 必须将 requirement 解析为宿主物理 editor；当前 Web multiline profile 解析为一个 `HTMLTextAreaElement`。
-      en: The adapter or host capability must resolve the requirement to a physical host editor; the current Web multiline profile resolves to one `HTMLTextAreaElement`.
+      zh-CN: Adapter/host capability 必须将 requirement 解析为宿主物理 editor；当前 Web profile 对 single-line 解析为一个 `HTMLInputElement`，对 multiline 解析为一个 `HTMLTextAreaElement`。
+      en: The adapter or host capability must resolve the requirement to a physical host editor; the current Web profile resolves single-line requirements to one `HTMLInputElement` and multiline requirements to one `HTMLTextAreaElement`.
   - id: D-TEXT-CONTROL-PROJECTION-0001-C
     text:
       zh-CN: 普通 property sync 与未改变 value 的 patch 不得破坏 active selection、cursor、composition 或系统 editing session；controlled composition 期间不得因无关 patch 写回 owner value。
@@ -59,4 +59,8 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Selected host-owned plain-text editing with semantic declarations and an explicitly Web-only initial conformance profile.
+
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Extended the Web profile target-resolution evidence to map single-line requirements to HTMLInputElement and multiline requirements to HTMLTextAreaElement while retaining the host-owned boundary.
 tags: [text-control, editing, host-projection, selection, textarea]
