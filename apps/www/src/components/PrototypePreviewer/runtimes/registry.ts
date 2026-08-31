@@ -7,6 +7,10 @@ export type PublicRuntimeId = (typeof AdapterIds)[number];
 /** Kept as a compatibility alias for internal validation surfaces. */
 export const InternalAdapterIds = [...AdapterIds] as const satisfies readonly RuntimeId[];
 
+export function isRuntimeId(value: unknown): value is RuntimeId {
+  return typeof value === 'string' && (AdapterIds as readonly string[]).includes(value);
+}
+
 export function selectRuntimeIds(
   requested: readonly RuntimeId[] | undefined,
   permitted: readonly RuntimeId[] = AdapterIds

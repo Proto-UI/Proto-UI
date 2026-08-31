@@ -15,10 +15,16 @@ Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution 
 ## Release governance
 
 - Declares alpha, beta, and rc as explicit stabilization stages. rc is reserved for a build believed ready for stable promotion.
-- Aligns the current 42 public packages under the exact `0.3.0-alpha.0` ecosystem identity.
+- Aligns the current 43 public packages under the exact `0.3.0-alpha.0` ecosystem identity.
 - Gives 0.3 contributions an exact declared V-entity version while keeping each feature or package change independently reviewable.
 - Keeps future public package identities and their registry bootstrap work in the implementation PRs that introduce them.
 - Completes the `@proto.ui/module-expose-event` npm identity bootstrap and Trusted Publisher binding ahead of release; its deprecated placeholder is not release evidence.
+
+## Image View
+
+- Adds the public `@proto.ui/module-image-view` package and admits it to the exact 43-package release identity as the host-mediated image presentation protocol used by Base Image and Runtime.
+- Covers generation-bound loading, stale completion rejection, replacement visual clearing, explicit accessibility mode, and direct `source` projection with executable fake-host and runtime evidence.
+- Keeps the first `@proto.ui/module-image-view` npm identity bootstrap, protected release-workflow configuration, and registry readiness as explicit pre-publication gates; bootstrap must not claim `latest` or `next`.
 
 ## Official Vue 2 Adapter
 

@@ -7,7 +7,8 @@
   "dependencies": {
     "@proto.ui/core": "workspace:*",
     "@proto.ui/hooks": "workspace:*",
-    "@proto.ui/module-text-control": "workspace:*"
+    "@proto.ui/module-text-control": "workspace:*",
+    "@proto.ui/module-image-view": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/module-anatomy": "workspace:*",
@@ -53,6 +54,11 @@
       "types": "./dist/hover-card/index.d.ts",
       "import": "./dist/hover-card/index.js",
       "default": "./dist/hover-card/index.js"
+    },
+    "./image": {
+      "types": "./dist/image/index.d.ts",
+      "import": "./dist/image/index.js",
+      "default": "./dist/image/index.js"
     },
     "./tooltip": {
       "types": "./dist/tooltip/index.d.ts",

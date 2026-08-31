@@ -1,8 +1,8 @@
 import { loadDemo } from './demo-modules';
-import { renderDemo } from './demo-renderer';
+import { prepareDemoRuntime, renderDemo } from './demo-renderer';
 import { collectPrototypeIds } from './demo-types';
 import { loadPrototypes } from './prototype-modules';
-import type { RuntimeId } from './runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './runtimes/registry';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from '../adapter-preference';
 import {
   initSiteShadcnControls,
@@ -22,6 +22,8 @@ type RuntimeOption = {
   id: RuntimeId;
   label: string;
 };
+
+type RunnerState = 'loading' | 'ready' | 'error';
 
 type ActiveRender = {
   runtime: RuntimeId;
@@ -45,11 +47,33 @@ const DEFAULT_RUNTIME_OPTIONS: RuntimeOption[] = [
 function readPreferredRuntime(runtimeOptions: RuntimeOption[]): RuntimeId | null {
   try {
     const stored = localStorage.getItem(PREFERRED_ADAPTER_KEY);
-    return runtimeOptions.some((option) => option.id === stored) ? (stored as RuntimeId) : null;
+    return isRuntimeId(stored) && runtimeOptions.some((option) => option.id === stored)
+      ? stored
+      : null;
   } catch {
     return null;
   }
 }
+
+function readRuntimeOptions(raw: string | undefined): RuntimeOption[] {
+  if (!raw) return DEFAULT_RUNTIME_OPTIONS;
+  const parsed = JSON.parse(raw) as unknown;
+  if (
+    !Array.isArray(parsed) ||
+    parsed.length === 0 ||
+    parsed.some(
+      (option) =>
+        !option ||
+        typeof option !== 'object' ||
+        !isRuntimeId((option as RuntimeOption).id) ||
+        typeof (option as RuntimeOption).label !== 'string'
+    )
+  ) {
+    throw new Error('[HomeDemoPreviewer] runtime options contain an unsupported runtime.');
+  }
+  return parsed as RuntimeOption[];
+}
+
 function populateSelect(
   select: SiteSelectRoot,
   options: Array<{ id: string; label: string }>,
@@ -74,6 +98,7 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   root.dataset.inited = '1';
 
   const host = root.querySelector<HTMLElement>('[data-home-demo-host]');
+  const status = root.querySelector<HTMLElement>('[data-home-demo-status]');
   const runtimeSelect = root.querySelector<SiteSelectRoot>('[data-home-demo-runtime]');
   const demoSelect = root.querySelector<SiteSelectRoot>('[data-home-demo-picker]');
 
@@ -86,14 +111,13 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   const demoSelectEl = demoSelect;
 
   const demoOptions = JSON.parse(root.dataset.homeDemoOptions || '[]') as DemoOption[];
-  const runtimeOptions = root.dataset.runtimeOptions
-    ? (JSON.parse(root.dataset.runtimeOptions) as RuntimeOption[])
-    : DEFAULT_RUNTIME_OPTIONS;
+  const runtimeOptions = readRuntimeOptions(root.dataset.runtimeOptions);
 
   const initialDemoId = root.dataset.initialDemoId || demoOptions[0]?.id || '';
-  const configuredRuntime = (root.dataset.initialRuntime ||
-    runtimeOptions[0]?.id ||
-    'wc') as RuntimeId;
+  const configuredRuntimeValue = root.dataset.initialRuntime || runtimeOptions[0]?.id || 'wc';
+  const configuredRuntime = isRuntimeId(configuredRuntimeValue)
+    ? configuredRuntimeValue
+    : runtimeOptions[0].id;
   const initialRuntime =
     readPreferredRuntime(runtimeOptions) ??
     (runtimeOptions.some((option) => option.id === configuredRuntime)
@@ -113,8 +137,31 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   let version = 0;
   let destroyed = false;
 
+  const takeActive = () => {
+    const current = active;
+    active = null;
+    return current;
+  };
+
   let lastRuntimeValue = selectValue(runtimeSelectEl);
   let lastDemoValue = selectValue(demoSelectEl);
+
+  const runtimeLabel = (runtime: RuntimeId) =>
+    runtimeOptions.find((option) => option.id === runtime)?.label ?? runtime;
+  const setRunnerState = (state: RunnerState, runtime: RuntimeId) => {
+    root.dataset.runnerState = state;
+    root.dataset.runnerRuntime = runtime;
+    hostEl.setAttribute('aria-busy', String(state === 'loading'));
+    if (!status) return;
+    const stateLabel = root.dataset[`status${state[0].toUpperCase()}${state.slice(1)}`];
+    status.textContent = `${runtimeLabel(runtime)} · ${stateLabel ?? state}`;
+  };
+  const waitForMountPaint = () =>
+    new Promise<void>((resolve) => {
+      const view = hostEl.ownerDocument.defaultView;
+      if (view?.requestAnimationFrame) view.requestAnimationFrame(() => resolve());
+      else queueMicrotask(resolve);
+    });
 
   async function renderCurrent(
     runtime: RuntimeId,
@@ -125,17 +172,19 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     const currentVersion = ++version;
     setSiteSelectDisabled(runtimeSelectEl, true);
     setSiteSelectDisabled(demoSelectEl, true);
+    setRunnerState('loading', runtime);
 
     try {
-      if (active) {
-        await active.destroy();
-        active = null;
-      }
-
       const demo = await loadDemo(demoId);
       const ids = new Set<string>();
       collectPrototypeIds(demo.root, ids);
       await loadPrototypes(Array.from(ids));
+      await prepareDemoRuntime(runtime);
+
+      if (destroyed || currentVersion !== version) return;
+
+      const previous = takeActive();
+      if (previous) await previous.destroy();
 
       if (destroyed || currentVersion !== version) return;
 
@@ -146,10 +195,18 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
         isCurrent: () => !destroyed && currentVersion === version,
       });
 
-      if (destroyed || currentVersion !== version) return;
+      if (destroyed || currentVersion !== version) {
+        await destroy();
+        return;
+      }
 
       active = { runtime, demoId, destroy };
+      await waitForMountPaint();
+      if (!destroyed && currentVersion === version) setRunnerState('ready', runtime);
     } catch (error) {
+      if (destroyed || currentVersion !== version) return;
+      const failedActive = takeActive();
+      if (failedActive) await failedActive.destroy();
       if (destroyed || currentVersion !== version) return;
       hostEl.innerHTML = '';
       const pre = document.createElement('pre');
@@ -159,6 +216,7 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
       pre.style.whiteSpace = 'pre-wrap';
       pre.style.color = 'crimson';
       hostEl.appendChild(pre);
+      setRunnerState('error', runtime);
       console.error(error);
     } finally {
       if (!destroyed && currentVersion === version) {
@@ -203,11 +261,13 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(changed);
     const previousValue = changed === runtimeSelectEl ? lastRuntimeValue : lastDemoValue;
     if (previousValue === value) return;
+    const nextRuntime = changed === runtimeSelectEl ? value : selectValue(runtimeSelectEl);
+    if (!isRuntimeId(nextRuntime)) return;
     if (changed === runtimeSelectEl) lastRuntimeValue = value;
     else lastDemoValue = value;
     setSelectValue(changed, value);
     renderCurrent(
-      (changed === runtimeSelectEl ? value : selectValue(runtimeSelectEl)) as RuntimeId,
+      nextRuntime,
       changed === demoSelectEl ? value : selectValue(demoSelectEl),
       focusTarget
     );
@@ -218,7 +278,7 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   const onRuntimeChange = (event: Event) => {
     const detail = (event as CustomEvent<{ value?: unknown }>).detail;
     const value = typeof detail?.value === 'string' ? detail.value : selectValue(runtimeSelectEl);
-    if (!runtimeOptions.some((option) => option.id === value)) return;
+    if (!isRuntimeId(value) || !runtimeOptions.some((option) => option.id === value)) return;
     const focusTarget = runtimeSelectEl.querySelector<HTMLElement>('wc-shadcn-select-trigger');
     if (lastRuntimeValue === value) return;
     try {
@@ -236,17 +296,12 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
   const onAdapterChange = (event: Event) => {
     const detail = (event as CustomEvent<AdapterPreferenceDetail>).detail;
     const adapter = detail?.adapter;
-    if (typeof adapter !== 'string' || !runtimeOptions.some((option) => option.id === adapter))
-      return;
+    if (!isRuntimeId(adapter) || !runtimeOptions.some((option) => option.id === adapter)) return;
     if (detail?.source === runtimeSelectEl) return;
     if (lastRuntimeValue === adapter) return;
     lastRuntimeValue = adapter;
     setSelectValue(runtimeSelectEl, adapter);
-    void renderCurrent(
-      adapter as RuntimeId,
-      selectValue(demoSelectEl),
-      detail?.focusTarget ?? null
-    );
+    void renderCurrent(adapter, selectValue(demoSelectEl), detail?.focusTarget ?? null);
   };
   demoSelectEl.addEventListener('valueChange', onDemoChange);
   runtimeSelectEl.addEventListener('valueChange', onRuntimeChange);
@@ -258,8 +313,8 @@ export function initHomeDemoPreviewer(root: HTMLElement) {
     if (!document.body.contains(root)) {
       destroyed = true;
       version += 1;
-      Promise.resolve(active?.destroy?.()).finally(() => {
-        active = null;
+      const detachedActive = takeActive();
+      Promise.resolve(detachedActive?.destroy?.()).finally(() => {
         demoSelectEl.removeEventListener('valueChange', onDemoChange);
         runtimeSelectEl.removeEventListener('valueChange', onRuntimeChange);
         runtimeSelectEl.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);

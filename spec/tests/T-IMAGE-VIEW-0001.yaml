@@ -1,0 +1,113 @@
+id: T-IMAGE-VIEW-0001
+type: test
+title: Image View declaration, module, and fake-host contract tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Covers host-neutral image presentation requirements, portable property projection, a11y binary input, generation-bound lease lifecycle, loading status transitions, stale completion rejection, replacement visual clearing, and lease cleanup.
+cases:
+  - id: T-IMAGE-VIEW-0001-CASE-DECLARATION
+    title: Host-neutral static requirement declares one image presentation target
+    covers:
+      - C-IMAGE-VIEW-0001-A
+    expectation: semantic-image-requirement-resolves-to-one-host-target-before-render
+  - id: T-IMAGE-VIEW-0001-CASE-PROPERTIES
+    title: Portable patches project source, a11yMode, alternativeText, fit, and loadingStatus
+    covers:
+      - C-IMAGE-VIEW-0001-B
+    expectation: portable-image-properties-project-live
+  - id: T-IMAGE-VIEW-0001-CASE-A11Y
+    title: A11y binary input requires alternativeText for informative and excludes semantic content for decorative
+    covers:
+      - C-IMAGE-VIEW-0001-C
+    expectation: a11y-binary-input-fail-closed-on-contradiction
+  - id: T-IMAGE-VIEW-0001-CASE-GENERATION-LEASE
+    title: New source creates new generation and loading state before host work
+    covers:
+      - C-IMAGE-VIEW-0001-E
+    expectation: new-source-creates-generation-and-loading-before-host-work
+  - id: T-IMAGE-VIEW-0001-CASE-STATUS-TRANSITION
+    title: loadingStatus and loadingStatusChange are the only status and transition surfaces
+    covers:
+      - C-IMAGE-VIEW-0001-F
+    expectation: loading-status-and-transition-are-canonical-surfaces
+  - id: T-IMAGE-VIEW-0001-CASE-REPLACEMENT
+    title: Replacement v0 clears previous visual
+    covers:
+      - C-IMAGE-VIEW-0001-G
+    expectation: replacement-clears-previous-visual
+  - id: T-IMAGE-VIEW-0001-CASE-STALE-COMPLETION
+    title: Stale completion from old generation does not change current state
+    covers:
+      - C-IMAGE-VIEW-0001-E
+      - C-IMAGE-VIEW-0001-H
+    expectation: stale-completion-rejected-and-does-not-emit-outward-signal
+  - id: T-IMAGE-VIEW-0001-CASE-LEASE-BOUNDARY
+    title: Lease boundary revokes listeners on detach and disposal
+    covers:
+      - C-IMAGE-VIEW-0001-H
+    expectation: lease-boundary-revokes-listeners-on-detach-and-dispose
+implementations:
+  - id: module-image-view-impl-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/image-view/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-IMAGE-VIEW-0001-CASE-DECLARATION
+      - T-IMAGE-VIEW-0001-CASE-PROPERTIES
+      - T-IMAGE-VIEW-0001-CASE-A11Y
+      - T-IMAGE-VIEW-0001-CASE-GENERATION-LEASE
+      - T-IMAGE-VIEW-0001-CASE-STATUS-TRANSITION
+      - T-IMAGE-VIEW-0001-CASE-REPLACEMENT
+      - T-IMAGE-VIEW-0001-CASE-STALE-COMPLETION
+      - T-IMAGE-VIEW-0001-CASE-LEASE-BOUNDARY
+    exercises:
+      - M-IMAGE-VIEW-0001
+      - HC-IMAGE-VIEW-0001
+  - id: base-image-runtime-contract
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/image.test.ts
+    required: true
+    consumesCases:
+      - T-IMAGE-VIEW-0001-CASE-DECLARATION
+      - T-IMAGE-VIEW-0001-CASE-PROPERTIES
+      - T-IMAGE-VIEW-0001-CASE-STATUS-TRANSITION
+verifies:
+  contracts:
+    - id: C-IMAGE-VIEW-0001
+      anchors:
+        - C-IMAGE-VIEW-0001-A
+        - C-IMAGE-VIEW-0001-B
+        - C-IMAGE-VIEW-0001-C
+        - C-IMAGE-VIEW-0001-E
+        - C-IMAGE-VIEW-0001-F
+        - C-IMAGE-VIEW-0001-G
+        - C-IMAGE-VIEW-0001-H
+exercises:
+  modules:
+    - M-IMAGE-VIEW-0001
+  hostCaps:
+    - HC-IMAGE-VIEW-0001
+  prototypes:
+    - P-BASE-IMAGE
+sources:
+  - path: packages/modules/image-view/test/impl-spec.test.ts
+  - path: packages/prototypes/base/test/image.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: >-
+      Registered Base Image runtime evidence for direct source projection and canonical loading status transitions.
+
+
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: >-
+      Added focused Image View host and module conformance coverage with fake-host evidence for synchronous completion, source replacement, stale completion, detach/rematerialize, dispose, terminal-once, and transition ordering.
+
+
+tags:
+  - image
+  - test
+  - module

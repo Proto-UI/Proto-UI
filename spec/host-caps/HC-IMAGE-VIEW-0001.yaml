@@ -1,0 +1,37 @@
+id: HC-IMAGE-VIEW-0001
+type: host-cap
+title: Host can lease one image presentation target
+status: draft
+since: 0.3.0-alpha.0
+summary: The host can resolve a portable image presentation requirement to one host-owned image target and return an updateable, inspectable, disposable generation-bound lease.
+statement:
+  zh-CN: >-
+    Host 可以将 Image View portable requirement 与 patch 投影到一个 host-owned image target，标准化该 target 的 loading status transition，使 update 与 completion 携带 generation identity，并返回可 update、snapshot 与 dispose 的 mount lease。
+
+
+  en: >-
+    The host can project a portable Image View requirement and patch to one host-owned image target, normalize that target's loading status transitions, carry generation identity through updates and completions, and return a mount lease that can be updated, inspected, and disposed.
+
+
+satisfies:
+  contracts:
+    - C-IMAGE-VIEW-0001
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+verifies:
+  tests:
+    - T-IMAGE-VIEW-0001
+sources:
+  - path: packages/modules/image-view/src/caps.ts
+  - path: packages/modules/image-view/src/create.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: >-
+      Cataloged the Image View host lease for one host-owned image presentation target with generation-bound lifecycle.
+
+
+tags:
+  - image
+  - host-capability
