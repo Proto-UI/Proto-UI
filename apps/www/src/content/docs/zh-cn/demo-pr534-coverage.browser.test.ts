@@ -84,12 +84,10 @@ async function expectNarrowLayout(
 }
 
 async function expectPublicPreviewerControls(previewer: Locator, label: string): Promise<void> {
-  expect(
-    await previewer
-      .locator('select.adapter-select option')
-      .evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value)),
-    `${label}/public-runtimes`
-  ).toEqual([...RUNTIMES]);
+  const publicRuntimes = await previewer
+    .locator('[data-adapter-select-root] wc-shadcn-select-item')
+    .evaluateAll((items) => items.map((item) => item.getAttribute('data-value')));
+  expect(publicRuntimes, `${label}/public-runtimes`).toEqual([...RUNTIMES]);
   expect(await previewer.locator('[data-code-shell]').count(), `${label}/empty-code-panel`).toBe(0);
 }
 
