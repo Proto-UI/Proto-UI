@@ -735,22 +735,18 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const triggerElement = await trigger.elementHandle();
         if (!triggerElement) throw new Error('Hover Card trigger was not materialized.');
         await opened.page.waitForFunction(
-          (target) => target instanceof HTMLElement && !target.hasAttribute('data-hovered'),
+          (target) =>
+            target instanceof HTMLElement &&
+            !target.hasAttribute('data-hovered') &&
+            !target.hasAttribute('data-pressed') &&
+            !target.hasAttribute('data-open') &&
+            getComputedStyle(target).boxShadow.includes('3px 3px 0px 0px'),
           triggerElement,
           { timeout: 10_000 }
         );
         const panelText = opened.page
           .getByText('A square hard-shadowed preview panel.', { exact: true })
           .last();
-        await opened.page.waitForFunction(
-          (element) =>
-            element &&
-            !element.hasAttribute('data-hovered') &&
-            !element.hasAttribute('data-pressed') &&
-            !element.hasAttribute('data-open'),
-          await trigger.elementHandle(),
-          { timeout: 10_000 }
-        );
         const triggerSurface = await facts(trigger);
         const [expectedTriggerBackground] = await resolvedThemeColors(
           opened.page,
