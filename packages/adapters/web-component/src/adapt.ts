@@ -294,6 +294,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
 
+        if (this._imageViewTarget?.parentNode) {
+          this._imageViewTarget.parentNode.removeChild(this._imageViewTarget);
+        }
+
         const projector = this._slotProjector;
         if (!projector) return;
         const externalChildren = projector.collectSlotPoolBeforeCommit();
