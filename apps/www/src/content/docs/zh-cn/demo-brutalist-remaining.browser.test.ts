@@ -731,6 +731,14 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         );
         const nodes = opened.previewer.locator('.host [data-pui-root]');
         const trigger = nodes.nth(1);
+        await opened.page.mouse.move(5, 5);
+        const triggerElement = await trigger.elementHandle();
+        if (!triggerElement) throw new Error('Hover Card trigger was not materialized.');
+        await opened.page.waitForFunction(
+          (target) => target instanceof HTMLElement && !target.hasAttribute('data-hovered'),
+          triggerElement,
+          { timeout: 10_000 }
+        );
         const panelText = opened.page
           .getByText('A square hard-shadowed preview panel.', { exact: true })
           .last();
