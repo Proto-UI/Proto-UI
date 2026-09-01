@@ -56,8 +56,6 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
     autoComplete: '',
     minLength: -1,
     maxLength: -1,
-    inputMode: 'text',
-    enterKeyHint: 'enter',
     ariaLabel: '',
     labelledBy: '',
     describedBy: '',
@@ -120,8 +118,8 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
       autoComplete: props.autoComplete ?? '',
       minLength: props.minLength ?? -1,
       maxLength: props.maxLength ?? -1,
-      inputMode: props.inputMode ?? 'text',
-      enterKeyHint: props.enterKeyHint ?? 'enter',
+      inputMode: props.inputMode,
+      enterKeyHint: props.enterKeyHint,
     });
     value.set(control.snapshot()?.value ?? '', 'reason: input sync value');
   };

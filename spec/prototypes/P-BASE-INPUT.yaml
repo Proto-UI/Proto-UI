@@ -45,6 +45,7 @@ dependsOn:
   contracts:
     - C-TEXT-CONTROL-0001
     - C-HOST-SURFACE-PROJECTION-0001
+    - C-AS-HOOK-0001
     - C-PROPS-0001
     - C-STATE-0001
     - C-EXPOSE-STATE-0001

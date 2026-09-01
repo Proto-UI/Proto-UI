@@ -8,12 +8,11 @@ cases:
   - id: T-BASE-INPUT-0001-CASE-SURFACE
     title: Root materializes one contentless native input with the accepted property surface
     covers:
-      [
-        P-BASE-INPUT-AUTHORING-ENTRIES,
-        P-BASE-INPUT-PHYSICAL-TARGET,
-        P-BASE-INPUT-NATIVE-PROPS,
-        P-BASE-INPUT-BOUNDARY,
-      ]
+      - P-BASE-INPUT-AUTHORING-ENTRIES
+      - P-BASE-INPUT-PHYSICAL-TARGET
+      - P-BASE-INPUT-NATIVE-PROPS
+      - P-BASE-INPUT-A11Y-AND-FOCUS
+      - P-BASE-INPUT-BOUNDARY
     expectation: base-input-is-one-contentless-native-target-with-exact-props
   - id: T-BASE-INPUT-0001-CASE-TYPES
     title: State and event types preserve the single-line protocol boundary

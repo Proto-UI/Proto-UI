@@ -88,4 +88,108 @@ describe('prototypes/base: input', () => {
     ]);
     element.remove();
   });
+
+  it('synchronizes accessibility, disabled state, and physical focus', async () => {
+    const element = document.createElement('base-input-root') as InputElement;
+    setElementProps(element, {
+      value: 'before',
+      ariaLabel: 'Query',
+      labelledBy: 'query-label',
+      describedBy: 'query-help',
+    } satisfies InputRootProps);
+    document.body.appendChild(element);
+    await flush();
+    const target = physicalInput(element);
+    expect(target.getAttribute('aria-label')).toBe('Query');
+    expect(target.getAttribute('aria-labelledby')).toBe('query-label');
+    expect(target.getAttribute('aria-describedby')).toBe('query-help');
+    exposes(element).focusSelf();
+    expect(document.activeElement).toBe(target);
+    setElementProps(element, {
+      value: 'after',
+      disabled: true,
+      readOnly: true,
+      ariaLabel: 'Updated query',
+      labelledBy: '',
+      describedBy: 'updated-help',
+    });
+    await flush();
+    expect(target.value).toBe('after');
+    expect(target.disabled).toBe(true);
+    expect(target.readOnly).toBe(true);
+    expect(target.getAttribute('aria-disabled')).toBe('true');
+    expect(target.getAttribute('aria-readonly')).toBe('true');
+    expect(target.getAttribute('aria-label')).toBe('Updated query');
+    expect(target.hasAttribute('aria-labelledby')).toBe(false);
+    expect(target.getAttribute('aria-describedby')).toBe('updated-help');
+    target.blur();
+    exposes(element).focusSelf();
+    expect(document.activeElement).not.toBe(target);
+    element.remove();
+  });
+
+  it('keeps controlled ownership and emits the complete composition boundary', async () => {
+    const element = document.createElement('base-input-root') as InputElement;
+    const values: InputValueChangeDetail[] = [];
+    const changes: Array<{ value: string }> = [];
+    const events: string[] = [];
+    element.addEventListener('valueChange', (event) =>
+      values.push((event as CustomEvent<InputValueChangeDetail>).detail)
+    );
+    element.addEventListener('change', (event) =>
+      changes.push((event as CustomEvent<{ value: string }>).detail)
+    );
+    for (const name of ['compositionStart', 'compositionUpdate', 'compositionEnd'])
+      element.addEventListener(name, () => events.push(name));
+    setElementProps(element, { value: 'owner' } satisfies InputRootProps);
+    document.body.appendChild(element);
+    await flush();
+    const target = physicalInput(element);
+    target.value = 'candidate';
+    target.dispatchEvent(new InputEvent('input', { inputType: 'insertText', data: 'x' }));
+    target.dispatchEvent(new Event('change'));
+    target.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    target.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true }));
+    target.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    expect(values.at(-1)).toMatchObject({ value: 'candidate', composing: false });
+    expect(changes).toEqual([{ value: 'candidate' }]);
+    expect(events).toEqual(['compositionStart', 'compositionUpdate', 'compositionEnd']);
+    setElementProps(element, { value: 'owner' });
+    await flush();
+    expect(target.value).toBe('owner');
+    element.remove();
+  });
+
+  it('emits normalized input and composition payloads from the physical editor', async () => {
+    const element = document.createElement('base-input-root') as InputElement;
+    const values: InputValueChangeDetail[] = [];
+    const compositions: Array<{ value: string; data: string | null }> = [];
+    const compositionEvent = (type: string, data: string) => {
+      const event = new CompositionEvent(type, { bubbles: true });
+      Object.defineProperty(event, 'data', { value: data });
+      return event;
+    };
+    element.addEventListener('valueChange', (event) => {
+      values.push((event as CustomEvent<InputValueChangeDetail>).detail);
+    });
+    element.addEventListener('compositionStart', (event) => {
+      compositions.push((event as CustomEvent<{ value: string; data: string | null }>).detail);
+    });
+    setElementProps(element, { defaultValue: 'first' } satisfies InputRootProps);
+    document.body.appendChild(element);
+    await flush();
+    const target = physicalInput(element);
+    target.value = 'next';
+    target.dispatchEvent(new InputEvent('input', { data: 'x', inputType: 'insertText' }));
+    target.dispatchEvent(compositionEvent('compositionstart', '候'));
+    expect(values.at(-1)).toMatchObject({
+      value: 'next',
+      composing: false,
+      data: 'x',
+      inputType: 'insertText',
+    });
+    expect(compositions).toEqual([{ value: 'next', data: '候' }]);
+    expect(exposes(element).value.get()).toBe('next');
+    element.remove();
+  });
 });
