@@ -26,13 +26,24 @@ Do not modify tracked files or create branches, commits, issues, pull requests,
 or other external writes.
 
 Return:
+- stable, non-secret Verifier `actorId` and fresh task-context `taskId`;
 - classification;
 - independent reproduction;
 - supporting evidence;
 - contradicting evidence;
 - corrected scope, if needed;
 - confidence;
-- recommended human decision.
+- whether applicable authority already fixes the expected result;
+- evidence-driven next transition:
+  - governed remediation for a confirmed or partially confirmed drift whose
+    expected result is fixed by current authority;
+  - record rejected for not reproducible or expected behavior;
+  - bounded follow-up evidence mission when the evidence is insufficient;
+  - an `unresolved-product-direction` decision packet only when current
+    authority leaves a material semantic, ownership, compatibility, public
+    guarantee, or lifecycle choice open;
+  - a `privileged-or-irreversible-operation` decision packet only when the next
+    action has that character.
 
 Before finishing, prove that git status contains no Verifier-created tracked
 changes.

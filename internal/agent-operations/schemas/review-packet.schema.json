@@ -52,7 +52,13 @@
     "reconciliation": { "$ref": "#/$defs/reconciliation" },
     "limitations": { "$ref": "#/$defs/strings" },
     "unknowns": { "$ref": "#/$defs/strings" },
-    "humanGates": { "$ref": "#/$defs/strings" },
+    "humanGates": {
+      "type": "array",
+      "items": {
+        "enum": ["unresolved-product-direction", "privileged-or-irreversible-operation"]
+      },
+      "uniqueItems": true
+    },
     "recommendedAction": { "enum": ["APPROVE", "REQUEST_CHANGES", "COMMENT", "ABSTAIN"] }
   },
   "$defs": {

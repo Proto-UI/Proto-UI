@@ -24,6 +24,7 @@ import {
   submitGitHubMerge,
   submitGitHubReview,
   summarizeLiveChecks,
+  summarizeLiveDco,
 } from './collect-live-review-input.mjs';
 import {
   evaluateSkillEligibility,
@@ -312,7 +313,6 @@ try {
       selfAssessment: execution.selfAssessment,
       credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
       reviewer: live.viewerLogin,
-      pullRequestAuthor: live.authorLogin,
       ciConclusion: summarizeLiveChecks(live.input.checks, {
         repositoryId: packet.repositoryId,
         trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
@@ -321,18 +321,35 @@ try {
         trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
         trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
       }),
+      dcoConclusion: summarizeLiveDco(live.input.checks, {
+        repositoryId: packet.repositoryId,
+        trustedRepositoryId: policy.trustedDcoEvidence?.repositoryId,
+        trustedCheckName: policy.trustedDcoEvidence?.checkName,
+        trustedSource: policy.trustedDcoEvidence?.source,
+        trustedProviderId: policy.trustedDcoEvidence?.providerId,
+        trustedDetailsUrl: policy.trustedDcoEvidence?.detailsUrl,
+      }),
     });
     if (!authorization.allowed) {
       output = authorization;
     } else {
-      const receipt = submitGitHubReview(packet.repositoryId, packet.pullRequest, {
-        commitId: packet.headSha,
-        event: authorization.recommendedAction,
-        body: renderReviewBody(packet),
-      });
+      const receipt = submitGitHubReview(
+        packet.repositoryId,
+        packet.pullRequest,
+        {
+          commitId: packet.headSha,
+          event: authorization.recommendedAction,
+          body: renderReviewBody(packet),
+        },
+        undefined,
+        {
+          reviewerLogin: live.viewerLogin,
+          invocationId: `${packet.repositoryId}:${packet.pullRequest}:${packet.headSha}:${authorization.recommendedAction}`,
+        }
+      );
       output = {
         ...authorization,
-        submitted: true,
+        submitted: receipt.status === 'applied',
         receipt,
       };
     }
@@ -358,7 +375,6 @@ try {
       selfAssessment: execution.selfAssessment,
       credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
       actor: live.viewerLogin,
-      pullRequestAuthor: live.authorLogin,
       ciConclusion: summarizeLiveChecks(live.input.checks, {
         repositoryId: packet.repositoryId,
         trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
@@ -366,6 +382,14 @@ try {
         trustedCheckNames: policy.trustedCiEvidence?.checkNames,
         trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
         trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
+      }),
+      dcoConclusion: summarizeLiveDco(live.input.checks, {
+        repositoryId: packet.repositoryId,
+        trustedRepositoryId: policy.trustedDcoEvidence?.repositoryId,
+        trustedCheckName: policy.trustedDcoEvidence?.checkName,
+        trustedSource: policy.trustedDcoEvidence?.source,
+        trustedProviderId: policy.trustedDcoEvidence?.providerId,
+        trustedDetailsUrl: policy.trustedDcoEvidence?.detailsUrl,
       }),
       mergeable: live.mergeable,
       mergeStateStatus: live.mergeStateStatus,

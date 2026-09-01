@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/event-shadow-state.schema.json",
+  "title": "Proto UI Event shadow replay state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "seenDeliveryKeys", "objectCursors"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.event-shadow-state" },
+    "seenDeliveryKeys": {
+      "description": "Unique replay identities. Input order is semantically irrelevant; the runtime emits canonical lexical order.",
+      "type": "array",
+      "maxItems": 10000,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/digest" }
+    },
+    "objectCursors": {
+      "type": "object",
+      "maxProperties": 10000,
+      "propertyNames": {
+        "pattern": "^repository:[1-9][0-9]*:pull-request:[1-9][0-9]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["deliveryKey", "updatedAt", "headSha"],
+        "properties": {
+          "deliveryKey": { "$ref": "#/$defs/digest" },
+          "updatedAt": {
+            "description": "Canonical UTC timestamp emitted by the runtime.",
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+          },
+          "headSha": { "$ref": "#/$defs/sha" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

@@ -106,4 +106,4 @@ The Base Button, Toggle, Tabs, and Shadcn Button entities referenced here are cu
 
 - [Maintaining an Existing Prototype](/en/build/prototypes/maintaining-an-existing-prototype/)
 - [Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/)
-- [Implementing an Approved Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/)
+- [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/)

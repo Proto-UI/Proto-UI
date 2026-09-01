@@ -1,10 +1,10 @@
 ---
 name: Adapter Proposal
-about: Research a new adapter or a major adapter boundary with maintainer guidance
-labels: ['area: adapters', 'needs maintainer design']
+about: Advance a new adapter or major adapter boundary through evidence-first research and implementation
+labels: ['area: adapters']
 ---
 
-> The Module, Host Capability, and official Adapter-profile catalog is still being completed. This template starts maintainer-guided research; it does not authorize an implementation pull request. A bounded parity bug should use the Bug Report template instead.
+> Use this template to produce the smallest host-capability and Adapter-profile slice that can be tested honestly. When existing authority and the bounded outcome determine the result, an Agent or contributor may continue through implementation and independent review. Isolate one decision packet only if materially different product directions remain. A bounded parity bug should use the Bug Report template instead.
 
 ## Target technology
 
@@ -21,17 +21,20 @@ Which framework/platform is this adapter for?
 - Which required relations or semantics are still uncataloged?
 - What known implementation or documentation drift may affect this proposal?
 
-## Evidence before implementation
+## Evidence and first implementation slice
 
 - Which frozen Prototype and smallest host capability slice would be used for a feasibility assessment?
 - What would prove native, translated, emulated, unsupported, or deferred realization?
 - Which existing Adapter is comparison evidence, and which details must not be copied as protocol authority?
+- What focused contract, fake-host, cross-Adapter, or real-host evidence makes the first slice reviewable?
 
-## Contributor and maintainer decisions
+## Automatic continuation and decision boundary
 
-- What may the proposer investigate independently?
-- Which decisions require a maintainer checkpoint?
-- Has implementation been authorized? Default: **no**.
+- What does existing authority already decide?
+- What may the Agent or contributor decide within this bounded slice?
+- What is the first implementation and validation result that can proceed now?
+- Is there an `unresolved-product-direction` choice? Default: **none**. If yes, list the materially different options and the smallest decision required.
+- Does the work require a `privileged-or-irreversible-operation`? Default: **none**.
 
 ## Dependency changes
 

@@ -32,7 +32,14 @@ query($owner: String!, $name: String!, $number: Int!) {
       headRefOid
       author { login }
       commits(first: 100) {
-        nodes { commit { oid messageHeadline } }
+        nodes {
+          commit {
+            oid
+            message
+            author { name email user { login } }
+            committer { name email user { login } }
+          }
+        }
         pageInfo { hasNextPage }
       }
       reviews(first: 100) {
@@ -68,7 +75,7 @@ query($owner: String!, $name: String!, $number: Int!) {
                     completedAt
                     detailsUrl
                     checkSuite {
-                      app { slug }
+                      app { id slug }
                       repository { nameWithOwner }
                       workflowRun {
                         file { path }
@@ -113,6 +120,7 @@ export function normalizeCheck(node) {
       completedAt: node.completedAt,
       detailsUrl: node.detailsUrl,
       source: node.checkSuite?.app?.slug ?? 'unknown-check-run',
+      providerId: node.checkSuite?.app?.id ?? null,
       repository: node.checkSuite?.repository?.nameWithOwner ?? null,
       workflowName: node.checkSuite?.workflowRun?.workflow?.name ?? null,
       workflowPath: node.checkSuite?.workflowRun?.file?.path ?? null,
@@ -126,6 +134,7 @@ export function normalizeCheck(node) {
     completedAt: node.createdAt,
     detailsUrl: node.targetUrl,
     source: 'status-context',
+    providerId: null,
     repository: null,
     workflowName: null,
     workflowPath: null,
@@ -143,18 +152,14 @@ function repositoryActionsPrefix(repositoryId) {
 
 export function summarizeLiveChecks(checks, options = {}) {
   if (!Array.isArray(checks) || checks.length === 0) return 'unknown';
-  if (checks.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
-  const allReady = checks.every(
-    (check) => check.status === 'COMPLETED' && SUCCESSFUL_CONCLUSIONS.has(check.conclusion)
-  );
   const actionsPrefix = repositoryActionsPrefix(options.repositoryId);
   const trustedSource = options.trustedSource ?? 'github-actions';
   const trustedRepository = repositoryName(options.trustedRepositoryId ?? options.repositoryId);
   const trustedCheckNames = new Set(options.trustedCheckNames ?? []);
   const trustedWorkflowNames = new Set(options.trustedWorkflowNames ?? []);
   const trustedWorkflowPaths = new Set(options.trustedWorkflowPaths ?? []);
-  const hasTrustedRepositorySuccess = checks.some((check) => {
-    if (check.conclusion !== 'SUCCESS' || typeof check.detailsUrl !== 'string') return false;
+  const trustedChecks = checks.filter((check) => {
+    if (typeof check.detailsUrl !== 'string') return false;
     const isRepositoryAction = actionsPrefix
       ? check.detailsUrl.startsWith(actionsPrefix)
       : /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\//.test(check.detailsUrl);
@@ -172,7 +177,42 @@ export function summarizeLiveChecks(checks, options = {}) {
       workflowPathIsTrusted
     );
   });
-  return allReady && hasTrustedRepositorySuccess ? 'success' : 'unknown';
+  if (
+    trustedChecks.length === 0 ||
+    (trustedCheckNames.size > 0 &&
+      [...trustedCheckNames].some(
+        (expectedName) => !trustedChecks.some((check) => check.name === expectedName)
+      ))
+  ) {
+    return 'unknown';
+  }
+  if (trustedChecks.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
+  const allReady = trustedChecks.every(
+    (check) => check.status === 'COMPLETED' && SUCCESSFUL_CONCLUSIONS.has(check.conclusion)
+  );
+  return allReady && trustedChecks.some((check) => check.conclusion === 'SUCCESS')
+    ? 'success'
+    : 'unknown';
+}
+
+export function summarizeLiveDco(checks, options = {}) {
+  if (!Array.isArray(checks) || checks.length === 0) return 'unknown';
+  const trustedRepository = repositoryName(options.trustedRepositoryId ?? options.repositoryId);
+  const trusted = checks.filter(
+    (check) =>
+      check.name === options.trustedCheckName &&
+      check.source === options.trustedSource &&
+      check.providerId === options.trustedProviderId &&
+      check.repository === trustedRepository &&
+      check.detailsUrl === options.trustedDetailsUrl &&
+      check.workflowName === null &&
+      check.workflowPath === null
+  );
+  if (trusted.length === 0) return 'unknown';
+  if (trusted.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
+  return trusted.every((check) => check.status === 'COMPLETED' && check.conclusion === 'SUCCESS')
+    ? 'success'
+    : 'unknown';
 }
 
 export function parseRepositoryId(repositoryId) {
@@ -205,6 +245,9 @@ export function buildLiveReviewInput(
   if (!pullRequestPayload) throw new Error('live pull-request payload is incomplete');
   if (!payload?.data?.viewer?.login || !payload?.data?.repository?.viewerPermission) {
     throw new Error('live viewer identity or permission is unavailable');
+  }
+  if (!pullRequestPayload.author?.login) {
+    throw new Error('live pull-request author identity is unavailable');
   }
   if (
     !Number.isInteger(pullRequestPayload.changedFiles) ||
@@ -259,11 +302,12 @@ export function buildLiveReviewInput(
   const checks = (checkContexts?.nodes ?? []).map(normalizeCheck);
 
   const input = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     kind: 'proto-ui.review-input',
     repositoryId,
     pullRequest,
     pullRequestState: pullRequestPayload.state,
+    pullRequestAuthor: pullRequestPayload.author.login,
     isDraft: pullRequestPayload.isDraft,
     baseRefName: pullRequestPayload.baseRefName,
     baseSha: pullRequestPayload.baseRefOid,
@@ -276,11 +320,21 @@ export function buildLiveReviewInput(
     })),
     commits: (pullRequestPayload.commits?.nodes ?? []).map((node) => ({
       sha: node.commit.oid,
-      message: node.commit.messageHeadline ?? '',
+      message: node.commit.message ?? '',
+      author: {
+        login: node.commit.author?.user?.login ?? null,
+        name: node.commit.author?.name ?? '',
+        email: node.commit.author?.email ?? '',
+      },
+      committer: {
+        login: node.commit.committer?.user?.login ?? null,
+        name: node.commit.committer?.name ?? '',
+        email: node.commit.committer?.email ?? '',
+      },
     })),
     reviews: (pullRequestPayload.reviews?.nodes ?? []).map((review) => ({
       id: review.id,
-      author: review.author?.login ?? 'ghost',
+      author: review.author?.login ?? null,
       state: review.state,
       commitSha: review.commit?.oid ?? null,
       submittedAt: review.submittedAt ?? null,
@@ -302,7 +356,7 @@ export function buildLiveReviewInput(
     input,
     viewerLogin: payload.data.viewer.login,
     viewerPermission: payload.data.repository.viewerPermission,
-    authorLogin: pullRequestPayload.author?.login,
+    authorLogin: input.pullRequestAuthor,
     mergeable: pullRequestPayload.mergeable,
     mergeStateStatus: pullRequestPayload.mergeStateStatus,
   };
@@ -312,7 +366,8 @@ export function submitGitHubReview(
   repositoryId,
   pullRequest,
   { commitId, event, body },
-  runner = execFileSync
+  runner = execFileSync,
+  { reviewerLogin = null, invocationId = `${commitId}:${event}:${body}` } = {}
 ) {
   const { owner, name } = parseRepositoryId(repositoryId);
   if (!Number.isInteger(pullRequest) || pullRequest < 1) {
@@ -326,36 +381,76 @@ export function submitGitHubReview(
   }
   if (typeof body !== 'string') throw new Error('review submission body is invalid');
 
-  const response = JSON.parse(
-    runner(
-      'gh',
-      [
-        'api',
-        '--method',
-        'POST',
-        `repos/${owner}/${name}/pulls/${pullRequest}/reviews`,
-        '--input',
-        '-',
-      ],
-      {
-        encoding: 'utf8',
-        input: JSON.stringify({ commit_id: commitId, event, body }),
-        stdio: ['pipe', 'pipe', 'pipe'],
-      }
-    )
-  );
-  if (response.commit_id !== commitId) {
-    throw new Error('submitted review commit does not match the inspected head');
-  }
   const expectedState = {
     APPROVE: 'APPROVED',
     REQUEST_CHANGES: 'CHANGES_REQUESTED',
     COMMENT: 'COMMENTED',
   }[event];
+  const postArgs = [
+    'api',
+    '--method',
+    'POST',
+    `repos/${owner}/${name}/pulls/${pullRequest}/reviews`,
+    '--input',
+    '-',
+  ];
+  let response;
+  try {
+    response = JSON.parse(
+      runner('gh', postArgs, {
+        encoding: 'utf8',
+        input: JSON.stringify({ commit_id: commitId, event, body }),
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
+    );
+  } catch (submissionError) {
+    const reconciliationArgs = [
+      'api',
+      '--method',
+      'GET',
+      '--paginate',
+      `repos/${owner}/${name}/pulls/${pullRequest}/reviews?per_page=100`,
+    ];
+    try {
+      const reviews = JSON.parse(
+        runner('gh', reconciliationArgs, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+      );
+      const matches = Array.isArray(reviews)
+        ? reviews.filter(
+            (review) =>
+              review?.commit_id === commitId &&
+              review?.state === expectedState &&
+              review?.body === body &&
+              (reviewerLogin === null || review?.user?.login === reviewerLogin)
+          )
+        : [];
+      if (matches.length === 1) return reviewReceipt(matches[0], invocationId, true);
+    } catch {
+      // Preserve the explicit unknown outcome below; never retry the write.
+    }
+    return {
+      status: 'unknown',
+      reconciled: false,
+      invocationId,
+      commitId,
+      event,
+      error: submissionError instanceof Error ? submissionError.message : String(submissionError),
+    };
+  }
+  if (response.commit_id !== commitId) {
+    throw new Error('submitted review commit does not match the inspected head');
+  }
   if (!['number', 'string'].includes(typeof response.id) || response.state !== expectedState) {
     throw new Error('submitted review receipt is incomplete or has an unexpected state');
   }
+  return reviewReceipt(response, invocationId, false);
+}
+
+function reviewReceipt(response, invocationId, reconciled) {
   return {
+    status: 'applied',
+    reconciled,
+    invocationId,
     id: String(response.id),
     nodeId: response.node_id ?? null,
     state: response.state,

@@ -12,7 +12,7 @@ description: Independently review one Proto UI autonomous-maintenance remediatio
 5. Remain read-only. Attempt to falsify completion.
 6. Return `adequate`, `incomplete`, or `misleading` with exact evidence.
 
-Return technical gaps to `pui-remediate`. Return product, compatibility, scope, and integration choices to their human gates. Do not modify files or issue the integration decision.
+Return technical gaps to `pui-remediate`. Route an adequate governed repair to `pui-maintenance-close`; return only a genuinely unresolved product or compatibility direction to a maintainer. Keep this context non-mutating so the verdict remains independent.
 
 ## Explicit handoff
 

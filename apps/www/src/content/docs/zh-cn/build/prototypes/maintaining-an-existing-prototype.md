@@ -51,7 +51,7 @@ rg -n "<prototype name|entity id|criterion id>" spec packages/prototypes apps/ww
 
 ### Spec change
 
-期望行为本身需要变化。普通维护到这里应暂停：先在 Issue 中说明受影响 criterion、兼容影响、备选方案和所需 checkpoint，再修改实体及其 revision、T evidence 和所有受影响投影。
+期望行为本身需要变化。先追踪 active entity、已接受 draft direction、Issue acceptance criteria 或 decision 是否已经固定新结果；若已固定，就同步更新 entity revision、T evidence、实现与投影。若尚未固定，则把受影响 criterion、兼容影响和备选方案收敛为一个 `unresolved-product-direction` 决定，再选择方向。
 
 ## 第三步：保持改动闭环
 
@@ -121,7 +121,7 @@ corepack pnpm@10.32.1 docs:build
 
 ## 什么时候升级为设计工作？
 
-遇到以下任一情况，先回到 Issue：
+遇到以下变化时先重读 Issue 与当前权威；已有方向就直接继续，只有尚未决定时才提交最小的 `unresolved-product-direction`：
 
 - 需要增加或改变 P criterion；
 - 需要改变 Base 与 styled projection 的所有权；

@@ -11,9 +11,9 @@ description: '在不重定义 Base 语义的前提下交付设计语言 P 实体
 - Issue 明确列出 Base owner、derived identity 和 lifecycle status；
 - Base 拥有的 state、event、focus、accessibility、context、positioning 或 host-capability 责任已经写清楚；
 - 设计语言允许增加的 props、tokens、rules、anatomy 和兼容范围已经写清楚；
-- Issue 明确允许开始实现，而不是仍处于 `needs maintainer design`。
+- 已有受治理 Base subject 与预期 derived delta 已写清楚；如果出现真正全新的 Base identity，在 admission 决定前保持为 candidate。
 
-缺少任何一项时，先完善 Issue，不要靠复制现有风格库代码推断边界。
+缺少任何一项时，一边完善 Issue 与 candidate graph，一边收集 focused evidence，不要靠复制现有风格库代码推断边界。已有受治理 projection 在证据收敛期间继续推进。
 
 ## Base projection 与 styled-only 的区别
 
@@ -63,7 +63,7 @@ P entity 应：
 - 必要且经过编目的视觉 anatomy；
 - derived library 自己的类型和公开入口。
 
-如果实现开始重新维护 Base value、事件请求、焦点、a11y、dismissal 或 positioning，说明所有权已经漂移，应停止并回到 Issue。
+如果实现开始重新维护 Base value、事件请求、焦点、a11y、dismissal 或 positioning，说明所有权已经漂移：同步更新 governing/candidate entity 与测试，纠正实现，再进入 fresh review。只有证据要求准入真正全新的 Base identity 时才升级。
 
 ### 4. 验证正向与缺失保证
 
@@ -106,17 +106,17 @@ Focused tests 至少覆盖：
 
 只有 Prototype 按设计没有自然 trigger，或其公开 controls 本身就是演示对象时，才允许最小外部 orchestration。Toast-style invocation 和直接驱动 Transition 是典型例外。例外必须位于 Prototype 之外、只使用公开 API，并在 Demo source 与 PR 中说明为什么不可避免、哪些代码不会随 package 安装且需要消费者自行实现。
 
-## 贡献者可以决定什么？
+## 哪些内容继续通过实现与 review 收敛？
 
-在 frozen issue boundary 内，贡献者通常可以决定：
+对于已有受治理 Base subject，贡献者与 Agent 可以继续决定可逆的 projection 细节，并让 P/T 图、实现、证据和公开 surface 保持一致：
 
 - source 文件组织；
 - token 和 rule 的内部复用方式；
 - focused test 的具体 fixture；
-- Demo 如何清楚展示已批准的 states；
+- Demo 如何清楚展示受治理 states；
 - 不改变公开语义的局部重构。
 
-需要 maintainer checkpoint 的内容包括：
+同一套证据绑定的 review loop 处理：
 
 - 新增或删除公开 props、events、states 或 anatomy identity；
 - 改变 Base ownership；
@@ -124,6 +124,8 @@ Focused tests 至少覆盖：
 - 扩大第三方 compatibility claim；
 - 从 projection 改为 styled-only，或反向改变；
 - 引入新 dependency。
+
+这些属于受治理变更，不是普遍 human checkpoint。唯一需要升级的语义决定是是否准入一个真正全新的独立 Base identity；在 admission 未决期间，它的 research、candidate graph、draft entity、projection probe 和 tests 仍可继续，但不能被写成已经准入的保证。
 
 ## 参考实现
 

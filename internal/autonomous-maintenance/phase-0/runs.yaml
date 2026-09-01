@@ -1,4 +1,4 @@
-schemaVersion: 1
+schemaVersion: 2
 runs:
   - id: AM-P0-001
     missionPath: internal/autonomous-maintenance/phase-0/missions/run-001-props.md

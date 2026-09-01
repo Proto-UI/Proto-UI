@@ -1,11 +1,11 @@
 ---
 title: 'Writing a Compound Prototype'
-description: 'Model anatomy, ownership, context, and part responsibilities inside an approved boundary.'
+description: 'Model anatomy, ownership, context, and part responsibilities inside a governed or candidate boundary.'
 ---
 
-A compound Prototype is not a large component split into more files. It begins as a set of approved protocol subjects, owners, and structural relations; source organization follows.
+A compound Prototype is not a large component split into more files. It begins as a governed or explicitly draft set of protocol subjects, owners, and structural relations; source organization follows.
 
-> This guide explains compound modeling. A new Base family still requires a proposal and maintainer checkpoint; implementation follows [Implementing an Approved Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/).
+> This guide explains compound modeling. Existing governed families continue directly. For a new Base family, research, candidate anatomy, draft P/T entities, implementation probes, and tests can establish the model before admission; only the decision to admit the new independent Base identities remains unresolved. Continue with [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/).
 
 ## Read the P/T graph before splitting DOM
 
@@ -77,7 +77,7 @@ P criterion
 → exports, CLI, docs, demo
 ```
 
-Typical boundaries include controlled requests, disabled items, empty or duplicate values, structural churn, presence, focus, accessibility relationships, and teardown. The approved issue decides the exact scope.
+Typical boundaries include controlled requests, disabled items, empty or duplicate values, structural churn, presence, focus, accessibility relationships, and teardown. The applicable graph and accumulating evidence refine the exact scope through review.
 
 ## Next
 

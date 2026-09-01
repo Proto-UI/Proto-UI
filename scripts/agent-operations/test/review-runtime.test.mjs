@@ -26,16 +26,26 @@ const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
   readFileSync(path.join(root, 'internal/agent-operations/capability-policy.yaml'), 'utf8')
 );
+const activePolicy = structuredClone(policy);
+for (const authorization of [
+  ...(activePolicy.collaborationMutationAuthorizations ?? []),
+  ...(activePolicy.reviewSubmissionAuthorizations ?? []),
+  ...(activePolicy.pullRequestMergeAuthorizations ?? []),
+]) {
+  authorization.status = 'active';
+  delete authorization.blockedBy;
+}
 const sha = (letter) => letter.repeat(40);
 const digest = (letter) => letter.repeat(64);
 
 function reviewInput(overrides = {}) {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     kind: 'proto-ui.review-input',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
     pullRequest: 487,
     pullRequestState: 'OPEN',
+    pullRequestAuthor: 'contributor',
     isDraft: false,
     baseRefName: 'main',
     baseSha: sha('a'),
@@ -48,7 +58,22 @@ function reviewInput(overrides = {}) {
         status: 'modified',
       },
     ],
-    commits: [{ sha: sha('b'), message: 'Bounded change' }],
+    commits: [
+      {
+        sha: sha('b'),
+        message: 'Bounded change\n\nSigned-off-by: Contributor <contributor@example.com>',
+        author: {
+          login: 'contributor',
+          name: 'Contributor',
+          email: 'contributor@example.com',
+        },
+        committer: {
+          login: 'web-flow',
+          name: 'GitHub',
+          email: 'noreply@github.com',
+        },
+      },
+    ],
     reviews: [],
     comments: [],
     replies: [],
@@ -61,6 +86,7 @@ function reviewInput(overrides = {}) {
         completedAt: '2026-08-23T00:00:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
         source: 'github-actions',
+        providerId: 'APP_github_actions',
         repository: 'Proto-UI/Proto-UI',
         workflowName: 'CI',
         workflowPath: '.github/workflows/ci.yml',
@@ -101,7 +127,7 @@ function packet(overrides = {}, input = reviewInput()) {
     },
     limitations: ['Review depth is limited without a fresh local assessment'],
     unknowns: [],
-    humanGates: ['pull-request-approval'],
+    humanGates: [],
     recommendedAction: 'ABSTAIN',
     ...overrides,
   };
@@ -154,14 +180,26 @@ test('review packet binds revision and input state and supports incremental reco
 
   const reordered = reviewInput({
     commits: [
-      { sha: sha('c'), message: 'Second' },
-      { sha: sha('b'), message: 'First' },
+      {
+        sha: sha('c'),
+        message: 'Second',
+        author: { login: 'second-author', name: 'Second', email: 'second@example.com' },
+        committer: { login: 'web-flow', name: 'GitHub', email: 'noreply@github.com' },
+      },
+      {
+        sha: sha('b'),
+        message: 'First',
+        author: { login: 'first-author', name: 'First', email: 'first@example.com' },
+        committer: { login: 'web-flow', name: 'GitHub', email: 'noreply@github.com' },
+      },
     ],
   });
   const reversed = { ...reordered, commits: [...reordered.commits].reverse() };
   assert.equal(computeReviewInputDigest(reordered), computeReviewInputDigest(reversed));
   const reorderedKeys = Object.fromEntries(Object.entries(reordered).reverse());
   reorderedKeys.commits = reorderedKeys.commits.map((commit) => ({
+    committer: commit.committer,
+    author: commit.author,
     message: commit.message,
     sha: commit.sha,
   }));
@@ -175,6 +213,7 @@ test('review packet binds revision and input state and supports incremental reco
         completedAt: '2026-08-23T00:01:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
         source: 'github-actions',
+        providerId: 'APP_github_actions',
         repository: 'Proto-UI/Proto-UI',
         workflowName: 'CI',
         workflowPath: '.github/workflows/ci.yml',
@@ -186,6 +225,7 @@ test('review packet binds revision and input state and supports incremental reco
         completedAt: '2026-08-23T00:00:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
         source: 'github-actions',
+        providerId: 'APP_github_actions',
         repository: 'Proto-UI/Proto-UI',
         workflowName: 'CI',
         workflowPath: '.github/workflows/ci.yml',
@@ -247,7 +287,7 @@ test('canonical review input is insensitive to top-level comment connection orde
   );
 });
 
-test('review input v3 binds changed files and check provenance while classifying spec entities', () => {
+test('review input v4 binds identities, changed files, and check provenance while classifying spec entities', () => {
   const ordinary = reviewInput();
   assert.equal(reviewChangesSpecEntities(ordinary), false);
   assert.equal(
@@ -459,7 +499,7 @@ test('review packet requires real scope, evidence accounting, and finding reconc
   assert.throws(() => validateReviewPacket(stillCurrentResolvedFinding, input), /still references/);
 });
 
-test('human-assisted review remains open while autonomous review obeys the exact class ceiling', () => {
+test('human-assisted review is dispositive without assessment while autonomous review obeys the exact class ceiling', () => {
   const c1 = assessment('C1', ['review-facts-and-ci', 'review-docs-and-links']);
   assert.deepEqual(
     evaluateReviewEligibility({
@@ -470,10 +510,25 @@ test('human-assisted review remains open while autonomous review obeys the exact
     }),
     {
       eligible: true,
-      reviewDepth: 'partial',
-      maximumRecommendation: 'ABSTAIN',
-      limitationRequired: true,
-      approvalDecisionRequired: true,
+      reviewDepth: 'full',
+      maximumRecommendation: 'APPROVE',
+      limitationRequired: false,
+      approvalDecisionRequired: false,
+    }
+  );
+  assert.deepEqual(
+    evaluateReviewEligibility({
+      executionMode: 'human-assisted',
+      selfAssessment: null,
+      reviewClass: 'review-governed-implementation-slice',
+      policy,
+    }),
+    {
+      eligible: true,
+      reviewDepth: 'full',
+      maximumRecommendation: 'APPROVE',
+      limitationRequired: false,
+      approvalDecisionRequired: false,
     }
   );
   assert.equal(
@@ -508,7 +563,7 @@ test('human-assisted review remains open while autonomous review obeys the exact
   });
   assert.equal(bounded.eligible, true);
   assert.equal(bounded.maximumRecommendation, 'APPROVE');
-  assert.equal(bounded.approvalDecisionRequired, 'when-spec-entities-change');
+  assert.equal(bounded.approvalDecisionRequired, 'when-unresolved-product-direction');
   assert.equal(
     evaluateReviewEligibility({
       executionMode: 'autonomous',
@@ -530,19 +585,17 @@ test('human-assisted review remains open while autonomous review obeys the exact
     () => validateReviewPacketEligibility(highClassPacket, c1HighClass, 'autonomous'),
     /exceeds the autonomous ceiling/
   );
-  assert.throws(
-    () =>
-      validateReviewPacketEligibility(
-        packet({ recommendedAction: 'REQUEST_CHANGES', limitations: [] }),
-        evaluateReviewEligibility({
-          executionMode: 'human-assisted',
-          selfAssessment: null,
-          reviewClass: 'review-governed-implementation-slice',
-          policy,
-        }),
-        'human-assisted'
-      ),
-    /eligible maximum|limitation/
+  assert.doesNotThrow(() =>
+    validateReviewPacketEligibility(
+      packet({ recommendedAction: 'REQUEST_CHANGES', limitations: [] }),
+      evaluateReviewEligibility({
+        executionMode: 'human-assisted',
+        selfAssessment: null,
+        reviewClass: 'review-governed-implementation-slice',
+        policy,
+      }),
+      'human-assisted'
+    )
   );
 });
 
@@ -565,8 +618,8 @@ test('review submission preserves explicit authorization and activates the bound
     policy,
     credentialCanReview: true,
     reviewer: 'agent',
-    pullRequestAuthor: 'contributor',
     ciConclusion: 'success',
+    dcoConclusion: 'success',
   };
   assert.equal(authorizeReviewSubmission({ ...base, authorizationId: 'wrong' }).allowed, false);
   assert.equal(authorizeReviewSubmission({ ...base, credentialCanReview: false }).allowed, false);
@@ -579,7 +632,6 @@ test('review submission preserves explicit authorization and activates the bound
     authorizeReviewSubmission({
       ...base,
       reviewer: 'contributor',
-      pullRequestAuthor: 'contributor',
       packet: packet(
         {
           findings: [
@@ -613,7 +665,78 @@ test('review submission preserves explicit authorization and activates the bound
     }).allowed,
     false
   );
+  const contributorInput = reviewInput({ pullRequestAuthor: 'different-pr-author' });
+  assert.match(
+    authorizeReviewSubmission({
+      ...base,
+      input: contributorInput,
+      liveInput: structuredClone(contributorInput),
+      reviewer: 'CONTRIBUTOR',
+      packet: packet(
+        { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
+        contributorInput
+      ),
+    }).reason,
+    /commit contributor/
+  );
+  assert.match(
+    authorizeReviewSubmission({
+      ...base,
+      input: contributorInput,
+      liveInput: structuredClone(contributorInput),
+      reviewer: 'web-flow',
+      packet: packet(
+        {
+          findings: [
+            {
+              id: 'F-COMMITTER',
+              severity: 'P1',
+              confidence: 'high',
+              file: 'src/a.ts',
+              line: 1,
+              authority: 'governed rule',
+              observed: 'broken',
+              expected: 'working',
+              impact: 'regression',
+              fix: 'repair',
+            },
+          ],
+          limitations: [],
+          unknowns: [],
+          humanGates: [],
+          recommendedAction: 'REQUEST_CHANGES',
+          reconciliation: {
+            priorReviewedHeadSha: null,
+            priorPacketDigest: null,
+            resolvedFindingIds: [],
+            openFindingIds: [],
+            newFindingIds: ['F-COMMITTER'],
+          },
+        },
+        contributorInput
+      ),
+    }).reason,
+    /commit contributor/
+  );
+  const unlinkedContributorInput = structuredClone(contributorInput);
+  unlinkedContributorInput.commits[0].author.login = null;
+  assert.match(
+    authorizeReviewSubmission({
+      ...base,
+      input: unlinkedContributorInput,
+      liveInput: structuredClone(unlinkedContributorInput),
+      packet: packet(
+        { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
+        unlinkedContributorInput
+      ),
+    }).reason,
+    /verifiable platform identity/
+  );
   assert.equal(authorizeReviewSubmission({ ...base, ciConclusion: 'failure' }).allowed, false);
+  assert.match(
+    authorizeReviewSubmission({ ...base, dcoConclusion: 'unknown' }).reason,
+    /DCO status/
+  );
 
   const requestChangesPacket = packet(
     {
@@ -645,12 +768,19 @@ test('review submission preserves explicit authorization and activates the bound
     },
     input
   );
+  const humanRequestChanges = authorizeReviewSubmission({
+    ...base,
+    packet: requestChangesPacket,
+  });
+  assert.equal(humanRequestChanges.allowed, true);
+  assert.equal(humanRequestChanges.recommendedAction, 'REQUEST_CHANGES');
   const scheduledBase = {
     ...base,
     executionMode: 'autonomous',
     executionModeSource: 'schedule',
     authorizationId: 'proto-ui-scheduled-review-v1',
-    selfAssessment: assessment('C4', Object.keys(policy.reviewClasses)),
+    policy: activePolicy,
+    selfAssessment: assessment('C4', Object.keys(activePolicy.reviewClasses)),
   };
   const requestChanges = authorizeReviewSubmission({
     ...scheduledBase,
@@ -673,7 +803,7 @@ test('review submission preserves explicit authorization and activates the bound
       executionMode: 'autonomous',
       selfAssessment: reviewEligibleC3,
       reviewClass: scheduledBase.packet.reviewClass,
-      policy,
+      policy: activePolicy,
     }).eligible,
     true
   );
@@ -682,7 +812,7 @@ test('review submission preserves explicit authorization and activates the bound
       ...scheduledBase,
       selfAssessment: reviewEligibleC3,
     }).allowed,
-    false
+    true
   );
   assert.equal(
     authorizeReviewSubmission({ ...scheduledBase, selfAssessment: null }).allowed,
@@ -736,14 +866,13 @@ test('review submission preserves explicit authorization and activates the bound
     packet: packet(
       {
         limitations: [],
-        humanGates: ['pull-request-approval'],
+        humanGates: [],
         recommendedAction: 'APPROVE',
       },
       specInput
     ),
   });
-  assert.equal(specApproval.allowed, false);
-  assert.equal(specApproval.humanReviewRequired, true);
+  assert.equal(specApproval.allowed, true);
   assert.equal(
     authorizeReviewSubmission({
       ...base,
@@ -752,7 +881,7 @@ test('review submission preserves explicit authorization and activates the bound
       packet: packet(
         {
           limitations: [],
-          humanGates: ['pull-request-approval'],
+          humanGates: [],
           recommendedAction: 'APPROVE',
         },
         specInput
@@ -760,13 +889,28 @@ test('review submission preserves explicit authorization and activates the bound
     }).allowed,
     true
   );
+  const unresolvedProductDirection = authorizeReviewSubmission({
+    ...scheduledBase,
+    input: specInput,
+    liveInput: structuredClone(specInput),
+    packet: packet(
+      {
+        limitations: [],
+        humanGates: ['unresolved-product-direction'],
+        recommendedAction: 'APPROVE',
+      },
+      specInput
+    ),
+  });
+  assert.equal(unresolvedProductDirection.allowed, false);
+  assert.match(unresolvedProductDirection.reason, /clean review packet/);
 
   assert.equal(
     authorizeReviewSubmission({
       ...scheduledBase,
       packet: packet({ limitations: [], humanGates: [], recommendedAction: 'COMMENT' }, input),
     }).allowed,
-    false
+    true
   );
   assert.equal(
     authorizeReviewSubmission({
@@ -778,7 +922,24 @@ test('review submission preserves explicit authorization and activates the bound
         reviewInput({ isDraft: true })
       ),
     }).allowed,
-    false
+    true
+  );
+});
+
+test('review packets accept only the two attended decision classes', () => {
+  const input = reviewInput();
+  assert.doesNotThrow(() =>
+    validateReviewPacket(packet({ humanGates: ['unresolved-product-direction'] }, input), input)
+  );
+  assert.doesNotThrow(() =>
+    validateReviewPacket(
+      packet({ humanGates: ['privileged-or-irreversible-operation'] }, input),
+      input
+    )
+  );
+  assert.throws(
+    () => validateReviewPacket(packet({ humanGates: ['pull-request-approval'] }, input), input),
+    /unknown attended decision class/
   );
 });
 
@@ -801,8 +962,8 @@ test('an active scheduled standing authorization can submit an exact-head review
     selfAssessment: assessment('C4', Object.keys(activePolicy.reviewClasses)),
     credentialCanReview: true,
     reviewer: 'agent',
-    pullRequestAuthor: 'contributor',
     ciConclusion: 'success',
+    dcoConclusion: 'success',
   });
   assert.equal(approval.allowed, true);
   assert.equal(approval.recommendedAction, 'APPROVE');
@@ -820,8 +981,8 @@ test('submission preflight re-collects live canonical input and rejects drift an
     policy,
     credentialCanReview: true,
     reviewer: 'agent',
-    pullRequestAuthor: 'contributor',
     ciConclusion: 'success',
+    dcoConclusion: 'success',
   };
 
   // A new reply on the same head changes the canonical input digest: submission must reject.
@@ -877,6 +1038,7 @@ test('submission preflight re-collects live canonical input and rejects drift an
         completedAt: '2026-08-23T02:00:00.000Z',
         detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/2',
         source: 'github-actions',
+        providerId: 'APP_github_actions',
         repository: 'Proto-UI/Proto-UI',
         workflowName: 'CI',
         workflowPath: '.github/workflows/ci.yml',
@@ -895,12 +1057,9 @@ test('submission preflight re-collects live canonical input and rejects drift an
     /different repository or pull request/
   );
 
-  // Reviewer and author identities must come from the trusted live context.
+  // Reviewer identity must come from the trusted live context. PR and commit
+  // contributor identities are canonical live-input fields, not caller claims.
   assert.throws(() => authorizeReviewSubmission({ ...base, reviewer: '' }), /viewer identity/);
-  assert.throws(
-    () => authorizeReviewSubmission({ ...base, pullRequestAuthor: undefined }),
-    /pull-request author identity/
-  );
 
   // Staleness is derived from the live revision, never from caller-supplied SHAs.
   const pushedLiveInput = { ...structuredClone(input), headSha: sha('d') };
@@ -985,6 +1144,7 @@ test('review input validation accepts nullable check details links but rejects e
           completedAt: '2026-08-23T00:00:00.000Z',
           detailsUrl,
           source: 'github-actions',
+          providerId: 'APP_github_actions',
           repository: 'Proto-UI/Proto-UI',
           workflowName: 'CI',
           workflowPath: '.github/workflows/ci.yml',
@@ -1042,7 +1202,10 @@ test('agent:review CLI validates and inspects the same packet contract used by t
   try {
     const input = reviewInput();
     writeFileSync(inputPath, JSON.stringify(input));
-    writeFileSync(packetPath, JSON.stringify(packet({}, input)));
+    writeFileSync(
+      packetPath,
+      JSON.stringify(packet({ limitations: [], recommendedAction: 'APPROVE' }, input))
+    );
     writeFileSync(
       handoffPath,
       JSON.stringify({
@@ -1124,7 +1287,10 @@ test('agent:review CLI validates and inspects the same packet contract used by t
       )
     );
     assert.equal(eligibility.eligible, true);
-    assert.equal(eligibility.reviewDepth, 'partial');
+    assert.equal(eligibility.reviewDepth, 'full');
+    assert.equal(eligibility.maximumRecommendation, 'APPROVE');
+    assert.equal(eligibility.limitationRequired, false);
+    assert.equal(eligibility.approvalDecisionRequired, false);
 
     const inputDigest = JSON.parse(
       execFileSync(process.execPath, [command, 'input-digest', '--input', inputPath], {

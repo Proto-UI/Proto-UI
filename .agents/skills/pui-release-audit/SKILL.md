@@ -5,7 +5,7 @@ description: Audit an already completed protected Proto UI publication and recon
 
 # Audit publication evidence
 
-1. Read `AGENTS.md`, release governance, the approved candidate state, publication workflow logs, and current external facts.
+1. Read `AGENTS.md`, release governance, the published candidate state, publication workflow logs, and current external facts.
 2. Require the published version and immutable publication identity. Work from a fresh branch based on current main when repository changes are authorized.
 3. Verify registry version, channel, integrity, package set, workflow head, tag target, Release type, assets, snapshot digest, and deployment status.
 4. Separate confirmed external facts from missing, mutable, or conflicting evidence.
@@ -13,7 +13,7 @@ description: Audit an already completed protected Proto UI publication and recon
 6. Run release-version, asset, Agent projection, type, and docs checks required by governance.
 7. Return a reconciliation report and any recovery decision packet.
 
-Do not regenerate an immutable snapshot to match a release, change the version, republish, infer that all draft entities became active, or perform partial-recovery actions without explicit approval.
+Do not regenerate an immutable snapshot to match a release, change the version, republish, infer that all draft entities became active, or perform partial-recovery actions in this read-and-reconcile leaf. Route any recovery mutation through the `privileged-or-irreversible-operation` decision class and its purpose-bound runtime.
 
 ## Explicit handoff
 
