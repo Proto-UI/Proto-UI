@@ -101,6 +101,20 @@ type EditorStyle = {
   nativeFocusVisible: boolean;
 };
 
+async function waitForStableProjection(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const editor = document.querySelector<HTMLElement>('[data-previewer-id] textarea');
+      return (
+        !!editor &&
+        !editor.hasAttribute('data-pui-view-pending') &&
+        !editor.hasAttribute('data-pui-view-revealing')
+      );
+    },
+    undefined,
+    { timeout: 20_000 }
+  );
+}
 async function editorStyle(page: Page): Promise<EditorStyle> {
   return page.evaluate(() => {
     const editor = document.querySelector('[data-previewer-id] textarea');
@@ -213,6 +227,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
         await applyColorScheme(page, 'light');
+        await waitForStableProjection(page);
 
         const resting = await editorStyle(page);
         // The property set is the whole point: `all` would also animate the
