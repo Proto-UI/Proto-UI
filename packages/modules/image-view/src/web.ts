@@ -42,6 +42,7 @@ function attachImageTarget(
   options: Readonly<{ stopPropagation?: boolean }>
 ): ImageViewHostLease {
   let generation = connection.generation;
+  let sourceGeneration = generation;
   let patch: ImageViewPatch = Object.freeze({});
   let status: ImageViewStatus = 'idle';
   let source = '';
@@ -53,9 +54,12 @@ function attachImageTarget(
     patch = Object.freeze({ ...patch, ...next });
     if (typeof patch.source === 'string' && patch.source !== previousSource) {
       source = patch.source;
+      sourceGeneration = generation;
       status = source ? 'loading' : 'idle';
-      if (source) img.src = source;
-      else img.removeAttribute('src');
+      if (source) {
+        if (previousSource) img.removeAttribute('src');
+        img.src = source;
+      } else img.removeAttribute('src');
     }
     if (!source) img.removeAttribute('src');
     if (next.loadingStatus) status = next.loadingStatus;
@@ -70,10 +74,10 @@ function attachImageTarget(
   };
 
   const complete = (nextStatus: 'loaded' | 'error', event?: Event) => {
-    if (disposed || !source || status === 'loaded' || status === 'error') return;
     if (options.stopPropagation && event) event.stopPropagation();
+    if (disposed || !source || status === 'loaded' || status === 'error') return;
     status = nextStatus;
-    connection.onStatusChange({ generation, status: nextStatus });
+    connection.onStatusChange({ generation: sourceGeneration, status: nextStatus });
   };
   const onLoad = (event: Event) => complete('loaded', event);
   const onError = (event: Event) => complete('error', event);
