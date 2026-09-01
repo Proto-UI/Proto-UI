@@ -5,5 +5,7 @@ export function resolveCorepackCli(
   options?: {
     platform?: NodeJS.Platform;
     fileExists?: (candidate: string) => boolean;
+    pathEnv?: string;
+    realpath?: (candidate: string) => string;
   }
 ): string;

@@ -14,6 +14,14 @@ criteria:
         en: Entry name is shadcn-scroll-area-scrollbar,
         zh-CN: 入口名为 shadcn-scroll-area-scrollbar,
       }
+  - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-GEOMETRY
+    text:
+      en: >-
+        Orientation-specific Scrollbar tracks must remain an absolutely positioned, transparent-bordered visual surface: vertical uses full height, width 0.625rem, and top/right edge placement; horizontal uses full width, height 0.625rem, bottom/left edge placement, and column flex layout for its Thumb.
+
+      zh-CN: >-
+        Scrollbar 必须保持按 orientation 区分的 absolute、透明边框 visual surface：vertical 使用满高、0.625rem 宽并贴合 top/right 边缘；horizontal 使用满宽、0.625rem 高、bottom/left 边缘与 column flex layout 以承载 Thumb。
+
 sources:
   - path: internal/records/2026-08-28-shadcn-tooltip-scroll-area-provenance.zh-CN.md
   - path: packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts
@@ -21,5 +29,11 @@ sources:
     label: shadcn/ui v4 new-york Scroll Area pinned provenance baseline
 inherits: { prototypes: [{ id: P-BASE-SCROLL-AREA-SCROLLBAR }] }
 verifies: { tests: [T-SHADCN-SCROLL-AREA-0001] }
-revisions: [{ version: 0.3.0-alpha.0, change: introduced, summary: Introduced. }]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added the orientation-specific absolute track geometry and edge-placement contract for vertical and horizontal Scrollbars.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced.
 tags: [prototype, shadcn, visual, scroll-area, scrollbar]

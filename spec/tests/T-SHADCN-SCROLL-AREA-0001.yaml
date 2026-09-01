@@ -33,6 +33,7 @@ cases:
     title: Rendered geometry, two-axis overflow, composed projection, and runtime behavior across WC, React, Vue, and Vue 2
     covers:
       - P-SHADCN-SCROLL-AREA-VISUAL-GRAMMAR
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR-GEOMETRY
       - P-SHADCN-SCROLL-AREA-VIEWPORT-COMPOSED-PROJECTION
       - P-BASE-SCROLL-AREA-PROJECTION-CHOICE
       - P-BASE-SCROLL-AREA-VIEWPORT-COMPOSED-BINDING
