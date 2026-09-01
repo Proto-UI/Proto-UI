@@ -148,6 +148,26 @@ async function expectVisibility(locator: Locator, visible: boolean, label: strin
   expect(await locator.isVisible(), label).toBe(visible);
 }
 
+async function waitForHoverCardEndpoint(page: Page, panel: Locator): Promise<void> {
+  await panel.waitFor({ state: 'visible', timeout: 10_000 });
+  const element = await panel.elementHandle();
+  if (!element) throw new Error('Hover Card panel was not materialized.');
+  await page.waitForFunction(
+    (target) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tokens = target.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
+      return (
+        !target.hasAttribute('data-pui-view-pending') &&
+        target.getAttribute('data-transition-state') === 'entered' &&
+        tokens.includes('transition-none') &&
+        tokens.includes('duration-200')
+      );
+    },
+    element,
+    { timeout: 10_000 }
+  );
+}
+
 async function resolvedThemeColors(
   page: Page,
   property: 'backgroundColor' | 'color' | 'borderTopColor',
@@ -521,7 +541,6 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
             expect(surface.animationName, `${label}/animation`).toBe('none');
             expect(surface.animationDuration, `${label}/animation-duration`).toBe('0s');
-            expect(surface.transitionProperty, `${label}/transition-property`).toBe('all');
             expect(surface.transitionDuration, `${label}/transition-duration`).toBe('0s');
             expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
             expect(Number.parseFloat(surface.width), `${label}/width`).toBeGreaterThan(0);
@@ -743,15 +762,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         await trigger.hover();
         await expectVisibility(panelText, true, `${runtime}/hover-pointer-open`);
         const panel = panelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
-        // Wait for the React adapter's reveal transition to finish before
-        // asserting the stable endpoint. The adapter sets
-        // data-pui-view-revealing during mount and removes it after layout.
-        await panel.waitFor({ state: 'visible', timeout: 10_000 });
-        await opened.page.waitForFunction(
-          (el) => !el?.hasAttribute('data-pui-view-revealing'),
-          await panel.elementHandle(),
-          { timeout: 10_000 }
-        );
+        // View visibility is not a transition endpoint. Wait for the actual
+        // committed host tokens and governed enter lifecycle before sampling.
+        await waitForHoverCardEndpoint(opened.page, panel);
         const panelSurface = await facts(panel);
         const [expectedPanelBackground] = await resolvedThemeColors(
           opened.page,
@@ -804,12 +817,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         await darkTrigger.focus();
         await expectVisibility(darkPanelText, true, `${runtime}/dark/hover-focus-open`);
         const darkPanel = darkPanelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
-        await darkPanel.waitFor({ state: 'visible', timeout: 10_000 });
-        await opened.page.waitForFunction(
-          (el) => !el?.hasAttribute('data-pui-view-revealing'),
-          await darkPanel.elementHandle(),
-          { timeout: 10_000 }
-        );
+        await waitForHoverCardEndpoint(opened.page, darkPanel);
         const darkPanelSurface = await facts(darkPanel);
         const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
           '--pui-secondary-background',
@@ -823,6 +831,14 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(darkPanelSurface.color, `${runtime}/dark/hover-panel/foreground`).toBe(
           darkPanelForeground
         );
+        expect(
+          darkPanelSurface.transitionProperty,
+          `${runtime}/dark/hover-panel/transition-property`
+        ).toBe('none');
+        expect(
+          darkPanelSurface.transitionDuration,
+          `${runtime}/dark/hover-panel/transition-duration`
+        ).toBe('0.2s');
         await darkTrigger.evaluate((element) => (element as HTMLElement).blur());
         await darkTrigger.dispatchEvent('pointerleave');
         await expectVisibility(darkPanelText, false, `${runtime}/dark/hover-pointer-close`);
