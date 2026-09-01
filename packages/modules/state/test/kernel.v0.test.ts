@@ -136,29 +136,39 @@ describe('state-kernel.v0', () => {
     expect(seen).toEqual([3]);
   });
 
-  it('rolls back a reentrant validation failure and keeps recovery writes ordered', () => {
+  it('delivers a committed transition to every watcher before reporting a nested rejection', () => {
     const k = new StateKernel();
     const h = k.define('x', { kind: 'number.discrete' }, 2);
-    const seen: Array<[number, number]> = [];
+    const early: Array<[number, number]> = [];
+    const late: Array<[number, number]> = [];
 
     k.beforeSet(h, (_prev, next) => {
       if (next === 0) throw new Error('invalid state');
     });
     k.subscribe(h, (e: any) => {
       if (e?.type !== 'next') return;
-      seen.push([e.prev, e.next]);
-      if (e.next === 3) h.set(0); // reentrant invalid write, not swallowed
+      early.push([e.prev, e.next]);
+      if (e.next === 3) h.set(0); // rejected nested write must not silently roll back 3
+    });
+    k.subscribe(h, (e: any) => {
+      if (e?.type !== 'next') return;
+      late.push([e.prev, e.next]);
     });
 
     expect(() => h.set(3)).toThrow('invalid state');
-    expect(h.get()).toBe(2); // whole transaction restored to the pre-dispatch value
-    expect(seen).toEqual([[2, 3]]); // 2→3 observed; 3→0 never committed or notified
+    expect(h.get()).toBe(3); // committed 2→3 survives the nested rejection
+    expect(early).toEqual([[2, 3]]);
+    expect(late).toEqual([[2, 3]]); // the later watcher still observes the valid transition
 
-    h.set(4); // recovery after the caller caught the rejection
+    h.set(4);
     expect(h.get()).toBe(4);
-    expect(seen).toEqual([
+    expect(early).toEqual([
       [2, 3],
-      [2, 4], // deterministic 2→4, never a stale 3→0
+      [3, 4],
+    ]);
+    expect(late).toEqual([
+      [2, 3],
+      [3, 4],
     ]);
   });
 });

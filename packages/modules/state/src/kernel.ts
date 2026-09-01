@@ -132,7 +132,12 @@ export class StateKernel {
     try {
       for (const validator of rec.beforeSet) validator(prev, next);
     } catch (error) {
-      if (this.emitting) throw new StateValidationFailure(error);
+      if (this.emitting) {
+        this.pending.push(() => {
+          throw error;
+        });
+        return;
+      }
       throw error;
     }
 
