@@ -721,7 +721,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
     const opened = await openRoute(browser, baseUrl, HOVER_CARD_ROUTE, NARROW_VIEWPORT);
     try {
       for (const runtime of TEST_RUNTIMES) {
-        await opened.page.mouse.move(5, 5);
+        await opened.page.mouse.move(1, 843);
         await selectRuntimeWithDiagnostics(
           opened.page,
           opened.previewer,
