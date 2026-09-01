@@ -7,45 +7,49 @@ summary: Governs how compound prototypes declare structured same-domain part-to-
 statement:
   zh-CN: >-
     复合原型可以使用结构化 accessibility relationship 声明同一 anatomy domain 内 part 与 part 之间的语义关系（例如 Tabs 中 trigger(value=x) controls content(value=x)）。声明基于 anatomy family、opaque same-domain scope、source/target role、relation semantic 与 protocol match key；protocol match key 是协议匹配依据，不是宿主 id。Runtime/A11y 边界处由独立于 Anatomy 的 relationship-projection 服务持有有界 lease 表，Web adapter 拥有稳定唯一宿主 id 的保留与释放，并在缺失、重复、动态变更与 L1 detach 等情况下 fail closed，而不是猜测。传送中不得把宿主节点、宿主 id、framework key 或原始几何写入 portable Props/State/Context。
+
+
   en: >-
     Compound prototypes may declare structured accessibility relationships between parts in the same anatomy domain, such as Tabs trigger(value=x) controls content(value=x). A declaration is based on anatomy family, opaque same-domain scope, source and target roles, relation semantic, and a protocol match key; the match key is a protocol matching basis, not a host id. A relationship-projection service at the Runtime/A11y boundary, distinct from Anatomy, owns a bounded lease table; the Web adapter owns stable unique host-id reservation and release and fails closed on missing, duplicate, dynamic, and L1-detached cases rather than guessing. No host node, host id, framework key, or raw geometry may enter portable Props/State/Context in transit.
+
+
 criteria:
   - id: C-A11Y-PART-RELATIONSHIP-0001-A
     text:
-      zh-CN: "结构化 relationship 声明必须至少携带 anatomy family、opaque same-domain scope 身份、source part 实例身份与 role、target role、relation semantic 以及 protocol match key，并保留 source/target view epoch 以拒绝过期投射。"
-      en: "A structured relationship declaration must carry at least anatomy family, opaque same-domain scope identity, source part instance identity and role, target role, relation semantic, and a protocol match key, and retain source and target view epochs to reject stale projection."
+      zh-CN: '结构化 relationship 声明必须至少携带 anatomy family、opaque same-domain scope 身份、source part 实例身份与 role、target role、relation semantic 以及 protocol match key，并保留 source/target view epoch 以拒绝过期投射。'
+      en: 'A structured relationship declaration must carry at least anatomy family, opaque same-domain scope identity, source part instance identity and role, target role, relation semantic, and a protocol match key, and retain source and target view epochs to reject stale projection.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-B
     text:
-      zh-CN: "protocol match key 必须与宿主 id 相互独立；adapter 生成的宿主 id 不得写回 prototype 拥有的 State 以模仿结构化载体。"
-      en: "The protocol match key must remain independent of the host id; an adapter-generated host id must not be written back into prototype-owned State to imitate the structured carrier."
+      zh-CN: 'protocol match key 必须与宿主 id 相互独立；adapter 生成的宿主 id 不得写回 prototype 拥有的 State 以模仿结构化载体。'
+      en: 'The protocol match key must remain independent of the host id; an adapter-generated host id must not be written back into prototype-owned State to imitate the structured carrier.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-C
     text:
-      zh-CN: "匹配器必须按完整 tuple（anatomy family、opaque domain scope、target role、exact protocol match key）过滤；零个或多个匹配必须 fail closed，并发出有界诊断，不得按 DOM order、注册顺序、prototype 名称或值转义选择。"
-      en: "The resolver must filter by the full tuple of anatomy family, opaque domain scope, target role, and exact protocol match key; zero or multiple matches must fail closed with a bounded diagnostic rather than choosing by DOM order, registration order, prototype name, or value escaping."
+      zh-CN: '匹配器必须按完整 tuple（anatomy family、opaque domain scope、target role、exact protocol match key）过滤；零个或多个匹配必须 fail closed，并发出有界诊断，不得按 DOM order、注册顺序、prototype 名称或值转义选择。'
+      en: 'The resolver must filter by the full tuple of anatomy family, opaque domain scope, target role, and exact protocol match key; zero or multiple matches must fail closed with a bounded diagnostic rather than choosing by DOM order, registration order, prototype name, or value escaping.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-D
     text:
-      zh-CN: "L1 detach 必须移除仅由该 lease 拥有的 source IDREF token，同时保留宿主作者自有或独立拥有的 token 与仍然有效的逻辑 reservation；仅在 attribute 不再含任何 token 时才移除 attribute 本身。"
-      en: "L1 detach must remove only the lease-owned source IDREF token while preserving host-authored or independently owned tokens and any still-valid logical reservation; the attribute itself is removed only when no token remains."
+      zh-CN: 'L1 detach 必须移除仅由该 lease 拥有的 source IDREF token，同时保留宿主作者自有或独立拥有的 token 与仍然有效的逻辑 reservation；仅在 attribute 不再含任何 token 时才移除 attribute 本身。'
+      en: 'L1 detach must remove only the lease-owned source IDREF token while preserving host-authored or independently owned tokens and any still-valid logical reservation; the attribute itself is removed only when no token remains.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-E
     text:
-      zh-CN: "rematerialization 必须在新 target view epoch 内把同一 logical target instance 与其 reserved host id 重新绑定，并在该 epoch 的 host commit 可见之前恢复 reciprocal IDREF；仅在 mounted 回调之后执行无法满足 reveal 前恢复。"
+      zh-CN: 'rematerialization 必须在新 target view epoch 内把同一 logical target instance 与其 reserved host id 重新绑定，并在该 epoch 的 host commit 可见之前恢复 reciprocal IDREF；仅在 mounted 回调之后执行无法满足 reveal 前恢复。'
       en: "Rematerialization must re-bind the same logical target instance to its reserved host id within the new view epoch and restore reciprocal IDREFs before that epoch's host commit becomes visible; running only after mounted callbacks cannot satisfy before-reveal restoration."
   - id: C-A11Y-PART-RELATIONSHIP-0001-F
     text:
-      zh-CN: "Web adapter 必须拥有从 logical target-instance 身份到稳定唯一宿主 id 的映射，并在首次 materialization 时保留、在 L1 detach 时保留 reservation、在 terminal disposal 时释放该 identity。"
-      en: "The Web adapter must own the mapping from logical target-instance identity to a stable unique host id, reserve it on first materialization, retain the reservation across L1 detach, and release it on terminal disposal."
+      zh-CN: 'Web adapter 必须拥有从 logical target-instance 身份到稳定唯一宿主 id 的映射，并在首次 materialization 时保留、在 L1 detach 时保留 reservation、在 terminal disposal 时释放该 identity。'
+      en: 'The Web adapter must own the mapping from logical target-instance identity to a stable unique host id, reserve it on first materialization, retain the reservation across L1 detach, and release it on terminal disposal.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-G
     text:
-      zh-CN: "match key 变更必须按一次原子 re-key 事务执行移除与插入，并同时使旧 key 与新 key 的投射失效；相等检查必须先于发布，防止递归 no-op 更新与同一实例在双 key 下短暂暴露。"
-      en: "A match-key change must perform removal and insertion as one atomic re-key transaction and invalidate both the old-key and new-key projections; equality must be checked before publishing to prevent recursive no-op updates and transient exposure of the same instance under both keys."
+      zh-CN: 'match key 变更必须按一次原子 re-key 事务执行移除与插入，并同时使旧 key 与新 key 的投射失效；相等检查必须先于发布，防止递归 no-op 更新与同一实例在双 key 下短暂暴露。'
+      en: 'A match-key change must perform removal and insertion as one atomic re-key transaction and invalidate both the old-key and new-key projections; equality must be checked before publishing to prevent recursive no-op updates and transient exposure of the same instance under both keys.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-H
     text:
-      zh-CN: "relationship-projection 服务与 Anatomy 必须分离：Anatomy 仅提供结构声明、domain scope 与 readiness signal，不成为 instance registry 或 relationship 实例 owner；presence 不得写入 portable Context。"
-      en: "The relationship-projection service must remain separate from Anatomy: Anatomy provides only structural declarations, domain scope, and readiness signals and must not become an instance registry or owner of relationship instances; presence must not be written into portable Context."
+      zh-CN: 'relationship-projection 服务与 Anatomy 必须分离：Anatomy 仅提供结构声明、domain scope 与 readiness signal，不成为 instance registry 或 relationship 实例 owner；presence 不得写入 portable Context。'
+      en: 'The relationship-projection service must remain separate from Anatomy: Anatomy provides only structural declarations, domain scope, and readiness signals and must not become an instance registry or owner of relationship instances; presence must not be written into portable Context.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-I
     text:
-      zh-CN: "prototype 作者不得获得 registry 访问、宿主 target、宿主 id、framework key 或原始几何；relationship projection 是 Runtime/A11y 的有界服务，不是通用信息通道。"
-      en: "Prototype authors must receive no registry access, host targets, host ids, framework keys, or raw geometry; relationship projection is a bounded Runtime/A11y service, not a general information channel."
+      zh-CN: 'prototype 作者不得获得 registry 访问、宿主 target、宿主 id、framework key 或原始几何；relationship projection 是 Runtime/A11y 的有界服务，不是通用信息通道。'
+      en: 'Prototype authors must receive no registry access, host targets, host ids, framework keys, or raw geometry; relationship projection is a bounded Runtime/A11y service, not a general information channel.'
 sources:
   - path: internal/records/2026-08-26-same-domain-anatomy-relationship-design.md
     label: Same-domain anatomy-part relationship design record
