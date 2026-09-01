@@ -378,3 +378,9 @@ No merge, no review submission, no label/close/assign this pass.
 ## Ledger persistence
 
 - Version-controlled copies are maintained on branch `agent/portfolio-chief-ledger-20260901` under `internal/records/2026-09-01-portfolio-chief-progress.md` and `internal/records/2026-09-01-portfolio-chief-report.md`; branch is pushed to `origin`.
+
+## Blocker remediation (2026-09-01, exact pushed heads)
+
+- #581 generation binding repaired and pushed at `ed041a17d3628b2786b49f60889b8fb824d94631`: request-bound `HTMLImageElement.decode()` tokens carry immutable generation; raw native events are containment-only; stale/clear/dispose/cached paths covered across module, React, Vue, and Web Component tests. Fresh evidence after rebase on `e240e635`: 23/23 focused tests and `check:types:workspace` passed. Receipt: https://github.com/Proto-UI/Proto-UI/pull/581#issuecomment-5499994326
+- #571 browser evidence repaired and pushed at `e6e76a62bcf89aefb78b6a9b6fb07d5ee663773f`: removed Skeleton `transition-property: all` overfit; both light/dark Hover Card paths wait on real view-pending/transition-state/style-token endpoint; dark transition assertions retained. Fresh evidence after rebase on rewritten `d7f940e8`: full WC/React/Vue/Vue2 browser file 6/6, authority tests 22/22, and `check:types:workspace` passed. Receipt: https://github.com/Proto-UI/Proto-UI/pull/571#issuecomment-5499994948
+- #551 Option A/B remains human-gated; no maintainer ruling exists. Posted exact decision packet recommending A11y-boundary Option A and defining the full authorization required for Option B. No semantic code choice was made. Receipt: https://github.com/Proto-UI/Proto-UI/pull/551#issuecomment-5498722020

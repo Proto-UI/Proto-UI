@@ -35,3 +35,9 @@ No merge, review submission, label, close, assign, or release mutations were per
 - Branch: `agent/portfolio-chief-ledger-20260901` (pushed to `origin`).
 - `internal/records/2026-09-01-portfolio-chief-progress.md`
 - `internal/records/2026-09-01-portfolio-chief-report.md`
+
+## Concrete blocker follow-up
+
+- **#581** fixed/pushed `ed041a17`: request-bound decode token replaces mutable generation reads; 23 focused tests + workspace types green after rebase. Receipt: https://github.com/Proto-UI/Proto-UI/pull/581#issuecomment-5499994326
+- **#571** fixed/pushed `e6e76a62`: real Hover Card lifecycle endpoint, no Skeleton browser-default overfit, dark motion evidence; full four-runtime file 6/6 + 22 authority tests + workspace types green after rebase. Receipt: https://github.com/Proto-UI/Proto-UI/pull/571#issuecomment-5499994948
+- **#551** remains a human semantic gate. Exact Option A/B packet posted; recommendation is Option A (A11y-boundary fail-closed projection, no generic State veto). No semantic implementation selected pending maintainer authorization. Receipt: https://github.com/Proto-UI/Proto-UI/pull/551#issuecomment-5498722020
