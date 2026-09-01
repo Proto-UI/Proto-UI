@@ -734,6 +734,15 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const panelText = opened.page
           .getByText('A square hard-shadowed preview panel.', { exact: true })
           .last();
+        await opened.page.waitForFunction(
+          (element) =>
+            element &&
+            !element.hasAttribute('data-hovered') &&
+            !element.hasAttribute('data-pressed') &&
+            !element.hasAttribute('data-open'),
+          await trigger.elementHandle(),
+          { timeout: 10_000 }
+        );
         const triggerSurface = await facts(trigger);
         const [expectedTriggerBackground] = await resolvedThemeColors(
           opened.page,
