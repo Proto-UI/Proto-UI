@@ -72,6 +72,10 @@ criteria:
     text:
       zh-CN: Adapter 必须接入 required Expose Event semantic Module，并以 translated capability 提供 `HC-EXPOSE-EVENT-SINK-0001`；合法 emission 必须在 persistent Custom Element owner 上映射为同名 `CustomEvent`，declaration metadata 不得进入 `getExposes()`，跨内部 repeatable view epoch 与同步 DOM move 保留，且该关系不得被解释为 Event input routing。
       en: The Adapter must wire the required Expose Event semantic Module and provide `HC-EXPOSE-EVENT-SINK-0001` as a translated capability; valid emissions must map to same-named `CustomEvent`s on the persistent Custom Element owner, declaration metadata must not enter `getExposes()`, registration must survive internal repeatable view epochs and synchronous DOM moves, and this relation must not be interpreted as Event input routing.
+  - id: A-WEB-COMPONENT-0001-N
+    text:
+      zh-CN: 对声明 `M-IMAGE-VIEW-0001` 的 Web Component realization 必须将每个 Image View request 绑定到不可变 generation，清理替换/空 source 的旧视觉目标，并在 view detach/disposal 后移除 owned physical image；该保证由 `T-IMAGE-VIEW-0001` 的 Web Component integration evidence 验证。
+      en: The Web Component realization of `M-IMAGE-VIEW-0001` must bind each Image View request to an immutable generation, clear stale visual targets on replacement or empty source, and remove the owned physical image after view detach or disposal; `T-IMAGE-VIEW-0001` Web Component integration evidence verifies this guarantee.
 supports:
   modules:
     - id: M-PROPS-0001
@@ -165,7 +169,7 @@ sources:
 revisions:
   - version: 0.3.0-alpha.0
     change: revised
-    summary: Migrated the outward signal sink from Event wiring to the standalone Expose Event Module.
+    summary: Added the Image View Web realization criterion, support relation, and exact-head integration evidence.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added required Expose Event support, translated signal sink provision, persistent-owner CustomEvent mapping, and declaration-record exclusion.
