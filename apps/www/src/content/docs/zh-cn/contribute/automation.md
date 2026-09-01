@@ -11,7 +11,7 @@ Agent Operations Shadow workflow 会定时或由维护者手动采集一段 Issu
 
 PR portfolio trial 只由人工触发，而且只读。外部引擎返回不完整结果时，流程会保留错误，不会把它包装成完整事实。
 
-单一本地 Codex schedule 有两条有条件写入路径：`proto-ui-scheduled-review-v1` 可以提交 exact-head、证据支持的非阻塞 `COMMENT`、带 finding 的 `REQUEST_CHANGES` 或 clean `APPROVE`；`proto-ui-scheduled-merge-v1` 可以在批准者不同于 PR author 与所有 commit author/committer、thread 全部解决、可信 CI 与可信 DCO 分别成功、实时权限和 GitHub merge readiness 同时满足后通过 `pui-integrate` 合并。这些 standing scope 不会扩大仓库 shadow workflow 的权限。
+单一本地 Codex schedule 当前是只读的。其 collaboration、review 与 merge scope 都是 `pending-runtime-identity`，在 Poppy broker-verified workload identity 绑定前不能执行 GitHub 写入；有人协作时的操作仍依据当前用户的明确授权。激活后仍必须满足 exact-head evidence、独立 contributor 身份、已解决 threads、可信 CI 与 DCO、实时权限和 GitHub merge readiness。这些 standing scope 不会扩大仓库 shadow workflow 的权限。
 
 ## 自治维护路径
 

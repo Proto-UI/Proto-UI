@@ -39,7 +39,7 @@ Review packet 写明仓库、PR、base/head、review class、精确输入 digest
 
 自治 review classes 从事实与 CI 开始，逐步覆盖文档与链接、测试、bounded regression、受治理实现切片、跨域语义，以及治理或发布证据。在 `human-assisted` 模式中，这些类别只调整复核深度和限制说明，不会挡住用户要求的 review。
 
-本地定时任务的 standing scopes 已激活。`proto-ui-scheduled-collaboration-v1` 让 `pui-collaborate` 执行 exact-target、可逆的 metadata、update-branch、ready-for-review、已修复 thread、review request、有边界 comment 与 trusted workflow recheck；`proto-ui-scheduled-review-v1` 会提交有证据支撑的非阻塞 `COMMENT`、证据完整且带 finding 的 `REQUEST_CHANGES`，以及 clean `APPROVE`。内容理解继续按 C1–C4 的具体 review class 判断，每个 exact-target 写入原语本身只要求 C2。Spec path 会进入 packet 分类，但不再一刀切成人工决定；只有真正未决的产品方向才停。`proto-ui-scheduled-merge-v1` 随后只接受 reviewer login 同时不同于 PR author 与所有 commit author/committer 的 exact-head 批准，并在无 active change request、threads 全部解决、可信 CI 与可信 DCO 分别通过、实时权限有效且 GitHub 同时报 `MERGEABLE`/`CLEAN` 时执行 squash merge。
+本地定时任务的 scopes 都是 `pending-runtime-identity`，目前不是激活的 autonomous 写入 scope。在 Poppy broker-verified workload identity 绑定之前，定时执行只能进行只读观察与 reconciliation，不能提交 review disposition 或合并 PR。有人协作时的 review 与 integration 仍只能依据当前用户的明确授权；standing scope 激活后，exact-target、独立身份、可信 CI/DCO 与仓库规则 gate 仍然有效。Spec path 继续进入 packet，只有真正未决的产品方向才构成 decision boundary。
 
 本地复核始终可以进行。低档位 Agent 在有人协作时可以给出部分复核或明确的 `ABSTAIN`，同时说明自己没覆盖什么。`submit-review` 会从 GitHub 实时重新采集 canonical v4 输入并比对 digest，从实时上下文派生 reviewer 权限、PR/commit contributor 身份、可信 CI 与可信 DCO。`APPROVE` 和 `REQUEST_CHANGES` 会拒绝 PR author 或任一 commit author/committer； contributor login 缺失时 fail closed，clean approval 还要求两条可信机器结论分别成功。`merge-pull-request` 会再次做同样的 reconciliation，再把 `sha` 固定为已审 head；不得把任一预检与后续未绑定的 GitHub 写入拆开。公开 desktop task 名称不充当认证；当前范围依赖单一持证本地 runner、精确 standing policy、exact-head 写入和 GitHub 规则。扩展到并发 runner 前仍需服务侧 lease 与更强 runtime attribution。
 

@@ -11,7 +11,7 @@ The Agent Operations Shadow workflow collects bounded Issue and pull-request sna
 
 The pull-request portfolio trial is manual and read-only. It preserves incomplete external-engine results instead of presenting them as complete facts.
 
-The single local Codex schedule has two conditional write paths. It may submit an exact-head evidence-backed `COMMENT`, finding-backed `REQUEST_CHANGES`, or clean `APPROVE` through `proto-ui-scheduled-review-v1`, and it may use `pui-integrate` under `proto-ui-scheduled-merge-v1` after platform-contributor-independent approval, resolved threads, separately trusted CI and DCO status, live permission, and GitHub merge readiness all agree. These standing scopes do not widen the repository shadow workflow.
+The single local Codex schedule is currently read-only. Its collaboration, review, and merge scopes are `pending-runtime-identity` and cannot perform GitHub writes until Poppy broker-verified workload identity is bound; human-assisted actions remain governed by explicit current-user authorization. After activation, exact-head evidence, platform-contributor-independent approval, resolved threads, separately trusted CI and DCO status, live permission, and GitHub merge readiness still remain required. These standing scopes do not widen the repository shadow workflow.
 
 ## Autonomous maintenance path
 

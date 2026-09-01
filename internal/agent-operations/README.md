@@ -38,11 +38,11 @@ corepack pnpm@10.32.1 agent:event-shadow -- replay \
   --state <prior-state.json>
 ```
 
-Every envelope and receipt fixes `mutationAuthorized` to `false` and `writeOperationsPerformed` to `0` because this layer authenticates and orders signals; it does not carry a GitHub credential. An admitted event triggers canonical live recollection, after which `pui-review` and `pui-integrate` may act under their active standing scopes. A consumer that does not trust the process boundary must retain the signed raw body and reproduce normalization. A production controller still supplies durable replay storage, leases, acknowledgements, and independently authenticated transport provenance.
+Every envelope and receipt fixes `mutationAuthorized` to `false` and `writeOperationsPerformed` to `0` because this layer authenticates and orders signals; it does not carry a GitHub credential. An admitted event triggers canonical live recollection, after which `pui-review` and `pui-integrate` may act only under separate explicit current-user authorization or a future activated standing scope. A consumer that does not trust the process boundary must retain the signed raw body and reproduce normalization. A production controller still supplies durable replay storage, leases, acknowledgements, and independently authenticated transport provenance.
 
 ## Maintainer-controlled local review and integration schedule
 
-The Codex desktop task `proto-ui` retains read-only observation and reconciliation for the three scheduled writer scopes. `proto-ui-scheduled-collaboration-v1`, `proto-ui-scheduled-review-v1`, and `proto-ui-scheduled-merge-v1` are pending broker-verified workload identity; they do not authorize GitHub writes until a Poppy-specific signed/OIDC execution envelope is bound at the final write boundary.
+The Codex desktop task `proto-ui` retains read-only observation and reconciliation for the three scheduled writer scopes. `proto-ui-scheduled-collaboration-v1`, `proto-ui-scheduled-review-v1`, and `proto-ui-scheduled-merge-v1` are all `pending-runtime-identity`; they do not authorize GitHub writes until a Poppy-specific signed/OIDC execution envelope is bound at the final write boundary.
 
 The local repository cannot authenticate a Codex task name, and a process holding the live GitHub credential could bypass these scripts. The effective boundary is therefore read-only until broker-verified workload identity, repository/task binding, replay prevention, live permission, canonical input reconciliation, exact-head checks, and GitHub rules are enforced at the final write boundary.
 

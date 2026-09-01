@@ -294,6 +294,65 @@ try {
   fail('capability policy is not executable: ' + error.message);
 }
 
+const scheduledScopeProjectionPaths = [
+  resolve(root, '.agents/skills/pui-review/SKILL.md'),
+  resolve(root, 'internal/agent-operations/contributor-agents.md'),
+  resolve(root, 'internal/agent-operations/README.md'),
+  resolve(root, 'CONTRIBUTING.md'),
+  resolve(root, 'apps/www/src/content/docs/en/contribute/agents.md'),
+  resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/agents.md'),
+  resolve(root, 'apps/www/src/content/docs/en/contribute/automation.md'),
+  resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/automation.md'),
+  resolve(root, 'internal/governance/ci-cd.md'),
+];
+const staleActiveScheduleClaims = [
+  '`proto-ui-scheduled-review-v1` is active',
+  'the local schedule scopes are active',
+  'standing scopes are active',
+  'two active standing scopes',
+  'under the active standing authorizations',
+  'active local schedule scope',
+  'standing scopes 已激活',
+  '定时任务的 standing scopes 已激活',
+];
+try {
+  const lockstepPolicy = loadCapabilityPolicy(
+    resolve(root, 'internal/agent-operations/capability-policy.yaml')
+  );
+  const scheduledScopeIds = [
+    'proto-ui-scheduled-collaboration-v1',
+    'proto-ui-scheduled-review-v1',
+    'proto-ui-scheduled-merge-v1',
+  ];
+  const scheduledScopesPending = scheduledScopeIds.every((id) => {
+    const authorization = [
+      ...(lockstepPolicy.collaborationMutationAuthorizations ?? []),
+      ...(lockstepPolicy.reviewSubmissionAuthorizations ?? []),
+      ...(lockstepPolicy.pullRequestMergeAuthorizations ?? []),
+    ].find((candidate) => candidate.id === id);
+    return authorization?.status === 'pending-runtime-identity';
+  });
+  if (scheduledScopesPending) {
+    for (const projectionPath of scheduledScopeProjectionPaths) {
+      const projection = readFileSync(projectionPath, 'utf8');
+      if (!projection.includes('pending-runtime-identity')) {
+        fail(projectionPath + ': scheduled scope status is out of sync with capability policy.');
+      }
+      if (!/(read-only|read only|只读)/i.test(projection)) {
+        fail(projectionPath + ': pending scheduled scopes must be described as read-only.');
+      }
+      const normalized = projection.toLowerCase();
+      for (const claim of staleActiveScheduleClaims) {
+        if (normalized.includes(claim.toLowerCase())) {
+          fail(projectionPath + ': stale active scheduled-scope claim: ' + claim);
+        }
+      }
+    }
+  }
+} catch (error) {
+  fail('scheduled-scope projection lockstep is not executable: ' + error.message);
+}
+
 for (const schemaName of [
   'skill-handoff.schema.json',
   'capability-challenge.schema.json',
