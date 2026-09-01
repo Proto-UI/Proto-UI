@@ -105,7 +105,13 @@ async function waitForStableEditorProjection(page: Page): Promise<void> {
   await page.waitForFunction(
     () => {
       const editor = document.querySelector<HTMLElement>('[data-previewer-id] textarea');
-      if (!editor || editor.hasAttribute('data-pui-view-pending')) return false;
+      if (
+        !editor ||
+        editor.hasAttribute('data-pui-view-pending') ||
+        editor.hasAttribute('data-pui-view-revealing')
+      ) {
+        return false;
+      }
       const tokens = editor.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
       return (
         tokens.includes('transition-[color,box-shadow]') &&

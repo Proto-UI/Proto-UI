@@ -158,6 +158,7 @@ async function waitForHoverCardEndpoint(page: Page, panel: Locator): Promise<voi
       const tokens = target.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
       return (
         !target.hasAttribute('data-pui-view-pending') &&
+        !target.hasAttribute('data-pui-view-revealing') &&
         target.getAttribute('data-transition-state') === 'entered' &&
         tokens.includes('transition-none') &&
         tokens.includes('duration-200')
