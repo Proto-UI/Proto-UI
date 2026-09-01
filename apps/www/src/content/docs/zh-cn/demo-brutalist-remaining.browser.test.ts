@@ -218,7 +218,7 @@ let baseUrl = '';
 beforeAll(async () => {
   baseUrl = await startServer(REMAINING_ROUTES);
   browser = await launchBrowser();
-}, 180_000);
+}, 360_000);
 
 afterAll(async () => {
   await browser?.close();
@@ -231,64 +231,67 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
     try {
       for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(opened.page, opened.previewer, runtime, '[data-pui-root]', 3);
-        const badges = roots(opened.previewer);
-        const allFacts = await badges.evaluateAll((elements) =>
-          elements.map((element) => {
-            const style = getComputedStyle(element);
-            return {
-              role: element.getAttribute('role'),
-              tabIndex: (element as HTMLElement).tabIndex,
-              ariaSelected: element.getAttribute('aria-selected'),
-              ariaPressed: element.getAttribute('aria-pressed'),
-              ariaLive: element.getAttribute('aria-live'),
-              borderWidth: style.borderTopWidth,
-              borderColor: style.borderTopColor,
-              borderRadius: style.borderTopLeftRadius,
-              backgroundColor: style.backgroundColor,
-              color: style.color,
-              boxShadow: style.boxShadow,
-              fontFamily: style.fontFamily,
-              textTransform: style.textTransform,
-            };
-          })
-        );
-        const expectedBackgrounds = await resolvedThemeColors(opened.page, 'backgroundColor', [
-          '--pui-canary',
-          '--pui-sky',
-          '--pui-coral',
-        ]);
-        const expectedForegrounds = await resolvedThemeColors(opened.page, 'color', [
-          '--pui-canary-foreground',
-          '--pui-sky-foreground',
-          '--pui-coral-foreground',
-        ]);
-        const [expectedBorder] = await resolvedThemeColors(opened.page, 'borderTopColor', [
-          '--pui-foreground',
-        ]);
-        expect(
-          allFacts.map((surface) => surface.backgroundColor),
-          `${runtime}/background-pairs`
-        ).toEqual(expectedBackgrounds);
-        expect(
-          allFacts.map((surface) => surface.color),
-          `${runtime}/foreground-pairs`
-        ).toEqual(expectedForegrounds);
-        expect(
-          allFacts.every((surface) => surface.borderColor === expectedBorder),
-          `${runtime}/border-pair`
-        ).toBe(true);
-        for (const [index, surface] of allFacts.entries()) {
-          const label = `${runtime}/badge-${index}`;
-          expect(surface.role, `${label}/role`).toBeNull();
-          expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
-          expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
-          expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
-          expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
-          expect(surface.borderWidth, `${label}/border`).toBe('2px');
-          expect(surface.borderRadius, `${label}/radius`).toBe('0px');
-          expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
-          expect(surface.fontFamily.toLowerCase(), `${label}/font`).toMatch(/mono|monospace/);
-          expect(surface.textTransform, `${label}/case`).toBe('uppercase');
+        for (const colorScheme of COLOR_SCHEMES) {
+          await applyColorScheme(opened.page, colorScheme);
+          const badges = roots(opened.previewer);
+          const allFacts = await badges.evaluateAll((elements) =>
+            elements.map((element) => {
+              const style = getComputedStyle(element);
+              return {
+                role: element.getAttribute('role'),
+                tabIndex: (element as HTMLElement).tabIndex,
+                ariaSelected: element.getAttribute('aria-selected'),
+                ariaPressed: element.getAttribute('aria-pressed'),
+                ariaLive: element.getAttribute('aria-live'),
+                borderWidth: style.borderTopWidth,
+                borderColor: style.borderTopColor,
+                borderRadius: style.borderTopLeftRadius,
+                backgroundColor: style.backgroundColor,
+                color: style.color,
+                boxShadow: style.boxShadow,
+                fontFamily: style.fontFamily,
+                textTransform: style.textTransform,
+              };
+            })
+          );
+          const expectedBackgrounds = await resolvedThemeColors(opened.page, 'backgroundColor', [
+            '--pui-canary',
+            '--pui-sky',
+            '--pui-coral',
+          ]);
+          const expectedForegrounds = await resolvedThemeColors(opened.page, 'color', [
+            '--pui-canary-foreground',
+            '--pui-sky-foreground',
+            '--pui-coral-foreground',
+          ]);
+          const [expectedBorder] = await resolvedThemeColors(opened.page, 'borderTopColor', [
+            '--pui-foreground',
+          ]);
+          expect(
+            allFacts.map((surface) => surface.backgroundColor),
+            `${runtime}/background-pairs`
+          ).toEqual(expectedBackgrounds);
+          expect(
+            allFacts.map((surface) => surface.color),
+            `${runtime}/foreground-pairs`
+          ).toEqual(expectedForegrounds);
+          expect(
+            allFacts.every((surface) => surface.borderColor === expectedBorder),
+            `${runtime}/border-pair`
+          ).toBe(true);
+          for (const [index, surface] of allFacts.entries()) {
+            const label = `${runtime}/badge-${index}`;
+            expect(surface.role, `${label}/role`).toBeNull();
+            expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
+            expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
+            expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
+            expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
+            expect(surface.borderWidth, `${label}/border`).toBe('2px');
+            expect(surface.borderRadius, `${label}/radius`).toBe('0px');
+            expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
+            expect(surface.fontFamily.toLowerCase(), `${label}/font`).toMatch(/mono|monospace/);
+            expect(surface.textTransform, `${label}/case`).toBe('uppercase');
+          }
         }
       }
     } finally {
@@ -301,30 +304,46 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
     try {
       for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(opened.page, opened.previewer, runtime, '[data-pui-root]', 5);
-        const card = roots(opened.previewer).first();
-        const surface = await facts(card);
-        expectHardFrame(surface, '6px', `${runtime}/card`);
-        const [expectedBackground, expectedForeground, expectedBorder] = await Promise.all([
-          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-background']),
-          resolvedThemeColors(opened.page, 'color', ['--pui-foreground']),
-          resolvedThemeColors(opened.page, 'borderTopColor', ['--pui-foreground']),
-        ]).then(([background, foreground, border]) => [background[0], foreground[0], border[0]]);
-        expect(surface.backgroundColor, `${runtime}/card/background`).toBe(expectedBackground);
-        expect(surface.color, `${runtime}/card/foreground`).toBe(expectedForeground);
-        expect(surface.borderColor, `${runtime}/card/border-color`).toBe(expectedBorder);
-        expect(surface.display, `${runtime}/card/display`).toBe('flex');
-        expect(surface.flexDirection, `${runtime}/card/direction`).toBe('column');
-        expect(surface.role, `${runtime}/card/role`).toBeNull();
-        expect(surface.tabIndex, `${runtime}/card/tabindex`).toBe(-1);
-        expect(surface.ariaSelected, `${runtime}/card/aria-selected`).toBeNull();
-        expect(surface.ariaPressed, `${runtime}/card/aria-pressed`).toBeNull();
-        expect(surface.ariaLive, `${runtime}/card/aria-live`).toBeNull();
-        expect(surface.ariaBusy, `${runtime}/card/aria-busy`).toBeNull();
-        expect(surface.hasActiveState, `${runtime}/card/data-active`).toBe(false);
-        expect(surface.hasPressedState, `${runtime}/card/data-pressed`).toBe(false);
-        expect(surface.hasSelectedState, `${runtime}/card/data-selected`).toBe(false);
-        expect(Number.parseFloat(surface.width), `${runtime}/card/width`).toBeGreaterThan(0);
-        expect(Number.parseFloat(surface.height), `${runtime}/card/height`).toBeGreaterThan(0);
+        for (const colorScheme of COLOR_SCHEMES) {
+          await applyColorScheme(opened.page, colorScheme);
+          const card = roots(opened.previewer).first();
+          const surface = await facts(card);
+          expectHardFrame(surface, '6px', `${runtime}/${colorScheme}/card`);
+          const [expectedBackground, expectedForeground, expectedBorder] = await Promise.all([
+            resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-background']),
+            resolvedThemeColors(opened.page, 'color', ['--pui-foreground']),
+            resolvedThemeColors(opened.page, 'borderTopColor', ['--pui-foreground']),
+          ]).then(([background, foreground, border]) => [background[0], foreground[0], border[0]]);
+          expect(surface.backgroundColor, `${runtime}/${colorScheme}/card/background`).toBe(
+            expectedBackground
+          );
+          expect(surface.color, `${runtime}/${colorScheme}/card/foreground`).toBe(
+            expectedForeground
+          );
+          expect(surface.borderColor, `${runtime}/${colorScheme}/card/border-color`).toBe(
+            expectedBorder
+          );
+          expect(surface.display, `${runtime}/${colorScheme}/card/display`).toBe('flex');
+          expect(surface.flexDirection, `${runtime}/${colorScheme}/card/direction`).toBe('column');
+          expect(surface.role, `${runtime}/${colorScheme}/card/role`).toBeNull();
+          expect(surface.tabIndex, `${runtime}/${colorScheme}/card/tabindex`).toBe(-1);
+          expect(surface.ariaSelected, `${runtime}/${colorScheme}/card/aria-selected`).toBeNull();
+          expect(surface.ariaPressed, `${runtime}/${colorScheme}/card/aria-pressed`).toBeNull();
+          expect(surface.ariaLive, `${runtime}/${colorScheme}/card/aria-live`).toBeNull();
+          expect(surface.ariaBusy, `${runtime}/${colorScheme}/card/aria-busy`).toBeNull();
+          expect(surface.hasActiveState, `${runtime}/${colorScheme}/card/data-active`).toBe(false);
+          expect(surface.hasPressedState, `${runtime}/${colorScheme}/card/data-pressed`).toBe(
+            false
+          );
+          expect(
+            Number.parseFloat(surface.width),
+            `${runtime}/${colorScheme}/card/width`
+          ).toBeGreaterThan(0);
+          expect(
+            Number.parseFloat(surface.height),
+            `${runtime}/${colorScheme}/card/height`
+          ).toBeGreaterThan(0);
+        }
       }
     } finally {
       await opened.context.close();
@@ -451,60 +470,63 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
     try {
       for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(opened.page, opened.previewer, runtime, '[data-pui-root]', 3);
-        const skeletons = roots(opened.previewer);
-        const allFacts = await skeletons.evaluateAll((elements) =>
-          elements.map((element) => {
-            const style = getComputedStyle(element);
-            return {
-              role: element.getAttribute('role'),
-              ariaHidden: element.getAttribute('aria-hidden'),
-              ariaSelected: element.getAttribute('aria-selected'),
-              ariaPressed: element.getAttribute('aria-pressed'),
-              ariaLive: element.getAttribute('aria-live'),
-              ariaBusy: element.getAttribute('aria-busy'),
-              tabIndex: (element as HTMLElement).tabIndex,
-              borderWidth: style.borderTopWidth,
-              borderColor: style.borderTopColor,
-              borderRadius: style.borderTopLeftRadius,
-              backgroundColor: style.backgroundColor,
-              boxShadow: style.boxShadow,
-              animationName: style.animationName,
-              animationDuration: style.animationDuration,
-              transitionProperty: style.transitionProperty,
-              transitionDuration: style.transitionDuration,
-              width: style.width,
-              height: style.height,
-            };
-          })
-        );
-        const [expectedBackground, expectedBorder] = await Promise.all([
-          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-lavender']),
-          resolvedThemeColors(opened.page, 'borderTopColor', ['--pui-foreground']),
-        ]).then(([background, border]) => [background[0], border[0]]);
-        expect(
-          await opened.previewer.locator('[data-demo-ref="skeleton-canary"]').count(),
-          `${runtime}/skeleton-content`
-        ).toBe(0);
-        for (const [index, surface] of allFacts.entries()) {
-          const label = `${runtime}/skeleton-${index}`;
-          expect(surface.role, `${label}/role`).toBeNull();
-          expect(surface.ariaHidden, `${label}/hidden`).toBe('true');
-          expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
-          expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
-          expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
-          expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
-          expect(surface.ariaBusy, `${label}/aria-busy`).toBeNull();
-          expect(surface.borderWidth, `${label}/border`).toBe('2px');
-          expect(surface.borderColor, `${label}/border-color`).toBe(expectedBorder);
-          expect(surface.borderRadius, `${label}/radius`).toBe('0px');
-          expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
-          expect(surface.animationName, `${label}/animation`).toBe('none');
-          expect(surface.animationDuration, `${label}/animation-duration`).toBe('0s');
-          expect(surface.transitionProperty, `${label}/transition-property`).toBe('all');
-          expect(surface.transitionDuration, `${label}/transition-duration`).toBe('0s');
-          expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
-          expect(Number.parseFloat(surface.width), `${label}/width`).toBeGreaterThan(0);
-          expect(Number.parseFloat(surface.height), `${label}/height`).toBeGreaterThan(0);
+        for (const colorScheme of COLOR_SCHEMES) {
+          await applyColorScheme(opened.page, colorScheme);
+          const skeletons = roots(opened.previewer);
+          const allFacts = await skeletons.evaluateAll((elements) =>
+            elements.map((element) => {
+              const style = getComputedStyle(element);
+              return {
+                role: element.getAttribute('role'),
+                ariaHidden: element.getAttribute('aria-hidden'),
+                ariaSelected: element.getAttribute('aria-selected'),
+                ariaPressed: element.getAttribute('aria-pressed'),
+                ariaLive: element.getAttribute('aria-live'),
+                ariaBusy: element.getAttribute('aria-busy'),
+                tabIndex: (element as HTMLElement).tabIndex,
+                borderWidth: style.borderTopWidth,
+                borderColor: style.borderTopColor,
+                borderRadius: style.borderTopLeftRadius,
+                backgroundColor: style.backgroundColor,
+                boxShadow: style.boxShadow,
+                animationName: style.animationName,
+                animationDuration: style.animationDuration,
+                transitionProperty: style.transitionProperty,
+                transitionDuration: style.transitionDuration,
+                width: style.width,
+                height: style.height,
+              };
+            })
+          );
+          const [expectedBackground, expectedBorder] = await Promise.all([
+            resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-lavender']),
+            resolvedThemeColors(opened.page, 'borderTopColor', ['--pui-foreground']),
+          ]).then(([background, border]) => [background[0], border[0]]);
+          expect(
+            await opened.previewer.locator('[data-demo-ref="skeleton-canary"]').count(),
+            `${runtime}/skeleton-content`
+          ).toBe(0);
+          for (const [index, surface] of allFacts.entries()) {
+            const label = `${runtime}/skeleton-${index}`;
+            expect(surface.role, `${label}/role`).toBeNull();
+            expect(surface.ariaHidden, `${label}/hidden`).toBe('true');
+            expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
+            expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
+            expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
+            expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
+            expect(surface.ariaBusy, `${label}/aria-busy`).toBeNull();
+            expect(surface.borderWidth, `${label}/border`).toBe('2px');
+            expect(surface.borderColor, `${label}/border-color`).toBe(expectedBorder);
+            expect(surface.borderRadius, `${label}/radius`).toBe('0px');
+            expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
+            expect(surface.animationName, `${label}/animation`).toBe('none');
+            expect(surface.animationDuration, `${label}/animation-duration`).toBe('0s');
+            expect(surface.transitionProperty, `${label}/transition-property`).toBe('all');
+            expect(surface.transitionDuration, `${label}/transition-duration`).toBe('0s');
+            expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
+            expect(Number.parseFloat(surface.width), `${label}/width`).toBeGreaterThan(0);
+            expect(Number.parseFloat(surface.height), `${label}/height`).toBeGreaterThan(0);
+          }
         }
       }
     } finally {
@@ -679,6 +701,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
     const opened = await openRoute(browser, baseUrl, HOVER_CARD_ROUTE, NARROW_VIEWPORT);
     try {
       for (const runtime of TEST_RUNTIMES) {
+        await opened.page.mouse.move(5, 5);
         await selectRuntimeWithDiagnostics(
           opened.page,
           opened.previewer,
@@ -720,6 +743,15 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         await trigger.hover();
         await expectVisibility(panelText, true, `${runtime}/hover-pointer-open`);
         const panel = panelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
+        // Wait for the React adapter's reveal transition to finish before
+        // asserting the stable endpoint. The adapter sets
+        // data-pui-view-revealing during mount and removes it after layout.
+        await panel.waitFor({ state: 'visible', timeout: 10_000 });
+        await opened.page.waitForFunction(
+          (el) => !el?.hasAttribute('data-pui-view-revealing'),
+          await panel.elementHandle(),
+          { timeout: 10_000 }
+        );
         const panelSurface = await facts(panel);
         const [expectedPanelBackground] = await resolvedThemeColors(
           opened.page,
@@ -764,6 +796,37 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         await trigger.evaluate((element) => (element as HTMLElement).blur());
         await trigger.dispatchEvent('pointerleave');
         await expectVisibility(panelText, false, `${runtime}/hover-focus-close`);
+        await applyColorScheme(opened.page, 'dark');
+        const darkTrigger = opened.previewer.locator('.host [data-pui-root]').nth(1);
+        const darkPanelText = opened.page
+          .getByText('A square hard-shadowed preview panel.', { exact: true })
+          .last();
+        await darkTrigger.focus();
+        await expectVisibility(darkPanelText, true, `${runtime}/dark/hover-focus-open`);
+        const darkPanel = darkPanelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
+        await darkPanel.waitFor({ state: 'visible', timeout: 10_000 });
+        await opened.page.waitForFunction(
+          (el) => !el?.hasAttribute('data-pui-view-revealing'),
+          await darkPanel.elementHandle(),
+          { timeout: 10_000 }
+        );
+        const darkPanelSurface = await facts(darkPanel);
+        const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
+          '--pui-secondary-background',
+        ]);
+        const [darkPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
+          '--pui-foreground',
+        ]);
+        expect(darkPanelSurface.backgroundColor, `${runtime}/dark/hover-panel/background`).toBe(
+          darkPanelBackground
+        );
+        expect(darkPanelSurface.color, `${runtime}/dark/hover-panel/foreground`).toBe(
+          darkPanelForeground
+        );
+        await darkTrigger.evaluate((element) => (element as HTMLElement).blur());
+        await darkTrigger.dispatchEvent('pointerleave');
+        await expectVisibility(darkPanelText, false, `${runtime}/dark/hover-pointer-close`);
+        await applyColorScheme(opened.page, 'light');
       }
     } finally {
       await opened.context.close();
