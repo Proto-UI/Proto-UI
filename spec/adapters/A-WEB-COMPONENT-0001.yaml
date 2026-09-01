@@ -92,6 +92,10 @@ supports:
     - id: M-EXPOSE-EVENT-0001
       role: required-module
       note: The standalone Expose Event module owns the Component-to-App-Maker outward-signal bridge and receives its sink through expose-event wiring.
+    - id: M-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: optional-module
+      note: The persistent Custom Element owner keeps its logical boundary while projecting declared Image View requirements to one inner HTMLImageElement target.
 provides:
   hostCaps:
     - id: HC-PROPS-SOURCE-0001
@@ -109,6 +113,10 @@ provides:
     - id: HC-EXPOSE-EVENT-SINK-0001
       role: translated-capability
       note: The persistent Custom Element owner dispatches validated outward signals as same-named CustomEvents.
+    - id: HC-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: The Custom Element maps Image View to the inner image target and carries loading completion through the generation-bound host lease.
 relates:
   decisions:
     - D-ADAPTER-PROFILE-0001
@@ -124,6 +132,8 @@ verifies:
     - T-EXPOSE-0002
     - T-EXPOSE-STATE-0002
     - T-EXPOSE-EVENT-0002
+    - id: T-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
 openQuestions:
   - id: A-WEB-COMPONENT-0001-Q-INGRESS-PRECEDENCE
     question:
@@ -151,6 +161,7 @@ sources:
   - path: packages/adapters/base/src/host/exposes.ts
   - path: packages/adapters/web-component/test/contract/expose.basic.v0.contract.test.ts
   - path: packages/adapters/web-component/test/expose.test.ts
+  - path: packages/adapters/web-component/test/image-view.integration.test.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: revised

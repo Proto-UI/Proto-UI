@@ -93,6 +93,10 @@ supports:
     - id: M-EXPOSE-EVENT-0001
       role: required-module
       note: The standalone Expose Event module owns the Component-to-App-Maker outward-signal bridge and receives its sink through expose-event wiring.
+    - id: M-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: optional-module
+      note: React resolves declared Image View requirements to one physical HTMLImageElement root and retains the generation-bound host lease.
 provides:
   hostCaps:
     - id: HC-PROPS-SOURCE-0001
@@ -110,6 +114,10 @@ provides:
     - id: HC-EXPOSE-EVENT-SINK-0001
       role: translated-capability
       note: React maps validated outward signal keys to the current onXxx callback props.
+    - id: HC-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: React maps Image View to the physical image root and carries loading completion through the host lease.
 relates:
   decisions:
     - D-ADAPTER-PROFILE-0001
@@ -125,6 +133,8 @@ verifies:
     - T-EXPOSE-0002
     - T-EXPOSE-STATE-0002
     - T-EXPOSE-EVENT-0002
+    - id: T-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
 sources:
   - path: packages/adapters/react/package.json
   - path: packages/adapters/react/src/adapt.ts
@@ -144,6 +154,7 @@ sources:
   - path: packages/adapters/base/src/host/exposes.ts
   - path: packages/adapters/react/test/expose.test.ts
   - path: packages/adapters/react/test/expose-event.test.ts
+  - path: packages/adapters/react/test/image-view.integration.test.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: revised

@@ -77,6 +77,11 @@ import {
   TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
   type WebTextControl,
 } from '@proto.ui/module-text-control';
+import {
+  createWebImageViewHost,
+  IMAGE_VIEW_HOST_CAP,
+  IMAGE_VIEW_RUN_IN_CALLBACK_CAP,
+} from '@proto.ui/module-image-view';
 import { type RawPropsSource, RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/module-rule-expose-state-web';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
@@ -96,6 +101,7 @@ import {
 
 const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
 const WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
+const WEB_COMPONENT_IMAGE_VIEW_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
 
 function resolveWebComponentTriggerSurface(
   root: HTMLElement,
@@ -131,6 +137,7 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   instanceToken: LogicalInstanceToken;
   rawPropsSource: RawPropsSource<Props>;
   textControlTarget: WebTextControl | null;
+  imageViewTarget: HTMLImageElement | null;
   getMeta: (key: string) => unknown;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
@@ -148,6 +155,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   const { el, instanceToken, rawPropsSource, getMeta, setExposes } = args;
   const getTriggerSurface = () => {
     if (args.textControlTarget) return args.textControlTarget;
+    if (args.imageViewTarget) return args.imageViewTarget;
     const target = getLogicalTriggerSurfaceRoot(instanceToken);
     const surface = resolveWebComponentTriggerSurface(el, target);
     return surface?.isConnected ? surface : null;
@@ -161,6 +169,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   // The custom element is the persistent owner shell, so semantic and
   // expose-state projection remain valid while its internal view is absent.
   const physicalControl = () => args.textControlTarget;
+  const physicalImage = () => args.imageViewTarget;
 
   return createCapsWiring()
     .use('text-control', [
@@ -169,6 +178,13 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
         createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
       ],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('image-view', [
+      [
+        IMAGE_VIEW_HOST_CAP,
+        createWebImageViewHost(physicalImage, WEB_COMPONENT_IMAGE_VIEW_HOST_OPTIONS),
+      ],
+      [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('a11y', [
@@ -263,6 +279,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
   textControlTarget: WebTextControl | null;
+  imageViewTarget: HTMLImageElement | null;
   getMeta: (key: string) => unknown;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
@@ -308,10 +325,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     };
   };
   const physicalControl = () => args.textControlTarget;
+  const physicalImage = () => args.imageViewTarget;
   // Keep canonical instance-facing state markers on the custom-element
   // boundary while mirroring only the generated selector context needed by
   // translated feedback.style tokens on a split presentation surface.
-  const presentationSurface = args.textControlTarget ?? el;
+  const presentationSurface = args.textControlTarget ?? args.imageViewTarget ?? el;
 
   return createCapsWiring()
     .use('text-control', [
@@ -321,13 +339,20 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       ],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
+    .use('image-view', [
+      [
+        IMAGE_VIEW_HOST_CAP,
+        createWebImageViewHost(physicalImage, WEB_COMPONENT_IMAGE_VIEW_HOST_OPTIONS),
+      ],
+      [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [[EFFECTS_CAP, effectsPort]])
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
         createWebA11yProjector(
-          () => physicalControl() ?? getConnectedTriggerSurface(),
+          () => physicalControl() ?? physicalImage() ?? getConnectedTriggerSurface(),
           (listener) => subscribeLogicalTriggerSurface(instanceToken, listener)
         ),
       ],
