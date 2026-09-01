@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ImageViewStatusChange } from '@proto.ui/core';
 import imageRoot from '../../../prototypes/base/src/image';
 import { AdaptToWebComponent, setElementProps, type WebComponentAdapterElement } from '../src';
@@ -10,8 +10,23 @@ async function flush(): Promise<void> {
   await Promise.resolve();
 }
 
+function controlImageDecodes(): {
+  requests: Array<{ resolve(): void; reject(error?: unknown): void }>;
+  restore(): void;
+} {
+  const requests: Array<{ resolve(): void; reject(error?: unknown): void }> = [];
+  const decode = vi.spyOn(HTMLImageElement.prototype, 'decode').mockImplementation(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        requests.push({ resolve, reject });
+      })
+  );
+  return { requests, restore: () => decode.mockRestore() };
+}
+
 describe('adapter-web-component image view', () => {
   it('keeps the custom boundary while projecting one image target and its lifecycle', async () => {
+    const decodes = controlImageDecodes();
     const element = document.createElement('x-wc-image-view') as WebComponentAdapterElement<
       typeof imageRoot
     >;
@@ -51,7 +66,7 @@ describe('adapter-web-component image view', () => {
     expect(exposes.loadingStatus.get()).toBe('loading');
 
     if (!image) throw new Error('physical image was not materialized');
-    image.dispatchEvent(new Event('load'));
+    decodes.requests[0].resolve();
     await flush();
     expect(exposes.loadingStatus.get()).toBe('loaded');
     expect(statusChanges.map(({ status }) => status)).toEqual(['loading', 'loaded']);
@@ -73,7 +88,7 @@ describe('adapter-web-component image view', () => {
     expect(exposes.loadingStatus.get()).toBe('loading');
     expect(statusChanges.map(({ status }) => status)).toEqual(['loading', 'loaded', 'loading']);
 
-    image.dispatchEvent(new Event('error'));
+    decodes.requests[1].reject(new Error('image:b failed'));
     await flush();
     expect(exposes.loadingStatus.get()).toBe('error');
     expect(statusChanges.map(({ status }) => status)).toEqual([
@@ -98,9 +113,10 @@ describe('adapter-web-component image view', () => {
     element.remove();
     await flush();
     const statusCountAfterDetach = statusChanges.length;
-    image.dispatchEvent(new Event('load'));
+    decodes.requests[2].resolve();
     await flush();
     expect(statusChanges).toHaveLength(statusCountAfterDetach);
+    decodes.restore();
 
     void ImageElement;
   });

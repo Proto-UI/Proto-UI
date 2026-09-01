@@ -1,10 +1,30 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import imageRoot from '../../../prototypes/base/src/image';
 import { createMountedReactAdapter } from './utils/fake-react';
 
+function controlImageDecodes(): {
+  requests: Array<{ resolve(): void; reject(error?: unknown): void }>;
+  restore(): void;
+} {
+  const requests: Array<{ resolve(): void; reject(error?: unknown): void }> = [];
+  const decode = vi.spyOn(HTMLImageElement.prototype, 'decode').mockImplementation(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        requests.push({ resolve, reject });
+      })
+  );
+  return { requests, restore: () => decode.mockRestore() };
+}
+
+async function flushCompletion(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
 describe('adapter-react image view', () => {
-  it('materializes one image root and projects source, a11y, fit, and status lifecycle', () => {
+  it('materializes one image root and projects source, a11y, fit, and status lifecycle', async () => {
     const transitions: string[] = [];
+    const decodes = controlImageDecodes();
     const mounted = createMountedReactAdapter(imageRoot, {
       source: 'image:a',
       a11yMode: 'informative',
@@ -29,7 +49,8 @@ describe('adapter-react image view', () => {
     expect(exposes.fit.get()).toBe('cover');
     expect(exposes.loadingStatus.get()).toBe('loading');
 
-    image.dispatchEvent(new Event('load'));
+    decodes.requests[0].resolve();
+    await flushCompletion();
     expect(exposes.loadingStatus.get()).toBe('loaded');
     expect(transitions).toEqual(['loading', 'loaded']);
 
@@ -48,7 +69,8 @@ describe('adapter-react image view', () => {
     expect(image.classList.contains('surface-next')).toBe(true);
     expect(exposes.loadingStatus.get()).toBe('loading');
 
-    image.dispatchEvent(new Event('error'));
+    decodes.requests[1].reject(new Error('image:b failed'));
+    await flushCompletion();
     expect(exposes.loadingStatus.get()).toBe('error');
     expect(transitions).toEqual(['loading', 'loaded', 'loading', 'error']);
 
@@ -65,7 +87,9 @@ describe('adapter-react image view', () => {
 
     const transitionCountBeforeUnmount = transitions.length;
     mounted.unmount();
-    image.dispatchEvent(new Event('load'));
+    decodes.requests[2].resolve();
+    await flushCompletion();
     expect(transitions).toHaveLength(transitionCountBeforeUnmount);
+    decodes.restore();
   });
 });

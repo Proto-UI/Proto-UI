@@ -1,9 +1,24 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import imageRoot from '../../../prototypes/base/src/image';
 import { createMountedVueAdapter, flushVue } from './utils/vue';
 
+function controlImageDecodes(): {
+  requests: Array<{ resolve(): void; reject(error?: unknown): void }>;
+  restore(): void;
+} {
+  const requests: Array<{ resolve(): void; reject(error?: unknown): void }> = [];
+  const decode = vi.spyOn(HTMLImageElement.prototype, 'decode').mockImplementation(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        requests.push({ resolve, reject });
+      })
+  );
+  return { requests, restore: () => decode.mockRestore() };
+}
+
 describe('adapter-vue image view', () => {
   it('materializes one image root and projects source, a11y, fit, and status lifecycle', async () => {
+    const decodes = controlImageDecodes();
     const transitions: string[] = [];
     const mounted = createMountedVueAdapter(imageRoot, {
       source: 'image:a',
@@ -32,19 +47,37 @@ describe('adapter-vue image view', () => {
       expect(exposes.fit.get()).toBe('cover');
       expect(exposes.loadingStatus.get()).toBe('loading');
 
-      image.dispatchEvent(new Event('load'));
+      decodes.requests[0].resolve();
       await flushVue();
       expect(exposes.loadingStatus.get()).toBe('loaded');
       expect(transitions).toEqual(['loading', 'loaded']);
 
-      const transitionCountBeforeUnmount = transitions.length;
       mounted.unmount();
       unmounted = true;
-      image.dispatchEvent(new Event('error'));
-      await flushVue();
-      expect(transitions).toHaveLength(transitionCountBeforeUnmount);
     } finally {
       if (!unmounted) mounted.unmount();
+      decodes.restore();
     }
+  });
+
+  it('ignores a pending decode completion after unmount', async () => {
+    const decodes = controlImageDecodes();
+    const transitions: string[] = [];
+    const mounted = createMountedVueAdapter(imageRoot, {
+      a11yMode: 'informative',
+      alternativeText: 'Pending image',
+      source: 'image:pending',
+      onLoadingStatusChange: (event: { status: string }) => transitions.push(event.status),
+    });
+    await flushVue();
+    expect(decodes.requests).toHaveLength(1);
+    expect(transitions).toEqual(['loading']);
+
+    mounted.unmount();
+    decodes.requests[0].reject(new Error('late error'));
+    await flushVue();
+
+    expect(transitions).toEqual(['loading']);
+    decodes.restore();
   });
 });

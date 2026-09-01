@@ -11,6 +11,30 @@ function createConnection(
   return { generation, patch, onStatusChange };
 }
 
+type DecodeRequest = {
+  resolve(): void;
+  reject(error?: unknown): void;
+};
+
+function controlDecodes(image: HTMLImageElement): DecodeRequest[] {
+  const requests: DecodeRequest[] = [];
+  Object.defineProperty(image, 'decode', {
+    configurable: true,
+    value: vi.fn(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          requests.push({ resolve, reject });
+        })
+    ),
+  });
+  return requests;
+}
+
+async function flushCompletion(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
 describe('module-image-view Web host bridge', () => {
   it('resolves the portable image requirement to one img target', () => {
     expect(resolveWebImageLocalName()).toBe('img');
@@ -52,8 +76,9 @@ describe('module-image-view Web host bridge', () => {
     lease.dispose();
   });
 
-  it('projects source, informative alt text, fit, and load status', () => {
+  it('projects source, informative alt text, fit, and load status', async () => {
     const image = document.createElement('img');
+    const requests = controlDecodes(image);
     const changes: ImageViewHostCompletion[] = [];
     const lease = createWebImageViewHost(() => image).attach(
       createConnection(
@@ -74,7 +99,8 @@ describe('module-image-view Web host bridge', () => {
     expect(image.style.objectFit).toBe('cover');
     expect(lease.snapshot()).toEqual({ source: 'image:a', loadingStatus: 'loading', fit: 'cover' });
 
-    image.dispatchEvent(new Event('load'));
+    requests[0].resolve();
+    await flushCompletion();
     expect(changes).toEqual([{ generation: 4, status: 'loaded' }]);
     expect(lease.snapshot()).toEqual({ source: 'image:a', loadingStatus: 'loaded', fit: 'cover' });
     lease.dispose();
@@ -140,22 +166,52 @@ describe('module-image-view Web host bridge', () => {
     lease.dispose();
   });
 
-  it('starts a new source request even when the prior patch was terminal', () => {
+  it('starts a new source request even when the prior patch was terminal', async () => {
     const image = document.createElement('img');
+    const requests = controlDecodes(image);
     const lease = createWebImageViewHost(() => image).attach(
       createConnection({ source: 'image:a', loadingStatus: 'loading' })
     );
 
-    image.dispatchEvent(new Event('load'));
+    requests[0].resolve();
+    await flushCompletion();
     expect(lease.snapshot()?.loadingStatus).toBe('loaded');
     lease.update({ generation: 2, patch: { source: 'image:b' } });
 
+    expect(requests).toHaveLength(2);
     expect(lease.snapshot()).toMatchObject({ source: 'image:b', loadingStatus: 'loading' });
     lease.dispose();
   });
 
-  it('propagates the current generation, suppresses duplicate terminal status, and disposes listeners', () => {
+  it('rejects a completion retained from an older source generation', async () => {
     const image = document.createElement('img');
+    const requests = controlDecodes(image);
+    const changes: ImageViewHostCompletion[] = [];
+    const lease = createWebImageViewHost(() => image).attach(
+      createConnection({ source: 'image:a', loadingStatus: 'loading' }, 7, (change) =>
+        changes.push(change)
+      )
+    );
+
+    lease.update({ generation: 8, patch: { source: 'image:b' } });
+
+    expect(requests).toHaveLength(2);
+    image.dispatchEvent(new Event('load'));
+    image.dispatchEvent(new Event('error'));
+    expect(changes).toEqual([]);
+    requests[0].resolve();
+    await flushCompletion();
+    expect(changes).toEqual([]);
+    expect(lease.snapshot()).toMatchObject({ source: 'image:b', loadingStatus: 'loading' });
+    requests[1].resolve();
+    await flushCompletion();
+    expect(changes).toEqual([{ generation: 8, status: 'loaded' }]);
+    lease.dispose();
+  });
+
+  it('propagates the current generation, suppresses raw terminal events, and disposes', async () => {
+    const image = document.createElement('img');
+    const requests = controlDecodes(image);
     const changes: ImageViewHostCompletion[] = [];
     const lease = createWebImageViewHost(() => image).attach(
       createConnection(
@@ -165,15 +221,18 @@ describe('module-image-view Web host bridge', () => {
       )
     );
 
-    image.dispatchEvent(new Event('error'));
+    requests[0].reject(new Error('image:a failed'));
+    await flushCompletion();
     image.dispatchEvent(new Event('load'));
+    image.dispatchEvent(new Event('error'));
     expect(changes).toEqual([{ generation: 7, status: 'error' }]);
 
     lease.update({
       generation: 8,
       patch: { source: 'image:b', alternativeText: 'B', a11yMode: 'informative', fit: 'cover' },
     });
-    image.dispatchEvent(new Event('load'));
+    requests[1].resolve();
+    await flushCompletion();
     expect(changes).toEqual([
       { generation: 7, status: 'error' },
       { generation: 8, status: 'loaded' },
