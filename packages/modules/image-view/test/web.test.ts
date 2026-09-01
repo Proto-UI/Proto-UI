@@ -128,6 +128,32 @@ describe('module-image-view Web host bridge', () => {
     lease.dispose();
   });
 
+  it('clears a reused target when attaching an empty source', () => {
+    const image = document.createElement('img');
+    image.src = 'image:stale';
+    const lease = createWebImageViewHost(() => image).attach(
+      createConnection({ source: '', loadingStatus: 'idle' })
+    );
+
+    expect(image.hasAttribute('src')).toBe(false);
+    expect(lease.snapshot()).toEqual({ source: '', loadingStatus: 'idle', fit: 'contain' });
+    lease.dispose();
+  });
+
+  it('starts a new source request even when the prior patch was terminal', () => {
+    const image = document.createElement('img');
+    const lease = createWebImageViewHost(() => image).attach(
+      createConnection({ source: 'image:a', loadingStatus: 'loading' })
+    );
+
+    image.dispatchEvent(new Event('load'));
+    expect(lease.snapshot()?.loadingStatus).toBe('loaded');
+    lease.update({ generation: 2, patch: { source: 'image:b' } });
+
+    expect(lease.snapshot()).toMatchObject({ source: 'image:b', loadingStatus: 'loading' });
+    lease.dispose();
+  });
+
   it('propagates the current generation, suppresses duplicate terminal status, and disposes listeners', () => {
     const image = document.createElement('img');
     const changes: ImageViewHostCompletion[] = [];

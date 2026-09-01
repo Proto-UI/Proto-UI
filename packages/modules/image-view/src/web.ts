@@ -57,7 +57,8 @@ function attachImageTarget(
       if (source) img.src = source;
       else img.removeAttribute('src');
     }
-    if (patch.loadingStatus) status = patch.loadingStatus;
+    if (!source) img.removeAttribute('src');
+    if (next.loadingStatus) status = next.loadingStatus;
     // The module empties alternativeText before a decorative patch reaches the
     // host, so an informative target keeps a name and a decorative target is
     // explicitly removed from the semantic tree via empty alt.
