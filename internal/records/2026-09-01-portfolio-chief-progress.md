@@ -1,0 +1,380 @@
+# Proto UI portfolio pass progress
+
+Started: 2026-09-01 (Asia/Shanghai) Repository: https://github.com/Proto-UI/Proto-UI Execution mode: `human-assisted` / `current-user`
+
+Prior completed object receipts and no-op evidence are preserved in `HANDOFF.md`. Entries below record this continuation pass.
+
+## #531 — https://github.com/Proto-UI/Proto-UI/issues/531
+
+- Observed: 2026-09-01T02:40+08:00; OPEN, no comments; live main 9c8891ca. Spec anchors C-TEXT-CONTROL-0001, D-TEXT-CONTROL-PROJECTION-0001 (open Q-SELECTION seam), HC-TEXT-CONTROL-0001, M-TEXT-CONTROL-0001, P-BASE-TEXTAREA; #389 Text Control revision in PR #547; #514 matrix is consumption target.
+- Action: guidance comment https://github.com/Proto-UI/Proto-UI/issues/531#issuecomment-5484064304 — three tracer bullets (responsibility/trust table → fake-engine HC lease sketch → smallest-slice recommendation) with record deliverables and no spec changes.
+- Blocker: none for research; verdict is a maintainer semantic gate.
+- Recheck: yes, after #514/#517/#529 land.
+
+## #530 — https://github.com/Proto-UI/Proto-UI/issues/530
+
+- Observed: 2026-09-01T02:45+08:00; OPEN, no comments; live main 9c8891ca. Anchors: C-HOST-SURFACE-PROJECTION-0001, C/D/HC/M-TEXT-CONTROL graph as worked host-lease example, #521 windowing relation, #517 Code Block fallback.
+- Action: guidance comment https://github.com/Proto-UI/Proto-UI/issues/530#issuecomment-5484084546 — three tracer bullets plus two explicit boundary decisions (screen-diff rate threshold; scrollback vs #521).
+- Blocker: none for research; verdict is maintainer semantic gate.
+- Recheck: yes, with #514/#521 progress.
+
+## #529 — https://github.com/Proto-UI/Proto-UI/issues/529
+
+- Observed: OPEN, no comments; live main 9c8891ca. Body already fixes M1 Artifact Workspace and bounded static Diff Review, dependencies (#517/#523/#522/#374), explicit data-only request boundary, lifecycle/accessibility evidence, and non-goals.
+- Action: no-op; adding guidance would duplicate the complete body. The next material action is implementation after available dependencies, not another routing comment.
+- Blocker: dependent owners remain open; no public Base Artifact/Diff admission in this slice.
+- Recheck: yes, when #517/#522/#523/#374 status changes.
+
+## #521 — https://github.com/Proto-UI/Proto-UI/issues/521
+
+- Observed: 2026-08-31T20:34Z; OPEN, 0 comments, agent-ready. Body (8.5KB) already contains complete decision packet: slice 1 (fixed-extent known ordered list with stable keys), identity/range/extent/focus/a11y/lifecycle packet, fake-host + real-Web evidence plan, 9 acceptance criteria, Agent-forward execution with no pending human gate. M-COLLECTION-0001, M-SCROLL-0001, HC-SCROLL-SURFACE-0001 supply the baseline patterns; #519/#520 reconciliation already an acceptance criterion.
+- Action: no-op (worker Issue521) — body already supplies every missing element; a comment would duplicate guidance.
+- Blocker: none.
+- Recheck: yes, with #519/#520.
+
+## #473 — https://github.com/Proto-UI/Proto-UI/issues/473
+
+- Observed: OPEN; umbrella whitepaper initiative. Body + maintainer comments 2026-08-22 (#5378004327) and 2026-08-28 (#5451223225) fix dependency graph (#478 → #475/#477 → #476/#474 → #479), quality gates, close condition; PR #565 merged WPD-01..10 record present at internal/records/2026-08-28-whitepaper-rewrite-maintainer-decisions.zh-CN.md.
+- Action: no-op (scout) — every actionable next step lives on child issues; umbrella comment would be generic status.
+- Blocker: none new. Recheck: no.
+
+## #474 — https://github.com/Proto-UI/Proto-UI/issues/474
+
+- Observed: OPEN; body has complete 10-step workflow + acceptance; 2026-08-28 maintainer update re-gates to blueprint/research now, prose only after maintainer accepts blueprint; WPD-06/WPD-08 incorporated; no blueprint artifact exists yet.
+- Action: no-op (scout) — next slice and human gate already fully specified by maintainer direction.
+- Blocker: final prose gated on maintainer blueprint acceptance. Recheck: yes (blueprint acceptance).
+
+## #380 — https://github.com/Proto-UI/Proto-UI/issues/380
+
+- Observed: OPEN, help wanted, no PR; body complete on scope/acceptance but no reference implementation or order.
+- Action: guidance comment https://github.com/Proto-UI/Proto-UI/issues/380#issuecomment-5484322484 — brutalist scroll-area family as template; Root→Viewport→Scrollbar→Thumb order per Base dependsOn; consume (not reinstall) focus domain; mirror select/tabs packaging; frozen shadcn markup as comparison only.
+- Blocker: none. Recheck: no.
+
+## #385 — https://github.com/Proto-UI/Proto-UI/issues/385
+
+- Observed: OPEN, help wanted, no PR; Base Tooltip merged; no brutalist tooltip/ yet.
+- Action: guidance comment https://github.com/Proto-UI/Proto-UI/issues/385#issuecomment-5484322467 — hover-card as structural precedent; Root/Trigger/Content evidence before unprecedented Group warmth slice; Arrow excluded per P-BASE-TOOLTIP-CONTENT-DEFERRED-ARROW; composition criterion satisfiable with existing brutalist button/badge hosts.
+- Blocker: none. Recheck: no.
+
+## #533 — https://github.com/Proto-UI/Proto-UI/issues/533
+
+- Observed: OPEN, no comments; depends on #514 (allowlist) + #515. Repo enforcement convention is check:\* script family wired into ci.yml (no eslint config); analysis:monorepo graph walker exists.
+- Action: guidance comment https://github.com/Proto-UI/Proto-UI/issues/533#issuecomment-5484386189 — settle check shapes now (check:agent-harness-boundary script, reuse monorepo walker), tracer order (import/manifest boundary → matrix-row manifest → state-machine drift as explicit-review first), non-goal guardrail fixtures.
+- Blocker: #514 allowlist. Recheck: yes.
+
+## #388 — https://github.com/Proto-UI/Proto-UI/issues/388
+
+- Observed: OPEN; Checkpoint A approved (5378970491); continuous exact-head dependency comment chain through 5470943298; PR #551 head 64cbaf3814 still CHANGES_REQUESTED + 4 unresolved threads; PR #553 head 45fad059 unchanged with five-step tracer plan on the PR.
+- Action: no-op (scout) — Issue already carries authoritative blocker list and next acceptable states.
+- Blocker: #548/PR #551 review threads; #549/PR #553 migration evidence or maintainer scope decision. Recheck: yes.
+
+## #393 — https://github.com/Proto-UI/Proto-UI/issues/393
+
+- Observed: OPEN; maintainer ruling 2026-08-22 approves app-owned real-link bounded direction with full evidence plan; demo still authors brutalist-hover-card-trigger without href; PR #512 is cosmetic only and does not implement #393.
+- Action: no-op (scout) — body + ruling + PR #512 separation already settle everything; implementation PR is the missing artifact, not guidance.
+- Blocker: no bounded implementation PR for real-link Trigger across WC/React/Vue. Recheck: yes.
+
+## #389 — https://github.com/Proto-UI/Proto-UI/issues/389
+
+- Observed: OPEN; Checkpoint A approved (5378972126); Checkpoint C auto-eligible once #547 gains independent review. PR #547 live: open, mergeable/clean, APPROVED at exact head 209a809f by @guangliang2019 2026-08-31T13:38Z, 12 checks green, signed commit with DCO.
+- Action: no-op (scout) — body + latest comment already fix progression condition and Checkpoint C scope/evidence; #547 now satisfies it.
+- Blocker: #547 unmerged (integration path, not Issue guidance). Recheck: yes.
+
+## #386 — https://github.com/Proto-UI/Proto-UI/issues/386
+
+- Observed: OPEN, needs semantic decision; research phase complete in comment 5389994052 (Alert defer, Spinner admit styled-only, Kbd shared-style); claim valid to 2026-09-07.
+- Action: no-op (scout) — remaining unmet acceptance turns on maintainer adjudication (Alert vs Callout) + Brutalist co-signoff, a human gate already surfaced.
+- Blocker: maintainer ruling + Brutalist co-signoff. Recheck: yes.
+
+## #387 — https://github.com/Proto-UI/Proto-UI/issues/387
+
+- Observed: OPEN, needs semantic decision, unresolved-product-direction. Research packet complete (5389994040): hybrid Table identity, dependency chain, two prerequisite drifts confirmed in repo.
+- Action: no-op (scout) — single remaining transition is the named maintainer ruling on four explicit questions.
+- Blocker: maintainer product-direction ruling. Recheck: yes.
+
+## #420 — https://github.com/Proto-UI/Proto-UI/issues/420
+
+- Observed: OPEN; #567/#576 merged (last parent comment stale: still says #567 awaits re-review); #563 head 8fa42073 blocked with COV-001/002/003; #579/#580 appeared 2026-09-01 without matrix mirror.
+- Action: tracker checkpoint comment https://github.com/Proto-UI/Proto-UI/issues/420#issuecomment-5484620047 — mirror live dependency graph, gate M0 on #563 findings, record child order, require child→matrix-row binding.
+- Blocker: #563 COV findings; #571 evidence state. Recheck: yes.
+
+## #532 — https://github.com/Proto-UI/Proto-UI/issues/532
+
+- Observed: OPEN, agent-ready. Two 2026-08-28 research-checkpoint comments already provide primary-source sandbox/security/accessibility evidence and recommend slice B: trusted same-origin static HTML preview with no bidirectional bridge; C/D/E deferred; #514/#563 matrix projection is the named dependency.
+- Action: no-op — the live checkpoint already supplies the bounded recommendation, source evidence, trust boundary, and dependency gate.
+- Blocker: #514 matrix projection via PR #563. Recheck: yes.
+
+## #528 — https://github.com/Proto-UI/Proto-UI/issues/528
+
+- Observed: OPEN, agent-ready, zero comments. Body fully fixes Attachment vs optional AttachmentList decision packet, anatomy/cardinality, App-owned status/resource boundary, dependency staging (#527/#374), data-only action requests, no-thumbnail first slice, accessibility/lifecycle evidence, reuse cases, and non-goals.
+- Action: no-op — another routing comment would duplicate the complete body; the next material artifact is the bounded composition packet.
+- Blocker: none for proposal work; thumbnails depend on #374, file acquisition on #527. Recheck: yes.
+
+## #377 — https://github.com/Proto-UI/Proto-UI/issues/377
+
+- Observed: OPEN; matrix rows/counts stale against #378/#464, #381, #382, #379; blanket B/C review flag stale against approved #388/#389 checkpoints; #387 now unresolved-product-direction.
+- Action: matrix reconciliation comment https://github.com/Proto-UI/Proto-UI/issues/377#issuecomment-5485063085 — exact row changes, minimum corrected counts, and review-flag refreshes.
+- Blocker: none for ledger reconciliation. Recheck: no.
+
+## #383 — https://github.com/Proto-UI/Proto-UI/issues/383
+
+- Observed: OPEN, ready; Base Tooltip and positioning dependencies exist. Missing upstream provenance and undeclared delay-default compatibility delta (upstream 0ms vs Base Group 700/100/300ms); no shadcn tooltip implementation exists.
+- Action: guidance comment https://github.com/Proto-UI/Proto-UI/issues/383#issuecomment-5485063068 — pinned upstream revision/path, delay/sideOffset/Arrow/Portal deltas, export/entity/version precedents.
+- Blocker: none. Recheck: no.
+
+## #398 — https://github.com/Proto-UI/Proto-UI/issues/398
+
+- Observed: OPEN; maintainer typed-grammar ruling exists. 2026-08-25 classification and 2026-08-28 corrections records postdate the thread; no owning K/D entity exists; EN/ZH pages remain unqualified.
+- Action: status-linkage comment https://github.com/Proto-UI/Proto-UI/issues/398#issuecomment-5485001463 — links both records, names four binding corrections, and restores entity→P references→normalization→visual→docs order.
+- Blocker: maintainer admission of owning entity. Recheck: yes.
+
+## #469 — https://github.com/Proto-UI/Proto-UI/issues/469
+
+- Observed: OPEN; latest status incorrectly treats source audit as rendered evidence and narrows call sites; merged #552/#564 record identifies broader actual-adjacency/state matrix; style.ts still carries universal border-black.
+- Action: correction/guidance comment https://github.com/Proto-UI/Proto-UI/issues/469#issuecomment-5485001455 — rendered Light/Dark × WC/React/Vue harness first, then #427 frame migration and governing P/test updates.
+- Blocker: rendered adjacency matrix. Recheck: no.
+
+## #374 — https://github.com/Proto-UI/Proto-UI/issues/374
+
+- Observed: OPEN, agent-ready. PR #554 merged accepted Checkpoint B; latest maintainer comment 5469766448 automatically starts Checkpoint C. Body completely bounds Web HTMLImageElement host/adapter/evidence slice; no open PR references #374.
+- Action: no-op (scout) — current transition and automatic progression are already explicit.
+- Blocker: none; implementation PR absent. Recheck: yes.
+
+## #384 — https://github.com/Proto-UI/Proto-UI/issues/384
+
+- Observed: OPEN; bounded contract complete; linked PR #534 head ff534b6 already carries source/spec/tests/docs/demo/exports. Latest PR guidance names exact sequence: resolve Scroll Area thread, red React/property browser check, Poppy deployment, then exact-head review.
+- Action: no-op (scout) — Issue guidance would duplicate active PR guidance.
+- Blocker: PR #534 unresolved review/check/deployment/approval gates. Recheck: yes.
+
+## #527 — https://github.com/Proto-UI/Proto-UI/issues/527
+
+- Observed: OPEN, agent-ready, zero comments. 8.3KB body already defines resource/lease and App bridge, security/trust, portable no-raw-host boundary, Slice A as default, later drop/paste staging, acceptance criteria, and Agent-forward execution.
+- Action: no-op — next material artifact is the bounded File Intake packet; another guidance comment would duplicate the body.
+- Blocker: none for Slice A proposal. Recheck: yes.
+
+## #526 — https://github.com/Proto-UI/Proto-UI/issues/526
+
+- Observed: OPEN, agent-ready, zero comments. 7.5KB body fully separates Questionnaire composition from Agent protocol/schema/form/value owners, fixes anatomy/submission/validation/review actions, dependencies, evidence, acceptance, and Agent-forward execution.
+- Action: no-op — bounded packet already explicit.
+- Blocker: none for proposal work. Recheck: yes.
+
+## #525 — https://github.com/Proto-UI/Proto-UI/issues/525
+
+- Observed: OPEN, zero comments. Body fully bounds app-local Run Status/Reasoning Trace/Agent Lane, App-owned data/privacy boundary, dependencies, states/actions, accessibility/lifecycle evidence, and acceptance; it explicitly rejects Base Progress/runtime/chain-of-thought ownership.
+- Action: no-op — implementation is the next material action; no missing routing guidance.
+- Blocker: dependent surfaces as available (#388/#519). Recheck: yes.
+
+## #524 — https://github.com/Proto-UI/Proto-UI/issues/524
+
+- Observed: OPEN, zero comments. Body fully bounds app-local Tool Invocation/Approval Request, App-owned execution truth, authored controls and exactly-once requests, dependencies, accessibility/lifecycle evidence, acceptance, and public-Base negative boundary.
+- Action: no-op — next material action is the app-local implementation slice.
+- Blocker: dependent surfaces as available (#517/#518/#388). Recheck: yes.
+
+## #523 — https://github.com/Proto-UI/Proto-UI/issues/523
+
+- Observed: OPEN, agent-ready, zero comments. 8.3KB body provides complete Tree hierarchy/anatomy/focus/selection/a11y packet, first-slice reduction rule, collection/relationship dependencies, evidence/acceptance, and Agent-forward execution.
+- Action: no-op — body already supplies the bounded proposal.
+- Blocker: none for proposal work; later windowing remains #521. Recheck: yes.
+
+## #522 — https://github.com/Proto-UI/Proto-UI/issues/522
+
+- Observed: OPEN, agent-ready, zero comments. 7.5KB body fixes a two-pane/one-separator first slice, pointer/keyboard/value/a11y/geometry/cleanup evidence, explicit #495 reconciliation, exclusions, acceptance, and Agent-forward execution.
+- Action: no-op — dependency and first-slice order are already explicit.
+- Blocker: implementation waits for the named #495 prerequisite decision/evidence. Recheck: yes.
+
+## #520 — https://github.com/Proto-UI/Proto-UI/issues/520
+
+- Observed: OPEN, agent-ready, zero comments. Body fully defines generic visual-anchor preservation ownership, smallest automatic slice, #519/#521 dependency reconciliation, neutral anchor facts/requests, geometry/lifecycle evidence, acceptance, and Agent-forward execution.
+- Action: no-op — next artifact is the bounded proposal/evidence packet, not another routing comment.
+- Blocker: none for proposal work. Recheck: yes.
+
+## #519 — https://github.com/Proto-UI/Proto-UI/issues/519
+
+- Observed: OPEN, agent-ready, zero comments. Body fully defines generic end-follow semantics (follow only while at end, pause on intentional departure, explicit resume), Scroll-domain ownership selection, host lease/evidence, acceptance, and Agent-forward execution.
+- Action: no-op — bounded Scroll proposal is already complete enough to execute.
+- Blocker: none for proposal work. Recheck: yes.
+
+## #518 — https://github.com/Proto-UI/Proto-UI/issues/518
+
+- Observed: OPEN, agent-ready, zero comments. Body fully bounds reusable Composer composition over Textarea/Button/Async/Live Region, App-owned transport/run/form responsibilities, anatomy/value/action/a11y/lifecycle evidence, acceptance, and automatic implementation after one boundary remains.
+- Action: no-op — no missing slice or evidence plan.
+- Blocker: none for composition packet. Recheck: yes.
+
+## #517 — https://github.com/Proto-UI/Proto-UI/issues/517
+
+- Observed: OPEN. First private Code Block composition body is complete; latest Issue comment links decision packet PR #570, keeps code/language/highlight/copy App-owned, and states implementation waits on maintainer acceptance of the reusable composition-entity decision.
+- Action: no-op — current human gate and packet location are explicit; new guidance would duplicate #570.
+- Blocker: maintainer acceptance of #570 packet / reusable composition-entity path. Recheck: yes.
+
+## #516 — https://github.com/Proto-UI/Proto-UI/issues/516
+
+- Observed: OPEN. First private Message composition body is complete; latest Issue comment links decision packet PR #569 and isolates Q3 (reusable composition-entity path) as the sole semantic decision.
+- Action: no-op — current human gate and packet location are explicit; new guidance would duplicate #569.
+- Blocker: maintainer acceptance of #569 packet. Recheck: yes.
+
+## #515 — https://github.com/Proto-UI/Proto-UI/issues/515
+
+- Observed: OPEN. Body fully bounds the M1 all-Proto vertical slice; latest comment supplies direct dependency map (#514/#516/#517/#518/#519/#524/#525/#529/#533) and explicitly defers #520–#523/#526–#532 unless pulled in.
+- Action: no-op — dependency order and evidence boundary are already explicit.
+- Blocker: M0/#514 and named direct child slices. Recheck: yes.
+
+## #514 — https://github.com/Proto-UI/Proto-UI/issues/514
+
+- Observed: OPEN. Body defines the authoritative Harness coverage matrix/baseline; PR #563 is the active carrier under exact-head review with COV-001/002/003 guidance already recorded on the PR and mirrored on parent #513/#420.
+- Action: no-op — Issue-level status comment would duplicate active PR and parent-tracker guidance.
+- Blocker: PR #563 review findings. Recheck: yes.
+
+## #513 — https://github.com/Proto-UI/Proto-UI/issues/513
+
+- Observed: OPEN aggregate Harness program. 12KB body carries complete matrix/classification/ownership/child routing; latest comment records #563's 63-row Harness matrix, React production-host wall, 11 checkpoints, child index through #558, and preserves 0-dogfooded/ready/research/blocked truth.
+- Action: no-op — current aggregate state and M0 gate are already accurately mirrored; child objects own the actionable slices.
+- Blocker: #563/M0 plus child graph. Recheck: yes.
+
+## #505 — https://github.com/Proto-UI/Proto-UI/issues/505
+
+- Observed: OPEN. Body authorizes audit/evidence/draft record/tooling only; maintainer scope comments admit only PR #535's one-file non-normative Button audit. PR #535 is OPEN at head f5ce1f4f, REVIEW_REQUIRED, checks green; Issue comment already says this does not close #505.
+- Action: no-op — the active pilot boundary and review gate are explicit.
+- Blocker: independent exact-head review/integration of #535; broader profile decisions remain out of scope. Recheck: yes.
+
+## #504 — https://github.com/Proto-UI/Proto-UI/issues/504
+
+- Observed: OPEN event-driven review/integration tracker. Latest Issue comment records exact-head #509 blockers: DCO identity remediation and scheduled-writer/unknown-outcome authorization projections; #509 remains OPEN/REVIEW_REQUIRED with green checks.
+- Action: no-op — exact current blockers and correction standard are already recorded; new Issue guidance would duplicate #509.
+- Blocker: #509 DCO/projection/reconciliation findings. Recheck: yes.
+
+## #503 — https://github.com/Proto-UI/Proto-UI/issues/503
+
+- Observed: OPEN non-normative layered library-quality profile proposal. Maintainer checkpoint admits only PR #535's one-file dated Button audit and explicitly excludes tooling/schema, further pilots, spec/stable guarantees, release gates, merge/publication/release.
+- Action: no-op — pilot scope and human gates are explicit.
+- Blocker: #535 exact-head independent review; later architecture/ownership decision. Recheck: yes.
+
+## #498 — https://github.com/Proto-UI/Proto-UI/issues/498
+
+- Observed: OPEN, needs semantic decision. Non-normative Switch drag proposal exists; latest comment proposes immediate Move + commit-on-release and asks the unresolved cancel-semantics/checkpoint question.
+- Action: no-op — the remaining product-direction question is already concentrated for maintainer decision; implementation would overrun authority.
+- Blocker: maintainer ruling on substrate and cancel behavior. Recheck: yes.
+
+## #496 — https://github.com/Proto-UI/Proto-UI/issues/496
+
+- Observed: OPEN, needs semantic decision. Non-normative item-aligned positioning record exists; latest comment proposes an optional Base Select `itemAlignment` path and explicitly asks default-vs-opt-in/checkpoint.
+- Action: no-op — observable Base/public compatibility choice is already presented to maintainers.
+- Blocker: maintainer ruling on ownership/API/default compatibility. Recheck: yes.
+
+## #495 — https://github.com/Proto-UI/Proto-UI/issues/495
+
+- Observed: OPEN parent proposal. Latest comment records the two authorized bounded children (#496 via merged #497 record; #498 via #499/proposal record), both non-normative and awaiting their own checkpoints.
+- Action: no-op — child Issues own the actionable decisions; parent comment would be status duplication.
+- Blocker: #496/#498 maintainer checkpoints. Recheck: yes.
+
+## #479 — https://github.com/Proto-UI/Proto-UI/issues/479
+
+- Observed: OPEN, assigned. Latest maintainer update supersedes the #478 hard gate after merged #565; Issue remains intentionally last-stage and starts only after one foundational chapter/prose has editorial acceptance, current source/entity map, bounded evidence, and no semantic contradiction presented as settled.
+- Action: no-op — publication-selection gate and evidence conditions are explicit.
+- Blocker: accepted foundational chapter/prose. Recheck: yes.
+
+## #478 — https://github.com/Proto-UI/Proto-UI/issues/478
+
+- Observed: OPEN, assigned. Latest maintainer update records #565 merged (`094b99f5`) and narrows this from blocking full editorial audit to a bounded neutral source-inventory/research follow-up, naming included facts, excluded obsolete rewrite conclusions, source/lifecycle mapping, contradiction/unknown handling, and child dependency changes.
+- Action: no-op — the remaining inventory slice is completely bounded; further guidance would duplicate the maintainer update.
+- Blocker: none for source inventory. Recheck: yes.
+
+## #477 — https://github.com/Proto-UI/Proto-UI/issues/477
+
+- Observed: OPEN, assigned. Latest maintainer update incorporates #565/WPD-04/05/09, allows research + private chapter blueprint now, fixes Maker/App Maker distinction and information-channel terminology, and keeps direct legacy-page prose gated on blueprint acceptance.
+- Action: no-op — blueprint slice, terminology, evidence boundary, and prose gate are explicit.
+- Blocker: maintainer blueprint acceptance before prose. Recheck: yes.
+
+## #476 — https://github.com/Proto-UI/Proto-UI/issues/476
+
+- Observed: OPEN, assigned. Latest maintainer update applies #565/WPD-07, replaces #478 hard gate with blueprint-first, defines the conditional consistency envelope inputs/contexts/tolerance/exclusions, and keeps old-page prose gated.
+- Action: no-op — current bounded blueprint and gate are explicit.
+- Blocker: maintainer blueprint acceptance before prose. Recheck: yes.
+
+## #475 — https://github.com/Proto-UI/Proto-UI/issues/475
+
+- Observed: OPEN, assigned. Latest maintainer update after #565 authorizes research + private chapter blueprint, forbids surgical old-page rewrite, and specifies reader question/claim/objection/evidence/negative-boundary/source-map/bridge contents before human-authored prose.
+- Action: no-op — no missing slice, dependency, or evidence plan.
+- Blocker: maintainer blueprint acceptance before prose; PR #572 remains CHANGES_REQUESTED and does not satisfy it. Recheck: yes.
+
+## Final re-audit (2026-09-01, ~03:30+08:00)
+
+### PR #570 (Code Block first-slice packet, #517)
+
+- Live: OPEN, head c03dc413a, REVIEW_REQUIRED, BLOCKED, no failed checks, author cyjin-yl.
+- Action: no-op. Awaiting independent maintainer acceptance of the decision packet; author cannot self-approve.
+
+### PR #569 (Message first-slice packet, #516)
+
+- Live: OPEN, head e6b0146, REVIEW_REQUIRED, BLOCKED, no failed checks, author cyjin-yl.
+- Action: no-op. Same gate: independent maintainer acceptance; Q3 reusable composition-entity path is the semantic decision.
+
+### PR #571 (Brutalist browser coverage, #539)
+
+- Live: OPEN, head 196f0dea, CHANGES_REQUESTED, BLOCKED, no failed checks. Author cyjin-yl.
+- Action: no-op. Blocked on reviewer change request; focused startup budget + Hover Card dark/repaint evidence remain.
+
+### PR #547 (Text Control line-mode, #389 B)
+
+- Live: OPEN, head 209a809f, reviewDecision APPROVED, mergeStateStatus CLEAN, all 12 checks green. Author cyjin-yl; the only independent non-author reviewer @guangliang2019 APPROVED at exact head on 2026-08-31T13:38Z (latest review, prior CHANGES_REQUESTED superseded by DISMISS).
+- Action: no external mutation. Independent GitHub approval gate is now satisfied, but canonical squash-merge still requires the `pui-integrate` path with a clean canonical APPROVE review packet; the viewer credential is the PR author, so self-review is prohibited. This is the exact remaining gate — no bypass attempted.
+
+### New objects detected after handoff (beyond the enumerated queue)
+
+- Issue #577 (www projection scopes) and #579 (content-flow rhythm, bug) opened post-handoff; carried by PR #578 and #580 respectively. PR #580 OPEN/BLOCKED head 2a6d5f32; both already hold active PR guidance. No separate Issue comment added (would duplicate in-flight PR work); #420 tracker already mirrors #579/#580.
+
+## Integration outcome
+
+- No PR met every canonical `pui-integrate` precondition within this pass: the only independently-approved clean head (#547) still requires a non-author clean canonical review packet, which the viewer (its author) cannot supply. Recorded fail-closed; no `gh pr merge` workaround used.
+
+## Portfolio summary (pass complete)
+
+48-issue remaining queue fully processed; 6 guidance comments posted this pass, 42 evidence-backed no-ops.
+
+Guidance comments (this pass):
+
+- #531 (three tracer bullets over Text Control graph)
+- #530 (terminal research bullets + boundary decisions)
+- #533 (enforcement check:\* script shapes, gated on #514)
+- #380 (brutalist scroll-area template + order)
+- #385 (tooltip precedent + warmth slice + Arrow exclusion)
+- #383 (tooltip provenance + delay-default delta)
+- #398 (typed-grammar record linkage + four corrections)
+- #469 (correct source-audit vs rendered-evidence gate)
+- #420 (tracker reconciliation)
+- #377 (matrix row/count reconciliation)
+
+No-op reasons were either (a) body already complete + Agent-forward, (b) active PR already carries the exact next step, or (c) a maintainer/ownership/admission human gate already named.
+
+Integration: no merge performed; the single independently-approved clean head (#547) remains viewer-authored, so canonical self-review prohibition blocks the merge path. All other open PRs are CHANGES_REQUESTED, REVIEW_REQUIRED, or unresolved at head. Remaining human gates (compact): #563 COV-001/002/003; #549/#548 semantic decisions; #553 Tabs migration; #551/#553 review chains; whitepaper blueprint acceptance (#475/#476/#477/#479); Brutalist admission/co-signoff (#386/#387); #496/#498 substrate rulings; #498/#496 checkpoints; #505/#503 pilot boundary; DCO/identity remediation (#509/#504).
+
+## Follow-up pass (2026-09-01, ~15:00+08:00)
+
+Live main advanced 9c8891ca → 18b9c78f. Re-audited the 7 PRs with head/review/merge changes.
+
+Merged since prior pass:
+
+- #547 → squash 37755def (2026-09-01T08:16:12Z, approved by @guangliang2019).
+- #512 → squash 18b9c78f (2026-09-01T08:16:42Z, approved by @guangliang2019).
+
+Guidance comments posted this pass (all viewer-authored, factual exact-head evidence; no self-approval):
+
+- #571 https://github.com/Proto-UI/Proto-UI/pull/571#issuecomment-5492337691 — CI red at 6c996be (Hover Card transition-duration 0s vs 0.2s; same surface as R2-002); CHANGES_REQUESTED not resolved.
+- #551 https://github.com/Proto-UI/Proto-UI/pull/551#issuecomment-5492337668 — deterministic runtime contract failure at f9934d5 (StateValidationFailure never constructed); Poppy preview failed; Option A/B undecided.
+- #509 https://github.com/Proto-UI/Proto-UI/pull/509#issuecomment-5492337721 — DCO closed exact-identity; six remaining/current blockers incl --slurp reconciliation, automation.md drift, non-exec resolve-fixed-review-thread, schema-v2 digest contradiction, handoff replay gap, packet-mode digest.
+- #581 https://github.com/Proto-UI/Proto-UI/pull/581#issuecomment-5492337695 — test failure pre-existing on base main, not introduced by diff; base refresh needed; Codex P1 web.ts:94 generation-binding; no human approval yet.
+
+No-op / already-routed (no duplicate):
+
+- #553 — design-vs-Tabs-migration maintainer decision already posed; reviews pending.
+- #534 — prior blockers cleared, only independent approval remains; reviewers already requested.
+
+No merge, no review submission, no label/close/assign this pass.
+
+## Priority exact-head review (2026-09-01, ~15:04+08:00)
+
+- #583 exact head `c25642894b513f98af74cf08e786c6af7432d9e3`: prior floating-revision and contradictory remaining-gap wording were resolved, but exact-head review found three remaining spec/evidence blockers (centering owner differs from the later recipe; focused test does not bind historical baseline `f31ed819...`; anonymous radius ruling is not reconstructible). CHANGES_REQUESTED receipt: https://github.com/Proto-UI/Proto-UI/pull/583#pullrequestreview-5079678403
+- #585 exact head `d4d5c7ef832a7c5c171d10718a598f42bebd37ca`: placeholder lowering itself is narrow and generated tokens align, but the new scanner misses `const hook = asHook(); const state = hook.stateHandles` bindings already used in-tree, so the purported closure coverage can remain green while real hook/state pairs drift. User-reported CI-green state and Vercel fork authorization were not re-litigated. CHANGES_REQUESTED receipt: https://github.com/Proto-UI/Proto-UI/pull/585#pullrequestreview-5079680889
+
+## Ledger persistence
+
+- Version-controlled copies are maintained on branch `agent/portfolio-chief-ledger-20260901` under `internal/records/2026-09-01-portfolio-chief-progress.md` and `internal/records/2026-09-01-portfolio-chief-report.md`; branch is pushed to `origin`.
