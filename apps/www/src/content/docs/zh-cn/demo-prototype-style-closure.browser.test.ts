@@ -206,7 +206,7 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         vue2: boolean;
       };
       expect(facts.mounted, `${runtime}/mounted`).toBe(true);
-      expect(facts.textareaCount, `${runtime}/physical-textareas`).toBe(4);
+      expect(facts.textareaCount, `${runtime}/physical-textareas`).toBe(5);
 
       if (runtime === 'wc') {
         expect(facts.firstRootTag, `${runtime}/owner`).toMatch(/^WC-/);
@@ -401,11 +401,11 @@ describe.sequential('Prototype style closure without Website CSS', () => {
           override: { color: string; fontFamily: string };
         };
 
-        expect(facts.textareas, `${runtime}/textarea-count`).toHaveLength(4);
+        expect(facts.textareas, `${runtime}/textarea-count`).toHaveLength(5);
         for (const textarea of facts.textareas) {
           const label = `${runtime}/${textarea.label}`;
           expect(textarea.resize, `${label}/resize`).toBe('vertical');
-          if (textarea.label !== 'Standalone consumer override') {
+          if (!textarea.label?.includes('override')) {
             expect(textarea.boxSizing, `${label}/box-sizing`).toBe('border-box');
             expect(textarea.fontFamily, `${label}/consumer-font`).toBe(facts.hostFont);
             expect(textarea.color, `${label}/foreground`).toBe(result.foreground);
@@ -435,7 +435,7 @@ describe.sequential('Prototype style closure without Website CSS', () => {
           );
         }
 
-        const [editable, disabled, readOnly, consumerOverride] = facts.textareas;
+        const [editable, disabled, readOnly, consumerOverride, utilityLayer] = facts.textareas;
         expect(editable).toMatchObject({
           label: 'Standalone editable',
           value: 'Standalone editable',
@@ -486,6 +486,25 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         });
         expect(consumerOverride.fontFamily, `${runtime}/native-consumer-font-override`).toContain(
           'Proto UI Native Consumer Override'
+        );
+        expect(utilityLayer).toMatchObject({
+          label: 'Standalone utility layer override',
+          value: 'Standalone utility layer override',
+          rows: 2,
+          disabled: false,
+          readOnly: false,
+          boxSizing: 'content-box',
+          background: 'rgb(23, 45, 67)',
+          color: 'rgb(210, 220, 230)',
+          opacity: '0.75',
+          margin: ['4px', '6px', '4px', '6px'],
+          padding: ['5px', '7px', '5px', '7px'],
+          borderWidth: ['3px', '3px', '3px', '3px'],
+          borderStyle: 'dashed',
+          borderColor: 'rgb(89, 67, 45)',
+        });
+        expect(utilityLayer.fontFamily, `${runtime}/utility-layer-font-override`).toContain(
+          'Proto UI Utility Layer Override'
         );
 
         const editableSelector = `[data-runtime-host="${runtime}"] textarea[aria-label="Standalone editable"]`;
