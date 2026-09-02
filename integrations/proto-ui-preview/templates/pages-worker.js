@@ -195,9 +195,20 @@ async function fetchAsset(env, request) {
   return env.ASSETS.fetch(new Request(url, request));
 }
 
-async function assetHealth(env) {
-  const probe = await env.ASSETS.fetch(new Request(`${CANONICAL_ORIGIN}/`));
-  return response(null, { status: probe.ok ? 204 : 503 });
+async function assetHealth(request, env) {
+  // Keep the original Pages Request context and probe the emitted file
+  // explicitly. Advanced Mode does not guarantee directory-index routing for
+  // ASSETS.fetch(new Request(CANONICAL_ORIGIN + "/")).
+  const probeURL = new URL(request.url);
+  probeURL.pathname = "/index.html";
+  probeURL.search = "";
+  probeURL.hash = "";
+  try {
+    const probe = await env.ASSETS.fetch(new Request(probeURL, request));
+    return response(null, { status: probe.ok ? 204 : 503 });
+  } catch {
+    return response(null, { status: 503, headers: { "Retry-After": "5" } });
+  }
 }
 
 export default {
@@ -206,7 +217,7 @@ export default {
     if (url.origin !== CANONICAL_ORIGIN) {
       return redirect(`${CANONICAL_ORIGIN}${url.pathname}${url.search}`, 308);
     }
-    if (url.pathname === "/__poppy/assets-ready") return assetHealth(env);
+    if (url.pathname === "/__poppy/assets-ready") return assetHealth(request, env);
     if (url.pathname === "/__poppy/session") return exchangeTicket(request, env);
     return serveAuthorized(request, env);
   },
