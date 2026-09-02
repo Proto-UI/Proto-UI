@@ -116,6 +116,20 @@ describe('version release entities', () => {
     expect(isSpecEntityActiveAt(entity, '0.4.0')).toBe(false);
   });
 
+  it('rejects activation after a terminal lifecycle boundary', () => {
+    expect(() =>
+      validateSpecEntity({
+        id: 'D-LIFECYCLE-0005',
+        type: 'decision',
+        title: 'Invalid lifecycle fixture',
+        status: 'deprecated',
+        since: '0.2.0',
+        activeSince: '0.4.0',
+        deprecatedSince: '0.3.0',
+      })
+    ).toThrow(/activeSince must precede terminal lifecycle boundaries/);
+  });
+
   it('uses release publication evidence for Version active-at queries', () => {
     const entity = validateSpecEntity({
       ...draftRelease,

@@ -360,20 +360,24 @@ function renderGroupedEntities(entities, context, renderTable) {
     ]);
 }
 
+function lifecycleStatus(entity) {
+  return `\`${entity.status}\` / \`${entity.activeSince ?? '未记录'}\``;
+}
+
 function renderContractTable(entities, context) {
   return [
-    '| Entity | 状态 | 标题 | Criteria | 被 T 验证 | 摘要 |',
+    '| Entity | 状态 / activeSince | 标题 | Criteria | 被 T 验证 | 摘要 |',
     '| --- | --- | --- | ---: | ---: | --- |',
     ...entities.map((entity) => {
       const verifiedBy = incomingOfType(entity.id, 'test', 'verifies', context).length;
-      return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | ${escapeTable(entity.title)} | ${entity.criteria.length} | ${verifiedBy} | ${escapeTable(entity.summary ?? '')} |`;
+      return `| ${entityLink(entity.id, context)} | ${lifecycleStatus(entity)} | ${escapeTable(entity.title)} | ${entity.criteria.length} | ${verifiedBy} | ${escapeTable(entity.summary ?? '')} |`;
     }),
   ];
 }
 
 function renderPrototypeTable(entities, context) {
   return [
-    '| Entity | 状态 | 标题 | 继承 | Anatomy | Criteria | 关联 T |',
+    '| Entity | 状态 / activeSince | 标题 | 继承 | Anatomy | Criteria | 关联 T |',
     '| --- | --- | --- | --- | --- | ---: | ---: |',
     ...entities.map((entity) => {
       const inherits = relationIds(entity.inherits).map(code).join('<br>') || '—';
@@ -381,37 +385,37 @@ function renderPrototypeTable(entities, context) {
       const anatomy = entity.anatomy
         ? `${Object.keys(entity.anatomy.roles).length} roles / ${Object.keys(entity.anatomy.profiles).length} profiles`
         : '—';
-      return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | ${escapeTable(entity.title)} | ${inherits} | ${anatomy} | ${entity.criteria.length} | ${relatedTests} |`;
+      return `| ${entityLink(entity.id, context)} | ${lifecycleStatus(entity)} | ${escapeTable(entity.title)} | ${inherits} | ${anatomy} | ${entity.criteria.length} | ${relatedTests} |`;
     }),
   ];
 }
 
 function renderModuleTable(entities, context) {
   return [
-    '| Entity | 状态 | 标题 | Satisfies contracts | Criteria | 摘要 |',
+    '| Entity | 状态 / activeSince | 标题 | Satisfies contracts | Criteria | 摘要 |',
     '| --- | --- | --- | --- | ---: | --- |',
     ...entities.map((entity) => {
       const contracts = relationIds(entity.satisfies, 'contracts').map(code).join('<br>') || '—';
-      return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | ${escapeTable(entity.title)} | ${contracts} | ${entity.criteria.length} | ${escapeTable(entity.summary ?? '')} |`;
+      return `| ${entityLink(entity.id, context)} | ${lifecycleStatus(entity)} | ${escapeTable(entity.title)} | ${contracts} | ${entity.criteria.length} | ${escapeTable(entity.summary ?? '')} |`;
     }),
   ];
 }
 
 function renderHostCapTable(entities, context) {
   return [
-    '| Entity | 状态 | 标题 | Related contracts | Criteria | 摘要 |',
+    '| Entity | 状态 / activeSince | 标题 | Related contracts | Criteria | 摘要 |',
     '| --- | --- | --- | --- | ---: | --- |',
     ...entities.map((entity) => {
       const contracts =
         allRelationIdsByTargetType(entity, 'contracts').map(code).join('<br>') || '—';
-      return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | ${escapeTable(entity.title)} | ${contracts} | ${entity.criteria.length} | ${escapeTable(entity.summary ?? '')} |`;
+      return `| ${entityLink(entity.id, context)} | ${lifecycleStatus(entity)} | ${escapeTable(entity.title)} | ${contracts} | ${entity.criteria.length} | ${escapeTable(entity.summary ?? '')} |`;
     }),
   ];
 }
 
 function renderAdapterTable(entities, context) {
   return [
-    '| Entity | 状态 | Package | Target | Supports Modules | Omits Modules | Provides Host Caps |',
+    '| Entity | 状态 / activeSince | Package | Target | Supports Modules | Omits Modules | Provides Host Caps |',
     '| --- | --- | --- | --- | --- | --- | --- |',
     ...entities.map((entity) => {
       const profile = entity.adapterProfile;
@@ -422,31 +426,31 @@ function renderAdapterTable(entities, context) {
       const supports = relationIds(entity.supports, 'modules').map(code).join('<br>') || '—';
       const omits = relationIds(entity.omits, 'modules').map(code).join('<br>') || '—';
       const provides = relationIds(entity.provides, 'hostCaps').map(code).join('<br>') || '—';
-      return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | \`${escapeTable(profile?.package ?? '—')}\` | ${escapeTable(target || '—')} | ${supports} | ${omits} | ${provides} |`;
+      return `| ${entityLink(entity.id, context)} | ${lifecycleStatus(entity)} | \`${escapeTable(profile?.package ?? '—')}\` | ${escapeTable(target || '—')} | ${supports} | ${omits} | ${provides} |`;
     }),
   ];
 }
 
 function renderDecisionTable(entities, context) {
   return [
-    '| Entity | 状态 | 标题 | Criteria | 摘要 |',
+    '| Entity | 状态 / activeSince | 标题 | Criteria | 摘要 |',
     '| --- | --- | --- | ---: | --- |',
     ...entities.map(
       (entity) =>
-        `| ${entityLink(entity.id, context)} | \`${entity.status}\` | ${escapeTable(entity.title)} | ${entity.criteria.length} | ${escapeTable(entity.summary ?? '')} |`
+        `| ${entityLink(entity.id, context)} | ${lifecycleStatus(entity)} | ${escapeTable(entity.title)} | ${entity.criteria.length} | ${escapeTable(entity.summary ?? '')} |`
     ),
   ];
 }
 
 function renderTestTable(entities, context) {
   return [
-    '| Entity | 状态 | 标题 | Cases | Implementations | Verifies | Exercises |',
+    '| Entity | 状态 / activeSince | 标题 | Cases | Implementations | Verifies | Exercises |',
     '| --- | --- | --- | ---: | --- | --- | --- |',
     ...entities.map((entity) => {
       const implementations = summarizeImplementations(entity.implementations);
       const verifies = relationIds(entity.verifies).map(code).join('<br>') || '—';
       const exercises = relationIds(entity.exercises).map(code).join('<br>') || '—';
-      return `| ${entityLink(entity.id, context)} | \`${entity.status}\` | ${escapeTable(entity.title)} | ${entity.cases.length} | ${implementations} | ${verifies} | ${exercises} |`;
+      return `| ${entityLink(entity.id, context)} | ${lifecycleStatus(entity)} | ${escapeTable(entity.title)} | ${entity.cases.length} | ${implementations} | ${verifies} | ${exercises} |`;
     }),
   ];
 }
