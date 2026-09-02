@@ -63,6 +63,7 @@ type SurfaceFacts = {
   transitionProperty: string;
   transitionDuration: string;
   animationDuration: string;
+  boxShadow: string;
   display: string;
   flexDirection: string;
   fontFamily: string;
@@ -233,7 +234,11 @@ async function selectRuntimeWithDiagnostics(
 function expectHardFrame(surface: SurfaceFacts, shadowOffset: string, label: string): void {
   expect(surface.borderWidth, `${label}/border`).toBe('2px');
   expect(surface.borderRadius, `${label}/radius`).toBe('0px');
-  expect(surface.boxShadow, `${label}/shadow`).toContain(`${shadowOffset} ${shadowOffset} 0px 0px`);
+  const shadowLayers = surface.boxShadow
+    .split(/,\s*(?=(?:rgba?|oklab|rgb)\()/u)
+    .filter((layer) => !layer.includes('rgba(0, 0, 0, 0)'));
+  expect(shadowLayers, `${label}/shadow-layers`).toHaveLength(1);
+  expect(shadowLayers[0], `${label}/shadow`).toContain(`${shadowOffset} ${shadowOffset} 0px 0px`);
 }
 
 let browser: Browser;
