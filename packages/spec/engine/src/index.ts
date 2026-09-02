@@ -114,11 +114,12 @@ export function diffSpecSnapshots(from: SpecSnapshot, to: SpecSnapshot): SpecSna
         compareSpecVersions(revision.version, to.version) <= 0
     );
 
-    if (
-      revisions.length > 0 ||
-      previous.status !== entity.status ||
-      previous.activeSince !== entity.activeSince
-    ) {
+    const activationCrossed =
+      entity.activeSince !== undefined &&
+      compareSpecVersions(from.version, entity.activeSince) < 0 &&
+      compareSpecVersions(to.version, entity.activeSince) >= 0;
+
+    if (revisions.length > 0 || previous.status !== entity.status || activationCrossed) {
       revised.push({ before: previous, after: entity, revisions });
     }
   }

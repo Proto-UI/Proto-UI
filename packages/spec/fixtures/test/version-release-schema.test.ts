@@ -116,7 +116,22 @@ describe('version release entities', () => {
     expect(isSpecEntityActiveAt(entity, '0.4.0')).toBe(false);
   });
 
-  it('keeps Version lifecycle history on the release evidence path', () => {
+  it('uses release publication evidence for Version active-at queries', () => {
+    const entity = validateSpecEntity({
+      ...draftRelease,
+      status: 'active',
+      release: {
+        ...draftRelease.release,
+        publishedAt: '2026-09-02T00:00:00Z',
+        commit: 'a'.repeat(40),
+        specSnapshotDigest: `sha256:${'a'.repeat(64)}`,
+      },
+    });
+
+    expect(isSpecEntityActiveAt(entity, '0.2.0-rc.0')).toBe(true);
+  });
+
+  it('rejects activation history on Version entities', () => {
     expect(() =>
       validateSpecEntity({
         ...draftRelease,
@@ -132,7 +147,7 @@ describe('version release entities', () => {
     ).toThrow(/Version entities use release publication evidence/);
   });
 
-  it('rejects activation history on a draft entity', () =>
+  it('rejects activation history on a draft entity', () => {
     expect(() =>
       validateSpecEntity({
         ...draftRelease,
@@ -140,22 +155,19 @@ describe('version release entities', () => {
         type: 'decision',
         activeSince: '0.3.0',
       })
-    ).toThrow(/Only lifecycle-complete entities may declare activeSince/));
+    ).toThrow(/Only lifecycle-complete entities may declare activeSince/);
+  });
 
-  it('reports activation-boundary changes in snapshot diffs', () => {
-    const draft = validateSpecEntity({
+  it('reports activation-boundary crossings in snapshot diffs', () => {
+    const active = validateSpecEntity({
       id: 'P-LIFECYCLE-0004',
       type: 'prototype',
       title: 'Diff lifecycle fixture',
-      status: 'draft',
-      since: '0.2.0',
-    });
-    const active = validateSpecEntity({
-      ...draft,
       status: 'active',
+      since: '0.2.0',
       activeSince: '0.3.0',
     });
-    const before = getSpecSnapshot(createSpecWorkspace([draft]), '0.2.0');
+    const before = getSpecSnapshot(createSpecWorkspace([active]), '0.2.0');
     const after = getSpecSnapshot(createSpecWorkspace([active]), '0.3.0');
 
     expect(diffSpecSnapshots(before, after).revised).toHaveLength(1);

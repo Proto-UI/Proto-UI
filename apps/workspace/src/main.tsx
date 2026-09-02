@@ -40,6 +40,7 @@ const UI_TEXT = {
     id: 'ID',
     status: 'Status',
     since: 'Since',
+    activeSince: 'Active since',
     noEntity: 'No entity selected.',
     statement: 'Statement',
     adapterProfile: 'Adapter Profile',
@@ -156,6 +157,7 @@ const UI_TEXT = {
     id: 'ID',
     status: '状态',
     since: '引入版本',
+    activeSince: '稳定生效版本',
     noEntity: '未选择实体。',
     statement: '契约陈述',
     adapterProfile: 'Adapter Profile',
@@ -647,6 +649,12 @@ function EntityInspector(props: {
           <dt>{props.t.since}</dt>
           <dd>{entity.since}</dd>
         </div>
+        {entity.activeSince ? (
+          <div>
+            <dt>{props.t.activeSince}</dt>
+            <dd>{entity.activeSince}</dd>
+          </div>
+        ) : null}
       </dl>
       {entity.summary ? <p className="summary">{renderInlineText(entity.summary)}</p> : null}
       {entity.statement ? (

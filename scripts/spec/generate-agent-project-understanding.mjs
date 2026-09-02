@@ -329,7 +329,7 @@ function renderKnowledge(entities, context) {
     const lines = [
       `### ${entityLink(entity.id, context)} ${escapeText(entity.title)}`,
       '',
-      `- 状态：\`${entity.status}\`；since：\`${entity.since}\`；criteria：${entity.criteria.length}`,
+      `- 状态：\`${entity.status}\`；since：\`${entity.since}\`；activeSince：\`${entity.activeSince ?? '未记录'}\`；criteria：${entity.criteria.length}`,
     ];
 
     if (entity.summary) lines.push(`- 摘要：${escapeText(entity.summary)}`);

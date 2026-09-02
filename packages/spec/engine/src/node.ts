@@ -121,6 +121,28 @@ function validateEntityTimelines(loaded: LoadedSpecEntity[], issues: SpecValidat
     }
 
     if (
+      entity.activeSince &&
+      entity.deprecatedSince &&
+      compareSpecVersions(entity.activeSince, entity.deprecatedSince) >= 0
+    ) {
+      issues.push({
+        filePath: entry.filePath,
+        message: `${entity.id} activeSince must precede deprecatedSince.`,
+      });
+    }
+
+    if (
+      entity.activeSince &&
+      entity.removedSince &&
+      compareSpecVersions(entity.activeSince, entity.removedSince) >= 0
+    ) {
+      issues.push({
+        filePath: entry.filePath,
+        message: `${entity.id} activeSince must precede removedSince.`,
+      });
+    }
+
+    if (
       entity.deprecatedSince &&
       entity.removedSince &&
       compareSpecVersions(entity.removedSince, entity.deprecatedSince) < 0
