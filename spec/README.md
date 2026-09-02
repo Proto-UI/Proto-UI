@@ -27,17 +27,13 @@ Compiler is not a schema entity type at present. Adapter is now a first-class id
 Every entity declares `since` and one of these statuses:
 
 - `draft`: cataloged work in progress. It is the current formal direction, not a stable public guarantee.
-- `active`: an applicable current guarantee.
+- `active`: an applicable current guarantee. Ordinary entities record the version at which that guarantee was admitted in `activeSince`; legacy active entities without activation provenance remain auditable rather than being backfilled automatically.
 - `deprecated`: retained for compatibility or migration and accompanied by `deprecatedSince`.
 - `removed`: historical after `removedSince`.
 
-`replacedBy` points to a replacement of the same entity type. `revisions` records semantic changes against project versions. Relations may also have `since` and `until` bounds.
+`since` records catalog/version-history introduction. It does not mean that a draft entity was already a stable guarantee. `activeSince` is the distinct activation boundary for ordinary active entities; it must not precede `since`. A snapshot query for identity availability uses `since`/`removedSince`, while a query for stable applicability additionally requires `status: active` and a reached `activeSince`. `replacedBy` points to a replacement of the same entity type. `revisions` records semantic changes against project versions. Relations may also have `since` and `until` bounds.
 
-A version snapshot includes entities and relations available at that version. The current working catalog can contain draft work beyond the immutable snapshot published for a release, so distinguish these identities:
-
-- release evidence recorded by a `V-*` entity;
-- the current workspace snapshot calculated from the checked-out `spec/**` files;
-- generated views such as the workspace dataset and Agent project understanding.
+A package publication or dependency edge is evidence for lifecycle review, not automatic activation. Promotion remains an explicit semantic admission with applicable criteria, relations, and executable evidence.
 
 ## Core fields
 

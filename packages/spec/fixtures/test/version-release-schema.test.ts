@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { createSpecWorkspace, getSpecReleases } from '@proto.ui/spec-engine';
-import { compareSpecVersions, validateSpecEntity } from '@proto.ui/spec-schema';
+import { createSpecWorkspace, getSpecReleases, getSpecSnapshot } from '@proto.ui/spec-engine';
+import {
+  compareSpecVersions,
+  isSpecEntityActiveAt,
+  validateSpecEntity,
+} from '@proto.ui/spec-schema';
 
 const draftRelease = {
   id: 'V-PROTO-UI-0001',
@@ -64,6 +68,43 @@ describe('version release entities', () => {
         release: { ...draftRelease.release, npmDistTag: 'latest' },
       })
     ).toThrow(/npmDistTag must be next/);
+  });
+
+  it('keeps activation history separate from catalog introduction', () => {
+    const entity = validateSpecEntity({
+      id: 'P-LIFECYCLE-0001',
+      type: 'prototype',
+      title: 'Lifecycle fixture',
+      status: 'active',
+      since: '0.2.0',
+      activeSince: '0.3.0',
+    });
+
+    expect(isSpecEntityActiveAt(entity, '0.2.0')).toBe(false);
+    expect(isSpecEntityActiveAt(entity, '0.3.0')).toBe(true);
+    expect(getSpecSnapshot(createSpecWorkspace([entity]), '0.2.0').entities).toHaveLength(1);
+  });
+
+  it('rejects activation history before catalog introduction', () => {
+    expect(() =>
+      validateSpecEntity({
+        ...draftRelease,
+        id: 'D-LIFECYCLE-0001',
+        type: 'decision',
+        activeSince: '0.1.0',
+      })
+    ).toThrow(/activeSince must not be earlier than since/);
+  });
+
+  it('rejects activation history on a draft entity', () => {
+    expect(() =>
+      validateSpecEntity({
+        ...draftRelease,
+        id: 'D-LIFECYCLE-0002',
+        type: 'decision',
+        activeSince: '0.3.0',
+      })
+    ).toThrow(/Only active entities may declare activeSince/);
   });
 
   it('sorts prerelease identifiers with semver precedence', () => {
