@@ -155,6 +155,7 @@ test("authorized Astro routes fall back to their explicit directory index", asyn
   }
 });
 
+// Keep this contract explicit: Advanced Mode must probe the emitted file, not the directory root.
 test("the public readiness probe checks the emitted index without exposing it", async () => {
   const paths = [];
   const result = await worker.fetch(
