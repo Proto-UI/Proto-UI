@@ -32,8 +32,8 @@ jobs:
           persist-credentials: false
 
       - name: Delete all preview resources for the PR
+        id: cleanup
         if: vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'
-        continue-on-error: true
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
