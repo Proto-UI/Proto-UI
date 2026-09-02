@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { createSpecWorkspace, getSpecReleases, getSpecSnapshot } from '@proto.ui/spec-engine';
+import {
+  createSpecWorkspace,
+  diffSpecSnapshots,
+  getSpecReleases,
+  getSpecSnapshot,
+} from '@proto.ui/spec-engine';
 import {
   compareSpecVersions,
   isSpecEntityActiveAt,
@@ -96,7 +101,38 @@ describe('version release entities', () => {
     ).toThrow(/activeSince must not be earlier than since/);
   });
 
-  it('rejects activation history on a draft entity', () => {
+  it('preserves activation history through deprecation', () => {
+    const entity = validateSpecEntity({
+      id: 'D-LIFECYCLE-0003',
+      type: 'decision',
+      title: 'Deprecated lifecycle fixture',
+      status: 'deprecated',
+      since: '0.2.0',
+      activeSince: '0.3.0',
+      deprecatedSince: '0.4.0',
+    });
+
+    expect(isSpecEntityActiveAt(entity, '0.3.0')).toBe(true);
+    expect(isSpecEntityActiveAt(entity, '0.4.0')).toBe(false);
+  });
+
+  it('keeps Version lifecycle history on the release evidence path', () => {
+    expect(() =>
+      validateSpecEntity({
+        ...draftRelease,
+        status: 'active',
+        activeSince: '0.3.0',
+        release: {
+          ...draftRelease.release,
+          publishedAt: '2026-09-02T00:00:00Z',
+          commit: 'a'.repeat(40),
+          specSnapshotDigest: 'a'.repeat(64),
+        },
+      })
+    ).toThrow(/Version entities use release publication evidence/);
+  });
+
+  it('rejects activation history on a draft entity', () =>
     expect(() =>
       validateSpecEntity({
         ...draftRelease,
@@ -104,7 +140,25 @@ describe('version release entities', () => {
         type: 'decision',
         activeSince: '0.3.0',
       })
-    ).toThrow(/Only active entities may declare activeSince/);
+    ).toThrow(/Only lifecycle-complete entities may declare activeSince/));
+
+  it('reports activation-boundary changes in snapshot diffs', () => {
+    const draft = validateSpecEntity({
+      id: 'P-LIFECYCLE-0004',
+      type: 'prototype',
+      title: 'Diff lifecycle fixture',
+      status: 'draft',
+      since: '0.2.0',
+    });
+    const active = validateSpecEntity({
+      ...draft,
+      status: 'active',
+      activeSince: '0.3.0',
+    });
+    const before = getSpecSnapshot(createSpecWorkspace([draft]), '0.2.0');
+    const after = getSpecSnapshot(createSpecWorkspace([active]), '0.3.0');
+
+    expect(diffSpecSnapshots(before, after).revised).toHaveLength(1);
   });
 
   it('sorts prerelease identifiers with semver precedence', () => {

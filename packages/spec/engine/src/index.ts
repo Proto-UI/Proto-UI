@@ -114,7 +114,11 @@ export function diffSpecSnapshots(from: SpecSnapshot, to: SpecSnapshot): SpecSna
         compareSpecVersions(revision.version, to.version) <= 0
     );
 
-    if (revisions.length > 0 || previous.status !== entity.status) {
+    if (
+      revisions.length > 0 ||
+      previous.status !== entity.status ||
+      previous.activeSince !== entity.activeSince
+    ) {
       revised.push({ before: previous, after: entity, revisions });
     }
   }

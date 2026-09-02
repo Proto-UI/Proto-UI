@@ -446,11 +446,17 @@ export const specEntitySchema = z
     }
 
     if (entity.activeSince) {
-      if (entity.status !== 'active') {
+      if (entity.type === 'version') {
         context.addIssue({
           code: 'custom',
           path: ['activeSince'],
-          message: 'Only active entities may declare activeSince.',
+          message: 'Version entities use release publication evidence, not activeSince.',
+        });
+      } else if (entity.status === 'draft') {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'Only lifecycle-complete entities may declare activeSince.',
         });
       }
 
@@ -843,6 +849,8 @@ export function isSpecEntityAvailableAt(entity: SpecEntity, version: string): bo
 
 export function isSpecEntityActiveAt(entity: SpecEntity, version: string): boolean {
   if (!isSpecEntityAvailableAt(entity, version)) return false;
-  if (entity.status !== 'active' || !entity.activeSince) return false;
+  if (entity.status === 'draft' || !entity.activeSince) return false;
+  if (entity.deprecatedSince && compareSpecVersions(version, entity.deprecatedSince) >= 0)
+    return false;
   return compareSpecVersions(version, entity.activeSince) >= 0;
 }

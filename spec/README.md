@@ -31,15 +31,17 @@ Every entity declares `since` and one of these statuses:
 - `deprecated`: retained for compatibility or migration and accompanied by `deprecatedSince`.
 - `removed`: historical after `removedSince`.
 
-`since` records catalog/version-history introduction. It does not mean that a draft entity was already a stable guarantee. `activeSince` is the distinct activation boundary for ordinary active entities; it must not precede `since`. A snapshot query for identity availability uses `since`/`removedSince`, while a query for stable applicability additionally requires `status: active` and a reached `activeSince`. `replacedBy` points to a replacement of the same entity type. `revisions` records semantic changes against project versions. Relations may also have `since` and `until` bounds.
+`since` records catalog/version-history introduction. It does not mean that a draft entity was already a stable guarantee. `activeSince` is the distinct activation boundary for ordinary lifecycle-complete entities; it must not precede `since`. A snapshot query for identity availability uses `since`/`removedSince`, while a query for stable applicability additionally requires the activation boundary and lifecycle status. `replacedBy` points to a replacement of the same entity type. `revisions` records semantic changes against project versions. Relations may also have `since` and `until` bounds.
 
 A package publication or dependency edge is evidence for lifecycle review, not automatic activation. Promotion remains an explicit semantic admission with applicable criteria, relations, and executable evidence.
+
+Release evidence, the current workspace snapshot, and generated views are distinct artifacts. A workspace snapshot recalculated after a release can differ from the immutable snapshot digest recorded by the corresponding `V-*` entity.
 
 ## Core fields
 
 Common fields include:
 
-- `id`, `type`, `title`, `status`, and `since` for identity and lifecycle;
+- `id`, `type`, `title`, `status`, `since`, and (for ordinary lifecycle history) `activeSince` for identity and lifecycle;
 - `summary` and bilingual `statement` for the rule or model;
 - `criteria` for individually addressable acceptance points;
 - `openQuestions` for explicit unresolved gaps;
