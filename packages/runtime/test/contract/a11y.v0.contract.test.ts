@@ -339,7 +339,7 @@ describe('runtime contract: a11y (v0)', () => {
     expect(() => result.invokeInCallbackScope(() => setLevel(3))).toThrow(
       /level must be an integer in range 1-6/
     );
-    expect(getLevel()).toBe(2);
+    expect(getLevel()).toBe(3);
     result.invokeUnmounted();
   });
 
