@@ -104,6 +104,7 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
       transitionDuration: style.transitionDuration,
       animationDuration: style.animationDuration,
       boxShadow: style.boxShadow,
+      display: style.display,
       flexDirection: style.flexDirection,
       fontFamily: style.fontFamily,
       fontWeight: style.fontWeight,
@@ -270,6 +271,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 borderColor: style.borderTopColor,
                 borderRadius: style.borderTopLeftRadius,
                 backgroundColor: style.backgroundColor,
+                backgroundImage: style.backgroundImage,
                 color: style.color,
                 boxShadow: style.boxShadow,
                 fontFamily: style.fontFamily,
@@ -312,6 +314,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             expect(surface.borderWidth, `${label}/border`).toBe('2px');
             expect(surface.borderRadius, `${label}/radius`).toBe('0px');
             expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
+            expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
             expect(surface.fontFamily.toLowerCase(), `${label}/font`).toMatch(/mono|monospace/);
             expect(surface.textTransform, `${label}/case`).toBe('uppercase');
           }
@@ -463,6 +466,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 parentWidth: parentBox?.width ?? 0,
                 parentHeight: parentBox?.height ?? 0,
                 backgroundColor: style.backgroundColor,
+                backgroundImage: style.backgroundImage,
               };
             })
           );
@@ -483,6 +487,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             Math.abs(allFacts[1].height - allFacts[1].parentHeight),
             `${runtime}/${colorScheme}/vertical-length`
           ).toBeLessThanOrEqual(0.5);
+          expect(
+            allFacts.every((surface) => surface.backgroundImage === 'none'),
+            `${runtime}/${colorScheme}/flat-fill`
+          ).toBe(true);
           expect(
             allFacts.every((surface) => surface.backgroundColor === expectedInk),
             `${runtime}/${colorScheme}/ink`
@@ -517,6 +525,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 borderColor: style.borderTopColor,
                 borderRadius: style.borderTopLeftRadius,
                 backgroundColor: style.backgroundColor,
+                backgroundImage: style.backgroundImage,
                 boxShadow: style.boxShadow,
                 animationName: style.animationName,
                 animationDuration: style.animationDuration,
@@ -548,6 +557,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             expect(surface.borderColor, `${label}/border-color`).toBe(expectedBorder);
             expect(surface.borderRadius, `${label}/radius`).toBe('0px');
             expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
+            expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
             expect(surface.animationName, `${label}/animation`).toBe('none');
             expect(surface.animationDuration, `${label}/animation-duration`).toBe('0s');
             expect(surface.transitionDuration, `${label}/transition-duration`).toBe('0s');
@@ -580,6 +590,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               borderRadius: style.borderTopLeftRadius,
               boxShadow: style.boxShadow,
               backgroundColor: style.backgroundColor,
+              backgroundImage: style.backgroundImage,
               color: style.color,
             };
           })
@@ -626,6 +637,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expectedRestingForeground,
           expectedRestingForeground,
         ]);
+        expect(
+          factsBefore.every((surface) => surface.backgroundImage === 'none'),
+          `${runtime}/flat-fill`
+        ).toBe(true);
         expect(
           new Set(factsBefore.map((surface) => surface.backgroundColor)).size,
           runtime
@@ -697,7 +712,12 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const darkFacts = await toggles.evaluateAll((elements) =>
           elements.map((element) => {
             const style = getComputedStyle(element);
-            return { backgroundColor: style.backgroundColor, color: style.color };
+            return {
+              backgroundColor: style.backgroundColor,
+              backgroundImage: style.backgroundImage,
+              color: style.color,
+              borderColor: style.borderTopColor,
+            };
           })
         );
         expect(
@@ -718,6 +738,14 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkRestingForeground,
           darkRestingForeground,
         ]);
+        expect(
+          darkFacts.every((surface) => surface.backgroundImage === 'none'),
+          `${runtime}/dark/flat-fill`
+        ).toBe(true);
+        expect(
+          darkFacts.every((surface) => surface.borderColor === 'rgb(0, 0, 0)'),
+          `${runtime}/dark/border`
+        ).toBe(true);
         await applyColorScheme(opened.page, 'light');
       }
     } finally {
