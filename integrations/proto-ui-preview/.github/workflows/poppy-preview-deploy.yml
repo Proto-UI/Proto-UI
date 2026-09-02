@@ -20,12 +20,14 @@ jobs:
     if: >-
       (github.event_name == 'repository_dispatch' && github.event.client_payload.build_succeeded == true) || ((github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.event == 'workflow_dispatch') && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.repository.full_name == github.repository)
 
+
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     outputs:
       pr: ${{ steps.resolve.outputs.pr }}
-
+      head_sha: ${{ steps.resolve.outputs.head_sha }}
+      project: ${{ steps.resolve.outputs.project }}
     steps:
       # This job receives no deployment secrets. Its only purpose is to derive
       # a stable PR-number lock from GitHub API state instead of trusting the
@@ -92,11 +94,14 @@ jobs:
               }
             }
             core.setOutput("pr", String(pr.number));
+            core.setOutput("head_sha", candidate.sha);
+            core.setOutput("project", `poppy-proto-ui-pr-${candidate.pr}`);
 
   report-failed-build:
     name: Report a failed PR build
     if: >-
       (github.event_name == 'repository_dispatch' && github.event.client_payload.build_succeeded != true) || ((github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.event == 'workflow_dispatch') && github.event.workflow_run.conclusion != 'success' && github.event.workflow_run.repository.full_name == github.repository)
+
 
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -211,10 +216,36 @@ jobs:
         shell: bash
         run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
 
+  fallback-unavailable:
+    name: Report preview fallback unavailable
+    needs: resolve-deploy
+    if: needs.resolve-deploy.outputs.pr != '' && vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out trusted reporting code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Maintain the sticky fallback comment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PREVIEW_PR: ${{ needs.resolve-deploy.outputs.pr }}
+          PREVIEW_SHA: ${{ needs.resolve-deploy.outputs.head_sha }}
+          PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
+          PREVIEW_ORIGIN: ''
+          PREVIEW_STATUS: fallback-unavailable
+          PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
+
   deploy:
     name: Publish contributor-only preview
     needs: resolve-deploy
-    if: needs.resolve-deploy.outputs.pr != ''
+    if: needs.resolve-deploy.outputs.pr != '' && vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -449,6 +480,7 @@ jobs:
         if: >-
           always() && steps.publish.outputs.exit_code == '0' && steps.deployed.outcome == 'success' && steps.assets-ready.outcome == 'success'
 
+
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
           PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
@@ -466,6 +498,7 @@ jobs:
       - name: Report a failed deployment to Poppy
         if: >-
           always() && steps.resolve.outputs.pr != '' && (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' || steps.assets-ready.outcome != 'success' || steps.ready.outcome != 'success')
+
 
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
@@ -498,6 +531,7 @@ jobs:
       - name: Fail the workflow when publishing failed
         if: >-
           always() && (steps.publish.outputs.exit_code != '0' || steps.deployed.outcome != 'success' || steps.assets-ready.outcome != 'success' || steps.ready.outcome != 'success')
+
 
         shell: bash
         run: exit 1

@@ -5,6 +5,10 @@ import { appendFile } from 'node:fs/promises';
 import { boundedRetryDelay, parseRetryAfter } from './cloudflare-retry.mjs';
 
 const [command, project, expectedSHA, expectedMessage] = process.argv.slice(2);
+const mutationCommands = new Set(['ensure', 'delete']);
+if (mutationCommands.has(command) && process.env.POPPY_CLOUDFLARE_MUTATIONS_ENABLED !== 'true') {
+  throw new Error('Cloudflare mutations are disabled by POPPY_CLOUDFLARE_MUTATIONS_ENABLED');
+}
 const account = process.env.CLOUDFLARE_ACCOUNT_ID || '';
 const token = process.env.CLOUDFLARE_API_TOKEN || '';
 if (!account || !token) throw new Error('Cloudflare account ID and API token are required');

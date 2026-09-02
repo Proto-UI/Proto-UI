@@ -124,6 +124,16 @@ test('deployment and close serialize on an API-derived PR key', () => {
   assert.doesNotMatch(close, /display_title/);
 });
 
+test('Cloudflare mutation kill switch gates deployment and cleanup', () => {
+  assert.match(
+    workflow,
+    /deploy:[\s\S]*if: needs\.resolve-deploy\.outputs\.pr != '' && vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'/
+  );
+  assert.match(close, /cleanup:[\s\S]*if: vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'/);
+  assert.match(workflow, /PREVIEW_STATUS: fallback-unavailable/);
+  assert.doesNotMatch(workflow, /fallback-unavailable:[\s\S]*PREVIEW_STATUS: ready/);
+});
+
 test('installed workflows remain byte-identical to reviewed templates', async (t) => {
   const names = [
     'poppy-preview-bootstrap.yml',

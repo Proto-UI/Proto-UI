@@ -49,3 +49,10 @@ test('README keeps invite authority, deployment binding, and revocation explicit
   assert.match(readmeSource, /head SHA, run ID, run attempt, and project/);
   assert.match(readmeSource, /explicit invite revocation/);
 });
+
+test('the fallback state never claims a preview origin or ready deployment', () => {
+  assert.match(stickySource, /fallback-unavailable/);
+  assert.match(stickySource, /No preview was published/);
+  assert.match(readmeSource, /Preview unavailable/);
+  assert.match(readmeSource, /dcbot repository/);
+});

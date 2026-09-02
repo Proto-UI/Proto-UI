@@ -4,6 +4,12 @@ This integration gives every open or draft `Proto-UI/Proto-UI` pull request a Ve
 
 The preview is not public. Its trusted Pages `_worker.js` asks Poppy to authorize every asset request. GitHub OAuth grants access only to the PR author, a current requested or non-dismissed recorded reviewer, an active member of the Proto-UI organization, or a user explicitly invited through Poppy by an identity with current maintainer trust for this repository. An invite is scoped to the exact repository, PR, and current head and is valid only for the Ready deployment tuple (head SHA, run ID, run attempt, and project); a new head, Building/Failed/Closed transition, explicit invite revocation, lost maintainer trust, dismissed review, or removed membership invalidates authorization without waiting for the session cookie to expire.
 
+## Cloudflare mutation kill switch and fallback boundary
+
+Set the repository Actions variable `POPPY_CLOUDFLARE_MUTATIONS_ENABLED` to anything other than `true` while the Cloudflare account is suspended or under Terms of Service review. The deploy and cleanup jobs are then skipped before any Cloudflare credential-bearing step, and the trusted workflow updates the PR's existing sticky comment to **Preview unavailable**. Existing Pages projects are not deleted or reconciled.
+
+The intended replacement is a single stable Poppy origin serving private artifacts at `/preview/<pr>/` (or an equivalent safely mapped route). This repository does not implement or claim that fallback until the dcbot repository exposes and documents all of the following: a trusted-workflow artifact upload endpoint authenticated by `X-Poppy-Signature-256` over the raw artifact bytes plus the immutable PR/head/run tuple; private/no-store/CSP artifact GETs gated by the existing OAuth/session authorization; exact-head replacement; and close-time artifact cleanup. Until that contract exists and is independently verified, **Preview unavailable** is the only truthful fallback state.
+
 ## Data flow
 
 ```text
