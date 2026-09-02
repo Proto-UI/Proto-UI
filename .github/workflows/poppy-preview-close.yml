@@ -17,7 +17,6 @@ concurrency:
 jobs:
   cleanup:
     name: Delete the per-PR Pages project
-    if: vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -33,7 +32,7 @@ jobs:
           persist-credentials: false
 
       - name: Delete all preview resources for the PR
-        id: cleanup
+        if: vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'
         continue-on-error: true
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -69,12 +68,12 @@ jobs:
           PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
           PREVIEW_PROJECT: poppy-proto-ui-pr-${{ github.event.pull_request.number }}
           PREVIEW_ORIGIN: ''
-          PREVIEW_STATUS: ${{ steps.cleanup.outcome == 'success' && steps.revoke.outcome == 'success' && 'closed' || 'cleanup-failed' }}
+          PREVIEW_STATUS: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && steps.cleanup.outcome == 'success' && steps.revoke.outcome == 'success' && 'closed' || vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && steps.revoke.outcome == 'success' && 'fallback-closed' || 'cleanup-failed' }}
           PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
 
       - name: Fail when resource cleanup or access revocation failed
-        if: steps.cleanup.outcome != 'success' || steps.revoke.outcome != 'success'
+        if: vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && (steps.cleanup.outcome != 'success' || steps.revoke.outcome != 'success')
         shell: bash
         run: exit 1

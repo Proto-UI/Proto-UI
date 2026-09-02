@@ -17,10 +17,17 @@ const marker = `<!-- poppy-preview:${project} -->`;
 const shortSHA = (process.env.PREVIEW_SHA || '').slice(0, 12);
 const runURL = process.env.PREVIEW_RUN_URL || '';
 const origin = process.env.PREVIEW_ORIGIN || '';
+const fallbackMode = process.env.POPPY_PREVIEW_FALLBACK_MODE === 'true';
+if (fallbackMode && !/^[0-9a-f]{40}$/.test(process.env.PREVIEW_SHA || '')) {
+  throw new Error('fallback preview requires a full head SHA');
+}
+const previewURL = fallbackMode
+  ? `${origin.replace(/\/$/, '')}/admin/preview/content/${pr}/${process.env.PREVIEW_SHA}/`
+  : origin;
 const states = {
   ready: {
     heading: '✅ Preview ready',
-    detail: `[Open the contributor preview](${origin})`,
+    detail: `[Open the contributor preview](${previewURL})`,
     note: 'GitHub sign-in is required. Access is limited to the PR author, live recorded reviewers, active Proto-UI organization members, and current-head users explicitly invited by a maintainer through Poppy; mutable eligibility is rechecked while browsing.',
   },
   failed: {
@@ -43,6 +50,11 @@ const states = {
     heading: '⚠️ Preview unavailable',
     detail: 'No preview was published because the Cloudflare mutation kill switch is active.',
     note: 'The stable Poppy artifact-origin fallback is not enabled until its dcbot endpoint and authentication contract are deployed and verified.',
+  },
+  'fallback-closed': {
+    heading: '🧹 Preview removed',
+    detail: "The pull request's Poppy artifact has been closed and scheduled for deletion.",
+    note: 'Cloudflare cleanup was intentionally skipped while the mutation kill switch is active.',
   },
 };
 const selected = states[status];

@@ -29,12 +29,17 @@ const build = await readFile(
 ).catch(() =>
   readFile(new URL('../../../.github/workflows/poppy-preview-build.yml', import.meta.url), 'utf8')
 );
+const upload = await readFile(new URL('./upload-poppy-artifact.mjs', import.meta.url), 'utf8');
 
 test('Poppy revokes the previous ready state before Cloudflare publication', () => {
-  const buildingStart = workflow.indexOf('- name: Mark the current head as building in Poppy');
-  const downloadStart = workflow.indexOf('- name: Download only the verified artifact');
+  const deployStart = workflow.indexOf('  deploy:');
+  const deployWorkflow = workflow.slice(deployStart);
+  const buildingStart = deployWorkflow.indexOf(
+    '- name: Mark the current head as building in Poppy'
+  );
+  const downloadStart = deployWorkflow.indexOf('- name: Download only the verified artifact');
   assert.ok(buildingStart > 0 && downloadStart > buildingStart);
-  const buildingStep = workflow.slice(buildingStart, downloadStart);
+  const buildingStep = deployWorkflow.slice(buildingStart, downloadStart);
   assert.doesNotMatch(buildingStep, /continue-on-error:\s*true/);
   assert.match(buildingStep, /report\.mjs building/);
 });
@@ -124,14 +129,28 @@ test('deployment and close serialize on an API-derived PR key', () => {
   assert.doesNotMatch(close, /display_title/);
 });
 
-test('Cloudflare mutation kill switch gates deployment and cleanup', () => {
+test('Cloudflare mutation kill switch gates deployment and selects the dcbot fallback', () => {
   assert.match(
     workflow,
     /deploy:[\s\S]*if: needs\.resolve-deploy\.outputs\.pr != '' && vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'/
   );
   assert.match(close, /cleanup:[\s\S]*if: vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'/);
-  assert.match(workflow, /PREVIEW_STATUS: fallback-unavailable/);
-  assert.doesNotMatch(workflow, /fallback-unavailable:[\s\S]*PREVIEW_STATUS: ready/);
+  assert.match(workflow, /fallback-upload:[\s\S]*vars\.POPPY_PREVIEW_FALLBACK_ORIGIN != ''/);
+  assert.match(workflow, /fallback-unavailable:[\s\S]*vars\.POPPY_PREVIEW_FALLBACK_ORIGIN == ''/);
+  assert.match(upload, /new URL\(['"]\/api\/preview\/deployments['"]/);
+  for (const file of ['_worker.js', '_routes.json', '_headers', '_redirects', '.assetsignore']) {
+    assert.match(workflow, new RegExp(`--exclude='\\./${file.replace('.', '\\.')}'`));
+  }
+  assert.match(workflow, /PREVIEW_ORIGIN: \$\{\{ vars\.POPPY_PREVIEW_FALLBACK_ORIGIN \}\}/);
+  assert.match(workflow, /POPPY_PREVIEW_FALLBACK_MODE: 'true'/);
+  assert.match(upload, /X-Poppy-Preview-Head-SHA/);
+});
+
+test('close always reports closed to Poppy while Cloudflare deletion is gated', () => {
+  assert.match(close, /Report the closed deployment to Poppy/);
+  assert.match(close, /run: node integrations\/proto-ui-preview\/scripts\/report\.mjs closed/);
+  assert.match(close, /cleanup:[\s\S]*if: vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'/);
+  assert.match(close, /fallback-closed/);
 });
 
 test('installed workflows remain byte-identical to reviewed templates', async (t) => {

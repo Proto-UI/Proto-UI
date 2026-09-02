@@ -54,5 +54,11 @@ test('the fallback state never claims a preview origin or ready deployment', () 
   assert.match(stickySource, /fallback-unavailable/);
   assert.match(stickySource, /No preview was published/);
   assert.match(readmeSource, /Preview unavailable/);
-  assert.match(readmeSource, /dcbot repository/);
+  assert.match(readmeSource, /dcbot fallback/);
+});
+
+test('the fallback close state reports Poppy cleanup without claiming Cloudflare deletion', () => {
+  assert.match(stickySource, /fallback-closed/);
+  assert.match(stickySource, /scheduled for deletion/);
+  assert.match(stickySource, /Cloudflare cleanup was intentionally skipped/);
 });

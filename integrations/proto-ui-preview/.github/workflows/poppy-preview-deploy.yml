@@ -28,6 +28,11 @@ jobs:
       pr: ${{ steps.resolve.outputs.pr }}
       head_sha: ${{ steps.resolve.outputs.head_sha }}
       project: ${{ steps.resolve.outputs.project }}
+      artifact_id: ${{ steps.resolve.outputs.artifact_id }}
+      run_id: ${{ steps.resolve.outputs.run_id }}
+      run_attempt: ${{ steps.resolve.outputs.run_attempt }}
+      author_login: ${{ steps.resolve.outputs.author_login }}
+      author_id: ${{ steps.resolve.outputs.author_id }}
     steps:
       # This job receives no deployment secrets. Its only purpose is to derive
       # a stable PR-number lock from GitHub API state instead of trusting the
@@ -96,6 +101,11 @@ jobs:
             core.setOutput("pr", String(pr.number));
             core.setOutput("head_sha", candidate.sha);
             core.setOutput("project", `poppy-proto-ui-pr-${candidate.pr}`);
+            core.setOutput("artifact_id", String(candidate.artifact.id));
+            core.setOutput("run_id", String(run.id));
+            core.setOutput("run_attempt", String(run.run_attempt));
+            core.setOutput("author_login", pr.user.login);
+            core.setOutput("author_id", String(pr.user.id));
 
   report-failed-build:
     name: Report a failed PR build
@@ -216,10 +226,95 @@ jobs:
         shell: bash
         run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
 
+  fallback-upload:
+    name: Publish Poppy artifact fallback
+    needs: resolve-deploy
+    if: needs.resolve-deploy.outputs.pr != '' && vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted fallback tooling
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Report fallback build to Poppy
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
+          POPPY_PREVIEW_FALLBACK_MODE: 'true'
+          PREVIEW_PR: ${{ needs.resolve-deploy.outputs.pr }}
+          PREVIEW_SHA: ${{ needs.resolve-deploy.outputs.head_sha }}
+          PREVIEW_AUTHOR: ${{ needs.resolve-deploy.outputs.author_login }}
+          PREVIEW_AUTHOR_ID: ${{ needs.resolve-deploy.outputs.author_id }}
+          PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
+          PREVIEW_ORIGIN: ''
+          PREVIEW_DEPLOYMENT_ID: ''
+          PREVIEW_RUN_ID: ${{ needs.resolve-deploy.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ needs.resolve-deploy.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs building
+
+      - name: Download only the verified artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          artifact-ids: ${{ needs.resolve-deploy.outputs.artifact_id }}
+          path: .poppy/artifact
+          github-token: ${{ github.token }}
+          run-id: ${{ needs.resolve-deploy.outputs.run_id }}
+      - name: Build sanitized fallback archive
+        shell: bash
+        run: >-
+          tar --exclude='./_worker.js' --exclude='./_routes.json' --exclude='./_headers' --exclude='./_redirects' --exclude='./.assetsignore' -czf .poppy/preview.tar.gz -C .poppy/artifact .
+
+
+      - name: Upload signed artifact to Poppy
+        env:
+          POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
+          POPPY_PREVIEW_ARTIFACT: .poppy/preview.tar.gz
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          PREVIEW_PR: ${{ needs.resolve-deploy.outputs.pr }}
+          PREVIEW_SHA: ${{ needs.resolve-deploy.outputs.head_sha }}
+          PREVIEW_RUN_ID: ${{ needs.resolve-deploy.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ needs.resolve-deploy.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/upload-poppy-artifact.mjs
+      - name: Report fallback ready to Poppy
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
+          POPPY_PREVIEW_FALLBACK_MODE: 'true'
+          PREVIEW_PR: ${{ needs.resolve-deploy.outputs.pr }}
+          PREVIEW_SHA: ${{ needs.resolve-deploy.outputs.head_sha }}
+          PREVIEW_AUTHOR: ${{ needs.resolve-deploy.outputs.author_login }}
+          PREVIEW_AUTHOR_ID: ${{ needs.resolve-deploy.outputs.author_id }}
+          PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
+          PREVIEW_ORIGIN: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
+          PREVIEW_DEPLOYMENT_ID: ''
+          PREVIEW_RUN_ID: ${{ needs.resolve-deploy.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ needs.resolve-deploy.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs ready
+
+      - name: Maintain the sticky fallback comment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PREVIEW_PR: ${{ needs.resolve-deploy.outputs.pr }}
+          PREVIEW_SHA: ${{ needs.resolve-deploy.outputs.head_sha }}
+          PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
+          PREVIEW_ORIGIN: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
+          POPPY_PREVIEW_FALLBACK_MODE: 'true'
+          PREVIEW_STATUS: ready
+          PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ needs.resolve-deploy.outputs.run_id }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
+
   fallback-unavailable:
     name: Report preview fallback unavailable
     needs: resolve-deploy
-    if: needs.resolve-deploy.outputs.pr != '' && vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true'
+    if: needs.resolve-deploy.outputs.pr != '' && vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN == ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -238,7 +333,7 @@ jobs:
           PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
           PREVIEW_ORIGIN: ''
           PREVIEW_STATUS: fallback-unavailable
-          PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ needs.resolve-deploy.outputs.run_id }}
         shell: bash
         run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
 
