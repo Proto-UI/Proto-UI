@@ -98,7 +98,7 @@ describe('runtime contract: a11y (v0)', () => {
   );
 
   it.each([0, -1, 1.5, 7, Number.NaN, Number.POSITIVE_INFINITY])(
-    'A11Y-0063: rejects invalid state-backed heading level update %s before projection',
+    'A11Y-0063: omits invalid state-backed heading level from projection %s',
     (invalidLevel) => {
       // T-A11Y-0001-CASE-HEADING-LEVEL
       let level!: OwnedStateHandle<number>;
@@ -115,10 +115,8 @@ describe('runtime contract: a11y (v0)', () => {
       const result = executeWithHost(P as any, ctx.host as any);
       expect(ctx.snapshots.at(-1)?.level).toBe(2);
 
-      expect(() =>
-        result.invokeInCallbackScope(() => level.set(invalidLevel, 'reason: invalid heading level'))
-      ).toThrow(/level must be an integer in range 1-6/);
-      expect(ctx.snapshots.at(-1)?.level).toBe(2);
+      result.invokeInCallbackScope(() => level.set(invalidLevel, 'reason: invalid heading level'));
+      expect(ctx.snapshots.at(-1)?.level).toBeUndefined();
 
       result.invokeInCallbackScope(() => level.set(3, 'reason: valid heading level'));
       expect(ctx.snapshots.at(-1)?.level).toBe(3);
@@ -222,32 +220,31 @@ describe('runtime contract: a11y (v0)', () => {
     const result = executeWithHost(P as any, ctx.host as any);
     if (!emitFacts || !getVisibleRatio) throw new Error('scroll test host did not attach');
 
-    expect(() =>
-      result.invokeInCallbackScope(() =>
-        emitFacts!({
-          axes: 'both',
-          horizontal: {
-            position: 0,
-            visibleRatio: 0.5,
-            canScrollBefore: false,
-            canScrollAfter: true,
-          },
-          vertical: {
-            position: 0,
-            visibleRatio: 1,
-            canScrollBefore: false,
-            canScrollAfter: false,
-          },
-          scrolling: false,
-          projection: 'system',
-        })
-      )
-    ).toThrow(/level must be an integer in range 1-6/);
+    result.invokeInCallbackScope(() =>
+      emitFacts!({
+        axes: 'both',
+        horizontal: {
+          position: 0,
+          visibleRatio: 0.5,
+          canScrollBefore: false,
+          canScrollAfter: true,
+        },
+        vertical: {
+          position: 0,
+          visibleRatio: 1,
+          canScrollBefore: false,
+          canScrollAfter: false,
+        },
+        scrolling: false,
+        projection: 'system',
+      })
+    );
+    expect(ctx.snapshots.at(-1)?.level).toBeUndefined();
     expect(getVisibleRatio()).toBe(0.5);
     result.invokeUnmounted();
   });
 
-  it('validates state-backed heading levels before mount and across repeatable detach', async () => {
+  it('keeps invalid state-backed heading levels out of A11y projection before and across repeatable detach', async () => {
     let level!: OwnedStateHandle<number>;
     const P = definePrototype({
       name: 'x-a11y-detached-heading-level',
@@ -260,18 +257,13 @@ describe('runtime contract: a11y (v0)', () => {
 
     const ctx = createHost();
     const session = createRuntimeSession(P as any, ctx.host as any);
-    expect(() =>
-      session.invokeInCallbackScope(() => level.set(0, 'reason: pre-mount invalid heading level'))
-    ).toThrow(/level must be an integer in range 1-6/);
-    expect(level.get()).toBe(2);
-
     await session.mount();
+    session.invokeInCallbackScope(() => level.set(0, 'reason: mounted invalid heading level'));
+    expect(level.get()).toBe(0);
     await session.unmount();
     expect(session.mountPhase).toBe('detached');
-    expect(() =>
-      session.invokeInCallbackScope(() => level.set(0, 'reason: detached invalid heading level'))
-    ).toThrow(/level must be an integer in range 1-6/);
-    expect(level.get()).toBe(2);
+    session.invokeInCallbackScope(() => level.set(0, 'reason: detached invalid heading level'));
+    expect(level.get()).toBe(0);
     await session.dispose();
   });
 
@@ -293,10 +285,8 @@ describe('runtime contract: a11y (v0)', () => {
     const result = executeWithHost(P as any, ctx.host as any);
     expect(ctx.snapshots.at(-1)?.level).toBe(2);
 
-    expect(() =>
-      result.invokeInCallbackScope(() => second.set(0, 'reason: invalid replacement level'))
-    ).toThrow(/level must be an integer in range 1-6/);
-    expect(second.get()).toBe(2);
+    result.invokeInCallbackScope(() => second.set(0, 'reason: invalid replacement level'));
+    expect(second.get()).toBe(0);
 
     result.invokeInCallbackScope(() => second.set(4, 'reason: replacement level'));
     expect(ctx.snapshots.at(-1)?.level).toBe(4);
@@ -336,10 +326,8 @@ describe('runtime contract: a11y (v0)', () => {
     const ctx = createHost();
     const result = executeWithHost(P as any, ctx.host as any);
     expect(ctx.snapshots.at(-1)?.level).toBe(2);
-    expect(() => result.invokeInCallbackScope(() => setLevel(3))).toThrow(
-      /level must be an integer in range 1-6/
-    );
-    expect(getLevel()).toBe(2);
+    expect(() => result.invokeInCallbackScope(() => setLevel(3))).not.toThrow();
+    expect(getLevel()).toBe(0);
     result.invokeUnmounted();
   });
 
@@ -389,11 +377,9 @@ describe('runtime contract: a11y (v0)', () => {
     });
 
     const result = executeWithHost(P as any, createHost().host as any);
-    expect(() => result.invokeInCallbackScope(() => setLevel(0))).toThrow(
-      /level must be an integer in range 1-6/
-    );
-    expect(getLevel()).toBe(2);
-    expect(seen).toEqual([]);
+    result.invokeInCallbackScope(() => setLevel(0));
+    expect(getLevel()).toBe(0);
+    expect(seen).toEqual([0]);
     result.invokeUnmounted();
   });
 
@@ -412,9 +398,8 @@ describe('runtime contract: a11y (v0)', () => {
     delete (ctx.host as Partial<RuntimeHost<any>>).onRuntimeReady;
     const result = executeWithHost(P as any, ctx.host as any);
 
-    expect(() =>
-      result.invokeInCallbackScope(() => level.set(0, 'reason: invalid heading level'))
-    ).toThrow(/level must be an integer in range 1-6/);
+    result.invokeInCallbackScope(() => level.set(0, 'reason: invalid heading level'));
+    expect(ctx.host).toBeDefined();
   });
 
   it('A11Y-0067: rejects a non-emitting invalid level before installing a cap-less watch', () => {

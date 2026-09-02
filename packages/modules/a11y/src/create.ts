@@ -223,13 +223,6 @@ class A11yModuleImpl extends ModuleBase {
     this.stateWatchesInstalled = true;
   }
 
-  /**
-   * Instance-scoped pre-commit level validation. When the state module
-   * exposes before-set validation, an invalid replacement rejects before
-   * the value is committed or any watcher is notified. Internal host-fact
-   * writes that bypass handle guards keep a post-commit rollback so the
-   * source is restored at the originating mutation.
-   */
   private installLevelWatch(): void {
     const nextHandle = isState(this.ir.level) ? (this.ir.level as State<number>) : null;
     if (this.levelWatchInstalled && this.levelWatchHandle === nextHandle) return;
@@ -240,31 +233,9 @@ class A11yModuleImpl extends ModuleBase {
     this.levelWatchInstalled = true;
     if (!nextHandle) return;
 
-    const levelHandle = nextHandle as OwnedStateHandle<number>;
-    const writable = typeof levelHandle.setDefault === 'function';
-
-    if (writable && this.statePort.beforeSet) {
-      // Owned/borrowed heading-level source: reject invalid values before the
-      // state commits or any watcher (including earlier-authored ones) runs.
-      const offValidator = this.statePort.beforeSet(levelHandle, (_prev, next) => {
-        resolveA11yLevel(next);
-      });
-      const offWatch = this.statePort.watch(levelHandle, (_ctx, event) => {
-        if (event.type === 'disconnect') return;
-        this.applyProjection();
-      });
-      this.levelWatchOff = () => {
-        offValidator();
-        offWatch();
-      };
-      return;
-    }
-
-    // Observed (foreign-owned) source: the owning module keeps its own facts,
-    // so validate after the commit without vetoing or rolling the value back.
-    this.levelWatchOff = this.statePort.watch(levelHandle, (_ctx, event) => {
-      if (event.type === 'disconnect') return;
-      resolveA11yLevel(nextHandle.get());
+    // Runtime State retains its existing mutation semantics. A11y omits an
+    // invalid level from its snapshot and therefore removes aria-level.
+    this.levelWatchOff = this.statePort.watch(nextHandle as OwnedStateHandle<number>, () => {
       this.applyProjection();
     });
   }
@@ -299,7 +270,7 @@ class A11yModuleImpl extends ModuleBase {
     const role = isState(this.ir.role) ? (this.ir.role.get() as A11yRole) : this.ir.role;
     const level =
       role === 'heading' && typeof this.ir.level !== 'undefined'
-        ? resolveA11yLevel(this.ir.level)
+        ? tryResolveA11yLevel(this.ir.level)
         : undefined;
 
     return {
@@ -344,6 +315,14 @@ function resolveA11yLevel(value: number | State<number>): number {
   return level;
 }
 
+function tryResolveA11yLevel(value: number | State<number>): number | undefined {
+  try {
+    return resolveA11yLevel(value);
+  } catch {
+    return undefined;
+  }
+}
+
 function cloneTextAlternative(
   value: A11yTextAlternative | undefined
 ): A11yTextAlternative | undefined {
@@ -371,6 +350,7 @@ export function createA11yModule(ctx: ModuleFactoryArgs): A11yModule {
     name: 'a11y',
     scope: 'instance',
     init,
+
     caps,
     deps,
     build: ({ caps, deps }) => {

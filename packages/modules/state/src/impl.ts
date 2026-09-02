@@ -211,12 +211,6 @@ export class StateModuleImpl {
       return this.addWatcher(handle, cb);
     },
 
-    beforeSet: (handle, validator) => {
-      this.ensureAlive(`state.port.beforeSet`);
-      this.sys.ensureSetup(`state.port.beforeSet`);
-      return this.kernel.beforeSet(handle, validator);
-    },
-
     disconnect: (handle) => {
       this.ensureAlive(`state.port.disconnect`);
       this.emitDisconnect(handle);
