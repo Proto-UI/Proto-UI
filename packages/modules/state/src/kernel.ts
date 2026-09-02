@@ -17,6 +17,10 @@ type StateRecord<V> = {
   beforeSet: Set<(prev: V, next: V) => void>;
 };
 
+class StateValidationFailure {
+  constructor(readonly error: unknown) {}
+}
+
 export class StateKernel {
   private nextId: StateId = 1;
   private records = new Map<StateId, StateRecord<any>>();
@@ -24,6 +28,8 @@ export class StateKernel {
   // event queue to make re-entrant set deterministic
   private emitting = false;
   private pending: Array<() => void> = [];
+
+  private transactionSnapshot: Map<StateId, unknown> | null = null;
 
   /** Define a state and return an owned handle. */
   define<V>(name: string, spec: StateSpec, defaultValue: V): OwnedStateHandle<V> {
@@ -121,6 +127,8 @@ export class StateKernel {
     const prev = rec.value;
     if (Object.is(prev, next)) return;
 
+    const isTransactionRoot = !this.emitting && !this.transactionSnapshot;
+
     try {
       for (const validator of rec.beforeSet) validator(prev, next);
     } catch (error) {
@@ -132,6 +140,8 @@ export class StateKernel {
       }
       throw error;
     }
+
+    if (isTransactionRoot) this.transactionSnapshot = this.snapshotValues();
 
     rec.value = next;
 
@@ -147,24 +157,52 @@ export class StateKernel {
     }
 
     this.emitting = true;
-    let failure: unknown = null;
-    try {
+    let failure: { error: unknown; validation: boolean } | null = null;
+
+    const invoke = (task: () => void): { error: unknown; validation: boolean } | null => {
       try {
-        emit();
+        task();
+        return null;
       } catch (error) {
-        failure = error;
+        return {
+          error: error instanceof StateValidationFailure ? error.error : error,
+          validation: error instanceof StateValidationFailure,
+        };
       }
-      while (this.pending.length) {
-        const task = this.pending.shift()!;
-        try {
-          task();
-        } catch (error) {
-          if (failure === null) failure = error;
-        }
+    };
+
+    try {
+      const first = invoke(emit);
+      if (first) failure = first;
+      // Drain re-entrant events even when a subscriber throws, so recorded
+      // transitions are not lost; stop only on a validation failure, which
+      // must roll the whole transaction back.
+      while (this.pending.length && !failure?.validation) {
+        const result = invoke(this.pending.shift()!);
+        if (result && !failure) failure = result;
+        else if (result?.validation && failure && !failure.validation) failure = result;
       }
-      if (failure !== null) throw failure;
+      if (failure?.validation) {
+        this.restoreTransaction();
+        this.pending.length = 0;
+      }
+      if (failure) throw failure.error;
     } finally {
       this.emitting = false;
+      this.transactionSnapshot = null;
+    }
+  }
+  private snapshotValues(): Map<StateId, unknown> {
+    return new Map(
+      Array.from(this.records.entries(), ([id, record]) => [id, record.value] as const)
+    );
+  }
+
+  private restoreTransaction(): void {
+    if (!this.transactionSnapshot) return;
+    for (const [id, value] of this.transactionSnapshot) {
+      const record = this.records.get(id);
+      if (record) record.value = value;
     }
   }
   private getIdFromHandle(handle: OwnedStateHandle<any>): StateId {
