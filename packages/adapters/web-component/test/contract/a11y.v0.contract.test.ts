@@ -99,7 +99,7 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
     expect(el.getAttribute('aria-orientation')).toBe('horizontal');
   });
 
-  it('A11Y-WC-0150: projects valid heading levels, rolls back invalid updates, and clears stale levels', () => {
+  it('A11Y-WC-0150: projects valid heading levels, omits invalid updates, and clears stale levels', () => {
     // T-A11Y-0001-CASE-HEADING-LEVEL
     const P = definePrototype({
       name: 'x-a11y-wc-heading-level',
@@ -140,16 +140,16 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
     el.getExposes().setLevel(6);
     expect(el.getAttribute('aria-level')).toBe('6');
 
-    expect(() => el.getExposes().setLevel(0)).toThrow(/level must be an integer in range 1-6/);
-    expect(el.getExposes().getLevel()).toBe(6);
-    expect(el.getAttribute('aria-level')).toBe('6');
+    el.getExposes().setLevel(0);
+    expect(el.getExposes().getLevel()).toBe(0);
+    expect(el.hasAttribute('aria-level')).toBe(false);
 
     el.getExposes().setRole('button');
     expect(el.getAttribute('role')).toBe('button');
     expect(el.hasAttribute('aria-level')).toBe(false);
 
     el.getExposes().setRole('heading');
-    expect(el.getAttribute('aria-level')).toBe('6');
+    expect(el.hasAttribute('aria-level')).toBe(false);
     el.remove();
   });
 

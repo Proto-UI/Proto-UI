@@ -18,7 +18,7 @@ const headingPrototype = definePrototype({
 });
 
 describe('adapter-vue: portable heading level', () => {
-  it('projects, rolls back invalid updates, and clears aria-level after a role change', async () => {
+  it('projects valid levels, omits invalid updates, and clears aria-level after a role change', async () => {
     const mounted = createMountedVueAdapter(headingPrototype);
     mounted.vm.update?.();
     await flushVue();
@@ -35,15 +35,16 @@ describe('adapter-vue: portable heading level', () => {
       exposes.setLevel(6);
       await flushVue();
       expect(root.getAttribute('aria-level')).toBe('6');
-      expect(() => exposes.setLevel(0)).toThrow(/level must be an integer in range 1-6/);
-      expect(root.getAttribute('aria-level')).toBe('6');
+      exposes.setLevel(0);
+      await flushVue();
+      expect(root.hasAttribute('aria-level')).toBe(false);
       exposes.setRole('button');
       await flushVue();
       expect(root.getAttribute('role')).toBe('button');
       expect(root.hasAttribute('aria-level')).toBe(false);
       exposes.setRole('heading');
       await flushVue();
-      expect(root.getAttribute('aria-level')).toBe('6');
+      expect(root.hasAttribute('aria-level')).toBe(false);
     } finally {
       mounted.unmount();
     }

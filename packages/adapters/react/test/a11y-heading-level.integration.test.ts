@@ -18,7 +18,7 @@ const headingPrototype = definePrototype({
 });
 
 describe('adapter-react: portable heading level', () => {
-  it('projects, rolls back invalid updates, and clears aria-level after a role change', () => {
+  it('projects valid levels, omits invalid updates, and clears aria-level after a role change', () => {
     const mounted = createMountedReactAdapter(headingPrototype);
     const exposes = mounted.ref.current.getExposes() as {
       setRole(value: string): void;
@@ -30,13 +30,13 @@ describe('adapter-react: portable heading level', () => {
       expect(mounted.root?.getAttribute('aria-level')).toBe('2');
       exposes.setLevel(6);
       expect(mounted.root?.getAttribute('aria-level')).toBe('6');
-      expect(() => exposes.setLevel(0)).toThrow(/level must be an integer in range 1-6/);
-      expect(mounted.root?.getAttribute('aria-level')).toBe('6');
+      exposes.setLevel(0);
+      expect(mounted.root?.hasAttribute('aria-level')).toBe(false);
       exposes.setRole('button');
       expect(mounted.root?.getAttribute('role')).toBe('button');
       expect(mounted.root?.hasAttribute('aria-level')).toBe(false);
       exposes.setRole('heading');
-      expect(mounted.root?.getAttribute('aria-level')).toBe('6');
+      expect(mounted.root?.hasAttribute('aria-level')).toBe(false);
     } finally {
       mounted.unmount();
     }
