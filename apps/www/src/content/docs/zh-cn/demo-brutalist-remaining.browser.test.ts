@@ -55,13 +55,14 @@ type SurfaceFacts = {
   borderColor: string;
   borderRadius: string;
   backgroundColor: string;
+  backgroundImage: string;
   color: string;
-  boxShadow: string;
   outlineStyle: string;
   outlineWidth: string;
   outlineOffset: string;
   transitionProperty: string;
   transitionDuration: string;
+  animationDuration: string;
   display: string;
   flexDirection: string;
   fontFamily: string;
@@ -94,14 +95,15 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
       borderColor: style.borderTopColor,
       borderRadius: style.borderTopLeftRadius,
       backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
       color: style.color,
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
       outlineOffset: style.outlineOffset,
       transitionProperty: style.transitionProperty,
       transitionDuration: style.transitionDuration,
+      animationDuration: style.animationDuration,
       boxShadow: style.boxShadow,
-      display: style.display,
       flexDirection: style.flexDirection,
       fontFamily: style.fontFamily,
       fontWeight: style.fontWeight,
@@ -355,6 +357,12 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expect(surface.hasActiveState, `${runtime}/${colorScheme}/card/data-active`).toBe(false);
           expect(surface.hasPressedState, `${runtime}/${colorScheme}/card/data-pressed`).toBe(
             false
+          );
+          expect(surface.hasSelectedState, `${runtime}/${colorScheme}/card/data-selected`).toBe(
+            false
+          );
+          expect(surface.backgroundImage, `${runtime}/${colorScheme}/card/background-image`).toBe(
+            'none'
           );
           expect(
             Number.parseFloat(surface.width),
@@ -762,6 +770,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(triggerSurface.color, `${runtime}/hover-trigger/foreground`).toBe(
           expectedTriggerForeground
         );
+        expect(triggerSurface.backgroundImage, `${runtime}/hover-trigger/background-image`).toBe(
+          'none'
+        );
         expect(triggerSurface.borderColor, `${runtime}/hover-trigger/border-color`).toBe(
           'rgb(0, 0, 0)'
         );
@@ -794,6 +805,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         );
         expect(panelSurface.color, `${runtime}/hover-panel/foreground`).toBe(
           expectedPanelForeground
+        );
+        expect(panelSurface.backgroundImage, `${runtime}/hover-panel/background-image`).toBe(
+          'none'
         );
         expect(panelSurface.borderColor, `${runtime}/hover-panel/border-color`).toBe(
           'rgb(0, 0, 0)'
@@ -833,6 +847,32 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const darkPanel = darkPanelText.locator('xpath=ancestor-or-self::*[@data-pui-root][1]');
         await waitForHoverCardEndpoint(opened.page, darkPanel);
         const darkPanelSurface = await facts(darkPanel);
+        const darkTriggerSurface = await facts(darkTrigger);
+        const [darkTriggerBackground, darkTriggerForeground] = await Promise.all([
+          resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-main']),
+          resolvedThemeColors(opened.page, 'color', ['--pui-main-foreground']),
+        ]).then(([background, foreground]) => [background[0], foreground[0]]);
+        expect(darkTriggerSurface.backgroundColor, `${runtime}/dark/hover-trigger/background`).toBe(
+          darkTriggerBackground
+        );
+        expect(darkTriggerSurface.color, `${runtime}/dark/hover-trigger/foreground`).toBe(
+          darkTriggerForeground
+        );
+        expect(
+          darkTriggerSurface.backgroundImage,
+          `${runtime}/dark/hover-trigger/background-image`
+        ).toBe('none');
+        expect(darkTriggerSurface.borderColor, `${runtime}/dark/hover-trigger/border-color`).toBe(
+          'rgb(0, 0, 0)'
+        );
+        expect(
+          darkPanelSurface.backgroundImage,
+          `${runtime}/dark/hover-panel/background-image`
+        ).toBe('none');
+        expect(
+          darkPanelSurface.animationDuration,
+          `${runtime}/dark/hover-panel/animation-duration`
+        ).toBe('0.2s');
         const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
           '--pui-secondary-background',
         ]);
