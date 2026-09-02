@@ -11,7 +11,6 @@ import {
 import type {
   AnchoredPositionAlign,
   AnchoredPositionConfig,
-  AnchoredPositionConnection,
   AnchoredPositionSide,
 } from '@proto.ui/core';
 import type { AnchoredPositionHost, AnchoredPositionHostLease } from '../caps';
@@ -106,9 +105,15 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
     attach(initial): AnchoredPositionHostLease {
       let connection = initial;
       let disposed = false;
-      let cleanup: (() => void) | null = null;
+      let positionCleanup: (() => void) | null = null;
+      let anchorCleanup: (() => void) | null = null;
+      let pointerEndCleanup: (() => void) | null = null;
+      let pointerTracking = false;
+      let activePointerId: number | null = null;
+      let positionRequest = 0;
 
       const position = async () => {
+        const request = ++positionRequest;
         const { anchor, floating, config } = connection;
         if (disposed || !isElement(anchor) || !isElement(floating)) return;
         const result = await computePosition(positionReference(anchor, config), floating, {
@@ -116,7 +121,7 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
           strategy: config.strategy,
           middleware: middlewareFor(config),
         });
-        if (disposed) return;
+        if (disposed || request !== positionRequest) return;
         Object.assign(floating.style, {
           position: result.strategy,
           left: `${result.x}px`,
@@ -128,12 +133,62 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
         connection.onResolved?.({ ...resolved, strategy: result.strategy });
       };
 
-      const restart = () => {
-        cleanup?.();
-        cleanup = null;
+      const restartPositioning = () => {
+        positionCleanup?.();
+        positionCleanup = null;
         const { anchor, floating } = connection;
         if (!isElement(anchor) || !isElement(floating)) return;
-        cleanup = autoUpdate(anchor, floating, position, { animationFrame: false });
+        positionCleanup = autoUpdate(anchor, floating, position, {
+          animationFrame: pointerTracking,
+        });
+      };
+
+      const stopPointerTracking = (event?: Event) => {
+        if (!pointerTracking) return;
+        const pointerId =
+          event && 'pointerId' in event && typeof event.pointerId === 'number'
+            ? event.pointerId
+            : null;
+        if (pointerId !== null && activePointerId !== null && pointerId !== activePointerId) return;
+        pointerTracking = false;
+        activePointerId = null;
+        pointerEndCleanup?.();
+        pointerEndCleanup = null;
+        restartPositioning();
+      };
+
+      const bindAnchor = () => {
+        anchorCleanup?.();
+        anchorCleanup = null;
+        const { anchor } = connection;
+        if (!isElement(anchor)) return;
+        const ownerWindow = anchor.ownerDocument.defaultView;
+        const startPointerTracking = (event: Event) => {
+          if (disposed || pointerTracking || !ownerWindow) return;
+          pointerTracking = true;
+          activePointerId =
+            'pointerId' in event && typeof event.pointerId === 'number' ? event.pointerId : null;
+          ownerWindow.addEventListener('pointerup', stopPointerTracking, true);
+          ownerWindow.addEventListener('pointercancel', stopPointerTracking, true);
+          ownerWindow.addEventListener('blur', stopPointerTracking);
+          pointerEndCleanup = () => {
+            ownerWindow.removeEventListener('pointerup', stopPointerTracking, true);
+            ownerWindow.removeEventListener('pointercancel', stopPointerTracking, true);
+            ownerWindow.removeEventListener('blur', stopPointerTracking);
+          };
+          restartPositioning();
+        };
+        anchor.addEventListener('pointerdown', startPointerTracking);
+        anchorCleanup = () => anchor.removeEventListener('pointerdown', startPointerTracking);
+      };
+
+      const restart = () => {
+        pointerEndCleanup?.();
+        pointerEndCleanup = null;
+        pointerTracking = false;
+        activePointerId = null;
+        bindAnchor();
+        restartPositioning();
       };
 
       restart();
@@ -152,8 +207,14 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
         },
         dispose() {
           disposed = true;
-          cleanup?.();
-          cleanup = null;
+          activePointerId = null;
+          positionRequest += 1;
+          pointerEndCleanup?.();
+          pointerEndCleanup = null;
+          anchorCleanup?.();
+          anchorCleanup = null;
+          positionCleanup?.();
+          positionCleanup = null;
         },
       };
     },

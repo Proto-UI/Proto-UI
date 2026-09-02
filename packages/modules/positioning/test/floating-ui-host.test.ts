@@ -42,7 +42,10 @@ async function flush(): Promise<void> {
   await Promise.resolve();
 }
 
-afterEach(() => document.body.replaceChildren());
+afterEach(() => {
+  document.body.replaceChildren();
+  vi.unstubAllGlobals();
+});
 
 describe('module-positioning: Floating UI host', () => {
   it('applies side, alignment, offsets, categorical data, and non-transform coordinates', async () => {
@@ -145,6 +148,85 @@ describe('module-positioning: Floating UI host', () => {
     expect(floating.style.top).toBe('126px');
     transformSpy.mockRestore();
     lease.dispose();
+  });
+
+  it('tracks rendered anchor movement each frame only during an active pointer drag', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+
+    vi.stubGlobal('ResizeObserver', undefined);
+    vi.stubGlobal('IntersectionObserver', undefined);
+    const frames = new Map<number, FrameRequestCallback>();
+    let frameId = 0;
+    vi.stubGlobal(
+      'requestAnimationFrame',
+      vi.fn((callback: FrameRequestCallback) => {
+        frameId += 1;
+        frames.set(frameId, callback);
+        return frameId;
+      })
+    );
+    vi.stubGlobal(
+      'cancelAnimationFrame',
+      vi.fn((id: number) => {
+        frames.delete(id);
+      })
+    );
+
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+    });
+    await flush();
+    expect(floating.style.left).toBe('100px');
+    expect(frames).toHaveLength(0);
+
+    anchor.dispatchEvent(new Event('pointerdown'));
+    expect(frames).toHaveLength(1);
+    setRect(anchor, rect(140, 100, 50, 20));
+    const activeFrame = frames.entries().next().value as [number, FrameRequestCallback] | undefined;
+    if (!activeFrame) throw new Error('Active pointer tracking did not schedule a frame.');
+    frames.delete(activeFrame[0]);
+    activeFrame[1](16);
+    await flush();
+    expect(floating.style.left).toBe('140px');
+
+    window.dispatchEvent(new Event('pointerup'));
+    expect(frames).toHaveLength(0);
+    await flush();
+    expect(floating.style.left).toBe('140px');
+    setRect(anchor, rect(180, 100, 50, 20));
+    await flush();
+    expect(floating.style.left).toBe('140px');
+    anchor.dispatchEvent(new Event('pointerdown'));
+    expect(frames).toHaveLength(1);
+    window.dispatchEvent(new Event('pointercancel'));
+    expect(frames).toHaveLength(0);
+
+    anchor.dispatchEvent(new Event('pointerdown'));
+    expect(frames).toHaveLength(1);
+    window.dispatchEvent(new Event('blur'));
+    expect(frames).toHaveLength(0);
+
+    anchor.dispatchEvent(new Event('pointerdown'));
+    expect(frames).toHaveLength(1);
+    const replacementAnchor = document.createElement('button');
+    document.body.appendChild(replacementAnchor);
+    setRect(replacementAnchor, rect(200, 100, 50, 20));
+    lease.update({ anchor: replacementAnchor, floating, config: baseConfig });
+    expect(frames).toHaveLength(0);
+    anchor.dispatchEvent(new Event('pointerdown'));
+    expect(frames).toHaveLength(0);
+    replacementAnchor.dispatchEvent(new Event('pointerdown'));
+    expect(frames).toHaveLength(1);
+    lease.dispose();
+    expect(frames).toHaveLength(0);
+    window.dispatchEvent(new Event('pointerup'));
+    expect(frames).toHaveLength(0);
   });
 
   it('reports collision-resolved side and alignment against the viewport', async () => {
