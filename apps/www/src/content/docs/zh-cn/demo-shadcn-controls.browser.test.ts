@@ -130,6 +130,27 @@ async function editorStyle(page: Page): Promise<EditorStyle> {
   });
 }
 
+async function waitForTransitionStyle(page: Page): Promise<void> {
+  await page.waitForFunction(
+    ({ property, duration, timing }) => {
+      const editor = document.querySelector('[data-previewer-id] textarea');
+      if (!editor) return false;
+      const style = getComputedStyle(editor);
+      return (
+        style.transitionProperty === property &&
+        style.transitionDuration === duration &&
+        style.transitionTimingFunction === timing
+      );
+    },
+    {
+      property: TRANSITION_PROPERTY,
+      duration: TRANSITION_DURATION,
+      timing: TRANSITION_TIMING,
+    },
+    { timeout: 10_000 }
+  );
+}
+
 async function focusEditorWithRealTab(page: Page): Promise<void> {
   const prepared = await page.evaluate(() => {
     const editor = document.querySelector<HTMLTextAreaElement>('[data-previewer-id] textarea');
@@ -213,6 +234,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
         await applyColorScheme(page, 'light');
+        await waitForTransitionStyle(page);
 
         const resting = await editorStyle(page);
         // The property set is the whole point: `all` would also animate the
