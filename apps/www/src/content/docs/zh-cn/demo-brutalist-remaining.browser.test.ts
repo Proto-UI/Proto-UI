@@ -241,6 +241,13 @@ function expectHardFrame(surface: SurfaceFacts, shadowOffset: string, label: str
   expect(shadowLayers[0], `${label}/shadow`).toContain(`${shadowOffset} ${shadowOffset} 0px 0px`);
 }
 
+function expectExactHardShadow(boxShadow: string, offset: string, label: string): void {
+  const layers = boxShadow
+    .split(/,\s*(?=(?:rgba?|oklab|rgb)\()/u)
+    .filter((layer) => !layer.includes('rgba(0, 0, 0, 0)'));
+  expect(layers, `${label}/shadow-layers`).toHaveLength(1);
+  expect(layers[0], `${label}/shadow`).toContain(`${offset} ${offset} 0px 0px`);
+}
 let browser: Browser;
 let baseUrl = '';
 
@@ -311,7 +318,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           ).toBe(true);
           for (const [index, surface] of allFacts.entries()) {
             const label = `${runtime}/badge-${index}`;
-            expect(surface.role, `${label}/role`).toBeNull();
+            expectExactHardShadow(surface.boxShadow, '2px', `${label}`);
             expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
             expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
             expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
@@ -559,7 +566,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
             expect(surface.ariaBusy, `${label}/aria-busy`).toBeNull();
             expect(surface.borderWidth, `${label}/border`).toBe('2px');
-            expect(surface.borderColor, `${label}/border-color`).toBe(expectedBorder);
+            expectExactHardShadow(surface.boxShadow, '2px', `${label}`);
             expect(surface.borderRadius, `${label}/radius`).toBe('0px');
             expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
             expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
