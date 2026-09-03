@@ -394,3 +394,30 @@ No merge, no review submission, no label/close/assign this pass.
 - #585 exact head `a40e7e304124e0dbdc6fdbb97021a154b511101a`: prior hook-result binding blind spot is improved and trusted CI/DCO are green, but exact-head review found two P1s—untraced lowerable leaves are silently dropped (fail-open), and whole-file identifier maps are not lexical-scope-safe. CHANGES_REQUESTED receipt: https://github.com/Proto-UI/Proto-UI/pull/585#pullrequestreview-5085153882. Non-blocking exclusion-fixture gap: https://github.com/Proto-UI/Proto-UI/pull/585#issuecomment-5505778509
 - #571 current live head `84d5236cd9e77c9aff76547f57fe6b67f32ea6e2` has no failed checks after the browser-evidence repair sequence.
 - Issue #587 remains OPEN as an investigation. PR #591 (`cd549b4b868ac4ee0f02913dd9aef1a2abbcb920`) was CLOSED UNMERGED. Its active-pointer-only frame-tracking proposal and local unit/type evidence did not establish the reported device regression: real 390×844 component measurement invalidated the synthetic ~204px lag and observed at most 1px of host deviation during layout movement. Do not restore Floating UI `animationFrame: true` without on-device compositor-scroll evidence. The non-normative record `internal/records/2026-09-02-dropdown-active-pointer-positioning.zh-CN.md` remains investigation context; `T-ANCHORED-POSITIONING-0001` stays unchanged.
+
+## Final portfolio pass (2026-09-03)
+
+Live main advanced `9c8891ca` → `40ba5fb9011a` during the run. Viewer-authored PR #583 (exact head 6e9562f7) and PR #597 (exact head e0bffaa6) merged with independent non-author approval: squash `772b1939` and `40ba5fb9`. No duplicate action for either.
+
+External writes this pass:
+
+- Ledger/resport correction: PR #591 CLOSED UNMERGED; Issue #587 OPEN investigation (not fixed); removed stray untracked `e`; commit `71ad51a0` on `agent/portfolio-chief-ledger-20260901`.
+- Issue #539 tracker checkpoint (1/8): https://github.com/Proto-UI/Proto-UI/issues/539#issuecomment-5519619902
+
+No review/merge mutation for the two active code PRs: the canonical review collector in this checkout predates merged fork-rollup fix PR #588 (commit 868bba7d on remote main). Re-sync checkout to main>=#588 before any submit; do not patch or hand-craft a packet.
+
+Active review targets (heads kept drifting; latest observed):
+
+- #585 `183374d8` (was `6613a98e`). Scanner/extractor parity gate. CHANGES_REQUESTED, no current-head approval. Latest push restricts token-map dot-vs-element access; independent exact-head review + submission still gated by the collector.
+- #599 `fbaf80be` (was `968afc05`). Catalog evidence integrity (#598). Latest push addresses the four Codex threads: absolute-path rejection, focus-roving decision relation, privileged-rollback workspace-check, obsolete coalescing question removal. CHANGES_REQUESTED, no human approval.
+
+Sibling dispositions (no GitHub write unless noted):
+
+- #590 head 50fad0b: clean bounded-regression candidate; independent approval pending (guangliang2019); author cannot self-approve.
+- #593 head b830750e: trusted CI test red (unrelated #594/#595 Shadcn transition), 11 stale Codex threads, no independent approval.
+- #595 head ed147e84: #594 flake fix; fact-vs-value wait concern is P2 non-blocking; no human approval; author is the only eligible actor; keep #594 open until merged main evidence.
+- #596 head 63665f6: 14/14 green but 7 unresolved threads (2 P1/5 P2), six material security/lifecycle defects; needs author push + independent review.
+- #574 head 6953ee42: prior P1/P2 resolved in-tree; base stale (9c8891ca, 35 behind) + body/DCO count need fresh review.
+- #586 head b580322: Base Input Checkpoint C; 6 Codex P2 incl two code bugs (unreachable nofail event delivery, invalid inputMode decimal); needs fixes + independent review.
+- Issue #584: research/discussion; maintainer keeps Compiler outside schema — no-op.
+- Issues #592/#594/#598: open; close only after merged evidence / #599 lands; #592 is not closed by a #593 merge (residual slice remains).

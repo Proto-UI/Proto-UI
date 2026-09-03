@@ -49,3 +49,15 @@ No merge, review submission, label, close, assign, or release mutations were per
 - **#583 @ `c2564289`**: no new code since the existing exact-head CHANGES_REQUESTED. Old two findings resolved; three later blockers remain (centering owner, historical baseline test binding, anonymous radius ruling). Receipt: https://github.com/Proto-UI/Proto-UI/pull/583#pullrequestreview-5079678403
 - **#585 @ `a40e7e30`**: CI/DCO green and previous binding-shape gap improved, but scanner remains fail-open on untraced lowerable leaves and is not lexical-scope-safe. Receipt: https://github.com/Proto-UI/Proto-UI/pull/585#pullrequestreview-5085153882; P2 fixture note: https://github.com/Proto-UI/Proto-UI/pull/585#issuecomment-5505778509
 - **#587 / PR #591**: Issue #587 remains OPEN as an investigation; PR #591 (`cd549b4b`) was CLOSED UNMERGED. Real 390×844 component measurement invalidated the synthetic ~204px lag and bounded host deviation during layout movement to at most 1px. Do not restore Floating UI `animationFrame: true` without on-device compositor-scroll evidence. Issue: https://github.com/Proto-UI/Proto-UI/issues/587 · closed PR: https://github.com/Proto-UI/Proto-UI/pull/591
+
+## 2026-09-03 final pass
+
+Main advanced `9c8891ca` → `40ba5fb9`. #583 (6e9562f7) and #597 (e0bffaa6) merged after independent approval — no duplicate actions.
+
+External writes: corrected ledger/report (PR #591 closed-unmerged; #587 open investigation; removed stray `e`) committed `71ad51a0` on `agent/portfolio-chief-ledger-20260901`; posted #539 1/8 tracker checkpoint https://github.com/Proto-UI/Proto-UI/issues/539#issuecomment-5519619902.
+
+Review/merge mutations blocked this pass: canonical collector in checkout predates merged fork-rollup fix #588 (868bba7d). Re-sync checkout to main>=#588 before any submit.
+
+Still-moving review targets: #585 `183374d8` (scanner/extractor parity), #599 `fbaf80be` (catalog evidence integrity); both CHANGES_REQUESTED with no current-head approval; latest pushes address the immediately prior findings. Independent exact-head approval + canonical submission remain the gate.
+
+Sibling summary: #590 clean review candidate (approval pending); #593 red CI + stale threads; #595 flake fix (approval pending, author self-blocked); #596 7 unresolved threads + security/lifecycle defects; #574 base refresh needed; #586 needs code fixes; #584 research-only; #592/#594/#598 stay open until merged evidence. Full detail in PROGRESS.md.
