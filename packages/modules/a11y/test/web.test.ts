@@ -92,4 +92,25 @@ describe('module-a11y web projector', () => {
     });
     expect(second.getAttribute('aria-level')).toBe('4');
   });
+
+  it('preserves a host-owned aria-level when no coherent level was projected', () => {
+    const target = document.createElement('div');
+    target.setAttribute('aria-level', '7');
+    const project = createWebA11yProjector(target);
+
+    project({
+      role: 'button',
+      id: undefined,
+      name: undefined,
+      description: undefined,
+      states: {},
+      actions: {},
+      relations: {},
+      tree: undefined,
+      level: undefined,
+    });
+    project.clearHeadingLevel?.();
+
+    expect(target.getAttribute('aria-level')).toBe('7');
+  });
 });

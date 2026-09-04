@@ -44,8 +44,12 @@ export function createWebA11yProjector(
   };
 
   project.clearHeadingLevel = () => {
-    lastTarget?.removeAttribute('aria-level');
-    if (lastSnapshot) lastSnapshot = { ...lastSnapshot, level: undefined };
+    if (lastTarget && lastSnapshot && typeof resolveWebHeadingLevel(lastSnapshot) !== 'undefined') {
+      lastTarget.removeAttribute('aria-level');
+    }
+    if (lastSnapshot && typeof lastSnapshot.level !== 'undefined') {
+      lastSnapshot = { ...lastSnapshot, level: undefined };
+    }
   };
 
   subscribeTargetChange?.(() => {
@@ -55,13 +59,22 @@ export function createWebA11yProjector(
   return project;
 }
 
+function resolveWebHeadingLevel(snapshot: A11ySemanticObjectSnapshot): number | undefined {
+  const level = snapshot.level;
+  return snapshot.role === 'heading' &&
+    typeof level === 'number' &&
+    Number.isInteger(level) &&
+    level >= 1 &&
+    level <= 6
+    ? level
+    : undefined;
+}
 export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObjectSnapshot): void {
   if (typeof snapshot.id !== 'undefined') el.removeAttribute('id');
   if (typeof snapshot.role !== 'undefined') el.removeAttribute('role');
   if (snapshot.name) el.removeAttribute('aria-label');
   if (snapshot.description) el.removeAttribute('aria-description');
-  if (typeof snapshot.level !== 'undefined') el.removeAttribute('aria-level');
-
+  if (typeof resolveWebHeadingLevel(snapshot) !== 'undefined') el.removeAttribute('aria-level');
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {
     if (Object.prototype.hasOwnProperty.call(snapshot.states, key)) el.removeAttribute(attr);
   }
@@ -121,14 +134,7 @@ export function applyWebA11ySnapshot(
     }
   }
 
-  const level =
-    snapshot.role === 'heading' &&
-    typeof snapshot.level === 'number' &&
-    Number.isInteger(snapshot.level) &&
-    snapshot.level >= 1 &&
-    snapshot.level <= 6
-      ? snapshot.level
-      : undefined;
+  const level = resolveWebHeadingLevel(snapshot);
   if (typeof level !== 'undefined') {
     setOptionalAttr(el, 'aria-level', String(level));
   } else if (
