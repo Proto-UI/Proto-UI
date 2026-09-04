@@ -89,10 +89,10 @@ The engine can remain completely outside Proto UI. The Host Capability obtains m
 
 Names below illustrate a proposal; they are not an admitted API:
 
-- App input: `document: { id: string; sourceRevision: string }`, `readOnly`, `inputEnabled`, monotonic policy revision, loading/conflicted/error status, accessible label/description/help, and a host-configured shortcut-policy identifier.
-- Host/Module facts: `attachment`, `composing`, `editRevision`, `savedSourceRevision`, `dirty`, `canUndo`, `canRedo`, bounded per-feature support/reasons, and a revision-bound selection summary. Focused state is reported only through the Focus domain. Connection freshness is owned by the Module, not reported as a host epoch.
-- Engine event summary: opaque `transactionId`, `documentId`, `sourceRevision`, prior/new engine revision, origin (`user | undo | redo | app`), and change count. The actual change set remains in the App-owned editor service addressed exactly once by that transaction ID.
-- Engine requests/results: undo/redo, reveal line, replace document reference, and explicit snapshot/export by the App-owned service. Focus/blur requests remain in Focus. Save/revert remain App actions, not editor-engine authority.
+- App input: stable opaque `surfaceId`, `document: { id: string; sourceRevision: string }`, `readOnly`, `inputEnabled`, monotonic policy revision, App-acknowledged saved engine revision, loading/conflicted/error status, and a host-configured shortcut-policy identifier. Accessible name/description/help remain A11y-domain facts, not Editor Surface patch fields.
+- Host facts: a discriminated attachment state; applied policy revision; and, only when ready, composition/engine revision, undo/redo availability, and revision-bound selection summary. The Module derives `dirty` by comparing current engine revision with the App-acknowledged saved engine revision. Focused state is reported only through Focus. Connection freshness is Module-owned.
+- Engine event summary: local `transactionId`, document/source/policy/engine revisions, origin (`user | undo | redo | app`), and change count. Lookup and deduplication use the composite `{ connectionId, documentId, sourceRevision, transactionId }`; the actual change set remains in the App-owned editor service.
+- Engine requests/results: revision-bound undo/redo and explicit snapshot/export by the App-owned service. Line/column navigation remains deferred until a position convention is governed. Focus/blur remain in Focus. Save/revert remain App actions.
 
 The first slice's selection summary is intentionally bounded to `{ count, primaryCollapsed }` plus the current engine revision. No raw range, selected text, mutable selection, pixel rectangle, or ungoverned line/column encoding crosses. A later line/column or range API needs an explicit Unicode position encoding and revision semantics.
 
@@ -102,15 +102,16 @@ This resolves the seam with `D-TEXT-CONTROL-PROJECTION-0001-Q-SELECTION` without
 
 | Input | Owner path | Observable output | Synchronization boundary |
 | --- | --- | --- | --- |
-| Document identity/revision | App -> Text Document Module patch -> Host Capability resolver | Correct engine model/view appears for that reference. | Current document ID, source revision, and Module-owned connection identity. |
+| Document identity/revision | App -> Text Document Module patch -> Host Capability resolver | Correct engine model/view appears for that reference. | Stable surface ID, current document ID/source revision, and Module-owned connection identity. |
 | Source content | App-owned document service -> engine directly | Engine renders/editable text. | Service/model boundary; no full text copy through generic Proto State. |
-| IME/text/key input | Physical editor target -> engine | Engine applies one transaction; host emits a bounded summary and the App service resolves its exact changes once. | Current policy revision, composition boundary, document ID, and connection identity. |
-| Edit details | Engine -> App-owned editor service | App may validate/persist the exact change set by `transactionId`. | Document, source/engine revision, connection identity, and exactly-once transaction ID; stale/replayed IDs reject. |
-| Save/Revert | Proto UI Button -> App service | Saved/conflicted/reverted App state; surface receives a new source revision or replacement reference. | App idempotency key plus document/source revision. |
-| Undo/Redo | App/semantic command -> Module request -> Host Capability -> engine | Engine transaction and updated availability facts. | Current engine revision and connection identity. |
-| Selection/caret | Engine | Engine/native accessibility exposes ranges; Proto receives only count/collapsed summary. | Current engine revision and connection identity; stale selection facts ignore. |
+| IME/text/key input | Physical editor target -> engine | Engine applies one transaction; host emits a bounded summary and the App service resolves its exact changes once. | Applied policy revision, composition boundary, document ID, and connection identity. |
+| Edit details | Engine -> App-owned editor service | App may validate/persist the exact change set by the composite transaction key. | Connection/document/source revision/transaction ID; stale/replayed composite keys reject. |
+| Save/Revert | Proto UI Button -> App service -> saved-engine-revision patch | Module derives dirty from current versus acknowledged saved engine revision; App supplies new source/conflict state. | App idempotency key plus document/source/engine revision. |
+| Undo/Redo | App/semantic command -> Module request -> Host Capability -> engine | Engine transaction and updated availability facts. | Expected current engine/policy revision and connection identity are validated before mutation. |
+| Selection/caret | Engine | Engine/native accessibility exposes ranges; Proto receives only count/collapsed summary. | Current engine/policy revision and connection identity; stale selection facts ignore. |
 | Focus/Tab escape | Focus domain / host keyboard arbiter -> physical editor or Harness region | Exactly one focus destination; facts return only through Focus and mode is announced/helped. | Current Focus/view epoch and configured local shortcut policy. |
-| Viewport/layout | Host geometry -> engine | Engine renders/reflows and stores host-private view state. | Current target/model; no raw pixels or view state in portable values. |
+| Accessible naming/help | A11y semantic object -> HC-A11Y/Adapter -> resolved physical editor target | One current name/description/help projection. | A11y-domain identity and target replacement; no duplicate Editor Surface fields. |
+| Viewport/layout | Host geometry -> engine | Engine renders/reflows and stores host-private view state. | Stable surface ID plus document ID; no raw pixels or view state in portable values. |
 | Diagnostics/decorations | App language service -> engine/composition in a later slice | Deferred. | No first-slice channel. |
 
 ## Fake-engine / fake-host protocol sketch
@@ -137,17 +138,16 @@ type DocumentSurfaceSupport = Readonly<{
 }>;
 
 type DocumentSurfacePatch = Readonly<{
+  surfaceId: string;
   document: DocumentRef;
   readOnly: boolean;
   inputEnabled: boolean;
   policyRevision: number;
+  savedEngineRevision: number;
   loading: boolean;
   conflicted: boolean;
   status: 'idle' | 'loading' | 'ready' | 'error';
   shortcutPolicyId: string;
-  accessibleLabel: string;
-  accessibleDescription?: string;
-  accessibilityHelpId: string;
 }>;
 
 type DocumentSelectionSummary = Readonly<{
@@ -156,21 +156,33 @@ type DocumentSelectionSummary = Readonly<{
   primaryCollapsed: boolean;
 }>;
 
-type DocumentSurfaceFacts = Readonly<{
-  attachment: 'detached' | 'attaching' | 'ready' | 'unavailable' | 'error';
-  composing: boolean;
-  engineRevision: number;
-  dirty: boolean;
-  canUndo: boolean;
-  canRedo: boolean;
+type DocumentSurfaceBase = Readonly<{
+  appliedPolicyRevision: number | null;
   support: DocumentSurfaceSupport;
-  selection: DocumentSelectionSummary;
 }>;
+
+type DocumentSurfaceFacts =
+  | (DocumentSurfaceBase & Readonly<{ attachment: 'detached' | 'attaching' }>)
+  | (DocumentSurfaceBase &
+      Readonly<{
+        attachment: 'unavailable' | 'error';
+        reason: DocumentUnavailableReason;
+      }>)
+  | (DocumentSurfaceBase &
+      Readonly<{
+        attachment: 'ready';
+        composing: boolean;
+        engineRevision: number;
+        canUndo: boolean;
+        canRedo: boolean;
+        selection: DocumentSelectionSummary;
+      }>);
 
 type DocumentTransactionSummary = Readonly<{
   transactionId: string;
   documentId: string;
   sourceRevision: string;
+  appliedPolicyRevision: number;
   beforeEngineRevision: number;
   afterEngineRevision: number;
   origin: 'user' | 'undo' | 'redo' | 'app';
@@ -187,8 +199,9 @@ type DocumentSurfaceConnection = Readonly<{
     connectionId: string,
     result: Readonly<{
       requestId: string;
-      command: 'undo' | 'redo' | 'reveal-line';
+      command: 'undo' | 'redo';
       status: 'applied' | 'rejected' | 'unavailable';
+      appliedPolicyRevision: number;
       engineRevision: number;
       reason: DocumentUnavailableReason | null;
     }>
@@ -200,8 +213,9 @@ type DocumentSurfaceLease = Readonly<{
   requestCommand(
     request: Readonly<{
       requestId: string;
-      command: 'undo' | 'redo' | 'reveal-line';
-      line?: number;
+      command: 'undo' | 'redo';
+      expectedPolicyRevision: number;
+      expectedEngineRevision: number;
     }>
   ): void;
   snapshot(): DocumentSurfaceFacts;
@@ -213,35 +227,36 @@ type DocumentSurfaceHost = Readonly<{
 }>;
 ```
 
-A fake host receives a private document-service/engine map at construction. `DocumentSurfacePatch` contains only IDs and status/policy values. The Module issues a unique connection identity and retires its callback closure before replacement. The red-first exercise:
+A fake host receives a private document-service/engine map at construction. `DocumentSurfacePatch` contains only IDs and status/policy values. The Module issues a unique connection identity and retires its callback closure before replacement. A separate fake A11y capability projects name/description/help to the resolved editor target. The red-first exercise:
 
-1. attach `{ id: 'doc-7', sourceRevision: 'r4' }`; receive `attaching`, then clean `ready` facts with explicit input/accessibility/view-state support and accessible label/description/help;
-2. simulate one IME-committed engine transaction and expose only `tx-1`, document/source/engine revisions, origin, and count; verify the App service resolves the transaction's inserted text/ranges exactly once and portable State retains none of them;
-3. update selection from collapsed to one range; receive only count/collapsed/revision;
-4. request undo and observe a connection- and revision-bound transaction plus command result;
-5. revoke write permission at policy revision 9 during composition; cancel host composition, suppress all post-revocation user transactions, and report read-only facts without mutating App source;
-6. simulate unavailable engine/document/service/input/accessibility/read-only enforcement/view state and assert the bounded support/reason codes identify each failed requirement;
-7. replace the document and target; retire the Module-owned connection identity and dispose old bindings before issuing the new connection; restore only host-private view state keyed by document/view identity;
-8. complete stale edit/save/selection callbacks from the old document or a colliding host counter; observe zero current-state updates and zero App-service transaction lookups;
-9. recursively validate all captured patch/fact/request/summary values and prove no engine, model, range, selection, target, worker, stream, file handle, full document, or view-state object appears.
+1. attach stable `surface-2` to `{ id: 'doc-7', sourceRevision: 'r4' }`; receive `attaching`, then a `ready` union branch with applied policy revision and explicit input/accessibility/view-state support; verify naming/help arrives only through the A11y fake;
+2. simulate one IME-committed engine transaction and expose local `tx-1`, document/source/policy/engine revisions, origin, and count; verify the App service resolves inserted text/ranges exactly once by `{ connectionId, documentId, sourceRevision, transactionId }` and portable State retains none;
+3. update selection from collapsed to one range; receive only count/collapsed/engine revision on the ready branch;
+4. request undo with expected policy/engine revisions; reject after an intervening edit, then accept a current request and observe revision-bound transaction/result;
+5. acknowledge a save at engine revision 5 after revision 6 exists; derive `dirty: true`; acknowledge revision 6 and derive `dirty: false` without trusting a host boolean;
+6. revoke write permission at policy revision 9 during composition, then re-enable at 10; every fact/transaction/result carries its applied revision and revision-9 delayed output is rejected;
+7. simulate unavailable engine/document/service/input/accessibility/read-only enforcement/view state; receive the unavailable union branch with no fabricated engine/selection/undo fields and a bounded reason;
+8. replace the document and target; retire the Module connection, dispose old bindings, then restore host-private view state only for stable `{ surfaceId, documentId }`;
+9. complete stale callbacks from the old document or a colliding host counter; observe zero current-state updates and zero App-service lookups;
+10. recursively validate captured values and prove no engine, model, range, selection, target, worker, stream, file handle, full document, A11y duplicate, or view-state object appears.
 
-This proves a data-only boundary with testable revision, accessibility-input, unavailability, connection-identity, and service-delivery rules. It does not prove browser/native IME, model correctness, accessibility, layout, large-document performance, or an Adapter profile.
+This proves a data-only boundary with testable revision, discriminated availability, A11y ownership, stable view identity, command preconditions, dirty derivation, composite transaction identity, connection identity, and service-delivery rules. It does not prove browser/native IME, model correctness, accessibility, layout, large-document performance, or an Adapter profile.
 
 ## Revision, input, shortcut, and permission policy
 
-- **Revision ownership:** App `sourceRevision` identifies the persisted/authoritative source. Engine `engineRevision` is a monotonic view/model fact scoped to one document lease. They are never compared as interchangeable values. Transactions carry both identity context and are accepted once by opaque `transactionId`.
-- **Save/conflict:** Save/Revert controls are ordinary Proto UI controls invoking App services. The App checks document/source/engine revision and idempotency, then patches saved/conflicted state. Render, mount, prop sync, or engine remount never saves.
+- **Revision and transaction ownership:** App `sourceRevision` identifies persisted source; engine `engineRevision` is scoped to one model/lease; policy revision is independently monotonic. Lookup/deduplication uses `{ connectionId, documentId, sourceRevision, transactionId }`, so engine-local IDs cannot collide across documents or attachments.
+- **Save/conflict/dirty:** Save/Revert controls invoke App services with idempotency. A successful save patches the exact `savedEngineRevision`; the Module derives `dirty = currentEngineRevision !== savedEngineRevision`, so a late revision-5 save cannot clean revision 6. Render, mount, sync, or remount never saves.
 - **IME:** candidate text/composition UI stays engine/host-owned. One committed composition produces an engine transaction summary. Enter, Tab, or local commands during composition must not emit a duplicate action.
 - **Text versus command keys:** the engine owns text editing, cursor motion, undo/redo, indent/outdent, and editor-native commands. App/Harness commands run only through the host-configured command arbiter; no DOM/native key object or editor keybinding object enters portable authoring.
 - **Shortcut order:** explicitly registered Harness commands such as Save or global navigation are checked before engine processing; all other keys reach the engine exactly once. The resolver is adapter configuration, not a portable callback.
 - **Tab:** Tab indents/navigates within the editor by default. The Web profile must provide a documented Tab-focus mode (Monaco's `tabFocusMode` is evidence, not the portable API), reserve `F6`/`Shift+F6` for next/previous Harness regions, and place an adjacent named Button that leaves the editor. A host without a keyboard escape plus reachable visible control reports the interactive slice unavailable.
 - **Clipboard/paste:** system/editor selection, copy/cut/paste, multi-line paste, and undo grouping remain engine/host behavior. The surface receives only resulting transaction summaries. Clipboard objects, selected text, and file paths gain no authority; pasted paths are plain text. Drop/file intake is separate.
-- **Read-only/permission change:** App policy wins immediately before the next edit. On revocation, the host stops input, cancels active composition using host semantics, emits no user transaction at or after the newer `policyRevision`, and preserves App source. Re-enabling creates no implicit edit. A stale save or edit result cannot clear `conflicted` or `readOnly`. If read-only cannot be enforced, the surface fails closed as unavailable.
+- **Read-only/permission change:** App policy wins immediately before the next edit. Every host fact, transaction, and result carries `appliedPolicyRevision`; callbacks older than the current patch are rejected. On revocation, the host stops input, cancels active composition using host semantics, emits no user transaction at or after the newer revision, and preserves App source. If read-only cannot be enforced, the unavailable union branch reports it.
 - **Mobile/virtual keyboard:** the physical editor may invoke host IME and touch editing chrome. If the host cannot preserve composition, selection, or an exit route, it reports interactive editing unavailable or read-only; it does not claim desktop parity.
 
 ## Accessibility boundary
 
-- App supplies the document label/description, read-only/dirty/conflict/loading status, and help route. The composition supplies reachable status and explicit Save/Revert controls.
+- App supplies document name/description/help as A11y semantic-object facts, and read-only/dirty/conflict/loading status as App/Module facts. The Adapter projects A11y IR to the physical editor target; the composition supplies reachable status and explicit Save/Revert controls. Editor Surface patches do not duplicate naming channels.
 - The engine/Host Capability owns the editable text role/control type, caret and selection representation, line/word/document navigation, text ranges, wrapping, viewport mapping, and screen-reader editing mode. Proto UI does not mirror the whole document into an ARIA tree or generic State.
 - `DocumentSelectionSummary` supports low-cost status/UI policy only; native accessibility APIs expose actual current ranges. A later portable line/column API requires position-encoding and replacement-validity rules.
 - Streaming edit/caret events do not feed a live region. Announcements are bounded to App state transitions such as read-only enabled, save complete, conflict detected, or command rejected. Diagnostics/error navigation is option D and must not be smuggled into the first slice.
@@ -252,11 +267,11 @@ This proves a data-only boundary with testable revision, accessibility-input, un
 ## Performance, viewport, windowing, and lifecycle
 
 - Full document text, model snapshots, token streams, syntax trees, decorations, and viewport lines do not enter generic Proto State. The engine/document service owns them.
-- Transaction summaries cross once per engine transaction; cursor/selection facts are deduplicated and coalesced while preserving the newest engine revision. The actual changes remain service-local by transaction ID.
+- Transaction summaries cross once per engine transaction; cursor/selection facts are deduplicated and coalesced while preserving engine/policy revision. Actual changes remain service-local under the composite transaction key.
 - Editor viewport rendering/windowing is engine-owned. #521 applies to authored logical Collections such as a file tree, diagnostics list, or static diff rows, not the editor's internal line renderer/model. Exporting an immutable snapshot to Code Block/static Diff does not transfer live editor ownership.
-- Raw layout geometry and serializable engine view-state structures remain host-private. The host may persist view state in its injected service keyed by App-provided document/view IDs; portable state receives only success/unavailable and current revision facts.
-- One logical surface holds one Module-owned connection identity for the current document lease. Document/reference replacement, model replacement, target replacement, Adapter capability replacement, detach, remount, and disposal retire the callback closure before another attachment reports facts; host counters never decide freshness.
-- Pending edit, selection, undo/redo, snapshot, save, validation, language-service, and view-state completions carry the current connection identity plus document ID, source/engine/policy revision, and request ID as applicable. Old completions cannot update current state or trigger an App-service lookup.
+- Raw layout geometry and engine view-state structures remain host-private. The host may persist view state keyed by stable `{ surfaceId, documentId }`; `connectionId` remains replaceable and cannot key restoration. Portable state receives only support/current revision facts.
+- One logical surface holds one Module-owned connection identity for the current document lease. Replacement, detach, remount, and disposal retire the callback closure before another attachment reports facts; host counters never decide freshness.
+- Pending edit, selection, undo/redo, snapshot, save, validation, language-service, and view-state completions carry current connection/document/source/engine/policy/request identity. Old completions cannot update state or trigger an App-service lookup.
 - `dispose()` removes key/composition/paste listeners, the Focus-domain target bridge, layout observers, engine/model subscriptions owned by the view, accessibility bridge resources, target/controller references, and service callbacks.
 - A view lease does not dispose an App/service-owned shared model unless it created that model and ownership is explicit. It never closes a file, stream, language server, or storage session. App/backend owns those lifetimes.
 - Unsupported engine/document/service attachment, input, accessibility, view-state, or read-only enforcement fails closed to `unavailable`/read-only with a bounded per-feature reason; no fake ready state.
@@ -288,10 +303,10 @@ No new Adapter identity is justified: existing profiles receive reviewed relatio
 
 1. **Portable negatives:** type/runtime fixtures reject engine, model, target, range/selection, worker, stream, file handle, framework component, DOM/native event, raw geometry, complete document, token/decorations, engine view-state, and service values.
 2. **Fake lease:** attach/update/snapshot/dispose, missing capability, document/model/target replacement, remount, exact cleanup, Module-owned connection retirement, and stale-callback suppression even when host counters collide.
-3. **Revision/transactions:** opaque IDs, document/source/engine/policy revisions, exactly-once App-service transaction lookup, undo/redo origin, replay rejection, source-revision conflict, and no save on render/remount.
-4. **Input/permissions:** IME commits once, local shortcut versus editor command routes once, Tab mode/F6 exits through Focus, multiline paste groups correctly, permission revocation suppresses later input, failed enforcement reports unavailable, and re-enable is inert.
-5. **Selection:** only count/collapsed/revision crosses; high-frequency cursor motion coalesces; no selected text/range; stale selection ignored.
-6. **Accessibility fake:** label/description/help/status inputs, read-only/conflict transitions, per-feature support/reason negotiation, no document mirror/live spam, and explicit unavailable degradation.
+3. **Revision/transactions:** document/source/engine/policy revisions, composite transaction identity, exactly-once App-service lookup, save-revision dirty derivation, undo/redo origin, replay rejection, source-revision conflict, and no save on render/remount.
+4. **Input/permissions/commands:** IME commits once, local shortcut versus editor command routes once, Tab mode/F6 exits through Focus, multiline paste groups correctly, every callback carries applied policy revision, permission revocation suppresses later input, undo/redo validate expected engine/policy revisions, and re-enable is inert.
+5. **Selection/availability/view identity:** only count/collapsed/revision crosses on the ready union branch; unavailable branches contain no engine-only fields; cursor motion coalesces; stable surface/document identity restores view state across connection replacement; line navigation remains deferred.
+6. **Accessibility fake:** naming/description/help arrives only through A11y IR; Editor patch has no duplicate fields; status transitions and per-feature support/reason negotiation produce no document mirror/live spam.
 7. **Real Web:** engine double or selected engine only after separate approval; keyboard/IME/Tab/F6/focus, selection, undo/redo, read-only change, document/target replacement, accessibility tree/help, zoom/wrap/high contrast, and exact disposal.
 8. **Performance:** rapid edits/caret movement and a bounded first-slice document prove no full-content/token/viewport copies through Proto UI and no retained listeners/models.
 9. **Cross-adapter Web only if claimed:** WC/React/Vue from one authoring source remains Web evidence.
