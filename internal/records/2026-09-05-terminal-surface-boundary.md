@@ -28,7 +28,7 @@ The following catalog entities are draft unless stated otherwise:
 - `C-FOCUS-0001-B/D/G` keeps focus facts, requests, eligibility, topology, policy, and entry-region delegation in the Focus domain.
 - `C-A11Y-0001-G/H` and `HC-A11Y-0001` allow native, degraded, or diagnostic host accessibility projection without making one host representation portable.
 - `C-SCROLL-0001-D/E`, `M-SCROLL-0001-E`, and `HC-SCROLL-SURFACE-0001-D/E` keep geometry and high-frequency host facts behind a lease and require stale-callback suppression and cleanup.
-- Active `D-ADAPTER-PROFILE-0001-C/D/E` means an existing Adapter can claim Terminal Module support or Host Capability provision only after concrete reviewed evidence. Absence from an Adapter profile means uncataloged, not unsupported.
+- Active `D-ADAPTER-PROFILE-0001-B/C/D/E` means an existing Adapter can claim Terminal Module support or Host Capability provision only after concrete reviewed evidence. Absence from an Adapter profile means uncataloged, not unsupported.
 
 Current implementation and tests confirm those adjacent patterns:
 
@@ -86,10 +86,10 @@ The engine can remain completely outside Proto UI. The Host Capability resolves 
 The proposal may evaluate these plain values; names are illustrative and not an admitted API:
 
 - App input: opaque `sessionId: string`, `readOnly`, `inputEnabled`, App-authoritative connection/process status, accessible label/description, and a host-configured shortcut-policy identifier.
-- Host facts: `attachment: detached | attaching | ready | unavailable | error`, `focused`, `composing`, `columns`, `rows`, display title as untrusted host text, accessibility projection mode, and monotonically increasing `epoch`/`revision`.
-- Requests/results: `focus`, `blur`, committed `textInput`, normalized `keyInput`, resize `{ columns, rows, revision }`, and bounded `attention`/`error` signal.
+- Host facts: `attachment: detached | attaching | ready | unavailable | error`, `composing`, `columns`, `rows`, display title as untrusted host text, per-feature support plus bounded reason codes, and the latest revision-bound resize outcome. Focused state is reported only through the Focus domain, not through Terminal-specific facts.
+- Requests/results: committed `textInput`, normalized `keyInput`, resize `{ columns, rows, revision }` with applied/rejected result, and bounded `attention`/`error` signal. Focus/blur requests remain in the Focus domain.
 
-`columns` and `rows` are neutral positive integer character-cell counts. Pixels, rectangles, font metrics, device scale, observers, and layout objects remain host-local. A resize request is not a fact until the host/backend reports the same or a newer revision as applied/rejected.
+`columns` and `rows` are neutral positive integer character-cell counts. Pixels, rectangles, font metrics, device scale, observers, and layout objects remain host-local. A resize request is not a fact until the host/backend reports an applied/rejected result carrying the acknowledged revision and effective dimensions; older results cannot replace newer facts.
 
 A current accessible text snapshot can be a plain diagnostic/test result, but should not be continuously copied into portable State. The first slice should expose `host-bridge | bounded-snapshot | unavailable` support and prefer a host-owned accessibility bridge. Any later author-facing snapshot request requires a separate privacy, size, cadence, and stale-revision decision.
 
@@ -101,11 +101,11 @@ Selection summaries and copy requests are technically expressible as plain value
 | --- | --- | --- | --- |
 | App connection/process fact | App -> Terminal Module patch -> composition status | Label/badge/status only; no engine control implied. | Current logical instance revision. |
 | Output bytes/VT data | App backend -> engine directly | Engine updates visible grid/cursor/scrollback. | Engine write/render queue; **zero portable grid updates**. |
-| IME/text/key input | Physical input target -> host/engine -> App-owned backend sink | Terminal process receives engine-encoded input. Optional normalized intent is ephemeral, never retained State. | Current lease epoch and active input policy. |
+| IME/text/key input | Physical input target -> host/engine -> App-owned backend sink | Terminal process receives engine-encoded input exactly once. Optional normalized intent is ephemeral, never retained State or a second backend path. | Module-owned connection identity and active input policy. |
 | Harness shortcut | Host keyboard arbiter -> App command owner | Harness action, with no duplicate terminal forwarding. | Keydown decision before engine processing. |
 | Terminal key | Host keyboard arbiter fallthrough -> engine | Engine emits encoded input to backend. | Same key event, once. |
-| Host geometry | Target/font/DPR observers -> Host Capability -> character-cell resize request -> App backend/PTY | Engine and process converge on rows/columns; result fact updates after acknowledgement. | Monotonic resize revision; stale results ignored. |
-| Focus request or user entry | Focus domain -> Host Capability -> physical engine input target | One focused logical terminal surface; focus facts return through Focus. | Current view/lease epoch. |
+| Host geometry | Target/font/DPR observers -> Host Capability -> character-cell resize request -> App backend/PTY | Engine and process converge on rows/columns; applied/rejected result carries the acknowledged revision and effective dimensions. | Monotonic resize revision within the Module-owned connection identity; stale results ignored. |
+| Focus request or user entry | Focus domain -> Host Capability's focus bridge -> physical engine input target | One focused logical terminal surface; focus facts return only through Focus. | Current Focus/view epoch; Terminal facts do not duplicate focused state. |
 | Accessible terminal content | Engine buffer -> host accessibility bridge | Platform screen reader navigates bounded/current content. | Host accessibility lifecycle; not generic Proto State. |
 | Bell/error | Engine/host -> normalized attention fact -> App/composition policy | Bounded visual/audible/status response respecting user settings. | Deduplicated semantic signal, not per-cell output. |
 
@@ -116,11 +116,37 @@ The connection callbacks below are Module-to-Host internals. They are not Protot
 ```ts
 type TerminalSize = Readonly<{ columns: number; rows: number; revision: number }>;
 
+type TerminalUnavailableReason =
+  | 'engine-unavailable'
+  | 'backend-unavailable'
+  | 'input-unavailable'
+  | 'accessibility-unavailable'
+  | 'resize-unavailable'
+  | 'backend-rejected';
+
+type TerminalResizeResult = Readonly<{
+  revision: number;
+  outcome: 'applied' | 'rejected';
+  requested: Readonly<{ columns: number; rows: number }>;
+  effective: Readonly<{ columns: number; rows: number }> | null;
+  reason: TerminalUnavailableReason | null;
+}>;
+
+type TerminalSurfaceSupport = Readonly<{
+  input: 'available' | 'read-only' | 'unavailable';
+  resize: 'available' | 'unavailable';
+  accessibility: 'host-bridge' | 'bounded-snapshot' | 'unavailable';
+  reasons: readonly TerminalUnavailableReason[];
+}>;
+
 type TerminalSurfacePatch = Readonly<{
   sessionId: string;
   readOnly: boolean;
   inputEnabled: boolean;
   shortcutPolicyId: string;
+  accessibleLabel: string;
+  accessibleDescription?: string;
+  connectionStatus: 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 }>;
 
 type TerminalInputIntent =
@@ -136,27 +162,27 @@ type TerminalInputIntent =
     }>;
 
 type TerminalSurfaceFacts = Readonly<{
-  epoch: number;
   attachment: 'detached' | 'attaching' | 'ready' | 'unavailable' | 'error';
-  focused: boolean;
   composing: boolean;
   columns: number | null;
   rows: number | null;
-  accessibility: 'host-bridge' | 'bounded-snapshot' | 'unavailable';
+  title: string | null;
+  support: TerminalSurfaceSupport;
+  lastResize: TerminalResizeResult | null;
 }>;
 
 type TerminalSurfaceConnection = Readonly<{
+  // Issued and retired by the Module; callback closures reject any retired identity.
+  connectionId: string;
   patch: TerminalSurfacePatch;
-  onFacts(facts: TerminalSurfaceFacts): void;
-  onInput(intent: TerminalInputIntent): void;
-  onResizeRequest(size: TerminalSize): void;
-  onAttention(kind: 'bell' | 'error'): void;
+  onFacts(connectionId: string, facts: TerminalSurfaceFacts): void;
+  onInput(connectionId: string, intent: TerminalInputIntent): void;
+  onResizeRequest(connectionId: string, size: TerminalSize): void;
+  onAttention(connectionId: string, kind: 'bell' | 'error'): void;
 }>;
 
 type TerminalSurfaceLease = Readonly<{
   update(patch: TerminalSurfacePatch): void;
-  requestFocus(): void;
-  requestBlur(): void;
   requestResize(size: TerminalSize): void;
   snapshot(): TerminalSurfaceFacts;
   dispose(): void;
@@ -167,16 +193,17 @@ type TerminalSurfaceHost = Readonly<{
 }>;
 ```
 
-A fake host is constructed with a private map from `sessionId` to scripted fake engine; the map and engine never enter `TerminalSurfacePatch`. The red-first exercise is:
+A fake host is constructed with a private map from `sessionId` to a scripted fake engine and fake backend sink; the map, engine, sink, and engine-encoded bytes never enter `TerminalSurfacePatch`. The Module issues a unique connection identity and retires its callback closure before replacement. The red-first exercise is:
 
-1. attach `session-7`; receive `attaching`, then `ready` with 80x24;
-2. emit committed text and one modified key as immutable intent values;
-3. issue resize revisions 1/2/3 and accept only revision 3 at 120x40;
-4. replace the target/engine and verify the old lease is disposed before the new epoch reports facts;
-5. dispose, then make the old fake emit input, resize, bell, and error; observe zero callbacks;
-6. recursively validate every captured patch/fact/request as data-only and prove that no fake-engine identity, target, buffer, stream, callback source, or cell grid appears.
+1. attach `session-7`; receive `attaching`, then `ready` with 80x24, explicit input/resize/accessibility support, accessible label/description, and connected status;
+2. emit committed text and one modified key as immutable intent values, while asserting the private fake backend receives each engine-encoded sequence exactly once and no normalized-intent callback becomes a second send path;
+3. issue resize revisions 1/2/3; report revision 2 as rejected and revision 3 as applied at 120x40; accept only revision 3 as current facts;
+4. replace the target/engine; retire the Module-owned connection identity and dispose the old lease before a new connection is issued, even if the new host's internal counters restart;
+5. simulate missing engine, input, accessibility, and resize support and assert the bounded support/reason codes identify the failed requirement;
+6. dispose, then make the old fake emit input, resize, bell, error, and focus; observe zero Terminal callbacks and zero backend writes, while focus state remains solely in the Focus domain;
+7. recursively validate every captured patch/fact/request as data-only and prove that no fake-engine identity, target, buffer, stream, backend sink, callback source, or cell grid appears.
 
-This sketch proves the boundary can be data-only. It does not prove browser layout, IME, screen-reader behavior, native focus, key routing, renderer performance, or an Adapter profile.
+This sketch proves the boundary can be data-only and makes resize/result, diagnostic, accessibility-input, connection-identity, backend-delivery, and Focus ownership testable. It does not prove browser layout, IME, screen-reader behavior, native focus, key routing, renderer performance, or an Adapter profile.
 
 ## Input, shortcut, and focus policy
 
@@ -195,7 +222,7 @@ This sketch proves the boundary can be data-only. It does not prove browser layo
 - The engine/Host Capability owns the mutable screen representation, cursor/selection mapping, row navigation, terminal modes, and platform accessibility API. Proto UI does not set a generic `textbox`, `application`, or `log` role for every terminal host.
 - Streaming screen diffs never feed a generic Proto UI live region. The host bridge may announce bounded output according to engine/platform policy; App-level announcements are limited to state transitions such as connected, disconnected, input disabled, or a deduplicated bell/error.
 - Engine-local keyboard selection and copy remain available when the host supports them. Any composition-provided Copy/Search control is a separately admitted ordinary Proto UI control invoking a host/App request; selected text and Clipboard contents stay outside portable state.
-- Zoom, reflow, font metrics, glyph width, high contrast, cursor contrast, selection contrast, and screen-reader row geometry remain host/engine responsibilities. Resize results expose only rows/columns. Reduced-motion policy disables or reduces visual bell/cursor animation through host settings; the semantic attention fact is unchanged.
+- Zoom, reflow, font metrics, glyph width, high contrast, cursor contrast, selection contrast, and screen-reader row geometry remain host/engine responsibilities. Resize results expose rows/columns plus acknowledged revision and applied/rejected outcome. Reduced-motion policy disables or reduces visual bell/cursor animation through host settings; the semantic attention fact is unchanged.
 - A non-Web profile may use UI Automation or another native accessibility API and may degrade explicitly. Passing WC/React/Vue tests on the Web host cannot establish non-Web conformance.
 
 ## Performance, scrollback, and lifecycle
@@ -210,13 +237,13 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 
 ### Lifecycle rules
 
-- One logical instance holds one current lease epoch. Detach, target replacement, engine replacement, session switch, capability replacement, and disposal revoke the old epoch before attaching another.
-- Every input, fact, resize result, accessibility callback, title, bell, and error is epoch/revision checked. Late callbacks are ignored.
-- `dispose()` removes keyboard/composition/paste/pointer/focus listeners, geometry/DPR observers, accessibility nodes/listeners, engine subscriptions, renderer resources owned by the lease, target references, and backend-sink references.
+- One logical instance holds one Module-owned connection identity for the current lease. Detach, target replacement, engine replacement, session switch, capability replacement, and disposal retire the callback closure before attaching another; host-authored counters never decide freshness.
+- Every input, fact, resize result, accessibility callback, title, bell, and error is checked against the current connection identity and request revision. Late callbacks are ignored.
+- `dispose()` removes keyboard/composition/paste/pointer listeners, the Focus-domain target bridge, geometry/DPR observers, accessibility nodes/listeners, engine subscriptions, renderer resources owned by the lease, target references, and backend-sink references.
 - Disposing a view lease does **not** terminate the process or PTY. The App/backend owns explicit process stop and decides whether detach preserves or closes a session.
 - If the Host Capability created an engine for the lease, it disposes that engine after draining/revoking its callbacks. If the host injected a shared engine, the lease only detaches its owned bindings. Ownership must be explicit; double-disposal is an error.
-- Resize bursts are latest-revision-wins. The host coalesces geometry changes, the backend result confirms applied/rejected size, and replacement/disposal cancels pending work.
-- Unsupported engine attachment, input bridge, accessibility route, or resize must fail closed to `unavailable`/read-only with reason; no fake success state.
+- Resize bursts are latest-revision-wins. The host coalesces geometry changes; the backend result carries the acknowledged revision, applied/rejected outcome, effective dimensions, and bounded reason; replacement/disposal cancels pending work.
+- Unsupported engine attachment, backend sink, input bridge, accessibility route, or resize reports `unavailable`/read-only plus a bounded per-feature reason code; no fake success state.
 
 ## Proposed entity and evidence graph
 
@@ -242,12 +269,12 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** compile-time and runtime fixtures reject engine, target, buffer, stream, DOM/native event, mutable controller, raw pixels, cell grids, and functions in portable patch/fact/request values.
-2. **Fake lease:** attach/update/snapshot/dispose, missing capability, target/engine replacement, session switch, exactly-once cleanup, and stale-epoch suppression.
-3. **Input policy:** IME candidate stays host-local; committed text emits once; reserved Harness chord stays local; other modified keys reach the engine once; bare Escape reaches the engine; F6 exits.
-4. **Resize:** invalid/zero dimensions reject; bursts coalesce to the newest revision; applied/rejected result is revision-bound; late results do not change current facts.
+1. **Portable negatives:** compile-time and runtime fixtures reject engine, target, buffer, stream, DOM/native event, mutable controller, raw pixels, cell grids, backend sink, and functions in portable patch/fact/request values.
+2. **Fake lease:** attach/update/snapshot/dispose, missing capability, target/engine replacement, session switch, exactly-once cleanup, Module-owned connection retirement, and stale-callback suppression even when host counters collide.
+3. **Input policy:** IME candidate stays host-local; committed text emits once; the private backend sink receives the engine-encoded sequence once; normalized intents cannot double-send; reserved Harness chord stays local; other modified keys reach the engine once; bare Escape reaches the engine; F6 exits through Focus.
+4. **Resize:** invalid/zero dimensions reject; bursts coalesce to the newest revision; applied/rejected result contains acknowledged revision/effective dimensions/reason; late or older results do not change current facts.
 5. **Performance:** replay rapid cursor/grid/alternate-screen updates and assert zero portable content publications/allocations; only deduplicated low-cardinality facts cross.
-6. **Accessibility fake:** support negotiation, label/mode/status, bounded attention, unavailable degradation, and no generic live-stream snapshot.
+6. **Accessibility fake:** label/description/status inputs, per-feature support/reason negotiation, bounded attention, unavailable degradation, and no generic live-stream snapshot.
 7. **Real Web:** engine double mounted behind React; real keyboard/IME/focus/F6/resize/target replacement/dispose; accessibility-tree inspection; high-frequency renderer path; no retained listeners/observers/targets.
 8. **Cross-adapter Web only if claimed:** WC/React/Vue evidence for one admitted portable authoring source. This remains Web evidence.
 9. **Non-Web:** independent native profile with native focus/input/resize/accessibility evidence before any multi-host statement.
