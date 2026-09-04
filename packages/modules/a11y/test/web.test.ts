@@ -107,8 +107,9 @@ describe('module-a11y web projector', () => {
       actions: {},
       relations: {},
       tree: undefined,
-      level: undefined,
+      level: 2,
     });
+    expect(target.getAttribute('aria-level')).toBe('7');
     project.clearHeadingLevel?.();
 
     expect(target.getAttribute('aria-level')).toBe('7');

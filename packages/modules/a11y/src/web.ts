@@ -137,10 +137,7 @@ export function applyWebA11ySnapshot(
   const level = resolveWebHeadingLevel(snapshot);
   if (typeof level !== 'undefined') {
     setOptionalAttr(el, 'aria-level', String(level));
-  } else if (
-    typeof snapshot.level !== 'undefined' ||
-    typeof previousSnapshot?.level !== 'undefined'
-  ) {
+  } else if (previousSnapshot && typeof resolveWebHeadingLevel(previousSnapshot) !== 'undefined') {
     el.removeAttribute('aria-level');
   }
 
