@@ -192,20 +192,42 @@ test('rejects Web Component Adapter evidence inside the native/static shell clos
   );
 });
 
-test('allows the reviewed site Shadcn Web Component adapter in an approved shell closure', () => {
+test('allows Adapter modules only in the exact reviewed site-control bridge chunk', () => {
   const graph = graphFixture();
-  graph.chunks[0].moduleIds.push('apps/www/src/components/site-shadcn-controls.ts');
   graph.chunks[0].imports.push('_astro/site-shadcn-controls.js');
   graph.chunks.push(
     chunk('_astro/site-shadcn-controls.js', {
       moduleIds: [
         'apps/www/src/components/site-shadcn-controls.ts',
+        'packages/adapters/base/src/host/adapter-host.ts',
         'packages/adapters/web-component/src/adapt.ts?used',
       ],
     })
   );
 
   assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+});
+
+test('does not let the reviewed site-control bridge exempt a sibling Adapter chunk', () => {
+  const graph = graphFixture();
+  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js', '_astro/sibling-adapter.js');
+  graph.chunks.push(
+    chunk('_astro/site-shadcn-controls.js', {
+      moduleIds: [
+        'apps/www/src/components/site-shadcn-controls.ts',
+        'packages/adapters/web-component/src/adapt.ts?used',
+      ],
+    }),
+    chunk('_astro/sibling-adapter.js', {
+      moduleIds: ['packages/adapters/web-component/src/runtime/session.ts'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('packages/adapters/web-component/src/runtime/session.ts')
+    )
+  );
 });
 
 test('treats an unproven null-facade entry as a shell root', () => {

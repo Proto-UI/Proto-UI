@@ -1,0 +1,43 @@
+name: Coverage governance drift
+
+on:
+  issues:
+    types:
+      [
+        opened,
+        edited,
+        closed,
+        reopened,
+        assigned,
+        unassigned,
+        labeled,
+        unlabeled,
+        milestoned,
+        demilestoned,
+      ]
+  schedule:
+    - cron: '23 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Compare retained dependency governance with GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check

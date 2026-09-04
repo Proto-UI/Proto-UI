@@ -283,13 +283,23 @@ export function collectWebsiteProductionBundleIssues({
     }
   }
 
+  const reviewedWebsiteControlChunks = new Set(
+    chunks
+      .filter((chunk) =>
+        chunk.moduleIds.some(
+          (moduleId) => moduleIdWithoutQuery(moduleId) === REVIEWED_WEBSITE_CONTROL_MODULE
+        )
+      )
+      .map((chunk) => chunk.fileName)
+  );
+  if (reviewedWebsiteControlChunks.size > 1) {
+    issues.push(
+      `production bundle graph must contain at most one exact reviewed Website control bridge chunk (found ${reviewedWebsiteControlChunks.size})`
+    );
+  }
+
   for (const shellRoot of shellRoots) {
     const shellClosure = closure(chunksByFileName, shellRoot.fileName, ['imports']);
-    const reviewedSiteControlShell = [...shellClosure].some((fileName) =>
-      (chunksByFileName.get(fileName)?.moduleIds ?? []).some(
-        (moduleId) => moduleIdWithoutQuery(moduleId) === REVIEWED_WEBSITE_CONTROL_MODULE
-      )
-    );
     const leakedModules = new Set();
     for (const fileName of shellClosure) {
       const chunk = chunksByFileName.get(fileName);
@@ -297,7 +307,10 @@ export function collectWebsiteProductionBundleIssues({
         const isFrameworkModule = forbiddenFrameworkFamily(moduleId) !== null;
         const isUnapprovedAdapter =
           isProtoUiAdapterModule(moduleId) &&
-          !(reviewedSiteControlShell && isReviewedWebsiteControlAdapterModule(moduleId));
+          !(
+            reviewedWebsiteControlChunks.has(fileName) &&
+            isReviewedWebsiteControlAdapterModule(moduleId)
+          );
         if (isFrameworkModule || isUnapprovedAdapter) leakedModules.add(moduleId);
       }
     }

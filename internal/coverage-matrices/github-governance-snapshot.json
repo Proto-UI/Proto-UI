@@ -1,0 +1,621 @@
+{
+  "schemaVersion": 1,
+  "repository": "Proto-UI/Proto-UI",
+  "issues": [
+    {
+      "number": 374,
+      "nodeId": "I_kwDOMhQZjc8AAAABMjhekQ",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/374",
+      "title": "[implementation][image] Deliver Base Image host-mediated semantic slices",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-09-01T21:05:51Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": "v0.3 — November 2026 Release Baseline",
+      "owners": [
+        "attachment, file intake, and image maintainers",
+        "image and workspace maintainers"
+      ]
+    },
+    {
+      "number": 377,
+      "nodeId": "I_kwDOMhQZjc8AAAABMmjOVA",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/377",
+      "title": "[tracking] Maintain the v0.3 Prototype Coverage Matrix",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-31T21:43:41Z",
+      "labels": ["F3 – Moderate", "area: prototypes", "documentation"],
+      "assignees": ["guangliang2019"],
+      "milestone": null,
+      "owners": [
+        "base input and brutalist maintainers",
+        "input projection and harness maintainers",
+        "lucide prototype library"
+      ]
+    },
+    {
+      "number": 384,
+      "nodeId": "I_kwDOMhQZjc8AAAABMmlRyg",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/384",
+      "title": "[brutalist] Project Base Checkbox into the Brutalist design language",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-09-01T13:48:34Z",
+      "labels": ["F3 – Moderate", "area: prototypes", "help wanted"],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["tree, workspace, and brutalist checkbox maintainers"]
+    },
+    {
+      "number": 388,
+      "nodeId": "I_kwDOMhQZjc8AAAABMnTzqQ",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/388",
+      "title": "[implementation][disclosure] Deliver Base Collapsible and Accordion",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-09-02T09:06:57Z",
+      "labels": [
+        "F5 - Large",
+        "advanced contribution",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "app-local and disclosure maintainers",
+        "disclosure domain and website reading",
+        "disclosure domain plus website ia",
+        "disclosure domain plus website shell",
+        "disclosure/button domains plus website examples",
+        "overlay/a11y domains plus website knowledge",
+        "scroll/collection domains plus website reading"
+      ]
+    },
+    {
+      "number": 420,
+      "nodeId": "I_kwDOMhQZjc8AAAABM4Qycg",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/420",
+      "title": "[tracking][www] Self-host every eligible website UI surface with Proto UI",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-31T21:09:09Z",
+      "labels": [
+        "F∞ – Needs Split",
+        "advanced contribution",
+        "area: adapters",
+        "area: prototypes",
+        "area: website",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": "Website Self-Hosting — Complete Proto UI Dogfood",
+      "owners": [
+        "a11y/async domains plus website search",
+        "adapter documentation",
+        "adapter maintainers plus website demos",
+        "brutalist badge domain plus website specs",
+        "brutalist library plus website demos",
+        "button/a11y domains plus website docs",
+        "button/a11y domains plus website examples",
+        "button/a11y domains plus website gallery",
+        "button/collection domains plus website gallery",
+        "dialog domain plus website gallery",
+        "dialog domain plus website search",
+        "disclosure domain and website reading",
+        "disclosure domain plus website ia",
+        "disclosure domain plus website shell",
+        "disclosure/button domains plus website examples",
+        "input/collection domains plus website gallery",
+        "input/collection domains plus website search",
+        "input/dialog/button domains plus website search",
+        "lucide prototype library",
+        "overlay/a11y domains plus website knowledge",
+        "radio group/textarea/transition domains plus website demos",
+        "scroll/collection domains plus website reading",
+        "select domain and website theming",
+        "select domain plus examples",
+        "select domain plus localization",
+        "select/tabs domains plus website demos",
+        "select/tabs/collection domains plus website landing page",
+        "shadcn prototype and website shell",
+        "tabs domain plus website examples",
+        "tabs/disclosure domains plus website demos",
+        "tabs/toggle group domains plus website docs",
+        "toggle domain plus website theming",
+        "website gallery",
+        "website information architecture and spec governance",
+        "website maintainers",
+        "website navigation plus motion/scroll reviewers",
+        "website platform",
+        "website prototypes"
+      ]
+    },
+    {
+      "number": 495,
+      "nodeId": "I_kwDOMhQZjc8AAAABN8Nyhg",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/495",
+      "title": "[proposal] Define interaction extensibility primitives for drag-to-value, sliding indicators, and interruptible value motion",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-27T19:09:29Z",
+      "labels": ["advanced contribution", "area: prototypes", "area: spec", "enhancement"],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["resizable and interaction-extensibility maintainers"]
+    },
+    {
+      "number": 513,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKWf7Q",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/513",
+      "title": "[tracking][dogfood] Build a full Agent Harness interface with Proto UI",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-27T18:17:52Z",
+      "labels": [
+        "F∞ – Needs Split",
+        "advanced contribution",
+        "area: adapters",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["app/backend integration owner"]
+    },
+    {
+      "number": 515,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKXUug",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/515",
+      "title": "[dogfood][agent-harness] Build the first fixed-layout all-Proto Harness vertical slice",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-27T19:08:31Z",
+      "labels": ["advanced contribution", "area: adapters", "area: prototypes", "enhancement"],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "announcement-policy and harness implementers",
+        "artifact workspace implementer",
+        "harness implementer",
+        "harness implementer, with scroll catalog lifecycle respected",
+        "input projection and harness maintainers"
+      ]
+    },
+    {
+      "number": 516,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKXnhg",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/516",
+      "title": "[implementation][chatui] Build the first private Message composition slice for Harness dogfood",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-29T04:54:23Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "app content infrastructure owner",
+        "app content renderer",
+        "private message composition maintainer"
+      ]
+    },
+    {
+      "number": 517,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKX2_Q",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/517",
+      "title": "[implementation][chatui] Build the first private Code Block composition slice for Harness dogfood",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-29T05:20:09Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "app highlighting infrastructure owner",
+        "code block and workspace maintainers",
+        "private code block composition maintainer"
+      ]
+    },
+    {
+      "number": 518,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKYVtA",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/518",
+      "title": "[proposal][chatui] Define a bounded Composer composition over Textarea and Button",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:04Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "composer implementer",
+        "composer implementer consuming existing textarea",
+        "private composer composition maintainer"
+      ]
+    },
+    {
+      "number": 519,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKYsug",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/519",
+      "title": "[proposal][scroll] Define end-follow behavior for streaming and append-only surfaces",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:11Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "collection/windowing maintainer",
+        "scroll anchor maintainer",
+        "scroll end-follow maintainer"
+      ]
+    },
+    {
+      "number": 520,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKZARw",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/520",
+      "title": "[proposal][scroll] Define visual-anchor preservation across prepend and content reflow",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:19Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["collection/windowing maintainer", "scroll anchor maintainer"]
+    },
+    {
+      "number": 521,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKZWqQ",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/521",
+      "title": "[proposal][collection] Define windowed collection and virtual viewport semantics for long dynamic timelines",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:26Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["collection/windowing maintainer"]
+    },
+    {
+      "number": 522,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKZu0A",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/522",
+      "title": "[proposal][resizable] Define a bounded two-pane Resizable semantic slice for workbench layouts",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:33Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["harness implementer", "resizable and interaction-extensibility maintainers"]
+    },
+    {
+      "number": 523,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKaOtA",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/523",
+      "title": "[proposal][tree] Define a hierarchical Tree family for files, plans, sessions, and subagents",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:40Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "app-local and tree maintainers",
+        "harness implementer",
+        "tree maintainer",
+        "tree, workspace, and brutalist checkbox maintainers"
+      ]
+    },
+    {
+      "number": 524,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKanmg",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/524",
+      "title": "[dogfood][agent-harness] Define app-local Tool Invocation and Approval Request prototypes",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-25T11:41:06Z",
+      "labels": ["advanced contribution", "area: prototypes", "enhancement"],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["app-local prototype implementer"]
+    },
+    {
+      "number": 525,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKa5Iw",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/525",
+      "title": "[dogfood][agent-harness] Define app-local Reasoning Trace, Run Status, and Agent Lane prototypes",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-25T11:41:40Z",
+      "labels": ["advanced contribution", "area: prototypes", "enhancement"],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "announcement-policy and harness implementers",
+        "app-local and disclosure maintainers",
+        "app-local and tree maintainers",
+        "app-local prototype implementer"
+      ]
+    },
+    {
+      "number": 526,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKbOOw",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/526",
+      "title": "[proposal][composition] Define a Questionnaire and review-action composition for human input gates",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:48Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["composition and input maintainers"]
+    },
+    {
+      "number": 527,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKbs8Q",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/527",
+      "title": "[proposal][file-intake] Define a host-mediated file acquisition capability for pick, drop, and paste",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:17:55Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["attachment, file intake, and image maintainers", "file intake maintainer"]
+    },
+    {
+      "number": 528,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKcBug",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/528",
+      "title": "[proposal][composition] Define an Attachment composition for Composer and Message surfaces",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T01:18:03Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: prototypes",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "attachment composition maintainer",
+        "attachment, file intake, and image maintainers"
+      ]
+    },
+    {
+      "number": 529,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKcXlg",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/529",
+      "title": "[dogfood][agent-harness] Build app-local Artifact Workspace and static Diff Review compositions",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-25T11:44:32Z",
+      "labels": ["advanced contribution", "area: prototypes", "enhancement"],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "app diff infrastructure owner",
+        "artifact workspace implementer",
+        "code block and workspace maintainers",
+        "image and workspace maintainers",
+        "tree, workspace, and brutalist checkbox maintainers"
+      ]
+    },
+    {
+      "number": 530,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKc1Ow",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/530",
+      "title": "[research][terminal] Define the Terminal Surface boundary for later Agent Harness work",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-31T20:25:13Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["app/backend terminal infrastructure owner", "terminal research maintainer"]
+    },
+    {
+      "number": 531,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKdMVQ",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/531",
+      "title": "[research][text-document] Define the editor/document surface boundary for later Agent Harness work",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-31T20:23:25Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["app editor infrastructure owner", "text document research maintainer"]
+    },
+    {
+      "number": 532,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKdjxA",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/532",
+      "title": "[research][preview-surface] Define the sandboxed preview/browser boundary for later Agent Harness work",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-28T20:02:09Z",
+      "labels": [
+        "advanced contribution",
+        "agent-ready",
+        "area: adapters",
+        "area: spec",
+        "enhancement"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["app security/preview infrastructure owner", "preview surface research maintainer"]
+    },
+    {
+      "number": 533,
+      "nodeId": "I_kwDOMhQZjc8AAAABOKd-Og",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/533",
+      "title": "[dogfood][agent-harness] Enforce the Proto UI-only consumer and state-machine boundary",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-31T20:50:48Z",
+      "labels": ["advanced contribution", "area: adapters", "area: prototypes", "enhancement"],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["consumer-boundary maintainer"]
+    },
+    {
+      "number": 558,
+      "nodeId": "I_kwDOMhQZjc8AAAABOe8wAA",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/558",
+      "title": "[dogfood][agent-harness] Define app-local branch and checkpoint navigation",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-27T11:22:20Z",
+      "labels": ["advanced contribution", "area: prototypes", "enhancement"],
+      "assignees": [],
+      "milestone": null,
+      "owners": ["app-local branch/checkpoint maintainer"]
+    },
+    {
+      "number": 559,
+      "nodeId": "I_kwDOMhQZjc8AAAABOf0erg",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/559",
+      "title": "[research][www] Define native-anchor navigation and action visual ownership",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-31T16:36:51Z",
+      "labels": [
+        "advanced contribution",
+        "area: spec",
+        "area: website",
+        "enhancement",
+        "needs semantic decision"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "website information architecture and spec governance",
+        "website landing page and spec governance",
+        "website shell and spec governance"
+      ]
+    },
+    {
+      "number": 561,
+      "nodeId": "I_kwDOMhQZjc8AAAABOgwkcw",
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/561",
+      "title": "[dogfood][www] Govern inherited Expressive Code runtime controls",
+      "state": "OPEN",
+      "stateReason": null,
+      "updatedAt": "2026-08-31T16:35:48Z",
+      "labels": [
+        "advanced contribution",
+        "area: adapters",
+        "area: website",
+        "enhancement",
+        "needs evidence"
+      ],
+      "assignees": [],
+      "milestone": null,
+      "owners": [
+        "button/a11y domains and website documentation",
+        "scroll/a11y domains and website documentation"
+      ]
+    }
+  ],
+  "pullRequests": [
+    {
+      "number": 580,
+      "nodeId": "PR_kwDOMhQZjc8AAAABBpziKw",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/580",
+      "title": "fix(www): restore documentation content flow rhythm",
+      "state": "MERGED",
+      "updatedAt": "2026-09-03T08:59:01Z",
+      "headSha": "2a6d5f3208d91e5c9862a67408a39ff208d43306",
+      "mergeCommit": "9841c86a10940267fb30ee25b63c9a5a39f76fe6"
+    }
+  ]
+}

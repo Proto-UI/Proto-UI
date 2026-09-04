@@ -55,6 +55,8 @@
     "check:component-presets": "node --import tsx scripts/components/generate-shadcn-component-presets.mjs --check",
     "check:prototype-catalog": "node scripts/spec/check-prototype-catalog.mjs",
     "check:coverage-matrices": "node scripts/coverage-matrices/check-coverage-matrices.mjs && node --test scripts/coverage-matrices/test/*.test.mjs",
+    "coverage:governance:refresh": "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --write",
+    "check:coverage-governance-live": "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check",
     "check:website-production-bundle": "corepack pnpm@10.32.1 -s docs:build && node scripts/coverage-matrices/check-website-production-bundle.mjs",
     "check:public-docs": "node scripts/docs/check-public-docs.mjs",
     "check:autonomous-review": "node scripts/autonomous-maintenance/check-review-packets.mjs",

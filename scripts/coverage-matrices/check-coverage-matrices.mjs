@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import { builtinModules } from 'node:module';
 import path from 'node:path';
@@ -22,14 +24,17 @@ const INTERACTIVE_SOURCE_PATTERNS = Object.freeze([
   /\b[A-Za-z_$][\w$]*\.on[a-z][A-Za-z0-9_$]*\s*=/u,
 ]);
 
-function collectNativeEventAttributeNames() {
+const LIB_DOM_SOURCE_FILE = (() => {
   const libDomPath = path.join(path.dirname(ts.getDefaultLibFilePath({})), 'lib.dom.d.ts');
-  const sourceFile = ts.createSourceFile(
+  return ts.createSourceFile(
     libDomPath,
     fs.readFileSync(libDomPath, 'utf8'),
     ts.ScriptTarget.Latest,
     true
   );
+})();
+
+function collectNativeEventAttributeNames() {
   const names = new Set();
   const containsFunctionType = (node) => {
     let found = false;
@@ -53,8 +58,20 @@ function collectNativeEventAttributeNames() {
     }
     ts.forEachChild(node, visit);
   };
-  visit(sourceFile);
+  visit(LIB_DOM_SOURCE_FILE);
   return names;
+}
+
+function collectAriaReflectionPropertyNames() {
+  const ariaMixin = LIB_DOM_SOURCE_FILE.statements.find(
+    (statement) => ts.isInterfaceDeclaration(statement) && statement.name.text === 'ARIAMixin'
+  );
+  if (!ariaMixin) return new Set();
+  return new Set(
+    ariaMixin.members
+      .filter((member) => ts.isPropertySignature(member) && ts.isIdentifier(member.name))
+      .map((member) => member.name.text)
+  );
 }
 
 // Lowercase inline HTML handlers must be real DOM event attributes. Camel-cased
@@ -62,6 +79,7 @@ function collectNativeEventAttributeNames() {
 // define their own `onXxx` semantic events.
 const NATIVE_EVENT_ATTRIBUTE_NAMES = collectNativeEventAttributeNames();
 const GOVERNED_DOM_STATE_PROPERTY_NAMES = new Set([
+  ...collectAriaReflectionPropertyNames(),
   'scrollLeft',
   'scrollTop',
   'selectionDirection',
@@ -460,6 +478,30 @@ const AGENT_HARNESS_SURFACE_IDS = Object.freeze([
   'harness.shared.icons',
 ]);
 
+const WEBSITE_DOCUMENT_SEMANTICS_CLOSURE = Object.freeze({
+  issue: 579,
+  pullRequest: 580,
+  implementationHead: '2a6d5f3208d91e5c9862a67408a39ff208d43306',
+  routes: Object.freeze([
+    '/en/ui-libraries/shadcn/select/',
+    '/zh-cn/ui-libraries/shadcn/select/',
+    '/en/start-here/quick-start/',
+    '/zh-cn/start-here/quick-start/',
+  ]),
+  repositoryPaths: Object.freeze([
+    'apps/www/src/components/override/MarkdownContent.astro',
+    'apps/www/src/styles/markdown.css',
+    'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
+    'docs/evidence/579-docs-content-flow',
+  ]),
+  reReviewPhrases: Object.freeze([
+    'MarkdownContent override',
+    'docs-flow selectors',
+    'Starlight reset behavior',
+    'MarkdownContent/Starlight',
+  ]),
+});
+
 export const MATRIX_CONFIGS = Object.freeze([
   Object.freeze({
     kind: 'website',
@@ -496,6 +538,12 @@ export const MATRIX_CONFIGS = Object.freeze([
     }),
     requiredRepositoryPathsByRow: Object.freeze({
       ...WEBSITE_NON_INTERACTIVE_PATHS,
+    }),
+    requiredInlineCodeByRow: Object.freeze({
+      'www.search.input-results': Object.freeze(['@pagefind/default-ui']),
+    }),
+    closureBindingsByRow: Object.freeze({
+      'www.content.document-semantics': WEBSITE_DOCUMENT_SEMANTICS_CLOSURE,
     }),
     inheritedSurfaceManifests: Object.freeze([
       Object.freeze({
@@ -770,9 +818,27 @@ function rowRecord(headers, cells) {
 function includesIssue(value) {
   return /(^|\D)#\d+\b/.test(value);
 }
+function issueBindings(value) {
+  return [...value.matchAll(/#([1-9]\d*)\b/gu)].map((match) => {
+    const suffix = value.slice((match.index ?? 0) + match[0].length);
+    const linkedUrl =
+      value[(match.index ?? 0) - 1] === '[' ? (suffix.match(/^\]\(([^)]+)\)/u)?.[1] ?? null) : null;
+    return { number: Number(match[1]), linkedUrl };
+  });
+}
 
 function labeledValue(value, labelPattern) {
   return value.match(new RegExp(`\\b(?:${labelPattern})\\s*:\\s*([^;|]+)`, 'i'))?.[1].trim();
+}
+
+function normalizedOwnerToken(value) {
+  const owner = labeledValue(value, 'owners?');
+  return (
+    owner
+      ?.split(/[.!?。！？]/u, 1)[0]
+      .trim()
+      .toLowerCase() || null
+  );
 }
 
 function includesConcreteOwnerLabel(value) {
@@ -828,7 +894,7 @@ function explicitRepositoryPaths(value) {
   const paths = [];
   for (const match of value.matchAll(/`([^`\r\n]+)`/g)) {
     const candidate = match[1].trim().replaceAll('\\', '/');
-    if (!/^(?:apps|packages|scripts|spec|internal)\//.test(candidate)) continue;
+    if (!/^(?:apps|docs|packages|scripts|spec|internal)\//.test(candidate)) continue;
     if (/[?*{}\[\]]/.test(candidate) || candidate.split('/').includes('..')) continue;
     paths.push(candidate);
   }
@@ -839,7 +905,7 @@ function repositoryPathsFromMatrixPath(value) {
   const paths = explicitRepositoryPaths(value);
   const candidate = value.trim().replaceAll('\\', '/');
   if (
-    /^(?:apps|packages|scripts|spec|internal)\/[A-Za-z0-9._@+()/-]+$/u.test(candidate) &&
+    /^(?:apps|docs|packages|scripts|spec|internal)\/[A-Za-z0-9._@+()/-]+$/u.test(candidate) &&
     !candidate.split('/').includes('..')
   ) {
     paths.push(candidate);
@@ -885,6 +951,78 @@ function loadCatalogEntries(rootDir, issues) {
     entries.set(idResult.data, { absolutePath, status: statusResult.data });
   }
   return entries;
+}
+function loadGovernanceSnapshot(rootDir, issues) {
+  const relativePath = 'internal/coverage-matrices/github-governance-snapshot.json';
+  const absolutePath = path.join(rootDir, relativePath);
+  if (!fs.existsSync(absolutePath)) {
+    issues.push(`${relativePath}: repository-owned governance snapshot is missing`);
+    return { issues: new Map(), pullRequests: new Map() };
+  }
+  let snapshot;
+  try {
+    snapshot = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+  } catch (error) {
+    issues.push(`${relativePath}: governance snapshot is invalid JSON: ${error.message}`);
+    return { issues: new Map(), pullRequests: new Map() };
+  }
+  if (
+    snapshot?.schemaVersion !== 1 ||
+    snapshot.repository !== 'Proto-UI/Proto-UI' ||
+    !Array.isArray(snapshot.issues)
+  ) {
+    issues.push(
+      `${relativePath}: snapshot must use schemaVersion 1, repository Proto-UI/Proto-UI, and an issues array`
+    );
+    return { issues: new Map(), pullRequests: new Map() };
+  }
+  const issueMap = new Map();
+  let previousNumber = 0;
+  for (const issue of snapshot.issues) {
+    const number = issue?.number;
+    const canonicalUrl = `https://github.com/Proto-UI/Proto-UI/issues/${number}`;
+    const owners = issue?.owners;
+    if (!Number.isSafeInteger(number) || number <= 0 || issueMap.has(number)) {
+      issues.push(`${relativePath}: every Issue must have a unique positive integer number`);
+      continue;
+    }
+    if (number <= previousNumber) {
+      issues.push(`${relativePath}: Issue entries must be sorted by ascending number`);
+    }
+    previousNumber = number;
+    if (
+      typeof issue.nodeId !== 'string' ||
+      issue.nodeId.length === 0 ||
+      issue.url !== canonicalUrl ||
+      typeof issue.title !== 'string' ||
+      issue.title.length === 0 ||
+      !/^(?:OPEN|CLOSED)$/u.test(issue.state ?? '') ||
+      (issue.stateReason !== null && typeof issue.stateReason !== 'string') ||
+      typeof issue.updatedAt !== 'string' ||
+      Number.isNaN(Date.parse(issue.updatedAt)) ||
+      !Array.isArray(owners) ||
+      owners.length === 0 ||
+      owners.some(
+        (owner, index) =>
+          typeof owner !== 'string' ||
+          owner.length === 0 ||
+          owner !== owner.toLowerCase() ||
+          (index > 0 && owners[index - 1].localeCompare(owner) >= 0)
+      )
+    ) {
+      issues.push(
+        `${relativePath}: Issue #${number} must retain canonical nodeId, URL, title, state/stateReason, updatedAt, and sorted lowercase owners`
+      );
+    }
+    issueMap.set(number, issue);
+  }
+  const pullRequestMap = new Map(
+    (Array.isArray(snapshot.pullRequests) ? snapshot.pullRequests : []).map((pullRequest) => [
+      pullRequest.number,
+      pullRequest,
+    ])
+  );
+  return { issues: issueMap, pullRequests: pullRequestMap };
 }
 
 function stripMarkdownCode(content) {
@@ -996,6 +1134,20 @@ function unwrapTypeScriptExpression(expression) {
     current = current.expression;
   }
   return current;
+}
+function staticMemberAccess(expression) {
+  const candidate = unwrapTypeScriptExpression(expression);
+  if (ts.isPropertyAccessExpression(candidate)) {
+    return { name: candidate.name.text, receiver: candidate.expression };
+  }
+  if (
+    ts.isElementAccessExpression(candidate) &&
+    candidate.argumentExpression &&
+    ts.isStringLiteralLike(candidate.argumentExpression)
+  ) {
+    return { name: candidate.argumentExpression.text, receiver: candidate.expression };
+  }
+  return null;
 }
 
 function isDomTypeNode(typeNode, sourceFile) {
@@ -1212,48 +1364,44 @@ function astContainsInteractiveRuntime(content) {
       found = true;
       return;
     }
-    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
-      const owner = node.expression.expression.getText(sourceFile);
-      const method = node.expression.name.text;
-      if (
-        method === 'addEventListener' ||
-        ((owner === 'customElements' || owner.endsWith('.customElements')) && method === 'define')
-      ) {
-        found = true;
-        return;
-      }
-      if (
-        /^(?:blur|focus|scrollBy|scrollIntoView|scrollTo)$/u.test(method) &&
-        isDomReceiverExpression(node.expression.expression, sourceFile, receiverBindings, node)
-      ) {
-        found = true;
-        return;
-      }
-      if (
-        (method === 'setAttribute' ||
-          method === 'toggleAttribute' ||
-          method === 'removeAttribute') &&
-        isDomReceiverExpression(node.expression.expression, sourceFile, receiverBindings, node) &&
-        node.arguments.length > 0 &&
-        ts.isStringLiteralLike(node.arguments[0]) &&
-        /^aria-/u.test(node.arguments[0].text)
-      ) {
-        found = true;
-        return;
-      }
-      if (
-        ts.isPropertyAccessExpression(node.expression.expression) &&
-        node.expression.expression.name.text === 'classList' &&
-        isDomReceiverExpression(
-          node.expression.expression.expression,
-          sourceFile,
-          receiverBindings,
-          node
-        ) &&
-        /^(?:add|remove|replace|toggle)$/u.test(method)
-      ) {
-        found = true;
-        return;
+    if (ts.isCallExpression(node)) {
+      const calledMember = staticMemberAccess(node.expression);
+      if (calledMember) {
+        const owner = calledMember.receiver.getText(sourceFile);
+        const method = calledMember.name;
+        if (
+          method === 'addEventListener' ||
+          ((owner === 'customElements' || owner.endsWith('.customElements')) && method === 'define')
+        ) {
+          found = true;
+          return;
+        }
+        if (
+          /^(?:blur|focus|scrollBy|scrollIntoView|scrollTo)$/u.test(method) &&
+          isDomReceiverExpression(calledMember.receiver, sourceFile, receiverBindings, node)
+        ) {
+          found = true;
+          return;
+        }
+        if (
+          /^(?:removeAttribute|setAttribute|toggleAttribute)$/u.test(method) &&
+          isDomReceiverExpression(calledMember.receiver, sourceFile, receiverBindings, node) &&
+          node.arguments.length > 0 &&
+          ts.isStringLiteralLike(node.arguments[0]) &&
+          /^aria-/u.test(node.arguments[0].text)
+        ) {
+          found = true;
+          return;
+        }
+        const classListAccess = staticMemberAccess(calledMember.receiver);
+        if (
+          classListAccess?.name === 'classList' &&
+          isDomReceiverExpression(classListAccess.receiver, sourceFile, receiverBindings, node) &&
+          /^(?:add|remove|replace|toggle)$/u.test(method)
+        ) {
+          found = true;
+          return;
+        }
       }
     }
     if (
@@ -1261,12 +1409,7 @@ function astContainsInteractiveRuntime(content) {
       node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
       node.operatorToken.kind <= ts.SyntaxKind.LastAssignment
     ) {
-      const assignedProperty = ts.isPropertyAccessExpression(node.left)
-        ? { name: node.left.name.text, receiver: node.left.expression }
-        : ts.isElementAccessExpression(node.left) &&
-            ts.isStringLiteralLike(node.left.argumentExpression)
-          ? { name: node.left.argumentExpression.text, receiver: node.left.expression }
-          : null;
+      const assignedProperty = staticMemberAccess(node.left);
       if (
         assignedProperty &&
         GOVERNED_DOM_STATE_PROPERTY_NAMES.has(assignedProperty.name) &&
@@ -1520,44 +1663,22 @@ function discoverWebsiteInteractiveSources(rootDir) {
 
 function discoverWebsiteComponentSources(rootDir) {
   const websiteSourceRoot = path.join(rootDir, 'apps', 'www', 'src');
-  const componentsRoot = path.join(websiteSourceRoot, 'components');
   const pagesRoot = path.join(websiteSourceRoot, 'pages');
-  const contentRoot = path.join(websiteSourceRoot, 'content', 'docs');
-  return ['components', 'pages']
-    .flatMap((directory) => {
-      const absoluteRoot = path.join(websiteSourceRoot, directory);
-      return fs.existsSync(absoluteRoot) ? walkFiles(absoluteRoot) : [];
-    })
-    .concat(
-      walkFiles(contentRoot).filter((absolutePath) => {
-        const content = fs.readFileSync(absolutePath, 'utf8');
-        if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
-          return /<[A-Za-z]/u.test(markupSourceForJsxFallback(content, absolutePath) ?? '');
-        }
-        return (
-          /\.[cm]?[jt]sx?$/i.test(absolutePath) &&
-          astContainsExportedUserFacingComponent(
-            fs.readFileSync(absolutePath, 'utf8'),
-            absolutePath
-          )
-        );
-      })
-    )
-    .filter((absolutePath) => {
-      if (/\.(?:astro|vue|svelte|[cm]?[jt]sx)$/i.test(absolutePath)) return true;
-      if (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath)) {
-        return true;
-      }
-      return (
-        absolutePath.startsWith(`${componentsRoot}${path.sep}`) &&
-        /\.[cm]?[jt]sx?$/i.test(absolutePath) &&
-        astContainsExportedUserFacingComponent(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
-      );
-    })
+  return walkFiles(websiteSourceRoot)
     .filter(
       (absolutePath) =>
         !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[cm]?[jt]sx?)$/i.test(absolutePath)
     )
+    .filter((absolutePath) => {
+      if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) return true;
+      if (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath)) {
+        return true;
+      }
+      return (
+        /\.[cm]?[jt]sx?$/i.test(absolutePath) &&
+        astContainsExportedUserFacingComponent(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
+      );
+    })
     .map((absolutePath) => path.relative(rootDir, absolutePath).replaceAll('\\', '/'))
     .sort();
 }
@@ -1874,6 +1995,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
           : ts.ScriptKind.TSX
   );
   const effectNames = new Set(['useEffect', 'useInsertionEffect', 'useLayoutEffect']);
+  const renderEvaluatedHookNames = new Set(['useMemo', 'useState']);
   const reactNamespaceNames = new Set();
   const reactCreateElementNames = new Set();
   for (const statement of sourceFile.statements) {
@@ -1895,24 +2017,31 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         if (/^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(importedName)) {
           effectNames.add(element.name.text);
         }
+        if (/^(?:useMemo|useState)$/u.test(importedName)) {
+          renderEvaluatedHookNames.add(element.name.text);
+        }
         if (importedName === 'createElement') reactCreateElementNames.add(element.name.text);
       }
     }
   }
 
-  const effectAliasEdges = [];
-  const collectEffectAliases = (node) => {
+  const hookAliasEdges = [];
+  const collectHookAliases = (node) => {
     if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
       const initializer = unwrapTypeScriptExpression(node.initializer);
       if (
         ts.isPropertyAccessExpression(initializer) &&
         ts.isIdentifier(initializer.expression) &&
-        reactNamespaceNames.has(initializer.expression.text) &&
-        /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(initializer.name.text)
+        reactNamespaceNames.has(initializer.expression.text)
       ) {
-        effectNames.add(node.name.text);
+        if (/^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(initializer.name.text)) {
+          effectNames.add(node.name.text);
+        }
+        if (/^(?:useMemo|useState)$/u.test(initializer.name.text)) {
+          renderEvaluatedHookNames.add(node.name.text);
+        }
       } else if (ts.isIdentifier(initializer)) {
-        effectAliasEdges.push([node.name.text, initializer.text]);
+        hookAliasEdges.push([node.name.text, initializer.text]);
       }
     }
     if (
@@ -1920,23 +2049,31 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
       ts.isIdentifier(node.name) &&
       node.propertyName &&
       (ts.isIdentifier(node.propertyName) || ts.isStringLiteralLike(node.propertyName)) &&
-      /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(node.propertyName.text) &&
       ts.isVariableDeclaration(node.parent?.parent) &&
       ts.isIdentifier(node.parent.parent.initializer) &&
       reactNamespaceNames.has(node.parent.parent.initializer.text)
     ) {
-      effectNames.add(node.name.text);
+      if (/^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(node.propertyName.text)) {
+        effectNames.add(node.name.text);
+      }
+      if (/^(?:useMemo|useState)$/u.test(node.propertyName.text)) {
+        renderEvaluatedHookNames.add(node.name.text);
+      }
     }
-    ts.forEachChild(node, collectEffectAliases);
+    ts.forEachChild(node, collectHookAliases);
   };
-  collectEffectAliases(sourceFile);
-  let effectAliasesChanged = true;
-  while (effectAliasesChanged) {
-    effectAliasesChanged = false;
-    for (const [alias, sourceName] of effectAliasEdges) {
+  collectHookAliases(sourceFile);
+  let hookAliasesChanged = true;
+  while (hookAliasesChanged) {
+    hookAliasesChanged = false;
+    for (const [alias, sourceName] of hookAliasEdges) {
       if (!effectNames.has(alias) && effectNames.has(sourceName)) {
         effectNames.add(alias);
-        effectAliasesChanged = true;
+        hookAliasesChanged = true;
+      }
+      if (!renderEvaluatedHookNames.has(alias) && renderEvaluatedHookNames.has(sourceName)) {
+        renderEvaluatedHookNames.add(alias);
+        hookAliasesChanged = true;
       }
     }
   }
@@ -2086,29 +2223,61 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
     if (!ts.isCallExpression(node)) return false;
     return isAgentActionExpression(node.expression);
   };
+  const callableBindings = new Map();
+  const callableLexicalScope = (node) => {
+    for (let current = node.parent; current; current = current.parent) {
+      if (ts.isBlock(current) || ts.isFunctionLike(current) || ts.isSourceFile(current)) {
+        return current;
+      }
+    }
+    return sourceFile;
+  };
+  const addCallableBinding = (name, node, callable, hoisted) => {
+    const bindings = callableBindings.get(name) ?? [];
+    bindings.push({
+      callable,
+      hoisted,
+      position: node.getStart(sourceFile),
+      scope: callableLexicalScope(node),
+    });
+    callableBindings.set(name, bindings);
+  };
+  const collectCallableBindings = (node) => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+      const initializer = unwrapTypeScriptExpression(node.initializer);
+      if (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)) {
+        addCallableBinding(node.name.text, node, initializer, false);
+      }
+    }
+    if (ts.isFunctionDeclaration(node) && node.name && node.body) {
+      addCallableBinding(node.name.text, node, node, true);
+    }
+    ts.forEachChild(node, collectCallableBindings);
+  };
+  collectCallableBindings(sourceFile);
+  const resolveCallable = (name, useNode) => {
+    const bindings = callableBindings.get(name) ?? [];
+    const usePosition = useNode.getStart(sourceFile);
+    for (let scope = callableLexicalScope(useNode); scope; scope = callableLexicalScope(scope)) {
+      const binding = bindings
+        .filter((entry) => entry.scope === scope && (entry.hoisted || entry.position < usePosition))
+        .sort((left, right) => right.position - left.position)[0];
+      if (binding) return binding.callable;
+      if (ts.isSourceFile(scope)) break;
+    }
+    return null;
+  };
   const executionPathContainsAgentAction = (root) => {
     let found = false;
-    const callableBindings = new Map();
-    const executionNode =
-      ts.isArrowFunction(root) || ts.isFunctionExpression(root) ? root.body : root;
-    const collectCallableBindings = (node, collectionRoot = executionNode) => {
-      if (
-        ts.isVariableDeclaration(node) &&
-        ts.isIdentifier(node.name) &&
-        node.initializer &&
-        (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))
-      ) {
-        callableBindings.set(node.name.text, node.initializer);
-      }
-      if (ts.isFunctionDeclaration(node) && node.name && node.body) {
-        callableBindings.set(node.name.text, node);
-      }
-      if (node !== collectionRoot && ts.isFunctionLike(node)) return;
-      ts.forEachChild(node, (child) => collectCallableBindings(child, collectionRoot));
-    };
-    collectCallableBindings(executionNode);
+    const candidate = unwrapTypeScriptExpression(root);
+    const resolvedRoot = ts.isIdentifier(candidate)
+      ? (resolveCallable(candidate.text, candidate) ?? candidate)
+      : candidate;
+    const executionNode = ts.isFunctionLike(resolvedRoot) ? resolvedRoot.body : resolvedRoot;
+    if (!executionNode) return false;
     const visitedCallables = new Set();
-    const visit = (node, executionRoot = root) => {
+    if (ts.isFunctionLike(resolvedRoot)) visitedCallables.add(resolvedRoot);
+    const visit = (node, executionRoot = executionNode) => {
       if (found) return;
       if (isAgentActionCall(node)) {
         found = true;
@@ -2117,17 +2286,16 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
       if (node !== executionRoot && ts.isFunctionLike(node)) return;
       if (ts.isCallExpression(node)) {
         const callee = unwrapTypeScriptExpression(node.expression);
-        if (ts.isArrowFunction(callee) || ts.isFunctionExpression(callee)) {
-          visit(callee.body, callee.body);
+        const callable =
+          ts.isArrowFunction(callee) || ts.isFunctionExpression(callee)
+            ? callee
+            : ts.isIdentifier(callee)
+              ? resolveCallable(callee.text, callee)
+              : null;
+        if (callable && !visitedCallables.has(callable) && callable.body) {
+          visitedCallables.add(callable);
+          visit(callable.body, callable.body);
           if (found) return;
-        }
-        if (ts.isIdentifier(callee)) {
-          const callable = callableBindings.get(callee.text);
-          if (callable && !visitedCallables.has(callable)) {
-            visitedCallables.add(callable);
-            visit(callable.body, callable.body);
-            if (found) return;
-          }
         }
       }
       ts.forEachChild(node, (child) => visit(child, executionRoot));
@@ -2135,17 +2303,21 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
     visit(executionNode, executionNode);
     return found;
   };
-  const isEffectCall = (node) => {
+  const isReactHookCall = (node, localNames, canonicalPattern) => {
     if (!ts.isCallExpression(node)) return false;
     const expression = unwrapTypeScriptExpression(node.expression);
-    if (ts.isIdentifier(expression)) return effectNames.has(expression.text);
+    if (ts.isIdentifier(expression)) return localNames.has(expression.text);
     return (
       ts.isPropertyAccessExpression(expression) &&
       ts.isIdentifier(expression.expression) &&
       reactNamespaceNames.has(expression.expression.text) &&
-      /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(expression.name.text)
+      canonicalPattern.test(expression.name.text)
     );
   };
+  const isEffectCall = (node) =>
+    isReactHookCall(node, effectNames, /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u);
+  const isRenderEvaluatedHookCall = (node) =>
+    isReactHookCall(node, renderEvaluatedHookNames, /^(?:useMemo|useState)$/u);
 
   let found = false;
   const visitEffects = (node) => {
@@ -2190,11 +2362,26 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
     visit(root);
     return rendered;
   };
-  const exportedFunctionLikes = [];
-  const collectRenderedFunctionLikes = (root) => {
+  const renderedLocalDeclarations = new Map();
+  const collectRenderedFunctionLikes = (root, destination) => {
     const visit = (node) => {
       if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
-        if (containsRenderedSurface(node)) exportedFunctionLikes.push(node);
+        if (containsRenderedSurface(node)) destination.add(node);
+        return;
+      }
+      if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
+        for (const member of node.members) {
+          if (
+            ts.isMethodDeclaration(member) &&
+            member.name &&
+            (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)) &&
+            member.name.text === 'render' &&
+            member.body &&
+            containsRenderedSurface(member)
+          ) {
+            destination.add(member);
+          }
+        }
         return;
       }
       ts.forEachChild(node, visit);
@@ -2202,8 +2389,53 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
     visit(root);
   };
   for (const statement of sourceFile.statements) {
+    if (ts.isFunctionDeclaration(statement) && statement.name && statement.body) {
+      if (containsRenderedSurface(statement)) {
+        renderedLocalDeclarations.set(statement.name.text, new Set([statement]));
+      }
+      continue;
+    }
+    if (ts.isClassDeclaration(statement) && statement.name) {
+      const roots = new Set();
+      collectRenderedFunctionLikes(statement, roots);
+      if (roots.size > 0) renderedLocalDeclarations.set(statement.name.text, roots);
+      continue;
+    }
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue;
+        const roots = new Set();
+        collectRenderedFunctionLikes(declaration.initializer, roots);
+        if (roots.size > 0) renderedLocalDeclarations.set(declaration.name.text, roots);
+      }
+    }
+  }
+
+  const exportedFunctionLikes = new Set();
+  for (const statement of sourceFile.statements) {
     if (ts.isExportAssignment(statement)) {
-      collectRenderedFunctionLikes(statement.expression);
+      const expression = unwrapTypeScriptExpression(statement.expression);
+      if (ts.isIdentifier(expression) && renderedLocalDeclarations.has(expression.text)) {
+        for (const root of renderedLocalDeclarations.get(expression.text)) {
+          exportedFunctionLikes.add(root);
+        }
+      } else {
+        collectRenderedFunctionLikes(expression, exportedFunctionLikes);
+      }
+      continue;
+    }
+    if (
+      ts.isExportDeclaration(statement) &&
+      !statement.moduleSpecifier &&
+      statement.exportClause &&
+      ts.isNamedExports(statement.exportClause)
+    ) {
+      for (const element of statement.exportClause.elements) {
+        const localName = (element.propertyName ?? element.name).text;
+        for (const root of renderedLocalDeclarations.get(localName) ?? []) {
+          exportedFunctionLikes.add(root);
+        }
+      }
       continue;
     }
     const exported = statement.modifiers?.some(
@@ -2212,17 +2444,16 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         modifier.kind === ts.SyntaxKind.DefaultKeyword
     );
     if (!exported) continue;
-    if (
-      ts.isFunctionDeclaration(statement) &&
-      statement.body &&
-      containsRenderedSurface(statement)
-    ) {
-      exportedFunctionLikes.push(statement);
-    }
-    if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        if (declaration.initializer) collectRenderedFunctionLikes(declaration.initializer);
+    const statementName =
+      (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) && statement.name
+        ? statement.name.text
+        : null;
+    if (statementName && renderedLocalDeclarations.has(statementName)) {
+      for (const root of renderedLocalDeclarations.get(statementName)) {
+        exportedFunctionLikes.add(root);
       }
+    } else {
+      collectRenderedFunctionLikes(statement, exportedFunctionLikes);
     }
   }
   for (const functionLike of exportedFunctionLikes) {
@@ -2230,6 +2461,14 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
       if (found) return;
       if (node !== functionLike && ts.isFunctionLike(node)) return;
       if (isAgentActionCall(node)) {
+        found = true;
+        return;
+      }
+      if (
+        isRenderEvaluatedHookCall(node) &&
+        node.arguments[0] &&
+        executionPathContainsAgentAction(node.arguments[0])
+      ) {
         found = true;
         return;
       }
@@ -2282,6 +2521,34 @@ function scriptModuleSpecifiers(source, fileName) {
   const addLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) specifiers.push(node.text);
   };
+  const workerEntrySpecifier = (node) => {
+    if (
+      !ts.isNewExpression(node) ||
+      !ts.isIdentifier(node.expression) ||
+      !/^(?:SharedWorker|Worker)$/u.test(node.expression.text) ||
+      !node.arguments?.[0]
+    ) {
+      return null;
+    }
+    const urlExpression = unwrapTypeScriptExpression(node.arguments[0]);
+    if (
+      !ts.isNewExpression(urlExpression) ||
+      !ts.isIdentifier(urlExpression.expression) ||
+      urlExpression.expression.text !== 'URL' ||
+      !urlExpression.arguments?.[0] ||
+      !ts.isStringLiteralLike(urlExpression.arguments[0]) ||
+      !urlExpression.arguments[1]
+    ) {
+      return null;
+    }
+    const base = unwrapTypeScriptExpression(urlExpression.arguments[1]);
+    return ts.isPropertyAccessExpression(base) &&
+      base.name.text === 'url' &&
+      ts.isMetaProperty(base.expression) &&
+      base.expression.keywordToken === ts.SyntaxKind.ImportKeyword
+      ? urlExpression.arguments[0].text
+      : null;
+  };
   const visit = (node) => {
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
       addLiteral(node.moduleSpecifier);
@@ -2299,6 +2566,9 @@ function scriptModuleSpecifiers(source, fileName) {
       ) {
         addLiteral(node.arguments[0]);
       }
+    } else if (ts.isNewExpression(node)) {
+      const workerSpecifier = workerEntrySpecifier(node);
+      if (workerSpecifier) specifiers.push(workerSpecifier);
     }
     ts.forEachChild(node, visit);
   };
@@ -2310,6 +2580,9 @@ function externalScriptModuleSpecifiers(content) {
   return [
     ...content.matchAll(/<script\b[^>]*\bsrc\s*=\s*(?:(['"])([^'"]+)\1|([^\s"'=<>`]+))/giu),
   ].map((match) => match[2] ?? match[3]);
+}
+function isExternalExecutableScriptSpecifier(specifier) {
+  return /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(specifier);
 }
 
 function scriptViteGlobPatternGroups(source, fileName) {
@@ -2649,6 +2922,19 @@ function discoverWebsiteRawImports(rootDir) {
   const websiteSourceAliasRoot = configuredWebsiteSourceAliasRoot(rootDir);
   for (const absolutePath of candidates) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
+    if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
+      const content = fs.readFileSync(absolutePath, 'utf8');
+      for (const specifier of externalScriptModuleSpecifiers(content)) {
+        if (isExternalExecutableScriptSpecifier(specifier)) {
+          rawImports.push({
+            sourcePath,
+            specifier,
+            category: 'external-executable-script',
+            resolvedPath: null,
+          });
+        }
+      }
+    }
     for (const specifier of moduleSpecifiersForWebsiteSource(absolutePath)) {
       const guardedImport = guardedWebsiteImport(
         rootDir,
@@ -2684,6 +2970,12 @@ function discoverWebsiteRawImports(rootDir) {
 
 function validateWebsiteRawImports(rootDir, relativePath, issues) {
   for (const rawImport of discoverWebsiteRawImports(rootDir)) {
+    if (rawImport.category === 'external-executable-script') {
+      issues.push(
+        `${relativePath}: external executable script \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
+      );
+      continue;
+    }
     if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
     issues.push(
       `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist`
@@ -2894,8 +3186,8 @@ function labelValuePattern(label, nextLabelPattern) {
   );
 }
 
-function evidenceRecordLabelValue(record, label) {
-  const nextLabelPattern = SELF_HOSTED_WEBSITE_RECORD_LABELS.map(escapeRegularExpression).join('|');
+function evidenceRecordLabelValue(record, label, labels = SELF_HOSTED_WEBSITE_RECORD_LABELS) {
+  const nextLabelPattern = labels.map(escapeRegularExpression).join('|');
   return record.match(labelValuePattern(label, nextLabelPattern))?.[1].trim() ?? '';
 }
 
@@ -2961,6 +3253,201 @@ function canonicalRetainedEvidenceFile(
   return canonicalPath;
 }
 
+function gitOutput(rootDir, args) {
+  const result = spawnSync('git', args, {
+    cwd: rootDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+  return result.status === 0 ? result.stdout.trim() : null;
+}
+
+function evidenceCommitMetadata(rootDir, commit, evidenceKind, context, issues) {
+  if (!commit || !/^[0-9a-f]{40}$/iu.test(commit)) return null;
+  if (gitOutput(rootDir, ['cat-file', '-e', `${commit}^{commit}`]) === null) {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Commit \`${commit}\` does not resolve to a Git commit`
+    );
+    return null;
+  }
+  const candidateRevision = gitOutput(rootDir, ['rev-parse', 'HEAD']);
+  const ancestry = spawnSync('git', ['merge-base', '--is-ancestor', commit, 'HEAD'], {
+    cwd: rootDir,
+    stdio: 'ignore',
+  });
+  if (!candidateRevision || ancestry.status !== 0) {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Commit \`${commit}\` must be an ancestor of the candidate revision${candidateRevision ? ` \`${candidateRevision}\`` : ''}`
+    );
+  }
+  const tree = gitOutput(rootDir, ['rev-parse', `${commit}^{tree}`]);
+  return tree ? { commit, tree } : null;
+}
+
+function sha256File(absolutePath) {
+  return createHash('sha256').update(fs.readFileSync(absolutePath)).digest('hex');
+}
+
+function validateEvidenceResultsManifest({
+  rootDir,
+  record,
+  recordLabels,
+  artifactLabels,
+  evidenceRootRelative,
+  commitMetadata,
+  evidenceKind,
+  context,
+  issues,
+}) {
+  if (!commitMetadata) return;
+  const resultsPaths = explicitRepositoryPaths(
+    evidenceRecordLabelValue(record, 'Results:', recordLabels)
+  ).filter((repositoryPath) => repositoryPath.startsWith(evidenceRootRelative));
+  if (resultsPaths.length !== 1) {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Results must bind exactly one machine-readable manifest under ${evidenceRootRelative}**`
+    );
+    return;
+  }
+  const resultsPath = resultsPaths[0];
+  const canonicalResultsPath = canonicalRetainedEvidenceFile(
+    rootDir,
+    resultsPath,
+    evidenceRootRelative
+  );
+  if (!canonicalResultsPath || !/\.json$/iu.test(resultsPath)) {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Results must resolve to a retained JSON manifest under ${evidenceRootRelative}**`
+    );
+    return;
+  }
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(canonicalResultsPath, 'utf8'));
+  } catch (error) {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Results manifest is invalid JSON: ${error.message}`
+    );
+    return;
+  }
+  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
+    issues.push(`${context}: ${evidenceKind} evidence Results manifest must be an object`);
+    return;
+  }
+  if (manifest.schemaVersion !== 1 || manifest.kind !== 'proto-ui.coverage-evidence-results') {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Results manifest must use schemaVersion 1 and kind proto-ui.coverage-evidence-results`
+    );
+  }
+  if (manifest.repository !== 'Proto-UI/Proto-UI') {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Results repository must be Proto-UI/Proto-UI`
+    );
+  }
+  if (manifest.revision !== commitMetadata.commit) {
+    issues.push(`${context}: ${evidenceKind} evidence Results revision must equal Commit`);
+  }
+  if (typeof manifest.tree !== 'string' || manifest.tree.length === 0) {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Results manifest must contain non-empty tree`
+    );
+  } else if (manifest.tree !== commitMetadata.tree) {
+    issues.push(`${context}: ${evidenceKind} evidence Results tree must match the Commit tree`);
+  }
+  for (const field of ['commands', 'results', 'artifacts']) {
+    if (!Array.isArray(manifest[field]) || manifest[field].length === 0) {
+      issues.push(
+        `${context}: ${evidenceKind} evidence Results manifest must contain non-empty ${field}`
+      );
+    }
+  }
+  if (Array.isArray(manifest.commands)) {
+    for (const command of manifest.commands) {
+      if (
+        !command ||
+        typeof command !== 'object' ||
+        typeof command.command !== 'string' ||
+        command.command.length === 0 ||
+        command.status !== 'passed'
+      ) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results commands must name non-empty commands with passed status`
+        );
+      }
+    }
+    const manifestCommands = new Set(manifest.commands.map((entry) => entry?.command));
+    for (const command of inlineCodeValues(
+      evidenceRecordLabelValue(record, 'Commands:', recordLabels)
+    )) {
+      if (!manifestCommands.has(command)) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results commands must include record command \`${command}\``
+        );
+      }
+    }
+  }
+  if (Array.isArray(manifest.results)) {
+    for (const result of manifest.results) {
+      if (
+        !result ||
+        typeof result !== 'object' ||
+        typeof result.name !== 'string' ||
+        result.name.length === 0 ||
+        result.status !== 'passed'
+      ) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results entries must have non-empty names and passed status`
+        );
+      }
+    }
+  }
+  const manifestArtifacts = new Map();
+  if (Array.isArray(manifest.artifacts)) {
+    for (const artifact of manifest.artifacts) {
+      const repositoryPath = artifact?.path;
+      if (typeof repositoryPath !== 'string' || manifestArtifacts.has(repositoryPath)) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifacts must have unique repository paths`
+        );
+        continue;
+      }
+      manifestArtifacts.set(repositoryPath, artifact);
+      const canonicalArtifactPath = canonicalRetainedEvidenceFile(
+        rootDir,
+        repositoryPath,
+        evidenceRootRelative
+      );
+      if (!canonicalArtifactPath) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifact must resolve within ${evidenceRootRelative}**: ${repositoryPath}`
+        );
+        continue;
+      }
+      const actualSize = fs.statSync(canonicalArtifactPath).size;
+      const actualDigest = sha256File(canonicalArtifactPath);
+      if (artifact.size !== actualSize || artifact.sha256 !== actualDigest) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifact metadata does not match retained file: ${repositoryPath}`
+        );
+      }
+    }
+  }
+  const requiredArtifactPaths = new Set(
+    artifactLabels.flatMap((label) =>
+      explicitRepositoryPaths(evidenceRecordLabelValue(record, label, recordLabels)).filter(
+        (repositoryPath) => repositoryPath.startsWith(evidenceRootRelative)
+      )
+    )
+  );
+  for (const repositoryPath of requiredArtifactPaths) {
+    if (!manifestArtifacts.has(repositoryPath)) {
+      issues.push(
+        `${context}: ${evidenceKind} evidence Results artifacts must include record artifact \`${repositoryPath}\``
+      );
+    }
+  }
+}
+
 function validateRetainedEvidenceArtifacts(record, context, rootDir, issues) {
   const artifactLabels = [
     'Build:',
@@ -2985,11 +3472,18 @@ function validateRetainedEvidenceArtifacts(record, context, rootDir, issues) {
     }
     for (const repositoryPath of artifactPaths) {
       const absolutePath = path.resolve(rootDir, repositoryPath);
-      if (!fs.existsSync(absolutePath)) {
-        issues.push(`${context}: ${label} retained artifact does not exist: ${repositoryPath}`);
-      } else if (!fs.statSync(absolutePath).isFile()) {
-        issues.push(`${context}: ${label} retained artifact must be a file: ${repositoryPath}`);
-      } else if (fs.statSync(absolutePath).size === 0) {
+      const retainedArtifactPath = canonicalRetainedEvidenceFile(rootDir, repositoryPath);
+      if (!retainedArtifactPath) {
+        if (!fs.existsSync(absolutePath)) {
+          issues.push(`${context}: ${label} retained artifact does not exist: ${repositoryPath}`);
+        } else if (!fs.statSync(absolutePath).isFile()) {
+          issues.push(`${context}: ${label} retained artifact must be a file: ${repositoryPath}`);
+        } else {
+          issues.push(
+            `${context}: ${label} retained artifact must resolve within internal/website/evidence/**: ${repositoryPath}`
+          );
+        }
+      } else if (fs.statSync(retainedArtifactPath).size === 0) {
         issues.push(`${context}: ${label} retained artifact must not be empty: ${repositoryPath}`);
       }
     }
@@ -3058,6 +3552,7 @@ function validateRetainedEvidenceArtifacts(record, context, rootDir, issues) {
       issues.push(`${context}: Multi-frame: JSON frame manifest is invalid: ${repositoryPath}`);
     }
   }
+  return artifactsByLabel;
 }
 
 function validateSelfHostedWebsiteEvidenceRecord(record, context, rootDir, issues) {
@@ -3078,7 +3573,15 @@ function validateSelfHostedWebsiteEvidenceRecord(record, context, rootDir, issue
   validateRetainedEvidenceArtifacts(record, context, rootDir, issues);
 }
 
-function validateMainRows(config, table, relativePath, rootDir, catalogEntries, issues) {
+function validateMainRows(
+  config,
+  table,
+  relativePath,
+  rootDir,
+  catalogEntries,
+  governanceSnapshot,
+  issues
+) {
   if (!table) {
     return {
       stateCounts: new Map(),
@@ -3202,6 +3705,58 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
         );
       }
     }
+    const inlineCode = new Set(Object.values(record).flatMap(inlineCodeValues));
+    for (const requiredValue of config.requiredInlineCodeByRow?.[id] ?? []) {
+      if (!inlineCode.has(requiredValue)) {
+        issues.push(
+          `${context}: matrix row \`${id}\` must bind \`${requiredValue}\` as interaction-owned UI`
+        );
+      }
+    }
+    const closureBinding = config.closureBindingsByRow?.[id];
+    if (closureBinding) {
+      if (!new RegExp(`\\bIssue #${closureBinding.issue}\\b`, 'u').test(record.Evidence)) {
+        issues.push(
+          `${context}: closure binding for \`${id}\` must retain Issue #${closureBinding.issue}`
+        );
+      }
+      if (
+        !new RegExp(`\\bmerged PR #${closureBinding.pullRequest}\\b`, 'iu').test(record.Evidence)
+      ) {
+        issues.push(
+          `${context}: closure binding for \`${id}\` must retain merged PR #${closureBinding.pullRequest}`
+        );
+      }
+      if (!inlineCode.has(closureBinding.implementationHead)) {
+        issues.push(
+          `${context}: closure binding for \`${id}\` must retain reviewed PR #${closureBinding.pullRequest} head \`${closureBinding.implementationHead}\``
+        );
+      }
+      for (const requiredValue of [...closureBinding.routes, ...closureBinding.repositoryPaths]) {
+        if (!inlineCode.has(requiredValue)) {
+          issues.push(`${context}: closure binding for \`${id}\` must retain \`${requiredValue}\``);
+        }
+      }
+      for (const phrase of closureBinding.reReviewPhrases) {
+        if (!record['Re-review or removal issue'].includes(phrase)) {
+          issues.push(
+            `${context}: closure binding for \`${id}\` must retain re-review trigger \`${phrase}\``
+          );
+        }
+      }
+      const pullRequest = governanceSnapshot.pullRequests.get(closureBinding.pullRequest);
+      if (
+        !pullRequest ||
+        pullRequest.state !== 'MERGED' ||
+        pullRequest.headSha !== closureBinding.implementationHead ||
+        pullRequest.url !==
+          `https://github.com/Proto-UI/Proto-UI/pull/${closureBinding.pullRequest}`
+      ) {
+        issues.push(
+          `${context}: closure binding for \`${id}\` must match the repository-owned merged PR #${closureBinding.pullRequest} snapshot`
+        );
+      }
+    }
 
     const referencedIds = [...new Set(recordText.match(CATALOG_ID_PATTERN) ?? [])];
     for (const entityId of referencedIds) {
@@ -3312,18 +3867,30 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
           `${context} self-hosted evidence record ${repositoryPath}`,
           issues
         );
+        const evidenceContext = `${context} self-hosted evidence record ${repositoryPath}`;
         const evidenceCommit = evidenceRecord.match(/\bCommit:\s*([^\r\n;|]*)/i)?.[1].trim();
         if (evidenceCommit && !/^[0-9a-f]{40}$/i.test(evidenceCommit)) {
-          issues.push(
-            `${context} self-hosted evidence record ${repositoryPath} must bind Commit to an exact 40-character Git SHA`
-          );
+          issues.push(`${evidenceContext} must bind Commit to an exact 40-character Git SHA`);
         }
-        validateSelfHostedWebsiteEvidenceRecord(
-          evidenceRecord,
-          `${context} self-hosted evidence record ${repositoryPath}`,
+        const commitMetadata = evidenceCommitMetadata(
           rootDir,
+          evidenceCommit,
+          'self-hosted',
+          evidenceContext,
           issues
         );
+        validateSelfHostedWebsiteEvidenceRecord(evidenceRecord, evidenceContext, rootDir, issues);
+        validateEvidenceResultsManifest({
+          rootDir,
+          record: evidenceRecord,
+          recordLabels: SELF_HOSTED_WEBSITE_RECORD_LABELS,
+          artifactLabels: ['Build:', 'Browser:', 'Accessibility:', 'Screenshot:', 'Multi-frame:'],
+          evidenceRootRelative: SELF_HOSTED_WEBSITE_EVIDENCE_ROOT,
+          commitMetadata,
+          evidenceKind: 'self-hosted',
+          context: evidenceContext,
+          issues,
+        });
       }
     }
     if (config.kind === 'agent-harness' && state === 'dogfooded') {
@@ -3353,13 +3920,19 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
           issues.push(
             `${context}: dogfooded implementation path must be a file: ${repositoryPath}`
           );
+        } else if (
+          repositoryPath.startsWith('apps/agent-harness/') &&
+          !canonicalRetainedEvidenceFile(rootDir, repositoryPath, 'apps/agent-harness/')
+        ) {
+          issues.push(
+            `${context}: dogfooded implementation path must resolve within apps/agent-harness/**: ${repositoryPath}`
+          );
         }
       }
       const harnessImplementationPaths = implementationPaths.filter(
         (repositoryPath) =>
           repositoryPath.startsWith('apps/agent-harness/') &&
-          fs.existsSync(path.resolve(rootDir, repositoryPath)) &&
-          fs.statSync(path.resolve(rootDir, repositoryPath)).isFile()
+          canonicalRetainedEvidenceFile(rootDir, repositoryPath, 'apps/agent-harness/')
       );
       if (harnessImplementationPaths.length === 0) {
         issues.push(
@@ -3398,12 +3971,29 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
           `${context} dogfooded evidence record ${repositoryPath}`,
           issues
         );
+        const evidenceContext = `${context} dogfooded evidence record ${repositoryPath}`;
         const evidenceCommit = evidenceRecord.match(/\bCommit:\s*([^\r\n;|]*)/i)?.[1].trim();
         if (evidenceCommit && !/^[0-9a-f]{40}$/i.test(evidenceCommit)) {
-          issues.push(
-            `${context} dogfooded evidence record ${repositoryPath} must bind Commit to an exact 40-character Git SHA`
-          );
+          issues.push(`${evidenceContext} must bind Commit to an exact 40-character Git SHA`);
         }
+        const commitMetadata = evidenceCommitMetadata(
+          rootDir,
+          evidenceCommit,
+          'dogfooded',
+          evidenceContext,
+          issues
+        );
+        validateEvidenceResultsManifest({
+          rootDir,
+          record: evidenceRecord,
+          recordLabels: DOGFOODED_RECORD_LABELS,
+          artifactLabels: DOGFOODED_EVIDENCE_LABELS,
+          evidenceRootRelative: 'internal/agent-harness/evidence/',
+          commitMetadata,
+          evidenceKind: 'dogfooded',
+          context: evidenceContext,
+          issues,
+        });
       }
       requireMeaningfulLabels(record.Evidence, DOGFOODED_EVIDENCE_LABELS, context, issues);
     }
@@ -3423,6 +4013,44 @@ function validateMainRows(config, table, relativePath, rootDir, catalogEntries, 
       issues.push(
         `${context}: ${state} rows must give the \`owner:\` or \`owners:\` label a concrete value in Dependency and owner`
       );
+    }
+    const dependencyCell = record['Dependency and owner'];
+    const dependencyOwner = normalizedOwnerToken(dependencyCell);
+    const seenDependencyIssues = new Set();
+    for (const binding of issueBindings(dependencyCell)) {
+      const canonicalIssueUrl = `https://github.com/Proto-UI/Proto-UI/issues/${binding.number}`;
+      if (seenDependencyIssues.has(binding.number)) {
+        issues.push(`${context}: dependency issue #${binding.number} is bound more than once`);
+        continue;
+      }
+      seenDependencyIssues.add(binding.number);
+      if (binding.linkedUrl && binding.linkedUrl !== canonicalIssueUrl) {
+        issues.push(
+          `${context}: dependency issue #${binding.number} must use the canonical Proto-UI/Proto-UI Issue URL`
+        );
+      }
+      const governanceIssue = governanceSnapshot.issues.get(binding.number);
+      if (!governanceIssue) {
+        issues.push(
+          `${context}: dependency issue #${binding.number} is absent from the Proto-UI/Proto-UI governance snapshot`
+        );
+        continue;
+      }
+      if (governanceIssue.url !== canonicalIssueUrl) {
+        issues.push(
+          `${context}: dependency issue #${binding.number} snapshot URL is not canonical for Proto-UI/Proto-UI`
+        );
+      }
+      if (governanceIssue.state !== 'OPEN') {
+        issues.push(
+          `${context}: dependency issue #${binding.number} must be OPEN for a ${state} row; snapshot state is ${governanceIssue.state}/${governanceIssue.stateReason ?? 'NONE'}`
+        );
+      }
+      if (dependencyOwner && !governanceIssue.owners?.includes(dependencyOwner)) {
+        issues.push(
+          `${context}: dependency owner \`${dependencyOwner}\` is not reviewed for issue #${binding.number}`
+        );
+      }
     }
 
     const exemptLike =
@@ -3588,6 +4216,58 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
   return bindings;
 }
 
+function parseSourceFingerprints(lines, afterIndex, relativePath, issues) {
+  const headingIndexes = findExactLineIndexes(lines, '## Source-scan fingerprints').filter(
+    (index) => index > afterIndex
+  );
+  if (headingIndexes.length === 0) return new Map();
+  if (headingIndexes.length !== 1) {
+    issues.push(
+      `${relativePath}: expected exactly one \`## Source-scan fingerprints\` heading after ${END_MARKER}; found ${headingIndexes.length}`
+    );
+    return new Map();
+  }
+  const headingIndex = headingIndexes[0];
+  const nextHeadingOffset = lines
+    .slice(headingIndex + 1)
+    .findIndex((line) => /^#{1,6}\s+/.test(line.trim()));
+  const tableEnd = nextHeadingOffset === -1 ? lines.length : headingIndex + 1 + nextHeadingOffset;
+  const table = parseTable(
+    lines,
+    headingIndex + 1,
+    tableEnd,
+    ['Website source', 'SHA-256'],
+    `${relativePath} Source-scan fingerprints`,
+    issues,
+    { requireContiguous: true }
+  );
+  const fingerprints = new Map();
+  if (!table) return fingerprints;
+  for (const row of table.rows) {
+    const context = `${relativePath}:${row.line}`;
+    const sourcePaths = explicitRepositoryPaths(row.cells[0]);
+    const sourcePath = sourcePaths[0];
+    const digest = stripInlineCode(row.cells[1]);
+    if (
+      sourcePaths.length !== 1 ||
+      (!sourcePath.startsWith('apps/www/src/') && !sourcePath.startsWith('apps/www/public/'))
+    ) {
+      issues.push(`${context}: source fingerprint must name exactly one Website source path`);
+      continue;
+    }
+    if (!/^[0-9a-f]{64}$/u.test(digest)) {
+      issues.push(`${context}: source fingerprint must be a lowercase SHA-256 digest`);
+      continue;
+    }
+    if (fingerprints.has(sourcePath)) {
+      issues.push(`${context}: duplicate source fingerprint for \`${sourcePath}\``);
+      continue;
+    }
+    fingerprints.set(sourcePath, { digest, line: row.line });
+  }
+  return fingerprints;
+}
+
 function validateWebsiteSourceBindings(
   rootDir,
   relativePath,
@@ -3597,7 +4277,29 @@ function validateWebsiteSourceBindings(
   issues
 ) {
   const bindings = parseSourceBindings(lines, afterIndex, relativePath, issues);
+  const fingerprints = parseSourceFingerprints(lines, afterIndex, relativePath, issues);
+  for (const [sourcePath, fingerprint] of fingerprints) {
+    const absolutePath = path.resolve(rootDir, sourcePath);
+    if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
+      issues.push(
+        `${relativePath}:${fingerprint.line}: source fingerprint references missing file \`${sourcePath}\``
+      );
+      continue;
+    }
+    if (sha256File(absolutePath) !== fingerprint.digest) {
+      issues.push(
+        `${relativePath}:${fingerprint.line}: source fingerprint for \`${sourcePath}\` does not match its reviewed SHA-256`
+      );
+    }
+  }
   const interactiveSources = new Set(discoverWebsiteInteractiveSources(rootDir));
+  for (const sourcePath of interactiveSources) {
+    if (!fingerprints.has(sourcePath)) {
+      issues.push(
+        `${relativePath}: interactive website source \`${sourcePath}\` is missing a reviewed Source-scan fingerprint`
+      );
+    }
+  }
   for (const [sourcePath, binding] of bindings) {
     if (!fs.existsSync(path.resolve(rootDir, sourcePath))) {
       issues.push(
@@ -4012,7 +4714,7 @@ function validateTargetClassTotals(config, lines, afterIndex, actualCounts, rela
   }
 }
 
-function validateMatrixFile(rootDir, config, catalogEntries, issues) {
+function validateMatrixFile(rootDir, config, catalogEntries, governanceSnapshot, issues) {
   validateInheritedDependencyVersions(rootDir, config, issues);
   const absolutePath = path.join(rootDir, config.relativePath);
   if (!fs.existsSync(absolutePath)) {
@@ -4056,6 +4758,7 @@ function validateMatrixFile(rootDir, config, catalogEntries, issues) {
     config.relativePath,
     rootDir,
     catalogEntries,
+    governanceSnapshot,
     issues
   );
   validateTotals(config, lines, endIndex, matrixResult.stateCounts, config.relativePath, issues);
@@ -4093,8 +4796,9 @@ function validateMatrixFile(rootDir, config, catalogEntries, issues) {
 export function collectCoverageMatrixIssues({ rootDir = process.cwd() } = {}) {
   const issues = [];
   const catalogEntries = loadCatalogEntries(rootDir, issues);
+  const governanceSnapshot = loadGovernanceSnapshot(rootDir, issues);
   for (const config of MATRIX_CONFIGS) {
-    validateMatrixFile(rootDir, config, catalogEntries, issues);
+    validateMatrixFile(rootDir, config, catalogEntries, governanceSnapshot, issues);
   }
   return issues;
 }

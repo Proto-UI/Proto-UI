@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -75,8 +77,160 @@ snapshots:
 `,
     'utf8'
   );
+  writeGovernanceSnapshot(root);
+  fs.mkdirSync(path.join(root, 'docs', 'evidence', '579-docs-content-flow'), {
+    recursive: true,
+  });
+  for (const repositoryPath of [
+    'apps/www/src/styles/markdown.css',
+    'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
+  ]) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, 'fixture', 'utf8');
+  }
   temporaryRoots.push(root);
   return root;
+}
+
+function writeGovernanceSnapshot(root, issueOverrides = {}) {
+  const issues = [
+    {
+      number: 420,
+      nodeId: 'I_kwDOMhQZjc_fixture_420',
+      state: 'OPEN',
+      stateReason: null,
+      title: 'Website Self-Hosting',
+      url: 'https://github.com/Proto-UI/Proto-UI/issues/420',
+      updatedAt: '2026-09-01T00:00:00Z',
+      labels: ['area: website'],
+      assignees: [],
+      milestone: 'Website Self-Hosting — Complete Proto UI Dogfood',
+      owners: ['website search', 'website team'],
+    },
+    {
+      number: 519,
+      nodeId: 'I_kwDOMhQZjc_fixture_519',
+      state: 'OPEN',
+      stateReason: null,
+      title: 'End-follow semantics',
+      url: 'https://github.com/Proto-UI/Proto-UI/issues/519',
+      updatedAt: '2026-09-01T00:00:00Z',
+      labels: ['area: adapters'],
+      assignees: [],
+      milestone: null,
+      owners: ['scroll domain'],
+    },
+    {
+      number: 533,
+      nodeId: 'I_kwDOMhQZjc_fixture_533',
+      state: 'OPEN',
+      stateReason: null,
+      title: 'Coverage enforcement',
+      url: 'https://github.com/Proto-UI/Proto-UI/issues/533',
+      updatedAt: '2026-09-01T00:00:00Z',
+      labels: ['area: agent-harness'],
+      assignees: [],
+      milestone: null,
+      owners: ['harness infrastructure owner'],
+    },
+  ].map((issue) => ({ ...issue, ...(issueOverrides[issue.number] ?? {}) }));
+  const snapshotPath = path.join(
+    root,
+    'internal',
+    'coverage-matrices',
+    'github-governance-snapshot.json'
+  );
+  fs.mkdirSync(path.dirname(snapshotPath), { recursive: true });
+  fs.writeFileSync(
+    snapshotPath,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        repository: 'Proto-UI/Proto-UI',
+        issues,
+        pullRequests: [
+          {
+            number: 580,
+            state: 'MERGED',
+            headSha: '2a6d5f3208d91e5c9862a67408a39ff208d43306',
+            mergeCommit: '9841c86a10940267fb30ee25b63c9a5a39f76fe6',
+            url: 'https://github.com/Proto-UI/Proto-UI/pull/580',
+          },
+        ],
+      },
+      null,
+      2
+    )}\n`,
+    'utf8'
+  );
+}
+
+function commitFixtureRoot(root) {
+  execFileSync('git', ['init', '--quiet', '--initial-branch=main'], { cwd: root });
+  execFileSync('git', ['add', '.'], { cwd: root });
+  execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit',
+      '--quiet',
+      '--no-gpg-sign',
+      '-m',
+      'fixture baseline',
+    ],
+    { cwd: root }
+  );
+  return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+}
+
+function gitTreeForRevision(root, revision) {
+  try {
+    return execFileSync('git', ['rev-parse', `${revision}^{tree}`], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return '0'.repeat(40);
+  }
+}
+
+function machineReadableResults(root, revision, artifactPaths, overrides = {}) {
+  return `${JSON.stringify(
+    {
+      schemaVersion: 1,
+      kind: 'proto-ui.coverage-evidence-results',
+      repository: 'Proto-UI/Proto-UI',
+      revision,
+      tree: gitTreeForRevision(root, revision),
+      commands: [
+        {
+          command: 'corepack pnpm@10.32.1 --filter @proto-ui/www build',
+          status: 'passed',
+        },
+        { command: 'corepack pnpm@10.32.1 test', status: 'passed' },
+      ],
+      results: [{ name: 'fixture acceptance', status: 'passed' }],
+      artifacts: artifactPaths.map((repositoryPath) => ({
+        path: repositoryPath,
+        size: fs.statSync(path.join(root, repositoryPath)).size,
+        sha256: sourceDigest(root, repositoryPath),
+      })),
+      ...overrides,
+    },
+    null,
+    2
+  )}\n`;
+}
+function sourceDigest(root, repositoryPath) {
+  const absolutePath = path.join(root, repositoryPath);
+  return fs.existsSync(absolutePath)
+    ? createHash('sha256').update(fs.readFileSync(absolutePath)).digest('hex')
+    : '0'.repeat(64);
 }
 
 function separator(headers) {
@@ -141,6 +295,31 @@ function validWebsiteRow(overrides = {}) {
   };
 }
 
+function validDocumentSemanticsRow(overrides = {}) {
+  return validWebsiteRow({
+    ID: 'www.content.document-semantics',
+    Path: '`apps/www/src/content/docs/{en,zh-cn}/**`, `apps/www/src/components/override/MarkdownContent.astro`',
+    'User job': 'Read headings, prose, lists, tables, code, and links in document order',
+    'Current owner': 'Website content authors',
+    'Target class': 'native/static',
+    'Proto UI chain': 'Native document HTML generated from Markdown/MDX',
+    Lifecycle: 'Native semantic content; interactive embeds are tracked separately',
+    'WC host and SSR/no-JS strategy':
+      'WC: not needed for document semantics; SSR: complete content is rendered in order; no-JS: prose and native links remain readable',
+    'Dependency and owner': 'No Proto UI dependency; owner: website content governance',
+    Difficulty: 'F2',
+    Milestone: 'M0 / S14',
+    State: 'native/static',
+    Evidence:
+      'Issue #579; merged PR #580; implementation head `2a6d5f3208d91e5c9862a67408a39ff208d43306`; routes `/en/ui-libraries/shadcn/select/`, `/zh-cn/ui-libraries/shadcn/select/`, `/en/start-here/quick-start/`, `/zh-cn/start-here/quick-start/`; `apps/www/src/components/override/MarkdownContent.astro`; `apps/www/src/styles/markdown.css`; `apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts`; `docs/evidence/579-docs-content-flow`',
+    'Escape or exemption':
+      'Reason: native document flow and Starlight presentation are the intended semantic end state; limit: static HTML/CSS flow only',
+    'Re-review or removal issue':
+      '#420 when the MarkdownContent override, docs-flow selectors, Starlight reset behavior, or relevant MarkdownContent/Starlight dependency changes',
+    ...overrides,
+  });
+}
+
 function validSelfHostedWebsiteEvidence(overrides = {}) {
   return Object.entries({
     Commit: '0123456789abcdef0123456789abcdef01234567',
@@ -160,7 +339,11 @@ function validSelfHostedWebsiteEvidence(overrides = {}) {
     .join('\n');
 }
 
-function writeSelfHostedWebsiteArtifacts(root) {
+function writeSelfHostedWebsiteArtifacts(
+  root,
+  revision = '0123456789abcdef0123456789abcdef01234567',
+  resultRevision = revision
+) {
   const artifactRoot = path.join(root, 'internal/website/evidence/s14');
   const onePixelPng = Buffer.from(
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
@@ -187,7 +370,18 @@ function writeSelfHostedWebsiteArtifacts(root) {
     }),
     'utf8'
   );
-  fs.writeFileSync(path.join(artifactRoot, 'results.json'), '{"passed":true}\n', 'utf8');
+  const retainedArtifactPaths = [
+    'internal/website/evidence/s14/build.log',
+    'internal/website/evidence/s14/browser-results.json',
+    'internal/website/evidence/s14/accessibility-results.json',
+    'internal/website/evidence/s14/home-desktop.png',
+    'internal/website/evidence/s14/navigation-frames.json',
+  ];
+  fs.writeFileSync(
+    path.join(artifactRoot, 'results.json'),
+    machineReadableResults(root, resultRevision, retainedArtifactPaths),
+    'utf8'
+  );
 }
 
 function validHarnessRow(overrides = {}) {
@@ -212,6 +406,36 @@ function validHarnessRow(overrides = {}) {
     'Re-review or removal issue': '—',
     ...overrides,
   };
+}
+
+function writeHarnessPromotionArtifacts(root, commit, resultRevision = commit) {
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const evidencePath = 'internal/agent-harness/evidence/m1/tool-invocation.md';
+  const evidenceRoot = 'internal/agent-harness/evidence/m1';
+  const resultsPath = `${evidenceRoot}/tool-invocation-results.json`;
+  const artifactPaths = [
+    `${evidenceRoot}/build.log`,
+    `${evidenceRoot}/browser-results.json`,
+    `${evidenceRoot}/accessibility-results.json`,
+    `${evidenceRoot}/lifecycle-results.json`,
+    `${evidenceRoot}/design-review.txt`,
+  ];
+  for (const repositoryPath of artifactPaths) {
+    const absolutePath = path.join(root, repositoryPath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, 'passed\n', 'utf8');
+  }
+  fs.writeFileSync(
+    path.join(root, resultsPath),
+    machineReadableResults(root, resultRevision, artifactPaths),
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    `Build: \`${artifactPaths[0]}\`\nBrowser: \`${artifactPaths[1]}\`\nAccessibility: \`${artifactPaths[2]}\`\nLifecycle: \`${artifactPaths[3]}\`\nDesign: \`${artifactPaths[4]}\`\nCommit: ${commit}\nEnvironment: fixture\nFixtures: tool invocation\nCommands: \`corepack pnpm@10.32.1 test\`\nResults: \`${resultsPath}\`\n`,
+    'utf8'
+  );
+  return { implementationPath, evidencePath };
 }
 
 function writeMatrix(
@@ -261,6 +485,8 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
     ...(config.requiredIds ?? []),
     ...Object.keys(config.requiredCatalogIdsByRow ?? {}),
     ...Object.keys(config.requiredRepositoryPathsByRow ?? {}),
+    ...Object.keys(config.requiredInlineCodeByRow ?? {}),
+    ...Object.keys(config.closureBindingsByRow ?? {}),
     ...(config.inheritedSurfaceManifests ?? []).flatMap((manifest) => manifest.ids),
     ...nonInteractiveEntries.keys(),
   ]);
@@ -269,8 +495,10 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
     ...[...requiredIds]
       .filter((id) => id !== primaryRow.ID)
       .map((id) => {
+        if (id === 'www.content.document-semantics') return validDocumentSemanticsRow();
         const requiredCatalogIds = config.requiredCatalogIdsByRow?.[id] ?? [];
         const requiredRepositoryPaths = config.requiredRepositoryPathsByRow?.[id] ?? [];
+        const requiredInlineCode = config.requiredInlineCodeByRow?.[id] ?? [];
         const nonInteractiveExpectation = nonInteractiveEntries.get(id);
         return rowFactory({
           ID: id,
@@ -326,6 +554,13 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
                   .join(', ')} source baseline`,
               }
             : {}),
+          ...(requiredInlineCode.length > 0
+            ? {
+                Evidence: `Reviewed interaction dependency ${requiredInlineCode
+                  .map((entry) => `\`${entry}\``)
+                  .join(', ')}`,
+              }
+            : {}),
         });
       }),
   ];
@@ -337,15 +572,32 @@ function writeValidMatrices(
   harnessOverrides = {},
   { websiteBindings = [], harnessBindings = [] } = {}
 ) {
+  const websiteBindingEntries = [
+    [
+      'apps/www/src/components/override/Header.astro',
+      ['www.shell.primary-nav', 'www.shell.header-separators'],
+    ],
+    ...websiteBindings,
+  ];
+  const websiteFingerprintPaths = [
+    ...new Set(websiteBindingEntries.map(([sourcePath]) => sourcePath)),
+  ];
   const extraText = [
     '## Source-scan bindings',
     '',
     '| Interactive or integration source | Owning matrix row |',
     '| --- | --- |',
-    '| `apps/www/src/components/override/Header.astro` | `www.shell.primary-nav`, `www.shell.header-separators` |',
-    ...websiteBindings.map(
+    ...websiteBindingEntries.map(
       ([sourcePath, ownerIds]) =>
         `| \`${sourcePath}\` | ${ownerIds.map((ownerId) => `\`${ownerId}\``).join(', ')} |`
+    ),
+    '',
+    '## Source-scan fingerprints',
+    '',
+    '| Website source | SHA-256 |',
+    '| --- | --- |',
+    ...websiteFingerprintPaths.map(
+      (sourcePath) => `| \`${sourcePath}\` | \`${sourceDigest(root, sourcePath)}\` |`
     ),
   ].join('\n');
   writeMatrix(
@@ -558,7 +810,14 @@ test('ignores inert JSON data scripts during interaction discovery', () => {
     fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
     fs.writeFileSync(sourcePath, content);
   }
-  writeValidMatrices(root);
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [[cases[0][0], ['www.content.document-semantics']]],
+    }
+  );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
@@ -1676,6 +1935,19 @@ test('requires new static website components to have a matrix classification', (
   );
 });
 
+test('requires new static website layouts to have a matrix classification', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const sourcePath = path.join(root, 'apps', 'www', 'src', 'layouts', 'StaticLayout.astro');
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, '<main><slot /></main>', 'utf8');
+
+  assert.match(
+    validationMessage(root),
+    /website component source `apps\/www\/src\/layouts\/StaticLayout\.astro` is not classified by a matrix row/
+  );
+});
+
 test('discovers exported Website components rendered through React factories in JS and TS', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -2260,6 +2532,40 @@ test('rejects self-hosted website evidence without an exact commit SHA', () => {
   );
 });
 
+test('rejects a nonexistent self-hosted Website evidence commit', () => {
+  const root = createRoot();
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const nonexistentCommit = 'f'.repeat(40);
+  writeSelfHostedWebsiteArtifacts(root, nonexistentCommit);
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    validSelfHostedWebsiteEvidence({ Commit: nonexistentCommit }),
+    'utf8'
+  );
+  writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+  assert.match(
+    validationMessage(root),
+    /self-hosted evidence Commit `f{40}` does not resolve to a Git commit/
+  );
+});
+
+test('rejects self-hosted Website results bound to a different revision', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  writeSelfHostedWebsiteArtifacts(root, revision, 'e'.repeat(40));
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    validSelfHostedWebsiteEvidence({ Commit: revision }),
+    'utf8'
+  );
+  writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+  assert.match(validationMessage(root), /self-hosted evidence Results revision must equal Commit/);
+});
+
 test('rejects a missing self-hosted website evidence artifact', () => {
   const root = createRoot();
   const evidencePath = 'internal/website/evidence/s14/missing-closeout.md';
@@ -2424,11 +2730,17 @@ test('rejects fake images and traversal in multi-frame manifests', () => {
 
 test('accepts reproducible multi-dimensional evidence for a self-hosted website row', () => {
   const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
   const evidencePath = 'internal/website/evidence/s14/closeout.md';
   const absoluteEvidencePath = path.join(root, evidencePath);
   fs.mkdirSync(path.dirname(absoluteEvidencePath), { recursive: true });
-  writeSelfHostedWebsiteArtifacts(root);
-  fs.writeFileSync(absoluteEvidencePath, validSelfHostedWebsiteEvidence(), 'utf8');
+  writeSelfHostedWebsiteArtifacts(root, revision);
+  fs.writeFileSync(
+    absoluteEvidencePath,
+    validSelfHostedWebsiteEvidence({ Commit: revision }),
+    'utf8'
+  );
   writeValidMatrices(root, {
     State: 'self-hosted',
     Evidence: `\`${evidencePath}\``,
@@ -2517,6 +2829,37 @@ test('requires a concrete dependency owner for every blocked or research row', (
       new RegExp(`${state} rows must give the .*label a concrete value`)
     );
   }
+});
+
+test('rejects dependency issues absent from the repository-owned snapshot', () => {
+  const root = createRoot();
+  writeValidMatrices(root, {}, { 'Dependency and owner': '#999999; owner: scroll domain' });
+
+  assert.match(
+    validationMessage(root),
+    /dependency issue #999999 is absent from the Proto-UI\/Proto-UI governance snapshot/
+  );
+});
+
+test('rejects closed dependency issues for blocked and research rows', () => {
+  const root = createRoot();
+  writeGovernanceSnapshot(root, { 519: { state: 'CLOSED', stateReason: 'COMPLETED' } });
+  writeValidMatrices(root);
+
+  assert.match(
+    validationMessage(root),
+    /dependency issue #519 must be OPEN for a research row; snapshot state is CLOSED\/COMPLETED/
+  );
+});
+
+test('rejects dependency owners not reviewed in governance metadata', () => {
+  const root = createRoot();
+  writeValidMatrices(root, {}, { 'Dependency and owner': '#519; owner: unrelated team' });
+
+  assert.match(
+    validationMessage(root),
+    /dependency owner `unrelated team` is not reviewed for issue #519/
+  );
 });
 
 test('requires reasons and re-review triggers for native and infrastructure exemptions', () => {
@@ -2698,6 +3041,40 @@ test('requires non-native static projections to retain exact source-path binding
   );
 });
 
+test('rejects deletion of the PR #580 document-flow closure binding', () => {
+  const root = createRoot();
+  const row = validDocumentSemanticsRow();
+  writeValidMatrices(root, {
+    ...row,
+    Evidence: row.Evidence.replace(
+      '; `apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts`',
+      ''
+    ),
+  });
+
+  assert.match(
+    validationMessage(root),
+    /closure binding for `www\.content\.document-semantics` must retain `apps\/www\/src\/content\/docs\/zh-cn\/docs-content-flow\.browser\.test\.ts`/
+  );
+});
+
+test('rejects a stale PR #580 document-flow implementation head', () => {
+  const root = createRoot();
+  const row = validDocumentSemanticsRow();
+  writeValidMatrices(root, {
+    ...row,
+    Evidence: row.Evidence.replace(
+      '2a6d5f3208d91e5c9862a67408a39ff208d43306',
+      '0123456789abcdef0123456789abcdef01234567'
+    ),
+  });
+
+  assert.match(
+    validationMessage(root),
+    /closure binding for `www\.content\.document-semantics` must retain reviewed PR #580 head `2a6d5f3208d91e5c9862a67408a39ff208d43306`/
+  );
+});
+
 test('requires a removal issue for a temporary escape', () => {
   const root = createRoot();
   writeValidMatrices(root, {
@@ -2812,18 +3189,12 @@ test('rejects stale explicit website paths and terminal class/state mismatches',
 test('allows an app-local prototype row to advance to dogfooded with implementation evidence', () => {
   const root = createRoot();
   const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
-  const evidencePath = 'internal/agent-harness/evidence/m1/tool-invocation.md';
-  for (const repositoryPath of [implementationPath, evidencePath]) {
-    const absolutePath = path.join(root, repositoryPath);
-    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
-    fs.writeFileSync(
-      absolutePath,
-      repositoryPath === evidencePath
-        ? 'Build: passed\nBrowser: passed\nAccessibility: passed\nLifecycle: passed\nDesign: Brutalist\nCommit: 0123456789abcdef0123456789abcdef01234567\nEnvironment: fixture\nFixtures: tool invocation\nCommands: pnpm test\nResults: passed\n'
-        : 'fixture',
-      'utf8'
-    );
-  }
+  const absoluteImplementationPath = path.join(root, implementationPath);
+  fs.mkdirSync(path.dirname(absoluteImplementationPath), { recursive: true });
+  fs.writeFileSync(absoluteImplementationPath, 'fixture', 'utf8');
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const { evidencePath } = writeHarnessPromotionArtifacts(root, revision);
   writeValidMatrices(
     root,
     {},
@@ -2874,6 +3245,60 @@ test('requires dogfooded Harness evidence to bind an exact 40-character Git SHA'
       /dogfooded evidence record .* must bind Commit to an exact 40-character Git SHA/
     );
   }
+});
+
+test('rejects a nonexistent dogfooded Harness evidence commit', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const absoluteImplementationPath = path.join(root, implementationPath);
+  fs.mkdirSync(path.dirname(absoluteImplementationPath), { recursive: true });
+  fs.writeFileSync(absoluteImplementationPath, 'fixture', 'utf8');
+  const nonexistentCommit = 'f'.repeat(40);
+  const { evidencePath } = writeHarnessPromotionArtifacts(root, nonexistentCommit);
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /dogfooded evidence Commit `f{40}` does not resolve to a Git commit/
+  );
+});
+
+test('rejects dogfooded Harness results bound to a different revision', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const absoluteImplementationPath = path.join(root, implementationPath);
+  fs.mkdirSync(path.dirname(absoluteImplementationPath), { recursive: true });
+  fs.writeFileSync(absoluteImplementationPath, 'fixture', 'utf8');
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const { evidencePath } = writeHarnessPromotionArtifacts(root, revision, 'e'.repeat(40));
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+
+  assert.match(validationMessage(root), /dogfooded evidence Results revision must equal Commit/);
 });
 
 test('requires a dogfooded implementation path under the Harness application root', () => {
@@ -4804,4 +5229,369 @@ test('rejects unreviewed third-party Harness UI dependencies by default', () => 
   ]) {
     assert.ok(message.includes(`forbidden third-party Harness UI package \`${specifier}\``));
   }
+});
+
+test('requires renderable Website sources in unlisted source roots to have a classification', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relativePath = 'apps/www/src/presenters/StaticSurface.astro';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, '<main><slot /></main>', 'utf8');
+
+  assert.match(
+    validationMessage(root),
+    /website component source `apps\/www\/src\/presenters\/StaticSurface\.astro` is not classified by a matrix row/
+  );
+});
+
+test('rejects symlink escapes for every retained Website artifact label', () => {
+  for (const [label, repositoryPath] of Object.entries({
+    'Build:': 'internal/website/evidence/s14/build.log',
+    'Browser:': 'internal/website/evidence/s14/browser-results.json',
+    'Accessibility:': 'internal/website/evidence/s14/accessibility-results.json',
+    'Screenshot:': 'internal/website/evidence/s14/home-desktop.png',
+    'Results:': 'internal/website/evidence/s14/results.json',
+  })) {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const revision = commitFixtureRoot(root);
+    const evidencePath = 'internal/website/evidence/s14/closeout.md';
+    writeSelfHostedWebsiteArtifacts(root, revision);
+    fs.writeFileSync(
+      path.join(root, evidencePath),
+      validSelfHostedWebsiteEvidence({ Commit: revision }),
+      'utf8'
+    );
+    const outsidePath = path.join(root, 'internal', 'records', path.basename(repositoryPath));
+    fs.mkdirSync(path.dirname(outsidePath), { recursive: true });
+    fs.copyFileSync(path.join(root, repositoryPath), outsidePath);
+    fs.rmSync(path.join(root, repositoryPath));
+    fs.symlinkSync(outsidePath, path.join(root, repositoryPath));
+    writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+    assert.match(
+      validationMessage(root),
+      new RegExp(`${label} retained artifact must resolve within internal/website/evidence/\\*\\*`)
+    );
+  }
+});
+
+test('rejects interaction drift inside an already mapped Website source', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relativePath = 'apps/www/src/components/override/Header.astro';
+  fs.writeFileSync(
+    path.join(root, relativePath),
+    '<nav>Docs</nav><script>window.addEventListener("keydown", openPalette)</script>',
+    'utf8'
+  );
+
+  assert.match(
+    validationMessage(root),
+    /source fingerprint for `apps\/www\/src\/components\/override\/Header\.astro` does not match its reviewed SHA-256/
+  );
+});
+
+test('requires Pagefind default UI ownership on the search interaction row', () => {
+  const root = createRoot();
+  const searchPath = 'apps/www/src/components/override/Search.astro';
+  fs.mkdirSync(path.dirname(path.join(root, searchPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, searchPath), '<div id="starlight__search"></div>', 'utf8');
+  writeValidMatrices(root, {
+    ID: 'www.search.input-results',
+    Path: `\`${searchPath}\``,
+    'Target class': 'site-composition',
+    State: 'blocked',
+    'Proto UI chain': 'Input, Collection, links, and async result state',
+    Lifecycle: 'Search interaction ownership remains blocked',
+    'Dependency and owner': '#420; owner: website search',
+    Evidence: `${searchPath} input and result baseline`,
+  });
+
+  assert.match(
+    validationMessage(root),
+    /matrix row `www\.search\.input-results` must bind `@pagefind\/default-ui` as interaction-owned UI/
+  );
+});
+
+test('rejects unreviewed external executable script sources in the Website shell', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/ExternalRuntime.astro';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    '<main>Docs</main><script src="https://cdn.example/react.production.min.js"></script>',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    { websiteBindings: [[relativePath, ['www.shell.primary-nav']]] }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /external executable script `https:\/\/cdn\.example\/react\.production\.min\.js` in `apps\/www\/src\/components\/ExternalRuntime\.astro` is not reviewed/
+  );
+});
+
+test('rejects dogfooded Harness implementation symlinks escaping the application root', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const outsidePath = 'packages/runtime/src/ToolInvocation.tsx';
+  fs.mkdirSync(path.dirname(path.join(root, outsidePath)), { recursive: true });
+  fs.writeFileSync(path.join(root, outsidePath), 'export const tool = true;', 'utf8');
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.symlinkSync(path.join(root, outsidePath), path.join(root, implementationPath));
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const { evidencePath } = writeHarnessPromotionArtifacts(root, revision);
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+
+  assert.match(
+    validationMessage(root),
+    /dogfooded implementation path must resolve within apps\/agent-harness\/\*\*/
+  );
+});
+
+test('rejects Agent actions in render-evaluated hook callbacks', () => {
+  for (const renderHook of [
+    'const value = useMemo(() => { actions.send(); return 1; }, []);',
+    'const [value] = useState(() => { actions.send(); return 1; });',
+  ]) {
+    const root = createRoot();
+    const relativePath = 'apps/agent-harness/src/run/RenderHook.tsx';
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `import { useMemo, useState } from 'react'; import * as actions from './agent-actions'; export function RenderHook() { ${renderHook} return <section>{value}</section>; }`,
+      'utf8'
+    );
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+    assert.match(
+      validationMessage(root),
+      /Harness source `apps\/agent-harness\/src\/run\/RenderHook\.tsx` contains a forbidden interaction or DOM state machine/
+    );
+  }
+});
+
+test('enforces consumer walls for Vite Worker and SharedWorker URL entries', () => {
+  for (const [applicationRoot, constructorName, expected] of [
+    [
+      'apps/www/src/components/worker.ts',
+      'Worker',
+      /raw Proto UI import `\.\.\/\.\.\/\.\.\/\.\.\/packages\/runtime\/src\/worker\.ts`/,
+    ],
+    [
+      'apps/agent-harness/src/run/worker.ts',
+      'SharedWorker',
+      /raw Proto UI import `\.\.\/\.\.\/\.\.\/\.\.\/packages\/runtime\/src\/worker\.ts`/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, applicationRoot);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `new ${constructorName}(new URL('../../../../packages/runtime/src/worker.ts', import.meta.url), { type: 'module' });`,
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('resolves named effect callbacks in their enclosing lexical scope', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/NamedEffect.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import { useEffect } from 'react'; import * as actions from './agent-actions'; export function NamedEffect() { function runOnMount() { actions.send(); } useEffect(runOnMount, []); return <section>Run</section>; }",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/NamedEffect\.tsx` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('scans local components exposed through named exports for render actions', () => {
+  for (const source of [
+    "import * as actions from './agent-actions'; function Surface() { actions.send(); return <div>Run</div>; } export { Surface };",
+    "import React from 'react'; import * as actions from './agent-actions'; class Surface extends React.Component { render() { actions.send(); return <div>Run</div>; } } export { Surface };",
+  ]) {
+    const root = createRoot();
+    const relativePath = 'apps/agent-harness/src/run/NamedSurface.tsx';
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+    assert.match(
+      validationMessage(root),
+      /Harness source `apps\/agent-harness\/src\/run\/NamedSurface\.tsx` contains a forbidden interaction or DOM state machine/
+    );
+  }
+});
+
+test('detects reflected ARIA property writes on Website and Harness DOM receivers', () => {
+  for (const [relativePath, expected] of [
+    [
+      'apps/www/src/components/aria-state.ts',
+      /interactive website source `apps\/www\/src\/components\/aria-state\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/aria-state.ts',
+      /Harness source `apps\/agent-harness\/src\/run\/aria-state\.ts` contains a forbidden interaction or DOM state machine/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      "const element = document.querySelector('button'); if (element) element.ariaExpanded = 'true';",
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('detects string-literal computed DOM calls in Website and Harness sources', () => {
+  for (const [relativePath, source, expected] of [
+    [
+      'apps/www/src/components/computed-focus.ts',
+      "document.querySelector('button')?.['focus']();",
+      /interactive website source `apps\/www\/src\/components\/computed-focus\.ts` is not bound/,
+    ],
+    [
+      'apps/www/src/components/computed-listener.ts',
+      "document.querySelector('button')?.['addEventListener']('click', run);",
+      /interactive website source `apps\/www\/src\/components\/computed-listener\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/computed-focus.ts',
+      "document.querySelector('button')?.['focus']();",
+      /Harness source `apps\/agent-harness\/src\/run\/computed-focus\.ts` contains a forbidden interaction or DOM state machine/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('validates every dependency issue binding in a cell independently', () => {
+  const root = createRoot();
+  writeValidMatrices(
+    root,
+    {},
+    {
+      'Dependency and owner': '#519 and #999999; owner: scroll domain',
+    }
+  );
+  assert.match(
+    validationMessage(root),
+    /dependency issue #999999 is absent from the Proto-UI\/Proto-UI governance snapshot/
+  );
+});
+
+test('rejects duplicate and noncanonical dependency Issue bindings', () => {
+  for (const [dependency, expected] of [
+    ['#519 and #519; owner: scroll domain', /dependency issue #519 is bound more than once/],
+    [
+      '[#519](https://github.com/Elsewhere/Other/issues/519); owner: scroll domain',
+      /dependency issue #519 must use the canonical Proto-UI\/Proto-UI Issue URL/,
+    ],
+  ]) {
+    const root = createRoot();
+    writeValidMatrices(root, {}, { 'Dependency and owner': dependency });
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('rejects incomplete machine-readable evidence result manifests', () => {
+  for (const missingField of ['tree', 'commands', 'results', 'artifacts']) {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const revision = commitFixtureRoot(root);
+    const evidencePath = 'internal/website/evidence/s14/closeout.md';
+    writeSelfHostedWebsiteArtifacts(root, revision);
+    const resultsPath = path.join(root, 'internal/website/evidence/s14/results.json');
+    const manifest = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+    delete manifest[missingField];
+    fs.writeFileSync(resultsPath, `${JSON.stringify(manifest)}\n`, 'utf8');
+    fs.writeFileSync(
+      path.join(root, evidencePath),
+      validSelfHostedWebsiteEvidence({ Commit: revision }),
+      'utf8'
+    );
+    writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+    assert.match(
+      validationMessage(root),
+      new RegExp(`self-hosted evidence Results manifest must contain non-empty ${missingField}`)
+    );
+  }
+});
+
+test('rejects evidence commits outside the candidate revision ancestry', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const evidenceRevision = commitFixtureRoot(root);
+  execFileSync('git', ['checkout', '--quiet', '--orphan', 'unrelated-candidate'], { cwd: root });
+  execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit',
+      '--quiet',
+      '--allow-empty',
+      '--no-gpg-sign',
+      '-m',
+      'unrelated candidate',
+    ],
+    { cwd: root }
+  );
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  writeSelfHostedWebsiteArtifacts(root, evidenceRevision);
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    validSelfHostedWebsiteEvidence({ Commit: evidenceRevision }),
+    'utf8'
+  );
+  writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+  assert.match(
+    validationMessage(root),
+    /self-hosted evidence Commit .* must be an ancestor of the candidate revision/
+  );
 });
