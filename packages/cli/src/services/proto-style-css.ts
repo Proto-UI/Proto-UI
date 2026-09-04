@@ -383,9 +383,9 @@ export function renderProtoStyleEntryCss({
     '/* Do not edit by hand. */',
     '/* Hosts with named reset or consumer layers must declare their full order before this entry loads. */',
     '',
-    '@layer proto-ui;',
+    '@layer theme, proto-ui;',
     '',
-    `@import '${themeImport}';`,
+    `@import '${themeImport}' layer(theme);`,
     `@import '${tokensImport}';`,
     '',
   ].join('\n');

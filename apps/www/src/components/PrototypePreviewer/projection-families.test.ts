@@ -26,7 +26,14 @@ const EXPECTED_SHARED_BASE_FAMILY_IDS = [
 
 const EXPECTED_COMPONENT_IDS = {
   shadcn: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'checkbox'],
-  brutalist: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'badge', 'card', 'skeleton', 'scroll-area'],
+  brutalist: [
+    ...EXPECTED_SHARED_BASE_FAMILY_IDS,
+    'badge',
+    'card',
+    'skeleton',
+    'scroll-area',
+    'tooltip',
+  ],
 } as const;
 
 const EXPECTED_REQUIRED_PART_IDS = {
@@ -56,6 +63,7 @@ const EXPECTED_REQUIRED_PART_IDS = {
   card: ['root', 'header', 'content', 'footer'],
   skeleton: ['root'],
   'scroll-area': ['root', 'viewport', 'scrollbar', 'thumb'],
+  tooltip: ['group', 'root', 'trigger', 'content'],
 } as const;
 
 const EXPECTED_THEME_REFERENCES = {
@@ -146,6 +154,34 @@ const EXPECTED_LANE_ONLY_FAMILIES = {
         thumb: {
           basePrototypeId: 'P-BASE-SCROLL-AREA-THUMB',
           prototypeId: 'brutalist-scroll-area-thumb',
+        },
+      },
+    },
+    tooltip: {
+      baseFamilyId: 'P-BASE-TOOLTIP',
+      recipeId: 'demo-brutalist-tooltip',
+      recipePrototypeIds: [
+        'brutalist-tooltip-group',
+        'brutalist-tooltip-root',
+        'brutalist-tooltip-trigger',
+        'brutalist-tooltip-content',
+      ],
+      parts: {
+        group: {
+          basePrototypeId: 'P-BASE-TOOLTIP-GROUP',
+          prototypeId: 'brutalist-tooltip-group',
+        },
+        root: {
+          basePrototypeId: 'P-BASE-TOOLTIP',
+          prototypeId: 'brutalist-tooltip-root',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-TOOLTIP-TRIGGER',
+          prototypeId: 'brutalist-tooltip-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-TOOLTIP-CONTENT',
+          prototypeId: 'brutalist-tooltip-content',
         },
       },
     },

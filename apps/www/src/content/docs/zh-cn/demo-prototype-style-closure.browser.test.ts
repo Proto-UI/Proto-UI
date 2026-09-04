@@ -13,6 +13,16 @@ import {
 
 const ROUTE = '/en/test/style-isolation/';
 const VIEWPORT = { width: 1440, height: 1200 };
+const CONSUMER_THEME_PAINT = {
+  light: {
+    foreground: 'rgb(19, 31, 43)',
+    inputBorder: 'rgb(57, 81, 105)',
+  },
+  dark: {
+    foreground: 'rgb(221, 229, 237)',
+    inputBorder: 'rgb(117, 139, 161)',
+  },
+} as const satisfies Record<ColorScheme, { foreground: string; inputBorder: string }>;
 
 let browser: Browser;
 let context: BrowserContext;
@@ -253,6 +263,14 @@ describe.sequential('Prototype style closure without Website CSS', () => {
       // T-WEB-STYLE-BASELINE-0001-CASE-CASCADE-OWNERSHIP
       await openStandaloneTheme(colorScheme);
       const expectedButton = await readTokenPaint();
+      const expectedConsumerTheme = CONSUMER_THEME_PAINT[colorScheme];
+
+      expect(expectedButton.foreground, `${colorScheme}/consumer-theme-foreground`).toBe(
+        expectedConsumerTheme.foreground
+      );
+      expect(expectedButton.inputBorder, `${colorScheme}/consumer-theme-input-border`).toBe(
+        expectedConsumerTheme.inputBorder
+      );
 
       const result = await page.evaluate(
         (runtimeIds) => {

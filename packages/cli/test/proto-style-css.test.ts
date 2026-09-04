@@ -24,14 +24,14 @@ describe('proto style css renderer', () => {
     expect(css).not.toMatch(/(^|\n)::after\s*\{/);
   });
 
-  it('predeclares the Proto UI layer before generated entry imports', () => {
+  it('places generated theme defaults below the Proto UI layer and consumer layers', () => {
     // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
     const css = renderProtoStyleEntryCss({
       themeImport: './shadcn-theme.css',
       tokensImport: './proto-ui-tokens.generated.css',
     });
-    const preludeAt = css.indexOf('@layer proto-ui;');
-    const themeImportAt = css.indexOf("@import './shadcn-theme.css';");
+    const preludeAt = css.indexOf('@layer theme, proto-ui;');
+    const themeImportAt = css.indexOf("@import './shadcn-theme.css' layer(theme);");
     const tokensImportAt = css.indexOf("@import './proto-ui-tokens.generated.css';");
     const declaredLayerSlots = [...css.matchAll(/@layer\s+([^;{]+)\s*;/g)].map((match) =>
       match[1].trim()
@@ -40,7 +40,8 @@ describe('proto style css renderer', () => {
     expect(preludeAt).toBeGreaterThan(-1);
     expect(preludeAt).toBeLessThan(themeImportAt);
     expect(preludeAt).toBeLessThan(tokensImportAt);
-    expect(declaredLayerSlots).toEqual(['proto-ui']);
+    expect(declaredLayerSlots).toEqual(['theme, proto-ui']);
+    expect(css).not.toContain("@import './shadcn-theme.css';");
   });
 
   it('normalizes only styled native controls at zero specificity before token rules', () => {

@@ -110,7 +110,7 @@ import './styles/proto-ui-style.css';
 
 ```css
 /* src/app.css */
-@layer base, proto-ui, components, utilities;
+@layer theme, base, proto-ui, components, utilities;
 
 @import './reset.css' layer(base);
 @import './styles/proto-ui-style.css';
@@ -118,9 +118,9 @@ import './styles/proto-ui-style.css';
 @import './app-utilities.css' layer(utilities);
 ```
 
-应用入口只需 import 一次 `app.css`，不要再分别导入这些 stylesheet。关键关系是 `reset/base < proto-ui < explicit consumer layers`。使用 Tailwind 或其他分层 reset 时，应在最早的 layer order statement 中把 `proto-ui` 放在其 base layer 之后、应用的 components 与 utilities layers 之前。
+应用入口只需 import 一次 `app.css`，不要再分别导入这些 stylesheet。生成入口会把 theme 默认值放进 `theme` layer，因此更后的 named consumer layer 或 unlayered consumer CSS 声明的变量值仍然拥有优先权。完整关系是 `theme defaults < reset/base < proto-ui < explicit consumer layers`。使用 Tailwind 时，应保留它的 `theme < base < components < utilities` 顺序，并在最早的 layer order statement 中把 `proto-ui` 插入 base 之后、应用的 components 与 utilities layers 之前。
 
-Named layer 的顺序会在首次出现时固定。在包含相应声明的版本中，生成的 `@layer proto-ui;` 只有在该入口先加载时才能预留 Proto UI 自身 slot；它无法修复更早 stylesheet 已经建立的顺序。只要应用引入 named reset 或 consumer layers，上面的 host order statement 就仍然是必要的集成配置。
+Named layer 的顺序会在首次出现时固定。生成的 `@layer theme, proto-ui;` 只有在该入口先加载时才能预留这两个 slot；它无法修复更早 stylesheet 已经建立的顺序。只要应用引入 named reset 或 consumer layers，上面的 host order statement 就仍然是必要的集成配置。
 
 ## 添加并导入组件
 

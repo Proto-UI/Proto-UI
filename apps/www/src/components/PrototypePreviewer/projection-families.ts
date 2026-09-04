@@ -18,7 +18,8 @@ export type ProjectionComponentId =
   | 'badge'
   | 'card'
   | 'skeleton'
-  | 'scroll-area';
+  | 'scroll-area'
+  | 'tooltip';
 export type ProjectionFamilyId = 'shadcn' | 'brutalist';
 
 export type ProjectionPartManifest = Readonly<{
@@ -73,6 +74,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   card: ['root', 'header', 'content', 'footer'],
   skeleton: ['root'],
   'scroll-area': ['root', 'viewport', 'scrollbar', 'thumb'],
+  tooltip: ['group', 'root', 'trigger', 'content'],
 };
 
 const SHADCN_MANIFEST = {
@@ -567,6 +569,34 @@ const BRUTALIST_MANIFEST = {
         thumb: {
           basePrototypeId: 'P-BASE-SCROLL-AREA-THUMB',
           prototypeId: 'brutalist-scroll-area-thumb',
+        },
+      },
+    },
+    tooltip: {
+      baseFamilyId: 'P-BASE-TOOLTIP',
+      recipeId: 'demo-brutalist-tooltip',
+      recipePrototypeIds: [
+        'brutalist-tooltip-group',
+        'brutalist-tooltip-root',
+        'brutalist-tooltip-trigger',
+        'brutalist-tooltip-content',
+      ],
+      parts: {
+        group: {
+          basePrototypeId: 'P-BASE-TOOLTIP-GROUP',
+          prototypeId: 'brutalist-tooltip-group',
+        },
+        root: {
+          basePrototypeId: 'P-BASE-TOOLTIP',
+          prototypeId: 'brutalist-tooltip-root',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-TOOLTIP-TRIGGER',
+          prototypeId: 'brutalist-tooltip-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-TOOLTIP-CONTENT',
+          prototypeId: 'brutalist-tooltip-content',
         },
       },
     },

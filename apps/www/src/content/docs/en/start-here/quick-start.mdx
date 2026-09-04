@@ -111,7 +111,7 @@ If the application does not use named CSS cascade layers, keep the single import
 
 ```css
 /* src/app.css */
-@layer base, proto-ui, components, utilities;
+@layer theme, base, proto-ui, components, utilities;
 
 @import './reset.css' layer(base);
 @import './styles/proto-ui-style.css';
@@ -119,9 +119,9 @@ If the application does not use named CSS cascade layers, keep the single import
 @import './app-utilities.css' layer(utilities);
 ```
 
-Import `app.css` once from the application entry instead of importing those stylesheets separately. The important relationship is `reset/base < proto-ui < explicit consumer layers`. For Tailwind or another layered reset, place `proto-ui` after its base layer and before the application's component and utility layers in the earliest order statement.
+Import `app.css` once from the application entry instead of importing those stylesheets separately. The generated entry places its theme defaults in the `theme` layer, so values declared by later named consumer layers—or by unlayered consumer CSS—remain authoritative. The complete relationship is `theme defaults < reset/base < proto-ui < explicit consumer layers`. For Tailwind, preserve its `theme < base < components < utilities` order while inserting `proto-ui` after `base` and before the application's component and utility layers in the earliest order statement.
 
-Layer order is fixed when a named layer first appears. A generated `@layer proto-ui;` declaration, in versions that include one, can reserve only the Proto UI slot when that entry loads first; it cannot repair an order that earlier stylesheets already established. The host order statement above remains necessary whenever the application introduces named reset or consumer layers.
+Layer order is fixed when a named layer first appears. A generated `@layer theme, proto-ui;` declaration can reserve only those two slots when that entry loads first; it cannot repair an order that earlier stylesheets already established. The host order statement above remains necessary whenever the application introduces named reset or consumer layers.
 
 ## Add and import a component
 

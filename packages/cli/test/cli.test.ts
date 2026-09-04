@@ -430,11 +430,12 @@ describe('@proto.ui/cli', () => {
     expect(tokensCss).not.toContain(`aria-checked:bg-primary"])[aria-checked='true']`);
     expect(tokensCss).not.toContain('@source');
     expect(tokensCss).not.toContain('Unsupported Proto UI style tokens');
-    expect(styleCss).toContain('@layer proto-ui;');
-    expect(styleCss.indexOf('@layer proto-ui;')).toBeLessThan(
-      styleCss.indexOf(`@import './shadcn-theme.css';`)
+    expect(styleCss).toContain('@layer theme, proto-ui;');
+    expect(styleCss.indexOf('@layer theme, proto-ui;')).toBeLessThan(
+      styleCss.indexOf(`@import './shadcn-theme.css' layer(theme);`)
     );
-    expect(styleCss).toContain(`@import './shadcn-theme.css';`);
+    expect(styleCss).toContain(`@import './shadcn-theme.css' layer(theme);`);
+    expect(styleCss).not.toContain(`@import './shadcn-theme.css';`);
     expect(styleCss).toContain(`@import './proto-ui-tokens.generated.css';`);
     expect(themeCss).toContain('--pui-background');
     expect(themeCss).not.toContain('--background:');

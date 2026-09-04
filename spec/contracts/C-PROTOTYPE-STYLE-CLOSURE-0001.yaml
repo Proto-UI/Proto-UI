@@ -32,8 +32,8 @@ criteria:
       en: The consumer must continue to own outer layout, explicit surface class or style, theme activation and variable values, font resources and font-family where not explicitly overridden by the Prototype, and environmental inputs such as viewport, content, and locale; isolation tests must not misclassify these legitimate inputs as component-stylesheet dependencies.
   - id: C-PROTOTYPE-STYLE-CLOSURE-0001-E
     text:
-      zh-CN: 为闭合 Prototype style 而新增的 host normalization 必须限制在 Adapter/style translation 所拥有的 presentation surface，不得安装 document-wide reset、修改未进入 style projection 的元素，或以不必要的 specificity/cascade precedence 阻止 Prototype token 与 consumer 显式覆盖。当 host 使用 named cascade layers 时，它必须在任一相关 layer 首次声明前建立 `reset/base < proto-ui < explicit consumer layers` 的顺序；后加载的生成 artifact 不能被假定能够重排已经声明的 layer。
-      en: Host normalization added to close Prototype styling must be scoped to presentation surfaces owned by Adapter or style translation; it must not install a document-wide reset, modify elements outside style projection, or use unnecessary specificity or cascade precedence that prevents Prototype tokens and explicit consumer overrides from winning. When a host uses named cascade layers, it must establish `reset/base < proto-ui < explicit consumer layers` before any relevant layer is first declared; a later generated artifact cannot be assumed to reorder layers that have already been declared.
+      zh-CN: 为闭合 Prototype style 而新增的 host normalization 必须限制在 Adapter/style translation 所拥有的 presentation surface，不得安装 document-wide reset、修改未进入 style projection 的元素，或以不必要的 specificity/cascade precedence 阻止 Prototype token、consumer 显式覆盖或 consumer-owned theme variable value 生效。当 host 使用 named cascade layers 时，它必须在任一相关 layer 首次声明前建立 `generated theme defaults < reset/base < proto-ui < explicit consumer layers` 的顺序；后加载的生成 artifact 不能被假定能够重排已经声明的 layer。
+      en: Host normalization added to close Prototype styling must be scoped to presentation surfaces owned by Adapter or style translation; it must not install a document-wide reset, modify elements outside style projection, or use unnecessary specificity or cascade precedence that prevents Prototype tokens, explicit consumer overrides, or consumer-owned theme variable values from winning. When a host uses named cascade layers, it must establish `generated theme defaults < reset/base < proto-ui < explicit consumer layers` before any relevant layer is first declared; a later generated artifact cannot be assumed to reorder layers that have already been declared.
 sources:
   - path: internal/records/2026-08-02-host-surface-projection.zh-CN.md
   - path: packages/adapters/base/src/host/surface-projection.ts
@@ -68,6 +68,9 @@ verifies:
   tests:
     - T-PROTOTYPE-STYLE-CLOSURE-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Required generated theme defaults to occupy a lower named layer so later consumer-owned variable values remain authoritative in the supported host order.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Made early host layer ordering an explicit integration precondition when reset or consumer styles use named cascade layers.

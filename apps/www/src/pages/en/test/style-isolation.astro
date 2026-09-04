@@ -203,7 +203,7 @@
 </html>
 
 <style is:global>
-  @layer base, proto-ui, utilities, consumer;
+  @layer theme, base, proto-ui, utilities, consumer;
 
   @import '../../../styles/proto-ui-style.css';
 
@@ -262,6 +262,16 @@
   }
 
   @layer consumer {
+    :root[data-theme='light'] {
+      --pui-foreground: rgb(19 31 43);
+      --pui-input: rgb(57 81 105);
+    }
+
+    :root[data-theme='dark'] {
+      --pui-foreground: rgb(221 229 237);
+      --pui-input: rgb(117 139 161);
+    }
+
     .consumer-override {
       color: rgb(12 34 56);
       font-family: 'Proto UI Explicit Consumer', serif;

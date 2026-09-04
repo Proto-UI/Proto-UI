@@ -421,10 +421,11 @@ type ButtonFill = {
 };
 
 /**
- * Reads each Button fill and the `:root` value of the variable it names through
- * the same 1x1 canvas, so a theme hex and a computed `rgb()` compare as painted
- * rather than as text. Comparing the pair is what "resolves through the theme
- * variable" means; comparing two schemes only proves the surface moved.
+ * Reads each Button fill and the value of the variable it names on that same
+ * projected presentation surface through one 1x1 canvas. The Website scope
+ * deliberately keeps lane variables off `:root`, so the surface is the actual
+ * consumer-owned theme boundary. Comparing the pair is what "resolves through
+ * the theme variable" means; comparing two schemes only proves the surface moved.
  */
 /**
  * Switches the host theme through the site's own control surface.
@@ -471,14 +472,19 @@ const CANARY_VALUES: Record<string, string> = {
 
 async function applyCanaryTheme(page: Page, on: boolean): Promise<void> {
   await page.evaluate(
-    ({ enabled, values }) => {
-      const root = document.documentElement;
-      for (const [name, value] of Object.entries(values)) {
-        if (enabled) root.style.setProperty(name, value);
-        else root.style.removeProperty(name);
+    ({ enabled, values, refs }) => {
+      for (const ref of refs) {
+        const surface = document.querySelector<HTMLElement>(
+          `[data-previewer-id] [data-demo-ref="${ref}"]`
+        );
+        if (!surface) throw new Error(`The Brutalist Button demo must render ${ref}.`);
+        for (const [name, value] of Object.entries(values)) {
+          if (enabled) surface.style.setProperty(name, value);
+          else surface.style.removeProperty(name);
+        }
       }
     },
-    { enabled: on, values: CANARY_VALUES }
+    { enabled: on, values: CANARY_VALUES, refs: Object.keys(BUTTON_FILLS) }
   );
 }
 
@@ -498,7 +504,6 @@ async function buttonFills(page: Page): Promise<Record<keyof typeof BUTTON_FILLS
       return Array.from(context.getImageData(0, 0, 1, 1).data).join(',');
     };
 
-    const rootStyle = getComputedStyle(document.documentElement);
     const result: Record<string, unknown> = {};
     for (const [ref, [backgroundVar, colorVar]] of Object.entries(fills)) {
       const element = document.querySelector<HTMLElement>(
@@ -511,8 +516,8 @@ async function buttonFills(page: Page): Promise<Record<keyof typeof BUTTON_FILLS
         color: paint(style.color),
         opacity: style.opacity,
         variables: {
-          background: paint(rootStyle.getPropertyValue(backgroundVar).trim()),
-          color: paint(rootStyle.getPropertyValue(colorVar).trim()),
+          background: paint(style.getPropertyValue(backgroundVar).trim()),
+          color: paint(style.getPropertyValue(colorVar).trim()),
         },
         hovered: element.hasAttribute('data-hovered'),
         pressed: element.hasAttribute('data-pressed'),
@@ -701,6 +706,10 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         if (!(boundary instanceof HTMLElement)) {
           throw new Error('The Tooltip page must expose its shared theme boundary.');
         }
+        const portal = document.querySelector('[role="tooltip"]');
+        if (!(portal instanceof HTMLElement)) {
+          throw new Error('The Tooltip renderer must expose its body portal surface.');
+        }
         const readPaint = (parent: HTMLElement) => {
           const probe = document.createElement('div');
           probe.style.color = 'var(--pui-foreground)';
@@ -716,7 +725,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         };
         return {
           boundary: readPaint(boundary),
-          portal: readPaint(document.body),
+          portal: readPaint(portal),
         };
       });
       expect(resolved.boundary, frame).toEqual(resolved.portal);
@@ -744,7 +753,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
         // Scoped to the rendered host: the previewer chrome is Proto UI too, so
         // a previewer-wide count is not evidence about this demo.
-        const roots = previewer.locator('.host [data-pui-root]');
+        const roots = previewer.locator('[data-projection-content] [data-pui-root]');
         expect(await roots.count(), runtime).toBe(7);
         expect(await roots.nth(0).getAttribute('data-pui-root'), runtime).toBe('');
         const firstTrigger = roots.filter({ hasText: 'Hover or focus for details' }).last();
@@ -1169,7 +1178,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       await page.emulateMedia({ colorScheme: 'light' });
 
       for (const runtime of EVERY_RUNTIME) {
-          await selectPreviewRuntime(page, previewer, runtime, '[data-demo-ref="surface"]', 1);
+        await selectPreviewRuntime(page, previewer, runtime, '[data-demo-ref="surface"]', 1);
         // Park the pointer off the demo: a repaint that needed a hover to land
         // would otherwise pass here and fail for a reader who never moves.
         await page.mouse.move(0, 0);

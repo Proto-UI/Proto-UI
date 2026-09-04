@@ -20,16 +20,16 @@ cases:
       - D-WEB-SURFACE-NORMALIZATION-0001-E
     expectation: normalization-is-data-pui-style-scoped-and-loses-to-owned-overrides
   - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
-    title: generated style entry reserves the Proto UI layer before its imports without claiming control over existing host layers
+    title: generated style entry reserves theme below Proto UI and imports generated theme defaults into the lower layer without claiming control over host layers
     covers:
       - D-WEB-SURFACE-NORMALIZATION-0001-F
-    expectation: generated-entry-predeclares-only-the-proto-ui-slot-before-imports
+    expectation: generated-entry-predeclares-theme-below-proto-ui-and-layers-theme-default-import
   - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CASCADE-LAYER-OWNERSHIP
-    title: early host ordering keeps reset or base layers below Proto UI and explicit consumer layers above it
+    title: early host ordering keeps generated theme defaults below reset or base, Proto UI below explicit consumer layers, and consumer theme values authoritative
     covers:
       - C-PROTOTYPE-STYLE-CLOSURE-0001-E
       - D-WEB-SURFACE-NORMALIZATION-0001-E
-    expectation: reset-base-below-proto-ui-below-explicit-consumer-layers
+    expectation: theme-defaults-below-reset-base-below-proto-ui-below-explicit-consumer-layers
   - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-STANDALONE-FOUR-RUNTIMES
     title: standalone Web Components React Vue 3 and Vue 2 fixtures need only generated Proto UI styles for component correctness
     covers:
@@ -38,7 +38,7 @@ cases:
       - C-PROTOTYPE-STYLE-CLOSURE-0001-C
     expectation: four-official-web-runtimes-render-prototype-styles-without-site-css-or-tailwind-preflight
   - id: T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CONSUMER-INPUTS
-    title: standalone coverage preserves explicit consumer presentation and environmental inputs without introducing a global reset
+    title: standalone coverage preserves consumer theme values, explicit presentation, and environmental inputs without introducing a global reset
     covers:
       - C-PROTOTYPE-STYLE-CLOSURE-0001-D
       - C-PROTOTYPE-STYLE-CLOSURE-0001-E
@@ -59,7 +59,7 @@ implementations:
       - C-PROTOTYPE-STYLE-CLOSURE-0001
       - D-WEB-SURFACE-NORMALIZATION-0001
     notes:
-      - Asserts the exact zero-specificity native-control selector, required declarations, placement inside the Proto UI layer before token rules, the generated entry slot before imports, absence of unscoped resets, and continued consumer cascade ownership.
+      - Asserts the exact zero-specificity native-control selector, required declarations, placement inside the Proto UI layer before token rules, the generated theme and Proto UI slots before imports, the layered theme-default import, absence of unscoped resets, and continued consumer cascade ownership.
   - id: cli-init-proto-style-layer-slot
     kind: module-test
     status: passing
@@ -70,7 +70,7 @@ implementations:
     exercises:
       - D-WEB-SURFACE-NORMALIZATION-0001
     notes:
-      - Asserts that CLI init writes the generated Proto UI layer slot before theme and token imports.
+      - Asserts that CLI init writes the generated theme and Proto UI layer slots before imports and places generated theme defaults in the lower theme layer.
   - id: www-prototype-style-closure-browser
     kind: runtime-test
     status: passing
@@ -94,6 +94,7 @@ implementations:
     notes:
       - The standalone apps/www/src/pages/en/test/style-isolation.astro route loads generated proto-ui-style.css without the landing page, Starlight, Tailwind Preflight, or apps/www/src/styles/global.css, then mounts real Web Components, React, Vue 3, and Vue 2 projections.
       - Theme activation and variables, inherited font choice, viewport, content, locale, outer fixture layout, and explicit surface class or style remain declared consumer inputs rather than hidden component CSS dependencies.
+      - Non-default Light and Dark `--pui-foreground` and `--pui-input` values declared in a later named consumer layer must win over generated theme defaults and flow through rendered surfaces in all four runtimes.
       - Light and Dark computed-style assertions cover Shadcn Button, exact default Textarea background and border token paint in three states, a separately consumer-overridden native Textarea, and portaled Hover Card Content; CSSOM assertions reject document-wide and bare native-control resets.
       - A deliberately conflicting base-layer Textarea sentinel must lose to Proto UI defaults, while a later named consumer layer must retain margin, padding, border, background, color, opacity, font, and content-box ownership across all four runtimes.
       - Adjacent enabled/disabled Textarea paint, focus/blur transition endpoints, and Hover Card closed/open endpoints are driven in every Runtime so conditional styles and transition assets cannot be replaced by static mount evidence.
@@ -133,6 +134,9 @@ sources:
   - path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
   - path: apps/www/src/pages/en/test/style-isolation.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added generated-entry and four-runtime evidence that layered theme defaults remain below reset, Proto UI, and consumer-owned theme values while preserving Tailwind-compatible order.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added generated layer-slot, exact Textarea paint, and base-to-Proto-to-consumer named-layer ownership evidence.

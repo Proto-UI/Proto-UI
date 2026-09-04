@@ -2,7 +2,7 @@
 /* Do not edit by hand. */
 /* Hosts with named reset or consumer layers must declare their full order before this entry loads. */
 
-@layer proto-ui;
+@layer theme, proto-ui;
 
-@import './shadcn-theme.css';
+@import './shadcn-theme.css' layer(theme);
 @import './proto-ui-tokens.generated.css';
