@@ -290,7 +290,15 @@ type TerminalResizeOwnerLease = Readonly<{
 
 type TerminalResizeOwnerResult =
   | Readonly<{ status: 'acquired'; owner: TerminalResizeOwnerLease; reason: null }>
-  | Readonly<{ status: 'unavailable'; owner: null; reason: 'resize-owner-conflict' }>;
+  | Readonly<{
+      status: 'unavailable';
+      owner: null;
+      reason:
+        | 'engine-unavailable'
+        | 'engine-session-mismatch'
+        | 'resize-unavailable'
+        | 'resize-owner-conflict';
+    }>;
 
 type TerminalSurfaceHost = Readonly<{
   acquireResizeOwner(identity: {
@@ -300,29 +308,30 @@ type TerminalSurfaceHost = Readonly<{
 }>;
 ```
 
-A fake Module mints a unique `terminalInstanceId`; Host resolves a session-affine engine/coordinator from `sessionId`, atomically returns a separate resize-owner lease, then each view attach resolves its backend sink from `backendBindingId`. The objects/bytes never enter patches. App-authored values cannot select owner identity. View `dispose()` cannot release the owner; only explicit final `owner.release()` can, after pending resize settlement. Module owns connection/policy generations; Host owner/session coordinator owns exclusive participation and serialized resize across views/backend replacement. A Host callback echoes generation captured when work began; snapshots return generation that produced cached facts and never restamp. Sole input send path is Host/engine -> live immutable sink after synchronous generation/mode/process-epoch check; `onInputObserved` is post-send observation only. The red-first exercise:
+A fake Module mints a unique `terminalInstanceId`; Host resolves a session-affine engine/coordinator from `sessionId` before granting a separate resize-owner lease, then each view attach resolves backend sink from `backendBindingId`. Engine/session/coordinator failures return their exact unavailable reason and never reserve ownership. App values cannot select owner identity. View `dispose()` cannot release owner; explicit final `owner.release()` enters a releasing state, blocks acquisition and new resize dispatch, then cancels-and-awaits or awaits the pending mutation before grant release. Module owns connection/policy generations; Host owner/session coordinator owns participation/serialization. Host callbacks echo start generation; snapshots never restamp. Sole input is Host/engine -> live sink after synchronous policy/process check; observations never write. The red-first exercise:
 
-1. Module mints `terminal-instance-7`; acquire owner for `session-7`, attach `backend-2` generation 1, receive ready support/A11y, snapshot generation 1;
-2. App supplies a colliding label/value but Module mints distinct `terminal-instance-8`; its acquisition for live `session-7` rejects `resize-owner-conflict` and no geometry/input enters coordinator. Disposing/replacing instance 7's view does not release owner or let instance 8 acquire;
-3. explicitly final-release instance 7 after pending resize settles; only then can instance 8 acquire. Releasing old view alone and duplicate App data never transfers ownership;
-4. App/backend marks process exited while transport remains connected: revoke sink first, then publish exit; Module atomically commits disabled generation 2 plus Focus-ineligible. Raw/text/key/mobile input before/after Host update produces zero writes; returning interactive on old binding rejects. Restart uses fresh backend binding/connection;
-5. start old support probe/event, update through read-only generation 3 to disabled generation 4, then complete old work; Host drops stale input before sink, and delayed observations/facts/old snapshot change nothing;
-6. keep read-only Focus-eligible, then commit disabled plus Focus-ineligible; user/programmatic Focus entry rejects before Host bridge;
-7. on a live process/binding return to interactive generation 5 and request mobile Escape; engine writes once, then one observation. Arbitrary/generation-mismatched keys reject before sink;
-8. enable terminal mouse protocol; pointer reports produce zero backend writes while local selection changes;
-9. make F6 reservation unavailable; report exact failure and reject composition independently of Button;
-10. send dimensions `{0, 24}`, `{-1, 24}`, `{80.5, 24}`, `{NaN, 24}`, `{Infinity, 24}`, and unsafe integers; each rejects `invalid-dimensions` with null revision before coordinator/backend. Repeat invalid rows. Boundary `{1, 1}` proceeds;
-11. as owner, dispatch resize 1, observe valid sizes 2/3 while unresolved, assert no second mutation; replace view through retained owner while pending; replacement cannot ready/dispatch until 1 completes/cancels, then applies newest at 120x40; reject next valid resize with backend reason;
-12. reconnect same session/instance through `backend-3` while resize pending; retire old view/sink, retain owner/coordinator, await/cancel old completion, reapply newest before ready; old sink gets no later input while engine state remains;
-13. replace target/view through same owner; engine state survives and stale callbacks cannot revive;
-14. attempt same-session engine replacement without complete replay/rehydration and fail closed; session replacement final-releases old owner then acquires distinct engine/coordinator/owner;
-15. try borrowed engine across sessions; reject mismatch absent complete reset;
-16. simulate missing/unverified support; assert bounded reason;
-17. omit/disable leave Button then provide Button + Focus topology;
-18. with no resize pending dispose view and emit observations; zero view callbacks/writes while engine/coordinator/owner intact; call final owner release and prove another instance can acquire;
-19. prove no engine/target/buffer/stream/sink/title/A11y duplicate/cell grid or owner lease enters portable authoring.
+1. attempt owner acquisition with engine unavailable, session mismatch, and missing resize coordinator/support; receive exact `engine-unavailable`, `engine-session-mismatch`, or `resize-unavailable`, no owner, and prove another valid instance can acquire because failure reserved nothing;
+2. Module mints `terminal-instance-7`; acquire owner for `session-7`, attach `backend-2` generation 1, receive and preserve ordered `attaching -> ready` callbacks even within one scheduling turn, then snapshot generation 1;
+3. App supplies colliding label but Module mints distinct instance 8; its acquisition rejects resize-owner-conflict and no geometry/input enters. Disposing/replacing instance 7 view does not release owner;
+4. with instance 7 resize unresolved, call `owner.release()` immediately. Assert owner enters releasing, rejects further resize/view attach and instance 8 acquisition, and does not free grant. After cancel acknowledgement or backend completion settles old mutation, release completes; only then instance 8 acquires/dispatches. Complete old callback afterward and prove it cannot overwrite new size;
+5. App/backend process exit while transport connected: revoke sink first, publish exit, commit disabled generation 2 + Focus-ineligible. All input writes zero; old binding cannot return interactive; restart uses fresh binding/connection;
+6. start old probe/event, update read-only gen3 -> disabled gen4, complete old work; stale input/facts/snapshot change nothing;
+7. keep read-only Focus eligible, then disabled/ineligible; user/programmatic entry rejects;
+8. live binding interactive gen5; mobile Escape writes once + one observation; invalid keys/generation reject;
+9. terminal mouse reports blocked while local selection changes;
+10. F6 unavailable reports exact failure and composition rejects independently;
+11. invalid columns/rows: zero, negative, fractional, NaN, Infinity, unsafe; each invalid-dimensions/null revision/no backend; `{1,1}` proceeds;
+12. as owner dispatch resize 1, observe 2/3 pending, no second mutation; replace view via retained owner; cannot ready/dispatch until settle, then apply newest 120x40; next valid resize backend-rejects;
+13. reconnect same instance `backend-3` pending; retire old sink/view, retain owner/coordinator, settle/reapply newest before ready; engine state remains;
+14. target/view replace through owner preserves engine; stale callbacks cannot revive;
+15. same-session engine replacement fails absent complete rehydration; session replacement releases old then acquires new;
+16. borrowed engine cross-session rejects absent reset;
+17. emit `attaching -> ready -> unavailable` and support availability transitions within one scheduling turn; assert every lifecycle/support transition arrives in order while only observationally equivalent same-generation level facts coalesce;
+18. simulate remaining support failures; omit/disable leave Button then provide Button + Focus topology;
+19. dispose view and emit observations: zero view effects while owner intact; final release then permits another instance;
+20. prove no raw engine/target/buffer/stream/sink/title/A11y/grid/owner lease enters portable authoring.
 
-This makes Module-issued owner identity, owner/view lifetime separation, invalid-size rejection, post-exit input gating, generation-stamped snapshots, single-path input, policy-generation/Focus behavior, mouse suppression, session affinity, backend rebinding, session resize serialization, engine-state preservation, and cleanup testable. It does not prove real host behavior or Adapter conformance.
+This makes complete owner acquisition failure, release-while-resize-pending, lifecycle transition ordering, Module owner identity, owner/view separation, invalid-size rejection, post-exit gating, snapshots, single input path, Focus/policy, mouse, affinity/rebinding, session resize, engine preservation, and cleanup testable. It does not prove real host behavior or Adapter conformance.
 
 ## Input, shortcut, and focus policy
 
@@ -349,7 +358,7 @@ This makes Module-issued owner identity, owner/view lifetime separation, invalid
 
 ### High-frequency threshold
 
-The portable threshold for terminal content is **zero cell/row/grid diffs**. The first cell mutation is engine-internal regardless of whether updates arrive once a second or once a frame; update rate is not a portable semantic. Low-cardinality facts may be deduplicated and coalesced to at most one publication per animation/frame scheduling turn, while status transitions and input/resize results remain lossless and ordered.
+The portable threshold for terminal content is **zero cell/row/grid diffs**. First cell mutation is engine-internal regardless of cadence. Attachment/lifecycle/status transitions, support availability/degradation transitions, attention signals, input observations, and resize/request results are lossless and ordered; they never enter the frame coalescer. Only observationally equivalent, same-generation low-cardinality level facts may deduplicate, with at most the latest such level publication per animation/frame scheduling turn. Therefore `attaching -> ready -> unavailable` in one turn still emits all three transitions in order.
 
 No portable Module receives `onRender`, `onWriteParsed`, buffer lines, dirty rectangles, glyph runs, or scroll positions. This avoids allocation/copy churn and prevents adapter profiles from re-litigating a grid schema.
 
@@ -357,16 +366,16 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 
 ### Lifecycle rules
 
-- One logical Terminal instance has a Module-minted immutable `terminalInstanceId`, one independent resize-owner lease, and replaceable view connections. App data cannot choose/collide owner identity. Target/backend/capability replacement disposes only view lease before fresh `owner.attachView`; update cannot change identity/requirement.
-- Before first view ready, Host session coordinator atomically grants owner lease to one `terminalInstanceId`. A different live instance for same session is unavailable with `resize-owner-conflict` and cannot submit geometry/input. View disposal/replacement never releases grant. Explicit final instance `owner.release()` waits for/cancels pending resize, then releases; no replacement gap exists.
-- Policy-sensitive callbacks carry connection plus Module generation. Host rejects stale/dead-process input before sink; Module rejects retired observation/facts. Snapshots atomically pair facts/generation. Resize results carry coordinator's pending Module revision; title stays host-local.
-- View dispose removes input/paste/pointer listeners, Focus bridge, geometry observers, A11y nodes, renderer/view subscriptions, target/backend refs. It does not dispose/release session engine, coordinator, owner lease, parser, grid, scrollback, process/PTY.
-- Engine/parser/buffer/coordinator lifetime is session-scoped. Same-instance target replacement attaches through retained owner. Same-session engine replacement fails closed absent complete replay/rehydration of grid, modes, cursor, alternate screen, scrollback.
-- Process exit/failure revokes backend sink epoch before App publishes status; runtime resolves disabled plus Focus-ineligible in newer generation. Post-exit writes are impossible. Restart requires fresh `backendBindingId`, connection, and live sink before interactive.
-- App-owned session teardown terminates process/PTY, disposes views, settles resize, explicitly releases owner, then releases capability-created engine/coordinator. Borrowed engine stays host-owned/session-affine; another session requires proven reset/recreation.
-- Backend replacement for same session/instance uses fresh view connection through retained owner, revokes old sink, preserves engine/coordinator. It cannot ready until old resize cancel+await or completion+newest reapply.
-- Coordinator validates finite positive safe-integer dimensions before revision allocation; invalid input returns `invalid-dimensions` with null revision and no coordinator/backend mutation. It dispatches at most one resize across owner's views; completion releases slot; old view result may drop; undispatched stale sizes cancel.
-- Unsupported engine/session/backend/input/keyboard-route/mouse-denial/A11y/resize or conflicting owner fails closed with bounded reason.
+- One logical Terminal instance has Module-minted immutable ID, independent resize-owner lease, replaceable view connections. App cannot choose/collide identity. Target/backend/capability replacement disposes view only before `owner.attachView`; update cannot change identity.
+- Host resolves session engine/coordinator before owner grant. Acquisition failure returns exact engine-unavailable/session-mismatch/resize-unavailable without reserving ownership. A different live instance returns resize-owner-conflict. Before first view ready, valid acquisition atomically grants one owner.
+- View disposal/replacement never releases owner. Explicit final `owner.release()` with pending resize first enters releasing: rejects new dispatch/view attach/competing acquisition, then cancels-and-awaits or awaits completion; grant releases only after settlement. Late old completion cannot affect a subsequent owner.
+- Policy callbacks carry connection+generation. Host rejects stale/dead input before sink; Module rejects retired observations/facts. Snapshots pair facts/generation. Resize results carry pending revision; title host-local.
+- View dispose removes listeners, Focus, geometry, A11y, renderer subscriptions, target/backend refs; not engine/coordinator/owner/parser/grid/scrollback/process.
+- Engine/parser/buffer/coordinator session-scoped. Same-instance target replacement uses retained owner. Engine replacement fails absent complete replay/rehydration.
+- Process exit/failure revokes sink before status; runtime resolves disabled+Focus-ineligible. Post-exit writes impossible; restart needs fresh binding/connection/live sink.
+- Session teardown terminates process, disposes views, calls owner release and awaits pending settlement, then releases capability-created engine/coordinator. Borrowed engine remains host-owned/affine.
+- Backend replacement uses fresh view through retained owner, revokes old sink, preserves engine/coordinator; new ready waits old resize settle/reapply.
+- Coordinator validates finite positive safe integers before revision; invalid returns null revision/no mutation. One resize across owner views; completion releases slot; stale queued sizes cancel. Lifecycle/support transitions bypass level-fact coalescing and remain ordered.
 
 ## Proposed entity and evidence graph
 
@@ -393,13 +402,13 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 ### Bounded red-first plan
 
 1. **Portable negatives:** reject engine/target/buffer/stream/event/controller/geometry/grid/sink/arbitrary key/functions/owner lease; reject Module instance/session/backend identity in mutable patch and App status in Host policy.
-2. **Owner + view leases:** Module-issued collision-free instance ID; exclusive per-session owner acquire/conflict; view dispose/replace cannot release; explicit final release after pending settle; backend reconnect/target/capability view reattach; session-engine preservation; engine replacement rejection without replay; borrowed affinity; cleanup/stale suppression.
-3. **Policy/input/Focus:** strictly increasing generations; generation-stamped snapshots; stale/process-exited Host event rejection before sink; sink revocation before exit publication; fresh binding for restart; Host/engine sole backend path with observation-only callback; resolved modes/disabled Focus eligibility; IME/key/shortcut/mobile; zero duplicate/stale/dead-process sends.
+2. **Owner + view leases:** Module ID; owner acquire exact engine/session/resize/conflict failures without grant; view dispose/replace cannot release; call final release during pending resize and block acquisition/dispatch until cancel/complete settlement; reattach/reconnect; engine preservation/replacement rejection; borrowed affinity; cleanup/stale suppression.
+3. **Policy/input/Focus:** strict generations/snapshots; stale/exited rejection; sink revoke before exit/fresh restart binding; sole Host input + observation; modes/Focus; IME/key/shortcut/mobile; zero duplicate/stale/dead sends.
 4. **Mouse exclusion:** process enables mouse mode; Host blocks reports/backend writes while local selection works.
-5. **Resize:** reject 0/negative/fractional/NaN/Infinity/unsafe columns and rows before revision/backend; accept positive boundary; second instance conflicts; one owner/in-flight per session across same-instance view/backend replacement; newest coalescing; cancel/await before owner release/replacement ready/dispatch; exact result branches.
-6. **Performance:** rapid grid updates create zero portable content allocation/publication.
+5. **Resize:** reject invalid columns/rows before revision/backend; boundary valid; second instance conflict; one owner/in-flight across same-instance replacement; newest coalescing; release-during-pending blocks acquisition/dispatch until settle; late old completion cannot overwrite; exact results.
+6. **Performance/order:** rapid grid updates create zero portable content publication; observationally equivalent level facts coalesce, but every attachment/status/support transition and result emits losslessly in order, including three transitions in one turn.
 7. **A11y/composition/Focus:** only A11y name/mode; independent App statuses; Host keyboard support plus composition Button/topology; bounded attention.
-8. **Real Web:** Module ID collision attempt; owner acquire/view replace/final release; invalid dimensions; exited-process input denial/restart binding; modes/generations/snapshots/IME/keyboard/F6/single input path/mouse suppression/session resize/backend reconnect/engine-state preservation/A11y/cleanup.
+8. **Real Web:** acquisition failures; Module collision; owner acquire/view replace/release while resize pending; invalid dimensions; ordered same-turn lifecycle transitions; exited input/restart; modes/generations/snapshots/IME/keyboard/F6/single input/mouse/session resize/reconnect/engine state/A11y/cleanup.
 9. **Cross-adapter Web only if claimed:** WC/React/Vue evidence for one admitted portable authoring source. This remains Web evidence.
 10. **Non-Web:** independent native profile with native focus/input/resize/accessibility evidence before any multi-host statement.
 
