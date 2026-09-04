@@ -9,7 +9,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/tooltip.tsx`。upstream Provider 的 pointer delay 默认为 0ms；Proto UI 有意保留 Base Group 的 700ms open、100ms close 与 300ms skip defaults。upstream Content 的 `sideOffset` 默认为 0，Proto UI 继承 Base 默认值 4。Portal 继续是 renderer projection；当前没有受治理的 arrow geometry channel，因此 Arrow 缺席。
 
-从 `@proto.ui/prototypes-shadcn/tooltip` 导入该 family，或使用 `proto-ui add shadcn-tooltip` 生成 facade。Content 保持 supplementary、不可聚焦且非任务必要；交互式任务内容应使用 Popover 或 non-modal Dialog。
+从 `@proto.ui/prototypes-shadcn/tooltip` 导入该 family，或使用 `proto-ui add react shadcn-tooltip` 生成 React facade。Content 保持 supplementary、不可聚焦且非任务必要；交互式任务内容应使用 Popover 或 non-modal Dialog。
 
 <PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />
 
