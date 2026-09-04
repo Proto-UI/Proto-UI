@@ -134,6 +134,8 @@ function shallowEqualHostProps(
   );
 }
 
+const MAX_FOCUS_TARGET_RETRIES = 3;
+
 export function createVueAdapter(runtime: VueRuntime) {
   const sharedOverlayLayerScheduler = createZIndexOverlayLayerScheduler();
   const logicalOwnerKey = Symbol('@proto.ui/adapter-vue/logical-owner');
@@ -210,10 +212,12 @@ export function createVueAdapter(runtime: VueRuntime) {
         let viewReady = false;
         const focusTargetReadyListeners = new Set<() => void>();
         let focusTargetRetryScheduled = false;
+        let focusTargetRetryCount = 0;
         const notifyFocusTargetReady = () => {
           const target = rootRef.value;
           if (!viewReady || !target?.isConnected) return;
           for (const listener of Array.from(focusTargetReadyListeners)) listener();
+          if (target.ownerDocument.activeElement === target) focusTargetRetryCount = 0;
         };
 
         const subs = new Set<() => void>();
@@ -335,6 +339,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             pendingCommit = false;
             await runtime.nextTick();
             viewReady = true;
+            focusTargetRetryCount = 0;
             rootRef.value?.removeAttribute(PUI_VIEW_PENDING_ATTR);
             eventGateRef.value?.enable();
             notifyFocusTargetReady();
@@ -414,13 +419,16 @@ export function createVueAdapter(runtime: VueRuntime) {
               return () => focusTargetReadyListeners.delete(listener);
             },
             retryTargetReady: () => {
-              if (focusTargetRetryScheduled) return;
+              if (focusTargetRetryScheduled || focusTargetRetryCount >= MAX_FOCUS_TARGET_RETRIES) {
+                return;
+              }
               focusTargetRetryScheduled = true;
+              focusTargetRetryCount += 1;
               scheduleAfterWebLayout(
                 rootRef.value,
                 () => {
-                  notifyFocusTargetReady();
                   focusTargetRetryScheduled = false;
+                  notifyFocusTargetReady();
                 },
                 schedule
               );
@@ -462,6 +470,7 @@ export function createVueAdapter(runtime: VueRuntime) {
         });
         runtime.onDeactivated?.(() => {
           viewReady = false;
+          focusTargetRetryCount = 0;
           rootRef.value?.setAttribute(PUI_VIEW_PENDING_ATTR, '');
           if (owner.hasView) void owner.detachView();
           lastInitRoot = null;
@@ -475,6 +484,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           async (val: boolean) => {
             if (val) {
               viewReady = false;
+              focusTargetRetryCount = 0;
               await runtime.nextTick();
               initSession();
             } else {
@@ -482,6 +492,7 @@ export function createVueAdapter(runtime: VueRuntime) {
               if (owner.hasView) void owner.detachView();
               hostTokens.value = [];
               viewReady = false;
+              focusTargetRetryCount = 0;
               // The host element survives a detach now, so the same element has
               // to be able to initialize a second time. Without this the reopen
               // path skips initSession and binds against a disposed router.

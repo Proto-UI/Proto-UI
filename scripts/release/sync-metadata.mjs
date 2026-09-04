@@ -151,6 +151,16 @@ const PACKAGE_RULES = {
     preserveReadme: true,
     extraKeywords: ['text-control', 'textarea'],
   },
+  '@proto.ui/module-image-view': {
+    description: 'Proto UI portable image-view host protocol.',
+    kind: 'module',
+    capability: 'image-view host protocol',
+    purpose:
+      'Owns the host boundary for a semantic host-owned image presentation requirement: opaque URI source, a11y binary input (informative/decorative), fit, generation-bound lease lifecycle, loading status transitions, and stale completion rejection.',
+    role: 'Adapter-facing dependency used by Base Image and future adapter integrations.',
+    preserveReadme: true,
+    extraKeywords: ['image', 'image-view'],
+  },
   '@proto.ui/adapter-react': adapterRule('React'),
   '@proto.ui/adapter-vue': adapterRule('Vue'),
   '@proto.ui/adapter-vue2': {

@@ -46,6 +46,7 @@ export default {
             props: {
               defaultValue: 'This editor is disabled.',
               disabled: true,
+              ariaLabel: 'Disabled release note',
               rows: 2,
             },
           },
@@ -66,6 +67,7 @@ export default {
             props: {
               defaultValue: 'This editor is read only, and still focusable.',
               readOnly: true,
+              ariaLabel: 'Read-only release note',
               rows: 2,
             },
           },

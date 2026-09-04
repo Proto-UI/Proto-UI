@@ -1,0 +1,39 @@
+id: P-BRUTALIST-TOOLTIP-GROUP
+type: prototype
+title: Brutalist Tooltip Group transparent projection
+status: draft
+since: 0.3.0-alpha.0
+summary: Brutalist Tooltip Group is a cataloged draft package entry that inherits Base Group timing and context ownership with zero semantic or visual delta.
+statement:
+  en: Brutalist Tooltip Group is the current draft transparent design-language projection over Base Tooltip Group. It catalogs one direct/package entry while Base remains the sole owner of same-domain request aggregation, open/close/skip delays, warm-window coordination, cooldown cleanup, and controlled-owner requests. Brutalist adds no props, state, timing, event, accessibility, anatomy, or visual owner.
+  zh-CN: Brutalist Tooltip Group 是 Base Tooltip Group 之上当前编目的 draft 透明设计语言投影。它编目一个 direct/package entry；Base 继续唯一拥有同域 request aggregation、open/close/skip delay、warm-window coordination、cooldown cleanup 与 controlled-owner request。Brutalist 不增加 props、state、timing、event、accessibility、anatomy 或 visual owner。
+criteria:
+  - id: P-BRUTALIST-TOOLTIP-GROUP-AUTHORING-ENTRY
+    text:
+      en: '`brutalist-tooltip-group`, the tooltip package export, and `BrutalistTooltipGroup` must identify the same cataloged draft direct prototype entry.'
+      zh-CN: '`brutalist-tooltip-group`、tooltip package export 与 `BrutalistTooltipGroup` 必须标识同一编目的 draft direct prototype entry。'
+  - id: P-BRUTALIST-TOOLTIP-GROUP-BASE-INHERITANCE
+    text:
+      en: The entry must consume `asTooltipGroup()` exactly once and preserve Base same-domain intent aggregation, delay/context ownership, warm-window coordination, controlled-owner requests, and lifecycle cleanup.
+      zh-CN: 该 entry 必须且仅一次消费 `asTooltipGroup()`，并保留 Base 的同域 intent aggregation、delay/context ownership、warm-window coordination、controlled-owner request 与 lifecycle cleanup。
+  - id: P-BRUTALIST-TOOLTIP-GROUP-ZERO-DELTA
+    text:
+      en: The projection must add no props, state, timing, event, accessibility, anatomy role, or feedback style and must not introduce another Group owner.
+      zh-CN: 该投影不得增加 props、state、timing、event、accessibility、anatomy role 或 feedback style，也不得建立第二个 Group owner。
+sources:
+  - path: packages/prototypes/brutalist/src/tooltip/group.proto.ts
+  - path: packages/prototypes/brutalist/src/tooltip/index.ts
+  - path: packages/prototypes/brutalist/test/tooltip.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-tooltip.demo.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP-GROUP
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-CONTEXT-0001, C-DELAY-0001]
+verifies:
+  tests: [T-BRUTALIST-TOOLTIP-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the draft transparent Group entry with real package/demo/test evidence and no semantic or visual delta.
+tags: [prototype, brutalist, tooltip, group, transparent, zero-delta]

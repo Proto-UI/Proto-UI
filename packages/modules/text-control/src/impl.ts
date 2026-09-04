@@ -6,11 +6,12 @@ import type {
   TextControlEvent,
   TextControlEventType,
   TextControlHandle,
+  TextControlLineMode,
   TextControlPatch,
   TextControlSnapshot,
   TextControlValueMode,
 } from '@proto.ui/core';
-import { getModuleDeclaration } from '@proto.ui/core';
+import { canonicalizeTextControlValue, getModuleDeclaration } from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import type { PropsBaseType } from '@proto.ui/types';
 import {
@@ -20,6 +21,7 @@ import {
   type TextControlHostLease,
 } from './caps';
 import { TEXT_CONTROL_DECLARATION } from './declaration';
+import type { TextControlDeclaration } from './declaration';
 
 const EMPTY_PATCH: TextControlPatch = Object.freeze({});
 
@@ -31,6 +33,7 @@ type Listener = {
 export class TextControlModuleImpl extends ModuleBase {
   private readonly prototypeName: string;
   private readonly supported: boolean;
+  private readonly declaration: TextControlDeclaration | null;
   private declared = false;
   private initialized = false;
   private valueMode: TextControlValueMode | null = null;
@@ -48,13 +51,16 @@ export class TextControlModuleImpl extends ModuleBase {
   ) {
     super(caps);
     this.prototypeName = prototypeName;
-    this.supported = Boolean(
-      getModuleDeclaration({ modules: declarations }, TEXT_CONTROL_DECLARATION)
-    );
+    const declaration = getModuleDeclaration({ modules: declarations }, TEXT_CONTROL_DECLARATION);
+    this.declaration = declaration?.config ?? null;
+    this.supported = this.declaration !== null;
     if (this.supported) this.refreshHost();
   }
 
-  declare<P extends PropsBaseType>(): TextControlHandle<P> {
+  declare<
+    P extends PropsBaseType,
+    Mode extends TextControlLineMode = TextControlLineMode,
+  >(): TextControlHandle<P, Mode> {
     this.sys.ensureSetup('textControl.declare');
     if (!this.supported) {
       throw new Error(
@@ -89,17 +95,32 @@ export class TextControlModuleImpl extends ModuleBase {
 
   private sync(next: TextControlPatch): void {
     this.sys.ensureCallback('textControl.sync');
+    if (
+      this.declaration?.lineMode === 'single' &&
+      (typeof next.rows === 'number' || next.wrap !== undefined)
+    ) {
+      throw new Error('[TextControl] rows/wrap are not compatible with single-line mode');
+    }
+
     if (!this.initialized) {
       this.valueMode = next.valueMode ?? 'uncontrolled';
-      this.value = this.valueMode === 'controlled' ? (next.value ?? '') : (next.defaultValue ?? '');
+      this.value =
+        this.valueMode === 'controlled'
+          ? this.canonicalize(next.value ?? '')
+          : this.canonicalize(next.defaultValue ?? '');
       this.initialized = true;
     }
     this.patch = Object.freeze({
       ...this.patch,
       ...next,
       valueMode: this.valueMode ?? 'uncontrolled',
+      value: typeof next.value === 'string' ? this.canonicalize(next.value) : this.patch.value,
+      defaultValue:
+        typeof next.defaultValue === 'string'
+          ? this.canonicalize(next.defaultValue)
+          : this.patch.defaultValue,
     });
-    if (this.valueMode === 'controlled') this.value = this.patch.value ?? '';
+    if (this.valueMode === 'controlled') this.value = this.canonicalize(this.patch.value ?? '');
     this.syncLease();
   }
 
@@ -161,9 +182,15 @@ export class TextControlModuleImpl extends ModuleBase {
   }
 
   private receive(event: TextControlEvent): void {
-    this.composing = event.composing;
-    if (this.valueMode === 'uncontrolled' && event.type === 'input') {
-      this.value = event.value;
+    // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
+    const canonicalEvent: TextControlEvent = Object.freeze({
+      ...event,
+      value: this.canonicalize(event.value),
+      data: typeof event.data === 'string' ? this.canonicalize(event.data) : event.data,
+    });
+    this.composing = canonicalEvent.composing;
+    if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {
+      this.value = canonicalEvent.value;
     }
 
     const runInCallback = this.caps.has(TEXT_CONTROL_RUN_IN_CALLBACK_CAP)
@@ -173,7 +200,7 @@ export class TextControlModuleImpl extends ModuleBase {
       const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
       if (!run) return;
       for (const listener of this.listeners) {
-        if (listener.type === event.type) listener.callback(run, event);
+        if (listener.type === canonicalEvent.type) listener.callback(run, canonicalEvent);
       }
     });
 
@@ -182,5 +209,10 @@ export class TextControlModuleImpl extends ModuleBase {
       ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
     if (!mustRestoreControlledValue) return;
     queueMicrotask(() => this.syncLease());
+  }
+
+  private canonicalize(value: string): string {
+    const lineMode: TextControlLineMode = this.declaration?.lineMode ?? 'multiline';
+    return canonicalizeTextControlValue(value, lineMode);
   }
 }

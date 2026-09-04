@@ -1,14 +1,14 @@
 # @proto.ui/module-text-control
 
-Portable host-mediated multiline text-control protocol for Proto UI adapters and prototypes.
+Portable host-mediated single-line and multiline text-control protocol for Proto UI adapters and prototypes.
 
 ## Purpose
 
-Owns the host boundary for a semantic plain-text/multiline/host-owned editing requirement: stable controlled or uncontrolled value ownership, normalized input/change/IME composition events, live property projection, and physical focus access. Adapters select the physical host editor; the current Web profile resolves the requirement to `HTMLTextAreaElement`. The module does not own labels, form submission, validation messages, rich text, auto-resize policy, system selection handles, or edit menus.
+Owns the host boundary for a semantic plain-text, line-mode-aware, host-owned editing requirement: stable controlled or uncontrolled value ownership, normalized input/change/IME composition events, live property projection, and physical focus access. Adapters select the physical host editor; the current Web profile resolves single-line declarations to `HTMLInputElement` and multiline declarations to `HTMLTextAreaElement`. The module does not own labels, form submission, validation messages, rich text, auto-resize policy, system selection handles, or edit menus.
 
 ## Package role
 
-Adapter-facing dependency used by Base Textarea and official Web Component, React, and Vue adapters. Host integrations provide a `TextControlHost`; Web hosts can use `resolveWebTextControlLocalName` and `createWebTextControlHost`. The three current adapters are one Web-host profile, not multi-host conformance.
+Adapter-facing dependency used by Base Textarea, the admitted Base Input prerequisite path, and official Web Component, React, and Vue adapters. Host integrations provide a `TextControlHost`; Web hosts can use `resolveWebTextControlLocalName` and `createWebTextControlHost`. The three current adapters are one Web-host profile, not multi-host conformance.
 
 ## Install
 

@@ -279,6 +279,22 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/brutalist/src/scroll-area/index');
     registerPrototype('brutalist-scroll-area-thumb', mod.BrutalistScrollAreaThumb);
   },
+  'brutalist-tooltip-group': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/tooltip');
+    registerPrototype('brutalist-tooltip-group', mod.BrutalistTooltipGroup);
+  },
+  'brutalist-tooltip-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/tooltip');
+    registerPrototype('brutalist-tooltip-root', mod.BrutalistTooltipRoot);
+  },
+  'brutalist-tooltip-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/tooltip');
+    registerPrototype('brutalist-tooltip-trigger', mod.BrutalistTooltipTrigger);
+  },
+  'brutalist-tooltip-content': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/tooltip');
+    registerPrototype('brutalist-tooltip-content', mod.BrutalistTooltipContent);
+  },
   'shadcn-toggle': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/toggle/index');
     registerPrototype('shadcn-toggle', mod.default);

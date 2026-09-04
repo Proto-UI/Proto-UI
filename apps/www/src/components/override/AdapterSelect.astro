@@ -4,6 +4,7 @@ interface Props {
 }
 
 const { id = 'adapter-select' } = Astro.props;
+const labelId = `${id}-label-${Math.random().toString(36).slice(2)}`;
 
 // 适配器选项
 const options = [
@@ -15,55 +16,55 @@ const options = [
 ---
 
 <div class="adapter-select-wrapper relative inline-flex items-center" data-adapter-select>
-  <label class="sr-only" for={id}>选择适配器</label>
-  <select
+  <span id={labelId} class="sr-only">选择适配器</span>
+  <wc-shadcn-select-root
     id={id}
-    class="adapter-select appearance-none inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all outline-none h-8 rounded-md gap-1.5 px-3 pr-8 cursor-pointer bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-    aria-label="选择适配器"
-    autocomplete="off"
-    data-adapter-select
+    data-site-select-root
+    data-adapter-select-root
+    data-site-initial-value="wc"
   >
-    {options.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-  </select>
+    <wc-shadcn-select-trigger
+      aria-labelledby={labelId}
+      data-size="sm"
+      class="adapter-select inline-flex h-8 min-w-36 items-center justify-between rounded-md border-transparent bg-transparent px-3 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+    >
+      <wc-shadcn-select-value data-placeholder="选择适配器"></wc-shadcn-select-value>
+    </wc-shadcn-select-trigger>
+    <wc-shadcn-select-content data-position="popper" data-align="end">
+      {
+        options.map((opt) => (
+          <wc-shadcn-select-item data-value={opt.value} data-text-value={opt.label}>
+            {opt.label}
+          </wc-shadcn-select-item>
+        ))
+      }
+    </wc-shadcn-select-content>
+  </wc-shadcn-select-root>
   <script>
+    import { initSiteShadcnControls } from '../site-shadcn-controls';
     import { initAdapterSelects } from '../adapter-preference';
 
+    initSiteShadcnControls(document);
     initAdapterSelects(document);
-    document.addEventListener('astro:page-load', () => initAdapterSelects(document));
+    document.addEventListener('astro:page-load', () => {
+      initSiteShadcnControls(document);
+      initAdapterSelects(document);
+    });
   </script>
-  <svg
-    class="adapter-select-arrow absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-foreground opacity-60 transition-opacity w-4 h-4"
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <path
-      d="M4 6L8 10L12 6"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"></path>
-  </svg>
 </div>
 
 <style>
-  .adapter-select-wrapper:hover .adapter-select-arrow {
-    opacity: 1;
+  .adapter-select-wrapper wc-shadcn-select-root {
+    display: inline-flex;
   }
-  .adapter-select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    border: 1px solid transparent;
+
+  .adapter-select-wrapper wc-shadcn-select-trigger {
+    min-width: 9rem;
   }
-  .adapter-select option {
-    background-color: var(--color-popover);
-    color: var(--color-popover-foreground);
-    padding: 0.5rem;
-  }
-  .adapter-select:focus-visible {
-    border-color: var(--color-ring);
+
+  /* Keep server-rendered chrome compact until the custom elements upgrade so
+     the projected option list never flashes inline in the header. */
+  .adapter-select-wrapper wc-shadcn-select-content:not(:defined) {
+    display: none;
   }
 </style>

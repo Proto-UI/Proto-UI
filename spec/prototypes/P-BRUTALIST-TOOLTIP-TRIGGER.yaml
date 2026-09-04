@@ -1,0 +1,34 @@
+id: P-BRUTALIST-TOOLTIP-TRIGGER
+type: prototype
+title: Brutalist Tooltip Trigger projection
+status: draft
+since: 0.3.0-alpha.0
+summary: Brutalist Trigger preserves Base interaction and accessible-description behavior without a visual delta.
+statement:
+  en: Brutalist Trigger consumes Base Trigger and adds no props, state, events, behavior, accessibility semantics, or feedback style.
+  zh-CN: Brutalist Trigger 消费 Base Trigger，不增加 props、state、events、behavior、accessibility semantics 或 feedback style。
+criteria:
+  - id: P-BRUTALIST-TOOLTIP-TRIGGER-AUTHORING-ENTRY
+    text:
+      en: '`brutalist-tooltip-trigger`, the tooltip package export, and `BrutalistTooltipTrigger` must identify the same cataloged draft direct prototype entry.'
+      zh-CN: '`brutalist-tooltip-trigger`、tooltip package export 与 `BrutalistTooltipTrigger` 必须标识同一编目的 draft direct prototype entry。'
+  - id: P-BRUTALIST-TOOLTIP-TRIGGER-PURE-INHERITANCE
+    text:
+      en: Trigger must consume `asTooltipTrigger()` exactly once and preserve Base disabled, hover, focus, focus-visible, focusSelf, and describedBy behavior without additions.
+      zh-CN: Trigger 必须且仅一次消费 `asTooltipTrigger()`，并原样保留 Base disabled、hover、focus、focus-visible、focusSelf 与 describedBy behavior。
+  - id: P-BRUTALIST-TOOLTIP-TRIGGER-ZERO-DELTA
+    text:
+      en: Trigger must add no props, state, events, activation, accessibility ownership, or feedback style and must remain dependent on the same-domain Base Tooltip Root.
+      zh-CN: Trigger 不得增加 props、state、events、activation、accessibility ownership 或 feedback style，并且必须继续依赖同域 Base Tooltip Root。
+sources: [{ path: packages/prototypes/brutalist/src/tooltip/trigger.proto.ts }]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Strengthened the cataloged draft package entry, exact one-time Base inheritance, and zero-delta negative guarantees with executable evidence.
+tags: [prototype, brutalist, tooltip, trigger]
+inherits:
+  prototypes: [{ id: P-BASE-TOOLTIP-TRIGGER }]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001]
+verifies:
+  tests: [T-BRUTALIST-TOOLTIP-0001]

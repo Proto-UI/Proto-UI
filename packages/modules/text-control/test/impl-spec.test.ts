@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { TextControlEvent } from '@proto.ui/core';
+import type { TextControlEvent, TextControlLineMode, TextControlPatch } from '@proto.ui/core';
 import { CapsVault, SYS_CAP, type SystemCaps } from '@proto.ui/module-base';
 import {
   TEXT_CONTROL_HOST_CAP,
@@ -55,17 +55,19 @@ function event(type: TextControlEvent['type'], value: string, composing = false)
   return { type, value, composing, data: null, inputType: null };
 }
 
-function createHarness(withHost = true) {
+function createHarness(withHost = true, lineMode: TextControlLineMode = 'multiline') {
   const sys = createSystemCaps();
   const vault = new CapsVault();
   const connectionBox: { current: TextControlHostConnection | null } = { current: null };
   let patchValue = '';
+  let latestPatch: TextControlPatch = {};
   let disposed = 0;
   let updateCount = 0;
   vault.attachBase([[SYS_CAP, sys]]);
   const lease: TextControlHostLease = {
     update(patch) {
       updateCount += 1;
+      latestPatch = patch;
       if (typeof patch.value === 'string') patchValue = patch.value;
     },
     snapshot: () => ({ value: patchValue, composing: false }),
@@ -76,6 +78,7 @@ function createHarness(withHost = true) {
   const host: TextControlHost = {
     attach(connection) {
       connectionBox.current = connection;
+      latestPatch = connection.patch;
       patchValue = connection.patch.value ?? connection.patch.defaultValue ?? '';
       return lease;
     },
@@ -84,9 +87,7 @@ function createHarness(withHost = true) {
   const module = createTextControlModule({
     init: {
       prototypeName: 'x-textarea',
-      declarations: [
-        declareTextControl({ content: 'plain-text', lineMode: 'multiline', engine: 'host' }),
-      ],
+      declarations: [declareTextControl({ content: 'plain-text', lineMode, engine: 'host' })],
     },
     caps: vault,
     deps: {
@@ -106,6 +107,7 @@ function createHarness(withHost = true) {
     module,
     connectionBox,
     getPatchValue: () => patchValue,
+    getLatestPatch: () => latestPatch,
     setPatchValue: (value: string) => {
       patchValue = value;
     },
@@ -140,6 +142,85 @@ describe('module-text-control', () => {
 
     harness.module.hooks.onMountPhase?.('detached', 1);
     expect(harness.getDisposed()).toBeGreaterThan(0);
+  });
+
+  it('retains defaultValue across unrelated patches and a fresh host lease', () => {
+    const harness = createHarness();
+    const control = harness.module.facade.declare();
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    harness.sys.phase = 'callback';
+    control.sync({ valueMode: 'uncontrolled', defaultValue: 'initial' });
+    control.sync({ disabled: true });
+
+    expect(harness.getLatestPatch()).toMatchObject({
+      valueMode: 'uncontrolled',
+      defaultValue: 'initial',
+      disabled: true,
+    });
+
+    harness.module.hooks.onMountPhase?.('detached', 1);
+    harness.module.hooks.onMountPhase?.('mounted', 2);
+    expect(harness.getLatestPatch()).toMatchObject({
+      valueMode: 'uncontrolled',
+      defaultValue: 'initial',
+      disabled: true,
+    });
+  });
+
+  it('retains the declaration and accepts common hints for both line modes', () => {
+    const multiline = createHarness(true, 'multiline');
+    const multilineControl = multiline.module.facade.declare();
+    multiline.module.hooks.onMountPhase?.('mounted', 1);
+    multiline.sys.phase = 'callback';
+    expect(() => multilineControl.sync({ inputMode: 'search' })).not.toThrow();
+    expect(() => multilineControl.sync({ enterKeyHint: 'search' })).not.toThrow();
+    expect(() => multilineControl.sync({ rows: 4, wrap: 'hard' })).not.toThrow();
+
+    const single = createHarness(true, 'single');
+    const singleControl = single.module.facade.declare();
+    single.module.hooks.onMountPhase?.('mounted', 1);
+    single.sys.phase = 'callback';
+    expect(() => singleControl.sync({ rows: 4 })).toThrow(/not compatible with single-line/);
+    expect(() => singleControl.sync({ wrap: 'hard' })).toThrow(/not compatible with single-line/);
+    expect(() => singleControl.sync({ inputMode: 'search', enterKeyHint: 'search' })).not.toThrow();
+  });
+
+  it('removes normalized line feeds from single-line patch, state, and event values', () => {
+    const harness = createHarness(true, 'single');
+    const control = harness.module.facade.declare();
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    const seen: string[] = [];
+    control.on('input', (_run, next) => seen.push(next.value));
+
+    harness.sys.phase = 'callback';
+    control.sync({ valueMode: 'uncontrolled', defaultValue: 'a\r\nb\nc' });
+    expect(harness.getLatestPatch().defaultValue).toBe('abc');
+    expect(control.snapshot()).toEqual({ value: 'abc', composing: false });
+
+    const connection = harness.connectionBox.current;
+    if (!connection) throw new Error('text-control host connection was not attached');
+    connection.onEvent(event('input', 'x\r\ny\nz'));
+    expect(control.snapshot()).toEqual({ value: 'xyz', composing: false });
+    expect(seen).toEqual(['xyz']);
+  });
+
+  it('canonicalizes CR and CRLF in outward event data', () => {
+    const harness = createHarness(true, 'multiline');
+    const control = harness.module.facade.declare();
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    const seen: Array<string | null> = [];
+    control.on('compositionupdate', (_run, next) => seen.push(next.data));
+
+    const connection = harness.connectionBox.current;
+    if (!connection) throw new Error('text-control host connection was not attached');
+    harness.sys.phase = 'callback';
+    connection.onEvent({
+      ...event('compositionupdate', 'value'),
+      data: 'a\r\nb\rc',
+      inputType: 'insertCompositionText',
+    });
+
+    expect(seen).toEqual(['a\nb\nc']);
   });
 
   it('preserves controlled composition and restores only after the IME boundary', async () => {

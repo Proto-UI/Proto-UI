@@ -8,6 +8,13 @@ import { collectPrototypeIds } from './demo-types';
 import { releaseHostMount } from './runtimes/host-mount';
 import type { RuntimeId } from './runtimes/registry';
 import { refreshCodePanel } from './code-panel-client';
+import {
+  initSiteShadcnControls,
+  selectValue,
+  setSiteSelectDisabled,
+  setSelectValue,
+  type SiteSelectRoot,
+} from '../site-shadcn-controls';
 
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 
@@ -32,7 +39,21 @@ export function initPreviewer(options: PreviewerOptions) {
   root.dataset.inited = '1';
 
   const host = root.querySelector('.host') as HTMLElement;
-  const select = root.querySelector('select') as HTMLSelectElement | null;
+  const selectRoot = root.querySelector<SiteSelectRoot>(
+    '[data-adapter-select-root], wc-shadcn-select-root'
+  );
+  const nativeSelect = root.querySelector<HTMLSelectElement>('select');
+
+  const readSelectValue = () =>
+    selectRoot ? selectValue(selectRoot) : (nativeSelect?.value ?? initialRuntime);
+  const writeSelectValue = (value: string) => {
+    if (selectRoot) setSelectValue(selectRoot, value);
+    else if (nativeSelect) nativeSelect.value = value;
+  };
+  const setPreviewerSelectDisabled = (disabled: boolean) => {
+    if (selectRoot) setSiteSelectDisabled(selectRoot, disabled);
+    else if (nativeSelect) nativeSelect.disabled = disabled;
+  };
 
   function preferredRuntime(): RuntimeId {
     try {
@@ -45,9 +66,11 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   const selectedInitialRuntime = preferredRuntime();
+  const nativeSelectUsesPagePreference = Boolean(nativeSelect?.closest('[data-adapter-select]'));
 
   let current: { id: string; api: any } | null = null;
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
+  let requestedRuntime: RuntimeId | null = null;
   let version = 0;
   let destroyed = false;
 
@@ -65,9 +88,32 @@ export function initPreviewer(options: PreviewerOptions) {
     if (shell) refreshCodePanel(shell, { reset: true });
   }
 
-  // 初始化下拉
-  if (select) {
-    select.innerHTML = '';
+  // Populate the shared Shadcn Select composition while retaining a native
+  // fallback for the isolated unit-test harness and third-party embeds.
+  if (selectRoot) {
+    const content = selectRoot.querySelector<HTMLElement>('wc-shadcn-select-content');
+    content?.replaceChildren();
+    for (const id of runtimeList) {
+      const item = document.createElement('wc-shadcn-select-item');
+      item.dataset.value = id;
+      item.dataset.textValue =
+        (
+          {
+            wc: 'Web Components',
+            react: 'React',
+            vue: 'Vue',
+            vue2: 'Vue 2',
+          } as Record<string, string>
+        )[id] || id;
+      item.textContent = item.dataset.textValue;
+      content?.appendChild(item);
+    }
+    initSiteShadcnControls(selectRoot);
+    // AdapterSelect has an SSR `wc` seed. The preference-adjusted runtime is
+    // authoritative for both the first mount and the visible selector.
+    writeSelectValue(selectedInitialRuntime);
+  } else if (nativeSelect) {
+    nativeSelect.innerHTML = '';
     for (const id of runtimeList) {
       const opt = document.createElement('option');
       opt.value = id;
@@ -81,7 +127,7 @@ export function initPreviewer(options: PreviewerOptions) {
           } as Record<string, string>
         )[id] || id;
       if (id === selectedInitialRuntime) opt.selected = true;
-      select.appendChild(opt);
+      nativeSelect.appendChild(opt);
     }
   }
 
@@ -118,13 +164,23 @@ export function initPreviewer(options: PreviewerOptions) {
     return loaderPromise;
   }
 
-  async function switchTo(id: string) {
+  async function switchTo(id: string, options: { force?: boolean } = {}) {
     if (destroyed) return;
+    const runtime = id as RuntimeId;
+    const activeRuntime = current?.id ?? currentDemo?.id ?? null;
+    if (
+      !options.force &&
+      (requestedRuntime === runtime || (requestedRuntime === null && activeRuntime === runtime))
+    ) {
+      writeSelectValue(runtime);
+      return;
+    }
+    requestedRuntime = runtime;
     const myVersion = ++version;
     // Invalidate a runtime that is still awaiting its loader before this
     // switch reaches the next runtime's mount() call.
     releaseHostMount(host);
-    if (select) select.disabled = true;
+    setPreviewerSelectDisabled(true);
 
     try {
       // 卸载旧 runtime / demo
@@ -132,7 +188,9 @@ export function initPreviewer(options: PreviewerOptions) {
         await currentDemo.destroy();
         currentDemo = null;
       }
-      if (current?.api?.unmount) await current.api.unmount(host);
+      const previous = current;
+      current = null;
+      if (previous?.api?.unmount) await previous.api.unmount(host);
       else host.innerHTML = '';
 
       if (demoId) {
@@ -142,15 +200,15 @@ export function initPreviewer(options: PreviewerOptions) {
         await loadPrototypes(Array.from(ids));
 
         const { destroy } = await renderDemo({
-          runtime: id as RuntimeId,
+          runtime,
           demo,
           host,
           isCurrent: () => !destroyed && myVersion === version,
         });
         if (destroyed || myVersion !== version) return;
         currentDemo = { id, destroy };
-        updateCodePanel(id as RuntimeId);
-        dispatch('runtime:changed', { id });
+        updateCodePanel(runtime);
+        dispatch('runtime:changed', { id: runtime });
         return;
       }
 
@@ -163,7 +221,7 @@ export function initPreviewer(options: PreviewerOptions) {
 
       // 并行加载：运行时 API + 原型对象引用
       const [api, proto] = await Promise.all([
-        runtimeLoaders[id as RuntimeId](),
+        runtimeLoaders[runtime](),
         Promise.resolve().then(() => getPrototype(prototypeId)),
       ]);
 
@@ -173,8 +231,8 @@ export function initPreviewer(options: PreviewerOptions) {
       await api.mount(host, proto, { props: demoProps });
       if (destroyed || myVersion !== version) return;
       current = { id, api };
-      updateCodePanel(id as RuntimeId);
-      dispatch('runtime:changed', { id });
+      updateCodePanel(runtime);
+      dispatch('runtime:changed', { id: runtime });
     } catch (err) {
       if (destroyed || myVersion !== version) return;
       // 如果是原型未找到的错误，不需要重试（动态加载应该已经处理了）
@@ -191,7 +249,10 @@ export function initPreviewer(options: PreviewerOptions) {
       console.error(err);
       dispatch('error', { error: err });
     } finally {
-      if (myVersion === version && !destroyed && select) select.disabled = false;
+      if (myVersion === version && !destroyed) {
+        requestedRuntime = null;
+        setPreviewerSelectDisabled(false);
+      }
     }
   }
 
@@ -203,10 +264,28 @@ export function initPreviewer(options: PreviewerOptions) {
   // AdapterSelect synchronizes all selector instances and broadcasts the selected
   // runtime. Listen on document so the page-level selector also remounts every
   // compatible previewer; previewer-local selector changes use the same path.
+  const onSelectChange = (event: Event) => {
+    const detail = (event as CustomEvent<{ value?: unknown }>).detail;
+    const id = typeof detail?.value === 'string' ? detail.value : readSelectValue();
+    if (!runtimeList.includes(id as RuntimeId)) return;
+    writeSelectValue(id);
+    void switchTo(id);
+  };
+  // AdapterSelect already broadcasts a single document-level preference event
+  // for its valueChange. Listening to that root as well would remount twice;
+  // retain the local path only for isolated custom-select embeddings that do
+  // not participate in the shared adapter preference bridge.
+  const usesSharedAdapterSelect = selectRoot?.hasAttribute('data-adapter-select-root') ?? false;
+  if (selectRoot && !usesSharedAdapterSelect) {
+    selectRoot.addEventListener('valueChange', onSelectChange);
+  } else if (nativeSelect && !nativeSelectUsesPagePreference) {
+    nativeSelect.addEventListener('change', onSelectChange);
+  }
+
   const onAdapterChange = (event: Event) => {
     const id = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
     if (typeof id !== 'string' || !runtimeList.includes(id as RuntimeId)) return;
-    if (select) select.value = id;
+    writeSelectValue(id);
     void switchTo(id);
   };
   document.addEventListener('proto-adapter:change', onAdapterChange);
@@ -215,8 +294,8 @@ export function initPreviewer(options: PreviewerOptions) {
   (root as any).__previewer__ = {
     switchRuntime: (id: string) => switchTo(id),
     reload: () => {
-      if (current) return switchTo(current.id);
-      if (currentDemo) return switchTo(currentDemo.id);
+      if (current) return switchTo(current.id, { force: true });
+      if (currentDemo) return switchTo(currentDemo.id, { force: true });
       return null;
     },
     getCurrentRuntime: () => current?.id ?? currentDemo?.id ?? null,
@@ -226,7 +305,7 @@ export function initPreviewer(options: PreviewerOptions) {
         return;
       }
       Object.assign(demoProps, nextProps || {});
-      if (current) switchTo(current.id);
+      if (current) switchTo(current.id, { force: true });
     },
     destroy: async () => {
       destroyed = true;
@@ -238,6 +317,11 @@ export function initPreviewer(options: PreviewerOptions) {
       host.innerHTML = '';
       current = null;
       currentDemo = null;
+      if (selectRoot && !usesSharedAdapterSelect) {
+        selectRoot.removeEventListener('valueChange', onSelectChange);
+      } else if (nativeSelect && !nativeSelectUsesPagePreference) {
+        nativeSelect.removeEventListener('change', onSelectChange);
+      }
     },
   };
 

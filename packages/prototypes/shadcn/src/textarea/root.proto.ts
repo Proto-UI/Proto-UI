@@ -38,15 +38,11 @@ export const ShadcnTextareaRoot = definePrototype<
     def.feedback.style.use(tw(ROOT_BASE_TOKENS));
 
     // P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES
-    // Upstream keys the ring on `:focus-visible`. `focusVisible` would be the
-    // matching state, but it currently misses pointer focus on text controls
-    // while this host's own `:focus-visible` matches it, so the ring would
-    // never paint on click. Keying on the inherited `focused` state reproduces
-    // the measured host behaviour without inventing a second focus owner. This
-    // is a temporary arrangement: once #438 aligns `focusVisible` with the
-    // host determination, this rule moves back to it with no behaviour change.
+    // Upstream keys the ring on `:focus-visible`; Focus now honors the host
+    // `:focus-visible` determination for pointer-focused text controls (#438),
+    // so the projected `focusVisible` state matches upstream click behaviour.
     def.rule({
-      when: (w) => w.state(state.focused).eq(true),
+      when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) => i.feedback.style.use(tw('border-ring ring-ring/50 ring-3')),
     });
     def.rule({

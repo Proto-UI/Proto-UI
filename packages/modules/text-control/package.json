@@ -16,7 +16,7 @@
       "default": "./dist/index.js"
     }
   },
-  "description": "Proto UI portable multiline text-control host protocol.",
+  "description": "Proto UI portable single-line and multiline text-control host protocol.",
   "license": "MIT",
   "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/text-control",
   "repository": {

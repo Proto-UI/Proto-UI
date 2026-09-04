@@ -10,6 +10,7 @@ import { loadVue2, toVue2ComponentData, toVue2Runtime } from './runtimes/vue2-ru
 import { claimHostMount, type HostMountLease } from './runtimes/host-mount';
 import type { DemoChild, DemoRenderOptions, DemoRenderResult, DemoRuntimeApi } from './demo-types';
 import { ensurePreviewWcRegistered } from './wc-registry';
+import type { RuntimeId } from './runtimes/registry';
 
 type PropsBaseType = Record<string, unknown>;
 
@@ -18,6 +19,33 @@ const vueComponentCache = new WeakMap<object, Map<string, any>>();
 const wcSurfaceProps = new WeakMap<HTMLElement, Record<string, unknown>>();
 
 const EMPTY_DEMO_RENDER: DemoRenderResult = { destroy: () => {} };
+
+function unsupportedRuntime(runtime: never): Error {
+  return new Error(`[PrototypePreviewer] unsupported runtime: ${String(runtime)}`);
+}
+
+/**
+ * Resolve a framework's browser dependency before replacing the currently
+ * mounted demo. The renderer still owns the host lease and performs its own
+ * load so direct callers remain safe; browser module imports are cached.
+ */
+export async function prepareDemoRuntime(runtime: RuntimeId): Promise<void> {
+  switch (runtime) {
+    case 'wc':
+      return;
+    case 'react':
+      await loadReact();
+      return;
+    case 'vue':
+      await loadVue();
+      return;
+    case 'vue2':
+      await loadVue2();
+      return;
+    default:
+      throw unsupportedRuntime(runtime);
+  }
+}
 
 function ownsLease(opt: DemoRenderOptions, lease: HostMountLease): boolean {
   return lease.isCurrent() && opt.isCurrent?.() !== false;
@@ -583,8 +611,17 @@ function nextVue2(Vue: { nextTick: (fn?: () => void) => Promise<void> | void }) 
 export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResult> {
   if (opt.isCurrent?.() === false) return EMPTY_DEMO_RENDER;
   const lease = claimHostMount(opt.host);
-  if (opt.runtime === 'react') return renderDemoReact(opt, lease);
-  if (opt.runtime === 'vue') return renderDemoVue(opt, lease);
-  if (opt.runtime === 'vue2') return renderDemoVue2(opt, lease);
-  return renderDemoWc(opt, lease);
+  switch (opt.runtime) {
+    case 'wc':
+      return renderDemoWc(opt, lease);
+    case 'react':
+      return renderDemoReact(opt, lease);
+    case 'vue':
+      return renderDemoVue(opt, lease);
+    case 'vue2':
+      return renderDemoVue2(opt, lease);
+    default:
+      lease.release();
+      throw unsupportedRuntime(opt.runtime);
+  }
 }

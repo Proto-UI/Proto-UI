@@ -15,7 +15,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   root: Element | ShadowRoot;
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
-  textControlTarget: HTMLTextAreaElement | null;
+  textControlTarget: HTMLElement | null;
   wiring: ReturnType<typeof createHostWiring>;
   eventGate: {
     enable(): void;
@@ -108,7 +108,7 @@ function commitWebComponentChildren(args: {
   root: Element | ShadowRoot;
   children: TemplateChildren;
   shadow: boolean;
-  textControlTarget: HTMLTextAreaElement | null;
+  textControlTarget: HTMLElement | null;
   eventGate: { enable(): void };
   getSlotProjector: () => SlotProjector | null;
   ensureSlotProjector: () => SlotProjector;

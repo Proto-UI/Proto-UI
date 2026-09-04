@@ -52,8 +52,8 @@ criteria:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
   - id: P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES
     text:
-      zh-CN: focus、disabled 与 dark colorScheme 的视觉 rule 必须以继承的 Textarea state handle 或 host metadata 为条件。焦点环当前键控继承的 `focused`：`focusVisible` 在目标宿主上漏掉文本控件的指针聚焦（实测见 #438），而宿主自身的 `:focus-visible` 会匹配，因此键控 `focusVisible` 会使环在点击路径上不出现。这是临时安排，#438 使 `focusVisible` 与宿主判定对齐后即恢复，且行为不变，不得建立第二套 focus、disabled 或 theme truth，也不得依赖宿主 data attribute；具体 attribute 降级方式由 Adapter 拥有，不属于本投影的 guarantee。
-      en: Visual rules for focus, disabled, and the dark colorScheme must be conditioned on the inherited Textarea state handles or host metadata. The focus ring currently keys the inherited `focused` state, because `focusVisible` misses pointer focus on text controls in the target host while that host's own `:focus-visible` matches it (measured in #438), so keying `focusVisible` would leave the ring unpainted on the pointer path. This is a temporary arrangement: once #438 aligns `focusVisible` with the host determination, the rule returns to it with no behaviour change. Independently of which state the rule keys, it must not establish a second focus, disabled, or theme source of truth, and must not depend on a host data attribute; the concrete attribute lowering is owned by the Adapter and is not a guarantee of this projection.
+      zh-CN: focus、disabled 与 dark colorScheme 的视觉 rule 必须以继承的 Textarea state handle 或 host metadata 为条件。焦点环必须键控继承的 `focusVisible`：Focus 对文本控件的指针聚焦遵循宿主 `:focus-visible` 判定（#438），因此环在点击路径上的表现与 upstream 一致，不得建立第二套 focus、disabled 或 theme truth，也不得依赖宿主 data attribute；具体 attribute 降级方式由 Adapter 拥有，不属于本投影的 guarantee。
+      en: Visual rules for focus, disabled, and the dark colorScheme must be conditioned on the inherited Textarea state handles or host metadata. The focus ring must key the inherited `focusVisible` state; Focus honors the host `:focus-visible` determination for pointer-focused text controls (#438), so the ring paints on the pointer path exactly as upstream does. Independently of which state the rule keys, it must not establish a second focus, disabled, or theme source of truth, and must not depend on a host data attribute; the concrete attribute lowering is owned by the Adapter and is not a guarantee of this projection.
     dependsOn:
       contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
     references:
@@ -123,6 +123,9 @@ inherits:
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-TEXTAREA-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Restored the focus ring to the inherited focusVisible state after #438 aligned Focus with the host :focus-visible determination for pointer-focused text controls.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the Shadcn Textarea projection with Base inheritance, restated contentless renderer, and centralized upstream differences.

@@ -4,7 +4,12 @@ export default {
     kind: 'box',
     className: 'flex flex-wrap items-center gap-4',
     children: [
-      { kind: 'proto', prototypeId: 'brutalist-button', children: ['Solid main'] },
+      {
+        kind: 'proto',
+        prototypeId: 'brutalist-button',
+        ref: 'solidMain',
+        children: ['Solid main'],
+      },
       {
         kind: 'proto',
         prototypeId: 'brutalist-button',
@@ -32,12 +37,14 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-button',
+        ref: 'surface',
         props: { variant: 'surface' },
         children: ['Surface'],
       },
       {
         kind: 'proto',
         prototypeId: 'brutalist-button',
+        ref: 'destructive',
         props: { variant: 'destructive' },
         children: ['Destructive'],
       },
@@ -45,8 +52,16 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-button',
+        ref: 'disabledSolid',
         props: { disabled: true },
         children: ['Disabled'],
+      },
+      {
+        kind: 'proto',
+        prototypeId: 'brutalist-button',
+        ref: 'disabledSurface',
+        props: { variant: 'surface', disabled: true },
+        children: ['Disabled surface'],
       },
     ],
   },
