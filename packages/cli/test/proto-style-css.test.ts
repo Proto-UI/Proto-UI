@@ -30,6 +30,14 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
+  it('renders whitespace-preserving wrapping utilities for private compositions', () => {
+    const css = renderProtoStyleTokenCss(['whitespace-pre-wrap', 'wrap-anywhere']);
+
+    expect(css).toContain('white-space: pre-wrap;');
+    expect(css).toContain('overflow-wrap: anywhere;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
   it('renders intrinsic sizing and surface utilities used by Shadcn Tabs v4', () => {
     const css = renderProtoStyleTokenCss([
       'w-fit',

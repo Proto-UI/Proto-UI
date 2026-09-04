@@ -109,6 +109,8 @@ const staticUtilities: Record<string, string[]> = {
   'overflow-y-auto': ['overflow-y: auto;'],
   'resize-y': ['resize: vertical;'],
   'whitespace-nowrap': ['white-space: nowrap;'],
+  'whitespace-pre-wrap': ['white-space: pre-wrap;'],
+  'wrap-anywhere': ['overflow-wrap: anywhere;'],
   'bg-clip-padding': ['background-clip: padding-box;'],
   'will-change-transform': ['will-change: transform;'],
   'animate-in': [
