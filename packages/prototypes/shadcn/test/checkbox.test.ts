@@ -1,12 +1,37 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { executeWithHost, type RuntimeHost } from '@proto.ui/runtime';
+import {
+  ANATOMY_GET_PROTO_CAP,
+  ANATOMY_INSTANCE_TOKEN_CAP,
+  ANATOMY_PARENT_CAP,
+  ANATOMY_ROOT_TARGET_CAP,
+} from '@proto.ui/module-anatomy';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
+import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import {
+  FOCUS_REQUEST_FOCUS_CAP,
+  FOCUS_ROOT_TARGET_CAP,
+  FOCUS_SET_FOCUSABLE_CAP,
+} from '@proto.ui/module-focus';
+import {
+  AS_TRIGGER_GET_PROTO_CAP,
+  AS_TRIGGER_INSTANCE_CAP,
+  AS_TRIGGER_PARENT_CAP,
+} from '@proto.ui/module-as-trigger';
+import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
 import {
   checkboxIndicator,
   checkboxRoot,
   shadcnCheckboxIndicator,
   shadcnCheckboxRoot,
 } from '../src/checkbox';
+import type { ShadcnCheckboxRootProps } from '../src/checkbox';
+
+type HasAsChild<Props> = 'asChild' extends keyof Props ? true : false;
 
 AdaptToWebComponent(checkboxRoot as any);
 AdaptToWebComponent(checkboxIndicator as any);
@@ -98,6 +123,97 @@ describe('prototypes/shadcn: checkbox', () => {
     expect(checkboxIndicator.name).toBe('shadcn-checkbox-indicator');
   });
 
+  it('inherits the Base Indicator protocol exactly once', async () => {
+    // T-SHADCN-CHECKBOX-0001-CASE-INDICATOR-INHERITANCE
+    const rootInstance = new EventTarget();
+    const indicatorInstance = new EventTarget();
+    const globalTarget = new EventTarget();
+    const parents = new Map<unknown, unknown>([[indicatorInstance, rootInstance]]);
+    const prototypes = new Map<unknown, unknown>([
+      [rootInstance, checkboxRoot],
+      [indicatorInstance, checkboxIndicator],
+    ]);
+    const createHost = (prototype: unknown, instance: EventTarget): RuntimeHost<any> => ({
+      prototypeName: `${(prototype as { name: string }).name}-hook-trace`,
+      getRawProps: () => ({}),
+      commit(_children, signal) {
+        signal?.done();
+      },
+      schedule(task) {
+        task();
+      },
+      onRuntimeReady(wiring) {
+        wiring.attach('anatomy', [
+          [ANATOMY_INSTANCE_TOKEN_CAP, instance],
+          [ANATOMY_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
+          [ANATOMY_GET_PROTO_CAP, (token: unknown) => prototypes.get(token) ?? null],
+          [ANATOMY_ROOT_TARGET_CAP, (token: unknown) => token],
+        ]);
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, instance],
+          [CONTEXT_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
+        ]);
+        wiring.attach('event', [
+          [EVENT_ROOT_TARGET_CAP, () => instance],
+          [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
+        ]);
+        wiring.attach('focus', [
+          [FOCUS_ROOT_TARGET_CAP, () => instance],
+          [FOCUS_SET_FOCUSABLE_CAP, () => undefined],
+          [FOCUS_REQUEST_FOCUS_CAP, () => true],
+        ]);
+        wiring.attach('as-trigger', [
+          [AS_TRIGGER_INSTANCE_CAP, instance],
+          [AS_TRIGGER_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
+          [AS_TRIGGER_GET_PROTO_CAP, (token: unknown) => prototypes.get(token) ?? null],
+        ]);
+        wiring.attach('a11y', [[A11Y_PROJECT_CAP, () => undefined]]);
+        wiring.attach('expose-event', [[EXPOSE_EVENT_SINK_CAP, () => undefined]]);
+        wiring.attach('expose-state', [[EXPOSE_STATE_SET_EXPOSES_CAP, () => undefined]]);
+      },
+    });
+
+    const rootRuntime = executeWithHost(
+      checkboxRoot as any,
+      createHost(checkboxRoot, rootInstance)
+    );
+    const indicatorRuntime = executeWithHost(
+      checkboxIndicator as any,
+      createHost(checkboxIndicator, indicatorInstance)
+    );
+    try {
+      const hooks = ((checkboxIndicator as any).__asHooks ?? []).filter(
+        (hook: { name?: string }) => hook.name === 'as-checkbox-indicator'
+      );
+      expect(hooks).toEqual([
+        expect.objectContaining({ name: 'as-checkbox-indicator', mode: 'once' }),
+      ]);
+    } finally {
+      await indicatorRuntime.invokeUnmounted();
+      await rootRuntime.invokeUnmounted();
+    }
+  });
+
+  it('omits asChild from the public props and keeps the Root as the owner', async () => {
+    // T-SHADCN-CHECKBOX-0001-CASE-AS-CHILD-OMISSION
+    expectTypeOf<HasAsChild<ShadcnCheckboxRootProps>>().toEqualTypeOf<false>();
+
+    const root = document.createElement('shadcn-checkbox-root') as ExposingElement;
+    const candidate = document.createElement('button');
+    candidate.dataset.asChildCandidate = '';
+    setElementProps(root, { asChild: true } as any);
+    root.appendChild(candidate);
+    document.body.appendChild(root);
+    await flush();
+
+    expect(root.isConnected).toBe(true);
+    expect(root.contains(candidate)).toBe(true);
+    expect(root.getAttribute('role')).toBe('checkbox');
+    expect(candidate.hasAttribute('role')).toBe(false);
+
+    root.remove();
+  });
+
   it('projects the resting box and paints no glyph before any state', async () => {
     // T-SHADCN-CHECKBOX-0001-CASE-DEFAULT
     const { root, indicator } = await mount();
@@ -132,6 +248,17 @@ describe('prototypes/shadcn: checkbox', () => {
     expect(root.hasAttribute('data-checked')).toBe(true);
     expect(indicator.hasAttribute('data-checked')).toBe(true);
     expect(glyphPaths(indicator)).toEqual([CHECK_PATH]);
+    // The checked presentation remains derived: it does not acquire a role,
+    // writable value, focus/event surface, or second activation owner.
+    expect(Object.keys(indicator.getExposes()).sort()).toEqual([
+      'checked',
+      'indeterminate',
+      'isChecked',
+      'isIndeterminate',
+    ]);
+    expect(indicator.hasAttribute('role')).toBe(false);
+    expect(indicator.hasAttribute('aria-checked')).toBe(false);
+    expect(root.getAttribute('role')).toBe('checkbox');
     // The Root already carries the role and the checked state, so the glyph
     // would only add an unnamed node to the accessibility tree.
     expect(indicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');

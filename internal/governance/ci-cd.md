@@ -72,7 +72,7 @@ The workflow does not accept ad hoc `version`, `tag`, or `only` inputs. Version 
 - `publish-all` is allowed only on `main`.
 - `publish-all` requires the `workspace` profile; `launch` is for product-scope audit and rehearsal only.
 - Real publication selects the GitHub `npm` environment and uses npm Trusted Publishing through OIDC. Environment reviewers, branch restrictions, and administrator bypass are external configuration; verify them immediately before a release instead of inferring protection from the workflow file.
-- `stage` and `publish-all` fail before package staging unless every public package identity is already readable from the npm registry. The check cannot inspect private Trusted Publisher settings, which remain a maintainer responsibility.
+- `stage` and `publish-all` fail before package staging unless every public package identity is readable and its bootstrap dist-tags/deprecation state meets the release gate. The check cannot inspect private Trusted Publisher settings, which remain a maintainer responsibility.
 - Concurrency prevents overlapping release runs for the same ref.
 - The workflow creates `v<version>` only after every public package publishes successfully.
 

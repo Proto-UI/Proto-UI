@@ -42,6 +42,35 @@ function createTextareaPrototype(name: string, values: string[] = []) {
   });
 }
 
+type SingleLineProps = { defaultValue?: string; placeholder?: string };
+
+function createInputPrototype(name: string, values: string[] = []) {
+  return definePrototype({
+    name,
+    modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
+    setup(def: DefHandle<SingleLineProps>) {
+      def.props.define({
+        defaultValue: { type: 'string', empty: 'fallback' },
+        placeholder: { type: 'string', empty: 'fallback' },
+      });
+      const control = asTextControl<SingleLineProps, 'single'>();
+      control.on('input', (_run, event) => values.push(event.value));
+      const sync = (props: Readonly<SingleLineProps>) => {
+        control.sync({
+          valueMode: 'uncontrolled',
+          defaultValue: props.defaultValue,
+          placeholder: props.placeholder,
+          inputMode: 'text',
+          enterKeyHint: 'search',
+        });
+      };
+      def.lifecycle.onCreated((run) => sync(run.props.get()));
+      def.props.watchAll((_run, next) => sync(next));
+      return () => null;
+    },
+  });
+}
+
 describe('adapter-react text control', () => {
   it('materializes the declared textarea root, projects patches, and routes input', () => {
     const values: string[] = [];
@@ -94,6 +123,36 @@ describe('adapter-react text control', () => {
     textarea.defaultValue = 'native fallback';
     mounted.update({ authored: false });
     expect(textarea.textContent).toBe('native fallback');
+    mounted.unmount();
+  });
+
+  it('materializes a single-line input with common hints and strips newlines', () => {
+    const values: string[] = [];
+    const proto = createInputPrototype('react-text-control-input', values);
+    const fake = createFakeReactRuntime();
+    const Component = createReactAdapter(fake.runtime)(proto, { schedule: (task) => task() });
+    const mounted = fake.render(Component, {
+      defaultValue: 'initial',
+      placeholder: 'Search',
+      surfaceClassName: 'surface-input outline-none',
+    });
+    const input = mounted.root as HTMLInputElement;
+    expect(input.tagName.toLowerCase()).toBe('input');
+    expect(input.value).toBe('initial');
+    expect(input.defaultValue).toBe('initial');
+    expect(input.placeholder).toBe('Search');
+    expect(input.inputMode).toBe('text');
+    expect(input.enterKeyHint).toBe('search');
+    expect(input.classList.contains('surface-input')).toBe(true);
+    expect(input.classList.contains('outline-none')).toBe(true);
+
+    input.value = 'edited';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(values).toEqual(['edited']);
+
+    input.value = 'no\nnewlines';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(values).toEqual(['edited', 'nonewlines']);
     mounted.unmount();
   });
 });

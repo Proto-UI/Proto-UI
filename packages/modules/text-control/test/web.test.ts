@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { TextControlEvent } from '@proto.ui/core';
-import { createWebTextControlHost } from '../src/web';
+import { createWebTextControlHost, resolveWebTextControlLocalName } from '../src/web';
 
 describe('module-text-control web bridge', () => {
   it('projects the supported textarea properties and live updates', () => {
@@ -137,6 +137,154 @@ describe('module-text-control web bridge', () => {
     expect(seen).toHaveLength(5);
   });
 
+  it('reads editing payloads independently of target and event realms', () => {
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    const targetDocument = iframe.contentDocument;
+    const targetView = iframe.contentWindow;
+    expect(targetDocument).not.toBeNull();
+    expect(targetView).not.toBeNull();
+    if (!targetDocument || !targetView) throw new Error('iframe realm is unavailable');
+    const targetRealm = targetView as unknown as Pick<
+      typeof globalThis,
+      'CompositionEvent' | 'InputEvent'
+    >;
+    const originalTargetCompositionEvent = targetRealm.CompositionEvent;
+    const originalTargetInputEvent = targetRealm.InputEvent;
+    class TargetRealmCompositionEvent extends Event {
+      readonly data: string | null;
+      constructor(type: string, init: CompositionEventInit = {}) {
+        super(type, init);
+        this.data = init.data ?? null;
+      }
+    }
+    class TargetRealmInputEvent extends Event {
+      readonly data: string | null;
+      readonly inputType: string;
+      readonly isComposing: boolean;
+      constructor(type: string, init: InputEventInit = {}) {
+        super(type, init);
+        this.data = init.data ?? null;
+        this.inputType = init.inputType ?? '';
+        this.isComposing = init.isComposing ?? false;
+      }
+    }
+    Object.defineProperties(targetView, {
+      CompositionEvent: { configurable: true, value: TargetRealmCompositionEvent },
+      InputEvent: { configurable: true, value: TargetRealmInputEvent },
+    });
+    expect(targetRealm.CompositionEvent).not.toBe(CompositionEvent);
+    expect(targetRealm.InputEvent).not.toBe(InputEvent);
+
+    const input = targetDocument.createElement('input');
+    targetDocument.body.appendChild(input);
+    const seen: TextControlEvent[] = [];
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent: (event) => seen.push(event),
+    });
+
+    const compositionStart = new targetRealm.CompositionEvent('compositionstart', {
+      bubbles: true,
+      data: '編',
+    });
+    const inputEvent = new targetRealm.InputEvent('input', {
+      bubbles: true,
+      data: '中',
+      inputType: 'insertCompositionText',
+      isComposing: true,
+    });
+    input.dispatchEvent(compositionStart);
+    input.value = '編集中';
+    input.dispatchEvent(inputEvent);
+
+    input.value = 'other realm';
+    const otherRealmInput = new InputEvent('input', {
+      bubbles: true,
+      data: '他',
+      inputType: 'insertText',
+      isComposing: false,
+    });
+    expect(otherRealmInput instanceof targetRealm.InputEvent).toBe(false);
+    input.dispatchEvent(otherRealmInput);
+
+    document.adoptNode(input);
+    document.body.appendChild(input);
+    expect(input.ownerDocument).toBe(document);
+    const adoptedComposition = new CompositionEvent('compositionupdate', { bubbles: true });
+    Object.defineProperty(adoptedComposition, 'data', { value: 'adopted' });
+    input.dispatchEvent(adoptedComposition);
+
+    expect(seen).toEqual([
+      {
+        type: 'compositionstart',
+        value: '',
+        composing: true,
+        data: '編',
+        inputType: null,
+      },
+      {
+        type: 'input',
+        value: '編集中',
+        composing: true,
+        data: '中',
+        inputType: 'insertCompositionText',
+      },
+      {
+        type: 'input',
+        value: 'other realm',
+        composing: true,
+        data: '他',
+        inputType: 'insertText',
+      },
+      {
+        type: 'compositionupdate',
+        value: 'other realm',
+        composing: true,
+        data: 'adopted',
+        inputType: null,
+      },
+    ]);
+
+    lease.dispose();
+    Object.defineProperties(targetView, {
+      CompositionEvent: { configurable: true, value: originalTargetCompositionEvent },
+      InputEvent: { configurable: true, value: originalTargetInputEvent },
+    });
+    iframe.remove();
+  });
+
+  it('reads editing payloads when the target document has no Window', () => {
+    const targetDocument = document.implementation.createHTMLDocument('detached');
+    expect(targetDocument.defaultView).toBeNull();
+    const input = targetDocument.createElement('input');
+    const seen: TextControlEvent[] = [];
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent: (event) => seen.push(event),
+    });
+
+    input.value = 'detached';
+    input.dispatchEvent(
+      new InputEvent('input', {
+        data: 'd',
+        inputType: 'insertText',
+        isComposing: true,
+      })
+    );
+
+    expect(seen).toEqual([
+      {
+        type: 'input',
+        value: 'detached',
+        composing: true,
+        data: 'd',
+        inputType: 'insertText',
+      },
+    ]);
+    lease.dispose();
+  });
+
   it('preserves cursor and selection across host patches and controlled restoration', () => {
     const textarea = document.createElement('textarea');
     document.body.appendChild(textarea);
@@ -228,5 +376,262 @@ describe('module-text-control web bridge', () => {
 
     lease.dispose();
     textarea.remove();
+  });
+});
+
+describe('module-text-control single-line web bridge', () => {
+  it('resolves declarations to their physical Web editor local names', () => {
+    expect(
+      resolveWebTextControlLocalName({ content: 'plain-text', lineMode: 'single', engine: 'host' })
+    ).toBe('input');
+    expect(
+      resolveWebTextControlLocalName({
+        content: 'plain-text',
+        lineMode: 'multiline',
+        engine: 'host',
+      })
+    ).toBe('textarea');
+  });
+
+  it('resolves an input element for single-line declaration', () => {
+    const input = document.createElement('input');
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: {
+        valueMode: 'uncontrolled',
+        defaultValue: 'initial',
+        placeholder: 'Search',
+        required: true,
+        name: 'query',
+        inputMode: 'search',
+        enterKeyHint: 'search',
+      },
+      onEvent() {},
+    });
+
+    expect(input.value).toBe('initial');
+    expect(input.placeholder).toBe('Search');
+    expect(input.required).toBe(true);
+    expect(input.name).toBe('query');
+    expect(input.inputMode).toBe('search');
+    expect(input.enterKeyHint).toBe('search');
+
+    lease.update({
+      valueMode: 'uncontrolled',
+      defaultValue: 'initial',
+      inputMode: undefined,
+      enterKeyHint: undefined,
+    });
+    expect(input.inputMode).toBe('');
+    expect(input.enterKeyHint).toBe('');
+
+    lease.dispose();
+  });
+
+  it.each(['text', 'search', 'tel', 'password'])(
+    'projects values through the text-compatible input type %s',
+    (type) => {
+      const input = document.createElement('input');
+      input.type = type;
+      const lease = createWebTextControlHost(() => input).attach({
+        patch: { valueMode: 'controlled', value: 'initial' },
+        onEvent() {},
+      });
+
+      expect(input.value).toBe('initial');
+      lease.update({ valueMode: 'controlled', value: 'updated' });
+      expect(input.value).toBe('updated');
+      lease.dispose();
+    }
+  );
+
+  it.each(['file', 'checkbox', 'url'])(
+    'rejects unsupported input type %s before projection',
+    (type) => {
+      const input = document.createElement('input');
+      input.type = type;
+      const valueBeforeAttach = input.value;
+      const onEvent = vi.fn();
+
+      expect(() =>
+        createWebTextControlHost(() => input).attach({
+          patch: { valueMode: 'controlled', value: 'plain text' },
+          onEvent,
+        })
+      ).toThrow(`[TextControl] unsupported Web input type "${type}".`);
+      expect(input.value).toBe(valueBeforeAttach);
+      input.dispatchEvent(new InputEvent('input'));
+      expect(onEvent).not.toHaveBeenCalled();
+    }
+  );
+
+  it('fails closed when a leased input mutates to a non-text type', () => {
+    const input = document.createElement('input');
+    const onEvent = vi.fn();
+    const lease = createWebTextControlHost(() => input, { stopPropagation: true }).attach({
+      patch: { valueMode: 'controlled', value: 'initial' },
+      onEvent,
+    });
+
+    input.type = 'checkbox';
+    const event = new InputEvent('input', { bubbles: true });
+    const stopPropagation = vi.spyOn(event, 'stopPropagation');
+    expect(() => input.dispatchEvent(event)).toThrow(
+      '[TextControl] unsupported Web input type "checkbox".'
+    );
+    expect(stopPropagation).toHaveBeenCalledOnce();
+    expect(onEvent).not.toHaveBeenCalled();
+    expect(() => lease.snapshot()).toThrow('[TextControl] unsupported Web input type "checkbox".');
+    expect(() => lease.update({ valueMode: 'controlled', value: 'updated' })).toThrow(
+      '[TextControl] unsupported Web input type "checkbox".'
+    );
+    lease.dispose();
+  });
+
+  it('revalidates deferred composition restoration after the owner callback', () => {
+    const input = document.createElement('input');
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'controlled', value: 'owner' },
+      onEvent(event) {
+        if (event.type === 'compositionend') input.type = 'file';
+      },
+    });
+    input.dispatchEvent(new CompositionEvent('compositionstart'));
+    input.value = 'candidate';
+    lease.update({ valueMode: 'controlled', value: 'next owner' });
+
+    expect(() => input.dispatchEvent(new CompositionEvent('compositionend'))).toThrow(
+      '[TextControl] unsupported Web input type "file".'
+    );
+    expect(input.value).toBe('');
+    lease.dispose();
+  });
+
+  it('does not restore a deferred value after the owner callback disposes the lease', () => {
+    const input = document.createElement('input');
+    let lease: ReturnType<ReturnType<typeof createWebTextControlHost>['attach']>;
+    lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'controlled', value: 'owner' },
+      onEvent(event) {
+        if (event.type === 'compositionend') lease.dispose();
+      },
+    });
+    input.dispatchEvent(new CompositionEvent('compositionstart'));
+    input.value = 'candidate';
+    lease.update({ valueMode: 'controlled', value: 'next owner' });
+    input.dispatchEvent(new CompositionEvent('compositionend'));
+
+    expect(input.value).toBe('candidate');
+  });
+
+  it('projects and preserves selection when the current-realm constructor does not own the input', () => {
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    vi.stubGlobal('HTMLInputElement', class CurrentRealmHTMLInputElement {});
+    expect(input instanceof HTMLInputElement).toBe(false);
+    try {
+      const lease = createWebTextControlHost(() => input).attach({
+        patch: {
+          valueMode: 'controlled',
+          value: '0123456789',
+          inputMode: 'search',
+          enterKeyHint: 'search',
+        },
+        onEvent() {},
+      });
+      input.focus();
+      input.setSelectionRange(3, 7, 'forward');
+
+      lease.update({
+        valueMode: 'controlled',
+        value: 'short',
+        inputMode: 'numeric',
+        enterKeyHint: 'next',
+      });
+      expect({
+        value: input.value,
+        start: input.selectionStart,
+        end: input.selectionEnd,
+        direction: input.selectionDirection,
+        inputMode: input.inputMode,
+        enterKeyHint: input.enterKeyHint,
+      }).toEqual({
+        value: 'short',
+        start: 3,
+        end: 5,
+        direction: 'forward',
+        inputMode: 'numeric',
+        enterKeyHint: 'next',
+      });
+
+      lease.dispose();
+    } finally {
+      vi.unstubAllGlobals();
+      input.remove();
+    }
+  });
+  it('canonicalizes CR/LF to LF in event values and snapshots', () => {
+    const input = document.createElement('input');
+    const events: TextControlEvent[] = [];
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent(event) {
+        events.push(event);
+      },
+    });
+
+    // Input elements strip \r\n, so test canonicalization with a textarea
+    const textarea = document.createElement('textarea');
+    const textareaEvents: TextControlEvent[] = [];
+    const textareaLease = createWebTextControlHost(() => textarea).attach({
+      patch: { valueMode: 'uncontrolled', defaultValue: '' },
+      onEvent(event) {
+        textareaEvents.push(event);
+      },
+    });
+
+    textarea.value = 'hello\r\nworld';
+    textarea.dispatchEvent(new InputEvent('input', { bubbles: true }));
+
+    expect(textareaEvents.length).toBeGreaterThan(0);
+    const last = textareaEvents[textareaEvents.length - 1];
+    expect(last.value).toBe('hello\nworld');
+
+    expect(textareaLease.snapshot()?.value).toBe('hello\nworld');
+    textareaLease.dispose();
+    lease.dispose();
+  });
+  it('projects common input hints to a textarea', () => {
+    const textarea = document.createElement('textarea');
+    const lease = createWebTextControlHost(() => textarea).attach({
+      patch: {
+        valueMode: 'uncontrolled',
+        inputMode: 'email',
+        enterKeyHint: 'next',
+      },
+      onEvent() {},
+    });
+
+    expect(textarea.inputMode).toBe('email');
+    expect(textarea.enterKeyHint).toBe('next');
+    lease.dispose();
+  });
+
+  it('does not apply rows or wrap to an input element', () => {
+    const input = document.createElement('input');
+    const lease = createWebTextControlHost(() => input).attach({
+      patch: {
+        valueMode: 'uncontrolled',
+        defaultValue: 'test',
+        rows: 4,
+        wrap: 'hard',
+      } as any,
+      onEvent() {},
+    });
+
+    // input has no rows or wrap properties
+    expect((input as any).rows).toBeUndefined();
+    expect((input as any).wrap).toBeUndefined();
+    expect(input.value).toBe('test');
+    lease.dispose();
   });
 });

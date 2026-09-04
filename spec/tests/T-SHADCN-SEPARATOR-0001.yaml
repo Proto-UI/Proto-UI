@@ -3,7 +3,7 @@ type: test
 title: Shadcn Separator Root delta protocol contract tests
 status: draft
 since: 0.3.0-alpha.0
-summary: Covers Separator Root identity, Base inheritance, orientation-driven geometry, the restated contentless renderer, and its passive boundary.
+summary: Covers Separator Root identity, Base inheritance, orientation-driven geometry, the restated contentless renderer, its passive boundary, and the intentional asChild omission.
 cases:
   - id: T-SHADCN-SEPARATOR-0001-CASE-EXPORTS
     title: Root is a direct unofficial projection reachable through exact package entries
@@ -31,6 +31,10 @@ cases:
     title: Projection stays contentless and adds no interaction surface
     covers: [P-SHADCN-SEPARATOR-CONTENTLESS, P-SHADCN-SEPARATOR-PASSIVE-BOUNDARY]
     expectation: shadcn-separator-drops-authored-children-and-declares-no-interaction
+  - id: T-SHADCN-SEPARATOR-0001-CASE-AS-CHILD-OMISSION
+    title: Root omits asChild from public props and never substitutes an authored element
+    covers: [P-SHADCN-SEPARATOR-AS-CHILD-OMISSION]
+    expectation: shadcn-separator-root-does-not-expose-or-emulate-as-child
   - id: T-SHADCN-SEPARATOR-0001-CASE-WEB-GEOMETRY-EVIDENCE
     title: Both orientation rules reach the web style projection as conditional geometry
     covers: [P-SHADCN-SEPARATOR-STATE-DRIVEN-GEOMETRY]
@@ -47,11 +51,12 @@ implementations:
         T-SHADCN-SEPARATOR-0001-CASE-DEFAULTS,
         T-SHADCN-SEPARATOR-0001-CASE-DYNAMIC-SEMANTICS,
         T-SHADCN-SEPARATOR-0001-CASE-PASSIVE-BOUNDARY,
+        T-SHADCN-SEPARATOR-0001-CASE-AS-CHILD-OMISSION,
         T-SHADCN-SEPARATOR-0001-CASE-WEB-GEOMETRY-EVIDENCE,
       ]
     exercises: &id001 [P-SHADCN-SEPARATOR, P-BASE-SEPARATOR]
     notes:
-      - Positive tests cover only the current Proto UI guarantee; asChild omission and remaining parity gaps are bounded by the decision, declared surface, and centralized compatibility question.
+      - The asChild omission case checks both the exported props type and contentless host ownership; remaining parity gaps stay bounded by the declared surface and centralized compatibility question.
       - The web-geometry case asserts Adapter lowering of the two state-conditioned rules on the Web Component host. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited orientation state handle plus semantic aria-orientation.
 verifies:
   prototypes:
@@ -62,4 +67,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added draft Shadcn Separator projection coverage.
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added mutation-sensitive public-type and runtime evidence for the intentional asChild omission.
 tags: [test, shadcn, separator, visual, compatibility]

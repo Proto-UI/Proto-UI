@@ -76,18 +76,20 @@ openQuestions:
       en: During render function execution, should the `run handle` include write-capable APIs such as state, context, and event APIs, or expose only read APIs and disable all write APIs?
     context:
       zh-CN: >-
-        render 期间读取 props/context 等 runtime input 是构建 template 的必要能力；当前只能通过 `renderer.read.props` 读取 props，不能读取 context 更像实现缺口。真正的权衡在 write API：若 render-time `run` 不含 write API，可能限制某些需求；若包含 write API，write 可能触发 watcher，并在当前 update 尚未完成时再次进入 update flow，风险接近直接在 render 中调用 `run.update()`。
+        render 期间读取 props/context 等 runtime input 是构建 template 的必要能力；`renderer.read.context` 与 anatomy 读取现已具备，由 `prototype.render-syntax.v0.contract.test.ts` 覆盖，因此读取面不再是缺口。真正的权衡在 write API：若 render-time `run` 不含 write API，可能限制某些需求；若包含 write API，write 可能触发 watcher，并在当前 update 尚未完成时再次进入 update flow，风险接近直接在 render 中调用 `run.update()`。
 
 
       en: >-
-        Reading runtime input such as props and context during render is necessary for template construction; the current `renderer.read.props`-only surface makes context reads look like an implementation gap. The real tradeoff is write APIs: excluding write APIs from render-time `run` may block some use cases, while including them may trigger watchers and re-enter update flow before the current update completes, with risks similar to calling `run.update()` during render.
+        Reading runtime input such as props and context during render is necessary for template construction; `renderer.read.context` and anatomy reads now exist and are covered by `prototype.render-syntax.v0.contract.test.ts`, so the read surface is no longer a gap. The real tradeoff is write APIs: excluding write APIs from render-time `run` may block some use cases, while including them may trigger watchers and re-enter update flow before the current update completes, with risks similar to calling `run.update()` during render.
 
 
-    blocks:
-      - C-LIFECYCLE-0003-C
-      - C-LIFECYCLE-0003-D
-      - C-LIFECYCLE-0003-E
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Recorded the render read surface as implemented rather than an implementation gap, and released the criteria the write-surface question blocked. `prototype.render-syntax.v0.contract.test.ts` reads props, context, and anatomy during render and asserts that `renderer.update` is unavailable there, which settles the read and re-entry criteria. Whether render-time `run` should carry write APIs stays open, but it decides no criterion here: module APIs must not trigger render or commit under either answer, and `T-LIFECYCLE-0002` already records passing evidence for that.
+
+
   - version: 0.1.0
     change: introduced
     summary: Drafted the lifecycle-owned explicit update/render entry-point boundary.

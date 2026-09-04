@@ -1,27 +1,27 @@
 id: C-TEXT-CONTROL-0001
 type: contract
-title: Text Control projects one host-owned multiline editing target
+title: Text Control projects one host-owned plain-text editing target
 status: draft
 since: 0.2.0-rc.7
-summary: Text Control binds one semantically declared host-owned multiline editor to stable value ownership, portable property patches, normalized editing events, and a bounded host lease.
+summary: Text Control binds one semantically declared host-owned plain-text editor to stable value ownership, portable property patches, normalized editing events, and a bounded host lease.
 statement:
   zh-CN: >-
-    Text Control 必须通过 prototype 的静态 declaration 在首次 render 前声明 plain-text multiline host-owned editing requirement，由 adapter 选择物理宿主 editor，并通过 portable patch、标准化 input/change/composition event 与有界 host lease 投影多行文本编辑协议。Controlled 与 uncontrolled ownership 在 logical instance 生命周期内保持稳定，Template v0 不获得原生 property、event channel 或 raw host target。
+    Text Control 必须通过 prototype 的静态 declaration 在首次 render 前声明 plain-text、line-mode（single 或 multiline）与 host-owned engine requirement，由 adapter 选择物理宿主 editor，并通过 portable patch、标准化 input/change/composition event 与有界 host lease 投影文本编辑协议。Controlled 与 uncontrolled ownership 在 logical instance 生命周期内保持稳定，Template v0 不获得原生 property、event channel 或 raw host target。
 
 
   en: >-
-    Text Control must declare a plain-text multiline host-owned editing requirement before first render, let the adapter select the physical host editor, and project the multiline editing protocol through portable patches, normalized input/change/composition events, and a bounded host lease. Controlled or uncontrolled ownership remains stable for the logical instance lifetime, and Template v0 gains no native property channel, event channel, or raw host target.
+    Text Control must declare a plain-text, line-mode-aware (single or multiline), host-owned editing requirement before first render, let the adapter select the physical host editor, and project the editing protocol through portable patches, normalized input/change/composition events, and a bounded host lease. Controlled or uncontrolled ownership remains stable for the logical instance lifetime, and Template v0 gains no native property channel, event channel, or raw host target.
 
 
 criteria:
   - id: C-TEXT-CONTROL-0001-A
     text:
-      zh-CN: Static declaration 必须只表达 plain-text、multiline 与 host-owned engine requirement；adapter 在首次 render 前选择物理 editor。当前 Web profile 解析为一个 `HTMLTextAreaElement`，该 target 属于 adapter infrastructure，不属于 Template children。
-      en: A static declaration must express only the plain-text, multiline, and host-owned-engine requirement; the adapter selects the physical editor before first render. The current Web profile resolves to one `HTMLTextAreaElement`, which belongs to adapter infrastructure rather than Template children.
+      zh-CN: Static declaration 必须只表达 plain-text、line-mode（single 或 multiline）与 host-owned engine requirement；adapter 在首次 render 前选择物理 editor。当前 Web profile 对 single-line 解析为 `HTMLInputElement`，对 multiline 解析为 `HTMLTextAreaElement`，该 target 属于 adapter infrastructure，不属于 Template children。
+      en: A static declaration must express only the plain-text, line-mode (single or multiline), and host-owned-engine requirement; the adapter selects the physical editor before first render. The current Web profile resolves to one `HTMLInputElement` for single-line or one `HTMLTextAreaElement` for multiline, which belongs to adapter infrastructure rather than Template children.
   - id: C-TEXT-CONTROL-0001-B
     text:
-      zh-CN: Portable patch 必须投影 value、defaultValue、disabled、readOnly、required、name、placeholder、autoComplete、minLength、maxLength、rows 与 soft/hard wrap；原生 textarea.defaultValue 必须同步，而已编辑的 uncontrolled value 不得被后续 defaultValue 或其他 prop update 重置。
-      en: The portable patch must project value, defaultValue, disabled, readOnly, required, name, placeholder, autoComplete, minLength, maxLength, rows, and soft/hard wrap; native textarea.defaultValue must stay synchronized without a later defaultValue or unrelated prop update resetting an edited uncontrolled value.
+      zh-CN: Portable patch 必须投影 value、defaultValue、disabled、readOnly、required、name、placeholder、autoComplete、minLength、maxLength 与 common inputMode、enterKeyHint；multiline 模式还投影 rows 与 soft/hard wrap；原生 textarea.defaultValue 必须同步，而已编辑的 uncontrolled value 不得被后续 defaultValue 或其他 prop update 重置。
+      en: The portable patch must project value, defaultValue, disabled, readOnly, required, name, placeholder, autoComplete, minLength, maxLength, and the common inputMode and enterKeyHint hints; multiline mode also projects rows and soft/hard wrap. Native textarea.defaultValue must stay synchronized without a later defaultValue or unrelated prop update resetting an edited uncontrolled value.
   - id: C-TEXT-CONTROL-0001-C
     text:
       zh-CN: input、change、compositionstart、compositionupdate 与 compositionend 必须按原生顺序标准化为 value、composing、data 与 inputType facts，不得把原生 Event object 作为 prototype event payload 泄漏。
@@ -36,8 +36,8 @@ criteria:
       en: Controlled composition must not restore an old value or disrupt the IME candidate or cursor; an unaccepted proposal may be restored only after the composition boundary completes.
   - id: C-TEXT-CONTROL-0001-F
     text:
-      zh-CN: Target listener 与 host reference 必须受 mount lease 约束并在 detach/dispose 时撤销；Web Component inner textarea 的原生事件必须在 wrapper boundary 内停止传播，再通过标准化 prototype event 发出。
-      en: Target listeners and host references must be bounded by a mount lease and revoked on detach or disposal; native events from a Web Component inner textarea must stop at the wrapper boundary and re-emerge only as normalized prototype events.
+      zh-CN: Target listener 与 host reference 必须受 mount lease 约束并在 detach/dispose 时撤销；Web Component inner textarea 或 inner input 的原生事件必须在 wrapper boundary 内停止传播，再通过标准化 prototype event 发出。
+      en: Target listeners and host references must be bounded by a mount lease and revoked on detach or disposal; native events from a Web Component inner textarea or inner input must stop at the wrapper boundary and re-emerge only as normalized prototype events.
   - id: C-TEXT-CONTROL-0001-G
     text:
       zh-CN: 宿主必须默认保留 selection、cursor、IME 与系统 editing chrome；普通 property patch 或未改变 value 的同步不得破坏 active editing session，controlled composition 期间的无关 patch 不得写回 owner value。
@@ -46,6 +46,16 @@ criteria:
     text:
       zh-CN: 在 adapter 使用 infrastructure wrapper 的 profile 中，wrapper 必须保留 logical boundary，host-owned physical editor 必须成为 Root visual intent 的 surfaceTarget；不得把 surface class/style 留在 wrapper 上形成第二个视觉控件或错位的 focus surface。
       en: In profiles where an adapter uses an infrastructure wrapper, the wrapper must retain the logical boundary while the host-owned physical editor becomes the surfaceTarget for Root visual intent; surface class or style must not remain on the wrapper and create a second visual control or a displaced focus surface.
+  - id: C-TEXT-CONTROL-0001-I
+    text:
+      zh-CN: >-
+        在 module boundary 处，所有 CR/LF 行尾必须先标准化为 LF，用于 comparison、state projection、snapshot 与 outward payload。single-line 模式随后移除 LF，使 portable value 与宿主单行 value sanitization 一致；multiline 模式保留 LF。仅依赖 Web DOM 清理不充分。
+
+
+      en: >-
+        At the module boundary, all CR/LF line endings must first be canonicalized to LF before comparison, state projection, snapshots, and outward payloads. Single-line mode then removes LF so the portable value agrees with host single-line value sanitization; multiline mode retains LF. Web DOM sanitization alone is not sufficient.
+
+
 sources:
   - path: packages/core/src/text-control.ts
   - path: packages/modules/text-control/src/impl.ts
@@ -69,6 +79,12 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Introduced the focused native multiline Text Control host boundary.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Made the Text Control module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, and required CR/LF canonicalization at the module boundary. Single-line mode resolves to HTMLInputElement on the Web profile.
+
+
 tags:
   - text-control
   - textarea

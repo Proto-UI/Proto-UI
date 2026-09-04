@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import separatorRoot, { shadcnSeparatorRoot } from '../src/separator';
+import type { ShadcnSeparatorRootProps } from '../src/separator';
+
+type HasAsChild<Props> = 'asChild' extends keyof Props ? true : false;
 
 AdaptToWebComponent(separatorRoot);
 
@@ -24,6 +27,25 @@ describe('prototypes/shadcn: separator', () => {
     // T-SHADCN-SEPARATOR-0001-CASE-EXPORTS
     expect(shadcnSeparatorRoot).toBe(separatorRoot);
     expect(separatorRoot.name).toBe('shadcn-separator-root');
+  });
+
+  it('omits asChild from public props and never substitutes an authored element', async () => {
+    // T-SHADCN-SEPARATOR-0001-CASE-AS-CHILD-OMISSION
+    expectTypeOf<HasAsChild<ShadcnSeparatorRootProps>>().toEqualTypeOf<false>();
+
+    const el = document.createElement('shadcn-separator-root');
+    const candidate = document.createElement('div');
+    candidate.dataset.asChildCandidate = '';
+    setElementProps(el, { asChild: true } as any);
+    el.appendChild(candidate);
+    document.body.appendChild(el);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(el.isConnected).toBe(true);
+    expect(el.contains(candidate)).toBe(false);
+    expect(el.innerHTML).toBe('');
+    el.remove();
   });
 
   it('inherits decorative defaults and projects the upstream surface', async () => {

@@ -13,6 +13,20 @@
     line-height: 1.625;
   }
 
+  /*
+   * Own the rhythm between Markdown and MDX blocks at the content boundary.
+   * Keeping this selector to direct children gives every embedded root the
+   * same incoming space without leaking prose layout into widget internals.
+   */
+  .docs-content-flow {
+    --docs-content-flow-space: calc(var(--spacing) * 4);
+    margin-block-start: var(--docs-content-flow-space);
+  }
+
+  .docs-content-flow > :where(* + *) {
+    margin-block-start: var(--docs-content-flow-space);
+  }
+
   main[data-pagefind-body] h1 {
     @apply scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl;
   }

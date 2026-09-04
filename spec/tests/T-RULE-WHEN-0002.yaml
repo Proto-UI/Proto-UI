@@ -53,6 +53,19 @@ implementations:
       - T-RULE-WHEN-0002-CASE-PROPS-DEPS
       - T-RULE-WHEN-0002-CASE-STATE-DEPS
       - T-RULE-WHEN-0002-CASE-CONTEXT-DEPS
+    notes:
+      - The runtime matrix contract is the executable side of the props, state, and context cases.
+  - id: spec-meta-secondary-boundary
+    kind: workspace-check
+    status: planned
+    path: packages/spec/graph/test/meta-secondary-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-WHEN-0002-CASE-META-DEFERRED
+    notes:
+      - Planned because no executable guard proves the deferred boundary; the decision record states it and nothing asserts it.
+      - A workspace check rather than a runtime test, because `C-RULE-WHEN-0002-E` is a governance claim about `meta` staying secondary and out of stable Rule-core naming. `rule.meta.v0.contract.test.ts` already proves the runtime behaviour while `packages/core/src/handles.ts` still declares `WhenBuilder.meta`, so a runtime test could pass while the boundary it claims to cover went unchecked.
+
 verifies:
   contracts:
     - id: C-RULE-WHEN-0002
@@ -73,6 +86,9 @@ exercises:
       coverageImpact: review-test-surface
       note: Host/environment meta inputs are not required by the core when dependency matrix.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Moved the deferred meta case to its own planned workspace check, because the criterion is a governance boundary rather than runtime behaviour.
   - version: 0.1.0
     change: introduced
     summary: Added Rule when dependency dimension test mapping and fixture ownership.
