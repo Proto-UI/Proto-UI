@@ -1233,76 +1233,128 @@ function domReceiverBindings(sourceFile) {
   };
   collect(sourceFile);
 
-  const isIdentifierDomReceiver = (name, useNode, visitedBindings = new Set()) => {
+  const latestBinding = (name, useNode) => {
     const usePosition = useNode.getStart(sourceFile);
     const bindings = bindingsByName.get(name) ?? [];
     for (let scope = lexicalScope(useNode); scope; scope = lexicalScope(scope)) {
       const binding = bindings
         .filter((entry) => entry.scope === scope && entry.position < usePosition)
         .sort((left, right) => right.position - left.position)[0];
-      if (binding) {
-        if (binding.intrinsicallyDom) return true;
-        if (!binding.initializer || visitedBindings.has(binding)) return false;
-        visitedBindings.add(binding);
-        if (binding.destructuredProperties) {
-          const owner = unwrapTypeScriptExpression(binding.initializer);
-          const propertyChain = binding.destructuredProperties;
-          const lastProperty = propertyChain.at(-1);
-          const ownerProperty =
-            propertyChain.at(-2) ??
-            (ts.isIdentifier(owner) || ts.isPropertyAccessExpression(owner)
-              ? owner.getText(sourceFile)
-              : '');
-          if (lastProperty === 'current' && /(?:Element|Node|Ref)$/u.test(ownerProperty)) {
-            return true;
-          }
-          if (
-            /^(?:body|documentElement|activeElement)$/u.test(lastProperty) &&
-            ts.isIdentifier(owner) &&
-            owner.text === 'document'
-          ) {
-            return true;
-          }
-          if (
-            /^(?:currentTarget|target)$/u.test(lastProperty) &&
-            ts.isIdentifier(owner) &&
-            /^(?:e|ev|event)$/u.test(owner.text)
-          ) {
-            return true;
-          }
-          return false;
-        }
-        return isDomReceiverExpression(
-          binding.initializer,
-          sourceFile,
-          receiverBindings,
-          binding.node,
-          visitedBindings
-        );
-      }
+      if (binding) return binding;
       if (ts.isSourceFile(scope)) break;
     }
-    return name === 'document' || name === 'window';
+    return null;
   };
-  const receiverBindings = { isIdentifierDomReceiver };
+  const isIdentifierDomReceiver = (name, useNode, visitedBindings = new Set()) => {
+    const binding = latestBinding(name, useNode);
+    if (!binding) return name === 'document' || name === 'window';
+    if (binding.intrinsicallyDom) return true;
+    if (!binding.initializer || visitedBindings.has(binding)) return false;
+    visitedBindings.add(binding);
+    if (binding.destructuredProperties) {
+      const owner = unwrapTypeScriptExpression(binding.initializer);
+      const propertyChain = binding.destructuredProperties;
+      const lastProperty = propertyChain.at(-1);
+      const ownerProperty =
+        propertyChain.at(-2) ??
+        (ts.isIdentifier(owner) || ts.isPropertyAccessExpression(owner)
+          ? owner.getText(sourceFile)
+          : '');
+      if (lastProperty === 'current' && /(?:Element|Node|Ref)$/u.test(ownerProperty)) {
+        return true;
+      }
+      if (
+        /^(?:body|documentElement|activeElement)$/u.test(lastProperty) &&
+        ts.isIdentifier(owner) &&
+        owner.text === 'document'
+      ) {
+        return true;
+      }
+      return (
+        /^(?:currentTarget|target)$/u.test(lastProperty) &&
+        ts.isIdentifier(owner) &&
+        /^(?:e|ev|event)$/u.test(owner.text)
+      );
+    }
+    return isDomReceiverExpression(
+      binding.initializer,
+      sourceFile,
+      receiverBindings,
+      binding.node,
+      visitedBindings
+    );
+  };
+  const isIdentifierDomCollection = (name, useNode, visitedBindings = new Set()) => {
+    const binding = latestBinding(name, useNode);
+    if (!binding?.initializer || binding.destructuredProperties || visitedBindings.has(binding)) {
+      return false;
+    }
+    visitedBindings.add(binding);
+    return isDomCollectionExpression(
+      binding.initializer,
+      sourceFile,
+      receiverBindings,
+      binding.node,
+      visitedBindings
+    );
+  };
+  const receiverBindings = { isIdentifierDomCollection, isIdentifierDomReceiver };
   return receiverBindings;
 }
 
 function isDomAcquisitionCall(expression, sourceFile, receiverBindings, useNode, visitedBindings) {
   const candidate = unwrapTypeScriptExpression(expression);
-  if (!ts.isCallExpression(candidate) || !ts.isPropertyAccessExpression(candidate.expression)) {
-    return false;
-  }
-  const method = candidate.expression.name.text;
-  if (!/^(?:closest|createElement|getElementById|querySelector)$/u.test(method)) {
+  if (!ts.isCallExpression(candidate)) return false;
+  const calledMember = staticMemberAccess(candidate.expression);
+  if (
+    !calledMember ||
+    !/^(?:closest|createElement|getElementById|querySelector)$/u.test(calledMember.name)
+  ) {
     return false;
   }
   return isDomReceiverExpression(
-    candidate.expression.expression,
+    calledMember.receiver,
     sourceFile,
     receiverBindings,
     useNode,
     visitedBindings
+  );
+}
+
+function isDomCollectionExpression(
+  expression,
+  sourceFile,
+  receiverBindings,
+  useNode,
+  visitedBindings
+) {
+  const candidate = unwrapTypeScriptExpression(expression);
+  if (ts.isIdentifier(candidate)) {
+    return receiverBindings.isIdentifierDomCollection(candidate.text, useNode, visitedBindings);
+  }
+  if (ts.isCallExpression(candidate)) {
+    const calledMember = staticMemberAccess(candidate.expression);
+    return Boolean(
+      calledMember &&
+      /^(?:getElementsByClassName|getElementsByName|getElementsByTagName|getElementsByTagNameNS|querySelectorAll)$/u.test(
+        calledMember.name
+      ) &&
+      isDomReceiverExpression(
+        calledMember.receiver,
+        sourceFile,
+        receiverBindings,
+        useNode,
+        visitedBindings
+      )
+    );
+  }
+  const member = staticMemberAccess(candidate);
+  return Boolean(
+    member &&
+    /^(?:childNodes|children|elements|forms|images|links|options|selectedOptions)$/u.test(
+      member.name
+    ) &&
+    isDomReceiverExpression(member.receiver, sourceFile, receiverBindings, useNode, visitedBindings)
   );
 }
 
@@ -1316,6 +1368,18 @@ function isDomReceiverExpression(
   const candidate = unwrapTypeScriptExpression(expression);
   if (ts.isIdentifier(candidate)) {
     return receiverBindings.isIdentifierDomReceiver(candidate.text, useNode, visitedBindings);
+  }
+  if (
+    ts.isElementAccessExpression(candidate) &&
+    isDomCollectionExpression(
+      candidate.expression,
+      sourceFile,
+      receiverBindings,
+      useNode,
+      visitedBindings
+    )
+  ) {
+    return true;
   }
   if (isDomAcquisitionCall(candidate, sourceFile, receiverBindings, useNode, visitedBindings)) {
     return true;
@@ -2370,16 +2434,28 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         return;
       }
       if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
-        for (const member of node.members) {
-          if (
+        const hasRenderedSurface = node.members.some(
+          (member) =>
             ts.isMethodDeclaration(member) &&
             member.name &&
             (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)) &&
             member.name.text === 'render' &&
             member.body &&
             containsRenderedSurface(member)
-          ) {
-            destination.add(member);
+        );
+        if (hasRenderedSurface) {
+          for (const member of node.members) {
+            if (
+              ts.isMethodDeclaration(member) &&
+              member.name &&
+              (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)) &&
+              /^(?:UNSAFE_componentWillMount|componentDidMount|componentWillMount|render)$/u.test(
+                member.name.text
+              ) &&
+              member.body
+            ) {
+              destination.add(member);
+            }
           }
         }
         return;
@@ -3439,6 +3515,27 @@ function validateEvidenceResultsManifest({
       )
     )
   );
+  for (const frameManifestPath of explicitRepositoryPaths(
+    evidenceRecordLabelValue(record, 'Multi-frame:', recordLabels)
+  )) {
+    if (!/\.json$/iu.test(frameManifestPath)) continue;
+    const canonicalManifestPath = canonicalRetainedEvidenceFile(
+      rootDir,
+      frameManifestPath,
+      evidenceRootRelative
+    );
+    if (!canonicalManifestPath) continue;
+    try {
+      const frameManifest = JSON.parse(fs.readFileSync(canonicalManifestPath, 'utf8'));
+      for (const framePath of frameManifest.frames ?? []) {
+        if (typeof framePath === 'string' && framePath.startsWith(evidenceRootRelative)) {
+          requiredArtifactPaths.add(framePath);
+        }
+      }
+    } catch {
+      // The retained-artifact validator reports malformed frame manifests.
+    }
+  }
   for (const repositoryPath of requiredArtifactPaths) {
     if (!manifestArtifacts.has(repositoryPath)) {
       issues.push(
@@ -4041,7 +4138,7 @@ function validateMainRows(
           `${context}: dependency issue #${binding.number} snapshot URL is not canonical for Proto-UI/Proto-UI`
         );
       }
-      if (governanceIssue.state !== 'OPEN') {
+      if (governanceIssue.state !== 'OPEN' && (state === 'blocked' || state === 'research')) {
         issues.push(
           `${context}: dependency issue #${binding.number} must be OPEN for a ${state} row; snapshot state is ${governanceIssue.state}/${governanceIssue.stateReason ?? 'NONE'}`
         );

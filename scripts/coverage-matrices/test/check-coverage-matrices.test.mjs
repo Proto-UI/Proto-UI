@@ -376,6 +376,8 @@ function writeSelfHostedWebsiteArtifacts(
     'internal/website/evidence/s14/accessibility-results.json',
     'internal/website/evidence/s14/home-desktop.png',
     'internal/website/evidence/s14/navigation-frames.json',
+    'internal/website/evidence/s14/navigation-before.png',
+    'internal/website/evidence/s14/navigation-after.png',
   ];
   fs.writeFileSync(
     path.join(artifactRoot, 'results.json'),
@@ -5593,5 +5595,85 @@ test('rejects evidence commits outside the candidate revision ancestry', () => {
   assert.match(
     validationMessage(root),
     /self-hosted evidence Commit .* must be an ancestor of the candidate revision/
+  );
+});
+
+test('follows indexed DOM collection receivers in Website and Harness scans', () => {
+  for (const [relativePath, source, expected] of [
+    [
+      'apps/www/src/components/indexed-focus.ts',
+      "document.querySelectorAll('button')[0]?.focus();",
+      /interactive website source `apps\/www\/src\/components\/indexed-focus\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/indexed-aria.ts',
+      "const buttons = document.querySelectorAll('button'); buttons[0].ariaExpanded = 'true';",
+      /Harness source `apps\/agent-harness\/src\/run\/indexed-aria\.ts` contains a forbidden interaction or DOM state machine/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('rejects Agent actions from exported class mount lifecycle methods', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/ClassMount.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import React from 'react'; import * as actions from './agent-actions'; class ClassMount extends React.Component { componentDidMount() { actions.send(); } render() { return <section>Run</section>; } } export { ClassMount };",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/ClassMount\.tsx` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('allows resolved rows to retain closed dependency Issues as provenance', () => {
+  const root = createRoot();
+  writeGovernanceSnapshot(root, { 533: { state: 'CLOSED', stateReason: 'COMPLETED' } });
+  writeValidMatrices(
+    root,
+    {},
+    {
+      State: 'ready',
+      'Dependency and owner': '#533; owner: Harness infrastructure owner',
+    }
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('requires every multi-frame image in the evidence results manifest', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  writeSelfHostedWebsiteArtifacts(root, revision);
+  const resultsPath = path.join(root, 'internal/website/evidence/s14/results.json');
+  const manifest = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+  manifest.artifacts = manifest.artifacts.filter(
+    (artifact) => artifact.path !== 'internal/website/evidence/s14/navigation-after.png'
+  );
+  fs.writeFileSync(resultsPath, `${JSON.stringify(manifest)}\n`, 'utf8');
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    validSelfHostedWebsiteEvidence({ Commit: revision }),
+    'utf8'
+  );
+  writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+  assert.match(
+    validationMessage(root),
+    /self-hosted evidence Results artifacts must include record artifact `internal\/website\/evidence\/s14\/navigation-after\.png`/
   );
 });
