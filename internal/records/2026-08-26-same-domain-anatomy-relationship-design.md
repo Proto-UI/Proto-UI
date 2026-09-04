@@ -1,6 +1,6 @@
 # Same-domain anatomy-part relationship design
 
-Non-normative record. Refs #549 and #388. This record catalogs a candidate design for the accepted prerequisite; it does not amend `spec/**`, add a public API, describe an implemented capability, create a stable guarantee, or authorize merge by itself.
+Non-normative record. Refs #549 and #388. This record explains the draft contract direction cataloged by `C-A11Y-PART-RELATIONSHIP-0001`; the record itself does not amend `spec/**`, add a public API, describe an implemented capability, create a stable guarantee, or authorize merge.
 
 ## Problem and governing direction
 
@@ -12,11 +12,11 @@ Disclosure, Collapsible, Accordion, and Tabs need a reusable same-domain relatio
 4. fail closed for zero or multiple matches instead of guessing; and
 5. release runtime records, observers, host attributes, and reserved identity on terminal disposal.
 
-The applicable draft authority is `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001`. In particular, criteria B–D require a structured relationship carrier and leave stable, unique host-ID generation plus missing/duplicate/dynamic fallback to the Web adapter. Existing `def.a11y.relation()` accepts only a string or `State<string>` target. Existing `AnatomyClaimDecl` contains only `role` and optional `profile`, and `AnatomyRelation` currently expresses only `contains`. None of those existing surfaces can carry the proposed semantics today.
+The applicable draft contract authority is `C-A11Y-PART-RELATIONSHIP-0001`; upstream direction remains recorded by `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001`. In particular, contract criteria A–C and decision criteria B–D require a structured relationship carrier and leave stable, unique host-ID generation plus missing/duplicate/dynamic fallback to the Web adapter. Existing `def.a11y.relation()` accepts only a string or `State<string>` target. Existing `AnatomyClaimDecl` contains only `role` and optional `profile`, and `AnatomyRelation` currently expresses only `contains`. None of those existing surfaces implements the governed semantics today.
 
 ## Candidate structured carrier — not an existing API
 
-A future catalog amendment must admit a typed relationship declaration. Exact syntax remains an implementation choice, but the runtime carrier must preserve at least:
+`C-A11Y-PART-RELATIONSHIP-0001-A` governs the minimum runtime carrier fields. Exact public syntax remains an implementation choice, but the carrier must preserve at least:
 
 - anatomy family and opaque same-domain scope identity;
 - source part instance identity and source role;
@@ -25,7 +25,7 @@ A future catalog amendment must admit a typed relationship declaration. Exact sy
 - protocol match key, kept distinct from host ID; and
 - the source and target view epochs needed to reject stale projection work.
 
-Illustrative names such as `def.a11y.partRelation(...)`, an extended anatomy claim, or a module-internal declaration type are not current APIs and must not be implemented from this record without first updating the governing contract/schema and public types. The current string-based `def.a11y.relation()` remains the legacy projection surface; an adapter-generated host ID must not be written back into a prototype-owned `State<string>` merely to imitate the structured carrier.
+Illustrative names such as `def.a11y.partRelation(...)`, an extended anatomy claim, or a module-internal declaration type are not current APIs. Any implementation must first align the Core declaration and IR schemas, public types, Runtime/A11y owner, and adapter seam with `C-A11Y-PART-RELATIONSHIP-0001`; an adapter-generated host ID must not be written back into prototype-owned `State<string>` merely to imitate the structured carrier.
 
 ## Runtime/A11y projection ownership and presence
 
@@ -53,14 +53,14 @@ No unconditional `ContextCenter.update()` loop is part of this design. If an adm
 
 ## Host identity and projection lifecycle
 
-The Web adapter, not Anatomy and not prototype State, owns the mapping from a logical target-instance identity to a stable unique host ID.
+The Web adapter, not Anatomy and not prototype State, owns the mapping from a logical target-instance identity to a stable unique host ID, subject to the non-destructive host-id policy in `C-A11Y-PART-RELATIONSHIP-0001-J`.
 
-- First materialization: reserve or retrieve the target instance's host ID, assign it to the target, and project matching source IDREFs.
+- First materialization: inspect the target's existing host `id`. Adopt it unchanged only when it is non-empty, unique in the applicable host scope, and not reserved by another logical target. Otherwise preserve any authored value and fail closed on a collision; when no adoptable id exists, assign a unique reserved id while recording the exact prior per-view value and adapter ownership.
 - L1 detach: withdraw each lease-owned source IDREF token while retaining the logical relationship, reserved target-instance identity, and every unowned token in the host attribute; remove the attribute itself only when no tokens remain.
-- Rematerialization: bind the new target view epoch to the same logical target instance and reserved host ID, then restore reciprocal IDREFs.
-- Terminal disposal: the relationship registry removes the instance entry; the adapter clears only values owned by its leases, preserves host-authored and independently owned values, and releases its reservation. No `State<string>.set(null)` is prescribed. Empty string remains valid only for existing optional string projections, not as the ownership mechanism for this structured relationship.
+- Source or target materialization/rematerialization: bind every new source or target view epoch to its retained logical instance. Once both current bindings form one valid match, bind the target reservation and restore reciprocal IDREFs before the corresponding new epoch's host commit becomes visible. A rematerialized target carrying a different authored id is preserved and fails closed rather than being overwritten.
+- Terminal disposal: remove every target registry membership, source lease, dependent projection binding, and observer owned by or retaining the disposed logical instance; invalidate affected sources before the adapter clears lease-owned host values and releases its reservation. A per-view prior id is restored or removed only when the current value still equals the lease-owned id, so cleanup never overwrites a later author mutation. No `State<string>.set(null)` is prescribed. Empty string remains valid only for existing optional string projections, not as the ownership mechanism for this structured relationship.
 
-The current runtime invokes mounted callbacks after the mount render/commit, so `onMounted` cannot satisfy before-reveal restoration. An admitted design needs an explicit adapter/runtime pre-commit integration seam: once current source/target bindings for the new view epoch exist, relationship matching, target ID assignment, and source IDREF projection must complete before that epoch's host commit becomes visible. Existing `subscribeTargets` is evidence of module-internal readiness notification, not proof that this pre-commit ordering already exists. Detach/dispose must revoke the seam and all observers.
+The current runtime invokes `host.commit` before `afterRenderCommit` and mounted callbacks, so neither hook can satisfy the new-source or new-target before-visible-commit guarantee. An admitted design needs an explicit adapter/runtime pre-commit integration seam: once current source and target bindings for the new view epoch exist, relationship matching, target ID assignment, and source IDREF projection must complete before that epoch's host commit becomes visible. Existing `subscribeTargets` is evidence of module-internal readiness notification, not proof that this pre-commit ordering already exists. Detach/dispose must revoke the seam and every associated observer.
 
 ## Tabs migration boundary
 
@@ -73,12 +73,11 @@ Root continues to own selection facts through Context, but Context gains no pres
 
 ## Required catalog and schema work
 
-Before implementation, the accepted prerequisite must be projected into machine-governed authority. At minimum:
+`C-A11Y-PART-RELATIONSHIP-0001` now supplies the draft machine-governed contract authority. Before implementation can satisfy it, the executable slice must still:
 
-- refine or promote `D-A11Y-PART-RELATIONSHIP-PROJECTION-0001` into the appropriate contract and criteria;
-- extend the core Anatomy/A11y declaration and IR schemas with the structured carrier rather than pretending current `AnatomyClaimDecl`, `AnatomyRelation`, or `def.a11y.relation()` already supports it;
-- define a separately governed Runtime/A11y relationship-projection service as owner of the scoped lease table, atomic re-keying, target epochs, diagnostics, and cleanup, while keeping Anatomy limited to structured declaration, domain scope, and readiness signals under `C-ANATOMY-0001`;
-- define the adapter capability for ID reservation, pre-commit projection, and fail-closed zero/multiple matching; and
+- extend the Core Anatomy/A11y declaration and IR schemas with the structured carrier rather than pretending current `AnatomyClaimDecl`, `AnatomyRelation`, or `def.a11y.relation()` already supports it;
+- revise the existing A11y Module and Host Capability entities to own the separately governed Runtime/A11y relationship-projection service, scoped lease table, atomic re-keying, source/target epochs, diagnostics, terminal cleanup, and non-destructive host-id reservation while keeping Anatomy limited to structured declaration, domain scope, and readiness signals under `C-ANATOMY-0001`;
+- add test entities and real executable mappings for pre-commit source/target projection, fail-closed matching, collision-free host-id adoption and compare-and-restore cleanup; and
 - revise Tabs prototype/test mappings plus the reusable Disclosure/Collapsible/Accordion prerequisite mapping without changing unrelated stable guarantees.
 
 All new or revised entities remain governed by their declared lifecycle status. This record cannot turn a draft decision into an active guarantee.
@@ -86,13 +85,13 @@ All new or revised entities remain governed by their declared lifecycle status. 
 ## Executable evidence
 
 - Schema/type tests reject incomplete or host-specific declarations and prove protocol match keys are not host IDs.
-- Runtime/module tests cover independent same-family domains, same-root multi-family isolation, zero/one/multiple matches, arbitrary string keys including `__proto__` and `constructor`, target replacement, stale epochs, detach/rematerialization, and terminal disposal. The multi-family case uses identical root identity, target role, and protocol key and proves the family-qualified resolver never cross-matches or reports false duplicate ambiguity.
+- Runtime/module tests cover independent same-family domains, same-root multi-family isolation, zero/one/multiple matches, arbitrary string keys including `__proto__` and `constructor`, target replacement, stale source and target epochs, detach/rematerialization, and terminal disposal. The multi-family case uses identical root identity, target role, and protocol key and proves the family-qualified resolver never cross-matches or reports false duplicate ambiguity.
 - Re-key tests change a mounted target from value A to B and prove one atomic removal/insertion, no reentrant dispatch, old-source IDREF removal, new-source restoration, and duplicate ambiguity preservation.
-- Pre-commit tests prove a rematerialized target receives its reserved ID and reciprocal relationships before reveal; a mounted callback-only implementation must fail this test.
-- Web adapter tests prove unique stable ID ownership, missing/duplicate fail-closed behavior, reservation reuse across L1 detach, and release on terminal disposal. Additive-IDREF cases begin with host-authored and independently owned tokens, then prove detach, ambiguity, re-key, replacement, and terminal cleanup remove only the Proto-generated lease token and remove the host attribute only when it is truly empty.
+- Pre-commit tests independently rematerialize the source and target, proving each new epoch binds its current logical instance, assigns or adopts the target reservation, and restores reciprocal relationships before the corresponding commit becomes visible; mounted or `afterRenderCommit`-only implementations must fail these tests.
+- Web adapter tests prove unique stable ID ownership, collision-free adoption of a host-authored target id, fail-closed preservation of colliding or different authored ids, per-view compare-and-restore behavior, missing/duplicate fail-closed matching, reservation reuse across L1 detach, and complete release on terminal disposal. Additive-IDREF cases begin with host-authored and independently owned tokens, then prove detach, ambiguity, re-key, replacement, and terminal cleanup remove only the Proto-generated lease token and remove the host attribute only when it is truly empty.
 - Tabs migration tests cover reciprocal Trigger/Content relationships for lazy and `keepMounted` Content without adding presence or IDs to `TABS_CONTEXT`.
 - Browser evidence exercises the Web Component, React, Vue 3, and active Vue 2 adapters separately. Disclosure/Collapsible/Accordion remain outside this prerequisite implementation slice except as future consumers of the admitted reusable contract.
 
 ## Status
 
-This remains a non-normative design record. Implementation may proceed only after the structured declaration, ownership, pre-commit seam, adapter capability, and test mappings are reconciled in `spec/**` under the #549/#388 authority. Until then, no public same-domain relationship API exists, existing string-based relation behavior remains current implementation evidence, and this proposal must not be presented as a completed or stable guarantee.
+This remains a non-normative design record. `C-A11Y-PART-RELATIONSHIP-0001` is the applicable draft contract authority, but no public same-domain relationship API or implemented capability exists until the structured declaration, Runtime/A11y ownership, source/target pre-commit seam, adapter reservation policy, test mappings, and Tabs migration land together. Existing string-based relation behavior remains current implementation evidence and this proposal must not be presented as a completed or stable guarantee.
