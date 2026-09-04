@@ -129,7 +129,7 @@ implementations:
       - Exercises Web Components, React, and Vue in Chromium through the public Button preview and asserts exact square borders, black zero-blur hard shadows, hover lift, pressed sink, focus-visible ring, and disabled projections from computed CSS.
       - Compares rest, hover, press, and settled state pairs so the verdict depends on exact shadow and transform transitions; optional fixed-host frames are inspection artifacts and are not compared by brittle PNG byte equality.
       - >-
-        Resolves the focus ring and its offset from active CSS custom properties, rejects transparent colors, and compares disabled border, radius, shadow, and transform with the enabled rest state in addition to exact `opacity: 0.5` and `pointer-events: none`.
+        Resolves the focus ring and its offset from active CSS custom properties, rejects transparent colors, and compares the disabled background/foreground pair, border, radius, shadow, and transform with the enabled rest state in addition to exact `opacity: 0.5` and `pointer-events: none`.
 
 
 verifies:

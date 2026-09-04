@@ -22,12 +22,14 @@ const VIEWPORT = { width: 1440, height: 900 } as const;
 const EVIDENCE_DIR = process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
 
 type ButtonStyle = Readonly<{
+  backgroundColor: string;
   backgroundImage: string;
   borderColor: string;
   borderRadius: string;
   borderStyle: string;
   borderWidth: string;
   boxShadow: string;
+  color: string;
   opacity: string;
   pointerEvents: string;
   transform: string;
@@ -40,12 +42,14 @@ async function styleOf(button: Locator): Promise<ButtonStyle> {
   return button.evaluate((element: HTMLElement) => {
     const style = getComputedStyle(element);
     return {
+      backgroundColor: style.backgroundColor,
       backgroundImage: style.backgroundImage,
       borderColor: style.borderTopColor,
       borderRadius: style.borderTopLeftRadius,
       borderStyle: style.borderTopStyle,
       borderWidth: style.borderTopWidth,
       boxShadow: style.boxShadow,
+      color: style.color,
       opacity: style.opacity,
       pointerEvents: style.pointerEvents,
       transform: style.transform,
@@ -231,6 +235,10 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const disabled = await styleOf(disabledSolid);
         expect(disabled.opacity, `${runtime}/disabled-opacity`).toBe('0.5');
         expect(disabled.pointerEvents, `${runtime}/disabled-pointer-events`).toBe('none');
+        expect(disabled.backgroundColor, `${runtime}/disabled-background`).toBe(
+          resting.backgroundColor
+        );
+        expect(disabled.color, `${runtime}/disabled-foreground`).toBe(resting.color);
         expect(geometryOf(disabled), `${runtime}/disabled-geometry`).toEqual(geometryOf(resting));
       } finally {
         await context.close();
