@@ -91,6 +91,13 @@ type Binding =
       initializer: ts.Expression;
       /** Members written after the declaration, latest candidates first. */
       members?: Map<string, ts.Expression[]>;
+      /** Containers the name may still hold because a write may be skipped. */
+      alternates?: ts.Expression[];
+      /**
+       * Some branch of this container's value is not a form the scanner can
+       * resolve, so its member set is known to be incomplete.
+       */
+      opaque?: boolean;
     }
   /** A named import; only a relative one is something the extractor follows. */
   | { kind: 'tokenImport'; specifier: string; imported: string; from?: string }
@@ -264,6 +271,20 @@ function isDeferredWrite(node: ts.Node, readFunction: ts.Node | null): boolean {
   return !reachedInPlace(node, writing);
 }
 
+/** Every runtime branch of a conditional, whether or not this recognizes it. */
+function conditionalLeafCount(node: ts.Node): number {
+  const value =
+    ts.isParenthesizedExpression(node) ||
+    ts.isAsExpression(node) ||
+    ts.isTypeAssertionExpression(node) ||
+    ts.isNonNullExpression(node)
+      ? conditionalLeafCount(node.expression)
+      : null;
+  if (value !== null) return value;
+  if (!ts.isConditionalExpression(node)) return 1;
+  return conditionalLeafCount(node.whenTrue) + conditionalLeafCount(node.whenFalse);
+}
+
 /** `var` binds to the function however deeply the declaration is nested. */
 function functionScope(scope: Scope): Scope {
   for (let current: Scope | null = scope; current; current = current.parent) {
@@ -394,6 +415,19 @@ export function scanRuleStateReads(
   type MemberEdge = { target: string; at: number; conditional: boolean };
   const objectMembers = new Map<ts.Node, Map<string, Map<string, MemberEdge[]>>>();
 
+  /**
+   * Every object literal an initializer may yield. A conditional selects one at
+   * runtime, so both are recorded for the same reason `aliasTargets` fans out.
+   */
+  const objectLiteralTargets = (node: ts.Node): ts.ObjectLiteralExpression[] => {
+    const value = unwrap(node);
+    if (ts.isObjectLiteralExpression(value)) return [value];
+    if (ts.isConditionalExpression(value)) {
+      return [...objectLiteralTargets(value.whenTrue), ...objectLiteralTargets(value.whenFalse)];
+    }
+    return [];
+  };
+
   /** Every member an object literal names, at the position it was written. */
   const recordObjectLiteral = (
     owner: ts.Node,
@@ -434,12 +468,14 @@ export function scanRuleStateReads(
       const visible = visibleEdges(candidates, at);
       if (visible.length === 0) return [name];
       const next = new Set([...seen, name]);
-      // A base that may be either of two objects writes to both tables.
-      return [
-        ...new Set(
-          visible.flatMap((edge) => containerRoots(edge.target, edge.chain ?? chain, edge.at, next))
-        ),
-      ];
+      // A base that may be either of two objects writes to both tables, and
+      // reads consult both; recording under the alias would reach neither. If
+      // every edge out of the name may not have been taken, the name's own
+      // table stays a candidate — a literal branch was recorded under it.
+      const roots = visible.flatMap((edge) =>
+        containerRoots(edge.target, edge.chain ?? chain, edge.at, next)
+      );
+      return [...new Set(visible.every((edge) => edge.conditional) ? [name, ...roots] : roots)];
     }
     return [name];
   };
@@ -627,10 +663,16 @@ export function scanRuleStateReads(
       names.add(node.name.text);
       declaredIn.set(owner, names);
       if (node.initializer) {
-        const literal = unwrap(node.initializer);
         const conditional = isConditionallyReached(node);
-        if (ts.isObjectLiteralExpression(literal)) {
-          recordObjectLiteral(owner, node.name.text, literal, node.getStart(), conditional);
+        const literals = objectLiteralTargets(node.initializer);
+        for (const literal of literals) {
+          recordObjectLiteral(
+            owner,
+            node.name.text,
+            literal,
+            node.getStart(),
+            conditional || literals.length > 1
+          );
         }
         for (const target of aliasTargets(node.initializer)) {
           aliasEdges.push({
@@ -721,9 +763,21 @@ export function scanRuleStateReads(
         nextChain[0] ??
         source;
       const conditional = isConditionallyReached(node);
-      const replacement = unwrap(node.right);
-      if (ts.isObjectLiteralExpression(replacement)) {
-        recordObjectLiteral(assignOwner, left, replacement, node.getStart(), conditional);
+      const replacements = objectLiteralTargets(node.right);
+      // A conditional may mix a literal with a name; when it can yield more
+      // than one value neither outcome is certain.
+      // Every branch counts, not only the ones this recognizes.
+      const valueCount = conditionalLeafCount(node.right);
+      for (const replacement of replacements) {
+        recordObjectLiteral(
+          assignOwner,
+          left,
+          replacement,
+          node.getStart(),
+          // Either literal may be the one the runtime took, and the name may
+          // still hold the container it replaced.
+          conditional || valueCount > 1
+        );
       }
       for (const target of aliasTargets(node.right)) {
         aliasEdges.push({
@@ -731,7 +785,7 @@ export function scanRuleStateReads(
           name: left,
           target,
           at: node.getStart(),
-          conditional,
+          conditional: conditional || valueCount > 1,
           chain: [...nextChain, source],
           node,
         });
@@ -942,12 +996,23 @@ export function scanRuleStateReads(
           declaredAs: binding.declaredAs,
           exposedAs: binding.exposedAs,
         });
+        // A branch may itself be a conditional, so its own alternatives are
+        // lifted here; `head.alternatives` would otherwise be overwritten by
+        // this key and `bare` would strip the rest's.
+        const seen = new Set([head.declaredAs]);
+        const alternatives: LocalStateBinding[] = [];
+        for (const candidate of [
+          ...(head.alternatives ?? []),
+          ...rest.flatMap((branch) => [bare(branch), ...(branch.alternatives ?? [])]),
+        ]) {
+          if (seen.has(candidate.declaredAs)) continue;
+          seen.add(candidate.declaredAs);
+          alternatives.push(bare(candidate));
+        }
         declare(scope, name.text, {
           ...head,
           exposedAs: exposureFor(name.text, scope) ?? head.exposedAs,
-          alternatives: rest
-            .map(bare)
-            .filter((candidate) => candidate.declaredAs !== head.declaredAs),
+          alternatives,
         });
         return;
       }
@@ -1042,7 +1107,16 @@ export function scanRuleStateReads(
     // the same scope chain means two blocks may each declare `TOKENS` without
     // either becoming ambiguous, which is what the extractor's scopes do.
     if (ts.isIdentifier(name)) {
-      declare(scope, name.text, { kind: 'token', initializer });
+      // A conditional whose branches are only partly recognized would otherwise
+      // read as if the recognized ones were all of them.
+      const recognized =
+        objectLiteralTargets(initializer).length + aliasTargets(initializer).length;
+      const partial = recognized > 0 && recognized < conditionalLeafCount(initializer);
+      declare(scope, name.text, {
+        kind: 'token',
+        initializer,
+        ...(partial ? { opaque: true } : {}),
+      });
     }
   };
 
@@ -1109,6 +1183,10 @@ export function scanRuleStateReads(
       }
       // `const controls = { ready: flag }` — production reads the container the
       // same way it reads an `asHook` bag, so this is not a blind spot.
+      // A container with an unresolvable branch is: certifying the members it
+      // does show would vouch for a set the runtime can step outside of.
+      const owner = ownerOf(argument);
+      if (owner && containerIsOpaque(owner, scope)) return null;
       const held = memberOfHandleObject(argument, scope);
       if (held.length === 0) return null;
       const reads = held.map((expression) => readState(expression, scope));
@@ -1163,7 +1241,11 @@ export function scanRuleStateReads(
         // A write through the container replaces what the declaration named.
         const written = binding.members?.get(key);
         if (written && written.length > 0) return written;
-        return containerMembers(binding.initializer, key, scope, new Set([...seen, value.text]));
+        const next = new Set([...seen, value.text]);
+        // A container that replaced another conditionally still answers for it.
+        return [binding.initializer, ...(binding.alternates ?? [])].flatMap((held) =>
+          containerMembers(held, key, scope, next)
+        );
       }
     }
     return [];
@@ -1214,6 +1296,25 @@ export function scanRuleStateReads(
       if (next.length > 0) return next;
     }
     return [{ scope: owner, name: value.text }];
+  };
+
+  /** Whether any container this base may name has an unresolvable branch. */
+  const containerIsOpaque = (node: ts.Node, scope: Scope, seen = new Set<string>()): boolean => {
+    const value = unwrap(node);
+    if (ts.isConditionalExpression(value)) {
+      return (
+        containerIsOpaque(value.whenTrue, scope, seen) ||
+        containerIsOpaque(value.whenFalse, scope, seen)
+      );
+    }
+    if (!ts.isIdentifier(value) || seen.has(value.text)) return false;
+    const binding = lookup(scope, value.text);
+    if (binding?.kind !== 'token') return false;
+    if (binding.opaque) return true;
+    const next = new Set([...seen, value.text]);
+    return [binding.initializer, ...(binding.alternates ?? [])].some((held) =>
+      containerIsOpaque(held, scope, next)
+    );
   };
 
   const memberOfHandleObject = (node: ts.Node, scope: Scope): ts.Expression[] => {
@@ -1789,9 +1890,13 @@ export function scanRuleStateReads(
               : [member];
           const members = new Map(container.members ?? []);
           for (const key of keys) {
-            // Before the first write the member still lives in the declaration.
+            // Before the first write the member still lives in the declaration —
+            // or in a container this one replaced but may not have.
             const previous =
-              container.members?.get(key) ?? containerMembers(container.initializer, key, current);
+              container.members?.get(key) ??
+              [container.initializer, ...(container.alternates ?? [])].flatMap((held) =>
+                containerMembers(held, key, current)
+              );
             members.set(key, [node.right, ...(uncertain ? previous : [])]);
           }
           declare(target.scope, target.name, { ...container, members });
@@ -1807,7 +1912,29 @@ export function scanRuleStateReads(
     ) {
       const name = node.left.text;
       const owner = scopeBinding(current, name) ?? current;
+      const replaced = owner.bindings.get(name);
       declareConditionally(owner, name, node.left, current, node.right);
+      const next = owner.bindings.get(name);
+      const uncertain =
+        isConditionallyReached(node) || isDeferredWrite(node, enclosingFunction(owner.node));
+      if (uncertain && replaced?.kind === 'token' && next?.kind === 'token') {
+        // Members written into the replaced container are candidates too; its
+        // initializer alone does not carry them.
+        const members = new Map(next.members ?? []);
+        for (const [key, held] of replaced.members ?? []) {
+          const kept = members.get(key) ?? containerMembers(next.initializer, key, current);
+          members.set(key, [...kept, ...held]);
+        }
+        declare(owner, name, {
+          ...next,
+          ...(members.size > 0 ? { members } : {}),
+          alternates: [
+            ...(next.alternates ?? []),
+            replaced.initializer,
+            ...(replaced.alternates ?? []),
+          ],
+        });
+      }
     }
 
     if (

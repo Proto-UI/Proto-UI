@@ -944,6 +944,190 @@ describe('lowered hook coverage', () => {
     }
   });
 
+  it('keeps the replaced container when the replacement may be skipped', () => {
+    const use = "(i) => i.feedback.style.use(tw('bg-accent'))";
+    const source = [
+      "const first = def.state.bool('firstFlag', false);",
+      "const second = def.state.bool('secondFlag', false);",
+      'let controls = { ready: first };',
+      'if (enabled) controls = { ready: second };',
+      "def.expose.state('visible', controls.ready);",
+      `def.rule({ when: (w) => w.state(controls.ready).eq(true), intent: ${use} });`,
+    ].join('\n');
+    const scan = scanRuleStateReads(source);
+
+    expect(scan.unresolved).toEqual([]);
+    expect(scan.exposedLocals.map((local) => local.attribute).sort()).toEqual([
+      'first-flag',
+      'second-flag',
+    ]);
+  });
+
+  it('reads both containers a conditional replacement may install', () => {
+    const use = "(i) => i.feedback.style.use(tw('bg-accent'))";
+    const source = [
+      "const first = def.state.bool('firstFlag', false);",
+      "const second = def.state.bool('secondFlag', false);",
+      "const third = def.state.bool('thirdFlag', false);",
+      'let controls = { ready: first };',
+      'controls = enabled ? { ready: second } : { ready: third };',
+      "def.expose.state('visible', controls.ready);",
+      `def.rule({ when: (w) => w.state(controls.ready).eq(true), intent: ${use} });`,
+    ].join('\n');
+    const scan = scanRuleStateReads(source);
+
+    expect(scan.unresolved).toEqual([]);
+    expect(scan.exposedLocals.map((local) => local.attribute).sort()).toEqual([
+      'second-flag',
+      'third-flag',
+    ]);
+  });
+
+  it('reaches every leaf of a nested conditional replacement', () => {
+    const use = "(i) => i.feedback.style.use(tw('bg-accent'))";
+    const source = [
+      "const first = def.state.bool('firstFlag', false);",
+      "const second = def.state.bool('secondFlag', false);",
+      "const third = def.state.bool('thirdFlag', false);",
+      'let controls = a ? (b ? { ready: first } : { ready: second }) : { ready: third };',
+      "def.expose.state('visible', controls.ready);",
+      `def.rule({ when: (w) => w.state(controls.ready).eq(true), intent: ${use} });`,
+    ].join('\n');
+    const scan = scanRuleStateReads(source);
+
+    expect(scan.unresolved).toEqual([]);
+    expect(scan.exposedLocals.map((local) => local.attribute).sort()).toEqual([
+      'first-flag',
+      'second-flag',
+      'third-flag',
+    ]);
+  });
+
+  it('keeps the literal branch of a mixed conditional replacement', () => {
+    const use = "(i) => i.feedback.style.use(tw('bg-accent'))";
+    const source = [
+      "const first = def.state.bool('firstFlag', false);",
+      "const second = def.state.bool('secondFlag', false);",
+      "const third = def.state.bool('thirdFlag', false);",
+      'const otherControls = { ready: third };',
+      'let controls = { ready: first };',
+      'controls = enabled ? { ready: second } : otherControls;',
+      "def.expose.state('visible', controls.ready);",
+      `def.rule({ when: (w) => w.state(controls.ready).eq(true), intent: ${use} });`,
+    ].join('\n');
+    const scan = scanRuleStateReads(source);
+
+    expect(scan.unresolved).toEqual([]);
+    expect(scan.exposedLocals.map((local) => local.attribute).sort()).toEqual([
+      'second-flag',
+      'third-flag',
+    ]);
+  });
+
+  it('records every candidate when a member write meets a skippable replacement', () => {
+    // Whichever order they are written in, the gate has to record the same set
+    // the extractor emits, or it certifies an incomplete one.
+    const use = "(i) => i.feedback.style.use(tw('bg-accent'))";
+    for (const [label, lines, expected] of [
+      [
+        'write after replace',
+        [
+          'let controls = { ready: first };',
+          'if (enabled) controls = { ready: second };',
+          'if (other) controls.ready = third;',
+        ],
+        ['first-flag', 'second-flag', 'third-flag'],
+      ],
+      [
+        'write before replace',
+        [
+          'let controls = { ready: first };',
+          'controls.ready = third;',
+          'if (enabled) controls = { ready: second };',
+        ],
+        ['second-flag', 'third-flag'],
+      ],
+    ] as const) {
+      const source = [
+        "const first = def.state.bool('firstFlag', false);",
+        "const second = def.state.bool('secondFlag', false);",
+        "const third = def.state.bool('thirdFlag', false);",
+        ...lines,
+        "def.expose.state('visible', controls.ready);",
+        `def.rule({ when: (w) => w.state(controls.ready).eq(true), intent: ${use} });`,
+      ].join('\n');
+      const scan = scanRuleStateReads(source);
+
+      expect(scan.unresolved, label).toEqual([]);
+      expect(scan.exposedLocals.map((local) => local.attribute).sort(), label).toEqual([
+        ...expected,
+      ]);
+    }
+  });
+
+  it('refuses to certify a container with an unresolvable branch', () => {
+    // `enabled ? { … } : makeControls()` can leave the member on a handle this
+    // never sees. Certifying the branch it does see would vouch for a set the
+    // runtime can step outside of, so the shape has to go unresolved instead.
+    const use = "(i) => i.feedback.style.use(tw('bg-accent'))";
+    const source = [
+      "const second = def.state.bool('secondFlag', false);",
+      "const third = def.state.bool('thirdFlag', false);",
+      'const makeControls = () => ({ ready: third });',
+      'let controls = { ready: second };',
+      'controls = enabled ? { ready: second } : makeControls();',
+      "def.expose.state('visible', controls.ready);",
+      `def.rule({ when: (w) => w.state(controls.ready).eq(true), intent: ${use} });`,
+    ].join('\n');
+    const scan = scanRuleStateReads(source);
+
+    expect(scan.exposedLocals).toEqual([]);
+    expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['subject']);
+  });
+
+  it('reports every leaf of a nested local-state conditional', () => {
+    // The gate is the oracle for the extractor, so a blind spot here would let
+    // a future extractor regression on this shape through unnoticed.
+    const use = "(i) => i.feedback.style.use(tw('bg-accent'))";
+    for (const [label, initializer] of [
+      ['nested on the left', 'a ? (b ? first : second) : third'],
+      ['nested on the right', 'a ? first : (b ? second : third)'],
+    ] as const) {
+      const source = [
+        "const first = def.state.bool('firstFlag', false);",
+        "const second = def.state.bool('secondFlag', false);",
+        "const third = def.state.bool('thirdFlag', false);",
+        `const current = ${initializer};`,
+        "def.expose.state('visible', current);",
+        `def.rule({ when: (w) => w.state(current).eq(true), intent: ${use} });`,
+      ].join('\n');
+      const scan = scanRuleStateReads(source);
+
+      expect(scan.unresolved, label).toEqual([]);
+      expect(scan.exposedLocals.map((local) => local.attribute).sort(), label).toEqual([
+        'first-flag',
+        'second-flag',
+        'third-flag',
+      ]);
+    }
+
+    // The ordinary two-branch merge is unchanged.
+    const flat = scanRuleStateReads(
+      [
+        "const first = def.state.bool('firstFlag', false);",
+        "const second = def.state.bool('secondFlag', false);",
+        'const current = a ? first : second;',
+        "def.expose.state('visible', current);",
+        `def.rule({ when: (w) => w.state(current).eq(true), intent: ${use} });`,
+      ].join('\n')
+    );
+    expect(flat.unresolved).toEqual([]);
+    expect(flat.exposedLocals.map((local) => local.attribute).sort()).toEqual([
+      'first-flag',
+      'second-flag',
+    ]);
+  });
+
   it('reports an exposed state whose declared name it cannot read', () => {
     // The extractor emits nothing for this, so certifying the expose key would
     // be the fail-closed mismatch this gate exists to prevent.

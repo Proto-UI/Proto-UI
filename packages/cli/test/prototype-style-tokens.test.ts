@@ -2312,4 +2312,163 @@ describe('collectProtoStyleTokens', () => {
       else expect(tokens, label).not.toContain('data-[first-flag]:bg-accent');
     }
   });
+  it('keeps the replaced container when the replacement may be skipped', async () => {
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        '',
+        'const widget = definePrototype({',
+        "  name: 'widget',",
+        '  setup(def) {',
+        "    const first = def.state.bool('firstFlag', false);",
+        "    const second = def.state.bool('secondFlag', false);",
+        '    let controls = { ready: first };',
+        '    if (enabled) controls = { ready: second };',
+        "    def.expose.state('visible', controls.ready);",
+        '    def.rule({',
+        '      when: (w) => w.state(controls.ready).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('bg-accent')),",
+        '    });',
+        '  },',
+        '});',
+        '',
+        'export default widget;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+    expect(tokens).toContain('data-[first-flag]:bg-accent');
+    expect(tokens).toContain('data-[second-flag]:bg-accent');
+  });
+
+  it('reads both containers a conditional replacement may install', async () => {
+    // The assignment itself always runs, so the replaced container is gone and
+    // only the two the conditional may install have variants.
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        '',
+        'const widget = definePrototype({',
+        "  name: 'widget',",
+        '  setup(def) {',
+        "    const first = def.state.bool('firstFlag', false);",
+        "    const second = def.state.bool('secondFlag', false);",
+        "    const third = def.state.bool('thirdFlag', false);",
+        '    let controls = { ready: first };',
+        '    controls = enabled ? { ready: second } : { ready: third };',
+        "    def.expose.state('visible', controls.ready);",
+        '    def.rule({',
+        '      when: (w) => w.state(controls.ready).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('bg-accent')),",
+        '    });',
+        '  },',
+        '});',
+        '',
+        'export default widget;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+    expect(tokens).toContain('data-[second-flag]:bg-accent');
+    expect(tokens).toContain('data-[third-flag]:bg-accent');
+    expect(tokens).not.toContain('data-[first-flag]:bg-accent');
+  });
+  it('reaches every leaf of a nested conditional replacement', async () => {
+    // A branch may itself be a conditional, so the candidates are the leaves
+    // the runtime can land on rather than the composites above them.
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        '',
+        'const widget = definePrototype({',
+        "  name: 'widget',",
+        '  setup(def) {',
+        "    const first = def.state.bool('firstFlag', false);",
+        "    const second = def.state.bool('secondFlag', false);",
+        "    const third = def.state.bool('thirdFlag', false);",
+        '    let controls = a ? (b ? { ready: first } : { ready: second }) : { ready: third };',
+        "    def.expose.state('visible', controls.ready);",
+        '    def.rule({',
+        '      when: (w) => w.state(controls.ready).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('bg-accent')),",
+        '    });',
+        '  },',
+        '});',
+        '',
+        'export default widget;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+    expect(tokens).toContain('data-[first-flag]:bg-accent');
+    expect(tokens).toContain('data-[second-flag]:bg-accent');
+    expect(tokens).toContain('data-[third-flag]:bg-accent');
+  });
+  it('keeps the literal branch of a mixed conditional replacement', async () => {
+    // `enabled ? { … } : otherControls` yields two values, so following the
+    // name edge alone abandons the table the literal branch was recorded under.
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        '',
+        'const widget = definePrototype({',
+        "  name: 'widget',",
+        '  setup(def) {',
+        "    const first = def.state.bool('firstFlag', false);",
+        "    const second = def.state.bool('secondFlag', false);",
+        "    const third = def.state.bool('thirdFlag', false);",
+        '    const otherControls = { ready: third };',
+        '    let controls = { ready: first };',
+        '    controls = enabled ? { ready: second } : otherControls;',
+        "    def.expose.state('visible', controls.ready);",
+        '    def.rule({',
+        '      when: (w) => w.state(controls.ready).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('bg-accent')),",
+        '    });',
+        '  },',
+        '});',
+        '',
+        'export default widget;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+    expect(tokens).toContain('data-[second-flag]:bg-accent');
+    expect(tokens).toContain('data-[third-flag]:bg-accent');
+  });
+  it('still emits what it can prove when a conditional branch is opaque', async () => {
+    // The extractor cannot see through `makeControls()`, so it emits the branch
+    // it can prove and the coverage gate refuses to certify the shape at all —
+    // that pairing is what keeps the unseen branch from shipping without CSS.
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        '',
+        'const widget = definePrototype({',
+        "  name: 'widget',",
+        '  setup(def) {',
+        "    const second = def.state.bool('secondFlag', false);",
+        "    const third = def.state.bool('thirdFlag', false);",
+        '    const makeControls = () => ({ ready: third });',
+        '    let controls = { ready: second };',
+        '    controls = enabled ? { ready: second } : makeControls();',
+        "    def.expose.state('visible', controls.ready);",
+        '    def.rule({',
+        '      when: (w) => w.state(controls.ready).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('bg-accent')),",
+        '    });',
+        '  },',
+        '});',
+        '',
+        'export default widget;',
+      ].join('\n')
+    );
+
+    expect(await collectProtoStyleTokens(dir)).toContain('data-[second-flag]:bg-accent');
+  });
 });

@@ -196,6 +196,13 @@ function isVarList(list) {
   );
 }
 
+/** Every runtime branch of a conditional, whether or not this recognizes it. */
+function conditionalLeafCount(node) {
+  const value = unwrapTransparent(node);
+  if (!ts.isConditionalExpression(value)) return 1;
+  return conditionalLeafCount(value.whenTrue) + conditionalLeafCount(value.whenFalse);
+}
+
 /** Every semantic a binding may stand for, the declared one first. */
 function bindingSemantics(binding) {
   if (!binding) return [];
@@ -213,7 +220,11 @@ function readMemberSemantics(node, scope) {
   const owner = memberOwner(node);
   const name = memberName(node);
   if (!owner || name === null) return [];
-  return memberSemantics(resolveExpression(owner, scope).semanticMap?.get(name));
+  const resolved = resolveExpression(owner, scope);
+  // A name that may be either of two objects answers for both, and a container
+  // that replaced another conditionally still answers for what it replaced.
+  const values = resolved.containers ?? [resolved];
+  return [...new Set(values.flatMap((value) => memberSemantics(value.semanticMap?.get(name))))];
 }
 
 /**
@@ -348,12 +359,17 @@ function walk(node, scope, tokens, exposures) {
     const kept = bindingSemantics(previous).filter((candidate) => candidate !== binding.semantic);
     const uncertain =
       isConditionallyReached(node) || isDeferredWrite(node, enclosingFunction(owner.node));
-    owner.bindings.set(
-      name,
-      uncertain && kept.length > 0
-        ? { ...binding, alternatives: [...new Set([...(binding.alternatives ?? []), ...kept])] }
-        : binding
-    );
+    let next = binding;
+    if (uncertain && kept.length > 0) {
+      next = { ...next, alternatives: [...new Set([...(next.alternatives ?? []), ...kept])] };
+    }
+    // Replacing a container keeps its members too: on the branch the source may
+    // not take, the name still holds the object it held before.
+    if (uncertain && previous && (previous.semanticMap || previous.containers)) {
+      const held = [...(next.containers ?? [next]), ...(previous.containers ?? [previous])];
+      next = { ...next, containers: [...new Set(held)] };
+    }
+    owner.bindings.set(name, next);
     return;
   }
 
@@ -623,7 +639,11 @@ function resolveBinding(node, scope) {
     }
     // Neither branch is a handle, but the name may still be either object, so
     // it carries both and a member write through it reaches both tables.
-    const containers = branches.filter((branch) => branch.semanticMap);
+    // Flattened, because a branch may itself be a conditional: the candidates
+    // are the leaves the runtime can land on, not the composites above them.
+    const containers = branches.flatMap(
+      (branch) => branch.containers ?? (branch.semanticMap ? [branch] : [])
+    );
     if (containers.length > 0) return { ...branches[0], containers };
   }
 
@@ -908,6 +928,19 @@ function collectExposures(root) {
   const objectMembers = new Map();
 
   /** Every member an object literal names, at the position it was written. */
+  /**
+   * Every object literal an initializer may yield. A conditional selects one at
+   * runtime, so both are recorded for the same reason `aliasTargets` fans out.
+   */
+  const objectLiteralTargets = (node) => {
+    const value = unwrapExpression(node);
+    if (ts.isObjectLiteralExpression(value)) return [value];
+    if (ts.isConditionalExpression(value)) {
+      return [...objectLiteralTargets(value.whenTrue), ...objectLiteralTargets(value.whenFalse)];
+    }
+    return [];
+  };
+
   const recordObjectLiteral = (owner, base, literal, at, conditional) => {
     for (const property of literal.properties) {
       if (ts.isShorthandPropertyAssignment(property)) {
@@ -937,12 +970,13 @@ function collectExposures(root) {
       if (visible.length === 0) return [name];
       const next = new Set([...seen, name]);
       // A base that may be either of two objects writes to both tables, and
-      // reads consult both; recording under the alias would reach neither.
-      return [
-        ...new Set(
-          visible.flatMap((edge) => containerRoots(edge.target, edge.chain ?? chain, edge.at, next))
-        ),
-      ];
+      // reads consult both; recording under the alias would reach neither. If
+      // every edge out of the name may not have been taken, the name's own
+      // table stays a candidate — a literal branch was recorded under it.
+      const roots = visible.flatMap((edge) =>
+        containerRoots(edge.target, edge.chain ?? chain, edge.at, next)
+      );
+      return [...new Set(visible.every((edge) => edge.conditional) ? [name, ...roots] : roots)];
     }
     return [name];
   };
@@ -1072,9 +1106,17 @@ function collectExposures(root) {
       if (node.initializer) {
         const literal = unwrapExpression(node.initializer);
         const conditional = isConditionallyReached(node);
-        if (ts.isObjectLiteralExpression(literal)) {
-          recordObjectLiteral(owner, node.name.text, literal, node.getStart(), conditional);
+        const literals = objectLiteralTargets(node.initializer);
+        for (const held of literals) {
+          recordObjectLiteral(
+            owner,
+            node.name.text,
+            held,
+            node.getStart(),
+            conditional || literals.length > 1
+          );
         }
+        void literal;
         for (const target of aliasTargets(node.initializer)) {
           aliasEdges.push({
             owner,
@@ -1166,9 +1208,22 @@ function collectExposures(root) {
         nextChain[0] ??
         root;
       const conditional = isConditionallyReached(node);
-      const replacement = unwrapExpression(node.right);
-      if (ts.isObjectLiteralExpression(replacement)) {
-        recordObjectLiteral(owner, node.left.text, replacement, node.getStart(), conditional);
+      const replacements = objectLiteralTargets(node.right);
+      // A conditional may mix a literal with a name; when it can yield more
+      // than one value neither outcome is certain.
+      // Every branch counts, not only the ones this recognizes: an
+      // unrecognized branch is still a value the name may end up holding.
+      const valueCount = conditionalLeafCount(node.right);
+      for (const replacement of replacements) {
+        recordObjectLiteral(
+          owner,
+          node.left.text,
+          replacement,
+          node.getStart(),
+          // Either literal may be the one the runtime took, and the name may
+          // still hold the container it replaced.
+          conditional || valueCount > 1
+        );
       }
       for (const target of aliasTargets(node.right)) {
         aliasEdges.push({
@@ -1176,7 +1231,7 @@ function collectExposures(root) {
           name: node.left.text,
           target,
           at: node.getStart(),
-          conditional,
+          conditional: conditional || valueCount > 1,
           chain: [...nextChain, root],
           node,
         });
