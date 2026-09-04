@@ -121,10 +121,8 @@ function attachImageTarget(
     // host, so an informative target keeps a name and a decorative target is
     // explicitly removed from the semantic tree via empty alt.
     img.alt = patch.a11yMode === 'decorative' ? '' : (patch.alternativeText ?? '');
-    if (patch.fit) {
-      fit = patch.fit;
-      img.style.objectFit = OBJECT_FIT[fit];
-    }
+    fit = patch.fit ?? 'contain';
+    img.style.objectFit = OBJECT_FIT[fit];
     if (requestToBegin) beginCompletion(requestToBegin);
   };
 

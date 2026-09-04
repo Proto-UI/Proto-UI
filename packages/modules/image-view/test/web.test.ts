@@ -161,11 +161,13 @@ describe('module-image-view Web host bridge', () => {
   it('clears a reused target when attaching an empty source', () => {
     const image = document.createElement('img');
     image.src = 'image:stale';
+    image.style.objectFit = 'cover';
     const lease = createWebImageViewHost(() => image).attach(
       createConnection({ source: '', loadingStatus: 'idle' })
     );
 
     expect(image.hasAttribute('src')).toBe(false);
+    expect(image.style.objectFit).toBe('contain');
     expect(lease.snapshot()).toEqual({ source: '', loadingStatus: 'idle', fit: 'contain' });
     lease.dispose();
   });
