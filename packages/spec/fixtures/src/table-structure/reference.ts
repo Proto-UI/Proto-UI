@@ -37,6 +37,7 @@ export type TableStructureDiagnosticCode =
   | 'missing-cell'
   | 'invalid-span'
   | 'row-span-out-of-range'
+  | 'column-range-out-of-range'
   | 'missing-header-key'
   | 'duplicate-header-key'
   | 'missing-cell-headers'
@@ -82,6 +83,11 @@ export type TableStructureSnapshot<Ref> = {
 type CellDimensions = {
   readonly rowSpan: number;
   readonly columnSpan: number;
+};
+
+type ColumnInterval = {
+  readonly start: number;
+  readonly end: number;
 };
 
 type PlacedCell<Ref> = {
@@ -131,9 +137,9 @@ export function projectTableStructure<Ref>(
       const rowSpan = cell.rowSpan ?? 1;
       const columnSpan = cell.columnSpan ?? 1;
       if (
-        !Number.isInteger(rowSpan) ||
+        !Number.isSafeInteger(rowSpan) ||
         rowSpan <= 0 ||
-        !Number.isInteger(columnSpan) ||
+        !Number.isSafeInteger(columnSpan) ||
         columnSpan <= 0
       ) {
         diagnostics.push({ code: 'invalid-span', ref: cell.ref });
@@ -144,7 +150,7 @@ export function projectTableStructure<Ref>(
     }
   }
 
-  const occupied = new Set<string>();
+  const occupied = new Map<number, ColumnInterval[]>();
   const placed: PlacedCell<Ref>[] = [];
   const rows: TableStructureRowSnapshot<Ref>[] = [];
   let columnCount = 0;
@@ -169,6 +175,10 @@ export function projectTableStructure<Ref>(
         size.rowSpan,
         size.columnSpan
       );
+      if (column === null) {
+        diagnostics.push({ code: 'column-range-out-of-range', ref: cell.ref, row });
+        continue;
+      }
       occupy(occupied, row, column, size.rowSpan, size.columnSpan);
       columnCursor = column + size.columnSpan;
       columnCount = Math.max(columnCount, columnCursor);
@@ -284,42 +294,59 @@ export function projectTableStructure<Ref>(
 }
 
 function firstAvailableColumn(
-  occupied: ReadonlySet<string>,
+  occupied: ReadonlyMap<number, readonly ColumnInterval[]>,
   row: number,
   start: number,
   rowSpan: number,
   columnSpan: number
-): number {
+): number | null {
   let column = start;
-  while (!rectangleIsFree(occupied, row, column, rowSpan, columnSpan)) column += 1;
-  return column;
-}
+  for (;;) {
+    const end = column + columnSpan;
+    if (!Number.isSafeInteger(end)) return null;
 
-function rectangleIsFree(
-  occupied: ReadonlySet<string>,
-  row: number,
-  column: number,
-  rowSpan: number,
-  columnSpan: number
-): boolean {
-  for (let rowOffset = 0; rowOffset < rowSpan; rowOffset += 1) {
-    for (let columnOffset = 0; columnOffset < columnSpan; columnOffset += 1) {
-      if (occupied.has(`${row + rowOffset}:${column + columnOffset}`)) return false;
+    let nextColumn = column;
+    for (let rowOffset = 0; rowOffset < rowSpan; rowOffset += 1) {
+      const intervals = occupied.get(row + rowOffset);
+      if (!intervals) continue;
+      for (const interval of intervals) {
+        if (interval.end <= column) continue;
+        if (interval.start >= end) break;
+        nextColumn = Math.max(nextColumn, interval.end);
+        break;
+      }
     }
+    if (nextColumn === column) return column;
+    column = nextColumn;
   }
-  return true;
 }
 
 function occupy(
-  occupied: Set<string>,
+  occupied: Map<number, ColumnInterval[]>,
   row: number,
   column: number,
   rowSpan: number,
   columnSpan: number
 ): void {
+  const end = column + columnSpan;
   for (let rowOffset = 0; rowOffset < rowSpan; rowOffset += 1) {
-    for (let columnOffset = 0; columnOffset < columnSpan; columnOffset += 1) {
-      occupied.add(`${row + rowOffset}:${column + columnOffset}`);
+    const rowIndex = row + rowOffset;
+    const intervals = occupied.get(rowIndex);
+    if (!intervals) {
+      occupied.set(rowIndex, [{ start: column, end }]);
+      continue;
     }
+
+    let insertion = 0;
+    while (insertion < intervals.length && intervals[insertion]!.end < column) insertion += 1;
+    let mergedStart = column;
+    let mergedEnd = end;
+    while (insertion < intervals.length && intervals[insertion]!.start <= mergedEnd) {
+      const current = intervals[insertion]!;
+      mergedStart = Math.min(mergedStart, current.start);
+      mergedEnd = Math.max(mergedEnd, current.end);
+      intervals.splice(insertion, 1);
+    }
+    intervals.splice(insertion, 0, { start: mergedStart, end: mergedEnd });
   }
 }

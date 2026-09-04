@@ -70,8 +70,8 @@ criteria:
           anchors: [C-ANATOMY-ORDER-0001-B, C-ANATOMY-ORDER-0001-C, C-ANATOMY-ORDER-0001-D]
   - id: C-TABLE-STRUCTURE-0001-PLACEMENT
     text:
-      zh-CN: Rows 使用 zero-based logical index；每个 HeaderCell/Cell 按同 Row order 放入第一个能容纳其 rectangle 且未被先前 span 占用的 column。rowSpan/columnSpan 必须是 positive integer，默认 1；rectangle 不得 overlap，也不得越过当前 Row count，column count 取有效占用的最大边界。
-      en: Rows use zero-based logical indices; each HeaderCell or Cell is placed in Row order at the first column whose rectangle fits without intersecting a previously occupied span. rowSpan and columnSpan must be positive integers defaulting to one; rectangles must not overlap or extend beyond the current Row count, and column count is the maximum valid occupied boundary.
+      zh-CN: Rows 使用 zero-based logical index；每个 HeaderCell/Cell 按同 Row order 放入第一个能容纳其 rectangle 且未被先前 span 占用的 column。rowSpan/columnSpan 必须是 positive safe integer，默认 1；rectangle 不得 overlap，也不得越过当前 Row count 或 safe coordinate boundary，column count 取有效占用的最大边界。Span magnitude 不得导致逐 column coordinate 的 materialization 或 iteration。
+      en: Rows use zero-based logical indices; each HeaderCell or Cell is placed in Row order at the first column whose rectangle fits without intersecting a previously occupied span. rowSpan and columnSpan must be positive safe integers defaulting to one; rectangles must not overlap or extend beyond the current Row count or safe coordinate boundary, and column count is the maximum valid occupied boundary. Span magnitude must not cause per-column-coordinate materialization or iteration.
   - id: C-TABLE-STRUCTURE-0001-HEADER-KEYS
     text:
       zh-CN: HeaderCell 必须声明 non-empty、same-domain unique protocol headerKey 与 headerKind=column|row；Cell 必须声明 non-empty ordered header-key set，HeaderCell 可以声明 upstream header keys。Keys 只用于 protocol match，不得直接投影为 host id。
@@ -95,8 +95,8 @@ criteria:
             [D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-A, D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-E]
   - id: C-TABLE-STRUCTURE-0001-DIAGNOSTICS
     text:
-      zh-CN: Invalid cardinality、empty Row、invalid span、missing/duplicate headerKey、duplicate key reference、missing/ambiguous target 与 out-of-range placement 必须产生 addressable structural diagnostic；实现不得猜 target、生成 fallback id、补 part 或把 invalid snapshot 表述为 valid table projection。
-      en: Invalid cardinality, empty Rows, invalid spans, missing or duplicate headerKeys, duplicate key references, missing or ambiguous targets, and out-of-range placement must produce addressable structural diagnostics; implementations must not guess targets, generate fallback IDs, synthesize parts, or present an invalid snapshot as a valid table projection.
+      zh-CN: Invalid cardinality、empty Row、invalid/unsafe span、missing/duplicate headerKey、duplicate key reference、missing/ambiguous target，以及越过 Row count 或 safe column-coordinate boundary 的 placement 必须产生 addressable structural diagnostic；实现不得猜 target、生成 fallback id、补 part 或把 invalid snapshot 表述为 valid table projection。
+      en: Invalid cardinality, empty Rows, invalid or unsafe spans, missing or duplicate headerKeys, duplicate key references, missing or ambiguous targets, and placements beyond the Row count or safe column-coordinate boundary must produce addressable structural diagnostics; implementations must not guess targets, generate fallback IDs, synthesize parts, or present an invalid snapshot as a valid table projection.
   - id: C-TABLE-STRUCTURE-0001-CHURN
     text:
       zh-CN: Insert、remove 与 reorder 必须从当前 actual parts 重算 topology、coordinates 与 relationships；暂时无效的 runtime structure 可以保持 mounted 并报告 invalid snapshot，但不得重写 authored content/header keys、制造 data mutation 或发出 sorting/selection/pagination signal。

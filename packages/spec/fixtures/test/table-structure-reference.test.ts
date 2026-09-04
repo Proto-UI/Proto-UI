@@ -152,6 +152,138 @@ describe('spec fixture: Table Structure reference projection', () => {
     expect(snapshot.columnCount).toBe(3);
   });
 
+  it('projects very large safe column spans without per-coordinate expansion', () => {
+    // T-TABLE-STRUCTURE-0001-CASE-TOPOLOGY
+    const header = ref('large-header');
+    const cell = ref('large-cell');
+
+    const snapshot = projectTableStructure({
+      root: ref('table'),
+      rows: [
+        {
+          ref: ref('row'),
+          cells: [
+            {
+              ref: header,
+              kind: 'headerCell',
+              headerKey: 'large',
+              headerKind: 'column',
+              columnSpan: 1_000_000_000,
+            },
+            { ref: cell, kind: 'cell', headers: ['large'] },
+          ],
+        },
+      ],
+    });
+
+    expect(snapshot.valid).toBe(true);
+    expect(snapshot.columnCount).toBe(1_000_000_001);
+    expect(snapshot.rows[0]?.cells[0]).toMatchObject({ column: 0, columnSpan: 1_000_000_000 });
+    expect(snapshot.rows[0]?.cells[1]).toMatchObject({
+      ref: cell,
+      column: 1_000_000_000,
+      columnHeaders: [header],
+    });
+    const unsafeSpan = projectTableStructure({
+      root: ref('unsafe-span-table'),
+      rows: [
+        {
+          ref: ref('row'),
+          cells: [
+            {
+              ref: ref('header'),
+              kind: 'headerCell',
+              headerKey: 'header',
+              headerKind: 'column',
+            },
+            {
+              ref: ref('unsafe-cell'),
+              kind: 'cell',
+              headers: ['header'],
+              columnSpan: Number.MAX_SAFE_INTEGER + 1,
+            },
+          ],
+        },
+      ],
+    });
+    expect(unsafeSpan.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['invalid-span']);
+
+    const coordinateOverflow = projectTableStructure({
+      root: ref('coordinate-overflow-table'),
+      rows: [
+        {
+          ref: ref('row'),
+          cells: [
+            {
+              ref: ref('header'),
+              kind: 'headerCell',
+              headerKey: 'header',
+              headerKind: 'column',
+              columnSpan: Number.MAX_SAFE_INTEGER,
+            },
+            { ref: ref('cell'), kind: 'cell', headers: ['header'] },
+          ],
+        },
+      ],
+    });
+    expect(coordinateOverflow.columnCount).toBe(Number.MAX_SAFE_INTEGER);
+    expect(coordinateOverflow.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      'column-range-out-of-range',
+    ]);
+  });
+
+  it('covers empty-domain cardinality and empty header-list diagnostics', () => {
+    // T-TABLE-STRUCTURE-0001-CASE-DIAGNOSTICS
+    const empty = projectTableStructure({ root: ref('empty-table'), rows: [] });
+    expect(empty.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      'missing-row',
+      'missing-header-cell',
+      'missing-cell',
+    ]);
+
+    const emptyHeaders = projectTableStructure({
+      root: ref('empty-headers-table'),
+      rows: [
+        {
+          ref: ref('row'),
+          cells: [
+            {
+              ref: ref('header'),
+              kind: 'headerCell',
+              headerKey: 'header',
+              headerKind: 'column',
+            },
+            { ref: ref('cell'), kind: 'cell', headers: [] },
+          ],
+        },
+      ],
+    });
+    expect(emptyHeaders.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      'missing-cell-headers',
+    ]);
+
+    const emptyReference = projectTableStructure({
+      root: ref('empty-reference-table'),
+      rows: [
+        {
+          ref: ref('row'),
+          cells: [
+            {
+              ref: ref('header'),
+              kind: 'headerCell',
+              headerKey: 'header',
+              headerKind: 'column',
+            },
+            { ref: ref('cell'), kind: 'cell', headers: [''] },
+          ],
+        },
+      ],
+    });
+    expect(emptyReference.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      'empty-header-reference',
+    ]);
+  });
+
   it('reports invalid spans and ambiguous or missing header relationships without guessing', () => {
     // T-TABLE-STRUCTURE-0001-CASE-DIAGNOSTICS
     const duplicateA = ref('duplicate-a');
