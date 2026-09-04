@@ -1,0 +1,41 @@
+id: T-BASE-INPUT-0001
+type: test
+title: Base Input single-line plain-text conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Verifies the Base Input authoring entries, physical input target, hints, normalized state, and boundary.
+cases:
+  - id: T-BASE-INPUT-0001-CASE-SURFACE
+    title: Root materializes one contentless native input with the accepted property surface
+    covers:
+      - P-BASE-INPUT-AUTHORING-ENTRIES
+      - P-BASE-INPUT-PHYSICAL-TARGET
+      - P-BASE-INPUT-NATIVE-PROPS
+      - P-BASE-INPUT-A11Y-AND-FOCUS
+      - P-BASE-INPUT-BOUNDARY
+    expectation: base-input-is-one-contentless-native-target-with-exact-props
+  - id: T-BASE-INPUT-0001-CASE-TYPES
+    title: State and event types preserve the single-line protocol boundary
+    covers: [P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME]
+    expectation: input-state-and-event-types-are-normalized
+implementations:
+  - id: prototypes-base-input-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/input.test.ts
+    required: true
+    consumesCases: [T-BASE-INPUT-0001-CASE-SURFACE, T-BASE-INPUT-0001-CASE-TYPES]
+    exercises: [P-BASE-INPUT]
+verifies:
+  prototypes: [P-BASE-INPUT]
+  contracts: [C-TEXT-CONTROL-0001]
+exercises:
+  prototypes: [P-BASE-INPUT]
+  modules: [M-TEXT-CONTROL-0001]
+sources:
+  - path: packages/prototypes/base/test/input.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added focused Base Input executable evidence for the accepted first slice.
+tags: [test, base, input, text-control]

@@ -110,6 +110,11 @@
       "import": "./dist/scroll-area/index.js",
       "default": "./dist/scroll-area/index.js"
     },
+    "./input": {
+      "types": "./dist/input/index.d.ts",
+      "import": "./dist/input/index.js",
+      "default": "./dist/input/index.js"
+    },
     "./textarea": {
       "types": "./dist/textarea/index.d.ts",
       "import": "./dist/textarea/index.js",

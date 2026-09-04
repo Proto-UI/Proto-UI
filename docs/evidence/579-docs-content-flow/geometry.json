@@ -1,0 +1,128 @@
+[
+  {
+    "browserVersion": "151.0.7922.174",
+    "frame": "before",
+    "url": "https://www.proto-ui.com/zh-cn/ui-libraries/shadcn/select/",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "file": "select-zh-1440-before.png",
+    "clip": {
+      "x": 344,
+      "y": 150,
+      "width": 704,
+      "height": 519.75
+    },
+    "paragraphToPreviewer": 0,
+    "previewerToHeading": 64,
+    "previewerHeaderToPanel": 0,
+    "contentFlowBoundaryCount": 0,
+    "overflow": 0
+  },
+  {
+    "browserVersion": "151.0.7922.174",
+    "frame": "before",
+    "url": "https://www.proto-ui.com/zh-cn/ui-libraries/shadcn/select/",
+    "viewport": {
+      "width": 390,
+      "height": 900
+    },
+    "file": "select-zh-390-before.png",
+    "clip": {
+      "x": 16,
+      "y": 170.5625,
+      "width": 358,
+      "height": 536.5
+    },
+    "paragraphToPreviewer": 0,
+    "previewerToHeading": 64,
+    "previewerHeaderToPanel": 0,
+    "contentFlowBoundaryCount": 0,
+    "overflow": 0
+  },
+  {
+    "browserVersion": "151.0.7922.174",
+    "frame": "before",
+    "url": "https://www.proto-ui.com/zh-cn/ui-libraries/shadcn/select/",
+    "viewport": {
+      "width": 320,
+      "height": 900
+    },
+    "file": "select-zh-320-before.png",
+    "clip": {
+      "x": 16,
+      "y": 170.5625,
+      "width": 288,
+      "height": 560.875
+    },
+    "paragraphToPreviewer": 0,
+    "previewerToHeading": 64,
+    "previewerHeaderToPanel": 0,
+    "contentFlowBoundaryCount": 0,
+    "overflow": 0
+  },
+  {
+    "browserVersion": "151.0.7922.174",
+    "frame": "after",
+    "url": "http://127.0.0.1:4327/zh-cn/ui-libraries/shadcn/select/",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "file": "select-zh-1440-after.png",
+    "clip": {
+      "x": 344,
+      "y": 150,
+      "width": 704,
+      "height": 535.75
+    },
+    "paragraphToPreviewer": 16,
+    "previewerToHeading": 64,
+    "previewerHeaderToPanel": 0,
+    "contentFlowBoundaryCount": 1,
+    "overflow": 0
+  },
+  {
+    "browserVersion": "151.0.7922.174",
+    "frame": "after",
+    "url": "http://127.0.0.1:4327/zh-cn/ui-libraries/shadcn/select/",
+    "viewport": {
+      "width": 390,
+      "height": 900
+    },
+    "file": "select-zh-390-after.png",
+    "clip": {
+      "x": 16,
+      "y": 170.5625,
+      "width": 358,
+      "height": 552.5
+    },
+    "paragraphToPreviewer": 16,
+    "previewerToHeading": 64,
+    "previewerHeaderToPanel": 0,
+    "contentFlowBoundaryCount": 1,
+    "overflow": 0
+  },
+  {
+    "browserVersion": "151.0.7922.174",
+    "frame": "after",
+    "url": "http://127.0.0.1:4327/zh-cn/ui-libraries/shadcn/select/",
+    "viewport": {
+      "width": 320,
+      "height": 900
+    },
+    "file": "select-zh-320-after.png",
+    "clip": {
+      "x": 16,
+      "y": 170.5625,
+      "width": 288,
+      "height": 576.875
+    },
+    "paragraphToPreviewer": 16,
+    "previewerToHeading": 64,
+    "previewerHeaderToPanel": 0,
+    "contentFlowBoundaryCount": 1,
+    "overflow": 0
+  }
+]

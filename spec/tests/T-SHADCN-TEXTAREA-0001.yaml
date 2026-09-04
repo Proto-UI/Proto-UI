@@ -3,7 +3,7 @@ type: test
 title: Shadcn Textarea Root delta protocol contract tests
 status: draft
 since: 0.3.0-alpha.0
-summary: Covers Textarea Root identity, Base inheritance, the single host-owned editor, state-driven presentation, the restated contentless renderer, and its slice boundary.
+summary: Covers Textarea Root identity, Base inheritance, the single host-owned editor, state-driven presentation, the restated contentless renderer, the intentional asChild omission, and its slice boundary.
 cases:
   - id: T-SHADCN-TEXTAREA-0001-CASE-EXPORTS
     title: Root is a direct unofficial projection reachable through exact package entries
@@ -31,6 +31,10 @@ cases:
     title: Projection stays contentless and adds no second editing surface
     covers: [P-SHADCN-TEXTAREA-CONTENTLESS, P-SHADCN-TEXTAREA-BOUNDARY]
     expectation: shadcn-textarea-drops-authored-children-and-declares-no-second-editor
+  - id: T-SHADCN-TEXTAREA-0001-CASE-AS-CHILD-OMISSION
+    title: Root omits asChild from public props and preserves the Base-owned editor
+    covers: [P-SHADCN-TEXTAREA-AS-CHILD-OMISSION]
+    expectation: shadcn-textarea-root-does-not-expose-or-emulate-as-child
   - id: T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE
     title: Focus, disabled, and dark rules reach the web style projection as conditional presentation
     covers: [P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES]
@@ -47,11 +51,12 @@ implementations:
         T-SHADCN-TEXTAREA-0001-CASE-EDITOR-OWNERSHIP,
         T-SHADCN-TEXTAREA-0001-CASE-SURFACE,
         T-SHADCN-TEXTAREA-0001-CASE-CONTENTLESS,
+        T-SHADCN-TEXTAREA-0001-CASE-AS-CHILD-OMISSION,
         T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE,
       ]
     exercises: &id001 [P-SHADCN-TEXTAREA, P-BASE-TEXTAREA]
     notes:
-      - Positive tests cover only the current Proto UI guarantee; asChild omission, auto-resize, aria-invalid presentation, and remaining parity gaps are bounded by the decision, declared surface, and centralized compatibility question.
+      - The asChild omission case checks both the exported props type and preservation of the single Base-owned editor; auto-resize, aria-invalid presentation, and remaining parity gaps stay bounded by the declared surface and centralized compatibility question.
       - The web-state case asserts Adapter lowering of the three condition-driven rules on the Web Component host, including the colorScheme rule. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited focus, disabled, and value state handles.
   - id: prototypes-shadcn-textarea-browser
     kind: runtime-test
@@ -70,3 +75,10 @@ verifies:
     - id: P-SHADCN-TEXTAREA
 exercises:
   prototypes: *id001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added draft Shadcn Textarea projection coverage.
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added mutation-sensitive public-type and runtime evidence for the intentional asChild omission.

@@ -6,6 +6,39 @@ import { resolve } from 'node:path';
 import { findProtoPackages } from './version-utils.mjs';
 
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org/';
+const BOOTSTRAP_VERSION = /^0\.0\.0-bootstrap(?:[.-]|$)/;
+
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function bootstrapReadinessViolation(metadata) {
+  if (!isRecord(metadata) || !isRecord(metadata['dist-tags']) || !isRecord(metadata.versions)) {
+    return 'registry metadata is missing dist-tags or versions';
+  }
+
+  const distTags = metadata['dist-tags'];
+  const versions = metadata.versions;
+  if (typeof distTags.bootstrap === 'string') return 'bootstrap dist-tag must be removed';
+
+  if (typeof distTags.next === 'string' && BOOTSTRAP_VERSION.test(distTags.next)) {
+    return `next must not point to bootstrap version ${distTags.next}`;
+  }
+
+  if (typeof distTags.latest === 'string' && BOOTSTRAP_VERSION.test(distTags.latest)) {
+    const latestMetadata = versions[distTags.latest];
+    const isSoleVersion = Object.keys(versions).length === 1;
+    const isDeprecated =
+      isRecord(latestMetadata) &&
+      typeof latestMetadata.deprecated === 'string' &&
+      latestMetadata.deprecated.trim().length > 0;
+    if (!isSoleVersion || !isDeprecated) {
+      return 'latest may retain bootstrap version only when it is the sole deprecated version';
+    }
+  }
+
+  return null;
+}
 
 export async function checkRegistryReadiness(
   packageNames,
@@ -26,7 +59,21 @@ export async function checkRegistryReadiness(
           headers: { accept: 'application/json' },
           signal: timeoutMs > 0 ? AbortSignal.timeout(timeoutMs) : undefined,
         });
-        if (response.status === 200) return { name, state: 'ready' };
+        if (response.status === 200) {
+          let metadata;
+          try {
+            metadata = await response.json();
+          } catch (error) {
+            return {
+              name,
+              state: 'error',
+              detail: `invalid registry metadata: ${error instanceof Error ? error.message : String(error)}`,
+            };
+          }
+          const violation = bootstrapReadinessViolation(metadata);
+          if (violation) return { name, state: 'error', detail: violation };
+          return { name, state: 'ready' };
+        }
         if (response.status === 404) return { name, state: 'missing' };
 
         const detail = (await response.text()).trim().replace(/\s+/g, ' ').slice(0, 240);

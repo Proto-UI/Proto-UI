@@ -1,0 +1,63 @@
+id: P-BASE-INPUT
+type: prototype
+title: Base Input owns a host-mediated single-line text-control protocol
+status: draft
+since: 0.3.0-alpha.0
+summary: Base Input is a contentless single-target protocol for single-line plain-text value ownership, normalized editing events, hints, accessibility, and physical focus.
+statement:
+  zh-CN: Base Input 通过 Text Control host boundary 拥有一个 single-line plain-text editor；当前 Web profile 使用一个原生 input[type=text]。它不拥有 form submission、validation、search command 或 arbitrary native input types。
+  en: Base Input owns one single-line plain-text editor through the Text Control host boundary; the current Web profile uses one native input[type=text]. It does not own form submission, validation, search commands, or arbitrary native input types.
+criteria:
+  - id: P-BASE-INPUT-AUTHORING-ENTRIES
+    text:
+      zh-CN: '`base-input-root` 与 `asInputRoot` 必须是同一 Root protocol 的 direct 与 authored-asHook entries，并复用同一冻结 single-line Text Control requirement。'
+      en: '`base-input-root` and `asInputRoot` must be the direct and authored-asHook entries of the same Root protocol and reuse one frozen single-line Text Control requirement.'
+  - id: P-BASE-INPUT-PHYSICAL-TARGET
+    text:
+      zh-CN: Root 必须声明 host-owned plain-text single-line requirement；每个实例只能 materialize 一个 input[type=text]，renderer 返回 null 且 authored children 不得成为第二 surface。
+      en: Root must declare a host-owned plain-text single-line requirement; each instance materializes one input[type=text], the renderer returns null, and authored children cannot become a second surface.
+  - id: P-BASE-INPUT-VALUE-OWNERSHIP
+    text:
+      zh-CN: value/defaultValue controlledness、CR/LF normalization、dirty uncontrolled value 与 controlled proposal 必须遵循 Text Control contract。
+      en: value/defaultValue controlledness, CR/LF normalization, dirty uncontrolled values, and controlled proposals must follow the Text Control contract.
+  - id: P-BASE-INPUT-EVENTS-AND-IME
+    text:
+      zh-CN: Root 必须发出 normalized valueChange、change 与 composition payload，并保留 composition candidate。
+      en: Root must emit normalized valueChange, change, and composition payloads while preserving composition candidates.
+  - id: P-BASE-INPUT-NATIVE-PROPS
+    text:
+      zh-CN: Root 必须 live-project placeholder、required、name、autoComplete、minLength、maxLength、inputMode 与 enterKeyHint 到同一个 physical input。
+      en: Root must live-project placeholder, required, name, autoComplete, minLength, maxLength, inputMode, and enterKeyHint to the same physical input.
+  - id: P-BASE-INPUT-A11Y-AND-FOCUS
+    text:
+      zh-CN: Physical target 保留 textbox semantics，投影 naming/description/disabled/readOnly，并提供 disabled-aware focusSelf/blurSelf。
+      en: The physical target retains textbox semantics, projects naming/description/disabled/readOnly, and provides disabled-aware focusSelf/blurSelf.
+  - id: P-BASE-INPUT-BOUNDARY
+    text:
+      zh-CN: Root 不得拥有 generic type、submit/search/send event、Form workflow、validation UI、selection API 或第二 physical editor；Enter 保持 host/Form-owned。
+      en: Root must not own generic type, submit/search/send events, Form workflow, validation UI, selection APIs, or a second physical editor; Enter remains host/Form-owned.
+sources:
+  - path: packages/prototypes/base/src/input/root.proto.ts
+  - path: packages/prototypes/base/src/input/types.ts
+dependsOn:
+  decisions:
+    - D-TEXT-CONTROL-PROJECTION-0001
+  contracts:
+    - C-TEXT-CONTROL-0001
+    - C-HOST-SURFACE-PROJECTION-0001
+    - C-AS-HOOK-0001
+    - C-PROPS-0001
+    - C-STATE-0001
+    - C-EXPOSE-STATE-0001
+    - C-A11Y-0001
+    - C-FOCUS-0001
+  modules:
+    - M-TEXT-CONTROL-0001
+verifies:
+  tests:
+    - T-BASE-INPUT-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged Base Input as the accepted single-line plain-text leaf protocol after Text Control Checkpoint B.
+tags: [prototype, base, input, text-control, native-control]

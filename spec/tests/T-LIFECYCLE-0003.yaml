@@ -61,6 +61,7 @@ implementations:
     path: packages/adapters/react/test/contract/lifecycle-events.v1.contract.test.ts
     required: true
     consumesCases:
+      - T-LIFECYCLE-0003-CASE-UPDATE-REVISION
       - T-LIFECYCLE-0003-CASE-ADAPTER-EVENT-TRACE
   - id: adapter-vue-lifecycle-events
     kind: adapter-test
@@ -68,6 +69,7 @@ implementations:
     path: packages/adapters/vue/test/contract/lifecycle-events.v1.contract.test.ts
     required: true
     consumesCases:
+      - T-LIFECYCLE-0003-CASE-UPDATE-REVISION
       - T-LIFECYCLE-0003-CASE-ADAPTER-EVENT-TRACE
   - id: adapter-vue2-lifecycle-events
     kind: adapter-test
@@ -82,6 +84,7 @@ implementations:
     path: packages/adapters/web-component/test/contract/lifecycle-events.v1.contract.test.ts
     required: true
     consumesCases:
+      - T-LIFECYCLE-0003-CASE-UPDATE-REVISION
       - T-LIFECYCLE-0003-CASE-ADAPTER-EVENT-TRACE
 verifies:
   contracts:
@@ -111,6 +114,9 @@ verifies:
       anchors:
         - A-WEB-COMPONENT-0001-H
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Bound the update-revision case to the React, Vue, and Web Component lifecycle-events tests, which already assert a shared epoch and revision.
   - version: 0.3.0-alpha.0
     change: implemented
     summary: Added structured lifecycle event evidence for the official Vue 2 Adapter.
