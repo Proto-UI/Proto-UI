@@ -78,3 +78,9 @@ Sibling summary: #590 clean review candidate (approval pending); #593 red CI + s
 
 - **PR #570** exact head `c03dc413` had non-author approval, green trusted CI/DCO, all six threads resolved, and an accepted package-local Code Block composition decision boundary. Live reconciliation found it squash-merged as `e814aebc`: https://github.com/Proto-UI/Proto-UI/commit/e814aebcd4fb020139db358d6ac8b0477d7b77e5
 - The per-object worker issued no merge mutation; its command was skipped before execution, then the external/concurrent merge was confirmed and not retried. Issue #517 remains OPEN for the separately governed implementation carrier.
+
+## 2026-09-05 — #517 owner + association audit
+
+- #517: sole owner `codex-517-codeblock` reconciled and reused (no duplicate); implementation complete, validation passing; pre-commit independent review in progress before the linked PR opens. No merge/approval until exact-head gates.
+- Association audit across all 12 open PRs: no un-associated PR found; several `Closes` carriers remain open because acceptance/threads/approval are not closure-qualified (#596/#612, #540/#611, #534/#384/#383/#380) or use accurate non-closing `advances`/`refs` (#613/#530, #593/#592, #581/#374, #578/#577, #563/#514, #553/#549, #551/#548, #509/#504).
+- No new parallel worker was launched: every residual stage is occupied or gated; only the existing #517 owner proceeds. Full per-object receipts in PROGRESS.md.
