@@ -439,3 +439,12 @@ Sibling dispositions (no GitHub write unless noted):
 - Action: evidence-backed no-op. No merge, review, comment, or duplicate reviewer request. Canonical integration was not entered because `MERGEABLE/CLEAN` is false.
 - Blocker: author must refresh the branch onto current main and resolve conflicts. The push will invalidate/dismiss the current exact-head approval; trusted CI and an independent approval must then be reacquired on the replacement head.
 - Human gates: `integration-decision`, `merge`. Linked Issue #594 remains OPEN until a reviewed repair merges and merged-main evidence exists. Recheck: yes, after a refreshed head.
+
+## PR #570 terminal reconciliation (2026-09-04)
+
+- URL: https://github.com/Proto-UI/Proto-UI/pull/570. Fresh per-object `pui-dev -> pui-orient -> pui-pr` chain completed; final live reconciliation at 2026-09-04T13:14:26.917Z.
+- Reviewed state before integration: OPEN, non-draft; author/viewer `cyjin-yl`; exact head `c03dc413a7e4503cc7c9e13a837e1610543ca420`; one added non-normative record only; trusted CI/DCO successful; six of six threads resolved; no active change request. Non-author `guangliang2019` exact-head APPROVED receipt: https://github.com/Proto-UI/Proto-UI/pull/570#pullrequestreview-5099156817. Canonical pre-merge digest: `2e19a9aea1dcde6fd3dbd97a75c2a25c220feb5dcd420628d1a7bc95a8d109d0`.
+- Semantic gate: the independent review explicitly accepted the package-local private Code Block composition packet and its App-owned boundaries; no reusable composition entity or implementation was silently admitted.
+- Terminal outcome: live GitHub shows exact head `c03dc413a7e4503cc7c9e13a837e1610543ca420` squash-merged on 2026-09-04T13:11:13Z by `cyjin-yl` as `e814aebcd4fb020139db358d6ac8b0477d7b77e5`, sole parent `b927d70b196bc42eee85b9f791c15a84db9697bc`. Receipt: https://github.com/Proto-UI/Proto-UI/commit/e814aebcd4fb020139db358d6ac8b0477d7b77e5
+- Idempotency: the object's worker merge command was skipped before execution; the merge occurred externally/concurrently and was confirmed through PR metadata, timeline, parent identity, and current main. No retry or duplicate write is due.
+- Linked Issue #517 remains OPEN. Human gate: the separately governed spec/test/implementation transition for the accepted private slice; publication/release/access/rules remain excluded. Recheck: yes, when an implementation carrier appears.

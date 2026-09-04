@@ -73,3 +73,8 @@ Sibling summary: #590 clean review candidate (approval pending); #593 red CI + s
 
 - **PR #595** (`ed147e84`) remains OPEN despite an independent exact-head approval and green trusted CI: its base is 89 commits behind live main and GitHub reports `CONFLICTING` / `DIRTY` / `rebaseable=false`. Fresh `pui-pr` inspection made no write; integration correctly stopped before `pui-integrate`.
 - Next gate: author refreshes onto current main, then replacement-head CI and non-author approval. Existing approval will be stale after the push. Issue #594 remains OPEN. No duplicate comment/reviewer request was posted.
+
+## 2026-09-04 — PR #570 terminal
+
+- **PR #570** exact head `c03dc413` had non-author approval, green trusted CI/DCO, all six threads resolved, and an accepted package-local Code Block composition decision boundary. Live reconciliation found it squash-merged as `e814aebc`: https://github.com/Proto-UI/Proto-UI/commit/e814aebcd4fb020139db358d6ac8b0477d7b77e5
+- The per-object worker issued no merge mutation; its command was skipped before execution, then the external/concurrent merge was confirmed and not retried. Issue #517 remains OPEN for the separately governed implementation carrier.
