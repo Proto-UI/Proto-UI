@@ -32,7 +32,7 @@ export function createWebA11yProjector(
   let lastTarget: HTMLElement | null = null;
   let lastSnapshot: A11ySemanticObjectSnapshot | null = null;
 
-  const project = (snapshot: A11ySemanticObjectSnapshot) => {
+  const project: A11yProjector = (snapshot: A11ySemanticObjectSnapshot) => {
     const nextTarget = getTarget();
     if (lastTarget && lastTarget !== nextTarget && lastSnapshot) {
       clearWebA11ySnapshot(lastTarget, lastSnapshot);
@@ -41,6 +41,12 @@ export function createWebA11yProjector(
     lastTarget = nextTarget;
     lastSnapshot = snapshot;
     if (nextTarget) applyWebA11ySnapshot(nextTarget, snapshot, previousSnapshot ?? undefined);
+  };
+
+  project.clear = () => {
+    if (lastTarget && lastSnapshot) clearWebA11ySnapshot(lastTarget, lastSnapshot);
+    lastTarget = null;
+    lastSnapshot = null;
   };
 
   subscribeTargetChange?.(() => {
@@ -116,9 +122,20 @@ export function applyWebA11ySnapshot(
     }
   }
 
-  if (typeof snapshot.level !== 'undefined') {
-    setOptionalAttr(el, 'aria-level', String(snapshot.level));
-  } else if (typeof previousSnapshot?.level !== 'undefined') {
+  const level =
+    snapshot.role === 'heading' &&
+    typeof snapshot.level === 'number' &&
+    Number.isInteger(snapshot.level) &&
+    snapshot.level >= 1 &&
+    snapshot.level <= 6
+      ? snapshot.level
+      : undefined;
+  if (typeof level !== 'undefined') {
+    setOptionalAttr(el, 'aria-level', String(level));
+  } else if (
+    typeof snapshot.level !== 'undefined' ||
+    typeof previousSnapshot?.level !== 'undefined'
+  ) {
     el.removeAttribute('aria-level');
   }
 

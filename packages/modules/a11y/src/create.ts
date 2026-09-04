@@ -32,6 +32,7 @@ class A11yModuleImpl extends ModuleBase {
   private levelWatchOff: Unsubscribe | null = null;
   private levelWatchInstalled = false;
   private levelWatchHandle: State<number> | null = null;
+  private projectionActive = false;
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
@@ -138,10 +139,18 @@ class A11yModuleImpl extends ModuleBase {
 
   /** Remove view-scoped projection subscriptions; keep instance-scoped level observation. */
   private disposeViews(): void {
+    this.clearProjection();
     while (this.stateWatchOffs.length) {
       this.stateWatchOffs.pop()?.();
     }
     this.stateWatchesInstalled = false;
+  }
+
+  private clearProjection(): void {
+    if (!this.projectionActive) return;
+    this.projectionActive = false;
+    if (!this.caps.has(A11Y_PROJECT_CAP)) return;
+    this.caps.get(A11Y_PROJECT_CAP).clear?.();
   }
   dispose(): void {
     this.disposeViews();
@@ -286,6 +295,7 @@ class A11yModuleImpl extends ModuleBase {
     if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
     if (!this.caps.has(A11Y_PROJECT_CAP)) return;
     this.caps.get(A11Y_PROJECT_CAP)(this.getSnapshot());
+    this.projectionActive = true;
   }
 }
 

@@ -14,6 +14,7 @@ import { createRuntimeSession, executeWithHost, type RuntimeHost } from '../../s
 function createHost(initialRaw: Record<string, unknown> = {}) {
   let raw = { ...initialRaw };
   const snapshots: A11ySemanticObjectSnapshot[] = [];
+  const projectionEvents: string[] = [];
 
   const host: RuntimeHost<any> = {
     prototypeName: 'x-a11y-contract',
@@ -28,9 +29,16 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
       wiring.attach('a11y', [
         [
           A11Y_PROJECT_CAP,
-          (snapshot: A11ySemanticObjectSnapshot) => {
-            snapshots.push(snapshot);
-          },
+          Object.assign(
+            (snapshot: A11ySemanticObjectSnapshot) => {
+              snapshots.push(snapshot);
+            },
+            {
+              clear() {
+                projectionEvents.push('clear');
+              },
+            }
+          ),
         ],
       ]);
     },
@@ -39,6 +47,7 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
   return {
     host,
     snapshots,
+    projectionEvents,
     applyRaw(nextRaw: Record<string, unknown>) {
       raw = { ...nextRaw };
     },
@@ -263,6 +272,7 @@ describe('runtime contract: a11y (v0)', () => {
     expect(ctx.snapshots.at(-1)?.level).toBe(2);
 
     await session.unmount();
+    expect(ctx.projectionEvents).toEqual(['clear']);
     expect(session.mountPhase).toBe('detached');
     ctx.snapshots.length = 0;
     session.invokeInCallbackScope(() => level.set(0, 'reason: detached invalid heading level'));

@@ -61,9 +61,35 @@ describe('module-a11y web projector', () => {
       actions: {},
       relations: {},
       tree: undefined,
-      level: undefined,
+      level: 2,
     });
     expect(second.getAttribute('role')).toBe('button');
     expect(second.hasAttribute('aria-level')).toBe(false);
+
+    project({
+      role: 'heading',
+      id: undefined,
+      name: undefined,
+      description: undefined,
+      states: {},
+      actions: {},
+      relations: {},
+      tree: undefined,
+      level: 0,
+    });
+    expect(second.hasAttribute('aria-level')).toBe(false);
+
+    project({
+      role: 'heading',
+      id: undefined,
+      name: undefined,
+      description: undefined,
+      states: {},
+      actions: {},
+      relations: {},
+      tree: undefined,
+      level: 4,
+    });
+    expect(second.getAttribute('aria-level')).toBe('4');
   });
 });
