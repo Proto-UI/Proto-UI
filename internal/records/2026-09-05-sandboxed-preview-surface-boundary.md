@@ -108,8 +108,8 @@ Equivalent non-Web hosts must prove their own no-execution, origin/process, netw
 Names below illustrate a proposal; they are not admitted API.
 
 - Immutable requirement: stable opaque `surfaceId`, `source: { artifactId, revision }`, `trust: trusted-static`, and exact policy profile ID. Source/profile change retires the connection; none is mutable patch data.
-- Mutable patch/status: policy revision plus App loading/error status. Policy change uses a Module-allocated generation and fail-closed replacement; status-only change retains generation.
-- Host facts: discriminated attachment/preparing/ready/error/unavailable state; applied policy; Module generation; verified origin/storage/execution/network/navigation/permission/message/focus/A11y support; bounded reasons. Focus and naming remain system domains.
+- Mutable Host policy: policy revision only. A policy change uses a Module-allocated generation and fail-closed replacement. App loading/error status remains Module/composition state and never rides an asynchronous Host policy request.
+- Host facts: discriminated preparing/ready/runtime-error/unavailable state; applied policy; Module generation; verified origin/storage/execution/network/navigation/permission/message/focus/A11y support; bounded reasons. Focus/naming/App status remain their owners.
 - Content title and URL remain host/content-local. Chrome uses an App-owned artifact label. Content-controlled strings do not become portable status or accessible name.
 - No application-message request/result exists in option B.
 
@@ -155,10 +155,15 @@ type PreviewUnavailableReason =
   | 'message-channel-present'
   | 'focus-path-unverified'
   | 'accessibility-unavailable'
+  | 'content-load-failed'
   | 'host-crashed';
 
 type PreviewPrePolicyFailure = 'policy-unavailable' | 'preparation-crashed';
-type PreviewAppliedFailure = Exclude<PreviewUnavailableReason, PreviewPrePolicyFailure>;
+type PreviewRuntimeError = 'content-load-failed' | 'host-crashed';
+type PreviewAppliedUnavailable = Exclude<
+  PreviewUnavailableReason,
+  PreviewPrePolicyFailure | PreviewRuntimeError
+>;
 
 type PreviewSupport = Readonly<{
   origin: 'unique-isolated' | 'unverified';
@@ -173,9 +178,8 @@ type PreviewSupport = Readonly<{
   reasons: readonly PreviewUnavailableReason[];
 }>;
 
-type PreviewPatch = Readonly<{
+type PreviewPolicyPatch = Readonly<{
   policyRevision: number;
-  appStatus: 'idle' | 'loading' | 'ready' | 'error';
 }>;
 
 type PreviewFacts =
@@ -193,11 +197,18 @@ type PreviewFacts =
       reason: PreviewPrePolicyFailure;
     }>
   | Readonly<{
-      attachment: 'error' | 'unavailable';
+      attachment: 'unavailable';
       appliedPolicyRevision: number;
       generation: number;
       support: PreviewSupport;
-      reason: PreviewAppliedFailure;
+      reason: PreviewAppliedUnavailable;
+    }>
+  | Readonly<{
+      attachment: 'error';
+      appliedPolicyRevision: number;
+      generation: number;
+      support: PreviewSupport;
+      reason: PreviewRuntimeError;
     }>
   | Readonly<{
       attachment: 'ready';
@@ -228,7 +239,7 @@ type PreviewReloadResult =
       outcome: 'rejected';
       currentGeneration: number;
       appliedPolicyRevision: number | null;
-      reason: 'stale-generation' | 'stale-policy' | 'unavailable';
+      reason: 'stale-generation' | 'stale-policy' | 'transition-pending' | 'unavailable';
     }>;
 
 type PreviewPolicyResult =
@@ -244,7 +255,7 @@ type PreviewPolicyResult =
       outcome: 'rejected';
       currentGeneration: number;
       currentPolicyRevision: number | null;
-      reason: 'stale-generation' | 'regressing-policy' | 'unavailable';
+      reason: 'stale-generation' | 'regressing-policy' | 'transition-pending' | 'unavailable';
     }>;
 
 type PreviewConnection = Readonly<{
@@ -252,7 +263,7 @@ type PreviewConnection = Readonly<{
   connectionId: string;
   generation: number;
   requirement: PreviewRequirement;
-  patch: PreviewPatch;
+  policy: PreviewPolicyPatch;
   onFacts(connectionId: string, facts: PreviewFacts): void;
   onNavigation(connectionId: string, result: PreviewNavigationResult): void;
   onReloadResult(connectionId: string, result: PreviewReloadResult): void;
@@ -260,18 +271,12 @@ type PreviewConnection = Readonly<{
 }>;
 
 type PreviewLease = Readonly<{
-  updateStatus(
-    update: Readonly<{
-      generation: number;
-      appStatus: PreviewPatch['appStatus'];
-    }>
-  ): void;
   requestPolicyChange(
     request: Readonly<{
       requestId: string;
       expectedGeneration: number;
       nextGeneration: number;
-      patch: PreviewPatch;
+      policy: PreviewPolicyPatch;
     }>
   ): void;
   requestReload(
@@ -291,46 +296,48 @@ type PreviewHost = Readonly<{
 }>;
 ```
 
-The immutable requirement, mutable patch, facts, requests, and results contain no functions outside the internal connection, raw content/URL, execution value, host target, or message channel. A fake host is injected with private artifact and policy resolvers.
+The immutable requirement, Host policy, facts, requests, and results contain no raw content/URL, App status, execution value, host target, or message channel. A fake host receives private artifact/policy resolvers; the Module separately owns App status and one pending-transition reservation.
 
 ### Transition table
 
 | Current | Input | Required transition/result |
 | --- | --- | --- |
-| detached | attach valid immutable source/profile requirement | Module issues connection/generation; host reports `preparing` with null applied policy before content work. |
-| preparing | origin/storage isolation and every other support field verified, controlled content committed | `ready` with numeric policy for current artifact; iframe `load` alone cannot cause this. |
-| preparing | policy lookup or preparation fails before policy application | `unavailable` with null policy and pre-policy reason; no fabricated revision. |
-| preparing | source is not static (anchors, refresh, forms, nested contexts) | numeric-policy `static-validation-failed`; no content or fragment result. |
-| preparing | any positive support proof is unverified | numeric-policy `unavailable` with exact reason; no content. |
-| preparing/ready | resolver/renderer failure after policy application | numeric-policy `error`; revoke target content and show fallback. |
-| ready | observable descendant/top/popup/external/download attempt | block/report bounded kind, stay ready; raw URL stays in audit. |
-| ready | status-only update on current generation | update App status only; retain content, policy, generation. |
-| ready | policy revision change | Module allocates `nextGeneration`; Host accepts/rejects request. On accept revoke old content first, report result, enter `preparing`, then verify the new policy before ready. |
-| ready | reload with matching expected generation/policy and Module-provided next generation | Echo accepted old/new generation, revoke old resources, enter `preparing`. |
-| ready | stale/unavailable policy/reload request | Emit correlated rejection; no state/resource change. |
-| any live state | source/trust/profile replacement | Retire connection/lease and attach new immutable requirement; no mutable identity update. |
-| any live state | old callback/result | Ignore by retired connection, Module generation, or policy. |
-| any live state | host crash | Null revision before policy; numeric after policy; no privilege change. |
-| any live state | detach/dispose | Revoke target/hooks/resources/Focus/A11y mapping; no later delivery. |
+| detached | attach valid immutable source/profile requirement | Module issues connection/generation; host reports `preparing` with null policy before work. |
+| preparing | origin/storage isolation and every support field verified, controlled content committed | `ready` with numeric policy; iframe `load` alone is insufficient. |
+| preparing | policy lookup/preparation fails before application | null-policy `unavailable` with pre-policy reason. |
+| preparing | source not static | numeric-policy `unavailable` with `static-validation-failed`. |
+| preparing | another support proof unverified | numeric-policy `unavailable` with matching support reason. |
+| preparing/ready | content resolver/renderer fails after policy application | numeric-policy `error` with `content-load-failed`/`host-crashed`; never `unavailable`. |
+| ready | observable navigation attempt | block/report, stay ready; raw URL audit-local. |
+| any | App status-only change | Update Module/composition only; no Host request, generation, policy, or content change. |
+| ready | first policy/reload request for generation | Module atomically reserves generation, allocates unique next generation, then calls Host. |
+| ready | competing policy/reload while reservation pending | Module rejects `transition-pending` without calling Host. |
+| ready | accepted policy change | Revoke content, report result, enter preparing, verify new policy before ready. |
+| ready | accepted reload | Echo Module old/new generation, revoke resources, enter preparing. |
+| ready | stale/unavailable request | Correlated rejection; no state/resource change. |
+| any | source/trust/profile replacement | Retire connection/lease and attach new immutable requirement. |
+| any | result/connection disposal | Release pending reservation; old callbacks ignored. |
+| any | host crash | Null revision before policy, numeric runtime error after policy; no privilege change. |
+| any | detach/dispose | Revoke target/hooks/resources/Focus/A11y mapping; no delivery. |
 
 ### Fake-host exercise
 
-1. attach immutable `surface-3` / `artifact-7@r4` at Module generation 1, policy 2; preparing/null policy precedes work;
-2. fail policy lookup/preparation before application; null policy and exact pre-policy reason, zero attachment;
-3. reject navigation-producing content before attach as numeric-policy static validation failure;
-4. fail origin/storage/execution/network/navigation/permission/message/focus/A11y proofs independently; exact reason, zero attachment;
-5. resolve content; ready only after every positive proof and controlled commit, never iframe load alone;
-6. observable navigation kinds block once; raw destinations never cross;
-7. no message listener/IPC/port/content action path exists;
-8. status-only update retains generation/content;
-9. Module allocates generation 2 for policy 3; stale/regressing request rejects, current request accepts, revokes old target, enters preparing, and cannot stay ready under policy 2;
-10. Module allocates generation 3 for reload; accepted result echoes 2 -> 3, stale request rejects, old object URL revokes before preparation;
-11. source/profile replacement retires connection/new requirement; colliding host counters cannot mint or revive Module generation;
-12. A11y naming plus composition Enter/Leave around no-tabbable static content; no focus/name facts in Preview;
-13. dispose then emit completion/crash/navigation/reload/policy result/focus/message; zero callbacks/resources/actions;
-14. prove no raw HTML/URI/policy mechanics/host object/message/executable value crosses.
+1. attach immutable surface/artifact at Module generation 1 and policy 2; preparing/null policy precedes work;
+2. fail pre-policy lookup/preparation; null-policy unavailable;
+3. reject navigation-producing content as applied unavailable, never runtime error;
+4. fail each positive support proof as applied unavailable with exact reason;
+5. after all proof, force content load failure and host crash; both produce `error`, never `unavailable`; then commit successfully to ready;
+6. block observable navigation; no raw destination crosses;
+7. prove no message/IPC/content action path;
+8. change App status during ready and pending policy; only Module/composition changes—accepted policy cannot roll it back because Host carries no App status;
+9. reserve generation 1 for policy->2, then issue competing reload/policy; reject both `transition-pending` without Host calls; accepted result releases reservation;
+10. reserve generation 2 for reload->3; result echoes Module generations; stale rejects; disposal releases reservation;
+11. source/profile replacement retires connection; host counters cannot mint generations;
+12. A11y + composition Enter/Leave; no Preview focus/name;
+13. dispose then emit all callbacks; zero effects;
+14. prove no raw content/policy mechanics/host object/message/executable value crosses.
 
-This fake evidence proves positive isolation support, Module generation ownership, policy fail-closed transition, correlated policy/reload results, immutable identity, and lifecycle shape only. Real host enforcement remains unproved.
+This fake evidence proves failure discrimination, one pending generation transition, Host-free App status, positive isolation support, Module generation ownership, correlated results, immutable identity, and lifecycle shape only.
 
 ## Focus, accessibility, layout, and lifecycle
 
@@ -341,7 +348,7 @@ This fake evidence proves positive isolation support, Module generation ownershi
 - Status/error/unavailable is exposed through ordinary composition and bounded App announcements. Inner document mutations do not drive a Proto UI live region.
 - Parent-controlled viewport dimensions and responsive containment are host presentation. Inner scroll remains embedded-document/browser behavior and is not projected as `C-SCROLL-0001` facts. No child size or raw geometry enters portable state.
 - Zoom/reflow, high contrast, reduced motion, color scheme, and accessible static markup are artifact/engine responsibilities. The fixed profile rejects active animation that the trusted artifact pipeline cannot bound. Proto UI owns only accessible/reflowing chrome and explicit degradation.
-- One stable surface may receive multiple Module-issued generations/connections. Source/trust/profile replacement retires the connection; policy revision change allocates a new generation and revokes ready content before re-verification; status-only update retains generation.
+- One stable surface may receive multiple Module generations/connections. The Module atomically reserves at most one policy/reload transition per current generation; source/profile replacement retires connection, accepted policy/reload revokes ready content before preparation, and App status remains outside Host policy.
 - Disposal removes target listeners/observers, navigation/new-window/permission hooks, Focus/A11y target bindings, resource/custom-protocol leases, object URLs, renderer subscriptions, and target/controller references. Option B has no message listener to remove.
 - Disposing the Preview lease does not delete the artifact or revoke App authorization globally; those are App lifetimes. It revokes only the host resources it owns.
 
@@ -380,16 +387,17 @@ No new Adapter identity is justified: existing profiles receive relations only a
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** reject raw content/URI/CSP/sandbox tokens/callback/iframe/webview/message/DOM/object URL/permission/controller/navigation/label and immutable identity in mutable updates.
-2. **Policy negotiation:** origin/storage isolation plus execution/network/navigation/permissions denial, message absence, focus, and A11y are explicit; any unverified field fails closed with correct pre/applied revision.
+1. **Portable negatives:** reject raw content/URI/CSP/sandbox tokens/callback/iframe/webview/message/DOM/object URL/permission/controller/navigation/label/App status and immutable identity in Host policy.
+2. **Policy/failure negotiation:** positive isolation/support fields; pre-policy null unavailable, applied unsupported unavailable, runtime content/crash error; no branch ambiguity or weak fallback.
 3. **Static validation/state:** reject active/navigation content; preparing precedes work; controlled commit causes ready; source/profile reattaches; stale callbacks reject.
-4. **Generation/policy/reload:** Module allocates every next generation; status-only retains it; policy change/reload uses correlated accepted/rejected result and revokes ready content before fail-closed preparation.
-5. **Observable navigation/actions:** host-observable attempts block; raw URL stays security-local; content cannot invoke App actions.
-6. **No bridge:** no message listener/port/preload/IPC/content-to-App path.
-7. **Focus/A11y:** A11y naming; composition Enter/Leave; no tabbable descendants; real browser proves native Tab order; no focus/name facts.
-8. **Real Web security:** a controlled adversarial fixture attempts script, parent DOM access, subresource network, form, navigation, popup, download, permissions, storage, and messaging; every denied capability is observed at the host boundary without unsafe real side effects.
-9. **Real Web accessibility/layout:** frame label and static document semantics, keyboard entry/exit, fallback/error announcement, 320px/390px/desktop, zoom/reflow, high contrast, reduced motion, target replacement, and cleanup.
-10. **Non-Web:** independent Electron/native profile proves process/origin isolation, Node/API denial, permissions, navigation/new-window/external-open, no IPC, accessibility, focus, crash, and cleanup before multi-host language.
+4. **Generation serialization:** Module allocates/reserves one pending policy/reload per generation; competing request rejects before Host; result/disposal releases; accepted result revokes ready content before preparation.
+5. **Status ownership:** App status updates only Module/composition, including while policy pending; Host request/result cannot roll it back.
+6. **Observable navigation/actions:** host-observable attempts block; raw URL stays security-local; content cannot invoke App actions.
+7. **No bridge:** no message listener/port/preload/IPC/content-to-App path.
+8. **Focus/A11y:** A11y naming; composition Enter/Leave; no tabbable descendants; browser proves native Tab; no focus/name facts.
+9. **Real Web security:** a controlled adversarial fixture attempts script, parent DOM access, subresource network, form, navigation, popup, download, permissions, storage, and messaging; every denied capability is observed at the host boundary without unsafe real side effects.
+10. **Real Web accessibility/layout:** frame label and static document semantics, keyboard entry/exit, fallback/error announcement, 320px/390px/desktop, zoom/reflow, high contrast, reduced motion, target replacement, and cleanup.
+11. **Non-Web:** independent Electron/native profile proves process/origin isolation, Node/API denial, permissions, navigation/new-window/external-open, no IPC, accessibility, focus, crash, and cleanup before multi-host language.
 
 ## #513/#514 matrix consumption
 
