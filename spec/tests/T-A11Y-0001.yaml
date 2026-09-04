@@ -69,12 +69,13 @@ cases:
       - HC-A11Y-0001-B
     expectation: web-a11y-live-atomic-busy-projection
   - id: T-A11Y-0001-CASE-HEADING-LEVEL
-    title: Portable heading levels accept 1-6, reject invalid values, stay coherent with heading role, and project through Web adapters
+    title: Portable heading levels separate setup rejection from runtime omission and remain coherent across Web projection lifecycles
     covers:
       - C-A11Y-0001-LEVEL
       - HC-A11Y-0001-A
       - HC-A11Y-0001-B
-    expectation: portable-heading-level-validation-role-coherence-and-web-projection
+      - HC-A11Y-0001-C
+    expectation: portable-heading-level-setup-validation-runtime-omission-recovery-role-and-target-cleanup
 implementations:
   - id: runtime-a11y-contract
     kind: runtime-test
@@ -131,6 +132,15 @@ implementations:
       - T-A11Y-0001-CASE-HEADING-LEVEL
     exercises:
       - HC-A11Y-0001
+  - id: vue2-a11y-heading-level-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/a11y-heading-level.integration.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
 verifies:
   contracts:
     - id: C-A11Y-0001
@@ -158,6 +168,7 @@ verifies:
       anchors:
         - HC-A11Y-0001-A
         - HC-A11Y-0001-B
+        - HC-A11Y-0001-C
 revisions:
   - version: 0.1.0
     change: introduced
@@ -173,7 +184,7 @@ revisions:
     summary: Added additive relation ownership, dynamic semantic tree projection, optional Web state omission, and live/atomic/busy Web projection coverage.
   - version: 0.3.0-alpha.0
     change: refined
-    summary: Added executable runtime and Web coverage for portable heading-level validation and aria-level projection.
+    summary: Added executable Runtime, shared Web projector, Web Component, React, Vue 3, and Vue 2 coverage for setup/final-setup validation, State-owned runtime omission and recovery, role gating, rematerialization, observed-source non-mutation, and stale aria-level cleanup.
 tags:
   - a11y
   - accessibility

@@ -22,6 +22,21 @@ describe('module-a11y web projector', () => {
     expect(first.getAttribute('role')).toBe('heading');
     expect(first.getAttribute('aria-level')).toBe('2');
 
+    target = null;
+    project({
+      role: 'heading',
+      id: undefined,
+      name: undefined,
+      description: undefined,
+      states: {},
+      actions: {},
+      relations: {},
+      tree: undefined,
+      level: 4,
+    });
+    expect(first.hasAttribute('role')).toBe(false);
+    expect(first.hasAttribute('aria-level')).toBe(false);
+
     target = second;
     project({
       role: 'heading',
@@ -34,7 +49,6 @@ describe('module-a11y web projector', () => {
       tree: undefined,
       level: 4,
     });
-    expect(first.hasAttribute('aria-level')).toBe(false);
     expect(second.getAttribute('role')).toBe('heading');
     expect(second.getAttribute('aria-level')).toBe('4');
 

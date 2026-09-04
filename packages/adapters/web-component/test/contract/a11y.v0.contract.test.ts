@@ -142,14 +142,20 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
 
     el.getExposes().setLevel(0);
     expect(el.getExposes().getLevel()).toBe(0);
+    expect(el.getAttribute('role')).toBe('heading');
     expect(el.hasAttribute('aria-level')).toBe(false);
+
+    el.getExposes().setLevel(4);
+    expect(el.getExposes().getLevel()).toBe(4);
+    expect(el.getAttribute('aria-level')).toBe('4');
 
     el.getExposes().setRole('button');
     expect(el.getAttribute('role')).toBe('button');
     expect(el.hasAttribute('aria-level')).toBe(false);
 
     el.getExposes().setRole('heading');
-    expect(el.hasAttribute('aria-level')).toBe(false);
+    expect(el.getAttribute('role')).toBe('heading');
+    expect(el.getAttribute('aria-level')).toBe('4');
     el.remove();
   });
 

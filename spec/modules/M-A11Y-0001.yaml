@@ -21,7 +21,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-
-      Added portable heading-level (1-6) support with fail-closed validation. The a11y module now accepts a level value and projects it as aria-level on the Web profile. Invalid levels (0, negatives, fractions, NaN, Infinity) are rejected.
+      Added portable heading-level (1-6) support. The a11y module rejects invalid setup and final-setup declarations, observes State-owned runtime values without veto or rollback, omits invalid or non-heading levels from snapshots, restores later valid projection, and delegates stale aria-level cleanup to the Web host projection.
 
 
   - version: 0.1.0

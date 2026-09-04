@@ -116,6 +116,8 @@ describe('runtime contract: a11y (v0)', () => {
       expect(ctx.snapshots.at(-1)?.level).toBe(2);
 
       result.invokeInCallbackScope(() => level.set(invalidLevel, 'reason: invalid heading level'));
+      expect(level.get()).toBe(invalidLevel);
+      expect(ctx.snapshots.at(-1)?.role).toBe('heading');
       expect(ctx.snapshots.at(-1)?.level).toBeUndefined();
 
       result.invokeInCallbackScope(() => level.set(3, 'reason: valid heading level'));
@@ -244,7 +246,7 @@ describe('runtime contract: a11y (v0)', () => {
     result.invokeUnmounted();
   });
 
-  it('keeps invalid state-backed heading levels out of A11y projection before and across repeatable detach', async () => {
+  it('rematerializes with an invalid runtime level omitted and restores later valid projection', async () => {
     let level!: OwnedStateHandle<number>;
     const P = definePrototype({
       name: 'x-a11y-detached-heading-level',
@@ -258,16 +260,25 @@ describe('runtime contract: a11y (v0)', () => {
     const ctx = createHost();
     const session = createRuntimeSession(P as any, ctx.host as any);
     await session.mount();
-    session.invokeInCallbackScope(() => level.set(0, 'reason: mounted invalid heading level'));
-    expect(level.get()).toBe(0);
+    expect(ctx.snapshots.at(-1)?.level).toBe(2);
+
     await session.unmount();
     expect(session.mountPhase).toBe('detached');
+    ctx.snapshots.length = 0;
     session.invokeInCallbackScope(() => level.set(0, 'reason: detached invalid heading level'));
     expect(level.get()).toBe(0);
+    expect(ctx.snapshots).toEqual([]);
+
+    await expect(session.mount()).resolves.toBeUndefined();
+    expect(ctx.snapshots.at(-1)).toMatchObject({ role: 'heading', level: undefined });
+
+    session.invokeInCallbackScope(() => level.set(4, 'reason: recovered heading level'));
+    expect(level.get()).toBe(4);
+    expect(ctx.snapshots.at(-1)?.level).toBe(4);
     await session.dispose();
   });
 
-  it('rebinds validation when the level source is replaced during setup', () => {
+  it('tracks a replacement level source during setup', () => {
     let first!: OwnedStateHandle<number>;
     let second!: OwnedStateHandle<number>;
     const P = definePrototype({
@@ -293,7 +304,7 @@ describe('runtime contract: a11y (v0)', () => {
     result.invokeUnmounted();
   });
 
-  it('validates the live level after a reentrant source update', () => {
+  it('retains a reentrant invalid runtime level in State while omitting projection', () => {
     let setLevel!: (value: number) => void;
     let getLevel!: () => number;
     const asReentrantLevel = defineAsHook<
@@ -347,7 +358,7 @@ describe('runtime contract: a11y (v0)', () => {
     );
   });
 
-  it('rejects invalid level before an earlier borrowed watcher observes it', () => {
+  it('keeps State watcher delivery unchanged for an invalid runtime level', () => {
     let setLevel!: (value: number) => void;
     let getLevel!: () => number;
     const seen: number[] = [];
@@ -383,7 +394,7 @@ describe('runtime contract: a11y (v0)', () => {
     result.invokeUnmounted();
   });
 
-  it('A11Y-0066: rejects invalid heading level updates without a host projector', () => {
+  it('A11Y-0066: retains invalid runtime levels without a host projector', () => {
     let level!: OwnedStateHandle<number>;
     const P = definePrototype({
       name: 'x-a11y-capless-heading-level',
@@ -399,7 +410,7 @@ describe('runtime contract: a11y (v0)', () => {
     const result = executeWithHost(P as any, ctx.host as any);
 
     result.invokeInCallbackScope(() => level.set(0, 'reason: invalid heading level'));
-    expect(ctx.host).toBeDefined();
+    expect(level.get()).toBe(0);
   });
 
   it('A11Y-0067: rejects a non-emitting invalid level before installing a cap-less watch', () => {

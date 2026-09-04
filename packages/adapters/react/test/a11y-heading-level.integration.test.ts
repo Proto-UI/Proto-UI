@@ -13,6 +13,7 @@ const headingPrototype = definePrototype({
     def.expose.method('setLevel', (value: number) =>
       level.set(value, 'reason: update heading level')
     );
+    def.expose.method('getLevel', () => level.get());
     return (r) => r.el('div', 'Heading');
   },
 });
@@ -23,6 +24,7 @@ describe('adapter-react: portable heading level', () => {
     const exposes = mounted.ref.current.getExposes() as {
       setRole(value: string): void;
       setLevel(value: number): void;
+      getLevel(): number;
     };
 
     try {
@@ -31,12 +33,18 @@ describe('adapter-react: portable heading level', () => {
       exposes.setLevel(6);
       expect(mounted.root?.getAttribute('aria-level')).toBe('6');
       exposes.setLevel(0);
+      expect(exposes.getLevel()).toBe(0);
+      expect(mounted.root?.getAttribute('role')).toBe('heading');
       expect(mounted.root?.hasAttribute('aria-level')).toBe(false);
+      exposes.setLevel(4);
+      expect(exposes.getLevel()).toBe(4);
+      expect(mounted.root?.getAttribute('aria-level')).toBe('4');
       exposes.setRole('button');
       expect(mounted.root?.getAttribute('role')).toBe('button');
       expect(mounted.root?.hasAttribute('aria-level')).toBe(false);
       exposes.setRole('heading');
-      expect(mounted.root?.hasAttribute('aria-level')).toBe(false);
+      expect(mounted.root?.getAttribute('role')).toBe('heading');
+      expect(mounted.root?.getAttribute('aria-level')).toBe('4');
     } finally {
       mounted.unmount();
     }
