@@ -59,6 +59,7 @@ export class ScrollModuleImpl extends ModuleBase {
   private lease: ScrollSurfaceHostLease | null = null;
   private mounted = false;
   private leaseEpoch = 0;
+  private snapshotEpoch = 0;
 
   private readonly axesOwned: OwnedStateHandle<ScrollAxes>;
   private readonly scrollingOwned: OwnedStateHandle<boolean>;
@@ -348,16 +349,25 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   private applySnapshot(snapshot: ScrollSurfaceSnapshot): void {
+    const epoch = ++this.snapshotEpoch;
     this.set(this.axesOwned, snapshot.axes);
-    this.applyAxis('horizontal', snapshot.horizontal);
-    this.applyAxis('vertical', snapshot.vertical);
+    if (epoch !== this.snapshotEpoch) return;
+    if (!this.applyAxis('horizontal', snapshot.horizontal, epoch)) return;
+    if (!this.applyAxis('vertical', snapshot.vertical, epoch)) return;
     this.set(this.scrollingOwned, snapshot.scrolling);
+    if (epoch !== this.snapshotEpoch) return;
     this.set(this.projectionOwned, snapshot.projection);
+    if (epoch !== this.snapshotEpoch) return;
     this.set(this.endFollowStateOwned, snapshot.endFollow.state);
+    if (epoch !== this.snapshotEpoch) return;
     this.set(this.endFollowRequestStatusOwned, snapshot.endFollow.requestStatus);
   }
 
-  private applyAxis(axis: 'horizontal' | 'vertical', snapshot: ScrollAxisSnapshot): void {
+  private applyAxis(
+    axis: 'horizontal' | 'vertical',
+    snapshot: ScrollAxisSnapshot,
+    epoch: number
+  ): boolean {
     const value = snapshot ?? EMPTY_AXIS;
     const handles =
       axis === 'horizontal'
@@ -376,10 +386,15 @@ export class ScrollModuleImpl extends ModuleBase {
             this.verticalAtEndOwned,
           ];
     this.set(handles[0] as OwnedStateHandle<number>, clampRatio(value.position));
+    if (epoch !== this.snapshotEpoch) return false;
     this.set(handles[1] as OwnedStateHandle<number>, clampRatio(value.visibleRatio));
+    if (epoch !== this.snapshotEpoch) return false;
     this.set(handles[2] as OwnedStateHandle<boolean>, value.canScrollBefore);
+    if (epoch !== this.snapshotEpoch) return false;
     this.set(handles[3] as OwnedStateHandle<boolean>, value.canScrollAfter);
+    if (epoch !== this.snapshotEpoch) return false;
     this.set(handles[4] as OwnedStateHandle<boolean>, value.atEnd);
+    return epoch === this.snapshotEpoch;
   }
 
   private set<V>(handle: OwnedStateHandle<V>, value: V): void {

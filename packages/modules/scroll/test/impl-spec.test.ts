@@ -207,6 +207,25 @@ describe('module-scroll: fake host contract', () => {
     expect(harness.surface.vertical.atEnd.get()).toBe(true);
   });
 
+  it('preserves the latest nested host outcome during snapshot application', () => {
+    const harness = createHarness();
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    const connection = harness.connections[0];
+    let interrupted = false;
+    harness.surface.endFollow.state.watch((_run, event) => {
+      if (event.type !== 'next' || event.next !== 'pending' || interrupted) return;
+      interrupted = true;
+      harness.surface.request({ kind: 'by', axis: 'vertical', delta: -0.1 });
+      connection.onFacts(snapshot('paused', 'rejected'));
+    });
+    harness.sys.phase = 'callback';
+
+    connection.onFacts(snapshot('pending', 'pending'));
+
+    expect(harness.surface.endFollow.state.get()).toBe('paused');
+    expect(harness.surface.endFollow.requestStatus.get()).toBe('rejected');
+  });
+
   it('rejects to-end when no current host lease can apply it', () => {
     const harness = createHarness(false);
     harness.module.hooks.onMountPhase?.('mounted', 1);
