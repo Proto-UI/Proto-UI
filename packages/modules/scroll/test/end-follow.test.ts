@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { MoveGestureHost, ScrollSurfaceSnapshot } from '@proto.ui/core';
-import { createWebScrollSurfaceHost } from '../src';
+import { createWebScrollSurfaceHost, type ScrollSurfaceHostLease } from '../src';
 
 const moveGestureHost: MoveGestureHost = {
   attach() {
@@ -545,6 +545,108 @@ describe('module-scroll: end-follow host contract', () => {
 
     window.dispatchEvent(new Event('resize'));
 
+    expect(snapshots.at(-1)?.endFollow).toEqual({
+      state: 'paused',
+      requestStatus: 'rejected',
+    });
+    lease.dispose();
+  });
+
+  it('rejects an end application that host clamping leaves away from end', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    let scrollTop = 0;
+    Object.defineProperty(target, 'scrollTop', {
+      configurable: true,
+      get: () => scrollTop,
+      set: (value: number) => {
+        scrollTop = Math.min(200, value);
+      },
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+
+    frames.runAll();
+
+    expect(target.scrollTop).toBe(200);
+    expect(snapshots.at(-1)?.vertical.atEnd).toBe(false);
+    expect(snapshots.at(-1)?.endFollow).toEqual({
+      state: 'paused',
+      requestStatus: 'rejected',
+    });
+    lease.dispose();
+  });
+
+  it('observes descendant resource loads beneath a fixed direct wrapper', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const wrapper = document.createElement('div');
+    const image = document.createElement('img');
+    wrapper.append(image);
+    target.append(wrapper);
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    updateMetrics({ scrollHeight: 500 });
+    image.dispatchEvent(new Event('load'));
+
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    lease.dispose();
+  });
+
+  it('makes a pending follow cancellable before publishing it to watchers', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    let interruptPending = false;
+    let lease!: ScrollSurfaceHostLease;
+    lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => {
+        snapshots.push(snapshot);
+        if (interruptPending && snapshot.endFollow.state === 'pending') {
+          interruptPending = false;
+          lease.request({ kind: 'by', axis: 'vertical', delta: -50 });
+        }
+      },
+    });
+    frames.runAll();
+
+    interruptPending = true;
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+
+    expect(frames.pending()).toBe(0);
+    expect(target.scrollTop).toBe(250);
     expect(snapshots.at(-1)?.endFollow).toEqual({
       state: 'paused',
       requestStatus: 'rejected',

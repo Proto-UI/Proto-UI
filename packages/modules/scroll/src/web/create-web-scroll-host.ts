@@ -155,6 +155,7 @@ export function createWebScrollSurfaceHost(
       let endFollowRequestStatus: ScrollEndFollowRequestStatus = 'idle';
       let cancelEndFollowFrame: (() => void) | null = null;
       let scheduledAxis: ScrollAxis | null = null;
+      let endFollowPending = false;
       let readerIntentUntil = 0;
       let readerGestureActive = false;
       let lastFollowLayout: { axis: ScrollAxis; viewport: number; extent: number } | null = null;
@@ -305,9 +306,10 @@ export function createWebScrollSurfaceHost(
         return range - clampedOffset <= endThreshold;
       };
       const cancelScheduledEnd = (rejected: boolean) => {
-        const pending = cancelEndFollowFrame !== null;
+        const pending = endFollowPending;
         cancelEndFollowFrame?.();
         cancelEndFollowFrame = null;
+        endFollowPending = false;
         scheduledAxis = null;
         if (pending && rejected) endFollowRequestStatus = 'rejected';
         return pending;
@@ -319,7 +321,7 @@ export function createWebScrollSurfaceHost(
           publish();
           return;
         }
-        if (cancelEndFollowFrame && scheduledAxis === axis) {
+        if (endFollowPending && scheduledAxis === axis) {
           if (configuredFollowAxis() === axis) endFollowState = 'pending';
           endFollowRequestStatus = 'pending';
           publish();
@@ -327,11 +329,14 @@ export function createWebScrollSurfaceHost(
         }
         cancelScheduledEnd(false);
         scheduledAxis = axis;
+        endFollowPending = true;
         if (configuredFollowAxis() === axis) endFollowState = 'pending';
         endFollowRequestStatus = 'pending';
         publish();
+        if (!endFollowPending || scheduledAxis !== axis || disposed) return;
         const apply = () => {
           cancelEndFollowFrame = null;
+          endFollowPending = false;
           const currentAxis = scheduledAxis;
           scheduledAxis = null;
           if (disposed || !currentAxis) return;
@@ -343,12 +348,13 @@ export function createWebScrollSurfaceHost(
           }
           applyRequest(target, { kind: 'to-end', axis: currentAxis });
           if (!readerGestureActive) readerIntentUntil = 0;
+          const reachedEnd = isAxisAtEnd(currentAxis);
           const followAxis = configuredFollowAxis();
           if (followAxis === currentAxis) {
             lastFollowLayout = readFollowLayout(currentAxis);
-            endFollowState = 'following';
+            endFollowState = reachedEnd ? 'following' : 'paused';
           }
-          endFollowRequestStatus = 'applied';
+          endFollowRequestStatus = reachedEnd ? 'applied' : 'rejected';
           publish();
         };
         if (ownerWindow?.requestAnimationFrame) {
@@ -536,7 +542,7 @@ export function createWebScrollSurfaceHost(
         const axis = configuredFollowAxis();
         if (axis && isAxisEnabled(axis)) {
           const atEnd = isAxisAtEnd(axis);
-          if (atEnd && !cancelEndFollowFrame) {
+          if (atEnd && !endFollowPending) {
             endFollowState = 'following';
           } else if (!atEnd && readerIntent) {
             cancelScheduledEnd(true);
@@ -552,7 +558,11 @@ export function createWebScrollSurfaceHost(
         }, options.scrollEndDelay ?? 120);
         cancelScrollEndTimer = () => clearTimeout(timer);
       };
+      const onContentLoad = () => {
+        if (configuredFollowAxis()) onLayoutChange();
+      };
       target.addEventListener('scroll', onScroll, { passive: true });
+      target.addEventListener('load', onContentLoad, true);
       target.addEventListener('wheel', onWheel, { passive: true });
       target.addEventListener('pointerdown', onPointerDown, { passive: true });
       ownerWindow?.addEventListener('pointerup', onReaderIntentEnd, { passive: true });
@@ -650,6 +660,7 @@ export function createWebScrollSurfaceHost(
           cancelScheduledEnd(false);
           cancelScrollEndTimer?.();
           target.removeEventListener('scroll', onScroll);
+          target.removeEventListener('load', onContentLoad, true);
           target.removeEventListener('wheel', onWheel);
           target.removeEventListener('pointerdown', onPointerDown);
           ownerWindow?.removeEventListener('pointerup', onReaderIntentEnd);
