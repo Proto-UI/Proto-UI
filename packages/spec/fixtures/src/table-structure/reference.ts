@@ -44,7 +44,9 @@ export type TableStructureDiagnosticCode =
   | 'empty-header-reference'
   | 'duplicate-header-reference'
   | 'missing-header-target'
-  | 'ambiguous-header-target';
+  | 'ambiguous-header-target'
+  | 'unprojectable-header-target'
+  | 'non-upstream-header-target';
 
 export type TableStructureDiagnostic<Ref> = {
   readonly code: TableStructureDiagnosticCode;
@@ -235,6 +237,7 @@ export function projectTableStructure<Ref>(
         diagnostics.push({ code: 'missing-cell-headers', ref: cell.ref, row });
       }
 
+      const source = placedByInput.get(cell)?.snapshot;
       const columnHeaders: Ref[] = [];
       const rowHeaders: Ref[] = [];
       const seen = new Set<string>();
@@ -268,17 +271,25 @@ export function projectTableStructure<Ref>(
         const targetInput = matches[0]!;
         const target = placedByInput.get(targetInput);
         if (!target) {
-          diagnostics.push({ code: 'missing-header-target', ref: cell.ref, row, headerKey });
+          diagnostics.push({ code: 'unprojectable-header-target', ref: cell.ref, row, headerKey });
+          continue;
+        }
+        if (
+          cell.kind === 'headerCell' &&
+          source &&
+          (target.snapshot.row > source.row ||
+            (target.snapshot.row === source.row && target.snapshot.column >= source.column))
+        ) {
+          diagnostics.push({ code: 'non-upstream-header-target', ref: cell.ref, row, headerKey });
           continue;
         }
         if (targetInput.headerKind === 'column') columnHeaders.push(targetInput.ref);
         else rowHeaders.push(targetInput.ref);
       }
 
-      const output = placedByInput.get(cell)?.snapshot;
-      if (!output) continue;
-      (output.columnHeaders as Ref[]).push(...columnHeaders);
-      (output.rowHeaders as Ref[]).push(...rowHeaders);
+      if (!source) continue;
+      (source.columnHeaders as Ref[]).push(...columnHeaders);
+      (source.rowHeaders as Ref[]).push(...rowHeaders);
     }
   }
 

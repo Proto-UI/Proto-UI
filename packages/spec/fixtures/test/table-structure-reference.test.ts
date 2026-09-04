@@ -323,7 +323,11 @@ describe('spec fixture: Table Structure reference projection', () => {
               headerKind: 'column',
               columnSpan: 0,
             },
-            { ref: dataCell, kind: 'cell', headers: ['duplicate', 'missing', 'missing'] },
+            {
+              ref: dataCell,
+              kind: 'cell',
+              headers: ['duplicate', 'missing', 'missing', 'out-of-range'],
+            },
             { ref: ref('invalid-span'), kind: 'cell', headers: ['duplicate'], columnSpan: 0 },
           ],
         },
@@ -344,6 +348,7 @@ describe('spec fixture: Table Structure reference projection', () => {
       'ambiguous-header-target',
       'missing-header-target',
       'duplicate-header-reference',
+      'unprojectable-header-target',
       'ambiguous-header-target',
     ]);
     const projectedData = snapshot.rows[0]?.cells.find((cell) => cell.ref === dataCell);
@@ -390,6 +395,70 @@ describe('spec fixture: Table Structure reference projection', () => {
     ]);
     const projectedData = snapshot.rows[0]?.cells.find((cell) => cell.ref === dataCell);
     expect(projectedData?.columnHeaders).toEqual([]);
+  });
+
+  it('rejects self and downstream HeaderCell relationships while retaining upstream edges', () => {
+    // T-TABLE-STRUCTURE-0001-CASE-HEADER-GRAPH
+    // T-TABLE-STRUCTURE-0001-CASE-DIAGNOSTICS
+    const first = ref('first-header');
+    const second = ref('second-header');
+    const data = ref('data');
+
+    const cycle = projectTableStructure({
+      root: ref('cycle-table'),
+      rows: [
+        {
+          ref: ref('row'),
+          cells: [
+            {
+              ref: first,
+              kind: 'headerCell',
+              headerKey: 'first',
+              headerKind: 'column',
+              headers: ['second'],
+            },
+            {
+              ref: second,
+              kind: 'headerCell',
+              headerKey: 'second',
+              headerKind: 'column',
+              headers: ['first'],
+            },
+            { ref: data, kind: 'cell', headers: ['first', 'second'] },
+          ],
+        },
+      ],
+    });
+
+    expect(cycle.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      'non-upstream-header-target',
+    ]);
+    expect(cycle.rows[0]?.cells[0]?.columnHeaders).toEqual([]);
+    expect(cycle.rows[0]?.cells[1]?.columnHeaders).toEqual([first]);
+    expect(cycle.rows[0]?.cells[2]?.columnHeaders).toEqual([first, second]);
+
+    const selfReference = projectTableStructure({
+      root: ref('self-reference-table'),
+      rows: [
+        {
+          ref: ref('row'),
+          cells: [
+            {
+              ref: first,
+              kind: 'headerCell',
+              headerKey: 'first',
+              headerKind: 'column',
+              headers: ['first'],
+            },
+            { ref: data, kind: 'cell', headers: ['first'] },
+          ],
+        },
+      ],
+    });
+    expect(selfReference.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      'non-upstream-header-target',
+    ]);
+    expect(selfReference.rows[0]?.cells[0]?.columnHeaders).toEqual([]);
   });
 
   it('recomputes structural churn without mutating authored inputs or adding data-operation state', () => {

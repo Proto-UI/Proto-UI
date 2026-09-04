@@ -41,9 +41,9 @@ Caption、HeaderCell 与 Cell content 仍由 App 通过每个 part 的单一 ano
 
 Row 与 cell 顺序来自当前 host-observable Anatomy order。每个 cell 都放在第一个未被先前 span 占用、且能容纳自身 rectangle 的 column。Index 从零开始；`rowSpan` 与 `columnSpan` 必须是 positive safe integer，默认值为一。Span 不能和已占用 rectangle overlap，也不能越过当前 row count 或 safe coordinate boundary。Occupancy 使用 ranges，而不是逐个 materialize 所覆盖的 column，因此 large span 不会按数值大小成比例分配空间。
 
-HeaderCell 声明 non-empty、same-domain unique 的 `headerKey` 与 `headerKind: 'column' | 'row'`。Cell 声明 ordered、non-empty header-key set；HeaderCell 可以为 layered header 声明 upstream header keys。Key 只是 protocol match key，绝不是 DOM id 或 native accessibility identifier。
+HeaderCell 声明 non-empty、same-domain unique 的 `headerKey` 与 `headerKind: 'column' | 'row'`。Cell 声明 ordered、non-empty header-key set。HeaderCell 可以为 layered header 声明 upstream header keys；upstream 表示 target 在 computed row-major topology 中先于 source，self 与 later/downstream reference 均无效。
 
-Resolution 产出 opaque same-domain semantic-object refs，并按 target kind 分成有序 `columnHeaders` 与 `rowHeaders`；同一个 cell 可以关联多个 header。Missing、empty、duplicate 或 ambiguous reference 都产生 structural diagnostic；实现不得猜测 target 或制造 host id。Resolution 不会搜索 sibling 或 nested Table domain，因此当前 domain 缺失的 key 即使在其它 domain 存在同名 key，也仍然是 missing target。
+Resolution 产出 opaque same-domain semantic-object refs，并按 target kind 分成有序 `columnHeaders` 与 `rowHeaders`；同一个 cell 可以关联多个 header。Missing、empty、duplicate、ambiguous、unprojectable、self 或 downstream reference 都产生 structural diagnostic；实现不得猜测 target 或制造 host id。Resolution 不会搜索 sibling 或 nested Table domain，因此当前 domain 缺失的 key 即使在其它 domain 存在同名 key，也仍然是 missing target。
 
 Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无效的结构可以保持 mounted 并报告 invalid snapshot，但不能改写 authored content，也不能发送 data-operation signal。
 

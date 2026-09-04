@@ -83,8 +83,8 @@ criteria:
             [D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-B, D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-C]
   - id: C-TABLE-STRUCTURE-0001-HEADER-RELATIONS
     text:
-      zh-CN: Resolution 必须把每个 key 转换为当前 domain 中唯一 HeaderCell 的 opaque semantic-object ref，并按 target headerKind 形成 ordered rowHeaders/columnHeaders；一个 cell 可关联多个 row/column headers，输入顺序必须保留。
-      en: Resolution must convert each key to the opaque semantic-object reference of the unique HeaderCell in the current domain and form ordered rowHeaders and columnHeaders according to the target headerKind; a cell may relate to multiple row and column headers, and input order must be preserved.
+      zh-CN: Resolution 必须把每个 key 转换为当前 domain 中唯一且可 placement 的 HeaderCell opaque semantic-object ref，并按 target headerKind 形成 ordered rowHeaders/columnHeaders；一个 cell 可关联多个 row/column headers，输入顺序必须保留。HeaderCell 的 upstream target 必须在 computed row-major topology 中先于 source；self 或 later/downstream reference 必须拒绝，以保持 header graph acyclic。
+      en: Resolution must convert each key to the opaque semantic-object reference of the unique, placeable HeaderCell in the current domain and form ordered rowHeaders and columnHeaders according to the target headerKind; a cell may relate to multiple row and column headers, and input order must be preserved. A HeaderCell's upstream target must precede the source in computed row-major topology; self or later/downstream references must be rejected so the header graph remains acyclic.
     dependsOn:
       contracts:
         - id: C-A11Y-0001
@@ -95,8 +95,8 @@ criteria:
             [D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-A, D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-E]
   - id: C-TABLE-STRUCTURE-0001-DIAGNOSTICS
     text:
-      zh-CN: Invalid cardinality、empty Row、invalid/unsafe span、missing/duplicate headerKey、duplicate key reference、missing/ambiguous target，以及越过 Row count 或 safe column-coordinate boundary 的 placement 必须产生 addressable structural diagnostic；实现不得猜 target、生成 fallback id、补 part 或把 invalid snapshot 表述为 valid table projection。
-      en: Invalid cardinality, empty Rows, invalid or unsafe spans, missing or duplicate headerKeys, duplicate key references, missing or ambiguous targets, and placements beyond the Row count or safe column-coordinate boundary must produce addressable structural diagnostics; implementations must not guess targets, generate fallback IDs, synthesize parts, or present an invalid snapshot as a valid table projection.
+      zh-CN: Invalid cardinality、empty Row、invalid/unsafe span、missing/duplicate headerKey、duplicate key reference、missing/ambiguous/unprojectable target、self/downstream HeaderCell target，以及越过 Row count 或 safe column-coordinate boundary 的 placement 必须产生 addressable structural diagnostic；实现不得猜 target、生成 fallback id、补 part 或把 invalid snapshot 表述为 valid table projection。
+      en: Invalid cardinality, empty Rows, invalid or unsafe spans, missing or duplicate headerKeys, duplicate key references, missing, ambiguous, or unprojectable targets, self or downstream HeaderCell targets, and placements beyond the Row count or safe column-coordinate boundary must produce addressable structural diagnostics; implementations must not guess targets, generate fallback IDs, synthesize parts, or present an invalid snapshot as a valid table projection.
   - id: C-TABLE-STRUCTURE-0001-CHURN
     text:
       zh-CN: Insert、remove 与 reorder 必须从当前 actual parts 重算 topology、coordinates 与 relationships；暂时无效的 runtime structure 可以保持 mounted 并报告 invalid snapshot，但不得重写 authored content/header keys、制造 data mutation 或发出 sorting/selection/pagination signal。
