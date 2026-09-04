@@ -552,6 +552,67 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
+  it('applies end-follow directly even when authored scrolling is smooth', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    target.style.scrollBehavior = 'smooth';
+    let scrollTop = 0;
+    let deferredScrollTop = 0;
+    Object.defineProperty(target, 'scrollTop', {
+      configurable: true,
+      get: () => scrollTop,
+      set: (value: number) => {
+        if (target.style.scrollBehavior === 'auto') scrollTop = value;
+        else deferredScrollTop = value;
+      },
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+
+    frames.runAll();
+
+    expect(target.scrollTop).toBe(300);
+    expect(deferredScrollTop).toBe(0);
+    expect(target.style.scrollBehavior).toBe('smooth');
+    expect(snapshots.at(-1)?.endFollow).toEqual({
+      state: 'following',
+      requestStatus: 'applied',
+    });
+    lease.dispose();
+  });
+
+  it('reconciles descendant reflow when a nested transition completes', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const wrapper = document.createElement('div');
+    target.append(wrapper);
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    updateMetrics({ scrollHeight: 500 });
+    wrapper.dispatchEvent(new Event('transitionend'));
+
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    lease.dispose();
+  });
+
   it('rejects an end application that host clamping leaves away from end', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');

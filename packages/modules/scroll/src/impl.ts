@@ -60,6 +60,8 @@ export class ScrollModuleImpl extends ModuleBase {
   private mounted = false;
   private leaseEpoch = 0;
   private snapshotEpoch = 0;
+  private attachingLease = false;
+  private pendingAttachRequests: ScrollSurfaceRequest[] = [];
 
   private readonly axesOwned: OwnedStateHandle<ScrollAxes>;
   private readonly scrollingOwned: OwnedStateHandle<boolean>;
@@ -207,6 +209,10 @@ export class ScrollModuleImpl extends ModuleBase {
       request.kind === 'to' || request.kind === 'control-drag'
         ? { ...request, position: clampRatio(request.position) }
         : request;
+    if (this.attachingLease && !this.lease) {
+      this.pendingAttachRequests.push(normalized);
+      return;
+    }
     if (!this.lease) {
       if (normalized.kind === 'to-end') {
         this.set(this.endFollowRequestStatusOwned, 'rejected');
@@ -288,7 +294,25 @@ export class ScrollModuleImpl extends ModuleBase {
     }
     const projection = resolveScrollProjection(this.config, host.support, host.preference);
     this.set(this.projectionOwned, projection);
-    this.lease = host.attach(this.createHostAttachment(epoch));
+    this.pendingAttachRequests = [];
+    this.attachingLease = true;
+    try {
+      const lease = host.attach(this.createHostAttachment(epoch));
+      if (epoch !== this.leaseEpoch || !this.mounted) {
+        lease.dispose();
+        return;
+      }
+      this.lease = lease;
+      const requests = this.pendingAttachRequests;
+      this.pendingAttachRequests = [];
+      for (const request of requests) {
+        if (this.lease !== lease) break;
+        lease.request(request);
+      }
+    } finally {
+      this.attachingLease = false;
+      if (!this.lease) this.pendingAttachRequests = [];
+    }
   }
 
   private createHostAttachment(epoch = this.leaseEpoch): ScrollSurfaceHostAttachment {
@@ -404,8 +428,12 @@ export class ScrollModuleImpl extends ModuleBase {
 
   disconnect(): void {
     this.leaseEpoch++;
+    const snapshotEpoch = ++this.snapshotEpoch;
+    this.pendingAttachRequests = [];
     this.lease?.dispose();
     this.lease = null;
+    this.applyAxis('horizontal', EMPTY_AXIS, snapshotEpoch);
+    this.applyAxis('vertical', EMPTY_AXIS, snapshotEpoch);
     this.set(this.scrollingOwned, false);
     this.set(this.projectionOwned, 'unresolved');
     this.set(this.endFollowStateOwned, 'off');

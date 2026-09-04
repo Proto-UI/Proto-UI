@@ -78,6 +78,17 @@ function applyRequest(target: HTMLElement, request: ScrollSurfaceRequest): void 
   }
   if (request.kind === 'to-end') next = range;
   next = Math.min(range, Math.max(0, next));
+  if (request.kind === 'to-end') {
+    const authoredScrollBehavior = target.style.scrollBehavior;
+    target.style.scrollBehavior = 'auto';
+    try {
+      if (horizontal) target.scrollLeft = next;
+      else target.scrollTop = next;
+    } finally {
+      target.style.scrollBehavior = authoredScrollBehavior;
+    }
+    return;
+  }
   if (horizontal) target.scrollLeft = next;
   else target.scrollTop = next;
 }
@@ -558,11 +569,13 @@ export function createWebScrollSurfaceHost(
         }, options.scrollEndDelay ?? 120);
         cancelScrollEndTimer = () => clearTimeout(timer);
       };
-      const onContentLoad = () => {
+      const onContentReflow = () => {
         if (configuredFollowAxis()) onLayoutChange();
       };
       target.addEventListener('scroll', onScroll, { passive: true });
-      target.addEventListener('load', onContentLoad, true);
+      target.addEventListener('load', onContentReflow, true);
+      target.addEventListener('transitionend', onContentReflow, true);
+      target.addEventListener('animationend', onContentReflow, true);
       target.addEventListener('wheel', onWheel, { passive: true });
       target.addEventListener('pointerdown', onPointerDown, { passive: true });
       ownerWindow?.addEventListener('pointerup', onReaderIntentEnd, { passive: true });
@@ -660,7 +673,9 @@ export function createWebScrollSurfaceHost(
           cancelScheduledEnd(false);
           cancelScrollEndTimer?.();
           target.removeEventListener('scroll', onScroll);
-          target.removeEventListener('load', onContentLoad, true);
+          target.removeEventListener('load', onContentReflow, true);
+          target.removeEventListener('transitionend', onContentReflow, true);
+          target.removeEventListener('animationend', onContentReflow, true);
           target.removeEventListener('wheel', onWheel);
           target.removeEventListener('pointerdown', onPointerDown);
           ownerWindow?.removeEventListener('pointerup', onReaderIntentEnd);

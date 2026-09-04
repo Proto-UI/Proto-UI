@@ -86,7 +86,7 @@ function snapshot(
   });
 }
 
-function createHarness(withHost = true) {
+function createHarness(withHost = true, initialFacts?: ScrollSurfaceSnapshot) {
   const sys = createSystemCaps();
   const vault = new CapsVault();
   const connections: ScrollSurfaceHostAttachment[] = [];
@@ -98,6 +98,7 @@ function createHarness(withHost = true) {
     attach(connection) {
       connections.push(connection);
       let current = connection;
+      initialFacts && connection.onFacts(initialFacts);
       return {
         update(next) {
           current = next;
@@ -224,6 +225,41 @@ describe('module-scroll: fake host contract', () => {
 
     expect(harness.surface.endFollow.state.get()).toBe('paused');
     expect(harness.surface.endFollow.requestStatus.get()).toBe('rejected');
+  });
+
+  it('invalidates an in-progress snapshot when its watcher detaches the surface', () => {
+    const harness = createHarness();
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    const connection = harness.connections[0];
+    let detached = false;
+    harness.surface.endFollow.state.watch((_run, event) => {
+      if (event.type !== 'next' || event.next !== 'pending' || detached) return;
+      detached = true;
+      harness.module.hooks.onMountPhase?.('detached', 1);
+    });
+    harness.sys.phase = 'callback';
+
+    connection.onFacts(snapshot('pending', 'pending'));
+
+    expect(harness.surface.projection.get()).toBe('unresolved');
+    expect(harness.surface.vertical.position.get()).toBe(0);
+    expect(harness.surface.vertical.atEnd.get()).toBe(true);
+    expect(harness.surface.endFollow.state.get()).toBe('off');
+    expect(harness.surface.endFollow.requestStatus.get()).toBe('idle');
+  });
+
+  it('replays a request emitted by an initial fact watcher after the host lease attaches', () => {
+    const harness = createHarness(true, snapshot('pending', 'pending'));
+    let requested = false;
+    harness.surface.endFollow.state.watch((_run, event) => {
+      if (event.type !== 'next' || event.next !== 'pending' || requested) return;
+      requested = true;
+      harness.surface.request({ kind: 'by', axis: 'vertical', delta: -0.1 });
+    });
+
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+
+    expect(harness.requests).toEqual([{ kind: 'by', axis: 'vertical', delta: -0.1 }]);
   });
 
   it('rejects to-end when no current host lease can apply it', () => {
