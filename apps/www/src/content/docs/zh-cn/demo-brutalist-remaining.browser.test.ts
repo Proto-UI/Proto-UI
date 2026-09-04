@@ -51,8 +51,8 @@ type SurfaceFacts = {
   hasActiveState: boolean;
   hasPressedState: boolean;
   hasSelectedState: boolean;
-  borderWidth: string;
-  borderColor: string;
+  borderWidths: string[];
+  borderColors: string[];
   borderRadius: string;
   backgroundColor: string;
   backgroundImage: string;
@@ -92,8 +92,18 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
       hasActiveState: element.hasAttribute('data-active'),
       hasPressedState: element.hasAttribute('data-pressed'),
       hasSelectedState: element.hasAttribute('data-selected'),
-      borderWidth: style.borderTopWidth,
-      borderColor: style.borderTopColor,
+      borderWidths: [
+        style.borderTopWidth,
+        style.borderRightWidth,
+        style.borderBottomWidth,
+        style.borderLeftWidth,
+      ],
+      borderColors: [
+        style.borderTopColor,
+        style.borderRightColor,
+        style.borderBottomColor,
+        style.borderLeftColor,
+      ],
       borderRadius: style.borderTopLeftRadius,
       backgroundColor: style.backgroundColor,
       backgroundImage: style.backgroundImage,
@@ -231,22 +241,38 @@ async function selectRuntimeWithDiagnostics(
   }
 }
 
-function expectHardFrame(surface: SurfaceFacts, shadowOffset: string, label: string): void {
-  expect(surface.borderWidth, `${label}/border`).toBe('2px');
-  expect(surface.borderRadius, `${label}/radius`).toBe('0px');
-  const shadowLayers = surface.boxShadow
+function nonTransparentShadowLayers(boxShadow: string): string[] {
+  return boxShadow
     .split(/,\s*(?=(?:rgba?|oklab|rgb)\()/u)
     .filter((layer) => !layer.includes('rgba(0, 0, 0, 0)'));
-  expect(shadowLayers, `${label}/shadow-layers`).toHaveLength(1);
-  expect(shadowLayers[0], `${label}/shadow`).toContain(`${shadowOffset} ${shadowOffset} 0px 0px`);
 }
 
-function expectExactHardShadow(boxShadow: string, offset: string, label: string): void {
-  const layers = boxShadow
-    .split(/,\s*(?=(?:rgba?|oklab|rgb)\()/u)
-    .filter((layer) => !layer.includes('rgba(0, 0, 0, 0)'));
-  expect(layers, `${label}/shadow-layers`).toHaveLength(1);
-  expect(layers[0], `${label}/shadow`).toContain(`${offset} ${offset} 0px 0px`);
+function expectSquareBorder(surface: SurfaceFacts, label: string): void {
+  expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
+  expect(surface.borderRadius, `${label}/radius`).toBe('0px');
+}
+
+function expectBorderColors(surface: SurfaceFacts, expectedColor: string, label: string): void {
+  expect(surface.borderColors, `${label}/border-colors`).toEqual(Array(4).fill(expectedColor));
+}
+
+function expectHardFrame(surface: SurfaceFacts, shadowOffset: string, label: string): void {
+  expectSquareBorder(surface, label);
+  expectExactHardShadow(surface.boxShadow, shadowOffset, label);
+}
+
+function expectExactHardShadow(
+  boxShadow: string,
+  offset: string,
+  label: string,
+  expectedLayerCount = 1
+): void {
+  const layers = nonTransparentShadowLayers(boxShadow);
+  expect(layers, `${label}/shadow-layers`).toHaveLength(expectedLayerCount);
+  expect(
+    layers.some((layer) => layer.includes(`${offset} ${offset} 0px 0px`)),
+    `${label}/shadow`
+  ).toBe(true);
 }
 let browser: Browser;
 let baseUrl = '';
@@ -279,8 +305,18 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 ariaSelected: element.getAttribute('aria-selected'),
                 ariaPressed: element.getAttribute('aria-pressed'),
                 ariaLive: element.getAttribute('aria-live'),
-                borderWidth: style.borderTopWidth,
-                borderColor: style.borderTopColor,
+                borderWidths: [
+                  style.borderTopWidth,
+                  style.borderRightWidth,
+                  style.borderBottomWidth,
+                  style.borderLeftWidth,
+                ],
+                borderColors: [
+                  style.borderTopColor,
+                  style.borderRightColor,
+                  style.borderBottomColor,
+                  style.borderLeftColor,
+                ],
                 borderRadius: style.borderTopLeftRadius,
                 backgroundColor: style.backgroundColor,
                 backgroundImage: style.backgroundImage,
@@ -313,17 +349,20 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             `${runtime}/foreground-pairs`
           ).toEqual(expectedForegrounds);
           expect(
-            allFacts.every((surface) => surface.borderColor === expectedBorder),
-            `${runtime}/border-pair`
+            allFacts.every((surface) =>
+              surface.borderColors.every((color) => color === expectedBorder)
+            ),
+            `${runtime}/${colorScheme}/border-pair`
           ).toBe(true);
           for (const [index, surface] of allFacts.entries()) {
-            const label = `${runtime}/badge-${index}`;
+            const label = `${runtime}/${colorScheme}/badge-${index}`;
             expectExactHardShadow(surface.boxShadow, '2px', `${label}`);
+            expect(surface.role, `${label}/role`).toBeNull();
             expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
             expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
             expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
             expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
-            expect(surface.borderWidth, `${label}/border`).toBe('2px');
+            expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
             expect(surface.borderRadius, `${label}/radius`).toBe('0px');
             expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
             expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
@@ -358,9 +397,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expect(surface.color, `${runtime}/${colorScheme}/card/foreground`).toBe(
             expectedForeground
           );
-          expect(surface.borderColor, `${runtime}/${colorScheme}/card/border-color`).toBe(
-            expectedBorder
-          );
+          expectBorderColors(surface, expectedBorder, `${runtime}/${colorScheme}/card`);
           expect(surface.display, `${runtime}/${colorScheme}/card/display`).toBe('flex');
           expect(surface.flexDirection, `${runtime}/${colorScheme}/card/direction`).toBe('column');
           expect(surface.role, `${runtime}/${colorScheme}/card/role`).toBeNull();
@@ -533,8 +570,18 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 ariaLive: element.getAttribute('aria-live'),
                 ariaBusy: element.getAttribute('aria-busy'),
                 tabIndex: (element as HTMLElement).tabIndex,
-                borderWidth: style.borderTopWidth,
-                borderColor: style.borderTopColor,
+                borderWidths: [
+                  style.borderTopWidth,
+                  style.borderRightWidth,
+                  style.borderBottomWidth,
+                  style.borderLeftWidth,
+                ],
+                borderColors: [
+                  style.borderTopColor,
+                  style.borderRightColor,
+                  style.borderBottomColor,
+                  style.borderLeftColor,
+                ],
                 borderRadius: style.borderTopLeftRadius,
                 backgroundColor: style.backgroundColor,
                 backgroundImage: style.backgroundImage,
@@ -565,8 +612,11 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
             expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
             expect(surface.ariaBusy, `${label}/aria-busy`).toBeNull();
-            expect(surface.borderWidth, `${label}/border`).toBe('2px');
+            expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
             expectExactHardShadow(surface.boxShadow, '2px', `${label}`);
+            expect(surface.borderColors, `${label}/border-colors`).toEqual(
+              Array(4).fill(expectedBorder)
+            );
             expect(surface.borderRadius, `${label}/radius`).toBe('0px');
             expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
             expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
@@ -597,8 +647,18 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               role: element.getAttribute('role'),
               pressed: element.getAttribute('aria-pressed'),
               disabled: element.getAttribute('aria-disabled'),
-              borderWidth: style.borderTopWidth,
-              borderColor: style.borderTopColor,
+              borderWidths: [
+                style.borderTopWidth,
+                style.borderRightWidth,
+                style.borderBottomWidth,
+                style.borderLeftWidth,
+              ],
+              borderColors: [
+                style.borderTopColor,
+                style.borderRightColor,
+                style.borderBottomColor,
+                style.borderLeftColor,
+              ],
               borderRadius: style.borderTopLeftRadius,
               boxShadow: style.boxShadow,
               backgroundColor: style.backgroundColor,
@@ -659,14 +719,13 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         ).toBeGreaterThan(1);
         for (const [index, surface] of factsBefore.entries()) {
           expect(surface.role, `${runtime}/toggle-${index}/role`).toBe('button');
-          expect(surface.borderWidth, `${runtime}/toggle-${index}/border`).toBe('2px');
-          expect(surface.borderColor, `${runtime}/toggle-${index}/border-color`).toBe(
-            'rgb(0, 0, 0)'
+          const label = `${runtime}/toggle-${index}`;
+          expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
+          expect(surface.borderColors, `${label}/border-colors`).toEqual(
+            Array(4).fill('rgb(0, 0, 0)')
           );
-          expect(surface.borderRadius, `${runtime}/toggle-${index}/radius`).toBe('0px');
-          expect(surface.boxShadow, `${runtime}/toggle-${index}/shadow`).toContain(
-            '3px 3px 0px 0px'
-          );
+          expect(surface.borderRadius, `${label}/radius`).toBe('0px');
+          expectExactHardShadow(surface.boxShadow, '3px', label, index === 1 ? 2 : 1);
         }
 
         const first = toggles.first();
@@ -694,6 +753,17 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         ).toBe(expectedRestingBackground);
         expect(firstRestingSurface.color, `${runtime}/after-second-click/foreground`).toBe(
           expectedRestingForeground
+        );
+        const firstElement = await first.elementHandle();
+        if (!firstElement) throw new Error('Toggle was not materialized.');
+        await opened.page.mouse.move(1, NARROW_VIEWPORT.height - 1);
+        await opened.page.waitForFunction(
+          (target) =>
+            target instanceof HTMLElement &&
+            !target.hasAttribute('data-hovered') &&
+            getComputedStyle(target).boxShadow.includes('3px 3px 0px 0px'),
+          firstElement,
+          { timeout: 10_000 }
         );
         const disabled = toggles.nth(3);
         expect(
@@ -728,7 +798,19 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
               backgroundColor: style.backgroundColor,
               backgroundImage: style.backgroundImage,
               color: style.color,
-              borderColor: style.borderTopColor,
+              borderWidths: [
+                style.borderTopWidth,
+                style.borderRightWidth,
+                style.borderBottomWidth,
+                style.borderLeftWidth,
+              ],
+              borderColors: [
+                style.borderTopColor,
+                style.borderRightColor,
+                style.borderBottomColor,
+                style.borderLeftColor,
+              ],
+              boxShadow: style.boxShadow,
             };
           })
         );
@@ -754,10 +836,14 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkFacts.every((surface) => surface.backgroundImage === 'none'),
           `${runtime}/dark/flat-fill`
         ).toBe(true);
-        expect(
-          darkFacts.every((surface) => surface.borderColor === 'rgb(0, 0, 0)'),
-          `${runtime}/dark/border`
-        ).toBe(true);
+        for (const [index, surface] of darkFacts.entries()) {
+          const label = `${runtime}/dark/toggle-${index}`;
+          expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
+          expect(surface.borderColors, `${label}/border-colors`).toEqual(
+            Array(4).fill('rgb(0, 0, 0)')
+          );
+          expectExactHardShadow(surface.boxShadow, '3px', label, index === 1 ? 2 : 1);
+        }
         await applyColorScheme(opened.page, 'light');
       }
     } finally {
@@ -813,9 +899,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(triggerSurface.backgroundImage, `${runtime}/hover-trigger/background-image`).toBe(
           'none'
         );
-        expect(triggerSurface.borderColor, `${runtime}/hover-trigger/border-color`).toBe(
-          'rgb(0, 0, 0)'
-        );
+        expectBorderColors(triggerSurface, 'rgb(0, 0, 0)', `${runtime}/hover-trigger`);
         expect(triggerSurface.fontWeight, `${runtime}/hover-trigger/weight`).toBe('700');
         expect(triggerSurface.textTransform, `${runtime}/hover-trigger/case`).toBe('uppercase');
         expectHardFrame(triggerSurface, '3px', `${runtime}/hover-trigger`);
@@ -849,9 +933,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(panelSurface.backgroundImage, `${runtime}/hover-panel/background-image`).toBe(
           'none'
         );
-        expect(panelSurface.borderColor, `${runtime}/hover-panel/border-color`).toBe(
-          'rgb(0, 0, 0)'
-        );
+        expectBorderColors(panelSurface, 'rgb(0, 0, 0)', `${runtime}/hover-panel`);
         expect(panelSurface.width, `${runtime}/hover-panel/width`).toBe('256px');
         expect(panelSurface.padding, `${runtime}/hover-panel/padding`).toBe('16px');
         expect(panelSurface.fontSize, `${runtime}/hover-panel/font-size`).toBe('14px');
@@ -863,6 +945,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           'none'
         );
         expect(panelSurface.transitionDuration, `${runtime}/hover-panel/transition-duration`).toBe(
+          '0.2s'
+        );
+        expect(panelSurface.animationDuration, `${runtime}/hover-panel/animation-duration`).toBe(
           '0.2s'
         );
 
@@ -902,9 +987,8 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkTriggerSurface.backgroundImage,
           `${runtime}/dark/hover-trigger/background-image`
         ).toBe('none');
-        expect(darkTriggerSurface.borderColor, `${runtime}/dark/hover-trigger/border-color`).toBe(
-          'rgb(0, 0, 0)'
-        );
+        expectSquareBorder(darkTriggerSurface, `${runtime}/dark/hover-trigger`);
+        expectBorderColors(darkTriggerSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-trigger`);
         expect(
           darkPanelSurface.backgroundImage,
           `${runtime}/dark/hover-panel/background-image`
@@ -913,6 +997,8 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkPanelSurface.animationDuration,
           `${runtime}/dark/hover-panel/animation-duration`
         ).toBe('0.2s');
+        expectHardFrame(darkPanelSurface, '3px', `${runtime}/dark/hover-panel`);
+        expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
         const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
           '--pui-secondary-background',
         ]);
