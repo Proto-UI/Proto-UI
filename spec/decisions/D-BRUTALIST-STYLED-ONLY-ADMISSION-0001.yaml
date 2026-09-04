@@ -89,10 +89,10 @@ criteria:
   - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-BOUNDARY
     text:
       en: >-
-        Spinner materializes directly without a Base Spinner hook and is always aria-hidden, roleless, non-focusable, and empty-exposed. It owns no loading or busy fact, status or accessible name, announcement, activation, event, command, timer, layout, operation lifecycle, or focus behavior; those remain with the parent composition, Base Async Region, Base Live Region, or authored control.
+        Spinner materializes directly without a Base Spinner hook and is always aria-hidden, roleless, non-focusable, and empty-exposed. It owns no loading or busy fact, status or accessible name, announcement, activation, event, command, operation delay or lifecycle timer, parent placement or alignment, external layout, or focus behavior; those remain with the parent composition, Base Async Region, Base Live Region, or authored control. Its `size` prop owns only intrinsic Root dimensions, and its 1000ms CSS timeline owns only visual rotation.
 
       zh-CN: >-
-        Spinner 直接 materialize，不使用 Base Spinner hook，并始终 aria-hidden、无 role、不可聚焦且 exposes 为空。它不拥有 loading 或 busy fact、status 或 accessible name、announcement、activation、event、command、timer、layout、operation lifecycle 或 focus 行为；这些职责保留给父级组合、Base Async Region、Base Live Region 或 authored control。
+        Spinner 直接 materialize，不使用 Base Spinner hook，并始终 aria-hidden、无 role、不可聚焦且 exposes 为空。它不拥有 loading 或 busy fact、status 或 accessible name、announcement、activation、event、command、operation delay 或 lifecycle timer、父级 placement 或 alignment、external layout 或 focus 行为；这些职责保留给父级组合、Base Async Region、Base Live Region 或 authored control。其 `size` prop 仅拥有 Root intrinsic dimensions，1000ms CSS timeline 仅拥有视觉旋转。
 
     references:
       prototypes:
@@ -111,10 +111,15 @@ criteria:
   - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-EVIDENCE
     text:
       en: >-
-        A separate bounded implementation carrier must add P-BRUTALIST-SPINNER and T-BRUTALIST-SPINNER-0001 together with direct-ownership, type/default-removal, size, visual, motion, reduced-motion, content-absence, semantic-absence, exact export and CLI closure, bilingual documentation, two-composition demo, and Web Component, React, Vue, and Vue 2 preview evidence.
+        A separate bounded implementation carrier must add P-BRUTALIST-SPINNER and T-BRUTALIST-SPINNER-0001 together with direct-ownership, type/default-removal, size, visual, motion, reduced-motion, content-absence, semantic-absence, exact export and CLI closure, bilingual documentation, two-composition demo, and Web Component, React, Vue, and Vue 2 preview evidence. That carrier must also add P-BRUTALIST-SPINNER to D-CLI-BRUTALIST-PRESET-CLOSURE-0001 `relates.prototypes` and T-CLI-BRUTALIST-PRESET-CLOSURE-0001 `exercises.prototypes` so the generated CLI token closure remains relation-visible and executable.
 
       zh-CN: >-
-        独立的有界实施载体必须同时新增 P-BRUTALIST-SPINNER 与 T-BRUTALIST-SPINNER-0001，并提供 direct-ownership、type/default-removal、size、visual、motion、reduced-motion、content-absence、semantic-absence、精确 export 与 CLI closure、双语文档、两种组合 demo，以及 Web Component、React、Vue 与 Vue 2 preview 证据。
+        独立的有界实施载体必须同时新增 P-BRUTALIST-SPINNER 与 T-BRUTALIST-SPINNER-0001，并提供 direct-ownership、type/default-removal、size、visual、motion、reduced-motion、content-absence、semantic-absence、精确 export 与 CLI closure、双语文档、两种组合 demo，以及 Web Component、React、Vue 与 Vue 2 preview 证据。该载体还必须将 P-BRUTALIST-SPINNER 加入 D-CLI-BRUTALIST-PRESET-CLOSURE-0001 的 `relates.prototypes` 与 T-CLI-BRUTALIST-PRESET-CLOSURE-0001 的 `exercises.prototypes`，确保生成式 CLI token closure 在关系图中可见且具备可执行证据。
+    references:
+      decisions:
+        - id: D-CLI-BRUTALIST-PRESET-CLOSURE-0001
+          anchors: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B]
+      tests: [T-CLI-BRUTALIST-PRESET-CLOSURE-0001]
 
   - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-KBD-SHARED
     text:
