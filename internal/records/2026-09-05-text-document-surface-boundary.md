@@ -91,7 +91,7 @@ Names below illustrate a proposal; they are not an admitted API:
 
 - App input: immutable stable `surfaceId` plus `document: { documentId, modelSessionId }`; the composite pair is the model key, and the model-session service owns source/saved content. Mutable resolved `editingMode: interactive | read-only | disabled` and status policy crosses per view. Role/name/description remain A11y; help is composition/relation.
 - Host facts: discriminated attachment; post-attachment facts/policy revisions; ready model/source/mutation/content; independent composition and bounded-selection availability/facts; input/keyboard-route/A11y/view-state support. Module derives dirty. Focus and resolved Scroll facts remain in their domains.
-- Model transaction summary: `{ documentId, modelSessionId, transactionId }`, document/source/mutation/content identity, immutable commit-time origin authorization context, disposition/count, and no observer freshness. The durable dispatcher reaches App once; a per-connection observation envelope adds the observing view's applied policy/facts revision for optional UI delivery.
+- Model transaction summary: `{ documentId, modelSessionId, transactionId }`, document/source/mutation/content identity, immutable commit-time origin authorization context, disposition/count, and no observer freshness. One serial durable dispatcher per composite model key preserves the `beforeMutationRevision -> afterMutationRevision` chain and reaches App once in commit order; a per-connection observation envelope adds the observing view's applied policy/facts revision for optional UI delivery.
 - Engine requests/results: mutation/policy-bound undo/redo and explicit snapshot/export by the App-owned service. Line navigation remains deferred. Focus/blur remain in Focus. Save/revert remain App actions.
 
 The first slice's selection summary is intentionally bounded to `{ count, primaryCollapsed }` plus the current monotonic mutation revision. No raw range, selected text, mutable selection, pixel rectangle, or ungoverned line/column encoding crosses. A later line/column or range API needs an explicit Unicode position encoding and revision semantics.
@@ -104,12 +104,12 @@ This resolves the seam with `D-TEXT-CONTROL-PROJECTION-0001-Q-SELECTION` without
 | --- | --- | --- | --- |
 | Document/model identity | App -> immutable Text Document requirement -> Host Capability resolver | Correct shared/private model and view appear even when different documents reuse a locally scoped session ID. | Resolve model by composite `{ documentId, modelSessionId }`; use `documentId` alone only for the underlying App document service. |
 | Source content/revision | App model-session service -> engine/model dispatcher | Engine renders text and all attached views observe one current persisted base. | Composite document/model session owns source revision and changes once for all its views. |
-| IME/text/key input | Physical editor -> initiating Host view bridge -> engine/model dispatcher | Before the transaction enters the shared model dispatcher, that exact bridge stamps immutable initiating surface/connection/applied-policy context; durable model delivery reaches App exactly once even if views detach. The Module never guesses origin from a later shared-model callback. | Composition support, composite model key, mutation revision, and commit-time interactive authorization; observer freshness does not govern durability. |
-| Edit details | Already-stamped model dispatcher -> App service; views receive optional observation envelopes | App validates origin context and persists `persist` by `{ documentId, modelSessionId, transactionId }`; stale view observation may drop without data loss. | Shared summary retains immutable origin authorization but no observing-view revision; each envelope binds only its current recipient connection/policy/facts revision. |
+| IME/text/key input | Physical editor -> initiating Host view bridge -> composite-key serial model dispatcher | Exact bridge stamps immutable initiating surface/connection/applied-policy context before shared dispatch. Dispatcher queues by commit revision and permits one unacknowledged durable App delivery per `{ documentId, modelSessionId }`; views may detach without reordering/loss. Module never guesses origin later. | Composition support, composite model key, contiguous mutation chain, and commit-time authorization; observer freshness does not govern durability. |
+| Edit details | Already-stamped serial dispatcher -> App service; views receive optional observation envelopes | App validates origin and persists once by `{ documentId, modelSessionId, transactionId }`; transaction N+1 is not sent before N acknowledgement; duplicates do not advance chain; stale view observation may drop. | `beforeMutationRevision` must equal prior accepted `afterMutationRevision`; shared summary retains origin but no observing-view revision; each envelope binds recipient freshness only. |
 | Save/Revert | Button -> App/model-session service | Save atomically advances model-session source revision and saved content version for all views sharing the composite model key; Module derives dirty. | App idempotency plus composite model/source/content identity; no per-view stale base. |
 | Undo/Redo | App/semantic command -> initiating Host view bridge -> engine | Engine transaction and availability facts. | Expected mutation/policy revision validated before mutation; the bridge stamps initiating authorization before the committed result enters shared dispatch. |
 | Selection/caret | Engine | Native accessibility exposes ranges; when supported, Proto receives only count/collapsed summary; unsupported summary is explicit and carries no selection fact. | Monotonic facts and selection revisions within connection/policy; engine selection remains usable independently. |
-| Focus/Tab escape | Focus domain / host keyboard arbiter -> editor or Harness | Exactly one focus destination; facts return only through Focus. | Focus identity/view epoch and shortcut policy. |
+| Focus/Tab escape | Host arbiter: active/conservative IME -> required Focus exit route -> ordinary Harness shortcut -> editor | Exactly one focus destination; at least one policy-verified exit key/chord cannot be captured by Harness/editor; facts return only through Focus. | `DocumentKeyboardRouteSupport.shortcutPolicyId` equals applied patch policy; route recomputed on every shortcut-policy update, plus Focus identity/view epoch. |
 | Accessible role/naming | A11y semantic object -> HC-A11Y/Adapter -> editor target | One role/name/description projection; App help control uses existing relations. | A11y identity and target replacement; engine supplies native implementation, not role truth. |
 | Viewport/scroll | Text Document registers one logical Scroll surface; M-SCROLL/HC-SCROLL-SURFACE map requests/facts to editor controller | Portable logical scroll facts/requests; engine retains physics/rendering/internal line windowing. | Scroll view epoch plus host-local geometry/controller; no raw view state. |
 | Diagnostics/decorations | App language service -> later engine/composition slice | Deferred. | No first-slice channel. |
@@ -183,9 +183,16 @@ type DocumentTransactionOriginSupport =
     }>;
 
 type DocumentKeyboardRouteSupport =
-  | Readonly<{ availability: 'available'; reason: null }>
+  | Readonly<{
+      availability: 'available';
+      shortcutPolicyId: string;
+      reservedExit: 'Tab' | 'F6' | 'Shift+F6';
+      reason: null;
+    }>
   | Readonly<{
       availability: 'unavailable';
+      shortcutPolicyId: string;
+      reservedExit: null;
       reason: 'keyboard-route-unavailable';
     }>;
 
@@ -223,7 +230,11 @@ type DocumentSurfaceFacts =
   | Readonly<{
       attachment: 'detached' | 'attaching';
       appliedPolicyRevision: null;
-      support: DocumentSurfaceSupport;
+    }>
+  | Readonly<{
+      attachment: 'unavailable';
+      appliedPolicyRevision: null;
+      reason: 'engine-unavailable' | 'document-unavailable' | 'service-unavailable';
     }>
   | Readonly<{
       attachment: 'unavailable' | 'error';
@@ -338,39 +349,39 @@ type DocumentSurfaceHost = Readonly<{
 }>;
 ```
 
-1. attach two surfaces to `{ documentId: doc-7, modelSessionId: default }`; resolve the same model, while `{ doc-8, default }` and `{ doc-7, model-4 }` resolve independent models and view-state keys;
-2. receive attaching/null policy, then ready with exact discriminated input/transaction-origin/keyboard/A11y/view support; each unavailable availability branch contains only its matching reason, with no free-form reason array; resolve Scroll support separately through `M-SCROLL-0001`;
-3. commit `tx-1` from the interactive surface; before shared dispatch, that initiating Host bridge stamps the durable `{ doc-7, default, tx-1 }` summary with its immutable surface/connection/policy context; App validates the context and persists once, while each observation envelope has only its recipient policy/facts revision;
-4. deliver the same model transaction to a read-only sibling view; its observation cannot replace the interactive origin context or authorize a second persistence; Module attempts to infer an origin from the sibling are prohibited;
-5. detach one view before observation; stale UI drops but durable delivery remains once;
+1. attach two surfaces to `{ documentId: doc-7, modelSessionId: default }`; resolve same model, while `{ doc-8, default }` and `{ doc-7, model-4 }` resolve independent models/view keys;
+2. snapshot detached/attaching with null policy and no support field; fail pre-attachment engine resolution with null policy/no fabricated support; then ready with exact discriminated support. Resolve Scroll separately through `M-SCROLL-0001`;
+3. commit `tx-1` then `tx-2` rapidly from interactive surface. Initiating bridges stamp immutable origin before shared dispatcher; delay App acknowledgement for tx-1 and prove serial composite-key dispatcher does not deliver tx-2 early; after ack, deliver tx-2 with `beforeMutationRevision === tx-1.afterMutationRevision`; duplicate tx-1 does not advance chain;
+4. deliver model observations to read-only sibling; observation cannot replace origin, authorize second persistence, or reorder durable delivery; Module origin inference is prohibited;
+5. detach one view before observation/ack; stale UI drops but ordered durable queue persists once;
 6. recover unavailable -> ready; older failure loses by facts revision;
-7. keep committed input interactive while composition reporting is unavailable: Host-local IME arbitration conservatively sends candidate Enter/Tab/Escape to the engine before Harness and reports no `composing` fact. If that ordering cannot be guaranteed, resolve read-only/unavailable. Separately make selection summary unavailable while engine-local selection remains usable; each support union has exact reason/null fact;
+7. keep input interactive while composition reporting unavailable: Host-local IME conservatively precedes Focus/Harness/editor and reports no composing. If unsafe, resolve read-only/unavailable. Separately degrade selection summary while engine selection remains;
 8. move supported selection twice without edit; facts/selection revisions order callbacks;
-9. exercise interactive/read-only/disabled: only interactive edits; undo/redo under non-interactive mode returns `policy-denied` before engine mutation; unavailable origin stamping resolves read-only/unavailable rather than emitting a persistable edit;
-10. during reported active composition, IME-consumed Enter/Tab/Escape reaches engine before Harness shortcuts; after known composition end, registered shortcut precedence resumes;
-11. make Tab/F6 exit route unavailable; exact keyboard support reason is `keyboard-route-unavailable`, and composition acceptance rejects independently of Button;
-12. request undo while selection summary, keyboard route, A11y, and view-state are unavailable; command still executes if engine/document/service and policy/mutation checks pass. Only a `DocumentCommandUnavailableReason` may produce command `unavailable`;
-13. save model content/source centrally for all views sharing the composite model key; dirty/source remain coherent;
-14. enforce strict policy updates and per-view observation envelopes; durable summary retains commit-time Host-stamped authorization but no observer freshness;
+9. exercise editing modes: only interactive edits; non-interactive undo/redo returns `policy-denied`; unavailable origin stamping resolves read-only/unavailable;
+10. during reported active composition, IME-consumed Enter/Tab/Escape precedes everything. After known end, a policy-verified reserved exit key/chord reaches Focus before Harness; ordinary registered Harness shortcuts then precede editor;
+11. set `shortcutPolicyId` that binds the proposed exit route to Harness; recompute support for that exact ID as `keyboard-route-unavailable`, reject composition, and never report a stale prior-policy route. Use a non-colliding policy and prove reserved exit works ahead of Harness;
+12. request undo while selection summary, keyboard route, A11y, and view-state unavailable; command executes if engine/document/service and policy/mutation pass. Only command-specific reason may produce unavailable;
+13. save model content/source centrally for all composite-key views; dirty/source remain coherent;
+14. enforce strict policy updates and per-view envelopes; durable summary retains Host-stamped origin but no observer freshness;
 15. App-origin transaction is observe-only; no persistence echo;
-16. unavailable/error carries facts/policy revision but no engine fields; unavailable command omits mutation/content and uses only engine/document/service reason;
-17. switch `surface-2` between composite model keys; release old leases with `retain-for-surface`, restore each `{ surfaceId, documentId, modelSessionId }` state without collision, then permanently remove the logical surface with `evict-surface` and prove all of its cached keys are purged;
-18. map role/name only A11y and focus only Focus; consume logical viewport/support only from Scroll and prove Text Document reports no second Scroll truth;
-19. complete stale UI callbacks without suppressing durable transactions;
-20. prove no raw engine/model/range/target/scroll controller/file/document/system-duplicate/view-state value crosses and no view-state cache survives final surface eviction.
+16. unavailable/error carries appropriate policy/facts/support shape; unavailable command omits mutation/content and uses only engine/document/service reason;
+17. switch `surface-2` between model keys; release view with `retain-for-surface`, restore each key, then `evict-surface` and prove cache purge;
+18. map role/name only A11y/focus only Focus; consume viewport/support only from Scroll. On detach, Text Document removes only its editor-controller bridge; `M-SCROLL-0001` advances its epoch and disposes the Scroll Host lease once;
+19. complete stale UI callbacks without suppressing/reordering durable transactions;
+20. prove no raw engine/model/range/target/scroll controller/file/document/system-duplicate/view-state crosses and no cache survives final eviction.
 
-This proves composite model-session identity, initiating-Host commit authorization, exact support/reason coupling, command-specific unavailability, conservative IME arbitration without composition facts, bounded view-state lifetime, resolved editing mode, keyboard-route support, model-scoped restoration, monotonic UI revisions, recipient-only observation envelopes, durable delivery, and system-domain ownership. It does not prove real host behavior.
+This proves pending attachment without fabricated support, composite identity, Host commit authorization, per-model commit-order delivery, exact support/reason coupling, command-specific unavailability, IME-then-exit-then-Harness arbitration, bounded view-state lifetime, resolved modes, policy-bound keyboard route, model restoration, UI revisions, recipient-only envelopes, durable delivery, and system-domain ownership. It does not prove real host behavior.
 
 ## Revision, input, shortcut, and permission policy
 
-- **Revision, transaction, and authorization ownership:** the composite `{ documentId, modelSessionId }` service owns current `sourceRevision`; monotonic mutation prevents ABA; content version identifies equality. The initiating Host bridge—not the Module or an observing sibling—captures immutable `surfaceId`, `connectionId`, applied policy revision, and `editingMode: interactive` before the transaction enters the shared dispatcher. Durable `{ documentId, modelSessionId, transactionId }` summaries then emit once. The App/backend validates that context against its permission decision before persistence. Recipient observation envelopes carry separate current policy/facts revisions and may stale-drop; they never rewrite origin authorization. User/undo/redo persist; App origin observes only. If the bridge cannot correlate and stamp the initiating view synchronously, `transaction-origin-unavailable` prevents interactive persistable delivery.
+- **Revision, transaction, authorization, and order:** composite `{ documentId, modelSessionId }` service owns source revision; mutation revisions prevent ABA; content version identifies equality. Initiating Host bridge captures immutable surface/connection/applied policy/interactive mode before shared dispatch. One serial dispatcher per composite model key permits one unacknowledged durable App delivery, requires each next `beforeMutationRevision` to equal previous accepted `afterMutationRevision`, and dedupes the triple key without reordering. App validates origin before persistence. Recipient envelopes carry separate UI freshness and may stale-drop; user/undo/redo persist, App observes only. Unavailable origin stamping blocks interactive delivery.
 - **Save/conflict/dirty:** Save/Revert invokes the App's composite model-session service. Success atomically advances source revision and saved content version for every attached view sharing that key; the next facts publication carries both, with no per-view patch or stale base. Dirty compares content versions. Lifecycle never saves.
-- **IME and shortcut precedence:** candidate/composition UI stays engine-owned. With available reporting, active composition sends IME-consumed keys (including Enter/Tab/Escape) to the engine first; Harness shortcut precedence resumes only after a known composition end. With reporting unavailable but interactive input retained, `conservative-ime-first` requires the Host's local IME arbiter to consume candidate/composition keys before Harness without publishing `composing`; it must never infer “not composing” from null. If the Host cannot guarantee that order, policy resolves read-only/unavailable.
+- **IME/exit/shortcut precedence:** arbitration order is active or conservative Host-local IME first, then one required Focus exit key/chord reserved against the applied `shortcutPolicyId`, then ordinary Harness commands, then editor processing. Available composition reporting resumes later tiers only after known end; unavailable reporting never treats null as not composing. `DocumentKeyboardRouteSupport.shortcutPolicyId` must equal current applied patch and is recomputed on every shortcut-policy update. A collision produces exact unavailable support and blocks composed acceptance; Harness cannot capture the reserved exit route.
 - **Text versus command keys:** engine owns editing/cursor/undo/indent. App commands use host arbiter; no native key object crosses.
-- **Tab and escape:** Web host reports Tab/F6 route through exact `DocumentKeyboardRouteSupport`; composition owns leave Button/Focus topology. Either unavailable route or absent control fails acceptance.
-- **Clipboard/paste:** system/editor owns; only a resulting persistable transaction already stamped by the initiating Host bridge enters the durable model dispatcher.
+- **Tab and escape:** composition owns enabled leave Button and Focus topology in addition to policy-verified host route. Either unavailable route or absent control fails acceptance.
+- **Clipboard/paste:** system/editor owns; only a resulting persistable transaction already stamped by the initiating Host bridge enters the serial durable dispatcher.
 - **Editing mode and policy:** one resolved mode replaces conflicting booleans. Only `interactive` with `transactionOrigin.availability: commit-stamped` may emit persistable edits or execute undo/redo. `read-only` preserves focus/engine-local selection; `disabled` blocks entry. Commands in non-interactive modes return `policy-denied` before engine mutation. Every update is strictly newer; committed transactions remain durable.
-- **Mobile:** host IME/touch chrome; input, composition-reporting/arbitration, selection-summary, and exit support report through exact discriminated branches. Unavailable composition reporting may retain interactive input only with conservative Host-local IME-first arbitration; unavailable selection may degrade without claiming a summary; unavailable exit blocks composed acceptance.
+- **Mobile:** host IME/touch chrome; input, composition arbitration/reporting, selection-summary, and exit support use exact branches. Unavailable composition reporting retains interactive only with conservative IME-first; unavailable selection may degrade; unavailable policy-bound exit blocks acceptance.
 
 ## Accessibility boundary
 
@@ -384,14 +395,14 @@ This proves composite model-session identity, initiating-Host commit authorizati
 ## Performance, viewport, windowing, and lifecycle
 
 - Full document/model/token/decorations/internal viewport lines do not enter generic Proto State.
-- Durable model transactions are view-independent but retain immutable initiating-Host commit authorization; App validates and dedupes `{ documentId, modelSessionId, transactionId }` and ignores observe-only. Recipient view envelopes may stale-drop and cannot change origin.
-- Text Document registers a logical Scroll surface. `M-SCROLL-0001` exclusively owns portable Scroll identity/facts/requests/support and view epoch; `HC-SCROLL-SURFACE-0001` maps the engine controller behind a lease. Text Document consumes that resolved state and never republishes a Scroll support field. Engine owns physics/rendering/internal line windowing; #521 applies to external authored Collections, not engine lines.
+- Durable model transactions are view-independent but retain immutable initiating-Host authorization. One serial dispatcher per `{ documentId, modelSessionId }` preserves contiguous commit order with one unacknowledged App delivery; App validates/dedupes triple key and ignores observe-only. Recipient view envelopes may stale-drop without changing origin/order.
+- Text Document registers a logical Scroll surface. `M-SCROLL-0001` exclusively owns portable Scroll identity/facts/requests/support/view epoch and alone releases `HC-SCROLL-SURFACE-0001` leases. Text Document supplies and cleans only its editor-owned controller bridge/subscription; it never disposes the Scroll lease or republishes support. Engine owns physics/rendering/internal line windowing; #521 applies to authored Collections, not engine lines.
 - Raw geometry/view state remains host-private; restoration keys `{ surfaceId, documentId, modelSessionId }` so independent sessions never share cursor/selection/folding/scroll state.
 - One surface holds immutable surface plus composite document/model requirement and view connection. Identity replacement reattaches; model source updates centrally; mutable update is strictly increasing policy only. Loading is represented only by the `status` discriminant; no duplicate boolean exists.
-- Every post-attachment facts branch has facts revision. Each support dimension is an exact discriminated union: success has null reason; unavailable has only its matching bounded reason. Composition-reporting/selection unavailable branches contain null facts. UI callbacks stale-suppress; durable transactions never use observer freshness.
-- `dispose({ viewState: 'retain-for-surface' })` releases input, Focus bridge, separately owned Scroll lease/controller, observations, A11y, and target refs while keeping only the keyed host-private view state for later attachment during the same logical `surfaceId` lifetime. `dispose({ viewState: 'evict-surface' })` performs the same cleanup and purges every cached `{ surfaceId, documentId, modelSessionId }` entry when that logical surface is permanently removed. The App/runtime must issue final eviction; retention is not global or indefinite.
+- Detached/attaching and pre-attachment unavailable facts have null policy and omit support; no engine-derived capability/live composition/selection fact exists before attachment. Every post-attachment facts branch has facts revision. Each support dimension is exact: success has null reason, unavailable only matching reason. UI stale-suppresses; durable dispatcher never uses observer freshness.
+- `dispose({ viewState: 'retain-for-surface' })` releases input, Focus bridge, editor-owned Scroll-controller bridge/subscription, observations, A11y, target refs, while keeping keyed view state for same surface lifetime. It does not release the independently owned Scroll Host lease; `M-SCROLL-0001` handles its epoch/disposal. `evict-surface` also purges every cached key on permanent removal; App/runtime must issue final eviction.
 - View lease disposal never disposes App-owned model/file/language/storage sessions.
-- Attachment failure uses only `DocumentAttachmentFailure`; command unavailable uses only `DocumentCommandUnavailableReason`; surface capabilities fail or degrade only through their own exact branch. Scroll availability remains solely in the Scroll domain.
+- Attachment failure uses only `DocumentAttachmentFailure`; command unavailable only `DocumentCommandUnavailableReason`; capabilities fail/degrade through exact branch. Scroll availability remains solely in Scroll.
 
 ## Proposed entity and evidence graph
 
@@ -419,12 +430,12 @@ No new Adapter identity is justified: existing profiles receive reviewed relatio
 ### Bounded red-first plan
 
 1. **Portable negatives:** reject raw engine/model/target/range/worker/stream/file/framework/native event/geometry/document/token/view-state/scroll-controller/service values; reject identity in mutable updates.
-2. **Fake lease:** composite document/model-session resolution, immutable attach, strict policy, editing modes, keyboard-route support, source update across views, model-scoped view-state retain/restore/final eviction, replacement, cleanup, stale UI suppression without edit loss.
-3. **Revisions/transactions:** composite model key and triple idempotency key; UI revisions/content equality; initiating-Host commit authorization before shared dispatch; recipient-only observation freshness; exactly-once persistence; App observe-only; shared save; undo dirty/conflict.
-4. **Input/permissions/commands:** exact per-capability support/reason unions; conservative IME-first arbitration when composition reporting is unavailable; editing-mode and transaction-origin gates; command-specific unavailable reasons plus policy-denied/stale branches; composition Button/Focus; regressing policy rejection.
-5. **Selection/availability/view identity:** facts revision on post-attachment/ready branches; ready-only engine fields; null policy only attaching; `{surface,document,model}` view key; retain-for-reattach versus final surface eviction; loading status single-valued; line navigation deferred.
-6. **A11y/Focus/Scroll fakes:** role/name only A11y; help composition; focus only Focus; logical viewport/support consumed exclusively through Scroll; keyboard-route support explicit; no duplicate Scroll fact.
-7. **Real Web:** editing modes, initiating-bridge authorization stamping, composition reporting/arbitration/degradation, Tab/F6 support, bounded selection availability/undo, shared composite-key model save, model-scoped view restore/final eviction, replacement, A11y, Scroll, cleanup.
+2. **Fake lease:** pending/null-policy attach and pre-attach unavailable omit support; composite resolution; strict policy; editing modes; policy-bound keyboard route; source update across views; model-scoped state retain/restore/final eviction; replacement; cleanup; stale UI suppression without edit loss.
+3. **Revisions/transactions:** composite/triple keys; UI/content revisions; initiating-Host authorization; one unacknowledged durable delivery per model, contiguous mutation chain under delayed/reordered transport, dedupe without reordering; recipient-only freshness; App observe-only; shared save; undo dirty/conflict.
+4. **Input/permissions/commands:** exact support/reasons; arbitration order IME -> reserved Focus exit -> ordinary Harness -> editor; recompute route against shortcut policy/collision; editing/origin gates; command-specific unavailable and policy-denied/stale; Button/Focus; regressing policy rejection.
+5. **Selection/availability/view identity:** facts revision post-attachment only; ready-only engine fields; null policy/no support before attach; `{surface,document,model}` view key; retain versus eviction; loading single-valued; line navigation deferred.
+6. **A11y/Focus/Scroll fakes:** role/name only A11y; help composition; focus only Focus; logical viewport/support consumed only through Scroll; Text Document drops editor bridge while M-SCROLL advances epoch/disposes lease once; no duplicate Scroll fact/disposal.
+7. **Real Web:** modes, initiating authorization, serialized transaction delivery, composition/exit/shortcut arbitration, policy-collision route, bounded selection/undo, shared model save, view restore/eviction, replacement, A11y, Scroll owner cleanup.
 8. **Performance:** rapid edits/caret movement and a bounded first-slice document prove no full-content/token/viewport copies through Proto UI and no retained listeners/models.
 9. **Cross-adapter Web only if claimed:** WC/React/Vue from one authoring source remains Web evidence.
 10. **Non-Web:** independent native profile with native input, selection, revision, accessibility, view replacement, and cleanup evidence before multi-host language.
