@@ -399,6 +399,16 @@ export function checkSpecLifecycleProjection({ documents }) {
       errors.push(
         `${document.file}: public spec lifecycle guide must explain \`activeSince\` as distinct from \`since\`.`
       );
+      continue;
+    }
+    const allowsSameRelease =
+      document.locale === 'zh-cn'
+        ? document.text.includes('可以与 `since` 相同')
+        : document.text.includes('may equal `since`');
+    if (!allowsSameRelease) {
+      errors.push(
+        `${document.file}: public spec lifecycle guide must state that \`activeSince\` may equal \`since\` for an identity introduced stable.`
+      );
     }
   }
   return errors;

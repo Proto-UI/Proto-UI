@@ -185,6 +185,7 @@ describe('version release entities', () => {
     const after = getSpecSnapshot(createSpecWorkspace([active]), '0.3.0');
 
     expect(diffSpecSnapshots(before, after).revised).toHaveLength(1);
+    expect(diffSpecSnapshots(after, before).revised).toHaveLength(1);
   });
 
   it('sorts prerelease identifiers with semver precedence', () => {

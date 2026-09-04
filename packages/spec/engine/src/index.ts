@@ -116,8 +116,8 @@ export function diffSpecSnapshots(from: SpecSnapshot, to: SpecSnapshot): SpecSna
 
     const activationCrossed =
       entity.activeSince !== undefined &&
-      compareSpecVersions(from.version, entity.activeSince) < 0 &&
-      compareSpecVersions(to.version, entity.activeSince) >= 0;
+      compareSpecVersions(from.version, entity.activeSince) >= 0 !==
+        compareSpecVersions(to.version, entity.activeSince) >= 0;
 
     if (
       revisions.length > 0 ||

@@ -250,5 +250,6 @@ test('public spec lifecycle guides expose the activation-history boundary', () =
 
   assert.deepEqual(errors, [
     'apps/www/src/content/docs/en/specifications/introduction.md: public spec lifecycle guide must explain `activeSince` as distinct from `since`.',
+    'apps/www/src/content/docs/zh-cn/specifications/introduction.md: public spec lifecycle guide must state that `activeSince` may equal `since` for an identity introduced stable.',
   ]);
 });
