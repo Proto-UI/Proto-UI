@@ -1,0 +1,107 @@
+id: P-BRUTALIST-CHECKBOX
+type: prototype
+title: Brutalist Checkbox Root inherits Base Checkbox and layers a square check surface
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  Brutalist Checkbox Root inherits Base Checkbox ownership and projects the current square, hard-bordered control surface without creating a second value, activation, focus, event, form, or accessibility owner.
+
+
+statement:
+  en: >-
+    Brutalist Checkbox Root is a draft semantic projection over Base Checkbox. Base retains checked and indeterminate ownership, activation, disabled behavior, focus, events, and accessibility. This layer adds only the current square geometry, paired fills, hard shadow, press, focus-visible, and disabled presentation. The already-public Brutalist package exports the family and its anatomy subpath, while proto-ui add intentionally has no Checkbox entry.
+
+
+  zh-CN: >-
+    Brutalist Checkbox Root 是 Base Checkbox 之上的 draft 语义投射。checked 与 indeterminate 所有权、activation、disabled、focus、event 与 accessibility 仍由 Base 持有；本层只增加当前 方形几何、成对 fill、硬阴影、pressed、focus-visible 与 disabled 呈现。已经公开的 Brutalist package 导出该 family 与 anatomy subpath，但 proto-ui add 刻意不提供 Checkbox 入口。
+
+
+criteria:
+  - id: P-BRUTALIST-CHECKBOX-BASE-INHERITANCE
+    text:
+      en: >-
+        The Root must inherit P-BASE-CHECKBOX through asCheckboxRoot() and may consume its checked, indeterminate, disabled, focusVisible, and pressed handles only for presentation.
+
+
+      zh-CN: >-
+        Root 必须通过 asCheckboxRoot() 继承 P-BASE-CHECKBOX，且只能为呈现消费其 checked、indeterminate、disabled、focusVisible 与 pressed handles。
+
+
+    references:
+      prototypes:
+        - id: P-BASE-CHECKBOX
+          anchors:
+            - P-BASE-CHECKBOX-ROOT-SEMANTIC-OWNER
+            - P-BASE-CHECKBOX-CONTROLLED-CHECKED
+            - P-BASE-CHECKBOX-ACTIVATION-FLIPS-CHECKED
+            - P-BASE-CHECKBOX-ACCESSIBLE-ROLE
+  - id: P-BRUTALIST-CHECKBOX-DIRECT-ENTRY
+    text:
+      en: The direct Root entry is brutalist-checkbox-root and this layer provides no authored asHook.
+      zh-CN: Root direct entry 为 brutalist-checkbox-root，且本层不提供 authored asHook。
+  - id: P-BRUTALIST-CHECKBOX-PUBLIC-PACKAGE-NO-CLI
+    text:
+      en: >-
+        The already-public @proto.ui/prototypes-brutalist package must export Root and Indicator from its root and ./checkbox anatomy subpath. Checkbox must not enter the proto-ui add registry and creates no package, publication channel, or independent release commitment.
+
+
+      zh-CN: >-
+        已公开的 @proto.ui/prototypes-brutalist package 必须从 package root 与 ./checkbox anatomy subpath 导出 Root 和 Indicator。Checkbox 不得进入 proto-ui add registry，也不创建 package、 publication channel 或独立 release commitment。
+
+
+  - id: P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
+    text:
+      en: >-
+        Root must project inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 border-black bg-main text-main-foreground shadow-[3px_3px_0_0_#000] outline-none select-none transition-none. It must use no gradient, glass, rounded-card, or soft-elevation treatment.
+
+
+      zh-CN: >-
+        Root 必须投射 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 border-black bg-main text-main-foreground shadow-[3px_3px_0_0_#000] outline-none select-none transition-none，且不得使用 gradient、glass、rounded-card 或 soft-elevation 处理。
+
+
+  - id: P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
+    text:
+      en: >-
+        Checked while not indeterminate must use bg-foreground text-background; indeterminate takes visual precedence and retains the paired bg-main text-main-foreground surface. Pressed removes the shadow, focus-visible applies the shared hard ring, and disabled applies pointer-events-none opacity-50.
+
+
+      zh-CN: >-
+        checked 且非 indeterminate 时必须使用 bg-foreground text-background；indeterminate 在视觉上优先， 并保留配对的 bg-main text-main-foreground surface。pressed 移除 shadow，focus-visible 使用共享硬 ring， disabled 使用 pointer-events-none opacity-50。
+
+
+  - id: P-BRUTALIST-CHECKBOX-ADMITTED-ANATOMY
+    text:
+      en: Root and Indicator are the only admitted identities; no Label, Group, HiddenInput, styled-only duplicate, or raw class alias is added.
+      zh-CN: Root 与 Indicator 是唯一 admitted identities；不得增加 Label、Group、HiddenInput、styled-only duplicate 或 raw class alias。
+  - id: P-BRUTALIST-CHECKBOX-BOUNDARY
+    text:
+      en: >-
+        The projection must add no second checked, indeterminate, activation, disabled, focus, event, form, or accessibility owner and must not add variants, event callbacks, submission, or validation.
+
+
+      zh-CN: >-
+        该投射不得增加第二个 checked、indeterminate、activation、disabled、focus、event、form 或 accessibility owner，也不得增加 variants、event callbacks、submission 或 validation。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/checkbox/root.proto.ts
+  - path: packages/prototypes/brutalist/src/checkbox/types.ts
+  - path: packages/prototypes/brutalist/test/checkbox.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/checkbox.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/checkbox.mdx
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts:
+    [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-CHECKBOX
+verifies:
+  tests: [T-BRUTALIST-CHECKBOX-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the draft Brutalist Checkbox Root projection with its public-package/no-CLI boundary.
+tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox]

@@ -57,6 +57,10 @@ describe('@proto.ui/cli', () => {
     expect(COMPONENT_REGISTRY).not.toHaveProperty('brutalist-tooltip');
   });
 
+  it('keeps the public Brutalist Checkbox family out of proto-ui add', () => {
+    expect(COMPONENT_REGISTRY).not.toHaveProperty('brutalist-checkbox');
+  });
+
   it('pins official packages to the exact built CLI release train', () => {
     const moduleUrl = pathToFileURL(
       path.join(CLI_DIR, 'dist', 'services', 'package-manager.js')

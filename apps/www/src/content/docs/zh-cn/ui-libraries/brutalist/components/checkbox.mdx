@@ -1,0 +1,29 @@
+---
+title: 'Checkbox'
+description: '覆盖在 Base Checkbox 协议之上的 Brutalist Checkbox 草案呈现。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个 draft family 包含 Root 与 Indicator。controlled/uncontrolled `checked`、由 author 控制的 `indeterminate` display state、生效的 disabled behavior、pointer 与 Space activation、focus，以及包含 `aria-checked="mixed"` 的可访问 `checkbox` role 均由 Base Checkbox 所有。
+
+Brutalist 层只拥有呈现：方形两像素 ink border、硬偏移 shadow、成对的状态 fill，以及从可访问树隐藏的硬线 tick 或 dash。Indicator 从最近的 Root 派生状态，不拥有 value、focus、event、form 或 accessibility control surface。checked 与 indeterminate 同时为 true 时，mixed dash 优先。
+
+Root 与 Indicator 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/checkbox` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-checkbox` registry entry，也不产生单独的 publication 或 release 承诺。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-checkbox" initialRuntime="wc" />
+</div>
+
+## 建议验收路径
+
+1. 分别用 pointer 与 Space 操作 Unchecked、Checked 和 Mixed 示例。
+2. 确认 Disabled 示例不能改变。
+3. 用 Tab 聚焦名为 Focus-visible target 的示例，确认硬 ring 出现在 Root 上且焦点不会移动到 Indicator。
+4. 确认 Checked and indeterminate 示例显示 mixed dash 而不是 tick。
+5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Checkbox guarantee。

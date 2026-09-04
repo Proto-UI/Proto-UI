@@ -104,6 +104,11 @@
       "types": "./dist/textarea/index.d.ts",
       "import": "./dist/textarea/index.js",
       "default": "./dist/textarea/index.js"
+    },
+    "./checkbox": {
+      "types": "./dist/checkbox/index.d.ts",
+      "import": "./dist/checkbox/index.js",
+      "default": "./dist/checkbox/index.js"
     }
   },
   "description": "Neo-Brutalist Proto UI prototype library with package and CLI family imports.",

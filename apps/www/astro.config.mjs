@@ -462,6 +462,12 @@ export default defineConfig({
                   slug: 'ui-libraries/brutalist/components/textarea',
                 },
                 {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/brutalist/components/checkbox',
+                  badge: inProgressBadge,
+                },
+                {
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/brutalist/components/button',

@@ -1,0 +1,110 @@
+id: T-BRUTALIST-CHECKBOX-0001
+type: test
+title: Brutalist Checkbox projection and public-boundary tests
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  Covers exact exports and CLI absence, Base-owned behavior, the Root and Indicator visual surfaces, mixed precedence, the no-second-owner boundary, and rendered cross-runtime evidence.
+
+
+cases:
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-EXPORTS
+    title: The public package exposes Root and Indicator exactly while proto-ui add omits Checkbox
+    covers:
+      - P-BRUTALIST-CHECKBOX-DIRECT-ENTRY
+      - P-BRUTALIST-CHECKBOX-PUBLIC-PACKAGE-NO-CLI
+      - P-BRUTALIST-CHECKBOX-INDICATOR-DIRECT-ENTRY
+    expectation: brutalist-checkbox-package-and-subpath-export-the-family-without-a-cli-entry
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-SURFACE
+    title: Resting, checked, and mixed states paint the governed Root and Indicator surfaces
+    covers:
+      - P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
+      - P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
+      - P-BRUTALIST-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
+      - P-BRUTALIST-CHECKBOX-INDICATOR-GLYPH-SELECTION
+    expectation: brutalist-checkbox-paints-square-paired-surfaces-and-mixed-precedence
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-INTERACTION
+    title: Press, focus-visible, and disabled presentation consumes inherited Base facts
+    covers:
+      - P-BRUTALIST-CHECKBOX-BASE-INHERITANCE
+      - P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
+    expectation: brutalist-checkbox-styles-inherited-interaction-facts-without-owning-them
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-NO-SECOND-OWNER
+    title: Root and Indicator add no semantic owner or unsupported public API
+    covers:
+      - P-BRUTALIST-CHECKBOX-ADMITTED-ANATOMY
+      - P-BRUTALIST-CHECKBOX-BOUNDARY
+      - P-BRUTALIST-CHECKBOX-INDICATOR-BASE-INHERITANCE
+      - P-BRUTALIST-CHECKBOX-INDICATOR-CONTEXT-DERIVED
+    expectation: brutalist-checkbox-republishes-only-base-owned-facts-and-derived-indicator-state
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-CSS
+    title: The style renderer supports the Indicator visibility and current-color glyph tokens
+    covers:
+      - P-BRUTALIST-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
+    expectation: brutalist-checkbox-indicator-tokens-produce-supported-css
+  - id: T-BRUTALIST-CHECKBOX-0001-CASE-BROWSER
+    title: Real package exports render state, focus, contrast, and one accessible control across Web Components, React, Vue, and Vue 2
+    covers:
+      - P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
+      - P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
+      - P-BRUTALIST-CHECKBOX-ADMITTED-ANATOMY
+      - P-BRUTALIST-CHECKBOX-BOUNDARY
+      - P-BRUTALIST-CHECKBOX-INDICATOR-CONTEXT-DERIVED
+      - P-BRUTALIST-CHECKBOX-INDICATOR-GLYPH-SELECTION
+    expectation: rendered-brutalist-checkbox-keeps-stable-geometry-readable-glyphs-and-one-control
+implementations:
+  - id: prototypes-brutalist-checkbox-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/checkbox.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-CHECKBOX-0001-CASE-EXPORTS
+      - T-BRUTALIST-CHECKBOX-0001-CASE-SURFACE
+      - T-BRUTALIST-CHECKBOX-0001-CASE-INTERACTION
+      - T-BRUTALIST-CHECKBOX-0001-CASE-NO-SECOND-OWNER
+    exercises: &checkbox-prototypes
+      - P-BASE-CHECKBOX
+      - P-BASE-CHECKBOX-INDICATOR
+      - P-BRUTALIST-CHECKBOX
+      - P-BRUTALIST-CHECKBOX-INDICATOR
+  - id: cli-brutalist-checkbox-absence
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/cli.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-CHECKBOX-0001-CASE-EXPORTS]
+    exercises: *checkbox-prototypes
+  - id: type-brutalist-checkbox-export-parity
+    kind: workspace-check
+    status: passing
+    path: internal/contracts/types/prototype-family-exports.contract.v0.type-test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-CHECKBOX-0001-CASE-EXPORTS]
+    exercises: *checkbox-prototypes
+  - id: cli-brutalist-checkbox-css
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/proto-style-css.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-CHECKBOX-0001-CASE-CSS]
+    exercises:
+      - P-BRUTALIST-CHECKBOX-INDICATOR
+  - id: www-brutalist-checkbox-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-CHECKBOX-0001-CASE-BROWSER]
+    exercises: *checkbox-prototypes
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-CHECKBOX
+    - id: P-BRUTALIST-CHECKBOX-INDICATOR
+exercises:
+  prototypes: *checkbox-prototypes
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced draft Brutalist Checkbox package, behavior, CSS, and cross-runtime coverage.
+tags: [test, brutalist, neo-brutalist, visual, checkbox]

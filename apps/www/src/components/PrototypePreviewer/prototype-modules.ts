@@ -550,6 +550,15 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/checkbox');
     registerPrototype('shadcn-checkbox-indicator', mod.shadcnCheckboxIndicator);
   },
+  // Runtime-selected preview registry keeps the real public family import lazy.
+  'brutalist-checkbox-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/checkbox');
+    registerPrototype('brutalist-checkbox-root', mod.brutalistCheckboxRoot);
+  },
+  'brutalist-checkbox-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/checkbox');
+    registerPrototype('brutalist-checkbox-indicator', mod.brutalistCheckboxIndicator);
+  },
   'shadcn-textarea-root': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/textarea');
     registerPrototype('shadcn-textarea-root', mod.default);

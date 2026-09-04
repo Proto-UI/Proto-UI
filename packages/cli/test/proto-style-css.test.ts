@@ -87,6 +87,15 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
+  it('renders the visibility and inherited glyph ink used by Brutalist Checkbox', () => {
+    const css = renderProtoStyleTokenCss(['text-current', 'opacity-0', 'opacity-100']);
+
+    expect(css).toContain('color: currentColor;');
+    expect(css).toContain('opacity: 0;');
+    expect(css).toContain('opacity: 1;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
   it('resets composed custom properties inside the layer, below every token rule', () => {
     const css = renderProtoStyleTokenCss(['ring-2', 'shadow-[3px_3px_0_0_#000]', 'translate-x-0']);
 
