@@ -86,10 +86,10 @@ The engine can remain completely outside Proto UI. The Host Capability resolves 
 The proposal may evaluate these plain values; names are illustrative and not an admitted API:
 
 - App input: opaque `sessionId: string`, `readOnly`, `inputEnabled`, App-authoritative connection/process status, accessible label/description, and a host-configured shortcut-policy identifier.
-- Host facts: `attachment: detached | attaching | ready | unavailable | error`, `composing`, `columns`, `rows`, display title as untrusted host text, per-feature support plus bounded reason codes, and the latest revision-bound resize outcome. Focused state is reported only through the Focus domain, not through Terminal-specific facts.
-- Requests/results: committed `textInput`, normalized `keyInput`, resize `{ columns, rows, revision }` with applied/rejected result, and bounded `attention`/`error` signal. Focus/blur requests remain in the Focus domain.
+- Host facts: `attachment: detached | attaching | ready | unavailable | error`, `composing`, `columns`, `rows`, per-feature support plus bounded reason codes, and the latest revision-bound resize outcome. Focused state is reported only through the Focus domain, not through Terminal-specific facts. Terminal-controlled title strings remain host-local.
+- Requests/results: committed `textInput`, normalized `keyInput`, an App-to-host special-key request, resize `{ columns, rows, revision }` with applied/rejected result, and bounded `attention`/`error` signal. Focus/blur requests remain in the Focus domain.
 
-`columns` and `rows` are neutral positive integer character-cell counts. Pixels, rectangles, font metrics, device scale, observers, and layout objects remain host-local. A resize request is not a fact until the host/backend reports an applied/rejected result carrying the acknowledged revision and effective dimensions; older results cannot replace newer facts.
+`columns` and `rows` are neutral positive integer character-cell counts. Pixels, rectangles, font metrics, device scale, observers, and layout objects remain host-local. A resize request is not a fact until the host/backend reports an applied/rejected result carrying the acknowledged revision and effective dimensions; older results cannot replace newer facts. Terminal-controlled title sequences do not enter portable facts: they are process-controlled, unbounded, and may change at render cadence. If chrome needs a title, the App/backend may observe it outside Proto UI, remove control characters, enforce its own length/cadence policy, and supply a bounded App-owned label through ordinary composition.
 
 A current accessible text snapshot can be a plain diagnostic/test result, but should not be continuously copied into portable State. The first slice should expose `host-bridge | bounded-snapshot | unavailable` support and prefer a host-owned accessibility bridge. Any later author-facing snapshot request requires a separate privacy, size, cadence, and stale-revision decision.
 
@@ -149,24 +149,25 @@ type TerminalSurfacePatch = Readonly<{
   connectionStatus: 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 }>;
 
+type TerminalKeyIntent = Readonly<{
+  type: 'key';
+  key: string;
+  ctrl: boolean;
+  alt: boolean;
+  shift: boolean;
+  meta: boolean;
+  repeat: boolean;
+}>;
+
 type TerminalInputIntent =
   | Readonly<{ type: 'text'; text: string; composing: false }>
-  | Readonly<{
-      type: 'key';
-      key: string;
-      ctrl: boolean;
-      alt: boolean;
-      shift: boolean;
-      meta: boolean;
-      repeat: boolean;
-    }>;
+  | TerminalKeyIntent;
 
 type TerminalSurfaceFacts = Readonly<{
   attachment: 'detached' | 'attaching' | 'ready' | 'unavailable' | 'error';
   composing: boolean;
   columns: number | null;
   rows: number | null;
-  title: string | null;
   support: TerminalSurfaceSupport;
   lastResize: TerminalResizeResult | null;
 }>;
@@ -183,6 +184,7 @@ type TerminalSurfaceConnection = Readonly<{
 
 type TerminalSurfaceLease = Readonly<{
   update(patch: TerminalSurfacePatch): void;
+  requestKey(intent: TerminalKeyIntent): void;
   requestResize(size: TerminalSize): void;
   snapshot(): TerminalSurfaceFacts;
   dispose(): void;
@@ -197,13 +199,14 @@ A fake host is constructed with a private map from `sessionId` to a scripted fak
 
 1. attach `session-7`; receive `attaching`, then `ready` with 80x24, explicit input/resize/accessibility support, accessible label/description, and connected status;
 2. emit committed text and one modified key as immutable intent values, while asserting the private fake backend receives each engine-encoded sequence exactly once and no normalized-intent callback becomes a second send path;
-3. issue resize revisions 1/2/3; report revision 2 as rejected and revision 3 as applied at 120x40; accept only revision 3 as current facts;
-4. replace the target/engine; retire the Module-owned connection identity and dispose the old lease before a new connection is issued, even if the new host's internal counters restart;
-5. simulate missing engine, input, accessibility, and resize support and assert the bounded support/reason codes identify the failed requirement;
-6. dispose, then make the old fake emit input, resize, bell, error, and focus; observe zero Terminal callbacks and zero backend writes, while focus state remains solely in the Focus domain;
-7. recursively validate every captured patch/fact/request as data-only and prove that no fake-engine identity, target, buffer, stream, backend sink, callback source, or cell grid appears.
+3. invoke `requestKey` for a visible mobile Escape control; assert the engine—not App code—encodes it and the private backend receives exactly one sequence;
+4. issue resize revisions 1/2/3; report revision 2 as rejected and revision 3 as applied at 120x40; accept only revision 3 as current facts;
+5. replace the target/engine; retire the Module-owned connection identity and dispose the old lease before a new connection is issued, even if the new host's internal counters restart;
+6. simulate missing engine, input, accessibility, and resize support and assert the bounded support/reason codes identify the failed requirement;
+7. dispose, then make the old fake emit input, resize, bell, error, and focus; observe zero Terminal callbacks and zero backend writes, while focus state remains solely in the Focus domain;
+8. recursively validate every captured patch/fact/request as data-only and prove that no fake-engine identity, target, buffer, stream, backend sink, callback source, process-controlled title, or cell grid appears.
 
-This sketch proves the boundary can be data-only and makes resize/result, diagnostic, accessibility-input, connection-identity, backend-delivery, and Focus ownership testable. It does not prove browser layout, IME, screen-reader behavior, native focus, key routing, renderer performance, or an Adapter profile.
+This sketch proves the boundary can be data-only and makes resize/result, diagnostic, accessibility-input, connection-identity, backend-delivery, mobile-key, title, and Focus ownership testable. It does not prove browser layout, IME, screen-reader behavior, native focus, key routing, renderer performance, or an Adapter profile.
 
 ## Input, shortcut, and focus policy
 
@@ -214,7 +217,7 @@ This sketch proves the boundary can be data-only and makes resize/result, diagno
 - **Ctrl/Meta/Alt:** no blanket interception. Only registered Harness chords are local. The engine receives the rest and owns platform-specific encoding.
 - **Paste:** Clipboard acquisition and paste confirmation/policy are App/host services. The first slice may forward committed pasted text through the engine, including bracketed-paste behavior; it does not receive Clipboard objects. File paths are plain pasted text only—no file access, drop, or path authority.
 - **Pointer/mouse:** first-slice terminal mouse reporting is disabled. Engine-local pointer selection may remain available. Custom pointer reports, block-selection APIs, and selection gestures belong to option D.
-- **Mobile/virtual keyboard:** tapping the surface may request the engine input target and host IME. Hosts may provide visible special-key controls as ordinary App composition. If committed text/IME cannot be bridged without leaking a raw target, the host reports interactive input unavailable rather than claiming parity.
+- **Mobile/virtual keyboard:** tapping the surface may request the engine input target and host IME. A visible App-composed special-key Button emits a plain `TerminalKeyIntent` through `requestKey`; the host/engine performs mode-specific encoding and writes the private backend once. App code never manufactures VT bytes. If committed text/IME or this governed key route cannot be bridged without leaking a raw target, the host reports interactive input unavailable rather than claiming parity.
 
 ## Accessibility boundary
 
@@ -238,7 +241,7 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 ### Lifecycle rules
 
 - One logical instance holds one Module-owned connection identity for the current lease. Detach, target replacement, engine replacement, session switch, capability replacement, and disposal retire the callback closure before attaching another; host-authored counters never decide freshness.
-- Every input, fact, resize result, accessibility callback, title, bell, and error is checked against the current connection identity and request revision. Late callbacks are ignored.
+- Every input, fact, resize result, accessibility callback, bell, and error is checked against the current connection identity and request revision. Process-controlled title updates remain host-local. Late callbacks are ignored.
 - `dispose()` removes keyboard/composition/paste/pointer listeners, the Focus-domain target bridge, geometry/DPR observers, accessibility nodes/listeners, engine subscriptions, renderer resources owned by the lease, target references, and backend-sink references.
 - Disposing a view lease does **not** terminate the process or PTY. The App/backend owns explicit process stop and decides whether detach preserves or closes a session.
 - If the Host Capability created an engine for the lease, it disposes that engine after draining/revoking its callbacks. If the host injected a shared engine, the lease only detaches its owned bindings. Ownership must be explicit; double-disposal is an error.
@@ -271,7 +274,7 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 
 1. **Portable negatives:** compile-time and runtime fixtures reject engine, target, buffer, stream, DOM/native event, mutable controller, raw pixels, cell grids, backend sink, and functions in portable patch/fact/request values.
 2. **Fake lease:** attach/update/snapshot/dispose, missing capability, target/engine replacement, session switch, exactly-once cleanup, Module-owned connection retirement, and stale-callback suppression even when host counters collide.
-3. **Input policy:** IME candidate stays host-local; committed text emits once; the private backend sink receives the engine-encoded sequence once; normalized intents cannot double-send; reserved Harness chord stays local; other modified keys reach the engine once; bare Escape reaches the engine; F6 exits through Focus.
+3. **Input policy:** IME candidate stays host-local; committed text emits once; the private backend sink receives the engine-encoded sequence once; normalized intents cannot double-send; reserved Harness chord stays local; other modified keys reach the engine once; a mobile special-key request is engine-encoded and delivered once; bare Escape reaches the engine; F6 exits through Focus.
 4. **Resize:** invalid/zero dimensions reject; bursts coalesce to the newest revision; applied/rejected result contains acknowledged revision/effective dimensions/reason; late or older results do not change current facts.
 5. **Performance:** replay rapid cursor/grid/alternate-screen updates and assert zero portable content publications/allocations; only deduplicated low-cardinality facts cross.
 6. **Accessibility fake:** label/description/status inputs, per-feature support/reason negotiation, bounded attention, unavailable degradation, and no generic live-stream snapshot.
