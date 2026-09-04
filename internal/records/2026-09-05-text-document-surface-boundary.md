@@ -365,6 +365,20 @@ type DocumentCommandResult =
       reason: DocumentCommandRuntimeUnavailableReason;
     }>;
 
+type DocumentCommandRequest =
+  | Readonly<{
+      requestId: string;
+      command: 'undo' | 'redo';
+      expectedPolicyRevision: null;
+      expectedMutationRevision: null;
+    }>
+  | Readonly<{
+      requestId: string;
+      command: 'undo' | 'redo';
+      expectedPolicyRevision: number;
+      expectedMutationRevision: number;
+    }>;
+
 type DocumentSurfaceConnection = Readonly<{
   // Issued and retired by the Module; callback closures reject retired identities.
   connectionId: string;
@@ -378,14 +392,7 @@ type DocumentSurfaceConnection = Readonly<{
 
 type DocumentSurfaceLease = Readonly<{
   update(patch: DocumentSurfacePatch): void;
-  requestCommand(
-    request: Readonly<{
-      requestId: string;
-      command: 'undo' | 'redo';
-      expectedPolicyRevision: number | null;
-      expectedMutationRevision: number | null;
-    }>
-  ): void;
+  requestCommand(request: DocumentCommandRequest): void;
   snapshot(): DocumentSurfaceFacts;
   dispose(options: Readonly<{ viewState: 'retain-for-surface' | 'evict-surface' }>): void;
 }>;
