@@ -464,6 +464,94 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
+  it('clears pointer intent when the gesture ends outside the surface', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    window.dispatchEvent(new PointerEvent('pointerup'));
+    target.scrollTop = 200;
+    target.dispatchEvent(new Event('scroll'));
+
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+    lease.dispose();
+  });
+
+  it('classifies Shift+wheel as horizontal reader departure', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 300,
+      clientHeight: 100,
+      scrollHeight: 100,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'both',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'horizontal' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    frames.runAll();
+
+    const shiftWheel = new WheelEvent('wheel', { bubbles: true, deltaY: -40 });
+    Object.defineProperty(shiftWheel, 'shiftKey', { configurable: true, value: true });
+    target.dispatchEvent(shiftWheel);
+    target.scrollLeft = 100;
+    target.dispatchEvent(new Event('scroll'));
+
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    lease.dispose();
+  });
+
+  it('keeps a follow lease rejected while its configured axis is disabled', () => {
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'horizontal' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    expect(snapshots.at(-1)?.endFollow).toEqual({
+      state: 'paused',
+      requestStatus: 'rejected',
+    });
+
+    window.dispatchEvent(new Event('resize'));
+
+    expect(snapshots.at(-1)?.endFollow).toEqual({
+      state: 'paused',
+      requestStatus: 'rejected',
+    });
+    lease.dispose();
+  });
+
   it('keeps vertical pending follow while applying an unrelated horizontal request', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');

@@ -289,6 +289,8 @@ export function createWebScrollSurfaceHost(
         connection.config.endFollow.mode === 'while-at-end'
           ? connection.config.endFollow.axis
           : null;
+      const isAxisEnabled = (axis: ScrollAxis) =>
+        connection.config.axes === 'both' || connection.config.axes === axis;
       const readFollowLayout = (axis: ScrollAxis) =>
         axis === 'horizontal'
           ? { axis, viewport: target.clientWidth, extent: target.scrollWidth }
@@ -312,7 +314,7 @@ export function createWebScrollSurfaceHost(
       };
       const scheduleEnd = (axis: ScrollAxis) => {
         if (disposed) return;
-        if (connection.config.axes !== 'both' && connection.config.axes !== axis) {
+        if (!isAxisEnabled(axis)) {
           endFollowRequestStatus = 'rejected';
           publish();
           return;
@@ -333,7 +335,7 @@ export function createWebScrollSurfaceHost(
           const currentAxis = scheduledAxis;
           scheduledAxis = null;
           if (disposed || !currentAxis) return;
-          if (connection.config.axes !== 'both' && connection.config.axes !== currentAxis) {
+          if (!isAxisEnabled(currentAxis)) {
             endFollowState = configuredFollowAxis() ? 'paused' : 'off';
             endFollowRequestStatus = 'rejected';
             publish();
@@ -457,6 +459,12 @@ export function createWebScrollSurfaceHost(
           publish();
           return;
         }
+        if (!isAxisEnabled(axis)) {
+          endFollowState = 'paused';
+          endFollowRequestStatus = 'rejected';
+          publish();
+          return;
+        }
         const nextLayout = readFollowLayout(axis);
         const layoutChanged =
           !lastFollowLayout ||
@@ -490,7 +498,10 @@ export function createWebScrollSurfaceHost(
         if (event.ctrlKey) return;
         const axis = configuredFollowAxis();
         if (!axis) return;
-        const leavingEnd = axis === 'vertical' ? event.deltaY < 0 : event.deltaX < 0;
+        const leavingEnd =
+          axis === 'vertical'
+            ? event.deltaY < 0
+            : event.deltaX < 0 || (event.shiftKey && event.deltaY < 0);
         if (!leavingEnd) return;
         armReaderIntent();
       };
@@ -523,7 +534,7 @@ export function createWebScrollSurfaceHost(
         scrolling = true;
         const readerIntent = hasReaderIntent();
         const axis = configuredFollowAxis();
-        if (axis) {
+        if (axis && isAxisEnabled(axis)) {
           const atEnd = isAxisAtEnd(axis);
           if (atEnd && !cancelEndFollowFrame) {
             endFollowState = 'following';
@@ -544,13 +555,13 @@ export function createWebScrollSurfaceHost(
       target.addEventListener('scroll', onScroll, { passive: true });
       target.addEventListener('wheel', onWheel, { passive: true });
       target.addEventListener('pointerdown', onPointerDown, { passive: true });
-      target.addEventListener('pointerup', onReaderIntentEnd, { passive: true });
-      target.addEventListener('pointercancel', onReaderIntentEnd, { passive: true });
+      ownerWindow?.addEventListener('pointerup', onReaderIntentEnd, { passive: true });
+      ownerWindow?.addEventListener('pointercancel', onReaderIntentEnd, { passive: true });
       target.addEventListener('touchstart', onTouchStart, { passive: true });
-      target.addEventListener('touchend', onReaderIntentEnd, { passive: true });
-      target.addEventListener('touchcancel', onReaderIntentEnd, { passive: true });
+      ownerWindow?.addEventListener('touchend', onReaderIntentEnd, { passive: true });
+      ownerWindow?.addEventListener('touchcancel', onReaderIntentEnd, { passive: true });
       target.addEventListener('keydown', onKeyDown);
-      target.addEventListener('keyup', onReaderIntentEnd);
+      ownerWindow?.addEventListener('keyup', onReaderIntentEnd);
       const resizeObserver =
         typeof ResizeObserver === 'function' ? new ResizeObserver(onLayoutChange) : undefined;
       const mutationObserver =
@@ -597,7 +608,7 @@ export function createWebScrollSurfaceHost(
           publish();
           return;
         }
-        if (connection.config.axes !== 'both' && connection.config.axes !== axis) {
+        if (!isAxisEnabled(axis)) {
           endFollowState = 'paused';
           endFollowRequestStatus = 'rejected';
           publish();
@@ -641,13 +652,13 @@ export function createWebScrollSurfaceHost(
           target.removeEventListener('scroll', onScroll);
           target.removeEventListener('wheel', onWheel);
           target.removeEventListener('pointerdown', onPointerDown);
-          target.removeEventListener('pointerup', onReaderIntentEnd);
-          target.removeEventListener('pointercancel', onReaderIntentEnd);
+          ownerWindow?.removeEventListener('pointerup', onReaderIntentEnd);
+          ownerWindow?.removeEventListener('pointercancel', onReaderIntentEnd);
           target.removeEventListener('touchstart', onTouchStart);
-          target.removeEventListener('touchend', onReaderIntentEnd);
-          target.removeEventListener('touchcancel', onReaderIntentEnd);
+          ownerWindow?.removeEventListener('touchend', onReaderIntentEnd);
+          ownerWindow?.removeEventListener('touchcancel', onReaderIntentEnd);
           target.removeEventListener('keydown', onKeyDown);
-          target.removeEventListener('keyup', onReaderIntentEnd);
+          ownerWindow?.removeEventListener('keyup', onReaderIntentEnd);
           ownerWindow?.removeEventListener('resize', onLayoutChange);
           resizeObserver?.disconnect();
           mutationObserver?.disconnect();
