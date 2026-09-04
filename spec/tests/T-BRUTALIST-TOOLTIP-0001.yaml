@@ -1,0 +1,112 @@
+id: T-BRUTALIST-TOOLTIP-0001
+type: test
+title: Brutalist Tooltip projection contract test
+status: draft
+since: 0.3.0-alpha.0
+summary: Verifies the four-entry package surface, transparent Group and Trigger Base inheritance, current Tooltip interaction/accessibility behavior, and the exact Content visual delta.
+cases:
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-INHERITANCE
+    title: Four-entry projection preserves Base behavior and Content grammar
+    covers:
+      - P-BASE-TOOLTIP-ROOT-OWNER
+      - P-BASE-TOOLTIP-ANATOMY-CONTEXT
+      - P-BASE-TOOLTIP-TRIGGER-INTERACTION
+      - P-BASE-TOOLTIP-TRIGGER-DESCRIPTION
+      - P-BASE-TOOLTIP-CONTENT-SEMANTICS
+      - P-BASE-TOOLTIP-CONTENT-PORTAL-BOUNDARY
+      - P-BRUTALIST-TOOLTIP-BASE-INHERITANCE
+      - P-BRUTALIST-TOOLTIP-VISUAL-ONLY
+      - P-BRUTALIST-TOOLTIP-TRIGGER-AUTHORING-ENTRY
+      - P-BRUTALIST-TOOLTIP-TRIGGER-PURE-INHERITANCE
+      - P-BRUTALIST-TOOLTIP-TRIGGER-ZERO-DELTA
+      - P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
+      - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
+    expectation: A typed Web Component composition opens from real Trigger pointer intent, projects the Base tooltip role/open/describedBy facts, closes on leave, and carries the exact Content style tokens.
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-GROUP-TRANSPARENT-ENTRY
+    title: Group is a real package entry that preserves Base warm-window timing and adds no second owner or style
+    covers:
+      - P-BRUTALIST-TOOLTIP-GROUP-AUTHORING-ENTRY
+      - P-BRUTALIST-TOOLTIP-GROUP-BASE-INHERITANCE
+      - P-BRUTALIST-TOOLTIP-GROUP-ZERO-DELTA
+      - P-BASE-TOOLTIP-GROUP-DELAYS
+      - P-BASE-TOOLTIP-GROUP-WARMTH
+      - P-BASE-TOOLTIP-GROUP-ACTIVE-OWNER
+    expectation: real-brutalist-group-entry-inherits-base-delay-context-and-sibling-warmth-with-zero-delta
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-PACKAGE-SURFACE
+    title: Tooltip package exports exactly Group Root Trigger and Content while Trigger remains zero-delta
+    covers:
+      - P-BRUTALIST-TOOLTIP-GROUP-AUTHORING-ENTRY
+      - P-BRUTALIST-TOOLTIP-TRIGGER-AUTHORING-ENTRY
+      - P-BRUTALIST-TOOLTIP-TRIGGER-PURE-INHERITANCE
+      - P-BRUTALIST-TOOLTIP-TRIGGER-ZERO-DELTA
+    expectation: package-surface-has-four-real-entries-and-transparent-trigger-keeps-exact-base-exposes
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-CONTENT-INTERACTION-BOUNDARY
+    title: Content remains supplementary and non-focusable and teardown removes the owned describedBy relation
+    covers:
+      - P-BASE-TOOLTIP-TRIGGER-DESCRIPTION
+      - P-BASE-TOOLTIP-CONTENT-SEMANTICS
+      - P-BASE-TOOLTIP-CONTENT-HOVERABLE
+      - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
+    expectation: content-teardown-cleans-owned-description-and-rendered-tooltip-has-no-focusable-task-interaction
+  - id: T-BRUTALIST-TOOLTIP-0001-CASE-RENDERED-VISUAL
+    title: Uncontrolled sibling Tooltips render the exact Content grammar across WC React and Vue
+    covers:
+      - P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
+      - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
+    expectation: trigger-driven-rendered-content-has-square-border-inverse-colors-hard-shadow-monospace-uppercase-spacing-and-nonzero-geometry
+implementations:
+  - id: prototypes-brutalist-tooltip-projection
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/tooltip.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TOOLTIP-0001-CASE-INHERITANCE
+      - T-BRUTALIST-TOOLTIP-0001-CASE-GROUP-TRANSPARENT-ENTRY
+      - T-BRUTALIST-TOOLTIP-0001-CASE-PACKAGE-SURFACE
+      - T-BRUTALIST-TOOLTIP-0001-CASE-CONTENT-INTERACTION-BOUNDARY
+    exercises:
+      - P-BASE-TOOLTIP
+      - P-BASE-TOOLTIP-GROUP
+      - P-BASE-TOOLTIP-TRIGGER
+      - P-BASE-TOOLTIP-CONTENT
+      - P-BRUTALIST-TOOLTIP
+      - P-BRUTALIST-TOOLTIP-GROUP
+      - P-BRUTALIST-TOOLTIP-TRIGGER
+      - P-BRUTALIST-TOOLTIP-CONTENT
+  - id: docs-browser-brutalist-tooltip-four-entry-composition
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TOOLTIP-0001-CASE-GROUP-TRANSPARENT-ENTRY
+      - T-BRUTALIST-TOOLTIP-0001-CASE-PACKAGE-SURFACE
+      - T-BRUTALIST-TOOLTIP-0001-CASE-CONTENT-INTERACTION-BOUNDARY
+      - T-BRUTALIST-TOOLTIP-0001-CASE-RENDERED-VISUAL
+    exercises:
+      - P-BRUTALIST-TOOLTIP
+      - P-BRUTALIST-TOOLTIP-GROUP
+      - P-BRUTALIST-TOOLTIP-TRIGGER
+      - P-BRUTALIST-TOOLTIP-CONTENT
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-TOOLTIP
+    - id: P-BRUTALIST-TOOLTIP-GROUP
+    - id: P-BRUTALIST-TOOLTIP-TRIGGER
+    - id: P-BRUTALIST-TOOLTIP-CONTENT
+exercises:
+  prototypes:
+    - P-BASE-TOOLTIP
+    - P-BASE-TOOLTIP-GROUP
+    - P-BASE-TOOLTIP-TRIGGER
+    - P-BASE-TOOLTIP-CONTENT
+    - P-BRUTALIST-TOOLTIP
+    - P-BRUTALIST-TOOLTIP-GROUP
+    - P-BRUTALIST-TOOLTIP-TRIGGER
+    - P-BRUTALIST-TOOLTIP-CONTENT
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Completed executable four-entry package, transparent Group/Trigger, shared warm-delay, Content teardown/non-focusable interaction boundary, exact built export/CLI negative gates, and rendered three-runtime visual coverage.
+tags: [test, brutalist, visual, tooltip, interaction, accessibility]

@@ -11,6 +11,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { choosePreviewRuntime, runtimeSelectTrigger } from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -54,6 +55,11 @@ async function availablePort(): Promise<number> {
 async function chromeExecutable(): Promise<string> {
   const candidates = [
     process.env.CHROME_PATH,
+    process.env.LOCALAPPDATA
+      ? `${process.env.LOCALAPPDATA}/Google/Chrome/Application/chrome.exe`
+      : undefined,
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
     '/usr/bin/google-chrome',
     '/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
@@ -114,6 +120,7 @@ async function spawnServer(): Promise<string> {
     {
       cwd: process.cwd(),
       detached: process.platform !== 'win32',
+      shell: process.platform === 'win32',
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
@@ -152,7 +159,20 @@ async function startServer(): Promise<string> {
 
 async function stopServer(): Promise<void> {
   if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
-  const signalTarget = process.platform === 'win32' ? devServer.pid : -devServer.pid;
+  const pid = devServer.pid;
+  if (process.platform === 'win32') {
+    await new Promise<void>((resolve) => {
+      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
+      killer.once('error', () => resolve());
+      killer.once('exit', () => resolve());
+    });
+    return;
+  }
+
+  const signalTarget = -pid;
   process.kill(signalTarget, 'SIGTERM');
 
   const exited = await Promise.race([
@@ -181,15 +201,15 @@ async function selectRuntime(
   readySelector: string,
   expectedCount: number
 ): Promise<void> {
-  await previewer.locator('select.adapter-select').selectOption(runtime);
+  await choosePreviewRuntime(page, previewer, runtime);
   await page.waitForFunction(
     ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
       const root = document.querySelector<HTMLElement>('[data-previewer-id]');
-      const select = root?.querySelector<HTMLSelectElement>('select.adapter-select');
+      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
       const host = root?.querySelector<HTMLElement>('.host');
       const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!root || !select || !host || select.value !== selectedRuntime) return false;
-      if (root.querySelectorAll(selector).length !== count || !firstRoot) return false;
+      if (!root || !select || !host || select.dataset.value !== selectedRuntime) return false;
+      if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
       if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
       if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
       // React owns neither a custom element nor a Vue app root. The host tag is
@@ -361,6 +381,23 @@ async function setFittingContent(page: Page, rows: number): Promise<void> {
  * with or without the focus slice, so a missing tab stop fails on the assertion
  * that names it instead of on a readiness timeout that does not.
  */
+/**
+ * A wheel notch is delivered asynchronously and the scroll may be smoothed, so
+ * a fixed pause races the browser under load. Wait for the offset instead.
+ */
+async function waitForScrolled(page: Page, index: number): Promise<void> {
+  await page.waitForFunction(
+    ({ selector, index: at }) => {
+      const viewport = document.querySelectorAll<HTMLElement>(`[data-previewer-id] ${selector}`)[
+        at
+      ];
+      return Boolean(viewport && viewport.scrollTop > 0);
+    },
+    { selector: VIEWPORT_SELECTOR, index },
+    { timeout: 10_000 }
+  );
+}
+
 async function waitForCanScroll(page: Page, index: number, expected: boolean): Promise<void> {
   await page.waitForFunction(
     ({ selector, index: at, expected: want }) => {
@@ -531,7 +568,7 @@ describe.sequential('Base control documentation browser regressions', () => {
         await selectRuntime(page, previewer, runtime, VIEWPORT_SELECTOR, 2);
         await waitForCanScroll(page, SCROLLING, true);
 
-        await previewer.locator('select.adapter-select').focus();
+        await runtimeSelectTrigger(previewer).focus();
         await page.keyboard.press('Tab');
         await page.waitForTimeout(200);
 
@@ -568,7 +605,7 @@ describe.sequential('Base control documentation browser regressions', () => {
         await waitForCanScroll(page, SCROLLING, true);
 
         const viewport = previewer.locator(VIEWPORT_SELECTOR).first();
-        await previewer.locator('select.adapter-select').focus();
+        await runtimeSelectTrigger(previewer).focus();
         await page.keyboard.press('Tab');
         await page.waitForTimeout(100);
 
@@ -586,7 +623,7 @@ describe.sequential('Base control documentation browser regressions', () => {
 
         await viewport.hover();
         await page.mouse.wheel(0, 120);
-        await page.waitForTimeout(200);
+        await waitForScrolled(page, SCROLLING);
         expect(
           (await viewportFacts(page))[SCROLLING].scrollTop,
           `${runtime}/wheel`

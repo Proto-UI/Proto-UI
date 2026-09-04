@@ -8,6 +8,7 @@ import {
   applyColorScheme,
   launchBrowser,
   openRoute,
+  runtimeSelectTrigger,
   selectRuntime,
   startServer,
   stopServer,
@@ -96,7 +97,7 @@ async function switchShadows(page: Page): Promise<SwitchShadows> {
 
 /** Real keyboard focus, so the ring comes from the host's own focus-visible determination. */
 async function focusFirstSwitch(page: Page, previewer: Locator): Promise<void> {
-  await previewer.locator('select.adapter-select').focus();
+  await runtimeSelectTrigger(previewer).focus();
   await page.keyboard.press('Tab');
   await page.waitForFunction(
     () =>

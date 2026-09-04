@@ -17,6 +17,7 @@ export default {
                 kind: 'proto',
                 prototypeId: 'shadcn-checkbox-indicator',
               },
+              { kind: 'box', className: 'sr-only', children: ['Unchecked'] },
             ],
           },
           {
@@ -39,6 +40,7 @@ export default {
                 kind: 'proto',
                 prototypeId: 'shadcn-checkbox-indicator',
               },
+              { kind: 'box', className: 'sr-only', children: ['Checked'] },
             ],
           },
           {
@@ -61,6 +63,7 @@ export default {
                 kind: 'proto',
                 prototypeId: 'shadcn-checkbox-indicator',
               },
+              { kind: 'box', className: 'sr-only', children: ['Mixed'] },
             ],
           },
           {
@@ -83,6 +86,7 @@ export default {
                 kind: 'proto',
                 prototypeId: 'shadcn-checkbox-indicator',
               },
+              { kind: 'box', className: 'sr-only', children: ['Disabled'] },
             ],
           },
           {
@@ -105,6 +109,7 @@ export default {
                 kind: 'proto',
                 prototypeId: 'shadcn-checkbox-indicator',
               },
+              { kind: 'box', className: 'sr-only', children: ['Focus ring'] },
             ],
           },
           {

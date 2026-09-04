@@ -26,12 +26,6 @@ cases:
       - C-STATE-INTERACTION-0002-B
       - C-STATE-INTERACTION-0002-F
     expectation: disabled-gates-transient-interaction-state
-  - id: T-STATE-INTERACTION-0001-CASE-FOCUS-VISIBLE-MODALITY
-    title: Focus-visible interaction state follows keyboard and pointer modality
-    covers:
-      - C-STATE-INTERACTION-0002-A
-      - C-STATE-INTERACTION-0002-G
-    expectation: pointer-modality-clears-focus-visible
   - id: T-STATE-INTERACTION-0001-CASE-SHARED-SUBJECT
     title: Interaction state identity is shared for the same interaction subject
     covers:
@@ -41,6 +35,11 @@ cases:
       - C-STATE-INTERACTION-0003-C
       - C-STATE-INTERACTION-0003-D
     expectation: shared-interaction-state-reference
+  - id: T-STATE-INTERACTION-0001-CASE-FOCUS-FACTS-NOT-OWNED
+    title: focused and focusVisible are not runtime-managed by state-interaction wiring
+    covers:
+      - C-STATE-INTERACTION-0002-G
+    expectation: focus-facts-not-owned-by-state-interaction
 implementations:
   - id: runtime-state-interaction-event-wiring-contract
     kind: runtime-test
@@ -51,8 +50,8 @@ implementations:
       - T-STATE-INTERACTION-0001-CASE-EVENT-WIRING
       - T-STATE-INTERACTION-0001-CASE-CALLBACK-ORDER
       - T-STATE-INTERACTION-0001-CASE-DISABLED-GATE
-      - T-STATE-INTERACTION-0001-CASE-FOCUS-VISIBLE-MODALITY
       - T-STATE-INTERACTION-0001-CASE-SHARED-SUBJECT
+      - T-STATE-INTERACTION-0001-CASE-FOCUS-FACTS-NOT-OWNED
   - id: module-event-internal-listener-order-contract
     kind: module-test
     status: passing
@@ -72,7 +71,7 @@ verifies:
         - C-STATE-INTERACTION-0002-D
         - C-STATE-INTERACTION-0002-E
         - C-STATE-INTERACTION-0002-F
-        - C-STATE-INTERACTION-0002-G
+
     - id: C-STATE-INTERACTION-0003
       anchors:
         - C-STATE-INTERACTION-0003-A
@@ -90,6 +89,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Exercises root/global target binding used by interaction state wiring.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Reconciled stale modality case with the native-focus-visible equality boundary from #438.
   - version: 0.1.0
     change: introduced
     summary: Added interaction state event wiring and shared subject test entity.

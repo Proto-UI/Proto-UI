@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
-import { AdapterIds, InternalAdapterIds, selectRuntimeIds } from './registry';
+import { AdapterIds, InternalAdapterIds, isRuntimeId, selectRuntimeIds } from './registry';
 
 describe('runtime registry', () => {
   it('presents Vue 2 as an official public adapter', () => {
     expect(AdapterIds).toEqual(['wc', 'react', 'vue', 'vue2']);
     expect(InternalAdapterIds).toEqual(['wc', 'react', 'vue', 'vue2']);
+  });
+
+  it('rejects research runner ids at the executable runtime boundary', () => {
+    expect(isRuntimeId('react')).toBe(true);
+    expect(isRuntimeId('gpui-wasm')).toBe(false);
+    expect(isRuntimeId(undefined)).toBe(false);
   });
 
   it('uses defaults only for omitted runtime input and fails closed for explicit unsupported input', () => {

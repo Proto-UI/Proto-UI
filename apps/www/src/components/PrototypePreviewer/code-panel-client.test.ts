@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initCodePanels, refreshCodePanel } from './code-panel-client';
 
-function panelMarkup(id: string, raw = 'const exact = "<&";'): string {
+function panelMarkup(id: string, raw = 'const exact = "<&";', projected = false): string {
   const escaped = raw.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const buttonTag = projected ? 'wc-shadcn-button' : 'button';
   return `<figure data-code-shell id="${id}">
     <div data-code-inner>
-      <button type="button" data-copy aria-label="Copy code"><span data-copy-text>copy</span></button>
+      <${buttonTag} type="button" data-copy aria-label="Copy code"><span data-copy-text>copy</span></${buttonTag}>
       <div data-code-content><pre class="proto-previewer__code"><code data-raw-code="${escaped}">${raw}</code></pre></div>
-      <button type="button" data-code-toggle aria-expanded="false">View code</button>
+      <${buttonTag} type="button" data-code-toggle aria-expanded="false">View code</${buttonTag}>
     </div>
   </figure>`;
 }
@@ -63,6 +64,20 @@ describe('CodePanel client', () => {
     shell.querySelector<HTMLButtonElement>('[data-copy]')!.click();
     await Promise.resolve();
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('const exact = "<&";');
+  });
+
+  it('handles only the projected Button outward click signal', () => {
+    document.body.innerHTML = panelMarkup('projected', 'line\n'.repeat(80), true);
+    const shell = document.querySelector<HTMLElement>('[data-code-shell]')!;
+    const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]')!;
+    setMeasurements(shell, { fullHeight: 400 });
+    initCodePanels(document);
+    refreshCodePanel(shell, { reset: true });
+
+    toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(shell.dataset.codeExpanded).toBe('false');
+    toggle.dispatchEvent(new CustomEvent('click', { bubbles: true }));
+    expect(shell.dataset.codeExpanded).toBe('true');
   });
 
   it('auto-expands short content and keeps long content collapsed', () => {

@@ -32,75 +32,60 @@ const localePaths: Record<string, string> = {};
 localeOptions.forEach((opt) => {
   localePaths[opt.value] = opt.path;
 });
+
+const selectedLocale =
+  localeOptions.find((option) => option.isCurrent)?.value ?? currentLocale ?? locales[0] ?? '';
+const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
 ---
 
-<label class="language-select-wrapper relative inline-flex items-center">
-  <span class="sr-only">选择语言 / Select Language</span>
-  <select
-    class="language-select appearance-none inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all outline-none h-8 rounded-md gap-1.5 px-3 pr-8 cursor-pointer bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-    data-language-select
-    autocomplete="off"
-    data-current-locale={currentLocale || ''}
+<div class="language-select-wrapper relative inline-flex items-center" data-language-select>
+  <span id={labelId} class="sr-only">选择语言 / Select Language</span>
+  <wc-shadcn-select-root
+    data-site-select-root
+    data-language-select-root
+    data-current-locale={selectedLocale}
     data-locale-paths={JSON.stringify(localePaths)}
-    value={currentLocale || ''}
+    data-site-initial-value={selectedLocale}
   >
-    {
-      localeOptions.map((option) => (
-        <option value={option.value} selected={option.isCurrent}>
-          {option.label}
-        </option>
-      ))
-    }
-  </select>
-  <svg
-    class="language-select-arrow absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-foreground opacity-60 transition-opacity w-4 h-4"
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <path
-      d="M4 6L8 10L12 6"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"></path>
-  </svg>
-</label>
+    <wc-shadcn-select-trigger
+      aria-labelledby={labelId}
+      data-size="sm"
+      class="language-select inline-flex h-8 min-w-24 items-center justify-between rounded-md border-transparent bg-transparent px-3 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+    >
+      <wc-shadcn-select-value data-placeholder="Select language"></wc-shadcn-select-value>
+    </wc-shadcn-select-trigger>
+    <wc-shadcn-select-content data-position="popper" data-align="end">
+      {
+        localeOptions.map((option) => (
+          <wc-shadcn-select-item data-value={option.value} data-text-value={option.label}>
+            {option.label}
+          </wc-shadcn-select-item>
+        ))
+      }
+    </wc-shadcn-select-content>
+  </wc-shadcn-select-root>
+</div>
 
 <style>
-  .language-select-wrapper:hover .language-select-arrow {
-    opacity: 1;
+  .language-select-wrapper wc-shadcn-select-root {
+    display: inline-flex;
   }
 
-  /* Custom arrow removal for different browsers */
-  .language-select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    border: 1px solid transparent;
+  .language-select-wrapper wc-shadcn-select-trigger {
+    min-width: 6rem;
   }
 
-  /* Ensure option styles work in dropdown */
-  .language-select option {
-    background-color: var(--color-popover);
-    color: var(--color-popover-foreground);
-    padding: 0.5rem;
-  }
-
-  /* Focus visible border */
-  .language-select:focus-visible {
-    border-color: var(--color-ring);
-  }
-
-  /* For Firefox */
-  @-moz-document url-prefix() {
-    .language-select {
-      text-indent: 0;
-    }
+  .language-select-wrapper wc-shadcn-select-content:not(:defined) {
+    display: none;
   }
 </style>
+
+<script>
+  import { initSiteShadcnControls } from '../site-shadcn-controls';
+
+  initSiteShadcnControls(document);
+  document.addEventListener('astro:page-load', () => initSiteShadcnControls(document));
+</script>
 
 <script is:inline>
   (function () {
@@ -124,6 +109,14 @@ localeOptions.forEach((opt) => {
       return match ? decodeURIComponent(match[1]) : '';
     }
 
+    function readValue(select) {
+      const exposed = select.getExposes && select.getExposes();
+      const value = exposed && exposed.value;
+      return value && typeof value.get === 'function'
+        ? value.get()
+        : select.dataset.currentLocale || '';
+    }
+
     function initLanguageSelect(select) {
       if (select.dataset.languageSelectInitialized === 'true') return;
 
@@ -136,8 +129,9 @@ localeOptions.forEach((opt) => {
         return;
       }
 
-      function handleLanguageChange() {
-        const newLocale = select.value;
+      function handleLanguageChange(event) {
+        const newLocale =
+          event && event.detail && event.detail.value ? event.detail.value : readValue(select);
         const newPath = localePaths[newLocale];
 
         if (newPath && newLocale && newLocale !== currentLocale) {
@@ -158,11 +152,13 @@ localeOptions.forEach((opt) => {
       }
 
       select.dataset.languageSelectInitialized = 'true';
-      select.addEventListener('change', handleLanguageChange);
+      select.addEventListener('valueChange', handleLanguageChange);
     }
 
     function initLanguageSelects() {
-      document.querySelectorAll('select[data-language-select]').forEach(initLanguageSelect);
+      document
+        .querySelectorAll('wc-shadcn-select-root[data-language-select-root]')
+        .forEach(initLanguageSelect);
     }
 
     // Ensure DOM is ready
@@ -171,5 +167,6 @@ localeOptions.forEach((opt) => {
     } else {
       initLanguageSelects();
     }
+    document.addEventListener('astro:page-load', initLanguageSelects);
   })();
 </script>

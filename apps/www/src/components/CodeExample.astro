@@ -126,7 +126,9 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
   import { initCodeExamples } from './code-example-client';
 
   initCodeExamples(document);
-  document.addEventListener('astro:page-load', () => initCodeExamples(document));
+  document.addEventListener('astro:page-load', () => {
+    initCodeExamples(document);
+  });
 </script>
 
 <style>

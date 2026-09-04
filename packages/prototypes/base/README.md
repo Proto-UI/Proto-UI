@@ -75,6 +75,7 @@ The root package export remains available for compatibility. Compound anatomy pa
 - `@proto.ui/core`
 - `@proto.ui/hooks`
 - `@proto.ui/module-text-control`
+- `@proto.ui/module-image-view`
 
 ## License
 

@@ -155,21 +155,22 @@ test("authorized Astro routes fall back to their explicit directory index", asyn
   }
 });
 
-test("the public readiness probe follows Pages' canonical root route without exposing it", async () => {
+// Keep this contract explicit: Advanced Mode must probe the emitted file, not the directory root.
+test("the public readiness probe checks the emitted index without exposing it", async () => {
   const paths = [];
   const result = await worker.fetch(
     new Request("https://poppy-proto-ui-pr-462.pages.dev/__poppy/assets-ready"),
     { ASSETS: { fetch(request) {
       const pathname = new URL(request.url).pathname;
       paths.push(pathname);
-      return pathname === "/"
+      return pathname === "/index.html"
         ? new Response("private html")
-        : new Response(null, { status: 308, headers: { Location: "/" } });
+        : new Response("missing", { status: 404 });
     } } },
   );
   assert.equal(result.status, 204);
   assert.equal(await result.text(), "");
-  assert.deepEqual(paths, ["/"]);
+  assert.deepEqual(paths, ["/index.html"]);
 });
 
 test("a transient control-plane failure does not clear the session or loop OAuth", async () => {

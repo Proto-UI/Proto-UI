@@ -1,0 +1,55 @@
+{
+  "name": "@proto.ui/module-image-view",
+  "version": "0.3.0-alpha.0",
+  "private": false,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./declaration": {
+      "types": "./dist/declaration.d.ts",
+      "import": "./dist/declaration.js",
+      "default": "./dist/declaration.js"
+    }
+  },
+  "dependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/types": "workspace:*",
+    "@proto.ui/module-base": "workspace:*"
+  },
+  "description": "Proto UI portable image-view host protocol.",
+  "license": "MIT",
+  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/image-view",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proto-UI/Proto-UI.git",
+    "directory": "packages/modules/image-view"
+  },
+  "bugs": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "proto-ui",
+    "proto",
+    "ui",
+    "module",
+    "image",
+    "view",
+    "image-view"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/module-image-view",
+    "prepack": "pnpm run build"
+  }
+}

@@ -1,11 +1,13 @@
 ---
 // const labelLight = Astro.locals?.t?.('themeSelect.light') ?? 'Light theme';
 // const labelDark = Astro.locals?.t?.('themeSelect.dark') ?? 'Dark theme';
-
 ---
 
-<button
-  data-slot="button"
+<wc-shadcn-button
+  data-site-shadcn-button
+  data-theme-toggle
+  data-variant="ghost"
+  data-size="icon"
   class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 group/toggle extend-touch-target size-8"
   type="button"
   aria-label="Toggle color theme"
@@ -14,13 +16,20 @@
 >
   <!-- 初始占位，避免布局跳动；首帧由 hydrate 脚本替换为对应图标 -->
   <span class="sr-only">Toggle theme</span>
-</button>
+</wc-shadcn-button>
 
+<script>
+  import { initSiteShadcnControls } from '../site-shadcn-controls';
+
+  initSiteShadcnControls(document);
+  document.addEventListener('astro:page-load', () => initSiteShadcnControls(document));
+</script>
 
 <script is:inline>
   (function () {
-    const btn = document.currentScript.previousElementSibling;
+    const btn = document.querySelector('[data-theme-toggle]');
     const tmpl = document.getElementById('starlight-theme-icons');
+    if (!btn) return;
 
     function iconFor(theme) {
       if (!tmpl) return null;
@@ -34,6 +43,10 @@
         btn.replaceChildren(icon);
         // 无障碍文案与 pressed 状态
         const isDark = theme === 'dark';
+        const accessibleText = document.createElement('span');
+        accessibleText.className = 'sr-only';
+        accessibleText.textContent = isDark ? 'Switch to light theme' : 'Switch to dark theme';
+        btn.append(accessibleText);
         btn.setAttribute('aria-pressed', String(isDark));
         btn.setAttribute(
           'aria-label',
@@ -54,9 +67,12 @@
     render(current());
 
     // 点击切换
-    btn.addEventListener('click', () => {
+    // The Web Component adapter emits an untrusted projected click signal in
+    // addition to the browser's trusted native click. Handle the projection
+    // only so pointer activation toggles the theme exactly once.
+    btn.addEventListener('click', (event) => {
+      if (!(event instanceof CustomEvent)) return;
       window.StarlightTheme.toggle();
-
     });
 
     // 响应全局变更（来自其它控件）
