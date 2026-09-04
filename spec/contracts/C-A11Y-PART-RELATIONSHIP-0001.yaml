@@ -28,8 +28,8 @@ criteria:
       en: 'The resolver must filter by the full tuple of anatomy family, opaque domain scope, target role, and exact protocol match key; zero or multiple matches must fail closed with a bounded diagnostic rather than choosing by DOM order, registration order, prototype name, or value escaping.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-D
     text:
-      zh-CN: 'L1 detach 必须移除仅由该 lease 拥有的 source IDREF token，同时保留宿主作者自有或独立拥有的 token 与仍然有效的逻辑 reservation；仅在 attribute 不再含任何 token 时才移除 attribute 本身。'
-      en: 'L1 detach must remove only the lease-owned source IDREF token while preserving host-authored or independently owned tokens and any still-valid logical reservation; the attribute itself is removed only when no token remains.'
+      zh-CN: 'source 或 target 的 L1 detach 必须在相应 target-removal host commit 可见前撤销该 lease 的 source IDREF contribution，同时保留有效 logical reservation 与所有宿主作者或独立 owner 的 contribution。Adapter 必须维护 per-attribute token ownership/reference ledger；若相同 token 在 lease acquisition 前已经存在，lease 不得取得其唯一所有权，并且 release 只有在 host-authored baseline 与所有独立/lease reference 都不存在时才可移除 token；仅在 attribute 不再含任何 token 时才移除 attribute 本身。'
+      en: 'Source or target L1 detach must withdraw the lease source-IDREF contribution before the corresponding target-removal host commit becomes visible while preserving the valid logical reservation and every host-authored or independently owned contribution. The adapter must maintain a per-attribute token ownership and reference ledger; when the identical token existed before lease acquisition, the lease must not acquire exclusive ownership of it, and release may remove the token only after its host-authored baseline and every independent or lease reference are absent; the attribute itself is removed only when no token remains.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-E
     text:
       zh-CN: 'source 或 target 的每次 materialization/rematerialization 都必须把其新 view epoch 绑定到保留的 logical instance；当当前 source/target binding 形成唯一有效匹配时，target reserved host id 赋值与 reciprocal IDREF 恢复必须在相应新 epoch 的 host commit 可见之前完成。仅在 mounted 回调之后执行无法满足该 pre-commit 要求。'
@@ -40,8 +40,8 @@ criteria:
       en: 'Terminal disposal must, before releasing host identity, remove every relationship-service target-registry membership, source lease, dependent projection binding, and observer owned by or still retaining the disposed logical instance, and re-resolve affected sources so a later same-tuple instance is not mistaken for a duplicate; the Web adapter then clears only lease-owned host projection and releases its reservation, leaving no service-owned record behind.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-G
     text:
-      zh-CN: 'match key 变更必须按一次原子 re-key 事务执行移除与插入，并同时使旧 key 与新 key 的投射失效；相等检查必须先于发布，防止递归 no-op 更新与同一实例在双 key 下短暂暴露。'
-      en: 'A match-key change must perform removal and insertion as one atomic re-key transaction and invalidate both the old-key and new-key projections; equality must be checked before publishing to prevent recursive no-op updates and transient exposure of the same instance under both keys.'
+      zh-CN: '任何 mutable resolver-tuple 字段（至少包括 opaque anatomy domain scope 与 exact protocol match key）的变更都必须按一次原子 re-index 事务执行旧 tuple 移除与新 tuple 插入，并同时使两侧投射失效；相等检查必须先于发布，防止递归 no-op 更新、跨 domain 残留与同一实例在双 tuple 下短暂暴露。'
+      en: 'A change to any mutable resolver-tuple field, including at least opaque anatomy domain scope and exact protocol match key, must remove the old tuple and insert the new tuple as one atomic re-index transaction and invalidate projections on both sides; equality must be checked before publication to prevent recursive no-op updates, cross-domain residue, and transient exposure of one instance under two tuples.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-H
     text:
       zh-CN: 'relationship-projection 服务与 Anatomy 必须分离：Anatomy 仅提供结构声明、domain scope 与 readiness signal，不成为 instance registry 或 relationship 实例 owner；presence 不得写入 portable Context。'
@@ -52,8 +52,12 @@ criteria:
       en: 'Prototype authors must receive no registry access, host targets, host ids, framework keys, or raw geometry; relationship projection is a bounded Runtime/A11y service, not a general information channel.'
   - id: C-A11Y-PART-RELATIONSHIP-0001-J
     text:
-      zh-CN: 'Web adapter 在给 target 赋 id 前必须检查当前宿主 id 与 reservation 冲突：仅可在现有非空 id 在适用宿主 scope 内唯一、未被另一 logical target 保留且与既有 reservation 一致时原样 adopt；任何冲突或 rematerialized view 上不同的宿主作者 id 都必须保留且使本次 relation fail closed，不得覆盖。若 adapter 给无可采用 id 的 view 写入 reserved id，必须记录该 view 的精确先前值并只在当前值仍等于 lease-owned id 时 compare-and-restore；detach、rebind 或 terminal release 不得删除或恢复覆盖宿主作者后来写入的值。'
-      en: "Before assigning a target id, the Web adapter must check the current host id and reservation for conflicts: it may adopt an existing non-empty id unchanged only when that id is unique in the applicable host scope, is not reserved by another logical target, and agrees with any existing reservation; any collision or different host-authored id on a rematerialized view must be preserved and make this relation fail closed rather than be overwritten. If the adapter writes a reserved id to a view without an adoptable id, it must record that view's exact prior value and compare-and-restore only while the current value still equals the lease-owned id; detach, rebind, or terminal release must never erase or restore over a value later written by the host author."
+      zh-CN: 'Web adapter 在给 target 赋 id 前必须检查当前宿主 id 与 reservation 冲突：仅可在现有非空 id 在适用宿主 scope 内唯一、未被另一 logical target 保留且与既有 reservation 一致时原样 adopt；任何冲突或 rematerialized view 上不同的宿主作者 id 都必须保留且使本次 relation fail closed，不得覆盖。若 adapter 给无可采用 id 的 view 写入 reserved id，必须记录该 view 的精确先前值并只在当前值仍等于 lease-owned id 时 compare-and-restore。若宿主作者在 live binding 期间修改 target id，adapter 必须保留新值、立即使旧 reservation 与 dependent source IDREF contribution 失效，再通过完整 collision check 重新 adopt/rebind；detach、rebind 或 terminal release 不得删除或恢复覆盖宿主作者后来写入的值。'
+      en: "Before assigning a target id, the Web adapter must check the current host id and reservation for conflicts: it may adopt an existing non-empty id unchanged only when that id is unique in the applicable host scope, is not reserved by another logical target, and agrees with any existing reservation; any collision or different host-authored id on a rematerialized view must be preserved and make this relation fail closed rather than be overwritten. If the adapter writes a reserved id to a view without an adoptable id, it must record that view's exact prior value and compare-and-restore only while the current value still equals the lease-owned id. If the host author changes the target id during a live binding, the adapter must preserve the new value, immediately invalidate the old reservation and dependent source-IDREF contributions, and only then re-adopt or rebind through the full collision check; detach, rebind, or terminal release must never erase or restore over a value later written by the host author."
+  - id: C-A11Y-PART-RELATIONSHIP-0001-K
+    text:
+      zh-CN: '当 adapter 在同一 view epoch 内替换 source 或 target 的 physical accessibility binding 时，必须在同一 host replacement transaction 内撤销旧 view 的 lease ownership 与 observer、绑定新 view、重新校验 target reservation 并使所有 dependent source 重新解析；有效关系必须在新 binding 对 accessibility surface 可见前完成投射，否则 fail closed。'
+      en: 'When an adapter replaces a source or target physical accessibility binding within the same view epoch, it must revoke the old view lease ownership and observers, bind the new view, revalidate the target reservation, and re-resolve every dependent source within the same host replacement transaction; a valid relationship must be projected before the new binding becomes visible to the accessibility surface, otherwise it fails closed.'
 sources:
   - path: internal/records/2026-08-26-same-domain-anatomy-relationship-design.md
     label: Same-domain anatomy-part relationship design record
@@ -76,10 +80,13 @@ relates:
     - C-ANATOMY-0001
   prototypes:
     - P-BASE-TABS
+verifies:
+  tests:
+    - T-A11Y-PART-RELATIONSHIP-0001
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced
-    summary: Promoted the settled same-domain relationship semantics into draft contract authority with symmetric source/target pre-commit binding, complete terminal cleanup, and non-destructive host-id ownership.
+    summary: Promoted the settled same-domain relationship semantics into draft contract authority with symmetric source/target pre-commit binding, detach-before-removal ordering, complete terminal cleanup, atomic domain/key re-indexing, non-destructive live host-id reconciliation, same-epoch target replacement, and mapped executable evidence.
 tags:
   - a11y
   - anatomy
