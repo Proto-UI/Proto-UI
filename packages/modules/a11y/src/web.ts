@@ -43,10 +43,9 @@ export function createWebA11yProjector(
     if (nextTarget) applyWebA11ySnapshot(nextTarget, snapshot, previousSnapshot ?? undefined);
   };
 
-  project.clear = () => {
-    if (lastTarget && lastSnapshot) clearWebA11ySnapshot(lastTarget, lastSnapshot);
-    lastTarget = null;
-    lastSnapshot = null;
+  project.clearHeadingLevel = () => {
+    lastTarget?.removeAttribute('aria-level');
+    if (lastSnapshot) lastSnapshot = { ...lastSnapshot, level: undefined };
   };
 
   subscribeTargetChange?.(() => {

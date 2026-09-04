@@ -139,18 +139,18 @@ class A11yModuleImpl extends ModuleBase {
 
   /** Remove view-scoped projection subscriptions; keep instance-scoped level observation. */
   private disposeViews(): void {
-    this.clearProjection();
+    this.clearHeadingLevelProjection();
     while (this.stateWatchOffs.length) {
       this.stateWatchOffs.pop()?.();
     }
     this.stateWatchesInstalled = false;
   }
 
-  private clearProjection(): void {
+  private clearHeadingLevelProjection(): void {
     if (!this.projectionActive) return;
     this.projectionActive = false;
     if (!this.caps.has(A11Y_PROJECT_CAP)) return;
-    this.caps.get(A11Y_PROJECT_CAP).clear?.();
+    this.caps.get(A11Y_PROJECT_CAP).clearHeadingLevel?.();
   }
   dispose(): void {
     this.disposeViews();

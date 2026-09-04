@@ -34,8 +34,8 @@ function createHost(initialRaw: Record<string, unknown> = {}) {
               snapshots.push(snapshot);
             },
             {
-              clear() {
-                projectionEvents.push('clear');
+              clearHeadingLevel() {
+                projectionEvents.push('clear-heading-level');
               },
             }
           ),
@@ -272,7 +272,7 @@ describe('runtime contract: a11y (v0)', () => {
     expect(ctx.snapshots.at(-1)?.level).toBe(2);
 
     await session.unmount();
-    expect(ctx.projectionEvents).toEqual(['clear']);
+    expect(ctx.projectionEvents).toEqual(['clear-heading-level']);
     expect(session.mountPhase).toBe('detached');
     ctx.snapshots.length = 0;
     session.invokeInCallbackScope(() => level.set(0, 'reason: detached invalid heading level'));
