@@ -444,6 +444,39 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
+  it.each(['characterData', 'attribute'] as const)(
+    'observes nested %s growth beneath a fixed direct wrapper',
+    async (mutationKind) => {
+      const frames = installFrameHarness();
+      const target = document.createElement('div');
+      const wrapper = document.createElement('div');
+      const text = document.createTextNode('stream');
+      wrapper.append(text);
+      target.append(wrapper);
+      const updateMetrics = installMetrics(target, {
+        clientWidth: 100,
+        scrollWidth: 100,
+        clientHeight: 100,
+        scrollHeight: 400,
+      });
+      document.body.append(target);
+      const snapshots: ScrollSurfaceSnapshot[] = [];
+      const lease = attachEndFollow(target, snapshots);
+      frames.runAll();
+
+      updateMetrics({ scrollHeight: 500 });
+      if (mutationKind === 'characterData') text.data = 'stream update';
+      else wrapper.setAttribute('data-expanded', 'true');
+      await Promise.resolve();
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+      expect(frames.pending()).toBe(1);
+      frames.runAll();
+      expect(target.scrollTop).toBe(400);
+      lease.dispose();
+    }
+  );
+
   it('reports an explicit to-end request pending then applied and resumes following', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');

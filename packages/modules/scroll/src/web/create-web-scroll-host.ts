@@ -560,7 +560,12 @@ export function createWebScrollSurfaceHost(
         for (const contentTarget of Array.from(target.children)) {
           resizeObserver?.observe(contentTarget);
         }
-        mutationObserver?.observe(target, { childList: true, subtree: true });
+        mutationObserver?.observe(target, {
+          attributes: true,
+          characterData: true,
+          childList: true,
+          subtree: true,
+        });
         for (const control of connection.composedChrome?.controls ?? []) {
           if (!isWebControl(control)) continue;
           resizeObserver?.observe(control.trackTarget);
