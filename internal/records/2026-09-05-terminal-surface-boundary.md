@@ -114,7 +114,8 @@ Selection summaries and copy requests are technically expressible as plain value
 The connection callbacks below are Module-to-Host internals. They are not Prototype props and do not make functions or engine values portable.
 
 ```ts
-type TerminalSize = Readonly<{ columns: number; rows: number; revision: number }>;
+type TerminalDimensions = Readonly<{ columns: number; rows: number }>;
+type TerminalSize = TerminalDimensions & Readonly<{ revision: number }>;
 
 type TerminalUnavailableReason =
   | 'engine-unavailable'
@@ -124,13 +125,21 @@ type TerminalUnavailableReason =
   | 'resize-unavailable'
   | 'backend-rejected';
 
-type TerminalResizeResult = Readonly<{
-  revision: number;
-  outcome: 'applied' | 'rejected';
-  requested: Readonly<{ columns: number; rows: number }>;
-  effective: Readonly<{ columns: number; rows: number }> | null;
-  reason: TerminalUnavailableReason | null;
-}>;
+type TerminalResizeResult =
+  | Readonly<{
+      revision: number;
+      outcome: 'applied';
+      requested: TerminalDimensions;
+      effective: TerminalDimensions;
+      reason: null;
+    }>
+  | Readonly<{
+      revision: number;
+      outcome: 'rejected';
+      requested: TerminalDimensions;
+      effective: null;
+      reason: 'resize-unavailable' | 'backend-rejected';
+    }>;
 
 type TerminalSurfaceSupport = Readonly<{
   input: 'available' | 'read-only' | 'unavailable';
@@ -139,8 +148,12 @@ type TerminalSurfaceSupport = Readonly<{
   reasons: readonly TerminalUnavailableReason[];
 }>;
 
-type TerminalSurfacePatch = Readonly<{
+type TerminalSurfaceRequirement = Readonly<{
+  // Immutable for one connection; changing sessions requires a fresh attach.
   sessionId: string;
+}>;
+
+type TerminalSurfacePatch = Readonly<{
   readOnly: boolean;
   inputEnabled: boolean;
   shortcutPolicyId: string;
@@ -149,9 +162,65 @@ type TerminalSurfacePatch = Readonly<{
   connectionStatus: 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 }>;
 
+type TerminalLetter = Lowercase<
+  | 'A'
+  | 'B'
+  | 'C'
+  | 'D'
+  | 'E'
+  | 'F'
+  | 'G'
+  | 'H'
+  | 'I'
+  | 'J'
+  | 'K'
+  | 'L'
+  | 'M'
+  | 'N'
+  | 'O'
+  | 'P'
+  | 'Q'
+  | 'R'
+  | 'S'
+  | 'T'
+  | 'U'
+  | 'V'
+  | 'W'
+  | 'X'
+  | 'Y'
+  | 'Z'
+>;
+
+type TerminalKey =
+  | TerminalLetter
+  | '0'
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | 'Enter'
+  | 'Escape'
+  | 'Backspace'
+  | 'Tab'
+  | 'ArrowUp'
+  | 'ArrowDown'
+  | 'ArrowLeft'
+  | 'ArrowRight'
+  | 'Home'
+  | 'End'
+  | 'PageUp'
+  | 'PageDown'
+  | 'Insert'
+  | 'Delete';
+
 type TerminalKeyIntent = Readonly<{
   type: 'key';
-  key: string;
+  key: TerminalKey;
   ctrl: boolean;
   alt: boolean;
   shift: boolean;
@@ -175,6 +244,7 @@ type TerminalSurfaceFacts = Readonly<{
 type TerminalSurfaceConnection = Readonly<{
   // Issued and retired by the Module; callback closures reject any retired identity.
   connectionId: string;
+  requirement: TerminalSurfaceRequirement;
   patch: TerminalSurfacePatch;
   onFacts(connectionId: string, facts: TerminalSurfaceFacts): void;
   onInput(connectionId: string, intent: TerminalInputIntent): void;
@@ -195,13 +265,13 @@ type TerminalSurfaceHost = Readonly<{
 }>;
 ```
 
-A fake host is constructed with a private map from `sessionId` to a scripted fake engine and fake backend sink; the map, engine, sink, and engine-encoded bytes never enter `TerminalSurfacePatch`. The Module issues a unique connection identity and retires its callback closure before replacement. The red-first exercise is:
+A fake host is constructed with a private map from immutable `TerminalSurfaceRequirement.sessionId` to a scripted fake engine and fake backend sink; the map, engine, sink, and engine-encoded bytes never enter `TerminalSurfacePatch`. The Module issues a unique connection identity and retires its callback closure before replacement. The red-first exercise is:
 
 1. attach `session-7`; receive `attaching`, then `ready` with 80x24, explicit input/resize/accessibility support, accessible label/description, and connected status;
 2. emit committed text and one modified key as immutable intent values, while asserting the private fake backend receives each engine-encoded sequence exactly once and no normalized-intent callback becomes a second send path;
 3. invoke `requestKey` for a visible mobile Escape control; assert the engine—not App code—encodes it and the private backend receives exactly one sequence;
-4. issue resize revisions 1/2/3; report revision 2 as rejected and revision 3 as applied at 120x40; accept only revision 3 as current facts;
-5. replace the target/engine; retire the Module-owned connection identity and dispose the old lease before a new connection is issued, even if the new host's internal counters restart;
+4. issue resize revisions 1/2/3; report revision 2 as rejected with `backend-rejected` and no effective size, then revision 3 as applied at 120x40 with no reason; accept only revision 3 as current facts;
+5. replace the target/engine, then switch sessions through a new immutable requirement and fresh attachment; retire the old Module connection and dispose its lease before issuing the new connection, even if host counters restart;
 6. simulate missing engine, input, accessibility, and resize support and assert the bounded support/reason codes identify the failed requirement;
 7. dispose, then make the old fake emit input, resize, bell, error, and focus; observe zero Terminal callbacks and zero backend writes, while focus state remains solely in the Focus domain;
 8. recursively validate every captured patch/fact/request as data-only and prove that no fake-engine identity, target, buffer, stream, backend sink, callback source, process-controlled title, or cell grid appears.
@@ -211,7 +281,7 @@ This sketch proves the boundary can be data-only and makes resize/result, diagno
 ## Input, shortcut, and focus policy
 
 - **IME:** candidate text and composition UI stay in the host engine's physical input target. Only committed text may leave the host bridge as `text` intent. `Enter`/other command keys during composition do not trigger Harness shortcuts or a duplicate terminal key.
-- **Key versus text:** committed Unicode text uses `text`; non-text keys use a normalized key plus modifiers. A DOM `KeyboardEvent`, native key object, scan code, or engine-encoded VT string never enters portable state/events.
+- **Key versus text:** committed Unicode text uses `text`; non-text keys and modifier chords use the bounded `TerminalKey` vocabulary. Letter/digit keys are valid here only with Ctrl/Alt/Meta; unmodified or Shift-only printable input must use `text`. Unsupported punctuation/function keys remain deferred. A DOM `KeyboardEvent`, native key object, scan code, arbitrary string, or engine-encoded VT value never enters portable state/events.
 - **Shortcut order:** the adapter-injected Harness keyboard arbiter checks the configured local command map before the terminal engine. An explicitly reserved Harness chord wins; every other chord falls through exactly once to the engine. The policy resolver is host configuration, not a portable callback.
 - **Escape route:** bare `Escape` is terminal input. The Web Harness profile must reserve `F6`/`Shift+F6` for next/previous Harness focus regions and provide an adjacent, named Proto UI Button that leaves the terminal. A host that cannot provide both a keyboard route and reachable visible control reports the interactive slice unavailable.
 - **Ctrl/Meta/Alt:** no blanket interception. Only registered Harness chords are local. The engine receives the rest and owns platform-specific encoding.
@@ -240,12 +310,12 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 
 ### Lifecycle rules
 
-- One logical instance holds one Module-owned connection identity for the current lease. Detach, target replacement, engine replacement, session switch, capability replacement, and disposal retire the callback closure before attaching another; host-authored counters never decide freshness.
+- One logical instance holds one Module-owned connection identity and immutable session requirement for the current lease. Detach, target/engine/session/capability replacement, and disposal retire the callback closure and lease before a new attachment; `update()` cannot change `sessionId`, and host-authored counters never decide freshness.
 - Every input, fact, resize result, accessibility callback, bell, and error is checked against the current connection identity and request revision. Process-controlled title updates remain host-local. Late callbacks are ignored.
 - `dispose()` removes keyboard/composition/paste/pointer listeners, the Focus-domain target bridge, geometry/DPR observers, accessibility nodes/listeners, engine subscriptions, renderer resources owned by the lease, target references, and backend-sink references.
 - Disposing a view lease does **not** terminate the process or PTY. The App/backend owns explicit process stop and decides whether detach preserves or closes a session.
 - If the Host Capability created an engine for the lease, it disposes that engine after draining/revoking its callbacks. If the host injected a shared engine, the lease only detaches its owned bindings. Ownership must be explicit; double-disposal is an error.
-- Resize bursts are latest-revision-wins. The host coalesces geometry changes; the backend result carries the acknowledged revision, applied/rejected outcome, effective dimensions, and bounded reason; replacement/disposal cancels pending work.
+- Resize bursts are latest-revision-wins. An applied result requires effective dimensions and null reason; a rejected result requires `resize-unavailable` or `backend-rejected` and has no effective size. Replacement/disposal cancels pending work.
 - Unsupported engine attachment, backend sink, input bridge, accessibility route, or resize reports `unavailable`/read-only plus a bounded per-feature reason code; no fake success state.
 
 ## Proposed entity and evidence graph
@@ -272,10 +342,10 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** compile-time and runtime fixtures reject engine, target, buffer, stream, DOM/native event, mutable controller, raw pixels, cell grids, backend sink, and functions in portable patch/fact/request values.
-2. **Fake lease:** attach/update/snapshot/dispose, missing capability, target/engine replacement, session switch, exactly-once cleanup, Module-owned connection retirement, and stale-callback suppression even when host counters collide.
-3. **Input policy:** IME candidate stays host-local; committed text emits once; the private backend sink receives the engine-encoded sequence once; normalized intents cannot double-send; reserved Harness chord stays local; other modified keys reach the engine once; a mobile special-key request is engine-encoded and delivered once; bare Escape reaches the engine; F6 exits through Focus.
-4. **Resize:** invalid/zero dimensions reject; bursts coalesce to the newest revision; applied/rejected result contains acknowledged revision/effective dimensions/reason; late or older results do not change current facts.
+1. **Portable negatives:** compile-time and runtime fixtures reject engine, target, buffer, stream, DOM/native event, mutable controller, raw pixels, cell grids, backend sink, arbitrary key strings, and functions in portable patch/fact/request values.
+2. **Fake lease:** attach/update/snapshot/dispose, missing capability, target/engine replacement, session replacement through fresh immutable requirement, exactly-once cleanup, Module-owned connection retirement, and stale-callback suppression even when host counters collide.
+3. **Input policy:** IME candidate stays host-local; printable input uses `text`; bounded named/modifier keys reach the private backend once; arbitrary keys reject; normalized intents cannot double-send; reserved Harness chord stays local; a mobile special-key request is engine-encoded once; bare Escape reaches the engine; F6 exits through Focus.
+4. **Resize:** invalid/zero dimensions reject; bursts coalesce; the applied branch requires acknowledged revision/effective dimensions, the rejected branch requires revision/bounded reason, and late/older results do not change current facts.
 5. **Performance:** replay rapid cursor/grid/alternate-screen updates and assert zero portable content publications/allocations; only deduplicated low-cardinality facts cross.
 6. **Accessibility fake:** label/description/status inputs, per-feature support/reason negotiation, bounded attention, unavailable degradation, and no generic live-stream snapshot.
 7. **Real Web:** engine double mounted behind React; real keyboard/IME/focus/F6/resize/target replacement/dispose; accessibility-tree inspection; high-frequency renderer path; no retained listeners/observers/targets.
