@@ -25,8 +25,8 @@ The following catalog entities are draft unless stated otherwise:
 - `K-HOST-SURFACE-ROLES-0001-A..D` distinguishes `boundaryTarget`, `surfaceTarget`, and host-private targets/controllers. Splitting roles creates no second semantic owner or portable channel.
 - `C-HOST-SURFACE-PROJECTION-0001-A/B/D/E` keeps lifecycle and logical identity at `boundaryTarget`, limits `surfaceTarget` to presentation, leaves focus/a11y/event/native targets to their domains, and requires replacement cleanup.
 - `C-TEXT-CONTROL-0001-A/C/F/G/H`, `D-TEXT-CONTROL-PROJECTION-0001-A/C/D/E`, and `HC-TEXT-CONTROL-0001` are the worked precedent for portable requirements, a host-owned engine, normalized events, a bounded lease, editing-session preservation, and Web-only evidence limits. They do not authorize expanding Textarea into a terminal.
-- `C-FOCUS-0001-B/D/G` keeps focus facts, requests, eligibility, topology, policy, and entry-region delegation in the Focus domain.
-- `C-A11Y-0001-G/H` and `HC-A11Y-0001` allow native, degraded, or diagnostic host accessibility projection without making one host representation portable.
+- `C-FOCUS-0001-B/C/D/G` distinguishes focus facts/requests/topology/policy, keeps fact ownership in Focus, and lets entry regions delegate without creating Terminal-specific focused state.
+- `C-A11Y-0001-B/D/E/G/H/I` and `HC-A11Y-0001` govern semantic-object name/description/state/relation facts, state-backed mode, updated name/description projection, and native/degraded host projection; Terminal patches do not form a second A11y channel.
 - `C-SCROLL-0001-D/E`, `M-SCROLL-0001-E`, and `HC-SCROLL-SURFACE-0001-D/E` keep geometry and high-frequency host facts behind a lease and require stale-callback suppression and cleanup.
 - Active `D-ADAPTER-PROFILE-0001-B/C/D/E` means an existing Adapter can claim Terminal Module support or Host Capability provision only after concrete reviewed evidence. Absence from an Adapter profile means uncataloged, not unsupported.
 
