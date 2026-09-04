@@ -161,6 +161,7 @@ export {
 } from './dialog';
 
 export * from './scroll-area';
+export * from './tooltip';
 export type {
   BrutalistDialogRootProps,
   BrutalistDialogRootExposes,

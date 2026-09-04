@@ -18,6 +18,7 @@ import {
   installViewVisibilityRule,
   PUI_VIEW_DETACHED_ATTR,
   PUI_VIEW_PENDING_ATTR,
+  PUI_VIEW_REVEALING_ATTR,
   type ProtoAdapterProps,
   scheduleAfterWebLayout,
 } from '@proto.ui/adapter-base';
@@ -144,6 +145,7 @@ function hasSameRawProps(
   );
 }
 
+const MAX_FOCUS_TARGET_RETRIES = 3;
 export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
   const runtime = normalizeRuntime(runtimeInput);
   const sharedOverlayLayerScheduler = createZIndexOverlayLayerScheduler();
@@ -201,15 +203,26 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         bindLogicalParent(instanceTokenRef.current, parentToken);
       }
       const [renderChildren, setRenderChildren] = runtime.useState<any>(null);
-      const [hostTokens, setHostTokens] = runtime.useState<string[]>([]);
+      const hostTokenRevisionRef = runtime.useRef(0);
+      const [hostStyle, setHostStyle] = runtime.useState<{ tokens: string[]; revision: number }>({
+        tokens: [],
+        revision: 0,
+      });
+      const setHostTokens = (tokens: string[]) => {
+        const revision = ++hostTokenRevisionRef.current;
+        setHostStyle({ tokens, revision });
+      };
       const [shouldExist, setShouldExist] = runtime.useState(!supportsOwnerContext);
+      const viewEffectsTargetReadyRef = runtime.useRef(false);
       const viewReadyRef = runtime.useRef(false);
       const focusTargetReadyListenersRef = runtime.useRef<Set<() => void>>(new Set());
       const focusTargetRetryScheduledRef = runtime.useRef(false);
+      const focusTargetRetryCountRef = runtime.useRef(0);
       const notifyFocusTargetReady = () => {
         const target = rootRef.current;
         if (!viewReadyRef.current || !target?.isConnected) return;
         for (const listener of Array.from(focusTargetReadyListenersRef.current)) listener();
+        if (target.ownerDocument.activeElement === target) focusTargetRetryCountRef.current = 0;
       };
 
       const controllerRef = runtime.useRef<RuntimeController | null>(null);
@@ -233,6 +246,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const pendingSignalRef = runtime.useRef<CommitSignal | null>(null);
       const commitVersionRef = runtime.useRef(0);
       const [commitVersion, setCommitVersion] = runtime.useState(0);
+      const pendingRevealStyleRevisionRef = runtime.useRef<number | null>(null);
+      const revealGenerationRef = runtime.useRef(0);
       const hostSessionRef = runtime.useRef<ReturnType<
         typeof createReactHostSession<Props>
       > | null>(null);
@@ -359,10 +374,16 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         if (!shouldExist) {
           const detachedEl = rootRef.current;
           if (detachedEl) installViewVisibilityRule(detachedEl.ownerDocument);
+          detachedEl?.setAttribute(PUI_VIEW_PENDING_ATTR, '');
+          revealGenerationRef.current += 1;
+          detachedEl?.removeAttribute(PUI_VIEW_REVEALING_ATTR);
           eventGateRef.current?.disable?.();
           if (ownerRef.current?.hasView) void ownerRef.current.detachView();
           setHostTokens([]);
+          pendingRevealStyleRevisionRef.current = null;
+          viewEffectsTargetReadyRef.current = false;
           viewReadyRef.current = false;
+          focusTargetRetryCountRef.current = 0;
           return;
         }
 
@@ -429,20 +450,27 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           // A child of a detached ancestor still mounts and attaches its own
           // view, so readiness has to consult the subtree, not just this host.
           isViewReady: () =>
-            viewReadyRef.current && !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+            viewEffectsTargetReadyRef.current &&
+            !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
           getCurrentElement: () => rootRef.current,
           subscribeTargetReady: (listener) => {
             focusTargetReadyListenersRef.current.add(listener);
             return () => focusTargetReadyListenersRef.current.delete(listener);
           },
           retryTargetReady: () => {
-            if (focusTargetRetryScheduledRef.current) return;
+            if (
+              focusTargetRetryScheduledRef.current ||
+              focusTargetRetryCountRef.current >= MAX_FOCUS_TARGET_RETRIES
+            ) {
+              return;
+            }
             focusTargetRetryScheduledRef.current = true;
+            focusTargetRetryCountRef.current += 1;
             scheduleAfterWebLayout(
               rootRef.current,
               () => {
-                notifyFocusTargetReady();
                 focusTargetRetryScheduledRef.current = false;
+                notifyFocusTargetReady();
               },
               schedule
             );
@@ -472,23 +500,78 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       runtime.useLayoutEffect(() => {
         ownerDisposalRef.current?.retain();
         return () => {
+          pendingRevealStyleRevisionRef.current = null;
+          viewEffectsTargetReadyRef.current = false;
           viewReadyRef.current = false;
-          rootRef.current?.setAttribute(PUI_VIEW_PENDING_ATTR, '');
+          focusTargetRetryCountRef.current = 0;
+          const cleanupRoot = rootRef.current;
+          cleanupRoot?.setAttribute(PUI_VIEW_PENDING_ATTR, '');
+          revealGenerationRef.current += 1;
+          cleanupRoot?.removeAttribute(PUI_VIEW_REVEALING_ATTR);
           void ownerRef.current?.detachView();
           ownerDisposalRef.current?.release();
         };
       }, []);
 
       runtime.useLayoutEffect(() => {
-        if (!pendingCommitRef.current) return;
-        pendingCommitRef.current = false;
+        if (pendingCommitRef.current) {
+          pendingCommitRef.current = false;
+          const wasReady = viewReadyRef.current;
+          const signal = pendingSignalRef.current;
+          pendingSignalRef.current = null;
+          viewEffectsTargetReadyRef.current = true;
+
+          // Runtime finalizes rule-driven view effects from CommitSignal.done().
+          // Keep a newly attached root pending until that flush has reached a
+          // later React DOM commit; otherwise the base style becomes visible
+          // before its variant, size, and state tokens.
+          signal?.done?.();
+
+          if (wasReady) {
+            if (!pendingCommitRef.current) {
+              eventGateRef.current?.enable();
+              notifyFocusTargetReady();
+            }
+            return;
+          }
+
+          pendingRevealStyleRevisionRef.current = hostTokenRevisionRef.current;
+        }
+
+        const requiredStyleRevision = pendingRevealStyleRevisionRef.current;
+        if (requiredStyleRevision === null) return;
+        if (
+          hostStyle.revision < requiredStyleRevision ||
+          hostStyle.revision !== hostTokenRevisionRef.current
+        ) {
+          return;
+        }
+
+        pendingRevealStyleRevisionRef.current = null;
         viewReadyRef.current = true;
-        rootRef.current?.removeAttribute(PUI_VIEW_PENDING_ATTR);
+        focusTargetRetryCountRef.current = 0;
+        const revealedRoot = rootRef.current;
+        const revealGeneration = ++revealGenerationRef.current;
+        revealedRoot?.setAttribute(PUI_VIEW_REVEALING_ATTR, '');
+        revealedRoot?.removeAttribute(PUI_VIEW_PENDING_ATTR);
+        if (revealedRoot) {
+          scheduleAfterWebLayout(
+            revealedRoot,
+            () => {
+              if (
+                revealGenerationRef.current === revealGeneration &&
+                rootRef.current === revealedRoot &&
+                !revealedRoot.hasAttribute(PUI_VIEW_PENDING_ATTR)
+              ) {
+                revealedRoot.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+              }
+            },
+            schedule
+          );
+        }
         eventGateRef.current?.enable();
         notifyFocusTargetReady();
-        pendingSignalRef.current?.done?.();
-        pendingSignalRef.current = null;
-      }, [commitVersion]);
+      }, [commitVersion, hostStyle.revision]);
 
       // A renderer can replace the host element after the Proto commit that
       // first announced readiness. Re-advertise the current ref after every
@@ -542,7 +625,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
                 'data-pui-root': '',
                 [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
                 [PUI_VIEW_PENDING_ATTR]: viewReadyRef.current ? undefined : '',
-                'data-pui-style': serializeStyleTokens(hostTokens),
+                'data-pui-style': serializeStyleTokens(hostStyle.tokens),
                 'data-demo-ref': props['data-demo-ref' as keyof typeof props] as string | undefined,
               },
               // Without a view there is no template to place the slot into, so the

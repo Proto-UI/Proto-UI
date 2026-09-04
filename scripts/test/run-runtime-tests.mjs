@@ -17,15 +17,24 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // can exceed its own hook timeout and fall back to spawning its own server.
 // Warm every route the suites wait on.
 const READY_ROUTES = [
+  '/en/start-here/quick-start/',
+  '/en/ui-libraries/shadcn/select/',
   '/en/ui-libraries/base/scroll-area/',
   '/en/ui-libraries/base/textarea/',
   '/en/ui-libraries/brutalist/components/button/',
   '/en/ui-libraries/brutalist/components/switch/',
   '/en/ui-libraries/brutalist/components/tabs/',
+  '/en/ui-libraries/brutalist/components/tooltip/',
+  '/en/ui-libraries/brutalist/components/dialog/',
+  '/en/ui-libraries/brutalist/components/select/',
   '/en/ui-libraries/shadcn/checkbox/',
   '/en/ui-libraries/shadcn/dropdown-menu/',
   '/en/ui-libraries/shadcn/switch/',
   '/en/ui-libraries/shadcn/textarea/',
+  '/zh-cn/',
+  '/zh-cn/start-here/quick-start/',
+  '/zh-cn/internal/demo-matrix/',
+  '/zh-cn/ui-libraries/shadcn/select/',
 ];
 const READY_TIMEOUT_MS = 180_000;
 
@@ -91,6 +100,7 @@ async function startServer() {
     {
       cwd: root,
       detached: process.platform !== 'win32',
+      shell: process.platform === 'win32',
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
@@ -108,7 +118,20 @@ async function startServer() {
 async function stopServer() {
   if (shuttingDown || !devServer || devServer.exitCode !== null || !devServer.pid) return;
   shuttingDown = true;
-  const target = process.platform === 'win32' ? devServer.pid : -devServer.pid;
+  const pid = devServer.pid;
+  if (process.platform === 'win32') {
+    await new Promise((resolve) => {
+      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
+      killer.once('error', resolve);
+      killer.once('exit', resolve);
+    });
+    return;
+  }
+
+  const target = -pid;
   try {
     process.kill(target, 'SIGTERM');
   } catch {
@@ -141,6 +164,7 @@ async function runVitest(args, baseUrl) {
     const child = spawn(vitestBin, ['run', ...args], {
       cwd: root,
       env,
+      shell: process.platform === 'win32',
       stdio: 'inherit',
     });
     child.on('error', reject);

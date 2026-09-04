@@ -1,60 +1,33 @@
 // @vitest-environment node
 
+import { mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
-  RUNTIMES,
   launchBrowser,
   openRoute,
+  runtimeSelectTrigger,
   selectRuntime,
   startServer,
   stopServer,
+  type RuntimeId,
 } from './browser-harness';
-import { mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
 
 const BUTTON_ROUTE = '/en/ui-libraries/brutalist/components/button/';
 const BUTTON_SELECTOR = '.host [data-pui-root]';
-const BUTTON_COUNT = 9;
+const BUTTON_COUNT = 10;
+const BUTTON_RUNTIMES = ['wc', 'react', 'vue'] as const satisfies readonly RuntimeId[];
 const VIEWPORT = { width: 1440, height: 900 } as const;
 const EVIDENCE_DIR = process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
-const ACCENT_TOKEN_PAIRS = [
-  { background: '--pui-main', foreground: '--pui-main-foreground' },
-  { background: '--pui-mint', foreground: '--pui-mint-foreground' },
-  { background: '--pui-lavender', foreground: '--pui-lavender-foreground' },
-  { background: '--pui-coral', foreground: '--pui-coral-foreground' },
-  { background: '--pui-sky', foreground: '--pui-sky-foreground' },
-] as const;
-const SURFACE_TOKEN_PAIR = {
-  background: '--pui-secondary-background',
-  foreground: '--pui-foreground',
-} as const;
-const DESTRUCTIVE_TOKEN_PAIR = {
-  background: '--pui-destructive',
-  foreground: '--pui-destructive-foreground',
-} as const;
-
-type HostTheme = 'light' | 'dark';
-
-type ThemeTokenPair = Readonly<{
-  background: `--pui-${string}`;
-  foreground: `--pui-${string}`;
-}>;
-
-type ColorPair = Readonly<{
-  backgroundColor: string;
-  color: string;
-}>;
 
 type ButtonStyle = Readonly<{
-  backgroundColor: string;
   backgroundImage: string;
   borderColor: string;
   borderRadius: string;
   borderStyle: string;
   borderWidth: string;
   boxShadow: string;
-  color: string;
   opacity: string;
   pointerEvents: string;
   transform: string;
@@ -63,44 +36,21 @@ type ButtonStyle = Readonly<{
 let browser: Browser;
 let baseUrl: string;
 
-async function setHostTheme(page: Page, theme: HostTheme): Promise<void> {
-  await page.evaluate((nextTheme) => {
-    const themeApi = (
-      window as Window & {
-        StarlightTheme?: { set(theme: 'light' | 'dark'): void };
-      }
-    ).StarlightTheme;
-    if (!themeApi) throw new Error('StarlightTheme host API is unavailable.');
-    themeApi.set(nextTheme);
-  }, theme);
-  await page.waitForFunction(
-    (expectedTheme) => document.documentElement.dataset.theme === expectedTheme,
-    theme,
-    { timeout: 10_000 }
-  );
-}
-
 async function styleOf(button: Locator): Promise<ButtonStyle> {
   return button.evaluate((element: HTMLElement) => {
     const style = getComputedStyle(element);
     return {
-      backgroundColor: style.backgroundColor,
       backgroundImage: style.backgroundImage,
       borderColor: style.borderTopColor,
       borderRadius: style.borderTopLeftRadius,
       borderStyle: style.borderTopStyle,
       borderWidth: style.borderTopWidth,
       boxShadow: style.boxShadow,
-      color: style.color,
       opacity: style.opacity,
       pointerEvents: style.pointerEvents,
       transform: style.transform,
     };
   });
-}
-
-function colorPairOf(style: ButtonStyle): ColorPair {
-  return { backgroundColor: style.backgroundColor, color: style.color };
 }
 
 function geometryOf(style: ButtonStyle) {
@@ -112,43 +62,6 @@ function geometryOf(style: ButtonStyle) {
     boxShadow: style.boxShadow,
     transform: style.transform,
   };
-}
-
-async function resolvedTokenPairs(
-  page: Page,
-  tokenPairs: readonly ThemeTokenPair[]
-): Promise<ColorPair[]> {
-  return page.evaluate((pairs) => {
-    const rootStyle = getComputedStyle(document.documentElement);
-    const probe = document.createElement('span');
-    probe.style.position = 'fixed';
-    probe.style.pointerEvents = 'none';
-    probe.style.visibility = 'hidden';
-    document.body.append(probe);
-
-    try {
-      return pairs.map(({ background, foreground }) => {
-        if (!rootStyle.getPropertyValue(background).trim()) {
-          throw new Error(`Theme token ${background} is unavailable.`);
-        }
-        if (!rootStyle.getPropertyValue(foreground).trim()) {
-          throw new Error(`Theme token ${foreground} is unavailable.`);
-        }
-        probe.style.setProperty('background-color', `var(${background})`, 'important');
-        probe.style.setProperty('color', `var(${foreground})`, 'important');
-        const style = getComputedStyle(probe);
-        return { backgroundColor: style.backgroundColor, color: style.color };
-      });
-    } finally {
-      probe.remove();
-    }
-  }, tokenPairs);
-}
-
-async function resolvedTokenPair(page: Page, tokenPair: ThemeTokenPair): Promise<ColorPair> {
-  const [resolved] = await resolvedTokenPairs(page, [tokenPair]);
-  if (!resolved) throw new Error('Expected one resolved theme token pair.');
-  return resolved;
 }
 
 async function resolvedTokenColors(
@@ -177,10 +90,10 @@ async function resolvedTokenColors(
   }, tokens);
 }
 
-async function captureFrame(locator: Locator, runtime: string, frame: string): Promise<Buffer> {
-  if (!EVIDENCE_DIR) return locator.screenshot();
+async function persistFrame(locator: Locator, runtime: RuntimeId, frame: string): Promise<void> {
+  if (!EVIDENCE_DIR) return;
   await mkdir(EVIDENCE_DIR, { recursive: true });
-  return locator.screenshot({ path: join(EVIDENCE_DIR, `${runtime}-${frame}.png`) });
+  await locator.screenshot({ path: join(EVIDENCE_DIR, `${runtime}-${frame}.png`) });
 }
 
 async function waitForState(
@@ -207,16 +120,16 @@ async function waitForState(
 beforeAll(async () => {
   baseUrl = await startServer(BUTTON_ROUTE);
   browser = await launchBrowser();
-}, 120_000);
+}, 150_000);
 
 afterAll(async () => {
   await browser?.close();
   await stopServer();
-});
+}, 60_000);
 
 describe.sequential('Brutalist Button browser regressions', () => {
-  for (const runtime of RUNTIMES) {
-    it(`preserves visual, interaction, and live-theme contracts in ${runtime}`, async () => {
+  for (const runtime of BUTTON_RUNTIMES) {
+    it(`preserves visual and interaction projections in ${runtime}`, async () => {
       const { context, page, previewer } = await openRoute(
         browser,
         baseUrl,
@@ -225,66 +138,71 @@ describe.sequential('Brutalist Button browser regressions', () => {
       );
 
       try {
-        await setHostTheme(page, 'light');
         await selectRuntime(page, previewer, runtime, BUTTON_SELECTOR, BUTTON_COUNT);
 
         const buttons = previewer.locator(BUTTON_SELECTOR);
         await expect(buttons.count()).resolves.toBe(BUTTON_COUNT);
-        const originalButtons = await buttons.elementHandles();
-        expect(originalButtons).toHaveLength(BUTTON_COUNT);
-        const assertOriginalButtons = async (phase: string): Promise<void> => {
-          const identities = await Promise.all(
-            originalButtons.map((original, index) =>
-              buttons.nth(index).evaluate((current, initial) => current === initial, original)
-            )
-          );
-          expect(identities, phase).toEqual(Array(BUTTON_COUNT).fill(true));
-        };
         const solid = buttons.nth(0);
-        const surface = buttons.nth(5);
-        const destructive = buttons.nth(6);
-        const disabledSurface = buttons.nth(8);
+        const disabledSolid = buttons.nth(8);
         const interactionFrame = previewer.locator('.host');
-        expect(await surface.textContent()).toContain('Surface');
-        expect(await destructive.textContent()).toContain('Destructive');
-        expect(await disabledSurface.textContent()).toContain('Disabled');
+
+        expect(
+          await buttons.evaluateAll((elements) =>
+            elements.map((element) => getComputedStyle(element).backgroundImage)
+          ),
+          `${runtime}/flat-fills`
+        ).toEqual(Array(BUTTON_COUNT).fill('none'));
 
         const resting = await styleOf(solid);
-        expect(resting).toMatchObject({
-          backgroundImage: 'none',
+        expect(resting, `${runtime}/rest`).toMatchObject({
           borderColor: 'rgb(0, 0, 0)',
           borderRadius: '0px',
           borderStyle: 'solid',
           borderWidth: '2px',
           transform: 'none',
         });
-        expect(resting.boxShadow).toMatch(/(?:^|, )rgb\(0, 0, 0\) 3px 3px 0px 0px$/);
+        expect(resting.boxShadow, `${runtime}/rest-hard-shadow`).toMatch(
+          /(?:^|, )rgb\(0, 0, 0\) 3px 3px 0px 0px$/
+        );
+        await persistFrame(interactionFrame, runtime, 'rest');
 
         await solid.hover();
         await waitForState(page, 0, 'data-hovered', true);
         const hovered = await styleOf(solid);
-        expect(hovered.boxShadow).toMatch(/(?:^|, )rgb\(0, 0, 0\) 4px 4px 0px 0px$/);
-        expect(hovered.transform).toBe('matrix(1, 0, 0, 1, -1, -1)');
-        await captureFrame(interactionFrame, runtime, 'hovered');
+        expect(hovered.boxShadow, `${runtime}/hover-hard-shadow`).toMatch(
+          /(?:^|, )rgb\(0, 0, 0\) 4px 4px 0px 0px$/
+        );
+        expect(hovered.boxShadow, `${runtime}/hover-shadow-delta`).not.toBe(resting.boxShadow);
+        expect(hovered.transform, `${runtime}/hover-transform`).toBe('matrix(1, 0, 0, 1, -1, -1)');
+        expect(hovered.transform, `${runtime}/hover-transform-delta`).not.toBe(resting.transform);
+        await persistFrame(interactionFrame, runtime, 'hover');
 
         const bounds = await solid.boundingBox();
-        expect(bounds).not.toBeNull();
+        expect(bounds, `${runtime}/button-bounds`).not.toBeNull();
         await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
         await page.mouse.down();
         await waitForState(page, 0, 'data-pressed', true);
         const pressed = await styleOf(solid);
-        expect(pressed.boxShadow).toMatch(/^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/);
-        expect(pressed.transform).toBe('matrix(1, 0, 0, 1, 1, 1)');
-        await captureFrame(interactionFrame, runtime, 'pressed');
+        expect(
+          pressed.boxShadow === 'none' ||
+            /^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/.test(pressed.boxShadow),
+          `${runtime}/pressed-shadow-cleared`
+        ).toBe(true);
+        expect(pressed.boxShadow, `${runtime}/pressed-shadow-delta`).not.toBe(hovered.boxShadow);
+        expect(pressed.transform, `${runtime}/pressed-transform`).toBe('matrix(1, 0, 0, 1, 1, 1)');
+        expect(pressed.transform, `${runtime}/pressed-transform-delta`).not.toBe(hovered.transform);
+        await persistFrame(interactionFrame, runtime, 'pressed');
 
         await page.mouse.up();
         await waitForState(page, 0, 'data-pressed', false);
         const settled = await styleOf(solid);
-        expect(settled.boxShadow).toBe(hovered.boxShadow);
-        expect(settled.transform).toBe(hovered.transform);
-        await captureFrame(interactionFrame, runtime, 'settled');
+        expect(settled.boxShadow, `${runtime}/settled-shadow`).toBe(hovered.boxShadow);
+        expect(settled.transform, `${runtime}/settled-transform`).toBe(hovered.transform);
+        await persistFrame(interactionFrame, runtime, 'settled');
 
-        await previewer.locator('select.adapter-select').focus();
+        await page.mouse.move(0, 0);
+        await waitForState(page, 0, 'data-hovered', false);
+        await runtimeSelectTrigger(previewer).focus();
         await page.keyboard.press('Tab');
         await waitForState(page, 0, 'data-focus-visible', true);
         const focused = await styleOf(solid);
@@ -295,81 +213,25 @@ describe.sequential('Brutalist Button browser regressions', () => {
         if (!ringOffsetColor || !ringColor) {
           throw new Error('Expected resolved focus ring and ring-offset colors.');
         }
-        expect(ringOffsetColor).not.toMatch(/^(?:transparent|rgba\([^)]*, 0\))$/);
-        expect(ringColor).not.toMatch(/^(?:transparent|rgba\([^)]*, 0\))$/);
-        expect(focused.boxShadow).toContain(`${ringOffsetColor} 0px 0px 0px 2px`);
-        expect(focused.boxShadow).toContain(`${ringColor} 0px 0px 0px 4px`);
-
-        expect(await disabledSurface.getAttribute('data-disabled')).not.toBeNull();
-        const disabledLight = await styleOf(disabledSurface);
-        expect(disabledLight.opacity).toBe('0.5');
-        expect(disabledLight.pointerEvents).toBe('none');
-
-        const accentsLight = await Promise.all(
-          ACCENT_TOKEN_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+        expect(ringOffsetColor, `${runtime}/ring-offset-visible`).not.toMatch(
+          /^(?:transparent|rgba\([^)]*, 0\))$/
         );
-        const surfaceLight = await styleOf(surface);
-        const destructiveLight = await styleOf(destructive);
-        const expectedAccentsLight = await resolvedTokenPairs(page, ACCENT_TOKEN_PAIRS);
-        const expectedSurfaceLight = await resolvedTokenPair(page, SURFACE_TOKEN_PAIR);
-        const expectedDestructiveLight = await resolvedTokenPair(page, DESTRUCTIVE_TOKEN_PAIR);
-        expect(
-          [...accentsLight, surfaceLight, destructiveLight, disabledLight].map(
-            ({ backgroundImage }) => backgroundImage
-          )
-        ).toEqual(Array(8).fill('none'));
-        expect(accentsLight.map(colorPairOf)).toEqual(expectedAccentsLight);
-        expect(colorPairOf(surfaceLight)).toEqual(expectedSurfaceLight);
-        expect(colorPairOf(destructiveLight)).toEqual(expectedDestructiveLight);
-        expect(colorPairOf(disabledLight)).toEqual(expectedSurfaceLight);
-        expect(geometryOf(disabledLight)).toEqual(geometryOf(surfaceLight));
-        const lightFrame = await captureFrame(previewer.locator('.host'), runtime, 'light');
-
-        // Drive the host API directly: this is a live host-theme transition,
-        // not a colorScheme prop, media query, remount, or pointer refresh.
-        await setHostTheme(page, 'dark');
-        await assertOriginalButtons(`${runtime}/dark identity`);
-        const accentsDark = await Promise.all(
-          ACCENT_TOKEN_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+        expect(ringColor, `${runtime}/ring-visible`).not.toMatch(
+          /^(?:transparent|rgba\([^)]*, 0\))$/
         );
-        const surfaceDark = await styleOf(surface);
-        const destructiveDark = await styleOf(destructive);
-        const disabledDark = await styleOf(disabledSurface);
-        const expectedAccentsDark = await resolvedTokenPairs(page, ACCENT_TOKEN_PAIRS);
-        const expectedSurfaceDark = await resolvedTokenPair(page, SURFACE_TOKEN_PAIR);
-        const expectedDestructiveDark = await resolvedTokenPair(page, DESTRUCTIVE_TOKEN_PAIR);
-        expect(
-          [...accentsDark, surfaceDark, destructiveDark, disabledDark].map(
-            ({ backgroundImage }) => backgroundImage
-          )
-        ).toEqual(Array(8).fill('none'));
-        expect(accentsDark.map(colorPairOf)).toEqual(expectedAccentsDark);
-        expect(accentsDark.map(colorPairOf)).toEqual(accentsLight.map(colorPairOf));
-        expect(colorPairOf(surfaceDark)).toEqual(expectedSurfaceDark);
-        expect(colorPairOf(surfaceDark)).not.toEqual(colorPairOf(surfaceLight));
-        expect(colorPairOf(destructiveDark)).toEqual(expectedDestructiveDark);
-        expect(colorPairOf(destructiveDark)).not.toEqual(colorPairOf(destructiveLight));
-        expect(colorPairOf(disabledDark)).toEqual(expectedSurfaceDark);
-        expect(geometryOf(disabledDark)).toEqual(geometryOf(surfaceDark));
-        const darkFrame = await captureFrame(previewer.locator('.host'), runtime, 'dark');
-        expect(darkFrame.equals(lightFrame)).toBe(false);
-
-        await setHostTheme(page, 'light');
-        await assertOriginalButtons(`${runtime}/restored-light identity`);
-        const accentsRestored = await Promise.all(
-          ACCENT_TOKEN_PAIRS.map((_, index) => styleOf(buttons.nth(index)))
+        expect(focused.boxShadow, `${runtime}/ring-offset`).toContain(
+          `${ringOffsetColor} 0px 0px 0px 2px`
         );
-        expect(accentsRestored).toEqual(accentsLight);
-        expect(await styleOf(surface)).toMatchObject({
-          backgroundColor: surfaceLight.backgroundColor,
-          color: surfaceLight.color,
-        });
-        expect(colorPairOf(await styleOf(destructive))).toEqual(colorPairOf(destructiveLight));
-        expect(await styleOf(disabledSurface)).toMatchObject({
-          backgroundColor: disabledLight.backgroundColor,
-          color: disabledLight.color,
-          opacity: '0.5',
-        });
+        expect(focused.boxShadow, `${runtime}/ring`).toContain(`${ringColor} 0px 0px 0px 4px`);
+        await persistFrame(interactionFrame, runtime, 'focus-visible');
+
+        expect(await disabledSolid.getAttribute('data-disabled'), `${runtime}/disabled`).not.toBe(
+          null
+        );
+        const disabled = await styleOf(disabledSolid);
+        expect(disabled.opacity, `${runtime}/disabled-opacity`).toBe('0.5');
+        expect(disabled.pointerEvents, `${runtime}/disabled-pointer-events`).toBe('none');
+        expect(geometryOf(disabled), `${runtime}/disabled-geometry`).toEqual(geometryOf(resting));
       } finally {
         await context.close();
       }

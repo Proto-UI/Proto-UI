@@ -26,4 +26,13 @@ describe('Previewer host mount lease', () => {
     expect(secondCleanup).toHaveBeenCalledTimes(1);
     expect(host.childElementCount).toBe(0);
   });
+
+  it('clears framework mount markers together with the host generation', () => {
+    const host = document.createElement('div');
+    host.setAttribute('data-v-app', '');
+
+    releaseHostMount(host);
+
+    expect(host.hasAttribute('data-v-app')).toBe(false);
+  });
 });

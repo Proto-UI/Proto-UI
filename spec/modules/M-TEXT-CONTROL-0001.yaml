@@ -1,9 +1,9 @@
 id: M-TEXT-CONTROL-0001
 type: module
-title: Text Control module owns multiline value reconciliation
+title: Text Control module owns line-mode-aware value reconciliation
 status: draft
 since: 0.2.0-rc.7
-summary: The mixed-lifetime Text Control module owns stable value mode, portable multiline editing patches, normalized callback routing, composition-safe restoration, and host lease rebinding.
+summary: The mixed-lifetime Text Control module owns stable value mode, portable line-mode-aware editing patches (single or multiline), common inputMode and enterKeyHint hints, CR/LF canonicalization, normalized callback routing, composition-safe restoration, and host lease rebinding.
 satisfies:
   contracts:
     - C-TEXT-CONTROL-0001
@@ -25,6 +25,12 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added the mixed-lifetime Text Control module for native multiline controls.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Made the module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, and required CR/LF canonicalization at the module boundary. Single-line mode projects the shared shape, while multiline mode also projects rows and wrap.
+
+
 tags:
   - text-control
   - textarea

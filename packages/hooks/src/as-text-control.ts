@@ -1,13 +1,19 @@
-import type { TextControlHandle } from '@proto.ui/core';
+import type { TextControlHandle, TextControlLineMode } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
 import { definePrivilegedAsHook } from './privileged';
 
 type TextControlFacade = {
-  declare<P extends PropsBaseType = PropsBaseType>(): TextControlHandle<P>;
+  declare<
+    P extends PropsBaseType = PropsBaseType,
+    Mode extends TextControlLineMode = TextControlLineMode,
+  >(): TextControlHandle<P, Mode>;
 };
 
-export function asTextControl<P extends PropsBaseType = PropsBaseType>(): TextControlHandle<P> {
-  return getTextControl() as TextControlHandle<P>;
+export function asTextControl<
+  P extends PropsBaseType = PropsBaseType,
+  Mode extends TextControlLineMode = TextControlLineMode,
+>(): TextControlHandle<P, Mode> {
+  return getTextControl() as TextControlHandle<P, Mode>;
 }
 
 const getTextControl = definePrivilegedAsHook<PropsBaseType, TextControlHandle<PropsBaseType>>({

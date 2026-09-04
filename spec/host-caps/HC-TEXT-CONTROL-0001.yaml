@@ -1,16 +1,16 @@
 id: HC-TEXT-CONTROL-0001
 type: host-cap
-title: Host can lease one multiline plain-text editor
+title: Host can lease one plain-text editor (single-line or multiline)
 status: draft
 since: 0.2.0-rc.7
-summary: The host can resolve a portable multiline editing requirement to one host-owned editor and return an updateable, inspectable, disposable lease.
+summary: The host can resolve a portable single-line or multiline editing requirement to one host-owned editor and return an updateable, inspectable, disposable lease.
 statement:
   zh-CN: >-
-    Host 可以将 Text Control portable requirement 与 patch 投影到一个 host-owned 多行纯文本 editor，标准化该 target 的 input/change/composition event，保留系统 editing session，并返回可 update、snapshot 与 dispose 的 mount lease。当前 Web implementation 使用 `HTMLTextAreaElement`。
+    Host 可以将 Text Control portable requirement 与 patch 投影到一个 host-owned 单行或多行纯文本 editor，标准化该 target 的 input/change/composition event，保留系统 editing session，并返回可 update、snapshot 与 dispose 的 mount lease。当前 Web implementation 对 single-line 使用 `HTMLInputElement`，对 multiline 使用 `HTMLTextAreaElement`。
 
 
   en: >-
-    The host can project a portable Text Control requirement and patch to one host-owned multiline plain-text editor, normalize that target's input/change/composition events, preserve the system editing session, and return a mount lease that can be updated, inspected, and disposed. The current Web implementation uses `HTMLTextAreaElement`.
+    The host can project a portable Text Control requirement and patch to one host-owned plain-text editor (single-line or multiline), normalize that target's input/change/composition events, preserve the system editing session, and return a mount lease that can be updated, inspected, and disposed. The current Web implementation uses `HTMLInputElement` for single-line or `HTMLTextAreaElement` for multiline.
 
 
 satisfies:
@@ -35,6 +35,12 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged the Text Control host lease for one native textarea.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Made the host capability line-mode-aware (single or multiline), resolving to HTMLInputElement for single-line or HTMLTextAreaElement for multiline on the Web profile.
+
+
 tags:
   - text-control
   - textarea

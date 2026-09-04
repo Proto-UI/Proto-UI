@@ -1,0 +1,22 @@
+---
+title: Tooltip
+sidebar:
+  order: 16
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+Brutalist Tooltip 公开四个 Base Tooltip 投影入口：Group 继承同域 delay defaults、warm-window 与 active Tooltip 协调；Root 负责受控或非受控 open state；Trigger 负责 hover/focus 路由和无障碍描述关联；Content 负责 presence、锚定 portal 定位、Escape dismissal 与 `role="tooltip"`。
+
+Group、Root 与 Trigger 是当前编目的 draft 透明投影，具有明确的 Brutalist package identity，且不新增第二套 props、state、timing、events、accessibility 或 visual owner。只有 Content 增加方形高对比 surface。下方交互示例通过一个真实 Group 组合两个非受控 sibling Tooltip，并可在 Web Components、React 与 Vue 之间切换。
+
+<div class="brutalist-demo-frame" data-brutalist-tooltip-theme-boundary>
+  <PrototypePreviewer
+    demoId="demo-brutalist-tooltip"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+  />
+</div>

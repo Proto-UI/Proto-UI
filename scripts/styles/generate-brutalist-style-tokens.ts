@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 import { format, resolveConfig } from 'prettier';
 
@@ -13,7 +13,7 @@ const themeInputPath = path.join(root, 'packages/prototypes/brutalist/src/theme.
 const themeOutputPath = path.join(root, 'packages/cli/src/generated/brutalist-theme.ts');
 const checkOnly = process.argv.slice(2).includes('--check');
 const tokens = (await collectProtoStyleTokens(inputPath)) as string[];
-const themeModule = await import(`${pathToFileURL(themeInputPath).href}?t=${Date.now()}`);
+const themeModule = await import(`${new URL(themeInputPath, 'file:').href}?t=${Date.now()}`);
 const themeManifest = themeModule.BRUTALIST_THEME as Readonly<{
   light: Readonly<Record<string, string>>;
   dark: Readonly<Record<string, string>>;

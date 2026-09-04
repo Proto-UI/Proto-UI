@@ -8,6 +8,8 @@ export interface BrutalistThemeManifest {
 const SHARED_ACCENTS = {
   main: '#fef08a',
   'main-foreground': '#000000',
+  destructive: '#fecdd3',
+  'destructive-foreground': '#000000',
   border: '#000000',
   input: '#000000',
   primary: '#fef08a',
@@ -45,8 +47,6 @@ export const BRUTALIST_THEME: BrutalistThemeManifest = Object.freeze({
     muted: '#e5e5e5',
     'muted-foreground': '#525252',
     ring: '#171717',
-    destructive: '#fecdd3',
-    'destructive-foreground': '#000000',
     // `destructive` is a fill, so it cannot double as resting text. This is its
     // ink counterpart and it flips, because the pale fill already reads well on
     // the Dark panel and would need no help there.
@@ -67,8 +67,6 @@ export const BRUTALIST_THEME: BrutalistThemeManifest = Object.freeze({
     muted: '#404040',
     'muted-foreground': '#d4d4d4',
     ring: '#f5f5f5',
-    destructive: '#fb7185',
-    'destructive-foreground': '#000000',
     // Unchanged from what the row already painted here: 10.73:1 on the panel.
     'destructive-ink': '#fecdd3',
     ...SHARED_ACCENTS,

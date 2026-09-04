@@ -14,10 +14,10 @@ interface CodeExampleController {
 const controllers = new WeakMap<HTMLElement, CodeExampleController>();
 let globalListenerInstalled = false;
 
-function tabsIn(list: HTMLElement): HTMLButtonElement[] {
+function tabsIn(list: HTMLElement): HTMLElement[] {
   return [...list.children].filter(
-    (child): child is HTMLButtonElement =>
-      child instanceof HTMLButtonElement && child.getAttribute('role') === 'tab'
+    (child): child is HTMLElement =>
+      child instanceof HTMLElement && child.getAttribute('role') === 'tab'
   );
 }
 
@@ -29,8 +29,8 @@ function childPanels(root: HTMLElement, dataAttribute: string): HTMLElement[] {
 }
 
 function activateTab(
-  tabs: readonly HTMLButtonElement[],
-  active: HTMLButtonElement,
+  tabs: readonly HTMLElement[],
+  active: HTMLElement,
   panels: readonly HTMLElement[]
 ): void {
   const controls = active.getAttribute('aria-controls');
@@ -44,12 +44,12 @@ function activateTab(
 
 function installHorizontalActivation(
   list: HTMLElement,
-  activate: (tab: HTMLButtonElement) => void
+  activate: (tab: HTMLElement) => void
 ): void {
   const tabs = tabsIn(list);
   for (const tab of tabs) tab.addEventListener('click', () => activate(tab));
   list.addEventListener('keydown', (event) => {
-    if (!(event.target instanceof HTMLButtonElement) || !tabs.includes(event.target)) return;
+    if (!(event.target instanceof HTMLElement) || !tabs.includes(event.target)) return;
     const currentIndex = tabs.indexOf(event.target);
     let nextIndex: number | undefined;
     if (event.key === 'ArrowLeft') nextIndex = currentIndex - 1;
@@ -84,7 +84,7 @@ function initCodeExample(root: HTMLElement): void {
   const hostPanels = childPanels(root, 'data-code-host-panel');
   let localOverride = false;
 
-  function selectFile(panel: HTMLElement, tab: HTMLButtonElement): void {
+  function selectFile(panel: HTMLElement, tab: HTMLElement): void {
     const fileList = panel.querySelector<HTMLElement>('[data-code-file-tabs]');
     if (!fileList) return;
     const filePanels = childPanels(panel, 'data-code-file-panel');
@@ -98,7 +98,7 @@ function initCodeExample(root: HTMLElement): void {
     if (fileList) installHorizontalActivation(fileList, (tab) => selectFile(panel, tab));
   }
 
-  function selectHost(tab: HTMLButtonElement, isLocal: boolean): void {
+  function selectHost(tab: HTMLElement, isLocal: boolean): void {
     if (isLocal) localOverride = true;
     activateTab(hostTabs, tab, hostPanels);
     const panel = hostPanels.find((candidate) => !candidate.hidden);
@@ -108,7 +108,7 @@ function initCodeExample(root: HTMLElement): void {
 
   installHorizontalActivation(hostList, (tab) => selectHost(tab, true));
 
-  function tabForHost(host: PublicRuntimeId): HTMLButtonElement | undefined {
+  function tabForHost(host: PublicRuntimeId): HTMLElement | undefined {
     return hostTabs.find((tab) => tab.dataset.codeHost === host);
   }
 

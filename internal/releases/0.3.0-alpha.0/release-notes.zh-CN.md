@@ -15,10 +15,16 @@ Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。�
 ## Release governance
 
 - 明确 alpha、beta 与 rc 的稳定化阶段语义；rc 只用于被认为可晋升 stable 的候选版本。
-- 将当前 42 个公开 package 对齐到精确的 `0.3.0-alpha.0` 生态身份。
+- 将当前 43 个公开 package 对齐到精确的 `0.3.0-alpha.0` 生态身份。
 - 为 0.3 contribution 提供已声明的精确 V-entity version，同时继续让每个 feature 或 package 变化独立接受评审。
 - 未来新增公开 package 的 identity 与 registry bootstrap 仍由引入它们的实现 PR 负责。
 - 已提前完成 `@proto.ui/module-expose-event` npm identity bootstrap 与 Trusted Publisher 绑定；其 deprecated placeholder 不构成 release evidence。
+
+## Image View
+
+- 新增公开 package `@proto.ui/module-image-view`，并将其纳入精确的 43-package release identity，作为 Base Image 与 Runtime 使用的 host-mediated image presentation protocol。
+- 通过可执行 fake-host 与 runtime 证据覆盖 generation-bound loading、stale completion rejection、replacement visual clearing、显式 accessibility mode，以及 Base Image 的 controlled/uncontrolled source ownership。
+- 首次 `@proto.ui/module-image-view` npm identity bootstrap、受保护 release workflow 配置与 registry readiness 仍是发布前显式门禁；bootstrap 不得占用 `latest` 或 `next`。
 
 ## Official Vue 2 Adapter
 

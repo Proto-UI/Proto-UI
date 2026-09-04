@@ -24,3 +24,4 @@ export * from './delay';
 export * from './text-control';
 
 export * from './caps';
+export * from './image-view';

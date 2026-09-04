@@ -26,14 +26,14 @@ cases:
       - C-HOST-SURFACE-PROJECTION-0001-G
     expectation: wc-brutalist-textarea-state-markers-and-conditional-style-share-one-surface
   - id: T-BRUTALIST-TEXTAREA-0001-CASE-WC-FOCUS-RING
-    title: Keyboard focus projects the Brutalist ring onto the single physical Web Component textarea while pointer focus does not
+    title: Keyboard and pointer focus project the Brutalist ring according to the physical textarea native focus-visible result
     covers:
       - P-BRUTALIST-TEXTAREA-BASE-INHERITANCE
       - P-BRUTALIST-TEXTAREA-SINGLE-TARGET
       - P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
       - P-BASE-TEXTAREA-A11Y-AND-FOCUS
       - P-BASE-TEXTAREA-PRESENTATION-SURFACE
-    expectation: wc-brutalist-textarea-renders-the-physical-ring-only-for-keyboard-focus-visible
+    expectation: wc-brutalist-textarea-focus-facts-markers-and-ring-follow-the-physical-target-native-focus-visible-result
 implementations:
   - id: prototypes-brutalist-textarea-contract
     kind: module-test
@@ -77,7 +77,7 @@ sources:
 revisions:
   - version: 0.3.0-alpha.0
     change: revised
-    summary: Added Light/Dark browser evidence for native keyboard focus, pointer modality, exposed focus facts, colocalized DOM markers, and the physical Brutalist ring.
+    summary: Added Light/Dark browser evidence that keyboard and pointer focus facts/markers/ring follow the measured native focus-visible result of the physical textarea without a Brutalist modality override.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added state-selector colocation coverage for the Web Component presentation surface.

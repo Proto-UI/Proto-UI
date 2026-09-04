@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
@@ -157,11 +157,13 @@ describe('prototypes/brutalist: tabs', () => {
     triggerB.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi.spyOn(triggerB, 'matches').mockReturnValue(true);
     triggerB.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
     expect(triggerB.getExposes().focusVisible.get()).toBe(true);
     expect(styleContains(triggerB, 'data-[focus-visible]:ring-2')).toBe(true);
     expect(styleContains(triggerB, 'data-[focus-visible]:ring-ring')).toBe(true);
+    matchesSpy.mockRestore();
 
     setElementProps(triggerB, { value: 'b', disabled: true });
     await flush();

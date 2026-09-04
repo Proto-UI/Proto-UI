@@ -1,15 +1,56 @@
 id: T-TEXT-CONTROL-0001
 type: test
-title: Text Control declaration, host bridge, and adapter tests
+title: Text Control declaration, host bridge, and adapter tests (single-line and multiline)
 status: draft
 since: 0.2.0-rc.7
-summary: Covers host-neutral static editing requirements, the Web textarea profile, portable property projection, normalized events, composition-safe value reconciliation, selection preservation, cross-adapter materialization, native-event containment, and lease cleanup.
+summary: Covers host-neutral static editing requirements, the Web single-line (input) and multiline (textarea) profiles, portable property projection, normalized events, CR/LF canonicalization, composition-safe value reconciliation, selection preservation, cross-adapter materialization, native-event containment, and lease cleanup.
 cases:
   - id: T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
-    title: Host-neutral static requirements materialize one textarea across Web Component, React, and Vue adapters on the Web host
+    title: Host-neutral static requirements materialize one textarea across Web Component, React, Vue 3, and Vue 2 adapters on the Web host
     covers:
       - C-TEXT-CONTROL-0001-A
     expectation: semantic-multiline-requirement-resolves-to-one-web-textarea-before-render
+  - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
+    title: A single-line declaration materializes one input, projects common hints, and strips line breaks across Web Component, React, Vue 3, and Vue 2 adapters
+    covers:
+      - C-TEXT-CONTROL-0001-A
+      - C-TEXT-CONTROL-0001-B
+      - C-TEXT-CONTROL-0001-I
+    expectation: single-line-requirement-resolves-to-one-web-input-projects-common-hints-and-canonicalizes-line-breaks
+  - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
+    title: Portable patches project common inputMode and enterKeyHint hints on input and textarea, plus the line-mode-specific fields
+    covers:
+      - C-TEXT-CONTROL-0001-B
+    expectation: common-hints-project-on-single-line-and-multiline-web-controls
+  - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-TARGET-COMPATIBILITY
+    title: The Web bridge accepts only text-compatible HTMLInputElement targets for a single-line plain-text declaration
+    covers:
+      - C-TEXT-CONTROL-0001-A
+      - C-TEXT-CONTROL-0001-F
+    expectation: non-text-input-types-fail-before-listener-installation-or-value-projection
+  - id: T-TEXT-CONTROL-0001-CASE-OWNING-REALM
+    title: Text controls normalize editing payloads across target realms, event realms, adoption, and documents without a Window
+    covers:
+      - C-TEXT-CONTROL-0001-B
+      - C-TEXT-CONTROL-0001-C
+      - C-TEXT-CONTROL-0001-G
+    expectation: text-control-projects-properties-normalizes-realm-independent-editing-payloads-and-preserves-selection
+  - id: T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
+    title: CR and CRLF line endings are canonicalized by line mode at the module boundary in patches, events, snapshots, and listener payloads
+    covers:
+      - C-TEXT-CONTROL-0001-I
+    expectation: multiline-retains-canonical-lf-and-single-line-removes-lf-before-host-state-snapshot-and-outward-payload
+  - id: T-TEXT-CONTROL-0001-CASE-MODE-COMPATIBILITY
+    title: Retained declarations reject mode-incompatible patches
+    covers:
+      - C-TEXT-CONTROL-0001-B
+    expectation: single-line-rejects-rows-wrap-and-multiline-accepts-common-inputMode-and-enterKeyHint
+  - id: T-TEXT-CONTROL-0001-CASE-PATCH-PRESERVATION
+    title: Omitted fields retain the latest complete patch across unrelated updates and lease rebinding
+    covers:
+      - C-TEXT-CONTROL-0001-B
+      - C-TEXT-CONTROL-0001-G
+    expectation: unrelated-sync-retains-default-value-and-complete-host-patch
   - id: T-TEXT-CONTROL-0001-CASE-PROPERTIES
     title: Portable patches project every supported native textarea property and defaultValue update
     covers:
@@ -56,6 +97,20 @@ implementations:
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
+  - id: module-text-control-single-line-web-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/text-control/test/web.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-TARGET-COMPATIBILITY
+      - T-TEXT-CONTROL-0001-CASE-OWNING-REALM
+      - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
+    exercises:
+      - HC-TEXT-CONTROL-0001
+    notes:
+      - Exercises web.ts resolveWebTextControlLocalName('single') → 'input', common inputMode/enterKeyHint projection and clearing on both input and textarea, realm-independent InputEvent/CompositionEvent normalization across adoption and documents without a Window, and owning-realm editing-session preservation through the Web bridge. Module-boundary line-mode canonicalization and compatibility are covered directly by impl-spec.test.ts.
   - id: module-text-control-value-reconciliation
     kind: module-test
     status: passing
@@ -64,6 +119,9 @@ implementations:
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-VALUE-AND-IME
       - T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
+      - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
+      - T-TEXT-CONTROL-0001-CASE-MODE-COMPATIBILITY
+      - T-TEXT-CONTROL-0001-CASE-PATCH-PRESERVATION
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
@@ -74,6 +132,7 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
       - T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
       - T-TEXT-CONTROL-0001-CASE-PRESENTATION-SURFACE
     exercises:
@@ -86,6 +145,7 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
@@ -96,6 +156,18 @@ implementations:
     required: true
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
+    exercises:
+      - M-TEXT-CONTROL-0001
+      - HC-TEXT-CONTROL-0001
+  - id: adapter-vue2-text-control-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/textarea.integration.test.ts
+    required: true
+    consumesCases:
+      - T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
+      - T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-ADAPTER
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
@@ -120,6 +192,7 @@ verifies:
         - C-TEXT-CONTROL-0001-F
         - C-TEXT-CONTROL-0001-G
         - C-TEXT-CONTROL-0001-H
+        - C-TEXT-CONTROL-0001-I
     - id: C-HOST-SURFACE-PROJECTION-0001
       anchors:
         - C-HOST-SURFACE-PROJECTION-0001-B
@@ -137,6 +210,7 @@ sources:
   - path: packages/adapters/react/test/text-control.integration.test.ts
   - path: packages/adapters/vue/test/text-control.integration.test.ts
   - path: packages/adapters/web-component/test/text-control.integration.test.ts
+  - path: packages/adapters/vue2/test/textarea.integration.test.ts
   - path: packages/prototypes/base/test/textarea.test.ts
 revisions:
   - version: 0.2.0-rc.7
@@ -145,9 +219,16 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added focused Text Control host and cross-adapter conformance coverage.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Added single-line input projection and clearing, common inputMode/enterKeyHint projection to both Web controls, text-compatible target validation, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, line-mode value canonicalization, and cross-adapter single-line evidence across Web Component, React, Vue 3, and Vue 2.
+
+
 tags:
   - text-control
   - textarea
+  - text-input
   - test
   - adapter
   - host-projection

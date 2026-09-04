@@ -162,6 +162,9 @@ describe('prototypes/brutalist: select', () => {
     trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    const matchesSpy = vi
+      .spyOn(trigger, 'matches')
+      .mockImplementation((selector: string) => selector === ':focus-visible');
     trigger.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().focusVisible.get()).toBe(true);

@@ -9,7 +9,7 @@ export default {
         kind: 'proto',
         prototypeId: 'shadcn-button',
         props: { variant: 'secondary' },
-        children: ['Secondary2'],
+        children: ['Secondary'],
       },
       {
         kind: 'proto',
