@@ -85,7 +85,7 @@ The engine can remain completely outside Proto UI. The Host Capability resolves 
 
 The proposal may evaluate these plain values; names are illustrative and not an admitted API:
 
-- App input: opaque `sessionId: string`, `readOnly`, `inputEnabled`, App-authoritative connection/process status, accessible label/description, and a host-configured shortcut-policy identifier.
+- App input: opaque `sessionId: string`, `readOnly`, `inputEnabled`, separate bounded connection and process status, and a host-configured shortcut-policy identifier. Accessible name/description remain A11y-domain facts, not Terminal patch fields.
 - Host facts: `attachment: detached | attaching | ready | unavailable | error`, `composing`, `columns`, `rows`, per-feature support plus bounded reason codes, and the latest revision-bound resize outcome. Focused state is reported only through the Focus domain, not through Terminal-specific facts. Terminal-controlled title strings remain host-local.
 - Requests/results: committed `textInput`, normalized `keyInput`, an App-to-host special-key request, resize `{ columns, rows, revision }` with applied/rejected result, and bounded `attention`/`error` signal. Focus/blur requests remain in the Focus domain.
 
@@ -99,7 +99,7 @@ Selection summaries and copy requests are technically expressible as plain value
 
 | Input | Owner path | Observable output | Synchronization boundary |
 | --- | --- | --- | --- |
-| App connection/process fact | App -> Terminal Module patch -> composition status | Label/badge/status only; no engine control implied. | Current logical instance revision. |
+| App connection/process facts | App -> Terminal Module patch -> composition status | Independent transport and process labels/badges; neither dimension falsifies the other. | Current logical instance revision. |
 | Output bytes/VT data | App backend -> engine directly | Engine updates visible grid/cursor/scrollback. | Engine write/render queue; **zero portable grid updates**. |
 | IME/text/key input | Physical input target -> host/engine -> App-owned backend sink | Terminal process receives engine-encoded input exactly once. Optional normalized intent is ephemeral, never retained State or a second backend path. | Module-owned connection identity and active input policy. |
 | Harness shortcut | Host keyboard arbiter -> App command owner | Harness action, with no duplicate terminal forwarding. | Keydown decision before engine processing. |
@@ -157,9 +157,8 @@ type TerminalSurfacePatch = Readonly<{
   readOnly: boolean;
   inputEnabled: boolean;
   shortcutPolicyId: string;
-  accessibleLabel: string;
-  accessibleDescription?: string;
   connectionStatus: 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
+  processStatus: 'unknown' | 'starting' | 'running' | 'exited' | 'failed';
 }>;
 
 type TerminalLetter = Lowercase<
@@ -265,25 +264,27 @@ type TerminalSurfaceHost = Readonly<{
 }>;
 ```
 
-A fake host is constructed with a private map from immutable `TerminalSurfaceRequirement.sessionId` to a scripted fake engine and fake backend sink; the map, engine, sink, and engine-encoded bytes never enter `TerminalSurfacePatch`. The Module issues a unique connection identity and retires its callback closure before replacement. The red-first exercise is:
+A fake host is constructed with a private map from immutable `TerminalSurfaceRequirement.sessionId` to a scripted fake engine and fake backend sink; the map, engine, sink, and engine-encoded bytes never enter `TerminalSurfacePatch`. The Module issues a unique connection identity and retires its callback closure before replacement. A separate fake A11y capability projects name/description to the engine target. The red-first exercise is:
 
-1. attach `session-7`; receive `attaching`, then `ready` with 80x24, explicit input/resize/accessibility support, accessible label/description, and connected status;
-2. emit committed text and one modified key as immutable intent values, while asserting the private fake backend receives each engine-encoded sequence exactly once and no normalized-intent callback becomes a second send path;
-3. invoke `requestKey` for a visible mobile Escape control; assert the engine—not App code—encodes it and the private backend receives exactly one sequence;
-4. issue resize revisions 1/2/3; report revision 2 as rejected with `backend-rejected` and no effective size, then revision 3 as applied at 120x40 with no reason; accept only revision 3 as current facts;
-5. replace the target/engine, then switch sessions through a new immutable requirement and fresh attachment; retire the old Module connection and dispose its lease before issuing the new connection, even if host counters restart;
-6. simulate missing engine, input, accessibility, and resize support and assert the bounded support/reason codes identify the failed requirement;
-7. dispose, then make the old fake emit input, resize, bell, error, and focus; observe zero Terminal callbacks and zero backend writes, while focus state remains solely in the Focus domain;
-8. recursively validate every captured patch/fact/request as data-only and prove that no fake-engine identity, target, buffer, stream, backend sink, callback source, process-controlled title, or cell grid appears.
+1. attach `session-7`; receive `attaching`, then `ready` with 80x24, explicit input/resize/accessibility support, separate `connected` transport and `running` process status, and name/description only through A11y;
+2. transition process to `exited` while transport remains `connected`; composition reports both accurately;
+3. emit committed text and one modified key as immutable intent values, while asserting the private fake backend receives each engine-encoded sequence exactly once and no normalized-intent callback becomes a second send path;
+4. invoke `requestKey` for a visible mobile Escape control; assert the engine—not App code—encodes it and the private backend receives exactly one sequence;
+5. issue resize revisions 1/2/3; report revision 2 as rejected with `backend-rejected` and no effective size, then revision 3 as applied at 120x40 with no reason; accept only revision 3 as current facts;
+6. replace target/engine, then switch sessions through a new immutable requirement/attachment; retire the old connection and dispose its lease before the new one, even if host counters restart;
+7. simulate missing engine, input, accessibility, and resize support and assert bounded support/reason codes;
+8. have composition omit/disable the leave-terminal Button and assert composed acceptance fails independently of Host input support; then provide the Button plus Focus route and accept;
+9. dispose, then emit input, resize, bell, error, and focus; observe zero callbacks/backend writes, while focus remains solely in Focus;
+10. prove no engine/target/buffer/stream/backend sink/callback source/process title/A11y duplicate/cell grid appears in portable values.
 
-This sketch proves the boundary can be data-only and makes resize/result, diagnostic, accessibility-input, connection-identity, backend-delivery, mobile-key, title, and Focus ownership testable. It does not prove browser layout, IME, screen-reader behavior, native focus, key routing, renderer performance, or an Adapter profile.
+This sketch proves the boundary can be data-only and makes independent App status, resize/result, diagnostic, A11y, connection, backend delivery, mobile key, title, composition escape, and Focus ownership testable. It does not prove browser layout, IME, screen-reader behavior, native focus, key routing, renderer performance, or an Adapter profile.
 
 ## Input, shortcut, and focus policy
 
 - **IME:** candidate text and composition UI stay in the host engine's physical input target. Only committed text may leave the host bridge as `text` intent. `Enter`/other command keys during composition do not trigger Harness shortcuts or a duplicate terminal key.
 - **Key versus text:** committed Unicode text uses `text`; non-text keys and modifier chords use the bounded `TerminalKey` vocabulary. Letter/digit keys are valid here only with Ctrl/Alt/Meta; unmodified or Shift-only printable input must use `text`. Unsupported punctuation/function keys remain deferred. A DOM `KeyboardEvent`, native key object, scan code, arbitrary string, or engine-encoded VT value never enters portable state/events.
 - **Shortcut order:** the adapter-injected Harness keyboard arbiter checks the configured local command map before the terminal engine. An explicitly reserved Harness chord wins; every other chord falls through exactly once to the engine. The policy resolver is host configuration, not a portable callback.
-- **Escape route:** bare `Escape` is terminal input. The Web Harness profile must reserve `F6`/`Shift+F6` for next/previous Harness focus regions and provide an adjacent, named Proto UI Button that leaves the terminal. A host that cannot provide both a keyboard route and reachable visible control reports the interactive slice unavailable.
+- **Escape route ownership:** bare `Escape` is terminal input. The Web host reserves `F6`/`Shift+F6` through Focus and reports only keyboard-route support. Composition—not Adapter/Host Capability—supplies and keeps reachable/enabled the adjacent named leave-terminal Button plus Focus topology; composed acceptance fails when it is absent, hidden, or disabled.
 - **Ctrl/Meta/Alt:** no blanket interception. Only registered Harness chords are local. The engine receives the rest and owns platform-specific encoding.
 - **Paste:** Clipboard acquisition and paste confirmation/policy are App/host services. The first slice may forward committed pasted text through the engine, including bracketed-paste behavior; it does not receive Clipboard objects. File paths are plain pasted text only—no file access, drop, or path authority.
 - **Pointer/mouse:** first-slice terminal mouse reporting is disabled. Engine-local pointer selection may remain available. Custom pointer reports, block-selection APIs, and selection gestures belong to option D.
@@ -291,7 +292,7 @@ This sketch proves the boundary can be data-only and makes resize/result, diagno
 
 ## Accessibility boundary
 
-- The Terminal logical surface supplies an accessible label, description, mode (`interactive`/`read-only`), connection/display status, focus entry, and a reliable exit path.
+- The A11y domain supplies accessible name/description/mode to the resolved terminal target; App/Module facts and composition report independent connection/process/display status, focus entry, and the reliable exit control. Terminal patches do not duplicate A11y naming.
 - The engine/Host Capability owns the mutable screen representation, cursor/selection mapping, row navigation, terminal modes, and platform accessibility API. Proto UI does not set a generic `textbox`, `application`, or `log` role for every terminal host.
 - Streaming screen diffs never feed a generic Proto UI live region. The host bridge may announce bounded output according to engine/platform policy; App-level announcements are limited to state transitions such as connected, disconnected, input disabled, or a deduplicated bell/error.
 - Engine-local keyboard selection and copy remain available when the host supports them. Any composition-provided Copy/Search control is a separately admitted ordinary Proto UI control invoking a host/App request; selected text and Clipboard contents stay outside portable state.
@@ -347,7 +348,7 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 3. **Input policy:** IME candidate stays host-local; printable input uses `text`; bounded named/modifier keys reach the private backend once; arbitrary keys reject; normalized intents cannot double-send; reserved Harness chord stays local; a mobile special-key request is engine-encoded once; bare Escape reaches the engine; F6 exits through Focus.
 4. **Resize:** invalid/zero dimensions reject; bursts coalesce; the applied branch requires acknowledged revision/effective dimensions, the rejected branch requires revision/bounded reason, and late/older results do not change current facts.
 5. **Performance:** replay rapid cursor/grid/alternate-screen updates and assert zero portable content publications/allocations; only deduplicated low-cardinality facts cross.
-6. **Accessibility fake:** label/description/status inputs, per-feature support/reason negotiation, bounded attention, unavailable degradation, and no generic live-stream snapshot.
+6. **Accessibility/composition fake:** name/description/mode arrives only through A11y IR; separate connection/process statuses remain accurate; per-feature support/reason negotiation and bounded attention avoid live-stream spam; composition rejects a missing/hidden/disabled leave-terminal Button even when host input is available.
 7. **Real Web:** engine double mounted behind React; real keyboard/IME/focus/F6/resize/target replacement/dispose; accessibility-tree inspection; high-frequency renderer path; no retained listeners/observers/targets.
 8. **Cross-adapter Web only if claimed:** WC/React/Vue evidence for one admitted portable authoring source. This remains Web evidence.
 9. **Non-Web:** independent native profile with native focus/input/resize/accessibility evidence before any multi-host statement.
