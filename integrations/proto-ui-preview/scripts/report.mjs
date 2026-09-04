@@ -3,13 +3,32 @@
 import { createHmac } from 'node:crypto';
 import process from 'node:process';
 
+import { assertValidDeploymentID } from './deployment-id.mjs';
+
 const status = process.argv[2] || '';
 if (!new Set(['building', 'ready', 'failed', 'closed']).has(status)) {
   throw new Error('invalid preview status');
 }
+const deploymentID = process.env.PREVIEW_DEPLOYMENT_ID || '';
+assertValidDeploymentID(status, deploymentID);
 
-const controlPlane = new URL(process.env.POPPY_CONTROL_PLANE || '');
-if (controlPlane.protocol !== 'https:') throw new Error('POPPY_CONTROL_PLANE must use HTTPS');
+let controlPlane;
+try {
+  controlPlane = new URL(process.env.POPPY_CONTROL_PLANE || '');
+} catch {
+  throw new Error('POPPY_CONTROL_PLANE must be an HTTPS origin');
+}
+if (
+  controlPlane.protocol !== 'https:' ||
+  controlPlane.username ||
+  controlPlane.password ||
+  controlPlane.port ||
+  controlPlane.pathname !== '/' ||
+  controlPlane.search ||
+  controlPlane.hash
+) {
+  throw new Error('POPPY_CONTROL_PLANE must be an HTTPS origin');
+}
 const secret = process.env.POPPY_PREVIEW_INGEST_SECRET || '';
 if (secret.length < 32) throw new Error('POPPY_PREVIEW_INGEST_SECRET is missing or too short');
 const pr = Number(process.env.PREVIEW_PR);
@@ -17,7 +36,9 @@ const authorID = Number(process.env.PREVIEW_AUTHOR_ID);
 const runID = Number(process.env.PREVIEW_RUN_ID);
 const runAttempt = Number(process.env.PREVIEW_RUN_ATTEMPT);
 const project = process.env.PREVIEW_PROJECT || '';
-if (!Number.isSafeInteger(pr) || pr < 1) throw new Error('invalid PR number');
+if (!Number.isSafeInteger(pr) || pr < 1 || pr > 2 ** 31 - 1) {
+  throw new Error('invalid PR number');
+}
 if (!Number.isSafeInteger(authorID) || authorID < 1) throw new Error('invalid author ID');
 if (!Number.isSafeInteger(runID) || runID < 1) throw new Error('invalid workflow run ID');
 if (!Number.isSafeInteger(runAttempt) || runAttempt < 1)
@@ -40,7 +61,10 @@ if (fallbackMode) {
     fallbackOrigin.protocol !== 'https:' ||
     fallbackOrigin.username ||
     fallbackOrigin.password ||
-    fallbackOrigin.pathname !== '/'
+    fallbackOrigin.port ||
+    fallbackOrigin.pathname !== '/' ||
+    fallbackOrigin.search ||
+    fallbackOrigin.hash
   ) {
     throw new Error('fallback origin must be an HTTPS origin without a path');
   }
@@ -55,7 +79,7 @@ const payload = {
   author_id: authorID,
   project,
   origin: configuredOrigin,
-  deployment_id: process.env.PREVIEW_DEPLOYMENT_ID || '',
+  deployment_id: deploymentID,
   run_id: runID,
   run_attempt: runAttempt,
   status,

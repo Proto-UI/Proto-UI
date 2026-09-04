@@ -14,15 +14,14 @@ if (!Number.isSafeInteger(pr) || pr < 1) throw new Error('invalid PR number');
 if (project !== `poppy-proto-ui-pr-${pr}`) throw new Error('invalid project name');
 
 const marker = `<!-- poppy-preview:${project} -->`;
-const shortSHA = (process.env.PREVIEW_SHA || '').slice(0, 12);
+const headSHA = process.env.PREVIEW_SHA || '';
+if (!/^[0-9a-f]{40}$/.test(headSHA)) throw new Error('preview comment requires a full head SHA');
+const shortSHA = headSHA.slice(0, 12);
 const runURL = process.env.PREVIEW_RUN_URL || '';
 const origin = process.env.PREVIEW_ORIGIN || '';
 const fallbackMode = process.env.POPPY_PREVIEW_FALLBACK_MODE === 'true';
-if (fallbackMode && !/^[0-9a-f]{40}$/.test(process.env.PREVIEW_SHA || '')) {
-  throw new Error('fallback preview requires a full head SHA');
-}
 const previewURL = fallbackMode
-  ? `${origin.replace(/\/$/, '')}/admin/preview/content/${pr}/${process.env.PREVIEW_SHA}/`
+  ? `${origin.replace(/\/$/, '')}/admin/preview/content/${pr}/${headSHA}/`
   : origin;
 const states = {
   ready: {
@@ -104,6 +103,16 @@ for (let page = 1; page <= 20; page += 1) {
 // The marker is public, so trusting user.type alone would let an unrelated App
 // make Poppy edit or delete its comment.
 const matches = ownedMarkerComments(comments, marker);
+// Re-read the pull request immediately before the shared comment mutation.
+// The earlier workflow resolver runs before the per-PR lock and therefore is
+// evidence, not authority for this final write boundary.
+const pullRequest = await github(`/pulls/${pr}`);
+const expectedState = new Set(['closed', 'fallback-closed', 'cleanup-failed']).has(status)
+  ? 'closed'
+  : 'open';
+if (pullRequest?.state !== expectedState || pullRequest?.head?.sha !== headSHA) {
+  throw new Error('preview comment no longer matches the live pull request state and exact head');
+}
 if (matches.length === 0) {
   await github(`/issues/${pr}/comments`, { method: 'POST', body: JSON.stringify({ body }) });
   console.log(`Created the preview comment for PR #${pr}.`);

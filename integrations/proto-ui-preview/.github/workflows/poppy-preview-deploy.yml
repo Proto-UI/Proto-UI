@@ -117,7 +117,7 @@ jobs:
     timeout-minutes: 10
 
     env:
-      POPPY_CONTROL_PLANE: https://poppy-proto-ui.chenyejin2004.workers.dev
+      POPPY_CONTROL_PLANE: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN != '' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN || 'https://poppy-proto-ui.chenyejin2004.workers.dev' }}
 
     steps:
       - name: Check out trusted reporting code
@@ -200,6 +200,7 @@ jobs:
         if: steps.resolve.outputs.report == 'true'
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          POPPY_PREVIEW_FALLBACK_MODE: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN != '' && 'true' || 'false' }}
           PREVIEW_PR: ${{ steps.resolve.outputs.pr }}
           PREVIEW_SHA: ${{ steps.resolve.outputs.head_sha }}
           PREVIEW_AUTHOR: ${{ steps.resolve.outputs.author_login }}
@@ -231,7 +232,12 @@ jobs:
     needs: resolve-deploy
     if: needs.resolve-deploy.outputs.pr != '' && vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN != ''
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+
+    concurrency:
+      group: poppy-preview-pr-${{ needs.resolve-deploy.outputs.pr }}
+      cancel-in-progress: false
+
     steps:
       - name: Check out trusted fallback tooling
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -239,7 +245,23 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Revalidate the open pull request and exact head after acquiring the lock
+        id: live
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              ...context.repo,
+              pull_number: Number('${{ needs.resolve-deploy.outputs.pr }}'),
+            });
+            if (pr.state !== 'open' || pr.head.sha !== '${{ needs.resolve-deploy.outputs.head_sha }}') {
+              core.setFailed('Refusing stale fallback publication after the per-PR lock');
+            }
+
       - name: Report fallback build to Poppy
+        id: building
+        if: steps.live.outcome == 'success'
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
           POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
@@ -257,23 +279,32 @@ jobs:
         run: node integrations/proto-ui-preview/scripts/report.mjs building
 
       - name: Download only the verified artifact
+        id: download
+        if: steps.building.outcome == 'success'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           artifact-ids: ${{ needs.resolve-deploy.outputs.artifact_id }}
           path: .poppy/artifact
           github-token: ${{ github.token }}
           run-id: ${{ needs.resolve-deploy.outputs.run_id }}
-      - name: Build sanitized fallback archive
+      - name: Build the bounded regular-file fallback archive
+        id: archive
+        if: steps.download.outcome == 'success'
         shell: bash
-        run: >-
-          tar --exclude='./_worker.js' --exclude='./_routes.json' --exclude='./_headers' --exclude='./_redirects' --exclude='./.assetsignore' -czf .poppy/preview.tar.gz -C .poppy/artifact .
-
+        run: |
+          node integrations/proto-ui-preview/scripts/prepare-fallback-artifact.mjs \
+            --source .poppy/artifact \
+            --output .poppy/fallback-site \
+            --archive .poppy/preview.tar.gz
 
       - name: Upload signed artifact to Poppy
+        id: upload
+        if: steps.archive.outcome == 'success'
         env:
           POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
           POPPY_PREVIEW_ARTIFACT: .poppy/preview.tar.gz
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          PREVIEW_REPOSITORY: ${{ github.repository }}
           PREVIEW_PR: ${{ needs.resolve-deploy.outputs.pr }}
           PREVIEW_SHA: ${{ needs.resolve-deploy.outputs.head_sha }}
           PREVIEW_RUN_ID: ${{ needs.resolve-deploy.outputs.run_id }}
@@ -281,6 +312,8 @@ jobs:
         shell: bash
         run: node integrations/proto-ui-preview/scripts/upload-poppy-artifact.mjs
       - name: Report fallback ready to Poppy
+        id: ready
+        if: steps.upload.outcome == 'success'
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
           POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
@@ -291,13 +324,37 @@ jobs:
           PREVIEW_AUTHOR_ID: ${{ needs.resolve-deploy.outputs.author_id }}
           PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
           PREVIEW_ORIGIN: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
-          PREVIEW_DEPLOYMENT_ID: ''
+          PREVIEW_DEPLOYMENT_ID: ${{ steps.upload.outputs.deployment_id }}
           PREVIEW_RUN_ID: ${{ needs.resolve-deploy.outputs.run_id }}
           PREVIEW_RUN_ATTEMPT: ${{ needs.resolve-deploy.outputs.run_attempt }}
         shell: bash
         run: node integrations/proto-ui-preview/scripts/report.mjs ready
 
+      - name: Report a failed fallback deployment to Poppy
+        id: failed
+        if: >-
+          always() && steps.live.outcome == 'success' && steps.ready.outcome != 'success'
+
+
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
+          POPPY_PREVIEW_FALLBACK_MODE: 'true'
+          PREVIEW_PR: ${{ needs.resolve-deploy.outputs.pr }}
+          PREVIEW_SHA: ${{ needs.resolve-deploy.outputs.head_sha }}
+          PREVIEW_AUTHOR: ${{ needs.resolve-deploy.outputs.author_login }}
+          PREVIEW_AUTHOR_ID: ${{ needs.resolve-deploy.outputs.author_id }}
+          PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
+          PREVIEW_ORIGIN: ''
+          PREVIEW_DEPLOYMENT_ID: ''
+          PREVIEW_RUN_ID: ${{ needs.resolve-deploy.outputs.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ needs.resolve-deploy.outputs.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs failed
+
       - name: Maintain the sticky fallback comment
+        id: comment
+        if: always() && steps.live.outcome == 'success'
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -306,10 +363,18 @@ jobs:
           PREVIEW_PROJECT: ${{ needs.resolve-deploy.outputs.project }}
           PREVIEW_ORIGIN: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
           POPPY_PREVIEW_FALLBACK_MODE: 'true'
-          PREVIEW_STATUS: ready
+          PREVIEW_STATUS: ${{ steps.ready.outcome == 'success' && 'ready' || 'failed' }}
           PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ needs.resolve-deploy.outputs.run_id }}
         shell: bash
         run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
+
+      - name: Fail the fallback job when publication did not converge
+        if: >-
+          always() && (steps.live.outcome != 'success' || steps.building.outcome != 'success' || steps.download.outcome != 'success' || steps.archive.outcome != 'success' || steps.upload.outcome != 'success' || steps.ready.outcome != 'success' || (steps.ready.outcome != 'success' && steps.failed.outcome != 'success') || steps.comment.outcome != 'success')
+
+
+        shell: bash
+        run: exit 1
 
   fallback-unavailable:
     name: Report preview fallback unavailable
@@ -317,6 +382,11 @@ jobs:
     if: needs.resolve-deploy.outputs.pr != '' && vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN == ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
+    concurrency:
+      group: poppy-preview-pr-${{ needs.resolve-deploy.outputs.pr }}
+      cancel-in-progress: false
+
     steps:
       - name: Check out trusted reporting code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -325,6 +395,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Maintain the sticky fallback comment
+        id: comment
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -496,6 +567,7 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          POPPY_CLOUDFLARE_MUTATIONS_ENABLED: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED }}
           PREVIEW_PROJECT: ${{ steps.resolve.outputs.project }}
         shell: bash
         run: node integrations/proto-ui-preview/scripts/cloudflare-pages.mjs ensure "$PREVIEW_PROJECT"
