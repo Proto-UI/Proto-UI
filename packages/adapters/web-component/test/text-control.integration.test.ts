@@ -73,6 +73,36 @@ const focusTextareaPrototype = definePrototype({
 
 AdaptToWebComponent(focusTextareaPrototype);
 
+const singleLineValues: string[] = [];
+type SingleLineProps = { defaultValue?: string; placeholder?: string };
+
+const singleLinePrototype = definePrototype({
+  name: 'x-wc-text-control-input',
+  modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
+  setup(def: DefHandle<SingleLineProps>) {
+    def.props.define({
+      defaultValue: { type: 'string', empty: 'fallback' },
+      placeholder: { type: 'string', empty: 'fallback' },
+    });
+    const control = asTextControl<SingleLineProps, 'single'>();
+    control.on('input', (_run, event) => singleLineValues.push(event.value));
+    const sync = (props: Readonly<SingleLineProps>) => {
+      control.sync({
+        valueMode: 'uncontrolled',
+        defaultValue: props.defaultValue,
+        placeholder: props.placeholder,
+        inputMode: 'text',
+        enterKeyHint: 'search',
+      });
+    };
+    def.lifecycle.onCreated((run) => sync(run.props.get()));
+    def.props.watchAll((_run, next) => sync(next));
+    return () => null;
+  },
+});
+
+AdaptToWebComponent(singleLinePrototype);
+
 async function flush(): Promise<void> {
   await Promise.resolve();
   await Promise.resolve();
@@ -317,5 +347,52 @@ describe('adapter-web-component text control', () => {
     textarea.blur();
     shell.remove();
     await flush();
+  });
+
+  it('materializes one physical input for a single-line declaration and routes/strips newlines', async () => {
+    singleLineValues.length = 0;
+    const shell = document.createElement('x-wc-text-control-input') as WebComponentAdapterElement<
+      typeof singleLinePrototype
+    >;
+    setElementProps(shell, {
+      defaultValue: 'initial',
+      placeholder: 'Search',
+      surfaceClassName: 'surface-input outline-none',
+    });
+    document.body.appendChild(shell);
+    await flush();
+
+    const input = shell.querySelector('input');
+    expect(shell.querySelectorAll('textarea')).toHaveLength(0);
+    expect(input?.tagName.toLowerCase()).toBe('input');
+    expect(input?.getAttribute('part')).toBe('control');
+    expect(input?.classList.contains('surface-input')).toBe(true);
+    expect(input?.classList.contains('outline-none')).toBe(true);
+    expect(input?.value).toBe('initial');
+    expect(input?.defaultValue).toBe('initial');
+    expect(input?.placeholder).toBe('Search');
+    // Common hints are projected onto the single-line physical editor.
+    expect(input?.inputMode).toBe('text');
+    expect(input?.enterKeyHint).toBe('search');
+
+    // Event routing through the module boundary, not the wrapper.
+    const leakedNativeInputs: Event[] = [];
+    shell.addEventListener('input', (event) => leakedNativeInputs.push(event));
+    if (!input) throw new Error('physical input was not materialized');
+    input.value = 'edited';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(singleLineValues).toEqual(['edited']);
+
+    // Single-line canonicalization strips line breaks at the module boundary.
+    input.value = 'no\nnewlines';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(singleLineValues).toEqual(['edited', 'nonewlines']);
+    expect(leakedNativeInputs).toHaveLength(0);
+
+    shell.remove();
+    await flush();
+    input.value = 'after-detach';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(singleLineValues).toEqual(['edited', 'nonewlines']);
   });
 });

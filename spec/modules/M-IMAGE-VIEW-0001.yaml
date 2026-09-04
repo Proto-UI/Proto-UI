@@ -1,0 +1,29 @@
+id: M-IMAGE-VIEW-0001
+type: module
+title: Image View module owns generation-bound image presentation
+status: draft
+since: 0.3.0-alpha.0
+summary: The Image View module owns stable source ownership, portable property patches, generation-bound lease lifecycle, loading status transitions, and stale completion rejection.
+satisfies:
+  contracts:
+    - C-IMAGE-VIEW-0001
+requires:
+  hostCaps:
+    - HC-IMAGE-VIEW-0001
+verifies:
+  tests:
+    - T-IMAGE-VIEW-0001
+sources:
+  - path: packages/modules/image-view/src/create.ts
+  - path: packages/modules/image-view/src/declaration.ts
+  - path: packages/modules/image-view/src/types.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: >-
+      Added the draft Image View module for generation-bound image presentation with loading status transitions and stale completion rejection.
+
+
+tags:
+  - image
+  - module

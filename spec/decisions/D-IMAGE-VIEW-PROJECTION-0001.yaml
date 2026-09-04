@@ -1,0 +1,53 @@
+id: D-IMAGE-VIEW-PROJECTION-0001
+type: decision
+title: Image View keeps the image presentation target host-owned
+status: draft
+since: 0.3.0-alpha.0
+summary: Image View declarations express portable image presentation requirements while adapters select host image targets and retain native loading, caching, and rendering behavior.
+statement:
+  zh-CN: >-
+    Image View 必须声明 opaque URI source 与 host-owned image presentation requirement，而不得在 prototype declaration 中指定 Web tag、native resource object 或其它宿主 materialization。Adapter 与 host capability 负责选择物理 image target，并默认保留 native loading、caching 与 rendering 行为；v0 仅覆盖 portable protocol 与 fake-host evidence，不得表述为已完成 Web conformance。
+
+
+  en: >-
+    Image View must declare an opaque URI source and a host-owned image presentation requirement rather than naming a Web tag, native resource object, or other host materialization in the prototype declaration. The adapter and host capability select the physical image target and preserve native loading, caching, and rendering behavior by default; v0 covers the portable protocol and fake-host evidence only and must not be represented as Web conformance.
+
+
+criteria:
+  - id: D-IMAGE-VIEW-PROJECTION-0001-A
+    text:
+      zh-CN: Prototype static declaration 只能表达 portable image presentation requirement，不得包含具体宿主 target 名称。
+      en: A prototype static declaration may express only portable image presentation requirements and must not contain a concrete host target name.
+  - id: D-IMAGE-VIEW-PROJECTION-0001-B
+    text:
+      zh-CN: Image source 使用 opaque URI；v0 不暴露 asset resolver、namespace/key stability 或 native fetch API。
+      en: Image source uses an opaque URI; v0 does not expose asset resolver, namespace/key stability, or native fetch API.
+  - id: D-IMAGE-VIEW-PROJECTION-0001-C
+    text:
+      zh-CN: a11y 采用显式二分输入：informative 必须有 non-empty alternativeText；decorative 明确排除语义内容。矛盾/缺失输入属于 authoring diagnostic 并 fail closed。
+      en: >-
+        A11y uses explicit binary input: informative requires non-empty alternativeText; decorative explicitly excludes semantic content. Contradictory or missing input is an authoring diagnostic and fails closed.
+
+
+  - id: D-IMAGE-VIEW-PROJECTION-0001-D
+    text:
+      zh-CN: loadingStatus (idle|loading|loaded|error) 与 loadingStatusChange transition 是唯一的状态/transition surface；v0 不公开同义的 load/error 事件。
+      en: loadingStatus (idle|loading|loaded|error) and loadingStatusChange transition are the only status/transition surfaces; v0 does not expose synonymous load/error events.
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+    - C-MODULE-DECLARATION-0001
+sources:
+  - path: packages/modules/image-view/src/declaration.ts
+  - path: packages/modules/image-view/src/create.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: >-
+      Introduced the draft Image View projection decision for the host-owned image presentation target with opaque URI source, explicit a11y binary input, and generation-bound lease.
+
+
+tags:
+  - image
+  - host-projection
+  - decision

@@ -103,6 +103,7 @@ implementations:
     path: packages/runtime/test/contract/focus.v0.contract.test.ts
     required: true
     consumesCases:
+      - T-FOCUS-0001-CASE-FOCUS-VISIBLE-NATIVE-EQUALITY
       - T-FOCUS-0001-CASE-FOCUSABLE-ONCE
       - T-FOCUS-0001-CASE-SCOPE-ONCE
       - T-FOCUS-0001-CASE-SETUP-ONLY
@@ -134,6 +135,7 @@ implementations:
     path: packages/adapters/react/test/focus.test.ts
     required: false
     consumesCases:
+      - T-FOCUS-0001-CASE-FOCUS-VISIBLE-NATIVE-EQUALITY
       - T-FOCUS-0001-CASE-UNIQUE-OWNER
   - id: adapter-vue-focus-unique-owner
     kind: adapter-test
@@ -141,6 +143,7 @@ implementations:
     path: packages/adapters/vue/test/focus.test.ts
     required: false
     consumesCases:
+      - T-FOCUS-0001-CASE-FOCUS-VISIBLE-NATIVE-EQUALITY
       - T-FOCUS-0001-CASE-UNIQUE-OWNER
   - id: prototypes-base-tabs-nav-participation
     kind: module-test
@@ -183,6 +186,9 @@ verifies:
         - C-AS-FOCUS-ENTRY-0001-F
         - C-AS-FOCUS-ENTRY-0001-G
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Bound the focus-visible native-equality case to the runtime focus contract and the React and Vue adapter focus tests, which jointly prove the measurable and fallback halves.
   - version: 0.1.0
     change: introduced
     summary: Mapped existing focus runtime contract tests to focus target and scope contracts.

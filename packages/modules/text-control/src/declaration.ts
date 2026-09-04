@@ -7,7 +7,7 @@ import {
 
 export type TextControlDeclaration = Readonly<{
   content: 'plain-text';
-  lineMode: 'multiline';
+  lineMode: 'single' | 'multiline';
   engine: 'host';
 }>;
 

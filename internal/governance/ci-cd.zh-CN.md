@@ -72,7 +72,7 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 - `publish-all` 仅允许在 `main` 上运行。
 - `publish-all` 必须使用 `workspace` profile；`launch` 只用于产品范围审计和彩排。
 - 真实发布会选择 GitHub `npm` environment，并使用 npm Trusted Publishing OIDC。Environment reviewer、分支限制和管理员 bypass 均属于外部配置；发布前必须现场核验，不能仅凭 workflow 文件推断这些保护存在。
-- `stage` 与 `publish-all` 在 package 暂存前检查全部公开 package identity 均已可从 npm registry 读取；该检查无法读取私有的 Trusted Publisher 设置，后者仍由维护者负责核对。
+- `stage` 与 `publish-all` 在 package 暂存前检查全部公开 package identity 均已可从 npm registry 读取，且其 bootstrap dist-tag/deprecation 状态满足发布门禁；该检查无法读取私有的 Trusted Publisher 设置，后者仍由维护者负责核对。
 - 同一 ref 上启用并发互斥，避免重叠发布任务。
 - 全部公开 package 发布成功后才创建 `v<version>` tag。
 

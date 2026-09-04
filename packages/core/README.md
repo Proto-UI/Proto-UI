@@ -30,6 +30,7 @@ npm install @proto.ui/core@0.3.0-alpha.0
 - `src/focus.ts`
 - `src/handles.ts`
 - `src/hit-participation.ts`
+- `src/image-view.ts`
 - `src/index.ts`
 - `src/internal.ts`
 - `src/module/`

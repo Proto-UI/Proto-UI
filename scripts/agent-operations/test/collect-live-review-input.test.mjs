@@ -33,7 +33,7 @@ const changedFiles = [
 ];
 
 function payload(overrides = {}) {
-  return {
+  const result = {
     data: {
       viewer: { login: 'reviewer' },
       repository: {
@@ -136,6 +136,9 @@ function payload(overrides = {}) {
     },
     ...overrides,
   };
+  result.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup =
+    result.data.repository.pullRequest.headRef.target.statusCheckRollup;
+  return result;
 }
 
 test('live collector builds a complete canonical input from the GraphQL payload', () => {
@@ -246,7 +249,7 @@ test('live collector fails closed on pagination truncation for every connection'
     [
       'check contexts',
       (p) => {
-        p.data.repository.pullRequest.headRef.target.statusCheckRollup.contexts.pageInfo.hasNextPage = true;
+        p.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts.pageInfo.hasNextPage = true;
       },
     ],
   ]) {
@@ -422,23 +425,24 @@ test('live collector passes external evidence through verbatim and validates its
 
 test('live collector accepts nullable check links without treating them as trusted CI evidence', () => {
   const nullableUrls = payload();
-  nullableUrls.data.repository.pullRequest.headRef.target.statusCheckRollup.contexts.nodes = [
-    {
-      __typename: 'CheckRun',
-      name: 'test',
-      status: 'COMPLETED',
-      conclusion: 'SUCCESS',
-      completedAt: '2026-08-23T06:00:00Z',
-      detailsUrl: null,
-    },
-    {
-      __typename: 'StatusContext',
-      context: 'legacy-ci',
-      state: 'SUCCESS',
-      targetUrl: null,
-      createdAt: '2026-08-23T06:00:00Z',
-    },
-  ];
+  nullableUrls.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts.nodes =
+    [
+      {
+        __typename: 'CheckRun',
+        name: 'test',
+        status: 'COMPLETED',
+        conclusion: 'SUCCESS',
+        completedAt: '2026-08-23T06:00:00Z',
+        detailsUrl: null,
+      },
+      {
+        __typename: 'StatusContext',
+        context: 'legacy-ci',
+        state: 'SUCCESS',
+        targetUrl: null,
+        createdAt: '2026-08-23T06:00:00Z',
+      },
+    ];
   const result = buildLiveReviewInput(
     nullableUrls,
     'github.com:Proto-UI/Proto-UI',
@@ -450,6 +454,23 @@ test('live collector accepts nullable check links without treating them as trust
   assert.equal(result.input.checks[0].detailsUrl, null);
   assert.equal(result.input.checks[1].detailsUrl, null);
   assert.equal(summarizeLiveChecks(result.input.checks), 'unknown');
+});
+
+test('live collector reads checks from the exact head commit when headRef target rollup is absent', () => {
+  const forkPullRequest = payload();
+  forkPullRequest.data.repository.pullRequest.headRef.target.statusCheckRollup = null;
+  const result = buildLiveReviewInput(forkPullRequest, repositoryId, 487, [], changedFiles);
+  assert.equal(result.input.headSha, sha('b'));
+  assert.equal(result.input.checks.length, 2);
+});
+
+test('live collector fails closed when the collected final commit is not the pull-request head', () => {
+  const mismatched = payload();
+  mismatched.data.repository.pullRequest.commits.nodes[0].commit.oid = sha('c');
+  assert.throws(
+    () => buildLiveReviewInput(mismatched, repositoryId, 487, [], changedFiles),
+    /head commit collection does not match/
+  );
 });
 
 test('check context normalization matches both connection node kinds', () => {

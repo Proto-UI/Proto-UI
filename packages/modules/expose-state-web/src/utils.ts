@@ -1,30 +1,30 @@
+/**
+ * Semantics the Web projection names directly instead of normalizing. Exported
+ * so a static analyzer can reproduce the same attribute without depending on
+ * this module at runtime; `packages/cli/test/prototype-style-tokens.test.ts`
+ * asserts the two stay identical.
+ */
+export const OFFICIAL_EXPOSED_STATE_NAMES: Readonly<Record<string, string>> = Object.freeze({
+  '@interaction/disabled': 'disabled',
+  '@interaction/hovered': 'hovered',
+  '@interaction/pressed': 'pressed',
+  '@interaction/focused': 'focused',
+  '@focus/focused': 'focused',
+  '@interaction/focusVisible': 'focus-visible',
+  '@focus/focusVisible': 'focus-visible',
+  '@accessibility/expanded': 'expanded',
+  '@accessibility/invalid': 'invalid',
+  '@accessibility/selected': 'selected',
+  '@accessibility/checked': 'checked',
+  '@accessibility/current': 'current',
+});
+
 function mapOfficialSemanticName(semantic: string): string | null {
-  switch (semantic) {
-    case '@interaction/disabled':
-      return 'disabled';
-    case '@interaction/hovered':
-      return 'hovered';
-    case '@interaction/pressed':
-      return 'pressed';
-    case '@interaction/focused':
-    case '@focus/focused':
-      return 'focused';
-    case '@interaction/focusVisible':
-    case '@focus/focusVisible':
-      return 'focus-visible';
-    case '@accessibility/expanded':
-      return 'expanded';
-    case '@accessibility/invalid':
-      return 'invalid';
-    case '@accessibility/selected':
-      return 'selected';
-    case '@accessibility/checked':
-      return 'checked';
-    case '@accessibility/current':
-      return 'current';
-    default:
-      return null;
-  }
+  // The table inherits `Object.prototype`, so a semantic spelled `constructor`
+  // or `toString` would otherwise resolve to the inherited function.
+  return Object.hasOwn(OFFICIAL_EXPOSED_STATE_NAMES, semantic)
+    ? OFFICIAL_EXPOSED_STATE_NAMES[semantic]
+    : null;
 }
 
 export function createExposeStateWebNameMap(semantic: string) {

@@ -360,7 +360,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           // Route the trusted physical event through the adapter-private host
           // ingress: Proto focus facts update without emitting a second public
           // native-looking event from the custom-element boundary.
-          const control = this._textControlTarget;
+          const control: HTMLElement = this._textControlTarget;
           // Bind native focus/blur directly on the known control so the
           // callback receives the real DOM event object with target/currentTarget
           // intact. The private transport preserves both the declared type and
