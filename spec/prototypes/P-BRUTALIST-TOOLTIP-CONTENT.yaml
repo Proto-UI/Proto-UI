@@ -1,0 +1,30 @@
+id: P-BRUTALIST-TOOLTIP-CONTENT
+type: prototype
+title: Brutalist Tooltip Content visual projection
+status: draft
+since: 0.3.0-alpha.0
+summary: Brutalist Content preserves Base semantics, presence, portal, dismissal, and positioning while adding a square high-contrast surface.
+statement:
+  en: 'Brutalist Content consumes Base Content and adds only feedback style: square geometry, a 2px foreground border, foreground fill, inverse text, mono bold uppercase type, compact spacing, and a hard 4px foreground shadow.'
+  zh-CN: 'Brutalist Content 消费 Base Content，只增加 feedback style：方形 geometry、2px foreground border、foreground fill、inverse text、mono bold uppercase type、紧凑 spacing 与 4px foreground hard shadow。'
+criteria:
+  - id: P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
+    text:
+      en: 'Content must include rounded-none, border-2 border-foreground, bg-foreground, text-background, font-mono font-bold uppercase text-xs, px-3 py-2, z-50, and shadow-[4px_4px_0_0_var(--pui-foreground)].'
+      zh-CN: 'Content 必须包含 rounded-none、border-2 border-foreground、bg-foreground、text-background、font-mono font-bold uppercase text-xs、px-3 py-2、z-50 与 shadow-[4px_4px_0_0_var(--pui-foreground)]。'
+  - id: P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
+    text:
+      en: Content must inherit Base tooltip role, open state, presence, Escape dismissal, renderer portal ownership, and positioning without adding a second owner.
+      zh-CN: Content 必须继承 Base tooltip role、open state、presence、Escape dismissal、renderer portal ownership 与 positioning，不得增加第二个 owner。
+sources: [{ path: packages/prototypes/brutalist/src/tooltip/content.proto.ts }]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Aligned Content with the interactive Base Tooltip protocol.
+tags: [prototype, brutalist, tooltip, content, visual]
+inherits:
+  prototypes: [{ id: P-BASE-TOOLTIP-CONTENT }]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+verifies:
+  tests: [T-BRUTALIST-TOOLTIP-0001]

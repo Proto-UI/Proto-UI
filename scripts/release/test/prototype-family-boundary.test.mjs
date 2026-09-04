@@ -62,12 +62,62 @@ const BRUTALIST_FAMILIES = new Set([
   'tabs',
   'textarea',
   'toggle',
+  'tooltip',
 ]);
 
 test('prototype packages expose side-effect-free family entry points', () => {
   assertFamilyExports(BASE_ROOT, BASE_FAMILIES);
   assertFamilyExports(SHADCN_ROOT, SHADCN_FAMILIES);
   assertFamilyExports(BRUTALIST_ROOT, BRUTALIST_FAMILIES);
+});
+
+test('Brutalist Tooltip exports only the reviewed root and family subpath', () => {
+  const manifest = JSON.parse(readFileSync(join(BRUTALIST_ROOT, 'package.json'), 'utf8'));
+  assert.deepEqual(manifest.exports['./tooltip'], {
+    types: './dist/tooltip/index.d.ts',
+    import: './dist/tooltip/index.js',
+    default: './dist/tooltip/index.js',
+  });
+  assert.equal(
+    Object.keys(manifest.exports).some(
+      (key) => key.includes('/src') || key.startsWith('./tooltip/')
+    ),
+    false
+  );
+});
+
+test('built Brutalist Tooltip root and subpath expose the exact four entries', async () => {
+  const { pathToFileURL } = await import('node:url');
+  const { execSync } = await import('node:child_process');
+  // Always rebuild to validate current source, never stale dist artifacts.
+  execSync('corepack pnpm@10.32.1 --filter @proto.ui/prototypes-brutalist build', {
+    cwd: ROOT_DIR,
+    stdio: 'pipe',
+    timeout: 60_000,
+  });
+  const distRoot = join(BRUTALIST_ROOT, 'dist');
+  const rootModule = await import(pathToFileURL(join(distRoot, 'index.js')).href);
+  const tooltipModule = await import(pathToFileURL(join(distRoot, 'tooltip', 'index.js')).href);
+  const expected = [
+    'BrutalistTooltipGroup',
+    'BrutalistTooltipRoot',
+    'BrutalistTooltipTrigger',
+    'BrutalistTooltipContent',
+  ];
+  for (const name of expected) {
+    assert.ok(rootModule[name], `root barrel must export ${name}`);
+    assert.ok(tooltipModule[name], `./tooltip subpath must export ${name}`);
+  }
+  // Root barrel may export other Brutalist families; assert the four Tooltip entries are present.
+  for (const name of expected) {
+    assert.ok(rootModule[name], `root barrel must export ${name}`);
+  }
+  const tooltipKeys = Object.keys(tooltipModule).filter((k) => k.startsWith('Brutalist'));
+  assert.deepEqual(
+    tooltipKeys.sort(),
+    expected.sort(),
+    './tooltip subpath must expose only the four Tooltip entries'
+  );
 });
 
 test('Base component families do not import sibling component families', () => {

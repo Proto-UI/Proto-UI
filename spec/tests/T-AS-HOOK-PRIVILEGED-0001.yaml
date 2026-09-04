@@ -54,6 +54,16 @@ implementations:
     consumesCases:
       - T-AS-HOOK-PRIVILEGED-0001-CASE-PORT-CAPABILITY
       - T-AS-HOOK-PRIVILEGED-0001-CASE-TRACE
+  - id: spec-privileged-rollback-declaration
+    kind: workspace-check
+    status: planned
+    path: packages/spec/graph/test/privileged-rollback-declaration.test.ts
+    required: true
+    consumesCases:
+      - T-AS-HOOK-PRIVILEGED-0001-CASE-ROLLBACK-BOUNDARY
+    notes:
+      - Planned because none of the four privileged contract tests asserts a restricted or omitted rollback; the word does not appear in any of them.
+      - A workspace check rather than a runtime test, because `C-AS-HOOK-PRIVILEGED-0001-D` requires that a hook omitting full rollback says so in its own contract. A runtime test can observe the behaviour but not the declaration, so it could pass while the required contract text is absent.
 verifies:
   contracts:
     - id: C-AS-HOOK-PRIVILEGED-0001
@@ -63,6 +73,9 @@ verifies:
         - C-AS-HOOK-PRIVILEGED-0001-C
         - C-AS-HOOK-PRIVILEGED-0001-D
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Recorded the rollback-boundary case as a planned workspace check, because the criterion is a contract declaration a runtime test cannot observe.
   - version: 0.1.0
     change: introduced
     summary: Added privileged asHook test mapping through focus, boundary, overlay, and hit-participation runtime tests.

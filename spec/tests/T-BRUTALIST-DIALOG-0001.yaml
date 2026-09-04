@@ -87,6 +87,12 @@ cases:
       - P-BRUTALIST-DIALOG-FOOTER-ANATOMY
       - P-BRUTALIST-DIALOG-FOOTER-VISUAL-GRAMMAR
     expectation: p-brutalist-dialog-footer-anatomy
+  - id: T-BRUTALIST-DIALOG-0001-CASE-OVERLAY-GEOMETRY-BROWSER
+    title: The mask covers the viewport and the hard-shadowed panel stays centred in a real browser, in every runtime
+    covers:
+      - P-BRUTALIST-DIALOG-MASK-VISUAL-GRAMMAR
+      - P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR
+    expectation: p-brutalist-dialog-overlay-geometry-browser
 implementations:
   - id: prototypes-brutalist-dialog-contract
     kind: module-test
@@ -122,6 +128,28 @@ implementations:
       - P-BRUTALIST-DIALOG-MASK
       - P-BRUTALIST-DIALOG-TITLE
       - P-BRUTALIST-DIALOG-TRIGGER
+  - id: www-brutalist-dialog-overlay-geometry-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DIALOG-0001-CASE-OVERLAY-GEOMETRY-BROWSER
+    exercises:
+      - P-BASE-DIALOG
+      - P-BASE-DIALOG-CONTENT
+      - P-BASE-DIALOG-MASK
+      - P-BASE-DIALOG-TRIGGER
+      - P-BRUTALIST-DIALOG
+      - P-BRUTALIST-DIALOG-CONTENT
+      - P-BRUTALIST-DIALOG-MASK
+      - P-BRUTALIST-DIALOG-TRIGGER
+    notes:
+      - The module test asserts the token strings these two criteria name. happy-dom lays nothing out, so "covers the viewport", "centred" and "above the mask" hold nowhere in the repository; this case reads them in Chromium, in Web Components, React, Vue and Vue 2.
+      - The panel is measured only once its transition reports `entered`, because a measurement taken during `zoom-in-95` reads the animating scale rather than the resting geometry the criterion states.
+      - The viewport is then changed and the panel re-measured, so a projection that positioned it once at mount cannot pass on the first measurement alone.
+      - The hard offset shadow is asserted as the browser composes it, which also states that the arbitrary-value token reached the generated CSS; removing it from `BRUTALIST_PANEL_TOKENS` fails this case.
+      - Overlays are selected by `data-is-present` rather than by body membership, because Vue 2 leaves a closed Dialog's portalled nodes in the body and they outlive the app that mounted them; a body-child count would read the previous runtime's residue as this runtime's overlay.
 verifies:
   prototypes:
     - id: P-BRUTALIST-DIALOG

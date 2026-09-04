@@ -119,6 +119,7 @@ sources:
   - path: packages/prototypes/brutalist/src/button/button.proto.ts
   - path: packages/prototypes/brutalist/src/button/types.ts
   - path: packages/prototypes/brutalist/test/button-live-theme.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
   - path: packages/prototypes/brutalist/src/style.ts
   - path: packages/prototypes/brutalist/test/button.test.ts
   - path: docs/superpowers/specs/2026-07-24-brutalist-design-system-design.md
