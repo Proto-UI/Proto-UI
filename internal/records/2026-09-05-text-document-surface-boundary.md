@@ -105,8 +105,8 @@ This resolves the seam with `D-TEXT-CONTROL-PROJECTION-0001-Q-SELECTION` without
 | Document/model identity | App -> immutable Text Document requirement -> Host Capability resolver | Correct shared/private model and view appear even when different documents reuse a locally scoped session ID. | Resolve model by composite `{ documentId, modelSessionId }`; use `documentId` alone only for the underlying App document service. |
 | Source content/revision | App model-session service -> engine/model dispatcher | Engine renders text and all attached views observe one current persisted base. | Composite document/model session owns source revision and changes once for all its views. |
 | IME/text/key input | Physical editor -> initiating Host view bridge -> composite-key serial model dispatcher | Bridge stamps origin before shared dispatch. One unacknowledged App delivery per model; views detach without reorder/loss. Negative acknowledgement pauses all views, drops dependent queued summaries, and reconciles engine privately to authoritative App content before any new edit. | Composition, composite key, contiguous mutation chain, commit authorization, reconciliation epoch; observer freshness never governs durability. |
-| Edit details | Serial dispatcher -> App service -> accepted/rejected acknowledgement; views get optional envelopes | Accepted tx N permits N+1. Rejected tx atomically stops queue, prevents persistence of later dependent transactions, resets/rebases model through App service with monotonic new mutation/content identity, and publishes conflict/error; stale view observations drop. | Before must equal prior accepted after; rejection reconciliation revision exceeds all discarded committed revisions so stale callbacks cannot revive. |
-| Save/Revert | Button -> composite-key model action barrier -> serial dispatcher/App service | Barrier resolves earlier acknowledgements and blocks later edits. Save persists exact drained version. Revert applies authoritative saved content App-origin observe-only, then atomically rebases dispatcher's accepted mutation/content/source head to replacement facts before resume; next user transaction chains from replacement. | One barrier/model; rejection reconciles first and supersedes action for retry; no old-source transaction crosses; Revert baseline reset is barrier result, not transaction acknowledgement. |
+| Edit details | Serial dispatcher -> App service -> accepted/rejected acknowledgement; views get optional envelopes | Accepted ack must name sole in-flight transaction; dispatcher advances only to that delivered summary's own afterMutationRevision/contentVersion, with no echoed revision fields to disagree. Unknown/mismatched ID triggers protocol rejection/reconciliation. Rejected ack stops queue/resets model; stale UI drops. | Before equals prior accepted after; accepted uses immutable in-flight summary as source of truth; reconciliation revision exceeds discarded revisions. |
+| Save/Revert | Button -> model action barrier -> dispatcher/App | Barrier resolves earlier acks, blocks edits. Save persists drained version and atomically advances both published source/saved facts and dispatcher's accepted source baseline while retaining mutation/content head; next user tx uses new source. Revert replaces content then rebases all accepted heads. | One barrier/model; rejection reconciles then action retry; Save/Revert baseline update is barrier result, not transaction ack. |
 | Undo/Redo | App/semantic command -> initiating Host view bridge -> engine | Applied mutation, no-op empty, policy/stale rejection, or unavailable. | Before applied policy both expected policy and mutation are null; Host returns policy-not-applied before any numeric check/engine. After attach both must be numeric/current and history rechecked; no-op changes nothing. |
 | Selection/caret | Engine | Native accessibility exposes ranges; when supported, Proto receives only count/collapsed summary; unsupported summary is explicit and carries no selection fact. | Monotonic facts and selection revisions within connection/policy; engine selection remains usable independently. |
 | Focus/Tab escape | Host arbiter: active/conservative IME -> required Focus exit route -> ordinary Harness shortcut -> editor | Exactly one focus destination; at least one policy-verified exit key/chord cannot be captured by Harness/editor; facts return only through Focus. | `DocumentKeyboardRouteSupport.shortcutPolicyId` equals applied patch policy; route recomputed on every shortcut-policy update, plus Focus identity/view epoch. |
@@ -233,10 +233,12 @@ type DocumentSurfaceFacts =
   | Readonly<{
       attachment: 'detached' | 'attaching';
       appliedPolicyRevision: null;
+      factsRevision: number;
     }>
   | Readonly<{
       attachment: 'unavailable';
       appliedPolicyRevision: null;
+      factsRevision: number;
       reason: 'engine-unavailable' | 'document-unavailable' | 'service-unavailable';
     }>
   | Readonly<{
@@ -299,10 +301,9 @@ type DocumentTransactionObservation = Readonly<{
 // neither acknowledgement nor reconciliation content is a portable authoring value.
 type DocumentTransactionAck =
   | Readonly<{
+      // Must equal the sole in-flight transactionId; dispatcher uses its stored summary head.
       transactionId: string;
       status: 'accepted';
-      acceptedMutationRevision: number;
-      acceptedContentVersion: string;
       reason: null;
     }>
   | Readonly<{
@@ -388,35 +389,32 @@ type DocumentSurfaceHost = Readonly<{
 ```
 
 1. attach two surfaces to composite doc/model keys; distinct key pairs resolve independent models/view state;
-2. snapshot detached/attaching null policy/no support; call undo with both expected policy and mutation `null`, receive unavailable `policy-not-applied`/applied null before revision comparison or engine access; mixed null/numeric request rejects as invalid internal request. Then ready with support and Scroll separately;
-3. commit tx-1 then tx-2. Delay tx-1 ack; serial dispatcher withholds tx-2. Accept tx-1 then deliver tx-2 with contiguous revision; duplicate tx-1 does not advance;
-4. repeat but App rejects tx-1 for authorization-revoked and source-conflict. Before negative ack handling, engine has tx-1/tx-2 locally. Assert all views become non-interactive, tx-2 is never persisted, queue resets, App service privately replaces model with authoritative content, undo/history/view facts reconcile at a mutation revision greater than every discarded revision, old callbacks cannot revive, then editing resumes only under fresh source/policy;
-5. sibling observations cannot replace origin, authorize persistence, or reorder; Module origin inference prohibited;
-6. detach view before ack; UI drops but durable/reconciliation queue remains correct;
-7. recover unavailable -> ready; old failure loses by facts revision;
-8. degrade composition reporting with conservative IME; degrade selection independently;
-9. move supported selection twice; order revisions;
-10. exercise editing modes/origin stamping; only eligible interactive persists;
-11. during composition IME precedes. After end, reserved policy-verified exit precedes Harness, then editor;
-12. shortcut policy collision makes exact route unavailable; non-colliding reserved exit works;
-13. call undo/redo with current policy/mutation while corresponding history is empty, including race after previously true canUndo/canRedo; receive no-op history-empty with unchanged mutation/content and no transaction. Unrelated support degradation cannot make command unavailable;
-14. commit tx-3/tx-4, delay tx-3 ack, invoke Save. Barrier blocks edits/commands, waits both accepted, saves exact drained version, advances source/saved, resumes; no old-source delivery;
-15. repeat Save/Revert with rejected pending transaction; reconcile first and return superseded/retry. Retry Revert on reconciled baseline: apply authoritative saved content App-origin observe-only, atomically set dispatcher accepted head to replacement mutation/content/source, then resume. Commit tx-after-revert with `beforeMutationRevision` equal replacement revision and prove it persists normally without acknowledgement for App-origin replacement;
-16. enforce strict policy/per-view envelopes; App-origin observe-only no echo;
-17. unavailable/error shapes exact; command unavailable policy may be null only for policy-not-applied and otherwise uses engine/document/service;
-18. switch surface between model keys; retain/restore then final evict cache;
-19. map A11y/Focus/Scroll owners; Text Document removes bridge only, M-SCROLL disposes lease once;
-20. stale UI callbacks cannot suppress/reorder/revive rejected durable chain;
-21. prove no raw engine/model/content/range/target/Scroll-controller/file/document/view-state/reconciliation payload crosses portable authoring.
+2. snapshot detached/attaching null policy/no support with facts revisions 1/2; delay an earlier null-policy unavailable revision 3 until after ready revision 4 and prove stale suppression. Pre-policy undo with both expected revisions null returns policy-not-applied before engine; mixed pair invalid;
+3. commit tx1 then tx2. Delay tx1 ack; withhold tx2. Send accepted ack containing only tx1 ID; dispatcher advances to stored tx1 summary head, then delivers contiguous tx2. Ack with unknown/tx2 ID while tx1 in flight triggers protocol rejection and authoritative reconciliation; no caller-supplied accepted revision/content can desynchronize head. Duplicate tx1 no advance;
+4. App rejects tx1 authorization/source; all views non-interactive, tx2 never persists, queue reset, private authoritative replacement, undo/view facts reconcile above discarded revisions, old callbacks reject, resume fresh;
+5. sibling observations cannot replace origin/order; detach before ack preserves durable/reconciliation queue;
+6. recover unavailable->ready; delayed lower facts revision cannot regress;
+7. composition/selection degradations independent;
+8. selection revisions order; editing modes/origin gate;
+9. IME -> reserved Focus exit -> Harness -> editor; shortcut collision route unavailable;
+10. empty undo/redo current/race returns no-op unchanged; unrelated support does not make unavailable;
+11. commit tx3/tx4, delay tx3 ack, invoke Save. Barrier blocks, waits both accepted, persists exact drained content, advances source r4->r5 and saved facts, atomically sets dispatcher source head r5 while mutation/content head stays drained value, resumes. Immediate tx-after-save carries source r5 and beforeMutation equal drained head; persists normally; no r4 summary follows;
+12. Save/Revert with rejected pending reconciles first/superseded retry. Revert on reconciled baseline applies App-origin saved content and atomically sets dispatcher mutation/content/source heads; tx-after-revert chains and persists without replacement ack;
+13. strict policy/envelopes; App-origin observe-only no echo;
+14. unavailable/error/command shapes exact;
+15. view key retain/restore/final evict;
+16. A11y/Focus/Scroll owners; M-SCROLL disposes once;
+17. stale UI cannot suppress/reorder/revive durable chain;
+18. no raw engine/model/content/range/target/Scroll/file/view-state/reconciliation crosses.
 
-This proves pending command completion, undo/redo no-op race, ordered positive and reconciled negative transaction acknowledgement, Save/Revert barriers, pending attachment, composite identity, Host authorization, support coupling, IME/exit/Harness arbitration, bounded view state, policy-bound route, system ownership, and no raw reconciliation content. It does not prove real host behavior.
+This proves all fact callbacks versioned before and after attachment, accepted acknowledgement bound to stored in-flight summary, Save source-head and Revert full-head rebasing, null/no-op commands, positive/rejected ordered delivery, barriers, reconciliation, pending attach, identity/authorization/support/input arbitration/view lifecycle/system ownership. It does not prove real host behavior.
 
 ## Revision, input, shortcut, and permission policy
 
-- **Revision, transaction, authorization, order, and rejection:** composite service owns source revision; mutation revisions prevent ABA; content version identifies equality. Initiating Host stamps authorization before shared dispatch. One dispatcher per composite key allows one unacknowledged App delivery and contiguous chain. Accepted ack advances. Rejected `authorization-revoked | source-conflict` ack atomically marks all views non-interactive, discards every dependent queued summary, privately reloads/rebases engine from App authoritative content, clears/reseeds undo as engine requires, and publishes a reconciliation mutation revision greater than every rejected/discarded revision. New edits wait for fresh facts/policy. App validates/dedupes triple key; recipient freshness never changes origin/order.
-- **Save/Revert barrier:** barrier makes views non-interactive, blocks edits/commands, drains earlier acknowledgements. Save persists exact drained version then advances source/saved facts. Revert applies App authoritative saved content App-origin observe-only and, as one atomic barrier completion, resets serial dispatcher's accepted mutation/content/source baseline to the replacement facts; the first subsequent user transaction must chain from that revision. No acknowledgement is expected for App-origin replacement. Earlier rejection reconciles first and returns superseded/retry. Input resumes only after result/new facts/policy.
-- **IME/exit/shortcut precedence:** Host-local IME, required Focus exit, Harness, editor. Null composition not inactive; route support matches policy; collision blocks.
-- **Command outcomes:** Before applied policy, request must carry both expected policy/mutation null; Host returns unavailable policy-not-applied/applied null before revision comparison/engine. A mixed null/numeric pair rejects as invalid internal request. After attach both are numeric/current; false history returns no-op history-empty unchanged; non-interactive policy-denied; only engine/document/service unavailable.
+- **Revision, transaction, authorization, order, and acknowledgement:** initiating Host stamps origin. One dispatcher/model has one in-flight and contiguous chain. Accepted ack carries only transaction ID, must match sole in-flight ID, and advances exactly to stored delivered summary afterMutation/content; unknown/out-of-order ID is protocol rejection entering authoritative reconciliation. Rejected authorization/source does same pause/drop/private reset at revision above discarded, then fresh policy/facts. App validates/dedupes; recipient freshness independent.
+- **Save/Revert barrier:** blocks views/actions and drains acks. Save persists exact drained mutation/content then atomically advances published source/saved facts and dispatcher accepted source head to new source while retaining drained mutation/content; first later tx uses new source. Revert App-origin replacement atomically resets all accepted heads; no replacement ack. Earlier rejection reconciles then action retry. Resume after result/facts/policy.
+- **IME/exit/shortcut precedence:** Host IME, Focus exit, Harness, editor. Route policy collision blocks.
+- **Command outcomes:** pre-policy both expected null -> policy-not-applied before revision/engine; mixed invalid. Attached numeric/current; empty -> no-op unchanged; noninteractive denied; engine/document/service unavailable.
 - **Text versus command keys:** engine owns editing/cursor/undo/indent. App commands use host arbiter; no native key object crosses.
 - **Tab and escape:** composition owns enabled leave Button and Focus topology plus policy-verified host route. Either failure blocks acceptance.
 - **Clipboard/paste:** system/editor owns; only Host-stamped persistable transaction enters serial durable dispatcher.
@@ -439,9 +437,9 @@ This proves pending command completion, undo/redo no-op race, ordered positive a
 - Text Document registers logical Scroll; M-SCROLL exclusively owns identity/facts/requests/support/epoch and HC lease disposal. Text Document cleans only editor controller bridge, never Scroll lease/support.
 - Raw geometry/view state host-private; restoration keys composite with surface.
 - One surface holds immutable composite requirement; identity replacement reattaches; mutable update policy only. Loading only status discriminant.
-- Detached/attaching/pre-attach unavailable have null policy/no support. Post-attach facts revision. Support exact branches. UI stale suppression never governs durability/reconciliation.
-- Dispose retain releases input/Focus/editor Scroll bridge/observations/A11y/target and keeps keyed state; M-SCROLL disposes own lease. Evict purges all keys. App models survive view lease.
-- Attachment failure uses attachment union; command unavailable uses policy-not-applied/engine/document/service only; Scroll remains Scroll-owned.
+- Every facts callback, including detached/attaching/null-policy unavailable, carries a monotonic connection `factsRevision`; support remains omitted before attachment. A delayed pre-attachment failure cannot replace higher ready facts. Post-attachment support exact; UI freshness never governs durability.
+- Dispose retain releases view-owned resources/keeps keyed state; M-SCROLL owns lease. Evict purges. App models survive.
+- Attachment failure exact; command unavailable exact; Scroll stays owned.
 
 ## Proposed entity and evidence graph
 
@@ -469,12 +467,12 @@ No new Adapter identity is justified: existing profiles receive reviewed relatio
 ### Bounded red-first plan
 
 1. **Portable negatives:** reject raw engine/model/target/range/worker/stream/file/framework/native event/geometry/document/token/view-state/scroll-controller/service values; reject identity in mutable updates.
-2. **Fake lease:** pending attach; both expected revisions null for pre-policy command, mixed pair invalid; composite resolution; strict policy/modes/route; source views; state retain/evict; replacement/cleanup/stale UI.
-3. **Transactions/actions:** composite/triple keys; Host auth; serial accepted/rejected chains; reconciliation; Save/Revert barriers; Revert atomically rebases accepted dispatcher head to App-origin replacement then next user edit persists from it; no late persistence; recipient freshness; shared dirty/conflict.
-4. **Commands/input:** applied/no-op/rejected/unavailable; null policy+mutation policy-not-applied; empty-history race; exact support; IME -> Focus exit -> Harness -> editor; policy collision; editing/origin gates.
-5. **Selection/availability/view identity:** post-attach revisions; ready-only fields; null policy/no support before attach; composite view key; retain/evict; loading single; line navigation deferred.
-6. **A11y/Focus/Scroll fakes:** system owners; Text Document drops bridge, M-SCROLL disposes once; no duplicate.
-7. **Real Web:** modes/auth; accepted/rejected transaction chains/reconciliation; Save/Revert queue barriers plus post-Revert dispatcher rebase/edit; null-revision/no-op commands; arbitration/route; selection/undo; shared save; restore/evict; replacement/A11y/Scroll cleanup.
+2. **Fake lease:** every pre/post-attach callback facts revision; delayed null failure after ready stale-drops; null command revisions; composite/policy/modes/route/view state/cleanup.
+3. **Transactions/actions:** one in-flight; accepted ack contains matching ID only and advances from stored summary; unknown/out-of-order ID reconciles; rejection reconciliation; Save barrier atomically rebases source head then immediate edit; Revert rebases all heads then edit; no late persistence.
+4. **Commands/input:** applied/no-op/rejected/unavailable; null inputs; empty race; exact support; IME->Focus exit->Harness->editor; collision/gates.
+5. **Selection/view:** post-attach ready fields; pre-attach versioned null/no support; composite key retain/evict; loading; line deferred.
+6. **A11y/Focus/Scroll:** owners; bridge drop, M-SCROLL dispose once; no duplicate.
+7. **Real Web:** versioned pre-attach recovery; accepted-ack mismatch attempt; accepted/rejected chains/reconciliation; Save source-head and Revert full-head barriers with immediate edits; null/no-op commands; arbitration/selection/shared save/view/A11y/Scroll cleanup.
 8. **Performance:** rapid edits/caret movement and a bounded first-slice document prove no full-content/token/viewport copies through Proto UI and no retained listeners/models.
 9. **Cross-adapter Web only if claimed:** WC/React/Vue from one authoring source remains Web evidence.
 10. **Non-Web:** independent native profile with native input, selection, revision, accessibility, view replacement, and cleanup evidence before multi-host language.
