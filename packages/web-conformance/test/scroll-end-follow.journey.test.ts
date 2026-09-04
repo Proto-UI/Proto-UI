@@ -82,12 +82,9 @@ describe('Web adapter conformance / Scroll end-follow', () => {
             projection: 'system',
             endFollow: { mode: 'while-at-end', axis: 'vertical' },
           });
-          def.expose.state('atEnd', surface.vertical.atEnd ?? surface.vertical.canScrollAfter);
-          def.expose.state('followState', surface.endFollow?.state ?? surface.projection);
-          def.expose.state(
-            'followRequestStatus',
-            surface.endFollow?.requestStatus ?? surface.scrolling
-          );
+          def.expose.state('atEnd', surface.vertical.atEnd);
+          def.expose.state('followState', surface.endFollow.state);
+          def.expose.state('followRequestStatus', surface.endFollow.requestStatus);
           def.expose.method('jumpToEnd', () =>
             surface.request({ kind: 'to-end', axis: 'vertical' })
           );
@@ -97,6 +94,17 @@ describe('Web adapter conformance / Scroll end-follow', () => {
 
       const mounted = await mount(runtime, proto);
       try {
+        Object.defineProperties(mounted.root, {
+          clientWidth: { configurable: true, value: 100 },
+          scrollWidth: { configurable: true, value: 100 },
+          clientHeight: { configurable: true, value: 100 },
+          scrollHeight: { configurable: true, value: 400 },
+          scrollLeft: { configurable: true, value: 0, writable: true },
+          scrollTop: { configurable: true, value: 0, writable: true },
+        });
+        window.dispatchEvent(new Event('resize'));
+        await settle(runtime);
+        expect(mounted.root.scrollTop).toBe(300);
         const exposes = mounted.getExposes();
         expect(exposes.atEnd.get()).toBe(true);
         expect(exposes.followState.get()).toBe('following');

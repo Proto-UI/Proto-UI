@@ -38,6 +38,7 @@ type ThumbStyleSnapshot = Readonly<{
 
 const clampRatio = (value: number) =>
   Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
+const READER_INTENT_WINDOW_MS = 250;
 
 function axisSnapshot(
   offset: number,
@@ -147,7 +148,7 @@ export function createWebScrollSurfaceHost(
       let endFollowRequestStatus: ScrollEndFollowRequestStatus = 'idle';
       let cancelEndFollowFrame: (() => void) | null = null;
       let scheduledAxis: ScrollAxis | null = null;
-      let readerIntent = false;
+      let readerIntentUntil = 0;
       let lastFollowLayout: { axis: ScrollAxis; viewport: number; extent: number } | null = null;
       const ownerWindow = target.ownerDocument.defaultView;
       const configuredEndThreshold = options.endThreshold ?? 1;
@@ -331,8 +332,11 @@ export function createWebScrollSurfaceHost(
             return;
           }
           applyRequest(target, { kind: 'to-end', axis: currentAxis });
-          lastFollowLayout = readFollowLayout(currentAxis);
-          endFollowState = configuredFollowAxis() === currentAxis ? 'following' : 'off';
+          const followAxis = configuredFollowAxis();
+          if (followAxis === currentAxis) {
+            lastFollowLayout = readFollowLayout(currentAxis);
+            endFollowState = 'following';
+          }
           endFollowRequestStatus = 'applied';
           publish();
         };
@@ -345,13 +349,18 @@ export function createWebScrollSurfaceHost(
         }
       };
       const executeRequest = (request: ScrollSurfaceRequest) => {
+        const followAxis = configuredFollowAxis();
         if (request.kind === 'to-end') {
+          if (followAxis && request.axis !== followAxis) {
+            endFollowRequestStatus = 'rejected';
+            publish();
+            return;
+          }
           scheduleEnd(request.axis);
           return;
         }
-        cancelScheduledEnd(false);
+        if (scheduledAxis === request.axis) cancelScheduledEnd(true);
         applyRequest(target, request);
-        const followAxis = configuredFollowAxis();
         if (followAxis === request.axis) {
           endFollowState = isAxisAtEnd(followAxis) ? 'following' : 'paused';
         }
@@ -431,6 +440,7 @@ export function createWebScrollSurfaceHost(
         connection.onFacts(facts);
       };
       const onLayoutChange = () => {
+        if (disposed) return;
         const axis = configuredFollowAxis();
         if (!axis) {
           lastFollowLayout = null;
@@ -459,24 +469,33 @@ export function createWebScrollSurfaceHost(
         endFollowState = configuredFollowAxis() ? 'paused' : 'off';
         publish();
       };
+      const armReaderIntent = () => {
+        const now = ownerWindow?.performance.now() ?? Date.now();
+        readerIntentUntil = now + READER_INTENT_WINDOW_MS;
+      };
+      const consumeReaderIntent = () => {
+        const now = ownerWindow?.performance.now() ?? Date.now();
+        const active = readerIntentUntil >= now;
+        readerIntentUntil = 0;
+        return active;
+      };
       const onWheel = (event: WheelEvent) => {
+        if (event.ctrlKey) return;
         const axis = configuredFollowAxis();
         if (!axis) return;
         const leavingEnd = axis === 'vertical' ? event.deltaY < 0 : event.deltaX < 0;
-        readerIntent = leavingEnd;
-        if (leavingEnd) interruptPendingFollow();
-        queueMicrotask(() => {
-          readerIntent = false;
-        });
+        if (!leavingEnd) return;
+        armReaderIntent();
+        interruptPendingFollow();
       };
       const onPointerDown = () => {
-        readerIntent = true;
+        armReaderIntent();
       };
       const onTouchStart = () => {
-        readerIntent = true;
+        armReaderIntent();
       };
       const onReaderIntentEnd = () => {
-        readerIntent = false;
+        readerIntentUntil = 0;
       };
       const onKeyDown = (event: KeyboardEvent) => {
         const axis = configuredFollowAxis();
@@ -485,22 +504,23 @@ export function createWebScrollSurfaceHost(
           axis === 'vertical'
             ? event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home'
             : event.key === 'ArrowLeft' || event.key === 'PageUp' || event.key === 'Home';
-        readerIntent = leavingEnd;
-        if (leavingEnd) interruptPendingFollow();
+        if (!leavingEnd) return;
+        armReaderIntent();
+        interruptPendingFollow();
       };
       const onScroll = () => {
         scrolling = true;
+        const readerIntent = consumeReaderIntent();
         const axis = configuredFollowAxis();
         if (axis) {
           const atEnd = isAxisAtEnd(axis);
           if (atEnd && !cancelEndFollowFrame) {
             endFollowState = 'following';
-          } else if (!atEnd && (readerIntent || !cancelEndFollowFrame)) {
+          } else if (!atEnd && readerIntent) {
             cancelScheduledEnd(true);
             endFollowState = 'paused';
           }
         }
-        readerIntent = false;
         publish();
         cancelScrollEndTimer?.();
         const timer = setTimeout(() => {
@@ -524,6 +544,7 @@ export function createWebScrollSurfaceHost(
       const mutationObserver =
         typeof MutationObserver === 'function'
           ? new MutationObserver((records) => {
+              if (disposed) return;
               if (
                 records.some((record) => record.type === 'childList' && record.target === target)
               ) {
@@ -539,7 +560,7 @@ export function createWebScrollSurfaceHost(
         for (const contentTarget of Array.from(target.children)) {
           resizeObserver?.observe(contentTarget);
         }
-        mutationObserver?.observe(target, { childList: true });
+        mutationObserver?.observe(target, { childList: true, subtree: true });
         for (const control of connection.composedChrome?.controls ?? []) {
           if (!isWebControl(control)) continue;
           resizeObserver?.observe(control.trackTarget);
@@ -596,6 +617,7 @@ export function createWebScrollSurfaceHost(
         dispose() {
           if (disposed) return;
           disposed = true;
+          readerIntentUntil = 0;
           cancelScheduledEnd(false);
           cancelScrollEndTimer?.();
           target.removeEventListener('scroll', onScroll);

@@ -44,8 +44,29 @@ const probeSource = `
   import { asScrollSurface } from './packages/hooks/src/index.ts';
   import { AdaptToWebComponent } from './packages/adapters/web-component/src/index.ts';
 
-  globalThis.runScrollEndFollowProbe = async () => {
-    let surface;
+  let surface;
+  let viewport;
+  let focusOwner;
+  const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  const appendRows = (count) => {
+    for (let index = 0; index < count; index += 1) {
+      const row = document.createElement('div');
+      row.textContent = 'Log row ' + (viewport.children.length + 1);
+      row.style.height = '24px';
+      viewport.append(row);
+    }
+  };
+  const read = () => ({
+    maximum: viewport.scrollHeight - viewport.clientHeight,
+    top: viewport.scrollTop,
+    followState: surface.endFollow.state.get(),
+    requestStatus: surface.endFollow.requestStatus.get(),
+    atEnd: surface.vertical.atEnd.get(),
+    focusPreserved: document.activeElement === focusOwner,
+    scrollBehavior: viewport.style.scrollBehavior,
+  });
+
+  globalThis.setupScrollEndFollowProbe = async () => {
     const proto = definePrototype({
       name: 'scroll-end-follow-browser-probe',
       setup() {
@@ -66,69 +87,32 @@ const probeSource = `
       customElements.define('scroll-end-follow-browser-probe', Ctor);
     }
 
-    const focusOwner = document.createElement('button');
+    focusOwner = document.createElement('button');
     focusOwner.textContent = 'Stable focus owner';
-    const viewport = document.createElement('scroll-end-follow-browser-probe');
+    viewport = document.createElement('scroll-end-follow-browser-probe');
     viewport.style.display = 'block';
     viewport.style.width = '240px';
     viewport.style.height = '120px';
     viewport.style.overflow = 'auto';
-    const appendRows = (count) => {
-      for (let index = 0; index < count; index += 1) {
-        const row = document.createElement('div');
-        row.textContent = 'Log row ' + (viewport.children.length + 1);
-        row.style.height = '24px';
-        viewport.append(row);
-      }
-    };
-    const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
     appendRows(20);
     document.body.replaceChildren(focusOwner, viewport);
     focusOwner.focus();
     await frame();
     await frame();
-
-    const initialMaximum = viewport.scrollHeight - viewport.clientHeight;
-    const initialTop = viewport.scrollTop;
-    viewport.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -80 }));
-    viewport.scrollTop = Math.max(0, initialTop - 96);
-    viewport.dispatchEvent(new Event('scroll'));
-    await frame();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    const awayTop = viewport.scrollTop;
-
-    appendRows(8);
+    return read();
+  };
+  globalThis.readScrollEndFollowProbe = read;
+  globalThis.appendScrollEndFollowRows = async (count) => {
+    appendRows(count);
     await frame();
     await frame();
-    const afterAwayAppend = viewport.scrollTop;
-
+    return read();
+  };
+  globalThis.jumpScrollEndFollowToEnd = async () => {
     surface.request({ kind: 'to-end', axis: 'vertical' });
     await frame();
     await frame();
-    const resumedMaximum = viewport.scrollHeight - viewport.clientHeight;
-    const resumedTop = viewport.scrollTop;
-
-    appendRows(12);
-    await frame();
-    await frame();
-    const streamedMaximum = viewport.scrollHeight - viewport.clientHeight;
-    const streamedTop = viewport.scrollTop;
-
-    return {
-      initialMaximum,
-      initialTop,
-      awayTop,
-      afterAwayAppend,
-      resumedMaximum,
-      resumedTop,
-      streamedMaximum,
-      streamedTop,
-      followState: surface.endFollow.state.get(),
-      requestStatus: surface.endFollow.requestStatus.get(),
-      atEnd: surface.vertical.atEnd.get(),
-      focusPreserved: document.activeElement === focusOwner,
-      scrollBehavior: viewport.style.scrollBehavior,
-    };
+    return read();
   };
 `;
 
@@ -175,26 +159,42 @@ afterAll(async () => {
 });
 
 describe('Scroll end-follow / real Chromium', () => {
-  it('follows rapid appends only at end and resumes explicitly without moving focus', async () => {
+  it('follows rapid appends only at end and resumes after trusted reader input', async () => {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
     await page.waitForFunction(
-      () => typeof (globalThis as any).runScrollEndFollowProbe === 'function'
+      () => typeof (globalThis as any).setupScrollEndFollowProbe === 'function'
     );
-    const result = await page.evaluate(() => (globalThis as any).runScrollEndFollowProbe());
+    const initial = await page.evaluate(() => (globalThis as any).setupScrollEndFollowProbe());
 
-    expect(result.initialMaximum).toBeGreaterThan(0);
-    expect(result.initialTop).toBe(result.initialMaximum);
-    expect(result.awayTop).toBeLessThan(result.initialTop);
-    expect(result.afterAwayAppend).toBe(result.awayTop);
-    expect(result.resumedTop).toBe(result.resumedMaximum);
-    expect(result.streamedTop).toBe(result.streamedMaximum);
-    expect(result.followState).toBe('following');
-    expect(result.requestStatus).toBe('applied');
-    expect(result.atEnd).toBe(true);
-    expect(result.focusPreserved).toBe(true);
-    expect(result.scrollBehavior).not.toBe('smooth');
+    expect(initial.maximum).toBeGreaterThan(0);
+    expect(initial.top).toBe(initial.maximum);
+    const viewport = page.locator('scroll-end-follow-browser-probe');
+    await viewport.hover();
+    await page.mouse.wheel(0, -96);
+    await page.waitForFunction(() => {
+      const target = document.querySelector<HTMLElement>('scroll-end-follow-browser-probe');
+      return !!target && target.scrollTop < target.scrollHeight - target.clientHeight;
+    });
+    const away = await page.evaluate(() => (globalThis as any).readScrollEndFollowProbe());
+
+    expect(away.top).toBeLessThan(initial.top);
+    expect(away.followState).toBe('paused');
+    const afterAwayAppend = await page.evaluate(() =>
+      (globalThis as any).appendScrollEndFollowRows(8)
+    );
+    expect(afterAwayAppend.top).toBe(away.top);
+
+    const resumed = await page.evaluate(() => (globalThis as any).jumpScrollEndFollowToEnd());
+    expect(resumed.top).toBe(resumed.maximum);
+    const streamed = await page.evaluate(() => (globalThis as any).appendScrollEndFollowRows(12));
+    expect(streamed.top).toBe(streamed.maximum);
+    expect(streamed.followState).toBe('following');
+    expect(streamed.requestStatus).toBe('applied');
+    expect(streamed.atEnd).toBe(true);
+    expect(streamed.focusPreserved).toBe(true);
+    expect(streamed.scrollBehavior).not.toBe('smooth');
     await context.close();
   }, 120_000);
 });

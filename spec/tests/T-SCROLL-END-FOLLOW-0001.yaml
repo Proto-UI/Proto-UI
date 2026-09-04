@@ -59,7 +59,7 @@ cases:
     expectation: shared-portable-contract-and-host-behavior-across-four-web-adapters
 implementations:
   - id: scroll-end-follow-host-transitions
-    kind: module-test
+    kind: adapter-test
     status: passing
     path: packages/modules/scroll/test/end-follow.test.ts
     required: true
@@ -72,7 +72,18 @@ implementations:
       - T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
       - T-SCROLL-END-FOLLOW-0001-CASE-A11Y
     notes:
-      - Fails before the end-follow implementation and passes with layout scheduling, end movement, follow facts, pause/resume, and cleanup preconditions enforced.
+      - Fails before the end-follow implementation and passes with host-local layout scheduling, nested growth, axis isolation, end movement, follow facts, pause/resume, and exact callback cleanup enforced.
+  - id: scroll-end-follow-module-fake-host
+    kind: module-test
+    status: passing
+    path: packages/modules/scroll/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-END-FOLLOW-0001-CASE-POLICY
+      - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
+      - T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
+    notes:
+      - A deterministic fake Host Capability proves portable fact/request routing, no-host rejection, replacement disposal, and stale-epoch fact suppression.
   - id: scroll-end-follow-web-adapter-journey
     kind: adapter-test
     status: passing
@@ -92,7 +103,7 @@ implementations:
       - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
       - T-SCROLL-END-FOLLOW-0001-CASE-A11Y
     notes:
-      - A self-hosted source bundle runs the actual Web Component adapter in Chromium and verifies streaming append, pause, explicit resume, focus stability, and direct motion.
+      - A self-hosted source bundle runs the actual Web Component adapter in Chromium and uses trusted Playwright wheel input to verify pause, streaming append, explicit resume, focus stability, and direct motion.
 verifies:
   contracts:
     - C-SCROLL-END-FOLLOW-0001

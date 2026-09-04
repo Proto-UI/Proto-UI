@@ -65,6 +65,8 @@ function attachEndFollow(target: HTMLElement, snapshots: ScrollSurfaceSnapshot[]
 afterEach(() => {
   document.body.replaceChildren();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe('module-scroll: end-follow host contract', () => {
@@ -287,6 +289,161 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
+  it('publishes unclassified scroll geometry without pausing the follow lease', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    target.scrollTop = 200;
+    target.dispatchEvent(new Event('scroll'));
+    expect(snapshots.at(-1)?.vertical.atEnd).toBe(false);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    lease.dispose();
+  });
+
+  it('does not classify control-wheel zoom as reader departure', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    expect(frames.pending()).toBe(1);
+    const zoom = new WheelEvent('wheel', { bubbles: true, deltaY: -40 });
+    Object.defineProperty(zoom, 'ctrlKey', { configurable: true, value: true });
+    expect(zoom.ctrlKey).toBe(true);
+    target.dispatchEvent(zoom);
+
+    expect(frames.pending()).toBe(1);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('pending');
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    lease.dispose();
+  });
+
+  it('keeps vertical pending follow while applying an unrelated horizontal request', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 300,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'both',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    frames.runAll();
+
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    lease.request({ kind: 'by', axis: 'horizontal', delta: 20 });
+
+    expect(target.scrollLeft).toBe(20);
+    expect(frames.pending()).toBe(1);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('pending');
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+    lease.dispose();
+  });
+
+  it('rejects nonmatching to-end without disabling the configured follow axis', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 300,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'both',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    frames.runAll();
+
+    lease.request({ kind: 'to-end', axis: 'horizontal' });
+    expect(frames.pending()).toBe(0);
+    expect(snapshots.at(-1)?.endFollow).toEqual({
+      state: 'following',
+      requestStatus: 'rejected',
+    });
+
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+    lease.dispose();
+  });
+
+  it('observes nested append growth beneath a fixed direct wrapper', async () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const wrapper = document.createElement('div');
+    target.append(wrapper);
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    updateMetrics({ scrollHeight: 500 });
+    wrapper.append(document.createElement('div'));
+    await Promise.resolve();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    lease.dispose();
+  });
+
   it('reports an explicit to-end request pending then applied and resumes following', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');
@@ -377,5 +534,72 @@ describe('module-scroll: end-follow host contract', () => {
 
     expect(target.scrollTop).toBe(0);
     expect(snapshots).toHaveLength(reportCount);
+  });
+
+  it('does not revive observers timers or requests from a disposed lease', () => {
+    vi.useFakeTimers();
+    const frames = installFrameHarness();
+    let resizeCallback: ResizeObserverCallback | undefined;
+    let mutationCallback: MutationCallback | undefined;
+    let resizeObserveCount = 0;
+    let mutationObserveCount = 0;
+    class RecordingResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        resizeCallback = callback;
+      }
+      observe() {
+        resizeObserveCount += 1;
+      }
+      disconnect() {}
+    }
+    class RecordingMutationObserver {
+      constructor(callback: MutationCallback) {
+        mutationCallback = callback;
+      }
+      observe() {
+        mutationObserveCount += 1;
+      }
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', RecordingResizeObserver);
+    vi.stubGlobal('MutationObserver', RecordingMutationObserver);
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    const lateFrame = frames.peek();
+    target.dispatchEvent(new Event('scroll'));
+    const reportCount = snapshots.length;
+
+    lease.dispose();
+    const resizeObserveAfterDispose = resizeObserveCount;
+    const mutationObserveAfterDispose = mutationObserveCount;
+    resizeCallback?.([], {} as ResizeObserver);
+    const emptyNodes = document.createDocumentFragment().childNodes;
+    const mutationRecord: MutationRecord = {
+      type: 'childList',
+      target,
+      addedNodes: emptyNodes,
+      removedNodes: emptyNodes,
+      previousSibling: null,
+      nextSibling: null,
+      attributeName: null,
+      attributeNamespace: null,
+      oldValue: null,
+    };
+    mutationCallback?.([mutationRecord], {} as MutationObserver);
+    vi.runAllTimers();
+    lateFrame?.(performance.now());
+
+    expect(resizeObserveCount).toBe(resizeObserveAfterDispose);
+    expect(mutationObserveCount).toBe(mutationObserveAfterDispose);
+    expect(snapshots).toHaveLength(reportCount);
+    expect(target.scrollTop).toBe(0);
   });
 });

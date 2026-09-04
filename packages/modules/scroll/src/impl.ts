@@ -206,7 +206,13 @@ export class ScrollModuleImpl extends ModuleBase {
       request.kind === 'to' || request.kind === 'control-drag'
         ? { ...request, position: clampRatio(request.position) }
         : request;
-    this.lease?.request(normalized);
+    if (!this.lease) {
+      if (normalized.kind === 'to-end') {
+        this.set(this.endFollowRequestStatusOwned, 'rejected');
+      }
+      return;
+    }
+    this.lease.request(normalized);
   }
 
   getConfig(): ScrollSurfaceConfig {
