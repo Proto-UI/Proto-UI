@@ -361,6 +361,12 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/checkbox',
                 },
                 {
+                  label: 'Scroll Area',
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/shadcn/scroll-area',
+                  badge: inProgressBadge,
+                },
+                {
                   label: 'Dialog',
                   translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
                   slug: 'ui-libraries/shadcn/dialog',

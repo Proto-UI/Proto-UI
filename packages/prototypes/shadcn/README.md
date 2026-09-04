@@ -32,6 +32,12 @@ Prefer anatomy-family subpaths so only the selected Shadcn family and its corres
 ```ts
 import { shadcnButton } from '@proto.ui/prototypes-shadcn/button';
 import { shadcnSelectRoot, shadcnSelectTrigger } from '@proto.ui/prototypes-shadcn/select';
+import {
+  shadcnScrollAreaRoot,
+  shadcnScrollAreaViewport,
+  shadcnScrollAreaScrollbar,
+  shadcnScrollAreaThumb,
+} from '@proto.ui/prototypes-shadcn/scroll-area';
 ```
 
 The root package export remains available for compatibility. Shadcn families do not depend on sibling Shadcn families.
@@ -46,6 +52,7 @@ The root package export remains available for compatibility. Shadcn families do 
 - `src/hover-card/`
 - `src/index.ts`
 - `src/select/`
+- `src/scroll-area/`
 - `src/switch/`
 - `src/tabs/`
 - `src/toggle/`
@@ -53,6 +60,7 @@ The root package export remains available for compatibility. Shadcn families do 
 ## Related Internal Packages
 
 - `@proto.ui/core`
+- `@proto.ui/hooks`
 - `@proto.ui/prototypes-base`
 
 ## License

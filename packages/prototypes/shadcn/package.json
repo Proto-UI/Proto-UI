@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@proto.ui/core": "workspace:*",
+    "@proto.ui/hooks": "workspace:*",
     "@proto.ui/prototypes-base": "workspace:*"
   },
   "devDependencies": {
@@ -87,6 +88,11 @@
       "types": "./dist/toggle/index.d.ts",
       "import": "./dist/toggle/index.js",
       "default": "./dist/toggle/index.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/scroll-area/index.d.ts",
+      "import": "./dist/scroll-area/index.js",
+      "default": "./dist/scroll-area/index.js"
     }
   },
   "description": "shadcn-style Proto UI prototype library for adapter-driven components.",

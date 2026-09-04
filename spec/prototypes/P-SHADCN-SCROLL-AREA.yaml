@@ -1,0 +1,92 @@
+id: P-SHADCN-SCROLL-AREA
+type: prototype
+title: shadcn Scroll Area Root preserves the host-owned Base scrolling domain
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  shadcn Scroll Area is an unofficial Proto UI-maintained projection whose Root, Viewport, Scrollbar, and Thumb preserve the Base host-owned scrolling domain while adding only the current clipped frame and composed chrome presentation.
+
+
+statement:
+  en: >-
+    Base owns the logical scroll surface, normalized facts and requests, projection negotiation, and bounded control leases. The shadcn family adds Root, Viewport, oriented track, and Thumb presentation without creating a scrolling engine or exposing host-specific scrollbar APIs.
+
+
+  zh-CN: >-
+    logical scroll surface、normalized facts/requests、projection negotiation 与 bounded control leases 由 Base 所有。shadcn family 只增加 Root、Viewport、定向 track 与 Thumb 呈现，不创建 scrolling engine， 也不暴露 host-specific scrollbar APIs。
+
+
+criteria:
+  - id: P-SHADCN-SCROLL-AREA-UPSTREAM-IDENTITY
+    text:
+      en: >-
+        The comparison baseline is shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc, path apps/v4/registry/new-york-v4/ui/scroll-area.tsx. The projection is unofficial and claims neither upstream ownership nor endorsement.
+
+
+      zh-CN: >-
+        comparison baseline 固定为 shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc 的 apps/v4/registry/new-york-v4/ui/scroll-area.tsx；该投射为非官方实现，不主张 upstream ownership 或 endorsement。
+
+
+  - id: P-SHADCN-SCROLL-AREA-BASE-INHERITANCE
+    text:
+      en: Root must inherit P-BASE-SCROLL-AREA through asScrollAreaRoot() and must not replace or duplicate Base behavior.
+      zh-CN: Root 必须通过 asScrollAreaRoot() 继承 P-BASE-SCROLL-AREA，且不得替换或重复 Base behavior。
+  - id: P-SHADCN-SCROLL-AREA-DIRECT-ENTRY
+    text:
+      en: The direct Root entry is shadcn-scroll-area-root and this layer provides no authored asHook.
+      zh-CN: Root direct entry 为 shadcn-scroll-area-root，且本层不提供 authored asHook。
+  - id: P-SHADCN-SCROLL-AREA-PUBLIC-SURFACE
+    text:
+      en: >-
+        Root, Viewport, Scrollbar, and Thumb must be exported from @proto.ui/prototypes-shadcn, its ./scroll-area family subpath, and the shadcn-scroll-area proto-ui add registry entry. No host-specific scrollbar size, DOM, event, type, direction, or position API may be added.
+
+
+      zh-CN: >-
+        Root、Viewport、Scrollbar 与 Thumb 必须从 @proto.ui/prototypes-shadcn、其 ./scroll-area family subpath 与 shadcn-scroll-area proto-ui add registry entry 导出；不得增加 host-specific scrollbar size、DOM、event、type、direction 或 position API。
+
+
+  - id: P-SHADCN-SCROLL-AREA-CURRENT-VISUAL-SURFACE
+    text:
+      en: Root must project relative overflow-hidden and must not own consumer dimensions.
+      zh-CN: Root 必须投射 relative overflow-hidden，且不得拥有 consumer dimensions。
+  - id: P-SHADCN-SCROLL-AREA-OWNERSHIP-BOUNDARY
+    text:
+      en: >-
+        The family must add no second Scroll or Move state, scrolling engine, virtualizer, carousel, list protocol, raw host escape, or required projection. Wheel, touch, keyboard, physics, inertia, and overscroll remain host-owned.
+
+
+      zh-CN: >-
+        该 family 不得增加第二份 Scroll/Move state、scrolling engine、virtualizer、carousel、list protocol、 raw host escape 或 required projection。wheel、touch、keyboard、physics、inertia 与 overscroll 继续由 host 所有。
+
+
+  - id: P-SHADCN-SCROLL-AREA-COMPATIBILITY-SUBSET
+    text:
+      en: >-
+        The entities claim only implemented and tested Base inheritance and presentation. The pinned Web DOM recipe remains comparison evidence rather than a portable DOM guarantee.
+
+
+      zh-CN: >-
+        各实体只声明已实现并测试的 Base inheritance 与呈现；固定 Web DOM recipe 仅为 comparison evidence， 不构成 portable DOM guarantee。
+
+
+sources:
+  - path: internal/records/2026-09-05-shadcn-scroll-area-provenance.zh-CN.md
+  - path: packages/prototypes/shadcn/src/scroll-area/root.proto.ts
+  - path: packages/prototypes/shadcn/src/scroll-area/types.ts
+  - path: packages/prototypes/shadcn/test/scroll-area.test.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/scroll-area.tsx
+    label: shadcn/ui v4 new-york Scroll Area pinned comparison baseline
+inherits:
+  prototypes:
+    - id: P-BASE-SCROLL-AREA
+dependsOn:
+  contracts:
+    [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-SCROLL-PROJECTION-0001]
+verifies:
+  tests: [T-SHADCN-SCROLL-AREA-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the draft shadcn Scroll Area family and host-owned projection boundary.
+tags: [prototype, shadcn, scroll-area, upstream-derived, compatibility, visual, delta]

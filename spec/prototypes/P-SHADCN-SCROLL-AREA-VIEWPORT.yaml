@@ -1,0 +1,79 @@
+id: P-SHADCN-SCROLL-AREA-VIEWPORT
+type: prototype
+title: shadcn Scroll Area Viewport prefers composed chrome and preserves host fallback
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  shadcn Scroll Area Viewport inherits the Base host-owned surface, adds full-size rounded presentation, and expresses composed chrome as a fallible design-language preference.
+
+
+statement:
+  en: >-
+    Viewport retains Base normalized facts, requests, focus participation, and host-owned engine. It asks for composed chrome so authored tracks can render, but capability resolution and fallback remain owned by the adapter and Scroll host.
+
+
+  zh-CN: >-
+    Viewport 保留 Base normalized facts、requests、focus participation 与 host-owned engine。它请求 composed chrome 以渲染 authored tracks，但 capability resolution 与 fallback 继续由 adapter 和 Scroll host 所有。
+
+
+criteria:
+  - id: P-SHADCN-SCROLL-AREA-VIEWPORT-BASE-INHERITANCE
+    text:
+      en: Viewport must inherit P-BASE-SCROLL-AREA-VIEWPORT through asScrollAreaViewport() and must not duplicate scroll or focus facts.
+      zh-CN: Viewport 必须通过 asScrollAreaViewport() 继承 P-BASE-SCROLL-AREA-VIEWPORT，且不得复制 scroll 或 focus facts。
+  - id: P-SHADCN-SCROLL-AREA-VIEWPORT-DIRECT-ENTRY
+    text:
+      en: The direct Viewport entry is shadcn-scroll-area-viewport and this layer provides no authored asHook.
+      zh-CN: Viewport direct entry 为 shadcn-scroll-area-viewport，且本层不提供 authored asHook。
+  - id: P-SHADCN-SCROLL-AREA-VIEWPORT-CURRENT-VISUAL-SURFACE
+    text:
+      en: Viewport must project h-full w-full rounded-md transition-[color,box-shadow] outline-none while consumer layout owns Root dimensions.
+      zh-CN: Viewport 必须投射 h-full w-full rounded-md transition-[color,box-shadow] outline-none，而 Root dimensions 由 consumer layout 所有。
+  - id: P-SHADCN-SCROLL-AREA-VIEWPORT-FOCUS-FEEDBACK
+    text:
+      en: >-
+        Inherited focusVisible must project ring-3 ring-ring/50 outline-1 outline-ring without installing a second focus domain or changing Viewport geometry.
+
+
+      zh-CN: >-
+        inherited focusVisible 必须投射 ring-3 ring-ring/50 outline-1 outline-ring，且不得安装 第二个 focus domain 或改变 Viewport geometry。
+
+
+    references:
+      prototypes:
+        - id: P-BASE-SCROLL-AREA-VIEWPORT
+          anchors:
+            - P-BASE-SCROLL-AREA-VIEWPORT-KEYBOARD-FOCUS
+            - P-BASE-SCROLL-AREA-VIEWPORT-NAV-PARTICIPATION
+    dependsOn:
+      contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  - id: P-SHADCN-SCROLL-AREA-VIEWPORT-COMPOSED-PREFERENCE
+    text:
+      en: >-
+        Viewport must express the design-language preference through privileged asScrollSurface().configure({ projection: 'composed' }). It must not set requireProjection. A host without composed support may fall back to system under D-SCROLL-PROJECTION-0001-D.
+
+
+      zh-CN: >-
+        Viewport 必须通过 privileged asScrollSurface().configure({ projection: 'composed' }) 表达 design-language preference，且不得设置 requireProjection。不支持 composed 的 host 可以依 D-SCROLL-PROJECTION-0001-D fallback 到 system。
+
+
+    dependsOn:
+      decisions: [D-SCROLL-PROJECTION-0001]
+sources:
+  - path: packages/prototypes/shadcn/src/scroll-area/viewport.proto.ts
+  - path: packages/prototypes/shadcn/test/scroll-area.test.ts
+inherits:
+  prototypes:
+    - id: P-BASE-SCROLL-AREA-VIEWPORT
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-AS-SCROLL-SURFACE-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-SCROLL-PROJECTION-0001]
+relates:
+  prototypes: [P-SHADCN-SCROLL-AREA]
+verifies:
+  tests: [T-SHADCN-SCROLL-AREA-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced full-size Viewport presentation and a fallible composed-chrome preference.
+tags: [prototype, shadcn, scroll-area, viewport, composed-projection, fallback, visual]

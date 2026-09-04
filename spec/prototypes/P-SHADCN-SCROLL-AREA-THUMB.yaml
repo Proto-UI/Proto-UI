@@ -1,0 +1,44 @@
+id: P-SHADCN-SCROLL-AREA-THUMB
+type: prototype
+title: shadcn Scroll Area Thumb projects passive host-driven feedback
+status: draft
+since: 0.3.0-alpha.0
+summary: shadcn Scroll Area Thumb inherits Base passive geometry and Move hit routing and adds the current rounded fill.
+statement:
+  en: Thumb remains a passive, non-focusable, roleless host-projected subregion and adds only its flexible rounded surface.
+  zh-CN: Thumb 继续作为 passive、不可聚焦、roleless 的 host-projected subregion，仅增加 flexible rounded surface。
+criteria:
+  - id: P-SHADCN-SCROLL-AREA-THUMB-BASE-INHERITANCE
+    text:
+      en: Thumb must inherit P-BASE-SCROLL-AREA-THUMB through asScrollAreaThumb() and must not own scroll or Move state.
+      zh-CN: Thumb 必须通过 asScrollAreaThumb() 继承 P-BASE-SCROLL-AREA-THUMB，且不得拥有 scroll 或 Move state。
+  - id: P-SHADCN-SCROLL-AREA-THUMB-DIRECT-ENTRY
+    text:
+      en: The direct Thumb entry is shadcn-scroll-area-thumb and this layer provides no authored asHook.
+      zh-CN: Thumb direct entry 为 shadcn-scroll-area-thumb，且本层不提供 authored asHook。
+  - id: P-SHADCN-SCROLL-AREA-THUMB-CURRENT-VISUAL-SURFACE
+    text:
+      en: Thumb must project relative flex-1 rounded-full bg-border while host facts determine its size and offset.
+      zh-CN: Thumb 必须投射 relative flex-1 rounded-full bg-border，而 size 与 offset 由 host facts 决定。
+  - id: P-SHADCN-SCROLL-AREA-THUMB-PASSIVE-BOUNDARY
+    text:
+      en: Thumb must remain roleless and outside sequential focus; movement requests must retain Base pointer guards and teardown.
+      zh-CN: Thumb 必须保持 roleless 且不进入 sequential focus；movement requests 必须保留 Base pointer guards 与 teardown。
+sources:
+  - path: packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts
+  - path: packages/prototypes/shadcn/test/scroll-area.test.ts
+inherits:
+  prototypes:
+    - id: P-BASE-SCROLL-AREA-THUMB
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-SCROLL-PROJECTION-0001]
+relates:
+  prototypes: [P-SHADCN-SCROLL-AREA]
+verifies:
+  tests: [T-SHADCN-SCROLL-AREA-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the passive rounded shadcn Scroll Area Thumb surface.
+tags: [prototype, shadcn, scroll-area, thumb, passive, visual, delta]

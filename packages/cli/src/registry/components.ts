@@ -353,6 +353,29 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     },
   ]),
 
+  'shadcn-scroll-area': shadcnCompound('shadcn-scroll-area', 'shadcn Scroll Area', [
+    {
+      prototypeImport: 'shadcnScrollAreaRoot',
+      exportBaseName: 'ShadcnScrollAreaRoot',
+      elementName: 'proto-ui-shadcn-scroll-area-root',
+    },
+    {
+      prototypeImport: 'shadcnScrollAreaViewport',
+      exportBaseName: 'ShadcnScrollAreaViewport',
+      elementName: 'proto-ui-shadcn-scroll-area-viewport',
+    },
+    {
+      prototypeImport: 'shadcnScrollAreaScrollbar',
+      exportBaseName: 'ShadcnScrollAreaScrollbar',
+      elementName: 'proto-ui-shadcn-scroll-area-scrollbar',
+    },
+    {
+      prototypeImport: 'shadcnScrollAreaThumb',
+      exportBaseName: 'ShadcnScrollAreaThumb',
+      elementName: 'proto-ui-shadcn-scroll-area-thumb',
+    },
+  ]),
+
   'shadcn-dialog': shadcnCompound(
     'shadcn-dialog',
     'shadcn Dialog',

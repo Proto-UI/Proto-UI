@@ -211,6 +211,39 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('registers the exact shadcn Scroll Area family facade', () => {
+    expect(COMPONENT_REGISTRY['shadcn-scroll-area']).toMatchObject({
+      packageName: '@proto.ui/prototypes-shadcn',
+      importPath: '@proto.ui/prototypes-shadcn/scroll-area',
+      stylePreset: 'shadcn',
+      items: [
+        { prototypeImport: 'shadcnScrollAreaRoot', reactExport: 'ShadcnScrollAreaRoot' },
+        {
+          prototypeImport: 'shadcnScrollAreaViewport',
+          reactExport: 'ShadcnScrollAreaViewport',
+        },
+        {
+          prototypeImport: 'shadcnScrollAreaScrollbar',
+          reactExport: 'ShadcnScrollAreaScrollbar',
+        },
+        { prototypeImport: 'shadcnScrollAreaThumb', reactExport: 'ShadcnScrollAreaThumb' },
+      ],
+    });
+
+    for (const adapter of ['react', 'vue', 'wc'] as const) {
+      const source = renderHostIndex(adapter, ['shadcn-scroll-area']);
+      expect(source).toContain("from '@proto.ui/prototypes-shadcn/scroll-area'");
+      for (const prototypeImport of [
+        'shadcnScrollAreaRoot',
+        'shadcnScrollAreaViewport',
+        'shadcnScrollAreaScrollbar',
+        'shadcnScrollAreaThumb',
+      ]) {
+        expect(source).toContain(prototypeImport);
+      }
+    }
+  });
+
   it('registers the Base Radio Group compound facade', () => {
     expect(COMPONENT_REGISTRY['base-radio-group']).toMatchObject({
       packageName: '@proto.ui/prototypes-base',
