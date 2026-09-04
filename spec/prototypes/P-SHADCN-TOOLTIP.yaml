@@ -1,0 +1,113 @@
+id: P-SHADCN-TOOLTIP
+type: prototype
+title: shadcn Tooltip Root preserves Base ownership and governs the family compatibility boundary
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  shadcn Tooltip is an unofficial Proto UI-maintained projection whose Group, Root, Trigger, and Content preserve the Base Tooltip protocol while adding only governed presentation and a pinned compatibility comparison.
+
+
+statement:
+  en: >-
+    The draft shadcn Tooltip family inherits Base open state, delay and dismissal sequencing, disabled behavior, supplementary-description accessibility, renderer-owned Portal projection, and host positioning. It adds a Group layout surface, Trigger feedback, and compact Content presentation without creating Arrow or Portal prototype identities.
+
+
+  zh-CN: >-
+    draft shadcn Tooltip family 继承 Base 的 open state、delay 与 dismissal sequencing、disabled、 supplementary-description accessibility、renderer-owned Portal projection 与 host positioning。 本层只增加 Group layout surface、Trigger feedback 与紧凑 Content 呈现，不创建 Arrow 或 Portal prototype identities。
+
+
+criteria:
+  - id: P-SHADCN-TOOLTIP-UPSTREAM-IDENTITY
+    text:
+      en: >-
+        The compatibility baseline is shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc, path apps/v4/registry/new-york-v4/ui/tooltip.tsx. The projection is unofficial and claims neither upstream ownership nor endorsement.
+
+
+      zh-CN: >-
+        compatibility baseline 固定为 shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc 的 apps/v4/registry/new-york-v4/ui/tooltip.tsx；该投射为非官方实现，不主张 upstream ownership 或 endorsement。
+
+
+  - id: P-SHADCN-TOOLTIP-BASE-INHERITANCE
+    text:
+      en: Root must inherit P-BASE-TOOLTIP through asTooltipRoot() and must not replace or duplicate Base behavior.
+      zh-CN: Root 必须通过 asTooltipRoot() 继承 P-BASE-TOOLTIP，且不得替换或重复 Base behavior。
+  - id: P-SHADCN-TOOLTIP-DIRECT-ENTRY
+    text:
+      en: The direct Root entry is shadcn-tooltip-root and this layer provides no authored asHook.
+      zh-CN: Root direct entry 为 shadcn-tooltip-root，且本层不提供 authored asHook。
+  - id: P-SHADCN-TOOLTIP-PUBLIC-SURFACE
+    text:
+      en: >-
+        Group, Root, Trigger, and Content must be exported from @proto.ui/prototypes-shadcn, its ./tooltip family subpath, and the shadcn-tooltip proto-ui add registry entry. No Arrow, Portal, provider-only alias, or unsupported upstream prop may be exported.
+
+
+      zh-CN: >-
+        Group、Root、Trigger 与 Content 必须从 @proto.ui/prototypes-shadcn、其 ./tooltip family subpath 与 shadcn-tooltip proto-ui add registry entry 导出；不得导出 Arrow、Portal、provider-only alias 或未支持的 upstream prop。
+
+
+  - id: P-SHADCN-TOOLTIP-OWNERSHIP-BOUNDARY
+    text:
+      en: >-
+        The family must add no second open, delay, dismissal, disabled, accessibility, presence, Portal, or positioning owner. Focusable or task-essential Content remains outside Tooltip.
+
+
+      zh-CN: >-
+        该 family 不得增加第二个 open、delay、dismissal、disabled、accessibility、presence、Portal 或 positioning owner；可聚焦或任务必要的 Content 不属于 Tooltip。
+
+
+  - id: P-SHADCN-TOOLTIP-ARROW-OMISSION
+    text:
+      en: >-
+        Arrow is absent because the governed family has no executable arrow geometry, offset, or collision-feedback channel. Portal remains a renderer-owned Content Overlay projection, not a public prototype part.
+
+
+      zh-CN: >-
+        Arrow 必须缺席，因为受治理 family 尚无可执行的 arrow geometry、offset 或 collision-feedback channel。Portal 继续是 renderer-owned Content Overlay projection，而不是 public prototype part。
+
+
+  - id: P-SHADCN-TOOLTIP-COMPATIBILITY-SUBSET
+    text:
+      en: >-
+        The entities claim only implemented and tested Base inheritance and presentation. Every difference from the pinned baseline remains centralized in the single compatibility question.
+
+
+      zh-CN: >-
+        各实体只声明已实现并测试的 Base inheritance 与呈现；相对固定 baseline 的全部差异都集中在 唯一 compatibility question 中。
+
+
+openQuestions:
+  - id: P-SHADCN-TOOLTIP-Q-UPSTREAM-DIFFERENCES
+    question:
+      en: Which current differences are intentional Proto UI boundaries versus future parity work?
+      zh-CN: 当前差异中哪些是 Proto UI 的有意边界，哪些属于未来 parity work？
+    context:
+      en: >-
+        The pinned TooltipProvider defaults delayDuration to 0ms, while P-BASE-TOOLTIP-GROUP-DELAYS keeps 700/100/300ms Group defaults and explicit Root override semantics. The projection keeps the Base defaults and documents this upstream divergence. Pinned TooltipContent defaults sideOffset to 0, while Base Content defaults to 4; this projection inherits 4. Upstream wraps Content in Portal and renders Arrow unconditionally; Proto UI keeps Portal renderer-owned and omits Arrow under D-TOOLTIP-PROTOTYPE-BOUNDARY-0001. Group inline-flex, Trigger feedback, and the local Content border/popover/shadow/overflow additions are Proto UI presentation deltas.
+
+
+      zh-CN: >-
+        固定 TooltipProvider 的 delayDuration 默认为 0ms，而 P-BASE-TOOLTIP-GROUP-DELAYS 保留 700/100/300ms Group defaults 与显式 Root override semantics；本投射保留 Base defaults 并记录该差异。 固定 TooltipContent 的 sideOffset 默认为 0，Base Content 默认为 4，本投射继承 4。upstream 显式 Portal 包裹 Content 且无条件渲染 Arrow；Proto UI 依 D-TOOLTIP-PROTOTYPE-BOUNDARY-0001 保持 Portal 为 renderer-owned 并省略 Arrow。Group inline-flex、Trigger feedback 与本地 Content 的 border/popover/shadow/overflow 是 Proto UI presentation deltas。
+
+
+    blocks: [shadcn tooltip parity roadmap]
+sources:
+  - path: internal/records/2026-09-05-shadcn-tooltip-provenance.zh-CN.md
+  - path: packages/prototypes/shadcn/src/tooltip/root.proto.ts
+  - path: packages/prototypes/shadcn/src/tooltip/types.ts
+  - path: packages/prototypes/shadcn/test/tooltip.test.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/tooltip.tsx
+    label: shadcn/ui v4 new-york Tooltip pinned compatibility baseline
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP
+dependsOn:
+  contracts:
+    [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-TOOLTIP-PROTOTYPE-BOUNDARY-0001]
+verifies:
+  tests: [T-SHADCN-TOOLTIP-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the draft shadcn Tooltip family boundary and centralized compatibility differences.
+tags: [prototype, shadcn, tooltip, upstream-derived, compatibility, visual, delta]

@@ -376,6 +376,12 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/hover-card',
                 },
                 {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/shadcn/tooltip',
+                  badge: inProgressBadge,
+                },
+                {
                   label: 'Select',
                   translations: { en: 'Select', 'zh-CN': 'Select' },
                   slug: 'ui-libraries/shadcn/select',

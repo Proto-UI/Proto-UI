@@ -1,0 +1,25 @@
+---
+title: 'Tooltip'
+description: '覆盖在 Base Tooltip family 之上的 shadcn 草案呈现。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+这个 draft family 包含 Group、Root、Trigger 与 Content。open state、controlled ownership、disabled、pointer/focus intent、delay 与 dismissal sequencing、`aria-describedby`、presence、Escape、renderer-owned Portal projection 与 anchored positioning 继续只由 Base Tooltip 持有。shadcn 层仅增加 Group layout、Trigger feedback 与紧凑 Content surface。
+
+比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/tooltip.tsx`。upstream Provider 的 pointer delay 默认为 0ms；Proto UI 有意保留 Base Group 的 700ms open、100ms close 与 300ms skip defaults。upstream Content 的 `sideOffset` 默认为 0，Proto UI 继承 Base 默认值 4。Portal 继续是 renderer projection；当前没有受治理的 arrow geometry channel，因此 Arrow 缺席。
+
+从 `@proto.ui/prototypes-shadcn/tooltip` 导入该 family，或使用 `proto-ui add shadcn-tooltip` 生成 facade。Content 保持 supplementary、不可聚焦且非任务必要；交互式任务内容应使用 Popover 或 non-modal Dialog。
+
+<PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />
+
+## 建议验收路径
+
+1. hover Account，确认 cold Tooltip 约 700ms 后打开；提前离开时不得闪现。
+2. 在 300ms warm window 结束前移动到 Notifications，确认 sibling 立即打开且始终只有一个 active owner。
+3. 用 Tab 聚焦任一 Trigger，确认立即打开、focus ring 可见，且 Trigger 没有 button role。
+4. 确认 Content portal 到 preview frame 外，仍通过 `aria-describedby` 关联，且没有可聚焦 control 或 Arrow。
+5. 按 Escape，确认 Content 关闭且焦点留在 Trigger。
+6. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 entities 仍为 `draft`；本页描述当前 cataloged direction，而不是稳定 compatibility guarantee。

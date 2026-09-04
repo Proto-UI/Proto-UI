@@ -1,0 +1,68 @@
+id: P-SHADCN-TOOLTIP-CONTENT
+type: prototype
+title: shadcn Tooltip Content preserves Base Overlay ownership and adds a compact surface
+status: draft
+since: 0.3.0-alpha.0
+summary: shadcn Tooltip Content inherits the Base supplementary Overlay and adds the current compact popover presentation.
+statement:
+  en: Content remains supplementary, non-focusable, renderer-portaled, anchored, and Root-owned for visibility while adding only its current visual recipe.
+  zh-CN: Content 继续保持 supplementary、不可聚焦、由 renderer portal、anchored 且 visibility 归 Root 所有，仅增加当前 visual recipe。
+criteria:
+  - id: P-SHADCN-TOOLTIP-CONTENT-BASE-INHERITANCE
+    text:
+      en: >-
+        Content must inherit P-BASE-TOOLTIP-CONTENT through asTooltipContent() and retain role tooltip, stable identity, Root-derived presence, Escape bridging, hoverable close delay, fixed positioning, and renderer-owned Portal behavior.
+
+
+      zh-CN: >-
+        Content 必须通过 asTooltipContent() 继承 P-BASE-TOOLTIP-CONTENT，并保留 role tooltip、stable identity、 Root-derived presence、Escape bridge、hoverable close delay、fixed positioning 与 renderer-owned Portal behavior。
+
+
+  - id: P-SHADCN-TOOLTIP-CONTENT-DIRECT-ENTRY
+    text:
+      en: The direct Content entry is shadcn-tooltip-content and this layer provides no authored asHook.
+      zh-CN: Content direct entry 为 shadcn-tooltip-content，且本层不提供 authored asHook。
+  - id: P-SHADCN-TOOLTIP-CONTENT-CURRENT-VISUAL-SURFACE
+    text:
+      en: >-
+        Content must project z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md and must not move that presentation to Root.
+
+
+      zh-CN: >-
+        Content 必须投射 z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md，且不得把该呈现移动到 Root。
+
+
+  - id: P-SHADCN-TOOLTIP-CONTENT-SUPPLEMENTARY-BOUNDARY
+    text:
+      en: >-
+        Content must remain non-focusable and non-essential with no interactive descendants in the official demo. It inherits Base sideOffset 4, renderer-owned Portal projection, and Arrow omission.
+
+
+      zh-CN: >-
+        Content 必须保持不可聚焦且非任务必要，official demo 不得包含 interactive descendants。 它继承 Base sideOffset 4、renderer-owned Portal projection 与 Arrow omission。
+
+
+sources:
+  - path: packages/prototypes/shadcn/src/tooltip/content.proto.ts
+  - path: packages/prototypes/shadcn/test/tooltip.test.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP-CONTENT
+dependsOn:
+  contracts:
+    [
+      C-AS-HOOK-0001,
+      C-RULE-INTENT-FEEDBACK-STYLE-0001,
+      C-AS-OVERLAY-0001,
+      C-ANCHORED-POSITIONING-0001,
+    ]
+  decisions: [D-TOOLTIP-PROTOTYPE-BOUNDARY-0001]
+relates:
+  prototypes: [P-SHADCN-TOOLTIP]
+verifies:
+  tests: [T-SHADCN-TOOLTIP-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the Base-portaled shadcn Tooltip Content presentation.
+tags: [prototype, shadcn, tooltip, content, overlay, visual, delta]

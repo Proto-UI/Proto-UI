@@ -1,0 +1,25 @@
+---
+title: 'Tooltip'
+description: 'Draft shadcn presentation over the Base Tooltip family.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+This draft family contains Group, Root, Trigger, and Content. Base Tooltip remains the sole owner of open state, controlled ownership, disabled behavior, pointer and focus intent, delay and dismissal sequencing, `aria-describedby`, presence, Escape handling, renderer-owned Portal projection, and anchored positioning. The shadcn layer adds only Group layout, Trigger feedback, and a compact Content surface.
+
+The comparison baseline is shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`, `apps/v4/registry/new-york-v4/ui/tooltip.tsx`. Its Provider defaults pointer delay to 0ms; Proto UI deliberately keeps the Base Group defaults of 700ms open, 100ms close, and 300ms skip. Its Content defaults `sideOffset` to 0; Proto UI inherits the Base default of 4. Portal remains a renderer projection, and Arrow is absent because no governed arrow geometry channel exists.
+
+Import the family from `@proto.ui/prototypes-shadcn/tooltip`, or generate its facade with `proto-ui add shadcn-tooltip`. Content remains supplementary, non-focusable, and non-essential; interactive task content belongs to Popover or a non-modal Dialog.
+
+<PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />
+
+## Suggested acceptance path
+
+1. Hover Account and confirm the cold Tooltip opens after about 700ms; leave early and confirm no flash appears.
+2. Move to Notifications before the 300ms warm window expires and confirm the sibling opens immediately with one active owner.
+3. Tab to either Trigger and confirm immediate opening, a visible focus ring, and no button role.
+4. Confirm Content is portaled outside the preview frame, remains linked by `aria-describedby`, and contains no focusable control or Arrow.
+5. Press Escape and confirm Content closes while focus remains on Trigger.
+6. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related entities are `draft`; this page describes the current cataloged direction, not a stable compatibility guarantee.
