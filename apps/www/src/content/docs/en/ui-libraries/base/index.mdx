@@ -30,4 +30,8 @@ It does not, at this layer, define persistent selection, checkbox/radio item sem
 
 `textarea` exercises a host-mediated native-control boundary: Root owns one logical multiline editor while its renderer stays contentless, and the adapter selects the physical host target. The current Web profile uses one native textarea across Web Component, React, and Vue. It keeps controlled/uncontrolled ownership stable, normalizes input/change/IME signals, preserves the active editing session, restores unaccepted controlled proposals after composition, and projects properties, focus, and accessibility without claiming form submission, rich text, auto-resize, system editing chrome, or live-region semantics.
 
+## Pre-implementation protocol definitions
+
+[Base Table](/en/ui-libraries/base/table/) has a reviewed draft D/C/T definition for passive two-dimensional structure, spans, and header relationships. It is not part of the released package inventory, CLI, or interactive previews; its module, Base identities, and Adapter evidence remain planned in a separate implementation carrier.
+
 <PrototypeLibraryOverview library="base" locale="en" />

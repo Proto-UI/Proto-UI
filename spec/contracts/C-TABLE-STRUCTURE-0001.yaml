@@ -1,0 +1,165 @@
+id: C-TABLE-STRUCTURE-0001
+type: contract
+title: Table Structure produces a valid two-dimensional header graph
+status: draft
+since: 0.3.0-alpha.0
+summary: Table Structure turns explicit same-domain Table parts, Anatomy order, positive spans, and protocol header keys into a read-only two-dimensional topology and opaque accessibility relationship graph without owning data operations or host materialization.
+statement:
+  zh-CN: >-
+    Table Structure 必须把同一 Base Table anatomy domain 中实际存在的 Caption、ordered Rows、HeaderCells 与 Cells，加上 Maker authored positive spans 和 protocol header keys，投影成只读的二维 topology/header graph。输出包含 caption ref、row/cell coordinates、spans、resolved row/column header refs、validity 与 diagnostics，但不包含 host target/id、App data、selection、focus、event、layout geometry 或 native materialization。无效或动态结构不得触发猜测、补 part 或改写 authored content。
+
+
+  en: >-
+    Table Structure must project the actually present Caption, ordered Rows, HeaderCells, and Cells in one Base Table anatomy domain, together with Maker-authored positive spans and protocol header keys, into a read-only two-dimensional topology and header graph. Its output contains a caption reference, row and cell coordinates, spans, resolved row and column header references, validity, and diagnostics, but no host target or ID, App data, selection, focus, event, layout geometry, or native materialization. Invalid or dynamic structure must not trigger guessing, part synthesis, or authored-content mutation.
+
+
+criteria:
+  - id: C-TABLE-STRUCTURE-0001-DOMAIN
+    text:
+      zh-CN: 每个 Table root 必须建立一个独立 anatomy domain；查询与 header resolution 只能使用最近合法 root 内实际存在的同 family parts，不得跨 nested 或 sibling Table。
+      en: Each Table root must establish an independent anatomy domain; queries and header resolution may use only actually present same-family parts under the nearest valid root and must not cross nested or sibling Tables.
+    dependsOn:
+      contracts:
+        - id: C-ANATOMY-0005
+          anchors: [C-ANATOMY-0005-A, C-ANATOMY-0005-B, C-ANATOMY-0005-C]
+        - id: C-ANATOMY-0008
+          anchors: [C-ANATOMY-0008-B, C-ANATOMY-0008-C]
+  - id: C-TABLE-STRUCTURE-0001-DOMAIN-ISOLATION
+    text:
+      zh-CN: Header resolution 不得观察最近合法 root domain 之外的 parts；当当前 domain 内不存在 matching headerKey 时，必须报告 missing target，即使 sibling 或 nested Table 中存在同名 key，也不得搜索或解析到该 target。
+      en: Header resolution must not observe parts outside the nearest valid root domain; when no matching headerKey exists in the current domain it must report a missing target, and must not search for or resolve an equal key in a sibling or nested Table.
+    dependsOn:
+      contracts:
+        - id: C-ANATOMY-0005
+          anchors: [C-ANATOMY-0005-B, C-ANATOMY-0005-C, C-ANATOMY-0005-D]
+  - id: C-TABLE-STRUCTURE-0001-ANATOMY
+    text:
+      zh-CN: 有效 authoring 必须恰有一个 root、零或一个 caption、至少一个 row、至少一个 headerCell 与至少一个 cell；root 可包含 caption/row，row 可包含 headerCell/cell，且每个 row 至少包含一个 cell role part。
+      en: Valid authoring has exactly one root, zero or one caption, at least one row, at least one headerCell, and at least one cell; root may contain caption and row parts, row may contain headerCell and cell parts, and every row contains at least one cell-role part.
+    dependsOn:
+      contracts:
+        - id: C-ANATOMY-0002
+          anchors: [C-ANATOMY-0002-E]
+        - id: C-ANATOMY-0004
+          anchors: [C-ANATOMY-0004-B, C-ANATOMY-0004-C]
+        - id: C-ANATOMY-0010
+          anchors: [C-ANATOMY-0010-A, C-ANATOMY-0010-B]
+  - id: C-TABLE-STRUCTURE-0001-NO-ROW-GROUP-IDENTITY
+    text:
+      zh-CN: Portable anatomy roles 只能是 root、caption、row、headerCell 与 cell；Head、Body、RowGroup、Web thead/tbody 或等价 native wrapper 不得成为 required part、portable identity 或 topology input。
+      en: Portable anatomy roles are limited to root, caption, row, headerCell, and cell; Head, Body, RowGroup, Web thead or tbody, and equivalent native wrappers must not become required parts, portable identities, or topology inputs.
+    dependsOn:
+      decisions:
+        - id: D-BASE-TABLE-STRUCTURE-0001
+          anchors: [D-BASE-TABLE-STRUCTURE-0001-NO-HEAD-BODY]
+  - id: C-TABLE-STRUCTURE-0001-CONTENT
+    text:
+      zh-CN: Caption、HeaderCell 与 Cell 的 authored content 必须通过各 part 的单一 anonymous Template slot 保持 App Maker-owned；Table Structure 不解析、复制或把 content 当作 data record。
+      en: Authored Caption, HeaderCell, and Cell content remains App Maker-owned through each part's single anonymous Template slot; Table Structure does not parse, copy, or treat content as a data record.
+    dependsOn:
+      contracts:
+        - id: C-TEMPLATE-0005
+          anchors: [C-TEMPLATE-0005-B, C-TEMPLATE-0005-C, C-TEMPLATE-0005-D]
+  - id: C-TABLE-STRUCTURE-0001-ORDER
+    text:
+      zh-CN: Row 顺序与每个 Row 内 HeaderCell/Cell 顺序必须来自当前 host-observable Anatomy order；Topology 不得使用 Collection、App data order、host node access 或 prototype name 推断顺序。
+      en: Row order and HeaderCell or Cell order within each Row must come from current host-observable Anatomy order; topology must not derive order from Collection, App data order, host-node access, or prototype names.
+    dependsOn:
+      contracts:
+        - id: C-ANATOMY-ORDER-0001
+          anchors: [C-ANATOMY-ORDER-0001-B, C-ANATOMY-ORDER-0001-C, C-ANATOMY-ORDER-0001-D]
+  - id: C-TABLE-STRUCTURE-0001-PLACEMENT
+    text:
+      zh-CN: Rows 使用 zero-based logical index；每个 HeaderCell/Cell 按同 Row order 放入第一个能容纳其 rectangle 且未被先前 span 占用的 column。rowSpan/columnSpan 必须是 positive integer，默认 1；rectangle 不得 overlap，也不得越过当前 Row count，column count 取有效占用的最大边界。
+      en: Rows use zero-based logical indices; each HeaderCell or Cell is placed in Row order at the first column whose rectangle fits without intersecting a previously occupied span. rowSpan and columnSpan must be positive integers defaulting to one; rectangles must not overlap or extend beyond the current Row count, and column count is the maximum valid occupied boundary.
+  - id: C-TABLE-STRUCTURE-0001-HEADER-KEYS
+    text:
+      zh-CN: HeaderCell 必须声明 non-empty、same-domain unique protocol headerKey 与 headerKind=column|row；Cell 必须声明 non-empty ordered header-key set，HeaderCell 可以声明 upstream header keys。Keys 只用于 protocol match，不得直接投影为 host id。
+      en: A HeaderCell must declare a non-empty, same-domain-unique protocol headerKey and headerKind=column or row; a Cell must declare a non-empty ordered header-key set, and a HeaderCell may declare upstream header keys. Keys exist only for protocol matching and must not be projected directly as host IDs.
+    dependsOn:
+      decisions:
+        - id: D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
+          anchors:
+            [D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-B, D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-C]
+  - id: C-TABLE-STRUCTURE-0001-HEADER-RELATIONS
+    text:
+      zh-CN: Resolution 必须把每个 key 转换为当前 domain 中唯一 HeaderCell 的 opaque semantic-object ref，并按 target headerKind 形成 ordered rowHeaders/columnHeaders；一个 cell 可关联多个 row/column headers，输入顺序必须保留。
+      en: Resolution must convert each key to the opaque semantic-object reference of the unique HeaderCell in the current domain and form ordered rowHeaders and columnHeaders according to the target headerKind; a cell may relate to multiple row and column headers, and input order must be preserved.
+    dependsOn:
+      contracts:
+        - id: C-A11Y-0001
+          anchors: [C-A11Y-0001-A, C-A11Y-0001-B]
+      decisions:
+        - id: D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
+          anchors:
+            [D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-A, D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-E]
+  - id: C-TABLE-STRUCTURE-0001-DIAGNOSTICS
+    text:
+      zh-CN: Invalid cardinality、empty Row、invalid span、missing/duplicate headerKey、duplicate key reference、missing/ambiguous target 与 out-of-range placement 必须产生 addressable structural diagnostic；实现不得猜 target、生成 fallback id、补 part 或把 invalid snapshot 表述为 valid table projection。
+      en: Invalid cardinality, empty Rows, invalid spans, missing or duplicate headerKeys, duplicate key references, missing or ambiguous targets, and out-of-range placement must produce addressable structural diagnostics; implementations must not guess targets, generate fallback IDs, synthesize parts, or present an invalid snapshot as a valid table projection.
+  - id: C-TABLE-STRUCTURE-0001-CHURN
+    text:
+      zh-CN: Insert、remove 与 reorder 必须从当前 actual parts 重算 topology、coordinates 与 relationships；暂时无效的 runtime structure 可以保持 mounted 并报告 invalid snapshot，但不得重写 authored content/header keys、制造 data mutation 或发出 sorting/selection/pagination signal。
+      en: Insert, removal, and reorder must recompute topology, coordinates, and relationships from current actual parts; temporarily invalid runtime structure may remain mounted and report an invalid snapshot, but it must not rewrite authored content or header keys, invent data mutation, or emit sorting, selection, or pagination signals.
+  - id: C-TABLE-STRUCTURE-0001-A11Y-PROJECTION
+    text:
+      zh-CN: Valid snapshot 必须向通用 A11y path 提供 table/caption/row/column-header/row-header/cell identity、coordinates、spans 与 opaque relationships；Host Adapter 选择 native、translated、degraded 或 diagnostic-only projection。当前任何 Adapter support 在单独编目和测试前都不是本 contract 的 passing evidence。
+      en: A valid snapshot must provide table, caption, row, column-header, row-header, and cell identities, coordinates, spans, and opaque relationships to the generic A11y path; the Host Adapter selects native, translated, degraded, or diagnostic-only projection. No current Adapter support is passing evidence for this contract until separately cataloged and tested.
+    dependsOn:
+      decisions:
+        - id: D-A11Y-SEMANTIC-DOMAIN-0001
+          anchors: [D-A11Y-SEMANTIC-DOMAIN-0001-A, D-A11Y-SEMANTIC-DOMAIN-0001-B]
+        - id: D-BASE-TABLE-STRUCTURE-0001
+          anchors:
+            - D-BASE-TABLE-STRUCTURE-0001-A11Y-PATH
+            - D-BASE-TABLE-STRUCTURE-0001-NO-TABLE-HOST-CAP
+      hostCaps:
+        - id: HC-A11Y-0001
+          anchors: [HC-A11Y-0001-A, HC-A11Y-0001-B]
+  - id: C-TABLE-STRUCTURE-0001-EXCLUSIONS
+    text:
+      zh-CN: 本 contract 不包含 App data model、Collection membership、sorting、row/cell selection、pagination、virtualization、resize/reorder、editing、data fetching、keyboard grid、focus policy、form behavior、layout-table mode、design-language style 或 host materialization guarantee。
+      en: This contract excludes App data models, Collection membership, sorting, row or cell selection, pagination, virtualization, resize or reorder, editing, data fetching, keyboard-grid behavior, focus policy, form behavior, layout-table mode, design-language styling, and host-materialization guarantees.
+    dependsOn:
+      decisions:
+        - id: D-BASE-TABLE-STRUCTURE-0001
+          anchors: [D-BASE-TABLE-STRUCTURE-0001-DATA-TABLE-BOUNDARY]
+sources:
+  - path: spec/decisions/D-BASE-TABLE-STRUCTURE-0001.yaml
+  - path: https://github.com/Proto-UI/Proto-UI/issues/387
+    label: Issue 387 proposal and live research
+  - path: spec/contracts/C-ANATOMY-0001.yaml
+  - path: spec/contracts/C-ANATOMY-ORDER-0001.yaml
+  - path: spec/decisions/D-A11Y-PART-RELATIONSHIP-PROJECTION-0001.yaml
+  - path: https://developer.apple.com/documentation/uikit/uiaccessibilitycontainerdatatable
+    label: UIKit accessibility data table container
+  - path: https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.provider.itableitemprovider
+    label: Windows UI Automation TableItem provider
+  - path: https://w3c.github.io/aria/#table
+    label: WAI-ARIA table and related structural roles
+dependsOn:
+  decisions:
+    - D-BASE-TABLE-STRUCTURE-0001
+    - D-A11Y-SEMANTIC-DOMAIN-0001
+    - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
+  contracts:
+    - C-ANATOMY-0001
+    - C-ANATOMY-0002
+    - C-ANATOMY-0004
+    - C-ANATOMY-0005
+    - C-ANATOMY-0008
+    - C-ANATOMY-0009
+    - C-ANATOMY-0010
+    - C-ANATOMY-ORDER-0001
+    - C-TEMPLATE-0005
+    - C-A11Y-0001
+relates:
+  modules: [M-A11Y-0001]
+  hostCaps: [HC-A11Y-0001]
+verifies:
+  tests: [T-TABLE-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Defined the draft Table Structure domain, deterministic topology, explicit multi-header relationships, structural diagnostics and churn, generic A11y boundary, and Data Table exclusions.
+tags: [table, structure, topology, accessibility, contract]

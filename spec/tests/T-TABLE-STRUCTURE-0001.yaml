@@ -1,0 +1,170 @@
+id: T-TABLE-STRUCTURE-0001
+type: test
+title: Table Structure decision, topology, header graph, and boundary evidence
+status: draft
+since: 0.3.0-alpha.0
+summary: Maps the Base Table admission and structural contract to an executable host-neutral topology probe plus planned module, Base prototype, and Web Adapter conformance paths without claiming current host support.
+cases:
+  - id: T-TABLE-STRUCTURE-0001-CASE-INDEPENDENT-PROTOCOL
+    title: Table Structure carries a two-dimensional header graph beyond Template anatomy
+    covers:
+      - D-BASE-TABLE-STRUCTURE-0001-INDEPENDENT-PROTOCOL
+      - D-BASE-TABLE-STRUCTURE-0001-STRUCTURE-OWNER
+    expectation: table-structure-has-an-independent-host-neutral-information-path
+  - id: T-TABLE-STRUCTURE-0001-CASE-DOMAIN-ISOLATION
+    title: Nearest Table domains ignore equal keys outside their scope and report missing local targets
+    covers:
+      - C-TABLE-STRUCTURE-0001-DOMAIN
+      - C-TABLE-STRUCTURE-0001-DOMAIN-ISOLATION
+    expectation: table-domain-resolution-is-nearest-and-out-of-domain-keys-remain-invisible
+  - id: T-TABLE-STRUCTURE-0001-CASE-ANATOMY
+    title: The family contains only Table Caption Row HeaderCell and Cell with exact validity cardinalities
+    covers:
+      - D-BASE-TABLE-STRUCTURE-0001-IDENTITIES
+      - D-BASE-TABLE-STRUCTURE-0001-NO-HEAD-BODY
+      - C-TABLE-STRUCTURE-0001-ANATOMY
+      - C-TABLE-STRUCTURE-0001-NO-ROW-GROUP-IDENTITY
+      - C-TABLE-STRUCTURE-0001-CONTENT
+    expectation: table-family-anatomy-and-content-boundary-remain-exact
+  - id: T-TABLE-STRUCTURE-0001-CASE-TOPOLOGY
+    title: Anatomy order and positive spans produce deterministic zero-based rectangular topology
+    covers:
+      - C-TABLE-STRUCTURE-0001-ORDER
+      - C-TABLE-STRUCTURE-0001-PLACEMENT
+    expectation: ordered-parts-produce-deterministic-non-overlapping-table-topology
+  - id: T-TABLE-STRUCTURE-0001-CASE-HEADER-GRAPH
+    title: Protocol keys resolve multiple ordered row and column header references without host IDs
+    covers:
+      - D-BASE-TABLE-STRUCTURE-0001-A11Y-PATH
+      - C-TABLE-STRUCTURE-0001-HEADER-KEYS
+      - C-TABLE-STRUCTURE-0001-HEADER-RELATIONS
+    expectation: header-keys-resolve-to-opaque-same-domain-semantic-object-references
+  - id: T-TABLE-STRUCTURE-0001-CASE-DIAGNOSTICS
+    title: Invalid cardinality spans and header references fail closed with addressable diagnostics
+    covers:
+      - C-TABLE-STRUCTURE-0001-DIAGNOSTICS
+      - C-TABLE-STRUCTURE-0001-PLACEMENT
+      - C-TABLE-STRUCTURE-0001-HEADER-KEYS
+    expectation: invalid-table-structure-produces-diagnostics-without-guessed-projection
+  - id: T-TABLE-STRUCTURE-0001-CASE-STRUCTURAL-CHURN
+    title: Insert remove and reorder recompute structure without rewriting authored facts or emitting data operations
+    covers:
+      - C-TABLE-STRUCTURE-0001-CHURN
+      - D-BASE-TABLE-STRUCTURE-0001-DATA-TABLE-BOUNDARY
+    expectation: structural-churn-recomputes-read-only-topology-without-data-signals
+  - id: T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY
+    title: Generic A11y receives structural facts while Adapter materialization and support remain separately evidenced
+    covers:
+      - D-BASE-TABLE-STRUCTURE-0001-NO-TABLE-HOST-CAP
+      - D-BASE-TABLE-STRUCTURE-0001-EVIDENCE-BOUNDARY
+      - C-TABLE-STRUCTURE-0001-A11Y-PROJECTION
+    expectation: table-structure-reuses-generic-a11y-without-inventing-host-conformance
+  - id: T-TABLE-STRUCTURE-0001-CASE-EXCLUSIONS
+    title: Base Table exposes no Data Table layout-table or design-language behavior
+    covers:
+      - D-BASE-TABLE-STRUCTURE-0001-DATA-TABLE-BOUNDARY
+      - C-TABLE-STRUCTURE-0001-EXCLUSIONS
+    expectation: base-table-remains-passive-and-data-table-behavior-is-absent
+implementations:
+  - id: spec-fixture-table-structure-probe
+    kind: fixture
+    status: passing
+    path: packages/spec/fixtures/src/table-structure/reference.ts
+    required: true
+    consumesCases:
+      - T-TABLE-STRUCTURE-0001-CASE-INDEPENDENT-PROTOCOL
+      - T-TABLE-STRUCTURE-0001-CASE-TOPOLOGY
+      - T-TABLE-STRUCTURE-0001-CASE-HEADER-GRAPH
+      - T-TABLE-STRUCTURE-0001-CASE-DIAGNOSTICS
+      - T-TABLE-STRUCTURE-0001-CASE-STRUCTURAL-CHURN
+    notes:
+      - This is a host-neutral executable reference probe, not runtime, Base, or Adapter conformance.
+      - Exercised by packages/spec/fixtures/test/table-structure-reference.test.ts.
+  - id: module-table-structure-contract
+    kind: module-test
+    status: planned
+    path: packages/modules/table-structure/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-TABLE-STRUCTURE-0001-CASE-INDEPENDENT-PROTOCOL
+      - T-TABLE-STRUCTURE-0001-CASE-DOMAIN-ISOLATION
+      - T-TABLE-STRUCTURE-0001-CASE-TOPOLOGY
+      - T-TABLE-STRUCTURE-0001-CASE-HEADER-GRAPH
+      - T-TABLE-STRUCTURE-0001-CASE-DIAGNOSTICS
+      - T-TABLE-STRUCTURE-0001-CASE-STRUCTURAL-CHURN
+      - T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY
+  - id: prototypes-base-table-contract
+    kind: runtime-test
+    status: planned
+    path: packages/prototypes/base/test/table.test.ts
+    required: true
+    consumesCases:
+      - T-TABLE-STRUCTURE-0001-CASE-ANATOMY
+      - T-TABLE-STRUCTURE-0001-CASE-HEADER-GRAPH
+      - T-TABLE-STRUCTURE-0001-CASE-STRUCTURAL-CHURN
+      - T-TABLE-STRUCTURE-0001-CASE-EXCLUSIONS
+  - id: adapter-web-component-table-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/table.test.ts
+    required: true
+    consumesCases: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]
+  - id: adapter-react-table-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/react/test/table.test.ts
+    required: true
+    consumesCases: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]
+  - id: adapter-vue-table-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue/test/table.test.ts
+    required: true
+    consumesCases: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]
+  - id: adapter-vue2-table-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue2/test/table.test.ts
+    required: true
+    consumesCases: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]
+verifies:
+  decisions:
+    - id: D-BASE-TABLE-STRUCTURE-0001
+      anchors:
+        - D-BASE-TABLE-STRUCTURE-0001-INDEPENDENT-PROTOCOL
+        - D-BASE-TABLE-STRUCTURE-0001-IDENTITIES
+        - D-BASE-TABLE-STRUCTURE-0001-NO-HEAD-BODY
+        - D-BASE-TABLE-STRUCTURE-0001-STRUCTURE-OWNER
+        - D-BASE-TABLE-STRUCTURE-0001-A11Y-PATH
+        - D-BASE-TABLE-STRUCTURE-0001-NO-TABLE-HOST-CAP
+        - D-BASE-TABLE-STRUCTURE-0001-DATA-TABLE-BOUNDARY
+        - D-BASE-TABLE-STRUCTURE-0001-EVIDENCE-BOUNDARY
+  contracts:
+    - id: C-TABLE-STRUCTURE-0001
+      anchors:
+        - C-TABLE-STRUCTURE-0001-DOMAIN
+        - C-TABLE-STRUCTURE-0001-DOMAIN-ISOLATION
+        - C-TABLE-STRUCTURE-0001-ANATOMY
+        - C-TABLE-STRUCTURE-0001-NO-ROW-GROUP-IDENTITY
+        - C-TABLE-STRUCTURE-0001-CONTENT
+        - C-TABLE-STRUCTURE-0001-ORDER
+        - C-TABLE-STRUCTURE-0001-PLACEMENT
+        - C-TABLE-STRUCTURE-0001-HEADER-KEYS
+        - C-TABLE-STRUCTURE-0001-HEADER-RELATIONS
+        - C-TABLE-STRUCTURE-0001-DIAGNOSTICS
+        - C-TABLE-STRUCTURE-0001-CHURN
+        - C-TABLE-STRUCTURE-0001-A11Y-PROJECTION
+        - C-TABLE-STRUCTURE-0001-EXCLUSIONS
+references:
+  modules: [M-A11Y-0001]
+  hostCaps: [HC-A11Y-0001]
+sources:
+  - path: spec/decisions/D-BASE-TABLE-STRUCTURE-0001.yaml
+  - path: spec/contracts/C-TABLE-STRUCTURE-0001.yaml
+  - path: https://github.com/Proto-UI/Proto-UI/issues/387
+    label: Issue 387 acceptance and implementation boundary
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added executable-probe and planned conformance mappings for Table identity, topology, header relations, diagnostics, churn, A11y projection, and negative boundaries.
+tags: [table, structure, test, accessibility]
