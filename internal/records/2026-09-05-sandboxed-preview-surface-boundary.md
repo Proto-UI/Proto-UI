@@ -120,9 +120,9 @@ Names below illustrate a proposal; they are not admitted API.
 | Artifact/policy reference | App -> Preview Module -> Host Capability resolver | Static document appears only after policy verification and host content commit. | Stable surface ID, Module connection, generation, policy revision. |
 | Raw HTML/resources | App artifact service -> sandbox engine directly | Inner document renders under fixed restrictions. | Host-only pipeline; zero raw content in Proto UI values. |
 | Readiness/failure | Artifact resolver + host policy/commit -> Host Capability -> Module | `preparing -> ready/error/unavailable` with bounded reason. | Current connection/generation/policy; iframe `load` alone is insufficient. |
-| Reload | App Button -> Module request -> Host Capability | New generation revalidates policy/source and replaces target/content. | Expected current generation and policy revision; stale request rejects. |
+| Reload | App Button -> Module request -> Host Capability -> result callback | Accepted result names old/new generation before preparation; stale policy/generation returns bounded rejection. | Request ID plus expected generation/policy; no ambiguous void outcome. |
 | Navigation attempt | Embedded context -> host blocker -> Module summary | Attempt remains blocked; optional bounded kind/outcome supports status/audit. | Current connection/generation/policy; raw destination never crosses. |
-| Focus entry/exit | Focus domain -> Host Capability focus bridge | Focus enters frame/document or returns to Harness exactly once. | Focus/view epoch; Preview facts do not duplicate focus. |
+| Focus entry/exit | Focus domain + composition-owned controls + browser-native frame order | Parent-owned Enter/Leave controls bracket one static, non-tabbable inner document; native Tab/Shift+Tab exit without an inner handler. | Focus/view epoch and real-browser proof; Preview facts do not duplicate focus. |
 | Accessible naming | A11y semantic object -> HC-A11Y/Adapter -> frame target | Frame has one App-owned concise label/description. | A11y identity and target epoch; inner document names itself. |
 | Close/open action | Proto UI Button -> App service | App removes surface or opens only its validated artifact URL. | App authorization/idempotency; content cannot trigger it. |
 | Messages | No route. | No listener, port, callback, request, or result. | Option B invariant. |
@@ -132,6 +132,14 @@ Names below illustrate a proposal; they are not admitted API.
 ```ts
 type PreviewSourceRef = Readonly<{ artifactId: string; revision: string }>;
 
+type PreviewRequirement = Readonly<{
+  // Immutable for one connection; source/profile changes require reattachment.
+  surfaceId: string;
+  source: PreviewSourceRef;
+  trust: 'trusted-static';
+  policyProfileId: 'trusted-static-no-execution-v1';
+}>;
+
 type PreviewUnavailableReason =
   | 'source-unavailable'
   | 'policy-unavailable'
@@ -140,6 +148,8 @@ type PreviewUnavailableReason =
   | 'network-not-denied'
   | 'navigation-not-denied'
   | 'permissions-not-denied'
+  | 'message-channel-present'
+  | 'focus-path-unverified'
   | 'accessibility-unavailable'
   | 'host-crashed';
 
@@ -147,38 +157,39 @@ type PreviewSupport = Readonly<{
   execution: 'denied' | 'unverified';
   network: 'denied' | 'unverified';
   navigation: 'denied' | 'unverified';
+  permissions: 'denied' | 'unverified';
   messages: 'absent' | 'present';
-  accessibility: 'embedded-document' | 'unavailable';
+  focusPath: 'native-static-tab-order' | 'unverified';
+  accessibility: 'embedded-document' | 'unverified' | 'unavailable';
   reasons: readonly PreviewUnavailableReason[];
 }>;
 
 type PreviewPatch = Readonly<{
-  surfaceId: string;
-  source: PreviewSourceRef;
-  trust: 'trusted-static';
-  policyProfileId: 'trusted-static-no-execution-v1';
   policyRevision: number;
   appStatus: 'idle' | 'loading' | 'ready' | 'error';
 }>;
 
-type PreviewBaseFacts = Readonly<{
-  appliedPolicyRevision: number | null;
-  generation: number;
-  support: PreviewSupport;
-}>;
-
 type PreviewFacts =
-  | (PreviewBaseFacts & Readonly<{ attachment: 'detached' | 'preparing' }>)
-  | (PreviewBaseFacts &
-      Readonly<{
-        attachment: 'error' | 'unavailable';
-        reason: PreviewUnavailableReason;
-      }>)
-  | (PreviewBaseFacts &
-      Readonly<{
-        attachment: 'ready';
-        committedArtifactRevision: string;
-      }>);
+  | Readonly<{
+      attachment: 'detached' | 'preparing';
+      appliedPolicyRevision: null;
+      generation: number;
+      support: PreviewSupport;
+    }>
+  | Readonly<{
+      attachment: 'error' | 'unavailable';
+      appliedPolicyRevision: number;
+      generation: number;
+      support: PreviewSupport;
+      reason: PreviewUnavailableReason;
+    }>
+  | Readonly<{
+      attachment: 'ready';
+      appliedPolicyRevision: number;
+      generation: number;
+      support: PreviewSupport;
+      committedArtifactRevision: string;
+    }>;
 
 type PreviewNavigationResult = Readonly<{
   attemptId: string;
@@ -188,13 +199,31 @@ type PreviewNavigationResult = Readonly<{
   generation: number;
 }>;
 
+type PreviewReloadResult =
+  | Readonly<{
+      requestId: string;
+      outcome: 'accepted';
+      previousGeneration: number;
+      nextGeneration: number;
+      appliedPolicyRevision: number;
+    }>
+  | Readonly<{
+      requestId: string;
+      outcome: 'rejected';
+      currentGeneration: number;
+      appliedPolicyRevision: number | null;
+      reason: 'stale-generation' | 'stale-policy' | 'unavailable';
+    }>;
+
 type PreviewConnection = Readonly<{
   // Issued and retired by the Module; callback closures reject retired identities.
   connectionId: string;
   generation: number;
+  requirement: PreviewRequirement;
   patch: PreviewPatch;
   onFacts(connectionId: string, facts: PreviewFacts): void;
   onNavigation(connectionId: string, result: PreviewNavigationResult): void;
+  onReloadResult(connectionId: string, result: PreviewReloadResult): void;
 }>;
 
 type PreviewLease = Readonly<{
@@ -215,43 +244,44 @@ type PreviewHost = Readonly<{
 }>;
 ```
 
-The patch, facts, requests, and results contain no functions outside the internal connection, raw content/URL, execution value, host target, or message channel. A fake host is injected with private artifact and policy resolvers.
+The immutable requirement, mutable patch, facts, requests, and results contain no functions outside the internal connection, raw content/URL, execution value, host target, or message channel. A fake host is injected with private artifact and policy resolvers.
 
 ### Transition table
 
 | Current | Input | Required transition/result |
 | --- | --- | --- |
-| detached | attach valid source/profile | Module issues connection/generation; host reports `preparing` before content work. |
-| preparing | all restrictions verified and controlled content committed | `ready` for current artifact revision; native iframe `load` alone cannot cause this. |
-| preparing | source missing, profile mismatch, or restriction unverified | `unavailable` with bounded reason; no content attaches. |
+| detached | attach valid immutable source/profile requirement | Module issues connection/generation; host reports `preparing` with null applied policy before content work. |
+| preparing | execution/network/navigation/permissions denied, messages absent, native static Tab order and accessibility verified, controlled content committed | `ready` with numeric policy for current artifact revision; native iframe `load` alone cannot cause this. |
+| preparing | source missing, profile mismatch, or any required proof unverified | `unavailable` with numeric policy and bounded reason; no content attaches. |
 | preparing/ready | resolver/renderer failure | `error`; target content is revoked and fallback remains reachable. |
 | ready | any content navigation/download/popup attempt | Host blocks it, reports bounded kind/outcome, stays `ready`; raw URL is discarded or kept only in App security audit. |
-| ready | reload with matching expected generation/policy | Module creates a new generation; old target/resources terminate; new state is `preparing`. |
-| any live state | source/trust/profile/policy replacement | New generation and policy verification before content; no weaker fallback. |
+| ready | reload with matching expected generation/policy | Emit accepted result with previous/new generation, then revoke old resources and enter `preparing`. |
+| ready | stale/unavailable reload | Emit correlated rejected result with current generation/policy/reason; no state or resource change. |
+| any live state | source/trust/profile replacement | Retire connection/lease and attach a new immutable requirement; no mutable identity update or weaker fallback. |
 | any live state | old callback/result | Ignore by retired connection, generation, or policy revision. |
 | any live state | host crash | Current `error`/`unavailable` with reason; no automatic privilege change. |
 | any live state | detach/dispose | Revoke target, observers, navigation hooks, object URLs/custom-protocol lease, resolver callbacks, Focus/A11y target mappings; no later delivery. |
 
 ### Fake-host exercise
 
-1. attach `surface-3` / `artifact-7@r4` under policy revision 2; verify `preparing` precedes resolver work;
-2. make each required policy proof fail independently; observe `unavailable` with the exact bounded reason and zero content attachment;
-3. resolve approved static content privately; observe `ready` only after policy verification and controlled commit, not a simulated iframe load;
+1. attach immutable `surface-3` / `artifact-7@r4` under policy revision 2; verify `preparing` with null applied policy precedes resolver work;
+2. make execution, network, navigation, permission, message-absence, focus-path, and accessibility proofs fail independently; observe `unavailable` with numeric policy/exact reason and zero content attachment;
+3. resolve approved static content privately; observe `ready` only after every proof and controlled commit, not a simulated iframe load;
 4. attempt same-document, descendant, top, popup, external, and download navigation; assert each is blocked once, raw destinations never cross, and state remains ready;
 5. assert no message listener/IPC/port exists and no content event can invoke reload, close, external-open, or App action;
-6. invoke reload with stale/current generation and policy revisions; reject stale, create a new current generation, and revoke the old target/object URL before replacement;
-7. replace source/policy/target and collide host-local counters; Module connection/generation/policy identity rejects old facts/navigation;
-8. route frame naming through a separate A11y fake and focus through a separate Focus fake; Preview facts contain neither name nor focused state;
-9. dispose, then emit resolver completion, crash, navigation, resize, focus, and synthetic message; observe zero callbacks/resources/actions;
-10. recursively inspect all portable values and prove no HTML/code/URI/CSP/sandbox token, host target, object URL, controller, Window/webview/WebContents, MessagePort, or executable value appears.
+6. invoke reload with stale/current generation and policy; stale returns correlated rejection; current returns accepted old/new generation before `preparing`, then revokes old target/object URL;
+7. replace source/profile only through connection retirement and a new immutable requirement; policy-only updates retain identity; colliding host counters cannot revive old callbacks;
+8. route frame naming through A11y; compose parent-owned Enter/Leave controls around a static artifact with no tabbable descendants; Preview facts contain neither name nor focused state;
+9. dispose, then emit resolver completion, crash, navigation, reload result, resize, focus, and synthetic message; observe zero callbacks/resources/actions;
+10. prove no HTML/code/URI/CSP/sandbox token, host target, object URL, controller, Window/webview/WebContents, MessagePort, or executable value appears.
 
-This fake evidence proves protocol shape and fail-closed state transitions only. It does not prove actual browser/native sandbox enforcement, origin isolation, network denial, focus behavior, accessibility, or resource cleanup.
+This fake evidence proves protocol shape, support accounting, correlated reload, immutable identity, and fail-closed transitions only. It cannot prove browser-native cross-frame focus order, actual sandbox/origin/network denial, accessibility, or cleanup.
 
 ## Focus, accessibility, layout, and lifecycle
 
-- Focus facts/requests remain in Focus. The Preview Host Capability exposes the current physical focus entry target only to Focus integration; Preview facts do not report `focused`.
-- The Web Harness profile reserves `F6`/`Shift+F6` for next/previous Harness regions and provides an adjacent named Proto UI Button to leave the preview. Bare Escape is not a universal Preview action; if the Preview is inside a real Dialog, Dialog owns Escape/trap/restore.
-- Option B rejects interactive inner controls. Tab may enter the embedded document for screen-reader/static-document navigation; the reserved Focus route and visible leave control guarantee exit. A host that cannot provide both reports the surface unavailable.
+- Focus facts/requests remain in Focus. Option B's composition supplies parent-owned Enter Preview and Leave Preview controls before/after the frame; the Host Capability exposes only its frame focus target. Preview facts do not report `focused`.
+- The static artifact pipeline rejects tabbable descendants. The Web profile relies on browser-native sequential navigation: Tab may enter the labelled static document, and the next Tab reaches the parent-owned Leave control; Shift+Tab returns to Enter. No unreachable inner F6 handler or message bridge is assumed.
+- Composition owns both controls and Focus topology; the host reports only `native-static-tab-order` support. Real-browser keyboard and screen-reader evidence must prove entry/exit. If the browser/host cannot guarantee it, `focus-path-unverified` makes the surface unavailable.
 - App-provided frame name/description flows through A11y IR and the Adapter to the frame target. The static artifact pipeline owns the inner document's title, language, headings, links-as-text policy, and content semantics. Frame name does not name the inner document.
 - Status/error/unavailable is exposed through ordinary composition and bounded App announcements. Inner document mutations do not drive a Proto UI live region.
 - Parent-controlled viewport dimensions and responsive containment are host presentation. Inner scroll remains embedded-document/browser behavior and is not projected as `C-SCROLL-0001` facts. No child size or raw geometry enters portable state.
@@ -295,12 +325,12 @@ No new Adapter identity is justified: existing profiles receive relations only a
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** reject raw HTML/code/URI, CSP/sandbox token list, executable callback, iframe/Window/webview/WebContents/native view, MessagePort/IPC, DOM/framework object, object URL, permission handle, renderer/controller, raw navigation destination, and content-provided label.
-2. **Policy negotiation:** each required execution/network/navigation/permission/message restriction fails independently to `unavailable`; no partial profile loads or weak fallback.
-3. **State/generation:** preparing precedes content work; controlled commit—not iframe load—causes ready; source/profile/policy/reload replacements issue Module generations and retire old connections; stale callbacks reject.
+1. **Portable negatives:** reject raw HTML/code/URI, CSP/sandbox token list, executable callback, iframe/Window/webview/WebContents/native view, MessagePort/IPC, DOM/framework object, object URL, permission handle, renderer/controller, raw navigation destination, content-provided label, and mutable source/profile identity.
+2. **Policy negotiation:** execution/network/navigation/permissions denied, messages absent, focus path, and accessibility are explicit support fields; any unverified/unsafe field fails to `unavailable` with no weak fallback.
+3. **State/generation/reload:** preparing/null policy precedes work; ready/terminal branches require numeric policy; controlled commit—not iframe load—causes ready; reload returns correlated accepted/rejected outcome; source/profile replacement reattaches; stale callbacks reject.
 4. **Navigation/actions:** every navigation/new-window/download kind is blocked; raw URL stays in security infrastructure; content cannot invoke App actions or external open.
 5. **No bridge:** static inspection and runtime spies prove no message listener, port, preload, IPC handler, or content-to-App request path.
-6. **Focus/A11y:** separate Focus/A11y fakes own target focus and naming; F6/Shift+F6 and visible leave control; frame label plus inner document metadata; Preview facts contain neither focus nor naming.
+6. **Focus/A11y:** A11y owns frame naming; composition owns Enter/Leave controls and topology; static content has no tabbable descendants; real browser proves native Tab/Shift+Tab entry/exit without inner handler; Preview facts contain neither focus nor naming.
 7. **Lifecycle:** target/source/policy/session replacement; crash; reload; object URL/custom protocol; observer/listener/hook/resolver cleanup; no post-dispose delivery.
 8. **Real Web security:** a controlled adversarial fixture attempts script, parent DOM access, subresource network, form, navigation, popup, download, permissions, storage, and messaging; every denied capability is observed at the host boundary without unsafe real side effects.
 9. **Real Web accessibility/layout:** frame label and static document semantics, keyboard entry/exit, fallback/error announcement, 320px/390px/desktop, zoom/reflow, high contrast, reduced motion, target replacement, and cleanup.
