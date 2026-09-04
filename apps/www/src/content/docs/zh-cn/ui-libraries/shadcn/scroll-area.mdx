@@ -9,7 +9,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 Viewport 通过 privileged Scroll surface 请求 `composed` design-language preference，但不把它设为 required；不支持 composed chrome 的 host 可以依 `D-SCROLL-PROJECTION-0001` fallback 到 `system`。无论哪种 projection，wheel、touch、keyboard、physics、inertia 与 overscroll 继续由 host 所有。该 family 不暴露 DOM scrollbar、size、position callback 或其它 host-specific API。
 
-比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/scroll-area.tsx`。其中 Web DOM 与 Radix details 仅为 comparison evidence，不构成 portable guarantees。从 `@proto.ui/prototypes-shadcn/scroll-area` 导入该 family，或使用 `proto-ui add shadcn-scroll-area` 生成 facade。
+比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/scroll-area.tsx`。其中 Web DOM 与 Radix details 仅为 comparison evidence，不构成 portable guarantees。从 `@proto.ui/prototypes-shadcn/scroll-area` 导入该 family，或使用 `proto-ui add react shadcn-scroll-area` 生成 React facade。
 
 <PrototypePreviewer demoId="demo-shadcn-scroll-area" initialRuntime="wc" />
 

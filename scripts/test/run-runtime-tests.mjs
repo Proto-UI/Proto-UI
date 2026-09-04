@@ -35,6 +35,7 @@ const READY_ROUTES = [
   '/zh-cn/start-here/quick-start/',
   '/zh-cn/internal/demo-matrix/',
   '/zh-cn/ui-libraries/shadcn/select/',
+  '/zh-cn/ui-libraries/shadcn/scroll-area/',
 ];
 const READY_TIMEOUT_MS = 180_000;
 

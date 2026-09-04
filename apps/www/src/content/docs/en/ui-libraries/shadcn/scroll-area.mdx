@@ -9,7 +9,7 @@ This draft family contains Root, Viewport, Scrollbar, and Thumb. Base owns the l
 
 Viewport requests `composed` as a design-language preference through the privileged Scroll surface. It does not require that projection: a host without composed chrome may fall back to `system` under `D-SCROLL-PROJECTION-0001`. In either case, the host retains wheel, touch, keyboard, physics, inertia, and overscroll. The family exposes no DOM scrollbar, size, position callback, or other host-specific API.
 
-The comparison baseline is shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`, `apps/v4/registry/new-york-v4/ui/scroll-area.tsx`. Its Web DOM and Radix details remain comparison evidence rather than portable guarantees. Import the family from `@proto.ui/prototypes-shadcn/scroll-area`, or generate its facade with `proto-ui add shadcn-scroll-area`.
+The comparison baseline is shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`, `apps/v4/registry/new-york-v4/ui/scroll-area.tsx`. Its Web DOM and Radix details remain comparison evidence rather than portable guarantees. Import the family from `@proto.ui/prototypes-shadcn/scroll-area`, or generate its React facade with `proto-ui add react shadcn-scroll-area`.
 
 <PrototypePreviewer demoId="demo-shadcn-scroll-area" initialRuntime="wc" />
 
