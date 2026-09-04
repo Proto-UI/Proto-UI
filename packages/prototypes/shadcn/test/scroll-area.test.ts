@@ -163,6 +163,7 @@ describe('prototypes/shadcn: scroll-area', () => {
     for (const token of [
       'data-[focus-visible]:ring-3',
       'data-[focus-visible]:ring-ring/50',
+      'data-[focus-visible]:ring-inset',
       'data-[focus-visible]:outline-1',
       'data-[focus-visible]:outline-ring',
     ]) {

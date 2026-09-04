@@ -114,9 +114,17 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
         );
         const focusPaint = await viewport.evaluate((element) => {
           const style = getComputedStyle(element);
-          return { boxShadow: style.boxShadow, outlineWidth: style.outlineWidth };
+          return {
+            boxShadow: style.boxShadow,
+            outlineWidth: style.outlineWidth,
+            ringInset: style.getPropertyValue('--pui-ring-inset').trim(),
+            ringWidth: style.getPropertyValue('--pui-ring-width').trim(),
+          };
         });
         expect(focusPaint.boxShadow, `${runtime}/focus-ring`).not.toBe('none');
+        expect(focusPaint.boxShadow, `${runtime}/focus-ring-inside-clip`).toContain('inset');
+        expect(focusPaint.ringInset, `${runtime}/focus-ring-inset-token`).toBe('inset');
+        expect(focusPaint.ringWidth, `${runtime}/focus-ring-width`).toBe('3px');
         expect(focusPaint.outlineWidth, `${runtime}/focus-outline`).toBe('1px');
         const viewportAfterFocus = await bounds(viewport, `${runtime}/viewport-after-focus`);
         for (const property of ['x', 'y', 'width', 'height'] as const) {

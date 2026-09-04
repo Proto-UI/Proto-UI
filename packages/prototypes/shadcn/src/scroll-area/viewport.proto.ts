@@ -22,7 +22,7 @@ const scrollAreaViewport = definePrototype<
     def.rule({
       when: (when) => when.state(state.focusVisible).eq(true),
       intent: (intent) =>
-        intent.feedback.style.use(tw('ring-3 ring-ring/50 outline-1 outline-ring')),
+        intent.feedback.style.use(tw('ring-3 ring-ring/50 ring-inset outline-1 outline-ring')),
     });
     return (renderer) => [renderer.r.slot()];
   },
