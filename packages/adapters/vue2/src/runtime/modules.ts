@@ -124,8 +124,18 @@ export function createVue2OverlayGlobalMount(
       anchors.set(hostEl, anchor);
     },
     unmount(hostEl: HTMLElement) {
-      anchors.get(hostEl)?.remove();
+      const anchor = anchors.get(hostEl);
       anchors.delete(hostEl);
+      // Only a host this mount moved is ours to put back. Returning it to the
+      // anchor hands it to the position Vue owns, so ordinary teardown removes
+      // it; if the anchor's parent is gone there is nowhere to return it to and
+      // detaching is the only way not to leave an adapter-owned body node.
+      if (anchor) {
+        const parent = anchor.parentNode;
+        if (parent) parent.insertBefore(hostEl, anchor);
+        else hostEl.remove();
+        anchor.remove();
+      }
       // The retained Proto instance stays in its logical tree while its Vue2
       // view epoch is torn down and will receive a fresh projection on remount.
       clearProtoParentProjection(hostEl);

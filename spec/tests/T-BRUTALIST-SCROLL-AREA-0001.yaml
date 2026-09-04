@@ -3,8 +3,21 @@ type: test
 title: Brutalist Scroll Area visual and documentation layout contract tests
 status: draft
 since: 0.2.0-rc.7
-summary: Covers the current Neo-Brutalist visual grammar, Base anatomy inheritance, orientation, composed projection preference, host-projected Thumb geometry, Move Gesture-backed dragging, the inward Viewport focus ring, and responsive reference-demo consumer sizing.
+summary: Covers the current Neo-Brutalist visual grammar, exact-once Base anatomy inheritance, surface projection, orientation, host-resolved composed preference, host-projected Thumb geometry, Move Gesture-backed dragging, the inward Viewport focus ring, and responsive reference-demo consumer sizing.
 cases:
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-BASE-INHERITANCE
+    title: Every Brutalist anatomy part installs its matching Base hook exactly once
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-BASE-INHERITANCE
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-BASE-INHERITANCE
+      - P-BRUTALIST-SCROLL-AREA-THUMB-BASE-INHERITANCE
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-BASE-INHERITANCE
+    expectation: p-brutalist-scroll-area-base-hooks-are-installed-exactly-once
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
+    title: Viewport asks the host to resolve the composed design-language preference
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-COMPOSED-PREFERENCE
+    expectation: p-brutalist-scroll-area-viewport-resolves-composed-projection
   - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-1
     title: P-BRUTALIST-SCROLL-AREA retains Base semantics and projects the Brutalist visual grammar
     covers:
@@ -25,6 +38,28 @@ cases:
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT-FOCUS-RING
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT-SURFACE
     expectation: p-brutalist-scroll-area-viewport-rings-inside-its-own-box
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-SCROLLBAR-SURFACE
+    title: Scrollbar projects the Brutalist visual surface and orientation geometry
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-TRACK
+      - P-BRUTALIST-SCROLL-AREA-SCROLLBAR-ORIENTATION
+    expectation: p-brutalist-scroll-area-scrollbar-visual-surface
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-THUMB-SURFACE
+    title: Thumb projects the Brutalist surface tokens
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-THUMB-SURFACE
+    expectation: p-brutalist-scroll-area-thumb-visual-surface
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-SURFACE
+    title: Viewport projects the Brutalist surface and focus ring
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT-SURFACE
+    expectation: p-brutalist-scroll-area-viewport-visual-surface
+  - id: T-BRUTALIST-SCROLL-AREA-0001-CASE-ROOT-SURFACE
+    title: Root projects the Brutalist visual grammar surface
+    covers:
+      - P-BRUTALIST-SCROLL-AREA-VISUAL-GRAMMAR
+    expectation: p-brutalist-scroll-area-root-visual-surface
+
 implementations:
   - id: prototypes-brutalist-scroll-area-contract
     kind: module-test
@@ -32,17 +67,23 @@ implementations:
     path: packages/prototypes/brutalist/test/scroll-area.test.ts
     required: true
     consumesCases:
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-BASE-INHERITANCE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-1
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-SCROLLBAR-SURFACE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-THUMB-SURFACE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-SURFACE
+      - T-BRUTALIST-SCROLL-AREA-0001-CASE-ROOT-SURFACE
     exercises:
       - P-BASE-SCROLL-AREA
       - P-BASE-SCROLL-AREA-SCROLLBAR
       - P-BASE-SCROLL-AREA-THUMB
-      - P-BASE-SCROLL-AREA-VIEWPORT
-      - P-BRUTALIST-SCROLL-AREA
       - P-BRUTALIST-SCROLL-AREA-SCROLLBAR
       - P-BRUTALIST-SCROLL-AREA-THUMB
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT
+      - P-BASE-SCROLL-AREA-VIEWPORT
+      - P-BRUTALIST-SCROLL-AREA
   - id: web-adapters-brutalist-scroll-area-move-journey
     kind: adapter-test
     status: passing
@@ -51,10 +92,13 @@ implementations:
     consumesCases:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-1
     exercises:
+      - P-BASE-SCROLL-AREA
+      - P-BASE-SCROLL-AREA-SCROLLBAR
+      - P-BASE-SCROLL-AREA-THUMB
       - P-BRUTALIST-SCROLL-AREA
-      - P-BRUTALIST-SCROLL-AREA-VIEWPORT
       - P-BRUTALIST-SCROLL-AREA-SCROLLBAR
       - P-BRUTALIST-SCROLL-AREA-THUMB
+      - P-BRUTALIST-SCROLL-AREA-VIEWPORT
     notes:
       - The shared journey is mandatory for Web Components, React, Vue, and Vue 2.
   - id: www-brutalist-scroll-area-demo-layout
@@ -75,7 +119,6 @@ implementations:
       - T-BRUTALIST-SCROLL-AREA-0001-CASE-VIEWPORT-FOCUS
     exercises:
       - P-BRUTALIST-SCROLL-AREA-VIEWPORT
-      - P-BASE-SCROLL-AREA-VIEWPORT
     notes:
       - Reads the computed box-shadow in Web Components, React, and Vue, in both schemes, and requires one inset layer with zero offsets and a positive spread. That shape is the four-sided claim; an outward layer would be clipped by the Root and is asserted absent.
       - The demo gained a row wider than the Viewport so the same surface scrolls both ways, and the case scrolls each axis while the ring is up.
@@ -83,6 +126,9 @@ implementations:
 verifies:
   prototypes:
     - id: P-BRUTALIST-SCROLL-AREA
+    - id: P-BRUTALIST-SCROLL-AREA-SCROLLBAR
+    - id: P-BRUTALIST-SCROLL-AREA-THUMB
+    - id: P-BRUTALIST-SCROLL-AREA-VIEWPORT
   contracts:
     - C-SCROLL-COMPOSED-CONTROL-0001
 exercises:
@@ -96,6 +142,9 @@ exercises:
     - P-BRUTALIST-SCROLL-AREA-THUMB
     - P-BRUTALIST-SCROLL-AREA-VIEWPORT
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Bound all four Base inheritance criteria to exact-once as-hook traces and the Viewport composed preference to its host-resolved projection.
   - version: 0.3.0-alpha.0
     change: strengthened
     summary: Added Vue 2 to the mandatory shared Web Adapter Move journey.

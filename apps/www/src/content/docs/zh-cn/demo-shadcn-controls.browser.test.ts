@@ -213,6 +213,18 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
         await applyColorScheme(page, 'light');
+        await page.waitForFunction(
+          (root) => !root?.querySelector('[data-pui-view-revealing]'),
+          await previewer.elementHandle(),
+          { timeout: 10_000 }
+        );
+        await page.waitForFunction(
+          () => {
+            const editor = document.querySelector('[data-previewer-id] textarea');
+            return editor && getComputedStyle(editor).transitionProperty !== 'none';
+          },
+          { timeout: 10_000 }
+        );
 
         const resting = await editorStyle(page);
         // The property set is the whole point: `all` would also animate the

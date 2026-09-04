@@ -67,10 +67,9 @@ criteria:
       zh-CN: Runtime 不得内建某个具体计时机制作为 `delay` 的可移植默认实现；当代码调用 `delay` 时，当前 host/adapter 必须提供 delayed scheduling capability，否则调用必须失败并给出可诊断错误。
       en: Runtime must not embed a concrete timing mechanism as the portable default implementation for `delay`; when code calls `delay`, the current host/adapter must provide a delayed scheduling capability, otherwise the call must fail with a diagnosable error.
 sources:
-  - path: internal/records/2026-07-06-presence-visibility-governance.zh-CN.md
-    sections:
-      - 近期工作路线
-      - 保留断口
+  - path: packages/core/src/delay.ts
+  - path: packages/runtime/test/contract/delay.v0.contract.test.ts
+  - path: packages/adapters/base/test/adapter-host-delay.test.ts
 dependsOn:
   contracts:
     - C-LIFECYCLE-0001

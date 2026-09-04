@@ -74,11 +74,11 @@ openQuestions:
       en: How should the current public Indicator anatomy part align with the pinned upstream internal Indicator in composition, centering mechanism, and glyph ownership?
     context:
       zh-CN: >-
-        upstream 不单独导出 Indicator，而是在 `Checkbox` wrapper 内固定创建一个，className 为 `grid place-content-center text-current transition-none`，并在其中放一个 `size-3.5` 的 lucide `CheckIcon`；它没有 mixed glyph。Proto UI 当前公开 `shadcn-checkbox-indicator`，用 `flex items-center justify-center` 居中而非 `grid place-content-center`——后两个 utility 不在 style closure 内，而本切片只被批准新增 `rounded-[4px]` 与 `3.5` 两个精确闭包。`size-3.5` 落在 Indicator 自身而非其中的 icon 上，因为 renderer 的 SVG factory 不接受 style handle；两种写法画出的 glyph box 都是 14px。glyph 由本原型的 renderer 直接绘制，未取用 `@proto.ui/prototypes-lucide`。公开 composition 是否保留、是否改用 Lucide glyph、以及 `grid place-content-center` 是否值得为其扩展 closure，仍是待评审问题；具体 parity 通过实现与测试前不得宣称。
+        upstream 不单独导出 Indicator，而是在 `Checkbox` wrapper 内固定创建一个，className 为 `grid place-content-center text-current transition-none`，并在其中放一个 `size-3.5` 的 lucide `CheckIcon`；它没有 mixed glyph。Proto UI 当前公开 `shadcn-checkbox-indicator`，用 `flex items-center justify-center` 居中而非 `grid place-content-center`——后两个 utility 不在 style closure 内，而本切片只被批准新增 `rounded-[4px]` 与 `3.5` 两个精确闭包。这一选择与较新官方 recipe 一致：固定历史基线为 revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`，而 revision `1773ecfeeb4a04366978d353e69b5c7ded78dcb2` 的 `.cn-checkbox` 同样用 `flex items-center justify-center`，`.cn-checkbox-indicator` 同样把 glyph 定为 `size-3.5`。因此居中**机制**归类为有意采用较新官方 recipe，而非 parity gap；是否为 `grid place-content-center` 扩展 closure 也随之不再必要。**所有者**则确有差异：该 recipe 把居中放在 Root，本投射放在 Indicator，这一点记为有意偏离，源于 Indicator 在本投射中是公开的 anatomy part。`size-3.5` 落在 Indicator 自身而非其中的 icon 上，因为 renderer 的 SVG factory 不接受 style handle；两种写法画出的 glyph box 都是 14px。glyph 由本原型的 renderer 直接绘制，未取用 `@proto.ui/prototypes-lucide`。公开 composition 是否保留、以及是否改用 Lucide glyph，仍是待评审问题；具体 parity 通过实现与测试前不得宣称。
 
 
       en: >-
-        Upstream does not export Indicator separately; its `Checkbox` wrapper creates one internally with the className `grid place-content-center text-current transition-none` and places a `size-3.5` lucide `CheckIcon` inside it, with no mixed glyph. Proto UI currently exposes `shadcn-checkbox-indicator` and centers with `flex items-center justify-center` rather than `grid place-content-center`, because neither of those two utilities is in the style closure and this slice was approved to add exactly two exact closures, `rounded-[4px]` and `3.5`. `size-3.5` sits on the Indicator itself rather than on an icon inside it, because the renderer's SVG factory accepts no style handle; both spellings paint a 14px glyph box. The glyph is drawn by this prototype's own renderer and does not consume `@proto.ui/prototypes-lucide`. Whether the public composition remains, whether the glyph should move to Lucide, and whether `grid place-content-center` is worth a closure extension are pending review; exact parity must not be claimed before implementation and tests.
+        Upstream does not export Indicator separately; its `Checkbox` wrapper creates one internally with the className `grid place-content-center text-current transition-none` and places a `size-3.5` lucide `CheckIcon` inside it, with no mixed glyph. Proto UI currently exposes `shadcn-checkbox-indicator` and centers with `flex items-center justify-center` rather than `grid place-content-center`, because neither of those two utilities is in the style closure and this slice was approved to add exactly two exact closures, `rounded-[4px]` and `3.5`. That choice agrees with the later official recipe, where, against the pinned historical baseline revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`, `.cn-checkbox` at revision `1773ecfeeb4a04366978d353e69b5c7ded78dcb2` also centers with `flex items-center justify-center` and `.cn-checkbox-indicator` also fixes the glyph at `size-3.5`. The centering mechanism is therefore classified as an intentional adoption of the later official recipe rather than a parity gap, and extending the closure for `grid place-content-center` is no longer necessary. The owner does differ, because that recipe centers at Root while this projection centers at Indicator, and that is recorded as an intentional deviation following from Indicator being a public anatomy part here. `size-3.5` sits on the Indicator itself rather than on an icon inside it, because the renderer's SVG factory accepts no style handle; both spellings paint a 14px glyph box. The glyph is drawn by this prototype's own renderer and does not consume `@proto.ui/prototypes-lucide`. Whether the public composition remains and whether the glyph should move to Lucide are pending review; exact parity must not be claimed before implementation and tests.
 
 
     blocks: [shadcn checkbox parity roadmap]
@@ -86,8 +86,13 @@ sources:
   - path: packages/prototypes/shadcn/src/checkbox/indicator.proto.ts
   - path: packages/prototypes/shadcn/src/checkbox/types.ts
   - path: packages/prototypes/shadcn/test/checkbox.test.ts
+  - path: packages/spec/graph/test/shadcn-checkbox-baseline.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/checkbox.tsx
-    label: shadcn/ui v4 new-york Checkbox Indicator pinned baseline
+    label: shadcn/ui v4 new-york Checkbox Indicator pinned historical compatibility baseline
+  - path: https://github.com/shadcn-ui/ui/blob/63c1308d112b6b1205d86244a156cca1abef5087/apps/v4/registry/new-york-v4/ui/checkbox.tsx
+    label: shadcn/ui Checkbox at the exact compared revision, byte-identical to the pinned baseline file
+  - path: https://github.com/shadcn-ui/ui/blob/1773ecfeeb4a04366978d353e69b5c7ded78dcb2/apps/v4/registry/styles/style-maia.css
+    label: shadcn/ui later official maia Checkbox recipe, recorded as visual-source evidence only; it does not advance the pinned compatibility baseline
 dependsOn:
   contracts:
     [C-AS-HOOK-0001, C-CORE-SYNTAX-0003, C-CORE-SYNTAX-0007, C-RULE-INTENT-FEEDBACK-STYLE-0001]
@@ -99,6 +104,9 @@ inherits:
       note: Default inherited indicator protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-CHECKBOX-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Classified the centering mechanism as an intentional adoption of the later official recipe rather than a parity gap against the pinned baseline.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the Shadcn Checkbox Indicator projection with derived glyph selection and centralized upstream differences.

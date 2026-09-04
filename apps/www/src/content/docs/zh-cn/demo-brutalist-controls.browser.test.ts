@@ -11,7 +11,12 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { choosePreviewRuntime, runtimeSelectTrigger } from './browser-harness';
+import {
+  RUNTIMES as EVERY_RUNTIME,
+  choosePreviewRuntime,
+  runtimeSelectTrigger,
+  selectRuntime as selectRuntimeIncludingVue2,
+} from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -20,7 +25,9 @@ const SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 const TABS_ROUTE = '/en/ui-libraries/brutalist/components/tabs/';
 const SCROLL_AREA_ROUTE = '/en/ui-libraries/brutalist/components/scroll-area/';
 const TEXTAREA_ROUTE = '/en/ui-libraries/brutalist/components/textarea/';
+const TOOLTIP_ROUTE = '/en/ui-libraries/brutalist/components/tooltip/';
 const DROPDOWN_ROUTE = '/en/ui-libraries/brutalist/components/dropdown-menu/';
+const BUTTON_ROUTE = '/en/ui-libraries/brutalist/components/button/';
 const GEOMETRY_EPSILON = 0.5;
 
 const COLOR_SCHEMES = ['light', 'dark'] as const;
@@ -413,6 +420,126 @@ async function viewportRing(page: Page): Promise<ViewportRing> {
   });
 }
 
+/** Every Button fill this suite reads, paired with the theme variable it names. */
+const BUTTON_FILLS = {
+  solidMain: ['--pui-main', '--pui-main-foreground'],
+  surface: ['--pui-secondary-background', '--pui-foreground'],
+  destructive: ['--pui-destructive', '--pui-destructive-foreground'],
+  disabledSolid: ['--pui-main', '--pui-main-foreground'],
+  disabledSurface: ['--pui-secondary-background', '--pui-foreground'],
+} as const;
+
+type ButtonFill = {
+  background: string;
+  color: string;
+  opacity: string;
+  variables: { background: string; color: string };
+  hovered: boolean;
+  pressed: boolean;
+};
+
+/**
+ * Reads each Button fill and the `:root` value of the variable it names through
+ * the same 1x1 canvas, so a theme hex and a computed `rgb()` compare as painted
+ * rather than as text. Comparing the pair is what "resolves through the theme
+ * variable" means; comparing two schemes only proves the surface moved.
+ */
+/**
+ * Switches the host theme through the site's own control surface.
+ *
+ * `P-BRUTALIST-BUTTON-LIVE-THEME` names host-theme-driven CSS variable
+ * resolution as the supported mechanism and puts `prefers-color-scheme`
+ * outside the criterion, so `emulateMedia` would let a Button written entirely
+ * in media queries satisfy this case. Calling `StarlightTheme.set` rather than
+ * writing attributes means the case exercises the exact signal the documentation
+ * theme toggle emits: `data-theme` and `color-scheme` on the root, and nothing
+ * else. Setting a `.dark` class here as well would keep the case green if the
+ * `:root[data-theme='dark']` selector broke, which is the selector the real
+ * toggle depends on.
+ */
+async function applyHostTheme(page: Page, scheme: ColorScheme): Promise<void> {
+  await page.evaluate((next) => {
+    const host = window as unknown as { StarlightTheme?: { set(theme: string): void } };
+    if (!host.StarlightTheme) throw new Error('The documentation theme provider must be present.');
+    host.StarlightTheme.set(next);
+  }, scheme);
+  await page.waitForFunction((next) => document.documentElement.dataset.theme === next, scheme, {
+    timeout: 10_000,
+  });
+}
+
+/**
+ * Overrides the theme variables `P-BRUTALIST-BUTTON-LIGHT-DARK` requires the
+ * surface and destructive fills to resolve through, each with a value in no
+ * palette and distinct from the others, so a pair hard-coded to the current
+ * Light or Dark values cannot pass and no fill can satisfy the check by
+ * following a variable it does not name.
+ *
+ * The solid accent variables are deliberately absent. That criterion asks solid
+ * pairs to be theme-invariant and asks for variable resolution from surface and
+ * destructive only, so a conforming projection may materialize the accent pair
+ * as fixed colours. Canarying it would fail that projection for conforming.
+ */
+const CANARY_VALUES: Record<string, string> = {
+  '--pui-secondary-background': 'rgb(7, 8, 9)',
+  '--pui-foreground': 'rgb(10, 11, 12)',
+  '--pui-destructive': 'rgb(13, 14, 15)',
+  '--pui-destructive-foreground': 'rgb(16, 17, 18)',
+};
+
+async function applyCanaryTheme(page: Page, on: boolean): Promise<void> {
+  await page.evaluate(
+    ({ enabled, values }) => {
+      const root = document.documentElement;
+      for (const [name, value] of Object.entries(values)) {
+        if (enabled) root.style.setProperty(name, value);
+        else root.style.removeProperty(name);
+      }
+    },
+    { enabled: on, values: CANARY_VALUES }
+  );
+}
+
+async function buttonFills(page: Page): Promise<Record<keyof typeof BUTTON_FILLS, ButtonFill>> {
+  return page.evaluate((fills) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) throw new Error('Canvas 2D context is required to resolve painted colours.');
+
+    const paint = (color: string): string => {
+      context.clearRect(0, 0, 1, 1);
+      context.fillStyle = '#000';
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+      return Array.from(context.getImageData(0, 0, 1, 1).data).join(',');
+    };
+
+    const rootStyle = getComputedStyle(document.documentElement);
+    const result: Record<string, unknown> = {};
+    for (const [ref, [backgroundVar, colorVar]] of Object.entries(fills)) {
+      const element = document.querySelector<HTMLElement>(
+        `[data-previewer-id] [data-demo-ref="${ref}"]`
+      );
+      if (!element) throw new Error(`The Brutalist Button demo must render ${ref}.`);
+      const style = getComputedStyle(element);
+      result[ref] = {
+        background: paint(style.backgroundColor),
+        color: paint(style.color),
+        opacity: style.opacity,
+        variables: {
+          background: paint(rootStyle.getPropertyValue(backgroundVar).trim()),
+          color: paint(rootStyle.getPropertyValue(colorVar).trim()),
+        },
+        hovered: element.hasAttribute('data-hovered'),
+        pressed: element.hasAttribute('data-pressed'),
+      };
+    }
+    return result as Record<string, ButtonFill>;
+  }, BUTTON_FILLS);
+}
+
 beforeAll(async () => {
   baseUrl = await startServer();
   browser = await chromium.launch({
@@ -541,6 +668,178 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           GEOMETRY_EPSILON
         );
         await page.mouse.up();
+      }
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it('composes the transparent Tooltip Group across Web Components, React, and Vue', async () => {
+    const { context, page, previewer } = await openRoute(TOOLTIP_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    const expectTooltipPaint = async (
+      tooltip: Locator,
+      expectedText: string,
+      frame: string
+    ): Promise<void> => {
+      const paint = await tooltip.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return {
+          text: element.textContent,
+          tabIndex: (element as HTMLElement).tabIndex,
+          interactive: element.querySelectorAll('a,button,input,select,textarea,[tabindex]').length,
+          borderRadius: style.borderRadius,
+          borderWidth: style.borderTopWidth,
+          borderColor: style.borderTopColor,
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          boxShadow: style.boxShadow,
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          fontWeight: style.fontWeight,
+          textTransform: style.textTransform,
+          paddingInline: style.paddingInline,
+          paddingBlock: style.paddingBlock,
+          width: rect.width,
+          height: rect.height,
+        };
+      });
+      expect(paint.text, frame).toContain(expectedText);
+      expect(paint.tabIndex, frame).toBe(-1);
+      expect(paint.interactive, frame).toBe(0);
+      expect(paint.borderRadius, frame).toBe('0px');
+      expect(paint.borderWidth, frame).toBe('2px');
+      // The preview frame and the renderer-owned body portal must resolve one shared theme.
+      const resolved = await page.evaluate(() => {
+        const boundary = document.querySelector('[data-brutalist-tooltip-theme-boundary]');
+        if (!(boundary instanceof HTMLElement)) {
+          throw new Error('The Tooltip page must expose its shared theme boundary.');
+        }
+        const readPaint = (parent: HTMLElement) => {
+          const probe = document.createElement('div');
+          probe.style.color = 'var(--pui-foreground)';
+          probe.style.backgroundColor = 'var(--pui-background)';
+          parent.appendChild(probe);
+          const style = getComputedStyle(probe);
+          const result = {
+            foreground: style.color,
+            background: style.backgroundColor,
+          };
+          probe.remove();
+          return result;
+        };
+        return {
+          boundary: readPaint(boundary),
+          portal: readPaint(document.body),
+        };
+      });
+      expect(resolved.boundary, frame).toEqual(resolved.portal);
+      expect(paint.backgroundColor, frame).toBe(resolved.boundary.foreground);
+      expect(paint.color, frame).toBe(resolved.boundary.background);
+      expect(paint.borderColor, frame).toBe(resolved.boundary.foreground);
+      expect(paint.boxShadow, frame).toContain('4px 4px 0px');
+      expect(paint.fontFamily.toLowerCase(), frame).toContain('mono');
+      expect(paint.fontSize, frame).toBe('12px');
+      expect(Number(paint.fontWeight), frame).toBeGreaterThanOrEqual(700);
+      expect(paint.textTransform, frame).toBe('uppercase');
+      expect(paint.paddingInline, frame).toBe('12px');
+      expect(paint.paddingBlock, frame).toBe('8px');
+      expect(paint.width, frame).toBeGreaterThan(20);
+      expect(paint.height, frame).toBeGreaterThan(20);
+    };
+
+    try {
+      // Choosing each declared runtime is the evidence: `selectRuntime` waits
+      // for `[data-adapter-select-root].dataset.value` to equal it before the
+      // host is accepted. Reading an option inventory would retest the
+      // previewer's own Select, whose items exist only while it is open.
+      for (const runtime of RUNTIMES) {
+        await applyColorScheme(page, 'light');
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
+        // Scoped to the rendered host: the previewer chrome is Proto UI too, so
+        // a previewer-wide count is not evidence about this demo.
+        const roots = previewer.locator('.host [data-pui-root]');
+        expect(await roots.count(), runtime).toBe(7);
+        expect(await roots.nth(0).getAttribute('data-pui-root'), runtime).toBe('');
+        const firstTrigger = roots.filter({ hasText: 'Hover or focus for details' }).last();
+        const secondTrigger = roots.filter({ hasText: 'Move to the second trigger' }).last();
+        await expect.poll(() => page.getByRole('tooltip').count(), { message: runtime }).toBe(0);
+
+        await firstTrigger.hover();
+        await page.waitForTimeout(100);
+        expect(await page.getByRole('tooltip').count(), `${runtime}/cold-delay`).toBe(0);
+        const firstTooltip = page
+          .getByRole('tooltip')
+          .filter({ hasText: 'Portable Base behavior, Brutalist visual grammar' });
+        await expect.poll(() => firstTooltip.count(), { message: runtime }).toBe(1);
+        await expectTooltipPaint(
+          firstTooltip,
+          'Portable Base behavior, Brutalist visual grammar',
+          `${runtime}/light`
+        );
+        await applyColorScheme(page, 'dark');
+        await expectTooltipPaint(
+          firstTooltip,
+          'Portable Base behavior, Brutalist visual grammar',
+          `${runtime}/dark-repaint`
+        );
+        const firstTooltipId = await firstTooltip.getAttribute('id');
+        expect(firstTooltipId, runtime).toBeTruthy();
+        expect(
+          (await firstTrigger.getAttribute('aria-describedby'))?.split(/\s+/),
+          runtime
+        ).toContain(firstTooltipId);
+
+        // The Group is warm after the first owner closes, so the sibling opens without the cold delay.
+        await secondTrigger.hover();
+        const secondTooltip = page
+          .getByRole('tooltip')
+          .filter({ hasText: 'Group preserves the shared warm-delay domain' });
+        await expect
+          .poll(
+            async () => ({
+              second: await secondTooltip.count(),
+              first: await firstTooltip.count(),
+              total: await page.getByRole('tooltip').count(),
+              firstOwnsDescription:
+                (await firstTrigger.getAttribute('aria-describedby'))
+                  ?.split(/\s+/)
+                  .includes(firstTooltipId!) ?? false,
+            }),
+            { message: `${runtime}/warm-owner-handoff`, timeout: 300, interval: 25 }
+          )
+          .toEqual({ second: 1, first: 0, total: 1, firstOwnsDescription: false });
+        await expectTooltipPaint(
+          secondTooltip,
+          'Group preserves the shared warm-delay domain',
+          `${runtime}/dark-warm-owner`
+        );
+
+        const secondTooltipId = await secondTooltip.getAttribute('id');
+        expect(secondTooltipId, runtime).toBeTruthy();
+        expect(
+          (await secondTrigger.getAttribute('aria-describedby'))?.split(/\s+/),
+          runtime
+        ).toContain(secondTooltipId);
+
+        // Closing the final owner must unmount Content and remove its owned IDREF token.
+        await page.mouse.move(0, 0);
+        await expect
+          .poll(
+            async () => ({
+              total: await page.getByRole('tooltip').count(),
+              secondOwnsDescription:
+                (await secondTrigger.getAttribute('aria-describedby'))
+                  ?.split(/\s+/)
+                  .includes(secondTooltipId!) ?? false,
+            }),
+            { message: `${runtime}/final-owner-teardown` }
+          )
+          .toEqual({ total: 0, secondOwnsDescription: false });
       }
     } finally {
       await context.close();
@@ -865,6 +1164,127 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
             { timeout: 10_000 }
           );
         }
+      }
+    } finally {
+      await context.close();
+    }
+  }, 240_000);
+
+  it('repaints theme-following Button fills on a host theme change in all runtimes', async () => {
+    const { context, page, previewer } = await openRoute(BUTTON_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      // Pinned for the whole case, and never changed again. Dark is then reached
+      // only through the host theme, so a media-query implementation cannot
+      // satisfy any measurement below.
+      await page.emulateMedia({ colorScheme: 'light' });
+
+      for (const runtime of EVERY_RUNTIME) {
+        await selectRuntimeIncludingVue2(page, previewer, runtime, '[data-demo-ref="surface"]', 1);
+        // Park the pointer off the demo: a repaint that needed a hover to land
+        // would otherwise pass here and fail for a reader who never moves.
+        await page.mouse.move(0, 0);
+
+        const painted: Record<
+          ColorScheme,
+          Record<keyof typeof BUTTON_FILLS, ButtonFill>
+        > = {} as never;
+        for (const scheme of COLOR_SCHEMES) {
+          await applyHostTheme(page, scheme);
+
+          const rootSignal = await page.evaluate(() => ({
+            theme: document.documentElement.dataset.theme,
+            darkClass: document.documentElement.classList.contains('dark'),
+          }));
+          expect(rootSignal.theme, `${runtime}/${scheme}/host-signal`).toBe(scheme);
+          // The documentation toggle sets no class. If this case set one, a
+          // broken `:root[data-theme='dark']` selector would still look healthy
+          // here while the real toggle left mounted Buttons in Light.
+          expect(rootSignal.darkClass, `${runtime}/${scheme}/no-class-signal`).toBe(false);
+
+          const fills = await buttonFills(page);
+          painted[scheme] = fills;
+
+          for (const [ref, fill] of Object.entries(fills)) {
+            const label = `${runtime}/${scheme}/${ref}`;
+            // Each fill is the theme variable it names, not a copy of the value
+            // that variable happened to hold when the control mounted.
+            expect(fill.background, `${label}/background`).toBe(fill.variables.background);
+            expect(fill.color, `${label}/color`).toBe(fill.variables.color);
+            expect(fill.hovered, `${label}/hovered`).toBe(false);
+            expect(fill.pressed, `${label}/pressed`).toBe(false);
+          }
+
+          // Disabled lowers emphasis without leaving the theme: same pair as the
+          // enabled control of the same variant, at half opacity.
+          expect(fills.disabledSurface.background, `${runtime}/${scheme}/disabled-pair`).toBe(
+            fills.surface.background
+          );
+          expect(fills.disabledSurface.color, `${runtime}/${scheme}/disabled-ink`).toBe(
+            fills.surface.color
+          );
+          expect(fills.disabledSurface.opacity, `${runtime}/${scheme}/disabled-opacity`).toBe(
+            '0.5'
+          );
+        }
+
+        // Surface is the fill this family moves between schemes; if the theme
+        // ever collapsed, every assertion above would still hold.
+        expect(painted.dark.surface.background, `${runtime}/surface-moves`).not.toBe(
+          painted.light.surface.background
+        );
+        expect(painted.dark.disabledSurface.background, `${runtime}/disabled-moves`).not.toBe(
+          painted.light.disabledSurface.background
+        );
+        // Accent pairs are theme-invariant, enabled and disabled alike.
+        expect(painted.dark.solidMain.background, `${runtime}/accent-invariant`).toBe(
+          painted.light.solidMain.background
+        );
+        expect(painted.dark.solidMain.color, `${runtime}/accent-ink-invariant`).toBe(
+          painted.light.solidMain.color
+        );
+        expect(painted.dark.disabledSolid.background, `${runtime}/disabled-accent`).toBe(
+          painted.light.disabledSolid.background
+        );
+
+        // Back to the scheme this runtime started in, so the repaint is proven
+        // to run both ways rather than only into Dark.
+        await applyHostTheme(page, 'light');
+        const restored = await buttonFills(page);
+        expect(restored.surface.background, `${runtime}/restored`).toBe(
+          painted.light.surface.background
+        );
+        expect(restored.surface.color, `${runtime}/restored-ink`).toBe(painted.light.surface.color);
+
+        // Both schemes above are palettes an implementation could hard-code.
+        // Every variable this case reads is now moved to a value in neither, and
+        // each to a different one, so a fill can only match by resolving the
+        // variable it names.
+        await applyCanaryTheme(page, true);
+        const canary = await buttonFills(page);
+        for (const [ref, fill] of Object.entries(canary)) {
+          const key = ref as keyof typeof BUTTON_FILLS;
+          const label = `${runtime}/canary/${ref}`;
+          const [backgroundVar] = BUTTON_FILLS[key];
+          if (backgroundVar in CANARY_VALUES) {
+            // A theme-following fill has to land on the moved variable. A pair
+            // hard-coded to a value both palettes share satisfies both schemes
+            // and fails here, which is the whole point of the canary.
+            expect(fill.background, `${label}/background`).toBe(fill.variables.background);
+            expect(fill.color, `${label}/color`).toBe(fill.variables.color);
+            expect(fill.background, `${label}/moved`).not.toBe(painted.light[key].background);
+            expect(fill.color, `${label}/ink-moved`).not.toBe(painted.light[key].color);
+            continue;
+          }
+          // A fixed accent pair owns no theme variable to follow, so moving the
+          // surface and destructive variables must leave it exactly where it was.
+          expect(fill.background, `${label}/fixed`).toBe(painted.light[key].background);
+          expect(fill.color, `${label}/fixed-ink`).toBe(painted.light[key].color);
+        }
+        await applyCanaryTheme(page, false);
       }
     } finally {
       await context.close();

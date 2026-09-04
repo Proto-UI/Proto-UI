@@ -39,8 +39,9 @@ function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerE
     const nextDisabled = !!run.props.get().disabled || ctx.disabled;
     disabled.set(nextDisabled, 'reason: tooltip trigger disabled sync');
     focusable.setDisabled(nextDisabled);
+    const contentPresent = run.anatomy.partsOf(TOOLTIP_FAMILY, 'content').length > 0;
     describedBy.set(
-      ctx.open ? createTooltipContentId(ctx.rootId) : '',
+      ctx.open && contentPresent ? createTooltipContentId(ctx.rootId) : '',
       'reason: tooltip trigger describedBy sync'
     );
     if (!nextDisabled) return;
@@ -54,6 +55,13 @@ function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerE
   };
 
   def.context.subscribe(TOOLTIP_CONTEXT, (run, next) => syncContext(run, next));
+  def.anatomy.subscribeParts(TOOLTIP_FAMILY, 'content', (run) => {
+    try {
+      syncContext(run, run.context.read(TOOLTIP_CONTEXT));
+    } catch (error) {
+      if ((error as { code?: string })?.code !== 'CONTEXT_DISCONNECTED') throw error;
+    }
+  });
   def.props.watch(['disabled'], (run) => syncContext(run, run.context.read(TOOLTIP_CONTEXT)));
   def.lifecycle.onCreated((run) => syncContext(run, run.context.read(TOOLTIP_CONTEXT)));
 
