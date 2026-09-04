@@ -680,15 +680,12 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       height: 900,
     });
 
-    const expectTooltipPaint = async (
-      tooltip: Locator,
-      expectedText: string,
-      frame: string
-    ): Promise<void> => {
+    const expectTooltipPaint = async (tooltip: Locator, expectedText: string, frame: string) => {
       const paint = await tooltip.evaluate((element) => {
         const style = getComputedStyle(element);
         const rect = element.getBoundingClientRect();
         return {
+          id: (element as HTMLElement).id,
           text: element.textContent,
           tabIndex: (element as HTMLElement).tabIndex,
           interactive: element.querySelectorAll('a,button,input,select,textarea,[tabindex]').length,
@@ -750,6 +747,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       expect(paint.paddingBlock, frame).toBe('8px');
       expect(paint.width, frame).toBeGreaterThan(20);
       expect(paint.height, frame).toBeGreaterThan(20);
+      return paint;
     };
 
     try {
@@ -776,19 +774,24 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           .getByRole('tooltip')
           .filter({ hasText: 'Portable Base behavior, Brutalist visual grammar' });
         await expect.poll(() => firstTooltip.count(), { message: runtime }).toBe(1);
-        await expectTooltipPaint(
+        const lightPaint = await expectTooltipPaint(
           firstTooltip,
           'Portable Base behavior, Brutalist visual grammar',
           `${runtime}/light`
         );
+        const firstTooltipId = lightPaint.id;
+        expect(firstTooltipId, runtime).toBeTruthy();
         await applyColorScheme(page, 'dark');
-        await expectTooltipPaint(
+        const darkPaint = await expectTooltipPaint(
           firstTooltip,
           'Portable Base behavior, Brutalist visual grammar',
           `${runtime}/dark-repaint`
         );
-        const firstTooltipId = await firstTooltip.getAttribute('id');
-        expect(firstTooltipId, runtime).toBeTruthy();
+        expect(darkPaint.id, `${runtime}/same-mounted-content`).toBe(firstTooltipId);
+        expect(darkPaint.backgroundColor, `${runtime}/live-fill-repaint`).not.toBe(
+          lightPaint.backgroundColor
+        );
+        expect(darkPaint.color, `${runtime}/live-ink-repaint`).not.toBe(lightPaint.color);
         expect(
           (await firstTrigger.getAttribute('aria-describedby'))?.split(/\s+/),
           runtime
