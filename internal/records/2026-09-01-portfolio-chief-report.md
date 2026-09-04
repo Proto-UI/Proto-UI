@@ -68,3 +68,8 @@ Sibling summary: #590 clean review candidate (approval pending); #593 red CI + s
 - **#609** durably captured R-01/R-02, received a maintainer-confirmed CLI-only boundary, and closed only when the repair merged.
 - **#610** merged exact head `b6a6ae44` as `b927d70b` after non-author `cyjin-yl` exact-head approval: https://github.com/Proto-UI/Proto-UI/pull/610#pullrequestreview-5108775771. Zero threads; trusted CI/DCO green; fork Vercel authorization red only. The rebase includes #608.
 - Drifted findings were preserved as PR comments (`#issuecomment-5533828110`, `#issuecomment-5534599073`) while formal verdicts remained canonical exact-head only. No Review610 job, unknown mutation, or retry remains.
+
+## 2026-09-04 — next portfolio object
+
+- **PR #595** (`ed147e84`) remains OPEN despite an independent exact-head approval and green trusted CI: its base is 89 commits behind live main and GitHub reports `CONFLICTING` / `DIRTY` / `rebaseable=false`. Fresh `pui-pr` inspection made no write; integration correctly stopped before `pui-integrate`.
+- Next gate: author refreshes onto current main, then replacement-head CI and non-author approval. Existing approval will be stale after the push. Issue #594 remains OPEN. No duplicate comment/reviewer request was posted.

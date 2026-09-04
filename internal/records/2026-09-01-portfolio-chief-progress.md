@@ -430,3 +430,12 @@ Sibling dispositions (no GitHub write unless noted):
 - Terminal PR #610 state: author `HyacinthHaru`; exact head `b6a6ae443e6b7ff786285608374fe8c317a99c6b`; base `64266b564277f4a632c14189e21cf109df78fb4c` (rebased, includes merged PR #608); zero review threads; trusted repository CI and DCO successful; fork Vercel authorization failure treated as external authorization only. Non-author `cyjin-yl` exact-head APPROVED receipt: https://github.com/Proto-UI/Proto-UI/pull/610#pullrequestreview-5108775771
 - PR #610 merged on 2026-09-04T03:00:52Z as `b927d70b196bc42eee85b9f791c15a84db9697bc`. URL: https://github.com/Proto-UI/Proto-UI/pull/610
 - Idempotency: no Review610 collector or background job remains. Earlier canonical submissions that encountered digest drift failed before mutation; live GitHub exposes the single terminal exact-head approval and merge receipts above. No unknown review/merge outcome exists and no retry is due.
+
+## PR #595 re-audit (2026-09-04)
+
+- URL: https://github.com/Proto-UI/Proto-UI/pull/595. Fresh per-object `pui-dev -> pui-orient -> pui-pr` chain observed at 2026-09-04T12:24:02.645Z.
+- Exact state: OPEN, non-draft; author/viewer `cyjin-yl`; head `ed147e84a567e3c983ebd882bd42012e2aec9be8`; recorded base `02666e149e146094c439b538c9406cbba7d87341`; live main `b927d70b196bc42eee85b9f791c15a84db9697bc` (89 commits ahead). GitHub reports `CONFLICTING` / `DIRTY`, `mergeable=false`, `rebaseable=false`.
+- Evidence: one signed and DCO-clean commit; one-file +22/-0 readiness-wait diff; trusted `CI` checks successful; zero threads/replies/inline comments; non-author `guangliang2019` exact-head APPROVED review `5099893099`; no active change request. Canonical review input digest: `dd6ad0000e63b72fffc2421b341369ce9ab6a5adf2c9308bdef12f652c9c8634`.
+- Action: evidence-backed no-op. No merge, review, comment, or duplicate reviewer request. Canonical integration was not entered because `MERGEABLE/CLEAN` is false.
+- Blocker: author must refresh the branch onto current main and resolve conflicts. The push will invalidate/dismiss the current exact-head approval; trusted CI and an independent approval must then be reacquired on the replacement head.
+- Human gates: `integration-decision`, `merge`. Linked Issue #594 remains OPEN until a reviewed repair merges and merged-main evidence exists. Recheck: yes, after a refreshed head.
