@@ -72,12 +72,12 @@ These sources support a cross-host boundary, not cross-host conformance: engines
 | --- | --- | --- | --- |
 | App/backend | Unique `sessionId` per process lifetime; unique non-reused transport `backendBindingId`; process/PTY/input/output epoch lifecycle; authorization; reconnect; audit; explicit stop/restart. Restart creates a new session identity. | Data-only session/binding reference; resize result; bounded actions. | PTY/streams/process/tokens/raw callbacks/bytes. |
 | Terminal engine infrastructure | VT/escape parsing; mutable cell grid; cursor and alternate screen; scrollback; reflow; glyph measurement; selection; terminal mouse modes; paste encoding; renderer; engine accessibility buffer; direct high-frequency diffs; session-scoped engine/parser/buffer lifetime. | Host-local target and backend byte/data channels supplied outside Proto UI authoring. | Engine instance, buffer, parser, renderer, DOM/canvas/native view, controller, mutable selection, raw output/input stream. |
-| Proto UI Terminal semantic owner | Module-issued instance identity; attachment/display facts; resolved input mode; App-composed bounded key requests; resize correlation; lossless attention callbacks; view identity, policy generation, stale rejection. | Plain immutable facts/requests plus Focus identity/epoch/eligibility; Focus sole fact owner. | Grid/scrollback/raw bytes or input text/keys, host events/geometry, engine/controller, App owner identity, Focus facts, credentials/process authority. |
-| Terminal Surface Host Capability | Acquire/idempotently return one owner; maintain one view; reject mismatches/repeat/releasing; keep output epoch subscription session/owner-scoped across target-view gaps; keep input view-scoped; gate both by binding; private input write; resize/attention/A11y/cleanup; await release. | Immutable IDs/policy/non-input callbacks/resolvers. | No raw host/backend/input/epoch; no second owner lease; no view cleanup of output route; no output loss/mix. |
+| Proto UI Terminal semantic owner | Module-issued instance identity; view facts/policy/resize/key requests; one process-session attention connection with monotonic sequence independent of owner/view. | Plain values plus Focus; Focus sole fact owner. | Grid/raw input/output, engine/controller, App owner identity, Focus/process authority. |
+| Terminal Host Capability | Bind process-session engine/output/attention channel before backend activation; keep it until process end; acquire idempotent UI/resize owners inside session; maintain one view/owner; view-scoped input/Focus/A11y/geometry; gated private I/O; resize; cleanup. | Immutable IDs/policy, session attention callback, view callbacks, resolvers. | No raw host/I/O/epoch; owner/view release cannot close session output/attention; no gaps between owners. |
 | Adapter profile | Materialize `boundaryTarget` and actual presentation/input/a11y targets; wire the Host Capability; translate lifecycle and Focus participation. | Governed Module requirement and capability token after admission. | No semantic reinterpretation and no support/provision relation before profile-specific evidence. |
 | Composition/design language | Tabs, toolbar, label, connection badge, reconnect/close, status, search/copy controls when separately admitted, visible leave-terminal control. | App facts and ordinary Proto UI control events. | Terminal protocol, key encoding, PTY/process control, buffer/selection state, engine-owned accessibility tree. |
 
-Engine remains outside Proto UI. Host resolves session engine/coordinator and one owner-scoped output epoch subscription by process-lifetime `sessionId`; view leases own only target/input/Focus/A11y/geometry bindings. Target-only view disposal/replacement leaves output subscription active so bytes continue into preserved engine during gap. Transport reconnect changes unique `backendBindingId` through drain-or-revoke epoch barrier. Repeated owner acquisition for same `{sessionId, terminalInstanceId}` returns exact existing owner lease object without allocation; different instance conflicts; releasing identity rejects. Restart uses new session/engine/coordinator/binding. Nothing crosses portable authoring.
+Engine remains outside Proto UI. Host binds one process-lifetime session channel by unique `sessionId` before backend activation. That channel owns engine/parser/grid, output epoch gating, and monotonic lossless attention delivery from process start through final output drain/process end, independent of zero/one UI owner and zero/one view. Owner release affects only exclusive view/resize participation; output and attention continue between owners and during view gaps. Reconnect changes binding through epoch barrier. Session close—not owner release—drains/closes output/attention and disposes engine. Restart creates new session. Repeated same owner acquire returns exact lease. Nothing raw crosses authoring.
 
 ## Portable facts, requests, and information paths
 
@@ -85,9 +85,9 @@ Engine remains outside Proto UI. Host resolves session engine/coordinator and on
 
 The proposal may evaluate these plain values; names are illustrative and not an admitted API:
 
-- App input: process-lifetime `sessionId`, per-transport unique `backendBindingId`, resolved input mode, statuses, shortcut policy. Module mints instance ID. Restart must use new session ID; reconnect alone may preserve it. Name/description remain A11y.
-- Host facts: attachment, composition, dimensions, input/resize/A11y/keyboard/mouse support and resize outcome. Focus/App status/title stay their owners.
-- Requests/results: App-composed bounded key request, serialized resize result, and every attention/error callback. Physical committed text/key input stays Host/engine-private and goes only to backend. Focus remains Focus.
+- App input: process-lifetime session ID, transport binding ID, input mode/status/shortcut policy. Module mints instance and session-connection IDs. Restart new session.
+- View Host facts: attachment/composition/dimensions/support/resize. Session attention event: `{ sequence, kind: bell | error }`, monotonic per session, independent of view generation. Focus/App status/title separate.
+- Requests/results: App-composed key, resize result, every session attention occurrence. Physical input stays private. Focus remains Focus.
 
 `columns` and `rows` must be finite positive safe integers. The Module/Host rejects `0`, negatives, fractions, `NaN`, `Infinity`, and values above the safe-integer range as `invalid-dimensions` before allocating a resize revision, mutating the coordinator, or calling engine/backend; pixels, rectangles, font metrics, device scale, observers, and layout objects remain host-local. The first slice admits exactly one active Module-issued `terminalInstanceId` resize owner per `sessionId`. A Host session coordinator atomically grants a separate owner lease before any view can become ready and rejects a different live instance with `resize-owner-conflict`. Disposing/replacing a view cannot release the owner; same-instance replacement attaches through the retained owner lease. Explicit final instance release waits for pending resize settlement, then permits another instance to acquire. The coordinator permits at most one unresolved resize across the owner's old/replacement views and retains only newest valid geometry while pending. A resize becomes fact only after Host completion with Module revision/effective dimensions; only then may retained newest size dispatch. Replacement must cancel+await, or await completion and reapply newest size, before ready. Thus old work cannot execute after new, duplicate App IDs cannot alias ownership, and differently sized instances cannot fight over one PTY. Terminal-controlled title stays outside portable facts.
 
@@ -99,15 +99,15 @@ Selection summaries and copy requests are technically expressible as plain value
 
 | Input | Owner path | Observable output | Synchronization boundary |
 | --- | --- | --- | --- |
-| App connection/process facts | App/backend closes input/output before exit; Module disabled+Focus-ineligible | Target-view replacement does not close session output. Reconnect uses epoch barrier. Restart new session/engine/binding. | Process session vs transport epoch vs view lifetime remain distinct. |
-| Output bytes/VT data | Active owner-scoped backend subscription -> epoch gate -> session engine parser | Continues while no view is attached; target replacement loses zero bytes. Reconnect drains old before new or revokes/drops+awaits; only current binding parses. | Owner/session lifetime; non-reused binding barrier; zero portable bytes/grid. |
-| IME/text/key input | Active view target -> Host/engine -> binding | View-scoped; generation/mode/process/binding checked; private write once; no observation. View gap/read-only/disabled/revoked zero. | Connection/policy + binding epoch; raw input never Module. |
-| Harness shortcut | Host arbiter -> App command | Command, no terminal forwarding. | Before engine. |
-| Terminal key | Host fallthrough -> engine -> backend | Encoded once, no semantic callback. | Same event under accepted policy/live epoch. |
-| Host geometry | Active Module-issued instance -> target/font/DPR observers -> owner lease/session coordinator -> engine/backend resize | Coordinator rejects another instance for same session; owner keeps engine/process rows/columns converged with one mutation across old/replacement views; result carries Module revision/effective dimensions. | Atomic owner grant by `{ sessionId, terminalInstanceId }`; valid dimensions only; old operation completes/cancels before owner release, replacement ready, or newest retained dispatch. |
-| Focus request or user entry | Focus domain eligibility/topology/request -> Host Capability's focus bridge -> physical engine input target | One focused logical terminal surface; `disabled` rejects entry, while focus facts return only through Focus. | The runtime commits resolved input mode and Focus eligibility together; current Focus/view epoch; Terminal facts do not duplicate focused state. |
-| Accessible terminal content | Engine buffer -> host accessibility bridge | Platform screen reader navigates bounded/current content. | Host accessibility lifecycle; not generic Proto State. |
-| Bell/error | Engine/host -> lossless ordered `onAttention` callbacks -> App/composition presentation policy | Every occurrence is delivered/countable; audible/visual/status presentation may rate-limit or deduplicate identical signals for user comfort without deleting protocol/audit occurrences. | Connection/generation and callback order; presentation dedupe is downstream, not callback coalescing. |
+| App connection/process facts | App/backend closes binding at process end; Module disables view Focus | View replacement/owner release does not close session channel. Reconnect epoch barrier. Restart new session. | Process session > owner > view lifetimes explicitly nested. |
+| Output bytes/VT data | Active binding -> process-session channel epoch gate -> session engine | Continues with no owner/view and between owners; next view inherits complete engine state. Reconnect drain/revoke barrier. | Session lifetime + binding epoch; zero portable bytes/grid. |
+| IME/text/key input | Active view -> Host/engine -> binding | View-scoped private write; no owner/view means no input. | View connection/policy + binding epoch. |
+| Harness shortcut | Host arbiter -> App command | Command no forwarding. | Before engine. |
+| Terminal key | Host fallthrough -> engine/backend | Encoded once no callback. | Accepted view/live epoch. |
+| Host geometry | Active owner/view -> coordinator -> resize | Exclusive/serialized valid dimensions. | Session coordinator + owner/revision. |
+| Focus entry | Focus -> active view input target | One logical focus; disabled/no view rejects. | Focus/view epoch. |
+| Accessible terminal content | Session engine -> active view host bridge | Platform access while view exists; engine state persists without it. | View A11y lifecycle over session engine. |
+| Bell/error | Session engine/host -> process-session `onAttention` with monotonic sequence -> App presentation | Every occurrence delivered/countable even with no owner/view; owner replacement does not rebind it. Presentation may dedupe effects only. | `sessionConnectionId`, `sessionId`, strictly increasing attention sequence; session close drains before callback retirement. |
 
 ## Fake-engine / fake-host protocol sketch
 
@@ -257,6 +257,18 @@ type TerminalSurfaceSnapshot = Readonly<{
   facts: TerminalSurfaceFacts;
 }>;
 
+type TerminalAttentionEvent = Readonly<{
+  sequence: number;
+  kind: 'bell' | 'error';
+}>;
+
+type TerminalSessionConnection = Readonly<{
+  // Module-issued; persists for the full process session, independent of owners/views.
+  sessionConnectionId: string;
+  sessionId: string;
+  onAttention(sessionConnectionId: string, sessionId: string, event: TerminalAttentionEvent): void;
+}>;
+
 type TerminalSurfaceConnection = Readonly<{
   // Issued and retired by the Module; callback closures reject any retired identity.
   connectionId: string;
@@ -267,7 +279,6 @@ type TerminalSurfaceConnection = Readonly<{
   onResizeRequest(connectionId: string, generation: number, dimensions: TerminalDimensions): void;
   // Completion may be observed by a retired view but always settles the session coordinator.
   onResizeResult(connectionId: string, result: TerminalResizeResult): void;
-  onAttention(connectionId: string, generation: number, kind: 'bell' | 'error'): void;
 }>;
 
 type TerminalSurfaceLease = Readonly<{
@@ -289,9 +300,9 @@ type TerminalViewAttachResult =
     }>;
 
 type TerminalResizeOwnerLease = Readonly<{
-  // Exact identity match and exactly one active view; caller disposes before reattach.
+  // Exact identity match and one active view; caller disposes before reattach.
   attachView(connection: TerminalSurfaceConnection): TerminalViewAttachResult;
-  // Resolves only after pending resize settles and grant releases.
+  // Settles resize/releases owner only; session output/attention remain alive.
   release(): Promise<'released'>;
 }>;
 
@@ -313,33 +324,32 @@ type TerminalResizeOwnerResult =
         | 'owner-releasing';
     }>;
 
+type TerminalSessionLease = Readonly<{
+  acquireResizeOwner(terminalInstanceId: string): TerminalResizeOwnerResult;
+  // Process-end only; drains output/attention before retiring session callback/engine.
+  close(): Promise<'closed'>;
+}>;
+
 type TerminalSurfaceHost = Readonly<{
-  acquireResizeOwner(identity: {
-    terminalInstanceId: string;
-    sessionId: string;
-  }): TerminalResizeOwnerResult;
+  bindSession(connection: TerminalSessionConnection): TerminalSessionLease;
 }>;
 ```
 
-A fake Module mints ID. Host registry atomically keys owner by `{sessionId, terminalInstanceId}`: first valid acquire returns acquired; repeated same identity returns existing with strict same lease object and no resolver/listener/allocation; different ID conflicts; releasing identity returns owner-releasing. Owner holds engine/coordinator/output epoch independent of view; exactly one view owns target/input/geometry. Target-only disposal leaves output subscription alive. Attach validates identity/repeat. Release awaits resize and output epoch close. Restart new session. Attention lossless; input unobserved. Exercise:
+A fake Module mints sessionConnectionId and binds session7 before backend output starts. Session lease owns engine/output/attention until process end; owner registry/view sits beneath it. Same owner acquire idempotent. Owner/view release never closes session channel. Attention sequence increments at event source and session callback remains live without owners/views. `close()` drains output/attention then retires callback/engine. Exercise:
 
-1. owner failures exact/no grant; later valid works;
-2. acquire instance7/session7, immediately repeat identical acquire; get status existing and object identity equality with first owner, resolver/resource counts unchanged. Attempts to attach via either reference share one active-view guard; second attach rejects view-already-attached;
-3. attach matching backend2 gen1; ordered facts/snapshot; mismatched identity rejects;
-4. dispose target view while backend2 outputs A/B/C during gap; no input accepted, but owner-scoped output parses all bytes into engine in order. Attach replacement view with same binding and prove grid/modes include gap output, exactly one input/geometry bridge;
-5. during owner release attach/acquire same identity returns owner-releasing; distinct instance conflicts; view dispose never releases;
-6. unresolved resize then release promise pending/blocks; settles then next owner; late result no overwrite;
-7. backend2 -> backend3 reconnect: drain and revoke/drop paths; late old rejects before parser; owner output subscription switches atomically and view replacement loses none;
-8. exit closes owner output + view input, disabled Focus. Binding-only restart on session7 rejects; await release/engine cleanup; new session8/engine/coordinator/owner/backend4 reset grid/parser/modes;
-9. stale generations ignored; Focus modes correct;
-10. sensitive private input zero Module/log callbacks; mobile key outbound once;
-11. mouse/F6; invalid dimensions; serialized resize/reconnect; target state; engine/session affinity/support failures;
-12. same-turn lifecycle/support ordered; two bells+two errors four callbacks while presentation may dedupe effects;
-13. leave Button/Focus topology failure/success;
-14. dispose view zero effects while output can continue; await final release closes output, then another acquires;
-15. no raw host/backend/input/epoch/grid/owner portable.
+1. bind session7; acquire failures then valid instance7 owner; repeated acquire exact same lease;
+2. attach one matching view; mismatch/repeat/releasing rejects;
+3. dispose target view while output A/B/C and bell/error occur; output parses and session onAttention receives ordered sequences despite no view. Replacement inherits complete grid and attention sequence continues; view input absent during gap;
+4. release instance7 owner while process emits D plus two bells; await owner release, leave session open, assert output/state and attention sequences continue. Before instance8 acquisition emit E/error; after acquisition/attach, view sees A-E-derived state and next attention sequence with none queued/lost/rebound;
+5. unresolved resize owner release blocks owner work but never session output/attention; late resize no overwrite;
+6. reconnect backend epoch paths while session remains; late old output rejects;
+7. exit/final process: close binding, drain final output/attention, await `session.close()`, then callback/engine retire. Owner absence never closes early. Binding-only restart rejects; new session8 fresh engine/channel;
+8. stale view generations/Focus modes; sensitive input private; mobile key; mouse/F6; invalid dimensions; resize/target/session affinity failures;
+9. same-turn lifecycle/support ordered; identical attention events each unique sequence/callback, presentation may dedupe effects;
+10. leave Button/Focus; dispose view/owner while session live then close at process end;
+11. no raw host/I/O/epoch/grid/lease portable.
 
-This makes idempotent owner acquisition, output continuity across view gaps, one active view, restart reset, private input, attention ordering, await release, identity/epoch/resize/Focus/A11y cleanup testable. It does not prove real host behavior or Adapter conformance.
+This makes session-scoped output/attention across view and owner gaps, process-end drain, owner idempotency/one view/resize, restart reset, privacy, attention order, identity/epoch/Focus/A11y cleanup testable. It does not prove real host behavior or Adapter conformance.
 
 ## Input, shortcut, and focus policy
 
@@ -374,16 +384,15 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 
 ### Lifecycle rules
 
-- Host owner registry keys Module ID/session. First valid acquire returns acquired; repeated same identity returns exact existing lease without resource allocation; releasing returns owner-releasing; other instance conflicts. Owner engine/coordinator/output subscription is unique.
-- Owner permits exactly one view. Attach rejects mismatch, repeated active view, or releasing. Dispose old view before replacement avoids duplicate input/geometry.
-- View dispose never releases owner or owner-scoped output subscription. Await release blocks work/attach/acquire, closes output epoch and settles resize before grant; late completion cannot affect next owner.
-- Callbacks connection/generation; no input callback; snapshots versioned; attention each occurrence; presentation dedupe only.
-- Output subscription is owner/session-scoped and remains active during target-only view gaps; input/Focus/A11y/geometry are view-scoped. Gap bytes continue into engine in order. Reconnect changes binding via drain or revoke/drop+await; queued callbacks recheck. Exit/final release closes output.
-- View dispose removes target input/listeners/Focus/geometry/A11y/renderer refs only; not backend output subscription, engine/coordinator/owner/parser/grid/process.
-- Session process-lifetime; reconnect preserve engine/output subscription with new binding. Restart awaits release/cleanup then new session/engine/binding reset.
-- Session teardown closes view input and owner output, disposes view, awaits owner, releases engine. Borrowed affine.
-- Backend reconnect validates owner/view, atomically switches owner output epoch, fresh binding, preserves engine, waits resize settle/reapply.
-- Coordinator validates dimensions/one resize. Lifecycle/support/attention ordered.
+- Host binds one session connection before backend activation. Session lease exclusively owns engine/output epoch/attention sequence until process-end `close()` drains final output/attention and retires callback/engine. Zero-owner gaps do not stop session processing.
+- Owner registry lives within session lease. Same ID returns exact existing lease; releasing rejects; other instance conflicts; failures no grant.
+- Owner one view; attach mismatch/repeat/releasing rejects. View dispose before replacement.
+- Owner release settles resize/grant only; it never closes session output/attention. Output and sequenced attention continue between owners. Session close is separate awaitable process-end operation.
+- View callbacks connection/generation; no input callback; snapshots versioned. Attention callback is session-scoped with strictly increasing sequence and remains live without view/owner; presentation only dedupes effects.
+- Input/Focus/A11y/geometry view-scoped. Output/engine/attention session-scoped. Reconnect switches binding barrier. View dispose removes only view resources.
+- Session ID process-lifetime; restart closes old session after drain then new session/engine/channel reset. Borrowed engine affine.
+- Backend reconnect changes session channel binding, validates owner/view for input/resize, preserves engine, waits resize reapply for view ready.
+- Coordinator validates dimensions/serializes. Lifecycle/support/attention ordered.
 
 ## Proposed entity and evidence graph
 
@@ -409,16 +418,15 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** reject raw host/input/output/epoch/owner; no input observation/identity mutation.
-2. **Owner/views:** acquisition failures; repeated same identity returns exact existing lease/no allocation; releasing/different conflict; mismatch/repeated view reject; one view; await release; cleanup.
-3. **Input/output/restart:** owner-scoped output survives target-view gap and proves bytes preserved; view-scoped input absent in gap; reconnect epoch paths/late reject; exit close; restart new reset session; sensitive input private.
-4. **Mouse exclusion:** block reports/backend; selection local.
-5. **Resize:** invalid/boundary; owner conflict; one in-flight; replacement/newest/release exact.
-6. **Performance/order:** zero content; only levels coalesce; lifecycle/support/results/attention ordered and counted.
-7. **A11y/composition/Focus:** A11y/Focus view-scoped; App status; keyboard/Button/topology; attention effects.
-8. **Real Web:** same-owner reacquire object/resource identity; output during target gap; repeated view/await release; output reconnect/restart reset; private input; dimensions/lifecycle/attention/modes/A11y/cleanup.
-9. **Cross-adapter Web only if claimed:** WC/React/Vue evidence for one admitted portable authoring source. This remains Web evidence.
-10. **Non-Web:** independent native profile with native focus/input/resize/accessibility evidence before any multi-host statement.
+1. **Portable negatives:** reject raw I/O/engine/epoch/leases/input observation; IDs immutable.
+2. **Session/owner/view:** bind session before output; session channel survives zero owners/views; same-owner idempotent; owner/view errors; owner release separate from process-end session close; final drain/callback retirement.
+3. **Output/attention/input:** output and strictly sequenced attention continue during target gap and between owners; replacement view inherits full state; no rebinding/loss; input remains view-private/absent in gaps; reconnect epoch; restart fresh session.
+4. **Mouse/resize:** mouse blocked; invalid/boundary; owner conflict; serialization/release/replacement.
+5. **Performance/order:** zero portable content; levels coalesce only; lifecycle/support/results and each session attention ordered.
+6. **A11y/Focus:** view-scoped over session engine; App status/keyboard/Button/topology; presentation effects.
+7. **Real Web:** no-view/no-owner output+attention; owner transfer; final session drain; acquisition/view/release; reconnect/restart reset; private input; dimensions/lifecycle/A11y cleanup.
+8. **Cross-adapter Web only if claimed:** WC/React/Vue evidence for one admitted portable authoring source. This remains Web evidence.
+9. **Non-Web:** independent native profile with native focus/input/resize/accessibility evidence before any multi-host statement.
 
 ## #513/#514 matrix consumption
 
