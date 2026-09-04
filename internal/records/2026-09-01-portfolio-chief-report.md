@@ -61,3 +61,10 @@ Review/merge mutations blocked this pass: canonical collector in checkout predat
 Still-moving review targets: #585 `183374d8` (scanner/extractor parity), #599 `fbaf80be` (catalog evidence integrity); both CHANGES_REQUESTED with no current-head approval; latest pushes address the immediately prior findings. Independent exact-head approval + canonical submission remain the gate.
 
 Sibling summary: #590 clean review candidate (approval pending); #593 red CI + stale threads; #595 flake fix (approval pending, author self-blocked); #596 7 unresolved threads + security/lifecycle defects; #574 base refresh needed; #586 needs code fixes; #584 research-only; #592/#594/#598 stay open until merged evidence. Full detail in PROGRESS.md.
+
+## 2026-09-04 — #601 -> #609 -> #610 terminal closure
+
+- **#601** merged exact head `49cdd746` as `30ca6ef6`; its independent review exposed residual conditional-container gaps rather than silently broadening the original PR.
+- **#609** durably captured R-01/R-02, received a maintainer-confirmed CLI-only boundary, and closed only when the repair merged.
+- **#610** merged exact head `b6a6ae44` as `b927d70b` after non-author `cyjin-yl` exact-head approval: https://github.com/Proto-UI/Proto-UI/pull/610#pullrequestreview-5108775771. Zero threads; trusted CI/DCO green; fork Vercel authorization red only. The rebase includes #608.
+- Drifted findings were preserved as PR comments (`#issuecomment-5533828110`, `#issuecomment-5534599073`) while formal verdicts remained canonical exact-head only. No Review610 job, unknown mutation, or retry remains.

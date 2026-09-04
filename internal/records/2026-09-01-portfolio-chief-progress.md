@@ -401,7 +401,7 @@ Live main advanced `9c8891ca` → `40ba5fb9011a` during the run. Viewer-authored
 
 External writes this pass:
 
-- Ledger/resport correction: PR #591 CLOSED UNMERGED; Issue #587 OPEN investigation (not fixed); removed stray untracked `e`; commit `71ad51a0` on `agent/portfolio-chief-ledger-20260901`.
+- Ledger/report correction: PR #591 CLOSED UNMERGED; Issue #587 OPEN investigation (not fixed); removed stray untracked `e`; commit `71ad51a0` on `agent/portfolio-chief-ledger-20260901`.
 - Issue #539 tracker checkpoint (1/8): https://github.com/Proto-UI/Proto-UI/issues/539#issuecomment-5519619902
 
 No review/merge mutation for the two active code PRs: the canonical review collector in this checkout predates merged fork-rollup fix PR #588 (commit 868bba7d on remote main). Re-sync checkout to main>=#588 before any submit; do not patch or hand-craft a packet.
@@ -421,3 +421,12 @@ Sibling dispositions (no GitHub write unless noted):
 - #586 head b580322: Base Input Checkpoint C; 6 Codex P2 incl two code bugs (unreachable nofail event delivery, invalid inputMode decimal); needs fixes + independent review.
 - Issue #584: research/discussion; maintainer keeps Compiler outside schema — no-op.
 - Issues #592/#594/#598: open; close only after merged evidence / #599 lands; #592 is not closed by a #593 merge (residual slice remains).
+
+## #601 -> #609 -> #610 closure (2026-09-04)
+
+- PR #601 (`fix/expose-state-static-lowering`) merged exact head `49cdd746630c83fe6f844cda187a04e0ce2d3157` as `30ca6ef6ed7f8d545eed8a40d1df141145c64444` on 2026-09-03T22:08:57Z after an exact-head independent approval. URL: https://github.com/Proto-UI/Proto-UI/pull/601
+- Residual conditional-container findings R-01/R-02 from the #601 review were first persisted as Issue #609 instead of relying on a stale review run. Maintainer comment `#issuecomment-5533267989` verified both on `main@30ca6ef6` and authorized a bounded CLI-only repair. Issue #609 closed on 2026-09-04T03:00:53Z when PR #610 merged. URL: https://github.com/Proto-UI/Proto-UI/issues/609
+- PR #610 converged through R-01/R-02, F-01/F-02/F-03, the partly-recognized conditional fail-closed boundary, and REV-610-01. Findings that could not survive exact-head digest drift were preserved through PR comments https://github.com/Proto-UI/Proto-UI/pull/610#issuecomment-5533828110 and https://github.com/Proto-UI/Proto-UI/pull/610#issuecomment-5534599073; this closed the prior lost-finding gap without weakening canonical review verdict binding.
+- Terminal PR #610 state: author `HyacinthHaru`; exact head `b6a6ae443e6b7ff786285608374fe8c317a99c6b`; base `64266b564277f4a632c14189e21cf109df78fb4c` (rebased, includes merged PR #608); zero review threads; trusted repository CI and DCO successful; fork Vercel authorization failure treated as external authorization only. Non-author `cyjin-yl` exact-head APPROVED receipt: https://github.com/Proto-UI/Proto-UI/pull/610#pullrequestreview-5108775771
+- PR #610 merged on 2026-09-04T03:00:52Z as `b927d70b196bc42eee85b9f791c15a84db9697bc`. URL: https://github.com/Proto-UI/Proto-UI/pull/610
+- Idempotency: no Review610 collector or background job remains. Earlier canonical submissions that encountered digest drift failed before mutation; live GitHub exposes the single terminal exact-head approval and merge receipts above. No unknown review/merge outcome exists and no retry is due.
