@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ImageViewPatch } from '@proto.ui/core';
-import type { ImageViewHostCompletion, ImageViewHostConnection } from '../src/caps';
+import type {
+  ImageViewHostCompletion,
+  ImageViewHostConnection,
+  ImageViewHostLease,
+} from '../src/caps';
 import { createWebImageViewHost, resolveWebImageLocalName } from '../src/web';
 
 function createConnection(
@@ -246,18 +250,22 @@ describe('module-image-view Web host bridge', () => {
   it('stops completion event propagation when requested', () => {
     const image = document.createElement('img');
     const stopPropagation = vi.spyOn(Event.prototype, 'stopPropagation');
-    const lease = createWebImageViewHost(() => image, { stopPropagation: true }).attach(
-      createConnection({
-        source: 'image:a',
-        alternativeText: 'A',
-        a11yMode: 'informative',
-        fit: 'contain',
-      })
-    );
+    let lease: ImageViewHostLease | null = null;
+    try {
+      lease = createWebImageViewHost(() => image, { stopPropagation: true }).attach(
+        createConnection({
+          source: 'image:a',
+          alternativeText: 'A',
+          a11yMode: 'informative',
+          fit: 'contain',
+        })
+      );
 
-    image.dispatchEvent(new Event('load', { bubbles: true }));
-    expect(stopPropagation).toHaveBeenCalledOnce();
-    lease.dispose();
-    stopPropagation.mockRestore();
+      image.dispatchEvent(new Event('load', { bubbles: true }));
+      expect(stopPropagation).toHaveBeenCalledOnce();
+    } finally {
+      lease?.dispose();
+      stopPropagation.mockRestore();
+    }
   });
 });

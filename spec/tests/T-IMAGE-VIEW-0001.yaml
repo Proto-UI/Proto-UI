@@ -52,6 +52,7 @@ cases:
       - C-IMAGE-VIEW-0001-A
       - C-IMAGE-VIEW-0001-B
       - C-IMAGE-VIEW-0001-C
+      - D-IMAGE-VIEW-PROJECTION-0001-E
     expectation: official-web-adapters-materialize-one-img-and-project-source-fit-and-a11y-without-duplicating-the-boundary
   - id: T-IMAGE-VIEW-0001-CASE-WEB-LIFECYCLE
     title: Official Web adapter image leases report completion and revoke old targets across replacement and teardown
@@ -60,7 +61,8 @@ cases:
       - C-IMAGE-VIEW-0001-F
       - C-IMAGE-VIEW-0001-G
       - C-IMAGE-VIEW-0001-H
-    expectation: web-image-leases-report-load-error-and-replacement-lifecycle-while-detach-revokes-listeners
+      - D-IMAGE-VIEW-PROJECTION-0001-F
+    expectation: web-image-leases-map-cache-hit-or-request-scoped-decode-to-terminal-status-and-retire-old-settlements-on-replacement-or-detach
 implementations:
   - id: module-image-view-impl-contract
     kind: module-test
@@ -166,19 +168,9 @@ sources:
   - path: packages/adapters/vue/test/image-view.integration.test.ts
 revisions:
   - version: 0.3.0-alpha.0
-    change: refined
-    summary: >-
-      Registered Base Image runtime evidence for direct source projection and canonical loading status transitions.
-
-
-  - version: 0.3.0-alpha.0
-    change: refined
-    summary: Added bounded Web Component, React, and Vue image-target projection and lifecycle evidence.
-
-  - version: 0.3.0-alpha.0
     change: introduced
     summary: >-
-      Added focused Image View host and module conformance coverage with fake-host evidence for synchronous completion, source replacement, stale completion, detach/rematerialize, dispose, terminal-once, and transition ordering.
+      Introduced Image View declaration, module, fake-host, Base runtime, and bounded Web Component, React, and Vue evidence for portable properties, request-scoped readiness, source replacement, stale completion, detach/rematerialization, disposal, terminal-once, and transition ordering.
 
 
 tags:

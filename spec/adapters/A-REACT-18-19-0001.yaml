@@ -163,6 +163,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added the Image View Web realization criterion, support relation, and exact-head integration evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Migrated the outward signal sink from Event wiring to the standalone Expose Event Module.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added required Expose Event support, translated signal sink provision, onXxx mapping, listener-prop filtering, and declaration-record exclusion.

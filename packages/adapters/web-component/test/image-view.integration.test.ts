@@ -1,13 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ImageViewStatusChange } from '@proto.ui/core';
+import { definePrototype, type ImageViewStatusChange, type RunHandle } from '@proto.ui/core';
+import { asImageView } from '@proto.ui/hooks';
+import { declareImageView } from '@proto.ui/module-image-view';
 import imageRoot from '../../../prototypes/base/src/image';
 import { AdaptToWebComponent, setElementProps, type WebComponentAdapterElement } from '../src';
 
 const ImageElement = AdaptToWebComponent(imageRoot, { registerAs: 'x-wc-image-view' });
 
 async function flush(): Promise<void> {
-  await Promise.resolve();
-  await Promise.resolve();
+  for (let index = 0; index < 6; index += 1) await Promise.resolve();
 }
 
 function controlImageDecodes(): {
@@ -119,5 +120,72 @@ describe('adapter-web-component image view', () => {
     decodes.restore();
 
     void ImageElement;
+  });
+
+  it('removes the light-DOM image while absent and rematerializes the owned target', async () => {
+    const decodes = controlImageDecodes();
+    let run!: RunHandle<any>;
+    const proto = definePrototype({
+      name: 'x-wc-image-view-presence',
+      modules: [
+        declareImageView({
+          source: 'image:present',
+          alternativeText: 'Present image',
+          a11yMode: 'informative',
+          fit: 'contain',
+        }),
+      ],
+      setup(def) {
+        const imageView = asImageView();
+        def.lifecycle.onCreated((nextRun) => {
+          run = nextRun;
+        });
+        def.expose('view', {
+          show: () => run.lifecycle.setPresent(true),
+          hide: () => run.lifecycle.setPresent(false),
+          status: () => imageView.snapshot()?.loadingStatus,
+        });
+        return () => null;
+      },
+    });
+    const PresenceImageElement = AdaptToWebComponent(proto, { registerAs: proto.name });
+    const element = document.createElement(proto.name) as HTMLElement & {
+      getExposes(): { view: { show(): void; hide(): void; status(): string | undefined } };
+    };
+
+    try {
+      document.body.appendChild(element);
+      await flush();
+      const image = element.querySelector('img');
+      if (!image) throw new Error('physical image was not materialized');
+      expect(image.getAttribute('src')).toBe('image:present');
+      expect(decodes.requests).toHaveLength(1);
+
+      element.getExposes().view.hide();
+      await flush();
+      expect(element.querySelector('img')).toBeNull();
+      expect(image.isConnected).toBe(false);
+
+      element.getExposes().view.show();
+      await flush();
+      expect(element.querySelectorAll('img')).toHaveLength(1);
+      expect(element.querySelector('img')?.getAttribute('src')).toBe('image:present');
+      expect(decodes.requests).toHaveLength(2);
+
+      expect(element.getExposes().view.status()).toBe('loading');
+      decodes.requests[0].resolve();
+      await flush();
+      expect(element.getExposes().view.status()).toBe('loading');
+
+      decodes.requests[1].resolve();
+      await flush();
+      expect(element.getExposes().view.status()).toBe('loaded');
+    } finally {
+      element.remove();
+      await flush();
+      decodes.restore();
+    }
+
+    void PresenceImageElement;
   });
 });

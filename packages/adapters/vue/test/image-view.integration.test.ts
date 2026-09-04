@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import imageRoot from '../../../prototypes/base/src/image';
-import { createMountedVueAdapter, flushVue } from './utils/vue';
+import { createVueAdapter } from '../src';
+import { createMountedVueAdapter, flushVue, VueAny } from './utils/vue';
 
 function controlImageDecodes(): {
   requests: Array<{ resolve(): void; reject(error?: unknown): void }>;
@@ -17,10 +18,10 @@ function controlImageDecodes(): {
 }
 
 describe('adapter-vue image view', () => {
-  it('materializes one image root and projects source, a11y, fit, and status lifecycle', async () => {
+  it('replaces the source without accepting the queued completion for the old request', async () => {
     const decodes = controlImageDecodes();
     const transitions: string[] = [];
-    const mounted = createMountedVueAdapter(imageRoot, {
+    const state = VueAny.reactive({
       source: 'image:a',
       a11yMode: 'informative',
       alternativeText: 'Image A',
@@ -28,11 +29,22 @@ describe('adapter-vue image view', () => {
       surfaceClass: 'surface-image',
       onLoadingStatusChange: (event: { status: string }) => transitions.push(event.status),
     });
-    let unmounted = false;
+    const adapterRef = VueAny.ref(null);
+    const Component = createVueAdapter(VueAny)(imageRoot);
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const app = VueAny.createApp({
+      setup() {
+        return () => VueAny.h(Component, { ...state, ref: adapterRef });
+      },
+    });
+    let mounted = false;
     try {
+      app.mount(host);
+      mounted = true;
       await flushVue();
-      const image = mounted.root as HTMLImageElement;
-      const exposes = mounted.vm.getExposes() as {
+      const image = host.firstElementChild as HTMLImageElement;
+      const exposes = adapterRef.value.getExposes() as {
         source: { get(): string };
         loadingStatus: { get(): string };
         fit: { get(): string };
@@ -46,16 +58,38 @@ describe('adapter-vue image view', () => {
       expect(exposes.source.get()).toBe('image:a');
       expect(exposes.fit.get()).toBe('cover');
       expect(exposes.loadingStatus.get()).toBe('loading');
+      expect(decodes.requests).toHaveLength(1);
+
+      Object.assign(state, {
+        source: 'image:b',
+        alternativeText: 'Image B',
+        fit: 'contain',
+        surfaceClass: 'surface-next',
+      });
+      await flushVue();
+
+      expect(host.firstElementChild).toBe(image);
+      expect(image.getAttribute('src')).toBe('image:b');
+      expect(image.alt).toBe('Image B');
+      expect(image.style.objectFit).toBe('contain');
+      expect(image.classList.contains('surface-image')).toBe(false);
+      expect(image.classList.contains('surface-next')).toBe(true);
+      expect(exposes.source.get()).toBe('image:b');
+      expect(exposes.loadingStatus.get()).toBe('loading');
+      expect(decodes.requests).toHaveLength(2);
 
       decodes.requests[0].resolve();
       await flushVue();
+      expect(exposes.loadingStatus.get()).toBe('loading');
+      expect(transitions).toEqual(['loading']);
+
+      decodes.requests[1].resolve();
+      await flushVue();
       expect(exposes.loadingStatus.get()).toBe('loaded');
       expect(transitions).toEqual(['loading', 'loaded']);
-
-      mounted.unmount();
-      unmounted = true;
     } finally {
-      if (!unmounted) mounted.unmount();
+      if (mounted) app.unmount();
+      host.remove();
       decodes.restore();
     }
   });
