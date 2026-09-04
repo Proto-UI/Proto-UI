@@ -1,0 +1,34 @@
+id: P-BRUTALIST-TOOLTIP
+type: prototype
+title: Brutalist Tooltip projection
+status: draft
+since: 0.3.0-alpha.0
+summary: Brutalist Tooltip publishes transparent Group, Root, and Trigger entries plus a styled Content entry while preserving Base ownership.
+statement:
+  en: Brutalist Tooltip consumes the canonical Base Group, Root, Trigger, and Content hooks. Base remains the sole owner of open state, delays, hover and focus routing, accessible description linkage, presence, Escape dismissal, renderer portal ownership, and anchored positioning; Brutalist adds only Content feedback style.
+  zh-CN: Brutalist Tooltip 消费 canonical Base Group、Root、Trigger、Content hooks。Base 继续唯一持有 open state、delay、hover/focus routing、accessible description linkage、presence、Escape dismissal、renderer portal ownership 与 anchored positioning；Brutalist 只增加 Content feedback style。
+criteria:
+  - id: P-BRUTALIST-TOOLTIP-BASE-INHERITANCE
+    text:
+      en: Group, Root, Trigger, and Content must consume their corresponding Base Tooltip asHooks exactly once without replacing or duplicating Base behavior.
+      zh-CN: Group、Root、Trigger、Content 必须且仅一次消费对应的 Base Tooltip asHooks，不得替换或重复 Base behavior。
+  - id: P-BRUTALIST-TOOLTIP-VISUAL-ONLY
+    text:
+      en: Only Content may add Brutalist feedback style; no Brutalist part may create another open, accessibility, presence, portal, or positioning owner.
+      zh-CN: 只有 Content 可以增加 Brutalist feedback style；任何 Brutalist part 都不得另建 open、accessibility、presence、portal 或 positioning owner。
+sources:
+  - path: packages/prototypes/brutalist/src/tooltip/group.proto.ts
+  - path: packages/prototypes/brutalist/src/tooltip/root.proto.ts
+  - path: packages/prototypes/brutalist/src/tooltip/types.ts
+  - path: packages/prototypes/brutalist/test/tooltip.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Completed the four-entry projection with a transparent Group while preserving Base semantic and lifecycle ownership.
+tags: [prototype, brutalist, tooltip, visual]
+inherits:
+  prototypes: [{ id: P-BASE-TOOLTIP }]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+verifies:
+  tests: [T-BRUTALIST-TOOLTIP-0001]

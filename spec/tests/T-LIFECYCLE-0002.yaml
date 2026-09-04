@@ -15,15 +15,6 @@ openQuestions:
     blocks:
       - C-LIFECYCLE-0003-F
       - C-LIFECYCLE-0003-G
-  - id: T-LIFECYCLE-0002-Q-COALESCED-UPDATE-CYCLE
-    question:
-      zh-CN: 若未来 runtime/adapter 实现 update intent 合并，是否需要新增 fake host scheduler fixture 来验证多个 intent 合并为一次 commit 时 `updated` 只执行一次？
-      en: If a future runtime or adapter implements update-intent coalescing, should a fake host scheduler fixture verify that multiple intents coalesced into one commit produce only one `updated` callback?
-    context:
-      zh-CN: 当前实现未合并 update intent；本测试断口只保留合并语义的未来验证位置。
-      en: The current implementation does not coalesce update intents; this test gap only preserves the future verification point for coalescing semantics.
-    blocks:
-      - C-LIFECYCLE-0003-H
 cases:
   - id: T-LIFECYCLE-0002-CASE-EXPLICIT-UPDATE-INTENT
     title: '`run.update()` and controller update are explicit update intents'
@@ -62,7 +53,7 @@ cases:
       - C-LIFECYCLE-0003-H
     expectation: coalesced-update-intents-run-updated-once-per-commit
     notes:
-      - This case becomes executable only for runtimes or adapters that implement update coalescing.
+      - The runtime coalesces update intents, so this case is executable today. `lifecycle.session.transitions.v1.contract.test.ts` drives three intents during an in-flight commit and asserts the resulting `updated` callbacks.
 implementations:
   - id: runtime-lifecycle-update-strict-order
     kind: runtime-test
@@ -120,6 +111,24 @@ implementations:
       - T-LIFECYCLE-0002-CASE-MODULE-APIS-NO-IMPLICIT-RENDER
     notes:
       - Web Component adapter coverage verifies props re-provision dispatch behavior without implicit render.
+  - id: runtime-render-reads-runtime-input
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/prototype.render-syntax.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0002-CASE-RENDER-RUNTIME-INPUT
+    notes:
+      - This test reads props, context, and anatomy during render, asserts that `renderer.update` is unavailable there, and completes exactly one commit. `T-CORE-SYNTAX-0001` already maps it to `C-LIFECYCLE-0003-D` and `C-LIFECYCLE-0003-E`, which is what this case covers.
+  - id: runtime-lifecycle-coalesced-update
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.session.transitions.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0002-CASE-COALESCED-UPDATE
+    notes:
+      - The case titled `coalesces update intents while one update commit is in flight` drives three update intents during an in-flight commit and asserts two completed `updated` callbacks at revisions 1 and 2.
 verifies:
   contracts:
     - id: C-LIFECYCLE-0003
@@ -139,6 +148,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Explicit update flow tests rely on the callback ordering model defined by `C-LIFECYCLE-0002`.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Bound the render-input and coalescing cases to the tests that already prove them, and retired the coalescing gap, which the runtime closed.
   - version: 0.1.0
     change: introduced
     summary: Added explicit update flow test mapping and preserved future gaps for async host profiles and update coalescing.

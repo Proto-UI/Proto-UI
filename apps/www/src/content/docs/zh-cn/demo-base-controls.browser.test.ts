@@ -381,6 +381,23 @@ async function setFittingContent(page: Page, rows: number): Promise<void> {
  * with or without the focus slice, so a missing tab stop fails on the assertion
  * that names it instead of on a readiness timeout that does not.
  */
+/**
+ * A wheel notch is delivered asynchronously and the scroll may be smoothed, so
+ * a fixed pause races the browser under load. Wait for the offset instead.
+ */
+async function waitForScrolled(page: Page, index: number): Promise<void> {
+  await page.waitForFunction(
+    ({ selector, index: at }) => {
+      const viewport = document.querySelectorAll<HTMLElement>(`[data-previewer-id] ${selector}`)[
+        at
+      ];
+      return Boolean(viewport && viewport.scrollTop > 0);
+    },
+    { selector: VIEWPORT_SELECTOR, index },
+    { timeout: 10_000 }
+  );
+}
+
 async function waitForCanScroll(page: Page, index: number, expected: boolean): Promise<void> {
   await page.waitForFunction(
     ({ selector, index: at, expected: want }) => {
@@ -606,7 +623,7 @@ describe.sequential('Base control documentation browser regressions', () => {
 
         await viewport.hover();
         await page.mouse.wheel(0, 120);
-        await page.waitForTimeout(200);
+        await waitForScrolled(page, SCROLLING);
         expect(
           (await viewportFacts(page))[SCROLLING].scrollTop,
           `${runtime}/wheel`

@@ -6,11 +6,11 @@ since: 0.1.0
 summary: The project has an implemented defineHook API and use-style internal hooks, but whether Proto UI should stabilize a separate useHook/defineUseHook concept instead of ordinary user functions remains undecided; useCollection remains a quarantined privileged-boundary case, not a resolved classification.
 statement:
   zh-CN: >-
-    当前实现存在 `defineHook`，并且一些官方原型已经用 `useOpenState`、`useEscapeKey`、`useCollection`、`useFocusRoving` 等命名表达更接近组合式逻辑复用的能力。但如果 use-style hook 只是普通函数封装，原型作者完全可以自行定义函数；只有当它需要 trace、capture、setup guard、artifacts、disposers 或未来冲突诊断时，才值得成为受治理 API。因此 `defineHook`、`defineUseHook` 或普通函数之间的关系暂不进入 asHook 核心契约，需要后续单独讨论。`useCollection` / `useCollectionItem` 当前落在 `defineHook` 只是对遗留 `asCollection` 特权边界的临时隔离，不代表 collection structural projection 已被判定为普通 useHook。
+    当前实现存在 `defineHook`，并且一些官方原型已经用 `useOpenState`、`useEscapeKey`、`useCollection` 等命名表达更接近组合式逻辑复用的能力（`useFocusRoving` 是同一批命名中的历史例子，已被移除并由 `asFocusRoving` 取代）。但如果 use-style hook 只是普通函数封装，原型作者完全可以自行定义函数；只有当它需要 trace、capture、setup guard、artifacts、disposers 或未来冲突诊断时，才值得成为受治理 API。因此 `defineHook`、`defineUseHook` 或普通函数之间的关系暂不进入 asHook 核心契约，需要后续单独讨论。`useCollection` / `useCollectionItem` 当前落在 `defineHook` 只是对遗留 `asCollection` 特权边界的临时隔离，不代表 collection structural projection 已被判定为普通 useHook。
 
 
   en: >-
-    The current implementation has `defineHook`, and some official prototypes use names such as `useOpenState`, `useEscapeKey`, `useCollection`, and `useFocusRoving` for logic reuse closer to composition. But if a use-style hook is only an ordinary function wrapper, prototype authors can write their own functions; it deserves a governed API only when it needs trace, capture, setup guards, artifacts, disposers, or future conflict diagnostics. Therefore the relationship between `defineHook`, `defineUseHook`, and ordinary functions is not part of the core asHook contract yet and needs separate discussion. `useCollection` / `useCollectionItem` currently being implemented through `defineHook` is only a temporary quarantine for the legacy `asCollection` privileged boundary; it does not classify collection structural projection as an ordinary useHook.
+    The current implementation has `defineHook`, and some official prototypes use names such as `useOpenState`, `useEscapeKey`, and `useCollection` for logic reuse closer to composition; `useFocusRoving` was a historical member of that set and has since been removed in favour of `asFocusRoving`. But if a use-style hook is only an ordinary function wrapper, prototype authors can write their own functions; it deserves a governed API only when it needs trace, capture, setup guards, artifacts, disposers, or future conflict diagnostics. Therefore the relationship between `defineHook`, `defineUseHook`, and ordinary functions is not part of the core asHook contract yet and needs separate discussion. `useCollection` / `useCollectionItem` currently being implemented through `defineHook` is only a temporary quarantine for the legacy `asCollection` privileged boundary; it does not classify collection structural projection as an ordinary useHook.
 
 
 relates:
@@ -18,6 +18,7 @@ relates:
     - C-AS-HOOK-0001
   decisions:
     - D-AS-HOOK-PRIVILEGED-NO-ARG-MIGRATION-0001
+    - D-USE-FOCUS-ROVING-DEPRECATION-0001
 sources:
   - path: packages/core/src/prototype.ts
     sections:
@@ -34,10 +35,14 @@ sources:
   - path: packages/hooks/src/collection/use-collection-item.ts
     sections:
       - useCollectionItem
-  - path: packages/prototypes/base/src/behaviors/use-focus-roving.ts
+  - path: packages/hooks/src/as-focus-roving.ts
     sections:
-      - useFocusRoving
+      - asFocusRoving
+  - path: internal/records/2026-07-06-use-focus-roving-deprecation.zh-CN.md
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Recorded `useFocusRoving` as a historical member of the use-style set, replaced by `asFocusRoving`, and related the decision that catalogs that migration.
   - version: 0.1.0
     change: introduced
     summary: Recorded `defineHook` / useHook naming and API shape as unresolved.

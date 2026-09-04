@@ -149,21 +149,28 @@ function validateBuiltPackage(pkg, distDir) {
     throw new Error(`${pkg.name}: missing built export targets: ${missing.join(', ')}`);
   }
 
-  const entry = join(distDir, 'index.js');
-  if (!existsSync(entry)) throw new Error(`${pkg.name}: build did not produce dist/index.js`);
-  const smoke = spawnSync(
-    process.execPath,
-    ['--input-type=module', '--eval', `import(${JSON.stringify(pathToFileURL(entry).href)})`],
-    {
-      cwd: ROOT_DIR,
-      encoding: 'utf8',
-      timeout: 20000,
-    }
+  const runtimeEntries = new Set(
+    flattenExportTargets(pkg.manifest.exports)
+      .filter(
+        (target) => target.startsWith('./dist/') && target.endsWith('.js') && !target.includes('*')
+      )
+      .map((target) => join(distDir, target.slice('./dist/'.length)))
   );
-  if (smoke.status !== 0) {
-    throw new Error(
-      `${pkg.name}: JavaScript-only import smoke failed\n${smoke.stderr || smoke.stdout}`
+  const rootEntry = join(distDir, 'index.js');
+  if (!runtimeEntries.has(rootEntry)) runtimeEntries.add(rootEntry);
+  for (const entry of runtimeEntries) {
+    if (!existsSync(entry))
+      throw new Error(`${pkg.name}: missing built runtime entry ${relative(distDir, entry)}`);
+    const smoke = spawnSync(
+      process.execPath,
+      ['--input-type=module', '--eval', `import(${JSON.stringify(pathToFileURL(entry).href)})`],
+      { cwd: ROOT_DIR, encoding: 'utf8', timeout: 20000 }
     );
+    if (smoke.status !== 0) {
+      throw new Error(
+        `${pkg.name}: JavaScript-only import smoke failed for ${relative(distDir, entry)}\n${smoke.stderr || smoke.stdout}`
+      );
+    }
   }
 }
 

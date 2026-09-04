@@ -33,8 +33,8 @@ criteria:
       zh-CN: 本 release train 可以承载经过评审的架构、顶层 API 与新 Prototype 变化，因此必须以 alpha 呈现，不能被描述为 release candidate 或 stable compatibility 承诺。
   - id: V-PROTO-UI-0009-NEW-PACKAGE
     text:
-      en: Publication remains blocked until the new @proto.ui/module-expose-event, @proto.ui/adapter-vue2, and @proto.ui/module-image-view npm identities exist, are configured for the protected release workflow, and pass registry readiness without receiving latest or next during bootstrap.
-      zh-CN: 在新的 @proto.ui/module-expose-event、@proto.ui/adapter-vue2 与 @proto.ui/module-image-view npm identity 已建立、已配置受保护 release workflow，且 bootstrap 未占用 latest 或 next 并通过 registry readiness 前，真实发布保持 blocked。
+      en: Publication remains blocked until the new @proto.ui/module-expose-event, @proto.ui/adapter-vue2, and @proto.ui/module-image-view npm identities exist, are configured for the protected release workflow, and pass registry readiness. Bootstrap must not receive next or retain its bootstrap dist-tag. If npm refuses to remove latest from the sole clearly non-release bootstrap version, latest may remain only when that version is deprecated and no release-train or stable version is published merely to replace it.
+      zh-CN: 在新的 @proto.ui/module-expose-event、@proto.ui/adapter-vue2 与 @proto.ui/module-image-view npm identity 已建立、已配置受保护 release workflow，且通过 registry readiness 前，真实发布保持 blocked。bootstrap 不得占用 next，也不得保留 bootstrap dist-tag；若 npm 拒绝移除唯一明确属于非正式发行的 bootstrap 版本上的 latest，则仅当该版本已 deprecated，且没有仅为替换它而发布 release-train 或 stable 版本时，允许 latest 暂留。
   - id: V-PROTO-UI-0009-PUBLICATION
     text:
       en: The entity may become active only after all packages in its reviewed release BOM exist at 0.3.0-alpha.0, their next tags point to it, the v0.3.0-alpha.0 tag resolves to the publication commit, and immutable snapshot evidence exists.
@@ -46,8 +46,12 @@ sources:
   - path: internal/records/2026-08-16-0.3.0-alpha.0-release-train.zh-CN.md
   - path: internal/records/2026-08-16-expose-event-package-extraction.zh-CN.md
   - path: internal/records/2026-08-16-expose-event-npm-identity-bootstrap.zh-CN.md
+  - path: internal/records/2026-09-01-npm-bootstrap-latest-reconciliation.zh-CN.md
 openQuestions: []
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Reconciled the new-package bootstrap gate with npm retaining latest on a sole deprecated bootstrap version while preserving the next-channel and protected-publication requirements.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Expanded the reviewed draft train to 43 public packages by admitting the public Image View Module and its pending npm identity bootstrap gate.
