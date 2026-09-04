@@ -345,6 +345,125 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
+  it('does not pause a pending follow until the configured surface actually moves', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -40 }));
+
+    expect(frames.pending()).toBe(1);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('pending');
+    frames.runAll();
+    expect(target.scrollTop).toBe(400);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+    lease.dispose();
+  });
+
+  it('classifies Shift+Space as vertical reader departure', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    frames.runAll();
+
+    const pageUp = new KeyboardEvent('keydown', { bubbles: true, key: ' ' });
+    Object.defineProperty(pageUp, 'shiftKey', { configurable: true, value: true });
+    target.dispatchEvent(pageUp);
+    target.scrollTop = 200;
+    target.dispatchEvent(new Event('scroll'));
+
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    lease.dispose();
+  });
+
+  it('keeps deep mutation observation disabled for default-off surfaces', () => {
+    const observations: Array<{ target: Node; options: MutationObserverInit }> = [];
+    class RecordingMutationObserver {
+      constructor(_callback: MutationCallback) {}
+      observe(target: Node, options: MutationObserverInit) {
+        observations.push({ target, options });
+      }
+      disconnect() {}
+    }
+    vi.stubGlobal('MutationObserver', RecordingMutationObserver);
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+
+    const lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'off' },
+      },
+      projection: 'system',
+      onFacts: () => {},
+    });
+
+    expect(observations.find((entry) => entry.target === target)?.options).toEqual({
+      childList: true,
+    });
+    lease.dispose();
+  });
+
+  it('retains pointer intent across other-axis scrolling until the followed axis departs', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 300,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'both',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    frames.runAll();
+
+    target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    target.scrollLeft = 50;
+    target.dispatchEvent(new Event('scroll'));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+
+    target.scrollTop = 200;
+    target.dispatchEvent(new Event('scroll'));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    target.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    lease.dispose();
+  });
+
   it('keeps vertical pending follow while applying an unrelated horizontal request', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');

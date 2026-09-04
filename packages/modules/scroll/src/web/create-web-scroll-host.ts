@@ -39,6 +39,13 @@ type ThumbStyleSnapshot = Readonly<{
 const clampRatio = (value: number) =>
   Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
 const READER_INTENT_WINDOW_MS = 250;
+const BASE_CONTENT_OBSERVER_OPTIONS = Object.freeze({ childList: true });
+const END_FOLLOW_CONTENT_OBSERVER_OPTIONS = Object.freeze({
+  attributes: true,
+  characterData: true,
+  childList: true,
+  subtree: true,
+});
 
 function axisSnapshot(
   offset: number,
@@ -149,6 +156,7 @@ export function createWebScrollSurfaceHost(
       let cancelEndFollowFrame: (() => void) | null = null;
       let scheduledAxis: ScrollAxis | null = null;
       let readerIntentUntil = 0;
+      let readerGestureActive = false;
       let lastFollowLayout: { axis: ScrollAxis; viewport: number; extent: number } | null = null;
       const ownerWindow = target.ownerDocument.defaultView;
       const configuredEndThreshold = options.endThreshold ?? 1;
@@ -332,6 +340,7 @@ export function createWebScrollSurfaceHost(
             return;
           }
           applyRequest(target, { kind: 'to-end', axis: currentAxis });
+          if (!readerGestureActive) readerIntentUntil = 0;
           const followAxis = configuredFollowAxis();
           if (followAxis === currentAxis) {
             lastFollowLayout = readFollowLayout(currentAxis);
@@ -473,11 +482,9 @@ export function createWebScrollSurfaceHost(
         const now = ownerWindow?.performance.now() ?? Date.now();
         readerIntentUntil = now + READER_INTENT_WINDOW_MS;
       };
-      const consumeReaderIntent = () => {
+      const hasReaderIntent = () => {
         const now = ownerWindow?.performance.now() ?? Date.now();
-        const active = readerIntentUntil >= now;
-        readerIntentUntil = 0;
-        return active;
+        return readerGestureActive || readerIntentUntil >= now;
       };
       const onWheel = (event: WheelEvent) => {
         if (event.ctrlKey) return;
@@ -486,15 +493,17 @@ export function createWebScrollSurfaceHost(
         const leavingEnd = axis === 'vertical' ? event.deltaY < 0 : event.deltaX < 0;
         if (!leavingEnd) return;
         armReaderIntent();
-        interruptPendingFollow();
       };
       const onPointerDown = () => {
+        readerGestureActive = true;
         armReaderIntent();
       };
       const onTouchStart = () => {
+        readerGestureActive = true;
         armReaderIntent();
       };
       const onReaderIntentEnd = () => {
+        readerGestureActive = false;
         readerIntentUntil = 0;
       };
       const onKeyDown = (event: KeyboardEvent) => {
@@ -502,15 +511,17 @@ export function createWebScrollSurfaceHost(
         if (!axis) return;
         const leavingEnd =
           axis === 'vertical'
-            ? event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home'
+            ? event.key === 'ArrowUp' ||
+              event.key === 'PageUp' ||
+              event.key === 'Home' ||
+              (event.key === ' ' && event.shiftKey)
             : event.key === 'ArrowLeft' || event.key === 'PageUp' || event.key === 'Home';
         if (!leavingEnd) return;
         armReaderIntent();
-        interruptPendingFollow();
       };
       const onScroll = () => {
         scrolling = true;
-        const readerIntent = consumeReaderIntent();
+        const readerIntent = hasReaderIntent();
         const axis = configuredFollowAxis();
         if (axis) {
           const atEnd = isAxisAtEnd(axis);
@@ -519,6 +530,7 @@ export function createWebScrollSurfaceHost(
           } else if (!atEnd && readerIntent) {
             cancelScheduledEnd(true);
             endFollowState = 'paused';
+            readerIntentUntil = 0;
           }
         }
         publish();
@@ -560,12 +572,12 @@ export function createWebScrollSurfaceHost(
         for (const contentTarget of Array.from(target.children)) {
           resizeObserver?.observe(contentTarget);
         }
-        mutationObserver?.observe(target, {
-          attributes: true,
-          characterData: true,
-          childList: true,
-          subtree: true,
-        });
+        mutationObserver?.observe(
+          target,
+          configuredFollowAxis()
+            ? END_FOLLOW_CONTENT_OBSERVER_OPTIONS
+            : BASE_CONTENT_OBSERVER_OPTIONS
+        );
         for (const control of connection.composedChrome?.controls ?? []) {
           if (!isWebControl(control)) continue;
           resizeObserver?.observe(control.trackTarget);
@@ -622,6 +634,7 @@ export function createWebScrollSurfaceHost(
         dispose() {
           if (disposed) return;
           disposed = true;
+          readerGestureActive = false;
           readerIntentUntil = 0;
           cancelScheduledEnd(false);
           cancelScrollEndTimer?.();
