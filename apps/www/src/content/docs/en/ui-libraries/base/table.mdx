@@ -39,7 +39,7 @@ Caption, HeaderCell, and Cell content remains App-owned content passed through e
 
 ## Topology and header relationships
 
-Rows and cells use the current host-observable Anatomy order. Each cell is placed at the first column whose rectangle is not occupied by an earlier span. Indices are zero-based; `rowSpan` and `columnSpan` are positive safe integers defaulting to one. A span cannot overlap an occupied rectangle or extend beyond the current row count or safe coordinate boundary. Occupancy uses ranges rather than materializing every covered column, so large spans do not allocate in proportion to their numeric magnitude.
+Rows and cells use the current host-observable Anatomy order. The first cell in a Row searches from column zero; each later cell starts at the previous placed cell's exclusive end and uses the first fitting rectangle at or after that cursor. Placement never backfills an earlier hole in a way that reverses authored order. Indices are zero-based; `rowSpan` and `columnSpan` are positive safe integers defaulting to one. A span cannot overlap an occupied rectangle or extend beyond the current row count or safe coordinate boundary. Occupancy uses ranges rather than materializing every covered column, so large spans do not allocate in proportion to their numeric magnitude.
 
 A HeaderCell declares a non-empty, same-domain-unique `headerKey` and `headerKind: 'column' | 'row'`. A Cell declares an ordered, non-empty set of header keys. A HeaderCell may declare upstream header keys for layered headers, where upstream means the target precedes the source in computed row-major topology; self and later/downstream references are invalid.
 

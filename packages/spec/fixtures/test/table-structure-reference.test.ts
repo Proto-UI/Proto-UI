@@ -152,6 +152,59 @@ describe('spec fixture: Table Structure reference projection', () => {
     expect(snapshot.columnCount).toBe(3);
   });
 
+  it('preserves authored cell order when prior row spans leave earlier holes', () => {
+    // T-TABLE-STRUCTURE-0001-CASE-TOPOLOGY
+    const left = ref('left-header');
+    const right = ref('right-header');
+    const wide = ref('wide-cell');
+    const narrow = ref('narrow-cell');
+
+    const snapshot = projectTableStructure({
+      root: ref('table'),
+      rows: [
+        {
+          ref: ref('header-row'),
+          cells: [
+            {
+              ref: left,
+              kind: 'headerCell',
+              headerKey: 'left',
+              headerKind: 'column',
+              rowSpan: 2,
+              columnSpan: 2,
+            },
+            {
+              ref: ref('spacer-header'),
+              kind: 'headerCell',
+              headerKey: 'spacer',
+              headerKind: 'column',
+              columnSpan: 3,
+            },
+            {
+              ref: right,
+              kind: 'headerCell',
+              headerKey: 'right',
+              headerKind: 'column',
+              rowSpan: 2,
+            },
+          ],
+        },
+        {
+          ref: ref('data-row'),
+          cells: [
+            { ref: wide, kind: 'cell', headers: ['left', 'right'], columnSpan: 4 },
+            { ref: narrow, kind: 'cell', headers: ['left', 'right'] },
+          ],
+        },
+      ],
+    });
+
+    expect(snapshot.valid).toBe(true);
+    expect(snapshot.rows[1]?.cells[0]).toMatchObject({ ref: wide, column: 6, columnSpan: 4 });
+    expect(snapshot.rows[1]?.cells[1]).toMatchObject({ ref: narrow, column: 10 });
+    expect(snapshot.columnCount).toBe(11);
+  });
+
   it('projects very large safe column spans without per-coordinate expansion', () => {
     // T-TABLE-STRUCTURE-0001-CASE-TOPOLOGY
     const header = ref('large-header');

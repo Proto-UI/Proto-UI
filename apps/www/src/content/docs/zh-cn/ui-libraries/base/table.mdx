@@ -39,7 +39,7 @@ Caption、HeaderCell 与 Cell content 仍由 App 通过每个 part 的单一 ano
 
 ## Topology 与 header relationships
 
-Row 与 cell 顺序来自当前 host-observable Anatomy order。每个 cell 都放在第一个未被先前 span 占用、且能容纳自身 rectangle 的 column。Index 从零开始；`rowSpan` 与 `columnSpan` 必须是 positive safe integer，默认值为一。Span 不能和已占用 rectangle overlap，也不能越过当前 row count 或 safe coordinate boundary。Occupancy 使用 ranges，而不是逐个 materialize 所覆盖的 column，因此 large span 不会按数值大小成比例分配空间。
+Row 与 cell 顺序来自当前 host-observable Anatomy order。每个 Row 的第一个 cell 从 column 0 开始搜索；后续 cell 从前一个已 placement cell 的 exclusive end 开始，选择 cursor 之后第一个可容纳的 rectangle。Placement 不会回填更早的 hole 并反转 authored order。Index 从零开始；`rowSpan` 与 `columnSpan` 必须是 positive safe integer，默认值为一。Span 不能和已占用 rectangle overlap，也不能越过当前 row count 或 safe coordinate boundary。Occupancy 使用 ranges，而不是逐个 materialize 所覆盖的 column，因此 large span 不会按数值大小成比例分配空间。
 
 HeaderCell 声明 non-empty、same-domain unique 的 `headerKey` 与 `headerKind: 'column' | 'row'`。Cell 声明 ordered、non-empty header-key set。HeaderCell 可以为 layered header 声明 upstream header keys；upstream 表示 target 在 computed row-major topology 中先于 source，self 与 later/downstream reference 均无效。
 
