@@ -158,6 +158,7 @@ type PreviewUnavailableReason =
   | 'message-channel-present'
   | 'focus-path-unverified'
   | 'accessibility-unavailable'
+  | 'transition-deadline-unavailable'
   | 'content-load-failed'
   | 'host-crashed';
 
@@ -187,6 +188,7 @@ type PreviewSupport = Readonly<{
   messages: 'absent' | 'present';
   focusPath: 'native-static-tab-order' | 'unverified';
   accessibility: 'embedded-document' | 'unverified' | 'unavailable';
+  transitionDeadline: 'atomic-replayable' | 'unverified';
   reasons: readonly PreviewUnavailableReason[];
 }>;
 
@@ -201,6 +203,7 @@ type PreviewReadySupport = Readonly<{
   messages: 'absent';
   focusPath: 'native-static-tab-order';
   accessibility: 'embedded-document';
+  transitionDeadline: 'atomic-replayable';
   reasons: readonly [];
 }>;
 
@@ -281,7 +284,7 @@ type PreviewReloadResult =
       outcome: 'cancelled';
       currentGeneration: number;
       currentAppliedPolicyRevision: number | null;
-      reason: 'disposed' | 'replaced';
+      reason: 'disposed' | 'replaced' | 'deadline-exceeded';
     }>;
 
 type PreviewPolicyResult =
@@ -311,8 +314,10 @@ type PreviewPolicyResult =
       outcome: 'cancelled';
       currentGeneration: number;
       currentPolicyRevision: number | null;
-      reason: 'disposed' | 'replaced';
+      reason: 'disposed' | 'replaced' | 'deadline-exceeded';
     }>;
+
+type PreviewTransitionTerminalResult = PreviewReloadResult | PreviewPolicyResult;
 
 type PreviewConnection = Readonly<{
   // Connection and every next generation are allocated by the Module.
@@ -335,6 +340,8 @@ type PreviewLease = Readonly<{
       expectedGeneration: number;
       nextGeneration: number;
       policy: PreviewPolicyPatch;
+      // Fixed first-slice deadline; Module owns the timer.
+      deadlineMs: 30_000;
     }>
   ): void;
   requestReload(
@@ -345,8 +352,17 @@ type PreviewLease = Readonly<{
       expectedAppliedPolicyRevision: number | null;
       // Equality check only: reload cannot select or regress policy.
       expectedPolicyRevision: number;
+      // Fixed first-slice deadline; Module owns the timer.
+      deadlineMs: 30_000;
     }>
   ): void;
+  // Atomic: returns cached terminal result or cancels pending work/resources now.
+  resolveExpiredTransition(
+    request: Readonly<{
+      requestId: string;
+      expectedGeneration: number;
+    }>
+  ): PreviewTransitionTerminalResult;
   snapshot(): PreviewFacts;
   dispose(): void;
 }>;
@@ -374,10 +390,11 @@ The immutable requirement, Host policy, facts, requests, and results contain no 
 | ready | observable navigation attempt | Block/report, stay ready; raw URL audit-local. |
 | any | App status-only change | Update Module/composition only; no Host request, generation, policy, or content change. |
 | ready, runtime `error`, or `PreviewReloadRecoverableUnavailable` | first reload request for generation/current applied revision/current desired policy revision | Module verifies exact current desired non-regressing policy, reserves/allocates next generation, calls Host. This includes restored support proof and `policy-revision-mismatch` under unchanged policy; null applied revision is valid. Source-revision/static-invalid states require replacement/reattachment. |
-| ready or `PreviewPolicyRecoverableUnavailable` | first non-regressing policy-change request for generation | Module atomically reserves generation, requires proposed revision greater than current desired (even when applied revision is null), allocates unique next generation, then calls Host. Source unavailable/revision mismatch/static validation are not policy-recoverable. |
-| requestable state | competing policy/reload while reservation pending | Module rejects `transition-pending` without calling Host. |
-| ready or `PreviewPolicyRecoverableUnavailable` | accepted policy change | Revoke any surviving content, report result, enter preparing in fresh Module generation, and verify exact new policy plus every support/static/artifact check before ready. |
-| ready, runtime `error`, or `PreviewReloadRecoverableUnavailable` | accepted reload | Echo generations, previous nullable applied revision, exact same current policy; revoke any surviving content/resources, enter preparing, rerun all policy/support/static/artifact/revision checks before ready. |
+| ready, runtime `error`, or `PreviewPolicyRecoverableUnavailable` | first non-regressing policy-change request for generation | Module reserves, requires revision greater than current desired (nullable applied allowed), allocates next generation, starts fixed 30s deadline, calls Host. Source unavailable/revision mismatch/static invalid are not policy-recoverable. |
+| requestable state | competing policy/reload while reservation pending | Reject `transition-pending` without Host. |
+| pending transition | 30s deadline expires before Module receives terminal callback | Module atomically calls `resolveExpiredTransition`. Host either replays its one cached terminal result, or marks pending token cancelled, aborts/revokes partial work/resources, returns `cancelled: deadline-exceeded`; Module consumes result and releases reservation before new recovery. No connection recreation; late callback ignored. |
+| ready, runtime `error`, or `PreviewPolicyRecoverableUnavailable` | accepted policy change | Revoke surviving content, report result, enter preparing fresh generation, verify exact new policy and every support/static/artifact check before ready. Runtime error may recover directly with newer policy. |
+| ready, runtime `error`, or `PreviewReloadRecoverableUnavailable` | accepted reload | Echo generations/revisions, revoke surviving resources, prepare and fully reverify same policy. |
 | any requestable state | stale/regressing/non-recoverable request | Correlated rejection (`stale-policy` for reload policy unequal to current desired; `not-recoverable` for policy change from source/revision/static-invalid unavailable); no state/resource change or Host call. |
 | any | source/trust/profile replacement | Emit correlated `cancelled: replaced` for any reserved request, release reservation, then retire connection/lease and attach new immutable requirement. |
 | any | physical target/view-epoch replacement | Adapter/runtime synchronously invokes `onViewInvalidated(connectionId, 'target-replaced')` before invalidating/exposing targets, even when Host Capability identity is unchanged. Module emits correlated `cancelled: replaced` for reserved request, releases reservation, retires old connection/lease, then allocates fresh connection/generation for same immutable requirement/policy; no ready facts carry over and every policy/support/revision check repeats. If the signal cannot be guaranteed, replacement must use capability/mount disposal and reattachment instead of silent target swap. |
@@ -386,27 +403,15 @@ The immutable requirement, Host policy, facts, requests, and results contain no 
 
 ### Fake-host exercise
 
-1. attach immutable surface/artifact at Module generation 1 and policy 2; preparing/null policy precedes work;
-2. fail pre-policy lookup with `policy-unavailable`; request strictly newer policy 3 from that recoverable unavailable state, reserve/allocate new generation, enter preparing, and recover only after full policy/support/static/artifact verification;
-3. try same/equal or regressing policy from unavailable and reject `regressing-policy`; try policy change from source-unavailable/revision-mismatch/static-invalid and reject `not-recoverable` without Host call; use reload or reattachment as specified;
-4. have resolver/cache return right artifact ID but wrong revision; emit source-revision-mismatch, commit no content, then ready only on exact source revision;
-5. after policy change 3 -> 5, have Host claim applied 3; emit policy-revision-mismatch/no content, then ready only when applied equals desired 5;
-6. reject navigation-producing content as applied unavailable, never runtime error;
-7. fail each positive support proof as exact applied unavailable; only exact ready support/empty reasons becomes ready;
-8. from ready with transition pending, lose each proof; correlate support-lost/release, remove content/resources before unavailable. Restore proof under unchanged policy revision, use same-policy reload in fresh generation, and reach ready only after all checks. Repeat for policy-revision-mismatch; source-revision/static invalid cannot reload;
-9. from ready, force content-load failure and host crash; before error fact assert committed document, navigation/permission hooks, objects, and resources are synchronously revoked. Reload same policy in fresh generation through complete verification;
-10. reserve policy change then crash; correlated host-crashed/release before revoked error; recovery reload accepted;
-11. block navigation/no raw destination; no message/IPC/content action path;
-12. App status during ready/pending changes Module/composition only;
-13. compete reload/policy against reservation; transition-pending; accepted result releases;
-14. desired/applied 5 reload expecting 4 rejects; exact 5 succeeds;
-15. reserved request + source/profile replacement: cancelled replaced before retirement, fresh generation verification;
-16. same capability physical swap calls onViewInvalidated before target exposure; cancellation/release/retire then fresh preparation. Missing signal requires dispose+reattach;
-17. A11y + Enter/Leave; no Preview focus/name;
-18. dispose pending: cancelled disposed before callback revoke; old callbacks zero;
-19. prove no raw content/policy/target/epoch/host/message/executable crosses.
+1. attach requires transitionDeadline atomic-replayable plus every other ready support;
+2. exercise unavailable/newer policy and same-policy reload classifications, exact artifact/policy revision, support loss/runtime revocation;
+3. from content-load-failed and host-crashed error under policy5, request newer policy6 directly; fresh generation/full verification reaches ready without first making policy5 reload succeed. Regressing/stale rejects;
+4. dispatch reload/policy request with `deadlineMs: 30_000`, drop its result callback. Case A Host already settled/cached result: at deadline atomic resolver replays it once. Case B work pending: resolver cancels token, revokes partial content/hooks/resources, returns deadline-exceeded cancellation. Both release reservation; subsequent Reload reaches Host on same connection; late original callback has zero effect;
+5. make transition cancellation/deadline support unverified: attachment unavailable `transition-deadline-unavailable`, never ready;
+6. compete transitions, crash, replacement, target invalidation, dispose; each correlated settlement/releases;
+7. block navigation/no bridge; App status stays Module-only; A11y/Enter/Leave; no raw target/content/policy mechanics.
 
-This fake evidence proves same-policy recovery after support restoration, runtime-error revocation-before-fact, newer-policy recovery for cataloged unavailable states, lifecycle target invalidation, exact identity/policy binding, support loss, cancellation, failure discrimination, sandbox readiness, serialization, Host-free status, Module generations, and no raw target channel. It does not prove real host behavior.
+If implemented as specified, this evidence plan would verify deadline recovery without connection recreation, direct newer-policy recovery from runtime errors, prior identity/security/failure/replacement invariants, and no bridge. This record supplies no executable `T-PREVIEW-SURFACE-*` evidence and claims no completed proof.
 
 ## Focus, accessibility, layout, and lifecycle
 
@@ -417,9 +422,9 @@ This fake evidence proves same-policy recovery after support restoration, runtim
 - Status/error/unavailable is exposed through ordinary composition and bounded App announcements. Inner document mutations do not drive a Proto UI live region.
 - Parent-controlled viewport dimensions and responsive containment are host presentation. Inner scroll remains embedded-document/browser behavior and is not projected as `C-SCROLL-0001` facts. No child size or raw geometry enters portable state.
 - Zoom/reflow, high contrast, reduced motion, color scheme, and accessible static markup are artifact/engine responsibilities. The fixed profile rejects active animation that the trusted artifact pipeline cannot bound. Proto UI owns only accessible/reflowing chrome and explicit degradation.
-- One stable surface may receive generations/connections. Module reserves one transition. Same-policy reload may recover `PreviewReloadRecoverableUnavailable` (including restored support or policy mismatch); strictly newer policy may recover only `PreviewPolicyRecoverableUnavailable`; source-revision/static invalid require replacement/reattachment. Replacement/target invalidation cancel before retirement; accepted transition revokes surviving content before preparation; App status outside Host.
-- Physical target replacement is terminal even with unchanged capability. Adapter lifecycle calls onViewInvalidated before swap; Module cancels, fresh connection/generation, clears ready, re-verifies. Missing signal requires dispose+reattach; no target/epoch value.
-- Support loss rejects pending and revokes content/resources before unavailable. Resolver/renderer runtime failure likewise settles pending and synchronously revokes committed content plus navigation/permission/resource hooks before error fact. Host crash cannot strand reservation. Disposal sends cancellation before all cleanup; artifact/App auth outlive lease.
+- One surface may receive generations/connections. Module owns one reservation and fixed 30s timer. Host must support atomic replay-or-cancel: retain at most one terminal result, replay it on expiry query, or cancel pending token/revoke partial work and return deadline-exceeded. Either releases reservation before same-connection recovery; late callbacks reject. Missing support makes attachment unavailable.
+- Same-policy reload recovers reload-recoverable states; strictly newer policy change recovers policy-recoverable unavailable **and runtime error**. Source-revision/static invalid require replacement. Accepted transitions fully prepare. Replacement/target invalidation/dispose settle first; App status outside Host.
+- Target replacement signals before swap. Support/runtime failure revoke before facts. Host crash settles. Disposal cleans. No raw target/epoch.
 
 ## Why no bidirectional bridge
 
@@ -459,15 +464,13 @@ No new Adapter identity is justified: existing profiles receive relations only a
 1. **Portable negatives:** reject raw content/URI/CSP/sandbox tokens/callback/iframe/webview/message/DOM/object URL/permission/controller/navigation/label/App status and immutable identity in Host policy.
 2. **Policy/failure negotiation:** exact requested artifact and current desired policy revisions; exact positive isolation/support shape including no-relaxations sandbox proof and empty reasons; pre-policy null unavailable, applied unsupported/mismatched-revision unavailable, runtime content/crash error; no branch ambiguity or weak fallback.
 3. **Static validation/state:** exact commit; source/profile reattach; support loss revokes before unavailable; resolver/renderer failure revokes content/hooks/resources before error; stale callbacks reject.
-4. **Generation/recovery:** one reserved transition; same-policy reload recovers restored support/policy mismatch/pre-policy/source/runtime states in fresh generation; newer policy only cataloged recoverable unavailable; source-revision/static invalid require replacement; competing rejects; all terminal paths settle/release before teardown; accepted fully prepares.
-5. **Target replacement:** same-capability physical target change synchronously signals `onViewInvalidated` through governed Adapter surface lifecycle before swap; cancellation/retirement/fresh generation/no inherited ready/full re-verification; absent signal forces mount/capability dispose+reattach; no raw target/epoch.
-6. **Status ownership:** App status updates only Module/composition, including while policy pending; Host request/result cannot roll it back.
-7. **Observable navigation/actions:** host-observable attempts block; raw URL stays security-local; content cannot invoke App actions.
-8. **No bridge:** no message listener/port/preload/IPC/content-to-App path.
-9. **Focus/A11y:** A11y naming; composition Enter/Leave; no tabbable descendants; browser proves native Tab; no focus/name facts.
-10. **Real Web security:** a controlled adversarial fixture attempts script, parent DOM access, subresource network, form, navigation, popup, download, permissions, storage, and messaging; every denied capability and zero sandbox relaxation tokens are positively observed at the host boundary without unsafe real side effects.
-11. **Real Web accessibility/layout:** frame label and static document semantics, keyboard entry/exit, fallback/error/reload announcement, 320px/390px/desktop, zoom/reflow, high contrast, reduced motion, target replacement with full re-verification, and cleanup.
-12. **Non-Web:** independent Electron/native profile proves process/origin isolation, Node/API denial, permissions, navigation/new-window/external-open, no IPC, accessibility, focus, crash, and cleanup before multi-host language.
+4. **Generation/recovery evidence to implement:** one reservation; 30s Module deadline; atomic cached-result replay or pending-token cancellation/revocation; deadline cancellation releases before same-connection recovery; late result stale; reload classifications; newer policy directly from runtime error; all terminal paths settle.
+5. **Target replacement:** pre-swap signal; cancellation/retirement/fresh generation/full verification; fallback dispose+reattach; no raw target.
+6. **Status/navigation/no bridge:** App status Module-only; navigation blocked; no message path.
+7. **Focus/A11y:** naming/Enter/Leave/native Tab/no duplicates.
+8. **Real Web security evidence to implement:** adversarial execution/network/navigation/permission/storage/message denial, zero sandbox relaxations, support-loss/runtime/deadline revocation.
+9. **Real Web layout/A11y evidence to implement:** label/static semantics/keyboard/fallback/error/reload/deadline, responsive/reflow/contrast/motion/target cleanup.
+10. **Non-Web evidence to implement:** independent Electron/native isolation/API/permission/navigation/no IPC/A11y/focus/crash/deadline/cleanup.
 
 ## #513/#514 matrix consumption
 
