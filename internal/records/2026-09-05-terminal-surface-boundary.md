@@ -77,7 +77,7 @@ These sources support a cross-host boundary, not cross-host conformance: engines
 | Adapter profile | Materialize targets, wire capability/lifecycle/Focus. | Governed requirement after evidence. | No semantic reinterpretation/support claim early. |
 | Composition | Chrome/status/controls/attention presentation. | App facts/events. | Terminal protocol/process/grid/selection. |
 
-Engine remains infrastructure. `bindSession` resolves engine/output/attention before backend activation and returns bounded unavailable or bound/existing. Same `sessionConnectionId`+session returns exact lease/no allocation; same session with different connection conflicts. Session connection owns initial binding and `replaceBinding`, so reconnect works with zero owner/view. Attention uses fixed-size run batches and fixed pending-batch capacity; overflow emits one sequence-range/count record instead of unbounded callbacks/queues. Session close cascades active view -> owner/resize -> output EOF/queued drain -> attention drain -> subscriptions, then disposes only capability-created engine or detaches borrowed engine. Restart creates new session.
+Engine remains infrastructure. `bindSession` resolves engine affinity/initial binding/output/attention before backend activation. Exact retry returns existing only while live; closing/closed tombstone rejects, preventing inert reactivation; session IDs never reuse. Same live session different connection conflicts. `replaceBinding` atomically reserves one transition; overlap rejects correlated pending. Session channel supports zero owner/view. Attention bounded. Close cascades children, drains, respects created/borrowed ownership. Restart new session.
 
 ## Portable facts, requests, and information paths
 
@@ -89,7 +89,7 @@ The proposal may evaluate these plain values; names are illustrative and not an 
 - View facts: attachment/composition/dimensions/support/resize. Session facts/results: binding transition and bounded attention event/overflow batches with contiguous sequences.
 - Requests: session binding replace/close; owner/view/key/resize. Physical input/output private. Focus remains Focus.
 
-`columns` and `rows` must be finite positive safe integers. The Module/Host rejects `0`, negatives, fractions, `NaN`, `Infinity`, and values above the safe-integer range as `invalid-dimensions` before allocating a resize revision, mutating the coordinator, or calling engine/backend; pixels, rectangles, font metrics, device scale, observers, and layout objects remain host-local. The first slice admits exactly one active Module-issued `terminalInstanceId` resize owner per `sessionId`. A Host session coordinator atomically grants a separate owner lease before any view can become ready and rejects a different live instance with `resize-owner-conflict`. Disposing/replacing a view cannot release the owner; same-instance replacement attaches through the retained owner lease. Explicit final instance release waits for pending resize settlement, then permits another instance to acquire. The coordinator permits at most one unresolved resize across the owner's old/replacement views and retains only newest valid geometry while pending. A resize becomes fact only after Host completion with Module revision/effective dimensions; only then may retained newest size dispatch. Replacement must cancel+await, or await completion and reapply newest size, before ready. Thus old work cannot execute after new, duplicate App IDs cannot alias ownership, and differently sized instances cannot fight over one PTY. Terminal-controlled title stays outside portable facts.
+Dimensions must be finite positive safe integers. Resize revision is Module-issued positive safe integer strictly increasing per `terminalInstanceId` across view/backend replacement; coordinator rejects zero/unsafe/duplicate/decreasing as `invalid-revision` before queue/backend and never rewinds last accepted revision. One owner per session, one active view, one in-flight resize; replacement/release waits settlement. Geometry/engine internals stay Host-private.
 
 A current accessible text snapshot can be a plain diagnostic/test result, but should not be continuously copied into portable State. The first slice should expose `host-bridge | bounded-snapshot | unavailable` support and prefer a host-owned accessibility bridge. Any later author-facing snapshot request requires a separate privacy, size, cadence, and stale-revision decision.
 
@@ -100,7 +100,7 @@ Selection summaries and copy requests are technically expressible as plain value
 | Input | Owner path | Observable output | Synchronization boundary |
 | --- | --- | --- | --- |
 | Session bind | Module session connection -> Host resolvers -> bind result -> App activates backend | Bound/existing exact lease or bounded engine/output/attention/session-conflict unavailable; failure allocates nothing and backend emits no first byte. | Session connection ID + process session ID + initial binding ID. |
-| Binding reconnect | App -> `session.replaceBinding` with expected/next IDs and drain-or-revoke mode | Works without owner/view; old epoch drained to EOF before retirement or revoked/dropped; correlated applied/rejected result. | Session current binding; IDs never reused; queued callbacks recheck. |
+| Binding reconnect | App -> `replaceBinding` request ID + expected/next IDs | Session atomically reserves one transition before drain/revoke; overlap rejects `binding-transition-pending` with no queue. Applied/rejected echoes request ID and releases reservation. Works without owner/view. | Current binding, unique next ID, one pending transition; input blocked until result. |
 | Process exit/close | Revoke input -> mark output draining while ID remains accepted -> EOF/queued output + attention batches settle -> cascade view/owner -> retire binding/session | Final frame/attention retained; all descendant leases inert; created engine disposed, borrowed detached. | Awaitable idempotent session close; binding retirement occurs after drain. |
 | Output | Session binding gate -> engine | Continues with no owner/view/between owners. | Session/binding epoch; zero portable bytes/grid. |
 | Input | Active view -> Host/engine -> current binding | Private once; no view means none. | View policy + current session binding. |
@@ -115,7 +115,11 @@ The connection callbacks below are Module-to-Host internals. They are not Protot
 ```ts
 type TerminalDimensions = Readonly<{ columns: number; rows: number }>;
 type TerminalSize = TerminalDimensions & Readonly<{ revision: number }>;
-type TerminalResizeRejectReason = 'invalid-dimensions' | 'resize-unavailable' | 'backend-rejected';
+type TerminalResizeRejectReason =
+  | 'invalid-dimensions'
+  | 'invalid-revision'
+  | 'resize-unavailable'
+  | 'backend-rejected';
 
 type TerminalUnavailableReason =
   | 'engine-unavailable'
@@ -292,15 +296,21 @@ type TerminalSessionConnection = Readonly<{
 
 type TerminalBindingResult =
   | Readonly<{
+      requestId: string;
       status: 'applied';
       previousBackendBindingId: string;
       currentBackendBindingId: string;
       reason: null;
     }>
   | Readonly<{
+      requestId: string;
       status: 'rejected';
       currentBackendBindingId: string;
-      reason: 'stale-binding' | 'binding-id-reused' | 'session-closing';
+      reason:
+        | 'stale-binding'
+        | 'binding-id-reused'
+        | 'binding-transition-pending'
+        | 'session-closing';
     }>;
 
 type TerminalSurfaceConnection = Readonly<{
@@ -354,12 +364,7 @@ type TerminalResizeOwnerResult =
   | Readonly<{
       status: 'unavailable';
       owner: null;
-      reason:
-        | 'engine-unavailable'
-        | 'engine-session-mismatch'
-        | 'resize-unavailable'
-        | 'resize-owner-conflict'
-        | 'owner-releasing';
+      reason: 'resize-unavailable' | 'resize-owner-conflict' | 'owner-releasing';
     }>;
 
 type TerminalSessionCloseResult = Readonly<{
@@ -371,6 +376,7 @@ type TerminalSessionLease = Readonly<{
   acquireResizeOwner(terminalInstanceId: string): TerminalResizeOwnerResult;
   replaceBinding(
     request: Readonly<{
+      requestId: string;
       expectedBackendBindingId: string;
       nextBackendBindingId: string;
       oldOutput: 'drain-to-eof' | 'revoke-and-drop';
@@ -394,11 +400,14 @@ type TerminalSessionBindResult =
       engineOwnership: null;
       reason:
         | 'engine-unavailable'
+        | 'engine-session-mismatch'
         | 'backend-binding-unavailable'
         | 'binding-id-reused'
         | 'output-channel-unavailable'
         | 'attention-channel-unavailable'
-        | 'session-identity-conflict';
+        | 'session-identity-conflict'
+        | 'session-closing'
+        | 'session-closed';
     }>;
 
 type TerminalSurfaceHost = Readonly<{
@@ -406,20 +415,21 @@ type TerminalSurfaceHost = Readonly<{
 }>;
 ```
 
-A fake binds before backend activation through `TerminalSessionBindResult`. Fixed attention profile defines max runs/batch and pending batches. Session registry/children/binding/engine ownership are observable fakes. Exercise:
+A fake binds via result and tracks live/closing/closed tombstones, engine affinity, binding reservation, and resize-revision high watermark. Exercise:
 
-1. engine/initial-binding/output/attention resolver failures return exact unavailable/no session/resources; backend first-byte attempt remains blocked. Valid bind returns bound;
-2. repeat exact `{sessionConnectionId, sessionId, initialBackendBindingId}`: existing with strict same lease/engineOwnership and unchanged counters. Same session with different connection ID, or same connection with different initial binding, returns session-identity-conflict/no resources; reused binding ID rejects;
-3. initial binding2 outputs before owner; with zero owners replace expected2->3 drain then revoke paths. Reused/stale IDs reject; late old never parses;
-4. attention normal runs cover each contiguous sequence exactly once and run counts sum to batch range. Overflow invariant `bellCount + errorCount === lastSequence - firstSequence + 1`; callback count bounded and interleaving loss explicit;
-5. acquire owner/view. Call owner.release while view active: reject view-active, view remains sole bridge. Dispose view, call release with resize pending: await settle/release while session output/attention continue;
-6. output/attention during no-view and between-owner gaps update engine/session batches; next owner/view inherits state and sequence without replay/rebind;
-7. call session.close unexpectedly with active view, Focus/A11y/input, owner, pending resize, queued final output/attention. It revokes input, disposes/awaits view resources, settles/releases owner, keeps current binding in draining state through EOF/queued parser and bounded attention delivery, then retires binding/callback;
-8. run close with capability-created engine: disposition disposed-created and one engine dispose. Run borrowed: detach subscriptions/references, disposition detached-borrowed, zero engine dispose; external owner remains usable. Repeated close returns same completion/no double cleanup;
-9. restart uses fresh session/engine/binding reset. Reconnect does not. Sensitive input private; policy/Focus/mouse/F6/invalid resize/stale callbacks/support failures;
-10. no raw host/I/O/engine/ownership/epoch/lease crosses authoring.
+1. resolver returns borrowed engine affine to another session: bind rejects engine-session-mismatch/no backend activation/subscriptions. Engine/initial-binding/output/attention failures likewise exact/no resources; valid bind works;
+2. exact bind retry while live returns same lease/ownership. Start close then retry exact bind: session-closing. After close, same ID retry: session-closed. Neither permits backend first byte or new resources; session ID cannot be reused;
+3. same live session changed connection/initial binding conflicts; binding ID reuse rejects;
+4. with current binding2, request r1 replace ->3 and hold drain. Concurrent r2 expected2 ->4 rejects binding-transition-pending immediately/no Host work/queue; r1 applies and releases reservation. Later r3 expected2 stale rejects; request IDs/results correlate. Repeat revoke path and close-race session-closing;
+5. attention normal/overflow bounds and invariants;
+6. owner/view: active-view release rejects, then dispose and release pending resize; session I/O continues;
+7. allocate resize revision 1, retain owner across view/reconnect, attempt revision1 duplicate, 0, unsafe, and decreasing after revision3; each invalid-revision/null effective/no coordinator/backend mutation. Revision2 then3 apply in strict order; replacement cannot reset high watermark;
+8. session close unexpectedly cascades active children; output binding drains EOF before retirement; attention drains; handles inert;
+9. created engine disposed once; borrowed same-session engine detached not disposed; external owner usable; close idempotent;
+10. restart fresh session/engine/binding; private input/policy/Focus/mouse/F6/dimension/stale/support cases;
+11. no raw host/I/O/engine/ownership/epoch/lease crosses authoring.
 
-This makes binding epochs without views, idempotent/failable session bind, bounded attention overflow, active-child close cascade, final drain ordering, and borrowed-engine ownership executable in addition to owner/view/resize/privacy/focus cleanup. It does not prove real host behavior.
+This makes bind affinity and closed retry, serialized binding replacement, monotonic resize revision, plus bounded attention/child close/ownership and core Terminal boundary executable. It does not prove real host behavior.
 
 ## Input, shortcut, and focus policy
 
@@ -454,13 +464,13 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 
 ### Lifecycle rules
 
-- `bindSession` resolves engine/initial binding/output/attention before activation. Failure returns exact bounded unavailable/no resources; backend cannot emit. Exact immutable `{sessionConnectionId, sessionId, initialBackendBindingId}` retry returns same lease/ownership; any differing member for live identity conflicts; binding IDs never reused.
-- Session owns current binding. `replaceBinding` works without owner/view, validates expected/non-reused next, blocks input during transition, completes drain-to-EOF or revoke-drop before switch, then returns result. Output callbacks recheck.
-- Owner registry/view live below session. Owner release rejects view-active; caller disposes view first. Session close may cascade: revoke input, dispose/await view Focus/A11y/listeners, settle owner resize/release, drain output/attention, retire descendants.
-- Output close order: mark binding draining while still accepted, process EOF/queued bytes and attention batches, then retire binding. Final output is not invalidated before drain.
-- Attention profile fixes max runs/batch and max pending batches. Normal runs cover contiguous sequence once; overflow count sum equals sequence-range cardinality and explicitly loses only interleaving. Callback session-scoped/drained before retirement.
-- Session close idempotent. Created engine disposed exactly once. Borrowed engine only unsubscribed/detached; external owner retains it. All descendant handles reject after close.
-- View input/Focus/A11y/geometry are view-scoped; engine/output/attention session-scoped. Restart new session; reconnect binding update. Coordinator dimensions/resize serialized.
+- Bind validates resolved engine session affinity before activation, including borrowed engine. Failure exact/no resources. Exact immutable retry returns existing only while live. Closing/closed tombstone returns session-closing/session-closed; session IDs never reuse. Changed live identity conflicts.
+- Session owns current binding and atomically reserves at most one replacement. Request/result IDs correlate. Competing request rejects binding-transition-pending without queue/Host work; result/close releases reservation. Expected/non-reused IDs validate; input blocked; drain/revoke completes before switch.
+- Owner/view below session. Release rejects active view; close cascade disposes view then settles owner resize.
+- Output draining accepts old ID until EOF/queued bytes/attention settle, then retires. Attention fixed bounded batches/overflow.
+- Session close idempotent; created engine disposed once; borrowed engine only detached. Descendants reject.
+- Resize revision is Module-owned positive safe monotonic per terminal instance across view/reconnect. Coordinator tracks high watermark; invalid/duplicate/decreasing rejects before coordinator/backend and cannot reset on replacement. Dimensions validated separately; one in-flight.
+- View systems scoped; session I/O scoped; restart new session; reconnect binding update.
 
 ## Proposed entity and evidence graph
 
@@ -487,12 +497,14 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 ### Bounded red-first plan
 
 1. **Portable negatives:** no raw I/O/engine/ownership/epochs/leases/input observation.
-2. **Session bind:** engine/initial-binding/output/attention failures before activation; exact immutable triple existing same lease/ownership/no allocation; changed member conflict; binding reuse rejection; created/borrowed evidence.
-3. **Binding/output:** session initial ID; no-owner replace drain/revoke with input block; stale/reused results; final binding drains EOF/queued work before retirement.
-4. **Attention:** fixed bounds; normal run contiguous coverage/count invariant; flood overflow range/count-sum invariant/bounded callbacks/interleaving-loss signal; view/owner gaps; presentation separate.
-5. **Owner/view/close:** one owner/view; release rejects active view; pending resize release; unexpected session close cascades/awaits view->owner->output/attention->engine; handles inert; idempotent close.
-6. **Input/resize/Focus/A11y:** private input; modes; mouse; invalid/serialized resize; system view projection; restart reset.
-7. **Real Web:** bind failures/idempotency; binding changes without view; final-frame drain; attention overflow; active-child close; borrowed non-disposal; owner/view/privacy/lifecycle cleanup.
+2. **Session bind:** cross-session borrowed-engine mismatch and all resolver failures before activation; live exact existing; closing/closed retries reject; changed identity conflict; created/borrowed.
+3. **Binding:** request correlation; atomic one-pending reservation; concurrent pending rejection/no queue; stale/reused/close results; no-owner drain/revoke; final EOF.
+4. **Attention:** fixed normal/overflow invariants/bounds/gaps.
+5. **Owner/view/close:** release active-view reject; cascade/await children; inert handles; idempotent close.
+6. **Resize/input/systems:** positive safe strictly increasing per-instance revision across replacements; duplicate/decreasing/invalid rejects before backend; dimensions/serialization; private input/modes/mouse/Focus/A11y/restart.
+7. **Real Web:** bind close race/affinity; overlapping binding replacements; resize revision high watermark; final drain/attention/borrowed ownership/owner-view cleanup.
+8. **Cross-adapter Web only if claimed:** WC/React/Vue evidence from one authoring source remains Web evidence.
+9. **Non-Web:** independent native profile proves session bind/ownership/binding/attention/close and native input/resize/A11y before multi-host language.
 
 ## #513/#514 matrix consumption
 
