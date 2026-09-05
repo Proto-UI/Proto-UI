@@ -199,6 +199,7 @@ type DocumentCompositionCancelResult =
 type DocumentModelCompositionState = Readonly<{
   generation: number;
   activeViewCount: number;
+  unprovableViewCount: number;
   unsettledCancellationCount: number;
 }>;
 
@@ -500,7 +501,7 @@ type DocumentSurfaceLease = Readonly<{
   ): Promise<DocumentCompositionCancelResult>;
   requestCommand(request: DocumentCommandRequest): void;
   snapshot(): DocumentSurfaceFacts;
-  dispose(options: Readonly<{ viewState: 'retain-for-surface' | 'evict-surface' }>): void;
+  dispose(options: Readonly<{ viewState: 'retain-for-document' | 'evict-surface' }>): void;
 }>;
 
 type DocumentSurfaceHost = Readonly<{
@@ -509,25 +510,23 @@ type DocumentSurfaceHost = Readonly<{
 ```
 
 1. attach composite models; versioned pending facts. Before policy use null/null command. After numeric-policy attachment failure with no model baseline, use number/null request and receive numeric-policy runtime unavailable without fabricating mutation revision or engine access;
-2. while view A composes, invoke command from sibling view B sharing model: aggregate `DocumentModelCompositionState.activeViewCount > 0`, so B returns busy composition-active. Disposing A or stale callback updates aggregate by connection/epoch; command proceeds only when active and unsettled counts are zero;
-3. transition interactive A to read-only/disabled: synchronously block input and atomically close old composition epoch/increment current **before** calling Host cancel. Reentrant compositionend from cancel carries old epoch and rejects before transaction. Separate cancel result is awaited; then apply policy. Cancellation unavailable -> attachment unavailable;
-4. Revert with A+B composing closes/increments every active view epoch first, then invokes/awaits each cancellation; late callbacks all reject. Save waits every aggregate active composition to end and includes each committed candidate before barrier drain;
-5. mode admission: interactive/read-only requires current-policy `keyboardRoute.available` plus enabled composition Leave control/Focus topology. Collide every exit chord: block Focus entry, transfer existing focus to Leave before failure, publish unavailable keyboard-route-unavailable. Disabled remains ineligible and does not require entry route. Disabled A11y unavailable publishes representable accessibility-unavailable;
-6. delivery acknowledgements: current epoch sequence <= acknowledgedThrough is ignored first as duplicate even when later sequence is in-flight; retired epoch ignored second; exact in-flight key processed third; only future/current wrong ID then reconciles. Test delayed duplicate sequence1 after sequence2 becomes in-flight;
-7. persist/retry/backpressure/observe/equality. Reject with full reconciliation;
-8. Save/Revert exact rebases; final outbox close; view/system cleanup;
-9. no raw private values.
+2. view A composition active blocks sibling B command. Attach view C with composition reporting unavailable: aggregate unprovableViewCount increments; interactive mode is rejected/resolved read-only or unavailable, and commands/Save remain composition-active blocked until C is noninteractive and Host confirms cancellation/epoch settlement. No null composing value is treated inactive;
+3. noninteractive transitions close epoch before cancellation; Revert all views; Save waits aggregate active+unprovable+unsettled counts all zero;
+4. mode admission tests keyboard route/disabled A11y and exact behaviors;
+5. acknowledgement duplicate order and full delivery/rejection/Save/Revert/outbox cases;
+6. switch stable surface S from `{docA,model1}` to `{docB,model1}`. Dispose A with retain-for-document and store view state only under exact `{surfaceId:S, documentId:docA, modelSessionId:model1}`. B attach uses distinct key and cannot restore A selection/folding/scroll. Switching back restores A only. evict-surface purges all S keys;
+7. view/system cleanup; no raw values.
 
-If implemented as specified, this evidence plan would verify applied-failure commands, model-wide/reentrant composition safety, focus-route and disabled-A11y admission, duplicate-before-mismatch acknowledgements, full reconciliation, exact Save/Revert, and delivery/view/system ownership. This record supplies no executable `T-TEXT-DOCUMENT-*` evidence and claims no completed proof.
+If implemented as specified, this evidence plan would verify conservative unprovable composition gating, document-keyed view retention, mode/admission, duplicate/reconciliation/barriers, and delivery/system ownership. This record supplies no executable `T-TEXT-DOCUMENT-*` evidence and claims no completed proof.
 
 ## Revision, input, shortcut, and permission policy
 
-- **Command revision branches:** null/null before policy; number/null for applied-policy unattached failure; number/number ready. Outcomes exact; no fabricated revision.
-- **Acknowledgement classification order:** (1) retired delivery epoch -> ignore; (2) current epoch sequence <= scalar `acknowledgedThrough` -> idempotent duplicate ignore, regardless of current in-flight; (3) exact current in-flight epoch/sequence/transaction ID -> process accepted/retry/rejected; (4) only future sequence or current in-flight sequence with wrong ID -> protocol reconciliation. This ordering precedes all mismatch handling and needs no completed-ID set.
-- **Model-wide composition/cancellation:** aggregate by model+connection+epoch. Sibling active/unsettled blocks commands. For noninteractive/revert, block input and atomically close/increment epoch before Host cancel; reentrant/late rejects; separate ack required.
-- **Mode/Focus/A11y/keyboard admission:** interactive and read-only are Focus-eligible only when `DocumentKeyboardRouteSupport` is available for exact applied shortcutPolicyId and composition provides enabled Leave control/topology. Route collision/unavailability blocks entry; if already focused, Focus transfers to Leave before numeric-policy attachment unavailable `keyboard-route-unavailable`. Disabled is Focus-ineligible and needs no entry route, but can be ready only with readable A11y; otherwise representable `accessibility-unavailable`. Read-only/disabled selection/input/command semantics remain as stated.
-- **Rejected transaction reconciliation:** atomically gate views/commands, cancel compositions, discard dependents/private records, rotate delivery epoch/reset watermark, privately install App authoritative content above discarded revision, clear undo/redo/selection view state, publish coherent all-view facts, require fresh policy. No revival.
-- **Save/Revert exact:** Save settles compositions/drains, persists current identity, advances source+saved+dispatcher source preserving mutation/content/delivery. Revert cancels/drains, App-origin saved replace, advances mutation/clean, clears history, rotates delivery/reset watermark/all accepted heads, resumes sequence1 no ack.
+- **Command revision and acknowledgement:** three revision branches. Ack ordering: retired epoch ignore; current sequence <= acknowledgedThrough duplicate ignore; exact in-flight process; future/wrong ID reconcile.
+- **Model-wide composition:** aggregate active, **unprovable**, and unsettled counts by model/connection/epoch. Any nonzero blocks every command and Save as composition-active. Reporting-unavailable can never support interactive mode in first slice; resolve read-only/unavailable and confirm cancellation/epoch settlement. Null is never inactive. Dispose/stale clears matching epoch only. Revert closes/cancels all.
+- **Cancellation:** block input; close/increment epoch before Host cancel; reentrant/late reject; separate ack.
+- **Mode/Focus/A11y/keyboard:** interactive requires edit/origin/delivery + composition reporting available + route/Leave. Read-only Focus/A11y/selection-copy no mutation; reporting unavailable allowed only after no active candidate. Disabled Focus-ineligible/no interaction/readable A11y. Route/A11y failures representable.
+- **Rejection and barriers:** full atomic rejection reconciliation. Save waits composition counts zero and exactly rebases source/saved. Revert cancels/drains, observe-only replaces, clears history, rotates delivery/resets all heads.
+- **View-state lifetime:** `retain-for-document` key is exact `{surfaceId, documentId, modelSessionId}` from immutable requirement. Document/session change never reads another key. `evict-surface` purges all keys for surface. Raw ranges/state never cross.
 
 ## Accessibility boundary
 
@@ -540,12 +539,11 @@ If implemented as specified, this evidence plan would verify applied-failure com
 
 ## Performance, viewport, windowing, and lifecycle
 
-- Private payload absent; persist/observe/outbox exact.
-- Ack classification ignores retired epoch/current <= watermark before checking in-flight mismatch.
-- Model-wide composition and noninteractive cancellation order exact; command/backpressure gates.
-- Rejection and Save/Revert exact resets/rebases.
-- Focus-eligible modes require policy-matched keyboard route+Leave topology; disabled requires readable A11y; failure reasons in attachment union.
-- Scroll/view/retain/App lifetimes distinct; facts/support/dirty ownership exact.
+- Private payload/delivery/outbox rules exact; ack duplicate order explicit.
+- Model composition aggregate includes unprovable views; interactive requires reporting available; nonzero counts gate commands/Save; cancellation ordered.
+- Rejection/Save/Revert exact. Mode Focus/keyboard/A11y exact.
+- View state keyed exact surface+document+model; identity switch isolates, surface eviction purges.
+- Scroll/view/App lifetimes distinct; facts/support/dirty ownership exact.
 
 ## Proposed entity and evidence graph
 
@@ -572,15 +570,14 @@ No new Adapter identity is justified: existing profiles receive reviewed relatio
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** raw private values absent; bounded IDs only.
-2. **Modes/admission:** sibling composition and pre-cancel epoch close; exact read-only/disabled; interactive/read-only keyboard route+Leave gate/loss transfer; disabled A11y available/unavailable.
-3. **Commands/reconciliation:** three revision pairs; composition/backpressure busy; attachment failure reasons; full rejection reset/no revival.
-4. **Delivery/barriers:** retired/<=watermark duplicate ignored before mismatch; exact/future/wrong key; persist payload/retry/outbox; exact Save/Revert rebases/immediate edits.
-5. **Systems:** view retain/evict; A11y/Focus/Scroll cleanup.
-6. **Real Web evidence to implement:** duplicate ack with later in-flight, route collision/loss, disabled readability, sibling/reentrant composition, applied-failure command, reconciliation/barriers/delivery/view cases.
-7. **Performance evidence to implement:** rapid edits/caret movement and a bounded first-slice document must demonstrate no full-content/token/viewport copies through Proto UI and no retained listeners/models.
-8. **Cross-adapter Web only if claimed:** WC/React/Vue from one authoring source remains Web evidence.
-9. **Non-Web:** independent native profile with native input, selection, revision, accessibility, view replacement, and cleanup evidence before multi-host language.
+1. **Portable negatives:** raw private/view-state values absent; bounded IDs only.
+2. **Composition/modes:** active/unprovable/unsettled aggregate; reporting-unavailable forced noninteractive; sibling command/Save gates; pre-cancel epoch; route/disabled A11y semantics.
+3. **Delivery/reconciliation:** three commands; duplicate order; persist/retry/outbox; full rejection; exact Save/Revert.
+4. **View identity:** retain exact `{surface,document,model}` across A->B->A; no cross-document restore; evict surface all keys; Scroll/A11y/Focus cleanup.
+5. **Real Web evidence to implement:** unreportable composition, sibling gates, identity-switched view state, mode/admission, duplicate/reconciliation/barrier/delivery/system cases.
+6. **Performance evidence to implement:** bounded document without full copies/retained listeners/models.
+7. **Cross-adapter Web only if claimed:** WC/React/Vue remains Web evidence.
+8. **Non-Web:** independent native input/selection/revision/A11y/view replacement/cleanup evidence.
 
 ## #513/#514 matrix consumption
 
