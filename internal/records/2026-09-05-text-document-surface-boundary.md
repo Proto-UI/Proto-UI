@@ -178,6 +178,28 @@ type DocumentCompositionSupport =
       reason: 'composition-unavailable';
     }>;
 
+type DocumentCompositionCancelResult =
+  | Readonly<{
+      requestId: string;
+      status: 'cancelled';
+      previousEpoch: number;
+      currentEpoch: number;
+      reason: null;
+    }>
+  | Readonly<{
+      requestId: string;
+      status: 'unavailable';
+      previousEpoch: number;
+      currentEpoch: number;
+      reason: 'composition-cancellation-unavailable';
+    }>;
+
+type DocumentModelCompositionState = Readonly<{
+  generation: number;
+  activeViewCount: number;
+  unsettledCancellationCount: number;
+}>;
+
 type DocumentSelectionSupport =
   | Readonly<{ availability: 'available'; summary: DocumentSelectionSummary; reason: null }>
   | Readonly<{
@@ -443,6 +465,13 @@ type DocumentCommandRequest =
   | Readonly<{
       requestId: string;
       command: 'undo' | 'redo';
+      // Applied policy but no attached model mutation baseline.
+      expectedPolicyRevision: number;
+      expectedMutationRevision: null;
+    }>
+  | Readonly<{
+      requestId: string;
+      command: 'undo' | 'redo';
       expectedPolicyRevision: number;
       expectedMutationRevision: number;
     }>;
@@ -460,6 +489,13 @@ type DocumentSurfaceConnection = Readonly<{
 
 type DocumentSurfaceLease = Readonly<{
   update(patch: DocumentSurfacePatch): void;
+  cancelComposition(
+    request: Readonly<{
+      requestId: string;
+      previousEpoch: number;
+      currentEpoch: number;
+    }>
+  ): Promise<DocumentCompositionCancelResult>;
   requestCommand(request: DocumentCommandRequest): void;
   snapshot(): DocumentSurfaceFacts;
   dispose(options: Readonly<{ viewState: 'retain-for-surface' | 'evict-surface' }>): void;
@@ -470,44 +506,45 @@ type DocumentSurfaceHost = Readonly<{
 }>;
 ```
 
-1. attach composite models; versioned pending facts/null command;
-2. exercise input support/edit-origin coupling. While interactive with active composition, revoke permission or request read-only/disabled: immediately block new Host input, cancel composition, advance composition epoch, await cancel ack, reject old-epoch compositionend before transaction creation, then publish/apply noninteractive policy. Cancellation failure makes view unavailable; zero unauthorized edit;
-3. call programmatic undo/redo during reported active composition and during unavailable reporting where Host-local arbiter cannot prove inactive: return busy composition-active synchronously, no engine mutation/command queue. After newer inactive composition epoch, explicit retry proceeds;
-4. verify modes: read-only remains Focus eligible and allows engine-local selection/copy/A11y navigation but no IME/text/paste/undo/redo mutation; disabled is Focus-ineligible, transfers/clears current Focus, starts no IME, accepts no input/selection/copy/commands, while document remains A11y-readable with disabled state and engine selection private;
-5. persist/observe delivery sequencing, retry/backpressure, rejection/history, exact payload/equality/barriers as specified;
-6. final dispatcher close durable handoff success/failure/idempotency;
-7. view retain/evict and A11y/Focus/Scroll cleanup;
-8. no raw private values cross.
+1. attach composite models; versioned pending facts. Before policy use null/null command. After numeric-policy attachment failure with no model baseline, use number/null request and receive numeric-policy runtime unavailable without fabricating mutation revision or engine access;
+2. while view A composes, invoke command from sibling view B sharing model: aggregate `DocumentModelCompositionState.activeViewCount > 0`, so B returns busy composition-active. Disposing A or stale callback updates aggregate by connection/epoch; command proceeds only when active and unsettled counts are zero;
+3. transition interactive A to read-only/disabled: synchronously block input and atomically close old composition epoch/increment current **before** calling Host cancel. Reentrant compositionend from cancel carries old epoch and rejects before transaction. Separate cancel result is awaited; then apply policy. Cancellation unavailable -> attachment unavailable;
+4. Revert with A+B composing closes/increments every active view epoch first, then invokes/awaits each cancellation; late callbacks all reject. Save waits every aggregate active composition to end and includes each committed candidate before barrier drain;
+5. mode semantics: read-only Focus eligible/selection-copy/A11y readable/no mutations. Disabled requires readable accessibility support before ready, projects Focus-ineligible/clears focus, no IME/input/selection-copy/commands, retains only private selection. If A11y unavailable, disabled transition publishes unavailable `accessibility-unavailable`, never ready;
+6. delivery exact payload/retry/backpressure/observe-only/equality cases. Reject in-flight tx with dependents: atomically block every view/command, close/cancel all compositions, discard dependent deliveries/private records, rotate delivery epoch/reset sequence+watermark, fetch App authoritative source/content privately, replace model at mutation revision above all discarded, clear undo/redo/selection-derived view state, publish canUndo/canRedo false, then resume only after fresh policy/facts. Undo/redo cannot revive;
+7. Save exact: after all compositions settle and queue drains, persist current content identity, atomically advance App sourceRevision and savedContentIdentity plus dispatcher accepted source head while retaining mutation/content/delivery epoch+sequence; publish all views, then immediate edit chains from new source;
+8. Revert exact: after composition cancel/drain, App-origin observe-only replace from authoritative saved source, advance mutation, set contentIdentity=saved, clear history, rotate delivery epoch/reset sequence+watermark, atomically set accepted source/mutation/content heads, publish all views, resume; next persist starts new epoch sequence1 without replacement ack;
+9. final dispatcher retryable outbox handoff success/failure/idempotency; view retain/evict and system cleanup;
+10. no raw private values cross.
 
-If implemented as specified, this fake/real evidence plan would verify restored input/origin coupling, composition-safe commands and noninteractive transitions, disabled semantics, persist-only sequencing, backpressure, retryable disposal, payload/order/equality/barrier/view/system ownership. This record itself supplies no executable `T-TEXT-DOCUMENT-*` evidence and does not claim these properties are already proved.
+If implemented as specified, this evidence plan would verify applied-failure commands, model-wide composition admission, reentrancy-safe cancellation, disabled A11y coupling, full rejection reconciliation, exact Save/Revert rebases, and delivery/view/system ownership. This record supplies no executable `T-TEXT-DOCUMENT-*` evidence and claims no completed proof.
 
 ## Revision, input, shortcut, and permission policy
 
-- **Edit/origin and policy transition:** interactive requires available input+commit-stamped origin+delivery. Any interactive -> read-only/disabled transition (including permission/origin loss) first blocks new input under old generation, cancels Host composition, advances composition epoch, awaits cancellation, rejects late old-epoch commit, then applies/publishes new policy. If cancellation cannot be guaranteed, fail closed unavailable; never fabricate provenance.
-- **Mode semantics:** interactive is Focus-eligible and permits supported input/selection/copy/commands. Read-only stays Focus-eligible and preserves engine-local selection/copy plus A11y text navigation, but starts no editing IME and rejects text/paste/undo/redo mutations as policy-denied. Disabled projects Focus-ineligible through Focus domain, transfers/clears current focus, starts no IME, suppresses input and user selection/copy, and returns policy-denied for commands; existing selection may remain engine-private only. Document remains A11y-readable with disabled state. External App Save/Revert controls remain separate.
-- **Programmatic command composition gate:** before queue reservation or engine access, Host-local arbiter must prove composition inactive. Reported active or unprovable unavailable state returns `busy: composition-active`, no command queue/mutation; caller retries only after newer inactive composition epoch. Then delivery backpressure gate may return its own busy result.
-- **Delivery/storage/disposal:** persist-only delivery keys/private payload; observe-only no coordinate; scalar duplicate/retry/rejection; queue slots before mutation; outbox handoff or blocked close. Rejection/Revert history and Save/Revert composition barriers/equality as above.
-- **Input arbitration:** physical IME -> required Focus exit -> Harness -> editor; programmatic commands use composition gate separately. Exact policy-bound route/support.
-- **Systems:** view freshness separate; Scroll/A11y/Focus own; no raw private/outbox value.
+- **Command revision branches:** before policy request is null/null -> policy-not-applied. Numeric applied policy with unattached/failed model uses number/null -> numeric-policy `DocumentCommandRuntimeUnavailableReason` before mutation comparison/engine. Ready model uses number/number. No revision is fabricated.
+- **Model-wide composition gate:** dispatcher aggregates active and unsettled-cancellation state by composite model key, connection, and composition epoch. Any view's active/unprovable composition blocks undo/redo from every sibling as busy composition-active before queue/engine. Dispose/stale callbacks clear only matching epoch. Save waits all; Revert/policy reconciliation closes/cancels all applicable epochs.
+- **Noninteractive transition ordering:** block input, atomically mark old epoch closed and increment current, then invoke `cancelComposition(previous,current)`. Reentrant/late old-epoch completion rejects before transaction. Cancellation acknowledgement travels separately; only success permits read-only/disabled policy publication. Failure -> unavailable.
+- **Mode/A11y:** read-only remains Focus eligible, A11y-readable, selection/copy enabled, mutation commands denied. Disabled requires `accessibility` available to become ready; otherwise unavailable accessibility-unavailable. Disabled is Focus-ineligible, clears/transfers focus, suppresses IME/input/user selection-copy/commands, keeps prior selection private, and remains A11y-readable with disabled state. App Save/Revert controls separate.
+- **Rejected transaction reconciliation:** on authorization/source rejection, atomically gate all views/commands, close/cancel compositions, discard dependent delivery/private records, rotate delivery epoch/reset high watermark, privately fetch/install App authoritative content at mutation revision above discarded work, clear undo/redo and selection-derived view state, publish coherent source/saved/content/canUndo/canRedo facts to all views, then require fresh policy before editing. No dependent/undo revival.
+- **Save exact rebase:** settle all model compositions, gate new mutations, drain retry/acks, persist exact current identity, atomically advance App source + saved identity and dispatcher accepted source head while preserving mutation/content/delivery coordinate, publish all views, then resume. **Revert exact rebase:** close/cancel all compositions, drain/reconcile, install App-origin saved content, advance mutation/set clean identity, clear history, rotate delivery epoch/reset sequence+watermark, atomically reset accepted source/mutation/content heads, publish, resume at sequence1. Observe-only replacement consumes no ack.
 
 ## Accessibility boundary
 
-- App supplies role/name/description/disabled or read-only state through A11y facts; Help composition. Adapter projects IR; engine/Host supplies native text ranges/caret/wrapping/screen-reader mechanics without role ownership. Disabled remains readable to A11y but not Focus/input eligible.
-- Selection summary low-cost only; native ranges. Read-only may allow user selection/copy; disabled suppresses user interaction and keeps any old selection engine-private.
-- Streaming edits do not drive live region. Announcements bounded.
-- Web evidence must cover exact interactive/read-only/disabled Focus/input/selection/copy/A11y behavior, composition cancellation/late-event suppression, keyboard exit, zoom/wrap/contrast, replacement, and no duplicates.
+- A11y role/name/description/read-only/disabled state stays A11y-owned; engine supplies native ranges. Any mode requires explicit degradation; disabled ready specifically requires readable `host-text-provider | bounded-range`, never accessibility unavailable.
+- Read-only selection/copy and navigation remain; disabled suppresses user interaction while document stays readable and prior selection private.
+- Announcements bounded; no edit live region.
+- Web evidence must exercise disabled transition with A11y available/unavailable, model-wide composition across sibling views, reentrant cancellation, exact mode behavior, keyboard/layout/replacement/no duplicates.
 - Native evidence may use UIA TextPattern or equivalent; sensitive content projection is App/Host privacy. Degradation explicit.
 - Large-document accessibility and range-query performance are option E. Same-Web WC/React/Vue results cannot establish native-host conformance.
 
 ## Performance, viewport, windowing, and lifecycle
 
-- Full private model/content/transaction/outbox payload stays infrastructure; bounded IDs only.
-- Persist dispatcher uses epoch/watermark/in-flight/bounded queue; observe-only consumes no coordinate. Queue slot and composition-inactive gate precede text/undo/redo mutation; distinct busy reasons create no command queue.
-- Interactive -> read-only/disabled blocks input, cancels/epochs composition, waits cancellation, then publishes policy; disabled/read-only Focus/selection/copy/A11y/command semantics remain exact.
-- Final dispatcher close settles or hands off to durable outbox; failure blocks and retains. Save/Revert composition/equality/head/history rules apply.
-- Scroll owns its lease; view state/identity stay host-private and bounded.
-- Facts revisions/support exact; edit input structurally coupled to origin and capacity.
-- View retain/evict affects view resources only; App model/dispatcher/outbox survive as specified. Dirty/attachment/command ownership remains exact.
+- Private payload absent; bounded IDs only. Persist dispatcher exact; observe-only no coordinate; outbox close exact.
+- Model-wide composition registry/gate keyed by connection+epoch precedes commands/barriers. Noninteractive transition closes epoch before Host cancel; stale/reentrant commit rejected.
+- Rejection reconciliation atomic full reset/epoch rotation/history clear; Save/Revert exact head/identity/delivery rebases as specified, not shorthand.
+- Disabled ready couples to readable A11y; mode Focus/input/selection/copy/commands exact.
+- Queue slot/composition gate before mutations; busy no queue. Facts/support revisions exact.
+- Scroll/view state/retain/evict/App model lifetimes remain distinct. Dirty/attachment/command ownership exact.
 
 ## Proposed entity and evidence graph
 
@@ -535,11 +572,11 @@ No new Adapter identity is justified: existing profiles receive reviewed relatio
 ### Bounded red-first plan
 
 1. **Portable negatives:** raw private values absent; bounded IDs only.
-2. **Modes/composition:** input-origin coupling; interactive->read-only/disabled cancellation/epoch/late suppression; read-only vs disabled Focus/input/selection/copy/A11y/command semantics; cancellation failure unavailable.
-3. **Commands/delivery:** programmatic undo/redo busy during active/unprovable composition before backpressure; distinct busy outcomes/no queue; persist-only sequencing/payload/retry/rejection/history/backpressure.
-4. **Disposal/barriers/equality:** outbox handoff/block; Save waits IME, Revert cancels; heads/history/equality.
+2. **Modes/composition:** model-wide sibling composition gate; epoch closed/incremented before cancellation; reentrant/late suppression; read-only/disabled exact; disabled A11y available/unavailable.
+3. **Commands/reconciliation:** null/null, number/null, number/number requests; composition/backpressure busy; full rejection gate/drop/epoch rotate/authoritative replace/history clear/no revival.
+4. **Delivery/barriers:** persist-only payload/retry/outbox; Save preserves mutation/content/delivery while rebasing source/saved; Revert observe-only replace rotates delivery/resets all heads; immediate next edits.
 5. **Systems:** view retain/evict; A11y/Focus/Scroll cleanup.
-6. **Real Web evidence to implement:** mode transitions during IME, late composition rejection, command composition-busy, exact disabled/read-only behavior, delivery/outbox/equality/view/system cases.
+6. **Real Web evidence to implement:** sibling composition command, reentrant cancel, applied-failure command, disabled readability failure, rejection reconciliation, Save/Revert exact rebases, delivery/view/system cases.
 7. **Performance evidence to implement:** rapid edits/caret movement and a bounded first-slice document must demonstrate no full-content/token/viewport copies through Proto UI and no retained listeners/models.
 8. **Cross-adapter Web only if claimed:** WC/React/Vue from one authoring source remains Web evidence.
 9. **Non-Web:** independent native profile with native input, selection, revision, accessibility, view replacement, and cleanup evidence before multi-host language.
