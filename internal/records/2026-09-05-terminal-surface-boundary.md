@@ -349,7 +349,8 @@ type TerminalBindingResult =
         | 'stale-request'
         | 'input-channel-unavailable'
         | 'output-channel-unavailable'
-        | 'parser-reset-unavailable';
+        | 'parser-reset-unavailable'
+        | 'session-closing';
     }>
   | Readonly<{
       requestId: string;
@@ -440,9 +441,28 @@ type TerminalSessionCloseResult =
   | Readonly<{
       requestId: string;
       status: 'closed-with-error';
-      outputDisposition: 'forced-reset-failed';
+      outputDisposition: 'eof-parser-reset-failed' | 'forced-reset-failed';
       engineDisposition: 'disposed-created' | 'quarantined-borrowed';
       reason: 'parser-reset-failed';
+    }>
+  | Readonly<{
+      requestId: string;
+      status: 'already-closing';
+      originalRequestId: string;
+      currentBackendBindingId: TerminalBindingId | null;
+      reason: null;
+    }>
+  | Readonly<{
+      requestId: string;
+      status: 'already-closed';
+      originalRequestId: string;
+      outputDisposition:
+        | 'drained-to-eof'
+        | 'forced-revoke-reset'
+        | 'eof-parser-reset-failed'
+        | 'forced-reset-failed';
+      engineDisposition: 'disposed-created' | 'detached-borrowed' | 'quarantined-borrowed';
+      reason: null | 'parser-reset-failed';
     }>;
 
 type TerminalSessionLease = Readonly<{
@@ -501,18 +521,15 @@ type TerminalSurfaceHost = Readonly<{
 
 A fake fixes registry/session/binding/dimension bounds and injects channel/parser/EOF failures. Exercise:
 
-1. fill registry with 64 active sessions; 65th returns session-capacity-exceeded/no resolver/resources/backend activation. Close one, then retry succeeds. Exercise epoch/sequence watermarks/rotation/stale reuse;
-2. affinity/initial bind failures, exact live vs closing/closed bind retries;
-3. owner exact connection/conflict; attention bounds;
-4. start binding request seq1/id-r1 expected2->3. Atomically reserve and revoke old input before any drain; keystrokes during transition write zero. Exact retry with identical sequence/ID/fields returns strict same pending Promise, then same cached terminal result before next distinct request. Reuse ID/sequence with changed next/mode/deadline -> request-id-conflict. Different seq2 while pending -> binding-transition-pending/no queue;
-5. preflight input/output/reset failure restores old input/current binding before rejected result and releases reservation. Successful drain-to-eof has 30s deadline; if EOF stalls, automatically revoke/drop+parser-ground reset and apply with deadline-revoke-reset. Then seq2 succeeds; later seq1 retry -> stale-request;
-6. after close retires binding but cascade still running, replace returns unavailable/current null/session-closing. After close returns session-closed/current null. No fabricated binding;
-7. revoke-reset path partial CSI/OSC grounds parser before new. Unexpected reset/activation -> failed-closed/current null/session cascade;
-8. close EOF and never-EOF. Force-reset success returns forced-revoke-reset. Inject parser reset failure: created engine disposed with closed-with-error; borrowed engine is not disposed/detached-as-safe, returns quarantined-borrowed and external owner must recreate or independently reset before reuse. Repeated close same result;
-9. owner resize A/B release settlement; dimension caps/revision/coalescing/facts;
-10. private input/Focus/mouse/F6/support/restart; no raw values.
+1. capacity/identity/bind/owner/attention basics;
+2. start binding replace r1 and hold drain. Call close c1: synchronously mark closing, revoke/preflight next channels, settle r1 rejected session-closing with still-draining current binding ID, release replacement reservation, and prove r1 cannot later activate. Close then drains current binding;
+3. during close before binding retirement, replace r2 returns rejected session-closing with non-null current ID. After retirement but before cascade completion returns unavailable session-closing/current null; after completion session-closed/null;
+4. exact close c1 retry returns same pending Promise/cached result. Concurrent close c2 returns correlated already-closing with requestId c2, originalRequestId c1, and current nullable binding without second cascade. After completion c3 returns already-closed with c3/original c1 and cached dispositions. No caller receives another request ID as its own;
+5. graceful EOF with borrowed engine ending in partial CSI/OSC: verify parser ground; if not, reset before detached-borrowed. Inject reset failure: closed-with-error/eof-parser-reset-failed/quarantined-borrowed; external owner must reset/recreate. Created engine disposes. Never-EOF uses forced reset success/failure similarly;
+6. binding exact retry/overlap/input revoke/channel failure/deadline/parser reset; session/owner resize dimension cases;
+7. private input/Focus/mouse/F6/support/restart; no raw values.
 
-If implemented as specified, this plan would verify capacity, idempotent/deadline-bounded input-safe binding transitions including post-retirement calls, forced-reset quarantine, and prior Terminal identity/resize/security/lifecycle invariants. This record supplies no executable `T-TERMINAL-*` evidence.
+If implemented as specified, this plan would verify close-versus-replacement settlement, nullable draining/retired binding results, per-caller close idempotency, graceful-EOF borrowed parser safety, and prior Terminal capacity/binding/resize/lifecycle invariants. This record supplies no executable `T-TERMINAL-*` evidence.
 
 ## Input, shortcut, and focus policy
 
@@ -547,14 +564,12 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 
 ### Lifecycle rules
 
-- Registry structured/bounded: 64 capacity has exact retryable session-capacity-exceeded; freeing slot permits bind. Epoch/session/binding watermarks avoid unbounded tombstones.
-- Bind affinity/parser/channel preflight; exact live/closing/closed/stale/reuse results.
-- Binding request identity is sequence+ID+all fields. Exact retry returns same pending Promise/cached terminal result without work; changed-field reuse conflicts; one newer pending rejects; only current/last result retained, older sequence stale.
-- On reservation, revoke old input synchronously. Preflight failure restores old input/current binding before rejected result. New input activates only after output barrier success. Drain has 30s deadline then revoke-drop/parser reset fallback. Result releases reservation.
-- Before old-route mutation, channel/reset failure leaves old current. Unexpected post-revoke failure returns failed-closed/null and cascades close. Calls after binding retirement return unavailable/null session-closing/closed.
-- Close cascade: EOF drain or 30s forced reset. Reset failure is explicit closed-with-error; created engine disposed, borrowed engine quarantined (not disposed nor claimed safe) until external recreation/reset. Descendants inert.
-- Owner exact connection; active-view/release retained/in-flight rules. Dimensions/revisions/latest/facts exact.
-- View/session attention/input/Focus/A11y/restart ownership explicit.
+- Registry/bind/capacity/affinity IDs bounded/exact.
+- Binding exact retry/one pending/input revoke/preflight/deadline/reset/fail-closed as specified. When close starts, it cancels and terminally settles pending replacement as session-closing, releases reservation, and forbids later activation before close drain.
+- replaceBinding during close reports session-closing with current non-null while draining; after retirement reports nullable unavailable; after close session-closed/null.
+- Close idempotency is request-aware: exact request ID shares Promise/result; different ID during close gets correlated already-closing referencing original without cascade; different ID after gets already-closed with cached disposition. Only original performs teardown.
+- Close cascade orders view/owner/replacement cancellation/output/attention. Borrowed engine parser must be ground even after graceful EOF; reset failure quarantines with eof-parser-reset-failed. Forced close has analogous disposition; created engine may dispose.
+- Owner/resize/dimension facts and view/session input/Focus/A11y/attention/restart remain exact.
 
 ## Proposed entity and evidence graph
 
@@ -580,15 +595,15 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** no raw I/O/engine/leases/input observation; bounded structured IDs.
-2. **Session/capacity:** 64 full rejection/free-slot retry; epoch/sequence watermarks; affinity/live/closing/closed binds; owner exact connection.
-3. **Binding:** exact retry same Promise/result; changed-field ID conflict; one pending; old input revoked at reservation/restored on preflight failure; channel failure preserves old; drain 30s fallback; parser-ground; failed-closed/null; post-retirement nullable results.
-4. **Close/ownership:** EOF/never-EOF; forced parser reset success/failure; created dispose vs borrowed quarantine; idempotent cascade.
-5. **Attention/resize:** bounded attention; active-view/release retained/in-flight; dimension caps, monotonic/coalesced owner result/applied facts.
-6. **Input/systems:** private input, modes/mouse/Focus/A11y/restart.
-7. **Real Web evidence to implement:** capacity/idempotency/overlap/input race/channel failure/stuck drain/post-close/reset quarantine plus owner/resize/attention cleanup.
-8. **Cross-adapter Web only if claimed:** one authoring source remains Web evidence.
-9. **Non-Web:** independent native evidence for session/binding/parser/close/quarantine/resize/input/A11y.
+1. **Portable negatives:** no raw I/O/engine/leases/input observation; bounded IDs.
+2. **Session/binding:** capacity/identity; close cancels pending replacement; replace during draining/retired/closed gives non-null/null exact result; no late activation.
+3. **Close idempotency/parser:** exact-ID shared; different-ID already-closing/already-closed correlated; EOF partial parser reset; borrowed quarantine on graceful/forced reset failure; child cascade.
+4. **Binding operations:** retry/overlap/input revoke/preflight/deadline/fail-closed.
+5. **Owner/resize/attention:** owner release/retained/in-flight; caps/revisions/facts; bounded attention.
+6. **Input/systems:** private input/modes/mouse/Focus/A11y/restart.
+7. **Real Web evidence to implement:** close/replace race and per-ID calls; EOF parser partial/failure; forced close; binding/owner/resize/attention cleanup.
+8. **Cross-adapter Web only if claimed:** one source remains Web evidence.
+9. **Non-Web:** independent native session/binding/parser/close/quarantine/resize/input/A11y evidence.
 
 ## #513/#514 matrix consumption
 
