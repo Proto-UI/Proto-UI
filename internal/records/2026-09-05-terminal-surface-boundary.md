@@ -89,7 +89,7 @@ The proposal may evaluate these plain values; names are illustrative and not an 
 - View facts: attachment/composition/dimensions/support/resize. Session facts/results: binding transition and bounded attention event/overflow batches with contiguous sequences.
 - Requests: session binding replace/close; owner/view/key/resize. Physical input/output private. Focus remains Focus.
 
-Dimensions must be finite positive safe integers. Resize revision is Module-issued positive safe integer strictly increasing per `terminalInstanceId` across view/backend replacement; coordinator rejects zero/unsafe/duplicate/decreasing as `invalid-revision` before queue/backend and never rewinds last accepted revision. One owner per session, one active view, one in-flight resize; replacement/release waits settlement. Geometry/engine internals stay Host-private.
+Dimensions are finite positive safe integers. Module resize revision is positive safe and strictly increasing per terminal instance across views/bindings. Owner coordinator has exactly one backend operation plus one latest-valid retained slot: new valid geometry replaces that slot, emits owner-scoped `superseded` for displaced revision, and never queues more. After in-flight result, retained latest dispatches. Invalid revision/dimensions reject immediately. View facts expose only last applied result's effective dimensions/revision; rejected/superseded/observed target geometry never change them.
 
 A current accessible text snapshot can be a plain diagnostic/test result, but should not be continuously copied into portable State. The first slice should expose `host-bridge | bounded-snapshot | unavailable` support and prefer a host-owned accessibility bridge. Any later author-facing snapshot request requires a separate privacy, size, cadence, and stale-revision decision.
 
@@ -104,7 +104,7 @@ Selection summaries and copy requests are technically expressible as plain value
 | Process exit/close | Revoke input -> mark output draining while ID remains accepted -> EOF/queued output + attention batches settle -> cascade view/owner -> retire binding/session | Final frame/attention retained; all descendant leases inert; created engine disposed, borrowed detached. | Awaitable idempotent session close; binding retirement occurs after drain. |
 | Output | Session binding gate -> engine | Continues with no owner/view/between owners. | Session/binding epoch; zero portable bytes/grid. |
 | Input | Active view -> Host/engine -> current binding | Private once; no view means none. | View policy + current session binding. |
-| Geometry | Active owner/view -> coordinator | Exclusive valid serialized resize. | Owner/revision. |
+| Geometry/resize | Active view observes dimensions -> Module allocates revision -> owner `requestResize` | Submission says dispatched/retained-latest/rejected. One retained slot; replacing it emits owner-scoped superseded. Owner callback survives view disposal; after result retained latest dispatches. | Per-instance monotonic revision + owner connection, not view connection. Facts change only on applied effective result. |
 | Focus/A11y | System domains -> active view over session engine | View-only projection, engine persists. | View epochs. |
 | Attention | Session engine -> bounded consecutive runs -> `onAttentionBatch` | Normal batches preserve run order/count; fixed pending capacity. Overflow batch preserves sequence range and bell/error counts while explicitly losing interleaving; no unbounded callback/queue. | Contiguous session sequences; callback retired only after drain; presentation dedupe downstream. |
 
@@ -119,7 +119,43 @@ type TerminalResizeRejectReason =
   | 'invalid-dimensions'
   | 'invalid-revision'
   | 'resize-unavailable'
-  | 'backend-rejected';
+  | 'backend-rejected'
+  | 'owner-released';
+
+type TerminalResizeSubmission =
+  | Readonly<{
+      status: 'dispatched' | 'retained-latest';
+      revision: number;
+      reason: null;
+    }>
+  | Readonly<{
+      status: 'rejected';
+      revision: null;
+      reason: 'invalid-dimensions' | 'invalid-revision' | 'owner-released';
+    }>;
+
+type TerminalResizeResult =
+  | Readonly<{
+      revision: number;
+      outcome: 'applied';
+      requested: TerminalDimensions;
+      effective: TerminalDimensions;
+      reason: null;
+    }>
+  | Readonly<{
+      revision: number;
+      outcome: 'superseded';
+      requested: TerminalDimensions;
+      effective: null;
+      reason: 'newer-resize';
+    }>
+  | Readonly<{
+      revision: number | null;
+      outcome: 'rejected';
+      requested: TerminalDimensions;
+      effective: null;
+      reason: TerminalResizeRejectReason;
+    }>;
 
 type TerminalUnavailableReason =
   | 'engine-unavailable'
@@ -136,22 +172,6 @@ type TerminalUnavailableReason =
   | 'view-already-attached'
   | 'owner-releasing'
   | 'backend-rejected';
-
-type TerminalResizeResult =
-  | Readonly<{
-      revision: number;
-      outcome: 'applied';
-      requested: TerminalDimensions;
-      effective: TerminalDimensions;
-      reason: null;
-    }>
-  | Readonly<{
-      revision: number | null;
-      outcome: 'rejected';
-      requested: TerminalDimensions;
-      effective: null;
-      reason: TerminalResizeRejectReason;
-    }>;
 
 type TerminalSurfaceSupport = Readonly<{
   input: 'available' | 'read-only' | 'unavailable';
@@ -248,6 +268,8 @@ type TerminalKeyIntent = Readonly<{
 type TerminalSurfaceFacts = Readonly<{
   attachment: 'detached' | 'attaching' | 'ready' | 'unavailable' | 'error';
   composing: boolean;
+  // Only the last applied result's effective dimensions; never raw target geometry.
+  appliedResizeRevision: number | null;
   columns: number | null;
   rows: number | null;
   support: TerminalSurfaceSupport;
@@ -321,17 +343,13 @@ type TerminalSurfaceConnection = Readonly<{
   // generation is the policy generation under which the event/probe began.
   onFacts(connectionId: string, generation: number, facts: TerminalSurfaceFacts): void;
   onResizeRequest(connectionId: string, generation: number, dimensions: TerminalDimensions): void;
-  // Completion may be observed by a retired view but always settles the session coordinator.
-  onResizeResult(connectionId: string, result: TerminalResizeResult): void;
 }>;
 
 type TerminalSurfaceLease = Readonly<{
   update(update: TerminalSurfaceUpdate): void;
   requestKey(generation: number, intent: TerminalKeyIntent): void;
-  // The retained owner/session coordinator serializes across replacement views.
-  requestResize(size: TerminalSize): void;
   snapshot(): TerminalSurfaceSnapshot;
-  // View cleanup only; cannot release resize ownership.
+  // View cleanup only; owner-scoped resize completion survives.
   dispose(): void;
 }>;
 
@@ -343,6 +361,13 @@ type TerminalViewAttachResult =
       reason: 'owner-identity-mismatch' | 'view-already-attached' | 'owner-releasing';
     }>;
 
+type TerminalResizeOwnerConnection = Readonly<{
+  ownerConnectionId: string;
+  terminalInstanceId: string;
+  // Owner-scoped: remains valid across view disposal/replacement.
+  onResizeResult(ownerConnectionId: string, result: TerminalResizeResult): void;
+}>;
+
 type TerminalOwnerReleaseResult =
   | Readonly<{ status: 'released'; reason: null }>
   | Readonly<{ status: 'rejected'; reason: 'view-active' }>;
@@ -350,6 +375,8 @@ type TerminalOwnerReleaseResult =
 type TerminalResizeOwnerLease = Readonly<{
   // Exact identity match and one active view; caller disposes before reattach/release.
   attachView(connection: TerminalSurfaceConnection): TerminalViewAttachResult;
+  // One in-flight plus one latest-valid retained slot. Every accepted revision gets a result.
+  requestResize(size: TerminalSize): TerminalResizeSubmission;
   // Active view rejects. Otherwise settles resize/releases owner; session stays alive.
   release(): Promise<TerminalOwnerReleaseResult>;
 }>;
@@ -373,7 +400,7 @@ type TerminalSessionCloseResult = Readonly<{
 }>;
 
 type TerminalSessionLease = Readonly<{
-  acquireResizeOwner(terminalInstanceId: string): TerminalResizeOwnerResult;
+  acquireResizeOwner(connection: TerminalResizeOwnerConnection): TerminalResizeOwnerResult;
   replaceBinding(
     request: Readonly<{
       requestId: string;
@@ -422,14 +449,14 @@ A fake binds via result and tracks live/closing/closed tombstones, engine affini
 3. same live session changed connection/initial binding conflicts; binding ID reuse rejects;
 4. with current binding2, request r1 replace ->3 and hold drain. Concurrent r2 expected2 ->4 rejects binding-transition-pending immediately/no Host work/queue; r1 applies and releases reservation. Later r3 expected2 stale rejects; request IDs/results correlate. Repeat revoke path and close-race session-closing;
 5. attention normal/overflow bounds and invariants;
-6. owner/view: active-view release rejects, then dispose and release pending resize; session I/O continues;
-7. allocate resize revision 1, retain owner across view/reconnect, attempt revision1 duplicate, 0, unsafe, and decreasing after revision3; each invalid-revision/null effective/no coordinator/backend mutation. Revision2 then3 apply in strict order; replacement cannot reset high watermark;
-8. session close unexpectedly cascades active children; output binding drains EOF before retirement; attention drains; handles inert;
-9. created engine disposed once; borrowed same-session engine detached not disposed; external owner usable; close idempotent;
-10. restart fresh session/engine/binding; private input/policy/Focus/mouse/F6/dimension/stale/support cases;
+6. acquire owner with ownerConnection callback; attach view. Submit resize1 -> dispatched and hold backend. Observe B revision2 -> retained-latest, then C revision3 -> retained-latest and owner callback reports revision2 superseded; assert bounded one in-flight+one slot and no B backend call;
+7. dispose old view while resize1 unresolved, attach replacement. Complete resize1 clamped request120x40 -> effective100x40 through owner callback; retired view gets no callback, replacement/logical facts become appliedRevision1/100x40. Coordinator then dispatches retained revision3;
+8. reject revision3 backend: facts stay revision1/100x40. Submit revision4 request80x24 and apply: facts revision4/80x24. Raw target geometry before acknowledgement never changes columns/rows;
+9. attempt duplicate/decreasing/0/unsafe revisions across view/reconnect: immediate invalid-revision/no slot/backend/fact change; high watermark never resets;
+10. session/binding/attention/close/created-borrowed/restart plus private input/Focus/mouse/F6/support cases;
 11. no raw host/I/O/engine/ownership/epoch/lease crosses authoring.
 
-This makes bind affinity and closed retry, serialized binding replacement, monotonic resize revision, plus bounded attention/child close/ownership and core Terminal boundary executable. It does not prove real host behavior.
+If implemented as specified, this evidence plan would verify session bind/closure, binding serialization, bounded owner-scoped resize coalescing/completion, acknowledgement-gated effective dimension facts, attention/child close/ownership, and the core Terminal boundary. This record itself provides no executable `T-TERMINAL-*` evidence.
 
 ## Input, shortcut, and focus policy
 
@@ -449,7 +476,7 @@ This makes bind affinity and closed retry, serialized binding replacement, monot
 - The engine/Host Capability owns the mutable screen representation, cursor/selection mapping, row navigation, terminal modes, and platform accessibility API. Proto UI does not set a generic `textbox`, `application`, or `log` role for every terminal host.
 - Streaming grid stays engine-local. Attention delivery is bounded: profile limits runs per batch and pending batches; normal batches preserve contiguous ordered runs, overflow preserves first/last sequence plus bell/error totals and explicitly signals interleaving loss. App presentation may further dedupe effects; callback count/memory remain bounded.
 - Engine-local keyboard selection and copy remain available when the host supports them. Any composition-provided Copy/Search control is a separately admitted ordinary Proto UI control invoking a host/App request; selected text and Clipboard contents stay outside portable state.
-- Zoom, reflow, font metrics, glyph width, high contrast, cursor contrast, selection contrast, and screen-reader row geometry remain host/engine responsibilities. Resize results expose rows/columns plus acknowledged revision and applied/rejected outcome. Reduced-motion policy disables or reduces visual bell/cursor animation through host settings; the semantic attention fact is unchanged.
+- Zoom/reflow/font metrics/glyph width/contrast/screen-reader row geometry remain host/engine. `columns`, `rows`, and `appliedResizeRevision` expose only last applied effective result; clamped effective becomes fact, rejected/superseded/observed geometry preserves prior fact. Reduced-motion presentation does not alter attention batch.
 - A non-Web profile may use UI Automation or another native accessibility API and may degrade explicitly. Passing WC/React/Vue tests on the Web host cannot establish non-Web conformance.
 
 ## Performance, scrollback, and lifecycle
@@ -466,10 +493,9 @@ Terminal scrollback is engine-owned. #521 windowed Collection applies to authore
 
 - Bind validates resolved engine session affinity before activation, including borrowed engine. Failure exact/no resources. Exact immutable retry returns existing only while live. Closing/closed tombstone returns session-closing/session-closed; session IDs never reuse. Changed live identity conflicts.
 - Session owns current binding and atomically reserves at most one replacement. Request/result IDs correlate. Competing request rejects binding-transition-pending without queue/Host work; result/close releases reservation. Expected/non-reused IDs validate; input blocked; drain/revoke completes before switch.
-- Owner/view below session. Release rejects active view; close cascade disposes view then settles owner resize.
-- Output draining accepts old ID until EOF/queued bytes/attention settle, then retires. Attention fixed bounded batches/overflow.
-- Session close idempotent; created engine disposed once; borrowed engine only detached. Descendants reject.
-- Resize revision is Module-owned positive safe monotonic per terminal instance across view/reconnect. Coordinator tracks high watermark; invalid/duplicate/decreasing rejects before coordinator/backend and cannot reset on replacement. Dimensions validated separately; one in-flight.
+- Owner/view below session. Owner-scoped resize connection/result route persists across view disposal/replacement; retired view callbacks still reject. Release rejects active view; close cascade disposes view then settles owner resize.
+- Output drains before retirement; attention bounded; close idempotent/created vs borrowed.
+- Resize revision Module-owned positive safe monotonic per instance. Coordinator holds one in-flight and one latest-valid retained slot; newer replaces slot and emits superseded for displaced revision. Result delivered only through owner connection. Applied effective result alone updates facts; rejection/supersession leaves prior applied revision/dimensions. Invalid input never occupies slot.
 - View systems scoped; session I/O scoped; restart new session; reconnect binding update.
 
 ## Proposed entity and evidence graph
@@ -500,11 +526,11 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 2. **Session bind:** cross-session borrowed-engine mismatch and all resolver failures before activation; live exact existing; closing/closed retries reject; changed identity conflict; created/borrowed.
 3. **Binding:** request correlation; atomic one-pending reservation; concurrent pending rejection/no queue; stale/reused/close results; no-owner drain/revoke; final EOF.
 4. **Attention:** fixed normal/overflow invariants/bounds/gaps.
-5. **Owner/view/close:** release active-view reject; cascade/await children; inert handles; idempotent close.
-6. **Resize/input/systems:** positive safe strictly increasing per-instance revision across replacements; duplicate/decreasing/invalid rejects before backend; dimensions/serialization; private input/modes/mouse/Focus/A11y/restart.
-7. **Real Web:** bind close race/affinity; overlapping binding replacements; resize revision high watermark; final drain/attention/borrowed ownership/owner-view cleanup.
+5. **Owner/view/close:** owner-scoped resize callback survives view replacement; release active-view reject; cascade/children/idempotent close.
+6. **Resize/input/systems:** monotonic revisions; one in-flight+latest slot; B superseded by C; owner result after old view disposal; clamped applied facts; rejected/superseded preserve prior dimensions; raw geometry never facts; private input/Focus/A11y.
+7. **Real Web evidence to implement:** bind close/affinity, overlapping binding replacements, resize A/B/C coalescing and replacement callback/facts, final drain/attention/borrowed ownership/cleanup.
 8. **Cross-adapter Web only if claimed:** WC/React/Vue evidence from one authoring source remains Web evidence.
-9. **Non-Web:** independent native profile proves session bind/ownership/binding/attention/close and native input/resize/A11y before multi-host language.
+9. **Non-Web:** independent native profile must prove session/binding/attention/resize/close and native input/A11y before multi-host language.
 
 ## #513/#514 matrix consumption
 
