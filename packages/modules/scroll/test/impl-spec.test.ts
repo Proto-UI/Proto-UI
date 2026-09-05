@@ -242,8 +242,6 @@ describe('module-scroll: fake host contract', () => {
     connection.onFacts(snapshot('pending', 'pending'));
 
     expect(harness.surface.projection.get()).toBe('unresolved');
-    expect(harness.surface.vertical.position.get()).toBe(0);
-    expect(harness.surface.vertical.atEnd.get()).toBe(true);
     expect(harness.surface.endFollow.state.get()).toBe('off');
     expect(harness.surface.endFollow.requestStatus.get()).toBe('idle');
   });

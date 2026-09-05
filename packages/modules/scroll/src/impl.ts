@@ -428,12 +428,10 @@ export class ScrollModuleImpl extends ModuleBase {
 
   disconnect(): void {
     this.leaseEpoch++;
-    const snapshotEpoch = ++this.snapshotEpoch;
+    this.snapshotEpoch++;
     this.pendingAttachRequests = [];
     this.lease?.dispose();
     this.lease = null;
-    this.applyAxis('horizontal', EMPTY_AXIS, snapshotEpoch);
-    this.applyAxis('vertical', EMPTY_AXIS, snapshotEpoch);
     this.set(this.scrollingOwned, false);
     this.set(this.projectionOwned, 'unresolved');
     this.set(this.endFollowStateOwned, 'off');
