@@ -416,7 +416,7 @@ type DocumentCommandResult =
       appliedPolicyRevision: number;
       mutationRevision: number;
       contentIdentity: string;
-      reason: 'delivery-backpressure';
+      reason: 'delivery-backpressure' | 'composition-active';
     }>
   | Readonly<{
       requestId: string;
@@ -471,46 +471,43 @@ type DocumentSurfaceHost = Readonly<{
 ```
 
 1. attach composite models; versioned pending facts/null command;
-2. prove `DocumentInputSupport` exact available/read-only/unavailable reasons. Attempt interactive patch with unavailable origin: structural `DocumentEditSupport` cannot represent input-available+origin-unavailable; Module resolves read-only/unavailable and zero edit. While interactive, lose origin support: block input first, publish newer noninteractive policy/facts, zero committed edit;
-3. delivery epoch7 tx1/tx2: exact payload retained; accepted/dedup/old/future/wrong key behaviors; observe-only App replacement carries observationId only, consumes no sequence/watermark, and next persist uses next contiguous sequence;
-4. retryable tx retains exact record and blocks. Explicit retry. Fill bounded queue: delivery support becomes backpressured before next mutation; physical input pauses. Concurrent undo/redo returns busy delivery-backpressure synchronously, with unchanged engine/history/revision and no queued command. After slot release/new facts, explicit retry executes;
-5. reject authorization/source: noninteractive, drop dependents, rotate epoch, private reconcile, clear history/no revival;
-6. active IME Save waits settle; Revert cancels/epochs late commit; equality edit/undo/redo dirty;
-7. Save/Revert queues/retries/head rebases; view/systems cleanup;
-8. final App model-session close while tx retryable: atomically hand exact in-flight/queued records and epoch/watermark to durable App outbox using same keys; receive handoff receipt, then dispose model/dispatcher. Outbox retries idempotently; later rejection becomes App conflict and next attach loads authoritative source;
-9. make outbox unavailable: close returns blocked/outbox-unavailable, retains model/private records and can be retried; it never reports closed or drops content. Repeated successful close returns same receipt/no duplicate handoff;
-10. no raw content/edit/snapshot/outbox payload/engine/target crosses authoring.
+2. exercise input support/edit-origin coupling. While interactive with active composition, revoke permission or request read-only/disabled: immediately block new Host input, cancel composition, advance composition epoch, await cancel ack, reject old-epoch compositionend before transaction creation, then publish/apply noninteractive policy. Cancellation failure makes view unavailable; zero unauthorized edit;
+3. call programmatic undo/redo during reported active composition and during unavailable reporting where Host-local arbiter cannot prove inactive: return busy composition-active synchronously, no engine mutation/command queue. After newer inactive composition epoch, explicit retry proceeds;
+4. verify modes: read-only remains Focus eligible and allows engine-local selection/copy/A11y navigation but no IME/text/paste/undo/redo mutation; disabled is Focus-ineligible, transfers/clears current Focus, starts no IME, accepts no input/selection/copy/commands, while document remains A11y-readable with disabled state and engine selection private;
+5. persist/observe delivery sequencing, retry/backpressure, rejection/history, exact payload/equality/barriers as specified;
+6. final dispatcher close durable handoff success/failure/idempotency;
+7. view retain/evict and A11y/Focus/Scroll cleanup;
+8. no raw private values cross.
 
-This proves restored input support and origin coupling, persist-only sequencing, command backpressure, retryable disposal handoff/block, exact payload/order/equality/composition/barrier/view/system ownership. It does not prove real host behavior.
+If implemented as specified, this fake/real evidence plan would verify restored input/origin coupling, composition-safe commands and noninteractive transitions, disabled semantics, persist-only sequencing, backpressure, retryable disposal, payload/order/equality/barrier/view/system ownership. This record itself supplies no executable `T-TEXT-DOCUMENT-*` evidence and does not claim these properties are already proved.
 
 ## Revision, input, shortcut, and permission policy
 
-- **Edit/origin gate:** `DocumentInputSupport` is exact. `DocumentEditSupport` structurally allows input available only with commit-stamped origin; noninteractive input may pair with unavailable origin. Module/runtime accepts `editingMode: interactive` only on first branch plus delivery available. Origin/capacity loss blocks host input before fact/policy publication and resolves read-only/unavailable; no committed edit is dropped or provenance fabricated.
-- **Delivery identity/storage:** only `DocumentPersistTransactionSummary` has delivery key/ack/private payload. `DocumentObserveOnlySummary` has observationId, consumes no sequence, and barrier/reconciliation explicitly rebase heads. One in-flight/contiguous; exact payload; bounded queue reserves slot before all input/undo/redo mutations.
-- **Duplicate/retry/backpressure:** scalar epoch/watermark. Duplicate/retired ignore; mismatch reconciles. Retry retains exact record. Full queue publishes delivery backpressure, pauses text before engine, returns command busy without queue/mutation; explicit retry only after available facts.
-- **Rejected history/composition/barriers/equality:** rejection/Revert clear history; Save waits IME, Revert cancels epoch; Save/Revert drain/rebase; equality IDs derive dirty.
-- **Final dispatcher disposal:** view dispose never closes model dispatcher. Final close first seeks terminal ack; if retryable remains, atomically hands exact keyed records plus epoch/watermark to App durable outbox. Receipt makes local state handed-off and disposable; repeated close same receipt. Outbox failure returns blocked and retains all state. Eventual outbox rejection records App conflict; next attach uses authoritative source.
-- **Command/input order:** pre-policy null; no-op/busy/reject/unavailable exact; IME->Focus->Harness; support exact.
-- **Systems:** view freshness separate; Scroll/A11y/Focus own; no raw private/outbox payload portable.
+- **Edit/origin and policy transition:** interactive requires available input+commit-stamped origin+delivery. Any interactive -> read-only/disabled transition (including permission/origin loss) first blocks new input under old generation, cancels Host composition, advances composition epoch, awaits cancellation, rejects late old-epoch commit, then applies/publishes new policy. If cancellation cannot be guaranteed, fail closed unavailable; never fabricate provenance.
+- **Mode semantics:** interactive is Focus-eligible and permits supported input/selection/copy/commands. Read-only stays Focus-eligible and preserves engine-local selection/copy plus A11y text navigation, but starts no editing IME and rejects text/paste/undo/redo mutations as policy-denied. Disabled projects Focus-ineligible through Focus domain, transfers/clears current focus, starts no IME, suppresses input and user selection/copy, and returns policy-denied for commands; existing selection may remain engine-private only. Document remains A11y-readable with disabled state. External App Save/Revert controls remain separate.
+- **Programmatic command composition gate:** before queue reservation or engine access, Host-local arbiter must prove composition inactive. Reported active or unprovable unavailable state returns `busy: composition-active`, no command queue/mutation; caller retries only after newer inactive composition epoch. Then delivery backpressure gate may return its own busy result.
+- **Delivery/storage/disposal:** persist-only delivery keys/private payload; observe-only no coordinate; scalar duplicate/retry/rejection; queue slots before mutation; outbox handoff or blocked close. Rejection/Revert history and Save/Revert composition barriers/equality as above.
+- **Input arbitration:** physical IME -> required Focus exit -> Harness -> editor; programmatic commands use composition gate separately. Exact policy-bound route/support.
+- **Systems:** view freshness separate; Scroll/A11y/Focus own; no raw private/outbox value.
 
 ## Accessibility boundary
 
-- App supplies editor role/name/description through A11y semantic-object facts. Help is App composition through existing relations; no help fact. Adapter projects A11y IR; engine/Host Capability supplies native editable control, text ranges, caret behavior, wrapping, and screen-reader editing mechanics without second role ownership.
-- `DocumentSelectionSummary` supports low-cost status only; native accessibility exposes ranges. Later line/column API needs encoding/replacement rules.
-- Streaming edit/caret does not feed live region. Announcements are bounded to read-only/save/conflict/rejection. Diagnostics is option D.
-- Web evidence covers A11y role/name/description/help relation, screen-reader mode, Tab-focus, composition, selection, read-only, Scroll integration, zoom/wrap/high contrast, focus entry/exit, and no duplicates.
+- App supplies role/name/description/disabled or read-only state through A11y facts; Help composition. Adapter projects IR; engine/Host supplies native text ranges/caret/wrapping/screen-reader mechanics without role ownership. Disabled remains readable to A11y but not Focus/input eligible.
+- Selection summary low-cost only; native ranges. Read-only may allow user selection/copy; disabled suppresses user interaction and keeps any old selection engine-private.
+- Streaming edits do not drive live region. Announcements bounded.
+- Web evidence must cover exact interactive/read-only/disabled Focus/input/selection/copy/A11y behavior, composition cancellation/late-event suppression, keyboard exit, zoom/wrap/contrast, replacement, and no duplicates.
 - Native evidence may use UIA TextPattern or equivalent; sensitive content projection is App/Host privacy. Degradation explicit.
 - Large-document accessibility and range-query performance are option E. Same-Web WC/React/Vue results cannot establish native-host conformance.
 
 ## Performance, viewport, windowing, and lifecycle
 
-- Full model/content/private transaction/outbox payload stays infrastructure; bounded IDs only.
-- Persist dispatcher uses epoch/watermark/in-flight/bounded queue; observe-only never consumes coordinate. Queue slot reserved before text/undo/redo mutation; busy no engine/command queue. Duplicates/retry/rejection exact.
-- Final model close settles or durable-handoffs same keyed records; outbox receipt permits disposal; unavailable blocks and retains; view disposal never drops dispatcher.
-- Save/Revert composition/equality/head/history rules; Scroll/view state/identity owners unchanged.
-- Facts revisions/support exact; edit input structurally coupled to origin; origin/backpressure loss blocks before mutation.
-- Dispose retain/evict view resources only; App model/dispatcher/outbox lifetimes explicit.
-- Dirty equality; attachment/command/Scroll exact.
+- Full private model/content/transaction/outbox payload stays infrastructure; bounded IDs only.
+- Persist dispatcher uses epoch/watermark/in-flight/bounded queue; observe-only consumes no coordinate. Queue slot and composition-inactive gate precede text/undo/redo mutation; distinct busy reasons create no command queue.
+- Interactive -> read-only/disabled blocks input, cancels/epochs composition, waits cancellation, then publishes policy; disabled/read-only Focus/selection/copy/A11y/command semantics remain exact.
+- Final dispatcher close settles or hands off to durable outbox; failure blocks and retains. Save/Revert composition/equality/head/history rules apply.
+- Scroll owns its lease; view state/identity stay host-private and bounded.
+- Facts revisions/support exact; edit input structurally coupled to origin and capacity.
+- View retain/evict affects view resources only; App model/dispatcher/outbox survive as specified. Dirty/attachment/command ownership remains exact.
 
 ## Proposed entity and evidence graph
 
@@ -537,13 +534,13 @@ No new Adapter identity is justified: existing profiles receive reviewed relatio
 
 ### Bounded red-first plan
 
-1. **Portable negatives:** raw model/content/edit/snapshot/outbox/engine/target/service/view state absent; bounded IDs only.
-2. **Support/lease:** restored exact input union; edit-origin structural coupling; interactive acceptance/loss transition; versioned composition/policy/view facts.
-3. **Delivery:** persist-only epoch/sequence; observe-only no coordinate; exact payload; scalar duplicate handling; retry; queue slot before text/undo/redo; command busy/no mutation; rejection/history.
-4. **Disposal/barriers/equality:** retryable close durable handoff same keys/receipt/idempotency; outbox failure blocked-retained; Save/Revert IME/head/history; equality dirty.
-5. **Systems:** selection/view retain/evict; A11y/Focus/Scroll owner cleanup.
-6. **Real Web:** input/origin loss; observe-only sequence; backpressured undo/redo; retryable close handoff/failure; delivery ack/reconciliation; IME barriers/equality/view cleanup.
-7. **Performance:** rapid edits/caret movement and a bounded first-slice document prove no full-content/token/viewport copies through Proto UI and no retained listeners/models.
+1. **Portable negatives:** raw private values absent; bounded IDs only.
+2. **Modes/composition:** input-origin coupling; interactive->read-only/disabled cancellation/epoch/late suppression; read-only vs disabled Focus/input/selection/copy/A11y/command semantics; cancellation failure unavailable.
+3. **Commands/delivery:** programmatic undo/redo busy during active/unprovable composition before backpressure; distinct busy outcomes/no queue; persist-only sequencing/payload/retry/rejection/history/backpressure.
+4. **Disposal/barriers/equality:** outbox handoff/block; Save waits IME, Revert cancels; heads/history/equality.
+5. **Systems:** view retain/evict; A11y/Focus/Scroll cleanup.
+6. **Real Web evidence to implement:** mode transitions during IME, late composition rejection, command composition-busy, exact disabled/read-only behavior, delivery/outbox/equality/view/system cases.
+7. **Performance evidence to implement:** rapid edits/caret movement and a bounded first-slice document must demonstrate no full-content/token/viewport copies through Proto UI and no retained listeners/models.
 8. **Cross-adapter Web only if claimed:** WC/React/Vue from one authoring source remains Web evidence.
 9. **Non-Web:** independent native profile with native input, selection, revision, accessibility, view replacement, and cleanup evidence before multi-host language.
 
