@@ -433,6 +433,12 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         a11y.tree(patch);
         recordCaptured(def, 'context', { op: 'a11y.tree', patch });
       },
+      level(value) {
+        ensureSetup('def.a11y.level');
+        if (!a11y) throw new Error(`[A11y] module unavailable.`);
+        a11y.level(value);
+        recordCaptured(def, 'context', { op: 'a11y.level', value });
+      },
     },
   };
 

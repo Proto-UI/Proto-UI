@@ -32,7 +32,7 @@ export function createWebA11yProjector(
   let lastTarget: HTMLElement | null = null;
   let lastSnapshot: A11ySemanticObjectSnapshot | null = null;
 
-  const project = (snapshot: A11ySemanticObjectSnapshot) => {
+  const project: A11yProjector = (snapshot: A11ySemanticObjectSnapshot) => {
     const nextTarget = getTarget();
     if (lastTarget && lastTarget !== nextTarget && lastSnapshot) {
       clearWebA11ySnapshot(lastTarget, lastSnapshot);
@@ -43,6 +43,15 @@ export function createWebA11yProjector(
     if (nextTarget) applyWebA11ySnapshot(nextTarget, snapshot, previousSnapshot ?? undefined);
   };
 
+  project.clearHeadingLevel = () => {
+    if (lastTarget && lastSnapshot && typeof resolveWebHeadingLevel(lastSnapshot) !== 'undefined') {
+      lastTarget.removeAttribute('aria-level');
+    }
+    if (lastSnapshot && typeof lastSnapshot.level !== 'undefined') {
+      lastSnapshot = { ...lastSnapshot, level: undefined };
+    }
+  };
+
   subscribeTargetChange?.(() => {
     if (lastSnapshot) project(lastSnapshot);
   });
@@ -50,12 +59,22 @@ export function createWebA11yProjector(
   return project;
 }
 
+function resolveWebHeadingLevel(snapshot: A11ySemanticObjectSnapshot): number | undefined {
+  const level = snapshot.level;
+  return snapshot.role === 'heading' &&
+    typeof level === 'number' &&
+    Number.isInteger(level) &&
+    level >= 1 &&
+    level <= 6
+    ? level
+    : undefined;
+}
 export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObjectSnapshot): void {
   if (typeof snapshot.id !== 'undefined') el.removeAttribute('id');
   if (typeof snapshot.role !== 'undefined') el.removeAttribute('role');
   if (snapshot.name) el.removeAttribute('aria-label');
   if (snapshot.description) el.removeAttribute('aria-description');
-
+  if (typeof resolveWebHeadingLevel(snapshot) !== 'undefined') el.removeAttribute('aria-level');
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {
     if (Object.prototype.hasOwnProperty.call(snapshot.states, key)) el.removeAttribute(attr);
   }
@@ -113,6 +132,13 @@ export function applyWebA11ySnapshot(
     } else {
       el.removeAttribute('aria-description');
     }
+  }
+
+  const level = resolveWebHeadingLevel(snapshot);
+  if (typeof level !== 'undefined') {
+    setOptionalAttr(el, 'aria-level', String(level));
+  } else if (previousSnapshot && typeof resolveWebHeadingLevel(previousSnapshot) !== 'undefined') {
+    el.removeAttribute('aria-level');
   }
 
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {

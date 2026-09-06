@@ -49,6 +49,7 @@ export type A11ySemanticObjectSnapshot = {
   relations: Record<A11yRelationKey, string | null | undefined>;
   relationModes?: Record<A11yRelationKey, A11yRelationMode>;
   tree?: A11yTreeSnapshot;
+  level?: number;
 };
 
 export type A11yDefAPI = {
@@ -61,4 +62,5 @@ export type A11yDefAPI = {
   action(key: A11yActionKey, spec?: A11yActionSpec): void;
   relation(key: A11yRelationKey, spec: A11yRelationSpec): void;
   tree(patch: A11yTreeBehavior): void;
+  level(value: number | State<number>): void;
 };

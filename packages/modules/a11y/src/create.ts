@@ -14,6 +14,7 @@ import type {
   OwnedStateHandle,
   Unsubscribe,
   MountPhase,
+  InstancePhase,
 } from '@proto.ui/core';
 import type { StatePort } from '@proto.ui/module-state';
 
@@ -28,6 +29,10 @@ class A11yModuleImpl extends ModuleBase {
   };
   private readonly stateWatchOffs: Unsubscribe[] = [];
   private stateWatchesInstalled = false;
+  private levelWatchOff: Unsubscribe | null = null;
+  private levelWatchInstalled = false;
+  private levelWatchHandle: State<number> | null = null;
+  private projectionActive = false;
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
@@ -82,6 +87,13 @@ class A11yModuleImpl extends ModuleBase {
       this.ir.tree = { ...(this.ir.tree ?? {}), ...patch };
       this.applyProjection();
     },
+    level: (value: number | State<number>) => {
+      this.ensureSetup('def.a11y.level');
+      resolveA11yLevel(value);
+      this.ir.level = value;
+      this.installLevelWatch();
+      this.applyProjection();
+    },
   };
 
   readonly port: A11yPort = {
@@ -95,6 +107,7 @@ class A11yModuleImpl extends ModuleBase {
       actions: new Map(this.ir.actions),
       relations: new Map(this.ir.relations),
       tree: this.ir.tree ? { ...this.ir.tree } : undefined,
+      level: this.ir.level,
     }),
   };
 
@@ -111,7 +124,7 @@ class A11yModuleImpl extends ModuleBase {
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
-    if (phase === 'detached') this.dispose();
+    if (phase === 'detached') this.disposeViews();
   }
 
   afterRenderCommit(): void {
@@ -119,11 +132,32 @@ class A11yModuleImpl extends ModuleBase {
     this.applyProjection();
   }
 
-  dispose(): void {
+  override onInstancePhase(phase: InstancePhase): void {
+    super.onInstancePhase(phase);
+    if (phase === 'alive' && isState(this.ir.level)) resolveA11yLevel(this.ir.level);
+  }
+
+  /** Remove view-scoped projection subscriptions; keep instance-scoped level observation. */
+  private disposeViews(): void {
+    this.clearHeadingLevelProjection();
     while (this.stateWatchOffs.length) {
       this.stateWatchOffs.pop()?.();
     }
     this.stateWatchesInstalled = false;
+  }
+
+  private clearHeadingLevelProjection(): void {
+    if (!this.projectionActive) return;
+    this.projectionActive = false;
+    if (!this.caps.has(A11Y_PROJECT_CAP)) return;
+    this.caps.get(A11Y_PROJECT_CAP).clearHeadingLevel?.();
+  }
+  dispose(): void {
+    this.disposeViews();
+    this.levelWatchOff?.();
+    this.levelWatchOff = null;
+    this.levelWatchHandle = null;
+    this.levelWatchInstalled = false;
   }
 
   private ensureSetup(op: string): void {
@@ -189,7 +223,25 @@ class A11yModuleImpl extends ModuleBase {
       this.stateWatchOffs.push(off);
     }
 
+    this.installLevelWatch();
     this.stateWatchesInstalled = true;
+  }
+
+  private installLevelWatch(): void {
+    const nextHandle = isState(this.ir.level) ? (this.ir.level as State<number>) : null;
+    if (this.levelWatchInstalled && this.levelWatchHandle === nextHandle) return;
+
+    this.levelWatchOff?.();
+    this.levelWatchOff = null;
+    this.levelWatchHandle = nextHandle;
+    this.levelWatchInstalled = true;
+    if (!nextHandle) return;
+
+    // Runtime State retains its existing mutation semantics. A11y omits an
+    // invalid level from its snapshot and therefore removes aria-level.
+    this.levelWatchOff = this.statePort.watch(nextHandle as OwnedStateHandle<number>, () => {
+      this.applyProjection();
+    });
   }
 
   private getSnapshot(): A11ySemanticObjectSnapshot {
@@ -219,9 +271,15 @@ class A11yModuleImpl extends ModuleBase {
         )
       : undefined;
 
+    const role = isState(this.ir.role) ? (this.ir.role.get() as A11yRole) : this.ir.role;
+    const level =
+      role === 'heading' && typeof this.ir.level !== 'undefined'
+        ? tryResolveA11yLevel(this.ir.level)
+        : undefined;
+
     return {
       id: isState(this.ir.id) ? (this.ir.id.get() as string | null | undefined) : this.ir.id,
-      role: isState(this.ir.role) ? (this.ir.role.get() as A11yRole) : this.ir.role,
+      role,
       name: resolveTextAlternative(this.ir.name),
       description: resolveTextAlternative(this.ir.description),
       states,
@@ -229,6 +287,7 @@ class A11yModuleImpl extends ModuleBase {
       relations,
       ...(Object.keys(relationModes).length ? { relationModes } : {}),
       tree,
+      level,
     };
   }
 
@@ -236,6 +295,7 @@ class A11yModuleImpl extends ModuleBase {
     if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
     if (!this.caps.has(A11Y_PROJECT_CAP)) return;
     this.caps.get(A11Y_PROJECT_CAP)(this.getSnapshot());
+    this.projectionActive = true;
   }
 }
 
@@ -250,6 +310,22 @@ function isState(value: unknown): value is State<unknown> {
   return (
     !!value && typeof value === 'object' && typeof (value as State<unknown>).get === 'function'
   );
+}
+
+function resolveA11yLevel(value: number | State<number>): number {
+  const level = isState(value) ? value.get() : value;
+  if (!Number.isInteger(level) || level < 1 || level > 6) {
+    throw new Error('[A11y] level must be an integer in range 1-6');
+  }
+  return level;
+}
+
+function tryResolveA11yLevel(value: number | State<number>): number | undefined {
+  try {
+    return resolveA11yLevel(value);
+  } catch {
+    return undefined;
+  }
 }
 
 function cloneTextAlternative(
@@ -279,6 +355,7 @@ export function createA11yModule(ctx: ModuleFactoryArgs): A11yModule {
     name: 'a11y',
     scope: 'instance',
     init,
+
     caps,
     deps,
     build: ({ caps, deps }) => {

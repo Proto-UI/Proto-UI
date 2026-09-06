@@ -3,14 +3,14 @@ type: host-cap
 title: Host can project accessibility semantics
 status: draft
 since: 0.1.0
-summary: The host can receive Proto UI accessibility semantic object IR and project it to its accessibility surface.
+summary: The host can receive Proto UI accessibility semantic object IR, including coherent heading role and level, and project it to its accessibility surface.
 statement:
   zh-CN: >-
-    Host 可以接收 Proto UI a11y semantic object IR，并将 role、name、description、state、action 等语义投影到自身的 accessibility surface。不同宿主可以投影到 ARIA/native attributes、平台 accessibility API、测试语义树，或保留诊断数据。
+    Host 可以接收 Proto UI a11y semantic object IR，并将 role、name、description、state、action、coherent heading role/level 等语义投影到自身的 accessibility surface。不同宿主可以投影到 ARIA/native attributes、平台 accessibility API、测试语义树，或保留诊断数据。
 
 
   en: >-
-    The host can receive Proto UI a11y semantic object IR and project role, name, description, state, action, and related semantics to its accessibility surface. Different hosts may project to ARIA/native attributes, platform accessibility APIs, test semantic trees, or diagnostic data.
+    The host can receive Proto UI a11y semantic object IR and project role, name, description, state, action, coherent heading role and level, and related semantics to its accessibility surface. Different hosts may project to ARIA/native attributes, platform accessibility APIs, test semantic trees, or diagnostic data.
 
 
 criteria:
@@ -22,6 +22,10 @@ criteria:
     text:
       zh-CN: host-cap 不要求所有宿主都支持相同的原生投影能力。
       en: The host capability does not require every host to support the same native projection abilities.
+  - id: HC-A11Y-0001-C
+    text:
+      zh-CN: Web host 投影只能在 snapshot 同时携带 heading role 与有效 level 时设置 aria-level；当 level 被省略、role 不再是 heading、target 被替换或 view detach/dispose 时，必须从旧物理 target 清理 aria-level，并在有效 snapshot rematerialize 时恢复当前值。
+      en: Web host projection may set aria-level only when a snapshot carries both the heading role and a valid level; when level is omitted, role is no longer heading, the target is replaced, or the view detaches or disposes, it must clear aria-level from the previous physical target and restore the current value when a valid snapshot rematerializes.
 relates:
   contracts:
     - C-A11Y-0001
@@ -29,6 +33,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Drafted the host projection capability for a11y semantic IR.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added the Web host boundary for role-gated portable heading levels, State-owned runtime omission and recovery, and stale aria-level cleanup during role, target, detach, disposal, and rematerialization transitions.
 tags:
   - host-capability
   - a11y

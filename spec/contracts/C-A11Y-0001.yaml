@@ -66,6 +66,16 @@ criteria:
     text:
       zh-CN: Web adapter 投影字符串 a11y state 时，空字符串必须移除对应宿主 attribute，并在恢复非空值后重新投影。
       en: When the Web adapter projects a string a11y state, an empty string must remove the corresponding host attribute, and a later non-empty value must restore it.
+  - id: C-A11Y-0001-LEVEL
+    text:
+      zh-CN: >-
+        a11y 语义对象可以携带 portable heading level。只有 resolved role 为 heading 且 level 是 1-6 的整数时，snapshot 才投影 level，Web adapter 将其投影为 aria-level。静态、初始 state-backed 与 final-setup 声明中的 0、负数、分数、NaN 和 Infinity 必须 fail closed 并被拒绝。setup 完成后的无效 state-backed runtime 值仍由 State 拥有；a11y 不得修改、否决或回滚该源，只从 snapshot 省略 level 并让 Web adapter 移除旧 aria-level，后续有效值必须恢复投影。非 heading role、target replacement、detach 或 disposal 必须清理旧物理 target 的 aria-level；runtime 值无效时不得改写独立治理的 role。
+
+
+      en: >-
+        The a11y semantic object may carry a portable heading level. A snapshot projects level only when the resolved role is heading and level is an integer from 1 through 6; the Web adapter projects it as aria-level. Static, initial state-backed, and final-setup declarations containing 0, negatives, fractions, NaN, or Infinity must fail closed and be rejected. After setup, an invalid state-backed runtime value remains owned by State; A11y must not mutate, veto, or roll back that source, must omit level from the snapshot so the Web adapter removes stale aria-level, and must restore projection after a later valid value. A non-heading role, target replacement, detach, or disposal must clear aria-level from the previous physical target; an invalid runtime level must not rewrite the independently governed role.
+
+
 sources:
   - path: internal/records/2026-06-30-a11y-module-planning-for-button.zh-CN.md
   - path: packages/modules/a11y/src/types.ts
@@ -103,6 +113,12 @@ revisions:
   - version: 0.2.0-rc.7
     change: refined
     summary: Added additive relation projection, state-backed semantic tree behavior, and optional Web a11y state omission.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: >-
+      Added role-gated portable heading-level semantics with strict setup and final-setup validation, State-owned runtime invalid-value omission and recovery, and stale Web aria-level cleanup across role, target, and view-lifecycle transitions.
+
+
 tags:
   - a11y
   - accessibility

@@ -18,6 +18,12 @@ sources:
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: >-
+      Added portable heading-level (1-6) support. The a11y module rejects invalid setup and final-setup declarations, observes State-owned runtime values without veto or rollback, omits invalid or non-heading levels from snapshots, restores later valid projection, and delegates stale aria-level cleanup to the Web host projection.
+
+
   - version: 0.1.0
     change: introduced
     summary: Drafted the a11y module entity.
