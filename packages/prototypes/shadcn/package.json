@@ -87,6 +87,11 @@
       "types": "./dist/toggle/index.d.ts",
       "import": "./dist/toggle/index.js",
       "default": "./dist/toggle/index.js"
+    },
+    "./tooltip": {
+      "types": "./dist/tooltip/index.d.ts",
+      "import": "./dist/tooltip/index.js",
+      "default": "./dist/tooltip/index.js"
     }
   },
   "description": "shadcn-style Proto UI prototype library for adapter-driven components.",

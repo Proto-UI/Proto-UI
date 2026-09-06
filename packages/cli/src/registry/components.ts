@@ -353,6 +353,29 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     },
   ]),
 
+  'shadcn-tooltip': shadcnCompound('shadcn-tooltip', 'shadcn Tooltip', [
+    {
+      prototypeImport: 'shadcnTooltipGroup',
+      exportBaseName: 'ShadcnTooltipGroup',
+      elementName: 'proto-ui-shadcn-tooltip-group',
+    },
+    {
+      prototypeImport: 'shadcnTooltipRoot',
+      exportBaseName: 'ShadcnTooltipRoot',
+      elementName: 'proto-ui-shadcn-tooltip-root',
+    },
+    {
+      prototypeImport: 'shadcnTooltipTrigger',
+      exportBaseName: 'ShadcnTooltipTrigger',
+      elementName: 'proto-ui-shadcn-tooltip-trigger',
+    },
+    {
+      prototypeImport: 'shadcnTooltipContent',
+      exportBaseName: 'ShadcnTooltipContent',
+      elementName: 'proto-ui-shadcn-tooltip-content',
+    },
+  ]),
+
   'shadcn-dialog': shadcnCompound(
     'shadcn-dialog',
     'shadcn Dialog',
