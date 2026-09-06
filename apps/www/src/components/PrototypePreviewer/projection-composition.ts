@@ -125,6 +125,122 @@ function coordinateMarkerClasses(coordinateAttrs: DemoBoxAttrs): string[] {
   ];
 }
 
+const OWNER_MARKER_PREFIX = 'pui-projection-owner-';
+const GENERATION_MARKER_PREFIX = 'pui-projection-generation-';
+
+type MarkerObserverRegistration = Readonly<{
+  key: string;
+  stamp(): void;
+}>;
+
+type MarkerObserverState = {
+  observer: MutationObserver;
+  registrations: Set<MarkerObserverRegistration>;
+};
+
+const markerObserverStates = new WeakMap<Document, MarkerObserverState>();
+
+function markerCoordinateKey(ownerMarker: string, generationMarker: string): string {
+  return `${ownerMarker}\u0000${generationMarker}`;
+}
+
+function addMarkerCoordinates(classNames: Iterable<string>, coordinates: Set<string>): void {
+  const ownerMarkers: string[] = [];
+  const generationMarkers: string[] = [];
+  for (const className of classNames) {
+    if (className.startsWith(OWNER_MARKER_PREFIX)) ownerMarkers.push(className);
+    else if (className.startsWith(GENERATION_MARKER_PREFIX)) generationMarkers.push(className);
+  }
+  for (const ownerMarker of ownerMarkers) {
+    for (const generationMarker of generationMarkers) {
+      coordinates.add(markerCoordinateKey(ownerMarker, generationMarker));
+    }
+  }
+}
+
+function collectMarkerCoordinates(
+  node: Node,
+  view: Window & typeof globalThis,
+  coordinates: Set<string>
+): void {
+  if (!(node instanceof view.Element)) return;
+  addMarkerCoordinates(node.classList, coordinates);
+  for (const element of node.querySelectorAll(
+    `[class*="${OWNER_MARKER_PREFIX}"][class*="${GENERATION_MARKER_PREFIX}"]`
+  )) {
+    addMarkerCoordinates(element.classList, coordinates);
+  }
+}
+
+function observeProjectionSurfaceMarkers(
+  document: Document,
+  ownerMarker: string,
+  generationMarker: string,
+  stamp: () => void
+): () => void {
+  const view = document.defaultView;
+  if (!view) return () => {};
+
+  let state = markerObserverStates.get(document);
+  if (!state) {
+    const registrations = new Set<MarkerObserverRegistration>();
+    const observer = new view.MutationObserver((records) => {
+      const affectedCoordinates = new Set<string>();
+      for (const record of records) {
+        if (record.type === 'attributes' && record.target instanceof view.Element) {
+          addMarkerCoordinates(record.target.classList, affectedCoordinates);
+          if (record.oldValue) {
+            addMarkerCoordinates(record.oldValue.split(/\s+/), affectedCoordinates);
+          }
+          continue;
+        }
+        for (const node of record.addedNodes) {
+          collectMarkerCoordinates(node, view, affectedCoordinates);
+        }
+        for (const node of record.removedNodes) {
+          collectMarkerCoordinates(node, view, affectedCoordinates);
+        }
+      }
+
+      for (const registration of registrations) {
+        if (!affectedCoordinates.has(registration.key)) continue;
+        try {
+          registration.stamp();
+        } catch (error) {
+          console.error('[PrototypePreviewer] Failed to stamp projection surfaces.', error);
+        }
+      }
+    });
+    state = { observer, registrations };
+    markerObserverStates.set(document, state);
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: ['class'],
+    });
+  }
+
+  const registration: MarkerObserverRegistration = {
+    key: markerCoordinateKey(ownerMarker, generationMarker),
+    stamp,
+  };
+  state.registrations.add(registration);
+  let stopped = false;
+  return () => {
+    if (stopped) return;
+    stopped = true;
+    const current = markerObserverStates.get(document);
+    if (!current) return;
+    current.registrations.delete(registration);
+    if (current.registrations.size === 0) {
+      current.observer.disconnect();
+      markerObserverStates.delete(document);
+    }
+  };
+}
+
 function cloneJsonLike<Value>(value: Value): Value {
   if (Array.isArray(value)) {
     return value.map((entry) => cloneJsonLike(entry)) as Value;
@@ -572,7 +688,7 @@ export function createProjectionComposition(
       }
     };
     stampActiveProjectionSurfaces = stampProjectionSurfaces;
-    const markerObserver = new view.MutationObserver(stampProjectionSurfaces);
+    let stopObservingMarkerChanges = () => {};
     let childCleanup: void | (() => void) = undefined;
     try {
       for (const id of controlIds) {
@@ -618,15 +734,15 @@ export function createProjectionComposition(
         api: context.api,
       });
       stampProjectionSurfaces();
-      markerObserver.observe(document.body, {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        attributeFilter: ['class'],
-      });
+      stopObservingMarkerChanges = observeProjectionSurfaceMarkers(
+        document,
+        ownerMarker,
+        generationMarker,
+        stampProjectionSurfaces
+      );
       applyLocked(context);
     } catch (error) {
-      markerObserver.disconnect();
+      stopObservingMarkerChanges();
       for (const { element, listener } of listeners) {
         element.removeEventListener('valueChange', listener);
       }
@@ -646,7 +762,7 @@ export function createProjectionComposition(
       if (cleaned) return;
       cleaned = true;
       eventGateOpen = false;
-      markerObserver.disconnect();
+      stopObservingMarkerChanges();
       try {
         for (const id of controlIds) {
           context.api.call(CONTROL_REFS[id].root, 'close', 'projection composition cleanup');

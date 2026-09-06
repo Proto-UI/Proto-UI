@@ -530,6 +530,63 @@ describe('Website projection composition', () => {
     (cleanup as () => void)();
   });
 
+  it('shares one owner-filtered marker observer across compositions', async () => {
+    const childDemo = {
+      type: 'demo',
+      root: {
+        kind: 'proto',
+        prototypeId: 'shadcn-button',
+        ref: 'child-button',
+        children: ['Child'],
+      },
+    } satisfies DemoSpec;
+    const createComposition = (ownerId: string) =>
+      createProjectionComposition({
+        ownerId,
+        runtimeId: 'wc',
+        projectionFamilyId: 'shadcn',
+        generation: 1,
+        componentId: 'button',
+        childDemo,
+        controls: controls(),
+        controlIds: [],
+      });
+    const first = createComposition('marker-owner-a');
+    const second = createComposition('marker-owner-b');
+    const firstMount = mountDemoTree(first.demo);
+    const secondMount = mountDemoTree(second.demo);
+    const api: DemoRuntimeApi = {
+      call: () => undefined,
+      getExposes: () => undefined,
+      setProps: () => undefined,
+    };
+    const firstCleanup = first.demo.setup?.({ ...firstMount, api });
+    const secondCleanup = second.demo.setup?.({ ...secondMount, api });
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+    const documentScan = vi.spyOn(document, 'getElementsByClassName');
+    let cleaned = false;
+
+    try {
+      firstMount.refs['child-button']!.classList.add('state-change');
+      await vi.waitFor(() => expect(documentScan).toHaveBeenCalled());
+      expect(documentScan).toHaveBeenCalledTimes(1);
+
+      (firstCleanup as () => void)();
+      (secondCleanup as () => void)();
+      cleaned = true;
+      documentScan.mockClear();
+      firstMount.refs['child-button']!.classList.add('after-cleanup');
+      await new Promise<void>((resolve) => queueMicrotask(resolve));
+      expect(documentScan).not.toHaveBeenCalled();
+    } finally {
+      documentScan.mockRestore();
+      if (!cleaned) {
+        (firstCleanup as () => void)();
+        (secondCleanup as () => void)();
+      }
+    }
+  });
+
   it('stamps SVG Prototype surfaces with generation identity and theme values', async () => {
     const componentFamily = PROJECTION_FAMILY_MANIFESTS.shadcn.families.toggle;
     const childDemo = await loadDemo(componentFamily.recipeId);
