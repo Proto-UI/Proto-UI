@@ -363,6 +363,24 @@ test('security CI checks the immutable dcbot handler source and runs its real pr
   assert.match(security, /go test \.\/internal\/preview/);
 });
 
+test('security CI degrades safely when the private contract repo is unreachable', () => {
+  // The pinned dcbot checkout must not fail the job when github.token cannot see
+  // the private repository; an optional PAT restores full verification.
+  assert.match(security, /id: dcbot-contract/);
+  assert.match(security, /continue-on-error: true/);
+  assert.match(security, /token: \$\{\{ secrets\.DCBOT_CONTRACT_TOKEN \|\| github\.token \}\}/);
+  const goSuite = security.indexOf('Run the pinned real dcbot preview handler suite');
+  assert.ok(goSuite > security.indexOf("if: steps.dcbot-contract.outcome == 'success'"));
+  assert.match(
+    security,
+    /if: steps\.dcbot-contract\.outcome == 'success'\n\s+working-directory: \.poppy\/dcbot-contract/
+  );
+  assert.match(
+    security,
+    /if: steps\.dcbot-contract\.outcome == 'success'\n\s+env:\n\s+DCBOT_CONTRACT_ROOT:/
+  );
+});
+
 test('installed workflows remain byte-identical to reviewed templates', async (t) => {
   const names = [
     'poppy-preview-bootstrap.yml',

@@ -31,13 +31,16 @@ jobs:
           persist-credentials: false
 
       - name: Check out the pinned dcbot preview handler contract
+        id: dcbot-contract
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        continue-on-error: true
         with:
           repository: Proto-UI/dcbot
           ref: 3f60a2b41832a0b02e64a0f4b8bf237355b59806
           path: .poppy/dcbot-contract
           fetch-depth: 1
           persist-credentials: false
+          token: ${{ secrets.DCBOT_CONTRACT_TOKEN || github.token }}
 
       - name: Use Node.js 22
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -47,6 +50,7 @@ jobs:
           cache-dependency-path: integrations/proto-ui-preview/package-lock.json
 
       - name: Use Go from the pinned dcbot module
+        if: steps.dcbot-contract.outcome == 'success'
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: .poppy/dcbot-contract/go.mod
@@ -57,12 +61,18 @@ jobs:
         run: npm ci --prefix integrations/proto-ui-preview --ignore-scripts
 
       - name: Run the edge, lifecycle, browser, and lockstep suite
-        env:
-          DCBOT_CONTRACT_ROOT: ${{ github.workspace }}/.poppy/dcbot-contract
         shell: bash
         run: npm test --prefix integrations/proto-ui-preview
 
+      - name: Verify the pinned dcbot handler source digests
+        if: steps.dcbot-contract.outcome == 'success'
+        env:
+          DCBOT_CONTRACT_ROOT: ${{ github.workspace }}/.poppy/dcbot-contract
+        shell: bash
+        run: node --test integrations/proto-ui-preview/scripts/dcbot-handler-contract.test.mjs
+
       - name: Run the pinned real dcbot preview handler suite
+        if: steps.dcbot-contract.outcome == 'success'
         working-directory: .poppy/dcbot-contract
         shell: bash
         run: go test ./internal/preview
