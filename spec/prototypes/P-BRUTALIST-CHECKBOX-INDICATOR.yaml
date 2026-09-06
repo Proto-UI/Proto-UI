@@ -1,0 +1,83 @@
+id: P-BRUTALIST-CHECKBOX-INDICATOR
+type: prototype
+title: Brutalist Checkbox Indicator inherits Base Checkbox Indicator and projects a derived glyph
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  Brutalist Checkbox Indicator inherits the same-domain Base context projection and paints an accessibility-hidden hard-stroke tick or dash without owning value, interaction, focus, event, form, or accessibility semantics.
+
+
+statement:
+  en: >-
+    The draft Indicator is a presentation-only anatomy part over P-BASE-CHECKBOX-INDICATOR. It derives checked and indeterminate from the nearest Root, gives indeterminate precedence, and adds only the current glyph box, hard-stroke SVG, and visibility styling.
+
+
+  zh-CN: >-
+    draft Indicator 是 P-BASE-CHECKBOX-INDICATOR 之上的纯呈现 anatomy part。它从最近 Root 派生 checked 与 indeterminate，并让 indeterminate 优先；本层只增加当前 glyph box、硬线 SVG 与可见性样式。
+
+
+criteria:
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-BASE-INHERITANCE
+    text:
+      en: >-
+        Indicator must inherit P-BASE-CHECKBOX-INDICATOR through asCheckboxIndicator(), retain same-domain context derivation, and create no autonomous checked or indeterminate state.
+
+
+      zh-CN: >-
+        Indicator 必须通过 asCheckboxIndicator() 继承 P-BASE-CHECKBOX-INDICATOR，保留 same-domain context 派生，并且不得创建自治 checked 或 indeterminate state。
+
+
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-DIRECT-ENTRY
+    text:
+      en: The direct Indicator entry is brutalist-checkbox-indicator and this layer provides no authored asHook.
+      zh-CN: Indicator direct entry 为 brutalist-checkbox-indicator，且本层不提供 authored asHook。
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-CONTEXT-DERIVED
+    text:
+      en: >-
+        Indicator must expose only context-derived checked and indeterminate observation. It must have no writable value, activation route, focus target, event target, form behavior, role, or aria-checked; its SVG glyph must be aria-hidden.
+
+
+      zh-CN: >-
+        Indicator 只能 expose 从 context 派生的 checked 与 indeterminate observation。它不得拥有 writable value、activation route、focus target、event target、form behavior、role 或 aria-checked； SVG glyph 必须 aria-hidden。
+
+
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-GLYPH-SELECTION
+    text:
+      en: >-
+        checked paints exactly one hard-stroke tick, indeterminate paints exactly one hard dash, and neither state paints no glyph. Indeterminate wins when both are true, and repeated updates must never stack a second SVG.
+
+
+      zh-CN: >-
+        checked 必须恰好绘制一个硬线 tick，indeterminate 必须恰好绘制一个硬横杠，两者均不成立时 不绘制 glyph；两者同真时 indeterminate 优先，重复更新不得叠加第二个 SVG。
+
+
+  - id: P-BRUTALIST-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
+    text:
+      en: >-
+        Indicator must project inline-flex size-3.5 items-center justify-center text-current transition-none, use opacity-100 for checked or indeterminate, and use opacity-0 only when both are false.
+
+
+      zh-CN: >-
+        Indicator 必须投射 inline-flex size-3.5 items-center justify-center text-current transition-none； checked 或 indeterminate 时使用 opacity-100，仅两者均为 false 时使用 opacity-0。
+
+
+sources:
+  - path: packages/prototypes/brutalist/src/checkbox/indicator.proto.ts
+  - path: packages/prototypes/brutalist/src/checkbox/types.ts
+  - path: packages/prototypes/brutalist/test/checkbox.test.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts:
+    [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-CHECKBOX-INDICATOR
+verifies:
+  tests: [T-BRUTALIST-CHECKBOX-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the draft context-derived Brutalist Checkbox Indicator projection.
+tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox, indicator]

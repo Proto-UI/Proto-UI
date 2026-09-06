@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { renderPrefixedThemeCss, renderProtoStyleTokenCss } from '../src/services/proto-style-css';
+import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
   it('gives Proto UI styled elements a scoped border-box baseline without a global reset', () => {
@@ -84,6 +85,28 @@ describe('proto style css renderer', () => {
     expect(css).toContain('border-radius: 4px;');
     expect(css).toContain('width: 0.875rem;');
     expect(css).toContain('height: 0.875rem;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
+  it('closes and renders the surface-paired frame tokens used by Brutalist Checkbox', () => {
+    expect(BRUTALIST_STYLE_TOKENS).toContain('border-main-foreground');
+    expect(BRUTALIST_STYLE_TOKENS).toContain(
+      'data-[checked]:not-[data-indeterminate]:border-background'
+    );
+
+    const css = renderProtoStyleTokenCss([
+      'text-current',
+      'opacity-0',
+      'opacity-100',
+      'border-main-foreground',
+      'border-background',
+    ]);
+
+    expect(css).toContain('color: currentColor;');
+    expect(css).toContain('opacity: 0;');
+    expect(css).toContain('opacity: 1;');
+    expect(css).toContain('border-color: var(--pui-main-foreground);');
+    expect(css).toContain('border-color: var(--pui-background);');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
