@@ -7,6 +7,7 @@ import type {
   A11yRelationSpec,
   A11yRole,
   A11yRoleTarget,
+  A11ySemanticObjectRef,
   A11ySemanticObjectSnapshot,
   A11yStateKey,
   A11yTextAlternative,
@@ -40,8 +41,11 @@ export type A11ySemanticObjectIR = {
 };
 
 export type A11yPort = ModulePort & {
+  getObjectRef(): A11ySemanticObjectRef;
   getSnapshot(): A11ySemanticObjectSnapshot;
   getIR(): A11ySemanticObjectIR;
+  setRelation(key: A11yRelationKey, spec: A11yRelationSpec): void;
+  removeRelation(key: A11yRelationKey): void;
 };
 
 export type A11yModule = ModuleInstance<A11yFacade> & {

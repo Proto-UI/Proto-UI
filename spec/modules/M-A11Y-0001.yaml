@@ -3,7 +3,7 @@ type: module
 title: A11y module records semantic object IR
 status: draft
 since: 0.1.0
-summary: The a11y module provides the prototype author API and runtime IR storage for host-projectable accessibility semantic objects.
+summary: The a11y module provides the author API, one stable opaque ref per logical instance, runtime IR storage, internal direct-ref relation updates, and bounded host-projector cleanup.
 satisfies:
   contracts:
     - C-A11Y-0001
@@ -17,10 +17,14 @@ sources:
   - path: packages/modules/a11y/src/create.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
+  - path: packages/modules/a11y/test/web-reference.test.ts
 revisions:
   - version: 0.1.0
     change: introduced
     summary: Drafted the a11y module entity.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added opaque semantic-object identity, ordered direct-ref relationships, runtime relation mutation, and projector disposal without admitting the pending anatomy matcher.
 tags:
   - a11y
   - accessibility
