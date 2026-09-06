@@ -53,6 +53,12 @@ cases:
       - P-BRUTALIST-TOGGLE-ACTIVE-SIGNAL
       - P-BRUTALIST-TOGGLE-INTERACTION
     expectation: p-brutalist-toggle-state-precedence
+  - id: T-BRUTALIST-TOGGLE-0001-CASE-BROWSER
+    title: Rendered active and resting Toggle surfaces preserve paired fills and hard frames across official runtimes
+    covers:
+      - P-BRUTALIST-TOGGLE-PAIR-INVARIANT
+      - P-BRUTALIST-TOGGLE-VISUAL-GRAMMAR
+    expectation: rendered-brutalist-toggle-cross-runtime-visual-and-active-pair
 implementations:
   - id: prototypes-brutalist-toggle-contract
     kind: module-test
@@ -71,6 +77,15 @@ implementations:
     exercises:
       - P-BASE-TOGGLE
       - P-BRUTALIST-TOGGLE
+  - id: website-brutalist-remaining-browser-toggle
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TOGGLE-0001-CASE-BROWSER
+    exercises:
+      - P-BRUTALIST-TOGGLE
 verifies:
   prototypes:
     - id: P-BRUTALIST-TOGGLE
@@ -84,11 +99,16 @@ revisions:
     summary: >-
       Introduced draft Brutalist Toggle coverage mapped to the rc.7 P criteria (size, defaults, active pair, interaction). Not present in the immutable rc.6 snapshot.
 
+
   - version: 0.2.0
     change: revised
     summary: >-
       Added executable coverage for the persistent non-color active frame and deterministic hover/press/active precedence.
 
+
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added required cross-runtime browser evidence for exact resting/active pairs, state re-projection, and structural borders.
 
 tags:
   - test

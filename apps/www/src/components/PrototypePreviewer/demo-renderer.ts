@@ -126,10 +126,12 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
     ...(node.props ?? {}),
     ...surfaceProps,
   });
-  parent.appendChild(el);
 
+  // Materialize authored children before connecting the custom element so the
+  // Web Component adapter can project slots or reject contentless children.
   const kids = node.children ?? [];
   for (const child of kids) renderDemoNodeWc(child, el, instances);
+  parent.appendChild(el);
 }
 
 function collectDemoRefs(host: HTMLElement): Record<string, HTMLElement> {

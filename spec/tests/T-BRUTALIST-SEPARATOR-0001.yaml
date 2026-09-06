@@ -18,6 +18,12 @@ cases:
       - P-BRUTALIST-SEPARATOR-VISUAL-GRAMMAR
       - P-BRUTALIST-SEPARATOR-DYNAMIC-GEOMETRY
     expectation: brutalist-separator-live-semantics-select-vertical-geometry
+  - id: T-BRUTALIST-SEPARATOR-0001-CASE-BROWSER
+    title: Rendered orientation follows two-pixel horizontal and vertical geometry across official runtimes
+    covers:
+      - P-BRUTALIST-SEPARATOR-VISUAL-GRAMMAR
+      - P-BRUTALIST-SEPARATOR-DYNAMIC-GEOMETRY
+    expectation: rendered-brutalist-separator-cross-runtime-orientation-geometry
 implementations:
   - id: prototypes-brutalist-separator-contract
     kind: module-test
@@ -30,6 +36,16 @@ implementations:
     exercises: &id001
       - P-BRUTALIST-SEPARATOR
       - P-BASE-SEPARATOR
+  - id: website-brutalist-remaining-browser-separator
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SEPARATOR-0001-CASE-BROWSER
+    exercises:
+      - P-BRUTALIST-SEPARATOR
+      - P-BASE-SEPARATOR
 verifies:
   prototypes:
     - id: P-BRUTALIST-SEPARATOR
@@ -39,6 +55,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added draft Brutalist separator prototype coverage.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added required cross-runtime browser evidence for live orientation updates, consumer-fill geometry, and foreground ink.
 tags:
   - test
   - brutalist

@@ -217,6 +217,15 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
+  it('emits explicit leading overrides after text-size utilities so they win the cascade', () => {
+    const css = renderProtoStyleTokenCss(['leading-6', 'text-sm']);
+    const textSize = css.indexOf('[data-pui-style~="text-sm"]');
+    const leading = css.indexOf('[data-pui-style~="leading-6"]');
+
+    expect(textSize).toBeGreaterThan(-1);
+    expect(leading).toBeGreaterThan(textSize);
+  });
+
   it('renders state-driven spacing translations used by the Switch thumb', () => {
     const css = renderProtoStyleTokenCss([
       'translate-x-0',

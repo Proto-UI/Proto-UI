@@ -32,6 +32,12 @@ cases:
       - P-BRUTALIST-HOVER-CARD-CONTENT-TRANSITION
       - P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR
     expectation: p-brutalist-hover-card-content-transition-panel
+  - id: T-BRUTALIST-HOVER-CARD-0001-CASE-BROWSER
+    title: Rendered Hover Card trigger and panel preserve square hard-shadow surfaces across official runtimes
+    covers:
+      - P-BRUTALIST-HOVER-CARD-TRIGGER-VISUAL-GRAMMAR
+      - P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR
+    expectation: rendered-brutalist-hover-card-cross-runtime-visual-grammar
 implementations:
   - id: prototypes-brutalist-hover-card-contract
     kind: module-test
@@ -49,6 +55,16 @@ implementations:
       - P-BRUTALIST-HOVER-CARD
       - P-BRUTALIST-HOVER-CARD-CONTENT
       - P-BRUTALIST-HOVER-CARD-TRIGGER
+  - id: website-brutalist-remaining-browser-hover-card
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-HOVER-CARD-0001-CASE-BROWSER
+    exercises:
+      - P-BRUTALIST-HOVER-CARD-TRIGGER
+      - P-BRUTALIST-HOVER-CARD-CONTENT
 verifies:
   prototypes:
     - id: P-BRUTALIST-HOVER-CARD
@@ -68,6 +84,10 @@ revisions:
     summary: >-
       Introduced draft Brutalist Hover Card coverage mapped 1:1 to the rc.7 P criteria (root entry+inheritance, trigger pair+interaction, content transition+panel). Not present in the immutable rc.6 snapshot.
 
+
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added required cross-runtime browser evidence for trigger and panel visual grammar, dimensions, and typography.
 
 tags:
   - test
