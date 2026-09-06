@@ -11,7 +11,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 Brutalist Tooltip publishes four Base Tooltip projection entries: Group inherits same-domain delay defaults, warm-window behavior, and active Tooltip coordination; Root owns controlled or uncontrolled open state; Trigger owns hover/focus routing and accessible-description linkage; Content owns presence, anchored portal positioning, Escape dismissal, and `role="tooltip"`.
 
-Group, Root, and Trigger are current draft transparent projections with cataloged Brutalist package identities; they add no second props, state, timing, event, accessibility, or visual owner. Only Content adds the square high-contrast surface. The interactive demo uses one real Group to compose two uncontrolled sibling Tooltips and can switch among Web Components, React, and Vue.
+Group, Root, and Trigger are current draft transparent projections with cataloged Brutalist package identities; they add no second props, state, timing, event, accessibility, or visual owner. Only Content adds the square high-contrast surface. The interactive demo uses one real Group to compose two uncontrolled sibling Tooltips and can switch among Web Components, React, and Vue. While Content stays mounted through its renderer-owned portal, changing the documentation host from Light to Dark repaints the same surface through `--pui-foreground` and `--pui-background`.
 
 <div class="brutalist-demo-frame" data-brutalist-tooltip-theme-boundary>
   <PrototypePreviewer

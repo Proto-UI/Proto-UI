@@ -521,7 +521,6 @@ export default defineConfig({
                   label: 'Tooltip',
                   translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
                   slug: 'ui-libraries/brutalist/components/tooltip',
-                  badge: inProgressBadge,
                 },
               ],
             },
