@@ -530,6 +530,53 @@ describe('Website projection composition', () => {
     (cleanup as () => void)();
   });
 
+  it('stamps SVG Prototype surfaces with generation identity and theme values', async () => {
+    const componentFamily = PROJECTION_FAMILY_MANIFESTS.shadcn.families.toggle;
+    const childDemo = await loadDemo(componentFamily.recipeId);
+    const composition = createProjectionComposition({
+      ownerId: 'scope-svg',
+      runtimeId: 'react',
+      projectionFamilyId: 'shadcn',
+      generation: 10,
+      componentId: 'toggle',
+      childDemo,
+      controls: controls(),
+      controlIds: [],
+      themeSurfaceStyle: {
+        '--pui-background': '#fff',
+        '--pui-foreground': '#111',
+      },
+    });
+    const projectedIcon = findNode(
+      composition.demo,
+      (node) => node.kind === 'proto' && node.prototypeId === 'lucide-icon'
+    );
+    if (projectedIcon.kind !== 'proto' || !projectedIcon.className) {
+      throw new Error('Projected Lucide marker classes required.');
+    }
+    const { host, refs } = mountDemoTree(composition.demo);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add(...projectedIcon.className.split(/\s+/).filter(Boolean));
+    document.body.appendChild(svg);
+    const api: DemoRuntimeApi = {
+      call: () => undefined,
+      getExposes: () => undefined,
+      setProps: () => undefined,
+    };
+
+    const cleanup = composition.demo.setup?.({ host, refs, api });
+
+    expect(svg.getAttribute('data-projection-owner')).toBe('scope-svg');
+    expect(svg.getAttribute('data-projection-family')).toBe('shadcn');
+    expect(svg.getAttribute('data-projection-runtime')).toBe('react');
+    expect(svg.getAttribute('data-projection-generation')).toBe('10');
+    expect(svg.getAttribute('data-projection-prototype')).toBe('lucide-icon');
+    expect(svg.style.getPropertyValue('--pui-background')).toBe('#fff');
+    expect(svg.style.getPropertyValue('--pui-foreground')).toBe('#111');
+
+    (cleanup as () => void)();
+  });
+
   it('runs child cleanup and releases the mount when setup fails after child setup', () => {
     const childCleanup = vi.fn();
     const childDemo = {

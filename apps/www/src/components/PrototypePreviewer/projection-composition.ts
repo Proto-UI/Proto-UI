@@ -553,7 +553,7 @@ export function createProjectionComposition(
     const stampProjectionSurfaces = () => {
       for (const element of Array.from(document.getElementsByClassName(ownerMarker))) {
         if (
-          !(element instanceof view.HTMLElement) ||
+          (!(element instanceof view.HTMLElement) && !(element instanceof view.SVGElement)) ||
           !element.classList.contains(generationMarker)
         ) {
           continue;

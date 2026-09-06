@@ -193,6 +193,31 @@ describe('Homepage Prototype projection scope', () => {
     await homeApi(root).destroy();
   });
 
+  it('renders the exact initial projection failure in the empty host', async () => {
+    const failure = new Error('Initial Shadcn Button recipe is unavailable');
+    projection.materialize.mockRejectedValueOnce(failure);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const root = createHomeRoot();
+    initHomeDemoPreviewer(root);
+
+    try {
+      await vi.waitFor(() => expect(root.dataset.runnerState).toBe('error'));
+
+      const host = root.querySelector<HTMLElement>('[data-home-demo-host]');
+      expect(host?.textContent).toContain('[Home Demo Error]');
+      expect(host?.textContent).toContain(failure.message);
+      expect(host?.getAttribute('aria-busy')).toBe('false');
+      expect(homeApi(root).getSnapshot()).toEqual({
+        selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+        generation: 0,
+        phase: 'idle',
+      });
+    } finally {
+      consoleError.mockRestore();
+      await homeApi(root).destroy();
+    }
+  });
+
   it('replays the latest complete intent after the initial generation finishes preparing', async () => {
     let resolveInitial!: (candidate: Candidate) => void;
     const initial = new Promise<Candidate>((resolve) => {
@@ -506,6 +531,9 @@ describe('Homepage Prototype projection scope', () => {
     expect(candidates[0]!.dispose).not.toHaveBeenCalled();
     expect(candidates[0]!.setLocked).toHaveBeenLastCalledWith(false);
     expect(root.dataset.projectionFamily).toBe('shadcn');
+    expect(root.querySelector('[data-home-demo-host]')?.textContent).not.toContain(
+      '[Home Demo Error]'
+    );
     expect(consoleError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Brutalist Select item mapping missing' })
     );
@@ -541,6 +569,39 @@ describe('Homepage Prototype projection scope', () => {
 
     expect(() => initHomeDemoPreviewer(root)).toThrow(/lane-only.*cross-library selector/i);
     expect(projection.materialize).not.toHaveBeenCalled();
+  });
+
+  it('returns the in-flight teardown promise to repeated callers', async () => {
+    let finishDisposal!: () => void;
+    const disposal = new Promise<void>((resolve) => {
+      finishDisposal = resolve;
+    });
+    projection.materialize.mockImplementationOnce(
+      async (request: ProjectionScopeMaterializeRequest) => {
+        const candidate = createCandidate(`initial:${request.generation}`);
+        candidate.dispose.mockReturnValue(disposal);
+        candidates.push(candidate);
+        return candidate;
+      }
+    );
+    const root = createHomeRoot();
+    initHomeDemoPreviewer(root);
+    await vi.waitFor(() => expect(root.dataset.runnerState).toBe('ready'));
+
+    const first = homeApi(root).destroy();
+    const repeated = homeApi(root).destroy();
+    let repeatedSettled = false;
+    void repeated.then(() => {
+      repeatedSettled = true;
+    });
+
+    expect(repeated).toBe(first);
+    await vi.waitFor(() => expect(candidates[0]!.dispose).toHaveBeenCalledTimes(1));
+    expect(repeatedSettled).toBe(false);
+
+    finishDisposal();
+    await first;
+    expect(repeatedSettled).toBe(true);
   });
 
   it('updates the active generation theme in place instead of remounting it', async () => {

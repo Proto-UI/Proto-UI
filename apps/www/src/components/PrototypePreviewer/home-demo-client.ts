@@ -171,6 +171,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
   let desiredIntentRevision = 0;
   let latestCommittedGeneration = 0;
   let startPromise: Promise<ProjectionScopeSnapshot> | null = null;
+  let destroyPromise: Promise<void> | null = null;
   let activeCandidate: MaterializedProjectionCandidate | null = null;
   let watchedProjectionFamilyId: ProjectionFamilyId | null = null;
   let stopThemeWatcher: (() => void) | null = null;
@@ -207,6 +208,14 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
     if (!status) return;
     const stateLabel = root.dataset[`status${state[0]!.toUpperCase()}${state.slice(1)}`];
     status.textContent = `${runtimeLabel(runtimeId)} · ${stateLabel ?? state}`;
+  };
+  const renderInitialError = (error: unknown): void => {
+    const pre = root.ownerDocument.createElement('pre');
+    const detail = error instanceof Error ? error.stack || error.message : String(error);
+    pre.textContent = `[Home Demo Error]\n${detail}`;
+    pre.style.whiteSpace = 'pre-wrap';
+    pre.style.color = 'crimson';
+    mount.replaceChildren(pre);
   };
 
   const resetDesiredToCommitted = (): ProjectionScopeSnapshot => {
@@ -246,6 +255,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
       for (const generation of Array.from(candidateByGeneration.keys())) {
         if (generation !== snapshot.generation) candidateByGeneration.delete(generation);
       }
+      if (snapshot.generation === 0) renderInitialError(error);
       setRunnerState('error', snapshot.selection.runtimeId as RuntimeId);
       console.error(error);
     });
@@ -536,19 +546,22 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
   root.ownerDocument.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
 
   let removalObserver!: MutationObserver;
-  const destroy = async (): Promise<void> => {
-    if (destroyed) return;
-    destroyed = true;
-    requestEpoch += 1;
-    stopThemeWatcher?.();
-    stopThemeWatcher = null;
-    activeCandidate = null;
-    componentByGeneration.clear();
-    intentRevisionByGeneration.clear();
-    candidateByGeneration.clear();
-    removalObserver.disconnect();
-    root.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
-    await controller.destroy();
+  const destroy = (): Promise<void> => {
+    if (destroyPromise) return destroyPromise;
+    destroyPromise = (async () => {
+      destroyed = true;
+      requestEpoch += 1;
+      stopThemeWatcher?.();
+      stopThemeWatcher = null;
+      activeCandidate = null;
+      componentByGeneration.clear();
+      intentRevisionByGeneration.clear();
+      candidateByGeneration.clear();
+      removalObserver.disconnect();
+      root.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
+      await controller.destroy();
+    })();
+    return destroyPromise;
   };
   removalObserver = new MutationObserver(() => {
     if (!root.isConnected) void destroy();

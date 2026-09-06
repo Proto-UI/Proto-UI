@@ -50,6 +50,24 @@ cases:
       - C-PROTOTYPE-STYLE-CLOSURE-0001-C
       - C-PROTOTYPE-STYLE-CLOSURE-0001-D
     expectation: preview-lane-theme-does-not-mutate-root-or-recolor-unrelated-site-controls
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-SURFACE-METADATA-CLOSURE
+    title: every marker-bearing HTML or SVG Prototype surface receives the current generation coordinates identity and direct theme copy
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-EXPLICIT-MANIFEST
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NO-HYBRID-PRESENTATION
+    expectation: html-and-svg-prototype-surfaces-carry-complete-generation-metadata-and-theme-values
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
+    title: an initial materialization failure renders its exact error while a replacement failure leaves the committed generation visible
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: empty-initial-host-renders-error-and-retained-generation-is-never-overwritten
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+    title: every repeated destroy caller awaits the same generation-owned candidate and portal teardown
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: repeated-destroy-returns-one-pending-promise-until-generation-cleanup-finishes
 implementations:
   - id: www-projection-family-manifest-unit
     kind: module-test
@@ -80,6 +98,27 @@ implementations:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MANIFEST-COMPLETENESS
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-SURFACE-METADATA-CLOSURE
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-home-projection-client-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/home-demo-client.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-fixed-family-projection-client-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-materializer-unit
@@ -111,6 +150,7 @@ implementations:
       - A-VUE-2-0001
       - P-SHADCN-SELECT
       - P-BRUTALIST-SELECT
+      - P-LUCIDE-ICON
 verifies:
   decisions:
     - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
@@ -153,9 +193,11 @@ exercises:
 sources:
   - path: apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro
   - path: apps/www/src/components/PrototypePreviewer/home-demo-client.ts
+  - path: apps/www/src/components/PrototypePreviewer/home-demo-client.test.ts
   - path: apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro
   - path: apps/www/src/components/PrototypePreviewer/previewer-client.ts
   - path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts
+  - path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.test.ts
   - path: apps/www/src/components/PrototypePreviewer/demo-renderer.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-families.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-families.test.ts
@@ -168,6 +210,9 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projection-theme.ts
   - path: apps/www/src/components/BrutalistPageStyle.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added HTML and SVG surface metadata closure, first-generation error presentation, and repeated teardown-await evidence.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added passing manifest, controller, and four-Runtime browser evidence for atomic Website projection lanes, child-portal activation and cleanup, portal theme closure, and page-style isolation.

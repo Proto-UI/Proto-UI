@@ -57,7 +57,9 @@ export const WEBSITE_SHADCN_THEME_TOKENS = [
 
 export type ProjectionThemeSurfaceStyle = Readonly<Record<`--pui-${string}`, string>>;
 
-const appliedThemeProperties = new WeakMap<HTMLElement, ReadonlySet<string>>();
+type ProjectionThemeSurface = HTMLElement | SVGElement;
+
+const appliedThemeProperties = new WeakMap<ProjectionThemeSurface, ReadonlySet<string>>();
 
 function isDarkTheme(doc: Document): boolean {
   const root = doc.documentElement;
@@ -104,7 +106,7 @@ export function resolveProjectionThemeSurfaceStyle(
 }
 
 export function applyProjectionThemeSurfaceStyle(
-  element: HTMLElement,
+  element: ProjectionThemeSurface,
   theme: ProjectionThemeSurfaceStyle
 ): void {
   const nextProperties = new Set(Object.keys(theme));

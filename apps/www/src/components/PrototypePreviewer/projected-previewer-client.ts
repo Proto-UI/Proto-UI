@@ -93,6 +93,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   let requestEpoch = 0;
   let mounted = false;
   let startPromise: Promise<ProjectionScopeSnapshot> | null = null;
+  let destroyPromise: Promise<void> | null = null;
   let latestCommittedGeneration = 0;
   let activeCandidate: MaterializedProjectionCandidate | null = null;
   let stopThemeWatcher: (() => void) | null = null;
@@ -104,6 +105,14 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   const setState = (state: 'loading' | 'ready' | 'error'): void => {
     root.dataset.projectionState = state;
     mount.setAttribute('aria-busy', String(state === 'loading'));
+  };
+  const renderInitialError = (error: unknown): void => {
+    const pre = root.ownerDocument.createElement('pre');
+    const detail = error instanceof Error ? error.stack || error.message : String(error);
+    pre.textContent = `[Preview Error]\n${detail}`;
+    pre.style.whiteSpace = 'pre-wrap';
+    pre.style.color = 'crimson';
+    mount.replaceChildren(pre);
   };
 
   const updateCodePanel = (runtimeId: RuntimeId): void => {
@@ -140,6 +149,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       (error) => {
         if (destroyed || epoch !== requestEpoch) return;
         const snapshot = controller.getSnapshot();
+        if (snapshot.generation === 0) renderInitialError(error);
         desiredRuntimeId = snapshot.selection.runtimeId as RuntimeId;
         desiredIntentRevision += 1;
         setState('error');
@@ -396,18 +406,21 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   root.ownerDocument.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
 
   let removalObserver!: MutationObserver;
-  const destroy = async (): Promise<void> => {
-    if (destroyed) return;
-    destroyed = true;
-    requestEpoch += 1;
-    stopThemeWatcher?.();
-    stopThemeWatcher = null;
-    activeCandidate = null;
-    candidateByGeneration.clear();
-    removalObserver.disconnect();
-    root.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
-    await controller.destroy();
-    mount.replaceChildren();
+  const destroy = (): Promise<void> => {
+    if (destroyPromise) return destroyPromise;
+    destroyPromise = (async () => {
+      destroyed = true;
+      requestEpoch += 1;
+      stopThemeWatcher?.();
+      stopThemeWatcher = null;
+      activeCandidate = null;
+      candidateByGeneration.clear();
+      removalObserver.disconnect();
+      root.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
+      await controller.destroy();
+      mount.replaceChildren();
+    })();
+    return destroyPromise;
   };
 
   removalObserver = new MutationObserver(() => {

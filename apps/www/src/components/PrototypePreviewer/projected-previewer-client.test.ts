@@ -126,6 +126,30 @@ describe('PrototypePreviewer fixed-family projection', () => {
     await previewerApi(root).destroy();
   });
 
+  it('renders the exact initial projection failure in the empty host', async () => {
+    const failure = new Error('Initial fixed-family recipe is unavailable');
+    projection.materialize.mockRejectedValueOnce(failure);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const projectionError = vi.fn();
+    const root = createRoot();
+    root.addEventListener('error', projectionError);
+    init(root);
+
+    try {
+      await vi.waitFor(() => expect(root.dataset.projectionState).toBe('error'));
+
+      const mount = root.querySelector<HTMLElement>('.host');
+      expect(mount?.textContent).toContain('[Preview Error]');
+      expect(mount?.textContent).toContain(failure.message);
+      expect(mount?.getAttribute('aria-busy')).toBe('false');
+      expect(previewerApi(root).getCurrentRuntime()).toBeNull();
+      expect(projectionError).toHaveBeenCalledTimes(1);
+    } finally {
+      consoleError.mockRestore();
+      await previewerApi(root).destroy();
+    }
+  });
+
   it('switches Runtime once while preserving the fixed family and component', async () => {
     const root = createRoot();
     const adapterChange = vi.fn();
@@ -338,6 +362,7 @@ describe('PrototypePreviewer fixed-family projection', () => {
     expect(root.dataset.projectionRuntime).toBe('wc');
     expect(candidates[0]!.dispose).not.toHaveBeenCalled();
     expect(candidates[0]!.setLocked).toHaveBeenLastCalledWith(false);
+    expect(root.querySelector('.host')?.textContent).not.toContain('[Preview Error]');
     expect(consoleError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'React projection preparation failed' })
     );
@@ -448,6 +473,43 @@ describe('PrototypePreviewer fixed-family projection', () => {
     expect(projection.materialize.mock.calls[0]![1].controlIds).toEqual([]);
 
     await previewerApi(root).destroy();
+  });
+
+  it('returns the in-flight teardown promise to repeated callers', async () => {
+    let finishDisposal!: () => void;
+    const disposal = new Promise<void>((resolve) => {
+      finishDisposal = resolve;
+    });
+    projection.materialize.mockImplementationOnce(
+      async (request: ProjectionScopeMaterializeRequest) => {
+        const candidate = createCandidate(`initial:${request.generation}`);
+        candidate.dispose.mockReturnValue(disposal);
+        candidates.push(candidate);
+        return candidate;
+      }
+    );
+    const root = createRoot();
+    init(root);
+    await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+    const mount = root.querySelector<HTMLElement>('.host')!;
+    mount.textContent = 'teardown pending';
+
+    const first = previewerApi(root).destroy();
+    const repeated = previewerApi(root).destroy();
+    let repeatedSettled = false;
+    void repeated.then(() => {
+      repeatedSettled = true;
+    });
+
+    expect(repeated).toBe(first);
+    await vi.waitFor(() => expect(candidates[0]!.dispose).toHaveBeenCalledTimes(1));
+    expect(repeatedSettled).toBe(false);
+    expect(mount.textContent).toBe('teardown pending');
+
+    finishDisposal();
+    await first;
+    expect(repeatedSettled).toBe(true);
+    expect(mount.textContent).toBe('');
   });
 
   it('materializes an exact lane-only recipe without inventing a cross-lane family', async () => {
