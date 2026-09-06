@@ -2183,8 +2183,12 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
     }
   }
 
-  const isAgentActionVerbName = (name) =>
-    /^(?:approve|delete|deny|navigate|patch|retry|send|stop|upload)(?:[A-Z0-9_$].*)?$/u.test(name);
+  const isAgentActionVerbName = (name) => {
+    const candidate = name.replace(/^on([A-Z])/u, (_match, initial) => initial.toLowerCase());
+    return /^(?:approve|delete|deny|navigate|patch|retry|send|stop|upload)(?:[A-Z0-9_$].*)?$/u.test(
+      candidate
+    );
+  };
   const hasAgentActionOwnerProvenance = (owner) =>
     /(?:action|agent|api|approval|client|command|props|request|run|service|tool)/iu.test(owner);
   const bindingElementOwnerProvenance = (bindingElement) => {
@@ -2502,7 +2506,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
               ts.isMethodDeclaration(member) &&
               member.name &&
               (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)) &&
-              /^(?:UNSAFE_componentWillMount|componentDidMount|componentWillMount|render)$/u.test(
+              /^(?:UNSAFE_componentWillMount|UNSAFE_componentWillReceiveProps|UNSAFE_componentWillUpdate|componentDidMount|componentDidUpdate|componentWillMount|componentWillReceiveProps|componentWillUpdate|getSnapshotBeforeUpdate|render|shouldComponentUpdate)$/u.test(
                 member.name.text
               ) &&
               member.body
@@ -3633,9 +3637,20 @@ function validateEvidenceResultsManifest({
       }
     }
     const manifestCommands = new Set(manifest.commands.map((entry) => entry?.command));
-    for (const command of inlineCodeValues(
-      evidenceRecordLabelValue(record, 'Commands:', recordLabels)
-    )) {
+    const commandValue = evidenceRecordLabelValue(record, 'Commands:', recordLabels);
+    const inlineCommands = inlineCodeValues(commandValue);
+    const recordCommands =
+      inlineCommands.length > 0
+        ? inlineCommands
+        : /^(?:corepack\s+)?(?:bun|node|npm|pnpm(?:@[^\s]+)?|yarn)(?:\s|$)/u.test(commandValue)
+          ? [commandValue]
+          : [];
+    if (recordCommands.length === 0) {
+      issues.push(
+        `${context}: ${evidenceKind} evidence record Commands must name at least one executable command`
+      );
+    }
+    for (const command of recordCommands) {
       if (!manifestCommands.has(command)) {
         issues.push(
           `${context}: ${evidenceKind} evidence Results commands must include record command \`${command}\``

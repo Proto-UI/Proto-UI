@@ -23,11 +23,11 @@ const headers = [
   'Re-review or removal issue',
 ];
 
-function matrix(dependency) {
+function matrix(dependency, reReview = '#420') {
   return [
     `| ${headers.join(' | ')} |`,
     `| ${headers.map(() => '---').join(' | ')} |`,
-    `| www.fixture.surface | fixture | job | owner | site-composition | chain | lifecycle | strategy | ${dependency} | F1 | M0 | blocked | evidence | — | #420 |`,
+    `| www.fixture.surface | fixture | job | owner | site-composition | chain | lifecycle | strategy | ${dependency} | F1 | M0 | blocked | evidence | — | ${reReview} |`,
   ].join('\n');
 }
 
@@ -44,6 +44,17 @@ test('collects every dependency Issue with normalized reviewed owner tokens', ()
       [420, ['search and input maintainers']],
       [519, ['search and input maintainers']],
     ]
+  );
+});
+
+test('collects distinct re-review Issues with the row owner', () => {
+  const owners = collectDependencyOwners([
+    matrix('No dependency; owner: website team', '#533 when the exemption changes'),
+  ]);
+
+  assert.deepEqual(
+    [...owners].map(([number, values]) => [number, [...values]]),
+    [[533, ['website team']]]
   );
 });
 

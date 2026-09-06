@@ -6428,3 +6428,75 @@ test('binds PR580 provenance head separately from merged ancestry evidence', () 
     /closure binding for `www\.content\.document-semantics` must retain merged PR #580 commit `9841c86a10940267fb30ee25b63c9a5a39f76fe6`/
   );
 });
+
+test('recognizes on-prefixed Agent action callbacks with proven props ownership', () => {
+  for (const source of [
+    "import { useEffect } from 'react'; export function Surface({ onSend }) { useEffect(() => onSend(), []); return <section>Run</section>; }",
+    "import { useEffect } from 'react'; export function Surface(props) { useEffect(() => props.onApprove(), [props]); return <section>Run</section>; }",
+  ]) {
+    const root = createRoot();
+    const relativePath = 'apps/agent-harness/src/run/OnAction.tsx';
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+    assert.match(
+      validationMessage(root),
+      /Harness source `apps\/agent-harness\/src\/run\/OnAction\.tsx` contains a forbidden interaction or DOM state machine/
+    );
+  }
+});
+
+test('rejects Agent actions from exported class update lifecycle methods', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/ClassUpdate.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import React from 'react'; import * as actions from './agent-actions'; class ClassUpdate extends React.Component { componentDidUpdate() { actions.send(); } render() { return <section>Run</section>; } } export { ClassUpdate };",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/ClassUpdate\.tsx` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('binds plain-text Harness evidence commands to manifest commands', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const absoluteImplementationPath = path.join(root, implementationPath);
+  fs.mkdirSync(path.dirname(absoluteImplementationPath), { recursive: true });
+  fs.writeFileSync(absoluteImplementationPath, 'fixture', 'utf8');
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const { evidencePath } = writeHarnessPromotionArtifacts(root, revision);
+  const absoluteEvidencePath = path.join(root, evidencePath);
+  fs.writeFileSync(
+    absoluteEvidencePath,
+    fs.readFileSync(absoluteEvidencePath, 'utf8').replace(/^Commands:.*$/mu, 'Commands: pnpm test'),
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /dogfooded evidence Results commands must include record command `pnpm test`/
+  );
+});

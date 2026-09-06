@@ -132,12 +132,22 @@
         "tabs/disclosure domains plus website demos",
         "tabs/toggle group domains plus website docs",
         "toggle domain plus website theming",
+        "website accessibility and starlight integration",
+        "website api documentation",
+        "website content governance",
+        "website content governance and starlight integration",
+        "website content presentation",
         "website gallery",
+        "website information architecture",
         "website information architecture and spec governance",
+        "website integration content",
         "website maintainers",
         "website navigation plus motion/scroll reviewers",
         "website platform",
-        "website prototypes"
+        "website prototype documentation",
+        "website prototypes",
+        "website shell",
+        "website specification presentation"
       ]
     },
     {
@@ -532,7 +542,12 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": ["app security/preview infrastructure owner", "preview surface research maintainer"]
+      "owners": [
+        "app content infrastructure owner",
+        "app content renderer",
+        "app security/preview infrastructure owner",
+        "preview surface research maintainer"
+      ]
     },
     {
       "number": 533,
@@ -545,7 +560,14 @@
       "labels": ["advanced contribution", "area: adapters", "area: prototypes", "enhancement"],
       "assignees": [],
       "milestone": null,
-      "owners": ["consumer-boundary maintainer"]
+      "owners": [
+        "artifact workspace implementer",
+        "composer implementer",
+        "composer implementer consuming existing textarea",
+        "consumer-boundary maintainer",
+        "harness implementer",
+        "harness implementer, with scroll catalog lifecycle respected"
+      ]
     },
     {
       "number": 558,

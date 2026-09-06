@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { format as formatPrettier, resolveConfig as resolvePrettierConfig } from 'prettier';
 
 const REPOSITORY = 'Proto-UI/Proto-UI';
 const SNAPSHOT_PATH = 'internal/coverage-matrices/github-governance-snapshot.json';
@@ -45,22 +46,26 @@ export function collectDependencyOwners(matrixContents) {
   const ownersByIssue = new Map();
   for (const content of matrixContents) {
     let dependencyIndex = -1;
+    let reReviewIndex = -1;
     for (const line of content.split(/\r?\n/u)) {
       const cells = parseMarkdownRow(line);
       if (!cells) continue;
       if (cells.includes('Dependency and owner')) {
         dependencyIndex = cells.indexOf('Dependency and owner');
+        reReviewIndex = cells.indexOf('Re-review or removal issue');
         continue;
       }
       if (dependencyIndex < 0 || cells.every((cell) => /^:?-{3,}:?$/u.test(cell))) continue;
       const dependency = cells[dependencyIndex] ?? '';
       const owner = normalizedOwnerToken(dependency);
       if (!owner) continue;
-      for (const match of dependency.matchAll(/#([1-9]\d*)\b/gu)) {
-        const number = Number(match[1]);
-        const owners = ownersByIssue.get(number) ?? new Set();
-        owners.add(owner);
-        ownersByIssue.set(number, owners);
+      for (const issueCell of [dependency, cells[reReviewIndex] ?? '']) {
+        for (const match of issueCell.matchAll(/#([1-9]\d*)\b/gu)) {
+          const number = Number(match[1]);
+          const owners = ownersByIssue.get(number) ?? new Set();
+          owners.add(owner);
+          ownersByIssue.set(number, owners);
+        }
       }
     }
   }
@@ -204,7 +209,10 @@ if (isMainModule()) {
     liveIssues,
     livePullRequests,
   });
-  const serialized = `${JSON.stringify(reconciled, null, 2)}\n`;
+  const serialized = await formatPrettier(JSON.stringify(reconciled), {
+    ...(await resolvePrettierConfig(absoluteSnapshotPath)),
+    filepath: absoluteSnapshotPath,
+  });
   if (mode === '--write') {
     fs.writeFileSync(absoluteSnapshotPath, serialized, 'utf8');
     console.log(`[coverage-governance] refreshed ${reconciled.issues.length} Issues`);
