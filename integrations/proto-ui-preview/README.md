@@ -1,8 +1,22 @@
 # Poppy contributor previews
 
-This integration gives every open or draft `Proto-UI/Proto-UI` pull request a Vercel-style preview, including pull requests whose head branch lives in a fork. Each PR receives one isolated Cloudflare Pages project named `poppy-proto-ui-pr-<number>`. A new commit replaces that project's deployment; closing the PR deletes the entire project.
+This integration gives open or draft `Proto-UI/Proto-UI` pull requests a Vercel-style private preview, including pull requests whose head branch lives in a fork. In Cloudflare mode, each PR receives one isolated Pages project named `poppy-proto-ui-pr-<number>`; a new commit replaces that project's deployment and closing the PR deletes the project. The incident fallback described below uses the same immutable preview identity without creating or deleting Cloudflare resources.
 
-The preview is not public. Its trusted Pages `_worker.js` asks Poppy to authorize every asset request. GitHub OAuth grants access only to the PR author, a current requested or non-dismissed recorded reviewer, an active member of the Proto-UI organization, or a user explicitly invited through Poppy by an identity with current maintainer trust for this repository. An invite is scoped to the exact repository, PR, and current head and is valid only for the Ready deployment tuple (head SHA, run ID, run attempt, and project); a new head, Building/Failed/Closed transition, explicit invite revocation, lost maintainer trust, dismissed review, or removed membership invalidates authorization without waiting for the session cookie to expire.
+The preview is not public. In Pages mode, the trusted `_worker.js` asks Poppy to authorize every asset request; in fallback mode, dcbot applies the same Poppy OAuth/session gate before serving a stored file. GitHub OAuth grants access only to the PR author, a current requested or non-dismissed recorded reviewer, an active member of the Proto-UI organization, or a user explicitly invited through Poppy by an identity with current maintainer trust for this repository. An invite is scoped to the exact repository, PR, and current head and is valid only for the Ready deployment tuple (head SHA, run ID, run attempt, and project); a new head, Building/Failed/Closed transition, explicit invite revocation, lost maintainer trust, dismissed review, or removed membership invalidates authorization without waiting for the session cookie to expire.
+
+## Cloudflare mutation kill switch and fallback boundary
+
+Set the repository Actions variable `POPPY_CLOUDFLARE_MUTATIONS_ENABLED` to anything other than `true` while the Cloudflare account is suspended or under Terms of Service review. The deploy and cleanup jobs are then skipped before any Cloudflare credential-bearing step. If no fallback origin is configured, the trusted workflow updates the PR's existing sticky comment to **Preview unavailable**. Existing Pages projects are not deleted or reconciled.
+
+The dcbot fallback is selected only when `POPPY_PREVIEW_FALLBACK_ORIGIN` is a configured HTTPS origin and `POPPY_CLOUDFLARE_MUTATIONS_ENABLED` is not `true`. Its reviewed receiver contract is pinned to `Proto-UI/dcbot@3f60a2b41832a0b02e64a0f4b8bf237355b59806` in `contracts/dcbot-preview-handler-v1.json`. Before signing anything, a fallback-specific sanitizer copies ordinary files into a separate non-executable tree and rejects symlinks, special files, unsafe path segments, overlapping trees, and the root controls `_worker.js`, `_routes.json`, `_headers`, `_redirects`, and `.assetsignore`. It permits at most 20,000 files, 25 MiB per file, 100 MiB expanded, and 50 MiB compressed. This is deliberately distinct from the Pages sanitizer: the fallback rejects platform controls and never injects a Pages Worker.
+
+The trusted sender refuses any repository binding other than `Proto-UI/Proto-UI`, then uploads the sanitized `tar.gz` to `POST /api/preview/deployments` with `X-Poppy-Signature-256: sha256=<HMAC(raw tar.gz)>`, `X-Poppy-Preview-PR`, `X-Poppy-Preview-Head-SHA`, `X-Poppy-Preview-Run-ID`, and `X-Poppy-Preview-Run-Attempt`. Only an acknowledgement matching that immutable PR/head/run/attempt tuple emits `poppy-artifact-<pr>-<head-sha>-<run-id>-<run-attempt>` for the non-empty Ready `deployment_id`. Building, upload, Ready, Failed, failed-build, and Closed records use the same selected fallback control plane.
+
+The security workflow checks out the pinned contract repository to verify its real Go handler sources and run its preview test suite. Because `Proto-UI/dcbot` is private, that checkout uses an optional `DCBOT_CONTRACT_TOKEN` secret and is marked `continue-on-error`: when the token is absent or unauthorized, the job stays green and skips only the pinned-source digest verification and the Go handler suite; the in-repository contract tests still run. Configure `DCBOT_CONTRACT_TOKEN` with a fine-grained read-only token for `Proto-UI/dcbot` to restore full pinned-source verification.
+
+Fallback jobs serialize on the API-derived PR number and recheck the live open PR plus exact head after acquiring the lock. A live attempt that does not reach Ready makes a best-effort Failed transition for the same tuple, writes a failed sticky state, and leaves the job failed; this includes an ambiguous Building response. The comment writer repeats the live state/head check immediately before mutation. A rejected Closed transition fails cleanup even while Cloudflare deletion is disabled.
+
+These files and tests do not enable rollout, configure the repository variable, deploy dcbot, or prove which dcbot revision is running in production. Keep the fallback disabled until its external deployment/configuration and post-merge end-to-end checks are separately accepted. When the origin variable is absent, the workflow emits **Preview unavailable** instead of claiming Ready.
 
 ## Data flow
 
@@ -17,16 +31,22 @@ build apps-www -> GitHub Actions artifact (untrusted)
         v
 verify run + live PR + head SHA + exact artifact name
         |
-        v
-sanitize artifact -> inject trusted _worker.js -> deploy per-PR Pages project
+        +--> Cloudflare switch == true
+        |      Pages sanitizer -> inject trusted _worker.js -> per-PR Pages project
         |
-        +--> HMAC-signed deployment record -> Poppy
-        +--> one updated PR comment
+        +--> Cloudflare switch != true + configured fallback origin
+        |      reject/bound hostile tree -> signed tar.gz -> pinned dcbot contract
+        |
+        +--> Cloudflare switch != true + no fallback origin
+               Preview unavailable (no publication)
+        |
+        +--> HMAC-signed lifecycle record -> selected Poppy control plane
+        +--> one exact-head-checked PR comment
 
 failed build -> exact live PR/head association -> revoke stale ready state
              -> update the same PR comment with the failed Actions run
 
-pull_request_target: closed -> delete the whole Pages project -> mark closed
+pull_request_target: closed -> delete Pages only when enabled -> always revoke lifecycle
 ```
 
 ## Install in `Proto-UI/Proto-UI`
@@ -95,7 +115,7 @@ Configure Poppy with the same `POPPY_PREVIEW_EDGE_SECRET` and `POPPY_PREVIEW_ING
 | `GET /preview/auth/github?pr=<n>&return=<url>` | Starts OAuth. `return` is the requested absolute URL on the exact recorded `https://poppy-proto-ui-pr-<n>.pages.dev` origin; reserved `/__poppy/*` paths are rejected. On success Poppy redirects to `/__poppy/session?ticket=...&return=<clean-path-and-query>`. |
 | `POST /api/preview/exchange` | Requires `X-Poppy-Preview-Edge-Secret`. Exchanges `{ticket, pr, project, head_sha, run_id, run_attempt}` once and returns `{session, return, expires_at}` (`expires_in` is also accepted by the Worker). |
 | `POST /api/preview/authorize` | Requires the same edge-secret header. Checks the session plus the same immutable head/run tuple and returns `{authorized: true}` or `{allowed: true}` only while that exact deployment record is Ready, the PR is open, and the user is eligible as author, live reviewer, active organization member, or exact-current-head invite issued by an identity with current maintainer trust. Head/deployment transition, invite revocation, or loss of mutable eligibility denies the next asset request. |
-| `POST /api/preview/deployments` | Requires `X-Poppy-Signature-256: sha256=<HMAC(raw body)>`. Accepts the deployment lifecycle payload described below. |
+| `POST /api/preview/deployments` | Requires `X-Poppy-Signature-256: sha256=<HMAC(raw body)>`. Accepts the JSON deployment lifecycle payload described below. At the pinned dcbot fallback receiver, `application/gzip` selects the bounded artifact-upload contract and the immutable tuple is supplied by the preview headers listed above. |
 
 Deployment lifecycle payloads use stable snake-case fields:
 
@@ -107,26 +127,26 @@ Deployment lifecycle payloads use stable snake-case fields:
   "author_id": 12345,
   "project": "poppy-proto-ui-pr-462",
   "origin": "https://poppy-proto-ui-pr-462.pages.dev",
-  "deployment_id": "cloudflare-deployment-id-or-empty",
+  "deployment_id": "cloudflare-or-poppy-artifact-deployment-id",
   "run_id": 123456789,
   "run_attempt": 1,
   "status": "ready"
 }
 ```
 
-`status` is `building`, `ready`, `failed`, or `closed`. `origin` remains the canonical per-PR origin for every status; `run_id` is always the positive GitHub Actions run ID, `run_attempt` distinguishes immutable artifacts created by a re-run, and `deployment_id` may be empty when no deployment became ready.
+`status` is `building`, `ready`, `failed`, or `closed`. In Cloudflare mode, `origin` is the canonical per-PR Pages origin. Fallback Building and Ready use the configured dcbot origin, while non-ready cleanup records retain the canonical project identity. `run_id` is always the positive GitHub Actions run ID and `run_attempt` distinguishes immutable artifacts created by a re-run. Every Ready record requires a non-empty `deployment_id`; all deployment IDs are at most 255 characters and contain no carriage return, line feed, or NUL. Non-ready records may leave it empty.
 
 ## Security boundaries
 
 - The fork build receives no secrets and a read-only token. It checks out the exact live PR head SHA, not a mutable branch name.
 - The artifact is always considered hostile. The privileged job verifies the workflow path, base repository, event, current open PR, current head SHA, artifact name, expiry, and size through GitHub's API.
-- The privileged job checks out deployment code from its trusted ref and never runs a file from the artifact. The sanitizer rejects links and special files, enforces Pages limits, removes `_worker.js`, `_routes.json`, `_headers`, `_redirects`, and `.assetsignore`, then writes its own gate last. In particular, an attacker cannot use `_routes.json` to bypass the Worker.
+- The privileged job checks out deployment code from its trusted ref and never runs a file from the artifact. The Pages sanitizer rejects links and special files, enforces Pages limits, removes `_worker.js`, `_routes.json`, `_headers`, `_redirects`, and `.assetsignore`, then writes its own gate last. The separate fallback sanitizer rejects those root controls and enforces the pinned dcbot regular-file and size envelope without injecting executable content.
 - Existing per-PR projects are accepted only when they are Direct Upload projects. A Git-integrated Pages project with the same name is rejected, so a separate Git deployment cannot replace the trusted gate at the canonical URL.
 - `POPPY_PREVIEW_EDGE_SECRET` is a Pages encrypted secret binding. It is not written into JavaScript, an artifact, a comment, or a workflow log.
 - The trusted job installs its exact Wrangler version from the checked-in npm lockfile with lifecycle scripts disabled before any secret-bearing Wrangler command runs.
 - The browser stores only an opaque session in `__Host-poppy-preview` with `Secure; HttpOnly; SameSite=Lax; Path=/`. The OAuth ticket is one-time and short-lived. Poppy re-authorizes every asset request and can revoke a session immediately when a PR closes or membership changes.
 - Artifact responses set both `Content-Security-Policy: worker-src 'none'` and a deliberately unrelated `Service-Worker-Allowed` scope. Pull-request code cannot install a persistent Service Worker that bypasses later authorization or intercepts `/__poppy/session`.
-- The trusted workflow must receive Poppy's `building` acknowledgement before touching Cloudflare. A failed `ready` acknowledgement produces a failed card and failed workflow; Cloudflare success alone can never publish Ready.
+- The trusted workflow must receive Poppy's `building` acknowledgement before touching Cloudflare. In fallback mode, only an exact artifact acknowledgement can produce the deterministic Ready ID. Any non-Ready publication path attempts Failed, produces a failed card, and leaves the workflow failed; a Cloudflare or artifact upload alone can never publish Ready.
 - Every response is `private, no-store` and carries `X-Robots-Tag: noindex, nofollow, noarchive`. The Pages origin has no unguarded route.
 - Cloudflare's deployment-specific hash hostnames are redirected to the one canonical per-PR hostname before OAuth, preventing a session from being split across or bootstrapped for an unrecorded origin.
 - The ingest HMAC key and edge authorization key are deliberately different.
@@ -142,7 +162,7 @@ gh workflow run poppy-preview-build.yml \
   -f expected_head_sha="$(gh pr view 462 --repo Proto-UI/Proto-UI --json headRefOid --jq .headRefOid)"
 ```
 
-After this integration reaches the default branch, open or update a disposable PR to exercise the normal `pull_request` → `workflow_run` path. A maintainer can also use GitHub's ordinary **Re-run jobs** UI; `run_attempt` keeps those immutable artifacts and lifecycle updates distinct.
+After this integration reaches the default branch, open or update a disposable PR to exercise the normal `pull_request` → `workflow_run` path. A maintainer can also use GitHub's ordinary **Re-run jobs** UI; `run_attempt` keeps those immutable artifacts and lifecycle updates distinct. Do not set the fallback origin merely to run repository tests: external rollout requires the pinned dcbot revision to be deployed and configured first.
 
 For acceptance, verify all of the following:
 
