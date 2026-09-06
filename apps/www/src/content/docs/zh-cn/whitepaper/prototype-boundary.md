@@ -1,6 +1,7 @@
 ---
 title: '原型边界'
 description: '哪些内容应该进入 Prototype，以及原型应如何拆分'
+draft: true
 ---
 
 ## 这篇文章要回答什么？

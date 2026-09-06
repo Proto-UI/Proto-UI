@@ -1,6 +1,7 @@
 ---
 title: '信息通路模型'
 description: 'Proto UI 定义组件的方式'
+draft: true
 ---
 
 ## 这篇文章要回答什么？

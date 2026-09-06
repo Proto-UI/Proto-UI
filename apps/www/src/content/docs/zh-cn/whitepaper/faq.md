@@ -1,6 +1,7 @@
 ---
 title: 'FAQ'
 description: '关于 Proto UI 的常见问题与边界说明'
+draft: true
 ---
 
 ## 这页是做什么的？

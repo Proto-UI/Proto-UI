@@ -2,6 +2,7 @@
 title: 'FAQ'
 desp: 'Common questions and boundary notes about Proto UI'
 description: 'Common questions and boundary notes about Proto UI'
+draft: true
 ---
 
 ## What is this page for?

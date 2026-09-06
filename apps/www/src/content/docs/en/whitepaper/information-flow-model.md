@@ -2,6 +2,7 @@
 title: 'Information Flow Model'
 desp: 'How Proto UI defines components'
 description: 'How Proto UI defines components'
+draft: true
 ---
 
 ## What does this article answer?

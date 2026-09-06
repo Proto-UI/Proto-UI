@@ -1,6 +1,7 @@
 ---
 title: '组件作为协议'
 description: '核心理念：组件即协议'
+draft: true
 ---
 
 ## 这篇文章要回答什么？

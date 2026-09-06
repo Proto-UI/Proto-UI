@@ -134,4 +134,4 @@ If you already want to start using it:
 
 If you want to keep understanding the principles behind the design:
 
-- Go to [Whitepaper](/en/whitepaper/component-as-protocol/)
+- Go to [Whitepaper](/en/whitepaper/0-preface/)

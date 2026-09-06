@@ -133,4 +133,4 @@ Proto UI 做的事情更接近：
 
 如果你想继续理解它背后的设计原则：
 
-- 前往 [Whitepaper](/zh-cn/whitepaper/component-as-protocol/)
+- 前往 [Whitepaper](/zh-cn/whitepaper/0-preface/)
