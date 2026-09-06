@@ -94,3 +94,8 @@ Sibling summary: #590 clean review candidate (approval pending); #593 red CI + s
 
 - Mandated fresh single-object Subagents for PRs #620, #621, #622, #623, #624 could not run: the subagent runtime is out of capacity. `ReviewPR619` consumed its remaining budget mid-run (credit balance=0), and the probe spawn `ReviewPR620` exited in 23.6s with `429 usage_limit_reached` on an independent model route. Two distinct failure modes across two spawns rule out a transient or single-model issue.
 - No object work was silently dropped or replaced: each still requires a fresh per-object Subagent under the same cardinality and canonical chain. No GitHub mutation occurred for any of #620–#624. Next step when the subagent runtime capacity returns: run one fresh Subagent per object in ascending order.
+
+## 2026-09-06 — capacity-gated no-op
+
+- One capacity probe returned `CAPACITY_OK`; fresh autonomous/schedule orientation and a snapshot-bound C4 assessment then completed. The first real object worker, `ReviewPR620-2`, failed after 11m43s with quota category `insufficient_user_quota` (HTTP 400, credit balance 0, required 34546; request `20260906014506232841970c955d568UbAZuSVy`).
+- Per pass contract: stopped immediately, did not retry, did not dispatch #621–#624, and did not substitute chief-context object work. Zero GitHub mutations; PR #620 has no accepted terminal outcome from this pass.
