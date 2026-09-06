@@ -438,9 +438,10 @@ export function createProjectionScopeController(
       throw error;
     }
 
-    if (previousCandidate && previousCandidate !== candidate) {
-      await disposeCandidateAfterOutcome(previousCandidate, 'the replaced generation');
-    }
+    const previousDisposal =
+      previousCandidate && previousCandidate !== candidate
+        ? disposeCandidateAfterOutcome(previousCandidate, 'the replaced generation')
+        : null;
 
     if (
       focusKey &&
@@ -458,6 +459,8 @@ export function createProjectionScopeController(
       }
     }
 
+    if (previousDisposal) await previousDisposal;
+
     return getSnapshot();
   };
 
@@ -465,18 +468,19 @@ export function createProjectionScopeController(
     if (destroyed) {
       return Promise.reject(new Error('[ProjectionScope] Cannot start a destroyed controller.'));
     }
-    if (startPromise) return startPromise;
+    if (startPromise && phase !== 'idle') return startPromise;
 
     const generation = ++nextGeneration;
     latestRequestGeneration = generation;
     phase = 'preparing';
-    startPromise = trackMaterialization(() =>
-      materializeGeneration(desiredSelection, generation).catch((error) => {
-        startPromise = null;
-        throw error;
-      })
-    );
-    return startPromise;
+    let currentStart!: Promise<ProjectionScopeSnapshot>;
+    currentStart = trackMaterialization(() =>
+      materializeGeneration(desiredSelection, generation)
+    ).finally(() => {
+      if (startPromise === currentStart && committedGeneration === 0) startPromise = null;
+    });
+    startPromise = currentStart;
+    return currentStart;
   };
 
   const runRequest = async (
@@ -544,11 +548,9 @@ export function createProjectionScopeController(
     // already-settled facade while every external caller keeps the real
     // teardown Promise, which still awaits independent async cleanup.
     const pending = [...inFlightRequests, ...inFlightMaterializations];
-    destroyPromise = Promise.allSettled(pending).then(async (results) => {
-      const disposal = await Promise.allSettled([
-        candidate ? disposeCandidate(candidate) : Promise.resolve(),
-      ]);
-      const failure = [...disposal, ...results].find(
+    const activeDisposal = candidate ? disposeCandidate(candidate) : Promise.resolve();
+    destroyPromise = Promise.allSettled([activeDisposal, ...pending]).then((results) => {
+      const failure = results.find(
         (result): result is PromiseRejectedResult => result.status === 'rejected'
       );
       if (failure) throw failure.reason;

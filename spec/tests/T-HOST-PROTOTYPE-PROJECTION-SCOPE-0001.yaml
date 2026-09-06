@@ -37,17 +37,17 @@ cases:
       - C-PROTOTYPE-STYLE-CLOSURE-0001-C
     expectation: selected-lane-controls-contain-no-hard-coded-or-recolored-foreign-prototype-parts
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
-    title: wrapper-controlled selections and semantic focus survive rematerialization while child-local state does not become scope-owned
+    title: controlled selections and semantic focus survive rematerialization without delayed cleanup stealing later user focus
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: controlled-selection-and-semantic-focus-restore-without-reusing-replaced-prototype-instances
+    expectation: controlled-selection-and-post-commit-focus-restore-precedes-cleanup-and-never-reuses-replaced-instances
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
-    title: stale loads events cleanup and client retention cannot commit erase or retain a superseded generation
+    title: stale loads fulfilled start caches events cleanup and client retention cannot commit erase retain or block retry of a superseded generation
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
-    expectation: generation-guarded-completion-cleanup-and-client-registries-preserve-only-current-owned-trees
+    expectation: generation-guarded-completion-start-cache-cleanup-and-client-registries-preserve-only-current-owned-trees
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
     title: projection-lane tokens remain inside the scope explicit host light or dark activation wins over system preference and unrelated Website chrome retains the site theme
     covers:
@@ -70,10 +70,10 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
     expectation: empty-initial-host-renders-error-successful-retry-removes-it-and-retained-generation-is-never-overwritten
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
-    title: repeated destroy callers await one generation teardown and late materialization cannot repopulate cleared client registries
+    title: active disposal begins immediately while repeated destroy callers await pending cleanup and late materialization cannot repopulate client registries
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: repeated-destroy-shares-one-promise-and-post-destroy-completion-is-disposed-without-client-retention
+    expectation: destroy-starts-active-disposal-before-pending-work-and-shares-one-promise-without-post-destroy-retention
 implementations:
   - id: www-projection-family-manifest-unit
     kind: module-test
@@ -93,6 +93,7 @@ implementations:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-composition-unit
@@ -230,6 +231,9 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projection-theme.test.ts
   - path: apps/www/src/components/BrutalistPageStyle.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added stale-start retry, immediate active disposal, and pre-cleanup focus restoration evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added superseded-client-retention and shared owner-filtered portal-observer evidence.

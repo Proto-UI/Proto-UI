@@ -137,6 +137,40 @@ describe('Website Prototype projection scope controller', () => {
     await controller.destroy();
   });
 
+  it('starts new work after a stale initial start fulfills without a commit', async () => {
+    const initial = candidate('initial');
+    const retry = candidate('retry');
+    const initialPreparation = deferred<ProjectionScopeCandidate>();
+    const requestFailure = new Error('superseding request failed');
+    const materialize = vi
+      .fn<(request: ProjectionScopeMaterializeRequest) => Promise<ProjectionScopeCandidate>>()
+      .mockReturnValueOnce(initialPreparation.promise)
+      .mockRejectedValueOnce(requestFailure)
+      .mockResolvedValueOnce(retry);
+    const controller = createProjectionScopeController({
+      initialSelection: selection('wc', 'shadcn'),
+      materialize,
+    });
+
+    const staleStart = controller.start();
+    await expect(controller.request({ runtimeId: 'react' })).rejects.toBe(requestFailure);
+    initialPreparation.resolve(initial);
+    await staleStart;
+    expect(controller.getSnapshot()).toMatchObject({ generation: 0, phase: 'idle' });
+
+    await expect(controller.start()).resolves.toMatchObject({
+      selection: selection('wc', 'shadcn'),
+      generation: 3,
+      phase: 'ready',
+    });
+    expect(materialize).toHaveBeenCalledTimes(3);
+    expect(initial.activate).not.toHaveBeenCalled();
+    expect(initial.dispose).toHaveBeenCalledTimes(1);
+    expect(retry.activate).toHaveBeenCalledTimes(1);
+
+    await controller.destroy();
+  });
+
   it('keeps the committed generation active until the prepared candidate activates', async () => {
     const current = candidate('current');
     const next = candidate('next');
@@ -428,6 +462,41 @@ describe('Website Prototype projection scope controller', () => {
       restoreFocus.mock.invocationCallOrder[1]!
     );
 
+    await controller.destroy();
+  });
+
+  it('restores switch focus before delayed retired-generation cleanup', async () => {
+    const retiredCleanup = deferred<void>();
+    const current: ProjectionScopeCandidate = {
+      activate: vi.fn(),
+      dispose: vi.fn(() => retiredCleanup.promise),
+    };
+    const next = candidate('next');
+    const materialize = vi
+      .fn<(request: ProjectionScopeMaterializeRequest) => Promise<ProjectionScopeCandidate>>()
+      .mockResolvedValueOnce(current)
+      .mockResolvedValueOnce(next);
+    const initiatingControl = document.createElement('button');
+    const laterControl = document.createElement('button');
+    document.body.append(initiatingControl, laterControl);
+    const restoreFocus = vi.fn(() => initiatingControl.focus());
+    const controller = createProjectionScopeController({
+      initialSelection: selection('wc', 'shadcn'),
+      materialize,
+      restoreFocus,
+    });
+
+    await controller.start();
+    const switching = controller.request({ runtimeId: 'react' }, { focusKey: 'runtime-select' });
+    await vi.waitFor(() => expect(next.activate).toHaveBeenCalledTimes(1));
+
+    expect(restoreFocus).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(initiatingControl);
+    laterControl.focus();
+    retiredCleanup.resolve(undefined);
+    await switching;
+
+    expect(document.activeElement).toBe(laterControl);
     await controller.destroy();
   });
 
@@ -797,6 +866,7 @@ describe('Website Prototype projection scope controller', () => {
       phase: 'destroyed',
     });
 
+    expect(current.dispose).toHaveBeenCalledTimes(1);
     nextPreparation.resolve(stale);
     await vi.waitFor(() => expect(stale.dispose).toHaveBeenCalledTimes(1));
 
@@ -978,7 +1048,7 @@ describe('Website Prototype projection scope controller', () => {
     await controller.destroy();
   });
 
-  it('waits for an in-flight async seal before disposing the retained generation', async () => {
+  it('disposes the retained generation while an async seal is still pending', async () => {
     const sealing = deferred<void>();
     const events: string[] = [];
     const current: ProjectionScopeCandidate = {
@@ -1010,15 +1080,15 @@ describe('Website Prototype projection scope controller', () => {
       destroyResolved = true;
       events.push('destroy-resolved');
     });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await vi.waitFor(() => expect(current.dispose).toHaveBeenCalledTimes(1));
 
-    expect(current.dispose).not.toHaveBeenCalled();
+    expect(events).toEqual(['dispose']);
     expect(destroyResolved).toBe(false);
 
     sealing.resolve(undefined);
     await Promise.all([request, destroying]);
 
-    expect(events).toEqual(['seal-settled', 'dispose', 'destroy-resolved']);
+    expect(events).toEqual(['dispose', 'seal-settled', 'destroy-resolved']);
     expect(controller.getSnapshot()).toMatchObject({ phase: 'destroyed' });
   });
 
