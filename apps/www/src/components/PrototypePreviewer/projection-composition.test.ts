@@ -306,6 +306,33 @@ describe('Website projection composition', () => {
     );
   });
 
+  it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+    'rejects unrepresentable important surface priorities before %s rendering',
+    (runtimeId) => {
+      for (const surfaceStyle of ['color: red !important;', { color: 'red !important' }]) {
+        expect(() =>
+          createProjectionComposition({
+            ownerId: `important-${runtimeId}`,
+            runtimeId,
+            projectionFamilyId: 'shadcn',
+            generation: 1,
+            componentId: 'button',
+            childDemo: {
+              type: 'demo',
+              root: {
+                kind: 'proto',
+                prototypeId: 'shadcn-button',
+                surfaceStyle,
+                children: ['Child'],
+              },
+            },
+            controls: controls(),
+          })
+        ).toThrow(/!important/);
+      }
+    }
+  );
+
   it('bounds child setup, closes before value callbacks, locks controls, restores focus, and cleans up', () => {
     const order: string[] = [];
     const childCleanup = vi.fn();

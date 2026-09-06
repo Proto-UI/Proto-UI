@@ -22,7 +22,7 @@ cases:
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
-    expectation: visible-and-renderer-owned-surfaces-carry-the-current-lane-generation-and-theme-without-page-inheritance-or-stale-prop-replay
+    expectation: visible-and-renderer-owned-surfaces-carry-current-theme-without-page-inheritance-stale-prop-replay-or-runtime-specific-important-priority
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
     title: one document observer dispatches portal reconciliation only to the affected owner and generation
     covers:
@@ -256,6 +256,7 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.test.ts
   - path: apps/www/src/components/PrototypePreviewer/demo-renderer.ts
   - path: apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/demo-types.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-families.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-families.test.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-composition.ts
@@ -272,7 +273,7 @@ sources:
 revisions:
   - version: 0.3.0-alpha.0
     change: refined
-    summary: Added shared marker observation, forced-reload retention, request-to-frame focus ownership, renderer theme synchronization, React style normalization, and exhaustive teardown evidence.
+    summary: Added shared marker observation, forced-reload retention, request-to-frame focus ownership, renderer theme synchronization, React style normalization, cross-Runtime important-priority rejection, and exhaustive teardown evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added stale-start retry, immediate active disposal, and pre-cleanup focus restoration evidence.

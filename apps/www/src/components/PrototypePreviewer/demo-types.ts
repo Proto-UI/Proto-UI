@@ -115,6 +115,32 @@ function assertBoxAttrs(value: unknown, path: string[]) {
   }
 }
 
+function assertSurfaceStyle(value: unknown, path: string[]): void {
+  assertJsonLike(value, path);
+  const entries = Array.isArray(value) ? value : [value];
+  const hasImportantPriority = (entry: string): boolean =>
+    /!\s*important(?:\s*;|\s*$)/i.test(entry);
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (typeof entry === 'string') {
+      if (!hasImportantPriority(entry)) continue;
+    } else if (
+      entry &&
+      typeof entry === 'object' &&
+      Object.values(entry).every((styleValue) =>
+        typeof styleValue === 'string' ? !hasImportantPriority(styleValue) : true
+      )
+    ) {
+      continue;
+    }
+    throw new Error(
+      `[PrototypePreviewer] demo surfaceStyle 不支持 !important：${[...path, String(index)].join(
+        '.'
+      )}`
+    );
+  }
+}
+
 export function assertDemoSpec(demo: DemoSpec) {
   if (!demo || typeof demo !== 'object' || demo.type !== 'demo') {
     throw new Error('[PrototypePreviewer] demo 格式错误：缺少 type="demo"。');
@@ -160,6 +186,9 @@ export function assertDemoSpec(demo: DemoSpec) {
         typeof (node as Record<string, unknown>).ref !== 'string'
       ) {
         throw new Error(`[PrototypePreviewer] demo ref 必须是字符串：${path.join('.')}`);
+      }
+      if (node.surfaceStyle !== undefined) {
+        assertSurfaceStyle(node.surfaceStyle, [...path, 'surfaceStyle']);
       }
       if ((node as any).props !== undefined) {
         assertJsonLike((node as any).props, [...path, 'props']);
