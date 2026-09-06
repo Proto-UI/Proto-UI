@@ -53,13 +53,14 @@ type SurfaceFacts = {
   hasSelectedState: boolean;
   borderWidths: string[];
   borderColors: string[];
-  borderRadius: string;
+  borderRadii: string[];
   backgroundColor: string;
   backgroundImage: string;
   color: string;
   outlineStyle: string;
   outlineWidth: string;
   outlineOffset: string;
+  outlineColor: string;
   transitionProperty: string;
   transitionDuration: string;
   animationDuration: string;
@@ -104,13 +105,19 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
         style.borderBottomColor,
         style.borderLeftColor,
       ],
-      borderRadius: style.borderTopLeftRadius,
+      borderRadii: [
+        style.borderTopLeftRadius,
+        style.borderTopRightRadius,
+        style.borderBottomRightRadius,
+        style.borderBottomLeftRadius,
+      ],
       backgroundColor: style.backgroundColor,
       backgroundImage: style.backgroundImage,
       color: style.color,
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
       outlineOffset: style.outlineOffset,
+      outlineColor: style.outlineColor,
       transitionProperty: style.transitionProperty,
       transitionDuration: style.transitionDuration,
       animationDuration: style.animationDuration,
@@ -247,32 +254,82 @@ function nonTransparentShadowLayers(boxShadow: string): string[] {
     .filter((layer) => !layer.includes('rgba(0, 0, 0, 0)'));
 }
 
+type ShadowLayer = {
+  inset: boolean;
+  color: string;
+  lengths: string[];
+};
+
+/**
+ * Computed `boxShadow` serializes each layer as `<color> <x> <y> <blur> <spread> [inset]`,
+ * so a layer can be parsed back into its outset/inset flag, ink, and exact geometry
+ * without relying on substring matching.
+ */
+function parseShadowLayer(layer: string): ShadowLayer {
+  const trimmed = layer.trim();
+  const inset = /\binset\b/u.test(trimmed);
+  const withoutInset = trimmed.replace(/\binset\b/u, '').trim();
+  const color = withoutInset.match(/^(?:rgba?|oklch|oklab|color)\([^)]*\)/u)?.[0] ?? '';
+  return {
+    inset,
+    color,
+    lengths: withoutInset.slice(color.length).trim().split(/\s+/u).filter(Boolean),
+  };
+}
+
 function expectSquareBorder(surface: SurfaceFacts, label: string): void {
   expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
-  expect(surface.borderRadius, `${label}/radius`).toBe('0px');
+  expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('0px'));
 }
 
 function expectBorderColors(surface: SurfaceFacts, expectedColor: string, label: string): void {
   expect(surface.borderColors, `${label}/border-colors`).toEqual(Array(4).fill(expectedColor));
 }
 
-function expectHardFrame(surface: SurfaceFacts, shadowOffset: string, label: string): void {
+function expectHardFrame(
+  surface: SurfaceFacts,
+  shadowOffset: string,
+  shadowColor: string,
+  label: string
+): void {
   expectSquareBorder(surface, label);
-  expectExactHardShadow(surface.boxShadow, shadowOffset, label);
+  expectExactHardShadow(surface.boxShadow, shadowOffset, shadowColor, label);
 }
 
 function expectExactHardShadow(
   boxShadow: string,
   offset: string,
+  expectedColor: string,
   label: string,
   expectedLayerCount = 1
 ): void {
-  const layers = nonTransparentShadowLayers(boxShadow);
+  const layers = nonTransparentShadowLayers(boxShadow).map(parseShadowLayer);
   expect(layers, `${label}/shadow-layers`).toHaveLength(expectedLayerCount);
-  expect(
-    layers.some((layer) => layer.includes(`${offset} ${offset} 0px 0px`)),
-    `${label}/shadow`
-  ).toBe(true);
+  const hardShadows = layers.filter(
+    (layer) =>
+      !layer.inset &&
+      layer.lengths.length === 4 &&
+      layer.lengths[0] === offset &&
+      layer.lengths[1] === offset &&
+      layer.lengths[2] === '0px' &&
+      layer.lengths[3] === '0px'
+  );
+  expect(hardShadows, `${label}/outset-hard-shadow`).toHaveLength(1);
+  expect(hardShadows[0].color, `${label}/shadow-color`).toBe(expectedColor);
+}
+
+/** A passive root carries no `tabindex` and must not retain programmatic focus. */
+async function expectPassiveFocus(locator: Locator, label: string): Promise<void> {
+  const state = await locator.evaluate((element) => {
+    const htmlElement = element as HTMLElement;
+    htmlElement.focus();
+    return {
+      hasTabIndexAttribute: element.hasAttribute('tabindex'),
+      retainedFocus: document.activeElement === element,
+    };
+  });
+  expect(state.hasTabIndexAttribute, `${label}/tabindex-attribute`).toBe(false);
+  expect(state.retainedFocus, `${label}/focus-retained`).toBe(false);
 }
 let browser: Browser;
 let baseUrl = '';
@@ -317,7 +374,12 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                   style.borderBottomColor,
                   style.borderLeftColor,
                 ],
-                borderRadius: style.borderTopLeftRadius,
+                borderRadii: [
+                  style.borderTopLeftRadius,
+                  style.borderTopRightRadius,
+                  style.borderBottomRightRadius,
+                  style.borderBottomLeftRadius,
+                ],
                 backgroundColor: style.backgroundColor,
                 backgroundImage: style.backgroundImage,
                 color: style.color,
@@ -356,14 +418,15 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           ).toBe(true);
           for (const [index, surface] of allFacts.entries()) {
             const label = `${runtime}/${colorScheme}/badge-${index}`;
-            expectExactHardShadow(surface.boxShadow, '2px', `${label}`);
+            expectExactHardShadow(surface.boxShadow, '2px', expectedBorder, `${label}`);
             expect(surface.role, `${label}/role`).toBeNull();
             expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
+            await expectPassiveFocus(badges.nth(index), label);
             expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
             expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
             expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
             expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
-            expect(surface.borderRadius, `${label}/radius`).toBe('0px');
+            expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('0px'));
             expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
             expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
             expect(surface.fontFamily.toLowerCase(), `${label}/font`).toMatch(/mono|monospace/);
@@ -385,12 +448,12 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           await applyColorScheme(opened.page, colorScheme);
           const card = roots(opened.previewer).first();
           const surface = await facts(card);
-          expectHardFrame(surface, '6px', `${runtime}/${colorScheme}/card`);
           const [expectedBackground, expectedForeground, expectedBorder] = await Promise.all([
             resolvedThemeColors(opened.page, 'backgroundColor', ['--pui-background']),
             resolvedThemeColors(opened.page, 'color', ['--pui-foreground']),
             resolvedThemeColors(opened.page, 'borderTopColor', ['--pui-foreground']),
           ]).then(([background, foreground, border]) => [background[0], foreground[0], border[0]]);
+          expectHardFrame(surface, '6px', expectedBorder, `${runtime}/${colorScheme}/card`);
           expect(surface.backgroundColor, `${runtime}/${colorScheme}/card/background`).toBe(
             expectedBackground
           );
@@ -402,6 +465,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expect(surface.flexDirection, `${runtime}/${colorScheme}/card/direction`).toBe('column');
           expect(surface.role, `${runtime}/${colorScheme}/card/role`).toBeNull();
           expect(surface.tabIndex, `${runtime}/${colorScheme}/card/tabindex`).toBe(-1);
+          await expectPassiveFocus(card, `${runtime}/${colorScheme}/card`);
           expect(surface.ariaSelected, `${runtime}/${colorScheme}/card/aria-selected`).toBeNull();
           expect(surface.ariaPressed, `${runtime}/${colorScheme}/card/aria-pressed`).toBeNull();
           expect(surface.ariaLive, `${runtime}/${colorScheme}/card/aria-live`).toBeNull();
@@ -582,7 +646,12 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                   style.borderBottomColor,
                   style.borderLeftColor,
                 ],
-                borderRadius: style.borderTopLeftRadius,
+                borderRadii: [
+                  style.borderTopLeftRadius,
+                  style.borderTopRightRadius,
+                  style.borderBottomRightRadius,
+                  style.borderBottomLeftRadius,
+                ],
                 backgroundColor: style.backgroundColor,
                 backgroundImage: style.backgroundImage,
                 boxShadow: style.boxShadow,
@@ -608,16 +677,17 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             expect(surface.role, `${label}/role`).toBeNull();
             expect(surface.ariaHidden, `${label}/hidden`).toBe('true');
             expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
+            await expectPassiveFocus(skeletons.nth(index), label);
             expect(surface.ariaSelected, `${label}/aria-selected`).toBeNull();
             expect(surface.ariaPressed, `${label}/aria-pressed`).toBeNull();
             expect(surface.ariaLive, `${label}/aria-live`).toBeNull();
             expect(surface.ariaBusy, `${label}/aria-busy`).toBeNull();
             expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
-            expectExactHardShadow(surface.boxShadow, '2px', `${label}`);
+            expectExactHardShadow(surface.boxShadow, '2px', expectedBorder, `${label}`);
             expect(surface.borderColors, `${label}/border-colors`).toEqual(
               Array(4).fill(expectedBorder)
             );
-            expect(surface.borderRadius, `${label}/radius`).toBe('0px');
+            expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('0px'));
             expect(surface.backgroundColor, `${label}/background`).toBe(expectedBackground);
             expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
             expect(surface.animationName, `${label}/animation`).toBe('none');
@@ -659,7 +729,12 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 style.borderBottomColor,
                 style.borderLeftColor,
               ],
-              borderRadius: style.borderTopLeftRadius,
+              borderRadii: [
+                style.borderTopLeftRadius,
+                style.borderTopRightRadius,
+                style.borderBottomRightRadius,
+                style.borderBottomLeftRadius,
+              ],
               boxShadow: style.boxShadow,
               backgroundColor: style.backgroundColor,
               backgroundImage: style.backgroundImage,
@@ -724,8 +799,14 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expect(surface.borderColors, `${label}/border-colors`).toEqual(
             Array(4).fill('rgb(0, 0, 0)')
           );
-          expect(surface.borderRadius, `${label}/radius`).toBe('0px');
-          expectExactHardShadow(surface.boxShadow, '3px', label, index === 1 ? 2 : 1);
+          expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('0px'));
+          expectExactHardShadow(
+            surface.boxShadow,
+            '3px',
+            'rgb(0, 0, 0)',
+            label,
+            index === 1 ? 2 : 1
+          );
         }
 
         const first = toggles.first();
@@ -842,7 +923,13 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           expect(surface.borderColors, `${label}/border-colors`).toEqual(
             Array(4).fill('rgb(0, 0, 0)')
           );
-          expectExactHardShadow(surface.boxShadow, '3px', label, index === 1 ? 2 : 1);
+          expectExactHardShadow(
+            surface.boxShadow,
+            '3px',
+            'rgb(0, 0, 0)',
+            label,
+            index === 1 ? 2 : 1
+          );
         }
         await applyColorScheme(opened.page, 'light');
       }
@@ -902,7 +989,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expectBorderColors(triggerSurface, 'rgb(0, 0, 0)', `${runtime}/hover-trigger`);
         expect(triggerSurface.fontWeight, `${runtime}/hover-trigger/weight`).toBe('700');
         expect(triggerSurface.textTransform, `${runtime}/hover-trigger/case`).toBe('uppercase');
-        expectHardFrame(triggerSurface, '3px', `${runtime}/hover-trigger`);
+        expectHardFrame(triggerSurface, '3px', 'rgb(0, 0, 0)', `${runtime}/hover-trigger`);
         expect(triggerSurface.role, `${runtime}/hover-trigger/role`).toBeNull();
         expect(triggerSurface.tabIndex, `${runtime}/hover-trigger/tabindex`).toBeGreaterThanOrEqual(
           0
@@ -923,7 +1010,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         const [expectedPanelForeground] = await resolvedThemeColors(opened.page, 'color', [
           '--pui-foreground',
         ]);
-        expectHardFrame(panelSurface, '3px', `${runtime}/hover-panel`);
+        expectHardFrame(panelSurface, '3px', 'rgb(0, 0, 0)', `${runtime}/hover-panel`);
         expect(panelSurface.backgroundColor, `${runtime}/hover-panel/background`).toBe(
           expectedPanelBackground
         );
@@ -941,6 +1028,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(panelSurface.outlineStyle, `${runtime}/hover-panel/outline-style`).toBe('solid');
         expect(panelSurface.outlineWidth, `${runtime}/hover-panel/outline-width`).toBe('2px');
         expect(panelSurface.outlineOffset, `${runtime}/hover-panel/outline-offset`).toBe('2px');
+        expect(panelSurface.outlineColor, `${runtime}/hover-panel/outline-color`).toBe(
+          'rgba(0, 0, 0, 0)'
+        );
         expect(panelSurface.transitionProperty, `${runtime}/hover-panel/transition-property`).toBe(
           'none'
         );
@@ -997,8 +1087,11 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkPanelSurface.animationDuration,
           `${runtime}/dark/hover-panel/animation-duration`
         ).toBe('0.2s');
-        expectHardFrame(darkPanelSurface, '3px', `${runtime}/dark/hover-panel`);
+        expectHardFrame(darkPanelSurface, '3px', 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
         expectBorderColors(darkPanelSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-panel`);
+        expect(darkPanelSurface.outlineColor, `${runtime}/dark/hover-panel/outline-color`).toBe(
+          'rgba(0, 0, 0, 0)'
+        );
         const [darkPanelBackground] = await resolvedThemeColors(opened.page, 'backgroundColor', [
           '--pui-secondary-background',
         ]);
