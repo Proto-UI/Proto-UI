@@ -68,6 +68,22 @@ describe('collectProtoStyleTokens', () => {
     expect(tokens).toContain('data-[hovered]:-translate-x-0.5');
     expect(tokens).toContain('data-[hovered]:shadow-[8px_8px_0_0_var(--pui-foreground)]');
   });
+  it('collects all private CodeBlock style constants from the real source tree', async () => {
+    const tokens = await collectProtoStyleTokens(
+      path.resolve(process.cwd(), 'packages/compositions/chatui')
+    );
+
+    expect(tokens).toEqual(
+      expect.arrayContaining([
+        'flex',
+        'justify-between',
+        'text-sm',
+        'leading-6',
+        'whitespace-pre-wrap',
+        'wrap-anywhere',
+      ])
+    );
+  });
 
   it('maps asButton pressed rules to the data-[pressed] web serialization', async () => {
     await writeFile(

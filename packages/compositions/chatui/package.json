@@ -1,0 +1,30 @@
+{
+  "name": "@proto.ui/compositions-chatui",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "protoUi": {
+    "release": {
+      "scan": false
+    }
+  },
+  "dependencies": {
+    "@proto.ui/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@proto.ui/module-anatomy": "workspace:*",
+    "@proto.ui/prototypes-base": "workspace:*",
+    "@proto.ui/runtime": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./code-block": {
+      "types": "./src/code-block/index.ts",
+      "default": "./src/code-block/index.ts"
+    }
+  },
+  "description": "Private structural compositions for Agent Harness ChatUI dogfood."
+}

@@ -552,6 +552,22 @@ importers:
         specifier: ^2.4.9
         version: 2.4.9
 
+  packages/compositions/chatui:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+    devDependencies:
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../../modules/anatomy
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../../prototypes/base
+      '@proto.ui/runtime':
+        specifier: workspace:*
+        version: link:../../runtime
+
   packages/core:
     devDependencies:
       '@proto.ui/types':

@@ -30,6 +30,14 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
+  it('renders whitespace-preserving wrapping utilities for private compositions', () => {
+    const css = renderProtoStyleTokenCss(['whitespace-pre-wrap', 'wrap-anywhere']);
+
+    expect(css).toContain('white-space: pre-wrap;');
+    expect(css).toContain('overflow-wrap: anywhere;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
   it('renders intrinsic sizing and surface utilities used by Shadcn Tabs v4', () => {
     const css = renderProtoStyleTokenCss([
       'w-fit',
@@ -214,6 +222,18 @@ describe('proto style css renderer', () => {
     expect(ease).toBeGreaterThan(transitionColors);
     expect(css).toContain('transition-duration: 150ms;');
     expect(css).toContain('transition-duration: 200ms;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+  it('emits explicit leading overrides after text-size utilities', () => {
+    const css = renderProtoStyleTokenCss(['leading-6', 'text-sm']);
+
+    const textSize = css.indexOf('[data-pui-style~="text-sm"]');
+    const leading = css.indexOf('[data-pui-style~="leading-6"]');
+
+    expect(textSize).toBeGreaterThan(-1);
+    expect(leading).toBeGreaterThan(textSize);
+    expect(css).toContain('line-height: 1.25rem;');
+    expect(css).toContain('line-height: 1.5rem;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
