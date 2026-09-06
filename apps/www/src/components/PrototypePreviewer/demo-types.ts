@@ -115,20 +115,34 @@ function assertBoxAttrs(value: unknown, path: string[]) {
   }
 }
 
+function hasImportantPriority(entry: string, declarationList: boolean): boolean {
+  const withoutComments = entry.replace(/\/\*[\s\S]*?\*\//g, '');
+  if (typeof document === 'undefined') {
+    return /!\s*important(?:\s*;|\s*$)/i.test(withoutComments);
+  }
+
+  for (const candidate of entry === withoutComments ? [entry] : [entry, withoutComments]) {
+    const parsed = document.createElement('span').style;
+    parsed.cssText = declarationList ? candidate : `--pui-priority-probe: ${candidate};`;
+    for (let index = 0; index < parsed.length; index += 1) {
+      if (parsed.getPropertyPriority(parsed.item(index)).toLowerCase() === 'important') return true;
+    }
+  }
+  return false;
+}
+
 function assertSurfaceStyle(value: unknown, path: string[]): void {
   assertJsonLike(value, path);
   const entries = Array.isArray(value) ? value : [value];
-  const hasImportantPriority = (entry: string): boolean =>
-    /!\s*important(?:\s*;|\s*$)/i.test(entry);
   for (let index = 0; index < entries.length; index += 1) {
     const entry = entries[index];
     if (typeof entry === 'string') {
-      if (!hasImportantPriority(entry)) continue;
+      if (!hasImportantPriority(entry, true)) continue;
     } else if (
       entry &&
       typeof entry === 'object' &&
       Object.values(entry).every((styleValue) =>
-        typeof styleValue === 'string' ? !hasImportantPriority(styleValue) : true
+        typeof styleValue === 'string' ? !hasImportantPriority(styleValue, false) : true
       )
     ) {
       continue;

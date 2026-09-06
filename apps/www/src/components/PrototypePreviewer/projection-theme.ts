@@ -61,15 +61,22 @@ type ProjectionThemeSurface = HTMLElement | SVGElement;
 
 const appliedThemeProperties = new WeakMap<ProjectionThemeSurface, ReadonlySet<string>>();
 
-function isDarkTheme(doc: Document): boolean {
-  const root = doc.documentElement;
-  if (root.classList.contains('dark') || root.dataset.theme === 'dark') return true;
-  if (root.classList.contains('light') || root.dataset.theme === 'light') return false;
-  return doc.defaultView?.matchMedia?.('(prefers-color-scheme: dark)').matches === true;
+function isDarkTheme(scope: Element): boolean {
+  for (let current: Element | null = scope; current; current = current.parentElement) {
+    if (current.classList.contains('dark') || current.getAttribute('data-theme') === 'dark') {
+      return true;
+    }
+    if (current.classList.contains('light') || current.getAttribute('data-theme') === 'light') {
+      return false;
+    }
+  }
+  return (
+    scope.ownerDocument.defaultView?.matchMedia?.('(prefers-color-scheme: dark)').matches === true
+  );
 }
 
-function readWebsiteShadcnTheme(doc: Document): ProjectionThemeSurfaceStyle {
-  const computed = doc.defaultView?.getComputedStyle(doc.documentElement);
+function readWebsiteShadcnTheme(scope: Element): ProjectionThemeSurfaceStyle {
+  const computed = scope.ownerDocument.defaultView?.getComputedStyle(scope);
   if (!computed) {
     throw new Error('[PrototypePreviewer] Website Shadcn theme input is unavailable.');
   }
@@ -87,8 +94,8 @@ function readWebsiteShadcnTheme(doc: Document): ProjectionThemeSurfaceStyle {
   return Object.freeze(Object.fromEntries(entries)) as ProjectionThemeSurfaceStyle;
 }
 
-function readBrutalistTheme(doc: Document): ProjectionThemeSurfaceStyle {
-  const mode = isDarkTheme(doc) ? BRUTALIST_THEME.dark : BRUTALIST_THEME.light;
+function readBrutalistTheme(scope: Element): ProjectionThemeSurfaceStyle {
+  const mode = isDarkTheme(scope) ? BRUTALIST_THEME.dark : BRUTALIST_THEME.light;
   return Object.freeze(
     Object.fromEntries(Object.entries(mode).map(([name, value]) => [`--pui-${name}`, value]))
   ) as ProjectionThemeSurfaceStyle;
@@ -97,10 +104,10 @@ function readBrutalistTheme(doc: Document): ProjectionThemeSurfaceStyle {
 /** Resolve only the manifest-declared consumer theme input for a projection lane. */
 export function resolveProjectionThemeSurfaceStyle(
   projectionFamilyId: ProjectionFamilyId,
-  doc: Document
+  scope: Element
 ): ProjectionThemeSurfaceStyle {
-  if (projectionFamilyId === 'shadcn') return readWebsiteShadcnTheme(doc);
-  if (projectionFamilyId === 'brutalist') return readBrutalistTheme(doc);
+  if (projectionFamilyId === 'shadcn') return readWebsiteShadcnTheme(scope);
+  if (projectionFamilyId === 'brutalist') return readBrutalistTheme(scope);
   const exhaustive: never = projectionFamilyId;
   throw new Error(`[PrototypePreviewer] unsupported projection theme ${String(exhaustive)}.`);
 }
@@ -126,9 +133,10 @@ export function applyProjectionThemeSurfaceStyle(
  */
 export function watchProjectionThemeSurfaceStyle(
   projectionFamilyId: ProjectionFamilyId,
-  doc: Document,
+  scope: Element,
   onChange: (theme: ProjectionThemeSurfaceStyle) => void
 ): () => void {
+  const doc = scope.ownerDocument;
   const view = doc.defaultView;
   if (!view) {
     throw new Error('[PrototypePreviewer] projection theme document has no window.');
@@ -140,7 +148,7 @@ export function watchProjectionThemeSurfaceStyle(
   const emit = () => {
     queued = false;
     if (cleaned) return;
-    const theme = resolveProjectionThemeSurfaceStyle(projectionFamilyId, doc);
+    const theme = resolveProjectionThemeSurfaceStyle(projectionFamilyId, scope);
     const fingerprint = JSON.stringify(Object.entries(theme));
     if (fingerprint === lastFingerprint) return;
     lastFingerprint = fingerprint;
@@ -153,10 +161,12 @@ export function watchProjectionThemeSurfaceStyle(
   };
 
   const observer = new view.MutationObserver(schedule);
-  observer.observe(doc.documentElement, {
-    attributes: true,
-    attributeFilter: ['class', 'data-theme', 'style'],
-  });
+  for (let input: Element | null = scope; input; input = input.parentElement) {
+    observer.observe(input, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme', 'style'],
+    });
+  }
   const colorScheme = view.matchMedia?.('(prefers-color-scheme: dark)');
   colorScheme?.addEventListener?.('change', schedule);
   try {

@@ -460,11 +460,7 @@ describe('Homepage Prototype projection scope', () => {
       projectionFamilyId: 'brutalist',
     });
     expect(projection.materialize.mock.calls[1]![1].componentId).toBe('button');
-    expect(projection.watchTheme).toHaveBeenLastCalledWith(
-      'brutalist',
-      document,
-      expect.any(Function)
-    );
+    expect(projection.watchTheme).toHaveBeenLastCalledWith('brutalist', root, expect.any(Function));
 
     await homeApi(root).destroy();
   });

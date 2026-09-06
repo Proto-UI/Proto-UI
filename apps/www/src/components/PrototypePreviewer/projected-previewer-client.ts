@@ -307,12 +307,12 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
 
       try {
         candidate.setThemeSurfaceStyle(
-          resolveProjectionThemeSurfaceStyle(projectionFamilyId, root.ownerDocument)
+          resolveProjectionThemeSurfaceStyle(projectionFamilyId, root)
         );
         if (!previousStopThemeWatcher) {
           preparedStopThemeWatcher = watchProjectionThemeSurfaceStyle(
             projectionFamilyId,
-            root.ownerDocument,
+            root,
             (theme) => {
               if (
                 watcherPublished &&

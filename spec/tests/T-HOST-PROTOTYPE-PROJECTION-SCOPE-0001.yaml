@@ -18,11 +18,11 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
     expectation: four-runtimes-by-two-lanes-and-pending-initial-supersession-never-expose-a-stale-mixed-or-partial-generation
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
-    title: Select trigger content and items retain the selected projection lane and current Light or Dark theme across body portals and later Adapter prop updates
+    title: Select trigger content and items retain the owning scope projection lane and current Light or Dark theme across body portals and later Adapter prop updates
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
-    expectation: visible-and-renderer-owned-surfaces-carry-current-theme-without-page-inheritance-stale-prop-replay-or-runtime-specific-important-priority
+    expectation: owning-scope-and-renderer-surfaces-carry-current-theme-without-document-drift-stale-prop-replay-or-runtime-specific-priority
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
     title: one document observer dispatches portal reconciliation only to the affected owner and generation
     covers:
@@ -152,6 +152,7 @@ implementations:
     required: true
     consumesCases:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-materializer-unit
@@ -273,7 +274,7 @@ sources:
 revisions:
   - version: 0.3.0-alpha.0
     change: refined
-    summary: Added shared marker observation, forced-reload retention, request-to-frame focus ownership, renderer theme synchronization, React style normalization, cross-Runtime important-priority rejection, and exhaustive teardown evidence.
+    summary: Added shared marker observation, forced-reload retention, request-to-frame focus ownership, owning-scope theme resolution, renderer synchronization, React style normalization, parsed priority rejection, and exhaustive teardown evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added stale-start retry, immediate active disposal, and pre-cleanup focus restoration evidence.

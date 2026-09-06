@@ -348,10 +348,7 @@ export async function materializeProjectionCandidate(
     );
   }
 
-  const themeSurfaceStyle = resolveProjectionThemeSurfaceStyle(
-    projectionFamilyId,
-    options.mount.ownerDocument
-  );
+  const themeSurfaceStyle = resolveProjectionThemeSurfaceStyle(projectionFamilyId, options.mount);
   const childDemo = await loadDemo(componentManifest.recipeId);
   const composition = createProjectionComposition({
     ownerId: options.ownerId,

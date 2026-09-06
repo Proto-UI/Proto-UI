@@ -309,7 +309,12 @@ describe('Website projection composition', () => {
   it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     'rejects unrepresentable important surface priorities before %s rendering',
     (runtimeId) => {
-      for (const surfaceStyle of ['color: red !important;', { color: 'red !important' }]) {
+      for (const surfaceStyle of [
+        'color: red !important;',
+        { color: 'red !important' },
+        'color: red !/**/important;',
+        { color: 'red !important/**/' },
+      ]) {
         expect(() =>
           createProjectionComposition({
             ownerId: `important-${runtimeId}`,

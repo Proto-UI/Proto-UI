@@ -5,6 +5,7 @@ import {
   applyProjectionThemeSurfaceStyle,
   resolveProjectionThemeSurfaceStyle,
   watchProjectionThemeSurfaceStyle,
+  type ProjectionThemeSurfaceStyle,
   WEBSITE_SHADCN_THEME_TOKENS,
 } from './projection-theme';
 
@@ -21,31 +22,70 @@ describe('Website projection theme inputs', () => {
     }
     document.documentElement.style.setProperty('--page-private-token', 'do-not-copy');
 
-    const theme = resolveProjectionThemeSurfaceStyle('shadcn', document);
+    const theme = resolveProjectionThemeSurfaceStyle('shadcn', document.documentElement);
 
     expect(theme['--pui-background']).toBe('value-background');
     expect(Object.keys(theme)).toHaveLength(WEBSITE_SHADCN_THEME_TOKENS.length);
     expect(theme).not.toHaveProperty('--page-private-token');
 
     document.documentElement.style.removeProperty('--pui-popover');
-    expect(() => resolveProjectionThemeSurfaceStyle('shadcn', document)).toThrow(
+    expect(() => resolveProjectionThemeSurfaceStyle('shadcn', document.documentElement)).toThrow(
       /missing required --pui-popover/
     );
   });
 
   it('uses the Prototype-owned Brutalist theme for the active Website color mode', () => {
-    expect(resolveProjectionThemeSurfaceStyle('brutalist', document)).toMatchObject({
-      '--pui-background': BRUTALIST_THEME.light.background,
-      '--pui-foreground': BRUTALIST_THEME.light.foreground,
-      '--pui-border': BRUTALIST_THEME.light.border,
-    });
+    expect(resolveProjectionThemeSurfaceStyle('brutalist', document.documentElement)).toMatchObject(
+      {
+        '--pui-background': BRUTALIST_THEME.light.background,
+        '--pui-foreground': BRUTALIST_THEME.light.foreground,
+        '--pui-border': BRUTALIST_THEME.light.border,
+      }
+    );
 
     document.documentElement.dataset.theme = 'dark';
-    expect(resolveProjectionThemeSurfaceStyle('brutalist', document)).toMatchObject({
+    expect(resolveProjectionThemeSurfaceStyle('brutalist', document.documentElement)).toMatchObject(
+      {
+        '--pui-background': BRUTALIST_THEME.dark.background,
+        '--pui-foreground': BRUTALIST_THEME.dark.foreground,
+        '--pui-border': BRUTALIST_THEME.dark.border,
+      }
+    );
+  });
+
+  it('resolves the nearest explicit Brutalist frame theme before the document theme', () => {
+    document.documentElement.classList.add('light');
+    const frame = document.createElement('section');
+    frame.className = 'brutalist-demo-frame dark';
+    const scope = document.createElement('div');
+    frame.appendChild(scope);
+    document.body.appendChild(frame);
+
+    expect(resolveProjectionThemeSurfaceStyle('brutalist', scope)).toMatchObject({
       '--pui-background': BRUTALIST_THEME.dark.background,
       '--pui-foreground': BRUTALIST_THEME.dark.foreground,
       '--pui-border': BRUTALIST_THEME.dark.border,
     });
+  });
+
+  it('watches the owning scope ancestry for explicit Brutalist theme changes', async () => {
+    document.documentElement.classList.add('light');
+    const frame = document.createElement('section');
+    const scope = document.createElement('div');
+    frame.appendChild(scope);
+    document.body.appendChild(frame);
+    const themes: ProjectionThemeSurfaceStyle[] = [];
+    const cleanup = watchProjectionThemeSurfaceStyle('brutalist', scope, (theme) => {
+      themes.push(theme);
+    });
+
+    expect(themes.at(-1)?.['--pui-background']).toBe(BRUTALIST_THEME.light.background);
+    frame.classList.add('dark');
+    await vi.waitFor(() => {
+      expect(themes.at(-1)?.['--pui-background']).toBe(BRUTALIST_THEME.dark.background);
+    });
+
+    cleanup();
   });
 
   it('uses an explicit light class before a dark system preference', () => {
@@ -55,7 +95,9 @@ describe('Website projection theme inputs', () => {
     document.documentElement.classList.add('light');
 
     try {
-      expect(resolveProjectionThemeSurfaceStyle('brutalist', document)).toMatchObject({
+      expect(
+        resolveProjectionThemeSurfaceStyle('brutalist', document.documentElement)
+      ).toMatchObject({
         '--pui-background': BRUTALIST_THEME.light.background,
         '--pui-foreground': BRUTALIST_THEME.light.foreground,
         '--pui-border': BRUTALIST_THEME.light.border,
@@ -84,11 +126,18 @@ describe('Website projection theme inputs', () => {
 
   it('watches color-mode changes without self-looping and returns idempotent cleanup', async () => {
     const themes: Array<Readonly<Record<string, string>>> = [];
-    const cleanup = watchProjectionThemeSurfaceStyle('brutalist', document, (theme) => {
-      themes.push(theme);
-      // A consumer-side root write must not make the watcher emit the same map forever.
-      document.documentElement.style.setProperty('--watcher-consumer-write', String(themes.length));
-    });
+    const cleanup = watchProjectionThemeSurfaceStyle(
+      'brutalist',
+      document.documentElement,
+      (theme) => {
+        themes.push(theme);
+        // A consumer-side root write must not make the watcher emit the same map forever.
+        document.documentElement.style.setProperty(
+          '--watcher-consumer-write',
+          String(themes.length)
+        );
+      }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(themes).toHaveLength(1);
@@ -143,7 +192,7 @@ describe('Website projection theme inputs', () => {
 
     try {
       expect(() =>
-        watchProjectionThemeSurfaceStyle('brutalist', document, () => {
+        watchProjectionThemeSurfaceStyle('brutalist', document.documentElement, () => {
           throw new Error('initial theme publication failed');
         })
       ).toThrow('initial theme publication failed');

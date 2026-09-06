@@ -411,12 +411,12 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
 
       try {
         candidate.setThemeSurfaceStyle(
-          resolveProjectionThemeSurfaceStyle(projectionFamilyId, root.ownerDocument)
+          resolveProjectionThemeSurfaceStyle(projectionFamilyId, root)
         );
         if (replacesThemeWatcher) {
           preparedThemeWatcher = watchProjectionThemeSurfaceStyle(
             projectionFamilyId,
-            root.ownerDocument,
+            root,
             (theme) => {
               if (
                 preparedThemeWatcherPublished &&
