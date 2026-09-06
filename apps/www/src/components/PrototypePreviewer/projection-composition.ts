@@ -762,23 +762,37 @@ export function createProjectionComposition(
       if (cleaned) return;
       cleaned = true;
       eventGateOpen = false;
-      stopObservingMarkerChanges();
-      try {
-        for (const id of controlIds) {
-          context.api.call(CONTROL_REFS[id].root, 'close', 'projection composition cleanup');
-        }
-        for (const { element, listener } of listeners) {
-          element.removeEventListener('valueChange', listener);
-        }
-        if (typeof childCleanup === 'function') childCleanup();
-      } finally {
-        if (activeContext === context) {
-          activeContext = null;
-          if (stampActiveProjectionSurfaces === stampProjectionSurfaces) {
-            stampActiveProjectionSurfaces = null;
+      let cleanupFailed = false;
+      let cleanupFailure: unknown;
+      const attempt = (operation: () => void): void => {
+        try {
+          operation();
+        } catch (error) {
+          if (!cleanupFailed) {
+            cleanupFailed = true;
+            cleanupFailure = error;
           }
         }
+      };
+
+      attempt(stopObservingMarkerChanges);
+      for (const id of controlIds) {
+        attempt(() =>
+          context.api.call(CONTROL_REFS[id].root, 'close', 'projection composition cleanup')
+        );
       }
+      for (const { element, listener } of listeners) {
+        attempt(() => element.removeEventListener('valueChange', listener));
+      }
+      if (typeof childCleanup === 'function') attempt(childCleanup);
+      if (activeContext === context) {
+        activeContext = null;
+        if (stampActiveProjectionSurfaces === stampProjectionSurfaces) {
+          stampActiveProjectionSurfaces = null;
+        }
+      }
+
+      if (cleanupFailed) throw cleanupFailure;
     };
   };
 

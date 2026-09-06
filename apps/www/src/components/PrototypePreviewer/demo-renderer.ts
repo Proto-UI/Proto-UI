@@ -56,6 +56,22 @@ function abandonLease(lease: HostMountLease): DemoRenderResult {
   return EMPTY_DEMO_RENDER;
 }
 
+function runCleanupSteps(steps: readonly (() => void)[]): void {
+  let cleanupFailed = false;
+  let cleanupFailure: unknown;
+  for (const step of steps) {
+    try {
+      step();
+    } catch (error) {
+      if (!cleanupFailed) {
+        cleanupFailed = true;
+        cleanupFailure = error;
+      }
+    }
+  }
+  if (cleanupFailed) throw cleanupFailure;
+}
+
 function getScopedComponentCache<T extends object>(
   cache: WeakMap<object, Map<string, T>>,
   adapter: object
@@ -188,14 +204,21 @@ async function renderDemoWc(
 
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
+      const cleanupSteps: Array<() => void> = [
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+      ];
       // A globally mounted overlay is no longer a physical descendant of the
       // preview host. Remove every rendered instance explicitly so portaled
       // parts disconnect and dispose together with their logical demo tree.
       for (let index = instances.length - 1; index >= 0; index -= 1) {
-        instances[index]?.remove();
+        const instance = instances[index];
+        if (instance) cleanupSteps.push(() => instance.remove());
       }
+      runCleanupSteps(cleanupSteps);
     })
   ) {
     return EMPTY_DEMO_RENDER;
@@ -275,9 +298,14 @@ async function renderDemoReact(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
-      root.unmount();
+      runCleanupSteps([
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+        () => root.unmount(),
+      ]);
     })
   ) {
     return EMPTY_DEMO_RENDER;
@@ -414,9 +442,14 @@ async function renderDemoVue(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
-      app.unmount();
+      runCleanupSteps([
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+        () => app.unmount(),
+      ]);
     })
   ) {
     return EMPTY_DEMO_RENDER;
@@ -551,9 +584,14 @@ async function renderDemoVue2(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
-      app.$destroy();
+      runCleanupSteps([
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+        () => app.$destroy(),
+      ]);
     })
   ) {
     return EMPTY_DEMO_RENDER;

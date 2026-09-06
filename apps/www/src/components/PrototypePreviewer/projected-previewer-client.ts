@@ -96,6 +96,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   let destroyPromise: Promise<void> | null = null;
   let initialErrorSurface: HTMLElement | null = null;
   let latestCommittedGeneration = 0;
+  let latestMaterializationGeneration = 0;
   let activeCandidate: MaterializedProjectionCandidate | null = null;
   let stopThemeWatcher: (() => void) | null = null;
   const candidateByGeneration = new Map<number, MaterializedProjectionCandidate>();
@@ -245,6 +246,15 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       projectionFamilyId,
     },
     async materialize(request) {
+      latestMaterializationGeneration = Math.max(
+        latestMaterializationGeneration,
+        request.generation
+      );
+      for (const generation of candidateByGeneration.keys()) {
+        if (generation > latestCommittedGeneration && generation < request.generation) {
+          candidateByGeneration.delete(generation);
+        }
+      }
       const intentRevision = desiredIntentRevision;
       const candidate = await materializeProjectionCandidate(request, {
         mount,
@@ -256,6 +266,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       if (
         !destroyed &&
         intentRevision === desiredIntentRevision &&
+        request.generation === latestMaterializationGeneration &&
         request.generation >= latestCommittedGeneration
       ) {
         candidateByGeneration.set(request.generation, candidate);

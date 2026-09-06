@@ -528,9 +528,11 @@ export function restoreProjectionControlFocus(
   focusKey: string,
   generation: number
 ): void {
+  const activeElement = mount.ownerDocument.activeElement;
   const controlId = CONTROL_BY_FOCUS_KEY[focusKey as ProjectionFocusKey];
   if (!controlId) return;
   const restore = () => {
+    if (mount.ownerDocument.activeElement !== activeElement) return;
     const activeHost = generationHosts(mount, mount.dataset.projectionOwner ?? '').find(
       (host) =>
         host.dataset.projectionGenerationState === 'active' &&

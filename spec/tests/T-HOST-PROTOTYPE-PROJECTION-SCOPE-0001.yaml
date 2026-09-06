@@ -29,6 +29,12 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
     expectation: portal-mutations-trigger-one-owner-generation-filtered-document-scan
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MARKER-OBSERVER-SCALING
+    title: one document observer dispatches surface-marker stamping only to the affected owner and generation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: class-and-subtree-mutations-trigger-one-owner-generation-filtered-surface-scan-and-final-cleanup-disconnects-it
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
     title: Brutalist and Shadcn scope controls use their own Prototype identities behavior and style assets rather than recolored foreign-lane chrome
     covers:
@@ -37,17 +43,17 @@ cases:
       - C-PROTOTYPE-STYLE-CLOSURE-0001-C
     expectation: selected-lane-controls-contain-no-hard-coded-or-recolored-foreign-prototype-parts
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
-    title: controlled selections and semantic focus survive rematerialization without delayed cleanup stealing later user focus
+    title: controlled selections and semantic focus survive rematerialization without cleanup or a deferred callback stealing later user focus
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: controlled-selection-and-post-commit-focus-restore-precedes-cleanup-and-never-reuses-replaced-instances
+    expectation: controlled-selection-and-post-commit-focus-restoration-precede-cleanup-and-run-only-while-captured-focus-remains-current
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
-    title: stale loads fulfilled start caches events cleanup and client retention cannot commit erase retain or block retry of a superseded generation
+    title: stale loads forced reloads fulfilled start caches events cleanup and client retention cannot commit erase retain or block retry of a superseded generation
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
-    expectation: generation-guarded-completion-start-cache-cleanup-and-client-registries-preserve-only-current-owned-trees
+    expectation: generation-guarded-completion-start-cache-cleanup-and-client-registries-preserve-only-the-newest-request-owned-trees
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
     title: projection-lane tokens remain inside the scope explicit host light or dark activation wins over system preference and unrelated Website chrome retains the site theme
     covers:
@@ -74,6 +80,12 @@ cases:
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
     expectation: destroy-starts-active-disposal-before-pending-work-and-shares-one-promise-without-post-destroy-retention
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+    title: cleanup failure does not skip remaining composition listener child framework root host or portal lease revocation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: teardown-runs-every-owned-cleanup-step-and-rethrows-the-first-failure-only-after-all-leases-are-revoked
 implementations:
   - id: www-projection-family-manifest-unit
     kind: module-test
@@ -106,6 +118,8 @@ implementations:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-SURFACE-METADATA-CLOSURE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MARKER-OBSERVER-SCALING
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-home-projection-client-unit
@@ -149,6 +163,26 @@ implementations:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-demo-renderer-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-host-mount-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/runtimes/host-mount.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-scope-browser
@@ -219,6 +253,7 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts
   - path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.test.ts
   - path: apps/www/src/components/PrototypePreviewer/demo-renderer.ts
+  - path: apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-families.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-families.test.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-composition.ts
@@ -229,8 +264,13 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projection-materializer.test.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-theme.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-theme.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/runtimes/host-mount.ts
+  - path: apps/www/src/components/PrototypePreviewer/runtimes/host-mount.test.ts
   - path: apps/www/src/components/BrutalistPageStyle.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added filtered shared marker observation, concurrent forced-reload retention, deferred-focus ownership, and exhaustive teardown evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added stale-start retry, immediate active disposal, and pre-cleanup focus restoration evidence.

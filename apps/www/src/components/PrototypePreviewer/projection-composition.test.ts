@@ -412,6 +412,55 @@ describe('Website projection composition', () => {
     expect(composition.restoreFocus(PROJECTION_FOCUS_KEYS.runtime)).toBe(false);
   });
 
+  it('continues composition teardown after a control close fails', () => {
+    const controlEvents: string[] = [];
+    const childCleanup = vi.fn();
+    const composition = createProjectionComposition({
+      ownerId: 'cleanup-failure',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 1,
+      componentId: 'button',
+      childDemo: {
+        type: 'demo',
+        setup: () => childCleanup,
+        root: {
+          kind: 'proto',
+          prototypeId: 'shadcn-button',
+          children: ['Child'],
+        },
+      },
+      controls: controls(controlEvents),
+    });
+    const { host, refs } = mountDemoTree(composition.demo);
+    const closeFailure = new Error('first control close failed');
+    const closeCalls: string[] = [];
+    const api: DemoRuntimeApi = {
+      call(ref, path) {
+        closeCalls.push(`${ref}:${path}`);
+        if (closeCalls.length === 1) throw closeFailure;
+      },
+      getExposes: () => undefined,
+      setProps: () => undefined,
+    };
+    const cleanup = composition.demo.setup?.({ host, refs, api }) as () => void;
+    const runtimeRoot = refs.__pui_projection__runtime_root!;
+
+    expect(cleanup).toThrow(closeFailure.message);
+    expect(closeCalls).toEqual([
+      '__pui_projection__runtime_root:close',
+      '__pui_projection__family_root:close',
+      '__pui_projection__component_root:close',
+    ]);
+    expect(childCleanup).toHaveBeenCalledTimes(1);
+
+    closeCalls.length = 0;
+    runtimeRoot.dispatchEvent(new CustomEvent('valueChange', { detail: { value: 'react' } }));
+    expect(closeCalls).toEqual([]);
+    expect(controlEvents).toEqual([]);
+    expect(cleanup).not.toThrow();
+  });
+
   it.each(['react', 'vue', 'vue2'] as const)(
     'routes %s projection controls through the framework callback channel only',
     (runtimeId) => {

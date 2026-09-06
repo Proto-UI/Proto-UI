@@ -36,7 +36,10 @@ vi.mock('./projection-theme', () => ({
 vi.mock('./prototype-modules', () => ({ loadPrototypes: fakes.loadPrototypes }));
 vi.mock('./runtimes/host-mount', () => ({ releaseHostMount: fakes.releaseHostMount }));
 
-import { materializeProjectionCandidate } from './projection-materializer';
+import {
+  materializeProjectionCandidate,
+  restoreProjectionControlFocus,
+} from './projection-materializer';
 
 const childDemo = {
   type: 'demo',
@@ -482,5 +485,36 @@ describe('Website projection materializer', () => {
     expect(projected.host.isConnected).toBe(false);
     expect(portal.isConnected).toBe(false);
     expect(mount.querySelector('[data-projection-generation-host]')).toBeNull();
+  });
+
+  it('does not overwrite focus established after restoration is scheduled', () => {
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const mount = document.createElement('div');
+    mount.dataset.projectionOwner = 'focus-owner';
+    const activeHost = document.createElement('div');
+    activeHost.dataset.projectionOwnerHost = 'focus-owner';
+    activeHost.dataset.projectionGenerationHost = '2';
+    activeHost.dataset.projectionGenerationState = 'active';
+    activeHost.innerHTML =
+      '<div data-projection-control="runtime"><button role="combobox">Runtime</button></div>';
+    mount.appendChild(activeHost);
+    const source = document.createElement('button');
+    const newerFocus = document.createElement('button');
+    document.body.append(source, newerFocus, mount);
+    const runtimeControl = activeHost.querySelector<HTMLElement>('[role="combobox"]')!;
+
+    source.focus();
+    restoreProjectionControlFocus(mount, 'runtime-select', 2);
+    newerFocus.focus();
+    frames.shift()!(0);
+    expect(document.activeElement).toBe(newerFocus);
+
+    restoreProjectionControlFocus(mount, 'runtime-select', 2);
+    frames.shift()!(0);
+    expect(document.activeElement).toBe(runtimeControl);
   });
 });
