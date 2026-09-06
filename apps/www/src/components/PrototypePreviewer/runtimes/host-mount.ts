@@ -36,6 +36,26 @@ function clearHost(host: HTMLElement): void {
   host.removeAttribute('data-v-app');
 }
 
+function resetHost(host: HTMLElement, state: HostMountState): void {
+  let resetFailed = false;
+  let resetFailure: unknown;
+  try {
+    disposeCurrent(state);
+  } catch (error) {
+    resetFailed = true;
+    resetFailure = error;
+  }
+  try {
+    clearHost(host);
+  } catch (error) {
+    if (!resetFailed) {
+      resetFailed = true;
+      resetFailure = error;
+    }
+  }
+  if (resetFailed) throw resetFailure;
+}
+
 /**
  * Claims one host view generation across every Previewer runtime.
  *
@@ -46,8 +66,7 @@ function clearHost(host: HTMLElement): void {
 export function claimHostMount(host: HTMLElement): HostMountLease {
   const state = getHostMount(host);
   state.generation += 1;
-  disposeCurrent(state);
-  clearHost(host);
+  resetHost(host, state);
 
   const generation = state.generation;
   const isCurrent = () => state.generation === generation;
@@ -65,8 +84,7 @@ export function claimHostMount(host: HTMLElement): HostMountLease {
     release() {
       if (!isCurrent()) return false;
       state.generation += 1;
-      disposeCurrent(state);
-      clearHost(host);
+      resetHost(host, state);
       return true;
     },
   };
@@ -75,6 +93,5 @@ export function claimHostMount(host: HTMLElement): HostMountLease {
 export function releaseHostMount(host: HTMLElement): void {
   const state = getHostMount(host);
   state.generation += 1;
-  disposeCurrent(state);
-  clearHost(host);
+  resetHost(host, state);
 }

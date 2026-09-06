@@ -207,9 +207,16 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       await previewer.scrollIntoViewIfNeeded();
       const mountScope = await previewer.evaluate((root) => ({
         previewerRoots: root.querySelectorAll('[data-pui-root]').length,
-        demoRoots: root.querySelector('.host')?.querySelectorAll('[data-pui-root]').length ?? 0,
+        demoRoots:
+          root.querySelector('[data-projection-content]')?.querySelectorAll('[data-pui-root]')
+            .length ?? 0,
+        runtimeControlRoots:
+          root
+            .querySelector('[data-projection-control="runtime"]')
+            ?.querySelectorAll('[data-pui-root]').length ?? 0,
       }));
       expect(mountScope.previewerRoots).toBeGreaterThan(mountScope.demoRoots);
+      expect(mountScope.runtimeControlRoots).toBeGreaterThan(0);
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
         await applyColorScheme(page, 'light');

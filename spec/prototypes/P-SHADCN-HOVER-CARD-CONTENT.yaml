@@ -46,8 +46,13 @@ criteria:
       en: Content must configure enterDuration and leaveDuration to 200ms through the inherited `asTransition` handle; the presence lifecycle remains sourced from the Transition protocol.
   - id: P-SHADCN-HOVER-CARD-CONTENT-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: Content 必须提供当前 z-index、width、radius、border、popover colors、padding、typography、shadow、outline 与 duration tokens。
-      en: Content must provide the current z-index, width, radius, border, popover colors, padding, typography, shadow, outline, and duration tokens.
+      zh-CN: Content 必须提供当前 `z-50 w-64 rounded-md border border-border bg-popover p-4 text-sm text-popover-foreground shadow-md outline-none transition-none duration-200` surface；边框颜色必须由 Prototype 的 `border-border` intent 与生成的 token rule 得到，不得借用文档站 document-wide border default。
+      en: Content must provide the current `z-50 w-64 rounded-md border border-border bg-popover p-4 text-sm text-popover-foreground shadow-md outline-none transition-none duration-200` surface. Its border color must come from Prototype-owned `border-border` intent and the generated token rule rather than a documentation-site document-wide border default.
+    dependsOn:
+      contracts:
+        - id: C-PROTOTYPE-STYLE-CLOSURE-0001
+          since: 0.3.0-alpha.0
+        - C-RULE-INTENT-FEEDBACK-STYLE-0001
   - id: P-SHADCN-HOVER-CARD-CONTENT-OPEN-AND-SIDE-STYLES
     text:
       zh-CN: enter/leave fade、zoom 与四向 slide rules 必须从 inherited open state 与 side prop 派生，不得另建 presence 或 placement truth。
@@ -92,6 +97,7 @@ dependsOn:
       C-CORE-SYNTAX-0007,
       C-RULE-WHEN-0002,
       C-RULE-INTENT-FEEDBACK-STYLE-0001,
+      { id: C-PROTOTYPE-STYLE-CLOSURE-0001, since: 0.3.0-alpha.0 },
     ]
   decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
   prototypes: [P-SHADCN-HOVER-CARD]
@@ -101,6 +107,9 @@ inherits:
       note: Default inherited overlay and transition protocol; explicit setup-time negative patches must be declared.
 verifies: { tests: [T-SHADCN-HOVER-CARD-CONTENT-0001] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Made the popover border color explicit Prototype intent so the surface no longer relies on documentation-site global border defaults.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced Shadcn Hover Card Content delta cataloging with Base overlay inheritance, 200ms transitions, current animations, asChild omission, and centralized differences.

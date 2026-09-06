@@ -7,6 +7,9 @@ const runtimeSpies = vi.hoisted(() => ({
 const hostMountSpies = vi.hoisted(() => ({
   release: vi.fn(),
 }));
+const demoSpies = vi.hoisted(() => ({
+  render: vi.fn(async () => ({ destroy: vi.fn() })),
+}));
 
 vi.mock('./runtimes/registry', () => ({
   AdapterIds: ['wc', 'vue2'],
@@ -27,9 +30,12 @@ vi.mock('./runtimes/registry', () => ({
 }));
 
 vi.mock('./registry', () => ({ getPrototype: () => ({}) }));
-vi.mock('./prototype-modules', () => ({ loadPrototype: async () => {} }));
+vi.mock('./prototype-modules', () => ({
+  loadPrototype: async () => {},
+  loadPrototypes: async () => {},
+}));
 vi.mock('./demo-modules', () => ({ loadDemo: async () => ({}) }));
-vi.mock('./demo-renderer', () => ({ renderDemo: async () => ({ destroy: () => {} }) }));
+vi.mock('./demo-renderer', () => ({ renderDemo: demoSpies.render }));
 vi.mock('./demo-types', () => ({ collectPrototypeIds: () => {} }));
 vi.mock('./runtimes/host-mount', () => ({
   releaseHostMount: (host: HTMLElement) => hostMountSpies.release(host),
@@ -82,8 +88,30 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     runtimeSpies.mount.mockReset();
     runtimeSpies.unmount.mockReset();
     hostMountSpies.release.mockReset();
+    demoSpies.render.mockClear();
     localStorage.clear();
     document.body.innerHTML = '';
+  });
+
+  it('keeps an uncataloged demo on the legacy demo renderer', async () => {
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      demoId: 'demo-custom-preview',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+
+    await vi.waitFor(() => expect(demoSpies.render).toHaveBeenCalledTimes(1));
+    expect(demoSpies.render).toHaveBeenCalledWith(
+      expect.objectContaining({ runtime: 'wc', host: root.querySelector('.host') })
+    );
+    expect(runtimeSpies.mount).not.toHaveBeenCalled();
+    expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc');
+
+    await (root as any).__previewer__.destroy();
   });
 
   it('uses the persisted page-level adapter preference for its first mount', async () => {

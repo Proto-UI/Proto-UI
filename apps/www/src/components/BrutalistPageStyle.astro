@@ -3,7 +3,9 @@ import { renderBrutalistThemeCss } from '../../../../packages/prototypes/brutali
 
 const themeCss = renderBrutalistThemeCss({
   variablePrefix: 'pui-',
-  darkSelector: ":root.dark,\n:root[data-theme='dark'],\n.dark,\n[data-theme='dark']",
+  lightSelector: '.brutalist-demo-frame',
+  darkSelector:
+    ":root.dark .brutalist-demo-frame,\n:root[data-theme='dark'] .brutalist-demo-frame,\n.brutalist-demo-frame.dark,\n.brutalist-demo-frame[data-theme='dark']",
 });
 ---
 

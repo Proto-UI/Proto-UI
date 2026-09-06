@@ -1,3 +1,5 @@
+@layer theme, base, starlight, proto-ui, components, utilities;
+
 @import './tailwindcss.css';
 @import './proto-ui-style.css';
 @import './search-trigger.css';

@@ -5,11 +5,17 @@ export type DemoTextNode = {
   text: string;
 };
 
+export type DemoBoxAttrs = Readonly<Record<string, string>>;
+
+export type DemoSurfaceStyleEntry = string | Record<string, string>;
+export type DemoSurfaceStyle = DemoSurfaceStyleEntry | DemoSurfaceStyleEntry[];
+
 export type DemoNode =
   | DemoTextNode
   | {
       kind: 'box';
       className?: string;
+      attrs?: DemoBoxAttrs;
       ref?: string;
       children?: DemoChild[];
     }
@@ -17,7 +23,7 @@ export type DemoNode =
       kind: 'proto';
       prototypeId: string;
       className?: string;
-      surfaceStyle?: string | Record<string, string> | Array<Record<string, string>>;
+      surfaceStyle?: DemoSurfaceStyle;
       ref?: string;
       props?: Record<string, unknown>;
       children?: DemoChild[];
@@ -91,6 +97,64 @@ function assertClassName(value: unknown, path: string[]) {
   }
 }
 
+function assertBoxAttrs(value: unknown, path: string[]) {
+  if (value === undefined) return;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(
+      `[PrototypePreviewer] demo box attrs 必须是字符串属性对象。\n` +
+        `非法值位置: ${path.join('.')}`
+    );
+  }
+  for (const [name, attributeValue] of Object.entries(value as Record<string, unknown>)) {
+    if (!name || typeof attributeValue !== 'string') {
+      throw new Error(
+        `[PrototypePreviewer] demo box attrs 只支持非空名称与字符串值。\n` +
+          `非法值位置: ${[...path, name || '(empty)'].join('.')}`
+      );
+    }
+  }
+}
+
+function hasImportantPriority(entry: string, declarationList: boolean): boolean {
+  const withoutComments = entry.replace(/\/\*[\s\S]*?\*\//g, '');
+  if (typeof document === 'undefined') {
+    return /!\s*important(?:\s*;|\s*$)/i.test(withoutComments);
+  }
+
+  for (const candidate of entry === withoutComments ? [entry] : [entry, withoutComments]) {
+    const parsed = document.createElement('span').style;
+    parsed.cssText = declarationList ? candidate : `--pui-priority-probe: ${candidate};`;
+    for (let index = 0; index < parsed.length; index += 1) {
+      if (parsed.getPropertyPriority(parsed.item(index)).toLowerCase() === 'important') return true;
+    }
+  }
+  return false;
+}
+
+function assertSurfaceStyle(value: unknown, path: string[]): void {
+  assertJsonLike(value, path);
+  const entries = Array.isArray(value) ? value : [value];
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (typeof entry === 'string') {
+      if (!hasImportantPriority(entry, true)) continue;
+    } else if (
+      entry &&
+      typeof entry === 'object' &&
+      Object.values(entry).every((styleValue) =>
+        typeof styleValue === 'string' ? !hasImportantPriority(styleValue, false) : true
+      )
+    ) {
+      continue;
+    }
+    throw new Error(
+      `[PrototypePreviewer] demo surfaceStyle 不支持 !important：${[...path, String(index)].join(
+        '.'
+      )}`
+    );
+  }
+}
+
 export function assertDemoSpec(demo: DemoSpec) {
   if (!demo || typeof demo !== 'object' || demo.type !== 'demo') {
     throw new Error('[PrototypePreviewer] demo 格式错误：缺少 type="demo"。');
@@ -115,6 +179,7 @@ export function assertDemoSpec(demo: DemoSpec) {
     }
     if (node.kind === 'box') {
       assertClassName((node as any).className, [...path, 'className']);
+      assertBoxAttrs((node as any).attrs, [...path, 'attrs']);
       if ((node as any).surfaceStyle !== undefined) {
         assertJsonLike((node as any).surfaceStyle, [...path, 'surfaceStyle']);
       }
@@ -135,6 +200,9 @@ export function assertDemoSpec(demo: DemoSpec) {
         typeof (node as Record<string, unknown>).ref !== 'string'
       ) {
         throw new Error(`[PrototypePreviewer] demo ref 必须是字符串：${path.join('.')}`);
+      }
+      if (node.surfaceStyle !== undefined) {
+        assertSurfaceStyle(node.surfaceStyle, [...path, 'surfaceStyle']);
       }
       if ((node as any).props !== undefined) {
         assertJsonLike((node as any).props, [...path, 'props']);

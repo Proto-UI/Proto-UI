@@ -8,7 +8,13 @@ import { loadReact } from './runtimes/react-runtime';
 import { loadVue } from './runtimes/vue-runtime';
 import { loadVue2, toVue2ComponentData, toVue2Runtime } from './runtimes/vue2-runtime';
 import { claimHostMount, type HostMountLease } from './runtimes/host-mount';
-import type { DemoChild, DemoRenderOptions, DemoRenderResult, DemoRuntimeApi } from './demo-types';
+import type {
+  DemoChild,
+  DemoRenderOptions,
+  DemoRenderResult,
+  DemoRuntimeApi,
+  DemoSurfaceStyle,
+} from './demo-types';
 import { ensurePreviewWcRegistered } from './wc-registry';
 import type { RuntimeId } from './runtimes/registry';
 
@@ -54,6 +60,52 @@ function ownsLease(opt: DemoRenderOptions, lease: HostMountLease): boolean {
 function abandonLease(lease: HostMountLease): DemoRenderResult {
   lease.release();
   return EMPTY_DEMO_RENDER;
+}
+
+function runCleanupSteps(steps: readonly (() => void)[]): void {
+  let cleanupFailed = false;
+  let cleanupFailure: unknown;
+  for (const step of steps) {
+    try {
+      step();
+    } catch (error) {
+      if (!cleanupFailed) {
+        cleanupFailed = true;
+        cleanupFailure = error;
+      }
+    }
+  }
+  if (cleanupFailed) throw cleanupFailure;
+}
+
+function reactStylePropertyName(property: string): string {
+  if (property.startsWith('--')) return property;
+  if (property === 'float') return 'cssFloat';
+  const normalized = property.startsWith('-ms-') ? property.slice(1) : property;
+  return normalized.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase());
+}
+
+function normalizeReactSurfaceStyle(
+  surfaceStyle: DemoSurfaceStyle,
+  document: Document
+): Record<string, string> {
+  const normalized: Record<string, string> = {};
+  const entries = Array.isArray(surfaceStyle) ? surfaceStyle : [surfaceStyle];
+  for (const entry of entries) {
+    if (typeof entry === 'string') {
+      const declaration = document.createElement('span').style;
+      declaration.cssText = entry;
+      for (let index = 0; index < declaration.length; index += 1) {
+        const property = declaration.item(index);
+        normalized[reactStylePropertyName(property)] = declaration.getPropertyValue(property);
+      }
+      continue;
+    }
+    for (const [property, value] of Object.entries(entry)) {
+      normalized[reactStylePropertyName(property)] = value;
+    }
+  }
+  return normalized;
 }
 
 function getScopedComponentCache<T extends object>(
@@ -103,6 +155,9 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
   }
   if (node.kind === 'box') {
     const el = document.createElement('div');
+    for (const [name, value] of Object.entries(node.attrs ?? {})) {
+      el.setAttribute(name, value);
+    }
     if (node.className) el.className = node.className;
     if (node.ref) el.setAttribute('data-demo-ref', node.ref);
     parent.appendChild(el);
@@ -185,14 +240,21 @@ async function renderDemoWc(
 
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
+      const cleanupSteps: Array<() => void> = [
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+      ];
       // A globally mounted overlay is no longer a physical descendant of the
       // preview host. Remove every rendered instance explicitly so portaled
       // parts disconnect and dispose together with their logical demo tree.
       for (let index = instances.length - 1; index >= 0; index -= 1) {
-        instances[index]?.remove();
+        const instance = instances[index];
+        if (instance) cleanupSteps.push(() => instance.remove());
       }
+      runCleanupSteps(cleanupSteps);
     })
   ) {
     return EMPTY_DEMO_RENDER;
@@ -237,7 +299,7 @@ async function renderDemoReact(
       const kids = (node.children ?? []).map((child) => renderNode(child));
       return React.createElement(
         'div',
-        { className: node.className, 'data-demo-ref': node.ref },
+        { ...node.attrs, className: node.className, 'data-demo-ref': node.ref },
         ...kids
       );
     }
@@ -260,7 +322,9 @@ async function renderDemoReact(
       };
     }
     if (node.className) mergedProps.surfaceClassName = node.className;
-    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
+    if (node.surfaceStyle) {
+      mergedProps.surfaceStyle = normalizeReactSurfaceStyle(node.surfaceStyle, host.ownerDocument);
+    }
     return React.createElement(Component, mergedProps as Record<string, unknown>, ...kids);
   }
 
@@ -272,9 +336,14 @@ async function renderDemoReact(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
-      root.unmount();
+      runCleanupSteps([
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+        () => root.unmount(),
+      ]);
     })
   ) {
     return EMPTY_DEMO_RENDER;
@@ -367,6 +436,7 @@ async function renderDemoVue(
       return Vue.h(
         'div',
         {
+          ...node.attrs,
           class: node.className,
           'data-demo-ref': node.ref,
           ref: node.ref
@@ -410,9 +480,14 @@ async function renderDemoVue(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
-      app.unmount();
+      runCleanupSteps([
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+        () => app.unmount(),
+      ]);
     })
   ) {
     return EMPTY_DEMO_RENDER;
@@ -497,6 +572,7 @@ async function renderDemoVue2(
         {
           class: node.className,
           attrs: {
+            ...node.attrs,
             'data-demo-ref': node.ref,
           },
         },
@@ -546,9 +622,14 @@ async function renderDemoVue2(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
-      if (typeof cleanup === 'function') cleanup();
+      const currentCleanup = cleanup;
       cleanup = undefined;
-      app.$destroy();
+      runCleanupSteps([
+        () => {
+          if (typeof currentCleanup === 'function') currentCleanup();
+        },
+        () => app.$destroy(),
+      ]);
     })
   ) {
     return EMPTY_DEMO_RENDER;

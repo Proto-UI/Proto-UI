@@ -107,6 +107,22 @@ import './styles/proto-ui-style.css';
 
 Adjust the relative path if your entry file is elsewhere. When the application has not selected a theme, the generated Shadcn theme follows `prefers-color-scheme`. Set `data-theme="light"` / `data-theme="dark"` on the root element, or use the compatible `.light` / `.dark` classes, to override the system preference.
 
+If the application does not use named CSS cascade layers, keep the single import above. If it does, establish the complete order in one CSS entry before any reset, Proto UI, or consumer layer is first declared:
+
+```css
+/* src/app.css */
+@layer theme, base, proto-ui, components, utilities;
+
+@import './reset.css' layer(base);
+@import './styles/proto-ui-style.css';
+@import './app-components.css' layer(components);
+@import './app-utilities.css' layer(utilities);
+```
+
+Import `app.css` once from the application entry instead of importing those stylesheets separately. The generated entry places its theme defaults in the `theme` layer, so values declared by later named consumer layers—or by unlayered consumer CSS—remain authoritative. The complete relationship is `theme defaults < reset/base < proto-ui < explicit consumer layers`. For Tailwind, preserve its `theme < base < components < utilities` order while inserting `proto-ui` after `base` and before the application's component and utility layers in the earliest order statement.
+
+Layer order is fixed when a named layer first appears. A generated `@layer theme, proto-ui;` declaration can reserve only those two slots when that entry loads first; it cannot repair an order that earlier stylesheets already established. The host order statement above remains necessary whenever the application introduces named reset or consumer layers.
+
 ## Add and import a component
 
 Add the official Shadcn Button facade for the host your application uses. The example keeps the CLI command and application entry together for React and Web Components; its initial host follows the site-wide Adapter preference when supported.

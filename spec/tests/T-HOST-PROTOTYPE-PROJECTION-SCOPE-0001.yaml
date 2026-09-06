@@ -1,0 +1,302 @@
+id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+type: test
+title: Host Prototype projection-scope coherence tests
+status: draft
+since: 0.3.0-alpha.0
+summary: Maps manifest, unit, and real-browser evidence for coherent Runtime and projection-lane switching across Website-owned selection controls, composition content, themes, and portaled overlays.
+cases:
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MANIFEST-COMPLETENESS
+    title: an explicit projection-lane manifest resolves complete part and auxiliary recipe Prototype mappings with declared Base lineage
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-EXPLICIT-MANIFEST
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
+    expectation: explicit-lane-manifest-classifies-complete-part-and-auxiliary-lineage-and-rejects-missing-mappings
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+    title: Runtime and design-language switches including requests during initial preparation activate only the latest complete generation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: four-runtimes-by-two-lanes-and-pending-initial-supersession-never-expose-a-stale-mixed-or-partial-generation
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
+    title: Select trigger content and items retain the owning scope projection lane and current Light or Dark theme across body portals and later Adapter prop updates
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
+    expectation: owning-scope-and-renderer-surfaces-carry-current-theme-without-document-drift-stale-prop-replay-or-runtime-specific-priority
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
+    title: one document observer dispatches portal reconciliation only to the affected owner and generation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: portal-mutations-trigger-one-owner-generation-filtered-document-scan
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MARKER-OBSERVER-SCALING
+    title: one document observer dispatches surface-marker stamping only to the affected owner and generation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: class-and-subtree-mutations-trigger-one-owner-generation-filtered-surface-scan-and-final-cleanup-disconnects-it
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
+    title: Brutalist and Shadcn scope controls use their own Prototype identities behavior and style assets rather than recolored foreign-lane chrome
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NO-HYBRID-PRESENTATION
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-C
+    expectation: selected-lane-controls-contain-no-hard-coded-or-recolored-foreign-prototype-parts
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
+    title: controlled selections and semantic focus survive preparation rematerialization and cleanup without stealing later user focus
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: focus-origin-crosses-async-preparation-restoration-precedes-cleanup-allows-teardown-blur-and-aborts-after-newer-focus-acquisition
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
+    title: stale loads forced reloads fulfilled start caches events cleanup and client retention cannot commit erase retain or block retry of a superseded generation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
+    expectation: generation-guarded-completion-start-cache-cleanup-and-client-registries-preserve-only-the-newest-request-owned-trees
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
+    title: projection-lane tokens remain inside the scope explicit host light or dark activation wins over system preference and unrelated Website chrome retains the site theme
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NEGATIVE-BOUNDARY
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-C
+      - C-PROTOTYPE-STYLE-CLOSURE-0001-D
+    expectation: explicit-host-theme-controls-the-preview-lane-without-root-mutation-or-unrelated-site-recoloring
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-SURFACE-METADATA-CLOSURE
+    title: every marker-bearing HTML or SVG Prototype surface receives the current generation coordinates identity and direct theme copy
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-EXPLICIT-MANIFEST
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NO-HYBRID-PRESENTATION
+    expectation: html-and-svg-prototype-surfaces-carry-complete-generation-metadata-and-theme-values
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
+    title: an initial materialization failure renders its exact error successful retry replaces it and replacement failure retains the committed generation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: empty-initial-host-renders-error-successful-retry-removes-it-and-retained-generation-is-never-overwritten
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+    title: active disposal begins immediately while repeated destroy callers await pending cleanup and late materialization cannot repopulate client registries
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: destroy-starts-active-disposal-before-pending-work-and-shares-one-promise-without-post-destroy-retention
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+    title: cleanup failure does not skip remaining composition listener child framework root host or portal lease revocation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: teardown-runs-every-owned-cleanup-step-and-rethrows-the-first-failure-only-after-all-leases-are-revoked
+implementations:
+  - id: www-projection-family-manifest-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projection-families.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MANIFEST-COMPLETENESS
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-projection-scope-controller-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projection-scope.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-projection-composition-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projection-composition.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MANIFEST-COMPLETENESS
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-SURFACE-METADATA-CLOSURE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MARKER-OBSERVER-SCALING
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-home-projection-client-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/home-demo-client.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-fixed-family-projection-client-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-projection-theme-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projection-theme.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-projection-materializer-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projection-materializer.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-demo-renderer-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-host-mount-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/runtimes/host-mount.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-EXHAUSTIVE-TEARDOWN
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-projection-scope-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+      - A-WEB-COMPONENT-0001
+      - A-REACT-18-19-0001
+      - A-VUE-3-0001
+      - A-VUE-2-0001
+      - P-SHADCN-SELECT
+      - P-BRUTALIST-SELECT
+      - P-LUCIDE-ICON
+verifies:
+  decisions:
+    - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+      anchors:
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-EXPLICIT-MANIFEST
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NO-HYBRID-PRESENTATION
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
+        - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NEGATIVE-BOUNDARY
+  contracts:
+    - id: C-PROTOTYPE-STYLE-CLOSURE-0001
+      anchors:
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-C
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-D
+exercises:
+  adapters:
+    - A-WEB-COMPONENT-0001
+    - A-REACT-18-19-0001
+    - A-VUE-3-0001
+    - A-VUE-2-0001
+  prototypes:
+    - P-BASE-SELECT
+    - P-BASE-SELECT-TRIGGER
+    - P-BASE-SELECT-VALUE
+    - P-BASE-SELECT-CONTENT
+    - P-BASE-SELECT-ITEM
+    - P-SHADCN-SELECT
+    - P-SHADCN-SELECT-TRIGGER
+    - P-SHADCN-SELECT-VALUE
+    - P-SHADCN-SELECT-CONTENT
+    - P-SHADCN-SELECT-ITEM
+    - P-BRUTALIST-SELECT
+    - P-BRUTALIST-SELECT-TRIGGER
+    - P-BRUTALIST-SELECT-VALUE
+    - P-BRUTALIST-SELECT-CONTENT
+    - P-BRUTALIST-SELECT-ITEM
+sources:
+  - path: apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro
+  - path: apps/www/src/components/PrototypePreviewer/home-demo-client.ts
+  - path: apps/www/src/components/PrototypePreviewer/home-demo-client.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro
+  - path: apps/www/src/components/PrototypePreviewer/previewer-client.ts
+  - path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts
+  - path: apps/www/src/components/PrototypePreviewer/projected-previewer-client.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/demo-renderer.ts
+  - path: apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/demo-types.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-families.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-families.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-composition.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-composition.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-scope.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-scope.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-materializer.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-materializer.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-theme.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-theme.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/runtimes/host-mount.ts
+  - path: apps/www/src/components/PrototypePreviewer/runtimes/host-mount.test.ts
+  - path: apps/www/src/components/BrutalistPageStyle.astro
+revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added shared marker observation, forced-reload retention, request-to-frame focus ownership, owning-scope theme resolution, renderer synchronization, React style normalization, parsed priority rejection, and exhaustive teardown evidence.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added stale-start retry, immediate active disposal, and pre-cleanup focus restoration evidence.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added superseded-client-retention and shared owner-filtered portal-observer evidence.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added pending-initial supersession and explicit light-over-system-preference evidence.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added explicit auxiliary Prototype lineage, successful retry cleanup, and post-destroy materialization retention evidence.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added HTML and SVG surface metadata closure, first-generation error presentation, and repeated teardown-await evidence.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added passing manifest, controller, and four-Runtime browser evidence for atomic Website projection lanes, child-portal activation and cleanup, portal theme closure, and page-style isolation.
+tags:
+  - test
+  - host-composition
+  - prototype
+  - projection-lane
+  - browser
+  - overlay

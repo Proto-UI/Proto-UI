@@ -1,0 +1,154 @@
+id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+type: decision
+title: Website host projection scopes materialize one coherent design-language lane per generation
+status: draft
+since: 0.3.0-alpha.0
+summary: The Website preview host combines explicit projection-lane and content manifests, an independent Runtime materializer, and a separately referenced theme artifact plus consumer-owned theme inputs to replace every scope-owned control and overlay as one generation without creating a special Base, changing Prototype inheritance, or mixing fallback parts.
+statement:
+  zh-CN: >-
+    Website preview composition 在运行时切换 official Adapter Runtime 或 design-language projection 时，必须由 host-owned projection scope 持有 canonical `{ runtimeId, projectionFamilyId }` coordinates。`projectionFamilyId` 只是 Website-local projection-lane manifest key；它不是 Prototype family、Anatomy family、catalog identity、新 Prototype identity、`inherits.prototypes` runtime provider 或公共 package API。`componentId` 等当前展示内容属于独立的 host-controlled composition content state；它与 coordinates 一起形成完整 materialization target，但不是第三个 projection coordinate。每个 lane 必须显式把 composition 所需的 semantic slot 与 compound part role 映射到 cataloged Base lineage 和具体 Prototype identity，并将 component materialization recipe、lane theme artifact、consumer-owned theme activation/value input 与 Runtime materializer 作为彼此独立的输入。Scope 必须在当前 generation 保持 active 且 request surfaces 被锁定时验证并准备完整 candidate；candidate activation 与 coordinates/generation commit 必须构成同一次 host-observable commit，旧 generation 只能在该 commit 成功后撤销。不得通过命名、Anatomy 或 runtime reflection 猜测映射，不得把固定的另一 design-language Prototype 用当前 theme 重新着色，也不得在缺失映射时跨 lane 回退。Prototype 继续拥有 behavior、state、event 与 accessibility 语义，Adapter 与 style translation 继续拥有 Prototype-governed physical style asset，scope 只拥有 coordinates、composition content、同步、generation lifecycle 以及显式 consumer theme input 的投影。
+
+
+  en: >-
+    When the Website preview composition switches an official Adapter Runtime or design-language projection at runtime, a host-owned projection scope must own the canonical `{ runtimeId, projectionFamilyId }` coordinates. `projectionFamilyId` is only a Website-local projection-lane manifest key; it is not a Prototype family, Anatomy family, catalog identity, new Prototype identity, runtime provider derived from `inherits.prototypes`, or public package API. Current presentation content such as `componentId` is separate host-controlled composition content state; it joins the coordinates to form the complete materialization target but is not a third projection coordinate. Each lane explicitly maps every semantic slot and compound part role required by the composition to a concrete Prototype identity and, wherever a cataloged Base exists, its Base lineage; a cataloged Prototype or anatomy-only helper without a Base explicitly declares no Base lineage. Component materialization recipes, the lane theme artifact, consumer-owned theme activation or value inputs, and the Runtime materializer remain independent inputs. The scope validates and prepares the complete candidate while the current generation stays active and its request surfaces are locked. Candidate activation and the coordinates or generation commit form one host-observable commit, and the previous generation is revoked only after that commit succeeds. The scope must not infer mappings from names, Anatomy, or runtime reflection, recolor a fixed Prototype from another design language with the selected theme, or fall back across lanes when a mapping is missing. Prototypes continue to own behavior, state, events, and accessibility semantics; Adapters and style translation continue to own Prototype-governed physical style assets; the scope owns only coordinates, composition content, synchronization, generation lifecycle, and projection of explicit consumer theme inputs.
+
+
+criteria:
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-EXPLICIT-MANIFEST
+    text:
+      zh-CN: >-
+        每个 Website-local `projectionFamilyId` key 必须精确解析到一个 projection-lane manifest；该 key 不得被解释为 Prototype family、Anatomy family 或 catalog identity。每个 manifest 必须显式把 scope composition 所需的 semantic slot 以及 compound control 的必需 part role 映射到具体 Prototype identity；存在 cataloged Base 的 part 还必须显式映射其 Base-lineage identity，没有 Base 的 cataloged Prototype 或 Anatomy helper 必须显式声明 `basePrototypeId: null`。Component materialization recipe 必须由 composition content 独立解析；lane theme artifact 与 consumer-owned theme activation/value input 必须分别引用，recipe 不得携带 theme variable；Runtime materializer 必须按 official Adapter Runtime 显式注册。实现不得按 package、文件或 Prototype 名称前缀猜测 lane，也不得把 Anatomy 当作 composer、派生 registry 或自动补全器。
+
+
+      en: >-
+        Each Website-local `projectionFamilyId` key must resolve exactly to one projection-lane manifest and must not be interpreted as a Prototype family, Anatomy family, or catalog identity. Each manifest must explicitly map every semantic slot required by the scope composition and every required part role of a compound control to a concrete Prototype identity. A part with a cataloged Base must also map that Base-lineage identity explicitly, while a cataloged Prototype or Anatomy helper without a Base must explicitly declare `basePrototypeId: null`. Component materialization recipes must resolve independently from composition content; the lane theme artifact and consumer-owned theme activation or value inputs must be referenced separately, and recipes must not carry theme variables; Runtime materializers must be registered explicitly by official Adapter Runtime. Implementations must not infer a lane from package, file, or Prototype-name prefixes or treat Anatomy as a composer, derived-identity registry, or automatic completion mechanism.
+
+
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
+    text:
+      zh-CN: Canonical projection coordinates 必须严格为 `{ runtimeId, projectionFamilyId }`；`componentId` 等 current composition content 是独立的 controlled host state，不得进入 coordinates。切换 Runtime 必须保留当前 lane 与 content，切换 lane 必须保留当前 Runtime 与 content，切换 content 必须保留当前 coordinates；全部 scope-owned selection control、demo part 与 overlay 必须通过同一 generation 的完整 target、Runtime materializer 与 lane manifest 解析。
+      en: Canonical projection coordinates must be exactly `{ runtimeId, projectionFamilyId }`; current composition content such as `componentId` is separate controlled host state and must not enter the coordinates. Switching Runtime must preserve the current lane and content, switching lane must preserve the current Runtime and content, and switching content must preserve the current coordinates. Every scope-owned selection control, demo part, and overlay must resolve through the complete target, Runtime materializer, and lane manifest of the same generation.
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    text:
+      zh-CN: 切换必须先锁定当前 request surfaces，并在当前 generation 继续 active 时根据 target coordinates 与 composition content 准备 Runtime materializer、lane manifest、Prototype、component recipe、theme artifact 与 consumer theme input。只有最新 request 可 activation candidate；activation 与 target coordinates/generation commit 必须处于同一次 host-observable commit，随后才可撤销旧 generation。新 generation 完整 ready 前不得展示部分新树，旧异步完成、事件或 cleanup 不得提交或删除当前 generation。
+      en: A switch must first lock the current request surfaces and use the target coordinates plus composition content to prepare the Runtime materializer, lane manifest, Prototypes, component recipe, theme artifact, and consumer theme input while the current generation remains active. Only the latest request may activate its candidate; activation and the target coordinates or generation commit must occur in the same host-observable commit, after which the previous generation may be revoked. No partial next tree may be shown before the generation is fully ready, and stale asynchronous completion, events, or cleanup must not commit or remove the current generation.
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+    text:
+      zh-CN: 当前 generation 的 lane、generation ownership 与 theme variable value 必须投影到每个需要它们的 presentation surface，包括脱离 scope DOM ancestor 的 portal/teleport root；只在 scope ancestor 设置继承变量不构成 overlay closure，page-global theme mutation 也不得作为替代。
+      en: The current generation's lane, generation ownership, and theme variable values must project to every presentation surface that needs them, including portal or teleport roots outside the scope's DOM ancestry. Setting inherited variables only on the scope ancestor does not close overlays, and mutating a page-global theme is not an acceptable substitute.
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NO-HYBRID-PRESENTATION
+    text:
+      zh-CN: 一个 ready generation 内不得保留另一 projection lane 的固定 Prototype identity、behavior 或 style asset，再用当前 lane 的 theme value 重新着色；Website CSS 只可拥有 scope 外层 layout 与可识别的显式 normalized surface override，不得把 Shadcn structure 修补成 Brutalist presentation 或反向修补。
+      en: A ready generation must not retain a fixed Prototype identity, behavior, or style asset from another projection lane and recolor it with the current lane's theme values. Website CSS may own only the scope's outer layout and identifiable explicit normalized surface overrides; it must not repair Shadcn structure into a Brutalist presentation or vice versa.
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
+    text:
+      zh-CN: Scope-owned Runtime、lane 与 composition content 必须作为彼此可区分的 controlled host state 跨成功 generation 切换保留；若发起切换的 control 在新 composition 中存在对应 semantic key，scope 必须恢复其 focus。被替换 Prototype 的内部 state 默认随实例撤销，除非 App 已通过既有 public controlled channel 显式拥有并重放该 state。
+      en: Scope-owned Runtime, lane, and composition content must persist as distinguishable controlled host state across successful generation switches. If the control that initiated the switch has a corresponding semantic key in the new composition, the scope must restore its focus. Internal state of a replaced Prototype is revoked with its instance by default unless the App already owns and replays that state through an existing public controlled channel.
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
+    text:
+      zh-CN: 若完整 target 缺少所需 semantic slot、必需 part、component recipe、lane theme artifact、consumer theme input 或 Runtime materializer，scope 必须在 replacement 前拒绝该 request、保留并解锁当前完整 generation，并报告精确缺口；不得提交目标 coordinates 或 content state、显示部分目标树，或混入另一 lane 的 Prototype、recipe、style asset、behavior 或 overlay 来恢复。
+      en: If the complete target lacks a required semantic slot, required part, component recipe, lane theme artifact, consumer theme input, or Runtime materializer, the scope must reject the request before replacement, retain and unlock the current complete generation, and report the exact gap. It must not commit the target coordinates or content state, expose a partial target tree, or recover by mixing in another lane's Prototype, recipe, style asset, behavior, or overlay.
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NEGATIVE-BOUNDARY
+    text:
+      zh-CN: 本决策不新增 Base Prototype、Template composition、Anatomy 能力、Adapter profile、Host Capability 或公共 package API，不把静态 `inherits.prototypes` 改造成 runtime provider，也不要求 scope 外的 Website chrome 跟随 preview lane；首个实现限定在 Website preview composition，任何公共化或 Adapter-level scoped portal target 都必须另行准入。
+      en: This decision creates no Base Prototype, Template-composition feature, Anatomy capability, Adapter profile, Host Capability, or public package API; it does not turn static `inherits.prototypes` into a runtime provider or require Website chrome outside the scope to follow the preview lane. The first implementation is limited to Website preview composition, and any public admission or Adapter-level scoped portal target requires a separate decision.
+openQuestions:
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-Q1
+    question:
+      zh-CN: Website-local projection-lane manifest 经验证后，是否需要成为公共 Maker API 或独立 catalog identity？
+      en: After the Website-local projection-lane manifest is validated, should it become a public Maker API or a separate catalog identity?
+    context:
+      zh-CN: 当前 schema 没有 design-language profile entity；本切片不扩张 schema 或 package surface。
+      en: The current schema has no design-language profile entity; this slice does not expand the schema or package surface.
+    blocks: [public-api-admission]
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-Q2
+    question:
+      zh-CN: 多个 scope 或更复杂 overlay tree 是否需要 Adapter-level scoped portal target，而不是对每个 surface 显式投影 lane theme？
+      en: Do multiple scopes or more complex overlay trees require an Adapter-level scoped portal target instead of explicit lane-theme projection on every surface?
+    context:
+      zh-CN: 首个 Website consumer 使用既有 normalized surface channels，不改变四个 Adapter 的 portal contract。
+      en: The first Website consumer uses existing normalized surface channels and does not change the four Adapters' portal contracts.
+    blocks: [adapter-portal-scope-admission]
+sources:
+  - path: internal/contracts/template/no-prototype-composition.v0.md
+  - path: apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro
+  - path: apps/www/src/components/PrototypePreviewer/home-demo-client.ts
+  - path: apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro
+  - path: apps/www/src/components/PrototypePreviewer/previewer-client.ts
+  - path: apps/www/src/components/PrototypePreviewer/demo-renderer.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-families.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-composition.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-scope.ts
+  - path: apps/www/src/components/BrutalistPageStyle.astro
+dependsOn:
+  contracts:
+    - id: C-AS-OVERLAY-0001
+      anchors:
+        - C-AS-OVERLAY-0001-J
+        - C-AS-OVERLAY-0001-K
+    - id: C-HOST-SURFACE-PROJECTION-0001
+      anchors:
+        - C-HOST-SURFACE-PROJECTION-0001-C
+        - C-HOST-SURFACE-PROJECTION-0001-E
+        - C-HOST-SURFACE-PROJECTION-0001-F
+    - id: C-PROTOTYPE-STYLE-CLOSURE-0001
+      anchors:
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-A
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-C
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-D
+        - C-PROTOTYPE-STYLE-CLOSURE-0001-E
+  decisions:
+    - id: D-ADAPTER-PROFILE-0001
+      anchors:
+        - D-ADAPTER-PROFILE-0001-A
+        - D-ADAPTER-PROFILE-0001-E
+  knowledge:
+    - id: K-PROTOTYPE-COMPOSITION-0001
+      anchors:
+        - K-PROTOTYPE-COMPOSITION-0001-C
+relates:
+  decisions:
+    - id: D-BASE-PROTOTYPE-INDEPENDENCE-0001
+      anchors:
+        - D-BASE-PROTOTYPE-INDEPENDENCE-0001-A
+        - D-BASE-PROTOTYPE-INDEPENDENCE-0001-C
+    - id: D-COMPONENT-PRESET-MATERIALIZATION-0001
+      anchors:
+        - D-COMPONENT-PRESET-MATERIALIZATION-0001-A
+        - D-COMPONENT-PRESET-MATERIALIZATION-0001-B
+        - D-COMPONENT-PRESET-MATERIALIZATION-0001-E
+  adapters:
+    - A-WEB-COMPONENT-0001
+    - A-REACT-18-19-0001
+    - A-VUE-3-0001
+    - A-VUE-2-0001
+  prototypes:
+    - P-BASE-SELECT
+    - P-BASE-SELECT-TRIGGER
+    - P-BASE-SELECT-VALUE
+    - P-BASE-SELECT-CONTENT
+    - P-BASE-SELECT-ITEM
+    - P-SHADCN-SELECT
+    - P-SHADCN-SELECT-TRIGGER
+    - P-SHADCN-SELECT-VALUE
+    - P-SHADCN-SELECT-CONTENT
+    - P-SHADCN-SELECT-ITEM
+    - P-BRUTALIST-SELECT
+    - P-BRUTALIST-SELECT-TRIGGER
+    - P-BRUTALIST-SELECT-VALUE
+    - P-BRUTALIST-SELECT-CONTENT
+    - P-BRUTALIST-SELECT-ITEM
+verifies:
+  tests:
+    - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Defined a Website-first host projection scope with explicit composition and projection manifests, coherent Runtime/lane coordinates, atomic generations, portal theme closure, no-hybrid validation, controlled selection ownership, and fail-closed completeness.
+tags:
+  - host-composition
+  - prototype
+  - projection-lane
+  - runtime-switching
+  - style-closure
+  - overlay

@@ -426,11 +426,20 @@ describe('@proto.ui/cli', () => {
     );
     const styleCss = await fs.readFile(path.join(cwd, 'src/styles/proto-ui-style.css'), 'utf8');
     const themeCss = await fs.readFile(path.join(cwd, 'src/styles/shadcn-theme.css'), 'utf8');
+    // T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT
+    // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
+    const baselineAt = tokensCss.indexOf(
+      `  [data-pui-style],\n  [data-pui-style]::before,\n  [data-pui-style]::after {`
+    );
+    const protoLayerAt = tokensCss.indexOf('@layer proto-ui {');
+    const firstTokenAt = tokensCss.indexOf(':where([data-pui-style~="bg-primary"])');
 
     expect(tokensCss).toContain(`[data-pui-style~="bg-primary"]`);
     expect(tokensCss).toContain(
-      `[data-pui-style],\n[data-pui-style]::before,\n[data-pui-style]::after {`
+      `  [data-pui-style],\n  [data-pui-style]::before,\n  [data-pui-style]::after {`
     );
+    expect(baselineAt).toBeGreaterThan(protoLayerAt);
+    expect(baselineAt).toBeLessThan(firstTokenAt);
     expect(tokensCss).toContain('box-sizing: border-box;');
     expect(tokensCss).toContain(`data-[active]:bg-muted"])[data-active]`);
     expect(tokensCss).toContain(
@@ -448,7 +457,12 @@ describe('@proto.ui/cli', () => {
     expect(tokensCss).not.toContain(`aria-checked:bg-primary"])[aria-checked='true']`);
     expect(tokensCss).not.toContain('@source');
     expect(tokensCss).not.toContain('Unsupported Proto UI style tokens');
-    expect(styleCss).toContain(`@import './shadcn-theme.css';`);
+    expect(styleCss).toContain('@layer theme, proto-ui;');
+    expect(styleCss.indexOf('@layer theme, proto-ui;')).toBeLessThan(
+      styleCss.indexOf(`@import './shadcn-theme.css' layer(theme);`)
+    );
+    expect(styleCss).toContain(`@import './shadcn-theme.css' layer(theme);`);
+    expect(styleCss).not.toContain(`@import './shadcn-theme.css';`);
     expect(styleCss).toContain(`@import './proto-ui-tokens.generated.css';`);
     expect(themeCss).toContain('--pui-background');
     expect(themeCss).not.toContain('--background:');
