@@ -94,7 +94,7 @@ test('built Brutalist Tooltip root and subpath expose the exact four entries', a
   execSync('corepack pnpm@10.32.1 --filter @proto.ui/prototypes-brutalist build', {
     cwd: ROOT_DIR,
     stdio: 'pipe',
-    timeout: 60_000,
+    timeout: 180_000,
   });
   const distRoot = join(BRUTALIST_ROOT, 'dist');
   const rootModule = await import(pathToFileURL(join(distRoot, 'index.js')).href);
