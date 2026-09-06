@@ -9,7 +9,7 @@
       "title": "[implementation][image] Deliver Base Image host-mediated semantic slices",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-09-01T21:05:51Z",
+      "updatedAt": "2026-09-05T13:05:58Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -61,7 +61,7 @@
       "title": "[implementation][disclosure] Deliver Base Collapsible and Accordion",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-09-02T09:06:57Z",
+      "updatedAt": "2026-09-05T21:03:57Z",
       "labels": [
         "F5 - Large",
         "advanced contribution",
@@ -245,7 +245,7 @@
       "title": "[proposal][chatui] Define a bounded Composer composition over Textarea and Button",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-08-28T01:17:04Z",
+      "updatedAt": "2026-09-04T17:28:31Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -268,7 +268,7 @@
       "title": "[proposal][scroll] Define end-follow behavior for streaming and append-only surfaces",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-08-28T01:17:11Z",
+      "updatedAt": "2026-09-04T17:32:19Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -291,7 +291,7 @@
       "title": "[proposal][scroll] Define visual-anchor preservation across prepend and content reflow",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-08-28T01:17:19Z",
+      "updatedAt": "2026-09-05T00:16:03Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -330,7 +330,7 @@
       "title": "[proposal][resizable] Define a bounded two-pane Resizable semantic slice for workbench layouts",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-08-28T01:17:33Z",
+      "updatedAt": "2026-09-04T17:32:27Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -350,7 +350,7 @@
       "title": "[proposal][tree] Define a hierarchical Tree family for files, plans, sessions, and subagents",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-08-28T01:17:40Z",
+      "updatedAt": "2026-09-04T17:38:42Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -405,7 +405,7 @@
       "title": "[proposal][composition] Define a Questionnaire and review-action composition for human input gates",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-08-28T01:17:48Z",
+      "updatedAt": "2026-09-04T17:59:07Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -590,7 +590,7 @@
       "title": "[dogfood][www] Govern inherited Expressive Code runtime controls",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-08-31T16:35:48Z",
+      "updatedAt": "2026-09-04T17:24:28Z",
       "labels": [
         "advanced contribution",
         "area: adapters",
