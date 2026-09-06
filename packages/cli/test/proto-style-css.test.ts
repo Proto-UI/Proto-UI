@@ -224,6 +224,18 @@ describe('proto style css renderer', () => {
     expect(css).toContain('transition-duration: 200ms;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
+  it('emits explicit leading overrides after text-size utilities', () => {
+    const css = renderProtoStyleTokenCss(['leading-6', 'text-sm']);
+
+    const textSize = css.indexOf('[data-pui-style~="text-sm"]');
+    const leading = css.indexOf('[data-pui-style~="leading-6"]');
+
+    expect(textSize).toBeGreaterThan(-1);
+    expect(leading).toBeGreaterThan(textSize);
+    expect(css).toContain('line-height: 1.25rem;');
+    expect(css).toContain('line-height: 1.5rem;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
 
   it('renders state-driven spacing translations used by the Switch thumb', () => {
     const css = renderProtoStyleTokenCss([
