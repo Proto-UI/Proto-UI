@@ -25,14 +25,22 @@ criteria:
       zh-CN: 协议层默认优先采用可序列化表达，即使这会降低某些原型作者的表达便利性。
       en: The protocol layer prefers serializable expression by default, even when that reduces some convenience for prototype authors.
 sources:
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/design-constraints.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/6-consistency-boundary.md
     sections:
-      - Proto UI 的取舍顺序
-      - 可序列化是一个长期方向约束
-  - path: apps/www/src/content/docs/en/whitepaper/design-constraints.md
+      - Prototype 是一致性的第一把尺度
+      - 共同条件越多，比较越细
+  - path: apps/www/src/content/docs/en/whitepaper/6-consistency-boundary.md
     sections:
-      - Proto UI's order of tradeoffs
-      - Serializability is a long-term directional constraint
+      - Prototype Is the First Measure of Consistency
+      - More Shared Conditions Permit Finer Comparison
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/7-evolving-within-boundaries.md
+    sections:
+      - 一条可行路径，而不是唯一答案
+      - 实践怎样修正当前近似
+  - path: apps/www/src/content/docs/en/whitepaper/7-evolving-within-boundaries.md
+    sections:
+      - One Viable Path, Not the Only Answer
+      - How Practice Revises the Current Approximation
 revisions:
   - version: 0.1.0
     change: introduced

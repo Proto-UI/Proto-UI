@@ -16,21 +16,21 @@ const DEFAULT_SHADCN_DOCS_BASE_URL = 'https://ui.shadcn.com/docs/components';
 
 export const DEFAULT_PROTO_UI_THEORY_LINKS: ProtoUiTheoryLink[] = [
   {
-    slug: 'whitepaper/component-as-protocol',
+    slug: 'whitepaper/1-components-before-code',
     title: {
-      'zh-CN': '组件作为协议',
-      en: 'Component as Protocol',
+      'zh-CN': '代码之前的组件',
+      en: 'Components Before Code',
     },
     description: {
-      'zh-CN': '理解 Proto UI 为什么把组件视为协议，而不只是一次渲染结果。',
-      en: 'Understand why Proto UI treats a component as a protocol instead of a one-off render result.',
+      'zh-CN': '理解 Proto UI 为什么先把组件看作交互主体，而不是某一种代码形式。',
+      en: 'Understand why Proto UI first treats a component as an interactive subject rather than one code form.',
     },
   },
   {
-    slug: 'whitepaper/prototype-boundary',
+    slug: 'whitepaper/3-component-boundary',
     title: {
-      'zh-CN': '原型边界',
-      en: 'Prototype Boundary',
+      'zh-CN': '组件的边界',
+      en: 'Component Boundaries',
     },
     description: {
       'zh-CN': '查看 Base 原型与上层风格化原型之间应该如何分层和继承。',

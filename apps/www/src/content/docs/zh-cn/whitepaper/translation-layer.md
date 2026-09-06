@@ -1,6 +1,7 @@
 ---
 title: '翻译层：Adapter / Compiler'
 description: '适配器与编译器'
+draft: true
 ---
 
 ## 这篇文章要回答什么？

@@ -73,6 +73,22 @@ export default defineConfig({
   redirects: {
     '/en/prototypes/shadcn/dialog': '/en/ui-libraries/shadcn/dialog/',
     '/zh-cn/prototypes/shadcn/dialog': '/zh-cn/ui-libraries/shadcn/dialog/',
+    '/en/whitepaper/component-as-protocol': '/en/whitepaper/1-components-before-code/',
+    '/en/whitepaper/information-flow-model': '/en/whitepaper/2-interaction-relations/',
+    '/en/whitepaper/prototype-boundary': '/en/whitepaper/3-component-boundary/',
+    '/en/whitepaper/execution-semantics': '/en/whitepaper/4-semantics-beyond-channels/',
+    '/en/whitepaper/translation-layer': '/en/whitepaper/5-translation-layer/',
+    '/en/whitepaper/design-constraints': '/en/whitepaper/6-consistency-boundary/',
+    '/en/whitepaper/evolution-path': '/en/whitepaper/7-evolving-within-boundaries/',
+    '/en/whitepaper/faq': '/en/whitepaper/0-preface/',
+    '/zh-cn/whitepaper/component-as-protocol': '/zh-cn/whitepaper/1-components-before-code/',
+    '/zh-cn/whitepaper/information-flow-model': '/zh-cn/whitepaper/2-interaction-relations/',
+    '/zh-cn/whitepaper/prototype-boundary': '/zh-cn/whitepaper/3-component-boundary/',
+    '/zh-cn/whitepaper/execution-semantics': '/zh-cn/whitepaper/4-semantics-beyond-channels/',
+    '/zh-cn/whitepaper/translation-layer': '/zh-cn/whitepaper/5-translation-layer/',
+    '/zh-cn/whitepaper/design-constraints': '/zh-cn/whitepaper/6-consistency-boundary/',
+    '/zh-cn/whitepaper/evolution-path': '/zh-cn/whitepaper/7-evolving-within-boundaries/',
+    '/zh-cn/whitepaper/faq': '/zh-cn/whitepaper/0-preface/',
   },
   integrations: [
     starlight({
@@ -192,47 +208,82 @@ export default defineConfig({
           translations: { en: 'Whitepaper', 'zh-CN': '白皮书' },
           items: [
             {
-              label: '组件作为协议',
-              translations: { en: 'Component as Protocol', 'zh-CN': '组件作为协议' },
-              slug: 'whitepaper/component-as-protocol',
+              label: '序章',
+              translations: { en: 'Preface', 'zh-CN': '序章' },
+              slug: 'whitepaper/0-preface',
             },
             {
-              label: '信息通路模型',
-              translations: { en: 'Information Flow Model', 'zh-CN': '信息通路模型' },
-              slug: 'whitepaper/information-flow-model',
+              label: '第一部 · 原型',
+              translations: { en: 'Part I · Prototype', 'zh-CN': '第一部 · 原型' },
+              items: [
+                {
+                  label: '代码之前的组件',
+                  translations: {
+                    en: 'Components Before Code',
+                    'zh-CN': '代码之前的组件',
+                  },
+                  slug: 'whitepaper/1-components-before-code',
+                },
+                {
+                  label: '从交互关系出发',
+                  translations: {
+                    en: 'Starting from Interaction Relations',
+                    'zh-CN': '从交互关系出发',
+                  },
+                  slug: 'whitepaper/2-interaction-relations',
+                },
+                {
+                  label: '组件的边界',
+                  translations: { en: 'Component Boundaries', 'zh-CN': '组件的边界' },
+                  slug: 'whitepaper/3-component-boundary',
+                },
+                {
+                  label: '通路之外的语义',
+                  translations: {
+                    en: 'Semantics Beyond Channels',
+                    'zh-CN': '通路之外的语义',
+                  },
+                  slug: 'whitepaper/4-semantics-beyond-channels',
+                },
+              ],
             },
             {
-              label: '原型边界',
-              translations: {
-                en: 'Prototype Boundary',
-                'zh-CN': '原型边界',
-              },
-              slug: 'whitepaper/prototype-boundary',
+              label: '第二部 · 翻译',
+              translations: { en: 'Part II · Translation', 'zh-CN': '第二部 · 翻译' },
+              items: [
+                {
+                  label: '翻译层',
+                  translations: { en: 'Translation Layer', 'zh-CN': '翻译层' },
+                  slug: 'whitepaper/5-translation-layer',
+                },
+                {
+                  label: '一致性的边界',
+                  translations: {
+                    en: 'The Boundaries of Consistency',
+                    'zh-CN': '一致性的边界',
+                  },
+                  slug: 'whitepaper/6-consistency-boundary',
+                },
+              ],
             },
             {
-              label: '执行语义',
-              translations: { en: 'Execution Semantics', 'zh-CN': '执行语义' },
-              slug: 'whitepaper/execution-semantics',
+              label: '第三部 · 演进',
+              translations: { en: 'Part III · Evolution', 'zh-CN': '第三部 · 演进' },
+              items: [
+                {
+                  label: '在边界中演进',
+                  translations: {
+                    en: 'Evolving Within Boundaries',
+                    'zh-CN': '在边界中演进',
+                  },
+                  slug: 'whitepaper/7-evolving-within-boundaries',
+                },
+              ],
             },
             {
-              label: '翻译层',
-              translations: { en: 'Translation Layer', 'zh-CN': '翻译层' },
-              slug: 'whitepaper/translation-layer',
-            },
-            {
-              label: '设计约束',
-              translations: { en: 'Design Constraints', 'zh-CN': '设计约束' },
-              slug: 'whitepaper/design-constraints',
-            },
-            {
-              label: '演进路径',
-              translations: { en: 'Evolution Path', 'zh-CN': '演进路径' },
-              slug: 'whitepaper/evolution-path',
-            },
-            {
-              label: 'FAQ',
-              translations: { en: 'FAQ', 'zh-CN': 'FAQ' },
-              slug: 'whitepaper/faq',
+              label: '结语',
+              translations: { en: 'Conclusion', 'zh-CN': '结语' },
+              slug: 'whitepaper/8-conclusion',
             },
           ],
         },

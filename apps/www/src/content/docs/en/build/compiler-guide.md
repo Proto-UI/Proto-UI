@@ -10,7 +10,7 @@ This guide exists to stop future direction from being mistaken for shipped behav
 
 ## Prerequisites
 
-Read [Translation Layer: Adapter / Compiler](/en/whitepaper/translation-layer/) for the conceptual distinction, [Core](/en/specifications/core/) for portable syntax, and [Runtime Architecture](/en/build/runtime-architecture/) for the current execution path.
+Read [Chapter 5: Translation Layer](/en/whitepaper/5-translation-layer/) for the conceptual distinction, [Core](/en/specifications/core/) for portable syntax, and [Runtime Architecture](/en/build/runtime-architecture/) for the current execution path.
 
 ## What 0.2 actually ships
 

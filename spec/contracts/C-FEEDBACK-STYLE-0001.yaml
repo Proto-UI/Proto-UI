@@ -48,12 +48,14 @@ sources:
       - Purpose
       - Scope (v0)
       - Separation of Concerns
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/translation-layer.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/5-translation-layer.md
     sections:
-      - 样式与反馈
-  - path: apps/www/src/content/docs/en/whitepaper/translation-layer.md
+      - 形式改变不等于语义损失
+      - 以 Terminal UI 为例
+  - path: apps/www/src/content/docs/en/whitepaper/5-translation-layer.md
     sections:
-      - Styling and feedback
+      - A Change in Form Is Not Necessarily Semantic Loss
+      - Terminal UI as an Example
 dependsOn:
   contracts:
     - C-FEEDBACK-0001

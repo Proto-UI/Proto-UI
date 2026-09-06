@@ -28,14 +28,16 @@ criteria:
       zh-CN: 越靠近具体宿主，越难成为跨宿主协议的一部分；Proto UI 可以承认并维护宿主相关方向，但会审慎决定它是否进入核心原型。
       en: The closer something is to a specific host, the harder it is to make it part of a cross-host protocol; Proto UI can acknowledge and maintain host-related directions while remaining cautious about admitting them into the core prototype.
 sources:
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md
     sections:
-      - Proto UI 先从“使用者”切分组件关系
-      - 信息通路可以扩展吗？
-  - path: apps/www/src/content/docs/en/whitepaper/information-flow-model.md
+      - 组件都在和谁交互？
+      - 从关系得到信息通路
+      - 这只是一副骨架
+  - path: apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md
     sections:
-      - Proto UI starts by splitting component relations through "users"
-      - Can information flows be extended?
+      - With Whom Does a Component Interact?
+      - Deriving Information Channels from Relations
+      - This Is Only a Skeleton
 dependsOn:
   knowledge:
     - K-COMPONENT-INTERACTION-0001

@@ -6,9 +6,7 @@ const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline, image, actions = [] } = data.hero || {};
 const locale = Astro.locals.starlightRoute.locale;
 const whitepaperHref =
-  locale && locale !== 'root'
-    ? `/${locale}/whitepaper/component-as-protocol/`
-    : '/whitepaper/component-as-protocol/';
+  locale && locale !== 'root' ? `/${locale}/whitepaper/0-preface/` : '/whitepaper/0-preface/';
 const whitepaperLabel = locale === 'zh-cn' ? '阅读白皮书' : 'Read Whitepaper';
 
 if (image) {
