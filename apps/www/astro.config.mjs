@@ -406,6 +406,11 @@ export default defineConfig({
                   translations: { en: 'Async Region', 'zh-CN': 'Async Region' },
                   slug: 'ui-libraries/base/async-region',
                 },
+                {
+                  label: 'Table (Draft)',
+                  translations: { en: 'Table (Draft)', 'zh-CN': 'Table（Draft）' },
+                  slug: 'ui-libraries/base/table',
+                },
               ],
             },
             {
@@ -441,6 +446,12 @@ export default defineConfig({
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/shadcn/hover-card',
+                },
+                {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/shadcn/tooltip',
+                  badge: inProgressBadge,
                 },
                 {
                   label: 'Select',

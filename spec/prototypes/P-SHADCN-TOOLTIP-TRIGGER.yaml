@@ -1,0 +1,54 @@
+id: P-SHADCN-TOOLTIP-TRIGGER
+type: prototype
+title: shadcn Tooltip Trigger preserves Base description intent and adds state feedback
+status: draft
+since: 0.3.0-alpha.0
+summary: shadcn Tooltip Trigger inherits Base focus, hover, disabled, and description linkage and adds only current feedback style.
+statement:
+  en: Trigger remains a supplementary-description intent surface rather than a command and adds inline layout plus hover, focus-visible, and pressed feedback.
+  zh-CN: Trigger 继续作为 supplementary-description intent surface 而非 command，只增加 inline layout 与 hover、focus-visible、pressed feedback。
+criteria:
+  - id: P-SHADCN-TOOLTIP-TRIGGER-BASE-INHERITANCE
+    text:
+      en: Trigger must inherit P-BASE-TOOLTIP-TRIGGER through asTooltipTrigger() and retain its disabled, hover, focus, and describedBy behavior.
+      zh-CN: Trigger 必须通过 asTooltipTrigger() 继承 P-BASE-TOOLTIP-TRIGGER，并保留 disabled、hover、focus 与 describedBy behavior。
+  - id: P-SHADCN-TOOLTIP-TRIGGER-DIRECT-ENTRY
+    text:
+      en: The direct Trigger entry is shadcn-tooltip-trigger and this layer provides no authored asHook.
+      zh-CN: Trigger direct entry 为 shadcn-tooltip-trigger，且本层不提供 authored asHook。
+  - id: P-SHADCN-TOOLTIP-TRIGGER-CURRENT-VISUAL-SURFACE
+    text:
+      en: Trigger must project inline-flex cursor-pointer outline-none.
+      zh-CN: Trigger 必须投射 inline-flex cursor-pointer outline-none。
+  - id: P-SHADCN-TOOLTIP-TRIGGER-STATE-FEEDBACK
+    text:
+      en: >-
+        Inherited hovered must project opacity-70; inherited focusVisible must project ring-2 ring-ring ring-offset-2 ring-offset-background; the runtime-owned pressed slot must project scale-[0.98] only while effective disabled is false.
+
+
+      zh-CN: >-
+        inherited hovered 必须投射 opacity-70；inherited focusVisible 必须投射 ring-2 ring-ring ring-offset-2 ring-offset-background；runtime-owned pressed slot 仅在 effective disabled 为 false 时投射 scale-[0.98]。
+
+
+  - id: P-SHADCN-TOOLTIP-TRIGGER-NO-ACTIVATION-OWNER
+    text:
+      en: Trigger must add no button role, activation route, command event, or second open owner.
+      zh-CN: Trigger 不得增加 button role、activation route、command event 或第二个 open owner。
+sources:
+  - path: packages/prototypes/shadcn/src/tooltip/trigger.proto.ts
+  - path: packages/prototypes/shadcn/test/tooltip.test.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP-TRIGGER
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-TOOLTIP-PROTOTYPE-BOUNDARY-0001]
+relates:
+  prototypes: [P-SHADCN-TOOLTIP]
+verifies:
+  tests: [T-SHADCN-TOOLTIP-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the Base-inheriting shadcn Tooltip Trigger feedback projection.
+tags: [prototype, shadcn, tooltip, trigger, interaction, visual, delta]

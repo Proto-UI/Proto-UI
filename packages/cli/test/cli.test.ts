@@ -211,6 +211,33 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('registers the exact shadcn Tooltip family facade', () => {
+    expect(COMPONENT_REGISTRY['shadcn-tooltip']).toMatchObject({
+      packageName: '@proto.ui/prototypes-shadcn',
+      importPath: '@proto.ui/prototypes-shadcn/tooltip',
+      stylePreset: 'shadcn',
+      items: [
+        { prototypeImport: 'shadcnTooltipGroup', reactExport: 'ShadcnTooltipGroup' },
+        { prototypeImport: 'shadcnTooltipRoot', reactExport: 'ShadcnTooltipRoot' },
+        { prototypeImport: 'shadcnTooltipTrigger', reactExport: 'ShadcnTooltipTrigger' },
+        { prototypeImport: 'shadcnTooltipContent', reactExport: 'ShadcnTooltipContent' },
+      ],
+    });
+
+    for (const adapter of ['react', 'vue', 'wc'] as const) {
+      const source = renderHostIndex(adapter, ['shadcn-tooltip']);
+      expect(source).toContain("from '@proto.ui/prototypes-shadcn/tooltip'");
+      for (const prototypeImport of [
+        'shadcnTooltipGroup',
+        'shadcnTooltipRoot',
+        'shadcnTooltipTrigger',
+        'shadcnTooltipContent',
+      ]) {
+        expect(source).toContain(prototypeImport);
+      }
+    }
+  });
+
   it('registers the Base Radio Group compound facade', () => {
     expect(COMPONENT_REGISTRY['base-radio-group']).toMatchObject({
       packageName: '@proto.ui/prototypes-base',
