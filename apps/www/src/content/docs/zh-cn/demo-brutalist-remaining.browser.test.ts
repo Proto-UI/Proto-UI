@@ -65,6 +65,7 @@ type SurfaceFacts = {
   transitionDuration: string;
   animationDuration: string;
   boxShadow: string;
+  backdropFilter: string;
   display: string;
   flexDirection: string;
   fontFamily: string;
@@ -122,6 +123,7 @@ async function facts(locator: Locator): Promise<SurfaceFacts> {
       transitionDuration: style.transitionDuration,
       animationDuration: style.animationDuration,
       boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
       display: style.display,
       flexDirection: style.flexDirection,
       fontFamily: style.fontFamily,
@@ -318,6 +320,25 @@ function expectExactHardShadow(
   expect(hardShadows[0].color, `${label}/shadow-color`).toBe(expectedColor);
 }
 
+/**
+ * The active Brutalist Toggle keeps a persistent, color-independent inset ink
+ * frame (`inset 0 0 0 2px #000`) beside its resting outset hard shadow. This
+ * asserts the parsed inset layer's flag, zero-blur geometry, and black ink.
+ */
+function expectInsetFrame(boxShadow: string, label: string): void {
+  const insetLayers = nonTransparentShadowLayers(boxShadow)
+    .map(parseShadowLayer)
+    .filter((layer) => layer.inset);
+  expect(insetLayers, `${label}/inset-layer`).toHaveLength(1);
+  const inset = insetLayers[0];
+  expect(inset.lengths, `${label}/inset-geometry`).toHaveLength(4);
+  expect(inset.lengths[0], `${label}/inset-offset-x`).toBe('0px');
+  expect(inset.lengths[1], `${label}/inset-offset-y`).toBe('0px');
+  expect(inset.lengths[2], `${label}/inset-blur`).toBe('0px');
+  expect(inset.lengths[3], `${label}/inset-spread`).toBe('2px');
+  expect(inset.color, `${label}/inset-color`).toBe('rgb(0, 0, 0)');
+}
+
 /** A passive root carries no `tabindex` and must not retain programmatic focus. */
 async function expectPassiveFocus(locator: Locator, label: string): Promise<void> {
   const state = await locator.evaluate((element) => {
@@ -429,7 +450,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('0px'));
             expect(surface.boxShadow, `${label}/shadow`).toContain('2px 2px 0px 0px');
             expect(surface.backgroundImage, `${label}/background-image`).toBe('none');
-            expect(surface.fontFamily.toLowerCase(), `${label}/font`).toMatch(/mono|monospace/);
+            expect(
+              surface.fontFamily.split(',')[0].trim().toLowerCase(),
+              `${label}/font`
+            ).toMatch(/mono/);
             expect(surface.textTransform, `${label}/case`).toBe('uppercase');
           }
         }
@@ -736,6 +760,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 style.borderBottomLeftRadius,
               ],
               boxShadow: style.boxShadow,
+              backdropFilter: style.backdropFilter,
               backgroundColor: style.backgroundColor,
               backgroundImage: style.backgroundImage,
               color: style.color,
@@ -807,6 +832,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             label,
             index === 1 ? 2 : 1
           );
+          expect(surface.backdropFilter, `${label}/backdrop-filter`).toBe('none');
+          if (index === 1) {
+            expectInsetFrame(surface.boxShadow, label);
+          }
         }
 
         const first = toggles.first();
@@ -892,6 +921,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
                 style.borderLeftColor,
               ],
               boxShadow: style.boxShadow,
+              backdropFilter: style.backdropFilter,
             };
           })
         );
@@ -930,6 +960,10 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
             label,
             index === 1 ? 2 : 1
           );
+          expect(surface.backdropFilter, `${label}/backdrop-filter`).toBe('none');
+          if (index === 1) {
+            expectInsetFrame(surface.boxShadow, label);
+          }
         }
         await applyColorScheme(opened.page, 'light');
       }
@@ -986,6 +1020,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(triggerSurface.backgroundImage, `${runtime}/hover-trigger/background-image`).toBe(
           'none'
         );
+        expect(triggerSurface.backdropFilter, `${runtime}/hover-trigger/backdrop-filter`).toBe(
+          'none'
+        );
         expectBorderColors(triggerSurface, 'rgb(0, 0, 0)', `${runtime}/hover-trigger`);
         expect(triggerSurface.fontWeight, `${runtime}/hover-trigger/weight`).toBe('700');
         expect(triggerSurface.textTransform, `${runtime}/hover-trigger/case`).toBe('uppercase');
@@ -1020,6 +1057,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         expect(panelSurface.backgroundImage, `${runtime}/hover-panel/background-image`).toBe(
           'none'
         );
+        expect(panelSurface.backdropFilter, `${runtime}/hover-panel/backdrop-filter`).toBe('none');
         expectBorderColors(panelSurface, 'rgb(0, 0, 0)', `${runtime}/hover-panel`);
         expect(panelSurface.width, `${runtime}/hover-panel/width`).toBe('256px');
         expect(panelSurface.padding, `${runtime}/hover-panel/padding`).toBe('16px');
@@ -1077,11 +1115,19 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           darkTriggerSurface.backgroundImage,
           `${runtime}/dark/hover-trigger/background-image`
         ).toBe('none');
+        expect(
+          darkTriggerSurface.backdropFilter,
+          `${runtime}/dark/hover-trigger/backdrop-filter`
+        ).toBe('none');
         expectSquareBorder(darkTriggerSurface, `${runtime}/dark/hover-trigger`);
         expectBorderColors(darkTriggerSurface, 'rgb(0, 0, 0)', `${runtime}/dark/hover-trigger`);
         expect(
           darkPanelSurface.backgroundImage,
           `${runtime}/dark/hover-panel/background-image`
+        ).toBe('none');
+        expect(
+          darkPanelSurface.backdropFilter,
+          `${runtime}/dark/hover-panel/backdrop-filter`
         ).toBe('none');
         expect(
           darkPanelSurface.animationDuration,
