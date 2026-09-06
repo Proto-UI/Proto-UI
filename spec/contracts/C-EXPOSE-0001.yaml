@@ -42,12 +42,14 @@ sources:
   - path: internal/contracts/expose/expose-classification.v0.md
     sections:
       - Categories
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md
     sections:
-      - Maker ↔ Component
-  - path: apps/www/src/content/docs/en/whitepaper/information-flow-model.md
+      - 从关系得到信息通路
+      - 把 Switch 放进这张关系图
+  - path: apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md
     sections:
-      - Maker ↔ Component
+      - Deriving Information Channels from Relations
+      - Placing Switch in the Relation Map
 refines:
   contracts:
     - id: C-CORE-CHANNEL-0001

@@ -35,14 +35,14 @@ openQuestions:
     blocks:
       - C-CORE-CHANNEL-0001-C
 sources:
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md
     sections:
-      - 由信息通路可以导出哪些核心能力？
-      - 信息通路可以扩展吗？
-  - path: apps/www/src/content/docs/en/whitepaper/information-flow-model.md
+      - 从关系得到信息通路
+      - 这只是一副骨架
+  - path: apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md
     sections:
-      - Which core capabilities follow from the information flows?
-      - Can information flows be extended?
+      - Deriving Information Channels from Relations
+      - This Is Only a Skeleton
 dependsOn:
   knowledge:
     - K-INFORMATION-CHANNEL-0001

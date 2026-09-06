@@ -25,16 +25,14 @@ criteria:
       zh-CN: Host/environment 相关交换可以被承认和维护，但默认不构成核心可移植通路。
       en: Host/environment-related exchange can be acknowledged and maintained, but by default it does not form a core portable channel.
 sources:
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md
     sections:
-      - 什么是信息通路？
-      - 为什么这些能力不是随意枚举出来的？
-      - 信息通路可以扩展吗？
-  - path: apps/www/src/content/docs/en/whitepaper/information-flow-model.md
+      - 从关系得到信息通路
+      - 这只是一副骨架
+  - path: apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md
     sections:
-      - What is an information flow?
-      - Why are these capabilities not arbitrarily enumerated?
-      - Can information flows be extended?
+      - Deriving Information Channels from Relations
+      - This Is Only a Skeleton
 dependsOn:
   knowledge:
     - K-COMPONENT-ACTOR-0001
