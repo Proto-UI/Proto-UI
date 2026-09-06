@@ -96,6 +96,26 @@ test('accepts module-proven demo runtimes isolated from shell static closures', 
   });
 });
 
+test('accepts coalesced module-proven demo runtime chunks', () => {
+  const graph = graphFixture();
+  const runtimeFileNames = new Set(['_astro/react.js', '_astro/vue.js', '_astro/vue2.js']);
+  const runtimeChunks = graph.chunks.filter((candidate) =>
+    runtimeFileNames.has(candidate.fileName)
+  );
+  graph.chunks = graph.chunks.filter((candidate) => !runtimeFileNames.has(candidate.fileName));
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/home-demo.js')
+    .imports.splice(1, 3, '_astro/coalesced-runtimes.js');
+  graph.chunks.push(
+    chunk('_astro/coalesced-runtimes.js', {
+      isDynamicEntry: true,
+      moduleIds: runtimeChunks.flatMap((candidate) => candidate.moduleIds),
+    })
+  );
+
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+});
+
 test('rejects a graph without route-owned Web Component host provenance', () => {
   const graph = graphFixture();
   graph.chunks.find((candidate) => candidate.fileName === '_astro/home-demo.js').imports =
@@ -344,4 +364,17 @@ test('accepts a dynamic demonstration entry reached from an explicit route-owned
   );
 
   assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+});
+
+test('rejects shell dynamic imports of demo-owned framework chunks', () => {
+  const graph = graphFixture();
+  graph.chunks[0].dynamicImports.push('_astro/react.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes(
+        'Website shell entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` dynamically reaches forbidden React/Vue module(s)'
+      )
+    )
+  );
 });

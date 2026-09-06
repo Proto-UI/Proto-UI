@@ -90,14 +90,16 @@ function isReviewedWebsiteControlAdapterModule(moduleId) {
   );
 }
 
-function reviewedNullFacadeRuntimeModule(chunk) {
-  if (chunk.facadeModuleId !== null || !Array.isArray(chunk.moduleIds)) return null;
-  const matches = chunk.moduleIds
-    .map(moduleIdWithoutQuery)
-    .filter((moduleId) => REVIEWED_NULL_FACADE_RUNTIME_MODULES.has(moduleId));
-  return matches.length === 1 ? matches[0] : null;
+function reviewedNullFacadeRuntimeModules(chunk) {
+  if (chunk.facadeModuleId !== null || !Array.isArray(chunk.moduleIds)) return [];
+  return [
+    ...new Set(
+      chunk.moduleIds
+        .map(moduleIdWithoutQuery)
+        .filter((moduleId) => REVIEWED_NULL_FACADE_RUNTIME_MODULES.has(moduleId))
+    ),
+  ];
 }
-
 function loadGraph(rootDir, graphPath, issues) {
   const absolutePath = path.resolve(rootDir, graphPath);
   if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
@@ -201,11 +203,12 @@ export function collectWebsiteProductionBundleIssues({
   );
   const routeOwnedDemoRoots = approvedDemoRoots.filter((chunk) => chunk.isEntry);
   const reviewedNullFacadeRuntimeChunks = chunks.filter(
-    (chunk) => (chunk.isEntry || chunk.isDynamicEntry) && reviewedNullFacadeRuntimeModule(chunk)
+    (chunk) =>
+      (chunk.isEntry || chunk.isDynamicEntry) && reviewedNullFacadeRuntimeModules(chunk).length > 0
   );
   for (const runtimeModule of REVIEWED_NULL_FACADE_RUNTIME_MODULES) {
-    const owners = reviewedNullFacadeRuntimeChunks.filter(
-      (chunk) => reviewedNullFacadeRuntimeModule(chunk) === runtimeModule
+    const owners = reviewedNullFacadeRuntimeChunks.filter((chunk) =>
+      reviewedNullFacadeRuntimeModules(chunk).includes(runtimeModule)
     );
     if (owners.length !== 1) {
       issues.push(
@@ -218,7 +221,7 @@ export function collectWebsiteProductionBundleIssues({
       chunk.isEntry &&
       !APPROVED_DEMONSTRATION_ENTRY_FACADES.has(chunk.facadeModuleId) &&
       !REVIEWED_DEMONSTRATION_RUNTIME_FACADES.has(chunk.facadeModuleId) &&
-      reviewedNullFacadeRuntimeModule(chunk) === null
+      reviewedNullFacadeRuntimeModules(chunk).length === 0
   );
   if (shellRoots.length === 0) issues.push('production bundle graph has no Website shell roots');
   if (routeOwnedDemoRoots.length === 0) {
@@ -318,6 +321,29 @@ export function collectWebsiteProductionBundleIssues({
       const shellIdentity = shellRoot.facadeModuleId ?? `<null facade: ${shellRoot.fileName}>`;
       issues.push(
         `Website shell entry \`${shellIdentity}\` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): ${[...leakedModules].sort().join(', ')}`
+      );
+    }
+  }
+  for (const shellRoot of shellRoots) {
+    const staticClosure = closure(chunksByFileName, shellRoot.fileName, ['imports']);
+    const completeClosure = closure(chunksByFileName, shellRoot.fileName, [
+      'imports',
+      'dynamicImports',
+    ]);
+    const dynamicallyReachedModules = new Set();
+    for (const fileName of completeClosure) {
+      if (staticClosure.has(fileName)) continue;
+      const chunk = chunksByFileName.get(fileName);
+      for (const moduleId of chunk?.moduleIds ?? []) {
+        if (forbiddenFrameworkFamily(moduleId) !== null || isProtoUiAdapterModule(moduleId)) {
+          dynamicallyReachedModules.add(moduleId);
+        }
+      }
+    }
+    if (dynamicallyReachedModules.size > 0) {
+      const shellIdentity = shellRoot.facadeModuleId ?? `<null facade: ${shellRoot.fileName}>`;
+      issues.push(
+        `Website shell entry \`${shellIdentity}\` dynamically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): ${[...dynamicallyReachedModules].sort().join(', ')}`
       );
     }
   }

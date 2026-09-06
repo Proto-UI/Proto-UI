@@ -482,6 +482,7 @@ const WEBSITE_DOCUMENT_SEMANTICS_CLOSURE = Object.freeze({
   issue: 579,
   pullRequest: 580,
   implementationHead: '2a6d5f3208d91e5c9862a67408a39ff208d43306',
+  mergeCommit: '9841c86a10940267fb30ee25b63c9a5a39f76fe6',
   routes: Object.freeze([
     '/en/ui-libraries/shadcn/select/',
     '/zh-cn/ui-libraries/shadcn/select/',
@@ -913,14 +914,49 @@ function repositoryPathsFromMatrixPath(value) {
   return [...new Set(paths)];
 }
 
-function walkFiles(directory) {
+function walkFiles(
+  directory,
+  { boundary = directory, issues = null, label = 'source', rootDir = path.dirname(directory) } = {}
+) {
   if (!fs.existsSync(directory)) return [];
   const files = [];
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const absolutePath = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...walkFiles(absolutePath));
-    else if (entry.isFile()) files.push(absolutePath);
-  }
+  const canonicalBoundary = fs.realpathSync.native(boundary);
+  const isWithinBoundary = (candidate) => {
+    const relative = path.relative(canonicalBoundary, candidate);
+    return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+  };
+  const visit = (authoredDirectory, canonicalAncestors) => {
+    const canonicalDirectory = fs.realpathSync.native(authoredDirectory);
+    if (canonicalAncestors.has(canonicalDirectory)) return;
+    const nextAncestors = new Set(canonicalAncestors).add(canonicalDirectory);
+    for (const entry of fs.readdirSync(authoredDirectory, { withFileTypes: true })) {
+      const absolutePath = path.join(authoredDirectory, entry.name);
+      if (entry.isSymbolicLink()) {
+        let canonicalPath;
+        try {
+          canonicalPath = fs.realpathSync.native(absolutePath);
+        } catch {
+          issues?.push(
+            `${label} symlink \`${path.relative(rootDir, absolutePath).replaceAll('\\', '/')}\` is broken`
+          );
+          continue;
+        }
+        if (!isWithinBoundary(canonicalPath)) {
+          issues?.push(
+            `${label} symlink \`${path.relative(rootDir, absolutePath).replaceAll('\\', '/')}\` resolves outside its governed source root ${path.relative(rootDir, boundary).replaceAll('\\', '/')}`
+          );
+          continue;
+        }
+        const target = fs.statSync(absolutePath);
+        if (target.isDirectory()) visit(absolutePath, nextAncestors);
+        else if (target.isFile()) files.push(absolutePath);
+        continue;
+      }
+      if (entry.isDirectory()) visit(absolutePath, nextAncestors);
+      else if (entry.isFile()) files.push(absolutePath);
+    }
+  };
+  visit(directory, new Set());
   return files;
 }
 
@@ -2059,7 +2095,12 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
           : ts.ScriptKind.TSX
   );
   const effectNames = new Set(['useEffect', 'useInsertionEffect', 'useLayoutEffect']);
-  const renderEvaluatedHookNames = new Set(['useMemo', 'useState']);
+  const renderEvaluatedHooks = new Map([
+    ['useMemo', 'useMemo'],
+    ['useState', 'useState'],
+    ['useReducer', 'useReducer'],
+    ['useSyncExternalStore', 'useSyncExternalStore'],
+  ]);
   const reactNamespaceNames = new Set();
   const reactCreateElementNames = new Set();
   for (const statement of sourceFile.statements) {
@@ -2081,8 +2122,8 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         if (/^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(importedName)) {
           effectNames.add(element.name.text);
         }
-        if (/^(?:useMemo|useState)$/u.test(importedName)) {
-          renderEvaluatedHookNames.add(element.name.text);
+        if (/^(?:useMemo|useReducer|useState|useSyncExternalStore)$/u.test(importedName)) {
+          renderEvaluatedHooks.set(element.name.text, importedName);
         }
         if (importedName === 'createElement') reactCreateElementNames.add(element.name.text);
       }
@@ -2101,8 +2142,8 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         if (/^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(initializer.name.text)) {
           effectNames.add(node.name.text);
         }
-        if (/^(?:useMemo|useState)$/u.test(initializer.name.text)) {
-          renderEvaluatedHookNames.add(node.name.text);
+        if (/^(?:useMemo|useReducer|useState|useSyncExternalStore)$/u.test(initializer.name.text)) {
+          renderEvaluatedHooks.set(node.name.text, initializer.name.text);
         }
       } else if (ts.isIdentifier(initializer)) {
         hookAliasEdges.push([node.name.text, initializer.text]);
@@ -2120,8 +2161,8 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
       if (/^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u.test(node.propertyName.text)) {
         effectNames.add(node.name.text);
       }
-      if (/^(?:useMemo|useState)$/u.test(node.propertyName.text)) {
-        renderEvaluatedHookNames.add(node.name.text);
+      if (/^(?:useMemo|useReducer|useState|useSyncExternalStore)$/u.test(node.propertyName.text)) {
+        renderEvaluatedHooks.set(node.name.text, node.propertyName.text);
       }
     }
     ts.forEachChild(node, collectHookAliases);
@@ -2135,8 +2176,8 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         effectNames.add(alias);
         hookAliasesChanged = true;
       }
-      if (!renderEvaluatedHookNames.has(alias) && renderEvaluatedHookNames.has(sourceName)) {
-        renderEvaluatedHookNames.add(alias);
+      if (!renderEvaluatedHooks.has(alias) && renderEvaluatedHooks.has(sourceName)) {
+        renderEvaluatedHooks.set(alias, renderEvaluatedHooks.get(sourceName));
         hookAliasesChanged = true;
       }
     }
@@ -2380,8 +2421,20 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
   };
   const isEffectCall = (node) =>
     isReactHookCall(node, effectNames, /^(?:useEffect|useInsertionEffect|useLayoutEffect)$/u);
-  const isRenderEvaluatedHookCall = (node) =>
-    isReactHookCall(node, renderEvaluatedHookNames, /^(?:useMemo|useState)$/u);
+  const renderEvaluatedCallbackIndexes = (node) => {
+    if (!ts.isCallExpression(node)) return [];
+    const expression = unwrapTypeScriptExpression(node.expression);
+    const hookKind = ts.isIdentifier(expression)
+      ? renderEvaluatedHooks.get(expression.text)
+      : ts.isPropertyAccessExpression(expression) &&
+          ts.isIdentifier(expression.expression) &&
+          reactNamespaceNames.has(expression.expression.text)
+        ? expression.name.text
+        : null;
+    if (hookKind === 'useReducer') return [0, 2];
+    if (hookKind === 'useSyncExternalStore') return [1, 2];
+    return hookKind === 'useMemo' || hookKind === 'useState' ? [0] : [];
+  };
 
   let found = false;
   const visitEffects = (node) => {
@@ -2540,10 +2593,12 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         found = true;
         return;
       }
+      const callbackIndexes = renderEvaluatedCallbackIndexes(node);
       if (
-        isRenderEvaluatedHookCall(node) &&
-        node.arguments[0] &&
-        executionPathContainsAgentAction(node.arguments[0])
+        callbackIndexes.some(
+          (index) =>
+            node.arguments[index] && executionPathContainsAgentAction(node.arguments[index])
+        )
       ) {
         found = true;
         return;
@@ -2652,10 +2707,24 @@ function scriptModuleSpecifiers(source, fileName) {
   return specifiers;
 }
 
+function staticMarkupAttribute(openingTag, name) {
+  const pattern = `\\b${escapeRegularExpression(name)}\\s*=\\s*(?:(['"])([^'"]*)\\1|([^\\s'"=<>\\x60]+))`;
+  const match = openingTag.match(new RegExp(pattern, 'iu'));
+  return match ? (match[2] ?? match[3]) : null;
+}
+function isExecutableScriptType(type) {
+  if (type === null || type.trim() === '' || type.trim().toLowerCase() === 'module') return true;
+  const essence = type.split(';', 1)[0].trim().toLowerCase();
+  return /^(?:(?:application|text)\/(?:javascript|ecmascript|x-javascript)|text\/(?:javascript1\.[0-5]|jscript|livescript))$/u.test(
+    essence
+  );
+}
 function externalScriptModuleSpecifiers(content) {
-  return [
-    ...content.matchAll(/<script\b[^>]*\bsrc\s*=\s*(?:(['"])([^'"]+)\1|([^\s"'=<>`]+))/giu),
-  ].map((match) => match[2] ?? match[3]);
+  return jsxOpeningTagCandidates(content)
+    .filter((openingTag) => /^<script\b/iu.test(openingTag))
+    .filter((openingTag) => isExecutableScriptType(staticMarkupAttribute(openingTag, 'type')))
+    .map((openingTag) => staticMarkupAttribute(openingTag, 'src'))
+    .filter((specifier) => typeof specifier === 'string' && specifier.length > 0);
 }
 function isExternalExecutableScriptSpecifier(specifier) {
   return /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(specifier);
@@ -3235,14 +3304,6 @@ function validateInheritedDependencyVersions(rootDir, config, issues) {
   }
 }
 
-function requireLabels(value, labels, context, issues) {
-  for (const label of labels) {
-    if (!value.includes(label)) {
-      issues.push(`${context}: missing required \`${label}\` label`);
-    }
-  }
-}
-
 function requireMeaningfulLabels(value, labels, context, issues) {
   const nextLabelPattern = labels.map(escapeRegularExpression).join('|');
   for (const label of labels) {
@@ -3304,7 +3365,7 @@ function hasVideoFileSignature(absolutePath) {
   );
 }
 
-function canonicalRetainedEvidenceFile(
+function canonicalFileWithinRoot(
   rootDir,
   repositoryPath,
   evidenceRootRelative = SELF_HOSTED_WEBSITE_EVIDENCE_ROOT
@@ -3338,30 +3399,133 @@ function gitOutput(rootDir, args) {
   return result.status === 0 ? result.stdout.trim() : null;
 }
 
-function evidenceCommitMetadata(rootDir, commit, evidenceKind, context, issues) {
+function evidenceCommitMetadata(
+  rootDir,
+  commit,
+  evidenceKind,
+  context,
+  issues,
+  promotionContext,
+  implementationPaths
+) {
   if (!commit || !/^[0-9a-f]{40}$/iu.test(commit)) return null;
-  if (gitOutput(rootDir, ['cat-file', '-e', `${commit}^{commit}`]) === null) {
+  const objectType = gitOutput(rootDir, ['cat-file', '-t', commit]);
+  if (objectType === null) {
     issues.push(
       `${context}: ${evidenceKind} evidence Commit \`${commit}\` does not resolve to a Git commit`
     );
     return null;
   }
-  const candidateRevision = gitOutput(rootDir, ['rev-parse', 'HEAD']);
-  const ancestry = spawnSync('git', ['merge-base', '--is-ancestor', commit, 'HEAD'], {
-    cwd: rootDir,
-    stdio: 'ignore',
-  });
-  if (!candidateRevision || ancestry.status !== 0) {
+  if (objectType !== 'commit') {
     issues.push(
-      `${context}: ${evidenceKind} evidence Commit \`${commit}\` must be an ancestor of the candidate revision${candidateRevision ? ` \`${candidateRevision}\`` : ''}`
+      `${context}: ${evidenceKind} evidence Commit \`${commit}\` must identify a commit object directly`
+    );
+    return null;
+  }
+
+  const { baseRevision, headRevision, mergeRevision } = promotionContext;
+  if (!baseRevision || !headRevision) {
+    issues.push(`${context}: promotion validation requires explicit base and head revisions`);
+  } else {
+    for (const [role, revision] of [
+      ['base', baseRevision],
+      ['head', headRevision],
+    ]) {
+      if (
+        !/^[0-9a-f]{40}$/iu.test(revision) ||
+        gitOutput(rootDir, ['cat-file', '-t', revision]) !== 'commit'
+      ) {
+        issues.push(
+          `${context}: promotion history proof is unavailable for ${role} \`${revision}\``
+        );
+      }
+    }
+    const checkoutRevision = gitOutput(rootDir, ['rev-parse', 'HEAD']);
+    if (checkoutRevision && headRevision !== checkoutRevision) {
+      issues.push(
+        `${context}: promotion head \`${headRevision}\` must equal checked-out revision \`${checkoutRevision}\``
+      );
+    }
+    if (gitOutput(rootDir, ['cat-file', '-t', baseRevision]) === 'commit') {
+      const ancestry = spawnSync('git', ['merge-base', '--is-ancestor', commit, baseRevision], {
+        cwd: rootDir,
+        stdio: 'ignore',
+      });
+      if (ancestry.status === 1) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Commit \`${commit}\` is not contained in the reviewed base \`${baseRevision}\``
+        );
+      } else if (ancestry.status !== 0) {
+        issues.push(
+          `${context}: promotion history proof is unavailable for base \`${baseRevision}\``
+        );
+      }
+    }
+    if (
+      gitOutput(rootDir, ['cat-file', '-t', baseRevision]) === 'commit' &&
+      gitOutput(rootDir, ['cat-file', '-t', headRevision]) === 'commit'
+    ) {
+      const baseToHead = spawnSync(
+        'git',
+        ['merge-base', '--is-ancestor', baseRevision, headRevision],
+        { cwd: rootDir, stdio: 'ignore' }
+      );
+      if (baseToHead.status === 1) {
+        issues.push(
+          `${context}: reviewed base \`${baseRevision}\` must be an ancestor of exact head \`${headRevision}\``
+        );
+      } else if (baseToHead.status !== 0) {
+        issues.push(`${context}: promotion history proof is unavailable between base and head`);
+      }
+    }
+  }
+  if (mergeRevision && commit === mergeRevision) {
+    issues.push(
+      `${context}: evidence Commit must not equal the temporary pull-request merge commit`
     );
   }
-  const tree = gitOutput(rootDir, ['rev-parse', `${commit}^{tree}`]);
+
+  for (const repositoryPath of implementationPaths) {
+    const retainedImplementation = canonicalFileWithinRoot(
+      rootDir,
+      repositoryPath,
+      repositoryPath.startsWith('apps/www/') ? 'apps/www/' : 'apps/agent-harness/'
+    );
+    if (!retainedImplementation) {
+      issues.push(
+        `${context}: promoted implementation \`${repositoryPath}\` must resolve within its governed application root`
+      );
+    }
+    const atEvidence = spawnSync('git', ['show', `${commit}:${repositoryPath}`], {
+      cwd: rootDir,
+      encoding: null,
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    if (atEvidence.status !== 0) {
+      issues.push(
+        `${context}: promoted implementation \`${repositoryPath}\` is absent at evidence Commit \`${commit}\``
+      );
+    } else if (
+      retainedImplementation &&
+      !Buffer.from(atEvidence.stdout).equals(fs.readFileSync(retainedImplementation))
+    ) {
+      issues.push(
+        `${context}: promoted implementation \`${repositoryPath}\` differs from evidence Commit \`${commit}\``
+      );
+    }
+  }
+
+  const tree = gitOutput(rootDir, ['show', '-s', '--format=%T', commit]);
   return tree ? { commit, tree } : null;
 }
 
 function sha256File(absolutePath) {
   return createHash('sha256').update(fs.readFileSync(absolutePath)).digest('hex');
+}
+function sourceScanDigest(absolutePath) {
+  const normalizedSource = fs.readFileSync(absolutePath, 'utf8').replace(/\r\n?/gu, '\n');
+  return createHash('sha256').update(normalizedSource).digest('hex');
 }
 
 function validateEvidenceResultsManifest({
@@ -3386,11 +3550,7 @@ function validateEvidenceResultsManifest({
     return;
   }
   const resultsPath = resultsPaths[0];
-  const canonicalResultsPath = canonicalRetainedEvidenceFile(
-    rootDir,
-    resultsPath,
-    evidenceRootRelative
-  );
+  const canonicalResultsPath = canonicalFileWithinRoot(rootDir, resultsPath, evidenceRootRelative);
   if (!canonicalResultsPath || !/\.json$/iu.test(resultsPath)) {
     issues.push(
       `${context}: ${evidenceKind} evidence Results must resolve to a retained JSON manifest under ${evidenceRootRelative}**`
@@ -3410,9 +3570,28 @@ function validateEvidenceResultsManifest({
     issues.push(`${context}: ${evidenceKind} evidence Results manifest must be an object`);
     return;
   }
-  if (manifest.schemaVersion !== 1 || manifest.kind !== 'proto-ui.coverage-evidence-results') {
+  const manifestKeys = new Set([
+    'schemaVersion',
+    'kind',
+    'repository',
+    'revision',
+    'tree',
+    'commands',
+    'results',
+    'artifacts',
+  ]);
+  const unknownManifestKeys = Object.keys(manifest).filter((key) => !manifestKeys.has(key));
+  if (unknownManifestKeys.length > 0) {
     issues.push(
-      `${context}: ${evidenceKind} evidence Results manifest must use schemaVersion 1 and kind proto-ui.coverage-evidence-results`
+      `${context}: ${evidenceKind} evidence Results manifest has unknown keys: ${unknownManifestKeys.join(', ')}`
+    );
+  }
+  if (manifest.schemaVersion !== 1) {
+    issues.push(`${context}: ${evidenceKind} evidence Results manifest schemaVersion must be 1`);
+  }
+  if (manifest.kind !== 'proto-ui.coverage-evidence-results') {
+    issues.push(
+      `${context}: ${evidenceKind} evidence Results manifest kind must be proto-ui.coverage-evidence-results`
     );
   }
   if (manifest.repository !== 'Proto-UI/Proto-UI') {
@@ -3442,12 +3621,14 @@ function validateEvidenceResultsManifest({
       if (
         !command ||
         typeof command !== 'object' ||
+        Array.isArray(command) ||
+        Object.keys(command).some((key) => key !== 'command' && key !== 'status') ||
         typeof command.command !== 'string' ||
         command.command.length === 0 ||
         command.status !== 'passed'
       ) {
         issues.push(
-          `${context}: ${evidenceKind} evidence Results commands must name non-empty commands with passed status`
+          `${context}: ${evidenceKind} evidence Results commands must name non-empty commands with passed status and no unknown keys`
         );
       }
     }
@@ -3467,43 +3648,14 @@ function validateEvidenceResultsManifest({
       if (
         !result ||
         typeof result !== 'object' ||
+        Array.isArray(result) ||
+        Object.keys(result).some((key) => key !== 'name' && key !== 'status') ||
         typeof result.name !== 'string' ||
         result.name.length === 0 ||
         result.status !== 'passed'
       ) {
         issues.push(
-          `${context}: ${evidenceKind} evidence Results entries must have non-empty names and passed status`
-        );
-      }
-    }
-  }
-  const manifestArtifacts = new Map();
-  if (Array.isArray(manifest.artifacts)) {
-    for (const artifact of manifest.artifacts) {
-      const repositoryPath = artifact?.path;
-      if (typeof repositoryPath !== 'string' || manifestArtifacts.has(repositoryPath)) {
-        issues.push(
-          `${context}: ${evidenceKind} evidence Results artifacts must have unique repository paths`
-        );
-        continue;
-      }
-      manifestArtifacts.set(repositoryPath, artifact);
-      const canonicalArtifactPath = canonicalRetainedEvidenceFile(
-        rootDir,
-        repositoryPath,
-        evidenceRootRelative
-      );
-      if (!canonicalArtifactPath) {
-        issues.push(
-          `${context}: ${evidenceKind} evidence Results artifact must resolve within ${evidenceRootRelative}**: ${repositoryPath}`
-        );
-        continue;
-      }
-      const actualSize = fs.statSync(canonicalArtifactPath).size;
-      const actualDigest = sha256File(canonicalArtifactPath);
-      if (artifact.size !== actualSize || artifact.sha256 !== actualDigest) {
-        issues.push(
-          `${context}: ${evidenceKind} evidence Results artifact metadata does not match retained file: ${repositoryPath}`
+          `${context}: ${evidenceKind} evidence Results entries must have non-empty names and passed status and no unknown keys`
         );
       }
     }
@@ -3519,7 +3671,7 @@ function validateEvidenceResultsManifest({
     evidenceRecordLabelValue(record, 'Multi-frame:', recordLabels)
   )) {
     if (!/\.json$/iu.test(frameManifestPath)) continue;
-    const canonicalManifestPath = canonicalRetainedEvidenceFile(
+    const canonicalManifestPath = canonicalFileWithinRoot(
       rootDir,
       frameManifestPath,
       evidenceRootRelative
@@ -3536,10 +3688,102 @@ function validateEvidenceResultsManifest({
       // The retained-artifact validator reports malformed frame manifests.
     }
   }
+  const canonicalKey = (absolutePath) =>
+    process.platform === 'win32' ? absolutePath.toLowerCase() : absolutePath;
+  const requiredCanonicalArtifacts = new Map();
   for (const repositoryPath of requiredArtifactPaths) {
-    if (!manifestArtifacts.has(repositoryPath)) {
+    const canonicalPath = canonicalFileWithinRoot(rootDir, repositoryPath, evidenceRootRelative);
+    if (canonicalPath) requiredCanonicalArtifacts.set(canonicalKey(canonicalPath), repositoryPath);
+  }
+
+  const manifestArtifacts = new Map();
+  if (Array.isArray(manifest.artifacts)) {
+    for (const artifact of manifest.artifacts) {
+      const repositoryPath = artifact?.path;
+      if (
+        !artifact ||
+        typeof artifact !== 'object' ||
+        Array.isArray(artifact) ||
+        Object.keys(artifact).some((key) => key !== 'path' && key !== 'size' && key !== 'sha256') ||
+        typeof repositoryPath !== 'string' ||
+        !Number.isSafeInteger(artifact.size) ||
+        artifact.size <= 0 ||
+        !/^[0-9a-f]{64}$/u.test(artifact.sha256 ?? '')
+      ) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifacts must use exact path, positive size, and lowercase SHA-256 fields`
+        );
+        if (typeof repositoryPath !== 'string') continue;
+      }
+      const canonicalArtifactPath = canonicalFileWithinRoot(
+        rootDir,
+        repositoryPath,
+        evidenceRootRelative
+      );
+      if (!canonicalArtifactPath) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifact must resolve within ${evidenceRootRelative}**: ${repositoryPath}`
+        );
+        continue;
+      }
+      const artifactKey = canonicalKey(canonicalArtifactPath);
+      if (artifactKey === canonicalKey(canonicalResultsPath)) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifacts must not include the Results manifest itself`
+        );
+        continue;
+      }
+      if (manifestArtifacts.has(artifactKey)) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifacts must have unique canonical paths`
+        );
+        continue;
+      }
+      manifestArtifacts.set(artifactKey, { artifact, repositoryPath });
+      if (!requiredCanonicalArtifacts.has(artifactKey)) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifacts contain unreferenced retained artifact \`${repositoryPath}\``
+        );
+      }
+      const actualSize = fs.statSync(canonicalArtifactPath).size;
+      const actualDigest = sha256File(canonicalArtifactPath);
+      if (artifact.size !== actualSize || artifact.sha256 !== actualDigest) {
+        issues.push(
+          `${context}: ${evidenceKind} evidence Results artifact metadata does not match retained file: ${repositoryPath}`
+        );
+      }
+    }
+  }
+  for (const [artifactKey, repositoryPath] of requiredCanonicalArtifacts) {
+    if (!manifestArtifacts.has(artifactKey)) {
       issues.push(
         `${context}: ${evidenceKind} evidence Results artifacts must include record artifact \`${repositoryPath}\``
+      );
+    }
+  }
+}
+
+function validateDogfoodedRetainedEvidenceArtifacts(record, context, rootDir, issues) {
+  const evidenceRoot = 'internal/agent-harness/evidence/';
+  for (const labelName of DOGFOODED_EVIDENCE_LABELS) {
+    const artifactPaths = explicitRepositoryPaths(
+      evidenceRecordLabelValue(record, labelName, DOGFOODED_RECORD_LABELS)
+    ).filter((repositoryPath) => repositoryPath.startsWith(evidenceRoot));
+    if (artifactPaths.length !== 1) {
+      issues.push(
+        `${context}: dogfooded evidence ${labelName} must bind exactly one retained artifact under ${evidenceRoot}**`
+      );
+      continue;
+    }
+    const repositoryPath = artifactPaths[0];
+    const canonicalPath = canonicalFileWithinRoot(rootDir, repositoryPath, evidenceRoot);
+    if (!canonicalPath) {
+      issues.push(
+        `${context}: dogfooded evidence ${labelName} retained artifact must resolve within ${evidenceRoot}**: ${repositoryPath}`
+      );
+    } else if (fs.statSync(canonicalPath).size === 0) {
+      issues.push(
+        `${context}: dogfooded evidence ${labelName} retained artifact must not be empty: ${repositoryPath}`
       );
     }
   }
@@ -3567,9 +3811,14 @@ function validateRetainedEvidenceArtifacts(record, context, rootDir, issues) {
       );
       continue;
     }
+    if (artifactPaths.length > 1) {
+      issues.push(
+        `${context}: ${label} must bind exactly one retained artifact under internal/website/evidence/**`
+      );
+    }
     for (const repositoryPath of artifactPaths) {
       const absolutePath = path.resolve(rootDir, repositoryPath);
-      const retainedArtifactPath = canonicalRetainedEvidenceFile(rootDir, repositoryPath);
+      const retainedArtifactPath = canonicalFileWithinRoot(rootDir, repositoryPath);
       if (!retainedArtifactPath) {
         if (!fs.existsSync(absolutePath)) {
           issues.push(`${context}: ${label} retained artifact does not exist: ${repositoryPath}`);
@@ -3624,7 +3873,7 @@ function validateRetainedEvidenceArtifacts(record, context, rootDir, issues) {
       }
       const canonicalFrames = new Set();
       for (const framePath of manifest.frames) {
-        const canonicalFrame = canonicalRetainedEvidenceFile(rootDir, framePath);
+        const canonicalFrame = canonicalFileWithinRoot(rootDir, framePath);
         if (!canonicalFrame) {
           issues.push(
             `${context}: Multi-frame: JSON manifest frame must be an existing retained artifact under internal/website/evidence/**: ${String(framePath)}`
@@ -3677,6 +3926,7 @@ function validateMainRows(
   rootDir,
   catalogEntries,
   governanceSnapshot,
+  promotionContext,
   issues
 ) {
   if (!table) {
@@ -3780,6 +4030,11 @@ function validateMainRows(
       }
     }
 
+    const boundRepositoryPaths = new Set(
+      (config.existingPathHeaders ?? []).flatMap((header) =>
+        explicitRepositoryPaths(record[header])
+      )
+    );
     for (const header of config.existingPathHeaders ?? []) {
       for (const repositoryPath of explicitRepositoryPaths(record[header])) {
         if (!fs.existsSync(path.resolve(rootDir, repositoryPath))) {
@@ -3789,12 +4044,6 @@ function validateMainRows(
         }
       }
     }
-
-    const boundRepositoryPaths = new Set(
-      (config.existingPathHeaders ?? []).flatMap((header) =>
-        explicitRepositoryPaths(record[header])
-      )
-    );
     for (const requiredRepositoryPath of config.requiredRepositoryPathsByRow?.[id] ?? []) {
       if (!boundRepositoryPaths.has(requiredRepositoryPath)) {
         issues.push(
@@ -3803,6 +4052,19 @@ function validateMainRows(
       }
     }
     const inlineCode = new Set(Object.values(record).flatMap(inlineCodeValues));
+    if (id === 'www.search.input-results') {
+      const ownsPagefindUi =
+        record['Current owner'].includes('`@pagefind/default-ui`') &&
+        record['Proto UI chain'].includes('P-BASE-INPUT') &&
+        inlineCode.has('new PagefindUI') &&
+        state === 'blocked' &&
+        /(?:^|\D)#420\b/u.test(record['Dependency and owner']);
+      if (!ownsPagefindUi) {
+        issues.push(
+          `${context}: matrix row \`www.search.input-results\` must structurally own \`new PagefindUI\` through \`@pagefind/default-ui\`, \`P-BASE-INPUT\`, blocked state, and dependency Issue #420`
+        );
+      }
+    }
     for (const requiredValue of config.requiredInlineCodeByRow?.[id] ?? []) {
       if (!inlineCode.has(requiredValue)) {
         issues.push(
@@ -3829,6 +4091,11 @@ function validateMainRows(
           `${context}: closure binding for \`${id}\` must retain reviewed PR #${closureBinding.pullRequest} head \`${closureBinding.implementationHead}\``
         );
       }
+      if (!inlineCode.has(closureBinding.mergeCommit)) {
+        issues.push(
+          `${context}: closure binding for \`${id}\` must retain merged PR #${closureBinding.pullRequest} commit \`${closureBinding.mergeCommit}\``
+        );
+      }
       for (const requiredValue of [...closureBinding.routes, ...closureBinding.repositoryPaths]) {
         if (!inlineCode.has(requiredValue)) {
           issues.push(`${context}: closure binding for \`${id}\` must retain \`${requiredValue}\``);
@@ -3846,6 +4113,7 @@ function validateMainRows(
         !pullRequest ||
         pullRequest.state !== 'MERGED' ||
         pullRequest.headSha !== closureBinding.implementationHead ||
+        pullRequest.mergeCommit !== closureBinding.mergeCommit ||
         pullRequest.url !==
           `https://github.com/Proto-UI/Proto-UI/pull/${closureBinding.pullRequest}`
       ) {
@@ -3936,6 +4204,9 @@ function validateMainRows(
       issues.push(`${context}: Evidence must name a baseline, executable check, or evidence path`);
     }
     if (config.kind === 'website' && state === 'self-hosted') {
+      const promotedImplementationPaths = repositoryPathsFromMatrixPath(record.Path).filter(
+        (repositoryPath) => repositoryPath.startsWith('apps/www/')
+      );
       const evidencePaths = explicitRepositoryPaths(record.Evidence).filter((repositoryPath) =>
         repositoryPath.startsWith(SELF_HOSTED_WEBSITE_EVIDENCE_ROOT)
       );
@@ -3946,7 +4217,7 @@ function validateMainRows(
       }
       for (const repositoryPath of evidencePaths) {
         const absoluteEvidencePath = path.resolve(rootDir, repositoryPath);
-        const retainedEvidencePath = canonicalRetainedEvidenceFile(rootDir, repositoryPath);
+        const retainedEvidencePath = canonicalFileWithinRoot(rootDir, repositoryPath);
         if (!retainedEvidencePath) {
           if (!fs.existsSync(absoluteEvidencePath)) {
             issues.push(`${context}: self-hosted evidence path does not exist: ${repositoryPath}`);
@@ -3974,7 +4245,9 @@ function validateMainRows(
           evidenceCommit,
           'self-hosted',
           evidenceContext,
-          issues
+          issues,
+          promotionContext,
+          promotedImplementationPaths
         );
         validateSelfHostedWebsiteEvidenceRecord(evidenceRecord, evidenceContext, rootDir, issues);
         validateEvidenceResultsManifest({
@@ -4019,7 +4292,7 @@ function validateMainRows(
           );
         } else if (
           repositoryPath.startsWith('apps/agent-harness/') &&
-          !canonicalRetainedEvidenceFile(rootDir, repositoryPath, 'apps/agent-harness/')
+          !canonicalFileWithinRoot(rootDir, repositoryPath, 'apps/agent-harness/')
         ) {
           issues.push(
             `${context}: dogfooded implementation path must resolve within apps/agent-harness/**: ${repositoryPath}`
@@ -4029,7 +4302,7 @@ function validateMainRows(
       const harnessImplementationPaths = implementationPaths.filter(
         (repositoryPath) =>
           repositoryPath.startsWith('apps/agent-harness/') &&
-          canonicalRetainedEvidenceFile(rootDir, repositoryPath, 'apps/agent-harness/')
+          canonicalFileWithinRoot(rootDir, repositoryPath, 'apps/agent-harness/')
       );
       if (harnessImplementationPaths.length === 0) {
         issues.push(
@@ -4046,7 +4319,7 @@ function validateMainRows(
       }
       for (const repositoryPath of evidencePaths) {
         const absoluteEvidencePath = path.resolve(rootDir, repositoryPath);
-        const retainedEvidencePath = canonicalRetainedEvidenceFile(
+        const retainedEvidencePath = canonicalFileWithinRoot(
           rootDir,
           repositoryPath,
           'internal/agent-harness/evidence/'
@@ -4078,6 +4351,14 @@ function validateMainRows(
           evidenceCommit,
           'dogfooded',
           evidenceContext,
+          issues,
+          promotionContext,
+          harnessImplementationPaths
+        );
+        validateDogfoodedRetainedEvidenceArtifacts(
+          evidenceRecord,
+          evidenceContext,
+          rootDir,
           issues
         );
         validateEvidenceResultsManifest({
@@ -4204,6 +4485,32 @@ function validateMainRows(
     } else if (isMeaningful(escapeOrExemption) && !includesIssue(reReviewOrRemoval)) {
       issues.push(`${context}: temporary escapes must link their removal as #<issue>`);
     }
+    const seenReReviewIssues = new Set();
+    for (const binding of issueBindings(reReviewOrRemoval)) {
+      const canonicalIssueUrl = `https://github.com/Proto-UI/Proto-UI/issues/${binding.number}`;
+      if (seenReReviewIssues.has(binding.number)) {
+        issues.push(`${context}: re-review issue #${binding.number} is bound more than once`);
+        continue;
+      }
+      seenReReviewIssues.add(binding.number);
+      if (binding.linkedUrl && binding.linkedUrl !== canonicalIssueUrl) {
+        issues.push(
+          `${context}: re-review issue #${binding.number} must use the canonical Proto-UI/Proto-UI Issue URL`
+        );
+      }
+      const governanceIssue = governanceSnapshot.issues.get(binding.number);
+      if (!governanceIssue) {
+        issues.push(
+          `${context}: re-review issue #${binding.number} is absent from the Proto-UI/Proto-UI governance snapshot`
+        );
+        continue;
+      }
+      if (governanceIssue.state !== 'OPEN') {
+        issues.push(
+          `${context}: re-review issue #${binding.number} must be OPEN; snapshot state is ${governanceIssue.state}/${governanceIssue.stateReason ?? 'NONE'}`
+        );
+      }
+    }
 
     if (config.kind === 'website') {
       requireMeaningfulLabels(
@@ -4276,7 +4583,7 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
     lines,
     headingIndex + 1,
     tableEnd,
-    ['Interactive or integration source', 'Owning matrix row'],
+    ['Interactive or integration source', 'Owning matrix row', 'Source SHA-256'],
     `${relativePath} Source-scan bindings`,
     issues,
     { requireContiguous: true }
@@ -4303,66 +4610,19 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
       );
       continue;
     }
+    const digest = stripInlineCode(row.cells[2]);
+    if (!/^[0-9a-f]{64}$/u.test(digest)) {
+      issues.push(`${context}: source binding must retain a lowercase SHA-256 source fingerprint`);
+      continue;
+    }
     const ownerIds = [...row.cells[1].matchAll(/`(www\.[a-z0-9.-]+)`/g)].map((match) => match[1]);
     if (ownerIds.length === 0) {
       issues.push(`${context}: source binding must name at least one owning matrix row ID`);
       continue;
     }
-    bindings.set(sourcePath, { line: row.line, ownerIds: [...new Set(ownerIds)] });
+    bindings.set(sourcePath, { digest, line: row.line, ownerIds: [...new Set(ownerIds)] });
   }
   return bindings;
-}
-
-function parseSourceFingerprints(lines, afterIndex, relativePath, issues) {
-  const headingIndexes = findExactLineIndexes(lines, '## Source-scan fingerprints').filter(
-    (index) => index > afterIndex
-  );
-  if (headingIndexes.length === 0) return new Map();
-  if (headingIndexes.length !== 1) {
-    issues.push(
-      `${relativePath}: expected exactly one \`## Source-scan fingerprints\` heading after ${END_MARKER}; found ${headingIndexes.length}`
-    );
-    return new Map();
-  }
-  const headingIndex = headingIndexes[0];
-  const nextHeadingOffset = lines
-    .slice(headingIndex + 1)
-    .findIndex((line) => /^#{1,6}\s+/.test(line.trim()));
-  const tableEnd = nextHeadingOffset === -1 ? lines.length : headingIndex + 1 + nextHeadingOffset;
-  const table = parseTable(
-    lines,
-    headingIndex + 1,
-    tableEnd,
-    ['Website source', 'SHA-256'],
-    `${relativePath} Source-scan fingerprints`,
-    issues,
-    { requireContiguous: true }
-  );
-  const fingerprints = new Map();
-  if (!table) return fingerprints;
-  for (const row of table.rows) {
-    const context = `${relativePath}:${row.line}`;
-    const sourcePaths = explicitRepositoryPaths(row.cells[0]);
-    const sourcePath = sourcePaths[0];
-    const digest = stripInlineCode(row.cells[1]);
-    if (
-      sourcePaths.length !== 1 ||
-      (!sourcePath.startsWith('apps/www/src/') && !sourcePath.startsWith('apps/www/public/'))
-    ) {
-      issues.push(`${context}: source fingerprint must name exactly one Website source path`);
-      continue;
-    }
-    if (!/^[0-9a-f]{64}$/u.test(digest)) {
-      issues.push(`${context}: source fingerprint must be a lowercase SHA-256 digest`);
-      continue;
-    }
-    if (fingerprints.has(sourcePath)) {
-      issues.push(`${context}: duplicate source fingerprint for \`${sourcePath}\``);
-      continue;
-    }
-    fingerprints.set(sourcePath, { digest, line: row.line });
-  }
-  return fingerprints;
 }
 
 function validateWebsiteSourceBindings(
@@ -4374,35 +4634,29 @@ function validateWebsiteSourceBindings(
   issues
 ) {
   const bindings = parseSourceBindings(lines, afterIndex, relativePath, issues);
-  const fingerprints = parseSourceFingerprints(lines, afterIndex, relativePath, issues);
-  for (const [sourcePath, fingerprint] of fingerprints) {
+  for (const [sourcePath, binding] of bindings) {
     const absolutePath = path.resolve(rootDir, sourcePath);
     if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
       issues.push(
-        `${relativePath}:${fingerprint.line}: source fingerprint references missing file \`${sourcePath}\``
+        `${relativePath}:${binding.line}: source binding references missing path \`${sourcePath}\``
       );
       continue;
     }
-    if (sha256File(absolutePath) !== fingerprint.digest) {
+    if (sourceScanDigest(absolutePath) !== binding.digest) {
       issues.push(
-        `${relativePath}:${fingerprint.line}: source fingerprint for \`${sourcePath}\` does not match its reviewed SHA-256`
+        `${relativePath}:${binding.line}: source fingerprint for \`${sourcePath}\` does not match its reviewed SHA-256`
       );
     }
   }
   const interactiveSources = new Set(discoverWebsiteInteractiveSources(rootDir));
   for (const sourcePath of interactiveSources) {
-    if (!fingerprints.has(sourcePath)) {
+    if (!bindings.has(sourcePath)) {
       issues.push(
-        `${relativePath}: interactive website source \`${sourcePath}\` is missing a reviewed Source-scan fingerprint`
+        `${relativePath}: interactive website source \`${sourcePath}\` is missing a reviewed Source-scan binding and fingerprint`
       );
     }
   }
-  for (const [sourcePath, binding] of bindings) {
-    if (!fs.existsSync(path.resolve(rootDir, sourcePath))) {
-      issues.push(
-        `${relativePath}:${binding.line}: source binding references missing path \`${sourcePath}\``
-      );
-    }
+  for (const binding of bindings.values()) {
     for (const ownerId of binding.ownerIds) {
       if (!matrixResult.seenIds.has(ownerId)) {
         issues.push(
@@ -4480,13 +4734,10 @@ function validateWebsiteSourceBindings(
       continue;
     }
 
-    if (directOwners.length === 1 && binding) {
-      if (!hasNativeDirectOwner) {
-        issues.push(
-          `${relativePath}: interactive website source \`${sourcePath}\` is already owned by matrix row \`${directOwners[0].id}\`; use the direct Path or the explicit binding, not both`
-        );
-        continue;
-      }
+    if (directOwners.length === 1 && binding && !binding.ownerIds.includes(directOwners[0].id)) {
+      issues.push(
+        `${relativePath}:${binding.line}: grouped binding for \`${sourcePath}\` must include direct matrix Path owner \`${directOwners[0].id}\``
+      );
     }
 
     if (directOwners.length > 1) {
@@ -4811,7 +5062,14 @@ function validateTargetClassTotals(config, lines, afterIndex, actualCounts, rela
   }
 }
 
-function validateMatrixFile(rootDir, config, catalogEntries, governanceSnapshot, issues) {
+function validateMatrixFile(
+  rootDir,
+  config,
+  catalogEntries,
+  governanceSnapshot,
+  promotionContext,
+  issues
+) {
   validateInheritedDependencyVersions(rootDir, config, issues);
   const absolutePath = path.join(rootDir, config.relativePath);
   if (!fs.existsSync(absolutePath)) {
@@ -4819,6 +5077,24 @@ function validateMatrixFile(rootDir, config, catalogEntries, governanceSnapshot,
       `${config.relativePath}: file is missing; create it with ${config.startMarker}, the exact matrix table, ${END_MARKER}, and a ## State totals table`
     );
     return;
+  }
+  const governedSourceRoots =
+    config.kind === 'website'
+      ? [
+          ['apps/www/src', 'Website source'],
+          ['apps/www/public', 'Website public source'],
+        ]
+      : [['apps/agent-harness/src', 'Harness source']];
+  for (const [sourceRootRelative, label] of governedSourceRoots) {
+    const sourceRoot = path.resolve(rootDir, sourceRootRelative);
+    if (fs.existsSync(sourceRoot)) {
+      walkFiles(sourceRoot, {
+        boundary: sourceRoot,
+        issues,
+        label,
+        rootDir,
+      });
+    }
   }
 
   const content = fs.readFileSync(absolutePath, 'utf8');
@@ -4856,6 +5132,7 @@ function validateMatrixFile(rootDir, config, catalogEntries, governanceSnapshot,
     rootDir,
     catalogEntries,
     governanceSnapshot,
+    promotionContext,
     issues
   );
   validateTotals(config, lines, endIndex, matrixResult.stateCounts, config.relativePath, issues);
@@ -4890,12 +5167,25 @@ function validateMatrixFile(rootDir, config, catalogEntries, governanceSnapshot,
   }
 }
 
-export function collectCoverageMatrixIssues({ rootDir = process.cwd() } = {}) {
+export function collectCoverageMatrixIssues({
+  rootDir = process.cwd(),
+  baseRevision = null,
+  headRevision = null,
+  mergeRevision = null,
+} = {}) {
   const issues = [];
   const catalogEntries = loadCatalogEntries(rootDir, issues);
   const governanceSnapshot = loadGovernanceSnapshot(rootDir, issues);
+  const promotionContext = { baseRevision, headRevision, mergeRevision };
   for (const config of MATRIX_CONFIGS) {
-    validateMatrixFile(rootDir, config, catalogEntries, governanceSnapshot, issues);
+    validateMatrixFile(
+      rootDir,
+      config,
+      catalogEntries,
+      governanceSnapshot,
+      promotionContext,
+      issues
+    );
   }
   return issues;
 }
@@ -4913,7 +5203,11 @@ function isMainModule() {
 
 if (isMainModule()) {
   try {
-    const result = validateCoverageMatrices();
+    const result = validateCoverageMatrices({
+      baseRevision: process.env.COVERAGE_BASE_REVISION ?? null,
+      headRevision: process.env.COVERAGE_HEAD_REVISION ?? null,
+      mergeRevision: process.env.COVERAGE_MERGE_REVISION ?? null,
+    });
     console.log(`[coverage-matrices] OK (${result.matrixCount} matrices)`);
   } catch (error) {
     if (error instanceof CoverageMatrixValidationError) {

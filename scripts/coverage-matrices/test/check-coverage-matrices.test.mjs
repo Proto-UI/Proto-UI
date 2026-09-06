@@ -24,6 +24,7 @@ function createRoot() {
   for (const [id, status] of [
     ['P-ACTIVE-BUTTON', 'active'],
     ['P-BASE-BUTTON', 'draft'],
+    ['P-BASE-INPUT', 'draft'],
     ['P-BASE-SCROLL-AREA', 'draft'],
     ['P-REMOVED-BUTTON', 'removed'],
     ['A-WEB-COMPONENT-0001', 'active'],
@@ -186,6 +187,32 @@ function commitFixtureRoot(root) {
   );
   return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 }
+function commitFixtureChange(root, repositoryPath, content, message = 'fixture change') {
+  const absolutePath = path.join(root, repositoryPath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, content, 'utf8');
+  execFileSync('git', ['add', repositoryPath], { cwd: root });
+  execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit',
+      '--quiet',
+      '--no-gpg-sign',
+      '-m',
+      message,
+    ],
+    { cwd: root }
+  );
+  return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+}
+
+function promotionOptions(baseRevision, headRevision = baseRevision) {
+  return { baseRevision, headRevision };
+}
 
 function gitTreeForRevision(root, revision) {
   try {
@@ -231,6 +258,11 @@ function sourceDigest(root, repositoryPath) {
   return fs.existsSync(absolutePath)
     ? createHash('sha256').update(fs.readFileSync(absolutePath)).digest('hex')
     : '0'.repeat(64);
+}
+function sourceScanDigest(root, repositoryPath) {
+  const absolutePath = path.join(root, repositoryPath);
+  const normalizedSource = fs.readFileSync(absolutePath, 'utf8').replace(/\r\n?/gu, '\n');
+  return createHash('sha256').update(normalizedSource).digest('hex');
 }
 
 function separator(headers) {
@@ -311,7 +343,7 @@ function validDocumentSemanticsRow(overrides = {}) {
     Milestone: 'M0 / S14',
     State: 'native/static',
     Evidence:
-      'Issue #579; merged PR #580; implementation head `2a6d5f3208d91e5c9862a67408a39ff208d43306`; routes `/en/ui-libraries/shadcn/select/`, `/zh-cn/ui-libraries/shadcn/select/`, `/en/start-here/quick-start/`, `/zh-cn/start-here/quick-start/`; `apps/www/src/components/override/MarkdownContent.astro`; `apps/www/src/styles/markdown.css`; `apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts`; `docs/evidence/579-docs-content-flow`',
+      'Issue #579; merged PR #580; reviewed implementation head `2a6d5f3208d91e5c9862a67408a39ff208d43306`; merged ancestry commit `9841c86a10940267fb30ee25b63c9a5a39f76fe6`; routes `/en/ui-libraries/shadcn/select/`, `/zh-cn/ui-libraries/shadcn/select/`, `/en/start-here/quick-start/`, `/zh-cn/start-here/quick-start/`; `apps/www/src/components/override/MarkdownContent.astro`; `apps/www/src/styles/markdown.css`; `apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts`; `docs/evidence/579-docs-content-flow`',
     'Escape or exemption':
       'Reason: native document flow and Starlight presentation are the intended semantic end state; limit: static HTML/CSS flow only',
     'Re-review or removal issue':
@@ -385,6 +417,34 @@ function writeSelfHostedWebsiteArtifacts(
     'utf8'
   );
 }
+function writeSelfHostedPromotion(
+  root,
+  revision,
+  { manifestOverrides = {}, evidenceOverrides = {}, matrixOverrides = {} } = {}
+) {
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  const resultsPath = 'internal/website/evidence/s14/results.json';
+  writeSelfHostedWebsiteArtifacts(root, revision);
+  if (Object.keys(manifestOverrides).length > 0) {
+    const manifest = JSON.parse(fs.readFileSync(path.join(root, resultsPath), 'utf8'));
+    fs.writeFileSync(
+      path.join(root, resultsPath),
+      `${JSON.stringify({ ...manifest, ...manifestOverrides }, null, 2)}\n`,
+      'utf8'
+    );
+  }
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    validSelfHostedWebsiteEvidence({ Commit: revision, ...evidenceOverrides }),
+    'utf8'
+  );
+  writeValidMatrices(root, {
+    State: 'self-hosted',
+    Evidence: `\`${evidencePath}\``,
+    ...matrixOverrides,
+  });
+  return { evidencePath, resultsPath };
+}
 
 function validHarnessRow(overrides = {}) {
   return {
@@ -449,9 +509,9 @@ function writeMatrix(
   const defaultWebsiteBindings = [
     '## Source-scan bindings',
     '',
-    '| Interactive or integration source | Owning matrix row |',
-    '| --- | --- |',
-    '| `apps/www/src/components/override/Header.astro` | `www.shell.primary-nav`, `www.shell.header-separators` |',
+    '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
+    '| --- | --- | --- |',
+    `| \`apps/www/src/components/override/Header.astro\` | \`www.shell.primary-nav\`, \`www.shell.header-separators\` | \`${sourceScanDigest(root, 'apps/www/src/components/override/Header.astro')}\` |`,
   ].join('\n');
   const absolutePath = path.join(root, config.relativePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
@@ -563,6 +623,17 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
                   .join(', ')}`,
               }
             : {}),
+          ...(id === 'www.search.input-results'
+            ? {
+                'Current owner': '`@pagefind/default-ui` plus Website search orchestration',
+                'Proto UI chain': '`P-BASE-INPUT` draft target plus current Pagefind UI',
+                Lifecycle: '`P-BASE-INPUT=draft`; third-party UI remains current',
+                State: 'blocked',
+                'Dependency and owner': '#420; owner: website search',
+                Evidence:
+                  '`@pagefind/default-ui` constructs `new PagefindUI` for the Website search input and results',
+              }
+            : {}),
         });
       }),
   ];
@@ -581,25 +652,14 @@ function writeValidMatrices(
     ],
     ...websiteBindings,
   ];
-  const websiteFingerprintPaths = [
-    ...new Set(websiteBindingEntries.map(([sourcePath]) => sourcePath)),
-  ];
   const extraText = [
     '## Source-scan bindings',
     '',
-    '| Interactive or integration source | Owning matrix row |',
-    '| --- | --- |',
+    '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
+    '| --- | --- | --- |',
     ...websiteBindingEntries.map(
       ([sourcePath, ownerIds]) =>
-        `| \`${sourcePath}\` | ${ownerIds.map((ownerId) => `\`${ownerId}\``).join(', ')} |`
-    ),
-    '',
-    '## Source-scan fingerprints',
-    '',
-    '| Website source | SHA-256 |',
-    '| --- | --- |',
-    ...websiteFingerprintPaths.map(
-      (sourcePath) => `| \`${sourcePath}\` | \`${sourceDigest(root, sourcePath)}\` |`
+        `| \`${sourcePath}\` | ${ownerIds.map((ownerId) => `\`${ownerId}\``).join(', ')} | \`${sourceScanDigest(root, sourcePath)}\` |`
     ),
   ].join('\n');
   writeMatrix(
@@ -630,10 +690,10 @@ function writeValidMatrices(
   );
 }
 
-function validationMessage(root) {
+function validationMessage(root, options = {}) {
   let caught;
   try {
-    validateCoverageMatrices({ rootDir: root });
+    validateCoverageMatrices({ rootDir: root, ...options });
   } catch (error) {
     caught = error;
   }
@@ -2301,9 +2361,9 @@ test('requires a grouped binding to name every direct owner across exemption cla
     extraText: [
       '## Source-scan bindings',
       '',
-      '| Interactive or integration source | Owning matrix row |',
-      '| --- | --- |',
-      `| \`${sharedSource}\` | grouped row \`www.demo.runtime-select\` |`,
+      '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
+      '| --- | --- | --- |',
+      `| \`${sharedSource}\` | grouped row \`www.demo.runtime-select\` | \`${sourceScanDigest(root, sharedSource)}\` |`,
     ].join('\n'),
   });
   writeMatrix(
@@ -2732,7 +2792,11 @@ test('rejects fake images and traversal in multi-frame manifests', () => {
 
 test('accepts reproducible multi-dimensional evidence for a self-hosted website row', () => {
   const root = createRoot();
-  writeValidMatrices(root);
+  const implementationPath = path.join(root, 'apps/www/src/components/override/Search.astro');
+  fs.mkdirSync(path.dirname(implementationPath), { recursive: true });
+  fs.writeFileSync(implementationPath, '<main>search</main>', 'utf8');
+  const websiteBindings = [['apps/www/src/components/override/Search.astro', ['www.shell.search']]];
+  writeValidMatrices(root, {}, {}, { websiteBindings });
   const revision = commitFixtureRoot(root);
   const evidencePath = 'internal/website/evidence/s14/closeout.md';
   const absoluteEvidencePath = path.join(root, evidencePath);
@@ -2743,12 +2807,16 @@ test('accepts reproducible multi-dimensional evidence for a self-hosted website 
     validSelfHostedWebsiteEvidence({ Commit: revision }),
     'utf8'
   );
-  writeValidMatrices(root, {
-    State: 'self-hosted',
-    Evidence: `\`${evidencePath}\``,
-  });
+  writeValidMatrices(
+    root,
+    { State: 'self-hosted', Evidence: `\`${evidencePath}\`` },
+    {},
+    { websiteBindings }
+  );
 
-  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
+    matrixCount: 2,
+  });
 });
 
 test('requires the raw-runtime row to inventory every shipped active Adapter profile', () => {
@@ -3210,7 +3278,9 @@ test('allows an app-local prototype row to advance to dogfooded with implementat
       'Dependency and owner': 'No blocker; owner: Harness application',
     }
   );
-  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
+    matrixCount: 2,
+  });
 });
 
 test('requires dogfooded Harness evidence to bind an exact 40-character Git SHA', () => {
@@ -5236,14 +5306,14 @@ test('rejects unreviewed third-party Harness UI dependencies by default', () => 
 test('requires renderable Website sources in unlisted source roots to have a classification', () => {
   const root = createRoot();
   writeValidMatrices(root);
-  const relativePath = 'apps/www/src/presenters/StaticSurface.astro';
+  const relativePath = 'apps/www/src/features/HiddenSurface.astro';
   const absolutePath = path.join(root, relativePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(absolutePath, '<main><slot /></main>', 'utf8');
 
   assert.match(
     validationMessage(root),
-    /website component source `apps\/www\/src\/presenters\/StaticSurface\.astro` is not classified by a matrix row/
+    /website component source `apps\/www\/src\/features\/HiddenSurface\.astro` is not classified by a matrix row/
   );
 });
 
@@ -5253,6 +5323,7 @@ test('rejects symlink escapes for every retained Website artifact label', () => 
     'Browser:': 'internal/website/evidence/s14/browser-results.json',
     'Accessibility:': 'internal/website/evidence/s14/accessibility-results.json',
     'Screenshot:': 'internal/website/evidence/s14/home-desktop.png',
+    'Multi-frame:': 'internal/website/evidence/s14/navigation-frames.json',
     'Results:': 'internal/website/evidence/s14/results.json',
   })) {
     const root = createRoot();
@@ -5583,6 +5654,10 @@ test('rejects evidence commits outside the candidate revision ancestry', () => {
     ],
     { cwd: root }
   );
+  const candidateRevision = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim();
   const evidencePath = 'internal/website/evidence/s14/closeout.md';
   writeSelfHostedWebsiteArtifacts(root, evidenceRevision);
   fs.writeFileSync(
@@ -5593,8 +5668,8 @@ test('rejects evidence commits outside the candidate revision ancestry', () => {
   writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
 
   assert.match(
-    validationMessage(root),
-    /self-hosted evidence Commit .* must be an ancestor of the candidate revision/
+    validationMessage(root, promotionOptions(candidateRevision)),
+    /self-hosted evidence Commit .* is not contained in the reviewed base/
   );
 });
 
@@ -5675,5 +5750,681 @@ test('requires every multi-frame image in the evidence results manifest', () => 
   assert.match(
     validationMessage(root),
     /self-hosted evidence Results artifacts must include record artifact `internal\/website\/evidence\/s14\/navigation-after\.png`/
+  );
+});
+
+test('accepts same-root evidence symlinks after canonical validation', () => {
+  const root = createRoot();
+  const implementationPath = path.join(root, 'apps/www/src/components/override/Search.astro');
+  fs.mkdirSync(path.dirname(implementationPath), { recursive: true });
+  fs.writeFileSync(implementationPath, '<main>search</main>', 'utf8');
+  const websiteBindings = [['apps/www/src/components/override/Search.astro', ['www.shell.search']]];
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  writeSelfHostedWebsiteArtifacts(root, revision);
+  const buildPath = path.join(root, 'internal/website/evidence/s14/build.log');
+  const canonicalBuildPath = path.join(root, 'internal/website/evidence/s14/build-canonical.log');
+  fs.renameSync(buildPath, canonicalBuildPath);
+  fs.symlinkSync(canonicalBuildPath, buildPath);
+  const resultsPath = path.join(root, 'internal/website/evidence/s14/results.json');
+  const manifest = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+  const buildArtifact = manifest.artifacts.find(
+    (artifact) => artifact.path === 'internal/website/evidence/s14/build.log'
+  );
+  buildArtifact.size = fs.statSync(canonicalBuildPath).size;
+  buildArtifact.sha256 = sourceDigest(root, 'internal/website/evidence/s14/build.log');
+  fs.writeFileSync(resultsPath, `${JSON.stringify(manifest)}\n`, 'utf8');
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    validSelfHostedWebsiteEvidence({ Commit: revision }),
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    { State: 'self-hosted', Evidence: `\`${evidencePath}\`` },
+    {},
+    { websiteBindings }
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
+    matrixCount: 2,
+  });
+});
+
+test('rejects a multi-frame image symlink escaping the Website evidence root', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const evidencePath = 'internal/website/evidence/s14/closeout.md';
+  writeSelfHostedWebsiteArtifacts(root, revision);
+  const framePath = path.join(root, 'internal/website/evidence/s14/navigation-after.png');
+  const outsidePath = path.join(root, 'internal/records/navigation-after.png');
+  fs.mkdirSync(path.dirname(outsidePath), { recursive: true });
+  fs.renameSync(framePath, outsidePath);
+  fs.symlinkSync(outsidePath, framePath);
+  fs.writeFileSync(
+    path.join(root, evidencePath),
+    validSelfHostedWebsiteEvidence({ Commit: revision }),
+    'utf8'
+  );
+  writeValidMatrices(root, { State: 'self-hosted', Evidence: `\`${evidencePath}\`` });
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Multi-frame: JSON manifest frame must be an existing retained artifact under internal\/website\/evidence\/\*\*/
+  );
+});
+
+test('treats LF and CRLF scanner inputs as one reviewed fingerprint', () => {
+  const root = createRoot();
+  const sourcePath = 'apps/www/src/components/override/Header.astro';
+  const lfSource =
+    '<nav>Docs</nav>\n<script>window.addEventListener("keydown", openPalette)</script>\n';
+  fs.writeFileSync(path.join(root, sourcePath), lfSource, 'utf8');
+  writeValidMatrices(root);
+  fs.writeFileSync(path.join(root, sourcePath), lfSource.replaceAll('\n', '\r\n'), 'utf8');
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('accepts reviewed fingerprints embedded in Website source bindings', () => {
+  const root = createRoot();
+  const sourcePath = 'apps/www/src/components/override/Header.astro';
+  const source =
+    '<nav>Docs</nav>\n<script>window.addEventListener("keydown", openPalette)</script>\n';
+  fs.writeFileSync(path.join(root, sourcePath), source, 'utf8');
+  const digest = createHash('sha256').update(source.replaceAll('\r\n', '\n')).digest('hex');
+  const websiteRows = rowsWithRequiredIds(MATRIX_CONFIGS[0], validWebsiteRow(), validWebsiteRow);
+  writeMatrix(root, MATRIX_CONFIGS[0], websiteRows, {
+    extraText: [
+      '## Source-scan bindings',
+      '',
+      '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
+      '| --- | --- | --- |',
+      `| \`${sourcePath}\` | \`www.shell.primary-nav\`, \`www.shell.header-separators\` | \`${digest}\` |`,
+    ].join('\n'),
+  });
+  writeMatrix(
+    root,
+    MATRIX_CONFIGS[1],
+    rowsWithRequiredIds(MATRIX_CONFIGS[1], validHarnessRow(), validHarnessRow)
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('does not classify remote inert JSON script sources as executable', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/RemoteStructuredData.astro';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    '<main>Docs</main><script type="application/ld+json" src="https://cdn.example/schema.json"></script>',
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [[relativePath, ['www.content.document-semantics']]],
+    }
+  );
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('rejects render-evaluated reducer and external-store callbacks', () => {
+  for (const renderHook of [
+    'const [value] = useReducer(() => { actions.send(); return 1; }, 0);',
+    'const [value] = useReducer((state) => state, 0, () => { actions.send(); return 1; });',
+    'const value = useSyncExternalStore(subscribe, () => { actions.send(); return 1; }, () => { actions.send(); return 1; });',
+  ]) {
+    const root = createRoot();
+    const relativePath = 'apps/agent-harness/src/run/RenderCallback.tsx';
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `import { useReducer, useSyncExternalStore } from 'react'; import * as actions from './agent-actions'; const subscribe = () => () => {}; export function RenderCallback() { ${renderHook} return <section>{value}</section>; }`,
+      'utf8'
+    );
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      /Harness source `apps\/agent-harness\/src\/run\/RenderCallback\.tsx` contains a forbidden interaction or DOM state machine/
+    );
+  }
+});
+
+test('does not execute callbacks merely memoized by useCallback', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/MemoizedCallback.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import { useCallback } from 'react'; import * as actions from './agent-actions'; export function MemoizedCallback() { const run = useCallback(() => actions.send(), []); return <section>{String(Boolean(run))}</section>; }",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('ignores ordinary new URL expressions outside Worker constructors', () => {
+  for (const relativePath of [
+    'apps/www/src/components/asset-url.ts',
+    'apps/agent-harness/src/run/asset-url.ts',
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      "export const asset = new URL('../../../../packages/runtime/src/worker.ts', import.meta.url);",
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  }
+});
+
+test('scans aliased local named exports for render actions', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/AliasedSurface.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import * as actions from './agent-actions'; function Surface() { actions.send(); return <div>Run</div>; } export { Surface as AliasedSurface };",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/AliasedSurface\.tsx` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('ignores named re-exports and exported data functions without rendered roots', () => {
+  for (const source of [
+    "export { Surface } from './surface';",
+    'function selectData() { return { send: true }; } export { selectData as Surface };',
+  ]) {
+    const root = createRoot();
+    const relativePath = 'apps/agent-harness/src/run/DataExports.ts';
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root);
+    assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  }
+});
+
+test('respects lexical shadowing for named effect callbacks', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/ShadowedEffect.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import { useEffect } from 'react'; import * as actions from './agent-actions'; const runOnMount = () => actions.send(); export function ShadowedEffect() { const runOnMount = () => undefined; useEffect(runOnMount, []); return <section>Run</section>; }",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('detects computed reflected ARIA writes without flagging domain models', () => {
+  for (const [relativePath, source, expected] of [
+    [
+      'apps/www/src/components/computed-aria.ts',
+      "const element = document.querySelector('button'); if (element) element['ariaExpanded'] = 'true';",
+      /interactive website source `apps\/www\/src\/components\/computed-aria\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/computed-aria.ts',
+      "const element = document.querySelector('button'); if (element) element['ariaExpanded'] = 'true';",
+      /Harness source `apps\/agent-harness\/src\/run\/computed-aria\.ts` contains a forbidden interaction or DOM state machine/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+
+  const root = createRoot();
+  const modelPath = path.join(root, 'apps/agent-harness/src/run/model-aria.ts');
+  fs.mkdirSync(path.dirname(modelPath), { recursive: true });
+  fs.writeFileSync(
+    modelPath,
+    "const model = { ariaExpanded: 'false' }; model.ariaExpanded = 'true';",
+    'utf8'
+  );
+  writeValidMatrices(root);
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+test('detects computed Harness addEventListener calls', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/computed-listener.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "document.querySelector('button')?.['addEventListener']('click', run);",
+    'utf8'
+  );
+  writeValidMatrices(root);
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/computed-listener\.ts` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('requires structural Pagefind UI ownership on the input-results row', () => {
+  const root = createRoot();
+  const searchPath = 'apps/www/src/components/override/Search.astro';
+  fs.mkdirSync(path.dirname(path.join(root, searchPath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, searchPath),
+    "---\nconst { PagefindUI } = await import('@pagefind/default-ui');\nnew PagefindUI({ element: '#search' });\n---\n<div id=\"search\"></div>",
+    'utf8'
+  );
+  writeValidMatrices(root, {
+    ID: 'www.search.input-results',
+    Path: `\`${searchPath}\``,
+    'Target class': 'site-composition',
+    State: 'blocked',
+    'Proto UI chain': 'Input and result UI',
+    Lifecycle: 'Third-party UI remains current',
+    'Dependency and owner': '#420; owner: website search',
+    Evidence: 'Reviewed interaction dependency `@pagefind/default-ui`',
+  });
+
+  assert.match(
+    validationMessage(root),
+    /matrix row `www\.search\.input-results` must structurally own `new PagefindUI`/
+  );
+});
+
+test('discovers governed symlink sources and rejects source-root escapes', () => {
+  const internalRoot = createRoot();
+  const internalTarget = path.join(internalRoot, 'apps/www/src/features/internal-surface.txt');
+  const internalLink = path.join(internalRoot, 'apps/www/src/features/LinkedSurface.astro');
+  fs.mkdirSync(path.dirname(internalTarget), { recursive: true });
+  fs.writeFileSync(internalTarget, '<main>Linked</main>', 'utf8');
+  fs.symlinkSync(internalTarget, internalLink);
+  writeValidMatrices(internalRoot);
+  assert.match(
+    validationMessage(internalRoot),
+    /website component source `apps\/www\/src\/features\/LinkedSurface\.astro` is not classified/
+  );
+
+  const externalRoot = createRoot();
+  const externalTarget = path.join(externalRoot, 'internal/records/escaped-source.ts');
+  const externalLink = path.join(externalRoot, 'apps/agent-harness/src/run/escaped-source.ts');
+  fs.mkdirSync(path.dirname(externalTarget), { recursive: true });
+  fs.writeFileSync(externalTarget, "document.querySelector('button')?.focus();", 'utf8');
+  fs.mkdirSync(path.dirname(externalLink), { recursive: true });
+  fs.symlinkSync(externalTarget, externalLink);
+  writeValidMatrices(externalRoot);
+  assert.match(
+    validationMessage(externalRoot),
+    /Harness source symlink `apps\/agent-harness\/src\/run\/escaped-source\.ts` resolves outside its governed source root/
+  );
+});
+
+test('validates every exemption re-review Issue through governance', () => {
+  for (const [issueOverrides, reReview, expected] of [
+    [
+      {},
+      '#999999 if the native surface gains interaction',
+      /re-review issue #999999 is absent from the Proto-UI\/Proto-UI governance snapshot/,
+    ],
+    [
+      { 533: { state: 'CLOSED', stateReason: 'COMPLETED' } },
+      '#533 if the native surface gains interaction',
+      /re-review issue #533 must be OPEN; snapshot state is CLOSED\/COMPLETED/,
+    ],
+  ]) {
+    const root = createRoot();
+    writeGovernanceSnapshot(root, issueOverrides);
+    writeValidMatrices(root, {
+      ID: 'www.shell.site-title',
+      Path: '`apps/www/src/components/override/SiteTitle.astro`',
+      'Target class': 'native/static',
+      State: 'native/static',
+      'Proto UI chain': 'Native semantic HTML',
+      Lifecycle: 'Native HTML; no catalog entity required',
+      'Dependency and owner': 'No Proto UI dependency; owner: website team',
+      'Escape or exemption': 'Reason: native semantic HTML owns the complete information path',
+      'Re-review or removal issue': reReview,
+    });
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('requires retained artifacts for every dogfooded evidence dimension', () => {
+  for (const label of ['Build', 'Browser', 'Accessibility', 'Lifecycle', 'Design']) {
+    const root = createRoot();
+    const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+    const absoluteImplementationPath = path.join(root, implementationPath);
+    fs.mkdirSync(path.dirname(absoluteImplementationPath), { recursive: true });
+    fs.writeFileSync(absoluteImplementationPath, 'fixture', 'utf8');
+    writeValidMatrices(root);
+    const revision = commitFixtureRoot(root);
+    const { evidencePath } = writeHarnessPromotionArtifacts(root, revision);
+    const absoluteEvidencePath = path.join(root, evidencePath);
+    const record = fs.readFileSync(absoluteEvidencePath, 'utf8');
+    fs.writeFileSync(
+      absoluteEvidencePath,
+      record.replace(new RegExp(`^${label}:.*$`, 'mu'), `${label}: passed`),
+      'utf8'
+    );
+    writeValidMatrices(
+      root,
+      {},
+      {
+        ID: 'harness.run.tool-invocation',
+        'Target owner': 'Harness app-local Tool Invocation prototype',
+        'Target class': 'app-local-proto',
+        State: 'dogfooded',
+        Path: `\`${implementationPath}\``,
+        Evidence: `Build: passed; Browser: passed; Accessibility: passed; Lifecycle: passed; Design: Brutalist; \`${evidencePath}\``,
+        'Dependency and owner': 'No blocker; owner: Harness application',
+      }
+    );
+    assert.match(
+      validationMessage(root, promotionOptions(revision)),
+      new RegExp(`dogfooded evidence ${label}: must bind exactly one retained artifact`)
+    );
+  }
+});
+
+test('rejects blob and annotated-tag object IDs as evidence commits', () => {
+  for (const objectKind of ['tag', 'blob']) {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const commit = commitFixtureRoot(root);
+    let objectId;
+    if (objectKind === 'tag') {
+      execFileSync(
+        'git',
+        [
+          '-c',
+          'user.name=Coverage Fixture',
+          '-c',
+          'user.email=coverage@example.com',
+          'tag',
+          '-a',
+          'evidence-tag',
+          '-m',
+          'not a commit id',
+          commit,
+        ],
+        { cwd: root }
+      );
+      objectId = execFileSync('git', ['rev-parse', 'refs/tags/evidence-tag'], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    } else {
+      objectId = execFileSync('git', ['hash-object', '-w', 'pnpm-lock.yaml'], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    }
+    writeSelfHostedPromotion(root, objectId);
+    assert.match(
+      validationMessage(root, promotionOptions(commit)),
+      /self-hosted evidence Commit .* must identify a commit object directly/
+    );
+  }
+});
+
+test('rejects evidence revisions that have not landed in the reviewed base', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>base</main>', 'utf8');
+  writeValidMatrices(root);
+  const baseRevision = commitFixtureRoot(root);
+  const evidenceRevision = commitFixtureChange(
+    root,
+    implementationPath,
+    '<main>unmerged feature</main>',
+    'unmerged implementation'
+  );
+  writeSelfHostedPromotion(root, evidenceRevision);
+
+  assert.match(
+    validationMessage(root, promotionOptions(baseRevision, evidenceRevision)),
+    /self-hosted evidence Commit .* is not contained in the reviewed base/
+  );
+});
+
+test('fails closed when base or head history proof is unavailable', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, revision);
+
+  assert.match(
+    validationMessage(root, promotionOptions('e'.repeat(40), revision)),
+    /promotion history proof is unavailable for base `e{40}`/
+  );
+});
+
+test('rejects the temporary pull-request merge commit as evidence', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, revision);
+
+  assert.match(
+    validationMessage(root, {
+      ...promotionOptions(revision),
+      mergeRevision: revision,
+    }),
+    /evidence Commit must not equal the temporary pull-request merge commit/
+  );
+});
+
+test('requires explicit reviewed base and exact head for promotion checks', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, revision);
+
+  assert.match(
+    validationMessage(root),
+    /promotion validation requires explicit base and head revisions/
+  );
+});
+
+test('rejects mismatched manifest tree, repository, kind, and schema', () => {
+  for (const [manifestOverrides, expected] of [
+    [{ tree: 'f'.repeat(40) }, /Results tree must (?:equal|match) (?:the )?Commit tree/],
+    [{ repository: 'Elsewhere/Other' }, /Results repository must be Proto-UI\/Proto-UI/],
+    [
+      { kind: 'other-results' },
+      /Results manifest kind must be proto-ui\.coverage-evidence-results/,
+    ],
+    [{ schemaVersion: 2 }, /Results manifest schemaVersion must be 1/],
+  ]) {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const revision = commitFixtureRoot(root);
+    writeSelfHostedPromotion(root, revision, { manifestOverrides });
+    assert.match(validationMessage(root, promotionOptions(revision)), expected);
+  }
+});
+
+test('rejects empty, unnamed, or failing command and result entries', () => {
+  for (const [manifestOverrides, expected] of [
+    [{ commands: [] }, /Results manifest must contain non-empty commands/],
+    [
+      { commands: [{ command: 'corepack pnpm test', status: 'failed' }] },
+      /Results commands must name non-empty commands with passed status/,
+    ],
+    [{ results: [] }, /Results manifest must contain non-empty results/],
+    [
+      { results: [{ name: '', status: 'passed' }] },
+      /Results entries must have non-empty names and passed status/,
+    ],
+    [
+      { results: [{ name: 'browser', status: 'failed' }] },
+      /Results entries must have non-empty names and passed status/,
+    ],
+  ]) {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const revision = commitFixtureRoot(root);
+    writeSelfHostedPromotion(root, revision, { manifestOverrides });
+    assert.match(validationMessage(root, promotionOptions(revision)), expected);
+  }
+});
+
+test('rejects retained artifact size and digest mismatches', () => {
+  for (const field of ['size', 'sha256']) {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const revision = commitFixtureRoot(root);
+    const { resultsPath } = writeSelfHostedPromotion(root, revision);
+    const absoluteResultsPath = path.join(root, resultsPath);
+    const manifest = JSON.parse(fs.readFileSync(absoluteResultsPath, 'utf8'));
+    manifest.artifacts[0][field] =
+      field === 'size' ? manifest.artifacts[0].size + 1 : 'f'.repeat(64);
+    fs.writeFileSync(absoluteResultsPath, `${JSON.stringify(manifest)}\n`, 'utf8');
+    assert.match(
+      validationMessage(root, promotionOptions(revision)),
+      /Results artifact metadata does not match retained file/
+    );
+  }
+});
+
+test('rejects unlisted, duplicate, and self-referential result artifacts', () => {
+  for (const mode of ['unlisted', 'duplicate', 'self']) {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const revision = commitFixtureRoot(root);
+    const { resultsPath } = writeSelfHostedPromotion(root, revision);
+    const absoluteResultsPath = path.join(root, resultsPath);
+    const manifest = JSON.parse(fs.readFileSync(absoluteResultsPath, 'utf8'));
+    if (mode === 'unlisted') {
+      const extraPath = 'internal/website/evidence/s14/unlisted.log';
+      fs.writeFileSync(path.join(root, extraPath), 'unlisted\n', 'utf8');
+      manifest.artifacts.push({
+        path: extraPath,
+        size: fs.statSync(path.join(root, extraPath)).size,
+        sha256: sourceDigest(root, extraPath),
+      });
+    } else if (mode === 'duplicate') {
+      manifest.artifacts.push({ ...manifest.artifacts[0] });
+    } else {
+      manifest.artifacts.push({
+        path: resultsPath,
+        size: fs.statSync(absoluteResultsPath).size,
+        sha256: sourceDigest(root, resultsPath),
+      });
+    }
+    fs.writeFileSync(absoluteResultsPath, `${JSON.stringify(manifest)}\n`, 'utf8');
+    assert.match(
+      validationMessage(root, promotionOptions(revision)),
+      mode === 'unlisted'
+        ? /Results artifacts contain unreferenced retained artifact/
+        : mode === 'duplicate'
+          ? /Results artifacts must have unique canonical paths/
+          : /Results artifacts must not include the Results manifest itself/
+    );
+  }
+});
+
+test('rejects canonical artifact aliases listed more than once', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const { resultsPath } = writeSelfHostedPromotion(root, revision);
+  const aliasPath = 'internal/website/evidence/s14/build-alias.log';
+  fs.symlinkSync(
+    path.join(root, 'internal/website/evidence/s14/build.log'),
+    path.join(root, aliasPath)
+  );
+  const absoluteResultsPath = path.join(root, resultsPath);
+  const manifest = JSON.parse(fs.readFileSync(absoluteResultsPath, 'utf8'));
+  manifest.artifacts.push({
+    path: aliasPath,
+    size: fs.statSync(path.join(root, aliasPath)).size,
+    sha256: sourceDigest(root, aliasPath),
+  });
+  fs.writeFileSync(absoluteResultsPath, `${JSON.stringify(manifest)}\n`, 'utf8');
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Results artifacts must have unique canonical paths/
+  );
+});
+
+test('rejects promoted implementation paths absent at the evidence revision', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>late implementation</main>', 'utf8');
+  writeSelfHostedPromotion(root, revision);
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /promoted implementation `apps\/www\/src\/components\/override\/Search\.astro` is absent at evidence Commit/
+  );
+});
+
+test('rejects implementation changed after its evidence revision', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, implementationPath),
+    '<main>reviewed implementation</main>',
+    'utf8'
+  );
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  fs.writeFileSync(
+    path.join(root, implementationPath),
+    '<main>changed implementation</main>',
+    'utf8'
+  );
+  writeSelfHostedPromotion(root, revision);
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /promoted implementation `apps\/www\/src\/components\/override\/Search\.astro` differs from evidence Commit/
+  );
+});
+
+test('binds PR580 provenance head separately from merged ancestry evidence', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const matrixPath = path.join(root, 'internal/website/self-hosting-coverage-matrix.md');
+  fs.writeFileSync(
+    matrixPath,
+    fs
+      .readFileSync(matrixPath, 'utf8')
+      .replace('merged ancestry commit `9841c86a10940267fb30ee25b63c9a5a39f76fe6`; ', ''),
+    'utf8'
+  );
+
+  assert.match(
+    validationMessage(root),
+    /closure binding for `www\.content\.document-semantics` must retain merged PR #580 commit `9841c86a10940267fb30ee25b63c9a5a39f76fe6`/
   );
 });
