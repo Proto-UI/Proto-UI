@@ -339,6 +339,11 @@ export default defineConfig({
                   translations: { en: 'Async Region', 'zh-CN': 'Async Region' },
                   slug: 'ui-libraries/base/async-region',
                 },
+                {
+                  label: 'Table (Draft)',
+                  translations: { en: 'Table (Draft)', 'zh-CN': 'Table（Draft）' },
+                  slug: 'ui-libraries/base/table',
+                },
               ],
             },
             {

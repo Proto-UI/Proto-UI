@@ -30,4 +30,8 @@ Package exports 与 CLI registry 是相关但不完全相同的 inventory。CLI 
 
 `textarea` 用来验证 host-mediated native-control 边界：Root 拥有一个 logical multiline editor，renderer 保持 contentless，由 adapter 选择物理宿主目标。当前 Web profile 在 Web Component、React 与 Vue 中使用一个原生 textarea。它维持稳定的受控/非受控所有权，归一化 input/change/IME signal，保留 active editing session，在 composition 结束后恢复未被接纳的受控提案，并投影 property、focus 与 accessibility；它不声明 form submission、rich text、auto-resize、系统 editing chrome 或 live-region 语义。
 
+## 实施前的 protocol definitions
+
+[Base Table](/zh-cn/ui-libraries/base/table/) 已有经过收敛的 draft D/C/T 定义，覆盖 passive two-dimensional structure、spans 与 header relationships。它不属于已发布 package inventory、CLI 或交互 preview；对应 module、Base identities 与 Adapter evidence 仍由单独的 implementation carrier 跟进。
+
 <PrototypeLibraryOverview library="base" locale="zh-cn" />

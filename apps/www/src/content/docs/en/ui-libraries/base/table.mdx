@@ -1,0 +1,96 @@
+---
+title: 'Table (Draft)'
+description: 'The pre-implementation Base Table structural decision, topology, accessibility boundary, and exclusions.'
+---
+
+Base Table is a **draft protocol definition**, not a package export or usable component. The current authority consists of `D-BASE-TABLE-STRUCTURE-0001`, `C-TABLE-STRUCTURE-0001`, and `T-TABLE-STRUCTURE-0001`. Runtime, Base prototype, Adapter, CLI, demo, and design-language work remains planned.
+
+## Why Table is a protocol
+
+Table carries information that Template anatomy alone cannot express: ordered parts become a two-dimensional topology with coordinates and spans, and authored header keys resolve to relationships between semantic objects. Adapters can project that graph to an accessibility surface without inferring Table behavior from a prototype name, host tree, CSS class, or Web-only attribute.
+
+The information path is:
+
+```text
+Maker-authored parts, spans, and header keys
+  -> Table Structure topology and header graph
+  -> generic A11y semantic-object graph
+  -> Adapter-selected host projection
+  -> User-observable table relationships
+```
+
+The definition does not claim that a current Adapter implements the complete path.
+
+## Planned family
+
+The implementation carrier may add exactly these Base identities once matching source and evidence exist:
+
+| Planned identity | Cardinality | Structural responsibility |
+| --- | --- | --- |
+| `P-BASE-TABLE` | `1..1` | Owns one independent Table anatomy domain and its read-only structural snapshot. |
+| `P-BASE-TABLE-CAPTION` | `0..1` | Supplies the authored caption/purpose semantic object. |
+| `P-BASE-TABLE-ROW` | `1..*` | Establishes one ordered logical row. |
+| `P-BASE-TABLE-HEADER-CELL` | `1..*` | Declares a column or row header, a same-domain `headerKey`, and spans. |
+| `P-BASE-TABLE-CELL` | `1..*` | Declares spans and an ordered, non-empty header-key set. |
+
+Every Row contains at least one HeaderCell or Cell. `Head`, `Body`, and `RowGroup` are deliberately absent: no cross-host evidence makes them required portable identities. A Web or native Adapter may use host row-group wrappers without turning those wrappers into Base facts.
+
+Caption, HeaderCell, and Cell content remains App-owned content passed through each part's single anonymous Template slot. Table Structure does not parse it into records.
+
+## Topology and header relationships
+
+Rows and cells use the current host-observable Anatomy order. The first cell in a Row searches from column zero; each later cell starts at the previous placed cell's exclusive end and uses the first fitting rectangle at or after that cursor. Placement never backfills an earlier hole in a way that reverses authored order. Indices are zero-based; `rowSpan` and `columnSpan` are positive safe integers defaulting to one. A span cannot overlap an occupied rectangle or extend beyond the current row count or safe coordinate boundary. Occupancy uses ranges rather than materializing every covered column, so large spans do not allocate in proportion to their numeric magnitude.
+
+A HeaderCell declares a non-empty, same-domain-unique `headerKey` and `headerKind: 'column' | 'row'`. A Cell declares an ordered, non-empty set of header keys. A HeaderCell may declare upstream header keys for layered headers, where upstream means the target precedes the source in computed row-major topology; self and later/downstream references are invalid.
+
+Resolution produces opaque same-domain semantic-object references, split into ordered `columnHeaders` and `rowHeaders`. It supports multiple headers. Missing, empty, duplicate, ambiguous, unprojectable, self, or downstream references produce structural diagnostics; the implementation must not guess a target or manufacture a host ID. Resolution never searches sibling or nested Table domains, so a key absent locally remains a missing target even when another domain contains an equal key.
+
+Insert, removal, and reorder recompute the snapshot from the actual parts. Temporarily invalid structure may stay mounted and report an invalid snapshot, but it does not rewrite authored content or emit data-operation signals.
+
+## Accessibility and host boundary
+
+Base Table reuses the draft generic A11y direction and `HC-A11Y-0001`; it does not introduce `HC-TABLE`. Table Structure asks for no physical widget, measurement, input, resource, or system service.
+
+The current A11y implementation still represents relationships as strings. Opaque semantic-object references and multi-target relationships are an explicit implementation prerequisite, not completed evidence. Current Adapter profiles also do not catalog Table support.
+
+The external host comparison establishes a shared information shape only:
+
+| Portable fact | Web accessibility vocabulary | UIKit evidence | Windows UIA evidence |
+| --- | --- | --- | --- |
+| Table domain | table with row, cell, and header descendants | `UIAccessibilityContainerDataTable` | TablePattern with GridPattern |
+| Coordinates and spans | ordered rows/cells and span properties | row/column counts, addressed cells, row/column ranges | Row, Column, RowSpan, ColumnSpan, ContainingGrid |
+| Header relationships | rowheader/columnheader and explicit relations when needed | row/column header element methods | TableItem row/column header providers |
+| Multiple headers | multiple semantic relationship targets | header-element arrays | header-provider collections |
+
+This matrix does not claim current Web, UIKit, Windows, or cross-host conformance. Native versus translated materialization remains an Adapter-profile decision backed by executable evidence.
+
+## Table versus Data Table
+
+Base Table owns passive structure only. It excludes:
+
+- App data records and Collection membership;
+- sorting;
+- row or cell selection;
+- pagination and virtualization;
+- column resize or reorder;
+- editing and data fetching;
+- keyboard-grid and focus policy;
+- form workflow;
+- layout-table mode; and
+- shadcn or Brutalist styling.
+
+A later Data Table composition may consume the passive structure while composing separately governed data, Collection, selection, pagination, virtualization, editing, and other capabilities.
+
+## Evidence status
+
+The host-neutral reference probe at `packages/spec/fixtures/src/table-structure/reference.ts` exercises deterministic placement, multiple-header resolution, topology/header diagnostics, and pairwise insertion, removal, and reorder. It cannot represent Anatomy-backed nearest-domain isolation and is not runtime or Adapter conformance. `T-TABLE-STRUCTURE-0001` keeps domain isolation, the Table module, Base family, and four official Web Adapter paths in `planned` status until those tests exist and pass.
+
+## References
+
+- [D-BASE-TABLE-STRUCTURE-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/decisions/D-BASE-TABLE-STRUCTURE-0001.yaml)
+- [C-TABLE-STRUCTURE-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TABLE-STRUCTURE-0001.yaml)
+- [T-TABLE-STRUCTURE-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-TABLE-STRUCTURE-0001.yaml)
+- [Issue 387](https://github.com/Proto-UI/Proto-UI/issues/387)
+- [WAI-ARIA table role](https://w3c.github.io/aria/#table)
+- [UIKit accessibility data table](https://developer.apple.com/documentation/uikit/uiaccessibilitycontainerdatatable)
+- [Windows UI Automation Table pattern](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/implementing-the-ui-automation-table-control-pattern)
