@@ -1,0 +1,78 @@
+id: C-SCROLL-END-FOLLOW-0001
+type: contract
+title: Scroll end-follow preserves reader intent across append-only layout
+status: draft
+since: 0.3.0-alpha.0
+summary: End-follow is an opt-in Scroll policy that follows logical-end growth only while its bounded lease is active, pauses after host-observed departure, and resumes through natural arrival or an explicit semantic request.
+statement:
+  zh-CN: >-
+    End-follow 是既有 Scroll domain 内的独立可选策略。Module 拥有 portable policy、只读 observed facts、request causality 与 logical lease；Scroll Surface Host Capability 拥有 end proximity、content/layout observation、host input classification、coalesced layout-ready end movement 与 cleanup。Composition 只决定是否 opt in 以及是否呈现 jump control；App Maker 继续拥有消息、日志、未读数与 session 业务语义。
+
+
+  en: >-
+    End-follow is a distinct opt-in policy inside the existing Scroll domain. The Module owns portable policy, read-only observed facts, request causality, and the logical lease; the Scroll Surface Host Capability owns end proximity, content and layout observation, host-input classification, coalesced layout-ready end movement, and cleanup. A composition only decides whether to opt in and whether to present a jump control; the App Maker continues to own message, log, unread-count, and session business semantics.
+
+
+criteria:
+  - id: C-SCROLL-END-FOLLOW-0001-POLICY
+    text:
+      zh-CN: Portable configuration 必须把 end-follow 表达为带显式 axis 的 `off | while-at-end` policy；end threshold 由 host/profile 限定，portable Props、State、Context、Expose 与 request 不得包含 raw pixel、offset、extent、DOM target 或 controller。
+      en: Portable configuration must express end-follow as an `off | while-at-end` policy with an explicit axis; the end threshold is host or profile bounded, and portable Props, State, Context, Expose, and requests must contain no raw pixel, offset, extent, DOM target, or controller.
+  - id: C-SCROLL-END-FOLLOW-0001-FACTS
+    text:
+      zh-CN: 每轴 `atEnd`、end-follow state `off | pending | following | paused` 与 request status `idle | pending | applied | rejected` 必须是 Module/host 拥有的只读 observed facts；prototype author 不得写入这些 facts。
+      en: Per-axis `atEnd`, end-follow state `off | pending | following | paused`, and request status `idle | pending | applied | rejected` must be read-only observed facts owned by the Module and host; prototype authors must not write those facts.
+  - id: C-SCROLL-END-FOLLOW-0001-INITIAL
+    text:
+      zh-CN: 启用 `while-at-end` 的新 host lease 必须等待首次 layout-ready，然后把一次 logical-end movement 标记为 pending 并应用；disabled policy 不得改变初始 position。
+      en: A new host lease with `while-at-end` enabled must wait for initial layout readiness, mark one logical-end movement pending, and apply it; a disabled policy must not change the initial position.
+  - id: C-SCROLL-END-FOLLOW-0001-APPEND
+    text:
+      zh-CN: 只有当前 lease 正在 following 时，append、stream update 或 content extent growth 才能安排 layout-ready end movement；同一 layout window 内的重复更新必须 coalesce，paused lease 中的更新不得发出 end movement。
+      en: Append, streaming updates, or content-extent growth may schedule a layout-ready end movement only while the current lease is following; repeated updates in one layout window must coalesce, and updates during a paused lease must not issue end movement.
+  - id: C-SCROLL-END-FOLLOW-0001-INTERRUPT
+    text:
+      zh-CN: 当宿主有证据表明 reader input 正在离开 logical end 时，必须取消尚未应用的 automatic end movement 并进入 paused；zoom/reflow、screen-reader virtual navigation 或未分类 callback 不得在没有证据时被假定为普通 pointer departure。
+      en: When the host has evidence that reader input is leaving the logical end, it must cancel an unapplied automatic end movement and enter `paused`; zoom or reflow, screen-reader virtual navigation, and unclassified callbacks must not be assumed to be ordinary pointer departure without evidence.
+  - id: C-SCROLL-END-FOLLOW-0001-RESUME
+    text:
+      zh-CN: Reader 自然到达 logical end 时，`while-at-end` lease 必须恢复 following；显式 `to-end` request 必须先报告 pending，再在 host layout 应用后报告 applied 并恢复 matching follow axis，无法应用的 request 必须报告 rejected。
+      en: When the reader naturally reaches the logical end, a `while-at-end` lease must resume following; an explicit `to-end` request must report `pending`, then report `applied` after host-layout application and resume the matching follow axis, while a request that cannot be applied must report `rejected`.
+  - id: C-SCROLL-END-FOLLOW-0001-REFLOW
+    text:
+      zh-CN: Viewport resize、reflow 与 content collapse/expand 必须经过同一 lease/state 规则；following lease 可重新对齐 logical end，paused lease 不得发出 end movement。本契约不保证 #520 所属的 away-from-end visual-anchor preservation。
+      en: Viewport resize, reflow, and content collapse or expansion must use the same lease and state rules; a following lease may realign to logical end, while a paused lease must not issue end movement. This contract does not guarantee the away-from-end visual-anchor preservation owned by #520.
+  - id: C-SCROLL-END-FOLLOW-0001-LIFETIME
+    text:
+      zh-CN: Target/session replacement、detach、rematerialize 与 dispose 必须取消 scheduled movement、释放 observer/listener，并使旧 epoch 的 layout、timer、observer 与 request callback 无法更新新 lease。
+      en: Target or session replacement, detachment, rematerialization, and disposal must cancel scheduled movement, release observers and listeners, and prevent layout, timer, observer, or request callbacks from an old epoch from updating a new lease.
+  - id: C-SCROLL-END-FOLLOW-0001-A11Y
+    text:
+      zh-CN: Automatic 或显式 end movement 不得移动 keyboard focus 或合并 Live Region ownership；reduced-motion profile 不得被强制使用 smooth motion，jump control 的 accessible name 与 deterministic focus behavior 由 composition 使用既有 capability 提供。
+      en: Automatic or explicit end movement must not move keyboard focus or absorb Live Region ownership; a reduced-motion profile must not be forced to use smooth motion, and a jump control's accessible name and deterministic focus behavior are provided by the composition through existing capabilities.
+  - id: C-SCROLL-END-FOLLOW-0001-BOUNDARY
+    text:
+      zh-CN: Composition 可以 opt in、呈现 jump/new-content control 并发送 semantic request；App Maker 保留 item meaning/count、unread、ordering、persistence 与 session/thread selection；Scroll domain 不得引入 Message 或 Agent vocabulary。
+      en: A composition may opt in, present a jump or new-content control, and send the semantic request; the App Maker retains item meaning and count, unread state, ordering, persistence, and session or thread selection; the Scroll domain must introduce no Message or Agent vocabulary.
+sources:
+  - path: https://github.com/Proto-UI/Proto-UI/issues/519
+    label: Issue 519 bounded end-follow proposal
+  - path: internal/records/2026-09-05-scroll-end-follow-first-slice.md
+dependsOn:
+  contracts:
+    - C-SCROLL-0001
+relates:
+  contracts:
+    - C-AS-SCROLL-SURFACE-0001
+  modules:
+    - M-SCROLL-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+verifies:
+  tests:
+    - T-SCROLL-END-FOLLOW-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Defined the opt-in end-follow policy, observed state, semantic resume request, transition rules, ownership boundary, accessibility, and lease cleanup.
+tags: [scroll, end-follow, streaming, layout, accessibility]

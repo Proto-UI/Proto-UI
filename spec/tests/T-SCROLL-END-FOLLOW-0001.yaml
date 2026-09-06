@@ -1,0 +1,120 @@
+id: T-SCROLL-END-FOLLOW-0001
+type: test
+title: Scroll end-follow transition and host-lifetime conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Verifies portable policy and facts, layout-ready following, coalescing, reader interruption, explicit and natural resume, reflow, cross-adapter consumption, and stale callback suppression.
+cases:
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-POLICY
+    title: portable policy and observed facts contain no host geometry
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-POLICY
+      - C-SCROLL-END-FOLLOW-0001-FACTS
+      - C-AS-SCROLL-SURFACE-0001-G
+    expectation: explicit-axis-policy-and-observed-state-without-raw-host-geometry
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-INITIAL
+    title: enabled initial materialization follows after layout readiness
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-INITIAL
+      - HC-SCROLL-SURFACE-0001-H
+    expectation: initial-layout-pending-then-applied-at-logical-end
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-APPEND
+    title: rapid growth coalesces while following and does not move while paused
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-APPEND
+      - M-SCROLL-0001-G
+      - HC-SCROLL-SURFACE-0001-H
+    expectation: one-layout-end-application-for-following-growth-and-zero-for-paused-growth
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
+    title: reader interruption pauses and natural or explicit end arrival resumes
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-INTERRUPT
+      - C-SCROLL-END-FOLLOW-0001-RESUME
+      - HC-SCROLL-SURFACE-0001-I
+    expectation: pending-interruption-pauses-and-to-end-reports-pending-applied-or-rejected
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-REFLOW
+    title: resize and content reflow obey the current follow lease
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-REFLOW
+    expectation: following-realigns-to-end-and-paused-emits-no-end-movement
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
+    title: replacement disposal and late callbacks cannot update a later epoch
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-LIFETIME
+      - M-SCROLL-0001-H
+      - HC-SCROLL-SURFACE-0001-J
+    expectation: exact-cleanup-and-stale-layout-observer-timer-suppression
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-A11Y
+    title: end movement keeps focus motion and announcements separately owned
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-A11Y
+      - C-SCROLL-END-FOLLOW-0001-BOUNDARY
+    expectation: focus-stays-put-no-forced-smooth-motion-and-no-message-or-live-region-state
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-WEB-ADAPTERS
+    title: WC React Vue and Vue2 consume one portable end-follow contract
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-POLICY
+      - C-SCROLL-END-FOLLOW-0001-FACTS
+      - C-SCROLL-END-FOLLOW-0001-RESUME
+    expectation: shared-portable-contract-and-host-behavior-across-four-web-adapters
+implementations:
+  - id: scroll-end-follow-host-transitions
+    kind: adapter-test
+    status: passing
+    path: packages/modules/scroll/test/end-follow.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-END-FOLLOW-0001-CASE-POLICY
+      - T-SCROLL-END-FOLLOW-0001-CASE-INITIAL
+      - T-SCROLL-END-FOLLOW-0001-CASE-APPEND
+      - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
+      - T-SCROLL-END-FOLLOW-0001-CASE-REFLOW
+      - T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
+      - T-SCROLL-END-FOLLOW-0001-CASE-A11Y
+    notes:
+      - Fails before the end-follow implementation and passes with host-local layout scheduling, nested growth, axis isolation, end movement, follow facts, pause/resume, and exact callback cleanup enforced.
+  - id: scroll-end-follow-module-fake-host
+    kind: module-test
+    status: passing
+    path: packages/modules/scroll/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-END-FOLLOW-0001-CASE-POLICY
+      - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
+      - T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
+    notes:
+      - A deterministic fake Host Capability proves portable fact/request routing, no-host rejection, replacement disposal, and stale-epoch fact suppression.
+  - id: scroll-end-follow-web-adapter-journey
+    kind: adapter-test
+    status: passing
+    path: packages/web-conformance/test/scroll-end-follow.journey.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-END-FOLLOW-0001-CASE-WEB-ADAPTERS
+    notes:
+      - Fails before the portable atEnd fact exists and passes through WC, React, Vue, and Vue2 after the shared contract is implemented.
+  - id: scroll-end-follow-real-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-END-FOLLOW-0001-CASE-APPEND
+      - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
+      - T-SCROLL-END-FOLLOW-0001-CASE-A11Y
+    notes:
+      - A self-hosted source bundle runs the actual Web Component adapter in Chromium and uses trusted Playwright wheel input to verify pause, streaming append, explicit resume, focus stability, and direct motion.
+verifies:
+  contracts:
+    - C-SCROLL-END-FOLLOW-0001
+    - C-AS-SCROLL-SURFACE-0001
+exercises:
+  modules:
+    - M-SCROLL-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped end-follow policy, transition, lifetime, cross-adapter, real-browser, and accessibility evidence.
+tags: [scroll, end-follow, test, web, lifecycle]

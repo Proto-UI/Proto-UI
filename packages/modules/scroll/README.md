@@ -6,6 +6,23 @@ Proto UI module that provides host-mediated scroll capability for adapters.
 
 Provides host-mediated scroll capability to adapters running Proto UI prototypes.
 
+## Optional end-follow
+
+Prototype and composition authors reach end-follow through the privileged `asScrollSurface()` handle:
+
+```ts
+const scroll = asScrollSurface();
+scroll.configure({
+  axes: 'vertical',
+  projection: 'auto',
+  endFollow: { mode: 'while-at-end', axis: 'vertical' },
+});
+```
+
+The handle exposes per-axis `atEnd` plus read-only `endFollow.state` and `endFollow.requestStatus` facts. A jump control sends `scroll.request({ kind: 'to-end', axis: 'vertical' })`; it never receives a DOM node, offset, extent, or pixel threshold.
+
+The policy is off by default. The host owns proximity, layout observation, coalescing, input interruption, and direct end movement. Message counts, unread state, focus, announcements, visual-anchor preservation, and virtualization remain separate owners.
+
 ## Package Role
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.
