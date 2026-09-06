@@ -1,0 +1,151 @@
+id: T-A11Y-PART-RELATIONSHIP-0001
+type: test
+title: Same-domain anatomy-part relationship conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Maps the structured relationship carrier, fail-closed matching, view lifecycle, host-id ownership, terminal cleanup, and Tabs migration criteria to the existing Runtime, Web adapter, and Base Tabs test surfaces that must implement them.
+cases:
+  - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-STRUCTURED-CARRIER
+    title: Structured relationship declarations preserve portable identity fields without exposing host data
+    covers:
+      - C-A11Y-PART-RELATIONSHIP-0001-A
+      - C-A11Y-PART-RELATIONSHIP-0001-B
+      - C-A11Y-PART-RELATIONSHIP-0001-H
+      - C-A11Y-PART-RELATIONSHIP-0001-I
+    expectation: structured-portable-relationship-carrier
+  - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
+    title: Missing, duplicate, arbitrary-key, re-keyed, and re-domained targets resolve atomically without guessing or cross-domain residue
+    covers:
+      - C-A11Y-PART-RELATIONSHIP-0001-C
+      - C-A11Y-PART-RELATIONSHIP-0001-G
+    expectation: exact-tuple-fail-closed-atomic-resolution
+  - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE
+    title: Source and target detach withdraws IDREF projection before removal and rematerialization restores current bindings before visibility
+    covers:
+      - C-A11Y-PART-RELATIONSHIP-0001-D
+      - C-A11Y-PART-RELATIONSHIP-0001-E
+    expectation: detach-and-rematerialization-precommit-ordering
+  - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP
+    title: Terminal disposal removes every retained registry, lease, projection, observer, and adapter reservation resource
+    covers:
+      - C-A11Y-PART-RELATIONSHIP-0001-F
+    expectation: complete-terminal-relationship-resource-cleanup
+  - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-HOST-ID-OWNERSHIP
+    title: Host ids and identical pre-existing IDREF tokens survive adoption, collision, live mutation, and compare-and-restore cleanup
+    covers:
+      - C-A11Y-PART-RELATIONSHIP-0001-D
+      - C-A11Y-PART-RELATIONSHIP-0001-J
+    expectation: non-destructive-host-id-and-idref-token-ownership
+  - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-SAME-EPOCH-REPLACEMENT
+    title: Same-epoch source and target binding replacement revokes old ownership and projects the new valid binding before visibility
+    covers:
+      - C-A11Y-PART-RELATIONSHIP-0001-K
+    expectation: atomic-same-epoch-physical-binding-replacement
+  - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+    title: Tabs uses reciprocal structured Trigger and Content relationships across lazy, retained, ambiguous, and dynamic compositions in every Web adapter
+    covers:
+      - C-A11Y-PART-RELATIONSHIP-0001-A
+      - C-A11Y-PART-RELATIONSHIP-0001-C
+      - C-A11Y-PART-RELATIONSHIP-0001-D
+      - C-A11Y-PART-RELATIONSHIP-0001-E
+      - C-A11Y-PART-RELATIONSHIP-0001-G
+      - C-A11Y-PART-RELATIONSHIP-0001-J
+      - C-A11Y-PART-RELATIONSHIP-0001-K
+      - P-BASE-TABS-A11Y-RELATIONSHIP-TARGET
+      - P-BASE-TABS-DEFAULT-L1-DETACH
+      - P-BASE-TABS-TRIGGER-A11Y-CONTROLS-TARGET
+      - P-BASE-TABS-CONTENT-A11Y-LABELLEDBY-TARGET
+    expectation: cross-adapter-tabs-structured-relationship-migration
+implementations:
+  - id: runtime-a11y-part-relationship-contract
+    kind: runtime-test
+    status: planned
+    path: packages/runtime/test/contract/a11y.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-STRUCTURED-CARRIER
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP
+    notes:
+      - Existing test path is the required implementation target; planned status makes no passing claim in PR #553.
+  - id: web-component-a11y-part-relationship-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-HOST-ID-OWNERSHIP
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-SAME-EPOCH-REPLACEMENT
+    notes:
+      - Existing test path is the required Web projection target; planned status makes no passing claim in PR #553.
+  - id: base-tabs-structured-relationship-contract
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/tabs.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+    notes:
+      - Existing test path is the required Web Component Tabs migration target; planned status makes no passing claim in PR #553.
+  - id: react-tabs-structured-relationship-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/react/test/tabs.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+  - id: vue-tabs-structured-relationship-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue/test/tabs.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+  - id: vue2-tabs-structured-relationship-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue2/test/tabs.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+verifies:
+  contracts:
+    - id: C-A11Y-PART-RELATIONSHIP-0001
+      anchors:
+        - C-A11Y-PART-RELATIONSHIP-0001-A
+        - C-A11Y-PART-RELATIONSHIP-0001-B
+        - C-A11Y-PART-RELATIONSHIP-0001-C
+        - C-A11Y-PART-RELATIONSHIP-0001-D
+        - C-A11Y-PART-RELATIONSHIP-0001-E
+        - C-A11Y-PART-RELATIONSHIP-0001-F
+        - C-A11Y-PART-RELATIONSHIP-0001-G
+        - C-A11Y-PART-RELATIONSHIP-0001-H
+        - C-A11Y-PART-RELATIONSHIP-0001-I
+        - C-A11Y-PART-RELATIONSHIP-0001-J
+        - C-A11Y-PART-RELATIONSHIP-0001-K
+exercises:
+  prototypes:
+    - P-BASE-TABS
+    - P-BASE-TABS-TRIGGER
+    - P-BASE-TABS-CONTENT
+sources:
+  - path: spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml
+  - path: packages/runtime/test/contract/a11y.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts
+  - path: packages/prototypes/base/test/tabs.test.ts
+  - path: packages/adapters/react/test/tabs.test.ts
+  - path: packages/adapters/vue/test/tabs.test.ts
+  - path: packages/adapters/vue2/test/tabs.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added the planned cross-layer conformance map for the accepted Issue #549 relationship implementation slice without claiming the mapped paths already pass it.
+tags:
+  - a11y
+  - anatomy
+  - relationship
+  - tabs
+  - conformance

@@ -1,0 +1,95 @@
+id: C-A11Y-PART-RELATIONSHIP-0001
+type: contract
+title: Same-domain anatomy-part relationship projection
+status: draft
+since: 0.3.0-alpha.0
+summary: Governs how compound prototypes declare structured same-domain part-to-part accessibility relationships and how adapters project them to host IDREF attributes without guessing, breaking L1 detach, leaking resources, overwriting host-authored identity, or leaking host identity into portable state.
+statement:
+  zh-CN: >-
+    复合原型可以使用结构化 accessibility relationship 声明同一 anatomy domain 内 part 与 part 之间的语义关系（例如 Tabs 中 trigger(value=x) controls content(value=x)）。声明基于 anatomy family、opaque same-domain scope、source/target role、relation semantic 与 protocol match key；protocol match key 是协议匹配依据，不是宿主 id。Runtime/A11y 边界处由独立于 Anatomy 的 relationship-projection 服务持有有界 lease 表，Web adapter 以不覆盖宿主作者 identity 的方式拥有稳定唯一宿主 id 的保留与释放，并在缺失、重复、动态变更与 L1 detach 等情况下 fail closed，而不是猜测。传送中不得把宿主节点、宿主 id、framework key 或原始几何写入 portable Props/State/Context。
+
+
+  en: >-
+    Compound prototypes may declare structured accessibility relationships between parts in the same anatomy domain, such as Tabs trigger(value=x) controls content(value=x). A declaration is based on anatomy family, opaque same-domain scope, source and target roles, relation semantic, and a protocol match key; the match key is a protocol matching basis, not a host id. A relationship-projection service at the Runtime/A11y boundary, distinct from Anatomy, owns a bounded lease table; the Web adapter owns stable unique host-id reservation and release without overwriting host-authored identity and fails closed on missing, duplicate, dynamic, and L1-detached cases rather than guessing. No host node, host id, framework key, or raw geometry may enter portable Props/State/Context in transit.
+
+
+criteria:
+  - id: C-A11Y-PART-RELATIONSHIP-0001-A
+    text:
+      zh-CN: '结构化 relationship 声明必须至少携带 anatomy family、opaque same-domain scope 身份、source part 实例身份与 role、target role、relation semantic 以及 protocol match key，并保留 source/target view epoch 以拒绝过期投射。'
+      en: 'A structured relationship declaration must carry at least anatomy family, opaque same-domain scope identity, source part instance identity and role, target role, relation semantic, and a protocol match key, and retain source and target view epochs to reject stale projection.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-B
+    text:
+      zh-CN: 'protocol match key 必须与宿主 id 相互独立；adapter 生成的宿主 id 不得写回 prototype 拥有的 State 以模仿结构化载体。'
+      en: 'The protocol match key must remain independent of the host id; an adapter-generated host id must not be written back into prototype-owned State to imitate the structured carrier.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-C
+    text:
+      zh-CN: '匹配器必须按完整 tuple（anatomy family、opaque domain scope、target role、exact protocol match key）过滤；零个或多个匹配必须 fail closed，并发出有界诊断，不得按 DOM order、注册顺序、prototype 名称或值转义选择。'
+      en: 'The resolver must filter by the full tuple of anatomy family, opaque domain scope, target role, and exact protocol match key; zero or multiple matches must fail closed with a bounded diagnostic rather than choosing by DOM order, registration order, prototype name, or value escaping.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-D
+    text:
+      zh-CN: 'source 或 target 的 L1 detach 必须在相应 target-removal host commit 可见前撤销该 lease 的 source IDREF contribution，同时保留有效 logical reservation 与所有宿主作者或独立 owner 的 contribution。Adapter 必须维护 per-attribute token ownership/reference ledger；若相同 token 在 lease acquisition 前已经存在，lease 不得取得其唯一所有权，并且 release 只有在 host-authored baseline 与所有独立/lease reference 都不存在时才可移除 token；仅在 attribute 不再含任何 token 时才移除 attribute 本身。'
+      en: 'Source or target L1 detach must withdraw the lease source-IDREF contribution before the corresponding target-removal host commit becomes visible while preserving the valid logical reservation and every host-authored or independently owned contribution. The adapter must maintain a per-attribute token ownership and reference ledger; when the identical token existed before lease acquisition, the lease must not acquire exclusive ownership of it, and release may remove the token only after its host-authored baseline and every independent or lease reference are absent; the attribute itself is removed only when no token remains.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-E
+    text:
+      zh-CN: 'source 或 target 的每次 materialization/rematerialization 都必须把其新 view epoch 绑定到保留的 logical instance；当当前 source/target binding 形成唯一有效匹配时，target reserved host id 赋值与 reciprocal IDREF 恢复必须在相应新 epoch 的 host commit 可见之前完成。仅在 mounted 回调之后执行无法满足该 pre-commit 要求。'
+      en: "Every source or target materialization or rematerialization must bind its new view epoch to the retained logical instance; once the current source and target bindings form one valid match, target reserved-host-id assignment and reciprocal IDREF restoration must complete before the corresponding new epoch's host commit becomes visible. Running only after mounted callbacks cannot satisfy this pre-commit requirement."
+  - id: C-A11Y-PART-RELATIONSHIP-0001-F
+    text:
+      zh-CN: 'terminal disposal 必须在释放宿主 identity 前移除所有由被处置 logical instance 拥有或仍引用它的 relationship-service target registry membership、source lease、dependent projection binding 与 observer，并使受影响 source 重新解析，以免后续同 tuple 实例被 stale entry 误判为重复；Web adapter 随后只清理由其 lease 拥有的宿主投射并释放 reservation，不得残留 service-owned record。'
+      en: 'Terminal disposal must, before releasing host identity, remove every relationship-service target-registry membership, source lease, dependent projection binding, and observer owned by or still retaining the disposed logical instance, and re-resolve affected sources so a later same-tuple instance is not mistaken for a duplicate; the Web adapter then clears only lease-owned host projection and releases its reservation, leaving no service-owned record behind.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-G
+    text:
+      zh-CN: '任何 mutable resolver-tuple 字段（至少包括 opaque anatomy domain scope 与 exact protocol match key）的变更都必须按一次原子 re-index 事务执行旧 tuple 移除与新 tuple 插入，并同时使两侧投射失效；相等检查必须先于发布，防止递归 no-op 更新、跨 domain 残留与同一实例在双 tuple 下短暂暴露。'
+      en: 'A change to any mutable resolver-tuple field, including at least opaque anatomy domain scope and exact protocol match key, must remove the old tuple and insert the new tuple as one atomic re-index transaction and invalidate projections on both sides; equality must be checked before publication to prevent recursive no-op updates, cross-domain residue, and transient exposure of one instance under two tuples.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-H
+    text:
+      zh-CN: 'relationship-projection 服务与 Anatomy 必须分离：Anatomy 仅提供结构声明、domain scope 与 readiness signal，不成为 instance registry 或 relationship 实例 owner；presence 不得写入 portable Context。'
+      en: 'The relationship-projection service must remain separate from Anatomy: Anatomy provides only structural declarations, domain scope, and readiness signals and must not become an instance registry or owner of relationship instances; presence must not be written into portable Context.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-I
+    text:
+      zh-CN: 'prototype 作者不得获得 registry 访问、宿主 target、宿主 id、framework key 或原始几何；relationship projection 是 Runtime/A11y 的有界服务，不是通用信息通道。'
+      en: 'Prototype authors must receive no registry access, host targets, host ids, framework keys, or raw geometry; relationship projection is a bounded Runtime/A11y service, not a general information channel.'
+  - id: C-A11Y-PART-RELATIONSHIP-0001-J
+    text:
+      zh-CN: 'Web adapter 在给 target 赋 id 前必须检查当前宿主 id 与 reservation 冲突：仅可在现有非空 id 在适用宿主 scope 内唯一、未被另一 logical target 保留且与既有 reservation 一致时原样 adopt；任何冲突或 rematerialized view 上不同的宿主作者 id 都必须保留且使本次 relation fail closed，不得覆盖。若 adapter 给无可采用 id 的 view 写入 reserved id，必须记录该 view 的精确先前值并只在当前值仍等于 lease-owned id 时 compare-and-restore。若宿主作者在 live binding 期间修改 target id，adapter 必须保留新值、立即使旧 reservation 与 dependent source IDREF contribution 失效，再通过完整 collision check 重新 adopt/rebind；detach、rebind 或 terminal release 不得删除或恢复覆盖宿主作者后来写入的值。'
+      en: "Before assigning a target id, the Web adapter must check the current host id and reservation for conflicts: it may adopt an existing non-empty id unchanged only when that id is unique in the applicable host scope, is not reserved by another logical target, and agrees with any existing reservation; any collision or different host-authored id on a rematerialized view must be preserved and make this relation fail closed rather than be overwritten. If the adapter writes a reserved id to a view without an adoptable id, it must record that view's exact prior value and compare-and-restore only while the current value still equals the lease-owned id. If the host author changes the target id during a live binding, the adapter must preserve the new value, immediately invalidate the old reservation and dependent source-IDREF contributions, and only then re-adopt or rebind through the full collision check; detach, rebind, or terminal release must never erase or restore over a value later written by the host author."
+  - id: C-A11Y-PART-RELATIONSHIP-0001-K
+    text:
+      zh-CN: '当 adapter 在同一 view epoch 内替换 source 或 target 的 physical accessibility binding 时，必须在同一 host replacement transaction 内撤销旧 view 的 lease ownership 与 observer、绑定新 view、重新校验 target reservation 并使所有 dependent source 重新解析；有效关系必须在新 binding 对 accessibility surface 可见前完成投射，否则 fail closed。'
+      en: 'When an adapter replaces a source or target physical accessibility binding within the same view epoch, it must revoke the old view lease ownership and observers, bind the new view, revalidate the target reservation, and re-resolve every dependent source within the same host replacement transaction; a valid relationship must be projected before the new binding becomes visible to the accessibility surface, otherwise it fails closed.'
+sources:
+  - path: internal/records/2026-08-26-same-domain-anatomy-relationship-design.md
+    label: Same-domain anatomy-part relationship design record
+  - path: spec/decisions/D-A11Y-PART-RELATIONSHIP-PROJECTION-0001.yaml
+  - path: packages/prototypes/base/src/tabs/trigger.proto.ts
+  - path: packages/prototypes/base/src/tabs/content.proto.ts
+dependsOn:
+  decisions:
+    - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
+  contracts:
+    - C-A11Y-0001
+    - C-ANATOMY-0001
+    - C-ANATOMY-0005
+    - C-PROPS-0001
+relates:
+  decisions:
+    - D-A11Y-SEMANTIC-DOMAIN-0001
+  contracts:
+    - C-A11Y-0001
+    - C-ANATOMY-0001
+  prototypes:
+    - P-BASE-TABS
+verifies:
+  tests:
+    - T-A11Y-PART-RELATIONSHIP-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Promoted the settled same-domain relationship semantics into draft contract authority with symmetric source/target pre-commit binding, detach-before-removal ordering, complete terminal cleanup, atomic domain/key re-indexing, non-destructive live host-id reconciliation, same-epoch target replacement, and mapped executable evidence.
+tags:
+  - a11y
+  - anatomy
+  - relationship
+  - adapter
+  - tabs
