@@ -69,8 +69,8 @@ import {
 } from '@proto.ui/prototypes-shadcn/tabs';
 import { shadcnToggle } from '@proto.ui/prototypes-shadcn/toggle';
 import * as ShadcnPackage from '@proto.ui/prototypes-shadcn';
+import * as ShadcnScrollAreaFamily from '@proto.ui/prototypes-shadcn/scroll-area';
 import * as ShadcnTooltipFamily from '@proto.ui/prototypes-shadcn/tooltip';
-
 import { separatorRoot } from '@proto.ui/prototypes-base/separator';
 import { textareaRoot } from '@proto.ui/prototypes-base/textarea';
 import { brutalistBadgeRoot } from '@proto.ui/prototypes-brutalist/badge';
@@ -132,6 +132,64 @@ import { brutalistToggle } from '@proto.ui/prototypes-brutalist/toggle';
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 type Assert<T extends true> = T;
+
+type ShadcnScrollAreaFamilyTypeSurface = {
+  root: [
+    ShadcnScrollAreaFamily.ShadcnScrollAreaRootProps,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaRootExposes,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaRootStateHandles,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaRootAsHookContract,
+  ];
+  viewport: [
+    ShadcnScrollAreaFamily.ShadcnScrollAreaViewportProps,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaViewportExposes,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaViewportStateHandles,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaViewportAsHookContract,
+  ];
+  scrollbar: [
+    ShadcnScrollAreaFamily.ShadcnScrollAreaScrollbarProps,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaScrollbarExposes,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaScrollbarStateHandles,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaScrollbarAsHookContract,
+  ];
+  thumb: [
+    ShadcnScrollAreaFamily.ShadcnScrollAreaThumbProps,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaThumbExposes,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaThumbStateHandles,
+    ShadcnScrollAreaFamily.ShadcnScrollAreaThumbAsHookContract,
+  ];
+};
+
+type ShadcnScrollAreaRootTypeSurface = {
+  root: [
+    ShadcnPackage.ShadcnScrollAreaRootProps,
+    ShadcnPackage.ShadcnScrollAreaRootExposes,
+    ShadcnPackage.ShadcnScrollAreaRootStateHandles,
+    ShadcnPackage.ShadcnScrollAreaRootAsHookContract,
+  ];
+  viewport: [
+    ShadcnPackage.ShadcnScrollAreaViewportProps,
+    ShadcnPackage.ShadcnScrollAreaViewportExposes,
+    ShadcnPackage.ShadcnScrollAreaViewportStateHandles,
+    ShadcnPackage.ShadcnScrollAreaViewportAsHookContract,
+  ];
+  scrollbar: [
+    ShadcnPackage.ShadcnScrollAreaScrollbarProps,
+    ShadcnPackage.ShadcnScrollAreaScrollbarExposes,
+    ShadcnPackage.ShadcnScrollAreaScrollbarStateHandles,
+    ShadcnPackage.ShadcnScrollAreaScrollbarAsHookContract,
+  ];
+  thumb: [
+    ShadcnPackage.ShadcnScrollAreaThumbProps,
+    ShadcnPackage.ShadcnScrollAreaThumbExposes,
+    ShadcnPackage.ShadcnScrollAreaThumbStateHandles,
+    ShadcnPackage.ShadcnScrollAreaThumbAsHookContract,
+  ];
+};
+
+type _ShadcnScrollAreaRootBarrelParity = Assert<
+  Equal<ShadcnScrollAreaFamilyTypeSurface, ShadcnScrollAreaRootTypeSurface>
+>;
 
 type ShadcnTooltipFamilyTypeSurface = {
   group: [
@@ -292,6 +350,18 @@ void [
   brutalistScrollAreaViewport,
   brutalistScrollAreaScrollbar,
   brutalistScrollAreaThumb,
+  ShadcnScrollAreaFamily.ShadcnScrollAreaRoot,
+  ShadcnScrollAreaFamily.ShadcnScrollAreaViewport,
+  ShadcnScrollAreaFamily.ShadcnScrollAreaScrollbar,
+  ShadcnScrollAreaFamily.ShadcnScrollAreaThumb,
+  ShadcnScrollAreaFamily.shadcnScrollAreaRoot,
+  ShadcnScrollAreaFamily.shadcnScrollAreaViewport,
+  ShadcnScrollAreaFamily.shadcnScrollAreaScrollbar,
+  ShadcnScrollAreaFamily.shadcnScrollAreaThumb,
+  ShadcnPackage.ShadcnScrollAreaRoot,
+  ShadcnPackage.ShadcnScrollAreaViewport,
+  ShadcnPackage.ShadcnScrollAreaScrollbar,
+  ShadcnPackage.ShadcnScrollAreaThumb,
   ShadcnTooltipFamily.ShadcnTooltipGroup,
   ShadcnTooltipFamily.ShadcnTooltipRoot,
   ShadcnTooltipFamily.ShadcnTooltipTrigger,

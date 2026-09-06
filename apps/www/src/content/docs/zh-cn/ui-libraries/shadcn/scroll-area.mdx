@@ -1,0 +1,25 @@
+---
+title: 'Scroll Area'
+description: '覆盖在 Base host-owned scrolling domain 之上的 shadcn 草案 chrome。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+这个 draft family 包含 Root、Viewport、Scrollbar 与 Thumb。logical scroll surface、normalized position/extent facts、scroll requests、focus participation、system/composed negotiation 与 bounded Thumb control leases 均由 Base 所有。shadcn 层只增加 clipped frame、full-size rounded Viewport、slim oriented tracks 与 flexible rounded Thumb。
+
+Viewport 通过 privileged Scroll surface 请求 `composed` design-language preference，但不把它设为 required；不支持 composed chrome 的 host 可以依 `D-SCROLL-PROJECTION-0001` fallback 到 `system`。无论哪种 projection，wheel、touch、keyboard、physics、inertia 与 overscroll 继续由 host 所有。该 family 不暴露 DOM scrollbar、size、position callback 或其它 host-specific API。
+
+比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/scroll-area.tsx`。其中 Web DOM 与 Radix details 仅为 comparison evidence，不构成 portable guarantees。从 `@proto.ui/prototypes-shadcn/scroll-area` 导入该 family，或使用 `proto-ui add react shadcn-scroll-area` 生成 React facade。
+
+<PrototypePreviewer demoId="demo-shadcn-scroll-area" initialRuntime="wc" />
+
+## 建议验收路径
+
+1. 纵向与横向滚动 Viewport，确认两个轴移动的是同一个 host surface。
+2. 分别拖动两个 Thumb，确认各自轴向请求 host scrolling，且没有第二份 position state。
+3. 用 Tab 聚焦 Viewport，确认继承的 focus-visible ring 出现，且 surface 不移动或改变尺寸。
+4. 确认 vertical track 宽 10px 并贴合 top/right，horizontal track 高 10px 并贴合 bottom/left。
+5. 确认两条 track 使用透明 2px border、horizontal track 使用 column layout，且两个 Thumb 保持 roleless 并不进入 tab order。
+6. 在 Web Components、React、Vue 与 Vue 2 的 320px viewport 中重复检查，页面不得 overflow。
+
+相关 entities 仍为 `draft`；本页描述当前 cataloged direction，而不是稳定 compatibility guarantee。

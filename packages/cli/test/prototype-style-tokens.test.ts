@@ -198,6 +198,62 @@ describe('collectProtoStyleTokens', () => {
     expect(tokens).toContain('data-[orientation=vertical]:w-0.5');
   });
 
+  it('maps asScrollAreaScrollbar orientation rules to track selectors', async () => {
+    await writeFile(
+      path.join(dir, 'scroll-area-scrollbar.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        "import { asScrollAreaScrollbar } from '@proto.ui/prototypes-base/scroll-area';",
+        '',
+        'const scrollbar = definePrototype({',
+        "  name: 'styled-scroll-area-scrollbar',",
+        '  setup(def) {',
+        '    const state = asScrollAreaScrollbar().stateHandles;',
+        '    if (!state) throw new Error("missing state handles");',
+        '    def.rule({',
+        "      when: (w) => w.state(state.orientation).eq('horizontal'),",
+        "      intent: (i) => i.feedback.style.use(tw('h-2.5 flex-col')),",
+        '    });',
+        '  },',
+        '});',
+        'export default scrollbar;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+
+    expect(tokens).toContain('data-[orientation=horizontal]:h-2.5');
+    expect(tokens).toContain('data-[orientation=horizontal]:flex-col');
+  });
+
+  it('maps asScrollAreaViewport focus rules to the inherited focus-visible selector', async () => {
+    await writeFile(
+      path.join(dir, 'scroll-area-viewport.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        "import { asScrollAreaViewport } from '@proto.ui/prototypes-base/scroll-area';",
+        '',
+        'const viewport = definePrototype({',
+        "  name: 'styled-scroll-area-viewport',",
+        '  setup(def) {',
+        '    const state = asScrollAreaViewport().stateHandles;',
+        '    if (!state) throw new Error("missing state handles");',
+        '    def.rule({',
+        '      when: (w) => w.state(state.focusVisible).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('ring-3 outline-1')),",
+        '    });',
+        '  },',
+        '});',
+        'export default viewport;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+
+    expect(tokens).toContain('data-[focus-visible]:ring-3');
+    expect(tokens).toContain('data-[focus-visible]:outline-1');
+  });
+
   it('maps asAsyncRegionRoot busy rules to the data-busy web serialization', async () => {
     await writeFile(
       path.join(dir, 'async-region.proto.ts'),

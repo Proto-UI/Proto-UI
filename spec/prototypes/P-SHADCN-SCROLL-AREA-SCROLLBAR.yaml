@@ -1,0 +1,50 @@
+id: P-SHADCN-SCROLL-AREA-SCROLLBAR
+type: prototype
+title: shadcn Scroll Area Scrollbar projects an oriented composed track
+status: draft
+since: 0.3.0-alpha.0
+summary: shadcn Scroll Area Scrollbar inherits Base control routing and adds the current common and oriented track presentation.
+statement:
+  en: Scrollbar keeps Base orientation and host-control leases and adds only the authored track surface.
+  zh-CN: Scrollbar 保留 Base orientation 与 host-control leases，仅增加 authored track surface。
+criteria:
+  - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-BASE-INHERITANCE
+    text:
+      en: Scrollbar must inherit P-BASE-SCROLL-AREA-SCROLLBAR through asScrollAreaScrollbar() and must not own scroll position or movement.
+      zh-CN: Scrollbar 必须通过 asScrollAreaScrollbar() 继承 P-BASE-SCROLL-AREA-SCROLLBAR，且不得拥有 scroll position 或 movement。
+  - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-DIRECT-ENTRY
+    text:
+      en: The direct Scrollbar entry is shadcn-scroll-area-scrollbar and this layer provides no authored asHook.
+      zh-CN: Scrollbar direct entry 为 shadcn-scroll-area-scrollbar，且本层不提供 authored asHook。
+  - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-CURRENT-VISUAL-SURFACE
+    text:
+      en: Scrollbar must project absolute flex touch-none select-none transition-colors.
+      zh-CN: Scrollbar 必须投射 absolute flex touch-none select-none transition-colors。
+  - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-ORIENTED-GEOMETRY
+    text:
+      en: >-
+        Vertical must project h-full w-2.5 top-0 right-0 border-2 border-transparent. Horizontal must project w-full h-2.5 flex-col bottom-0 left-0 border-2 border-transparent. These tracks remain composed chrome around the same host-owned Viewport.
+
+
+      zh-CN: >-
+        vertical 必须投射 h-full w-2.5 top-0 right-0 border-2 border-transparent；horizontal 必须投射 w-full h-2.5 flex-col bottom-0 left-0 border-2 border-transparent。两条 track 继续作为同一个 host-owned Viewport 周围的 composed chrome。
+
+
+sources:
+  - path: packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts
+  - path: packages/prototypes/shadcn/test/scroll-area.test.ts
+inherits:
+  prototypes:
+    - id: P-BASE-SCROLL-AREA-SCROLLBAR
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-SCROLL-PROJECTION-0001]
+relates:
+  prototypes: [P-SHADCN-SCROLL-AREA]
+verifies:
+  tests: [T-SHADCN-SCROLL-AREA-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the common and orientation-specific shadcn Scrollbar track surface.
+tags: [prototype, shadcn, scroll-area, scrollbar, geometry, visual, delta]

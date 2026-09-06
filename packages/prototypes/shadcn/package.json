@@ -13,13 +13,17 @@
   },
   "dependencies": {
     "@proto.ui/core": "workspace:*",
+    "@proto.ui/hooks": "workspace:*",
     "@proto.ui/prototypes-base": "workspace:*"
   },
   "devDependencies": {
+    "@proto.ui/module-anatomy": "workspace:*",
     "@proto.ui/module-as-trigger": "workspace:*",
+    "@proto.ui/module-context": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
     "@proto.ui/module-expose-event": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
+    "@proto.ui/module-scroll": "workspace:*",
     "@proto.ui/runtime": "workspace:*"
   },
   "exports": {
@@ -87,6 +91,11 @@
       "types": "./dist/toggle/index.d.ts",
       "import": "./dist/toggle/index.js",
       "default": "./dist/toggle/index.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/scroll-area/index.d.ts",
+      "import": "./dist/scroll-area/index.js",
+      "default": "./dist/scroll-area/index.js"
     },
     "./tooltip": {
       "types": "./dist/tooltip/index.d.ts",

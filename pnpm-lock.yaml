@@ -1076,13 +1076,22 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/hooks':
+        specifier: workspace:*
+        version: link:../../hooks
       '@proto.ui/prototypes-base':
         specifier: workspace:*
         version: link:../base
     devDependencies:
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../../modules/anatomy
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
+      '@proto.ui/module-context':
+        specifier: workspace:*
+        version: link:../../modules/context
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
@@ -1092,6 +1101,9 @@ importers:
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
+      '@proto.ui/module-scroll':
+        specifier: workspace:*
+        version: link:../../modules/scroll
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime

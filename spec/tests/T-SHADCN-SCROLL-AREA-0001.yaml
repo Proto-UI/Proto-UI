@@ -1,0 +1,110 @@
+id: T-SHADCN-SCROLL-AREA-0001
+type: test
+title: shadcn Scroll Area inheritance, fallback, package, geometry, and rendered tests
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  Covers exact package and CLI surfaces, complete visual tokens, a fallible composed preference, direct unsupported-composed fallback evidence, two-axis host behavior, passive controls, lifecycle teardown, and real cross-runtime geometry.
+
+
+cases:
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-PUBLIC-SURFACE
+    title: The package and CLI expose exactly Root Viewport Scrollbar and Thumb
+    covers:
+      - P-SHADCN-SCROLL-AREA-UPSTREAM-IDENTITY
+      - P-SHADCN-SCROLL-AREA-DIRECT-ENTRY
+      - P-SHADCN-SCROLL-AREA-PUBLIC-SURFACE
+      - P-SHADCN-SCROLL-AREA-COMPATIBILITY-SUBSET
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-DIRECT-ENTRY
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR-DIRECT-ENTRY
+      - P-SHADCN-SCROLL-AREA-THUMB-DIRECT-ENTRY
+    expectation: shadcn-scroll-area-exports-only-the-portable-four-part-family
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-SURFACES
+    title: Root Viewport Scrollbar orientations and Thumb project every governed token
+    covers:
+      - P-SHADCN-SCROLL-AREA-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-FOCUS-FEEDBACK
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR-ORIENTED-GEOMETRY
+      - P-SHADCN-SCROLL-AREA-THUMB-CURRENT-VISUAL-SURFACE
+    expectation: shadcn-scroll-area-projects-complete-common-and-oriented-surfaces
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
+    title: Viewport requests composed chrome as a fallible preference
+    covers:
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-BASE-INHERITANCE
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-COMPOSED-PREFERENCE
+    expectation: shadcn-viewport-resolves-composed-when-supported-and-system-when-composed-is-unsupported
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-HOST-BEHAVIOR
+    title: One host-owned Viewport drives both axes guarded Thumb movement replacement and teardown
+    covers:
+      - P-SHADCN-SCROLL-AREA-BASE-INHERITANCE
+      - P-SHADCN-SCROLL-AREA-OWNERSHIP-BOUNDARY
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR-BASE-INHERITANCE
+      - P-SHADCN-SCROLL-AREA-THUMB-BASE-INHERITANCE
+      - P-SHADCN-SCROLL-AREA-THUMB-PASSIVE-BOUNDARY
+    expectation: shadcn-scroll-area-retains-base-two-axis-host-control-and-lifecycle
+  - id: T-SHADCN-SCROLL-AREA-0001-CASE-BROWSER
+    title: Real package exports render exact focus and oriented geometry with two-axis movement across Web Components React Vue and Vue 2
+    covers:
+      - P-SHADCN-SCROLL-AREA-OWNERSHIP-BOUNDARY
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-COMPOSED-PREFERENCE
+      - P-SHADCN-SCROLL-AREA-VIEWPORT-FOCUS-FEEDBACK
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR-ORIENTED-GEOMETRY
+      - P-SHADCN-SCROLL-AREA-THUMB-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-SCROLL-AREA-THUMB-PASSIVE-BOUNDARY
+    expectation: rendered-shadcn-scroll-area-keeps-one-host-surface-exact-tracks-and-two-axis-thumb-movement
+implementations:
+  - id: prototypes-shadcn-scroll-area-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/scroll-area.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-SCROLL-AREA-0001-CASE-PUBLIC-SURFACE
+      - T-SHADCN-SCROLL-AREA-0001-CASE-SURFACES
+      - T-SHADCN-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
+      - T-SHADCN-SCROLL-AREA-0001-CASE-HOST-BEHAVIOR
+    exercises: &scroll-area-prototypes
+      - P-BASE-SCROLL-AREA
+      - P-BASE-SCROLL-AREA-VIEWPORT
+      - P-BASE-SCROLL-AREA-SCROLLBAR
+      - P-BASE-SCROLL-AREA-THUMB
+      - P-SHADCN-SCROLL-AREA
+      - P-SHADCN-SCROLL-AREA-VIEWPORT
+      - P-SHADCN-SCROLL-AREA-SCROLLBAR
+      - P-SHADCN-SCROLL-AREA-THUMB
+  - id: cli-shadcn-scroll-area-facade
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/cli.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SCROLL-AREA-0001-CASE-PUBLIC-SURFACE]
+    exercises: *scroll-area-prototypes
+  - id: type-shadcn-scroll-area-export-parity
+    kind: workspace-check
+    status: passing
+    path: internal/contracts/types/prototype-family-exports.contract.v0.type-test.ts
+    required: true
+    consumesCases: [T-SHADCN-SCROLL-AREA-0001-CASE-PUBLIC-SURFACE]
+    exercises: *scroll-area-prototypes
+  - id: www-shadcn-scroll-area-browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SCROLL-AREA-0001-CASE-BROWSER]
+    exercises: *scroll-area-prototypes
+verifies:
+  prototypes:
+    - id: P-SHADCN-SCROLL-AREA
+    - id: P-SHADCN-SCROLL-AREA-VIEWPORT
+    - id: P-SHADCN-SCROLL-AREA-SCROLLBAR
+    - id: P-SHADCN-SCROLL-AREA-THUMB
+exercises:
+  prototypes: *scroll-area-prototypes
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced draft shadcn Scroll Area package, fallback, geometry, behavior, and cross-runtime coverage.
+tags: [test, shadcn, scroll-area, projection, fallback, geometry, interaction]
