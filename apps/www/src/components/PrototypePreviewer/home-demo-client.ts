@@ -352,14 +352,19 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
     },
     async materialize(request) {
       const componentId = desiredComponentId;
-      componentByGeneration.set(request.generation, componentId);
+      const intentRevision = desiredIntentRevision;
       const candidate = await materializeProjectionCandidate(request, {
         mount,
         ownerId,
         componentId,
         controls: controlsFor(),
       });
-      if (!destroyed && request.generation >= latestCommittedGeneration) {
+      if (
+        !destroyed &&
+        intentRevision === desiredIntentRevision &&
+        request.generation >= latestCommittedGeneration
+      ) {
+        componentByGeneration.set(request.generation, componentId);
         candidateByGeneration.set(request.generation, candidate);
       }
       return candidate;

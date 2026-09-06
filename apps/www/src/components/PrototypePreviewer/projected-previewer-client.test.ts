@@ -546,6 +546,50 @@ describe('PrototypePreviewer fixed-family projection', () => {
     }
   });
 
+  it('does not retain a superseded candidate when the latest request fails', async () => {
+    let finishOlder!: (candidate: Candidate) => void;
+    let rejectLatest!: (error: Error) => void;
+    const olderMaterialization = new Promise<Candidate>((resolve) => {
+      finishOlder = resolve;
+    });
+    const latestMaterialization = new Promise<Candidate>((_resolve, reject) => {
+      rejectLatest = reject;
+    });
+    const root = createRoot();
+    init(root);
+    await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+    projection.materialize
+      .mockReturnValueOnce(olderMaterialization)
+      .mockReturnValueOnce(latestMaterialization);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const mapSet = vi.spyOn(Map.prototype, 'set');
+
+    try {
+      const olderRequest = previewerApi(root).switchRuntime('react');
+      await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(2));
+      const latestRequest = previewerApi(root).switchRuntime('wc');
+      await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(3));
+      const olderCandidate = createCandidate('superseded-before-latest-failure');
+      mapSet.mockClear();
+      finishOlder(olderCandidate);
+      await olderRequest;
+      await vi.waitFor(() => expect(olderCandidate.dispose).toHaveBeenCalledTimes(1));
+
+      const latestFailure = new Error('latest projection preparation failed');
+      rejectLatest(latestFailure);
+      await expect(latestRequest).rejects.toBe(latestFailure);
+
+      expect(mapSet.mock.calls.some(([, value]) => value === olderCandidate)).toBe(false);
+      expect(root.dataset.projectionState).toBe('error');
+      expect(previewerApi(root).getCurrentRuntime()).toBe('wc');
+      expect(candidates[0]!.dispose).not.toHaveBeenCalled();
+    } finally {
+      mapSet.mockRestore();
+      consoleError.mockRestore();
+      await previewerApi(root).destroy();
+    }
+  });
+
   it('materializes an exact lane-only recipe without inventing a cross-lane family', async () => {
     const root = createRoot();
     initProjectedPreviewer({

@@ -258,6 +258,68 @@ describe('Website projection materializer', () => {
     expect(otherOwnerPortal.isConnected).toBe(true);
   });
 
+  it('shares one owner-filtered document portal observer across candidates', async () => {
+    fakes.createComposition.mockImplementation(() => ({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+      setThemeSurfaceStyle: vi.fn(),
+      restoreFocus: vi.fn(),
+    }));
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('section');
+      scope.dataset.projectionScope = host.dataset.projectionOwnerHost;
+      host.appendChild(scope);
+      return { destroy: vi.fn() };
+    });
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      queueMicrotask(() => callback(0));
+      return 1;
+    });
+    const firstMount = document.createElement('div');
+    const secondMount = document.createElement('div');
+    document.body.append(firstMount, secondMount);
+
+    const [first, second] = await Promise.all([
+      materializeProjectionCandidate(
+        {
+          selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+          generation: 1,
+        },
+        {
+          mount: firstMount,
+          ownerId: 'observer-owner-a',
+          componentId: 'button',
+          controls: controls(),
+        }
+      ),
+      materializeProjectionCandidate(
+        {
+          selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+          generation: 1,
+        },
+        {
+          mount: secondMount,
+          ownerId: 'observer-owner-b',
+          componentId: 'button',
+          controls: controls(),
+        }
+      ),
+    ]);
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+    const documentQuery = vi.spyOn(document, 'querySelectorAll');
+    const portal = document.createElement('section');
+    portal.dataset.projectionOwner = 'observer-owner-a';
+    portal.dataset.projectionGeneration = '1';
+
+    document.body.appendChild(portal);
+
+    await vi.waitFor(() => expect(portal.inert).toBe(true));
+    expect(documentQuery).toHaveBeenCalledTimes(1);
+
+    await Promise.all([first.dispose(), second.dispose()]);
+  });
+
   it('removes only the failed candidate external portal roots', async () => {
     fakes.createComposition.mockReturnValue({
       demo: childDemo,

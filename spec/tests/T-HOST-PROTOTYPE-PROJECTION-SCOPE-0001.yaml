@@ -23,6 +23,12 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
     expectation: visible-portal-surfaces-carry-the-current-lane-generation-and-theme-without-page-inheritance
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
+    title: one document observer dispatches portal reconciliation only to the affected owner and generation
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
+    expectation: portal-mutations-trigger-one-owner-generation-filtered-document-scan
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-NO-HYBRID-PRESENTATION
     title: Brutalist and Shadcn scope controls use their own Prototype identities behavior and style assets rather than recolored foreign-lane chrome
     covers:
@@ -37,11 +43,11 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
     expectation: controlled-selection-and-semantic-focus-restore-without-reusing-replaced-prototype-instances
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
-    title: stale loads events and portal cleanup cannot commit or erase the current generation
+    title: stale loads events cleanup and client retention cannot commit erase or retain a superseded generation
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
-    expectation: generation-guarded-completion-and-cleanup-preserve-the-latest-complete-tree
+    expectation: generation-guarded-completion-cleanup-and-client-registries-preserve-only-current-owned-trees
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
     title: projection-lane tokens remain inside the scope explicit host light or dark activation wins over system preference and unrelated Website chrome retains the site theme
     covers:
@@ -121,6 +127,7 @@ implementations:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-theme-unit
@@ -140,6 +147,7 @@ implementations:
     consumesCases:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-scope-browser
@@ -222,6 +230,9 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projection-theme.test.ts
   - path: apps/www/src/components/BrutalistPageStyle.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added superseded-client-retention and shared owner-filtered portal-observer evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added pending-initial supersession and explicit light-over-system-preference evidence.

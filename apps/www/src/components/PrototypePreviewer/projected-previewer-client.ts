@@ -245,6 +245,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       projectionFamilyId,
     },
     async materialize(request) {
+      const intentRevision = desiredIntentRevision;
       const candidate = await materializeProjectionCandidate(request, {
         mount,
         ownerId,
@@ -252,7 +253,11 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         controls: controls(),
         controlIds: toolbar ? ['runtime'] : [],
       });
-      if (!destroyed && request.generation >= latestCommittedGeneration) {
+      if (
+        !destroyed &&
+        intentRevision === desiredIntentRevision &&
+        request.generation >= latestCommittedGeneration
+      ) {
         candidateByGeneration.set(request.generation, candidate);
       }
       return candidate;

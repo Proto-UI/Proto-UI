@@ -145,6 +145,137 @@ function externalProjectionPortalRoots(
   });
 }
 
+type PortalObserverRegistration = Readonly<{
+  ownerId: string;
+  generation: string;
+  reconcile(): void;
+}>;
+
+type PortalObserverState = {
+  observer: MutationObserver;
+  registrations: Set<PortalObserverRegistration>;
+};
+
+const portalObserverStates = new WeakMap<Document, PortalObserverState>();
+
+function portalCoordinateKey(ownerId: string, generation: string): string {
+  return `${ownerId}\u0000${generation}`;
+}
+
+function addPortalCoordinate(
+  coordinates: Set<string>,
+  ownerId: string | null,
+  generation: string | null
+): void {
+  if (ownerId && generation) coordinates.add(portalCoordinateKey(ownerId, generation));
+}
+
+function collectPortalCoordinates(
+  node: Node,
+  view: Window & typeof globalThis,
+  coordinates: Set<string>
+): void {
+  if (!(node instanceof view.Element)) return;
+  addPortalCoordinate(
+    coordinates,
+    node.getAttribute('data-projection-owner'),
+    node.getAttribute('data-projection-generation')
+  );
+  for (const element of node.querySelectorAll(
+    '[data-projection-owner][data-projection-generation]'
+  )) {
+    addPortalCoordinate(
+      coordinates,
+      element.getAttribute('data-projection-owner'),
+      element.getAttribute('data-projection-generation')
+    );
+  }
+}
+
+function observeExternalProjectionPortals(
+  document: Document,
+  ownerId: string,
+  generation: number,
+  reconcile: () => void
+): () => void {
+  const view = document.defaultView;
+  if (!view) return () => {};
+
+  let state = portalObserverStates.get(document);
+  if (!state) {
+    const registrations = new Set<PortalObserverRegistration>();
+    const observer = new view.MutationObserver((records) => {
+      const affectedCoordinates = new Set<string>();
+      for (const record of records) {
+        if (record.type === 'attributes' && record.target instanceof view.Element) {
+          const target = record.target;
+          const currentOwnerId = target.getAttribute('data-projection-owner');
+          const currentGeneration = target.getAttribute('data-projection-generation');
+          addPortalCoordinate(affectedCoordinates, currentOwnerId, currentGeneration);
+          if (record.attributeName === 'data-projection-owner') {
+            addPortalCoordinate(affectedCoordinates, record.oldValue, currentGeneration);
+          } else if (record.attributeName === 'data-projection-generation') {
+            addPortalCoordinate(affectedCoordinates, currentOwnerId, record.oldValue);
+          }
+          continue;
+        }
+        for (const node of record.addedNodes) {
+          collectPortalCoordinates(node, view, affectedCoordinates);
+        }
+        for (const node of record.removedNodes) {
+          collectPortalCoordinates(node, view, affectedCoordinates);
+        }
+      }
+
+      for (const registration of registrations) {
+        if (
+          !affectedCoordinates.has(
+            portalCoordinateKey(registration.ownerId, registration.generation)
+          )
+        ) {
+          continue;
+        }
+        try {
+          registration.reconcile();
+        } catch (error) {
+          console.error(
+            '[PrototypePreviewer] Failed to reconcile external projection portals.',
+            error
+          );
+        }
+      }
+    });
+    state = { observer, registrations };
+    portalObserverStates.set(document, state);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: ['data-projection-owner', 'data-projection-generation'],
+    });
+  }
+
+  const registration: PortalObserverRegistration = {
+    ownerId,
+    generation: String(generation),
+    reconcile,
+  };
+  state.registrations.add(registration);
+  let stopped = false;
+  return () => {
+    if (stopped) return;
+    stopped = true;
+    const current = portalObserverStates.get(document);
+    if (!current) return;
+    current.registrations.delete(registration);
+    if (current.registrations.size === 0) {
+      current.observer.disconnect();
+      portalObserverStates.delete(document);
+    }
+  };
+}
+
 function removeExternalGenerationSurfaces(
   mount: HTMLElement,
   ownerId: string,
@@ -262,14 +393,12 @@ export async function materializeProjectionCandidate(
       else lockExternalPortalRoot(root);
     }
   };
-  const view = options.mount.ownerDocument.defaultView;
-  const portalObserver = view ? new view.MutationObserver(reconcileCandidateExternalPortals) : null;
-  portalObserver?.observe(options.mount.ownerDocument.body, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['data-projection-owner', 'data-projection-generation'],
-  });
+  const stopObservingExternalPortals = observeExternalProjectionPortals(
+    options.mount.ownerDocument,
+    options.ownerId,
+    request.generation,
+    reconcileCandidateExternalPortals
+  );
   const teardownCandidate = async (): Promise<void> => {
     let teardownFailed = false;
     let teardownFailure: unknown;
@@ -296,7 +425,7 @@ export async function materializeProjectionCandidate(
     } catch (error) {
       recordFailure(error);
     }
-    attempt(() => portalObserver?.disconnect());
+    attempt(stopObservingExternalPortals);
     attempt(() =>
       removeExternalGenerationSurfaces(options.mount, options.ownerId, request.generation)
     );
