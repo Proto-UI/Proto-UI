@@ -10,7 +10,7 @@ import { loadPrototypes } from '../../../apps/www/src/components/PrototypePrevie
 import {
   AdapterIds,
   type RuntimeId,
-} from '../../../apps/www/src/components/PrototypePreviewer/runtimes/registry';
+} from '../../../apps/www/src/components/PrototypePreviewer/runtimes/ids';
 import type {
   DemoRuntimeApi,
   DemoSpec,

@@ -10,7 +10,7 @@ import { loadVue2, toVue2ComponentData, toVue2Runtime } from './runtimes/vue2-ru
 import { claimHostMount, type HostMountLease } from './runtimes/host-mount';
 import type { DemoChild, DemoRenderOptions, DemoRenderResult, DemoRuntimeApi } from './demo-types';
 import { ensurePreviewWcRegistered } from './wc-registry';
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 
 type PropsBaseType = Record<string, unknown>;
 

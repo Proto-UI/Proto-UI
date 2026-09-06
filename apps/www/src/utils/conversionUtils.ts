@@ -1,4 +1,4 @@
-import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/registry';
+import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/ids';
 
 // 用于 PrototypePreviewer 的代码格式化，去除代码中的空格和换行符
 export function formatCode(code: string) {

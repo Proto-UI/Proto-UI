@@ -1,4 +1,4 @@
-import type { RuntimeAPI } from './registry';
+import type { RuntimeAPI } from './ids';
 import { createVueAdapter, type VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import { claimHostMount, releaseHostMount } from './host-mount';
 

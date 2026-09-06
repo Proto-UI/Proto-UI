@@ -1,10 +1,5 @@
 ---
-import {
-  AdapterIds,
-  InternalAdapterIds,
-  selectRuntimeIds,
-  type RuntimeId,
-} from './runtimes/registry';
+import { AdapterIds, InternalAdapterIds, selectRuntimeIds, type RuntimeId } from './runtimes/ids';
 import AdapterSelect from '../override/AdapterSelect.astro';
 import CodePanel from './CodePanel.astro';
 import { highlightCode, type CodeLang } from './code-highlight';
@@ -282,7 +277,7 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
   </style>
 
   <script>
-    import type { RuntimeId } from './runtimes/registry';
+    import type { RuntimeId } from './runtimes/ids';
     const defaultRuntimeIds: RuntimeId[] = ['wc', 'react', 'vue', 'vue2'];
 
     async function mount(root: HTMLElement) {

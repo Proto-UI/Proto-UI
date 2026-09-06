@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@proto.ui/spec-schema':
+        specifier: workspace:*
+        version: link:packages/spec/schema
       '@proto.ui/types':
         specifier: workspace:*
         version: link:packages/types

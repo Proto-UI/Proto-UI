@@ -2,7 +2,7 @@ import { loadDemo } from './demo-modules';
 import { prepareDemoRuntime, renderDemo } from './demo-renderer';
 import { collectPrototypeIds } from './demo-types';
 import { loadPrototypes } from './prototype-modules';
-import { isRuntimeId, type RuntimeId } from './runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './runtimes/ids';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from '../adapter-preference';
 import {
   initSiteShadcnControls,

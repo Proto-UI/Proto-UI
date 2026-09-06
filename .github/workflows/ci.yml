@@ -138,8 +138,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      COVERAGE_BASE_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+      COVERAGE_HEAD_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      COVERAGE_MERGE_REVISION: ${{ github.event_name == 'pull_request' && github.sha || '' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Validate the exact PR head; never treat GitHub's temporary merge commit as retained evidence.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:

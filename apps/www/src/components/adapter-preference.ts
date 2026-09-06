@@ -1,4 +1,4 @@
-import { AdapterIds, type PublicRuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { AdapterIds, type PublicRuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { selectValue, setSelectValue, type SiteSelectRoot } from './site-shadcn-controls';
 
 export const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';

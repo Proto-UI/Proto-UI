@@ -1,4 +1,4 @@
-import type { RuntimeAPI } from './registry';
+import type { RuntimeAPI } from './ids';
 import { createReactAdapter } from '@proto.ui/adapter-react';
 import type * as ReactTypes from 'react';
 import { claimHostMount, releaseHostMount } from './host-mount';
