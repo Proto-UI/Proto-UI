@@ -738,6 +738,8 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       expect(paint.backgroundColor, frame).toBe(resolved.boundary.foreground);
       expect(paint.color, frame).toBe(resolved.boundary.background);
       expect(paint.borderColor, frame).toBe(resolved.boundary.foreground);
+      // The hard shadow must resolve to the same active foreground token as the border.
+      expect(paint.boxShadow, frame).toContain(resolved.boundary.foreground);
       expect(paint.boxShadow, frame).toContain('4px 4px 0px');
       expect(paint.fontFamily.toLowerCase(), frame).toContain('mono');
       expect(paint.fontSize, frame).toBe('12px');
@@ -755,9 +757,11 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       // for `[data-adapter-select-root].dataset.value` to equal it before the
       // host is accepted. Reading an option inventory would retest the
       // previewer's own Select, whose items exist only while it is open.
+      // Pin the browser preference to Light; both palettes below must come from the host theme API.
+      await page.emulateMedia({ colorScheme: 'light' });
       for (const runtime of RUNTIMES) {
-        await applyColorScheme(page, 'light');
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
+        await applyHostTheme(page, 'light');
         // Scoped to the rendered host: the previewer chrome is Proto UI too, so
         // a previewer-wide count is not evidence about this demo.
         const roots = previewer.locator('.host [data-pui-root]');
@@ -779,14 +783,25 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           'Portable Base behavior, Brutalist visual grammar',
           `${runtime}/light`
         );
+        const lightTooltipNode = await firstTooltip.elementHandle();
+        if (!lightTooltipNode) throw new Error(`${runtime}: Tooltip Content has no DOM node.`);
         const firstTooltipId = lightPaint.id;
         expect(firstTooltipId, runtime).toBeTruthy();
-        await applyColorScheme(page, 'dark');
+        await applyHostTheme(page, 'dark');
         const darkPaint = await expectTooltipPaint(
           firstTooltip,
           'Portable Base behavior, Brutalist visual grammar',
           `${runtime}/dark-repaint`
         );
+        const darkTooltipNode = await firstTooltip.elementHandle();
+        if (!darkTooltipNode) throw new Error(`${runtime}: Tooltip Content has no DOM node.`);
+        const sameTooltipNode = await page.evaluate(
+          ([before, after]) => before === after,
+          [lightTooltipNode, darkTooltipNode]
+        );
+        expect(sameTooltipNode, `${runtime}/same-mounted-content`).toBe(true);
+        await lightTooltipNode.dispose();
+        await darkTooltipNode.dispose();
         expect(darkPaint.id, `${runtime}/same-mounted-content`).toBe(firstTooltipId);
         expect(darkPaint.backgroundColor, `${runtime}/live-fill-repaint`).not.toBe(
           lightPaint.backgroundColor
