@@ -22,6 +22,7 @@
     "@proto.ui/module-context": "workspace:*",
     "@proto.ui/module-focus": "workspace:*",
     "@proto.ui/module-hit-participation": "workspace:*",
+    "@proto.ui/module-image-view": "workspace:*",
     "@proto.ui/module-overlay": "workspace:*",
     "@proto.ui/module-positioning": "workspace:*",
     "@proto.ui/module-scroll": "workspace:*",

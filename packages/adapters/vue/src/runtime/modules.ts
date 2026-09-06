@@ -79,6 +79,11 @@ import {
   TEXT_CONTROL_HOST_CAP,
   TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
 } from '@proto.ui/module-text-control';
+import {
+  createWebImageViewHost,
+  IMAGE_VIEW_HOST_CAP,
+  IMAGE_VIEW_RUN_IN_CALLBACK_CAP,
+} from '@proto.ui/module-image-view';
 
 import {
   clearProtoParentProjection,
@@ -228,11 +233,16 @@ export function createVueModules<Props extends PropsBaseType>(args: {
   };
 
   const physicalControl = () => args.getCurrentElement() as HTMLTextAreaElement | null;
+  const physicalImage = () => args.getCurrentElement() as HTMLImageElement | null;
 
   return createCapsWiring()
     .use('text-control', [
       [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('image-view', [
+      [IMAGE_VIEW_HOST_CAP, createWebImageViewHost(physicalImage)],
+      [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [[EFFECTS_CAP, effectsPort]])

@@ -6,11 +6,11 @@ since: 0.3.0-alpha.0
 summary: Image View declarations express portable image presentation requirements while adapters select host image targets and retain native loading, caching, and rendering behavior.
 statement:
   zh-CN: >-
-    Image View 必须声明 opaque URI source 与 host-owned image presentation requirement，而不得在 prototype declaration 中指定 Web tag、native resource object 或其它宿主 materialization。Adapter 与 host capability 负责选择物理 image target，并默认保留 native loading、caching 与 rendering 行为；v0 仅覆盖 portable protocol 与 fake-host evidence，不得表述为已完成 Web conformance。
+    Image View 必须声明 opaque URI source 与 host-owned image presentation requirement，而不得在 prototype declaration 中指定 Web tag、native resource object 或其它宿主 materialization。Adapter 与 host capability 负责选择物理 image target，并默认保留 native loading、caching 与 rendering 行为。当前 Web profile 可对已完成且有可展示宽度的 target 同步报告 loaded；否则将此次 source request 对应的 `HTMLImageElement.decode()` settlement 映射为 terminal status，并在 replacement、removal 或 lease disposal 时 retire 旧 settlement。原生 `load` / `error` event 只在物理 target 边界内 containment，不成为 portable transition。v0 覆盖 portable protocol、fake-host evidence 与 Web Component、React、Vue 的 bounded Web profile evidence，但不得表述为已完成多宿主 conformance。
 
 
   en: >-
-    Image View must declare an opaque URI source and a host-owned image presentation requirement rather than naming a Web tag, native resource object, or other host materialization in the prototype declaration. The adapter and host capability select the physical image target and preserve native loading, caching, and rendering behavior by default; v0 covers the portable protocol and fake-host evidence only and must not be represented as Web conformance.
+    Image View must declare an opaque URI source and a host-owned image presentation requirement rather than naming a Web tag, native resource object, or other host materialization in the prototype declaration. The adapter and host capability select the physical image target and preserve native loading, caching, and rendering behavior by default. The current Web profile may report `loaded` synchronously for a complete target with displayable width; otherwise it maps the `HTMLImageElement.decode()` settlement for that source request to terminal status and retires old settlements on replacement, removal, or lease disposal. Native `load` and `error` events are contained at the physical target boundary and do not become portable transitions. v0 covers the portable protocol, fake-host evidence, and bounded Web profile evidence for Web Component, React, and Vue, but must not be represented as multi-host conformance.
 
 
 criteria:
@@ -33,18 +33,37 @@ criteria:
     text:
       zh-CN: loadingStatus (idle|loading|loaded|error) 与 loadingStatusChange transition 是唯一的状态/transition surface；v0 不公开同义的 load/error 事件。
       en: loadingStatus (idle|loading|loaded|error) and loadingStatusChange transition are the only status/transition surfaces; v0 does not expose synonymous load/error events.
+  - id: D-IMAGE-VIEW-PROJECTION-0001-E
+    text:
+      zh-CN: 当前 Web profile 必须在 Web Component、React 与 Vue adapter 中将该 requirement 投影到每个 instance 的一个物理 `img`；通过这些 adapter 的测试只能证明 cross-adapter Web profile，不得冒充多宿主 conformance。
+      en: The current Web profile must project this requirement to one physical `img` per instance in the Web Component, React, and Vue adapters; passing those adapters proves only a cross-adapter Web profile and must not masquerade as multi-host conformance.
+  - id: D-IMAGE-VIEW-PROJECTION-0001-F
+    text:
+      zh-CN: 当前 Web profile 必须将同步 cache hit（`complete && naturalWidth > 0`）或当前 source request 对应的 `decode()` settlement 映射为 `loaded` / `error`，并用不可变 request token 拒绝 replacement、removal 或 disposal 后的旧 settlement；原生 `load` / `error` event 只做 boundary containment。该选择不得提升为跨宿主 loaded readiness 保证。
+      en: The current Web profile must map a synchronous cache hit (`complete && naturalWidth > 0`) or the `decode()` settlement bound to the current source request to `loaded` or `error`, reject old settlements after replacement, removal, or disposal through an immutable request token, and use native `load` and `error` events only for boundary containment. This choice must not become a cross-host loaded-readiness guarantee.
 dependsOn:
   contracts:
     - C-HOST-SURFACE-PROJECTION-0001
     - C-MODULE-DECLARATION-0001
+verifies:
+  tests:
+    - T-IMAGE-VIEW-0001
 sources:
   - path: packages/modules/image-view/src/declaration.ts
   - path: packages/modules/image-view/src/create.ts
+  - path: packages/modules/image-view/src/web.ts
+  - path: packages/adapters/react/src/adapt.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/adapt.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/adapt.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/session.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: >-
-      Introduced the draft Image View projection decision for the host-owned image presentation target with opaque URI source, explicit a11y binary input, and generation-bound lease.
+      Introduced the draft host-owned Image View projection decision with opaque URI source, explicit a11y binary input, generation-bound lease semantics, a request-scoped Web cache-hit/decode readiness mapping, and bounded Web Component, React, and Vue realization boundaries without claiming multi-host conformance.
 
 
 tags:

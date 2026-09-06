@@ -30,6 +30,7 @@ import {
   TEXT_CONTROL_DECLARATION,
   type WebTextControl,
 } from '@proto.ui/module-text-control';
+import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
 
 import {
   bindController,
@@ -114,6 +115,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   const tagName = opt.registerAs ?? proto.name;
   assertKebabCase(tagName);
   const textControl = getModuleDeclaration(proto, TEXT_CONTROL_DECLARATION)?.config;
+  const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
 
   const shadow = opt.shadow ?? false;
   const getProps = opt.getProps ?? (() => ({}) as Partial<Props>);
@@ -154,6 +156,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _slotProjector: SlotProjector | null = null;
     private _hostDisplay: HostDisplayController | null = null;
     private _textControlTarget: WebTextControl | null = null;
+    private _imageViewTarget: HTMLImageElement | null = null;
     private _surfaceProjection: HostSurfaceProjection<HTMLElement>;
 
     private _applier: ReturnType<typeof createOwnedTwTokenApplier> | null = null;
@@ -162,15 +165,24 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     constructor() {
       super();
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
+      if (textControl && imageView) {
+        throw new Error(
+          '[WC Adapter] text-control and image-view declarations cannot share a root.'
+        );
+      }
       if (textControl) {
         this._textControlTarget = document.createElement(
           resolveWebTextControlLocalName(textControl)
         );
         this._textControlTarget.setAttribute('part', 'control');
       }
+      if (imageView) {
+        this._imageViewTarget = document.createElement(resolveWebImageLocalName());
+        this._imageViewTarget.setAttribute('part', 'image');
+      }
       this._surfaceProjection = createHostSurfaceProjection<HTMLElement>(
         this,
-        this._textControlTarget ?? this
+        this._textControlTarget ?? this._imageViewTarget ?? this
       );
       bindElementSurfaceProjection(this, this._surfaceProjection);
       this._instanceToken = createLogicalInstance(proto as Prototype<any>);
@@ -282,6 +294,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
 
+        if (this._imageViewTarget?.parentNode) {
+          this._imageViewTarget.parentNode.removeChild(this._imageViewTarget);
+        }
+
         const projector = this._slotProjector;
         if (!projector) return;
         const externalChildren = projector.collectSlotPoolBeforeCommit();
@@ -300,6 +316,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           schedule,
           rawPropsSource,
           textControlTarget: this._textControlTarget,
+          imageViewTarget: this._imageViewTarget,
           wiring,
           eventGate: {
             enable: () => currentEventGate?.enable(),
@@ -346,11 +363,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           isEnabled: () => eventGate.isEnabled?.() ?? true,
         });
         bindLogicalEventTarget(this._instanceToken, router.rootTarget);
-        const applier = createOwnedTwTokenApplier(this._textControlTarget ?? thisEl, {
-          onChange: () => {
-            this._hostDisplay?.sync();
-          },
-        });
+        const applier = createOwnedTwTokenApplier(
+          this._textControlTarget ?? this._imageViewTarget ?? thisEl,
+          {
+            onChange: () => {
+              this._hostDisplay?.sync();
+            },
+          }
+        );
         currentEventGate = eventGate;
         currentRouter = router;
         this._applier = applier;
@@ -407,6 +427,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             effectsPort: createWebEffectsPort(applier),
             getMeta,
             textControlTarget: this._textControlTarget,
+            imageViewTarget: this._imageViewTarget,
             exposeStateWebMode,
             scrollProjection,
             setExposes,
@@ -483,6 +504,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         rawPropsSource,
         getMeta,
         textControlTarget: this._textControlTarget,
+        imageViewTarget: this._imageViewTarget,
         exposeStateWebMode,
         setExposes,
         runInCallbackScope,

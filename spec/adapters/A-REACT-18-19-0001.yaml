@@ -73,6 +73,10 @@ criteria:
     text:
       zh-CN: Adapter 必须接入 required Expose Event semantic Module，并以 translated capability 提供 `HC-EXPOSE-EVENT-SINK-0001`；合法 emission 映射到当前 `onXxx` callback，listener props 不得进入 Proto raw props，declaration metadata 不得进入 `getExposes()`，且该关系不得被解释为 Event input routing。
       en: The Adapter must wire the required Expose Event semantic Module and provide `HC-EXPOSE-EVENT-SINK-0001` as a translated capability; valid emissions map to the current `onXxx` callback, listener props must not enter Proto raw props, declaration metadata must not enter `getExposes()`, and this relation must not be interpreted as Event input routing.
+  - id: A-REACT-18-19-0001-N
+    text:
+      zh-CN: 对声明 `M-IMAGE-VIEW-0001` 的 React Web realization 必须将每个 Image View request 绑定到不可变 generation，清理替换/空 source 的旧视觉目标，并在 view detach/disposal 后移除 owned physical image；该保证由 `T-IMAGE-VIEW-0001` 的 React integration evidence 验证。
+      en: The React Web realization of `M-IMAGE-VIEW-0001` must bind each Image View request to an immutable generation, clear stale visual targets on replacement or empty source, and remove the owned physical image after view detach or disposal; `T-IMAGE-VIEW-0001` React integration evidence verifies this guarantee.
 supports:
   modules:
     - id: M-PROPS-0001
@@ -93,6 +97,10 @@ supports:
     - id: M-EXPOSE-EVENT-0001
       role: required-module
       note: The standalone Expose Event module owns the Component-to-App-Maker outward-signal bridge and receives its sink through expose-event wiring.
+    - id: M-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: optional-module
+      note: React resolves declared Image View requirements to one physical HTMLImageElement root and retains the generation-bound host lease.
 provides:
   hostCaps:
     - id: HC-PROPS-SOURCE-0001
@@ -110,6 +118,10 @@ provides:
     - id: HC-EXPOSE-EVENT-SINK-0001
       role: translated-capability
       note: React maps validated outward signal keys to the current onXxx callback props.
+    - id: HC-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: React maps Image View to the physical image root and carries loading completion through the host lease.
 relates:
   decisions:
     - D-ADAPTER-PROFILE-0001
@@ -125,6 +137,8 @@ verifies:
     - T-EXPOSE-0002
     - T-EXPOSE-STATE-0002
     - T-EXPOSE-EVENT-0002
+    - id: T-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
 sources:
   - path: packages/adapters/react/package.json
   - path: packages/adapters/react/src/adapt.ts
@@ -144,7 +158,11 @@ sources:
   - path: packages/adapters/base/src/host/exposes.ts
   - path: packages/adapters/react/test/expose.test.ts
   - path: packages/adapters/react/test/expose-event.test.ts
+  - path: packages/adapters/react/test/image-view.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added the Image View Web realization criterion, support relation, and exact-head integration evidence.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Migrated the outward signal sink from Event wiring to the standalone Expose Event Module.

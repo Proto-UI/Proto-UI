@@ -17,6 +17,7 @@ sources:
   - path: packages/modules/image-view/src/create.ts
   - path: packages/modules/image-view/src/declaration.ts
   - path: packages/modules/image-view/src/types.ts
+  - path: packages/modules/image-view/src/web.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced

@@ -23,7 +23,7 @@ Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。�
 ## Image View
 
 - 新增公开 package `@proto.ui/module-image-view`，并将其纳入精确的 43-package release identity，作为 Base Image 与 Runtime 使用的 host-mediated image presentation protocol。
-- 通过可执行 fake-host 与 runtime 证据覆盖 generation-bound loading、stale completion rejection、replacement visual clearing、显式 accessibility mode，以及 Base Image 的 controlled/uncontrolled source ownership。
+- 通过可执行 fake-host 与 runtime 证据覆盖 generation-bound loading、stale completion rejection、replacement visual clearing、显式 accessibility mode，以及 `source` 的直接投影。
 - 首次 `@proto.ui/module-image-view` npm identity bootstrap、受保护 release workflow 配置与 registry readiness 仍是发布前显式门禁；bootstrap 不得占用 `latest` 或 `next`。
 
 ## Official Vue 2 Adapter
