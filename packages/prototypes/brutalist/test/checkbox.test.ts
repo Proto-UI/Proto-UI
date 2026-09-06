@@ -29,7 +29,7 @@ const ROOT_SURFACE_TOKENS = [
   'justify-center',
   'rounded-none',
   'border-2',
-  'border-black',
+  'border-main-foreground',
   'bg-main',
   'text-main-foreground',
   'shadow-[3px_3px_0_0_#000]',
@@ -108,6 +108,7 @@ describe('prototypes/brutalist: checkbox', () => {
     for (const token of ROOT_SURFACE_TOKENS) {
       expect(styleContains(root, token), token).toBe(true);
     }
+    expect(styleContains(root, 'border-black')).toBe(false);
     for (const token of INDICATOR_SURFACE_TOKENS) {
       expect(styleContains(indicator, token), token).toBe(true);
     }
@@ -120,6 +121,9 @@ describe('prototypes/brutalist: checkbox', () => {
     expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:text-background')).toBe(
       true
     );
+    expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:border-background')).toBe(
+      true
+    );
     expect(root.getAttribute('aria-checked')).toBe('true');
     expect(glyphPaths(indicator)).toEqual([CHECK_PATH]);
 
@@ -128,6 +132,7 @@ describe('prototypes/brutalist: checkbox', () => {
     expect(root.getAttribute('aria-checked')).toBe('mixed');
     expect(styleContains(root, 'bg-main')).toBe(true);
     expect(styleContains(root, 'text-main-foreground')).toBe(true);
+    expect(styleContains(root, 'border-main-foreground')).toBe(true);
     expect(glyphPaths(indicator)).toEqual([DASH_PATH]);
   });
 

@@ -32,6 +32,72 @@ if (requestedRuntime && TEST_RUNTIMES.length === 0) {
 
 type ElementGeometry = { x: number; y: number; width: number; height: number };
 
+type SurfaceVariables = {
+  background: string;
+  color: string;
+  border: string;
+};
+
+type SurfacePaint = {
+  background: string;
+  color: string;
+  border: string;
+  borderWidth: string;
+  borderRadius: string;
+  boxShadow: string;
+  variables: {
+    background: string;
+    color: string;
+    border: string;
+  };
+};
+
+const RESTING_SURFACE = {
+  background: '--pui-main',
+  color: '--pui-main-foreground',
+  border: '--pui-main-foreground',
+} as const;
+
+const CHECKED_SURFACE = {
+  background: '--pui-foreground',
+  color: '--pui-background',
+  border: '--pui-background',
+} as const;
+
+async function surfacePaint(locator: Locator, variables: SurfaceVariables): Promise<SurfacePaint> {
+  return locator.evaluate((element, expectedVariables) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) throw new Error('Canvas 2D context is required to resolve painted colours.');
+
+    const paint = (color: string): string => {
+      context.clearRect(0, 0, 1, 1);
+      context.fillStyle = '#000';
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+      return Array.from(context.getImageData(0, 0, 1, 1).data).join(',');
+    };
+
+    const style = getComputedStyle(element);
+    const rootStyle = getComputedStyle(document.documentElement);
+    return {
+      background: paint(style.backgroundColor),
+      color: paint(style.color),
+      border: paint(style.borderTopColor),
+      borderWidth: style.borderTopWidth,
+      borderRadius: style.borderTopLeftRadius,
+      boxShadow: style.boxShadow,
+      variables: {
+        background: paint(rootStyle.getPropertyValue(expectedVariables.background).trim()),
+        color: paint(rootStyle.getPropertyValue(expectedVariables.color).trim()),
+        border: paint(rootStyle.getPropertyValue(expectedVariables.border).trim()),
+      },
+    };
+  }, variables);
+}
+
 async function geometry(locator: Locator, label: string): Promise<ElementGeometry> {
   const box = await locator.boundingBox();
   if (!box) throw new Error(`${label}: expected visible rendered geometry.`);
@@ -176,6 +242,31 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
         for (const colorScheme of COLOR_SCHEMES) {
           const label = `${runtime}/${colorScheme}`;
           await applyColorScheme(page, colorScheme);
+          if ((await checkbox.getAttribute('aria-checked')) !== 'false') await checkbox.click();
+
+          const surfaces = [
+            ['resting', checkboxes.first(), RESTING_SURFACE],
+            ['checked', checkboxes.nth(1), CHECKED_SURFACE],
+          ] as const;
+          for (const [state, surface, variables] of surfaces) {
+            const paint = await surfacePaint(surface, variables);
+            expect(paint.background, `${label}/${state}/background`).toBe(
+              paint.variables.background
+            );
+            expect(paint.color, `${label}/${state}/color`).toBe(paint.variables.color);
+            expect(paint.border, `${label}/${state}/border`).toBe(paint.variables.border);
+            expect(paint.borderWidth, `${label}/${state}/border-width`).toBe('2px');
+            expect(paint.borderRadius, `${label}/${state}/border-radius`).toBe('0px');
+            expect(paint.boxShadow, `${label}/${state}/hard-shadow`).toContain('3px 3px 0px');
+
+            const box = await geometry(surface, `${label}/${state}/geometry`);
+            expect(Math.abs(box.width - 20), `${label}/${state}/width`).toBeLessThanOrEqual(
+              GEOMETRY_EPSILON
+            );
+            expect(Math.abs(box.height - 20), `${label}/${state}/height`).toBeLessThanOrEqual(
+              GEOMETRY_EPSILON
+            );
+          }
 
           expect(
             await foregroundBackgroundContrast(mixedCheckbox),
@@ -188,7 +279,6 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
             scale: 'css',
           });
 
-          if ((await checkbox.getAttribute('aria-checked')) !== 'false') await checkbox.click();
           await page.keyboard.press('Tab');
           await checkbox.focus();
           await page.waitForFunction(

@@ -12,7 +12,7 @@ const ROOT_SURFACE_TOKENS = [
   'justify-center',
   'rounded-none',
   'border-2',
-  'border-black',
+  'border-main-foreground',
   'bg-main',
   'text-main-foreground',
   'shadow-[3px_3px_0_0_#000]',
@@ -36,7 +36,8 @@ const checkboxRoot = definePrototype<BrutalistCheckboxRootProps, BrutalistCheckb
 
     def.rule({
       when: (when) => when.all(when.state(checked).eq(true), when.state(indeterminate).eq(false)),
-      intent: (intent) => intent.feedback.style.use(tw('bg-foreground text-background')),
+      intent: (intent) =>
+        intent.feedback.style.use(tw('bg-foreground text-background border-background')),
     });
     def.rule({
       when: (when) => when.state(pressed).eq(true),
