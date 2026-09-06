@@ -6500,3 +6500,95 @@ test('binds plain-text Harness evidence commands to manifest commands', () => {
     /dogfooded evidence Results commands must include record command `pnpm test`/
   );
 });
+
+test('discovers local components exported through React wrappers', () => {
+  for (const [relativePath, expected] of [
+    [
+      'apps/www/src/components/WrappedSurface.tsx',
+      /website component source `apps\/www\/src\/components\/WrappedSurface\.tsx` is not classified/,
+    ],
+    [
+      'apps/agent-harness/src/run/WrappedSurface.tsx',
+      /Harness user-facing source `apps\/agent-harness\/src\/run\/WrappedSurface\.tsx` is not classified/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      "import { memo } from 'react'; const Surface = () => <section>Wrapped</section>; export default memo(Surface);",
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('rejects Agent actions from callable render class fields', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/ClassFieldRender.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import React from 'react'; import * as actions from './agent-actions'; class ClassFieldRender extends React.Component { render = () => { actions.send(); return <section>Run</section>; }; } export { ClassFieldRender };",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/ClassFieldRender\.tsx` contains a forbidden interaction or DOM state machine/
+  );
+});
+
+test('follows object spreads while resolving native handler props', () => {
+  for (const [relativePath, expected] of [
+    [
+      'apps/www/src/components/SpreadHandlers.tsx',
+      /interactive website source `apps\/www\/src\/components\/SpreadHandlers\.tsx` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/SpreadHandlers.tsx',
+      /Harness source `apps\/agent-harness\/src\/run\/SpreadHandlers\.tsx` contains a forbidden interaction or DOM state machine/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      'const base = { onKeyDown() {} }; const handlers = { ...base }; export function Surface() { return <button {...handlers}>Run</button>; }',
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('resolves every configured Website alias before consumer-wall classification', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const configPath = path.join(root, 'apps/www/astro.config.mjs');
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
+  fs.writeFileSync(
+    configPath,
+    [
+      "import { fileURLToPath } from 'node:url';",
+      "export default { vite: { resolve: { alias: { rawRuntime: fileURLToPath(new URL('../../packages/runtime/src', import.meta.url)) } } } };",
+    ].join('\n'),
+    'utf8'
+  );
+  const runtimePath = path.join(root, 'packages/runtime/src/index.ts');
+  fs.mkdirSync(path.dirname(runtimePath), { recursive: true });
+  fs.writeFileSync(runtimePath, 'export const runtime = true;', 'utf8');
+  const sourcePath = 'apps/www/src/components/AliasRuntime.ts';
+  const absolutePath = path.join(root, sourcePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, "import { runtime } from 'rawRuntime';", 'utf8');
+
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `rawRuntime` in `apps\/www\/src\/components\/AliasRuntime\.ts` escapes the website consumer-wall allowlist/
+  );
+});

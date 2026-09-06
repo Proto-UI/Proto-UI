@@ -2,9 +2,20 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 
-import { BROWSER_SUITES, createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { BROWSER_SUITES, corepackInvocation, createRuntimeTestPlan } from './runtime-test-plan.mjs';
 
 describe('runtime test plan', () => {
+  it('launches the Windows Corepack shim through a shell', () => {
+    assert.deepEqual(corepackInvocation('win32'), {
+      executable: 'corepack.cmd',
+      shell: true,
+    });
+    assert.deepEqual(corepackInvocation('linux'), {
+      executable: 'corepack',
+      shell: false,
+    });
+  });
+
   it('preserves focused Vitest arguments without starting the documentation server', () => {
     assert.deepEqual(
       createRuntimeTestPlan(['--', 'packages/spec/fixtures/test/context-fixtures.test.ts']),

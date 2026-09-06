@@ -18,6 +18,12 @@ function discoverBrowserSuites(directory) {
 }
 
 export const BROWSER_SUITES = Object.freeze(discoverBrowserSuites(BROWSER_SUITE_ROOT));
+export function corepackInvocation(platform = process.platform) {
+  return {
+    executable: platform === 'win32' ? 'corepack.cmd' : 'corepack',
+    shell: platform === 'win32',
+  };
+}
 
 function fullRuntimeTestPlan(forwardedArgs = []) {
   return [

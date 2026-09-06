@@ -1872,6 +1872,14 @@ function astContainsExportedUserFacingComponent(content, absolutePath) {
       }
     }
   }
+  const wrappedExpressionReferencesRenderedLocal = (expression) => {
+    const candidate = unwrapTypeScriptExpression(expression);
+    if (ts.isIdentifier(candidate)) return renderedLocalNames.has(candidate.text);
+    return (
+      ts.isCallExpression(candidate) &&
+      candidate.arguments.some(wrappedExpressionReferencesRenderedLocal)
+    );
+  };
 
   return sourceFile.statements.some((statement) => {
     const directlyExported = statement.modifiers?.some(
@@ -1880,10 +1888,21 @@ function astContainsExportedUserFacingComponent(content, absolutePath) {
         modifier.kind === ts.SyntaxKind.DefaultKeyword
     );
     if (directlyExported && containsRenderedSurface(statement)) return true;
+    if (
+      directlyExported &&
+      ts.isVariableStatement(statement) &&
+      statement.declarationList.declarations.some(
+        (declaration) =>
+          declaration.initializer &&
+          wrappedExpressionReferencesRenderedLocal(declaration.initializer)
+      )
+    ) {
+      return true;
+    }
     if (ts.isExportAssignment(statement)) {
       return (
         containsRenderedSurface(statement.expression) ||
-        (ts.isIdentifier(statement.expression) && renderedLocalNames.has(statement.expression.text))
+        wrappedExpressionReferencesRenderedLocal(statement.expression)
       );
     }
     if (
@@ -1954,8 +1973,15 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
   }
   const isNativeEventName = (name) =>
     /^on[A-Z][A-Za-z0-9_$]*$/u.test(name) || NATIVE_EVENT_ATTRIBUTE_NAMES.has(name);
-  const objectLiteralHasNativeEvent = (objectLiteral) =>
+  const objectLiteralHasNativeEvent = (objectLiteral, useNode, visitedBindings) =>
     objectLiteral.properties.some((property) => {
+      if (ts.isSpreadAssignment(property)) {
+        return expressionHasNativeEventObject(
+          property.expression,
+          useNode,
+          new Set(visitedBindings)
+        );
+      }
       if (
         !ts.isPropertyAssignment(property) &&
         !ts.isMethodDeclaration(property) &&
@@ -2007,7 +2033,9 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
   collectObjectBindings(sourceFile);
   const expressionHasNativeEventObject = (expression, useNode, visitedBindings = new Set()) => {
     const candidate = unwrapTypeScriptExpression(expression);
-    if (ts.isObjectLiteralExpression(candidate)) return objectLiteralHasNativeEvent(candidate);
+    if (ts.isObjectLiteralExpression(candidate)) {
+      return objectLiteralHasNativeEvent(candidate, useNode, visitedBindings);
+    }
     if (!ts.isIdentifier(candidate)) return false;
 
     const bindings = objectBindings.get(candidate.text) ?? [];
@@ -2484,6 +2512,20 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
     return rendered;
   };
   const renderedLocalDeclarations = new Map();
+  const classMemberCallable = (member) => {
+    if (ts.isMethodDeclaration(member) && member.body) return member;
+    if (ts.isPropertyDeclaration(member) && member.initializer) {
+      const initializer = unwrapTypeScriptExpression(member.initializer);
+      if (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)) {
+        return initializer;
+      }
+    }
+    return null;
+  };
+  const classMemberName = (member) =>
+    member.name && (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name))
+      ? member.name.text
+      : null;
   const collectRenderedFunctionLikes = (root, destination) => {
     const visit = (node) => {
       if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
@@ -2491,27 +2533,26 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         return;
       }
       if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
-        const hasRenderedSurface = node.members.some(
-          (member) =>
-            ts.isMethodDeclaration(member) &&
-            member.name &&
-            (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)) &&
-            member.name.text === 'render' &&
-            member.body &&
-            containsRenderedSurface(member)
-        );
+        const hasRenderedSurface = node.members.some((member) => {
+          const callable = classMemberCallable(member);
+          return (
+            classMemberName(member) === 'render' &&
+            callable !== null &&
+            containsRenderedSurface(callable)
+          );
+        });
         if (hasRenderedSurface) {
           for (const member of node.members) {
+            const callable = classMemberCallable(member);
+            const memberName = classMemberName(member);
             if (
-              ts.isMethodDeclaration(member) &&
-              member.name &&
-              (ts.isIdentifier(member.name) || ts.isStringLiteralLike(member.name)) &&
+              callable &&
+              memberName &&
               /^(?:UNSAFE_componentWillMount|UNSAFE_componentWillReceiveProps|UNSAFE_componentWillUpdate|componentDidMount|componentDidUpdate|componentWillMount|componentWillReceiveProps|componentWillUpdate|getSnapshotBeforeUpdate|render|shouldComponentUpdate)$/u.test(
-                member.name.text
-              ) &&
-              member.body
+                memberName
+              )
             ) {
-              destination.add(member);
+              destination.add(callable);
             }
           }
         }
@@ -2543,18 +2584,27 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
       }
     }
   }
+  const collectWrappedRenderedLocals = (expression, destination) => {
+    const candidate = unwrapTypeScriptExpression(expression);
+    if (ts.isIdentifier(candidate)) {
+      for (const root of renderedLocalDeclarations.get(candidate.text) ?? []) {
+        destination.add(root);
+      }
+      return;
+    }
+    if (ts.isCallExpression(candidate)) {
+      for (const argument of candidate.arguments) {
+        collectWrappedRenderedLocals(argument, destination);
+      }
+    }
+  };
 
   const exportedFunctionLikes = new Set();
   for (const statement of sourceFile.statements) {
     if (ts.isExportAssignment(statement)) {
       const expression = unwrapTypeScriptExpression(statement.expression);
-      if (ts.isIdentifier(expression) && renderedLocalDeclarations.has(expression.text)) {
-        for (const root of renderedLocalDeclarations.get(expression.text)) {
-          exportedFunctionLikes.add(root);
-        }
-      } else {
-        collectRenderedFunctionLikes(expression, exportedFunctionLikes);
-      }
+      collectWrappedRenderedLocals(expression, exportedFunctionLikes);
+      collectRenderedFunctionLikes(expression, exportedFunctionLikes);
       continue;
     }
     if (
@@ -2885,14 +2935,90 @@ function viteGlobPatternGroupsForWebsiteSource(absolutePath) {
   return scriptViteGlobPatternGroups(source, absolutePath);
 }
 
-function configuredWebsiteSourceAliasRoot(rootDir) {
+function configuredWebsiteSourceAliases(rootDir) {
   const configPath = path.join(rootDir, 'apps', 'www', 'astro.config.mjs');
-  if (!fs.existsSync(configPath)) return null;
+  const aliases = new Map();
+  const unsupported = new Set();
+  if (!fs.existsSync(configPath)) return { aliases, unsupported };
   const configSource = fs.readFileSync(configPath, 'utf8');
-  const match = configSource.match(
-    /\balias\s*:\s*\{[\s\S]*?['"]@['"]\s*:\s*fileURLToPath\s*\(\s*new URL\s*\(\s*['"]([^'"]+)['"]\s*,\s*import\.meta\.url\s*\)\s*\)/u
+  const sourceFile = ts.createSourceFile(
+    configPath,
+    configSource,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS
   );
-  return match ? path.resolve(path.dirname(configPath), match[1]) : null;
+  const propertyName = (node) =>
+    node.name && (ts.isIdentifier(node.name) || ts.isStringLiteralLike(node.name))
+      ? node.name.text
+      : null;
+  const aliasReplacement = (expression) => {
+    const candidate = unwrapTypeScriptExpression(expression);
+    if (ts.isStringLiteralLike(candidate)) {
+      return path.isAbsolute(candidate.text)
+        ? candidate.text
+        : path.resolve(path.dirname(configPath), candidate.text);
+    }
+    if (
+      !ts.isCallExpression(candidate) ||
+      !ts.isIdentifier(candidate.expression) ||
+      candidate.expression.text !== 'fileURLToPath' ||
+      !candidate.arguments[0]
+    ) {
+      return null;
+    }
+    const url = unwrapTypeScriptExpression(candidate.arguments[0]);
+    if (
+      !ts.isNewExpression(url) ||
+      !ts.isIdentifier(url.expression) ||
+      url.expression.text !== 'URL' ||
+      !url.arguments?.[0] ||
+      !ts.isStringLiteralLike(url.arguments[0])
+    ) {
+      return null;
+    }
+    return path.resolve(path.dirname(configPath), url.arguments[0].text);
+  };
+  const visit = (node) => {
+    if (
+      ts.isPropertyAssignment(node) &&
+      propertyName(node) === 'alias' &&
+      ts.isObjectLiteralExpression(unwrapTypeScriptExpression(node.initializer))
+    ) {
+      const aliasObject = unwrapTypeScriptExpression(node.initializer);
+      for (const property of aliasObject.properties) {
+        if (!ts.isPropertyAssignment(property)) continue;
+        const key = propertyName(property);
+        if (!key) continue;
+        const replacement = aliasReplacement(property.initializer);
+        if (replacement) aliases.set(key, replacement);
+        else unsupported.add(key);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return { aliases, unsupported };
+}
+
+function configuredAliasMatch(specifier, aliasConfig) {
+  for (const [key, replacement] of [...aliasConfig.aliases].sort(
+    ([left], [right]) => right.length - left.length
+  )) {
+    if (specifier === key || specifier.startsWith(`${key}/`)) {
+      return {
+        replacement,
+        suffix: specifier.slice(key.length).replace(/^\//u, ''),
+      };
+    }
+  }
+  return null;
+}
+
+function matchesUnsupportedAlias(specifier, aliasConfig) {
+  return [...aliasConfig.unsupported].some(
+    (key) => specifier === key || specifier.startsWith(`${key}/`)
+  );
 }
 
 function importSpecifierWithoutViteSuffix(specifier) {
@@ -2912,14 +3038,15 @@ function canonicalImportTarget(absolutePath) {
   return path.join(fs.realpathSync(existing), ...suffix);
 }
 
-function viteGlobTargets(rootDir, sourcePath, patterns, { aliasRoot = null, viteRoot }) {
+function viteGlobTargets(rootDir, sourcePath, patterns, { aliasConfig, viteRoot }) {
   const sourceDirectory = path.dirname(path.resolve(rootDir, sourcePath));
   const targets = new Map();
   const expandPattern = (authoredPattern) => {
     const pattern = authoredPattern.startsWith('!') ? authoredPattern.slice(1) : authoredPattern;
     let absolutePattern = null;
-    if (aliasRoot && pattern.startsWith('@/')) {
-      absolutePattern = path.resolve(aliasRoot, pattern.slice(2));
+    const aliasMatch = configuredAliasMatch(pattern, aliasConfig);
+    if (aliasMatch) {
+      absolutePattern = path.resolve(aliasMatch.replacement, aliasMatch.suffix);
     } else if (pattern.startsWith('.')) {
       absolutePattern = path.resolve(sourceDirectory, pattern);
     } else if (pattern.startsWith('/')) {
@@ -2958,7 +3085,7 @@ function relativeImportSpecifier(sourcePath, rootDir, targetPath) {
   return specifier;
 }
 
-function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAliasRoot) {
+function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteAliasConfig) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'adapter-package', resolvedPath: null };
@@ -2978,21 +3105,16 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteSourceAlias
   if (/^@proto\.ui\/hooks(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'hooks-package', resolvedPath: null };
   }
-  const websiteAliasPrefix = '@/';
-  const isWebsiteSourceAlias =
-    websiteSourceAliasRoot && classifiedSpecifier.startsWith(websiteAliasPrefix);
-  if (!classifiedSpecifier.startsWith('.') && !isWebsiteSourceAlias) return null;
-
+  const aliasMatch = configuredAliasMatch(classifiedSpecifier, websiteAliasConfig);
+  if (matchesUnsupportedAlias(classifiedSpecifier, websiteAliasConfig)) {
+    return { category: 'unresolved-alias', resolvedPath: null };
+  }
+  if (!classifiedSpecifier.startsWith('.') && !aliasMatch) return null;
   const resolvedPath = path
     .relative(
       rootDir,
-      isWebsiteSourceAlias
-        ? canonicalImportTarget(
-            path.resolve(
-              websiteSourceAliasRoot,
-              classifiedSpecifier.slice(websiteAliasPrefix.length)
-            )
-          )
+      aliasMatch
+        ? canonicalImportTarget(path.resolve(aliasMatch.replacement, aliasMatch.suffix))
         : canonicalImportTarget(
             path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier)
           )
@@ -3068,7 +3190,7 @@ function discoverWebsiteRawImports(rootDir) {
     )
     .filter((absolutePath) => !/\.(?:browser\.)?(?:test|spec)\.[cm]?[jt]sx?$/i.test(absolutePath));
   const rawImports = [];
-  const websiteSourceAliasRoot = configuredWebsiteSourceAliasRoot(rootDir);
+  const websiteAliasConfig = configuredWebsiteSourceAliases(rootDir);
   for (const absolutePath of candidates) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
     if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
@@ -3089,20 +3211,20 @@ function discoverWebsiteRawImports(rootDir) {
         rootDir,
         sourcePath,
         specifier,
-        websiteSourceAliasRoot
+        websiteAliasConfig
       );
       if (guardedImport) rawImports.push({ sourcePath, specifier, ...guardedImport });
     }
     for (const patterns of viteGlobPatternGroupsForWebsiteSource(absolutePath)) {
       for (const target of viteGlobTargets(rootDir, sourcePath, patterns, {
-        aliasRoot: websiteSourceAliasRoot,
+        aliasConfig: websiteAliasConfig,
         viteRoot: websiteRoot,
       })) {
         const guardedImport = guardedWebsiteImport(
           rootDir,
           sourcePath,
           relativeImportSpecifier(sourcePath, rootDir, target.absolutePath),
-          websiteSourceAliasRoot
+          websiteAliasConfig
         );
         if (guardedImport) {
           rawImports.push({
