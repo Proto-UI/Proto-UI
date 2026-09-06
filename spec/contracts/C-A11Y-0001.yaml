@@ -3,7 +3,7 @@ type: contract
 title: Accessibility exposes projectable semantic objects
 status: draft
 since: 0.1.0
-summary: The a11y domain records projectable semantic object facts such as identity, role, name, description, state, action, relation, and semantic tree behavior.
+summary: The a11y domain records projectable semantic object facts, stable opaque object identity, and string or ordered-reference relationships without exposing protocol keys as host ids.
 statement:
   zh-CN: >-
     Accessibility 是一个可由宿主投影的 semantic object domain。原型通过 a11y API 声明当前交互对象的 identity、role、name、description、state、action、relation 与 semantic tree behavior；runtime 将这些声明保存为稳定 IR，adapter 负责把 IR 投影到宿主的无障碍表达。a11y IR 可以引用 state/focus/event/anatomy 等其它域事实，但 a11y 不重新拥有这些域。
@@ -44,8 +44,8 @@ criteria:
       en: Adapters may choose native identity/role/name/state/action/relation projection, degraded projection, or diagnostic-only IR based on host capabilities.
   - id: C-A11Y-0001-H
     text:
-      zh-CN: a11y relation 可以引用字符串目标或 state handle；其语义表示对象关系，宿主 adapter 负责投影为宿主可表达的关系机制。
-      en: A11y relation may reference a string target or state handle; it represents an object relationship, and host adapters are responsible for projecting it to host-expressible relationship mechanisms.
+      zh-CN: a11y relation 可以引用字符串目标、state handle、单个 opaque semantic-object ref 或有序 ref list；ref 与 protocol match key / host id 相互独立，宿主 adapter 负责投影为宿主可表达的关系机制。
+      en: An A11y relation may reference a string target, state handle, one opaque semantic-object ref, or an ordered ref list; refs remain independent of protocol match keys and host ids, and host adapters project them to host-expressible relationship mechanisms.
   - id: C-A11Y-0001-I
     text:
       zh-CN: a11y name 与 description 可以引用字符串或 state handle；当引用 state handle 时，adapter 投射必须随 state 值变化更新。
@@ -66,6 +66,18 @@ criteria:
     text:
       zh-CN: Web adapter 投影字符串 a11y state 时，空字符串必须移除对应宿主 attribute，并在恢复非空值后重新投影。
       en: When the Web adapter projects a string a11y state, an empty string must remove the corresponding host attribute, and a later non-empty value must restore it.
+  - id: C-A11Y-0001-N
+    text:
+      zh-CN: 每个 A11y module logical instance 必须拥有一个 opaque semantic-object ref；该 ref 不包含 host data，在 source/target view detach、replacement 与 rematerialization 期间保持 identity，terminal disposal 时释放 projector ownership。
+      en: Every A11y module logical instance must own one opaque semantic-object ref; the ref contains no host data, preserves identity across source or target view detach, replacement, and rematerialization, and releases projector ownership on terminal disposal.
+  - id: C-A11Y-0001-O
+    text:
+      zh-CN: 单 ref 或 ordered ref list 必须在 snapshot 中归一化为 first-occurrence order 的 frozen list；module-internal owner 可以原子 set/remove relation。Mounted 后 set、replace 或 remove State-backed relation 时，投影必须跟随 current binding，并停止跟随 replaced/removed handle。Missing、duplicate-bound 或 unavailable target 必须使整个 structured relation fail closed，而不得投影 partial list。
+      en: A single ref or ordered ref list must normalize in snapshots to a frozen first-occurrence-ordered list; a module-internal owner may atomically set or remove the relation. When a State-backed relation is set, replaced, or removed after mount, projection must follow the current binding and stop following the replaced or removed handle. A missing, duplicate-bound, or unavailable target must fail the entire structured relation closed rather than project a partial list.
+  - id: C-A11Y-0001-P
+    text:
+      zh-CN: Web direct-ref projector 必须从 opaque ref 保留 target identity，而不是从 protocol key 生成 host id；reservation 作用域必须限定为 target owner document，projector cap replacement 必须立即 replay current semantic snapshot，dependent-source re-resolution 必须按 dependency 定向且不得 sweep unrelated legacy projections；target detach/rematerialize、owner-document transition、source/target physical replacement 与 terminal disposal 必须撤销 stale IDREF/id ownership、重新解析 dependent sources，并保留 host-authored additive tokens 与不再由 projector 拥有的值。
+      en: The Web direct-ref projector must reserve target identity from the opaque ref rather than derive a host id from a protocol key; reservations must be scoped to the target owner document, projector-cap replacement must immediately replay the current semantic snapshot, and dependent-source re-resolution must be dependency-targeted without sweeping unrelated legacy projections. Target detach or rematerialization, owner-document transition, source or target physical replacement, and terminal disposal must revoke stale IDREF or id ownership, re-resolve dependent sources, and preserve host-authored additive tokens and values the projector no longer owns.
 sources:
   - path: internal/records/2026-06-30-a11y-module-planning-for-button.zh-CN.md
   - path: packages/modules/a11y/src/types.ts
@@ -73,6 +85,7 @@ sources:
   - path: packages/modules/a11y/src/web.ts
   - path: packages/runtime/test/contract/a11y.v0.contract.test.ts
   - path: packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts
+  - path: packages/modules/a11y/test/web-reference.test.ts
   - path: https://www.w3.org/TR/accname-1.2/
     label: W3C Accessible Name and Description Computation
   - path: https://www.w3.org/TR/wai-aria-1.2/
@@ -103,6 +116,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: refined
     summary: Added additive relation projection, state-backed semantic tree behavior, and optional Web a11y state omission.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added opaque logical semantic-object refs, ordered multi-target relations, runtime mutation, and bounded Web direct-ref projection lifecycle.
 tags:
   - a11y
   - accessibility

@@ -23,6 +23,23 @@ cases:
       - C-A11Y-0001-H
       - C-A11Y-0001-I
     expectation: semantic-object-ir
+  - id: T-A11Y-0001-CASE-OPAQUE-RELATIONS
+    title: A logical semantic object keeps one opaque ref, normalizes ordered relation refs, and rewires runtime State-backed relation mutations
+    covers:
+      - C-A11Y-0001-H
+      - C-A11Y-0001-N
+      - C-A11Y-0001-O
+    expectation: opaque-semantic-object-ref-and-ordered-relation-ir
+  - id: T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION
+    title: Web direct-ref projection fails closed, rebinds identity per document, targets dependency reconciliation, and preserves unowned tokens across projector and view lifecycle
+    covers:
+      - C-A11Y-0001-G
+      - C-A11Y-0001-K
+      - C-A11Y-0001-P
+      - HC-A11Y-0001-A
+      - HC-A11Y-0001-B
+      - HC-A11Y-0001-C
+    expectation: bounded-web-direct-ref-projection-lifecycle
   - id: T-A11Y-0001-CASE-BUTTON
     title: Base Button declares button role, content-derived name policy, disabled state, and activate action
     covers:
@@ -77,6 +94,16 @@ implementations:
     consumesCases:
       - T-A11Y-0001-CASE-DYNAMIC-ROLE
       - T-A11Y-0001-CASE-IR
+      - T-A11Y-0001-CASE-OPAQUE-RELATIONS
+  - id: module-a11y-web-reference-projector
+    kind: module-test
+    status: passing
+    path: packages/modules/a11y/test/web-reference.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION
+    notes:
+      - Direct-ref transport evidence only; this does not claim the pending PR #553 family/domain/key matcher or Tabs migration.
   - id: base-button-a11y-contract
     kind: module-test
     status: passing
@@ -112,6 +139,9 @@ verifies:
         - C-A11Y-0001-K
         - C-A11Y-0001-L
         - C-A11Y-0001-M
+        - C-A11Y-0001-N
+        - C-A11Y-0001-O
+        - C-A11Y-0001-P
     - id: C-ASYNC-A11Y-0001
       since: 0.2.0-rc.7
       anchors:
@@ -121,6 +151,7 @@ verifies:
       anchors:
         - HC-A11Y-0001-A
         - HC-A11Y-0001-B
+        - HC-A11Y-0001-C
 revisions:
   - version: 0.1.0
     change: introduced
@@ -134,6 +165,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: refined
     summary: Added additive relation ownership, dynamic semantic tree projection, optional Web state omission, and live/atomic/busy Web projection coverage.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added passing Runtime and Web projector evidence for opaque logical refs, ordered direct-ref relations, view replacement, fail-closed targets, and terminal cleanup.
 tags:
   - a11y
   - accessibility

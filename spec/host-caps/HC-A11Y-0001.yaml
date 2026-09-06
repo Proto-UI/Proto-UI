@@ -22,6 +22,10 @@ criteria:
     text:
       zh-CN: host-cap 不要求所有宿主都支持相同的原生投影能力。
       en: The host capability does not require every host to support the same native projection abilities.
+  - id: HC-A11Y-0001-C
+    text:
+      zh-CN: host-cap 必须允许 adapter 将 opaque semantic-object refs 与 ordered ref relationships 绑定到当前 accessibility targets，并在 target unavailable、view replacement 或 terminal disposal 时撤销自身 projection；该能力不要求 host 解析 protocol match key。
+      en: The host capability must let adapters bind opaque semantic-object refs and ordered ref relationships to current accessibility targets and revoke their own projection when a target is unavailable, a view is replaced, or the logical object is terminally disposed; the capability does not require the host to resolve protocol match keys.
 relates:
   contracts:
     - C-A11Y-0001
@@ -29,6 +33,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Drafted the host projection capability for a11y semantic IR.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added bounded direct-ref relationship projection and cleanup to the generic A11y host capability without creating a Table-specific capability.
 tags:
   - host-capability
   - a11y
