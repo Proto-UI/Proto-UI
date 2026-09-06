@@ -114,6 +114,24 @@ implementations:
       - The media preference is pinned to Light for the whole case and Dark is reached by calling the documentation theme control, because the criterion puts `prefers-color-scheme` outside the supported mechanism and a media-query implementation would otherwise satisfy every comparison. The case asserts the root carries no `dark` class, so it cannot stay green on a class selector while the selector the real toggle depends on is broken.
       - The variables this criterion pair requires the surface and destructive fills to resolve through are then overridden, each with a distinct value in neither palette, and those fills are asserted against the variable they name. A pair hard-coded to a value both palettes share passes both schemes and fails here, which is what separates variable resolution from a fixed colour. The solid accent variables are left alone and the accent pair is asserted unchanged, because the criterion asks solid to be theme-invariant rather than variable-backed and a conforming projection may materialize it as fixed colours.
       - The demo gained a disabled `surface` Button; the disabled example it already had is `solid`, whose accent pair is theme-invariant and cannot show a repaint.
+  - id: www-brutalist-button-visual-interaction-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-BUTTON-0001-CASE-5
+      - T-BRUTALIST-BUTTON-0001-CASE-6
+    exercises:
+      - P-BASE-BUTTON
+      - P-BRUTALIST-BUTTON
+    notes:
+      - Exercises Web Components, React, and Vue in Chromium through the public Button preview and asserts exact square borders, black zero-blur hard shadows, hover lift, pressed sink, focus-visible ring, and disabled projections from computed CSS.
+      - Compares rest, hover, press, and settled state pairs so the verdict depends on exact shadow and transform transitions; optional fixed-host frames are inspection artifacts and are not compared by brittle PNG byte equality.
+      - >-
+        Resolves the focus ring and its offset from active CSS custom properties, rejects transparent colors, and compares the disabled background/foreground pair, border, radius, shadow, and transform with the enabled rest state in addition to exact `opacity: 0.5` and `pointer-events: none`.
+
+
 verifies:
   prototypes:
     - id: P-BRUTALIST-BUTTON
@@ -122,6 +140,9 @@ exercises:
     - P-BASE-BUTTON
     - P-BRUTALIST-BUTTON
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added WC, React, and Vue real-browser evidence for exact Button visual grammar and rest/hover/press/focus-visible/disabled interaction projections without duplicating the separate live-theme case.
   - version: 0.3.0-alpha.0
     change: strengthened
     summary: Added real-browser live-theme coverage across Web Components, React, and Vue, so the criterion no longer rests only on a module test that must strip `@layer` and scope the theme to a wrapper.
