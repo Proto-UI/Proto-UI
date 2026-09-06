@@ -98,6 +98,39 @@ describe('collectProtoStyleTokens', () => {
     expect(tokens).not.toContain('active:translate-x-[5px]');
   });
 
+  it('maps asTooltipTrigger feedback rules to the serialized Tooltip state attributes', async () => {
+    await writeFile(
+      path.join(dir, 'tooltip-trigger.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        "import { asTooltipTrigger } from '@proto.ui/prototypes-base/tooltip';",
+        '',
+        'const trigger = definePrototype({',
+        "  name: 'styled-tooltip-trigger',",
+        '  setup(def) {',
+        '    const state = asTooltipTrigger().stateHandles;',
+        '    if (!state) throw new Error("missing state handles");',
+        '    def.rule({',
+        '      when: (w) => w.state(state.hovered).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('opacity-70')),",
+        '    });',
+        '    def.rule({',
+        '      when: (w) => w.state(state.focusVisible).eq(true),',
+        "      intent: (i) => i.feedback.style.use(tw('ring-2')),",
+        '    });',
+        '  },',
+        '});',
+        'export default trigger;',
+      ].join('\n')
+    );
+
+    const tokens = await collectProtoStyleTokens(dir);
+
+    expect(tokens).toContain('data-[hovered]:opacity-70');
+    expect(tokens).toContain('data-[focus-visible]:ring-2');
+    expect(tokens).not.toContain('hover:opacity-70');
+  });
+
   it('maps asTextareaRoot state rules to their web data attributes', async () => {
     await writeFile(
       path.join(dir, 'textarea.proto.ts'),

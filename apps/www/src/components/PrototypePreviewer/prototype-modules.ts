@@ -567,6 +567,23 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
     registerPrototype('shadcn-scroll-area-thumb', mod.shadcnScrollAreaThumb);
   },
+  // Runtime-selected preview registry keeps the public Tooltip package import lazy.
+  'shadcn-tooltip-group': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-group', mod.shadcnTooltipGroup);
+  },
+  'shadcn-tooltip-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-root', mod.shadcnTooltipRoot);
+  },
+  'shadcn-tooltip-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-trigger', mod.shadcnTooltipTrigger);
+  },
+  'shadcn-tooltip-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
+    registerPrototype('shadcn-tooltip-content', mod.shadcnTooltipContent);
+  },
   'shadcn-textarea-root': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/textarea');
     registerPrototype('shadcn-textarea-root', mod.default);

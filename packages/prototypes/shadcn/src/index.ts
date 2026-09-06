@@ -206,3 +206,30 @@ export type {
   ShadcnScrollAreaThumbStateHandles,
   ShadcnScrollAreaThumbAsHookContract,
 } from './scroll-area';
+export {
+  ShadcnTooltipGroup,
+  ShadcnTooltipRoot,
+  ShadcnTooltipTrigger,
+  ShadcnTooltipContent,
+  shadcnTooltipGroup,
+  shadcnTooltipRoot,
+  shadcnTooltipTrigger,
+  shadcnTooltipContent,
+} from './tooltip';
+export type {
+  ShadcnTooltipGroupProps,
+  ShadcnTooltipGroupExposes,
+  ShadcnTooltipGroupAsHookContract,
+  ShadcnTooltipRootProps,
+  ShadcnTooltipRootExposes,
+  ShadcnTooltipRootStateHandles,
+  ShadcnTooltipRootAsHookContract,
+  ShadcnTooltipTriggerProps,
+  ShadcnTooltipTriggerExposes,
+  ShadcnTooltipTriggerStateHandles,
+  ShadcnTooltipTriggerAsHookContract,
+  ShadcnTooltipContentProps,
+  ShadcnTooltipContentExposes,
+  ShadcnTooltipContentStateHandles,
+  ShadcnTooltipContentAsHookContract,
+} from './tooltip';

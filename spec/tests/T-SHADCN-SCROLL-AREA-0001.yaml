@@ -4,7 +4,7 @@ title: shadcn Scroll Area inheritance, fallback, package, geometry, and rendered
 status: draft
 since: 0.3.0-alpha.0
 summary: >-
-  Covers exact package and CLI surfaces, complete visual tokens, a fallible composed preference, existing unsupported-composed fallback evidence, two-axis host behavior, passive controls, lifecycle teardown, and real cross-runtime geometry.
+  Covers exact package and CLI surfaces, complete visual tokens, a fallible composed preference, direct unsupported-composed fallback evidence, two-axis host behavior, passive controls, lifecycle teardown, and real cross-runtime geometry.
 
 
 cases:
@@ -74,12 +74,6 @@ implementations:
       - P-SHADCN-SCROLL-AREA-VIEWPORT
       - P-SHADCN-SCROLL-AREA-SCROLLBAR
       - P-SHADCN-SCROLL-AREA-THUMB
-  - id: module-scroll-projection-fallback
-    kind: module-test
-    status: passing
-    path: packages/modules/scroll/test/projection.test.ts
-    required: true
-    consumesCases: [T-SHADCN-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE]
   - id: cli-shadcn-scroll-area-facade
     kind: workspace-check
     status: passing

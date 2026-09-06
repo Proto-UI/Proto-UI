@@ -1,0 +1,57 @@
+id: P-SHADCN-TOOLTIP-GROUP
+type: prototype
+title: shadcn Tooltip Group preserves Base delay coordination and adds a layout surface
+status: draft
+since: 0.3.0-alpha.0
+summary: shadcn Tooltip Group inherits Base Tooltip Group and adds the current inline-flex layout surface.
+statement:
+  en: Group keeps Base delay defaults, warm-window coordination, active ownership, and teardown while adding inline-flex only.
+  zh-CN: Group 保留 Base delay defaults、warm-window coordination、active ownership 与 teardown，仅增加 inline-flex。
+criteria:
+  - id: P-SHADCN-TOOLTIP-GROUP-BASE-INHERITANCE
+    text:
+      en: Group must inherit P-BASE-TOOLTIP-GROUP through asTooltipGroup() without creating a second delay or active-owner protocol.
+      zh-CN: Group 必须通过 asTooltipGroup() 继承 P-BASE-TOOLTIP-GROUP，不得创建第二套 delay 或 active-owner protocol。
+  - id: P-SHADCN-TOOLTIP-GROUP-DIRECT-ENTRY
+    text:
+      en: The direct Group entry is shadcn-tooltip-group and this layer provides no authored asHook.
+      zh-CN: Group direct entry 为 shadcn-tooltip-group，且本层不提供 authored asHook。
+  - id: P-SHADCN-TOOLTIP-GROUP-BASE-DEFAULTS
+    text:
+      en: >-
+        Group must retain Base 700ms open, 100ms close, and 300ms skip defaults, Root override precedence, immediate warm sibling handoff, and owned timer teardown rather than adopting the pinned upstream 0ms provider default.
+
+
+      zh-CN: >-
+        Group 必须保留 Base 的 700ms open、100ms close、300ms skip defaults、Root override precedence、 warm sibling 即时 handoff 与 owned timer teardown，不得采用固定 upstream 的 0ms provider default。
+
+
+    references:
+      prototypes:
+        - id: P-BASE-TOOLTIP-GROUP
+          anchors:
+            - P-BASE-TOOLTIP-GROUP-DELAYS
+            - P-BASE-TOOLTIP-GROUP-WARMTH
+            - P-BASE-TOOLTIP-GROUP-ACTIVE-OWNER
+  - id: P-SHADCN-TOOLTIP-GROUP-CURRENT-VISUAL-SURFACE
+    text:
+      en: Group must project inline-flex and no other local state, event, accessibility, or behavior surface.
+      zh-CN: Group 必须投射 inline-flex，且不得增加其它本地 state、event、accessibility 或 behavior surface。
+sources:
+  - path: packages/prototypes/shadcn/src/tooltip/group.proto.ts
+  - path: packages/prototypes/shadcn/test/tooltip.test.ts
+inherits:
+  prototypes:
+    - id: P-BASE-TOOLTIP-GROUP
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-TOOLTIP-PROTOTYPE-BOUNDARY-0001]
+relates:
+  prototypes: [P-SHADCN-TOOLTIP]
+verifies:
+  tests: [T-SHADCN-TOOLTIP-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced the Base-coordinated shadcn Tooltip Group with explicit default-delay and layout deltas.
+tags: [prototype, shadcn, tooltip, group, delay, visual, delta]

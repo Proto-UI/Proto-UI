@@ -1,5 +1,20 @@
 import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  ANATOMY_GET_PROTO_CAP,
+  ANATOMY_INSTANCE_TOKEN_CAP,
+  ANATOMY_PARENT_CAP,
+  ANATOMY_ROOT_TARGET_CAP,
+} from '@proto.ui/module-anatomy';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
+import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import {
+  SCROLL_SURFACE_HOST_CAP,
+  type ScrollPort,
+  type ScrollSurfaceHost,
+  type ScrollSurfaceHostAttachment,
+} from '@proto.ui/module-scroll';
+import { createRuntimeSession, type RuntimeHost } from '@proto.ui/runtime';
 import { styleContains } from '../../test-utils/style';
 import * as ShadcnPackage from '../src';
 import * as scrollAreaFamily from '../src/scroll-area';
@@ -198,6 +213,63 @@ describe('prototypes/shadcn: scroll-area', () => {
     }
     expect(viewport.dataset.puiScrollProjection).toBe('composed');
     expect(viewport.getExposes().scrollProjection.get()).toBe('composed');
+  });
+
+  it('falls back to system without a diagnostic when the host cannot compose chrome', async () => {
+    // T-SHADCN-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
+    const instance = new EventTarget();
+    const attachments: ScrollSurfaceHostAttachment[] = [];
+    const scrollHost: ScrollSurfaceHost = {
+      support: { system: true, composed: false },
+      attach(connection) {
+        attachments.push(connection);
+        return {
+          update(next) {
+            attachments.push(next);
+          },
+          request() {},
+          dispose() {},
+        };
+      },
+    };
+    const host: RuntimeHost<any> = {
+      prototypeName: 'shadcn-scroll-area-system-fallback',
+      getRawProps: () => ({}),
+      commit(_children, signal) {
+        signal?.done();
+      },
+      schedule(task) {
+        task();
+      },
+      onRuntimeReady(wiring) {
+        wiring.attach('anatomy', [
+          [ANATOMY_INSTANCE_TOKEN_CAP, instance],
+          [ANATOMY_PARENT_CAP, () => null],
+          [ANATOMY_GET_PROTO_CAP, () => ShadcnScrollAreaViewport],
+          [ANATOMY_ROOT_TARGET_CAP, () => instance],
+        ]);
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, instance],
+          [CONTEXT_PARENT_CAP, () => null],
+        ]);
+        wiring.attach('event', [
+          [EVENT_ROOT_TARGET_CAP, () => instance],
+          [EVENT_GLOBAL_TARGET_CAP, () => instance],
+        ]);
+        wiring.attach('scroll', [[SCROLL_SURFACE_HOST_CAP, scrollHost]]);
+      },
+    };
+    const session = createRuntimeSession(ShadcnScrollAreaViewport, host);
+
+    try {
+      await expect(session.mount()).resolves.toBeUndefined();
+      expect(attachments).toHaveLength(1);
+      expect(attachments[0]?.config.requireProjection).toBeUndefined();
+      expect(attachments[0]?.projection).toBe('system');
+      expect(session.caps.getPort<ScrollPort>('scroll')?.getSnapshot().projection).toBe('system');
+    } finally {
+      await session.dispose();
+    }
   });
 
   it('inherits two-axis host scrolling, guarded Thumb movement, replacement, and teardown', async () => {
