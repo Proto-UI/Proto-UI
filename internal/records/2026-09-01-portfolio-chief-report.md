@@ -99,3 +99,8 @@ Sibling summary: #590 clean review candidate (approval pending); #593 red CI + s
 
 - One capacity probe returned `CAPACITY_OK`; fresh autonomous/schedule orientation and a snapshot-bound C4 assessment then completed. The first real object worker, `ReviewPR620-2`, failed after 11m43s with quota category `insufficient_user_quota` (HTTP 400, credit balance 0, required 34546; request `20260906014506232841970c955d568UbAZuSVy`).
 - Per pass contract: stopped immediately, did not retry, did not dispatch #621–#624, and did not substitute chief-context object work. Zero GitHub mutations; PR #620 has no accepted terminal outcome from this pass.
+
+## 2026-09-07 — resume: #620/#622 merged externally, #621 is an Issue
+
+- Capacity restored (probe `CAPACITY_OK`). Fresh C4 assessment (`e72f10a2`, expires 04:12:42+08:00) bound to snapshot: main `da5934d1`, 21 open PRs, 61 open Issues.
+- PR #620 (Base Table spec) and PR #622 (shadcn Base Tooltip) were merged externally during the day by `cyjin-yl` (merge commits `0fa7dda5`, `da5934d1`); both recorded terminal with zero pass mutations. #621 is an open unassigned implementation Issue — no claim scope exists, so it is a proposal-only candidate. #619 received external CHANGES_REQUESTED from `guangliang2019`. Remaining mandated objects: PR #623 and PR #624, each via a fresh single-object worker.
