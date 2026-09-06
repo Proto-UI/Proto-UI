@@ -212,6 +212,20 @@ describe('Homepage Prototype projection scope', () => {
         generation: 0,
         phase: 'idle',
       });
+
+      document.dispatchEvent(
+        new CustomEvent('proto-adapter:change', {
+          detail: { adapter: 'react', source: document.body },
+        })
+      );
+      await vi.waitFor(() =>
+        expect(homeApi(root).getSnapshot()).toMatchObject({
+          selection: { runtimeId: 'react', projectionFamilyId: 'shadcn' },
+          generation: expect.any(Number),
+          phase: 'ready',
+        })
+      );
+      expect(host?.textContent).not.toContain('[Home Demo Error]');
     } finally {
       consoleError.mockRestore();
       await homeApi(root).destroy();
@@ -602,6 +616,31 @@ describe('Homepage Prototype projection scope', () => {
     finishDisposal();
     await first;
     expect(repeatedSettled).toBe(true);
+  });
+
+  it('does not retain a candidate that finishes after client destroy', async () => {
+    let finishMaterialization!: (candidate: Candidate) => void;
+    const materialization = new Promise<Candidate>((resolve) => {
+      finishMaterialization = resolve;
+    });
+    projection.materialize.mockReturnValueOnce(materialization);
+    const mapSet = vi.spyOn(Map.prototype, 'set');
+    const root = createHomeRoot();
+    initHomeDemoPreviewer(root);
+    await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(1));
+    const destruction = homeApi(root).destroy();
+    const lateCandidate = createCandidate('late-after-destroy');
+    mapSet.mockClear();
+
+    try {
+      finishMaterialization(lateCandidate);
+      await destruction;
+
+      expect(lateCandidate.dispose).toHaveBeenCalledTimes(1);
+      expect(mapSet.mock.calls.some(([, value]) => value === lateCandidate)).toBe(false);
+    } finally {
+      mapSet.mockRestore();
+    }
   });
 
   it('updates the active generation theme in place instead of remounting it', async () => {

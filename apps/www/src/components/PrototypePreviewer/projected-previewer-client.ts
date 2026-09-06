@@ -94,6 +94,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   let mounted = false;
   let startPromise: Promise<ProjectionScopeSnapshot> | null = null;
   let destroyPromise: Promise<void> | null = null;
+  let initialErrorSurface: HTMLElement | null = null;
   let latestCommittedGeneration = 0;
   let activeCandidate: MaterializedProjectionCandidate | null = null;
   let stopThemeWatcher: (() => void) | null = null;
@@ -112,6 +113,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     pre.textContent = `[Preview Error]\n${detail}`;
     pre.style.whiteSpace = 'pre-wrap';
     pre.style.color = 'crimson';
+    initialErrorSurface = pre;
     mount.replaceChildren(pre);
   };
 
@@ -250,7 +252,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         controls: controls(),
         controlIds: toolbar ? ['runtime'] : [],
       });
-      if (request.generation >= latestCommittedGeneration) {
+      if (!destroyed && request.generation >= latestCommittedGeneration) {
         candidateByGeneration.set(request.generation, candidate);
       }
       return candidate;
@@ -331,6 +333,8 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
           root.dataset.projectionRuntime = committedRuntimeId;
           setState('ready');
           skeleton?.remove();
+          initialErrorSurface?.remove();
+          initialErrorSurface = null;
           mounted = true;
 
           queueMicrotask(() => {

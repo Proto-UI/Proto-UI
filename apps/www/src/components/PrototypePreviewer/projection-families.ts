@@ -35,6 +35,7 @@ export type ProjectionComponentFamilyManifest = Readonly<{
   baseFamilyId: string | null;
   recipeId: string;
   recipePrototypeIds: readonly string[];
+  auxiliaryPrototypes?: readonly ProjectionPartManifest[];
   parts: Readonly<Record<string, ProjectionPartManifest>>;
 }>;
 
@@ -94,6 +95,7 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-TOGGLE',
       recipeId: 'demo-shadcn-toggle',
       recipePrototypeIds: ['shadcn-toggle', 'lucide-icon'],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'lucide-icon' }],
       parts: {
         root: { basePrototypeId: 'P-BASE-TOGGLE', prototypeId: 'shadcn-toggle' },
       },
@@ -229,6 +231,7 @@ const SHADCN_MANIFEST = {
         'shadcn-dialog-footer',
         'shadcn-button',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
       parts: {
         root: { basePrototypeId: 'P-BASE-DIALOG', prototypeId: 'shadcn-dialog-root' },
         trigger: {
@@ -455,6 +458,7 @@ const BRUTALIST_MANIFEST = {
         'brutalist-dialog-footer',
         'brutalist-button',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
       parts: {
         root: { basePrototypeId: 'P-BASE-DIALOG', prototypeId: 'brutalist-dialog-root' },
         trigger: {
@@ -529,6 +533,7 @@ const BRUTALIST_MANIFEST = {
         'brutalist-card-footer',
         'brutalist-button',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
       parts: {
         root: { basePrototypeId: null, prototypeId: 'brutalist-card-root' },
         header: { basePrototypeId: null, prototypeId: 'brutalist-card-header' },
@@ -730,6 +735,45 @@ export function validateProjectionFamilyManifest(manifest: ProjectionFamilyManif
           `[PrototypePreviewer] projection family ${projectionFamilyId} family ${familyId} part ${partId} does not match its explicit Prototype identity.`
         );
       }
+    }
+    const auxiliaryPrototypes = family.auxiliaryPrototypes ?? [];
+    const expectedAuxiliaryPrototypes = expectedFamily.auxiliaryPrototypes ?? [];
+    const partPrototypeIds = new Set(Object.values(family.parts).map((part) => part.prototypeId));
+    if (
+      !Array.isArray(auxiliaryPrototypes) ||
+      new Set(auxiliaryPrototypes.map((prototype) => prototype.prototypeId)).size !==
+        auxiliaryPrototypes.length ||
+      auxiliaryPrototypes.some(
+        (prototype) =>
+          !prototype ||
+          typeof prototype !== 'object' ||
+          typeof prototype.prototypeId !== 'string' ||
+          !hasOwn(prototype, 'basePrototypeId') ||
+          (prototype.basePrototypeId !== null && typeof prototype.basePrototypeId !== 'string') ||
+          partPrototypeIds.has(prototype.prototypeId)
+      ) ||
+      auxiliaryPrototypes.length !== expectedAuxiliaryPrototypes.length ||
+      expectedAuxiliaryPrototypes.some(
+        (expected, index) =>
+          auxiliaryPrototypes[index]?.prototypeId !== expected.prototypeId ||
+          auxiliaryPrototypes[index]?.basePrototypeId !== expected.basePrototypeId
+      )
+    ) {
+      throw new Error(
+        `[PrototypePreviewer] projection family ${projectionFamilyId} family ${familyId} has invalid auxiliary Prototype lineage.`
+      );
+    }
+    const classifiedPrototypeIds = new Set([
+      ...partPrototypeIds,
+      ...auxiliaryPrototypes.map((prototype) => prototype.prototypeId),
+    ]);
+    if (
+      classifiedPrototypeIds.size !== actualRecipePrototypeIds.length ||
+      actualRecipePrototypeIds.some((prototypeId) => !classifiedPrototypeIds.has(prototypeId))
+    ) {
+      throw new Error(
+        `[PrototypePreviewer] projection family ${projectionFamilyId} family ${familyId} has invalid auxiliary Prototype lineage.`
+      );
     }
   }
 }

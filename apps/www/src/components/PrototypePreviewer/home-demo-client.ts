@@ -172,25 +172,21 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
   let latestCommittedGeneration = 0;
   let startPromise: Promise<ProjectionScopeSnapshot> | null = null;
   let destroyPromise: Promise<void> | null = null;
+  let initialErrorSurface: HTMLElement | null = null;
   let activeCandidate: MaterializedProjectionCandidate | null = null;
   let watchedProjectionFamilyId: ProjectionFamilyId | null = null;
   let stopThemeWatcher: (() => void) | null = null;
   const componentByGeneration = new Map<number, SharedBaseFamilyId>();
-  const intentRevisionByGeneration = new Map<number, number>();
   const candidateByGeneration = new Map<number, MaterializedProjectionCandidate>();
 
   const deleteGeneration = (generation: number): void => {
     componentByGeneration.delete(generation);
-    intentRevisionByGeneration.delete(generation);
     candidateByGeneration.delete(generation);
   };
 
   const deleteOlderGenerations = (generation: number): void => {
     for (const candidateGeneration of Array.from(componentByGeneration.keys())) {
       if (candidateGeneration < generation) componentByGeneration.delete(candidateGeneration);
-    }
-    for (const candidateGeneration of Array.from(intentRevisionByGeneration.keys())) {
-      if (candidateGeneration < generation) intentRevisionByGeneration.delete(candidateGeneration);
     }
     for (const candidateGeneration of Array.from(candidateByGeneration.keys())) {
       if (candidateGeneration < generation) candidateByGeneration.delete(candidateGeneration);
@@ -215,6 +211,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
     pre.textContent = `[Home Demo Error]\n${detail}`;
     pre.style.whiteSpace = 'pre-wrap';
     pre.style.color = 'crimson';
+    initialErrorSurface = pre;
     mount.replaceChildren(pre);
   };
 
@@ -248,9 +245,6 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
       const snapshot = resetDesiredToCommitted();
       for (const generation of Array.from(componentByGeneration.keys())) {
         if (generation !== snapshot.generation) componentByGeneration.delete(generation);
-      }
-      for (const generation of Array.from(intentRevisionByGeneration.keys())) {
-        if (generation !== snapshot.generation) intentRevisionByGeneration.delete(generation);
       }
       for (const generation of Array.from(candidateByGeneration.keys())) {
         if (generation !== snapshot.generation) candidateByGeneration.delete(generation);
@@ -359,14 +353,13 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
     async materialize(request) {
       const componentId = desiredComponentId;
       componentByGeneration.set(request.generation, componentId);
-      intentRevisionByGeneration.set(request.generation, desiredIntentRevision);
       const candidate = await materializeProjectionCandidate(request, {
         mount,
         ownerId,
         componentId,
         controls: controlsFor(),
       });
-      if (request.generation >= latestCommittedGeneration) {
+      if (!destroyed && request.generation >= latestCommittedGeneration) {
         candidateByGeneration.set(request.generation, candidate);
       }
       return candidate;
@@ -389,7 +382,6 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
         );
       }
 
-      const generationIntentRevision = intentRevisionByGeneration.get(commit.generation);
       const previousRuntimeId = root.dataset.runnerRuntime;
       const previousRunnerState = root.dataset.runnerState;
       const previousProjectionFamily = root.dataset.projectionFamily;
@@ -473,11 +465,6 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
           try {
             latestCommittedGeneration = commit.generation;
             committedComponentId = componentId;
-            if (generationIntentRevision === desiredIntentRevision) {
-              desiredRuntimeId = runtimeId;
-              desiredProjectionFamilyId = projectionFamilyId;
-              desiredComponentId = componentId;
-            }
             activeCandidate = candidate;
             if (replacesThemeWatcher) {
               watchedProjectionFamilyId = projectionFamilyId;
@@ -507,6 +494,8 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
               });
             }
             deleteOlderGenerations(commit.generation);
+            initialErrorSurface?.remove();
+            initialErrorSurface = null;
           } catch (error) {
             rollbackPublishedState();
             throw error;
@@ -555,7 +544,6 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
       stopThemeWatcher = null;
       activeCandidate = null;
       componentByGeneration.clear();
-      intentRevisionByGeneration.clear();
       candidateByGeneration.clear();
       removalObserver.disconnect();
       root.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);

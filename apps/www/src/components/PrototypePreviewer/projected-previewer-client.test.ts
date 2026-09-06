@@ -144,6 +144,11 @@ describe('PrototypePreviewer fixed-family projection', () => {
       expect(mount?.getAttribute('aria-busy')).toBe('false');
       expect(previewerApi(root).getCurrentRuntime()).toBeNull();
       expect(projectionError).toHaveBeenCalledTimes(1);
+
+      await previewerApi(root).reload();
+      await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+      expect(mount?.textContent).not.toContain('[Preview Error]');
+      expect(previewerApi(root).getCurrentRuntime()).toBe('wc');
     } finally {
       consoleError.mockRestore();
       await previewerApi(root).destroy();
@@ -510,6 +515,31 @@ describe('PrototypePreviewer fixed-family projection', () => {
     await first;
     expect(repeatedSettled).toBe(true);
     expect(mount.textContent).toBe('');
+  });
+
+  it('does not retain a candidate that finishes after client destroy', async () => {
+    let finishMaterialization!: (candidate: Candidate) => void;
+    const materialization = new Promise<Candidate>((resolve) => {
+      finishMaterialization = resolve;
+    });
+    projection.materialize.mockReturnValueOnce(materialization);
+    const mapSet = vi.spyOn(Map.prototype, 'set');
+    const root = createRoot();
+    init(root);
+    await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(1));
+    const destruction = previewerApi(root).destroy();
+    const lateCandidate = createCandidate('late-after-destroy');
+    mapSet.mockClear();
+
+    try {
+      finishMaterialization(lateCandidate);
+      await destruction;
+
+      expect(lateCandidate.dispose).toHaveBeenCalledTimes(1);
+      expect(mapSet.mock.calls.some(([, value]) => value === lateCandidate)).toBe(false);
+    } finally {
+      mapSet.mockRestore();
+    }
   });
 
   it('materializes an exact lane-only recipe without inventing a cross-lane family', async () => {

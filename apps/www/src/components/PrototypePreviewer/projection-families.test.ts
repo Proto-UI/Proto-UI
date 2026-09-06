@@ -7,6 +7,7 @@ import {
   resolveProjectionRecipe,
   tryResolveProjectionRecipe,
   validateProjectionFamilyManifest,
+  type ProjectionComponentFamilyManifest,
   type ProjectionFamilyManifest,
   type ProjectionFamilyManifestRegistry,
 } from './projection-families';
@@ -114,6 +115,7 @@ const EXPECTED_LANE_ONLY_FAMILIES = {
         'brutalist-card-footer',
         'brutalist-button',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
       parts: {
         root: { basePrototypeId: null, prototypeId: 'brutalist-card-root' },
         header: { basePrototypeId: null, prototypeId: 'brutalist-card-header' },
@@ -600,6 +602,56 @@ describe('Website projection-family manifests', () => {
         EXPECTED_SELECT_PARTS[otherFamilyId].trigger
       );
     }
+  });
+
+  it('classifies every recipe Prototype with explicit part or auxiliary lineage', () => {
+    const expectedAuxiliaries = {
+      'shadcn/toggle': [{ basePrototypeId: null, prototypeId: 'lucide-icon' }],
+      'shadcn/dialog': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      'brutalist/card': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      'brutalist/dialog': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+    } as const;
+
+    for (const [projectionFamilyId, manifest] of Object.entries(PROJECTION_FAMILY_MANIFESTS)) {
+      const families = manifest.families as Readonly<
+        Record<string, ProjectionComponentFamilyManifest>
+      >;
+      for (const [familyId, family] of Object.entries(families)) {
+        const auxiliaryPrototypes = family.auxiliaryPrototypes ?? [];
+        const expected =
+          expectedAuxiliaries[
+            `${projectionFamilyId}/${familyId}` as keyof typeof expectedAuxiliaries
+          ] ?? [];
+        expect(auxiliaryPrototypes, `${projectionFamilyId}/${familyId} auxiliaries`).toEqual(
+          expected
+        );
+        expect(
+          new Set([
+            ...Object.values(family.parts).map((part) => part.prototypeId),
+            ...auxiliaryPrototypes.map((prototype) => prototype.prototypeId),
+          ]),
+          `${projectionFamilyId}/${familyId} classified recipe Prototypes`
+        ).toEqual(new Set(family.recipePrototypeIds));
+      }
+    }
+  });
+
+  it('fails closed when an auxiliary recipe Prototype declares the wrong lineage', () => {
+    const toggle = PROJECTION_FAMILY_MANIFESTS.shadcn.families.toggle;
+    const invalid = {
+      ...PROJECTION_FAMILY_MANIFESTS.shadcn,
+      families: {
+        ...PROJECTION_FAMILY_MANIFESTS.shadcn.families,
+        toggle: {
+          ...toggle,
+          auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-TOGGLE', prototypeId: 'lucide-icon' }],
+        },
+      },
+    } as ProjectionFamilyManifest;
+
+    expect(() => validateProjectionFamilyManifest(invalid)).toThrow(
+      /toggle.*auxiliary Prototype lineage/i
+    );
   });
 
   it('fails closed when a recipe Prototype dependency is missing, foreign, or duplicated', () => {

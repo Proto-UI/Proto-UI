@@ -6,11 +6,11 @@ since: 0.3.0-alpha.0
 summary: Maps manifest, unit, and real-browser evidence for coherent Runtime and projection-lane switching across Website-owned selection controls, composition content, themes, and portaled overlays.
 cases:
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-MANIFEST-COMPLETENESS
-    title: an explicit projection-lane manifest resolves complete same-lineage component and Select-part mappings without name inference
+    title: an explicit projection-lane manifest resolves complete part and auxiliary recipe Prototype mappings with declared Base lineage
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-EXPLICIT-MANIFEST
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
-    expectation: explicit-lane-manifest-resolves-complete-recipes-and-rejects-missing-parts
+    expectation: explicit-lane-manifest-classifies-complete-part-and-auxiliary-lineage-and-rejects-missing-mappings
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
     title: Runtime and design-language switches rematerialize every scope-owned control and demo part as one generation
     covers:
@@ -58,16 +58,16 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NO-HYBRID-PRESENTATION
     expectation: html-and-svg-prototype-surfaces-carry-complete-generation-metadata-and-theme-values
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
-    title: an initial materialization failure renders its exact error while a replacement failure leaves the committed generation visible
+    title: an initial materialization failure renders its exact error successful retry replaces it and replacement failure retains the committed generation
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: empty-initial-host-renders-error-and-retained-generation-is-never-overwritten
+    expectation: empty-initial-host-renders-error-successful-retry-removes-it-and-retained-generation-is-never-overwritten
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
-    title: every repeated destroy caller awaits the same generation-owned candidate and portal teardown
+    title: repeated destroy callers await one generation teardown and late materialization cannot repopulate cleared client registries
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: repeated-destroy-returns-one-pending-promise-until-generation-cleanup-finishes
+    expectation: repeated-destroy-shares-one-promise-and-post-destroy-completion-is-disposed-without-client-retention
 implementations:
   - id: www-projection-family-manifest-unit
     kind: module-test
@@ -210,6 +210,9 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projection-theme.ts
   - path: apps/www/src/components/BrutalistPageStyle.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added explicit auxiliary Prototype lineage, successful retry cleanup, and post-destroy materialization retention evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added HTML and SVG surface metadata closure, first-generation error presentation, and repeated teardown-await evidence.
