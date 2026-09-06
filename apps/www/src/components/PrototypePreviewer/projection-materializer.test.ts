@@ -487,7 +487,7 @@ describe('Website projection materializer', () => {
     expect(mount.querySelector('[data-projection-generation-host]')).toBeNull();
   });
 
-  it('does not overwrite focus established after restoration is scheduled', () => {
+  it('distinguishes newer focus from teardown blur before restoration', () => {
     const frames: FrameRequestCallback[] = [];
     vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
       frames.push(callback);
@@ -514,6 +514,15 @@ describe('Website projection materializer', () => {
     expect(document.activeElement).toBe(newerFocus);
 
     restoreProjectionControlFocus(mount, 'runtime-select', 2);
+    frames.shift()!(0);
+    expect(document.activeElement).toBe(runtimeControl);
+
+    const retiredControl = document.createElement('button');
+    document.body.appendChild(retiredControl);
+    retiredControl.focus();
+    restoreProjectionControlFocus(mount, 'runtime-select', 2);
+    retiredControl.remove();
+    expect(document.activeElement).toBe(document.body);
     frames.shift()!(0);
     expect(document.activeElement).toBe(runtimeControl);
   });

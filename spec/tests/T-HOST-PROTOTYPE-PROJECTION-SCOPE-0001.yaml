@@ -47,7 +47,7 @@ cases:
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: controlled-selection-and-post-commit-focus-restoration-precede-cleanup-and-run-only-while-captured-focus-remains-current
+    expectation: controlled-selection-and-post-commit-focus-restoration-precede-cleanup-allow-teardown-blur-and-abort-after-newer-focus-acquisition
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
     title: stale loads forced reloads fulfilled start caches events cleanup and client retention cannot commit erase retain or block retry of a superseded generation
     covers:

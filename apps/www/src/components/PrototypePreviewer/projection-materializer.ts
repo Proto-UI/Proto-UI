@@ -528,11 +528,17 @@ export function restoreProjectionControlFocus(
   focusKey: string,
   generation: number
 ): void {
-  const activeElement = mount.ownerDocument.activeElement;
+  const document = mount.ownerDocument;
   const controlId = CONTROL_BY_FOCUS_KEY[focusKey as ProjectionFocusKey];
   if (!controlId) return;
+  let newerFocusAcquired = false;
+  const handleFocusIn = (): void => {
+    newerFocusAcquired = true;
+  };
+  document.addEventListener('focusin', handleFocusIn, true);
   const restore = () => {
-    if (mount.ownerDocument.activeElement !== activeElement) return;
+    document.removeEventListener('focusin', handleFocusIn, true);
+    if (newerFocusAcquired) return;
     const activeHost = generationHosts(mount, mount.dataset.projectionOwner ?? '').find(
       (host) =>
         host.dataset.projectionGenerationState === 'active' &&
@@ -542,7 +548,7 @@ export function restoreProjectionControlFocus(
       ?.querySelector<HTMLElement>(`[data-projection-control="${controlId}"] [role="combobox"]`)
       ?.focus();
   };
-  const view = mount.ownerDocument.defaultView;
+  const view = document.defaultView;
   if (view?.requestAnimationFrame) view.requestAnimationFrame(restore);
   else queueMicrotask(restore);
 }
