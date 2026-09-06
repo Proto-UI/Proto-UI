@@ -385,6 +385,7 @@ export const specEntitySchema = z
     title: z.string().min(1),
     status: z.enum(SPEC_ENTITY_STATUSES).default('draft'),
     since: specVersionSchema,
+    activeSince: specVersionSchema.optional(),
     deprecatedSince: specVersionSchema.optional(),
     removedSince: specVersionSchema.optional(),
     replacedBy: z.string().optional(),
@@ -442,6 +443,40 @@ export const specEntitySchema = z
         path: ['removedSince'],
         message: 'Removed entities must set removedSince.',
       });
+    }
+
+    if (entity.activeSince) {
+      if (entity.type === 'version') {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'Version entities use release publication evidence, not activeSince.',
+        });
+      } else if (entity.status === 'draft') {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'Only lifecycle-complete entities may declare activeSince.',
+        });
+      }
+
+      const terminalBoundary = entity.deprecatedSince ?? entity.removedSince;
+      if (compareSpecVersions(entity.activeSince, entity.since) < 0) {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'activeSince must not be earlier than since.',
+        });
+      } else if (
+        terminalBoundary &&
+        compareSpecVersions(entity.activeSince, terminalBoundary) >= 0
+      ) {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'activeSince must precede terminal lifecycle boundaries.',
+        });
+      }
     }
 
     if (entity.inherits && entity.type !== 'prototype') {
@@ -815,9 +850,24 @@ export function isVersionInRange(
   if (range.until && compareSpecVersions(version, range.until) >= 0) return false;
   return true;
 }
-
 export function isSpecEntityAvailableAt(entity: SpecEntity, version: string): boolean {
   if (compareSpecVersions(version, entity.since) < 0) return false;
   if (entity.removedSince && compareSpecVersions(version, entity.removedSince) >= 0) return false;
   return true;
+}
+
+export function isSpecEntityActiveAt(entity: SpecEntity, version: string): boolean {
+  if (!isSpecEntityAvailableAt(entity, version)) return false;
+  if (entity.type === 'version') {
+    return (
+      entity.status === 'active' &&
+      entity.release?.publishedAt !== undefined &&
+      compareSpecVersions(version, entity.release.version) >= 0
+    );
+  }
+  if (entity.status === 'draft' || !entity.activeSince) return false;
+  if (entity.deprecatedSince && compareSpecVersions(version, entity.deprecatedSince) >= 0) {
+    return false;
+  }
+  return compareSpecVersions(version, entity.activeSince) >= 0;
 }

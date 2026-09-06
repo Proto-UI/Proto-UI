@@ -4,6 +4,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
+  checkSpecLifecycleProjection,
   checkLibraryInventory,
   checkLocalizedRoutes,
   checkScaffolding,
@@ -227,4 +228,28 @@ test('public scaffolding reports the source file and marker', async () => {
   assert.equal(errors.length, 1);
   assert.match(errors[0], /placeholder\.md:3/);
   assert.match(errors[0], /写作提示/);
+});
+
+test('public spec lifecycle guides expose the activation-history boundary', () => {
+  const errors = checkSpecLifecycleProjection({
+    documents: [
+      {
+        locale: 'en',
+        slug: 'specifications/introduction',
+        file: 'apps/www/src/content/docs/en/specifications/introduction.md',
+        text: 'Every entity has a `since` version and a lifecycle status.',
+      },
+      {
+        locale: 'zh-cn',
+        slug: 'specifications/introduction',
+        file: 'apps/www/src/content/docs/zh-cn/specifications/introduction.md',
+        text: '普通实体使用 `activeSince` 记录稳定生效版本。',
+      },
+    ],
+  });
+
+  assert.deepEqual(errors, [
+    'apps/www/src/content/docs/en/specifications/introduction.md: public spec lifecycle guide must explain `activeSince` as distinct from `since`.',
+    'apps/www/src/content/docs/zh-cn/specifications/introduction.md: public spec lifecycle guide must state that `activeSince` may equal `since` for an identity introduced stable.',
+  ]);
 });
