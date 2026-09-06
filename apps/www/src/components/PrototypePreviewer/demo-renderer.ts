@@ -8,7 +8,13 @@ import { loadReact } from './runtimes/react-runtime';
 import { loadVue } from './runtimes/vue-runtime';
 import { loadVue2, toVue2ComponentData, toVue2Runtime } from './runtimes/vue2-runtime';
 import { claimHostMount, type HostMountLease } from './runtimes/host-mount';
-import type { DemoChild, DemoRenderOptions, DemoRenderResult, DemoRuntimeApi } from './demo-types';
+import type {
+  DemoChild,
+  DemoRenderOptions,
+  DemoRenderResult,
+  DemoRuntimeApi,
+  DemoSurfaceStyle,
+} from './demo-types';
 import { ensurePreviewWcRegistered } from './wc-registry';
 import type { RuntimeId } from './runtimes/registry';
 
@@ -70,6 +76,36 @@ function runCleanupSteps(steps: readonly (() => void)[]): void {
     }
   }
   if (cleanupFailed) throw cleanupFailure;
+}
+
+function reactStylePropertyName(property: string): string {
+  if (property.startsWith('--')) return property;
+  if (property === 'float') return 'cssFloat';
+  const normalized = property.startsWith('-ms-') ? property.slice(1) : property;
+  return normalized.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase());
+}
+
+function normalizeReactSurfaceStyle(
+  surfaceStyle: DemoSurfaceStyle,
+  document: Document
+): Record<string, string> {
+  const normalized: Record<string, string> = {};
+  const entries = Array.isArray(surfaceStyle) ? surfaceStyle : [surfaceStyle];
+  for (const entry of entries) {
+    if (typeof entry === 'string') {
+      const declaration = document.createElement('span').style;
+      declaration.cssText = entry;
+      for (let index = 0; index < declaration.length; index += 1) {
+        const property = declaration.item(index);
+        normalized[reactStylePropertyName(property)] = declaration.getPropertyValue(property);
+      }
+      continue;
+    }
+    for (const [property, value] of Object.entries(entry)) {
+      normalized[reactStylePropertyName(property)] = value;
+    }
+  }
+  return normalized;
 }
 
 function getScopedComponentCache<T extends object>(
@@ -286,7 +322,9 @@ async function renderDemoReact(
       };
     }
     if (node.className) mergedProps.surfaceClassName = node.className;
-    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
+    if (node.surfaceStyle) {
+      mergedProps.surfaceStyle = normalizeReactSurfaceStyle(node.surfaceStyle, host.ownerDocument);
+    }
     return React.createElement(Component, mergedProps as Record<string, unknown>, ...kids);
   }
 
