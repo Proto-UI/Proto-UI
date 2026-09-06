@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
+import { createWebMoveGestureHost } from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
   ANATOMY_GET_PROTO_CAP,
@@ -9,6 +10,7 @@ import {
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import {
+  createWebScrollSurfaceHost,
   SCROLL_SURFACE_HOST_CAP,
   type ScrollPort,
   type ScrollSurfaceHost,
@@ -217,19 +219,17 @@ describe('prototypes/shadcn: scroll-area', () => {
 
   it('falls back to system without a diagnostic when the host cannot compose chrome', async () => {
     // T-SHADCN-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
-    const instance = new EventTarget();
+    const target = new ScrollAreaViewportElement();
+    const webHost = createWebScrollSurfaceHost(target, {
+      moveGestureHost: createWebMoveGestureHost(),
+    });
     const attachments: ScrollSurfaceHostAttachment[] = [];
     const scrollHost: ScrollSurfaceHost = {
-      support: { system: true, composed: false },
+      ...webHost,
+      support: Object.freeze({ system: true, composed: false }),
       attach(connection) {
         attachments.push(connection);
-        return {
-          update(next) {
-            attachments.push(next);
-          },
-          request() {},
-          dispose() {},
-        };
+        return webHost.attach(connection);
       },
     };
     const host: RuntimeHost<any> = {
@@ -243,18 +243,18 @@ describe('prototypes/shadcn: scroll-area', () => {
       },
       onRuntimeReady(wiring) {
         wiring.attach('anatomy', [
-          [ANATOMY_INSTANCE_TOKEN_CAP, instance],
+          [ANATOMY_INSTANCE_TOKEN_CAP, target],
           [ANATOMY_PARENT_CAP, () => null],
           [ANATOMY_GET_PROTO_CAP, () => ShadcnScrollAreaViewport],
-          [ANATOMY_ROOT_TARGET_CAP, () => instance],
+          [ANATOMY_ROOT_TARGET_CAP, () => target],
         ]);
         wiring.attach('context', [
-          [CONTEXT_INSTANCE_TOKEN_CAP, instance],
+          [CONTEXT_INSTANCE_TOKEN_CAP, target],
           [CONTEXT_PARENT_CAP, () => null],
         ]);
         wiring.attach('event', [
-          [EVENT_ROOT_TARGET_CAP, () => instance],
-          [EVENT_GLOBAL_TARGET_CAP, () => instance],
+          [EVENT_ROOT_TARGET_CAP, () => target],
+          [EVENT_GLOBAL_TARGET_CAP, () => target],
         ]);
         wiring.attach('scroll', [[SCROLL_SURFACE_HOST_CAP, scrollHost]]);
       },
@@ -264,6 +264,7 @@ describe('prototypes/shadcn: scroll-area', () => {
     try {
       await expect(session.mount()).resolves.toBeUndefined();
       expect(attachments).toHaveLength(1);
+      expect(attachments[0]?.config.projection).toBe('composed');
       expect(attachments[0]?.config.requireProjection).toBeUndefined();
       expect(attachments[0]?.projection).toBe('system');
       expect(session.caps.getPort<ScrollPort>('scroll')?.getSnapshot().projection).toBe('system');
