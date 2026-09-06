@@ -32,6 +32,12 @@ Prefer anatomy-family subpaths so only the selected Shadcn family and its corres
 ```ts
 import { shadcnButton } from '@proto.ui/prototypes-shadcn/button';
 import { shadcnSelectRoot, shadcnSelectTrigger } from '@proto.ui/prototypes-shadcn/select';
+import {
+  shadcnTooltipGroup,
+  shadcnTooltipRoot,
+  shadcnTooltipTrigger,
+  shadcnTooltipContent,
+} from '@proto.ui/prototypes-shadcn/tooltip';
 ```
 
 The root package export remains available for compatibility. Shadcn families do not depend on sibling Shadcn families.
@@ -49,6 +55,7 @@ The root package export remains available for compatibility. Shadcn families do 
 - `src/switch/`
 - `src/tabs/`
 - `src/toggle/`
+- `src/tooltip/`
 
 ## Related Internal Packages
 

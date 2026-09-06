@@ -46,6 +46,7 @@ const SHADCN_FAMILIES = new Set([
   'switch',
   'tabs',
   'toggle',
+  'tooltip',
 ]);
 const BRUTALIST_FAMILIES = new Set([
   'badge',
