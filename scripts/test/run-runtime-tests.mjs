@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRuntimeTestPlan, resolveCorepackCli } from './runtime-test-plan.mjs';
+import { createRuntimeTestPlan } from './runtime-test-plan.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Astro dev compiles a route on first request, so a suite probing a cold route
@@ -86,12 +86,14 @@ async function waitForServer(url) {
 async function generateProtoUiStyle() {
   styleGeneration ??= new Promise((resolve, reject) => {
     const appsWwwRoot = path.join(root, 'apps', 'www');
-    const corepackCli = resolveCorepackCli();
-    const child = spawn(
-      process.execPath,
-      [corepackCli, 'pnpm@10.32.1', 'run', 'generate:proto-ui-style'],
-      { cwd: appsWwwRoot, env: process.env, stdio: 'inherit' }
-    );
+    // The parent command requires Corepack on PATH. process.execPath may point
+    // at an unrelated distro Node binary, so do not derive Corepack from it.
+    const corepackExecutable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+    const child = spawn(corepackExecutable, ['pnpm@10.32.1', 'run', 'generate:proto-ui-style'], {
+      cwd: appsWwwRoot,
+      env: process.env,
+      stdio: 'inherit',
+    });
     child.on('error', reject);
     child.on('exit', (code, signal) => {
       if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));

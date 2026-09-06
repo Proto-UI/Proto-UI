@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,21 +18,6 @@ function discoverBrowserSuites(directory) {
 }
 
 export const BROWSER_SUITES = Object.freeze(discoverBrowserSuites(BROWSER_SUITE_ROOT));
-
-export function corepackCliCandidates(nodeExecutable = process.execPath) {
-  const nodeBin = path.dirname(nodeExecutable);
-  const suffix = ['node_modules', 'corepack', 'dist', 'corepack.js'];
-  return [path.join(nodeBin, ...suffix), path.resolve(nodeBin, '..', 'lib', ...suffix)];
-}
-
-export function resolveCorepackCli(nodeExecutable = process.execPath, exists = existsSync) {
-  const candidates = corepackCliCandidates(nodeExecutable);
-  const resolved = candidates.find((candidate) => exists(candidate));
-  if (resolved) return resolved;
-  throw new Error(
-    `Unable to locate Corepack for ${nodeExecutable}. Tried:\n${candidates.join('\n')}`
-  );
-}
 
 function fullRuntimeTestPlan(forwardedArgs = []) {
   return [
