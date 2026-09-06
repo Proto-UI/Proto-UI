@@ -377,6 +377,34 @@ describe('Homepage Prototype projection scope', () => {
     await homeApi(root).destroy();
   });
 
+  it('locks the active generation before publishing Runtime preference', async () => {
+    const root = createHomeRoot();
+    initHomeDemoPreviewer(root);
+    await vi.waitFor(() => expect(root.dataset.runnerState).toBe('ready'));
+
+    let lockedAtPublication = false;
+    const reenterWithFamilyChange = (): void => {
+      lockedAtPublication = candidates[0]!.setLocked.mock.calls.some(([locked]) => locked === true);
+      latestControls().family.onValueChange('brutalist');
+    };
+    document.addEventListener('proto-adapter:change', reenterWithFamilyChange);
+
+    try {
+      latestControls().runtime.onValueChange('react');
+      await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(3));
+      await vi.waitFor(() => expect(root.dataset.runnerState).toBe('ready'));
+
+      expect(lockedAtPublication).toBe(true);
+      expect(latestRequest().selection).toEqual({
+        runtimeId: 'react',
+        projectionFamilyId: 'brutalist',
+      });
+    } finally {
+      document.removeEventListener('proto-adapter:change', reenterWithFamilyChange);
+      await homeApi(root).destroy();
+    }
+  });
+
   it('switches the projection library while preserving Runtime and component content', async () => {
     const root = createHomeRoot();
     initHomeDemoPreviewer(root);

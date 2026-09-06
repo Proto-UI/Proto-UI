@@ -293,6 +293,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
     if (destroyed || runtimeId === desiredRuntimeId) return;
     desiredRuntimeId = runtimeId;
     desiredIntentRevision += 1;
+    requestDesiredIntent(PROJECTION_FOCUS_KEYS.runtime);
     try {
       localStorage.setItem(PREFERRED_ADAPTER_KEY, runtimeId);
     } catch {
@@ -303,7 +304,6 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
         detail: { adapter: runtimeId, source: root },
       })
     );
-    requestDesiredIntent(PROJECTION_FOCUS_KEYS.runtime);
   }
 
   function requestFamily(projectionFamilyId: ProjectionFamilyId): void {

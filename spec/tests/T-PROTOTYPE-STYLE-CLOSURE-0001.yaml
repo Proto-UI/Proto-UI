@@ -98,6 +98,7 @@ implementations:
       - Light and Dark computed-style assertions cover Shadcn Button, exact default Textarea background and border token paint in three states, a separately consumer-overridden native Textarea, and portaled Hover Card Content; CSSOM assertions reject document-wide and bare native-control resets.
       - A deliberately conflicting base-layer Textarea sentinel must lose to Proto UI defaults, while a later named consumer layer must retain margin, padding, border, background, color, opacity, font, and content-box ownership across all four runtimes.
       - Adjacent enabled/disabled Textarea paint, focus/blur transition endpoints, and Hover Card closed/open endpoints are driven in every Runtime so conditional styles and transition assets cannot be replaced by static mount evidence.
+      - The same browser suite opens a Starlight documentation route and uses competing `theme` and `utilities` layer probes to verify that the earliest Website host prelude establishes the complete order before later styles load.
 verifies:
   contracts:
     - id: C-PROTOTYPE-STYLE-CLOSURE-0001
@@ -134,6 +135,9 @@ sources:
   - path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
   - path: apps/www/src/pages/en/test/style-isolation.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added a Starlight-route browser probe proving the earliest Website host prelude keeps generated theme defaults below explicit consumer layers.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added generated-entry and four-runtime evidence that layered theme defaults remain below reset, Proto UI, and consumer-owned theme values while preserving Tailwind-compatible order.

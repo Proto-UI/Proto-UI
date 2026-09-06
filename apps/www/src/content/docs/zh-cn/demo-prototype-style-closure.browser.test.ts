@@ -232,6 +232,31 @@ describe.sequential('Prototype style closure without Website CSS', () => {
     }
   });
 
+  it('keeps Website theme defaults below consumer layers when Starlight declares first', async () => {
+    // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CASCADE-LAYER-OWNERSHIP
+    await page.goto(`${baseUrl}/en/ui-libraries/shadcn/select/`, { waitUntil: 'networkidle' });
+
+    const layerWinner = await page.evaluate(() => {
+      const style = document.createElement('style');
+      style.textContent = `
+        @layer theme {
+          [data-layer-order-probe] { --layer-order-probe: theme; }
+        }
+        @layer utilities {
+          [data-layer-order-probe] { --layer-order-probe: consumer; }
+        }
+      `;
+      document.head.append(style);
+
+      const probe = document.createElement('div');
+      probe.dataset.layerOrderProbe = '';
+      document.body.append(probe);
+      return getComputedStyle(probe).getPropertyValue('--layer-order-probe').trim();
+    });
+
+    expect(layerWinner).toBe('consumer');
+  });
+
   it('activates distinct Light and Dark token endpoints', async () => {
     await openStandaloneTheme('light');
     const light = await readTokenPaint();
