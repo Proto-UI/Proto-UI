@@ -287,7 +287,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
     // stack so its current-generation lock seals open portals before the
     // caller can observe the switch. Only initial start needs deferred replay.
     const request =
-      snapshot.generation > 0
+      snapshot.phase !== 'idle'
         ? requestAfterStart(snapshot)
         : ensureStarted().then(requestAfterStart);
     observeRequest(request, targetRuntimeId);

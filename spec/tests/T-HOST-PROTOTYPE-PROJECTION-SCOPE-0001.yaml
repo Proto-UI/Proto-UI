@@ -12,11 +12,11 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
     expectation: explicit-lane-manifest-classifies-complete-part-and-auxiliary-lineage-and-rejects-missing-mappings
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
-    title: Runtime and design-language switches rematerialize every scope-owned control and demo part as one generation
+    title: Runtime and design-language switches including requests during initial preparation activate only the latest complete generation
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: four-runtimes-by-two-lanes-never-expose-a-mixed-or-partial-generation
+    expectation: four-runtimes-by-two-lanes-and-pending-initial-supersession-never-expose-a-stale-mixed-or-partial-generation
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
     title: Select trigger content and items retain the selected projection lane and Light or Dark theme across body portals
     covers:
@@ -43,13 +43,13 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-FAIL-CLOSED
     expectation: generation-guarded-completion-and-cleanup-preserve-the-latest-complete-tree
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
-    title: projection-lane tokens remain inside the scope while unrelated Website chrome retains the site theme
+    title: projection-lane tokens remain inside the scope explicit host light or dark activation wins over system preference and unrelated Website chrome retains the site theme
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-NEGATIVE-BOUNDARY
       - C-PROTOTYPE-STYLE-CLOSURE-0001-C
       - C-PROTOTYPE-STYLE-CLOSURE-0001-D
-    expectation: preview-lane-theme-does-not-mutate-root-or-recolor-unrelated-site-controls
+    expectation: explicit-host-theme-controls-the-preview-lane-without-root-mutation-or-unrelated-site-recoloring
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-SURFACE-METADATA-CLOSURE
     title: every marker-bearing HTML or SVG Prototype surface receives the current generation coordinates identity and direct theme copy
     covers:
@@ -109,6 +109,7 @@ implementations:
     consumesCases:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-fixed-family-projection-client-unit
@@ -119,6 +120,16 @@ implementations:
     consumesCases:
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-INITIAL-FAILURE-SURFACE
       - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-TEARDOWN-AWAIT
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-ORTHOGONAL-ATOMIC-SWITCH
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-projection-theme-unit
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/projection-theme.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-WEBSITE-BOUNDARY
     exercises:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-materializer-unit
@@ -208,8 +219,12 @@ sources:
   - path: apps/www/src/components/PrototypePreviewer/projection-materializer.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-materializer.test.ts
   - path: apps/www/src/components/PrototypePreviewer/projection-theme.ts
+  - path: apps/www/src/components/PrototypePreviewer/projection-theme.test.ts
   - path: apps/www/src/components/BrutalistPageStyle.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added pending-initial supersession and explicit light-over-system-preference evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added explicit auxiliary Prototype lineage, successful retry cleanup, and post-destroy materialization retention evidence.

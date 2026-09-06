@@ -48,6 +48,23 @@ describe('Website projection theme inputs', () => {
     });
   });
 
+  it('uses an explicit light class before a dark system preference', () => {
+    const matchMedia = vi.spyOn(window, 'matchMedia').mockReturnValue({
+      matches: true,
+    } as MediaQueryList);
+    document.documentElement.classList.add('light');
+
+    try {
+      expect(resolveProjectionThemeSurfaceStyle('brutalist', document)).toMatchObject({
+        '--pui-background': BRUTALIST_THEME.light.background,
+        '--pui-foreground': BRUTALIST_THEME.light.foreground,
+        '--pui-border': BRUTALIST_THEME.light.border,
+      });
+    } finally {
+      matchMedia.mockRestore();
+    }
+  });
+
   it('applies a closed theme copy and removes properties retired from its owned shape', () => {
     const surface = document.createElement('div');
     applyProjectionThemeSurfaceStyle(surface, {

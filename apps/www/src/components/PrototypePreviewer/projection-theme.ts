@@ -64,7 +64,7 @@ const appliedThemeProperties = new WeakMap<ProjectionThemeSurface, ReadonlySet<s
 function isDarkTheme(doc: Document): boolean {
   const root = doc.documentElement;
   if (root.classList.contains('dark') || root.dataset.theme === 'dark') return true;
-  if (root.dataset.theme === 'light') return false;
+  if (root.classList.contains('light') || root.dataset.theme === 'light') return false;
   return doc.defaultView?.matchMedia?.('(prefers-color-scheme: dark)').matches === true;
 }
 

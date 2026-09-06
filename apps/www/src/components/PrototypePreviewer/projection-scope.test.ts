@@ -101,6 +101,42 @@ describe('Website Prototype projection scope controller', () => {
     await controller.destroy();
   });
 
+  it('supersedes a pending initial generation before it can activate', async () => {
+    const initial = candidate('initial');
+    const latest = candidate('latest');
+    const initialPreparation = deferred<ProjectionScopeCandidate>();
+    const materialize = vi
+      .fn<(request: ProjectionScopeMaterializeRequest) => Promise<ProjectionScopeCandidate>>()
+      .mockReturnValueOnce(initialPreparation.promise)
+      .mockResolvedValueOnce(latest);
+    const onCommit = vi.fn();
+    const controller = createProjectionScopeController({
+      initialSelection: selection('wc', 'shadcn'),
+      materialize,
+      prepareCommit: prepareCommit(onCommit),
+    });
+
+    const starting = controller.start();
+    const requested = controller.request({ runtimeId: 'react' });
+
+    await expect(requested).resolves.toMatchObject({
+      selection: selection('react', 'shadcn'),
+      generation: 2,
+      phase: 'ready',
+    });
+    expect(materialize).toHaveBeenCalledTimes(2);
+    expect(latest.activate).toHaveBeenCalledTimes(1);
+    expect(initial.activate).not.toHaveBeenCalled();
+    expect(onCommit).toHaveBeenCalledTimes(1);
+
+    initialPreparation.resolve(initial);
+    await starting;
+    expect(initial.activate).not.toHaveBeenCalled();
+    expect(initial.dispose).toHaveBeenCalledTimes(1);
+
+    await controller.destroy();
+  });
+
   it('keeps the committed generation active until the prepared candidate activates', async () => {
     const current = candidate('current');
     const next = candidate('next');

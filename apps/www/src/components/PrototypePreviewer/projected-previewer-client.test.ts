@@ -228,7 +228,7 @@ describe('PrototypePreviewer fixed-family projection', () => {
     await previewerApi(root).destroy();
   });
 
-  it('replays only the latest Runtime intent while the initial generation is pending', async () => {
+  it('supersedes a pending initial generation with the latest Runtime intent', async () => {
     let releaseInitial!: () => void;
     const initialPending = new Promise<void>((resolve) => {
       releaseInitial = resolve;
@@ -249,16 +249,20 @@ describe('PrototypePreviewer fixed-family projection', () => {
     const first = previewerApi(root).switchRuntime('react');
     const middle = previewerApi(root).switchRuntime('wc');
     const latest = previewerApi(root).switchRuntime('react');
-    releaseInitial();
-    await Promise.all([first, middle, latest]);
 
-    expect(projection.materialize).toHaveBeenCalledTimes(2);
+    await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(4));
+    await Promise.all([first, middle, latest]);
     expect(
       projection.materialize.mock.calls.map(([request]) => request.selection.runtimeId)
-    ).toEqual(['wc', 'react']);
+    ).toEqual(['wc', 'react', 'wc', 'react']);
     expect(root.dataset.projectionRuntime).toBe('react');
     expect(root.dataset.projectionState).toBe('ready');
     expect(root.querySelector('.host')?.getAttribute('aria-busy')).toBe('false');
+    expect(candidates[0]!.activate).not.toHaveBeenCalled();
+
+    releaseInitial();
+    await vi.waitFor(() => expect(candidates[0]!.dispose).toHaveBeenCalledTimes(1));
+    expect(candidates[0]!.activate).not.toHaveBeenCalled();
 
     await previewerApi(root).destroy();
   });

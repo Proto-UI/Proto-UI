@@ -232,7 +232,7 @@ describe('Homepage Prototype projection scope', () => {
     }
   });
 
-  it('replays the latest complete intent after the initial generation finishes preparing', async () => {
+  it('supersedes the initial generation with the latest complete intent', async () => {
     let resolveInitial!: (candidate: Candidate) => void;
     const initial = new Promise<Candidate>((resolve) => {
       resolveInitial = resolve;
@@ -240,7 +240,7 @@ describe('Homepage Prototype projection scope', () => {
     projection.materialize
       .mockReturnValueOnce(initial)
       .mockImplementationOnce(async (request: ProjectionScopeMaterializeRequest) => {
-        const candidate = createCandidate(`latest:${request.generation}`);
+        const candidate = createCandidate(`intermediate:${request.generation}`);
         candidates.push(candidate);
         return candidate;
       });
@@ -258,29 +258,25 @@ describe('Homepage Prototype projection scope', () => {
     initialControls.family.onValueChange('brutalist');
     initialControls.component.onValueChange('select');
 
-    await Promise.resolve();
-    expect(projection.materialize).toHaveBeenCalledTimes(1);
-    expect(root.dataset.runnerState).toBe('loading');
-
-    const initialCandidate = createCandidate('initial:1');
-    candidates.push(initialCandidate);
-    resolveInitial(initialCandidate);
-
-    await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(4));
     await vi.waitFor(() => expect(root.dataset.runnerState).toBe('ready'));
-
-    expect(projection.materialize.mock.calls[1]![0]).toEqual({
+    expect(latestRequest()).toEqual({
       selection: { runtimeId: 'react', projectionFamilyId: 'brutalist' },
-      generation: 2,
+      generation: 4,
     });
-    expect(projection.materialize.mock.calls[1]![1].componentId).toBe('select');
+    expect(projection.materialize.mock.calls[3]![1].componentId).toBe('select');
     expect(root.dataset.runnerRuntime).toBe('react');
     expect(root.dataset.projectionFamily).toBe('brutalist');
     expect(root.dataset.projectionComponent).toBe('select');
     expect(root.querySelector('[data-home-demo-description]')?.textContent).toBe(
       'Select description'
     );
-    expect(initialCandidate.dispose).toHaveBeenCalledTimes(1);
+
+    const initialCandidate = createCandidate('initial:1');
+    candidates.push(initialCandidate);
+    resolveInitial(initialCandidate);
+    await vi.waitFor(() => expect(initialCandidate.dispose).toHaveBeenCalledTimes(1));
+    expect(initialCandidate.activate).not.toHaveBeenCalled();
 
     await homeApi(root).destroy();
   });

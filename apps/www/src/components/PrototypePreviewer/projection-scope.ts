@@ -486,8 +486,8 @@ export function createProjectionScopeController(
     if (destroyed) {
       throw new Error('[ProjectionScope] Cannot request from a destroyed controller.');
     }
-    if (!startPromise || committedGeneration === 0) {
-      throw new Error('[ProjectionScope] start() must complete before request().');
+    if (!startPromise) {
+      throw new Error('[ProjectionScope] start() must be called before request().');
     }
 
     const targetSelection = copySelection({
