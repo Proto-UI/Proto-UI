@@ -517,6 +517,23 @@ describe('Website projection materializer', () => {
     frames.shift()!(0);
     expect(document.activeElement).toBe(runtimeControl);
 
+    source.focus();
+    newerFocus.focus();
+    expect(frames).toHaveLength(0);
+    restoreProjectionControlFocus(mount, 'runtime-select', 2, source);
+    expect(frames).toHaveLength(0);
+    expect(document.activeElement).toBe(newerFocus);
+
+    const portaledOrigin = document.createElement('button');
+    portaledOrigin.dataset.projectionOwner = 'focus-owner';
+    document.body.appendChild(portaledOrigin);
+    portaledOrigin.focus();
+    portaledOrigin.blur();
+    expect(document.activeElement).toBe(document.body);
+    restoreProjectionControlFocus(mount, 'runtime-select', 2, portaledOrigin);
+    frames.shift()!(0);
+    expect(document.activeElement).toBe(runtimeControl);
+
     const retiredControl = document.createElement('button');
     document.body.appendChild(retiredControl);
     retiredControl.focus();

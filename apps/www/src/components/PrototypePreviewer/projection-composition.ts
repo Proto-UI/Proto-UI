@@ -279,6 +279,24 @@ function mergeSurfaceStyle(
   return entries.length === 1 ? entries[0] : entries;
 }
 
+function updateRendererThemeSurfaceStyles(
+  node: DemoChild,
+  theme: ProjectionThemeSurfaceStyle
+): void {
+  if (typeof node === 'string' || node.kind === 'text') return;
+  if (node.kind === 'proto') {
+    const style = node.surfaceStyle;
+    const themeEntry = Array.isArray(style) ? style.at(-1) : style;
+    if (!themeEntry || typeof themeEntry === 'string') {
+      throw new Error(
+        '[PrototypePreviewer] projected Proto surface is missing renderer-owned theme state.'
+      );
+    }
+    Object.assign(themeEntry, theme);
+  }
+  for (const child of node.children ?? []) updateRendererThemeSurfaceStyles(child, theme);
+}
+
 function copyThemeSurfaceStyle(
   theme: ProjectionThemeSurfaceStyle,
   previous?: ProjectionThemeSurfaceStyle
@@ -606,12 +624,13 @@ export function createProjectionComposition(
   let themeSurfaceStyle = options.themeSurfaceStyle
     ? copyThemeSurfaceStyle(options.themeSurfaceStyle)
     : undefined;
+  const rendererThemeSurfaceStyle = themeSurfaceStyle ?? {};
   let activeContext: DemoSetupContext | null = null;
   let stampActiveProjectionSurfaces: (() => void) | null = null;
   const projectedChild = cloneProjectedChild(
     options.childDemo.root,
     coordinateAttrs,
-    themeSurfaceStyle,
+    rendererThemeSurfaceStyle,
     allowedPrototypeIds,
     componentRootPrototypeId
   );
@@ -623,7 +642,7 @@ export function createProjectionComposition(
       options.controls[id] as ProjectionControlConfig<string>,
       selectParts,
       coordinateAttrs,
-      themeSurfaceStyle,
+      rendererThemeSurfaceStyle,
       locked
     )
   );
@@ -845,7 +864,9 @@ export function createProjectionComposition(
       eventGateOpen = open;
     },
     setThemeSurfaceStyle(nextThemeSurfaceStyle) {
-      themeSurfaceStyle = copyThemeSurfaceStyle(nextThemeSurfaceStyle, themeSurfaceStyle);
+      const nextTheme = copyThemeSurfaceStyle(nextThemeSurfaceStyle, themeSurfaceStyle);
+      updateRendererThemeSurfaceStyles(demo.root, nextTheme);
+      themeSurfaceStyle = nextTheme;
       stampActiveProjectionSurfaces?.();
     },
     restoreFocus(focusKey) {

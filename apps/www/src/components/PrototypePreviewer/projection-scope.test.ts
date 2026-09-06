@@ -438,12 +438,17 @@ describe('Website Prototype projection scope controller', () => {
       prepareCommit: prepareCommit(onCommit),
       restoreFocus,
     });
+    const runtimeFocusOrigin = document.createElement('button');
+    const familyFocusOrigin = document.createElement('button');
 
     await controller.start();
-    await controller.request({ runtimeId: 'vue' }, { focusKey: 'runtime-select' });
+    await controller.request(
+      { runtimeId: 'vue' },
+      { focusKey: 'runtime-select', focusOrigin: runtimeFocusOrigin }
+    );
     await controller.request(
       { projectionFamilyId: 'brutalist' },
-      { focusKey: 'projection-family-select' }
+      { focusKey: 'projection-family-select', focusOrigin: familyFocusOrigin }
     );
 
     expect(onCommit.mock.calls.map(([commit]) => commit)).toEqual([
@@ -451,9 +456,23 @@ describe('Website Prototype projection scope controller', () => {
       { selection: selection('vue', 'shadcn'), generation: 2 },
       { selection: selection('vue', 'brutalist'), generation: 3 },
     ]);
-    expect(restoreFocus.mock.calls.map(([focusKey, commit]) => [focusKey, commit])).toEqual([
-      ['runtime-select', { selection: selection('vue', 'shadcn'), generation: 2 }],
-      ['projection-family-select', { selection: selection('vue', 'brutalist'), generation: 3 }],
+    expect(
+      restoreFocus.mock.calls.map(([focusKey, commit, focusOrigin]) => [
+        focusKey,
+        commit,
+        focusOrigin,
+      ])
+    ).toEqual([
+      [
+        'runtime-select',
+        { selection: selection('vue', 'shadcn'), generation: 2 },
+        runtimeFocusOrigin,
+      ],
+      [
+        'projection-family-select',
+        { selection: selection('vue', 'brutalist'), generation: 3 },
+        familyFocusOrigin,
+      ],
     ]);
     expect(candidates[1]!.activate.mock.invocationCallOrder[0]).toBeLessThan(
       restoreFocus.mock.invocationCallOrder[0]!

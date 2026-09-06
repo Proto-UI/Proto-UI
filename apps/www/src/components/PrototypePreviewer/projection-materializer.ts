@@ -526,11 +526,21 @@ const CONTROL_BY_FOCUS_KEY: Readonly<Record<ProjectionFocusKey, string>> = Objec
 export function restoreProjectionControlFocus(
   mount: HTMLElement,
   focusKey: string,
-  generation: number
+  generation: number,
+  focusOrigin: Element | null = null
 ): void {
   const document = mount.ownerDocument;
   const controlId = CONTROL_BY_FOCUS_KEY[focusKey as ProjectionFocusKey];
   if (!controlId) return;
+  const activeElement = document.activeElement;
+  const focusOriginOwner = focusOrigin
+    ?.closest('[data-projection-owner]')
+    ?.getAttribute('data-projection-owner');
+  const teardownFallback =
+    focusOrigin !== null &&
+    (activeElement === document.body || activeElement === document.documentElement) &&
+    (!focusOrigin.isConnected || focusOriginOwner === mount.dataset.projectionOwner);
+  if (focusOrigin !== null && activeElement !== focusOrigin && !teardownFallback) return;
   let newerFocusAcquired = false;
   const handleFocusIn = (): void => {
     newerFocusAcquired = true;

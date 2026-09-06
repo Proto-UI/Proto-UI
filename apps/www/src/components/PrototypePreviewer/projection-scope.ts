@@ -56,6 +56,8 @@ export type ProjectionScopeCandidate = Readonly<{
 
 export type ProjectionScopeRequestOptions = Readonly<{
   focusKey?: string;
+  /** Focused element that owned the request before async materialization began. */
+  focusOrigin?: Element | null;
   /** Rematerialize host-controlled content without changing projection coordinates. */
   force?: boolean;
 }>;
@@ -70,7 +72,7 @@ export type ProjectionScopeControllerOptions = Readonly<{
    * return an infallible synchronous publication with a rollback lease.
    */
   prepareCommit?(commit: ProjectionScopeCommit): ProjectionScopeCommitPublication;
-  restoreFocus?(focusKey: string, commit: ProjectionScopeCommit): void;
+  restoreFocus?(focusKey: string, commit: ProjectionScopeCommit, focusOrigin: Element | null): void;
 }>;
 
 export type ProjectionScopeController = Readonly<{
@@ -300,7 +302,8 @@ export function createProjectionScopeController(
   const materializeGeneration = async (
     targetSelection: ProjectionScopeSelection,
     generation: number,
-    focusKey?: string
+    focusKey?: string,
+    focusOrigin: Element | null = null
   ): Promise<ProjectionScopeSnapshot> => {
     let candidate: ProjectionScopeCandidate;
 
@@ -450,7 +453,7 @@ export function createProjectionScopeController(
       committedGeneration === generation
     ) {
       try {
-        options.restoreFocus?.(focusKey, commit);
+        options.restoreFocus?.(focusKey, commit, focusOrigin);
       } catch (error) {
         console.error(
           '[ProjectionScope] Failed to restore focus for the committed generation.',
@@ -523,7 +526,12 @@ export function createProjectionScopeController(
     }
     if (!isCurrentRequest(generation)) return getSnapshot();
     return trackMaterialization(() =>
-      materializeGeneration(targetSelection, generation, requestOptions.focusKey)
+      materializeGeneration(
+        targetSelection,
+        generation,
+        requestOptions.focusKey,
+        requestOptions.focusOrigin
+      )
     );
   };
   const request = (

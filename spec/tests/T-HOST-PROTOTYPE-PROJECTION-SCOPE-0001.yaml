@@ -18,11 +18,11 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
     expectation: four-runtimes-by-two-lanes-and-pending-initial-supersession-never-expose-a-stale-mixed-or-partial-generation
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-THEME-CLOSURE
-    title: Select trigger content and items retain the selected projection lane and Light or Dark theme across body portals
+    title: Select trigger content and items retain the selected projection lane and current Light or Dark theme across body portals and later Adapter prop updates
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-PORTAL-CLOSURE
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ORTHOGONAL-SELECTION
-    expectation: visible-portal-surfaces-carry-the-current-lane-generation-and-theme-without-page-inheritance
+    expectation: visible-and-renderer-owned-surfaces-carry-the-current-lane-generation-and-theme-without-page-inheritance-or-stale-prop-replay
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-PORTAL-OBSERVER-SCALING
     title: one document observer dispatches portal reconciliation only to the affected owner and generation
     covers:
@@ -43,11 +43,11 @@ cases:
       - C-PROTOTYPE-STYLE-CLOSURE-0001-C
     expectation: selected-lane-controls-contain-no-hard-coded-or-recolored-foreign-prototype-parts
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STATE-FOCUS-CONTINUITY
-    title: controlled selections and semantic focus survive rematerialization without cleanup or a deferred callback stealing later user focus
+    title: controlled selections and semantic focus survive preparation rematerialization and cleanup without stealing later user focus
     covers:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
-    expectation: controlled-selection-and-post-commit-focus-restoration-precede-cleanup-allow-teardown-blur-and-abort-after-newer-focus-acquisition
+    expectation: focus-origin-crosses-async-preparation-restoration-precedes-cleanup-allows-teardown-blur-and-aborts-after-newer-focus-acquisition
   - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-STALE-CLEANUP
     title: stale loads forced reloads fulfilled start caches events cleanup and client retention cannot commit erase retain or block retry of a superseded generation
     covers:
@@ -270,7 +270,7 @@ sources:
 revisions:
   - version: 0.3.0-alpha.0
     change: refined
-    summary: Added filtered shared marker observation, concurrent forced-reload retention, deferred-focus ownership, and exhaustive teardown evidence.
+    summary: Added shared marker observation, forced-reload retention, request-to-frame focus ownership, renderer theme synchronization, and exhaustive teardown evidence.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added stale-start retry, immediate active disposal, and pre-cleanup focus restoration evidence.

@@ -523,6 +523,7 @@ describe('Website projection composition', () => {
         prototypeId: 'shadcn-button',
         ref: 'child-button',
         children: ['Child'],
+        surfaceStyle: 'color: red;',
       },
     } satisfies DemoSpec;
     const composition = createProjectionComposition({
@@ -547,6 +548,14 @@ describe('Website projection composition', () => {
     const cleanup = composition.demo.setup?.({ host, refs, api });
     const childButton = refs['child-button']!;
     expect(childButton.style.getPropertyValue('--pui-background')).toBe('#fff');
+    const rendererThemeEntries: Array<Record<string, string>> = [];
+    walk(composition.demo.root, (node) => {
+      if (node.kind !== 'proto' || !node.surfaceStyle) return;
+      const entries = Array.isArray(node.surfaceStyle) ? node.surfaceStyle : [node.surfaceStyle];
+      const themeEntry = entries.at(-1);
+      if (themeEntry && typeof themeEntry === 'object') rendererThemeEntries.push(themeEntry);
+    });
+    expect(rendererThemeEntries.length).toBeGreaterThan(0);
 
     composition.setThemeSurfaceStyle({
       '--pui-background': '#090909',
@@ -554,6 +563,10 @@ describe('Website projection composition', () => {
     });
     expect(childButton.style.getPropertyValue('--pui-background')).toBe('#090909');
     expect(childButton.style.getPropertyValue('--pui-foreground')).toBe('#f4f4f5');
+    for (const rendererThemeEntry of rendererThemeEntries) {
+      expect(rendererThemeEntry['--pui-background']).toBe('#090909');
+      expect(rendererThemeEntry['--pui-foreground']).toBe('#f4f4f5');
+    }
     expect(() => composition.setThemeSurfaceStyle({ '--pui-background': '#fff' })).toThrow(
       /complete token shape/
     );

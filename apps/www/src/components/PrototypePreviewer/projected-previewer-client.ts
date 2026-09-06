@@ -172,6 +172,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     if (runtimeId === desiredRuntimeId && controller.getSnapshot().phase !== 'idle') {
       return Promise.resolve(controller.getSnapshot());
     }
+    const focusOrigin = requestOptions.restoreFocus ? root.ownerDocument.activeElement : null;
 
     desiredRuntimeId = runtimeId;
     const revision = ++desiredIntentRevision;
@@ -187,7 +188,9 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       }
       return controller.request(
         { runtimeId },
-        requestOptions.restoreFocus ? { focusKey: PROJECTION_FOCUS_KEYS.runtime } : undefined
+        requestOptions.restoreFocus
+          ? { focusKey: PROJECTION_FOCUS_KEYS.runtime, focusOrigin }
+          : undefined
       );
     };
     const snapshot = controller.getSnapshot();
@@ -405,8 +408,8 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         },
       };
     },
-    restoreFocus(focusKey, commit) {
-      restoreProjectionControlFocus(mount, focusKey, commit.generation);
+    restoreFocus(focusKey, commit, focusOrigin) {
+      restoreProjectionControlFocus(mount, focusKey, commit.generation, focusOrigin);
     },
   });
 

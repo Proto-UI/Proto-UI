@@ -406,7 +406,12 @@ describe('Homepage Prototype projection scope', () => {
     expect(adapterChange).toHaveBeenCalledTimes(1);
     expect(candidates[0]!.setLocked).toHaveBeenCalledWith(true);
     expect(candidates[0]!.dispose).toHaveBeenCalledTimes(1);
-    expect(projection.restoreFocus).toHaveBeenCalledWith(expect.anything(), 'runtime-select', 2);
+    expect(projection.restoreFocus).toHaveBeenCalledWith(
+      expect.anything(),
+      'runtime-select',
+      2,
+      document.body
+    );
 
     document.removeEventListener('proto-adapter:change', adapterChange);
     await homeApi(root).destroy();

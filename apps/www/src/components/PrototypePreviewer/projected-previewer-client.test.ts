@@ -179,7 +179,12 @@ describe('PrototypePreviewer fixed-family projection', () => {
     expect(adapterChange).toHaveBeenCalledTimes(1);
     expect(projection.materialize).toHaveBeenCalledTimes(2);
     expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('react');
-    expect(projection.restoreFocus).toHaveBeenCalledWith(expect.anything(), 'runtime-select', 2);
+    expect(projection.restoreFocus).toHaveBeenCalledWith(
+      expect.anything(),
+      'runtime-select',
+      2,
+      document.body
+    );
 
     document.removeEventListener('proto-adapter:change', adapterChange);
     await previewerApi(root).destroy();

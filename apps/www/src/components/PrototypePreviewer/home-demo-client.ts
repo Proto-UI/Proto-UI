@@ -256,6 +256,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
   };
 
   const requestDesiredIntent = (focusKey?: string): void => {
+    const focusOrigin = focusKey ? root.ownerDocument.activeElement : null;
     const revision = desiredIntentRevision;
     const targetRuntimeId = desiredRuntimeId;
     const requestAfterStart = (
@@ -279,7 +280,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
 
       return controller.request(
         { runtimeId, projectionFamilyId },
-        { force: componentChanged, focusKey }
+        { force: componentChanged, focusKey, focusOrigin }
       );
     };
     const snapshot = controller.getSnapshot();
@@ -517,8 +518,8 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
         },
       };
     },
-    restoreFocus(focusKey, commit) {
-      restoreProjectionControlFocus(mount, focusKey, commit.generation);
+    restoreFocus(focusKey, commit, focusOrigin) {
+      restoreProjectionControlFocus(mount, focusKey, commit.generation, focusOrigin);
     },
   });
 
