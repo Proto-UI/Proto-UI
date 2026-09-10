@@ -35,7 +35,7 @@ Button 的两个官方 authoring entries 是：
 - `asFocusable()` 提供 `focused`、`focusVisible` 与 focus method；
 - `def.event.on()` 承接 pointer 与 `press.commit`；
 - `def.expose.state()`、`def.expose.method()` 和 `def.expose.event()` 提供 outward surface；
-- `def.a11y.*` 声明 Button 的 role、name、state 与 action。
+- `asAccessible()` 声明 Button 的 role、name、state 与 action。
 
 旧的 `def.state.fromInteraction()` 例子已经不代表当前 Button 实现，不应继续作为这篇指南的示例。
 

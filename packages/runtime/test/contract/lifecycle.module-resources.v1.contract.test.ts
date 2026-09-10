@@ -9,7 +9,7 @@ import {
   type A11ySemanticObjectSnapshot,
 } from '@proto.ui/core';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
-import { asOverlay } from '@proto.ui/hooks';
+import { asAccessible, asOverlay } from '@proto.ui/hooks';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import { EFFECTS_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
@@ -147,7 +147,7 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
       setup(def) {
         disabled = def.state.bool('disabled', false);
         def.expose.state('disabled', disabled);
-        def.a11y.state('disabled', disabled);
+        asAccessible().state('disabled', disabled);
         return (run) => run.el('button', 'ok');
       },
     });

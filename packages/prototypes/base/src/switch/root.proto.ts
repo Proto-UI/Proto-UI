@@ -1,9 +1,10 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
 import { SWITCH_CONTEXT, SWITCH_FAMILY } from './shared';
 import type { SwitchRootAsHookContract, SwitchRootExposes, SwitchRootProps } from './types';
 
 function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-SWITCH-ROLE-ON-OFF-VALUE, P-BASE-SWITCH-DISPLAY-AND-INPUT
   // P-BASE-SWITCH-ROOT-SEMANTIC-OWNER, P-BASE-SWITCH-ROOT-DOMAIN-ANCHOR
   def.anatomy.claim(SWITCH_FAMILY, { role: 'root' });
@@ -53,13 +54,13 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
   def.expose.event('checkedChange', { payload: 'json' });
 
   // P-BASE-SWITCH-ACCESSIBLE-ROLE
-  def.a11y.role('switch');
+  accessible.role('switch');
   // P-BASE-SWITCH-ACCESSIBLE-NAME, P-BASE-SWITCH-STABLE-LABEL
-  def.a11y.nameFromContent();
+  accessible.nameFromContent();
   // P-BASE-SWITCH-A11Y-CHECKED, P-BASE-SWITCH-A11Y-NO-MIXED
-  def.a11y.state('checked', checked);
-  def.a11y.state('disabled', disabled);
-  def.a11y.action('activate', { event: 'checkedChange' });
+  accessible.state('checked', checked);
+  accessible.state('disabled', disabled);
+  accessible.action('activate', { event: 'checkedChange' });
 
   // P-BASE-SWITCH-CONTEXT-PROVIDE, P-BASE-SWITCH-CONTEXT-VALUE
   def.context.provide(SWITCH_CONTEXT, {

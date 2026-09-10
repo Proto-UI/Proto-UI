@@ -583,6 +583,14 @@ criteria:
             - P-BASE-BUTTON-NO-VISUAL-VARIANT-CORE
             - P-BASE-BUTTON-PROP-VISUAL-DEFERRED
 openQuestions:
+  - id: P-BASE-SWITCH-Q-A11Y-API
+    question:
+      zh-CN: 在 asAccessible 已提供语义声明入口的前提下，Switch 是否需要额外的 accessible name、description 或原因说明 props？
+      en: With asAccessible providing semantic declarations, does Switch need additional accessible-name, description or explanatory props?
+    context:
+      zh-CN: 作者入口已确定为 asAccessible；独立的组件 props 设计仍等待实际需求，不阻塞当前入口迁移。
+      en: The author entry is asAccessible; separate component prop design awaits concrete use cases and does not block this migration.
+    blocks: []
   - id: P-BASE-SWITCH-Q-TRACK
     question:
       zh-CN: Switch track 是否应成为官方 anatomy role、profile recommendation、独立 part protocol，还是继续作为宿主模板内部结构？
@@ -603,16 +611,6 @@ openQuestions:
     blocks:
       - form prototype catalog
       - switch form extension design
-  - id: P-BASE-SWITCH-Q-A11Y-API
-    question:
-      zh-CN: Switch 的 accessible name、description、checked state 与 role mapping 应由 `def.a11y` 顶层 API、Switch props、adapter inference 还是组合方式提供？
-      en: Should Switch accessible name, description, checked state, and role mapping be provided by a top-level `def.a11y` API, Switch props, adapter inference, or a combination?
-    context:
-      zh-CN: 当前 Switch 契约先要求可访问语义与 checked projection，但不提前固化 `label` prop 或 `def.a11y` API 形状。
-      en: The current Switch contract requires accessibility semantics and checked projection without prematurely fixing a `label` prop or `def.a11y` API shape.
-    blocks:
-      - a11y module catalog
-      - def.a11y API design
   - id: P-BASE-SWITCH-Q-CHECKED-NAMING
     question:
       zh-CN: Base Switch 对外状态是否应长期使用 `checked`，还是在语义层区分 `checked` 与 `on`？

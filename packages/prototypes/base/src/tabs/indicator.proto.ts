@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { TABS_CONTEXT, TABS_FAMILY, type TabsContextValue } from './shared';
 import type {
@@ -48,7 +49,7 @@ function setupTabsIndicator(def: DefHandle<TabsIndicatorProps, TabsIndicatorExpo
  * - P-BASE-TABS-INDICATOR-NO-SELECTION-OWNER: absence of value props and valueChange is the implementation.
  * - P-BASE-TABS-INDICATOR-NO-EVENT-TARGET: absence of def.event usage is the implementation.
  * - P-BASE-TABS-INDICATOR-NO-FOCUS-TARGET: absence of asFocusable/focusSelf is the implementation.
- * - P-BASE-TABS-INDICATOR-PRESENTATIONAL-A11Y: absence of def.a11y control syntax is the implementation.
+ * - P-BASE-TABS-INDICATOR-PRESENTATIONAL-A11Y: absence of asAccessible() control syntax is the implementation.
  * - P-BASE-TABS-INDICATOR-NO-LAYOUT-MEASUREMENT: layout measurement is deferred to downstream styled prototypes.
  * - P-BASE-TABS-INDICATOR-NO-AUTO-POSITIONING: no position or transform props are accepted.
  * - P-BASE-TABS-INDICATOR-NO-VISUAL-VARIANT-CORE: visual parameters are owned by downstream styled prototypes.

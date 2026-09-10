@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@proto.ui/core": "workspace:*",
-    "@proto.ui/prototypes-base": "workspace:*"
+    "@proto.ui/prototypes-base": "workspace:*",
+    "@proto.ui/hooks": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/module-as-trigger": "workspace:*",

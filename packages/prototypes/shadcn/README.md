@@ -60,6 +60,7 @@ The root package export remains available for compatibility. Shadcn families do 
 ## Related Internal Packages
 
 - `@proto.ui/core`
+- `@proto.ui/hooks`
 - `@proto.ui/prototypes-base`
 
 ## License

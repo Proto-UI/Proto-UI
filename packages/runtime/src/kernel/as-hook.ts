@@ -221,6 +221,7 @@ export function attachAsHookRuntime<P extends PropsBaseType>(
     string,
     { order: number; state: AsHookInstanceState; mode: AsHookMode }
   >();
+  const registrationKinds = new Map<string, boolean>();
   const frameStack: EffectFrame[] = [];
   const rootStateNames = new Map<string, StateNameEntry>();
   let instanceOrder = 0;
@@ -288,6 +289,13 @@ export function attachAsHookRuntime<P extends PropsBaseType>(
   const runtime: AsHookRuntime = {
     ensureSetup,
     register: (name: string, meta: AsHookMeta) => {
+      const privileged = !!meta.privileged;
+      if (registrationKinds.has(name) && registrationKinds.get(name) !== privileged) {
+        throw new Error(
+          `[AsHook] ${name}: privileged and authored hooks cannot share a registration name.`
+        );
+      }
+      registrationKinds.set(name, privileged);
       const mode = meta.mode ?? 'once';
       const existing = instances.get(name);
 

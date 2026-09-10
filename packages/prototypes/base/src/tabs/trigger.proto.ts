@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asCollectionItem, asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asCollectionItem, asFocusable, asTrigger } from '@proto.ui/hooks';
 import { createTabsPartId, TABS_CONTEXT, TABS_FAMILY, type TabsContextValue } from './shared';
 import type { TabsTriggerAsHookContract, TabsTriggerExposes, TabsTriggerProps } from './types';
 
@@ -66,6 +66,7 @@ function resolveEnabledTriggerValue(run: any, candidate: string): string {
 }
 
 function setupTabsTrigger(def: DefHandle<TabsTriggerProps, TabsTriggerExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-TABS-TRIGGER-ROLE-TAB, P-BASE-TABS-TRIGGER-PROTOCOL-DEPENDENCY
   // P-BASE-TABS-TRIGGER-NO-BUTTON-DEPENDENCY
   // P-BASE-TABS-TRIGGER-ACTIVATION-REQUESTS-SELECTION
@@ -129,13 +130,13 @@ function setupTabsTrigger(def: DefHandle<TabsTriggerProps, TabsTriggerExposes>):
   // P-BASE-TABS-TRIGGER-A11Y-ROLE, P-BASE-TABS-TRIGGER-A11Y-SELECTED
   // P-BASE-TABS-TRIGGER-A11Y-DISABLED, P-BASE-TABS-TRIGGER-A11Y-CONTROLS-TARGET
   // P-BASE-TABS-TRIGGER-ACCESSIBLE-NAME
-  def.a11y.id(triggerId);
-  def.a11y.role('tab');
-  def.a11y.nameFromContent();
-  def.a11y.state('selected', selected);
-  def.a11y.state('disabled', disabled);
-  def.a11y.relation('controls', { target: contentId });
-  def.a11y.action('activate', { event: 'click' });
+  accessible.id(triggerId);
+  accessible.role('tab');
+  accessible.nameFromContent();
+  accessible.state('selected', selected);
+  accessible.state('disabled', disabled);
+  accessible.relation('controls', { target: contentId });
+  accessible.action('activate', { event: 'click' });
 
   const syncIds = () => {
     // P-BASE-TABS-A11Y-RELATIONSHIP-TARGET

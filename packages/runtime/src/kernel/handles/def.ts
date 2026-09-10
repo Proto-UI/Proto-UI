@@ -22,7 +22,6 @@ import type { ExposeEventFacade } from '@proto.ui/module-expose-event';
 import type { StateFacade } from '@proto.ui/module-state';
 import type { StateInteractionFacade } from '@proto.ui/module-state-interaction';
 import type { StateAccessibilityFacade } from '@proto.ui/module-state-accessibility';
-import type { A11yFacade } from '@proto.ui/module-a11y';
 import type { ContextFacade } from '@proto.ui/module-context';
 import { createExposeEventDeclaration, type ExposeFacade } from '@proto.ui/module-expose';
 import type { AnatomyFacade } from '@proto.ui/module-anatomy';
@@ -79,7 +78,6 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
   const state = facades['state'] as StateFacade;
   const stateInteraction = facades['state-interaction'] as StateInteractionFacade | undefined;
   const stateAccessibility = facades['state-accessibility'] as StateAccessibilityFacade | undefined;
-  const a11y = facades['a11y'] as A11yFacade | undefined;
   const context = facades['context'] as ContextFacade;
   const expose = facades['expose'] as ExposeFacade;
   const anatomy = facades['anatomy'] as AnatomyFacade | undefined;
@@ -375,69 +373,6 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         return anatomy.subscribeParts(family, role, (ctx, parts) =>
           onChange(ctx as RunHandle<P>, parts)
         );
-      },
-    },
-
-    a11y: {
-      id(target) {
-        ensureSetup('def.a11y.id');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.id(target);
-        recordCaptured(def, 'context', { op: 'a11y.id', target });
-      },
-      role(role) {
-        ensureSetup('def.a11y.role');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.role(role);
-        recordCaptured(def, 'context', { op: 'a11y.role', role });
-      },
-      name(value) {
-        ensureSetup('def.a11y.name');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.name(value);
-        recordCaptured(def, 'context', { op: 'a11y.name', value });
-      },
-      nameFromContent() {
-        ensureSetup('def.a11y.nameFromContent');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.nameFromContent();
-        recordCaptured(def, 'context', { op: 'a11y.nameFromContent' });
-      },
-      description(value) {
-        ensureSetup('def.a11y.description');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.description(value);
-        recordCaptured(def, 'context', { op: 'a11y.description', value });
-      },
-      state(key, handle) {
-        ensureSetup('def.a11y.state');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.state(key, handle);
-        recordCaptured(def, 'state', { op: 'a11y.state', key, handle });
-      },
-      action(key, spec) {
-        ensureSetup('def.a11y.action');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.action(key, spec);
-        recordCaptured(def, 'event', { op: 'a11y.action', key, spec });
-      },
-      relation(key, spec) {
-        ensureSetup('def.a11y.relation');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.relation(key, spec);
-        recordCaptured(def, 'context', { op: 'a11y.relation', key, spec });
-      },
-      tree(patch) {
-        ensureSetup('def.a11y.tree');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.tree(patch);
-        recordCaptured(def, 'context', { op: 'a11y.tree', patch });
-      },
-      level(value) {
-        ensureSetup('def.a11y.level');
-        if (!a11y) throw new Error(`[A11y] module unavailable.`);
-        a11y.level(value);
-        recordCaptured(def, 'context', { op: 'a11y.level', value });
       },
     },
   };

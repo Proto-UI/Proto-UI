@@ -24,7 +24,6 @@ import {
 import type { AnatomyClaimDecl, AnatomyFamily, AnatomyOrderView, AnatomyPartView } from './anatomy';
 import { State, StateDefAPI, type BorrowedStateHandle, type OwnedStateHandle } from './state';
 import type { Unsubscribe } from './state';
-import type { A11yDefAPI } from './a11y';
 
 // 统一错误上下文，方便在 runtime 做 phase guard 时给出可诊断信息
 
@@ -289,8 +288,6 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
       onChange: (run: RunHandle<Props>, parts: readonly AnatomyPartView[]) => void
     ): Unsubscribe;
   };
-
-  a11y: A11yDefAPI;
 }
 
 export type ContextOnChange<P extends PropsBaseType, T extends JsonObject> = (

@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { describe, expect, it } from 'vitest';
 import { definePrototype, type RunHandle } from '@proto.ui/core';
 import { AdaptToWebComponent } from '../src/adapt';
@@ -136,7 +137,7 @@ describe('adapter-web-component: L1 view intent', () => {
       name: 'x-wc-view-intent-a11y-replay',
       setup(def) {
         const hidden = def.state.bool('hidden', true);
-        def.a11y.state('hidden', hidden);
+        asAccessible().state('hidden', hidden);
         def.lifecycle.onCreated((nextRun) => {
           run = nextRun;
           run.lifecycle.setPresent(false);

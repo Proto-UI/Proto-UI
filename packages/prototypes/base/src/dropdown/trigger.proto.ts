@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { setupDropdownCommand } from './command';
 import {
@@ -14,6 +15,7 @@ import type {
 } from './types';
 
 function setupDropdownTrigger(def: DefHandle<DropdownTriggerProps, DropdownTriggerExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-DROPDOWN-MENU-TRIGGER-COMMAND
   def.anatomy.claim(DROPDOWN_FAMILY, { role: 'trigger' });
   const command = setupDropdownCommand(def, 'dropdown trigger');
@@ -22,13 +24,13 @@ function setupDropdownTrigger(def: DefHandle<DropdownTriggerProps, DropdownTrigg
   const hasPopup = def.state.string('dropdownHasPopup', 'menu');
   const controls = def.state.string('dropdownContentId', '');
   // P-BASE-DROPDOWN-MENU-TRIGGER-A11Y
-  def.a11y.role('button');
-  def.a11y.nameFromContent();
-  def.a11y.state('disabled', command.disabled);
-  def.a11y.state('expanded', expanded);
-  def.a11y.state('hasPopup', hasPopup);
-  def.a11y.relation('controls', { target: controls });
-  def.a11y.action('activate', { event: 'click' });
+  accessible.role('button');
+  accessible.nameFromContent();
+  accessible.state('disabled', command.disabled);
+  accessible.state('expanded', expanded);
+  accessible.state('hasPopup', hasPopup);
+  accessible.relation('controls', { target: controls });
+  accessible.action('activate', { event: 'click' });
 
   const sync = (run: any, ctx: DropdownContextValue) => {
     command.syncDisabled(!!run.props.get().disabled || ctx.disabled);

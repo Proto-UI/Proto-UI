@@ -35,7 +35,7 @@ The current implementation includes:
 - `asFocusable()` for `focused`, `focusVisible`, and the focus method;
 - `def.event.on()` for pointer routes and `press.commit`;
 - `def.expose.state()`, `def.expose.method()`, and `def.expose.event()` for outward surfaces; and
-- `def.a11y.*` for Button role, name, state, and action.
+- `asAccessible()` for Button role, name, state, and action.
 
 The former `def.state.fromInteraction()` example no longer describes the current Button implementation and must not be used as the example for this guide.
 

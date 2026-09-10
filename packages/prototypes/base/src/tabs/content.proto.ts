@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
-import { asFocusEntry } from '@proto.ui/hooks';
+import { asAccessible, asFocusEntry } from '@proto.ui/hooks';
 import { createTabsPartId, TABS_CONTEXT, TABS_FAMILY, type TabsContextValue } from './shared';
 import type { TabsContentAsHookContract, TabsContentExposes, TabsContentProps } from './types';
 
@@ -17,6 +17,7 @@ function syncCurrentFromContext(
 }
 
 function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-TABS-CONTENT-ROLE-PANEL, P-BASE-TABS-CONTENT-PROTOCOL-DEPENDENCY
   // P-BASE-TABS-CONTENT-CLAIM-ROLE, P-BASE-TABS-CONTENT-SAME-DOMAIN
   def.anatomy.claim(TABS_FAMILY, { role: 'content' });
@@ -52,10 +53,10 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
 
   // P-BASE-TABS-CONTENT-A11Y-ROLE, P-BASE-TABS-CONTENT-A11Y-LABELLEDBY-TARGET
   // P-BASE-TABS-CONTENT-A11Y-HIDDEN, P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE
-  def.a11y.id(contentId);
-  def.a11y.role('tabpanel');
-  def.a11y.state('hidden', hidden);
-  def.a11y.relation('labelledBy', { target: triggerId });
+  accessible.id(contentId);
+  accessible.role('tabpanel');
+  accessible.state('hidden', hidden);
+  accessible.relation('labelledBy', { target: triggerId });
 
   const syncIds = () => {
     // P-BASE-TABS-A11Y-RELATIONSHIP-TARGET

@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asCollectionItem } from '@proto.ui/hooks';
+import { asAccessible, asCollectionItem } from '@proto.ui/hooks';
 import { setupDropdownCommand } from './command';
 import {
   DROPDOWN_CONTEXT,
@@ -10,6 +10,7 @@ import {
 import type { DropdownItemAsHookContract, DropdownItemExposes, DropdownItemProps } from './types';
 
 function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-DROPDOWN-MENU-ITEM-DISABLED: disabled menu items remain focusable.
   const command = setupDropdownCommand(def, 'dropdown item', { focusableWhenDisabled: true });
   const active = def.state.bool('active', false);
@@ -35,10 +36,10 @@ function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes
   def.props.setDefaults({ disabled: false, value: '', textValue: '' });
 
   // P-BASE-DROPDOWN-MENU-ITEM-A11Y
-  def.a11y.role('menuitem');
-  def.a11y.nameFromContent();
-  def.a11y.state('disabled', command.disabled);
-  def.a11y.action('activate', { event: 'select' });
+  accessible.role('menuitem');
+  accessible.nameFromContent();
+  accessible.state('disabled', command.disabled);
+  accessible.action('activate', { event: 'select' });
   def.expose.state('active', active);
   def.expose.event('select', { payload: 'json' });
 

@@ -1,9 +1,10 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asFocusRoving } from '@proto.ui/hooks';
+import { asAccessible, asFocusRoving } from '@proto.ui/hooks';
 import { TABS_CONTEXT, TABS_FAMILY } from './shared';
 import type { TabsListAsHookContract, TabsListExposes, TabsListProps } from './types';
 
 function setupTabsList(def: DefHandle<TabsListProps, TabsListExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-TABS-LIST-ROLE-COLLECTION, P-BASE-TABS-LIST-PROTOCOL-DEPENDENCY
   // P-BASE-TABS-LIST-CLAIM-ROLE, P-BASE-TABS-LIST-SAME-DOMAIN
   def.anatomy.claim(TABS_FAMILY, { role: 'list' });
@@ -25,9 +26,9 @@ function setupTabsList(def: DefHandle<TabsListProps, TabsListExposes>): void {
   const a11yLabel = def.state.string('a11yLabel', '');
   // P-BASE-TABS-LIST-A11Y-ROLE, P-BASE-TABS-LIST-A11Y-ORIENTATION
   // P-BASE-TABS-LIST-A11Y-LABEL
-  def.a11y.role('tablist');
-  def.a11y.name(a11yLabel);
-  def.a11y.state('orientation', orientation);
+  accessible.role('tablist');
+  accessible.name(a11yLabel);
+  accessible.state('orientation', orientation);
 
   // P-BASE-TABS-LIST-FOCUS-ROVING, P-BASE-TABS-LIST-SKIP-DISABLED
   // P-BASE-TABS-LIST-ORIENTATION-KEYS, P-BASE-TABS-LIST-HOME-END

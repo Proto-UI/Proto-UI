@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { setupDialogCommand } from './command';
 import {
@@ -15,6 +16,7 @@ import type {
 } from './types';
 
 function setupDialogTrigger(def: DefHandle<DialogTriggerProps, DialogTriggerExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-DIALOG-TRIGGER-COMMAND, P-BASE-DIALOG-TRIGGER-NO-BUTTON-DEPENDENCY
   def.anatomy.claim(DIALOG_FAMILY, { role: 'trigger' });
   const command = setupDialogCommand(def, 'dialog trigger');
@@ -22,9 +24,9 @@ function setupDialogTrigger(def: DefHandle<DialogTriggerProps, DialogTriggerExpo
   const hasPopup = def.state.string('dialogHasPopup', 'dialog');
   const controls = def.state.string('dialogContentId', '');
   // P-BASE-DIALOG-TRIGGER-A11Y
-  def.a11y.state('expanded', expanded);
-  def.a11y.state('hasPopup', hasPopup);
-  def.a11y.relation('controls', { target: controls });
+  accessible.state('expanded', expanded);
+  accessible.state('hasPopup', hasPopup);
+  accessible.relation('controls', { target: controls });
 
   const syncDialogFacts = (ctx: DialogContextValue) => {
     expanded.set(ctx.open, 'reason: dialog trigger expanded sync');

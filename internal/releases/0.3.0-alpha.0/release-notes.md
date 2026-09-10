@@ -4,6 +4,12 @@
 
 Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution train. Alpha is intentional: this line may include reviewed architecture changes, top-level API changes, and new capabilities. It is not a release candidate or a stable compatibility promise.
 
+## Accessible author handle
+
+- Replaces `def.a11y` with `asAccessible()` from `@proto.ui/hooks` and replaces the core `A11yDefAPI` type with `AccessibleHandle`, without compatibility aliases.
+- Repeated setup calls share the instance handle; retained methods remain setup-only. Dynamic declarations continue to follow existing State values.
+- Migrates official prototypes and keeps A11y semantics separate from focus, keyboard interaction and structural target resolution. This is a 0.3 migration, not a 0.2 backport.
+
 ## Expose Event ownership
 
 - Adds the public `@proto.ui/module-expose-event` package and standalone `ExposeEventModuleDef`.

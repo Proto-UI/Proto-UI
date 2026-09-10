@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
 import { CHECKBOX_CONTEXT, CHECKBOX_FAMILY } from './shared';
 import type { CheckboxRootAsHookContract, CheckboxRootExposes, CheckboxRootProps } from './types';
 
@@ -8,6 +8,7 @@ function isEnterKeyboardCommit(ev: { key?: unknown } | undefined): boolean {
 }
 
 function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-CHECKBOX-ROLE-CHECKED-INPUT, P-BASE-CHECKBOX-DISPLAY-AND-INPUT
   // P-BASE-CHECKBOX-ROOT-SEMANTIC-OWNER
   // P-BASE-CHECKBOX-ROOT-DOMAIN-ANCHOR
@@ -68,13 +69,13 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
   def.expose.event('indeterminateChange', { payload: 'json' });
 
   // P-BASE-CHECKBOX-ACCESSIBLE-ROLE
-  def.a11y.role('checkbox');
+  accessible.role('checkbox');
   // P-BASE-CHECKBOX-ACCESSIBLE-NAME, P-BASE-CHECKBOX-STABLE-LABEL
-  def.a11y.nameFromContent();
+  accessible.nameFromContent();
   // P-BASE-CHECKBOX-A11Y-CHECKED, P-BASE-CHECKBOX-A11Y-MIXED
-  def.a11y.state('checked', checkedA11y);
-  def.a11y.state('disabled', disabled);
-  def.a11y.action('activate', { event: 'checkedChange' });
+  accessible.state('checked', checkedA11y);
+  accessible.state('disabled', disabled);
+  accessible.action('activate', { event: 'checkedChange' });
 
   let controlledChecked = false;
   let controlledIndeterminate = false;

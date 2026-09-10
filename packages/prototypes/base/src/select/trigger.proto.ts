@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { setupSelectCommand } from './command';
 import {
@@ -14,6 +15,7 @@ import type {
 } from './types';
 
 function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExposes>): void {
+  const accessible = asAccessible();
   def.anatomy.claim(SELECT_FAMILY, { role: 'trigger' });
   const command = setupSelectCommand(def, 'select trigger');
   const expanded = def.state.bool('selectExpanded', false);
@@ -22,13 +24,13 @@ function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExpo
   const placeholder = def.state.bool('placeholder', true);
   def.expose.state('placeholder', placeholder);
 
-  def.a11y.role('combobox');
-  def.a11y.nameFromContent();
-  def.a11y.state('disabled', command.disabled);
-  def.a11y.state('expanded', expanded);
-  def.a11y.state('hasPopup', hasPopup);
-  def.a11y.relation('controls', { target: controls });
-  def.a11y.action('activate', { event: 'click' });
+  accessible.role('combobox');
+  accessible.nameFromContent();
+  accessible.state('disabled', command.disabled);
+  accessible.state('expanded', expanded);
+  accessible.state('hasPopup', hasPopup);
+  accessible.relation('controls', { target: controls });
+  accessible.action('activate', { event: 'click' });
 
   const sync = (run: any, ctx: SelectContextValue) => {
     command.syncDisabled(!!run.props.get().disabled || ctx.disabled);

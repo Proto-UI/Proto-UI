@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { SWITCH_CONTEXT, SWITCH_FAMILY, type SwitchContextValue } from './shared';
 import type { SwitchThumbAsHookContract, SwitchThumbExposes, SwitchThumbProps } from './types';
@@ -43,7 +44,7 @@ function setupSwitchThumb(def: DefHandle<SwitchThumbProps, SwitchThumbExposes>):
  * - P-BASE-SWITCH-THUMB-NO-VALUE-OWNER: absence of props and checkedChange is the implementation.
  * - P-BASE-SWITCH-THUMB-NO-EVENT-TARGET, P-BASE-SWITCH-THUMB-NOT-TARGET: absence of def.event usage is the implementation.
  * - P-BASE-SWITCH-THUMB-NO-FOCUS-TARGET: absence of asFocusable/focusSelf is the implementation.
- * - P-BASE-SWITCH-THUMB-PRESENTATIONAL-A11Y: absence of def.a11y control syntax is the implementation.
+ * - P-BASE-SWITCH-THUMB-PRESENTATIONAL-A11Y: absence of asAccessible() control syntax is the implementation.
  * - P-BASE-SWITCH-THUMB-NO-FORM-INTEGRATION: no form-associated props are accepted.
  * - P-BASE-SWITCH-THUMB-NO-VISUAL-VARIANT-CORE: visual parameters are owned by downstream styled prototypes.
  */

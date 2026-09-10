@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import type { DefHandle, RenderFn } from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
 import type {
@@ -16,6 +17,7 @@ export type {
 function setupAsyncRegionRoot(
   def: DefHandle<AsyncRegionRootProps, AsyncRegionRootExposes>
 ): RenderFn {
+  const accessible = asAccessible();
   // P-BASE-ASYNC-REGION-BUSY
   def.props.define({
     busy: { type: 'boolean', empty: 'fallback' },
@@ -25,7 +27,7 @@ function setupAsyncRegionRoot(
   // P-BASE-ASYNC-REGION-BUSY
   const busy = def.state.bool('busy', false);
   def.expose.state('busy', busy);
-  def.a11y.state('busy', busy);
+  accessible.state('busy', busy);
 
   // P-BASE-ASYNC-REGION-BUSY, P-BASE-ASYNC-REGION-DYNAMIC
   const sync = (props: Readonly<AsyncRegionRootProps>) => {

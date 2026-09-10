@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asFocusable, asTextControl } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asTextControl } from '@proto.ui/hooks';
 import { declareTextControl } from '@proto.ui/module-text-control';
 import type {
   InputChangeDetail,
@@ -21,6 +21,7 @@ export type {
 } from './types';
 
 function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
+  const accessible = asAccessible();
   def.props.define({
     value: { type: 'string', empty: 'fallback' },
     defaultValue: { type: 'string', empty: 'fallback' },
@@ -90,12 +91,12 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   def.expose.event('compositionUpdate', { payload: 'json' });
   def.expose.event('compositionEnd', { payload: 'json' });
 
-  def.a11y.role('textbox');
-  def.a11y.name(ariaLabel);
-  def.a11y.state('disabled', disabled);
-  def.a11y.state('readOnly', readOnly);
-  def.a11y.relation('labelledBy', { target: labelledBy });
-  def.a11y.relation('describedBy', { target: describedBy });
+  accessible.role('textbox');
+  accessible.name(ariaLabel);
+  accessible.state('disabled', disabled);
+  accessible.state('readOnly', readOnly);
+  accessible.relation('labelledBy', { target: labelledBy });
+  accessible.relation('describedBy', { target: describedBy });
 
   const sync = (props: Readonly<InputRootProps>) => {
     const controlled = typeof props.value === 'string';

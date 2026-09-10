@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { describe, expect, it } from 'vitest';
 import { definePrototype } from '@proto.ui/core';
 import { createMountedVueAdapter, flushVue } from './utils/vue';
@@ -7,8 +8,8 @@ const headingPrototype = definePrototype({
   setup(def) {
     const role = def.state.string('heading.role', 'heading');
     const level = def.state.numberDiscrete('heading.level', 2);
-    def.a11y.role(role);
-    def.a11y.level(level);
+    asAccessible().role(role);
+    asAccessible().level(level);
     def.expose.method('setRole', (value: string) => role.set(value, 'reason: update heading role'));
     def.expose.method('setLevel', (value: number) =>
       level.set(value, 'reason: update heading level')

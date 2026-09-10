@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asFocusable } from '@proto.ui/hooks';
+import { asAccessible, asFocusable } from '@proto.ui/hooks';
 import {
   createTooltipContentId,
   TOOLTIP_CONTEXT,
@@ -14,6 +14,7 @@ import type {
 } from './types';
 
 function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerExposes>): void {
+  const accessible = asAccessible();
   def.anatomy.claim(TOOLTIP_FAMILY, { role: 'trigger' });
   def.props.define({ disabled: { type: 'boolean', empty: 'fallback' } });
   def.props.setDefaults({ disabled: false });
@@ -26,7 +27,7 @@ function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerE
   const focused = focusable.focused;
   const focusVisible = focusable.focusVisible;
 
-  def.a11y.relation('describedBy', { target: describedBy, mode: 'append' });
+  accessible.relation('describedBy', { target: describedBy, mode: 'append' });
   def.expose.state('disabled', disabled);
   def.expose.state('hovered', hovered);
   def.expose.state('focused', focused);

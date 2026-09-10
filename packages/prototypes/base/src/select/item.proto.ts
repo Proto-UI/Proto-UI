@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asCollectionItem } from '@proto.ui/hooks';
+import { asAccessible, asCollectionItem } from '@proto.ui/hooks';
 import { setupSelectCommand } from './command';
 import {
   notifySelectItemSnapshotChanged,
@@ -13,6 +13,7 @@ import {
 import type { SelectItemAsHookContract, SelectItemExposes, SelectItemProps } from './types';
 
 function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): void {
+  const accessible = asAccessible();
   const command = setupSelectCommand(def, 'select item');
   const active = def.state.bool('active', false);
   const selected = def.state.fromAccessibility('selected');
@@ -40,11 +41,11 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
   def.expose.state('active', active);
   def.expose.state('selected', selected);
   def.expose.event('select', { payload: 'json' });
-  def.a11y.role('option');
-  def.a11y.nameFromContent();
-  def.a11y.state('selected', selected);
-  def.a11y.state('disabled', command.disabled);
-  def.a11y.action('activate', { event: 'select' });
+  accessible.role('option');
+  accessible.nameFromContent();
+  accessible.state('selected', selected);
+  accessible.state('disabled', command.disabled);
+  accessible.action('activate', { event: 'select' });
 
   const readContext = (run: any): SelectContextValue | null => {
     try {
