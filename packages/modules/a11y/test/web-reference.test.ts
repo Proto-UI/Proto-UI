@@ -448,6 +448,88 @@ describe('Web A11y opaque semantic-object references', () => {
     expect(document.body.hasAttribute('role')).toBe(false);
   });
 
+  it('3980446677: restores an overwritten host scalar baseline on release', () => {
+    // C-A11Y-0001-P: terminal release preserves the host-owned baseline.
+    const registry = createWebA11yProjectionRegistry();
+    const target = document.createElement('div');
+    target.setAttribute('role', 'navigation');
+    const projector = createWebA11yProjector(target, undefined, registry);
+    projector({ ...semanticSnapshot(createA11ySemanticObjectRef()), role: 'button' });
+    expect(target.getAttribute('role')).toBe('button');
+    projector.dispose?.();
+    expect(target.getAttribute('role')).toBe('navigation');
+  });
+
+  it('preserves a matching host scalar baseline with reverse shared-owner release', () => {
+    const registry = createWebA11yProjectionRegistry();
+    const target = document.createElement('div');
+    target.setAttribute('role', 'button');
+    const first = createWebA11yProjector(target, undefined, registry);
+    const second = createWebA11yProjector(target, undefined, registry);
+    first({ ...semanticSnapshot(createA11ySemanticObjectRef()), role: 'button' });
+    second({ ...semanticSnapshot(createA11ySemanticObjectRef()), role: 'button' });
+    second.dispose?.();
+    expect(target.getAttribute('role')).toBe('button');
+    first.dispose?.();
+    expect(target.getAttribute('role')).toBe('button');
+  });
+
+  it('3980446683: preserves host heading levels through detach and rematerialization', () => {
+    // C-A11Y-0001-P/LEVEL: release this projection, not host-owned aria-level.
+    const registry = createWebA11yProjectionRegistry();
+    const target = document.createElement('h4');
+    target.setAttribute('aria-level', '4');
+    const slot = targetSlot(target);
+    const projector = createWebA11yProjector(slot.get, slot.subscribe, registry);
+    const snapshot = {
+      ...semanticSnapshot(createA11ySemanticObjectRef()),
+      role: 'heading',
+      level: 4,
+    };
+    projector(snapshot);
+    projector.clearHeadingLevel?.();
+    projector.detach?.();
+    expect(target.getAttribute('aria-level')).toBe('4');
+    const replacement = document.createElement('h3');
+    replacement.setAttribute('aria-level', '3');
+    slot.set(replacement);
+    projector.reactivate?.();
+    projector({ ...snapshot, level: 5 });
+    expect(target.getAttribute('aria-level')).toBe('4');
+    expect(replacement.getAttribute('aria-level')).toBe('5');
+    projector.dispose?.();
+    expect(target.getAttribute('aria-level')).toBe('4');
+    expect(replacement.getAttribute('aria-level')).toBe('3');
+  });
+
+  it('3980446683: retains a live shared heading owner after another view detaches', () => {
+    const registry = createWebA11yProjectionRegistry();
+    const target = document.createElement('h4');
+    const first = createWebA11yProjector(target, undefined, registry);
+    const second = createWebA11yProjector(target, undefined, registry);
+    const firstSnapshot = {
+      ...semanticSnapshot(createA11ySemanticObjectRef()),
+      role: 'heading',
+      level: 4,
+    };
+    first(firstSnapshot);
+    second({ ...semanticSnapshot(createA11ySemanticObjectRef()), role: 'heading', level: 4 });
+    first.clearHeadingLevel?.();
+    first.detach?.();
+    expect(target.getAttribute('aria-level')).toBe('4');
+    first.reactivate?.();
+    first(firstSnapshot);
+    first({ ...firstSnapshot, level: undefined });
+    expect(target.getAttribute('aria-level')).toBe('4');
+    first.dispose?.();
+    expect(target.getAttribute('aria-level')).toBe('4');
+    second.clearHeadingLevel?.();
+    second.detach?.();
+    expect(target.hasAttribute('aria-level')).toBe(false);
+    second.dispose?.();
+    expect(target.hasAttribute('aria-level')).toBe(false);
+  });
+
   it('rebinds a reserved target when the host changes its id', () => {
     const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-id-rebind' });
     const sourceRef = createA11ySemanticObjectRef();

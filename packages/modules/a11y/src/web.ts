@@ -48,6 +48,13 @@ type RelationOwnership = {
 
 type ScalarAttributes = Map<string, string | undefined>;
 
+type ScalarOwnership = {
+  baseline: string | null;
+  // undefined invalidates restoration after a host rewrite; null is an owned removal.
+  projectedValue: string | null | undefined;
+  counts: Map<string | undefined, number>;
+};
+
 type IdReservation = {
   id: string;
   objectRef: A11ySemanticObjectRef;
@@ -88,30 +95,41 @@ export function createWebA11yProjectionRegistry(
   const reservedIdsByDocument = new Map<Document, Map<string, IdReservation>>();
   // Current shared choice; older cap leases can retain a different ID until disposal.
   const reservedIdsByRef = new Map<A11ySemanticObjectRef, Map<Document, IdReservation>>();
-  const scalarAttributeRefs = new WeakMap<
-    HTMLElement,
-    Map<string, Map<string, { count: number; baseline: boolean }>>
-  >();
+  const scalarAttributeRefs = new WeakMap<HTMLElement, Map<string, ScalarOwnership>>();
   const relationOwnerships = new WeakMap<HTMLElement, Map<string, RelationOwnership>>();
 
-  const releaseScalarAttributes = (record: WebProjectorRecord, removeOwned = true) => {
+  const releaseScalarAttribute = (record: WebProjectorRecord, attr: string) => {
     const target = record.target;
-    if (!removeOwned || !target) return;
+    if (!target) return;
     const byAttribute = scalarAttributeRefs.get(target);
-    for (const [attr, value] of record.scalarAttributes) {
-      if (value === undefined) continue;
-      const byValue = byAttribute?.get(attr);
-      const entry = byValue?.get(value);
-      if (!entry) continue;
-      entry.count -= 1;
-      if (entry.count === 0) {
-        byValue?.delete(value);
-        if (!entry.baseline && target.getAttribute(attr) === value) target.removeAttribute(attr);
+    if (!byAttribute) return;
+    const ownership = byAttribute.get(attr);
+    if (!ownership) return;
+    const value = record.scalarAttributes.get(attr);
+    const count = ownership.counts.get(value);
+    if (!count || !record.scalarAttributes.delete(attr)) return;
+    if (count === 1) ownership.counts.delete(value);
+    else ownership.counts.set(value, count - 1);
+    const current = target.getAttribute(attr);
+    if (current !== ownership.projectedValue) {
+      // A host rewrite supersedes the baseline; cleanup must not replay over it.
+      ownership.baseline = current;
+      ownership.projectedValue = undefined;
+    } else if (count === 1 && current === (value ?? null)) {
+      const baseline = ownership.baseline;
+      if (baseline !== current) {
+        if (baseline === null) target.removeAttribute(attr);
+        else target.setAttribute(attr, baseline);
       }
-      if (byValue?.size === 0) byAttribute?.delete(attr);
+      ownership.projectedValue = baseline;
     }
-    if (byAttribute?.size === 0) scalarAttributeRefs.delete(target);
-    record.scalarAttributes.clear();
+    if (ownership.counts.size === 0) byAttribute.delete(attr);
+    if (byAttribute.size === 0) scalarAttributeRefs.delete(target);
+  };
+
+  const releaseScalarAttributes = (record: WebProjectorRecord, removeOwned = true) => {
+    if (!removeOwned) return;
+    for (const attr of record.scalarAttributes.keys()) releaseScalarAttribute(record, attr);
   };
 
   const acquireScalarAttributes = (
@@ -122,19 +140,18 @@ export function createWebA11yProjectionRegistry(
     const attributes = projectedScalarAttributes(snapshot, false);
     let byAttribute = scalarAttributeRefs.get(target);
     for (const [attr, value] of attributes) {
-      if (value === undefined) continue;
       if (!byAttribute) {
         byAttribute = new Map();
         scalarAttributeRefs.set(target, byAttribute);
       }
-      let byValue = byAttribute.get(attr);
-      if (!byValue) {
-        byValue = new Map();
-        byAttribute.set(attr, byValue);
-      }
-      const entry = byValue.get(value);
-      if (entry) entry.count += 1;
-      else byValue.set(value, { count: 1, baseline: target.getAttribute(attr) === value });
+      const current = target.getAttribute(attr);
+      let ownership = byAttribute.get(attr);
+      if (!ownership) {
+        ownership = { baseline: current, projectedValue: current, counts: new Map() };
+        byAttribute.set(attr, ownership);
+      } else if (current !== ownership.projectedValue) ownership.baseline = current;
+      ownership.counts.set(value, (ownership.counts.get(value) ?? 0) + 1);
+      ownership.projectedValue = value ?? null;
     }
     record.scalarAttributes = attributes;
     return attributes;
@@ -519,13 +536,8 @@ export function createWebA11yProjectionRegistry(
       indexed.add(record);
       recordsByRef.set(snapshot.objectRef, indexed);
       const attributes = acquireScalarAttributes(record, nextTarget, snapshot);
-      applySnapshot(
-        nextTarget,
-        snapshot,
-        !bindingReplaced ? (previousSnapshot ?? undefined) : undefined,
-        attributes,
-        false
-      );
+      // Registry ownership already released old values; skip stateless snapshot cleanup.
+      applySnapshot(nextTarget, snapshot, undefined, attributes, false);
       for (const [key, attr] of Object.entries(ARIA_RELATION_ATTRS)) {
         if (!Object.prototype.hasOwnProperty.call(snapshot.relations, key)) continue;
         const relation = snapshot.relations[key];
@@ -624,7 +636,7 @@ export function createWebA11yProjectionRegistry(
       };
       projector.clearHeadingLevel = () => {
         if (record.snapshot && hasProjectedHeadingLevel(record.snapshot)) {
-          record.target?.removeAttribute('aria-level');
+          releaseScalarAttribute(record, 'aria-level');
           // Target notifications may replay only the still-valid cached projection.
           record.snapshot = { ...record.snapshot, level: undefined };
         }
