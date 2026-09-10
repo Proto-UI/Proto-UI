@@ -138,6 +138,16 @@ export function createWebA11yProjectionRegistry(
     snapshot: A11ySemanticObjectSnapshot
   ) => {
     const attributes = projectedScalarAttributes(snapshot, false);
+    // An explicit id takes over the physical target's generated ownership, not a host baseline.
+    if (attributes.has('id')) {
+      const reservation = reservedIdsByDocument.get(target.ownerDocument)?.get(target.id);
+      const owners = reservation && recordsByRef.get(reservation.objectRef);
+      if (owners) {
+        for (const owner of owners) {
+          if (owner.ownedIdTarget === target) releaseOwnedId(owner);
+        }
+      }
+    }
     let byAttribute = scalarAttributeRefs.get(target);
     for (const [attr, value] of attributes) {
       if (!byAttribute) {

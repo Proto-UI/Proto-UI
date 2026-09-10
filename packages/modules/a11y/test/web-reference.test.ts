@@ -550,6 +550,76 @@ describe('Web A11y opaque semantic-object references', () => {
     targetProjector.dispose?.();
   });
 
+  it.each(['generated', 'host-authored'] as const)(
+    'PUI-625-SCALAR-GENERATED-ID-BASELINE: releases an explicit id after %s identity',
+    (provenance) => {
+      // C-A11Y-0001-P/N: equal-looking IDs have different ownership provenance.
+      const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-id-provenance' });
+      const doc = document.implementation.createHTMLDocument('id-provenance');
+      const source = doc.createElement('div');
+      const target = doc.createElement('div');
+      doc.body.append(source, target);
+      const hostId = provenance === 'host-authored' ? 'test-id-provenance-1' : null;
+      if (hostId !== null) target.id = hostId;
+      source.setAttribute('aria-labelledby', 'host-caption');
+      const targetRef = createA11ySemanticObjectRef();
+      const sourceProjector = createWebA11yProjector(source, undefined, registry);
+      const targetProjector = createWebA11yProjector(target, undefined, registry);
+      sourceProjector(semanticSnapshot(createA11ySemanticObjectRef(), { labelledBy: [targetRef] }));
+      targetProjector(semanticSnapshot(targetRef));
+      const initialId = target.id;
+      expect(initialId).not.toBe('');
+      expect(source.getAttribute('aria-labelledby')).toBe(initialId);
+
+      targetProjector({ ...semanticSnapshot(targetRef), id: 'explicit-id' });
+      expect(target.id).toBe('explicit-id');
+      expect(source.getAttribute('aria-labelledby')).toBe('explicit-id');
+      targetProjector.dispose?.();
+      expect(source.getAttribute('aria-labelledby')).toBe('host-caption');
+      expect(target.getAttribute('id')).toBe(hostId);
+      sourceProjector.dispose?.();
+      expect(source.getAttribute('aria-labelledby')).toBe('host-caption');
+      expect(target.getAttribute('id')).toBe(hostId);
+    }
+  );
+
+  it.each(['generator-first', 'writer-first'] as const)(
+    'PUI-625-SCALAR-GENERATED-ID-BASELINE: shared-target provenance, %s disposal',
+    (order) => {
+      // C-A11Y-0001-N/P: shared physical targets do not turn another record's id into host data.
+      const registry = createWebA11yProjectionRegistry({ idPrefix: 'shared-generated' });
+      const doc = document.implementation.createHTMLDocument('shared-generated');
+      const source = doc.createElement('div');
+      const target = doc.createElement('div');
+      doc.body.append(source, target);
+      source.setAttribute('aria-labelledby', 'host-caption');
+      const generatedRef = createA11ySemanticObjectRef();
+      const generator = createWebA11yProjector(target, undefined, registry);
+      const writer = createWebA11yProjector(target, undefined, registry);
+      const sourceProjector = createWebA11yProjector(source, undefined, registry);
+      sourceProjector(
+        semanticSnapshot(createA11ySemanticObjectRef(), { labelledBy: [generatedRef] })
+      );
+      generator(semanticSnapshot(generatedRef));
+      expect(target.id).not.toBe('');
+      expect(source.getAttribute('aria-labelledby')).toBe(target.id);
+      writer({ ...semanticSnapshot(createA11ySemanticObjectRef()), id: 'explicit-shared-id' });
+      expect(target.id).toBe('explicit-shared-id');
+      if (order === 'generator-first') {
+        generator.dispose?.();
+        expect(target.id).toBe('explicit-shared-id');
+        writer.dispose?.();
+      } else {
+        writer.dispose?.();
+        generator.dispose?.();
+      }
+      expect(source.getAttribute('aria-labelledby')).toBe('host-caption');
+      expect(target.hasAttribute('id')).toBe(false);
+      sourceProjector.dispose?.();
+      expect(source.getAttribute('aria-labelledby')).toBe('host-caption');
+    }
+  );
+
   it('PUI-625-LOCAL-LEASED-HOST-ID-REBIND: follows a live ID change with an older cap lease', () => {
     // C-A11Y-0001-P; HC-A11Y-0001-C. Distinct from a replacement's initial ID mismatch.
     const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-cap-id-rebind' });

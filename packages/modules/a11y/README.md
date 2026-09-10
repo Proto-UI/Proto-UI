@@ -6,6 +6,8 @@ Each logical A11y instance also owns an opaque semantic-object reference. Module
 
 Web scalar cleanup restores the host baseline after the last matching contribution is released and preserves later host-authored changes. Heading clear, detach and disposal use the same ownership ledger, so releasing one view does not remove a matching host or live shared `aria-level`; rematerialization projects current facts onto the new target.
 
+An explicit id replaces generated-ID ownership on its physical target before scalar baseline capture, including when another record in the same registry generated the id. Terminal cleanup therefore does not restore the retired generated id as host data; an identically spelled host-authored baseline remains preserved.
+
 This lower-level transport does not implement the separate anatomy family/domain/role/key matcher or Tabs migration tracked by #549 and PR #553.
 
 This package is intentionally not a Web ARIA wrapper. Adapters decide how to map the semantic object snapshot to their host accessibility surface.
