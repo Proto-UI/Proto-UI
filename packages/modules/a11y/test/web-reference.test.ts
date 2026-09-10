@@ -620,6 +620,127 @@ describe('Web A11y opaque semantic-object references', () => {
     }
   );
 
+  it.each([
+    ['same', 'writer-first'],
+    ['same', 'generator-first'],
+    ['different', 'writer-first'],
+    ['different', 'generator-first'],
+  ] as const)('PUI-625-GENERATED-ID-SURVIVOR-RELEASE: %s id, %s', (identity, order) => {
+    // C-A11Y-0001-N/O/P: release must re-resolve the surviving opaque-ref dependent.
+    const doc = document.implementation.createHTMLDocument('same-id-survivor');
+    const target = doc.createElement('div');
+    const source = doc.createElement('button');
+    const caption = doc.createElement('span');
+    caption.id = 'host-caption';
+    doc.body.append(source, target, caption);
+    source.setAttribute('aria-labelledby', caption.id);
+    const registry = createWebA11yProjectionRegistry();
+    const generatedRef = createA11ySemanticObjectRef();
+    const generator = createWebA11yProjector(target, undefined, registry);
+    const writer = createWebA11yProjector(target, undefined, registry);
+    const dependent = createWebA11yProjector(source, undefined, registry);
+    const observe = () => {
+      const idref = source.getAttribute('aria-labelledby');
+      const resolved = idref ? doc.getElementById(idref) : null;
+      return {
+        targetId: target.getAttribute('id'),
+        idref,
+        resolved: resolved === target ? 'target' : resolved === caption ? 'caption' : null,
+      };
+    };
+    dependent(semanticSnapshot(createA11ySemanticObjectRef(), { labelledBy: [generatedRef] }));
+    generator(semanticSnapshot(generatedRef));
+    const generatedId = target.id;
+    const initial = observe();
+    const explicitId = identity === 'same' ? generatedId : 'different-explicit-id';
+    writer({ ...semanticSnapshot(createA11ySemanticObjectRef()), id: explicitId });
+    const takeover = observe();
+    (order === 'writer-first' ? writer : generator).dispose?.();
+    const survivor = observe();
+    (order === 'writer-first' ? generator : writer).dispose?.();
+    const bothGone = observe();
+    dependent.dispose?.();
+    const terminal = observe();
+    const live = { targetId: generatedId, idref: generatedId, resolved: 'target' };
+    const released = { targetId: null, idref: caption.id, resolved: 'caption' };
+    // Different-id takeover makes G unavailable under its existing reservation (C-A11Y-0001-O).
+    const writerOnly = { targetId: explicitId, idref: caption.id, resolved: 'caption' };
+    expect({ initial, takeover, survivor, bothGone, terminal }).toEqual({
+      initial: live,
+      takeover: identity === 'same' ? live : writerOnly,
+      survivor: order === 'writer-first' ? live : writerOnly,
+      bothGone: released,
+      terminal: released,
+    });
+  });
+
+  it('retains generated identity through shared writer updates and detached final release', () => {
+    // C-A11Y-0001-N/P: the shared lifetime outlives one writer, including a detached cap.
+    const doc = document.implementation.createHTMLDocument('shared-id-survivor');
+    const target = doc.createElement('div');
+    const source = doc.createElement('button');
+    const caption = doc.createElement('span');
+    caption.id = 'host-caption';
+    doc.body.append(target, source, caption);
+    source.setAttribute('aria-labelledby', caption.id);
+    const registry = createWebA11yProjectionRegistry();
+    const generatedRef = createA11ySemanticObjectRef();
+    const writerRef = createA11ySemanticObjectRef();
+    const generator = createWebA11yProjector(target, undefined, registry);
+    const first = createWebA11yProjector(target, undefined, registry);
+    const second = createWebA11yProjector(target, undefined, registry);
+    const dependent = createWebA11yProjector(source, undefined, registry);
+    dependent(semanticSnapshot(createA11ySemanticObjectRef(), { labelledBy: [generatedRef] }));
+    generator(semanticSnapshot(generatedRef));
+    const id = target.id;
+    const observe = () => ({
+      id: target.getAttribute('id'),
+      idref: source.getAttribute('aria-labelledby'),
+      resolved: doc.getElementById(source.getAttribute('aria-labelledby')!) === target,
+    });
+    const initial = observe();
+    first({ ...semanticSnapshot(writerRef), id });
+    const takeover = observe();
+    first({ ...semanticSnapshot(writerRef), id, role: 'button' });
+    const updated = observe();
+    second({ ...semanticSnapshot(createA11ySemanticObjectRef()), id });
+    const shared = observe();
+    first.dispose?.();
+    const survivor = observe();
+    second.detach?.();
+    const detached = observe();
+    second.dispose?.();
+    const released = observe();
+    generator.dispose?.();
+    const generatorGone = observe();
+    dependent.dispose?.();
+    const terminal = observe();
+    const live = { id, idref: id, resolved: true };
+    const gone = { id: null, idref: caption.id, resolved: false };
+    expect({
+      initial,
+      takeover,
+      updated,
+      shared,
+      survivor,
+      detached,
+      released,
+      generatorGone,
+      terminal,
+    }).toEqual({
+      initial: live,
+      takeover: live,
+      updated: live,
+      shared: live,
+      survivor: live,
+      detached: live,
+      released: live,
+      generatorGone: gone,
+      terminal: gone,
+    });
+    expect(doc.getElementById(source.getAttribute('aria-labelledby')!)).toBe(caption);
+  });
+
   it('PUI-625-LOCAL-LEASED-HOST-ID-REBIND: follows a live ID change with an older cap lease', () => {
     // C-A11Y-0001-P; HC-A11Y-0001-C. Distinct from a replacement's initial ID mismatch.
     const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-cap-id-rebind' });

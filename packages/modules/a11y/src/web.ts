@@ -53,6 +53,8 @@ type ScalarOwnership = {
   // undefined invalidates restoration after a host rewrite; null is an owned removal.
   projectedValue: string | null | undefined;
   counts: Map<string | undefined, number>;
+  // Generated identities affected by this shared id contribution, never host baseline data.
+  affectedIdRefs?: Set<A11ySemanticObjectRef>;
 };
 
 type IdReservation = {
@@ -129,13 +131,19 @@ export function createWebA11yProjectionRegistry(
 
   const releaseScalarAttributes = (record: WebProjectorRecord, removeOwned = true) => {
     if (!removeOwned) return;
+    const affectedIdRefs =
+      record.scalarAttributes.has('id') && record.target
+        ? scalarAttributeRefs.get(record.target)?.get('id')?.affectedIdRefs
+        : undefined;
     for (const attr of record.scalarAttributes.keys()) releaseScalarAttribute(record, attr);
+    return affectedIdRefs;
   };
 
   const acquireScalarAttributes = (
     record: WebProjectorRecord,
     target: HTMLElement,
-    snapshot: A11ySemanticObjectSnapshot
+    snapshot: A11ySemanticObjectSnapshot,
+    affectedIdRefs?: Set<A11ySemanticObjectRef>
   ) => {
     const attributes = projectedScalarAttributes(snapshot, false);
     // An explicit id takes over the physical target's generated ownership, not a host baseline.
@@ -144,7 +152,11 @@ export function createWebA11yProjectionRegistry(
       const owners = reservation && recordsByRef.get(reservation.objectRef);
       if (owners) {
         for (const owner of owners) {
-          if (owner.ownedIdTarget === target) releaseOwnedId(owner);
+          if (owner.ownedIdTarget !== target) continue;
+          if (owner !== record && owner.objectRef) {
+            (affectedIdRefs ??= new Set()).add(owner.objectRef);
+          }
+          releaseOwnedId(owner);
         }
       }
     }
@@ -162,6 +174,12 @@ export function createWebA11yProjectionRegistry(
       } else if (current !== ownership.projectedValue) ownership.baseline = current;
       ownership.counts.set(value, (ownership.counts.get(value) ?? 0) + 1);
       ownership.projectedValue = value ?? null;
+      if (affectedIdRefs && attr === 'id') {
+        if (!ownership.affectedIdRefs) ownership.affectedIdRefs = affectedIdRefs;
+        else if (ownership.affectedIdRefs !== affectedIdRefs) {
+          for (const ref of affectedIdRefs) ownership.affectedIdRefs.add(ref);
+        }
+      }
     }
     record.scalarAttributes = attributes;
     return attributes;
@@ -524,7 +542,7 @@ export function createWebA11yProjectionRegistry(
     const structuredChanged =
       forceStructured || bindingReplaced || structuredRelationsChanged(previousSnapshot, snapshot);
 
-    releaseScalarAttributes(record);
+    const releasedIdRefs = releaseScalarAttributes(record);
     if (bindingReplaced) {
       clearProjections(record);
       unindex(record);
@@ -545,7 +563,12 @@ export function createWebA11yProjectionRegistry(
       const indexed = recordsByRef.get(snapshot.objectRef) ?? new Set<WebProjectorRecord>();
       indexed.add(record);
       recordsByRef.set(snapshot.objectRef, indexed);
-      const attributes = acquireScalarAttributes(record, nextTarget, snapshot);
+      const attributes = acquireScalarAttributes(
+        record,
+        nextTarget,
+        snapshot,
+        bindingReplaced ? undefined : releasedIdRefs
+      );
       // Registry ownership already released old values; skip stateless snapshot cleanup.
       applySnapshot(nextTarget, snapshot, undefined, attributes, false);
       for (const [key, attr] of Object.entries(ARIA_RELATION_ATTRS)) {
@@ -586,8 +609,15 @@ export function createWebA11yProjectionRegistry(
       forceStructured || bindingReplaced || currentTargetId !== previousTargetId;
     record.lastTargetId = currentTargetId;
     if (structuredChanged) reconcileSource(record);
-    if (bindingChanged) {
-      const affectedRefs = new Set<A11ySemanticObjectRef>();
+    const currentIdRefs =
+      record.scalarAttributes.has('id') && nextTarget
+        ? scalarAttributeRefs.get(nextTarget)?.get('id')?.affectedIdRefs
+        : undefined;
+    if (bindingChanged || releasedIdRefs || currentIdRefs) {
+      const affectedRefs = new Set<A11ySemanticObjectRef>(releasedIdRefs);
+      if (currentIdRefs && currentIdRefs !== releasedIdRefs) {
+        for (const ref of currentIdRefs) affectedRefs.add(ref);
+      }
       if (previousRef) affectedRefs.add(previousRef);
       affectedRefs.add(snapshot.objectRef);
       reconcileDependents(affectedRefs, structuredChanged ? record : undefined);
@@ -620,7 +650,7 @@ export function createWebA11yProjectionRegistry(
       const detach = (removeOwned = false) => {
         if (record.disposed || record.detached) return;
         const affectedRef = record.objectRef;
-        releaseScalarAttributes(record, removeOwned);
+        const releasedIdRefs = releaseScalarAttributes(record, removeOwned);
         record.detached = true;
         unsubscribe?.();
         unsubscribe = undefined;
@@ -628,7 +658,11 @@ export function createWebA11yProjectionRegistry(
         removeDependencies(record);
         unindex(record);
         releaseOwnedId(record);
-        if (affectedRef) reconcileDependents(new Set([affectedRef]));
+        if (affectedRef || releasedIdRefs) {
+          const affectedRefs = new Set(releasedIdRefs);
+          if (affectedRef) affectedRefs.add(affectedRef);
+          reconcileDependents(affectedRefs);
+        }
       };
       const projector: A11yProjector = (snapshot) => {
         if (record.disposed || record.detached) return;
@@ -653,8 +687,8 @@ export function createWebA11yProjectionRegistry(
       };
       projector.dispose = () => {
         if (record.disposed) return;
-        if (record.detached) releaseScalarAttributes(record, true);
-        else detach(true);
+        const releasedIdRefs = record.detached ? releaseScalarAttributes(record, true) : undefined;
+        if (!record.detached) detach(true);
         record.disposed = true;
         releaseReservation(record);
         record.snapshot = null;
@@ -662,6 +696,7 @@ export function createWebA11yProjectionRegistry(
         record.targetDocument = null;
         record.lastTargetId = null;
         record.objectRef = null;
+        if (releasedIdRefs) reconcileDependents(releasedIdRefs);
       };
       return projector;
     },

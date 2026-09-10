@@ -45,6 +45,7 @@ Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。�
 - 加入 missing/duplicate binding fail-closed、按 owner document 隔离且跨 view replacement 与 owner-document movement 稳定的 target reservation、projector replacement 后 immediate snapshot replay、dependency-targeted reconciliation 与确定性 projector cleanup，同时保留现有 string、State-backed 与 additive relation behavior。
 - 修复 scalar cleanup 对被覆盖 host baseline 的恢复并保留后续 host 改写；heading detach 通过共享所有权释放 `aria-level`，不再直接删除属性。
 - 修复 explicit id 接管：在捕获 scalar baseline 前释放物理 target 的 generated-ID ownership，覆盖同一 registry 内共享 target 的不同 record；终态清理不再把已退役的 generated id 当作 host 数据恢复，同时保留真正的 host baseline。
+- 在共享 explicit-id contribution 变化或释放时重新解析仍存活的 generated-reference dependent，覆盖 writer 更新与 detached 终态释放，同时保留既有 reservation availability 与 host-baseline provenance。
 - #549 / PR #553 的 anatomy family/domain/role/key matcher 与 Tabs migration 不属于这一 lower-level transport slice。
 
 ## 发布状态
