@@ -5,6 +5,7 @@ status: draft
 lifecycleRationale: >-
   Retained as draft pending admission review of shared Web body-lock ownership and cleanup evidence. The reviewed scope excludes inertness, focus trapping and complete modal accessibility policy.
 
+
 since: 0.3.0-alpha.0
 summary: The current Web modal realization owns shared body scroll locking, not a complete modal interaction policy.
 criteria:

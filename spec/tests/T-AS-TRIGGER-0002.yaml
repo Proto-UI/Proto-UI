@@ -7,11 +7,28 @@ summary: Exercises branch rejection, accepted-route preservation and real framew
 cases:
   - id: T-AS-TRIGGER-0002-CASE-BRANCH
     title: Reject branching before changing accepted roles and routes
-    covers: [C-AS-TRIGGER-0001-L, D-TRIGGER-GROUP-SURFACE-0001-I, M-AS-TRIGGER-0001-D, HC-TRIGGER-GROUP-0001-B, HC-TRIGGER-GROUP-0001-C]
+    covers:
+      [
+        C-AS-TRIGGER-0001-L,
+        D-TRIGGER-GROUP-SURFACE-0001-I,
+        M-AS-TRIGGER-0001-D,
+        HC-TRIGGER-GROUP-0001-B,
+        HC-TRIGGER-GROUP-0001-C,
+      ]
     expectation: reject-siblings-late-parent-and-reparent-preserve-route-allow-replacement
   - id: T-AS-TRIGGER-0002-CASE-ADAPTER
     title: Three-member chains share activation while retaining host-local event identity
-    covers: [M-AS-TRIGGER-0001-B, M-AS-TRIGGER-0001-C, HC-TRIGGER-GROUP-0001-A, HC-TRIGGER-GROUP-0001-D, A-REACT-18-19-0001-TRIGGER, A-VUE-3-0001-TRIGGER, A-VUE-2-0001-TRIGGER, A-WEB-COMPONENT-0001-TRIGGER]
+    covers:
+      [
+        M-AS-TRIGGER-0001-B,
+        M-AS-TRIGGER-0001-C,
+        HC-TRIGGER-GROUP-0001-A,
+        HC-TRIGGER-GROUP-0001-D,
+        A-REACT-18-19-0001-TRIGGER,
+        A-VUE-3-0001-TRIGGER,
+        A-VUE-2-0001-TRIGGER,
+        A-WEB-COMPONENT-0001-TRIGGER,
+      ]
     expectation: inner-only-once-per-member-local-host-events-dispose-and-fresh-owner
 implementations:
   - id: host-trigger-chain
