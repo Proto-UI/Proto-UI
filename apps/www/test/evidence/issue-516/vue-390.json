@@ -1,0 +1,65 @@
+{
+  "runtime": "vue",
+  "width": 390,
+  "user": {
+    "width": 178.453125,
+    "available": 358,
+    "left": 179.546875,
+    "right": 0,
+    "padding": 16,
+    "gap": 12,
+    "background": "oklab(0.945101 -0.0248216 0.121804 / 0.1)",
+    "color": "rgb(23, 23, 23)"
+  },
+  "start": {
+    "width": 236.578125,
+    "available": 358,
+    "left": 0,
+    "right": 121.421875,
+    "padding": 16,
+    "gap": 12,
+    "background": "rgb(245, 245, 245)",
+    "color": "rgb(23, 23, 23)"
+  },
+  "end": {
+    "width": 236.578125,
+    "available": 358,
+    "left": 121.421875,
+    "right": 0,
+    "padding": 16,
+    "gap": 12,
+    "background": "rgb(245, 245, 245)",
+    "color": "rgb(23, 23, 23)"
+  },
+  "compact": {
+    "width": 358,
+    "available": 358,
+    "left": 0,
+    "right": 0,
+    "padding": 8,
+    "gap": 8,
+    "background": "rgb(245, 245, 245)",
+    "color": "rgb(23, 23, 23)"
+  },
+  "light": {
+    "width": 358,
+    "available": 358,
+    "left": 0,
+    "right": 0,
+    "padding": 8,
+    "gap": 8,
+    "background": "rgb(245, 245, 245)",
+    "color": "rgb(23, 23, 23)"
+  },
+  "final": {
+    "width": 358,
+    "available": 358,
+    "left": 0,
+    "right": 0,
+    "padding": 8,
+    "gap": 8,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(212, 212, 212)"
+  },
+  "errors": []
+}

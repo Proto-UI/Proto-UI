@@ -24,6 +24,10 @@
     "./code-block": {
       "types": "./src/code-block/index.ts",
       "default": "./src/code-block/index.ts"
+    },
+    "./message": {
+      "types": "./src/message/index.ts",
+      "default": "./src/message/index.ts"
     }
   },
   "description": "Private structural compositions for Agent Harness ChatUI dogfood."

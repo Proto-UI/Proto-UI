@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" class="light" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Private Message composition fixture</title>
+    <style>
+      @layer fixture, proto-ui;
+      @layer fixture {
+        body {
+          margin: 0;
+          background: var(--pui-background);
+          color: var(--pui-foreground);
+          font-family: system-ui, sans-serif;
+        }
+        main {
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 16px;
+        }
+        h1 {
+          font-size: 1.25rem;
+        }
+        #controls {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 24px;
+        }
+        #controls button,
+        #controls select {
+          border: 1px solid var(--pui-border);
+          border-radius: 4px;
+          padding: 6px 8px;
+          background: var(--pui-secondary-background);
+          color: var(--pui-foreground);
+          font: inherit;
+        }
+        #controls label {
+          font-size: 0.875rem;
+        }
+        article {
+          margin: 0 0 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Private Message composition</h1>
+      <p>App-owned content and actions · <span id="runtime-name"></span></p>
+      <div id="controls" aria-label="Fixture controls">
+        <button id="append" type="button">Append stream chunk</button>
+        <button id="density" type="button">Toggle density</button>
+        <label
+          >Assistant tone
+          <select id="tone">
+            <option>default</option>
+            <option>user</option>
+            <option selected>assistant</option>
+            <option>system</option>
+          </select>
+        </label>
+        <label
+          >Assistant alignment
+          <select id="alignment">
+            <option selected>start</option>
+            <option>end</option>
+            <option>stretch</option>
+          </select>
+        </label>
+        <label
+          >App direction
+          <select id="direction">
+            <option selected>ltr</option>
+            <option>rtl</option>
+          </select>
+        </label>
+        <button id="theme" type="button">Toggle theme</button>
+        <span>App retries: <output id="retry-count">0</output></span>
+      </div>
+      <div id="transcript"></div>
+    </main>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
