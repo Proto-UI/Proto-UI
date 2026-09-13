@@ -19,11 +19,11 @@ Base already owns the protocol. The derived P adds design-language props, tokens
 
 [Read Projecting Base into a Design Language](/en/build/prototypes/projecting-base-into-a-design-language/)
 
-### Implement an approved Base semantic slice
+### Implement a governed Base semantic slice
 
-This is advanced work. Implementation begins only after a maintainer checkpoint approves the independent subject, information paths, negative boundary, public API, P/T graph, and evidence scope.
+This is advanced work. Existing governed Base subjects proceed from their current P/T graph. For a genuinely new Base identity, research, a candidate graph, draft entities, implementation probes, and tests may proceed first; the only unresolved semantic decision is whether to admit the independent subject into Base.
 
-[Read Implementing an Approved Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/)
+[Read Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/)
 
 Every new public Prototype must appear on a reachable website page in the same pull request. The demo should consume the real public package export and prefer the Prototype's own anatomy and triggers. Use minimal, explicitly disclosed external orchestration only when there is no natural trigger or public controls must be demonstrated. See the [Prototype Author Checklist](/en/build/prototypes/checklist/) for delivery checks.
 
@@ -36,8 +36,8 @@ Proto UI does not admit a Base Prototype because a component name is familiar or
 If you are still deciding what kind of Prototype work you have:
 
 1. Read [Why You Usually Do Not Need a New Prototype](/en/build/prototypes/when-not-to-write-a-new-prototype/)
-2. Use [Writing a Custom Primitive Prototype](/en/build/prototypes/writing-a-custom-primitive-prototype/) to understand a leaf authoring entry inside an approved boundary
-3. Continue to [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/) when the approved subject is a family
+2. Use [Writing a Custom Primitive Prototype](/en/build/prototypes/writing-a-custom-primitive-prototype/) to understand a leaf authoring entry inside a governed or candidate boundary
+3. Continue to [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/) when the governed or candidate subject is a family
 4. For presentation and compatibility deltas, read [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
 5. Follow [How to Read Reference Implementations](/en/build/prototypes/reference-patterns/) from P/T entities into source and public projections
 

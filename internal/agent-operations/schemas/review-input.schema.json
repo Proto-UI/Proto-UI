@@ -8,6 +8,7 @@
     "repositoryId",
     "pullRequest",
     "pullRequestState",
+    "pullRequestAuthor",
     "isDraft",
     "baseRefName",
     "baseSha",
@@ -23,11 +24,12 @@
     "externalEvidence"
   ],
   "properties": {
-    "schemaVersion": { "const": 3 },
+    "schemaVersion": { "const": 4 },
     "kind": { "const": "proto-ui.review-input" },
     "repositoryId": { "type": "string", "minLength": 4 },
     "pullRequest": { "type": "integer", "minimum": 1 },
     "pullRequestState": { "enum": ["OPEN", "CLOSED", "MERGED"] },
+    "pullRequestAuthor": { "type": "string", "minLength": 1 },
     "isDraft": { "type": "boolean" },
     "baseRefName": { "type": "string", "minLength": 1 },
     "baseSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
@@ -53,10 +55,12 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["sha", "message"],
+        "required": ["sha", "message", "author", "committer"],
         "properties": {
           "sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
-          "message": { "type": "string" }
+          "message": { "type": "string" },
+          "author": { "$ref": "#/$defs/commitActor" },
+          "committer": { "$ref": "#/$defs/commitActor" }
         },
         "additionalProperties": false
       }
@@ -68,7 +72,7 @@
         "required": ["id", "author", "state", "commitSha", "submittedAt", "body"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
-          "author": { "type": "string", "minLength": 1 },
+          "author": { "type": ["string", "null"], "minLength": 1 },
           "state": { "type": "string", "minLength": 1 },
           "commitSha": {
             "type": ["string", "null"],
@@ -133,6 +137,7 @@
           "completedAt",
           "detailsUrl",
           "source",
+          "providerId",
           "repository",
           "workflowName",
           "workflowPath"
@@ -144,6 +149,7 @@
           "completedAt": { "type": ["string", "null"], "format": "date-time" },
           "detailsUrl": { "type": ["string", "null"], "minLength": 1 },
           "source": { "type": "string", "minLength": 1 },
+          "providerId": { "type": ["string", "null"], "minLength": 1 },
           "repository": { "type": ["string", "null"], "minLength": 1 },
           "workflowName": { "type": ["string", "null"], "minLength": 1 },
           "workflowPath": { "type": ["string", "null"], "minLength": 1 }
@@ -163,6 +169,18 @@
         },
         "additionalProperties": false
       }
+    }
+  },
+  "$defs": {
+    "commitActor": {
+      "type": "object",
+      "required": ["login", "name", "email"],
+      "properties": {
+        "login": { "type": ["string", "null"], "minLength": 1 },
+        "name": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

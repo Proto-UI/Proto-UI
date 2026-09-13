@@ -35,9 +35,9 @@ Official Adapter profile 按 Module slice 逐步编目。未列出的 Module 属
 - profile 与 target runtime/version range；
 - 跨 Adapter 不得改变的行为；
 - focused Runtime/Module 与 Adapter evidence；
-- 明确的 implementation authorization。
+- 覆盖该有界切片的 current-user 或 standing implementation authorization。
 
-新 Adapter proposal 仍属于 maintainer-guided research。有效 proposal 可以整理 host capability inventory、诚实的 support/omission decision、lifecycle/target ownership 与最小 feasibility evidence，但不会自动授权 production Adapter PR。
+新 Adapter proposal 属于受治理的候选工作。Agent 可以整理 host capability inventory、建模诚实的 support/omission 候选、识别 lifecycle/target ownership、建立最小 feasibility evidence，并起草有边界的实现与 spec 图。只有现有权威尚未解决的准入、所有权、公共保证或兼容性选择才形成 attended product-direction decision；决定完成后，同一工作会在 current-user 或 standing authorization 下继续进入 production PR。
 
 ## 什么会解锁完整指南
 

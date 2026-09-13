@@ -121,14 +121,14 @@ If a change causes users to reconsider whether packages from the same line can s
 
 ---
 
-## 6. Maintainer Decision Rules
+## 6. Release-line classification rules
 
-When deciding whether a change should be patch or minor during `v0`, use these defaults:
+When classifying a change as patch or minor during `v0`, use these defaults:
 
 - default to `patch` for local fixes and hardening
 - use `minor` for any release that changes how the ecosystem should be consumed
 
-If maintainers are unsure, prefer asking:
+When evidence leaves the classification unclear, ask one focused product question:
 
 "Would a careful user reasonably need to align their whole Proto UI stack differently because of this change?"
 

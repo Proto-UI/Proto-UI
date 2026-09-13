@@ -1,6 +1,6 @@
 ---
 name: pui-verify
-description: Independently attempt to falsify one Proto UI autonomous-maintenance finding in a fresh read-only context. Use after pui-observe produced a candidate finding. Stop before disposition, semantic choice, or remediation.
+description: Independently attempt to falsify one Proto UI autonomous-maintenance finding in a fresh non-mutating context. Use after pui-observe produced a candidate finding and route the result directly to remediation or closure when authority is clear.
 ---
 
 # Verify one finding
@@ -9,10 +9,10 @@ description: Independently attempt to falsify one Proto UI autonomous-maintenanc
 2. Read `AGENTS.md`, the autonomous-maintenance procedure, Verifier prompt, mission, and governing sources completely.
 3. Reconstruct the evidence independently. Do not inherit the Observer's desired classification.
 4. Attempt falsification, identify the owning layer, correct scope, and distinguish authority drift from implementation or projection drift.
-5. Remain read-only.
-6. Return the protocol classification, corrected finding, evidence limits, and residual uncertainty.
+5. Keep verification non-mutating so its classification remains independent.
+6. Return the protocol classification, corrected finding, evidence limits, residual uncertainty, and the next automatic route.
 
-Do not decide whether the finding is worth pursuing, choose new semantics, or repair it. Prepare one concentrated human decision packet for finding disposition and any separate semantic gate.
+Route a rejected finding to `pui-record`. Route a confirmed implementation, test, or projection drift whose expected result is already governed to `pui-remediate`. Produce one concentrated `unresolved-product-direction` packet only when available authority leaves materially different semantic or compatibility outcomes open.
 
 ## Explicit handoff
 

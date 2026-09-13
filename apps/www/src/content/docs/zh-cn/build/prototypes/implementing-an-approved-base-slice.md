@@ -1,13 +1,13 @@
 ---
-title: '实现已批准的 Base Semantic Slice'
-description: '把 maintainer checkpoint 已冻结的 Base P/T 边界实现成最小、完整、可验证的垂直切片。'
+title: '实现受治理的 Base Semantic Slice'
+description: '把受治理或明确标记为 draft 的 Base P/T 边界实现成最小、完整、可验证的垂直切片。'
 ---
 
-实现新的 Base Prototype 通常是高级贡献。贡献者承担的核心责任是忠实实现已经批准的协议切片，而不是在编码过程中重新决定主体、所有权或公共 API。
+实现 Base Prototype 通常是高级贡献。已有受治理 subject 从当前协议图直接继续。真正全新的 subject 可以在准入前积累 research、candidate graph、draft entity、实现探针和 executable evidence；唯一未决语义决定是 Proto UI 是否把这个独立 subject 准入为 Base identity。
 
-## 什么叫“已批准”？
+## Admission 与受治理方向
 
-开始实现前，Issue 或关联 checkpoint 必须明确批准：
+在把真正全新的 Base identity 表述为已受治理前，应记录“这个独立 protocol subject 是否进入 Base”的 admission 决定。下面这些内容可以也应该随着证据演进，在该决定前后由 candidate 工作持续明确：
 
 - 独立协议主体及 Base admission 结论；
 - input facts、owner、observable outputs 和同步规则；
@@ -18,11 +18,11 @@ description: '把 maintainer checkpoint 已冻结的 Base P/T 边界实现成最
 - 必要的 Module、Host Capability 与跨 Adapter 验证范围；
 - 本 slice 不包含的后续风格化投射和组合能力。
 
-只有目录名、草稿代码、讨论共识或“参考某个组件库”都不算批准。Issue 仍带有 `needs maintainer design` 时，不要开始实现。
+目录名、草稿代码、讨论共识或“参考某个组件库”本身都不是 Base-admission 证据。未决 admission 标记会让 identity 保持 candidate/draft，但不会阻止 research、graph authoring、实现探针或测试。Identity 一旦进入治理，implementation 与 projection 默认继续并接受独立 review。
 
 ## Base admission 自检
 
-批准的切片应满足：
+受治理或候选 slice 应证明：
 
 1. **Independent subject**：不是为了风格库继承或 package 对称而存在。
 2. **Explicit information path**：每条核心保证都有 input fact、owner、output 和规则。
@@ -31,7 +31,7 @@ description: '把 maintainer checkpoint 已冻结的 Base P/T 边界实现成最
 5. **Negative boundary**：明确不拥有的视觉、业务、focus、layout、form 或 announcement 责任。
 6. **Executable evidence**：每个保留 criterion 都能映射到 substantive T case 和真实测试。
 
-如果实现过程中发现批准结论无法满足其中一项，应报告设计断口，不要用空 `asHook`、host escape hatch 或特殊分支把代码勉强跑通。
+如果实现过程中发现其中一项无法成立，应修改 candidate/governed graph 并记录证据，不要用空 `asHook`、host escape hatch 或特殊分支把代码勉强跑通。只有证据改变 Base-identity admission 结论时才升级。
 
 ## 实现工作流
 
@@ -52,7 +52,7 @@ description: '把 maintainer checkpoint 已冻结的 Base P/T 边界实现成最
 
 ### 2. 先实现最小 owner
 
-- state 只由批准的 owner 持有；
+- state 只由已声明的 owner 持有；
 - Part 通过 context、relationship 或已有共享能力消费 owner；
 - 不把风格库 variant、宿主 raw object 或未来组合能力引入 Base；
 - direct prototype 和 authored `asHook` 描述同一协议时，应共享实现而不是分叉；
@@ -64,12 +64,12 @@ description: '把 maintainer checkpoint 已冻结的 Base P/T 边界实现成最
 - T cases 通过 anchors 指向具体 criteria；
 - executable tests 验证结果和 absence；
 - controlled 请求不得静默修改 final state；
-- disabled、empty、duplicate、structural churn、teardown 等边界按 checkpoint 覆盖；
+- disabled、empty、duplicate、structural churn、teardown 等已声明边界都有覆盖；
 - 三个 Web Adapter 的测试只证明一个 Web host profile，不要夸大为多宿主 conformance。
 
 ### 4. 完成 package 与消费面
 
-每个新增公开 Base identity 或 anatomy family 都必须在同一 PR 中进入官网可访问页面；checkpoint 可以决定页面展示哪些批准状态，但不能省略这个预览交付面。PR 必须记录本地预览路由。
+每个新增公开 Base identity 或 anatomy family 都必须在同一 PR 中进入官网可访问页面；governing criteria 与 evidence 决定页面展示哪些状态，预览面始终属于交付范围。PR 必须记录本地预览路由。
 
 完整消费面包括：
 
@@ -90,26 +90,26 @@ Demo 应从公开 package subpath 消费 Base，并优先通过 Base 自己的 a
 
 任何例外都必须位于 Prototype 外、只使用公开 API，并在 Demo source 与 PR 中明确说明必要性和消费者需要自行实现的部分。它不得掩盖缺失 anatomy、owner 错位、未编目能力或 Adapter drift。内部 Demo Matrix 只能补充三 Adapter 证据，不能替代官网页面。
 
-### 5. 处理发现的设计断口
+### 5. 让设计断口继续进入实现循环
 
-下面情况应暂停并请求 checkpoint：
+下面情况都作为下一轮 graph、implementation、evidence 与 fresh review 的输入：
 
 - criterion 无法对应唯一 owner；
-- 需要 checkpoint 未列出的公开 API；
+- 需要当前 graph 尚未列出的公开 API；
 - 现有 Module/Host Capability 无法承接必须行为；
 - 三 Adapter 暴露出不同协议语义；
 - 需要宿主 raw event、target 或对象 escape hatch；
-- 负向边界使批准行为无法成立；
+- 负向边界使预期行为无法成立；
 - 现有实体之间出现真实矛盾。
 
-把问题记录为 exact criterion、实现证据和备选方案，不要在 PR 中静默扩大 scope。
+同步更新 exact criterion、实现证据和备选方案，不要只在源码或 PR 中静默扩大 scope。唯一需要升级的语义决定是是否准入一个真正全新的独立 Base identity，或新证据已经推翻先前 admission 结论；未决期间让该 identity 保持 draft，其余可逆 remediation 继续接受独立 review。
 
 ## PR 组织建议
 
 一个可评审的 Base slice 应让 reviewer 能按下面顺序阅读：
 
 ```text
-approved checkpoint
+governed identity or candidate draft
 → P criteria and relations
 → T cases and executable paths
 → owner implementation
@@ -137,9 +137,9 @@ corepack pnpm@10.32.1 docs:build
 
 ## 提交前最后确认
 
-- 没有通过实现类比重新打开已批准 API；
+- 公共 API 变化明确进入 governed/candidate graph，而不是通过实现类比暗中引入；
 - 没有为风格库需求制造空 Base identity；
 - 没有把单一 Web Adapter 事实写成跨宿主语义；
 - P criteria、T evidence、实现和公开投影一致；
-- 后续 styled projection 和组合能力仍在 scope 外；
+- 后续 styled projection 和组合能力可以作为独立 coherent contribution 继续；
 - DCO、来源和 AI 辅助披露已经完成。

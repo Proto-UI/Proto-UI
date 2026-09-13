@@ -1,0 +1,65 @@
+schemaVersion: 1
+policyVersion: 2026-08-24.event-shadow
+status: contract-only-not-deployed
+architecture:
+  intendedPrimaryTrigger: github-webhook
+  currentReconciliationTrigger: scheduled-shadow
+  harnessBoundary: existing-reviewed-external-harness
+  durableControllerEvidence: absent
+authenticity:
+  algorithm: hmac-sha256
+  rawBodyRequired: true
+  signatureHeader: X-Hub-Signature-256
+  transportHeadersAuthenticated: false
+  requiredTrustAnchors:
+    - repository-id-and-name
+    - hook-id
+    - installation-id
+    - dedicated-agent-actor-id
+payload:
+  maximumBytes: 2097152
+  authoredContentIncludedInEnvelope: false
+allowlist:
+  pull_request:
+    - opened
+    - reopened
+    - synchronize
+    - ready_for_review
+    - converted_to_draft
+    - edited
+    - closed
+forks:
+  observation: allowed
+  actorAuthority: none
+  mutationAuthority: none
+deduplication:
+  identity: trusted-repository-id-plus-authenticated-raw-body-digest
+  transportHeaderRewriteAction: duplicate
+  requiredStore: globally-consistent-controller-store
+  maximumStateEntries: 10000
+ordering:
+  githubTotalOrderAssumed: false
+  objectCursor: repository-id-pull-request-number-updated-at-and-head-sha
+  outOfOrderAction: reconcile-live-state
+  tiedOrderAction: reconcile-live-state
+outputs:
+  envelopeSchema: internal/agent-operations/schemas/event-envelope.schema.json
+  receiptSchema: internal/agent-operations/schemas/event-shadow-receipt.schema.json
+  stateSchema: internal/agent-operations/schemas/event-shadow-state.schema.json
+mutation:
+  authorized: false
+  writeOperationsPerformed: 0
+  nextStages:
+    - none
+    - collect-live-state
+    - reconcile-live-state
+graduation:
+  attendedDecisionClass: privileged-or-irreversible-operation
+  remainsOutOfScope:
+    - listener-deployment
+    - controller-or-queue-deployment
+    - maintainer-inbox
+    - authorization-parser
+    - github-review-mutation
+    - required-check-mutation
+    - merge

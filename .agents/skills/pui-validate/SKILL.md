@@ -5,13 +5,13 @@ description: Select, run, and report proportional Proto UI validation for a comp
 
 # Validate a change
 
-1. Read `AGENTS.md`, the actual diff, the `pui-trace` map, and any approved validation boundary.
+1. Read `AGENTS.md`, the actual diff, the `pui-trace` map, and the governed validation boundary.
 2. Check worktree and generated-file discipline before running tests.
 3. Run focused evidence first. Confirm it exercises the intended failure and owning layer.
 4. Expand through affected entity graph, Runtime or Adapter integration, types, public docs, package surfaces, consumer smoke, and release governance as the change requires.
 5. Run generators before their corresponding check mode. Never hand-edit generated output.
 6. Record command, exit status, relevant output, environment, and skipped checks. Do not claim a check that did not run.
-7. Separate machine evidence, manual acceptance, semantic approval, and deployment evidence.
+7. Separate machine evidence, observable acceptance evidence, authority resolution, and deployment evidence.
 8. Return failures to the owning skill with the smallest useful diagnosis.
 
 Passing checks establish technical evidence, not product correctness, review approval, merge permission, or release authorization.

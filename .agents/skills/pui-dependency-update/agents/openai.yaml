@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Update Proto UI Dependency'
+  short_description: 'Apply one governed dependency update'
+  default_prompt: 'Use $pui-dependency-update to apply this assessed and governed dependency update with focused evidence.'
+
+policy:
+  allow_implicit_invocation: false

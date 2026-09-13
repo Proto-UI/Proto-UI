@@ -68,7 +68,7 @@ portable analyzable input → [future Compiler] → host artifacts
 
 ## 贡献边界
 
-Compiler proposal 应先作为 maintainer-guided research，并至少说明：
+Compiler proposal 从 Agent-led governed research 开始。research、candidate entity、实现探针与 executable evidence 可以立即推进；只有现有 authority 未决定的产品选择才形成 attended decision。proposal 至少说明：
 
 1. portable source subset，以及 unsupported construct 如何失败；
 2. output host 与 generated artifact ownership；

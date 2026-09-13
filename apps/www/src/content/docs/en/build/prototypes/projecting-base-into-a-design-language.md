@@ -11,9 +11,9 @@ Design-language projection is the clearest complete path for Prototype authors d
 - The issue names the Base owner, derived identity, and lifecycle status.
 - Base ownership of state, events, focus, accessibility, context, positioning, and host capabilities is explicit.
 - Allowed design-language props, tokens, rules, anatomy, and compatibility scope are explicit.
-- The issue authorizes implementation and is not waiting on `needs maintainer design`.
+- The governed Base subject and the intended derived delta are explicit; any genuinely new Base identity is kept as a candidate until its admission decision.
 
-If any condition is missing, improve the issue instead of inferring a boundary by copying another styled library.
+If any condition is missing, improve the issue and candidate graph while collecting focused evidence instead of inferring a boundary by copying another styled library. Existing governed projections continue while that evidence is refined.
 
 ## Base projection versus styled-only
 
@@ -63,7 +63,7 @@ Implementation normally calls the Base `asHook` first, then adds:
 - necessary cataloged visual anatomy; and
 - derived-library types and public entries.
 
-Stop and return to the issue if implementation begins to own Base value, event requests, focus, accessibility, dismissal, or positioning again.
+If implementation begins to own Base value, event requests, focus, accessibility, dismissal, or positioning again, treat it as ownership drift: update the governing or candidate entities and tests, correct the implementation, and continue through fresh review. Escalate only if the evidence requires admitting a genuinely new Base identity.
 
 ### 4. Verify positive and absence guarantees
 
@@ -106,17 +106,17 @@ The website demo must consume the real public package export and use, as far as 
 
 Minimal external orchestration is allowed only when the Prototype has no natural trigger by design, or when its public controls are themselves the subject of the demo. Toast-style invocation and directly controlled Transition demos are typical exceptions. Keep the exception outside the Prototype, use public APIs only, and state in the demo source and pull request why it is unavoidable and which code consumers must recreate because it is not installed with the package.
 
-## What may the contributor decide?
+## What continues through implementation and review?
 
-Within a frozen issue boundary, contributors can usually choose:
+For an existing governed Base subject, contributors and Agents can continue deciding reversible projection details while keeping the P/T graph, implementation, evidence, and public surface coherent:
 
 - source-file organization;
 - internal token and rule reuse;
 - focused-test fixtures;
-- how the demo communicates approved states; and
+- how the demo communicates governed states; and
 - local refactoring that preserves public semantics.
 
-Return for a maintainer checkpoint before:
+The same evidence-bound review loop handles:
 
 - adding or removing public props, events, states, or anatomy identities;
 - changing Base ownership;
@@ -124,6 +124,8 @@ Return for a maintainer checkpoint before:
 - widening a third-party compatibility claim;
 - changing between projection and styled-only classification; or
 - adding a dependency.
+
+These are governed changes, not blanket human checkpoints. The one semantic decision to escalate is admission of a genuinely new independent Base identity. While that admission is unresolved, its research, candidate graph, draft entities, projection probes, and tests can continue without presenting it as an admitted guarantee.
 
 ## References
 

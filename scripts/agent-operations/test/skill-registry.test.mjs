@@ -227,7 +227,7 @@ test('a review handoff can route one separately authorized exact-head integratio
         fresh: true,
         capability: {
           band: 'C4',
-          eligibleTaskClasses: ['integrate-approved-pull-request'],
+          eligibleTaskClasses: ['integrate-reviewed-pull-request'],
         },
       },
     }).eligible,
@@ -279,7 +279,7 @@ test('autonomous work enforces the fresh self-assessed leaf ceiling', () => {
     kind: 'proto-ui.agent-capability-self-result',
     validated: true,
     fresh: true,
-    capability: { band: 'C3', eligibleTaskClasses: ['implement-approved-module'] },
+    capability: { band: 'C3', eligibleTaskClasses: ['implement-governed-module'] },
   };
   assert.equal(
     evaluateSkillEligibility(implementation, { executionMode: 'autonomous', selfAssessment: c3 })
@@ -324,7 +324,7 @@ test('handoff rejects a mode whose source is not trusted for that mode', () => {
   assert.throws(() => validateSkillHandoff(handoff, registry), /cannot be established/);
 });
 
-test('autonomous handoff stops at a human gate and a new human-assisted run may continue', () => {
+test('autonomous handoff stops at an unresolved product decision and a new human-assisted run may continue', () => {
   const registry = loadSkillRegistry({ root });
   const handoff = {
     schemaVersion: 1,
@@ -335,7 +335,7 @@ test('autonomous handoff stops at a human gate and a new human-assisted run may 
     fromId: 'pui-orient',
     nextSkillId: 'pui-select',
     artifacts: [artifact('capability-envelope'), artifact('request-context')],
-    humanGates: ['semantic-direction'],
+    humanGates: ['unresolved-product-direction'],
     notes: [],
   };
   assert.throws(() => validateSkillHandoff(handoff, registry), /must stop/);

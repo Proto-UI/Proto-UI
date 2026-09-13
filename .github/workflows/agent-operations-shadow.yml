@@ -119,7 +119,7 @@ jobs:
               "",
               `- Run: \`${report.runId}\``,
               `- Analyzed: ${report.summary.analyzedCount}`,
-              `- Human decisions proposed: ${report.summary.decisionsRequired}`,
+              `- Attended decisions proposed: ${report.summary.decisionsRequired}`,
               `- GitHub writes performed: ${report.writeOperationsPerformed}`,
             ];
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);

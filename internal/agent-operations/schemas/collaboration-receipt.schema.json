@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/collaboration-receipt.schema.json",
+  "title": "Proto UI collaboration mutation receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "repositoryId",
+    "authorizationId",
+    "action",
+    "requestDigest",
+    "target",
+    "outcome",
+    "mutationCount",
+    "reconciliationCount",
+    "preStateDigest",
+    "postStateDigest",
+    "actor",
+    "platformObject",
+    "verifiedAt",
+    "verification",
+    "note"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.collaboration-receipt" },
+    "repositoryId": { "type": "string", "pattern": "^github\\.com:[^/\\s]+/[^/\\s]+$" },
+    "authorizationId": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "action": { "$ref": "#/$defs/action" },
+    "requestDigest": { "$ref": "#/$defs/hex64" },
+    "target": { "$ref": "#/$defs/target" },
+    "outcome": { "enum": ["applied", "no-op"] },
+    "mutationCount": { "enum": [0, 1] },
+    "reconciliationCount": { "enum": [0, 1] },
+    "preStateDigest": { "$ref": "#/$defs/hex64" },
+    "postStateDigest": { "$ref": "#/$defs/hex64" },
+    "actor": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "platformObject": {
+      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/platformObject" }]
+    },
+    "verifiedAt": { "type": "string", "format": "date-time" },
+    "verification": {
+      "enum": ["live-state-matches-desired", "idempotency-marker-present"]
+    },
+    "note": { "type": "string", "minLength": 1, "maxLength": 2000 }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "no-op" } } },
+      "then": {
+        "properties": {
+          "mutationCount": { "const": 0 },
+          "reconciliationCount": { "const": 0 },
+          "platformObject": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "applied" } } },
+      "then": {
+        "properties": {
+          "mutationCount": { "const": 1 },
+          "platformObject": { "$ref": "#/$defs/platformObject" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "hex64": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "action": {
+      "enum": [
+        "update-governed-issue-or-pull-request-metadata",
+        "update-pull-request-branch-at-expected-head",
+        "mark-exact-head-ready-for-review",
+        "request-independent-review",
+        "resolve-fixed-review-thread",
+        "rerun-exact-trusted-workflow",
+        "post-bounded-reconciliation-comment"
+      ]
+    },
+    "issueOrPullTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "number", "updatedAt", "headSha"],
+      "properties": {
+        "kind": { "enum": ["issue", "pull-request"] },
+        "number": { "type": "integer", "minimum": 1 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "headSha": { "oneOf": [{ "$ref": "#/$defs/sha" }, { "type": "null" }] }
+      }
+    },
+    "branchTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "number", "updatedAt", "headSha", "baseSha"],
+      "properties": {
+        "kind": { "const": "pull-request" },
+        "number": { "type": "integer", "minimum": 1 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "headSha": { "$ref": "#/$defs/sha" },
+        "baseSha": { "$ref": "#/$defs/sha" }
+      }
+    },
+    "threadTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "number", "updatedAt", "headSha", "threadId", "threadUpdatedAt"],
+      "properties": {
+        "kind": { "const": "review-thread" },
+        "number": { "type": "integer", "minimum": 1 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "headSha": { "$ref": "#/$defs/sha" },
+        "threadId": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "threadUpdatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "workflowTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "runId",
+        "updatedAt",
+        "headSha",
+        "attempt",
+        "workflowName",
+        "workflowPath"
+      ],
+      "properties": {
+        "kind": { "const": "workflow-run" },
+        "runId": { "type": "integer", "minimum": 1 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "headSha": { "$ref": "#/$defs/sha" },
+        "attempt": { "type": "integer", "minimum": 1 },
+        "workflowName": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "workflowPath": {
+          "type": "string",
+          "pattern": "^\\.github/workflows/",
+          "maxLength": 500
+        }
+      }
+    },
+    "target": {
+      "oneOf": [
+        { "$ref": "#/$defs/issueOrPullTarget" },
+        { "$ref": "#/$defs/branchTarget" },
+        { "$ref": "#/$defs/threadTarget" },
+        { "$ref": "#/$defs/workflowTarget" }
+      ]
+    },
+    "platformObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "nodeId",
+        "url",
+        "updatedAt",
+        "headSha",
+        "workflowRunId",
+        "workflowAttempt"
+      ],
+      "properties": {
+        "id": { "type": ["string", "null"], "maxLength": 200 },
+        "nodeId": { "type": ["string", "null"], "maxLength": 200 },
+        "url": { "type": ["string", "null"], "maxLength": 2000 },
+        "updatedAt": {
+          "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }]
+        },
+        "headSha": { "oneOf": [{ "$ref": "#/$defs/sha" }, { "type": "null" }] },
+        "workflowRunId": {
+          "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }]
+        },
+        "workflowAttempt": {
+          "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }]
+        }
+      }
+    }
+  }
+}

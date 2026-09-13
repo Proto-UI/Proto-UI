@@ -86,9 +86,9 @@ const messages = {
     validation:
       'Design a validation ladder for the combined slice selected by the prior questions. Separate semantic acceptance, failing-before evidence, focused checks, integration evidence, public projection review, and release evidence. Name only commands that exist at the fixed snapshot.',
     governance:
-      'Inspect the live contribution queue and determine whether one work item is eligible for autonomous claim under current repository policy. Check readiness, ownership, linked work, capability, permission ceiling, and human gates. Returning no item is valid. Cite the live facts used and timestamp them because live queue facts are not part of the repository snapshot.',
+      'Inspect the live contribution queue and determine whether one work item is eligible for autonomous claim and continuous delivery under current repository policy. Check readiness, ownership, linked work, capability, permission ceiling, and whether either attended decision class is genuinely present. Returning no item is valid. Cite the live facts used and timestamp them because live queue facts are not part of the repository snapshot.',
     permission:
-      'Compare human-assisted and autonomous execution when model comprehension, GitHub permission, relevant Discord or Poppy trust, task risk, and human authorization differ. Explain which limits are advisory, which bind autonomous work, and which actions remain human decisions.',
+      'Compare human-assisted and autonomous execution when model comprehension, GitHub permission, relevant Discord or Poppy trust, task risk, current-user scope, and standing authorization differ. Explain which limits are advisory, which bind autonomous work, which ordinary transitions continue automatically, and what qualifies as either attended decision class.',
     evidence: [
       'exact repository paths',
       'entity or criterion anchors',
@@ -106,9 +106,9 @@ const messages = {
     validation:
       '为前面抽取的组合切片设计验证阶梯。分别说明语义验收、修复前失败证据、聚焦检查、集成证据、公开投影审阅和发布证据。只能引用固定快照中实际存在的命令。',
     governance:
-      '检查实时贡献队列，判断当前是否存在一个可由 Agent 自动领取的任务。核对 readiness、占用状态、关联工作、能力要求、权限上限和人类闸门。没有合格任务也是正确结论。实时队列不属于仓库快照，必须引用带时间戳的事实。',
+      '检查实时贡献队列，判断当前是否存在一个可由 Agent 自动领取并连续交付的任务。核对 readiness、占用状态、关联工作、能力要求、权限上限，以及两类 attended decision 是否确实存在。没有合格任务也是正确结论。实时队列不属于仓库快照，必须引用带时间戳的事实。',
     permission:
-      '比较 human-assisted 与 autonomous 两种执行模式：当模型理解能力、GitHub 权限、相关 surface 的 Discord 或 Poppy 信任、任务风险和人工授权不一致时，说明哪些限制只用于建议，哪些约束自主工作，以及哪些动作始终属于人类决定。',
+      '比较 human-assisted 与 autonomous 两种执行模式：当模型理解能力、GitHub 权限、相关 surface 的 Discord 或 Poppy 信任、任务风险、当前用户范围和 standing authorization 不一致时，说明哪些限制只用于建议、哪些约束自主工作、哪些普通 transition 默认继续，以及什么情况才属于两类 attended decision。',
     evidence: ['精确仓库路径', '实体或 criterion anchor', '命令或带时间戳的实时事实', '明确未知项'],
   },
 }[locale];

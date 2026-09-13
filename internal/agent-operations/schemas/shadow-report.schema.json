@@ -16,7 +16,7 @@
   ],
   "properties": {
     "schemaVersion": { "type": "integer", "enum": [1] },
-    "policyVersion": { "type": "string", "enum": ["2026-08-20.phase-a"] },
+    "policyVersion": { "type": "string", "enum": ["2026-08-27.agent-forward-intake-1"] },
     "mode": { "type": "string", "enum": ["shadow"] },
     "runId": {
       "type": "string",
@@ -116,15 +116,7 @@
           "items": { "type": "string", "minLength": 1, "maxLength": 500 }
         },
         "humanGate": {
-          "enum": [
-            "finding-disposition",
-            "semantic",
-            "integration",
-            "scope",
-            "contributor-rights",
-            "security",
-            "none"
-          ]
+          "enum": ["unresolved-product-direction", "privileged-or-irreversible-operation", "none"]
         },
         "decisionPacket": {
           "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/decisionPacket" }]
@@ -142,16 +134,16 @@
       "required": [
         "observedFact",
         "recommendation",
-        "authorizationScope",
+        "decisionScope",
         "exclusions",
         "residualRisks",
         "nextAutomatedStage",
-        "separatelyGatedActions"
+        "privilegedOrIrreversibleActionsOutsideScope"
       ],
       "properties": {
         "observedFact": { "type": "string", "minLength": 1, "maxLength": 1000 },
         "recommendation": { "type": "string", "minLength": 1, "maxLength": 1000 },
-        "authorizationScope": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "decisionScope": { "type": "string", "minLength": 1, "maxLength": 1000 },
         "exclusions": {
           "type": "array",
           "minItems": 1,
@@ -165,7 +157,7 @@
           "items": { "type": "string", "minLength": 1, "maxLength": 500 }
         },
         "nextAutomatedStage": { "type": "string", "minLength": 1, "maxLength": 500 },
-        "separatelyGatedActions": {
+        "privilegedOrIrreversibleActionsOutsideScope": {
           "type": "array",
           "minItems": 1,
           "maxItems": 10,

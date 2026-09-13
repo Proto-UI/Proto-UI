@@ -1,4 +1,4 @@
-schemaVersion: 1
+schemaVersion: 2
 missions:
   - id: AM-P0-004
     class: discovery
@@ -15,12 +15,13 @@ missions:
     requiredBand: C3
     taskClass: observe
     risk: medium
-    executionMode: attended-read-only-fresh-context
+    executionMode: autonomous-read-only-fresh-context
     freshContextRequired: true
-    humanGates:
-      - mission-freezing
-      - finding-disposition
+    attendedDecisions: []
     lease:
+      scope: exact-item
+      target: AM-P0-004
+      mode: single-runner
       id: null
       owner: null
       acquiredAt: null
@@ -43,11 +44,13 @@ missions:
     requiredBand: C2
     taskClass: observe
     risk: medium
-    executionMode: attended-read-only-fresh-context
+    executionMode: autonomous-read-only-fresh-context
     freshContextRequired: true
-    humanGates:
-      - mission-freezing
+    attendedDecisions: []
     lease:
+      scope: exact-item
+      target: AM-P0-005
+      mode: single-runner
       id: null
       owner: null
       acquiredAt: null
@@ -70,11 +73,13 @@ missions:
     requiredBand: C2
     taskClass: observe
     risk: medium
-    executionMode: attended-read-only-fresh-context
+    executionMode: autonomous-read-only-fresh-context
     freshContextRequired: true
-    humanGates:
-      - mission-freezing
+    attendedDecisions: []
     lease:
+      scope: exact-item
+      target: AM-P0-006
+      mode: single-runner
       id: null
       owner: null
       acquiredAt: null
@@ -98,12 +103,13 @@ missions:
     requiredBand: C3
     taskClass: observe
     risk: medium
-    executionMode: attended-read-only-fresh-context
+    executionMode: autonomous-read-only-fresh-context
     freshContextRequired: true
-    humanGates:
-      - mission-freezing
-      - finding-disposition
+    attendedDecisions: []
     lease:
+      scope: exact-item
+      target: AM-P0-007
+      mode: single-runner
       id: null
       owner: null
       acquiredAt: null

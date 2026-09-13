@@ -1,6 +1,7 @@
-schemaVersion: 1
+schemaVersion: 2
 runs:
   - id: AM-P0-001
+    schemaVersion: 1
     missionPath: internal/autonomous-maintenance/phase-0/missions/run-001-props.md
     findingPaths:
       - internal/autonomous-maintenance/phase-0/findings/AM-P0-001-F1.md
@@ -41,6 +42,7 @@ runs:
       residualRiskCount: 1
 
   - id: AM-P0-002
+    schemaVersion: 1
     missionPath: internal/autonomous-maintenance/phase-0/missions/run-002-event-default-action.md
     findingPaths:
       - internal/autonomous-maintenance/phase-0/findings/AM-P0-002-F1.md
@@ -81,6 +83,7 @@ runs:
       residualRiskCount: 4
 
   - id: AM-P0-003
+    schemaVersion: 1
     missionPath: internal/autonomous-maintenance/phase-0/missions/run-003-props-doc-projection.md
     findingPaths:
       - internal/autonomous-maintenance/phase-0/findings/AM-P0-003-F1.md

@@ -1,7 +1,7 @@
 interface:
   display_name: 'Proto UI Host Capability'
-  short_description: 'Implement one approved host capability slice'
-  default_prompt: 'Use $pui-host to implement this approved Host Capability slice.'
+  short_description: 'Implement one governed host capability slice'
+  default_prompt: 'Use $pui-host to implement this governed Host Capability slice.'
 
 policy:
   allow_implicit_invocation: false

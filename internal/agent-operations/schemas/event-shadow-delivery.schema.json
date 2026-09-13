@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/event-shadow-delivery.schema.json",
+  "title": "Proto UI captured raw GitHub webhook delivery",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "observedAt", "headers", "bodyBase64"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.github-webhook-delivery" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "headers": {
+      "description": "Exact captured transport claims. GitHub's X-Hub-Signature-256 authenticates bodyBase64 after decoding, not these headers.",
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "required": [
+        "user-agent",
+        "x-github-delivery",
+        "x-github-event",
+        "x-github-hook-id",
+        "x-github-hook-installation-target-id",
+        "x-github-hook-installation-target-type",
+        "x-hub-signature-256"
+      ]
+    },
+    "bodyBase64": {
+      "type": "string",
+      "contentEncoding": "base64",
+      "minLength": 4
+    }
+  }
+}

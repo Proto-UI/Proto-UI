@@ -11,10 +11,10 @@ description: Close one technically complete Proto UI autonomous-maintenance tran
 4. Run the deterministic autonomous-maintenance checks before closure.
 5. Synchronize finding status, packet, mission, run IDs, baselines, classifications, completion rule, metrics, and ledger. Record unknown metrics as null.
 6. Convert only bounded residual risks with an external oracle into candidate missions when that queue mutation is separately authorized and lease-safe.
-7. Record the explicit integration decision after it occurs. Keep commit grouping, merge, publication, and release separately gated.
+7. Record the exact integration receipt after it occurs. Route a clean exact-head PR to the ordinary review and integration skills under current or standing authorization.
 8. Return closure evidence, the exact changed maintenance-state paths, and the next eligible transition.
 
-Do not invent metrics, close an inadequately reviewed run, or treat technical completion as integration authorization.
+Do not invent metrics or close an inadequately reviewed run. Technical completion feeds the exact-head integration preflight; it does not bypass live permission, CI, independent review, or repository rules.
 
 ## Explicit handoff
 

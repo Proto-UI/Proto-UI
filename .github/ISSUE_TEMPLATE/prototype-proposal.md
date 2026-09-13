@@ -8,7 +8,7 @@ labels: ['area: prototypes']
 
 - [ ] Maintain an existing `P-*` identity
 - [ ] Project an existing Base `P-*` into a design language
-- [ ] Implement a maintainer-approved Base semantic slice
+- [ ] Implement a governed Base semantic slice
 - [ ] Propose a new Base subject
 - [ ] Propose a styled-only Prototype with no Base counterpart
 
@@ -23,9 +23,9 @@ labels: ['area: prototypes']
 
 For a new Base subject, identify the input fact, owner, observable output, and synchronization rule. For a projection, identify the Base owner and the derived presentation-only delta.
 
-## Negative boundary
+## Responsibility boundary
 
-What value, event, focus, accessibility, layout, host, form, announcement, or compatibility responsibility must this Prototype not claim?
+Which value, event, focus, accessibility, layout, host, form, announcement, or compatibility responsibilities belong to this Prototype, and which remain owned elsewhere?
 
 ## Reference source and provenance
 
@@ -41,27 +41,28 @@ List proposed identities, anatomy, props, states, events, methods, exports, and 
 - Which T cases and real test paths verify them?
 - Which Web Component, React, and Vue evidence is required without claiming broader multi-host conformance?
 
-## Readiness and decisions
+## Readiness and automatic continuation
 
-- What is already decided?
-- What may the contributor decide?
-- What requires a maintainer checkpoint?
-- Is implementation authorized? Default for a new Base subject: **no**.
+- What does applicable authority or the accepted Issue direction already decide?
+- What may the Agent or contributor decide within this coherent slice?
+- Which implementation, evidence, docs, and projection work can proceed now?
+- Is there an `unresolved-product-direction` choice? Default: **none**. If yes, list the materially different options and the smallest decision required.
+- Does the slice require a `privileged-or-irreversible-operation`? Default: **none**.
 
 ## Delivery scope
 
-List source, entities, tests, exports, CLI/presets, docs, demos, previews, and generated projections that belong to the coherent slice. Every new public Prototype identity or anatomy family must include a reachable website page; this cannot be deferred as an optional follow-up.
+List source, entities, tests, exports, CLI/presets, docs, demos, previews, and generated projections that belong to the coherent slice. Include a reachable website page for every new public Prototype identity or anatomy family in the same delivery path.
 
 ## Website review surface
 
 - Proposed public docs route:
 - Documentation entry or navigation location:
-- Approved states and behavior the page will demonstrate:
+- Governed states and behavior the page will demonstrate:
 - Applicable runtimes: Web Component / React / Vue
 - How the demo uses the Prototype's own anatomy, triggers, state, events, and defaults:
 - Is external demo orchestration unavoidable? If yes, explain why the Prototype has no natural trigger or why its public controls must be demonstrated, and identify the consumer-owned code that is not installed with the package.
 
-The website demo must consume the real public package export. Development-only Demo Matrix coverage is supplementary and does not replace this page.
+The website demo consumes the real public package export. Development-only Demo Matrix coverage remains supplementary evidence for this page.
 
 ## Out of scope
 

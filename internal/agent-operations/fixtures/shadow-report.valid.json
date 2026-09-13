@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "2026-08-20.phase-a",
+  "policyVersion": "2026-08-27.agent-forward-intake-1",
   "mode": "shadow",
   "runId": "AO-SHADOW-20260820T123456Z-01234567",
   "generatedAt": "2026-08-20T12:35:00.000Z",
@@ -33,11 +33,11 @@
         "The body describes a shared default affecting multiple consumers.",
         "The requested outcome cannot be derived from an active catalog guarantee in the snapshot."
       ],
-      "humanGate": "semantic",
+      "humanGate": "unresolved-product-direction",
       "decisionPacket": {
         "observedFact": "The current shared fallback and three local call sites lead to different possible remediation boundaries.",
         "recommendation": "Choose the theme-relative shared fallback before authorizing implementation.",
-        "authorizationScope": "Approval would authorize one bounded proposal and its focused cross-runtime evidence.",
+        "decisionScope": "Choose the theme-relative shared fallback for this bounded semantic slice.",
         "exclusions": [
           "No merge, release, or stable guarantee promotion is authorized.",
           "Unrelated focus-ring composition behavior remains outside scope."
@@ -45,13 +45,8 @@
         "residualRisks": [
           "The snapshot does not prove that every downstream consumer uses the same surface token."
         ],
-        "nextAutomatedStage": "Reclassify the approved scope for a separately authorized implementation task.",
-        "separatelyGatedActions": [
-          "Code mutation",
-          "Ready-for-review transition",
-          "Merge",
-          "Publication or release"
-        ]
+        "nextAutomatedStage": "Implement the chosen fallback, collect focused cross-runtime evidence, and continue through independent review and exact-head integration.",
+        "privilegedOrIrreversibleActionsOutsideScope": ["Publication or release"]
       },
       "proposedActions": [
         {

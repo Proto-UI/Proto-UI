@@ -1,13 +1,13 @@
 ---
-title: 'Implementing an Approved Base Semantic Slice'
-description: 'Turn a maintainer-approved Base P/T boundary into a minimal, coherent, executable vertical slice.'
+title: 'Implementing a Governed Base Semantic Slice'
+description: 'Turn a governed or explicitly draft Base P/T boundary into a minimal, coherent, executable vertical slice.'
 ---
 
-Implementing a new Base Prototype is normally an advanced contribution. The contributor's primary responsibility is to implement the approved protocol faithfully, not to reopen subject identity, ownership, or public API while coding.
+Implementing a Base Prototype is normally an advanced contribution. Existing governed subjects proceed from their current protocol graph. A genuinely new subject may accumulate research, a candidate graph, draft entities, implementation probes, and executable evidence before admission; the one unresolved semantic decision is whether Proto UI admits that independent subject as a Base identity.
 
-## What counts as approved?
+## Admission and governed direction
 
-Before implementation, the issue or linked checkpoint must approve:
+Before presenting a genuinely new Base identity as governed, record the admission decision that its independent protocol subject belongs in Base. Candidate work can and should make the following explicit before or after that decision as evidence evolves:
 
 - the independent protocol subject and Base-admission conclusion;
 - input facts, owners, observable outputs, and synchronization rules;
@@ -18,11 +18,11 @@ Before implementation, the issue or linked checkpoint must approve:
 - required Module, Host Capability, and cross-Adapter evidence; and
 - later design-language projections and compositions that remain out of scope.
 
-A directory name, draft code, informal consensus, or reference component library is not approval. Do not implement while the issue still carries `needs maintainer design`.
+A directory name, draft code, informal consensus, or reference component library is not Base-admission evidence by itself. An unresolved admission marker keeps the identity candidate/draft; it does not block research, graph authoring, implementation probes, or tests. Once an identity is governed, implementation and projection continue by default through independent review.
 
 ## Base-admission check
 
-An approved slice should satisfy:
+A governed or candidate slice should demonstrate:
 
 1. **Independent subject**: it does not exist for styled-library inheritance or package symmetry.
 2. **Explicit information path**: each core guarantee has an input fact, owner, output, and rule.
@@ -31,7 +31,7 @@ An approved slice should satisfy:
 5. **Negative boundary**: visual, business, focus, layout, form, and announcement responsibilities that it does not own are explicit.
 6. **Executable evidence**: every retained criterion maps to a substantive T case and real test.
 
-If implementation reveals that one of these cannot hold, report the design gap instead of forcing the code through an empty `asHook`, host escape hatch, or special-case branch.
+If implementation reveals that one of these cannot hold, revise the candidate or governed graph and record the evidence instead of forcing the code through an empty `asHook`, host escape hatch, or special-case branch. Escalate only if the evidence changes the Base-identity admission conclusion.
 
 ## Implementation workflow
 
@@ -52,7 +52,7 @@ This mapping is the review spine. File count is not a completion measure.
 
 ### 2. Implement the smallest owner
 
-- Only the approved owner holds state.
+- Only the declared owner holds state.
 - Parts consume ownership through context, relationships, or existing shared capabilities.
 - Keep styled variants, host raw objects, and future composition out of Base.
 - When direct Prototype and authored `asHook` describe one protocol, share implementation rather than fork behavior.
@@ -64,12 +64,12 @@ This mapping is the review spine. File count is not a completion measure.
 - Anchor T cases to exact criteria.
 - Verify results and absence assertions in executable tests.
 - Controlled requests must not silently mutate final state.
-- Cover disabled, empty, duplicate, structural-churn, teardown, and other checkpoint boundaries.
+- Cover disabled, empty, duplicate, structural-churn, teardown, and other declared boundaries.
 - Tests across the three Web Adapters prove one Web host profile, not general multi-host conformance.
 
 ### 4. Complete package and consumer surfaces
 
-Every new public Base identity or anatomy family must appear on a reachable website page in the same pull request. A checkpoint may decide which approved states the page demonstrates, but it cannot omit this preview surface. Record the local preview route in the pull request.
+Every new public Base identity or anatomy family must appear on a reachable website page in the same pull request. The governing criteria and evidence determine which states the page demonstrates; the preview surface remains part of delivery. Record the local preview route in the pull request.
 
 The complete consumer surface includes:
 
@@ -90,26 +90,26 @@ For example, a Dialog demo should use `dialog-trigger` to request Root open. Cal
 
 Keep any exception outside the Prototype, use public APIs only, and explain its necessity and the consumer-owned portion in the demo source and pull request. It must not hide missing anatomy, misplaced ownership, uncataloged capability, or Adapter drift. The internal Demo Matrix may add three-Adapter evidence but cannot replace the website page.
 
-### 5. Handle design gaps explicitly
+### 5. Keep design gaps in the implementation loop
 
-Pause and request a checkpoint if:
+Treat these findings as inputs to the next graph, implementation, evidence, and fresh-review iteration:
 
 - a criterion has no unique owner;
-- implementation needs public API absent from the checkpoint;
+- implementation needs public API absent from the current graph;
 - existing Module or Host Capability slices cannot carry required behavior;
 - the three Adapters expose different protocol semantics;
 - implementation needs a raw host event, target, or object escape hatch;
-- the negative boundary prevents the approved behavior; or
+- the negative boundary prevents the intended behavior; or
 - applicable entities genuinely contradict one another.
 
-Report the exact criterion, implementation evidence, and alternatives instead of silently widening scope.
+Update the exact criterion, implementation evidence, and alternatives instead of silently widening source alone. The only semantic decision to escalate is admission of a genuinely new independent Base identity, or evidence that invalidates an earlier admission conclusion. Keep that identity draft while unresolved; all other reversible remediation continues through independent review.
 
 ## Pull-request organization
 
 A reviewer should be able to follow:
 
 ```text
-approved checkpoint
+governed identity or candidate draft
 → P criteria and relations
 → T cases and executable paths
 → owner implementation
@@ -137,9 +137,9 @@ Changes to the public package graph also require package manifest, build, budget
 
 ## Final check
 
-- Implementation did not reopen the approved API by analogy.
+- Public API changes are explicit in the governed or candidate graph rather than introduced by implementation analogy.
 - No empty Base identity was created for a styled-library need.
 - A single Web Adapter fact was not promoted into cross-host semantics.
 - P criteria, T evidence, implementation, and public projections agree.
-- Later styled projections and compositions remain out of scope.
+- Later styled projections and compositions can proceed as separate coherent contributions.
 - DCO, provenance, and material AI-assistance disclosure are complete.

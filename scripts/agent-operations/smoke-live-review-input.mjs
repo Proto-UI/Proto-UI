@@ -1,6 +1,10 @@
 import process from 'node:process';
 import { loadCapabilityPolicy } from './assessment-runtime.mjs';
-import { collectLiveReviewInput, summarizeLiveChecks } from './collect-live-review-input.mjs';
+import {
+  collectLiveReviewInput,
+  summarizeLiveChecks,
+  summarizeLiveDco,
+} from './collect-live-review-input.mjs';
 import { reviewChangesSpecEntities } from './review-runtime.mjs';
 
 function usage() {
@@ -48,6 +52,14 @@ try {
           trustedCheckNames: policy.trustedCiEvidence?.checkNames,
           trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
           trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
+        }),
+        dcoConclusion: summarizeLiveDco(live.input.checks, {
+          repositoryId,
+          trustedRepositoryId: policy.trustedDcoEvidence?.repositoryId,
+          trustedCheckName: policy.trustedDcoEvidence?.checkName,
+          trustedSource: policy.trustedDcoEvidence?.source,
+          trustedProviderId: policy.trustedDcoEvidence?.providerId,
+          trustedDetailsUrl: policy.trustedDcoEvidence?.detailsUrl,
         }),
         viewerLogin: live.viewerLogin,
         viewerPermission: live.viewerPermission,

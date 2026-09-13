@@ -61,7 +61,7 @@ jobs:
     # npm environment (required reviewers + branch=main only). scan and
     # stage have no side effects but ride the same job to keep the workflow shape
     # simple — the environment check on those modes is a no-op (no rules trigger
-    # for non-deployment runs that don't need approval).
+    # for non-deployment runs that do not enter the protected publication environment).
     # Name matches the Environment field configured in the npm Trusted Publisher
     # binding for every @proto.ui/* package — they MUST stay in sync or OIDC
     # exchange fails with "no matching trusted publisher".

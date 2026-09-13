@@ -175,7 +175,7 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
     ...registry,
     byId: new Map(registry.skills.map((skill) => [skill.id, Object.freeze({ ...skill })])),
     entrypointIds,
-    humanGates: new Set(policy.alwaysHuman ?? []),
+    humanGates: new Set(policy.attendedDecisionClasses ?? []),
   };
 }
 
@@ -281,7 +281,7 @@ export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
   if (handoff.executionMode === 'autonomous' && gates.size > 0) {
     assert(
       handoff.nextSkillId === null,
-      'autonomous handoff must stop when a human gate is pending'
+      'autonomous handoff must stop when an attended decision is pending'
     );
   }
 

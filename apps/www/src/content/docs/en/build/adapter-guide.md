@@ -35,9 +35,9 @@ Experienced contributors may implement an Adapter parity bug when its Issue stat
 - the profile and target runtime/version range;
 - behavior that must remain unchanged across Adapters;
 - focused Runtime/Module and Adapter evidence; and
-- explicit implementation authorization.
+- current-user or standing implementation authorization for the bounded slice.
 
-New Adapter proposals remain maintainer-guided research. A useful proposal can inventory host capabilities, model honest support/omission decisions, identify lifecycle and target ownership, and build minimal feasibility evidence. It does not automatically authorize a production Adapter PR.
+New Adapter proposals are governed candidate work. An Agent can inventory host capabilities, model honest support and omission candidates, identify lifecycle and target ownership, build minimal feasibility evidence, and draft the bounded implementation and spec graph. Only an admission, ownership, public-guarantee, or compatibility choice that current authority does not resolve becomes an attended product-direction decision; once resolved, the same work continues into a production pull request under current-user or standing authorization.
 
 ## What would unlock a complete guide
 
