@@ -14,9 +14,7 @@ import {
 
 // Observations for #639, not a contract or a new CI gate. Run from the repository root.
 const output = await mkdtemp(path.join(tmpdir(), 'proto-rule-meta-'));
-const baseUrl = await startServer('/en/ui-libraries/shadcn/button/');
-const browser = await launchBrowser();
-const observations = { browser: browser.version(), buttons: [], controls: [], transitions: [] };
+let browser;
 console.log(`Rule Meta observations: ${output}`);
 
 async function paint(locator) {
@@ -40,6 +38,10 @@ async function paint(locator) {
 }
 
 try {
+  const baseUrl = await startServer('/en/ui-libraries/shadcn/button/');
+  browser = await launchBrowser();
+  const observations = { browser: browser.version(), buttons: [], controls: [], transitions: [] };
+
   for (const runtime of RUNTIMES) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
@@ -144,6 +146,6 @@ try {
     `Captured ${observations.buttons.length} Button journeys, ${observations.controls.length} control journeys and ${observations.transitions.length} Transition journeys.`
   );
 } finally {
-  await browser.close();
+  await browser?.close();
   await stopServer();
 }
