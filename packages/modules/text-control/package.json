@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/module-text-control",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0-alpha.1",
   "private": false,
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,7 @@
       "default": "./dist/index.js"
     }
   },
-  "description": "Proto UI portable single-line and multiline text-control host protocol.",
+  "description": "Proto UI portable multiline text-control host protocol.",
   "license": "MIT",
   "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/text-control",
   "repository": {

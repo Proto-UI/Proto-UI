@@ -50,6 +50,26 @@ test('registry readiness permits a sole deprecated bootstrap version to retain l
   });
 });
 
+test('registry readiness permits a deprecated bootstrap latest after next names an existing prerelease', async () => {
+  const report = await checkRegistryReadiness(['@proto.ui/bootstrap'], {
+    timeoutMs: 1_000,
+    fetchImpl: async () =>
+      response(200, '', {
+        'dist-tags': { latest: '0.0.0-bootstrap.0', next: '0.3.0-alpha.0' },
+        versions: {
+          '0.0.0-bootstrap.0': { deprecated: 'Registry identity bootstrap only.' },
+          '0.3.0-alpha.0': {},
+        },
+      }),
+  });
+
+  assert.deepEqual(report, {
+    ready: ['@proto.ui/bootstrap'],
+    missing: [],
+    errors: [],
+  });
+});
+
 test('registry readiness rejects forbidden bootstrap registry states', async () => {
   const cases = [
     {
@@ -74,7 +94,8 @@ test('registry readiness rejects forbidden bootstrap registry states', async () 
         'dist-tags': { latest: '0.0.0-bootstrap.0' },
         versions: { '0.0.0-bootstrap.0': {} },
       },
-      detail: 'latest may retain bootstrap version only when it is the sole deprecated version',
+      detail:
+        'latest may retain bootstrap only when deprecated and either sole or superseded by an existing non-bootstrap prerelease on next',
     },
     {
       name: '@proto.ui/bootstrap-latest-not-sole',
@@ -85,7 +106,32 @@ test('registry readiness rejects forbidden bootstrap registry states', async () 
           '0.3.0-alpha.0': {},
         },
       },
-      detail: 'latest may retain bootstrap version only when it is the sole deprecated version',
+      detail:
+        'latest may retain bootstrap only when deprecated and either sole or superseded by an existing non-bootstrap prerelease on next',
+    },
+    {
+      name: '@proto.ui/bootstrap-latest-next-not-prerelease',
+      metadata: {
+        'dist-tags': { latest: '0.0.0-bootstrap.0', next: '0.3.0' },
+        versions: {
+          '0.0.0-bootstrap.0': { deprecated: 'bootstrap only' },
+          '0.3.0': {},
+        },
+      },
+      detail:
+        'latest may retain bootstrap only when deprecated and either sole or superseded by an existing non-bootstrap prerelease on next',
+    },
+    {
+      name: '@proto.ui/bootstrap-latest-next-missing-version',
+      metadata: {
+        'dist-tags': { latest: '0.0.0-bootstrap.0', next: '0.3.0-alpha.0' },
+        versions: {
+          '0.0.0-bootstrap.0': { deprecated: 'bootstrap only' },
+          '0.3.0-alpha.1': {},
+        },
+      },
+      detail:
+        'latest may retain bootstrap only when deprecated and either sole or superseded by an existing non-bootstrap prerelease on next',
     },
   ];
 

@@ -11,7 +11,7 @@ The legacy `EVENT_EMIT_CAP` name and the former exports from `@proto.ui/module-e
 ## Install
 
 ```bash
-npm install @proto.ui/module-expose-event@0.3.0-alpha.0
+npm install @proto.ui/module-expose-event@0.3.0-alpha.1
 ```
 
 ## Related Internal Packages

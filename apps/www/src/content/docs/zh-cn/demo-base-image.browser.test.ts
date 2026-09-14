@@ -14,7 +14,7 @@ import {
 } from './browser-harness';
 
 const ROUTE = '/en/ui-libraries/base/image/';
-const RUNTIMES = ['wc', 'react', 'vue'] as const;
+const RUNTIMES = ['wc', 'react', 'vue', 'vue2'] as const;
 let browser: Browser;
 let baseUrl = '';
 
@@ -185,7 +185,7 @@ describe.sequential('Base Image public consumer browser evidence', () => {
     }
   }
 
-  it('keeps the Chinese page on the same three-adapter public demo', async () => {
+  it('keeps the Chinese page on the same four-adapter public demo', async () => {
     const { context, page, previewer } = await openRoute(
       browser,
       baseUrl,
@@ -193,7 +193,7 @@ describe.sequential('Base Image public consumer browser evidence', () => {
       { width: 390, height: 900 }
     );
     try {
-      await selectRuntime(page, previewer, 'wc', 'img', 5);
+      await selectRuntime(page, previewer, 'vue2', 'img', 5);
       expect(
         await page.getByRole('heading', { name: 'Props 与 Exposes', exact: true }).count()
       ).toBe(1);

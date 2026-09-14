@@ -23,12 +23,13 @@ test('Demo Matrix remains development-only documentation', async () => {
   }
 });
 
-test('Demo Matrix renders every adapter column and identifies unavailable Image support', async () => {
+test('Demo Matrix renders every adapter column, including Vue 2 Image support', async () => {
   const source = await readFile(matrixComponent, 'utf8');
 
   assert.match(source, /\{previewCount\}/);
-  assert.match(source, /demoId === 'demo-base-image' && runtime === 'vue2'/);
-  assert.match(source, /data-unavailable=/);
+  assert.match(source, /const previewCount = demos\.length \* runtimes\.length;/);
+  assert.doesNotMatch(source, /data-unavailable=/);
+  assert.doesNotMatch(source, /Image View is not implemented for Vue 2\./);
   assert.match(source, /runtimes\.map\(\(runtime\) =>/);
   assert.match(source, /initialRuntime=\{runtime\}/);
   assert.match(source, /runtimes=\{\[runtime\]\}/);

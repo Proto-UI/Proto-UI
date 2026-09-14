@@ -33,6 +33,22 @@ export const ADAPTER_REGISTRY: Record<string, Adapter> = {
     adapterStatement: `const adapt = createVueAdapter(Vue);`,
     rootAliasPrefix: 'Vue',
   },
+  vue2: {
+    id: 'vue2',
+    label: 'Vue 2',
+    aliases: ['vue2', 'vue-2'],
+    packageName: '@proto.ui/adapter-vue2',
+    runtimePackages: ['vue'],
+    createImport: `import { createVue2Adapter } from '@proto.ui/adapter-vue2';`,
+    runtimeImport: `import Vue from 'vue';`,
+    adapterStatement: `const adapt = createVue2Adapter({
+  extend: Vue.extend.bind(Vue),
+  nextTick: Vue.nextTick.bind(Vue),
+  set: Vue.set.bind(Vue),
+  delete: Vue.delete.bind(Vue),
+});`,
+    rootAliasPrefix: 'Vue2',
+  },
   wc: {
     id: 'wc',
     label: 'Web Components',
