@@ -197,7 +197,7 @@ export function createWebScrollSurfaceHost(
       let readerIntentUntil = 0;
       let readerGestureActive = false;
       const activePointerIds = new Set<number>();
-      let activeTouchContacts = 0;
+      const activeTouchIds = new Set<number>();
       let requestedDepartureAxis: ScrollAxis | null = null;
       let lastFollowLayout: { axis: ScrollAxis; viewport: number; extent: number } | null = null;
       const ownerWindow = target.ownerDocument.defaultView;
@@ -411,7 +411,7 @@ export function createWebScrollSurfaceHost(
         const followAxis = configuredFollowAxis();
         if (request.kind === 'to-end') {
           if (followAxis && request.axis !== followAxis) {
-            if (!isAxisEnabled(request.axis)) cancelScheduledEnd(false);
+            // Reject this request without canceling the configured axis's automatic work.
             endFollowRequestEpoch++;
             endFollowRequestStatus = 'rejected';
             publish();
@@ -564,7 +564,13 @@ export function createWebScrollSurfaceHost(
         armReaderIntent();
       };
       const onTouchStart = (event: TouchEvent) => {
-        activeTouchContacts = Math.max(activeTouchContacts + 1, event.touches?.length ?? 0);
+        let startedHere = false;
+        for (const touch of Array.from(event.changedTouches)) {
+          if (!target.contains(touch.target as Node)) continue;
+          activeTouchIds.add(touch.identifier);
+          startedHere = true;
+        }
+        if (!startedHere) return;
         readerGestureActive = true;
         armReaderIntent();
       };
@@ -573,29 +579,38 @@ export function createWebScrollSurfaceHost(
         readerIntentUntil = 0;
       };
       const maybeCompleteReaderIntent = () => {
-        if (activePointerIds.size === 0 && activeTouchContacts === 0) completeReaderIntent();
+        if (activePointerIds.size === 0 && activeTouchIds.size === 0) completeReaderIntent();
         else readerGestureActive = true;
       };
       const onPointerUp = (event: PointerEvent) => {
-        activePointerIds.delete(event.pointerId);
+        if (!activePointerIds.delete(event.pointerId)) return;
         maybeCompleteReaderIntent();
+      };
+      const releaseTouchContacts = (event: TouchEvent) => {
+        let released = false;
+        for (const touch of Array.from(event.changedTouches)) {
+          released = activeTouchIds.delete(touch.identifier) || released;
+        }
+        const remaining = new Set(Array.from(event.touches, (touch) => touch.identifier));
+        for (const identifier of activeTouchIds) {
+          if (remaining.has(identifier)) continue;
+          activeTouchIds.delete(identifier);
+          released = true;
+        }
+        return released;
       };
       const onTouchEnd = (event: TouchEvent) => {
-        activeTouchContacts = event.touches?.length ?? Math.max(0, activeTouchContacts - 1);
-        maybeCompleteReaderIntent();
-      };
-      const onTouchCancel = (event: TouchEvent) => {
-        const canceledContacts = Math.max(1, event.changedTouches?.length ?? 0);
-        activeTouchContacts =
-          event.touches?.length ?? Math.max(0, activeTouchContacts - canceledContacts);
-        maybeCompleteReaderIntent();
+        if (releaseTouchContacts(event)) maybeCompleteReaderIntent();
       };
       const settleTouchCancellation = () => {
-        readerGestureActive = activePointerIds.size > 0 || activeTouchContacts > 0;
+        readerGestureActive = activePointerIds.size > 0 || activeTouchIds.size > 0;
         armReaderIntent();
       };
+      const onTouchCancel = (event: TouchEvent) => {
+        if (releaseTouchContacts(event)) settleTouchCancellation();
+      };
       const onPointerCancel = (event: PointerEvent) => {
-        activePointerIds.delete(event.pointerId);
+        if (!activePointerIds.delete(event.pointerId)) return;
         if (event.pointerType === 'touch') settleTouchCancellation();
         else maybeCompleteReaderIntent();
       };
@@ -766,7 +781,7 @@ export function createWebScrollSurfaceHost(
           disposed = true;
           readerGestureActive = false;
           activePointerIds.clear();
-          activeTouchContacts = 0;
+          activeTouchIds.clear();
           readerIntentUntil = 0;
           requestedDepartureAxis = null;
           cancelScheduledEnd(false);

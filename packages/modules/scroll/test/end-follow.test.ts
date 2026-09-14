@@ -62,6 +62,55 @@ function attachEndFollow(target: HTMLElement, snapshots: ScrollSurfaceSnapshot[]
   });
 }
 
+function touchContact(target: EventTarget, identifier: number): Touch {
+  return { target, identifier } as Touch;
+}
+
+function dispatchTouch(
+  receiver: EventTarget,
+  type: string,
+  changedTouches: Touch[],
+  touches: Touch[]
+) {
+  const event = new Event(type, { bubbles: true });
+  Object.defineProperties(event, {
+    changedTouches: { value: changedTouches },
+    touches: { value: touches },
+  });
+  receiver.dispatchEvent(event);
+}
+
+function installTouchFollowFixture() {
+  const frames = installFrameHarness();
+  const target = document.createElement('div');
+  const updateMetrics = installMetrics(target, {
+    clientWidth: 100,
+    scrollWidth: 100,
+    clientHeight: 100,
+    scrollHeight: 400,
+  });
+  document.body.append(target);
+  const snapshots: ScrollSurfaceSnapshot[] = [];
+  const lease = attachEndFollow(target, snapshots);
+  frames.runAll();
+  let now = 1000;
+  vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+  return {
+    frames,
+    target,
+    updateMetrics,
+    snapshots,
+    lease,
+    advance(ms: number) {
+      now += ms;
+    },
+    scrollTo(top: number) {
+      target.scrollTop = top;
+      target.dispatchEvent(new Event('scroll'));
+    },
+  };
+}
+
 function installFontHarness(): {
   dispatch(type: string): void;
   listeners(): ReadonlySet<EventListener>;
@@ -506,7 +555,8 @@ describe('module-scroll: end-follow host contract', () => {
     const lease = attachEndFollow(target, snapshots);
     frames.runAll();
 
-    target.dispatchEvent(new Event('touchstart', { bubbles: true }));
+    const touch = touchContact(target, 1);
+    dispatchTouch(target, 'touchstart', [touch], [touch]);
     target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
     window.dispatchEvent(new PointerEvent('pointercancel', { pointerType: 'touch' }));
     target.scrollTop = 200;
@@ -519,7 +569,7 @@ describe('module-scroll: end-follow host contract', () => {
     frames.runAll();
     expect(target.scrollTop).toBe(200);
     expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
-    window.dispatchEvent(new Event('touchend'));
+    dispatchTouch(window, 'touchend', [touch], []);
     lease.dispose();
   });
 
@@ -537,9 +587,11 @@ describe('module-scroll: end-follow host contract', () => {
     const lease = attachEndFollow(target, snapshots);
     frames.runAll();
 
+    const touch = touchContact(target, 1);
+    dispatchTouch(target, 'touchstart', [touch], [touch]);
     target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
     window.dispatchEvent(new PointerEvent('pointercancel', { pointerType: 'touch' }));
-    window.dispatchEvent(new Event('touchend'));
+    dispatchTouch(window, 'touchend', [touch], []);
     target.scrollTop = 200;
     target.dispatchEvent(new Event('scroll'));
 
@@ -561,14 +613,96 @@ describe('module-scroll: end-follow host contract', () => {
     const lease = attachEndFollow(target, snapshots);
     frames.runAll();
 
-    target.dispatchEvent(new Event('touchstart', { bubbles: true }));
-    window.dispatchEvent(new Event('touchcancel'));
+    const now = vi.spyOn(window.performance, 'now').mockReturnValue(1000);
+    const touch = touchContact(target, 1);
+    dispatchTouch(target, 'touchstart', [touch], [touch]);
+    dispatchTouch(window, 'touchcancel', [touch], []);
+    now.mockReturnValue(1400);
     target.scrollTop = 200;
     target.dispatchEvent(new Event('scroll'));
 
     expect(snapshots.at(-1)?.endFollow.state).toBe('following');
     lease.dispose();
   });
+
+  it('retains bounded native-pan intent after the last owned touch is canceled', () => {
+    // C-SCROLL-END-FOLLOW-0001-INTERRUPT: native pan cancellation precedes departure.
+    const fixture = installTouchFollowFixture();
+    const touch = touchContact(fixture.target, 11);
+    dispatchTouch(fixture.target, 'touchstart', [touch], [touch]);
+    dispatchTouch(window, 'touchcancel', [touch], []);
+    fixture.scrollTo(200);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    fixture.updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    fixture.frames.runAll();
+    expect(fixture.target.scrollTop).toBe(200);
+    fixture.lease.dispose();
+  });
+
+  it.each(['touchend', 'touchcancel'])(
+    'does not borrow another target contact after an owned %s',
+    (completion) => {
+      // HC-SCROLL-SURFACE-0001-I: global touches are not this lease's reader evidence.
+      const fixture = installTouchFollowFixture();
+      const own = touchContact(fixture.target, 11);
+      const foreign = touchContact(document.body, 22);
+      dispatchTouch(fixture.target, 'touchstart', [own], [own, foreign]);
+      dispatchTouch(window, completion, [own], [foreign]);
+      fixture.advance(400);
+      fixture.scrollTo(200);
+      expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('following');
+      fixture.lease.dispose();
+    }
+  );
+
+  it('retains only the remaining owned contact after partial touch cancellation', () => {
+    const fixture = installTouchFollowFixture();
+    const first = touchContact(fixture.target, 11);
+    const second = touchContact(fixture.target, 12);
+    const foreign = touchContact(document.body, 22);
+    dispatchTouch(fixture.target, 'touchstart', [first, second], [first, second, foreign]);
+    dispatchTouch(window, 'touchcancel', [first], [second, foreign]);
+    fixture.advance(400);
+    fixture.scrollTo(200);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    fixture.scrollTo(300);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('following');
+    dispatchTouch(window, 'touchend', [second], [foreign]);
+    fixture.scrollTo(200);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('following');
+    fixture.lease.dispose();
+  });
+
+  it('does not let an unrelated touch end erase owned native-pan grace', () => {
+    const fixture = installTouchFollowFixture();
+    const own = touchContact(fixture.target, 11);
+    const foreign = touchContact(document.body, 22);
+    dispatchTouch(fixture.target, 'touchstart', [own], [own]);
+    dispatchTouch(window, 'touchcancel', [own], []);
+    dispatchTouch(window, 'touchend', [foreign], []);
+    fixture.scrollTo(200);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    fixture.lease.dispose();
+  });
+
+  it.each(['touchcancel', 'pointercancel'])(
+    'does not arm reader intent from another target %s',
+    (cancellation) => {
+      const fixture = installTouchFollowFixture();
+      fixture.advance(400);
+      if (cancellation === 'touchcancel') {
+        dispatchTouch(window, cancellation, [touchContact(document.body, 22)], []);
+      } else {
+        window.dispatchEvent(
+          new PointerEvent(cancellation, { pointerType: 'touch', pointerId: 22 })
+        );
+      }
+      fixture.scrollTo(200);
+      expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('following');
+      fixture.lease.dispose();
+    }
+  );
 
   it('does not preserve non-touch pointer cancellation as panning intent', () => {
     const frames = installFrameHarness();
@@ -1171,7 +1305,7 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
-  it('cancels older automatic work for a disabled-axis to-end request', () => {
+  it('keeps automatic follow progressing after a disabled-axis to-end rejection', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');
     const updateMetrics = installMetrics(target, {
@@ -1198,9 +1332,16 @@ describe('module-scroll: end-follow host contract', () => {
     expect(frames.pending()).toBe(1);
     lease.request({ kind: 'to-end', axis: 'horizontal' });
     expect(snapshots.at(-1)?.endFollow.requestStatus).toBe('rejected');
+    expect(frames.pending()).toBe(1);
     frames.runAll();
-    expect(target.scrollTop).toBe(300);
-    expect(snapshots.at(-1)?.endFollow.requestStatus).toBe('rejected');
+    expect(target.scrollTop).toBe(400);
+    expect(snapshots.at(-1)?.endFollow).toEqual({ state: 'following', requestStatus: 'rejected' });
+    updateMetrics({ scrollHeight: 600 });
+    window.dispatchEvent(new Event('resize'));
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(500);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
     lease.dispose();
   });
 

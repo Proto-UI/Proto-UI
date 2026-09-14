@@ -47,6 +47,7 @@ const probeSource = `
   let surface;
   let viewport;
   let focusOwner;
+  let touchEvents = [];
   const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
   const appendRows = (count) => {
     for (let index = 0; index < count; index += 1) {
@@ -94,6 +95,16 @@ const probeSource = `
     viewport.style.width = '240px';
     viewport.style.height = '120px';
     viewport.style.overflow = 'auto';
+    for (const type of ['touchstart', 'touchcancel']) {
+      viewport.addEventListener(type, (event) => {
+        touchEvents.push({
+          type: event.type,
+          isTrusted: event.isTrusted,
+          activeTouchCount: event.touches.length,
+          changedTouchIds: Array.from(event.changedTouches, (touch) => touch.identifier),
+        });
+      });
+    }
     appendRows(20);
     document.body.replaceChildren(focusOwner, viewport);
     focusOwner.focus();
@@ -102,6 +113,18 @@ const probeSource = `
     return read();
   };
   globalThis.readScrollEndFollowProbe = read;
+  globalThis.readScrollEndFollowTouchEvents = () => touchEvents.slice();
+  globalThis.setScrollEndFollowOffsetForTest = async (top) => {
+    const scrollEvent = new Promise((resolve) => {
+      viewport.addEventListener('scroll', (event) => resolve(event.isTrusted), { once: true });
+    });
+    // This offset is deliberately test-driven. Chromium still emits the real
+    // scroll event consumed by the Web host; it is not represented as a pan.
+    viewport.scrollTop = top;
+    const scrollEventTrusted = await scrollEvent;
+    await frame();
+    return { ...read(), offsetSource: 'test-driven-scrollTop', scrollEventTrusted };
+  };
   globalThis.appendScrollEndFollowRows = async (count) => {
     appendRows(count);
     await frame();
@@ -195,6 +218,98 @@ describe('Scroll end-follow / real Chromium', () => {
     expect(streamed.atEnd).toBe(true);
     expect(streamed.focusPreserved).toBe(true);
     expect(streamed.scrollBehavior).not.toBe('smooth');
+    await context.close();
+  }, 120_000);
+
+  it('keeps owned touch-cancellation intent bounded to the ensuing scroll', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+    });
+    const page = await context.newPage();
+    await page.goto(baseUrl, { waitUntil: 'networkidle' });
+    await page.waitForFunction(
+      () => typeof (globalThis as any).setupScrollEndFollowProbe === 'function'
+    );
+    const initial = await page.evaluate(() => (globalThis as any).setupScrollEndFollowProbe());
+    const viewport = page.locator('scroll-end-follow-browser-probe');
+    const box = await viewport.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) throw new Error('Scroll end-follow probe has no Chromium layout box.');
+
+    const cdp = await context.newCDPSession(page);
+    const dispatchTrustedTouchCancellation = async (identifier: number) => {
+      const eventOffset = await page.evaluate(
+        () => (globalThis as any).readScrollEndFollowTouchEvents().length
+      );
+      const point = {
+        x: Math.floor(box.x + box.width / 2),
+        y: Math.floor(box.y + box.height / 2),
+        id: identifier,
+      };
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [point],
+      });
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchCancel',
+        touchPoints: [],
+      });
+      await page.waitForFunction((offset) => {
+        const events = (globalThis as any).readScrollEndFollowTouchEvents().slice(offset);
+        return (
+          events.some((event: any) => event.type === 'touchstart') &&
+          events.some((event: any) => event.type === 'touchcancel')
+        );
+      }, eventOffset);
+      return page.evaluate((offset) => {
+        return (globalThis as any).readScrollEndFollowTouchEvents().slice(offset);
+      }, eventOffset);
+    };
+
+    const immediateEvents = await dispatchTrustedTouchCancellation(11);
+    const immediateStart = immediateEvents.find((event: any) => event.type === 'touchstart');
+    const immediateCancel = immediateEvents.find((event: any) => event.type === 'touchcancel');
+    expect(immediateStart).toMatchObject({ isTrusted: true, activeTouchCount: 1 });
+    expect(immediateCancel).toMatchObject({ isTrusted: true, activeTouchCount: 0 });
+    expect(immediateCancel.changedTouchIds).toEqual(immediateStart.changedTouchIds);
+
+    const immediate = await page.evaluate(
+      (top) => (globalThis as any).setScrollEndFollowOffsetForTest(top),
+      initial.maximum - 96
+    );
+    expect(immediate).toMatchObject({
+      offsetSource: 'test-driven-scrollTop',
+      scrollEventTrusted: true,
+      followState: 'paused',
+    });
+    expect(immediate.top).toBeLessThan(initial.maximum);
+    const afterImmediateAppend = await page.evaluate(() =>
+      (globalThis as any).appendScrollEndFollowRows(4)
+    );
+    expect(afterImmediateAppend.top).toBe(immediate.top);
+
+    const resumed = await page.evaluate(() => (globalThis as any).jumpScrollEndFollowToEnd());
+    expect(resumed.top).toBe(resumed.maximum);
+    await dispatchTrustedTouchCancellation(12);
+    // The host's bounded cancellation token is 250 ms; wait beyond that
+    // semantic boundary before applying an unrelated test-driven offset.
+    await page.waitForTimeout(350);
+    const expired = await page.evaluate(
+      (top) => (globalThis as any).setScrollEndFollowOffsetForTest(top),
+      resumed.maximum - 96
+    );
+    expect(expired).toMatchObject({
+      offsetSource: 'test-driven-scrollTop',
+      scrollEventTrusted: true,
+      followState: 'following',
+    });
+    expect(expired.top).toBeLessThan(resumed.maximum);
+    const afterExpiredAppend = await page.evaluate(() =>
+      (globalThis as any).appendScrollEndFollowRows(4)
+    );
+    expect(afterExpiredAppend.top).toBe(afterExpiredAppend.maximum);
+    expect(afterExpiredAppend.followState).toBe('following');
     await context.close();
   }, 120_000);
 });
