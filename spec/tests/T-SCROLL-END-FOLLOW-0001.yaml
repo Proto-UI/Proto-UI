@@ -3,6 +3,9 @@ type: test
 title: Scroll end-follow transition and host-lifetime conformance
 status: draft
 since: 0.3.0-alpha.0
+lifecycleRationale:
+  zh-CN: 已映射 deterministic Module/host tests、四 Web Adapter journeys 与 Chromium evidence；required coverage 的边界及其对 draft end-follow contract 的充分性仍需独立审查。非 Chromium 与 pointer-only native cancellation 尚未由此证据覆盖，passing 记录不等于稳定准入。
+  en: Deterministic module and host tests, four Web Adapter journeys, and Chromium evidence are mapped, but the required coverage boundaries and their sufficiency for the draft end-follow contract still need independent review. Non-Chromium and pointer-only native cancellation are not covered by this evidence; recorded passing results do not constitute stable admission.
 summary: Verifies portable policy and facts, layout-ready following, coalescing, reader interruption, explicit and natural resume, reflow, cross-adapter consumption, and stale callback suppression.
 cases:
   - id: T-SCROLL-END-FOLLOW-0001-CASE-POLICY

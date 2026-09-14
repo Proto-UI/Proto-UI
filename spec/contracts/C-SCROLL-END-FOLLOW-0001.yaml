@@ -3,6 +3,9 @@ type: contract
 title: Scroll end-follow preserves reader intent across append-only layout
 status: draft
 since: 0.3.0-alpha.0
+lifecycleRationale:
+  zh-CN: End-follow 的 portable policy、request 与 host ownership 已形成有界提案；reader-input attribution 和 host/profile-specific end proximity 仍待审查。当前四 Web Adapter 与 Chromium 证据不代表所有原生输入路径已完成稳定准入，因此保持 draft。
+  en: The portable end-follow policy, requests, and host ownership form a bounded proposal, but reader-input attribution and host/profile-specific end proximity remain under review. Current four-Web-Adapter and Chromium evidence does not establish stable admission for every native input path, so the contract remains draft.
 summary: End-follow is an opt-in Scroll policy that follows logical-end growth only while its bounded lease is active, pauses after host-observed departure, and resumes through natural arrival or an explicit semantic request.
 statement:
   zh-CN: >-
