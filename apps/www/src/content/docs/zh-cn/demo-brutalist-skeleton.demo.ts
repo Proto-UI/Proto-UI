@@ -8,6 +8,7 @@ export default {
         kind: 'proto',
         prototypeId: 'brutalist-skeleton-root',
         className: 'w-32 h-4',
+        children: [{ kind: 'box', ref: 'skeleton-canary', children: ['SKELETON-CANARY'] }],
       },
       {
         kind: 'proto',

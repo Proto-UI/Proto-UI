@@ -268,7 +268,10 @@ export class ScrollModuleImpl extends ModuleBase {
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
-    if (phase === 'unmounted') this.disconnect();
+    if (phase === 'unmounted') {
+      this.mounted = false;
+      this.disconnect();
+    }
     if (phase === 'unmounted') {
       this.offAnatomyOrder?.();
       this.offAnatomyOrder = null;
@@ -284,8 +287,10 @@ export class ScrollModuleImpl extends ModuleBase {
   private attach(): void {
     const epoch = ++this.leaseEpoch;
     this.snapshotEpoch++;
-    this.lease?.dispose();
+    const previous = this.lease;
     this.lease = null;
+    previous?.dispose();
+    if (epoch !== this.leaseEpoch || !this.mounted) return;
     const host = this.getHost();
     if (!host) {
       this.set(this.projectionOwned, 'unresolved');
@@ -297,6 +302,7 @@ export class ScrollModuleImpl extends ModuleBase {
     }
     const projection = resolveScrollProjection(this.config, host.support, host.preference);
     this.set(this.projectionOwned, projection);
+    if (epoch !== this.leaseEpoch || !this.mounted) return;
     this.pendingAttachRequests = [];
     this.attachingLease = true;
     try {
@@ -430,14 +436,19 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   disconnect(): void {
-    this.leaseEpoch++;
+    const epoch = ++this.leaseEpoch;
     this.snapshotEpoch++;
     this.pendingAttachRequests = [];
-    this.lease?.dispose();
+    const previous = this.lease;
     this.lease = null;
+    previous?.dispose();
+    if (epoch !== this.leaseEpoch) return;
     this.set(this.scrollingOwned, false);
+    if (epoch !== this.leaseEpoch) return;
     this.set(this.projectionOwned, 'unresolved');
+    if (epoch !== this.leaseEpoch) return;
     this.set(this.endFollowStateOwned, 'off');
+    if (epoch !== this.leaseEpoch) return;
     this.set(this.endFollowRequestStatusOwned, 'idle');
   }
 }

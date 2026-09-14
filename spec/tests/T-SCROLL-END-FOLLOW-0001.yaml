@@ -104,6 +104,17 @@ implementations:
       - T-SCROLL-END-FOLLOW-0001-CASE-A11Y
     notes:
       - A self-hosted source bundle runs the actual Web Component adapter in Chromium and uses trusted Playwright wheel input to verify pause, streaming append, explicit resume, focus stability, and direct motion.
+      - Trusted CDP touch input proves native departure after pointer cancellation while an owned touch remains active; an unmoved touch cancellation terminates ownership before an immediate, explicitly test-driven offset change. No cancellation grace timer is used. This evidence is scoped to Chromium with PointerEvents and TouchEvents.
+  - id: scroll-reader-contact-session
+    kind: module-test
+    status: passing
+    path: packages/modules/scroll/test/reader-contact-session.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
+      - T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
+    notes:
+      - Deterministic idle/contact/native-pan transitions cover contact identity, cancellation order, native pointer handoff, foreign contacts, and terminal reset without reading a clock.
 verifies:
   contracts:
     - C-SCROLL-END-FOLLOW-0001

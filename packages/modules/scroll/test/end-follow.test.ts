@@ -93,17 +93,12 @@ function installTouchFollowFixture() {
   const snapshots: ScrollSurfaceSnapshot[] = [];
   const lease = attachEndFollow(target, snapshots);
   frames.runAll();
-  let now = 1000;
-  vi.spyOn(window.performance, 'now').mockImplementation(() => now);
   return {
     frames,
     target,
     updateMetrics,
     snapshots,
     lease,
-    advance(ms: number) {
-      now += ms;
-    },
     scrollTo(top: number) {
       target.scrollTop = top;
       target.dispatchEvent(new Event('scroll'));
@@ -613,11 +608,9 @@ describe('module-scroll: end-follow host contract', () => {
     const lease = attachEndFollow(target, snapshots);
     frames.runAll();
 
-    const now = vi.spyOn(window.performance, 'now').mockReturnValue(1000);
     const touch = touchContact(target, 1);
     dispatchTouch(target, 'touchstart', [touch], [touch]);
     dispatchTouch(window, 'touchcancel', [touch], []);
-    now.mockReturnValue(1400);
     target.scrollTop = 200;
     target.dispatchEvent(new Event('scroll'));
 
@@ -625,12 +618,14 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
-  it('retains bounded native-pan intent after the last owned touch is canceled', () => {
-    // C-SCROLL-END-FOLLOW-0001-INTERRUPT: native pan cancellation precedes departure.
+  it('samples an already-applied departure before ending a canceled contact session', () => {
+    // Actual host movement precedes cancellation, even if scroll dispatch is pending.
     const fixture = installTouchFollowFixture();
     const touch = touchContact(fixture.target, 11);
     dispatchTouch(fixture.target, 'touchstart', [touch], [touch]);
+    fixture.target.scrollTop = 200;
     dispatchTouch(window, 'touchcancel', [touch], []);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
     fixture.scrollTo(200);
     expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
     fixture.updateMetrics({ scrollHeight: 500 });
@@ -649,7 +644,6 @@ describe('module-scroll: end-follow host contract', () => {
       const foreign = touchContact(document.body, 22);
       dispatchTouch(fixture.target, 'touchstart', [own], [own, foreign]);
       dispatchTouch(window, completion, [own], [foreign]);
-      fixture.advance(400);
       fixture.scrollTo(200);
       expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('following');
       fixture.lease.dispose();
@@ -663,7 +657,6 @@ describe('module-scroll: end-follow host contract', () => {
     const foreign = touchContact(document.body, 22);
     dispatchTouch(fixture.target, 'touchstart', [first, second], [first, second, foreign]);
     dispatchTouch(window, 'touchcancel', [first], [second, foreign]);
-    fixture.advance(400);
     fixture.scrollTo(200);
     expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
     fixture.scrollTo(300);
@@ -674,13 +667,18 @@ describe('module-scroll: end-follow host contract', () => {
     fixture.lease.dispose();
   });
 
-  it('does not let an unrelated touch end erase owned native-pan grace', () => {
+  it('does not let an unrelated touch end terminate the owned native session', () => {
     const fixture = installTouchFollowFixture();
     const own = touchContact(fixture.target, 11);
     const foreign = touchContact(document.body, 22);
     dispatchTouch(fixture.target, 'touchstart', [own], [own]);
-    dispatchTouch(window, 'touchcancel', [own], []);
-    dispatchTouch(window, 'touchend', [foreign], []);
+    fixture.target.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch', pointerId: 31 })
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointercancel', { pointerType: 'touch', pointerId: 31 })
+    );
+    dispatchTouch(window, 'touchend', [foreign], [own]);
     fixture.scrollTo(200);
     expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
     fixture.lease.dispose();
@@ -690,7 +688,6 @@ describe('module-scroll: end-follow host contract', () => {
     'does not arm reader intent from another target %s',
     (cancellation) => {
       const fixture = installTouchFollowFixture();
-      fixture.advance(400);
       if (cancellation === 'touchcancel') {
         dispatchTouch(window, cancellation, [touchContact(document.body, 22)], []);
       } else {

@@ -48,6 +48,8 @@ document.body.innerHTML = '<proto-ui-shadcn-button variant="outline">Proto UI 0.
   adopting it in production.
 </Aside>
 
+This page takes you through adding a Shadcn Button to an existing application and rendering it for the first time. You can start here without reading the whitepaper.
+
 ## Before you begin
 
 Run these commands from an existing React, Vue, or Web Components application. The example below uses a React application that already has `react` installed.
@@ -119,6 +121,12 @@ Add the official Shadcn Button facade for the host your application uses. The ex
 
 The command installs the matching Adapter and `@proto.ui/prototypes-shadcn@0.2.0`, then generates the host entry under `proto-ui/components/`. Vue projects use `vue` in the same command. The relative imports are intentional: applications do not share one path-alias setup or directory depth. Generated facades preserve the Prototype's declared props, event listeners, and ref/expose surface.
 
+## Check your first integration
+
+Start the application. You should see an outline Button labeled “Proto UI 0.2.0”. Check that styles load, then try focusing it with Tab and activating it with Enter or Space. If an import fails, check the generated directory and relative path; if styling is missing, check that the application entry imports the generated stylesheet.
+
+Once this works, use the component documentation to connect business state and events.
+
 ## Continue one component at a time
 
 ```bash
@@ -149,6 +157,12 @@ To generate without installing missing packages, add `--no-install`. The CLI wil
 
 ## Next
 
-- [How It Works](/en/start-here/how-it-works/)
-- [UI Libraries](/en/ui-libraries/)
-- [Why Proto UI](/en/start-here/why-proto-ui/)
+Once you have integrated your first component, choose where to go next:
+
+| What would you like to do next? | Continue here |
+| --- | --- |
+| Find more Shadcn-style components | [Shadcn Library](/en/ui-libraries/shadcn/) |
+| Explore base components without default styling | [Base Library](/en/ui-libraries/base/) |
+| Try a Neo-Brutalist visual style | [Brutalist Library](/en/ui-libraries/brutalist/) |
+| Find and use icons | [Lucide Icons](/en/ui-libraries/lucide/) |
+| Explore Proto UI's ideas and design boundaries | [Whitepaper: Preface](/en/whitepaper/0-preface/) |

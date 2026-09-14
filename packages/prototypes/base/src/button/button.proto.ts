@@ -1,11 +1,12 @@
 import type { DefHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
-import { asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
 import type { ButtonAsHookContract, ButtonExposes, ButtonProps, ButtonStateHandles } from './types';
 
 export type { ButtonProps, ButtonExposes, ButtonStateHandles, ButtonAsHookContract } from './types';
 
 function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-BUTTON-TRIGGER-SEMANTICS, P-BASE-BUTTON-NESTED-TRIGGER-ROUTE
   asTrigger();
 
@@ -20,7 +21,7 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   // P-BASE-BUTTON-DISABLED-EXPOSE
   const disabled = def.state.bool('disabled', false);
   def.expose.state('disabled', disabled);
-  def.a11y.state('disabled', disabled);
+  accessible.state('disabled', disabled);
 
   // P-BASE-BUTTON-POINTER-HOVER
   const hovered = def.state.bool('hovered', false);
@@ -70,13 +71,13 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   // P-BASE-BUTTON-CLICK-SIGNAL, P-BASE-BUTTON-CLICK-PROTOCOL-NAME
   def.expose.event('click', { payload: 'void' });
   // P-BASE-BUTTON-ROLE-COMMAND
-  def.a11y.action('activate', { event: 'click' });
+  accessible.action('activate', { event: 'click' });
 
   // P-BASE-BUTTON-ACCESSIBLE-ROLE
-  def.a11y.role('button');
+  accessible.role('button');
 
   // P-BASE-BUTTON-ACCESSIBLE-NAME, P-BASE-BUTTON-CONTENT-LABEL-SOURCE
-  def.a11y.nameFromContent();
+  accessible.nameFromContent();
 
   // P-BASE-BUTTON-KEYBOARD-ACTIVATION, P-BASE-BUTTON-KEYBOARD-SPACE-PREVENT-DEFAULT,
   // HC-DEFAULT-ACTION-0001: prevention is requested through the portable

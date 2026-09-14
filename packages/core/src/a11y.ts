@@ -52,7 +52,8 @@ export type A11ySemanticObjectSnapshot = {
   level?: number;
 };
 
-export type A11yDefAPI = {
+/** Setup-only declarations for the current logical instance; acquired through asAccessible(). */
+export type AccessibleHandle = {
   id(target: A11yIdentityTarget): void;
   role(role: A11yRoleTarget): void;
   name(value: A11yTextTarget): void;

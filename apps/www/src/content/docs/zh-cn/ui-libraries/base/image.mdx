@@ -1,0 +1,99 @@
+---
+title: 'Image'
+desp: 'Image 基础原型'
+description: '由宿主呈现图片，显式表达可访问性与加载状态'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+`base-image-root` 是 `0.3.0-alpha.0` 包系列中的 draft Base 原型。它声明一个由宿主管理的图片目标，并公开 source、fit 和加载状态。目前 Web Components、React、Vue 3 将每个实例投射为一个物理 `<img>`。Vue 2 尚未接入 Image View；这些预览验证的是有界 Web profile，不代表非 Web 宿主支持。
+
+<div>
+  <PrototypePreviewer
+    demoId="demo-base-image"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue']}
+  />
+</div>
+
+上方三个等大的框用同一张图片比较 `contain`、`cover` 和 `fill`。小图是装饰性图片。下方图片初始没有 source：加载、替换、传入无效 source 或清空，观察真实的 `loadingStatusChange` 事件。缓存或本地图片可能很快完成加载，来不及看到中间状态；事件记录会保留这次转换。按钮、图片框尺寸和记录区域由 demo 提供，不属于 Base Image。
+
+## 使用 Image
+
+导入真实原型，在宿主应用中完成适配：
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { imageRoot } from '@proto.ui/prototypes-base/image';
+
+const Image = createReactAdapter(React)(imageRoot);
+
+export function Cover() {
+  return (
+    <Image
+      source="/images/cover.jpg"
+      a11yMode="informative"
+      alternativeText="倒映在湖中的山脊"
+      fit="cover"
+      surfaceStyle={{ width: '100%', height: '240px' }}
+    />
+  );
+}
+```
+
+Vue 使用 `createVueAdapter(Vue)(imageRoot)`。Web Components 使用 `AdaptToWebComponent(imageRoot, { registerAs: 'app-image' })`，挂载前通过 `setElementProps()` 设置声明的 props。应用内各个包应使用一致的精确版本。
+
+工作区 CLI 已为 `react`、`vue`、`wc` 注册 `base-image`，生成 `BaseImageRoot` 或 `BaseImageRootElement`。包含新注册项的构建支持 `proto-ui add react base-image` 及对应的 `vue` / `wc` 命令。
+
+历史发行边界：`0.3.0-alpha.0` 预发行包包含上面示例中的 Image 直接导出，但它的 CLI 早于 `base-image` 注册项。Image 不属于稳定版 `0.2.0` 的功能范围。
+
+## Props 与 Exposes
+
+| Prop | 含义 |
+| --- | --- |
+| `source` | opaque URI 字符串。省略或空字符串表示 `idle`。同步同一个 URI 不会重启已经结束的请求。 |
+| `a11yMode` | 显式选择 `informative` 或 `decorative`。默认值为 `informative`，仍然要求非空替代文本。 |
+| `alternativeText` | informative 图片要求非空文本；decorative 图片应省略或使用空字符串。 |
+| `fit` | `contain`（默认）、`cover` 或 `fill`，在调用方设定的图片框中居中。 |
+
+informative 图片把替代文本投射到物理目标。decorative 图片使用空 `alt`，不向可访问性树提供图片名称。互相矛盾或缺失的可访问性输入会被拒绝；Base Image 不会从 URI 猜测名称。
+
+公开状态为 `source`、`fit` 和 `loadingStatus`。唯一的对外状态转换事件是 `loadingStatusChange`：
+
+```text
+{ status, previousStatus, source }
+```
+
+状态为 `idle | loading | loaded | error`。新的非空 source 在宿主工作开始前进入 `loading`，当前请求随后可进入 `loaded` 或 `error`。替换 source 会清除之前的视觉内容，并使其未完成请求失效；清空 source 返回 `idle`。事件 payload 不包含原生事件或宿主错误对象。
+
+当前 Web profile 以可展示的同步缓存命中，或该 source 请求对应的 `HTMLImageElement.decode()` 结果，作为加载完成依据。这是 Web 的 readiness 映射，不要求所有宿主使用同一种解码 API。失败的 source 不会自动生成重试按钮或 fallback 内容，由应用决定周围如何呈现。
+
+## 组合与样式
+
+Root 不接收 authored children。应用负责尺寸、外框、相邻说明和状态显示；`fit` 负责图片如何填充这个物理框。Web Components 保留自定义元素边界和一个内部图片，`surfaceClassName`、`surfaceStyle` 指向物理图片；React 与 Vue 直接使用物理图片作为 root。
+
+复用 authored hook 的原型还必须携带它已经冻结的静态需求，让 Adapter 在 setup 之前选定图片目标：
+
+```ts
+import { definePrototype } from '@proto.ui/core';
+import { asImageRoot } from '@proto.ui/prototypes-base/image';
+
+const framedImage = definePrototype({
+  name: 'framed-image',
+  modules: asImageRoot.modules,
+  setup() {
+    asImageRoot();
+  },
+});
+```
+
+Base Image 不拥有 Avatar fallback、上传、裁剪、缩放、图库导航、响应式 `srcset`、缓存策略或实时播报。放在 Button 或 Link 中的图片不会成为独立控件；外层控件拥有激活行为和功能名称。
+
+## 参考
+
+- 原型：[P-BASE-IMAGE](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-IMAGE.yaml)
+- 合同：[C-IMAGE-VIEW-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-IMAGE-VIEW-0001.yaml)
+- Web 投射：[D-IMAGE-VIEW-PROJECTION-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/decisions/D-IMAGE-VIEW-PROJECTION-0001.yaml)
+- 源码：[packages/prototypes/base/src/image](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/image)
+- 证据：[T-IMAGE-VIEW-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-IMAGE-VIEW-0001.yaml)

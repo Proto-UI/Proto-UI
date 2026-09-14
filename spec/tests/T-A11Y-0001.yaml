@@ -5,6 +5,12 @@ status: draft
 since: 0.1.0
 summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, Web adapter projection, portable heading-level validation, role coherence, target rebinding, and cross-adapter lifecycle behavior.
 cases:
+  - id: T-A11Y-0001-CASE-ACCESSIBLE-HANDLE
+    title: Shared setup handle, removed legacy entry, guarded declarations and both name-collision orders
+    covers:
+      - C-A11Y-0001-AUTHOR-HANDLE
+      - C-A11Y-0001-DECLARATION-LIFETIME
+    expectation: same-instance-handle-with-last-setup-declaration-and-runtime-rejection
   - id: T-A11Y-0001-CASE-DYNAMIC-ROLE
     title: A semantic role may follow a state-backed fact
     covers:
@@ -77,6 +83,12 @@ cases:
       - HC-A11Y-0001-C
     expectation: portable-heading-level-setup-validation-runtime-omission-recovery-role-and-target-cleanup
 implementations:
+  - id: runtime-accessible-handle
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/as-accessible.contract.test.ts
+    required: true
+    consumesCases: [T-A11Y-0001-CASE-ACCESSIBLE-HANDLE]
   - id: runtime-a11y-contract
     kind: runtime-test
     status: passing
@@ -145,6 +157,8 @@ verifies:
   contracts:
     - id: C-A11Y-0001
       anchors:
+        - C-A11Y-0001-AUTHOR-HANDLE
+        - C-A11Y-0001-DECLARATION-LIFETIME
         - C-A11Y-0001-A
         - C-A11Y-0001-B
         - C-A11Y-0001-C
@@ -170,6 +184,9 @@ verifies:
         - HC-A11Y-0001-B
         - HC-A11Y-0001-C
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added shared AccessibleHandle, removed legacy API and retained-method setup guards; migrated existing Runtime and Adapter evidence to asAccessible.
   - version: 0.1.0
     change: introduced
     summary: Added the first a11y semantic object test mapping.

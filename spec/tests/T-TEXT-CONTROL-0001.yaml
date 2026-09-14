@@ -16,6 +16,10 @@ cases:
       - C-TEXT-CONTROL-0001-A
       - C-TEXT-CONTROL-0001-B
       - C-TEXT-CONTROL-0001-I
+      - A-REACT-18-19-0001-TEXT-CONTROL
+      - A-VUE-3-0001-TEXT-CONTROL
+      - A-VUE-2-0001-TEXT-CONTROL
+      - A-WEB-COMPONENT-0001-TEXT-CONTROL
     expectation: single-line-requirement-resolves-to-one-web-input-projects-common-hints-and-canonicalizes-line-breaks
   - id: T-TEXT-CONTROL-0001-CASE-SINGLE-LINE-PROPERTIES
     title: Portable patches project common inputMode and enterKeyHint hints on input and textarea, plus the line-mode-specific fields
@@ -66,6 +70,7 @@ cases:
     covers:
       - C-TEXT-CONTROL-0001-D
       - C-TEXT-CONTROL-0001-E
+      - M-TEXT-CONTROL-0001-A
     expectation: logical-value-mode-is-stable-and-controlled-restoration-is-composition-safe
   - id: T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
     title: Web Component native events remain contained and detach revokes target listeners
@@ -76,6 +81,7 @@ cases:
     title: Ordinary patches preserve active selection and controlled composition candidates
     covers:
       - C-TEXT-CONTROL-0001-G
+      - HC-TEXT-CONTROL-0001-A
     expectation: web-host-patches-preserve-selection-cursor-and-active-composition
   - id: T-TEXT-CONTROL-0001-CASE-PRESENTATION-SURFACE
     title: Wrapper-backed Web Component projection keeps boundary metadata on the custom element and visual intent on the textarea
@@ -84,6 +90,17 @@ cases:
       - C-HOST-SURFACE-PROJECTION-0001-B
       - C-HOST-SURFACE-PROJECTION-0001-C
     expectation: wc-text-control-wrapper-is-logical-only-while-textarea-is-the-presentation-surface
+  - id: T-TEXT-CONTROL-0001-CASE-LIFETIME
+    title: Stale and disposed lease callbacks are inert
+    covers:
+      - M-TEXT-CONTROL-0001-B
+    expectation: lifetime-boundary-enforced
+  - id: T-TEXT-CONTROL-0001-CASE-CANCEL
+    title: Listener cancellation remains setup-only
+    covers:
+      - M-TEXT-CONTROL-0001-C
+      - C-CORE-SYNTAX-0007-A
+    expectation: cancel-boundary-enforced
 implementations:
   - id: module-text-control-web-contract
     kind: module-test
@@ -122,6 +139,8 @@ implementations:
       - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
       - T-TEXT-CONTROL-0001-CASE-MODE-COMPATIBILITY
       - T-TEXT-CONTROL-0001-CASE-PATCH-PRESERVATION
+      - T-TEXT-CONTROL-0001-CASE-LIFETIME
+      - T-TEXT-CONTROL-0001-CASE-CANCEL
     exercises:
       - M-TEXT-CONTROL-0001
       - HC-TEXT-CONTROL-0001
@@ -197,6 +216,39 @@ verifies:
       anchors:
         - C-HOST-SURFACE-PROJECTION-0001-B
         - C-HOST-SURFACE-PROJECTION-0001-C
+    - id: C-CORE-SYNTAX-0007
+      since: 0.3.0-alpha.0
+      anchors:
+        - C-CORE-SYNTAX-0007-A
+  modules:
+    - id: M-TEXT-CONTROL-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - M-TEXT-CONTROL-0001-A
+        - M-TEXT-CONTROL-0001-B
+        - M-TEXT-CONTROL-0001-C
+  hostCaps:
+    - id: HC-TEXT-CONTROL-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - HC-TEXT-CONTROL-0001-A
+  adapters:
+    - id: A-REACT-18-19-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-REACT-18-19-0001-TEXT-CONTROL
+    - id: A-VUE-3-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-3-0001-TEXT-CONTROL
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-TEXT-CONTROL
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-WEB-COMPONENT-0001-TEXT-CONTROL
 exercises:
   modules:
     - M-TEXT-CONTROL-0001
@@ -224,6 +276,10 @@ revisions:
     summary: >-
       Added single-line input projection and clearing, common inputMode/enterKeyHint projection to both Web controls, text-compatible target validation, owning-realm editing-session and native-event payload coverage, declaration-driven mode compatibility, complete-patch preservation, line-mode value canonicalization, and cross-adapter single-line evidence across Web Component, React, Vue 3, and Vue 2.
 
+
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Connected M/HC/A criteria to existing editor evidence and added stale-lease/setup-cancel regressions.
 
 tags:
   - text-control

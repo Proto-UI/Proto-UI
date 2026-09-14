@@ -17,6 +17,7 @@ import type {
   ScrollSurfaceHostAttachment,
   ScrollSurfaceHostLease,
 } from '../caps';
+import { createReaderContactSession } from './reader-contact-session';
 
 export type WebScrollSurfaceHostOptions = Readonly<{
   moveGestureHost: MoveGestureHost;
@@ -38,7 +39,8 @@ type ThumbStyleSnapshot = Readonly<{
 
 const clampRatio = (value: number) =>
   Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
-const READER_INTENT_WINDOW_MS = 250;
+// Existing discrete wheel/key classification, separate from contact lifetime.
+const DISCRETE_READER_INTENT_WINDOW_MS = 250;
 const BASE_CONTENT_OBSERVER_OPTIONS = Object.freeze({ childList: true });
 const END_FOLLOW_CONTENT_OBSERVER_OPTIONS = Object.freeze({
   attributes: true,
@@ -195,9 +197,13 @@ export function createWebScrollSurfaceHost(
       let endFollowPending = false;
       let endFollowRequestEpoch = 0;
       let readerIntentUntil = 0;
-      let readerGestureActive = false;
-      const activePointerIds = new Set<number>();
-      const activeTouchIds = new Set<number>();
+      const readerContacts = createReaderContactSession();
+      let contactOrigin: {
+        axis: ScrollAxis;
+        offset: number;
+        viewport: number;
+        extent: number;
+      } | null = null;
       let requestedDepartureAxis: ScrollAxis | null = null;
       let lastFollowLayout: { axis: ScrollAxis; viewport: number; extent: number } | null = null;
       const ownerWindow = target.ownerDocument.defaultView;
@@ -387,7 +393,7 @@ export function createWebScrollSurfaceHost(
             return;
           }
           applyRequest(target, { kind: 'to-end', axis: currentAxis });
-          if (!readerGestureActive) readerIntentUntil = 0;
+          if (!readerContacts.active) readerIntentUntil = 0;
           const reachedEnd = isAxisAtEnd(currentAxis);
           const followAxis = configuredFollowAxis();
           if (followAxis === currentAxis) {
@@ -540,11 +546,11 @@ export function createWebScrollSurfaceHost(
       const armReaderIntent = () => {
         requestedDepartureAxis = null;
         const now = ownerWindow?.performance.now() ?? Date.now();
-        readerIntentUntil = now + READER_INTENT_WINDOW_MS;
+        readerIntentUntil = now + DISCRETE_READER_INTENT_WINDOW_MS;
       };
       const hasReaderIntent = () => {
         const now = ownerWindow?.performance.now() ?? Date.now();
-        return readerGestureActive || readerIntentUntil >= now;
+        return readerContacts.active || readerIntentUntil > now;
       };
       const onWheel = (event: WheelEvent) => {
         if (event.ctrlKey) return;
@@ -558,61 +564,75 @@ export function createWebScrollSurfaceHost(
         if (!leavingEnd) return;
         armReaderIntent();
       };
+      const beginContact = () => {
+        const axis = configuredFollowAxis();
+        if (!readerContacts.active && axis) {
+          contactOrigin = {
+            ...readFollowLayout(axis),
+            offset: axis === 'horizontal' ? target.scrollLeft : target.scrollTop,
+          };
+        }
+        readerIntentUntil = 0;
+        requestedDepartureAxis = null;
+      };
       const onPointerDown = (event: PointerEvent) => {
-        activePointerIds.add(event.pointerId);
-        readerGestureActive = true;
-        armReaderIntent();
+        beginContact();
+        readerContacts.startPointer(event.pointerId, event.pointerType);
       };
       const onTouchStart = (event: TouchEvent) => {
-        let startedHere = false;
-        for (const touch of Array.from(event.changedTouches)) {
-          if (!target.contains(touch.target as Node)) continue;
-          activeTouchIds.add(touch.identifier);
-          startedHere = true;
-        }
-        if (!startedHere) return;
-        readerGestureActive = true;
-        armReaderIntent();
+        const ownedIds = Array.from(event.changedTouches)
+          .filter((touch) => target.contains(touch.target as Node))
+          .map((touch) => touch.identifier);
+        if (ownedIds.length === 0) return;
+        beginContact();
+        readerContacts.startTouches(ownedIds);
       };
       const completeReaderIntent = () => {
-        readerGestureActive = false;
         readerIntentUntil = 0;
       };
-      const maybeCompleteReaderIntent = () => {
-        if (activePointerIds.size === 0 && activeTouchIds.size === 0) completeReaderIntent();
-        else readerGestureActive = true;
+      const finishContact = (owned: boolean) => {
+        if (!owned) return;
+        const axis = configuredFollowAxis();
+        if (contactOrigin && axis === contactOrigin.axis && isAxisEnabled(axis)) {
+          const layout = readFollowLayout(axis);
+          const offset = axis === 'horizontal' ? target.scrollLeft : target.scrollTop;
+          // Sample movement already applied during this session before its
+          // scroll event arrives. A later callback cannot reopen the session.
+          // Extent-only reflow is not evidence of an input displacement.
+          if (
+            layout.viewport === contactOrigin.viewport &&
+            layout.extent === contactOrigin.extent &&
+            offset < contactOrigin.offset &&
+            !isAxisAtEnd(axis)
+          ) {
+            cancelScheduledEnd(true);
+            endFollowState = 'paused';
+            requestedDepartureAxis = null;
+            publish();
+          }
+        }
+        if (!readerContacts.active) contactOrigin = null;
       };
       const onPointerUp = (event: PointerEvent) => {
-        if (!activePointerIds.delete(event.pointerId)) return;
-        maybeCompleteReaderIntent();
-      };
-      const releaseTouchContacts = (event: TouchEvent) => {
-        let released = false;
-        for (const touch of Array.from(event.changedTouches)) {
-          released = activeTouchIds.delete(touch.identifier) || released;
-        }
-        const remaining = new Set(Array.from(event.touches, (touch) => touch.identifier));
-        for (const identifier of activeTouchIds) {
-          if (remaining.has(identifier)) continue;
-          activeTouchIds.delete(identifier);
-          released = true;
-        }
-        return released;
-      };
-      const onTouchEnd = (event: TouchEvent) => {
-        if (releaseTouchContacts(event)) maybeCompleteReaderIntent();
-      };
-      const settleTouchCancellation = () => {
-        readerGestureActive = activePointerIds.size > 0 || activeTouchIds.size > 0;
-        armReaderIntent();
-      };
-      const onTouchCancel = (event: TouchEvent) => {
-        if (releaseTouchContacts(event)) settleTouchCancellation();
+        finishContact(readerContacts.finishPointer(event.pointerId, false));
       };
       const onPointerCancel = (event: PointerEvent) => {
-        if (!activePointerIds.delete(event.pointerId)) return;
-        if (event.pointerType === 'touch') settleTouchCancellation();
-        else maybeCompleteReaderIntent();
+        finishContact(readerContacts.finishPointer(event.pointerId, true));
+      };
+      // Both terminal TouchEvents close owned contacts. Native pointer handoff
+      // remains active only while an owned touch session actually survives.
+      const onTouchEnd = (event: TouchEvent) => {
+        finishContact(
+          readerContacts.finishTouches(
+            Array.from(event.changedTouches, (touch) => touch.identifier),
+            Array.from(event.touches, (touch) => touch.identifier)
+          )
+        );
+      };
+      const resetReaderInput = () => {
+        readerContacts.reset();
+        contactOrigin = null;
+        readerIntentUntil = 0;
       };
       const onKeyDown = (event: KeyboardEvent) => {
         const axis = configuredFollowAxis();
@@ -691,9 +711,10 @@ export function createWebScrollSurfaceHost(
       ownerWindow?.addEventListener('pointercancel', onPointerCancel, { passive: true });
       target.addEventListener('touchstart', onTouchStart, { passive: true });
       ownerWindow?.addEventListener('touchend', onTouchEnd, { passive: true });
-      ownerWindow?.addEventListener('touchcancel', onTouchCancel, { passive: true });
+      ownerWindow?.addEventListener('touchcancel', onTouchEnd, { passive: true });
       target.addEventListener('keydown', onKeyDown);
-      ownerWindow?.addEventListener('keyup', maybeCompleteReaderIntent);
+      ownerWindow?.addEventListener('keyup', completeReaderIntent);
+      ownerWindow?.addEventListener('blur', resetReaderInput);
       const resizeObserver =
         typeof ResizeObserver === 'function' ? new ResizeObserver(onLayoutChange) : undefined;
       const mutationObserver =
@@ -731,6 +752,7 @@ export function createWebScrollSurfaceHost(
         }
       }
       const resetEndFollow = () => {
+        resetReaderInput();
         cancelScheduledEnd(false);
         requestedDepartureAxis = null;
         const axis = configuredFollowAxis();
@@ -779,10 +801,7 @@ export function createWebScrollSurfaceHost(
         dispose() {
           if (disposed) return;
           disposed = true;
-          readerGestureActive = false;
-          activePointerIds.clear();
-          activeTouchIds.clear();
-          readerIntentUntil = 0;
+          resetReaderInput();
           requestedDepartureAxis = null;
           cancelScheduledEnd(false);
           cancelScrollEndTimer?.();
@@ -798,9 +817,10 @@ export function createWebScrollSurfaceHost(
           ownerWindow?.removeEventListener('pointercancel', onPointerCancel);
           target.removeEventListener('touchstart', onTouchStart);
           ownerWindow?.removeEventListener('touchend', onTouchEnd);
-          ownerWindow?.removeEventListener('touchcancel', onTouchCancel);
+          ownerWindow?.removeEventListener('touchcancel', onTouchEnd);
           target.removeEventListener('keydown', onKeyDown);
-          ownerWindow?.removeEventListener('keyup', maybeCompleteReaderIntent);
+          ownerWindow?.removeEventListener('keyup', completeReaderIntent);
+          ownerWindow?.removeEventListener('blur', resetReaderInput);
           ownerWindow?.removeEventListener('resize', onLayoutChange);
           if (observingFonts) {
             fontFaceSet?.removeEventListener('loadingdone', onContentReflow);

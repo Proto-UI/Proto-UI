@@ -1,0 +1,135 @@
+id: T-COLLECTION-0002
+type: test
+title: Collection Module asHook and Adapter conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Direct Module projection, actual Runtime phase/lifetime and four real Adapter journeys verify the bounded Collection slice.
+cases:
+  - id: T-COLLECTION-0002-CASE-MODULE
+    title: Collection module conformance
+    covers:
+      - M-COLLECTION-0001-A
+      - M-COLLECTION-0001-D
+      - M-COLLECTION-0001-F
+    expectation: collection-module-conforms
+  - id: T-COLLECTION-0002-CASE-RUNTIME
+    title: Collection runtime conformance
+    covers:
+      - M-COLLECTION-0001-B
+      - M-COLLECTION-0001-E
+    expectation: collection-runtime-conforms
+  - id: T-COLLECTION-0002-CASE-ADAPTER
+    title: Collection adapter conformance
+    covers:
+      - M-COLLECTION-0001-C
+      - M-COLLECTION-0001-D
+      - A-REACT-18-19-0001-COLLECTION
+      - A-VUE-3-0001-COLLECTION
+      - A-VUE-2-0001-COLLECTION
+      - A-WEB-COMPONENT-0001-COLLECTION
+    expectation: collection-adapter-conforms
+  - id: T-COLLECTION-0002-CASE-EXISTING
+    title: Collection existing conformance
+    covers:
+      - M-COLLECTION-0001-B
+      - M-COLLECTION-0001-C
+      - M-COLLECTION-0001-D
+    expectation: collection-existing-conforms
+implementations:
+  - id: collection-module
+    kind: module-test
+    status: passing
+    path: packages/modules/collection/test/catalog-boundary.test.ts
+    required: true
+    notes:
+      - Criterion F executable coverage checks Module defaults; hook last-known position during transient domain absence is source-inspected, without a dedicated absence/recovery journey.
+    consumesCases:
+      - T-COLLECTION-0002-CASE-MODULE
+  - id: collection-runtime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/collection.catalog.contract.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-0002-CASE-RUNTIME
+  - id: collection-existing-hooks
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/use-collection.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-0002-CASE-EXISTING
+  - id: collection-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/collection.integration.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-0002-CASE-ADAPTER
+    notes:
+      - Real framework keyed composition exercises insertion, removal and reorder. Repeated Proto view epochs are verified separately through actual Runtime.
+      - Shared fixture verifies rendered provider order, live metadata, computed positions, nested domain exclusion and fresh-owner baseline; no focus/selection or browser geometry claim.
+  - id: collection-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/collection.integration.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-0002-CASE-ADAPTER
+    notes:
+      - Real framework keyed composition exercises insertion, removal and reorder. Repeated Proto view epochs are verified separately through actual Runtime.
+      - Shared fixture verifies rendered provider order, live metadata, computed positions, nested domain exclusion and fresh-owner baseline; no focus/selection or browser geometry claim.
+  - id: collection-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/collection.integration.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-0002-CASE-ADAPTER
+    notes:
+      - Real framework keyed composition exercises insertion, removal and reorder. Repeated Proto view epochs are verified separately through actual Runtime.
+      - Shared fixture verifies rendered provider order, live metadata, computed positions, nested domain exclusion and fresh-owner baseline; no focus/selection or browser geometry claim.
+  - id: collection-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/collection.integration.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-0002-CASE-ADAPTER
+    notes:
+      - Web Component host replacement exercises terminal teardown and fresh owners between structural configurations. It does not establish retained-owner keyed reorder; synthetic Runtime order and view-epoch evidence are separate.
+      - Shared fixture verifies rendered provider order, live metadata, computed positions, nested domain exclusion and fresh-owner baseline; no focus/selection or browser geometry claim.
+verifies:
+  modules:
+    - id: M-COLLECTION-0001
+      anchors:
+        - M-COLLECTION-0001-A
+        - M-COLLECTION-0001-B
+        - M-COLLECTION-0001-C
+        - M-COLLECTION-0001-D
+        - M-COLLECTION-0001-E
+        - M-COLLECTION-0001-F
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-COLLECTION
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-COLLECTION
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-COLLECTION
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-COLLECTION
+sources:
+  - path: packages/adapters/base/test/fixtures/collection-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped bounded Collection module, privileged-hook and real Adapter evidence.
+tags:
+  - collection
+  - as-hook
+  - adapter
+  - lifecycle

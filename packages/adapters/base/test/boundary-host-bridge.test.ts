@@ -70,4 +70,15 @@ describe('module-boundary: web host bridge', () => {
       })
     ).toBe('unknown');
   });
+  it('T-BOUNDARY-0002-CASE-WEB: crosses a shadow root and retains positive proof among opaque regions', () => {
+    const bridge = createWebBoundaryHostBridge();
+    const host = document.createElement('div');
+    const shadow = host.attachShadow({ mode: 'open' });
+    const child = document.createElement('button');
+    shadow.append(child);
+    expect(
+      bridge.classify({ regions: [{ target: {} }, { target: host }], sample: { target: child } })
+    ).toBe('inside');
+    expect(bridge.classify({ regions: [], sample: { target: child } })).toBe('unknown');
+  });
 });

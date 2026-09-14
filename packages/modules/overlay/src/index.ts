@@ -11,3 +11,5 @@ export {
   createZIndexOverlayLayerScheduler,
   type OverlayZIndexLayerSchedulerOptions,
 } from './web/z-index-layer-scheduler';
+
+export { createWebOverlayModal } from './web/modal-lock';

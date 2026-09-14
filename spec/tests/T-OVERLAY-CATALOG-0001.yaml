@@ -1,0 +1,189 @@
+id: T-OVERLAY-CATALOG-0001
+type: test
+title: Overlay scoped dismissal and host resource catalog evidence
+status: draft
+lifecycleRationale: >-
+  Retained as draft while the new criterion mappings and required runtime, simulated-DOM Adapter and consumer evidence await admission review. These tests cover scoped Escape and resource cleanup, not generic focus or complete modal certification.
+
+since: 0.3.0-alpha.0
+summary: Runtime input identity, real Adapter wiring with simulated DOM, resource replacement and shared modal locks; no generic focus or full modal certification.
+cases:
+  - id: T-OVERLAY-CATALOG-0001-CASE-ESCAPE
+    title: One scoped Escape owner and immutable privileged input metadata
+    covers:
+      - C-AS-OVERLAY-0001-P
+      - M-OVERLAY-0001-B
+      - M-EVENT-0001-K
+      - HC-EVENT-BINDING-0001-G
+    expectation: one-owner-per-sample-with-controlled-reopen-and-detach-cleanup
+  - id: T-OVERLAY-CATALOG-0001-CASE-RESOURCES
+    title: Original provider cleanup and current provider reacquisition
+    covers:
+      - M-OVERLAY-0001-C
+    expectation: no-resource-left-with-replaced-provider
+  - id: T-OVERLAY-CATALOG-0001-CASE-LAYER
+    title: Layer style priority and idempotent disposal
+    covers:
+      - HC-OVERLAY-LAYER-0001-A
+    expectation: original-style-restored-once
+  - id: T-OVERLAY-CATALOG-0001-CASE-ADAPTER
+    title: Four Adapter nested Escape and concurrent modal ownership
+    covers:
+      - A-REACT-18-19-0001-OVERLAY
+      - A-VUE-3-0001-OVERLAY
+      - A-VUE-2-0001-OVERLAY
+      - A-WEB-COMPONENT-0001-OVERLAY
+      - HC-OVERLAY-MODAL-0001-A
+    expectation: translated-input-selects-one-owner-and-last-modal-restores-overflow
+  - id: T-OVERLAY-CATALOG-0001-CASE-PORTAL
+    title: Renderer-owned Portal and retained view reentry
+    covers:
+      - HC-OVERLAY-PORTAL-0001-A
+    expectation: renderer-projects-owned-host-and-retained-logical-instance-reenters
+  - id: T-OVERLAY-CATALOG-0001-CASE-CONSUMER
+    title: Nested controlled Dialog and Dropdown Root requests
+    covers:
+      - C-AS-OVERLAY-0001-P
+    expectation: only-selected-root-receives-escape-request-while-owner-keeps-open
+implementations:
+  - id: runtime-overlay-escape
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/overlay.escape.contract.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-ESCAPE
+  - id: overlay-resources
+    kind: module-test
+    status: passing
+    path: packages/modules/overlay/test/resource-lifetime.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-RESOURCES
+  - id: overlay-layer
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/overlay-layer-scheduler.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-LAYER
+  - id: react-overlay
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/overlay-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-ADAPTER
+  - id: vue-overlay
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/overlay-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-ADAPTER
+  - id: vue2-overlay
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/overlay-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-ADAPTER
+  - id: web-component-overlay
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/overlay-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-ADAPTER
+  - id: react-overlay-portal
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/overlay-portal-ownership.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-PORTAL
+  - id: vue-overlay-portal
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/overlay-portal-ownership.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-PORTAL
+  - id: vue2-overlay-portal
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/overlay-portal-ownership.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-PORTAL
+  - id: overlay-nested-consumers
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/overlay-dismissal.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-CONSUMER
+  - id: overlay-renderer-reentry-0
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/dialog.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-PORTAL
+  - id: overlay-renderer-reentry-1
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/previewer-dialog.demo.test.ts
+    required: true
+    consumesCases:
+      - T-OVERLAY-CATALOG-0001-CASE-PORTAL
+verifies:
+  contracts:
+    - id: C-AS-OVERLAY-0001
+      anchors:
+        - C-AS-OVERLAY-0001-P
+  modules:
+    - id: M-OVERLAY-0001
+      anchors:
+        - M-OVERLAY-0001-B
+        - M-OVERLAY-0001-C
+    - id: M-EVENT-0001
+      anchors:
+        - M-EVENT-0001-K
+  hostCaps:
+    - id: HC-OVERLAY-PORTAL-0001
+      anchors:
+        - HC-OVERLAY-PORTAL-0001-A
+    - id: HC-OVERLAY-MODAL-0001
+      anchors:
+        - HC-OVERLAY-MODAL-0001-A
+    - id: HC-OVERLAY-LAYER-0001
+      anchors:
+        - HC-OVERLAY-LAYER-0001-A
+    - id: HC-EVENT-BINDING-0001
+      anchors:
+        - HC-EVENT-BINDING-0001-G
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-OVERLAY
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-OVERLAY
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-OVERLAY
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-OVERLAY
+exercises:
+  modules:
+    - M-OVERLAY-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added scoped input arbitration and bounded Overlay host cleanup coverage.
+tags:
+  - overlay
+  - test
+  - adapter

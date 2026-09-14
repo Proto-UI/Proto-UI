@@ -14,6 +14,18 @@ statement:
 
 
 criteria:
+  - id: C-A11Y-0001-AUTHOR-HANDLE
+    text:
+      en: From 0.3.0-alpha.0, asAccessible() returns the current logical instance's AccessibleHandle during setup. Repeated calls share one handle and semantic object without resetting declarations. DefHandle has no a11y property and A11yDefAPI is not exported; no compatibility alias is provided. A privileged/authored hook name collision must be rejected before cached handle reuse or setup suppression.
+      zh-CN: 从 0.3.0-alpha.0 起，asAccessible() 在 setup 返回当前逻辑实例的 AccessibleHandle。重复调用共享同一 handle 与语义对象，不重置声明。DefHandle 不再具有 a11y 属性，不再导出 A11yDefAPI，且不提供兼容别名。特权与 authored hook 同名冲突必须在复用缓存 handle 或跳过 setup 前被拒绝。
+  - id: C-A11Y-0001-DECLARATION-LIFETIME
+    text:
+      en: All AccessibleHandle declaration methods are setup-only, including calls through a retained handle. The last setup declaration wins for a scalar field or the same state/action/relation key; tree patches merge by field. Runtime changes follow bound State values. The handle exposes no dispose or generic runtime mutation; view detach releases projection resources without discarding instance declarations, and remount projects current facts.
+      zh-CN: AccessibleHandle 的所有声明方法仅限 setup，包括通过保存的 handle 调用。单值字段及相同 state/action/relation key 以 setup 最后一次声明为准；tree patch 按字段合并。runtime 变化跟随绑定的 State。handle 不提供 dispose 或通用 runtime mutation；view detach 释放投影资源但保留实例声明，remount 投影当前事实。
+  - id: C-A11Y-0001-DOMAIN-BOUNDARY
+    text:
+      en: AccessibleHandle declares host-projectable accessibility semantics, not complete accessibility certification. It does not create State ownership, keyboard or focus behavior, layout visibility, or arbitrary host targets. Anatomy and domain modules resolve structural targets; A11y expresses their relationships. Internal relation mutation ports are not author APIs.
+      zh-CN: AccessibleHandle 声明可由宿主投影的无障碍语义，不表示完整无障碍认证。它不创建 State 所有权、键盘或焦点行为、布局可见性或任意宿主 target。Anatomy 与领域模块解析结构目标，A11y 表达其关系；内部关系 mutation port 不是作者 API。
   - id: C-A11Y-0001-A
     text:
       zh-CN: a11y domain 必须输出可由 adapter 投影的 semantic object IR。
@@ -101,6 +113,9 @@ verifies:
   tests:
     - T-A11Y-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Replaced def.a11y with the setup-only instance-scoped asAccessible handle without a compatibility alias; preserved domain ownership and existing declaration composition.
   - version: 0.1.0
     change: introduced
     summary: Introduced the minimal semantic object contract for the a11y module.

@@ -1,136 +1,53 @@
 ---
 title: '它是怎么工作的？'
-description: '用 Prototype + Adapter 理解 Proto UI 的最小工作模型'
+description: '用 Prototype 和 Adapter，理解同一份组件定义如何在不同框架中运行。'
 ---
 
-## 这篇文章要回答什么？
+同一个组件，为什么可以在 React、Vue 和 Web Components 中使用？你可以先记住一个简单的组合：
 
-在上一页中，你已经看到：
+> **Prototype + Adapter = 某个框架中可以使用的组件**
 
-> 同一份组件，在不同宿主中表现一致。
+## Prototype：定义组件怎样交互
 
-这一页要回答的是：
+Prototype 就是原型。它描述一个组件应该怎样工作。
 
-- 这种事情最基本是怎么做到的？
-- Prototype 和 Adapter 分别在做什么？
-- 为什么这是理解 Proto UI 的起点？
+以 Switch 为例：
 
-## 先从一个足够简单的模型开始
+- 点击后，开关状态怎样变化；
+- 禁用时，怎样处理用户操作；
+- 开启和关闭时，分别显示什么；
+- 状态变化后，怎样通知应用。
 
-你可以先用一句话理解 Proto UI：
+这些内容可以写在同一份 Prototype 中，不必在 React 和 Vue 里各写一遍。
 
-> **Prototype + Adapter = 某个宿主里的组件实现**
+## Adapter：让它在具体框架中运行
 
-这不是完整理论，但已经足够解释你刚刚看到的 Demo。
+Adapter 就是适配器。它负责把 Prototype 接到你使用的框架中，处理事件绑定、渲染更新等具体工作。
 
-## 回到你刚刚看到的现象
+例如，同一份 Switch Prototype：
 
-在首页 Demo 中，你看到的是：
+- 配合 React Adapter，得到 React 组件；
+- 配合 Vue Adapter，得到 Vue 组件；
+- 配合 Web Component Adapter，得到自定义元素。
 
-- 切换不同宿主（React / Vue / Web Components）
-- 组件的交互行为保持一致
+在 Proto UI 的文档中，这些组件运行的技术环境也被称为 **Host（宿主）**。
 
-从这个模型来看，本质上发生的是：
+## 回到首页 Demo
 
-- Prototype 没变
-- Adapter 换了
+在[首页 Demo](/zh-cn/#home-demo-previewer) 中切换框架时，Prototype 保持不变，换的是运行它的 Adapter。
 
-也就是说：
+这就是同一份交互定义能够在不同框架中复用的基本方式。具体能使用哪些组件，要看所选 Adapter 的支持情况。
 
-> **同一份交互定义，被不同宿主重新解释。**
+## 使用时需要做什么？
 
-## Prototype 在做什么？
+通常，你只需要：
 
-Prototype 负责描述：
+1. 从原型库中选一个组件；
+2. 用 CLI 添加对应框架的组件入口；
+3. 在应用里导入它，传入 props、监听事件。
 
-> **这个组件应该如何交互。**
+如果现有原型库已经满足需求，你不需要先学会编写 Prototype，也不需要自己开发 Adapter。
 
-它关注的是：
+接下来可以按[快速开始](/zh-cn/start-here/quick-start/)，在已有项目中添加第一个组件。
 
-- 状态如何变化
-- 用户输入如何被处理
-- 组件如何反馈
-
-而不是：
-
-- React 怎么写
-- Vue 怎么写
-- DOM 怎么操作
-
-你可以把它理解为：
-
-> Prototype 把组件中与宿主无关的交互部分，单独描述出来。
-
-## Adapter 在做什么？
-
-Adapter 负责回答另一个问题：
-
-> **这些交互，在这个宿主里要怎么实现？**
-
-它决定的是：
-
-- 如何映射到宿主能力
-- 组件 API 如何组织
-- 哪些能力可以直接承接，哪些需要适配
-
-所以：
-
-- Prototype 定义“要发生什么”
-- Adapter 决定“在这里怎么做”
-
-## 把它们放在一起看
-
-你可以用一个很简单的流程理解它：
-
-1. 选择一个 Prototype（交互定义）
-2. 选择一个 Adapter（目标宿主）
-3. 组合它们
-4. 得到该宿主中的组件实现
-
-这也是为什么：
-
-> 同一个 Prototype，可以被多个宿主复用。
-
-## 这个模型带来的直接结果
-
-在这个分层下：
-
-- 交互定义可以独立于具体实现存在
-- 同一个 Prototype 可以被多个宿主解释
-- Prototype 和 Adapter 可以分别演进
-
-## 它不意味着什么
-
-这个模型也有清晰的边界：
-
-- 它不意味着所有宿主天然完全等价
-- 它不意味着组件可以零成本迁移
-- 它不意味着有 Prototype 就一定有高质量实现
-
-Proto UI 做的事情更接近：
-
-> **把可复用的部分和必须适配的部分拆开。**
-
-而不是消除差异本身。
-
-如果你想继续往下看，更深一层的问题，例如：
-
-- 为什么要这样抽象组件
-- 这种抽象的边界在哪里
-- 一致性是如何约束出来的
-
-会放到 Whitepaper 中讨论。
-
-## 下一步
-
-如果你想判断它值不值得引入：
-
-- 前往 [Why Proto UI](/zh-cn/start-here/why-proto-ui/)
-
-如果你已经想直接开始使用：
-
-- 前往 [快速开始](/zh-cn/start-here/quick-start/)
-
-如果你想继续理解它背后的设计原则：
-
-- 前往 [Whitepaper](/zh-cn/whitepaper/0-preface/)
+如果你想进一步了解这套分工的设计，以及跨框架一致性如何判断，可以阅读白皮书的[第五章：翻译层](/zh-cn/whitepaper/5-translation-layer/)和[第六章：一致性的边界](/zh-cn/whitepaper/6-consistency-boundary/)。

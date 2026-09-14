@@ -9,7 +9,7 @@ import {
   type A11ySemanticObjectSnapshot,
 } from '@proto.ui/core';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
-import { asOverlay } from '@proto.ui/hooks';
+import { asAccessible, asOverlay } from '@proto.ui/hooks';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import { EFFECTS_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
@@ -113,6 +113,7 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
     await session.unmount();
     const feedback = session.caps.getPort<FeedbackPort>('feedback')!;
     session.invokeInCallbackScope(() => feedback.patchStyle(tw('detached-token')));
+    feedback.applyMergedStyle(tw('stale-view-token'));
     expect(queued).toEqual([]);
 
     await session.mount();
@@ -124,6 +125,17 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
       kind: 'tw',
       tokens: expect.arrayContaining(['base-token', 'detached-token']),
     });
+    const off = feedback.useStyleRuntime(tw('runtime-token'));
+    const unsafeOff = feedback.useStyleUnsafe(tw('hover:opacity-50'));
+    await session.dispose();
+    queued.length = 0;
+    off();
+    unsafeOff();
+    feedback.applyMergedStyle(tw('after-dispose-token'));
+    expect(() => feedback.useStyleRuntime(tw('after-dispose-token'))).toThrow();
+    expect(() => feedback.useStyleUnsafe(tw('hover:opacity-100'))).toThrow();
+    expect(() => feedback.patchStyle(tw('after-dispose-token'))).toThrow();
+    expect(queued).toEqual([]);
   });
 
   it('suspends A11y and ExposeState host projection but publishes latest state on remount', async () => {
@@ -135,7 +147,7 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
       setup(def) {
         disabled = def.state.bool('disabled', false);
         def.expose.state('disabled', disabled);
-        def.a11y.state('disabled', disabled);
+        asAccessible().state('disabled', disabled);
         return (run) => run.el('button', 'ok');
       },
     });

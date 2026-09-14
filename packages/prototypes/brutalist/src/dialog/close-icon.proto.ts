@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asDialogClose } from '@proto.ui/prototypes-base/dialog';
 import type { BrutalistDialogCloseExposes, BrutalistDialogCloseProps } from './types';
@@ -5,13 +6,14 @@ import type { BrutalistDialogCloseExposes, BrutalistDialogCloseProps } from './t
 const dialogCloseIcon = definePrototype<BrutalistDialogCloseProps, BrutalistDialogCloseExposes>({
   name: 'brutalist-dialog-close-icon',
   setup(def) {
+    const accessible = asAccessible();
     // P-BRUTALIST-DIALOG-CLOSE-ICON-BASE-INHERITANCE: inherit Base Dialog Close (close/disabled/hovered/focusVisible) once, as precomposed close-icon variant.
     const state = asDialogClose().stateHandles;
     if (!state) throw new Error('[brutalist-dialog-close-icon] command states are required.');
     const { disabled, hovered, focusVisible } = state;
 
     // P-BRUTALIST-DIALOG-CLOSE-ICON-A11Y-NAME: a11y accessible name 'Close'.
-    def.a11y.name('Close');
+    accessible.name('Close');
     // P-BRUTALIST-DIALOG-CLOSE-ICON-VISUAL-GRAMMAR + P-BRUTALIST-DIALOG-CLOSE-ICON-PAIR-INVARIANT: fixed bg-canary/text-canary-foreground surface, square border-2 black, hard shadow-3, trailing X icon.
     def.feedback.style.use(
       tw(

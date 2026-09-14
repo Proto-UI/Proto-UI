@@ -1,0 +1,182 @@
+{
+  "browser": "152.0.7977.83",
+  "profile": "Web Component",
+  "states": [
+    {
+      "name": "explicit-light",
+      "rootTheme": "light",
+      "rootClass": "astro-cblkwfwn",
+      "systemDark": false,
+      "cases": [
+        {
+          "id": "default",
+          "declaredScheme": "light",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "subtree-dark",
+          "declaredScheme": "light",
+          "localMarker": "dark",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.3)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "subtree-light",
+          "declaredScheme": "light",
+          "localMarker": "light",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "custom-dark",
+          "declaredScheme": "dark",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        }
+      ]
+    },
+    {
+      "name": "explicit-dark",
+      "rootTheme": "dark",
+      "rootClass": "astro-cblkwfwn",
+      "systemDark": true,
+      "cases": [
+        {
+          "id": "default",
+          "declaredScheme": "dark",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.922 0 0)"
+        },
+        {
+          "id": "subtree-dark",
+          "declaredScheme": "dark",
+          "localMarker": "dark",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.922 0 0)"
+        },
+        {
+          "id": "subtree-light",
+          "declaredScheme": "dark",
+          "localMarker": "light",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.922 0 0)"
+        },
+        {
+          "id": "custom-dark",
+          "declaredScheme": "dark",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.922 0 0)"
+        }
+      ]
+    },
+    {
+      "name": "system-dark",
+      "rootTheme": null,
+      "rootClass": "astro-cblkwfwn",
+      "systemDark": true,
+      "cases": [
+        {
+          "id": "default",
+          "declaredScheme": "dark",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "subtree-dark",
+          "declaredScheme": "dark",
+          "localMarker": "dark",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "subtree-light",
+          "declaredScheme": "dark",
+          "localMarker": "light",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "custom-dark",
+          "declaredScheme": "dark",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+          "border": "lab(100 0 0 / 0.15)",
+          "color": "oklch(0.269 0 0)"
+        }
+      ]
+    },
+    {
+      "name": "system-light",
+      "rootTheme": null,
+      "rootClass": "astro-cblkwfwn",
+      "systemDark": false,
+      "cases": [
+        {
+          "id": "default",
+          "declaredScheme": "light",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "subtree-dark",
+          "declaredScheme": "light",
+          "localMarker": "dark",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "oklab(0.921998 -0.00000908971 0.0000215769 / 0.3)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "subtree-light",
+          "declaredScheme": "light",
+          "localMarker": "light",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        },
+        {
+          "id": "custom-dark",
+          "declaredScheme": "dark",
+          "localMarker": "",
+          "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "lab(90.952 0 -0.0000119209)",
+          "color": "oklch(0.269 0 0)"
+        }
+      ]
+    }
+  ]
+}

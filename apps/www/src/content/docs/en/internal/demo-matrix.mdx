@@ -10,4 +10,6 @@ import DemoMatrix from '@/components/PrototypePreviewer/DemoMatrix.astro';
 
 This page is Proto UI's executable website parity loop: every demo mounts side by side in the four official adapters—Web Components, React, Vue, and Vue 2—so cross-adapter drift is visible in one place. The browser smoke verifies complete mount counts, error fallbacks, global adapter switching, and a zero-overflow 320px layout. It is intentionally omitted from the sidebar.
 
+The website code-surface slice for [#630](https://github.com/Proto-UI/Proto-UI/issues/630), tracked alongside [#420](https://github.com/Proto-UI/Proto-UI/issues/420) and [#568](https://github.com/Proto-UI/Proto-UI/issues/568), has a separate [browser regression](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts) and [retained evidence](https://github.com/Proto-UI/Proto-UI/tree/main/apps/www/test/evidence/issue-630). It compares Markdown and Previewer code in light/dark at 320px, 390px, and desktop widths, then checks CodeExample navigation, repeated `astro:page-load` initialization, and install-command styling. The current site uses full-document navigation, not Astro ClientRouter swaps; these checks do not claim SPA coverage or change Prototype/Adapter guarantees.
+
 <DemoMatrix />

@@ -1,5 +1,7 @@
 # feedback.style.export — Export Contract (v0)
 
+> Legacy explanation. Current authority: [M-FEEDBACK-0001](../../../spec/modules/M-FEEDBACK-0001.yaml), [C-FEEDBACK-STYLE-0003](../../../spec/contracts/C-FEEDBACK-STYLE-0003.yaml), [C-FEEDBACK-STYLE-0004](../../../spec/contracts/C-FEEDBACK-STYLE-0004.yaml), and [C-FEEDBACK-STYLE-0005](../../../spec/contracts/C-FEEDBACK-STYLE-0005.yaml). These entities remain draft.
+
 ## 1. Purpose
 
 This contract defines how merged style intent recorded by feedback is **exported for consumption** by adapters and internal modules.
@@ -34,8 +36,8 @@ The exact API surface (method name, access pattern) is implementation-defined, b
 
 The exported result represents a **snapshot** of merged style intent.
 
-- It reflects all `def.feedback.style.use` / `unUse` calls performed during setup.
-- It MUST NOT depend on runtime state, host state, or scheduling.
+- It reflects the remaining setup contributions, current internal base contributions (including Rule), and the current runtime patch layer.
+- Export does not independently evaluate conditions, read host state, or schedule updates.
 
 Exporting does not mutate feedback state.
 
@@ -43,14 +45,14 @@ Exporting does not mutate feedback state.
 
 ### 3.2 Determinism
 
-Given identical setup-time inputs, exporting style intent MUST produce an identical result.
+Given identical current contributions and runtime patch state, exporting style intent produces an identical result.
 
 The exported result MUST be independent of:
 
 - host rendering behavior
 - adapter implementation details
 - update timing or batching
-- lifecycle phase (as long as setup is complete)
+- lifecycle phase for the same retained logical state; terminal disposal clears that state
 
 ---
 
@@ -63,7 +65,7 @@ The export:
 - Does NOT imply class-based rendering
 - Does NOT imply CSS-based rendering
 - Does NOT encode priority or cascade rules
-- Does NOT encode selectors or conditions
+- Author semantic input does not encode selectors or conditions; internal translation artifacts may contain selector syntax under `C-FEEDBACK-STYLE-0004`
 
 How these tokens are translated into host output is the responsibility of adapters or higher-level compilation steps.
 
@@ -134,4 +136,4 @@ This contract depends on:
 This contract is consumed by:
 
 - `adapter-web-component/feedback.style.apply-to-host.v0`
-- future rule and optimization contracts
+- `C-RULE-INTENT-FEEDBACK-STYLE-0001` and `C-FEEDBACK-STYLE-0005`

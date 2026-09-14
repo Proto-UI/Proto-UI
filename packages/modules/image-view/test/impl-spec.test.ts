@@ -363,7 +363,7 @@ describe('module-image-view', () => {
     warn.mockRestore();
   });
 
-  it('accepts one terminal completion and keeps listener dispatch stable under unsubscribe', () => {
+  it('accepts one terminal completion and rejects runtime listener cancellation', () => {
     const fake = createFakeHost();
     const harness = createHarness(fake.host);
     const image = harness.module.facade.declare();
@@ -372,7 +372,7 @@ describe('module-image-view', () => {
     offFirst = image.on('loadingStatusChange', (_run, event) => {
       if (event.status === 'loaded') {
         calls.push('first');
-        offFirst();
+        expect(offFirst).toThrow();
       }
     });
     image.on('loadingStatusChange', (_run, event) => {
@@ -429,4 +429,14 @@ describe('module-image-view', () => {
     complete(remounted, 'loaded');
     expect(image.snapshot()).toBeNull();
   });
+});
+
+it('T-IMAGE-VIEW-0001-CASE-CANCEL: listener cancellation is setup-only', () => {
+  const h = createHarness(createFakeHost().host);
+  const image = h.module.facade.declare();
+  const off = image.on('loadingStatusChange', () => {});
+  off();
+  off();
+  h.sys.phase = 'callback';
+  expect(off).toThrow();
 });

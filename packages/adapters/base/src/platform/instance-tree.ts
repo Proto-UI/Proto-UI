@@ -220,7 +220,34 @@ export function createInstanceTreeMarkers(
     bridge.setTarget(BOUND_EVENT_TARGET_BY_TOKEN.get(token) ?? null);
   }
 
+  function isRegisteredTrigger(token: LogicalInstanceToken): boolean {
+    const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
+    return TRIGGER_GROUP_MEMBERS_BY_ANCHOR.get(owner)?.has(token) === true;
+  }
+
+  // Validate prospective logical participation before changing parents, roles, or routes.
+  // A detached view retains its logical identity but no longer occupies a group slot.
+  function assertContinuousTriggerChain(
+    token: LogicalInstanceToken,
+    parent: LogicalInstanceToken | null | undefined,
+    declaredAnchor?: LogicalInstanceToken
+  ): void {
+    const reject = () => {
+      throw new Error('[as-trigger] Trigger group must be a continuous chain; sibling Trigger branches are not supported.');
+    };
+    if (parent && (isRegisteredTrigger(parent) || declaredAnchor === parent)) {
+      for (const sibling of CHILDREN_BY_TOKEN.get(parent) ?? []) {
+        if (sibling !== token && isRegisteredTrigger(sibling)) reject();
+      }
+    }
+    let childCount = 0;
+    for (const child of CHILDREN_BY_TOKEN.get(token) ?? []) {
+      if (isRegisteredTrigger(child) && ++childCount > 1) reject();
+    }
+  }
+
   function mergeTriggerGroup(token: LogicalInstanceToken, owner: LogicalInstanceToken): void {
+    assertContinuousTriggerChain(token, PARENT_BY_TOKEN.get(token), owner);
     const previousOwner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
     if (previousOwner !== owner) unregisterTriggerMember(token, previousOwner);
     TRIGGER_GROUP_ANCHOR_BY_TOKEN.set(token, owner);
@@ -233,10 +260,10 @@ export function createInstanceTreeMarkers(
   }
 
   function recomputeTriggerGroup(token: LogicalInstanceToken): void {
-    if (!TRIGGER_TOKENS.has(token)) return;
+    if (!isRegisteredTrigger(token)) return;
     let owner = token;
     let parent = PARENT_BY_TOKEN.get(token);
-    while (parent && TRIGGER_TOKENS.has(parent)) {
+    while (parent && isRegisteredTrigger(parent)) {
       owner = parent;
       parent = PARENT_BY_TOKEN.get(parent);
     }
@@ -256,6 +283,7 @@ export function createInstanceTreeMarkers(
   ): void {
     const previous = PARENT_BY_TOKEN.get(token);
     if (previous === parent || (!previous && !parent)) return;
+    if (isRegisteredTrigger(token)) assertContinuousTriggerChain(token, parent);
     if (previous) CHILDREN_BY_TOKEN.get(previous)?.delete(token);
     if (parent) {
       PARENT_BY_TOKEN.set(token, parent);
@@ -301,6 +329,11 @@ export function createInstanceTreeMarkers(
     proto: Prototype<any>,
     token: LogicalInstanceToken = createLogicalInstance(proto)
   ): LogicalInstanceToken {
+    const parentRoot = getProtoParent(el);
+    const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
+    if (TRIGGER_TOKENS.has(token)) {
+      assertContinuousTriggerChain(token, parentToken ?? PARENT_BY_TOKEN.get(token));
+    }
     (el as any)[PROTO_INSTANCE] = true;
     PROTO_BY_INSTANCE.set(el, proto);
     TOKEN_BY_INSTANCE.set(el, token);
@@ -314,8 +347,6 @@ export function createInstanceTreeMarkers(
       notifyTriggerSurface(owner);
     }
 
-    const parentRoot = getProtoParent(el);
-    const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
     if (parentToken) setLogicalParentInternal(token, parentToken);
     for (const descendant of el.querySelectorAll<HTMLElement>('*')) {
       const descendantToken = TOKEN_BY_INSTANCE.get(descendant);

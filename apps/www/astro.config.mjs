@@ -9,9 +9,11 @@ import tailwindcss from '@tailwindcss/vite';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { rehypeScrollableTables } from './src/utils/rehype-scrollable-tables.js';
 import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
 import { whitepaperRedirectFragments } from './src/utils/whitepaper-redirect-fragments.mjs';
 import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
+import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
 
 const PROTO_UI_PREFIX = '@proto.ui/';
 const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url));
@@ -113,15 +115,20 @@ export default defineConfig({
         }),
       ],
       expressiveCode: {
+        themes: Object.values(codeThemes),
+        useStarlightUiThemeColors: false,
+        useDarkModeMediaQuery: false,
+        minSyntaxHighlightingColorContrast: 0,
         styleOverrides: {
-          borderRadius: 'calc(0.75rem - 1px)',
-          borderColor: 'var(--color-border)',
-          codeFontSize: '0.8125rem',
-          codeLineHeight: '1.5rem',
-          codeBackground: 'var(--color-muted)',
+          borderRadius: 'calc(var(--docs-code-radius) - 1px)',
+          borderColor: 'var(--docs-code-border)',
+          codeFontFamily: 'var(--docs-code-font)',
+          codeFontSize: 'var(--docs-code-size)',
+          codeLineHeight: 'var(--docs-code-line-height)',
+          codeBackground: 'var(--docs-code-background)',
           frames: {
-            editorBackground: 'var(--color-muted)',
-            terminalBackground: 'var(--color-muted)',
+            editorBackground: 'var(--docs-code-background)',
+            terminalBackground: 'var(--docs-code-background)',
           },
         },
       },
@@ -140,7 +147,7 @@ export default defineConfig({
       head: [
         {
           tag: 'style',
-          content: '@layer base, starlight, components, utilities;',
+          content: '@layer base, starlight, components, utilities, proto-ui, code-surfaces;',
         },
         // 双 theme-color
         {
@@ -178,15 +185,15 @@ export default defineConfig({
           translations: { en: 'Start Here', 'zh-CN': '从这里开始' },
           items: [
             {
-              label: '你刚刚看到的是什么？',
-              translations: { en: 'What You Just Saw', 'zh-CN': '你刚刚看到的是什么？' },
+              label: '认识 Proto UI',
+              translations: { en: 'Meet Proto UI', 'zh-CN': '认识 Proto UI' },
               slug: 'start-here/what-you-saw',
             },
             {
               label: 'Why Proto UI',
               translations: {
                 en: 'Why Proto UI',
-                'zh-CN': 'Why Proto UI',
+                'zh-CN': '为什么关注 Proto UI',
               },
               slug: 'start-here/why-proto-ui',
             },
@@ -374,6 +381,11 @@ export default defineConfig({
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
+                },
+                {
+                  label: 'Image',
+                  translations: { en: 'Image', 'zh-CN': 'Image' },
+                  slug: 'ui-libraries/base/image',
                 },
                 {
                   label: 'Separator',
@@ -583,7 +595,6 @@ export default defineConfig({
                   label: 'Tooltip',
                   translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
                   slug: 'ui-libraries/brutalist/components/tooltip',
-                  badge: inProgressBadge,
                 },
               ],
             },
@@ -891,7 +902,7 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [remarkDirective, remarkConceptDirective],
-    rehypePlugins: [rehypeEnhancedImage],
+    rehypePlugins: [rehypeEnhancedImage, rehypeScrollableTables],
   },
   vite: {
     resolve: {

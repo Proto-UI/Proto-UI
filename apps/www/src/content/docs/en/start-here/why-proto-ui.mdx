@@ -1,284 +1,43 @@
 ---
 title: 'Why Proto UI'
-description: 'What problem it solves, where it starts to make sense, and what to expect at this stage'
+description: 'Use the cost of repeated interaction maintenance to decide whether Proto UI is worth trying in your context.'
 ---
 
-import DocStageNotice from '@/components/DocStageNotice.astro';
+## Are you maintaining the same interactions repeatedly?
 
-<DocStageNotice
-  title="Proto UI is in its early public stage."
-  body="Core ideas are already visible, but component coverage and ecosystem readiness are still being built up."
-/>
+A team maintaining both React and Vue applications may need to fix a Switch's keyboard handling, disabled behavior, or change notifications in two component implementations. A later technology migration brings the same responsibilities back again.
 
-## Purpose of this page
+The knowledge worth maintaining together often lives in these details: which operations should change state, what users must perceive, and when the application should receive a notification. Proto UI aims to preserve the parts that hold across technologies so later implementations can reuse and test them.
 
-This is not a full introduction to Proto UI.
+Mature component libraries already reduce this repetition. Headless libraries, for example, centralize state, keyboard interactions, and accessibility handling. If your ecosystem reliably covers your needs, continuing to use those libraries is entirely reasonable. Proto UI explores whether that knowledge can remain executable and maintainable beyond its original technology boundary.
 
-Instead, it answers a more practical question:
+## Where is it worth evaluating?
 
-> Is your problem worth solving with something like Proto UI?
+- **Maintaining several Web stacks.** You want to share corrections to component behavior and verify them in each application.
+- **Building a long-lived component library or design system.** You want interaction definitions to accumulate beyond the lifetime of the current framework, instead of reconstructing them with every migration.
+- **Filling a component gap in your ecosystem.** First check whether the official prototype libraries and target Adapter cover it; missing coverage still requires prototype or adaptation work.
 
-And just as importantly:
+These situations indicate where reuse may be valuable. Actual benefits depend on component coverage, host capabilities, and integration cost. Adding an Adapter does not automatically make every Prototype usable; each combination still needs verification.
 
-> If yes, where will it start to become useful for you?
+## What work does adoption introduce?
 
----
+A shared definition may reduce divergence among behavior implementations, but it also introduces maintenance responsibilities. Debugging may require distinguishing an incomplete interaction definition, an incorrect Adapter mapping, and an application integration problem.
 
-## A familiar situation with hidden cost
+The target Host's input, focus, rendering, and accessibility capabilities still need to be connected correctly. Reusing a definition can concentrate some work, but cannot remove every host difference or verification cost in advance.
 
-Many teams don’t operate on a single, unified stack.
+If you only need mature components in one framework and existing options meet your needs, the additional abstraction may offer limited benefit. Even with several stacks, check current coverage before deciding how much to invest.
 
-You might be working with:
+## Evaluate one real component
 
-- legacy systems (Vue 2 / older React)
-- newer projects (Vue 3 / React 18)
-- constrained environments (Mini Programs, Tauri, embedded WebViews)
-- or additional hosts introduced over time
+A useful starting point before deciding on a library-wide migration is to:
 
-None of these systems are inherently problematic.  
-The issue is that **they don’t share component capabilities well.**
+1. Choose a component relevant to your application in [UI Libraries](/en/ui-libraries/) and inspect its API and examples.
+2. Follow [Quick Start](/en/start-here/quick-start/) to integrate it into an existing page.
+3. Check the input methods, state notifications, styling, and accessibility behavior you depend on. If you plan to use several frameworks, verify each target environment.
+4. Record integration and debugging costs, and whether it reduces work you would otherwise repeat, before expanding adoption.
 
-This usually starts with a simple goal:
+A getting-started path is available for the stable `0.2.0` release, while the project remains in v0. Website demos, repository development, and a published version may have different capabilities. Evaluate the version you actually install with your target Adapter.
 
-> “We want more consistent interaction behavior across our products.”
+## Continue reading
 
-For example:
-
-- better accessibility (ARIA)
-- consistent keyboard interactions
-- more predictable component behavior
-
-Then you realize:
-
-- high-quality implementations are often concentrated in a few ecosystems
-- other environments either lack them or vary in quality
-- the same component capability has to be re-implemented multiple times
-
-So you end up:
-
-- implementing similar components in multiple environments
-- degrading behavior in some platforms
-- or simply skipping certain interaction capabilities
-
-At first, it’s just “a bit more code.”
-
-But as systems grow, the cost changes shape:
-
-> **You keep paying multiple times for the same interaction capability.**
-
----
-
-## This is not a framework-specific issue
-
-You’ll see similar patterns across platforms:
-
-- On the web, mature component implementations are often tied to specific frameworks
-- In constrained environments, ecosystems are incomplete and need to be filled manually
-- In native or GUI frameworks, base controls exist, but high-quality interaction still needs custom work
-- When a design system enters a new host, the same problems reappear
-
-These cases look different, but share a structure:
-
-> **Interaction logic is tightly coupled to specific implementations and hosts.**
-
-Which leads to:
-
-- limited reuse of behavior
-- growing maintenance scope with each new host
-- component systems scaling with duplicated effort
-
----
-
-## Why existing approaches don’t fully solve this
-
-Design systems, component libraries, headless UI, and cross-platform frameworks all help.
-
-But they typically share a boundary:
-
-> **Reuse still happens at the implementation level, not at the interaction semantics level.**
-
-You can often share:
-
-- styles
-- structure
-- some API patterns
-
-But the hardest parts to keep consistent are:
-
-- state transitions
-- event semantics
-- keyboard behavior
-- accessibility
-- feedback across hosts
-
-So duplication remains — just in different forms.
-
----
-
-## Proto UI’s approach
-
-Proto UI separates components into two layers:
-
-- **Prototype**: defines interaction semantics (state, events, feedback)
-- **Adapter**: maps those semantics to specific hosts
-
-The goal is not to eliminate all differences, but to:
-
-> **reuse interaction definitions where possible, and constrain differences to the adapter layer.**
-
-This shifts the focus from:
-
-> “How do I implement this component in framework X?”
-
-to:
-
-> **“Can this interaction behavior exist as a shared definition across hosts?”**
-
-What you see in the homepage demo is not just switching frameworks:
-
-> **The same interaction definition being interpreted by different hosts.**
-
----
-
-## Where Proto UI will start to become useful
-
-Proto UI is unlikely to replace existing ecosystems all at once.
-
-Its value tends to emerge first in these scenarios:
-
-### 1. Filling ecosystem gaps
-
-When a host lacks mature component implementations, but similar components already exist elsewhere, Proto UI can help bridge that gap faster.
-
-It naturally acts as a **fallback layer**:
-
-- not something you must choose upfront
-- but something that becomes useful when the ecosystem falls short
-
----
-
-### 2. Controlling multi-host expansion cost
-
-In traditional setups, supporting more hosts often means more implementations.
-
-With Proto UI, as prototypes and adapters grow, the expansion cost becomes closer to linear, while coverage grows closer to multiplicative.
-
-In other words:
-
-> **Adding a new component or a new host does not require redoing all existing work across combinations.**
-
-This effect appears first in Proto UI’s own libraries, and gradually in any system built on top of it.
-
----
-
-### 3. Gradual consistency in design systems
-
-Proto UI does not require a full rewrite.
-
-It can be introduced at the component level:
-
-- used in new components first
-- applied selectively to high-value components
-- coexisting with existing implementations
-
-Once introduced:
-
-- those components can maintain consistent interaction semantics across hosts
-- future host expansion does not require re-implementing behavior
-
-It does not “fix everything immediately”, but it helps:
-
-> **prevent new components from adding more duplicated behavior over time.**
-
----
-
-## This is not free
-
-Adopting Proto UI is a trade-off.
-
-You reduce:
-
-- long-term duplication of implementation and maintenance
-- divergence of behavior across hosts
-- combinatorial growth of component complexity
-
-You introduce:
-
-- an additional abstraction layer (Prototype / Adapter)
-- more complex debugging paths
-- dependency on ecosystem maturity and component availability
-
-Proto UI is not an immediate “problem fixer”.
-
-More accurately:
-
-> **it is suited for problems that are long-lived, not one-off.**
-
----
-
-## Current stage: what to expect (and what not to)
-
-Proto UI is currently in its early public stage.
-
-This means:
-
-- the core ideas and architecture are already in place
-- but component coverage, host support, and tooling are still being built up
-
-Over the next few months, the focus is on:
-
-- strengthening core interaction primitives
-- expanding ready-to-use component coverage
-- improving multi-library output workflows
-
-So at this stage, it is more accurate to treat Proto UI as:
-
-> **something worth understanding and evaluating, rather than a fully mature drop-in solution.**
-
-If you are looking for:
-
-- a large, production-ready component ecosystem
-- complete coverage across all hosts
-- immediate replacement for mature framework-native libraries
-
-then it may still be early.
-
-But if you are dealing with:
-
-- multi-host interaction consistency
-- long-term component maintenance
-- ecosystem gaps across platforms
-- or scaling design systems beyond a single stack
-
-then this is a reasonable time to start exploring Proto UI.
-
----
-
-## When it starts to make sense
-
-- you need consistent interaction behavior across multiple hosts
-- you are building or maintaining a design system or component platform
-- duplication of implementation is becoming noticeable
-- your stack regularly encounters ecosystem gaps
-
----
-
-## When it may not be a good fit
-
-- you only target a single framework
-- your project is short-lived
-- you primarily need mature, ready-made components today
-- you prefer to avoid introducing new abstraction layers
-
----
-
-## Next steps
-
-If this direction seems relevant:
-
-- [How it works](/zh-cn/start-here/how-it-works/)
-- [Quick start](/zh-cn/start-here/quick-start/)
-
-If you want the full theory:
-
-- [Whitepaper / Preface](/en/whitepaper/0-preface/)
+Continue to [How It Works](/en/start-here/how-it-works/) for the division of responsibilities between Prototype and Adapter. For the reasoning behind this direction and where it might fail, start with the [whitepaper preface](/en/whitepaper/0-preface/).

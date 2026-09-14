@@ -86,7 +86,11 @@ function snapshot(
   });
 }
 
-function createHarness(withHost = true, initialFacts?: ScrollSurfaceSnapshot) {
+function createHarness(
+  withHost = true,
+  initialFacts?: ScrollSurfaceSnapshot,
+  onDispose?: () => void
+) {
   const sys = createSystemCaps();
   const vault = new CapsVault();
   const connections: ScrollSurfaceHostAttachment[] = [];
@@ -109,6 +113,7 @@ function createHarness(withHost = true, initialFacts?: ScrollSurfaceSnapshot) {
         },
         dispose() {
           disposed += 1;
+          onDispose?.();
         },
       };
     },
@@ -324,6 +329,66 @@ describe('module-scroll: fake host contract', () => {
 
     harness.vault.resetAttached();
 
+    expect(harness.surface.projection.get()).toBe('system');
+    expect(harness.surface.endFollow.state.get()).toBe('following');
+    expect(harness.surface.endFollow.requestStatus.get()).toBe('applied');
+  });
+
+  it('does not attach a host after a projection watcher detaches the surface', () => {
+    const harness = createHarness();
+    harness.surface.projection.watch((_run, event) => {
+      if (event.type === 'next' && event.next === 'system') {
+        harness.module.hooks.onMountPhase?.('detached', 1);
+      }
+    });
+
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+
+    expect(harness.connections).toHaveLength(0);
+    expect(harness.surface.projection.get()).toBe('unresolved');
+    expect(harness.surface.endFollow.state.get()).toBe('off');
+  });
+
+  it('does not attach twice when disposing an old lease installs a replacement host', () => {
+    let replaced = false;
+    let replacementAttachments = 0;
+    const replacementHost: ScrollSurfaceHost = {
+      support: Object.freeze({ system: true, composed: false }),
+      attach(connection) {
+        replacementAttachments++;
+        connection.onFacts(snapshot('following', 'applied'));
+        return { update() {}, request() {}, dispose() {} };
+      },
+    };
+    const harness = createHarness(true, snapshot('following', 'applied'), () => {
+      if (replaced) return;
+      replaced = true;
+      harness.vault.attach([[SCROLL_SURFACE_HOST_CAP, replacementHost]]);
+    });
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+
+    harness.vault.resetAttached();
+
+    expect(harness.getDisposed()).toBe(1);
+    expect(replacementAttachments).toBe(1);
+    expect(harness.surface.endFollow.state.get()).toBe('following');
+    expect(harness.surface.endFollow.requestStatus.get()).toBe('applied');
+  });
+
+  it('does not overwrite new lease facts when a disconnect watcher remounts the surface', () => {
+    const harness = createHarness(true, snapshot('following', 'applied'));
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+    let remounted = false;
+    harness.surface.projection.watch((_run, event) => {
+      if (event.type !== 'next' || event.next !== 'unresolved' || remounted) return;
+      remounted = true;
+      harness.module.hooks.onMountPhase?.('mounted', 2);
+    });
+
+    harness.module.hooks.onMountPhase?.('detached', 1);
+
+    expect(harness.connections).toHaveLength(2);
+    expect(harness.getDisposed()).toBe(1);
     expect(harness.surface.projection.get()).toBe('system');
     expect(harness.surface.endFollow.state.get()).toBe('following');
     expect(harness.surface.endFollow.requestStatus.get()).toBe('applied');

@@ -1,0 +1,48 @@
+id: HC-FEEDBACK-STYLE-SINK-0001
+type: host-cap
+title: Host accepts and realizes the final Feedback style result
+status: draft
+since: 0.3.0-alpha.0
+summary: A style sink accepts a final StyleHandle and flushes it to the current host view without structural rendering.
+statement:
+  en: 'The sink receives the Module’s final style result and provides a request to apply it. Queueing and flushing are one coherent capability: neither grants permission to change structure or interpret author conditions. EFFECTS_CAP and EffectsPort realize this boundary today; their token name does not extend this slice to other sensory channels.'
+  zh-CN: sink 接收 Module 的最终样式结果并提供应用请求。queue 与 flush 构成同一完整能力，均不授予结构变更或作者条件解释权限。当前由 EFFECTS_CAP 与 EffectsPort 实现此边界；token 名称不将本 slice 扩展至其他感官通路。
+criteria:
+  - id: HC-FEEDBACK-STYLE-SINK-0001-A
+    text:
+      en: queueStyle accepts the final StyleHandle as host-independent input; a newer queued result replaces the pending result. Host projection must not reinterpret Rule conditions or bypass the semantic patch layer.
+      zh-CN: queueStyle 接收 host-independent 最终 StyleHandle；较新 queued result 替换待应用结果。host projection 不重新解释 Rule condition，也不绕过 semantic patch layer。
+  - id: HC-FEEDBACK-STYLE-SINK-0001-B
+    text:
+      en: requestFlush applies the pending result to the current view without structural render or commit. Scheduling strategy and optional flushNow are implementation choices, not cross-host timing guarantees.
+      zh-CN: requestFlush 将待应用结果应用到当前 view，不触发 structural render 或 commit。调度策略与可选 flushNow 属于实现选择，不构成跨宿主时序保证。
+  - id: HC-FEEDBACK-STYLE-SINK-0001-C
+    text:
+      en: Projection replaces Feedback-owned style output and preserves unrelated host presentation. Current Web adapters use data-pui-style and preserve user classes; this attribute is a translation artifact, not author token syntax.
+      zh-CN: projection 替换 Feedback-owned style output，保留无关 host presentation。当前 Web Adapter 使用 data-pui-style 并保留用户 class；此 attribute 是 translation artifact，不是作者 token syntax。
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+relates:
+  contracts:
+    - C-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-STYLE-0004
+    - C-FEEDBACK-STYLE-0005
+verifies:
+  tests:
+    - T-FEEDBACK-0001
+sources:
+  - path: packages/core/src/effects/types.ts
+  - path: packages/modules/feedback/src/caps.ts
+  - path: packages/adapters/react/src/runtime/effects-port.ts
+  - path: packages/adapters/vue/src/runtime/effects-port.ts
+  - path: packages/adapters/vue2/src/runtime/effects-port.ts
+  - path: packages/adapters/web-component/src/runtime/effects-port.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the visual style sink as one coherent queue/apply responsibility.
+tags:
+  - feedback
+  - style
+  - host-capability
