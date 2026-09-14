@@ -296,6 +296,51 @@ describe('module-scroll: fake host contract', () => {
     expect(harness.requests).toEqual([{ kind: 'by', axis: 'vertical', delta: -0.1 }]);
   });
 
+  it('queues a projection watcher to-end request before attaching an off-policy host', () => {
+    const harness = createHarness(true, snapshot('off', 'idle'));
+    harness.surface.configure({ endFollow: { mode: 'off' } });
+    harness.surface.projection.watch((_run, event) => {
+      if (event.type === 'next' && event.next === 'system') {
+        harness.surface.request({ kind: 'to-end', axis: 'vertical' });
+      }
+    });
+
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+
+    expect(harness.requests).toEqual([{ kind: 'to-end', axis: 'vertical' }]);
+    expect(harness.connections).toHaveLength(1);
+  });
+
+  it('drains reentrant attach requests in order within the same lease epoch', () => {
+    const harness = createHarness(false);
+    const requests: ScrollSurfaceRequest[] = [];
+    const host: ScrollSurfaceHost = {
+      support: Object.freeze({ system: true, composed: false }),
+      attach() {
+        return {
+          update() {},
+          dispose() {},
+          request(request) {
+            requests.push(request);
+            if (request.kind === 'to-end') {
+              harness.surface.request({ kind: 'page', axis: 'vertical', direction: 'before' });
+            }
+          },
+        };
+      },
+    };
+    harness.vault.attach([[SCROLL_SURFACE_HOST_CAP, host]]);
+    harness.surface.projection.watch((_run, event) => {
+      if (event.type !== 'next' || event.next !== 'system') return;
+      harness.surface.request({ kind: 'to-end', axis: 'vertical' });
+      harness.surface.request({ kind: 'by', axis: 'vertical', delta: -10 });
+    });
+
+    harness.module.hooks.onMountPhase?.('mounted', 1);
+
+    expect(requests.map((request) => request.kind)).toEqual(['to-end', 'by', 'page']);
+  });
+
   it('rejects to-end when no current host lease can apply it', () => {
     const harness = createHarness(false);
     harness.module.hooks.onMountPhase?.('mounted', 1);

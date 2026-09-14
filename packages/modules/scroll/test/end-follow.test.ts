@@ -142,6 +142,54 @@ afterEach(() => {
 });
 
 describe('module-scroll: end-follow host contract', () => {
+  it('settles the latest request when pending and applied watchers schedule reentrantly', () => {
+    // C-SCROLL-END-FOLLOW-0001-RESUME/FACTS: old movement cannot consume a newer request.
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    const updateMetrics = installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    let armed = false;
+    let pendingRequested = false;
+    let appliedRequested = false;
+    const lease = createWebScrollSurfaceHost(target, { moveGestureHost }).attach({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts(snapshot) {
+        snapshots.push(snapshot);
+        if (!armed) return;
+        if (!pendingRequested && snapshot.endFollow.state === 'pending') {
+          pendingRequested = true;
+          lease.request({ kind: 'to-end', axis: 'vertical' });
+        } else if (!appliedRequested && snapshot.endFollow.requestStatus === 'applied') {
+          appliedRequested = true;
+          lease.request({ kind: 'to-end', axis: 'vertical' });
+        }
+      },
+    });
+    frames.runAll();
+    armed = true;
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    const queuedAfterPendingWatcher = frames.pending();
+    frames.runAll();
+    frames.runAll();
+    expect(snapshots.at(-1)?.endFollow).toEqual({ state: 'following', requestStatus: 'applied' });
+    expect(queuedAfterPendingWatcher).toBe(1);
+    expect(frames.pending()).toBe(0);
+    expect(target.scrollTop).toBe(400);
+    lease.dispose();
+  });
+
   it('keeps disabled initial materialization in place with off and idle facts', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');

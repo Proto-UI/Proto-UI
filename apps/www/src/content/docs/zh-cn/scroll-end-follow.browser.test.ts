@@ -50,6 +50,8 @@ const probeSource = `
   const inputEvents = [];
   const activeTouchIds = new Set();
   let offsetSource = 'native-input';
+  const reentrant = { armed: false, projectionRequested: false, pendingRequested: false, appliedRequested: false };
+  const requestOutcomes = [];
   const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
   const appendRows = (count) => {
     for (let index = 0; index < count; index += 1) {
@@ -67,9 +69,11 @@ const probeSource = `
     atEnd: surface.vertical.atEnd.get(),
     focusPreserved: document.activeElement === focusOwner,
     scrollBehavior: viewport.style.scrollBehavior,
+    ...reentrant,
+    requestOutcomes: requestOutcomes.slice(),
   });
 
-  globalThis.setupScrollEndFollowProbe = async () => {
+  globalThis.setupScrollEndFollowProbe = async (mode = 'default') => {
     const proto = definePrototype({
       name: 'scroll-end-follow-browser-probe',
       setup() {
@@ -77,7 +81,24 @@ const probeSource = `
         surface.configure({
           axes: 'vertical',
           projection: 'system',
-          endFollow: { mode: 'while-at-end', axis: 'vertical' },
+          endFollow: mode === 'projection' ? { mode: 'off' } : { mode: 'while-at-end', axis: 'vertical' },
+        });
+        surface.projection.watch((_run, event) => {
+          if (mode !== 'projection' || event.type !== 'next' || event.next !== 'system' || reentrant.projectionRequested) return;
+          reentrant.projectionRequested = true;
+          surface.request({ kind: 'to-end', axis: 'vertical' });
+        });
+        surface.endFollow.state.watch((_run, event) => {
+          if (!reentrant.armed || event.type !== 'next' || event.next !== 'pending' || reentrant.pendingRequested) return;
+          reentrant.pendingRequested = true;
+          surface.request({ kind: 'to-end', axis: 'vertical' });
+        });
+        surface.endFollow.requestStatus.watch((_run, event) => {
+          if (event.type !== 'next') return;
+          requestOutcomes.push(event.next);
+          if (!reentrant.armed || event.next !== 'applied' || reentrant.appliedRequested) return;
+          reentrant.appliedRequested = true;
+          surface.request({ kind: 'to-end', axis: 'vertical' });
         });
         return (renderer) => renderer.slot();
       },
@@ -127,6 +148,7 @@ const probeSource = `
     return read();
   };
   globalThis.readScrollEndFollowProbe = read;
+  globalThis.armReentrantScrollEndFollow = () => { reentrant.armed = true; };
   globalThis.readScrollEndFollowInputEvents = () => inputEvents.slice();
   globalThis.setScrollEndFollowOffsetForTest = async (top) => {
     const scrollEvent = new Promise((resolve) => {
@@ -243,6 +265,50 @@ async function openTouchProbe() {
 }
 
 describe('Scroll end-follow / real Chromium', () => {
+  it.each(['projection', 'reentrant'])(
+    'settles public %s watcher requests against the current movement',
+    async (mode) => {
+      // C-SCROLL-END-FOLLOW-0001-RESUME/FACTS: observable requests retain causality.
+      const context = await browser.newContext();
+      try {
+        const page = await context.newPage();
+        await page.goto(baseUrl, { waitUntil: 'networkidle' });
+        await page.waitForFunction(
+          () => typeof (globalThis as any).setupScrollEndFollowProbe === 'function'
+        );
+        const initial = await page.evaluate(
+          (mode) => (globalThis as any).setupScrollEndFollowProbe(mode),
+          mode
+        );
+        expect(initial.requestStatus).toBe('applied');
+        if (mode === 'reentrant') {
+          await page.evaluate(() => (globalThis as any).armReentrantScrollEndFollow());
+          await page.evaluate(() => (globalThis as any).appendScrollEndFollowRows(4));
+        }
+        await page.waitForFunction(() => {
+          const state = (globalThis as any).readScrollEndFollowProbe();
+          return (
+            state.requestStatus === 'applied' &&
+            (!state.armed || (state.pendingRequested && state.appliedRequested))
+          );
+        });
+        const result = await page.evaluate(() => (globalThis as any).readScrollEndFollowProbe());
+        expect(result.top).toBe(result.maximum);
+        expect(result.requestOutcomes).not.toContain('rejected');
+        if (mode === 'projection') {
+          expect(result.projectionRequested).toBe(true);
+          expect(result.followState).toBe('off');
+        } else {
+          expect(result.pendingRequested && result.appliedRequested).toBe(true);
+          expect(result.followState).toBe('following');
+        }
+      } finally {
+        await context.close();
+      }
+    },
+    120_000
+  );
+
   it('follows rapid appends only at end and resumes after trusted reader input', async () => {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();

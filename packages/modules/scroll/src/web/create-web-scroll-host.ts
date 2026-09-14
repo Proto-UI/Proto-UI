@@ -147,6 +147,12 @@ type ControlGeometry = Readonly<{
   travel: number;
 }>;
 
+type ScheduledEndMovement = {
+  axis: ScrollAxis;
+  requestEpoch: number;
+  cancel: (() => void) | null;
+};
+
 function coordinate(sample: MoveGestureSample, axis: ScrollAxis): number {
   return axis === 'vertical' ? sample.position.y : sample.position.x;
 }
@@ -192,9 +198,7 @@ export function createWebScrollSurfaceHost(
       let cancelScrollEndTimer: (() => void) | null = null;
       let endFollowState: ScrollEndFollowState = 'off';
       let endFollowRequestStatus: ScrollEndFollowRequestStatus = 'idle';
-      let cancelEndFollowFrame: (() => void) | null = null;
-      let scheduledAxis: ScrollAxis | null = null;
-      let endFollowPending = false;
+      let scheduledEnd: ScheduledEndMovement | null = null;
       let endFollowRequestEpoch = 0;
       let readerIntentUntil = 0;
       const readerContacts = createReaderContactSession();
@@ -353,14 +357,12 @@ export function createWebScrollSurfaceHost(
         return range - clampedOffset <= endThreshold;
       };
       const cancelScheduledEnd = (rejected: boolean) => {
-        const pending = endFollowPending;
-        cancelEndFollowFrame?.();
-        cancelEndFollowFrame = null;
-        endFollowPending = false;
-        scheduledAxis = null;
+        const pending = scheduledEnd;
+        scheduledEnd = null;
+        pending?.cancel?.();
         if (pending) endFollowRequestEpoch++;
         if (pending && rejected) endFollowRequestStatus = 'rejected';
-        return pending;
+        return pending !== null;
       };
       const scheduleEnd = (axis: ScrollAxis) => {
         requestedDepartureAxis = null;
@@ -373,19 +375,20 @@ export function createWebScrollSurfaceHost(
           return;
         }
         cancelScheduledEnd(false);
-        scheduledAxis = axis;
-        endFollowPending = true;
-        const requestEpoch = ++endFollowRequestEpoch;
+        const movement: ScheduledEndMovement = {
+          axis,
+          requestEpoch: ++endFollowRequestEpoch,
+          cancel: null,
+        };
+        scheduledEnd = movement;
         if (configuredFollowAxis() === axis) endFollowState = 'pending';
         endFollowRequestStatus = 'pending';
         publish();
-        if (!endFollowPending || scheduledAxis !== axis || disposed) return;
+        if (scheduledEnd !== movement || disposed) return;
         const apply = () => {
-          cancelEndFollowFrame = null;
-          endFollowPending = false;
-          const currentAxis = scheduledAxis;
-          scheduledAxis = null;
-          if (disposed || !currentAxis) return;
+          if (scheduledEnd !== movement || disposed) return;
+          scheduledEnd = null;
+          const currentAxis = movement.axis;
           if (!isAxisEnabled(currentAxis)) {
             endFollowState = configuredFollowAxis() ? 'paused' : 'off';
             endFollowRequestStatus = 'rejected';
@@ -400,17 +403,17 @@ export function createWebScrollSurfaceHost(
             lastFollowLayout = readFollowLayout(currentAxis);
             endFollowState = reachedEnd ? 'following' : 'paused';
           }
-          if (requestEpoch === endFollowRequestEpoch) {
+          if (movement.requestEpoch === endFollowRequestEpoch) {
             endFollowRequestStatus = reachedEnd ? 'applied' : 'rejected';
           }
           publish();
         };
         if (ownerWindow?.requestAnimationFrame) {
           const frame = ownerWindow.requestAnimationFrame(apply);
-          cancelEndFollowFrame = () => ownerWindow.cancelAnimationFrame(frame);
+          movement.cancel = () => ownerWindow.cancelAnimationFrame(frame);
         } else {
           const timer = setTimeout(apply, 0);
-          cancelEndFollowFrame = () => clearTimeout(timer);
+          movement.cancel = () => clearTimeout(timer);
         }
       };
       const executeRequest = (request: ScrollSurfaceRequest) => {
@@ -428,7 +431,7 @@ export function createWebScrollSurfaceHost(
         }
         const requestedAtEnd =
           followAxis === request.axis ? requestReachesEnd(target, request, endThreshold) : null;
-        if (scheduledAxis === request.axis) cancelScheduledEnd(true);
+        if (scheduledEnd?.axis === request.axis) cancelScheduledEnd(true);
         applyRequest(target, request);
         if (followAxis === request.axis) {
           const atEndAfterRequest = isAxisAtEnd(request.axis);
@@ -666,7 +669,7 @@ export function createWebScrollSurfaceHost(
         if (axis && isAxisEnabled(axis)) {
           const atEnd = isAxisAtEnd(axis);
           const requestedDeparture = requestedDepartureAxis === axis;
-          if (atEnd && !endFollowPending && !requestedDeparture) {
+          if (atEnd && !scheduledEnd && !requestedDeparture) {
             endFollowState = 'following';
           } else if (!atEnd && (readerIntent || requestedDeparture)) {
             cancelScheduledEnd(true);

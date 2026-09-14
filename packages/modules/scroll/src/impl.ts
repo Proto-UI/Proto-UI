@@ -60,8 +60,7 @@ export class ScrollModuleImpl extends ModuleBase {
   private mounted = false;
   private leaseEpoch = 0;
   private snapshotEpoch = 0;
-  private attachingLease = false;
-  private pendingAttachRequests: ScrollSurfaceRequest[] = [];
+  private attachingLease: { epoch: number; requests: ScrollSurfaceRequest[] } | null = null;
 
   private readonly axesOwned: OwnedStateHandle<ScrollAxes>;
   private readonly scrollingOwned: OwnedStateHandle<boolean>;
@@ -209,8 +208,8 @@ export class ScrollModuleImpl extends ModuleBase {
       request.kind === 'to' || request.kind === 'control-drag'
         ? { ...request, position: clampRatio(request.position) }
         : request;
-    if (this.attachingLease && !this.lease) {
-      this.pendingAttachRequests.push(normalized);
+    if (this.attachingLease?.epoch === this.leaseEpoch) {
+      this.attachingLease.requests.push(normalized);
       return;
     }
     if (!this.lease) {
@@ -287,6 +286,7 @@ export class ScrollModuleImpl extends ModuleBase {
   private attach(): void {
     const epoch = ++this.leaseEpoch;
     this.snapshotEpoch++;
+    this.attachingLease = null;
     const previous = this.lease;
     this.lease = null;
     previous?.dispose();
@@ -301,26 +301,25 @@ export class ScrollModuleImpl extends ModuleBase {
       return;
     }
     const projection = resolveScrollProjection(this.config, host.support, host.preference);
-    this.set(this.projectionOwned, projection);
-    if (epoch !== this.leaseEpoch || !this.mounted) return;
-    this.pendingAttachRequests = [];
-    this.attachingLease = true;
+    const attaching = { epoch, requests: [] as ScrollSurfaceRequest[] };
+    this.attachingLease = attaching;
     try {
+      this.set(this.projectionOwned, projection);
+      if (epoch !== this.leaseEpoch || !this.mounted) return;
       const lease = host.attach(this.createHostAttachment(epoch));
       if (epoch !== this.leaseEpoch || !this.mounted) {
         lease.dispose();
         return;
       }
       this.lease = lease;
-      const requests = this.pendingAttachRequests;
-      this.pendingAttachRequests = [];
-      for (const request of requests) {
-        if (this.lease !== lease) break;
+      // Keep the token while draining so reentrant requests join the tail,
+      // rather than overtaking requests emitted by earlier fact watchers.
+      for (const request of attaching.requests) {
+        if (this.lease !== lease || epoch !== this.leaseEpoch) break;
         lease.request(request);
       }
     } finally {
-      this.attachingLease = false;
-      if (!this.lease) this.pendingAttachRequests = [];
+      if (this.attachingLease === attaching) this.attachingLease = null;
     }
   }
 
@@ -438,7 +437,7 @@ export class ScrollModuleImpl extends ModuleBase {
   disconnect(): void {
     const epoch = ++this.leaseEpoch;
     this.snapshotEpoch++;
-    this.pendingAttachRequests = [];
+    this.attachingLease = null;
     const previous = this.lease;
     this.lease = null;
     previous?.dispose();
