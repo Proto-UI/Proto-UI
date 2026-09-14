@@ -1,0 +1,45 @@
+id: HC-CONTEXT-IDENTITY-0001
+type: host-cap
+title: Host provides opaque Context participant identity
+status: draft
+since: 0.3.0-alpha.0
+summary: The host supplies a stable opaque token for one logical component instance, independent of current materialization.
+statement:
+  en: The host supplies a stable opaque token for one logical component instance, independent of current materialization.
+  zh-CN: 宿主为每个逻辑组件实例提供稳定 opaque token，独立于当前物化。
+criteria:
+  - id: HC-CONTEXT-IDENTITY-0001-A
+    text:
+      en: Distinct live instances receive distinct identities; one instance retains its token across repeatable view epochs.
+      zh-CN: 不同 alive instance 具有不同身份；同一实例跨 repeatable view epoch 保留 token。
+  - id: HC-CONTEXT-IDENTITY-0001-B
+    text:
+      en: The token is an internal identity fact, not a DOM node requirement, framework instance API or serializable Context value. Null is reserved for absence; falsy non-null tokens remain valid identities.
+      zh-CN: token 是内部身份事实，不要求 DOM node、框架实例 API，也不是可序列化 Context value。null 保留为缺失标记；非 null 的 falsy token 仍是有效身份。
+  - id: HC-CONTEXT-IDENTITY-0001-C
+    text:
+      en: Identity must be available before a Context declaration that uses it; terminal disposal ends that owner and must not implicitly reuse it for a fresh owner.
+      zh-CN: 使用身份的 Context declaration 之前必须提供该身份；terminal disposal 终止 owner，不得隐式为新 owner 复用。
+relates:
+  contracts:
+    - C-CONTEXT-0004
+    - C-CONTEXT-0011
+    - C-CONTEXT-0012
+verifies:
+  tests:
+    - T-CONTEXT-0003
+sources:
+  - path: packages/modules/context/src/caps.ts
+  - path: packages/modules/context/src/impl.ts
+  - path: packages/adapters/base/src/platform/instance-tree.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Reserved null as the absence sentinel without narrowing opaque identity to truthy objects; added falsy-token lifetime evidence.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Separated the existing Context host identity and ancestry responsibilities without changing cap tokens.
+tags:
+  - context
+  - host-capability
+  - scope

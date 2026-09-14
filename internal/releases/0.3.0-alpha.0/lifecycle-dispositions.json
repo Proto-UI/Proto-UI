@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0-alpha.0",
+  "slices": [
+    {
+      "id": "a11y-part-relationship",
+      "entities": ["C-A11Y-PART-RELATIONSHIP-0001", "T-A11Y-PART-RELATIONSHIP-0001"],
+      "disposition": "remain-draft",
+      "rationale": "The accepted relationship contract has seven mapped cases, but all six required implementations remain planned. Structured relationship transport, host lifecycle and identity ownership, and Tabs migration still need executable acceptance evidence under #549. This disposition reviews the current catalog and does not revise the immutable 0.3.0-alpha.0 release snapshot.",
+      "evidence": [
+        "spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml",
+        "spec/tests/T-A11Y-PART-RELATIONSHIP-0001.yaml",
+        "packages/prototypes/base/src/tabs/trigger.proto.ts",
+        "packages/prototypes/base/src/tabs/content.proto.ts",
+        "https://github.com/Proto-UI/Proto-UI/issues/549#issuecomment-5546535682",
+        "https://github.com/Proto-UI/Proto-UI/pull/553#pullrequestreview-5120524917"
+      ]
+    }
+  ]
+}

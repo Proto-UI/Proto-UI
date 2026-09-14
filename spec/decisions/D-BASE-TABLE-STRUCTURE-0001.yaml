@@ -1,0 +1,111 @@
+id: D-BASE-TABLE-STRUCTURE-0001
+type: decision
+title: Base Table owns passive two-dimensional structure without host behavior
+status: draft
+since: 0.3.0-alpha.0
+summary: Base Table is admitted as a passive structural protocol with Table, Caption, Row, HeaderCell, and Cell identities; it feeds host-neutral topology and header relationships into the generic A11y path without owning Data Table operations or a Table-specific Host Capability.
+statement:
+  zh-CN: >-
+    Base Table 被准入为 draft 的被动二维结构协议，而不是 Template anatomy 的别名。它计划由 Table、Caption、Row、HeaderCell 与 Cell 五种 prototype identity 组成，通过 Anatomy order 与 Maker authored span/header-key facts 形成 table topology、caption、row/cell 坐标和多 header relationship，再把 opaque same-domain semantic-object relationship 交给通用 A11y 路径。第一轮不建立 Head、Body、RowGroup 或 HC-TABLE；sorting、selection、pagination、virtualization、resize/reorder、editing、data fetching、keyboard grid 与 layout table 都不属于 Base Table。
+
+
+  en: >-
+    Base Table is admitted as a draft passive two-dimensional structural protocol rather than an alias for Template anatomy. Its planned Table, Caption, Row, HeaderCell, and Cell prototype identities combine Anatomy order with Maker-authored span and header-key facts to form table topology, caption, row and cell coordinates, and multiple-header relationships, then pass opaque same-domain semantic-object relationships to the generic A11y path. The first slice creates no Head, Body, RowGroup, or HC-TABLE identity; sorting, selection, pagination, virtualization, resize or reorder, editing, data fetching, keyboard-grid behavior, and layout tables remain outside Base Table.
+
+
+criteria:
+  - id: D-BASE-TABLE-STRUCTURE-0001-INDEPENDENT-PROTOCOL
+    text:
+      zh-CN: Table 的独立信息路径是 Maker authored structural facts 到 Table-owned 二维 topology/header graph，再经通用 A11y semantic-object graph 与 Adapter projection 成为 User 可观察的 table relationship；因此它不能退化为 Template 或 Anatomy 名称集合。
+      en: Table's independent information path runs from Maker-authored structural facts to a Table-owned two-dimensional topology and header graph, then through the generic A11y semantic-object graph and Adapter projection to User-observable table relationships; it therefore cannot be reduced to a set of Template or Anatomy names.
+    dependsOn:
+      knowledge:
+        - id: K-INFORMATION-CHANNEL-0001
+          anchors: [K-INFORMATION-CHANNEL-0001-A, K-INFORMATION-CHANNEL-0001-B]
+      contracts:
+        - id: C-ANATOMY-0001
+          anchors: [C-ANATOMY-0001-A, C-ANATOMY-0001-B]
+  - id: D-BASE-TABLE-STRUCTURE-0001-IDENTITIES
+    text:
+      zh-CN: 计划的 Base identities 必须精确为 P-BASE-TABLE、P-BASE-TABLE-CAPTION、P-BASE-TABLE-ROW、P-BASE-TABLE-HEADER-CELL 与 P-BASE-TABLE-CELL；P 与 M entity 只有在真实 source 和 evidence 同时存在时才可创建。
+      en: The planned Base identities are exactly P-BASE-TABLE, P-BASE-TABLE-CAPTION, P-BASE-TABLE-ROW, P-BASE-TABLE-HEADER-CELL, and P-BASE-TABLE-CELL; P and M entities may be created only when their real source and evidence exist in the same implementation slice.
+    dependsOn:
+      decisions:
+        - id: D-PROTOTYPE-ENTITY-NAMING-0001
+          anchors: [D-PROTOTYPE-ENTITY-NAMING-0001-B, D-PROTOTYPE-ENTITY-NAMING-0001-H]
+  - id: D-BASE-TABLE-STRUCTURE-0001-NO-HEAD-BODY
+    text:
+      zh-CN: Base 不建立 Head、Body 或 RowGroup prototype identity，也不要求对应 part 存在；这些 group 不是已证明的跨宿主共同 identity，宿主可在 Adapter materialization 中使用自己的 native wrapper，但不得把它反推为 portable Table fact。
+      en: Base does not create Head, Body, or RowGroup prototype identities or require corresponding parts; those groups are not a proven cross-host identity, and a host may use native wrappers during Adapter materialization without turning them into portable Table facts.
+  - id: D-BASE-TABLE-STRUCTURE-0001-STRUCTURE-OWNER
+    text:
+      zh-CN: 计划的 M-TABLE-STRUCTURE-0001 只拥有 Anatomy-ordered 二维 placement、positive spans、header-key resolution、caption/header relationships、validity snapshot 与 structural diagnostics；它不拥有 App data 或交互状态。
+      en: The planned M-TABLE-STRUCTURE-0001 owns only Anatomy-ordered two-dimensional placement, positive spans, header-key resolution, caption and header relationships, validity snapshots, and structural diagnostics; it owns no App data or interaction state.
+    dependsOn:
+      contracts:
+        - id: C-ANATOMY-ORDER-0001
+          anchors: [C-ANATOMY-ORDER-0001-B, C-ANATOMY-ORDER-0001-D]
+  - id: D-BASE-TABLE-STRUCTURE-0001-A11Y-PATH
+    text:
+      zh-CN: Table relationship 必须使用 opaque same-domain semantic-object refs；protocol header key 不得成为 host id，Adapter 不得从 prototype name、host child order、class 或 style 推断 relationship。当前 string-only A11y IR 是实施 prerequisite，不是已通过证据。
+      en: Table relationships must use opaque same-domain semantic-object references; protocol header keys must not become host IDs, and Adapters must not infer relationships from prototype names, host child order, classes, or styles. The current string-only A11y IR is an implementation prerequisite, not passing evidence.
+    dependsOn:
+      decisions:
+        - id: D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
+          anchors:
+            - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-A
+            - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-B
+            - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-C
+            - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-E
+      contracts:
+        - id: C-A11Y-0001
+          anchors: [C-A11Y-0001-A, C-A11Y-0001-G]
+  - id: D-BASE-TABLE-STRUCTURE-0001-NO-TABLE-HOST-CAP
+    text:
+      zh-CN: 第一轮不得创建 HC-TABLE；Table Structure 不请求物理 widget、measurement、input、resource 或 system service，host boundary 继续由 HC-A11Y-0001 表达，具体 native/translated/diagnostic projection 必须在 Adapter profile 中另行取证。
+      en: The first slice must not create HC-TABLE; Table Structure requests no physical widget, measurement, input, resource, or system service, so HC-A11Y-0001 remains the host boundary and each native, translated, or diagnostic projection requires separate Adapter-profile evidence.
+    dependsOn:
+      hostCaps:
+        - id: HC-A11Y-0001
+          anchors: [HC-A11Y-0001-A, HC-A11Y-0001-B]
+  - id: D-BASE-TABLE-STRUCTURE-0001-DATA-TABLE-BOUNDARY
+    text:
+      zh-CN: Collection/data modeling、sorting、row/cell selection、pagination、virtualization、column resize/reorder、editable cells、data fetching、keyboard grid、form workflow 与 layout table 必须留给 later Data Table composition 或其它 owner；Base Table 不依赖 M-COLLECTION-0001。
+      en: Collection and data modeling, sorting, row or cell selection, pagination, virtualization, column resize or reorder, editable cells, data fetching, keyboard-grid behavior, form workflow, and layout tables remain with a later Data Table composition or other owners; Base Table does not depend on M-COLLECTION-0001.
+    dependsOn:
+      contracts:
+        - id: C-ANATOMY-ORDER-0001
+          anchors: [C-ANATOMY-ORDER-0001-D]
+  - id: D-BASE-TABLE-STRUCTURE-0001-EVIDENCE-BOUNDARY
+    text:
+      zh-CN: Web、UIKit 与 Windows UIA 的 source 只证明 shared information shape；在 runtime、Base 与 Adapter tests 通过且 profile relation 被编目以前，不得声明当前 cross-host、Web 或 native conformance，也不得把 draft entity 表述为 released implementation。
+      en: Web, UIKit, and Windows UIA sources prove only a shared information shape; current cross-host, Web, or native conformance must not be claimed, and draft entities must not be presented as released implementation, until runtime, Base, and Adapter tests pass and profile relations are cataloged.
+sources:
+  - path: https://github.com/Proto-UI/Proto-UI/issues/387
+    label: Issue 387 proposal and completed live research
+  - path: internal/records/2026-08-13-v0.3-prototype-coverage-and-shadcn-parity.zh-CN.md
+    sections: [Base Table 边界]
+  - path: spec/decisions/D-A11Y-PART-RELATIONSHIP-PROJECTION-0001.yaml
+  - path: packages/core/src/a11y.ts
+    sections: [A11yRelationTarget, A11ySemanticObjectSnapshot]
+  - path: https://w3c.github.io/aria/#table
+    label: WAI-ARIA table and related structural roles
+  - path: https://developer.apple.com/documentation/uikit/uiaccessibilitycontainerdatatable
+    label: UIKit accessibility data table container
+  - path: https://developer.apple.com/documentation/uikit/uiaccessibilitycontainerdatatablecell
+    label: UIKit accessibility data table cell
+  - path: https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/implementing-the-ui-automation-table-control-pattern
+    label: Windows UI Automation Table control pattern
+relates:
+  modules: [M-A11Y-0001]
+  hostCaps: [HC-A11Y-0001]
+  knowledge: [K-INFORMATION-CHANNEL-0001]
+explains:
+  contracts: [C-TABLE-STRUCTURE-0001]
+verifies:
+  tests: [T-TABLE-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Admitted the draft passive Base Table structural direction, fixed five planned identities, selected the generic A11y path without HC-TABLE, and excluded Data Table and host-specific behavior.
+tags: [table, base, structure, accessibility, decision]

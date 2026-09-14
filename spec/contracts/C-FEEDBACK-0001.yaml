@@ -35,14 +35,14 @@ criteria:
       zh-CN: Feedback 的具体媒介可以是视觉、听觉、触觉或其他可感知形式；具体媒介的宿主翻译不由本契约定义。
       en: Feedback can be carried through visual, auditory, tactile, or other perceivable forms; host translation for a concrete medium is not defined by this contract.
 sources:
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md
     sections:
-      - User
-      - User ↔ Component
-  - path: apps/www/src/content/docs/en/whitepaper/information-flow-model.md
+      - 从关系得到信息通路
+      - 把 Switch 放进这张关系图
+  - path: apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md
     sections:
-      - User
-      - User ↔ Component
+      - Deriving Information Channels from Relations
+      - Placing Switch in the Relation Map
 refines:
   contracts:
     - id: C-CORE-CHANNEL-0001

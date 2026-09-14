@@ -1,0 +1,96 @@
+---
+title: 'Table（Draft）'
+description: 'Base Table 实施前的结构决策、二维 topology、accessibility 边界与排除项。'
+---
+
+Base Table 当前是 **draft protocol definition**，不是 package export，也不是可使用的组件。现阶段 authority 由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001` 与 `T-TABLE-STRUCTURE-0001` 构成；runtime、Base prototype、Adapter、CLI、demo 与 design-language 工作仍处于 planned 状态。
+
+## 为什么 Table 是协议
+
+Table 携带了 Template anatomy 本身无法表达的信息：ordered parts 会形成包含 coordinates 与 spans 的二维 topology，author 声明的 header keys 会解析成 semantic objects 之间的 relationship。Adapter 可以把这张 graph 投影到 accessibility surface，而不必从 prototype name、host tree、CSS class 或 Web-only attribute 猜测 Table behavior。
+
+信息路径是：
+
+```text
+Maker-authored parts、spans 与 header keys
+  -> Table Structure topology 与 header graph
+  -> 通用 A11y semantic-object graph
+  -> Adapter 选择的 host projection
+  -> User 可观察的 table relationships
+```
+
+当前定义不声称已有 Adapter 完成了整条路径。
+
+## 计划中的 family
+
+只有在匹配的 source 与 evidence 同时存在后，implementation carrier 才可以加入以下五个 Base identities：
+
+| Planned identity | Cardinality | 结构职责 |
+| --- | --- | --- |
+| `P-BASE-TABLE` | `1..1` | 拥有一个独立 Table anatomy domain 及其只读结构 snapshot。 |
+| `P-BASE-TABLE-CAPTION` | `0..1` | 提供 authored caption/purpose semantic object。 |
+| `P-BASE-TABLE-ROW` | `1..*` | 建立一个有序 logical row。 |
+| `P-BASE-TABLE-HEADER-CELL` | `1..*` | 声明 column/row header、same-domain `headerKey` 与 spans。 |
+| `P-BASE-TABLE-CELL` | `1..*` | 声明 spans 与有序、非空的 header-key set。 |
+
+每个 Row 至少包含一个 HeaderCell 或 Cell。`Head`、`Body` 与 `RowGroup` 被明确排除：现有跨宿主证据不足以让它们成为 required portable identity。Web 或 native Adapter 可以在 host materialization 中使用 row-group wrapper，但不能把 wrapper 反推为 Base fact。
+
+Caption、HeaderCell 与 Cell content 仍由 App 通过每个 part 的单一 anonymous Template slot 提供。Table Structure 不把 content 解析成 data record。
+
+## Topology 与 header relationships
+
+Row 与 cell 顺序来自当前 host-observable Anatomy order。每个 Row 的第一个 cell 从 column 0 开始搜索；后续 cell 从前一个已 placement cell 的 exclusive end 开始，选择 cursor 之后第一个可容纳的 rectangle。Placement 不会回填更早的 hole 并反转 authored order。Index 从零开始；`rowSpan` 与 `columnSpan` 必须是 positive safe integer，默认值为一。Span 不能和已占用 rectangle overlap，也不能越过当前 row count 或 safe coordinate boundary。Occupancy 使用 ranges，而不是逐个 materialize 所覆盖的 column，因此 large span 不会按数值大小成比例分配空间。
+
+HeaderCell 声明 non-empty、same-domain unique 的 `headerKey` 与 `headerKind: 'column' | 'row'`。Cell 声明 ordered、non-empty header-key set。HeaderCell 可以为 layered header 声明 upstream header keys；upstream 表示 target 在 computed row-major topology 中先于 source，self 与 later/downstream reference 均无效。
+
+Resolution 产出 opaque same-domain semantic-object refs，并按 target kind 分成有序 `columnHeaders` 与 `rowHeaders`；同一个 cell 可以关联多个 header。Missing、empty、duplicate、ambiguous、unprojectable、self 或 downstream reference 都产生 structural diagnostic；实现不得猜测 target 或制造 host id。Resolution 不会搜索 sibling 或 nested Table domain，因此当前 domain 缺失的 key 即使在其它 domain 存在同名 key，也仍然是 missing target。
+
+Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无效的结构可以保持 mounted 并报告 invalid snapshot，但不能改写 authored content，也不能发送 data-operation signal。
+
+## Accessibility 与 host 边界
+
+Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-TABLE`。Table Structure 不请求 physical widget、measurement、input、resource 或 system service。
+
+当前 A11y implementation 仍以 string 表示 relationship。Opaque semantic-object refs 与 multi-target relationship 是明确的 implementation prerequisite，不是已完成证据；当前 Adapter profiles 也没有编目 Table support。
+
+外部 host 对照只证明 shared information shape：
+
+| Portable fact | Web accessibility vocabulary | UIKit evidence | Windows UIA evidence |
+| --- | --- | --- | --- |
+| Table domain | 包含 row、cell 与 header descendants 的 table | `UIAccessibilityContainerDataTable` | TablePattern 与 GridPattern |
+| Coordinates 与 spans | ordered rows/cells 与 span properties | row/column counts、addressed cells、row/column ranges | Row、Column、RowSpan、ColumnSpan、ContainingGrid |
+| Header relationships | rowheader/columnheader；必要时显式 relation | row/column header element methods | TableItem row/column header providers |
+| Multiple headers | 多个 semantic relationship targets | header-element arrays | header-provider collections |
+
+这张 matrix 不声明当前 Web、UIKit、Windows 或 cross-host conformance。Native 或 translated materialization 仍是需要 executable evidence 的 Adapter-profile decision。
+
+## Table 与 Data Table
+
+Base Table 只拥有 passive structure。它明确排除：
+
+- App data records 与 Collection membership；
+- sorting；
+- row/cell selection；
+- pagination 与 virtualization；
+- column resize/reorder；
+- editing 与 data fetching；
+- keyboard grid 与 focus policy；
+- form workflow；
+- layout-table mode；
+- shadcn 或 Brutalist styling。
+
+Later Data Table composition 可以消费 passive structure，同时组合分别受治理的 data、Collection、selection、pagination、virtualization、editing 与其它 capabilities。
+
+## Evidence 状态
+
+`packages/spec/fixtures/src/table-structure/reference.ts` 的 host-neutral reference probe 覆盖 deterministic placement、multiple-header resolution、topology/header diagnostics，以及 pairwise insert、remove 与 reorder；它不能表达由 Anatomy 支撑的 nearest-domain isolation，也不是 runtime 或 Adapter conformance。`T-TABLE-STRUCTURE-0001` 会把 domain isolation、Table module、Base family 与四个 official Web Adapter path 保持为 `planned`，直到对应 tests 真实存在并通过。
+
+## 参考
+
+- [D-BASE-TABLE-STRUCTURE-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/decisions/D-BASE-TABLE-STRUCTURE-0001.yaml)
+- [C-TABLE-STRUCTURE-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TABLE-STRUCTURE-0001.yaml)
+- [T-TABLE-STRUCTURE-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-TABLE-STRUCTURE-0001.yaml)
+- [Issue 387](https://github.com/Proto-UI/Proto-UI/issues/387)
+- [WAI-ARIA table role](https://w3c.github.io/aria/#table)
+- [UIKit accessibility data table](https://developer.apple.com/documentation/uikit/uiaccessibilitycontainerdatatable)
+- [Windows UI Automation Table pattern](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/implementing-the-ui-automation-table-control-pattern)

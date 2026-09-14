@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
-import { asBoundary, asFocusScope, asOverlay } from '@proto.ui/hooks';
+import { asAccessible, asBoundary, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
 import {
   DIALOG_CONTEXT,
@@ -30,6 +30,7 @@ function projectDialogContentHandle(
 }
 
 function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-DIALOG-CONTENT-PRESENCE, P-BASE-DIALOG-CONTENT-A11Y-ROLE
   def.anatomy.claim(DIALOG_FAMILY, { role: 'content' });
 
@@ -43,12 +44,12 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
   const labelledBy = def.state.string('dialogLabelledBy', '');
   const describedBy = def.state.string('dialogDescribedBy', '');
   // P-BASE-DIALOG-CONTENT-A11Y-ROLE, P-BASE-DIALOG-CONTENT-A11Y-RELATIONS
-  def.a11y.id(contentId);
-  def.a11y.role(role);
-  def.a11y.name(accessibleLabel);
-  def.a11y.state('modal', modal);
-  def.a11y.relation('labelledBy', { target: labelledBy });
-  def.a11y.relation('describedBy', { target: describedBy });
+  accessible.id(contentId);
+  accessible.role(role);
+  accessible.name(accessibleLabel);
+  accessible.state('modal', modal);
+  accessible.relation('labelledBy', { target: labelledBy });
+  accessible.relation('describedBy', { target: describedBy });
 
   // P-BASE-DIALOG-CONTENT-DISMISS, P-BASE-DIALOG-CONTENT-FOCUS
   const overlay = asOverlay<DialogContentProps>();

@@ -2,6 +2,7 @@
 title: 'Design Constraints'
 desp: 'Constraints that shape the system'
 description: 'Constraints that shape the system'
+draft: true
 ---
 
 ## What does this article answer?

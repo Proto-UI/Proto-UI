@@ -1,0 +1,106 @@
+id: M-CONTEXT-0001
+type: module
+title: Context owns scoped inter-component values and participation
+status: draft
+since: 0.3.0-alpha.0
+summary: The standard Context module owns JSON scope values, subscription intent, nearest-owner resolution and callback dispatch; adapters supply opaque instance identity and current logical ancestry.
+statement:
+  en: 'Context is the standard Runtime module for the Component-to-Component channel. Its per-instance facade records setup-time providers and required/optional subscriptions, then exposes runtime reads and callback-only updates. The privileged port supplies callback-dispatch integration, opaque scope lookup and diagnostics, never ordinary author access to host identity. A shared coordinator does not make provider or subscription resources global-lifetime resources: they belong to the component instance and survive repeatable view epochs. This first catalog slice remains draft; it neither introduces a new author API nor admits non-Web Adapter conformance.'
+  zh-CN: Context 是 standard Runtime 的组件间信息通路 Module。每实例 facade 记录 setup-time provider 与 required/optional subscription，再提供 runtime read 与 callback-only update；特权 port 提供 callback dispatcher 接入、opaque scope 查询和诊断，不向普通作者开放宿主身份。共享 coordinator 不改变 provider/subscription 的实例资源归属，它们跨 repeatable view epoch 保留。本轮编目保持 draft，不增加作者 API，也不宣称非 Web Adapter conformance。
+criteria:
+  - id: M-CONTEXT-0001-A
+    text:
+      en: The author facade exposes provide/subscribe/trySubscribe only in setup, read/tryRead at runtime including readonly render, and update/tryUpdate only in callback scope.
+      zh-CN: 作者 facade 仅在 setup 提供 provide/subscribe/trySubscribe，在 runtime（包括 readonly render）提供 read/tryRead，并仅在 callback scope 提供 update/tryUpdate。
+  - id: M-CONTEXT-0001-B
+    text:
+      en: Callback dispatcher installation, resolveScope and provider/subscription/queue diagnostics belong to the privileged port; opaque scope tokens never become Context values or author handles.
+      zh-CN: callback dispatcher 安装、resolveScope 与 provider/subscription/queue 诊断属于特权 port；opaque scope token 不得成为 Context value 或作者句柄。
+  - id: M-CONTEXT-0001-C
+    text:
+      en: The standard Runtime installs Context; shared coordination preserves per-instance provider and subscription ownership rather than substituting framework Context or a process-global application store.
+      zh-CN: standard Runtime 必须安装 Context；共享协调保留每实例 provider 与 subscription 所有权，不得以框架 Context 或进程全局应用 store 替代。
+  - id: M-CONTEXT-0001-D
+    text:
+      en: Host-provided identity identifies the participant independently of its current view; ContextKey reference identity independently identifies the channel.
+      zh-CN: 宿主提供的身份标识参与实例且独立于当前 view；ContextKey 引用身份独立标识通路。
+  - id: M-CONTEXT-0001-E
+    text:
+      en: Resolution is self-inclusive and selects the nearest provider using current supplied ancestry. Later reads, updates and notification recipient selection re-resolve; ancestry change alone emits no value callback.
+      zh-CN: resolution 从自身开始，使用当前宿主 ancestry 选择最近 provider。后续 read/update 与通知接收者选择重新解析；ancestry 改变本身不派发 value callback。
+  - id: M-CONTEXT-0001-F
+    text:
+      en: A provider may update its own value without subscribing. Other update callers need prior subscription; tryUpdate always needs optional subscription, while read/tryRead retain their declared subscription modes.
+      zh-CN: provider 可不订阅而 update 自己提供的值；其他 update 调用者必须先订阅。tryUpdate 始终需要 optional subscription，read/tryRead 保留各自订阅模式要求。
+  - id: M-CONTEXT-0001-G
+    text:
+      en: Updates validate top-level JSON objects before committing; callbacks preserve transition next/prev, deterministic order and the recipient Runtime callback scope without imposing one universal scheduling strategy.
+      zh-CN: update 在提交前验证顶层 JSON object；callback 保留 transition 的 next/prev、确定顺序与接收者 Runtime callback scope，不强制统一调度策略。
+  - id: M-CONTEXT-0001-H
+    text:
+      en: Provider values, subscription intent and callback registrations survive repeatable view detach/remount; unsubscribe deactivates delivery and terminal disposal removes the instance records.
+      zh-CN: provider value、subscription intent 与 callback registration 跨 view detach/remount 保留；unsubscribe 停用 delivery，terminal disposal 移除实例记录。
+  - id: M-CONTEXT-0001-I
+    text:
+      en: Operations requiring missing identity or ancestry fail diagnostically rather than guessing a scope. Declaration-only paths need not acquire an unused traversal capability.
+      zh-CN: 需要 identity 或 ancestry 的操作在能力缺失时给出诊断并失败，不猜测 scope；纯声明路径不必索取尚未使用的遍历能力。
+satisfies:
+  contracts:
+    - C-CONTEXT-0001
+    - C-CONTEXT-0002
+    - C-CONTEXT-0003
+    - C-CONTEXT-0004
+    - C-CONTEXT-0005
+    - C-CONTEXT-0006
+    - C-CONTEXT-0007
+    - C-CONTEXT-0008
+    - C-CONTEXT-0009
+    - C-CONTEXT-0010
+    - C-CONTEXT-0011
+    - C-CONTEXT-0012
+requires:
+  hostCaps:
+    - HC-CONTEXT-IDENTITY-0001
+    - HC-CONTEXT-ANCESTRY-0001
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+  knowledge:
+    - K-INFORMATION-CHANNEL-0001
+  decisions:
+    - D-CONTEXT-PROVIDER-SELF-SUBSCRIBE-0001
+    - D-CONTEXT-NOTIFICATION-SCHEDULING-0001
+    - D-CONTEXT-UPDATE-API-0001
+verifies:
+  tests:
+    - T-CONTEXT-0001
+    - T-CONTEXT-0002
+    - T-CONTEXT-0003
+sources:
+  - path: packages/modules/context/src/create.ts
+  - path: packages/modules/context/src/types.ts
+  - path: packages/modules/context/src/impl.ts
+  - path: packages/modules/context/src/center.ts
+  - path: packages/runtime/src/instance/session.ts
+  - path: packages/runtime/src/kernel/handles/def.ts
+  - path: packages/runtime/src/kernel/handles/run.ts
+openQuestions:
+  - id: M-CONTEXT-0001-Q-REQUIRED-SELECTION
+    question:
+      en: How will configurable Runtime module selection reject a missing Context module before author use?
+      zh-CN: 未来可配置 Runtime module selection 如何在作者使用前拒绝缺失 Context？
+    context:
+      en: The standard Runtime installs Context today; no new configurable-module policy is admitted here.
+      zh-CN: 当前 standard Runtime 固定安装 Context；本轮不引入可配置 module policy。
+    blocks:
+      - configurable-runtime-module-selection
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the existing Context vertical slice and the maintainer-approved provider self-update exception.
+tags:
+  - context
+  - module
+  - instance
+  - scope

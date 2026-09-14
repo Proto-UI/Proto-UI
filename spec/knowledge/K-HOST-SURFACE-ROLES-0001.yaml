@@ -36,8 +36,8 @@ criteria:
       en: State ownership and state-selector context are not the same concept. A boundary can continue to own and expose canonical state while the translation layer projects bounded Web selector markers onto the surface so conditional styling can evaluate there; that projection is a visual evaluation environment, not a second protocol state.
 sources:
   - path: internal/records/2026-08-02-host-surface-projection.zh-CN.md
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/translation-layer.md
-  - path: apps/www/src/content/docs/en/whitepaper/translation-layer.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/5-translation-layer.md
+  - path: apps/www/src/content/docs/en/whitepaper/5-translation-layer.md
 explains:
   contracts:
     - C-HOST-SURFACE-PROJECTION-0001

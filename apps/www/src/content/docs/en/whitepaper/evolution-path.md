@@ -2,6 +2,7 @@
 title: 'Evolution Path'
 desp: 'How Proto UI starts from the Web and gradually expands to broader hosts'
 description: 'How Proto UI starts from the Web and gradually expands to broader hosts'
+draft: true
 ---
 
 ## What does this article answer?

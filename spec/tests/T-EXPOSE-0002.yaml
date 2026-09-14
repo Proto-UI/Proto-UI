@@ -162,6 +162,14 @@ implementations:
     required: true
     consumesCases:
       - T-EXPOSE-0002-CASE-PROFILE
+  - id: adapter-vue2-follow-through
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/catalog-conformance.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-0002-CASE-LIFECYCLE
+      - T-EXPOSE-0002-CASE-CALLBACK-SCOPE
 verifies:
   modules:
     - id: M-EXPOSE-0001

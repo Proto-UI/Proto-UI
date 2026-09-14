@@ -115,7 +115,7 @@ export class ContextModuleImpl extends ModuleBase {
     const getParent = this.getParentGetter();
 
     const provider = CONTEXT_CENTER.resolveProvider(self, key, getParent);
-    if (!provider) {
+    if (provider === null) {
       throw contextError(
         ERR.PROVIDER_MISSING,
         `[Context] provider missing for key: ${key?.debugName ?? '(unknown)'}`
@@ -183,7 +183,7 @@ export class ContextModuleImpl extends ModuleBase {
 
     const getParent = this.getParentGetter();
     const provider = CONTEXT_CENTER.resolveProvider(self, key, getParent);
-    if (!provider) {
+    if (provider === null) {
       throw contextError(
         ERR.DISCONNECTED,
         `[Context] provider missing for key: ${key?.debugName ?? '(unknown)'}`
@@ -209,7 +209,7 @@ export class ContextModuleImpl extends ModuleBase {
 
     const getParent = this.getParentGetter();
     const provider = CONTEXT_CENTER.resolveProvider(self, key, getParent);
-    if (!provider) return null;
+    if (provider === null) return null;
 
     return (CONTEXT_CENTER.getProviderValue(provider, key) as T) ?? null;
   }
@@ -225,7 +225,7 @@ export class ContextModuleImpl extends ModuleBase {
 
     const getParent = this.getParentGetter();
     const provider = selfProvidesKey ? self : CONTEXT_CENTER.resolveProvider(self, key, getParent);
-    if (!provider) {
+    if (provider === null) {
       throw contextError(
         ERR.DISCONNECTED,
         `[Context] provider missing for key: ${key?.debugName ?? '(unknown)'}`
@@ -255,7 +255,7 @@ export class ContextModuleImpl extends ModuleBase {
 
     const getParent = this.getParentGetter();
     const provider = CONTEXT_CENTER.resolveProvider(self, key, getParent);
-    if (!provider) return false;
+    if (provider === null) return false;
 
     const prev = CONTEXT_CENTER.getProviderValue(provider, key);
     if (!prev) return false;
@@ -281,7 +281,7 @@ export class ContextModuleImpl extends ModuleBase {
 
   dispose(): void {
     const self = this.tryGetSelfToken();
-    if (self) {
+    if (self !== null) {
       CONTEXT_CENTER.removeInstance(self);
     }
   }
@@ -307,8 +307,8 @@ export class ContextModuleImpl extends ModuleBase {
   }
 
   resolveScope(key: ContextKey<any>, consumer?: ContextInstanceToken): ContextInstanceToken | null {
-    const from = consumer ?? this.tryGetSelfToken();
-    if (!from) return null;
+    const from = arguments.length < 2 ? this.getSelfToken() : consumer;
+    if (from === null) return null;
     return CONTEXT_CENTER.resolveProvider(from, key, this.getParentGetter());
   }
 
@@ -385,7 +385,11 @@ export class ContextModuleImpl extends ModuleBase {
       );
     }
 
-    return this.caps.get(CONTEXT_INSTANCE_TOKEN_CAP) as ContextInstanceToken;
+    const token = this.caps.get(CONTEXT_INSTANCE_TOKEN_CAP);
+    if (token === null) {
+      throw contextError(ERR.PROVIDER_MISSING, '[Context] host caps invalid: null instance token');
+    }
+    return token as ContextInstanceToken;
   }
 
   private tryGetSelfToken(): ContextInstanceToken | null {

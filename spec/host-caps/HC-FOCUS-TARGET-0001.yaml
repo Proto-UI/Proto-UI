@@ -1,0 +1,34 @@
+id: HC-FOCUS-TARGET-0001
+type: host-cap
+title: Host projects current Focus targets, eligibility and request readiness
+status: draft
+since: 0.3.0-alpha.0
+summary: Host projects current Focus targets, eligibility and request readiness.
+criteria:
+  - id: HC-FOCUS-TARGET-0001-A
+    text:
+      en: 'Host logical instance tokens and parent lookup identify targets independently from their current physical view. The target getter follows the current view and shared Trigger surface; callbacks enter the owning Runtime callback scope.'
+      zh-CN: '宿主 logical instance token 与 parent 查询独立于当前物理 view 标识 target。target getter 跟随当前 view 与共享 Trigger surface；callback 进入所属 Runtime callback scope。'
+  - id: HC-FOCUS-TARGET-0001-B
+    text:
+      en: 'The host translates enabled sequential participation separately from programmatic eligibility, and applies focus/blur requests to the actual target, forwarding preventScroll. A failed focus application reports false rather than success.'
+      zh-CN: '宿主分别翻译 enabled sequential participation 与 programmatic eligibility，在真实 target 应用 focus/blur request 并传递 preventScroll。focus 应用失败时报告 false，不得宣称成功。'
+  - id: HC-FOCUS-TARGET-0001-C
+    text:
+      en: 'Target readiness has a releasable subscription, supports late/replacement views and bounded post-layout retry, and allows retained requests to be retried under current Focus policy. It does not synthesize focus facts for an absent or rejected target.'
+      zh-CN: 'target readiness 具有可释放 subscription，支持延迟/替换 view 与有界 post-layout retry，使保留请求按当前 Focus policy 重试。target 缺失或拒绝时不得合成 focus facts。'
+dependsOn:
+  contracts: [C-FOCUS-0002, C-AS-FOCUSABLE-0001, C-LIFECYCLE-0006]
+verifies:
+  tests: [T-FOCUS-0001, T-FOCUS-ROVING-0001, T-FOCUS-0002]
+sources:
+  - path: packages/modules/focus/src/caps.ts
+  - path: packages/adapters/base/src/platform/layout-ready.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/vue2/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged bounded Focus ownership and executable evidence.

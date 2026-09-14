@@ -1,3 +1,5 @@
+import type { FocusEntryConfig } from '@proto.ui/core';
+import { resolveWebFocusEntryTarget } from '@proto.ui/adapter-base';
 import {
   cancelWebEventDefaultAction,
   createCapsWiring,
@@ -32,6 +34,7 @@ import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   EVENT_GLOBAL_TARGET_CAP,
+  EVENT_GLOBAL_INPUT_SCOPE_CAP,
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
@@ -43,6 +46,8 @@ import {
   FOCUS_PARENT_CAP,
   FOCUS_REQUEST_FOCUS_CAP,
   FOCUS_ROOT_TARGET_CAP,
+  FOCUS_RESOLVE_ENTRY_TARGET_CAP,
+  FOCUS_SET_ENTRY_FOCUSABLE_CAP,
   FOCUS_RUN_IN_CALLBACK_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
@@ -55,6 +60,7 @@ import {
   OVERLAY_GLOBAL_MOUNT_CAP,
   OVERLAY_LAYER_SCHEDULER_CAP,
   OVERLAY_MODAL_CAP,
+  createWebOverlayModal,
   type OverlayGlobalMount,
   type OverlayLayerScheduler,
 } from '@proto.ui/module-overlay';
@@ -79,6 +85,11 @@ import {
   TEXT_CONTROL_HOST_CAP,
   TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
 } from '@proto.ui/module-text-control';
+import {
+  createWebImageViewHost,
+  IMAGE_VIEW_HOST_CAP,
+  IMAGE_VIEW_RUN_IN_CALLBACK_CAP,
+} from '@proto.ui/module-image-view';
 
 import {
   clearProtoParentProjection,
@@ -228,11 +239,16 @@ export function createVueModules<Props extends PropsBaseType>(args: {
   };
 
   const physicalControl = () => args.getCurrentElement() as HTMLTextAreaElement | null;
+  const physicalImage = () => args.getCurrentElement() as HTMLImageElement | null;
 
   return createCapsWiring()
     .use('text-control', [
       [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('image-view', [
+      [IMAGE_VIEW_HOST_CAP, createWebImageViewHost(physicalImage)],
+      [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [[EFFECTS_CAP, effectsPort]])
@@ -247,6 +263,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     .use('event', [
       [EVENT_ROOT_TARGET_CAP, () => router.rootTarget],
       [EVENT_GLOBAL_TARGET_CAP, () => router.globalTarget],
+      [EVENT_GLOBAL_INPUT_SCOPE_CAP, () => el.ownerDocument],
       [EVENT_CANCEL_DEFAULT_ACTION_CAP, cancelWebEventDefaultAction],
     ])
     .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
@@ -261,6 +278,20 @@ export function createVueModules<Props extends PropsBaseType>(args: {
         (target: HTMLElement, enabled: boolean, options?: { programmatic?: boolean }) => {
           const surface = getLogicalTriggerSurfaceRoot(instanceToken);
           projectFocusable(target, enabled && (!surface || surface === target), options);
+        },
+      ],
+      [
+        FOCUS_RESOLVE_ENTRY_TARGET_CAP,
+        (target: HTMLElement, config: FocusEntryConfig) =>
+          resolveWebFocusEntryTarget(target, config, isNativelyFocusable),
+      ],
+      [
+        FOCUS_SET_ENTRY_FOCUSABLE_CAP,
+        (target: HTMLElement, config: FocusEntryConfig, enabled: boolean) => {
+          const resolved = enabled
+            ? resolveWebFocusEntryTarget(target, config, isNativelyFocusable)
+            : null;
+          projectFocusable(target, resolved === target);
         },
       ],
       [
@@ -351,21 +382,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     .use('overlay', () => [
       [HOST_ELEMENT_CAP, el],
       [OVERLAY_GLOBAL_MOUNT_CAP, createVueOverlayGlobalMount(instanceToken)],
-      [
-        OVERLAY_MODAL_CAP,
-        {
-          lock() {
-            const original = document.body.style.overflow;
-            (document.body as any).__proto_ui_original_overflow = original;
-            document.body.style.overflow = 'hidden';
-          },
-          unlock() {
-            const original = (document.body as any).__proto_ui_original_overflow ?? '';
-            document.body.style.overflow = original;
-            delete (document.body as any).__proto_ui_original_overflow;
-          },
-        },
-      ],
+      [OVERLAY_MODAL_CAP, createWebOverlayModal(el.ownerDocument)],
       ...(args.overlayLayerScheduler
         ? [[OVERLAY_LAYER_SCHEDULER_CAP, args.overlayLayerScheduler] as const]
         : []),
@@ -375,15 +392,31 @@ export function createVueModules<Props extends PropsBaseType>(args: {
 
 function isNativelyFocusable(el: HTMLElement): boolean {
   const tag = el.tagName.toLowerCase();
-  if (tag === 'button' || tag === 'input' || tag === 'select' || tag === 'textarea') {
+  if (tag === 'button' || tag === 'select' || tag === 'textarea' || tag === 'iframe') {
     return true;
   }
-  if (tag === 'a') {
-    return el.hasAttribute('href');
+  if (tag === 'input') return (el as HTMLInputElement).type !== 'hidden';
+  if (tag === 'a') return el.hasAttribute('href');
+  if (tag === 'area') {
+    const map = el.closest('map');
+    if (!el.hasAttribute('href') || !map?.name || !el.isConnected) return false;
+    return Array.from(el.ownerDocument.querySelectorAll('img[usemap]')).some(
+      (image) =>
+        image.getAttribute('usemap') === `#${map.name}` &&
+        !image.closest('[hidden],[inert],[aria-hidden="true"]')
+    );
   }
-
+  if (tag === 'audio' || tag === 'video') return el.hasAttribute('controls');
+  if (tag === 'summary') {
+    const parent = el.parentElement;
+    return (
+      parent?.tagName.toLowerCase() === 'details' &&
+      Array.from(parent.children).find((child) => child.tagName.toLowerCase() === 'summary') === el
+    );
+  }
   return false;
 }
+
 function projectFocusable(
   target: HTMLElement,
   enabled: boolean,

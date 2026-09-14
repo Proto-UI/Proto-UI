@@ -27,6 +27,7 @@ import {
   resolveWebTextControlLocalName,
   TEXT_CONTROL_DECLARATION,
 } from '@proto.ui/module-text-control';
+import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
 import {
   createZIndexOverlayLayerScheduler,
   type OverlayPort,
@@ -168,12 +169,21 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
     const textControlRootTag = textControl
       ? resolveWebTextControlLocalName(textControl)
       : undefined;
-    if (textControlRootTag && opt.rootTag && opt.rootTag !== textControlRootTag) {
+    const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
+    const imageViewRootTag = imageView ? resolveWebImageLocalName() : undefined;
+    if (textControlRootTag && imageViewRootTag) {
       throw new Error(
-        `[React Adapter] text-control declaration conflicts with rootTag: ${opt.rootTag}`
+        '[React Adapter] text-control and image-view declarations cannot share a root.'
       );
     }
-    const rootTag = textControlRootTag ?? opt.rootTag ?? 'div';
+    const declaredRootTag = textControlRootTag ?? imageViewRootTag;
+    if (declaredRootTag && opt.rootTag && opt.rootTag !== declaredRootTag) {
+      const declarationName = textControlRootTag ? 'text-control' : 'image-view';
+      throw new Error(
+        `[React Adapter] ${declarationName} declaration conflicts with rootTag: ${opt.rootTag}`
+      );
+    }
+    const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
       (typeof opt.overlayLayer.baseZIndex !== 'undefined' ||

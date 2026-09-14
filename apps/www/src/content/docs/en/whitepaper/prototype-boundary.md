@@ -2,6 +2,7 @@
 title: 'Prototype Boundary'
 desp: 'What should go into a Prototype, and how prototypes should be split'
 description: 'What should go into a Prototype, and how prototypes should be split'
+draft: true
 ---
 
 ## What does this article answer?

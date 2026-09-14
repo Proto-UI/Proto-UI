@@ -135,6 +135,14 @@ implementations:
     required: true
     consumesCases:
       - T-EXPOSE-STATE-0002-CASE-WEB-BOUNDARY
+  - id: adapter-vue2-follow-through
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/catalog-conformance.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-0002-CASE-LIFECYCLE
+      - T-EXPOSE-STATE-0002-CASE-EXTERNAL-HANDLE
 verifies:
   modules:
     - id: M-EXPOSE-STATE-0001

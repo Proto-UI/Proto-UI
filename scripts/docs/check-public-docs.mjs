@@ -391,6 +391,29 @@ export function checkScaffolding({ documents, markers, exceptions = [] }) {
   return errors;
 }
 
+export function checkSpecLifecycleProjection({ documents }) {
+  const errors = [];
+  for (const document of documents) {
+    if (document.slug !== 'specifications/introduction') continue;
+    if (!document.text.includes('`activeSince`')) {
+      errors.push(
+        `${document.file}: public spec lifecycle guide must explain \`activeSince\` as distinct from \`since\`.`
+      );
+      continue;
+    }
+    const allowsSameRelease =
+      document.locale === 'zh-cn'
+        ? document.text.includes('可以与 `since` 相同')
+        : document.text.includes('may equal `since`');
+    if (!allowsSameRelease) {
+      errors.push(
+        `${document.file}: public spec lifecycle guide must state that \`activeSince\` may equal \`since\` for an identity introduced stable.`
+      );
+    }
+  }
+  return errors;
+}
+
 async function loadCatalog(root) {
   const files = await walk(path.join(root, 'spec/prototypes'), (file) => /\.ya?ml$/.test(file));
   return Promise.all(files.map(async (file) => parseYaml(await fs.readFile(file, 'utf8'))));
@@ -439,6 +462,7 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
       text: await fs.readFile(source.file, 'utf8'),
     }))
   );
+  errors.push(...checkSpecLifecycleProjection({ documents: primaryDocuments }));
   for (const entry of policy.release.archivedRoutes) {
     if (!entry.reason)
       errors.push(`archived route ${entry.slug}: classification requires a reason.`);

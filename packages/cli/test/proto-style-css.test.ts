@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { renderPrefixedThemeCss, renderProtoStyleTokenCss } from '../src/services/proto-style-css';
+import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
   it('gives Proto UI styled elements a scoped border-box baseline without a global reset', () => {
@@ -27,6 +28,14 @@ describe('proto style css renderer', () => {
     const css = renderProtoStyleTokenCss(['resize-y']);
 
     expect(css).toContain('resize: vertical;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
+  it('renders whitespace-preserving wrapping utilities for private compositions', () => {
+    const css = renderProtoStyleTokenCss(['whitespace-pre-wrap', 'wrap-anywhere']);
+
+    expect(css).toContain('white-space: pre-wrap;');
+    expect(css).toContain('overflow-wrap: anywhere;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
@@ -84,6 +93,28 @@ describe('proto style css renderer', () => {
     expect(css).toContain('border-radius: 4px;');
     expect(css).toContain('width: 0.875rem;');
     expect(css).toContain('height: 0.875rem;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
+  it('closes and renders the surface-paired frame tokens used by Brutalist Checkbox', () => {
+    expect(BRUTALIST_STYLE_TOKENS).toContain('border-main-foreground');
+    expect(BRUTALIST_STYLE_TOKENS).toContain(
+      'data-[checked]:not-[data-indeterminate]:border-background'
+    );
+
+    const css = renderProtoStyleTokenCss([
+      'text-current',
+      'opacity-0',
+      'opacity-100',
+      'border-main-foreground',
+      'border-background',
+    ]);
+
+    expect(css).toContain('color: currentColor;');
+    expect(css).toContain('opacity: 0;');
+    expect(css).toContain('opacity: 1;');
+    expect(css).toContain('border-color: var(--pui-main-foreground);');
+    expect(css).toContain('border-color: var(--pui-background);');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
@@ -215,6 +246,27 @@ describe('proto style css renderer', () => {
     expect(css).toContain('transition-duration: 150ms;');
     expect(css).toContain('transition-duration: 200ms;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+  it('emits explicit leading overrides after text-size utilities', () => {
+    const css = renderProtoStyleTokenCss(['leading-6', 'text-sm']);
+
+    const textSize = css.indexOf('[data-pui-style~="text-sm"]');
+    const leading = css.indexOf('[data-pui-style~="leading-6"]');
+
+    expect(textSize).toBeGreaterThan(-1);
+    expect(leading).toBeGreaterThan(textSize);
+    expect(css).toContain('line-height: 1.25rem;');
+    expect(css).toContain('line-height: 1.5rem;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
+  it('emits explicit leading overrides after text-size utilities so they win the cascade', () => {
+    const css = renderProtoStyleTokenCss(['leading-6', 'text-sm']);
+    const textSize = css.indexOf('[data-pui-style~="text-sm"]');
+    const leading = css.indexOf('[data-pui-style~="leading-6"]');
+
+    expect(textSize).toBeGreaterThan(-1);
+    expect(leading).toBeGreaterThan(textSize);
   });
 
   it('renders state-driven spacing translations used by the Switch thumb', () => {

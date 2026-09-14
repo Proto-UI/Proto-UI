@@ -1,0 +1,38 @@
+id: HC-ANATOMY-ORDER-0001
+type: host-cap
+title: Host supplies private Anatomy order observation
+status: draft
+since: 0.3.0-alpha.0
+summary: Private root targets and cancellable host observation support ordered views without exposing host nodes to prototype authors.
+statement:
+  en: The current Web translation uses comparable root targets and MutationObserver child-list notifications. Missing targets or observers degrade to available stable query order rather than inventing host resources.
+  zh-CN: 当前 Web translation 使用可比较 root target 与 MutationObserver child-list 通知。target 或 observer 缺失时退回可用稳定查询顺序，不虚构宿主资源。
+criteria:
+  - id: HC-ANATOMY-ORDER-0001-A
+    text:
+      en: For comparable live Web targets, provide their relative host order. Targets remain private; missing or uncomparable targets permit stable fallback without claiming geometric, visual or cross-tree ordering.
+      zh-CN: 对可比较 live Web target 提供相对宿主顺序。target 保持内部可见；缺失或不可比较时允许稳定 fallback，不声称几何、视觉或跨树顺序。
+  - id: HC-ANATOMY-ORDER-0001-B
+    text:
+      en: An available order observer reports possible structural change and returns a disposer. Anatomy filters unchanged role signatures, shares observation for one family/root, and releases participation on detach or terminal disposal. An absent observer does not synthesize notifications.
+      zh-CN: 可用 order observer 报告可能的结构变化并返回 disposer。Anatomy 过滤未变化 role signature、按 family/root 共享观察，并在 detach 或 terminal disposal 释放参与关系。observer 缺失不合成通知。
+relates:
+  contracts:
+    - C-ANATOMY-ORDER-0001
+    - C-ANATOMY-ORDER-0002
+    - C-ANATOMY-ORDER-0003
+verifies:
+  tests:
+    - T-ANATOMY-0004
+sources:
+  - path: packages/modules/anatomy/src/caps.ts
+  - path: packages/modules/anatomy/src/web/order-observer.ts
+  - path: packages/modules/anatomy/src/impl.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged current private Web order projection and observation boundary.
+tags:
+  - anatomy
+  - host-capability
+  - order

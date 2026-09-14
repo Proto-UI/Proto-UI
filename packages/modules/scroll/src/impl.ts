@@ -52,6 +52,7 @@ export class ScrollModuleImpl extends ModuleBase {
   private offAnatomyTargets: Unsubscribe | null = null;
   private lease: ScrollSurfaceHostLease | null = null;
   private mounted = false;
+  private leaseEpoch = 0;
 
   private readonly axesOwned: OwnedStateHandle<ScrollAxes>;
   private readonly scrollingOwned: OwnedStateHandle<boolean>;
@@ -218,7 +219,10 @@ export class ScrollModuleImpl extends ModuleBase {
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
-    if (phase === 'unmounted') this.disconnect();
+    if (phase === 'unmounted') {
+      this.mounted = false;
+      this.disconnect();
+    }
     if (phase === 'unmounted') {
       this.offAnatomyOrder?.();
       this.offAnatomyOrder = null;
@@ -232,8 +236,10 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   private attach(): void {
-    this.lease?.dispose();
+    this.leaseEpoch += 1;
+    const previous = this.lease;
     this.lease = null;
+    previous?.dispose();
     const host = this.getHost();
     if (!host) {
       this.set(this.projectionOwned, 'unresolved');
@@ -241,15 +247,24 @@ export class ScrollModuleImpl extends ModuleBase {
     }
     const projection = resolveScrollProjection(this.config, host.support, host.preference);
     this.set(this.projectionOwned, projection);
-    this.lease = host.attach(this.createHostAttachment());
+    const epoch = this.leaseEpoch;
+    const lease = host.attach(this.createHostAttachment());
+    if (epoch !== this.leaseEpoch || !this.mounted) {
+      lease.dispose();
+      return;
+    }
+    this.lease = lease;
   }
 
   private createHostAttachment(): ScrollSurfaceHostAttachment {
+    const epoch = this.leaseEpoch;
     const composedChrome = this.resolveComposedChrome();
     const attachment: ScrollSurfaceHostAttachment = {
       config: this.config,
       projection: this.projectionOwned.get() as Exclude<ScrollResolvedProjection, 'unresolved'>,
-      onFacts: (snapshot) => this.applySnapshot(snapshot),
+      onFacts: (snapshot) => {
+        if (epoch === this.leaseEpoch && this.mounted) this.applySnapshot(snapshot);
+      },
       ...(composedChrome ? { composedChrome } : {}),
     };
     return Object.freeze(attachment);
@@ -259,9 +274,9 @@ export class ScrollModuleImpl extends ModuleBase {
     const binding = this.composedChromeBinding;
     if (!binding) return null;
     const anatomyScope = this.anatomyPort.resolveDomainScope(binding.anatomy);
-    if (!anatomyScope) return null;
+    if (anatomyScope === null) return null;
     const scope = this.contextPort.resolveScope(binding.scope, anatomyScope);
-    if (!scope || scope !== anatomyScope) return null;
+    if (scope === null || (scope !== anatomyScope && !Object.is(scope, anatomyScope))) return null;
     const scrollbars = this.anatomyPort.order.partsOf(binding.anatomy, binding.scrollbarRole, {
       missing: 'empty',
     });
@@ -334,8 +349,10 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   disconnect(): void {
-    this.lease?.dispose();
+    this.leaseEpoch += 1;
+    const previous = this.lease;
     this.lease = null;
+    previous?.dispose();
     this.set(this.scrollingOwned, false);
     this.set(this.projectionOwned, 'unresolved');
   }

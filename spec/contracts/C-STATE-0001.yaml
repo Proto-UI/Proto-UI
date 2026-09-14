@@ -31,12 +31,14 @@ sources:
     sections:
       - Positioning statement
       - Relationship to rendering and updates
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/4-semantics-beyond-channels.md
     sections:
-      - 信息通路并不等于组件的全部
-  - path: apps/www/src/content/docs/en/whitepaper/information-flow-model.md
+      - State：保存交互中的内部事实
+      - 再回到 Switch
+  - path: apps/www/src/content/docs/en/whitepaper/4-semantics-beyond-channels.md
     sections:
-      - Information flows are not the whole component
+      - 'State: Preserving Internal Facts Across Interactions'
+      - Returning to Switch Again
 dependsOn:
   knowledge:
     - K-INFORMATION-CHANNEL-0001

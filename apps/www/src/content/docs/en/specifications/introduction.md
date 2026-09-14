@@ -38,7 +38,7 @@ Entities form a typed graph. Relations such as `satisfies`, `verifies`, `support
 
 ## Lifecycle is separate from release version
 
-Every entity has a `since` version and a lifecycle status:
+Every entity has a `since` version and a lifecycle status. `since` records when the identity entered catalog/version history; it does not claim that draft semantics were already stable. For an ordinary non-Version entity, `activeSince` records the release version at which explicit semantic admission made the guarantee stably applicable; it may equal `since` when the identity is introduced already stable. Version entities continue to use their separate publication-evidence lifecycle rather than `activeSince`.
 
 | Status       | Meaning                                                                      |
 | ------------ | ---------------------------------------------------------------------------- |
@@ -46,6 +46,8 @@ Every entity has a `since` version and a lifecycle status:
 | `draft`      | Cataloged current direction, not a stable public guarantee                   |
 | `deprecated` | Kept for compatibility or migration; read `deprecatedSince` and `replacedBy` |
 | `removed`    | Historical and unavailable from `removedSince` onward                        |
+
+Availability and stable applicability are therefore different queries. An ordinary entity can be present from `since` while not becoming a stable guarantee until `activeSince`, and its current `active` status must not be projected backward across that boundary. Legacy active entities without durable activation provenance may omit `activeSince` and remain auditable instead of receiving invented history.
 
 Do not collapse three different things into one “current version”:
 

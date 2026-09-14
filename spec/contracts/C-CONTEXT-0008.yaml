@@ -5,13 +5,8 @@ status: draft
 since: 0.1.0
 summary: Runtime context updates must explicitly name the ContextKey and next value or updater; `update` requires certainty, while `tryUpdate` models optional context availability.
 statement:
-  zh-CN: >-
-    Context runtime update 必须显式指定 ContextKey 与 next context value，不能依赖隐式当前 context。`run.context.update(key, next)` 用于原型作者确信该 context 应存在的场景；缺少 prior subscription 或当前 provider 不存在时必须失败。`run.context.tryUpdate(key, next)` 用于可选 context；它要求 prior optional subscription，context 不存在时返回 `false`，成功更新时返回 `true`。
-
-
-  en: >-
-    Runtime context updates must explicitly specify the ContextKey and next context value; they must not rely on an implicit current context. `run.context.update(key, next)` is for cases where the author is certain the context should exist; it must fail without prior subscription or when the current provider is absent. `run.context.tryUpdate(key, next)` is for optional contexts; it requires prior optional subscription, returns `false` when the context is absent, and returns `true` after a successful update.
-
+  en: Context runtime updates explicitly name the ContextKey and next value or updater. A provider may call update for its own provided key without subscribing; other participants require prior required or optional subscription. No resolved provider means failure. tryUpdate always requires prior optional subscription, returns false on absence and true on success. Both operations are callback-only; read and tryRead retain their own subscription requirements.
+  zh-CN: Context runtime update 显式指定 ContextKey 与 next value/updater。provider 可不订阅而 update 自己提供的 Key；其他参与者必须先 required 或 optional subscription。没有 resolved provider 时失败。tryUpdate 始终要求 prior optional subscription，缺失返回 false，成功返回 true。两种写操作均为 callback-only；read 与 tryRead 保留各自订阅要求。
 
 criteria:
   - id: C-CONTEXT-0008-A
@@ -24,8 +19,8 @@ criteria:
       en: '`run.context.tryUpdate(key, next)` must explicitly receive a ContextKey and next value/updater.'
   - id: C-CONTEXT-0008-C
     text:
-      zh-CN: '`update` 必须要求 prior subscription，并在 resolved provider 不存在时失败。'
-      en: '`update` must require prior subscription and fail when no provider resolves.'
+      en: update requires prior subscription unless the current instance itself provides the key; it fails when no provider resolves. This exception grants neither read nor tryUpdate authority.
+      zh-CN: update 要求 prior subscription，当前实例自己提供该 Key 时除外；没有 resolved provider 时失败。该例外不授予 read 或 tryUpdate 权限。
   - id: C-CONTEXT-0008-D
     text:
       zh-CN: '`tryUpdate` 必须要求 prior optional subscription，并在 context 不存在时返回 `false`。'
@@ -54,6 +49,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Captured explicit key/value runtime update and the v0 update/tryUpdate split.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Maintainer accepted provider self-update without subscription while preserving consumer, read and tryUpdate requirements.
 tags:
   - context
   - update

@@ -44,12 +44,16 @@ export function createZIndexOverlayLayerScheduler(
 
       const hadInline = target.style.getPropertyValue('z-index').length > 0;
       const prev = target.style.zIndex;
+      const priority = target.style.getPropertyPriority('z-index');
+      let active = true;
 
-      target.style.zIndex = String(zIndex);
+      target.style.setProperty('z-index', String(zIndex), priority);
 
       return () => {
+        if (!active) return;
+        active = false;
         if (hadInline) {
-          target.style.zIndex = prev;
+          target.style.setProperty('z-index', prev, priority);
           return;
         }
         target.style.removeProperty('z-index');

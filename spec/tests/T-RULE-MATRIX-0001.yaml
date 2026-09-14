@@ -47,6 +47,38 @@ cases:
       - C-RULE-INTENT-0001-D
     expectation: deferred-state-intent-matrix-cells
 implementations:
+  - id: rule-react-supported-cells
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-MATRIX-0001-CASE-PROPS-FEEDBACK-STYLE
+      - T-RULE-MATRIX-0001-CASE-STATE-FEEDBACK-STYLE
+  - id: rule-vue-supported-cells
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-MATRIX-0001-CASE-PROPS-FEEDBACK-STYLE
+      - T-RULE-MATRIX-0001-CASE-STATE-FEEDBACK-STYLE
+  - id: rule-vue2-supported-cells
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-MATRIX-0001-CASE-PROPS-FEEDBACK-STYLE
+      - T-RULE-MATRIX-0001-CASE-STATE-FEEDBACK-STYLE
+  - id: rule-web-component-supported-cells
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-MATRIX-0001-CASE-PROPS-FEEDBACK-STYLE
+      - T-RULE-MATRIX-0001-CASE-STATE-FEEDBACK-STYLE
   - id: rule-matrix-fixture
     kind: fixture
     status: active

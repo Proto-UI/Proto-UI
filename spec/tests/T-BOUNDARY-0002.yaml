@@ -1,0 +1,75 @@
+id: T-BOUNDARY-0002
+type: test
+title: Boundary Web proof and four Adapter sample ownership
+status: draft
+since: 0.3.0-alpha.0
+summary: Real Adapter evidence for disjoint regions, unknown preservation and stack ownership during synchronous close.
+cases:
+  - id: T-BOUNDARY-0002-CASE-ADAPTER
+    title: Event-transported samples preserve inside/outside/unknown with disjoint regions and cleanup
+    covers:
+      [
+        C-BOUNDARY-0001-A,
+        C-BOUNDARY-0001-B,
+        C-BOUNDARY-0001-F,
+        M-BOUNDARY-0001-A,
+        M-BOUNDARY-0001-B,
+        HC-BOUNDARY-CLASSIFICATION-0001-A,
+      ]
+    expectation: disjoint-regions-unknown-preservation-idempotent-observation-terminal-cleanup
+  - id: T-BOUNDARY-0002-CASE-STACK
+    title: Both listener orders preserve top-most sample ownership across synchronous close
+    covers:
+      [
+        C-BOUNDARY-0001-D,
+        M-BOUNDARY-0001-C,
+        A-REACT-18-19-0001-BOUNDARY,
+        A-VUE-3-0001-BOUNDARY,
+        A-VUE-2-0001-BOUNDARY,
+        A-WEB-COMPONENT-0001-BOUNDARY,
+      ]
+    expectation: one-native-sample-cannot-close-two-stacked-boundaries
+  - id: T-BOUNDARY-0002-CASE-WEB
+    title: Web membership follows linked Proto ownership and Shadow DOM with unknown preservation
+    covers: [HC-BOUNDARY-CLASSIFICATION-0001-B]
+    expectation: host-proven-region-membership
+implementations:
+  - id: web-boundary-proof
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/boundary-host-bridge.test.ts
+    required: true
+    consumesCases: [T-BOUNDARY-0002-CASE-WEB]
+  - id: react-boundary-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/boundary.integration.test.ts
+    required: true
+    consumesCases: [T-BOUNDARY-0002-CASE-ADAPTER, T-BOUNDARY-0002-CASE-STACK]
+  - id: vue-boundary-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/boundary.integration.test.ts
+    required: true
+    consumesCases: [T-BOUNDARY-0002-CASE-ADAPTER, T-BOUNDARY-0002-CASE-STACK]
+  - id: vue2-boundary-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/boundary.integration.test.ts
+    required: true
+    consumesCases: [T-BOUNDARY-0002-CASE-ADAPTER, T-BOUNDARY-0002-CASE-STACK]
+  - id: web-component-boundary-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/boundary.integration.test.ts
+    required: true
+    consumesCases: [T-BOUNDARY-0002-CASE-ADAPTER, T-BOUNDARY-0002-CASE-STACK]
+verifies:
+  contracts: [C-BOUNDARY-0001]
+  modules: [M-BOUNDARY-0001]
+  hostCaps: [HC-BOUNDARY-CLASSIFICATION-0001]
+  adapters: [A-REACT-18-19-0001, A-VUE-3-0001, A-VUE-2-0001, A-WEB-COMPONENT-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added real Adapter classification and synchronous stack-close regression evidence.

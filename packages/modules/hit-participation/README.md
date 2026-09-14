@@ -4,7 +4,9 @@ Proto UI module that provides hit-participation capability.
 
 ## Purpose
 
-Provides reliable hit-testing semantics and click participation interpretation for prototype interaction logic.
+The draft `C-HIT-PARTICIPATION-0001` and `M-HIT-PARTICIPATION-0001` govern region eligibility independently from Event, Boundary and modal policy. The Web bridge supports same-mode shared owners, rejects conflicting modes atomically, and restores the original pointer-events declaration when the final owner releases a target. `HC-HIT-PARTICIPATION-0001` defines that host boundary.
+
+`asHitParticipation(patch)` retains its current migration compatibility shape; setup configuration is also available on the returned singleton handle.
 
 ## Package Role
 

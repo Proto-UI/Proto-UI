@@ -1167,3 +1167,58 @@ h1 {
     grid-column: auto;
   }
 }
+
+.lifecycle-panel,
+.block-targets {
+  overflow-wrap: anywhere;
+}
+
+.lifecycle-panel {
+  grid-column: 1 / -1;
+}
+
+.lifecycle-panel .entity-meta {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lifecycle-selection {
+  margin-top: 16px;
+}
+
+.lifecycle-selection summary {
+  cursor: pointer;
+}
+
+.lifecycle-selection p + p {
+  margin-top: 8px;
+}
+
+.lifecycle-selection button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.block-targets {
+  display: grid;
+  gap: 6px;
+  padding-left: 20px;
+  color: #65716b;
+  font-size: 12px;
+}
+
+.block-targets button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #20764a;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .lifecycle-panel .entity-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -9,10 +9,13 @@ const SPEC_SOURCE_PATTERN = /\.ya?ml$/i;
 const WATCH_DEBOUNCE_MS = 100;
 const appDir = fileURLToPath(new URL('.', import.meta.url));
 const specDir = path.resolve(appDir, '../../spec');
+const releaseDir = path.resolve(appDir, '../../internal/releases');
 const generatorPath = path.join(appDir, 'scripts/generate-spec-dataset.ts');
 const execFileAsync = promisify(execFile);
 
 function isSpecSource(filePath: string) {
+  const releasePath = path.relative(releaseDir, filePath).split(path.sep).join('/');
+  if (/^[^/]+\/lifecycle-dispositions\.json$/.test(releasePath)) return true;
   const relativePath = path.relative(specDir, filePath);
   return (
     relativePath !== '' &&
@@ -30,7 +33,7 @@ function specDatasetPlugin(): Plugin {
       let timer: ReturnType<typeof setTimeout> | undefined;
       let regeneration = Promise.resolve();
 
-      server.watcher.add(specDir);
+      server.watcher.add([specDir, releaseDir]);
 
       const scheduleRegeneration = (event: string, filePath: string) => {
         if (!['add', 'change', 'unlink'].includes(event) || !isSpecSource(filePath)) return;

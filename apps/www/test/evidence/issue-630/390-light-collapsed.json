@@ -1,0 +1,41 @@
+{
+  "facts": {
+    "ec": {
+      "background": "lab(96.52 -0.0000298023 0.0000119209)",
+      "color": "lab(2.75381 0 0)",
+      "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+      "size": "13px",
+      "lineHeight": "24px"
+    },
+    "preview": {
+      "background": "lab(96.52 -0.0000298023 0.0000119209)",
+      "color": "lab(2.75381 0 0)",
+      "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+      "size": "13px",
+      "lineHeight": "24px"
+    },
+    "ecCode": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "lab(2.75381 0 0)",
+      "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+      "size": "13px",
+      "lineHeight": "24px"
+    },
+    "previewCode": {
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "lab(2.75381 0 0)",
+      "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+      "size": "13px",
+      "lineHeight": "24px"
+    },
+    "border": ["lab(90.952 0 -0.0000119209)", "lab(90.952 0 -0.0000119209)"],
+    "radius": ["12px", "12px"],
+    "documentOverflow": 0
+  },
+  "collapsed": {
+    "expanded": "false",
+    "selectable": true,
+    "overflow": "auto",
+    "scrollable": true
+  }
+}

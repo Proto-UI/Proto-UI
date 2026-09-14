@@ -35,6 +35,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
 
   private bindings: Binding[] = [];
   private active = false;
+  private bindingGeneration = 0;
   private exposedByStateId = new Map<
     string,
     {
@@ -54,7 +55,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
-    if (phase !== 'detached') return;
+    if (phase !== 'detached' && phase !== 'unmounting') return;
     this.active = false;
     this.clearBindings();
     this.exposedByStateId.clear();
@@ -83,18 +84,14 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
 
     if (!this.caps.has(HOST_ELEMENT_CAP)) {
-      this.active = false;
-      this.exposedByStateId.clear();
+      this.clearBindings();
       return;
     }
     const host = this.caps.get(HOST_ELEMENT_CAP);
     if (!host) {
-      this.active = false;
-      this.exposedByStateId.clear();
+      this.clearBindings();
       return;
     }
-    this.active = true;
-
     const nameMap = this.caps.has(EXPOSE_STATE_WEB_MAP_CAP)
       ? this.caps.get(EXPOSE_STATE_WEB_MAP_CAP)
       : createExposeStateWebNameMap;
@@ -106,7 +103,8 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     const all = this.exposeState.getAll();
 
     this.clearBindings();
-    this.exposedByStateId.clear();
+    this.active = true;
+    const generation = this.bindingGeneration;
 
     for (const [key, value] of Object.entries(all)) {
       if (!isExposeStateExternalHandle(value)) continue;
@@ -138,6 +136,9 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
       this.applySnapshot(host, value, binding, mode);
 
       const off = value.subscribe((e) => {
+        // Unsubscription cannot retract a callback already queued by its source.
+        if (this.disposed || generation !== this.bindingGeneration) return;
+        if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
         if (e.type === 'disconnect') return;
         this.applyValue(host, e.next as any, binding, mode);
       });
@@ -227,6 +228,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
   }
 
   private clearBindings(): void {
+    this.bindingGeneration++;
     for (const b of this.bindings) {
       try {
         b.off?.();

@@ -1,16 +1,12 @@
 id: D-RULE-HANDLE-DISPOSE-0001
 type: decision
-title: RuleHandle.dispose conflicts with setup-only removal boundary
+title: RuleHandle.dispose is setup-time composition removal
 status: draft
 since: 0.1.0
-summary: Current `RuleHandle.dispose()` behavior can be called after setup, but setup-only removal should not become a runtime escape hatch without a dedicated runtime API.
+summary: RuleHandle.dispose follows the setup-only cancellation boundary and is unavailable from created onward; terminal cleanup belongs to Module lifecycle.
 statement:
-  zh-CN: >-
-    当前 `RuleHandle.dispose()` 可以在 setup 之后被调用，这与 setup-only API 返回移除动作默认仍为 setup-only 的边界存在冲突。后续需要决定 Rule removal 是 setup-only composition 能力，还是一条正式 runtime Rule API。
-
-  en: >-
-    Current `RuleHandle.dispose()` can be called after setup, which conflicts with the boundary that removal actions returned by setup-only APIs remain setup-only by default. A future decision must decide whether Rule removal is setup-only composition or a formal runtime Rule API.
-
+  en: RuleHandle.dispose is cancellation of a setup declaration. It is permitted only while prototype setup is executing; created callbacks and all later execution scopes must reject it before mutating Rule state or output. This follows C-CORE-SYNTAX-0007 regardless of whether cancellation is exposed as a function or a handle method. Terminal Module disposal is separate internal cleanup. Runtime rule removal is not admitted by this decision.
+  zh-CN: RuleHandle.dispose 是 setup 声明的取消动作，仅允许在原型 setup 执行期间调用；created callback 与后续所有执行阶段都必须在修改 Rule 状态或输出前拒绝调用。无论取消动作以函数还是 handle method 暴露，均遵循 C-CORE-SYNTAX-0007。Module terminal disposal 是独立的内部资源清理。本决定不接纳 runtime Rule removal。
 explains:
   contracts:
     - C-CORE-SYNTAX-0007
@@ -26,6 +22,9 @@ sources:
     sections:
       - D-RULE-HANDLE-DISPOSE-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Resolved the maintainer decision in favor of setup-only removal, including direct handles and captured asHook disposers; retained draft lifecycle.
   - version: 0.1.0
     change: introduced
     summary: Recorded `RuleHandle.dispose()` phase semantics as a decision gap.
@@ -33,4 +32,3 @@ tags:
   - rule
   - setup
   - dispose
-  - debt

@@ -76,4 +76,58 @@ describe('module-hit-participation: web host bridge', () => {
       })
     ).not.toThrow();
   });
+  it.each([false, true])(
+    'T-HIT-PARTICIPATION-0001-CASE-SHARING: final owner restores the original declaration (reverse=%s)',
+    (reverse) => {
+      const target = document.createElement('div');
+      target.style.setProperty('pointer-events', 'auto', 'important');
+      const owners = [createWebHitParticipationHostBridge(), createWebHitParticipationHostBridge()];
+      const claim = {
+        config: { mode: 'disabled' as const },
+        regions: [{ target, mode: 'disabled' as const }],
+      };
+      for (const owner of owners) owner.sync(claim);
+      if (reverse) owners.reverse();
+      owners[0].sync({ config: claim.config, regions: [] });
+      expect(target.style.pointerEvents).toBe('none');
+      owners[1].sync({ config: claim.config, regions: [] });
+      expect(target.style.pointerEvents).toBe('auto');
+      expect(target.style.getPropertyPriority('pointer-events')).toBe('important');
+      owners[1].sync({ config: claim.config, regions: [] });
+      expect(target.style.pointerEvents).toBe('auto');
+    }
+  );
+
+  it.each(['participating', 'passthrough'] as const)(
+    'T-HIT-PARTICIPATION-0001-CASE-CONFLICT: rejects %s before changing any region',
+    (mode) => {
+      const target = document.createElement('div');
+      const previous = document.createElement('div');
+      const fresh = document.createElement('div');
+      previous.style.pointerEvents = 'auto';
+      const first = createWebHitParticipationHostBridge();
+      const second = createWebHitParticipationHostBridge();
+      first.sync({ config: { mode: 'disabled' }, regions: [{ target, mode: 'disabled' }] });
+      second.sync({
+        config: { mode: 'disabled' },
+        regions: [{ target: previous, mode: 'disabled' }],
+      });
+      expect(() =>
+        second.sync({
+          config: { mode },
+          regions: [
+            { target: fresh, mode },
+            { target, mode },
+          ],
+        })
+      ).toThrow(/conflicting.*mode/i);
+      expect(previous.style.pointerEvents).toBe('none');
+      expect(fresh.style.pointerEvents).toBe('');
+      expect(target.style.pointerEvents).toBe('none');
+      second.sync({ config: { mode: 'disabled' }, regions: [] });
+      expect(previous.style.pointerEvents).toBe('auto');
+      expect(target.style.pointerEvents).toBe('none');
+      first.sync({ config: { mode: 'disabled' }, regions: [] });
+    }
+  );
 });

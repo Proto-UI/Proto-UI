@@ -1405,7 +1405,8 @@ function resolveKnownAsHookStateHandles(node) {
     hookName === 'asDialogTrigger' ||
     hookName === 'asDialogClose' ||
     hookName === 'asDropdownTrigger' ||
-    hookName === 'asHoverCardTrigger'
+    hookName === 'asHoverCardTrigger' ||
+    hookName === 'asTooltipTrigger'
   ) {
     return new Map(COMMAND_STATE_VARIANTS);
   }

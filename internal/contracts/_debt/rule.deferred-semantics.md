@@ -55,7 +55,7 @@ Acceptance criteria:
 
 `module-rule-meta` currently provides `w.meta(key)` through host-provided metadata.
 
-This is useful but not yet stable as rule core. Future design may replace "meta" with a more systematic host environment/configuration abstraction.
+This is an implemented extension already used for light/dark theme conditions by official Shadcn prototypes. The use case is accepted, but it is insufficient on its own to freeze a general environment abstraction. API shape may evolve or be replaced as broader requirements emerge; preserve existing theme behavior while naming and ownership are governed.
 
 Acceptance criteria:
 
@@ -68,16 +68,11 @@ Acceptance criteria:
 
 ### D-RULE-HANDLE-DISPOSE-0001: `RuleHandle.dispose()` conflicts with setup-only removal boundary
 
-Rule declaration is setup-only. A setup-only API may return a removal function for setup composition, but that removal action should not become a runtime escape hatch unless a separate runtime API is specified.
+Resolved direction in the 2026-09-08 maintainer discussion: `RuleHandle.dispose()` is setup-time cancellation, not a runtime API. See [D-RULE-HANDLE-DISPOSE-0001](../../../spec/decisions/D-RULE-HANDLE-DISPOSE-0001.yaml) and [C-CORE-SYNTAX-0007](../../../spec/contracts/C-CORE-SYNTAX-0007.yaml); lifecycle remains draft.
 
-Current `RuleHandle.dispose()` can be called after setup and is covered by existing smoke behavior.
+The historical implementation allowed direct handles after setup while asHook-captured disposers already rejected them. Direct Module handles now enforce the same boundary, including before the first mount in `onCreated`. Rejected calls preserve the declaration and output. Instance teardown uses internal Module cleanup rather than author cancellation.
 
-Acceptance criteria:
-
-1. Decide whether rule removal is setup-only or a formal runtime API.
-2. If setup-only, enforce phase guard on removal.
-3. If runtime, define runtime rule removal semantics separately.
-4. Update tests and docs accordingly.
+Executable evidence is mapped by `T-RULE-0001`; this resolves the removal-phase gap without claiming the other planned RuleIR or matrix evidence.
 
 ---
 

@@ -9,6 +9,7 @@ import { GlobalRegistrator } from '@happy-dom/global-registrator';
 GlobalRegistrator.register();
 
 await import('./proto-ui/components/wc/index.ts');
+const { setElementProps } = await import('@proto.ui/adapter-web-component');
 
 const tag = 'proto-ui-shadcn-button';
 const ctor = customElements.get(tag);
@@ -54,6 +55,31 @@ if (!closeIcon || closeIcon.getAttribute('aria-label') !== 'Close') {
   throw new Error('wc smoke: Dialog Content preset did not mount its default CloseIcon');
 }
 
+const imageElement = document.createElement('proto-ui-base-image');
+const source =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
+setElementProps(imageElement, {
+  source,
+  a11yMode: 'informative',
+  alternativeText: 'Packed Base Image',
+  fit: 'cover',
+});
+document.body.appendChild(imageElement);
+await flush();
+const image = imageElement.querySelector('img');
+if (
+  imageElement.querySelectorAll('img').length !== 1 ||
+  image?.getAttribute('src') !== source ||
+  image.alt !== 'Packed Base Image' ||
+  image.style.objectFit !== 'cover'
+) {
+  throw new Error(
+    'wc smoke: Base Image did not project its physical image: ' + imageElement.outerHTML
+  );
+}
+imageElement.remove();
+
 console.log(
-  'wc smoke ok | Button + Switch preset + Dialog CloseIcon preset, instance tagName=' + el.tagName
+  'wc smoke ok | Button + Switch preset + Dialog CloseIcon preset + Base Image, instance tagName=' +
+    el.tagName
 );

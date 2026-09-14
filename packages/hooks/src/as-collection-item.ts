@@ -83,11 +83,11 @@ export const asCollectionItem = definePrivilegedAsHook<PropsBaseType, Collection
       configure: (patch: CollectionItemConfigPatch) => {
         const role = patch.role ?? DEFAULT_ROLE;
         const metaExposeKey = patch.metaExposeKey ?? DEFAULT_META_EXPOSE_KEY;
-        store.getMeta = patch.getMeta as typeof store.getMeta;
         collection.configureItem({
           family: patch.family,
           role,
         });
+        store.getMeta = patch.getMeta as typeof store.getMeta;
         def.anatomy.claim(patch.family, { role });
 
         def.expose.state(

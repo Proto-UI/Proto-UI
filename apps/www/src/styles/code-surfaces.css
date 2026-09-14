@@ -1,0 +1,123 @@
+/* Site-owned presentation, after both renderer and Proto UI control defaults.
+ * Keep renderer behavior (frames, copy feedback, expansion) with its owner.
+ */
+@layer code-surfaces {
+  :root {
+    --docs-code-background: var(--color-muted);
+    --docs-code-foreground: var(--color-foreground);
+    --docs-code-border: var(--color-border);
+    --docs-code-radius: 0.75rem;
+    --docs-code-font: var(--font-mono);
+    --docs-code-size: 0.8125rem;
+    --docs-code-line-height: 1.5rem;
+    --docs-code-copy-size: 2rem;
+    --docs-code-copy-glyph: 18px;
+    --docs-code-copy-radius: 0.375rem;
+  }
+
+  .expressive-code pre,
+  .proto-previewer__code {
+    background: var(--docs-code-background);
+    color-scheme: light;
+    color: var(--docs-code-foreground);
+    font-family: var(--docs-code-font);
+    font-size: var(--docs-code-size);
+    line-height: var(--docs-code-line-height);
+  }
+
+  .expressive-code pre > code,
+  .proto-previewer__code > code {
+    font: inherit;
+    color: inherit;
+  }
+
+  [data-theme='dark'] .expressive-code pre,
+  [data-theme='dark'] .proto-previewer__code {
+    color-scheme: dark;
+  }
+
+  /* Shiki emits only custom properties, never inline color/background rules.
+   * Only styled tokens participate; plain line wrappers inherit normally.
+   */
+  .proto-previewer__code span[style] {
+    color: var(--shiki-light, inherit);
+  }
+
+  [data-theme='dark'] .proto-previewer__code span[style] {
+    color: var(--shiki-dark, inherit);
+  }
+
+  [data-code-inner] {
+    border-top: 1px solid var(--docs-code-border);
+    background: var(--docs-code-background);
+  }
+
+  .proto-previewer__code {
+    margin: 0;
+    max-height: 4.5rem;
+    overflow: auto;
+    white-space: pre;
+  }
+
+  [data-code-expanded='true'] .proto-previewer__code {
+    max-height: 9rem;
+  }
+
+  .proto-previewer__code:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: -2px;
+  }
+
+  /* Always discoverable, including touch. Preview copy remains gated by the
+   * existing expansion behavior; once shown it uses the same visual contract.
+   */
+  .expressive-code .copy,
+  .expressive-code .copy button,
+  .docs-code-copy {
+    opacity: 1;
+  }
+
+  .expressive-code .copy button,
+  .docs-code-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--docs-code-copy-size);
+    height: var(--docs-code-copy-size);
+    padding: 0;
+    border: 1px solid var(--docs-code-border);
+    border-radius: var(--docs-code-copy-radius);
+    background: var(--docs-code-background);
+    color: var(--docs-code-foreground);
+    cursor: pointer;
+    box-shadow: none;
+    transition: none;
+  }
+
+  .expressive-code .copy button::before {
+    display: none;
+  }
+
+  .expressive-code .copy button::after,
+  .docs-code-copy svg {
+    width: var(--docs-code-copy-glyph);
+    height: var(--docs-code-copy-glyph);
+    margin: 0;
+    opacity: 1;
+  }
+
+  .expressive-code .copy button::after {
+    background: currentColor;
+  }
+
+  .expressive-code .copy button:focus-visible,
+  .docs-code-copy:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  [data-code-shell] wc-shadcn-button[hidden] {
+    display: none;
+  }
+}

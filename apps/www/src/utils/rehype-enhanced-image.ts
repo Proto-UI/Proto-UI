@@ -1,6 +1,6 @@
 import type { Root } from 'hast';
 import type { Plugin } from 'unified';
-import { visit } from 'unist-util-visit';
+import { SKIP, visit } from 'unist-util-visit';
 
 /**
  * Rehype 插件：增强 Markdown 图片渲染
@@ -9,6 +9,12 @@ import { visit } from 'unist-util-visit';
 export const rehypeEnhancedImage: Plugin<[], Root> = () => {
   return (tree) => {
     visit(tree as any, 'element', (node: any, index, parent: any) => {
+      // Viewer buttons own their image layout and captions. Keep their entire
+      // subtree as phrasing content, including images nested in inline elements.
+      if (node.tagName === 'button' && Object.hasOwn(node.properties ?? {}, 'dataDiagramOpen')) {
+        return SKIP;
+      }
+
       if (node.tagName === 'img' && parent && typeof index === 'number') {
         const img = node;
         const src = img.properties?.src as string | undefined;

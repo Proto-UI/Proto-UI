@@ -44,6 +44,10 @@ sources:
   - path: packages/prototypes/base/src/image/root.proto.ts
   - path: packages/prototypes/base/src/image/types.ts
   - path: packages/prototypes/base/test/image.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/base/image.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/base/image.mdx
+  - path: apps/www/src/content/docs/zh-cn/demo-base-image.demo.ts
+  - path: packages/cli/src/registry/components.ts
 dependsOn:
   contracts: [C-IMAGE-VIEW-0001, C-AS-HOOK-0001]
   modules: [M-IMAGE-VIEW-0001]

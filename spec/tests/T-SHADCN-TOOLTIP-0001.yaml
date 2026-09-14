@@ -1,0 +1,109 @@
+id: T-SHADCN-TOOLTIP-0001
+type: test
+title: shadcn Tooltip inheritance, compatibility, package, and rendered tests
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  Covers exact package and CLI surfaces, Base delay and ownership semantics, Group, Trigger, and Content presentation, negative Arrow and Portal identities, and real cross-runtime Overlay evidence.
+
+
+cases:
+  - id: T-SHADCN-TOOLTIP-0001-CASE-PUBLIC-SURFACE
+    title: The package and CLI expose exactly Group Root Trigger and Content
+    covers:
+      - P-SHADCN-TOOLTIP-UPSTREAM-IDENTITY
+      - P-SHADCN-TOOLTIP-DIRECT-ENTRY
+      - P-SHADCN-TOOLTIP-PUBLIC-SURFACE
+      - P-SHADCN-TOOLTIP-ARROW-OMISSION
+      - P-SHADCN-TOOLTIP-COMPATIBILITY-SUBSET
+      - P-SHADCN-TOOLTIP-GROUP-DIRECT-ENTRY
+      - P-SHADCN-TOOLTIP-TRIGGER-DIRECT-ENTRY
+      - P-SHADCN-TOOLTIP-CONTENT-DIRECT-ENTRY
+    expectation: shadcn-tooltip-exports-the-four-part-family-without-arrow-or-portal-identities
+  - id: T-SHADCN-TOOLTIP-0001-CASE-GROUP
+    title: Group retains Base defaults warm handoff teardown and its declared layout surface
+    covers:
+      - P-SHADCN-TOOLTIP-GROUP-BASE-INHERITANCE
+      - P-SHADCN-TOOLTIP-GROUP-BASE-DEFAULTS
+      - P-SHADCN-TOOLTIP-GROUP-CURRENT-VISUAL-SURFACE
+    expectation: shadcn-tooltip-group-keeps-700-100-300-defaults-and-inline-layout
+  - id: T-SHADCN-TOOLTIP-0001-CASE-TRIGGER
+    title: Trigger feedback follows inherited facts without activation ownership
+    covers:
+      - P-SHADCN-TOOLTIP-TRIGGER-BASE-INHERITANCE
+      - P-SHADCN-TOOLTIP-TRIGGER-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-TOOLTIP-TRIGGER-STATE-FEEDBACK
+      - P-SHADCN-TOOLTIP-TRIGGER-NO-ACTIVATION-OWNER
+    expectation: shadcn-tooltip-trigger-paints-hover-focus-and-press-without-command-semantics
+  - id: T-SHADCN-TOOLTIP-0001-CASE-CONTENT
+    title: Content remains supplementary and renderer-portaled with its complete visual surface
+    covers:
+      - P-SHADCN-TOOLTIP-OWNERSHIP-BOUNDARY
+      - P-SHADCN-TOOLTIP-CONTENT-BASE-INHERITANCE
+      - P-SHADCN-TOOLTIP-CONTENT-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-TOOLTIP-CONTENT-SUPPLEMENTARY-BOUNDARY
+    expectation: shadcn-tooltip-content-keeps-base-overlay-ownership-and-compact-presentation
+  - id: T-SHADCN-TOOLTIP-0001-CASE-BROWSER
+    title: Real package exports render focus description Portal Escape and paint across Web Components React Vue and Vue 2
+    covers:
+      - P-SHADCN-TOOLTIP-OWNERSHIP-BOUNDARY
+      - P-SHADCN-TOOLTIP-ARROW-OMISSION
+      - P-SHADCN-TOOLTIP-TRIGGER-STATE-FEEDBACK
+      - P-SHADCN-TOOLTIP-CONTENT-BASE-INHERITANCE
+      - P-SHADCN-TOOLTIP-CONTENT-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-TOOLTIP-CONTENT-SUPPLEMENTARY-BOUNDARY
+    expectation: rendered-shadcn-tooltip-links-focus-to-portaled-painted-content-and-dismisses-with-escape
+implementations:
+  - id: prototypes-shadcn-tooltip-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/tooltip.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-TOOLTIP-0001-CASE-PUBLIC-SURFACE
+      - T-SHADCN-TOOLTIP-0001-CASE-GROUP
+      - T-SHADCN-TOOLTIP-0001-CASE-TRIGGER
+      - T-SHADCN-TOOLTIP-0001-CASE-CONTENT
+    exercises: &tooltip-prototypes
+      - P-BASE-TOOLTIP
+      - P-BASE-TOOLTIP-GROUP
+      - P-BASE-TOOLTIP-TRIGGER
+      - P-BASE-TOOLTIP-CONTENT
+      - P-SHADCN-TOOLTIP
+      - P-SHADCN-TOOLTIP-GROUP
+      - P-SHADCN-TOOLTIP-TRIGGER
+      - P-SHADCN-TOOLTIP-CONTENT
+  - id: cli-shadcn-tooltip-facade
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/cli.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TOOLTIP-0001-CASE-PUBLIC-SURFACE]
+    exercises: *tooltip-prototypes
+  - id: type-shadcn-tooltip-export-parity
+    kind: workspace-check
+    status: passing
+    path: internal/contracts/types/prototype-family-exports.contract.v0.type-test.ts
+    required: true
+    consumesCases: [T-SHADCN-TOOLTIP-0001-CASE-PUBLIC-SURFACE]
+    exercises: *tooltip-prototypes
+  - id: www-shadcn-tooltip-browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TOOLTIP-0001-CASE-BROWSER]
+    exercises: *tooltip-prototypes
+verifies:
+  prototypes:
+    - id: P-SHADCN-TOOLTIP
+    - id: P-SHADCN-TOOLTIP-GROUP
+    - id: P-SHADCN-TOOLTIP-TRIGGER
+    - id: P-SHADCN-TOOLTIP-CONTENT
+exercises:
+  prototypes: *tooltip-prototypes
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Introduced draft shadcn Tooltip package, compatibility, behavior, and cross-runtime coverage.
+tags: [test, shadcn, tooltip, compatibility, visual, interaction, accessibility]

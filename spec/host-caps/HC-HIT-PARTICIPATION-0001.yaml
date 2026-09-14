@@ -1,0 +1,26 @@
+id: HC-HIT-PARTICIPATION-0001
+type: host-cap
+title: Host projects Hit Participation claims per owner and restores shared targets
+status: draft
+since: 0.3.0-alpha.0
+summary: Host projects Hit Participation claims per owner and restores shared targets.
+criteria:
+  - id: HC-HIT-PARTICIPATION-0001-A
+    text:
+      en: 'Each bridge synchronizes one owner contribution across all currently supplied regions. Shared target claims agree on one mode; conflict preflight covers the whole replacement before any release or projection write. Empty synchronization releases only that bridge contribution.'
+      zh-CN: '每个 bridge 同步一个 owner 对全部当前 regions 的贡献。共享 target claims 必须同 mode；冲突预检覆盖整个替换，先于任何释放或投射写入。空同步仅释放该 bridge 的贡献。'
+  - id: HC-HIT-PARTICIPATION-0001-B
+    text:
+      en: 'The Web bridge projects disabled and passthrough HTMLElement regions to inline pointer-events none while retaining their distinct mode mark. participating restores the pre-claim declaration. The last owner restores both original pointer-events value and CSS priority and removes the mode mark; unknown non-HTMLElement targets are not projected.'
+      zh-CN: 'Web bridge 将 disabled 与 passthrough HTMLElement region 投射为 inline pointer-events none，同时保留各自 mode mark。participating 恢复 claim 前声明。最后 owner 释放时恢复原 pointer-events 值与 CSS priority 并移除 mode mark；未知非 HTMLElement target 不投射。'
+dependsOn:
+  contracts: [C-HIT-PARTICIPATION-0001]
+verifies:
+  tests: [T-HIT-PARTICIPATION-0001]
+sources:
+  - path: packages/modules/hit-participation/src/caps.ts
+  - path: packages/modules/hit-participation/src/web/host-bridge.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged Hit Participation and approved shared-target ownership with executable evidence.

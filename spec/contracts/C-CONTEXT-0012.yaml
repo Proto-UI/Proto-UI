@@ -5,23 +5,18 @@ status: draft
 since: 0.1.0
 summary: Context providers and subscriptions are bound to the component instance lifecycle, and context failures should be distinguishable for diagnostics.
 statement:
-  zh-CN: >-
-    Context provider 与 subscription 都绑定到组件实例生命周期。实例 unmount/dispose 后，当前实例提供的 context scope 与订阅记录必须被清理，残留 callback 不得继续接收后续 context update。Context 失败应具备可区分诊断信息，尤其是 phase violation、missing provider、missing subscription、duplicate provide、disconnected 与 invalid value。
-
-
-  en: >-
-    Context providers and subscriptions are bound to the component instance lifecycle. After instance unmount/dispose, context scopes and subscription records owned by the instance must be cleaned up, and leftover callbacks must not receive later context updates. Context failures should carry distinguishable diagnostics, especially phase violation, missing provider, missing subscription, duplicate provide, disconnected, and invalid value.
-
+  en: Context providers and subscriptions belong to instance lifetime. Repeatable view unmount preserves them; terminal instance disposal removes the owner records. Unsubscribed or disposed callbacks must not receive later updates. Phase, missing provider/subscription, duplicate provide, disconnection, invalid value and missing required scope capability remain diagnosable.
+  zh-CN: Context provider 与 subscription 属于 instance lifetime。repeatable view unmount 保留这些资源，terminal instance disposal 移除 owner 记录。unsubscribe 或 dispose 后旧 callback 不接收后续 update。phase、missing provider/subscription、duplicate provide、disconnected、invalid value 与缺失必要 scope capability 仍须可诊断。
 
 criteria:
   - id: C-CONTEXT-0012-A
     text:
-      zh-CN: dispose/unmount 必须移除当前实例提供的 context providers。
-      en: Dispose/unmount must remove context providers owned by the current instance.
+      en: Terminal disposal removes this instance’s providers; repeatable view unmount preserves them.
+      zh-CN: terminal disposal 移除当前实例 provider；repeatable view unmount 保留它们。
   - id: C-CONTEXT-0012-B
     text:
-      zh-CN: dispose/unmount 必须移除当前实例的 context subscriptions。
-      en: Dispose/unmount must remove context subscriptions owned by the current instance.
+      en: Terminal disposal removes this instance’s subscriptions; repeatable view unmount preserves intent and callback registrations.
+      zh-CN: terminal disposal 移除当前实例 subscription；repeatable view unmount 保留 intent 与 callback registration。
   - id: C-CONTEXT-0012-C
     text:
       zh-CN: unsubscribe 或 dispose 后，旧 callback 不得继续接收后续 context update。
@@ -49,10 +44,15 @@ dependsOn:
   contracts:
     - C-CONTEXT-0004
     - C-LIFECYCLE-0004
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
 revisions:
   - version: 0.1.0
     change: introduced
     summary: Captured lifecycle cleanup and distinguishable context diagnostics.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Reconciled legacy unmount wording with the existing repeatable-view versus terminal-instance lifecycle.
 tags:
   - context
   - lifecycle

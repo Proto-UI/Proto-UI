@@ -37,6 +37,8 @@ If the current trigger has a direct logical parent whose prototype also carries 
 
 The outermost member is the default anchor and the innermost member is the default interaction surface. A missing parent, missing prototype, non-trigger parent, or unprovable direct relation stops the merge; a standalone trigger forms a one-member group and is both anchor and surface.
 
+A group must be a single continuous chain. Sibling Trigger branches under one Trigger are diagnosed and rejected before replacing the accepted chain, surface or route; registration order must not choose a winner. Separate Trigger groups under a non-Trigger parent remain valid. See `C-AS-TRIGGER-0001-L`.
+
 ## Event boundary
 
 Semantic activation registrations from group members converge on the current surface target. One valid host activation sample is interpreted at most once for the group. `host:*` registrations remain bound to each member's own host root.
@@ -54,3 +56,7 @@ For Web pointer input, the physical hit origin must be the current surface root 
 - `T-AS-TRIGGER-0001`
 - `C-AS-HOOK-PRIVILEGED-0001`
 - `C-EVENT-0001`
+
+- `M-AS-TRIGGER-0001`
+- `HC-TRIGGER-GROUP-0001`
+- `T-AS-TRIGGER-0002`

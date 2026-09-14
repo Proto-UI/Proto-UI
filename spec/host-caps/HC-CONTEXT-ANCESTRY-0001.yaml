@@ -1,0 +1,46 @@
+id: HC-CONTEXT-ANCESTRY-0001
+type: host-cap
+title: Host supplies current Context scope ancestry
+status: draft
+since: 0.3.0-alpha.0
+summary: The host translates its ownership model into current logical-parent queries over opaque identities; Context owns provider selection.
+statement:
+  en: The host translates its ownership model into current logical-parent queries over opaque identities; Context owns provider selection.
+  zh-CN: 宿主将 ownership 模型翻译为 opaque identity 的当前 logical-parent 查询；Context 自身拥有 provider 选择。
+criteria:
+  - id: HC-CONTEXT-ANCESTRY-0001-A
+    text:
+      en: Queries return the current logical parent identity or null at an ancestry boundary; the relation must form a finite acyclic traversal.
+      zh-CN: 查询返回当前 logical parent identity 或边界处的 null；关系必须形成有限无环遍历。
+  - id: HC-CONTEXT-ANCESTRY-0001-B
+    text:
+      en: The supplied relation reflects logical ownership, rather than requiring DOM containment; physical containment is not a universal Context rule.
+      zh-CN: 关系反映逻辑 ownership，不要求 DOM containment；物理包含不是 Context 通用规则。
+  - id: HC-CONTEXT-ANCESTRY-0001-C
+    text:
+      en: The host provides ancestry facts, not Context values, key matching, subscription policy or callback scheduling; Context resolves the nearest self-inclusive provider.
+      zh-CN: 宿主只提供 ancestry facts，不拥有 Context value、Key matching、subscription policy 或 callback scheduling；Context 从自身开始解析最近 provider。
+  - id: HC-CONTEXT-ANCESTRY-0001-D
+    text:
+      en: Traversal is required when resolution is used; missing traversal fails diagnostically, while a valid null parent is an ordinary root or disconnected boundary.
+      zh-CN: 进行 resolution 时必须提供遍历能力；缺失能力给出诊断并失败，合法 null parent 则是普通 root 或 disconnected 边界。
+relates:
+  contracts:
+    - C-CONTEXT-0004
+    - C-CONTEXT-0011
+    - C-CONTEXT-0012
+verifies:
+  tests:
+    - T-CONTEXT-0003
+sources:
+  - path: packages/modules/context/src/caps.ts
+  - path: packages/modules/context/src/impl.ts
+  - path: packages/adapters/base/src/platform/instance-tree.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Separated the existing Context host identity and ancestry responsibilities without changing cap tokens.
+tags:
+  - context
+  - host-capability
+  - scope

@@ -6,6 +6,12 @@ Proto UI module that provides host-mediated anchored positioning for overlays.
 
 Provides collision-aware placement policy and host leases so prototypes can position floating content relative to an anchor without owning browser geometry APIs.
 
+## Contract and lifecycle
+
+The draft catalog is defined by `C-ANCHORED-POSITIONING-0001`, `M-POSITIONING-0001`, and `HC-ANCHORED-POSITION-0001`. The module retains a connection and categorical snapshot; Overlay owns active-view connection lifetime. The Web host uses Floating UI for geometry and preserves `transform` for downstream styling.
+
+Only the current computation of a live lease may publish coordinates, size variables, or resolved placement. Replacement and disposal invalidate pending work; disposal stops observation and cannot be reversed by updating the old lease. A missing host retains the declaration without projecting geometry.
+
 ## Package Role
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.

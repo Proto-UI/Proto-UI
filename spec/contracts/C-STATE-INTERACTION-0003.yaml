@@ -42,9 +42,9 @@ sources:
   - path: packages/runtime/test/contract/state.semantic.v0.contract.test.ts
     sections:
       - fromInteraction returns a shared borrowed handle
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/component-as-protocol.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/1-components-before-code.md
     sections:
-      - 交互主体
+      - 组件到底是什么？
   - path: apps/www/src/content/docs/zh-cn/wiki/as-hook.md
     sections:
       - asHook 是什么

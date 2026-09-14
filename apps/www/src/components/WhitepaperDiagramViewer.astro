@@ -1,0 +1,195 @@
+---
+const zh = (Astro.locals.starlightRoute.locale || 'en').startsWith('zh');
+const title = zh ? '插图预览' : 'Diagram preview';
+const original = zh ? '原尺寸' : 'Original size';
+const fit = zh ? '适应窗口' : 'Fit to window';
+---
+
+<whitepaper-diagram-viewer data-original={original} data-fit={fit}>
+  <dialog aria-labelledby="diagram-preview-title">
+    <header>
+      <h2 id="diagram-preview-title">{title}</h2>
+      <button type="button" data-zoom aria-pressed="false">{original}</button>
+      <button type="button" data-close autofocus>{zh ? '关闭' : 'Close'}</button>
+    </header>
+    <div class="diagram-preview-scroll" tabindex="0" aria-label={title}>
+      <img class="diagram-preview-image" alt="" />
+    </div>
+  </dialog>
+</whitepaper-diagram-viewer>
+
+<script>
+  class WhitepaperDiagramViewer extends HTMLElement {
+    connectedCallback() {
+      const dialog = this.querySelector('dialog')!;
+      const image = this.querySelector<HTMLImageElement>('img')!;
+      const zoom = this.querySelector<HTMLButtonElement>('[data-zoom]')!;
+      const scroll = this.querySelector<HTMLElement>('.diagram-preview-scroll')!;
+      const controller = new AbortController();
+      this.cleanup = () => {
+        dialog.close();
+        controller.abort();
+        document.documentElement.classList.remove('diagram-preview-open');
+      };
+      const options = { signal: controller.signal };
+      let opener: HTMLButtonElement | null = null;
+      const resetZoom = () => {
+        dialog.removeAttribute('data-zoomed');
+        zoom.setAttribute('aria-pressed', 'false');
+        zoom.textContent = this.dataset.original!;
+        scroll.scrollTo(0, 0);
+      };
+      document.addEventListener(
+        'click',
+        (event) => {
+          if (!(event.target instanceof Element)) return;
+          const button = event.target.closest<HTMLButtonElement>('button[data-diagram-open]');
+          const source = button?.querySelector('img');
+          if (!button || !source) return;
+          opener = button;
+          image.src = source.currentSrc || source.src;
+          image.alt = source.alt;
+          image.width = source.naturalWidth || source.width;
+          image.height = source.naturalHeight || source.height;
+          image.style.setProperty('--diagram-width', `${image.width}px`);
+          resetZoom();
+          dialog.showModal();
+          document.documentElement.classList.add('diagram-preview-open');
+        },
+        options
+      );
+      this.querySelector('[data-close]')!.addEventListener('click', () => dialog.close(), options);
+      dialog.addEventListener(
+        'click',
+        (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          if (
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom
+          )
+            dialog.close();
+        },
+        options
+      );
+      dialog.addEventListener(
+        'keydown',
+        (event) => {
+          if (event.key !== 'Tab') return;
+          const targets = Array.from(
+            dialog.querySelectorAll<HTMLElement>('button, [tabindex="0"]')
+          );
+          const first = targets[0];
+          const last = targets[targets.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        },
+        options
+      );
+      dialog.addEventListener(
+        'close',
+        () => {
+          document.documentElement.classList.remove('diagram-preview-open');
+          resetZoom();
+          if (opener?.isConnected) opener.focus({ preventScroll: true });
+        },
+        options
+      );
+      zoom.addEventListener(
+        'click',
+        () => {
+          const expanded = dialog.toggleAttribute('data-zoomed');
+          zoom.setAttribute('aria-pressed', String(expanded));
+          zoom.textContent = expanded ? this.dataset.fit! : this.dataset.original!;
+          scroll.scrollTo(0, 0);
+        },
+        options
+      );
+    }
+    cleanup?: () => void;
+    disconnectedCallback() {
+      this.cleanup?.();
+    }
+  }
+  if (!customElements.get('whitepaper-diagram-viewer'))
+    customElements.define('whitepaper-diagram-viewer', WhitepaperDiagramViewer);
+</script>
+
+<style>
+  :global(html.diagram-preview-open) {
+    overflow: hidden;
+  }
+  dialog {
+    margin: auto;
+    padding: 0;
+    width: min(1100px, calc(100vw - 32px));
+    max-width: none;
+    max-height: 92svh;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    box-shadow: 0 24px 80px #0006;
+  }
+  dialog::backdrop {
+    background: #0009;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  h2 {
+    margin: 0;
+    margin-right: auto;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  button {
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: var(--color-muted);
+  }
+  button:focus-visible,
+  .diagram-preview-scroll:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+  }
+  .diagram-preview-scroll {
+    padding: 16px;
+    overflow: auto;
+    max-height: calc(92svh - 66px);
+    overscroll-behavior: contain;
+  }
+  .diagram-preview-image {
+    display: block;
+    margin: auto;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: calc(92svh - 100px);
+    color-scheme: light;
+  }
+  :global([data-theme='dark']) .diagram-preview-image {
+    color-scheme: dark;
+  }
+  dialog[data-zoomed] .diagram-preview-image {
+    width: var(--diagram-width);
+    max-width: none;
+    max-height: none;
+  }
+</style>

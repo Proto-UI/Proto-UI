@@ -31,11 +31,14 @@ export function createScopedExposesReader(
   let lastRaw: Record<string, unknown> | null = null;
   let lastWrapped: Record<string, unknown> = {};
   const externalHandleCache = new WeakMap<object, Record<string, unknown>>();
+  // The top-level record is a replacement snapshot of one instance registry.
+  const rootReceiver = {};
   const callableCache = new WeakMap<object, WeakMap<Function, (...args: unknown[]) => unknown>>();
 
   const wrapCallable = (
     value: (...args: unknown[]) => unknown,
-    receiver: object
+    receiver: object,
+    currentReceiver: () => object = () => receiver
   ): ((...args: unknown[]) => unknown) => {
     let receiverCache = callableCache.get(receiver);
     if (!receiverCache) {
@@ -54,7 +57,7 @@ export function createScopedExposesReader(
 
       let result: unknown;
       invoke(() => {
-        result = Reflect.apply(value, receiver, args);
+        result = Reflect.apply(value, currentReceiver(), args);
       });
       return result;
     };
@@ -120,7 +123,17 @@ export function createScopedExposesReader(
       // consumers but is never part of the App Maker expose record.
       if (key.startsWith('__collection')) continue;
       if (!isAppMakerExposeRecordEntry(value)) continue;
-      defineEntry(target, key, wrapValue(value, source, seen));
+      defineEntry(
+        target,
+        key,
+        source === lastRaw && typeof value === 'function'
+          ? wrapCallable(
+              value as (...args: unknown[]) => unknown,
+              rootReceiver,
+              () => lastRaw ?? source
+            )
+          : wrapValue(value, source, seen)
+      );
     }
   }
 

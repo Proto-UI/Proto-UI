@@ -41,6 +41,16 @@ export const SPEC_RELATION_KINDS = [
   'provides',
   'omits',
 ] as const;
+export const SPEC_RELATION_TARGET_TYPES = {
+  contracts: 'contract',
+  prototypes: 'prototype',
+  modules: 'module',
+  adapters: 'adapter',
+  decisions: 'decision',
+  hostCaps: 'host-cap',
+  tests: 'test',
+  knowledge: 'knowledge',
+} as const satisfies Record<keyof NonNullable<SpecRelations>, SpecEntityType>;
 export const SPEC_ADAPTER_MODULE_SUPPORT_ROLES = [
   'required-module',
   'recommended-module',
@@ -350,12 +360,60 @@ export const specCriterionSchema = z.object({
   references: specRelationsSchema,
 });
 
+export type SpecBlockTarget =
+  | { kind: 'activation'; entityId: string }
+  | { kind: 'criterion' | 'implementation'; entityId: string; targetId: string };
+
+export function parseSpecBlockTarget(value: string): SpecBlockTarget | null {
+  const prefix = /^(activation|criterion|implementation):/.exec(value);
+  if (!prefix) return null;
+  const kind = prefix[1] as SpecBlockTarget['kind'];
+  const [entityId, targetId, extra] = value.slice(prefix[0].length).split('#');
+  if (
+    !specIdPattern.test(entityId) ||
+    extra !== undefined ||
+    (kind === 'activation' ? targetId !== undefined : !targetId || /[\s:#]/.test(targetId))
+  ) {
+    throw new Error(`Invalid canonical block target: ${value}.`);
+  }
+  return kind === 'activation' ? { kind, entityId } : { kind, entityId, targetId: targetId! };
+}
+
 export const specOpenQuestionSchema = z.object({
   id: z.string().min(1),
   question: specLocalizedTextSchema,
   context: specLocalizedTextSchema.optional(),
-  blocks: z.array(z.string().min(1)).default([]),
+  blocks: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .superRefine((value, context) => {
+          try {
+            parseSpecBlockTarget(value);
+          } catch (error) {
+            context.addIssue({ code: 'custom', message: (error as Error).message });
+          }
+        })
+    )
+    .default([]),
 });
+
+export const specLifecyclePlanSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    version: specVersionSchema,
+    slices: z.array(
+      z.object({
+        id: z.string().trim().min(1),
+        entities: z.array(z.string().regex(specIdPattern)).min(1),
+        disposition: z.enum(['promote', 'remain-draft', 'not-applicable']),
+        rationale: z.string().trim().min(1),
+        evidence: z.array(z.string().trim().min(1)).min(1),
+      })
+    ),
+  })
+  .strict();
 
 export const specTestCaseSchema = z.object({
   id: z.string().min(1),
@@ -385,6 +443,14 @@ export const specEntitySchema = z
     title: z.string().min(1),
     status: z.enum(SPEC_ENTITY_STATUSES).default('draft'),
     since: specVersionSchema,
+    activeSince: specVersionSchema.optional(),
+    lifecycleRationale: specLocalizedTextSchema
+      .refine(
+        (text) =>
+          (typeof text === 'string' ? [text] : Object.values(text)).some((value) => value?.trim()),
+        'Lifecycle rationale must contain non-whitespace text.'
+      )
+      .optional(),
     deprecatedSince: specVersionSchema.optional(),
     removedSince: specVersionSchema.optional(),
     replacedBy: z.string().optional(),
@@ -442,6 +508,40 @@ export const specEntitySchema = z
         path: ['removedSince'],
         message: 'Removed entities must set removedSince.',
       });
+    }
+
+    if (entity.activeSince) {
+      if (entity.type === 'version') {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'Version entities use release publication evidence, not activeSince.',
+        });
+      } else if (entity.status === 'draft') {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'Only lifecycle-complete entities may declare activeSince.',
+        });
+      }
+
+      const terminalBoundary = entity.deprecatedSince ?? entity.removedSince;
+      if (compareSpecVersions(entity.activeSince, entity.since) < 0) {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'activeSince must not be earlier than since.',
+        });
+      } else if (
+        terminalBoundary &&
+        compareSpecVersions(entity.activeSince, terminalBoundary) >= 0
+      ) {
+        context.addIssue({
+          code: 'custom',
+          path: ['activeSince'],
+          message: 'activeSince must precede terminal lifecycle boundaries.',
+        });
+      }
     }
 
     if (entity.inherits && entity.type !== 'prototype') {
@@ -698,6 +798,7 @@ export type SpecAdapterProfile = z.infer<typeof specAdapterProfileSchema>;
 export type SpecAnatomy = z.infer<typeof specAnatomySchema>;
 export type SpecCriterion = z.infer<typeof specCriterionSchema>;
 export type SpecOpenQuestion = z.infer<typeof specOpenQuestionSchema>;
+export type SpecLifecyclePlan = z.infer<typeof specLifecyclePlanSchema>;
 export type SpecTestCase = z.infer<typeof specTestCaseSchema>;
 export type SpecTestImplementation = z.infer<typeof specTestImplementationSchema>;
 export type SpecEntity = z.infer<typeof specEntitySchema>;
@@ -815,9 +916,24 @@ export function isVersionInRange(
   if (range.until && compareSpecVersions(version, range.until) >= 0) return false;
   return true;
 }
-
 export function isSpecEntityAvailableAt(entity: SpecEntity, version: string): boolean {
   if (compareSpecVersions(version, entity.since) < 0) return false;
   if (entity.removedSince && compareSpecVersions(version, entity.removedSince) >= 0) return false;
   return true;
+}
+
+export function isSpecEntityActiveAt(entity: SpecEntity, version: string): boolean {
+  if (!isSpecEntityAvailableAt(entity, version)) return false;
+  if (entity.type === 'version') {
+    return (
+      entity.status === 'active' &&
+      entity.release?.publishedAt !== undefined &&
+      compareSpecVersions(version, entity.release.version) >= 0
+    );
+  }
+  if (entity.status === 'draft' || !entity.activeSince) return false;
+  if (entity.deprecatedSince && compareSpecVersions(version, entity.deprecatedSince) >= 0) {
+    return false;
+  }
+  return compareSpecVersions(version, entity.activeSince) >= 0;
 }

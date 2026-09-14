@@ -34,7 +34,7 @@ description: '在提交一个新原型或大改动之前，先过一遍这张清
 - 我有没有把本该拆开的 part 继续塞在同一个原型里？
 - 我有没有把没有独立信息通路责任的局部结构硬拆成新原型？
 
-如果这里不确定，回到 [原型边界](/zh-cn/whitepaper/prototype-boundary/)。
+如果这里不确定，回到[第三章：组件的边界](/zh-cn/whitepaper/3-component-boundary/)。
 
 ## 五、我写的是交互语义，还是宿主实现？
 

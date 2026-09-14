@@ -3,8 +3,14 @@ type: test
 title: A11y semantic object contract tests
 status: draft
 since: 0.1.0
-summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, and Web adapter projection.
+summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, Web adapter projection, portable heading-level validation, role coherence, target rebinding, and cross-adapter lifecycle behavior.
 cases:
+  - id: T-A11Y-0001-CASE-ACCESSIBLE-HANDLE
+    title: Shared setup handle, removed legacy entry, guarded declarations and both name-collision orders
+    covers:
+      - C-A11Y-0001-AUTHOR-HANDLE
+      - C-A11Y-0001-DECLARATION-LIFETIME
+    expectation: same-instance-handle-with-last-setup-declaration-and-runtime-rejection
   - id: T-A11Y-0001-CASE-DYNAMIC-ROLE
     title: A semantic role may follow a state-backed fact
     covers:
@@ -68,7 +74,21 @@ cases:
       - HC-A11Y-0001-A
       - HC-A11Y-0001-B
     expectation: web-a11y-live-atomic-busy-projection
+  - id: T-A11Y-0001-CASE-HEADING-LEVEL
+    title: Portable heading levels separate setup rejection from runtime omission and remain coherent across Web projection lifecycles
+    covers:
+      - C-A11Y-0001-LEVEL
+      - HC-A11Y-0001-A
+      - HC-A11Y-0001-B
+      - HC-A11Y-0001-C
+    expectation: portable-heading-level-setup-validation-runtime-omission-recovery-role-and-target-cleanup
 implementations:
+  - id: runtime-accessible-handle
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/as-accessible.contract.test.ts
+    required: true
+    consumesCases: [T-A11Y-0001-CASE-ACCESSIBLE-HANDLE]
   - id: runtime-a11y-contract
     kind: runtime-test
     status: passing
@@ -77,6 +97,7 @@ implementations:
     consumesCases:
       - T-A11Y-0001-CASE-DYNAMIC-ROLE
       - T-A11Y-0001-CASE-IR
+      - T-A11Y-0001-CASE-HEADING-LEVEL
   - id: base-button-a11y-contract
     kind: module-test
     status: passing
@@ -95,10 +116,49 @@ implementations:
       - T-A11Y-0001-CASE-DYNAMIC-TREE
       - T-A11Y-0001-CASE-OPTIONAL-STATE
       - T-A11Y-0001-CASE-LIVE-ATOMIC-BUSY
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+  - id: a11y-web-projector-heading-contract
+    kind: module-test
+    status: passing
+    path: packages/modules/a11y/test/web.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
+  - id: react-a11y-heading-level-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/a11y-heading-level.integration.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
+  - id: vue-a11y-heading-level-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/a11y-heading-level.integration.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
+  - id: vue2-a11y-heading-level-integration
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/a11y-heading-level.integration.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-HEADING-LEVEL
+    exercises:
+      - HC-A11Y-0001
 verifies:
   contracts:
     - id: C-A11Y-0001
       anchors:
+        - C-A11Y-0001-AUTHOR-HANDLE
+        - C-A11Y-0001-DECLARATION-LIFETIME
         - C-A11Y-0001-A
         - C-A11Y-0001-B
         - C-A11Y-0001-C
@@ -112,6 +172,7 @@ verifies:
         - C-A11Y-0001-K
         - C-A11Y-0001-L
         - C-A11Y-0001-M
+        - C-A11Y-0001-LEVEL
     - id: C-ASYNC-A11Y-0001
       since: 0.2.0-rc.7
       anchors:
@@ -121,7 +182,11 @@ verifies:
       anchors:
         - HC-A11Y-0001-A
         - HC-A11Y-0001-B
+        - HC-A11Y-0001-C
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added shared AccessibleHandle, removed legacy API and retained-method setup guards; migrated existing Runtime and Adapter evidence to asAccessible.
   - version: 0.1.0
     change: introduced
     summary: Added the first a11y semantic object test mapping.
@@ -134,6 +199,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: refined
     summary: Added additive relation ownership, dynamic semantic tree projection, optional Web state omission, and live/atomic/busy Web projection coverage.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added executable Runtime, shared Web projector, Web Component, React, Vue 3, and Vue 2 coverage for setup/final-setup validation, State-owned runtime omission and recovery, role gating, rematerialization, observed-source non-mutation, and stale aria-level cleanup.
 tags:
   - a11y
   - accessibility

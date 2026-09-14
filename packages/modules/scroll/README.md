@@ -4,7 +4,11 @@ Proto UI module that provides host-mediated scroll capability for adapters.
 
 ## Purpose
 
-Provides host-mediated scroll capability to adapters running Proto UI prototypes.
+Owns stable logical surface identity, observed normalized facts, requests and system/composed projection negotiation. State stores facts; Context and Anatomy bind composed Scrollbar/Thumb controls to the same session. The host owns geometry, scrolling engine, physics and input integration.
+
+Only current mounted session facts are accepted. Host replacement, detach and terminal disposal invalidate previous callbacks and release the lease. Missing host support leaves projection unresolved; an unavailable required projection diagnoses rather than silently downgrading.
+
+The draft `M-SCROLL-0001`, `HC-SCROLL-SURFACE-0001` and `T-SCROLL-0001` graph covers four Web Adapters, including composed Thumb Move Gesture. Simulated geometry evidence does not certify browser physics or non-Web accessibility. Virtualization and A11y API redesign remain separate work.
 
 ## Package Role
 

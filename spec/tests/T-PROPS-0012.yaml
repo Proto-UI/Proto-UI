@@ -132,17 +132,6 @@ implementations:
     required: true
     consumesCases:
       - T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
-  - id: adapter-vue2-props-translation
-    kind: adapter-test
-    status: passing
-    path: packages/adapters/vue2/test/props-update.test.ts
-    required: true
-    notes:
-      - Supporting attrs classification and typed-listener exclusion evidence is in packages/adapters/vue2/test/expose.test.ts and packages/adapters/vue2/test/event.test.ts.
-    consumesCases:
-      - T-PROPS-0012-CASE-ADAPTER-WIRING
-      - T-PROPS-0012-CASE-INVALIDATION
-      - T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
   - id: adapter-web-component-props-normalization
     kind: adapter-test
     status: passing
@@ -166,6 +155,22 @@ implementations:
     required: true
     consumesCases:
       - T-PROPS-0012-CASE-DIRECT-APPLY
+  - id: adapter-vue2-props-host-source
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/contract/props-host-source.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-PROPS-0012-CASE-ADAPTER-WIRING
+      - T-PROPS-0012-CASE-SOURCE-SNAPSHOT
+      - T-PROPS-0012-CASE-INVALIDATION
+  - id: adapter-vue2-props-normalization
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/contract/props-normalization.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-PROPS-0012-CASE-FRAMEWORK-NORMALIZATION
 verifies:
   modules:
     - id: M-PROPS-0001

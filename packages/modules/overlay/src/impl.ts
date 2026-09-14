@@ -1,3 +1,4 @@
+import { joinEscapeScope, ownsEscapeSample } from './escape-coordinator';
 import type {
   BoundaryHandle,
   CapsVaultView,
@@ -133,6 +134,20 @@ export class OverlayModuleImpl extends ModuleBase {
   };
   private readonly offBoundaryOutside: (() => void) | null;
   private escapeSamplingInstalled = false;
+  private escapeScope: object | null = null;
+  private leaveEscapeScope: (() => void) | null = null;
+  private readonly escapeOwner = {};
+
+  private syncEscapeCandidate(): void {
+    const scope =
+      this.isOpen() && this.viewActive && this.mountPhase === 'mounted' && this.config.closeOnEscape
+        ? (this.eventPort.getGlobalInputScope?.() ?? null)
+        : null;
+    if (scope === this.escapeScope) return;
+    this.leaveEscapeScope?.();
+    this.escapeScope = scope;
+    this.leaveEscapeScope = scope ? joinEscapeScope(scope, this.escapeOwner) : null;
+  }
 
   constructor(
     caps: CapsVaultView,
@@ -163,6 +178,9 @@ export class OverlayModuleImpl extends ModuleBase {
       this.eventPort.onGlobal('key.down', (event) => {
         if (!this.isOpen() || !this.config.closeOnEscape) return;
         if (event.key !== 'Escape') return;
+        const input = this.eventPort.getInputContext?.(event);
+        if (!input || this.escapeScope !== input.scope) return;
+        if (!ownsEscapeSample(input.scope, input.sample, this.escapeOwner)) return;
         this.close('escape');
       });
     }
@@ -170,11 +188,15 @@ export class OverlayModuleImpl extends ModuleBase {
 
   protected override onCapsEpoch(_epoch: number): void {
     this.refreshHostCaps();
+    this.syncEscapeCandidate();
   }
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
     if (phase !== 'unmounted') return;
+    this.leaveEscapeScope?.();
+    this.leaveEscapeScope = null;
+    this.escapeScope = null;
     this.teardownMountedViewSideEffects();
     this.clearBoundaryRegistrations();
     this.offBoundaryOutside?.();
@@ -182,6 +204,7 @@ export class OverlayModuleImpl extends ModuleBase {
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
+    this.syncEscapeCandidate();
     if (phase === 'unmounting' || phase === 'detached') {
       this.teardownMountedViewSideEffects();
       this.boundary.setStackActive(false);
@@ -194,13 +217,21 @@ export class OverlayModuleImpl extends ModuleBase {
   }
 
   private refreshHostCaps(): void {
-    this.globalMount = this.caps.has(OVERLAY_GLOBAL_MOUNT_CAP)
+    const globalMount = this.caps.has(OVERLAY_GLOBAL_MOUNT_CAP)
       ? this.caps.get(OVERLAY_GLOBAL_MOUNT_CAP)
       : null;
-    this.modalLock = this.caps.has(OVERLAY_MODAL_CAP) ? this.caps.get(OVERLAY_MODAL_CAP) : null;
-    this.layerScheduler = this.caps.has(OVERLAY_LAYER_SCHEDULER_CAP)
+    const modalLock = this.caps.has(OVERLAY_MODAL_CAP) ? this.caps.get(OVERLAY_MODAL_CAP) : null;
+    const layerScheduler = this.caps.has(OVERLAY_LAYER_SCHEDULER_CAP)
       ? this.caps.get(OVERLAY_LAYER_SCHEDULER_CAP)
       : null;
+    // Release through the provider that acquired each resource before replacing it.
+    if (globalMount !== this.globalMount) this.unmountGlobalIfNeeded();
+    if (modalLock !== this.modalLock) this.unlockModalIfNeeded();
+    if (layerScheduler !== this.layerScheduler) this.clearLayer();
+    this.globalMount = globalMount;
+    this.modalLock = modalLock;
+    this.layerScheduler = layerScheduler;
+    if (this.viewActive) this.reconcileViewResourcesAfterCallback();
   }
 
   private ensureSetup(op: string) {
@@ -318,7 +349,13 @@ export class OverlayModuleImpl extends ModuleBase {
       return;
     }
 
+    if (!next) {
+      this.leaveEscapeScope?.();
+      this.leaveEscapeScope = null;
+      this.escapeScope = null;
+    }
     this.openState.set(next, reason);
+    this.syncEscapeCandidate();
 
     if (next) {
       this.boundary.setStackActive(true);
@@ -342,6 +379,7 @@ export class OverlayModuleImpl extends ModuleBase {
     }
 
     this.viewActive = active;
+    this.syncEscapeCandidate();
     this.viewReconciliationVersion += 1;
     if (active) {
       if (this.mountPhase === 'mounted') this.lockModalIfNeeded();

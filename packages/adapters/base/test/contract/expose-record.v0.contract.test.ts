@@ -148,3 +148,25 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(snapshot.authorValue).not.toBe(authorValue);
   });
 });
+
+describe('replacement expose snapshot callable identity', () => {
+  it('retains root callables with current receiver while distinguishing nested receivers', () => {
+    const reader = createScopedExposesReader(() => (fn) => fn());
+    function readLabel(this: { label: string }) {
+      return this.label;
+    }
+    const a = { label: 'nested-a', readLabel };
+    const b = { label: 'nested-b', readLabel };
+    const first = reader.read({ label: 'first', readLabel, a, b });
+    const next = reader.read({ label: 'next', readLabel, a, b });
+    expect(next.readLabel).toBe(first.readLabel);
+    expect((first.readLabel as () => string)()).toBe('next');
+    const nestedA = next.a as typeof a,
+      nestedB = next.b as typeof b;
+    expect(nestedA.readLabel).not.toBe(nestedB.readLabel);
+    expect(nestedA.readLabel()).toBe('nested-a');
+    expect(nestedB.readLabel()).toBe('nested-b');
+    reader.invalidate();
+    expect(() => (first.readLabel as () => string)()).toThrow(/terminal disposal/);
+  });
+});

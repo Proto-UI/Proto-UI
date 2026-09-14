@@ -21,6 +21,26 @@ statement:
 
 
 criteria:
+  - id: A-REACT-18-19-0001-POSITIONING
+    text:
+      en: 'The Web Adapter installs Positioning and translates anchored geometry through the shared Floating UI host. Active Overlay placement, resize updates, non-transform projection and cleanup have executable Adapter evidence; this slice does not claim native browser layout fidelity.'
+      zh-CN: 'Web Adapter 安装 Positioning 并通过共享 Floating UI host 翻译锚定几何。active Overlay placement、resize 更新、非 transform 投射与清理已有 Adapter executable evidence；此 slice 不声称证明原生浏览器布局 fidelity。'
+  - id: A-REACT-18-19-0001-HIT-PARTICIPATION
+    text:
+      en: The Adapter wires the current owner boundary and Hit Participation bridge, preserving identical-mode sharing, atomic conflict rejection, and restoration after cleanup. This bounded Web projection does not imply Event cancellation, outside classification or modal policy.
+      zh-CN: Adapter 接入当前 owner boundary 与 Hit Participation bridge，保留同模式共享、冲突原子拒绝及清理后恢复。有界 Web 投射不隐含 Event cancellation、outside 分类或 modal policy。
+  - id: A-REACT-18-19-0001-BOUNDARY
+    text:
+      en: The Adapter wires Boundary to the current host boundary and Web classification bridge while Event transports pointer samples. Disjoint regions and unresolved evidence preserve ternary classification; a top-layer close does not deliver the same sample to a lower active boundary.
+      zh-CN: Adapter 为 Boundary 接入当前 host boundary 与 Web classification bridge，Event 传输 pointer sample。分离 regions 与未解析证据保留三态分类；top layer 关闭不将同一 sample 传给较低 active boundary。
+  - id: A-REACT-18-19-0001-FOCUS
+    text:
+      en: The Adapter translates the bounded Focus Module with logical target identity, current host focus requests/readiness, sequential versus programmatic eligibility, and descendant-first entry delegation. Real Adapter evidence covers roving membership and entry fallback; Runtime evidence owns scope and retained-request arbitration.
+      zh-CN: Adapter 翻译有界 Focus Module，提供 logical target identity、当前 host focus request/readiness、顺序与程序化资格区分、descendant-first entry delegation。真实 Adapter 证据覆盖 roving membership 与 entry fallback；Runtime 证据负责 scope 与 retained-request 仲裁。
+  - id: A-REACT-18-19-0001-TRIGGER
+    text:
+      en: The Adapter installs the bounded Trigger Module and translates logical chains through the shared host group owner. Three nested members share one semantic activation route, host-local events stay local, and sibling Trigger branches are rejected by the host owner.
+      zh-CN: Adapter 安装有界 Trigger Module，通过共享宿主 group owner 翻译 logical chain。三层成员共享一条 semantic activation route，host-local event 保持局部，并列 Trigger 分叉由宿主 owner 拒绝。
   - id: A-REACT-18-19-0001-A
     text:
       zh-CN: Profile identity 必须对应 `@proto.ui/adapter-react` 与 peer range `react >=18.2.0 <20`，不得被表述为所有 React 版本或非 Web host 的保证。
@@ -73,8 +93,91 @@ criteria:
     text:
       zh-CN: Adapter 必须接入 required Expose Event semantic Module，并以 translated capability 提供 `HC-EXPOSE-EVENT-SINK-0001`；合法 emission 映射到当前 `onXxx` callback，listener props 不得进入 Proto raw props，declaration metadata 不得进入 `getExposes()`，且该关系不得被解释为 Event input routing。
       en: The Adapter must wire the required Expose Event semantic Module and provide `HC-EXPOSE-EVENT-SINK-0001` as a translated capability; valid emissions map to the current `onXxx` callback, listener props must not enter Proto raw props, declaration metadata must not enter `getExposes()`, and this relation must not be interpreted as Event input routing.
+  - id: A-REACT-18-19-0001-N
+    text:
+      zh-CN: 对声明 `M-IMAGE-VIEW-0001` 的 React Web realization 必须将每个 Image View request 绑定到不可变 generation，清理替换/空 source 的旧视觉目标，并在 view detach/disposal 后移除 owned physical image；该保证由 `T-IMAGE-VIEW-0001` 的 React integration evidence 验证。
+      en: The React Web realization of `M-IMAGE-VIEW-0001` must bind each Image View request to an immutable generation, clear stale visual targets on replacement or empty source, and remove the owned physical image after view detach or disposal; `T-IMAGE-VIEW-0001` React integration evidence verifies this guarantee.
+  - id: A-REACT-18-19-0001-CONTEXT
+    text:
+      en: The standard Adapter wires Context with stable opaque instance identity and current logical ancestry; real mounted nested scopes, equal-name Key isolation, callback updates and terminal owner replacement must conform to T-CONTEXT-0003.
+      zh-CN: standard Adapter 接入 Context 并提供稳定 opaque instance identity 与当前 logical ancestry；真实挂载的嵌套 scope、同名 Key 隔离、callback update 与 terminal owner 替换必须符合 T-CONTEXT-0003。
+  - id: A-REACT-18-19-0001-FEEDBACK
+    text:
+      en: The standard Adapter installs Feedback and translates its style sink into current-view data-pui-style output, preserving user classes. Runtime patch/suppress/clearPatch must update style without Proto structural rendering; the bounded draft slice is verified by T-FEEDBACK-0001.
+      zh-CN: standard Adapter 安装 Feedback，将 style sink 翻译为当前 view 的 data-pui-style output，保留用户 class。runtime patch/suppress/clearPatch 必须更新 style 而不触发 Proto structural render；该有界 draft slice 由 T-FEEDBACK-0001 验证。
+  - id: A-REACT-18-19-0001-RULE
+    text:
+      en: Standard Runtime installs the bounded draft Rule core slice. Resolved Props updates and current State drive Feedback style with deactivation cleanup; State-driven style does not trigger Proto structural rendering. Author Rule use remains optional.
+      zh-CN: standard Runtime 安装有界 draft Rule core slice。resolved Props update 与当前 State 驱动 Feedback style，条件失效时清理贡献；State 驱动样式不触发 Proto structural render。作者可选用 Rule。
+  - id: A-REACT-18-19-0001-ANATOMY
+    text:
+      en: Standard Adapter installs the bounded draft Anatomy slice, supplies logical participant and private order facts, and preserves nested domain isolation and target-owned Expose invocation. Host references never enter public PartView.
+      zh-CN: standard Adapter 安装有界 draft Anatomy slice，提供逻辑 participant 与内部顺序事实，保持嵌套 domain 隔离和目标归属 Expose 调用。host reference 不进入公开 PartView。
+  - id: A-REACT-18-19-0001-COLLECTION
+    text:
+      en: Standard Runtime installs the bounded Collection slice. Explicit items follow host composition changes with current metadata and structural positions; nested Anatomy domains remain isolated and ordinary host descendants are excluded.
+      zh-CN: standard Runtime 安装有界 Collection slice。显式 item 随宿主组合变化提供当前 metadata 与结构位置；嵌套 Anatomy domain 保持隔离，普通宿主后代不被吸收。
+  - id: A-REACT-18-19-0001-EXPOSE-STATE-WEB
+    text:
+      en: The standard Web Adapter installs the bounded Expose State Web extension and supplies its canonical target. State attributes and CSS variables follow default or explicitly configured mode mapping without requiring Proto structural rendering.
+      zh-CN: standard Web Adapter 安装有界 Expose State Web extension 并提供 canonical target。State attribute/CSS variable 按默认或显式 mode 配置映射，无需 Proto structural render。
+  - id: A-REACT-18-19-0001-RULE-EXPOSE-STATE-WEB
+    text:
+      en: The standard Web Adapter installs this partial Rule optimization slice with its native-variant policy. Bounded State selectors, default fallbacks and view cleanup have evidence; live replanning and full CSS equivalence remain open.
+      zh-CN: standard Web Adapter 安装此 partial Rule optimization slice 并提供 native-variant policy。有界 State selector、default fallback 和 view cleanup 已有证据；live replanning 与完整 CSS 等价仍 open。
+  - id: A-REACT-18-19-0001-OVERLAY
+    text:
+      en: The standard Adapter installs Overlay, provides renderer-appropriate Portal and shared Web modal scroll locking, and maps global input identity to the owning document independently of its per-instance Event router. Nested Escape and controlled reopen select one owner per sample; tests use simulated DOM, not browser layout certification.
+      zh-CN: standard Adapter 安装 Overlay，提供 renderer 对应 Portal、共享 Web modal scroll lock，并将 global input identity 映射到 owner document，独立于每 instance Event router。嵌套 Escape 与 controlled reopen 每 sample 选择一个 owner；测试为模拟 DOM，不是 browser layout 认证。
+  - id: A-REACT-18-19-0001-TEXT-CONTROL
+    text:
+      en: The standard Web Adapter installs Text Control and resolves static line mode to one physical input or textarea before rendering. It projects common hints and normalized input, owns callback scope and releases the editing lease. Web Component retains its logical wrapper; native frameworks use the physical editor root.
+      zh-CN: standard Web Adapter 安装 Text Control，在 render 前将静态 line mode 解析为一个物理 input 或 textarea，投射 common hint 与 normalized input，提供 callback scope 并释放 editing lease。Web Component 保留 logical wrapper，原生框架使用物理 editor root。
+  - id: A-REACT-18-19-0001-IMAGE-VIEW
+    text:
+      en: The Web Adapter resolves a static Image View declaration to one physical image, projects portable properties, and retires obsolete decode completions on source replacement or unmount. Completion uses the existing callback bridge; native image events are not a second author transition protocol.
+      zh-CN: Web Adapter 将静态 Image View declaration 解析为一个物理 image，投射 portable property，并在 source 替换或 unmount 后撤销过期 decode completion。completion 使用既有 callback bridge；native image event 不是第二套 author transition 协议。
+  - id: A-REACT-18-19-0001-SCROLL
+    text:
+      en: The standard Adapter wires Scroll with host-owned overflow and the current root, translates normalized requests/facts, and restores owned styles and listeners on teardown. Composed Thumb geometry and Move Gesture remain attached to the same Context/Anatomy-resolved surface; evidence uses simulated Web geometry, not native physics certification.
+      zh-CN: standard Adapter 将 Scroll 接入 host-owned overflow 与当前 root，翻译 normalized request/fact，并在 teardown 恢复拥有的样式、释放 listener。composed Thumb geometry 与 Move Gesture 附着到同一个 Context/Anatomy 解析的 surface；证据使用模拟 Web geometry，不是 native physics 认证。
 supports:
   modules:
+    - id: M-POSITIONING-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+    - id: M-HIT-PARTICIPATION-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+    - id: M-BOUNDARY-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+    - id: M-FOCUS-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+    - id: M-AS-TRIGGER-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+    - id: M-RULE-EXPOSE-STATE-WEB-0001
+      since: 0.3.0-alpha.0
+      role: partial-module
+      note: Installed by standard Runtime; partial conformance, see Module open questions.
+    - id: M-COLLECTION-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: Anatomy-backed collection projection and privileged hooks; no new Collection host capability.
+    - id: M-ANATOMY-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: Existing family/domain/order slice; no A11y relationship or new author query policy admission.
+    - id: M-RULE-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: Bounded Props/State-to-style core; author use optional, Context and downstream extensions excluded.
+    - id: M-FEEDBACK-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: Bounded draft visual style slice; other sensory feedback remains uncataloged.
     - id: M-PROPS-0001
       role: required-module
       note: Props is required for the standard Maker-to-Component configuration channel.
@@ -93,8 +196,58 @@ supports:
     - id: M-EXPOSE-EVENT-0001
       role: required-module
       note: The standalone Expose Event module owns the Component-to-App-Maker outward-signal bridge and receives its sink through expose-event wiring.
+    - id: M-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: optional-module
+      note: React resolves declared Image View requirements to one physical HTMLImageElement root and retains the generation-bound host lease.
+    - id: M-CONTEXT-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: The standard Runtime Context channel uses Adapter-owned identity and ancestry, never framework Context value semantics.
+    - id: M-EXPOSE-STATE-WEB-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: Required in this standard Web profile; not a cross-host requirement.
+    - id: M-OVERLAY-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+    - id: M-TEXT-CONTROL-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: Installed by standard Runtime; author use requires a static declaration.
+    - id: M-SCROLL-0001
+      since: 0.3.0-alpha.0
+      role: required-module
 provides:
   hostCaps:
+    - id: HC-ANCHORED-POSITION-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-HIT-PARTICIPATION-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-BOUNDARY-CLASSIFICATION-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-FOCUS-TARGET-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-FOCUS-ENTRY-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-TRIGGER-GROUP-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-ANATOMY-STRUCTURE-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-ANATOMY-ORDER-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-FEEDBACK-STYLE-SINK-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: EffectsPort projects the final visual style result without Proto structural rendering.
     - id: HC-PROPS-SOURCE-0001
       role: translated-capability
       note: React props are classified and exposed as a stable readable source with effect-driven invalidation.
@@ -110,11 +263,67 @@ provides:
     - id: HC-EXPOSE-EVENT-SINK-0001
       role: translated-capability
       note: React maps validated outward signal keys to the current onXxx callback props.
+    - id: HC-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: React maps Image View to the physical image root and carries loading completion through the host lease.
+    - id: HC-CONTEXT-IDENTITY-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: Adapter logical instance tokens and parent links translate host ownership into Context facts.
+    - id: HC-CONTEXT-ANCESTRY-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: Adapter logical instance tokens and parent links translate host ownership into Context facts.
+    - id: HC-EXPOSE-STATE-WEB-TARGETS-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: Canonical boundary; ordinary presentation surface coincides with it.
+    - id: HC-OVERLAY-PORTAL-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-OVERLAY-MODAL-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-OVERLAY-LAYER-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: Optional configured scheduler; the Adapter passes it through, and does not promise a default absolute hierarchy.
+    - id: HC-TEXT-CONTROL-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-SCROLL-SURFACE-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+    - id: HC-MOVE-GESTURE-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: Bounded Scroll composed Thumb realization; this relation is not general Drag and Drop support.
 relates:
   decisions:
     - D-ADAPTER-PROFILE-0001
 verifies:
   tests:
+    - id: T-ANCHORED-POSITIONING-0001
+      since: 0.3.0-alpha.0
+    - id: T-HIT-PARTICIPATION-0001
+      since: 0.3.0-alpha.0
+    - id: T-BOUNDARY-0002
+      since: 0.3.0-alpha.0
+    - id: T-FOCUS-0002
+      since: 0.3.0-alpha.0
+    - id: T-AS-TRIGGER-0002
+      since: 0.3.0-alpha.0
+    - id: T-RULE-EXPOSE-STATE-WEB-0001
+      since: 0.3.0-alpha.0
+    - id: T-COLLECTION-0002
+      since: 0.3.0-alpha.0
+    - id: T-ANATOMY-0004
+      since: 0.3.0-alpha.0
+    - id: T-RULE-0002
+      since: 0.3.0-alpha.0
+    - id: T-FEEDBACK-0001
+      since: 0.3.0-alpha.0
     - T-ADAPTER-PROFILE-0001
     - T-PROPS-0012
     - T-EVENT-0003
@@ -125,7 +334,26 @@ verifies:
     - T-EXPOSE-0002
     - T-EXPOSE-STATE-0002
     - T-EXPOSE-EVENT-0002
+    - id: T-IMAGE-VIEW-0001
+      since: 0.3.0-alpha.0
+    - id: T-CONTEXT-0003
+      since: 0.3.0-alpha.0
+    - id: T-EXPOSE-STATE-WEB-0001
+      since: 0.3.0-alpha.0
+    - id: T-OVERLAY-CATALOG-0001
+      since: 0.3.0-alpha.0
+    - id: T-TEXT-CONTROL-0001
+      since: 0.3.0-alpha.0
+    - id: T-SCROLL-0001
+      since: 0.3.0-alpha.0
+    - id: T-SCROLL-COMPOSED-CONTROL-0001
+      since: 0.3.0-alpha.0
 sources:
+  - path: packages/adapters/react/test/rule-expose-state-web.integration.test.ts
+  - path: packages/adapters/react/test/collection.integration.test.ts
+  - path: packages/adapters/react/test/anatomy.integration.test.ts
+  - path: packages/adapters/react/test/rule.integration.test.ts
+  - path: packages/adapters/react/test/feedback.integration.test.ts
   - path: packages/adapters/react/package.json
   - path: packages/adapters/react/src/adapt.ts
   - path: packages/adapters/react/src/runtime/modules.ts
@@ -144,7 +372,46 @@ sources:
   - path: packages/adapters/base/src/host/exposes.ts
   - path: packages/adapters/react/test/expose.test.ts
   - path: packages/adapters/react/test/expose-event.test.ts
+  - path: packages/adapters/react/test/image-view.integration.test.ts
+  - path: packages/adapters/react/test/context.integration.test.ts
+  - path: packages/adapters/react/test/expose-state-web.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Cataloged bounded Positioning support with active-view geometry and cleanup evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Hit Participation translation and shared owner evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Boundary classification and stacked-sample evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Focus support and target/entry host translation evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Trigger chain support and logical group projection evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Recorded partial Rule Expose State Web support, fallback and lifecycle evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Expose State Web module, target capability and executable projection evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Collection support with explicit item, metadata and dynamic host composition evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded draft Anatomy support and logical structure/private order capabilities with real host evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded draft Rule core support with real Props and State style evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added the bounded draft Feedback visual style slice and actual Adapter runtime patch evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added the Image View Web realization criterion, support relation, and exact-head integration evidence.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Migrated the outward signal sink from Event wiring to the standalone Expose Event Module.
@@ -169,4 +436,19 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged the official React 18.2-19 profile identity and its required Props translation slice.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added the reviewed Context identity/ancestry slice and real-framework nested-scope evidence; other unlisted modules remain uncataloged.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Cataloged bounded Overlay wiring, scoped Escape and concurrent modal cleanup evidence.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Cataloged existing single-line and multiline Text Control realization with executable Adapter evidence.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Connected Image View support to bounded Adapter generation evidence.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Cataloged Scroll session projection and composed Thumb evidence through real Adapter wiring.
 tags: [adapter, react, web, props, event, lifecycle, state, expose, official]

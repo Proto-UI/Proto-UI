@@ -1,0 +1,109 @@
+id: M-RULE-0001
+type: module
+title: Rule owns declarative Props and State driven style planning
+status: draft
+since: 0.3.0-alpha.0
+summary: Bounded Rule core realization from Props and State predicates to Feedback style, with setup cancellation, extension ports and mixed lifecycle ownership.
+statement:
+  en: This draft catalogs the existing host-neutral Rule core slice. Author use is optional even though standard Runtime installs it. Context conformance, intent.state execution and downstream meta/expose-state optimizations are not admitted by this slice.
+  zh-CN: 本 draft 编目已有的宿主无关 Rule core slice。standard Runtime 安装该 Module，但作者可选用。此 slice 不接纳完整 Context conformance、intent.state 执行或下游 meta/expose-state 优化。
+criteria:
+  - id: M-RULE-0001-A
+    text:
+      en: Author rule declarations and RuleHandle.dispose are setup-only; cancellation after setup is rejected before removing any declaration, including onCreated.
+      zh-CN: 作者 rule 声明与 RuleHandle.dispose 均为 setup-only；setup 后（包括 onCreated）的取消必须在移除声明前拒绝。
+  - id: M-RULE-0001-B
+    text:
+      en: The bounded Props/State-to-style slice compiles declarative when and intent once, records dependency identities, and keeps live State getters in an external side table. With serializable predicate values, its IR supports JSON round-trip and evaluation with an explicit State reader; this is not a deep-detached export guarantee.
+      zh-CN: 有界 Props/State-to-style slice 一次编译 when 与 intent、记录依赖 identity，并将 live State getter 留在外部 side table。predicate value 可序列化时，该 IR 支持 JSON 往返及显式 State reader 评估；这不承诺深拷贝导出。
+  - id: M-RULE-0001-C
+    text:
+      en: Pure when evaluation uses current inputs and strict equality with logical combinators. Author style handles are validated at declaration even for inactive Rules; active style contributions are collected in declaration order and semantically merged into a style.tokens Plan.
+      zh-CN: 纯 when 评估使用当前输入、严格相等和逻辑组合。即使 Rule 不成立，作者 style handle 也在声明时校验；成立的 style contribution 按声明顺序收集并语义合并为 style.tokens Plan。
+  - id: M-RULE-0001-D
+    text:
+      en: The standard Runtime installs Rule with optional semantic dependencies. Its default driver reads resolved Props on Proto updates and watches referenced State identities once per active view epoch, replacing only its own Feedback contribution. State-driven style changes request no structural render. Rule has no direct host capability.
+      zh-CN: standard Runtime 安装 Rule，语义依赖为 optional。默认 driver 在 Proto update 读取 resolved Props，在 active view epoch 内按引用 State identity 去重 watch，仅替换自身 Feedback contribution。State 驱动样式不请求 structural render。Rule 无直接宿主能力。
+  - id: M-RULE-0001-E
+    text:
+      en: Mixed ownership retains declarations across detach/remount, stops State watches and withdraws the Rule contribution while detached, and reevaluates current inputs on remount. Terminal disposal clears IR, State handle tables and extension closures; retained evaluation and extension-registration ports cannot revive the instance.
+      zh-CN: mixed ownership 跨 detach/remount 保留声明，detached 时停止 State watch 并撤回 Rule contribution，remount 时重新评估当前输入。terminal disposal 清理 IR、State handle 表与 extension closure；保留的 evaluate、registerExtension port 不能复活实例。
+  - id: M-RULE-0001-F
+    text:
+      en: Extension hooks transform rules before planning, run beforePlan in registration order, then run afterPlan for the default Plan. A short-circuit executes only its supplied callback and skips default planning; extensions remain responsible for semantic equivalence and do not redefine Rule core.
+      zh-CN: 扩展先 transform rules，再按注册顺序运行 beforePlan，默认 Plan 随后经过 afterPlan。short-circuit 仅执行其提供的 callback 并跳过默认 planning；扩展仍须负责语义等价，不反向定义 Rule core。
+satisfies:
+  contracts:
+    - C-RULE-0001
+    - C-RULE-0002
+    - C-RULE-0004
+    - C-CORE-SYNTAX-0007
+    - C-RULE-WHEN-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - id: C-RULE-0003
+      note: Bounded to Props/State predicates with serializable values and feedback.style; Context and intent.state gaps remain.
+    - id: C-RULE-RUNTIME-0001
+      anchors:
+        - C-RULE-RUNTIME-0001-A
+        - C-RULE-RUNTIME-0001-B
+        - C-RULE-RUNTIME-0001-C
+        - C-RULE-RUNTIME-0001-D
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+  modules:
+    - id: M-PROPS-0001
+      note: Optional dependency; resolved input when present.
+    - id: M-STATE-0001
+      note: Optional dependency; referenced State watches when present.
+    - id: M-FEEDBACK-0001
+      note: Default style executor delegates here; no direct host writes.
+relates:
+  contracts:
+    - C-RULE-WHEN-0002
+    - C-RULE-INTENT-0001
+    - C-RULE-EXTENSION-0001
+  decisions:
+    - D-RULE-HANDLE-DISPOSE-0001
+    - D-RULE-STATE-INTENT-0001
+    - D-RULE-CONTEXT-PATH-0001
+    - D-RULE-IR-SERIALIZABLE-0001
+    - D-RULE-META-NAMING-0001
+verifies:
+  tests:
+    - T-RULE-0002
+    - T-RULE-0001
+    - T-RULE-MATRIX-0001
+sources:
+  - path: packages/modules/rule/src/create.ts
+  - path: packages/modules/rule/src/impl.ts
+  - path: packages/modules/rule/src/compile.ts
+  - path: packages/modules/rule/src/when-builder.ts
+  - path: packages/modules/rule/src/intent-builder.ts
+  - path: packages/modules/rule/src/eval.ts
+  - path: packages/runtime/src/instance/session.ts
+openQuestions:
+  - id: M-RULE-0001-Q-CONTEXT
+    question:
+      en: How should Context identity serialization and reactive evaluation be completed?
+      zh-CN: Context identity 序列化与响应式评估应如何补全？
+    context:
+      en: Current driver uses tryRead without establishing subscriptions; raw Context keys and String(key) deduplication limit identity/serialization claims. Context path remains deferred.
+      zh-CN: 当前 driver 通过 tryRead 读取而不建立订阅；raw Context key 与 String(key) 去重限制 identity/serialization 声明。Context path 继续 deferred。
+  - id: M-RULE-0001-Q-DEFERRED
+    question:
+      en: When should demand justify state intent execution or stable extension API admission?
+      zh-CN: 何时由实际需求推动 state intent 执行或稳定 extension API 的接纳？
+    context:
+      en: intent.state remains unexecuted with live handles in IR. meta is deployed for colorScheme but evolving, not a placeholder or stable core guarantee. No new behavior is admitted here.
+      zh-CN: intent.state 仍不执行且在 IR 保留 live handle。meta 已用于 colorScheme，但 API 仍演进，不是占位，也不是稳定 core 保证。本轮不接纳新行为。
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded Props/State style slice and explicit deferred limits.
+tags:
+  - rule
+  - module
+  - style
+  - lifecycle

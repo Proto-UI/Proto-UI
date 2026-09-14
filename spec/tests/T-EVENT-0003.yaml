@@ -180,6 +180,13 @@ implementations:
       - React, Vue, and Web Component profiles inject the tested Adapter Base projection as their Event default-action capability.
     consumesCases:
       - T-EVENT-0003-CASE-DEFAULT-ACTION-WEB
+  - id: adapter-vue2-follow-through
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/catalog-conformance.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-DEFAULT-ACTION-WEB
 verifies:
   modules:
     - id: M-EVENT-0001

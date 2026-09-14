@@ -1,0 +1,169 @@
+id: T-ANATOMY-0004
+type: test
+title: Anatomy Module host and Adapter conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Direct Module, DOM observer, actual Runtime epoch and four real Adapter evidence for the bounded Anatomy slice.
+cases:
+  - id: T-ANATOMY-0004-CASE-DECLARATION
+    title: Anatomy declaration conformance
+    covers:
+      - M-ANATOMY-0001-A
+      - M-ANATOMY-0001-F
+      - HC-ANATOMY-STRUCTURE-0001-B
+    expectation: anatomy-declaration-conforms
+  - id: T-ANATOMY-0004-CASE-CANCEL
+    title: Anatomy cancel conformance
+    covers:
+      - M-ANATOMY-0001-D
+      - C-ANATOMY-ORDER-0003-A
+      - C-CORE-SYNTAX-0007-A
+      - C-CORE-SYNTAX-0007-D
+    expectation: anatomy-cancel-conforms
+  - id: T-ANATOMY-0004-CASE-HOST
+    title: Anatomy host conformance
+    covers:
+      - M-ANATOMY-0001-B
+      - M-ANATOMY-0001-C
+      - HC-ANATOMY-STRUCTURE-0001-A
+      - HC-ANATOMY-ORDER-0001-A
+    expectation: anatomy-host-conforms
+  - id: T-ANATOMY-0004-CASE-ORDER
+    title: Anatomy order conformance
+    covers:
+      - M-ANATOMY-0001-C
+      - M-ANATOMY-0001-D
+      - HC-ANATOMY-ORDER-0001-A
+      - HC-ANATOMY-ORDER-0001-B
+    expectation: anatomy-order-conforms
+  - id: T-ANATOMY-0004-CASE-LIFETIME
+    title: Anatomy lifetime conformance
+    covers:
+      - M-ANATOMY-0001-E
+      - HC-ANATOMY-ORDER-0001-B
+    expectation: anatomy-lifetime-conforms
+  - id: T-ANATOMY-0004-CASE-ADAPTER
+    title: Anatomy adapter conformance
+    covers:
+      - A-REACT-18-19-0001-ANATOMY
+      - A-VUE-3-0001-ANATOMY
+      - A-VUE-2-0001-ANATOMY
+      - A-WEB-COMPONENT-0001-ANATOMY
+    expectation: anatomy-adapter-conforms
+implementations:
+  - id: anatomy-existing-core
+    kind: module-test
+    status: passing
+    path: packages/modules/anatomy/test/impl-spec.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-DECLARATION
+      - T-ANATOMY-0004-CASE-HOST
+  - id: anatomy-core-static
+    kind: module-test
+    status: passing
+    path: packages/core/test/contract/anatomy-family.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-DECLARATION
+  - id: anatomy-boundaries
+    kind: module-test
+    status: passing
+    path: packages/modules/anatomy/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-CANCEL
+      - T-ANATOMY-0004-CASE-HOST
+      - T-ANATOMY-0004-CASE-ORDER
+  - id: anatomy-runtime-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-CANCEL
+      - T-ANATOMY-0004-CASE-LIFETIME
+  - id: anatomy-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/anatomy.integration.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-ADAPTER
+    notes:
+      - Real framework owners verify nested domain isolation, current Web order, safe PartView, target-owned Expose methods and fresh-owner State baseline. DOM observer reordering and repeated view epochs are covered separately; no CSS geometry or universal cross-tree ordering claim.
+  - id: anatomy-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/anatomy.integration.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-ADAPTER
+    notes:
+      - Real framework owners verify nested domain isolation, current Web order, safe PartView, target-owned Expose methods and fresh-owner State baseline. DOM observer reordering and repeated view epochs are covered separately; no CSS geometry or universal cross-tree ordering claim.
+  - id: anatomy-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/anatomy.integration.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-ADAPTER
+    notes:
+      - Real framework owners verify nested domain isolation, current Web order, safe PartView, target-owned Expose methods and fresh-owner State baseline. DOM observer reordering and repeated view epochs are covered separately; no CSS geometry or universal cross-tree ordering claim.
+  - id: anatomy-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/anatomy.integration.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-ADAPTER
+    notes:
+      - Real framework owners verify nested domain isolation, current Web order, safe PartView, target-owned Expose methods and fresh-owner State baseline. DOM observer reordering and repeated view epochs are covered separately; no CSS geometry or universal cross-tree ordering claim.
+verifies:
+  contracts:
+    - id: C-ANATOMY-ORDER-0003
+      anchors: [C-ANATOMY-ORDER-0003-A]
+    - id: C-CORE-SYNTAX-0007
+      anchors: [C-CORE-SYNTAX-0007-A, C-CORE-SYNTAX-0007-D]
+  modules:
+    - id: M-ANATOMY-0001
+      anchors:
+        - M-ANATOMY-0001-A
+        - M-ANATOMY-0001-B
+        - M-ANATOMY-0001-C
+        - M-ANATOMY-0001-D
+        - M-ANATOMY-0001-E
+        - M-ANATOMY-0001-F
+  hostCaps:
+    - id: HC-ANATOMY-STRUCTURE-0001
+      anchors:
+        - HC-ANATOMY-STRUCTURE-0001-A
+        - HC-ANATOMY-STRUCTURE-0001-B
+    - id: HC-ANATOMY-ORDER-0001
+      anchors:
+        - HC-ANATOMY-ORDER-0001-A
+        - HC-ANATOMY-ORDER-0001-B
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-ANATOMY
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-ANATOMY
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-ANATOMY
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-ANATOMY
+sources:
+  - path: packages/adapters/base/test/fixtures/anatomy-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped existing and new evidence without promoting deferred Anatomy semantics.
+tags:
+  - anatomy
+  - test
+  - adapter
+  - lifecycle

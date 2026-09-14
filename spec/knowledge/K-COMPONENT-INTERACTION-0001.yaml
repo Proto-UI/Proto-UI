@@ -21,20 +21,18 @@ criteria:
       zh-CN: Proto UI 的原型描述必须始终指向一个会成立的交互主体，而不是一组可脱离主体存在的局部能力。
       en: A Proto UI prototype description must keep pointing to a valid interactive subject rather than detached local capabilities.
 sources:
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/component-as-protocol.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/1-components-before-code.md
     sections:
-      - 组件并不只存在于代码里
-      - 原型不是漂浮的能力清单
-  - path: apps/www/src/content/docs/en/whitepaper/component-as-protocol.md
+      - 组件到底是什么？
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md
     sections:
-      - Components do not exist only in code
-      - A prototype is not a floating capability list
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md
+      - 从 Component 到 Prototype
+  - path: apps/www/src/content/docs/en/whitepaper/1-components-before-code.md
     sections:
-      - 组件并不是孤立存在的
-  - path: apps/www/src/content/docs/en/whitepaper/information-flow-model.md
+      - What Is a Component, Exactly?
+  - path: apps/www/src/content/docs/en/whitepaper/3-component-boundary.md
     sections:
-      - Components do not exist in isolation
+      - From Component to Prototype
 revisions:
   - version: 0.1.0
     change: introduced

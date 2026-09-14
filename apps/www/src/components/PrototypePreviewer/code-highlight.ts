@@ -1,4 +1,5 @@
 import { codeToHtml } from 'shiki';
+import { codeThemes } from './code-themes.mjs';
 
 export type CodeLang = 'bash' | 'html' | 'javascript' | 'tsx' | 'typescript' | 'vue';
 
@@ -10,15 +11,10 @@ export async function highlightCode(
 
   let html = await codeToHtml(raw, {
     lang,
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
+    themes: codeThemes,
+    defaultColor: false,
   });
   const safeRaw = raw.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  html = html.replace(
-    /<pre class="([^"]*)"/,
-    '<pre class="proto-previewer__code m-0 text-[0.8125rem] leading-6 whitespace-pre $1"'
-  );
+  html = html.replace(/<pre class="([^"]*)"/, '<pre class="proto-previewer__code $1" tabindex="0"');
   return html.replace(/<code([^>]*)>/, `<code$1 data-raw-code="${safeRaw}">`);
 }

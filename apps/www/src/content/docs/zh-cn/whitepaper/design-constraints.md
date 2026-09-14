@@ -1,6 +1,7 @@
 ---
 title: '设计约束'
 description: '影响系统设计的约束'
+draft: true
 ---
 
 ## 这篇文章要回答什么？

@@ -11,17 +11,6 @@ declare module '*.astro' {
   export default AstroComponent;
 }
 
-declare module 'shiki' {
-  export function codeToHtml(
-    code: string,
-    options?: {
-      lang?: string;
-      theme?: string;
-      themes?: Record<string, string>;
-    }
-  ): Promise<string>;
-}
-
 declare module 'virtual:starlight/user-config' {
   const config: {
     locales?: Record<string, unknown>;

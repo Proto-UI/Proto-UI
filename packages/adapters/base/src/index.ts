@@ -16,3 +16,4 @@ export * from './platform/layout-ready';
 export * from './platform/web-preferences';
 export * from './public-types';
 export * from './types';
+export * from './platform/focus-entry';

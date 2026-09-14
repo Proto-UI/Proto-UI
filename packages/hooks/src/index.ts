@@ -1,3 +1,4 @@
+export * from './as-accessible';
 export * from './as-boundary';
 export * from './as-collection';
 export * from './as-collection-item';

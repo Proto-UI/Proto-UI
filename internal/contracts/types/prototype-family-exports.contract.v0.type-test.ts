@@ -68,6 +68,9 @@ import {
   shadcnTabsTrigger,
 } from '@proto.ui/prototypes-shadcn/tabs';
 import { shadcnToggle } from '@proto.ui/prototypes-shadcn/toggle';
+import * as ShadcnPackage from '@proto.ui/prototypes-shadcn';
+import * as ShadcnTooltipFamily from '@proto.ui/prototypes-shadcn/tooltip';
+
 import { separatorRoot } from '@proto.ui/prototypes-base/separator';
 import { textareaRoot } from '@proto.ui/prototypes-base/textarea';
 import { brutalistBadgeRoot } from '@proto.ui/prototypes-brutalist/badge';
@@ -125,6 +128,117 @@ import {
 } from '@proto.ui/prototypes-brutalist/tabs';
 import { brutalistTextareaRoot } from '@proto.ui/prototypes-brutalist/textarea';
 import { brutalistToggle } from '@proto.ui/prototypes-brutalist/toggle';
+import {
+  BrutalistCheckboxIndicator,
+  BrutalistCheckboxRoot,
+  brutalistCheckboxIndicator,
+  brutalistCheckboxRoot,
+} from '@proto.ui/prototypes-brutalist/checkbox';
+import type {
+  BrutalistCheckboxIndicatorAsHookContract as FamilyCheckboxIndicatorAsHookContract,
+  BrutalistCheckboxIndicatorExposes as FamilyCheckboxIndicatorExposes,
+  BrutalistCheckboxIndicatorProps as FamilyCheckboxIndicatorProps,
+  BrutalistCheckboxIndicatorStateHandles as FamilyCheckboxIndicatorStateHandles,
+  BrutalistCheckboxRootAsHookContract as FamilyCheckboxRootAsHookContract,
+  BrutalistCheckboxRootExposes as FamilyCheckboxRootExposes,
+  BrutalistCheckboxRootProps as FamilyCheckboxRootProps,
+  BrutalistCheckboxRootStateHandles as FamilyCheckboxRootStateHandles,
+} from '@proto.ui/prototypes-brutalist/checkbox';
+import type {
+  BrutalistCheckboxIndicatorAsHookContract as RootCheckboxIndicatorAsHookContract,
+  BrutalistCheckboxIndicatorExposes as RootCheckboxIndicatorExposes,
+  BrutalistCheckboxIndicatorProps as RootCheckboxIndicatorProps,
+  BrutalistCheckboxIndicatorStateHandles as RootCheckboxIndicatorStateHandles,
+  BrutalistCheckboxRootAsHookContract as RootCheckboxRootAsHookContract,
+  BrutalistCheckboxRootExposes as RootCheckboxRootExposes,
+  BrutalistCheckboxRootProps as RootCheckboxRootProps,
+  BrutalistCheckboxRootStateHandles as RootCheckboxRootStateHandles,
+} from '@proto.ui/prototypes-brutalist';
+
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+type Assert<T extends true> = T;
+
+type _BrutalistCheckboxRootPropsParity = Assert<
+  Equal<FamilyCheckboxRootProps, RootCheckboxRootProps>
+>;
+type _BrutalistCheckboxRootExposesParity = Assert<
+  Equal<FamilyCheckboxRootExposes, RootCheckboxRootExposes>
+>;
+type _BrutalistCheckboxRootStateHandlesParity = Assert<
+  Equal<FamilyCheckboxRootStateHandles, RootCheckboxRootStateHandles>
+>;
+type _BrutalistCheckboxRootAsHookParity = Assert<
+  Equal<FamilyCheckboxRootAsHookContract, RootCheckboxRootAsHookContract>
+>;
+type _BrutalistCheckboxIndicatorPropsParity = Assert<
+  Equal<FamilyCheckboxIndicatorProps, RootCheckboxIndicatorProps>
+>;
+type _BrutalistCheckboxIndicatorExposesParity = Assert<
+  Equal<FamilyCheckboxIndicatorExposes, RootCheckboxIndicatorExposes>
+>;
+type _BrutalistCheckboxIndicatorStateHandlesParity = Assert<
+  Equal<FamilyCheckboxIndicatorStateHandles, RootCheckboxIndicatorStateHandles>
+>;
+type _BrutalistCheckboxIndicatorAsHookParity = Assert<
+  Equal<FamilyCheckboxIndicatorAsHookContract, RootCheckboxIndicatorAsHookContract>
+>;
+
+type ShadcnTooltipFamilyTypeSurface = {
+  group: [
+    ShadcnTooltipFamily.ShadcnTooltipGroupProps,
+    ShadcnTooltipFamily.ShadcnTooltipGroupExposes,
+    ShadcnTooltipFamily.ShadcnTooltipGroupAsHookContract,
+  ];
+  root: [
+    ShadcnTooltipFamily.ShadcnTooltipRootProps,
+    ShadcnTooltipFamily.ShadcnTooltipRootExposes,
+    ShadcnTooltipFamily.ShadcnTooltipRootStateHandles,
+    ShadcnTooltipFamily.ShadcnTooltipRootAsHookContract,
+  ];
+  trigger: [
+    ShadcnTooltipFamily.ShadcnTooltipTriggerProps,
+    ShadcnTooltipFamily.ShadcnTooltipTriggerExposes,
+    ShadcnTooltipFamily.ShadcnTooltipTriggerStateHandles,
+    ShadcnTooltipFamily.ShadcnTooltipTriggerAsHookContract,
+  ];
+  content: [
+    ShadcnTooltipFamily.ShadcnTooltipContentProps,
+    ShadcnTooltipFamily.ShadcnTooltipContentExposes,
+    ShadcnTooltipFamily.ShadcnTooltipContentStateHandles,
+    ShadcnTooltipFamily.ShadcnTooltipContentAsHookContract,
+  ];
+};
+
+type ShadcnTooltipRootTypeSurface = {
+  group: [
+    ShadcnPackage.ShadcnTooltipGroupProps,
+    ShadcnPackage.ShadcnTooltipGroupExposes,
+    ShadcnPackage.ShadcnTooltipGroupAsHookContract,
+  ];
+  root: [
+    ShadcnPackage.ShadcnTooltipRootProps,
+    ShadcnPackage.ShadcnTooltipRootExposes,
+    ShadcnPackage.ShadcnTooltipRootStateHandles,
+    ShadcnPackage.ShadcnTooltipRootAsHookContract,
+  ];
+  trigger: [
+    ShadcnPackage.ShadcnTooltipTriggerProps,
+    ShadcnPackage.ShadcnTooltipTriggerExposes,
+    ShadcnPackage.ShadcnTooltipTriggerStateHandles,
+    ShadcnPackage.ShadcnTooltipTriggerAsHookContract,
+  ];
+  content: [
+    ShadcnPackage.ShadcnTooltipContentProps,
+    ShadcnPackage.ShadcnTooltipContentExposes,
+    ShadcnPackage.ShadcnTooltipContentStateHandles,
+    ShadcnPackage.ShadcnTooltipContentAsHookContract,
+  ];
+};
+
+type _ShadcnTooltipRootBarrelParity = Assert<
+  Equal<ShadcnTooltipFamilyTypeSurface, ShadcnTooltipRootTypeSurface>
+>;
 
 // The CLI registry consumes these exact named exports from family subpaths.
 void [
@@ -229,4 +343,20 @@ void [
   brutalistScrollAreaViewport,
   brutalistScrollAreaScrollbar,
   brutalistScrollAreaThumb,
+  BrutalistCheckboxRoot,
+  BrutalistCheckboxIndicator,
+  brutalistCheckboxRoot,
+  brutalistCheckboxIndicator,
+  ShadcnTooltipFamily.ShadcnTooltipGroup,
+  ShadcnTooltipFamily.ShadcnTooltipRoot,
+  ShadcnTooltipFamily.ShadcnTooltipTrigger,
+  ShadcnTooltipFamily.ShadcnTooltipContent,
+  ShadcnTooltipFamily.shadcnTooltipGroup,
+  ShadcnTooltipFamily.shadcnTooltipRoot,
+  ShadcnTooltipFamily.shadcnTooltipTrigger,
+  ShadcnTooltipFamily.shadcnTooltipContent,
+  ShadcnPackage.ShadcnTooltipGroup,
+  ShadcnPackage.ShadcnTooltipRoot,
+  ShadcnPackage.ShadcnTooltipTrigger,
+  ShadcnPackage.ShadcnTooltipContent,
 ];

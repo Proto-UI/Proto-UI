@@ -1,0 +1,140 @@
+id: T-EXPOSE-STATE-WEB-0001
+type: test
+title: Expose State Web mapping and lifecycle conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Direct Module, actual Runtime and four real Adapter journeys verify the bounded Web extension.
+cases:
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-ACTIVE
+    title: Web projection active
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-D
+      - M-EXPOSE-STATE-WEB-0001-F
+    expectation: web-projection-active
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-REBIND
+    title: Web projection rebind
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-D
+    expectation: web-projection-rebind
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-LIFETIME
+    title: Web projection lifetime
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-D
+    expectation: web-projection-lifetime
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-MAPPING
+    title: Web projection mapping
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-B
+      - M-EXPOSE-STATE-WEB-0001-E
+      - HC-EXPOSE-STATE-WEB-TARGETS-0001-B
+    expectation: web-projection-mapping
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-RUNTIME
+    title: Web projection runtime
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-A
+      - M-EXPOSE-STATE-WEB-0001-D
+    expectation: web-projection-runtime
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    title: Web projection adapter
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-A
+      - M-EXPOSE-STATE-WEB-0001-B
+      - M-EXPOSE-STATE-WEB-0001-C
+      - HC-EXPOSE-STATE-WEB-TARGETS-0001-A
+      - A-REACT-18-19-0001-EXPOSE-STATE-WEB
+      - A-VUE-3-0001-EXPOSE-STATE-WEB
+      - A-VUE-2-0001-EXPOSE-STATE-WEB
+      - A-WEB-COMPONENT-0001-EXPOSE-STATE-WEB
+    expectation: web-projection-adapter
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-SURFACE
+    title: Split Web Component surface mirrors state
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-E
+      - HC-EXPOSE-STATE-WEB-TARGETS-0001-B
+    expectation: equivalent-surface-state
+implementations:
+  - id: module
+    kind: module-test
+    status: passing
+    path: packages/modules/expose-state-web/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-WEB-0001-CASE-ACTIVE
+      - T-EXPOSE-STATE-WEB-0001-CASE-REBIND
+      - T-EXPOSE-STATE-WEB-0001-CASE-LIFETIME
+      - T-EXPOSE-STATE-WEB-0001-CASE-MAPPING
+  - id: runtime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/expose-state-web.catalog.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-WEB-0001-CASE-RUNTIME
+  - id: react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/expose-state-web.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    notes:
+      - Real framework owner; default and mode override mapping, State transitions without Proto structural render and fresh-owner baseline. Runtime separately verifies retained-instance view epochs.
+  - id: vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/expose-state-web.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    notes:
+      - Real framework owner; default and mode override mapping, State transitions without Proto structural render and fresh-owner baseline. Runtime separately verifies retained-instance view epochs.
+  - id: vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/expose-state-web.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    notes:
+      - Real framework owner; default and mode override mapping, State transitions without Proto structural render and fresh-owner baseline. Runtime separately verifies retained-instance view epochs.
+  - id: web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/expose-state-web.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+      - T-EXPOSE-STATE-WEB-0001-CASE-SURFACE
+    notes:
+      - Real framework owner; default and mode override mapping, State transitions without Proto structural render and fresh-owner baseline. Runtime separately verifies retained-instance view epochs.
+verifies:
+  modules:
+    - id: M-EXPOSE-STATE-WEB-0001
+      anchors:
+        - M-EXPOSE-STATE-WEB-0001-A
+        - M-EXPOSE-STATE-WEB-0001-B
+        - M-EXPOSE-STATE-WEB-0001-C
+        - M-EXPOSE-STATE-WEB-0001-D
+        - M-EXPOSE-STATE-WEB-0001-E
+        - M-EXPOSE-STATE-WEB-0001-F
+  hostCaps:
+    - HC-EXPOSE-STATE-WEB-TARGETS-0001
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-EXPOSE-STATE-WEB
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-EXPOSE-STATE-WEB
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-EXPOSE-STATE-WEB
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-EXPOSE-STATE-WEB
+sources:
+  - path: packages/adapters/base/test/fixtures/expose-state-web-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Linked bounded Web projection mapping and resource-lifetime evidence.
