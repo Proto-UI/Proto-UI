@@ -18,6 +18,8 @@ Passing checks establish technical evidence, not product correctness, review app
 
 ## Evidence discipline
 
+Include the Agent-only soft-gate disposition from `internal/agent-operations/visual-evidence.md` in the evidence report. Verify request paraphrase, uploaded visuals and exact reproduction/head scope; mark unavailable evidence and the next Agent action. Humans may submit plain descriptions. Do not fabricate captures, count local files as uploaded, or convert missing images into a blanket intake/merge blocker. Upload mechanisms are documented in `internal/agent-operations/github-evidence-upload.md`; this validation leaf does not gain external-write authority.
+
 Apply these principles to every validation round; they are methodology, not a checklist of known bugs:
 
 1. Bind assertions to rendered output. Internal state facts prove wiring, not behavior; an observable claim must resolve against computed geometry, paint, positioning, or screen evidence.

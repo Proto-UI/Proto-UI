@@ -14,6 +14,8 @@ description: Inspect one bounded Proto UI Issue queue slice and return a read-on
 
 Remain read-only. Missing Project scope or live facts remain unknown and cannot be replaced with assumptions.
 
+Apply `internal/agent-operations/visual-evidence.md` as an Agent-only soft-gate assessment: identify missing uploaded topic/reproduction visuals, sanitized request paraphrases, and evidence debt in the report. Humans may submit plain descriptions; missing Agent evidence is not an intake rejection. Historical inventory includes open and closed Issues unless explicitly scoped otherwise. Do not upload or repair gaps in this read-only transition.
+
 Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-issue`, the registered Issue report artifact, and at most one `nextSkillId`.
 
 Communicate with the user in the user's current language. Keep GitHub identifiers canonical.

@@ -15,6 +15,8 @@ description: Inspect one bounded Proto UI pull-request slice and return a read-o
 
 Remain read-only. A green check, mergeability flag, or Agent recommendation never grants approval or merge authority.
 
+Report Agent evidence against `internal/agent-operations/visual-evidence.md`: sanitized request paraphrase, uploaded subject-appropriate visuals, baseline/candidate binding, HTML/static fallback when useful, and explicit debt. This is an Agent-only soft gate; humans may submit plain descriptions. Do not impose an image-presence merge blocker or repair evidence during this read-only transition.
+
 Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-pr`, both the registered pull-request report and canonical review-input artifacts, and at most one `nextSkillId`.
 
 Communicate with the user in the user's current language. Keep GitHub identifiers canonical.

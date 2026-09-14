@@ -79,6 +79,8 @@ A caller-provided task ID is not treated as proof. The repository policy is oper
 
 ## Evidence discipline
 
+Apply the [Agent-only visual evidence soft gate](visual-evidence.md) and [gh upload guide](github-evidence-upload.md) to every Issue or PR an Agent authors or materially advances, in both execution modes and historical backfill. Agents own reproduction, uploaded subject-appropriate visuals, sanitized request paraphrases, and explicit debt. Humans may submit plain descriptions without images or Agent checklists. This grants no external-write authority and adds no hard intake/merge check.
+
 Evidence follows six standing principles. Assertions bind to rendered output, not to internal state facts alone. States are probed pairwise so that verdicts rest on transitions and deltas, not isolated snapshots. Observing or changing a surface obligates re-verifying every surface anchored to, composed with, or layered above it. Every expected value cites its authority, whether a spec anchor or an upstream reference, and an observable behavior without a cited authority is itself a finding. Expectations are scoped per design-language family and never transfer across families without a fresh citation. Any boundary that depends on a live external system is exercised against that system before it is trusted.
 
 ## Handoff and zero trust
