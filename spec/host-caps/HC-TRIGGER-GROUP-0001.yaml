@@ -1,0 +1,35 @@
+id: HC-TRIGGER-GROUP-0001
+type: host-cap
+title: Host projects logical Trigger chains and their current semantic target
+status: draft
+since: 0.3.0-alpha.0
+summary: Host projects logical Trigger chains and their current semantic target.
+criteria:
+  - id: HC-TRIGGER-GROUP-0001-A
+    text:
+      en: "The host supplies opaque instance identity, direct parent and prototype lookup, group membership/anchor/surface, and a bindable semantic target. These form one logical group projection responsibility; physical DOM identity is not an author requirement."
+      zh-CN: "宿主提供 opaque instance identity、直接 parent 与 prototype 查询、group membership/anchor/surface 和可绑定 semantic target。这些构成一项 logical group projection 职责；不要求作者使用物理 DOM identity。"
+  - id: HC-TRIGGER-GROUP-0001-B
+    text:
+      en: "A continuous chain has the outermost anchor and deepest surface, independent of setup order. Declaring a trigger or changing its logical parent must reject sibling trigger branches before mutating accepted parent links, group roles or routes. A late parent declaration cannot combine two child trigger groups."
+      zh-CN: "连续链以最外层为 anchor、最深层为 surface，不受 setup 顺序影响。声明 Trigger 或更改 logical parent 时须在修改已接纳 parent links、group roles 或 routes 前拒绝并列 Trigger 分叉。延迟声明的 parent 不得合并两个 child Trigger group。"
+  - id: HC-TRIGGER-GROUP-0001-C
+    text:
+      en: "A stable semantic target bridge retains registrations before a view exists and moves them to replacement targets. Unbinding a surface view removes its live participation, allows a replacement owner, and must not let stale detached membership reclaim the surface during ancestor reconciliation."
+      zh-CN: "稳定 semantic target bridge 在 view 出现前保留 registration，并迁移至替换 target。解绑 surface view 移除其 live participation、允许替换 owner，且不得在祖先 reconciliation 时由过期 detached membership 抢回 surface。"
+  - id: HC-TRIGGER-GROUP-0001-D
+    text:
+      en: "Group roles remain domain-neutral. Web input admission accepts the current surface root or content and rejects a non-surface member host box; host-local events retain the member root. The capability does not define Focus or A11y policy."
+      zh-CN: "group roles 保持 domain-neutral。Web input admission 接纳当前 surface root 或内容，拒绝非 surface member 的宿主盒；host-local event 保留 member root。该 capability 不定义 Focus 或 A11y policy。"
+dependsOn:
+  contracts: [C-AS-TRIGGER-0001, C-LIFECYCLE-0006]
+verifies:
+  tests: [T-AS-TRIGGER-0001, T-AS-TRIGGER-0002]
+sources:
+  - path: packages/modules/as-trigger/src/caps.ts
+  - path: packages/adapters/base/src/platform/instance-tree.ts
+  - path: packages/adapters/base/src/events/web-event-router.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded continuous Trigger group slice and executable evidence.

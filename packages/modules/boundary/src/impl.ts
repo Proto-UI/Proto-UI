@@ -40,6 +40,7 @@ function pushOverrideWarning(warnings: string[], field: string, prev: unknown, n
 
 const STACK_CENTER = (() => {
   const order: number[] = [];
+  const sampleOwners = new WeakMap<object, number | null>();
 
   return {
     activate(id: number) {
@@ -55,8 +56,18 @@ const STACK_CENTER = (() => {
         order.splice(existingIndex, 1);
       }
     },
-    top(): number | null {
-      return order.length > 0 ? (order[order.length - 1] ?? null) : null;
+    topForSample(sample?: BoundarySample): number | null {
+      const native = sample?.nativeEvent;
+      const identity =
+        native && (typeof native === 'object' || typeof native === 'function')
+          ? (native as object)
+          : sample;
+      if (identity && sampleOwners.has(identity)) return sampleOwners.get(identity) ?? null;
+      const owner = order.at(-1) ?? null;
+      // Every Event listener wraps the same native sample independently. Retain
+      // its original owner even when that owner's outside callback closes it.
+      if (identity) sampleOwners.set(identity, owner);
+      return owner;
     },
   };
 })();
@@ -223,10 +234,10 @@ export class BoundaryModuleImpl extends ModuleBase {
 
   notify(sample?: BoundarySample): BoundaryClassification {
     if (this.suspended) return 'unknown';
+    const topBoundaryId = this.stackActive ? STACK_CENTER.topForSample(sample) : null;
     const classification = this.classify(sample);
     if (classification !== 'outside') return classification;
     if (this.stackActive) {
-      const topBoundaryId = STACK_CENTER.top();
       if (topBoundaryId !== null && topBoundaryId !== this.boundaryInstanceId) {
         return 'unknown';
       }

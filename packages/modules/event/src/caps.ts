@@ -23,3 +23,8 @@ export type EventDefaultActionCancel = (request: EventDefaultActionCancelRequest
 export const EVENT_CANCEL_DEFAULT_ACTION_CAP = cap<EventDefaultActionCancel>(
   '@proto.ui/event/cancelDefaultAction'
 );
+
+/** Shared input source identity for adapters whose global binding target is a per-instance proxy. */
+export const EVENT_GLOBAL_INPUT_SCOPE_CAP = cap<() => object | null>(
+  '@proto.ui/event/getGlobalInputScope'
+);

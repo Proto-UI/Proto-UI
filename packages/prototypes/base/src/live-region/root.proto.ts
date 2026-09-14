@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import type { DefHandle, RenderFn } from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
 import type {
@@ -15,6 +16,7 @@ export type {
 } from './types';
 
 function setupLiveRegionRoot(def: DefHandle<LiveRegionRootProps, LiveRegionRootExposes>): RenderFn {
+  const accessible = asAccessible();
   // P-BASE-LIVE-REGION-POLITENESS, P-BASE-LIVE-REGION-ATOMIC
   def.props.define({
     politeness: { type: 'enum', empty: 'fallback', options: ['polite', 'assertive'] },
@@ -26,9 +28,9 @@ function setupLiveRegionRoot(def: DefHandle<LiveRegionRootProps, LiveRegionRootE
   const role = def.state.string('role', 'status');
   const live = def.state.string('live', 'polite');
   const atomic = def.state.bool('atomic', true);
-  def.a11y.role(role);
-  def.a11y.state('live', live);
-  def.a11y.state('atomic', atomic);
+  accessible.role(role);
+  accessible.state('live', live);
+  accessible.state('atomic', atomic);
 
   // P-BASE-LIVE-REGION-SEMANTICS, P-BASE-LIVE-REGION-DYNAMIC
   const sync = (props: Readonly<LiveRegionRootProps>) => {

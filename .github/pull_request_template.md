@@ -6,6 +6,7 @@
 
 - Issue:
 - Applicable spec entities and lifecycle:
+- Initial or changed lifecycle rationale and release-slice disposition, when applicable:
 - Criteria / test anchors:
 - Related upstream:
 

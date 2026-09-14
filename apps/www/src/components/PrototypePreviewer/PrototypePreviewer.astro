@@ -181,10 +181,9 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
 
   <style>
     .proto-previewer {
-      --proto-previewer-radius: 0.75rem;
-      --proto-previewer-border: 1px solid var(--color-border);
+      --proto-previewer-radius: var(--docs-code-radius);
+      --proto-previewer-border: 1px solid var(--docs-code-border);
       --proto-previewer-bg: color-mix(in oklch, var(--color-muted) 30%, transparent);
-      --proto-code-fg: var(--color-code-foreground);
       border: var(--proto-previewer-border);
       border-radius: var(--proto-previewer-radius);
       overflow: hidden;

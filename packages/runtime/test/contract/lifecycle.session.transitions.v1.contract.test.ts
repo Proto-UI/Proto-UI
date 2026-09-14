@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { describe, expect, it, vi } from 'vitest';
 import { definePrototype, type Prototype } from '@proto.ui/core';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
@@ -37,7 +38,7 @@ const simpleProto = (callbacks: string[] = []): Prototype =>
   definePrototype({
     name: 'lifecycle-transition-matrix',
     setup(def) {
-      def.a11y.role('button');
+      asAccessible().role('button');
       def.lifecycle.onMounted(() => callbacks.push('mounted'));
       def.lifecycle.onUpdated(() => callbacks.push('updated'));
       def.lifecycle.onUnmounted(() => callbacks.push('unmounted'));

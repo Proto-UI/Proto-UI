@@ -1,0 +1,96 @@
+id: T-HIT-PARTICIPATION-0001
+type: test
+title: Hit Participation ownership, host projection and lifecycle evidence
+status: draft
+since: 0.3.0-alpha.0
+summary: Covers portable declaration boundaries, Web projection and shared-owner recovery across four Adapters.
+cases:
+  - id: T-HIT-PARTICIPATION-0001-CASE-CORE
+    title: Singleton configuration, region declarations and independent semantics
+    covers:
+      ['C-HIT-PARTICIPATION-0001-A', 'C-HIT-PARTICIPATION-0001-B', 'M-HIT-PARTICIPATION-0001-A']
+    expectation: hit-participation-core
+  - id: T-HIT-PARTICIPATION-0001-CASE-SHARING
+    title: Same-mode owners release independently and restore original CSS priority
+    covers: ['C-HIT-PARTICIPATION-0001-D', 'HC-HIT-PARTICIPATION-0001-B']
+    expectation: hit-participation-sharing
+  - id: T-HIT-PARTICIPATION-0001-CASE-CONFLICT
+    title: A differing mode rejects the entire target replacement
+    covers: ['C-HIT-PARTICIPATION-0001-C', 'HC-HIT-PARTICIPATION-0001-A']
+    expectation: hit-participation-conflict
+  - id: T-HIT-PARTICIPATION-0001-CASE-ADAPTER
+    title: Real Adapter owners survive rejected registration and fresh owner cleanup
+    covers:
+      [
+        'M-HIT-PARTICIPATION-0001-C',
+        'A-REACT-18-19-0001-HIT-PARTICIPATION',
+        'A-VUE-3-0001-HIT-PARTICIPATION',
+        'A-VUE-2-0001-HIT-PARTICIPATION',
+        'A-WEB-COMPONENT-0001-HIT-PARTICIPATION',
+      ]
+    expectation: hit-participation-adapter
+  - id: T-HIT-PARTICIPATION-0001-CASE-RELEASE-CONFLICT
+    title: A rejected release retains same-owner precedence and can be retried
+    covers: ['C-HIT-PARTICIPATION-0001-C', 'M-HIT-PARTICIPATION-0001-B']
+    expectation: hit-participation-release-conflict
+  - id: T-HIT-PARTICIPATION-0001-CASE-LIFETIME
+    title: Runtime view epochs suspend and restore claims before terminal disposal
+    covers: ['C-HIT-PARTICIPATION-0001-D', 'M-HIT-PARTICIPATION-0001-C']
+    expectation: hit-participation-lifetime
+implementations:
+  - id: runtime-hit
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/hit-participation.v0.contract.test.ts
+    required: true
+    consumesCases: ['T-HIT-PARTICIPATION-0001-CASE-CORE']
+  - id: host-hit
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/hit-participation-host-bridge.test.ts
+    required: true
+    consumesCases:
+      ['T-HIT-PARTICIPATION-0001-CASE-SHARING', 'T-HIT-PARTICIPATION-0001-CASE-CONFLICT']
+  - id: runtime-hit-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/hit-participation.catalog-lifecycle.contract.test.ts
+    required: true
+    consumesCases: ['T-HIT-PARTICIPATION-0001-CASE-LIFETIME']
+  - id: react-hit
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/hit.integration.test.ts
+    required: true
+    consumesCases:
+      ['T-HIT-PARTICIPATION-0001-CASE-ADAPTER', 'T-HIT-PARTICIPATION-0001-CASE-RELEASE-CONFLICT']
+  - id: vue-hit
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/hit.integration.test.ts
+    required: true
+    consumesCases:
+      ['T-HIT-PARTICIPATION-0001-CASE-ADAPTER', 'T-HIT-PARTICIPATION-0001-CASE-RELEASE-CONFLICT']
+  - id: vue2-hit
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/hit.integration.test.ts
+    required: true
+    consumesCases:
+      ['T-HIT-PARTICIPATION-0001-CASE-ADAPTER', 'T-HIT-PARTICIPATION-0001-CASE-RELEASE-CONFLICT']
+  - id: web-component-hit
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/hit.integration.test.ts
+    required: true
+    consumesCases:
+      ['T-HIT-PARTICIPATION-0001-CASE-ADAPTER', 'T-HIT-PARTICIPATION-0001-CASE-RELEASE-CONFLICT']
+verifies:
+  contracts: [C-HIT-PARTICIPATION-0001]
+  modules: [M-HIT-PARTICIPATION-0001]
+  hostCaps: [HC-HIT-PARTICIPATION-0001]
+  adapters: [A-REACT-18-19-0001, A-VUE-3-0001, A-VUE-2-0001, A-WEB-COMPONENT-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged existing semantic tests and new shared ownership, rollback and view-lifecycle evidence.

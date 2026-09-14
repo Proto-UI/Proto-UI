@@ -3,7 +3,7 @@ type: module
 title: A11y module records semantic object IR
 status: draft
 since: 0.1.0
-summary: The a11y module provides the prototype author API and runtime IR storage for host-projectable accessibility semantic objects.
+summary: The a11y module provides the asAccessible author handle and runtime IR storage for host-projectable accessibility semantic objects.
 satisfies:
   contracts:
     - C-A11Y-0001
@@ -14,10 +14,14 @@ verifies:
   tests:
     - T-A11Y-0001
 sources:
+  - path: packages/hooks/src/as-accessible.ts
   - path: packages/modules/a11y/src/create.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Exposed the existing instance facade through asAccessible while retaining setup guards, State observation and host projection ownership.
   - version: 0.3.0-alpha.0
     change: revised
     summary: >-

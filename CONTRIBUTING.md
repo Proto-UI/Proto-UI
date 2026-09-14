@@ -153,6 +153,8 @@ Use a readable legacy contract only for explanation or an explicitly accepted un
 
 A spec brainstorm may produce draft entities, executable probes, and a decision packet. Separate facts, alternatives, recommendation, negative boundary, and evidence plan; ask only for the smallest product choice that evidence cannot settle.
 
+New ordinary entities and lifecycle changes must record `lifecycleRationale` and pass `pnpm check:spec-authoring -- --base <base-sha>`. Follow `spec/README.md` for type-specific admission evidence and canonical `openQuestions[].blocks` targets. Release preparation reviews the lifecycle report and records slice dispositions; package publication and a `promote` disposition do not themselves authorize activation.
+
 ## Validate proportionally
 
 Run the smallest test that proves the affected rule, then expand along the affected graph.

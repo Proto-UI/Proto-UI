@@ -105,6 +105,7 @@ export class ImageViewModuleImpl extends ModuleBase {
     };
     this.listeners = this.listeners.concat(listener);
     return () => {
+      this.sys.ensureSetup('imageView.off');
       this.listeners = this.listeners.filter((candidate) => candidate !== listener);
     };
   }

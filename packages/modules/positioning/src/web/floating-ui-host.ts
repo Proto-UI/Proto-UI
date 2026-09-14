@@ -73,7 +73,7 @@ function positionReference(anchor: HTMLElement, config: AnchoredPositionConfig) 
   return config.excludeAnchorTranslation === true ? virtualReferenceFor(anchor) : anchor;
 }
 
-function middlewareFor(config: AnchoredPositionConfig): Middleware[] {
+function middlewareFor(config: AnchoredPositionConfig, isCurrent: () => boolean): Middleware[] {
   const middleware: Middleware[] = [
     offset({ mainAxis: config.sideOffset, crossAxis: config.alignOffset }),
   ];
@@ -90,6 +90,7 @@ function middlewareFor(config: AnchoredPositionConfig): Middleware[] {
       rootBoundary: 'viewport',
       padding: config.collisionPadding,
       apply({ availableWidth, availableHeight, rects, elements }) {
+        if (!isCurrent()) return;
         const style = elements.floating.style;
         style.setProperty('--proto-ui-anchor-width', `${rects.reference.width}px`);
         style.setProperty('--proto-ui-anchor-height', `${rects.reference.height}px`);
@@ -106,17 +107,21 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
     attach(initial): AnchoredPositionHostLease {
       let connection = initial;
       let disposed = false;
+      let generation = 0;
       let cleanup: (() => void) | null = null;
 
       const position = async () => {
-        const { anchor, floating, config } = connection;
+        const current = connection;
+        const { anchor, floating, config } = current;
+        const version = ++generation;
+        const isCurrent = () => !disposed && version === generation;
         if (disposed || !isElement(anchor) || !isElement(floating)) return;
         const result = await computePosition(positionReference(anchor, config), floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
-          middleware: middlewareFor(config),
+          middleware: middlewareFor(config, isCurrent),
         });
-        if (disposed) return;
+        if (!isCurrent()) return;
         Object.assign(floating.style, {
           position: result.strategy,
           left: `${result.x}px`,
@@ -125,7 +130,7 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
         const resolved = fromPlacement(result.placement);
         floating.dataset.side = resolved.side;
         floating.dataset.align = resolved.align;
-        connection.onResolved?.({ ...resolved, strategy: result.strategy });
+        current.onResolved?.({ ...resolved, strategy: result.strategy });
       };
 
       const restart = () => {
@@ -140,6 +145,8 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
 
       return {
         update(next) {
+          if (disposed) return;
+          generation += 1;
           const targetsChanged =
             !Object.is(connection.anchor, next.anchor) ||
             !Object.is(connection.floating, next.floating);
@@ -152,6 +159,7 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
         },
         dispose() {
           disposed = true;
+          generation += 1;
           cleanup?.();
           cleanup = null;
         },

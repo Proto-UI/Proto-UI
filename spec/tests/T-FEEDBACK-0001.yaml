@@ -1,0 +1,152 @@
+id: T-FEEDBACK-0001
+type: test
+title: Feedback Module and visual host/Adapter conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Direct module, Runtime lifecycle and Rule integration, EffectsPort and four real Web Adapter journeys verify the bounded visual style slice.
+cases:
+  - id: T-FEEDBACK-0001-CASE-SURFACE
+    title: Author and privileged surfaces preserve phase and token boundaries
+    covers:
+      - M-FEEDBACK-0001-A
+      - M-FEEDBACK-0001-B
+    expectation: feedback-surface-conforms
+  - id: T-FEEDBACK-0001-CASE-MERGE
+    title: Rule base replacement and runtime patches retain semantic precedence
+    covers:
+      - M-FEEDBACK-0001-C
+    expectation: feedback-merge-conforms
+  - id: T-FEEDBACK-0001-CASE-LIFETIME
+    title: Logical state survives view epochs and ends at terminal disposal
+    covers:
+      - M-FEEDBACK-0001-D
+      - M-FEEDBACK-0001-E
+      - M-FEEDBACK-0001-F
+    expectation: feedback-lifetime-conforms
+  - id: T-FEEDBACK-0001-CASE-SINK
+    title: Host sink queues latest result and flushes without structural work
+    covers:
+      - HC-FEEDBACK-STYLE-SINK-0001-A
+      - HC-FEEDBACK-STYLE-SINK-0001-B
+    expectation: feedback-sink-conforms
+  - id: T-FEEDBACK-0001-CASE-ADAPTER
+    title: Actual Web adapters patch, suppress and clear style without Proto render
+    covers:
+      - HC-FEEDBACK-STYLE-SINK-0001-C
+      - A-REACT-18-19-0001-FEEDBACK
+      - A-VUE-3-0001-FEEDBACK
+      - A-VUE-2-0001-FEEDBACK
+      - A-WEB-COMPONENT-0001-FEEDBACK
+    expectation: feedback-adapter-conforms
+implementations:
+  - id: feedback-module-boundary
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-SURFACE
+      - T-FEEDBACK-0001-CASE-MERGE
+      - T-FEEDBACK-0001-CASE-LIFETIME
+  - id: feedback-runtime-setup
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/feedback.style.setup-only.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-SURFACE
+  - id: feedback-runtime-patch
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/feedback.style.runtime-patch.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-MERGE
+  - id: feedback-runtime-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-LIFETIME
+  - id: feedback-effects-sink
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/feedback-effects-conformance.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-SINK
+  - id: feedback-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/feedback.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-ADAPTER
+    notes:
+      - Uses real Adapter owners and the shared feedback-conformance fixture. DOM evidence verifies token projection, user classes and Proto render count; it does not establish browser CSS appearance, geometry, non-Web hosts or every host-view lifecycle transition.
+  - id: feedback-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/feedback.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-ADAPTER
+    notes:
+      - Uses real Adapter owners and the shared feedback-conformance fixture. DOM evidence verifies token projection, user classes and Proto render count; it does not establish browser CSS appearance, geometry, non-Web hosts or every host-view lifecycle transition.
+  - id: feedback-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/feedback.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-ADAPTER
+    notes:
+      - Uses real Adapter owners and the shared feedback-conformance fixture. DOM evidence verifies token projection, user classes and Proto render count; it does not establish browser CSS appearance, geometry, non-Web hosts or every host-view lifecycle transition.
+  - id: feedback-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/feedback.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-0001-CASE-ADAPTER
+    notes:
+      - Uses real Adapter owners and the shared feedback-conformance fixture. DOM evidence verifies token projection, user classes and Proto render count; it does not establish browser CSS appearance, geometry, non-Web hosts or every host-view lifecycle transition.
+verifies:
+  modules:
+    - id: M-FEEDBACK-0001
+      anchors:
+        - M-FEEDBACK-0001-A
+        - M-FEEDBACK-0001-B
+        - M-FEEDBACK-0001-C
+        - M-FEEDBACK-0001-D
+        - M-FEEDBACK-0001-E
+        - M-FEEDBACK-0001-F
+  hostCaps:
+    - id: HC-FEEDBACK-STYLE-SINK-0001
+      anchors:
+        - HC-FEEDBACK-STYLE-SINK-0001-A
+        - HC-FEEDBACK-STYLE-SINK-0001-B
+        - HC-FEEDBACK-STYLE-SINK-0001-C
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-FEEDBACK
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-FEEDBACK
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-FEEDBACK
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-FEEDBACK
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped direct boundary, actual Runtime and four real Adapter evidence with explicit limits.
+tags:
+  - feedback
+  - style
+  - adapter
+  - lifecycle

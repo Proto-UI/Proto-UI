@@ -6,7 +6,7 @@ import type {
   State,
 } from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
-import { asScrollSurface } from '@proto.ui/hooks';
+import { asAccessible, asScrollSurface } from '@proto.ui/hooks';
 import { A11Y_PROJECT_CAP, type A11yPort } from '@proto.ui/module-a11y';
 import { SCROLL_SURFACE_HOST_CAP, type ScrollSurfaceHostAttachment } from '@proto.ui/module-scroll';
 import { createRuntimeSession, executeWithHost, type RuntimeHost } from '../../src';
@@ -60,8 +60,8 @@ describe('runtime contract: a11y (v0)', () => {
     const P = definePrototype({
       name: `x-a11y-heading-level-${level}`,
       setup(def) {
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
       },
     });
 
@@ -76,8 +76,8 @@ describe('runtime contract: a11y (v0)', () => {
       const P = definePrototype({
         name: 'x-a11y-invalid-static-heading-level',
         setup(def) {
-          def.a11y.role('heading');
-          def.a11y.level(level);
+          asAccessible().role('heading');
+          asAccessible().level(level);
         },
       });
 
@@ -95,8 +95,8 @@ describe('runtime contract: a11y (v0)', () => {
         name: 'x-a11y-invalid-initial-state-heading-level',
         setup(def) {
           const level = def.state.numberDiscrete('heading.level', initialLevel);
-          def.a11y.role('heading');
-          def.a11y.level(level);
+          asAccessible().role('heading');
+          asAccessible().level(level);
         },
       });
 
@@ -115,8 +115,8 @@ describe('runtime contract: a11y (v0)', () => {
         name: 'x-a11y-state-heading-level-update',
         setup(def) {
           level = def.state.numberDiscrete('heading.level', 2);
-          def.a11y.role('heading');
-          def.a11y.level(level);
+          asAccessible().role('heading');
+          asAccessible().level(level);
         },
       });
 
@@ -134,12 +134,12 @@ describe('runtime contract: a11y (v0)', () => {
     }
   );
 
-  it('A11Y-0064: captures a11y.tree declarations in an asHook result', () => {
+  it('A11Y-0064: captures the accessible child handle in an authored asHook result', () => {
     let result: any;
     const asSemanticTree = defineAsHook({
       name: 'as-semantic-tree',
       setup(def) {
-        def.a11y.tree({ mergeChildren: true });
+        asAccessible().tree({ mergeChildren: true });
       },
     });
     const P = definePrototype({
@@ -149,10 +149,12 @@ describe('runtime contract: a11y (v0)', () => {
       },
     });
 
-    executeWithHost(P as any, createHost().host as any);
-    expect(result.context).toEqual({
-      op: 'a11y.tree',
-      patch: { mergeChildren: true },
+    const runtime = executeWithHost(P as any, createHost().host as any);
+    const child = result.getAsHook('asAccessible');
+    expect(child.handle).toBe(child.result);
+    expect(typeof child.handle.tree).toBe('function');
+    expect(runtime.caps.getPort<A11yPort>('a11y')?.getSnapshot().tree).toEqual({
+      mergeChildren: true,
     });
   });
 
@@ -172,8 +174,8 @@ describe('runtime contract: a11y (v0)', () => {
       setup(def) {
         const level = asHeadingLevel().getState?.('level');
         if (!level) throw new Error('missing borrowed heading level');
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
       },
     });
 
@@ -187,8 +189,8 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-observed-heading-level',
       setup(def) {
         const scroll = asScrollSurface();
-        def.a11y.role('heading');
-        def.a11y.level(scroll.horizontal.visibleRatio);
+        asAccessible().role('heading');
+        asAccessible().level(scroll.horizontal.visibleRatio);
       },
     });
 
@@ -205,8 +207,8 @@ describe('runtime contract: a11y (v0)', () => {
       setup(def) {
         const scroll = asScrollSurface();
         getVisibleRatio = () => scroll.getSnapshot().horizontal.visibleRatio;
-        def.a11y.role('heading');
-        def.a11y.level(scroll.horizontal.visibleRatio);
+        asAccessible().role('heading');
+        asAccessible().level(scroll.horizontal.visibleRatio);
       },
     });
 
@@ -261,8 +263,8 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-detached-heading-level',
       setup(def) {
         level = def.state.numberDiscrete('heading.level', 2);
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
       },
     });
 
@@ -296,9 +298,9 @@ describe('runtime contract: a11y (v0)', () => {
       setup(def) {
         first = def.state.numberDiscrete('first.heading.level', 2);
         second = def.state.numberDiscrete('second.heading.level', 2);
-        def.a11y.role('heading');
-        def.a11y.level(first);
-        def.a11y.level(second);
+        asAccessible().role('heading');
+        asAccessible().level(first);
+        asAccessible().level(second);
       },
     });
 
@@ -339,8 +341,8 @@ describe('runtime contract: a11y (v0)', () => {
             level.set(0, 'reason: reentrant invalid level');
           }
         });
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
       },
     });
 
@@ -357,8 +359,8 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-final-invalid-heading-level',
       setup(def) {
         const level = def.state.numberDiscrete('heading.level', 2);
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
         level.setDefault(0);
       },
     });
@@ -392,8 +394,8 @@ describe('runtime contract: a11y (v0)', () => {
         level.watch((_run, event) => {
           if (event.type === 'next') seen.push(event.next);
         });
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
       },
     });
 
@@ -410,8 +412,8 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-capless-heading-level',
       setup(def) {
         level = def.state.numberDiscrete('heading.level', 2);
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
       },
     });
 
@@ -428,8 +430,8 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-capless-invalid-heading-level-before-watch',
       setup(def) {
         const level = def.state.numberDiscrete('heading.level', 2);
-        def.a11y.role('heading');
-        def.a11y.level(level);
+        asAccessible().role('heading');
+        asAccessible().level(level);
         level.setDefault(0);
       },
     });
@@ -448,7 +450,7 @@ describe('runtime contract: a11y (v0)', () => {
       name: 'x-a11y-dynamic-role',
       setup(def) {
         role = def.state.string('role', 'dialog', { options: ['dialog', 'alertdialog'] });
-        def.a11y.role(role as any);
+        asAccessible().role(role as any);
         return (r) => r.el('div', 'dialog');
       },
     });
@@ -463,7 +465,7 @@ describe('runtime contract: a11y (v0)', () => {
     expect(ctx.snapshots.at(-1)?.role).toBe('alertdialog');
   });
 
-  it('A11Y-0100: def.a11y records semantic object IR and projects state snapshots', () => {
+  it('A11Y-0100: asAccessible() records semantic object IR and projects state snapshots', () => {
     // T-A11Y-0001-CASE-IR
     const P: Prototype<{ disabled?: boolean }> = definePrototype({
       name: 'x-a11y-ir-contract',
@@ -476,15 +478,15 @@ describe('runtime contract: a11y (v0)', () => {
         const disabled = def.state.bool('button.disabled', false);
         const id = def.state.string('button.id', 'button-a');
         const controls = def.state.string('button.controls', 'panel-a');
-        def.a11y.id(id);
-        def.a11y.role('button');
-        def.a11y.name('Save');
-        def.a11y.description('Stores changes');
-        def.a11y.state('disabled', disabled);
-        def.a11y.action('activate', { event: 'click' });
-        def.a11y.relation('controls', { target: controls });
-        def.a11y.relation('describedBy', { target: 'help-a', mode: 'append' });
-        def.a11y.tree({ mergeChildren: true });
+        asAccessible().id(id);
+        asAccessible().role('button');
+        asAccessible().name('Save');
+        asAccessible().description('Stores changes');
+        asAccessible().state('disabled', disabled);
+        asAccessible().action('activate', { event: 'click' });
+        asAccessible().relation('controls', { target: controls });
+        asAccessible().relation('describedBy', { target: 'help-a', mode: 'append' });
+        asAccessible().tree({ mergeChildren: true });
 
         def.lifecycle.onCreated((run) => {
           disabled.set(run.props.get().disabled);

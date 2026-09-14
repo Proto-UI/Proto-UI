@@ -5,7 +5,7 @@
 >
 > This human-readable projection describes the Proto UI **Interaction Boundary** contract. The corresponding `spec/contracts` and `spec/tests` entities are the machine-readable truth source.
 >
-> This document is **normative**.
+> Normative source: `C-BOUNDARY-0001`; Module/host ownership and evidence are cataloged by `M-BOUNDARY-0001`, `HC-BOUNDARY-CLASSIFICATION-0001` and `T-BOUNDARY-0002`. This document is a transitional projection.
 
 ---
 

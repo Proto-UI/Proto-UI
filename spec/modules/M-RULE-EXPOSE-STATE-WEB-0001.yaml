@@ -1,0 +1,83 @@
+id: M-RULE-EXPOSE-STATE-WEB-0001
+type: module
+title: Rule Expose State Web lowers bounded Rule predicates into selector artifacts
+status: draft
+since: 0.3.0-alpha.0
+summary: A downstream Rule extension combines RuleIR, Expose State Web bindings and Feedback to lower representable style predicates; current Adapter support is partial because full optimization equivalence is not yet established.
+statement:
+  en: This Module has an empty author facade and no direct DOM sink. It selects RuleIR candidates, emits internal Feedback selector tokens and removes only accepted candidate IDs from subsequent default evaluation. Rule semantics and serialization remain upstream authority. The present catalog distinguishes tested translation from the remaining obligation to prove equivalent execution.
+  zh-CN: 本 Module 保持空 author facade，无直接 DOM sink。它选择 RuleIR candidate、输出 Feedback 内部 selector token，并从后续默认评估移除已接纳 candidate ID。Rule 语义与序列化仍以上游为权威。本次编目区分已测试翻译与尚待证明的等价执行义务。
+criteria:
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-A
+    text:
+      en: Candidate collection accepts only State/meta dependencies, equality or all-conjunction conditions, and intents consisting entirely of feedback.style.use with tw handles. Prop/Context dependencies, unsupported expressions/intents and empty candidates retain default evaluation.
+      zh-CN: candidate 仅接受 State/meta dependency、eq 或 all 联合条件，以及全部由 tw handle 的 feedback.style.use 构成的 intent。Prop/Context dependency、不支持的表达式/intent 和空 candidate 保留默认评估。
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-B
+    text:
+      en: For stable per-view bindings, exposed non-range State may lower to data selectors. Literal types must preserve strict equality; the bounded encoder accepts data attribute names containing only letters/digits/hyphens and nonempty stringified values containing only letters/digits/underscore/dot/hyphen. Unrepresentable values/names, null and range State retain default evaluation.
+      zh-CN: 对每个 view 内稳定的 binding，已公开的非 range State 可降为 data selector。literal 类型必须保持严格相等语义；有界编码仅接受字母/数字/连字符组成的 data attribute 名称，以及字母/数字/下划线/点/连字符组成的非空字符串化值。不可表达的 value/name、null 与 range State 保留默认评估。
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-C
+    text:
+      en: Boolean false may refine a conjunction through not-[data-*], but an all-negative candidate remains in the default path. colorScheme equal to dark lowers to dark; pure-dark lowering requires a Web binding or a supplied native-variant policy. Variants are deduplicated and ordered through the shared runtime/CLI canonicalizer.
+      zh-CN: bool false 可通过 not-[data-*] 细化联合条件，但全负 candidate 保留默认路径。colorScheme 等于 dark 降为 dark；pure-dark 需要 Web binding 或已提供的 native-variant policy。variant 通过 Runtime/CLI 共享 canonicalizer 去重排序。
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-D
+    text:
+      en: Supported legacy interaction semantics with literal true may use native variants under host policy; a denial falls back to the data selector when representable. This maps existing vocabulary and does not admit new interaction State authority or broaden Rule Meta APIs.
+      zh-CN: 受支持的 legacy interaction semantic 与 true 比较可按 host policy 使用 native variant；policy 拒绝时在可表达范围内回退 data selector。这仅映射既有词汇，不接纳新 interaction State authority，也不扩大 Rule Meta API。
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-E
+    text:
+      en: Successful lowering contributes each accepted candidate once per view and filters only its ID from subsequent evaluation. Unmounting/detach revoke owned Feedback contributions and ID filtering; remount rebuilds against current bindings while preserving RuleIR and State. Terminal disposal clears caches and cannot recreate contributions.
+      zh-CN: 成功 lowering 对每个 view 的已接纳 candidate 只贡献一次，并仅从后续评估过滤其 ID。unmounting/detach 撤销自有 Feedback contribution 与 ID 过滤；remount 按当前 binding 重建，保留 RuleIR 与 State。terminal dispose 清空缓存且不能重建 contribution。
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-F
+    text:
+      en: Equivalent execution remains mandatory under C-RULE-EXTENSION-0001-C and C-RULE-RUNTIME-0001-E. The current partial-support evidence proves selected selector/default transitions and resource lifetime, not arbitrary stylesheet availability, cascade equivalence, host pseudo-class truth or live mapping/policy replanning.
+      zh-CN: C-RULE-EXTENSION-0001-C 与 C-RULE-RUNTIME-0001-E 的等价执行要求仍适用。当前 partial-support evidence 证明所选 selector/default transition 与资源寿命，不证明任意 stylesheet 可用性、cascade 等价、host pseudo-class truth 或 live mapping/policy 重规划。
+dependsOn:
+  modules:
+    - id: M-RULE-0001
+      since: 0.3.0-alpha.0
+    - id: M-EXPOSE-STATE-WEB-0001
+      since: 0.3.0-alpha.0
+    - id: M-FEEDBACK-0001
+      since: 0.3.0-alpha.0
+  contracts:
+    - C-RULE-EXTENSION-0001
+    - C-RULE-RUNTIME-0001
+    - C-FEEDBACK-STYLE-0004
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+verifies:
+  tests:
+    - T-RULE-EXPOSE-STATE-WEB-0001
+openQuestions:
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-Q-REPLANNING
+    question:
+      en: How should a live Web mapping/policy change revoke optimization and atomically resume the default executor?
+      zh-CN: 同一 view 内 Web mapping/policy 变化时，如何撤销优化并原子地恢复默认执行器？
+    context:
+      en: Current candidate IDs are fixed after acceptance until view teardown. A changed or missing upstream binding can leave an old selector and filtering active. RulePort has no explicit reapply/invalidation operation. This known gap is not covered by the view-boundary repair and prevents full support claims.
+      zh-CN: 当前 candidate 接纳后 ID 固定至 view teardown。上游 binding 改变或丢失可能留下旧 selector 与过滤状态。RulePort 没有显式 reapply/invalidation 操作。此已知缺口未被 view-boundary 修复覆盖，阻止全面支持声明。
+  - id: M-RULE-EXPOSE-STATE-WEB-0001-Q-EQUIVALENCE
+    question:
+      en: What evidence or eligibility restriction establishes full CSS/default-Plan equivalence?
+      zh-CN: 何种证据或 eligibility 限制可以建立完整 CSS/default Plan 等价性？
+    context:
+      en: Legacy native pseudo-classes need not match independently writable State, mixed optimized/default rules may interact through CSS specificity and order, and emitting a token does not prove the host stylesheet contains it. Shared CLI canonicalization and bounded DOM journeys are partial evidence. Arbitrary encoding, custom mapping CSS generation and Rule Meta evolution remain separate work.
+      zh-CN: legacy native pseudo-class 未必等于可独立写入的 State；混合 optimized/default rule 可能受 CSS specificity/order 影响；输出 token 不证明宿主 stylesheet 包含它。共享 CLI canonicalization 与有界 DOM journey 只是部分证据。任意编码、自定义 mapping 的 CSS 生成及 Rule Meta 演进留待单独工作。
+sources:
+  - path: packages/modules/rule-expose-state-web/src/create.ts
+  - path: packages/modules/rule-expose-state-web/src/caps.ts
+  - path: scripts/styles/lowered-variant-order.canonical.ts
+  - path: packages/cli/src/services/prototype-style-tokens.ts
+  - path: packages/cli/src/services/proto-style-css.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged partial Web Rule lowering with safe fallback and view-owned contribution cleanup.
+tags:
+  - rule
+  - expose
+  - state
+  - web
+  - optimization
+  - partial

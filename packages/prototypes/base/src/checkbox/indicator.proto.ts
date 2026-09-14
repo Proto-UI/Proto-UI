@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { CHECKBOX_CONTEXT, CHECKBOX_FAMILY, type CheckboxContextValue } from './shared';
 import type {
@@ -60,7 +61,7 @@ function setupCheckboxIndicator(
  * - P-BASE-CHECKBOX-INDICATOR-NO-INDETERMINATE-OWNER: indeterminate is only derived from Checkbox context.
  * - P-BASE-CHECKBOX-INDICATOR-NO-EVENT-TARGET: absence of def.event usage is the implementation.
  * - P-BASE-CHECKBOX-INDICATOR-NO-FOCUS-TARGET: absence of asFocusable/focusSelf is the implementation.
- * - P-BASE-CHECKBOX-INDICATOR-PRESENTATIONAL-A11Y: absence of def.a11y control syntax is the implementation.
+ * - P-BASE-CHECKBOX-INDICATOR-PRESENTATIONAL-A11Y: absence of asAccessible() control syntax is the implementation.
  * - P-BASE-CHECKBOX-INDICATOR-NO-FORM-INTEGRATION: no form-associated props are accepted.
  * - P-BASE-CHECKBOX-INDICATOR-NO-VISUAL-VARIANT-CORE: visual parameters are owned by downstream styled prototypes.
  */

@@ -1,0 +1,142 @@
+id: T-RULE-0002
+type: test
+title: Rule core Module lifecycle and four Adapter conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Executable evidence for the bounded Props/State-to-style slice; Context, state intent and downstream extension equivalence remain outside this claim.
+cases:
+  - id: T-RULE-0002-CASE-SETUP
+    title: Setup cancellation rejects runtime removal
+    covers:
+      - M-RULE-0001-A
+    expectation: rule-setup-conforms
+  - id: T-RULE-0002-CASE-IR
+    title: Serializable supported IR and external State handles
+    covers:
+      - M-RULE-0001-B
+    expectation: rule-ir-conforms
+  - id: T-RULE-0002-CASE-WHEN
+    title: Pure logical evaluation
+    covers:
+      - M-RULE-0001-C
+    expectation: rule-when-conforms
+  - id: T-RULE-0002-CASE-STYLE
+    title: Inactive style declarations are validated
+    covers:
+      - M-RULE-0001-C
+    expectation: rule-style-conforms
+  - id: T-RULE-0002-CASE-EXTENSION
+    title: Ordered extension hooks and short-circuit
+    covers:
+      - M-RULE-0001-F
+    expectation: rule-extension-conforms
+  - id: T-RULE-0002-CASE-LIFETIME
+    title: State watches and instance resources follow mixed ownership
+    covers:
+      - M-RULE-0001-D
+      - M-RULE-0001-E
+    expectation: rule-lifetime-conforms
+  - id: T-RULE-0002-CASE-ADAPTER
+    title: Resolved Props and State drive isolated style output
+    covers:
+      - A-REACT-18-19-0001-RULE
+      - A-VUE-3-0001-RULE
+      - A-VUE-2-0001-RULE
+      - A-WEB-COMPONENT-0001-RULE
+    expectation: rule-adapter-conforms
+implementations:
+  - id: rule-module-core
+    kind: module-test
+    status: passing
+    path: packages/modules/rule/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0002-CASE-IR
+      - T-RULE-0002-CASE-WHEN
+      - T-RULE-0002-CASE-STYLE
+      - T-RULE-0002-CASE-EXTENSION
+      - T-RULE-0002-CASE-LIFETIME
+  - id: rule-runtime-setup
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.setup-cancellation.contract.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0002-CASE-SETUP
+  - id: rule-runtime-epochs
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.lifecycle-catalog.contract.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0002-CASE-LIFETIME
+  - id: rule-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0002-CASE-ADAPTER
+    notes:
+      - Real framework owner and shared fixture verify token output, user classes, State updates without structural rendering, and fresh-owner isolation. Props use each host update protocol; Web Component explicitly calls update after setElementProps. This does not verify CSS appearance or every framework detach/remount path.
+  - id: rule-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0002-CASE-ADAPTER
+    notes:
+      - Real framework owner and shared fixture verify token output, user classes, State updates without structural rendering, and fresh-owner isolation. Props use each host update protocol; Web Component explicitly calls update after setElementProps. This does not verify CSS appearance or every framework detach/remount path.
+  - id: rule-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0002-CASE-ADAPTER
+    notes:
+      - Real framework owner and shared fixture verify token output, user classes, State updates without structural rendering, and fresh-owner isolation. Props use each host update protocol; Web Component explicitly calls update after setElementProps. This does not verify CSS appearance or every framework detach/remount path.
+  - id: rule-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/rule.integration.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0002-CASE-ADAPTER
+    notes:
+      - Real framework owner and shared fixture verify token output, user classes, State updates without structural rendering, and fresh-owner isolation. Props use each host update protocol; Web Component explicitly calls update after setElementProps. This does not verify CSS appearance or every framework detach/remount path.
+verifies:
+  modules:
+    - id: M-RULE-0001
+      anchors:
+        - M-RULE-0001-A
+        - M-RULE-0001-B
+        - M-RULE-0001-C
+        - M-RULE-0001-D
+        - M-RULE-0001-E
+        - M-RULE-0001-F
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-RULE
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-RULE
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-RULE
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-RULE
+sources:
+  - path: packages/adapters/base/test/fixtures/rule-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped direct Module, Runtime epoch and real four-Adapter Rule evidence.
+tags:
+  - rule
+  - test
+  - adapter
+  - lifecycle

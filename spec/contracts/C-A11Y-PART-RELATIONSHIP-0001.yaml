@@ -3,6 +3,9 @@ type: contract
 title: Same-domain anatomy-part relationship projection
 status: draft
 since: 0.3.0-alpha.0
+lifecycleRationale:
+  zh-CN: 以 draft 编目已接受的 relationship 方向；T-A11Y-PART-RELATIONSHIP-0001 的六项 required implementation 仍为 planned，structured carrier、宿主生命周期与 Tabs migration 尚未形成可验收的执行证据。
+  en: Cataloged as draft for the accepted relationship direction; all six required implementations in T-A11Y-PART-RELATIONSHIP-0001 remain planned, so the structured carrier, host lifecycle, and Tabs migration lack acceptance evidence.
 summary: Governs how compound prototypes declare structured same-domain part-to-part accessibility relationships and how adapters project them to host IDREF attributes without guessing, breaking L1 detach, leaking resources, overwriting host-authored identity, or leaking host identity into portable state.
 statement:
   zh-CN: >-
@@ -58,6 +61,18 @@ criteria:
     text:
       zh-CN: '当 adapter 在同一 view epoch 内替换 source 或 target 的 physical accessibility binding 时，必须在同一 host replacement transaction 内撤销旧 view 的 lease ownership 与 observer、绑定新 view、重新校验 target reservation 并使所有 dependent source 重新解析；有效关系必须在新 binding 对 accessibility surface 可见前完成投射，否则 fail closed。'
       en: 'When an adapter replaces a source or target physical accessibility binding within the same view epoch, it must revoke the old view lease ownership and observers, bind the new view, revalidate the target reservation, and re-resolve every dependent source within the same host replacement transaction; a valid relationship must be projected before the new binding becomes visible to the accessibility surface, otherwise it fails closed.'
+openQuestions:
+  - id: C-A11Y-PART-RELATIONSHIP-0001-Q-IMPLEMENTATION
+    question:
+      zh-CN: 何时能为已接受的 structured relationship、宿主生命周期与 Tabs migration 补齐 required executable evidence？
+      en: When will the accepted structured relationship, host lifecycle, and Tabs migration have the required executable evidence?
+    context:
+      zh-CN: '#553 合入的是 draft contract 与 planned test mappings；#549 的实现仍需完成。现有测试路径存在不等于已经覆盖这些 cases。'
+      en: '#553 integrated the draft contract and planned test mappings; the implementation tracked by #549 remains incomplete. Existing test paths do not prove coverage of these cases.'
+    blocks:
+      - activation:C-A11Y-PART-RELATIONSHIP-0001
+      - activation:T-A11Y-PART-RELATIONSHIP-0001
+      - implementation:T-A11Y-PART-RELATIONSHIP-0001#runtime-a11y-part-relationship-contract
 sources:
   - path: internal/records/2026-08-26-same-domain-anatomy-relationship-design.md
     label: Same-domain anatomy-part relationship design record
@@ -84,6 +99,9 @@ verifies:
   tests:
     - T-A11Y-PART-RELATIONSHIP-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Recorded the remain-draft lifecycle rationale and explicit activation blockers for the still-planned relationship implementation evidence.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Promoted the settled same-domain relationship semantics into draft contract authority with symmetric source/target pre-commit binding, detach-before-removal ordering, complete terminal cleanup, atomic domain/key re-indexing, non-destructive live host-id reconciliation, same-epoch target replacement, and mapped executable evidence.

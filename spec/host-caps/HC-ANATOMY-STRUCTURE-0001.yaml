@@ -1,0 +1,39 @@
+id: HC-ANATOMY-STRUCTURE-0001
+type: host-cap
+title: Host supplies logical Anatomy participant facts
+status: draft
+since: 0.3.0-alpha.0
+summary: Opaque participant identity, logical ancestry and prototype facts allow Anatomy to derive family domains independently from physical DOM containment.
+statement:
+  en: The Adapter supplies facts; Anatomy owns claim and domain interpretation. Prototype metadata is private diagnostic input, not an author-facing instance reference.
+  zh-CN: Adapter 提供事实；Anatomy 拥有 claim 与 domain 解释。prototype metadata 是内部诊断输入，不是作者可见 instance reference。
+criteria:
+  - id: HC-ANATOMY-STRUCTURE-0001-A
+    text:
+      en: Provide distinct stable participant identities and logical parent links before claims and queries need them. Nested same-family roots remain independent domains even though their physical trees may be nested.
+      zh-CN: 在 claim/query 需要之前提供独立稳定 participant identity 与逻辑父链。嵌套同 family root 保持独立 domain，即使物理树嵌套。
+  - id: HC-ANATOMY-STRUCTURE-0001-B
+    text:
+      en: Provide the participant prototype facts needed for asHook diagnostics. Identity, ancestry and prototype getters stay inside module/Adapter wiring and are never included in public PartView.
+      zh-CN: 提供 asHook diagnostics 所需 participant prototype 事实。identity、ancestry 和 prototype getter 留在 Module/Adapter 接线内，不包含在公开 PartView 中。
+relates:
+  contracts:
+    - C-ANATOMY-0002
+    - C-ANATOMY-0004
+    - C-ANATOMY-0005
+    - C-ANATOMY-0007
+    - C-ANATOMY-0008
+verifies:
+  tests:
+    - T-ANATOMY-0004
+sources:
+  - path: packages/modules/anatomy/src/caps.ts
+  - path: packages/adapters/base/src/platform/instance-tree.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Grouped existing logical participant cap responsibilities without changing token APIs.
+tags:
+  - anatomy
+  - host-capability
+  - domain

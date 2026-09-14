@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asDialogClose } from '@proto.ui/prototypes-base/dialog';
 import type { ShadcnDialogCloseExposes, ShadcnDialogCloseProps } from './types';
@@ -5,11 +6,12 @@ import type { ShadcnDialogCloseExposes, ShadcnDialogCloseProps } from './types';
 const dialogCloseIcon = definePrototype<ShadcnDialogCloseProps, ShadcnDialogCloseExposes>({
   name: 'shadcn-dialog-close-icon',
   setup(def) {
+    const accessible = asAccessible();
     const state = asDialogClose().stateHandles;
     if (!state) throw new Error('[shadcn-dialog-close-icon] command states are required.');
     const { disabled, hovered, focusVisible } = state;
 
-    def.a11y.name('Close');
+    accessible.name('Close');
     def.feedback.style.use(
       tw(
         'absolute right-4 top-4 inline-flex items-center justify-center rounded-sm opacity-70 transition-opacity outline-none ring-offset-0'

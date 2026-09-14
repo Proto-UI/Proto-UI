@@ -88,7 +88,7 @@ function recordServerOutput(chunk: Buffer): void {
   serverOutput = `${serverOutput}${chunk.toString()}`.slice(-20_000);
 }
 
-async function spawnServer(readyRoute: string): Promise<string> {
+async function spawnServer(readyRoutes: readonly string[]): Promise<string> {
   const port = await availablePort();
   const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
   devServer = spawn(
@@ -119,14 +119,16 @@ async function spawnServer(readyRoute: string): Promise<string> {
   devServer.stderr?.on('data', recordServerOutput);
 
   const url = `http://127.0.0.1:${port}`;
-  await waitForServer(`${url}${readyRoute}`);
+  for (const readyRoute of readyRoutes) await waitForServer(`${url}${readyRoute}`);
   return url;
 }
 
-export async function startServer(readyRoute: string): Promise<string> {
+export async function startServer(readyRouteOrRoutes: string | readonly string[]): Promise<string> {
+  const readyRoutes =
+    typeof readyRouteOrRoutes === 'string' ? [readyRouteOrRoutes] : readyRouteOrRoutes;
   const externalBaseUrl = process.env.PROTO_UI_BROWSER_BASE_URL?.replace(/\/$/, '');
   if (externalBaseUrl) {
-    await waitForServer(`${externalBaseUrl}${readyRoute}`);
+    for (const readyRoute of readyRoutes) await waitForServer(`${externalBaseUrl}${readyRoute}`);
     return externalBaseUrl;
   }
 
@@ -136,7 +138,7 @@ export async function startServer(readyRoute: string): Promise<string> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      return await spawnServer(readyRoute);
+      return await spawnServer(readyRoutes);
     } catch (error) {
       lastError = error;
       await stopServer();

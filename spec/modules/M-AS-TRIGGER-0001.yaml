@@ -1,0 +1,42 @@
+id: M-AS-TRIGGER-0001
+type: module
+title: Trigger declares continuous groups through a privileged setup hook
+status: draft
+since: 0.3.0-alpha.0
+summary: Trigger declares continuous groups through a privileged setup hook.
+criteria:
+  - id: M-AS-TRIGGER-0001-A
+    text:
+      en: "The instance-owned as-trigger Module depends on Event. The privileged setup-only asTrigger hook declares membership and canonical trace identity; it returns no author handle and introduces no independent subscription channel."
+      zh-CN: "instance-owned as-trigger Module 依赖 Event。特权 setup-only asTrigger hook 声明 membership 与 canonical trace identity；不返回作者 handle，也不引入独立订阅通路。"
+  - id: M-AS-TRIGGER-0001-B
+    text:
+      en: "The Module follows host-proven direct parent/prototype relations through trigger ancestors, stopping at missing or non-trigger ancestry. All continuous members retain behavior and share one semantic route; host-local registrations remain on their own roots."
+      zh-CN: "Module 沿宿主证明的直接 parent/prototype 关系追溯 Trigger 祖先，在缺失或非 Trigger 处停止。连续成员保留 behavior 并共享 semantic route；host-local registration 保留在各自 root。"
+  - id: M-AS-TRIGGER-0001-C
+    text:
+      en: "Opaque logical identity is separate from the host semantic target. The host owns group roles and late/repeatable target binding; Event owns registrations and their cleanup. Focus, A11y, Boundary and Overlay policies remain with their respective domains."
+      zh-CN: "opaque logical identity 与宿主 semantic target 分离。宿主拥有 group roles 与延迟/重复 target 绑定；Event 拥有 registration 及清理。Focus、A11y、Boundary、Overlay policy 由各自 domain 拥有。"
+  - id: M-AS-TRIGGER-0001-D
+    text:
+      en: "A group is a single continuous chain. A host must diagnose and reject a prospective branch before replacing accepted group roles or routes; registration order cannot select among sibling surfaces."
+      zh-CN: "group 必须是一条连续链。宿主须在替换已接纳 group roles 或 routes 前诊断并拒绝分叉；不得按注册顺序从并列 surface 中择一。"
+satisfies:
+  contracts: [C-AS-TRIGGER-0001]
+dependsOn:
+  modules: [M-EVENT-0001]
+  contracts: [C-AS-HOOK-PRIVILEGED-0001, C-LIFECYCLE-0006, C-LIFECYCLE-0007]
+requires:
+  hostCaps: [HC-TRIGGER-GROUP-0001]
+relates:
+  decisions: [D-TRIGGER-GROUP-SURFACE-0001, D-AS-CHILD-OMISSION-0001]
+verifies:
+  tests: [T-AS-TRIGGER-0001, T-AS-TRIGGER-0002]
+sources:
+  - path: packages/modules/as-trigger/src/create.ts
+  - path: packages/modules/as-trigger/src/impl.ts
+  - path: packages/hooks/src/as-trigger.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded continuous Trigger group slice and executable evidence.

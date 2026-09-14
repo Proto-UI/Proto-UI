@@ -38,6 +38,10 @@ criteria:
     text:
       zh-CN: instance unmount、terminal disposal 或 registration removal 必须释放对应宿主 listener、observer、delegate 与其它 binding resource。
       en: Instance unmount, terminal disposal, or registration removal must release the corresponding host listener, observer, delegate, and other binding resources.
+  - id: HC-EVENT-BINDING-0001-G
+    text:
+      en: The standard Web binding supplies the shared owning-document input scope independently of per-instance router proxies. Wrappers for the same native input retain common source identity for privileged opaque sample tokens; neither identity nor raw host references enter portable author payloads. This does not change ordinary Event broadcast.
+      zh-CN: standard Web binding 提供共享 owner document input scope，独立于 per-instance router proxy。同一 native input 的 wrapper 保留共同 source identity，供 privileged opaque sample token 使用；identity 与 raw host reference 均不进入 portable author payload，也不改变普通 Event broadcast。
 relates:
   contracts:
     - C-EVENT-0002
@@ -55,6 +59,8 @@ relates:
 verifies:
   tests:
     - T-EVENT-0003
+    - id: T-OVERLAY-CATALOG-0001
+      since: 0.3.0-alpha.0
 sources:
   - path: internal/records/2026-08-14-event-module-host-cap-adapter-audit.zh-CN.md
   - path: internal/contracts/event/event.v0.md
@@ -85,4 +91,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged host-neutral scoped Event binding, translation, conditional availability, rebinding, and cleanup while recording the current EventTarget realization as portability debt.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added privileged shared input identity wiring for Overlay arbitration.
 tags: [host-capability, event, binding, adapter, lifecycle]

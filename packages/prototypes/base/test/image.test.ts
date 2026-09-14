@@ -103,6 +103,11 @@ describe('prototypes/base: image', () => {
     expect(namedImageRoot).toBe(imageRoot);
     expect(imageRoot.modules).toEqual(asImageRoot.modules);
     expect(imageRoot.modules).toHaveLength(1);
+    expect(Object.isFrozen(imageRoot.modules)).toBe(true);
+    expect(Object.isFrozen(asImageRoot.modules)).toBe(true);
+    expect(imageRoot.modules?.[0]).toBe(asImageRoot.modules[0]);
+    expect(Object.isFrozen(asImageRoot.modules[0])).toBe(true);
+    expect(Object.isFrozen(asImageRoot.modules[0].config)).toBe(true);
     expect(imageRoot.modules?.[0]?.config).toMatchObject({
       source: '',
       alternativeText: '',

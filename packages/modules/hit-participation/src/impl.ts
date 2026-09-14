@@ -107,48 +107,65 @@ export class HitParticipationModuleImpl extends ModuleBase {
   configure(patch: HitParticipationConfigPatch): void {
     this.ensureSetup('hitParticipation.configure');
 
-    this.patchMode(patch.mode);
+    const previous = this.config;
+    const warningCount = this.warnings.length;
+    try {
+      this.patchMode(patch.mode);
 
-    if (typeof patch.debugLabel !== 'undefined') {
-      pushOverrideWarning(this.warnings, 'debugLabel', this.config.debugLabel, patch.debugLabel);
-      this.config = Object.freeze({
-        ...this.config,
-        debugLabel: patch.debugLabel,
-      });
+      if (typeof patch.debugLabel !== 'undefined') {
+        pushOverrideWarning(this.warnings, 'debugLabel', this.config.debugLabel, patch.debugLabel);
+        this.config = Object.freeze({
+          ...this.config,
+          debugLabel: patch.debugLabel,
+        });
+      }
+
+      if (typeof patch.meta !== 'undefined') {
+        this.config = Object.freeze({
+          ...this.config,
+          meta: mergeMeta(this.config.meta, patch.meta),
+        });
+      }
+
+      this.syncHostBridge();
+    } catch (error) {
+      this.config = previous;
+      this.warnings.length = warningCount;
+      throw error;
     }
-
-    if (typeof patch.meta !== 'undefined') {
-      this.config = Object.freeze({
-        ...this.config,
-        meta: mergeMeta(this.config.meta, patch.meta),
-      });
-    }
-
-    this.syncHostBridge();
   }
 
   registerRegion(target: unknown, options: HitParticipationRegionOptions = {}): () => void {
     const id = this.nextRegionId++;
-    this.regions = this.regions.concat([
-      Object.freeze({
-        id,
-        target,
-        role: options.role,
-        mode: options.mode ?? this.config.mode,
-        meta: options.meta,
-      }),
-    ]);
-    this.syncHostBridge();
-
+    this.replaceRegions(
+      this.regions.concat([
+        Object.freeze({
+          id,
+          target,
+          role: options.role,
+          mode: options.mode ?? this.config.mode,
+          meta: options.meta,
+        }),
+      ])
+    );
     return () => {
-      this.regions = this.regions.filter((region) => region.id !== id);
-      this.syncHostBridge();
+      this.replaceRegions(this.regions.filter((region) => region.id !== id));
     };
   }
 
   unregisterRegion(target: unknown): void {
-    this.regions = this.regions.filter((region) => region.target !== target);
-    this.syncHostBridge();
+    this.replaceRegions(this.regions.filter((region) => region.target !== target));
+  }
+
+  private replaceRegions(next: HitParticipationRegionRecord[]): void {
+    const previous = this.regions;
+    this.regions = next;
+    try {
+      this.syncHostBridge();
+    } catch (error) {
+      this.regions = previous;
+      throw error;
+    }
   }
 
   getConfig(): HitParticipationConfig {

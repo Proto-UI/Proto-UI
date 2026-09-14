@@ -1,8 +1,10 @@
 # expose-state.web-extension.v0.md（中文底本）
 
+> 编目权威：`M-EXPOSE-STATE-WEB-0001`、`HC-EXPOSE-STATE-WEB-TARGETS-0001`、`T-EXPOSE-STATE-WEB-0001`。本文作为可读投影；生命周期与未决问题以实体为准。
+
 > 状态：Draft – v0（实现对齐）
 >
-> 本文定义 **expose-state 的 Web 平台扩展能力**：将外部 State 句柄投影为 DOM `data-*` 属性与 CSS 变量，以支持 headless 组件场景下的样式驱动与选择器消费。
+> 本文说明 **expose-state 的 Web 平台扩展能力**：将外部 State 句柄投影为 DOM `data-*` 属性与 CSS 变量，以支持 headless 组件场景下的样式驱动与选择器消费。
 >
 > **定位声明（v0）**：这是一个 **可选的 Web 专用扩展**。其存在不改变 expose-state 的核心语义，仅提供额外的表现层映射。
 
@@ -42,7 +44,7 @@ Web 扩展模块依赖以下能力（由 adapter 提供）：
 - `EXPOSE_STATE_WEB_MAP_CAP`：NameMap（语义名 → attr/css var）
 - `EXPOSE_STATE_WEB_MODE_CAP`（可选）：行为开关/策略覆盖
 
-> caps **可选**：缺失时扩展能力不生效，不应导致错误。
+> 缺少 host 时扩展不生效；name map 缺失时使用默认映射，mode 缺失时使用默认策略。可选 mirror target 仅提供 presentation selector context，不复制 owner identity。
 
 ---
 
@@ -57,7 +59,8 @@ Web 扩展模块依赖以下能力（由 adapter 提供）：
   - 去除两侧空白
   - `.` 与空格统一转 `-`
   - 其他非字母数字字符转 `-`
-  - 全部小写
+  - camelCase 分词，合并连字符并去除首尾连字符，全部小写
+  - official alias 优先使用共享名称表
 
 ### 3.2 类型驱动映射
 
@@ -92,7 +95,8 @@ adapter 可以通过 `EXPOSE_STATE_WEB_MODE_CAP` 覆盖默认行为，例如：
 ## 5. 生命周期与同步
 
 - 映射值必须与 expose-state 同步
-- 实例 dispose 后应清理订阅与映射
+- host 丢失、unmounting、detach 和 terminal dispose 撤销订阅、内部映射与后续写入；remount 重放当前值
+- target、mapping、mode 变化后旧 DOM artifact 的删除/恢复仍为未决问题
 
 ---
 

@@ -13,6 +13,7 @@ import { rehypeScrollableTables } from './src/utils/rehype-scrollable-tables.js'
 import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
 import { whitepaperRedirectFragments } from './src/utils/whitepaper-redirect-fragments.mjs';
 import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
+import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
 
 const PROTO_UI_PREFIX = '@proto.ui/';
 const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url));
@@ -114,15 +115,20 @@ export default defineConfig({
         }),
       ],
       expressiveCode: {
+        themes: Object.values(codeThemes),
+        useStarlightUiThemeColors: false,
+        useDarkModeMediaQuery: false,
+        minSyntaxHighlightingColorContrast: 0,
         styleOverrides: {
-          borderRadius: 'calc(0.75rem - 1px)',
-          borderColor: 'var(--color-border)',
-          codeFontSize: '0.8125rem',
-          codeLineHeight: '1.5rem',
-          codeBackground: 'var(--color-muted)',
+          borderRadius: 'calc(var(--docs-code-radius) - 1px)',
+          borderColor: 'var(--docs-code-border)',
+          codeFontFamily: 'var(--docs-code-font)',
+          codeFontSize: 'var(--docs-code-size)',
+          codeLineHeight: 'var(--docs-code-line-height)',
+          codeBackground: 'var(--docs-code-background)',
           frames: {
-            editorBackground: 'var(--color-muted)',
-            terminalBackground: 'var(--color-muted)',
+            editorBackground: 'var(--docs-code-background)',
+            terminalBackground: 'var(--docs-code-background)',
           },
         },
       },
@@ -141,7 +147,7 @@ export default defineConfig({
       head: [
         {
           tag: 'style',
-          content: '@layer base, starlight, components, utilities;',
+          content: '@layer base, starlight, components, utilities, proto-ui, code-surfaces;',
         },
         // 双 theme-color
         {
@@ -377,6 +383,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/textarea',
                 },
                 {
+                  label: 'Image',
+                  translations: { en: 'Image', 'zh-CN': 'Image' },
+                  slug: 'ui-libraries/base/image',
+                },
+                {
                   label: 'Separator',
                   translations: { en: 'Separator', 'zh-CN': 'Separator' },
                   slug: 'ui-libraries/base/separator',
@@ -584,7 +595,6 @@ export default defineConfig({
                   label: 'Tooltip',
                   translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
                   slug: 'ui-libraries/brutalist/components/tooltip',
-                  badge: inProgressBadge,
                 },
               ],
             },

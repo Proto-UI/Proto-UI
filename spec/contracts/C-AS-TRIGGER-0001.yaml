@@ -58,6 +58,10 @@ criteria:
     text:
       zh-CN: '`asTrigger()` 的稳定依赖只应包括 privileged trace、group membership、semantic event route 与 host-cap 提供的 logical tree/group projection；Focus、A11y、hit admission、overlay 与 boundary policy 必须由消费 group 角色的对应 domain 实现。'
       en: '`asTrigger()` stable dependencies should include only privileged trace, group membership, the semantic event route, and host-cap-provided logical-tree and group projection; Focus, A11y, hit admission, overlay, and boundary policy must be implemented by the corresponding domains that consume group roles.'
+  - id: C-AS-TRIGGER-0001-L
+    text:
+      zh-CN: Trigger group 必须是一条直接连续链；同一 Trigger 下出现并列 Trigger 分支时，宿主必须诊断并拒绝形成分叉的声明或父关系变更，并保留原有已接纳链、surface 与 route，不得按注册顺序选择赢家。非 Trigger parent 下的独立 Trigger group 不构成此分叉。
+      en: A Trigger group must be one directly continuous chain. Sibling Trigger branches under a Trigger require a diagnostic and rejection of the declaration or parent change that forms the branch, preserving the previously accepted chain, surface and route rather than selecting a registration-order winner. Independent Trigger groups under a non-Trigger parent are not such a branch.
 sources:
   - path: packages/hooks/src/as-trigger.ts
     sections: [asTrigger]
@@ -85,6 +89,9 @@ dependsOn:
 relates:
   decisions: [D-AS-HOOK-CALLER-NAME-0001, { id: D-TRIGGER-GROUP-SURFACE-0001, since: 0.2.0-rc.3 }]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Required a single continuous chain and diagnosed rejection of sibling Trigger branches.
   - version: 0.1.0
     change: introduced
     summary: Captured asTrigger as a minimal privileged asHook contract for nested trigger event route merging.
