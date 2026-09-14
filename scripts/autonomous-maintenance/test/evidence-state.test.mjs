@@ -229,7 +229,10 @@ function validForwardReview() {
 }
 
 test('accepts independently attributed schema-v2 review evidence', () => {
-  assert.deepEqual(validateForwardReviewIndependence(validForwardReview()), []);
+  assert.deepEqual(
+    validateForwardReviewIndependence(validForwardReview(), validForwardFinding()),
+    []
+  );
 });
 
 test('accepts an explicit pending review with no fabricated reviewer history', () => {
@@ -240,7 +243,7 @@ test('accepts an explicit pending review with no fabricated reviewer history', (
   review.independentReview.reviewedContentDigest = null;
   review.independentReview.decision = null;
   review.independentReview.history = [];
-  assert.deepEqual(validateForwardReviewIndependence(review), []);
+  assert.deepEqual(validateForwardReviewIndependence(review, validForwardFinding()), []);
 });
 
 test('rejects a revision-required packet whose independent review is still pending', () => {
@@ -253,7 +256,7 @@ test('rejects a revision-required packet whose independent review is still pendi
   review.independentReview.history = [];
 
   assert.ok(
-    validateForwardReviewIndependence(review).includes(
+    validateForwardReviewIndependence(review, validForwardFinding()).includes(
       'revision-required must reflect an incomplete, misleading, or blocked review'
     )
   );
@@ -265,7 +268,7 @@ test('rejects self-review and a current status that contradicts history', () => 
   review.independentReview.reviewer = structuredClone(review.remediationAuthor);
   review.independentReview.history[0].reviewer = structuredClone(review.remediationAuthor);
 
-  const errors = validateForwardReviewIndependence(review);
+  const errors = validateForwardReviewIndependence(review, validForwardFinding());
   assert.ok(
     errors.includes('independentReview.reviewer.actorId must differ from remediationAuthor.actorId')
   );
@@ -279,7 +282,78 @@ test('rejects a resolved review without reviewer history evidence', () => {
   const review = validForwardReview();
   delete review.independentReview.reviewer;
   delete review.independentReview.history;
-  const errors = validateForwardReviewIndependence(review);
+  const errors = validateForwardReviewIndependence(review, validForwardFinding());
   assert.ok(errors.includes('independentReview.reviewer is required'));
   assert.ok(errors.includes('independentReview.history is required'));
+});
+
+const rolePairs = [
+  ['observer', 'verifier'],
+  ['observer', 'remediationAuthor'],
+  ['verifier', 'remediationAuthor'],
+  ['observer', 'reviewer'],
+  ['verifier', 'reviewer'],
+  ['remediationAuthor', 'reviewer'],
+];
+for (const [earlier, later] of rolePairs) {
+  for (const field of ['actorId', 'taskId']) {
+    test(`rejects ${field} reuse between ${earlier} and ${later}`, () => {
+      const finding = validForwardFinding();
+      const review = validForwardReview();
+      const roles = {
+        observer: finding.observer,
+        verifier: finding.verifier,
+        remediationAuthor: review.remediationAuthor,
+        reviewer: review.independentReview.reviewer,
+      };
+      roles[later][field] = roles[earlier][field];
+      review.independentReview.history[0].reviewer = { ...roles.reviewer };
+      assert.ok(
+        validateForwardReviewIndependence(review, finding).some((message) =>
+          message.includes(`must differ from ${earlier}.${field}`)
+        )
+      );
+    });
+  }
+}
+
+test('pending review still requires the remediator to be independent from discovery', () => {
+  const finding = validForwardFinding();
+  const review = validForwardReview();
+  review.reviewStatus = 'ready-for-independent-review';
+  review.independentReview.status = 'pending';
+  review.independentReview.reviewer = null;
+  review.independentReview.reviewedContentDigest = null;
+  review.independentReview.history = [];
+  review.remediationAuthor.taskId = finding.observer.taskId;
+  assert.ok(
+    validateForwardReviewIndependence(review, finding).includes(
+      'remediationAuthor.taskId must differ from observer.taskId'
+    )
+  );
+});
+
+test('historical reviewers remain independent from discovery without requiring a new reviewer per round', () => {
+  const finding = validForwardFinding();
+  const review = validForwardReview();
+  const first = review.independentReview.history[0];
+  review.independentReview.history.push({ ...structuredClone(first), round: 2 });
+  assert.deepEqual(validateForwardReviewIndependence(review, finding), []);
+  first.reviewer.actorId = finding.verifier.actorId;
+  first.reviewer.taskId = finding.observer.taskId;
+  const errors = validateForwardReviewIndependence(review, finding);
+  assert.ok(
+    errors.includes(
+      'independentReview.history[0].reviewer.actorId must differ from verifier.actorId'
+    )
+  );
+  assert.ok(
+    errors.includes('independentReview.history[0].reviewer.taskId must differ from observer.taskId')
+  );
+});
+
+test('review independence fails closed without valid discovery identities', () => {
+  const errors = validateForwardReviewIndependence(validForwardReview(), {});
+  assert.ok(errors.includes('observer must be an object'));
+  assert.ok(errors.includes('verifier must be an object'));
 });

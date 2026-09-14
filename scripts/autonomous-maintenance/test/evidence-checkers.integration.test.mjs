@@ -67,7 +67,7 @@ test('review packet canonicalization preserves historical review digests', () =>
   assert.equal(canonicalizeReviewPacket(packet), canonicalizeReviewPacket(closureMutation));
 });
 
-function createFixture(t, { remediation = 'modify' } = {}) {
+function createFixture(t, { remediation = 'modify', reuseRole = null } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-maintenance-check-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   execFileSync('git', ['init', '--quiet'], { cwd: root });
@@ -253,6 +253,13 @@ function createFixture(t, { remediation = 'modify' } = {}) {
       ],
     },
   };
+  if (reuseRole) {
+    const target =
+      reuseRole.role === 'remediationAuthor'
+        ? review.remediationAuthor
+        : review.independentReview.reviewer;
+    target[reuseRole.field] = finding[reuseRole.source][reuseRole.field];
+  }
   const sections = [
     'Decision boundary',
     'Behavioral delta',
@@ -547,6 +554,30 @@ test('review checker accepts independent v2 identities and rejects self-review',
   assert.match(negative.stderr, /must differ from remediationAuthor\.actorId/);
   assert.match(negative.stderr, /must differ from remediationAuthor\.taskId/);
 });
+
+for (const role of ['remediationAuthor', 'reviewer']) {
+  for (const source of ['observer', 'verifier']) {
+    for (const field of ['actorId', 'taskId']) {
+      test(`both checkers reject ${role} reusing ${source}.${field}`, (t) => {
+        // Phase-0 independent remediation path: discovery contexts remain read-only.
+        // Set identities before hashing so only role independence invalidates this packet.
+        const fixture = createFixture(t, { reuseRole: { role, source, field } });
+        const results = [reviewChecker, runChecker].map((checker) => ({
+          checker,
+          result: spawnSync(process.execPath, [checker], {
+            cwd: fixture.root,
+            encoding: 'utf8',
+          }),
+        }));
+        for (const { checker, result } of results) {
+          assert.equal(result.status, 1, `${path.basename(checker)} accepted cross-role reuse`);
+          assert.match(result.stderr, new RegExp(`must differ from ${source}\\.${field}`));
+          assert.doesNotMatch(result.stderr, /reviewed-content digest does not match/);
+        }
+      });
+    }
+  }
+}
 
 test('review checker recomputes completed packet digests before integration eligibility', (t) => {
   const fixture = createFixture(t);

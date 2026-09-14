@@ -554,13 +554,19 @@ function sameIdentity(left, right) {
   return left?.actorId === right?.actorId && left?.taskId === right?.taskId;
 }
 
-function validateIndependentIdentity(errors, remediator, reviewer, label) {
+function validateIndependentIdentity(
+  errors,
+  remediator,
+  reviewer,
+  label,
+  ownerLabel = 'remediationAuthor'
+) {
   if (!recordValue(remediator) || !recordValue(reviewer)) return;
   if (remediator.actorId === reviewer.actorId) {
-    errors.push(`${label}.actorId must differ from remediationAuthor.actorId`);
+    errors.push(`${label}.actorId must differ from ${ownerLabel}.actorId`);
   }
   if (remediator.taskId === reviewer.taskId) {
-    errors.push(`${label}.taskId must differ from remediationAuthor.taskId`);
+    errors.push(`${label}.taskId must differ from ${ownerLabel}.taskId`);
   }
 }
 
@@ -579,9 +585,22 @@ export function validateObserverVerifierIndependence(observer, verifier) {
   return errors;
 }
 
-export function validateForwardReviewIndependence(metadata) {
+export function validateForwardReviewIndependence(metadata, finding) {
   const errors = [];
-  const authorValid = validateIdentity(errors, metadata.remediationAuthor, 'remediationAuthor');
+  // Discovery roles stay read-only even before an independent review is assigned.
+  // Keep the linked finding as the identity source; do not duplicate it in the packet.
+  const earlierRoles = [];
+  for (const [label, identity] of [
+    ['observer', finding?.observer],
+    ['verifier', finding?.verifier],
+    ['remediationAuthor', metadata.remediationAuthor],
+  ]) {
+    if (!validateIdentity(errors, identity, label)) continue;
+    for (const [earlierLabel, earlierIdentity] of earlierRoles) {
+      validateIndependentIdentity(errors, earlierIdentity, identity, label, earlierLabel);
+    }
+    earlierRoles.push([label, identity]);
+  }
   const review = metadata.independentReview;
   if (!recordValue(review)) return [...errors, 'independentReview must be an object'];
 
@@ -636,13 +655,16 @@ export function validateForwardReviewIndependence(metadata) {
   ) {
     errors.push('resolved post-implementation independentReview requires reviewedContentDigest');
   }
-  if (authorValid && reviewerValid) {
-    validateIndependentIdentity(
-      errors,
-      metadata.remediationAuthor,
-      review.reviewer,
-      'independentReview.reviewer'
-    );
+  if (reviewerValid) {
+    for (const [label, identity] of earlierRoles) {
+      validateIndependentIdentity(
+        errors,
+        identity,
+        review.reviewer,
+        'independentReview.reviewer',
+        label
+      );
+    }
   }
 
   let previousRound = 0;
@@ -676,13 +698,16 @@ export function validateForwardReviewIndependence(metadata) {
       errors.push(`${label}.reviewedContentDigest must be sha256:<64 lowercase hex>`);
     }
     const historyReviewerValid = validateIdentity(errors, entry.reviewer, `${label}.reviewer`);
-    if (authorValid && historyReviewerValid) {
-      validateIndependentIdentity(
-        errors,
-        metadata.remediationAuthor,
-        entry.reviewer,
-        `${label}.reviewer`
-      );
+    if (historyReviewerValid) {
+      for (const [earlierLabel, identity] of earlierRoles) {
+        validateIndependentIdentity(
+          errors,
+          identity,
+          entry.reviewer,
+          `${label}.reviewer`,
+          earlierLabel
+        );
+      }
     }
   }
 

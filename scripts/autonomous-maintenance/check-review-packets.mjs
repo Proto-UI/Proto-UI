@@ -610,6 +610,7 @@ function validateReview(file) {
   }
 
   const findingFile = resolveRepositoryPath(file, metadata.findingPath, errors, 'findingPath');
+  let findingMetadata = null;
   if (findingFile) {
     const finding = fs.readFileSync(findingFile, 'utf8');
     if (!finding.includes(`# ${metadata.findingId}:`)) {
@@ -617,6 +618,22 @@ function validateReview(file) {
     }
     if (!finding.includes(`baselineCommit: ${metadata.baselineCommit}`)) {
       fail(errors, file, 'finding baseline does not match the review packet baseline');
+    }
+    if (packetSchema === 'forward') {
+      const match = finding.match(/(?:<!-- prettier-ignore -->\s*)?```yaml\r?\n([\s\S]*?)\r?\n```/);
+      try {
+        findingMetadata = match ? YAML.parse(match[1]) : null;
+      } catch (error) {
+        fail(errors, file, `invalid finding YAML metadata: ${error.message}`);
+      }
+      if (findingMetadata?.schemaVersion !== 2) {
+        fail(errors, file, 'schemaVersion 2 review requires schemaVersion 2 finding metadata');
+      }
+      for (const field of ['findingId', 'runId', 'baselineCommit']) {
+        if (findingMetadata?.[field] !== metadata[field]) {
+          fail(errors, file, `finding ${field} does not match the review packet`);
+        }
+      }
     }
   }
 
@@ -708,7 +725,7 @@ function validateReview(file) {
     fail(errors, file, `invalid independentReview.status: ${metadata.independentReview?.status}`);
   }
   if (packetSchema === 'forward') {
-    for (const message of validateForwardReviewIndependence(metadata)) {
+    for (const message of validateForwardReviewIndependence(metadata, findingMetadata)) {
       fail(errors, file, message);
     }
   } else if (Array.isArray(metadata.independentReview?.history)) {

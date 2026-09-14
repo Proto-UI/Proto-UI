@@ -239,7 +239,29 @@ function validateExactIntegrationBinding(run, label, reviewFile, currentReview) 
       `${label}.integration.exactHeadSha must contain the completed independently reviewed packet for ${run.id}`
     );
   }
-  for (const message of validateForwardReviewIndependence(committedReview)) {
+  let committedFinding = null;
+  try {
+    const content = execFileSync('git', ['show', `${head}:${committedReview.findingPath}`], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    const match = content.match(/(?:<!-- prettier-ignore -->\s*)?```yaml\r?\n([\s\S]*?)\r?\n```/);
+    committedFinding = match ? YAML.parse(match[1]) : null;
+    if (committedFinding?.schemaVersion !== 2) {
+      fail(ledgerFile, `${label}.integration exact-head finding must use schemaVersion 2`);
+    }
+    for (const field of ['findingId', 'runId', 'baselineCommit']) {
+      if (committedFinding?.[field] !== committedReview[field]) {
+        fail(
+          ledgerFile,
+          `${label}.integration exact-head finding ${field} does not match its packet`
+        );
+      }
+    }
+  } catch (error) {
+    fail(ledgerFile, `${label}.integration could not read exact-head finding: ${error.message}`);
+  }
+  for (const message of validateForwardReviewIndependence(committedReview, committedFinding)) {
     fail(ledgerFile, `${label}.integration exact-head packet: ${message}`);
   }
 
@@ -732,6 +754,9 @@ function validateForwardFindingPacket(findingFile, findingPath, finding, run, la
 
   if (review.schemaVersion !== 2) {
     fail(findingFile, `${label}.remediationReview.packet must use schemaVersion 2`);
+  }
+  for (const message of validateForwardReviewIndependence(review, finding)) {
+    fail(findingFile, `${label}.remediationReview.packet: ${message}`);
   }
   if (review.findingId !== finding.findingId) {
     fail(findingFile, `${label}.remediationReview.packet findingId does not match`);
