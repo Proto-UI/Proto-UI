@@ -96,7 +96,7 @@ Names below illustrate a proposal; they are not an admitted API:
 
 `contentIdentity` is an opaque model-service equality token, not a monotonic engine version: within one composite model session, equal full document contents MUST yield the same token and unequal contents MUST yield different tokens. `savedContentIdentity` is the token of the current saved source. Mutation revision still increases on every edit/undo/replacement, so edit then undo to byte-for-byte saved text produces a newer mutation revision but restores `contentIdentity === savedContentIdentity` and dirty false. The engine/model service computes the token without copying full content through Proto UI.
 
-The first slice's selection summary is intentionally bounded to `{ count, primaryCollapsed }` plus the current monotonic mutation revision. No raw range, selected text, mutable selection, pixel rectangle, or ungoverned line/column encoding crosses. A later line/column or range API needs an explicit Unicode position encoding and revision semantics.
+The first slice's selection summary is intentionally bounded to `{ selectionRevision, mutationRevision, count, primaryCollapsed }`: `selectionRevision` orders selection changes, and `mutationRevision` binds the summary to the current document mutation. No raw range, selected text, mutable selection, pixel rectangle, or ungoverned line/column encoding crosses. A later line/column or range API needs an explicit Unicode position encoding and revision semantics.
 
 This resolves the seam with `D-TEXT-CONTROL-PROJECTION-0001-Q-SELECTION` without closing it: plain Text Control selection remains that decision's open question. Revision-bound document selection is a different future contract and must not be retrofitted into `TextControlHandle`. Neither surface gains `selectAll`, `setSelection`, or `replaceSelection` in this first slice.
 
@@ -141,13 +141,8 @@ type DocumentAttachmentFailure =
   | 'accessibility-unavailable'
   | 'read-only-unenforced';
 type DocumentCommandRejectReason = 'stale-policy' | 'stale-mutation' | 'policy-denied';
-type DocumentCommandRuntimeUnavailableReason =
-  | 'engine-unavailable'
-  | 'document-unavailable'
-  | 'service-unavailable';
-type DocumentCommandUnavailableReason =
-  | 'policy-not-applied'
-  | DocumentCommandRuntimeUnavailableReason;
+// An applied policy may fail attachment without establishing a model baseline.
+type DocumentCommandRuntimeUnavailableReason = DocumentAttachmentFailure;
 
 type DocumentInputAvailableSupport = Readonly<{
   availability: 'available';
@@ -195,13 +190,6 @@ type DocumentCompositionCancelResult =
       currentEpoch: number;
       reason: 'composition-cancellation-unavailable';
     }>;
-
-type DocumentModelCompositionState = Readonly<{
-  generation: number;
-  activeViewCount: number;
-  unprovableViewCount: number;
-  unsettledCancellationCount: number;
-}>;
 
 type DocumentSelectionSupport =
   | Readonly<{ availability: 'available'; summary: DocumentSelectionSummary; reason: null }>
@@ -509,7 +497,7 @@ type DocumentSurfaceHost = Readonly<{
 }>;
 ```
 
-1. attach composite models; versioned pending facts. Before policy use null/null command. After numeric-policy attachment failure with no model baseline, use number/null request and receive numeric-policy runtime unavailable without fabricating mutation revision or engine access;
+1. attach composite models; versioned pending facts. Before policy use null/null command. After numeric-policy attachment failure with no model baseline, use number/null request and receive numeric-policy runtime unavailable with the corresponding `DocumentAttachmentFailure`, including keyboard-route, accessibility, and read-only-enforcement failures, without fabricating mutation revision or engine access;
 2. view A composition active blocks sibling B command. Attach view C with composition reporting unavailable: aggregate unprovableViewCount increments; interactive mode is rejected/resolved read-only or unavailable, and commands/Save remain composition-active blocked until C is noninteractive and Host confirms cancellation/epoch settlement. No null composing value is treated inactive;
 3. noninteractive transitions close epoch before cancellation; Revert all views; Save waits aggregate active+unprovable+unsettled counts all zero;
 4. mode admission tests keyboard route/disabled A11y and exact behaviors;
@@ -525,8 +513,10 @@ If implemented as specified, this evidence plan would verify conservative unprov
 - **Model-wide composition:** aggregate active, **unprovable**, and unsettled counts by model/connection/epoch. Any nonzero blocks every command and Save as composition-active. Reporting-unavailable can never support interactive mode in first slice; resolve read-only/unavailable and confirm cancellation/epoch settlement. Null is never inactive. Dispose/stale clears matching epoch only. Revert closes/cancels all.
 - **Cancellation:** block input; close/increment epoch before Host cancel; reentrant/late reject; separate ack.
 - **Mode/Focus/A11y/keyboard:** interactive requires edit/origin/delivery + composition reporting available + route/Leave. Read-only Focus/A11y/selection-copy no mutation; reporting unavailable allowed only after no active candidate. Disabled Focus-ineligible/no interaction/readable A11y. Route/A11y failures representable.
+- **App acceptance authority:** an `accepted` acknowledgement requires the App's authorization and source-consistency checks on the exact retained transaction, its initiating origin, and `sourceRevision` to succeed. Host-stamped `committedPolicyRevision` is provenance, not an authorization grant. Failed checks use the existing `authorization-revoked` or `source-conflict` rejection. The App still decides its policy for edits committed before a permission change; this record does not choose that policy.
 - **Rejection and barriers:** full atomic rejection reconciliation. Save waits composition counts zero and exactly rebases source/saved. Revert cancels/drains, observe-only replaces, clears history, rotates delivery/resets all heads.
 - **View-state lifetime:** `retain-for-document` key is exact `{surfaceId, documentId, modelSessionId}` from immutable requirement. Document/session change never reads another key. `evict-surface` purges all keys for surface. Raw ranges/state never cross.
+- **View-lease cleanup ownership:** retire the connection and revoke this view's owned input/IME/keyboard listeners, transaction observers, command callbacks, target references, and Focus/A11y registrations; detach its editor-controller bridge from Scroll. Release only resources owned by this view. `M-SCROLL-0001-D` keeps release of the Scroll Host lease in the Scroll Module, and the App retains the shared model and dispatcher lease. Neither `dispose` cache option transfers those ownerships or closes the model session. This ownership rule does not settle the separate question of asynchronous composition cancellation during disposal.
 
 ## Accessibility boundary
 
