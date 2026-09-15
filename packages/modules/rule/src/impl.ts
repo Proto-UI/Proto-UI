@@ -14,7 +14,7 @@ import type { PropsFacade, PropsPort } from '@proto.ui/module-props';
 import type { StatePort } from '@proto.ui/module-state';
 import type { FeedbackPort, FeedbackRuntimeStyleDisposer } from '@proto.ui/module-feedback';
 import type { ContextFacade } from '@proto.ui/module-context';
-import type { MountPhase } from '@proto.ui/core';
+import type { InstancePhase, MountPhase } from '@proto.ui/core';
 
 type RuleExecutorDeps<Props extends PropsBaseType> = {
   propsFacade?: PropsFacade<Props>;
@@ -36,6 +36,8 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   private stateWatchOffs: Array<() => void> = [];
   private stateWatchesInstalled = false;
   private driverActive = false;
+  private instancePhase: InstancePhase = 'setup';
+  private mountPhase: MountPhase = 'detached';
   private unUseRuleStyle: FeedbackRuntimeStyleDisposer | null = null;
 
   define(spec: RuleSpec<Props>): RuleHandle {
@@ -118,6 +120,15 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
     this.deps = resolveDeps();
   }
 
+  requestStyleReevaluation(): void {
+    if (this.disposed || this.instancePhase !== 'alive' || this.mountPhase !== 'mounted') return;
+    this.evaluateAndApply(false);
+  }
+
+  onInstancePhase(phase: InstancePhase): void {
+    this.instancePhase = phase;
+  }
+
   onProtoPhase(phase: 'setup' | 'mounted' | 'updated' | 'unmounted'): void {
     if (this.disposed) return;
     if (phase === 'mounted') {
@@ -142,6 +153,7 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   }
 
   onMountPhase(phase: MountPhase): void {
+    this.mountPhase = phase;
     if (phase === 'detached') this.stopDriver();
   }
 
@@ -201,14 +213,14 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
     }
   }
 
-  private evaluateAndApply(): void {
+  private evaluateAndApply(syncProps = true): void {
     if (!this.driverActive) return;
 
     this.ensureDeps();
     const { propsFacade, propsPort, feedbackPort, contextFacade } = this.deps;
     if (!feedbackPort) return;
 
-    propsPort?.syncFromHost();
+    if (syncProps) propsPort?.syncFromHost();
     const props = (propsFacade?.get?.() ?? {}) as Props;
 
     const res = this.evaluate({

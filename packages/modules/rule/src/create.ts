@@ -55,8 +55,10 @@ export function createRuleModule<Props extends PropsBaseType>(
           resolveStateHandle: (id) => impl.resolveStateHandle(id),
           evaluate: (ctx) => impl.evaluate(ctx as any),
           registerExtension: (ext) => impl.registerExtension(ext as any),
+          requestStyleReevaluation: () => impl.requestStyleReevaluation(),
         },
         hooks: {
+          onInstancePhase: (p) => impl.onInstancePhase(p),
           onMountPhase: (p) => impl.onMountPhase(p),
           onProtoPhase: (p) => impl.onProtoPhase(p),
           dispose: () => impl.dispose(),

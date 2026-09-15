@@ -6,6 +6,12 @@ Translates Proto UI prototypes into React component functions for use with Proto
 
 Translates Proto UI prototypes into React component functions that run through the Proto UI adapter contracts.
 
+## Document theme
+
+The default `colorScheme` reader follows root `class` / `data-theme` markers and then the system preference. Mounted colorScheme Rule consumers update their existing style contribution when that effective value changes; view detach and terminal disposal release their subscription.
+
+The guarantee is limited to the default getter in same-document light DOM without intervening local theme markers. An explicit `getMeta` keeps sampled behavior; subtree, ShadowRoot and cross-document equivalence remain outside this slice. See [C-RULE-COLOR-SCHEME-0001](../../../spec/contracts/C-RULE-COLOR-SCHEME-0001.yaml) and [T-RULE-COLOR-SCHEME-0001](../../../spec/tests/T-RULE-COLOR-SCHEME-0001.yaml), both draft.
+
 ## Package Role
 
 Adapter package intended to be used together with Proto UI prototypes and the shared runtime stack.
