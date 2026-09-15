@@ -111,8 +111,9 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["missing", "reason", "nextAction"],
+            "required": ["kind", "missing", "reason", "nextAction"],
             "properties": {
+              "kind": { "enum": ["publication", "verification", "outside-scope"] },
               "missing": { "type": "string", "minLength": 1 },
               "reason": { "type": "string", "minLength": 1 },
               "nextAction": { "type": "string", "minLength": 1 }

@@ -25,6 +25,8 @@ Read `internal/agent-operations/visual-evidence.md`. Review packet v2 requires `
 
 Legacy v1 packets remain historical reconciliation inputs, but cannot be submitted as v2 merely by changing their version. Reinspect the target and supply the actual evidence disposition, validate, and refresh affected head/input bindings. Preserve unknown original prompts and historical baseline limitations.
 
+Classify each debt item with `kind`: `publication` means already-supported evidence lacks an upload or public presentation; `verification` means a missing observation/check weakens a conclusion inside the declared review scope; `outside-scope` names work genuinely excluded from that review. State the classification rationale in `reason`. Never classify unexecuted in-scope reproduction as publication-only, or shrink the required acceptance scope to hide a gap. Runtime blocks `REQUEST_CHANGES`, `APPROVE` and merge on unresolved verification debt, while an authorized `COMMENT` can disclose it. Publication-only debt remains a soft gate, not a required image count; all existing review limitations, human gates and CI requirements still apply.
+
 1. Findings bind to rendered output: geometry, paint, positioning, and screen evidence; state facts alone do not substantiate an observed behavior.
 2. Probe adjacent states pairwise and reason about their deltas; the review target is transitions, not snapshots.
 3. Re-assert every surface anchored to or composed with an affected surface before closing a finding.

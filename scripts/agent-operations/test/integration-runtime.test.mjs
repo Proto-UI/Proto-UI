@@ -121,6 +121,11 @@ function scheduledMerge(overrides = {}) {
 }
 
 test('standing authorization permits an exact-head merge after independent approval', () => {
+  const unverified = packet(reviewInput());
+  unverified.agentEvidence.debt[0].kind = 'verification';
+  const denied = scheduledMerge({ packet: unverified });
+  assert.equal(denied.allowed, false);
+  assert.match(denied.reason, /verification debt/);
   const result = scheduledMerge();
   assert.equal(result.allowed, true);
   assert.equal(result.headSha, sha('b'));

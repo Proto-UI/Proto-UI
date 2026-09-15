@@ -622,7 +622,11 @@ export function validateAgentEvidence(evidence, headSha) {
   );
   assert(Array.isArray(evidence.debt), 'agentEvidence.debt must be an array');
   for (const debt of evidence.debt) {
-    exactKeys(debt, ['missing', 'reason', 'nextAction'], 'agentEvidence.debt item');
+    exactKeys(debt, ['kind', 'missing', 'reason', 'nextAction'], 'agentEvidence.debt item');
+    assert(
+      ['publication', 'verification', 'outside-scope'].includes(debt.kind),
+      'agentEvidence.debt.kind is invalid'
+    );
     for (const field of ['missing', 'reason', 'nextAction'])
       assert(
         typeof debt[field] === 'string' && debt[field].trim().length > 0,
@@ -669,7 +673,7 @@ export function renderReviewBody(packet) {
       ? list(
           evidence.debt.map(
             (item) =>
-              `${item.missing}. Reason: ${item.reason} Next Agent action: ${item.nextAction}`
+              `[${item.kind}] ${item.missing}. Reason: ${item.reason} Next Agent action: ${item.nextAction}`
           )
         )
       : 'No known debt within that evidence scope.',
@@ -909,6 +913,12 @@ export function authorizeReviewSubmission({
       recommendedAction,
     };
   }
+  if (
+    ['REQUEST_CHANGES', 'APPROVE'].includes(recommendedAction) &&
+    packet.agentEvidence.debt.some((item) => item.kind === 'verification')
+  ) {
+    return { allowed: false, reason: 'review disposition has unresolved verification debt' };
+  }
   if (recommendedAction === 'REQUEST_CHANGES') {
     if (packet.findings.length === 0) {
       return { allowed: false, reason: 'REQUEST_CHANGES requires at least one finding' };
@@ -1050,6 +1060,9 @@ export function authorizePullRequestMerge({
   }
   if (packet.recommendedAction !== 'APPROVE') {
     return { allowed: false, reason: 'merge requires a clean APPROVE review packet' };
+  }
+  if (packet.agentEvidence.debt.some((item) => item.kind === 'verification')) {
+    return { allowed: false, reason: 'merge has unresolved verification debt' };
   }
   const resolvedByAuthorization = new Set([
     'commit-grouping',

@@ -15,6 +15,7 @@ export function agentEvidence(headSha) {
     disposition: 'partial',
     debt: [
       {
+        kind: 'publication',
         missing: 'Public visual capture',
         reason: 'Synthetic offline fixture',
         nextAction: 'Agent captures and verifies the real target when publishing.',

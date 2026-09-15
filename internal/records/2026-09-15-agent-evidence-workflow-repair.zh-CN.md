@@ -36,4 +36,8 @@ flowchart LR
 
 ## 验证边界
 
+独立复核后的第二轮区分上传欠账、范围内验证欠账与范围外工作。新增反例实测：首个候选把范围内未复现行为只写入 `agentEvidence.debt`，原授权判断仍返回 `allowed:true`。现在该类 `verification` debt 会阻止 REQUEST_CHANGES、APPROVE 和 merge；有明确授权的 COMMENT 仍可披露。只有上传/展示欠账仍是软门禁，不把图片数量变成人类合入门槛。缺口分类需要有事实依据，不能用 outside-scope 偷换必需审查范围。
+
+另一条独立场景复核发现“目标更新后停止写入”与“重复回执 no-op”措辞有交叉，已明确：停止的是新写入，只读核对同 marker/body/author 的既有评论仍可返回回执；新实质讨论仍需重新阅读。六个模拟场景和四个缺 artifact 负例已通过，非真实外部发布验收。
+
 聚焦 review/runtime 与 integration 测试覆盖缺字段拒绝、零 finding 的实际 renderer、错误 head、非公开/带凭据 URL、debt 一致性，以及既有授权、重复、CI 和 merge 防护。路由测试覆盖 claim 缺证据评估、publication 缺精确授权、终态回执缺账本更新等负例。无全量产品行为变更、组件复现或真实发布成功声明；完整验证结果与候选 commit 绑定在 PR 跟进中。

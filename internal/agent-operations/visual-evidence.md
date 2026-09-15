@@ -49,6 +49,8 @@ The registered `pui-evidence-publish` transition consumes one Issue report, a pr
 
 ## Historical backfill
 
+For review packets, distinguish publication-only debt from missing verification within the declared review scope and work truly outside that scope (`debt.kind` in packet v2). Missing uploads do not by themselves block acceptance; unverified in-scope conclusions cannot satisfy the existing complete-review conditions. Do not relabel verification debt as publication or omit it from review limitations to obtain an approval. An authorized factual comment may disclose either kind while investigation continues.
+
 Inventory open **and closed** Issues unless the user narrowed scope. Exhaust pagination and reconcile unique Issue URLs with the live total; distinguish Issues from PRs. A sample, recent page or open-only queue never satisfies an all-history request. Keep a resumable ledger: URL/state, request source, discussion-inspection status, existing evidence and quality, reproduction baseline/result, uploaded URLs, posted-comment receipt, missing work and next action. An image search in the body alone is triage, not proof that comments contain no evidence.
 
 Do not count inventory, a generic image, a rejected packet, or a known reproduction gap as completed backfill. Report inspected, reproduced, published/verified and still-pending scopes separately. Keep already adequate evidence with verified links; do not post duplicate comments merely to increment a counter. Fixed or closed Issues remain in scope, while their original closure and acceptance remain unchanged.

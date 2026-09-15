@@ -732,6 +732,26 @@ test('review submission preserves explicit authorization and activates the bound
   const scheduledApproval = authorizeReviewSubmission(scheduledBase);
   assert.equal(scheduledApproval.allowed, true);
   assert.equal(scheduledApproval.recommendedAction, 'APPROVE');
+  for (const boundary of [base, scheduledBase]) {
+    for (const reviewed of [base.packet, requestChangesPacket]) {
+      const unverified = structuredClone(reviewed);
+      unverified.agentEvidence.debt = [
+        {
+          kind: 'verification',
+          missing: 'Declared behavior not reproduced',
+          reason: 'Host unavailable',
+          nextAction: 'Run the required target before disposition',
+        },
+      ];
+      const denied = authorizeReviewSubmission({ ...boundary, packet: unverified });
+      assert.equal(denied.allowed, false);
+      assert.match(denied.reason, /verification debt/);
+    }
+  }
+  const honestComment = structuredClone(base.packet);
+  honestComment.recommendedAction = 'COMMENT';
+  honestComment.agentEvidence.debt[0].kind = 'verification';
+  assert.equal(authorizeReviewSubmission({ ...base, packet: honestComment }).allowed, true);
   const reviewEligibleC3 = assessment('C3', [
     'review-facts-and-ci',
     'review-docs-and-links',
