@@ -88,3 +88,11 @@ R1/R2 新测试修复前 3 失败；R3 两个 cleanup 分支修复前均失败�
 4. 高风险实现的独立检查关闭 SHADOW-R1/R2/R3；最后另外执行的 5 个 Chrome probes 验证非可聚焦 host 与 delegatesFocus 区别。Spec/docs 复核确认 draft/identity/criteria 未扩张；S3 diagnostic 的独立 bundle 检查有 304 inputs、0 package source inputs。
 
 未在本地重跑所有既有网站浏览器 suites，因此不声称完整 `pnpm test` 已通过；未复验全部 Safari/Firefox、真实系统 IME、发布 tarball 全消费矩阵或 CI。以上局限不从 S1–S5 人工验收或 Chrome 的通过结果中推断消失。CI、spec 独立审阅和合并决定仍属于 PR 后续门禁。
+
+## PR 收据与首轮 CI 跟进
+
+[PR #652](https://github.com/Proto-UI/Proto-UI/pull/652) 已由授权的 `codex/shadow-split-pr` 提交至 main，初始 head `e77036c5`。DCO、docs preview、public package build、release-stage、React consumer 与 CLI smoke 在该 head 上通过；这些不是后续 head 的 CI 结论。
+
+首轮 `type-check` 在干净检出出现两个 TS2307：S3/S4 fixture 引用的 ignored Shadow companion 尚未生成，而 `check:types` 先执行 workspace，再进入会生成产物的 docs check。本地先构建过，因而没有捕获此前置顺序问题。
+
+把集成工作树中对应的 JS 与声明文件临时移到可恢复备份后，原 workspace 检查重现同样两个 TS2307。随后仅在顶层 `check:types` 前显式调用既有 `apps-www generate:proto-ui-style`；生成器重建真实 companion 后，完整 workspace + 216 Astro 文件类型检查通过。没有手写替代 artifact、放宽类型或改变 Runtime/spec 语义。此修正以签署提交追加到同一 PR；新 head 的 CI 仍需平台复核。
