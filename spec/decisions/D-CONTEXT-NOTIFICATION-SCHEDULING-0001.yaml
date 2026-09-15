@@ -9,6 +9,9 @@ explains:
   contracts:
     - C-CONTEXT-0010
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: J1 orders same-provider-generation/key delivery by commit while preserving current reads, transition payloads, cleanup and host scheduling flexibility.
   - version: 0.1.0
     change: introduced
     summary: Recorded scheduling flexibility for context callbacks while preserving semantic delivery.

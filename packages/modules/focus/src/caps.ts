@@ -61,3 +61,15 @@ export const FOCUS_SET_ENTRY_FOCUSABLE_CAP = cap<FocusSetEntryFocusable>(
 );
 
 export const FOCUS_RUN_IN_CALLBACK_CAP = cap<FocusRunInCallback>('@proto.ui/focus/runInCallback');
+
+// Optional host observation only; direction/loop and scope policy stay in Focus.
+export const FOCUS_SAMPLE_SCOPE_TARGETS_CAP = cap<
+  (
+    container: HTMLElement,
+    direction?: 'next' | 'prev'
+  ) => {
+    targets: readonly HTMLElement[];
+    activeTarget: Element | null;
+    activeInsertionIndex?: number;
+  }
+>('@proto.ui/focus/sampleScopeTargets');

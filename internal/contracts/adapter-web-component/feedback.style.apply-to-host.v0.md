@@ -1,5 +1,7 @@
 # adapter-web-component / feedback.style.apply-to-host — Apply-to-Host Contract (v0)
 
+> Historical host-style projection, not a rule for every current presentation mode. In explicit Shadow split, visible Root paint targets the inner surface while governed placement and non-paint contributions target the boundary. Current authority is [C-HOST-SURFACE-PROJECTION-0001](../../../spec/contracts/C-HOST-SURFACE-PROJECTION-0001.yaml), [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001](../../../spec/decisions/D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001.yaml) and [D-WEB-COMPONENT-SHADOW-PROFILE-0001](../../../spec/decisions/D-WEB-COMPONENT-SHADOW-PROFILE-0001.yaml). In particular, unsupported split recipes fail closed under those draft criteria; the legacy graceful-degradation wording below does not authorize silent fallback.
+
 ## 1. Purpose
 
 This contract defines how a Web Component adapter consumes exported style intent from feedback and **applies it to the host element**.

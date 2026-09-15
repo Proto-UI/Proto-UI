@@ -10,6 +10,14 @@ const PROTO_INSTANCE_MARKS = [
 ] as const;
 const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
 const REJECTED_TRIGGER_ROUTE = Symbol('rejected-trigger-route');
+const GLOBAL_ROOT_EVENT_TYPES: Record<string, string> = {
+  pointerdown: 'pointer.down',
+  pointermove: 'pointer.move',
+  pointerup: 'pointer.up',
+  pointercancel: 'pointer.cancel',
+  click: 'press.commit',
+  contextmenu: 'context.menu',
+};
 
 type ElementWithSymbols = HTMLElement & Record<symbol, unknown>;
 
@@ -21,6 +29,7 @@ export type SemanticEventRouteResolution = {
 
 type Listener = {
   type: string;
+  target?: EventTarget;
   cb: any;
   options?: any;
   wrapped?: any;
@@ -31,8 +40,16 @@ const activeRouterByRoot = new WeakMap<HTMLElement, object>();
 
 export function createWebProtoEventRouter(opt: {
   rootEl: HTMLElement;
+  /** Physical native editor ingress for focus/blur only; no event redispatch. */
+  focusEventTarget?: EventTarget;
   instanceToken?: object;
-  resolveSemanticEventRoute?: (target: EventTarget | null) => SemanticEventRouteResolution | null;
+  /** Official tree's conservative reachability filter; never grants delivery. */
+  isSemanticEventRouteCandidate?: (root: HTMLElement, targets: EventTarget[]) => boolean;
+  resolveSemanticEventRoute?: (
+    target: EventTarget | null,
+    /** Query-local visited ancestors; never retained across routing decisions. */
+    visited?: Set<Node>
+  ) => SemanticEventRouteResolution | null;
   /** @deprecated Use resolveSemanticEventRoute so non-surface hits can be rejected. */
   resolveEventRouteOwner?: (target: EventTarget | null) => object | null;
   globalEl?: EventTarget; // window by default
@@ -101,9 +118,11 @@ export function createWebProtoEventRouter(opt: {
       : null;
   }
 
-  function getNearestProtoInstance(target: EventTarget | null): HTMLElement | null {
+  function getNearestProtoInstance(
+    target: EventTarget | null,
+    visited = new Set<Node>()
+  ): HTMLElement | null {
     let cur: Node | null = target instanceof Node ? target : null;
-    const visited = new Set<Node>();
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
@@ -126,9 +145,14 @@ export function createWebProtoEventRouter(opt: {
     return null;
   }
 
-  function getNearestTriggerOwner(target: EventTarget | null): object | HTMLElement | null {
+  function getNearestTriggerOwner(
+    target: EventTarget | null,
+    visited = new Set<Node>()
+  ): object | HTMLElement | null {
     let cur: Node | null = target instanceof Node ? target : null;
     while (cur) {
+      if (visited.has(cur)) return null;
+      visited.add(cur);
       if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
         cur = cur.host;
         continue;
@@ -145,20 +169,21 @@ export function createWebProtoEventRouter(opt: {
     options?: { includeActiveFallback?: boolean }
   ): object | HTMLElement | null | typeof REJECTED_TRIGGER_ROUTE {
     if (opt.resolveSemanticEventRoute) {
+      const visited = new Set<Node>();
       if (typeof native.composedPath === 'function') {
         for (const entry of native.composedPath()) {
-          const resolution = opt.resolveSemanticEventRoute(entry);
+          const resolution = opt.resolveSemanticEventRoute(entry, visited);
           if (!resolution) continue;
           return resolution.accepted ? resolution.surface : REJECTED_TRIGGER_ROUTE;
         }
       }
-      const resolution = opt.resolveSemanticEventRoute(native.target);
+      const resolution = opt.resolveSemanticEventRoute(native.target, visited);
       if (resolution) {
         return resolution.accepted ? resolution.surface : REJECTED_TRIGGER_ROUTE;
       }
       if (options?.includeActiveFallback !== false) {
         const active = typeof document !== 'undefined' ? document.activeElement : null;
-        const activeResolution = opt.resolveSemanticEventRoute(active);
+        const activeResolution = opt.resolveSemanticEventRoute(active, visited);
         if (activeResolution) {
           return activeResolution.accepted ? activeResolution.surface : REJECTED_TRIGGER_ROUTE;
         }
@@ -179,37 +204,50 @@ export function createWebProtoEventRouter(opt: {
         if (activeOwner) return activeOwner;
       }
     }
+    const visited = new Set<Node>();
     if (typeof native.composedPath === 'function') {
       for (const entry of native.composedPath()) {
-        const owner = getNearestTriggerOwner(entry);
+        const owner = getNearestTriggerOwner(entry, visited);
         if (owner) return owner;
       }
     }
-    const targetOwner = getNearestTriggerOwner(native.target);
+    const targetOwner = getNearestTriggerOwner(native.target, visited);
     if (targetOwner) return targetOwner;
     if (options?.includeActiveFallback === false) return null;
     const active = typeof document !== 'undefined' ? document.activeElement : null;
-    return getNearestTriggerOwner(active);
+    return getNearestTriggerOwner(active, visited);
   }
 
   function resolveOwningProtoInstance(
     native: Event,
     options?: { includeActiveFallback?: boolean }
   ) {
+    const visited = new Set<Node>();
     if (typeof native.composedPath === 'function') {
       for (const entry of native.composedPath()) {
-        const owner = getNearestProtoInstance(entry);
+        const owner = getNearestProtoInstance(entry, visited);
         if (owner) return owner;
       }
     }
-    const targetOwner = getNearestProtoInstance(native.target);
+    const targetOwner = getNearestProtoInstance(native.target, visited);
     if (targetOwner) return targetOwner;
     if (options?.includeActiveFallback === false) return null;
     const active = typeof document !== 'undefined' ? document.activeElement : null;
-    return getNearestProtoInstance(active);
+    return getNearestProtoInstance(active, visited);
   }
 
   function shouldRouteToCurrentRoot(native: Event, options?: { includeActiveFallback?: boolean }) {
+    if (opt.isSemanticEventRouteCandidate) {
+      const targets = typeof native.composedPath === 'function' ? native.composedPath() : [];
+      if (native.target) targets.push(native.target);
+      if (
+        options?.includeActiveFallback !== false &&
+        typeof document !== 'undefined' &&
+        document.activeElement
+      )
+        targets.push(document.activeElement);
+      if (!opt.isSemanticEventRouteCandidate(rootEl, targets)) return false;
+    }
     const triggerOwner = resolveOwningTrigger(native, options);
     if (triggerOwner === REJECTED_TRIGGER_ROUTE) return false;
     if (triggerOwner) return triggerOwner === (opt.instanceToken ?? rootEl);
@@ -223,6 +261,14 @@ export function createWebProtoEventRouter(opt: {
     native: Event,
     options?: { includeActiveFallback?: boolean }
   ) {
+    // Keep native listener order and Portal fallback semantics. An instance
+    // without a consumer has no root delivery to resolve. pointerdown also
+    // resets the keyboard follow-up click state for press consumers.
+    if (
+      !rootProxy.__hasProtoListeners(GLOBAL_ROOT_EVENT_TYPES[native.type]) &&
+      !(native.type === 'pointerdown' && rootProxy.__hasProtoListeners('press.commit'))
+    )
+      return false;
     if (isWithinRoot(native.target)) return false;
     return shouldRouteToCurrentRoot(native, options);
   }
@@ -347,13 +393,14 @@ export function createWebProtoEventRouter(opt: {
     listen(globalEl, 'keydown', (e: KeyboardEvent) => {
       if (!isEnabled()) return;
       emit(protoGlobalBus, 'key.down', e);
-      if (shouldRouteToCurrentRoot(e)) {
+      if (rootProxy.__hasProtoListeners('key.down') && shouldRouteToCurrentRoot(e)) {
         emit(protoRootBus, 'key.down', e);
       }
       if (!isCommitKey(e.key)) {
         suppressFollowupDirectClick = false;
         return;
       }
+      if (!rootProxy.__hasProtoListeners('press.commit')) return;
       if (shouldRouteToCurrentRoot(e)) {
         emitPressCommitOnce(e, true);
         return;
@@ -376,7 +423,7 @@ export function createWebProtoEventRouter(opt: {
     listen(globalEl, 'keyup', (e: KeyboardEvent) => {
       if (!isEnabled()) return;
       emit(protoGlobalBus, 'key.up', e);
-      if (shouldRouteToCurrentRoot(e)) {
+      if (rootProxy.__hasProtoListeners('key.up') && shouldRouteToCurrentRoot(e)) {
         emit(protoRootBus, 'key.up', e);
       }
     })
@@ -430,6 +477,7 @@ export function createWebProtoEventRouter(opt: {
     protoBus: protoRootBus,
     // hostTarget：先工作假设= rootEl；未来可以换成更准确的 host 专用 target
     hostTarget: rootEl,
+    focusEventTarget: opt.focusEventTarget,
     isEnabled,
     // 注：rootProxy 不做“解释”，只做“路由 + gating”
   });
@@ -509,10 +557,12 @@ function createProtoEventPayload(type: string, native: any) {
 function createProxyTarget(args: {
   protoBus: EventTarget;
   hostTarget: EventTarget;
+  focusEventTarget?: EventTarget;
   isEnabled: () => boolean;
 }) {
   // 记录已转发到 host 的监听器，便于 remove 时精确解绑
   const hostListeners: Listener[] = [];
+  const protoListeners: (Listener & { capture: boolean; cleanup: () => void })[] = [];
 
   // 为 host-bound 分支加 gating：eventGate disable 后，这些也不应该再进 proto 回调
   // 这点非常关键，否则“unmount 后还能触发回调”的竞态会回来。
@@ -535,22 +585,61 @@ function createProxyTarget(args: {
       const p = parseType(String(type));
 
       if (p.kind === 'proto') {
-        // proto semantic event: on proto bus
-        args.protoBus.addEventListener(p.inner, cb, options);
+        const signal = options?.signal;
+        if (!cb || signal?.aborted) return;
+        const capture = typeof options === 'boolean' ? options : Boolean(options?.capture);
+        const once = Boolean(options?.once);
+        if (protoListeners.some((r) => r.type === p.inner && r.cb === cb && r.capture === capture))
+          return;
+        const record = {
+          type: p.inner,
+          cb,
+          options,
+          capture,
+          wrapped: undefined as any,
+          cleanup: () => {},
+        };
+        record.cleanup = () => {
+          const index = protoListeners.indexOf(record);
+          if (index < 0) return;
+          protoListeners.splice(index, 1);
+          args.protoBus.removeEventListener(p.inner, record.wrapped, capture);
+          signal?.removeEventListener('abort', record.cleanup);
+        };
+        record.wrapped = (event: Event) => {
+          if (once) record.cleanup();
+          if (typeof cb === 'function') cb.call(args.protoBus, event);
+          else cb.handleEvent(event);
+        };
+        args.protoBus.addEventListener(p.inner, record.wrapped, {
+          capture,
+          once,
+          signal,
+          passive: Boolean(options?.passive),
+        });
+        protoListeners.push(record);
+        signal?.addEventListener('abort', record.cleanup, { once: true });
         return;
       }
 
       // host:*
       const wrapped = wrapWithGate(cb);
-      hostListeners.push({ type: p.inner, cb, options, wrapped } as any);
-      args.hostTarget.addEventListener(p.inner, wrapped as any, options);
+      const target =
+        p.inner === 'focus' || p.inner === 'blur'
+          ? (args.focusEventTarget ?? args.hostTarget)
+          : args.hostTarget;
+      hostListeners.push({ type: p.inner, target, cb, options, wrapped } as any);
+      target.addEventListener(p.inner, wrapped as any, options);
     },
 
     removeEventListener(type: string, cb: any, options?: any) {
       const p = parseType(String(type));
 
       if (p.kind === 'proto') {
-        args.protoBus.removeEventListener(p.inner, cb, options);
+        const capture = typeof options === 'boolean' ? options : Boolean(options?.capture);
+        protoListeners
+          .find((r) => r.type === p.inner && r.cb === cb && r.capture === capture)
+          ?.cleanup();
         return;
       }
 
@@ -563,7 +652,7 @@ function createProxyTarget(args: {
         // 你若坚持“plain object shallow compare”，可以把 sameOptions 搬进来
         if (!Object.is(r.options, options)) continue;
 
-        args.hostTarget.removeEventListener(p.inner, r.wrapped as any, options);
+        (r.target ?? args.hostTarget).removeEventListener(p.inner, r.wrapped as any, options);
         hostListeners.splice(i, 1);
         return;
       }
@@ -575,6 +664,10 @@ function createProxyTarget(args: {
       return args.protoBus.dispatchEvent(ev);
     },
 
+    __hasProtoListeners(type: string) {
+      return protoListeners.some((r) => r.type === type);
+    },
+
     /** Private adapter ingress; does not emit another public DOM event. */
     __dispatchHost(type: string, event: Event) {
       for (const listener of hostListeners) {
@@ -584,9 +677,10 @@ function createProxyTarget(args: {
     },
     // best-effort cleanup (not required by EventTarget)
     __dispose() {
+      for (const r of [...protoListeners]) r.cleanup();
       // 主动解绑所有已懒绑定的 host listener，避免残留
       for (const r of hostListeners.splice(0)) {
-        args.hostTarget.removeEventListener(
+        (r.target ?? args.hostTarget).removeEventListener(
           r.type,
           // @ts-ignore
           r.wrapped as any,

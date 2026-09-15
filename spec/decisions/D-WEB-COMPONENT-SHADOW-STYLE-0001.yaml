@@ -1,0 +1,236 @@
+id: D-WEB-COMPONENT-SHADOW-STYLE-0001
+type: decision
+title: Shadow style delivery uses a versioned artifact and an Adapter-owned color-scheme environment
+status: draft
+lifecycleRationale:
+  zh-CN: 同步 v1 artifact 与当前 recipe 已有有界证据，但载体兼容、严格 CSP 和更广 recipe 未准入；初版实验性交付未获得稳定化授权。
+  en: Synchronous v1 artifacts and current recipes have bounded evidence; wider carrier compatibility, strict CSP and broader recipes are not admitted, and the experimental delivery has no stable-promotion authorization.
+since: 0.3.0-alpha.0
+summary: The split Shadow profile receives a synchronous immutable v1 artifact and atomically shares an Adapter-owned color-scheme source between CSS and runtime meta; G1 exposes the bounded configuration without broadening carrier guarantees.
+statement:
+  zh-CN: >-
+    Web Component split Shadow profile 的样式交付必须把 semantic artifact、selector evaluation environment 与 physical stylesheet carrier 分离。Shadow-targeted token CSS 以 `proto-ui.shadow-style` version 1 immutable artifact 表达，并声明 `host-color-scheme-v1` environment ABI；该 ABI 只使用 Custom Element host 上由 Adapter 持有的 `data-pui-color-scheme="light|dark"` marker 作为显式 color-scheme selector context。默认 environment source 必须动态复用既有 Web precedence：`documentElement` 的 `data-theme` 或 `.dark`/`.light` 显式事实优先，其次是 `prefers-color-scheme`，最后回退到 light，并订阅可能改变结果的 document 与 media-query 输入。未来允许的 explicit source 必须同时提供同步读取与变化订阅，并成为 CSS marker 与 runtime `colorScheme` meta 的同一 truth。C1 private integration seam 必须在 first connection、view attach 之前同步并原子地组合 environment、stylesheet、inner surface 与 meta getter；`colorScheme` 由 retained source 保留，其余 meta key 委托既有 getter，失败时反向回滚，terminal teardown 时反向释放，而 view epoch 与同步 DOM move 不得重建这些 owner-generation resources。该决策只批准未导出的 renderer、resource owners、meta composition 与 coordinator 基础；它不公开 `shadow` object form，不把 Root style 路由到 inner surface，也不改变现有 boolean profile 或其它 Adapter。 上述基础授权边界描述 B1/C1；D1/E1 的后续 private Root routing 与非绘制性尺寸贡献由 `D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001` I–K 另行治理，不改变 public object activation gate。 F1 另行批准 L–M 的显式 CLI companion 交付。G1 现批准 N 的同步 public 接线；上述 private-only 边界保留为基础阶段历史，不限制已批准的 G1。
+
+
+  en: >-
+    Style delivery for the Web Component split Shadow profile must separate the semantic artifact, selector evaluation environment, and physical stylesheet carrier. Shadow-targeted token CSS is represented by an immutable version 1 `proto-ui.shadow-style` artifact declaring the `host-color-scheme-v1` environment ABI. That ABI uses only an Adapter-owned `data-pui-color-scheme="light|dark"` marker on the Custom Element host as the explicit color-scheme selector context. The default environment source must dynamically preserve the existing Web precedence: explicit `data-theme` or `.dark`/`.light` facts on `documentElement`, then `prefers-color-scheme`, then a light fallback, while subscribing to document and media-query inputs that can change the result. A future explicit source must provide both synchronous reads and change subscription and become the single truth for the CSS marker and runtime `colorScheme` meta. The C1 private integration seam must synchronously and atomically compose the environment, stylesheet, inner surface, and meta getter on first connection before view attachment; `colorScheme` is retained by the source while other meta keys delegate to the existing getter, failures roll back in reverse order, terminal teardown disposes in reverse order, and view epochs or synchronous DOM moves do not recreate these owner-generation resources. This decision approves only unexported renderer, resource-owner, meta-composition, and coordinator foundations; it does not publish the `shadow` object form, route Root styling to the inner surface, or alter an existing boolean profile or another Adapter. The foundation-only authorization above describes B1/C1. Subsequent D1/E1 private Root routing and non-paint sizing contributions are separately governed by D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 I-K without changing the public object activation gate. F1 separately approves opt-in CLI companion delivery in L-M. G1 now approves synchronous public wiring in N; the foundation-only boundary above records the earlier stage and does not prohibit approved G1 activation.
+
+
+criteria:
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-A
+    text:
+      zh-CN: >-
+        Shadow style artifact v1 必须携带精确的 `kind: 'proto-ui.shadow-style'`、`version: 1`、`cssText: string` 与 `environment: 'host-color-scheme-v1'` 字段；generator 输出与 Adapter 接纳后的 canonical value 必须不可变，未知 kind、version、environment、字段或非字符串 CSS 必须 fail closed。
+
+
+      en: >-
+        Shadow style artifact v1 must carry exactly `kind: 'proto-ui.shadow-style'`, `version: 1`, `cssText: string`, and `environment: 'host-color-scheme-v1'`; generator output and the canonical value accepted by the Adapter must be immutable, while an unknown kind, version, environment, field, or non-string CSS must fail closed.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-B
+    text:
+      zh-CN: >-
+        对同一 token closure，Shadow renderer 必须与 document renderer 保持 declaration、scoped baseline、composed-property reset、keyframe、cascade ordering 与 unsupported-token diagnostics 等价。B1 renderer 的差异只来自 environment selector strategy；E1 private split renderer 另外允许 `D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001` I–K 治理的同源非绘制性尺寸贡献和 Root target decomposition，不得因 host-local selector 改变条件之间的 cascade precedence。
+
+
+      en: >-
+        For the same token closure, the Shadow renderer must remain equivalent to the document renderer in declarations, scoped baseline, composed-property reset, keyframes, cascade ordering, and unsupported-token diagnostics. B1 renderer differences arise only from the environment selector strategy. The E1 private split renderer additionally admits same-source non-paint sizing contributions and Root target decomposition governed by D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 I-K; host-local selectors must not change cascade precedence between conditions.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-C
+    text:
+      zh-CN: >-
+        `host-color-scheme-v1` 下的 `dark:*` rule 必须使用 `:host([data-pui-color-scheme='dark'])` 约束 Shadow-local styled target，不得包含依赖跨 boundary ancestor 的 `.dark`、document `[data-theme]`、`:root` 或 system-media fallback selector。
+
+
+      en: >-
+        Under `host-color-scheme-v1`, a `dark:*` rule must constrain its Shadow-local styled target with `:host([data-pui-color-scheme='dark'])` and must not contain `.dark`, document `[data-theme]`, `:root`, or system-media fallback selectors that depend on crossing the Shadow boundary.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-D
+    text:
+      zh-CN: >-
+        Default color-scheme source 必须同步按 `documentElement[data-theme=dark|light]` 或 `.dark/.light`、`matchMedia('(prefers-color-scheme: dark)')`、light fallback 的顺序求值，并订阅 `class`、`data-theme` 与 media-query change；只有有效结果变化时才通知 consumer。
+
+
+      en: >-
+        The default color-scheme source must synchronously resolve `documentElement[data-theme=dark|light]` or `.dark/.light`, then `matchMedia('(prefers-color-scheme: dark)')`, then the light fallback; it must subscribe to `class`, `data-theme`, and media-query changes and notify consumers only when the effective result changes.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-E
+    text:
+      zh-CN: >-
+        Explicit color-scheme source 必须以同步 `get()` 与可撤销 `subscribe(listener)` 表达；split profile 激活后，同一 source 必须同时驱动 host marker 与 runtime `colorScheme` meta，不得与任意 pull-only `getMeta('colorScheme')` 形成两份 truth。
+
+
+      en: >-
+        An explicit color-scheme source must provide synchronous `get()` and revocable `subscribe(listener)` operations; after split-profile activation, the same source must drive both the host marker and runtime `colorScheme` meta rather than forming two truths with any pull-only `getMeta('colorScheme')` callback.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-F
+    text:
+      zh-CN: >-
+        Environment owner 必须在首次可见提交前同步写入 host marker，按 effective value 去重更新，跨 repeatable view epoch 保留，并在 terminal disposal 时取消全部订阅及移除 Adapter-owned marker；marker 只是 selector evaluation context，不获得 state、event、focus、a11y 或 lifecycle ownership。
+
+
+      en: >-
+        The environment owner must synchronously write the host marker before the first visible commit, deduplicate updates by effective value, survive repeatable view epochs, and cancel every subscription and remove the Adapter-owned marker at terminal disposal; the marker is selector evaluation context and gains no state, event, focus, accessibility, or lifecycle ownership.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-G
+    text:
+      zh-CN: >-
+        通过验证的 artifact 必须由既有 owner-lifetime stylesheet owner 安装；physical carrier 可以演进而不改变 artifact ABI，theme custom properties 继续从 host 继承且不得在每个 ShadowRoot 重复生成 theme declarations。
+
+
+      en: >-
+        A validated artifact must be installed through the existing owner-lifetime stylesheet owner; the physical carrier may evolve without changing the artifact ABI, while theme custom properties continue to inherit from the host and must not be regenerated as theme declarations in every ShadowRoot.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-H
+    text:
+      zh-CN: >-
+        B1/C1 private 基础不得改变 `shadow` omitted/`false` 或 `shadow: true` 的 DOM、slot、Root style target、lifecycle、marker、stylesheet 与 package export，也不得使 React、Vue 或 Vue 2 Adapter 获得 wrapper、marker 或 Shadow stylesheet owner。
+
+
+      en: >-
+        The private B1/C1 foundation must not change the DOM, slots, Root style target, lifecycle, markers, stylesheets, or package exports of omitted or false `shadow` and `shadow: true`, and must not add a wrapper, marker, or Shadow stylesheet owner to the React, Vue, or Vue 2 Adapter.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-I
+    text:
+      zh-CN: >-
+        C1 private meta getter 必须把 `colorScheme` 作为 split environment reserved key，直接读取 retained source 的当前值且不得调用 `baseGetMeta('colorScheme')`；其它 key 必须原样且仅一次委托 `baseGetMeta`。该组合不得改变 public `getMeta` 的 replacement/default 语义，也不得从 package root 导出。
+
+
+      en: >-
+        The C1 private meta getter must reserve `colorScheme` for the split environment, read the retained source's current value without calling `baseGetMeta('colorScheme')`, and delegate every other key unchanged and exactly once to `baseGetMeta`. This composition must not alter the public replacement/default semantics of `getMeta` and must not be exported from the package root.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-J
+    text:
+      zh-CN: >-
+        C1 private resource coordinator 必须同步按 environment、artifact stylesheet、inner surface 的顺序建立一个 owner generation；任一输入验证、订阅或资源创建失败时，必须按已完成步骤的反向顺序回滚，且不得在 host 或 ShadowRoot 留下 Adapter-owned marker、stylesheet 或 surface。成功后的 `dispose()` 必须按 surface、stylesheet、environment 的反向顺序执行且幂等。
+
+
+      en: >-
+        The C1 private resource coordinator must synchronously establish one owner generation in environment, artifact stylesheet, and inner-surface order. If any input validation, subscription, or resource creation step fails, it must roll back completed steps in reverse order without leaving an Adapter-owned marker, stylesheet, or surface on the host or ShadowRoot. After success, `dispose()` must run in surface, stylesheet, and environment reverse order and be idempotent.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-K
+    text:
+      zh-CN: >-
+        Split resources 必须在 Custom Element 首次 connection 时、runtime/view initialization 与首个 view attach 之前创建，不得在 constructor 中订阅环境；同一 generation 的 view absence、repeatable remount 与同步 DOM move 必须保留资源身份，terminal runtime teardown 必须释放资源，而之后的 reconnect 必须建立 fresh generation，且已释放 generation 的 listener 不得再写 host。
+
+
+      en: >-
+        Split resources must be created on the Custom Element's first connection before runtime or view initialization and the first view attachment, and environment subscription must not occur in the constructor. View absence, repeatable remounts, and synchronous DOM moves within one generation must retain resource identity; terminal runtime teardown must dispose the resources, while a later reconnect must establish a fresh generation whose predecessor's listeners can no longer write the host.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-L
+    text:
+      zh-CN: >-
+        F1 允许 `tokens`、`shadcn`、`brutalist` CLI command 显式使用 `--shadow-out <file.js>`，从同一 token closure 生成 document CSS、ESM companion 与同 stem `.d.ts`；唯一 named export 固定为 `protoShadowStyleArtifact`，其值为 frozen v1 artifact，声明保留 readonly 与 ABI literal types。生成的模块不依赖 DOM 或 runtime renderer。未传 flag 的既有命令保持原输出，`init` / `add` 不自动生成 companion；这不开放 public split Adapter object 或 package-root builder API。
+
+
+      en: >-
+        F1 permits the tokens, shadcn, and brutalist CLI commands to opt in with `--shadow-out <file.js>`, generating document CSS, an ESM companion, and a same-stem `.d.ts` from one token closure. The sole named export is `protoShadowStyleArtifact`, a frozen v1 artifact whose declaration preserves readonly and ABI literal types. The generated module requires neither DOM nor a runtime renderer. Existing commands without the flag retain their outputs, and init/add do not generate companions automatically; this does not open a public split Adapter object or package-root builder API.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-M
+    text:
+      zh-CN: >-
+        Opt-in 输出集合（preset 包括 theme 与 entry）必须在覆盖任何目标前验证全部路径并生成全部内容；拒绝缺失路径、非 `.js` suffix、重叠目标、symbolic-link 文件目标及非普通文件目标。Caught staging/replacement failure 必须尝试恢复所有已替换的旧文件并移除新文件；恢复失败时保留备份并报告路径。重新运行应确定性地更新整组文件；不承诺断电、进程终止或并发 writer 下的跨文件原子性。
+
+
+      en: >-
+        The opt-in output set, including preset theme and entry files, must validate all paths and generate all contents before overwriting any target; reject missing paths, non-.js suffixes, overlapping targets, symbolic-link file targets, and non-regular file targets. A caught staging or replacement failure must attempt to restore every replaced old file and remove new files; retain backups and report their paths if recovery fails. Regeneration deterministically updates the set; no cross-file atomicity is promised for power loss, process termination, or concurrent writers.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-N
+    text:
+      zh-CN: G1 公开 profile 必须通过 styleArtifact 接受同步 v1 plain value，复用 A–K 的验证、环境/meta 单一 truth、原子资源与 owner-generation 生命周期，以及已治理的 Root routing。不得接受 Promise/lazy loader；无需新增异步 reveal barrier。严格 CSP、nonce 与 constructable carrier guarantee 不在首版保证中。Public 接线必须在初始化或首次 effect 失败后撤销已安装的 view/owner 资源，不得残留可交互的半实例。已成功挂载后的 effect 拒绝继续遵守 `D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001` 的上一份完整投影保留规则，不因此终止实例。
+      en: The G1 public profile must accept a synchronous v1 plain value through styleArtifact and reuse A-K validation, environment/meta single truth, atomic resources, owner-generation lifetime, and governed Root routing. Promise/lazy loaders are not accepted and no asynchronous reveal barrier is introduced. Strict CSP, nonce, and constructable-carrier guarantees are outside the initial scope. Public wiring must revoke installed view/owner resources after initialization or initial-effect failure without leaving an interactive partial instance. Rejected effects after successful mounting continue to preserve the previous complete projection under D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001, without terminating the instance.
+
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-O
+    text:
+      zh-CN: H1 在 B 的同源 decomposition 上进一步实现 D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 L–O 的有界 Root geometry、独立 hit-testing 与 timing coordination。V1 artifact 字段不变；需要 H1 的 effect 必须拒绝缺少新生成 recipe 的旧 companion，并提示重生成。零声明 marker 必须保留非绘制性 compiled membership 证据；split slot-only 等价提交应保留 native slot 的扁平树连续性，防止消费者动画在无结构变化时被取消。当前 recipe 支持固定边框下的有界尺寸/位移/缩放动画，animated border-width 的 used-value rounding 尚未支持，必须遵守完整 preflight 拒绝。
+      en: H1 extends B's same-source decomposition with bounded Root geometry, separate hit testing, and timing coordination under D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 L-O. V1 artifact fields remain unchanged; effects requiring H1 reject old companions without the new generated recipe and request regeneration. Zero-declaration markers retain non-paint compiled-membership evidence. Equivalent split slot-only commits retain native-slot flattened-tree continuity so consumer animations are not canceled without structural changes. The current recipe supports bounded sizing/translation/scale animation with fixed borders; animated border-width used-value rounding is unsupported and must fail complete preflight.
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-P
+    text:
+      zh-CN: I1 在相同 token declaration、lowered condition 与 merge 结果下生成 hidden 的 host display none 和 relative 的 host position relative；surface 不重复接收二者。V1 artifact 字段保持不变，需要 I1 的完整 effect 必须在任一 target 修改前拒绝缺少 I1 recipe 证据或 compiled token 的 companion，提示重新生成。取消、patch、Rule 更新与 view replay 恢复当前完整投影，不依赖额外 document reset，也不改变 legacy a11y 或 lifecycle 行为。
+      en: I1 generates host display none for hidden and host position relative for relative from the same token declarations, lowered conditions, and merge results, without duplicating either on the surface. V1 artifact fields remain unchanged. Before mutating either target, complete effects requiring I1 must reject companions missing I1 recipe evidence or compiled tokens and request regeneration. Cancellation, patches, Rule updates, and view replay restore the current complete projection without extra document resets or changes to legacy a11y and lifecycle behavior.
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-Q
+    text:
+      zh-CN: K1 的半尺寸位移和普通 Dialog fade/zoom recipe 遵守 D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 S–T。V1 artifact ABI 不变；需要 K1 的完整 Root effect 必须在修改 target 前验证新 recipe 与编译成员，旧 companion 须明确拒绝并提示重新生成。动画 geometry、surface paint、时长/延迟与条件同源，嵌套 Root 不继承父级的变换或动画操作数；不扩大到 slide、自定义 keyframe 或任意组合。
+      en: K1 half translations and the ordinary Dialog fade/zoom recipe follow D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 S-T. The v1 artifact ABI is unchanged. Complete Root effects requiring K1 must validate the new recipe and compiled membership before target mutation, rejecting old companions with a regeneration diagnostic. Animated geometry, surface paint, duration/delay, and conditions share one source, and nested Roots must not inherit parent transform or animation operands. This does not broaden slide, custom keyframe, or arbitrary combination support.
+openQuestions:
+  - id: D-WEB-COMPONENT-SHADOW-STYLE-0001-Q-CSP
+    question:
+      zh-CN: '`<style>` fallback 在严格 CSP 下如何接收 nonce，何时可使用 constructable stylesheet？'
+      en: How should the `<style>` fallback receive a nonce under strict CSP, and when may a constructable stylesheet be used?
+    context:
+      zh-CN: B1 不建立 CSP guarantee，也不把任一 carrier 固定为公共 API。
+      en: B1 establishes no CSP guarantee and does not fix either carrier as public API.
+    blocks: []
+sources:
+  - path: internal/records/2026-09-13-shadow-g1-s1-approved-goal.zh-CN.md
+  - path: internal/records/2026-09-13-shadow-split-e1-evidence-and-public-delivery-gate.zh-CN.md
+  - path: packages/cli/src/services/shadow-style-delivery.ts
+  - path: internal/records/2026-09-12-shadow-style-artifact-environment-decision-packet.zh-CN.md
+  - path: internal/records/2026-09-12-shadow-split-activation-boundary-decision-packet.zh-CN.md
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: packages/adapters/base/src/platform/web-preferences.ts
+  - path: packages/adapters/web-component/src/shadow-stylesheet-owner.ts
+  - path: packages/adapters/web-component/src/shadow-owner-shell.ts
+  - path: packages/adapters/web-component/src/shadow-split-meta.ts
+  - path: packages/adapters/web-component/src/shadow-split-resources.ts
+refines:
+  decisions:
+    - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+  knowledge:
+    - K-HOST-SURFACE-ROLES-0001
+relates:
+  adapters:
+    - A-WEB-COMPONENT-0001
+  decisions:
+    - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+verifies:
+  tests:
+    - T-WEB-COMPONENT-SHADOW-STYLE-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved K1 bounded Dialog geometry and paint decomposition with versioned recipe evidence, unchanged artifact ABI, and old-companion refusal.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved I1 same-source participation/coordinate recipes with fail-closed old companion handling and unchanged artifact ABI.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Realized H1 bounded motion/hit/timing, no-paint marker receipts and native-slot continuity without changing artifact ABI; animated border-width remains explicitly unsupported.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved G1 synchronous public artifact activation, reused owner and meta invariants, and deferred strict CSP beyond the bounded profile.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved F1 opt-in CLI companion naming, same-closure delivery, preflight and caught-failure recovery; public Adapter activation and draft lifecycle remain unchanged.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Reconciled B1 renderer parity with E1 private same-source Root sizing decomposition and unchanged conditional cascade precedence; no public activation.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Governed the private C1 meta-composition, atomic resource-coordination, and owner-generation lifetime boundary without activating a public split profile.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the approved B1 artifact, host-local selector ABI, subscribable color-scheme environment, and private implementation boundary.
+tags:
+  - adapter
+  - web-component
+  - shadow-dom
+  - stylesheet
+  - color-scheme
+  - environment
+  - compatibility

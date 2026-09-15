@@ -1,7 +1,8 @@
 // packages/modules/rule-expose-state-web/src/create.ts
 import { createModule, defineModule, ModuleBase } from '@proto.ui/module-base';
 import type { ModuleFactoryArgs, ModuleDeps } from '@proto.ui/module-base';
-import type { MountPhase, ProtoPhase, StyleHandle } from '@proto.ui/core';
+import type { MountPhase, ProtoPhase } from '@proto.ui/core';
+import { lowerRootStyleTokens } from '@proto.ui/core/internal';
 import type { WhenExpr, RuleIR, RulePort } from '@proto.ui/module-rule';
 import type { ExposeStateWebPort, ExposeStateWebBinding } from '@proto.ui/module-expose-state-web';
 import type { FeedbackPort } from '@proto.ui/module-feedback';
@@ -290,8 +291,7 @@ class RuleExposeStateWebImpl extends ModuleBase {
       if (variants.every(isNegativeDataVariant)) continue;
 
       const prefix = canonicalizeLoweredVariants(variants).join(':');
-      const tokens = c.tokens.map((t) => `${prefix}:${t}`);
-      const handle: StyleHandle = { kind: 'tw', tokens };
+      const handle = lowerRootStyleTokens(c.tokens, prefix);
       this.contributionOffs.push(this.feedbackPort.useStyleUnsafe(handle));
       appliedIds.push(c.id);
     }

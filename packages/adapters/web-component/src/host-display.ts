@@ -37,12 +37,18 @@ export type HostDisplayController = {
   disconnect(): void;
 };
 
-export function installDefaultHostDisplay(el: HTMLElement): HostDisplayController {
+export function installDefaultHostDisplay(
+  el: HTMLElement,
+  { displayOwner = 'fallback' }: { displayOwner?: 'fallback' | 'presentation' } = {}
+): HostDisplayController {
   const doc = el.ownerDocument;
   if (doc) ensureDefaultHostDisplayRule(doc);
 
   const sync = () => {
-    if (hasExplicitDisplayClass(el)) {
+    // A split recipe owns grid/inline-grid inside Shadow. Even a low-specificity
+    // document rule on the host wins across that boundary. Keep view visibility
+    // infrastructure, but do not compete with the presentation owner's display.
+    if (displayOwner === 'presentation' || hasExplicitDisplayClass(el)) {
       el.classList.remove(HOST_DISPLAY_CLASS);
       return;
     }

@@ -170,7 +170,9 @@ export class FocusCenter {
       if (!entry.isFocusable()) return false;
       if (entry.instance === scope.instance) return false;
       const focusable = entry.getFocusableConfig();
-      if (focusable.disabled) return false;
+      // Scope Tab traversal must respect authored sequential participation;
+      // programmatic/roving focusability alone does not create a tab stop.
+      if (focusable.disabled || focusable.navParticipation === 'none') return false;
       return this.isDescendantOf(entry, scope);
     });
     return this.dedupeSharedHostTargets(members.sort((a, b) => this.compareEntries(a, b)));

@@ -17,6 +17,13 @@ export async function run(argv: string[]): Promise<void> {
     return;
   }
 
+  if (
+    Object.hasOwn(options, 'shadow-out') &&
+    !['tokens', 'shadcn', 'brutalist'].includes(command)
+  ) {
+    throw new Error('--shadow-out is supported only by tokens, shadcn, and brutalist');
+  }
+
   if (command === 'init') {
     if (rest.some(isHelpToken) || options.help === true || options.h === true) {
       printCommandHelp('init');

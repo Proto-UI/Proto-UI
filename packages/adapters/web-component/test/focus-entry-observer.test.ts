@@ -1,0 +1,158 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { definePrototype } from '@proto.ui/core';
+import { asFocusEntry } from '@proto.ui/hooks';
+import { AdaptToWebComponent } from '../src';
+
+// Happy DOM delivers MutationObserver through its task manager, not solely
+// Promise microtasks. Await completion instead of a platform-dependent delay.
+const settle = async () => {
+  await Promise.resolve();
+  await (
+    window as unknown as {
+      happyDOM: { waitUntilComplete(): Promise<void> };
+    }
+  ).happyDOM.waitUntilComplete();
+};
+let serial = 0;
+function panel(composed: boolean) {
+  const C = AdaptToWebComponent(
+    definePrototype({
+      name: `entry-observer-${++serial}`,
+      setup() {
+        asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+        return (r) => r.slot();
+      },
+    }),
+    { shadow: composed }
+  );
+  const host = new C();
+  document.body.append(host);
+  return host;
+}
+afterEach(async () => {
+  document.body.replaceChildren();
+  await settle();
+  vi.restoreAllMocks();
+});
+
+describe('WC live focus-entry resolver inputs', () => {
+  it.each([
+    [false, true],
+    [true, true],
+    [false, false],
+    [true, false],
+  ])('reprojects input type (composed: %s, initially hidden: %s)', async (composed, hidden) => {
+    const host = panel(composed);
+    const input = document.createElement('input');
+    input.type = hidden ? 'hidden' : 'text';
+    host.append(input);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(hidden);
+    input.type = hidden ? 'text' : 'hidden';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(!hidden);
+    input.type = hidden ? 'hidden' : 'text';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(hidden);
+  });
+
+  it.each([false, true])(
+    'reprojects details without a focusable summary (initially open: %s)',
+    async (open) => {
+      const host = panel(true);
+      const details = document.createElement('details');
+      details.open = open;
+      const input = document.createElement('input');
+      details.append(input);
+      host.append(details);
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(!open);
+      details.open = !open;
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(open);
+      details.open = open;
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(!open);
+    }
+  );
+
+  it.each([false, true])(
+    'tracks image-map associations outside the region (composed: %s)',
+    async (composed) => {
+      const host = panel(composed);
+      const map = document.createElement('map');
+      map.name = 'entry-map';
+      const area = document.createElement('area');
+      area.href = '#destination';
+      area.tabIndex = 0;
+      map.append(area);
+      host.append(map);
+      const image = document.createElement('img');
+      image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      document.body.append(image);
+      await settle();
+      expect(host.tabIndex).toBe(0);
+      image.useMap = '#entry-map';
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(false);
+      image.useMap = '#another-map';
+      await settle();
+      expect(host.tabIndex).toBe(0);
+      image.useMap = '#entry-map';
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(false);
+      if (composed) {
+        image.removeAttribute('src');
+        await settle();
+        expect(host.tabIndex).toBe(0);
+        image.src =
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        await settle();
+        expect(host.hasAttribute('tabindex')).toBe(false);
+      }
+      image.remove();
+      await settle();
+      expect(host.tabIndex).toBe(0);
+      document.body.append(image);
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(false);
+      map.name = 'renamed';
+      await settle();
+      expect(host.tabIndex).toBe(0);
+      map.name = 'entry-map';
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(false);
+      if (!composed) {
+        image.hidden = true;
+        await settle();
+        expect(host.tabIndex).toBe(0);
+        image.hidden = false;
+        await settle();
+        expect(host.hasAttribute('tabindex')).toBe(false);
+      }
+      host.remove();
+      await settle();
+      const project = vi.spyOn(host, 'setAttribute');
+      image.useMap = '#removed-owner';
+      await settle();
+      expect(project).not.toHaveBeenCalled();
+    }
+  );
+
+  it('only observes document image bindings while the region contains areas', async () => {
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const host = panel(false);
+    await settle();
+    expect(observe.mock.calls.some(([target]) => target === document)).toBe(false);
+    const area = document.createElement('area');
+    host.append(area);
+    await settle();
+    expect(observe.mock.calls.some(([target]) => target === document)).toBe(true);
+    area.remove();
+    await settle();
+    const project = vi.spyOn(host, 'setAttribute');
+    document.body.append(document.createElement('img'));
+    await settle();
+    expect(project).not.toHaveBeenCalled();
+  });
+});

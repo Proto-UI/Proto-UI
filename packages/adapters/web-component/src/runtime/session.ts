@@ -6,6 +6,9 @@ import { type PropsBaseType } from '@proto.ui/types';
 
 import { commitChildren } from '../commit';
 import { SlotProjector } from '../slot-projector';
+import type { ShadowOwnerShell } from '../shadow-owner-shell';
+
+type ShadowViewTarget = Pick<ShadowOwnerShell, 'replaceRenderedChildren' | 'hasOnlyRenderedNode'>;
 
 export function createWebComponentHostSession<Props extends PropsBaseType>(args: {
   proto: Prototype<Props>;
@@ -13,6 +16,9 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   shadow: boolean;
   host: HTMLElement;
   root: Element | ShadowRoot;
+  shadowOwnerShell: ShadowOwnerShell | null;
+  /** Private split pilot seam; owner resources are never Template commit targets. */
+  shadowViewTarget?: ShadowViewTarget;
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
   textControlTarget: HTMLElement | null;
@@ -40,6 +46,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     shadow,
     host,
     root,
+    shadowOwnerShell,
     schedule,
     rawPropsSource,
     wiring,
@@ -68,6 +75,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       commit: (children, signal) => {
         commitWebComponentChildren({
           root,
+          shadowOwnerShell: args.shadowViewTarget ?? shadowOwnerShell,
           children,
           shadow,
           textControlTarget,
@@ -109,6 +117,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
 
 function commitWebComponentChildren(args: {
   root: Element | ShadowRoot;
+  shadowOwnerShell: ShadowViewTarget | null;
   children: TemplateChildren;
   shadow: boolean;
   textControlTarget: HTMLElement | null;
@@ -120,6 +129,7 @@ function commitWebComponentChildren(args: {
 }) {
   const {
     root,
+    shadowOwnerShell,
     children,
     shadow,
     textControlTarget,
@@ -134,7 +144,11 @@ function commitWebComponentChildren(args: {
     if (hasChildren) {
       throw new Error('[WC Adapter] text-control prototypes must return empty Template children.');
     }
-    if (root.firstChild !== textControlTarget || root.childNodes.length !== 1) {
+    if (shadowOwnerShell) {
+      if (!shadowOwnerShell.hasOnlyRenderedNode(textControlTarget)) {
+        shadowOwnerShell.replaceRenderedChildren([textControlTarget]);
+      }
+    } else if (root.firstChild !== textControlTarget || root.childNodes.length !== 1) {
       root.replaceChildren(textControlTarget);
     }
     clearSlotProjector();
@@ -147,7 +161,11 @@ function commitWebComponentChildren(args: {
     if (hasChildren) {
       throw new Error('[WC Adapter] image-view prototypes must return empty Template children.');
     }
-    if (root.firstChild !== imageViewTarget || root.childNodes.length !== 1) {
+    if (shadowOwnerShell) {
+      if (!shadowOwnerShell.hasOnlyRenderedNode(imageViewTarget)) {
+        shadowOwnerShell.replaceRenderedChildren([imageViewTarget]);
+      }
+    } else if (root.firstChild !== imageViewTarget || root.childNodes.length !== 1) {
       root.replaceChildren(imageViewTarget);
     }
     clearSlotProjector();
@@ -156,7 +174,9 @@ function commitWebComponentChildren(args: {
   }
 
   if (shadow) {
-    commitChildren(root as any, children, { mode: 'shadow' });
+    const staging = root.ownerDocument.createDocumentFragment();
+    commitChildren(staging, children, { mode: 'shadow' });
+    shadowOwnerShell?.replaceRenderedChildren(Array.from(staging.childNodes));
     clearSlotProjector();
     eventGate.enable();
     return;

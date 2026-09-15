@@ -1,0 +1,232 @@
+---
+const zh = Astro.url.pathname.startsWith('/zh-cn/');
+---
+
+<section id="shadow-split-s2" class="s2" data-shadow-s2 aria-label="Shadow split S2">
+  <h2>Shadow split · S2</h2>
+  <p>
+    {
+      zh
+        ? '设置区：完整 Shadcn Button / Switch Root + Thumb，搭配 Checkbox 与 Badge。检查运动、输入和跨边界组合；仍为 draft。'
+        : 'Settings: complete Shadcn Button / Switch Root + Thumb alongside Checkbox and Badge. Inspect motion, input and mixed boundaries; still draft.'
+    }
+  </p>
+  <div class="s2-controls">
+    <label
+      >Button variant <select data-option="variant"
+        >{
+          ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'].map((v) => (
+            <option value={v}>{v}</option>
+          ))
+        }</select
+      ></label
+    >
+    <label
+      >Button size <select data-option="size"
+        >{['default', 'sm', 'lg', 'icon'].map((v) => <option value={v}>{v}</option>)}</select
+      ></label
+    >
+    <button data-action="scheme"
+      >{zh ? '切换整页 light / dark' : 'Toggle document light / dark'}</button
+    >
+    <button data-action="checked"
+      >{zh ? '切换 checked（全部列）' : 'Toggle checked (all columns)'}</button
+    >
+    <button data-action="rapid">{zh ? '连续反向切换 × 6' : 'Rapid reversal × 6'}</button>
+    <button data-action="disabled" aria-pressed="false">disabled</button>
+    <button data-action="tone">Badge tone</button>
+    <button data-action="slot" aria-pressed="false"
+      >{zh ? '替换 Button slot' : 'Replace Button slot'}</button
+    >
+    <button data-action="move" aria-pressed="false"
+      >{zh ? '同步移动设置区' : 'Move settings synchronously'}</button
+    >
+    <button data-action="disconnect" aria-pressed="false"
+      >{zh ? '移除 / 重连设置区' : 'Remove / reconnect settings'}</button
+    >
+  </div>
+  <div class="s2-columns">
+    {
+      ['light', 'split', 'mixed'].map((profile) => (
+        <article data-s2-profile={profile}>
+          <h3>
+            {profile === 'light'
+              ? 'Light DOM'
+              : profile === 'split'
+                ? 'Shadow split'
+                : zh
+                  ? '混合组合'
+                  : 'Mixed composition'}
+          </h3>
+          <div data-home>
+            <div data-settings>
+              <div class="s2-line">
+                <>
+                  <span data-mount="switch" />
+                  <span>{zh ? '自动同步' : 'Auto sync'}</span>
+                </>
+              </div>
+              <div class="s2-line">
+                <>
+                  <span data-mount="checkbox" />
+                  <span>{zh ? '接收通知' : 'Receive notifications'}</span>
+                </>
+              </div>
+              <div class="s2-line">
+                <>
+                  <span data-mount="button" />
+                  <span data-mount="badge" />
+                </>
+              </div>
+            </div>
+          </div>
+          <div data-destination />
+          <output data-stats aria-live="polite" />
+        </article>
+      ))
+    }
+  </div>
+  <p>
+    {
+      zh
+        ? '混合列：split Switch + Light Thumb、Light Checkbox + split Indicator、split Button + Light Badge。整页主题开关让所有列共享 document color scheme。'
+        : 'Mixed: split Switch + Light Thumb, Light Checkbox + split Indicator, split Button + Light Badge. The document theme control supplies one color scheme to all columns.'
+    }
+  </p>
+  <details>
+    <summary>{zh ? '人工验收清单与边界' : 'Manual checklist and boundaries'}</summary>
+    <ol>
+      <li>
+        {
+          zh
+            ? '鼠标按住 Button / Switch，观察位移、缩放和 focus ring；Tab / Space / Enter 验证真实输入与通知数。'
+            : 'Hold Button / Switch with the pointer; inspect translation, scale and focus ring. Use Tab / Space / Enter and check notification counts.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '循环全部 Button variant / size，包括图标；切换主题、disabled 和 checked，快速反向观察 Thumb 不跳帧、不叠加位移。'
+            : 'Cycle all Button variants/sizes, including the icon; change theme, disabled and checked. Reverse rapidly and check Thumb continuity without duplicate motion.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '替换 slot、同步移动（generation 不增）、移除重连（generation 增加），确认状态保留、通知不重复。'
+            : 'Replace slots, move synchronously (same generation), remove/reconnect (new generation). Check state retention and unduplicated notifications.'
+        }
+      </li>
+    </ol>
+    <p>
+      {
+        zh
+          ? '样式来自正式 CLI companion。只撤销网站 base reset 对 split host 的 padding/border 清零；没有页面尺寸补丁。固定边框动画已验证，动态 border-width 仍明确拒绝。slot 仍归 Maker；这不是全浏览器、任意 CSS 或 native/portal 支持声明。'
+          : 'Styles come from the real CLI companion. Only the site base reset of split-host padding/border is withdrawn; no page sizing patches. Fixed-border animation is covered; animated border-width is rejected. Slots remain Maker-owned; this is not all-browser, arbitrary-CSS or native/portal support.'
+      }
+    </p>
+  </details>
+</section>
+<script>
+  import { mountShadowSplitS2 } from './shadow-split-s2';
+  const initialize = () =>
+    document.querySelectorAll<HTMLElement>('[data-shadow-s2]').forEach(mountShadowSplitS2);
+  initialize();
+  document.addEventListener('astro:page-load', initialize);
+</script>
+<style is:global>
+  .s2 {
+    margin-block: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    min-width: 0;
+  }
+  .s2-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-block: 1rem;
+  }
+  .s2-controls button,
+  .s2-controls select {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.4rem;
+    border: 1px solid currentColor;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    max-width: 100%;
+  }
+  .s2-controls label {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+  }
+  .s2-controls button[aria-pressed='true'] {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+  .s2-columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .s2-columns article {
+    min-width: 0;
+    border: 1px solid var(--color-border);
+    padding: 0.75rem;
+  }
+  .s2 [data-settings] {
+    font:
+      16px/normal Arial,
+      sans-serif;
+    --pui-canary: #ffd83d;
+    --pui-canary-foreground: #172033;
+    --pui-sky: #85d7ff;
+    --pui-sky-foreground: #172033;
+    --pui-coral: #ff937f;
+    --pui-coral-foreground: #172033;
+  }
+  .s2-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-block: 1rem;
+  }
+  .s2 [data-mount] {
+    display: block;
+  }
+  .s2 [data-stats] {
+    display: block;
+    white-space: pre-line;
+    font: 12px/1.6 monospace;
+    margin-block: 1rem;
+    overflow-wrap: anywhere;
+  }
+  .s2 .s2-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  @layer base {
+    .s2 [data-s2-split] {
+      padding: revert-layer;
+      border: revert-layer;
+    }
+  }
+  @media (max-width: 960px) {
+    .s2-columns {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

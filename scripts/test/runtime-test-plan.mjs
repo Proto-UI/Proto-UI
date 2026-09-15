@@ -1,4 +1,5 @@
 export const BROWSER_SUITES = Object.freeze([
+  'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
   'apps/www/test/message-composition.browser.test.ts',
   'apps/www/test/color-scheme.browser.test.ts',
   'apps/workspace/test/lifecycle.browser.test.ts',
@@ -15,6 +16,12 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',

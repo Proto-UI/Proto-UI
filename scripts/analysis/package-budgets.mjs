@@ -4,11 +4,19 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
+import { createHash } from 'node:crypto';
 
-import { build } from 'esbuild';
+import { build, version as esbuildVersion } from 'esbuild';
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const json = process.argv.includes('--json');
+const environment = {
+  node: process.version,
+  zlib: process.versions.zlib,
+  esbuild: esbuildVersion,
+  platform: process.platform,
+  arch: process.arch,
+};
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
@@ -16,9 +24,10 @@ const cases = [
   ['runtime root', 'packages/runtime/src/index.ts', 60_000],
   ['adapter-react root', 'packages/adapters/react/src/index.ts', 75_000],
   ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_000],
-  // PR #634 adds scoped Escape arbitration and shared Overlay resource ownership.
-  // CI measured 75,115 gzip bytes; retain a bounded allowance for this semantic slice.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 76_000],
+  // Shadow split S1-S5 adds scoped presentation, role routing and native editors.
+  // Closeout measured 82,998 gzip bytes vs main's 74,834 with the same settings.
+  // Keep ~1 KB headroom; this is not a general allowance for future growth.
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 84_000],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];
@@ -70,17 +79,19 @@ for (const [name, entry, budget] of cases) {
     name,
     entry,
     minifiedBytes: contents.length,
+    minifiedSha256: createHash('sha256').update(contents).digest('hex'),
     gzipBytes,
     budget,
     pass: gzipBytes <= budget,
   });
 }
 
-if (json) console.log(JSON.stringify({ results }, null, 2));
+if (json) console.log(JSON.stringify({ environment, results }, null, 2));
 else {
+  console.log(`[package-budgets] ${JSON.stringify(environment)}`);
   for (const result of results) {
     console.log(
-      `${result.pass ? 'PASS' : 'FAIL'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes`
+      `${result.pass ? 'PASS' : 'FAIL'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes; minified=${result.minifiedBytes} sha256=${result.minifiedSha256}`
     );
   }
 }

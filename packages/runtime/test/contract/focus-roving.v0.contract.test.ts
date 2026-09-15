@@ -94,6 +94,47 @@ const createTreeHost = (
 });
 
 describe('runtime contract: focus-roving (v0)', () => {
+  it('preserves legacy group and roving warning ordering and ignores undefined warning fields', () => {
+    const first = createFocusRovingKey({ debugLabel: 'first' });
+    const second = createFocusRovingKey({ debugLabel: 'second' });
+    const group = { key: first };
+    const P = definePrototype({
+      name: 'x-focus-roving-diagnostics',
+      setup() {
+        const scope = asFocusScope();
+        scope.configure({ group });
+        scope.configure({
+          group: {
+            selectOnFocus: true,
+            entry: 'selected',
+            orientation: 'horizontal',
+            navigation: 'arrow',
+            loop: true,
+            key: second,
+          },
+        });
+        const roving = asFocusRoving();
+        roving.configure({ key: second, loop: true, meta: { onlyMetadata: true } });
+        roving.configure({ navigation: undefined });
+        return (r) => r.el('div', 'ok');
+      },
+    });
+    const result = executeWithHost(P as any, createHost(P.name).host as any);
+    const port = result.caps.getPort<FocusPort>('focus')!;
+    expect(port.getWarnings()).toEqual([
+      '[Focus] scope.group overridden: [object Object] -> [object Object]',
+      '[Focus] scope.roving.key overridden: first -> second',
+      '[Focus] scope.roving.loop overridden: false -> true',
+      '[Focus] scope.roving.navigation overridden: none -> arrow',
+      '[Focus] scope.roving.orientation overridden: vertical -> horizontal',
+      '[Focus] scope.roving.entry overridden: first -> selected',
+      '[Focus] scope.roving.selectOnFocus overridden: false -> true',
+    ]);
+    expect(port.getRovingConfig().navigation).toBeUndefined();
+    expect(port.getRovingConfig().meta).toEqual({ onlyMetadata: true });
+    expect(Object.isFrozen(port.getRovingConfig())).toBe(true);
+  });
+
   it('FOCUS-ROVING-0100: repeated asFocusRoving calls reuse one handle and configure through that handle', () => {
     const first = createFocusRovingKey({ debugLabel: 'roving-1' });
     const second = createFocusRovingKey({ debugLabel: 'roving-2' });

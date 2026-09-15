@@ -101,7 +101,9 @@ describe('Feedback catalog boundary', () => {
     f.style.patch(tw('opacity-100'));
     expect(f.queueStyle).not.toHaveBeenCalled();
     f.caps.attach([[EFFECTS_CAP, f.effects]]);
-    expect(f.queueStyle).toHaveBeenLastCalledWith(tw('opacity-100'));
+    // Internal effects carry Root role provenance; author snapshots stay token-only.
+    expect(f.queueStyle).toHaveBeenLastCalledWith(expect.objectContaining(tw('opacity-100')));
+    expect(f.style.exportMerged()).toEqual(tw('opacity-100'));
     f.hooks.onMountPhase?.('unmounting', 1);
     f.queueStyle.mockClear();
     f.port.applyMergedStyle(tw('text-white'));
@@ -114,7 +116,9 @@ describe('Feedback catalog boundary', () => {
     f.caps.attach([[EFFECTS_CAP, f.effects]]);
     expect(f.queueStyle).not.toHaveBeenCalled();
     f.hooks.onMountPhase?.('mounting', 2);
-    expect(f.queueStyle).toHaveBeenLastCalledWith(tw('opacity-100 bg-blue-500'));
+    expect(f.queueStyle).toHaveBeenLastCalledWith(
+      expect.objectContaining(tw('opacity-100 bg-blue-500'))
+    );
   });
 
   it('T-FEEDBACK-0001-CASE-LIFETIME: delayed temporary projection cannot cross view epochs', () => {
@@ -129,7 +133,7 @@ describe('Feedback catalog boundary', () => {
     for (const [handle] of f.queueStyle.mock.calls) {
       expect(handle.tokens).not.toContain('stale-view-token');
     }
-    expect(f.queueStyle).toHaveBeenLastCalledWith(tw('opacity-25'));
+    expect(f.queueStyle).toHaveBeenLastCalledWith(expect.objectContaining(tw('opacity-25')));
   });
 
   it('T-FEEDBACK-0001-CASE-LIFETIME: terminal cleanup cannot be undone by retained port, hooks or disposers', () => {

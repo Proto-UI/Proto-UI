@@ -1,5 +1,5 @@
-import { resolveWebFocusEntryTarget } from '@proto.ui/adapter-base';
 import {
+  resolveWebFocusEntryTarget,
   cancelWebEventDefaultAction,
   createCapsWiring,
   createWebMoveGestureHost,
@@ -58,6 +58,7 @@ import {
   FOCUS_SET_ENTRY_FOCUSABLE_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
+  FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
 } from '@proto.ui/module-focus';
 import {
   createWebHitParticipationHostBridge,
@@ -94,6 +95,11 @@ import {
 } from '@proto.ui/module-rule-meta';
 import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import { type PropsBaseType } from '@proto.ui/types';
+import { createWebComponentPortalMount } from '../portal-mount';
+import {
+  observeWebComponentRadioFocus,
+  sampleWebComponentScopeTargets,
+} from '../focus-scope-targets';
 
 import {
   getLogicalEventTarget,
@@ -316,9 +322,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     setExposes,
   } = args;
 
-  let mountedEl: HTMLElement | null = null;
-  let originalParent: Node | null = null;
-  let originalNext: Node | null = null;
   const getConnectedTriggerSurface = () => {
     const target = getLogicalTriggerSurfaceRoot(instanceToken);
     const surface = resolveWebComponentTriggerSurface(el, target);
@@ -327,10 +330,28 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   // A11y must project while the rematerialized host is still behind the reveal
   // barrier; focus remains gated until that host is ready for interaction.
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
+  let entryObserver: MutationObserver | null = null;
+  let entryImageObserver: MutationObserver | null = null;
+  let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
+  const stopEntryObserver = () => {
+    entryObserver?.disconnect();
+    entryObserver = null;
+    entryImageObserver?.disconnect();
+    entryImageObserver = null;
+  };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
     const offSurface = subscribeLogicalTriggerSurface(instanceToken, listener);
+    const history = observeWebComponentRadioFocus(el);
+    radioFocusHistory = history;
     return () => {
+      history.dispose();
+      // An old epoch's cleanup owns its captured listener, not a successor's
+      // native focus history or entry observation.
+      if (radioFocusHistory === history) {
+        radioFocusHistory = null;
+        stopEntryObserver();
+      }
       offReady();
       offSurface();
     };
@@ -392,30 +413,126 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
       [FOCUS_TARGET_READY_CAP, subscribeFocusTarget],
+      [
+        FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
+        (container: HTMLElement, direction?: 'next' | 'prev') =>
+          sampleWebComponentScopeTargets(
+            container,
+            isNativelyFocusable,
+            direction,
+            (radio) => radioFocusHistory?.order(radio) ?? 0
+          ),
+      ],
       [FOCUS_ROOT_TARGET_CAP, () => physicalControl() ?? getTriggerSurface()],
       [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, (target: HTMLElement) => isNativelyFocusable(target)],
       [
         FOCUS_SET_FOCUSABLE_CAP,
         (target: HTMLElement, enabled: boolean, options?: { programmatic?: boolean }) => {
+          // Explicit focus-target policy owns both tabindex=0 and the
+          // programmatic-only tabindex=-1; a previous entry observer must not
+          // overwrite it after the target becomes enabled.
+          if (options?.programmatic) stopEntryObserver();
           const surface = physicalControl() ?? getLogicalTriggerSurfaceRoot(instanceToken);
           projectFocusable(target, enabled && (!surface || surface === target), options);
         },
       ],
       [
         FOCUS_RESOLVE_ENTRY_TARGET_CAP,
-        (target: HTMLElement, config: FocusEntryConfig) =>
-          resolveWebFocusEntryTarget(target, config, isNativelyFocusable),
+        (target: HTMLElement, config: FocusEntryConfig) => resolveFocusEntryTarget(target, config),
       ],
       [
         FOCUS_SET_ENTRY_FOCUSABLE_CAP,
         (target: HTMLElement, config: FocusEntryConfig, enabled: boolean) => {
+          stopEntryObserver();
           if (!enabled) {
             projectFocusable(target, false);
             return;
           }
 
-          const resolved = resolveWebFocusEntryTarget(target, config, isNativelyFocusable);
-          projectFocusable(target, resolved === target);
+          const projectEntry = () => {
+            const resolved = resolveFocusEntryTarget(target, config);
+            projectFocusable(target, resolved === target);
+          };
+          projectEntry();
+          // Entry policy can be projected before descendant custom elements
+          // restore their tabindex on reveal. Track the same DOM inputs used
+          // by the resolver, without requesting focus or manufacturing facts.
+          const Observer = target.ownerDocument.defaultView?.MutationObserver;
+          if (config.strategy === 'descendant-first' && Observer) {
+            const observeTree = () => {
+              entryObserver?.disconnect();
+              entryImageObserver?.disconnect();
+              let hasArea = false;
+              const options: MutationObserverInit = {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: [
+                  'tabindex',
+                  'disabled',
+                  'aria-disabled',
+                  'hidden',
+                  'inert',
+                  'aria-hidden',
+                  'href',
+                  'contenteditable',
+                  'controls',
+                  'type',
+                  'open',
+                  'usemap',
+                  'src',
+                  'slot',
+                  'name',
+                  'class',
+                  'style',
+                ],
+              };
+              const observe = (root: HTMLElement | ShadowRoot) => {
+                entryObserver?.observe(root, options);
+                hasArea ||= !!root.querySelector('area');
+                if (root instanceof HTMLElement && root.shadowRoot) observe(root.shadowRoot);
+                for (const descendant of root.querySelectorAll<HTMLElement>('*'))
+                  if (descendant.shadowRoot) observe(descendant.shadowRoot);
+              };
+              observe(target);
+              // Both entry resolvers consult document-level image-map bindings.
+              // Only regions with areas need this extra observation; unrelated
+              // document mutations must not resample ordinary entry regions.
+              if (hasArea) {
+                entryImageObserver ??= new Observer((records) => {
+                  const containsImage = (node: Node) =>
+                    node instanceof Element && (node.matches('img') || !!node.querySelector('img'));
+                  if (
+                    records.some((record) =>
+                      record.type === 'childList'
+                        ? [...record.addedNodes, ...record.removedNodes].some(containsImage)
+                        : containsImage(record.target)
+                    )
+                  )
+                    projectEntry();
+                });
+                entryImageObserver.observe(target.ownerDocument, {
+                  subtree: true,
+                  childList: true,
+                  attributes: true,
+                  attributeFilter: ['usemap', 'src', 'hidden', 'inert', 'aria-hidden'],
+                });
+              }
+            };
+            entryObserver = new Observer((records) => {
+              if (
+                records.some(
+                  (record) => record.target !== target || record.attributeName !== 'tabindex'
+                )
+              ) {
+                projectEntry();
+                // New native descendants can own open roots. A single DOM
+                // subtree observation never crosses those boundaries.
+                observeTree();
+              }
+            });
+            observeTree();
+          }
         },
       ],
       [
@@ -513,45 +630,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     ])
     .use('overlay', () => [
       [HOST_ELEMENT_CAP, el],
-      [
-        OVERLAY_GLOBAL_MOUNT_CAP,
-        {
-          mount(el: HTMLElement) {
-            if (el.parentNode === document.body) return;
-            mountedEl = el;
-            originalParent = el.parentNode;
-            originalNext = el.nextSibling;
-            try {
-              Object.defineProperty(el, 'parentNode', {
-                get() {
-                  return originalParent;
-                },
-                configurable: true,
-              });
-            } catch {}
-            document.body.appendChild(el);
-          },
-          unmount(_el: HTMLElement) {
-            if (!mountedEl) return;
-            if (originalParent) {
-              if (originalNext && originalParent.contains(originalNext)) {
-                originalParent.insertBefore(mountedEl, originalNext);
-              } else {
-                originalParent.appendChild(mountedEl);
-              }
-            }
-            try {
-              Object.defineProperty(mountedEl, 'parentNode', {
-                get() {
-                  return originalParent;
-                },
-                configurable: true,
-              });
-            } catch {}
-            mountedEl = null;
-          },
-        },
-      ],
+      [OVERLAY_GLOBAL_MOUNT_CAP, createWebComponentPortalMount()],
       [OVERLAY_MODAL_CAP, createWebOverlayModal(el.ownerDocument)],
       ...(args.overlayLayerScheduler
         ? [[OVERLAY_LAYER_SCHEDULER_CAP, args.overlayLayerScheduler] as const]
@@ -599,4 +678,25 @@ function projectFocusable(
   } else {
     target.removeAttribute('tabindex');
   }
+}
+
+function resolveFocusEntryTarget(
+  container: HTMLElement,
+  config: { strategy: 'self' | 'descendant-first'; fallback: 'self' | 'none' }
+): HTMLElement | null {
+  // Keep the established Light DOM entry policy when no Shadow boundary
+  // needs traversal; composed scope sampling is a separate host realization.
+  if (
+    !container.shadowRoot &&
+    !Array.from(container.querySelectorAll<HTMLElement>('*')).some((el) => el.shadowRoot)
+  ) {
+    return resolveWebFocusEntryTarget(container, config, isNativelyFocusable);
+  }
+  if (config.strategy === 'descendant-first') {
+    const descendant = sampleWebComponentScopeTargets(container, isNativelyFocusable).targets[0];
+    if (descendant) return descendant;
+  }
+
+  if (config.fallback === 'self') return container;
+  return null;
 }

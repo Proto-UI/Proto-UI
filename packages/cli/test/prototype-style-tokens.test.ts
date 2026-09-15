@@ -8,7 +8,11 @@ import {
   createExposeStateWebNativeVariantPolicy,
   OFFICIAL_EXPOSED_STATE_NAMES,
 } from '../../modules/expose-state-web/src/utils';
-import { collectProtoStyleTokens } from '../src/services/prototype-style-tokens';
+import {
+  collectProtoRootStyleTokenOccurrences,
+  collectProtoRootStyleTokens,
+  collectProtoStyleTokens,
+} from '../src/services/prototype-style-tokens';
 
 describe('collectProtoStyleTokens', () => {
   let dir: string;
@@ -19,6 +23,60 @@ describe('collectProtoStyleTokens', () => {
 
   afterEach(async () => {
     await rm(dir, { recursive: true, force: true });
+  });
+
+  it('separates Root feedback style tokens from Template-node style tokens', async () => {
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      [
+        "import { definePrototype, tw } from '@proto.ui/core';",
+        '',
+        "const ROOT_TOKENS = 'absolute z-40';",
+        "const TEMPLATE_TOKENS = 'pointer-events-none';",
+        '',
+        'const widget = definePrototype({',
+        "  name: 'widget',",
+        '  setup(def) {',
+        '    def.feedback.style.use(tw(ROOT_TOKENS));',
+        '    def.rule({',
+        '      when: () => true,',
+        "      intent: (i) => i.feedback.style.use(tw('hidden')),",
+        '    });',
+        '    return (renderer) =>',
+        "      renderer.el('span', { style: tw(TEMPLATE_TOKENS) }, 'content');",
+        '  },',
+        '});',
+        'export default widget;',
+      ].join('\n')
+    );
+
+    expect(await collectProtoRootStyleTokens(dir)).toEqual(['absolute', 'hidden', 'z-40']);
+
+    const occurrences = await collectProtoRootStyleTokenOccurrences(dir);
+    expect(occurrences).toEqual([
+      expect.objectContaining({
+        token: 'absolute',
+        path: 'widget.proto.ts',
+        context: 'setup',
+      }),
+      expect.objectContaining({
+        token: 'z-40',
+        path: 'widget.proto.ts',
+        context: 'setup',
+      }),
+      expect.objectContaining({
+        token: 'hidden',
+        path: 'widget.proto.ts',
+        context: 'rule',
+      }),
+    ]);
+    for (const occurrence of occurrences) {
+      expect(occurrence.line).toBeGreaterThan(0);
+      expect(occurrence.column).toBeGreaterThan(0);
+    }
+
+    const closure = await collectProtoStyleTokens(dir);
+    expect(closure).toContain('pointer-events-none');
   });
 
   it('resolves template literal interpolation and cross-file constant imports', async () => {

@@ -20,6 +20,10 @@ statement:
 
 
 criteria:
+  - id: A-WEB-COMPONENT-0001-SHADOW-MODES
+    text:
+      zh-CN: 同一 Adapter identity 保留 Light（shadow omitted/false）和 direct Shadow（true），显式 object split 受 draft D-WEB-COMPONENT-SHADOW-PROFILE-0001 与 D-WEB-COMPONENT-SHADOW-STYLE-0001 限定。下列 Module 安装/provision 不代表每种 presentation mode 均已准入；split 仅接受已治理的 Root 与 plain-text editor recipe，拒绝 Image View。Adapter identity 的 active 状态不提升这些 draft 语义。
+      en: The same Adapter identity retains Light (shadow omitted/false) and direct Shadow (true); explicit object split is bounded by draft D-WEB-COMPONENT-SHADOW-PROFILE-0001 and D-WEB-COMPONENT-SHADOW-STYLE-0001. Module installation/provision below does not admit every presentation mode; split accepts only governed Root and plain-text editor recipes and rejects Image View. The active Adapter identity does not promote these draft semantics.
   - id: A-WEB-COMPONENT-0001-POSITIONING
     text:
       en: 'The Web Adapter installs Positioning and translates anchored geometry through the shared Floating UI host. Active Overlay placement, resize updates, non-transform projection and cleanup have executable Adapter evidence; this slice does not claim native browser layout fidelity.'
@@ -94,8 +98,8 @@ criteria:
       en: The Adapter must wire the required Expose Event semantic Module and provide `HC-EXPOSE-EVENT-SINK-0001` as a translated capability; valid emissions must map to same-named `CustomEvent`s on the persistent Custom Element owner, declaration metadata must not enter `getExposes()`, registration must survive internal repeatable view epochs and synchronous DOM moves, and this relation must not be interpreted as Event input routing.
   - id: A-WEB-COMPONENT-0001-N
     text:
-      zh-CN: 对声明 `M-IMAGE-VIEW-0001` 的 Web Component realization 必须将每个 Image View request 绑定到不可变 generation，清理替换/空 source 的旧视觉目标，并在 view detach/disposal 后移除 owned physical image；该保证由 `T-IMAGE-VIEW-0001` 的 Web Component integration evidence 验证。
-      en: The Web Component realization of `M-IMAGE-VIEW-0001` must bind each Image View request to an immutable generation, clear stale visual targets on replacement or empty source, and remove the owned physical image after view detach or disposal; `T-IMAGE-VIEW-0001` Web Component integration evidence verifies this guarantee.
+      zh-CN: 在非 split 模式下，对声明 `M-IMAGE-VIEW-0001` 的 Web Component realization 必须将每个 Image View request 绑定到不可变 generation，清理替换/空 source 的旧视觉目标，并在 view detach/disposal 后移除 owned physical image；该保证由 `T-IMAGE-VIEW-0001` 的 Web Component integration evidence 验证。
+      en: In non-split modes, the Web Component realization of `M-IMAGE-VIEW-0001` must bind each Image View request to an immutable generation, clear stale visual targets on replacement or empty source, and remove the owned physical image after view detach or disposal; `T-IMAGE-VIEW-0001` Web Component integration evidence verifies this guarantee.
   - id: A-WEB-COMPONENT-0001-CONTEXT
     text:
       en: The standard Adapter wires Context with stable opaque instance identity and current logical ancestry; real mounted nested scopes, equal-name Key isolation, callback updates and terminal owner replacement must conform to T-CONTEXT-0003.
@@ -134,8 +138,8 @@ criteria:
       zh-CN: standard Web Adapter 安装 Text Control，在 render 前将静态 line mode 解析为一个物理 input 或 textarea，投射 common hint 与 normalized input，提供 callback scope 并释放 editing lease。Web Component 保留 logical wrapper，原生框架使用物理 editor root。
   - id: A-WEB-COMPONENT-0001-IMAGE-VIEW
     text:
-      en: The Web Adapter resolves a static Image View declaration to one physical image, projects portable properties, and retires obsolete decode completions on source replacement or unmount. Completion uses the existing callback bridge; native image events are not a second author transition protocol.
-      zh-CN: Web Adapter 将静态 Image View declaration 解析为一个物理 image，投射 portable property，并在 source 替换或 unmount 后撤销过期 decode completion。completion 使用既有 callback bridge；native image event 不是第二套 author transition 协议。
+      en: In non-split modes, the Web Adapter resolves a static Image View declaration to one physical image, projects portable properties, and retires obsolete decode completions on source replacement or unmount. Completion uses the existing callback bridge; native image events are not a second author transition protocol.
+      zh-CN: 在非 split 模式下，Web Adapter 将静态 Image View declaration 解析为一个物理 image，投射 portable property，并在 source 替换或 unmount 后撤销过期 decode completion。completion 使用既有 callback bridge；native image event 不是第二套 author transition 协议。
   - id: A-WEB-COMPONENT-0001-SCROLL
     text:
       en: The standard Adapter wires Scroll with host-owned overflow and the current root, translates normalized requests/facts, and restores owned styles and listeners on teardown. Composed Thumb geometry and Move Gesture remain attached to the same Context/Anatomy-resolved surface; evidence uses simulated Web geometry, not native physics certification.
@@ -210,7 +214,7 @@ supports:
     - id: M-IMAGE-VIEW-0001
       since: 0.3.0-alpha.0
       role: optional-module
-      note: The persistent Custom Element owner keeps its logical boundary while projecting declared Image View requirements to one inner HTMLImageElement target.
+      note: Non-split modes retain the logical boundary and project Image View to an inner HTMLImageElement. Split refuses this declaration under D-WEB-COMPONENT-SHADOW-PROFILE-0001-J; this is not mode-independent admission.
     - id: M-CONTEXT-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -225,7 +229,7 @@ supports:
     - id: M-TEXT-CONTROL-0001
       since: 0.3.0-alpha.0
       role: required-module
-      note: Installed by standard Runtime; author use requires a static declaration.
+      note: Installed by standard Runtime; author use requires a static declaration. Split realization and native sizing are bounded by draft D-WEB-COMPONENT-SHADOW-PROFILE-0001-J/K/L, not arbitrary editor or CSS support.
     - id: M-SCROLL-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -281,7 +285,7 @@ provides:
     - id: HC-IMAGE-VIEW-0001
       since: 0.3.0-alpha.0
       role: translated-capability
-      note: The Custom Element maps Image View to the inner image target and carries loading completion through the generation-bound host lease.
+      note: In non-split modes only, the Custom Element maps Image View to the inner image target and carries loading completion through the generation-bound host lease.
     - id: HC-CONTEXT-IDENTITY-0001
       since: 0.3.0-alpha.0
       role: translated-capability
@@ -307,6 +311,7 @@ provides:
     - id: HC-TEXT-CONTROL-0001
       since: 0.3.0-alpha.0
       role: translated-capability
+      note: Split uses one native input[type=text] or textarea as both editor and surface, with view-owned attachment and leases; see the draft Shadow profile constraints.
     - id: HC-SCROLL-SURFACE-0001
       since: 0.3.0-alpha.0
       role: translated-capability
@@ -317,8 +322,16 @@ provides:
 relates:
   decisions:
     - D-ADAPTER-PROFILE-0001
+    - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      since: 0.3.0-alpha.0
+    - id: D-WEB-COMPONENT-SHADOW-STYLE-0001
+      since: 0.3.0-alpha.0
 verifies:
   tests:
+    - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001
+      since: 0.3.0-alpha.0
+    - id: T-WEB-COMPONENT-SHADOW-STYLE-0001
+      since: 0.3.0-alpha.0
     - id: T-RULE-COLOR-SCHEME-0001
       since: 0.3.0-alpha.0
     - id: T-ANCHORED-POSITIONING-0001
@@ -404,6 +417,9 @@ sources:
   - path: packages/adapters/web-component/test/context.integration.test.ts
   - path: packages/adapters/web-component/test/expose-state-web.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Qualified presentation-mode admission and linked bounded draft split evidence without promoting lifecycle or adding an Adapter identity.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Cataloged bounded Positioning support with active-view geometry and cleanup evidence.

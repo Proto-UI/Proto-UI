@@ -1,21 +1,30 @@
 // packages/core/src/spec/feedback/recorder.ts
 
 import type { StyleHandle } from './style';
-import { getSemanticGroupKeyV0, mergeTwTokensV0 } from './semantic-merge';
+import { getSemanticGroupKeyV0 } from './semantic-merge';
 import { assertTwTokenV0 } from './tokens';
+import {
+  createRootStyleEffect,
+  mergeRootStyleEntries,
+  readRootStyleEntries,
+  resolveRootStyleEntry,
+  type RootStyleEffect,
+  type RootStyleEntry,
+  type RootStyleOrigin,
+} from './root-effect';
 
 export type UnUse = () => void;
 
 type Chunk = {
   id: number;
-  tokens: string[]; // flattened tw tokens in order
+  entries: readonly RootStyleEntry[];
   removed: boolean;
 };
 
 type PatchEntry =
   | {
       kind: 'patch';
-      token: string;
+      entry: RootStyleEntry;
     }
   | {
       kind: 'suppress';
@@ -30,6 +39,15 @@ export class FeedbackStyleRecorder {
    * setup-only: record style intent tokens (tw handles only)
    */
   use(...handles: StyleHandle[]): UnUse {
+    return this.recordAuthorHandles(handles, 'setup');
+  }
+
+  /** Internal Rule contribution; replay keeps this origin rather than reclassifying. */
+  useRuntime(...handles: StyleHandle[]): UnUse {
+    return this.recordAuthorHandles(handles, 'rule');
+  }
+
+  private recordAuthorHandles(handles: StyleHandle[], origin: RootStyleOrigin): UnUse {
     // flatten & validate
     const flattened: string[] = [];
     for (const h of handles) {
@@ -44,7 +62,7 @@ export class FeedbackStyleRecorder {
 
     const chunk: Chunk = {
       id: this.nextId++,
-      tokens: flattened,
+      entries: flattened.map((t) => resolveRootStyleEntry(t, origin)),
       removed: false,
     };
 
@@ -62,7 +80,7 @@ export class FeedbackStyleRecorder {
    * Used by rule extensions that generate selector-based tokens.
    */
   useUnsafe(...handles: StyleHandle[]): UnUse {
-    const flattened: string[] = [];
+    const flattened: RootStyleEntry[] = [];
     for (const h of handles) {
       if (!h || h.kind !== 'tw' || !Array.isArray(h.tokens)) {
         throw new Error(`[feedback] unsupported style handle in v0`);
@@ -71,13 +89,13 @@ export class FeedbackStyleRecorder {
         if (typeof t !== 'string' || !t) {
           throw new Error(`[feedback] invalid tw token (unsafe): empty`);
         }
-        flattened.push(t);
       }
+      flattened.push(...readRootStyleEntries(h, 'rule'));
     }
 
     const chunk: Chunk = {
       id: this.nextId++,
-      tokens: flattened,
+      entries: createRootStyleEffect(flattened).entries,
       removed: false,
     };
 
@@ -95,7 +113,10 @@ export class FeedbackStyleRecorder {
    */
   patch(...handles: StyleHandle[]): void {
     for (const token of this.flattenRuntimePatchHandles(handles, 'run.feedback.style.patch')) {
-      this.runtimePatch.set(getSemanticGroupKeyV0(token), { kind: 'patch', token });
+      this.runtimePatch.set(getSemanticGroupKeyV0(token), {
+        kind: 'patch',
+        entry: resolveRootStyleEntry(token, 'runtime'),
+      });
     }
   }
 
@@ -132,45 +153,49 @@ export class FeedbackStyleRecorder {
    * the pre-patch base semantic result, not host translation artifacts.
    */
   exportWithAdditional(...handles: StyleHandle[]): { tokens: string[] } {
-    return this.applyPatchLayer(this.exportBaseTokens(handles));
+    return { tokens: this.exportRootEffect(...handles).tokens };
   }
 
   exportBase(): { tokens: string[] } {
-    return { tokens: this.exportBaseTokens() };
+    return { tokens: this.exportBaseEntries().map((entry) => entry.token) };
   }
 
-  private exportBaseTokens(additionalHandles: StyleHandle[] = []): string[] {
-    const inputs: string[] = [];
+  /** Internal Root-only effect snapshot. Public export retains its token-only shape. */
+  exportRootEffect(...handles: StyleHandle[]): RootStyleEffect {
+    return createRootStyleEffect(this.applyPatchLayer(this.exportBaseEntries(handles)));
+  }
+
+  private exportBaseEntries(additionalHandles: StyleHandle[] = []): RootStyleEntry[] {
+    const inputs: RootStyleEntry[] = [];
     for (const c of this.chunks) {
       if (c.removed) continue;
-      inputs.push(...c.tokens);
+      inputs.push(...c.entries);
     }
     for (const h of additionalHandles) {
       if (!h || h.kind !== 'tw' || !Array.isArray(h.tokens)) {
         throw new Error(`[feedback] unsupported style handle in v0`);
       }
-      inputs.push(...h.tokens);
+      inputs.push(...readRootStyleEntries(h, 'rule'));
     }
-    return mergeTwTokensV0(inputs).tokens;
+    return mergeRootStyleEntries(inputs);
   }
 
-  private applyPatchLayer(baseTokens: string[]): { tokens: string[] } {
-    if (this.runtimePatch.size === 0) return { tokens: baseTokens };
+  private applyPatchLayer(baseEntries: RootStyleEntry[]): RootStyleEntry[] {
+    if (this.runtimePatch.size === 0) return baseEntries;
 
-    const patchTokens: string[] = [];
-    const baseAfterSuppress: string[] = [];
+    const patchEntries: RootStyleEntry[] = [];
+    const baseAfterSuppress: RootStyleEntry[] = [];
 
-    for (const token of baseTokens) {
-      const entry = this.runtimePatch.get(getSemanticGroupKeyV0(token));
-      if (entry) continue;
-      baseAfterSuppress.push(token);
+    for (const entry of baseEntries) {
+      if (this.runtimePatch.has(getSemanticGroupKeyV0(entry.token))) continue;
+      baseAfterSuppress.push(entry);
     }
 
     for (const entry of this.runtimePatch.values()) {
-      if (entry.kind === 'patch') patchTokens.push(entry.token);
+      if (entry.kind === 'patch') patchEntries.push(entry.entry);
     }
 
-    return mergeTwTokensV0([...baseAfterSuppress, ...patchTokens]);
+    return mergeRootStyleEntries([...baseAfterSuppress, ...patchEntries]);
   }
 
   private flattenRuntimePatchHandles(handles: StyleHandle[], op: string): string[] {
