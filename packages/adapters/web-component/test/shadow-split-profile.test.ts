@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
+import { definePrototype, delay, tw, type RunHandle } from '@proto.ui/core';
 import { declareImageView } from '@proto.ui/module-image-view';
 import {
   AdaptToWebComponent,
@@ -34,6 +34,41 @@ afterEach(async () => {
 
 // D-WEB-COMPONENT-SHADOW-PROFILE-0001 G-J; D-WEB-COMPONENT-SHADOW-STYLE-0001 K/N.
 describe('public WC Shadow split profile', () => {
+  it('cancels failed onCreated work before reconnecting a fresh generation', async () => {
+    vi.useFakeTimers();
+    const events: string[] = [];
+    let generation = 0;
+    const proto = definePrototype({
+      name: name(),
+      setup(def) {
+        const id = ++generation;
+        def.lifecycle.onCreated(() => {
+          delay(20, () => events.push(`delay:${id}`));
+          if (id === 1) throw new Error('creation canary');
+        });
+        def.lifecycle.onBeforeDispose(() => events.push(`dispose:${id}`));
+        return () => null;
+      },
+    });
+    const C = AdaptToWebComponent(proto, { shadow });
+    const host = new C();
+    try {
+      expect(() => (host as any).connectedCallback()).toThrow('creation canary');
+      expect(host.shadowRoot!.childNodes).toHaveLength(0);
+      expect(events).toEqual(['dispose:1']);
+      document.body.append(host);
+      await flush();
+      await vi.advanceTimersByTimeAsync(50);
+      expect(events).toEqual(['dispose:1', 'delay:2']);
+      host.remove();
+      await flush();
+      expect(events).toEqual(['dispose:1', 'delay:2', 'dispose:2']);
+    } finally {
+      host.remove();
+      await flush();
+      vi.useRealTimers();
+    }
+  });
   it('atomically routes Root and normalized surface props with owner-generation lifetime', async () => {
     let run!: RunHandle<any>;
     let setup = 0;

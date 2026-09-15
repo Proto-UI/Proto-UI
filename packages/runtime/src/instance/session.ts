@@ -275,14 +275,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   (run as any).update = () => controller.update();
 
-  emit({ type: 'instance.setup.exit' });
-  propsPort.applyRaw({ ...(host.getRawProps?.() ?? {}) });
-  setInstancePhase('alive');
-  callbackScope.run(run, () => {
-    for (const cb of lifecycle.created) cb(run);
-  });
-  emit({ type: 'instance.created' });
-
   const mount = (): Promise<void> => {
     if (instancePhase !== 'alive') {
       return Promise.reject(
@@ -480,15 +472,36 @@ export function createRuntimeSession<P extends PropsBaseType>(
     return disposePending;
   };
 
-  if (host.presenceLifecycle === 'session') {
-    moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver({
-      requestMount() {
-        void mount();
-      },
-      requestUnmount() {
-        void unmount();
-      },
+  try {
+    emit({ type: 'instance.setup.exit' });
+    propsPort.applyRaw({ ...(host.getRawProps?.() ?? {}) });
+    setInstancePhase('alive');
+    callbackScope.run(run, () => {
+      for (const cb of lifecycle.created) cb(run);
     });
+    emit({ type: 'instance.created' });
+
+    if (host.presenceLifecycle === 'session') {
+      moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver({
+        requestMount() {
+          void mount();
+        },
+        requestUnmount() {
+          void unmount();
+        },
+      });
+    }
+  } catch (error) {
+    // The caller has no session to dispose until creation returns. Reclaim
+    // this still-detached generation here, including its pending delays.
+    // Detached disposal finalizes synchronously; its promise can still reject
+    // when a cleanup callback throws. Keep the original creation failure.
+    try {
+      void dispose().catch(() => {});
+    } catch {
+      // Synchronous teardown failures must not replace the creation error.
+    }
+    throw error;
   }
 
   return {

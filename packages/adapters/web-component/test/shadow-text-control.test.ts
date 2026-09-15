@@ -25,6 +25,47 @@ afterEach(async () => {
 });
 
 describe('S5 native Shadow text surface', () => {
+  it.each(['single', 'multiline'] as const)(
+    'keeps an initially absent %s editor detached inside another ShadowRoot',
+    async (lineMode) => {
+      let run!: RunHandle<any>;
+      let mounts = 0;
+      const proto = definePrototype({
+        name: name(),
+        modules: [declareTextControl({ content: 'plain-text', engine: 'host', lineMode })],
+        setup(def) {
+          const control = asTextControl();
+          def.lifecycle.onCreated((r) => {
+            run = r;
+            control.sync({ valueMode: 'uncontrolled', defaultValue: 'retained' });
+            r.lifecycle.setPresent(false);
+          });
+          def.lifecycle.onMounted(() => {
+            mounts++;
+          });
+          def.expose('show', () => run.lifecycle.setPresent(true));
+          return () => null;
+        },
+      });
+      const C = AdaptToWebComponent(proto, { shadow: shadow() });
+      const outer = document.createElement('div');
+      const outerRoot = outer.attachShadow({ mode: 'open' });
+      const host = new C();
+      outerRoot.append(host);
+      document.body.append(outer);
+      await flush();
+      expect(mounts).toBe(0);
+      expect(host.shadowRoot!.querySelector('input,textarea')).toBeNull();
+      expect(host.shadowRoot!.querySelector('style')).not.toBeNull();
+      (host.getExposes() as any).show();
+      await flush();
+      const editor = host.shadowRoot!.querySelector('input,textarea') as HTMLInputElement;
+      expect(mounts).toBe(1);
+      expect(editor.isConnected).toBe(true);
+      expect(editor.value).toBe('retained');
+      expect(editor.defaultValue).toBe('retained');
+    }
+  );
   it('refreshes entry fallback when an editor inside an open root changes eligibility', async () => {
     const panel = definePrototype({
       name: name(),

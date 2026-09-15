@@ -59,6 +59,15 @@ cases:
       - D-WEB-COMPONENT-SHADOW-PROFILE-0001-H
     expectation: forwarding-and-cleanup-only-not-arbitrary-css-sizing-parity
 implementations:
+  - id: native-initial-absence-browser
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases: [T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-NATIVE-TEXT]
+    exercises: [C-HOST-VIEW-ATTACHMENT-0001]
+    notes:
+      - Source-level Chrome probes initial input/textarea absence inside another open ShadowRoot, followed by visible and focusable first attachment; complements public-dist coverage.
   - id: public-dist-s5-native-text
     kind: workspace-check
     status: passing
@@ -182,6 +191,9 @@ sources:
   - path: packages/adapters/web-component/test/contract/slot-shadow-dom.v0.contract.test.ts
   - path: packages/adapters/web-component/test/shadow-owner-shell.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Connected native initial-absence browser regression to the existing view-lease criterion without expanding profile admission.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Connected mode-qualified Adapter admission and the S5 public-dist consumer alongside website and native lease evidence.

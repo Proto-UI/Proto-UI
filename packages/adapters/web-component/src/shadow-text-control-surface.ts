@@ -13,7 +13,8 @@ export function createShadowTextControlSurface(
   const assertActive = () => {
     if (disposed) throw new Error('[WC Adapter] native Shadow surface is disposed.');
   };
-  shell.attachOwnerNode(element);
+  // Identity is owner-lived, but initial absence must not acquire a view lease.
+  // The first successful view commit attaches the native editor below.
   return {
     element,
     replaceRenderedChildren(nodes) {

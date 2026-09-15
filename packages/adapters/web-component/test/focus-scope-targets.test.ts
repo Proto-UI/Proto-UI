@@ -1,6 +1,49 @@
 import { describe, it, expect } from 'vitest';
 import { sampleWebComponentScopeTargets } from '../src/focus-scope-targets';
 describe('WC scope sequential target sample', () => {
+  it('sorts tabindex within ShadowRoot and slot scopes before flattening', () => {
+    const scope = document.createElement('div');
+    const button = (index: number) => {
+      const el = document.createElement('button');
+      el.tabIndex = index;
+      return el;
+    };
+    const host = document.createElement('div');
+    const root = host.attachShadow({ mode: 'open' });
+    const inner = button(1),
+      outer = button(2),
+      last = button(0);
+    const slot = document.createElement('slot');
+    const slotted = button(3),
+      slottedFirst = button(1);
+    host.append(slotted, slottedFirst);
+    root.append(slot, inner);
+    scope.append(host, outer, last);
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets).toEqual([
+        outer,
+        inner,
+        slottedFirst,
+        slotted,
+        last,
+      ]);
+      host.tabIndex = 1;
+      expect(sampleWebComponentScopeTargets(scope).targets).toEqual([
+        host,
+        inner,
+        slottedFirst,
+        slotted,
+        outer,
+        last,
+      ]);
+      // Happy DOM's property setter removes tabindex=-1, unlike Chrome.
+      host.setAttribute('tabindex', '-1');
+      expect(sampleWebComponentScopeTargets(scope).targets).toEqual([outer, last]);
+    } finally {
+      scope.remove();
+    }
+  });
   it('excludes hidden inputs and unassociated areas inside an open shadow tree', () => {
     const scope = document.createElement('div');
     const host = document.createElement('div');

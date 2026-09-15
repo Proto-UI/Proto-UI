@@ -31,3 +31,29 @@
 ## 不变的限制
 
 本次没有修复独立 Dialog 快速重开问题 #645，没有扩大任意 CSS / Portal / 原型准入，也不从用户总体验收推断 Safari、Firefox 或真实系统 IME 完整矩阵。性能脚本仍是工程采样，不新增规范性帧预算。
+
+## 独立检查与修复
+
+本地独立检查分别覆盖 spec/文档、Context/Rule 调和和高风险 Runtime/WC 路径。这是提交 PR 前的局部检查，不是 GitHub approval 或完整独立验收。
+
+- CLI README 仍有 F1 阶段“不公开启用”的过时陈述：改为当前显式 object profile 的使用方式；历史 F1 Record 保持阶段事实。
+- SHADOW-R1：首次 `onCreated` 设为 absent 时，原生 editor 被提前挂载；在另一个 open ShadowRoot 内，document 隐藏规则无法遮蔽它。改为首次 view commit 才取得 editor attachment lease。Input/textarea 单测与 Chrome 初始不存在→显示→聚焦路径通过，独立 Chrome 另验 hide/remount、value/defaultValue 和 listener 撤销。
+- SHADOW-R2：全局排序 flattened targets 会把内层正 tabindex 提前到外层 scope。改为 host/slot scope 内排序后展开；显式负 tabindex host 排除子 scope，非可聚焦且不 delegatesFocus 的 host 不凭正 tabindex 提升优先级。Chrome 原生 Tab/Shift+Tab 为参照，覆盖 slot、正/负 host index、display:contents、隐藏 host/可见子节点，并实际验证 descendant entry 与 trap/loop。
+- SHADOW-R3：`onCreated` 抛错时 session 尚未返回，Adapter owner 无法清理已调度的 delay。这是主线已存在的 Runtime 缺口。Runtime 在 post-setup creation 失败时执行 terminal disposal，并保持原始异常；测试验证 canceled scheduler callback 即使被强制调用也无效、旧 handle 失效及每代 cleanup 一次。没有宣称任意更早 setup/onRuntimeReady 异常均已纳入本次修复。
+
+R1/R2 新测试修复前 3 失败；R3 两个 cleanup 分支修复前均失败。修复后 Adapter/Runtime focused 4 文件 / 38 项通过，新增 Chrome 3 路径通过。R2 非可聚焦 host 补充路径也先失败再修复。T 映射接到已有 draft criteria，不修改规范来迁就实现。
+
+## 体积预算
+
+保持 esbuild 0.25.12、ES2020、minify/tree-shaking、external 设置与 gzip level 9 不变：main `8f2eba12` 的 WC root 为 74,834 bytes；首个集成提交 `685ebfe1` 为 82,826；边界修复后为 82,998。仅 WC 门槛由 76,000 调整至 84,000，余量 1,002 bytes，其余 8 项不变并通过。
+
+独立 metafile 核对：首个集成相对 main 增加的 24,839 minified bytes，主要来自 WC Shadow/Portal/focus 17,885、Core role 3,160、Event routing 2,235、Context 874、shared Focus 656；余 29 是其它输出差异。这些不是可相加的 gzip 分项。新增 13 个 WC 和 2 个 Core 输入，没有重复 Runtime、source/dist 双份、CLI/compiler、生成式 stylesheet payload 或额外 prototype family。选择同一个运行时 Adapter 的结果是其 whole-entry 包含可选 split 实现；此次不为压缩数字改变已批准的公开入口。
+
+遵循 [Overlay 预算调整先例](./2026-09-10-overlay-catalog-package-budget.zh-CN.md)，这是本功能范围的实测增量，不是自动允许未来增长。CI 压缩结果需要另行复核，不以本地数值冒充 CI。
+
+## 验证过程中的非语义失败
+
+- 初次整仓回归的 Feedback exact internal-handle 断言与 native focus 接线问题已调和；最终检查仍保留 public token-only 输出与 cleanup/stale 条件。
+- S3 历史诊断 fixture 的旧 `def.a11y` 改用 main 已迁移的 `asAccessible()`。
+- 大型 squash 内容尚未提交时，Agent tooling 的同步 `git diff --binary HEAD` 超出缓冲；提交干净集成单元后 58 项检查通过，没有借本功能修改 unrelated tooling buffer。
+- 后续并行 build 与 CLI 测试出现一次 init 非零退出；冻结 dist 后相同用例通过。新 Chrome 文件未入 index 时 spec evidence 路径检查不认识它；纳入追踪后通过。后续最终回归顺序执行 build 与依赖其产物的测试，避免互相覆盖。

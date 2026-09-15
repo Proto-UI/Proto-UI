@@ -34,6 +34,14 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-B
     expectation: scope-without-target-remains-inactive
 implementations:
+  - id: wc-native-scope-order-browser
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-HOST-SEQUENTIAL-SAMPLE]
+    notes:
+      - Chrome native Tab and Shift+Tab provide the oracle for positive tabindex across ShadowRoot and slot scopes, including explicitly indexed hosts; also exercises descendant-first entry and active trapped traversal.
   - id: s4-scope-native-composition
     kind: workspace-check
     status: passing
@@ -72,6 +80,9 @@ verifies:
         - C-AS-FOCUS-SCOPE-0002-I
         - C-AS-FOCUS-SCOPE-0002-J
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added native scope-local tabindex ordering and trapped traversal regression evidence.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added bounded WC scope sequential sample evidence; full native composition is additionally verified by the S4 Dialog journey.

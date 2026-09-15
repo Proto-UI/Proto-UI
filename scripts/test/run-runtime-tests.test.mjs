@@ -11,6 +11,7 @@ describe('runtime test plan', () => {
       .filter((name) => /^demo-shadow-split-.+\.browser\.test\.ts$/.test(name))
       .map((name) => `${directory}${name}`);
     assert.ok(shadowSuites.length >= 5);
+    shadowSuites.push('packages/adapters/web-component/test/shadow-closeout.browser.test.ts');
     for (const suite of shadowSuites)
       assert.ok(BROWSER_SUITES.includes(suite), `Missing shared-server registration: ${suite}`);
   });

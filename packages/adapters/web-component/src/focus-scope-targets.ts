@@ -4,16 +4,17 @@ export function sampleWebComponentScopeTargets(
   container: HTMLElement,
   isNativelyFocusable?: (target: HTMLElement) => boolean
 ) {
-  const targets: HTMLElement[] = [];
+  type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
+  const scope: Entry[] = [];
   const visited = new Set<Element>();
-  const visit = (el: Element) => {
+  const visit = (el: Element, entries: Entry[]) => {
     if (visited.has(el)) return;
     visited.add(el);
     if (!(el instanceof HTMLElement)) return;
     if (el.hidden || el.hasAttribute('inert') || el.getAttribute('aria-hidden') === 'true') return;
     const style = getComputedStyle(el);
     if (style.display === 'none') return;
-    if (
+    const target =
       el !== container &&
       (el.tabIndex >= 0 ||
         (!el.hasAttribute('tabindex') && (isNativelyFocusable?.(el) || el.isContentEditable))) &&
@@ -22,23 +23,46 @@ export function sampleWebComponentScopeTargets(
       el.getAttribute('aria-disabled') !== 'true' &&
       style.visibility !== 'hidden' &&
       style.visibility !== 'collapse' &&
-      style.display !== 'contents'
-    )
-      targets.push(el);
+      style.display !== 'contents';
+    // Shadow hosts and slots own separate tabindex-ordered navigation scopes.
+    // Sort those scopes independently, then expand each at its owner's position.
+    // Sorting a flattened list would let an inner positive tabindex jump ahead
+    // of positive targets in an ancestor scope, contrary to native Tab order.
+    const ownsScope = el instanceof HTMLSlotElement || !!el.shadowRoot;
+    let children = entries;
+    if (ownsScope && el !== container) {
+      if (el.hasAttribute('tabindex') && el.tabIndex < 0) return;
+      children = [];
+      const delegatesFocus = !!el.shadowRoot?.delegatesFocus;
+      // A non-focusable, non-delegating host (e.g. display:contents) cannot
+      // promote its child scope via an otherwise positive tabindex.
+      const priority = el.shadowRoot && !target && !delegatesFocus ? 0 : el.tabIndex;
+      entries.push({ element: el, target: !!target && !delegatesFocus, priority, children });
+    } else if (target) entries.push({ element: el, target: true, priority: el.tabIndex });
     if (el instanceof HTMLSlotElement) {
-      const assigned = el.assignedElements({ flatten: true });
-      (assigned.length ? assigned : [...el.children]).forEach(visit);
+      const assigned = el.assignedNodes();
+      (assigned.length ? assigned : [...el.children]).forEach((node) => {
+        if (node instanceof Element) visit(node, children);
+      });
     } else if (el instanceof HTMLDetailsElement && !el.open) {
       const summary = [...el.children].find((child) => child.tagName === 'SUMMARY');
-      if (summary) visit(summary);
-    } else if (el.shadowRoot) [...el.shadowRoot.children].forEach(visit);
-    else [...el.children].forEach(visit);
+      if (summary) visit(summary, children);
+    } else if (el.shadowRoot)
+      [...el.shadowRoot.children].forEach((child) => visit(child, children));
+    else [...el.children].forEach((child) => visit(child, children));
   };
-  visit(container);
-  // Preserve composed order within each native tabindex priority.
-  targets.sort(
-    (a, b) => (a.tabIndex > 0 ? a.tabIndex : Infinity) - (b.tabIndex > 0 ? b.tabIndex : Infinity)
-  );
+  visit(container, scope);
+  const targets: HTMLElement[] = [];
+  const flatten = (entries: Entry[]) => {
+    entries.sort(
+      (a, b) => (a.priority > 0 ? a.priority : Infinity) - (b.priority > 0 ? b.priority : Infinity)
+    );
+    for (const entry of entries) {
+      if (entry.target) targets.push(entry.element);
+      if (entry.children) flatten(entry.children);
+    }
+  };
+  flatten(scope);
   let activeTarget = container.ownerDocument.activeElement;
   while (activeTarget?.shadowRoot?.activeElement)
     activeTarget = activeTarget.shadowRoot.activeElement;
