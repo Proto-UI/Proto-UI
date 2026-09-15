@@ -59,6 +59,11 @@ cases:
       - C-SCROLL-END-FOLLOW-0001-POLICY
       - C-SCROLL-END-FOLLOW-0001-FACTS
       - C-SCROLL-END-FOLLOW-0001-RESUME
+      - C-SCROLL-END-FOLLOW-0001-INTERRUPT
+      - A-WEB-COMPONENT-0001-SCROLL-END-FOLLOW
+      - A-REACT-18-19-0001-SCROLL-END-FOLLOW
+      - A-VUE-3-0001-SCROLL-END-FOLLOW
+      - A-VUE-2-0001-SCROLL-END-FOLLOW
     expectation: shared-portable-contract-and-host-behavior-across-four-web-adapters
 implementations:
   - id: scroll-end-follow-host-transitions
@@ -95,7 +100,7 @@ implementations:
     consumesCases:
       - T-SCROLL-END-FOLLOW-0001-CASE-WEB-ADAPTERS
     notes:
-      - Fails before the portable atEnd fact exists and passes through WC, React, Vue, and Vue2 after the shared contract is implemented.
+      - Consumes the four precisely anchored vertical Adapter criteria using simulated DOM geometry; verifies portable facts, initial alignment, stationary-contact offset-only non-interference, and explicit to-end completion. It does not verify native input fidelity for four browser/framework combinations.
   - id: scroll-end-follow-real-browser
     kind: runtime-test
     status: passing
@@ -122,12 +127,28 @@ verifies:
   contracts:
     - C-SCROLL-END-FOLLOW-0001
     - C-AS-SCROLL-SURFACE-0001
+  adapters:
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-WEB-COMPONENT-0001-SCROLL-END-FOLLOW]
+    - id: A-REACT-18-19-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-REACT-18-19-0001-SCROLL-END-FOLLOW]
+    - id: A-VUE-3-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-VUE-3-0001-SCROLL-END-FOLLOW]
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-VUE-2-0001-SCROLL-END-FOLLOW]
 exercises:
   modules:
     - M-SCROLL-0001
   hostCaps:
     - HC-SCROLL-SURFACE-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Added precise four-Adapter evidence relations and stationary-contact non-interference coverage; native input evidence remains Chromium-scoped.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Mapped end-follow policy, transition, lifetime, cross-adapter, real-browser, and accessibility evidence.

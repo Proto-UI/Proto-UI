@@ -265,6 +265,35 @@ async function openTouchProbe() {
 }
 
 describe('Scroll end-follow / real Chromium', () => {
+  it('realigns offset-only reflow during a stationary trusted touch without pausing', async () => {
+    // C-SCROLL-END-FOLLOW-0001-INTERRUPT/REFLOW. The offset write represents
+    // unclassified host reflow, not native user pan; touch input is trusted CDP.
+    const { context, page, cdp, initial, point, readEvents } = await openTouchProbe();
+    try {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
+      const displaced = await page.evaluate(
+        (top) => (globalThis as any).setScrollEndFollowOffsetForTest(top),
+        initial.maximum - 96
+      );
+      expect(displaced).toMatchObject({
+        top: initial.maximum - 96,
+        maximum: initial.maximum,
+        followState: 'following',
+        offsetSource: 'test-driven-scrollTop',
+        scrollEventTrusted: true,
+      });
+      const events = await readEvents();
+      expect(events.some((event) => event.type === 'touchstart' && event.isTrusted)).toBe(true);
+      expect(events.some((event) => event.type === 'touchmove')).toBe(false);
+      const appended = await page.evaluate(() => (globalThis as any).appendScrollEndFollowRows(4));
+      expect(appended.top).toBe(appended.maximum);
+      expect(appended.followState).toBe('following');
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    } finally {
+      await context.close();
+    }
+  }, 120_000);
+
   it.each(['projection', 'reentrant'])(
     'settles public %s watcher requests against the current movement',
     async (mode) => {

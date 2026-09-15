@@ -62,8 +62,8 @@ function attachEndFollow(target: HTMLElement, snapshots: ScrollSurfaceSnapshot[]
   });
 }
 
-function touchContact(target: EventTarget, identifier: number): Touch {
-  return { target, identifier } as Touch;
+function touchContact(target: EventTarget, identifier: number, clientX = 0, clientY = 0): Touch {
+  return { target, identifier, clientX, clientY } as Touch;
 }
 
 function dispatchTouch(
@@ -142,6 +142,77 @@ afterEach(() => {
 });
 
 describe('module-scroll: end-follow host contract', () => {
+  it('classifies reversal away after a toward-end movement was clamped', () => {
+    const fixture = installTouchFollowFixture();
+    const start = touchContact(fixture.target, 11, 0, 100);
+    dispatchTouch(fixture.target, 'touchstart', [start], [start]);
+    const toward = touchContact(fixture.target, 11, 0, 50);
+    dispatchTouch(window, 'touchmove', [toward], [toward]);
+    expect(fixture.target.scrollTop).toBe(300);
+    const reversed = touchContact(fixture.target, 11, 0, 80);
+    dispatchTouch(window, 'touchmove', [reversed], [reversed]);
+    fixture.scrollTo(270);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    fixture.updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    fixture.frames.runAll();
+    expect(fixture.target.scrollTop).toBe(270);
+    fixture.lease.dispose();
+  });
+
+  it('samples departure after a small direction reversal before terminal scroll delivery', () => {
+    const fixture = installTouchFollowFixture();
+    const start = touchContact(fixture.target, 11, 0, 100);
+    dispatchTouch(fixture.target, 'touchstart', [start], [start]);
+    const away = touchContact(fixture.target, 11, 0, 200);
+    dispatchTouch(window, 'touchmove', [away], [away]);
+    fixture.target.scrollTop = 200;
+    const reversed = touchContact(fixture.target, 11, 0, 190);
+    dispatchTouch(window, 'touchmove', [reversed], [reversed]);
+    fixture.target.scrollTop = 210;
+    dispatchTouch(window, 'touchend', [reversed], []);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    fixture.updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    fixture.frames.runAll();
+    expect(fixture.target.scrollTop).toBe(210);
+    fixture.lease.dispose();
+  });
+
+  it('retains followed-axis direction through an unrelated-axis scroll before departure delivery', () => {
+    const fixture = installTouchFollowFixture();
+    const start = touchContact(fixture.target, 11);
+    dispatchTouch(fixture.target, 'touchstart', [start], [start]);
+    const moved = touchContact(fixture.target, 11, 0, 50);
+    dispatchTouch(window, 'touchmove', [moved], [moved]);
+    fixture.target.scrollLeft = 20;
+    fixture.target.dispatchEvent(new Event('scroll'));
+    fixture.scrollTo(200);
+    expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    fixture.lease.dispose();
+  });
+
+  it.each(['scroll', 'pointerup', 'pointercancel', 'touchend', 'touchcancel'])(
+    'does not attribute stationary-contact offset reflow at %s to reader departure',
+    (completion) => {
+      // C-SCROLL-END-FOLLOW-0001-INTERRUPT/REFLOW: contact is not movement.
+      const fixture = installTouchFollowFixture();
+      const touch = touchContact(fixture.target, 11);
+      fixture.target.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 31 }));
+      dispatchTouch(fixture.target, 'touchstart', [touch], [touch]);
+      fixture.target.scrollTop = 200;
+      if (completion.startsWith('touch')) dispatchTouch(window, completion, [touch], []);
+      else if (completion.startsWith('pointer')) {
+        window.dispatchEvent(new PointerEvent(completion, { pointerId: 31 }));
+      } else fixture.target.dispatchEvent(new Event('scroll'));
+      expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('following');
+      window.dispatchEvent(new Event('resize'));
+      fixture.frames.runAll();
+      expect(fixture.target.scrollTop).toBe(300);
+      fixture.lease.dispose();
+    }
+  );
+
   it('settles the latest request when pending and applied watchers schedule reentrantly', () => {
     // C-SCROLL-END-FOLLOW-0001-RESUME/FACTS: old movement cannot consume a newer request.
     const frames = installFrameHarness();
@@ -577,6 +648,7 @@ describe('module-scroll: end-follow host contract', () => {
     target.dispatchEvent(new Event('scroll'));
     expect(snapshots.at(-1)?.endFollow.state).toBe('following');
 
+    window.dispatchEvent(new PointerEvent('pointermove', { clientY: -50 }));
     target.scrollTop = 200;
     target.dispatchEvent(new Event('scroll'));
     expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
@@ -601,6 +673,8 @@ describe('module-scroll: end-follow host contract', () => {
     const touch = touchContact(target, 1);
     dispatchTouch(target, 'touchstart', [touch], [touch]);
     target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'touch', clientY: 50 }));
+    dispatchTouch(window, 'touchmove', [touchContact(target, 1, 0, 50)], [touch]);
     window.dispatchEvent(new PointerEvent('pointercancel', { pointerType: 'touch' }));
     target.scrollTop = 200;
     target.dispatchEvent(new Event('scroll'));
@@ -671,6 +745,7 @@ describe('module-scroll: end-follow host contract', () => {
     const fixture = installTouchFollowFixture();
     const touch = touchContact(fixture.target, 11);
     dispatchTouch(fixture.target, 'touchstart', [touch], [touch]);
+    dispatchTouch(window, 'touchmove', [touchContact(fixture.target, 11, 0, 50)], [touch]);
     fixture.target.scrollTop = 200;
     dispatchTouch(window, 'touchcancel', [touch], []);
     expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
@@ -705,6 +780,12 @@ describe('module-scroll: end-follow host contract', () => {
     const foreign = touchContact(document.body, 22);
     dispatchTouch(fixture.target, 'touchstart', [first, second], [first, second, foreign]);
     dispatchTouch(window, 'touchcancel', [first], [second, foreign]);
+    dispatchTouch(
+      window,
+      'touchmove',
+      [touchContact(fixture.target, 12, 0, 50)],
+      [second, foreign]
+    );
     fixture.scrollTo(200);
     expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
     fixture.scrollTo(300);
@@ -727,6 +808,7 @@ describe('module-scroll: end-follow host contract', () => {
       new PointerEvent('pointercancel', { pointerType: 'touch', pointerId: 31 })
     );
     dispatchTouch(window, 'touchend', [foreign], [own]);
+    dispatchTouch(window, 'touchmove', [touchContact(fixture.target, 11, 0, 50)], [own]);
     fixture.scrollTo(200);
     expect(fixture.snapshots.at(-1)?.endFollow.state).toBe('paused');
     fixture.lease.dispose();
@@ -1770,6 +1852,7 @@ describe('module-scroll: end-follow host contract', () => {
     target.dispatchEvent(first);
     target.dispatchEvent(second);
     window.dispatchEvent(firstUp);
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 2, clientY: -50 }));
     target.scrollTop = 200;
     target.dispatchEvent(new Event('scroll'));
 

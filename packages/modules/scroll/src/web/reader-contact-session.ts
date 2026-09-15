@@ -1,11 +1,37 @@
-/** Host-local contact ownership. No clock, grace period, or portable state. */
+type Point = { x: number; y: number };
+type Contact = {
+  kind: string;
+  point: Point;
+  horizontal: boolean;
+  vertical: boolean;
+};
+const contact = (kind: string, point: Point): Contact => ({
+  kind,
+  point,
+  horizontal: false,
+  vertical: false,
+});
+const move = (entry: Contact | undefined, point: Point) => {
+  if (!entry || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
+  // Touch/pen pans content directly; a mouse drags native scrollbar chrome.
+  const sign = entry.kind === 'touch' || entry.kind === 'pen' ? 1 : -1;
+  const dx = point.x - entry.point.x;
+  const dy = point.y - entry.point.y;
+  if (dx !== 0) entry.horizontal = dx * sign > 0;
+  if (dy !== 0) entry.vertical = dy * sign > 0;
+  entry.point = point;
+};
+
+/** Host-local contact ownership and directional evidence. No clock or portable state. */
 export function createReaderContactSession() {
-  const pointers = new Map<number, string>();
-  const touches = new Set<number>();
+  const pointers = new Map<number, Contact>();
+  const touches = new Map<number, Contact>();
   let nativeHandoff = false;
   const active = () => pointers.size > 0 || touches.size > 0;
   const settle = () => {
-    if (!active()) nativeHandoff = false;
+    if (touches.size === 0) {
+      nativeHandoff = false;
+    }
   };
   return {
     get active() {
@@ -14,18 +40,39 @@ export function createReaderContactSession() {
     get phase(): 'idle' | 'contact' | 'native-pan' {
       return !active() ? 'idle' : nativeHandoff ? 'native-pan' : 'contact';
     },
-    startPointer(id: number, kind: string) {
-      pointers.set(id, kind);
+    hasDeparture(axis: 'horizontal' | 'vertical') {
+      return [...pointers.values(), ...touches.values()].some((entry) => entry[axis]);
     },
-    startTouches(ids: readonly number[]) {
-      for (const id of ids) touches.add(id);
+    clearMovement() {
+      for (const entry of [...pointers.values(), ...touches.values()]) {
+        entry.horizontal = false;
+        entry.vertical = false;
+      }
+    },
+    startPointer(id: number, kind: string, point: Point = { x: 0, y: 0 }) {
+      pointers.set(id, contact(kind, point));
+    },
+    startTouches(ids: readonly number[], points: readonly Point[] = []) {
+      for (const [index, id] of ids.entries()) {
+        touches.set(id, contact('touch', points[index] ?? { x: 0, y: 0 }));
+      }
+    },
+    movePointer(id: number, point: Point) {
+      move(pointers.get(id), point);
+    },
+    moveTouch(id: number, point: Point) {
+      move(touches.get(id), point);
     },
     finishPointer(id: number, canceled: boolean) {
-      const kind = pointers.get(id);
+      const entry = pointers.get(id);
       if (!pointers.delete(id)) return false;
       // Pointer routing can end while the same native touch session continues.
       // Cancellation alone never creates a new session or an expiring token.
-      if (canceled && kind === 'touch' && touches.size > 0) nativeHandoff = true;
+      if (canceled && entry?.kind === 'touch' && touches.size > 0) {
+        nativeHandoff = true;
+        // Pointer and touch IDs cannot be paired reliably. Surviving TouchEvents
+        // carry their own movement; never lend a canceled pointer's evidence.
+      }
       settle();
       return true;
     },
@@ -33,7 +80,7 @@ export function createReaderContactSession() {
       let released = false;
       for (const id of ids) released = touches.delete(id) || released;
       const remaining = new Set(remainingIds);
-      for (const id of touches) {
+      for (const id of touches.keys()) {
         if (!remaining.has(id)) released = touches.delete(id) || released;
       }
       if (!released) return false;
@@ -41,7 +88,7 @@ export function createReaderContactSession() {
       // owned TouchEvent completion closes its touch-pointer aliases as well,
       // regardless of which cancellation stream the browser delivers first.
       if (touches.size === 0) {
-        for (const [id, kind] of pointers) if (kind === 'touch') pointers.delete(id);
+        for (const [id, entry] of pointers) if (entry.kind === 'touch') pointers.delete(id);
       }
       settle();
       return true;

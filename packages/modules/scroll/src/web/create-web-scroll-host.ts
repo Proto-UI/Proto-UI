@@ -402,6 +402,7 @@ export function createWebScrollSurfaceHost(
           if (followAxis === currentAxis) {
             lastFollowLayout = readFollowLayout(currentAxis);
             endFollowState = reachedEnd ? 'following' : 'paused';
+            if (reachedEnd) readerContacts.clearMovement();
           }
           if (movement.requestEpoch === endFollowRequestEpoch) {
             endFollowRequestStatus = reachedEnd ? 'applied' : 'rejected';
@@ -553,7 +554,8 @@ export function createWebScrollSurfaceHost(
       };
       const hasReaderIntent = () => {
         const now = ownerWindow?.performance.now() ?? Date.now();
-        return readerContacts.active || readerIntentUntil > now;
+        const axis = configuredFollowAxis();
+        return (axis !== null && readerContacts.hasDeparture(axis)) || readerIntentUntil > now;
       };
       const onWheel = (event: WheelEvent) => {
         if (event.ctrlKey) return;
@@ -580,28 +582,44 @@ export function createWebScrollSurfaceHost(
       };
       const onPointerDown = (event: PointerEvent) => {
         beginContact();
-        readerContacts.startPointer(event.pointerId, event.pointerType);
+        readerContacts.startPointer(event.pointerId, event.pointerType, {
+          x: event.clientX,
+          y: event.clientY,
+        });
+      };
+      const onPointerMove = (event: PointerEvent) => {
+        sampleContactDeparture();
+        readerContacts.movePointer(event.pointerId, { x: event.clientX, y: event.clientY });
       };
       const onTouchStart = (event: TouchEvent) => {
-        const ownedIds = Array.from(event.changedTouches)
-          .filter((touch) => target.contains(touch.target as Node))
-          .map((touch) => touch.identifier);
-        if (ownedIds.length === 0) return;
+        const owned = Array.from(event.changedTouches).filter((touch) =>
+          target.contains(touch.target as Node)
+        );
+        if (owned.length === 0) return;
         beginContact();
-        readerContacts.startTouches(ownedIds);
+        readerContacts.startTouches(
+          owned.map((touch) => touch.identifier),
+          owned.map((touch) => ({ x: touch.clientX, y: touch.clientY }))
+        );
+      };
+      const onTouchMove = (event: TouchEvent) => {
+        sampleContactDeparture();
+        for (const touch of Array.from(event.changedTouches)) {
+          readerContacts.moveTouch(touch.identifier, { x: touch.clientX, y: touch.clientY });
+        }
       };
       const completeReaderIntent = () => {
         readerIntentUntil = 0;
       };
-      const finishContact = (owned: boolean) => {
-        if (!owned) return;
+      const sampleContactDeparture = () => {
         const axis = configuredFollowAxis();
-        if (contactOrigin && axis === contactOrigin.axis && isAxisEnabled(axis)) {
+        const moved = axis !== null && readerContacts.hasDeparture(axis);
+        if (moved && contactOrigin && axis === contactOrigin.axis && isAxisEnabled(axis)) {
           const layout = readFollowLayout(axis);
           const offset = axis === 'horizontal' ? target.scrollLeft : target.scrollTop;
           // Sample movement already applied during this session before its
           // scroll event arrives. A later callback cannot reopen the session.
-          // Extent-only reflow is not evidence of an input displacement.
+          // Neither stationary contact nor reflow alone is input displacement.
           if (
             layout.viewport === contactOrigin.viewport &&
             layout.extent === contactOrigin.extent &&
@@ -614,18 +632,22 @@ export function createWebScrollSurfaceHost(
             publish();
           }
         }
+      };
+      const finishContact = (release: () => boolean) => {
+        sampleContactDeparture();
+        release();
         if (!readerContacts.active) contactOrigin = null;
       };
       const onPointerUp = (event: PointerEvent) => {
-        finishContact(readerContacts.finishPointer(event.pointerId, false));
+        finishContact(() => readerContacts.finishPointer(event.pointerId, false));
       };
       const onPointerCancel = (event: PointerEvent) => {
-        finishContact(readerContacts.finishPointer(event.pointerId, true));
+        finishContact(() => readerContacts.finishPointer(event.pointerId, true));
       };
       // Both terminal TouchEvents close owned contacts. Native pointer handoff
       // remains active only while an owned touch session actually survives.
       const onTouchEnd = (event: TouchEvent) => {
-        finishContact(
+        finishContact(() =>
           readerContacts.finishTouches(
             Array.from(event.changedTouches, (touch) => touch.identifier),
             Array.from(event.touches, (touch) => touch.identifier)
@@ -670,6 +692,9 @@ export function createWebScrollSurfaceHost(
           const atEnd = isAxisAtEnd(axis);
           const requestedDeparture = requestedDepartureAxis === axis;
           if (atEnd && !scheduledEnd && !requestedDeparture) {
+            // A scroll callback for another axis at the unchanged followed end
+            // is not an arrival; retain evidence for pending native delivery.
+            if (endFollowState === 'paused') readerContacts.clearMovement();
             endFollowState = 'following';
           } else if (!atEnd && (readerIntent || requestedDeparture)) {
             cancelScheduledEnd(true);
@@ -710,9 +735,11 @@ export function createWebScrollSurfaceHost(
       target.addEventListener('animationcancel', onContentReflow, true);
       target.addEventListener('wheel', onWheel, { passive: true });
       target.addEventListener('pointerdown', onPointerDown, { passive: true });
+      ownerWindow?.addEventListener('pointermove', onPointerMove, { passive: true });
       ownerWindow?.addEventListener('pointerup', onPointerUp, { passive: true });
       ownerWindow?.addEventListener('pointercancel', onPointerCancel, { passive: true });
       target.addEventListener('touchstart', onTouchStart, { passive: true });
+      ownerWindow?.addEventListener('touchmove', onTouchMove, { passive: true });
       ownerWindow?.addEventListener('touchend', onTouchEnd, { passive: true });
       ownerWindow?.addEventListener('touchcancel', onTouchEnd, { passive: true });
       target.addEventListener('keydown', onKeyDown);
@@ -816,9 +843,11 @@ export function createWebScrollSurfaceHost(
           target.removeEventListener('animationcancel', onContentReflow, true);
           target.removeEventListener('wheel', onWheel);
           target.removeEventListener('pointerdown', onPointerDown);
+          ownerWindow?.removeEventListener('pointermove', onPointerMove);
           ownerWindow?.removeEventListener('pointerup', onPointerUp);
           ownerWindow?.removeEventListener('pointercancel', onPointerCancel);
           target.removeEventListener('touchstart', onTouchStart);
+          ownerWindow?.removeEventListener('touchmove', onTouchMove);
           ownerWindow?.removeEventListener('touchend', onTouchEnd);
           ownerWindow?.removeEventListener('touchcancel', onTouchEnd);
           target.removeEventListener('keydown', onKeyDown);

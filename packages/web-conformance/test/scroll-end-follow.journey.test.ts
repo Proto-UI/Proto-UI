@@ -110,6 +110,18 @@ describe('Web adapter conformance / Scroll end-follow', () => {
         expect(exposes.followState.get()).toBe('following');
         expect(exposes.followRequestStatus.get()).toBe('applied');
 
+        // A-*-SCROLL-END-FOLLOW: stationary contact does not classify reflow as a pan.
+        mounted.root.dispatchEvent(
+          new PointerEvent('pointerdown', { bubbles: true, pointerId: 31 })
+        );
+        mounted.root.scrollTop = 200;
+        mounted.root.dispatchEvent(new Event('scroll'));
+        expect(exposes.followState.get()).toBe('following');
+        window.dispatchEvent(new Event('resize'));
+        await settle(runtime);
+        expect(mounted.root.scrollTop).toBe(300);
+        window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 31 }));
+
         exposes.jumpToEnd();
         await settle(runtime);
 

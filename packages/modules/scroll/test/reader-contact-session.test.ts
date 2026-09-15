@@ -2,6 +2,72 @@ import { describe, expect, it } from 'vitest';
 import { createReaderContactSession } from '../src/web/reader-contact-session';
 
 describe('Web reader contact session transitions', () => {
+  it('requires directional movement from an owned contact, not a stationary or foreign sample', () => {
+    const session = createReaderContactSession();
+    session.startPointer(31, 'touch', { x: 10, y: 10 });
+    session.movePointer(99, { x: 50, y: 50 });
+    session.movePointer(31, { x: 10, y: 10 });
+    expect(session.hasDeparture('vertical')).toBe(false);
+    session.movePointer(31, { x: 50, y: 10 });
+    expect(session.hasDeparture('horizontal')).toBe(true);
+    expect(session.hasDeparture('vertical')).toBe(false);
+    session.movePointer(31, { x: 50, y: 30 });
+    expect(session.hasDeparture('vertical')).toBe(true);
+    session.movePointer(31, { x: 50, y: 20 });
+    expect(session.hasDeparture('vertical')).toBe(false);
+  });
+
+  it('keeps owned touch direction across native handoff until that touch completes', () => {
+    const session = createReaderContactSession();
+    session.startPointer(31, 'touch');
+    session.startTouches([11]);
+    session.movePointer(31, { x: 0, y: 50 });
+    session.moveTouch(11, { x: 0, y: 50 });
+    session.finishPointer(31, true);
+    expect(session.phase).toBe('native-pan');
+    expect(session.hasDeparture('vertical')).toBe(true);
+    session.moveTouch(11, { x: 0, y: -10 });
+    expect(session.hasDeparture('vertical')).toBe(false);
+    session.moveTouch(11, { x: 0, y: 30 });
+    expect(session.hasDeparture('vertical')).toBe(true);
+    session.finishTouches([11], []);
+    expect(session.hasDeparture('vertical')).toBe(false);
+  });
+
+  it('does not lend a released touch movement to a remaining stationary contact', () => {
+    const session = createReaderContactSession();
+    session.startTouches([11, 12]);
+    session.moveTouch(11, { x: 0, y: 50 });
+    session.finishTouches([11], [12]);
+    expect(session.active).toBe(true);
+    expect(session.hasDeparture('vertical')).toBe(false);
+  });
+
+  it('does not lend canceled pointer movement after its touch ends while another remains', () => {
+    const session = createReaderContactSession();
+    session.startTouches([11, 12]);
+    session.startPointer(31, 'touch');
+    session.movePointer(31, { x: 0, y: 50 });
+    session.finishPointer(31, true);
+    session.finishTouches([11], [12]);
+    expect(session.active).toBe(true);
+    expect(session.hasDeparture('vertical')).toBe(false);
+  });
+
+  it('tracks mouse chrome in scroll direction and clears evidence without releasing ownership', () => {
+    const session = createReaderContactSession();
+    session.startPointer(41, 'mouse');
+    session.movePointer(41, { x: 0, y: -50 });
+    expect(session.hasDeparture('vertical')).toBe(true);
+    session.clearMovement();
+    expect(session.active).toBe(true);
+    expect(session.hasDeparture('vertical')).toBe(false);
+    session.movePointer(41, { x: 0, y: -70 });
+    expect(session.hasDeparture('vertical')).toBe(true);
+    session.reset();
+    expect(session.hasDeparture('vertical')).toBe(false);
+  });
+
   it('keeps native pointer handoff within the lifetime of an owned touch', () => {
     const session = createReaderContactSession();
     expect(session.phase).toBe('idle');
