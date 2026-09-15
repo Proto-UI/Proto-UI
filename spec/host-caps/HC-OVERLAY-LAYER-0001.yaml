@@ -5,6 +5,7 @@ status: draft
 lifecycleRationale: >-
   Retained as draft pending admission review of the bounded Web z-index contribution and restoration evidence. Numeric offsets do not establish an absolute layer hierarchy; no stronger hierarchy is admitted here.
 
+
 since: 0.3.0-alpha.0
 summary: A layer scheduler owns a bounded host style contribution; numeric Web ordering does not arbitrate Escape.
 criteria:

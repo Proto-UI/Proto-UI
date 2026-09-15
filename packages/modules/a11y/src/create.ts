@@ -1,5 +1,6 @@
 import { createModule, defineModule, ModuleBase } from '@proto.ui/module-base';
 import type { ModuleFactoryArgs } from '@proto.ui/module-base';
+import { createA11ySemanticObjectRef, isA11ySemanticObjectRef } from '@proto.ui/core';
 import type {
   A11yActionKey,
   A11yActionSpec,
@@ -18,10 +19,15 @@ import type {
 } from '@proto.ui/core';
 import type { StatePort } from '@proto.ui/module-state';
 
-import { A11Y_PROJECT_CAP } from './caps';
+import { A11Y_PROJECT_CAP, type A11yProjector } from './caps';
 import type { A11yFacade, A11yModule, A11yPort, A11ySemanticObjectIR } from './types';
 
 class A11yModuleImpl extends ModuleBase {
+  private readonly objectRef = createA11ySemanticObjectRef();
+  private projectionDisposed = false;
+  private activeProjector: A11yProjector | null = null;
+  private projectorNeedsActivation = false;
+  private readonly projectors = new Set<A11yProjector>();
   private readonly ir: A11ySemanticObjectIR = {
     states: new Map(),
     actions: new Map(),
@@ -29,6 +35,7 @@ class A11yModuleImpl extends ModuleBase {
   };
   private readonly stateWatchOffs: Unsubscribe[] = [];
   private stateWatchesInstalled = false;
+  private readonly relationWatchOffs = new Map<A11yRelationKey, Unsubscribe>();
   private levelWatchOff: Unsubscribe | null = null;
   private levelWatchInstalled = false;
   private levelWatchHandle: State<number> | null = null;
@@ -41,6 +48,16 @@ class A11yModuleImpl extends ModuleBase {
     super(caps);
   }
 
+  override onInstancePhase(phase: InstancePhase): void {
+    super.onInstancePhase(phase);
+    if (phase === 'alive' && isState(this.ir.level)) resolveA11yLevel(this.ir.level);
+    if (phase !== 'disposing' || this.projectionDisposed) return;
+    this.projectionDisposed = true;
+    this.projectionActive = false;
+    for (const projector of this.projectors) projector.dispose?.();
+    this.projectors.clear();
+    this.activeProjector = null;
+  }
   readonly facade: A11yFacade = {
     id: (target) => {
       this.ensureSetup('asAccessible.id');
@@ -79,8 +96,7 @@ class A11yModuleImpl extends ModuleBase {
     },
     relation: (key: A11yRelationKey, spec: A11yRelationSpec) => {
       this.ensureSetup('asAccessible.relation');
-      this.ir.relations.set(key, { key, spec: { ...spec } });
-      this.applyProjection();
+      this.commitRelation(key, spec);
     },
     tree: (patch: A11yTreeBehavior) => {
       this.ensureSetup('asAccessible.tree');
@@ -97,6 +113,7 @@ class A11yModuleImpl extends ModuleBase {
   };
 
   readonly port: A11yPort = {
+    getObjectRef: () => this.objectRef,
     getSnapshot: () => this.getSnapshot(),
     getIR: () => ({
       role: this.ir.role,
@@ -109,6 +126,16 @@ class A11yModuleImpl extends ModuleBase {
       tree: this.ir.tree ? { ...this.ir.tree } : undefined,
       level: this.ir.level,
     }),
+    setRelation: (key, spec) => {
+      this.sys.ensureNotDisposed('a11y.port.setRelation');
+      this.commitRelation(key, spec);
+    },
+    removeRelation: (key) => {
+      this.sys.ensureNotDisposed('a11y.port.removeRelation');
+      if (!this.ir.relations.delete(key)) return;
+      this.clearRelationWatch(key);
+      this.applyProjection();
+    },
   };
 
   override onProtoPhase(phase: 'setup' | 'mounted' | 'updated' | 'unmounted'): void {
@@ -132,18 +159,29 @@ class A11yModuleImpl extends ModuleBase {
     this.applyProjection();
   }
 
-  override onInstancePhase(phase: InstancePhase): void {
-    super.onInstancePhase(phase);
-    if (phase === 'alive' && isState(this.ir.level)) resolveA11yLevel(this.ir.level);
-  }
-
   /** Remove view-scoped projection subscriptions; keep instance-scoped level observation. */
   private disposeViews(): void {
     this.clearHeadingLevelProjection();
     while (this.stateWatchOffs.length) {
       this.stateWatchOffs.pop()?.();
     }
+    for (const off of this.relationWatchOffs.values()) off();
+    this.relationWatchOffs.clear();
     this.stateWatchesInstalled = false;
+  }
+
+  protected override onCapsEpoch(_epoch: number): void {
+    if (this.projectionDisposed) return;
+    this.selectProjector(this.caps.has(A11Y_PROJECT_CAP) ? this.caps.get(A11Y_PROJECT_CAP) : null);
+    this.applyProjection();
+  }
+
+  private selectProjector(next: A11yProjector | null): void {
+    if (next === this.activeProjector) return;
+    this.activeProjector?.detach?.();
+    this.activeProjector = next;
+    this.projectorNeedsActivation = next !== null && this.projectors.has(next);
+    if (next) this.projectors.add(next);
   }
 
   private clearHeadingLevelProjection(): void {
@@ -152,6 +190,7 @@ class A11yModuleImpl extends ModuleBase {
     if (!this.caps.has(A11Y_PROJECT_CAP)) return;
     this.caps.get(A11Y_PROJECT_CAP).clearHeadingLevel?.();
   }
+
   dispose(): void {
     this.disposeViews();
     this.levelWatchOff?.();
@@ -164,6 +203,11 @@ class A11yModuleImpl extends ModuleBase {
     this.sys.ensureSetup(op);
   }
 
+  private commitRelation(key: A11yRelationKey, spec: A11yRelationSpec): void {
+    this.ir.relations.set(key, { key, spec: normalizeRelationSpec(spec) });
+    if (this.stateWatchesInstalled) this.watchRelation(key);
+    this.applyProjection();
+  }
   private installStateWatches(): void {
     if (this.stateWatchesInstalled) return;
 
@@ -202,13 +246,7 @@ class A11yModuleImpl extends ModuleBase {
       this.stateWatchOffs.push(off);
     }
 
-    for (const binding of this.ir.relations.values()) {
-      if (!isState(binding.spec.target)) continue;
-      const off = this.statePort.watch(binding.spec.target as any, () => {
-        this.applyProjection();
-      });
-      this.stateWatchOffs.push(off);
-    }
+    for (const key of this.ir.relations.keys()) this.watchRelation(key);
 
     if (isState(this.ir.tree?.hidden)) {
       const off = watchState(this.statePort, this.ir.tree.hidden, () => {
@@ -225,6 +263,25 @@ class A11yModuleImpl extends ModuleBase {
 
     this.installLevelWatch();
     this.stateWatchesInstalled = true;
+  }
+
+  private watchRelation(key: A11yRelationKey): void {
+    this.clearRelationWatch(key);
+    const target = this.ir.relations.get(key)?.spec.target;
+    if (!isState(target)) return;
+    this.relationWatchOffs.set(
+      key,
+      this.statePort.watch(target as OwnedStateHandle<unknown>, () => {
+        this.applyProjection();
+      })
+    );
+  }
+
+  private clearRelationWatch(key: A11yRelationKey): void {
+    const off = this.relationWatchOffs.get(key);
+    if (!off) return;
+    this.relationWatchOffs.delete(key);
+    off();
   }
 
   private installLevelWatch(): void {
@@ -250,11 +307,10 @@ class A11yModuleImpl extends ModuleBase {
       states[key] = binding.handle.get();
     }
 
-    const relations: Record<string, string | null | undefined> = {};
+    const relations: A11ySemanticObjectSnapshot['relations'] = {};
     const relationModes: NonNullable<A11ySemanticObjectSnapshot['relationModes']> = {};
     for (const [key, binding] of this.ir.relations) {
-      const target = binding.spec.target;
-      relations[key] = isState(target) ? target.get() : target;
+      relations[key] = resolveRelationTarget(binding.spec.target);
       if (binding.spec.mode === 'append') relationModes[key] = 'append';
     }
 
@@ -278,6 +334,7 @@ class A11yModuleImpl extends ModuleBase {
         : undefined;
 
     return {
+      objectRef: this.objectRef,
       id: isState(this.ir.id) ? (this.ir.id.get() as string | null | undefined) : this.ir.id,
       role,
       name: resolveTextAlternative(this.ir.name),
@@ -292,9 +349,16 @@ class A11yModuleImpl extends ModuleBase {
   }
 
   private applyProjection(): void {
+    if (this.projectionDisposed) return;
     if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
     if (!this.caps.has(A11Y_PROJECT_CAP)) return;
-    this.caps.get(A11Y_PROJECT_CAP)(this.getSnapshot());
+    const projector = this.caps.get(A11Y_PROJECT_CAP);
+    this.selectProjector(projector);
+    if (this.projectorNeedsActivation) {
+      projector.reactivate?.();
+      this.projectorNeedsActivation = false;
+    }
+    projector(this.getSnapshot());
     this.projectionActive = true;
   }
 }
@@ -348,6 +412,35 @@ function resolveTextAlternative(
   };
 }
 
+function normalizeRelationSpec(spec: A11yRelationSpec): A11yRelationSpec {
+  const { target } = spec;
+  if (Array.isArray(target)) {
+    const refs = [];
+    const seen = new Set();
+    for (const candidate of target) {
+      if (!isA11ySemanticObjectRef(candidate)) {
+        throw new TypeError('[A11y] relation reference lists accept semantic-object refs only');
+      }
+      if (seen.has(candidate)) continue;
+      seen.add(candidate);
+      refs.push(candidate);
+    }
+    return { ...spec, target: Object.freeze(refs) };
+  }
+  if (typeof target !== 'string' && !isState(target) && !isA11ySemanticObjectRef(target)) {
+    throw new TypeError('[A11y] relation target must be a string, State, or semantic-object ref');
+  }
+  return { ...spec };
+}
+
+function resolveRelationTarget(
+  target: A11yRelationSpec['target']
+): A11ySemanticObjectSnapshot['relations'][string] {
+  if (isState(target)) return target.get() as string | null | undefined;
+  if (isA11ySemanticObjectRef(target)) return Object.freeze([target]);
+  if (Array.isArray(target)) return Object.freeze([...target]);
+  return target;
+}
 export function createA11yModule(ctx: ModuleFactoryArgs): A11yModule {
   const { init, caps, deps } = ctx;
 
