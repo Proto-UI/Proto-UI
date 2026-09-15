@@ -55,8 +55,8 @@ openQuestions:
       en: How should a live Web mapping/policy change revoke optimization and atomically resume the default executor?
       zh-CN: 同一 view 内 Web mapping/policy 变化时，如何撤销优化并原子地恢复默认执行器？
     context:
-      en: Current candidate IDs are fixed after acceptance until view teardown. A changed or missing upstream binding can leave an old selector and filtering active. RulePort has no explicit reapply/invalidation operation. This known gap is not covered by the view-boundary repair and prevents full support claims.
-      zh-CN: 当前 candidate 接纳后 ID 固定至 view teardown。上游 binding 改变或丢失可能留下旧 selector 与过滤状态。RulePort 没有显式 reapply/invalidation 操作。此已知缺口未被 view-boundary 修复覆盖，阻止全面支持声明。
+      en: Current candidate IDs are fixed after acceptance until view teardown. A changed or missing upstream binding can leave an old selector and filtering active. RulePort now exposes a bounded style reevaluation request, but it does not revoke accepted IDs or rebuild Web bindings/policy. This known gap is not covered by the view-boundary repair and prevents full support claims.
+      zh-CN: 当前 candidate 接纳后 ID 固定至 view teardown。上游 binding 改变或丢失可能留下旧 selector 与过滤状态。RulePort 现有有界样式重评估请求，但它不撤销已接纳 ID，也不重建 Web binding/policy。此已知缺口未被 view-boundary 修复覆盖，阻止全面支持声明。
   - id: M-RULE-EXPOSE-STATE-WEB-0001-Q-EQUIVALENCE
     question:
       en: What evidence or eligibility restriction establishes full CSS/default-Plan equivalence?
@@ -74,6 +74,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged partial Web Rule lowering with safe fallback and view-owned contribution cleanup.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Distinguished the new Rule style request from unresolved live Web optimization replanning.
 tags:
   - rule
   - expose
