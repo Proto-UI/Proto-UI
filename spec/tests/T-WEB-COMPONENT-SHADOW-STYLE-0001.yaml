@@ -130,6 +130,26 @@ cases:
       - D-WEB-COMPONENT-SHADOW-STYLE-0001-H
     expectation: light-and-direct-shadow-profiles-remain-byte-for-byte-compatible-at-the-public-boundary
 implementations:
+  - id: public-owner-reconnect-serialization
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-profile.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-GENERATION-RETENTION
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-TERMINAL-GENERATION-RENEWAL
+    notes:
+      - Real lifecycle callback reconnects and a controlled asynchronous host-session disposal seam verify serialized resource renewal; the seam does not claim ordinary terminal Presence waits asynchronously.
+  - id: native-owner-reconnect-style-geometry
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-GENERATION-RETENTION
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-TERMINAL-GENERATION-RENEWAL
+    notes:
+      - Chrome verifies synchronous move retention, real teardown-callback reconnect, fresh resource identity, computed runtime style and live geometry after reconnect, and revoked predecessor environment callbacks.
   - id: browser-public-shadow-dist-consumer
     kind: workspace-check
     status: passing
@@ -349,6 +369,9 @@ sources:
   - path: packages/adapters/web-component/test/shadow-style-artifact.test.ts
   - path: packages/adapters/web-component/test/types.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added public Adapter teardown/reconnect race and native style/geometry evidence alongside the synchronous private generation harness.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added actual public S1 Chrome demo-matrix journey for Badge and complete Checkbox composition with explicit site reset boundary.

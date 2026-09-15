@@ -167,6 +167,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _runtimeGeneration = 0;
     private _instanceToken: LogicalInstanceToken;
     private _invokeUnmounted: (() => void | Promise<void>) | null = null;
+    private _splitOwnerDisposing = false;
     private _disconnectVersion = 0;
     private _pendingOwnedTokens: string[] | null = null;
     private _controller: RuntimeController | null = null;
@@ -233,6 +234,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     connectedCallback() {
+      // Reuse is valid for synchronous moves, not once terminal teardown starts.
+      // The predecessor owns host-wide resources until its complete cleanup;
+      // coalesce reconnects and initialize only after it can no longer write.
+      if (split && this._splitOwnerDisposing) return;
       const initializing = !this._mountedOnce;
       try {
         this._connectOwner();
@@ -703,16 +708,31 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           this._portalConceal.cancel();
           const fn = this._invokeUnmounted;
           this._invokeUnmounted = null;
-          const disposed = fn();
-          // Terminal invalidation is synchronous even though adapter cleanup
-          // exposes a Promise for callback errors. Publish the disconnected
-          // ownership state before yielding so a later reconnect cannot reuse
-          // the disposed session.
-          unbindProtoInstance(this._instanceToken, this);
-          this._controller = null;
-          this._mountedOnce = false;
-          this._pendingOwnedTokens = null;
-          await disposed;
+          // Install before invoking user lifecycle callbacks: they may reconnect
+          // synchronously, before fn() even returns its disposal promise.
+          if (split) this._splitOwnerDisposing = true;
+          try {
+            let disposed: void | Promise<void>;
+            try {
+              disposed = fn();
+            } finally {
+              unbindProtoInstance(this._instanceToken, this);
+              this._controller = null;
+              this._mountedOnce = false;
+              this._pendingOwnedTokens = null;
+            }
+            await disposed;
+          } finally {
+            if (split) {
+              this._splitOwnerDisposing = false;
+              // Keep reconnect failures separate from a rejected disposal, and
+              // recheck latest connectivity after repeated remove/append calls.
+              queueMicrotask(() => {
+                if (this.isConnected && !this._mountedOnce && !this._splitOwnerDisposing)
+                  this.connectedCallback();
+              });
+            }
+          }
           return;
         }
         unbindProtoInstance(this._instanceToken, this);

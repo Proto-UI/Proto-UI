@@ -10,6 +10,7 @@ import {
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
 import { checkboxRoot, checkboxIndicator } from '../../../prototypes/shadcn/src/checkbox';
+import * as hostSessions from '../src/runtime/session';
 
 const artifact = renderProtoShadowSplitStyleArtifact([
   'flex',
@@ -34,6 +35,169 @@ afterEach(async () => {
 
 // D-WEB-COMPONENT-SHADOW-PROFILE-0001 G-J; D-WEB-COMPONENT-SHADOW-STYLE-0001 K/N.
 describe('public WC Shadow split profile', () => {
+  it.each(['onUnmounted', 'onBeforeDispose'] as const)(
+    'serializes a real reentrant reconnect during %s',
+    async (checkpoint) => {
+      let host!: HTMLElement;
+      let setups = 0;
+      const disposed: number[] = [];
+      const listeners = new Set<() => void>();
+      const proto = definePrototype({
+        name: name(),
+        setup(def) {
+          const generation = ++setups;
+          def.feedback.style.use(tw('p-2'));
+          def.lifecycle[checkpoint](() => {
+            if (generation === 1) document.body.append(host);
+          });
+          def.lifecycle.onBeforeDispose(() => {
+            disposed.push(generation);
+          });
+          return (r) => r.slot();
+        },
+      });
+      const C = AdaptToWebComponent(proto, {
+        shadow: {
+          ...shadow,
+          colorSchemeSource: {
+            get: () => 'light',
+            subscribe(listener) {
+              listeners.add(listener);
+              return () => {
+                listeners.delete(listener);
+              };
+            },
+          },
+        },
+        schedule: (task) => task(),
+      });
+      host = new C();
+      host.textContent = 'retained consumer';
+      document.body.append(host);
+      const first = (host as any)._splitResources;
+      host.remove();
+      await flush();
+      try {
+        expect(host.isConnected).toBe(true);
+        expect(setups).toBe(2);
+        expect(disposed).toEqual([1]);
+        const second = (host as any)._splitResources;
+        expect(second).not.toBe(first);
+        expect(second.surface.element.isConnected).toBe(true);
+        expect(second.artifact.stylesheet.element.parentNode).toBe(host.shadowRoot);
+        expect(listeners.size).toBe(1);
+        expect(() => (host as any).update()).not.toThrow();
+      } finally {
+        host.remove();
+        await flush();
+      }
+      expect(disposed).toEqual([1, 2]);
+      expect(listeners.size).toBe(0);
+    }
+  );
+
+  it.each([true, false])(
+    'waits for asynchronous host-session disposal (still connected: %s)',
+    async (remainConnected) => {
+      // Exercise the Promise-returning Adapter session boundary deterministically.
+      // Current Runtime force-disposal normally finishes synchronously; this seam
+      // does not claim that real Presence transitions delay terminal teardown.
+      let finish!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+      const createSession = hostSessions.createWebComponentHostSession;
+      const sessionSpy = vi
+        .spyOn(hostSessions, 'createWebComponentHostSession')
+        .mockImplementationOnce((args) => {
+          const session = createSession(args);
+          return { ...session, dispose: () => gate.then(() => session.dispose()) };
+        });
+      let setups = 0;
+      let scheme: 'light' | 'dark' = 'light';
+      const listeners = new Set<() => void>();
+      const allListeners: (() => void)[] = [];
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: name(),
+          setup(def) {
+            setups++;
+            def.feedback.style.use(tw('p-2'));
+            return (r) => r.slot();
+          },
+        }),
+        {
+          shadow: {
+            ...shadow,
+            colorSchemeSource: {
+              get: () => scheme,
+              subscribe(listener) {
+                listeners.add(listener);
+                allListeners.push(listener);
+                return () => {
+                  listeners.delete(listener);
+                };
+              },
+            },
+          },
+          schedule: (task) => task(),
+        }
+      );
+      const host = new C();
+      try {
+        document.body.append(host);
+        const first = (host as any)._splitResources;
+        host.remove();
+        await flush(); // confirmed terminal disposal requested, deliberately unsettled
+        document.body.append(host);
+        host.remove();
+        document.body.append(host); // coalesce reconnect attempts during disposal
+        await flush();
+        expect(setups).toBe(1);
+        setElementProps(host, { surfaceClassName: 'latest' });
+        if (!remainConnected) host.remove();
+        scheme = 'dark';
+        finish();
+        await flush();
+        if (!remainConnected) {
+          expect(setups).toBe(1);
+          expect(listeners.size).toBe(0);
+          expect((host as any)._splitResources).toBeNull();
+          document.body.append(host);
+          await flush();
+        }
+        const second = (host as any)._splitResources;
+        expect(setups).toBe(2);
+        expect(second).not.toBe(first);
+        expect(second.surface).not.toBe(first.surface);
+        expect(second.artifact).not.toBe(first.artifact);
+        expect(second.environment).not.toBe(first.environment);
+        expect(host.shadowRoot!.querySelectorAll('style')).toHaveLength(1);
+        expect(second.surface.element.isConnected).toBe(true);
+        expect(second.surface.element.classList.contains('latest')).toBe(true);
+        expect(second.artifact.stylesheet.element.parentNode).toBe(host.shadowRoot);
+        expect(listeners.size).toBe(1);
+        expect(host.getAttribute('data-pui-color-scheme')).toBe('dark');
+        scheme = 'light';
+        allListeners[0](); // a retained predecessor listener has lost write authority
+        first.dispose(); // duplicate late cleanup cannot affect the successor
+        expect(host.getAttribute('data-pui-color-scheme')).toBe('dark');
+        expect(second.surface.element.isConnected).toBe(true);
+        expect(listeners.size).toBe(1);
+        allListeners[1]();
+        expect(host.getAttribute('data-pui-color-scheme')).toBe('light');
+        expect(() => host.update()).not.toThrow();
+        await flush();
+        expect(second.surface.element.isConnected).toBe(true);
+      } finally {
+        finish();
+        await flush();
+        host.remove();
+        await flush();
+        sessionSpy.mockRestore();
+      }
+    }
+  );
   it('cancels failed onCreated work before reconnecting a fresh generation', async () => {
     vi.useFakeTimers();
     const events: string[] = [];

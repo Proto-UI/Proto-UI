@@ -15,7 +15,7 @@ beforeAll(async () => {
       contents: `
         export { sampleWebComponentScopeTargets as sample } from './packages/adapters/web-component/src/focus-scope-targets';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
-        export { definePrototype as define } from '@proto.ui/core';
+        export { definePrototype as define, tw } from '@proto.ui/core';
         export { asTextControl, asFocusEntry, asFocusScope } from '@proto.ui/hooks';
         export { declareTextControl } from '@proto.ui/module-text-control';
       `,
@@ -37,6 +37,128 @@ afterAll(async () => {
 });
 
 describe('Shadow closeout native boundaries', () => {
+  it.each(['onUnmounted', 'onBeforeDispose'] as const)(
+    'retains moves and restores styled resources after reconnect inside %s',
+    async (checkpoint) => {
+      // D-WEB-COMPONENT-SHADOW-STYLE-0001-K: use the real Runtime in Chrome.
+      const page = await browser.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      try {
+        await page.addScriptTag({ content: script });
+        const observed = await page.evaluate(
+          async ({ artifact, checkpoint }) => {
+            const p = (window as any).Closeout;
+            let host: any;
+            let setups = 0;
+            let scheme = 'light';
+            const listeners = new Set<() => void>();
+            const retained: (() => void)[] = [];
+            const C = p.adapt(
+              p.define({
+                name: 'reentrant-shadow-generation',
+                setup(def: any) {
+                  const generation = ++setups;
+                  let run: any;
+                  def.lifecycle.onCreated((r: any) => {
+                    run = r;
+                  });
+                  def.lifecycle[checkpoint](() => {
+                    if (generation === 1) document.body.append(host);
+                  });
+                  def.expose('patch', () => run.feedback.style.patch(p.tw('p-2')));
+                  return (r: any) => r.slot();
+                },
+              }),
+              {
+                shadow: {
+                  mode: 'open',
+                  presentation: 'split',
+                  styleArtifact: artifact,
+                  colorSchemeSource: {
+                    get: () => scheme,
+                    subscribe(listener: () => void) {
+                      listeners.add(listener);
+                      retained.push(listener);
+                      return () => {
+                        listeners.delete(listener);
+                      };
+                    },
+                  },
+                },
+              }
+            );
+            host = new C();
+            host.textContent = 'Consumer text survives';
+            document.body.append(host);
+            const first = host._splitResources;
+            const carrier = document.createElement('section');
+            document.body.append(carrier);
+            carrier.append(host);
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            const sameMove = host._splitResources === first && setups === 1;
+            host.remove();
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            const second = host._splitResources;
+            host.getExposes().patch();
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+            const surface = second.surface.element;
+            const styleGeometry = {
+              padding: getComputedStyle(surface).paddingTop,
+              positiveBox: surface.getBoundingClientRect().height > 0,
+            };
+            scheme = 'dark';
+            retained[0]();
+            first.dispose();
+            const staleIsInert = host.getAttribute('data-pui-color-scheme') === 'light';
+            retained[1]();
+            const result = {
+              sameMove,
+              setups,
+              staleIsInert,
+              fresh:
+                second !== first &&
+                second.surface !== first.surface &&
+                second.environment !== first.environment &&
+                second.artifact !== first.artifact,
+              connected: surface.isConnected,
+              styles: host.shadowRoot.querySelectorAll('style').length,
+              subscriptions: listeners.size,
+              scheme: host.getAttribute('data-pui-color-scheme'),
+              text: host.textContent,
+              styleGeometry,
+            };
+            host.remove();
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            carrier.remove();
+            return {
+              ...result,
+              terminalSubscriptions: listeners.size,
+              terminalNodes: host.shadowRoot.childNodes.length,
+            };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact(['p-2']), checkpoint }
+        );
+        expect(observed).toEqual({
+          sameMove: true,
+          setups: 2,
+          staleIsInert: true,
+          fresh: true,
+          connected: true,
+          styles: 1,
+          subscriptions: 1,
+          scheme: 'dark',
+          text: 'Consumer text survives',
+          styleGeometry: { padding: '8px', positiveBox: true },
+          terminalSubscriptions: 0,
+          terminalNodes: 0,
+        });
+        expect(errors).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }
+  );
   it.each(['single', 'multiline'] as const)(
     'initially absent %s editor acquires no view lease',
     async (lineMode) => {
