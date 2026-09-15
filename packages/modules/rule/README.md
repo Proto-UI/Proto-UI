@@ -10,6 +10,8 @@ The bounded catalog is [M-RULE-0001](../../../spec/modules/M-RULE-0001.yaml), wi
 
 Declarations survive view detach/remount; State watches stop while detached and resume with current values on remount. Terminal disposal clears Rule resources. Rule owns no direct host capability.
 
+The privileged `requestStyleReevaluation()` port lets an approved input bridge refresh the existing style contribution while the instance is alive and mounted. It uses already accepted Props and current State/Context reads, without directly syncing host Props, dispatching author watches or requesting structural rendering. Existing State/lifecycle synchronization and framework presentation behavior remain intact. The default document-theme bridge is governed by [C-RULE-COLOR-SCHEME-0001](../../../spec/contracts/C-RULE-COLOR-SCHEME-0001.yaml).
+
 Context identity/serialization and reactive evaluation are incomplete, and Context path access remains deferred. `intent.state` is recorded but not executed by the default evaluator. `module-rule-meta` is deployed for theme inputs but its API remains evolving; downstream optimizations are outside this core support claim.
 
 ## Package Role
