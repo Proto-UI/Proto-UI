@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Continue Proto UI Collaboration'
+  short_description: 'Apply one exact reversible collaboration update'
+  default_prompt: 'Use $pui-collaborate and its registered runtime to apply this one authorized exact-target Issue, pull-request, thread, or CI update and return the validated receipt.'
+
+policy:
+  allow_implicit_invocation: false

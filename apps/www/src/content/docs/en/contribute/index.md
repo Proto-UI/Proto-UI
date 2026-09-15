@@ -9,11 +9,11 @@ The repository [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/
 
 ## Choose by readiness
 
-Starter work has a fixed result and little protocol judgment. Contributor-ready work has decided semantics but may still require substantial implementation. Maintainer-guided work still contains an admission, ownership, compatibility, or architecture decision.
+Starter work has a fixed result and little protocol judgment. Contributor-ready work has governed semantics but may still require substantial implementation. Decision-needed work contains a specific admission, ownership, compatibility, or architecture choice that current authority does not yet resolve; Agents can still collect evidence, shape alternatives, and advance every independent ready slice around that choice.
 
 Effort does not answer readiness. A small task can be blocked on design; a large slice can be ready to implement.
 
-Before claiming anything, read the Issue, recent comments, assignee, linked pull requests, and Project state when it becomes available. If the outcome, exclusions, implementation authorization, or validation boundary is missing, ask for the task to be shaped first.
+Before claiming anything, read the Issue, recent comments, assignee, linked pull requests, and Project state when it becomes available. Resolve missing facts from repository authority and live evidence, shape a bounded proposal where possible, and request attention only for a genuinely unresolved product-direction choice or a privileged or irreversible operation.
 
 ## Pick a path
 

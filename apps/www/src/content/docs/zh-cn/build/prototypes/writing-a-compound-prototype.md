@@ -1,11 +1,11 @@
 ---
 title: '编写一个定制的复合原型'
-description: '在已批准边界内建模 anatomy、owner、context 与 part responsibilities。'
+description: '在受治理边界或候选边界内建模 anatomy、owner、context 与 part responsibilities。'
 ---
 
-复合 Prototype 不是“把一个大组件拆成更多文件”。它首先是一组经过批准的 protocol subjects、owners 与结构关系，然后才是源码组织。
+复合 Prototype 不是“把一个大组件拆成更多文件”。它首先是一组受治理或明确标记为 draft 的 protocol subjects、owners 与结构关系，然后才是源码组织。
 
-> 本文解释 compound modeling。新的 Base family 仍需 proposal 与 maintainer checkpoint；实现阶段使用[实现已批准的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)。
+> 本文解释 compound modeling。已有受治理 family 直接继续。对于新的 Base family，research、candidate anatomy、draft P/T entity、实现探针与测试可以在准入前建立模型；唯一未决决定是是否把这些新的独立 Base identity 纳入治理。后续使用[实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)。
 
 ## 先读 P/T 图，而不是先拆 DOM
 
@@ -77,7 +77,7 @@ P criterion
 → exports, CLI, docs, demo
 ```
 
-需要关注 controlled request、disabled item、empty/duplicate value、动态结构、presence、focus、a11y relationship 与 teardown 等边界；具体范围以获批 Issue 为准。
+需要关注 controlled request、disabled item、empty/duplicate value、动态结构、presence、focus、a11y relationship 与 teardown 等边界；具体范围由适用 graph 与持续积累的证据在 review 中收敛。
 
 ## 下一步
 

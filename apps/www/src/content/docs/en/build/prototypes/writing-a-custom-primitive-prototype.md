@@ -1,11 +1,11 @@
 ---
 title: 'Writing a Custom Primitive Prototype'
-description: 'Understand the minimal shape of direct and authored-asHook entries inside an approved boundary.'
+description: 'Understand the minimal shape of direct and authored-asHook entries inside a governed or candidate boundary.'
 ---
 
 A leaf Prototype represents a protocol subject with a clear boundary and an independent information-flow responsibility. Button and Toggle are two relatively clear current examples.
 
-> This guide explains authoring structure; it does not approve a new Base identity. Before implementing a new Base subject, complete a maintainer checkpoint and follow the delivery workflow in [Implementing an Approved Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/).
+> This guide explains authoring structure. Existing governed subjects proceed directly from their current P/T graph. For a genuinely new Base subject, research, a candidate graph, draft entities, implementation probes, and tests may proceed immediately; the one unresolved semantic decision is whether Proto UI admits that independent subject as a Base identity. Use [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/) to carry either path through coherent delivery.
 
 ## Start from entities and evidence
 
@@ -67,10 +67,10 @@ Do not treat “exports a Prototype but no asHook” as a universal error. Ask:
 
 ## What completes a leaf slice
 
-A source file is only one part of delivery. An approved new leaf Prototype normally needs:
+A source file is only one part of delivery. A governed leaf or clearly marked candidate normally follows:
 
 ```text
-approved checkpoint
+governed identity or candidate draft
 → P criteria and relations
 → T cases and executable tests
 → implementation and public exports
@@ -83,7 +83,7 @@ The three current Adapter previews verify one Web host profile; they do not auto
 
 ## When to pause
 
-If implementation needs a new public prop/event/state, changes ownership, requires a raw host object, or exposes a contradiction between P/T and implementation, return to the issue for a checkpoint instead of widening the boundary in source.
+If implementation needs a new public prop/event/state, changes ownership, requires a raw host object, or exposes a contradiction between P/T and implementation, update the candidate or governed graph, tests, and evidence together instead of widening source alone. Continue the reversible work through fresh review. Escalate only when the evidence requires admission of a different new Base identity; keep that identity draft while the admission choice is unresolved.
 
 ## Next
 

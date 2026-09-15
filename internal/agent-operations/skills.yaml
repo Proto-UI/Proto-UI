@@ -1,5 +1,5 @@
 schemaVersion: 2
-registryVersion: 2026-08-27.integration-1
+registryVersion: 2026-08-27.agent-forward-1
 entrypoints:
   development: pui-dev
   maintenance: pui-maintain
@@ -10,8 +10,8 @@ compositionRules:
   - treat assessment as advice in human-assisted mode
   - enforce the fresh self-assessed ceiling before every autonomous transition
   - revalidate live permission and current authorization at every external action
-  - stop at human gates
-  - never infer integration or publication authority
+  - continue governed ready work through implementation, review, and integration
+  - stop only for unresolved product direction or a privileged or irreversible operation
 skills:
   - id: pui-assess
     entrypoints: [development, maintenance]
@@ -43,7 +43,7 @@ skills:
   - id: pui-claim
     entrypoints: [development]
     loadPath: .agents/skills/pui-claim/SKILL.md
-    transition: authorized selection proposal -> one posted claim or fail-closed no-write result
+    transition: authorized selection proposal -> one posted claim or exact re-selection result
     autonomousMinimumBand: C2
     taskClass: claim-work-item
     mutation: reversible-github-metadata
@@ -70,7 +70,7 @@ skills:
   - id: pui-brainstorm
     entrypoints: [development]
     loadPath: .agents/skills/pui-brainstorm/SKILL.md
-    transition: semantic uncertainty -> maintainer decision packet
+    transition: unresolved product direction -> attended decision packet
     autonomousMinimumBand: C4
     taskClass: shape-semantic-decision
     mutation: proposal-only
@@ -79,9 +79,9 @@ skills:
   - id: pui-spec
     entrypoints: [development]
     loadPath: .agents/skills/pui-spec/SKILL.md
-    transition: approved semantic scope -> governed spec graph change
+    transition: governed or accepted semantic scope -> governed spec graph change
     autonomousMinimumBand: C3
-    taskClass: author-approved-spec
+    taskClass: author-governed-spec
     mutation: feature-branch
     requires: [authority-map, semantic-authorization]
     produces: [candidate-change]
@@ -97,27 +97,27 @@ skills:
   - id: pui-module
     entrypoints: [development]
     loadPath: .agents/skills/pui-module/SKILL.md
-    transition: approved Module slice -> portable implementation and evidence
+    transition: governed Module slice -> portable implementation and evidence
     autonomousMinimumBand: C3
-    taskClass: implement-approved-module
+    taskClass: implement-governed-module
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
     produces: [candidate-change]
   - id: pui-host
     entrypoints: [development]
     loadPath: .agents/skills/pui-host/SKILL.md
-    transition: approved host responsibility -> capability realization and evidence
+    transition: governed host responsibility -> capability realization and evidence
     autonomousMinimumBand: C3
-    taskClass: implement-approved-host-capability
+    taskClass: implement-governed-host-capability
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
     produces: [candidate-change]
   - id: pui-adapter
     entrypoints: [development]
     loadPath: .agents/skills/pui-adapter/SKILL.md
-    transition: approved Adapter realization scope -> bounded implementation handoff
+    transition: governed Adapter realization scope -> bounded implementation handoff
     autonomousMinimumBand: C3
-    taskClass: implement-approved-adapter-slice
+    taskClass: implement-governed-adapter-slice
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
     produces: [candidate-change]
@@ -135,7 +135,7 @@ skills:
     loadPath: .agents/skills/pui-prototype/SKILL.md
     transition: governed component slice -> coherent Prototype delivery
     autonomousMinimumBand: C3
-    taskClass: implement-approved-prototype
+    taskClass: implement-governed-prototype
     mutation: feature-branch
     requires: [authority-map, implementation-authorization]
     produces: [candidate-change]
@@ -187,11 +187,20 @@ skills:
   - id: pui-integrate
     entrypoints: [development]
     loadPath: .agents/skills/pui-integrate/SKILL.md
-    transition: approved exact-head pull request -> rule-compliant integration receipt
-    autonomousMinimumBand: C4
-    taskClass: integrate-approved-pull-request
+    transition: independently reviewed exact-head pull request -> rule-compliant integration receipt
+    autonomousMinimumBand: C2
+    taskClass: integrate-reviewed-pull-request
     mutation: conditional-pull-request-merge
     requires: [review-packet, review-input, mutation-authorization]
+    produces: [mutation-receipt]
+  - id: pui-collaborate
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-collaborate/SKILL.md
+    transition: governed live collaboration state -> exact-target reversible mutation receipt
+    autonomousMinimumBand: C2
+    taskClass: maintain-collaboration-state
+    mutation: reversible-github-collaboration
+    requires: [capability-envelope, github-snapshot, mutation-authorization, collaboration-request]
     produces: [mutation-receipt]
   - id: pui-issue
     entrypoints: [development]
@@ -247,10 +256,19 @@ skills:
     mutation: none
     requires: [repository-snapshot, bounded-question]
     produces: [dependency-report]
+  - id: pui-dependency-update
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-dependency-update/SKILL.md
+    transition: governed dependency report -> bounded manifest and lockfile update
+    autonomousMinimumBand: C2
+    taskClass: update-governed-dependency
+    mutation: feature-branch
+    requires: [capability-envelope, dependency-report, implementation-authorization]
+    produces: [candidate-change]
   - id: pui-release-prep
     entrypoints: [development]
     loadPath: .agents/skills/pui-release-prep/SKILL.md
-    transition: approved release intent -> reviewable candidate state
+    transition: authorized release intent -> reviewable candidate state
     autonomousMinimumBand: C4
     taskClass: prepare-release-state
     mutation: feature-branch
@@ -295,7 +313,7 @@ skills:
   - id: pui-remediate
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-remediate/SKILL.md
-    transition: accepted finding -> bounded remediation packet and change
+    transition: verified governed finding -> bounded remediation packet and change
     autonomousMinimumBand: C2
     taskClass: repair-bounded-regression
     mutation: feature-branch

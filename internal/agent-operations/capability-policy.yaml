@@ -1,6 +1,6 @@
 schemaVersion: 2
-policyVersion: 2026-08-27.scheduled-review-and-integration-1
-principle: local assessment decides how far an Agent may go alone, not whether it may participate with a human
+policyVersion: 2026-08-28.agent-forward-review-provenance-1
+principle: governed ready work proceeds automatically up to live permission and repository rules
 executionModes:
   human-assisted:
     source: current trusted user instruction or an active human decision loop
@@ -38,7 +38,7 @@ bands:
     autonomousMutationCeiling: none
     autonomousReviewCeiling: review-docs-and-links
   C2:
-    description: can perform governed, bounded, and reversible maintenance
+    description: can perform governed bounded work and execute exact-target collaboration mutations
     includesLowerBands: true
     minimumDimensionScore: 2
     taskClasses:
@@ -49,23 +49,26 @@ bands:
       - maintain-contract-projection
       - repair-bounded-regression
       - implement-governed-tests
-    autonomousMutationCeiling: feature-branch-or-reversible-github-metadata
+      - update-governed-dependency
+      - integrate-reviewed-pull-request
+      - maintain-collaboration-state
+    autonomousMutationCeiling: feature-branch-or-conditional-collaboration
     autonomousReviewCeiling: review-bounded-regression
   C3:
-    description: can deliver and independently review an approved semantic implementation slice
+    description: can deliver and independently review a governed semantic implementation slice
     includesLowerBands: true
     minimumDimensionScore: 3
     taskClasses:
-      - author-approved-spec
-      - implement-approved-module
-      - implement-approved-host-capability
-      - implement-approved-adapter-slice
-      - implement-approved-prototype
+      - author-governed-spec
+      - implement-governed-module
+      - implement-governed-host-capability
+      - implement-governed-adapter-slice
+      - implement-governed-prototype
       - review-maintenance-remediation
     autonomousMutationCeiling: feature-branch
     autonomousReviewCeiling: review-governed-implementation-slice
   C4:
-    description: can prepare complex semantic and governance decisions and execute narrowly standing-authorized pull-request transitions
+    description: can prepare complex semantic and governance decisions and review release evidence
     includesLowerBands: true
     minimumDimensionScore: 4
     taskClasses:
@@ -73,8 +76,7 @@ bands:
       - coordinate-cross-domain-change
       - prepare-release-state
       - audit-release-evidence
-      - integrate-approved-pull-request
-    autonomousMutationCeiling: feature-branch-or-conditional-review-and-integration
+    autonomousMutationCeiling: feature-branch-or-conditional-collaboration
     autonomousReviewCeiling: review-governance-and-release-evidence
 reviewClasses:
   review-facts-and-ci:
@@ -97,12 +99,14 @@ mutationClasses:
   disposable-output-only: { autonomousMinimumBand: U0, trackedWrite: false, externalWrite: false }
   reversible-github-metadata:
     { autonomousMinimumBand: C2, trackedWrite: false, externalWrite: true }
+  reversible-github-collaboration:
+    { autonomousMinimumBand: C2, trackedWrite: false, externalWrite: true }
   feature-branch: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
   tracked-maintenance-state: { autonomousMinimumBand: C2, trackedWrite: true, externalWrite: false }
   conditional-review-submission:
-    { autonomousMinimumBand: C4, trackedWrite: false, externalWrite: true }
+    { autonomousMinimumBand: C2, trackedWrite: false, externalWrite: true }
   conditional-pull-request-merge:
-    { autonomousMinimumBand: C4, trackedWrite: false, externalWrite: true }
+    { autonomousMinimumBand: C2, trackedWrite: false, externalWrite: true }
 scoring:
   derivation: highest-band-whose-minimum-is-met-by-every-dimension
   noCrossDimensionCompensation: true
@@ -134,36 +138,93 @@ authorityIntersection:
   - live-discord-or-poppy-trust-when-community-or-bot-action
   - repository-rules-and-ci
   - provenance-and-dco
-alwaysHuman:
-  - finding-disposition
-  - semantic-direction
-  - scope-or-compatibility-tradeoff
-  - semantic-admission
-  - ownership-decision
-  - stable-lifecycle-promotion
-  - contributor-rights
-  - security-disclosure
-  - commit-grouping
-  - integration-decision
-  - ready-for-review
-  - pull-request-approval
-  - merge
-  - publication
-  - release
-  - access-or-secret-change
-  - branch-or-ruleset-change
+defaultAutomation:
+  proceedsWhen:
+    - governed-outcome-or-current-user-bounded-scope
+    - task-class-within-current-ceiling
+    - live-permission-for-external-action
+    - exact-target-and-idempotency-reconciled
+    - required-validation-and-independent-review-satisfied
+  includes:
+    - issue-routing-and-claim
+    - exact-target-collaboration-continuation
+    - feature-branch-implementation
+    - review-response-and-disposition
+    - ready-for-review
+    - exact-head-integration
+attendedDecisionClasses:
+  - unresolved-product-direction
+  - privileged-or-irreversible-operation
+collaborationMutationAuthorizations:
+  - id: proto-ui-scheduled-collaboration-v1
+    status: pending-runtime-identity
+    blockedBy:
+      - poppy-broker-verified-workload-identity
+    executionMode: autonomous
+    executionModeSource: schedule
+    repositoryId: github.com:Proto-UI/Proto-UI
+    mutationClass: reversible-github-collaboration
+    allowedActions:
+      - update-governed-issue-or-pull-request-metadata
+      - update-pull-request-branch-at-expected-head
+      - mark-exact-head-ready-for-review
+      - request-independent-review
+      - resolve-fixed-review-thread
+      - rerun-exact-trusted-workflow
+      - post-bounded-reconciliation-comment
+    requires:
+      - purpose-bound-request-digest
+      - exact-target
+      - live-preflight
+      - current-governed-outcome
+      - idempotency-or-reconciliation
+      - one-mutation-maximum
+      - one-reconciliation-without-blind-retry
+      - verified-receipt
+    excludedActions:
+      - review-disposition
+      - merge
+      - close-or-reopen
+      - force-or-bypass
+      - publication
+      - release
+      - access
+      - secrets
+      - applications
+      - ruleset-or-branch-protection
+      - security-disclosure
+      - provenance-exception
 reviewSubmissionAuthorizations:
   - id: proto-ui-scheduled-review-v1
-    status: active
+    status: pending-runtime-identity
+    blockedBy:
+      - poppy-broker-verified-workload-identity
     executionMode: autonomous
     executionModeSource: schedule
     repositoryId: github.com:Proto-UI/Proto-UI
     mutationClass: conditional-review-submission
-    allowedRecommendations: [REQUEST_CHANGES, APPROVE]
-    requestChangesRequires: [finding, complete-evidence, no-human-gate, live-preflight]
+    allowedRecommendations: [COMMENT, REQUEST_CHANGES, APPROVE]
+    requestChangesRequires:
+      [
+        finding,
+        complete-evidence,
+        no-attended-decision,
+        complete-commit-contributor-platform-identities,
+        independent-from-pr-author-and-commit-contributors,
+        live-preflight,
+      ]
     approveRequires:
-      [no-spec-entity-change, no-findings, complete-evidence, successful-ci, live-preflight]
-    excludedRecommendations: [COMMENT, ABSTAIN]
+      [
+        no-findings,
+        complete-evidence,
+        no-unresolved-decision,
+        successful-trusted-ci,
+        successful-trusted-dco-status,
+        complete-commit-contributor-platform-identities,
+        independent-from-pr-author-and-commit-contributors,
+        live-preflight,
+      ]
+    excludedRecommendations: [ABSTAIN]
     excludedActions:
       [merge, ready-for-review, close, label, assign, publication, release, access, ruleset]
 trustedCiEvidence:
@@ -173,9 +234,17 @@ trustedCiEvidence:
   workflowPaths: [.github/workflows/ci.yml]
   checkNames: [lockstep-check, public_package_plan, type-check, test, release-scan]
   neutralConclusions: [SKIPPED, NEUTRAL]
+trustedDcoEvidence:
+  repositoryId: github.com:Proto-UI/Proto-UI
+  checkName: DCO
+  source: dco
+  providerId: MDM6QXBwMTg2MQ==
+  detailsUrl: https://probot.github.io/apps/dco/
 pullRequestMergeAuthorizations:
   - id: proto-ui-scheduled-merge-v1
-    status: active
+    status: pending-runtime-identity
+    blockedBy:
+      - poppy-broker-verified-workload-identity
     executionMode: autonomous
     executionModeSource: schedule
     repositoryId: github.com:Proto-UI/Proto-UI
@@ -184,18 +253,21 @@ pullRequestMergeAuthorizations:
     mergeMethod: squash
     requires:
       - exact-head-clean-review-packet
-      - exact-head-independent-approval
-      - no-active-change-request
+      - complete-commit-contributor-platform-identities
+      - known-exact-head-approval-reviewer
+      - exact-head-approval-independent-from-pr-author-and-commit-contributors
+      - no-active-undismissed-or-unsuperseded-change-request-on-any-head
       - all-review-threads-resolved
       - successful-trusted-ci
+      - successful-trusted-dco-status
       - github-merge-ready
       - live-preflight
     excludedActions: [force, bypass, close-without-merge, publication, release, access, ruleset]
-futurePrivilegedAutomation:
-  status: required-for-broader-or-concurrent-runner-automation
+concurrentRunnerExpansion:
+  status: add-before-enabling-overlapping-privileged-runners
   requires:
     - independently-operated-evaluator
     - runtime-proof-of-possession
     - repository-and-task-bound-signed-envelope
     - globally-atomic-replay-prevention-for-external-writes
-  cannotGrant: [github-permission, repository-acceptance, human-gate-decisions]
+  preserves: [live-github-permission, repository-rules, two-human-decision-classes]

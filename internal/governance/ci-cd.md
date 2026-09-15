@@ -11,7 +11,7 @@ Release identity comes from the applicable `V-*` entity and immutable release ev
 | CI | `.github/workflows/ci.yml` | Type, test, spec, and global-version gates for pull requests and `main` |
 | Release Packages | `.github/workflows/release-packages.yml` | Manual release scan, stage rehearsal, or full-set publication |
 | Release Cadence | `.github/workflows/release-cadence.yml` | Periodic reminder based on the latest `v*` release tag |
-| Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request routing experiment |
+| Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request intake/reconciliation lane |
 | RepoSteward Portfolio Shadow Trial | `.github/workflows/reposteward-portfolio-shadow.yml` | Manual read-only external portfolio experiment |
 
 ## CI workflow (`ci.yml`)
@@ -33,11 +33,11 @@ Repository policy requires the relevant CI evidence before merge. GitHub ruleset
 
 ## Agent Operations Shadow workflow (`agent-operations-shadow.yml`)
 
-This Phase A experiment runs hourly at minute 17 UTC or by maintainer manual dispatch. It collects a bounded snapshot of open Issues and pull requests, runs a read-only structured analysis when `OPENAI_API_KEY` is configured, validates the result, and uploads the input and report with 14-day retention. If the key is absent, the workflow preserves only the bounded input snapshot. Hourly is the current automatic trigger; event-driven invocation is intended future architecture and is not deployed or evidenced by this repository state.
+This Phase A intake and reconciliation lane runs hourly at minute 17 UTC or by maintainer manual dispatch. It collects a bounded snapshot of open Issues and pull requests, runs a read-only structured analysis when `OPENAI_API_KEY` is configured, validates the result, and uploads the input and report with 14-day retention. If the key is absent, the workflow preserves the bounded input snapshot. Hourly is the current automatic trigger; event-driven invocation is intended future architecture and is not deployed or evidenced by this repository state.
 
-The workflow has read-only `contents`, `issues`, and `pull-requests` permissions, disables persisted checkout credentials, and runs Codex with the `:read-only` permission profile and `drop-sudo`. It does not run from pull-request events, post comments, change labels, create branches or pull requests, or authorize integration. Any future GitHub write permission requires a separate reviewed policy change and an explicit maintainer decision under `internal/agent-operations/**`.
+The workflow has read-only `contents`, `issues`, and `pull-requests` permissions, disables persisted checkout credentials, and runs Codex with the `:read-only` permission profile and `drop-sudo`. Those controls confine this ingestion credential: the workflow observes and reconciles but does not itself post comments, change labels, create branches, submit reviews, or integrate a pull request. They are not a global ceiling on Contributor Agents or the local review/integration schedule.
 
-Ordinary Contributor Agents use the lazy skill registry under `internal/agent-operations/skills.yaml`; it is not part of the scheduled shadow workflow. `$pui-dev` routes ordinary development, while `$pui-maintain` routes the separate autonomous-maintenance protocol.
+Ordinary Contributor Agents use the lazy skill registry under `internal/agent-operations/skills.yaml`; it is not part of the scheduled shadow workflow. `$pui-dev` routes ordinary development, while `$pui-maintain` routes the separate autonomous-maintenance protocol. Under the `pending-runtime-identity` standing authorizations, the scheduled lane remains read-only observation and reconciliation; human-assisted review or integration requires explicit current-user authorization, and any future standing activation still requires matching authorization, trusted evidence, a fresh canonical input, live credential permission, and agreement with review state and repository rules. Human decisions remain for unresolved product direction and privileged or irreversible operations.
 
 ## Private contributor preview workflows (`poppy-preview-*.yml`)
 
@@ -93,8 +93,8 @@ These tiers do not control the real npm publish set. Global exact-version govern
 3. For every newly named public package, publish a clearly non-release bootstrap version and configure its Trusted Publisher before the release rehearsal.
 4. Run `pnpm release:rehearse` for the complete sequential non-publishing gate. CI keeps the same checks split into parallel jobs for feedback speed.
 5. Review the launch product scope and isolated React plus multi-host CLI tarball consumer results.
-6. After merge to `main`, obtain the current human release approval and run `publish-all` with the `workspace` profile.
-7. In a separate evidence change, verify registry, tag, GitHub Release, assets, workflow head, deployment, and spec-snapshot digests before promoting the V entity according to its approved lifecycle.
+6. After merge to `main`, record the current privileged publication authorization and run `publish-all` with the `workspace` profile.
+7. In a separate evidence change, verify registry, tag, GitHub Release, assets, workflow head, deployment, and spec-snapshot digests before advancing the V entity according to its governed lifecycle.
 
 ## Local shortcuts
 

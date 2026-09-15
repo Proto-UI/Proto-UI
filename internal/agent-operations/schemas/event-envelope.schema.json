@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/event-envelope.schema.json",
+  "title": "Proto UI authenticated Agent event envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "eventShadowVersion",
+    "mode",
+    "authenticated",
+    "observedAt",
+    "repository",
+    "hook",
+    "delivery",
+    "sender",
+    "object",
+    "revision",
+    "source",
+    "transportHeadersAuthenticated",
+    "untrustedContentIncluded",
+    "mutationAuthorized",
+    "writeOperationsPerformed"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.agent-event-envelope" },
+    "eventShadowVersion": { "const": "2026-08-24.event-shadow" },
+    "mode": { "const": "event-shadow" },
+    "authenticated": { "const": true },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "nodeId", "fullName"],
+      "properties": {
+        "id": { "type": "integer", "minimum": 1 },
+        "nodeId": { "type": ["string", "null"] },
+        "fullName": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        }
+      }
+    },
+    "hook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "targetType", "targetId", "installationId"],
+      "properties": {
+        "id": { "type": "integer", "minimum": 1 },
+        "targetType": { "const": "repository" },
+        "targetId": { "type": "integer", "minimum": 1 },
+        "installationId": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "key", "event", "action", "payloadDigest"],
+      "properties": {
+        "id": {
+          "description": "GitHub transport claim retained for observation; the raw-body HMAC does not authenticate this header.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "key": {
+          "description": "Domain-separated digest of the trusted repository ID and authenticated raw-body digest; independent of transport headers.",
+          "$ref": "#/$defs/digest"
+        },
+        "event": { "const": "pull_request" },
+        "action": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "payloadDigest": {
+          "description": "SHA-256 digest of the exact raw body whose GitHub HMAC was verified before parsing.",
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "sender": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "login", "type"],
+      "properties": {
+        "id": { "type": "integer", "minimum": 1 },
+        "login": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "type": { "type": "string", "minLength": 1, "maxLength": 40 }
+      }
+    },
+    "object": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "nodeId", "number"],
+      "properties": {
+        "kind": { "const": "pull-request" },
+        "id": { "type": "integer", "minimum": 1 },
+        "nodeId": { "type": "string", "minLength": 1 },
+        "number": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseSha", "headSha", "updatedAt"],
+      "properties": {
+        "baseSha": { "$ref": "#/$defs/sha" },
+        "headSha": { "$ref": "#/$defs/sha" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repositoryId", "repositoryFullName", "isFork", "completeness"],
+      "properties": {
+        "repositoryId": { "type": ["integer", "null"], "minimum": 1 },
+        "repositoryFullName": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            { "type": "null" }
+          ]
+        },
+        "isFork": { "type": ["boolean", "null"] },
+        "completeness": { "enum": ["complete", "missing-head-repository"] }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "repositoryId": { "type": "integer", "minimum": 1 },
+            "repositoryFullName": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "isFork": { "type": "boolean" },
+            "completeness": { "const": "complete" }
+          }
+        },
+        {
+          "properties": {
+            "repositoryId": { "type": "null" },
+            "repositoryFullName": { "type": "null" },
+            "isFork": { "type": "null" },
+            "completeness": { "const": "missing-head-repository" }
+          }
+        }
+      ]
+    },
+    "transportHeadersAuthenticated": {
+      "description": "GitHub's webhook HMAC authenticates only the raw body, not captured transport headers.",
+      "const": false
+    },
+    "untrustedContentIncluded": { "const": false },
+    "mutationAuthorized": { "const": false },
+    "writeOperationsPerformed": { "const": 0 }
+  },
+  "$defs": {
+    "sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

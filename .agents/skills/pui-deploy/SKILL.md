@@ -10,7 +10,7 @@ description: Audit one bounded Proto UI deployment or publication evidence slice
 3. Query deployment, environment, artifact, status, URL, provenance, and revision facts with observation timestamps.
 4. Compare the delivered identity with the reviewed identity and the evidence the delivery phase is meant to produce.
 5. Separate preview inspection, production deployment, package publication, GitHub Release, and post-publication audit.
-6. Return observed facts, mismatches, unavailable evidence, residual risk, and one explicit human or release-audit transition.
+6. Return observed facts, mismatches, unavailable evidence, residual risk, and one eligible evidence, repair, or release-audit transition. Request an attended decision only for unresolved product direction or an actual privileged or irreversible delivery action.
 
 Remain read-only. A reachable URL or successful deployment status does not authorize promotion, rollback, publication, or release.
 

@@ -6,14 +6,14 @@ description: Reproduce and repair a bounded Proto UI regression whose expected b
 # Repair a governed regression
 
 1. Require a minimal reproduction, `pui-trace` map, fixed expected behavior, affected surfaces, and explicit exclusions.
-2. Classify the owning layer before editing. Keep the regression transition primary even when the owning layer is an Adapter, Module, Host Capability, or Prototype; propose a domain leaf later only if a separately approved artifact must change.
+2. Classify the owning layer before editing. Keep the regression transition primary even when the owning layer is an Adapter, Module, Host Capability, or Prototype; propose a domain leaf later only if a separately governed artifact must change.
 3. Add or identify evidence that fails for the governed reason before the fix.
 4. Repair the smallest owning layer. Preserve unrelated behavior and avoid opportunistic refactoring.
 5. Update `T-*` mapping only to the extent the executable evidence proves.
 6. Record another domain leaf in the handoff only when its governed artifact genuinely must change; do not load it here.
 7. Record the focused failure/pass evidence, affected integration checks, and broader validation boundary for a later `pui-validate` transition.
 
-Stop if the repair changes a normative criterion, owner, public API, compatibility promise, or lifecycle. Do not edit the spec to make the implementation pass, hide a lower-layer defect in a Prototype or stylesheet, or treat screenshots as sole protocol evidence.
+When the repair would change a normative criterion, owner, public API, compatibility promise, or lifecycle, continue only if current authority already fixes that transition; otherwise route the smallest product-direction decision. Do not edit the spec merely to make the implementation pass, hide a lower-layer defect in a Prototype or stylesheet, or treat screenshots as sole protocol evidence.
 
 ## Explicit handoff
 

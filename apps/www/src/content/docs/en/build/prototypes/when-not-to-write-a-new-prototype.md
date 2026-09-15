@@ -5,9 +5,9 @@ description: 'Distinguish maintenance, composition, design-language projection, 
 
 Proto UI provides Prototype authoring APIs, but that does not mean contributors should frequently add new protocol identities. A safer starting point is:
 
-> Find the applicable `P-*` and `T-*` entities first, then decide whether the work is maintenance, composition, a design-language projection, or a new Base semantic subject that still needs approval.
+> Find the applicable `P-*` and `T-*` entities first, then decide whether the work is maintenance, composition, a design-language projection, or a candidate for a genuinely new Base semantic identity.
 
-This is a boundary guide, not authorization to implement a new Prototype. A new Base subject must pass a proposal and maintainer checkpoint. Implementation begins only after its boundary, public API, P/T graph, and evidence scope are approved; then follow [Implementing an Approved Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/).
+This is a boundary guide. Existing governed subjects move directly into maintenance, projection, or implementation. For a genuinely new Base subject, the only unresolved semantic decision is whether Proto UI admits the independent identity. Research, a candidate P/T graph, draft entities, implementation probes, and executable evidence may proceed before that decision and should make it easier. Keep the candidate explicitly draft until admission, then continue through [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/).
 
 ## Identify the kind of work first
 
@@ -64,10 +64,10 @@ Before writing code, answer these questions in order:
 1. Is there an applicable P/T graph that makes this maintenance?
 2. Is this host- or framework-level composition?
 3. Is this only a design-language delta over existing Base semantics?
-4. If it is a new Base subject, has the issue recorded a maintainer checkpoint?
+4. If it is a new Base subject, is the admission decision recorded, or is the work clearly marked as a candidate draft?
 5. Are lifecycle, criteria, relations, sources, and evidence explicit?
 
-Until the first four steps are resolved, do not start by creating a Prototype file.
+The first three answers route existing governed work immediately. When only Base admission remains unresolved, begin with the candidate graph, draft entity, implementation probe, and evidence rather than presenting the new identity as already governed.
 
 ## Lifecycle note
 
@@ -76,5 +76,5 @@ Until the first four steps are resolved, do not start by creating a Prototype fi
 ## Next
 
 - To understand the structure of a leaf authoring entry, read [Writing a Custom Primitive Prototype](/en/build/prototypes/writing-a-custom-primitive-prototype/)
-- For an approved compound boundary, read [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/)
+- For a governed or candidate compound boundary, read [Writing a Compound Prototype](/en/build/prototypes/writing-a-compound-prototype/)
 - For a new design language, read [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
