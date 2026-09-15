@@ -22,6 +22,12 @@ const Component = adapt(prototype);
 
 The Adapter uses Vue 2 options lifecycle and `render(h)` APIs; it does not require the Vue 2.7 Composition API. `@proto.ui/adapter-vue` remains the separate Vue 3 Adapter.
 
+## Document theme
+
+The default `colorScheme` reader follows root `class` / `data-theme` markers and then the system preference. Mounted colorScheme Rule consumers update their existing style contribution when that effective value changes; view detach and terminal disposal release their subscription.
+
+The guarantee is limited to the default getter in same-document light DOM without intervening local theme markers. An explicit `getMeta` keeps sampled behavior; subtree, ShadowRoot and cross-document equivalence remain outside this slice. See [C-RULE-COLOR-SCHEME-0001](../../../spec/contracts/C-RULE-COLOR-SCHEME-0001.yaml) and [T-RULE-COLOR-SCHEME-0001](../../../spec/tests/T-RULE-COLOR-SCHEME-0001.yaml), both draft.
+
 ## References
 
 - `spec/adapters/A-VUE-2-0001.yaml`

@@ -12,6 +12,7 @@ import {
   createHostWiring,
   createHostSurfaceProjection,
   createEventGate,
+  createDefaultWebColorSchemeSource,
   createScopedExposesReader,
   createWebProtoEventRouter,
   createViewEpochOwner,
@@ -143,6 +144,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   const getProps = opt.getProps ?? (() => ({}) as Partial<Props>);
   const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
   const getMeta = opt.getMeta ?? createDefaultMetaGetter();
+  // Split reserves colorScheme for its retained environment, not the document getter.
+  const colorSchemeSource =
+    split || opt.getMeta ? undefined : createDefaultWebColorSchemeSource(getMeta);
   const exposeStateWebMode = opt.exposeStateWebMode;
   const scrollProjection = opt.scrollProjection;
   const MAX_FOCUS_TARGET_RETRIES = 3;
@@ -528,6 +532,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               rawPropsSource,
               effectsPort: splitEffects ?? createWebEffectsPort(applier!),
               getMeta: ownerGetMeta,
+              colorSchemeSource,
               textControlTarget: this._textControlTarget,
               imageViewTarget: this._imageViewTarget,
               exposeStateWebMode,
@@ -625,6 +630,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         instanceToken: this._instanceToken,
         rawPropsSource,
         getMeta: ownerGetMeta,
+        colorSchemeSource,
         textControlTarget: this._textControlTarget,
         imageViewTarget: this._imageViewTarget,
         exposeStateWebMode,

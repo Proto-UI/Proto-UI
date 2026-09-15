@@ -12,6 +12,7 @@ import type {
 } from '@proto.ui/runtime';
 import {
   createEventGate,
+  createDefaultWebColorSchemeSource,
   createScopedExposesReader,
   createViewEpochOwner,
   createWebProtoEventRouter,
@@ -34,6 +35,7 @@ import {
   type OverlayZIndexLayerSchedulerOptions,
 } from '@proto.ui/module-overlay';
 import type { RawPropsSource } from '@proto.ui/module-props';
+import type { ColorSchemeInvalidationSource } from '@proto.ui/module-rule-meta';
 import { PropsBaseType } from '@proto.ui/types';
 
 import { createDefaultMetaGetter } from './platform/meta';
@@ -96,6 +98,7 @@ type Vue2InternalState<Props extends PropsBaseType> = {
   initOptions: {
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
+    colorSchemeSource?: ColorSchemeInvalidationSource;
     onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
     onLifecycleEvent?: (event: RuntimeLifecycleEvent) => void;
     exposeStateWebMode?: ExposeStateWebMode;
@@ -173,6 +176,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
+    const colorSchemeSource = opt.getMeta ? undefined : createDefaultWebColorSchemeSource(getMeta);
     const exposeStateWebMode = opt.exposeStateWebMode;
     const scrollProjection = opt.scrollProjection;
     const autoUpdate = opt.autoUpdateOnPropsChange ?? true;
@@ -216,6 +220,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         initOptions: {
           schedule,
           getMeta,
+          colorSchemeSource,
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
           exposeStateWebMode,
@@ -351,6 +356,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           },
           rawPropsSource,
           getMeta,
+          colorSchemeSource,
           setExposes: (record) => {
             state.exposes = record;
           },
@@ -388,6 +394,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           initSession(runtime, this, proto, {
             schedule,
             getMeta,
+            colorSchemeSource,
             exposeStateWebMode,
             scrollProjection,
             overlayLayerScheduler,
@@ -405,6 +412,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               initSession(runtime, this, proto, {
                 schedule,
                 getMeta,
+                colorSchemeSource,
                 exposeStateWebMode,
                 scrollProjection,
                 overlayLayerScheduler,
@@ -427,6 +435,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           initSession(runtime, this, proto, {
             schedule,
             getMeta,
+            colorSchemeSource,
             exposeStateWebMode,
             scrollProjection,
             overlayLayerScheduler,
@@ -574,6 +583,7 @@ function initSession<Props extends PropsBaseType>(
   options: {
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
+    colorSchemeSource?: ColorSchemeInvalidationSource;
     onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
     onLifecycleEvent?: (event: RuntimeLifecycleEvent) => void;
     exposeStateWebMode?: ExposeStateWebMode;
@@ -634,6 +644,7 @@ function initSession<Props extends PropsBaseType>(
     rawPropsSource: state.rawPropsSource,
     effectsPort,
     getMeta: targetOptions.getMeta,
+    colorSchemeSource: targetOptions.colorSchemeSource,
     exposeStateWebMode: targetOptions.exposeStateWebMode,
     scrollProjection: targetOptions.scrollProjection,
     setExposes: (record) => {
@@ -732,6 +743,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
 ): {
   schedule: (task: () => void) => void;
   getMeta: (key: string) => unknown;
+  colorSchemeSource?: ColorSchemeInvalidationSource;
   onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
   onLifecycleEvent?: (event: RuntimeLifecycleEvent) => void;
   exposeStateWebMode?: ExposeStateWebMode;

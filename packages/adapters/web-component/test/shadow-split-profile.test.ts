@@ -11,6 +11,7 @@ import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/p
 import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
 import { checkboxRoot, checkboxIndicator } from '../../../prototypes/shadcn/src/checkbox';
 import * as hostSessions from '../src/runtime/session';
+import * as moduleWiring from '../src/runtime/modules';
 
 const artifact = renderProtoShadowSplitStyleArtifact([
   'flex',
@@ -35,6 +36,158 @@ afterEach(async () => {
 
 // D-WEB-COMPONENT-SHADOW-PROFILE-0001 G-J; D-WEB-COMPONENT-SHADOW-STYLE-0001 K/N.
 describe('public WC Shadow split profile', () => {
+  // C-RULE-COLOR-SCHEME-0001 C/D/G/K and D-WEB-COMPONENT-SHADOW-STYLE-0001 E/I/K:
+  // main's document invalidation pair must not be attached to the split reader.
+  it.each(['default', 'explicit', 'explicit-with-base'] as const)(
+    'keeps Light document leases separate from the %s split environment across views',
+    async (mode) => {
+      const html = document.documentElement;
+      const oldClass = html.className;
+      const oldTheme = html.getAttribute('data-theme');
+      const ownerSpy = vi.spyOn(moduleWiring, 'createWebComponentOwnerModules');
+      const viewSpy = vi.spyOn(moduleWiring, 'createWebComponentModules');
+      const listeners = new Set<() => void>();
+      let scheme: 'light' | 'dark' = 'light';
+      const source: ShadowColorSchemeSource = {
+        get: () => scheme,
+        subscribe(listener) {
+          listeners.add(listener);
+          return () => {
+            listeners.delete(listener);
+          };
+        },
+      };
+      const baseMeta = vi.fn(() => 'base');
+      const runs: RunHandle<{ enabled?: boolean }>[] = [];
+      const renders = [0, 0];
+      const hosts: (HTMLElement & { getExposes(): unknown })[] = [];
+      const setPresent = (present: boolean) =>
+        hosts.forEach((el) => {
+          (el.getExposes() as { view: { setPresent(present: boolean): void } }).view.setPresent(
+            present
+          );
+        });
+      const settle = async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await flush();
+      };
+      const tokens = (el: HTMLElement) =>
+        (el.shadowRoot?.querySelector('[part="surface"]') ?? el).getAttribute('data-pui-style');
+      try {
+        html.classList.remove('dark', 'light');
+        html.dataset.theme = 'light';
+        for (const index of [0, 1]) {
+          const proto = definePrototype<{ enabled?: boolean }>({
+            name: name(),
+            setup(def) {
+              def.props.define({ enabled: { type: 'boolean', default: true } });
+              def.feedback.style.use(tw('bg-primary'));
+              def.rule({
+                when: (w) => w.all(w.prop('enabled').eq(true), w.meta('colorScheme').eq('dark')),
+                intent: (i) => i.feedback.style.use(tw('bg-secondary')),
+              });
+              def.lifecycle.onCreated((run) => {
+                runs[index] = run;
+              });
+              def.expose('view', {
+                setPresent: (present: boolean) => runs[index].lifecycle.setPresent(present),
+              });
+              return (r) => {
+                renders[index]++;
+                return r.slot();
+              };
+            },
+          });
+          const C = AdaptToWebComponent(
+            proto,
+            index === 0
+              ? {}
+              : {
+                  shadow: {
+                    ...shadow,
+                    styleArtifact: renderProtoShadowSplitStyleArtifact([
+                      'bg-primary',
+                      'bg-secondary',
+                    ]),
+                    ...(mode === 'default' ? {} : { colorSchemeSource: source }),
+                  },
+                  ...(mode === 'explicit-with-base' ? { getMeta: baseMeta } : {}),
+                }
+          );
+          const el = new C();
+          hosts.push(el);
+          document.body.append(el);
+        }
+        await settle();
+        const [light, splitHost] = hosts;
+        const lightOwner = ownerSpy.mock.calls.find(([args]) => args.el === light)![0];
+        expect(lightOwner.colorSchemeSource?.getter).toBe(lightOwner.getMeta);
+        expect(lightOwner.colorSchemeSource).toBeDefined();
+        expect(
+          ownerSpy.mock.calls.find(([args]) => args.el === splitHost)![0].colorSchemeSource
+        ).toBeUndefined();
+        const before = [...renders];
+        html.dataset.theme = 'dark';
+        await settle();
+        expect(tokens(light)).toBe('bg-secondary');
+        expect(splitHost.getAttribute('data-pui-color-scheme')).toBe(
+          mode === 'default' ? 'dark' : 'light'
+        );
+        expect(runs[1].meta!.get('colorScheme')).toBe(mode === 'default' ? 'dark' : 'light');
+        expect(renders).toEqual(before);
+        if (mode !== 'default') {
+          scheme = 'dark';
+          listeners.forEach((listener) => listener());
+          expect(splitHost.getAttribute('data-pui-color-scheme')).toBe('dark');
+          expect(runs[1].meta!.get('colorScheme')).toBe('dark');
+          expect(listeners.size).toBe(1);
+        }
+        // Do not assert new reactive mixed-Rule equivalence for Shadow. Reattach
+        // must still sample its retained environment and use the current surface.
+        setPresent(false);
+        await settle();
+        const surface = splitHost.shadowRoot!.querySelector('[part="surface"]');
+        html.dataset.theme = 'light';
+        await settle();
+        if (mode !== 'default') expect(listeners.size).toBe(1);
+        setPresent(true);
+        await settle();
+        expect(tokens(light)).toBe('bg-primary');
+        expect(tokens(splitHost)).toBe(mode === 'default' ? 'bg-primary' : 'bg-secondary');
+        expect(splitHost.shadowRoot!.querySelector('[part="surface"]')).toBe(surface);
+        for (const [args] of viewSpy.mock.calls) {
+          if (args.el === light) {
+            expect(args.getMeta).toBe(lightOwner.getMeta);
+            expect(args.colorSchemeSource).toBe(lightOwner.colorSchemeSource);
+          } else if (args.el === splitHost) {
+            expect(args.colorSchemeSource).toBeUndefined();
+          }
+        }
+        expect(baseMeta.mock.calls.some((args) => (args as unknown[])[0] === 'colorScheme')).toBe(
+          false
+        );
+        hosts.forEach((el) => el.remove());
+        await settle();
+        expect(listeners.size).toBe(0);
+        expect(splitHost.hasAttribute('data-pui-color-scheme')).toBe(false);
+        document.body.append(...hosts);
+        await settle();
+        expect(tokens(light)).toBe('bg-primary');
+        expect(tokens(splitHost)).toBe(mode === 'default' ? 'bg-primary' : 'bg-secondary');
+        expect(splitHost.shadowRoot!.querySelector('[part="surface"]')).not.toBe(surface);
+        if (mode !== 'default') expect(listeners.size).toBe(1);
+      } finally {
+        hosts.forEach((el) => el.remove());
+        await settle();
+        ownerSpy.mockRestore();
+        viewSpy.mockRestore();
+        html.className = oldClass;
+        if (oldTheme === null) html.removeAttribute('data-theme');
+        else html.setAttribute('data-theme', oldTheme);
+      }
+    }
+  );
+
   it.each(['onUnmounted', 'onBeforeDispose'] as const)(
     'serializes a real reentrant reconnect during %s',
     async (checkpoint) => {

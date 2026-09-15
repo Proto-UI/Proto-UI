@@ -1,0 +1,62 @@
+id: HC-COLOR-SCHEME-INVALIDATION-0001
+type: host-cap
+title: Host invalidates one paired colorScheme reader
+status: draft
+since: 0.3.0-alpha.0
+lifecycleRationale:
+  en: The accepted responsibility is limited to a paired colorScheme-only source, with a default Web document realization. Resource/priority tests and native browser registration/release observations cover the default provider. Broader providers and generic reactive Meta remain excluded; independent stable admission is still required.
+  zh-CN: 已接受职责限于配对的 colorScheme-only source，当前由默认 Web 文档实现。资源/优先级单测和原生浏览器注册/释放观察覆盖默认 provider。更广 provider 与通用 reactive Meta 继续被排除，仍待独立稳定接纳。
+summary: A getter identity and releasable invalidation subscription let Rule Meta reread one environment input without receiving host objects or a second theme value.
+statement:
+  en: The capability pairs the exact Rule Meta getter with subscribe(invalidate), returning an independent disposer. Notifications carry no value and do not directly request Props work or structural rendering. The current provider is adapter-base's default document service; other providers need separate fidelity evidence and are not exposed as a new App option.
+  zh-CN: capability 将精确 Rule Meta getter 与 subscribe(invalidate) 配对，返回独立 disposer。通知不携带值，也不直接请求 Props 工作或结构渲染。当前 provider 为 adapter-base 默认文档服务；其它 provider 需要独立 fidelity 证据，不作为新的 App option 暴露。
+criteria:
+  - id: HC-COLOR-SCHEME-INVALIDATION-0001-A
+    text:
+      en: The source exposes the exact getter reference and a releasable subscription; it does not synchronously call invalidate from subscribe. The consumer reads after attaching and validates pairing. No DOM/framework object or independently cached delivered scheme enters the capability value.
+      zh-CN: source 暴露精确 getter 引用与可释放订阅；subscribe 不同步调用 invalidate。consumer 在挂接后读取并核对 pairing。capability value 不包含 DOM/framework object 或另一份缓存的已投递 scheme。
+  - id: HC-COLOR-SCHEME-INVALIDATION-0001-B
+    text:
+      en: The default Web provider uses resolveWebColorScheme, preserving root dark-first, explicit-light and system fallback order. Marker removal reconsiders fallback and notifications depend on effective values rather than raw mutations or MQL events.
+      zh-CN: 默认 Web provider 使用 resolveWebColorScheme，保留 root dark-first、显式 light 与 system fallback 顺序。marker 移除会重新考虑 fallback；通知取决于有效值，不取决于原始 mutation 或 MQL event。
+  - id: HC-COLOR-SCHEME-INVALIDATION-0001-C
+    text:
+      en: One loaded adapter-base module shares one service-owned root MutationObserver and one color-scheme MQL listener per Document across different default getter pairs. Construction does not observe; the first active subscription connects and the last release disconnects. Only root class/data-theme and the color-scheme query are observed.
+      zh-CN: 同一已加载 adapter-base 模块内，不同默认 getter pair 按 Document 共享一组 service-owned root MutationObserver 与 color-scheme MQL listener。构造时不观察；首活动订阅连接，末释放拆除。仅观察 root class/data-theme 和 color-scheme query。
+  - id: HC-COLOR-SCHEME-INVALIDATION-0001-D
+    text:
+      en: An observable batch notifies each still-active subscription at most once only when its final effective scheme differs. Disposers are independent and idempotent. Released subscriptions and old connection generations cannot receive queued or late notifications, including after reconnection.
+      zh-CN: 可观察批次仅在最终有效 scheme 改变时，对每个仍活动订阅最多通知一次。disposer 独立且幂等。已释放订阅与旧连接 generation 不得收到排队或迟到通知，包括重新连接之后。
+  - id: HC-COLOR-SCHEME-INVALIDATION-0001-E
+    text:
+      en: Missing Document or MutationObserver withholds the active source without changing the existing sampled getter fallback. Missing matchMedia leaves root marker observation and the resolver's light fallback available. This does not establish SSR support, cross-document fidelity or globally unique listeners across separate package copies.
+      zh-CN: 缺少 Document 或 MutationObserver 时不提供活动 source，不改变既有 sampled getter fallback。缺少 matchMedia 时保留 root marker 观察与 resolver 的 light fallback。不据此建立 SSR 支持、跨文档 fidelity 或不同 package 副本之间的全局唯一 listener。
+satisfies:
+  contracts:
+    - id: C-RULE-COLOR-SCHEME-0001
+      anchors: [C-RULE-COLOR-SCHEME-0001-E, C-RULE-COLOR-SCHEME-0001-F]
+relates:
+  modules:
+    - M-RULE-META-0001
+  decisions:
+    - D-RULE-META-NAMING-0001
+verifies:
+  tests:
+    - T-RULE-COLOR-SCHEME-0001
+openQuestions:
+  - id: HC-COLOR-SCHEME-INVALIDATION-0001-Q-ADMISSION
+    question:
+      en: Has default-document fidelity been demonstrated through the complete real Adapter matrix and independently admitted?
+      zh-CN: 默认文档 fidelity 是否已通过完整真实 Adapter 矩阵证明并获得独立接纳？
+    blocks:
+      - activation:HC-COLOR-SCHEME-INVALIDATION-0001
+sources:
+  - path: packages/modules/rule-meta/src/caps.ts
+  - path: packages/adapters/base/src/platform/web-color-scheme-source.ts
+  - path: packages/adapters/base/src/platform/web-preferences.ts
+  - path: packages/adapters/base/test/web-color-scheme-source.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the paired, releasable colorScheme source and bounded default document provider.
+tags: [host-capability, color-scheme, invalidation, lease, web, draft]

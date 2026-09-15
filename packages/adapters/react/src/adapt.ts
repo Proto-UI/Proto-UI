@@ -12,6 +12,7 @@ import type {
 import {
   createDeferredOwnerDisposal,
   createEventGate,
+  createDefaultWebColorSchemeSource,
   createScopedExposesReader,
   createViewEpochOwner,
   createWebProtoEventRouter,
@@ -163,6 +164,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
+    const colorSchemeSource = opt.getMeta ? undefined : createDefaultWebColorSchemeSource(getMeta);
     const exposeStateWebMode = opt.exposeStateWebMode;
     const scrollProjection = opt.scrollProjection;
     const autoUpdate = opt.autoUpdateOnPropsChange ?? true;
@@ -355,6 +357,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             },
             rawPropsSource: rawPropsSourceRef.current as RawPropsSource<Props>,
             getMeta,
+            colorSchemeSource,
             setExposes: (record) => {
               exposesRef.current = record;
             },
@@ -446,6 +449,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           rawPropsSource,
           effectsPort,
           getMeta,
+          colorSchemeSource,
           exposeStateWebMode,
           scrollProjection,
           setExposes: (record) => {
