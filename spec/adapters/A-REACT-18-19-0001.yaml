@@ -141,8 +141,20 @@ criteria:
     text:
       en: The standard Adapter wires Scroll with host-owned overflow and the current root, translates normalized requests/facts, and restores owned styles and listeners on teardown. Composed Thumb geometry and Move Gesture remain attached to the same Context/Anatomy-resolved surface; evidence uses simulated Web geometry, not native physics certification.
       zh-CN: standard Adapter 将 Scroll 接入 host-owned overflow 与当前 root，翻译 normalized request/fact，并在 teardown 恢复拥有的样式、释放 listener。composed Thumb geometry 与 Move Gesture 附着到同一个 Context/Anatomy 解析的 surface；证据使用模拟 Web geometry，不是 native physics 认证。
+  - id: A-REACT-18-19-0001-RULE-META
+    text:
+      en: The bounded draft Rule Meta slice passes the exact default getter/source pair through owner/view wiring, updates mixed Rule styles without a Proto update, and preserves retained-owner remount and normal Props synchronization. Custom getMeta remains sampled without the default source. Happy-dom evidence covers token/identity behavior, not browser paint or all framework replay paths.
+      zh-CN: 有界 draft Rule Meta slice 经 owner/view wiring 传递精确默认 getter/source pair，无需 Proto update 即更新混合 Rule 样式，保留 retained-owner remount 与正常 Props 同步。custom getMeta 维持 sampled 且不配接默认 source。happy-dom 证据覆盖 token/identity 行为，不证明 browser paint 或全部框架 replay 路径。
+  - id: A-REACT-18-19-0001-RULE-META-PAINT
+    text:
+      en: Within C-RULE-COLOR-SCHEME-0001's bounded draft default same-document light-DOM domain, actual mixed and eligible lowered recipes must follow explicit/system changes through existing presentation/reveal. Custom/subtree/ShadowRoot/cross-document equivalence, generic Meta reactivity and Transition retiming are not added; full browser cases are tracked separately from token integration.
+      zh-CN: 在 C-RULE-COLOR-SCHEME-0001 的有界 draft 默认同文档 light-DOM 域内，实际 mixed 与 eligible lowered 配方须经既有 presentation/reveal 跟随显式/system 变化。不新增 custom/subtree/ShadowRoot/跨文档等价、通用 Meta 响应或 Transition retiming；完整 browser case 与 token integration 分开跟踪。
 supports:
   modules:
+    - id: M-RULE-META-0001
+      since: 0.3.0-alpha.0
+      role: required-module
+      note: Bounded draft sampled reader and default document colorScheme lease. Source use is conditional on availability, exact pairing and consuming mounted Rules; custom readers remain sampled.
     - id: M-POSITIONING-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -173,7 +185,7 @@ supports:
     - id: M-RULE-0001
       since: 0.3.0-alpha.0
       role: required-module
-      note: Bounded Props/State-to-style core; author use optional, Context and downstream extensions excluded.
+      note: Bounded Props/State-to-style core and internal environment style request; author use optional. Rule Meta owns its separate source lease; Context and downstream optimization equivalence remain excluded.
     - id: M-FEEDBACK-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -220,6 +232,10 @@ supports:
       role: required-module
 provides:
   hostCaps:
+    - id: HC-COLOR-SCHEME-INVALIDATION-0001
+      since: 0.3.0-alpha.0
+      role: translated-capability
+      note: Default same-document source only when Document and MutationObserver are available; missing MQL retains root marker observation. No source is paired with custom getMeta.
     - id: HC-ANCHORED-POSITION-0001
       since: 0.3.0-alpha.0
       role: translated-capability
@@ -304,6 +320,8 @@ relates:
     - D-ADAPTER-PROFILE-0001
 verifies:
   tests:
+    - id: T-RULE-COLOR-SCHEME-0001
+      since: 0.3.0-alpha.0
     - id: T-ANCHORED-POSITIONING-0001
       since: 0.3.0-alpha.0
     - id: T-HIT-PARTICIPATION-0001
@@ -349,6 +367,8 @@ verifies:
     - id: T-SCROLL-COMPOSED-CONTROL-0001
       since: 0.3.0-alpha.0
 sources:
+  - path: packages/adapters/react/test/color-scheme.integration.test.ts
+  - path: packages/adapters/base/src/platform/web-color-scheme-source.ts
   - path: packages/adapters/react/test/rule-expose-state-web.integration.test.ts
   - path: packages/adapters/react/test/collection.integration.test.ts
   - path: packages/adapters/react/test/anatomy.integration.test.ts
@@ -451,4 +471,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Cataloged Scroll session projection and composed Thumb evidence through real Adapter wiring.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Cataloged bounded draft Rule Meta wiring and the conditional default colorScheme source, separating token evidence from browser painting.
 tags: [adapter, react, web, props, event, lifecycle, state, expose, official]

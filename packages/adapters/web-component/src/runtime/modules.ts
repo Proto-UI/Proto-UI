@@ -87,7 +87,11 @@ import {
 } from '@proto.ui/module-image-view';
 import { type RawPropsSource, RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/module-rule-expose-state-web';
-import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import {
+  RULE_META_GET_CAP,
+  RULE_META_COLOR_SCHEME_SOURCE_CAP,
+  type ColorSchemeInvalidationSource,
+} from '@proto.ui/module-rule-meta';
 import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import { type PropsBaseType } from '@proto.ui/types';
 
@@ -138,6 +142,7 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   textControlTarget: WebTextControl | null;
   imageViewTarget: HTMLImageElement | null;
   getMeta: (key: string) => unknown;
+  colorSchemeSource?: ColorSchemeInvalidationSource;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
     allowStringVar?: boolean;
@@ -151,7 +156,7 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
 export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   args: WebComponentOwnerModulesArgs<Props>
 ) {
-  const { el, instanceToken, rawPropsSource, getMeta, setExposes } = args;
+  const { el, instanceToken, rawPropsSource, getMeta, colorSchemeSource, setExposes } = args;
   const getTriggerSurface = () => {
     if (args.textControlTarget) return args.textControlTarget;
     if (args.imageViewTarget) return args.imageViewTarget;
@@ -256,7 +261,12 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
         (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken),
       ],
     ])
-    .use('rule-meta', [[RULE_META_GET_CAP, (key: string) => getMeta(key)]])
+    .use('rule-meta', [
+      [RULE_META_GET_CAP, getMeta],
+      ...(colorSchemeSource
+        ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
+        : []),
+    ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
     ])
@@ -280,6 +290,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   textControlTarget: WebTextControl | null;
   imageViewTarget: HTMLImageElement | null;
   getMeta: (key: string) => unknown;
+  colorSchemeSource?: ColorSchemeInvalidationSource;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
     allowStringVar?: boolean;
@@ -299,6 +310,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     rawPropsSource,
     effectsPort,
     getMeta,
+    colorSchemeSource,
     exposeStateWebMode,
     scrollProjection,
     setExposes,
@@ -472,7 +484,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken),
       ],
     ])
-    .use('rule-meta', [[RULE_META_GET_CAP, (key: string) => getMeta(key)]])
+    .use('rule-meta', [
+      [RULE_META_GET_CAP, getMeta],
+      ...(colorSchemeSource
+        ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
+        : []),
+    ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
     ])

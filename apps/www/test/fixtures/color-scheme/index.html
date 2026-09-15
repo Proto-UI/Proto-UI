@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" class="light" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Document theme conformance</title>
+    <style>
+      @layer fixture, proto-ui;
+      @layer fixture {
+        body {
+          margin: 0;
+          font-family: system-ui, sans-serif;
+          background: var(--pui-background);
+          color: var(--pui-foreground);
+        }
+        textarea {
+          font: inherit;
+          color: inherit;
+        }
+        main {
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 24px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+        #app {
+          display: grid;
+          gap: 16px;
+        }
+        article {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          min-height: 60px;
+          padding: 12px;
+          border: 1px solid var(--pui-border);
+          border-radius: 8px;
+        }
+        article > p {
+          flex: 0 0 220px;
+          margin: 0;
+        }
+        article > div {
+          flex: 1;
+        }
+        #portal {
+          display: contents;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="board">
+      <h1>Document theme conformance</h1>
+      <p>Real Adapter and Shadcn surfaces · <span id="runtime-name"></span></p>
+      <div id="app"></div>
+    </main>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

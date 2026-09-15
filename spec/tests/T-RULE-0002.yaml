@@ -3,7 +3,7 @@ type: test
 title: Rule core Module lifecycle and four Adapter conformance
 status: draft
 since: 0.3.0-alpha.0
-summary: Executable evidence for the bounded Props/State-to-style slice; Context, state intent and downstream extension equivalence remain outside this claim.
+summary: Executable evidence for the bounded Props/State-to-style slice and internal environment style request; Context, state intent and downstream extension equivalence remain outside this claim.
 cases:
   - id: T-RULE-0002-CASE-SETUP
     title: Setup cancellation rejects runtime removal
@@ -44,7 +44,28 @@ cases:
       - A-VUE-2-0001-RULE
       - A-WEB-COMPONENT-0001-RULE
     expectation: rule-adapter-conforms
+  - id: T-RULE-0002-CASE-ENVIRONMENT
+    title: Internal environment requests reuse the current Rule contribution owner
+    covers:
+      - M-RULE-0001-G
+    expectation: accepted-input-style-replacement-without-host-props-sync-or-structural-render
+    notes:
+      - Source subscriptions, physical Adapter painting and scope equivalence are mapped separately by T-RULE-COLOR-SCHEME-0001.
 implementations:
+  - id: rule-runtime-environment
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.color-scheme.contract.test.ts
+    required: true
+    consumesCases: [T-RULE-0002-CASE-ENVIRONMENT]
+  - id: rule-runtime-environment-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.color-scheme-lifecycle.contract.test.ts
+    required: true
+    consumesCases: [T-RULE-0002-CASE-ENVIRONMENT]
+    notes:
+      - Exercises mounted/terminal rejection and supplied extension hook order/short-circuit; this is not a general side-effect guarantee for third-party callbacks.
   - id: rule-module-core
     kind: module-test
     status: passing
@@ -116,6 +137,7 @@ verifies:
         - M-RULE-0001-D
         - M-RULE-0001-E
         - M-RULE-0001-F
+        - M-RULE-0001-G
   adapters:
     - id: A-REACT-18-19-0001
       anchors:
@@ -135,6 +157,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Mapped direct Module, Runtime epoch and real four-Adapter Rule evidence.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added Runtime evidence for the bounded internal environment request and retained extension execution.
 tags:
   - rule
   - test

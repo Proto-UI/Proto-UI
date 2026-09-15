@@ -11,6 +11,7 @@ import type {
 } from '@proto.ui/runtime';
 import {
   createEventGate,
+  createDefaultWebColorSchemeSource,
   createScopedExposesReader,
   createViewEpochOwner,
   createWebProtoEventRouter,
@@ -149,6 +150,7 @@ export function createVueAdapter(runtime: VueRuntime) {
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
+    const colorSchemeSource = opt.getMeta ? undefined : createDefaultWebColorSchemeSource(getMeta);
     const exposeStateWebMode = opt.exposeStateWebMode;
     const scrollProjection = opt.scrollProjection;
     const autoUpdate = opt.autoUpdateOnPropsChange ?? true;
@@ -295,6 +297,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             rawPropsSource,
             getMeta,
+            colorSchemeSource,
             setExposes: (record) => {
               exposesRef.value = record;
             },
@@ -407,6 +410,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             rawPropsSource,
             effectsPort,
             getMeta,
+            colorSchemeSource,
             exposeStateWebMode,
             scrollProjection,
             setExposes: (record) => {
