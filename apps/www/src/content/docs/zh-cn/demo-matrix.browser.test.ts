@@ -203,7 +203,7 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Website Demo Matrix browser smoke', () => {
-  it('mounts every supported demo and names the unimplemented Image adapter', async () => {
+  it('mounts every demo in every official Web adapter', async () => {
     const { context, page } = await openRoute(browser, baseUrl, MATRIX_ROUTE, {
       width: 1440,
       height: 900,
@@ -213,12 +213,9 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await waitForMatrix(page);
       const facts = await readMatrixFacts(page);
       expect(facts.demos).toBeGreaterThan(0);
-      // D-IMAGE-VIEW-PROJECTION-0001-E admits only WC/React/Vue 3 for Image.
-      expect(facts.unavailable).toEqual(['demo-base-image:vue2']);
-      expect(facts.previewers).toBe(facts.demos * RUNTIMES.length - 1);
-      expect(await page.locator('[data-unavailable]').innerText()).toContain(
-        'Image View is not implemented for Vue 2.'
-      );
+      // D-IMAGE-VIEW-PROJECTION-0001-E admits all four official Web adapters.
+      expect(facts.unavailable).toEqual([]);
+      expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
       expect(facts.initialized).toBe(facts.previewers);
       expect(facts.errors).toBe(0);
       expect(facts.overflow).toBeLessThanOrEqual(0);
@@ -275,8 +272,8 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
         expect(facts.errors).toBe(0);
         expect(facts.overflow).toBeLessThanOrEqual(0);
         expect(facts.adapterColumnCount).toBe(1);
-        expect(facts.unavailable).toEqual(['demo-base-image:vue2']);
-        expect(facts.previewers).toBe(facts.demos * RUNTIMES.length - 1);
+        expect(facts.unavailable).toEqual([]);
+        expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
       } finally {
         await context.close();
       }

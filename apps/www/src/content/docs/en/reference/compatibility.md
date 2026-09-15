@@ -12,8 +12,9 @@ Compatibility in Proto UI is recorded through Adapter profile entities and their
 | `A-WEB-COMPONENT-0001` | `@proto.ui/adapter-web-component` | Web / Custom Elements | Platform APIs | `active` since 0.2.0-rc.7 |
 | `A-REACT-18-19-0001` | `@proto.ui/adapter-react` | Web / React | `>=18.2.0 <20` | `active` since 0.2.0-rc.7 |
 | `A-VUE-3-0001` | `@proto.ui/adapter-vue` | Web / Vue | `>=3.4.0 <4` | `active` since 0.2.0-rc.7 |
+| `A-VUE-2-0001` | `@proto.ui/adapter-vue2` | Web / Vue | `>=2.6.0 <2.7` | `active` since 0.3.0-alpha.0 |
 
-All three are official Web profiles. React and Vue provide cross-Adapter evidence across framework runtimes; they do **not** constitute multi-host evidence for native mobile, desktop, or server UI. No official profile for those hosts is currently cataloged.
+All four are official Web profiles. React, Vue 3, and Vue 2 provide cross-Adapter evidence across framework runtimes; they do **not** constitute multi-host evidence for native mobile, desktop, or server UI. No official profile for those hosts is currently cataloged.
 
 ## Reviewed common slice
 
@@ -38,7 +39,7 @@ Each profile also records translated provision of these host capabilities:
 | `HC-EXPOSES-RECORD-SINK-0001` | Receive the exposed record          |
 | `HC-EXPOSE-EVENT-SINK-0001`   | Receive exposed events              |
 
-This means the listed slice has been reviewed positively for all three profiles. It does **not** mean every Module package or every Core capability has been classified. The profiles currently contain no `omits` relations: an unlisted Module is **uncataloged**, not implicitly supported, unsupported, or deferred.
+This means the listed slice has been reviewed positively for all four profiles. It does **not** mean every Module package or every Core capability has been classified. The profiles currently contain no `omits` relations: an unlisted Module is **uncataloged**, not implicitly supported, unsupported, or deferred.
 
 ## Evidence and interpretation
 
@@ -47,7 +48,7 @@ This means the listed slice has been reviewed positively for all three profiles.
 Use these labels precisely:
 
 - **Cataloged support:** a reviewed `supports.modules` relation with a role.
-- **Cataloged omission:** a reviewed `omits.modules` relation with a reason. None are recorded in the current three profiles.
+- **Cataloged omission:** a reviewed `omits.modules` relation with a reason. None are recorded in the current four profiles.
 - **Uncataloged:** no support or omission decision has been made in the profile.
 - **No official profile:** the catalog has no official Adapter identity for that host.
 

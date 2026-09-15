@@ -1,0 +1,52 @@
+id: V-PROTO-UI-0010
+type: version
+title: Proto UI 0.3.0-alpha.1
+status: draft
+since: 0.3.0-alpha.1
+summary: Second 0.3 alpha release train, preparing the reviewed Vue 2 CLI, Base Image projection, and release-consumer evidence as one globally exact 43-package prerelease identity.
+statement:
+  en: Proto UI 0.3.0-alpha.1 is one draft ecosystem release identity shared exactly by all 43 public @proto.ui packages and the corresponding future immutable spec snapshot.
+  zh-CN: Proto UI 0.3.0-alpha.1 是由全部 43 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行身份。
+release:
+  version: 0.3.0-alpha.1
+  channel: prerelease
+  gitTag: v0.3.0-alpha.1
+  npmDistTag: next
+  packageVersionPolicy: exact
+  packageScope: public-@proto.ui
+dependsOn:
+  decisions:
+    - D-GLOBAL-RELEASE-VERSION-0001
+    - D-PRERELEASE-STAGE-0001
+criteria:
+  - id: V-PROTO-UI-0010-DRAFT-BOUNDARY
+    text:
+      en: The draft entity may govern aligned 0.3.0-alpha.1 manifests, release assets, catalog references, and local rehearsal evidence, but it must not claim npm publication, a Git tag, GitHub prerelease, next-channel activation, or immutable snapshot evidence.
+      zh-CN: 本 draft 实体可以治理已对齐的 0.3.0-alpha.1 manifest、发行物料、catalog 引用与本地彩排证据，但不得声称 npm 发布、Git tag、GitHub prerelease、next channel 激活或不可变 snapshot 证据已经存在。
+  - id: V-PROTO-UI-0010-IDENTITY
+    text:
+      en: Before publication, VERSION, all 43 public @proto.ui package manifests, staged internal dependency versions, and the spec snapshot must be prepared at 0.3.0-alpha.1 exactly.
+      zh-CN: 发布前，VERSION、全部 43 个公开 @proto.ui package manifest、暂存发布包的内部依赖版本以及 spec snapshot 必须统一准备为 0.3.0-alpha.1。
+  - id: V-PROTO-UI-0010-ALPHA-SCOPE
+    text:
+      en: This train carries reviewed Vue 2 CLI, Base Image projection, and release-consumer evidence and must be presented as alpha rather than a release candidate or stable compatibility promise.
+      zh-CN: 本 release train 承载已经评审的 Vue 2 CLI、Base Image 投射与发布 consumer 证据，因此必须以 alpha 呈现，不能被描述为 release candidate 或 stable compatibility 承诺。
+  - id: V-PROTO-UI-0010-REGISTRY-READINESS
+    text:
+      en: Publication remains blocked until every public package identity passes registry readiness. A bootstrap dist-tag is forbidden; a bootstrap latest may remain only when deprecated and either it is the sole version or next resolves to an existing non-bootstrap prerelease. This exception neither publishes a replacement version nor activates this entity.
+      zh-CN: 在全部公开 package identity 通过 registry readiness 前，真实发布保持 blocked。bootstrap dist-tag 被禁止；bootstrap latest 仅当已 deprecated，且它是唯一版本或 next 解析到已存在的非 bootstrap prerelease 时才可暂留。此例外既不发布替换版本，也不激活本实体。
+  - id: V-PROTO-UI-0010-PUBLICATION
+    text:
+      en: The entity may become active only after all packages in its reviewed release BOM exist at 0.3.0-alpha.1, their next tags point to it, the v0.3.0-alpha.1 tag resolves to the publication commit, and immutable snapshot evidence exists.
+      zh-CN: 仅当已评审 release BOM 中的全部 package 均存在 0.3.0-alpha.1、各自 next tag 均指向该版本、v0.3.0-alpha.1 tag 解析到发布 commit，且不可变 snapshot 证据存在后，本实体才可转为 active。
+sources:
+  - path: internal/releases/0.3.0-alpha.1/package-bom.json
+  - path: internal/releases/0.3.0-alpha.1/release-notes.md
+  - path: internal/releases/0.3.0-alpha.1/release-notes.zh-CN.md
+  - path: internal/records/2026-09-14-alpha.1-prerelease-release-prep.zh-CN.md
+openQuestions: []
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Opened the second globally exact 0.3 alpha train with the reviewed Vue 2 CLI, Base Image projection, consumer smoke evidence, and a bounded bootstrap-latest readiness exception.
+tags: [release, prerelease, alpha, global-version]
