@@ -9,9 +9,15 @@ import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 const app = new URL('../../apps/www/', import.meta.url);
+// This diagnostic authors an asAccessible probe. Resolve the public hooks
+// export from Base's declared dependency; apps-www does not depend on hooks.
+const requireBase = createRequire(
+  new URL('../../packages/prototypes/base/package.json', import.meta.url)
+);
 const bundle = await build({
   entryPoints: ['scripts/analysis/fixtures/shadow-s3/admission.ts'],
   nodePaths: [fileURLToPath(new URL('node_modules', app))],
+  alias: { '@proto.ui/hooks': requireBase.resolve('@proto.ui/hooks') },
   bundle: true,
   write: false,
   platform: 'browser',
@@ -24,6 +30,7 @@ const inputs = Object.keys(bundle.metafile.inputs);
 assert.ok(inputs.some((p) => p.includes('adapters/web-component/dist/')));
 assert.ok(inputs.some((p) => p.includes('prototypes/shadcn/dist/tabs/')));
 assert.ok(inputs.some((p) => p.includes('prototypes/base/dist/tabs/')));
+assert.ok(inputs.some((p) => p.includes('hooks/dist/')));
 assert.ok(inputs.some((p) => p.endsWith('proto-ui-shadow-style.generated.js')));
 assert.ok(
   !inputs.some((p) => /packages\/.+\/src\//.test(p)),

@@ -14,9 +14,11 @@
 - [x] 补接 S5 public-dist、S4 closed-paint 和公共 Event router 回归证据。
 - [x] 为新增 draft 实体补生命周期理由；严格 CSP 为当前范围外问题，不提升为本次交付前置。
 - [x] 整理 README 为当前能力与限制，并标记旧 host-style/full-rebuild contract 的历史适用范围。
-- [ ] 完成干净集成检出的类型、spec、构建及相关浏览器回归。
-- [ ] 完成独立审阅、记录实际验证与剩余限制。
-- [ ] 核对提交、来源披露与 DCO，push 并创建 PR。
+- [x] 完成干净集成检出的类型、spec、构建及相关浏览器回归。
+- [x] 完成本地独立 scoped 检查、记录实际验证与剩余限制。
+- [x] 核对提交、来源披露与 DCO，准备获准提交的 PR 材料。
+
+本清单关闭于 PR 提交前；实际 push/PR 收据、CI 和独立合并审阅以平台记录为准，不以本地检查冒充已经合入或发布。
 
 ## 主线调和
 
@@ -54,6 +56,35 @@ R1/R2 新测试修复前 3 失败；R3 两个 cleanup 分支修复前均失败�
 ## 验证过程中的非语义失败
 
 - 初次整仓回归的 Feedback exact internal-handle 断言与 native focus 接线问题已调和；最终检查仍保留 public token-only 输出与 cleanup/stale 条件。
-- S3 历史诊断 fixture 的旧 `def.a11y` 改用 main 已迁移的 `asAccessible()`。
+- S3 历史诊断 fixture 的旧 `def.a11y` 改用 main 已迁移的 `asAccessible()`。Standalone runner 还需要从 Base 已声明的依赖解析 hooks public export，不能假定 apps-www 有直接 hooks 依赖；补充 hooks/dist 与无 package source 输入断言后，独立准入及 hiding-axis 路径通过。
 - 大型 squash 内容尚未提交时，Agent tooling 的同步 `git diff --binary HEAD` 超出缓冲；提交干净集成单元后 58 项检查通过，没有借本功能修改 unrelated tooling buffer。
-- 后续并行 build 与 CLI 测试出现一次 init 非零退出；冻结 dist 后相同用例通过。新 Chrome 文件未入 index 时 spec evidence 路径检查不认识它；纳入追踪后通过。后续最终回归顺序执行 build 与依赖其产物的测试，避免互相覆盖。
+- 并行 build 与 CLI 测试时观察到一次 init 非零退出；冻结 dist 后相同用例通过，没有将该观察升级为已证明的产品根因。CLI 测试自身也会重建 dist，与 workspace typecheck 并行时出现过 TS6053（dist 声明在枚举后消失）。最终按 build→unit→types/docs→browser 顺序通过。新 Chrome 文件未入 index 时 spec evidence 路径检查不认识它；纳入追踪后通过。
+
+## 最终验证结果
+
+运行环境：Node 22.23.2、pnpm 10.32.1、Chrome 152.0.7977.83。运行时代码冻结于 `d711a8aa`；之后仅有 S3 diagnostic public-export 解析和本收尾记录变更。
+
+| 检查 | 实际结果 |
+| --- | --- |
+| `vitest run --exclude '**/*.browser.test.ts' --pool=forks --maxWorkers=4 --minWorkers=1` | 最终 501 文件、2,505 项通过；3 个 skipped 文件、34 个既有 TODO |
+| Spec fixtures/graph | 初轮 23 文件 / 150 项通过；最终全部纳入上述 unit pass，包括新增 T 路径完整性 |
+| `build:packages`；最终 WC dependency closure build | 43/43 public packages；最终 WC closure 35/43，含原生 ESM smoke |
+| `check:types` | workspace 通过；216 Astro 文件 0 error/warning/hint |
+| `docs:build` | 240 页通过，主题/token/Shadow companion 使用生成器刷新 |
+| `spec:docs:agent` / `check:agent-doc` / `check:spec-authoring -- --base origin/main` | 615 entities 的忽略投影已更新；24 changed catalog inputs 通过 |
+| `check:prototype-catalog` / `check:package-manifests` | 136 declaration files、135 P；43 public manifests 通过 |
+| `check:package-budgets` | 9/9 通过；WC 82,998 / 84,000 gzip bytes |
+| `check:agent-operations` | 最终 58 项通过 |
+| release version/assets、style preset/variant order/component presets、type contracts | 全部通过；未执行 publish |
+| public-doc tests / release tests | 16 / 52 项通过 |
+| S4 detector + shutdown + runtime test plan Node tests | 8 项通过，含关闭 page/browser 的证据保存；最终 test plan 另复跑 3 项通过 |
+| `prettier --check` / `git diff --check` | 通过 |
+
+浏览器证据分两轮明确记录，而不是笼统声称全仓 browser matrix：
+
+1. 干净集成后的 S1–S5 + Demo Matrix：7 文件 / 22 条路径全部通过。
+2. R1–R3 修复后，新增边界 + 受影响 S3/S4/S4-paint/S5：5 文件 / 12 条路径全部通过。S3 覆盖双语、Light/split/mixed 与两种 keepMounted；S4 保留完整 Dialog 交互与 sampled closed-paint；S5 覆盖双语原生编辑场景。
+3. 最终 `node scripts/analysis/shadow-s3-admission-browser.mjs` 和 `node scripts/analysis/shadow-s5-public-browser.mjs` 均通过。前者包含 14 组 admission 和 hiding-axis 诊断；后者断言 public-dist/CLI 生成输入并复用真实 Chrome native journey。
+4. 高风险实现的独立检查关闭 SHADOW-R1/R2/R3；最后另外执行的 5 个 Chrome probes 验证非可聚焦 host 与 delegatesFocus 区别。Spec/docs 复核确认 draft/identity/criteria 未扩张；S3 diagnostic 的独立 bundle 检查有 304 inputs、0 package source inputs。
+
+未在本地重跑所有既有网站浏览器 suites，因此不声称完整 `pnpm test` 已通过；未复验全部 Safari/Firefox、真实系统 IME、发布 tarball 全消费矩阵或 CI。以上局限不从 S1–S5 人工验收或 Chrome 的通过结果中推断消失。CI、spec 独立审阅和合并决定仍属于 PR 后续门禁。
