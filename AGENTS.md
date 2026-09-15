@@ -109,6 +109,7 @@ Generated files must be changed through their generator. `internal/agent/PROJECT
 
 ## Change discipline
 
+- Apply the Agent-only [Issue/PR visual evidence soft gate](internal/agent-operations/visual-evidence.md): Agents own reproduction, uploaded subject-appropriate visuals, sanitized request paraphrases, and explicit evidence debt. Humans may submit plain descriptions without images or Agent checklists. See the [gh upload guide](internal/agent-operations/github-evidence-upload.md).
 - Keep unrelated user changes intact.
 - For user-directed Module/Host Capability/Adapter cataloging, default to one active batch branch and PR with independently reviewable commits per semantic slice. Split at architectural or unresolved semantic boundaries, not merely at Module names; follow the batch rules in `spec/MODULE-HOST-CAP-ADAPTER-CATALOGING.zh-CN.md`.
 - Do not edit generated artifacts by hand.

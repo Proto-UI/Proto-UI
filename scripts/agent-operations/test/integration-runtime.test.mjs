@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 
 import { authorizePullRequestMerge, computeReviewInputDigest } from '../review-runtime.mjs';
+import { agentEvidence } from './fixtures/agent-evidence.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
@@ -60,7 +61,7 @@ function reviewInput(overrides = {}) {
 
 function packet(input, overrides = {}) {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: 'proto-ui.review-packet',
     repositoryId: input.repositoryId,
     pullRequest: input.pullRequest,
@@ -72,6 +73,7 @@ function packet(input, overrides = {}) {
     scope: ['exact-head pull-request integration'],
     affectedEntities: [],
     affectedSurfaces: ['GitHub pull request'],
+    agentEvidence: agentEvidence(input.headSha),
     findings: [],
     validation: {
       commands: [{ command: 'pnpm test', exitCode: 0, result: 'passed' }],
@@ -119,6 +121,11 @@ function scheduledMerge(overrides = {}) {
 }
 
 test('standing authorization permits an exact-head merge after independent approval', () => {
+  const unverified = packet(reviewInput());
+  unverified.agentEvidence.debt[0].kind = 'verification';
+  const denied = scheduledMerge({ packet: unverified });
+  assert.equal(denied.allowed, false);
+  assert.match(denied.reason, /verification debt/);
   const result = scheduledMerge();
   assert.equal(result.allowed, true);
   assert.equal(result.headSha, sha('b'));

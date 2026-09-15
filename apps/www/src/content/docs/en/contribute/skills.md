@@ -53,13 +53,14 @@ A handoff carries typed artifacts and at most one next skill. A terminal handoff
 
 ## Build evidence and reader projections
 
-| Skill           | One transition                                                           |
-| --------------- | ------------------------------------------------------------------------ |
-| `pui-test`      | Governed behavior to executable evidence                                 |
-| `pui-docs`      | Governed repository fact to human documentation                          |
-| `pui-validate`  | Candidate change to a proportional evidence report                       |
-| `pui-review`    | Candidate change to a revision-bound packet at one declared review class |
-| `pui-integrate` | Approved exact-head pull request to a rule-compliant merge receipt       |
+| Skill | One transition |
+| --- | --- |
+| `pui-test` | Governed behavior to executable evidence |
+| `pui-docs` | Governed repository fact to human documentation |
+| `pui-validate` | Candidate change to a proportional evidence report |
+| `pui-review` | Candidate change to a revision-bound packet at one declared review class |
+| `pui-evidence-publish` | Prepared, separately authorized Issue evidence to one additive comment receipt; no uploads or metadata changes |
+| `pui-integrate` | Approved exact-head pull request to a rule-compliant merge receipt |
 
 ## Inspect repository operations
 

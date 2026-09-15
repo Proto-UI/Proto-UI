@@ -14,6 +14,7 @@ import {
   evaluateReviewEligibility,
   inspectReviewRevision,
   reviewPacketKey,
+  renderReviewBody,
   validateReviewInputSnapshot,
   validateReviewPacket,
   validateReviewPacketEligibility,
@@ -204,19 +205,6 @@ function readExternalEvidence(args) {
     throw new Error('--external-evidence-file must contain a JSON array');
   }
   return parsed;
-}
-
-function renderReviewBody(packet) {
-  const prefix = `Reviewed exact head \`${packet.headSha}\`.`;
-  if (packet.findings.length === 0) return prefix;
-  return [
-    prefix,
-    '',
-    ...packet.findings.map(
-      (finding) =>
-        `- **[${finding.severity}] ${finding.id}** (${finding.file}:${finding.line}) ${finding.observed} Expected: ${finding.expected} Fix: ${finding.fix}`
-    ),
-  ].join('\n');
 }
 
 try {

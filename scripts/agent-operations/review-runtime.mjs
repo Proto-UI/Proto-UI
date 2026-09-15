@@ -483,6 +483,7 @@ export function validateReviewPacket(packet, input) {
       'affectedSurfaces',
       'findings',
       'validation',
+      'agentEvidence',
       'reconciliation',
       'limitations',
       'unknowns',
@@ -491,7 +492,10 @@ export function validateReviewPacket(packet, input) {
     ],
     'review packet'
   );
-  assert(packet.schemaVersion === 1, 'review packet schemaVersion is invalid');
+  assert(
+    packet.schemaVersion === 2,
+    'review packet schemaVersion must be 2 (Agent evidence required)'
+  );
   assert(packet.kind === 'proto-ui.review-packet', 'review packet kind is invalid');
   assert(
     typeof packet.repositoryId === 'string' && packet.repositoryId.length > 3,
@@ -553,8 +557,139 @@ export function validateReviewPacket(packet, input) {
     assert(Number.isInteger(finding.line) && finding.line > 0, 'finding.line is invalid');
   }
   validateValidation(packet.validation);
+  validateAgentEvidence(packet.agentEvidence, packet.headSha);
   validateReconciliation(packet.reconciliation, findingIds);
   return packet;
+}
+
+function validatePublicUrl(value, label) {
+  assert(
+    typeof value === 'string' && /^https:\/\/[^\s<>]+$/.test(value),
+    `${label} must be an HTTPS URL`
+  );
+  const url = new URL(value);
+  assert(!url.username && !url.password, `${label} must not contain credentials`);
+}
+
+export function validateAgentEvidence(evidence, headSha) {
+  exactKeys(
+    evidence,
+    [
+      'requestParaphrase',
+      'source',
+      'scope',
+      'baseline',
+      'headSha',
+      'environment',
+      'observedAt',
+      'procedure',
+      'observations',
+      'visuals',
+      'supportingUrls',
+      'disposition',
+      'debt',
+    ],
+    'agentEvidence'
+  );
+  for (const field of ['requestParaphrase', 'source', 'scope', 'baseline', 'environment']) {
+    assert(
+      typeof evidence[field] === 'string' && evidence[field].trim().length > 0,
+      `agentEvidence.${field} is required`
+    );
+  }
+  assert(
+    SHA.test(evidence.headSha) && evidence.headSha === headSha,
+    'agentEvidence must bind the reviewed head'
+  );
+  validateTimestamp(evidence.observedAt, 'agentEvidence.observedAt');
+  for (const field of ['procedure', 'observations'])
+    validateStrings(evidence[field], `agentEvidence.${field}`, { min: 1 });
+  validateStrings(evidence.supportingUrls, 'agentEvidence.supportingUrls');
+  for (const url of evidence.supportingUrls) validatePublicUrl(url, 'agentEvidence.supportingUrls');
+  assert(Array.isArray(evidence.visuals), 'agentEvidence.visuals must be an array');
+  for (const visual of evidence.visuals) {
+    exactKeys(visual, ['url', 'alt', 'caption'], 'agentEvidence.visual');
+    validatePublicUrl(visual.url, 'agentEvidence.visual.url');
+    for (const field of ['alt', 'caption'])
+      assert(
+        typeof visual[field] === 'string' && visual[field].trim().length > 0,
+        `agentEvidence.visual.${field} is required`
+      );
+  }
+  assert(
+    ['complete', 'partial', 'blocked'].includes(evidence.disposition),
+    'agentEvidence.disposition is invalid'
+  );
+  assert(Array.isArray(evidence.debt), 'agentEvidence.debt must be an array');
+  for (const debt of evidence.debt) {
+    exactKeys(debt, ['kind', 'missing', 'reason', 'nextAction'], 'agentEvidence.debt item');
+    assert(
+      ['publication', 'verification', 'outside-scope'].includes(debt.kind),
+      'agentEvidence.debt.kind is invalid'
+    );
+    for (const field of ['missing', 'reason', 'nextAction'])
+      assert(
+        typeof debt[field] === 'string' && debt[field].trim().length > 0,
+        `agentEvidence.debt.${field} is required`
+      );
+  }
+  assert(
+    evidence.disposition === 'complete' ? evidence.debt.length === 0 : evidence.debt.length > 0,
+    'agentEvidence disposition must agree with declared debt'
+  );
+  return evidence;
+}
+
+// This exact body is passed to the head-bound GitHub Review API. Empty findings
+// must not discard evidence or turn a bounded review into an unqualified verdict.
+export function renderReviewBody(packet) {
+  validateAgentEvidence(packet.agentEvidence, packet.headSha);
+  const evidence = packet.agentEvidence;
+  const list = (items) => items.map((item) => `- ${item}`).join('\n');
+  return [
+    `Reviewed exact head \`${packet.headSha}\`.`,
+    `Review class: ${packet.reviewClass}. Scope: ${packet.scope.join('; ')}.`,
+    packet.findings.length
+      ? list(
+          packet.findings.map(
+            (finding) =>
+              `**[${finding.severity}] ${finding.id}** (${finding.file}:${finding.line}) ${finding.observed} Expected: ${finding.expected} Impact: ${finding.impact} Authority: ${finding.authority} Fix: ${finding.fix}`
+          )
+        )
+      : 'No actionable findings within the stated review scope.',
+    '## Agent evidence',
+    `Agent request paraphrase: ${evidence.requestParaphrase}\n\nSource: ${evidence.source}`,
+    `Evidence scope: ${evidence.scope}\n\nBaseline: ${evidence.baseline}\n\nCandidate: \`${evidence.headSha}\`\n\nEnvironment: ${evidence.environment}\n\nObserved: ${evidence.observedAt}`,
+    `### Procedure\n\n${list(evidence.procedure)}`,
+    `### Observations\n\n${list(evidence.observations)}`,
+    ...evidence.visuals.map(
+      ({ url, alt, caption }) => `![${alt.replace(/[\[\]\r\n]/g, ' ')}](<${url}>)\n\n${caption}`
+    ),
+    evidence.supportingUrls.length
+      ? `Supporting evidence:\n\n${list(evidence.supportingUrls.map((url) => `<${url}>`))}`
+      : 'No additional public evidence links recorded.',
+    `Evidence disposition: **${evidence.disposition}** for the named scope only; not Issue closure or acceptance.`,
+    evidence.debt.length
+      ? list(
+          evidence.debt.map(
+            (item) =>
+              `[${item.kind}] ${item.missing}. Reason: ${item.reason} Next Agent action: ${item.nextAction}`
+          )
+        )
+      : 'No known debt within that evidence scope.',
+    '### Validation and review limits',
+    list(
+      packet.validation.commands.map(
+        (item) => `${item.command} — exit ${item.exitCode}: ${item.result}`
+      )
+    ),
+    list(packet.validation.checksNotRun.map((item) => `Not run: ${item.check}. ${item.reason}`)),
+    ...['limitations', 'unknowns', 'humanGates'].map((field) =>
+      packet[field].length ? `${field}:\n\n${list(packet[field])}` : `${field}: none recorded.`
+    ),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 export function reviewPacketKey(packet, input) {
@@ -778,6 +913,12 @@ export function authorizeReviewSubmission({
       recommendedAction,
     };
   }
+  if (
+    ['REQUEST_CHANGES', 'APPROVE'].includes(recommendedAction) &&
+    packet.agentEvidence.debt.some((item) => item.kind === 'verification')
+  ) {
+    return { allowed: false, reason: 'review disposition has unresolved verification debt' };
+  }
   if (recommendedAction === 'REQUEST_CHANGES') {
     if (packet.findings.length === 0) {
       return { allowed: false, reason: 'REQUEST_CHANGES requires at least one finding' };
@@ -919,6 +1060,9 @@ export function authorizePullRequestMerge({
   }
   if (packet.recommendedAction !== 'APPROVE') {
     return { allowed: false, reason: 'merge requires a clean APPROVE review packet' };
+  }
+  if (packet.agentEvidence.debt.some((item) => item.kind === 'verification')) {
+    return { allowed: false, reason: 'merge has unresolved verification debt' };
   }
   const resolvedByAuthorization = new Set([
     'commit-grouping',
