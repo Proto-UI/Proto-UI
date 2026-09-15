@@ -21,6 +21,10 @@ Return adequate, incomplete, misleading, or `ABSTAIN`. Route semantic or integra
 
 ## Evidence discipline
 
+Read `internal/agent-operations/visual-evidence.md`. Review packet v2 requires `agentEvidence`: the sanitized request paraphrase and actual source, named evidence scope, baseline, exact reviewed `headSha`, environment/time, procedure/observations, verified uploaded visuals (URL/alt/caption), supporting URLs, disposition and explicit debt (missing/reason/nextAction). The supported submission renderer publishes this section even with zero findings. Partial or blocked visual evidence is valid: disclose it without manufacturing a capture or imposing human intake requirements. Review limitations and recommendation gates remain separate; evidence disposition never establishes acceptance. Verify links and sanitation before submission; schema validation does not establish access or truthful observation.
+
+Legacy v1 packets remain historical reconciliation inputs, but cannot be submitted as v2 merely by changing their version. Reinspect the target and supply the actual evidence disposition, validate, and refresh affected head/input bindings. Preserve unknown original prompts and historical baseline limitations.
+
 1. Findings bind to rendered output: geometry, paint, positioning, and screen evidence; state facts alone do not substantiate an observed behavior.
 2. Probe adjacent states pairwise and reason about their deltas; the review target is transitions, not snapshots.
 3. Re-assert every surface anchored to or composed with an affected surface before closing a finding.

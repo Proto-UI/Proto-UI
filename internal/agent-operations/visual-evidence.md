@@ -45,6 +45,8 @@ Before Agent publication or a material update, inspect the paraphrase, scoped ev
 
 `pui-issue` and `pui-pr` report gaps read-only. This rule grants neither leaf permission to edit/comment. Uploads, comments, PR updates and asset pushes still require current authorization, live permission, exact target/scope, fresh state and idempotency. Follow the [gh evidence-upload tutorial](github-evidence-upload.md); do not infer Release or new-host publication permission.
 
+The registered `pui-evidence-publish` transition consumes one Issue report, a prepared evidence-publication packet and exact mutation authorization, then publishes one additive comment or returns a no-write receipt. It reuses separately authorized, verified uploads; it does not create storage or prepare reproduction. `pui-select` carries an `evidence-assessment` into the exact approved `pui-claim` text. Review packet v2 carries `agentEvidence` into the head-bound review submission body, including an empty-finding review. Missing visuals may remain explicit partial/blocked debt in each path; neither the registry nor packet validation makes humans supply images.
+
 ## Historical backfill
 
 Inventory open **and closed** Issues unless the user narrowed scope. Exhaust pagination and reconcile unique Issue URLs with the live total; distinguish Issues from PRs. A sample, recent page or open-only queue never satisfies an all-history request. Keep a resumable ledger: URL/state, request source, discussion-inspection status, existing evidence and quality, reproduction baseline/result, uploaded URLs, posted-comment receipt, missing work and next action. An image search in the body alone is triage, not proof that comments contain no evidence.

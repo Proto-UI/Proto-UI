@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 
 import { authorizePullRequestMerge, computeReviewInputDigest } from '../review-runtime.mjs';
+import { agentEvidence } from './fixtures/agent-evidence.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
@@ -60,7 +61,7 @@ function reviewInput(overrides = {}) {
 
 function packet(input, overrides = {}) {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: 'proto-ui.review-packet',
     repositoryId: input.repositoryId,
     pullRequest: input.pullRequest,
@@ -72,6 +73,7 @@ function packet(input, overrides = {}) {
     scope: ['exact-head pull-request integration'],
     affectedEntities: [],
     affectedSurfaces: ['GitHub pull request'],
+    agentEvidence: agentEvidence(input.headSha),
     findings: [],
     validation: {
       commands: [{ command: 'pnpm test', exitCode: 0, result: 'passed' }],

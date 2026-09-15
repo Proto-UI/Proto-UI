@@ -20,4 +20,6 @@ Apply `internal/agent-operations/visual-evidence.md` as an Agent-only soft-gate 
 
 Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-issue`, the registered Issue report artifact, and at most one `nextSkillId`.
 
+For an authorized backfill publication, return `pui-evidence-publish` only when one prepared `evidence-publication-packet` and exact `mutation-authorization` accompany the Issue report and current capability envelope. Otherwise return the read-only gap/preparation result. This leaf never uploads or comments; the publication leaf revalidates live state, existing evidence and idempotency independently.
+
 Communicate with the user in the user's current language. Keep GitHub identifiers canonical.

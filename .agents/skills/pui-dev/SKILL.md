@@ -28,6 +28,7 @@ Load only the skill needed for the current transition. The list below is routing
 - use `pui-brainstorm` before normative work whose identity, owner, boundary, or compatibility remains unsettled;
 - use `pui-unclaim` when the current contributor's claim expires, its boundary changes, or work stops;
 - use `pui-issue` or `pui-pr` for bounded read-only queue inspection;
+- use `pui-evidence-publish` only for one prepared, separately authorized additive Issue evidence comment after `pui-issue`; evidence preparation/uploads remain separate authorized work;
 - use `pui-ci`, `pui-govern`, `pui-deploy`, or `pui-deps` for the corresponding bounded read-only operational question;
 - use `pui-spec` or `pui-contract` after the corresponding semantic scope is governed;
 - use `pui-adapter-assess` for a bounded read-only Adapter question and `pui-adapter` only for an explicitly approved Adapter implementation slice;
