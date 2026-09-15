@@ -17,6 +17,8 @@ Inspect and sanitize paraphrases, screenshots, HTML, logs, paths and metadata be
 
 ## Evidence by subject
 
+For the test design behind state/input attribution, CSS ownership, native-input claims and actual runner coverage, read [testing-method.md](testing-method.md) when relevant. It complements this publication policy without adding human intake requirements.
+
 | Subject | Agent supplies | Explicit limitation |
 | --- | --- | --- |
 | UI/interaction defect | Actual running component captures that visibly expose the fault, with initial/action/result states; video if motion matters; affected/fixed comparison for repair | Route, viewport, Adapter, input method and revision; a mockup, painted state badge, prose screenshot or log card is not component reproduction |

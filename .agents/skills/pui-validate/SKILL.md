@@ -5,6 +5,8 @@ description: Select, run, and report proportional Proto UI validation for a comp
 
 # Validate a change
 
+For state/ownership or rendered-projection changes, selective test commands, or resource-related failures, read `internal/agent-operations/testing-method.md`. Confirm the intended files ran and keep candidate-bound failures, controlled reruns and omitted evidence distinct.
+
 1. Read `AGENTS.md`, the actual diff, the `pui-trace` map, and any approved validation boundary.
 2. Check worktree and generated-file discipline before running tests.
 3. Run focused evidence first. Confirm it exercises the intended failure and owning layer.

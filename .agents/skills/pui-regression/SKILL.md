@@ -5,6 +5,8 @@ description: Reproduce and repair a bounded Proto UI regression whose expected b
 
 # Repair a governed regression
 
+For event ordering, input attribution, CSS ownership or a suspect fixture, read `internal/agent-operations/testing-method.md` before designing the red case. Separate injected facts from observations and retain meaningful assertions when correcting an older test.
+
 1. Require a minimal reproduction, `pui-trace` map, fixed expected behavior, affected surfaces, and explicit exclusions.
 2. Classify the owning layer before editing. Keep the regression transition primary even when the owning layer is an Adapter, Module, Host Capability, or Prototype; propose a domain leaf later only if a separately approved artifact must change.
 3. Add or identify evidence that fails for the governed reason before the fix.
