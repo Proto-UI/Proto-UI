@@ -68,7 +68,7 @@ revisions:
       Introduced the draft host-owned Image View projection decision with opaque URI source, explicit a11y binary input, generation-bound lease semantics, a request-scoped Web cache-hit/decode readiness mapping, and bounded Web Component, React, and Vue realization boundaries without claiming multi-host conformance.
 
 
-  - version: 0.3.0-alpha.0
+  - version: 0.3.0-alpha.1
     change: clarified
     summary: Aligned the bounded Web profile inventory with the active Vue 2 Image View Adapter criterion and executable implementation evidence.
 

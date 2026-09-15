@@ -665,6 +665,23 @@ describe('@proto.ui/cli', () => {
     expect(config.components.vue2).toEqual(['shadcn-button']);
   });
 
+  it('rejects a Vue 3 dependency before generating a Vue 2 facade', async () => {
+    const cwd = await createTempProject('pui-cli-add-vue2-incompatible-runtime', {
+      name: 'pui-cli-add-vue2-incompatible-runtime',
+      private: true,
+      dependencies: {
+        vue: '^3.5.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+    const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <2.7');
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
+  });
+
   it('adds the complete shadcn Select React facade', async () => {
     const cwd = await createTempProject('pui-cli-add-shadcn-select', {
       name: 'pui-cli-add-shadcn-select',

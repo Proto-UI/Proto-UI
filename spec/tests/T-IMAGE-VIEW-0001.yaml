@@ -184,7 +184,13 @@ implementations:
     path: packages/adapters/vue2/test/image-view.integration.test.ts
     required: true
     consumesCases:
+      - T-IMAGE-VIEW-0001-CASE-WEB-PROJECTION
+      - T-IMAGE-VIEW-0001-CASE-WEB-LIFECYCLE
       - T-IMAGE-VIEW-0001-CASE-VUE2
+    exercises:
+      - M-IMAGE-VIEW-0001
+      - HC-IMAGE-VIEW-0001
+      - P-BASE-IMAGE
   - id: base-image-packed-consumer
     kind: workspace-check
     status: passing
@@ -286,7 +292,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Connected M/HC/A criteria and added Vue 2 current-generation and setup-removal evidence.
-  - version: 0.3.0-alpha.0
+  - version: 0.3.0-alpha.1
     change: clarified
     summary: Reconciled packed-consumer and public-browser Image View evidence with the active Vue 2 adapter profile.
 

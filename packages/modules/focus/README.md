@@ -4,7 +4,9 @@ Proto UI module that provides focus capability for adapters.
 
 ## Purpose
 
-Provides focus capability to adapters running Proto UI prototypes.
+The draft `M-FOCUS-0001` catalogs the instance-owned Focus Module and shared FocusCenter. `asFocusable`, `asFocusEntry`, `asFocusRoving`, and `asFocusScope` separate observed target facts, entry delegation, sibling navigation, and scope policy. Event and State are dependencies; host target/readiness and entry projection are governed by `HC-FOCUS-TARGET-0001` and `HC-FOCUS-ENTRY-0001`.
+
+Current Adapter evidence covers Web hosts. The center still uses host DOM order and one shared center; this is not a claim of completed non-Web ordering or independent cross-document focus domains.
 
 ## Package Role
 
