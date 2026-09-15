@@ -41,6 +41,7 @@ import {
   FOCUS_SET_ENTRY_FOCUSABLE_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
+  FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
 } from './caps';
 import {
   FOCUS_CENTER,
@@ -122,6 +123,7 @@ class FocusModuleImpl extends ModuleBase {
   private focusableConfig: FocusableConfig = DEFAULT_FOCUSABLE_CONFIG;
   private focusableDeclared = false;
   private entryDeclared = false;
+  private lastScopeTarget: HTMLElement | null = null;
   private entryConfig: FocusEntryConfig = DEFAULT_ENTRY_CONFIG;
   private scopeDeclared = false;
   private rovingDeclared = false;
@@ -534,6 +536,26 @@ class FocusModuleImpl extends ModuleBase {
         reason: 'focus.scope.trap',
         source: this.prototypeName,
       });
+      const container = this.getRootTarget();
+      if (
+        container &&
+        this.caps.has(FOCUS_SAMPLE_SCOPE_TARGETS_CAP) &&
+        this.caps.has(FOCUS_REQUEST_FOCUS_CAP)
+      ) {
+        const { targets, activeTarget } = this.caps.get(FOCUS_SAMPLE_SCOPE_TARGETS_CAP)(container);
+        if (targets.length === 0) return;
+        let current = targets.findIndex((target) => target === activeTarget);
+        if (current < 0) current = targets.findIndex((target) => target === this.lastScopeTarget);
+        let next =
+          current < 0 ? (ev.shiftKey ? targets.length - 1 : 0) : current + (ev.shiftKey ? -1 : 1);
+        next = this.scopeConfig.loop
+          ? (next + targets.length) % targets.length
+          : Math.max(0, Math.min(targets.length - 1, next));
+        // Native host events, not this sample, report any logical focus facts.
+        this.caps.get(FOCUS_REQUEST_FOCUS_CAP)(targets[next]!, { reason: 'keyboard' });
+        this.lastScopeTarget = targets[next]!;
+        return;
+      }
       FOCUS_CENTER.focusInScope(entry, ev.shiftKey ? 'prev' : 'next');
     });
   }
@@ -1042,6 +1064,7 @@ class FocusModuleImpl extends ModuleBase {
   }
 
   private setScopeActive(active: boolean): void {
+    if (!active) this.lastScopeTarget = null;
     this.setFocusState(this.activeOwned, active, active ? 'scope.activate' : 'scope.deactivate');
     if (active) {
       this.setFocusState(this.hasFocusedOwned, true, 'scope.activate');
@@ -1158,6 +1181,7 @@ class FocusModuleImpl extends ModuleBase {
       if (self) FOCUS_CENTER.remove(self);
     }
     if (phase === 'disposed') {
+      this.lastScopeTarget = null;
       this.offTargetReady?.();
       this.offTargetReady = undefined;
     }
@@ -1173,6 +1197,7 @@ class FocusModuleImpl extends ModuleBase {
       return;
     }
     if (phase !== 'detached') return;
+    this.lastScopeTarget = null;
     this.invalidateHostFocusTarget();
     const self = this.getSelfToken();
     if (self) FOCUS_CENTER.detach(self);

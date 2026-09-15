@@ -1,0 +1,145 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createPortalConcealBarrier } from '../src/portal-conceal';
+import { createWebComponentPortalMount, isWebComponentPortaled } from '../src/portal-mount';
+import { AdaptToWebComponent, setElementProps } from '../src';
+import { dialogRoot, dialogContent, dialogClose } from '../../../prototypes/base/src/dialog';
+import type { TransitionControls } from '../../../prototypes/base/src/transition';
+
+describe('WC portal conceal rendering barrier', () => {
+  let host: HTMLElement;
+  let portal: ReturnType<typeof createWebComponentPortalMount>;
+  let frames: Map<number, FrameRequestCallback>;
+  let serial: number;
+  const frame = () => {
+    const callbacks = [...frames.values()];
+    frames.clear();
+    callbacks.forEach((callback) => callback(0));
+  };
+  beforeEach(() => {
+    serial = 0;
+    frames = new Map();
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.set(++serial, callback);
+      return serial;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+      frames.delete(id);
+    });
+    const origin = document.createElement('div');
+    host = document.createElement('div');
+    origin.append(host);
+    document.body.append(origin);
+    portal = createWebComponentPortalMount();
+  });
+  afterEach(() => {
+    portal.unmount(host);
+    document.body.replaceChildren();
+    vi.restoreAllMocks();
+  });
+  it('does not add a frame dependency to ordinary or non-visible owners', () => {
+    const barrier = createPortalConcealBarrier(host);
+    expect(barrier.wait()).toBeNull();
+    portal.mount(host);
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    expect(barrier.wait()).toBeNull();
+    expect(frames.size).toBe(0);
+  });
+  it('separates conceal from projection revocation by a rendering opportunity', async () => {
+    portal.mount(host);
+    expect(isWebComponentPortaled(host)).toBe(true);
+    host.setAttribute('data-pui-view-detached', '');
+    const barrier = createPortalConcealBarrier(host);
+    const done = vi.fn();
+    const wait = barrier.wait()!.then(done);
+    frame();
+    await Promise.resolve();
+    expect(done).not.toHaveBeenCalled();
+    expect(host.parentElement).toBe(document.body);
+    frame();
+    await wait;
+    expect(done).toHaveBeenCalledOnce();
+    expect(frames.size).toBe(0);
+    portal.unmount(host);
+    expect(isWebComponentPortaled(host)).toBe(false);
+  });
+  it.each([false, true])(
+    'cancels on a newer intent or terminal disposal (after first frame=%s)',
+    async (firstFrame) => {
+      portal.mount(host);
+      const barrier = createPortalConcealBarrier(host);
+      const done = vi.fn();
+      const wait = barrier.wait()!.then(done);
+      const stale = [...frames.values()][0]!;
+      if (firstFrame) frame();
+      barrier.cancel();
+      await wait;
+      stale(0);
+      expect(done).toHaveBeenCalledOnce();
+      expect(frames.size).toBe(0);
+    }
+  );
+  it('releases a pending barrier when the document becomes non-visible', async () => {
+    portal.mount(host);
+    const barrier = createPortalConcealBarrier(host);
+    const wait = barrier.wait()!;
+    frame();
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+    await wait;
+    expect(frames.size).toBe(0);
+  });
+
+  it('a newer open retains the epoch, while terminal removal cancels pending work', async () => {
+    const calls = { mounted: 0, unmounted: 0, disposed: 0 };
+    const Root = AdaptToWebComponent(dialogRoot, { registerAs: 'conceal-dialog-root' });
+    const Content = AdaptToWebComponent(dialogContent, {
+      registerAs: 'conceal-dialog-content',
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (event.type === 'mount.mounted') calls.mounted++;
+          if (event.type === 'unmount.done') calls.unmounted++;
+          if (event.type === 'instance.dispose.done') calls.disposed++;
+        },
+      },
+    });
+    const Close = AdaptToWebComponent(dialogClose, { registerAs: 'conceal-dialog-close' });
+    const root = new Root(),
+      content = new Content();
+    content.append(new Close());
+    root.append(content);
+    const flush = async () => {
+      for (let i = 0; i < 12; i++) await Promise.resolve();
+    };
+    setElementProps(root, { open: true });
+    document.body.append(root);
+    await flush();
+    expect(content.parentElement).toBe(document.body);
+    setElementProps(root, { open: false });
+    (content.getExposes().controls as TransitionControls).complete();
+    await flush();
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(calls).toEqual({ mounted: 1, unmounted: 0, disposed: 0 });
+
+    setElementProps(root, { open: true });
+    await flush();
+    frame();
+    frame();
+    await flush();
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expect(calls).toEqual({ mounted: 1, unmounted: 0, disposed: 0 });
+
+    setElementProps(root, { open: false });
+    (content.getExposes().controls as TransitionControls).complete();
+    await flush();
+    root.remove();
+    await flush();
+    frame();
+    frame();
+    await flush();
+    expect(content.isConnected).toBe(false);
+    expect(calls).toEqual({ mounted: 1, unmounted: 1, disposed: 1 });
+    expect(isWebComponentPortaled(content)).toBe(false);
+    expect(frames.size).toBe(0);
+  });
+});

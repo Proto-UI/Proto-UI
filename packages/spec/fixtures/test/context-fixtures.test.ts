@@ -46,15 +46,16 @@ function assertFixtureAlignment(
     }
   }
 
-  expect(fixtureSpecCases).toEqual(specCaseIds);
-
   const fixtureImplementation = testSpec?.implementations.find(
     (implementation) => implementation.id === fixtureId
   );
 
   expect(fixtureImplementation?.status).toBe('active');
   expect(fixtureImplementation?.path).toBe(fixturePath);
-  expect(new Set(fixtureImplementation?.consumesCases ?? [])).toEqual(specCaseIds);
+  // A Test may have several independently mapped implementations. This
+  // fixture must cover exactly its own declaration, not another implementation's
+  // cases (e.g. J1 reentrancy). Catalog integrity checks the full coverage union.
+  expect(fixtureSpecCases).toEqual(new Set(fixtureImplementation?.consumesCases ?? []));
 }
 
 describe('spec fixtures: context', () => {
@@ -82,5 +83,26 @@ describe('spec fixtures: context', () => {
       'packages/spec/fixtures/src/context/runtime-surface.ts',
       CONTEXT_RUNTIME_SURFACE_CASES
     );
+    expect(() =>
+      assertFixtureAlignment(
+        workspace,
+        'T-CONTEXT-0002',
+        'context-runtime-surface-fixture',
+        'packages/spec/fixtures/src/context/runtime-surface.ts',
+        CONTEXT_RUNTIME_SURFACE_CASES.slice(1)
+      )
+    ).toThrow();
+    expect(() =>
+      assertFixtureAlignment(
+        workspace,
+        'T-CONTEXT-0002',
+        'context-runtime-surface-fixture',
+        'packages/spec/fixtures/src/context/runtime-surface.ts',
+        [
+          ...CONTEXT_RUNTIME_SURFACE_CASES,
+          { id: 'not-owned', specCase: 'T-CONTEXT-0002-CASE-REENTRANCY', covers: [] },
+        ]
+      )
+    ).toThrow();
   });
 });

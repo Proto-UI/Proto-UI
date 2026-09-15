@@ -13,3 +13,100 @@ import DemoMatrix from '@/components/PrototypePreviewer/DemoMatrix.astro';
 官网代码展示的 [#630](https://github.com/Proto-UI/Proto-UI/issues/630) 切片归入 [#420](https://github.com/Proto-UI/Proto-UI/issues/420) 与 [#568](https://github.com/Proto-UI/Proto-UI/issues/568) 的 dogfood 跟踪，并保留独立的[浏览器回归](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts)与[证据](https://github.com/Proto-UI/Proto-UI/tree/main/apps/www/test/evidence/issue-630)。它比较 320px、390px、桌面宽度下浅色／深色的 Markdown 与 Previewer 代码区域，并检查 CodeExample 页面导航、重复 `astro:page-load` 初始化和安装命令样式。当前站点采用整页导航，未启用 Astro ClientRouter；这些检查不声称覆盖 SPA swap，也不改变 Prototype／Adapter 的保证。
 
 <DemoMatrix />
+
+## Shadow split S1 接入
+
+上方 S1 检测区使用正式 `AdaptToWebComponent` 与 CLI 同次生成的 document CSS / Shadow artifact；仅显式选择的两组原型使用实验性 split，不改变其余 Adapter 列。generation 与通知数用于观察生命周期/输入，不能替代浏览器外的支持保证。
+
+验收时请区分两类预期差异：light / dark 开关只切换 split 的独立 `colorSchemeSource`，Light 列仍跟随 document；Document CSS 干扰会让两列的 slotted Badge 文本变红，但不会直接改写 split 内部 surface 的背景。Badge tone 使用 `accent | info | danger`，应在不重连的情况下循环显示黄、蓝、红，再回到黄色。
+
+独立 S1 浏览器回归会检查实际颜色、glyph、通知数以及组合更新/重连路径，不只比较两列是否一致。从仓库根运行（需要 Chrome/Chromium；可用 `CHROME_PATH` 指定）：
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts --pool=forks
+```
+
+默认会启动测试服务。复用现有服务时，设置 `PROTO_UI_BROWSER_BASE_URL=http://127.0.0.1:4321`。
+
+```ts
+import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
+import { checkboxRoot, checkboxIndicator } from '@proto.ui/prototypes-shadcn/checkbox';
+import { protoShadowStyleArtifact } from './styles/proto-ui-shadow-style.generated.js';
+
+const shadow = {
+  mode: 'open',
+  presentation: 'split',
+  styleArtifact: protoShadowStyleArtifact,
+} as const;
+const Root = AdaptToWebComponent(checkboxRoot, { shadow });
+const Indicator = AdaptToWebComponent(checkboxIndicator, { shadow });
+const checkbox = new Root();
+checkbox.append(new Indicator());
+document.body.append(checkbox);
+```
+
+使用当前 CLI 的 `proto-ui shadcn --styles-dir ./src/styles --shadow-out ./src/styles/proto-ui-shadow-style.generated.js` 生成配套 artifact，并导入 document theme/entry CSS。对象 profile 与保证仍为 draft；此前发布的版本不一定包含本次接线。
+
+网站的 Tailwind `base` reset 默认会从 document 侧清零 host padding/border。检测区在同一层对所注册的 split tags 使用 `padding: revert-layer; border: revert-layer`，让生成的非绘制性尺寸贡献生效；“取消 host reset 豁免”开关可重现干扰。这是页面样式的显式集成，不是 Adapter 对任意外部 CSS 的自动保护。
+
+## Shadow split S2 设置区
+
+[S2 检测区](#shadow-split-s2) 使用完整 Shadcn Button 与 Switch Root + Thumb，并组合 Checkbox、Badge。三列分别为 Light、split、混合：混合列包含 split Switch + Light Thumb，以及 Light Checkbox + split Indicator。此处的主题开关切换整页 document，所有列共享主题；不同于 S1 的 split 独立 scheme 开关。
+
+循环 Button 的六种 variant、四种 size，检查图标/文字、hover、按压位移和键盘 focus ring。切换 checked、disabled、主题和 slot；快速反向切换检查 Thumb 的连续运动。同步移动不应增加 generation；真正移除后重连应增加 generation，保留消费者受控状态且不重复发出通知。Slot 仍归 Maker，不承诺隔离外部显式样式。
+
+H1 将整个 Root 的已准入 transform 放在 boundary 上应用一次；`pointer-events-none` 是独立的命中责任，不是 placement。当前只验证本阶段的精确 token 与固定边框 recipe；动态 border-width 过渡仍拒绝，其他 unresolved token 不自动放行。沿用上面的 reset 集成，不添加页面尺寸补丁；profile 与保证仍为 draft。
+
+独立路径覆盖（Chrome/Chromium、服务复用方式同 S1）：
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts --pool=forks
+```
+
+这里显式使用独立进程：本机默认线程池曾在 Chrome 关闭阶段超时；相同断言在 `--pool=forks` 下完整通过。联合运行两套浏览器测试时可再加 `--no-file-parallelism`。
+
+## Shadow split S3 Tabs 设置区
+
+[S3 检测区](#shadow-split-s3) 将 S2 设置放入完整 Shadcn Tabs Root/List/Trigger/Content，比较 Light、split 和混合树。默认使用 L1 view 卸载；`keepMounted` 可切换为保留隐藏 view。
+
+先用方向键与 Home/End 切换，确认跳过禁用标签。`manual` 模式只移动焦点，Enter/Space 才激活；`automatic` 会在焦点移动时激活。检查 loop 与横/纵向导航，再用 Tab 进入 Settings 的首个控件、Details 的按钮或 Empty 面板自身。返回 Settings 后仍应直接进入首个控件，而非多出面板停靠点。
+
+反复切换后，在 Settings 不显示时组合 checked、disabled、主题、Badge tone 和 slot 更新，再返回检查当前值。同步移动不应增加生命周期计数；移除并重连会创建新实例且不重复通知。Settings 值由 demo 的消费者受控模型保留，不承诺任意后代实例或原生状态自动保留。Slot 内容仍归 Maker；split profile 与本阶段语义仍为 draft。
+
+I1 将根隐藏参与和 `relative` 定位投射到 boundary；有界 nowrap flex recipe 保留已准入布局。J1 使同一 provider/key 的同步 Context 嵌套通知按提交顺序交付，不需要消费者用微任务延迟回写。页面不接管 Tabs 键盘、隐藏或组件尺寸；沿用 S1/S2 的 reset 豁免。
+
+页面原生交互路径测试（服务复用与 Chrome 配置同上）：
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts --pool=forks --no-file-parallelism
+```
+
+## Shadow split S4 Dialog 设置区
+
+[S4 检测区](#shadow-split-s4) 用完整官方 Shadcn Dialog 的十个 part 承载 S3 Tabs 设置，比较 Light、split、mixed；一次打开一个普通弹窗。先用键盘打开、Tab/Shift+Tab 循环、Tabs 方向键导航，再修改设置，用 Escape、Close、右上角图标或遮罩关闭；焦点应回到 Trigger。重新打开后检查消费者模型中的设置值。
+
+“拒绝关闭请求”用于检查受控边界：请求计数增加，但弹窗继续打开。取消勾选后恢复接受。组合主题、Badge tone、slot 和 disabled；打开时同步移动 Root 不重建实例，移除 Root 则同时清理 portal、遮罩和滚动锁。原卡片的重连按钮以关闭状态重新接入 Root，再打开检查设置值和通知没有重复。
+
+K1 只准入已记录的负半尺寸居中位移与整体 fade/zoom recipe；需要重新生成 CLI companion。Portal 跟随物理 document 目的地的主题，不复制来源祖先的局部变量。L1 由 WC 采样实际顺序焦点候选，Focus 保留 scope 策略，支持当前组合的原生 Details 按钮与空面板入口；不阻止任意外部 DOM `focus()` 调用。Slot 仍归 Maker，split 仍为 draft；不扩大到嵌套弹窗、跨 document、closed Shadow、任意 portal target、transform 或动画。
+
+以下路径检查实际 AX role/name/description 与关闭后的排除、原生焦点和受控关闭、状态恢复、几何与资源清理，不只检查属性字符串。服务复用和 Chrome 配置同上：
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts --pool=forks --no-file-parallelism
+```
+
+独立公开包消费：先运行 `corepack pnpm@10.32.1 build:packages` 和 `corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style`，再运行 `node scripts/analysis/shadow-s4-public-browser.mjs`。独立脚本可用 `PUI_CHROME_EXECUTABLE` 指定 Chrome；`shadow-s4-admission-browser.mjs` 另外采样真实动画中间帧，`shadow-s4-portal-browser.mjs` 覆盖来源树移除和旧 companion 拒绝后的清理。
+
+## Shadow split S5 原生输入
+
+[S5 检测区](#shadow-split-s5) 比较 Base Input、Base Textarea、Shadcn Textarea 及 Tabs 中的 editor。请重点验收真实 IME 候选/提交/取消、selection、鼠标与键盘 focus ring、受控提案拒绝、非受控编辑、disabled/readOnly、rows、主题和反复 Tabs 切换。
+
+原生 editor 是唯一 surface，`part="control surface"`；生成式尺寸先限于原生 intrinsic/rows、`w-full` 和 `min-h-16`，旧 companion 必须重新生成。无关 props 更新不得破坏编辑；终止实例后重连不保留非受控值，受控值由 demo 的 Maker 模型保留。Base 刻意保留 UA 外观，页面只撤销 reset，不补算尺寸。
+
+自动测试使用实际 named AX textbox，但不承诺外部跨 Shadow `labelledBy`/`describedBy` IDREF。真实系统 IME 与 Safari 仍需人工验证。Form、auto-resize、Image View 和独立 Dialog #645 不在本次范围。
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts --pool=forks --no-file-parallelism
+```
+
+公共包与 CLI 生成命令同 S4；独立消费验证运行 `node scripts/analysis/shadow-s5-public-browser.mjs`。

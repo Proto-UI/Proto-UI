@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "generate:proto-ui-style": "corepack pnpm@10.32.1 --dir ../.. --filter @proto.ui/cli build && node ../../packages/cli/bin/proto-ui.js theme shadcn --out ./src/styles/shadcn-theme.css && node ../../packages/cli/bin/proto-ui.js tokens --input ../../packages/prototypes --out ./src/styles/proto-ui-tokens.generated.css && node ../../packages/cli/bin/proto-ui.js style --out ./src/styles/proto-ui-style.css --theme-import ./shadcn-theme.css --tokens-import ./proto-ui-tokens.generated.css",
+    "generate:proto-ui-style": "corepack pnpm@10.32.1 --dir ../.. --filter @proto.ui/cli build && node ../../packages/cli/bin/proto-ui.js theme shadcn --out ./src/styles/shadcn-theme.css && node ../../packages/cli/bin/proto-ui.js tokens --input ../../packages/prototypes --out ./src/styles/proto-ui-tokens.generated.css --shadow-out ./src/styles/proto-ui-shadow-style.generated.js && node ../../packages/cli/bin/proto-ui.js style --out ./src/styles/proto-ui-style.css --theme-import ./shadcn-theme.css --tokens-import ./proto-ui-tokens.generated.css",
     "generate:prototype-tokens": "corepack pnpm@10.32.1 run generate:proto-ui-style",
     "generate:setup:shadcn:cli": "proto-ui shadcn --styles-dir ./src/styles",
     "generate:proto-ui-tokens:cli": "proto-ui tokens --input ../../packages/prototypes --out ./src/styles/proto-ui-tokens.generated.css",

@@ -22,6 +22,47 @@ export async function collectProtoStyleTokens(root) {
   return Array.from(tokens).sort();
 }
 
+/**
+ * Collect only author-side tokens that flow through Root feedback.style.use.
+ *
+ * Unlike collectProtoStyleTokens(), this inventory deliberately excludes
+ * Template-node style and Web selector variants generated from Rule
+ * conditions. It is an analysis surface for Root application-role work, not a
+ * replacement for the complete physical CSS closure collector.
+ */
+export async function collectProtoRootStyleTokens(root) {
+  const occurrences = await collectProtoRootStyleTokenOccurrences(root);
+  return Array.from(new Set(occurrences.map((occurrence) => occurrence.token))).sort();
+}
+
+/**
+ * Retain the call-site provenance needed to assess ambiguous Root token roles.
+ * Paths are relative to the supplied root and positions are one-based.
+ */
+export async function collectProtoRootStyleTokenOccurrences(root) {
+  const files = await collectSourceFiles(root);
+  const occurrences = [];
+  const moduleCache = new Map();
+
+  for (const file of files) {
+    const sourceFile = await parseSourceFile(file);
+    const scope = createScope();
+    await applyImportBindings(file, sourceFile, scope, moduleCache, []);
+    walk(sourceFile, scope, new Set(), collectExposures(sourceFile), {
+      occurrences,
+      sourcePath: path.relative(root, file).split(path.sep).join('/'),
+    });
+  }
+
+  return occurrences.sort(
+    (left, right) =>
+      left.path.localeCompare(right.path) ||
+      left.line - right.line ||
+      left.column - right.column ||
+      left.token.localeCompare(right.token)
+  );
+}
+
 async function parseSourceFile(file) {
   const sourceText = await fs.readFile(file, 'utf8');
   return ts.createSourceFile(
@@ -253,7 +294,7 @@ function scopeDeclaring(name, scope) {
   return null;
 }
 
-function walk(node, scope, tokens, exposures) {
+function walk(node, scope, tokens, exposures, rootInventory = null) {
   if (createsScope(node)) {
     const nextScope = createScope(scope, node);
 
@@ -273,16 +314,18 @@ function walk(node, scope, tokens, exposures) {
           const owner = isVarList(stmt.declarationList) ? functionScope(nextScope) : nextScope;
           for (const decl of stmt.declarationList.declarations) {
             registerDeclaration(decl, owner, exposures);
-            if (decl.initializer) walk(decl.initializer, nextScope, tokens, exposures);
+            if (decl.initializer) {
+              walk(decl.initializer, nextScope, tokens, exposures, rootInventory);
+            }
           }
           continue;
         }
-        walk(stmt, nextScope, tokens, exposures);
+        walk(stmt, nextScope, tokens, exposures, rootInventory);
       }
       return;
     }
 
-    ts.forEachChild(node, (child) => walk(child, nextScope, tokens, exposures));
+    ts.forEachChild(node, (child) => walk(child, nextScope, tokens, exposures, rootInventory));
     return;
   }
 
@@ -293,7 +336,7 @@ function walk(node, scope, tokens, exposures) {
     const owner = isVarList(node.declarationList) ? functionScope(scope) : scope;
     for (const decl of node.declarationList.declarations) {
       registerDeclaration(decl, owner, exposures);
-      if (decl.initializer) walk(decl.initializer, scope, tokens, exposures);
+      if (decl.initializer) walk(decl.initializer, scope, tokens, exposures, rootInventory);
     }
     return;
   }
@@ -305,7 +348,7 @@ function walk(node, scope, tokens, exposures) {
   ) {
     // Writing through the container moves the member for every read that
     // follows, so the rule side has to see it the way the exposure does.
-    walk(node.right, scope, tokens, exposures);
+    walk(node.right, scope, tokens, exposures, rootInventory);
     const base = unwrapTransparent(memberOwner(node.left) ?? node.left);
     const member = memberName(node.left);
     if (ts.isIdentifier(base)) {
@@ -349,7 +392,7 @@ function walk(node, scope, tokens, exposures) {
   ) {
     // A reassignment moves the handle for every read that follows it, so the
     // binding has to move with it rather than stay at its declaration.
-    walk(node.right, scope, tokens, exposures);
+    walk(node.right, scope, tokens, exposures, rootInventory);
     const name = node.left.text;
     const owner = scopeDeclaring(name, scope) ?? scope;
     const previous = owner.bindings.get(name);
@@ -386,11 +429,45 @@ function walk(node, scope, tokens, exposures) {
     }
   }
 
+  if (rootInventory && ts.isCallExpression(node) && isFeedbackStyleUseCall(node)) {
+    const sourceFile = node.getSourceFile();
+    const position = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+    const context = isInsideRuleCall(node) ? 'rule' : 'setup';
+    for (const token of collectTwTokens(node, scope, exposures)) {
+      rootInventory.occurrences.push(
+        Object.freeze({
+          token,
+          path: rootInventory.sourcePath,
+          line: position.line + 1,
+          column: position.character + 1,
+          context,
+        })
+      );
+    }
+  }
+
   if (ts.isCallExpression(node) && isPropertyNamed(node.expression, 'rule')) {
     collectRuleVariantTokens(node, scope, tokens, exposures);
   }
 
-  ts.forEachChild(node, (child) => walk(child, scope, tokens, exposures));
+  ts.forEachChild(node, (child) => walk(child, scope, tokens, exposures, rootInventory));
+}
+
+function isFeedbackStyleUseCall(node) {
+  if (!memberIs(node.expression, 'use')) return false;
+  const style = memberOwner(node.expression);
+  if (!style || !memberIs(style, 'style')) return false;
+  const feedback = memberOwner(style);
+  return Boolean(feedback && memberIs(feedback, 'feedback'));
+}
+
+function isInsideRuleCall(node) {
+  return Boolean(
+    ts.findAncestor(
+      node,
+      (ancestor) => ts.isCallExpression(ancestor) && memberIs(ancestor.expression, 'rule')
+    )
+  );
 }
 
 function createsScope(node) {

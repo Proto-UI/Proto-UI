@@ -1,7 +1,21 @@
 const PUI_STYLE_ATTR = 'data-pui-style';
+const PUI_COLOR_SCHEME_ATTR = 'data-pui-color-scheme';
 const SYSTEM_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 const SYSTEM_THEME_FALLBACK_ROOT =
   ":root:not(.dark):not(.light):not([data-theme='dark']):not([data-theme='light'])";
+
+export const PROTO_SHADOW_STYLE_ARTIFACT_KIND = 'proto-ui.shadow-style' as const;
+export const PROTO_SHADOW_STYLE_ARTIFACT_VERSION = 1 as const;
+export const PROTO_SHADOW_STYLE_ENVIRONMENT = 'host-color-scheme-v1' as const;
+
+export type ProtoShadowStyleArtifactV1 = Readonly<{
+  kind: typeof PROTO_SHADOW_STYLE_ARTIFACT_KIND;
+  version: typeof PROTO_SHADOW_STYLE_ARTIFACT_VERSION;
+  cssText: string;
+  environment: typeof PROTO_SHADOW_STYLE_ENVIRONMENT;
+}>;
+
+type ProtoStyleCssTarget = 'document' | 'shadow' | 'shadow-split';
 
 type CssRule = {
   token: string;
@@ -284,15 +298,207 @@ const staticUtilities: Record<string, string[]> = {
 };
 
 export function renderProtoStyleTokenCss(tokens: string[]): string {
-  const rules: CssRule[] = [];
-  const unknown: string[] = [];
+  return renderProtoStyleTokenCssForTarget(tokens, 'document');
+}
 
-  for (const token of tokens) {
-    const rule = renderTokenRule(token);
-    if (rule) rules.push(rule);
-    else unknown.push(token);
+export function renderProtoShadowStyleTokenCss(tokens: string[]): string {
+  return renderProtoStyleTokenCssForTarget(tokens, 'shadow');
+}
+
+export function renderProtoShadowStyleArtifact(tokens: string[]): ProtoShadowStyleArtifactV1 {
+  return Object.freeze({
+    kind: PROTO_SHADOW_STYLE_ARTIFACT_KIND,
+    version: PROTO_SHADOW_STYLE_ARTIFACT_VERSION,
+    cssText: renderProtoShadowStyleTokenCss(tokens),
+    environment: PROTO_SHADOW_STYLE_ENVIRONMENT,
+  });
+}
+
+/** Generated split recipe selected by the opt-in CLI companion. */
+export function renderProtoShadowSplitStyleArtifact(tokens: string[]): ProtoShadowStyleArtifactV1 {
+  return Object.freeze({
+    kind: PROTO_SHADOW_STYLE_ARTIFACT_KIND,
+    version: PROTO_SHADOW_STYLE_ARTIFACT_VERSION,
+    environment: PROTO_SHADOW_STYLE_ENVIRONMENT,
+    cssText: renderShadowSplitCss(tokens),
+  });
+}
+
+const SPLIT_ROOT_ATTR = 'data-pui-split-root-style';
+const SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
+const SPLIT_METRIC_SIDES = ['top', 'right', 'bottom', 'left'] as const;
+
+function renderShadowSplitCss(tokens: string[]): string {
+  const lines = [
+    '/* Private E1 split recipe; generated synchronously from the document token closure. */',
+    '@layer proto-ui {',
+    ':host([data-pui-split-root-style]) {',
+    '  --pui-split-motion-recipe: h1;',
+    '  --pui-split-participation-coordinate-recipe: i1;',
+    '  --pui-split-intrinsic-nowrap-recipe: v1;',
+    '  --pui-split-dialog-motion-recipe: k1;',
+    '  --pui-split-native-text-recipe: l1;',
+    '  --pui-split-inline-display: initial;',
+    // Each nested Root composes its own transform, never inherited operands.
+    '  --pui-translate-x: initial;',
+    '  --pui-translate-y: initial;',
+    '  --pui-scale-x: initial;',
+    '  --pui-scale-y: initial;',
+    '  --pui-split-rest-transform: initial;',
+    ...['enter-scale', 'exit-scale', 'enter-opacity', 'exit-opacity', 'animation-duration'].map(
+      (property) => `  --pui-${property}: initial;`
+    ),
+    '  display: grid;',
+    '  grid-template-columns: minmax(0, 1fr);',
+    '  grid-template-rows: minmax(0, 1fr);',
+    '  box-sizing: border-box;',
+    '  border-style: solid;',
+    '  border-color: transparent;',
+    ...SPLIT_METRIC_SIDES.flatMap((side) => [
+      `  --pui-split-padding-${side}: 0px;`,
+      `  --pui-split-border-${side}: 0px;`,
+      `  padding-${side}: var(--pui-split-padding-${side});`,
+      `  border-${side}-width: var(--pui-split-border-${side});`,
+    ]),
+    '}',
+    // Preserve intrinsic contributions through a one-child flex shell for
+    // this bounded combination. An explicit min-content/max-content minimum
+    // would incorrectly force the cross-axis size in a narrow column parent.
+    ':host([data-pui-split-root-style~="inline-flex"][data-pui-split-root-style~="flex-1"][data-pui-split-root-style~="whitespace-nowrap"]) {',
+    '  --pui-split-inline-display: inline-flex;',
+    '}',
+    ':host([data-pui-split-root-style~="inline-flex"][data-pui-split-root-style~="flex-1"][data-pui-split-root-style~="whitespace-nowrap"]) > [data-pui-split-surface] {',
+    '  flex: 1 1 auto;',
+    '}',
+    `:host([${SPLIT_ROOT_ATTR}]) > [${SPLIT_SURFACE_ATTR}]:not(input, textarea) {`,
+    '  box-sizing: border-box;',
+    '  min-width: 0;',
+    '  min-height: 0;',
+    '  align-self: stretch;',
+    '  justify-self: stretch;',
+    ...SPLIT_METRIC_SIDES.map(
+      (side) =>
+        `  margin-${side}: calc(0px - var(--pui-split-padding-${side}) - var(--pui-split-border-${side}));`
+    ),
+    '}',
+    // Native editors keep their own intrinsic box and UA editing engine.
+    // Unlike the ordinary grid surface, they own their padding/border once.
+    ':host([data-pui-split-root-style][data-pui-split-text-control]) {',
+    '  display: block;',
+    '  padding: 0;',
+    '  border-width: 0;',
+    '}',
+    '}',
+    // Keep composed-property defaults and animation ordering in the existing renderer.
+    // Only Root-selected surface tokens reach this data attribute.
+    renderProtoStyleTokenCssForTarget(tokens, 'shadow-split'),
+    '@layer proto-ui {',
+  ];
+  const rules = tokens.map(renderTokenRule).filter((rule): rule is CssRule => rule !== null);
+  sortTimingOverrides(rules);
+  for (const rule of rules) {
+    const selector = buildSplitHostSelector(rule.token);
+    // Empty-declaration markers still need a compiled membership receipt.
+    // This non-paint property does not introduce group/peer selector semantics.
+    const hostDeclarations = rule.css.length
+      ? rule.css.flatMap(splitHostDeclarations)
+      : ['--pui-split-compiled-marker: 1;'];
+    // The authored suppression belongs to the actual focus boundary too.
+    // Keep its transparent outline on the surface (forced-colors fallback),
+    // not on both boxes; a ring alone never authorizes removing the UA outline.
+    // Reuse the token selector so rule conditions and revocation stay atomic.
+    if (splitVariants(rule.token).at(-1) === 'outline-none') {
+      hostDeclarations.push('outline: none;');
+    }
+    if (hostDeclarations.length) {
+      lines.push(`  ${selector} {`, ...hostDeclarations.map((d) => `    ${d}`), '  }');
+    }
+    if (splitVariants(rule.token).at(-1) === 'hidden') {
+      lines.push(`  ${selector}:host([data-pui-split-text-control]) { display: none; }`);
+    }
   }
+  lines.push('}', '');
+  return lines.join('\n');
+}
 
+function buildSplitHostSelector(token: string): string {
+  const variants = splitVariants(token).slice(0, -1);
+  let selector = `[${SPLIT_ROOT_ATTR}~="${escapeCssString(token)}"]`;
+  let dark = false;
+  for (const variant of variants) {
+    if (variant === 'dark') dark = true;
+    else {
+      if (
+        !/^(hover|active|disabled|focus-visible|data-\[.+\]|not-\[data-[\w-]+\]|aria-[\w-]+)$/.test(
+          variant
+        )
+      ) {
+        throw new Error(`[shadow split CSS] unsupported condition in ${token}`);
+      }
+      selector = applyVariant(selector, variant)[0]!;
+    }
+  }
+  // Document dark context uses :where(): moving it onto :host must not add
+  // specificity and reverse its precedence against exposed-state conditions.
+  return `${dark ? `:where(:host([${PUI_COLOR_SCHEME_ATTR}='dark']))` : ''}:host(${selector})`;
+}
+
+/** Physical declaration decomposition, not a replacement application-role classifier. */
+function splitHostDeclarations(declaration: string): string[] {
+  const separator = declaration.indexOf(':');
+  const property = declaration.slice(0, separator).trim();
+  const value = declaration
+    .slice(separator + 1)
+    .trim()
+    .replace(/;$/, '');
+  // K1: the same token drives boundary geometry and surface opacity. Only
+  // the generated enter/exit names are decomposed; no arbitrary keyframes.
+  if (property === 'animation-name' && /^pui-(enter|exit)$/.test(value))
+    return [`animation-name: ${value.replace('pui-', 'pui-split-geometry-')};`];
+  // The explicit enter endpoint follows the same declaration/condition as
+  // resting geometry. Preserve the underlying none when no transform token
+  // exists; the browser still owns interpolation and filled computed values.
+  if (property === 'transform') return [declaration, `--pui-split-rest-transform: ${value};`];
+  if (
+    /^animation-(duration|delay|timing-function|fill-mode)$/.test(property) ||
+    /^--pui-(enter-scale|exit-scale|animation-duration)$/.test(property)
+  )
+    return [declaration];
+  const paddingSides: Record<string, readonly string[]> = {
+    padding: SPLIT_METRIC_SIDES,
+    'padding-inline': ['left', 'right'],
+    'padding-block': ['top', 'bottom'],
+  };
+  if (property.startsWith('padding')) {
+    if (!/^(?:0|\d*\.?\d+(?:px|rem|em|vw|vh|vmin|vmax))$/.test(value)) {
+      throw new Error(
+        `[shadow split CSS] padding contribution needs a verified length recipe: ${declaration}`
+      );
+    }
+    const sides = paddingSides[property] ?? [property.slice('padding-'.length)];
+    return sides.map((side) => `--pui-split-padding-${side}: ${value};`);
+  }
+  if (/^border(?:-(top|right|bottom|left))?-width$/.test(property)) {
+    const side = property.match(/^border-(top|right|bottom|left)-width$/)?.[1];
+    return (side ? [side] : SPLIT_METRIC_SIDES).map((s) => `--pui-split-border-${s}: ${value};`);
+  }
+  if (property === 'display') {
+    if (value === 'none') return ['display: none;'];
+    if (['block', 'flex', 'grid'].includes(value)) return ['display: grid;'];
+    if (value === 'inline-flex') return ['display: var(--pui-split-inline-display, inline-grid);'];
+    return [];
+  }
+  if (
+    /^(width|height|min-width|min-height|max-width|max-height|aspect-ratio|margin(?:-.+)?|position|inset(?:-.+)?|top|right|bottom|left|z-index|flex(?:-grow|-shrink|-basis)?|order|align-self|font(?:-.+)?|line-height|letter-spacing|transform|--pui-(?:translate|scale)-[xy]|will-change|pointer-events|transition-(?:property|duration|delay|timing-function))$/.test(
+      property
+    )
+  ) {
+    return [declaration];
+  }
+  return [];
+}
+
+function sortTimingOverrides(rules: CssRule[]): void {
   // Tailwind cascade ordering: `transition-*` utilities carry the default
   // duration/timing, so explicit `duration-*`/`ease-*`/`delay-*` overrides must
   // be emitted after them. Explicit `leading-*` utilities also override the
@@ -306,6 +512,18 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
     return 0;
   };
   rules.sort((a, b) => overridePriority(a) - overridePriority(b));
+}
+
+function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleCssTarget): string {
+  const rules: CssRule[] = [];
+  const unknown: string[] = [];
+
+  for (const token of tokens) {
+    const rule = renderTokenRule(token);
+    if (rule) rules.push(rule);
+    else unknown.push(token);
+  }
+  sortTimingOverrides(rules);
 
   const lines = [
     '/* This file is auto-generated by @proto.ui/cli (proto-ui tokens). */',
@@ -327,6 +545,28 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
       return utility === 'animate-in' || utility === 'animate-out';
     })
   ) {
+    if (target === 'shadow-split') {
+      for (const [direction, edge] of [
+        ['enter', 'from'],
+        ['exit', 'to'],
+      ] as const) {
+        lines.push(
+          `  @keyframes pui-split-geometry-${direction} {`,
+          `    ${edge} {`,
+          `      transform: translate(var(--pui-translate-x, 0), var(--pui-translate-y, 0)) scale(var(--pui-${direction}-scale, 1));`,
+          '    }',
+          ...(direction === 'enter'
+            ? ['    to {', '      transform: var(--pui-split-rest-transform, none);', '    }']
+            : []),
+          '  }',
+          `  @keyframes pui-split-paint-${direction} {`,
+          `    ${edge} {`,
+          `      opacity: var(--pui-${direction}-opacity, 1);`,
+          '    }',
+          '  }'
+        );
+      }
+    }
     lines.push(
       '  @keyframes pui-enter {',
       '    from {',
@@ -346,19 +586,32 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
   }
 
   for (const rule of rules) {
-    const selectors = buildSelectors(rule.token);
+    const selectors = buildSelectors(rule.token, { target });
     if (selectors.length === 0 || rule.css.length === 0) continue;
     lines.push(`  ${selectors.join(',\n  ')} {`);
-    for (const decl of rule.css) lines.push(`    ${decl}`);
+    for (const decl of rule.css) {
+      const translated =
+        target === 'shadow-split'
+          ? decl.replace(
+              /^animation-name: pui-(enter|exit);$/,
+              'animation-name: pui-split-paint-$1;'
+            )
+          : decl;
+      lines.push(`    ${translated}`);
+    }
     lines.push('  }');
     lines.push('');
   }
 
-  const systemDarkRules = rules.filter((rule) => hasDarkVariant(rule.token));
+  const systemDarkRules =
+    target === 'document' ? rules.filter((rule) => hasDarkVariant(rule.token)) : [];
   if (systemDarkRules.length > 0) {
     lines.push(`  @media ${SYSTEM_DARK_MEDIA_QUERY} {`);
     for (const rule of systemDarkRules) {
-      const selectors = buildSelectors(rule.token, { systemPreferenceFallback: true });
+      const selectors = buildSelectors(rule.token, {
+        target,
+        systemPreferenceFallback: true,
+      });
       if (selectors.length === 0 || rule.css.length === 0) continue;
       lines.push(`    ${selectors.join(',\n    ')} {`);
       for (const decl of rule.css) lines.push(`      ${decl}`);
@@ -574,8 +827,19 @@ function renderTransformUtility(utility: string): string[] | null {
 
 function buildSelectors(
   token: string,
-  { systemPreferenceFallback = false }: { systemPreferenceFallback?: boolean } = {}
+  {
+    target = 'document',
+    systemPreferenceFallback = false,
+  }: {
+    target?: ProtoStyleCssTarget;
+    systemPreferenceFallback?: boolean;
+  } = {}
 ): string[] {
+  if (target === 'shadow-split') {
+    return [
+      `${buildSplitHostSelector(token)} > [${SPLIT_SURFACE_ATTR}][${PUI_STYLE_ATTR}~="${escapeCssString(token)}"]`,
+    ];
+  }
   const parts = splitVariants(token);
   const variants = parts.slice(0, -1);
   let selectors = [`:where([${PUI_STYLE_ATTR}~="${escapeCssString(token)}"])`];
@@ -590,6 +854,10 @@ function buildSelectors(
   }
 
   if (dark) {
+    if (target === 'shadow') {
+      return selectors.map((selector) => `:host([${PUI_COLOR_SCHEME_ATTR}='dark']) ${selector}`);
+    }
+
     if (systemPreferenceFallback) {
       return selectors.map((selector) => `:where(${SYSTEM_THEME_FALLBACK_ROOT}) ${selector}`);
     }

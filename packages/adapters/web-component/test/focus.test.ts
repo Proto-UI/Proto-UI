@@ -109,6 +109,9 @@ describe('adapter-web-component focus wiring', () => {
 
     const withButton = document.createElement('x-focus-entry-panel') as any;
     const button = document.createElement('button');
+    // Happy DOM reports -1 for default native buttons; Chrome reports 0.
+    // Model the browser fact consumed by the composed-tree sampler.
+    Object.defineProperty(button, 'tabIndex', { get: () => 0 });
     withButton.appendChild(button);
     document.body.appendChild(withButton);
     await Promise.resolve();
@@ -136,6 +139,8 @@ describe('adapter-web-component focus wiring', () => {
     const el = document.createElement('x-focus-entry-delegate') as any;
     const disabled = document.createElement('button');
     const enabled = document.createElement('button');
+    Object.defineProperty(disabled, 'tabIndex', { get: () => 0 });
+    Object.defineProperty(enabled, 'tabIndex', { get: () => 0 });
     disabled.disabled = true;
     el.append(disabled, enabled);
     document.body.appendChild(el);
@@ -146,5 +151,87 @@ describe('adapter-web-component focus wiring', () => {
     expect(document.activeElement).toBe(enabled);
 
     el.remove();
+  });
+
+  it('does not let live entry fallback override an explicitly enabled focus target', async () => {
+    let focusable!: FocusableHandle;
+    const P = definePrototype({
+      name: 'x-focus-entry-explicit-target',
+      setup() {
+        asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+        focusable = asFocusable();
+        focusable.configure({ disabled: true });
+        return (r) => [r.slot()];
+      },
+    });
+    AdaptToWebComponent(P as any);
+    const el = document.createElement(P.name);
+    document.body.append(el);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    focusable.setDisabled(false);
+    const child = document.createElement('button');
+    el.append(child);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(el.tabIndex).toBe(0);
+    focusable.setNavParticipation('none');
+    child.remove();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(el.tabIndex).toBe(-1);
+    el.remove();
+  });
+
+  it('refreshes entry fallback as descendant focusability changes and cleans up on removal', async () => {
+    let entry!: ReturnType<typeof asFocusEntry>;
+    const P = definePrototype({
+      name: 'x-focus-entry-live-descendants',
+      setup() {
+        entry = asFocusEntry();
+        entry.configure({ strategy: 'descendant-first', fallback: 'self' });
+        return (r) => [r.slot()];
+      },
+    });
+    AdaptToWebComponent(P as any);
+    const el = document.createElement(P.name);
+    const child = document.createElement('span');
+    el.append(child);
+    document.body.append(el);
+    const settle = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    };
+    await settle();
+    expect(el.tabIndex).toBe(0);
+    child.tabIndex = 0;
+    await settle();
+    expect(el.hasAttribute('tabindex')).toBe(false);
+    child.setAttribute('aria-disabled', 'true');
+    await settle();
+    expect(el.tabIndex).toBe(0);
+    child.removeAttribute('aria-disabled');
+    await settle();
+    expect(el.hasAttribute('tabindex')).toBe(false);
+    child.remove();
+    await settle();
+    expect(el.tabIndex).toBe(0);
+    el.append(child);
+    await settle();
+    expect(el.hasAttribute('tabindex')).toBe(false);
+    entry.setDisabled(true);
+    child.remove();
+    await settle();
+    expect(el.hasAttribute('tabindex')).toBe(false);
+    entry.setDisabled(false);
+    await settle();
+    expect(el.tabIndex).toBe(0);
+    el.remove();
+    await settle();
+    const detachedTabindex = el.getAttribute('tabindex');
+    el.append(child);
+    await settle();
+    expect(el.getAttribute('tabindex')).toBe(detachedTabindex);
+    document.body.append(el);
+    await settle();
+    expect(el.hasAttribute('tabindex')).toBe(false);
+    el.remove();
+    await settle();
   });
 });

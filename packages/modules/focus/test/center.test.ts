@@ -41,6 +41,27 @@ function createEntry(options: {
 }
 
 describe('FocusCenter retained owner entry', () => {
+  it('skips programmatic-only members for scope traversal without removing roving access', () => {
+    const center = new FocusCenter(),
+      token = { id: 'scope' },
+      focused: string[] = [];
+    const scope = createEntry({ instance: token, scope: true, roving: true });
+    const inactive = createEntry({ instance: { id: 'inactive' }, parent: token, focused });
+    inactive.getFocusableConfig = () => ({
+      autoFocus: false,
+      disabled: false,
+      navParticipation: 'none',
+    });
+    const current = createEntry({ instance: { id: 'current' }, parent: token, focused });
+    center.upsert(scope);
+    center.upsert(inactive);
+    center.upsert(current);
+    center.activateScope(scope);
+    center.focusInScope(scope, 'next');
+    expect(focused).toEqual(['current']);
+    center.focusInRoving(scope, 'first');
+    expect(focused).toEqual(['current', 'inactive']);
+  });
   it('keeps a deferred roving request when a child view attaches before its provider view', () => {
     // T-FOCUS-ROVING-0001-CASE-DEFERRED-ENTRY
     const center = new FocusCenter();

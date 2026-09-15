@@ -1,0 +1,208 @@
+id: T-WEB-COMPONENT-SHADOW-PROFILE-0001
+type: test
+title: Web Component Shadow profile compatibility and atomic activation tests
+status: draft
+lifecycleRationale:
+  zh-CN: 映射实验性 split 的兼容、资源与原生文本证据；真实 IME 和跨浏览器完整矩阵不由这些测试证明，所验证 profile 尚未稳定化。
+  en: Maps experimental split compatibility, resources and native text evidence; these tests do not establish real IME or a complete cross-browser matrix, and the verified profile is not stable.
+since: 0.3.0-alpha.0
+summary: Maps boolean compatibility and production split activation, customization, refusal and owner lifetime evidence to the draft A1/G1 decision.
+cases:
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-NATIVE-TEXT
+    title: Native text editor is the single surface with repeatable view leases and no commit reinsertion
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-J
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-K
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-L
+    expectation: one-native-surface-preserves-editing-and-revokes-view-leases
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-PUBLIC-CUSTOMIZATION
+    title: Chrome observes surface isolation, part and raw paint customization and explicit host reset escape
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-H
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-I
+    expectation: generated-parity-with-scoped-reset-exemption-and-explicit-raw-css-limit
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-LIGHT-COMPATIBILITY
+    title: Omitted and false shadow options retain the existing Light DOM profile
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-A
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-B
+    expectation: boolean-light-profile-remains-collapsed-and-wrapper-free
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-DIRECT-COMPATIBILITY
+    title: Boolean true retains direct ShadowRoot children, native slot shape, and host Root styling
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-B
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-E
+    expectation: boolean-true-profile-keeps-existing-dom-and-style-target
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-OWNER-LIFETIME
+    title: Shadow owner resources survive repeatable view epochs while view contents are replaced
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-E
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-F
+    expectation: owner-resources-and-view-epoch-contents-have-distinct-lifetimes
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-ATOMIC-OBJECT
+    title: The public discriminated object activates split surface and stylesheet input together
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-C
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-D
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-G
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-J
+      - A-WEB-COMPONENT-0001-SHADOW-MODES
+    expectation: no-partial-object-profile-is-publicly-accepted
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-TERMINAL-CLEANUP
+    title: Terminal owner teardown revokes Adapter-owned Shadow resources exactly once
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-F
+    expectation: terminal-disposal-cleans-owner-resources-without-changing-view-epoch-lifecycle
+  - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-CUSTOMIZATION
+    title: Public split forwards normalized surface props and exposes a part without changing boundary ownership
+    covers:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-H
+    expectation: forwarding-and-cleanup-only-not-arbitrary-css-sizing-parity
+implementations:
+  - id: public-dist-s5-native-text
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s5-public-browser.mjs
+    required: true
+    consumesCases: [T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-NATIVE-TEXT]
+    exercises: [C-TEXT-CONTROL-0001, M-TEXT-CONTROL-0001, HC-TEXT-CONTROL-0001]
+    notes:
+      - Bundle inputs assert public dist exports with no package source aliases; the shared Chrome journey tests editing, geometry, selection, synthetic composition, focus, Tabs and reconnect. Not real OS IME or all-browser certification.
+  - id: website-s5-native-text-paths
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-NATIVE-TEXT
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      - C-TEXT-CONTROL-0001
+    notes:
+      - Scoped Chrome Light/split/mixed native metrics, editing, focus-visible, Tabs entry and named AX textboxes; synthetic composition is not real OS IME acceptance.
+  - id: adapter-web-component-shadow-text-control
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-text-control.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-NATIVE-TEXT
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      - C-TEXT-CONTROL-0001
+  - id: website-s1-shadow-customization-paths
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-CUSTOMIZATION
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+  - id: browser-public-shadow-profile-customization
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-public-browser.mjs
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-PUBLIC-CUSTOMIZATION
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+  - id: adapter-web-component-light-shadow-commit-compatibility
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/commit.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-LIGHT-COMPATIBILITY
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-DIRECT-COMPATIBILITY
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+  - id: adapter-web-component-native-shadow-slot-compatibility
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/contract/slot-shadow-dom.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-DIRECT-COMPATIBILITY
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+  - id: adapter-web-component-shadow-owner-shell
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-owner-shell.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-OWNER-LIFETIME
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      - C-HOST-VIEW-ATTACHMENT-0001
+  - id: adapter-web-component-shadow-split-profile
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-profile.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-ATOMIC-OBJECT
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-TERMINAL-CLEANUP
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-OWNER-LIFETIME
+      - T-WEB-COMPONENT-SHADOW-PROFILE-0001-CASE-CUSTOMIZATION
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      - C-HOST-SURFACE-PROJECTION-0001
+      - C-HOST-VIEW-ATTACHMENT-0001
+verifies:
+  adapters:
+    - id: A-WEB-COMPONENT-0001
+      anchors: [A-WEB-COMPONENT-0001-SHADOW-MODES]
+  decisions:
+    - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      anchors:
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-A
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-B
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-C
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-D
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-E
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-F
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-G
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-H
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-I
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-J
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-K
+        - D-WEB-COMPONENT-SHADOW-PROFILE-0001-L
+exercises:
+  adapters:
+    - A-WEB-COMPONENT-0001
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+    - C-HOST-VIEW-ATTACHMENT-0001
+sources:
+  - path: packages/adapters/web-component/test/shadow-split-profile.test.ts
+  - path: packages/adapters/web-component/test/commit.test.ts
+  - path: packages/adapters/web-component/test/contract/slot-shadow-dom.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/shadow-owner-shell.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Connected mode-qualified Adapter admission and the S5 public-dist consumer alongside website and native lease evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Mapped passing S5 native adapter and bilingual website evidence including bounded geometry and native focus; real IME and cross-Shadow external IDREF remain outside this evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added planned bounded S5 native editor surface evidence without claiming browser IME or geometry from DOM tests.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added S1 browser paths for customization removal after live theme, tone and slot updates; source independence and composed lifecycle remain bounded integration observations.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added production G1 configuration, ordinary-Root refusal, customization forwarding and generation cleanup evidence; no browser sizing claim from DOM tests.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped passing boolean-profile evidence and planned atomic split-profile and terminal-cleanup evidence.
+tags:
+  - test
+  - adapter
+  - web-component
+  - shadow-dom
+  - compatibility

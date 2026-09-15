@@ -5,6 +5,10 @@ status: draft
 since: 0.1.0
 summary: Runtime contract tests for explicit focus scope activation, previous focus restoration, and outside focus request gating.
 cases:
+  - id: T-FOCUS-SCOPE-0001-CASE-HOST-SEQUENTIAL-SAMPLE
+    title: Host sequential sample composes open slots, navigation participation and entry fallback
+    covers: [C-AS-FOCUS-SCOPE-0002-H, C-AS-FOCUS-SCOPE-0002-I, C-AS-FOCUS-SCOPE-0002-J]
+    expectation: scoped-tab-preserves-projected-current-native-and-fallback-targets
   - id: T-FOCUS-SCOPE-0001-CASE-ACTIVATE-FIRST
     title: Activating a scope requests focus for its first logical focusable child
     covers:
@@ -30,6 +34,20 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-B
     expectation: scope-without-target-remains-inactive
 implementations:
+  - id: s4-scope-native-composition
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s4-journey.mjs
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-HOST-SEQUENTIAL-SAMPLE]
+    notes:
+      - Executed by the S4 public and website runners; covers selected Tabs stop, native Details button, empty-panel fallback, forward/backward wrap and recovery after external native focus.
+  - id: wc-scope-sequential-sample
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/focus-scope-targets.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-HOST-SEQUENTIAL-SAMPLE]
   - id: runtime-focus-scope-activation-contract
     kind: runtime-test
     status: passing
@@ -50,7 +68,13 @@ verifies:
         - C-AS-FOCUS-SCOPE-0002-D
         - C-AS-FOCUS-SCOPE-0002-E
         - C-AS-FOCUS-SCOPE-0002-F
+        - C-AS-FOCUS-SCOPE-0002-H
+        - C-AS-FOCUS-SCOPE-0002-I
+        - C-AS-FOCUS-SCOPE-0002-J
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded WC scope sequential sample evidence; full native composition is additionally verified by the S4 Dialog journey.
   - version: 0.1.0
     change: introduced
     summary: Mapped scope activation runtime tests to the focus scope activation contract.

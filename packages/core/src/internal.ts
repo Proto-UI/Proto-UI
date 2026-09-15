@@ -1,6 +1,8 @@
 import type { AsHookRuntime } from './prototype';
 import type { DefHandle } from './handles';
 
+export * from './spec/feedback/root-effect';
+
 export type RuntimeDelayTask = {
   cancel(): void;
 };

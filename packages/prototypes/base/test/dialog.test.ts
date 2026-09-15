@@ -35,6 +35,27 @@ async function completeTransitions(...elements: any[]): Promise<void> {
 }
 
 describe('prototypes/base: dialog', () => {
+  it('preserves focus against backdrop default actions without owning dismissal or passthrough', async () => {
+    const root = document.createElement('base-dialog-root') as any;
+    const mask = document.createElement('base-dialog-mask') as any;
+    setElementProps(root, { open: true });
+    root.append(mask);
+    document.body.append(root);
+    await flushViewReconciliation();
+    try {
+      const down = new Event('pointerdown', { bubbles: true, cancelable: true });
+      mask.dispatchEvent(down);
+      expect(down.defaultPrevented).toBe(true);
+      expect(root.getExposes().open.get()).toBe(true);
+      setElementProps(mask, { passthrough: true });
+      const pass = new Event('pointerdown', { bubbles: true, cancelable: true });
+      mask.dispatchEvent(pass);
+      expect(pass.defaultPrevented).toBe(false);
+    } finally {
+      root.remove();
+      await flushViewReconciliation();
+    }
+  });
   it('uncontrolled root toggles open from trigger click and closes from close click', async () => {
     const root = document.createElement('base-dialog-root') as any;
     const trigger = document.createElement('base-dialog-trigger') as any;

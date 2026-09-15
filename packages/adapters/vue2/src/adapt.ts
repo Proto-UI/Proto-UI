@@ -49,6 +49,7 @@ import {
   bindLogicalEventTarget,
   createLogicalInstance,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   markProtoInstance,
   unbindProtoInstance,
   unbindLogicalEventTarget,
@@ -600,6 +601,7 @@ function initSession<Props extends PropsBaseType>(
     rootEl,
     instanceToken: state.instanceToken,
     resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
+    isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
     globalEl: typeof window === 'undefined' ? rootEl : window,
     isEnabled: () => eventGate.isEnabled?.() ?? true,
   });

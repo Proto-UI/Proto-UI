@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { renderPrefixedThemeCss, renderProtoStyleTokenCss } from '../src/services/proto-style-css';
+import {
+  PROTO_SHADOW_STYLE_ARTIFACT_KIND,
+  PROTO_SHADOW_STYLE_ARTIFACT_VERSION,
+  PROTO_SHADOW_STYLE_ENVIRONMENT,
+  renderPrefixedThemeCss,
+  renderProtoShadowStyleArtifact,
+  renderProtoShadowStyleTokenCss,
+  renderProtoStyleTokenCss,
+} from '../src/services/proto-style-css';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
@@ -174,6 +182,68 @@ describe('proto style css renderer', () => {
     expect(css).toContain(
       ":where(:root:not(.dark):not(.light):not([data-theme='dark']):not([data-theme='light']))"
     );
+  });
+
+  it('uses the host-color-scheme-v1 marker as the only Shadow dark environment selector', () => {
+    const css = renderProtoShadowStyleTokenCss(['dark:bg-input/30']);
+
+    expect(css).toContain(
+      `:host([data-pui-color-scheme='dark']) :where([data-pui-style~="dark:bg-input/30"])`
+    );
+    expect(css).toContain(
+      'background-color: color-mix(in oklab, var(--pui-input) 30%, transparent);'
+    );
+    expect(css).not.toContain(':where(.dark)');
+    expect(css).not.toContain('[data-theme=');
+    expect(css).not.toContain(':root');
+    expect(css).not.toContain('@media (prefers-color-scheme: dark)');
+  });
+
+  it('keeps non-environment Shadow output identical to document output', () => {
+    const tokens = [
+      'animate-in',
+      'duration-200',
+      'fade-in-0',
+      'ring-2',
+      'translate-x-0',
+      'unsupported-shadow-token',
+    ];
+
+    expect(renderProtoShadowStyleTokenCss(tokens)).toBe(renderProtoStyleTokenCss(tokens));
+  });
+
+  it('preserves declarations, ordering, keyframes, baseline, and diagnostics around Shadow dark rules', () => {
+    const css = renderProtoShadowStyleTokenCss([
+      'animate-in',
+      'dark:bg-input/30',
+      'duration-200',
+      'fade-in-0',
+      'unsupported-shadow-token',
+    ]);
+
+    expect(css).toContain('[data-pui-style]::before');
+    expect(css).toContain(':where([data-pui-style]) {');
+    expect(css).toContain('@keyframes pui-enter');
+    expect(css).toContain('--pui-enter-opacity: 0');
+    expect(css).toContain('transition-duration: 200ms;');
+    expect(css).toContain('Unsupported Proto UI style tokens:');
+    expect(css).toContain('* - unsupported-shadow-token');
+    expect(css.indexOf('[data-pui-style~="animate-in"]')).toBeLessThan(
+      css.indexOf('[data-pui-style~="duration-200"]')
+    );
+  });
+
+  it('builds a frozen versioned Shadow style artifact without exporting theme declarations', () => {
+    const artifact = renderProtoShadowStyleArtifact(['dark:bg-input/30']);
+
+    expect(artifact).toEqual({
+      kind: PROTO_SHADOW_STYLE_ARTIFACT_KIND,
+      version: PROTO_SHADOW_STYLE_ARTIFACT_VERSION,
+      cssText: renderProtoShadowStyleTokenCss(['dark:bg-input/30']),
+      environment: PROTO_SHADOW_STYLE_ENVIRONMENT,
+    });
+    expect(Object.isFrozen(artifact)).toBe(true);
+    expect(artifact.cssText).not.toContain('--pui-background:');
   });
 
   it('adds a system dark fallback to generated theme variables', () => {
