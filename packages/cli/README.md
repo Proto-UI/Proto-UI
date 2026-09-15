@@ -40,6 +40,8 @@ It is a frozen, synchronous version-1 value with `kind`, `version`, `environment
 
 `--shadow-out` requires an explicit `.js` path relative to the working directory, not to `--styles-dir`; its declaration replaces that suffix with `.d.ts`. Presets still generate their theme and entry CSS. Without the option, no companion is written; `init` and `add` do not generate one or select a split Adapter.
 
+Source scanning separates directly proven Template-only style occurrences from Root recipes. Those tokens receive ordinary Shadow-local CSS; shared Root uses, opaque helpers and unclassified handles remain subject to conservative Root preflight. Preset and flat token inputs remain conservative because they carry no target provenance. Template CSS membership never grants runtime Root admission, and generating that CSS does not enable automatic WC Template-handle projection.
+
 All target paths and generated content are checked before replacing any file. Targets must be distinct regular files or new paths, not file symlinks or directories; path collisions are conservatively case-folded across platforms. The complete set is staged first. Caught replacement failures attempt to restore old files and remove new outputs; if recovery fails, the error lists retained backup directories. Empty output parent directories may remain after failure. This is not an atomic multi-file transaction for crashes or concurrent writers.
 
 Rerun the same command after changing tokens; keep CSS, JavaScript and declarations together. There is no runtime generation-digest check. Generating a preset closure does not establish that every prototype or Root token in it is split-compatible. Theme custom properties remain document/host-owned and inherit into Shadow roots.

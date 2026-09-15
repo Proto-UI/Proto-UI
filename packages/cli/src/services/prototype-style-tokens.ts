@@ -22,6 +22,37 @@ export async function collectProtoStyleTokens(root) {
   return Array.from(tokens).sort();
 }
 
+/** Only proven Template uses bypass Root recipes. Unclassified tw() calls,
+ * shared Root uses and lowered Rule tokens remain conservatively Root-bound. */
+export async function collectProtoShadowStyleTokenUsage(root) {
+  const tokens = new Set();
+  const templateTokens = new Set();
+  const nonTemplateTokens = new Set();
+  const occurrences = [];
+  const moduleCache = new Map();
+  for (const file of await collectSourceFiles(root)) {
+    const sourceFile = await parseSourceFile(file);
+    const scope = createScope();
+    await applyImportBindings(file, sourceFile, scope, moduleCache, []);
+    walk(sourceFile, scope, tokens, collectExposures(sourceFile), {
+      occurrences,
+      sourcePath: path.relative(root, file).split(path.sep).join('/'),
+      templateTokens,
+      nonTemplateTokens,
+    });
+  }
+  // Reuse Root occurrence provenance; a token used on both targets needs both
+  // outputs and must still pass the complete Root recipe preflight.
+  for (const { token } of occurrences) nonTemplateTokens.add(token);
+  return {
+    tokens: Array.from(tokens).sort(),
+    rootTokens: Array.from(tokens)
+      .filter((token) => !templateTokens.has(token) || nonTemplateTokens.has(token))
+      .sort(),
+    templateTokens: Array.from(templateTokens).sort(),
+  };
+}
+
 /**
  * Collect only author-side tokens that flow through Root feedback.style.use.
  *
@@ -425,6 +456,12 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       const value = resolveExpression(arg, scope);
       for (const token of value.strings.flatMap(splitTokens)) {
         tokens.add(token);
+        if (rootInventory?.templateTokens) {
+          (isTemplateStyleCall(node)
+            ? rootInventory.templateTokens
+            : rootInventory.nonTemplateTokens
+          ).add(token);
+        }
       }
     }
   }
@@ -448,9 +485,153 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
 
   if (ts.isCallExpression(node) && isPropertyNamed(node.expression, 'rule')) {
     collectRuleVariantTokens(node, scope, tokens, exposures);
+    if (rootInventory?.nonTemplateTokens)
+      collectRuleVariantTokens(node, scope, rootInventory.nonTemplateTokens, exposures);
   }
 
   ts.forEachChild(node, (child) => walk(child, scope, tokens, exposures, rootInventory));
+}
+
+function isTemplateStyleCall(node) {
+  // No wrapper can receive the handle before the Template node does.
+  const style = node.parent;
+  if (
+    !ts.isPropertyAssignment(style) ||
+    style.initializer !== node ||
+    getPropertyName(style.name) !== 'style'
+  )
+    return false;
+  const props = style.parent;
+  const call = props.parent;
+  if (
+    !ts.isObjectLiteralExpression(props) ||
+    !ts.isCallExpression(call) ||
+    call.arguments[1] !== props ||
+    !ts.isPropertyAccessExpression(call.expression) ||
+    call.expression.name.text !== 'el' ||
+    !ts.isIdentifier(call.expression.expression)
+  )
+    return false;
+
+  const render = ts.findAncestor(call, ts.isFunctionLike);
+  if (!render || !(ts.isArrowFunction(render) || ts.isFunctionExpression(render))) return false;
+  const parameter = render.parameters[0];
+  const receiver = call.expression.expression.text;
+  if (
+    !parameter ||
+    !ts.isIdentifier(parameter.name) ||
+    parameter.name.text !== receiver ||
+    parameter.initializer ||
+    parameter.dotDotDotToken
+  )
+    return false;
+
+  // Only a directly returned callback in canonical definePrototype.setup
+  // establishes the renderer receiver. Arbitrary functions named el do not.
+  const body = render.body;
+  const returned =
+    ts.isBlock(body) && body.statements.length === 1 && ts.isReturnStatement(body.statements[0])
+      ? body.statements[0].expression
+      : body;
+  // Follow only literal Template structure to the return value, never an
+  // opaque wrapper, alias, spread or a call on another receiver.
+  for (let current = call; current !== returned; ) {
+    const parent = current.parent;
+    if (ts.isArrayLiteralExpression(parent) && parent.elements.includes(current)) {
+      current = parent;
+      continue;
+    }
+    if (
+      ts.isCallExpression(parent) &&
+      ts.isPropertyAccessExpression(parent.expression) &&
+      ts.isIdentifier(parent.expression.expression) &&
+      parent.expression.expression.text === receiver &&
+      parent.expression.name.text === 'el' &&
+      ((parent.arguments.length === 3 && parent.arguments[2] === current) ||
+        (parent.arguments.length === 2 && parent.arguments[1] === current))
+    ) {
+      current = parent;
+      continue;
+    }
+    return false;
+  }
+  const setup = ts.findAncestor(render.parent, ts.isFunctionLike);
+  if (
+    !setup ||
+    !ts.isMethodDeclaration(setup) ||
+    !ts.isReturnStatement(render.parent) ||
+    render.parent.expression !== render ||
+    render.parent.parent !== setup.body
+  )
+    return false;
+  if (getPropertyName(setup.name) !== 'setup') return false;
+  const config = setup.parent;
+  const definition = config.parent;
+  if (
+    !ts.isObjectLiteralExpression(config) ||
+    !ts.isCallExpression(definition) ||
+    definition.arguments[0] !== config ||
+    !ts.isIdentifier(definition.expression) ||
+    definition.expression.text !== 'definePrototype' ||
+    ts.findAncestor(definition.parent, ts.isFunctionLike)
+  )
+    return false;
+  const source = node.getSourceFile();
+  for (const name of ['definePrototype', 'tw']) {
+    if (
+      !source.statements.some(
+        (statement) =>
+          ts.isImportDeclaration(statement) &&
+          statement.moduleSpecifier.text === '@proto.ui/core' &&
+          !statement.importClause?.isTypeOnly &&
+          ts.isNamedImports(statement.importClause?.namedBindings ?? {}) &&
+          statement.importClause.namedBindings.elements.some(
+            (binding) =>
+              !binding.isTypeOnly &&
+              binding.name.text === name &&
+              (binding.propertyName ?? binding.name).text === name
+          )
+      )
+    )
+      return false;
+  }
+
+  let safe = true;
+  function check(current) {
+    if (ts.isIdentifier(current) && current.text === receiver && current !== parameter.name) {
+      const access = current.parent;
+      // Reject shadowing, reassignment, method replacement and escaping the
+      // receiver to helpers; only direct renderer calls prove this bounded case.
+      if (
+        !(
+          ts.isPropertyAccessExpression(access) &&
+          access.expression === current &&
+          ['el', 'slot'].includes(access.name.text) &&
+          ts.isCallExpression(access.parent) &&
+          access.parent.expression === access
+        )
+      )
+        safe = false;
+    }
+    ts.forEachChild(current, check);
+  }
+  check(render);
+  // A local tw binding would invalidate the canonical direct initializer too.
+  function checkTw(current) {
+    if (
+      (ts.isVariableDeclaration(current) ||
+        ts.isParameter(current) ||
+        ts.isBindingElement(current) ||
+        ts.isFunctionDeclaration(current)) &&
+      current.name &&
+      ts.isIdentifier(current.name) &&
+      current.name.text === 'tw'
+    )
+      safe = false;
+    ts.forEachChild(current, checkTw);
+  }
+  checkTw(setup);
+  return safe;
 }
 
 function isFeedbackStyleUseCall(node) {

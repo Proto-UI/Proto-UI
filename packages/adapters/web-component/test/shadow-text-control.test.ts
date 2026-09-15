@@ -80,18 +80,33 @@ describe('S5 native Shadow text surface', () => {
       child = new Input();
     parent.append(child);
     document.body.append(parent);
-    const settle = () => new Promise((resolve) => setTimeout(resolve, 15));
+    const settle = async () => {
+      await flush();
+      // The adapter schedules commits with microtasks; Happy DOM subsequently
+      // delivers MutationObserver records through its async task manager.
+      // A 15 ms timer is not a completion signal for that two-stage chain.
+      await (
+        window as unknown as {
+          happyDOM: { waitUntilComplete(): Promise<void> };
+        }
+      ).happyDOM.waitUntilComplete();
+    };
     await settle();
     expect(parent.hasAttribute('tabindex')).toBe(false);
+    const editor = child.shadowRoot!.querySelector('input')!;
     setElementProps(child, { disabled: true });
     child.update();
+    await flush();
+    // Capture the boundary: the scheduled native projection is complete, but
+    // the observer has not yet delivered the parent's fallback refresh.
+    expect(editor.disabled).toBe(true);
+    expect(parent.hasAttribute('tabindex')).toBe(false);
     await settle();
     expect(parent.tabIndex).toBe(0);
     setElementProps(child, { disabled: false });
     child.update();
     await settle();
     expect(parent.hasAttribute('tabindex')).toBe(false);
-    const editor = child.shadowRoot!.querySelector('input')!;
     editor.remove();
     await settle();
     expect(parent.tabIndex).toBe(0);

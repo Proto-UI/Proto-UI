@@ -1,9 +1,15 @@
 // Bounded same-document/open-composed-tree sampler for active scope traversal.
-// Stateless: fresh projected eligibility on each key event; no lifecycle lease.
+// Fresh projected eligibility on each key event. Optional native focus history
+// is observed by the view owner, never converted into logical focus facts.
 export function sampleWebComponentScopeTargets(
   container: HTMLElement,
-  isNativelyFocusable?: (target: HTMLElement) => boolean
+  isNativelyFocusable?: (target: HTMLElement) => boolean,
+  direction: 'next' | 'prev' = 'next',
+  radioFocusOrder?: (radio: HTMLInputElement) => number
 ) {
+  let activeTarget = container.ownerDocument.activeElement;
+  while (activeTarget?.shadowRoot?.activeElement)
+    activeTarget = activeTarget.shadowRoot.activeElement;
   type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
   const scope: Entry[] = [];
   const visited = new Set<Element>();
@@ -38,7 +44,8 @@ export function sampleWebComponentScopeTargets(
       // promote its child scope via an otherwise positive tabindex.
       const priority = el.shadowRoot && !target && !delegatesFocus ? 0 : el.tabIndex;
       entries.push({ element: el, target: !!target && !delegatesFocus, priority, children });
-    } else if (target) entries.push({ element: el, target: true, priority: el.tabIndex });
+    } else if (target || (el === activeTarget && el !== container))
+      entries.push({ element: el, target: !!target, priority: el.tabIndex });
     if (el instanceof HTMLSlotElement) {
       const assigned = el.assignedNodes();
       (assigned.length ? assigned : [...el.children]).forEach((node) => {
@@ -52,21 +59,139 @@ export function sampleWebComponentScopeTargets(
     else [...el.children].forEach((child) => visit(child, children));
   };
   visit(container, scope);
-  const targets: HTMLElement[] = [];
-  const flatten = (entries: Entry[]) => {
+  const flatten = (entries: Entry[], output: Entry[] = []) => {
     entries.sort(
       (a, b) => (a.priority > 0 ? a.priority : Infinity) - (b.priority > 0 ? b.priority : Infinity)
     );
     for (const entry of entries) {
-      if (entry.target) targets.push(entry.element);
-      if (entry.children) flatten(entry.children);
+      output.push(entry);
+      if (entry.children) flatten(entry.children, output);
     }
+    return output;
   };
-  flatten(scope);
-  let activeTarget = container.ownerDocument.activeElement;
-  while (activeTarget?.shadowRoot?.activeElement)
-    activeTarget = activeTarget.shadowRoot.activeElement;
-  return { targets, activeTarget };
+  const ordered = flatten(scope);
+  const targets = ordered.filter((entry) => entry.target).map((entry) => entry.element);
+  // Native radio groups share one sequential stop. Grouping follows DOM tree
+  // and form ownership, not composed placement (e.g. separate slots/forms).
+  // Unchecked groups enter at the forward/reverse edge; an already focused
+  // radio remains an anchor so departing it does not re-enter the same group.
+  const trees = new Map<Node, Map<HTMLFormElement | null, Map<string, HTMLInputElement[]>>>();
+  for (const target of targets) {
+    if (!(target instanceof HTMLInputElement) || target.type !== 'radio' || !target.name) continue;
+    const tree = target.getRootNode();
+    let forms = trees.get(tree);
+    if (!forms) trees.set(tree, (forms = new Map()));
+    let names = forms.get(target.form);
+    if (!names) forms.set(target.form, (names = new Map()));
+    let group = names.get(target.name);
+    if (!group) names.set(target.name, (group = []));
+    group.push(target);
+  }
+  const excluded = new Set<HTMLElement>();
+  const wholeTreeTargets = new Map<Node, Set<HTMLElement>>();
+  const eligibleOutside = (tree: Node, radio: HTMLInputElement) => {
+    let eligible = wholeTreeTargets.get(tree);
+    if (!eligible) {
+      // A checked group member may live outside this trap. Apply the same
+      // eligibility traversal, but never return outside targets to Focus.
+      visited.clear();
+      const entries: Entry[] = [];
+      if (tree instanceof Document) visit(tree.documentElement, entries);
+      else if (tree instanceof ShadowRoot) for (const child of tree.children) visit(child, entries);
+      eligible = new Set(
+        flatten(entries)
+          .filter((entry) => entry.target)
+          .map((entry) => entry.element)
+      );
+      wholeTreeTargets.set(tree, eligible);
+    }
+    return eligible.has(radio);
+  };
+  for (const [tree, forms] of trees)
+    for (const names of forms.values())
+      for (const group of names.values()) {
+        const active = group.find((el) => el === activeTarget);
+        const member = group[0]!;
+        const outsideChecked =
+          tree instanceof Document || tree instanceof ShadowRoot
+            ? Array.from(tree.querySelectorAll<HTMLInputElement>('input')).find(
+                (el) =>
+                  el.type === 'radio' &&
+                  el.name === member.name &&
+                  el.form === member.form &&
+                  el.checked &&
+                  !group.includes(el) &&
+                  eligibleOutside(tree, el)
+              )
+            : undefined;
+        const remembered = radioFocusOrder
+          ? group.reduce<HTMLInputElement | undefined>(
+              (last, el) => (radioFocusOrder(el) > (last ? radioFocusOrder(last) : 0) ? el : last),
+              undefined
+            )
+          : undefined;
+        const stop =
+          outsideChecked ??
+          group.find((el) => el.checked) ??
+          active ??
+          remembered ??
+          (direction === 'prev' ? group.at(-1) : group[0]);
+        for (const radio of group) if (radio !== stop && radio !== active) excluded.add(radio);
+      }
+  const current = ordered.findIndex((entry) => entry.element === activeTarget);
+  const filtered = targets.filter((target) => !excluded.has(target));
+  return {
+    targets: filtered,
+    activeTarget,
+    // Position is not a Tab stop. Focus owns direction/wrapping after native
+    // programmatic focus on tabindex=-1 or another currently excluded target.
+    ...(current >= 0 && !filtered.includes(activeTarget as HTMLElement)
+      ? {
+          activeInsertionIndex: ordered
+            .slice(0, current)
+            .filter((entry) => entry.target && !excluded.has(entry.element)).length,
+        }
+      : {}),
+  };
+}
+
+// Native unchecked radio groups remember the last focused member. Capture
+// actual focus while this view lease is live, including pointer/programmatic
+// focus and focus in open roots. Weak keys cannot retain detached descendants.
+export function observeWebComponentRadioFocus(root: HTMLElement) {
+  let sequence = 0;
+  const history = new WeakMap<
+    HTMLInputElement,
+    { order: number; tree: Node; form: HTMLFormElement | null; name: string }
+  >();
+  const remember = (event: Event) => {
+    const target = event.composedPath()[0];
+    if (!(target instanceof HTMLInputElement) || target.type !== 'radio' || !target.name) return;
+    let active = root.ownerDocument.activeElement;
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+    if (active !== target) return;
+    history.set(target, {
+      order: ++sequence,
+      tree: target.getRootNode(),
+      form: target.form,
+      name: target.name,
+    });
+  };
+  root.addEventListener('focusin', remember, true);
+  return {
+    order(target: HTMLInputElement) {
+      const last = history.get(target);
+      return last &&
+        last.tree === target.getRootNode() &&
+        last.form === target.form &&
+        last.name === target.name
+        ? last.order
+        : 0;
+    },
+    dispose() {
+      root.removeEventListener('focusin', remember, true);
+    },
+  };
 }
 
 // Preserve the shared Web entry exclusions while traversing composed children.

@@ -92,7 +92,10 @@ import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
 import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import { type PropsBaseType } from '@proto.ui/types';
 import { createWebComponentPortalMount } from '../portal-mount';
-import { sampleWebComponentScopeTargets } from '../focus-scope-targets';
+import {
+  observeWebComponentRadioFocus,
+  sampleWebComponentScopeTargets,
+} from '../focus-scope-targets';
 
 import {
   getLogicalEventTarget,
@@ -316,15 +319,27 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   // barrier; focus remains gated until that host is ready for interaction.
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
+  let entryImageObserver: MutationObserver | null = null;
+  let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
   const stopEntryObserver = () => {
     entryObserver?.disconnect();
     entryObserver = null;
+    entryImageObserver?.disconnect();
+    entryImageObserver = null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
     const offSurface = subscribeLogicalTriggerSurface(instanceToken, listener);
+    const history = observeWebComponentRadioFocus(el);
+    radioFocusHistory = history;
     return () => {
-      stopEntryObserver();
+      history.dispose();
+      // An old epoch's cleanup owns its captured listener, not a successor's
+      // native focus history or entry observation.
+      if (radioFocusHistory === history) {
+        radioFocusHistory = null;
+        stopEntryObserver();
+      }
       offReady();
       offSurface();
     };
@@ -386,7 +401,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
       [FOCUS_TARGET_READY_CAP, subscribeFocusTarget],
-      [FOCUS_SAMPLE_SCOPE_TARGETS_CAP, sampleWebComponentScopeTargets],
+      [
+        FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
+        (container: HTMLElement, direction?: 'next' | 'prev') =>
+          sampleWebComponentScopeTargets(
+            container,
+            isNativelyFocusable,
+            direction,
+            (radio) => radioFocusHistory?.order(radio) ?? 0
+          ),
+      ],
       [FOCUS_ROOT_TARGET_CAP, () => physicalControl() ?? getTriggerSurface()],
       [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, (target: HTMLElement) => isNativelyFocusable(target)],
       [
@@ -425,6 +449,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           if (config.strategy === 'descendant-first' && Observer) {
             const observeTree = () => {
               entryObserver?.disconnect();
+              entryImageObserver?.disconnect();
+              let hasArea = false;
               const options: MutationObserverInit = {
                 childList: true,
                 subtree: true,
@@ -439,6 +465,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   'href',
                   'contenteditable',
                   'controls',
+                  'type',
+                  'open',
+                  'usemap',
+                  'src',
                   'slot',
                   'name',
                   'class',
@@ -447,11 +477,35 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               };
               const observe = (root: HTMLElement | ShadowRoot) => {
                 entryObserver?.observe(root, options);
+                hasArea ||= !!root.querySelector('area');
                 if (root instanceof HTMLElement && root.shadowRoot) observe(root.shadowRoot);
                 for (const descendant of root.querySelectorAll<HTMLElement>('*'))
                   if (descendant.shadowRoot) observe(descendant.shadowRoot);
               };
               observe(target);
+              // Both entry resolvers consult document-level image-map bindings.
+              // Only regions with areas need this extra observation; unrelated
+              // document mutations must not resample ordinary entry regions.
+              if (hasArea) {
+                entryImageObserver ??= new Observer((records) => {
+                  const containsImage = (node: Node) =>
+                    node instanceof Element && (node.matches('img') || !!node.querySelector('img'));
+                  if (
+                    records.some((record) =>
+                      record.type === 'childList'
+                        ? [...record.addedNodes, ...record.removedNodes].some(containsImage)
+                        : containsImage(record.target)
+                    )
+                  )
+                    projectEntry();
+                });
+                entryImageObserver.observe(target.ownerDocument, {
+                  subtree: true,
+                  childList: true,
+                  attributes: true,
+                  attributeFilter: ['usemap', 'src', 'hidden', 'inert', 'aria-hidden'],
+                });
+              }
             };
             entryObserver = new Observer((records) => {
               if (

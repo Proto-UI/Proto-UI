@@ -5,6 +5,10 @@ status: draft
 since: 0.1.0
 summary: Runtime contract tests for explicit focus scope activation, previous focus restoration, and outside focus request gating.
 cases:
+  - id: T-FOCUS-SCOPE-0001-CASE-ENTRY-ELIGIBILITY-MUTATIONS
+    title: Entry fallback follows current native descendant eligibility and revokes observation on cleanup
+    covers: [C-AS-FOCUS-SCOPE-0002-J]
+    expectation: entry-fallback-reprojects-after-native-eligibility-input-changes
   - id: T-FOCUS-SCOPE-0001-CASE-HOST-SEQUENTIAL-SAMPLE
     title: Host sequential sample composes open slots, navigation participation and entry fallback
     covers: [C-AS-FOCUS-SCOPE-0002-H, C-AS-FOCUS-SCOPE-0002-I, C-AS-FOCUS-SCOPE-0002-J]
@@ -34,14 +38,26 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-B
     expectation: scope-without-target-remains-inactive
 implementations:
+  - id: wc-entry-eligibility-observer
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/focus-entry-observer.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-ENTRY-ELIGIBILITY-MUTATIONS]
+    notes:
+      - Deterministic Happy DOM completion boundaries cover input type, details open state, image-map association changes and observation cleanup; this is not cross-platform browser certification.
   - id: wc-native-scope-order-browser
     kind: adapter-test
     status: passing
     path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
     required: true
-    consumesCases: [T-FOCUS-SCOPE-0001-CASE-HOST-SEQUENTIAL-SAMPLE]
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-HOST-SEQUENTIAL-SAMPLE
+      - T-FOCUS-SCOPE-0001-CASE-ENTRY-ELIGIBILITY-MUTATIONS
     notes:
       - Chrome native Tab and Shift+Tab provide the oracle for positive tabindex across ShadowRoot and slot scopes, including explicitly indexed hosts; also exercises descendant-first entry and active trapped traversal.
+      - Radio evidence covers checked and unchecked groups, directional entry and revisits, form/tree identity and unchanged selection; input type transitions verify actual Tab entry in Light, direct Shadow and split profiles.
+      - Eligibility consults checked group members outside the trap without returning outside targets; programmatic negative-tabindex focus retains an insertion position without becoming a Tab stop.
   - id: s4-scope-native-composition
     kind: workspace-check
     status: passing
@@ -80,6 +96,9 @@ verifies:
         - C-AS-FOCUS-SCOPE-0002-I
         - C-AS-FOCUS-SCOPE-0002-J
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added native radio-group traversal and live entry-eligibility mutation evidence without promoting the draft contract.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added native scope-local tabindex ordering and trapped traversal regression evidence.

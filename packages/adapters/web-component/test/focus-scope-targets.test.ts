@@ -1,6 +1,94 @@
 import { describe, it, expect } from 'vitest';
-import { sampleWebComponentScopeTargets } from '../src/focus-scope-targets';
+import {
+  observeWebComponentRadioFocus,
+  sampleWebComponentScopeTargets,
+} from '../src/focus-scope-targets';
 describe('WC scope sequential target sample', () => {
+  it('revokes native radio history observation with its view lease', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<input id="a" type="radio" name="g" tabindex="0"><input id="b" type="radio" name="g" tabindex="0"><button id="after" tabindex="0"></button>';
+    document.body.append(scope);
+    const a = scope.querySelector<HTMLInputElement>('#a')!;
+    const b = scope.querySelector<HTMLInputElement>('#b')!;
+    const history = observeWebComponentRadioFocus(scope);
+    try {
+      b.focus();
+      scope.querySelector<HTMLElement>('#after')!.focus();
+      expect(
+        sampleWebComponentScopeTargets(scope, undefined, 'next', history.order).targets
+      ).toEqual([b, scope.lastElementChild]);
+      history.dispose();
+      a.focus();
+      expect(history.order(a)).toBe(0);
+      b.name = 'changed';
+      expect(history.order(b)).toBe(0);
+    } finally {
+      history.dispose();
+      scope.remove();
+    }
+  });
+  it('samples current radio group selection and direction without changing selection', () => {
+    // C-AS-FOCUS-SCOPE-0002-J; native Chrome forward/reverse oracle is separate.
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<button id="before" tabindex="0"></button><input id="a" type="radio" name="g" tabindex="0"><input id="b" type="radio" name="g" tabindex="0"><input id="c" type="radio" name="g" tabindex="0"><button id="after" tabindex="0"></button>';
+    document.body.append(scope);
+    const a = scope.querySelector<HTMLInputElement>('#a')!;
+    const b = scope.querySelector<HTMLInputElement>('#b')!;
+    const c = scope.querySelector<HTMLInputElement>('#c')!;
+    const sample = (direction: 'next' | 'prev' = 'next') =>
+      sampleWebComponentScopeTargets(scope, undefined, direction).targets.map((el) => el.id);
+    try {
+      expect(sample()).toEqual(['before', 'a', 'after']);
+      expect(sample('prev')).toEqual(['before', 'c', 'after']);
+      b.checked = true;
+      expect(sample()).toEqual(['before', 'b', 'after']);
+      expect(sample('prev')).toEqual(['before', 'b', 'after']);
+      b.disabled = true;
+      expect(sample()).toEqual(['before', 'a', 'after']);
+      expect(sample('prev')).toEqual(['before', 'c', 'after']);
+      b.disabled = false;
+      b.hidden = true;
+      expect(sample()).toEqual(['before', 'a', 'after']);
+      b.hidden = false;
+      b.setAttribute('tabindex', '-1');
+      expect(sample()).toEqual(['before', 'a', 'after']);
+      b.setAttribute('tabindex', '0');
+      b.checked = false;
+      c.focus();
+      expect(sample()).toEqual(['before', 'c', 'after']);
+      expect([a.checked, b.checked, c.checked]).toEqual([false, false, false]);
+      a.checked = true;
+      expect(sample('prev')).toEqual(['before', 'a', 'c', 'after']);
+    } finally {
+      scope.remove();
+    }
+  });
+  it('keeps same-name groups separate by DOM tree and form owner, with unnamed inputs independent', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<form id="one"><input id="a" name="g" type="radio" tabindex="0"><input id="b" name="g" type="radio" tabindex="0" checked></form><form id="two"><input id="c" name="g" type="radio" tabindex="0"><input id="d" name="g" type="radio" tabindex="0" checked></form><input id="e" form="one" name="g" type="radio" tabindex="0"><input id="free" name="g" type="radio" tabindex="0"><input id="unnamed-a" type="radio" tabindex="0"><input id="unnamed-b" type="radio" tabindex="0"><div id="host"></div>';
+    const shadow = scope.querySelector('#host')!.attachShadow({ mode: 'open' });
+    shadow.innerHTML =
+      '<input id="inner-a" type="radio" name="g" tabindex="0"><input id="inner-b" type="radio" name="g" tabindex="0" checked>';
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'b',
+        'd',
+        'free',
+        'unnamed-a',
+        'unnamed-b',
+        'inner-b',
+      ]);
+      // Happy DOM unchecks same-name radios across different form owners on
+      // property writes. Dynamic form-owner selection is asserted in Chrome.
+    } finally {
+      scope.remove();
+    }
+  });
+
   it('sorts tabindex within ShadowRoot and slot scopes before flattening', () => {
     const scope = document.createElement('div');
     const button = (index: number) => {

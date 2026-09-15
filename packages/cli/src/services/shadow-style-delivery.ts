@@ -4,16 +4,21 @@ import {
   PROTO_SHADOW_STYLE_ENVIRONMENT,
   renderProtoShadowSplitStyleArtifact,
   renderProtoStyleTokenCss,
+  type ShadowStyleTokenUsage,
 } from './proto-style-css';
 
 /** Internal serializer shared by F1 CLI delivery and controlled consumer fixtures.
  * No package-root builder export; the CLI fixes its generated export name. */
-export function renderShadowStyleDelivery(tokens: readonly string[], exportName: string) {
+export function renderShadowStyleDelivery(
+  tokens: readonly string[],
+  exportName: string,
+  usage?: ShadowStyleTokenUsage
+) {
   if (!/^[A-Za-z_$][\w$]*$/.test(exportName) || exportName === 'default') {
     throw new Error('[shadow delivery] expected a named JavaScript export identifier');
   }
   const closure = [...tokens];
-  const artifact = renderProtoShadowSplitStyleArtifact(closure);
+  const artifact = renderProtoShadowSplitStyleArtifact(closure, usage);
   const literal = JSON.stringify(artifact)
     .replaceAll('<', '\\u003c')
     .replaceAll('\u2028', '\\u2028')

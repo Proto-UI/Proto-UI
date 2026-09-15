@@ -188,7 +188,7 @@ describe('proto style css renderer', () => {
     const css = renderProtoShadowStyleTokenCss(['dark:bg-input/30']);
 
     expect(css).toContain(
-      `:host([data-pui-color-scheme='dark']) :where([data-pui-style~="dark:bg-input/30"])`
+      `:where(:host([data-pui-color-scheme='dark'])) :where([data-pui-style~="dark:bg-input/30"])`
     );
     expect(css).toContain(
       'background-color: color-mix(in oklab, var(--pui-input) 30%, transparent);'
@@ -197,6 +197,26 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('[data-theme=');
     expect(css).not.toContain(':root');
     expect(css).not.toContain('@media (prefers-color-scheme: dark)');
+  });
+
+  it('keeps ordinary Shadow dark context at zero specificity against state rules', () => {
+    // D-WEB-COMPONENT-SHADOW-STYLE-0001 B/C: environment substitution must
+    // not give dark:p-2 precedence over the document's data-[open]:p-4.
+    const tokens = ['dark:p-2', 'data-[open]:p-4', 'dark:data-[open]:p-8'];
+    const shadow = renderProtoShadowStyleTokenCss(tokens);
+    expect(shadow).toContain(
+      `:where(:host([data-pui-color-scheme='dark'])) :where([data-pui-style~="dark:p-2"])`
+    );
+    expect(shadow).toContain(`:where([data-pui-style~="data-[open]:p-4"])[data-open]`);
+    expect(shadow).toContain(
+      `:where(:host([data-pui-color-scheme='dark'])) :where([data-pui-style~="dark:data-[open]:p-8"])[data-open]`
+    );
+    expect(shadow).not.toContain(`:host([data-pui-color-scheme='dark']) :where`);
+    for (const css of [shadow, renderProtoStyleTokenCss(tokens)]) {
+      expect(css).toContain('padding: 0.5rem;');
+      expect(css).toContain('padding: 1rem;');
+      expect(css).toContain('padding: 2rem;');
+    }
   });
 
   it('keeps non-environment Shadow output identical to document output', () => {

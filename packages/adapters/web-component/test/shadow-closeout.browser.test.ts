@@ -2,7 +2,10 @@
 import { build } from 'esbuild';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser } from '../../../../apps/www/src/content/docs/zh-cn/browser-harness';
-import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
+import {
+  renderProtoShadowSplitStyleArtifact,
+  renderProtoStyleTokenCss,
+} from '../../../cli/src/services/proto-style-css';
 
 // D-WEB-COMPONENT-SHADOW-PROFILE-0001-K; C-HOST-VIEW-ATTACHMENT-0001-C;
 // C-AS-FOCUS-SCOPE-0002-J. These source-level edge probes complement the
@@ -37,6 +40,357 @@ afterAll(async () => {
 });
 
 describe('Shadow closeout native boundaries', () => {
+  it('preserves document precedence between Template dark and data conditions', async () => {
+    // Generated stylesheet consumer fixture; no automatic Template projection.
+    const tokens = ['dark:p-2', 'data-[open]:p-4'];
+    const page = await browser.newPage();
+    try {
+      await page.addStyleTag({ content: renderProtoStyleTokenCss(tokens) });
+      await page.evaluate(
+        ({ tokens, css }) => {
+          const light = document.createElement('div');
+          light.className = 'dark';
+          const reference = document.createElement('div');
+          reference.id = 'reference';
+          reference.textContent = 'Document';
+          reference.setAttribute('data-pui-style', tokens.join(' '));
+          light.append(reference);
+          const host = document.createElement('div');
+          host.id = 'shadow';
+          host.setAttribute('data-pui-color-scheme', 'dark');
+          const root = host.attachShadow({ mode: 'open' });
+          const style = document.createElement('style');
+          style.textContent = css;
+          const local = reference.cloneNode(true) as HTMLElement;
+          local.id = 'local';
+          root.append(style, local);
+          document.body.append(light, host);
+        },
+        {
+          tokens,
+          css: renderProtoShadowSplitStyleArtifact(tokens, {
+            rootTokens: [],
+            templateTokens: tokens,
+          }).cssText,
+        }
+      );
+      for (const open of [false, true, false]) {
+        const result = await page.evaluate((open) => {
+          const reference = document.querySelector<HTMLElement>('#reference')!;
+          const local = document
+            .querySelector('#shadow')!
+            .shadowRoot!.querySelector<HTMLElement>('#local')!;
+          for (const el of [reference, local]) el.toggleAttribute('data-open', open);
+          return [reference, local].map((el) => getComputedStyle(el).paddingTop);
+        }, open);
+        expect(result[0]).toBe(open ? '16px' : '8px');
+        expect(result[1]).toBe(result[0]);
+      }
+    } finally {
+      await page.close();
+    }
+  });
+  it.each(['light', 'direct', 'split'])(
+    'refreshes native entry after input type changes in %s',
+    async (profile) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        await page.evaluate(
+          async ({ profile, artifact }) => {
+            const p = (window as any).Closeout;
+            const C = p.adapt(
+              p.define({
+                name: 'type-entry',
+                setup() {
+                  p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                  return (r: any) => r.slot();
+                },
+              }),
+              {
+                shadow:
+                  profile === 'light'
+                    ? false
+                    : profile === 'direct'
+                      ? true
+                      : { mode: 'open', presentation: 'split', styleArtifact: artifact },
+              }
+            );
+            const before = document.createElement('button');
+            before.id = 'before';
+            before.textContent = 'Before';
+            const host = new C();
+            host.id = 'entry';
+            host.innerHTML = '<input id="input" type="hidden">';
+            const after = document.createElement('button');
+            after.id = 'after';
+            after.textContent = 'After';
+            document.body.append(before, host, after);
+            await new Promise(requestAnimationFrame);
+          },
+          { profile, artifact: renderProtoShadowSplitStyleArtifact([]) }
+        );
+        for (const hidden of [true, false, true, false]) {
+          await page.locator('#entry').evaluate(async (host, hidden) => {
+            host.querySelector('input')!.type = hidden ? 'hidden' : 'text';
+            // A frame boundary follows delivery of native mutation records.
+            await new Promise(requestAnimationFrame);
+          }, hidden);
+          expect(await page.locator('#entry').getAttribute('tabindex')).toBe(hidden ? '0' : null);
+          await page.locator('#before').focus();
+          await page.keyboard.press('Tab');
+          expect(await page.evaluate(() => document.activeElement?.id)).toBe(
+            hidden ? 'entry' : 'input'
+          );
+          await page.keyboard.press('Tab');
+          expect(await page.evaluate(() => document.activeElement?.id)).toBe('after');
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+  it('makes Template-local percentage CSS usable without a Root recipe', async () => {
+    // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F/K: this explicit stylesheet
+    // consumer probe is not a claim of automatic WC Template style projection.
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const artifact = renderProtoShadowSplitStyleArtifact(['p-2', 'p-[10%]'], {
+        rootTokens: ['p-2'],
+        templateTokens: ['p-[10%]'],
+      });
+      const result = await page.evaluate(async (artifact) => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'template-style-scope',
+            setup(def: any) {
+              def.feedback.style.use(p.tw('p-2'));
+              return (r: any) => r.el('div', { style: p.tw('p-[10%]') }, 'Template text');
+            },
+          }),
+          { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+        );
+        const host = new C();
+        host.style.width = '240px';
+        document.body.append(host);
+        await new Promise(requestAnimationFrame);
+        const surface = host._splitResources.surface.element as HTMLElement;
+        const child = surface.querySelector('div') as HTMLElement;
+        // WC Template handles remain ignored without a resolver. Explicitly
+        // bind the generated ordinary selector in this CSS consumer fixture.
+        child.setAttribute('data-pui-style', 'p-[10%]');
+        const styles = getComputedStyle(surface);
+        const contentWidth =
+          surface.clientWidth - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingRight);
+        return {
+          rootPadding: styles.paddingTop,
+          childPadding: parseFloat(getComputedStyle(child).paddingTop),
+          contentWidth,
+          visible: child.getBoundingClientRect().height > 0,
+          rootTokens: host.getAttribute('data-pui-split-root-style'),
+        };
+      }, artifact);
+      expect(result.rootPadding).toBe('8px');
+      expect(result.childPadding).toBeCloseTo(result.contentWidth * 0.1, 1);
+      expect(result.visible).toBe(true);
+      expect(result.rootTokens).toBe('p-2');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+  it('keeps native same-name radio stops distinct across form owners and DOM trees', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      await page.setContent(
+        '<div id="scope"><button id="before">Before</button><form id="one"><input id="a" type="radio" name="g"><input id="b" type="radio" name="g" checked></form><form id="two"><input id="c" type="radio" name="g"><input id="d" type="radio" name="g" checked></form><input id="e" type="radio" name="g" form="one"><input id="free" type="radio" name="g"><input id="unnamed-a" type="radio"><input id="unnamed-b" type="radio"><div id="host"></div><button id="after">After</button></div>'
+      );
+      await page.locator('#host').evaluate((el) => {
+        el.attachShadow({ mode: 'open' }).innerHTML =
+          '<input id="inner-a" type="radio" name="g"><input id="inner-b" type="radio" name="g" checked>';
+      });
+      for (const changed of [false, true]) {
+        if (changed)
+          await page.locator('#e').evaluate((el) => {
+            (el as HTMLInputElement).checked = true;
+          });
+        const expected = [
+          'before',
+          ...(changed ? ['d', 'e'] : ['b', 'd']),
+          'free',
+          'unnamed-a',
+          'unnamed-b',
+          'inner-b',
+          'after',
+        ];
+        expect(
+          await page.evaluate(() =>
+            (window as any).Closeout.sample(document.querySelector('#scope')).targets.map(
+              (el: HTMLElement) => el.id
+            )
+          )
+        ).toEqual(expected);
+        await page.locator('#before').focus();
+        for (const id of expected.slice(1)) {
+          await page.keyboard.press('Tab');
+          expect(
+            await page.evaluate(() => {
+              let el = document.activeElement;
+              while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+              return el?.id;
+            })
+          ).toBe(id);
+        }
+        for (const id of expected.slice(0, -1).reverse()) {
+          await page.keyboard.press('Shift+Tab');
+          expect(
+            await page.evaluate(() => {
+              let el = document.activeElement;
+              while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+              return el?.id;
+            })
+          ).toBe(id);
+        }
+      }
+    } finally {
+      await page.close();
+    }
+  });
+  it.each(
+    [
+      'checked-first',
+      'checked-second',
+      'unchecked',
+      'disabled-checked',
+      'hidden-checked',
+      'negative-checked',
+      'focused-unchecked',
+      'outside-checked',
+      'programmatic-negative',
+    ].flatMap((scenario) => [false, true].map((reverse) => ({ scenario, reverse })))
+  )(
+    'matches native radio Tab stops: $scenario (reverse: $reverse)',
+    async ({ scenario, reverse }) => {
+      // C-AS-FOCUS-SCOPE-0002-H/J: fresh native/trapped instances, real keys,
+      // unchanged selection. Unchecked groups have direction-dependent entry.
+      const paths: string[][] = [];
+      for (const trapped of [false, true]) {
+        const page = await browser.newPage();
+        const errors: string[] = [];
+        page.on('pageerror', (error) => errors.push(error.message));
+        try {
+          await page.addScriptTag({ content: script });
+          const initial = await page.evaluate(
+            ({ artifact, scenario, trapped }) => {
+              const p = (window as any).Closeout;
+              const C = p.adapt(
+                p.define({
+                  name: 'radio-scope',
+                  setup(def: any) {
+                    const scope = p.asFocusScope();
+                    scope.configure({ trap: true, loop: true, entry: 'manual' });
+                    def.expose('activate', () => scope.activate());
+                    return (r: any) => r.slot();
+                  },
+                }),
+                { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+              );
+              const scope = new C();
+              scope.id = 'scope';
+              scope.innerHTML =
+                '<button id="before">Before</button><input id="a" type="radio" name="group"><input id="b" type="radio" name="group"><input id="c" type="radio" name="group"><button id="after">After</button>';
+              const a = scope.querySelector('#a') as HTMLInputElement;
+              const b = scope.querySelector('#b') as HTMLInputElement;
+              if (scenario !== 'unchecked') a.checked = true;
+              if (scenario === 'checked-second') b.checked = true;
+              if (scenario === 'disabled-checked') a.disabled = true;
+              if (scenario === 'hidden-checked') a.hidden = true;
+              if (scenario === 'negative-checked') a.tabIndex = -1;
+              if (scenario === 'programmatic-negative') {
+                a.tabIndex = -1;
+                b.checked = true;
+              }
+              document.body.append(scope);
+              if (scenario === 'outside-checked') {
+                const outside = document.createElement('input');
+                outside.type = 'radio';
+                outside.name = 'group';
+                outside.checked = true;
+                document.body.prepend(outside);
+              }
+              if (trapped) scope.getExposes().activate();
+              return [...scope.querySelectorAll('input')].map((el: any) => el.checked);
+            },
+            { artifact: renderProtoShadowSplitStyleArtifact([]), scenario, trapped }
+          );
+          await page
+            .locator(
+              scenario === 'programmatic-negative'
+                ? '#a'
+                : scenario === 'focused-unchecked'
+                  ? '#b'
+                  : reverse
+                    ? '#after'
+                    : '#before'
+            )
+            .focus();
+          const path: string[] = [];
+          for (
+            let i = 0;
+            i <
+            (['focused-unchecked', 'outside-checked', 'programmatic-negative'].includes(scenario)
+              ? 1
+              : 2);
+            i++
+          ) {
+            await page.keyboard.press(reverse ? 'Shift+Tab' : 'Tab');
+            path.push(await page.evaluate(() => document.activeElement!.id));
+          }
+          if (scenario === 'unchecked') {
+            // Chrome remembers the last focused member even without selection.
+            await page.keyboard.press(reverse ? 'Tab' : 'Shift+Tab');
+            path.push(await page.evaluate(() => document.activeElement!.id));
+          }
+          expect(
+            await page
+              .locator('#scope input')
+              .evaluateAll((els) => els.map((el) => (el as HTMLInputElement).checked))
+          ).toEqual(initial);
+          expect(errors).toEqual([]);
+          paths.push(path);
+        } finally {
+          await page.close();
+        }
+      }
+      const radio =
+        scenario === 'checked-second'
+          ? 'b'
+          : scenario === 'checked-first'
+            ? 'a'
+            : reverse
+              ? 'c'
+              : scenario === 'unchecked'
+                ? 'a'
+                : 'b';
+      const expected =
+        scenario === 'programmatic-negative'
+          ? [reverse ? 'before' : 'b']
+          : scenario === 'outside-checked'
+            ? [reverse ? 'before' : 'after']
+            : scenario === 'focused-unchecked'
+              ? [reverse ? 'a' : 'after']
+              : [radio, reverse ? 'before' : 'after'];
+      if (scenario === 'unchecked') expected.push(radio);
+      expect(paths[0]).toEqual(expected);
+      expect(paths[1]).toEqual(paths[0]);
+    }
+  );
+
   it.each(['onUnmounted', 'onBeforeDispose'] as const)(
     'retains moves and restores styled resources after reconnect inside %s',
     async (checkpoint) => {

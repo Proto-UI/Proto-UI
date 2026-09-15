@@ -46,7 +46,7 @@ describe('adapter-web-component Shadow style artifact', () => {
 
     expect(validated).toEqual(generated);
     expect(validated.cssText).toContain(
-      `:host([data-pui-color-scheme='dark']) :where([data-pui-style~="dark:bg-input/30"])`
+      `:where(:host([data-pui-color-scheme='dark'])) :where([data-pui-style~="dark:bg-input/30"])`
     );
   });
 

@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { renderShadowStyleDelivery } from './shadow-style-delivery.js';
+import type { ShadowStyleTokenUsage } from './proto-style-css.js';
 import {
   validateStyleOutputPaths,
   writeStyleOutputSet,
@@ -24,7 +25,9 @@ export function shadowOutputPath(args: readonly string[]): string | undefined {
 export async function generateShadowStyleOutputs(options: {
   shadowPath: string;
   cssPath: string;
-  tokens: () => Promise<readonly string[]>;
+  tokens: () => Promise<
+    readonly string[] | (ShadowStyleTokenUsage & { tokens: readonly string[] })
+  >;
   additional?: readonly StyleOutput[];
 }) {
   const declaration = options.shadowPath.slice(0, -3) + '.d.ts';
@@ -35,7 +38,12 @@ export async function generateShadowStyleOutputs(options: {
     declaration,
     ...extra.map((file) => file.path),
   ]);
-  const delivery = renderShadowStyleDelivery(await options.tokens(), 'protoShadowStyleArtifact');
+  const inventory = await options.tokens();
+  const delivery = renderShadowStyleDelivery(
+    'tokens' in inventory ? inventory.tokens : inventory,
+    'protoShadowStyleArtifact',
+    'tokens' in inventory ? inventory : undefined
+  );
   await writeStyleOutputSet([
     { path: options.cssPath, content: delivery.documentCss },
     { path: options.shadowPath, content: delivery.shadowModule },

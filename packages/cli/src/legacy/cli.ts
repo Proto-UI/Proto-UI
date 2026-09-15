@@ -25,7 +25,10 @@ import {
   renderProtoStyleEntryCss,
   renderProtoStyleTokenCss,
 } from '../services/proto-style-css.js';
-import { collectProtoStyleTokens } from '../services/prototype-style-tokens.js';
+import {
+  collectProtoStyleTokens,
+  collectProtoShadowStyleTokenUsage,
+} from '../services/prototype-style-tokens.js';
 import { generateShadowStyleOutputs, shadowOutputPath } from '../services/shadow-style-output.js';
 
 /** Matches docs: apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx (proto-ui/ tree). */
@@ -449,7 +452,7 @@ async function runGenerateTokens(args) {
     await generateShadowStyleOutputs({
       shadowPath,
       cssPath: outputFile,
-      tokens: () => collectProtoStyleTokens(root),
+      tokens: () => collectProtoShadowStyleTokenUsage(root),
     });
     return;
   }

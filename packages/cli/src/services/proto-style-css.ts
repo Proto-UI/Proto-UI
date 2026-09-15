@@ -315,12 +315,30 @@ export function renderProtoShadowStyleArtifact(tokens: string[]): ProtoShadowSty
 }
 
 /** Generated split recipe selected by the opt-in CLI companion. */
-export function renderProtoShadowSplitStyleArtifact(tokens: string[]): ProtoShadowStyleArtifactV1 {
+export type ShadowStyleTokenUsage = {
+  rootTokens: readonly string[];
+  templateTokens: readonly string[];
+};
+
+export function renderProtoShadowSplitStyleArtifact(
+  tokens: string[],
+  usage?: ShadowStyleTokenUsage
+): ProtoShadowStyleArtifactV1 {
+  const templateTokens = new Set(usage?.templateTokens);
+  const rootTokens = new Set(usage?.rootTokens);
+  // Flat/preset inputs carry no target proof, so retain their Root checks.
+  const rootClosure = tokens.filter((token) => !templateTokens.has(token) || rootTokens.has(token));
+  const templateClosure = tokens.filter((token) => templateTokens.has(token));
   return Object.freeze({
     kind: PROTO_SHADOW_STYLE_ARTIFACT_KIND,
     version: PROTO_SHADOW_STYLE_ARTIFACT_VERSION,
     environment: PROTO_SHADOW_STYLE_ENVIRONMENT,
-    cssText: renderShadowSplitCss(tokens),
+    cssText: [
+      renderShadowSplitCss(rootClosure),
+      // Ordinary rules follow the Root renderer's zero-specificity resets.
+      // Root surface selectors remain more specific for tokens used on both.
+      ...(templateClosure.length ? [renderProtoShadowStyleTokenCss(templateClosure)] : []),
+    ].join('\n'),
   });
 }
 
@@ -855,7 +873,9 @@ function buildSelectors(
 
   if (dark) {
     if (target === 'shadow') {
-      return selectors.map((selector) => `:host([${PUI_COLOR_SCHEME_ATTR}='dark']) ${selector}`);
+      return selectors.map(
+        (selector) => `:where(:host([${PUI_COLOR_SCHEME_ATTR}='dark'])) ${selector}`
+      );
     }
 
     if (systemPreferenceFallback) {

@@ -8,6 +8,14 @@ lifecycleRationale:
 since: 0.3.0-alpha.0
 summary: Canonical classification plus Root-only provenance through semantic merge, Rule lowering, runtime patches, replay, and unchanged collapsed output.
 cases:
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-ONLY-CSS
+    title: Proven Template-only occurrences receive ordinary Shadow CSS without Root decomposition
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F]
+    expectation: template-css-generation-does-not-enroll-template-tokens-in-root-transport
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-NOT-ROOT-ADMISSION
+    title: Template membership does not admit unverified Root projection or weaken conservative flat-input checks
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K]
+    expectation: shared-root-and-unclassified-tokens-retain-fail-closed-root-recipes
   - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-K1-CLASSIFICATION
     title: Exact half translations retain independent Root geometry provenance without broadening variants
     covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-S]
@@ -129,6 +137,25 @@ cases:
       - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K
     expectation: complete-projection-or-synchronous-rejection
 implementations:
+  - id: cli-template-root-separation
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/shadow-template-style.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-ONLY-CSS
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-NOT-ROOT-ADMISSION
+    notes:
+      - Covers source CLI generation, shared and lowered Root tokens, runtime rejection of Template-only membership and unchanged preset delivery; unresolved source usage remains conservative.
+  - id: native-template-css-consumer
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-ONLY-CSS]
+    notes:
+      - Chrome measures percentage padding using an explicit data-pui-style binding on a Template child; this is generated stylesheet evidence, not automatic WC Template-handle projection.
+      - Native computed-style transitions also compare document and ordinary Shadow precedence between dark and data conditions.
   - id: k1-classification-and-transport
     kind: module-test
     status: passing
@@ -346,6 +373,9 @@ sources:
   - path: packages/core/src/spec/feedback/application-role.ts
   - path: packages/core/test/feedback/application-role.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Template-only CSS generation and Root admission separation evidence; public author APIs and draft lifecycle unchanged.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Bound K1 exact classification, atomic recipe refusal and 42-frame public Dialog geometry evidence; synchronous controlled dismissal and full S4 remain separate.

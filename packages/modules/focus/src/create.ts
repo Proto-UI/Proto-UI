@@ -542,12 +542,21 @@ class FocusModuleImpl extends ModuleBase {
         this.caps.has(FOCUS_SAMPLE_SCOPE_TARGETS_CAP) &&
         this.caps.has(FOCUS_REQUEST_FOCUS_CAP)
       ) {
-        const { targets, activeTarget } = this.caps.get(FOCUS_SAMPLE_SCOPE_TARGETS_CAP)(container);
+        const { targets, activeTarget, activeInsertionIndex } = this.caps.get(
+          FOCUS_SAMPLE_SCOPE_TARGETS_CAP
+        )(container, ev.shiftKey ? 'prev' : 'next');
         if (targets.length === 0) return;
         let current = targets.findIndex((target) => target === activeTarget);
-        if (current < 0) current = targets.findIndex((target) => target === this.lastScopeTarget);
+        if (current < 0 && activeInsertionIndex === undefined)
+          current = targets.findIndex((target) => target === this.lastScopeTarget);
         let next =
-          current < 0 ? (ev.shiftKey ? targets.length - 1 : 0) : current + (ev.shiftKey ? -1 : 1);
+          current < 0
+            ? activeInsertionIndex !== undefined
+              ? activeInsertionIndex - (ev.shiftKey ? 1 : 0)
+              : ev.shiftKey
+                ? targets.length - 1
+                : 0
+            : current + (ev.shiftKey ? -1 : 1);
         next = this.scopeConfig.loop
           ? (next + targets.length) % targets.length
           : Math.max(0, Math.min(targets.length - 1, next));
