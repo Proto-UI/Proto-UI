@@ -640,7 +640,7 @@ describe('@proto.ui/cli', () => {
       name: 'pui-cli-add-vue2',
       private: true,
       dependencies: {
-        vue: '^2.6.14',
+        vue: '~2.6.14',
       },
     });
 
@@ -671,6 +671,23 @@ describe('@proto.ui/cli', () => {
       private: true,
       dependencies: {
         vue: '^3.5.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+    const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <2.7');
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
+  });
+
+  it('rejects a widening Vue 2 caret range before generating a Vue 2 facade', async () => {
+    const cwd = await createTempProject('pui-cli-add-vue2-widening-runtime', {
+      name: 'pui-cli-add-vue2-widening-runtime',
+      private: true,
+      dependencies: {
+        vue: '^2.6.14',
       },
     });
 

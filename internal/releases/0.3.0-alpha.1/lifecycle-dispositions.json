@@ -6,7 +6,7 @@
       "id": "alpha.1-image-view-and-release-preparation",
       "entities": ["D-IMAGE-VIEW-PROJECTION-0001", "T-IMAGE-VIEW-0001"],
       "disposition": "remain-draft",
-      "rationale": "Image View's bounded Web evidence is being reconciled for this alpha train, while its remaining activation boundaries and the release identity's publication evidence are still open.",
+      "rationale": "D-IMAGE-VIEW-PROJECTION-0001 and T-IMAGE-VIEW-0001 remain draft because both catalog entries still lack the lifecycleRationale required for stable admission; this alpha.1 review reconciles their bounded Web evidence but does not supply that admission rationale.",
       "evidence": [
         "spec/decisions/D-IMAGE-VIEW-PROJECTION-0001.yaml",
         "spec/tests/T-IMAGE-VIEW-0001.yaml",

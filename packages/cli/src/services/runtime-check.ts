@@ -74,16 +74,17 @@ function getProjectPackageRange(
 }
 
 /**
- * The CLI intentionally accepts only the bounded Vue 2.6 forms it can verify
- * from package.json. It must fail closed instead of generating a Vue 2 facade
- * against an arbitrary range (notably Vue 3).
+ * The CLI intentionally accepts only bounded Vue 2.6 forms it can verify from
+ * package.json. A caret range rooted at 2.6 can resolve through <3.0.0, so it
+ * is not a subset of the governed <2.7 upper bound. Fail closed rather than
+ * generating a Vue 2 facade against an arbitrary range (notably Vue 2.7/3).
  */
 function isCompatibleRuntimeRange(declaredRange: string, requiredRange: string): boolean {
   if (requiredRange !== '>=2.6.0 <2.7') return false;
   const normalized = declaredRange.replace(/^npm:vue@/, '').trim();
   return (
     /^(?:v)?2\.6(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
-    /^(?:\^|~)2\.6(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
+    /^~2\.6(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
     /^2\.6(?:\.x|\.\*)?$/.test(normalized) ||
     /^>=\s*2\.6(?:\.0)?\s+<\s*2\.7(?:\.0)?$/.test(normalized)
   );

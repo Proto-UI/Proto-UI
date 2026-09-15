@@ -54,6 +54,9 @@ const PACKAGE_RULES = {
     purpose:
       'Provides the base template, shared host wiring, and common runtime bridges for building Proto UI adapters.',
     role: 'Adapter foundation package used to translate Proto UI contracts into concrete host integrations.',
+    // Contributor-authored README documents the default color-scheme source;
+    // preserve its lifecycle, cleanup, and exclusion boundaries.
+    preserveReadme: true,
   },
   '@proto.ui/module-a11y': {
     description: 'Proto UI module that records accessibility semantic object IR.',
@@ -140,7 +143,11 @@ const PACKAGE_RULES = {
     ...moduleRule('rule-based web state expose capability'),
     preserveReadme: true,
   },
-  '@proto.ui/module-rule-meta': moduleRule('rule metadata capability'),
+  '@proto.ui/module-rule-meta': {
+    ...moduleRule('rule metadata capability'),
+    // Contributor-authored README documents the color-scheme lease boundary.
+    preserveReadme: true,
+  },
   '@proto.ui/module-scroll': {
     ...moduleRule('host-mediated scroll capability'),
     preserveReadme: true,
@@ -171,8 +178,16 @@ const PACKAGE_RULES = {
     preserveReadme: true,
     extraKeywords: ['image', 'image-view'],
   },
-  '@proto.ui/adapter-react': adapterRule('React'),
-  '@proto.ui/adapter-vue': adapterRule('Vue'),
+  '@proto.ui/adapter-react': {
+    ...adapterRule('React'),
+    // Contributor-authored README documents default color-scheme lifecycle.
+    preserveReadme: true,
+  },
+  '@proto.ui/adapter-vue': {
+    ...adapterRule('Vue'),
+    // Contributor-authored README documents default color-scheme lifecycle.
+    preserveReadme: true,
+  },
   '@proto.ui/adapter-vue2': {
     ...adapterRule('Vue 2.6'),
     description:
@@ -182,7 +197,11 @@ const PACKAGE_RULES = {
     preserveReadme: true,
     extraKeywords: ['vue', 'vue2'],
   },
-  '@proto.ui/adapter-web-component': adapterRule('Web Components'),
+  '@proto.ui/adapter-web-component': {
+    ...adapterRule('Web Components'),
+    // Contributor-authored README documents default color-scheme lifecycle.
+    preserveReadme: true,
+  },
   '@proto.ui/cli': {
     description:
       'Proto UI command line tooling for initialization, component facade generation, and style presets.',
