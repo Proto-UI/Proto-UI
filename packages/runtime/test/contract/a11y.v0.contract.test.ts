@@ -241,15 +241,18 @@ describe('runtime contract: a11y (v0)', () => {
           visibleRatio: 0.5,
           canScrollBefore: false,
           canScrollAfter: true,
+          atEnd: false,
         },
         vertical: {
           position: 0,
           visibleRatio: 1,
           canScrollBefore: false,
           canScrollAfter: false,
+          atEnd: true,
         },
         scrolling: false,
         projection: 'system',
+        endFollow: { state: 'off', requestStatus: 'idle' },
       })
     );
     expect(ctx.snapshots.at(-1)?.level).toBeUndefined();
