@@ -1,19 +1,25 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { readdir, readFile, realpath, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { parse } from 'yaml';
 
 import {
   SPEC_RELATION_KINDS,
+  SPEC_RELATION_TARGET_TYPES as RELATION_TARGET_TYPES,
   compareSpecVersions,
   validateSpecEntity,
+  parseSpecBlockTarget,
+  specLifecyclePlanSchema,
+  specVersionSchema,
   type SpecEntity,
-  type SpecEntityType,
   type SpecRelationKind,
   type SpecRelations,
+  type SpecLifecyclePlan,
   type SpecValidationIssue,
 } from '@proto.ui/spec-schema';
 
-import { createSpecWorkspace, type SpecWorkspace } from './index';
+import { createSpecWorkspace, getSpecSnapshot, type SpecWorkspace } from './index';
+import { getSpecLifecycleReport, type SpecLifecycleReport } from './lifecycle';
 
 export type LoadedSpecEntity = {
   filePath: string;
@@ -24,6 +30,55 @@ export type LoadedSpecWorkspace = SpecWorkspace & {
   files: LoadedSpecEntity[];
   issues: SpecValidationIssue[];
 };
+
+export async function loadSpecLifecyclePlan(
+  repoRoot: string,
+  version: string
+): Promise<SpecLifecyclePlan | undefined> {
+  specVersionSchema.parse(version);
+  const planPath = path.join(repoRoot, 'internal/releases', version, 'lifecycle-dispositions.json');
+  let plan;
+  try {
+    plan = specLifecyclePlanSchema.parse(JSON.parse(await readFile(planPath, 'utf8')));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  const root = await realpath(repoRoot);
+  for (const slice of plan?.slices ?? []) {
+    for (const evidence of slice.evidence) {
+      if (/^https?:\/\//.test(evidence)) continue;
+      const target = path.resolve(root, evidence);
+      if (path.isAbsolute(evidence) || path.relative(root, target).startsWith('..')) {
+        throw new Error(
+          `${slice.id}: lifecycle evidence must stay inside the repository: ${evidence}`
+        );
+      }
+      const resolved = await realpath(target);
+      if (path.relative(root, resolved).startsWith('..') || !(await stat(resolved)).isFile()) {
+        throw new Error(
+          `${slice.id}: lifecycle evidence must resolve to a repository file: ${evidence}`
+        );
+      }
+    }
+  }
+  return plan;
+}
+
+export async function loadSpecLifecycleReport(
+  repoRoot: string,
+  version: string,
+  workspace: SpecWorkspace
+): Promise<SpecLifecycleReport> {
+  const plan = await loadSpecLifecyclePlan(repoRoot, version);
+  const report = getSpecLifecycleReport(workspace, version, plan);
+  const snapshot = getSpecSnapshot(workspace, version);
+  return {
+    ...report,
+    currentCatalogDigest: `sha256:${createHash('sha256')
+      .update(JSON.stringify({ version, entities: snapshot.entities }))
+      .digest('hex')}`,
+  };
+}
 
 export async function loadSpecWorkspaceFromDirectory(
   specDir: string
@@ -51,6 +106,7 @@ export async function loadSpecWorkspaceFromDirectory(
   validateWorkspaceRelations(uniqueLoaded, issues);
   const workspace = createSpecWorkspace(uniqueLoaded.map((entry) => entry.entity));
   await validateNoteReferences(specDir, uniqueLoaded, issues);
+  await validatePassingImplementationReferences(specDir, uniqueLoaded, issues);
 
   return {
     ...workspace,
@@ -121,6 +177,28 @@ function validateEntityTimelines(loaded: LoadedSpecEntity[], issues: SpecValidat
     }
 
     if (
+      entity.activeSince &&
+      entity.deprecatedSince &&
+      compareSpecVersions(entity.activeSince, entity.deprecatedSince) >= 0
+    ) {
+      issues.push({
+        filePath: entry.filePath,
+        message: `${entity.id} activeSince must precede deprecatedSince.`,
+      });
+    }
+
+    if (
+      entity.activeSince &&
+      entity.removedSince &&
+      compareSpecVersions(entity.activeSince, entity.removedSince) >= 0
+    ) {
+      issues.push({
+        filePath: entry.filePath,
+        message: `${entity.id} activeSince must precede removedSince.`,
+      });
+    }
+
+    if (
       entity.deprecatedSince &&
       entity.removedSince &&
       compareSpecVersions(entity.removedSince, entity.deprecatedSince) < 0
@@ -142,17 +220,6 @@ function validateEntityTimelines(loaded: LoadedSpecEntity[], issues: SpecValidat
   }
 }
 
-const RELATION_TARGET_TYPES = {
-  contracts: 'contract',
-  prototypes: 'prototype',
-  modules: 'module',
-  adapters: 'adapter',
-  decisions: 'decision',
-  hostCaps: 'host-cap',
-  tests: 'test',
-  knowledge: 'knowledge',
-} as const satisfies Record<keyof NonNullable<SpecRelations>, SpecEntityType>;
-
 function validateWorkspaceRelations(
   loaded: LoadedSpecEntity[],
   issues: SpecValidationIssue[]
@@ -161,9 +228,55 @@ function validateWorkspaceRelations(
 
   for (const entry of loaded) {
     validateReplacement(entry, byId, issues);
+    for (const question of entry.entity.openQuestions) {
+      for (const value of question.blocks) {
+        const block = parseSpecBlockTarget(value);
+        if (!block) continue;
+        const target = byId.get(block.entityId)?.entity;
+        let problem: string | undefined;
+        if (!target) problem = `Unknown block target entity ${block.entityId}`;
+        else if (target.type === 'version')
+          problem = 'Version entities retain their publication-evidence lifecycle';
+        else if (block.kind === 'activation' && target.status === 'active')
+          problem = `Active entity ${target.id} retains an activation-blocking question`;
+        else if (
+          block.kind === 'criterion' &&
+          !target.criteria.some((criterion) => criterion.id === block.targetId)
+        )
+          problem = `Unknown criterion ${block.targetId} on ${target.id}`;
+        else if (
+          block.kind === 'implementation' &&
+          (target.type !== 'test' ||
+            !target.implementations.some((implementation) => implementation.id === block.targetId))
+        )
+          problem = `Unknown test implementation ${block.targetId} on ${target.id}`;
+        if (problem)
+          issues.push({
+            filePath: entry.filePath,
+            message: `${question.id}: ${problem} (${value}).`,
+          });
+      }
+    }
 
     for (const relationKind of SPEC_RELATION_KINDS) {
       validateRelationGroup(entry, byId, issues, relationKind, entry.entity[relationKind]);
+    }
+
+    for (const implementation of entry.entity.implementations) {
+      for (const targetId of implementation.exercises) {
+        const target = byId.get(targetId)?.entity;
+        if (!target) {
+          issues.push({
+            filePath: entry.filePath,
+            message: `${entry.entity.id} implementation ${implementation.id} exercises target does not exist: ${targetId}.`,
+          });
+        } else if (target.type === 'version') {
+          issues.push({
+            filePath: entry.filePath,
+            message: `${entry.entity.id} implementation ${implementation.id} exercises target ${targetId} is version, expected ordinary entity.`,
+          });
+        }
+      }
     }
 
     for (const criterion of entry.entity.criteria) {
@@ -303,6 +416,59 @@ function validateCriterionAnchors(
       filePath: entry.filePath,
       message: `${sourceId} ${groupName}.${relationKey} relation to ${target.id} anchors unknown criterion ${anchor}.`,
     });
+  }
+}
+
+async function validatePassingImplementationReferences(
+  specDir: string,
+  loaded: LoadedSpecEntity[],
+  issues: SpecValidationIssue[]
+): Promise<void> {
+  const repoRoot = await realpath(path.resolve(specDir, '..'));
+  const contained = (target: string) => {
+    const relative = path.relative(repoRoot, target);
+    return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+  };
+  for (const entry of loaded) {
+    for (const implementation of entry.entity.implementations) {
+      if (implementation.status !== 'passing') continue;
+      const implementationPath = implementation.path;
+      const label = `Passing implementation ${entry.entity.id}#${implementation.id}`;
+      if (
+        !implementationPath?.trim() ||
+        /^[a-z][a-z0-9+.-]*:/i.test(implementationPath) ||
+        path.isAbsolute(implementationPath) ||
+        path.win32.isAbsolute(implementationPath)
+      ) {
+        issues.push({
+          filePath: entry.filePath,
+          message: `${label} must name a repository-relative file: ${implementationPath ?? '(no path)'}`,
+        });
+        continue;
+      }
+      const target = path.resolve(repoRoot, implementationPath);
+      if (!contained(target)) {
+        issues.push({
+          filePath: entry.filePath,
+          message: `${label} path must stay inside the repository: ${implementationPath}`,
+        });
+        continue;
+      }
+      try {
+        const resolved = await realpath(target);
+        if (!contained(resolved) || !(await stat(resolved)).isFile()) {
+          issues.push({
+            filePath: entry.filePath,
+            message: `${label} must resolve to a repository file: ${implementationPath}`,
+          });
+        }
+      } catch {
+        issues.push({
+          filePath: entry.filePath,
+          message: `${label} file does not exist: ${implementationPath}`,
+        });
+      }
+    }
   }
 }
 

@@ -353,6 +353,29 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     },
   ]),
 
+  'shadcn-tooltip': shadcnCompound('shadcn-tooltip', 'shadcn Tooltip', [
+    {
+      prototypeImport: 'shadcnTooltipGroup',
+      exportBaseName: 'ShadcnTooltipGroup',
+      elementName: 'proto-ui-shadcn-tooltip-group',
+    },
+    {
+      prototypeImport: 'shadcnTooltipRoot',
+      exportBaseName: 'ShadcnTooltipRoot',
+      elementName: 'proto-ui-shadcn-tooltip-root',
+    },
+    {
+      prototypeImport: 'shadcnTooltipTrigger',
+      exportBaseName: 'ShadcnTooltipTrigger',
+      elementName: 'proto-ui-shadcn-tooltip-trigger',
+    },
+    {
+      prototypeImport: 'shadcnTooltipContent',
+      exportBaseName: 'ShadcnTooltipContent',
+      elementName: 'proto-ui-shadcn-tooltip-content',
+    },
+  ]),
+
   'shadcn-dialog': shadcnCompound(
     'shadcn-dialog',
     'shadcn Dialog',
@@ -655,6 +678,7 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   'base-toggle': base('base-toggle', 'base Toggle', 'toggle', 'BaseToggle'),
   'base-transition': base('base-transition', 'base Transition', 'transition', 'BaseTransition'),
   'base-textarea': base('base-textarea', 'Base Textarea', 'textareaRoot', 'BaseTextareaRoot'),
+  'base-image': base('base-image', 'Base Image', 'imageRoot', 'BaseImageRoot'),
 
   'base-switch': baseCompound('base-switch', 'base Switch', [
     {

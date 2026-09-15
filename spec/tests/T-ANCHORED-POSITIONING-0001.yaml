@@ -5,6 +5,24 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers host-mediated offsets, collision resolution, non-transform coordinate projection, Overlay lease lifetime, and Hover Card adapter integration.
 cases:
+  - id: T-ANCHORED-POSITIONING-0001-CASE-MODULE
+    title: Module connection and host capability lifetime
+    covers: ['M-POSITIONING-0001-A', 'M-POSITIONING-0001-B', 'M-POSITIONING-0001-C']
+    expectation: retained-declaration-without-host-and-one-current-lease
+  - id: T-ANCHORED-POSITIONING-0001-CASE-GENERATION
+    title: Stale computations and disposed leases cannot publish or observe
+    covers: ['HC-ANCHORED-POSITION-0001-B', 'C-ANCHORED-POSITIONING-0001-E']
+    expectation: newer-calculation-wins-and-dispose-is-terminal
+  - id: T-ANCHORED-POSITIONING-0001-CASE-ADAPTER
+    title: Four Web Adapters project active Overlay geometry and stop after close/unmount
+    covers:
+      [
+        'A-VUE-2-0001-POSITIONING',
+        'A-WEB-COMPONENT-0001-POSITIONING',
+        'A-REACT-18-19-0001-POSITIONING',
+        'A-VUE-3-0001-POSITIONING',
+      ]
+    expectation: real-adapter-wiring-with-simulated-dom-geometry-and-observation-cleanup
   - id: T-ANCHORED-POSITIONING-0001-CASE-OFFSET
     title: Floating UI host applies placement, non-transform coordinates, and geometry variables
     covers:
@@ -33,6 +51,42 @@ cases:
       - C-ANCHORED-POSITIONING-0001-F
     expectation: portaled-hover-card-escapes-previewer-clipping-with-logical-owner-intact
 implementations:
+  - id: positioning-module-lifetime
+    kind: module-test
+    status: passing
+    path: packages/modules/positioning/test/module-lifetime.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-MODULE]
+  - id: positioning-lease-generation
+    kind: module-test
+    status: passing
+    path: packages/modules/positioning/test/lease-generation.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-GENERATION]
+  - id: react-positioning-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/positioning.integration.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-ADAPTER]
+  - id: vue-positioning-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/positioning.integration.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-ADAPTER]
+  - id: vue2-positioning-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/positioning.integration.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-ADAPTER]
+  - id: web-component-positioning-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/positioning.integration.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-ADAPTER]
   - id: module-positioning-floating-ui-host
     kind: module-test
     status: passing
@@ -57,6 +111,25 @@ implementations:
     consumesCases:
       - T-ANCHORED-POSITIONING-0001-CASE-PORTAL
 verifies:
+  modules:
+    - id: M-POSITIONING-0001
+      anchors: [M-POSITIONING-0001-A, M-POSITIONING-0001-B, M-POSITIONING-0001-C]
+  hostCaps:
+    - id: HC-ANCHORED-POSITION-0001
+      anchors: [HC-ANCHORED-POSITION-0001-A, HC-ANCHORED-POSITION-0001-B]
+  adapters:
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-VUE-2-0001-POSITIONING]
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-WEB-COMPONENT-0001-POSITIONING]
+    - id: A-REACT-18-19-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-REACT-18-19-0001-POSITIONING]
+    - id: A-VUE-3-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-VUE-3-0001-POSITIONING]
   contracts:
     - id: C-ANCHORED-POSITIONING-0001
       anchors:
@@ -71,6 +144,9 @@ exercises:
   modules: [M-POSITIONING-0001]
   hostCaps: [HC-ANCHORED-POSITION-0001]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Added module, async lease retirement and four-Adapter bounded geometry evidence; simulated DOM is not browser layout certification.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added module, host, Overlay lifetime, and Hover Card Portal integration coverage.

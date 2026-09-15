@@ -1,51 +1,40 @@
 ---
-title: 'What You Just Saw'
-desp: 'A quick recap of the landing demo'
-description: 'A quick recap of the landing demo'
+title: 'Meet Proto UI'
+description: 'What Proto UI aims to preserve, what you can try today, and where to begin reading.'
 ---
 
-## What You Just Saw
+Proto UI is an open-source project exploring how to preserve component interaction knowledge as definitions that can be reused, executed, and tested across technologies. It aims to keep some already-solved interaction problems solved as frameworks and platforms change.
 
-In the demo on the [Proto UI homepage](https://www.proto-ui.com), you can switch between different frameworks such as React, Vue, and Web Components while the component behavior remains exactly the same.
+Consider a familiar component: a Switch. Whether implemented in React or Vue, it needs to express its on/off state, respond to input, handle being disabled, and communicate changes to users and the application. The code differs, but these responsibilities keep appearing.
 
-This is not a visual mock, and it is not a simple style switch.  
-Each time you switch, the runtime environment for the corresponding framework is reloaded.
+Proto UI calls an executable description of these responsibilities a **Prototype**. An **Adapter** connects it to a particular technology environment, or **Host**, to produce a component an application can use. A Prototype captures the current understanding of an interaction and can be revised through use and verification.
 
-What you are seeing is not three separate component implementations, but one interaction definition being executed in different hosts.
+## Start with something you can try
 
-> If you have not tried the homepage demo yet, it is worth going back to the [homepage](https://www.proto-ui.com) first.  
-> It is not a prerequisite for reading this page, but it will help you understand more quickly what Proto UI is actually showing.
+In the [homepage demo](/en/#home-demo-previewer), select Switch, then switch between React, Vue, or Web Components. Observe:
 
-## Where do these components come from?
+- how state and visible feedback change when you operate the switch;
+- how focus and activation behave when using the keyboard;
+- how the same responsibilities are realized after changing the Adapter.
 
-You can first understand Proto UI as a compositional relationship:
+The demo runs the same set of Prototypes through the selected Adapter. Switching destroys the previous example and mounts new instances, so earlier interaction state may not persist.
 
-- choose a Prototype, which defines the component's interaction
-- choose an Adapter for a specific host
-- combine the two to get the component implementation in that host
+This demonstrates a reuse path among current Web technologies. It lets you inspect particular behaviors; other components, operating conditions, and non-Web platforms need their own implementations and verification. [Chapter 6 of the whitepaper](/en/whitepaper/6-consistency-boundary/) explains how to compare consistency in more depth.
 
-For example, you can:
+## How can you use it today?
 
-- choose a `shadcn/ui`-style Button Prototype
-- then choose the React Adapter
-- and get a Button implementation in React
+As an application developer, you can start with the official prototype libraries, use the CLI to add component entry points for your framework, and try them in an existing application. You do not need to author a Prototype or finish the whitepaper first.
 
-The same Prototype can also be combined with other Adapters to produce implementations in Vue or Web Components.
+As a component-library or design-system maintainer, you can evaluate which interaction definitions are worth maintaining together and which differences still belong to an Adapter or application. Current official Adapters and verification evidence are concentrated in the Web family; broader deployment to mobile, desktop, and other environments still needs exploration.
 
-For this page, it is enough to remember one thing:
+## Follow your question
 
-Proto UI does not copy an existing component into different frameworks. It separates a component into two parts, "definition" and "implementation", and then recombines them in different hosts.
+| What do you want to know? | Continue here |
+| --- | --- |
+| Is this worth my or my team's time? | [Why Proto UI](/en/start-here/why-proto-ui/) |
+| How does one definition become a usable component? | [How It Works](/en/start-here/how-it-works/) |
+| I want to try a component in an existing project | [Quick Start](/en/start-here/quick-start/) |
+| Which components can I inspect today? | [UI Libraries](/en/ui-libraries/) |
+| What are the premises, reasoning, and limits? | [Whitepaper: Preface](/en/whitepaper/0-preface/) |
 
-## Why does this matter?
-
-This is not just about "running the same component in multiple frameworks."
-
-More importantly, Proto UI extracts the interaction semantics that were previously tied to concrete implementations, lets them exist first as a Prototype, and then has Adapters interpret them in different hosts.
-
-Cross-platform support is only one outcome of this model, not its purpose.
-
-## Where to go next?
-
-- If you want to decide whether this is worth it, go to [Why Proto UI](/en/start-here/why-proto-ui/)
-- If you want to understand the most basic way it works, go to [How It Works](/en/start-here/how-it-works/)
-- If you already want to start using it, go to [Quick Start](/en/start-here/quick-start/)
+Reading this chapter in order takes you from the project's purpose to a first integration. The whitepaper develops the reasoning behind it. You can also go directly to the page closest to your current question.

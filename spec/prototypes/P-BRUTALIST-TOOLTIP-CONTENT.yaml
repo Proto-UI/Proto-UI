@@ -12,6 +12,10 @@ criteria:
     text:
       en: 'Content must include rounded-none, border-2 border-foreground, bg-foreground, text-background, font-mono font-bold uppercase text-xs, px-3 py-2, z-50, and shadow-[4px_4px_0_0_var(--pui-foreground)].'
       zh-CN: 'Content 必须包含 rounded-none、border-2 border-foreground、bg-foreground、text-background、font-mono font-bold uppercase text-xs、px-3 py-2、z-50 与 shadow-[4px_4px_0_0_var(--pui-foreground)]。'
+  - id: P-BRUTALIST-TOOLTIP-CONTENT-LIGHT-DARK
+    text:
+      en: Content border, fill, ink, and hard shadow must resolve through the active `--pui-foreground` and `--pui-background` values in both Light and Dark. Changing the host theme while Content is mounted through the renderer-owned portal must repaint that same Content without introducing another theme or presence owner.
+      zh-CN: Content 的 border、fill、ink 与 hard shadow 必须在 Light 和 Dark 下通过当前 `--pui-foreground` 与 `--pui-background` 值解析。Content 通过 renderer-owned portal 挂载期间切换 host theme 时，必须重绘同一个 Content，且不得引入另一套 theme 或 presence owner。
   - id: P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
     text:
       en: Content must inherit Base tooltip role, open state, presence, Escape dismissal, renderer portal ownership, and positioning without adding a second owner.
@@ -20,8 +24,8 @@ sources: [{ path: packages/prototypes/brutalist/src/tooltip/content.proto.ts }]
 revisions:
   - version: 0.3.0-alpha.0
     change: revised
-    summary: Aligned Content with the interactive Base Tooltip protocol.
-tags: [prototype, brutalist, tooltip, content, visual]
+    summary: Aligned Content with the interactive Base Tooltip protocol and bound Light/Dark live repaint across its renderer-owned portal.
+tags: [prototype, brutalist, tooltip, content, visual, theme]
 inherits:
   prototypes: [{ id: P-BASE-TOOLTIP-CONTENT }]
 dependsOn:

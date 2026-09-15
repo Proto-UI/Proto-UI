@@ -11,6 +11,7 @@ import type {
 } from '@proto.ui/runtime';
 import {
   createEventGate,
+  createDefaultWebColorSchemeSource,
   createScopedExposesReader,
   createViewEpochOwner,
   createWebProtoEventRouter,
@@ -26,6 +27,7 @@ import {
   resolveWebTextControlLocalName,
   TEXT_CONTROL_DECLARATION,
 } from '@proto.ui/module-text-control';
+import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
 import {
   createZIndexOverlayLayerScheduler,
   type OverlayLayerScheduler,
@@ -148,6 +150,7 @@ export function createVueAdapter(runtime: VueRuntime) {
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
+    const colorSchemeSource = opt.getMeta ? undefined : createDefaultWebColorSchemeSource(getMeta);
     const exposeStateWebMode = opt.exposeStateWebMode;
     const scrollProjection = opt.scrollProjection;
     const autoUpdate = opt.autoUpdateOnPropsChange ?? true;
@@ -155,12 +158,21 @@ export function createVueAdapter(runtime: VueRuntime) {
     const textControlRootTag = textControl
       ? resolveWebTextControlLocalName(textControl)
       : undefined;
-    if (textControlRootTag && opt.rootTag && opt.rootTag !== textControlRootTag) {
+    const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
+    const imageViewRootTag = imageView ? resolveWebImageLocalName() : undefined;
+    if (textControlRootTag && imageViewRootTag) {
       throw new Error(
-        `[Vue Adapter] text-control declaration conflicts with rootTag: ${opt.rootTag}`
+        '[Vue Adapter] text-control and image-view declarations cannot share a root.'
       );
     }
-    const rootTag = textControlRootTag ?? opt.rootTag ?? 'div';
+    const declaredRootTag = textControlRootTag ?? imageViewRootTag;
+    if (declaredRootTag && opt.rootTag && opt.rootTag !== declaredRootTag) {
+      const declarationName = textControlRootTag ? 'text-control' : 'image-view';
+      throw new Error(
+        `[Vue Adapter] ${declarationName} declaration conflicts with rootTag: ${opt.rootTag}`
+      );
+    }
+    const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
 
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
@@ -285,6 +297,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             rawPropsSource,
             getMeta,
+            colorSchemeSource,
             setExposes: (record) => {
               exposesRef.value = record;
             },
@@ -397,6 +410,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             rawPropsSource,
             effectsPort,
             getMeta,
+            colorSchemeSource,
             exposeStateWebMode,
             scrollProjection,
             setExposes: (record) => {

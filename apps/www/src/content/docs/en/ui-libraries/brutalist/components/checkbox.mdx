@@ -1,0 +1,29 @@
+---
+title: 'Checkbox'
+description: 'Draft Brutalist Checkbox presentation over the Base Checkbox protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft family contains a Root and an Indicator. Base Checkbox owns controlled and uncontrolled `checked`, the author-controlled `indeterminate` display state, effective disabled behavior, pointer and Space activation, focus, and the accessible `checkbox` role including `aria-checked="mixed"`.
+
+The Brutalist layer owns presentation only: a square two-pixel ink border, hard offset shadow, paired state fills, and an accessibility-hidden hard-stroke tick or dash. Indicator derives its state from the nearest Root and owns no value, focus, event, form, or accessibility control surface. When checked and indeterminate are both true, the mixed dash wins.
+
+Import Root and Indicator from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/checkbox` anatomy subpath. This family intentionally has no `proto-ui add brutalist-checkbox` registry entry and creates no separate publication or release promise.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-checkbox" initialRuntime="wc" />
+</div>
+
+## Suggested acceptance path
+
+1. Activate the Unchecked, Checked, and Mixed examples with pointer and Space.
+2. Confirm the Disabled example cannot change.
+3. Tab to the named Focus-visible target and confirm the hard ring appears on Root without moving focus to Indicator.
+4. Confirm the Checked and indeterminate example paints the mixed dash rather than the tick.
+5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related catalog entities are `draft`; this page records the current direction rather than a stable Checkbox guarantee.

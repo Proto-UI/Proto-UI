@@ -1,6 +1,6 @@
 # internal/contracts/context/with-tree.v0.md
 
-> Status: Draft – implementation-ready (contract-first) This contract specifies Proto UI **context**: tree-based provider resolution, setup-only subscription intent, runtime reads and updates, and strict value constraints for v0 portability.
+> Legacy readable projection. Current draft authority: [M-CONTEXT-0001](../../../spec/modules/M-CONTEXT-0001.yaml), [C-CONTEXT-0001](../../../spec/contracts/C-CONTEXT-0001.yaml) through [C-CONTEXT-0012](../../../spec/contracts/C-CONTEXT-0012.yaml). These entities supersede this prose; see [the index](./README.md) for host capability and evidence links.
 
 ---
 
@@ -10,7 +10,7 @@
 
 Context provides:
 
-- A **tree-based** communication channel between components (provider → consumer).
+- A **tree-based** communication channel between components within a provider-owned scope (subscribed consumers may update).
 - Setup-only **subscription intent** with runtime **reads** and **updates**.
 - Deterministic provider resolution: **nearest provider wins**.
 - v0 portability constraints: context values are JSON-serializable **objects**.
@@ -29,8 +29,8 @@ Context provides:
 - **ContextKey<T>**: a unique token (symbol-like) identifying a context channel.
 - **Provider**: a component instance that provides a value for a ContextKey.
 - **Consumer**: a component instance that subscribes/reads/updates a ContextKey.
-- **Logical tree**: the runtime component tree (for WC it matches DOM tree).
-- **Nearest provider wins**: the consumer binds to the closest ancestor provider for the key.
+- **Logical tree**: host-translated logical ownership; Web Component derives it from its supported DOM ownership boundary.
+- **Nearest provider wins**: the consumer binds to the closest provider, starting with the consumer itself for the key.
 
 ---
 
@@ -57,7 +57,7 @@ Core MUST provide a ContextKey factory, e.g.:
 ## 3. Provider resolution
 
 - Provider resolution MUST be based on the logical tree.
-- For a given (consumer instance, key), the bound provider is the **nearest ancestor provider** of that key.
+- For a given (consumer instance, key), the bound provider is the **nearest self-inclusive provider** of that key.
 - Different component instances may provide the same key simultaneously; binding is per consumer and depends on tree position.
 
 ---
@@ -96,13 +96,13 @@ Read APIs are runtime-only:
 
 ### 5.1 read (required)
 
-- `read(key)` MUST be callable only during runtime callback phase.
+- `read(key)` MUST be callable during runtime callback or readonly render phase.
 - `read(key)` MUST require prior `subscribe(key, onChange?)` in setup.
 - If the subscription is disconnected at runtime (provider removed / tree changed), `read` MUST throw.
 
 ### 5.2 tryRead (optional)
 
-- `tryRead(key)` MUST be callable only during runtime callback phase.
+- `tryRead(key)` MUST be callable during runtime callback or readonly render phase.
 - `tryRead(key)` MUST require prior `trySubscribe(key, onChange?)` in setup.
 - If the subscription is disconnected or provider is absent, `tryRead` MUST return `null`.
 
@@ -118,17 +118,17 @@ Read APIs are runtime-only:
 
 - `provide` MUST NOT return a provider-side `update` function.
 - A provider that needs to update its own context MUST use the unified runtime context update surface.
-- Provider-side updates therefore follow the same subscription and phase rules as `run.context.update` or `run.context.tryUpdate`.
+- Provider `update` of its own key needs no subscription, but remains callback-only. This exception grants neither read authority nor `tryUpdate` authority; see C-CONTEXT-0008-C.
 
 ### 6.3 Unified runtime update
 
-- `run.context.update(key, next)` is runtime-only.
-- A participant MUST have previously subscribed to the key (via `subscribe` or `trySubscribe`) to call `update`.
+- `run.context.update(key, next)` is callback-only.
+- A consumer must have previously subscribed to the key (via `subscribe` or `trySubscribe`) to call `update`; the provider itself is exempt for its own key.
 - The `run.context.update` signature accepts a next value or updater function: `update(key, prev => next)`.
 
 ### 6.4 tryUpdate (optional)
 
-- `run.context.tryUpdate(key, next)` is runtime-only and MUST require prior `trySubscribe`.
+- `run.context.tryUpdate(key, next)` is callback-only and MUST require prior `trySubscribe`.
 - If the context is unavailable (no provider or disconnected), `tryUpdate` MUST return `false` and perform no update.
 - If the update succeeds, `tryUpdate` MUST return `true`.
 
@@ -173,9 +173,9 @@ Read APIs are runtime-only:
 - `subscribe/trySubscribe` callbacks fire during runtime when context updates.
 - Callback signature: `(run, next, prev)`.
 - `next` and `prev` are JSON objects, or `null` if context is unavailable.
-- Update notifications are synchronous and MUST NOT be merged: every update enqueues exactly one notification.
+- Every successful update remains observable as a distinct semantic transition; delivery preserves its next/prev values.
 
-> v0 does not mandate async scheduling. Ordering MUST be deterministic.
+> [D-CONTEXT-NOTIFICATION-SCHEDULING-0001](../../../spec/decisions/D-CONTEXT-NOTIFICATION-SCHEDULING-0001.md) allows host scheduling without dropping or incorrectly merging transitions; ordering within a dispatch window is deterministic.
 
 ---
 
@@ -187,13 +187,17 @@ Read APIs are runtime-only:
 
 ---
 
+## Lifecycle
+
+Provider values, subscription intent and callbacks belong to the instance. Repeatable view detach/remount preserves them; terminal disposal removes them. Unsubscribe stops later delivery. See C-CONTEXT-0012 and C-LIFECYCLE-0006/0007.
+
 ## 10. Error model
 
 Implementations MUST throw for:
 
 - Phase violations (setup-only/runtime-only misuse)
 - Missing provider for required `subscribe`
-- Missing prior subscription intent (`read` without `subscribe`, `tryRead` without `trySubscribe`, `update` without subscribe)
+- Missing prior subscription intent (`read` without `subscribe`, `tryRead` without `trySubscribe`, consumer `update` without subscription)
 - Duplicate provide for the same key on the same instance
 - Disconnected required read
 - Invalid provided values

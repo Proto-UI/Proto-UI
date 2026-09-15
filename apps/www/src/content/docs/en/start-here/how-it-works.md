@@ -1,137 +1,53 @@
 ---
 title: 'How It Works'
-desp: 'Understand the minimal working model of Proto UI through Prototype + Adapter'
-description: 'Understand the minimal working model of Proto UI through Prototype + Adapter'
+description: 'Use Prototype and Adapter to understand how one component definition runs in different frameworks.'
 ---
 
-## What does this article answer?
+How can the same component work in React, Vue, and Web Components? Start with a simple combination:
 
-On the previous page, you already saw this:
+> **Prototype + Adapter = a component you can use in a particular framework**
 
-> The same component behaves consistently across different hosts.
+## Prototype: define how the component behaves
 
-This page answers:
+A Prototype describes how a component should work.
 
-- How is that possible at the most basic level?
-- What do Prototype and Adapter each do?
-- Why is this the starting point for understanding Proto UI?
+For a Switch, that includes:
 
-## Start with a model simple enough
+- how clicking changes its on/off state;
+- how it handles user input when disabled;
+- what it displays when on or off;
+- how it notifies the application when state changes.
 
-You can begin with a one-sentence understanding of Proto UI:
+These behaviors can live in one Prototype, so you do not need to write them separately in React and Vue.
 
-> **Prototype + Adapter = a component implementation in a specific host**
+## Adapter: run it in a particular framework
 
-This is not the full theory, but it is already enough to explain the demo you just saw.
+An Adapter connects a Prototype to your framework, handling details such as event binding and rendering updates.
 
-## Go back to the phenomenon you just saw
+For example, the same Switch Prototype can be used with:
 
-In the homepage demo, what you saw was:
+- a React Adapter to produce a React component;
+- a Vue Adapter to produce a Vue component;
+- a Web Component Adapter to produce a custom element.
 
-- switching between different hosts such as React, Vue, and Web Components
-- while the component behavior stayed consistent
+In Proto UI documentation, the technology environment where the component runs is also called a **Host**.
 
-From this model, what happened in essence is:
+## Back to the homepage demo
 
-- the Prototype did not change
-- the Adapter changed
+When you switch frameworks in the [homepage demo](/en/#home-demo-previewer), the Prototype stays the same. What changes is the Adapter running it.
 
-Which means:
+That is the basic way one interaction definition can be reused across frameworks. Which components you can use depends on the selected Adapter's support.
 
-> **The same interaction definition is being reinterpreted in different hosts.**
+## What do you need to do?
 
-## What does the Prototype do?
+Usually, you just:
 
-The Prototype is responsible for describing:
+1. Choose a component from a prototype library.
+2. Use the CLI to add its entry point for your framework.
+3. Import it into your application, pass props, and listen for events.
 
-> **How this component should interact.**
+If an existing prototype library meets your needs, you do not need to learn Prototype authoring or build an Adapter first.
 
-It focuses on:
+Continue to [Quick Start](/en/start-here/quick-start/) to add your first component to an existing project.
 
-- how state changes
-- how user input is handled
-- how the component provides feedback
-
-Not on:
-
-- how to write it in React
-- how to write it in Vue
-- how to manipulate the DOM
-
-You can think of it this way:
-
-> The Prototype describes the host-independent part of a component's interaction on its own.
-
-## What does the Adapter do?
-
-The Adapter answers a different question:
-
-> **How should those interactions be implemented in this host?**
-
-It decides:
-
-- how to map them onto host capabilities
-- how the component API should be organized
-- which capabilities can be carried over directly and which need adaptation
-
-So:
-
-- the Prototype defines what should happen
-- the Adapter decides how to do it here
-
-## Put them together
-
-You can understand it with a very simple flow:
-
-1. Choose a Prototype, the interaction definition
-2. Choose an Adapter, the target host
-3. Combine them
-4. Get the component implementation in that host
-
-That is also why:
-
-> The same Prototype can be reused across multiple hosts.
-
-## The direct result of this model
-
-Under this layering:
-
-- interaction definitions can exist independently of concrete implementations
-- the same Prototype can be interpreted by multiple hosts
-- Prototypes and Adapters can evolve separately
-
-## What it does not mean
-
-This model also has clear boundaries:
-
-- it does not mean all hosts are naturally fully equivalent
-- it does not mean components can migrate at zero cost
-- it does not mean having a Prototype automatically gives you a high-quality implementation
-
-What Proto UI does is closer to:
-
-> **Separating what can be reused from what must be adapted.**
-
-Not eliminating differences themselves.
-
-If you want to go deeper into questions such as:
-
-- why components should be abstracted this way
-- where the boundary of that abstraction lies
-- how consistency is actually constrained
-
-those will be discussed in the Whitepaper.
-
-## Next
-
-If you want to decide whether it is worth introducing:
-
-- Go to [Why Proto UI](/en/start-here/why-proto-ui/)
-
-If you already want to start using it:
-
-- Go to [Quick Start](/en/start-here/quick-start/)
-
-If you want to keep understanding the principles behind the design:
-
-- Go to [Whitepaper](/en/whitepaper/component-as-protocol/)
+For more on this division of work and how to assess consistency across frameworks, read [Chapter 5: The Translation Layer](/en/whitepaper/5-translation-layer/) and [Chapter 6: The Boundaries of Consistency](/en/whitepaper/6-consistency-boundary/) in the whitepaper.

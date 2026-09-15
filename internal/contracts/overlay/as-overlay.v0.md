@@ -16,7 +16,7 @@ It is responsible for:
 - overlay content registration
 - optional trigger/anchor registration as structural roles
 - dismiss policy
-- focus entry and restore coordination
+- consumer-owned focus integration (generic entry/restore remains deferred)
 - overlay stack and nesting participation
 - host-mediated placement negotiation
 
@@ -34,7 +34,7 @@ The returned handle exposes setup-only options such as `modal`, `closeOnOutsideP
 Normative direction:
 
 - `modal` should be treated as a **policy declaration**
-- outside/focus-outside semantics should ultimately derive from a dedicated interaction-boundary capability
+- outside press consumes Boundary classification; focus-outside awaits a reliable neutral sample
 - overlay should remain a consumer of those semantics rather than the foundational owner of them
 
 This means:
@@ -48,7 +48,7 @@ This means:
 
 Overlay behavior crosses multiple subsystems:
 
-- event: escape, outside press, focus outside
+- Event: neutral Escape input; Boundary: outside press classification
 - focus: entry, restore, local boundary behavior
 - state: open/closed facts
 - host/layout: anchor-relative placement and visibility
@@ -252,19 +252,9 @@ Escape is not a Boundary classification. When enabled, Overlay consumes the neut
 
 ## 8. Focus Policy
 
-`asOverlay()` should coordinate with the focus system rather than replacing it.
+`entry` and `restore` are retained configuration fields; the current generic Overlay does not execute these policies. Dialog, Dropdown and other consumers retain their own Focus and Root request protocols. `closeOnAnchorPress` and `closeOnTriggerPress` are likewise not automatic generic dismissal implementations.
 
-v0 should support:
-
-- `entry`
-  - examples: `first | selected | content | manual`
-
-- `restore`
-  - examples: `trigger | previous | none`
-
-- optional local focus-scope integration
-
-Routine policies such as "restore to trigger on close" should not require manual author scripting.
+Focus-outside remains deferred until a reliable neutral sample contract is admitted. These boundaries are cataloged in `M-OVERLAY-0001-D`; configuration shape alone is not evidence of behavior.
 
 ---
 
@@ -341,9 +331,9 @@ Example shape:
 type OverlayHandle = {
   open: ObservedStateHandle<boolean, any>;
 
-  show(reason?: string): void;
-  hide(reason?: string): void;
-  toggle(reason?: string): void;
+  openOverlay(reason?: OverlayReason): void;
+  close(reason?: OverlayReason): void;
+  toggle(reason?: OverlayReason): void;
 
   configure(patch: OverlayConfigPatch): void;
   updatePosition(patch: OverlayPositionPatch): void;
@@ -359,7 +349,7 @@ type OverlayHandle = {
 
 Notes:
 
-- naming may later be normalized to `open/close/toggle`
+- `open` is observed state; `openOverlay` is the command
 - `configure(...)` must be setup-only
 - `updatePosition(...)` updates only runtime geometry policy and does not redefine dismiss, focus, modal, or Portal policy
 - registration targets are adapter-facing and need not be public author primitives
@@ -371,7 +361,13 @@ Notes:
 
 The core boundary is:
 
-- `asOverlay()` governs overlay existence, dismissal, placement, and focus coordination
+- `asOverlay()` governs overlay existence, explicit dismissal, and delegated placement
 - trigger hooks govern which interaction requests state change
 
 This separation keeps overlay as a reusable structural capability while allowing dropdown, tooltip, dialog, and context menu to define their own trigger semantics.
+
+## 14. Cataloged host resources and Escape
+
+`M-OVERLAY-0001` coordinates optional `HC-OVERLAY-PORTAL-0001`, `HC-OVERLAY-MODAL-0001` and `HC-OVERLAY-LAYER-0001`. Missing providers acquire no corresponding resource. Replacement releases through the old provider before the active mounted view reconciles through the new one. The Web modal realization shares body scroll-lock ownership and restores the original inline overflow only after the final release; it does not supply inertness or a focus trap. The numeric layer scheduler preserves/restores inline z-index and its priority; role offsets do not establish an absolute hierarchy.
+
+`C-AS-OVERLAY-0001-P` defines one eligible owner per Escape sample within a shared input scope. Overlay owns selection, Event carries opaque privileged scope/sample identity, and ordinary Event broadcasts remain unchanged. Synchronous controlled reopen cannot pass the same sample to another Overlay. Repeated open does not reorder an already eligible candidate.

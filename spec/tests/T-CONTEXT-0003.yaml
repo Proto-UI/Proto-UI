@@ -1,0 +1,204 @@
+id: T-CONTEXT-0003
+type: test
+title: Context Module and host/Adapter vertical conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Opaque host facts, facade/port authority, Runtime instance resources and four Web Adapter scope journeys establish the bounded Context catalog slice.
+cases:
+  - id: T-CONTEXT-0003-CASE-SURFACE
+    title: Author facade and privileged port remain distinct
+    covers:
+      - M-CONTEXT-0001-A
+      - M-CONTEXT-0001-B
+      - C-CONTEXT-0004-B
+    expectation: context-surface-conforms
+  - id: T-CONTEXT-0003-CASE-HOST
+    title: Current opaque ancestry controls rebind, updates and recipients
+    covers:
+      - M-CONTEXT-0001-D
+      - M-CONTEXT-0001-E
+      - HC-CONTEXT-IDENTITY-0001-B
+      - HC-CONTEXT-ANCESTRY-0001-A
+      - HC-CONTEXT-ANCESTRY-0001-B
+      - HC-CONTEXT-ANCESTRY-0001-C
+    expectation: context-host-conforms
+  - id: T-CONTEXT-0003-CASE-OPAQUE-TOKEN
+    title: Falsy non-null identities retain resolution, update and terminal cleanup
+    covers:
+      - C-CONTEXT-0004-B
+      - M-CONTEXT-0001-D
+      - M-CONTEXT-0001-H
+      - HC-CONTEXT-IDENTITY-0001-B
+      - HC-CONTEXT-IDENTITY-0001-C
+      - C-CONTEXT-0012-A
+      - C-CONTEXT-0012-B
+    expectation: falsy-identities-are-not-absence
+  - id: T-CONTEXT-0003-CASE-EXPLICIT-CONSUMER
+    title: Actual Context port preserves explicit undefined consumer independently of its owner
+    covers:
+      - M-CONTEXT-0001-B
+      - HC-CONTEXT-IDENTITY-0001-B
+      - C-CONTEXT-0004-E
+    expectation: explicit-consumer-is-not-owner-fallback
+  - id: T-CONTEXT-0003-CASE-SCROLL-SCOPE
+    title: Composed Scroll preserves opaque scope identity through host attachment and refresh
+    covers:
+      - HC-CONTEXT-IDENTITY-0001-B
+      - C-CONTEXT-0004-E
+    expectation: composed-scroll-binds-only-matching-non-null-scopes
+  - id: T-CONTEXT-0003-CASE-AVAILABILITY
+    title: Capability use fails without invented fallback
+    covers:
+      - M-CONTEXT-0001-I
+      - HC-CONTEXT-IDENTITY-0001-C
+      - HC-CONTEXT-ANCESTRY-0001-D
+    expectation: context-availability-conforms
+  - id: T-CONTEXT-0003-CASE-LIFETIME
+    title: Runtime scopes survive epochs and end at terminal disposal
+    covers:
+      - M-CONTEXT-0001-C
+      - M-CONTEXT-0001-F
+      - M-CONTEXT-0001-G
+      - M-CONTEXT-0001-H
+      - HC-CONTEXT-IDENTITY-0001-A
+    expectation: context-lifetime-conforms
+  - id: T-CONTEXT-0003-CASE-ADAPTER
+    title: Real Adapter owners translate nested scopes and fresh-owner identity
+    covers:
+      - M-CONTEXT-0001-D
+      - M-CONTEXT-0001-E
+      - M-CONTEXT-0001-G
+      - M-CONTEXT-0001-H
+      - HC-CONTEXT-IDENTITY-0001-A
+      - A-REACT-18-19-0001-CONTEXT
+      - A-VUE-3-0001-CONTEXT
+      - A-VUE-2-0001-CONTEXT
+      - A-WEB-COMPONENT-0001-CONTEXT
+    expectation: context-adapter-conforms
+implementations:
+  - id: context-module-catalog
+    kind: module-test
+    status: passing
+    path: packages/modules/context/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0003-CASE-SURFACE
+      - T-CONTEXT-0003-CASE-EXPLICIT-CONSUMER
+      - T-CONTEXT-0003-CASE-OPAQUE-TOKEN
+      - T-CONTEXT-0003-CASE-HOST
+      - T-CONTEXT-0003-CASE-AVAILABILITY
+  - id: context-scroll-scope-integration
+    kind: module-test
+    status: passing
+    path: packages/modules/scroll/test/context-scope.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0003-CASE-SCROLL-SCOPE
+    notes:
+      - Uses real Context, State and Scroll modules with supplied Anatomy domain/target facts; verifies host binding and refresh, not browser geometry or all Anatomy host domains.
+  - id: context-runtime-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/context-lifecycle.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0003-CASE-LIFETIME
+  - id: context-react-adapter
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/context.integration.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0003-CASE-ADAPTER
+    notes:
+      - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
+  - id: context-vue-adapter
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/context.integration.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0003-CASE-ADAPTER
+    notes:
+      - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
+  - id: context-vue2-adapter
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/context.integration.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0003-CASE-ADAPTER
+    notes:
+      - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
+  - id: context-web-component-adapter
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/context.integration.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0003-CASE-ADAPTER
+    notes:
+      - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
+verifies:
+  modules:
+    - id: M-CONTEXT-0001
+      anchors:
+        - M-CONTEXT-0001-A
+        - M-CONTEXT-0001-B
+        - M-CONTEXT-0001-C
+        - M-CONTEXT-0001-D
+        - M-CONTEXT-0001-E
+        - M-CONTEXT-0001-F
+        - M-CONTEXT-0001-G
+        - M-CONTEXT-0001-H
+        - M-CONTEXT-0001-I
+  hostCaps:
+    - id: HC-CONTEXT-IDENTITY-0001
+      anchors:
+        - HC-CONTEXT-IDENTITY-0001-A
+        - HC-CONTEXT-IDENTITY-0001-B
+        - HC-CONTEXT-IDENTITY-0001-C
+    - id: HC-CONTEXT-ANCESTRY-0001
+      anchors:
+        - HC-CONTEXT-ANCESTRY-0001-A
+        - HC-CONTEXT-ANCESTRY-0001-B
+        - HC-CONTEXT-ANCESTRY-0001-C
+        - HC-CONTEXT-ANCESTRY-0001-D
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-CONTEXT
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-CONTEXT
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-CONTEXT
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-CONTEXT
+  contracts:
+    - id: C-CONTEXT-0004
+      anchors:
+        - C-CONTEXT-0004-B
+        - C-CONTEXT-0004-E
+    - id: C-CONTEXT-0012
+      anchors:
+        - C-CONTEXT-0012-A
+        - C-CONTEXT-0012-B
+        - C-CONTEXT-0012-C
+revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added actual-port explicit-consumer and composed Scroll opaque identity integration regressions.
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Bound provider-as-self and falsy opaque token resolution, updates and terminal cleanup to executable Module evidence.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped bounded Module, Runtime and real four-Adapter executable Context evidence.
+tags:
+  - context
+  - adapter
+  - host-capability
+  - lifecycle

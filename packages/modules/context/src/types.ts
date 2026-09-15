@@ -62,6 +62,7 @@ export type ContextCallbackTask = {
 export type ContextPort = {
   setCallbackDispatcher(dispatch: ContextCallbackDispatcher): void;
   /** Module-internal logical scope identity. Never place this token in a Context value. */
+  /** Omission validates the owner identity; an explicit consumer (including undefined) is preserved. */
   resolveScope(key: ContextKey<any>, consumer?: ContextInstanceToken): ContextInstanceToken | null;
   dumpProviders(): readonly ContextProviderEntry[];
   dumpSubscriptions(): readonly ContextSubscriptionEntry[];

@@ -305,13 +305,17 @@ export class AnatomyModuleImpl extends ModuleBase {
   ): Unsubscribe {
     this.ensureSetup('def.anatomy.subscribeParts');
     let previousSignature = this.computeRoleOrderSignature(family, role);
-    return this.subscribeOrder(family, (ctx) => {
+    const unsubscribe = this.subscribeOrder(family, (ctx) => {
       const nextSignature = this.computeRoleOrderSignature(family, role);
       if (nextSignature === previousSignature) return;
       previousSignature = nextSignature;
       const parts = this.tryOrderedPartsOf(family, role) ?? [];
       cb(ctx, parts);
     });
+    return () => {
+      this.ensureSetup('def.anatomy.subscribeParts.unsubscribe');
+      unsubscribe();
+    };
   }
 
   parts(family: AnatomyFamily, options?: AnatomyQueryOptions): readonly AnatomyPartView[] | null {

@@ -47,6 +47,8 @@ document.body.innerHTML = '<proto-ui-shadcn-button variant="outline">Proto UI 0.
   兼容性承诺；在用于生产环境前，请先阅读下方的当前边界。
 </Aside>
 
+本页带你在已有应用中添加一个 Shadcn Button，并完成首次渲染。你可以直接从这里开始，无需先读白皮书。
+
 ## 开始之前
 
 请在已有的 React、Vue 或 Web Components 应用中执行这些命令。下面以一个已经安装 `react` 的 React 应用为例。
@@ -118,6 +120,12 @@ import './styles/proto-ui-style.css';
 
 命令会安装匹配的 Adapter 与 `@proto.ui/prototypes-shadcn@0.2.0`，并在 `proto-ui/components/` 下生成 host 入口。Vue 项目在同一命令中使用 `vue`。这里有意使用相对路径：不同应用并不共享同一套路径别名与目录层级。生成的 facade 会保留 Prototype 声明的 props、事件 listener 与 ref/expose surface。
 
+## 确认首次接入
+
+启动应用后，应能看到标有 “Proto UI 0.2.0” 的 outline Button。检查样式是否加载，并尝试用 Tab 聚焦、用 Enter 或空格激活。如果导入失败，先核对生成目录与相对路径；如果外观缺失，先检查应用入口是否引入生成的样式表。
+
+完成这一步后，再按具体组件文档接入业务状态与事件。
+
 ## 按组件继续接入
 
 ```bash
@@ -148,6 +156,12 @@ import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/compon
 
 ## 下一步
 
-- [它是怎么工作的？](/zh-cn/start-here/how-it-works/)
-- [UI Library](/zh-cn/ui-libraries/)
-- [Why Proto UI](/zh-cn/start-here/why-proto-ui/)
+完成第一个组件的接入后，可以按你的兴趣继续：
+
+| 你接下来想做什么                   | 从这里继续                                         |
+| ---------------------------------- | -------------------------------------------------- |
+| 寻找更多 Shadcn 风格组件           | [Shadcn 原型库](/zh-cn/ui-libraries/shadcn/)       |
+| 了解不带默认样式的基础组件         | [Base 原型库](/zh-cn/ui-libraries/base/)           |
+| 尝试 Neo-Brutalist 视觉风格        | [Brutalist 原型库](/zh-cn/ui-libraries/brutalist/) |
+| 查找并使用图标                     | [Lucide 图标库](/zh-cn/ui-libraries/lucide/)       |
+| 深入了解 Proto UI 的思路与设计边界 | [白皮书：序章](/zh-cn/whitepaper/0-preface/)       |

@@ -55,8 +55,15 @@ criteria:
       zh-CN: >-
         listener attachment 失败时，runtime 必须回滚本次 binding attempt 已建立的全部 host listener，并保证每个受影响 registration 保持逻辑 unbound（diagnostics 记为 unbound），显式 bind retry 能完整重装。cleanup/unbind 必须幂等：重复 cleanup 不得遗留 listener。rollback 的 removeEventListener 自身失败不得掩盖原始 attachment 错误，并必须 fail closed（不得让部分 listener 视为已绑定）。portable 事件 callback 收到的是 data-only、immutable 的新 view，不得 alias 或修改 host event/detail；default-action control 仅在当前同步 callback window 内有效，window 结束后调用须 fail closed；同一 host sample 的多次 default-action request 在宿主边界去重。semantic（非 host:*）registration 不得携带 DOM listener options。宿主绑定事件保持 raw host event。
 
+
       en: >-
         When listener attachment fails, the runtime must roll back every host listener already attached by that binding attempt, keep each affected registration logically unbound (reported as unbound in diagnostics), and let an explicit bind retry reinstall the full set. Cleanup/unbind must be idempotent: repeated cleanup must not leave listeners behind. A rollback removeEventListener failure must not mask the original attachment error and must fail closed (no partial listener set may be treated as bound). A portable event callback receives a new, immutable, data-only view and must never alias or mutate the host event/detail; the default-action control is live only for the current synchronous callback window, and a call after the window must fail closed; multiple default-action requests for the same host sample are deduplicated at the host boundary. Semantic (non-host:*) registrations must not carry DOM listener options. Host-bound events stay raw host events.
+
+
+  - id: M-EVENT-0001-K
+    text:
+      en: Privileged consumers may obtain an opaque global-input scope and, only during synchronous portable dispatch, the opaque identity of that input sample. Adapter wrappers for the same native sample preserve that identity. This metadata is not added to the author payload, gives no host access, and does not change broadcast or default-action behavior. Scope uses the explicitly wired shared input source when available, otherwise the current global binding target.
+      zh-CN: 特权消费者可读取不透明 global-input scope，并仅在 portable dispatch 的同步窗口内读取该次 input sample 的不透明身份。同一 native sample 的 Adapter wrapper 保持同一身份。metadata 不加入作者 payload、不提供 host 访问，也不改变广播或 default-action 行为。scope 优先使用显式接入的共享输入源，否则使用当前 global binding target。
 
 satisfies:
   contracts:
@@ -83,6 +90,8 @@ verifies:
     - T-EVENT-0002
     - id: T-EVENT-0003
       since: 0.2.0-rc.7
+    - id: T-OVERLAY-CATALOG-0001
+      since: 0.3.0-alpha.0
 dependsOn:
   contracts:
     - C-LIFECYCLE-0001
@@ -143,4 +152,7 @@ revisions:
   - version: 0.2.0
     change: strengthened
     summary: Required target preflight before listener attachment, zero new listeners on target-resolution failure, and an explicit complete-plan retry without automatic recovery semantics.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added scope-bound single-sample Escape coordination without changing portable author payloads.
 tags: [event, module, required, adapter, lifecycle]

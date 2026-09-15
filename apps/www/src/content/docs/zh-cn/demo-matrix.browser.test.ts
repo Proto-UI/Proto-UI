@@ -15,6 +15,7 @@ type MatrixFacts = {
   adapterColumns: string;
   adapterColumnCount: number;
   runtimeRows: Record<string, number>;
+  unavailable: string[];
 };
 
 type InteractiveFact = {
@@ -39,7 +40,12 @@ async function waitForMatrix(page: Page): Promise<void> {
       const demos = document.querySelectorAll('.demo-matrix__item').length;
       const previewers = document.querySelectorAll('[data-previewer-id]').length;
       const initialized = document.querySelectorAll('[data-previewer-id][data-inited="1"]').length;
-      return demos > 0 && previewers === demos * runtimeCount && initialized === previewers;
+      const unavailable = document.querySelectorAll(
+        '.demo-matrix__adapter[data-unavailable]'
+      ).length;
+      return (
+        demos > 0 && previewers === demos * runtimeCount - unavailable && initialized === previewers
+      );
     },
     RUNTIMES.length,
     { timeout: 60_000 }
@@ -95,6 +101,10 @@ async function readMatrixFacts(page: Page): Promise<MatrixFacts> {
       adapterColumns: firstGrid ? getComputedStyle(firstGrid).gridTemplateColumns : '',
       adapterColumnCount: firstColumns.size,
       runtimeRows,
+      unavailable: adapters.flatMap((adapter) => {
+        const reason = adapter.getAttribute('data-unavailable');
+        return reason ? [reason] : [];
+      }),
     };
   }, RUNTIMES);
 }
@@ -140,7 +150,7 @@ async function readInteractiveFacts(page: Page): Promise<Record<string, Interact
     document.querySelectorAll<HTMLElement>('.demo-matrix__item').forEach((item) => {
       result[item.id] = Array.from(
         item.querySelectorAll<HTMLElement>(
-          ':scope > .demo-matrix__adapters > .demo-matrix__adapter'
+          ':scope > .demo-matrix__adapters > .demo-matrix__adapter:not([data-unavailable])'
         )
       ).map((adapter) =>
         Array.from(adapter.querySelectorAll<HTMLElement>('[role],button,input,select,textarea'))
@@ -193,7 +203,7 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Website Demo Matrix browser smoke', () => {
-  it('mounts every demo in every official adapter without errors or overflow', async () => {
+  it('mounts every supported demo and names the unimplemented Image adapter', async () => {
     const { context, page } = await openRoute(browser, baseUrl, MATRIX_ROUTE, {
       width: 1440,
       height: 900,
@@ -203,7 +213,12 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await waitForMatrix(page);
       const facts = await readMatrixFacts(page);
       expect(facts.demos).toBeGreaterThan(0);
-      expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
+      // D-IMAGE-VIEW-PROJECTION-0001-E admits only WC/React/Vue 3 for Image.
+      expect(facts.unavailable).toEqual(['demo-base-image:vue2']);
+      expect(facts.previewers).toBe(facts.demos * RUNTIMES.length - 1);
+      expect(await page.locator('[data-unavailable]').innerText()).toContain(
+        'Image View is not implemented for Vue 2.'
+      );
       expect(facts.initialized).toBe(facts.previewers);
       expect(facts.errors).toBe(0);
       expect(facts.overflow).toBeLessThanOrEqual(0);
@@ -260,7 +275,8 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
         expect(facts.errors).toBe(0);
         expect(facts.overflow).toBeLessThanOrEqual(0);
         expect(facts.adapterColumnCount).toBe(1);
-        expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
+        expect(facts.unavailable).toEqual(['demo-base-image:vue2']);
+        expect(facts.previewers).toBe(facts.demos * RUNTIMES.length - 1);
       } finally {
         await context.close();
       }

@@ -6,6 +6,10 @@
 
 ---
 
+## Catalog authority
+
+The bounded Props/State-to-style realization is cataloged by [M-RULE-0001](../../../spec/modules/M-RULE-0001.yaml) and [T-RULE-0002](../../../spec/tests/T-RULE-0002.yaml), with four Adapter profile relations. These are draft. The documents below remain explanatory projections; applicable spec entities own semantics. Existing planned matrix files are not passing evidence; the catalog separately maps executable supported cells.
+
 ## Core Contracts
 
 - `rule.v0.md`
@@ -18,7 +22,7 @@
 - `define.setup-only.v0.md`
   - setup-time declaration API
   - RuleSpec and RuleIR boundaries
-  - declaration order and RuleHandle concerns
+  - declaration order and setup-only RuleHandle cancellation
 
 - `when.expr.v0.md`
   - pure condition expression grammar
@@ -69,7 +73,7 @@ These are the preferred baseline for executable tests in the first cataloging pa
 - rule meta / host environment inputs
   - currently implemented by `module-rule-meta`
   - treated as rule secondary scope, not rule core
-  - naming and abstraction remain open
+  - already used for official light/dark theme behavior; API naming and abstraction may evolve
 
 - Web exposed-state selector optimization
   - belongs to `module-rule-expose-state-web` and Web adapter/profile contracts

@@ -31,7 +31,10 @@ criteria:
       zh-CN: Arrow 在没有可执行的 arrow geometry/positioning 通道前必须保持 deferred；styled library 可以拥有内部视觉投影，但不得宣称 Base Arrow compatibility。
       en: Arrow must remain deferred until an executable arrow geometry and positioning channel exists; a styled library may own an internal visual projection but must not claim Base Arrow compatibility.
 sources:
-  - path: apps/www/src/content/docs/zh-cn/whitepaper/prototype-boundary.md
+  - path: apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md
+    sections:
+      - 为什么 feedback-only 可拆可不拆？
+      - 运用上述规则
   - path: packages/prototypes/base/src/tooltip/shared.ts
   - path: packages/prototypes/base/src/tooltip/group.proto.ts
   - path: packages/prototypes/base/src/tooltip/content.proto.ts

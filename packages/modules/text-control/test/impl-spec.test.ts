@@ -304,3 +304,34 @@ describe('module-text-control', () => {
     expect(control.snapshot()?.value).toBe('retained');
   });
 });
+
+it('T-TEXT-CONTROL-0001-CASE-LIFETIME: stale lease events cannot change current value or invoke listeners', () => {
+  const h = createHarness();
+  const control = h.module.facade.declare();
+  const values: string[] = [];
+  control.on('input', (_run, event) => values.push(event.value));
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ defaultValue: 'initial' });
+  const old = h.connectionBox.current!;
+  h.module.hooks.onMountPhase?.('detached', 1);
+  h.module.hooks.onMountPhase?.('mounted', 2);
+  old.onEvent(event('input', 'stale'));
+  expect(control.snapshot()?.value).toBe('initial');
+  expect(values).toEqual([]);
+  h.connectionBox.current!.onEvent(event('input', 'current'));
+  expect(values).toEqual(['current']);
+  h.module.hooks.dispose?.();
+  h.connectionBox.current!.onEvent(event('input', 'disposed'));
+  expect(values).toEqual(['current']);
+});
+
+it('T-TEXT-CONTROL-0001-CASE-CANCEL: listener cancellation is setup-only', () => {
+  const h = createHarness();
+  const control = h.module.facade.declare();
+  const off = control.on('input', () => {});
+  off();
+  off();
+  h.sys.phase = 'callback';
+  expect(off).toThrow('illegal phase');
+});

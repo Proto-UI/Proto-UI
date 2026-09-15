@@ -2,6 +2,7 @@
 title: 'Execution Semantics'
 desp: 'Execution model and semantics'
 description: 'Execution model and semantics'
+draft: true
 ---
 
 ## What does this article answer?

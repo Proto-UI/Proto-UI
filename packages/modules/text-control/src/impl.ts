@@ -43,6 +43,7 @@ export class TextControlModuleImpl extends ModuleBase {
   private listeners: Listener[] = [];
   private host: TextControlHost | null = null;
   private lease: TextControlHostLease | null = null;
+  private leaseEpoch = 0;
 
   constructor(
     caps: CapsVaultView,
@@ -89,6 +90,7 @@ export class TextControlModuleImpl extends ModuleBase {
     };
     this.listeners = this.listeners.concat(listener);
     return () => {
+      this.sys.ensureSetup('textControl.off');
       this.listeners = this.listeners.filter((candidate) => candidate !== listener);
     };
   }
@@ -156,15 +158,20 @@ export class TextControlModuleImpl extends ModuleBase {
   private attachLease(): void {
     this.disposeLease();
     if (!this.declared || !this.host || this.mountPhase !== 'mounted') return;
+    const epoch = this.leaseEpoch;
     this.lease = this.host.attach({
       patch: this.effectivePatch(),
-      onEvent: (event) => this.receive(event),
+      onEvent: (event) => {
+        if (epoch === this.leaseEpoch) this.receive(event);
+      },
     });
   }
 
   private disposeLease(): void {
-    this.lease?.dispose();
+    this.leaseEpoch += 1;
+    const lease = this.lease;
     this.lease = null;
+    lease?.dispose();
   }
 
   private effectivePatch(): TextControlPatch {
@@ -208,7 +215,10 @@ export class TextControlModuleImpl extends ModuleBase {
       this.valueMode === 'controlled' &&
       ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
     if (!mustRestoreControlledValue) return;
-    queueMicrotask(() => this.syncLease());
+    const epoch = this.leaseEpoch;
+    queueMicrotask(() => {
+      if (epoch === this.leaseEpoch) this.syncLease();
+    });
   }
 
   private canonicalize(value: string): string {

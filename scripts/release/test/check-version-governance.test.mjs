@@ -9,7 +9,11 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = resolve(__dirname, '..', 'check-version-governance.mjs');
 
-function makeFixture({ packageVersion = '0.2.0-rc.0', entityVersion = '0.2.0-rc.0' } = {}) {
+function makeFixture({
+  packageVersion = '0.2.0-rc.0',
+  entityVersion = '0.2.0-rc.0',
+  activeSince,
+} = {}) {
   const root = mkdtempSync(join(tmpdir(), 'proto-version-governance-'));
   writeFileSync(join(root, 'VERSION'), '0.2.0-rc.0\n');
 
@@ -28,7 +32,7 @@ function makeFixture({ packageVersion = '0.2.0-rc.0', entityVersion = '0.2.0-rc.
 type: version
 title: Proto UI 0.2.0-rc.0
 status: draft
-since: ${entityVersion}
+since: ${entityVersion}${activeSince ? `\nactiveSince: ${activeSince}` : ''}
 release:
   version: ${entityVersion}
   channel: prerelease
@@ -93,6 +97,17 @@ since: 0.2.7
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /undeclared release version 0\.2\.7/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('global version governance rejects undeclared activeSince versions', () => {
+  const root = makeFixture({ activeSince: '0.3.1' });
+  try {
+    const result = runCheck(root);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /undeclared release version 0\.3\.1/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

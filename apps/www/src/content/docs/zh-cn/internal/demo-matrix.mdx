@@ -8,6 +8,8 @@ tableOfContents: false
 
 import DemoMatrix from '@/components/PrototypePreviewer/DemoMatrix.astro';
 
-这个页面是 Proto UI 官网的可执行 parity loop：当前所有 demo 会在 Web Components、React、Vue 与 Vue 2 四个官方适配器下同时挂载，便于在同一个页面发现跨适配器差异。浏览器 smoke 会验证完整挂载数、错误回退、全局适配器切换，以及 320px 窄屏的零溢出布局。它不会出现在左侧导航里。
+这个页面是 Proto UI 官网的可执行 parity loop：各个 demo 在已支持的 Web Components、React、Vue 与 Vue 2 适配器下同时挂载，便于在同一个页面发现跨适配器差异。尚未接入的能力会明确标记，不计为成功挂载；目前 Image View 尚不支持 Vue 2。浏览器 smoke 会验证支持范围内的完整挂载数、错误回退、全局适配器切换，以及 320px 窄屏的零溢出布局。它不会出现在左侧导航里。
+
+官网代码展示的 [#630](https://github.com/Proto-UI/Proto-UI/issues/630) 切片归入 [#420](https://github.com/Proto-UI/Proto-UI/issues/420) 与 [#568](https://github.com/Proto-UI/Proto-UI/issues/568) 的 dogfood 跟踪，并保留独立的[浏览器回归](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts)与[证据](https://github.com/Proto-UI/Proto-UI/tree/main/apps/www/test/evidence/issue-630)。它比较 320px、390px、桌面宽度下浅色／深色的 Markdown 与 Previewer 代码区域，并检查 CodeExample 页面导航、重复 `astro:page-load` 初始化和安装命令样式。当前站点采用整页导航，未启用 Astro ClientRouter；这些检查不声称覆盖 SPA swap，也不改变 Prototype／Adapter 的保证。
 
 <DemoMatrix />

@@ -17,6 +17,7 @@ sources:
   - path: packages/modules/image-view/src/create.ts
   - path: packages/modules/image-view/src/declaration.ts
   - path: packages/modules/image-view/src/types.ts
+  - path: packages/modules/image-view/src/web.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced
@@ -24,6 +25,27 @@ revisions:
       Added the draft Image View module for generation-bound image presentation with loading status transitions and stale completion rejection.
 
 
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Made generation ownership, callback scope and setup cancellation addressable.
+
 tags:
   - image
   - module
+criteria:
+  - id: M-IMAGE-VIEW-0001-A
+    text:
+      en: The instance owns source, fit, validated informative/decorative input and loading status. Source changes start a generation before host work; only one terminal result of the current generation and attachment may update state or emit a transition.
+      zh-CN: instance 拥有 source、fit、校验后的 informative/decorative input 与 loading status。source 改变先建立 generation 再启动 host work；仅当前 generation/attachment 的首次 terminal result 可改写 state 或派发 transition。
+  - id: M-IMAGE-VIEW-0001-B
+    text:
+      en: Static declaration permits one setup handle. Missing hosts retain logical facts; replacement, view detach and disposal retire old leases, and remount starts a current loading generation. Native image readiness and rendering remain host-owned.
+      zh-CN: 静态 declaration 允许一个 setup handle。缺失 host 保留 logical facts；替换、view detach、dispose 撤销旧 lease，remount 启动当前 loading generation。native image readiness/rendering 归 host。
+  - id: M-IMAGE-VIEW-0001-C
+    text:
+      en: Listener registration and returned cancellation are setup-only. Runtime sync and transition delivery require valid callback scope; an absent or invalid async callback bridge diagnoses instead of silently dropping listeners.
+      zh-CN: listener 注册及返回取消函数仅 setup 可用。runtime sync 与 transition delivery 要求有效 callback scope；异步 callback bridge 缺失或无效时诊断，不静默丢失 listener。
+dependsOn:
+  contracts:
+    - id: C-CORE-SYNTAX-0007
+      since: 0.3.0-alpha.0

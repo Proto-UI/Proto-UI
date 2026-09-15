@@ -175,6 +175,15 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
         : 'Host-mediated native multiline text editing.',
       href: './textarea/',
     },
+    {
+      id: 'image',
+      name: 'Image',
+      demoId: 'demo-base-image',
+      description: isZh
+        ? '宿主图片呈现、替代文本与加载状态。'
+        : 'Host-owned images, alternative text, and loading status.',
+      href: './image/',
+    },
   ],
   shadcn: [
     {
@@ -237,6 +246,15 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
         ? '为链接或对象补充上下文。'
         : 'Supplementary context for links or objects.',
       href: './hover-card/',
+    },
+    {
+      id: 'tooltip',
+      name: 'Tooltip',
+      demoId: 'demo-shadcn-tooltip',
+      description: isZh
+        ? '保留 Base 延时与定位的紧凑补充说明表面。'
+        : 'A compact supplementary surface that preserves Base timing and positioning.',
+      href: './tooltip/',
     },
     {
       id: 'separator',
@@ -302,6 +320,15 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
         ? '带硬边结构的四部分被动内容分组表面。'
         : 'A passive four-part content grouping surface with hard-edged structure.',
       href: './components/card/',
+    },
+    {
+      id: 'checkbox',
+      name: 'Checkbox',
+      demoId: 'demo-brutalist-checkbox',
+      description: isZh
+        ? '带硬阴影与高对比 tick/mixed glyph 的方形勾选面。'
+        : 'A square check surface with a hard shadow and high-contrast tick or mixed glyph.',
+      href: './components/checkbox/',
     },
     {
       id: 'toggle',

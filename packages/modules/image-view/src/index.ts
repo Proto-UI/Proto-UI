@@ -11,3 +11,4 @@ export {
 } from './caps';
 export { createImageViewModule, ImageViewModuleDef, ImageViewModuleImpl } from './create';
 export type { ImageViewFacade, ImageViewModule, ImageViewPort } from './types';
+export * from './web';

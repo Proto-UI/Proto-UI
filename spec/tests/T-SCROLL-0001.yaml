@@ -3,13 +3,14 @@ type: test
 title: Scroll domain, module, and host capability conformance
 status: draft
 since: 0.2.0-rc.7
-summary: Covers privileged surface identity, host-owned facts, request causality, projection negotiation, session cleanup, and cross-host accessibility boundaries.
+summary: Covers stable surface identity, host facts and requests, projection negotiation, current-session cleanup and bounded Web accessibility neutrality; non-Web conformance remains open.
 cases:
   - id: T-SCROLL-0001-CASE-SINGLETON
     title: asScrollSurface installs once and returns one stable handle
     covers:
       - C-AS-SCROLL-SURFACE-0001-A
       - C-AS-SCROLL-SURFACE-0001-B
+      - M-SCROLL-0001-A
     expectation: no-arg-scroll-surface-singleton-with-setup-only-configuration
   - id: T-SCROLL-0001-CASE-FACTS
     title: host facts remain observed and cannot be author-written
@@ -18,6 +19,8 @@ cases:
       - C-SCROLL-0001-D
       - C-AS-SCROLL-SURFACE-0001-C
       - C-AS-SCROLL-SURFACE-0001-E
+      - M-SCROLL-0001-B
+      - HC-SCROLL-SURFACE-0001-B
     expectation: host-reported-normalized-scroll-facts-without-raw-target-access
   - id: T-SCROLL-0001-CASE-REQUEST
     title: requests apply through the host before facts change
@@ -35,6 +38,7 @@ cases:
       - D-SCROLL-PROJECTION-0001-D
       - HC-SCROLL-SURFACE-0001-A
       - C-AS-SCROLL-SURFACE-0001-F
+      - M-SCROLL-0001-C
     expectation: adapter-preference-and-host-support-resolve-one-projection
   - id: T-SCROLL-0001-CASE-LIFETIME
     title: detach and replacement revoke the old host session
@@ -44,11 +48,19 @@ cases:
       - M-SCROLL-0001-D
     expectation: old-scroll-session-disposed-and-late-facts-ignored
   - id: T-SCROLL-0001-CASE-A11Y
-    title: neutral scroll semantics do not require ARIA on non-Web hosts
+    title: Web projection leaves accessibility ownership separate
     covers:
       - C-SCROLL-0001-G
       - HC-SCROLL-SURFACE-0001-E
-    expectation: host-specific-accessibility-projection-from-neutral-scroll-semantics
+    expectation: no-invented-aria-role-in-web-host-helper-not-non-web-certification
+  - id: T-SCROLL-0001-CASE-ADAPTER
+    title: Four real Adapter request/fact and cleanup paths
+    covers:
+      - A-REACT-18-19-0001-SCROLL
+      - A-VUE-3-0001-SCROLL
+      - A-VUE-2-0001-SCROLL
+      - A-WEB-COMPONENT-0001-SCROLL
+    expectation: host-request-changes-physical-offset-then-observed-facts-and-cleanup-stops-input
 implementations:
   - id: scroll-module-projection-negotiation
     kind: module-test
@@ -91,12 +103,80 @@ implementations:
     path: packages/adapters/vue/test/scroll.test.ts
     required: true
     consumesCases: [T-SCROLL-0001-CASE-PROJECTION]
+  - id: scroll-session-lifetime
+    kind: module-test
+    status: passing
+    path: packages/modules/scroll/test/session-lifetime.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-0001-CASE-LIFETIME
+  - id: react-scroll-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/scroll-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-0001-CASE-ADAPTER
+  - id: vue-scroll-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/scroll-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-0001-CASE-ADAPTER
+  - id: vue2-scroll-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/scroll-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-0001-CASE-ADAPTER
+  - id: web-component-scroll-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/scroll-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-0001-CASE-ADAPTER
 verifies:
   contracts:
     - C-SCROLL-0001
     - C-AS-SCROLL-SURFACE-0001
   decisions:
     - D-SCROLL-PROJECTION-0001
+  modules:
+    - id: M-SCROLL-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - M-SCROLL-0001-A
+        - M-SCROLL-0001-B
+        - M-SCROLL-0001-C
+        - M-SCROLL-0001-D
+  hostCaps:
+    - id: HC-SCROLL-SURFACE-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - HC-SCROLL-SURFACE-0001-A
+        - HC-SCROLL-SURFACE-0001-B
+        - HC-SCROLL-SURFACE-0001-C
+        - HC-SCROLL-SURFACE-0001-D
+  adapters:
+    - id: A-REACT-18-19-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-REACT-18-19-0001-SCROLL
+    - id: A-VUE-3-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-3-0001-SCROLL
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-SCROLL
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-WEB-COMPONENT-0001-SCROLL
 exercises:
   modules:
     - M-SCROLL-0001
@@ -106,4 +186,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Planned the executable conformance surface for Scroll facts, requests, projection negotiation, lifetime, and accessibility.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Added explicit M/HC/A mappings and failing-to-passing stale-session evidence; narrowed accessibility evidence wording.
 tags: [scroll, test, module, host-capability]

@@ -23,10 +23,12 @@ test('Demo Matrix remains development-only documentation', async () => {
   }
 });
 
-test('Demo Matrix renders every adapter side by side for each demo', async () => {
+test('Demo Matrix renders every adapter column and identifies unavailable Image support', async () => {
   const source = await readFile(matrixComponent, 'utf8');
 
-  assert.match(source, /demos\.length \* runtimes\.length/);
+  assert.match(source, /\{previewCount\}/);
+  assert.match(source, /demoId === 'demo-base-image' && runtime === 'vue2'/);
+  assert.match(source, /data-unavailable=/);
   assert.match(source, /runtimes\.map\(\(runtime\) =>/);
   assert.match(source, /initialRuntime=\{runtime\}/);
   assert.match(source, /runtimes=\{\[runtime\]\}/);

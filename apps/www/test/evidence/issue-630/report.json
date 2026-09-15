@@ -1,0 +1,170 @@
+{
+  "issue": "https://github.com/Proto-UI/Proto-UI/issues/630",
+  "observedAt": "2026-09-08",
+  "scope": "Website documentation code presentation only; no Prototype/Adapter/Runtime/CLI/package guarantees changed.",
+  "baseline": {
+    "head": "9b51ca78a231604e98b954075c75adf134aa8fbd",
+    "provenance": "Retained prior-attempt baseline build served on 4323; all eight retained baseline source files were byte-equal to HEAD. Build output itself was retained, not rebuilt during this resume.",
+    "renderedFacts": "before/facts.json",
+    "failure": "390px/light comparison fails: EC monospace 14.4px/23.76px rgb(246,247,249) versus Previewer ui-monospace 13px/24px lab(96.52 ...). Previewer inline paint is overridden by two @layer utilities !important rules and collapsed content is unselectable.",
+    "command": "PROTO_UI_BROWSER_BASE_URL=http://127.0.0.1:4323 CODEBOX_TEST_NAME=390px/light npm exec --yes --package=node@22 -- node --experimental-strip-types --import ./.codebox-browser-preload.mjs .codebox-run.mjs src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+    "exitCode": 1,
+    "tests": "1 expected failure, 6 filtered out"
+  },
+  "decisions": [
+    "Single code-surfaces layer after starlight, utilities and dynamically installed proto-ui control defaults; existing relative layer order preserved.",
+    "One github-light/github-dark pair consumed by both renderers; explicit data-theme selection; EC contrast adjustment disabled to preserve identical supplied palettes rather than renderer-specific transformed colors.",
+    "Shiki defaultColor:false emits theme custom properties, not inline paint; only styled tokens get theme colors; plain code inherits the shared foreground.",
+    "Copy controls always discoverable when available, including touch; existing Previewer expansion gate retained. Shared 32px target/18px glyph/6px radius/focus ring.",
+    "The pre owns internal keyboard/pointer scrolling in both expansion states; selecting code is no longer disabled. Sticky line numbers have an opaque code background.",
+    "Install command uses pre/code semantics to avoid inline-code prose styling, but only the code child preserves whitespace so template indentation does not add blank lines."
+  ],
+  "partialFixCorrections": [
+    "Added foreground equality assertions; caught and fixed Expressive Code inner code retaining its own color.",
+    "Added rendered single-line install height assertion; caught 120.2px content instead of <=25px and fixed pre wrapper whitespace.",
+    "Replaced draft matrix links that resolved to nonexistent website paths with repository test/evidence links; refreshed all screenshots."
+  ],
+  "environment": {
+    "node": "v22.23.1",
+    "pnpm": "10.32.1",
+    "browser": "Google Chrome 151.0.7922.108",
+    "surface": "production Astro build served at http://127.0.0.1:4321",
+    "transport": "Supervised Chrome CDP at http://127.0.0.1:9223; local preload attaches Playwright instead of launching Chrome inside the tool mount namespace."
+  },
+  "checks": [
+    {
+      "name": "build",
+      "command": "corepack pnpm@10.32.1 --filter apps-www build",
+      "environment": {},
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/build.log"
+    },
+    {
+      "name": "browser-matrix",
+      "command": "node --experimental-strip-types --import ./.codebox-browser-preload.mjs .codebox-run.mjs src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+      "environment": {
+        "PROTO_UI_BROWSER_BASE_URL": "http://127.0.0.1:4321",
+        "PROTO_UI_CODE_EVIDENCE_DIR": "/tmp/codebox-630-resume/after"
+      },
+      "exitCode": 1,
+      "log": "/tmp/codebox-630-resume/browser-matrix.log"
+    },
+    {
+      "name": "build-final",
+      "command": "corepack pnpm@10.32.1 --filter apps-www build",
+      "environment": {},
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/build-final.log"
+    },
+    {
+      "name": "browser-matrix-final",
+      "command": "node --experimental-strip-types --import ./.codebox-browser-preload.mjs .codebox-run.mjs src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+      "environment": {
+        "PROTO_UI_BROWSER_BASE_URL": "http://127.0.0.1:4321",
+        "PROTO_UI_CODE_EVIDENCE_DIR": "/tmp/codebox-630-resume/after"
+      },
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/browser-matrix-final.log"
+    },
+    {
+      "name": "code-panel-unit",
+      "command": "node --experimental-strip-types .codebox-run.mjs src/components/PrototypePreviewer/code-panel-client.test.ts",
+      "environment": {},
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/code-panel-unit.log"
+    },
+    {
+      "name": "docs-types",
+      "command": "corepack pnpm@10.32.1 --filter apps-www check",
+      "environment": {},
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/docs-types.log"
+    },
+    {
+      "name": "public-docs",
+      "command": "corepack pnpm@10.32.1 check:public-docs",
+      "environment": {},
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/public-docs.log"
+    },
+    {
+      "name": "content-flow",
+      "command": "node --experimental-strip-types --import ./.codebox-browser-preload.mjs .codebox-run.mjs src/content/docs/zh-cn/docs-content-flow.browser.test.ts",
+      "environment": {
+        "PROTO_UI_BROWSER_BASE_URL": "http://127.0.0.1:4321"
+      },
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/content-flow.log"
+    },
+    {
+      "name": "workspace-types",
+      "command": "corepack pnpm@10.32.1 check:types:workspace",
+      "environment": {},
+      "exitCode": 0,
+      "log": "/tmp/codebox-630-resume/workspace-types.log"
+    }
+  ],
+  "testResults": {
+    "codeSurfaceMatrix": "7/7 passed: light/dark at 1440,390,320; opposite OS preference; palette equality for same source; ordinary author overrides; rendered copy geometry/focus/visibility; drag selection and ArrowRight scrolling; CodeExample full navigation and repeat astro:page-load; install tokens and single-line geometry.",
+    "codePanelClient": "7/7 passed, including exact raw copy, projected activation, expansion/reset/hidden measurement/idempotence.",
+    "bilingualContentFlow": "6/6 passed at 1440,390,320.",
+    "build": "238 pages; exit 0.",
+    "astroCheck": "191 files; 0 errors, 0 warnings, 0 hints.",
+    "publicDocs": "108 bilingual routes, 4 library inventories; exit 0.",
+    "workspaceTypes": "exit 0."
+  },
+  "browserSmoke": {
+    "manualActions": "Expand Previewer, click Previewer copy and EC copy, toggle actual site theme control.",
+    "clipboard": {
+      "previewMatchesRawSource": true,
+      "previewCharacters": 955,
+      "markdownMatchesSource": true,
+      "markdownCharacters": 35
+    },
+    "themeTransition": "light -> dark",
+    "permissionNote": "Initial Previewer write was denied because Puppeteer permissions lacked clipboard-sanitized-write; after granting clipboard-read, clipboard-write and clipboard-sanitized-write, both real copy actions matched exactly. No application changes were made for the harness permission error.",
+    "visualInspection": [
+      "390-dark-expanded.png",
+      "390-dark-expanded-markdown.png",
+      "1440-dark-expanded-markdown.png",
+      "390-light-install.png"
+    ]
+  },
+  "validationWorkarounds": {
+    "standardCommand": "corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+    "standardResult": "Blocked before collection by unrelated corrupt /tmp/package.json (Unexpected NUL). Programmatic root-only bypass also failed while dependency/PostCSS search reached /tmp. File was not modified.",
+    "effectiveConfiguration": "Local runner imports unchanged vitest.config.ts, keeps its plugins and test environment, narrows root/include to apps/www and supplies empty inline PostCSS config to stop ancestor lookup. Runs the actual checked-in tests against production output with no assertion changes or mocks.",
+    "runnerSource": "// Disposable local runner: load the unchanged Vitest configuration without bundling it.\nimport { startVitest } from 'vitest/node';\nglobalThis.__dirname = process.cwd();\nconst { default: config } = await import('./vitest.config.ts');\nconst ctx = await startVitest('test', process.argv.slice(2), {\n  ...config.test,\n  run: true,\n  config: false,\n  root: `${process.cwd()}/apps/www`,\n  include: ['src/**/*.test.ts'],\n  testNamePattern: process.env.CODEBOX_TEST_NAME,\n}, { plugins: config.plugins, css: { postcss: {} } });\nawait ctx?.close();\n",
+    "browserPreloadSource": "// Local validation transport only: Chrome cannot execute inside this mount namespace.\nimport { chromium } from './apps/www/node_modules/playwright-core/index.mjs';\nchromium.launch = () => chromium.connectOverCDP('http://127.0.0.1:9223');\n",
+    "normalEnvironmentCommand": "PROTO_UI_BROWSER_BASE_URL=http://127.0.0.1:4321 PROTO_UI_CODE_EVIDENCE_DIR=/tmp/codebox-evidence corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts apps/www/src/components/PrototypePreviewer/code-panel-client.test.ts apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts",
+    "runtimeOrchestration": "The code-surface suite is registered in scripts/test/runtime-test-plan.mjs BROWSER_SUITES, and its Transition and Shadcn Button routes are warmed by scripts/test/run-runtime-tests.mjs READY_ROUTES. The shared runner therefore excludes it from the no-server phase and runs it sequentially in the shared-server browser phase.",
+    "runtimeOrchestrationResult": "node scripts/test/run-runtime-tests.mjs was rerun for this follow-up; it reached Vitest startup and exited 1 on the unrelated host /tmp/package.json NUL parse error before collecting tests. The captured output is /tmp/codebox-631-follow-up-runtime.log; no repository file was modified by the workaround."
+  },
+  "skipped": [
+    "Repository-wide test and release/package consumer suites: no package/protocol/release changes; focused website/browser/client suites, workspace types, docs types and production build exercised the affected graph.",
+    "Firefox/WebKit/physical touch devices: Chromium-only evidence; narrow widths do not claim physical-device coverage.",
+    "Astro ClientRouter swaps: not enabled on this site. Evidence covers real full-document navigation and repeat astro:page-load initialization, not SPA navigation.",
+    "WCAG contrast audit: not performed; shared supplied GitHub palettes retained without EC-only contrast transforms.",
+    "Remote PR CI/deployment: not part of local validation and not rerun or deployed manually."
+  ],
+  "buildWarnings": [
+    "Existing ./assets/font/GeistVF.woff2 reference did not resolve at build time.",
+    "Pagefind does not stem zh-cn; search index still generated successfully."
+  ],
+  "sourceSha256": {
+    "apps/www/astro.config.mjs": "179eddcec028a6e54b1ef4c8edf3d78cad532d75a495aadfae3e95a2461361c9",
+    "apps/www/src/components/CodeExample.astro": "37ba07463b4f673c7217aac090da66bb3df41b369fb13fc653be7771a98bc831",
+    "apps/www/src/components/InstallCommandCard.astro": "e55907df1e4ad1d88c1ab5489cf5697399e0f285668cea46580cddd34dbfc5be",
+    "apps/www/src/components/PrototypePreviewer/CodePanel.astro": "cf3f9dbe41ffd8248860bd623a74157e3e59f6c53bc59f9bde34e5d7c269ab4f",
+    "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro": "0811a608f2a7abf5733c7cb05c09d1c84038c36e55c28160463fab859e63c652",
+    "apps/www/src/components/PrototypePreviewer/code-highlight.ts": "104ee34161c693b38a24b646aa4ed0d4a710fb60ffcc0ed80af800363cba9328",
+    "apps/www/src/content/docs/en/internal/demo-matrix.mdx": "3adf34b8fc5b89ee6afcb08a3204c5300c7a9127fec6381949a88b605fe04d19",
+    "apps/www/src/content/docs/zh-cn/internal/demo-matrix.mdx": "02a68a267c1f4b49ffa69db5868b6bb84bbd61772e1292c980d0194189af743c",
+    "apps/www/src/env.d.ts": "b18c170a640871a6e352cb81abbf69edbcff28100ba9c1188179fcc94574bea7",
+    "apps/www/src/styles/global.css": "8a66cfc3bdaf5791b77ee3bb4cc1ce07852f6cf3a604415b51e293d5de023793",
+    "apps/www/src/styles/markdown.css": "2de6d5097d4aa13f7e60c0299a5cb27af89c95157f1db3bbb91d78a689c57a7b",
+    "apps/www/src/styles/code-surfaces.css": "74551feb1cb892a57802196b60fb113d4eeb4cc6fa1851282c28e432a1469c14",
+    "apps/www/src/components/PrototypePreviewer/code-themes.mjs": "0ed06f21952d00ee1e956182ba47e30a38f8a8f7c6d02bbcc790a52ff28220da",
+    "apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts": "5471dda8652475661bad9e3d646aafa22f5cdfd3f14d7558bce9903f277eec2e"
+  }
+}

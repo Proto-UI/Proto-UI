@@ -65,6 +65,11 @@ cases:
       - C-AS-OVERLAY-0001-N
       - C-AS-OVERLAY-0001-O
     expectation: overlay-delegates-positioning-and-boundary-classification-without-exposing-anatomy-target
+  - id: T-AS-OVERLAY-0001-CASE-MODULE
+    title: Overlay coordination boundary
+    covers:
+      - M-OVERLAY-0001-A
+    expectation: one-logical-owner-and-one-presence-driver-with-distinct-view-lifetime
 implementations:
   - id: runtime-overlay-contract
     kind: runtime-test
@@ -79,6 +84,7 @@ implementations:
       - T-AS-OVERLAY-0001-CASE-DISMISS
       - T-AS-OVERLAY-0001-CASE-POST-CALLBACK-RECONCILE
       - T-AS-OVERLAY-0001-CASE-ANCHORED
+      - T-AS-OVERLAY-0001-CASE-MODULE
   - id: base-overlay-transition-contract
     kind: runtime-test
     status: passing
@@ -87,6 +93,7 @@ implementations:
     consumesCases:
       - T-AS-OVERLAY-0001-CASE-BOUND
       - T-AS-OVERLAY-0001-CASE-CONFLICT
+      - T-AS-OVERLAY-0001-CASE-MODULE
   - id: base-dropdown-overlay-anchor-boundary-contract
     kind: module-test
     status: passing
@@ -144,6 +151,11 @@ verifies:
     - id: C-LIFECYCLE-0008
       anchors:
         - C-LIFECYCLE-0008-E
+  modules:
+    - id: M-OVERLAY-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - M-OVERLAY-0001-A
 exercises:
   decisions:
     - id: D-AS-HOOK-PRIVILEGED-NO-ARG-MIGRATION-0001

@@ -1,11 +1,12 @@
 import type { DefHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
-import { asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
 import type { ToggleAsHookContract, ToggleExposes, ToggleProps, ToggleStateHandles } from './types';
 
 export type { ToggleProps, ToggleExposes, ToggleStateHandles, ToggleAsHookContract } from './types';
 
 function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
+  const accessible = asAccessible();
   // P-BASE-TOGGLE-ROLE-ACTIVE-CONTROL, P-BASE-TOGGLE-PROTOCOL-INDEPENDENCE
   // P-BASE-TOGGLE-TRIGGER-SEMANTICS
   asTrigger();
@@ -53,13 +54,13 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
   def.expose.event('activeChange', { payload: 'json' });
 
   // P-BASE-TOGGLE-ACCESSIBLE-ROLE
-  def.a11y.role('button');
+  accessible.role('button');
   // P-BASE-TOGGLE-ACCESSIBLE-NAME
-  def.a11y.nameFromContent();
+  accessible.nameFromContent();
   // P-BASE-TOGGLE-A11Y-PRESSED
-  def.a11y.state('pressed', active);
-  def.a11y.state('disabled', disabled);
-  def.a11y.action('activate', { event: 'activeChange' });
+  accessible.state('pressed', active);
+  accessible.state('disabled', disabled);
+  accessible.action('activate', { event: 'activeChange' });
 
   let controlled = false;
 

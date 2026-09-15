@@ -138,7 +138,9 @@ function collectVersionReferences(value, path = [], references = []) {
     const nextPath = [...path, key];
     if (
       typeof entry === 'string' &&
-      ['since', 'until', 'deprecatedSince', 'removedSince', 'version'].includes(key) &&
+      ['since', 'until', 'activeSince', 'deprecatedSince', 'removedSince', 'version'].includes(
+        key
+      ) &&
       /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(entry)
     ) {
       references.push({ path: nextPath.join('.'), version: entry });

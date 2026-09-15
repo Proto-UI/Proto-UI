@@ -162,6 +162,7 @@ export {
 
 export * from './scroll-area';
 export * from './tooltip';
+export * from './checkbox';
 export type {
   BrutalistDialogRootProps,
   BrutalistDialogRootExposes,

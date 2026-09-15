@@ -49,9 +49,11 @@ export type A11ySemanticObjectSnapshot = {
   relations: Record<A11yRelationKey, string | null | undefined>;
   relationModes?: Record<A11yRelationKey, A11yRelationMode>;
   tree?: A11yTreeSnapshot;
+  level?: number;
 };
 
-export type A11yDefAPI = {
+/** Setup-only declarations for the current logical instance; acquired through asAccessible(). */
+export type AccessibleHandle = {
   id(target: A11yIdentityTarget): void;
   role(role: A11yRoleTarget): void;
   name(value: A11yTextTarget): void;
@@ -61,4 +63,5 @@ export type A11yDefAPI = {
   action(key: A11yActionKey, spec?: A11yActionSpec): void;
   relation(key: A11yRelationKey, spec: A11yRelationSpec): void;
   tree(patch: A11yTreeBehavior): void;
+  level(value: number | State<number>): void;
 };

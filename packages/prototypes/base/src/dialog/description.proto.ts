@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { createDialogPartId, DIALOG_CONTEXT, DIALOG_FAMILY } from './shared';
 import type {
@@ -9,10 +10,11 @@ import type {
 function setupDialogDescription(
   def: DefHandle<DialogDescriptionProps, DialogDescriptionExposes>
 ): void {
+  const accessible = asAccessible();
   // P-BASE-DIALOG-DESCRIPTION-RELATION
   def.anatomy.claim(DIALOG_FAMILY, { role: 'description' });
   const id = def.state.string('dialogDescriptionId', '');
-  def.a11y.id(id);
+  accessible.id(id);
   def.context.subscribe(DIALOG_CONTEXT, (_run, next) => {
     id.set(createDialogPartId(next.rootId, 'description'), 'reason: dialog description id sync');
   });

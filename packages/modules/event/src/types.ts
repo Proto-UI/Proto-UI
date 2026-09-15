@@ -36,7 +36,13 @@ export type EventModule = ModuleInstance<EventFacade> & {
   scope: 'instance';
 };
 
+export type EventInputContext = Readonly<{ scope: object; sample: object }>;
+
 export type EventPort = ModulePort & {
+  /** Opaque shared scope; neither the scope nor sample token exposes host objects. */
+  getGlobalInputScope?(): object | null;
+  /** Available only during the synchronous dispatch of this exact payload. */
+  getInputContext?(payload: ProtoEventPayload): EventInputContext | null;
   /**
    * Setup-only module-facing listener registration.
    *

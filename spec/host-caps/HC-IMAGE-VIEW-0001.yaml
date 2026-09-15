@@ -25,6 +25,7 @@ verifies:
 sources:
   - path: packages/modules/image-view/src/caps.ts
   - path: packages/modules/image-view/src/create.ts
+  - path: packages/modules/image-view/src/web.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced
@@ -32,6 +33,15 @@ revisions:
       Cataloged the Image View host lease for one host-owned image presentation target with generation-bound lifecycle.
 
 
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Made request-bound Web realization and cleanup addressable without generalizing readiness across hosts.
+
 tags:
   - image
   - host-capability
+criteria:
+  - id: HC-IMAGE-VIEW-0001-A
+    text:
+      en: The host owns one image target and immutable request identity, projects current source/alternative text/fit, and clears replaced visuals. Web completion comes from a complete displayable image or request-bound decode settlement; stale settlements and native load/error events cannot become current portable transitions. Disposal releases the target and listeners.
+      zh-CN: host 拥有一个 image target 与不可变 request identity，投射当前 source/alternative text/fit 并清除被替换视觉。Web completion 来自 complete 且可展示图像或绑定 request 的 decode settlement；旧 settlement 与 native load/error 不得成为当前 portable transition。dispose 释放 target 与 listener。

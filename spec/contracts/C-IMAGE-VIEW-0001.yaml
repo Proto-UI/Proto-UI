@@ -51,6 +51,7 @@ criteria:
 sources:
   - path: packages/modules/image-view/src/create.ts
   - path: packages/prototypes/base/src/image/root.proto.ts
+  - path: packages/modules/image-view/src/web.ts
 dependsOn:
   decisions:
     - D-IMAGE-VIEW-PROJECTION-0001

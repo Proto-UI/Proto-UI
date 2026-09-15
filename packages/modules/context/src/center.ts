@@ -116,7 +116,7 @@ export class ContextCenter {
     if (!byKey) return null;
 
     let cur: ContextInstanceToken | null = consumer;
-    while (cur) {
+    while (cur !== null) {
       if (byKey.has(cur)) return cur;
       cur = getParent(cur);
     }
@@ -155,7 +155,7 @@ export class ContextCenter {
     getParent: ContextParentGetter
   ): boolean {
     const provider = this.resolveProvider(consumer, key, getParent);
-    if (!provider) return false;
+    if (provider === null) return false;
 
     this.updateFromProvider(provider, key, next, ctx, getParent);
     return true;
@@ -176,7 +176,8 @@ export class ContextCenter {
       if (!rec || rec.callbacks.length === 0) continue;
 
       const bound = this.resolveProvider(instance, key, getParent);
-      if (bound !== provider) continue;
+      // Match the SameValueZero identity used by the provider Map (including NaN).
+      if (bound !== provider && !Object.is(bound, provider)) continue;
 
       const task: ContextCallbackTask = {
         instance,

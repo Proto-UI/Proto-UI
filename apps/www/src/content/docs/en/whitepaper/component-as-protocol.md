@@ -2,6 +2,7 @@
 title: 'Component as Protocol'
 desp: 'Core idea: component as protocol'
 description: 'Core idea: component as protocol'
+draft: true
 ---
 
 ## What does this article answer?

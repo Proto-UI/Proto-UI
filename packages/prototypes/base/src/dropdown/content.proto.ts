@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
-import { asBoundary, asFocusRoving, asFocusScope, asOverlay } from '@proto.ui/hooks';
+import { asAccessible, asBoundary, asFocusRoving, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { useTypeaheadNavigation } from '../behaviors';
 import { asTransition } from '../tools';
 import {
@@ -32,6 +32,7 @@ function setupDropdownContent(
   _options?: void,
   api?: { store: Record<string, unknown> }
 ): void {
+  const accessible = asAccessible();
   def.anatomy.claim(DROPDOWN_FAMILY, { role: 'content' });
   def.props.define({
     side: { type: 'enum', empty: 'fallback', options: ['top', 'right', 'bottom', 'left'] },
@@ -55,9 +56,9 @@ function setupDropdownContent(
   const contentId = def.state.string('dropdownContentId', '');
   const orientation = def.state.string('dropdownOrientation', 'vertical');
   // P-BASE-DROPDOWN-MENU-CONTENT-A11Y
-  def.a11y.id(contentId);
-  def.a11y.role('menu');
-  def.a11y.state('orientation', orientation);
+  accessible.id(contentId);
+  accessible.role('menu');
+  accessible.state('orientation', orientation);
 
   let currentContext: DropdownContextValue | null = null;
   const focusScope = asFocusScope<DropdownContentProps>();

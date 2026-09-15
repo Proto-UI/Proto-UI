@@ -108,6 +108,17 @@ implementations:
     required: true
     consumesCases:
       - T-CONTEXT-0002-CASE-CALLBACK-DELIVERY
+  - id: context-runtime-instance-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/context-lifecycle.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-CONTEXT-0002-CASE-RUNTIME-UPDATE
+      - T-CONTEXT-0002-CASE-CALLBACK-DELIVERY
+      - T-CONTEXT-0002-CASE-RECONNECT-CLEANUP
+    notes:
+      - Proves provider self-update without subscription and repeatable-view preservation versus terminal cleanup; diagnostics remain covered by module tests.
 verifies:
   contracts:
     - id: C-CONTEXT-0006

@@ -76,6 +76,7 @@ try {
     },
     devDependencies: {
       '@happy-dom/global-registrator': '20.11.0',
+      '@types/node': '25.6.2',
       '@types/react': '19.2.14',
       '@types/react-dom': '19.2.3',
       tsx: '4.21.0',

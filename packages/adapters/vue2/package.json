@@ -26,7 +26,8 @@
     "@proto.ui/module-text-control": "workspace:*",
     "@proto.ui/module-props": "workspace:*",
     "@proto.ui/module-rule-expose-state-web": "workspace:*",
-    "@proto.ui/module-rule-meta": "workspace:*"
+    "@proto.ui/module-rule-meta": "workspace:*",
+    "@proto.ui/module-image-view": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/prototypes-base": "workspace:*",

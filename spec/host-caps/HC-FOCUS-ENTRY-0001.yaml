@@ -1,0 +1,27 @@
+id: HC-FOCUS-ENTRY-0001
+type: host-cap
+title: Host resolves Focus entry regions and sequential fallback participation
+status: draft
+since: 0.3.0-alpha.0
+summary: Host resolves Focus entry regions and sequential fallback participation.
+criteria:
+  - id: HC-FOCUS-ENTRY-0001-A
+    text:
+      en: 'Given an entry region and policy, the host resolves a descendant-first target or the permitted self fallback. With no allowed target it returns absence and does not create target facts for the region.'
+      zh-CN: '给定 entry region 与 policy，宿主解析 descendant-first target 或允许的 self fallback。没有允许 target 时返回缺失，不为 region 创建 target facts。'
+  - id: HC-FOCUS-ENTRY-0001-B
+    text:
+      en: 'Sequential participation of the region is projected as a self fallback only when entry resolution needs it. Runtime entry disable suppresses entry requests and the region fallback; entry policy remains distinct from declaring a focusable target.'
+      zh-CN: 'region 的顺序参与仅在 entry resolution 需要时投射为 self fallback。runtime entry disable 抑制 entry request 与 region fallback；entry policy 与声明 focusable target 分离。'
+dependsOn:
+  contracts: [C-AS-FOCUS-ENTRY-0001]
+  decisions: [D-FOCUS-ENTRY-DELEGATION-0001]
+verifies:
+  tests: [T-FOCUS-0001, T-FOCUS-0002]
+sources:
+  - path: packages/modules/focus/src/caps.ts
+  - path: packages/adapters/base/src/platform/focus-entry.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged bounded Focus ownership and executable evidence.

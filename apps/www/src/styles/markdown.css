@@ -1,4 +1,41 @@
 @layer components {
+  /* The embedded SVG uses this scheme, including when the site overrides the OS theme. */
+  .whitepaper-diagram {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color-scheme: light;
+  }
+
+  [data-theme='dark'] .whitepaper-diagram {
+    color-scheme: dark;
+  }
+
+  .whitepaper-figure > button {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 8px;
+    cursor: zoom-in;
+  }
+
+  .whitepaper-figure > button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 4px;
+  }
+
+  .whitepaper-figure figcaption {
+    margin-top: 8px;
+    color: var(--color-muted-foreground);
+    font-size: 13px;
+    text-align: center;
+  }
+
   .main-frame {
     min-width: 0;
     width: 100%;
@@ -20,7 +57,7 @@
    */
   .docs-content-flow {
     --docs-content-flow-space: calc(var(--spacing) * 4);
-    margin-block-start: var(--docs-content-flow-space);
+    margin-block-start: 2rem;
   }
 
   .docs-content-flow > :where(* + *) {
@@ -55,22 +92,55 @@
     @apply leading-[1.625] [&:not(:first-child)]:mt-4;
   }
 
+  /* Prose has a roomier rhythm; embedded MDX roots retain the 1rem flow gap. */
+  main[data-pagefind-body] .docs-content-flow > p,
+  main[data-pagefind-body] .docs-content-flow > blockquote p,
+  main[data-pagefind-body] .docs-content-flow > :is(ul, ol) li {
+    line-height: 1.8;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > :is(p, ul, ol) + :is(p, ul, ol) {
+    margin-block-start: 1.5rem;
+  }
+
   main[data-pagefind-body] a {
     overflow-wrap: anywhere;
+  }
+
+  /* Decorate prose links without changing embedded demos or navigation controls. */
+  .docs-content-flow
+    > :is(p, ul, ol, dl, blockquote, table, .docs-table-scroll, .starlight-aside)
+    a[href]:not(:where(.not-content, .not-content *, .proto-concept *)) {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .docs-content-flow
+    > :is(p, ul, ol, dl, blockquote, table, .docs-table-scroll, .starlight-aside)
+    a[href]:not(:where(.not-content, .not-content *, .proto-concept *)):is(:hover, :focus-visible) {
+    text-decoration-thickness: 2px;
   }
 
   main[data-pagefind-body] blockquote {
     @apply mt-4 border-l-2 pl-6 italic;
   }
 
-  main[data-pagefind-body] table {
-    @apply mt-6 w-full text-sm border border-border rounded-lg overflow-hidden bg-background;
-    display: block;
+  .docs-table-scroll {
     max-width: 100%;
     overflow-x: auto;
+  }
+
+  main[data-pagefind-body] table {
+    @apply mt-6 w-full text-sm border border-border rounded-lg overflow-hidden bg-background;
+    display: table;
     border-collapse: separate;
     border-spacing: 0;
   }
+  main[data-pagefind-body] .docs-table-scroll > table {
+    margin-block: 0;
+  }
+
   main[data-pagefind-body] table tr {
     @apply even:bg-muted/40 m-0 border-b border-border p-0 last:border-b-0;
   }
@@ -160,28 +230,45 @@
     @apply my-6 ml-6 list-disc [&>li]:mt-2;
   }
 
+  main[data-pagefind-body] .docs-content-flow > :is(ul, ol) {
+    margin-inline-start: 0;
+    margin-block: 1.5rem 0;
+    padding-inline-start: 1.5rem;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > ul {
+    list-style-type: disc;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > ol {
+    list-style-type: decimal;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > :is(ul, ol) li:first-child {
+    margin-block-start: 0;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > :is(ul, ol) li + li {
+    margin-block-start: 0.5rem;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > :is(ul, ol) :is(ul, ol) {
+    margin-inline-start: 0;
+    margin-block: 0.5rem 0;
+    padding-inline-start: 1.5rem;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > :is(ul, ol) ul {
+    list-style-type: circle;
+  }
+
+  main[data-pagefind-body] .docs-content-flow > :is(ul, ol) ol {
+    list-style-type: decimal;
+  }
+
   /* 仅对行内 code 应用样式，排除 pre>code 代码块（如 Shiki 高亮），避免暗色模式下黑色矩形 */
   main[data-pagefind-body] :not(pre) > code {
     @apply bg-muted relative rounded-sm px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
-  }
-
-  /* Keep Markdown code controls on the same compact scale as previewer controls. */
-  main[data-pagefind-body] .expressive-code .copy button {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.375rem;
-    border: 1px solid var(--color-border);
-  }
-
-  main[data-pagefind-body] .expressive-code .copy button::after {
-    width: 18px;
-    height: 18px;
-    margin: 7px;
-  }
-
-  main[data-pagefind-body] .expressive-code .copy button:focus-visible {
-    outline: 2px solid var(--color-ring);
-    outline-offset: 2px;
   }
 
   main[data-pagefind-body] hr {
@@ -301,4 +388,24 @@
   main[data-pagefind-body] .enhanced-image[src=''] {
     opacity: 0.5;
   }
+}
+
+/* Keep pre-rewrite whitepaper bookmarks useful without adding visible empty space. */
+.sl-markdown .whitepaper-legacy-anchor {
+  margin: 0;
+  display: block;
+  height: 0;
+  scroll-margin-top: 6rem;
+}
+
+.whitepaper-legacy-topic {
+  display: none;
+  scroll-margin-top: 6rem;
+}
+
+.whitepaper-legacy-topic:target {
+  display: block;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
 }

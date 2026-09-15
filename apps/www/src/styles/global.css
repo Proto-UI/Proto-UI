@@ -4,6 +4,7 @@
 @import './markdown.css';
 @import './sidebar.css';
 @import './right-sidebar.css';
+@import './code-surfaces.css';
 
 .proto-concept {
   position: relative;
@@ -241,6 +242,8 @@ proto-concept {
   counter-increment: code-line;
   content: counter(code-line);
   color: var(--color-muted-foreground, #9ca3af);
+  background: var(--docs-code-background);
+  z-index: 1;
   width: calc(var(--spacing) * 16);
   padding-right: calc(var(--spacing) * 6);
   text-align: right;

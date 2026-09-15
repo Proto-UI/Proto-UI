@@ -4,6 +4,12 @@
 
 Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。使用 alpha 是有意的：本阶段仍可接纳经过评审的架构调整、顶层 API 变化与新能力，它不是 release candidate，也不构成 stable compatibility 承诺。
 
+## Accessible 作者入口
+
+- 用 `@proto.ui/hooks` 的 `asAccessible()` 替代 `def.a11y`，用 Core 的 `AccessibleHandle` 替代 `A11yDefAPI`，不保留兼容别名。
+- setup 重复调用共享实例 handle；保存后的声明方法仍仅限 setup。动态声明继续跟随已有 State 值。
+- 同步迁移官方原型，保留 A11y 与焦点、键盘交互及结构目标解析的职责边界。本次属于 0.3 迁移，不回补 0.2。
+
 ## Expose Event ownership
 
 - 新增公开 package `@proto.ui/module-expose-event` 与独立 `ExposeEventModuleDef`。
@@ -23,7 +29,7 @@ Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。�
 ## Image View
 
 - 新增公开 package `@proto.ui/module-image-view`，并将其纳入精确的 43-package release identity，作为 Base Image 与 Runtime 使用的 host-mediated image presentation protocol。
-- 通过可执行 fake-host 与 runtime 证据覆盖 generation-bound loading、stale completion rejection、replacement visual clearing、显式 accessibility mode，以及 Base Image 的 controlled/uncontrolled source ownership。
+- 通过可执行 fake-host 与 runtime 证据覆盖 generation-bound loading、stale completion rejection、replacement visual clearing、显式 accessibility mode，以及 `source` 的直接投影。
 - 首次 `@proto.ui/module-image-view` npm identity bootstrap、受保护 release workflow 配置与 registry readiness 仍是发布前显式门禁；bootstrap 不得占用 `latest` 或 `next`。
 
 ## Official Vue 2 Adapter

@@ -173,6 +173,14 @@ implementations:
     required: true
     consumesCases:
       - T-EXPOSE-EVENT-0002-CASE-PROFILES
+  - id: adapter-vue2-follow-through
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/catalog-conformance.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-EVENT-0002-CASE-DECLARATION
+      - T-EXPOSE-EVENT-0002-CASE-PROFILES
 verifies:
   modules:
     - id: M-EXPOSE-EVENT-0001

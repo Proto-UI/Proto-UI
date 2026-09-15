@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import type { DefHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
 import type {
@@ -15,6 +16,7 @@ export type {
 } from './types';
 
 function setupSeparatorRoot(def: DefHandle<SeparatorRootProps, SeparatorRootExposes>) {
+  const accessible = asAccessible();
   // P-BASE-SEPARATOR-ORIENTATION, P-BASE-SEPARATOR-DECORATIVE
   def.props.define({
     orientation: { type: 'enum', empty: 'fallback', options: ['horizontal', 'vertical'] },
@@ -33,9 +35,9 @@ function setupSeparatorRoot(def: DefHandle<SeparatorRootProps, SeparatorRootExpo
   def.expose.state('orientation', orientation);
   def.expose.state('decorative', decorative);
   // P-BASE-SEPARATOR-DECORATIVE, P-BASE-SEPARATOR-SEMANTIC
-  def.a11y.role(role);
-  def.a11y.state('orientation', a11yOrientation);
-  def.a11y.tree({ hidden });
+  accessible.role(role);
+  accessible.state('orientation', a11yOrientation);
+  accessible.tree({ hidden });
 
   // P-BASE-SEPARATOR-ORIENTATION, P-BASE-SEPARATOR-DECORATIVE, P-BASE-SEPARATOR-SEMANTIC
   const sync = (props: Readonly<SeparatorRootProps>) => {

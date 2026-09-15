@@ -19,6 +19,8 @@ function resolveProtoUiImport(id: string): string | null {
     subdir = path.join('adapters', pkg.slice('adapter-'.length));
   } else if (pkg.startsWith('prototypes-')) {
     subdir = path.join('prototypes', pkg.slice('prototypes-'.length));
+  } else if (pkg.startsWith('compositions-')) {
+    subdir = path.join('compositions', pkg.slice('compositions-'.length));
   } else if (pkg.startsWith('spec-')) {
     subdir = path.join('spec', pkg.slice('spec-'.length));
   } else if (pkg === 'rule') {

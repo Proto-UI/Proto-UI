@@ -1,0 +1,70 @@
+id: M-OVERLAY-0001
+type: module
+title: Overlay owns logical open and active-view resource coordination
+status: draft
+lifecycleRationale: >-
+  Retained as draft while the newly cataloged scoped Escape arbitration and active-view resource ownership await stable admission review. Generic focus and additional dismissal policies remain explicitly outside this slice; their future design is not a prerequisite to reviewing the bounded current semantics.
+
+since: 0.3.0-alpha.0
+summary: Overlay coordinates one Presence driver, explicit dismissal and optional host resources while delegating outside classification, geometry and input transport.
+criteria:
+  - id: M-OVERLAY-0001-A
+    text:
+      en: One instance retains logical open, merged setup configuration and registrations. The privileged once hook chooses one immediate or bound Presence driver. Logical open, active presence and mounted view are distinct; Boundary follows logical open, positioning/modal activity follows active view, and Portal/layer final teardown follows view detach.
+      zh-CN: 每个 instance 保留 logical open、setup 合并配置和 registration。privileged once hook 选择唯一 immediate 或 bound Presence driver。logical open、active presence、mounted view 分离；Boundary 跟随 logical open，positioning/modal activity 跟随 active view，Portal/layer 最终清理跟随 view detach。
+  - id: M-OVERLAY-0001-B
+    text:
+      en: Escape candidates and per-sample selection belong to Overlay and obey C-AS-OVERLAY-0001-P using privileged Event input identities. Outside press delegates to Boundary; anchored geometry delegates to Positioning, with Anatomy part resolution confined to internal ports.
+      zh-CN: Escape 候选与每 sample 选择归 Overlay，使用 Event privileged input identity 遵循 C-AS-OVERLAY-0001-P。outside press 委托 Boundary，anchored geometry 委托 Positioning，Anatomy part 解析限制在内部 port。
+  - id: M-OVERLAY-0001-C
+    text:
+      en: Optional absent Portal, modal or layer providers acquire no corresponding resource. Provider replacement releases each contribution through its previous owner and reconciles the active mounted view through the current provider; detach and terminal unmount release owned resources without duplicate cleanup.
+      zh-CN: 可选 Portal、modal、layer provider 缺失时不获取对应资源。provider 替换通过旧 owner 释放贡献，再通过当前 provider 协调 active mounted view；detach 与 terminal unmount 释放资源且不重复清理。
+  - id: M-OVERLAY-0001-D
+    text:
+      en: Generic entry, restore, closeOnAnchorPress and closeOnTriggerPress are retained configuration, not implemented automatic policies. Focus-outside remains deferred. Consumer-specific focus and Root request protocols remain consumer-owned; Overlay does not implement Hit Participation, A11y or complete modal semantics.
+      zh-CN: 通用 entry、restore、closeOnAnchorPress、closeOnTriggerPress 仅保留配置，尚非已实现自动策略。focus-outside deferred。消费者 focus 与 Root request 协议归消费者；Overlay 不实现 Hit Participation、A11y 或完整 modal 语义。
+satisfies:
+  contracts:
+    - C-AS-OVERLAY-0001
+dependsOn:
+  modules:
+    - M-EVENT-0001
+    - M-BOUNDARY-0001
+    - M-ANATOMY-0001
+    - M-POSITIONING-0001
+requires:
+  hostCaps:
+    - id: HC-OVERLAY-PORTAL-0001
+      note: Conditionally consumed when available and opted in; absence does not invent a host fallback.
+    - id: HC-OVERLAY-MODAL-0001
+      note: Conditionally consumed when available and opted in; absence does not invent a host fallback.
+    - id: HC-OVERLAY-LAYER-0001
+      note: Conditionally consumed when available and opted in; absence does not invent a host fallback.
+verifies:
+  tests:
+    - T-OVERLAY-CATALOG-0001
+    - T-AS-OVERLAY-0001
+sources:
+  - path: packages/modules/overlay/src/create.ts
+  - path: packages/modules/overlay/src/impl.ts
+  - path: packages/modules/overlay/src/escape-coordinator.ts
+  - path: packages/hooks/src/as-overlay.ts
+openQuestions:
+  - id: M-OVERLAY-0001-Q-POLICY
+    question:
+      en: What governed use cases should admit generic focus entry/restore, anchor/trigger dismissal and a stronger layer hierarchy?
+      zh-CN: 哪些治理后的需求应推动通用 focus entry/restore、anchor/trigger dismissal 和更强 layer hierarchy？
+    context:
+      en: Stored configuration and numeric role offsets are not evidence of these policies. Presence legacy compatibility is a separate inventory. This is an out-of-scope evolution question, not an activation blocker for the bounded current slice.
+      zh-CN: 已有配置和数字 role offset 不能证明这些策略已实现；旧 Presence compatibility 另行盘点。此处为范围外演进问题，不阻塞当前有界切片的准入。
+    blocks: []
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged accepted scoped Escape and existing resource ownership with bounded host responsibilities.
+tags:
+  - overlay
+  - module
+  - presence
+  - dismissal

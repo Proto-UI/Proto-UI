@@ -57,6 +57,10 @@ describe('@proto.ui/cli', () => {
     expect(COMPONENT_REGISTRY).not.toHaveProperty('brutalist-tooltip');
   });
 
+  it('keeps the public Brutalist Checkbox family out of proto-ui add', () => {
+    expect(COMPONENT_REGISTRY).not.toHaveProperty('brutalist-checkbox');
+  });
+
   it('pins official packages to the exact built CLI release train', () => {
     const moduleUrl = pathToFileURL(
       path.join(CLI_DIR, 'dist', 'services', 'package-manager.js')
@@ -207,6 +211,69 @@ describe('@proto.ui/cli', () => {
                 : item.wcExport;
           expect(source).toContain(exportName);
         }
+      }
+    }
+  });
+
+  it('materializes the Base Image facade for each supported Web adapter', () => {
+    expect(COMPONENT_REGISTRY['base-image']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/image',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'imageRoot',
+          reactExport: 'BaseImageRoot',
+          vueExport: 'BaseImageRoot',
+          wcExport: 'BaseImageRootElement',
+          elementName: 'proto-ui-base-image',
+        },
+      ],
+    });
+
+    for (const host of ['react', 'vue', 'wc'] as const) {
+      const source = renderHostIndex(host, ['base-image']);
+      expect(source).toContain("import { imageRoot } from '@proto.ui/prototypes-base/image';");
+      expect(source).toContain(
+        host === 'wc'
+          ? "export const BaseImageRootElement = AdaptToWebComponent(imageRoot, { registerAs: 'proto-ui-base-image' });"
+          : 'export const BaseImageRoot = adapt(imageRoot);'
+      );
+    }
+
+    const root = renderRootIndex({
+      react: ['base-image'],
+      vue: ['base-image'],
+      wc: ['base-image'],
+    });
+    expect(root).toContain("export { BaseImageRoot as ReactBaseImageRoot } from './react';");
+    expect(root).toContain("export { BaseImageRoot as VueBaseImageRoot } from './vue';");
+    expect(root).toContain("export { BaseImageRootElement } from './wc';");
+  });
+
+  it('registers the exact shadcn Tooltip family facade', () => {
+    expect(COMPONENT_REGISTRY['shadcn-tooltip']).toMatchObject({
+      packageName: '@proto.ui/prototypes-shadcn',
+      importPath: '@proto.ui/prototypes-shadcn/tooltip',
+      stylePreset: 'shadcn',
+      items: [
+        { prototypeImport: 'shadcnTooltipGroup', reactExport: 'ShadcnTooltipGroup' },
+        { prototypeImport: 'shadcnTooltipRoot', reactExport: 'ShadcnTooltipRoot' },
+        { prototypeImport: 'shadcnTooltipTrigger', reactExport: 'ShadcnTooltipTrigger' },
+        { prototypeImport: 'shadcnTooltipContent', reactExport: 'ShadcnTooltipContent' },
+      ],
+    });
+
+    for (const adapter of ['react', 'vue', 'wc'] as const) {
+      const source = renderHostIndex(adapter, ['shadcn-tooltip']);
+      expect(source).toContain("from '@proto.ui/prototypes-shadcn/tooltip'");
+      for (const prototypeImport of [
+        'shadcnTooltipGroup',
+        'shadcnTooltipRoot',
+        'shadcnTooltipTrigger',
+        'shadcnTooltipContent',
+      ]) {
+        expect(source).toContain(prototypeImport);
       }
     }
   });

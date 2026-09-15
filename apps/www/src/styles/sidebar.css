@@ -7,47 +7,116 @@
     @apply w-full;
   }
 
-  .sidebar-pane .sidebar-content {
-    @apply w-full;
-  }
-
   .sidebar-pane .top-level {
     @apply w-full;
+    padding-inline: 0.5rem;
   }
 
-  .sidebar-pane summary {
-    @apply flex px-2;
-    @apply ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md text-xs outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 text-muted-foreground font-medium;
+  /* Align section headings and their immediate children on one reading axis. */
+  .sidebar-pane .top-level li {
+    margin-inline-start: 0;
+    padding-inline-start: 0;
+    border-inline-start: 0;
   }
 
-  .sidebar-pane summary span {
-    @apply ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md text-xs outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 text-muted-foreground font-medium;
+  .sidebar-pane .top-level > li + li {
+    margin-block-start: 1.5rem;
   }
 
-  .sidebar-pane details {
-    @apply p-2;
+  .sidebar-pane .top-level details {
+    padding: 0;
   }
-  .sidebar-pane details ul {
+
+  .sidebar-pane .top-level ul {
     @apply flex flex-col gap-0.5;
   }
 
-  .sidebar-pane a {
-    @apply h-7.5 flex items-center font-medium flex justify-between;
-  }
-  .sidebar-pane a span {
-    @apply px-2 h-full rounded-sm flex items-center border-transparent text-[13px] leading-5;
-  }
-  .sidebar-pane a:hover span {
-    @apply bg-muted border-muted;
+  /* Only nested sections introduce an indent and a quiet guide for level three. */
+  .sidebar-pane .top-level ul details > ul {
+    margin-inline-start: 0.5rem;
+    padding-inline-start: 0.75rem;
+    border-inline-start: 1px solid var(--color-border);
   }
 
-  .sidebar-pane a[aria-current='page'] span {
-    @apply bg-accent text-accent-foreground border-accent;
+  .sidebar-pane .top-level summary {
+    @apply flex items-center justify-between gap-2 rounded-md text-muted-foreground;
+    min-height: 2rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    font-weight: 500;
   }
 
-  :where(a)[aria-current='page'],
-  :where(a)[aria-current='page']:hover,
-  :where(a)[aria-current='page']:focus {
-    background: transparent;
+  .sidebar-pane .top-level summary .group-label {
+    min-width: 0;
+  }
+
+  .sidebar-pane .top-level summary .large {
+    font: inherit;
+    color: inherit;
+  }
+
+  .sidebar-pane .top-level ul summary {
+    @apply text-sidebar-foreground;
+    font-size: 0.8125rem;
+  }
+
+  .sidebar-pane .top-level summary .caret {
+    width: 0.875rem;
+    height: 0.875rem;
+    color: var(--color-muted-foreground);
+  }
+
+  .sidebar-pane .top-level a {
+    @apply flex items-center justify-between gap-2 rounded-md text-sidebar-foreground;
+    min-height: 2rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-weight: 400;
+  }
+
+  .sidebar-pane .top-level a > span:first-child {
+    min-width: 0;
+  }
+
+  .sidebar-pane .top-level .sl-badge {
+    flex-shrink: 0;
+  }
+
+  .sidebar-pane .top-level .docs-wip-badge {
+    border: 1px solid var(--color-border);
+    background: var(--color-muted);
+    color: var(--color-muted-foreground);
+    border-radius: 999px;
+    padding: 0.125rem 0.375rem;
+    font-family: inherit;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1rem;
+    white-space: nowrap;
+  }
+
+  .sidebar-pane .top-level a:hover,
+  .sidebar-pane .top-level summary:hover {
+    @apply bg-muted text-sidebar-foreground;
+  }
+
+  .sidebar-pane .top-level a[aria-current='page'] {
+    @apply bg-accent text-accent-foreground;
+    font-weight: 500;
+  }
+
+  .sidebar-pane .top-level a:focus-visible,
+  .sidebar-pane .top-level summary:focus-visible {
+    outline: 2px solid var(--color-sidebar-ring);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 63.999rem) {
+    .sidebar-pane .top-level a,
+    .sidebar-pane .top-level summary {
+      min-height: 2.75rem;
+    }
   }
 }

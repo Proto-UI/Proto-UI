@@ -1,0 +1,204 @@
+id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001
+type: decision
+title: Brutalist direct styled-only admission is candidate-specific
+status: draft
+since: 0.3.0-alpha.0
+summary: >-
+  Alert is deferred pending a stable passive-versus-announced identity, Spinner is admitted as a one-part visual-only indicator, and Kbd remains shared native content and styling rather than a Prototype identity.
+
+statement:
+  en: >-
+    Brutalist direct styled-only admission follows the candidate's owned visual contract rather than a component-name checklist. Alert is deferred until passive surface, announcement, action, dismiss, tone, and anatomy ownership converge. Spinner may advance as one contentless Root that owns only a square open-edge silhouette, three sizes, one-second rotation, and a reduced-motion fallback while every loading and accessibility fact remains parent-owned. Kbd remains native `kbd` content plus shared styling and does not create a Prototype, spec, CLI, or implementation identity.
+
+  zh-CN: >-
+    Brutalist direct styled-only 准入依据候选自身拥有的视觉合同，而不是组件名称清单。Alert 延后，直到 passive surface、announcement、action、dismiss、tone 与 anatomy 的所有权收敛。Spinner 可以作为单一 contentless Root 推进，仅拥有方形开口轮廓、三档尺寸、1 秒旋转与 reduced-motion fallback；所有 loading 与 accessibility 事实仍由父级拥有。Kbd 保持为原生 `kbd` 内容加共享样式，不创建 Prototype、spec、CLI 或实施身份。
+
+criteria:
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-RULE
+    text:
+      en: >-
+        A direct styled-only candidate is admitted only when the same precise visual, anatomy, and API contract remains valid in at least two real compositions, can produce executable positive and absence evidence, needs no Base semantic carrier, exceeds shared classes or app-specific content, and leaves accessibility, async state, activation, layout, and announcement ownership explicit.
+
+      zh-CN: >-
+        direct styled-only 候选仅在以下条件同时成立时准入：同一份精确 visual、anatomy 与 API 合同至少适用于两种真实组合；可以产出可执行的正向与缺席证据；不需要 Base 语义载体；不只是共享 class 或应用特定内容；并明确 accessibility、async state、activation、layout 与 announcement 的所有权。
+
+    references:
+      knowledge:
+        - id: K-BRUTALIST-0001
+          anchors: [K-BRUTALIST-0001-A]
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-ALERT-DEFERRED
+    text:
+      en: >-
+        Alert is deferred. A future checkpoint must choose dynamically announced Alert versus passive Callout or AlertSurface, fix Root, Icon, Title, Description, action or dismiss anatomy and tone vocabulary, and assign announcement to Base Live Region or another explicit owner while Button or Link retains authored action activation. No Alert Prototype, spec identity, CLI entry, or implementation Issue is admitted by this decision.
+
+      zh-CN: >-
+        Alert 延后。后续 checkpoint 必须在动态播报的 Alert 与 passive Callout 或 AlertSurface 之间作出选择，固定 Root、Icon、Title、Description、action 或 dismiss anatomy 与 tone vocabulary，并将 announcement 分配给 Base Live Region 或其他明确 owner；authored action 的 activation 继续由 Button 或 Link 保留。本 decision 不准入任何 Alert Prototype、spec identity、CLI entry 或实施 Issue。
+
+    references:
+      prototypes:
+        - id: P-BASE-LIVE-REGION
+          anchors:
+            - P-BASE-LIVE-REGION-SEMANTICS
+            - P-BASE-LIVE-REGION-CONTENT
+            - P-BASE-LIVE-REGION-NO-INTERACTION
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-COMPOSITIONS
+    text:
+      en: >-
+        The admitted Spinner contract must remain unchanged when composed inline inside an action-owning Button and when placed beside authored loading text inside a parent-owned status or busy region. The surrounding Button or region owns operation state, accessible text, placement, alignment, delay, replacement, and focus continuity.
+
+      zh-CN: >-
+        已准入的 Spinner 合同在以下两类组合中必须保持不变：内联置于拥有 action 的 Button 内；以及置于父级拥有的 status 或 busy region 中并与 authored loading text 并列。外围 Button 或 region 拥有 operation state、accessible text、placement、alignment、delay、replacement 与 focus continuity。
+
+    references:
+      prototypes:
+        - id: P-BASE-ASYNC-REGION
+          anchors:
+            - P-BASE-ASYNC-REGION-BUSY
+            - P-BASE-ASYNC-REGION-CONTENT
+            - P-BASE-ASYNC-REGION-NO-INTERACTION
+        - id: P-BASE-LIVE-REGION
+          anchors:
+            - P-BASE-LIVE-REGION-SEMANTICS
+            - P-BASE-LIVE-REGION-CONTENT
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-API
+    text:
+      en: >-
+        Spinner has exactly one contentless Root and one public `size` prop: `sm | md | lg` resolves to 16, 24, or 32 CSS pixels, defaults to `md`, and restores that default after prop removal. It has no child anatomy, tone, loading, busy, label, delay, or replacement API.
+
+      zh-CN: >-
+        Spinner 仅有一个 contentless Root 与一个公开 `size` prop：`sm | md | lg` 分别解析为 16、24 或 32 CSS pixel，默认 `md`，并在 prop 移除后恢复默认值。它没有 child anatomy、tone、loading、busy、label、delay 或 replacement API。
+
+    references:
+      prototypes:
+        - id: P-BRUTALIST-CARD
+          anchors: [P-BRUTALIST-CARD-REDUCED-ANATOMY]
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-VISUAL
+    text:
+      en: >-
+        Spinner owns a square 2px `currentColor` ring with one open leading edge and no fill, radius, gradient, blur, glow, or soft shadow. It rotates linearly once per 1000ms only when reduced motion is not requested; `prefers-reduced-motion: reduce` removes animation while retaining the open edge as a non-color orientation cue.
+
+      zh-CN: >-
+        Spinner 拥有一个 2px `currentColor` 方形 ring，保留一个开口 leading edge，且不使用 fill、radius、gradient、blur、glow 或 soft shadow。仅在未请求 reduced motion 时以 1000ms 一周线性旋转；`prefers-reduced-motion: reduce` 移除 animation，同时保留开口 edge 作为非颜色 orientation cue。
+
+    references:
+      prototypes:
+        - id: P-BRUTALIST-BADGE
+          anchors: [P-BRUTALIST-BADGE-VISUAL-GRAMMAR]
+        - id: P-BRUTALIST-SKELETON
+          anchors: [P-BRUTALIST-SKELETON-VISUAL-GRAMMAR]
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-BOUNDARY
+    text:
+      en: >-
+        Spinner materializes directly without a Base Spinner hook and is always aria-hidden, roleless, non-focusable, and empty-exposed. It owns no loading or busy fact, status or accessible name, announcement, activation, event, command, operation delay or lifecycle timer, parent placement or alignment, external layout, or focus behavior; those remain with the parent composition, Base Async Region, Base Live Region, or authored control. Its `size` prop owns only intrinsic Root dimensions, and its 1000ms CSS timeline owns only visual rotation.
+
+      zh-CN: >-
+        Spinner 直接 materialize，不使用 Base Spinner hook，并始终 aria-hidden、无 role、不可聚焦且 exposes 为空。它不拥有 loading 或 busy fact、status 或 accessible name、announcement、activation、event、command、operation delay 或 lifecycle timer、父级 placement 或 alignment、external layout 或 focus 行为；这些职责保留给父级组合、Base Async Region、Base Live Region 或 authored control。其 `size` prop 仅拥有 Root intrinsic dimensions，1000ms CSS timeline 仅拥有视觉旋转。
+
+    references:
+      prototypes:
+        - id: P-BRUTALIST-SKELETON
+          anchors:
+            - P-BRUTALIST-SKELETON-DIRECT-OWNERSHIP
+            - P-BRUTALIST-SKELETON-VISUAL-ONLY
+        - id: P-BASE-ASYNC-REGION
+          anchors:
+            - P-BASE-ASYNC-REGION-BUSY
+            - P-BASE-ASYNC-REGION-NO-INTERACTION
+        - id: P-BASE-LIVE-REGION
+          anchors:
+            - P-BASE-LIVE-REGION-SEMANTICS
+            - P-BASE-LIVE-REGION-NO-INTERACTION
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-EVIDENCE
+    text:
+      en: >-
+        A separate bounded implementation carrier must add P-BRUTALIST-SPINNER and T-BRUTALIST-SPINNER-0001 together with direct-ownership, type/default-removal, size, visual, motion, reduced-motion, content-absence, semantic-absence, exact export and CLI closure, bilingual documentation, two-composition demo, and Web Component, React, Vue, and Vue 2 preview evidence. For CLI closure, it must extend the actual `packages/cli/src/services/proto-style-css.ts` renderer surface—`renderProtoStyleTokenCss`, its `staticUtilities` table, and variant projection—so `animate-spin` emits `@keyframes pui-spin` with a 1000ms linear infinite rotation and a reduced-motion variant such as `motion-reduce:animate-none` (or an equivalent generated `@media (prefers-reduced-motion: reduce)` rule) removes animation while retaining the open edge. The new Prototype entity must declare the typed `dependsOn.decisions: [D-BRUTALIST-STYLED-ONLY-ADMISSION-0001]` backlink. That carrier must also add P-BRUTALIST-SPINNER to D-CLI-BRUTALIST-PRESET-CLOSURE-0001 `relates.prototypes` and T-CLI-BRUTALIST-PRESET-CLOSURE-0001 `exercises.prototypes` so the generated CLI token closure remains relation-visible and executable.
+
+      zh-CN: >-
+        独立的有界实施载体必须同时新增 P-BRUTALIST-SPINNER 与 T-BRUTALIST-SPINNER-0001，并提供 direct-ownership、type/default-removal、size、visual、motion、reduced-motion、content-absence、semantic-absence、精确 export 与 CLI closure、双语文档、两种组合 demo，以及 Web Component、React、Vue 与 Vue 2 preview 证据。对于 CLI closure，必须扩展实际的 `packages/cli/src/services/proto-style-css.ts` renderer surface——`renderProtoStyleTokenCss`、其 `staticUtilities` 表与 variant projection——使 `animate-spin` 产生包含 1000ms linear infinite rotation 的 `@keyframes pui-spin`，并使 reduced-motion variant（例如 `motion-reduce:animate-none`，或等价生成的 `@media (prefers-reduced-motion: reduce)` rule）移除 animation，同时保留 open edge。新建的 Prototype entity 必须声明 typed `dependsOn.decisions: [D-BRUTALIST-STYLED-ONLY-ADMISSION-0001]` backlink。该载体还必须将 P-BRUTALIST-SPINNER 加入 D-CLI-BRUTALIST-PRESET-CLOSURE-0001 的 `relates.prototypes` 与 T-CLI-BRUTALIST-PRESET-CLOSURE-0001 的 `exercises.prototypes`，确保生成式 CLI token closure 在关系图中可见且具备可执行证据。
+    references:
+      decisions:
+        - id: D-CLI-BRUTALIST-PRESET-CLOSURE-0001
+          anchors: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B]
+      tests: [T-CLI-BRUTALIST-PRESET-CLOSURE-0001]
+
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-KBD-SHARED
+    text:
+      en: >-
+        Kbd remains native `kbd` markup plus shared design-language styling or authored content composition. It does not create a Prototype, spec identity, CLI component, or implementation Issue and owns no keyboard input, shortcut registration, chord or sequence parsing, platform glyph mapping, accessible alternate text, activation, command, event, state, or focus behavior. A richer KeybindingHint would require a separately named semantic proposal.
+
+      zh-CN: >-
+        Kbd 保持为原生 `kbd` markup 加共享 design-language styling 或 authored content composition。它不创建 Prototype、spec identity、CLI component 或实施 Issue，也不拥有 keyboard input、shortcut registration、chord 或 sequence parsing、platform glyph mapping、accessible alternate text、activation、command、event、state 或 focus 行为。更丰富的 KeybindingHint 必须另建有明确名称的语义 proposal。
+
+openQuestions:
+  - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-Q1
+    question:
+      en: >-
+        Should a future message-surface candidate be a dynamically announced Alert that composes Base Live Region, or a passive Callout or AlertSurface with no implicit announcement?
+
+      zh-CN: >-
+        后续 message-surface 候选应当是组合 Base Live Region 的动态播报 Alert，还是不隐含 announcement 的 passive Callout 或 AlertSurface？
+
+    context:
+      en: >-
+        This question also blocks exact tone, action or dismiss anatomy, and announcement ownership. It does not block the admitted Spinner carrier.
+
+      zh-CN: >-
+        此问题也阻塞精确 tone、action 或 dismiss anatomy 与 announcement ownership，但不阻塞已准入的 Spinner 载体。
+
+    blocks: [Alert identity, Alert implementation carrier]
+sources:
+  - path: https://github.com/Proto-UI/Proto-UI/issues/386
+    label: Issue 386 admission checkpoint and evidence discussion
+  - path: internal/records/2026-08-13-v0.3-prototype-coverage-and-shadcn-parity.zh-CN.md
+    sections:
+      [4.4 Brutalist 双轨账本, 5.2 Brutalist direct styled-only research queue, 7）Issue 发布方式]
+  - path: apps/www/src/components/override/Search.astro
+    label: Repository composition with parent-owned status and aria-hidden spinner
+  - path: spec/prototypes/P-BASE-LIVE-REGION.yaml
+  - path: spec/prototypes/P-BASE-ASYNC-REGION.yaml
+  - path: spec/prototypes/P-BRUTALIST-BADGE.yaml
+  - path: spec/prototypes/P-BRUTALIST-CARD.yaml
+  - path: spec/prototypes/P-BRUTALIST-SKELETON.yaml
+  - path: packages/cli/src/services/proto-style-css.ts
+    label: Current CLI CSS renderer without animate-spin or reduced-motion projection
+  - path: https://github.com/w3c/aria-practices/blob/7e4034b262bc0d25332e330d8a582aaf34113829/content/patterns/alert/alert-pattern.html
+    label: WAI-ARIA APG Alert Pattern at inspected revision
+  - path: https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-kbd-element
+    label: WHATWG HTML kbd element
+  - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/registry/new-york-v4/ui/alert.tsx
+    label: shadcn Alert implementation at inspected revision
+  - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/registry/new-york-v4/ui/spinner.tsx
+    label: shadcn Spinner implementation at inspected revision
+  - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/examples/base/button-spinner.tsx
+    label: shadcn inline Button composition at inspected revision
+  - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/examples/base/input-group-spinner.tsx
+    label: shadcn parent text and input-group compositions at inspected revision
+  - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/registry/new-york-v4/ui/kbd.tsx
+    label: shadcn Kbd implementation at inspected revision
+  - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/examples/base/kbd-tooltip.tsx
+    label: shadcn Tooltip Kbd composition at inspected revision
+  - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/examples/base/kbd-group.tsx
+    label: shadcn inline Kbd group composition at inspected revision
+  - path: https://github.com/mantinedev/mantine/blob/3862b09668c4523161a5b635666e0d68a3fe347b/packages/@mantine/core/src/components/Alert/Alert.tsx
+    label: Mantine Alert implementation at inspected revision
+  - path: https://github.com/mantinedev/mantine/blob/3862b09668c4523161a5b635666e0d68a3fe347b/packages/@mantine/core/src/components/Loader/Loader.tsx
+    label: Mantine Loader implementation at inspected revision
+  - path: https://github.com/mantinedev/mantine/blob/3862b09668c4523161a5b635666e0d68a3fe347b/packages/@mantine/core/src/components/Kbd/Kbd.tsx
+    label: Mantine Kbd implementation at inspected revision
+  - path: https://github.com/primer/react/blob/932e7d63acefed375a51d22e1a730423c2e6de0b/packages/react/src/Spinner/Spinner.tsx
+    label: Primer Spinner implementation at inspected revision
+relates:
+  knowledge: [K-BRUTALIST-0001]
+  prototypes:
+    - P-BASE-LIVE-REGION
+    - P-BASE-ASYNC-REGION
+    - P-BRUTALIST-BADGE
+    - P-BRUTALIST-CARD
+    - P-BRUTALIST-SKELETON
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: >-
+      Recorded the Issue 386 candidate-specific admission result without creating empty Alert or Kbd identities or implementing Spinner.
+
+tags: [decision, brutalist, styled-only, admission, alert, spinner, kbd]

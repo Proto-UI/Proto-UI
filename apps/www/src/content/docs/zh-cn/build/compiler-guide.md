@@ -10,7 +10,7 @@ Proto UI 0.2 **没有**交付 Compiler 实现或 Compiler authoring workflow。0
 
 ## 前置阅读
 
-先读[翻译层：Adapter / Compiler](/zh-cn/whitepaper/translation-layer/)理解概念差异，读[核心规范](/zh-cn/specifications/core/)理解 portable syntax，再读 [Runtime 架构](/zh-cn/build/runtime-architecture/)理解当前执行路径。
+先读[第五章：翻译层](/zh-cn/whitepaper/5-translation-layer/)理解概念差异，读[核心规范](/zh-cn/specifications/core/)理解 portable syntax，再读 [Runtime 架构](/zh-cn/build/runtime-architecture/)理解当前执行路径。
 
 ## 0.2 实际交付的内容
 
