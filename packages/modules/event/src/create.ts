@@ -30,6 +30,8 @@ export function createEventModule(ctx: ModuleFactoryArgs): EventModule {
           onProtoPhase: (p) => impl.onProtoPhase(p),
         },
         port: {
+          getGlobalInputScope: () => impl.getGlobalInputScope(),
+          getInputContext: (payload) => impl.getInputContext(payload),
           on: ((type: EventTypeV0, cb: EventInternalCallback, options?: HostEventListenerOptions) =>
             impl.onInternal(type, cb, options)) as EventPort['on'],
           onGlobal: ((

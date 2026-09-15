@@ -2,6 +2,7 @@ id: P-SHADCN-SCROLL-AREA-VIEWPORT
 type: prototype
 title: shadcn Scroll Area Viewport prefers composed chrome and preserves host fallback
 status: draft
+lifecycleRationale: The full-size inset-focus presentation and fallible composed preference remain a draft projection of the Base Viewport; direct fallback and browser evidence support review, not lifecycle promotion or a new host engine.
 since: 0.3.0-alpha.0
 summary: >-
   shadcn Scroll Area Viewport inherits the Base host-owned surface, adds full-size rounded presentation, and expresses composed chrome as a fallible design-language preference.

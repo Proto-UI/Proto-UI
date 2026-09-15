@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, delay, tw, type DefHandle } from '@proto.ui/core';
-import { asBoundary, asFocusRoving, asFocusScope, asOverlay } from '@proto.ui/hooks';
+import { asAccessible, asBoundary, asFocusRoving, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { useTypeaheadNavigation } from '../behaviors';
 import { asTransition } from '../tools';
 import {
@@ -32,6 +32,7 @@ function setupSelectContent(
   _options?: void,
   api?: { store: Record<string, unknown> }
 ): void {
+  const accessible = asAccessible();
   def.anatomy.claim(SELECT_FAMILY, { role: 'content' });
   def.props.define({
     side: { type: 'enum', empty: 'fallback', options: ['top', 'right', 'bottom', 'left'] },
@@ -52,9 +53,9 @@ function setupSelectContent(
 
   const contentId = def.state.string('selectContentId', '');
   const orientation = def.state.string('selectOrientation', 'vertical');
-  def.a11y.id(contentId);
-  def.a11y.role('listbox');
-  def.a11y.state('orientation', orientation);
+  accessible.id(contentId);
+  accessible.role('listbox');
+  accessible.state('orientation', orientation);
 
   const focusScope = asFocusScope<SelectContentProps>();
   focusScope.configure({ entry: 'manual', restore: 'none' });

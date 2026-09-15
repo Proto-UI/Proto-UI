@@ -2,6 +2,7 @@ id: T-SHADCN-SCROLL-AREA-0001
 type: test
 title: shadcn Scroll Area inheritance, fallback, package, geometry, and rendered tests
 status: draft
+lifecycleRationale: This execution map accompanies the draft Shadcn four-part slice. Direct fallback, package, geometry and browser tests are technical evidence for independent review, not activation of the mapped prototypes.
 since: 0.3.0-alpha.0
 summary: >-
   Covers exact package and CLI surfaces, complete visual tokens, a fallible composed preference, direct unsupported-composed fallback evidence, two-axis host behavior, passive controls, lifecycle teardown, and real cross-runtime geometry.

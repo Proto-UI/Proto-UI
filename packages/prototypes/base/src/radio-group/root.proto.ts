@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asCollection, asFocusRoving } from '@proto.ui/hooks';
+import { asAccessible, asCollection, asFocusRoving } from '@proto.ui/hooks';
 import {
   getRadioGroupItems,
   RADIO_GROUP_CONTEXT,
@@ -44,9 +44,8 @@ function sameContext(a: RadioGroupContextValue, b: RadioGroupContextValue): bool
   );
 }
 
-function setupRadioGroupRoot(
-  def: DefHandle<RadioGroupRootProps, RadioGroupRootExposes>
-): void {
+function setupRadioGroupRoot(def: DefHandle<RadioGroupRootProps, RadioGroupRootExposes>): void {
+  const accessible = asAccessible();
   def.anatomy.claim(RADIO_GROUP_FAMILY, { role: 'root' });
 
   const collection = asCollection();
@@ -80,9 +79,9 @@ function setupRadioGroupRoot(
   def.expose.method('focusPrev', () => focusRoving.focusPrev());
   def.expose.method('focusSelected', () => focusRoving.focusSelected());
 
-  def.a11y.role('radiogroup');
-  def.a11y.name(a11yLabel);
-  def.a11y.state('disabled', disabled);
+  accessible.role('radiogroup');
+  accessible.name(a11yLabel);
+  accessible.state('disabled', disabled);
 
   const initialContext: RadioGroupContextValue = {
     value: '',

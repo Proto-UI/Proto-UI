@@ -1,5 +1,7 @@
 # Expose State Web Extension (v0)
 
+> Catalog authority: `M-EXPOSE-STATE-WEB-0001`, `HC-EXPOSE-STATE-WEB-TARGETS-0001` and `T-EXPOSE-STATE-WEB-0001`. This document is a readable projection; lifecycle and open questions follow those entities.
+
 > Status: Draft – v0
 >
 > Web extension maps expose-state to DOM `data-*` attributes and CSS variables. This is Web-only and does not change expose-state semantics.
@@ -24,7 +26,7 @@ Not included:
 ### 1.1 Semantic name → DOM names
 
 - `btn.disabled` → `data-btn-disabled` and `--pui-btn-disabled`
-- rules: trim, `.`/spaces → `-`, non-alphanumeric → `-`, lowercase
+- rules: official aliases first; otherwise trim, separate camelCase, normalize punctuation/whitespace to collapsed hyphens, remove edge hyphens, lowercase
 
 ### 1.2 Type-driven mapping
 
@@ -47,7 +49,8 @@ Via `EXPOSE_STATE_WEB_MODE_CAP`:
 ## 3. Lifecycle
 
 - subscription-driven sync
-- cleanup on dispose
+- revoke subscriptions on host loss, unmounting, detach and terminal disposal; remount replays current values
+- cleanup invalidates bindings and future writes; erasing/restoring prior DOM artifacts after target, mapping or mode changes remains unresolved
 
 ---
 

@@ -1,0 +1,36 @@
+id: M-HIT-PARTICIPATION-0001
+type: module
+title: Hit Participation owns region declarations and host synchronization
+status: draft
+since: 0.3.0-alpha.0
+summary: Hit Participation owns region declarations and host synchronization.
+criteria:
+  - id: M-HIT-PARTICIPATION-0001-A
+    text:
+      en: 'The instance-scoped Module has mixed instance/view ownership and no semantic Module dependencies. asHitParticipation returns its privileged singleton handle; configure merges setup patches with override diagnostics. Region options capture the configured default mode at registration.'
+      zh-CN: 'instance-scoped Module 具有 mixed instance/view ownership，无其他 semantic Module 依赖。asHitParticipation 返回特权 singleton handle；configure 合并 setup patch 并提供覆盖诊断。region options 在注册时捕获配置的默认 mode。'
+  - id: M-HIT-PARTICIPATION-0001-B
+    text:
+      en: 'Explicit regions retain independent registration identities. A disposer removes its own record and unregisterRegion removes matching targets; the Web projection retains the latest same-owner declaration for repeated targets. The current host root is an implicit content region unless explicitly registered.'
+      zh-CN: '显式 regions 保留独立 registration identity。disposer 移除自身记录，unregisterRegion 移除匹配 target；Web 投射对重复 target 保留同 owner 最后声明。除非显式注册，当前 host root 是隐式 content region。'
+  - id: M-HIT-PARTICIPATION-0001-C
+    text:
+      en: 'Host rejection must leave accepted Module region/configuration state intact so unrelated operations and cleanup can continue. Missing host capability preserves logical declarations without pretending to project them. View detach clears live claims while remount resynchronizes retained declarations; terminal unmount clears regions.'
+      zh-CN: '宿主拒绝必须保留已接纳的 Module region/configuration 状态，使无关操作与清理可继续。缺失宿主能力时保留逻辑声明，不伪称完成投射。view detach 清理 live claims，remount 同步保留声明；terminal unmount 清空 regions。'
+satisfies:
+  contracts: [C-HIT-PARTICIPATION-0001]
+requires:
+  hostCaps: [HC-HIT-PARTICIPATION-0001]
+relates:
+  contracts: [C-BOUNDARY-0001]
+  decisions: [D-AS-HOOK-PRIVILEGED-NO-ARG-MIGRATION-0001]
+verifies:
+  tests: [T-HIT-PARTICIPATION-0001]
+sources:
+  - path: packages/modules/hit-participation/src/create.ts
+  - path: packages/modules/hit-participation/src/impl.ts
+  - path: packages/hooks/src/as-hit-participation.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged Hit Participation and approved shared-target ownership with executable evidence.

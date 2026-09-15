@@ -16,7 +16,9 @@ const cases = [
   ['runtime root', 'packages/runtime/src/index.ts', 60_000],
   ['adapter-react root', 'packages/adapters/react/src/index.ts', 75_000],
   ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_000],
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 75_000],
+  // PR #634 adds scoped Escape arbitration and shared Overlay resource ownership.
+  // CI measured 75,115 gzip bytes; retain a bounded allowance for this semantic slice.
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 76_000],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];

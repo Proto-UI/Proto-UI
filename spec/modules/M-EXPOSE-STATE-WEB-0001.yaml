@@ -1,0 +1,73 @@
+id: M-EXPOSE-STATE-WEB-0001
+type: module
+title: Expose State Web projects read-only state into Web selector context
+status: draft
+since: 0.3.0-alpha.0
+summary: A Web-only mixed-ownership extension maps external State handles to DOM attributes and CSS variables on the canonical boundary and optional presentation mirrors.
+statement:
+  en: The existing extension consumes Expose State external handles, owns naming and type-driven projection, and keeps an empty author facade. It adds no State write or ARIA authority. Instance State remains owned upstream; Web subscriptions and target bindings follow the current view.
+  zh-CN: 既有 Web extension 消费 Expose State external handle，拥有命名与类型驱动投影，保持空 author facade。不增加 State write 或 ARIA authority。instance State 仍归上游所有；Web subscription 与 target binding 跟随当前 view。
+criteria:
+  - id: M-EXPOSE-STATE-WEB-0001-A
+    text:
+      en: The Module depends on Expose State, accepts only branded external State handles from its translation record and ignores other entries. Web projection does not alter the external handle or create an author API.
+      zh-CN: Module 依赖 Expose State，仅投影 translation record 中带品牌的 external State handle，忽略其他 entry。Web projection 不改变 external handle，也不创建作者 API。
+  - id: M-EXPOSE-STATE-WEB-0001-B
+    text:
+      en: Default naming uses State semantic identity, falling back to the Expose key. Official interaction/focus/accessibility aliases use the shared name table; other names are trimmed, camelCase boundaries separated, punctuation/whitespace normalized to collapsed hyphens, edge hyphens removed and letters lowercased, with data- and --pui- prefixes. A host name-map may override these names.
+      zh-CN: 默认按 State semantic identity 命名，缺失时回退 Expose key。官方 interaction/focus/accessibility alias 使用共享名称表；其他名称经 trim、camelCase 分词、标点/空白转连字符、合并及去除首尾连字符、小写化，添加 data- 与 --pui- 前缀。host name-map 可覆盖名称。
+  - id: M-EXPOSE-STATE-WEB-0001-C
+    text:
+      en: Boolean true emits an empty attribute and false removes it; enum/string emit an attribute; discrete numbers emit attribute and CSS variable; range numbers emit only a CSS variable. Optional allowStringVar and allowContinuousAttr extend the latter mappings. Default projection emits no ARIA and does not require structural rendering for State updates.
+      zh-CN: bool true 输出空 attribute，false 移除；enum/string 输出 attribute；discrete number 输出 attribute 与 CSS variable；range number 仅输出 CSS variable。可选 allowStringVar、allowContinuousAttr 扩展相应映射。默认投影不输出 ARIA，State 更新不要求 structural render。
+  - id: M-EXPOSE-STATE-WEB-0001-D
+    text:
+      en: Current values are replayed on an eligible host-capability change or render commit, with one active subscription per projected entry. Missing/null hosts, unmounting, detach and terminal disposal revoke subscriptions and invalidate old callbacks; remount replays current values without recreating upstream State.
+      zh-CN: 有效 host capability 变化或 render commit 重放当前值，每个投影 entry 保持一份活动 subscription。host 缺失/null、unmounting、detach 与 terminal dispose 撤销 subscription 并使旧回调失效；remount 重放当前值而不重建上游 State。
+  - id: M-EXPOSE-STATE-WEB-0001-E
+    text:
+      en: The canonical target and optional distinct presentation mirrors receive equivalent emitted values; null and duplicate mirrors are ignored. Mirroring copies neither adapter identity nor State ownership and follows the split-surface contract.
+      zh-CN: canonical target 与可选独立 presentation mirror 接收等价输出；忽略 null 与重复 mirror。不复制 adapter identity 或 State ownership，遵循 split-surface contract。
+  - id: M-EXPOSE-STATE-WEB-0001-F
+    text:
+      en: The privileged port reports whether projection is active and maps internal State IDs to Expose keys, semantics, kinds and candidate Web names. It is internal optimization metadata, not App Maker authority or proof that every candidate CSS variable is emitted; emission still follows kind and mode.
+      zh-CN: 特权 port 报告投影是否活动，并把 internal State ID 映射到 Expose key、semantic、kind 与候选 Web 名称。这是内部优化 metadata，不是 App Maker authority，也不证明每个候选 CSS variable 都会输出；实际输出仍由 kind/mode 决定。
+dependsOn:
+  modules:
+    - M-EXPOSE-STATE-0001
+  contracts:
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+    - C-HOST-SURFACE-PROJECTION-0001
+requires:
+  hostCaps:
+    - HC-EXPOSE-STATE-WEB-TARGETS-0001
+verifies:
+  tests:
+    - T-EXPOSE-STATE-WEB-0001
+relates:
+  contracts:
+    - C-RULE-EXTENSION-0001
+openQuestions:
+  - id: M-EXPOSE-STATE-WEB-0001-Q-OWNERSHIP
+    question:
+      en: How should collisions and removal/restoration of emitted DOM artifacts be governed?
+      zh-CN: 名称冲突及已输出 DOM artifact 的撤销/恢复应如何治理？
+    context:
+      en: Current cleanup revokes subscriptions and future writes; it does not erase old attributes or variables on former targets, detach, changed mappings or changed modes. Default normalization may collide or produce an empty suffix. Ownership arbitration with consumer attributes/styles, validation of custom maps and transactional projection failures require separate decisions.
+      zh-CN: 当前 cleanup 撤销 subscription 和后续写入，不会因 target 替换、detach、mapping/mode 变化抹除旧 attribute/variable。默认归一化可能冲突或产生空后缀。与 consumer attribute/style 的归属协调、自定义 map 校验及投影失败事务性需单独决定。
+sources:
+  - path: packages/modules/expose-state-web/src/create.ts
+  - path: packages/modules/expose-state-web/src/impl.ts
+  - path: packages/modules/expose-state-web/src/utils.ts
+  - path: packages/modules/expose-state-web/src/caps.ts
+  - path: internal/contracts/expose/expose-state.web-extension.v0.md
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged existing Web projection with bounded mapping, view binding and four Adapter evidence.
+tags:
+  - expose
+  - state
+  - web
+  - lifecycle

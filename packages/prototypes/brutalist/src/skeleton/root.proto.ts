@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { definePrototype, tw } from '@proto.ui/core';
 import type { BrutalistSkeletonRootExposes, BrutalistSkeletonRootProps } from './types';
 
@@ -7,8 +8,9 @@ export const BrutalistSkeletonRoot = definePrototype<
 >({
   name: 'brutalist-skeleton-root',
   setup(def) {
+    const accessible = asAccessible();
     // P-BRUTALIST-SKELETON-DIRECT-OWNERSHIP, P-BRUTALIST-SKELETON-VISUAL-ONLY
-    def.a11y.tree({ hidden: true });
+    accessible.tree({ hidden: true });
     // P-BRUTALIST-SKELETON-CONSUMER-SIZE — the consuming composition owns dimensions.
     // P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
     def.feedback.style.use(

@@ -169,3 +169,5 @@ export function filterRelationsForVersion(
 
   return Object.keys(next).length > 0 ? next : undefined;
 }
+
+export * from './lifecycle';

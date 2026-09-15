@@ -1,5 +1,5 @@
 import type { DefHandle, State } from '@proto.ui/core';
-import { asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
 
 type DialogCommandProps = { disabled?: boolean };
 
@@ -17,6 +17,7 @@ export function setupDialogCommand(
   def: DefHandle<DialogCommandProps, any>,
   reasonPrefix: string
 ): DialogCommand {
+  const accessible = asAccessible();
   // P-BASE-DIALOG-TRIGGER-NO-BUTTON-DEPENDENCY, P-BASE-DIALOG-CLOSE-NO-BUTTON-DEPENDENCY
   // P-BASE-DIALOG-TRIGGER-COMMAND, P-BASE-DIALOG-CLOSE-COMMAND
   asTrigger();
@@ -43,10 +44,10 @@ export function setupDialogCommand(
     if (disabled.get()) return;
     focusable.focusSelf(options);
   });
-  def.a11y.role('button');
-  def.a11y.nameFromContent();
-  def.a11y.state('disabled', disabled);
-  def.a11y.action('activate', { event: 'click' });
+  accessible.role('button');
+  accessible.nameFromContent();
+  accessible.state('disabled', disabled);
+  accessible.action('activate', { event: 'click' });
 
   const clearTransient = (reason: string) => {
     hovered.set(false, reason);

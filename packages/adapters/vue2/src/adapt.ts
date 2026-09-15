@@ -1,3 +1,4 @@
+import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
 import {
   getModuleDeclaration,
   type Prototype,
@@ -178,12 +179,20 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
     const textControlRootTag = textControl
       ? resolveWebTextControlLocalName(textControl)
       : undefined;
-    if (textControlRootTag && opt.rootTag && opt.rootTag !== textControlRootTag) {
+    const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
+    const imageViewRootTag = imageView ? resolveWebImageLocalName() : undefined;
+    if (textControlRootTag && imageViewRootTag) {
       throw new Error(
-        `[Vue2 Adapter] text-control declaration conflicts with rootTag: ${opt.rootTag}`
+        '[Vue2 Adapter] text-control and image-view declarations cannot share a root.'
       );
     }
-    const rootTag = textControlRootTag ?? opt.rootTag ?? 'div';
+    const declaredRootTag = textControlRootTag ?? imageViewRootTag;
+    if (declaredRootTag && opt.rootTag && opt.rootTag !== declaredRootTag) {
+      throw new Error(
+        `[Vue2 Adapter] rootTag conflicts with the static ${textControlRootTag ? 'text-control' : 'image-view'} declaration.`
+      );
+    }
+    const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
 
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&

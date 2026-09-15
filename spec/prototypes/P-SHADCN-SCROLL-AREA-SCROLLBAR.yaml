@@ -2,6 +2,7 @@ id: P-SHADCN-SCROLL-AREA-SCROLLBAR
 type: prototype
 title: shadcn Scroll Area Scrollbar projects an oriented composed track
 status: draft
+lifecycleRationale: The oriented Shadcn track presentation remains a draft inherited Base control; current geometry and fallback evidence do not independently admit the design-language surface as stable.
 since: 0.3.0-alpha.0
 summary: shadcn Scroll Area Scrollbar inherits Base control routing and adds the current common and oriented track presentation.
 statement:

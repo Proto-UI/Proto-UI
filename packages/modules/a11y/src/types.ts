@@ -1,7 +1,7 @@
 import type {
   A11yActionKey,
   A11yActionSpec,
-  A11yDefAPI,
+  AccessibleHandle,
   A11yIdentityTarget,
   A11yRelationKey,
   A11yRelationSpec,
@@ -16,7 +16,7 @@ import type {
   State,
 } from '@proto.ui/core';
 
-export type A11yFacade = A11yDefAPI;
+export type A11yFacade = AccessibleHandle;
 
 export type A11yStateBinding = {
   key: A11yStateKey;

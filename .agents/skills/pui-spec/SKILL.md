@@ -8,7 +8,7 @@ description: Create or revise a Proto UI spec entity after identity, ownership, 
 1. Read `AGENTS.md`, `spec/README.md`, the schema, relevant engine validation, and the complete approved decision packet.
 2. Require a `pui-trace` map and recorded authorization for identity, owner, lifecycle intent, semantic boundary, compatibility, and evidence scope.
 3. Search existing IDs and relations again before creating anything.
-4. Model one coherent semantic slice. Write addressable criteria, precise directional relations, version bounds, sources, open questions, and revisions where semantics changed.
+4. Model one coherent semantic slice. Write addressable criteria, precise directional relations, version bounds, sources, open questions, and revisions where semantics changed. Record `lifecycleRationale` for new ordinary entities or lifecycle changes, classify canonical `openQuestions[].blocks` targets, and validate the changed authoring scope with `pnpm check:spec-authoring -- --base <base-sha>` as defined in `spec/README.md`.
 5. Add or update `T-*` evidence and real executable implementation paths for normative behavior.
 6. Change generated projections through their generators.
 7. Record spec graph, catalog, projection, focused evidence, and proportional type checks for a later `pui-validate` transition.

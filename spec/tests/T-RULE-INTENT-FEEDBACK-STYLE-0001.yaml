@@ -33,6 +33,13 @@ cases:
       - C-RULE-RUNTIME-0001-A
     expectation: rule-style-deactivation-cleanup
 implementations:
+  - id: rule-declaration-token-validation
+    kind: module-test
+    status: passing
+    path: packages/modules/rule/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-INTENT-FEEDBACK-STYLE-0001-CASE-HANDLE-CONSTRAINTS
   - id: rule-matrix-fixture
     kind: fixture
     status: active

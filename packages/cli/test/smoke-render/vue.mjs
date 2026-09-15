@@ -26,7 +26,7 @@ import { GlobalRegistrator } from '@happy-dom/global-registrator';
 GlobalRegistrator.register();
 
 const Vue = await import('vue');
-const { ShadcnButton, ShadcnDialogContent, ShadcnDialogRoot, ShadcnSwitch } =
+const { ShadcnButton, ShadcnDialogContent, ShadcnDialogRoot, ShadcnSwitch, BaseImageRoot } =
   await import('./proto-ui/components/vue/index.ts');
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
@@ -100,4 +100,32 @@ if (!closeIcon) {
   throw new Error('vue smoke: Dialog Content preset did not mount its default CloseIcon');
 }
 
-console.log('vue smoke ok | Button + Switch preset + Dialog CloseIcon preset');
+const imageContainer = document.createElement('div');
+document.body.appendChild(imageContainer);
+const source =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
+const imageApp = Vue.createApp({
+  render: () =>
+    Vue.h(BaseImageRoot, {
+      source,
+      a11yMode: 'informative',
+      alternativeText: 'Packed Base Image',
+      fit: 'cover',
+    }),
+});
+imageApp.mount(imageContainer);
+await flush();
+const image = imageContainer.querySelector('img');
+if (
+  imageContainer.querySelectorAll('img').length !== 1 ||
+  image?.getAttribute('src') !== source ||
+  image.alt !== 'Packed Base Image' ||
+  image.style.objectFit !== 'cover'
+) {
+  throw new Error(
+    'vue smoke: Base Image did not project its physical image: ' + imageContainer.innerHTML
+  );
+}
+imageApp.unmount();
+
+console.log('vue smoke ok | Button + Switch preset + Dialog CloseIcon preset + Base Image');

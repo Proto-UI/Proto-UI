@@ -99,7 +99,7 @@ const activeManager =
       data-variant="ghost"
       data-size="icon"
       type="button"
-      class="install-command-card__copy"
+      class="install-command-card__copy docs-code-copy"
       title="Copy command"
       aria-label="Copy command"
       data-copy-button
@@ -126,7 +126,7 @@ const activeManager =
 
   {
     normalizedEntries.map((entry) => (
-      <div
+      <pre
         class:list={[
           'install-command-card__body',
           entry.manager === activeManager || 'install-command-card__body--hidden',
@@ -135,7 +135,7 @@ const activeManager =
         hidden={entry.manager !== activeManager}
       >
         <code data-command>{entry.command}</code>
-      </div>
+      </pre>
     ))
   }
 </figure>
@@ -225,10 +225,10 @@ const activeManager =
 <style>
   .install-command-card {
     margin: 1.5rem 0 0;
-    border: 1px solid var(--color-border);
-    border-radius: 1.5rem;
+    border: 1px solid var(--docs-code-border);
+    border-radius: var(--docs-code-radius);
     overflow: hidden;
-    background: color-mix(in oklch, var(--color-muted) 55%, var(--color-background) 45%);
+    background: var(--docs-code-background);
     box-shadow: 0 1px 0 color-mix(in oklch, var(--color-foreground) 4%, transparent);
   }
 
@@ -287,34 +287,19 @@ const activeManager =
 
   .install-command-card__copy {
     margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border: 0;
-    border-radius: 0.75rem;
-    background: transparent;
-    color: var(--color-muted-foreground);
-    cursor: pointer;
-    transition:
-      background-color 150ms ease,
-      color 150ms ease;
-  }
-
-  .install-command-card__copy:hover {
-    background: color-mix(in oklch, var(--color-accent) 22%, transparent);
-    color: var(--color-foreground);
   }
 
   .install-command-card__body {
     margin: 0;
     padding: 0.6rem 1rem 0.7rem;
     overflow-x: auto;
-    color: var(--color-code-foreground, var(--color-foreground));
-    font-size: 1rem;
-    line-height: 1.4;
+    color: var(--docs-code-foreground);
+    font-family: var(--docs-code-font);
+    font-size: var(--docs-code-size);
+    line-height: var(--docs-code-line-height);
     text-align: left;
+    /* Preserve the command below, not whitespace around the template child. */
+    white-space: normal;
   }
 
   .install-command-card__body--hidden {
@@ -323,9 +308,7 @@ const activeManager =
 
   .install-command-card__body code {
     display: block;
-    font-family:
-      'SFMono-Regular', 'Cascadia Code', 'JetBrains Mono', Consolas, 'Liberation Mono', Menlo,
-      monospace;
+    font-family: inherit;
     width: max-content;
     min-width: 100%;
     white-space: pre;

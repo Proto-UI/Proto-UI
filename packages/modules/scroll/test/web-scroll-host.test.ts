@@ -69,6 +69,101 @@ afterEach(() => {
 });
 
 describe('module-scroll: Web scroll surface host', () => {
+  it.each(['', 'important'] as const)(
+    'restores display value and %s priority across system, composed, replacement and dispose',
+    (priority) => {
+      // D-SCROLL-PROJECTION-0001-B/D; HC-SCROLL-SURFACE-0001-F/G.
+      const target = document.createElement('div');
+      const track = document.createElement('div');
+      const thumb = document.createElement('div');
+      setMetrics(target, {
+        clientWidth: 100,
+        scrollWidth: 100,
+        clientHeight: 100,
+        scrollHeight: 400,
+      });
+      Object.defineProperty(track, 'clientHeight', { configurable: true, value: 100 });
+      track.style.setProperty('display', 'flex', priority);
+      thumb.style.setProperty('display', 'inline-block', priority);
+      track.append(thumb);
+      document.body.append(target, track);
+      const connection = (projection: 'composed' | 'system', present = true) => ({
+        config: { axes: 'vertical' as const, projection: 'composed' as const },
+        projection,
+        composedChrome: {
+          scope: {},
+          controls: present
+            ? [{ getAxis: () => 'vertical' as const, trackTarget: track, thumbTarget: thumb }]
+            : [],
+        },
+        onFacts: () => {},
+      });
+      const lease = createWebScrollSurfaceHost(target, {
+        moveGestureHost: createMoveHarness().host,
+      }).attach(connection('system'));
+      const hidden = () => {
+        for (const element of [track, thumb]) {
+          expect(element.style.getPropertyValue('display')).toBe('none');
+          expect(element.style.getPropertyPriority('display')).toBe('important');
+        }
+      };
+      const restored = () => {
+        expect(track.style.display).toBe('flex');
+        expect(thumb.style.display).toBe('inline-block');
+        for (const element of [track, thumb])
+          expect(element.style.getPropertyPriority('display')).toBe(priority);
+      };
+      try {
+        hidden();
+        const trackWrites = vi.spyOn(track.style, 'setProperty');
+        const thumbWrites = vi.spyOn(thumb.style, 'setProperty');
+        lease.update(connection('system'));
+        expect(trackWrites.mock.calls.filter(([name]) => name === 'display')).toHaveLength(0);
+        expect(thumbWrites.mock.calls.filter(([name]) => name === 'display')).toHaveLength(0);
+        lease.update(connection('composed'));
+        restored();
+        lease.update(connection('system'));
+        hidden();
+        lease.update(connection('system', false));
+        restored();
+        lease.update(connection('system'));
+        hidden();
+      } finally {
+        lease.dispose();
+      }
+      restored();
+    }
+  );
+
+  it('upgrades an already-none display to important and restores its empty priority', () => {
+    const target = document.createElement('div');
+    const track = document.createElement('div');
+    const thumb = document.createElement('div');
+    track.style.display = 'none';
+    track.append(thumb);
+    document.body.append(target, track);
+    const lease = createWebScrollSurfaceHost(target, {
+      moveGestureHost: createMoveHarness().host,
+    }).attach({
+      config: { axes: 'vertical', projection: 'system' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+    try {
+      expect(track.style.getPropertyPriority('display')).toBe('important');
+    } finally {
+      lease.dispose();
+    }
+    expect(track.style.display).toBe('none');
+    expect(track.style.getPropertyPriority('display')).toBe('');
+    expect(thumb.style.getPropertyValue('display')).toBe('');
+    expect(thumb.style.getPropertyPriority('display')).toBe('');
+  });
+
   it('reports normalized facts and applies requests without exposing the target', () => {
     const target = document.createElement('div');
     setMetrics(target, {

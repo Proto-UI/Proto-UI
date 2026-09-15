@@ -429,6 +429,9 @@ importers:
       '@proto.ui/module-hit-participation':
         specifier: workspace:*
         version: link:../../modules/hit-participation
+      '@proto.ui/module-image-view':
+        specifier: workspace:*
+        version: link:../../modules/image-view
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
@@ -560,6 +563,22 @@ importers:
       '@types/prompts':
         specifier: ^2.4.9
         version: 2.4.9
+
+  packages/compositions/chatui:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+    devDependencies:
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../../modules/anatomy
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../../prototypes/base
+      '@proto.ui/runtime':
+        specifier: workspace:*
+        version: link:../../runtime
 
   packages/core:
     devDependencies:

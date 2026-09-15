@@ -26,16 +26,13 @@ const highlighted = await highlightCode(code, lang);
   data-code-file-index={fileIndex}
   data-code-shell
 >
-  <div
-    class="group relative min-w-0 max-w-full max-h-24 min-h-12 overflow-hidden p-2 border-t border-border bg-muted data-[code-expanded=true]:max-h-none data-[code-expanded=true]:overflow-visible"
-    data-code-inner
-  >
+  <div class="group relative min-w-0 max-w-full min-h-12 p-2" data-code-inner>
     <wc-shadcn-button
       data-site-shadcn-button
       data-variant="outline"
       data-size="icon"
       type="button"
-      class="absolute top-2 right-2 size-8 items-center justify-center text-xs font-medium border border-border rounded-md bg-background/90 text-foreground cursor-pointer opacity-80 transition-colors duration-150 hover:opacity-100 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 inline-flex"
+      class="docs-code-copy absolute top-2 right-2 z-10"
       hidden
       title="Copy code"
       aria-label="Copy code"
@@ -68,11 +65,7 @@ const highlighted = await highlightCode(code, lang);
       <span class="sr-only">Copy code</span>
     </wc-shadcn-button>
 
-    <div
-      class="[&_.shiki]:!bg-muted dark:[&_.shiki_span]:![color:var(--shiki-dark)] min-w-0 max-w-full overflow-x-auto max-h-36 group-data-[code-expanded=false]:select-none group-data-[code-expanded=true]:overflow-y-auto"
-      data-code-content
-      set:html={highlighted}
-    />
+    <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
 
     <div
       class="absolute inset-x-0 bottom-0 h-16 z-9 pointer-events-none bg-gradient-to-b from-transparent to-muted group-data-[code-expanded=true]:hidden"
@@ -94,12 +87,6 @@ const highlighted = await highlightCode(code, lang);
     </wc-shadcn-button>
   </div>
 </figure>
-
-<style is:global>
-  [data-code-shell] wc-shadcn-button[hidden] {
-    display: none !important;
-  }
-</style>
 
 <script>
   import { initSiteShadcnControls } from '../site-shadcn-controls';

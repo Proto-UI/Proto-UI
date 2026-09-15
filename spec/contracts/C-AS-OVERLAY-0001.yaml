@@ -74,6 +74,10 @@ criteria:
     text:
       zh-CN: positioning lease 必须跟随 bound Presence 的 active view，而非仅跟随 logical open；Portal、layer 与 positioning 的建立必须在最外层 runtime callback 完成后协调。
       en: The positioning lease must follow the bound Presence active view rather than logical open alone; Portal, layer, and positioning establishment must be reconciled after the outermost runtime callback completes.
+  - id: C-AS-OVERLAY-0001-P
+    text:
+      en: 'Within one global input scope, one Escape sample selects at most the most recently activated eligible Overlay. Eligibility requires logical open, active presence, a mounted view and closeOnEscape opt-in. Opted-out or detached instances do not block eligible instances. Selection is fixed before callbacks: closing, disposing or synchronously reopening the selected instance cannot deliver that sample to another candidate. Logical activation order is independent of z-index; repeated open on an already eligible instance does not reorder it.'
+      zh-CN: 同一 global input scope 中，一次 Escape sample 至多选择最近激活的合格 Overlay。资格要求 logical open、active presence、mounted view 与 closeOnEscape opt-in。未启用或 detached 实例不阻挡合格实例。调用 callback 前固定选择；被选实例关闭、销毁或同步重新打开，都不能将同一 sample 传给另一候选。逻辑激活顺序独立于 z-index；已合格实例重复 open 不改变顺序。
 sources:
   - path: internal/contracts/overlay/as-overlay.v0.md
   - path: packages/hooks/src/as-overlay.ts
@@ -103,6 +107,8 @@ dependsOn:
 verifies:
   tests:
     - T-AS-OVERLAY-0001
+    - id: T-OVERLAY-CATALOG-0001
+      since: 0.3.0-alpha.0
 revisions:
   - version: 0.1.0
     change: introduced
@@ -125,6 +131,9 @@ revisions:
   - version: 0.2.0-rc.0
     change: refined
     summary: Required resolved Anatomy anchors to remain shared by Positioning and Boundary classification.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added scope-bound single-sample Escape coordination without changing portable author payloads.
 tags:
   - overlay
   - as-hook

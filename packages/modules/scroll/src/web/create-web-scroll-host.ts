@@ -23,11 +23,24 @@ export type WebScrollSurfaceHostOptions = Readonly<{
   minThumbSize?: number;
 }>;
 
+type DisplayStyle = Readonly<{ value: string; priority: string }>;
+const hiddenDisplay: DisplayStyle = { value: 'none', priority: 'important' };
+const readDisplay = (target: HTMLElement): DisplayStyle => ({
+  value: target.style.getPropertyValue('display'),
+  priority: target.style.getPropertyPriority('display'),
+});
+const writeDisplay = (target: HTMLElement, next: DisplayStyle) => {
+  const current = readDisplay(target);
+  if (current.value === next.value && current.priority === next.priority) return;
+  if (next.value) target.style.setProperty('display', next.value, next.priority);
+  else target.style.removeProperty('display');
+};
+
 type ThumbStyleSnapshot = Readonly<{
   width: string;
   height: string;
   transform: string;
-  display: string;
+  display: DisplayStyle;
   sizeVar: string;
   offsetVar: string;
 }>;
@@ -134,7 +147,7 @@ export function createWebScrollSurfaceHost(
       let endTimer: ReturnType<typeof setTimeout> | undefined;
       let chromeHidden = false;
       const thumbStyles = new Map<HTMLElement, ThumbStyleSnapshot>();
-      const trackStyles = new Map<HTMLElement, string>();
+      const trackStyles = new Map<HTMLElement, DisplayStyle>();
       const moveLeases = new Map<HTMLElement, MoveGestureHostLease>();
       const dragGrabOffsets = new Map<HTMLElement, number>();
       const original = {
@@ -167,7 +180,7 @@ export function createWebScrollSurfaceHost(
             width: thumb.style.width,
             height: thumb.style.height,
             transform: thumb.style.transform,
-            display: thumb.style.display,
+            display: readDisplay(thumb),
             sizeVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-size'),
             offsetVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-offset'),
           })
@@ -179,7 +192,7 @@ export function createWebScrollSurfaceHost(
         thumb.style.width = original.width;
         thumb.style.height = original.height;
         thumb.style.transform = original.transform;
-        thumb.style.display = original.display;
+        writeDisplay(thumb, original.display);
         if (original.sizeVar) {
           thumb.style.setProperty('--proto-ui-scroll-thumb-size', original.sizeVar);
         } else {
@@ -200,8 +213,7 @@ export function createWebScrollSurfaceHost(
       const restoreTrackDisplay = (track: HTMLElement) => {
         const original = trackStyles.get(track);
         if (original === undefined) return;
-        if (original) track.style.setProperty('display', original);
-        else track.style.removeProperty('display');
+        writeDisplay(track, original);
         trackStyles.delete(track);
       };
       const projectComposedChrome = (facts: ScrollSurfaceSnapshot) => {
@@ -221,15 +233,13 @@ export function createWebScrollSurfaceHost(
             active.add(thumb);
             active.add(track);
             if (!trackStyles.has(track)) {
-              trackStyles.set(track, track.style.getPropertyValue('display'));
+              trackStyles.set(track, readDisplay(track));
             }
-            if (track.style.getPropertyValue('display') !== 'none') {
-              track.style.setProperty('display', 'none');
-            }
+            writeDisplay(track, hiddenDisplay);
             if (!thumbStyles.has(thumb)) {
               rememberThumb(thumb);
             }
-            thumb.style.display = 'none';
+            writeDisplay(thumb, hiddenDisplay);
           }
           for (const track of Array.from(trackStyles.keys())) {
             if (active.has(track)) continue;
@@ -262,7 +272,7 @@ export function createWebScrollSurfaceHost(
           const available = geometry.available;
 
           if (available <= 0 || axisFacts.visibleRatio >= 1) {
-            thumb.style.display = 'none';
+            writeDisplay(thumb, hiddenDisplay);
             continue;
           }
 
@@ -273,7 +283,7 @@ export function createWebScrollSurfaceHost(
           );
           const offset = Math.max(0, available - thumbExtent) * clampRatio(axisFacts.position);
           const originalThumbStyle = thumbStyles.get(thumb);
-          thumb.style.display = originalThumbStyle?.display ?? '';
+          if (originalThumbStyle) writeDisplay(thumb, originalThumbStyle.display);
           thumb.style.setProperty('--proto-ui-scroll-thumb-size', `${thumbExtent}px`);
           thumb.style.setProperty('--proto-ui-scroll-thumb-offset', `${offset}px`);
           if (axis === 'vertical') {

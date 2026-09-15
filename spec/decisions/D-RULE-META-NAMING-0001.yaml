@@ -3,14 +3,10 @@ type: decision
 title: Rule host-environment input naming remains unsettled
 status: draft
 since: 0.1.0
-summary: The current `meta` Rule input is treated as secondary scope because host/environment configuration may need a more systematic abstraction.
+summary: Rule meta is an implemented extension used for light/dark theme conditions; its public shape remains evolving and may be replaced as broader requirements emerge.
 statement:
-  zh-CN: >-
-    当前 `module-rule-meta` 提供的 `w.meta(key)` 暂不进入 Rule core 命名。它表达的是宿主环境或配置类输入，但这类输入未来可能需要比 “meta” 更系统的抽象。
-
-  en: >-
-    The current `w.meta(key)` provided by `module-rule-meta` is not stabilized as Rule core naming. It represents host environment or configuration-like inputs, but that area may need a more systematic abstraction than "meta" in the future.
-
+  zh-CN: 当前 `module-rule-meta` 提供的 `w.meta(key)` 暂不进入 Rule core 命名。它表达的是宿主环境或配置类输入，但这类输入未来可能需要比 “meta” 更系统的抽象。 明暗主题是已成立且已有官方原型依赖的需求。meta 是已投入使用、API 尚在演进的特性，不是尚未实现的占位能力。单一主题需求不足以固化通用环境抽象；未来需求可能调整其形态或引入替代方案。抽象治理期间应保留已有主题行为。
+  en: The current `w.meta(key)` provided by `module-rule-meta` is not stabilized as Rule core naming. It represents host environment or configuration-like inputs, but that area may need a more systematic abstraction than "meta" in the future. The existing light/dark theme use case is accepted and already used by official prototypes. This is an implemented feature whose API is still evolving, not an unimplemented placeholder. That one use case is insufficient to freeze a general environment abstraction; future requirements may reshape or replace meta. Preserve existing theme behavior while its abstraction is governed.
 explains:
   contracts:
     - C-RULE-WHEN-0002
@@ -20,6 +16,9 @@ sources:
     sections:
       - D-RULE-META-NAMING-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Distinguished deployed theme behavior from unsettled extension naming and future API shape.
   - version: 0.1.0
     change: introduced
     summary: Recorded host-environment Rule input naming as unsettled.

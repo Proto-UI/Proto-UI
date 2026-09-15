@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, tw, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asOverlay } from '@proto.ui/hooks';
+import { asAccessible, asOverlay } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
 import {
   createTooltipContentId,
@@ -29,10 +29,11 @@ function projectTooltipContentHandle(
 }
 
 function setupTooltipContent(def: DefHandle<TooltipContentProps, TooltipContentExposes>): void {
+  const accessible = asAccessible();
   def.anatomy.claim(TOOLTIP_FAMILY, { role: 'content' });
   const contentId = def.state.string('tooltipContentId', '');
-  def.a11y.id(contentId);
-  def.a11y.role('tooltip');
+  accessible.id(contentId);
+  accessible.role('tooltip');
 
   def.props.define({
     side: { type: 'enum', empty: 'fallback', options: ['top', 'right', 'bottom', 'left'] },

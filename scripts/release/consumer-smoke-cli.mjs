@@ -101,12 +101,15 @@ try {
   for (const [host, component] of [
     ['react', 'shadcn-button'],
     ['react', 'base-button'],
+    ['react', 'base-image'],
     ['react', 'shadcn-switch'],
     ['react', 'shadcn-dialog'],
     ['vue', 'shadcn-button'],
+    ['vue', 'base-image'],
     ['vue', 'shadcn-switch'],
     ['vue', 'shadcn-dialog'],
     ['wc', 'shadcn-button'],
+    ['wc', 'base-image'],
     ['wc', 'shadcn-switch'],
     ['wc', 'shadcn-dialog'],
   ]) {
@@ -221,6 +224,7 @@ function verifyGeneratedConsumer(root) {
     '@proto.ui/adapter-web-component',
     'shadcn-button',
     'base-button',
+    'base-image',
     'shadcn-switch',
     'shadcn-dialog',
   ]) {

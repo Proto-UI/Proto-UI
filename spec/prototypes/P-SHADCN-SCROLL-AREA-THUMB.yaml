@@ -2,6 +2,7 @@ id: P-SHADCN-SCROLL-AREA-THUMB
 type: prototype
 title: shadcn Scroll Area Thumb projects passive host-driven feedback
 status: draft
+lifecycleRationale: This passive Shadcn Thumb presentation remains a draft Base projection; host-owned movement and cleanup evidence does not grant a new interaction protocol or stable lifecycle.
 since: 0.3.0-alpha.0
 summary: shadcn Scroll Area Thumb inherits Base passive geometry and Move hit routing and adds the current rounded fill.
 statement:

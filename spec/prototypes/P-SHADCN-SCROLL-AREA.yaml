@@ -2,6 +2,7 @@ id: P-SHADCN-SCROLL-AREA
 type: prototype
 title: shadcn Scroll Area Root preserves the host-owned Base scrolling domain
 status: draft
+lifecycleRationale: This bounded Shadcn presentation inherits the draft Base Scroll Area family and remains subject to independent slice review; the current package and browser evidence does not activate it as a stable guarantee.
 since: 0.3.0-alpha.0
 summary: >-
   shadcn Scroll Area is an unofficial Proto UI-maintained projection whose Root, Viewport, Scrollbar, and Thumb preserve the Base host-owned scrolling domain while adding only the current clipped frame and composed chrome presentation.

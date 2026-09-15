@@ -140,6 +140,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -181,7 +183,12 @@ jobs:
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
 
       - name: Public documentation gate and repository tests
+        env:
+          SPEC_AUTHORING_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
+          if [[ -n "${SPEC_AUTHORING_BASE}" && "${SPEC_AUTHORING_BASE}" != "0000000000000000000000000000000000000000" ]]; then
+            corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:spec-authoring -- --base "${SPEC_AUTHORING_BASE}"
+          fi
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test

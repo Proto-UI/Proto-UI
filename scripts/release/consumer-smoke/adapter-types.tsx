@@ -1,8 +1,14 @@
 import type { ComponentProps, ComponentRef } from 'react';
 
-import { ShadcnButton as ReactShadcnButton } from './proto-ui/components/react';
-import { ShadcnButton as VueShadcnButton } from './proto-ui/components/vue';
-import { ShadcnButtonElement } from './proto-ui/components/wc';
+import {
+  ShadcnButton as ReactShadcnButton,
+  BaseImageRoot as ReactBaseImageRoot,
+} from './proto-ui/components/react';
+import {
+  ShadcnButton as VueShadcnButton,
+  BaseImageRoot as VueBaseImageRoot,
+} from './proto-ui/components/vue';
+import { ShadcnButtonElement, BaseImageRootElement } from './proto-ui/components/wc';
 
 type ReactButtonProps = ComponentProps<typeof ReactShadcnButton>;
 type ReactButtonHandle = ComponentRef<typeof ReactShadcnButton>;
@@ -41,6 +47,35 @@ const webComponentInvalidProp: WebComponentButtonProps = { unknownProtoProp: tru
 declare const webComponentElement: WebComponentButton;
 const webComponentDisabled: boolean = webComponentElement.getExposes().disabled.get();
 
+type ReactImageProps = ComponentProps<typeof ReactBaseImageRoot>;
+type VueImageProps = InstanceType<typeof VueBaseImageRoot>['$props'];
+type WebComponentImageProps = NonNullable<
+  InstanceType<typeof BaseImageRootElement>['__protoUiProps']
+>;
+
+const imageValid: ReactImageProps & VueImageProps & WebComponentImageProps = {
+  source: 'image:consumer',
+  a11yMode: 'informative',
+  alternativeText: 'Packed image',
+  fit: 'cover',
+};
+// @ts-expect-error Packed React Image facade must preserve the fit union.
+const reactInvalidFit: ReactImageProps = { fit: 'stretch' };
+// @ts-expect-error Packed Vue Image facade must preserve the fit union.
+const vueInvalidFit: VueImageProps = { fit: 'stretch' };
+// @ts-expect-error Packed Web Component Image facade must preserve the fit union.
+const webComponentInvalidFit: WebComponentImageProps = { fit: 'stretch' };
+
+declare const reactImage: ComponentRef<typeof ReactBaseImageRoot>;
+declare const vueImage: InstanceType<typeof VueBaseImageRoot>;
+declare const webComponentImage: InstanceType<typeof BaseImageRootElement>;
+type ImageStatus = 'idle' | 'loading' | 'loaded' | 'error';
+const imageStatuses: ImageStatus[] = [
+  reactImage.getExposes().loadingStatus.get(),
+  vueImage.getExposes().loadingStatus.get(),
+  webComponentImage.getExposes().loadingStatus.get(),
+];
+
 void reactValid;
 void reactInvalidVariant;
 void reactInvalidProp;
@@ -53,3 +88,8 @@ void webComponentValid;
 void webComponentInvalidVariant;
 void webComponentInvalidProp;
 void webComponentDisabled;
+void imageValid;
+void reactInvalidFit;
+void vueInvalidFit;
+void webComponentInvalidFit;
+void imageStatuses;

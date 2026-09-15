@@ -61,3 +61,18 @@ describe('module-overlay: z-index layer scheduler', () => {
     expect(el.style.zIndex).toBe('42');
   });
 });
+
+it('T-OVERLAY-CATALOG-0001-CASE-LAYER: restores inline priority once and cannot undo a later lease', () => {
+  const el = document.createElement('div');
+  el.style.setProperty('z-index', '42', 'important');
+  const scheduler = createZIndexOverlayLayerScheduler();
+  const off = scheduler.attach(el, req('overlay'));
+  off();
+  expect(el.style.getPropertyValue('z-index')).toBe('42');
+  expect(el.style.getPropertyPriority('z-index')).toBe('important');
+  const next = scheduler.attach(el, req('overlay'));
+  const value = el.style.zIndex;
+  off();
+  expect(el.style.zIndex).toBe(value);
+  next();
+});

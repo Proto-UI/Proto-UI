@@ -8,7 +8,7 @@ Provides the built-in `as-*` hook DSL used by prototypes, while keeping runtime 
 
 ## Package Role
 
-Author-facing hook package for focus, overlay, trigger, collection, boundary, hit-participation, scroll-surface, and text-control helpers.
+Author-facing hook package for accessibility semantics, focus, overlay, trigger, collection, boundary, hit-participation, scroll-surface, and text-control helpers.
 
 ## Install
 
@@ -41,3 +41,22 @@ npm install @proto.ui/hooks@0.3.0-alpha.0
 ## License
 
 MIT
+
+## Accessibility semantics (0.3)
+
+`asAccessible()` returns the current instance's `AccessibleHandle` (exported by `@proto.ui/core`). Repeated calls during setup return the same handle without resetting declarations. All declaration methods are setup-only, even on a saved handle; runtime values follow bound State handles. Scalar fields and same-key bindings use the final setup declaration; tree patches merge by field.
+
+```ts
+import { asAccessible } from '@proto.ui/hooks';
+
+// Inside prototype setup:
+const accessible = asAccessible();
+accessible.role('button');
+accessible.nameFromContent();
+```
+
+This declares host-projectable semantics; it does not install keyboard handling, focus movement, or guarantee complete accessibility. State and interaction owners remain unchanged. The handle has no dispose, generic runtime mutation, arbitrary host target, or public internal-relation port.
+
+0.3 replaces `def.a11y` and `A11yDefAPI` directly, without compatibility aliases. 0.2 release history is unchanged; this migration is not backported.
+
+A setup cannot register both an authored and a privileged hook under the same name. Runtime rejects that collision explicitly before reusing a handle or skipping setup; rename the authored hook when its name conflicts with a built-in.

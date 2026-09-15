@@ -46,6 +46,10 @@ criteria:
     text:
       zh-CN: pointer hit origin 必须位于当前 surface 的宿主 root 或其内容中；命中 anchor 或其他非 surface member 自身的额外宿主盒不得激活 group，即使这些 members 在逻辑上属于同一 group。
       en: Pointer hit origin must be within the current surface host root or its content; hitting the extra host box of the anchor or another non-surface member must not activate the group even though those members logically belong to it.
+  - id: D-TRIGGER-GROUP-SURFACE-0001-I
+    text:
+      zh-CN: Trigger group 必须是一条直接连续链；同一 Trigger 下出现并列 Trigger 分支时，宿主必须诊断并拒绝形成分叉的声明或父关系变更，并保留原有已接纳链、surface 与 route，不得按注册顺序选择赢家。非 Trigger parent 下的独立 Trigger group 不构成此分叉。
+      en: A Trigger group must be one directly continuous chain. Sibling Trigger branches under a Trigger require a diagnostic and rejection of the declaration or parent change that forms the branch, preserving the previously accepted chain, surface and route rather than selecting a registration-order winner. Independent Trigger groups under a non-Trigger parent are not such a branch.
 sources:
   - path: internal/records/2026-07-22-trigger-surface-and-component-preset.zh-CN.md
   - path: spec/contracts/C-AS-TRIGGER-0001.yaml
@@ -61,6 +65,9 @@ relates:
   decisions: [D-AS-CHILD-OMISSION-0001, D-A11Y-SEMANTIC-DOMAIN-0001]
   prototypes: [P-SHADCN-BUTTON, P-SHADCN-DIALOG-TRIGGER, P-SHADCN-DIALOG-CLOSE]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Required a single continuous chain and diagnosed rejection of sibling Trigger branches.
   - version: 0.2.0-rc.3
     change: introduced
     summary: Separated outer behavior ownership from the single inner host interaction surface for continuous trigger groups.

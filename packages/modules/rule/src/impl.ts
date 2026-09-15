@@ -29,6 +29,7 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   private extensions: RuleExtension<Props>[] = [];
   private stateHandleById = new Map<any, { get(): any }>();
   private nextRuleId = 1;
+  private disposed = false;
 
   private deps: RuleExecutorDeps<Props> = {};
   private depsResolver?: () => RuleExecutorDeps<Props>;
@@ -38,6 +39,7 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   private unUseRuleStyle: FeedbackRuntimeStyleDisposer | null = null;
 
   define(spec: RuleSpec<Props>): RuleHandle {
+    this.ensureAlive();
     const ir = compileRule(spec, {
       registerStateHandle: (id, handle) => {
         if (handle && typeof handle.get === 'function') {
@@ -68,10 +70,12 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   }
 
   registerExtension(ext: RuleExtension<Props>): void {
+    this.ensureAlive();
     this.extensions.push(ext);
   }
 
   evaluate(ctx: RuleEvalCtx<Props>): RuleEvalResult {
+    this.ensureAlive();
     const readState =
       ctx.readState ??
       ((id: any) => {
@@ -109,11 +113,13 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   }
 
   attachExecutor(resolveDeps: () => RuleExecutorDeps<Props>): void {
+    this.ensureAlive();
     this.depsResolver = resolveDeps;
     this.deps = resolveDeps();
   }
 
   onProtoPhase(phase: 'setup' | 'mounted' | 'updated' | 'unmounted'): void {
+    if (this.disposed) return;
     if (phase === 'mounted') {
       this.ensureDeps();
       if (!this.stateWatchesInstalled) this.installStateWatches();
@@ -140,7 +146,18 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   }
 
   dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
     this.stopDriver();
+    this.rules = [];
+    this.extensions = [];
+    this.stateHandleById.clear();
+    this.deps = {};
+    this.depsResolver = undefined;
+  }
+
+  private ensureAlive(): void {
+    if (this.disposed) throw new Error('[rule] instance disposed');
   }
 
   private installStateWatches(): void {

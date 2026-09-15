@@ -54,7 +54,7 @@ Prerelease suffix 用来表达稳定化阶段，而不是泛化的内部构建�
 1. 从最新 `main` 创建 topic branch。
 2. 创建 draft V 实体并更新 `VERSION`。
 3. 使用 `stamp-version` 将全部公开 package 精确对齐。
-4. 更新 release note、package BOM、spec snapshot 与治理映射。
+4. 更新 release note、package BOM、spec snapshot 与治理映射，生成普通实体 lifecycle report 并记录已评审切片的 disposition。
 5. 运行版本治理、spec、类型、测试、release scan 和 tarball consumer smoke。
 6. 通过 PR 评审后合入 `main`。
 
@@ -65,6 +65,16 @@ Prerelease suffix 用来表达稳定化阶段，而不是泛化的内部构建�
 每条 release train 在 `internal/releases/<version>/` 下维护 `release-notes.md`、对应中文投射与确定性的 `package-bom.json`。`pnpm release:bom` 根据公开 workspace package 图和 launch governance 角色重新生成 BOM；`pnpm release:assets:check` 会在已评审 BOM 漂移或任一 release note 缺失时失败。英文说明作为 GitHub Release 正文，BOM、中文说明、spec snapshot 与 checksum 作为 release evidence 附件。
 
 npm Trusted Publisher 是 package 级配置，因此 package identity 不存在时无法预先绑定。每个首次出现的公开 package 都必须在 release train 前使用明确不属于正式发行的 bootstrap 版本完成创建，并绑定到已评审的发布 workflow。bootstrap 不得占用发行 channel dist-tag，且 identity setup 后必须移除其 `bootstrap` tag。若 npm 拒绝移除指向 package 唯一 bootstrap 版本的 `latest`，则仅当该唯一版本已 deprecated、`next` 不指向该 bootstrap 版本，且没有为了覆盖它而发布 release-train 或 stable 版本时，允许该 `latest` 暂留。`pnpm release:registry:check` 会核验这些公开 identity、dist-tag 与 deprecation 条件；它不宣称能够检查私有的 Trusted Publisher 配置。
+
+### 3.1 普通实体生命周期评审
+
+当受治理的 surface 首次进入 release train，以及每次准备阶段评审时，运行 `pnpm release:lifecycle`。报告保守地覆盖当前 catalog 中在所选版本可用的全部普通实体，展示未评审的 draft、已记录的测试证据、blocker 与旧元数据缺口；它不从 package publication 或 dependency edge 推断稳定生效。准入标准遵循 [`spec/README.md`](../../spec/README.md)。
+
+在 `internal/releases/<version>/lifecycle-dispositions.json` 中记录已评审的语义切片。每个切片列出 entity IDs、证据与理由，并选择一个 disposition：`promote` 表示提交评审的准入建议，`remain-draft` 必须指明 blocker，`not-applicable` 必须说明原因。该记录描述当前评审，不得表述为对不可变 release snapshot 的追溯修改。按切片逐步处理 release 相关实体，保留报告中尚未覆盖的余量，不得以没有证据的统一 disposition 填满目录。
+
+使用 `pnpm release:lifecycle -- --check --entities <entity-ids>` 要求已评审范围内的每个 draft 都有 disposition；省略 `--entities` 时，`--check` 检查完整报告 inventory 中的全部 draft，任何 draft disposition 缺失都会失败。非 draft 实体的元数据与 activation-provenance 缺口继续展示供审计，但不因此强制要求 disposition。准备 PR 必须说明通过检查的范围和仍未评审的余量。`release:rehearse` 生成完整报告以触发评审；生成成功不代表全目录已经通过 readiness 检查。报告和 disposition 不修改实体 status、不回填 activation history，也不替代独立的 V 实体发布证据流程。
+
+Draft disposition 按所选报告版本判断：当前为 draft，或所选版本早于已记录 `activeSince` 的可用普通实体，属于已知草案；缺少 activation provenance 时不推断其历史状态。
 
 ## 4. 发布流程
 
@@ -107,7 +117,7 @@ npm Trusted Publisher 是 package 级配置，因此 package identity 不存在�
 - 当前源码 tarball consumer smoke
 - Quick Start 与实际安装命令一致
 
-`pnpm release:rehearse` 是不发布的一键准备门禁。它会依次执行发行身份与物料检查、编目和测试、类型检查、临时 spec snapshot、共享公开 package 构建、package publish dry-run、React 与 CLI 多宿主 tarball consumer smoke，以及官网构建。release staging 会复制开发与 CI 已验证的同一份本地 `dist` 产物，不再单独编译另一套输出。该命令可能因 dry-run 或临时 consumer 安装访问 npm registry，但绝不会进入真实 publish 路径。
+`pnpm release:rehearse` 是不发布的一键准备门禁。它会依次执行发行身份与物料检查、普通实体 lifecycle reporting、编目和测试、类型检查、临时 spec snapshot、共享公开 package 构建、package publish dry-run、React 与 CLI 多宿主 tarball consumer smoke，以及官网构建。release staging 会复制开发与 CI 已验证的同一份本地 `dist` 产物，不再单独编译另一套输出。该命令可能因 dry-run 或临时 consumer 安装访问 npm registry，但绝不会进入真实 publish 路径。
 
 纯文档或内部 app 的变化可以不立即触发 release；但一旦创建新的数字版本或修改 `VERSION`，就必须通过上述 release train 流程。
 
@@ -121,7 +131,7 @@ npm Trusted Publisher 是 package 级配置，因此 package identity 不存在�
 2. 更新根 `VERSION`、创建新的 `draft` V 实体，并对齐 launch governance release line。
 3. 运行 `node scripts/release/stamp-version.mjs`，使全部公开 package manifest 使用同一精确版本，再用仓库声明的 pnpm 版本刷新 lockfile。
 4. 更新双语 release notes 并运行 `pnpm release:bom`。随 tarball 分发且会引用自身版本的 package README 也在此阶段更新。
-5. 运行 `pnpm spec:docs:agent` 生成被 Git 忽略的本地 Agent 投影，并审阅新 V 实体影响的 entity graph；不得把该一次性投影加入提交。
+5. 运行 `pnpm spec:docs:agent` 生成被 Git 忽略的本地 Agent 投影，并审阅新 V 实体影响的 entity graph；不得把该一次性投影加入提交。审阅 `pnpm release:lifecycle` 报告并记录切片 disposition，在 PR 中说明已检查范围与未评审余量。
 6. 提交前运行 `pnpm release:rehearse`、`pnpm check:agent-doc` 与 `git diff --check`。
 7. 创建 Draft PR，明确发行范围、检查结果、package 数量，以及尚未执行真实发布这一事实。
 
