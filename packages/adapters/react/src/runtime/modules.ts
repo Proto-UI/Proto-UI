@@ -78,7 +78,11 @@ import {
 } from '@proto.ui/module-positioning';
 import { RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/module-rule-expose-state-web';
-import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import {
+  RULE_META_GET_CAP,
+  RULE_META_COLOR_SCHEME_SOURCE_CAP,
+  type ColorSchemeInvalidationSource,
+} from '@proto.ui/module-rule-meta';
 import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import {
   createWebTextControlHost,
@@ -109,6 +113,7 @@ type ReactOwnerModulesArgs<Props extends PropsBaseType> = {
   emit: (key: string, payload?: unknown, options?: Record<string, unknown>) => void;
   rawPropsSource: RawPropsSource<Props>;
   getMeta: (key: string) => unknown;
+  colorSchemeSource?: ColorSchemeInvalidationSource;
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
@@ -134,7 +139,7 @@ export function createReactOverlayGlobalMount(
 export function createReactOwnerModules<Props extends PropsBaseType>(
   args: ReactOwnerModulesArgs<Props>
 ) {
-  const { instanceToken, emit, rawPropsSource, getMeta, setExposes } = args;
+  const { instanceToken, emit, rawPropsSource, getMeta, colorSchemeSource, setExposes } = args;
 
   return createCapsWiring()
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
@@ -179,7 +184,12 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
         (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken),
       ],
     ])
-    .use('rule-meta', [[RULE_META_GET_CAP, (key: string) => getMeta(key)]])
+    .use('rule-meta', [
+      [RULE_META_GET_CAP, getMeta],
+      ...(colorSchemeSource
+        ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
+        : []),
+    ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
     ])
@@ -202,6 +212,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
   getMeta: (key: string) => unknown;
+  colorSchemeSource?: ColorSchemeInvalidationSource;
   exposeStateWebMode?: ExposeStateWebMode;
   scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
@@ -220,6 +231,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     rawPropsSource,
     effectsPort,
     getMeta,
+    colorSchemeSource,
     exposeStateWebMode,
     scrollProjection,
     setExposes,
@@ -357,7 +369,12 @@ export function createReactModules<Props extends PropsBaseType>(args: {
         (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken),
       ],
     ])
-    .use('rule-meta', [[RULE_META_GET_CAP, (key: string) => getMeta(key)]])
+    .use('rule-meta', [
+      [RULE_META_GET_CAP, getMeta],
+      ...(colorSchemeSource
+        ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
+        : []),
+    ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
     ])
