@@ -39,13 +39,20 @@ async function fixture() {
 function run(dir: string, args: string[]) {
   return spawnSync(process.execPath, [bin, ...args], { cwd: dir, encoding: 'utf8' });
 }
+function snapshotKey(
+  dir: string,
+  file: string,
+  paths: Pick<typeof path, 'relative' | 'sep'> = path
+) {
+  return paths.relative(dir, file).split(paths.sep).join('/');
+}
 async function snapshot(dir: string): Promise<Record<string, string>> {
   const result: Record<string, string> = {};
   async function visit(root: string) {
     for (const entry of await fs.readdir(root, { withFileTypes: true })) {
       const file = path.join(root, entry.name);
       if (entry.isDirectory()) await visit(file);
-      else result[path.relative(dir, file)] = await fs.readFile(file, 'utf8');
+      else result[snapshotKey(dir, file)] = await fs.readFile(file, 'utf8');
     }
   }
   await visit(dir);
@@ -53,6 +60,15 @@ async function snapshot(dir: string): Promise<Record<string, string>> {
 }
 
 describe('F1 public CLI companion delivery', () => {
+  it.each([
+    ['POSIX', path.posix, '/fixture'],
+    ['Windows', path.win32, 'C:\\fixture'],
+  ] as const)('uses slash-delimited snapshot keys for %s paths', (_name, paths, dir) => {
+    for (const key of ['styles/custom.css', 'companions/shadow.js', 'src/styles/entry.css']) {
+      expect(snapshotKey(dir, paths.join(dir, ...key.split('/')), paths)).toBe(key);
+    }
+  });
+
   it.each([
     ['shadcn', SHADCN_STYLE_TOKENS],
     ['brutalist', BRUTALIST_STYLE_TOKENS],

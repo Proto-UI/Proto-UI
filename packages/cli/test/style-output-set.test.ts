@@ -37,12 +37,19 @@ describe('style output set preflight and caught-failure recovery', () => {
   it('replaces the full set, preserves permissions and regenerates without staging residue', async () => {
     const { dir, files, outputs } = await fixture();
     await fs.chmod(files[0], 0o640);
-    await writeStyleOutputSet(outputs);
-    await writeStyleOutputSet(outputs);
-    for (const output of outputs)
-      await expect(fs.readFile(output.path, 'utf8')).resolves.toBe(output.content);
-    expect((await fs.stat(files[0])).mode & 0o777).toBe(0o640);
-    expect((await fs.readdir(dir)).sort()).toEqual(files.map((file) => path.basename(file)).sort());
+    const initialMode = (await fs.stat(files[0])).mode & 0o777;
+    if (process.platform !== 'win32') expect(initialMode).toBe(0o640);
+    for (let replacement = 0; replacement < 2; replacement++) {
+      await writeStyleOutputSet(outputs);
+      for (const output of outputs)
+        await expect(fs.readFile(output.path, 'utf8')).resolves.toBe(output.content);
+      const mode = (await fs.stat(files[0])).mode & 0o777;
+      expect(mode).toBe(initialMode);
+      if (process.platform !== 'win32') expect(mode).toBe(0o640);
+      expect((await fs.readdir(dir)).sort()).toEqual(
+        files.map((file) => path.basename(file)).sort()
+      );
+    }
   });
 
   it.each(['mkdir', 'mkdtemp', 'copyFile', 'writeFile', 'chmod', 'rename'] as const)(
