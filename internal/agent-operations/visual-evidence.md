@@ -19,8 +19,8 @@ Inspect and sanitize paraphrases, screenshots, HTML, logs, paths and metadata be
 
 | Subject | Agent supplies | Explicit limitation |
 | --- | --- | --- |
-| UI/interaction defect | Actual initial/action/result screenshots; video if motion matters; before/after for repair | Route, viewport, Adapter, input method and revision; a mockup is not reproduction |
-| Runtime/state machine/CLI/build/API defect | Captured executed runner/terminal trace, deterministic fixture and raw output; state/sequence diagram when helpful | Label a rendered transcript as a transcript, not a native terminal or product UI screenshot; diagrams explain, not prove |
+| UI/interaction defect | Actual running component captures that visibly expose the fault, with initial/action/result states; video if motion matters; affected/fixed comparison for repair | Route, viewport, Adapter, input method and revision; a mockup, painted state badge, prose screenshot or log card is not component reproduction |
+| Purely internal Runtime/state machine/CLI/build/API defect | Executed reproduction plus a measured variable list and state/sequence walkthrough explaining the first divergence and its consequence | Cite actual observation points and distinguish measured values from inference; a terminal dump or prose rendered into an image alone is insufficient. Do not invent a visible component failure |
 | Architecture/spec/research/feature proposal | Subject-specific ownership/state/sequence diagram, comparison or annotated example, grounded in cited sources | Separate observed design, proposed design, unresolved decisions and assumptions |
 | Docs/design/accessibility | Actual rendered page/example capture and relevant annotated comparison | Appearance alone does not prove protocol or all assistive-technology behavior |
 | Governance/other non-UI work | Concrete workflow, scope/dependency map or captured command/report appropriate to the topic | No decorative stock image, title card or generic diagram to satisfy a quota |
@@ -28,6 +28,14 @@ Inspect and sanitize paraphrases, screenshots, HTML, logs, paths and metadata be
 For multi-state or interactive explanations, include a small reproducible **HTML artifact** when it materially helps review: source/download, instructions, dependencies and an uploaded static screenshot fallback. Mark simulations as simulations; rendering a model does not prove real component behavior. GitHub does not execute arbitrary attached HTML. State hosting/download/access limitations. Do not build an artifact for its own sake when simpler evidence suffices.
 
 Never fabricate observations with image generation or replace deterministic reproduction with arbitrary timing delays. Keep diagrams minimal and useful, with event/state/owner labels traceable to evidence.
+
+### Show the failure, then explain it
+
+For a visible defect, run the affected component through its real implementation and capture the malfunction itself. Keep enough surrounding context to compare the initial and failing states. Do not manually change CSS, attributes, state or displayed values to manufacture the reported appearance. A controlled host or synthetic event may isolate a real code path, but disclose that boundary; it is not evidence of native input or every Adapter. If the actual failure cannot be captured, record the missing reproduction instead of substituting a report screenshot.
+
+For a purely internal defect, write a technical walkthrough rather than a picture quota. Introduce the relevant owners and invariant, then explain the trigger, the first unexpected transition, why execution takes that branch, and the downstream consequence. Use only the variables needed to follow that story: their names, values before/after, owner or epoch, and the source location where they were observed. Align the variable list with actual event order, pending work and callback/lease identity when relevant. Provide a normal control when it distinguishes the cause. Clearly mark inferred causes or proposed transitions; link the executable reproduction and searchable raw data. A source-bound variable table and sequence visualization are valid internal evidence; merely reformatting assertions, JSON or Issue prose into a PNG is not.
+
+Inspect every published figure as a reader: can the visible defect be located directly, or can an internal reader trace the measured divergence and its consequence without guessing? Images complement the explanation, not duplicate paragraphs. Rejected or superseded figures remain historical material, not completed evidence; correct the Agent's public claim and ledger explicitly.
 
 ## Soft gate and authority
 
@@ -37,7 +45,9 @@ Before Agent publication or a material update, inspect the paraphrase, scoped ev
 
 ## Historical backfill
 
-Inventory open **and closed** Issues unless the user narrowed scope. Keep a resumable ledger: URL/state, request source, existing evidence, reproduction baseline/result, uploaded URLs, posted-comment receipt, missing work and next action. An image search in the body alone is triage, not proof that comments contain no evidence.
+Inventory open **and closed** Issues unless the user narrowed scope. Exhaust pagination and reconcile unique Issue URLs with the live total; distinguish Issues from PRs. A sample, recent page or open-only queue never satisfies an all-history request. Keep a resumable ledger: URL/state, request source, discussion-inspection status, existing evidence and quality, reproduction baseline/result, uploaded URLs, posted-comment receipt, missing work and next action. An image search in the body alone is triage, not proof that comments contain no evidence.
+
+Do not count inventory, a generic image, a rejected packet, or a known reproduction gap as completed backfill. Report inspected, reproduced, published/verified and still-pending scopes separately. Keep already adequate evidence with verified links; do not post duplicate comments merely to increment a counter. Fixed or closed Issues remain in scope, while their original closure and acceptance remain unchanged.
 
 Work serially in bounded batches. Read relevant discussions and existing assets, then reproduce. Preserve authors' text, intent, claims and closure history; append an attributed packet rather than rewriting a report. Do not reopen, close, label, assign or claim merely to backfill. Check a stable evidence marker before posting; read back an uncertain write before retrying.
 
@@ -46,7 +56,8 @@ For a fixed bug, use a safe recorded affected revision where feasible and compar
 ## Acceptance examples
 
 - A human reports “the dialog jumps” without images: accept the report; Agent investigates and captures transitions.
-- An Agent posts a decorative diagram without running the alleged bug: evidence remains partial; obtain the executed trace.
+- An Agent posts a screenshot of paragraphs, assertions or JSON about a visible bug: evidence is not a component reproduction; capture the actual failing component.
+- A purely internal watcher failure has no visible component: collect variable values at the exception and subsequent dispatch, explain queue ownership and event order with a source-bound sequence, and retain raw traces as supporting data.
 - A human submits a plain-text PR: do not impose the Agent checklist on the person; the Agent can supplement it in its own follow-up.
 - Agent upload fails: record public-asset debt and the next Agent action; neither a local path nor an inaccessible Gist counts as uploaded screenshot evidence.
 - An old closed Issue is backfilled: retain its state and text; cite the actual source and distinguish historical/current evidence.
@@ -65,7 +76,7 @@ Agent's sanitized paraphrase with source attribution; state if the original prom
 - Baseline / candidate / environment / observation time:
 - Steps/command and fixture:
 - Expected (authority) / observed:
-- Type: actual UI capture / executed trace capture / diagram / proposal / simulation.
+- Type: actual component capture / measured internal walkthrough / subject diagram / proposal / simulation.
 - Uploaded images with alt text and captions:
 - HTML source/download and static fallback, when useful:
 

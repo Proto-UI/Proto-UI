@@ -54,4 +54,6 @@ Commit and push when the user explicitly requests them and the live branch permi
 
 Apply `internal/agent-operations/visual-evidence.md` to Agent-authored or materially advanced Issues and PRs, including historical backfill. Agents own reproduction, uploaded visuals, sanitized request paraphrases, and evidence debt; humans may submit plain descriptions. This is a soft gate, not a new human intake requirement or external-write authority. Read `internal/agent-operations/github-evidence-upload.md` before choosing an upload method.
 
+Show visible bugs in actual running components. For purely internal failures, explain measured variable/state transitions and their consequences as a source-bound technical walkthrough. Prose/log screenshots alone satisfy neither. An all-history backfill includes closed Issues and cannot be completed by a sample or inventory.
+
 Author repository artifacts in the language and form required by their governing source. Communicate progress, decisions, blockers, and handoff in the user's current language. Keep identifiers, paths, API names, and entity IDs canonical.
