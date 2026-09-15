@@ -34,3 +34,11 @@
 - 第一次 `check:agent-operations` 在读取合并带入的未提交 binary diff 时触发 `spawnSync git ENOBUFS`。未修改检查脚本或丢弃证据，待保存本地合并提交后以干净工作区重跑；此时不将它记为通过。
 
 本轮未执行完整 `pnpm test`/全部 browser suites、全站构建、Windows、Safari、Firefox、OS IME 或新人工验收。新 head 的 CI 与独立 review 必须重新确认；没有关闭 review threads 或执行 PR merge。
+
+## 本地合并提交后的复核
+
+本地 merge commit 为 `9999605fb3a092326301423f594e54c12879b8b7`，父提交分别为上述 #652 head 与 main head。提交 hook 未引入额外文件变化；remerge diff 仅有两个冲突文件、共存测试和本记录。保存该提交后，干净工作区的 `check:agent-operations` 58 项全部通过，之前的 ENOBUFS 不再出现；未绕过或修改检查器。
+
+同一提交再次运行官方 Node 的预算脚本，WC 仍为 84,491 bytes；minified 为 316,826 bytes，SHA-256 为 `1810b6005b45bcb4d300cbb9db95cd5c232d7dd420bd597f396888e7a44fed5f`，其余 8 项继续通过。
+
+独立预算讨论已建立为 [#654](https://github.com/Proto-UI/Proto-UI/issues/654)，记录 whole-entry 与 consumer cost 的区别、工具链再现性、能力增长和基线更新问题。本记录不代替该讨论的维护者决定。分支推送后仍须以新 head 的 CI 和独立审查为准，当前预算失败未解除。
