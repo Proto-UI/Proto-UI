@@ -20,9 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
-    env:
-      POPPY_CONTROL_PLANE: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN != '' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN || 'https://poppy-proto-ui.chenyejin2004.workers.dev' }}
-
     steps:
       - name: Check out trusted cleanup code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -42,13 +39,33 @@ jobs:
         shell: bash
         run: node integrations/proto-ui-preview/scripts/cloudflare-pages.mjs delete "$PREVIEW_PROJECT"
 
-      - name: Report the closed deployment to Poppy
-        id: revoke
+      - name: Report the closed deployment to the central Poppy control plane
+        id: revoke-central
         if: always()
         continue-on-error: true
         env:
           POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
-          POPPY_PREVIEW_FALLBACK_MODE: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && vars.POPPY_PREVIEW_FALLBACK_ORIGIN != '' && 'true' || 'false' }}
+          POPPY_CONTROL_PLANE: https://poppy-proto-ui.chenyejin2004.workers.dev
+          PREVIEW_PR: ${{ github.event.pull_request.number }}
+          PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+          PREVIEW_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PREVIEW_AUTHOR_ID: ${{ github.event.pull_request.user.id }}
+          PREVIEW_PROJECT: poppy-proto-ui-pr-${{ github.event.pull_request.number }}
+          PREVIEW_ORIGIN: ''
+          PREVIEW_DEPLOYMENT_ID: ''
+          PREVIEW_RUN_ID: ${{ github.run_id }}
+          PREVIEW_RUN_ATTEMPT: ${{ github.run_attempt }}
+        shell: bash
+        run: node integrations/proto-ui-preview/scripts/report.mjs closed
+
+      - name: Report the closed deployment to the configured fallback control plane
+        id: revoke-fallback
+        if: always() && vars.POPPY_PREVIEW_FALLBACK_ORIGIN != ''
+        continue-on-error: true
+        env:
+          POPPY_PREVIEW_INGEST_SECRET: ${{ secrets.POPPY_PREVIEW_INGEST_SECRET }}
+          POPPY_CONTROL_PLANE: ${{ vars.POPPY_PREVIEW_FALLBACK_ORIGIN }}
+          POPPY_PREVIEW_FALLBACK_MODE: 'true'
           PREVIEW_PR: ${{ github.event.pull_request.number }}
           PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
           PREVIEW_AUTHOR: ${{ github.event.pull_request.user.login }}
@@ -70,14 +87,14 @@ jobs:
           PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
           PREVIEW_PROJECT: poppy-proto-ui-pr-${{ github.event.pull_request.number }}
           PREVIEW_ORIGIN: ''
-          PREVIEW_STATUS: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && steps.cleanup.outcome == 'success' && steps.revoke.outcome == 'success' && 'closed' || vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && steps.revoke.outcome == 'success' && 'fallback-closed' || 'cleanup-failed' }}
+          PREVIEW_STATUS: ${{ vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && steps.cleanup.outcome == 'success' && steps.revoke-central.outcome == 'success' && steps.revoke-fallback.outcome != 'failure' && 'closed' || vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED != 'true' && steps.revoke-central.outcome == 'success' && steps.revoke-fallback.outcome != 'failure' && 'fallback-closed' || 'cleanup-failed' }}
           PREVIEW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: node integrations/proto-ui-preview/scripts/sticky-comment.mjs
 
       - name: Fail when resource cleanup or access revocation failed
         if: >-
-          always() && (steps.revoke.outcome != 'success' || (vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && steps.cleanup.outcome != 'success'))
+          always() && (steps.revoke-central.outcome != 'success' || (vars.POPPY_PREVIEW_FALLBACK_ORIGIN != '' && steps.revoke-fallback.outcome != 'success') || (vars.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && steps.cleanup.outcome != 'success'))
 
 
         shell: bash

@@ -50,6 +50,11 @@ test('README keeps invite authority, deployment binding, and revocation explicit
   assert.match(readmeSource, /explicit invite revocation/);
 });
 
+test('the fallback Ready URL uses the isolated content route, never an admin route', () => {
+  assert.match(stickySource, /\/preview\/content\/\$\{pr\}\/\$\{headSHA\}\//);
+  assert.doesNotMatch(stickySource, /admin\/preview\/content/);
+});
+
 test('the fallback state never claims a preview origin or ready deployment', () => {
   assert.match(stickySource, /fallback-unavailable/);
   assert.match(stickySource, /No preview was published/);

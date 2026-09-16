@@ -40,7 +40,7 @@ if (fallbackMode && status === 'ready') {
   }
 }
 const previewURL = fallbackMode
-  ? `${origin.replace(/\/$/, '')}/admin/preview/content/${pr}/${headSHA}/`
+  ? `${origin.replace(/\/$/, '')}/preview/content/${pr}/${headSHA}/`
   : origin;
 const states = {
   ready: {

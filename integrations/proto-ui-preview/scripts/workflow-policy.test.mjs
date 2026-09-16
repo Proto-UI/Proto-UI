@@ -35,6 +35,7 @@ const fallbackPrepare = await readFile(
   'utf8'
 );
 const sticky = await readFile(new URL('./sticky-comment.mjs', import.meta.url), 'utf8');
+const extract = await readFile(new URL('./extract-fallback-artifact.mjs', import.meta.url), 'utf8');
 const security = await readFile(
   new URL('../.github/workflows/poppy-preview-security.yml', import.meta.url),
   'utf8'
@@ -171,10 +172,10 @@ test('fallback publication requires a separate untrusted content origin', async 
   );
 });
 
-
 test('close always reports closed to Poppy while Cloudflare deletion is gated', () => {
-  assert.match(close, /Report the closed deployment to Poppy/);
-  assert.match(close, /run: node integrations\/proto-ui-preview\/scripts\/report\.mjs closed/);
+  assert.match(close, /Report the closed deployment to the central Poppy control plane/);
+  assert.match(close, /Report the closed deployment to the configured fallback control plane/);
+  assert.equal((close.match(/report\.mjs closed/g) ?? []).length, 2);
   assert.match(close, /cleanup:[\s\S]*if: vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true'/);
   assert.match(close, /fallback-closed/);
 });
@@ -201,12 +202,33 @@ test('fallback rejects oversized artifacts before download extraction', () => {
     workflow.indexOf('  fallback-unavailable:')
   );
   assert.match(workflow, /artifact_size: \$\{\{ steps\.resolve\.outputs\.artifact_size \}\}/);
-  assert.match(fallback, /id: size[\s\S]*ARTIFACT_SIZE: \$\{\{ needs\.resolve-deploy\.outputs\.artifact_size \}\}/);
+  assert.match(
+    fallback,
+    /id: size[\s\S]*ARTIFACT_SIZE: \$\{\{ needs\.resolve-deploy\.outputs\.artifact_size \}\}/
+  );
   assert.match(fallback, /50 \* 1024 \* 1024/);
   assert.match(fallback, /id: download[\s\S]*if: steps\.building\.outcome == 'success'/);
   assert.match(fallback, /steps\.size\.outcome != 'success'/);
 });
 
+test('fallback download uses bounded extraction instead of an unbounded archive action', () => {
+  const fallback = workflow.slice(
+    workflow.indexOf('  fallback-upload:'),
+    workflow.indexOf('  fallback-unavailable:')
+  );
+  assert.doesNotMatch(fallback, /actions\/download-artifact/);
+  assert.match(fallback, /id: download[\s\S]*extract-fallback-artifact\.mjs/);
+  assert.match(extract, /does not belong to the verified workflow run/);
+  assert.match(extract, /artifact stream exceeded the 50 MiB compressed envelope/);
+  assert.match(extract, /redirect: 'manual'/);
+  assert.match(extract, /link or special file/);
+  assert.match(extract, /unsafe path segment/);
+  assert.match(extract, /maxOutputLength: limits\.maxFileBytes \+ 1/);
+  assert.match(extract, /expanded beyond its recorded size/);
+  const listed = extract.indexOf('export function listBoundedEntries');
+  const inflate = extract.indexOf('inflateRawSync(');
+  assert.ok(listed > 0 && inflate > listed, 'central-directory bounds run before any inflation');
+});
 
 test('fallback sanitizes into a trusted tree before archiving and enforces receiver limits', () => {
   const fallback = workflow.slice(
@@ -222,6 +244,23 @@ test('fallback sanitizes into a trusted tree before archiving and enforces recei
   assert.match(fallbackPrepare, /isSymbolicLink/);
   assert.match(fallbackPrepare, /isFile/);
   assert.match(fallbackPrepare, /reserved platform file/);
+});
+
+test('the Ready write is revalidated against the live head after the upload', () => {
+  const fallback = workflow.slice(
+    workflow.indexOf('  fallback-upload:'),
+    workflow.indexOf('  fallback-unavailable:')
+  );
+  const finalLive = fallback.indexOf(
+    '- name: Revalidate the open pull request and exact head before marking Ready'
+  );
+  const ready = fallback.indexOf('- name: Report fallback ready to Poppy');
+  assert.ok(finalLive > 0 && ready > finalLive, 'the live recheck must immediately precede Ready');
+  assert.match(fallback, /id: ready\s+if: steps\.final-live\.outcome == 'success'/);
+  assert.match(
+    fallback,
+    /pr\.state !== 'open' \|\| pr\.head\.sha !== '\$\{\{ needs\.resolve-deploy\.outputs\.head_sha \}\}'/
+  );
 });
 
 test('fallback Ready uses the deployment ID emitted by an exact handler acknowledgement', () => {
@@ -248,6 +287,7 @@ test('every fallback failure after Building converges to Failed, sticky state, a
     'download',
     'archive',
     'upload',
+    'final-live',
     'ready',
     'failed',
     'comment',
@@ -264,7 +304,16 @@ test('every fallback failure after Building converges to Failed, sticky state, a
     /PREVIEW_STATUS: \$\{\{ steps\.ready\.outcome == 'success' && 'ready' \|\| 'failed' \}\}/
   );
   assert.match(fallback, /Fail the fallback job when publication did not converge/);
-  for (const failedStep of ['size', 'download', 'archive', 'upload', 'ready', 'failed', 'comment']) {
+  for (const failedStep of [
+    'size',
+    'download',
+    'archive',
+    'upload',
+    'final-live',
+    'ready',
+    'failed',
+    'comment',
+  ]) {
     assert.match(fallback, new RegExp(`steps\\.${failedStep}\\.outcome != 'success'`));
   }
 
@@ -272,24 +321,56 @@ test('every fallback failure after Building converges to Failed, sticky state, a
     outcomes.live === 'success' && outcomes.ready !== 'success';
   const shouldWriteComment = (outcomes) => outcomes.live === 'success';
   const shouldFailJob = (outcomes) =>
-    ['live', 'size', 'building', 'download', 'archive', 'upload', 'ready', 'comment'].some(
-      (step) => outcomes[step] !== 'success'
-    ) ||
+    [
+      'live',
+      'size',
+      'building',
+      'download',
+      'archive',
+      'upload',
+      'final-live',
+      'ready',
+      'comment',
+    ].some((step) => outcomes[step] !== 'success') ||
     (outcomes.ready !== 'success' && outcomes.failed !== 'success');
 
   const success = Object.fromEntries(
-    ['live', 'size', 'building', 'download', 'archive', 'upload', 'ready', 'comment'].map((step) => [
-      step,
-      'success',
-    ])
+    [
+      'live',
+      'size',
+      'building',
+      'download',
+      'archive',
+      'upload',
+      'final-live',
+      'ready',
+      'comment',
+    ].map((step) => [step, 'success'])
   );
   success.failed = 'skipped';
   assert.equal(shouldReportFailed(success), false);
   assert.equal(shouldWriteComment(success), true);
   assert.equal(shouldFailJob(success), false);
-  const oversized = { ...success, size: 'failure', building: 'skipped', download: 'skipped', archive: 'skipped', upload: 'skipped', ready: 'skipped', failed: 'success' };
-  assert.equal(shouldReportFailed(oversized), true, 'oversized artifacts must revoke the lifecycle');
-  assert.equal(shouldWriteComment(oversized), true, 'oversized artifacts must update the sticky state');
+  const oversized = {
+    ...success,
+    size: 'failure',
+    building: 'skipped',
+    download: 'skipped',
+    archive: 'skipped',
+    upload: 'skipped',
+    ready: 'skipped',
+    failed: 'success',
+  };
+  assert.equal(
+    shouldReportFailed(oversized),
+    true,
+    'oversized artifacts must revoke the lifecycle'
+  );
+  assert.equal(
+    shouldWriteComment(oversized),
+    true,
+    'oversized artifacts must update the sticky state'
+  );
   assert.equal(shouldFailJob(oversized), true, 'oversized artifacts must fail the job');
 
   const publicationSteps = ['building', 'download', 'archive', 'upload', 'ready'];
@@ -339,7 +420,11 @@ test('fallback lifecycle writers use one configured dcbot control plane', () => 
     failedBuild,
     new RegExp(selectedControlPlane.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
   );
-  assert.match(close, new RegExp(selectedControlPlane.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.doesNotMatch(
+    close,
+    new RegExp(selectedControlPlane.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    'close must not key revocation on the current switch value'
+  );
 });
 
 test('all fallback comment writers serialize per PR and the writer rechecks live state', () => {
@@ -361,33 +446,98 @@ test('all fallback comment writers serialize per PR and the writer rechecks live
   assert.match(sticky, /pullRequest\?\.head\?\.sha !== headSHA/);
 });
 
-test('close revocation targets the active fallback control plane and is mandatory in both modes', () => {
-  const revoke = close.slice(
-    close.indexOf('- name: Report the closed deployment to Poppy'),
+test('close revocation covers every possibly-owning control plane in both modes', () => {
+  // The owning plane cannot be derived from the current kill-switch value, so
+  // trusted cleanup always revokes the central plane and revokes the fallback
+  // plane whenever one is configured.
+  const central = close.slice(
+    close.indexOf('- name: Report the closed deployment to the central Poppy control plane'),
+    close.indexOf('- name: Report the closed deployment to the configured fallback control plane')
+  );
+  assert.match(
+    central,
+    /POPPY_CONTROL_PLANE: https:\/\/poppy-proto-ui\.chenyejin2004\.workers\.dev/
+  );
+  assert.match(central, /continue-on-error: true/);
+  assert.match(central, /report\.mjs closed/);
+  const fallback = close.slice(
+    close.indexOf('- name: Report the closed deployment to the configured fallback control plane'),
     close.indexOf('- name: Maintain the sticky PR comment')
   );
-  assert.match(revoke, /POPPY_PREVIEW_FALLBACK_ORIGIN/);
+  assert.match(fallback, /POPPY_CONTROL_PLANE: \$\{\{ vars\.POPPY_PREVIEW_FALLBACK_ORIGIN \}\}/);
+  assert.match(fallback, /if: always\(\) && vars\.POPPY_PREVIEW_FALLBACK_ORIGIN != ''/);
+  assert.match(fallback, /report\.mjs closed/);
   assert.match(
     close,
-    /steps\.revoke\.outcome != 'success' \|\|\s*\(vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && steps\.cleanup\.outcome != 'success'\)/
+    /steps\.revoke-central\.outcome != 'success' \|\|\s*\(vars\.POPPY_PREVIEW_FALLBACK_ORIGIN != '' && steps\.revoke-fallback\.outcome != 'success'\) \|\|\s*\(vars\.POPPY_CLOUDFLARE_MUTATIONS_ENABLED == 'true' && steps\.cleanup\.outcome != 'success'\)/
   );
 
-  const cleanupFails = ({ cloudflareEnabled, cleanup, revoke }) =>
-    revoke !== 'success' || (cloudflareEnabled && cleanup !== 'success');
+  const cleanupFails = ({
+    cloudflareEnabled,
+    fallbackConfigured,
+    cleanup,
+    revokeCentral,
+    revokeFallback,
+  }) =>
+    revokeCentral !== 'success' ||
+    (fallbackConfigured && revokeFallback !== 'success') ||
+    (cloudflareEnabled && cleanup !== 'success');
   assert.equal(
-    cleanupFails({ cloudflareEnabled: false, cleanup: 'skipped', revoke: 'failure' }),
+    cleanupFails({
+      cloudflareEnabled: false,
+      fallbackConfigured: false,
+      cleanup: 'skipped',
+      revokeCentral: 'failure',
+      revokeFallback: 'skipped',
+    }),
     true,
     'Closed rejection must fail while Cloudflare is disabled'
   );
   assert.equal(
-    cleanupFails({ cloudflareEnabled: false, cleanup: 'skipped', revoke: 'success' }),
+    cleanupFails({
+      cloudflareEnabled: false,
+      fallbackConfigured: false,
+      cleanup: 'skipped',
+      revokeCentral: 'success',
+      revokeFallback: 'skipped',
+    }),
     false
   );
   assert.equal(
-    cleanupFails({ cloudflareEnabled: true, cleanup: 'failure', revoke: 'success' }),
+    cleanupFails({
+      cloudflareEnabled: false,
+      fallbackConfigured: true,
+      cleanup: 'skipped',
+      revokeCentral: 'success',
+      revokeFallback: 'failure',
+    }),
+    true,
+    'a rejected fallback Closed transition must fail cleanup'
+  );
+  assert.equal(
+    cleanupFails({
+      cloudflareEnabled: true,
+      fallbackConfigured: true,
+      cleanup: 'failure',
+      revokeCentral: 'success',
+      revokeFallback: 'success',
+    }),
     true,
     'Cloudflare deletion failure must remain fatal while it is enabled'
   );
+});
+
+test('pull_request security runs never receive the dcbot credential', () => {
+  const boundary = security.slice(
+    security.indexOf('  security-boundary:'),
+    security.indexOf('  dcbot-contract-pinned:')
+  );
+  assert.doesNotMatch(boundary, /secrets\.DCBOT_CONTRACT_TOKEN/);
+  assert.match(boundary, /token: \$\{\{ github\.token \}\}/);
+  const pinned = security.slice(security.indexOf('  dcbot-contract-pinned:'));
+  assert.match(pinned, /if: github\.event_name == 'push'/);
+  assert.match(pinned, /token: \$\{\{ secrets\.DCBOT_CONTRACT_TOKEN \|\| github\.token \}\}/);
+  assert.match(pinned, /continue-on-error: true/);
 });
 
 test('security CI checks the immutable dcbot handler source and runs its real preview tests', () => {
