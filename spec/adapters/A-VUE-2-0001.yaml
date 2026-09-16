@@ -43,8 +43,8 @@ criteria:
       zh-CN: Adapter 安装有界 Trigger Module，通过共享宿主 group owner 翻译 logical chain。三层成员共享一条 semantic activation route，host-local event 保持局部，并列 Trigger 分叉由宿主 owner 拒绝。
   - id: A-VUE-2-0001-A
     text:
-      zh-CN: Profile 的已验证 guarantee 必须对应 `@proto.ui/adapter-vue2` 在 Vue `>=2.6.0 <2.7` 的 Web 范围。package peer range 可以为了试用安装允许 Vue 2.7，但这不构成 Vue 2.7 guarantee；不得被表述为 Vue 3、所有 Vue 版本或非 Web host 的保证。
-      en: The profile's verified guarantee must correspond to `@proto.ui/adapter-vue2` on Vue `>=2.6.0 <2.7` for Web. The package peer range may permit Vue 2.7 for trial installation, but that does not constitute a Vue 2.7 guarantee; it must not be represented as a guarantee for Vue 3, every Vue version, or a non-Web host.
+      zh-CN: Profile identity 必须对应 `@proto.ui/adapter-vue2` 与 peer range `vue >=2.6.0 <2.7`，不得被表述为 Vue 3、所有 Vue 版本或非 Web host 的保证。
+      en: The profile identity must correspond to `@proto.ui/adapter-vue2` and peer range `vue >=2.6.0 <2.7`; it must not be represented as a guarantee for Vue 3, every Vue version, or a non-Web host.
   - id: A-VUE-2-0001-B
     text:
       zh-CN: Adapter 必须把 Props Module 作为 required Module 接入，并以 translated capability 提供 `HC-PROPS-SOURCE-0001`。
@@ -435,7 +435,4 @@ revisions:
   - version: 0.3.0-alpha.0
     change: extended
     summary: Cataloged bounded draft Rule Meta wiring and the conditional default colorScheme source, separating token evidence from browser painting.
-  - version: 0.3.0-alpha.1
-    change: clarified
-    summary: Distinguished the verified Vue 2.6 profile guarantee from the package peer range that permits unguaranteed Vue 2.7 trial installation.
 tags: [adapter, vue2, vue, web, props, event, lifecycle, state, expose, official]

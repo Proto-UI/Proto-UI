@@ -74,18 +74,19 @@ function getProjectPackageRange(
 }
 
 /**
- * The package permits Vue 2.6 and 2.7 installation and facade generation, but
- * A-VUE-2-0001 verifies only the Vue 2.6 profile. The CLI rejects Vue 3 while
- * leaving Vue 2.7 available as an explicitly unguaranteed trial boundary.
+ * The CLI intentionally accepts only bounded Vue 2.6 forms it can verify from
+ * package.json. A caret range rooted at 2.6 can resolve through <3.0.0, so it
+ * is not a subset of the governed <2.7 upper bound. Fail closed rather than
+ * generating a Vue 2 facade against an arbitrary range (notably Vue 2.7/3).
  */
 function isCompatibleRuntimeRange(declaredRange: string, requiredRange: string): boolean {
-  if (requiredRange !== '>=2.6.0 <3') return false;
+  if (requiredRange !== '>=2.6.0 <2.7') return false;
   const normalized = declaredRange.replace(/^npm:vue@/, '').trim();
   return (
-    /^(?:v)?2\.(?:6|7)(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
-    /^(?:\^|~)2\.(?:6|7)(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
-    /^2\.(?:6|7)(?:\.x|\.\*)?$/.test(normalized) ||
-    /^>=\s*2\.(?:6|7)(?:\.0)?\s+<\s*3(?:\.0(?:\.0)?)?$/.test(normalized)
+    /^(?:v)?2\.6(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
+    /^~2\.6(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
+    /^2\.6(?:\.x|\.\*)?$/.test(normalized) ||
+    /^>=\s*2\.6(?:\.0)?\s+<\s*2\.7(?:\.0)?$/.test(normalized)
   );
 }
 

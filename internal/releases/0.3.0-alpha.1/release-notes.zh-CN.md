@@ -9,7 +9,6 @@ Proto UI 0.3.0-alpha.1 是 0.3 alpha release train 的可测试延续。它仍�
 - 扩展官方 CLI 的 Adapter registry 与生成 facade 路径，使其识别 `vue2`。
 - Vue 2 consumer 可通过与其他受支持 Web Adapter profile 相同的组件生成路径添加 Base Image Prototype。
 - 将公开 Base Image 文档和 Demo Matrix 与已接纳的 `A-VUE-2-0001` profile 对齐，并提供亮色、暗色、桌面和移动端 browser evidence。
-- package 与 CLI 允许 Vue 2.7 安装并生成 facade 供试用，但只有 Vue `>=2.6.0 <2.7` 具有已验证兼容性证据；Vue 2.7 仍不受保证，Vue 3 仍不受支持。
 
 ## Consumer 证据
 

@@ -678,27 +678,32 @@ describe('@proto.ui/cli', () => {
     const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <3');
+    expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <2.7');
     await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
   });
 
-  it('allows unguaranteed Vue 2.7 facade generation without installation', async () => {
-    const cwd = await createTempProject('pui-cli-add-vue2-trial-runtime', {
-      name: 'pui-cli-add-vue2-trial-runtime',
-      private: true,
-      dependencies: {
-        vue: '2.7.16',
-      },
-    });
+  it.each(['2.7.16', '^2.6.14'])(
+    'rejects Vue range %s before generating a Vue 2 facade',
+    async (vue) => {
+      const cwd = await createTempProject(
+        `pui-cli-add-vue2-incompatible-${vue.replace(/[^A-Za-z0-9]/g, '-')}`,
+        {
+          name: 'pui-cli-add-vue2-trial-runtime',
+          private: true,
+          dependencies: {
+            vue,
+          },
+        }
+      );
 
-    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
-    const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
+      expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+      const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
 
-    expect(result.status).toBe(0);
-    await expect(
-      fs.readFile(path.join(cwd, 'proto-ui/components/vue2/index.ts'), 'utf8')
-    ).resolves.toContain('createVue2Adapter');
-  });
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <2.7');
+      await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
+    }
+  );
 
   it('adds the complete shadcn Select React facade', async () => {
     const cwd = await createTempProject('pui-cli-add-shadcn-select', {

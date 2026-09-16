@@ -9,7 +9,6 @@ Proto UI 0.3.0-alpha.1 is a testable continuation of the 0.3 alpha train. It rem
 - Extends the official CLI Adapter registry and generated facade path to recognize `vue2`.
 - Lets Vue 2 consumers add the Base Image prototype through the same generated component route as the other supported Web Adapter profiles.
 - Aligns the public Base Image documentation and Demo Matrix with the admitted `A-VUE-2-0001` profile, including light, dark, desktop, and mobile browser evidence.
-- The package and CLI permit Vue 2.7 installation and facade generation for trial use, but only Vue `>=2.6.0 <2.7` has verified compatibility evidence; Vue 2.7 remains unguaranteed and Vue 3 remains unsupported.
 
 ## Consumer evidence
 
