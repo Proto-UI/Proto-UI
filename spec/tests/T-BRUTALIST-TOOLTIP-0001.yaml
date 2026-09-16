@@ -3,7 +3,7 @@ type: test
 title: Brutalist Tooltip projection contract test
 status: draft
 since: 0.3.0-alpha.0
-summary: Verifies the four-entry package surface, transparent Group and Trigger Base inheritance, current Tooltip interaction/accessibility behavior, and the exact Content visual delta.
+summary: Verifies the four-entry package surface, transparent Group and Trigger Base inheritance, current Tooltip interaction/accessibility behavior, and exact Light/Dark Content projection.
 cases:
   - id: T-BRUTALIST-TOOLTIP-0001-CASE-INHERITANCE
     title: Four-entry projection preserves Base behavior and Content grammar
@@ -49,11 +49,12 @@ cases:
       - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
     expectation: content-teardown-cleans-owned-description-and-rendered-tooltip-has-no-focusable-task-interaction
   - id: T-BRUTALIST-TOOLTIP-0001-CASE-RENDERED-VISUAL
-    title: Uncontrolled sibling Tooltips render the exact Content grammar across WC React and Vue
+    title: Mounted sibling Tooltips preserve exact Content grammar and repaint from Light to Dark across WC React and Vue
     covers:
       - P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
+      - P-BRUTALIST-TOOLTIP-CONTENT-LIGHT-DARK
       - P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
-    expectation: trigger-driven-rendered-content-has-square-border-inverse-colors-hard-shadow-monospace-uppercase-spacing-and-nonzero-geometry
+    expectation: trigger-driven-mounted-content-keeps-one-identity-while-foreground-background-border-and-hard-shadow-follow-light-and-dark-host-tokens
 implementations:
   - id: prototypes-brutalist-tooltip-projection
     kind: module-test
@@ -89,6 +90,9 @@ implementations:
       - P-BRUTALIST-TOOLTIP-GROUP
       - P-BRUTALIST-TOOLTIP-TRIGGER
       - P-BRUTALIST-TOOLTIP-CONTENT
+    notes:
+      - The Website registry imports the real `@proto.ui/prototypes-brutalist/tooltip` package subpath for Group, Root, Trigger, and Content.
+      - The browser case opens one uncontrolled Content in Light, changes the live documentation host to Dark without closing it, and requires the same Content identity to repaint before exercising warm sibling handoff and teardown.
 verifies:
   prototypes:
     - id: P-BRUTALIST-TOOLTIP
@@ -108,5 +112,5 @@ exercises:
 revisions:
   - version: 0.3.0-alpha.0
     change: revised
-    summary: Completed executable four-entry package, transparent Group/Trigger, shared warm-delay, Content teardown/non-focusable interaction boundary, exact built export/CLI negative gates, and rendered three-runtime visual coverage.
-tags: [test, brutalist, visual, tooltip, interaction, accessibility]
+    summary: Completed executable four-entry package, transparent Group/Trigger, shared warm-delay, Content teardown/non-focusable interaction boundary, exact built export/CLI negative gates, and rendered three-runtime Light/Dark live-theme coverage.
+tags: [test, brutalist, visual, tooltip, interaction, accessibility, theme]

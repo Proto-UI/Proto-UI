@@ -6,6 +6,82 @@ import { loadSpecWorkspaceFromDirectory } from '@proto.ui/spec-engine/node';
 import { describe, expect, it } from 'vitest';
 
 describe('spec workspace relations', () => {
+  it('validates implementation exercise targets even for required planned evidence', async () => {
+    const specDir = await mkdtemp(path.join(os.tmpdir(), 'proto-ui-spec-exercise-targets-'));
+
+    try {
+      await writeFile(
+        path.join(specDir, 'P-FUTURE.yaml'),
+        JSON.stringify({
+          id: 'P-FUTURE',
+          type: 'prototype',
+          title: 'Future prototype',
+          status: 'draft',
+          since: '0.3.0',
+        })
+      );
+      await writeFile(
+        path.join(specDir, 'V-TARGET-0001.yaml'),
+        JSON.stringify({
+          id: 'V-TARGET-0001',
+          type: 'version',
+          title: 'Future release',
+          status: 'draft',
+          since: '0.3.0',
+          release: {
+            version: '0.3.0',
+            channel: 'stable',
+            gitTag: 'v0.3.0',
+            npmDistTag: 'latest',
+            packageVersionPolicy: 'exact',
+            packageScope: 'public-@proto.ui',
+          },
+        })
+      );
+      const sourcePath = path.join(specDir, 'T-SOURCE-0001.yaml');
+      const source = {
+        id: 'T-SOURCE-0001',
+        type: 'test',
+        title: 'Planned evidence',
+        status: 'draft',
+        since: '0.1.0',
+        implementations: [
+          {
+            id: 'runtime',
+            kind: 'runtime-test',
+            status: 'planned',
+            required: true,
+            exercises: ['P-FUTURE'],
+          },
+        ],
+      };
+      await writeFile(sourcePath, JSON.stringify(source));
+      expect((await loadSpecWorkspaceFromDirectory(specDir)).issues).toEqual([]);
+
+      source.implementations[0].exercises.push('P-MISSING', 'P-FUTUER', 'V-TARGET-0001');
+      await writeFile(sourcePath, JSON.stringify(source));
+      expect((await loadSpecWorkspaceFromDirectory(specDir)).issues).toEqual([
+        {
+          filePath: sourcePath,
+          message:
+            'T-SOURCE-0001 implementation runtime exercises target does not exist: P-MISSING.',
+        },
+        {
+          filePath: sourcePath,
+          message:
+            'T-SOURCE-0001 implementation runtime exercises target does not exist: P-FUTUER.',
+        },
+        {
+          filePath: sourcePath,
+          message:
+            'T-SOURCE-0001 implementation runtime exercises target V-TARGET-0001 is version, expected ordinary entity.',
+        },
+      ]);
+    } finally {
+      await rm(specDir, { recursive: true, force: true });
+    }
+  });
+
   it('validates criterion-level dependency target types', async () => {
     const specDir = await mkdtemp(path.join(os.tmpdir(), 'proto-ui-spec-relations-'));
 

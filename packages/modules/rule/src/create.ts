@@ -1,5 +1,5 @@
 // packages/modules/rule/src/create.ts
-import { createModule, defineModule } from '@proto.ui/module-base';
+import { createModule, defineModule, SYS_CAP } from '@proto.ui/module-base';
 import type { ModuleFactoryArgs } from '@proto.ui/module-base';
 import type { PropsBaseType } from '@proto.ui/types';
 
@@ -36,15 +36,29 @@ export function createRuleModule<Props extends PropsBaseType>(
 
       return {
         facade: {
-          rule: (spec) => impl.define(spec),
+          rule: (spec) => {
+            // Cancellation is part of author setup composition, including when
+            // the handle is obtained directly rather than through asHook.
+            caps.get(SYS_CAP).ensureSetup('def.rule');
+            const handle = impl.define(spec);
+            return {
+              id: handle.id,
+              dispose: () => {
+                caps.get(SYS_CAP).ensureSetup('def.rule.dispose');
+                handle.dispose();
+              },
+            };
+          },
         },
         port: {
           exportIR: () => impl.exportIR(),
           resolveStateHandle: (id) => impl.resolveStateHandle(id),
           evaluate: (ctx) => impl.evaluate(ctx as any),
           registerExtension: (ext) => impl.registerExtension(ext as any),
+          requestStyleReevaluation: () => impl.requestStyleReevaluation(),
         },
         hooks: {
+          onInstancePhase: (p) => impl.onInstancePhase(p),
           onMountPhase: (p) => impl.onMountPhase(p),
           onProtoPhase: (p) => impl.onProtoPhase(p),
           dispose: () => impl.dispose(),

@@ -3,7 +3,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const BROWSER_SUITE_ROOT = path.join(REPOSITORY_ROOT, 'apps', 'www', 'src', 'content', 'docs');
+const BROWSER_SUITE_ROOTS = [
+  path.join(REPOSITORY_ROOT, 'apps', 'www', 'src', 'content', 'docs'),
+  path.join(REPOSITORY_ROOT, 'apps', 'www', 'test'),
+  path.join(REPOSITORY_ROOT, 'apps', 'workspace', 'test'),
+];
 
 function discoverBrowserSuites(directory) {
   const suites = [];
@@ -17,7 +21,9 @@ function discoverBrowserSuites(directory) {
   return suites.sort();
 }
 
-export const BROWSER_SUITES = Object.freeze(discoverBrowserSuites(BROWSER_SUITE_ROOT));
+export const BROWSER_SUITES = Object.freeze(
+  BROWSER_SUITE_ROOTS.flatMap((root) => discoverBrowserSuites(root)).sort()
+);
 export function corepackInvocation(platform = process.platform) {
   return {
     executable: platform === 'win32' ? 'corepack.cmd' : 'corepack',

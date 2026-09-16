@@ -61,4 +61,24 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged the planned Scroll module as owner of logical sessions, facts, requests, negotiation, and host-lease lifetime.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Connected State/Context/Anatomy ownership and enforced current-session facts at replacement and detach.
 tags: [scroll, module, session, negotiation]
+dependsOn:
+  modules:
+    - id: M-STATE-0001
+      since: 0.3.0-alpha.0
+    - id: M-CONTEXT-0001
+      since: 0.3.0-alpha.0
+    - id: M-ANATOMY-0001
+      since: 0.3.0-alpha.0
+openQuestions:
+  - id: M-SCROLL-0001-Q-HOST-EVOLUTION
+    question:
+      en: Which concrete non-Web or accessibility use cases require additional scroll projection capabilities?
+      zh-CN: 哪些具体非 Web 或 accessibility 场景需要额外 scroll projection 能力？
+    context:
+      en: Current evidence covers normalized sessions and four Web Adapters. Physics, virtualization and a redesigned A11y author API are outside this slice. This question does not block admission of the bounded current Web evidence.
+      zh-CN: 当前证据覆盖 normalized session 与四 Web Adapter；physics、virtualization 及重设计的 A11y author API 不在本切片内。此问题不阻塞当前有界 Web 证据的准入。
+    blocks: []

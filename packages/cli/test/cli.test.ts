@@ -215,6 +215,42 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('materializes the Base Image facade for each supported Web adapter', () => {
+    expect(COMPONENT_REGISTRY['base-image']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/image',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'imageRoot',
+          reactExport: 'BaseImageRoot',
+          vueExport: 'BaseImageRoot',
+          wcExport: 'BaseImageRootElement',
+          elementName: 'proto-ui-base-image',
+        },
+      ],
+    });
+
+    for (const host of ['react', 'vue', 'wc'] as const) {
+      const source = renderHostIndex(host, ['base-image']);
+      expect(source).toContain("import { imageRoot } from '@proto.ui/prototypes-base/image';");
+      expect(source).toContain(
+        host === 'wc'
+          ? "export const BaseImageRootElement = AdaptToWebComponent(imageRoot, { registerAs: 'proto-ui-base-image' });"
+          : 'export const BaseImageRoot = adapt(imageRoot);'
+      );
+    }
+
+    const root = renderRootIndex({
+      react: ['base-image'],
+      vue: ['base-image'],
+      wc: ['base-image'],
+    });
+    expect(root).toContain("export { BaseImageRoot as ReactBaseImageRoot } from './react';");
+    expect(root).toContain("export { BaseImageRoot as VueBaseImageRoot } from './vue';");
+    expect(root).toContain("export { BaseImageRootElement } from './wc';");
+  });
+
   it('registers the exact shadcn Tooltip family facade', () => {
     expect(COMPONENT_REGISTRY['shadcn-tooltip']).toMatchObject({
       packageName: '@proto.ui/prototypes-shadcn',

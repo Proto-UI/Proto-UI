@@ -1,0 +1,73 @@
+id: M-RULE-META-0001
+type: module
+title: Rule Meta owns the sampled reader bridge and mounted colorScheme lease
+status: draft
+since: 0.3.0-alpha.0
+lifecycleRationale:
+  en: This catalogs the existing experimental reader together with the accepted colorScheme-only lease. Generic Meta naming remains unsettled. The bounded default-domain browser/lifecycle matrix has executable evidence, while independent stable admission remains required; the broader environment API is not stabilized.
+  zh-CN: 本实体编目既有实验 reader 与已接受的 colorScheme-only 租约。通用 Meta 命名仍未定。已有有界默认域 browser/lifecycle 可执行证据，仍待独立稳定接纳；不稳定化更广的环境 API。
+summary: An instance-owned reader and view-bound invalidation lease bridge host colorScheme changes to the existing Rule contribution owner.
+statement:
+  en: Standard Runtime installs Rule Meta with a Rule dependency. It supplies sampled Meta reads and fills readMeta only when an evaluation context has not supplied an override. Its mixed ownership retains the reader bridge across detach but owns only the mounted colorScheme subscription; Rule remains the Plan/execution owner and the Adapter owns host observation.
+  zh-CN: standard Runtime 安装依赖 Rule 的 Rule Meta。它提供 sampled Meta read，仅在 evaluation context 未提供 override 时补充 readMeta。mixed ownership 跨 detach 保留 reader bridge，但只拥有 mounted colorScheme 订阅；Rule 保持 Plan/执行 owner，Adapter 拥有 host observation。
+criteria:
+  - id: M-RULE-META-0001-A
+    text:
+      en: Existing meta.get(key) reads the current host getter or returns undefined when it is absent. The Rule extension respects an explicit ctx.readMeta override. Other keys, including reducedMotion, retain sampled behavior; the new source does not make them reactive.
+      zh-CN: 既有 meta.get(key) 读取当前 host getter，缺失时返回 undefined。Rule extension 尊重显式 ctx.readMeta override。其它 key（含 reducedMotion）保持 sampled 行为；新 source 不使它们响应式化。
+  - id: M-RULE-META-0001-B
+    text:
+      en: Lease eligibility comes from authored Rule IR meta:colorScheme dependencies, independently of downstream lowering. The alive owner waits for mounted mount/Proto phases before subscribing; setup, mounting, detached and non-consuming instances hold no lease.
+      zh-CN: 租约资格来自 authored Rule IR 的 meta:colorScheme dependency，独立于下游 lowering。alive owner 等待 mount/Proto phase 到达 mounted 后才订阅；setup、mounting、detached 与非消费者实例不持有租约。
+  - id: M-RULE-META-0001-C
+    text:
+      en: The capability source getter must be reference-equal to the current getter. A matching source has one active lease; every replacement, reset or mismatch invalidates the old generation before release. A new matching lease subscribes before requesting fresh Rule reconciliation, even if the scheme has not changed across views.
+      zh-CN: capability source getter 必须与当前 getter 引用相等。匹配 source 只持有一个活动租约；替换、reset 或 mismatch 均在释放前使旧 generation 失效。新匹配租约先订阅再请求 fresh Rule reconciliation，即使跨 view 的 scheme 没变化。
+  - id: M-RULE-META-0001-D
+    text:
+      en: Unmounting/detached and disposing/disposed revoke the lease through actual mount/instance/caps/dispose hooks. Late callbacks cannot touch the retired Rule driver. The bridge requests the current Rule port without retaining a surface or implementing a second evaluator or contribution owner.
+      zh-CN: unmounting/detached 与 disposing/disposed 通过真实 mount/instance/caps/dispose hook 撤销租约。迟到回调不能触及已退役 Rule driver。bridge 请求当前 Rule port，不保留 surface，也不实现第二 evaluator 或 contribution owner。
+owns:
+  contracts:
+    - id: C-RULE-COLOR-SCHEME-0001
+      anchors: [C-RULE-COLOR-SCHEME-0001-C, C-RULE-COLOR-SCHEME-0001-D]
+satisfies:
+  contracts:
+    - id: C-RULE-COLOR-SCHEME-0001
+      anchors: [C-RULE-COLOR-SCHEME-0001-C, C-RULE-COLOR-SCHEME-0001-D]
+dependsOn:
+  modules:
+    - M-RULE-0001
+  contracts:
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+    - C-LIFECYCLE-0008
+requires:
+  hostCaps:
+    - id: HC-COLOR-SCHEME-INVALIDATION-0001
+      note: Conditional on authored colorScheme Rules and the matching default reader; absence retains sampled Meta behavior.
+relates:
+  decisions:
+    - D-RULE-META-NAMING-0001
+  modules:
+    - M-RULE-EXPOSE-STATE-WEB-0001
+verifies:
+  tests:
+    - T-RULE-COLOR-SCHEME-0001
+openQuestions:
+  - id: M-RULE-META-0001-Q-ADMISSION
+    question:
+      en: Has the complete reader/lease and real Adapter matrix received independent admission without implying a generic reactive Meta protocol?
+      zh-CN: 完整 reader/lease 与真实 Adapter 矩阵是否已获得独立接纳，且没有暗示通用 reactive Meta 协议？
+    blocks:
+      - activation:M-RULE-META-0001
+sources:
+  - path: packages/modules/rule-meta/src/create.ts
+  - path: packages/modules/rule-meta/src/caps.ts
+  - path: packages/modules/rule-meta/src/types.ts
+  - path: packages/runtime/src/instance/session.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged sampled Meta reading and the single mounted colorScheme source lease as a bounded draft Module.
+tags: [rule, meta, module, lifecycle, invalidation, draft]

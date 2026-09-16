@@ -678,6 +678,7 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   'base-toggle': base('base-toggle', 'base Toggle', 'toggle', 'BaseToggle'),
   'base-transition': base('base-transition', 'base Transition', 'transition', 'BaseTransition'),
   'base-textarea': base('base-textarea', 'Base Textarea', 'textareaRoot', 'BaseTextareaRoot'),
+  'base-image': base('base-image', 'Base Image', 'imageRoot', 'BaseImageRoot'),
 
   'base-switch': baseCompound('base-switch', 'base Switch', [
     {

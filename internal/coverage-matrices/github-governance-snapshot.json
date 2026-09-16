@@ -3,28 +3,6 @@
   "repository": "Proto-UI/Proto-UI",
   "issues": [
     {
-      "number": 374,
-      "nodeId": "I_kwDOMhQZjc8AAAABMjhekQ",
-      "url": "https://github.com/Proto-UI/Proto-UI/issues/374",
-      "title": "[implementation][image] Deliver Base Image host-mediated semantic slices",
-      "state": "OPEN",
-      "stateReason": null,
-      "updatedAt": "2026-09-05T13:05:58Z",
-      "labels": [
-        "advanced contribution",
-        "agent-ready",
-        "area: prototypes",
-        "area: spec",
-        "enhancement"
-      ],
-      "assignees": [],
-      "milestone": "v0.3 — November 2026 Release Baseline",
-      "owners": [
-        "attachment, file intake, and image maintainers",
-        "image and workspace maintainers"
-      ]
-    },
-    {
       "number": 377,
       "nodeId": "I_kwDOMhQZjc8AAAABMmjOVA",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/377",
@@ -42,26 +20,13 @@
       ]
     },
     {
-      "number": 384,
-      "nodeId": "I_kwDOMhQZjc8AAAABMmlRyg",
-      "url": "https://github.com/Proto-UI/Proto-UI/issues/384",
-      "title": "[brutalist] Project Base Checkbox into the Brutalist design language",
-      "state": "OPEN",
-      "stateReason": null,
-      "updatedAt": "2026-09-01T13:48:34Z",
-      "labels": ["F3 – Moderate", "area: prototypes", "help wanted"],
-      "assignees": [],
-      "milestone": null,
-      "owners": ["tree, workspace, and brutalist checkbox maintainers"]
-    },
-    {
       "number": 388,
       "nodeId": "I_kwDOMhQZjc8AAAABMnTzqQ",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/388",
       "title": "[implementation][disclosure] Deliver Base Collapsible and Accordion",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-09-05T21:03:57Z",
+      "updatedAt": "2026-09-07T07:17:57Z",
       "labels": [
         "F5 - Large",
         "advanced contribution",
@@ -109,12 +74,14 @@
         "button/a11y domains plus website examples",
         "button/a11y domains plus website gallery",
         "button/collection domains plus website gallery",
+        "dialog domain plus website docs",
         "dialog domain plus website gallery",
         "dialog domain plus website search",
         "disclosure domain and website reading",
         "disclosure domain plus website ia",
         "disclosure domain plus website shell",
         "disclosure/button domains plus website examples",
+        "image view domain plus website demos",
         "input/collection domains plus website gallery",
         "input/collection domains plus website search",
         "input/dialog/button domains plus website search",
@@ -196,6 +163,7 @@
       "milestone": null,
       "owners": [
         "announcement-policy and harness implementers",
+        "app highlighting infrastructure owner",
         "artifact workspace implementer",
         "harness implementer",
         "harness implementer, with scroll catalog lifecycle respected",
@@ -207,9 +175,9 @@
       "nodeId": "I_kwDOMhQZjc8AAAABOKXnhg",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/516",
       "title": "[implementation][chatui] Build the first private Message composition slice for Harness dogfood",
-      "state": "OPEN",
-      "stateReason": null,
-      "updatedAt": "2026-08-29T04:54:23Z",
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "updatedAt": "2026-09-12T07:05:48Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -219,20 +187,16 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": [
-        "app content infrastructure owner",
-        "app content renderer",
-        "private message composition maintainer"
-      ]
+      "owners": ["app content infrastructure owner", "app content renderer"]
     },
     {
       "number": 517,
       "nodeId": "I_kwDOMhQZjc8AAAABOKX2_Q",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/517",
       "title": "[implementation][chatui] Build the first private Code Block composition slice for Harness dogfood",
-      "state": "OPEN",
-      "stateReason": null,
-      "updatedAt": "2026-08-29T05:20:09Z",
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "updatedAt": "2026-09-10T03:06:13Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -242,11 +206,7 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": [
-        "app highlighting infrastructure owner",
-        "code block and workspace maintainers",
-        "private code block composition maintainer"
-      ]
+      "owners": ["app highlighting infrastructure owner"]
     },
     {
       "number": 518,

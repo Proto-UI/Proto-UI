@@ -4,7 +4,7 @@ import { illegalPhase } from '@proto.ui/core';
 
 import { ModuleBase } from '@proto.ui/module-base';
 
-import type { EventDispatch, EventInternalCallback } from './types';
+import type { EventDispatch, EventInternalCallback, EventInputContext } from './types';
 import { EventKernel } from './kernel';
 import type {
   EventListenerToken,
@@ -16,6 +16,7 @@ import type {
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   EVENT_GLOBAL_TARGET_CAP,
+  EVENT_GLOBAL_INPUT_SCOPE_CAP,
   EVENT_ROOT_TARGET_CAP,
   EXPOSE_EVENT_SINK_CAP,
 } from './caps';
@@ -93,8 +94,33 @@ function isEventTargetLike(x: any): x is EventTarget {
   );
 }
 
+const inputTokens = new WeakMap<object, object>();
+function opaqueInputToken(source: object): object {
+  let token = inputTokens.get(source);
+  if (!token) {
+    token = Object.freeze({});
+    inputTokens.set(source, token);
+  }
+  return token;
+}
+
 export class EventModuleImpl extends ModuleBase {
   private readonly kernel = new EventKernel();
+  private readonly inputContexts = new WeakMap<object, EventInputContext>();
+
+  getGlobalInputScope(): object | null {
+    if (!this.kernel.hasAny('global')) return null;
+    const source = this.caps.has(EVENT_GLOBAL_INPUT_SCOPE_CAP)
+      ? this.caps.get(EVENT_GLOBAL_INPUT_SCOPE_CAP)()
+      : this.caps.has(EVENT_GLOBAL_TARGET_CAP)
+        ? this.caps.get(EVENT_GLOBAL_TARGET_CAP)()
+        : null;
+    return source ? opaqueInputToken(source) : null;
+  }
+
+  getInputContext(payload: ProtoEventPayload): EventInputContext | null {
+    return this.inputContexts.get(payload) ?? null;
+  }
   private readonly prototypeName: string;
 
   private overriddenRootTarget: EventTarget | null = null;
@@ -307,9 +333,19 @@ export class EventModuleImpl extends ModuleBase {
         },
       });
       const payload = createPortableEventPayload(type, raw, control);
+      const scope = this.getGlobalInputScope();
+      const source = eventDataSource(raw);
+      const native = source.nativeEvent ?? raw;
+      if (scope && native && (typeof native === 'object' || typeof native === 'function')) {
+        this.inputContexts.set(
+          payload,
+          Object.freeze({ scope, sample: opaqueInputToken(native as object) })
+        );
+      }
       try {
         dispatch(id, payload);
       } finally {
+        this.inputContexts.delete(payload);
         active = false;
       }
     };

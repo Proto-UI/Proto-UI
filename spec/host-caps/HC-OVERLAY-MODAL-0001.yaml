@@ -1,0 +1,31 @@
+id: HC-OVERLAY-MODAL-0001
+type: host-cap
+title: Host maintains Overlay modal activity resources
+status: draft
+lifecycleRationale: >-
+  Retained as draft pending admission review of shared Web body-lock ownership and cleanup evidence. The reviewed scope excludes inertness, focus trapping and complete modal accessibility policy.
+
+
+since: 0.3.0-alpha.0
+summary: The current Web modal realization owns shared body scroll locking, not a complete modal interaction policy.
+criteria:
+  - id: HC-OVERLAY-MODAL-0001-A
+    text:
+      en: Each Web modal provider owns one idempotent body scroll lock. Concurrent owners share the original inline overflow value and priority; only the last owner restores it. Unlock uses the body captured at acquisition. This capability does not promise inertness, focus trapping, backdrop or A11y policy.
+      zh-CN: 每个 Web modal provider 拥有一个幂等 body scroll lock；并发 owner 共享原 overflow 值与 priority，仅最后一个 owner 恢复。unlock 使用获取时的 body。本能力不承诺 inert、focus trap、backdrop 或 A11y policy。
+relates:
+  contracts:
+    - C-AS-OVERLAY-0001
+verifies:
+  tests:
+    - T-OVERLAY-CATALOG-0001
+sources:
+  - path: packages/modules/overlay/src/caps.ts
+  - path: packages/modules/overlay/src/web/modal-lock.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded Overlay host resource and cleanup responsibility.
+tags:
+  - overlay
+  - host-capability

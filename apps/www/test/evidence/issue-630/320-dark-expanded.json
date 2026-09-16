@@ -1,0 +1,33 @@
+{
+  "ec": {
+    "background": "lab(15.204 0 -0.00000596046)",
+    "color": "lab(98.26 0 0)",
+    "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+    "size": "13px",
+    "lineHeight": "24px"
+  },
+  "preview": {
+    "background": "lab(15.204 0 -0.00000596046)",
+    "color": "lab(98.26 0 0)",
+    "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+    "size": "13px",
+    "lineHeight": "24px"
+  },
+  "ecCode": {
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "lab(98.26 0 0)",
+    "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+    "size": "13px",
+    "lineHeight": "24px"
+  },
+  "previewCode": {
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "lab(98.26 0 0)",
+    "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+    "size": "13px",
+    "lineHeight": "24px"
+  },
+  "border": ["lab(100 0 0 / 0.1)", "lab(100 0 0 / 0.1)"],
+  "radius": ["12px", "12px"],
+  "documentOverflow": 0
+}

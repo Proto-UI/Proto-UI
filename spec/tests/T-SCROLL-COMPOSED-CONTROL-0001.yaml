@@ -15,6 +15,12 @@ cases:
     covers:
       - C-SCROLL-COMPOSED-CONTROL-0001-B
       - C-SCROLL-COMPOSED-CONTROL-0001-C
+      - M-SCROLL-0001-F
+      - HC-SCROLL-SURFACE-0001-G
+      - A-REACT-18-19-0001-SCROLL
+      - A-VUE-3-0001-SCROLL
+      - A-VUE-2-0001-SCROLL
+      - A-WEB-COMPONENT-0001-SCROLL
     expectation: thumb-drag-produces-normalized-control-request-without-jump-or-optimistic-state
   - id: T-SCROLL-COMPOSED-CONTROL-0001-CASE-GUARDS
     title: Unavailable geometry rejects start and cancellation preserves host facts
@@ -43,6 +49,33 @@ implementations:
       - T-SCROLL-COMPOSED-CONTROL-0001-CASE-GUARDS
 verifies:
   contracts: [C-SCROLL-COMPOSED-CONTROL-0001]
+  modules:
+    - id: M-SCROLL-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - M-SCROLL-0001-F
+  hostCaps:
+    - id: HC-SCROLL-SURFACE-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - HC-SCROLL-SURFACE-0001-G
+  adapters:
+    - id: A-REACT-18-19-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-REACT-18-19-0001-SCROLL
+    - id: A-VUE-3-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-3-0001-SCROLL
+    - id: A-VUE-2-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-VUE-2-0001-SCROLL
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.0
+      anchors:
+        - A-WEB-COMPONENT-0001-SCROLL
 exercises:
   hostCaps: [HC-MOVE-GESTURE-0001, HC-SCROLL-SURFACE-0001]
   modules: [M-SCROLL-0001]
@@ -56,4 +89,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added executable coverage for the first Move Gesture-backed Scroll composed control.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Connected four-Adapter composed Thumb journey to M/HC/A ownership criteria.
 tags: [test, scroll, thumb, move, drag]

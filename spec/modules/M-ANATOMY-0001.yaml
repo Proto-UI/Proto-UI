@@ -1,0 +1,106 @@
+id: M-ANATOMY-0001
+type: module
+title: Anatomy owns family claims and scoped structural views
+status: draft
+since: 0.3.0-alpha.0
+summary: Anatomy realizes family role claims, nearest-root domains, safe Expose-backed views, diagnostics and host order without owning component communication or assembly.
+statement:
+  en: This draft catalogs existing Anatomy semantics and their standard Runtime realization. Static family declarations belong to Core; Anatomy consumes them, depends on Expose, and delegates logical structure and host order facts to the Adapter. It does not own A11y relationships, collection interaction policy, or host materialization.
+  zh-CN: 本 draft 编目已有 Anatomy 语义及其 standard Runtime 实现。静态 family 声明由 Core 定义；Anatomy 消费声明、依赖 Expose，向 Adapter 获取逻辑结构与宿主顺序事实。它不拥有 A11y relationship、collection 交互策略或宿主物化。
+criteria:
+  - id: M-ANATOMY-0001-A
+    text:
+      en: Setup claims use canonical family-token identity, one role per instance per family, and root-only profile selection. Profiles refine the baseline; diagnostics distinguish family errors from profile warnings and check asHook requirements without injecting behavior.
+      zh-CN: setup claim 使用 canonical family token identity；每实例每 family 一个 role，仅 root 可选 profile。profile 收紧基线；diagnostics 区分 family error 与 profile warning，检查 asHook requirement 而不注入行为。
+  - id: M-ANATOMY-0001-B
+    text:
+      en: Runtime queries resolve the nearest same-family root using logical ancestry and isolate nested domains. PartView exposes only role, explicit Expose reads and hook checks; callable exposes execute in the target part callback scope. Host targets remain internal.
+      zh-CN: runtime query 沿逻辑祖先解析最近的同 family root，隔离嵌套 domain。PartView 仅提供 role、显式 Expose 读取与 hook 检查；可调用 expose 在目标 part callback scope 执行。host target 留在内部。
+  - id: M-ANATOMY-0001-C
+    text:
+      en: Order queries project existing domain claims in host-comparable order, preserving input order when targets cannot be compared. Adjacency and version describe structure only; Anatomy does not add selection, focus or keyboard policy.
+      zh-CN: order query 按宿主可比较顺序投影已有 domain claim，target 不可比较时保留输入顺序。相邻位置与 version 只描述结构；Anatomy 不增加 selection、focus 或键盘策略。
+  - id: M-ANATOMY-0001-D
+    text:
+      en: subscribeParts registration and its author cancellation function are setup-only. Runtime cancellation must fail before removing the subscription. Callbacks report changed role membership/order signatures in callback scope, with no initial emission and no notification for business-data-only changes.
+      zh-CN: subscribeParts 注册与其作者取消函数均为 setup-only。runtime 取消必须在移除订阅前失败。callback 在 callback scope 报告 role membership/order signature 变化，无 initial emission，纯业务数据变化不触发。
+  - id: M-ANATOMY-0001-E
+    text:
+      en: Mixed ownership retains claims and author subscription declarations across repeatable view detach/remount, while host order observation stops on detach and resumes on mount. Terminal disposal deletes owner claims and releases its listeners and shared-observer participation. View detachment alone does not delete a logical claim.
+      zh-CN: mixed ownership 跨 repeatable view detach/remount 保留 claim 与作者订阅声明，宿主顺序观察在 detach 停止、mount 恢复。terminal disposal 删除 owner claim 并释放自身 listener 与 shared observer 参与关系。view detach 本身不删除 logical claim。
+  - id: M-ANATOMY-0001-F
+    text:
+      en: Standard Runtime installs Anatomy with Expose as a required semantic dependency. Internal domain/descendant/target ports serve downstream modules without expanding public PartView or turning Anatomy into an arbitrary instance registry.
+      zh-CN: standard Runtime 安装 Anatomy，以 Expose 为必需语义依赖。内部 domain/descendant/target port 服务下游 Module，不扩大公开 PartView，也不使 Anatomy 成为任意 instance registry。
+satisfies:
+  contracts:
+    - C-ANATOMY-0001
+    - C-ANATOMY-0002
+    - C-ANATOMY-0003
+    - C-ANATOMY-0004
+    - C-ANATOMY-0005
+    - C-ANATOMY-0006
+    - C-ANATOMY-0007
+    - C-ANATOMY-0008
+    - C-ANATOMY-0009
+    - C-ANATOMY-0010
+    - C-ANATOMY-ORDER-0001
+    - C-ANATOMY-ORDER-0002
+    - C-ANATOMY-ORDER-0003
+    - C-CORE-SYNTAX-0007
+dependsOn:
+  modules:
+    - M-EXPOSE-0001
+  contracts:
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+requires:
+  hostCaps:
+    - HC-ANATOMY-STRUCTURE-0001
+    - HC-ANATOMY-ORDER-0001
+relates:
+  modules:
+    - M-COLLECTION-0001
+    - M-SCROLL-0001
+  decisions:
+    - D-ANATOMY-MISSING-POLICY-0001
+    - D-ANATOMY-PARTVIEW-TARGET-0001
+    - D-ANATOMY-FAMILY-DERIVE-0001
+    - D-ANATOMY-REQUIREMENT-EXTENSION-0001
+verifies:
+  tests:
+    - T-ANATOMY-0001
+    - T-ANATOMY-0002
+    - T-ANATOMY-0003
+    - T-ANATOMY-ORDER-0001
+    - T-ANATOMY-0004
+sources:
+  - path: packages/core/src/anatomy.ts
+  - path: packages/modules/anatomy/src/create.ts
+  - path: packages/modules/anatomy/src/impl.ts
+  - path: packages/modules/anatomy/src/types.ts
+  - path: packages/runtime/src/instance/session.ts
+openQuestions:
+  - id: M-ANATOMY-0001-Q-DEFERRED
+    question:
+      en: When should family derivation, non-hook requirements or ordinary author missing-query policy be admitted?
+      zh-CN: 何时接纳 family 派生、非 hook requirement 或普通作者 missing-query policy？
+    context:
+      en: Existing decisions keep these outside the admitted author slice. Internal tolerant reads and target/domain ports already support consumers; their existence does not admit a wider public API.
+      zh-CN: 已有 decision 将这些留在本作者 slice 之外。内部 tolerant read 和 target/domain port 已服务消费者；实现存在不代表接纳更宽公开 API。
+  - id: M-ANATOMY-0001-Q-TARGET
+    question:
+      en: What further conformance is needed for disconnected targets, target replacement and projected order across separate physical trees?
+      zh-CN: disconnected target、target replacement 与跨物理树投射顺序还需哪些 conformance？
+    context:
+      en: The current implementation uses compareDocumentPosition and a root-subtree observer. This slice verifies ordinary Web order, missing-target fallback and lifecycle cleanup, not a universal cross-tree order or all host-view transitions.
+      zh-CN: 当前实现使用 compareDocumentPosition 和 root subtree observer。本 slice 验证普通 Web 顺序、missing-target fallback 与 lifecycle cleanup，不保证通用跨树顺序或全部 host view transition。
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged existing Anatomy ownership, host boundaries and executable evidence without lifecycle promotion.
+tags:
+  - anatomy
+  - module
+  - structure
+  - lifecycle

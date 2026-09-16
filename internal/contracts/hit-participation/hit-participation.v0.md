@@ -5,7 +5,7 @@
 >
 > This document defines the Proto UI **Hit Participation** contract: the semantics of whether a region participates in hit-testing, when passthrough is allowed, and how this capability stays separate from event delivery and boundary classification.
 >
-> This document is **normative**.
+> Normative source: draft `C-HIT-PARTICIPATION-0001`, `M-HIT-PARTICIPATION-0001` and `HC-HIT-PARTICIPATION-0001`. This document is a transitional projection.
 
 ---
 
@@ -213,3 +213,7 @@ Its key v0 requirements are:
 - it is independent from feedback/style
 - passthrough is not equivalent to outside or dismiss
 - stronger blocking semantics are intentionally deferred
+
+## Shared target ownership
+
+Distinct owners may share a target with the same effective mode. Different modes are diagnosed and rejected before changing any existing claim or projection; `disabled` and `passthrough` remain distinct despite their Web projection. Releasing one owner preserves the others. The last owner restores the original host declaration. Rejected region registration or removal leaves the previous Module state intact and may be retried after the conflict is resolved.

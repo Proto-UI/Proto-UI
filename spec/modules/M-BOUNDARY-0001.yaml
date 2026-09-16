@@ -1,0 +1,40 @@
+id: M-BOUNDARY-0001
+type: module
+title: Boundary classifies shared interaction regions and coordinates outside samples
+status: draft
+since: 0.3.0-alpha.0
+summary: Boundary classifies shared interaction regions and coordinates outside samples.
+criteria:
+  - id: M-BOUNDARY-0001-A
+    text:
+      en: 'Boundary is instance-scoped with mixed instance/view resource ownership and depends on Event. The no-argument privileged asBoundary hook reuses one handle; configure and idempotent pointer.press observation are setup-only. Event owns native registration, lifecycle gating and callback scope.'
+      zh-CN: 'Boundary 为 instance scope、mixed instance/view resource ownership，依赖 Event。无参数特权 asBoundary hook 复用同一 handle；configure 与幂等 pointer.press observation 仅限 setup。Event 拥有 native registration、lifecycle gating、callback scope。'
+  - id: M-BOUNDARY-0001-B
+    text:
+      en: 'The Module maintains explicit disjoint regions and includes the current host boundary as an implicit content region. Exact explicit identity can prove inside; otherwise host classification preserves inside/outside/unknown, and lack of proof cannot become outside. Registration cleanup removes only its own claim; unregisterRegion removes matching targets.'
+      zh-CN: 'Module 维护显式分离 regions，并将当前 host boundary 作为隐式 content region。显式 identity 相等可证明 inside；否则宿主分类保留 inside/outside/unknown，证据缺失不得变为 outside。registration cleanup 仅移除自身 claim；unregisterRegion 移除匹配 target。'
+  - id: M-BOUNDARY-0001-C
+    text:
+      en: 'Outside subscriptions consume one classification. Among stack-active boundaries only the top owner of a shared sample can publish outside; its callback closing the boundary cannot transfer that same sample to lower layers. A later sample may reach the newly exposed top boundary.'
+      zh-CN: 'outside subscription 消费统一分类。在 stack-active boundaries 中仅共享 sample 的 top owner 可发布 outside；该 callback 关闭 boundary 不得将同一 sample 转交下层。后续 sample 可以到达新露出的 top boundary。'
+  - id: M-BOUNDARY-0001-D
+    text:
+      en: 'View unmounting/detach suspends notification and removes live stack participation while retaining logical configuration and regions. Mount restores participation; terminal unmount clears regions, subscriptions and stack ownership. Overlay/dismiss/focus consume results and Hit Participation stays independent.'
+      zh-CN: 'view unmounting/detach 暂停通知并移除 live stack participation，同时保留逻辑配置与 regions。mount 恢复参与；terminal unmount 清理 regions、subscriptions 与 stack ownership。Overlay/dismiss/focus 消费结果，Hit Participation 保持独立。'
+satisfies:
+  contracts: [C-BOUNDARY-0001]
+dependsOn:
+  modules: [M-EVENT-0001]
+  contracts: [C-LIFECYCLE-0006, C-LIFECYCLE-0007, C-LIFECYCLE-0008]
+requires:
+  hostCaps: [HC-BOUNDARY-CLASSIFICATION-0001]
+verifies:
+  tests: [T-BOUNDARY-0001, T-BOUNDARY-0002]
+sources:
+  - path: packages/modules/boundary/src/create.ts
+  - path: packages/modules/boundary/src/impl.ts
+  - path: packages/hooks/src/as-boundary.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded Boundary slice and executable evidence.

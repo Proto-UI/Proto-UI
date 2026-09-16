@@ -1,83 +1,73 @@
-import type { HitParticipationMode, HitParticipationRegion } from '@proto.ui/core';
+import type { HitParticipationMode } from '@proto.ui/core';
 import type { HitParticipationHostBridge } from '../caps';
 
 const HIT_PARTICIPATION_MODE_MARK = Symbol.for('@proto.ui/module-hit-participation/__mode');
-const HIT_PARTICIPATION_PREV_POINTER_EVENTS_MARK = Symbol.for(
-  '@proto.ui/module-hit-participation/__prev_pointer_events'
-);
-
 type HostElement = HTMLElement & Record<symbol, unknown>;
+type TargetClaims = {
+  owners: Map<object, HitParticipationMode>;
+  previousValue: string;
+  previousPriority: string;
+};
+const claimsByTarget = new WeakMap<HostElement, TargetClaims>();
 
-function isHostElement(target: unknown): target is HostElement {
-  return target instanceof HTMLElement;
-}
-
-function shouldDisablePointerEvents(mode: HitParticipationMode): boolean {
-  return mode === 'disabled' || mode === 'passthrough';
-}
-
-function applyMode(target: HostElement, mode: HitParticipationMode): void {
-  if (!(HIT_PARTICIPATION_PREV_POINTER_EVENTS_MARK in target)) {
-    target[HIT_PARTICIPATION_PREV_POINTER_EVENTS_MARK] = target.style.pointerEvents;
+function restore(target: HostElement, claims: TargetClaims): void {
+  if (claims.previousValue) {
+    target.style.setProperty('pointer-events', claims.previousValue, claims.previousPriority);
+  } else {
+    target.style.removeProperty('pointer-events');
   }
-
-  target[HIT_PARTICIPATION_MODE_MARK] = mode;
-
-  if (shouldDisablePointerEvents(mode)) {
-    target.style.pointerEvents = 'none';
-    return;
-  }
-
-  const prevPointerEvents = target[HIT_PARTICIPATION_PREV_POINTER_EVENTS_MARK];
-  target.style.pointerEvents = typeof prevPointerEvents === 'string' ? prevPointerEvents : '';
-}
-
-function clearMode(target: HostElement): void {
-  const prevPointerEvents = target[HIT_PARTICIPATION_PREV_POINTER_EVENTS_MARK];
-  target.style.pointerEvents = typeof prevPointerEvents === 'string' ? prevPointerEvents : '';
-  delete target[HIT_PARTICIPATION_MODE_MARK];
-  delete target[HIT_PARTICIPATION_PREV_POINTER_EVENTS_MARK];
-}
-
-function getElementRegions(regions: readonly HitParticipationRegion[]): HostElement[] {
-  const seen = new Set<HostElement>();
-  const elements: HostElement[] = [];
-
-  for (const region of regions) {
-    if (!isHostElement(region.target) || seen.has(region.target)) continue;
-    seen.add(region.target);
-    elements.push(region.target);
-  }
-
-  return elements;
 }
 
 export function createWebHitParticipationHostBridge(): HitParticipationHostBridge {
+  const owner = {};
   let applied = new Map<HostElement, HitParticipationMode>();
-
   return {
     sync({ regions }) {
       const next = new Map<HostElement, HitParticipationMode>();
-
       for (const region of regions) {
-        if (!isHostElement(region.target)) continue;
-        next.set(region.target, region.mode);
+        if (region.target instanceof HTMLElement) {
+          // Preserve same-owner region precedence; sharing is checked between owners.
+          next.set(region.target as HostElement, region.mode);
+        }
       }
-
+      // Validate the entire replacement before releasing or writing any target.
+      for (const [target, mode] of next) {
+        for (const [other, otherMode] of claimsByTarget.get(target)?.owners ?? []) {
+          if (other !== owner && otherMode !== mode) {
+            throw new Error(
+              `[HitParticipation] conflicting modes on a shared target: ${otherMode} and ${mode}.`
+            );
+          }
+        }
+      }
       for (const [target] of applied) {
         if (next.has(target)) continue;
-        clearMode(target);
+        const claims = claimsByTarget.get(target);
+        if (!claims) continue;
+        claims.owners.delete(owner);
+        if (claims.owners.size === 0) {
+          restore(target, claims);
+          delete target[HIT_PARTICIPATION_MODE_MARK];
+          claimsByTarget.delete(target);
+        }
       }
-
-      for (const target of getElementRegions(regions)) {
-        const mode = next.get(target);
-        if (!mode) continue;
-        applyMode(target, mode);
+      for (const [target, mode] of next) {
+        let claims = claimsByTarget.get(target);
+        if (!claims) {
+          claims = {
+            owners: new Map(),
+            previousValue: target.style.getPropertyValue('pointer-events'),
+            previousPriority: target.style.getPropertyPriority('pointer-events'),
+          };
+          claimsByTarget.set(target, claims);
+        }
+        claims.owners.set(owner, mode);
+        target[HIT_PARTICIPATION_MODE_MARK] = mode;
+        if (mode === 'participating') restore(target, claims);
+        else target.style.setProperty('pointer-events', 'none');
       }
-
       applied = next;
     },
   };
 }
-
 export const __HIT_PARTICIPATION_MODE_MARK = HIT_PARTICIPATION_MODE_MARK;

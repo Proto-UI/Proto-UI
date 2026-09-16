@@ -1,0 +1,85 @@
+id: M-FEEDBACK-0001
+type: module
+title: Feedback owns visual style intent and per-instance runtime patches
+status: draft
+since: 0.3.0-alpha.0
+summary: The standard Feedback module merges setup and internal contributions, applies a final runtime patch layer, and delegates visual realization to a host style sink.
+statement:
+  en: This slice catalogs the existing visual style realization of the Component-to-User Feedback channel. Feedback owns per-instance semantic style state; the host owns materialization. Runtime installs the module with mixed resource ownership. This draft does not admit auditory or tactile feedback, new author APIs, or a general rendering policy.
+  zh-CN: 本 slice 编目 Component-to-User Feedback 通路已有的视觉样式实现。Feedback 拥有每实例语义样式状态，宿主拥有物化；Runtime 以 mixed resource ownership 安装该 Module。本 draft 不接纳听觉或触觉能力、新作者 API 或通用渲染策略。
+criteria:
+  - id: M-FEEDBACK-0001-A
+    text:
+      en: The author setup surface records style.use contributions; both use and its returned unUse are setup-only, and unUse removes only its own contribution. Runtime exposes patch, suppress and clearPatch without reopening setup.
+      zh-CN: 作者 setup surface 记录 style.use contribution；use 与返回的 unUse 均为 setup-only，unUse 仅移除自身贡献。Runtime 暴露 patch、suppress、clearPatch，不重新开放 setup。
+  - id: M-FEEDBACK-0001-B
+    text:
+      en: Privileged ports provide runtime base replacement, temporary merged application and translation-artifact contributions. Selector-bearing artifacts are internal only; ordinary author handles remain subject to token validation.
+      zh-CN: 特权 port 提供 runtime base replacement、临时 merged application 与 translation artifact contribution。含 selector 的 artifact 仅限内部；普通作者 handle 仍须通过 token validation。
+  - id: M-FEEDBACK-0001-C
+    text:
+      en: Semantic merge combines setup and current internal base contributions before the single incremental instance patch layer. Suppression, positive patch and clearPatch follow C-FEEDBACK-STYLE-0005, including when Rule replaces its contribution.
+      zh-CN: semantic merge 合并 setup 与当前内部 base contribution，随后应用单一增量 instance patch layer。suppress、positive patch、clearPatch 遵循 C-FEEDBACK-STYLE-0005，包括 Rule 替换贡献时。
+  - id: M-FEEDBACK-0001-D
+    text:
+      en: The standard Runtime installs Feedback without a hard dependency on another semantic module. Style mutation requests only effects projection, never a structural render, template change or state write.
+      zh-CN: standard Runtime 安装 Feedback，不硬依赖其他语义 Module。style mutation 只请求 effects projection，不触发 structural render、template change 或 state write。
+  - id: M-FEEDBACK-0001-E
+    text:
+      en: Setup contributions and runtime patch state survive repeatable detach/remount. Detached and unmounting views receive no Feedback host writes; mounting replays retained state before structural commit when a sink is available.
+      zh-CN: setup contribution 与 runtime patch state 跨 repeatable detach/remount 保留。detached 与 unmounting view 不接收 Feedback host write；mounting 在 sink 可用时于 structural commit 前重放保留状态。
+  - id: M-FEEDBACK-0001-F
+    text:
+      en: Absent host style capability does not discard logical style changes or invent a host. Pending logical state is projected when capability becomes available in an attached view. Terminal disposal clears style state and prevents retained internal handles from reviving host effects.
+      zh-CN: 宿主 style capability 缺失时不丢弃逻辑样式变化，也不虚构宿主。attached view 的 capability 可用时投影待应用逻辑状态。terminal disposal 清理样式状态，保存的内部句柄不得复活 host effect。
+satisfies:
+  contracts:
+    - C-FEEDBACK-0002
+    - C-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-STYLE-0002
+    - C-FEEDBACK-STYLE-0003
+    - C-FEEDBACK-STYLE-0004
+    - C-FEEDBACK-STYLE-0005
+requires:
+  hostCaps:
+    - HC-FEEDBACK-STYLE-SINK-0001
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+relates:
+  contracts:
+    - C-FEEDBACK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+verifies:
+  tests:
+    - T-FEEDBACK-0001
+    - T-FEEDBACK-STYLE-0001
+    - T-FEEDBACK-STYLE-0002
+    - T-RULE-INTENT-FEEDBACK-STYLE-0001
+sources:
+  - path: packages/modules/feedback/src/create.ts
+  - path: packages/modules/feedback/src/types.ts
+  - path: packages/core/src/spec/feedback/recorder.ts
+  - path: packages/runtime/src/kernel/handles/def.ts
+  - path: packages/runtime/src/kernel/handles/run.ts
+  - path: packages/runtime/src/instance/session.ts
+openQuestions:
+  - id: M-FEEDBACK-0001-Q-RENDER-PHASE
+    question:
+      en: Should runtime style writes explicitly reject readonly render scope?
+      zh-CN: runtime style write 是否应显式拒绝 readonly render scope？
+    context:
+      en: C-FEEDBACK-STYLE-0005 leaves this policy open; this catalog does not resolve it.
+      zh-CN: C-FEEDBACK-STYLE-0005 保留此策略问题；本编目不做决定。
+    blocks:
+      - render-phase-style-write-policy
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded visual style Module, host sink and executable evidence without lifecycle promotion.
+tags:
+  - feedback
+  - style
+  - module
+  - lifecycle

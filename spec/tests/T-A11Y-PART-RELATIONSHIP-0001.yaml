@@ -3,6 +3,9 @@ type: test
 title: Same-domain anatomy-part relationship conformance
 status: draft
 since: 0.3.0-alpha.0
+lifecycleRationale:
+  zh-CN: 以 draft 建立七个 conformance cases 的执行映射；六项 required implementation 均仍为 planned，尚不能把现有测试路径表述为这些 cases 已通过的证据。
+  en: Introduced as a draft execution map for seven conformance cases; all six required implementations remain planned, so the existing test paths cannot be claimed as passing evidence for these cases.
 summary: Maps the structured relationship carrier, fail-closed matching, view lifecycle, host-id ownership, terminal cleanup, and Tabs migration criteria to the existing Runtime, Web adapter, and Base Tabs test surfaces that must implement them.
 cases:
   - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-STRUCTURED-CARRIER
@@ -140,6 +143,9 @@ sources:
   - path: packages/adapters/vue/test/tabs.test.ts
   - path: packages/adapters/vue2/test/tabs.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Recorded the remain-draft lifecycle rationale while preserving all six required implementation mappings as planned.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added the planned cross-layer conformance map for the accepted Issue #549 relationship implementation slice without claiming the mapped paths already pass it.

@@ -177,7 +177,7 @@ Event 的 host-neutral subscription lease 与当前 `EventTarget` getter 之间�
 
 ## 6. 编目 Adapter Profile
 
-Adapter profile 是翻译实现身份，不是 Contract 的替代品。每次只编目一个已审查的 Module slice。
+Adapter profile 是翻译实现身份，不是 Contract 的替代品。每次只推进一个已审查的 Module slice；多个依次完成的 slice 可以按下述批量规则进入同一个 PR。
 
 ### 6.1 `supports.modules`
 
@@ -334,6 +334,26 @@ Adapter profile schema test 可以证明：
 10. **独立审阅**：检查局部 slice 没有暗示完整 support matrix，也没有把 draft 当 active guarantee。
 
 不要先一次性创建所有 `M-*` 与 `HC-*` 再回填内容。Props/Event 已证明，小而完整的纵向 slice 更容易暴露 schema、证据和 ownership 的真实需求。
+
+### 10.1 批量分支、独立 commit 与一个 PR
+
+用户主导的连续 M/HC/A 编目，默认使用一个活跃的批量分支和一个 PR。纵向 slice 是语义与验证单位，commit 是可回顾的变更单位；Module 名称不同、实体类型不同、审查轮次增加或局部证据补齐，本身都不要求新增 PR。这样维护者主要关注一个 PR 的最新状态，同时 reviewer 仍能逐个检查切片。
+
+- 依次完成每个 slice 的 authority trace、M/HC/A/T、实际实现证据和必要投影；不要先建大批实体再补测试。
+- 每个 slice 使用独立、描述明确的 commit；基于既有契约的局部 drift 修复可用单独 commit 留在同一 PR。需要多次审查修正时继续追加 commit，不为每轮反馈创建新 PR。
+- PR 描述围绕最终实现维护一份切片清单：已完成、正在审查、待推进、被设计问题阻塞。列出每个 slice 的实体、证据、限制及最新验证；不要把未完成队列写成已具备的 support matrix。
+- 后续 slice 继续推进前，先处理会破坏其前提的 review 发现；互不依赖的已治理工作可以继续留在同一批次。Review 与 CI 仍以准确的 head 为准，不因批量提交放宽标准。
+- 当前已同意的队列完成后结束该批次；新增大领域应先更新范围与进度说明，避免一个 PR 永久扩张。拆分由实际语义依赖和审查负担决定，不按固定 Module 数量机械执行。
+
+以下情况触发停顿或拆分：
+
+1. 需要拆分或合并 Module、迁移 ownership、改变依赖方向，或改变 facade/port/host-cap 的公共形状。
+2. 需要新的兼容性策略、稳定保证、生命周期提升或尚未作出的产品语义决定。
+3. 存在必须先合入的外部依赖、独立发布/回退要求，或 reviewer 明确指出无法在当前 PR 中可靠审查的边界。
+
+例如，将 Expose Event 从 Event Module 拆出并改为 Expose 的下游 Module，属于架构变化。暂停依赖该变化的编目，先完成并合入当前可独立成立的编目 PR，再单独推进架构 PR；架构变化合入后继续后续编目。单纯发现漏测、错误诊断或既有契约的局部实现偏移，不属于这种拆分理由。
+
+这些组织规则不授予 commit、push、review submission 或 merge 权限；具体外部操作仍遵守当前用户授权与仓库规则。
 
 ## 11. 特殊情况：没有 Module package 的领域
 

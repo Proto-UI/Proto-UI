@@ -67,6 +67,16 @@ implementations:
     required: true
     consumesCases:
       - T-RULE-0001-CASE-AUTHORING-TYPES
+  - id: runtime-rule-setup-cancellation
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.setup-cancellation.contract.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-0001-CASE-SETUP-ONLY
+      - T-RULE-0001-CASE-SETUP-ONLY-REMOVAL
+    notes:
+      - Checks actual Runtime created/render/mounted/detached/disposed scopes and the direct Module facade. Does not claim the planned serializable-IR coverage.
 verifies:
   contracts:
     - id: C-RULE-0003
@@ -98,12 +108,15 @@ exercises:
     - id: D-RULE-HANDLE-DISPOSE-0001
       role: diagnostic-policy
       coverageImpact: review-test-surface
-      note: Captures the known gap that setup-time Rule removal must not remain callable as a runtime disposer.
+      note: Verifies the maintainer-confirmed setup-only removal boundary through direct and captured handles.
     - id: D-RULE-IR-SERIALIZABLE-0001
       role: diagnostic-policy
       coverageImpact: review-test-surface
       note: Captures the known RuleIR side-table migration needed for any live execution handles.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: strengthened
+    summary: Added actual Runtime and Module setup-cancellation evidence; other planned declaration/IR coverage remains planned.
   - version: 0.1.0
     change: introduced
     summary: Added rule declaration and serializable IR boundary test mapping.

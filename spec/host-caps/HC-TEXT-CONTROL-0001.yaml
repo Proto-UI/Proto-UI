@@ -41,7 +41,16 @@ revisions:
       Made the host capability line-mode-aware (single or multiline), resolving to HTMLInputElement for single-line or HTMLTextAreaElement for multiline on the Web profile.
 
 
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Made host editing-session projection and cleanup addressable without adding a portable selection API.
+
 tags:
   - text-control
   - textarea
   - host-capability
+criteria:
+  - id: HC-TEXT-CONTROL-0001-A
+    text:
+      en: The host resolves one declared single-line or multiline editor and leases property projection, normalized native-order events and snapshots. Unchanged value updates preserve selection/cursor; composition retains host editing ownership. Disposal releases listeners and target references.
+      zh-CN: host 解析一个声明的单行或多行 editor，提供 property projection、原生顺序的 normalized event 与 snapshot lease。未改变 value 的更新保留 selection/cursor；composition 保持 host editing ownership；dispose 释放 listener 与 target reference。

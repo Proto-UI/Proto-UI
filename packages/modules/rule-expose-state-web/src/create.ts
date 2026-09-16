@@ -112,11 +112,27 @@ function buildVariant(
   if (!binding) return null;
   if (binding.kind === 'number.range') return null;
 
-  const semanticVariant = buildSemanticVariant(binding.semantic, condition, allowNativeVariant);
+  // CSS attribute values are strings; lowering must preserve Rule strict equality.
+  if (binding.kind === 'bool' && typeof condition.literal !== 'boolean') return null;
+  if (
+    (binding.kind === 'string' || binding.kind === 'enum') &&
+    typeof condition.literal !== 'string'
+  )
+    return null;
+  if (
+    binding.kind === 'number.discrete' &&
+    (typeof condition.literal !== 'number' || !Number.isFinite(condition.literal))
+  )
+    return null;
+
+  const semanticVariant =
+    binding.kind === 'bool'
+      ? buildSemanticVariant(binding.semantic, condition, allowNativeVariant)
+      : null;
   if (semanticVariant) return semanticVariant;
 
   const attr = binding.attr;
-  if (!attr) return null;
+  if (!attr || !/^data-[a-zA-Z0-9-]+$/.test(attr)) return null;
   const key = stripDataPrefix(attr);
 
   if (binding.kind === 'bool') {
@@ -127,7 +143,11 @@ function buildVariant(
 
   if (condition.literal === null) return null;
   if (binding.kind === 'enum' || binding.kind === 'string' || binding.kind === 'number.discrete') {
-    return `data-[${key}=${String(condition.literal)}]`;
+    const value = String(condition.literal);
+    // A token containing whitespace or selector delimiters is not faithfully
+    // representable by the current runtime/CLI whole-token selector pipeline.
+    if (!/^[a-zA-Z0-9_.-]+$/.test(value)) return null;
+    return `data-[${key}=${value}]`;
   }
 
   return null;
@@ -145,6 +165,8 @@ class RuleExposeStateWebImpl extends ModuleBase {
   private candidates: Candidate[] = [];
   private candidatesReady = false;
   private optimizedIds = new Set<number>();
+  private contributionOffs: Array<() => void> = [];
+  private disposed = false;
 
   constructor(caps: any, deps: ModuleDeps) {
     super(caps);
@@ -164,6 +186,20 @@ class RuleExposeStateWebImpl extends ModuleBase {
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
+    if (phase === 'unmounting' || phase === 'detached') this.clearOptimization();
+  }
+
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.clearOptimization();
+    this.candidates = [];
+    this.candidatesReady = false;
+  }
+
+  private clearOptimization(): void {
+    this.optimizedIds.clear();
+    for (const off of this.contributionOffs.splice(0)) off();
   }
 
   protected override onCapsEpoch(_epoch: number): void {
@@ -215,6 +251,7 @@ class RuleExposeStateWebImpl extends ModuleBase {
   }
 
   private tryApply(): void {
+    if (this.disposed) return;
     if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
     // A pure-meta candidate resolves before the map is consulted, so an empty
     // exposed-state map must not short-circuit the pass. State candidates find
@@ -255,7 +292,7 @@ class RuleExposeStateWebImpl extends ModuleBase {
       const prefix = canonicalizeLoweredVariants(variants).join(':');
       const tokens = c.tokens.map((t) => `${prefix}:${t}`);
       const handle: StyleHandle = { kind: 'tw', tokens };
-      this.feedbackPort.useStyleUnsafe(handle);
+      this.contributionOffs.push(this.feedbackPort.useStyleUnsafe(handle));
       appliedIds.push(c.id);
     }
 
@@ -280,6 +317,7 @@ export function createRuleExposeStateWebModule(ctx: ModuleFactoryArgs): RuleExpo
           onMountPhase: (p, epoch) => impl.onMountPhase(p, epoch),
           onProtoPhase: (p) => impl.onProtoPhase(p),
           afterRenderCommit: () => impl.afterRenderCommit(),
+          dispose: () => impl.dispose(),
         },
       };
     },

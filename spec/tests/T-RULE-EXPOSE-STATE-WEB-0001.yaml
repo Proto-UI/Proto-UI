@@ -1,0 +1,147 @@
+id: T-RULE-EXPOSE-STATE-WEB-0001
+type: test
+title: Partial Rule Expose State Web conformance
+status: draft
+since: 0.3.0-alpha.0
+summary: Direct Module, actual Runtime, real Adapter and existing CLI tests support a bounded lowering slice; full execution equivalence remains open.
+cases:
+  - id: T-RULE-EXPOSE-STATE-WEB-0001-CASE-LIFETIME
+    title: Bounded Web Rule lifetime
+    covers:
+      - M-RULE-EXPOSE-STATE-WEB-0001-E
+    expectation: rule-web-lifetime
+  - id: T-RULE-EXPOSE-STATE-WEB-0001-CASE-FALLBACK
+    title: Bounded Web Rule fallback
+    covers:
+      - M-RULE-EXPOSE-STATE-WEB-0001-A
+      - M-RULE-EXPOSE-STATE-WEB-0001-B
+      - M-RULE-EXPOSE-STATE-WEB-0001-C
+    expectation: rule-web-fallback
+  - id: T-RULE-EXPOSE-STATE-WEB-0001-CASE-POLICY
+    title: Bounded Web Rule policy
+    covers:
+      - M-RULE-EXPOSE-STATE-WEB-0001-C
+      - M-RULE-EXPOSE-STATE-WEB-0001-D
+    expectation: rule-web-policy
+  - id: T-RULE-EXPOSE-STATE-WEB-0001-CASE-REPRESENTATION
+    title: Bounded Web Rule representation
+    covers:
+      - M-RULE-EXPOSE-STATE-WEB-0001-B
+    expectation: rule-web-representation
+  - id: T-RULE-EXPOSE-STATE-WEB-0001-CASE-RUNTIME
+    title: Bounded Web Rule runtime
+    covers:
+      - M-RULE-EXPOSE-STATE-WEB-0001-E
+    expectation: rule-web-runtime
+  - id: T-RULE-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    title: Bounded Web Rule adapter
+    covers:
+      - M-RULE-EXPOSE-STATE-WEB-0001-A
+      - M-RULE-EXPOSE-STATE-WEB-0001-C
+      - M-RULE-EXPOSE-STATE-WEB-0001-E
+      - A-REACT-18-19-0001-RULE-EXPOSE-STATE-WEB
+      - A-VUE-3-0001-RULE-EXPOSE-STATE-WEB
+      - A-VUE-2-0001-RULE-EXPOSE-STATE-WEB
+      - A-WEB-COMPONENT-0001-RULE-EXPOSE-STATE-WEB
+    expectation: rule-web-adapter
+  - id: T-RULE-EXPOSE-STATE-WEB-0001-CASE-COMPILER
+    title: Bounded Web Rule compiler
+    covers:
+      - M-RULE-EXPOSE-STATE-WEB-0001-C
+    expectation: rule-web-compiler
+implementations:
+  - id: module
+    kind: module-test
+    path: packages/modules/rule-expose-state-web/test/catalog-boundary.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-LIFETIME
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-FALLBACK
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-POLICY
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-REPRESENTATION
+  - id: runtime
+    kind: runtime-test
+    path: packages/runtime/test/contract/rule-expose-state-web.catalog.contract.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-RUNTIME
+  - id: react
+    kind: adapter-test
+    path: packages/adapters/react/test/rule-expose-state-web.integration.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    notes:
+      - Real framework owners verify positive/negative conjunction, range/Props fallback, State transitions and fresh-owner baseline. No computed-CSS or native pseudo-class equivalence claim.
+  - id: vue
+    kind: adapter-test
+    path: packages/adapters/vue/test/rule-expose-state-web.integration.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    notes:
+      - Real framework owners verify positive/negative conjunction, range/Props fallback, State transitions and fresh-owner baseline. No computed-CSS or native pseudo-class equivalence claim.
+  - id: vue2
+    kind: adapter-test
+    path: packages/adapters/vue2/test/rule-expose-state-web.integration.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    notes:
+      - Real framework owners verify positive/negative conjunction, range/Props fallback, State transitions and fresh-owner baseline. No computed-CSS or native pseudo-class equivalence claim.
+  - id: web-component
+    kind: adapter-test
+    path: packages/adapters/web-component/test/rule-expose-state-web.integration.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-ADAPTER
+    notes:
+      - Real framework owners verify positive/negative conjunction, range/Props fallback, State transitions and fresh-owner baseline. No computed-CSS or native pseudo-class equivalence claim.
+  - id: cli-extractor
+    kind: module-test
+    path: packages/cli/test/prototype-style-tokens.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-COMPILER
+  - id: cli-css
+    kind: module-test
+    path: packages/cli/test/proto-style-css.test.ts
+    status: passing
+    required: true
+    consumesCases:
+      - T-RULE-EXPOSE-STATE-WEB-0001-CASE-COMPILER
+verifies:
+  modules:
+    - id: M-RULE-EXPOSE-STATE-WEB-0001
+      anchors:
+        - M-RULE-EXPOSE-STATE-WEB-0001-A
+        - M-RULE-EXPOSE-STATE-WEB-0001-B
+        - M-RULE-EXPOSE-STATE-WEB-0001-C
+        - M-RULE-EXPOSE-STATE-WEB-0001-D
+        - M-RULE-EXPOSE-STATE-WEB-0001-E
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors:
+        - A-REACT-18-19-0001-RULE-EXPOSE-STATE-WEB
+    - id: A-VUE-3-0001
+      anchors:
+        - A-VUE-3-0001-RULE-EXPOSE-STATE-WEB
+    - id: A-VUE-2-0001
+      anchors:
+        - A-VUE-2-0001-RULE-EXPOSE-STATE-WEB
+    - id: A-WEB-COMPONENT-0001
+      anchors:
+        - A-WEB-COMPONENT-0001-RULE-EXPOSE-STATE-WEB
+sources:
+  - path: packages/adapters/base/test/fixtures/rule-expose-state-web-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped bounded lowering evidence without claiming full optimization equivalence.

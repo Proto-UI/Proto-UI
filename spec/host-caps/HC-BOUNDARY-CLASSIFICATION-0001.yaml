@@ -1,0 +1,27 @@
+id: HC-BOUNDARY-CLASSIFICATION-0001
+type: host-cap
+title: Host proves ternary membership across disjoint Boundary regions
+status: draft
+since: 0.3.0-alpha.0
+summary: Host proves ternary membership across disjoint Boundary regions.
+criteria:
+  - id: HC-BOUNDARY-CLASSIFICATION-0001-A
+    text:
+      en: 'The host classifies a sample against the current registered regions without owning native event transport or outside/dismiss policy. It returns inside only with positive membership evidence, outside only when all regions are resolved and excluded, and otherwise unknown.'
+      zh-CN: '宿主针对当前 registered regions 分类 sample，不拥有 native event transport 或 outside/dismiss policy。仅有正向 membership 证据时返回 inside，仅所有 regions 均可解析并排除时返回 outside，否则返回 unknown。'
+  - id: HC-BOUNDARY-CLASSIFICATION-0001-B
+    text:
+      en: 'The bounded Web bridge recognizes Node regions, physical parents, shadow-root hosts and explicit linked Proto parents with cycle protection. Non-Node samples, empty regions and unresolved regions remain unknown unless another region proves inside. This is host evidence, not author-side DOM containment policy.'
+      zh-CN: '有界 Web bridge 识别 Node region、physical parent、shadow-root host 与显式 linked Proto parent，并保护循环。非 Node sample、空 regions 与未解析 region 保持 unknown，除非其他 region 证明 inside。这是宿主证据，不是作者侧 DOM containment policy。'
+dependsOn:
+  contracts: [C-BOUNDARY-0001]
+verifies:
+  tests: [T-BOUNDARY-0001, T-BOUNDARY-0002]
+sources:
+  - path: packages/modules/boundary/src/caps.ts
+  - path: packages/modules/boundary/src/web/host-bridge.ts
+  - path: packages/adapters/base/test/boundary-host-bridge.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded Boundary slice and executable evidence.

@@ -43,52 +43,52 @@ class A11yModuleImpl extends ModuleBase {
 
   readonly facade: A11yFacade = {
     id: (target) => {
-      this.ensureSetup('def.a11y.id');
+      this.ensureSetup('asAccessible.id');
       this.ir.id = target;
       this.applyProjection();
     },
     role: (role) => {
-      this.ensureSetup('def.a11y.role');
+      this.ensureSetup('asAccessible.role');
       this.ir.role = role;
       this.applyProjection();
     },
     name: (value) => {
-      this.ensureSetup('def.a11y.name');
+      this.ensureSetup('asAccessible.name');
       this.ir.name = { kind: 'text', value };
       this.applyProjection();
     },
     nameFromContent: () => {
-      this.ensureSetup('def.a11y.nameFromContent');
+      this.ensureSetup('asAccessible.nameFromContent');
       this.ir.name = { kind: 'content' };
       this.applyProjection();
     },
     description: (value) => {
-      this.ensureSetup('def.a11y.description');
+      this.ensureSetup('asAccessible.description');
       this.ir.description = { kind: 'text', value };
       this.applyProjection();
     },
     state: <V>(key: A11yStateKey, handle: State<V>) => {
-      this.ensureSetup('def.a11y.state');
+      this.ensureSetup('asAccessible.state');
       this.ir.states.set(key, { key, handle: handle as State<unknown> });
       this.applyProjection();
     },
     action: (key: A11yActionKey, spec: A11yActionSpec = {}) => {
-      this.ensureSetup('def.a11y.action');
+      this.ensureSetup('asAccessible.action');
       this.ir.actions.set(key, { ...spec });
       this.applyProjection();
     },
     relation: (key: A11yRelationKey, spec: A11yRelationSpec) => {
-      this.ensureSetup('def.a11y.relation');
+      this.ensureSetup('asAccessible.relation');
       this.ir.relations.set(key, { key, spec: { ...spec } });
       this.applyProjection();
     },
     tree: (patch: A11yTreeBehavior) => {
-      this.ensureSetup('def.a11y.tree');
+      this.ensureSetup('asAccessible.tree');
       this.ir.tree = { ...(this.ir.tree ?? {}), ...patch };
       this.applyProjection();
     },
     level: (value: number | State<number>) => {
-      this.ensureSetup('def.a11y.level');
+      this.ensureSetup('asAccessible.level');
       resolveA11yLevel(value);
       this.ir.level = value;
       this.installLevelWatch();
