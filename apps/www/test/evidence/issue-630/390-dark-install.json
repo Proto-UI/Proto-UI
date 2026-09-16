@@ -1,0 +1,19 @@
+{
+  "facts": {
+    "ec": {
+      "background": "lab(15.204 0 -0.00000596046)",
+      "color": "lab(98.26 0 0)",
+      "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+      "size": "13px",
+      "lineHeight": "24px"
+    }
+  },
+  "install": {
+    "background": "lab(15.204 0 -0.00000596046)",
+    "color": "lab(98.26 0 0)",
+    "radius": "12px",
+    "font": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+    "size": "13px",
+    "lineHeight": "24px"
+  }
+}

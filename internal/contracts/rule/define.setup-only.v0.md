@@ -100,7 +100,7 @@ Rules:
 - runtime rule removal is not part of rule core v0
 - a removal function returned by a setup-only API must not be used as a lifecycle disposer
 
-The current `RuleHandle.dispose()` behavior needs implementation review because it can be called after setup in existing code. This is tracked as debt.
+`RuleHandle.dispose()` follows [C-CORE-SYNTAX-0007](../../../spec/contracts/C-CORE-SYNTAX-0007.yaml), as confirmed by [D-RULE-HANDLE-DISPOSE-0001](../../../spec/decisions/D-RULE-HANDLE-DISPOSE-0001.yaml): it is allowed only during setup execution. Calls in `onCreated` or any later scope fail before changing declarations or style output. Direct handles and asHook-captured disposers share this boundary. Internal Module teardown remains separate.
 
 ---
 
@@ -111,7 +111,7 @@ The following must fail synchronously:
 - calling `def.rule` outside setup
 - returning a non-declarative `when` expression
 - using unsupported intent operations
-- using setup-only removal outside setup, once the removal boundary is enforced
+- using setup-only removal outside setup
 
 ---
 

@@ -119,6 +119,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/textarea');
     registerPrototype('base-textarea-root', mod.textareaRoot);
   },
+  'base-image-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/image');
+    registerPrototype('base-image-root', mod.imageRoot);
+  },
   'brutalist-textarea-root': async () => {
     const mod = await import('@proto.ui/prototypes-brutalist/textarea');
     registerPrototype('brutalist-textarea-root', mod.brutalistTextareaRoot);

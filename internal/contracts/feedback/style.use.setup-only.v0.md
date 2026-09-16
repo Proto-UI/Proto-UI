@@ -4,7 +4,7 @@
 
 This contract defines the **author-facing API boundary** for recording style intent via feedback.
 
-In v0, feedback.style records **static style intent tokens** only. It does not express conditions, selectors, priorities, or realization strategy.
+This setup API records **static style intent tokens**. Runtime patching is separately governed by [C-FEEDBACK-STYLE-0005](../../../spec/contracts/C-FEEDBACK-STYLE-0005.yaml). It does not express conditions, selectors, priorities, or realization strategy.
 
 The intent recorded here is later composed with rule, expose, and adapter, but this contract intentionally limits what authors can express.
 
@@ -61,7 +61,7 @@ Rules:
 
 `unUse` is **not** a runtime update mechanism and **not** a lifecycle disposer.
 
-Component unmount cleanup is handled by feedback manager disposal or adapter-level cleanup, not by `unUse`.
+Repeatable view unmount suspends host effects while preserving logical contributions. Terminal instance disposal clears Feedback state; neither operation uses author `unUse`. See [M-FEEDBACK-0001](../../../spec/modules/M-FEEDBACK-0001.yaml) and [C-LIFECYCLE-0006](../../../spec/contracts/C-LIFECYCLE-0006.yaml).
 
 ---
 

@@ -1,0 +1,31 @@
+id: HC-OVERLAY-LAYER-0001
+type: host-cap
+title: Host projects Overlay layer requests
+status: draft
+lifecycleRationale: >-
+  Retained as draft pending admission review of the bounded Web z-index contribution and restoration evidence. Numeric offsets do not establish an absolute layer hierarchy; no stronger hierarchy is admitted here.
+
+
+since: 0.3.0-alpha.0
+summary: A layer scheduler owns a bounded host style contribution; numeric Web ordering does not arbitrate Escape.
+criteria:
+  - id: HC-OVERLAY-LAYER-0001-A
+    text:
+      en: attach receives the current target and layer request and returns an idempotent disposer. The Web scheduler projects base plus activation sequence times step plus role and instance offsets; disposal restores the original inline z-index value and priority. This arithmetic is not an absolute role hierarchy or logical Escape activation order.
+      zh-CN: attach 接受当前 target 与 layer request，并返回幂等 disposer。Web scheduler 投射 base + sequence × step + role/instance offset；dispose 恢复原 inline z-index 值与 priority。该算式不构成绝对 role hierarchy，也不是 Escape logical activation order。
+relates:
+  contracts:
+    - C-AS-OVERLAY-0001
+verifies:
+  tests:
+    - T-OVERLAY-CATALOG-0001
+sources:
+  - path: packages/modules/overlay/src/caps.ts
+  - path: packages/modules/overlay/src/web/z-index-layer-scheduler.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded Overlay host resource and cleanup responsibility.
+tags:
+  - overlay
+  - host-capability

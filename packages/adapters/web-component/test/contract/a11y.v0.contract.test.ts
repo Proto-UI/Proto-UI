@@ -1,3 +1,4 @@
+import { asAccessible } from '@proto.ui/hooks';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import type { A11ySemanticObjectSnapshot, Prototype } from '@proto.ui/core';
 import { definePrototype } from '@proto.ui/core';
@@ -29,17 +30,17 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
           const hidden = def.state.bool('button.hidden', false);
           const controls = def.state.string('button.controls', 'panel-a');
           const orientation = def.state.string('button.orientation', 'vertical');
-          def.a11y.id(id);
-          def.a11y.role('button');
-          def.a11y.name(name);
-          def.a11y.description('Stores changes');
-          def.a11y.state('disabled', disabled);
-          def.a11y.state('hidden', hidden);
-          def.a11y.state('orientation', orientation);
-          def.a11y.action('activate', { event: 'click' });
-          def.a11y.relation('controls', { target: controls });
-          def.a11y.relation('labelledBy', { target: 'label-a' });
-          def.a11y.tree({ mergeChildren: true });
+          asAccessible().id(id);
+          asAccessible().role('button');
+          asAccessible().name(name);
+          asAccessible().description('Stores changes');
+          asAccessible().state('disabled', disabled);
+          asAccessible().state('hidden', hidden);
+          asAccessible().state('orientation', orientation);
+          asAccessible().action('activate', { event: 'click' });
+          asAccessible().relation('controls', { target: controls });
+          asAccessible().relation('labelledBy', { target: 'label-a' });
+          asAccessible().tree({ mergeChildren: true });
           def.props.watch(['disabled'], (_run, next) => {
             disabled.set(next.disabled);
             hidden.set(next.disabled);
@@ -106,8 +107,8 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
       setup(def) {
         const role = def.state.string('heading.role', 'heading');
         const level = def.state.numberDiscrete('heading.level', 2);
-        def.a11y.role(role);
-        def.a11y.level(level);
+        asAccessible().role(role);
+        asAccessible().level(level);
         def.expose.method('setLevel', (value: number) =>
           level.set(value, 'reason: update heading level')
         );
@@ -169,7 +170,7 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
 
         const hidden = def.state.bool('tree.hidden', true);
         const mergeChildren = def.state.bool('tree.mergeChildren', true);
-        def.a11y.tree({ hidden, mergeChildren });
+        asAccessible().tree({ hidden, mergeChildren });
         def.props.watch(['decorative'], (_run, next) => {
           hidden.set(next.decorative, 'reason: test tree hidden');
           mergeChildren.set(next.decorative, 'reason: test tree merge children');
@@ -208,7 +209,7 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
       name: 'x-a11y-wc-additive-relation',
       setup(def) {
         const describedBy = def.state.string('describedBy', 'tooltip-a');
-        def.a11y.relation('describedBy', { target: describedBy, mode: 'append' });
+        asAccessible().relation('describedBy', { target: describedBy, mode: 'append' });
         def.expose.method('setDescription', (value: string) => describedBy.set(value));
         return (r) => r.el('button', 'Info');
       },
@@ -241,9 +242,9 @@ describe('contract: adapter-web-component / a11y projection (v0)', () => {
         const live = def.state.string('live', 'polite');
         const atomic = def.state.bool('atomic', true);
         const busy = def.state.bool('busy', false);
-        def.a11y.state('live', live);
-        def.a11y.state('atomic', atomic);
-        def.a11y.state('busy', busy);
+        asAccessible().state('live', live);
+        asAccessible().state('atomic', atomic);
+        asAccessible().state('busy', busy);
         def.expose.method('setLive', (value: string) => live.set(value));
         def.expose.method('setAtomic', (value: boolean) => atomic.set(value));
         def.expose.method('setBusy', (value: boolean) => busy.set(value));

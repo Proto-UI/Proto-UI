@@ -1,8 +1,8 @@
 # focus-model.v0.md
 
-> Status: Draft - discussion-backed base text
+> Status: Draft - transitional projection
 >
-> This document describes the current Proto UI focus model direction before it is promoted into formal `C-FOCUS-*` spec entities.
+> Normative direction: `C-FOCUS-0001`, `C-FOCUS-0002`, the `C-AS-FOCUS-*` contracts, and `M-FOCUS-0001`. This text is a readable projection; the entities retain draft lifecycle.
 
 ---
 

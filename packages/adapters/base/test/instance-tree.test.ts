@@ -152,6 +152,93 @@ describe('adapter-base: logical instance tree', () => {
       surface: child,
     });
   });
+  it.each([false, true])(
+    'rejects sibling trigger branches without replacing the accepted route (reverse=%s)',
+    (reverse) => {
+      const tree = createInstanceTreeMarkers('@proto.ui/test/trigger-branch');
+      const proto = { name: 'trigger', setup: () => undefined };
+      const outer = tree.createLogicalInstance(proto);
+      const children = [tree.createLogicalInstance(proto), tree.createLogicalInstance(proto)];
+      if (reverse) children.reverse();
+      const [first, second] = children;
+      tree.bindLogicalParent(first, outer);
+      tree.bindLogicalParent(second, outer);
+      tree.mergeLogicalTriggerGroup(outer, outer);
+      tree.mergeLogicalTriggerGroup(first, outer);
+      const target = new EventTarget();
+      const listener = vi.fn();
+      tree.bindLogicalEventTarget(first, target);
+      tree.getLogicalEventTarget(outer).addEventListener('press.commit', listener);
+
+      expect(() => tree.mergeLogicalTriggerGroup(second, outer)).toThrow(/continuous chain/);
+      expect(tree.getLogicalTriggerSurfaceOwner(outer)).toBe(first);
+      expect(tree.getLogicalTriggerGroupAnchor(second)).toBe(second);
+      target.dispatchEvent(new Event('press.commit'));
+      expect(listener).toHaveBeenCalledOnce();
+    }
+  );
+
+  it('rejects a late trigger parent before joining its two child groups', () => {
+    const tree = createInstanceTreeMarkers('@proto.ui/test/trigger-late-branch');
+    const proto = { name: 'trigger', setup: () => undefined };
+    const outer = tree.createLogicalInstance(proto);
+    const left = tree.createLogicalInstance(proto);
+    const right = tree.createLogicalInstance(proto);
+    tree.bindLogicalParent(left, outer);
+    tree.bindLogicalParent(right, outer);
+    tree.mergeLogicalTriggerGroup(left, left);
+    tree.mergeLogicalTriggerGroup(right, right);
+
+    expect(() => tree.mergeLogicalTriggerGroup(outer, outer)).toThrow(/continuous chain/);
+    expect(tree.getLogicalTriggerGroupAnchor(left)).toBe(left);
+    expect(tree.getLogicalTriggerGroupAnchor(right)).toBe(right);
+  });
+
+  it('rejects reparenting before changing either chain', () => {
+    const tree = createInstanceTreeMarkers('@proto.ui/test/trigger-reparent-branch');
+    const proto = { name: 'trigger', setup: () => undefined };
+    const outer = tree.createLogicalInstance(proto);
+    const left = tree.createLogicalInstance(proto);
+    const other = tree.createLogicalInstance(proto);
+    const right = tree.createLogicalInstance(proto);
+    tree.bindLogicalParent(left, outer);
+    tree.bindLogicalParent(right, other);
+    for (const [token, anchor] of [
+      [outer, outer],
+      [left, outer],
+      [other, other],
+      [right, other],
+    ]) {
+      tree.mergeLogicalTriggerGroup(token, anchor);
+    }
+    expect(() => tree.bindLogicalParent(right, outer)).toThrow(/continuous chain/);
+    expect(tree.getLogicalParent(right)).toBe(other);
+    expect(tree.getLogicalTriggerSurfaceOwner(other)).toBe(right);
+    expect(tree.getLogicalTriggerSurfaceOwner(outer)).toBe(left);
+  });
+
+  it('allows replacement after the old surface is unbound', () => {
+    const tree = createInstanceTreeMarkers('@proto.ui/test/trigger-replace-branch');
+    const proto = { name: 'trigger', setup: () => undefined };
+    const outer = tree.createLogicalInstance(proto);
+    const old = tree.createLogicalInstance(proto);
+    const next = tree.createLogicalInstance(proto);
+    tree.bindLogicalParent(old, outer);
+    tree.markProtoInstance(document.createElement('button'), proto, old);
+    tree.mergeLogicalTriggerGroup(outer, outer);
+    tree.mergeLogicalTriggerGroup(old, outer);
+    tree.unbindProtoInstance(old);
+    tree.bindLogicalParent(next, outer);
+    tree.mergeLogicalTriggerGroup(next, outer);
+    tree.mergeLogicalTriggerGroup(outer, outer);
+    expect(tree.getLogicalTriggerSurfaceOwner(outer)).toBe(next);
+    expect(() => tree.markProtoInstance(document.createElement('button'), proto, old)).toThrow(
+      /continuous chain/
+    );
+    expect(tree.getLogicalRoot(old)).toBeNull();
+    expect(tree.getLogicalTriggerSurfaceOwner(outer)).toBe(next);
+  });
+
   it('releases a div trigger surface without leaving a click-focusable tabindex', () => {
     const root = document.createElement('div');
     root.setAttribute('tabindex', '0');

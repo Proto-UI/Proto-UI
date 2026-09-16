@@ -17,6 +17,12 @@ cases:
       - P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
       - P-BRUTALIST-SKELETON-CONSUMER-SIZE
     expectation: brutalist-skeleton-hidden-static-surface-with-consumer-owned-size
+  - id: T-BRUTALIST-SKELETON-0001-CASE-BROWSER
+    title: Rendered Skeleton rejects authored content and stays hidden, square, and hard-shadowed across official runtimes
+    covers:
+      - P-BRUTALIST-SKELETON-VISUAL-ONLY
+      - P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
+    expectation: rendered-brutalist-skeleton-content-boundary-and-visual-grammar
 implementations:
   - id: prototypes-brutalist-skeleton-contract
     kind: module-test
@@ -26,6 +32,15 @@ implementations:
     consumesCases:
       - T-BRUTALIST-SKELETON-0001-CASE-DIRECT-OWNERSHIP
       - T-BRUTALIST-SKELETON-0001-CASE-VISUAL-ONLY
+    exercises:
+      - P-BRUTALIST-SKELETON
+  - id: website-brutalist-remaining-browser-skeleton
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SKELETON-0001-CASE-BROWSER
     exercises:
       - P-BRUTALIST-SKELETON
 verifies:
@@ -38,6 +53,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added draft Brutalist skeleton prototype coverage.
+  - version: 0.3.0-alpha.0
+    change: extended
+    summary: Added required cross-runtime browser evidence for authored-content rejection, no motion, and lavender/foreground grammar.
 tags:
   - test
   - brutalist

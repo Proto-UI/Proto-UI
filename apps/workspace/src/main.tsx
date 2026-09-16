@@ -5,15 +5,19 @@ import {
   createSpecWorkspace,
   diffSpecSnapshots,
   getSpecSnapshot,
+  getSpecLifecycleReport,
+  type SpecLifecycleReport,
   type SpecSnapshot,
   type SpecSnapshotDiff,
 } from '@proto.ui/spec-engine';
 import { buildSpecGraph, type SpecGraph } from '@proto.ui/spec-graph';
 import {
   SPEC_RELATION_KINDS,
+  parseSpecBlockTarget,
   type SpecEntity,
   type SpecRelations,
   type SpecRelationTarget,
+  type SpecLifecyclePlan,
 } from '@proto.ui/spec-schema';
 
 import './styles.css';
@@ -41,6 +45,29 @@ const UI_TEXT = {
     status: 'Status',
     since: 'Since',
     activeSince: 'Active since',
+    lifecycleReview: 'Lifecycle review',
+    lifecycleRationale: 'Lifecycle rationale',
+    lifecycleBasis:
+      'Current catalog, filtered by version. Recorded evidence and dispositions are not execution results or admission approval.',
+    lifecycleUnavailable: 'Lifecycle report is unavailable; inspect the validation issues.',
+    draftAtVersion: 'Draft at the selected version.',
+    unreviewed: 'Unreviewed drafts',
+    noDisposition: 'No authored disposition',
+    recordedDispositions: 'Drafts with dispositions at this version',
+    legacyActivation: 'Unknown activation provenance',
+    unclassified: 'Unclassified',
+    recordedGaps: 'Recorded gaps',
+    noRationale: 'No lifecycle rationale recorded.',
+    blockKinds: {
+      activation: 'Activation',
+      criterion: 'Criterion',
+      implementation: 'Implementation',
+    },
+    dispositions: {
+      promote: 'Propose promotion',
+      'remain-draft': 'Remain draft',
+      'not-applicable': 'Not applicable',
+    },
     noEntity: 'No entity selected.',
     statement: 'Statement',
     adapterProfile: 'Adapter Profile',
@@ -158,6 +185,20 @@ const UI_TEXT = {
     status: '状态',
     since: '引入版本',
     activeSince: '稳定生效版本',
+    lifecycleReview: '生命周期评审',
+    lifecycleRationale: '生命周期理由',
+    lifecycleBasis: '按版本筛选的当前目录。已记录的证据与处置不等于测试执行结果或稳定性批准。',
+    lifecycleUnavailable: '生命周期报告不可用，请检查验证问题。',
+    draftAtVersion: '在所选版本仍为草案。',
+    unreviewed: '未评审草案',
+    noDisposition: '尚无已记录处置',
+    recordedDispositions: '所选版本已记录处置的草案',
+    legacyActivation: '生效历史未确认',
+    unclassified: '未分类',
+    recordedGaps: '已记录缺口',
+    noRationale: '尚未记录生命周期理由。',
+    blockKinds: { activation: '稳定生效', criterion: '准则', implementation: '实现' },
+    dispositions: { promote: '提议晋级', 'remain-draft': '保持草案', 'not-applicable': '不适用' },
     noEntity: '未选择实体。',
     statement: '契约陈述',
     adapterProfile: 'Adapter Profile',
@@ -277,6 +318,8 @@ type SpecWorkspaceDataset = {
   versions: string[];
   latestVersion: string;
   entities: SpecEntity[];
+  catalogValid: boolean;
+  lifecyclePlans: Record<string, SpecLifecyclePlan | null | undefined>;
   issues: Array<{ filePath?: string; message: string }>;
 };
 
@@ -353,6 +396,10 @@ function App() {
   const snapshot = getSpecSnapshot(workspace, toVersion);
   const diff = diffSpecSnapshots(getSpecSnapshot(workspace, fromVersion), snapshot);
   const graph = buildSpecGraph(snapshot);
+  const lifecycleReport =
+    dataset.catalogValid !== true || dataset.lifecyclePlans[toVersion] === null
+      ? null
+      : getSpecLifecycleReport(workspace, toVersion, dataset.lifecyclePlans[toVersion]);
   const selectedEntity =
     snapshot.entities.find((entity) => entity.id === selectedId) ?? snapshot.entities[0] ?? null;
 
@@ -362,6 +409,7 @@ function App() {
       snapshot={snapshot}
       diff={diff}
       graph={graph}
+      lifecycleReport={lifecycleReport}
       selectedEntity={selectedEntity}
       selectedId={selectedEntity?.id ?? null}
       locale={locale}
@@ -381,6 +429,7 @@ function WorkspaceView(props: {
   snapshot: SpecSnapshot;
   diff: SpecSnapshotDiff;
   graph: SpecGraph;
+  lifecycleReport: SpecLifecycleReport | null;
   selectedEntity: SpecEntity | null;
   selectedId: string | null;
   locale: Locale;
@@ -576,6 +625,13 @@ function WorkspaceView(props: {
         </header>
 
         <section className="main-grid">
+          <LifecyclePanel
+            report={props.lifecycleReport}
+            selectedId={props.selectedId}
+            locale={props.locale}
+            t={props.t}
+            onSelectEntity={props.onSelectEntity}
+          />
           <EntityInspector
             entity={props.selectedEntity}
             locale={props.locale}
@@ -610,6 +666,136 @@ function SummaryMetric(props: { label: string; value: number; tone?: 'ok' | 'war
       <span>{props.label}</span>
       <strong>{props.value}</strong>
     </div>
+  );
+}
+
+function BlockTargets(props: { targets: string[]; t: UiText; onSelectEntity(id: string): void }) {
+  if (!props.targets.length) return null;
+  return (
+    <ul className="block-targets">
+      {props.targets.map((target, index) => {
+        const block = parseSpecBlockTarget(target);
+        return (
+          <li key={`${target}:${index}`}>
+            {block ? (
+              <>
+                <span>{props.t.blockKinds[block.kind]}: </span>
+                <button type="button" onClick={() => props.onSelectEntity(block.entityId)}>
+                  {block.entityId}
+                </button>
+                {block.kind !== 'activation' ? <code>#{block.targetId}</code> : null}
+              </>
+            ) : (
+              <span>
+                {props.t.unclassified}: {target}
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function LifecyclePanel(props: {
+  report: SpecLifecycleReport | null;
+  selectedId: string | null;
+  locale: Locale;
+  t: UiText;
+  onSelectEntity(id: string): void;
+}) {
+  const report = props.report;
+  const selected = report?.rows.find((row) => row.entityId === props.selectedId);
+  return (
+    <section className="panel work-panel lifecycle-panel" aria-label={props.t.lifecycleReview}>
+      <div className="panel-heading">
+        <h2>{props.t.lifecycleReview}</h2>
+      </div>
+      {!report ? (
+        <p className="empty">{props.t.lifecycleUnavailable}</p>
+      ) : (
+        <>
+          <p className="summary">
+            {report.version} · {props.t.lifecycleBasis}
+          </p>
+          <dl className="entity-meta">
+            <div>
+              <dt>{props.t.recordedDispositions}</dt>
+              <dd>
+                {report.summary.reviewedDrafts} / {report.summary.drafts}
+              </dd>
+            </div>
+            <div>
+              <dt>{props.t.unreviewed}</dt>
+              <dd>{report.unreviewedEntities.length}</dd>
+            </div>
+            <div>
+              <dt>{props.t.legacyActivation}</dt>
+              <dd>{report.summary.legacyActive}</dd>
+            </div>
+            <div>
+              <dt>{props.t.unclassified}</dt>
+              <dd>{report.summary.unclassifiedBlocks}</dd>
+            </div>
+          </dl>
+          {selected ? (
+            <article
+              className="issue-row lifecycle-selection"
+              data-lifecycle-entity={selected.entityId}
+            >
+              <strong>
+                {selected.entityId} · {selected.status}
+              </strong>
+              {selected.draftAtVersion && selected.status !== 'draft' ? (
+                <p>{props.t.draftAtVersion}</p>
+              ) : null}
+              <h3>{props.t.lifecycleRationale}</h3>
+              <p>
+                {selected.rationale
+                  ? renderLocalizedText(selected.rationale, props.locale)
+                  : props.t.noRationale}
+              </p>
+              <p>
+                {selected.disposition
+                  ? props.t.dispositions[selected.disposition.disposition]
+                  : selected.draftAtVersion
+                    ? props.t.unreviewed
+                    : props.t.noDisposition}
+              </p>
+              {selected.disposition ? <p>{selected.disposition.rationale}</p> : null}
+              {selected.activationProvenanceMissing ? <p>{props.t.legacyActivation}</p> : null}
+              {selected.activationBlockers.map((block) => (
+                <p key={`${block.sourceEntityId}:${block.questionId}:${block.target}`}>
+                  {props.t.blocks}:{' '}
+                  <button type="button" onClick={() => props.onSelectEntity(block.sourceEntityId)}>
+                    {block.questionId}
+                  </button>
+                </p>
+              ))}
+              {selected.gaps.length ? (
+                <details>
+                  <summary>
+                    {props.t.recordedGaps}: {selected.gaps.length}
+                  </summary>
+                  <ul>
+                    {selected.gaps.map((gap, index) => (
+                      <li key={`${gap.code}:${index}`}>{gap.message}</li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
+            </article>
+          ) : null}
+          {report.issues.length ? (
+            <ul>
+              {report.issues.map((issue, index) => (
+                <li key={index}>{issue.message}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
+      )}
+    </section>
   );
 }
 
@@ -719,11 +905,11 @@ function EntityInspector(props: {
                     {renderLocalizedText(question.context, props.locale)}
                   </p>
                 ) : null}
-                {question.blocks.length > 0 ? (
-                  <p className="blocked-items">
-                    {props.t.blocks}: {question.blocks.join(', ')}
-                  </p>
-                ) : null}
+                <BlockTargets
+                  targets={question.blocks}
+                  t={props.t}
+                  onSelectEntity={props.onSelectEntity}
+                />
               </article>
             ))}
           </div>
@@ -1344,11 +1530,11 @@ function OpenQuestionsPanel(props: {
               </button>
               <p className="issue-file">{question.id}</p>
               <p>{renderLocalizedText(question.question, props.locale)}</p>
-              {question.blocks.length > 0 ? (
-                <p className="blocked-items">
-                  {props.t.blocks}: {question.blocks.join(', ')}
-                </p>
-              ) : null}
+              <BlockTargets
+                targets={question.blocks}
+                t={props.t}
+                onSelectEntity={props.onSelectEntity}
+              />
             </article>
           ))}
         </div>

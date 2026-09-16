@@ -16,6 +16,18 @@ let succeeded = false;
 const steps = [
   ['Release identity', process.execPath, ['scripts/release/check-version-governance.mjs']],
   ['Release assets', process.execPath, ['scripts/release/check-release-assets.mjs', '--check']],
+  [
+    'Ordinary entity lifecycle review inventory',
+    'corepack',
+    [
+      packageManager,
+      '-s',
+      'release:lifecycle',
+      '--',
+      '--out',
+      join(artifactDir, 'lifecycle-review.json'),
+    ],
+  ],
   ['Prototype catalog', process.execPath, ['scripts/spec/check-prototype-catalog.mjs']],
   ['Workspace and docs types', 'corepack', [packageManager, '-s', 'check:types']],
   ['Release script tests', 'corepack', [packageManager, '-s', 'test:release']],

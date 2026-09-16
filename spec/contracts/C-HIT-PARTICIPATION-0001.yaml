@@ -1,0 +1,38 @@
+id: C-HIT-PARTICIPATION-0001
+type: contract
+title: Hit Participation declares region eligibility independently from interaction policy
+status: draft
+since: 0.3.0-alpha.0
+summary: Hit Participation declares region eligibility independently from interaction policy.
+criteria:
+  - id: C-HIT-PARTICIPATION-0001-A
+    text:
+      en: 'Hit Participation describes region hit eligibility before Event consumption. participating, disabled and passthrough remain distinct semantic modes even when a host shares their physical projection. It does not define event delivery, Boundary outside classification, dismiss, modal, focus or blocking policy.'
+      zh-CN: 'Hit Participation 描述 Event 消费之前的 region 命中资格。participating、disabled、passthrough 保持不同语义，即使宿主投射机制相同。不定义事件投递、Boundary outside 分类、dismiss、modal、focus 或 blocking policy。'
+  - id: C-HIT-PARTICIPATION-0001-B
+    text:
+      en: 'The privileged hook reuses one handle and setup-only configuration. The existing optional caller patch remains a migration compatibility surface; it is not a new general parameterized asHook model. Region declarations can be added and released during host binding.'
+      zh-CN: '特权 hook 复用同一 handle，配置仅限 setup。既有可选 caller patch 保留为迁移兼容面，不构成新的通用参数化 asHook 模型。region 声明可在宿主绑定期间添加与释放。'
+  - id: C-HIT-PARTICIPATION-0001-C
+    text:
+      en: 'Distinct owners may share a host target only with identical effective modes. A conflicting replacement must be diagnosed and rejected before changing any accepted claim or host projection, including when removing a region would expose a conflicting earlier declaration. disabled and passthrough are conflicting modes.'
+      zh-CN: '不同 owner 仅能以相同有效 mode 共享宿主 target。冲突替换必须在修改任何已接纳 claim 或宿主投射之前诊断并拒绝，包括删除 region 后暴露冲突的较早声明。disabled 与 passthrough 属于冲突 mode。'
+  - id: C-HIT-PARTICIPATION-0001-D
+    text:
+      en: 'Releasing one shared owner must preserve remaining owners. The final owner release restores the original host projection. Detached views suspend their projected claims; repeatable mount restores retained logical declarations, and terminal disposal releases claims and declarations.'
+      zh-CN: '释放一个共享 owner 必须保留其他 owner；最后一个 owner 释放时恢复原宿主投射。detached view 暂停其投射 claim；重复 mount 恢复保留的逻辑声明，terminal disposal 释放 claim 与声明。'
+dependsOn:
+  contracts: [C-BOUNDARY-0001, C-LIFECYCLE-0006, C-LIFECYCLE-0007]
+relates:
+  decisions: [D-AS-HOOK-PRIVILEGED-NO-ARG-MIGRATION-0001]
+verifies:
+  tests: [T-HIT-PARTICIPATION-0001]
+sources:
+  - path: packages/core/src/hit-participation.ts
+  - path: packages/modules/hit-participation/src/impl.ts
+  - path: packages/modules/hit-participation/src/web/host-bridge.ts
+  - path: internal/contracts/hit-participation/hit-participation.v0.md
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged Hit Participation and approved shared-target ownership with executable evidence.

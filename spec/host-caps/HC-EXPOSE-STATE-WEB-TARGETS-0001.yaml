@@ -1,0 +1,35 @@
+id: HC-EXPOSE-STATE-WEB-TARGETS-0001
+type: host-cap
+title: Host supplies Web state projection targets
+status: draft
+since: 0.3.0-alpha.0
+summary: A canonical DOM boundary and optional presentation mirrors provide the current Web state selector context.
+statement:
+  en: HOST_ELEMENT_CAP and optional EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP realize one target-resolution responsibility. The Module performs mapping and writes; the Adapter supplies its actual current boundary and any distinct surface requiring selector context. This is a Web-specific target contract, not a portable DOM abstraction.
+  zh-CN: HOST_ELEMENT_CAP 与可选 EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP 实现同一 target resolution 职责。Module 执行映射和写入；Adapter 提供实际当前 boundary 及需要 selector context 的独立 surface。这是 Web-specific target contract，不是 portable DOM abstraction。
+criteria:
+  - id: HC-EXPOSE-STATE-WEB-TARGETS-0001-A
+    text:
+      en: The canonical host target accepts DOM data attributes and inline CSS custom properties for the current owner boundary; it must not substitute an unrelated owner or expose the target to prototype authors.
+      zh-CN: canonical host target 在当前 owner boundary 接受 DOM data attribute 与 inline CSS custom property；不得替换为无关 owner，也不向 prototype author 暴露 target。
+  - id: HC-EXPOSE-STATE-WEB-TARGETS-0001-B
+    text:
+      en: Where boundary and presentation surface differ and generated styles need State selector context, the Adapter supplies the current surface as a mirror while retaining canonical identity and State exposure on the boundary. Collapsed targets require no extra mirror.
+      zh-CN: boundary 与 presentation surface 分离且生成样式需要 State selector context 时，Adapter 提供当前 surface 作为 mirror，同时将 canonical identity 与 State exposure 保留在 boundary。重合 target 无需额外 mirror。
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+    - C-LIFECYCLE-0006
+verifies:
+  tests:
+    - T-EXPOSE-STATE-WEB-0001
+sources:
+  - path: packages/modules/expose-state-web/src/caps.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/vue2/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged canonical and mirror Web targets as one projection responsibility.

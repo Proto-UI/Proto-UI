@@ -4,6 +4,19 @@ title: Positioning module owns anchored host-session lifetime
 status: draft
 since: 0.2.0-rc.0
 summary: The Positioning module converts an anchor and floating declaration into one host positioning lease, retains only categorical resolved placement, and revokes the lease with view or prototype lifetime.
+criteria:
+  - id: M-POSITIONING-0001-A
+    text:
+      en: 'The instance-scoped Module exposes one AnchoredPositionHandle through facade and port. It retains a connection and categorical frozen snapshot; measurement, coordinate projection, collision and observation belong to the host. Overlay determines when its view is active and calls connect/disconnect.'
+      zh-CN: 'instance-scoped Module 通过 facade 与 port 提供同一 AnchoredPositionHandle，保留 connection 和冻结的分类 snapshot；测量、坐标投射、碰撞与 observation 属于 host。Overlay 判断自身 view active 并调用 connect/disconnect。'
+  - id: M-POSITIONING-0001-B
+    text:
+      en: 'A connection without host capability is retained without acquiring a lease. Capability changes dispose the old lease and attach through the current host when available. Same-target connect and config update reuse the lease; target replacement disposes and reattaches.'
+      zh-CN: '缺失 host capability 时保留 connection 但不获取 lease。能力变化释放旧 lease，并在当前 host 可用时重新 attach。同目标 connect 和配置 update 复用 lease；目标替换释放并重新 attach。'
+  - id: M-POSITIONING-0001-C
+    text:
+      en: 'Disconnect and terminal prototype unmount dispose the lease and clear connection and snapshot. requestUpdate delegates only to a live lease. This Module does not own open state, Portal, focus, or perceptual transition policy.'
+      zh-CN: 'disconnect 和 terminal prototype unmount 释放 lease 并清空 connection 与 snapshot。requestUpdate 仅委托当前 lease。本 Module 不拥有 open state、Portal、focus 或感知 transition policy。'
 satisfies:
   contracts:
     - C-ANCHORED-POSITIONING-0001
@@ -19,6 +32,9 @@ sources:
   - path: packages/modules/positioning/src/caps.ts
   - path: packages/modules/positioning/src/impl.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Expanded connection, degraded-host, categorical snapshot and consumer-owned view boundaries with executable evidence.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged the adapter-independent positioning session and host-capability boundary.

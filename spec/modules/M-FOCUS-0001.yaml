@@ -1,0 +1,73 @@
+id: M-FOCUS-0001
+type: module
+title: Focus coordinates observed facts, target requests, entry, roving and scopes
+status: draft
+since: 0.3.0-alpha.0
+summary: Focus coordinates observed facts, target requests, entry, roving and scopes.
+criteria:
+  - id: M-FOCUS-0001-A
+    text:
+      en: 'The instance-owned Focus Module composes Event and State and uses a shared FocusCenter for logical ownership and policy arbitration. Four privileged no-argument setup hooks return singleton focusable, entry, roving and scope handles; configure remains setup-only.'
+      zh-CN: 'instance-owned Focus Module 组合 Event、State，并以共享 FocusCenter 进行 logical ownership 与 policy 仲裁。四个特权无参数 setup hook 返回单例 focusable、entry、roving、scope handle；configure 仅限 setup。'
+  - id: M-FOCUS-0001-B
+    text:
+      en: 'Focus owns observed facts and separates requests from facts. Disabled targets reject requests; a successful new owner clears stale facts even without blur. Requests awaiting a host target retain the latest intent, revalidate policy on readiness and do not fabricate success after host rejection.'
+      zh-CN: 'Focus 拥有 observed facts 并区分 request 与 fact。disabled target 拒绝请求；新 owner 成功后即使缺失 blur 也清理过期 facts。等待 host target 的请求保留最新 intent，在 readiness 时重验 policy，host 拒绝时不得伪造成功。'
+  - id: M-FOCUS-0001-C
+    text:
+      en: 'Logical ancestry determines nearest roving ownership and scope membership. Roving owns arrow/Home/End movement and default-action cancellation; navParticipation none excludes sequential Tab participation but preserves eligible programmatic targets. Collection and A11y are not required Module dependencies.'
+      zh-CN: 'logical ancestry 决定最近 roving owner 与 scope membership。Roving 拥有方向键/Home/End 移动与 default-action cancellation；navParticipation none 仅退出顺序 Tab 参与，保留合格程序化 target。Collection、A11y 不是必需 Module 依赖。'
+  - id: M-FOCUS-0001-D
+    text:
+      en: 'Entry delegates target resolution to the host without declaring target facts or roving membership. Scope activation, outside-request gating, previous-owner restore and active-scope Tab trap are separate from entry-region and roving roles.'
+      zh-CN: 'Entry 委派宿主解析 target，不声明 target facts 或 roving membership。Scope activation、外部请求拦截、previous-owner restore、active-scope Tab trap 与 entry-region、roving roles 分离。'
+  - id: M-FOCUS-0001-E
+    text:
+      en: 'Repeatable view detachment retains pending logical focus and deferred roving entry while removing the live view participation. New readiness retries the current intent. Terminal disposal removes the FocusCenter entry, clears pending requests and releases readiness subscription.'
+      zh-CN: '重复 view detach 保留 pending logical focus 与 deferred roving entry，同时移除 live view participation。新 readiness 重试当前 intent。terminal disposal 移除 FocusCenter entry、清除 pending request 并释放 readiness subscription。'
+satisfies:
+  contracts:
+    [
+      C-FOCUS-0001,
+      C-FOCUS-0002,
+      C-AS-FOCUSABLE-0001,
+      C-AS-FOCUS-ENTRY-0001,
+      C-AS-FOCUS-ROVING-0001,
+      C-AS-FOCUS-SCOPE-0001,
+      C-AS-FOCUS-SCOPE-0002,
+    ]
+dependsOn:
+  modules: [M-EVENT-0001, M-STATE-0001]
+  contracts: [C-LIFECYCLE-0006, C-LIFECYCLE-0007]
+requires:
+  hostCaps: [HC-FOCUS-TARGET-0001, HC-FOCUS-ENTRY-0001, HC-DEFAULT-ACTION-0001]
+relates:
+  decisions:
+    [
+      D-FOCUS-ENTRY-DELEGATION-0001,
+      D-FOCUS-ROVING-NAVIGATION-OWNERSHIP-0001,
+      D-COLLECTION-FOCUS-ROVING-RELATIONSHIP-0001,
+      D-TRIGGER-GROUP-SURFACE-0001,
+    ]
+verifies:
+  tests: [T-FOCUS-0001, T-FOCUS-ROVING-0001, T-FOCUS-SCOPE-0001, T-FOCUS-0002]
+sources:
+  - path: packages/modules/focus/src/create.ts
+  - path: packages/modules/focus/src/center.ts
+  - path: packages/modules/focus/src/caps.ts
+  - path: packages/hooks/src/as-focusable.ts
+  - path: packages/hooks/src/as-focus-entry.ts
+  - path: packages/hooks/src/as-focus-roving.ts
+  - path: packages/hooks/src/as-focus-scope.ts
+openQuestions:
+  - id: M-FOCUS-0001-Q-PORTABILITY
+    question:
+      en: How should non-Web ordering and multiple host focus domains be represented?
+      zh-CN: 非 Web order 与多个宿主 focus domain 应如何表达？
+    context:
+      en: Current center ordering uses host HTMLElement document order and the implementation exports one shared center. This bounded Web catalog does not admit an independent non-Web ordering protocol or cross-document focus-domain policy.
+      zh-CN: 当前 center order 使用宿主 HTMLElement document order，且实现导出一个共享 center。本有界 Web 编目不接纳独立非 Web order protocol 或跨 document focus-domain policy。
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged bounded Focus ownership and executable evidence.

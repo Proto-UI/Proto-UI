@@ -1,0 +1,30 @@
+id: HC-OVERLAY-PORTAL-0001
+type: host-cap
+title: Host projects Overlay into a global view location
+status: draft
+lifecycleRationale: >-
+  Retained as draft pending admission review of renderer-owned projection and provider-replacement cleanup across the declared Web profiles. This catalog does not certify arbitrary host portal realizations.
+
+
+since: 0.3.0-alpha.0
+summary: Portal projection follows renderer ownership and is revoked through its acquiring provider.
+criteria:
+  - id: HC-OVERLAY-PORTAL-0001-A
+    text:
+      en: A portal bridge projects a mounted Overlay target into a host-global location and revokes that projection on view detach or provider replacement. Renderer-owned targets use renderer projection primitives; the logical instance and ancestry remain intact.
+      zh-CN: Portal bridge 将 mounted Overlay target 投射到宿主全局位置，并在 view detach 或 provider 替换时撤销。renderer-owned target 使用 renderer projection primitive；logical instance 与 ancestry 保持有效。
+relates:
+  contracts:
+    - C-AS-OVERLAY-0001
+verifies:
+  tests:
+    - T-OVERLAY-CATALOG-0001
+sources:
+  - path: packages/modules/overlay/src/caps.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the bounded Overlay host resource and cleanup responsibility.
+tags:
+  - overlay
+  - host-capability

@@ -27,23 +27,18 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private recorder = new FeedbackStyleRecorder();
         private dirty = false;
         private flushRequested = false;
+        private disposed = false;
+        private viewEpoch = 0;
 
         /** setup-only */
         useStyle(handles: StyleHandle[]): () => void {
-          // 用 sys 更精确；没 sys 时 fallback protoPhase
-          const op = 'def.feedback.style.use';
-          this.sys?.ensureSetup(op);
-          if (!this.sys && this.protoPhase !== 'setup') {
-            throw illegalPhase(op, this.protoPhase, {
-              prototypeName: init.prototypeName,
-              hint: `Use 'run' inside runtime callbacks, not 'def'.`,
-            });
-          }
+          this.ensureSetup('def.feedback.style.use');
 
           const unUse = this.recorder.use(...handles);
           this.dirty = true;
 
           return () => {
+            this.ensureSetup('def.feedback.style.unUse');
             unUse();
             this.dirty = true;
           };
@@ -52,6 +47,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         /** internal runtime base style contribution, used by rule execution */
         useStyleRuntime(handles: StyleHandle[]): FeedbackRuntimeStyleDisposer {
           const op = 'rule.feedback.style.use';
+          this.ensureNotDisposed(op);
           if (this.protoPhase === 'setup') {
             throw illegalPhase(op, this.protoPhase, {
               prototypeName: init.prototypeName,
@@ -71,6 +67,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           handles: StyleHandle[]
         ): FeedbackRuntimeStyleDisposer | null {
           const op = 'rule.feedback.style.replace';
+          this.ensureNotDisposed(op);
           if (this.protoPhase === 'setup') {
             throw illegalPhase(op, this.protoPhase, {
               prototypeName: init.prototypeName,
@@ -114,11 +111,13 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         /** internal: record tokens without v0 validation (setup or runtime) */
         useStyleUnsafe(handles: StyleHandle[]): () => void {
+          this.ensureNotDisposed('feedback.style.useUnsafe');
           const unUse = this.recorder.useUnsafe(...handles);
           this.dirty = true;
           this.flushIfPossible();
 
           return () => {
+            if (this.disposed) return;
             unUse();
             this.dirty = true;
             this.flushIfPossible();
@@ -138,6 +137,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         override onMountPhase(phase: MountPhase, epoch: number): void {
           super.onMountPhase(phase, epoch);
+          this.viewEpoch = epoch;
           if (phase === 'mounting') {
             // A fresh view epoch owns a fresh EffectsPort. Replay the retained
             // instance style before the host commit so the first materialized
@@ -152,11 +152,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         flushIfPossible(): void {
           if (this.protoPhase === 'setup') return;
-          if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
+          if (!this.canProject()) return;
           if (!this.dirty) return;
 
           if (!this.caps.has(EFFECTS_CAP)) {
-            this.defer(() => this.flushIfPossible());
+            // onCapsEpoch retries the retained logical state.
             return;
           }
 
@@ -173,9 +173,12 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         /** runtime: apply merged style directly (rule / adapter) */
         applyMergedStyle(handle: StyleHandle): void {
-          if (this.protoPhase === 'setup') return;
+          if (this.protoPhase === 'setup' || !this.canProject()) return;
           if (!this.caps.has(EFFECTS_CAP)) {
-            this.defer(() => this.applyMergedStyle(handle));
+            const epoch = this.viewEpoch;
+            this.defer(() => {
+              if (!this.disposed && epoch === this.viewEpoch) this.applyMergedStyle(handle);
+            });
             return;
           }
           const effects = this.caps.get(EFFECTS_CAP);
@@ -186,8 +189,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         }
 
         afterRenderCommit(): void {
-          // 这里是否要“无条件 push style”取决于你的 contract
-          // 先按你原意：commit 后确保 host 拿到最新 style
+          if (!this.canProject()) return;
+          // A structural commit may replace the current materialized root.
           if (!this.caps.has(EFFECTS_CAP)) return;
           const effects = this.caps.get(EFFECTS_CAP);
           const merged = this.exportMerged();
@@ -197,6 +200,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         }
 
         private replayStyleForViewEpoch(): void {
+          if (!this.canProject()) return;
           // Runtime ProtoPhase intentionally remains `setup` until the first
           // commit completes. Mounting is nevertheless after prototype setup,
           // so replay must not use flushIfPossible's setup-phase guard.
@@ -210,13 +214,47 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         /** optional: runtime/adapter can call this after flush tick */
         onEffectsFlushed(): void {
           this.flushRequested = false;
+          if (!this.canProject()) return;
           if (this.dirty && this.caps.has(EFFECTS_CAP)) {
             this.caps.get(EFFECTS_CAP).requestFlush();
             this.flushRequested = true;
           }
         }
 
+        dispose(): void {
+          if (this.disposed) return;
+          this.disposed = true;
+          this.recorder = new FeedbackStyleRecorder();
+          this.dirty = false;
+          this.flushRequested = false;
+          // Discard deferred view work while its entry guards are terminal.
+          this.flushPending();
+        }
+
+        private canProject(): boolean {
+          return (
+            !this.disposed && (this.mountPhase === 'mounting' || this.mountPhase === 'mounted')
+          );
+        }
+
+        private ensureNotDisposed(op: string): void {
+          if (this.disposed) throw new Error(`[feedback] disposed. op=${op}`);
+          this.sys?.ensureNotDisposed(op);
+        }
+
+        private ensureSetup(op: string): void {
+          this.ensureNotDisposed(op);
+          this.sys?.ensureSetup(op);
+          if (!this.sys && this.protoPhase !== 'setup') {
+            throw illegalPhase(op, this.protoPhase, {
+              prototypeName: init.prototypeName,
+              hint: `Use 'run' inside runtime callbacks, not 'def'.`,
+            });
+          }
+        }
+
         private ensureRuntime(op: string): void {
+          this.ensureNotDisposed(op);
           this.sys?.ensureRuntime(op);
           if (!this.sys && this.protoPhase === 'setup') {
             throw illegalPhase(op, this.protoPhase, {
@@ -228,6 +266,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         private createRuntimeStyleDisposer(unUse: () => void): FeedbackRuntimeStyleDisposer {
           return (options = {}) => {
+            if (this.disposed) return;
             unUse();
             this.dirty = true;
             if (options.flush !== false) this.flushIfPossible();
@@ -260,6 +299,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           useStyleUnsafe: (...handles) => impl.useStyleUnsafe(handles),
         } satisfies FeedbackPort,
         hooks: {
+          dispose: () => impl.dispose(),
           onMountPhase: (p: MountPhase, epoch: number) => impl.onMountPhase(p, epoch),
           onProtoPhase: (p: ProtoPhase) => impl.onProtoPhase(p),
           afterRenderCommit: () => impl.afterRenderCommit(),

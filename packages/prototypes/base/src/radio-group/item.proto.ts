@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asCollectionItem, asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asCollectionItem, asFocusable, asTrigger } from '@proto.ui/hooks';
 import {
   createRadioGroupItemId,
   notifyRadioGroupItemsChanged,
@@ -17,6 +17,7 @@ import type {
 } from './types';
 
 function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemExposes>): void {
+  const accessible = asAccessible();
   asTrigger();
   const focusable = asFocusable<RadioGroupItemProps>();
   focusable.configure({ disabled: false });
@@ -54,11 +55,11 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
   def.expose.state('pressed', pressed);
   def.expose.event('select', { payload: 'json' });
 
-  def.a11y.role('radio');
-  def.a11y.nameFromContent();
-  def.a11y.state('checked', checked);
-  def.a11y.state('disabled', disabled);
-  def.a11y.action('activate', { event: 'select' });
+  accessible.role('radio');
+  accessible.nameFromContent();
+  accessible.state('checked', checked);
+  accessible.state('disabled', disabled);
+  accessible.action('activate', { event: 'select' });
 
   def.context.provide(RADIO_GROUP_ITEM_CONTEXT, { checked: false, disabled: false });
   let itemContextSnapshot = { checked: false, disabled: false };

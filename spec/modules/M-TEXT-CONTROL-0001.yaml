@@ -31,8 +31,29 @@ revisions:
       Made the module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, and required CR/LF canonicalization at the module boundary. Single-line mode projects the shared shape, while multiline mode also projects rows and wrap.
 
 
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Expanded module ownership, current-lease delivery and setup-only cancellation criteria.
+
 tags:
   - text-control
   - textarea
   - module
   - editing
+criteria:
+  - id: M-TEXT-CONTROL-0001-A
+    text:
+      en: A static plain-text line-mode declaration permits one setup control. The first sync fixes value ownership; Module canonicalizes line endings and reconciles controlled proposals without overwriting active composition. Selection, physical editing engine and native target belong to the host.
+      zh-CN: 静态 plain-text line-mode declaration 允许一个 setup control；首次 sync 固定 value ownership。Module 归一化换行并协调 controlled proposal，避免覆盖 active composition。selection、物理 editing engine 与 native target 归 host。
+  - id: M-TEXT-CONTROL-0001-B
+    text:
+      en: Declaration and current value survive missing or replaced hosts and view detach. Only the current mounted lease may deliver events or restore values; stale callbacks cannot update state. Detach/disposal revoke the lease.
+      zh-CN: 缺失或替换 host、view detach 时保留 declaration 与当前值。仅当前 mounted lease 可以派发事件或恢复值，stale callback 不得改变 state；detach/disposal 撤销 lease。
+  - id: M-TEXT-CONTROL-0001-C
+    text:
+      en: Listener registration and its returned cancellation are setup-only under C-CORE-SYNTAX-0007; sync requires runtime callback scope. The internal callback bridge supplies RunHandle without exposing native events.
+      zh-CN: listener 注册及其返回的取消函数遵循 C-CORE-SYNTAX-0007，仅可 setup 使用；sync 要求 runtime callback scope。内部 callback bridge 提供 RunHandle，不暴露 native event。
+dependsOn:
+  contracts:
+    - id: C-CORE-SYNTAX-0007
+      since: 0.3.0-alpha.0

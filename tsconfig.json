@@ -10,6 +10,8 @@
       "@proto.ui/spec-schema/*": ["packages/spec/schema/src/*"],
       "@proto.ui/module-*": ["packages/modules/*/src"],
       "@proto.ui/adapter-*": ["packages/adapters/*/src"],
+      "@proto.ui/compositions-chatui": ["packages/compositions/chatui/src/index.ts"],
+      "@proto.ui/compositions-chatui/*": ["packages/compositions/chatui/src/*/index.ts"],
       "@proto.ui/prototypes-base": ["packages/prototypes/base/src/index.ts"],
       "@proto.ui/prototypes-base/*": ["packages/prototypes/base/src/*/index.ts"],
       "@proto.ui/prototypes-shadcn": ["packages/prototypes/shadcn/src/index.ts"],

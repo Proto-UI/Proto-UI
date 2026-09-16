@@ -1,0 +1,105 @@
+id: T-FOCUS-0002
+type: test
+title: Four Adapter Focus entry and logical roving translation
+status: draft
+since: 0.3.0-alpha.0
+summary: Real framework evidence distinguishes entry delegation from target facts and sequential participation from programmatic focus.
+cases:
+  - id: T-FOCUS-0002-CASE-UNUSABLE-NATIVE
+    title: Hidden inputs and unassociated areas cannot suppress entry fallback
+    covers: [HC-FOCUS-ENTRY-0001-A, HC-FOCUS-ENTRY-0001-B]
+    expectation: hidden-input-with-or-without-tabindex-and-invalid-area-skip-to-self-absence-or-next-usable-descendant
+  - id: T-FOCUS-0002-CASE-NATIVE-ENTRY
+    title: Native summary entry wins without an explicit tabindex or a container fallback stop
+    covers: [HC-FOCUS-ENTRY-0001-A, HC-FOCUS-ENTRY-0001-B]
+    expectation: first-details-summary-delegation-with-self-and-none-fallback-and-negative-tabindex-exclusion
+  - id: T-FOCUS-0002-CASE-ENTRY
+    title: Descendant-first entry avoids an extra container Tab target and supports disabled/self fallback
+    covers:
+      [
+        C-AS-FOCUS-ENTRY-0001-D,
+        C-AS-FOCUS-ENTRY-0001-E,
+        C-AS-FOCUS-ENTRY-0001-G,
+        M-FOCUS-0001-D,
+        HC-FOCUS-ENTRY-0001-A,
+        HC-FOCUS-ENTRY-0001-B,
+      ]
+    expectation: descendant-focus-no-extra-container-tab-target-disabled-entry-self-fallback
+  - id: T-FOCUS-0002-CASE-ROVING
+    title: Logical roving moves to eligible targets outside Tab order and clears stale facts across fresh owners
+    covers:
+      [
+        M-FOCUS-0001-B,
+        M-FOCUS-0001-C,
+        HC-FOCUS-TARGET-0001-A,
+        HC-FOCUS-TARGET-0001-B,
+        A-REACT-18-19-0001-FOCUS,
+        A-VUE-3-0001-FOCUS,
+        A-VUE-2-0001-FOCUS,
+        A-WEB-COMPONENT-0001-FOCUS,
+      ]
+    expectation: logical-roving-programmatic-focus-observed-owner-replacement-disabled-rejection
+implementations:
+  - id: react-focus-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FOCUS-0002-CASE-ENTRY,
+        T-FOCUS-0002-CASE-NATIVE-ENTRY,
+        T-FOCUS-0002-CASE-UNUSABLE-NATIVE,
+        T-FOCUS-0002-CASE-ROVING,
+      ]
+  - id: vue-focus-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FOCUS-0002-CASE-ENTRY,
+        T-FOCUS-0002-CASE-NATIVE-ENTRY,
+        T-FOCUS-0002-CASE-UNUSABLE-NATIVE,
+        T-FOCUS-0002-CASE-ROVING,
+      ]
+  - id: vue2-focus-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FOCUS-0002-CASE-ENTRY,
+        T-FOCUS-0002-CASE-NATIVE-ENTRY,
+        T-FOCUS-0002-CASE-UNUSABLE-NATIVE,
+        T-FOCUS-0002-CASE-ROVING,
+      ]
+  - id: web-component-focus-catalog
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FOCUS-0002-CASE-ENTRY,
+        T-FOCUS-0002-CASE-NATIVE-ENTRY,
+        T-FOCUS-0002-CASE-UNUSABLE-NATIVE,
+        T-FOCUS-0002-CASE-ROVING,
+      ]
+verifies:
+  contracts: [C-AS-FOCUS-ENTRY-0001, C-FOCUS-0002, C-AS-FOCUSABLE-0001]
+  modules: [M-FOCUS-0001]
+  hostCaps: [HC-FOCUS-TARGET-0001, HC-FOCUS-ENTRY-0001]
+  adapters: [A-REACT-18-19-0001, A-VUE-3-0001, A-VUE-2-0001, A-WEB-COMPONENT-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Added four-Adapter hidden-input and invalid-area fallback regressions; corrected the area positive fixture to use a named map and associated image.
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Added four-Adapter native summary entry regressions for both fallback policies; valid descendants must not create a fallback container tab stop.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added real Adapter entry and logical roving tests; exposed and repaired missing entry capabilities in React, Vue and Vue2.

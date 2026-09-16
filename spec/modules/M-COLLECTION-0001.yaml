@@ -3,7 +3,7 @@ type: module
 title: Collection module projects explicit ordered item sets
 status: draft
 since: 0.1.0
-summary: The collection module provides the internal port backing asCollection and asCollectionItem with ordered item snapshots, item position facts, metadata reads, and anatomy-order integration.
+summary: Collection projects explicit Anatomy item roles into ordered metadata snapshots; privileged asHooks provide State, Expose and view-lifecycle synchronization.
 satisfies:
   contracts:
     - C-AS-COLLECTION-0001
@@ -14,6 +14,8 @@ requires:
 verifies:
   tests:
     - T-COLLECTION-0001
+    - id: T-COLLECTION-0002
+      since: 0.3.0-alpha.0
 sources:
   - path: packages/modules/collection/src/create.ts
   - path: packages/modules/collection/src/types.ts
@@ -23,6 +25,61 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Drafted the collection module entity for no-arg privileged collection hooks.
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Added bounded module/asHook ownership, phase integrity, snapshot and lifecycle criteria with four Adapter evidence.
 tags:
   - collection
   - module
+statement:
+  en: This bounded draft enriches the existing Module identity rather than adding a new channel or host abstraction. The Module provides configuration and structural reads; asCollection/asCollectionItem own their public returned handles and compose already governed modules.
+  zh-CN: 本有界 draft 补全既有 Module 身份，不增加信息通路或宿主抽象。Module 提供配置和结构读取；asCollection/asCollectionItem 拥有各自公开返回 handle，并组合已有治理的 Module。
+criteria:
+  - id: M-COLLECTION-0001-A
+    text:
+      en: Collection owns provider/item configuration and Anatomy-backed reads. The standard Runtime installs it as an instance-owned module depending on Anatomy; the privileged asHooks compose State, Expose and lifecycle synchronization around that port. No direct Collection host capability is required.
+      zh-CN: Collection 拥有 provider/item 配置与基于 Anatomy 的读取。standard Runtime 以 instance ownership 安装并依赖 Anatomy；特权 asHook 围绕 port 组合 State、Expose 和生命周期同步。无需 Collection 直接宿主能力。
+  - id: M-COLLECTION-0001-B
+    text:
+      en: asCollection and asCollectionItem are no-argument setup hooks whose repeated calls reuse the same respective handles. Configure is setup-only; a rejected runtime configure must leave the prior metadata getter and configuration intact.
+      zh-CN: asCollection 与 asCollectionItem 是无参数 setup hook，重复调用复用各自 handle。configure 为 setup-only；runtime configure 被拒绝后，原 metadata getter 与配置必须保持不变。
+  - id: M-COLLECTION-0001-C
+    text:
+      en: Provider snapshots enumerate the explicitly configured Anatomy item role within the current domain, excluding undeclared host descendants and nested same-family domains. Reads follow current host order and support insertion, removal and reorder through Anatomy.
+      zh-CN: provider snapshot 枚举当前 domain 中显式配置的 Anatomy item role，排除未声明宿主后代与嵌套同 family domain。读取遵循当前宿主顺序，通过 Anatomy 支持插入、移除与重排。
+  - id: M-COLLECTION-0001-D
+    text:
+      en: Item metadata is read from the configured Expose key or getter. Structural index, total, first and last are computed from current order and override same-named metadata fields without mutating the metadata record. Provider and item methods read current metadata; metadata-only changes do not create a new structural notification channel.
+      zh-CN: item metadata 读取配置的 Expose key 或 getter。结构字段 index、total、first、last 从当前顺序计算，覆盖 metadata 同名字段而不修改源记录。provider/item 方法读取当前 metadata；纯 metadata 变化不创建新的结构通知通路。
+  - id: M-COLLECTION-0001-E
+    text:
+      en: asHooks synchronize count and item position State on mount, update and subscribed order changes, and publish their configured State/method Exposes. Internal order subscriptions are released on unmount and rebound on remount; instance configuration survives repeatable view epochs. Terminal owner disposal releases the hook subscriptions and Anatomy claims.
+      zh-CN: asHook 在 mount、update 和已订阅 order change 时同步 count、item position State，并发布配置的 State/method Expose。内部 order subscription 在 unmount 释放、remount 重建；实例配置跨 repeatable view epoch 保留。terminal owner disposal 释放 hook subscription 与 Anatomy claim。
+  - id: M-COLLECTION-0001-F
+    text:
+      en: Unconfigured Module reads return empty provider data and the default missing item position. Internal queries use Anatomy tolerant policies for transient absence; the item hook retains its last known position when the domain is temporarily unavailable. This does not admit ordinary author missing-query policy or selection, focus navigation, keyboard or A11y ownership.
+      zh-CN: 未配置 Module 返回空 provider 数据与默认 missing item position。内部查询使用 Anatomy tolerant policy 处理暂时缺失；item hook 在 domain 暂不可用时保留最后位置。这不接纳普通作者 missing-query policy，也不引入 selection、focus navigation、keyboard 或 A11y ownership。
+dependsOn:
+  modules:
+    - id: M-ANATOMY-0001
+      since: 0.3.0-alpha.0
+  contracts:
+    - C-AS-HOOK-PRIVILEGED-0001
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+relates:
+  modules:
+    - M-STATE-0001
+    - M-EXPOSE-0001
+    - M-EXPOSE-STATE-0001
+  decisions:
+    - D-COLLECTION-FOCUS-ROVING-RELATIONSHIP-0001
+    - D-ANATOMY-MISSING-POLICY-0001
+openQuestions:
+  - id: M-COLLECTION-0001-Q-CONFIGURATION
+    question:
+      en: How should repeated configuration, conflicts and legacy state-name options be governed?
+      zh-CN: 重复配置、冲突及旧 state-name option 应如何治理？
+    context:
+      en: This slice verifies one successful setup configuration and phase rejection. Count/index/total/first/last State name options remain declared in Core types while current no-arg hooks create fixed semantic names before configure. Their migration and transactional recovery after setup configuration errors remain outside this slice.
+      zh-CN: 本 slice 验证单次成功 setup 配置及阶段拒绝。Core 类型仍声明 count/index/total/first/last State 命名 option，但当前 no-arg hook 在 configure 前以固定语义名创建 State。这些 option 的迁移以及 setup 配置失败后的事务性恢复留待单独治理。

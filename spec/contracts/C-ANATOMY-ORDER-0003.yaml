@@ -16,8 +16,8 @@ statement:
 criteria:
   - id: C-ANATOMY-ORDER-0003-A
     text:
-      zh-CN: '`def.anatomy.subscribeParts` 只能在 setup 期间注册，并必须返回可取消订阅的函数。'
-      en: '`def.anatomy.subscribeParts` may only be registered during setup and must return an unsubscribe function.'
+      zh-CN: '`def.anatomy.subscribeParts` 只能在 setup 期间注册，并必须返回同样仅限 setup 的取消函数；runtime 调用必须在取消前拒绝。'
+      en: '`def.anatomy.subscribeParts` may only be registered during setup and must return an unsubscribe function that is also setup-only; runtime calls must reject before cancellation.'
   - id: C-ANATOMY-ORDER-0003-B
     text:
       zh-CN: 回调必须在 runtime callback scope 中运行，并接收当前 same-domain、指定 role 的变化后有序 part projection。
@@ -40,10 +40,14 @@ sources:
   - path: packages/runtime/test/contract/anatomy.order.v0.contract.test.ts
 dependsOn:
   contracts:
+    - C-CORE-SYNTAX-0007
     - C-ANATOMY-0005
     - C-ANATOMY-ORDER-0001
     - C-ANATOMY-ORDER-0002
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Applied the existing universal setup-only cancellation boundary to the returned author unsubscribe function.
   - version: 0.1.0
     change: introduced
     summary: Added the public setup-time subscription for live role membership and order changes.

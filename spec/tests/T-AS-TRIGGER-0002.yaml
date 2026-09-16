@@ -1,0 +1,73 @@
+id: T-AS-TRIGGER-0002
+type: test
+title: Trigger chain rejection and four Adapter group evidence
+status: draft
+since: 0.3.0-alpha.0
+summary: Exercises branch rejection, accepted-route preservation and real framework chain composition.
+cases:
+  - id: T-AS-TRIGGER-0002-CASE-BRANCH
+    title: Reject branching before changing accepted roles and routes
+    covers:
+      [
+        C-AS-TRIGGER-0001-L,
+        D-TRIGGER-GROUP-SURFACE-0001-I,
+        M-AS-TRIGGER-0001-D,
+        HC-TRIGGER-GROUP-0001-B,
+        HC-TRIGGER-GROUP-0001-C,
+      ]
+    expectation: reject-siblings-late-parent-and-reparent-preserve-route-allow-replacement
+  - id: T-AS-TRIGGER-0002-CASE-ADAPTER
+    title: Three-member chains share activation while retaining host-local event identity
+    covers:
+      [
+        M-AS-TRIGGER-0001-B,
+        M-AS-TRIGGER-0001-C,
+        HC-TRIGGER-GROUP-0001-A,
+        HC-TRIGGER-GROUP-0001-D,
+        A-REACT-18-19-0001-TRIGGER,
+        A-VUE-3-0001-TRIGGER,
+        A-VUE-2-0001-TRIGGER,
+        A-WEB-COMPONENT-0001-TRIGGER,
+      ]
+    expectation: inner-only-once-per-member-local-host-events-dispose-and-fresh-owner
+implementations:
+  - id: host-trigger-chain
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/instance-tree.test.ts
+    required: true
+    consumesCases: [T-AS-TRIGGER-0002-CASE-BRANCH]
+  - id: react-trigger-chain
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/trigger.integration.test.ts
+    required: true
+    consumesCases: [T-AS-TRIGGER-0002-CASE-ADAPTER]
+  - id: vue-trigger-chain
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/trigger.integration.test.ts
+    required: true
+    consumesCases: [T-AS-TRIGGER-0002-CASE-ADAPTER]
+  - id: vue2-trigger-chain
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/trigger.integration.test.ts
+    required: true
+    consumesCases: [T-AS-TRIGGER-0002-CASE-ADAPTER]
+  - id: web-component-trigger-chain
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/trigger.integration.test.ts
+    required: true
+    consumesCases: [T-AS-TRIGGER-0002-CASE-ADAPTER]
+verifies:
+  contracts: [C-AS-TRIGGER-0001]
+  decisions: [D-TRIGGER-GROUP-SURFACE-0001]
+  modules: [M-AS-TRIGGER-0001]
+  hostCaps: [HC-TRIGGER-GROUP-0001]
+  adapters: [A-REACT-18-19-0001, A-VUE-3-0001, A-VUE-2-0001, A-WEB-COMPONENT-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added approved branch rejection and four real Adapter chain evidence.

@@ -28,7 +28,8 @@ GlobalRegistrator.register();
 
 const React = await import('react');
 const ReactDOMClient = await import('react-dom/client');
-const { ShadcnButton, BaseButton } = await import('./proto-ui/components/react/index.ts');
+const { ShadcnButton, BaseButton, BaseImageRoot } =
+  await import('./proto-ui/components/react/index.ts');
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -82,6 +83,37 @@ if (!shadcnClass.includes('user-added')) {
 
 const base = await renderHost('base BaseButton', BaseButton);
 
+const imageContainer = document.createElement('div');
+document.body.appendChild(imageContainer);
+const imageRoot = ReactDOMClient.createRoot(imageContainer);
+const source =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
+imageRoot.render(
+  React.createElement(BaseImageRoot, {
+    source,
+    a11yMode: 'informative',
+    alternativeText: 'Packed Base Image',
+    fit: 'cover',
+  })
+);
+await flush();
+const image = imageContainer.querySelector('img');
+if (
+  imageContainer.querySelectorAll('img').length !== 1 ||
+  image?.getAttribute('src') !== source ||
+  image.alt !== 'Packed Base Image' ||
+  image.style.objectFit !== 'cover'
+) {
+  throw new Error(
+    'react smoke: Base Image did not project its physical image: ' + imageContainer.innerHTML
+  );
+}
+imageRoot.unmount();
+
 console.log(
-  'react smoke ok | shadcn=' + shadcn.outerHTML.length + 'B base=' + base.outerHTML.length + 'B'
+  'react smoke ok | shadcn=' +
+    shadcn.outerHTML.length +
+    'B base=' +
+    base.outerHTML.length +
+    'B + Base Image'
 );

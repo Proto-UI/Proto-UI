@@ -101,6 +101,29 @@ type EditorStyle = {
   nativeFocusVisible: boolean;
 };
 
+async function waitForStableEditorProjection(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const editor = document.querySelector<HTMLElement>('[data-previewer-id] textarea');
+      if (
+        !editor ||
+        editor.hasAttribute('data-pui-view-pending') ||
+        editor.hasAttribute('data-pui-view-revealing')
+      ) {
+        return false;
+      }
+      const tokens = editor.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
+      return (
+        tokens.includes('transition-[color,box-shadow]') &&
+        tokens.includes('duration-150') &&
+        tokens.includes('ease-in-out')
+      );
+    },
+    undefined,
+    { timeout: 20_000 }
+  );
+}
+
 async function editorStyle(page: Page): Promise<EditorStyle> {
   return page.evaluate(() => {
     const editor = document.querySelector('[data-previewer-id] textarea');
@@ -219,6 +242,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       expect(mountScope.runtimeControlRoots).toBeGreaterThan(0);
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await waitForStableEditorProjection(page);
         await applyColorScheme(page, 'light');
         await page.waitForFunction(
           (root) => !root?.querySelector('[data-pui-view-revealing]'),
@@ -255,6 +279,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await waitForStableEditorProjection(page);
         await applyColorScheme(page, 'light');
 
         const resting = await editorStyle(page);
@@ -325,6 +350,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await waitForStableEditorProjection(page);
 
         // The background is outside the transition set, so each read is the
         // settled value and no animation-aware waiting is needed here.

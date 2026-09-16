@@ -54,7 +54,7 @@ Every published stage still requires an exact V entity, complete globally aligne
 1. Create a topic branch from current `main`.
 2. Create the draft V entity and update `VERSION`.
 3. Use `stamp-version` to align every public package exactly.
-4. Update release notes, package BOM, spec snapshot, and governance maps.
+4. Update release notes, package BOM, spec snapshot, and governance maps; generate the ordinary-entity lifecycle report and record the reviewed slice dispositions.
 5. Run version governance, spec, types, tests, release scan, and tarball consumer smoke.
 6. Merge through pull request review.
 
@@ -65,6 +65,16 @@ Package-local fixes do not use `publish-single`; they enter the next global rele
 Each release train owns `internal/releases/<version>/release-notes.md`, its Chinese projection, and a deterministic `package-bom.json`. `pnpm release:bom` regenerates the BOM from the public workspace package graph and launch-governance roles; `pnpm release:assets:check` fails when the reviewed BOM drifts or either release note is absent. The English note becomes the GitHub Release body, while the BOM, Chinese note, spec snapshot, and checksum are attached as release evidence.
 
 npm Trusted Publisher configuration is package-scoped and therefore cannot be attached before a package identity exists. Every newly named public package must be created before the release train with a clearly non-release bootstrap version and configured for the reviewed release workflow. Bootstrap must not receive a release-channel dist-tag and its `bootstrap` tag must be removed after identity setup. npm may refuse to remove `latest` when it points at the package's sole bootstrap version; that `latest` may remain only if the sole version is deprecated, `next` does not point to that bootstrap version, and no release-train or stable version is published merely to cover it. `pnpm release:registry:check` verifies these public identity, dist-tag, and deprecation conditions; it does not claim to inspect the private Trusted Publisher configuration.
+
+### 3.1 Ordinary-entity Lifecycle Review
+
+When a governed surface first enters a release train, and during each preparation review, run `pnpm release:lifecycle`. The report conservatively includes all ordinary entities available at the selected version in the current catalog. It exposes unreviewed drafts, recorded test evidence, blockers and legacy metadata gaps; it does not infer stable applicability from package publication or a dependency edge. Apply the admission policy in [`spec/README.md`](../../spec/README.md).
+
+Record reviewed semantic slices in `internal/releases/<version>/lifecycle-dispositions.json`. Each slice names its entity IDs, evidence and rationale, with one disposition: `promote` as an admission proposal, `remain-draft` with a named blocker, or `not-applicable` with an explicit reason. The record describes the current review and must not be presented as a retroactive change to an immutable release snapshot. Resolve release-related slices incrementally and keep the report's uncovered remainder visible; do not fill it with unsupported blanket dispositions.
+
+Use `pnpm release:lifecycle -- --check --entities <entity-ids>` to require a disposition for every draft in a reviewed scope. Without `--entities`, `--check` validates all drafts in the full report inventory and fails if any draft disposition is missing. Non-draft metadata and activation-provenance gaps remain visible for audit without making their dispositions mandatory. The preparation PR must state which scope passed and what remains unreviewed. `release:rehearse` generates the full report as the review trigger; generation alone is not a full-catalog readiness check. No report or disposition changes entity status, backfills activation history, or replaces the separate V-entity publication-evidence workflow.
+
+Draft requirements are evaluated at the selected report version: current drafts and available entities whose recorded `activeSince` is later than that version require a disposition. Missing activation provenance is not inferred.
 
 ## 4. Publication
 
@@ -107,7 +117,7 @@ Historical `0.1.x` package versions are fragmented releases from before global l
 - current-source tarball consumer smoke
 - Quick Start commands matching the verified install path
 
-`pnpm release:rehearse` is the non-publishing, one-command preparation gate. It runs the identity and asset checks, catalog and test suites, type checks, a temporary spec snapshot, launch scan, the shared public-package build, package publish dry-run, React and multi-host CLI tarball consumer smokes, and the documentation build. Release staging copies the same verified local `dist` artifacts used by development and CI instead of compiling a separate output. The command may access the npm registry for dry-run or temporary consumer dependency installation, but it never invokes the real publish path.
+`pnpm release:rehearse` is the non-publishing, one-command preparation gate. It runs the identity and asset checks, ordinary-entity lifecycle reporting, catalog and test suites, type checks, a temporary spec snapshot, launch scan, the shared public-package build, package publish dry-run, React and multi-host CLI tarball consumer smokes, and the documentation build. Release staging copies the same verified local `dist` artifacts used by development and CI instead of compiling a separate output. The command may access the npm registry for dry-run or temporary consumer dependency installation, but it never invokes the real publish path.
 
 Docs-only or private-app changes do not need to publish immediately. Creating a new numeric version or changing `VERSION`, however, must enter this release-train workflow.
 
@@ -121,7 +131,7 @@ This checklist turns the policy above into the required sequence for each releas
 2. Update root `VERSION`, create the new `draft` V entity, and align the launch-governance release line.
 3. Run `node scripts/release/stamp-version.mjs` so all public package manifests use the exact version, then refresh the lockfile with the repository-declared pnpm version.
 4. Update both release notes and run `pnpm release:bom`. Update package-local documentation that ships in the tarball when it refers to its own version.
-5. Generate the Git-ignored local Agent projection with `pnpm spec:docs:agent` and review the entity graph affected by the new V entity; do not add the disposable projection to the commit.
+5. Generate the Git-ignored local Agent projection with `pnpm spec:docs:agent` and review the entity graph affected by the new V entity; do not add the disposable projection to the commit. Review `pnpm release:lifecycle`, record slice dispositions, and state the checked scope and unreviewed remainder in the PR.
 6. Run `pnpm release:rehearse`, `pnpm check:agent-doc`, and `git diff --check` before committing.
 7. Open a Draft PR that states the release scope, checks, package count, and the fact that no publication has occurred.
 
