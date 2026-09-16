@@ -678,25 +678,26 @@ describe('@proto.ui/cli', () => {
     const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <2.7');
+    expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <3');
     await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
   });
 
-  it('rejects a widening Vue 2 caret range before generating a Vue 2 facade', async () => {
-    const cwd = await createTempProject('pui-cli-add-vue2-widening-runtime', {
-      name: 'pui-cli-add-vue2-widening-runtime',
+  it('allows unguaranteed Vue 2.7 facade generation without installation', async () => {
+    const cwd = await createTempProject('pui-cli-add-vue2-trial-runtime', {
+      name: 'pui-cli-add-vue2-trial-runtime',
       private: true,
       dependencies: {
-        vue: '^2.6.14',
+        vue: '2.7.16',
       },
     });
 
     expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
     const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
 
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <2.7');
-    await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
+    expect(result.status).toBe(0);
+    await expect(
+      fs.readFile(path.join(cwd, 'proto-ui/components/vue2/index.ts'), 'utf8')
+    ).resolves.toContain('createVue2Adapter');
   });
 
   it('adds the complete shadcn Select React facade', async () => {

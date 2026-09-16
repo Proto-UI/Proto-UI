@@ -43,7 +43,7 @@ export const ADAPTER_REGISTRY: Record<string, Adapter> = {
     label: 'Vue 2',
     aliases: ['vue2', 'vue-2'],
     packageName: '@proto.ui/adapter-vue2',
-    runtimePackages: [{ name: 'vue', versionRange: '>=2.6.0 <2.7' }],
+    runtimePackages: [{ name: 'vue', versionRange: '>=2.6.0 <3' }],
     createImport: `import { createVue2Adapter } from '@proto.ui/adapter-vue2';`,
     runtimeImport: `import Vue from 'vue';`,
     adapterStatement: `const adapt = createVue2Adapter({
