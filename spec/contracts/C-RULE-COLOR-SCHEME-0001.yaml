@@ -1,0 +1,105 @@
+id: C-RULE-COLOR-SCHEME-0001
+type: contract
+title: Default document colorScheme invalidates the existing Rule style owner
+status: draft
+since: 0.3.0-alpha.0
+lifecycleRationale:
+  en: The accepted S1-S8 implementation boundary is cataloged as draft. Source, Runtime, four Adapter token and bounded real-browser/reveal evidence now exist. The approved delivery remains experimental and requires independent stable admission before activation.
+  zh-CN: 已接受的 S1-S8 实施边界以 draft 编目。已有 source、Runtime、四 Adapter token 与有界真实 browser/reveal 证据。获准交付仍属实验范围，激活前须获得独立稳定接纳。
+summary: A paired colorScheme-only source refreshes one Rule/Feedback contribution for eligible mounted instances within the default same-document light-DOM theme domain.
+statement:
+  en: Rule Meta owns the source lease and requests the existing Rule style executor. The default Web source supplies invalidation rather than another theme value. This bounded contract preserves existing Web lowering and sampled custom readers; it neither stabilizes generic Meta APIs nor establishes new local-theme or cross-document equivalence.
+  zh-CN: Rule Meta 拥有 source 租约并请求既有 Rule 样式执行器。默认 Web source 只提供失效通知，不提供另一份主题值。本有界契约保留既有 Web lowering 和 custom reader 的 sampled 行为；不稳定化通用 Meta API，也不建立新的局部主题或跨文档等价保证。
+criteria:
+  - id: C-RULE-COLOR-SCHEME-0001-A
+    text:
+      en: The privileged requestStyleReevaluation port shares Rule's existing evaluator and replaces its single Feedback runtime contribution with the complete current default Plan in declaration order, preserving rollback, patch/suppress and installed extension behavior. It does not append dark-only contributions or create another executor.
+      zh-CN: 特权 requestStyleReevaluation port 共用 Rule 既有 evaluator，按声明顺序以完整当前 default Plan 替换唯一 Feedback runtime contribution，保留 rollback、patch/suppress 与已安装 extension 行为。不得追加仅 dark 的贡献或创建第二个执行器。
+  - id: C-RULE-COLOR-SCHEME-0001-B
+    text:
+      en: An environment request uses already accepted Props and current State/Context inputs. It does not itself sync host Props, consume or dispatch Props watches, enter author callback scope, write Props/State, issue Expose commands, or request Proto structural rendering. An inactive or terminal driver does not apply; existing explicit evaluate disposal behavior remains unchanged.
+      zh-CN: 环境请求使用已接纳的 Props 与当前 State/Context 输入。入口自身不 sync host Props、不 consume/dispatch Props watch、不进入 author callback scope、不写 Props/State、不发 Expose command，也不请求 Proto structural render。inactive 或 terminal driver 不 apply；既有显式 evaluate 的 disposed 行为保持不变。
+  - id: C-RULE-COLOR-SCHEME-0001-C
+    text:
+      en: Only an alive logical instance whose authored Rule IR references meta:colorScheme may hold a lease, after the mounted Rule driver is ready. Eligibility uses authored dependencies even when a downstream extension lowers a Rule. The source getter must be the exact current RULE_META_GET_CAP function; absent or mismatched pairs retain sampled behavior without a lease.
+      zh-CN: 仅 alive 且 authored Rule IR 引用 meta:colorScheme 的 logical instance 可在 mounted Rule driver 就绪后持有租约。资格依据 authored dependency，即使下游已 lowering Rule 也不改变。source getter 必须与当前 RULE_META_GET_CAP 函数为同一对象；缺失或不匹配时保留 sampled 行为且不订阅。
+  - id: C-RULE-COLOR-SCHEME-0001-D
+    text:
+      en: Rule Meta holds at most one active lease per logical instance. Every new lease subscribes before a fresh reconcile, including unchanged-value remount. Unmounting, detached, disposing, disposed, caps reset or pair mismatch releases the old lease and invalidates late callbacks. Reattachment reconciles only a complete matching pair; missing-capability windows are not theme values.
+      zh-CN: Rule Meta 对每个 logical instance 最多持有一份活动租约。每个新租约先订阅再 fresh reconcile，包括值未变化的 remount。unmounting、detached、disposing、disposed、caps reset 或 pair 不匹配均释放旧租约并使迟到回调失效。重附仅在完整匹配 pair 上重新协调；capability 空档不是主题值。
+  - id: C-RULE-COLOR-SCHEME-0001-E
+    text:
+      en: >-
+        The default source reuses the existing resolver's exact order: root data-theme=dark or class dark wins, then explicit light, then prefers-color-scheme: dark, then the existing light fallback. Removing a marker immediately reconsiders system fallback; system changes under an effective explicit override do not notify.
+
+
+      zh-CN: >-
+        默认 source 复用既有 resolver 的精确顺序：root data-theme=dark 或 class dark 优先，其次显式 light，再次 prefers-color-scheme: dark，最后为既有 light fallback。移除 marker 即重新考虑 system fallback；有效显式覆盖下的 system 变化不通知。
+
+
+  - id: C-RULE-COLOR-SCHEME-0001-F
+    text:
+      en: Within one loaded adapter-base module, subscriptions share one service-owned root observer and color-scheme MQL listener per Document. The first subscriber connects them and the last release disconnects them. Only class/data-theme and that MQL are observed; asynchronous batches notify each active lease at most once when the final effective value changes, and released or obsolete queued work cannot notify. Without Document or MutationObserver no active source is supplied; without MQL root markers remain observable with the existing fallback.
+      zh-CN: 同一个已加载 adapter-base 模块内，每个 Document 的订阅共享一组 service-owned root observer 与 color-scheme MQL listener。首订阅连接、末释放拆除。仅观察 class/data-theme 与该 MQL；异步批次仅在最终有效值改变时对每个活动租约最多通知一次，已释放或过期排队工作不得通知。无 Document 或 MutationObserver 时不提供活动 source；无 MQL 时仍观察 root marker 并保留既有 fallback。
+  - id: C-RULE-COLOR-SCHEME-0001-G
+    text:
+      en: Each official Web Adapter creates one default getter/source pair per adapted type and passes those exact objects through owner and view wiring. An explicit custom getMeta keeps its existing sampled path and is not paired with the default source. This adds no App-facing source option or generic subscribe(key) API.
+      zh-CN: 每个官方 Web Adapter 为每个 adapted type 构造一组默认 getter/source pair，并经 owner/view wiring 传递精确对象。显式 custom getMeta 保留既有 sampled 路径，不配接默认 source。不新增面向 App 的 source option 或通用 subscribe(key) API。
+  - id: C-RULE-COLOR-SCHEME-0001-H
+    text:
+      en: The new equivalence domain is the default reader in same-document light DOM with no intervening local theme markers, including a same-document portal satisfying those conditions. Root explicit/system transitions must refresh mixed default Plans and preserve existing eligible Web lowering so the actual supported recipes agree after presentation settles.
+      zh-CN: 新等价域限于默认 reader、同文档 light DOM 且无中间局部主题 marker，包括满足这些条件的同文档 portal。root 显式/system 转换须刷新混合 default Plan 并保留既有 eligible Web lowering，使受支持配方在 presentation 完成后实际一致。
+  - id: C-RULE-COLOR-SCHEME-0001-I
+    text:
+      en: Normal React/Vue presentation, Focus target-readiness callbacks and Props synchronization remain allowed. Zero additional author watches and Proto render/commit/updated are asserted only for settled color-only samples without pending Props, Focus, commit or lifecycle work. Concurrent legitimate Props watches and explicit updates, including autoUpdate=false, must not be suppressed or duplicated.
+      zh-CN: 保留正常 React/Vue presentation、Focus target-readiness callback 与 Props 同步。仅对没有 pending Props、Focus、commit 或 lifecycle 工作的静止 color-only 样本断言不新增 author watch 和 Proto render/commit/updated。并发合法 Props watch 与显式 update（含 autoUpdate=false）不得被抑制或重复。
+  - id: C-RULE-COLOR-SCHEME-0001-J
+    text:
+      en: Perceptual leaving while the view remains mounted retains the lease. ColorScheme notifications do not retime Transition reducedMotion, already queued fallback completion, phase/event sequences or ViewIntent. Reading reducedMotion without an authored colorScheme Rule does not subscribe.
+      zh-CN: view 仍 mounted 的 perceptual leaving 保持租约。colorScheme 通知不重新计时 Transition reducedMotion、已排队 fallback completion，也不改变 phase/event sequence 或 ViewIntent。仅读取 reducedMotion 且无 authored colorScheme Rule 不订阅。
+  - id: C-RULE-COLOR-SCHEME-0001-K
+    text:
+      en: Existing local CSS marker behavior is retained without promising nearest-subtree Meta semantics. Custom readers, subtree overrides, ShadowRoot, iframe/adoption and cross-document equivalence remain outside the new guarantee. Their counterexamples must not be reported as passing default-domain coverage; no generic reactive Meta keys or SSR support is admitted.
+      zh-CN: 保留既有局部 CSS marker 行为，但不承诺 nearest-subtree Meta 语义。custom reader、subtree override、ShadowRoot、iframe/adoption 和跨文档等价继续排除在新增保证外。其反例不得作为默认域通过证据；不接纳通用 reactive Meta key 或 SSR 支持。
+  - id: C-RULE-COLOR-SCHEME-0001-L
+    text:
+      en: Reconciliation targets the current Feedback/Effects binding rather than retaining a DOM surface. Initial mount, retained-owner remount and supported physical surface replacement must project the current recipe through existing Adapter presentation and reveal barriers without writing the retired view. Framework StrictMode/KeepAlive and WC reconnect use their existing owner/view lifetimes.
+      zh-CN: reconciliation 使用当前 Feedback/Effects binding，不保留 DOM surface。首 mount、retained-owner remount 和受支持的物理 surface replacement 须经既有 Adapter presentation/reveal barrier 投射当前配方，不写旧 view。框架 StrictMode/KeepAlive 和 WC reconnect 沿用既有 owner/view 生命周期。
+dependsOn:
+  contracts:
+    - C-RULE-RUNTIME-0001
+    - C-RULE-EXTENSION-0001
+    - C-RULE-WHEN-0002
+    - C-LIFECYCLE-0006
+    - C-LIFECYCLE-0007
+    - C-LIFECYCLE-0008
+relates:
+  decisions:
+    - D-RULE-META-NAMING-0001
+  contracts:
+    - C-AS-TRANSITION-0001
+verifies:
+  tests:
+    - T-RULE-COLOR-SCHEME-0001
+openQuestions:
+  - id: C-RULE-COLOR-SCHEME-0001-Q-ADMISSION
+    question:
+      en: Does the complete browser/reveal and compatibility evidence justify independent stable admission of this bounded slice?
+      zh-CN: 完整 browser/reveal 与兼容证据是否足以支持对此有界 slice 的独立稳定接纳？
+    context:
+      en: S1-S8 authorize implementation as draft; source and happy-dom evidence alone does not establish the complete browser matrix or active lifecycle.
+      zh-CN: S1-S8 授权以 draft 实施；source 与 happy-dom 证据本身不足以建立完整 browser 矩阵或 active lifecycle。
+    blocks:
+      - activation:C-RULE-COLOR-SCHEME-0001
+sources:
+  - path: internal/records/2026-09-14-color-scheme-invalidation-proposal.zh-CN.md
+    label: S1-S8 accepted in PR 644 review 5194863702
+  - path: packages/modules/rule/src/impl.ts
+  - path: packages/modules/rule-meta/src/create.ts
+  - path: packages/adapters/base/src/platform/web-color-scheme-source.ts
+  - path: packages/adapters/base/src/platform/web-preferences.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the accepted default document colorScheme invalidation boundary without generic Meta admission.
+tags: [rule, meta, color-scheme, invalidation, lifecycle, draft]
