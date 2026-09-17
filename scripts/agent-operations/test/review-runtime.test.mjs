@@ -791,7 +791,10 @@ test('review submission preserves explicit authorization and activates the bound
     false
   );
 
-  const duplicateInput = reviewInput({
+  // A legacy same-head approval without this packet's rendered body must not
+  // block a changed evidence packet; only an exact rendered-body match is an
+  // idempotent duplicate.
+  const legacyDuplicateInput = reviewInput({
     reviews: [
       {
         id: 'PRR_existing',
@@ -803,17 +806,48 @@ test('review submission preserves explicit authorization and activates the bound
       },
     ],
   });
-  const duplicateApproval = authorizeReviewSubmission({
+  const legacyDuplicate = authorizeReviewSubmission({
     ...scheduledBase,
-    input: duplicateInput,
-    liveInput: structuredClone(duplicateInput),
+    input: legacyDuplicateInput,
+    liveInput: structuredClone(legacyDuplicateInput),
     packet: packet(
       { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
-      duplicateInput
+      legacyDuplicateInput
     ),
   });
-  assert.equal(duplicateApproval.allowed, false);
-  assert.equal(duplicateApproval.duplicate, true);
+  assert.equal(legacyDuplicate.allowed, true);
+  assert.equal(legacyDuplicate.duplicate, undefined);
+
+  const publishedPacket = packet(
+    { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
+    reviewInput()
+  );
+  const publishedBody = renderReviewBody(publishedPacket);
+  assert.ok(publishedBody.includes('proto-ui:review-packet:sha256='));
+  assert.ok(publishedBody.includes('proto-ui:agent-evidence:sha256='));
+  const exactDuplicateInput = reviewInput({
+    reviews: [
+      {
+        id: 'PRR_exact',
+        author: 'agent',
+        state: 'APPROVED',
+        commitSha: sha('b'),
+        submittedAt: '2026-08-23T03:00:00.000Z',
+        body: publishedBody,
+      },
+    ],
+  });
+  const exactDuplicateApproval = authorizeReviewSubmission({
+    ...scheduledBase,
+    input: exactDuplicateInput,
+    liveInput: structuredClone(exactDuplicateInput),
+    packet: packet(
+      { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
+      exactDuplicateInput
+    ),
+  });
+  assert.equal(exactDuplicateApproval.allowed, false);
+  assert.equal(exactDuplicateApproval.duplicate, true);
 
   const specInput = reviewInput({
     changedFiles: [
@@ -1268,4 +1302,49 @@ test('agent:review CLI validates and inspects the same packet contract used by t
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test('legacy schema v1 packets ingest without evidence but cannot carry dispositions', () => {
+  const input = reviewInput();
+  const legacy = packet({ recommendedAction: 'COMMENT' }, input);
+  delete legacy.agentEvidence;
+  legacy.schemaVersion = 1;
+  assert.equal(validateReviewPacket(legacy, input), legacy);
+
+  const legacyBody = renderReviewBody(legacy);
+  assert.ok(legacyBody.includes('legacy schema v1'));
+  assert.ok(legacyBody.includes('proto-ui:review-packet:sha256='));
+  assert.ok(!legacyBody.includes('proto-ui:agent-evidence:sha256='));
+
+  const smuggled = packet({ recommendedAction: 'COMMENT' }, input);
+  smuggled.schemaVersion = 1;
+  assert.throws(() => validateReviewPacket(smuggled, input), /unexpected|agentEvidence/);
+
+  const base = {
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    authorizationId: 'explicit-current-user',
+    policy,
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+  };
+  const comment = authorizeReviewSubmission({ ...base, packet: legacy });
+  assert.equal(comment.allowed, true);
+
+  for (const recommendedAction of ['APPROVE', 'REQUEST_CHANGES']) {
+    const disposition = packet({ recommendedAction }, input);
+    delete disposition.agentEvidence;
+    disposition.schemaVersion = 1;
+    const result = authorizeReviewSubmission({ ...base, packet: disposition });
+    assert.equal(result.allowed, false);
+    assert.match(result.reason, /schema v2/);
+  }
+
+  const invalidVersion = packet({ recommendedAction: 'COMMENT' }, input);
+  invalidVersion.schemaVersion = 3;
+  assert.throws(() => validateReviewPacket(invalidVersion, input), /schemaVersion/);
 });

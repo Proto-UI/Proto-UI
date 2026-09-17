@@ -419,6 +419,33 @@ export function computeReviewPacketDigest(priorPacket) {
   return digest(priorPacket);
 }
 
+/**
+ * Stable publication receipt marker embedded in every rendered review body and
+ * evidence comment. Duplicate detection and merge authorization bind to this
+ * exact packet digest instead of reviewer/head/disposition triples, so a
+ * legacy or superseded same-head review never blocks a changed evidence
+ * packet, and a merge can prove the packet's evidence was actually published.
+ */
+export function reviewPacketMarker(packet) {
+  return `proto-ui:review-packet:sha256=${computeReviewPacketDigest(packet)}`;
+}
+
+export function reviewPacketMarkerPresent(packet, bodies) {
+  const marker = reviewPacketMarker(packet);
+  return bodies.some((body) => typeof body === 'string' && body.includes(marker));
+}
+
+/** Remove governed receipt markers so two rendered bodies compare by content. */
+function stripReceiptMarkers(body) {
+  return body.replace(/<!--[\s\S]*?proto-ui:[\s\S]*?-->/g, '').trim();
+}
+
+/** Evidence identity shared by every packet and publication carrying it. */
+export function agentEvidenceMarker(packet) {
+  assert(packet.schemaVersion === 2, 'schema v1 packets carry no Agent evidence');
+  return `proto-ui:agent-evidence:sha256=${digest(packet.agentEvidence)}`;
+}
+
 export function verifyReconciliation(packet, priorPacket) {
   assert(
     packet && typeof packet.reconciliation === 'object',
@@ -466,36 +493,33 @@ export function verifyReconciliation(packet, priorPacket) {
 }
 
 export function validateReviewPacket(packet, input) {
-  exactKeys(
-    packet,
-    [
-      'schemaVersion',
-      'kind',
-      'repositoryId',
-      'pullRequest',
-      'baseSha',
-      'headSha',
-      'reviewInputDigest',
-      'observedAt',
-      'reviewClass',
-      'scope',
-      'affectedEntities',
-      'affectedSurfaces',
-      'findings',
-      'validation',
-      'agentEvidence',
-      'reconciliation',
-      'limitations',
-      'unknowns',
-      'humanGates',
-      'recommendedAction',
-    ],
-    'review packet'
+  assert(
+    packet && typeof packet === 'object' && !Array.isArray(packet),
+    'review packet is invalid'
   );
   assert(
-    packet.schemaVersion === 2,
-    'review packet schemaVersion must be 2 (Agent evidence required)'
+    packet.schemaVersion === 1 || packet.schemaVersion === 2,
+    'review packet schemaVersion must be 1 (legacy, without Agent evidence) or 2 (Agent evidence required)'
   );
+  const packetKeys = [
+    'schemaVersion',
+    'kind',
+    'repositoryId',
+    'pullRequest',
+    'baseSha',
+    'headSha',
+    'reviewInputDigest',
+    'observedAt',
+    'reviewClass',
+    'scope',
+    'affectedEntities',
+    'affectedSurfaces',
+    'findings',
+    'validation',
+  ];
+  if (packet.schemaVersion === 2) packetKeys.push('agentEvidence');
+  packetKeys.push('reconciliation', 'limitations', 'unknowns', 'humanGates', 'recommendedAction');
+  exactKeys(packet, packetKeys, 'review packet');
   assert(packet.kind === 'proto-ui.review-packet', 'review packet kind is invalid');
   assert(
     typeof packet.repositoryId === 'string' && packet.repositoryId.length > 3,
@@ -557,7 +581,7 @@ export function validateReviewPacket(packet, input) {
     assert(Number.isInteger(finding.line) && finding.line > 0, 'finding.line is invalid');
   }
   validateValidation(packet.validation);
-  validateAgentEvidence(packet.agentEvidence, packet.headSha);
+  if (packet.schemaVersion === 2) validateAgentEvidence(packet.agentEvidence, packet.headSha);
   validateReconciliation(packet.reconciliation, findingIds);
   return packet;
 }
@@ -643,9 +667,32 @@ export function validateAgentEvidence(evidence, headSha) {
 // This exact body is passed to the head-bound GitHub Review API. Empty findings
 // must not discard evidence or turn a bounded review into an unqualified verdict.
 export function renderReviewBody(packet) {
+  const list = (items) => items.map((item) => `- ${item}`).join('\n');
+  const marker =
+    packet.schemaVersion === 2
+      ? `<!-- ${reviewPacketMarker(packet)} ${agentEvidenceMarker(packet)} -->`
+      : `<!-- ${reviewPacketMarker(packet)} -->`;
+  if (packet.schemaVersion !== 2) {
+    return [
+      `Reviewed exact head \`${packet.headSha}\`.`,
+      `Review class: ${packet.reviewClass}. Scope: ${packet.scope.join('; ')}.`,
+      packet.findings.length
+        ? list(
+            packet.findings.map(
+              (finding) =>
+                `**[${finding.severity}] ${finding.id}** (${finding.file}:${finding.line}) ${finding.observed} Expected: ${finding.expected} Impact: ${finding.impact} Authority: ${finding.authority} Fix: ${finding.fix}`
+            )
+          )
+        : 'No actionable findings within the stated review scope.',
+      '## Agent evidence',
+      'None recorded. This legacy schema v1 packet carries no Agent evidence and cannot authorize a review disposition or merge.',
+      marker,
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+  }
   validateAgentEvidence(packet.agentEvidence, packet.headSha);
   const evidence = packet.agentEvidence;
-  const list = (items) => items.map((item) => `- ${item}`).join('\n');
   return [
     `Reviewed exact head \`${packet.headSha}\`.`,
     `Review class: ${packet.reviewClass}. Scope: ${packet.scope.join('; ')}.`,
@@ -687,6 +734,7 @@ export function renderReviewBody(packet) {
     ...['limitations', 'unknowns', 'humanGates'].map((field) =>
       packet[field].length ? `${field}:\n\n${list(packet[field])}` : `${field}: none recorded.`
     ),
+    marker,
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -895,21 +943,37 @@ export function authorizeReviewSubmission({
   ) {
     return { allowed: false, reason: 'review recommendation is outside standing authorization' };
   }
+  if (['APPROVE', 'REQUEST_CHANGES'].includes(recommendedAction) && packet.schemaVersion !== 2) {
+    return {
+      allowed: false,
+      reason:
+        'review dispositions require a schema v2 packet with Agent evidence; legacy v1 packets may only COMMENT',
+    };
+  }
+  // Duplicate detection binds the exact rendered body, not the
+  // reviewer/head/disposition triple: a legacy or superseded same-disposition
+  // review must never block a changed evidence packet, while resubmitting a
+  // packet whose rendered body is already live stays an idempotent no-op.
+  const sameDispositionState = {
+    APPROVE: 'APPROVED',
+    REQUEST_CHANGES: 'CHANGES_REQUESTED',
+    COMMENT: 'COMMENTED',
+  }[recommendedAction];
+  const renderedBody = stripReceiptMarkers(renderReviewBody(packet));
   if (
     liveInput.reviews.some(
       (review) =>
         review.author === reviewer &&
         review.commitSha === liveInput.headSha &&
-        review.state ===
-          { APPROVE: 'APPROVED', REQUEST_CHANGES: 'CHANGES_REQUESTED', COMMENT: 'COMMENTED' }[
-            recommendedAction
-          ]
+        review.state === sameDispositionState &&
+        typeof review.body === 'string' &&
+        stripReceiptMarkers(review.body) === renderedBody
     )
   ) {
     return {
       allowed: false,
       duplicate: true,
-      reason: 'the live head already has the same review disposition from this reviewer',
+      reason: 'the live head already carries this exact rendered review from this reviewer',
       recommendedAction,
     };
   }
@@ -1061,6 +1125,12 @@ export function authorizePullRequestMerge({
   if (packet.recommendedAction !== 'APPROVE') {
     return { allowed: false, reason: 'merge requires a clean APPROVE review packet' };
   }
+  if (packet.schemaVersion !== 2) {
+    return {
+      allowed: false,
+      reason: 'merge requires a schema v2 review packet with Agent evidence',
+    };
+  }
   if (packet.agentEvidence.debt.some((item) => item.kind === 'verification')) {
     return { allowed: false, reason: 'merge has unresolved verification debt' };
   }
@@ -1102,6 +1172,26 @@ export function authorizePullRequestMerge({
   );
   if (!independentApproval) {
     return { allowed: false, reason: 'the exact head lacks an independent approval' };
+  }
+
+  // Publication debt fails closed: a local packet whose Agent evidence never
+  // reached the live pull request cannot authorize the material merge update.
+  // The receipt is the evidence digest marker published by a governed review
+  // or additive evidence comment; it is stable across the review packet and
+  // this merge packet because the evidence content is identical.
+  const evidenceReceipt = agentEvidenceMarker(packet);
+  const publicationReceipt = [
+    ...liveInput.reviews
+      .filter((review) => review.commitSha === liveInput.headSha)
+      .map((review) => review.body),
+    ...liveInput.comments.map((comment) => comment.body),
+  ].some((body) => typeof body === 'string' && body.includes(evidenceReceipt));
+  if (!publicationReceipt) {
+    return {
+      allowed: false,
+      reason:
+        'merge requires a live published Agent evidence receipt matching the packet evidence digest',
+    };
   }
 
   return {
