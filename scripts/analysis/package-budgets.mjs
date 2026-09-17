@@ -14,13 +14,19 @@ const cases = [
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
   ['core root', 'packages/core/src/index.ts', 6_000],
   ['runtime root', 'packages/runtime/src/index.ts', 60_000],
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 75_000],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_000],
+  // PR #623 adds opt-in end-follow, host observation, and owned contact-session handling
+  // to module-scroll, which every Adapter root bundles. Attribution on the pinned local
+  // toolchain: main sync base a3095552 measures react 72,498 / vue 72,208; this branch
+  // head measures react 75,397 / vue 75,148 (+~2.9KB gzip each from the scroll slice).
+  // CI at 89ac55c2 independently measured react 75,346 / vue 75,091, matching local
+  // within ~60 bytes. Ceilings keep ~350-600 bytes of headroom.
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 76_000],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_500],
   // PR #634 adds scoped Escape arbitration and shared Overlay resource ownership.
-  // CI measured 75,115 gzip bytes; retain a bounded allowance for this semantic slice.
-  // PR #623 adds opt-in end-follow, host observation, and owned contact-session handling.
-  // The combined slice measures 77,477 gzip bytes; keep this allowance specific to WC.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 78_000],
+  // CI measured 75,115 gzip bytes; retain a bounded allowance for that semantic slice.
+  // PR #623's scroll slice above measures wc 75,664 at base a3095552 -> 78,593 at head;
+  // keep this allowance specific to WC with ~400 bytes of headroom.
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 79_000],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];
