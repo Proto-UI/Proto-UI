@@ -488,7 +488,17 @@ function splitHostDeclarations(declaration: string): string[] {
     'padding-block': ['top', 'bottom'],
   };
   if (property.startsWith('padding')) {
-    if (!/^(?:0|\d*\.?\d+(?:px|rem|em|vw|vh|vmin|vmax))$/.test(value)) {
+    // Font-relative em resolves against the element's own font size. Split
+    // rendering may route the Root's font-size token to the inner surface,
+    // so host padding and surface compensation would resolve the same em
+    // against different bases. Reject until a basis-preserving decomposition
+    // exists.
+    if (/^\d*\.?\d+em$/.test(value)) {
+      throw new Error(
+        `[shadow split CSS] font-relative padding has no preserved basis in split rendering: ${declaration}`
+      );
+    }
+    if (!/^(?:0|\d*\.?\d+(?:px|rem|vw|vh|vmin|vmax))$/.test(value)) {
       throw new Error(
         `[shadow split CSS] padding contribution needs a verified length recipe: ${declaration}`
       );

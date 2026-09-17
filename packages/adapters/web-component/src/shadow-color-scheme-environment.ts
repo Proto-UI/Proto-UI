@@ -1,8 +1,10 @@
-import { resolveWebColorScheme, type WebColorScheme } from '@proto.ui/adapter-base';
+import {
+  createDefaultWebColorSchemeSource,
+  resolveWebColorScheme,
+  type WebColorScheme,
+} from '@proto.ui/adapter-base';
 
 export const SHADOW_COLOR_SCHEME_ATTRIBUTE = 'data-pui-color-scheme';
-
-const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
 export type ShadowColorSchemeSource = Readonly<{
   get(): WebColorScheme;
@@ -18,54 +20,20 @@ export type ShadowColorSchemeEnvironmentOwner = {
 const environmentOwners = new WeakMap<HTMLElement, ShadowColorSchemeEnvironmentOwner>();
 
 /**
- * Creates the default dynamic source without changing the pull-only Web meta
- * getter used by existing Adapter profiles.
+ * Creates the default dynamic source on the shared per-document observation
+ * from the base Adapter profile (one MutationObserver and one media query per
+ * document), without changing the pull-only Web meta getter used by existing
+ * Adapter profiles.
  */
 export function createDefaultShadowColorSchemeSource(): ShadowColorSchemeSource {
+  const shared =
+    typeof document === 'undefined'
+      ? undefined
+      : createDefaultWebColorSchemeSource(() => resolveWebColorScheme());
   return Object.freeze({
     get: resolveWebColorScheme,
     subscribe(listener) {
-      let active = true;
-      let current = readColorScheme(resolveWebColorScheme);
-      const root = typeof document !== 'undefined' ? document.documentElement : null;
-      const view = typeof window !== 'undefined' ? window : null;
-      const media =
-        typeof view?.matchMedia === 'function' ? view.matchMedia(DARK_MEDIA_QUERY) : null;
-
-      const notifyOnChange = () => {
-        if (!active) return;
-        const next = readColorScheme(resolveWebColorScheme);
-        if (next === current) return;
-        current = next;
-        listener();
-      };
-
-      const MutationObserverConstructor = root?.ownerDocument.defaultView?.MutationObserver;
-      const observer =
-        root && MutationObserverConstructor
-          ? new MutationObserverConstructor(notifyOnChange)
-          : null;
-      observer?.observe(root as Node, {
-        attributes: true,
-        attributeFilter: ['class', 'data-theme'],
-      });
-
-      if (typeof media?.addEventListener === 'function') {
-        media.addEventListener('change', notifyOnChange);
-      } else {
-        media?.addListener(notifyOnChange);
-      }
-
-      return () => {
-        if (!active) return;
-        active = false;
-        observer?.disconnect();
-        if (typeof media?.removeEventListener === 'function') {
-          media.removeEventListener('change', notifyOnChange);
-        } else {
-          media?.removeListener(notifyOnChange);
-        }
-      };
+      return shared?.subscribe(listener) ?? (() => {});
     },
   });
 }

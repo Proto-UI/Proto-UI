@@ -52,7 +52,11 @@ describe('Shadow color-scheme environment owner', () => {
     const listener = vi.fn();
     const unsubscribe = source.subscribe(listener);
 
+    // The shared per-document source batches notifications through a
+    // microtask (adapter-base web-color-scheme-source), so media-driven
+    // changes are observed after a flush rather than synchronously.
     media.setMatches(true);
+    await flushMutationObserver();
     expect(source.get()).toBe('dark');
     expect(listener).toHaveBeenCalledTimes(1);
 
@@ -62,6 +66,7 @@ describe('Shadow color-scheme environment owner', () => {
     expect(listener).toHaveBeenCalledTimes(2);
 
     media.setMatches(false);
+    await flushMutationObserver();
     expect(source.get()).toBe('light');
     expect(listener).toHaveBeenCalledTimes(2);
 

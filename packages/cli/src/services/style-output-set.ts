@@ -23,7 +23,7 @@ async function canonicalPath(file: string): Promise<string> {
 
 /** Read-only preflight. Fold case conservatively, including on case-sensitive volumes. */
 export async function validateStyleOutputPaths(files: readonly string[]) {
-  const targets: { path: string; key: string; inode?: string }[] = [];
+  const targets: { path: string; key: string; inode?: string; size?: number }[] = [];
   for (const file of files) {
     if (typeof file !== 'string' || !file.trim()) throw new Error('Missing style output path');
     const absolute = path.resolve(file);
@@ -35,18 +35,23 @@ export async function validateStyleOutputPaths(files: readonly string[]) {
     }
     const canonical = await canonicalPath(absolute);
     const key = canonical.normalize('NFC').toLowerCase();
-    const inode = stat ? `${stat.dev}:${stat.ino}` : undefined;
+    // Some Windows volumes report unreliable inode values (zero or shared
+    // across distinct files). Treat zero as unknown, and require matching
+    // size before calling two paths hard-link aliases: linked entries always
+    // share one physical size.
+    const inode = stat?.ino ? `${stat.dev}:${stat.ino}` : undefined;
+    const size = stat?.size;
     for (const previous of targets) {
       if (
         key === previous.key ||
         key.startsWith(previous.key + path.sep) ||
         previous.key.startsWith(key + path.sep) ||
-        (inode && inode === previous.inode)
+        (inode !== undefined && inode === previous.inode && size === previous.size)
       ) {
         throw new Error(`Conflicting style output paths: ${previous.path} and ${absolute}`);
       }
     }
-    targets.push({ path: absolute, key, inode });
+    targets.push({ path: absolute, key, inode, size });
   }
 }
 

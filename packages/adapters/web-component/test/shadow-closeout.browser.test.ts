@@ -19,7 +19,7 @@ beforeAll(async () => {
         export { sampleWebComponentScopeTargets as sample } from './packages/adapters/web-component/src/focus-scope-targets';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { definePrototype as define, tw } from '@proto.ui/core';
-        export { asTextControl, asFocusEntry, asFocusScope } from '@proto.ui/hooks';
+        export { asTextControl, asFocusEntry, asFocusScope, asFocusable } from '@proto.ui/hooks';
         export { declareTextControl } from '@proto.ui/module-text-control';
       `,
       resolveDir: process.cwd(),
@@ -513,6 +513,116 @@ describe('Shadow closeout native boundaries', () => {
       }
     }
   );
+  it('does not let split-editor focus retries reclaim focus after the caller moves on', async () => {
+    // FOCUS_REQUEST_FOCUS_CAP must decide success from the deepest composed
+    // active element: a focused editor inside the split open ShadowRoot leaves
+    // document.activeElement on the host, and a false "pending" verdict would
+    // schedule retries that steal focus back.
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate((artifact) => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-split-editor-focus',
+            modules: [
+              p.declareTextControl({ content: 'plain-text', engine: 'host', lineMode: 'single' }),
+            ],
+            setup(def: any) {
+              const control = p.asTextControl();
+              const focusable = p.asFocusable();
+              focusable.configure({ disabled: false });
+              def.lifecycle.onCreated(() => {
+                control.sync({ valueMode: 'uncontrolled', defaultValue: 'editor' });
+              });
+              def.expose('enter', () => focusable.focus());
+              return () => null;
+            },
+          }),
+          { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+        );
+        const host = new C();
+        const after = document.createElement('button');
+        after.id = 'after';
+        after.textContent = 'after';
+        document.body.append(host, after);
+        (window as any).__host = host;
+      }, renderProtoShadowSplitStyleArtifact([]));
+      await page.evaluate(() => (window as any).__host.getExposes().enter());
+      const editorFocused = await page.evaluate(() => {
+        const host = (window as any).__host;
+        const editor = host.shadowRoot.querySelector('input,textarea');
+        return !!editor && host.shadowRoot.activeElement === editor;
+      });
+      expect(editorFocused).toBe(true);
+      await page.locator('#after').focus();
+      // Outwait the layout-scheduled retry window; no retry may reclaim focus.
+      await page.waitForTimeout(400);
+      expect(await page.evaluate(() => document.activeElement?.id)).toBe('after');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('recovers trapped traversal from the remembered pointer focus after focus leaves the scope', async () => {
+    // C-AS-FOCUS-SCOPE-0002-I: the scope remembers its most recent native
+    // focus (pointer or programmatic), so a Tab after focus moved to the
+    // document body resumes from that anchor instead of the first target.
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-scope-recovery',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const scope = new C();
+        scope.id = 'recovery-scope';
+        scope.innerHTML =
+          '<button id="ra">A</button><button id="rb">B</button><button id="rc">C</button>';
+        document.body.append(scope);
+        (window as any).__scope = scope;
+      });
+      const active = () =>
+        page.evaluate(() => {
+          let el = document.activeElement;
+          while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+          return el?.id ?? null;
+        });
+      await page.evaluate(() => (window as any).__scope.getExposes().activate());
+      await page.locator('#rb').click();
+      expect(await active()).toBe('rb');
+      // Move focus to a blank, non-scope target without deactivating the trap.
+      await page.evaluate(() => {
+        document.body.tabIndex = -1;
+        document.body.focus();
+      });
+      expect(await active()).toBe('');
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('rc');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('rb');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each(['single', 'multiline'] as const)(
     'initially absent %s editor acquires no view lease',
     async (lineMode) => {

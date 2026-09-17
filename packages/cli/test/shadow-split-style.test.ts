@@ -179,4 +179,21 @@ describe('private generated Shadow split sizing', () => {
       /verified length recipe/
     );
   });
+
+  it('rejects font-relative em padding until its font-size basis is preserved', () => {
+    // Split rendering routes the Root font-size token to the inner surface, so
+    // host padding and surface compensation would resolve the same em against
+    // different font bases.
+    expect(() => renderProtoShadowSplitStyleArtifact(['text-2xl', 'p-[1em]'])).toThrow(
+      /font-relative padding/
+    );
+    expect(() => renderProtoShadowSplitStyleArtifact(['p-[0.5em]'])).toThrow(
+      /font-relative padding/
+    );
+    expect(() => renderProtoShadowSplitStyleArtifact(['px-[1em]'])).toThrow(
+      /font-relative padding/
+    );
+    // rem resolves against the document root in both modes and stays valid.
+    expect(() => renderProtoShadowSplitStyleArtifact(['text-2xl', 'p-[1rem]'])).not.toThrow();
+  });
 });

@@ -4,6 +4,154 @@ import {
   sampleWebComponentScopeTargets,
 } from '../src/focus-scope-targets';
 describe('WC scope sequential target sample', () => {
+  it('samples HTML focusables below non-HTML containers such as foreignObject', () => {
+    // C-AS-FOCUS-SCOPE-0002-J: composed traversal must not stop at SVG
+    // boundaries; foreignObject content participates in document order.
+    const scope = document.createElement('div');
+    scope.innerHTML = '<button id="before" tabindex="0"></button>';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    const inner = document.createElement('button');
+    inner.id = 'inner';
+    inner.tabIndex = 0;
+    foreign.append(inner);
+    svg.append(foreign);
+    scope.append(svg);
+    const after = document.createElement('button');
+    after.id = 'after';
+    after.tabIndex = 0;
+    scope.append(after);
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'before',
+        'inner',
+        'after',
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
+  it('keeps aria-disabled but still tabbable controls in the sample', () => {
+    // aria-disabled does not remove a control from native sequential focus
+    // navigation; only native disabled/inert/tabindex/visibility rules do.
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<button id="aria" tabindex="0" aria-disabled="true"></button><button id="plain" tabindex="0"></button><button id="native" tabindex="0" disabled></button>';
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'aria',
+        'plain',
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
+  it('excludes content-visibility:hidden subtrees from the sample', () => {
+    // C-AS-FOCUS-SCOPE-0002-J: skipped content is not sequentially reachable.
+    const scope = document.createElement('div');
+    scope.innerHTML = '<button id="before" tabindex="0"></button>';
+    const skipped = document.createElement('div');
+    skipped.style.contentVisibility = 'hidden';
+    skipped.innerHTML = '<button id="skipped" tabindex="0"></button>';
+    scope.append(skipped);
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual(['before']);
+    } finally {
+      scope.remove();
+    }
+  });
+
+  it('samples the editing host, not inherited-editability descendants', () => {
+    // isContentEditable is inherited; only the contenteditable host is a
+    // native sequential stop.
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<div id="editor" contenteditable=""><span id="plain">text</span><div id="nested">more</div></div><button id="after" tabindex="0"></button>';
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'editor',
+        'after',
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
+  it('excludes image-map areas whose image is CSS-hidden and restores them when rendered', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<button id="before" tabindex="0"></button><img id="map-image" src="data:x" usemap="#m" style="display:none"><map name="m"><area id="area" href="#a" tabindex="0" shape="rect" coords="0,0,10,10"></map><button id="after" tabindex="0"></button>';
+    document.body.append(scope);
+    const image = scope.querySelector<HTMLImageElement>('#map-image')!;
+    const sample = () => sampleWebComponentScopeTargets(scope).targets.map((el) => el.id);
+    try {
+      expect(sample()).toEqual(['before', 'after']);
+      image.style.display = '';
+      expect(sample()).toEqual(['before', 'area', 'after']);
+      image.style.visibility = 'hidden';
+      expect(sample()).toEqual(['before', 'after']);
+    } finally {
+      scope.remove();
+    }
+  });
+
+  it('remembers the most recent native in-scope focus for trap recovery', () => {
+    // C-AS-FOCUS-SCOPE-0002-I: pointer/programmatic focus is observed by the
+    // view lease, including when focus later leaves the scope entirely.
+    const scope = document.createElement('div');
+    scope.innerHTML = '<button id="a" tabindex="0"></button><button id="b" tabindex="0"></button>';
+    document.body.append(scope);
+    const a = scope.querySelector<HTMLElement>('#a')!;
+    const b = scope.querySelector<HTMLElement>('#b')!;
+    const history = observeWebComponentRadioFocus(scope);
+    try {
+      expect(history.recent()).toBeNull();
+      b.focus();
+      expect(history.recent()).toBe(b);
+      a.focus();
+      expect(history.recent()).toBe(a);
+      // Focus leaving the scope (blank area) must not clear the anchor.
+      (document.body as HTMLElement).tabIndex = -1;
+      document.body.focus();
+      expect(history.recent()).toBe(a);
+      a.remove();
+      expect(history.recent()).toBeNull();
+    } finally {
+      history.dispose();
+      scope.remove();
+      (document.body as HTMLElement).removeAttribute('tabindex');
+    }
+  });
+
+  it('surfaces the remembered focus through the sampler for module recovery', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<button id="a" tabindex="0"></button><button id="b" tabindex="0"></button><button id="c" tabindex="0"></button>';
+    document.body.append(scope);
+    const b = scope.querySelector<HTMLElement>('#b')!;
+    const history = observeWebComponentRadioFocus(scope);
+    try {
+      b.focus();
+      (document.body as HTMLElement).tabIndex = -1;
+      document.body.focus();
+      const sample = sampleWebComponentScopeTargets(scope, undefined, 'next', history.order, () =>
+        history.recent()
+      );
+      expect(sample.recentTarget).toBe(b);
+      expect(sample.targets.map((el) => el.id)).toEqual(['a', 'b', 'c']);
+    } finally {
+      history.dispose();
+      scope.remove();
+      (document.body as HTMLElement).removeAttribute('tabindex');
+    }
+  });
+
   it('revokes native radio history observation with its view lease', () => {
     const scope = document.createElement('div');
     scope.innerHTML =
@@ -179,6 +327,7 @@ describe('WC scope sequential target sample', () => {
       expect(sampleWebComponentScopeTargets(scope)).toEqual({
         targets: [current, native],
         activeTarget: native,
+        recentTarget: null,
       });
       panel.hidden = true;
       expect(sampleWebComponentScopeTargets(scope).targets).toEqual([current]);

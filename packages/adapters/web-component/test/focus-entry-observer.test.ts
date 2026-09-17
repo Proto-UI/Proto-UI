@@ -36,6 +36,39 @@ afterEach(async () => {
 });
 
 describe('WC live focus-entry resolver inputs', () => {
+  it('resamples when an observed descendant upgrades and attaches an open root', async () => {
+    // attachShadow() produces no light-tree MutationObserver record; the
+    // bounded upgrade watch must revoke the host fallback once a late-open
+    // root exposes a tabbable descendant.
+    const name = `entry-late-shadow-${++serial}`;
+    const host = panel(true);
+    const late = document.createElement(name);
+    host.append(late);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    class LateShadow extends HTMLElement {
+      connectedCallback() {
+        if (!this.shadowRoot) {
+          const root = this.attachShadow({ mode: 'open' });
+          const button = document.createElement('button');
+          button.tabIndex = 0;
+          root.append(button);
+        }
+      }
+    }
+    customElements.define(name, LateShadow);
+    await settle();
+    await customElements.whenDefined(name);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    // happy-dom upgrades replace the element instance; re-query before removal.
+    host.querySelector(name)!.remove();
+    await settle();
+    expect(host.tabIndex).toBe(0);
+  });
+
   it.each([
     [false, true],
     [true, true],

@@ -567,10 +567,14 @@ class FocusModuleImpl extends ModuleBase {
         this.caps.has(FOCUS_SAMPLE_SCOPE_TARGETS_CAP) &&
         this.caps.has(FOCUS_REQUEST_FOCUS_CAP)
       ) {
-        const { targets, activeTarget, activeInsertionIndex } = this.caps.get(
+        const { targets, activeTarget, activeInsertionIndex, recentTarget } = this.caps.get(
           FOCUS_SAMPLE_SCOPE_TARGETS_CAP
         )(container, ev.shiftKey ? 'prev' : 'next');
         if (targets.length === 0) return;
+        // Actual in-scope focus (pointer or programmatic) refreshes the
+        // remembered recovery anchor (C-AS-FOCUS-SCOPE-0002-I); only sampled
+        // targets qualify, so stale or out-of-scope history is ignored.
+        if (recentTarget && targets.includes(recentTarget)) this.lastScopeTarget = recentTarget;
         let current = targets.findIndex((target) => target === activeTarget);
         if (current < 0 && activeInsertionIndex === undefined)
           current = targets.findIndex((target) => target === this.lastScopeTarget);

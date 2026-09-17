@@ -1,32 +1,48 @@
 // Bounded same-document/open-composed-tree sampler for active scope traversal.
 // Fresh projected eligibility on each key event. Optional native focus history
 // is observed by the view owner, never converted into logical focus facts.
+// The UA leaves document.activeElement on the outermost host; only the
+// deepest composed active element proves where focus actually landed.
+export function deepestActiveElement(doc: Document): Element | null {
+  let active = doc.activeElement;
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+  return active;
+}
+
 export function sampleWebComponentScopeTargets(
   container: HTMLElement,
   isNativelyFocusable?: (target: HTMLElement) => boolean,
   direction: 'next' | 'prev' = 'next',
-  radioFocusOrder?: (radio: HTMLInputElement) => number
+  radioFocusOrder?: (radio: HTMLInputElement) => number,
+  recentFocusTarget?: () => HTMLElement | null
 ) {
-  let activeTarget = container.ownerDocument.activeElement;
-  while (activeTarget?.shadowRoot?.activeElement)
-    activeTarget = activeTarget.shadowRoot.activeElement;
+  const activeTarget = deepestActiveElement(container.ownerDocument);
   type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
   const scope: Entry[] = [];
   const visited = new Set<Element>();
   const visit = (el: Element, entries: Entry[]) => {
     if (visited.has(el)) return;
     visited.add(el);
-    if (!(el instanceof HTMLElement)) return;
-    if (el.hidden || el.hasAttribute('inert') || el.getAttribute('aria-hidden') === 'true') return;
+    if (el.hasAttribute('inert') || el.getAttribute('aria-hidden') === 'true') return;
     const style = getComputedStyle(el);
     if (style.display === 'none') return;
+    // content-visibility:hidden skips the subtree from rendering and from
+    // sequential focus navigation (C-AS-FOCUS-SCOPE-0002-J).
+    if (style.contentVisibility === 'hidden') return;
+    if (!(el instanceof HTMLElement)) {
+      // Non-HTML containers (SVG, MathML) are never candidates themselves,
+      // but their descendants (e.g. foreignObject content) stay in the
+      // document's sequential focus order.
+      [...el.children].forEach((child) => visit(child, entries));
+      return;
+    }
+    if (el.hidden) return;
     const target =
       el !== container &&
       (el.tabIndex >= 0 ||
-        (!el.hasAttribute('tabindex') && (isNativelyFocusable?.(el) || el.isContentEditable))) &&
+        (!el.hasAttribute('tabindex') && (isNativelyFocusable?.(el) || isEditingHost(el)))) &&
       isUsableNativeCandidate(el) &&
       !el.matches(':disabled') &&
-      el.getAttribute('aria-disabled') !== 'true' &&
       style.visibility !== 'hidden' &&
       style.visibility !== 'collapse' &&
       style.display !== 'contents';
@@ -143,6 +159,9 @@ export function sampleWebComponentScopeTargets(
   return {
     targets: filtered,
     activeTarget,
+    // View-observed native focus history; Focus decides whether to recover
+    // from it. Never fabricated from logical state.
+    recentTarget: recentFocusTarget?.() ?? null,
     // Position is not a Tab stop. Focus owns direction/wrapping after native
     // programmatic focus on tabindex=-1 or another currently excluded target.
     ...(current >= 0 && !filtered.includes(activeTarget as HTMLElement)
@@ -164,12 +183,13 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
     HTMLInputElement,
     { order: number; tree: Node; form: HTMLFormElement | null; name: string }
   >();
+  let lastFocused: HTMLElement | null = null;
   const remember = (event: Event) => {
     const target = event.composedPath()[0];
+    if (!(target instanceof HTMLElement)) return;
+    if (deepestActiveElement(root.ownerDocument) !== target) return;
+    lastFocused = target;
     if (!(target instanceof HTMLInputElement) || target.type !== 'radio' || !target.name) return;
-    let active = root.ownerDocument.activeElement;
-    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
-    if (active !== target) return;
     history.set(target, {
       order: ++sequence,
       tree: target.getRootNode(),
@@ -188,10 +208,50 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
         ? last.order
         : 0;
     },
+    // The most recent natively focused descendant of this root, while it
+    // stays connected. Covers pointer and programmatic focus alike.
+    recent() {
+      return lastFocused?.isConnected ? lastFocused : null;
+    },
     dispose() {
       root.removeEventListener('focusin', remember, true);
     },
   };
+}
+
+// Only the editing host itself is a sequential stop. isContentEditable is
+// inherited, so ordinary descendants of an editable host must not qualify;
+// the contenteditable attribute marks the actual host (empty/true/
+// plaintext-only enable editing; "false" and unknown values do not).
+function isEditingHost(el: HTMLElement): boolean {
+  const value = el.getAttribute('contenteditable');
+  if (value === null) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === '' || normalized === 'true' || normalized === 'plaintext-only';
+}
+
+// An <area> stop exists only while its image is actually rendered. Walk the
+// composed ancestors so a hidden image (or a hidden ancestor/host) revokes
+// eligibility.
+function isRendered(el: Element): boolean {
+  let node: Element | null = el;
+  while (node) {
+    if (node instanceof HTMLElement && node.hidden) return false;
+    const style = getComputedStyle(node);
+    if (
+      style.display === 'none' ||
+      style.visibility === 'hidden' ||
+      style.visibility === 'collapse'
+    )
+      return false;
+    const parent: Element | null = node.parentElement;
+    if (parent) node = parent;
+    else {
+      const root = node.getRootNode();
+      node = root instanceof ShadowRoot ? root.host : null;
+    }
+  }
+  return true;
 }
 
 // Preserve the shared Web entry exclusions while traversing composed children.
@@ -206,7 +266,9 @@ function isUsableNativeCandidate(el: HTMLElement): boolean {
     el.isConnected &&
     Array.from(el.ownerDocument.querySelectorAll('img[usemap]')).some(
       (image) =>
-        image.getAttribute('usemap') === `#${map.name}` && image.getAttribute('src')?.trim()
+        image.getAttribute('usemap') === `#${map.name}` &&
+        image.getAttribute('src')?.trim() &&
+        isRendered(image)
     )
   );
 }

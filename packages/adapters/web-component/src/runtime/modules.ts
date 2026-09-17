@@ -97,6 +97,7 @@ import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/m
 import { type PropsBaseType } from '@proto.ui/types';
 import { createWebComponentPortalMount } from '../portal-mount';
 import {
+  deepestActiveElement,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../focus-scope-targets';
@@ -420,7 +421,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             container,
             isNativelyFocusable,
             direction,
-            (radio) => radioFocusHistory?.order(radio) ?? 0
+            (radio) => radioFocusHistory?.order(radio) ?? 0,
+            () => radioFocusHistory?.recent() ?? null
           ),
       ],
       [FOCUS_ROOT_TARGET_CAP, () => physicalControl() ?? getTriggerSurface()],
@@ -487,12 +489,34 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   'style',
                 ],
               };
+              // attachShadow() itself produces no light-tree record, so a
+              // descendant custom element that upgrades (or otherwise attaches
+              // an open root) after observation starts would keep the host
+              // fallback forever. Upgrade notifications are the bounded
+              // readiness signal: resample once per newly defined name.
+              const registry = target.ownerDocument.defaultView?.customElements;
+              const pendingUpgrades = new Set<string>();
               const observe = (root: HTMLElement | ShadowRoot) => {
                 entryObserver?.observe(root, options);
                 hasArea ||= !!root.querySelector('area');
                 if (root instanceof HTMLElement && root.shadowRoot) observe(root.shadowRoot);
-                for (const descendant of root.querySelectorAll<HTMLElement>('*'))
+                for (const descendant of root.querySelectorAll<HTMLElement>('*')) {
                   if (descendant.shadowRoot) observe(descendant.shadowRoot);
+                  else if (registry) {
+                    const name = descendant.localName;
+                    if (!name.includes('-') || pendingUpgrades.has(name) || registry.get(name))
+                      continue;
+                    pendingUpgrades.add(name);
+                    registry
+                      .whenDefined(name)
+                      .then(() => {
+                        if (!entryObserver) return;
+                        projectEntry();
+                        observeTree();
+                      })
+                      .catch(() => {});
+                  }
+                }
               };
               observe(target);
               // Both entry resolvers consult document-level image-map bindings.
@@ -543,7 +567,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               ? { preventScroll: options.preventScroll }
               : undefined
           );
-          const applied = target.ownerDocument.activeElement === target;
+          // A focused editor inside an open ShadowRoot leaves
+          // document.activeElement on the host; only the deepest active
+          // element proves the request landed.
+          const applied = deepestActiveElement(target.ownerDocument) === target;
           if (!applied) args.retryTargetReady();
           return applied;
         },
