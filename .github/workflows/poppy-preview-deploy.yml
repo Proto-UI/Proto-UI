@@ -378,6 +378,9 @@ jobs:
         shell: bash
         run: node integrations/proto-ui-preview/scripts/report.mjs failed
 
+      # Revocation must land before the sticky comment: a same-head Ready
+      # deployment keeps passing Poppy authorization until every control plane
+      # that may own it records the Failed lifecycle for this SHA.
       - name: Maintain the sticky fallback comment
         id: comment
         if: always() && steps.live.outcome == 'success'
@@ -459,6 +462,9 @@ jobs:
         shell: bash
         run: node integrations/proto-ui-preview/scripts/report.mjs failed
 
+      # Revocation must land before the sticky comment: a same-head Ready
+      # deployment keeps passing Poppy authorization until every control plane
+      # that may own it records the Failed lifecycle for this SHA.
       - name: Maintain the sticky fallback comment
         id: comment
         if: always()
