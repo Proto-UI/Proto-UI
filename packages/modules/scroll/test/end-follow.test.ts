@@ -142,6 +142,123 @@ afterEach(() => {
 });
 
 describe('module-scroll: end-follow host contract', () => {
+  it('cancels a pending follow frame when departure input cannot scroll (key)', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    // Initial follow frame is pending while the surface is away from the end.
+    expect(frames.pending()).toBe(1);
+    // ArrowUp at scrollTop 0 is boundary-clamped: no scroll event will arrive.
+    target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowUp' }));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    expect(frames.pending()).toBe(0);
+    frames.runAll();
+    expect(target.scrollTop).toBe(0);
+    lease.dispose();
+  });
+
+  it('cancels a pending follow frame when departure input cannot scroll (wheel)', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    expect(frames.pending()).toBe(1);
+    target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -40 }));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    expect(frames.pending()).toBe(0);
+    frames.runAll();
+    expect(target.scrollTop).toBe(0);
+    lease.dispose();
+  });
+
+  it('keeps a pending follow frame for boundary-clamped input directed toward the end', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    expect(frames.pending()).toBe(1);
+    target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowDown' }));
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(300);
+    lease.dispose();
+  });
+
+  it('installs reader-input listeners only while a follow axis is configured', () => {
+    installFrameHarness();
+    const added = vi.spyOn(window, 'addEventListener');
+    const removed = vi.spyOn(window, 'removeEventListener');
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const host = createWebScrollSurfaceHost(target, { moveGestureHost });
+    const lease = host.attach({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'off' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    const addedTypes = () => added.mock.calls.map(([type]) => type);
+    expect(addedTypes()).not.toContain('pointermove');
+    expect(addedTypes()).not.toContain('touchmove');
+    expect(addedTypes()).not.toContain('keyup');
+    lease.update({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    expect(addedTypes()).toContain('pointermove');
+    expect(addedTypes()).toContain('touchmove');
+    lease.update({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'off' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    const removedTypes = removed.mock.calls.map(([type]) => type);
+    expect(removedTypes).toContain('pointermove');
+    expect(removedTypes).toContain('touchmove');
+    lease.dispose();
+  });
+
   it('classifies reversal away after a toward-end movement was clamped', () => {
     const fixture = installTouchFollowFixture();
     const start = touchContact(fixture.target, 11, 0, 100);

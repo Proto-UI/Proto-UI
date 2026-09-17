@@ -552,6 +552,18 @@ export function createWebScrollSurfaceHost(
         const now = ownerWindow?.performance.now() ?? Date.now();
         readerIntentUntil = now + DISCRETE_READER_INTENT_WINDOW_MS;
       };
+      // A boundary-clamped departure gesture emits no scroll event, so a
+      // pending follow frame must not wait for one to be canceled. Input
+      // that can still move the surface keeps the deadline-only path.
+      const cancelUnscrollableDeparture = (axis: ScrollAxis) => {
+        if (!isAxisEnabled(axis) || isAxisAtEnd(axis) || !scheduledEnd) return;
+        const offset = axis === 'horizontal' ? target.scrollLeft : target.scrollTop;
+        if (offset > 0) return;
+        cancelScheduledEnd(true);
+        endFollowState = 'paused';
+        requestedDepartureAxis = null;
+        publish();
+      };
       const hasReaderIntent = () => {
         const now = ownerWindow?.performance.now() ?? Date.now();
         const axis = configuredFollowAxis();
@@ -568,6 +580,7 @@ export function createWebScrollSurfaceHost(
             : event.deltaX < 0 || (event.shiftKey && event.deltaY < 0);
         if (!leavingEnd) return;
         armReaderIntent();
+        cancelUnscrollableDeparture(axis);
       };
       const beginContact = () => {
         const axis = configuredFollowAxis();
@@ -682,7 +695,10 @@ export function createWebScrollSurfaceHost(
                 : null;
         if (!scrollDirection) return;
         requestedDepartureAxis = null;
-        if (scrollDirection === 'before') armReaderIntent();
+        if (scrollDirection === 'before') {
+          armReaderIntent();
+          cancelUnscrollableDeparture(axis);
+        }
       };
       const onScroll = () => {
         scrolling = true;
@@ -733,17 +749,42 @@ export function createWebScrollSurfaceHost(
       target.addEventListener('transitioncancel', onContentReflow, true);
       target.addEventListener('animationend', onContentReflow, true);
       target.addEventListener('animationcancel', onContentReflow, true);
-      target.addEventListener('wheel', onWheel, { passive: true });
-      target.addEventListener('pointerdown', onPointerDown, { passive: true });
-      ownerWindow?.addEventListener('pointermove', onPointerMove, { passive: true });
-      ownerWindow?.addEventListener('pointerup', onPointerUp, { passive: true });
-      ownerWindow?.addEventListener('pointercancel', onPointerCancel, { passive: true });
-      target.addEventListener('touchstart', onTouchStart, { passive: true });
-      ownerWindow?.addEventListener('touchmove', onTouchMove, { passive: true });
-      ownerWindow?.addEventListener('touchend', onTouchEnd, { passive: true });
-      ownerWindow?.addEventListener('touchcancel', onTouchEnd, { passive: true });
-      target.addEventListener('keydown', onKeyDown);
-      ownerWindow?.addEventListener('keyup', completeReaderIntent);
+      let observingGestures = false;
+      // Reader-input listeners exist only while a follow axis is configured,
+      // so an ordinary Scroll Area never fans window movement events through
+      // every attached surface. Same reconcile discipline as font observation.
+      const reconcileGestureObservation = () => {
+        const shouldObserve = configuredFollowAxis() !== null;
+        if (shouldObserve === observingGestures) return;
+        if (shouldObserve) {
+          target.addEventListener('wheel', onWheel, { passive: true });
+          target.addEventListener('pointerdown', onPointerDown, { passive: true });
+          ownerWindow?.addEventListener('pointermove', onPointerMove, { passive: true });
+          ownerWindow?.addEventListener('pointerup', onPointerUp, { passive: true });
+          ownerWindow?.addEventListener('pointercancel', onPointerCancel, { passive: true });
+          target.addEventListener('touchstart', onTouchStart, { passive: true });
+          ownerWindow?.addEventListener('touchmove', onTouchMove, { passive: true });
+          ownerWindow?.addEventListener('touchend', onTouchEnd, { passive: true });
+          ownerWindow?.addEventListener('touchcancel', onTouchEnd, { passive: true });
+          target.addEventListener('keydown', onKeyDown);
+          ownerWindow?.addEventListener('keyup', completeReaderIntent);
+          observingGestures = true;
+          return;
+        }
+        resetReaderInput();
+        target.removeEventListener('wheel', onWheel);
+        target.removeEventListener('pointerdown', onPointerDown);
+        ownerWindow?.removeEventListener('pointermove', onPointerMove);
+        ownerWindow?.removeEventListener('pointerup', onPointerUp);
+        ownerWindow?.removeEventListener('pointercancel', onPointerCancel);
+        target.removeEventListener('touchstart', onTouchStart);
+        ownerWindow?.removeEventListener('touchmove', onTouchMove);
+        ownerWindow?.removeEventListener('touchend', onTouchEnd);
+        ownerWindow?.removeEventListener('touchcancel', onTouchEnd);
+        target.removeEventListener('keydown', onKeyDown);
+        ownerWindow?.removeEventListener('keyup', completeReaderIntent);
+        observingGestures = false;
+      };
       ownerWindow?.addEventListener('blur', resetReaderInput);
       const resizeObserver =
         typeof ResizeObserver === 'function' ? new ResizeObserver(onLayoutChange) : undefined;
@@ -806,6 +847,7 @@ export function createWebScrollSurfaceHost(
       reconcileMoveGestures();
       observeGeometry();
       reconcileFontObservation();
+      reconcileGestureObservation();
       resetEndFollow();
 
       return {
@@ -818,6 +860,7 @@ export function createWebScrollSurfaceHost(
           reconcileMoveGestures();
           observeGeometry();
           reconcileFontObservation();
+          reconcileGestureObservation();
           if (previousAxis !== configuredFollowAxis() || previousAxes !== connection.config.axes) {
             resetEndFollow();
           } else {
