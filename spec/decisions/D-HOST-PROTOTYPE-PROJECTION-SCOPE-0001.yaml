@@ -3,6 +3,13 @@ type: decision
 title: Website host projection scopes materialize one coherent design-language lane per generation
 status: draft
 since: 0.3.0-alpha.0
+lifecycleRationale:
+  en: >-
+    Cataloged as draft: the first implementation is deliberately limited to the Website preview composition, and two admission questions remain open — whether the validated projection-lane manifest should become a public Maker API or catalog identity (Q1), and whether multi-scope overlay trees need an Adapter-level scoped portal target (Q2). Both block stable activation of this decision.
+
+  zh-CN: >-
+    以 draft 编目：首个实现刻意限定在 Website preview composition，且仍有两个准入问题悬置——验证后的 projection-lane manifest 是否应成为公共 Maker API 或独立 catalog identity（Q1），以及多 scope overlay tree 是否需要 Adapter 级 scoped portal target（Q2）。两者均阻塞本 decision 的稳定激活。
+
 summary: The Website preview host combines explicit projection-lane and content manifests, an independent Runtime materializer, and a separately referenced theme artifact plus consumer-owned theme inputs to replace every scope-owned control and overlay as one generation without creating a special Base, changing Prototype inheritance, or mixing fallback parts.
 statement:
   zh-CN: >-
@@ -60,7 +67,7 @@ openQuestions:
     context:
       zh-CN: 当前 schema 没有 design-language profile entity；本切片不扩张 schema 或 package surface。
       en: The current schema has no design-language profile entity; this slice does not expand the schema or package surface.
-    blocks: [public-api-admission]
+    blocks: [activation:D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001]
   - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-Q2
     question:
       zh-CN: 多个 scope 或更复杂 overlay tree 是否需要 Adapter-level scoped portal target，而不是对每个 surface 显式投影 lane theme？
@@ -68,7 +75,7 @@ openQuestions:
     context:
       zh-CN: 首个 Website consumer 使用既有 normalized surface channels，不改变四个 Adapter 的 portal contract。
       en: The first Website consumer uses existing normalized surface channels and does not change the four Adapters' portal contracts.
-    blocks: [adapter-portal-scope-admission]
+    blocks: [activation:D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001]
 sources:
   - path: internal/contracts/template/no-prototype-composition.v0.md
   - path: apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro
