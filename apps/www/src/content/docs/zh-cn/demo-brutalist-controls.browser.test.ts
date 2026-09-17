@@ -778,6 +778,8 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         if (!lightTooltipNode) throw new Error(`${runtime}: Tooltip Content has no DOM node.`);
         const firstTooltipId = lightPaint.id;
         expect(firstTooltipId, runtime).toBeTruthy();
+        // The Brutalist projection materializes a closed theme copy, so Website
+        // overrides on :root must not leak into the projected portal surface.
         const tooltipCanaries = {
           foreground: 'rgb(17, 83, 139)',
           background: 'rgb(211, 89, 127)',
@@ -792,15 +794,15 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           'Portable Base behavior, Brutalist visual grammar',
           `${runtime}/canary`
         );
-        expect(canaryPaint.backgroundColor, `${runtime}/canary/fill`).toBe(
-          tooltipCanaries.foreground
+        expect(canaryPaint.backgroundColor, `${runtime}/canary/fill-closure`).toBe(
+          lightPaint.backgroundColor
         );
-        expect(canaryPaint.color, `${runtime}/canary/ink`).toBe(tooltipCanaries.background);
-        expect(canaryPaint.borderColor, `${runtime}/canary/border`).toBe(
-          tooltipCanaries.foreground
+        expect(canaryPaint.color, `${runtime}/canary/ink-closure`).toBe(lightPaint.color);
+        expect(canaryPaint.borderColor, `${runtime}/canary/border-closure`).toBe(
+          lightPaint.borderColor
         );
-        expect(canaryPaint.boxShadow, `${runtime}/canary/hard-shadow`).toContain(
-          tooltipCanaries.foreground
+        expect(canaryPaint.boxShadow, `${runtime}/canary/hard-shadow-closure`).toBe(
+          lightPaint.boxShadow
         );
         await page.evaluate(() => {
           const root = document.documentElement;
