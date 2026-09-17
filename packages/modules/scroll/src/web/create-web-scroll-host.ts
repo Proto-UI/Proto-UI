@@ -432,6 +432,8 @@ export function createWebScrollSurfaceHost(
         }
         const requestedAtEnd =
           followAxis === request.axis ? requestReachesEnd(target, request, endThreshold) : null;
+        // A boundary-clamped departure emits no scroll event, so the pending
+        // automatic end frame must be canceled from the classified input path.
         if (scheduledEnd?.axis === request.axis) cancelScheduledEnd(true);
         applyRequest(target, request);
         if (followAxis === request.axis) {
