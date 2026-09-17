@@ -14,9 +14,16 @@ const cases = [
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
   ['core root', 'packages/core/src/index.ts', 6_000],
   ['runtime root', 'packages/runtime/src/index.ts', 60_000],
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 75_000],
+  // PR #625 adds the A11y direct-reference transport and integrates the asAccessible
+  // slice (#636). Attribution on the pinned local toolchain: main a3095552 measures
+  // react 72,498 / wc 75,664; pre-merge 70f728dd react 74,980 / wc 78,206 (the WC root
+  // was already 206 bytes over 78,000 before asAccessible); head 8c80e14b react 75,131 /
+  // wc 78,334. asAccessible itself contributes +151 (react) and +128 (wc); the remainder
+  // is the direct-reference transport. CI run 34517369809 agrees exactly with the head
+  // numbers. Ceilings keep ~370-670 bytes of headroom; vue stays at 75,000 (74,857).
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 75_500],
   ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_000],
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 78_000],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 79_000],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];

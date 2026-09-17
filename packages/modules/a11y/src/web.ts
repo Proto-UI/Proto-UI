@@ -118,12 +118,17 @@ export function createWebA11yProjectionRegistry(
       ownership.baseline = current;
       ownership.projectedValue = undefined;
     } else if (count === 1 && current === (value ?? null)) {
-      const baseline = ownership.baseline;
-      if (baseline !== current) {
-        if (baseline === null) target.removeAttribute(attr);
-        else target.setAttribute(attr, baseline);
+      // Other owners may still contribute different values; keep the latest
+      // remaining contribution and restore the host baseline only after all
+      // owners are gone (C-A11Y-0001-P).
+      const remaining = [...ownership.counts.keys()];
+      const next =
+        remaining.length > 0 ? (remaining[remaining.length - 1] ?? null) : ownership.baseline;
+      if (next !== current) {
+        if (next === null) target.removeAttribute(attr);
+        else target.setAttribute(attr, next);
       }
-      ownership.projectedValue = baseline;
+      ownership.projectedValue = next;
     }
     if (ownership.counts.size === 0) byAttribute.delete(attr);
     if (byAttribute.size === 0) scalarAttributeRefs.delete(target);

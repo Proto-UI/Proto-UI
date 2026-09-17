@@ -460,6 +460,23 @@ describe('Web A11y opaque semantic-object references', () => {
     expect(target.getAttribute('role')).toBe('navigation');
   });
 
+  it('keeps the surviving scalar contribution when the top owner is released', () => {
+    // T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION / C-A11Y-0001-P: releasing the
+    // top owner must surface the latest remaining owned contribution, not the
+    // host baseline, while other owners remain.
+    const registry = createWebA11yProjectionRegistry();
+    const target = document.createElement('div');
+    const first = createWebA11yProjector(target, undefined, registry);
+    const second = createWebA11yProjector(target, undefined, registry);
+    first({ ...semanticSnapshot(createA11ySemanticObjectRef()), role: 'button' });
+    second({ ...semanticSnapshot(createA11ySemanticObjectRef()), role: 'checkbox' });
+    expect(target.getAttribute('role')).toBe('checkbox');
+    second.dispose?.();
+    expect(target.getAttribute('role')).toBe('button');
+    first.dispose?.();
+    expect(target.hasAttribute('role')).toBe(false);
+  });
+
   it('preserves a matching host scalar baseline with reverse shared-owner release', () => {
     const registry = createWebA11yProjectionRegistry();
     const target = document.createElement('div');

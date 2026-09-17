@@ -680,6 +680,48 @@ describe('runtime contract: a11y (v0)', () => {
     expect(dispose).toHaveBeenCalledOnce();
   });
 
+  it('A11Y-0152: retires a replaced view projector after the replacement applies', async () => {
+    // T-A11Y-0001-CASE-OPAQUE-RELATIONS
+    const target = document.createElement('div');
+    const first = createWebA11yProjector(target);
+    const second = createWebA11yProjector(target);
+    const firstDetach = vi.fn(first.detach);
+    const firstDispose = vi.fn(first.dispose);
+    const secondDispose = vi.fn(second.dispose);
+    first.detach = firstDetach;
+    first.dispose = firstDispose;
+    second.dispose = secondDispose;
+
+    const P = definePrototype({
+      name: 'x-a11y-projector-retirement',
+      setup(def) {
+        asAccessible().role('cell');
+        return (r) => r.el('div', 'value');
+      },
+    });
+    let wiringRef: Parameters<NonNullable<RuntimeHost<any>['onRuntimeReady']>>[0] | null = null;
+    const ctx = createHost();
+    ctx.host.onRuntimeReady = (wiring) => {
+      wiringRef = wiring;
+      wiring.attach('a11y', [[A11Y_PROJECT_CAP, first]]);
+    };
+
+    const result = executeWithHost(P, ctx.host);
+    expect(target.getAttribute('role')).toBe('cell');
+    expect(firstDetach).not.toHaveBeenCalled();
+    expect(firstDispose).not.toHaveBeenCalled();
+
+    // A new view epoch rewires the cap with a fresh projector.
+    wiringRef!.attach('a11y', [[A11Y_PROJECT_CAP, second]]);
+    expect(firstDetach).toHaveBeenCalledOnce();
+    expect(firstDispose).toHaveBeenCalledOnce();
+    expect(target.getAttribute('role')).toBe('cell');
+
+    await result.session.dispose();
+    expect(firstDispose).toHaveBeenCalledOnce();
+    expect(secondDispose).toHaveBeenCalledOnce();
+  });
+
   it('A11Y-0155: rewires State-backed relation updates after setup', () => {
     // T-A11Y-0001-CASE-OPAQUE-RELATIONS
     let firstTarget!: { set(value: string, reason?: string): void };

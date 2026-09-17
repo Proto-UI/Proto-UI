@@ -184,6 +184,23 @@ class A11yModuleImpl extends ModuleBase {
     if (next) this.projectors.add(next);
   }
 
+  /**
+   * A replacement projector only enters through a replaced host wiring, so
+   * every other retained projector belongs to a revoked view epoch and can
+   * never be rewired. Dispose those projectors only after the active one has
+   * applied the current snapshot and adopted the retained identity lease, so
+   * detached view state cannot accumulate until terminal instance disposal.
+   */
+  private retireReplacedProjectors(): void {
+    const active = this.activeProjector;
+    if (!active) return;
+    for (const projector of [...this.projectors]) {
+      if (projector === active) continue;
+      projector.dispose?.();
+      this.projectors.delete(projector);
+    }
+  }
+
   private clearHeadingLevelProjection(): void {
     if (!this.projectionActive) return;
     this.projectionActive = false;
@@ -360,6 +377,7 @@ class A11yModuleImpl extends ModuleBase {
     }
     projector(this.getSnapshot());
     this.projectionActive = true;
+    this.retireReplacedProjectors();
   }
 }
 
