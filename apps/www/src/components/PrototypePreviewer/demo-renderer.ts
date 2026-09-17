@@ -28,6 +28,9 @@ function unsupportedRuntime(runtime: never): Error {
  * mounted demo. The renderer still owns the host lease and performs its own
  * load so direct callers remain safe; browser module imports are cached.
  */
+// Framework adapters load through dynamic import() so the static entry closure
+// (and its package budget) never includes React/Vue; prepareDemoRuntime warms
+// the chunk so the runtime switch does not flash a skeleton.
 export async function prepareDemoRuntime(runtime: RuntimeId): Promise<void> {
   switch (runtime) {
     case 'wc':
