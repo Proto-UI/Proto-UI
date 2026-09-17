@@ -1,5 +1,4 @@
 import type { RuntimeAPI } from './ids';
-import { createReactAdapter } from '@proto.ui/adapter-react';
 import type * as ReactTypes from 'react';
 import { claimHostMount, releaseHostMount } from './host-mount';
 
@@ -39,7 +38,10 @@ export function createReactRuntime(load = loadReact): RuntimeAPI {
 
     async mount(host, prototype, options) {
       const lease = claimHostMount(host);
-      const { React, ReactDOM } = await load();
+      const [{ React, ReactDOM }, { createReactAdapter }] = await Promise.all([
+        load(),
+        import('@proto.ui/adapter-react'),
+      ]);
       if (!lease.isCurrent()) return;
 
       const adapter = createReactAdapter(React as any);

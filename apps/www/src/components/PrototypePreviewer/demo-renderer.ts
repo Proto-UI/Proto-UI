@@ -1,7 +1,6 @@
 import { setElementProps } from '@proto.ui/adapter-web-component';
-import { createReactAdapter, type ReactRuntime } from '@proto.ui/adapter-react';
-import { createVueAdapter, type VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
-import { createVue2Adapter } from '@proto.ui/adapter-vue2';
+import type { ReactRuntime } from '@proto.ui/adapter-react';
+import type { VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import type { Prototype } from '@proto.ui/core';
 import { getPrototype } from './registry';
 import { loadReact } from './runtimes/react-runtime';
@@ -34,13 +33,13 @@ export async function prepareDemoRuntime(runtime: RuntimeId): Promise<void> {
     case 'wc':
       return;
     case 'react':
-      await loadReact();
+      await Promise.all([loadReact(), import('@proto.ui/adapter-react')]);
       return;
     case 'vue':
-      await loadVue();
+      await Promise.all([loadVue(), import('@proto.ui/adapter-vue')]);
       return;
     case 'vue2':
-      await loadVue2();
+      await Promise.all([loadVue2(), import('@proto.ui/adapter-vue2')]);
       return;
     default:
       throw unsupportedRuntime(runtime);
@@ -214,6 +213,7 @@ async function renderDemoReact(
   const { host, demo } = opt;
 
   const { React, ReactDOM } = await loadReact();
+  const { createReactAdapter } = await import('@proto.ui/adapter-react');
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   const adapter = createReactAdapter({
     ...React,
@@ -346,6 +346,7 @@ async function renderDemoVue(
   const { host, demo } = opt;
 
   const Vue = await loadVue();
+  const { createVueAdapter } = await import('@proto.ui/adapter-vue');
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   const adapter = createVueAdapter(Vue as unknown as AdapterVueRuntime);
 
@@ -465,6 +466,7 @@ async function renderDemoVue2(
   const { host, demo } = opt;
 
   const Vue = await loadVue2();
+  const { createVue2Adapter } = await import('@proto.ui/adapter-vue2');
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   const adapter = createVue2Adapter(toVue2Runtime(Vue));
 
