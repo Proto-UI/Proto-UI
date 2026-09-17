@@ -83,8 +83,8 @@ function isCompatibleRuntimeRange(declaredRange: string, requiredRange: string):
   if (requiredRange !== '>=2.6.0 <2.7') return false;
   const normalized = declaredRange.replace(/^npm:vue@/, '').trim();
   return (
-    /^(?:v)?2\.6(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
-    /^~2\.6(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(normalized) ||
+    /^(?:v)?2\.6(?:\.\d+)?$/.test(normalized) ||
+    /^~2\.6(?:\.\d+)?$/.test(normalized) ||
     /^2\.6(?:\.x|\.\*)?$/.test(normalized) ||
     /^>=\s*2\.6(?:\.0)?\s+<\s*2\.7(?:\.0)?$/.test(normalized)
   );

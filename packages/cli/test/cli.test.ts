@@ -682,7 +682,7 @@ describe('@proto.ui/cli', () => {
     await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
   });
 
-  it.each(['2.7.16', '^2.6.14'])(
+  it.each(['2.7.16', '^2.6.14', '2.6.14-beta.1', '~2.6.14-beta.1'])(
     'rejects Vue range %s before generating a Vue 2 facade',
     async (vue) => {
       const cwd = await createTempProject(
