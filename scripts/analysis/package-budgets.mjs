@@ -15,15 +15,17 @@ const cases = [
   ['core root', 'packages/core/src/index.ts', 6_000],
   ['runtime root', 'packages/runtime/src/index.ts', 60_000],
   // PR #625 adds the A11y direct-reference transport and integrates the asAccessible
-  // slice (#636). Attribution on the pinned local toolchain: main a3095552 measures
-  // react 72,498 / wc 75,664; pre-merge 70f728dd react 74,980 / wc 78,206 (the WC root
-  // was already 206 bytes over 78,000 before asAccessible); head 8c80e14b react 75,131 /
-  // wc 78,334. asAccessible itself contributes +151 (react) and +128 (wc); the remainder
-  // is the direct-reference transport. CI run 34517369809 agrees exactly with the head
-  // numbers. Ceilings keep ~370-670 bytes of headroom; vue stays at 75,000 (74,857).
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 75_500],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_000],
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 79_000],
+  // slice (#636). Attribution on the pinned toolchain against current main ddac15da
+  // (react 72,498 / vue 72,208 / wc 75,664): the merged head measures react 75,971 /
+  // vue 75,705 / wc 79,096, i.e. +3,473 / +3,497 / +3,432 gzip bytes attributed to the
+  // shared ownership transport in packages/adapters/base (lease retention, scalar
+  // top-owner release, replaced-projector retirement) surfacing in all three adapters.
+  // Shrinking was considered first per #654: the delta is semantic ownership code with
+  // regression coverage, not removable bloat. CI run 35219288891 agrees exactly with
+  // the merged numbers. Ceilings keep ~400-800 bytes of headroom.
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 76_500],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 76_500],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 79_500],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];
