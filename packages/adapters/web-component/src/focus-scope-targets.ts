@@ -23,7 +23,10 @@ export function sampleWebComponentScopeTargets(
   const visit = (el: Element, entries: Entry[]) => {
     if (visited.has(el)) return;
     visited.add(el);
-    if (el.hasAttribute('inert') || el.getAttribute('aria-hidden') === 'true') return;
+    // aria-hidden hides a subtree from accessibility APIs but does not remove
+    // visible controls from native sequential focus navigation; keep
+    // accessibility-tree hiding separate from keyboard-focus eligibility.
+    if (el.hasAttribute('inert')) return;
     const style = getComputedStyle(el);
     if (style.display === 'none') return;
     // content-visibility:hidden skips the subtree from rendering and from

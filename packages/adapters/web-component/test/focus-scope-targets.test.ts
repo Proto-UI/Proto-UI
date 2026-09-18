@@ -50,6 +50,25 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('keeps aria-hidden wrappers with tabbable descendants in the sample', () => {
+    // aria-hidden removes the subtree from the accessibility tree but not from
+    // native sequential focus navigation; the substituted order must not jump
+    // over a real native tab stop inside such a wrapper.
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<button id="before" tabindex="0"></button><div aria-hidden="true"><button id="wrapped" tabindex="0"></button></div><button id="after" tabindex="0"></button>';
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'before',
+        'wrapped',
+        'after',
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
   it('excludes content-visibility:hidden subtrees from the sample', () => {
     // C-AS-FOCUS-SCOPE-0002-J: skipped content is not sequentially reachable.
     const scope = document.createElement('div');

@@ -117,6 +117,69 @@ const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
 const WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
 const WEB_COMPONENT_IMAGE_VIEW_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
 
+// attachShadow() produces no MutationObserver record, so an open root that an
+// already-upgraded descendant attaches after observation started is invisible
+// to DOM observation and to upgrade watches alike. While at least one caller
+// observes a region, wrap the window's attachShadow once (reference-counted)
+// and report late open roots to every subscriber; the original method is
+// restored when the last subscriber unsubscribes.
+type LateAttachShadowSubscriber = {
+  contains(host: Element): boolean;
+  onLateRoot(): void;
+};
+const lateAttachShadowWatches = new WeakMap<
+  Window,
+  {
+    count: number;
+    original: Element['attachShadow'];
+    subscribers: Set<LateAttachShadowSubscriber>;
+  }
+>();
+
+function watchLateAttachShadow(
+  view: (Window & typeof globalThis) | null,
+  contains: (host: Element) => boolean,
+  onLateRoot: () => void
+): (() => void) | null {
+  const ElementCtor = view?.Element;
+  if (!ElementCtor) return null;
+  let watch = lateAttachShadowWatches.get(view as Window);
+  if (!watch) {
+    const subscribers = new Set<LateAttachShadowSubscriber>();
+    const original = ElementCtor.prototype.attachShadow;
+    const patched = function (this: Element, init: ShadowRootInit): ShadowRoot {
+      const root = original.call(this, init);
+      // Defer past the attaching turn so callers that populate the root
+      // synchronously (e.g. connectedCallback) are sampled with content.
+      if (root.mode === 'open' && subscribers.size > 0) {
+        const host = this;
+        queueMicrotask(() => {
+          for (const subscriber of subscribers) {
+            if (subscriber.contains(host)) subscriber.onLateRoot();
+          }
+        });
+      }
+      return root;
+    };
+    ElementCtor.prototype.attachShadow = patched as typeof original;
+    watch = { count: 0, original, subscribers };
+    lateAttachShadowWatches.set(view as Window, watch);
+  }
+  const subscriber: LateAttachShadowSubscriber = { contains, onLateRoot };
+  watch.subscribers.add(subscriber);
+  watch.count += 1;
+  return () => {
+    const current = lateAttachShadowWatches.get(view as Window);
+    if (!current) return;
+    current.subscribers.delete(subscriber);
+    current.count -= 1;
+    if (current.count === 0) {
+      ElementCtor.prototype.attachShadow = current.original;
+      lateAttachShadowWatches.delete(view as Window);
+    }
+  };
+}
+
 function resolveWebComponentTriggerSurface(
   root: HTMLElement,
   logicalSurface: HTMLElement | null
@@ -333,12 +396,15 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
+  let stopEntryAttachShadowWatch: (() => void) | null = null;
   let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
   const stopEntryObserver = () => {
     entryObserver?.disconnect();
     entryObserver = null;
     entryImageObserver?.disconnect();
     entryImageObserver = null;
+    stopEntryAttachShadowWatch?.();
+    stopEntryAttachShadowWatch = null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
@@ -496,7 +562,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // readiness signal: resample once per newly defined name.
               const registry = target.ownerDocument.defaultView?.customElements;
               const pendingUpgrades = new Set<string>();
+              const observedRoots = new Set<Node>();
               const observe = (root: HTMLElement | ShadowRoot) => {
+                observedRoots.add(root);
                 entryObserver?.observe(root, options);
                 hasArea ||= !!root.querySelector('area');
                 if (root instanceof HTMLElement && root.shadowRoot) observe(root.shadowRoot);
@@ -519,6 +587,26 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               };
               observe(target);
+              // An already-upgraded descendant can still attach an open root
+              // later (from a method, timer, or state transition), which is
+              // invisible to both DOM mutation records and upgrade watches.
+              // While this region is observed, wrap the window's attachShadow
+              // with a reference-counted watch that resamples once a late open
+              // root lands inside an already-observed root.
+              stopEntryAttachShadowWatch ??= watchLateAttachShadow(
+                target.ownerDocument.defaultView,
+                (host) => {
+                  for (const root of observedRoots) {
+                    if (root === host || root.contains(host)) return true;
+                  }
+                  return false;
+                },
+                () => {
+                  if (!entryObserver) return;
+                  projectEntry();
+                  observeTree();
+                }
+              );
               // Both entry resolvers consult document-level image-map bindings.
               // Only regions with areas need this extra observation; unrelated
               // document mutations must not resample ordinary entry regions.

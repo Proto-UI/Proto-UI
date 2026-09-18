@@ -69,6 +69,32 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.tabIndex).toBe(0);
   });
 
+  it('resamples when an already-upgraded descendant attaches a late open root', async () => {
+    // attachShadow() from a later method call produces neither a light-tree
+    // mutation nor an upgrade signal; the bounded late-attach watch must still
+    // revoke the host fallback once the new root exposes a tabbable control.
+    const name = `entry-late-method-shadow-${++serial}`;
+    class LateMethodShadow extends HTMLElement {
+      attachLater() {
+        if (this.shadowRoot) return;
+        const root = this.attachShadow({ mode: 'open' });
+        const button = document.createElement('button');
+        button.tabIndex = 0;
+        root.append(button);
+      }
+    }
+    customElements.define(name, LateMethodShadow);
+    const host = panel(true);
+    const late = document.createElement(name) as LateMethodShadow;
+    host.append(late);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    late.attachLater();
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
   it.each([
     [false, true],
     [true, true],
