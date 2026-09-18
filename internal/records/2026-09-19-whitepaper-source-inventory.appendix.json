@@ -1,0 +1,1370 @@
+{
+  "generated": "2026-09-19",
+  "baseCommit": "ddac15dae7016d995fcb0cb5afb334b495c0a842",
+  "note": "Machine-extracted verified positions for the #478 bounded source-inventory. Non-normative research appendix to internal/records/2026-09-19-whitepaper-source-inventory.md.",
+  "sidebarOrder": [
+    "whitepaper/0-preface",
+    "whitepaper/1-components-before-code",
+    "whitepaper/2-interaction-relations",
+    "whitepaper/3-component-boundary",
+    "whitepaper/4-semantics-beyond-channels",
+    "whitepaper/5-translation-layer",
+    "whitepaper/6-consistency-boundary",
+    "whitepaper/7-evolving-within-boundaries",
+    "whitepaper/8-conclusion"
+  ],
+  "legacyRedirects": {
+    "component-as-protocol": "1-components-before-code",
+    "information-flow-model": "2-interaction-relations",
+    "prototype-boundary": "3-component-boundary",
+    "execution-semantics": "4-semantics-beyond-channels",
+    "translation-layer": "5-translation-layer",
+    "design-constraints": "6-consistency-boundary",
+    "evolution-path": "7-evolving-within-boundaries",
+    "faq": "0-preface"
+  },
+  "pages": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/0-preface.md",
+      "locale": "zh-cn",
+      "slug": "0-preface",
+      "kind": "numbered-chapter",
+      "title": "序章：我们还要发明多少次 Button？",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 3700,
+      "redirectedTo": null,
+      "headings": [],
+      "legacyAnchors": ["这页是做什么的"],
+      "legacyTopicStubs": [
+        {
+          "id": "1-proto-ui-是框架吗",
+          "target": "/zh-cn/whitepaper/7-evolving-within-boundaries/#一条可行路径而不是唯一答案"
+        },
+        {
+          "id": "2-proto-ui-和跨端框架有什么区别",
+          "target": "/zh-cn/whitepaper/5-translation-layer/#prototype-还不是宿主中的组件"
+        },
+        {
+          "id": "3-proto-ui-和组件库是什么关系",
+          "target": "/zh-cn/whitepaper/7-evolving-within-boundaries/#原型库"
+        },
+        {
+          "id": "4-为什么-proto-ui-不提供原型级别的组合能力",
+          "target": "/zh-cn/whitepaper/3-component-boundary/#从-component-到-prototype"
+        },
+        {
+          "id": "5-为什么子结构一旦承担独立信息通路就必须拆分",
+          "target": "/zh-cn/whitepaper/3-component-boundary/#用信息通路判断组件边界"
+        },
+        {
+          "id": "6-为什么-feedback-only-可以不拆",
+          "target": "/zh-cn/whitepaper/3-component-boundary/#为什么-feedback-only-可拆可不拆"
+        },
+        {
+          "id": "7-proto-ui-所说的一致性到底严格到什么程度",
+          "target": "/zh-cn/whitepaper/6-consistency-boundary/#共同条件越多比较越细"
+        },
+        {
+          "id": "8-为什么同为-web-宿主时要求更严格而跨平台时允许差异",
+          "target": "/zh-cn/whitepaper/6-consistency-boundary/#共同条件越多比较越细"
+        },
+        {
+          "id": "9-官方如何看待社区适配器",
+          "target": "/zh-cn/whitepaper/7-evolving-within-boundaries/#翻译层与生态"
+        },
+        {
+          "id": "10-官方如何看待社区原型",
+          "target": "/zh-cn/whitepaper/7-evolving-within-boundaries/#原型库"
+        },
+        {
+          "id": "还有别的问题",
+          "target": "/zh-cn/whitepaper/7-evolving-within-boundaries/#实践怎样修正当前近似"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/1-components-before-code.md",
+      "locale": "zh-cn",
+      "slug": "1-components-before-code",
+      "kind": "numbered-chapter",
+      "title": "第一章：代码之前的组件",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 3935,
+      "redirectedTo": null,
+      "headings": [
+        "## 开发者在“还原”和“实现”什么？",
+        "## 组件到底是什么？",
+        "## 但我们如何描述它？"
+      ],
+      "legacyAnchors": [
+        "这篇文章要回答什么",
+        "组件并不只存在于代码里",
+        "组件的预期往往先于实现而存在",
+        "原型不是漂浮的能力清单",
+        "可抽象不等于已经成为协议",
+        "为什么这里会出现协议这个词",
+        "这一篇没有展开什么",
+        "下一步"
+      ],
+      "legacyTopicStubs": [
+        {
+          "id": "proto-ui-为什么使用-prototypeadapter-和-host",
+          "target": "/zh-cn/whitepaper/5-translation-layer/#prototype-还不是宿主中的组件"
+        },
+        {
+          "id": "prototype原型",
+          "target": "/zh-cn/whitepaper/3-component-boundary/#从-component-到-prototype"
+        },
+        {
+          "id": "adapter适配器",
+          "target": "/zh-cn/whitepaper/5-translation-layer/#adapter"
+        },
+        {
+          "id": "host宿主",
+          "target": "/zh-cn/whitepaper/5-translation-layer/#prototype-还不是宿主中的组件"
+        },
+        {
+          "id": "三者之间的关系",
+          "target": "/zh-cn/whitepaper/5-translation-layer/#prototype-还不是宿主中的组件"
+        },
+        {
+          "id": "原型可以开放协议可以稳定",
+          "target": "/zh-cn/whitepaper/7-evolving-within-boundaries/#proto-ui-选择的三条主线"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md",
+      "locale": "zh-cn",
+      "slug": "2-interaction-relations",
+      "kind": "numbered-chapter",
+      "title": "第二章：从交互关系出发",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 6074,
+      "redirectedTo": null,
+      "headings": [
+        "## 未实现的组件该如何描述？",
+        "## 组件都在和谁交互？",
+        "## 从关系得到信息通路",
+        "## 把 Switch 放进这张关系图",
+        "# 这不是 Proto UI 语法，只是一张关系草图",
+        "## 这只是一副骨架"
+      ],
+      "legacyAnchors": [
+        "这篇文章要回答什么",
+        "组件并不是孤立存在的",
+        "proto-ui-先从使用者切分组件关系",
+        "user",
+        "maker",
+        "other-component",
+        "什么是信息通路",
+        "由信息通路可以导出哪些核心能力",
+        "user--component",
+        "maker--component",
+        "other-component--component",
+        "为什么这些能力不是随意枚举出来的",
+        "信息通路并不等于组件的全部",
+        "信息通路可以扩展吗",
+        "这一篇没有展开什么",
+        "下一步"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-information-channels.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md",
+      "locale": "zh-cn",
+      "slug": "3-component-boundary",
+      "kind": "numbered-chapter",
+      "title": "第三章：组件的边界",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 7978,
+      "redirectedTo": null,
+      "headings": [
+        "## 组件应该怎么拆分？",
+        "## 用信息通路判断组件边界",
+        "## 为什么 feedback-only 可拆可不拆？",
+        "## 运用上述规则",
+        "### Switch 开关",
+        "### Select 下拉框",
+        "## 从 Component 到 Prototype",
+        "## 骨架、边界，然后是内部规则"
+      ],
+      "legacyAnchors": [
+        "这篇文章要回答什么",
+        "proto-ui-关心的不是切块而是交互主体",
+        "一个子结构何时应被视为独立原型",
+        "proto-ui-的拆分判断",
+        "1-当一个子结构存在除-feedback-之外的任一信息通路需求时它必须拆成独立原型",
+        "3-当一个子结构没有激活任何信息通路时它必须不拆",
+        "2-当一个子结构仅激活-feedback-通路时它可拆可不拆",
+        "为什么-feedback-only-可以不拆",
+        "原型拆分不是为了追求越细越好",
+        "一旦独立通路出现拆分就不再是风格问题",
+        "子结构响应独立-event",
+        "子结构拥有独立-props",
+        "子结构向外-expose-状态或方法",
+        "子结构订阅或分发-context",
+        "原型不能失去自己的依附结构",
+        "proto-ui-如何强制原型边界成立",
+        "拆分之后组合回到宿主侧",
+        "原型边界的真正含义",
+        "这一篇没有展开什么",
+        "下一步"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": [
+        "/diagrams/whitepaper-component-boundary.zh-cn.svg",
+        "/diagrams/whitepaper-component-anatomy.zh-cn.svg"
+      ]
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/4-semantics-beyond-channels.md",
+      "locale": "zh-cn",
+      "slug": "4-semantics-beyond-channels",
+      "kind": "numbered-chapter",
+      "title": "第四章：通路之外的语义",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 10937,
+      "redirectedTo": null,
+      "headings": [
+        "## 只有通路还不够",
+        "## State：保存交互中的内部事实",
+        "## Anatomy：描述复合结构",
+        "## Lifecycle：原型如何在时间中建立",
+        "### 一次 setup，持续 runtime",
+        "## 再回到 Switch",
+        "## 原型如何翻译？"
+      ],
+      "legacyAnchors": [
+        "这篇文章要回答什么",
+        "原型不是静态结构",
+        "执行语义不只是在谈生命周期",
+        "生命周期在这里扮演什么角色",
+        "lifecycle-与能力开启的一致性",
+        "执行语义真正约束的是什么",
+        "为什么必须区分-setup-与-runtime",
+        "setup",
+        "runtime",
+        "这种分期为什么重要",
+        "setup-与生命周期并不是一回事",
+        "这一篇没有展开什么",
+        "下一步"
+      ],
+      "legacyTopicStubs": [
+        {
+          "id": "feedback-的一致性",
+          "target": "/zh-cn/whitepaper/6-consistency-boundary/#prototype-关心哪些细节"
+        },
+        {
+          "id": "event-的一致性",
+          "target": "/zh-cn/whitepaper/6-consistency-boundary/#prototype-关心哪些细节"
+        },
+        {
+          "id": "proto-ui-的一致性要求并不总是同样严格",
+          "target": "/zh-cn/whitepaper/6-consistency-boundary/#共同条件越多比较越细"
+        },
+        {
+          "id": "在共同依赖较强的宿主之间一致性要求更严格",
+          "target": "/zh-cn/whitepaper/6-consistency-boundary/#共同条件越多比较越细"
+        },
+        {
+          "id": "在跨平台场景中一致性由原型规则决定",
+          "target": "/zh-cn/whitepaper/6-consistency-boundary/#共同条件越多比较越细"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": [
+        "/diagrams/whitepaper-lifecycle.svg",
+        "/diagrams/whitepaper-switch-activation.zh-cn.svg"
+      ]
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/5-translation-layer.md",
+      "locale": "zh-cn",
+      "slug": "5-translation-layer",
+      "kind": "numbered-chapter",
+      "title": "第五章：翻译层",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 8873,
+      "redirectedTo": null,
+      "headings": [
+        "## Prototype 还不是宿主中的组件",
+        "## 翻译层的挑战",
+        "## Module 与 Host Capability",
+        "## 翻译可以发生在不同阶段",
+        "### Adapter",
+        "### Compiler",
+        "### Hybrid",
+        "## 形式改变不等于语义损失",
+        "### Faithful",
+        "### Authorized bounded degradation",
+        "### Unsupported",
+        "## 以 Terminal UI 为例",
+        "## 四个不该混在一起的问题",
+        "## 在最早可靠的边界报告问题",
+        "## 翻译结论需要证据",
+        "## 翻译...但一致到什么程度？"
+      ],
+      "legacyAnchors": [
+        "这篇文章要回答什么",
+        "原型不是宿主实现的别名",
+        "为什么需要翻译层",
+        "翻译层意味着什么",
+        "翻译层不只是语法转换",
+        "adapter-与-compiler-分别意味着什么",
+        "两者共享同一套语义基线",
+        "翻译为什么可能有损",
+        "宿主边界会怎样影响还原",
+        "host-通路默认不在跨平台主承诺范围内",
+        "这一篇没有展开什么",
+        "下一步"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-translation-responsibility.zh-cn.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/6-consistency-boundary.md",
+      "locale": "zh-cn",
+      "slug": "6-consistency-boundary",
+      "kind": "numbered-chapter",
+      "title": "第六章：一致性的边界",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 6304,
+      "redirectedTo": null,
+      "headings": [
+        "## Prototype 是一致性的第一把尺度",
+        "## 设计取舍与可移植性",
+        "## Prototype 没有说明意味着什么？",
+        "## Prototype 关心哪些细节？",
+        "## 共同条件越多，比较越细"
+      ],
+      "legacyAnchors": [
+        "这篇文章要回答什么",
+        "proto-ui-先保护交互主体再考虑表达自由",
+        "proto-ui-的取舍顺序",
+        "语义一致",
+        "user-体验",
+        "maker-体验",
+        "原型-author-体验",
+        "可序列化是一个长期方向约束",
+        "这些约束保护的是什么",
+        "约束不是补丁而是边界",
+        "这不是保守主义",
+        "这一篇没有展开什么",
+        "下一步"
+      ],
+      "legacyTopicStubs": [
+        {
+          "id": "proto-ui-不把自己做成框架",
+          "target": "/zh-cn/whitepaper/7-evolving-within-boundaries/#一条可行路径而不是唯一答案"
+        },
+        {
+          "id": "边界不只靠文档说明也会体现在语法能力里",
+          "target": "/zh-cn/whitepaper/4-semantics-beyond-channels/#只有通路还不够"
+        },
+        {
+          "id": "宿主特有能力更适合作为强宿主相关能力处理",
+          "target": "/zh-cn/whitepaper/5-translation-layer/#四个不该混在一起的问题"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-conditional-consistency.zh-cn.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/7-evolving-within-boundaries.md",
+      "locale": "zh-cn",
+      "slug": "7-evolving-within-boundaries",
+      "kind": "numbered-chapter",
+      "title": "第七章：在边界中演进",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 5001,
+      "redirectedTo": null,
+      "headings": [
+        "## 一条可行路径，而不是唯一答案",
+        "## Proto UI 选择的三条主线",
+        "### 原型库",
+        "### 翻译层与生态",
+        "### 理论与内核",
+        "## 没有进入主线，依然可能颇具价值",
+        "## 实践怎样修正当前近似",
+        "## 仍然需要更远的检验"
+      ],
+      "legacyAnchors": [
+        "这篇文章要回答什么",
+        "proto-ui-不会一步到位",
+        "第一阶段先在-web-站稳",
+        "工具链也会随着协议层一起成长",
+        "有一条工作会贯穿所有阶段",
+        "这一篇没有展开什么",
+        "第二阶段向原生宿主扩展",
+        "更长期的方向从覆盖宿主到影响宿主选择",
+        "下一步"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-evolution-feedback.zh-cn.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/8-conclusion.md",
+      "locale": "zh-cn",
+      "slug": "8-conclusion",
+      "kind": "numbered-chapter",
+      "title": "结语：为过去与未来保留交互知识",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 1750,
+      "redirectedTo": null,
+      "headings": [
+        "## 要保留的不是某一份实现",
+        "## 一条路径，而不是历史的终点",
+        "## 把精力还给交互本身"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/component-as-protocol.md",
+      "locale": "zh-cn",
+      "slug": "component-as-protocol",
+      "kind": "legacy",
+      "title": "组件作为协议",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 3527,
+      "redirectedTo": "/zh-cn/whitepaper/1-components-before-code/",
+      "headings": [
+        "## 这篇文章要回答什么？",
+        "## 组件并不只存在于代码里",
+        "## 组件的预期，往往先于实现而存在",
+        "## 原型不是漂浮的能力清单",
+        "## 可抽象，不等于已经成为协议",
+        "## 为什么这里会出现“协议”这个词？",
+        "## Proto UI 为什么使用 Prototype、Adapter 和 Host",
+        "### Prototype（原型）",
+        "### Adapter（适配器）",
+        "### Host（宿主）",
+        "## 三者之间的关系",
+        "## 原型可以开放，协议可以稳定",
+        "## 这一篇没有展开什么？",
+        "## 下一步"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/zh-cn/whitepaper/information-flow-model/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/design-constraints.md",
+      "locale": "zh-cn",
+      "slug": "design-constraints",
+      "kind": "legacy",
+      "title": "设计约束",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 4311,
+      "redirectedTo": "/zh-cn/whitepaper/6-consistency-boundary/",
+      "headings": [
+        "## 这篇文章要回答什么？",
+        "## 约束不是补丁，而是边界",
+        "## Proto UI 的取舍顺序",
+        "### 语义一致",
+        "### User 体验",
+        "### Maker 体验",
+        "### 原型 Author 体验",
+        "## Proto UI 先保护交互主体，再考虑表达自由",
+        "## Proto UI 不把自己做成框架",
+        "## 边界不只靠文档说明，也会体现在语法能力里",
+        "## 可序列化是一个长期方向约束",
+        "## 宿主特有能力更适合作为强宿主相关能力处理",
+        "## 这些约束保护的是什么？",
+        "## 这不是保守主义",
+        "## 这一篇没有展开什么？",
+        "## 下一步"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/zh-cn/whitepaper/faq/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/evolution-path.md",
+      "locale": "zh-cn",
+      "slug": "evolution-path",
+      "kind": "legacy",
+      "title": "演进路径",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 2708,
+      "redirectedTo": "/zh-cn/whitepaper/7-evolving-within-boundaries/",
+      "headings": [
+        "## 这篇文章要回答什么？",
+        "## Proto UI 不会一步到位",
+        "## 第一阶段：先在 Web 站稳",
+        "## 第二阶段：向原生宿主扩展",
+        "## 更长期的方向：从覆盖宿主，到影响宿主选择",
+        "## 有一条工作会贯穿所有阶段",
+        "## 工具链也会随着协议层一起成长",
+        "## 这一篇没有展开什么？",
+        "## 下一步"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/zh-cn/whitepaper/faq/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/execution-semantics.md",
+      "locale": "zh-cn",
+      "slug": "execution-semantics",
+      "kind": "legacy",
+      "title": "执行语义",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 4653,
+      "redirectedTo": "/zh-cn/whitepaper/4-semantics-beyond-channels/",
+      "headings": [
+        "## 这篇文章要回答什么？",
+        "## 原型不是静态结构",
+        "## 为什么必须区分 `setup` 与 `runtime`？",
+        "### setup",
+        "### runtime",
+        "## 这种分期为什么重要？",
+        "## 生命周期在这里扮演什么角色？",
+        "## `setup` 与生命周期并不是一回事",
+        "## 执行语义不只是在谈生命周期",
+        "### feedback 的一致性",
+        "### event 的一致性",
+        "### lifecycle 与能力开启的一致性",
+        "## Proto UI 的一致性要求并不总是同样严格",
+        "### 在共同依赖较强的宿主之间，一致性要求更严格",
+        "### 在跨平台场景中，一致性由原型规则决定",
+        "## 执行语义真正约束的是什么？",
+        "## 这一篇没有展开什么？",
+        "## 下一步"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/zh-cn/whitepaper/translation-layer/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/faq.md",
+      "locale": "zh-cn",
+      "slug": "faq",
+      "kind": "legacy",
+      "title": "FAQ",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 3996,
+      "redirectedTo": "/zh-cn/whitepaper/0-preface/",
+      "headings": [
+        "## 这页是做什么的？",
+        "## 1. Proto UI 是框架吗？",
+        "## 2. Proto UI 和跨端框架有什么区别？",
+        "## 3. Proto UI 和组件库是什么关系？",
+        "## 4. 为什么 Proto UI 不提供原型级别的组合能力？",
+        "## 5. 为什么子结构一旦承担独立信息通路就必须拆分？",
+        "## 6. 为什么 `feedback-only` 可以不拆？",
+        "## 7. Proto UI 所说的一致性，到底严格到什么程度？",
+        "## 8. 为什么同为 Web 宿主时要求更严格，而跨平台时允许差异？",
+        "## 9. 官方如何看待社区适配器？",
+        "## 10. 官方如何看待社区原型？",
+        "## 还有别的问题？"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md",
+      "locale": "zh-cn",
+      "slug": "information-flow-model",
+      "kind": "legacy",
+      "title": "信息通路模型",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 3544,
+      "redirectedTo": "/zh-cn/whitepaper/2-interaction-relations/",
+      "headings": [
+        "## 这篇文章要回答什么？",
+        "## 组件并不是孤立存在的",
+        "## Proto UI 先从“使用者”切分组件关系",
+        "### User",
+        "### Maker",
+        "### Other Component",
+        "## 什么是信息通路？",
+        "## 由信息通路可以导出哪些核心能力？",
+        "### User ↔ Component",
+        "### Maker ↔ Component",
+        "### Other Component ↔ Component",
+        "## 为什么这些能力不是随意枚举出来的？",
+        "## 信息通路并不等于组件的全部",
+        "## 信息通路可以扩展吗？",
+        "## 这一篇没有展开什么？",
+        "## 下一步"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/zh-cn/whitepaper/prototype-boundary/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/prototype-boundary.md",
+      "locale": "zh-cn",
+      "slug": "prototype-boundary",
+      "kind": "legacy",
+      "title": "原型边界",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 4900,
+      "redirectedTo": "/zh-cn/whitepaper/3-component-boundary/",
+      "headings": [
+        "## 这篇文章要回答什么？",
+        "## Proto UI 关心的不是切块，而是交互主体",
+        "## 原型不能失去自己的依附结构",
+        "## 一个子结构何时应被视为独立原型？",
+        "## Proto UI 的拆分判断",
+        "### 1. 当一个子结构存在除 `feedback` 之外的任一信息通路需求时，它必须拆成独立原型",
+        "### 2. 当一个子结构仅激活 `feedback` 通路时，它可拆可不拆",
+        "### 3. 当一个子结构没有激活任何信息通路时，它必须不拆",
+        "## 为什么 `feedback-only` 可以不拆？",
+        "## 一旦独立通路出现，拆分就不再是风格问题",
+        "### 子结构响应独立 `event`",
+        "### 子结构拥有独立 `props`",
+        "### 子结构向外 `expose` 状态或方法",
+        "### 子结构订阅或分发 `context`",
+        "## Proto UI 如何强制原型边界成立",
+        "## 拆分之后，组合回到宿主侧",
+        "## 原型拆分不是为了追求“越细越好”",
+        "## 原型边界的真正含义",
+        "## 这一篇没有展开什么？",
+        "## 下一步"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/zh-cn/whitepaper/execution-semantics/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/translation-layer.md",
+      "locale": "zh-cn",
+      "slug": "translation-layer",
+      "kind": "legacy",
+      "title": "翻译层：Adapter / Compiler",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": false,
+      "chars": 3501,
+      "redirectedTo": "/zh-cn/whitepaper/5-translation-layer/",
+      "headings": [
+        "## 这篇文章要回答什么？",
+        "## 原型不是宿主实现的别名",
+        "## 为什么需要翻译层？",
+        "## 翻译层不只是语法转换",
+        "## Adapter 与 Compiler 分别意味着什么？",
+        "### Adapter",
+        "### Compiler",
+        "### 两者共享同一套语义基线",
+        "## 翻译为什么可能有损？",
+        "## 宿主边界会怎样影响还原？",
+        "## `host` 通路默认不在跨平台主承诺范围内",
+        "## 翻译层意味着什么？",
+        "## 这一篇没有展开什么？",
+        "## 下一步"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/zh-cn/whitepaper/design-constraints/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/0-preface.md",
+      "locale": "en",
+      "slug": "0-preface",
+      "kind": "numbered-chapter",
+      "title": "Preface: How Many More Times Must We Reinvent the Button?",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 9046,
+      "redirectedTo": null,
+      "headings": [],
+      "legacyAnchors": ["what-is-this-page-for"],
+      "legacyTopicStubs": [
+        {
+          "id": "1-is-proto-ui-a-framework",
+          "target": "/en/whitepaper/7-evolving-within-boundaries/#one-viable-path-not-the-only-answer"
+        },
+        {
+          "id": "2-what-is-the-difference-between-proto-ui-and-cross-platform-frameworks",
+          "target": "/en/whitepaper/5-translation-layer/#a-prototype-is-not-yet-a-component-in-a-host"
+        },
+        {
+          "id": "3-what-is-the-relationship-between-proto-ui-and-component-libraries",
+          "target": "/en/whitepaper/7-evolving-within-boundaries/#prototype-libraries"
+        },
+        {
+          "id": "4-why-doesnt-proto-ui-provide-prototype-level-composition",
+          "target": "/en/whitepaper/3-component-boundary/#from-component-to-prototype"
+        },
+        {
+          "id": "5-why-must-a-substructure-be-split-once-it-takes-on-an-independent-information-flow",
+          "target": "/en/whitepaper/3-component-boundary/#using-information-channels-to-find-component-boundaries"
+        },
+        {
+          "id": "6-why-can-feedback-only-remain-unsplit",
+          "target": "/en/whitepaper/3-component-boundary/#why-may-a-feedback-only-structure-be-split-or-kept-attached"
+        },
+        {
+          "id": "7-how-strict-is-the-consistency-proto-ui-talks-about",
+          "target": "/en/whitepaper/6-consistency-boundary/#more-shared-conditions-permit-finer-comparison"
+        },
+        {
+          "id": "8-why-are-requirements-stricter-among-web-hosts-while-cross-platform-scenarios-allow-more-difference",
+          "target": "/en/whitepaper/6-consistency-boundary/#more-shared-conditions-permit-finer-comparison"
+        },
+        {
+          "id": "9-how-does-the-official-project-view-community-adapters",
+          "target": "/en/whitepaper/7-evolving-within-boundaries/#translation-layer-and-ecosystem"
+        },
+        {
+          "id": "10-how-does-the-official-project-view-community-prototypes",
+          "target": "/en/whitepaper/7-evolving-within-boundaries/#prototype-libraries"
+        },
+        {
+          "id": "still-have-other-questions",
+          "target": "/en/whitepaper/7-evolving-within-boundaries/#how-practice-revises-the-current-approximation"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/1-components-before-code.md",
+      "locale": "en",
+      "slug": "1-components-before-code",
+      "kind": "numbered-chapter",
+      "title": "Chapter 1: Components Before Code",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 9520,
+      "redirectedTo": null,
+      "headings": [
+        "## What Are Developers “Reproducing” and “Implementing”?",
+        "## What Is a Component, Exactly?",
+        "## But How Do We Describe It?"
+      ],
+      "legacyAnchors": [
+        "what-does-this-article-answer",
+        "components-do-not-exist-only-in-code",
+        "expectations-around-a-component-often-exist-before-implementation",
+        "a-prototype-is-not-a-floating-list-of-capabilities",
+        "being-abstractable-does-not-mean-it-is-already-a-protocol",
+        "why-does-the-word-protocol-appear-here",
+        "what-does-this-article-not-expand-on",
+        "next"
+      ],
+      "legacyTopicStubs": [
+        {
+          "id": "why-proto-ui-uses-prototype-adapter-and-host",
+          "target": "/en/whitepaper/5-translation-layer/#a-prototype-is-not-yet-a-component-in-a-host"
+        },
+        {
+          "id": "prototype",
+          "target": "/en/whitepaper/3-component-boundary/#from-component-to-prototype"
+        },
+        {
+          "id": "adapter",
+          "target": "/en/whitepaper/5-translation-layer/#adapter"
+        },
+        {
+          "id": "host",
+          "target": "/en/whitepaper/5-translation-layer/#a-prototype-is-not-yet-a-component-in-a-host"
+        },
+        {
+          "id": "the-relationship-among-the-three",
+          "target": "/en/whitepaper/5-translation-layer/#a-prototype-is-not-yet-a-component-in-a-host"
+        },
+        {
+          "id": "prototypes-can-stay-open-while-protocols-stay-stable",
+          "target": "/en/whitepaper/7-evolving-within-boundaries/#the-three-lines-proto-ui-chooses-to-pursue"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md",
+      "locale": "en",
+      "slug": "2-interaction-relations",
+      "kind": "numbered-chapter",
+      "title": "Chapter 2: Starting from Interaction Relations",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 12439,
+      "redirectedTo": null,
+      "headings": [
+        "## How Do We Describe a Component That Has Not Been Implemented?",
+        "## With Whom Does a Component Interact?",
+        "## Deriving Information Channels from Relations",
+        "## Placing Switch in the Relation Map",
+        "# This is not Proto UI syntax. It is only a sketch of the relations.",
+        "## This Is Only a Skeleton"
+      ],
+      "legacyAnchors": [
+        "what-does-this-article-answer",
+        "components-do-not-exist-in-isolation",
+        "proto-ui-starts-by-splitting-component-relations-through-users",
+        "user",
+        "maker",
+        "other-component",
+        "what-is-an-information-flow",
+        "which-core-capabilities-follow-from-the-information-flows",
+        "user--component",
+        "maker--component",
+        "other-component--component",
+        "why-are-these-capabilities-not-arbitrarily-enumerated",
+        "information-flows-are-not-the-whole-component",
+        "can-information-flows-be-extended",
+        "what-does-this-article-not-expand-on",
+        "next"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-information-channels.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/3-component-boundary.md",
+      "locale": "en",
+      "slug": "3-component-boundary",
+      "kind": "numbered-chapter",
+      "title": "Chapter 3: Component Boundaries",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 15983,
+      "redirectedTo": null,
+      "headings": [
+        "## How Should Components Be Divided?",
+        "## Using Information Channels to Find Component Boundaries",
+        "## Why May a Feedback-Only Structure Be Split or Kept Attached?",
+        "## Applying the Rules",
+        "### Switch",
+        "### Select",
+        "## From Component to Prototype",
+        "## Skeleton, Boundary, Then Internal Rules"
+      ],
+      "legacyAnchors": [
+        "what-does-this-article-answer",
+        "proto-ui-cares-about-interactive-subjects-not-just-chopping-structure",
+        "when-should-a-substructure-be-treated-as-an-independent-prototype",
+        "proto-uis-splitting-rules",
+        "1-if-a-substructure-has-any-information-flow-requirement-other-than-feedback-it-must-be-split-into-an-independent-prototype",
+        "3-if-a-substructure-activates-no-information-flow-at-all-it-must-not-be-split",
+        "2-if-a-substructure-activates-only-the-feedback-flow-splitting-is-optional",
+        "why-can-feedback-only-remain-unsplit",
+        "prototype-splitting-is-not-about-making-things-as-fine-grained-as-possible",
+        "once-an-independent-flow-appears-splitting-is-no-longer-a-matter-of-style",
+        "a-substructure-responds-to-its-own-event",
+        "a-substructure-has-independent-props",
+        "a-substructure-exposes-state-or-methods-outward",
+        "a-substructure-subscribes-to-or-distributes-context",
+        "a-prototype-cannot-lose-its-own-anchoring-structure",
+        "how-proto-ui-enforces-prototype-boundaries",
+        "after-splitting-composition-returns-to-the-host-side",
+        "the-real-meaning-of-a-prototype-boundary",
+        "what-does-this-article-not-expand-on",
+        "next"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": [
+        "/diagrams/whitepaper-component-boundary.en.svg",
+        "/diagrams/whitepaper-component-anatomy.en.svg"
+      ]
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/4-semantics-beyond-channels.md",
+      "locale": "en",
+      "slug": "4-semantics-beyond-channels",
+      "kind": "numbered-chapter",
+      "title": "Chapter 4: Semantics Beyond Channels",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 17813,
+      "redirectedTo": null,
+      "headings": [
+        "## Channels Alone Are Not Enough",
+        "## State: Preserving Internal Facts Across Interactions",
+        "## Anatomy: Describing Composite Structure",
+        "## Lifecycle: How a Prototype Is Established in Time",
+        "### One Setup, a Continuing Runtime",
+        "## Returning to Switch Again",
+        "## How Is a Prototype Translated?"
+      ],
+      "legacyAnchors": [
+        "what-does-this-article-answer",
+        "a-prototype-is-not-static-structure",
+        "execution-semantics-are-not-only-about-lifecycle",
+        "what-role-does-lifecycle-play-here",
+        "consistency-of-lifecycle-and-capability-activation",
+        "what-do-execution-semantics-really-constrain",
+        "why-must-setup-and-runtime-be-distinguished",
+        "setup",
+        "runtime",
+        "why-does-this-staging-matter",
+        "setup-and-lifecycle-are-not-the-same-thing",
+        "what-does-this-article-not-expand-on",
+        "next"
+      ],
+      "legacyTopicStubs": [
+        {
+          "id": "consistency-of-feedback",
+          "target": "/en/whitepaper/6-consistency-boundary/#which-details-matter-to-a-prototype"
+        },
+        {
+          "id": "consistency-of-event",
+          "target": "/en/whitepaper/6-consistency-boundary/#which-details-matter-to-a-prototype"
+        },
+        {
+          "id": "proto-uis-consistency-requirements-are-not-always-equally-strict",
+          "target": "/en/whitepaper/6-consistency-boundary/#more-shared-conditions-permit-finer-comparison"
+        },
+        {
+          "id": "consistency-is-stricter-among-hosts-with-stronger-common-foundations",
+          "target": "/en/whitepaper/6-consistency-boundary/#more-shared-conditions-permit-finer-comparison"
+        },
+        {
+          "id": "in-cross-platform-scenarios-consistency-is-determined-by-prototype-rules",
+          "target": "/en/whitepaper/6-consistency-boundary/#more-shared-conditions-permit-finer-comparison"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": [
+        "/diagrams/whitepaper-lifecycle.svg",
+        "/diagrams/whitepaper-switch-activation.en.svg"
+      ]
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/5-translation-layer.md",
+      "locale": "en",
+      "slug": "5-translation-layer",
+      "kind": "numbered-chapter",
+      "title": "Chapter 5: The Translation Layer",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 18771,
+      "redirectedTo": null,
+      "headings": [
+        "## A Prototype Is Not Yet a Component in a Host",
+        "## The Challenge of the Translation Layer",
+        "## Module and Host Capability",
+        "## Translation Can Happen at Different Stages",
+        "### Adapter",
+        "### Compiler",
+        "### Hybrid",
+        "## A Change in Form Is Not Necessarily Semantic Loss",
+        "### Faithful",
+        "### Authorized Bounded Degradation",
+        "### Unsupported",
+        "## Terminal UI as an Example",
+        "## Four Questions That Must Not Be Confused",
+        "## Report Problems at the Earliest Reliable Boundary",
+        "## Translation Conclusions Need Evidence",
+        "## Translation—But Consistent to What Degree?"
+      ],
+      "legacyAnchors": [
+        "what-does-this-article-answer",
+        "a-prototype-is-not-an-alias-for-host-implementation",
+        "why-is-a-translation-layer-needed",
+        "what-does-the-translation-layer-mean-in-the-end",
+        "the-translation-layer-is-not-only-syntax-conversion",
+        "what-do-adapter-and-compiler-each-mean",
+        "they-share-the-same-semantic-baseline",
+        "why-can-translation-be-lossy",
+        "how-do-host-boundaries-affect-reproduction",
+        "the-host-flow-is-not-part-of-the-default-cross-platform-core-commitment",
+        "what-does-this-article-not-expand-on",
+        "next"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-translation-responsibility.en.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/6-consistency-boundary.md",
+      "locale": "en",
+      "slug": "6-consistency-boundary",
+      "kind": "numbered-chapter",
+      "title": "Chapter 6: The Boundaries of Consistency",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 13159,
+      "redirectedTo": null,
+      "headings": [
+        "## Prototype Is the First Measure of Consistency",
+        "## Design Tradeoffs and Portability",
+        "## What Does It Mean When a Prototype Says Nothing?",
+        "## Which Details Matter to a Prototype?",
+        "## More Shared Conditions Permit Finer Comparison"
+      ],
+      "legacyAnchors": [
+        "what-does-this-article-answer",
+        "proto-ui-protects-the-interactive-subject-first-then-expression-freedom",
+        "proto-uis-order-of-tradeoffs",
+        "semantic-consistency",
+        "user-experience",
+        "maker-experience",
+        "prototype-author-experience",
+        "serializability-is-a-long-term-directional-constraint",
+        "what-do-these-constraints-protect",
+        "constraints-are-not-patches-they-are-boundaries",
+        "this-is-not-conservatism",
+        "what-does-this-article-not-expand-on",
+        "next"
+      ],
+      "legacyTopicStubs": [
+        {
+          "id": "proto-ui-does-not-make-itself-into-a-framework",
+          "target": "/en/whitepaper/7-evolving-within-boundaries/#one-viable-path-not-the-only-answer"
+        },
+        {
+          "id": "boundaries-are-not-explained-only-in-docs-they-also-appear-in-syntax",
+          "target": "/en/whitepaper/4-semantics-beyond-channels/#channels-alone-are-not-enough"
+        },
+        {
+          "id": "host-specific-capabilities-are-better-treated-as-strongly-host-related-capabilities",
+          "target": "/en/whitepaper/5-translation-layer/#four-questions-that-must-not-be-confused"
+        }
+      ],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-conditional-consistency.en.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/7-evolving-within-boundaries.md",
+      "locale": "en",
+      "slug": "7-evolving-within-boundaries",
+      "kind": "numbered-chapter",
+      "title": "Chapter 7: Evolving Within Boundaries",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 12677,
+      "redirectedTo": null,
+      "headings": [
+        "## One Viable Path, Not the Only Answer",
+        "## The Three Lines Proto UI Chooses to Pursue",
+        "### Prototype Libraries",
+        "### Translation Layer and Ecosystem",
+        "### Theory and Kernel",
+        "## A Path Outside the Main Lines May Still Be Valuable",
+        "## How Practice Revises the Current Approximation",
+        "## More Distant Tests Are Still Needed"
+      ],
+      "legacyAnchors": [
+        "what-does-this-article-answer",
+        "proto-ui-will-not-arrive-all-at-once",
+        "stage-1-stand-firmly-in-the-web-first",
+        "the-toolchain-will-grow-together-with-the-protocol-layer",
+        "one-line-of-work-will-run-through-every-stage",
+        "what-does-this-article-not-expand-on",
+        "stage-2-expand-into-native-hosts",
+        "a-longer-term-direction-from-covering-hosts-to-influencing-host-choice",
+        "next"
+      ],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": ["/diagrams/whitepaper-evolution-feedback.en.svg"]
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/8-conclusion.md",
+      "locale": "en",
+      "slug": "8-conclusion",
+      "kind": "numbered-chapter",
+      "title": "Conclusion: Preserving Interaction Knowledge for the Past and Future",
+      "frontmatterDraft": false,
+      "frontmatterStrayDesp": false,
+      "chars": 5360,
+      "redirectedTo": null,
+      "headings": [
+        "## What We Preserve Is Not One Implementation",
+        "## A Path, Not the End of History",
+        "## Returning Effort to Interaction Itself"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/component-as-protocol.md",
+      "locale": "en",
+      "slug": "component-as-protocol",
+      "kind": "legacy",
+      "title": "Component as Protocol",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 10169,
+      "redirectedTo": "/en/whitepaper/1-components-before-code/",
+      "headings": [
+        "## What does this article answer?",
+        "## Components do not exist only in code",
+        "## Expectations around a component often exist before implementation",
+        "## A prototype is not a floating list of capabilities",
+        "## Being abstractable does not mean it is already a protocol",
+        "## Why does the word \"protocol\" appear here?",
+        "## Why Proto UI uses Prototype, Adapter, and Host",
+        "### Prototype",
+        "### Adapter",
+        "### Host",
+        "## The relationship among the three",
+        "## Prototypes can stay open while protocols stay stable",
+        "## What does this article not expand on?",
+        "## Next"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/en/whitepaper/information-flow-model/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/design-constraints.md",
+      "locale": "en",
+      "slug": "design-constraints",
+      "kind": "legacy",
+      "title": "Design Constraints",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 12498,
+      "redirectedTo": "/en/whitepaper/6-consistency-boundary/",
+      "headings": [
+        "## What does this article answer?",
+        "## Constraints are not patches. They are boundaries",
+        "## Proto UI's order of tradeoffs",
+        "### Semantic consistency",
+        "### User experience",
+        "### Maker experience",
+        "### Prototype Author experience",
+        "## Proto UI protects the interactive subject first, then expression freedom",
+        "## Proto UI does not make itself into a framework",
+        "## Boundaries are not explained only in docs. They also appear in syntax",
+        "## Serializability is a long-term directional constraint",
+        "## Host-specific capabilities are better treated as strongly host-related capabilities",
+        "## What do these constraints protect?",
+        "## This is not conservatism",
+        "## What does this article not expand on?",
+        "## Next"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/en/whitepaper/faq/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/evolution-path.md",
+      "locale": "en",
+      "slug": "evolution-path",
+      "kind": "legacy",
+      "title": "Evolution Path",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 7543,
+      "redirectedTo": "/en/whitepaper/7-evolving-within-boundaries/",
+      "headings": [
+        "## What does this article answer?",
+        "## Proto UI will not arrive all at once",
+        "## Stage 1: stand firmly in the Web first",
+        "## Stage 2: expand into native hosts",
+        "## A longer-term direction: from covering hosts to influencing host choice",
+        "## One line of work will run through every stage",
+        "## The toolchain will grow together with the protocol layer",
+        "## What does this article not expand on?",
+        "## Next"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/en/whitepaper/faq/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/execution-semantics.md",
+      "locale": "en",
+      "slug": "execution-semantics",
+      "kind": "legacy",
+      "title": "Execution Semantics",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 12877,
+      "redirectedTo": "/en/whitepaper/4-semantics-beyond-channels/",
+      "headings": [
+        "## What does this article answer?",
+        "## A prototype is not static structure",
+        "## Why must `setup` and `runtime` be distinguished?",
+        "### setup",
+        "### runtime",
+        "## Why does this staging matter?",
+        "## What role does lifecycle play here?",
+        "## `setup` and lifecycle are not the same thing",
+        "## Execution semantics are not only about lifecycle",
+        "### Consistency of `feedback`",
+        "### Consistency of `event`",
+        "### Consistency of lifecycle and capability activation",
+        "## Proto UI's consistency requirements are not always equally strict",
+        "### Consistency is stricter among hosts with stronger common foundations",
+        "### In cross-platform scenarios, consistency is determined by prototype rules",
+        "## What do execution semantics really constrain?",
+        "## What does this article not expand on?",
+        "## Next"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/en/whitepaper/translation-layer/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/faq.md",
+      "locale": "en",
+      "slug": "faq",
+      "kind": "legacy",
+      "title": "FAQ",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 11616,
+      "redirectedTo": "/en/whitepaper/0-preface/",
+      "headings": [
+        "## What is this page for?",
+        "## 1. Is Proto UI a framework?",
+        "## 2. What is the difference between Proto UI and cross-platform frameworks?",
+        "## 3. What is the relationship between Proto UI and component libraries?",
+        "## 4. Why doesn't Proto UI provide prototype-level composition?",
+        "## 5. Why must a substructure be split once it takes on an independent information flow?",
+        "## 6. Why can `feedback-only` remain unsplit?",
+        "## 7. How strict is the consistency Proto UI talks about?",
+        "## 8. Why are requirements stricter among Web hosts, while cross-platform scenarios allow more difference?",
+        "## 9. How does the official project view community adapters?",
+        "## 10. How does the official project view community prototypes?",
+        "## Still have other questions?"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": [],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/information-flow-model.md",
+      "locale": "en",
+      "slug": "information-flow-model",
+      "kind": "legacy",
+      "title": "Information Flow Model",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 9509,
+      "redirectedTo": "/en/whitepaper/2-interaction-relations/",
+      "headings": [
+        "## What does this article answer?",
+        "## Components do not exist in isolation",
+        "## Proto UI starts by splitting component relations through \"users\"",
+        "### User",
+        "### Maker",
+        "### Other Component",
+        "## What is an information flow?",
+        "## Which core capabilities follow from the information flows?",
+        "### User ↔ Component",
+        "### Maker ↔ Component",
+        "### Other Component ↔ Component",
+        "## Why are these capabilities not arbitrarily enumerated?",
+        "## Information flows are not the whole component",
+        "## Can information flows be extended?",
+        "## What does this article not expand on?",
+        "## Next"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/en/whitepaper/prototype-boundary/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/prototype-boundary.md",
+      "locale": "en",
+      "slug": "prototype-boundary",
+      "kind": "legacy",
+      "title": "Prototype Boundary",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 14523,
+      "redirectedTo": "/en/whitepaper/3-component-boundary/",
+      "headings": [
+        "## What does this article answer?",
+        "## Proto UI cares about interactive subjects, not just chopping structure",
+        "## A prototype cannot lose its own anchoring structure",
+        "## When should a substructure be treated as an independent prototype?",
+        "## Proto UI's splitting rules",
+        "### 1. If a substructure has any information-flow requirement other than `feedback`, it must be split into an independent prototype",
+        "### 2. If a substructure activates only the `feedback` flow, splitting is optional",
+        "### 3. If a substructure activates no information flow at all, it must not be split",
+        "## Why can `feedback-only` remain unsplit?",
+        "## Once an independent flow appears, splitting is no longer a matter of style",
+        "### A substructure responds to its own `event`",
+        "### A substructure has independent `props`",
+        "### A substructure `expose`s state or methods outward",
+        "### A substructure subscribes to or distributes `context`",
+        "## How Proto UI enforces prototype boundaries",
+        "## After splitting, composition returns to the host side",
+        "## Prototype splitting is not about making things as fine-grained as possible",
+        "## The real meaning of a prototype boundary",
+        "## What does this article not expand on?",
+        "## Next"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/en/whitepaper/execution-semantics/"],
+      "figures": []
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/translation-layer.md",
+      "locale": "en",
+      "slug": "translation-layer",
+      "kind": "legacy",
+      "title": "Translation Layer: Adapter / Compiler",
+      "frontmatterDraft": true,
+      "frontmatterStrayDesp": true,
+      "chars": 10216,
+      "redirectedTo": "/en/whitepaper/5-translation-layer/",
+      "headings": [
+        "## What does this article answer?",
+        "## A prototype is not an alias for host implementation",
+        "## Why is a translation layer needed?",
+        "## The translation layer is not only syntax conversion",
+        "## What do Adapter and Compiler each mean?",
+        "### Adapter",
+        "### Compiler",
+        "### They share the same semantic baseline",
+        "## Why can translation be lossy?",
+        "## How do host boundaries affect reproduction?",
+        "## The `host` flow is not part of the default cross-platform core commitment",
+        "## What does the translation layer mean, in the end?",
+        "## What does this article not expand on?",
+        "## Next"
+      ],
+      "legacyAnchors": [],
+      "legacyTopicStubs": [],
+      "whitepaperInternalLinks": ["/en/whitepaper/design-constraints/"],
+      "figures": []
+    }
+  ]
+}
