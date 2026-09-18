@@ -14,6 +14,7 @@ authenticity:
   requiredTrustAnchors:
     - repository-id-and-name
     - hook-id
+    - app-id
     - installation-id
     - dedicated-agent-actor-id
 payload:

@@ -26,6 +26,7 @@ const trust = {
   repositoryId: repository.id,
   repositoryFullName: repository.full_name,
   hookIds: [9001],
+  appIds: [6001],
   installationIds: [7001],
 };
 const policy = {
@@ -107,8 +108,8 @@ function signedDelivery({
       'x-github-delivery': deliveryId,
       'x-github-event': event,
       'x-github-hook-id': String(hookId),
-      'x-github-hook-installation-target-id': String(payload.repository.id),
-      'x-github-hook-installation-target-type': 'repository',
+      'x-github-hook-installation-target-id': '6001',
+      'x-github-hook-installation-target-type': 'integration',
       'x-hub-signature-256': computeWebhookSignature(rawBody, signatureSecret),
     },
   };
@@ -186,6 +187,28 @@ test('normalization fails closed on tampering and mismatched trust anchors', () 
         trust: { ...trust, installationIds: [1] },
       }),
     /installation/i
+  );
+  assert.throws(
+    () =>
+      normalizeGithubWebhook({
+        ...delivery,
+        secret,
+        trust: { ...trust, appIds: [1] },
+      }),
+    /integration/i
+  );
+  assert.throws(
+    () =>
+      normalizeGithubWebhook({
+        ...delivery,
+        headers: {
+          ...delivery.headers,
+          'x-github-hook-installation-target-type': 'repository',
+        },
+        secret,
+        trust,
+      }),
+    /integration/i
   );
   assert.throws(
     () =>
@@ -364,6 +387,7 @@ test('ordering cursors remain isolated when one state observes matching PR numbe
       repositoryId: secondRepository.id,
       repositoryFullName: secondRepository.full_name,
       hookIds: [9002],
+      appIds: [6001],
       installationIds: [7002],
     },
   });

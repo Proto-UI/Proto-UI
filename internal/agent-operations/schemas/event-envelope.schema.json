@@ -49,7 +49,7 @@
       "required": ["id", "targetType", "targetId", "installationId"],
       "properties": {
         "id": { "type": "integer", "minimum": 1 },
-        "targetType": { "const": "repository" },
+        "targetType": { "const": "integration" },
         "targetId": { "type": "integer", "minimum": 1 },
         "installationId": { "type": "integer", "minimum": 1 }
       }

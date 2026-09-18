@@ -26,6 +26,7 @@ query ProtoUiCollaborationThread($threadId: ID!) {
         state
         author { login }
         repository { nameWithOwner }
+      }
       comments(first: 100) {
         nodes { databaseId updatedAt }
         pageInfo { hasNextPage }
@@ -45,6 +46,20 @@ const RESOLVE_THREAD_MUTATION = `
 mutation ProtoUiResolveThread($threadId: ID!) {
   resolveReviewThread(input: { threadId: $threadId }) {
     thread { id isResolved }
+  }
+}`;
+
+const UNRESOLVE_THREAD_MUTATION = `
+mutation ProtoUiUnresolveThread($threadId: ID!) {
+  unresolveReviewThread(input: { threadId: $threadId }) {
+    thread { id isResolved }
+  }
+}`;
+
+const CONVERT_TO_DRAFT_MUTATION = `
+mutation ProtoUiConvertToDraft($pullRequestId: ID!) {
+  convertPullRequestToDraft(input: { pullRequestId: $pullRequestId }) {
+    pullRequest { id isDraft }
   }
 }`;
 
@@ -515,12 +530,24 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
   const runner = options.runner ?? execFileSync;
   const collectState = options.collectState ?? collectLiveCollaborationState;
   let rawResponse;
-  if (request.action === 'resolve-fixed-review-thread') {
+  // Revalidate the exact authorized state at the mutation boundary: a target
+  // that drifted after the preflight must fail closed before any write.
+  if (
+    ['resolve-fixed-review-thread', 'mark-exact-head-ready-for-review'].includes(request.action) ||
+    request.action === 'update-governed-issue-or-pull-request-metadata'
+  ) {
     const latestState = collectState(request, { runner });
-    if (
-      latestState.current.threadUpdatedAt !== request.target.threadUpdatedAt ||
-      latestState.current.isResolved !== request.expected.isResolved
-    ) {
+    const current = latestState.current ?? {};
+    const drift =
+      current.updatedAt !== request.target.updatedAt ||
+      (request.action === 'resolve-fixed-review-thread' &&
+        (current.threadUpdatedAt !== request.target.threadUpdatedAt ||
+          current.headSha !== request.target.headSha ||
+          current.isResolved !== request.expected.isResolved)) ||
+      (request.action === 'mark-exact-head-ready-for-review' &&
+        (current.headSha !== request.target.headSha ||
+          current.isDraft !== request.expected.isDraft));
+    if (drift) {
       throw new Error(
         `${request.action} desired state was not verified before mutation; do not retry blindly`
       );
@@ -559,7 +586,39 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     );
   }
 
-  const postState = collectVerifiedPostWriteState(request, runner, collectState, options);
+  let postState;
+  try {
+    postState = collectVerifiedPostWriteState(request, runner, collectState, options);
+  } catch (error) {
+    // The write reached GitHub but verification found a concurrent change.
+    // Undo our own mutation so the raced target is not left mutated, then
+    // surface the original failure.
+    if (request.action === 'resolve-fixed-review-thread') {
+      const raced = collectState(request, { runner });
+      if (
+        raced.current?.isResolved === true &&
+        raced.current?.threadUpdatedAt !== request.target.threadUpdatedAt
+      ) {
+        try {
+          graphql(runner, UNRESOLVE_THREAD_MUTATION, { threadId: request.target.threadId });
+        } catch {
+          // The compensation is best-effort; the original error governs.
+        }
+      }
+    } else if (request.action === 'mark-exact-head-ready-for-review') {
+      const raced = collectState(request, { runner });
+      if (raced.current?.isDraft === false && raced.current?.headSha !== request.target.headSha) {
+        try {
+          graphql(runner, CONVERT_TO_DRAFT_MUTATION, {
+            pullRequestId: raced.current.nodeId ?? preState.current.nodeId,
+          });
+        } catch {
+          // The compensation is best-effort; the original error governs.
+        }
+      }
+    }
+    throw error;
+  }
   return {
     mutationCount: 1,
     reconciliationCount: 0,

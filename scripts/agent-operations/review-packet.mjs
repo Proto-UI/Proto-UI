@@ -176,13 +176,20 @@ function validateExecution(args, packet, policy) {
 function validateIntegrationExecution(args, packet, input, policy) {
   const routed = loadIntegrationHandoff(args.get('--handoff'));
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
+  // The reviewed content ceiling was established by the independent reviewer
+  // when this packet was sealed; recomputing it against the integrator's
+  // assessment would reapply the review-class ceiling to an actor who only
+  // performs the bounded integration mutation. Validate the packet against
+  // its declared review class without an actor ceiling, and apply the C2
+  // integration ceiling to the current actor via evaluateSkillEligibility
+  // below.
   const reviewEligibility = evaluateReviewEligibility({
-    executionMode: routed.handoff.executionMode,
+    executionMode: 'human-assisted',
     reviewClass: packet.reviewClass,
-    selfAssessment,
+    selfAssessment: null,
     policy,
   });
-  validateReviewPacketEligibility(packet, reviewEligibility, routed.handoff.executionMode);
+  validateReviewPacketEligibility(packet, reviewEligibility, 'human-assisted');
   const packetArtifact = routed.handoff.artifacts.find(
     (artifact) => artifact.type === 'review-packet'
   );

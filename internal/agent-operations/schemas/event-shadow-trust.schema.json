@@ -10,13 +10,21 @@
     "repositoryId",
     "repositoryFullName",
     "hookIds",
+    "appIds",
     "installationIds",
     "selfActorIds"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "kind": { "const": "proto-ui.event-shadow-trust" },
-    "repositoryId": { "type": "integer", "minimum": 1 },
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "proto-ui.event-shadow-trust"
+    },
+    "repositoryId": {
+      "type": "integer",
+      "minimum": 1
+    },
     "repositoryFullName": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
@@ -25,19 +33,37 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "type": "integer", "minimum": 1 }
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "appIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
     },
     "installationIds": {
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "type": "integer", "minimum": 1 }
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
     },
     "selfActorIds": {
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "type": "integer", "minimum": 1 }
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
     }
   }
 }

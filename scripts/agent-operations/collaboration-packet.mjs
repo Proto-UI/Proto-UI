@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 
 import {
   collectRepositorySnapshot,
+  deriveRepositoryId,
   isSelfAssessmentFresh,
   loadCapabilityPolicy,
   validateSelfAssessmentResult,
@@ -76,12 +77,22 @@ function readRequest(path) {
   return validateCollaborationRequest(readJson(path, '--request'));
 }
 
-function loadAssessment(path, policy) {
+function loadAssessment(path, policy, request) {
   if (!path) return null;
   const result = readJson(path, '--assessment');
   validateSelfAssessmentResult(result, policy);
+  // Bind the assessment to this checkout and to the exact request target: a
+  // capability envelope issued for another repository cannot authorize a
+  // mutation here.
+  const checkedOutRepositoryId = deriveRepositoryId(skillRegistryRoot);
+  if (result.scope.repositoryId !== checkedOutRepositoryId) {
+    throw new Error('assessment scope repository does not match the checked-out repository');
+  }
+  if (request && result.scope.repositoryId !== request.repositoryId) {
+    throw new Error('assessment scope repository does not match the exact collaboration target');
+  }
   const snapshot = collectRepositorySnapshot(skillRegistryRoot, {
-    repositoryId: result.scope.repositoryId,
+    repositoryId: checkedOutRepositoryId,
   });
   return { ...result, validated: true, fresh: isSelfAssessmentFresh(result, snapshot) };
 }
@@ -100,7 +111,7 @@ function loadCollaborationHandoff(path) {
 
 function validateExecution(request, args, policy) {
   const routed = loadCollaborationHandoff(args.get('--handoff'));
-  const selfAssessment = loadAssessment(args.get('--assessment'), policy);
+  const selfAssessment = loadAssessment(args.get('--assessment'), policy, request);
   validateCollaborationHandoffBinding(request, routed.handoff, { selfAssessment });
   const eligibility = evaluateSkillEligibility(routed.nextSkill, {
     executionMode: routed.handoff.executionMode,
