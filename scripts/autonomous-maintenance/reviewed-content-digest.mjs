@@ -1,7 +1,8 @@
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { lstatSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { lstatSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import YAML from 'yaml';
 
 const digestSentinel = `sha256:${'0'.repeat(64)}`;
@@ -80,39 +81,44 @@ function readWorktreePath(root, repositoryPath) {
   }
 }
 
-function isUntrackedWorktreePath(root, repositoryPath) {
+// Stage the reviewed worktree paths on top of the reviewed head into a
+// throwaway index, then diff the baseline against that index. The resulting
+// patch stream is byte-identical to `git diff baseline <new head>` after the
+// worktree content is committed, which keeps the pre-commit and post-commit
+// digest over the same canonical stream (including untracked paths and
+// deletions, interleaved in path order).
+function readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions) {
+  const tempDir = mkdtempSync(join(tmpdir(), 'proto-ui-reviewed-content-index-'));
+  const env = { ...process.env, GIT_INDEX_FILE: join(tempDir, 'index') };
   try {
-    const output = execFileSync(
+    execFileSync('git', ['read-tree', head], {
+      cwd: root,
+      env,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+    // Stage only paths present in the worktree or in the reviewed head tree;
+    // a path deleted before the head matches nothing and would fail the add,
+    // while its baseline deletion is still captured by the cached diff below.
+    const stagedPaths = reviewedPaths.filter(
+      (reviewedPath) =>
+        lstatSync(resolve(root, reviewedPath), { throwIfNoEntry: false }) !== undefined ||
+        readCommitMode(root, head, reviewedPath) !== null
+    );
+    if (stagedPaths.length > 0) {
+      execFileSync('git', ['add', '--force', '--', ...stagedPaths], {
+        cwd: root,
+        env,
+        stdio: ['ignore', 'ignore', 'pipe'],
+      });
+    }
+    return execFileSync(
       'git',
-      ['ls-files', '--others', '--exclude-standard', '--', repositoryPath],
-      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
-    ).trim();
-    return output.length > 0;
-  } catch {
-    return false;
+      ['diff', '--cached', ...diffOptions, baseline, '--', ...reviewedPaths],
+      { cwd: root, env, maxBuffer: 64 * 1024 * 1024 }
+    );
+  } finally {
+    rmSync(dirname(env.GIT_INDEX_FILE), { recursive: true, force: true });
   }
-}
-function readUntrackedDiff(root, repositoryPath) {
-  const result = spawnSync(
-    'git',
-    [
-      'diff',
-      '--no-index',
-      '--binary',
-      '--full-index',
-      '--no-color',
-      '--no-ext-diff',
-      '--no-textconv',
-      '--',
-      '/dev/null',
-      repositoryPath,
-    ],
-    { cwd: root, encoding: 'utf8' }
-  );
-  if (result.status !== 0 && result.status !== 1) {
-    throw new Error(result.stderr || `could not read untracked diff for ${repositoryPath}`);
-  }
-  return result.stdout;
 }
 function readWorktreeMode(root, repositoryPath) {
   try {
@@ -145,19 +151,20 @@ export function computeReviewedContentDigest({
 }) {
   const normalizedPaths = [...exactPaths].sort();
   const reviewedPaths = normalizedPaths.filter((entry) => entry !== reviewPath);
-  const diffArgs = [
-    'diff',
+  const diffOptions = [
     '--binary',
     '--full-index',
     '--no-color',
     '--no-ext-diff',
     '--no-textconv',
     '--no-renames',
-    baseline,
   ];
-  if (!worktree) diffArgs.push(head);
-  diffArgs.push('--', ...reviewedPaths);
-  const patch = execFileSync('git', diffArgs, { cwd: root, maxBuffer: 64 * 1024 * 1024 });
+  const patch = worktree
+    ? readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions)
+    : execFileSync('git', ['diff', ...diffOptions, baseline, head, '--', ...reviewedPaths], {
+        cwd: root,
+        maxBuffer: 64 * 1024 * 1024,
+      });
 
   const headPacket =
     headPacketContent ??
@@ -171,17 +178,6 @@ export function computeReviewedContentDigest({
   updateField(hash, 'exact-paths', normalizedPaths.join('\0'));
   hash.update('\0reviewed-path-diff\0', 'utf8');
   hash.update(patch);
-  if (worktree) {
-    for (const reviewedPath of reviewedPaths) {
-      if (isUntrackedWorktreePath(root, reviewedPath)) {
-        updateField(
-          hash,
-          `worktree-untracked-diff:${reviewedPath}`,
-          readUntrackedDiff(root, reviewedPath)
-        );
-      }
-    }
-  }
   updateField(hash, 'review-packet-path', reviewPath);
   updateField(
     hash,

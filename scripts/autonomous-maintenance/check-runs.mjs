@@ -675,6 +675,33 @@ function validateForwardRunState(run, label) {
               `${label}.integration.receipt.mergeCommitSha changed paths must match the reviewed exact-head inventory`
             );
           }
+          // Bind the receipt to the reviewed tree, not just to the changed-path
+          // set: the merge result must carry byte-identical content for every
+          // reviewed path. Paths outside the reviewed inventory may legitimately
+          // move with the base branch between the exact head and the merge.
+          const reviewedTreeDrift = execFileSync(
+            'git',
+            [
+              'diff',
+              '--binary',
+              '--full-index',
+              '--no-color',
+              '--no-ext-diff',
+              '--no-textconv',
+              '--no-renames',
+              integration.exactHeadSha,
+              receipt.mergeCommitSha,
+              '--',
+              ...expectedIntegrationPaths,
+            ],
+            { cwd: root, maxBuffer: 64 * 1024 * 1024 }
+          );
+          if (reviewedTreeDrift.length > 0) {
+            fail(
+              ledgerFile,
+              `${label}.integration.receipt.mergeCommitSha tree content diverges from the reviewed exact head`
+            );
+          }
         } catch (error) {
           fail(
             ledgerFile,

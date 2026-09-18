@@ -559,6 +559,161 @@ test('thread resolution refuses a verified receipt when a new reply races the mu
   );
 });
 
+test('a thread reply racing the resolution triggers a compensating unresolve', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'resolve-fixed-review-thread',
+    target: {
+      kind: 'review-thread',
+      number: 509,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      threadId: 'PRRT_thread',
+      threadUpdatedAt: UPDATED_AT,
+    },
+    expected: { isResolved: false },
+    desired: { isResolved: true },
+    evidence: [
+      {
+        type: 'review-thread-resolution',
+        reference: 'The exact finding is fixed on the target head.',
+      },
+    ],
+    rationale: 'Resolve only the reviewed thread revision.',
+  });
+  const current = {
+    kind: 'review-thread',
+    number: 509,
+    nodeId: null,
+    url: null,
+    state: 'OPEN',
+    authorLogin: 'contributor',
+    updatedAt: UPDATED_AT,
+    headSha: HEAD,
+    threadId: 'PRRT_thread',
+    threadUpdatedAt: UPDATED_AT,
+    isResolved: false,
+    isOutdated: false,
+  };
+  const preState = { ...metadataLive(), action: request.action, current };
+  const racedState = {
+    ...preState,
+    current: {
+      ...current,
+      threadUpdatedAt: '2026-08-27T01:00:09.000Z',
+      isResolved: true,
+    },
+  };
+  const mutations = [];
+  let collections = 0;
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(request, preState, {
+        runner(command, args, options) {
+          mutations.push(options?.input ? JSON.parse(options.input).query : args.join(' '));
+          return JSON.stringify({
+            data: { resolveReviewThread: { thread: { id: 'PRRT_thread', isResolved: true } } },
+          });
+        },
+        collectState() {
+          collections += 1;
+          // Boundary revalidation sees the authorized revision; the race lands
+          // between the boundary check and the resolve mutation.
+          return collections === 1 ? preState : racedState;
+        },
+      }),
+    /desired state was not verified.*do not retry blindly/
+  );
+  assert.equal(mutations.length, 2);
+  assert.match(mutations[0], /resolveReviewThread/);
+  assert.match(mutations[1], /unresolveReviewThread/);
+});
+
+test('a push racing ready-for-review triggers a compensating draft conversion', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'mark-exact-head-ready-for-review',
+    expected: { isDraft: true },
+    desired: { isDraft: false },
+    evidence: [
+      ...base.evidence,
+      {
+        type: 'validation-report',
+        reference: 'artifact://validation/pr-509',
+        digest: `sha256:${'0'.repeat(64)}`,
+      },
+    ],
+  });
+  const current = {
+    kind: 'pull-request',
+    number: 509,
+    nodeId: 'PR_node',
+    url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+    state: 'OPEN',
+    authorLogin: 'contributor',
+    updatedAt: UPDATED_AT,
+    headSha: HEAD,
+    isDraft: true,
+  };
+  const preState = { ...metadataLive(), action: request.action, current };
+  const racedState = {
+    ...preState,
+    current: { ...current, headSha: NEXT_HEAD, isDraft: false },
+  };
+  const mutations = [];
+  let collections = 0;
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(request, preState, {
+        runner(command, args, options) {
+          mutations.push(options?.input ? JSON.parse(options.input).query : args.join(' '));
+          return JSON.stringify({
+            data: {
+              markPullRequestReadyForReview: {
+                pullRequest: {
+                  id: 'PR_node',
+                  isDraft: false,
+                  updatedAt: UPDATED_AT,
+                  headRefOid: NEXT_HEAD,
+                },
+              },
+            },
+          });
+        },
+        collectState() {
+          collections += 1;
+          return collections === 1 ? preState : racedState;
+        },
+      }),
+    /desired state was not verified.*do not retry blindly/
+  );
+  assert.equal(mutations.length, 2);
+  assert.match(mutations[0], /markPullRequestReadyForReview/);
+  assert.match(mutations[1], /convertPullRequestToDraft/);
+});
+
+test('metadata PATCH fails closed when the target drifts at the mutation boundary', () => {
+  const request = metadataRequest();
+  const preState = metadataLive();
+  let writes = 0;
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(request, preState, {
+        runner() {
+          writes += 1;
+          return JSON.stringify({});
+        },
+        collectState() {
+          return metadataLive({ updatedAt: '2026-08-27T01:00:09.000Z' });
+        },
+      }),
+    /desired state was not verified before mutation.*do not retry blindly/
+  );
+  assert.equal(writes, 0);
+});
+
 test('mutation adapter performs exactly one write and one post-write verification', () => {
   const request = metadataRequest();
   const preState = metadataLive();
@@ -567,6 +722,7 @@ test('mutation adapter performs exactly one write and one post-write verificatio
     title: 'New title',
     updatedAt: '2026-08-27T01:00:10.000Z',
   });
+  let collections = 0;
   const result = applyGitHubCollaborationMutation(request, preState, {
     runner(command, args, options) {
       calls.push({ command, args, options });
@@ -580,11 +736,12 @@ test('mutation adapter performs exactly one write and one post-write verificatio
     },
     collectState() {
       calls.push({ collect: true });
-      return postState;
+      collections += 1;
+      return collections === 1 ? preState : postState;
     },
   });
   assert.equal(calls.filter((call) => call.command === 'gh').length, 1);
-  assert.equal(calls.filter((call) => call.collect).length, 1);
+  assert.equal(calls.filter((call) => call.collect).length, 2);
   assert.equal(result.mutationCount, 1);
   assert.equal(result.reconciliationCount, 0);
   assert.equal(result.postState.current.title, 'New title');
@@ -603,13 +760,15 @@ test('unknown outcomes reconcile once and never retry a non-attributable mutatio
         },
         collectState() {
           reconciliations += 1;
-          return metadataLive({ title: 'New title' });
+          // First read is the mutation-boundary revalidation; the failed write
+          // then reconciles exactly once.
+          return reconciliations === 1 ? metadataLive() : metadataLive({ title: 'New title' });
         },
       }),
     /ambiguous after one live reconciliation.*do not retry blindly/
   );
   assert.equal(writes, 1);
-  assert.equal(reconciliations, 1);
+  assert.equal(reconciliations, 2);
 });
 
 test('a bounded comment can reconcile an unknown outcome through its unique request marker', () => {
@@ -1305,7 +1464,9 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
       },
       collectState() {
         collectionCount += 1;
-        return fixture.request.action === 'resolve-fixed-review-thread' && collectionCount === 1
+        return ['resolve-fixed-review-thread', 'mark-exact-head-ready-for-review'].includes(
+          fixture.request.action
+        ) && collectionCount === 1
           ? preState
           : postState;
       },

@@ -126,6 +126,7 @@ function validateTrust(trust) {
     Array.isArray(trust.installationIds) && trust.installationIds.length > 0,
     'trusted installation ids are required'
   );
+  assert(Array.isArray(trust.appIds) && trust.appIds.length > 0, 'trusted app ids are required');
   return {
     repositoryId,
     repositoryFullName: trust.repositoryFullName,
@@ -133,6 +134,7 @@ function validateTrust(trust) {
     installationIds: trust.installationIds.map((value) =>
       integer(value, 'trusted installation id')
     ),
+    appIds: trust.appIds.map((value) => integer(value, 'trusted app id')),
   };
 }
 
@@ -160,15 +162,19 @@ export function normalizeGithubWebhook({ rawBody, headers, secret, trust, observ
   );
   const hookId = integer(normalizedHeaders['x-github-hook-id'], 'webhook hook id');
   assert(anchors.hookIds.includes(hookId), `webhook hook id ${hookId} is not trusted`);
+  // Single coherent ingress model: a GitHub App webhook. Only App deliveries
+  // carry the payload installation object required below; their hook target is
+  // the integration (the App), while the repository identity is authenticated
+  // from the signed payload, not from the transport header.
   const targetType = normalizedHeaders['x-github-hook-installation-target-type'];
-  assert(targetType === 'repository', 'webhook target type must be repository');
+  assert(targetType === 'integration', 'webhook target type must be the trusted integration');
   const targetId = integer(
     normalizedHeaders['x-github-hook-installation-target-id'],
     'webhook target id'
   );
   assert(
-    targetId === anchors.repositoryId,
-    'webhook target repository does not match trust anchors'
+    anchors.appIds.includes(targetId),
+    'webhook target integration does not match trust anchors'
   );
   assert(
     normalizedHeaders['user-agent']?.startsWith('GitHub-Hookshot/'),
@@ -412,10 +418,9 @@ export function validateEventEnvelope(envelope) {
   if (!isCanonicalDateTime(envelope.revision?.updatedAt)) {
     issues.push('revision updatedAt is invalid');
   }
-  if (envelope.repository?.id !== envelope.hook?.targetId) {
-    issues.push('hook target id must match repository id');
+  if (envelope.hook?.targetType !== 'integration') {
+    issues.push('hook targetType must be the trusted integration');
   }
-  if (envelope.hook?.targetType !== 'repository') issues.push('hook targetType is invalid');
   if (envelope.delivery?.event !== 'pull_request') issues.push('delivery event is invalid');
   if (envelope.object?.kind !== 'pull-request') issues.push('object kind is invalid');
   if (envelope.source?.completeness === 'complete') {

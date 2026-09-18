@@ -98,6 +98,7 @@ function normalizeTrust(value) {
       'repositoryId',
       'repositoryFullName',
       'hookIds',
+      'appIds',
       'installationIds',
       'selfActorIds',
     ],
