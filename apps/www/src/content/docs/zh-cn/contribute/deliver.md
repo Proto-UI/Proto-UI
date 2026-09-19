@@ -25,12 +25,12 @@ description: '让一个受治理的完整切片经过实现、证据、审阅、
 
 回归修复应先证明现有保证会因预期原因失败。如果期望行为本身不清楚，这项工作属于语义塑形，不属于 Bug 修复。
 
-新的 push 会触发 live reconciliation 和 fresh exact-head review。现有 standing authorization 允许独立 Agent 重新检查、提交有 finding 支撑的 `REQUEST_CHANGES`、批准符合条件的 clean exact head，并把已获独立批准的 head 交给 `pui-integrate`。合并命令绑定已审阅 SHA，且仅在可信 checks 通过、active change request 已清除、review thread 已解决、实时权限已确认、仓库规则报告 clean 且 mergeable 时执行。
+新的 push 会触发 live reconciliation 和 fresh exact-head review。在当前用户明确授权下，独立 Agent 可以重新检查、提交有 finding 支撑的 `REQUEST_CHANGES`、批准符合条件的 clean exact head，并把已获独立批准的 head 交给 `pui-integrate`。定时的 review 与 merge scope 均为 `pending-runtime-identity`，在 broker 核验的工作负载身份绑定前保持只读，激活后才能执行同样的写操作。合并命令绑定已审阅 SHA，且仅在可信 checks 通过、active change request 已清除、review thread 已解决、实时权限已确认、仓库规则报告 clean 且 mergeable 时执行。
 
 ## 发布
 
 发布准备形成可审阅的仓库状态。真正 publication 从受治理的 `main` 单独执行，并保持人类在场。随后再通过 evidence change 核验 registry、tag、GitHub Release、assets、snapshot digest、workflow head 和 deployment。
 
-无论由当前用户指导还是依据 active standing authorization 运行，Agent 都可以通过同一套证据绑定的转换准备、验证、审阅并集成 release-candidate 仓库改动。Publication、tag 创建、稳定生命周期激活和部分发布恢复属于特权或难以逆转的最终交付操作，仍需当前人类授权并保持人在场。
+无论由当前用户指导，还是在 `pending-runtime-identity` 的定时 scope 经 broker 核验的工作负载身份脱离只读观察边界、激活为 standing authorization 之后依其运行，Agent 都可以通过同一套证据绑定的转换准备、验证、审阅并集成 release-candidate 仓库改动。Publication、tag 创建、稳定生命周期激活和部分发布恢复属于特权或难以逆转的最终交付操作，仍需当前人类授权并保持人在场。
 
 精确命令和提交要求见 [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md)。

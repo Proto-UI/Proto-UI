@@ -25,12 +25,12 @@ Machine checks show that deterministic evidence passed. Independent review decid
 
 A regression fix begins with behavior that fails for the governed reason. If expected behavior is unclear, the work is a semantic question rather than a bug fix.
 
-A new push triggers live reconciliation and a fresh exact-head review. Under the active standing authorizations, an independent Agent may recheck, submit finding-backed `REQUEST_CHANGES`, approve an eligible clean exact head, and pass an independently approved head to `pui-integrate`. The merge command binds the reviewed SHA and proceeds only after trusted checks pass, active change requests are cleared, review threads are resolved, live permission is confirmed, and repository rules report a clean mergeable state.
+A new push triggers live reconciliation and a fresh exact-head review. Under the current user's explicit authorization, an independent Agent may recheck, submit finding-backed `REQUEST_CHANGES`, approve an eligible clean exact head, and pass an independently approved head to `pui-integrate`. The scheduled review and merge scopes are `pending-runtime-identity` and read-only until broker-verified workload identity is bound; only then can they perform the same writes. The merge command binds the reviewed SHA and proceeds only after trusted checks pass, active change requests are cleared, review threads are resolved, live permission is confirmed, and repository rules report a clean mergeable state.
 
 ## Release
 
 Release preparation creates reviewable repository state. Publication is a separate, attended operation from governed `main`. A later evidence change verifies registry, tag, GitHub Release, assets, snapshot digests, workflow head, and deployments.
 
-Agents may prepare, validate, review, and integrate release-candidate repository changes through the same evidence-bound transitions, whether directed by a current user or operating under an active standing authorization. Publication, tag creation, stable-lifecycle activation, and partial-release recovery remain attended because they are privileged or difficult to reverse; require current human authorization at that final delivery boundary.
+Agents may prepare, validate, review, and integrate release-candidate repository changes through the same evidence-bound transitions, whether directed by a current user or—once the `pending-runtime-identity` scheduled scopes leave their read-only observation boundary under broker-verified workload identity—operating under an activated standing authorization. Publication, tag creation, stable-lifecycle activation, and partial-release recovery remain attended because they are privileged or difficult to reverse; require current human authorization at that final delivery boundary.
 
 Exact commands and contribution requirements live in [CONTRIBUTING.md](https://github.com/Proto-UI/Proto-UI/blob/main/CONTRIBUTING.md).
