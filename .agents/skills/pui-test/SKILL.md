@@ -5,6 +5,8 @@ description: Design or implement the smallest complete executable evidence for a
 
 # Build executable evidence
 
+For input attribution, asynchronous ownership, CSS projection or uncertain test coverage, read `internal/agent-operations/testing-method.md`. Apply the techniques needed to distinguish the governed failure, not a universal list of Scroll cases.
+
 1. Require a `pui-trace` map and governed expected behavior.
 2. Identify the semantic owner, observable boundary, affected hosts, direct and indirect consumers, negative boundary, and failure modes.
 3. Choose the lowest layer that can prove the rule, then add integration or consumer evidence only where translation or packaging could fail.

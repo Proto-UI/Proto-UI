@@ -25,7 +25,7 @@
     "recommendedAction"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "enum": [1, 2] },
     "kind": { "const": "proto-ui.review-packet" },
     "repositoryId": { "type": "string", "minLength": 4 },
     "pullRequest": { "type": "integer", "minimum": 1 },
@@ -49,13 +49,92 @@
     "affectedSurfaces": { "$ref": "#/$defs/nonEmptyStrings" },
     "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
     "validation": { "$ref": "#/$defs/validation" },
+    "agentEvidence": { "$ref": "#/$defs/agentEvidence" },
     "reconciliation": { "$ref": "#/$defs/reconciliation" },
     "limitations": { "$ref": "#/$defs/strings" },
     "unknowns": { "$ref": "#/$defs/strings" },
     "humanGates": { "$ref": "#/$defs/strings" },
     "recommendedAction": { "enum": ["APPROVE", "REQUEST_CHANGES", "COMMENT", "ABSTAIN"] }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "schemaVersion": { "const": 2 } } },
+      "then": { "required": ["agentEvidence"] },
+      "else": { "not": { "required": ["agentEvidence"] } }
+    }
+  ],
   "$defs": {
+    "publicUrl": { "type": "string", "format": "uri", "pattern": "^https://[^\\s<>]+$" },
+    "agentEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestParaphrase",
+        "source",
+        "scope",
+        "baseline",
+        "headSha",
+        "environment",
+        "observedAt",
+        "procedure",
+        "observations",
+        "visuals",
+        "supportingUrls",
+        "disposition",
+        "debt"
+      ],
+      "properties": {
+        "requestParaphrase": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "scope": { "type": "string", "minLength": 1 },
+        "baseline": { "type": "string", "minLength": 1 },
+        "headSha": { "$ref": "#/$defs/sha" },
+        "environment": { "type": "string", "minLength": 1 },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "procedure": { "$ref": "#/$defs/nonEmptyStrings" },
+        "observations": { "$ref": "#/$defs/nonEmptyStrings" },
+        "visuals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["url", "alt", "caption"],
+            "properties": {
+              "url": { "$ref": "#/$defs/publicUrl" },
+              "alt": { "type": "string", "minLength": 1 },
+              "caption": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "supportingUrls": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/publicUrl" }
+        },
+        "disposition": { "enum": ["complete", "partial", "blocked"] },
+        "debt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "missing", "reason", "nextAction"],
+            "properties": {
+              "kind": { "enum": ["publication", "verification", "outside-scope"] },
+              "missing": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 },
+              "nextAction": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "disposition": { "const": "complete" } } },
+          "then": { "properties": { "debt": { "maxItems": 0 } } },
+          "else": { "properties": { "debt": { "minItems": 1 } } }
+        }
+      ]
+    },
     "sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
     "strings": {
       "type": "array",

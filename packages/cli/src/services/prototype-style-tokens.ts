@@ -1545,7 +1545,14 @@ function resolveKnownAsHookStateHandles(node) {
     return new Map([['busy', 'data-[busy]']]);
   }
 
-  if (hookName === 'asSeparatorRoot') {
+  if (hookName === 'asScrollAreaViewport') {
+    return new Map([
+      ['focused', 'data-[focused]'],
+      ['focusVisible', 'data-[focus-visible]'],
+    ]);
+  }
+
+  if (hookName === 'asSeparatorRoot' || hookName === 'asScrollAreaScrollbar') {
     return new Map([['orientation', 'data-[orientation]']]);
   }
 

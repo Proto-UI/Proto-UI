@@ -6,10 +6,10 @@ description: Post one already selected Proto UI work-item claim as a reversible 
 # Post one approved claim
 
 1. Require a current `pui-orient` envelope. In autonomous mode the claim must be within the fresh C2-or-higher ceiling; in human-assisted mode the assessment remains advisory.
-2. Require the raw `pui-select` proposal, explicit or standing authorization for its exact claim text and scope, live GitHub permission, and an idempotency key bound to the issue update time, repository, requested action, and contributor.
+2. Require the raw `pui-select` proposal and its `evidence-assessment`, explicit or standing authorization for the exact claim text including its `Agent evidence` section, live GitHub permission, and an idempotency key bound to the issue update time, repository, requested action, and contributor. Read `internal/agent-operations/visual-evidence.md`; verify target/cutoff, sanitized paraphrase/source, current evidence versus planned evidence, coverage/disposition and debt are present and accurately included in the authorized text.
 3. Re-read the live issue, assignee, recent comments, linked pull requests, and Project claim state immediately before posting.
 4. Stop without writing if readiness, ownership, scope, evidence, permission, authorization, or the idempotency state has changed. Record `pui-select` as the proposed next leaf without loading it. Do not repair or reinterpret the proposal inside this transition.
-5. Post exactly one claim containing the approved scope, planned evidence, capability band, and expiry.
+5. Post exactly one claim containing the approved scope, planned evidence, capability band, expiry, and the assessed `Agent evidence` section. Reuse verified links; disclose unexecuted reproduction and upload debt. `partial` or `blocked` evidence alone does not prevent this authorized claim; the soft gate never requires a human to supply images. An omitted assessment or changed authorized wording requires a revised proposal, not silently generated evidence inside this write transition.
 6. Return a mutation receipt with the issue identity, claim URL or identifier, timestamp, observed pre-state, resulting state, and the bounded subject for `pui-trace`.
 
 Do not change readiness, semantic approval, required capability, labels, milestones, or assignments. Do not post a second claim or release an existing claim.

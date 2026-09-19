@@ -15,12 +15,14 @@ import {
   inspectReviewRevision,
   reviewChangesSpecEntities,
   reviewPacketKey,
+  renderReviewBody,
   validateReviewInputSnapshot,
   validateReviewPacket,
   validateReviewPacketEligibility,
   verifyLiveReviewInput,
   verifyReconciliation,
 } from '../review-runtime.mjs';
+import { agentEvidence } from './fixtures/agent-evidence.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
@@ -73,7 +75,7 @@ function reviewInput(overrides = {}) {
 
 function packet(overrides = {}, input = reviewInput()) {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: 'proto-ui.review-packet',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
     pullRequest: 487,
@@ -85,6 +87,7 @@ function packet(overrides = {}, input = reviewInput()) {
     scope: ['agent operations'],
     affectedEntities: ['governance:contributor-agent'],
     affectedSurfaces: ['scripts', 'docs'],
+    agentEvidence: agentEvidence(overrides.headSha ?? input.headSha),
     findings: [],
     validation: {
       commands: [
@@ -115,6 +118,74 @@ function assessment(band, reviewClasses, { fresh = true, validated = true } = {}
     capability: { band, recommendedReviewClasses: reviewClasses },
   };
 }
+
+test('review packets cannot silently omit public Agent evidence', () => {
+  const legacy = packet();
+  delete legacy.agentEvidence;
+  assert.throws(() => validateReviewPacket(legacy, reviewInput()), /missing|agentEvidence/);
+});
+
+test('review rendering preserves evidence even when the finding list is empty', () => {
+  const current = packet({ recommendedAction: 'COMMENT' });
+  current.agentEvidence.visuals = [
+    {
+      url: 'https://example.com/observed.png',
+      alt: 'Observed ownership transitions',
+      caption: 'Synthetic transport test; no real observation claimed.',
+    },
+  ];
+  current.agentEvidence.supportingUrls = ['https://example.com/reproduce.html'];
+  const body = renderReviewBody(validateReviewPacket(current, reviewInput()));
+  for (const value of [
+    current.headSha,
+    current.agentEvidence.requestParaphrase,
+    current.agentEvidence.source,
+    current.agentEvidence.scope,
+    current.agentEvidence.baseline,
+    current.agentEvidence.environment,
+    current.agentEvidence.observedAt,
+    ...current.agentEvidence.procedure,
+    ...current.agentEvidence.observations,
+    ...Object.values(current.agentEvidence.visuals[0]),
+    ...current.agentEvidence.supportingUrls,
+    ...Object.values(current.agentEvidence.debt[0]),
+    ...current.limitations,
+    current.validation.commands[0].result,
+  ])
+    assert.ok(body.includes(value), value);
+  assert.ok(body.includes('**partial**'));
+  assert.ok(body.includes('![Observed ownership transitions](<https://example.com/observed.png>)'));
+  assert.ok(body.includes('No actionable findings within the stated review scope.'));
+});
+
+test('evidence validates head and debt without an image-presence submission gate', () => {
+  for (const disposition of ['partial', 'blocked']) {
+    const current = packet();
+    current.agentEvidence.disposition = disposition;
+    assert.equal(validateReviewPacket(current, reviewInput()), current);
+    assert.ok(renderReviewBody(current).includes(`**${disposition}**`));
+  }
+  const wrongHead = packet();
+  wrongHead.agentEvidence.headSha = sha('c');
+  assert.throws(() => validateReviewPacket(wrongHead, reviewInput()), /bind the reviewed head/);
+  const unexplained = packet();
+  unexplained.agentEvidence.debt = [];
+  assert.throws(() => validateReviewPacket(unexplained, reviewInput()), /agree with declared debt/);
+  const concealed = packet();
+  concealed.agentEvidence.disposition = 'complete';
+  assert.throws(() => validateReviewPacket(concealed, reviewInput()), /agree with declared debt/);
+  for (const url of [
+    'D:/capture.png',
+    'https://user:secret@example.com/image.png',
+    'javascript:alert(1)',
+  ]) {
+    const invalid = packet();
+    invalid.agentEvidence.visuals = [
+      { url, alt: 'Invalid locator', caption: 'Not a public verified image' },
+    ];
+    assert.throws(() => validateReviewPacket(invalid, reviewInput()), /HTTPS URL|credentials/);
+  }
+});
 
 test('review packet binds revision and input state and supports incremental reconciliation', () => {
   const input = reviewInput();
@@ -661,6 +732,26 @@ test('review submission preserves explicit authorization and activates the bound
   const scheduledApproval = authorizeReviewSubmission(scheduledBase);
   assert.equal(scheduledApproval.allowed, true);
   assert.equal(scheduledApproval.recommendedAction, 'APPROVE');
+  for (const boundary of [base, scheduledBase]) {
+    for (const reviewed of [base.packet, requestChangesPacket]) {
+      const unverified = structuredClone(reviewed);
+      unverified.agentEvidence.debt = [
+        {
+          kind: 'verification',
+          missing: 'Declared behavior not reproduced',
+          reason: 'Host unavailable',
+          nextAction: 'Run the required target before disposition',
+        },
+      ];
+      const denied = authorizeReviewSubmission({ ...boundary, packet: unverified });
+      assert.equal(denied.allowed, false);
+      assert.match(denied.reason, /verification debt/);
+    }
+  }
+  const honestComment = structuredClone(base.packet);
+  honestComment.recommendedAction = 'COMMENT';
+  honestComment.agentEvidence.debt[0].kind = 'verification';
+  assert.equal(authorizeReviewSubmission({ ...base, packet: honestComment }).allowed, true);
   const reviewEligibleC3 = assessment('C3', [
     'review-facts-and-ci',
     'review-docs-and-links',
@@ -700,7 +791,10 @@ test('review submission preserves explicit authorization and activates the bound
     false
   );
 
-  const duplicateInput = reviewInput({
+  // A legacy same-head approval without this packet's rendered body must not
+  // block a changed evidence packet; only an exact rendered-body match is an
+  // idempotent duplicate.
+  const legacyDuplicateInput = reviewInput({
     reviews: [
       {
         id: 'PRR_existing',
@@ -712,17 +806,48 @@ test('review submission preserves explicit authorization and activates the bound
       },
     ],
   });
-  const duplicateApproval = authorizeReviewSubmission({
+  const legacyDuplicate = authorizeReviewSubmission({
     ...scheduledBase,
-    input: duplicateInput,
-    liveInput: structuredClone(duplicateInput),
+    input: legacyDuplicateInput,
+    liveInput: structuredClone(legacyDuplicateInput),
     packet: packet(
       { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
-      duplicateInput
+      legacyDuplicateInput
     ),
   });
-  assert.equal(duplicateApproval.allowed, false);
-  assert.equal(duplicateApproval.duplicate, true);
+  assert.equal(legacyDuplicate.allowed, true);
+  assert.equal(legacyDuplicate.duplicate, undefined);
+
+  const publishedPacket = packet(
+    { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
+    reviewInput()
+  );
+  const publishedBody = renderReviewBody(publishedPacket);
+  assert.ok(publishedBody.includes('proto-ui:review-packet:sha256='));
+  assert.ok(publishedBody.includes('proto-ui:agent-evidence:sha256='));
+  const exactDuplicateInput = reviewInput({
+    reviews: [
+      {
+        id: 'PRR_exact',
+        author: 'agent',
+        state: 'APPROVED',
+        commitSha: sha('b'),
+        submittedAt: '2026-08-23T03:00:00.000Z',
+        body: publishedBody,
+      },
+    ],
+  });
+  const exactDuplicateApproval = authorizeReviewSubmission({
+    ...scheduledBase,
+    input: exactDuplicateInput,
+    liveInput: structuredClone(exactDuplicateInput),
+    packet: packet(
+      { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
+      exactDuplicateInput
+    ),
+  });
+  assert.equal(exactDuplicateApproval.allowed, false);
+  assert.equal(exactDuplicateApproval.duplicate, true);
 
   const specInput = reviewInput({
     changedFiles: [
@@ -1177,4 +1302,49 @@ test('agent:review CLI validates and inspects the same packet contract used by t
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test('legacy schema v1 packets ingest without evidence but cannot carry dispositions', () => {
+  const input = reviewInput();
+  const legacy = packet({ recommendedAction: 'COMMENT' }, input);
+  delete legacy.agentEvidence;
+  legacy.schemaVersion = 1;
+  assert.equal(validateReviewPacket(legacy, input), legacy);
+
+  const legacyBody = renderReviewBody(legacy);
+  assert.ok(legacyBody.includes('legacy schema v1'));
+  assert.ok(legacyBody.includes('proto-ui:review-packet:sha256='));
+  assert.ok(!legacyBody.includes('proto-ui:agent-evidence:sha256='));
+
+  const smuggled = packet({ recommendedAction: 'COMMENT' }, input);
+  smuggled.schemaVersion = 1;
+  assert.throws(() => validateReviewPacket(smuggled, input), /unexpected|agentEvidence/);
+
+  const base = {
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    authorizationId: 'explicit-current-user',
+    policy,
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+  };
+  const comment = authorizeReviewSubmission({ ...base, packet: legacy });
+  assert.equal(comment.allowed, true);
+
+  for (const recommendedAction of ['APPROVE', 'REQUEST_CHANGES']) {
+    const disposition = packet({ recommendedAction }, input);
+    delete disposition.agentEvidence;
+    disposition.schemaVersion = 1;
+    const result = authorizeReviewSubmission({ ...base, packet: disposition });
+    assert.equal(result.allowed, false);
+    assert.match(result.reason, /schema v2/);
+  }
+
+  const invalidVersion = packet({ recommendedAction: 'COMMENT' }, input);
+  invalidVersion.schemaVersion = 3;
+  assert.throws(() => validateReviewPacket(invalidVersion, input), /schemaVersion/);
 });
