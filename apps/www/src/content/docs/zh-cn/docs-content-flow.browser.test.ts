@@ -37,7 +37,11 @@ type FlowFacts = {
 type SelectFacts = {
   paragraphToPreviewer: number;
   previewerToHeading: number;
-  headerToPanel: number;
+  panelToContentBox: number;
+  projectionMode: string | undefined;
+  hasLegacyHeader: boolean;
+  hasProjectedControls: boolean;
+  hasProjectedContent: boolean;
   previousTag: string;
   nextClass: string;
 };
@@ -117,11 +121,12 @@ async function readSelectFacts(page: Page): Promise<SelectFacts> {
     const previewer = flow?.querySelector<HTMLElement>(':scope > [data-previewer-id]');
     const paragraph = previewer?.previousElementSibling as HTMLElement | null;
     const heading = previewer?.nextElementSibling as HTMLElement | null;
-    const header = previewer?.querySelector<HTMLElement>('.proto-previewer__header');
     const panel = previewer?.querySelector<HTMLElement>('.proto-previewer__preview-panel');
-    if (!flow || !previewer || !paragraph || !heading || !header || !panel) {
+    const projectedControls = panel?.querySelector<HTMLElement>('.pui-projection-controls');
+    const projectedContent = panel?.querySelector<HTMLElement>('.pui-projection-content');
+    if (!flow || !previewer || !paragraph || !heading || !panel) {
       throw new Error(
-        'The Select page must expose its prose, previewer, heading, and inner panels.'
+        'The Select page must expose its prose, previewer, heading, and projected panel.'
       );
     }
 
@@ -130,7 +135,14 @@ async function readSelectFacts(page: Page): Promise<SelectFacts> {
         previewer.getBoundingClientRect().top - paragraph.getBoundingClientRect().bottom,
       previewerToHeading:
         heading.getBoundingClientRect().top - previewer.getBoundingClientRect().bottom,
-      headerToPanel: panel.getBoundingClientRect().top - header.getBoundingClientRect().bottom,
+      panelToContentBox:
+        panel.getBoundingClientRect().top -
+        previewer.getBoundingClientRect().top -
+        Number.parseFloat(getComputedStyle(previewer).borderTopWidth),
+      projectionMode: previewer.dataset.projectionMode,
+      hasLegacyHeader: Boolean(previewer.querySelector('.proto-previewer__header')),
+      hasProjectedControls: Boolean(projectedControls),
+      hasProjectedContent: Boolean(projectedContent),
       previousTag: paragraph.tagName,
       nextClass: heading.className,
     };
@@ -260,7 +272,11 @@ describe.sequential('documentation content-flow browser regression', () => {
           expect(select.nextClass, `${label}/previewer successor`).toContain('sl-heading-wrapper');
           expectGap(select.paragraphToPreviewer, ORDINARY_FLOW_GAP_PX, `${label}/prose-preview`);
           expectGap(select.previewerToHeading, SECTION_FLOW_GAP_PX, `${label}/preview-heading`);
-          expectGap(select.headerToPanel, 0, `${label}/previewer internal boundary`);
+          expect(select.projectionMode, `${label}/projection mode`).toBe('fixed-family');
+          expect(select.hasLegacyHeader, `${label}/legacy header`).toBe(false);
+          expect(select.hasProjectedControls, `${label}/projected controls`).toBe(true);
+          expect(select.hasProjectedContent, `${label}/projected content`).toBe(true);
+          expectGap(select.panelToContentBox, 0, `${label}/previewer internal boundary`);
         } finally {
           await close();
         }
