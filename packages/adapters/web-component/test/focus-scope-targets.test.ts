@@ -181,6 +181,38 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('excludes image-map areas when the associated slotted image has a hidden flat-tree ancestor', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<map name="slotted-map"><area id="slotted-area" href="#a" tabindex="0"></map>';
+    const carrier = document.createElement('div');
+    const shadow = carrier.attachShadow({ mode: 'open' });
+    const hidden = document.createElement('div');
+    hidden.hidden = true;
+    const slot = document.createElement('slot');
+    hidden.append(slot);
+    shadow.append(hidden);
+    const image = document.createElement('img');
+    image.src = 'data:x';
+    image.useMap = '#slotted-map';
+    carrier.append(image);
+    // Happy DOM does not project assignedSlot. Inject only that host fact;
+    // the sampler still owns and observes the composed-ancestor decision.
+    Object.defineProperty(image, 'assignedSlot', { configurable: true, value: slot });
+    document.body.append(scope, carrier);
+    try {
+      expect(image.assignedSlot).toBe(slot);
+      expect(sampleWebComponentScopeTargets(scope).targets).toEqual([]);
+      hidden.hidden = false;
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'slotted-area',
+      ]);
+    } finally {
+      scope.remove();
+      carrier.remove();
+    }
+  });
+
   it('remembers the most recent native in-scope focus for trap recovery', () => {
     // C-AS-FOCUS-SCOPE-0002-I: pointer/programmatic focus is observed by the
     // view lease, including when focus later leaves the scope entirely.

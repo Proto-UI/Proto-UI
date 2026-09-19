@@ -416,6 +416,33 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('reprojects after selector state changes on composed ancestors outside the entry region', async () => {
+    const style = document.createElement('style');
+    style.textContent = '.entry-outer-hidden { visibility: hidden; }';
+    const wrapper = document.createElement('div');
+    document.body.append(style, wrapper);
+    const host = panel(true);
+    wrapper.append(host);
+    const button = document.createElement('button');
+    host.append(button);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    wrapper.classList.add('entry-outer-hidden');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    wrapper.classList.remove('entry-outer-hidden');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    wrapper.style.visibility = 'hidden';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    wrapper.style.visibility = '';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
   it('only observes document image bindings while the region contains areas', async () => {
     const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const host = panel(false);

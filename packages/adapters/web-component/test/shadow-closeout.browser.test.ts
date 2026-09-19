@@ -833,13 +833,43 @@ describe('Shadow closeout native boundaries', () => {
         const host = new C();
         host.id = 'css-only-entry';
         host.innerHTML = '<button id="css-only-entry-button">Button</button>';
-        document.body.append(host);
+        const carrier = document.createElement('div');
+        const root = carrier.attachShadow({ mode: 'open' });
+        const style = document.createElement('style');
+        style.textContent = '.entry-outer-hidden { visibility: hidden; }';
+        const outer = document.createElement('div');
+        outer.append(document.createElement('slot'));
+        root.append(style, outer);
+        carrier.append(host);
+        document.body.append(carrier);
+        (window as any).__cssOnlyEntryOuter = outer;
       });
       await page.waitForFunction(
         () => document.querySelector('#css-only-entry')?.getAttribute('tabindex') === null
       );
 
       const visibleBox = await page.locator('#css-only-entry-button').boundingBox();
+      await page.evaluate(() =>
+        (window as any).__cssOnlyEntryOuter.classList.add('entry-outer-hidden')
+      );
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+      await page.evaluate(() =>
+        (window as any).__cssOnlyEntryOuter.classList.remove('entry-outer-hidden')
+      );
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+
       await page.evaluate(() => {
         const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
         (window as any).__cssVisibilityRule = sheet.insertRule(
@@ -1026,6 +1056,45 @@ describe('Shadow closeout native boundaries', () => {
         inert: [],
         skipped: [],
         restored: ['slotted-inside'],
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('excludes an image-map area when its associated slotted image is not rendered', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(() => {
+        const scope = document.createElement('div');
+        scope.innerHTML =
+          '<map name="slotted-map" style="display:block"><area id="slotted-area" href="#a" tabindex="0" style="display:block"></map>';
+        const carrier = document.createElement('div');
+        const root = carrier.attachShadow({ mode: 'open' });
+        const wrapper = document.createElement('div');
+        const slot = document.createElement('slot');
+        wrapper.append(slot);
+        root.append(wrapper);
+        const image = document.createElement('img');
+        image.src =
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        image.useMap = '#slotted-map';
+        carrier.append(image);
+        document.body.append(scope, carrier);
+        const sample = () =>
+          (window as any).Closeout.sample(scope).targets.map((el: HTMLElement) => el.id);
+        const visible = sample();
+        wrapper.hidden = true;
+        const hidden = sample();
+        wrapper.hidden = false;
+        return { assigned: image.assignedSlot === slot, visible, hidden, restored: sample() };
+      });
+      expect(result).toEqual({
+        assigned: true,
+        visible: ['slotted-area'],
+        hidden: [],
+        restored: ['slotted-area'],
       });
     } finally {
       await page.close();

@@ -34,7 +34,7 @@ function isShadowRootNode(node: Node): node is ShadowRoot {
   return node.nodeType === 11 && isElementNode((node as ShadowRoot).host);
 }
 
-function composedParentElement(el: Element): Element | null {
+export function composedParentElement(el: Element): Element | null {
   if (isHtmlElement(el) && el.assignedSlot) return el.assignedSlot;
   if (el.parentElement) return el.parentElement;
   const root = el.getRootNode();
@@ -327,12 +327,7 @@ function isRendered(el: Element): boolean {
       style?.visibility === 'collapse'
     )
       return false;
-    const parent: Element | null = node.parentElement;
-    if (parent) node = parent;
-    else {
-      const root = node.getRootNode();
-      node = isShadowRootNode(root) ? root.host : null;
-    }
+    node = composedParentElement(node);
   }
   return true;
 }

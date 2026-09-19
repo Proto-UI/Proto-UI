@@ -97,6 +97,7 @@ import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/m
 import { type PropsBaseType } from '@proto.ui/types';
 import { createWebComponentPortalMount } from '../portal-mount';
 import {
+  composedParentElement,
   deepestActiveElement,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
@@ -801,6 +802,18 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               };
               observe(target);
+              // The entry region can itself be slotted or nested below
+              // selector-bearing ancestors outside its owned subtree. Their
+              // class/style state participates in descendant computed
+              // eligibility, so observe only that bounded composed chain.
+              let externalAncestor = composedParentElement(target);
+              while (externalAncestor) {
+                entryObserver?.observe(externalAncestor, {
+                  attributes: true,
+                  attributeFilter: ['class', 'style', 'hidden', 'inert'],
+                });
+                externalAncestor = composedParentElement(externalAncestor);
+              }
               // An already-upgraded descendant can still attach an open root
               // later (from a method, timer, or state transition), which is
               // invisible to both DOM mutation records and upgrade watches.

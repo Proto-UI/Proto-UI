@@ -135,6 +135,33 @@ describe('event route traversal work', () => {
     expect(listener).toHaveBeenCalledTimes(4);
   });
 
+  it('clears keyboard follow-up suppression after a once listener leaves no portal demand', () => {
+    const root = document.createElement('div');
+    const portalButton = document.createElement('button');
+    document.body.append(root, portalButton);
+    cleanup.push(() => {
+      root.remove();
+      portalButton.remove();
+    });
+    const router = createWebProtoEventRouter({
+      rootEl: root,
+      resolveSemanticEventRoute: () => ({ matched: true, accepted: true, surface: root }),
+      isEnabled: () => true,
+    });
+    cleanup.push(() => router.dispose());
+    const once = vi.fn();
+    router.rootTarget.addEventListener('press.commit', once, { once: true });
+
+    portalButton.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+    expect(once).toHaveBeenCalledTimes(1);
+    portalButton.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+
+    const later = vi.fn();
+    router.rootTarget.addEventListener('press.commit', later);
+    portalButton.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+    expect(later).toHaveBeenCalledTimes(1);
+  });
+
   it.each(['pointerdown', 'pointermove', 'pointerup', 'click', 'keydown'])(
     'rejects unrelated official roots before full resolution (%s)',
     (type) => {

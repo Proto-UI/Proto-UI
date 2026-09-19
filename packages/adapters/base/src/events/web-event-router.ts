@@ -264,11 +264,15 @@ export function createWebProtoEventRouter(opt: {
     // Keep native listener order and Portal fallback semantics. An instance
     // without a consumer has no root delivery to resolve. pointerdown also
     // resets the keyboard follow-up click state for press consumers.
-    if (
-      !rootProxy.__hasProtoListeners(GLOBAL_ROOT_EVENT_TYPES[native.type]) &&
-      !(native.type === 'pointerdown' && rootProxy.__hasProtoListeners('press.commit'))
-    )
-      return false;
+    const hasMappedListener = rootProxy.__hasProtoListeners(GLOBAL_ROOT_EVENT_TYPES[native.type]);
+    const resetsPressCommit =
+      native.type === 'pointerdown' && rootProxy.__hasProtoListeners('press.commit');
+    // A once/aborted listener can disappear during the keyboard commit before
+    // its native zero-detail follow-up click arrives. That click still owns
+    // this root's pending suppression state, so route it before applying the
+    // ordinary no-demand fast path. Unrelated routes cannot consume the flag.
+    const consumesPendingPressCommit = native.type === 'click' && suppressFollowupDirectClick;
+    if (!hasMappedListener && !resetsPressCommit && !consumesPendingPressCommit) return false;
     if (isWithinRoot(native.target)) return false;
     return shouldRouteToCurrentRoot(native, options);
   }
