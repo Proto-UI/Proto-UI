@@ -14,6 +14,7 @@ import {
   evaluateReviewEligibility,
   inspectReviewRevision,
   reviewPacketKey,
+  renderReviewBody,
   validateReviewInputSnapshot,
   validateReviewPacket,
   validateReviewPacketEligibility,
@@ -42,7 +43,7 @@ function usage() {
     '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
     '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
     '',
-    'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
+    'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge additionally fails closed unless the live input already contains an exact-head review or comment carrying the packet evidence receipt marker (proto-ui:agent-evidence:sha256=...), so publish the evidence first, then re-collect and rebuild the merge packet. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
     '',
     '  pnpm agent:review:smoke -- <repositoryId> <pullRequest>   # exercise the live collector against the real GitHub GraphQL schema',
   ].join('\n');
@@ -204,19 +205,6 @@ function readExternalEvidence(args) {
     throw new Error('--external-evidence-file must contain a JSON array');
   }
   return parsed;
-}
-
-function renderReviewBody(packet) {
-  const prefix = `Reviewed exact head \`${packet.headSha}\`.`;
-  if (packet.findings.length === 0) return prefix;
-  return [
-    prefix,
-    '',
-    ...packet.findings.map(
-      (finding) =>
-        `- **[${finding.severity}] ${finding.id}** (${finding.file}:${finding.line}) ${finding.observed} Expected: ${finding.expected} Fix: ${finding.fix}`
-    ),
-  ].join('\n');
 }
 
 try {

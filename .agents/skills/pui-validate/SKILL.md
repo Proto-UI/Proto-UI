@@ -5,6 +5,8 @@ description: Select, run, and report proportional Proto UI validation for a comp
 
 # Validate a change
 
+For state/ownership or rendered-projection changes, selective test commands, or resource-related failures, read `internal/agent-operations/testing-method.md`. Confirm the intended files ran and keep candidate-bound failures, controlled reruns and omitted evidence distinct.
+
 1. Read `AGENTS.md`, the actual diff, the `pui-trace` map, and any approved validation boundary.
 2. Check worktree and generated-file discipline before running tests.
 3. Run focused evidence first. Confirm it exercises the intended failure and owning layer.
@@ -18,9 +20,11 @@ Passing checks establish technical evidence, not product correctness, review app
 
 ## Evidence discipline
 
+Include the Agent-only soft-gate disposition from `internal/agent-operations/visual-evidence.md` in the evidence report. Verify request paraphrase, uploaded visuals and exact reproduction/head scope; mark unavailable evidence and the next Agent action. Humans may submit plain descriptions. Do not fabricate captures, count local files as uploaded, or convert missing images into a blanket intake/merge blocker. Upload mechanisms are documented in `internal/agent-operations/github-evidence-upload.md`; this validation leaf does not gain external-write authority.
+
 Apply these principles to every validation round; they are methodology, not a checklist of known bugs:
 
-1. Bind assertions to rendered output. Internal state facts prove wiring, not behavior; an observable claim must resolve against computed geometry, paint, positioning, or screen evidence.
+1. Bind visual assertions to actual rendered output: computed geometry, paint, positioning and component captures. Internal facts alone do not prove a visible defect. For purely internal claims, require executed variable/state observations and a source-bound causal walkthrough under the visual-evidence policy; do not invent a UI or substitute a prose/log screenshot.
 2. Probe transitions, not states. Sample adjacent states pairwise and assert on the deltas between them; most regressions live in the difference between two frames, invisible to isolated snapshots.
 3. Re-assert dependents. Observing or changing a surface obligates re-verifying every surface anchored to, composed with, or layered above it.
 4. Attribute every expectation. Each expected value names its authority (spec anchor or upstream reference); an observable behavior with no cited authority is itself a finding.

@@ -69,6 +69,101 @@ afterEach(() => {
 });
 
 describe('module-scroll: Web scroll surface host', () => {
+  it.each(['', 'important'] as const)(
+    'restores display value and %s priority across system, composed, replacement and dispose',
+    (priority) => {
+      // D-SCROLL-PROJECTION-0001-B/D; HC-SCROLL-SURFACE-0001-F/G.
+      const target = document.createElement('div');
+      const track = document.createElement('div');
+      const thumb = document.createElement('div');
+      setMetrics(target, {
+        clientWidth: 100,
+        scrollWidth: 100,
+        clientHeight: 100,
+        scrollHeight: 400,
+      });
+      Object.defineProperty(track, 'clientHeight', { configurable: true, value: 100 });
+      track.style.setProperty('display', 'flex', priority);
+      thumb.style.setProperty('display', 'inline-block', priority);
+      track.append(thumb);
+      document.body.append(target, track);
+      const connection = (projection: 'composed' | 'system', present = true) => ({
+        config: { axes: 'vertical' as const, projection: 'composed' as const },
+        projection,
+        composedChrome: {
+          scope: {},
+          controls: present
+            ? [{ getAxis: () => 'vertical' as const, trackTarget: track, thumbTarget: thumb }]
+            : [],
+        },
+        onFacts: () => {},
+      });
+      const lease = createWebScrollSurfaceHost(target, {
+        moveGestureHost: createMoveHarness().host,
+      }).attach(connection('system'));
+      const hidden = () => {
+        for (const element of [track, thumb]) {
+          expect(element.style.getPropertyValue('display')).toBe('none');
+          expect(element.style.getPropertyPriority('display')).toBe('important');
+        }
+      };
+      const restored = () => {
+        expect(track.style.display).toBe('flex');
+        expect(thumb.style.display).toBe('inline-block');
+        for (const element of [track, thumb])
+          expect(element.style.getPropertyPriority('display')).toBe(priority);
+      };
+      try {
+        hidden();
+        const trackWrites = vi.spyOn(track.style, 'setProperty');
+        const thumbWrites = vi.spyOn(thumb.style, 'setProperty');
+        lease.update(connection('system'));
+        expect(trackWrites.mock.calls.filter(([name]) => name === 'display')).toHaveLength(0);
+        expect(thumbWrites.mock.calls.filter(([name]) => name === 'display')).toHaveLength(0);
+        lease.update(connection('composed'));
+        restored();
+        lease.update(connection('system'));
+        hidden();
+        lease.update(connection('system', false));
+        restored();
+        lease.update(connection('system'));
+        hidden();
+      } finally {
+        lease.dispose();
+      }
+      restored();
+    }
+  );
+
+  it('upgrades an already-none display to important and restores its empty priority', () => {
+    const target = document.createElement('div');
+    const track = document.createElement('div');
+    const thumb = document.createElement('div');
+    track.style.display = 'none';
+    track.append(thumb);
+    document.body.append(target, track);
+    const lease = createWebScrollSurfaceHost(target, {
+      moveGestureHost: createMoveHarness().host,
+    }).attach({
+      config: { axes: 'vertical', projection: 'system' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+    try {
+      expect(track.style.getPropertyPriority('display')).toBe('important');
+    } finally {
+      lease.dispose();
+    }
+    expect(track.style.display).toBe('none');
+    expect(track.style.getPropertyPriority('display')).toBe('');
+    expect(thumb.style.getPropertyValue('display')).toBe('');
+    expect(thumb.style.getPropertyPriority('display')).toBe('');
+  });
+
   it('reports normalized facts and applies requests without exposing the target', () => {
     const target = document.createElement('div');
     setMetrics(target, {
@@ -404,5 +499,278 @@ describe('module-scroll: Web scroll surface host', () => {
     expect(move.getBinding()?.shouldStart?.(moveSample(0, 10))).toBe(false);
     expect(target.scrollTop).toBe(0);
     lease.dispose();
+  });
+
+  it('hides authored Scrollbar and Thumb chrome when projection falls back to system', () => {
+    const target = document.createElement('div');
+    const track = document.createElement('div');
+    const thumb = document.createElement('div');
+    setMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    Object.defineProperty(track, 'clientHeight', { configurable: true, value: 100 });
+    track.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 100 }) as DOMRect;
+    thumb.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 25 }) as DOMRect;
+    track.style.display = 'flex';
+    thumb.style.height = '25px';
+    track.append(thumb);
+    document.body.append(target, track);
+    const move = createMoveHarness();
+
+    const lease = createWebScrollSurfaceHost(target, {
+      moveGestureHost: move.host,
+      preference: 'composed',
+    }).attach({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'composed',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+
+    // Composed: track and thumb are visible, thumb is projected.
+    expect(track.style.display).toBe('flex');
+    expect(thumb.style.display).not.toBe('none');
+    expect(thumb.style.height).toBe('var(--proto-ui-scroll-thumb-size)');
+
+    // Fall back to system: authored chrome must hide.
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+
+    expect(track.style.display).toBe('none');
+    expect(thumb.style.display).toBe('none');
+
+    // Restore composed: authored chrome reappears.
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'composed',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+
+    expect(track.style.display).toBe('flex');
+    expect(thumb.style.display).not.toBe('none');
+    expect(thumb.style.height).toBe('var(--proto-ui-scroll-thumb-size)');
+
+    // Dispose after system fallback restores original authored display.
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+    expect(track.style.display).toBe('none');
+    lease.dispose();
+    expect(track.style.display).toBe('flex');
+    expect(thumb.style.height).toBe('25px');
+  });
+
+  it('hides authored chrome attached or replaced after system projection starts', () => {
+    const target = document.createElement('div');
+    const trackA = document.createElement('div');
+    const thumbA = document.createElement('div');
+    const trackB = document.createElement('div');
+    const thumbB = document.createElement('div');
+    setMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    for (const track of [trackA, trackB]) {
+      Object.defineProperty(track, 'clientHeight', { configurable: true, value: 100 });
+      track.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 100 }) as DOMRect;
+    }
+    thumbA.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 25 }) as DOMRect;
+    thumbB.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 25 }) as DOMRect;
+    trackA.style.display = 'flex';
+    trackB.style.display = 'grid';
+    trackA.append(thumbA);
+    trackB.append(thumbB);
+    document.body.append(target, trackA, trackB);
+    const move = createMoveHarness();
+
+    const lease = createWebScrollSurfaceHost(target, {
+      moveGestureHost: move.host,
+      preference: 'composed',
+    }).attach({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: undefined,
+      onFacts: () => {},
+    });
+
+    // The Viewport attaches alone: no controls exist yet.
+    expect(trackA.style.display).toBe('flex');
+    expect(trackB.style.display).toBe('grid');
+
+    // Late attachment: Anatomy reports the first control after fallback has
+    // already started; the next publish pass must hide it.
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: trackA, thumbTarget: thumbA }],
+      },
+      onFacts: () => {},
+    });
+    expect(trackA.style.display).toBe('none');
+    expect(thumbA.style.display).toBe('none');
+
+    // Replacement: a new control replaces the late one; the stale track must
+    // restore and the replacement must hide on the same pass.
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: trackB, thumbTarget: thumbB }],
+      },
+      onFacts: () => {},
+    });
+    expect(trackA.style.display).toBe('flex');
+    expect(thumbA.style.display).toBe('');
+    expect(trackB.style.display).toBe('none');
+    expect(thumbB.style.display).toBe('none');
+
+    // A publish-only pass (no attachment update) keeps the reconciliation.
+    target.dispatchEvent(new Event('scroll'));
+    expect(trackB.style.display).toBe('none');
+
+    lease.dispose();
+    expect(trackB.style.display).toBe('grid');
+    expect(thumbB.style.height).toBe('');
+  });
+  it('does not retrigger track style observation during system projection', () => {
+    const target = document.createElement('div');
+    const track = document.createElement('div');
+    const thumb = document.createElement('div');
+    setMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    Object.defineProperty(track, 'clientHeight', { configurable: true, value: 100 });
+    track.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 100 }) as DOMRect;
+    thumb.getBoundingClientRect = () => ({ top: 0, left: 0, width: 10, height: 25 }) as DOMRect;
+    track.style.display = 'flex';
+    thumb.style.display = 'inline-block';
+    track.append(thumb);
+    document.body.append(target, track);
+
+    let notifyStyleMutation: (() => void) | undefined;
+    vi.stubGlobal(
+      'MutationObserver',
+      class {
+        constructor(callback: MutationCallback) {
+          notifyStyleMutation = () => {
+            callback(
+              [
+                {
+                  type: 'attributes',
+                  target: track,
+                  attributeName: 'style',
+                } as unknown as MutationRecord,
+              ],
+              this as unknown as MutationObserver
+            );
+          };
+        }
+
+        observe(): void {}
+
+        disconnect(): void {}
+
+        takeRecords(): MutationRecord[] {
+          return [];
+        }
+      }
+    );
+    let displayWrites = 0;
+    const setProperty = track.style.setProperty.bind(track.style);
+    vi.spyOn(track.style, 'setProperty').mockImplementation((property, value, priority) => {
+      setProperty(property, value, priority);
+      if (property === 'display') {
+        displayWrites += 1;
+        const notify = notifyStyleMutation;
+        notifyStyleMutation = undefined;
+        notify?.();
+      }
+    });
+
+    const lease = createWebScrollSurfaceHost(target, {
+      moveGestureHost: createMoveHarness().host,
+      preference: 'composed',
+    }).attach({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+
+    // The observer delivers the mutation caused by the first host write. A
+    // repeated equal write would prove that publish is not observer-safe.
+    expect(displayWrites).toBe(1);
+    expect(track.style.display).toBe('none');
+    expect(thumb.style.display).toBe('none');
+
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+    expect(displayWrites).toBe(1);
+
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'composed',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+    expect(track.style.display).toBe('flex');
+    expect(thumb.style.display).toBe('inline-block');
+
+    lease.update({
+      config: { axes: 'vertical', projection: 'composed' },
+      projection: 'system',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: () => {},
+    });
+    lease.dispose();
+    expect(track.style.display).toBe('flex');
+    expect(thumb.style.display).toBe('inline-block');
   });
 });
