@@ -81,6 +81,26 @@ describe('Shadow color-scheme environment owner', () => {
     expect(listener).toHaveBeenCalledTimes(3);
   });
 
+  it('binds the default source to the host owning document', async () => {
+    // D-WEB-COMPONENT-SHADOW-STYLE-0001-D: an adopted host reads and
+    // observes its current document environment, not the Adapter module realm.
+    document.documentElement.dataset.theme = 'light';
+    const owningDocument = document.implementation.createHTMLDocument('owning-document');
+    owningDocument.documentElement.dataset.theme = 'dark';
+    const host = owningDocument.createElement('x-shadow-adopted-theme');
+    owningDocument.body.append(host);
+    const owner = createShadowColorSchemeEnvironmentOwner(host);
+
+    expect(owner.colorScheme).toBe('dark');
+    expect(host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe('dark');
+
+    owningDocument.documentElement.dataset.theme = 'light';
+    await flushMutationObserver();
+    expect(owner.colorScheme).toBe('light');
+    expect(host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe('light');
+    owner.dispose();
+  });
+
   it('uses one explicit source for synchronous reads, marker updates, and terminal cleanup', () => {
     let colorScheme: 'light' | 'dark' = 'light';
     const listeners = new Set<() => void>();

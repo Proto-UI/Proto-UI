@@ -50,7 +50,6 @@ export function sampleWebComponentScopeTargets(
     }
     if (el.hidden) return;
     const target =
-      el !== container &&
       (el.tabIndex >= 0 ||
         (!el.hasAttribute('tabindex') && (isNativelyFocusable?.(el) || isEditingHost(el)))) &&
       isUsableNativeCandidate(el) &&
@@ -80,7 +79,16 @@ export function sampleWebComponentScopeTargets(
       // promote its child scope via an otherwise positive tabindex.
       const priority = el.shadowRoot && !target && !delegatesFocus ? 0 : el.tabIndex;
       entries.push({ element: el, target: !!target && !delegatesFocus, priority, children });
-    } else if (target || (el === activeTarget && el !== container))
+    } else if (ownsScope && target) {
+      children = [];
+      const delegatesFocus = !!el.shadowRoot?.delegatesFocus;
+      entries.push({
+        element: el,
+        target: !delegatesFocus,
+        priority: el.tabIndex,
+        children,
+      });
+    } else if (target || el === activeTarget)
       entries.push({ element: el, target: !!target, priority: el.tabIndex });
     if (el instanceof HTMLSlotElement) {
       const assigned = el.assignedNodes();
@@ -260,6 +268,7 @@ function isRendered(el: Element): boolean {
     const style = getComputedStyle(node);
     if (
       style.display === 'none' ||
+      style.contentVisibility === 'hidden' ||
       style.visibility === 'hidden' ||
       style.visibility === 'collapse'
     )

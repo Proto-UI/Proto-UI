@@ -296,6 +296,7 @@ describe('WC live focus-entry resolver inputs', () => {
     style.textContent = `
       .entry-map-image-hidden { display: none; }
       .entry-map-ancestor-hidden { visibility: hidden; }
+      .entry-map-ancestor-skipped { content-visibility: hidden; }
     `;
     const wrapper = document.createElement('div');
     const image = document.createElement('img');
@@ -317,6 +318,13 @@ describe('WC live focus-entry resolver inputs', () => {
     await settle();
     expect(host.tabIndex).toBe(0);
     wrapper.classList.remove('entry-map-ancestor-hidden');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    wrapper.classList.add('entry-map-ancestor-skipped');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    wrapper.classList.remove('entry-map-ancestor-skipped');
     await settle();
     expect(host.hasAttribute('tabindex')).toBe(false);
 

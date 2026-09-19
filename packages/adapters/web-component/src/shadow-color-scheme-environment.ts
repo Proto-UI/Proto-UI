@@ -25,13 +25,14 @@ const environmentOwners = new WeakMap<HTMLElement, ShadowColorSchemeEnvironmentO
  * document), without changing the pull-only Web meta getter used by existing
  * Adapter profiles.
  */
-export function createDefaultShadowColorSchemeSource(): ShadowColorSchemeSource {
-  const shared =
-    typeof document === 'undefined'
-      ? undefined
-      : createDefaultWebColorSchemeSource(() => resolveWebColorScheme());
+export function createDefaultShadowColorSchemeSource(doc?: Document): ShadowColorSchemeSource {
+  const owningDocument = doc ?? (typeof document === 'undefined' ? undefined : document);
+  const resolve = () => resolveWebColorScheme(owningDocument ?? null);
+  const shared = owningDocument
+    ? createDefaultWebColorSchemeSource(() => resolve(), owningDocument)
+    : undefined;
   return Object.freeze({
-    get: resolveWebColorScheme,
+    get: resolve,
     subscribe(listener) {
       return shared?.subscribe(listener) ?? (() => {});
     },
@@ -52,7 +53,7 @@ export function createShadowColorSchemeEnvironmentOwner(
   const existing = environmentOwners.get(host);
   if (existing) return existing;
 
-  const resolvedSource = source ?? createDefaultShadowColorSchemeSource();
+  const resolvedSource = source ?? createDefaultShadowColorSchemeSource(host.ownerDocument);
   const previousMarker = host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE);
   let colorScheme = readColorScheme(() => resolvedSource.get());
   let disposed = false;

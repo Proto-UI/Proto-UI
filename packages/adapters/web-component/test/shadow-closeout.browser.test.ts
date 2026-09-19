@@ -17,6 +17,7 @@ beforeAll(async () => {
     stdin: {
       contents: `
         export { sampleWebComponentScopeTargets as sample } from './packages/adapters/web-component/src/focus-scope-targets';
+        export { createShadowColorSchemeEnvironmentOwner as createEnvironment } from './packages/adapters/web-component/src/shadow-color-scheme-environment';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { definePrototype as define, tw } from '@proto.ui/core';
         export { asTextControl, asFocusEntry, asFocusScope, asFocusable } from '@proto.ui/hooks';
@@ -40,6 +41,61 @@ afterAll(async () => {
 });
 
 describe('Shadow closeout native boundaries', () => {
+  it('binds a default Shadow environment to the host document and window', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        document.documentElement.dataset.theme = 'light';
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const foreignWindow = frame.contentWindow!;
+        foreignDocument.documentElement.removeAttribute('data-theme');
+        foreignDocument.documentElement.className = '';
+
+        let matches = true;
+        const listeners = new Set<() => void>();
+        Object.defineProperty(foreignWindow, 'matchMedia', {
+          configurable: true,
+          value: () => ({
+            get matches() {
+              return matches;
+            },
+            addEventListener: (_type: string, listener: () => void) => listeners.add(listener),
+            removeEventListener: (_type: string, listener: () => void) =>
+              listeners.delete(listener),
+          }),
+        });
+        const host = foreignDocument.createElement('x-shadow-foreign-environment');
+        foreignDocument.body.append(host);
+        const owner = p.createEnvironment(host);
+        const initial = {
+          scheme: owner.colorScheme,
+          marker: host.getAttribute('data-pui-color-scheme'),
+        };
+
+        matches = false;
+        for (const listener of listeners) listener();
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const updated = {
+          scheme: owner.colorScheme,
+          marker: host.getAttribute('data-pui-color-scheme'),
+        };
+        owner.dispose();
+        frame.remove();
+        return { initial, updated };
+      });
+      expect(result).toEqual({
+        initial: { scheme: 'dark', marker: 'dark' },
+        updated: { scheme: 'light', marker: 'light' },
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
   it('preserves document precedence between Template dark and data conditions', async () => {
     // Generated stylesheet consumer fixture; no automatic Template projection.
     const tokens = ['dark:p-2', 'data-[open]:p-4'];
@@ -751,6 +807,60 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects a composed radio entry after its form owner changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-radio-form-owner-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const formA = document.createElement('form');
+        formA.id = 'form-a';
+        const formB = document.createElement('form');
+        formB.id = 'form-b';
+        const host = new C();
+        host.id = 'radio-form-entry';
+        host.innerHTML =
+          '<input id="inside-form-radio" type="radio" name="entry-group" form="form-a">';
+        const outside = document.createElement('input');
+        outside.type = 'radio';
+        outside.name = 'entry-group';
+        outside.setAttribute('form', 'form-a');
+        outside.checked = true;
+        document.body.append(formA, formB, host, outside);
+      });
+      const hostTabIndex = () =>
+        page.locator('#radio-form-entry').evaluate((host) => host.getAttribute('tabindex'));
+      expect(await hostTabIndex()).toBe('0');
+
+      await page
+        .locator('#inside-form-radio')
+        .evaluate((radio) => radio.setAttribute('form', 'form-b'));
+      await page.evaluate(() => new Promise<void>((resolve) => queueMicrotask(resolve)));
+      expect(await hostTabIndex()).toBeNull();
+
+      await page
+        .locator('#inside-form-radio')
+        .evaluate((radio) => radio.setAttribute('form', 'form-a'));
+      await page.evaluate(() => new Promise<void>((resolve) => queueMicrotask(resolve)));
+      expect(await hostTabIndex()).toBe('0');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('continues trapped traversal around deep focus in a negative-tabindex shadow host', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -927,6 +1037,60 @@ describe('Shadow closeout native boundaries', () => {
           expect(await active()).toBe(id);
         }
       }
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('keeps a projected self-entry container in trapped forward and reverse traversal', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-self-entry-scope',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              p.asFocusEntry().configure({ strategy: 'self', fallback: 'self' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const scope = new C();
+        scope.id = 'self-entry-scope';
+        scope.innerHTML = '<button id="self-entry-child">Child</button>';
+        document.body.append(scope);
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#self-entry-scope')?.getAttribute('tabindex') === '0'
+      );
+      await page.locator('#self-entry-scope').evaluate((scope: any) => {
+        scope.getExposes().activate();
+        scope.focus();
+      });
+      const active = () =>
+        page.evaluate(() => {
+          let el = document.activeElement;
+          while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+          return el?.id;
+        });
+      expect(await active()).toBe('self-entry-scope');
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('self-entry-child');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('self-entry-scope');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('self-entry-child');
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('self-entry-scope');
       expect(errors).toEqual([]);
     } finally {
       await page.close();

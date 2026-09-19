@@ -569,6 +569,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   'src',
                   'slot',
                   'name',
+                  'form',
                   'class',
                   'style',
                 ],
@@ -879,7 +880,9 @@ function resolveFocusEntryTarget(
     return resolveWebFocusEntryTarget(container, config, isNativelyFocusable);
   }
   if (config.strategy === 'descendant-first') {
-    const descendant = sampleWebComponentScopeTargets(container, isNativelyFocusable).targets[0];
+    const descendant = sampleWebComponentScopeTargets(container, isNativelyFocusable).targets.find(
+      (target) => target !== container
+    );
     if (descendant) return descendant;
   }
 

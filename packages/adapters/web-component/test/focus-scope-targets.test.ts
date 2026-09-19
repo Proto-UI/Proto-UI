@@ -85,6 +85,24 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('includes a projected tabbable scope container in its native position', () => {
+    // C-AS-FOCUS-SCOPE-0002-J: strategy:self projects a real native stop on
+    // the scope owner; sampling must not erase that projected participation.
+    const scope = document.createElement('div');
+    scope.id = 'scope';
+    scope.tabIndex = 0;
+    scope.innerHTML = '<button id="child" tabindex="0"></button>';
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'scope',
+        'child',
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
   it('samples the editing host, not inherited-editability descendants', () => {
     // isContentEditable is inherited; only the contenteditable host is a
     // native sequential stop.
@@ -105,9 +123,10 @@ describe('WC scope sequential target sample', () => {
   it('excludes image-map areas whose image is CSS-hidden and restores them when rendered', () => {
     const scope = document.createElement('div');
     scope.innerHTML =
-      '<button id="before" tabindex="0"></button><img id="map-image" src="data:x" usemap="#m" style="display:none"><map name="m"><area id="area" href="#a" tabindex="0" shape="rect" coords="0,0,10,10"></map><button id="after" tabindex="0"></button>';
+      '<button id="before" tabindex="0"></button><div id="image-wrapper"><img id="map-image" src="data:x" usemap="#m" style="display:none"></div><map name="m"><area id="area" href="#a" tabindex="0" shape="rect" coords="0,0,10,10"></map><button id="after" tabindex="0"></button>';
     document.body.append(scope);
     const image = scope.querySelector<HTMLImageElement>('#map-image')!;
+    const wrapper = scope.querySelector<HTMLElement>('#image-wrapper')!;
     const sample = () => sampleWebComponentScopeTargets(scope).targets.map((el) => el.id);
     try {
       expect(sample()).toEqual(['before', 'after']);
@@ -115,6 +134,11 @@ describe('WC scope sequential target sample', () => {
       expect(sample()).toEqual(['before', 'area', 'after']);
       image.style.visibility = 'hidden';
       expect(sample()).toEqual(['before', 'after']);
+      image.style.visibility = '';
+      wrapper.style.contentVisibility = 'hidden';
+      expect(sample()).toEqual(['before', 'after']);
+      wrapper.style.contentVisibility = '';
+      expect(sample()).toEqual(['before', 'area', 'after']);
     } finally {
       scope.remove();
     }
