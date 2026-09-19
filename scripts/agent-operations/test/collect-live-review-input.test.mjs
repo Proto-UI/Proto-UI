@@ -3,6 +3,8 @@ import test from 'node:test';
 import {
   assertNoTruncation,
   buildLiveReviewInput,
+  collectLiveReviewInput,
+  MAX_LIVE_RESPONSE_BYTES,
   normalizeCheck,
   submitGitHubMerge,
   submitGitHubReview,
@@ -815,5 +817,50 @@ test('external success cannot substitute for trusted repository CI evidence', ()
       options
     ),
     'unknown'
+  );
+});
+
+test('live collector consumes a canonical changed-file response above the legacy 1 MiB buffer', () => {
+  // PR509-LIVE-INPUT-BUFFER-001: PR #509's paginated changed-file JSON is over
+  // 1 MiB; collection must not die on Node's incidental child-process default.
+  const graphqlPayload = payload();
+  const files = Array.from({ length: 100 }, (_, index) => ({
+    filename: `packages/core/src/file-${index}.ts`,
+    previous_filename: null,
+    status: 'modified',
+    patch: `+${'changed line\n'.repeat(1000)}`,
+  }));
+  graphqlPayload.data.repository.pullRequest.changedFiles = files.length;
+  const filePagesJson = JSON.stringify([files]);
+  assert.ok(
+    filePagesJson.length > 1024 * 1024,
+    'the regression changed-file response must exceed the legacy 1 MiB default'
+  );
+  const seenOptions = [];
+  const result = collectLiveReviewInput('github.com:Proto-UI/Proto-UI', 487, {
+    runner(command, args, options) {
+      seenOptions.push(options);
+      return args.includes('graphql') ? JSON.stringify(graphqlPayload) : filePagesJson;
+    },
+  });
+  assert.equal(result.input.changedFiles.length, files.length);
+  assert.ok(
+    seenOptions.length === 2 &&
+      seenOptions.every((options) => options.maxBuffer === MAX_LIVE_RESPONSE_BYTES),
+    'every live collection call must carry the documented payload bound'
+  );
+});
+
+test('live collector fails on the explicit documented payload bound instead of an incidental ENOBUFS', () => {
+  assert.throws(
+    () =>
+      collectLiveReviewInput('github.com:Proto-UI/Proto-UI', 487, {
+        runner() {
+          const error = new Error('spawnSync gh ENOBUFS');
+          error.code = 'ENOBUFS';
+          throw error;
+        },
+      }),
+    /exceeds the documented \d+-byte payload bound/
   );
 });
