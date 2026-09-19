@@ -15,7 +15,7 @@ const probeSource = `
     const thumb = document.querySelector('.thumb');
     for (let i = 1; i <= 16; i++) { const row = document.createElement('div'); row.className = 'row'; row.textContent = 'Log row ' + i; viewport.append(row); }
     if (inline) { track.style.setProperty('display','flex','important'); thumb.style.setProperty('display','block','important'); }
-    const connection = (projection, present = true) => ({ config:{axes:'vertical',projection:'composed'},projection,composedChrome:{scope:{},controls:present?[{getAxis:()=>'vertical',trackTarget:track,thumbTarget:thumb}]:[]},onFacts:()=>{} });
+    const connection = (projection, present = true) => ({ config:{axes:'vertical',projection:'composed',endFollow:{mode:'off'}},projection,composedChrome:{scope:{},controls:present?[{getAxis:()=>'vertical',trackTarget:track,thumbTarget:thumb}]:[]},onFacts:()=>{} });
     const lease = createWebScrollSurfaceHost(viewport, { moveGestureHost:{ attach(){return {update(){},dispose(){}}} } }).attach(connection('system'));
     const inspect = (element) => ({ value:element.style.getPropertyValue('display'), priority:element.style.getPropertyPriority('display'), computed:getComputedStyle(element).display, rects:element.getClientRects().length });
     globalThis.chromeDisplayProbe = {
