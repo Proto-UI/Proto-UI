@@ -26,10 +26,11 @@ export function createWebComponentPortalMount() {
       const marker = el.ownerDocument.createComment('proto-ui-portal-origin');
       const descriptor = Object.getOwnPropertyDescriptor(el, 'parentNode');
       let ownsParent = false;
+      let projected = false;
       const Observer = el.ownerDocument.defaultView?.MutationObserver ?? MutationObserver;
       const observer = new Observer(() => {
         // Mutation delivery observes the settled tree, preserving sync moves.
-        if (!parent.isConnected) revoke?.();
+        if (!parent.isConnected || (projected && marker.parentNode !== parent)) revoke?.();
         else observeOriginTrees();
       });
       let observedTrees: Node[] = [];
@@ -50,6 +51,8 @@ export function createWebComponentPortalMount() {
       const restore = () => {
         if (revoke !== restore) return;
         revoke = null;
+        const wasProjected = projected;
+        projected = false;
         activeProjections.delete(el);
         observer.disconnect();
         if (ownsParent) {
@@ -59,7 +62,7 @@ export function createWebComponentPortalMount() {
         if (marker.parentNode === parent) {
           parent.insertBefore(el, marker);
           marker.remove();
-        } else parent.appendChild(el);
+        } else if (wasProjected) el.remove();
       };
       revoke = restore;
       try {
@@ -70,6 +73,7 @@ export function createWebComponentPortalMount() {
         observeOriginTrees();
         parent.insertBefore(marker, el);
         el.ownerDocument.body.appendChild(el);
+        projected = true;
         activeProjections.add(el);
       } catch (error) {
         restore();

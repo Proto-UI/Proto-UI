@@ -117,6 +117,115 @@ export interface WebComponentAdapterOptions<Props extends PropsBaseType = PropsB
 const SHARED_OVERLAY_LAYER_SCHEDULER = createZIndexOverlayLayerScheduler();
 const NOTIFY_FOCUS_TARGET_READY = Symbol('proto-ui.notify-focus-target-ready');
 
+type RebindableEventTarget = EventTarget & {
+  setTarget(target: EventTarget | null): void;
+};
+
+function createRebindableEventTarget(): RebindableEventTarget {
+  type Registration = {
+    type: string;
+    listener: EventListenerOrEventListenerObject;
+    capture: boolean;
+    passive: boolean;
+    once: boolean;
+    signal?: AbortSignal;
+    wrapped: EventListener;
+    abort?: () => void;
+  };
+
+  let target: EventTarget | null = null;
+  const registrations: Registration[] = [];
+
+  const remove = (registration: Registration) => {
+    const index = registrations.indexOf(registration);
+    if (index < 0) return;
+    registrations.splice(index, 1);
+    target?.removeEventListener(registration.type, registration.wrapped, registration.capture);
+    if (registration.abort) {
+      registration.signal?.removeEventListener('abort', registration.abort);
+    }
+  };
+
+  const bridge = {
+    addEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject | null,
+      options?: boolean | AddEventListenerOptions
+    ) {
+      if (!listener) return;
+      const capture = typeof options === 'boolean' ? options : options?.capture === true;
+      if (
+        registrations.some(
+          (registration) =>
+            registration.type === type &&
+            registration.listener === listener &&
+            registration.capture === capture
+        )
+      ) {
+        return;
+      }
+      const signal = typeof options === 'boolean' ? undefined : options?.signal;
+      if (signal?.aborted) return;
+      const registration = {
+        type,
+        listener,
+        capture,
+        passive: typeof options === 'boolean' ? false : options?.passive === true,
+        once: typeof options === 'boolean' ? false : options?.once === true,
+        signal,
+      } as Registration;
+      registration.wrapped = function (event) {
+        if (registration.once) remove(registration);
+        if (typeof listener === 'function') listener.call(this, event);
+        else listener.handleEvent(event);
+      };
+      if (signal) {
+        registration.abort = () => remove(registration);
+        signal.addEventListener('abort', registration.abort, { once: true });
+      }
+      registrations.push(registration);
+      target?.addEventListener(type, registration.wrapped, {
+        capture,
+        passive: registration.passive,
+      });
+    },
+    removeEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject | null,
+      options?: boolean | EventListenerOptions
+    ) {
+      if (!listener) return;
+      const capture = typeof options === 'boolean' ? options : options?.capture === true;
+      const registration = registrations.find(
+        (entry) => entry.type === type && entry.listener === listener && entry.capture === capture
+      );
+      if (registration) remove(registration);
+    },
+    dispatchEvent(event: Event) {
+      return target?.dispatchEvent(event) ?? false;
+    },
+    setTarget(nextTarget: EventTarget | null) {
+      if (target === nextTarget) return;
+      if (target) {
+        for (const registration of registrations) {
+          target.removeEventListener(registration.type, registration.wrapped, registration.capture);
+        }
+      }
+      target = nextTarget;
+      if (target) {
+        for (const registration of registrations) {
+          target.addEventListener(registration.type, registration.wrapped, {
+            capture: registration.capture,
+            passive: registration.passive,
+          });
+        }
+      }
+    },
+  };
+
+  return bridge as RebindableEventTarget;
+}
+
 export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   proto: TProto,
   opt: WebComponentAdapterOptions<ProtoAdapterProps<TProto>> = {}
@@ -178,6 +287,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _focusTargetReadyListeners = new Set<() => void>();
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
+    private _globalEventTarget = createRebindableEventTarget();
 
     private _root: Element | ShadowRoot;
     private _shadowOwnerShell: ShadowOwnerShell | null;
@@ -195,6 +305,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     constructor() {
       super();
+      this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
       this._shadowOwnerShell = shadow ? createShadowOwnerShell(this._root as ShadowRoot) : null;
       if (textControl && imageView) {
@@ -238,6 +349,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     adoptedCallback(_oldDocument: Document, newDocument: Document) {
+      this._globalEventTarget.setTarget(newDocument.defaultView);
       this._splitResources?.environment.adoptDocument(newDocument);
     }
 
@@ -285,6 +397,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     private _connectOwner() {
+      this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._focusTargetRetryCount = 0;
 
       if (this._mountedOnce) {
@@ -498,7 +611,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           instanceToken: this._instanceToken,
           resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
           isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
-          globalEl: window,
+          globalEl: this._globalEventTarget,
           isEnabled: () => eventGate.isEnabled?.() ?? true,
         });
         bindLogicalEventTarget(this._instanceToken, router.rootTarget);
@@ -719,6 +832,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           this._pendingOwnedTokens = null;
           return;
         }
+
+        this._globalEventTarget.setTarget(null);
 
         if (this._invokeUnmounted) {
           this._portalConceal.cancel();

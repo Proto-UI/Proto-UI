@@ -214,6 +214,82 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('routes portal input through the current Window after connected cross-document adoption', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        let setups = 0;
+        let presses = 0;
+        let keys = 0;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-adopted-portal-event-route',
+            setup(def: any) {
+              setups += 1;
+              def.event.on('press.commit', () => presses++);
+              def.event.onGlobal('key.down', () => keys++);
+              def.expose('snapshot', () => ({ setups, presses, keys }));
+              return (r: any) => r.slot();
+            },
+          })
+        );
+        const host = new C();
+        const button = document.createElement('button');
+        button.textContent = 'Press';
+        host.append(button);
+        document.body.append(host);
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+        const portal = p.createPortal();
+        portal.mount(button);
+        button.click();
+        const beforeAdoption = host.getExposes().snapshot();
+        portal.unmount(button);
+
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const foreignWindow = frame.contentWindow!;
+        foreignDocument.adoptNode(host);
+        foreignDocument.body.append(host);
+        portal.mount(button);
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }));
+        const afterOldWindow = host.getExposes().snapshot();
+        foreignWindow.dispatchEvent(
+          new (foreignWindow as any).KeyboardEvent('keydown', { key: 'A' })
+        );
+        const afterNewWindow = host.getExposes().snapshot();
+        button.click();
+        const afterAdoption = host.getExposes().snapshot();
+        const projectedIntoCurrentBody = button.parentElement === foreignDocument.body;
+
+        portal.unmount(button);
+        frame.remove();
+        return {
+          beforeAdoption,
+          afterOldWindow,
+          afterNewWindow,
+          afterAdoption,
+          projectedIntoCurrentBody,
+        };
+      });
+      expect(result).toEqual({
+        beforeAdoption: { setups: 1, presses: 1, keys: 0 },
+        afterOldWindow: { setups: 1, presses: 1, keys: 0 },
+        afterNewWindow: { setups: 1, presses: 1, keys: 1 },
+        afterAdoption: { setups: 1, presses: 2, keys: 1 },
+        projectedIntoCurrentBody: true,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('preserves document precedence between Template dark and data conditions', async () => {
     // Generated stylesheet consumer fixture; no automatic Template projection.
     const tokens = ['dark:p-2', 'data-[open]:p-4'];

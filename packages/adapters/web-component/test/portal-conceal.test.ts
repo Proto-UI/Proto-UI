@@ -90,6 +90,34 @@ describe('WC portal conceal rendering barrier', () => {
     expect(frames.size).toBe(0);
   });
 
+  it('revokes a projection when renderer replacement removes its origin marker', async () => {
+    const origin = host.parentElement!;
+    portal.mount(host);
+    expect(host.parentElement).toBe(document.body);
+    expect(isWebComponentPortaled(host)).toBe(true);
+
+    origin.replaceChildren();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(isWebComponentPortaled(host)).toBe(false);
+    expect(host.isConnected).toBe(false);
+    expect(origin.childNodes).toHaveLength(0);
+    portal.unmount(host);
+    expect(origin.childNodes).toHaveLength(0);
+  });
+
+  it('preserves the origin element when projection fails before body insertion', () => {
+    const origin = host.parentElement!;
+    vi.spyOn(document.body, 'appendChild').mockImplementationOnce(() => {
+      throw new Error('projection failed');
+    });
+
+    expect(() => portal.mount(host)).toThrow('projection failed');
+    expect(host.parentElement).toBe(origin);
+    expect(Array.from(origin.childNodes)).toEqual([host]);
+    expect(isWebComponentPortaled(host)).toBe(false);
+  });
+
   it.each([['first'], ['second']] as const)(
     'restores adjacent simultaneous portals in original sibling order (%s restored first)',
     (first) => {
