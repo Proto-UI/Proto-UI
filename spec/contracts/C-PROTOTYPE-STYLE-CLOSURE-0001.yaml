@@ -7,8 +7,10 @@ lifecycleRationale:
   en: >-
     Cataloged as draft with the first projection-scope delivery. The standalone four-runtime fixture and generated-CSS assertions now provide executable closure evidence, but the consumer-ownership and cascade-layer boundaries have only been exercised on the Website preview host and the CLI generator; stable admission still requires independent review of those boundaries across every supported Adapter profile.
 
+
   zh-CN: >-
     随首个 projection-scope 交付以 draft 编目。standalone 四 Runtime fixture 与生成 CSS 断言已提供可执行闭包证据，但 consumer 所有权与 cascade layer 边界目前仅在 Website preview host 与 CLI 生成器上得到验证；稳定接纳仍需跨全部受支持 Adapter profile 对这些边界进行独立复审。
+
 
 summary: A supported Prototype presentation must carry every Prototype-governed visual asset through Adapter and style translation without relying on documentation-site or consumer-global CSS for correctness.
 statement:

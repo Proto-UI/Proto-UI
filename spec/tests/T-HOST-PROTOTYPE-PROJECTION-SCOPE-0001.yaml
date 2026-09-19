@@ -7,8 +7,10 @@ lifecycleRationale:
   en: >-
     Cataloged as draft because the decision it verifies remains draft: the mapped manifest, unit, and real-browser evidence covers the Website preview host only, and the governing decision's open admission questions (public Maker API, Adapter-level portal scope) may still reshape the expected guarantees.
 
+
   zh-CN: >-
     因其验证的 decision 仍为 draft 而以 draft 编目：已映射的 manifest、单测与真实浏览器证据仅覆盖 Website preview host，且上游 decision 悬置的准入问题（公共 Maker API、Adapter 级 portal scope）仍可能改变预期保证。
+
 
 summary: Maps manifest, unit, and real-browser evidence for coherent Runtime and projection-lane switching across Website-owned selection controls, composition content, themes, and portaled overlays.
 cases:

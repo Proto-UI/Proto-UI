@@ -7,8 +7,10 @@ lifecycleRationale:
   en: >-
     Cataloged as draft: the first implementation is deliberately limited to the Website preview composition, and two admission questions remain open — whether the validated projection-lane manifest should become a public Maker API or catalog identity (Q1), and whether multi-scope overlay trees need an Adapter-level scoped portal target (Q2). Both block stable activation of this decision.
 
+
   zh-CN: >-
     以 draft 编目：首个实现刻意限定在 Website preview composition，且仍有两个准入问题悬置——验证后的 projection-lane manifest 是否应成为公共 Maker API 或独立 catalog identity（Q1），以及多 scope overlay tree 是否需要 Adapter 级 scoped portal target（Q2）。两者均阻塞本 decision 的稳定激活。
+
 
 summary: The Website preview host combines explicit projection-lane and content manifests, an independent Runtime materializer, and a separately referenced theme artifact plus consumer-owned theme inputs to replace every scope-owned control and overlay as one generation without creating a special Base, changing Prototype inheritance, or mixing fallback parts.
 statement:
