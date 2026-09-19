@@ -23,11 +23,24 @@ export type WebScrollSurfaceHostOptions = Readonly<{
   minThumbSize?: number;
 }>;
 
+type DisplayStyle = Readonly<{ value: string; priority: string }>;
+const hiddenDisplay: DisplayStyle = { value: 'none', priority: 'important' };
+const readDisplay = (target: HTMLElement): DisplayStyle => ({
+  value: target.style.getPropertyValue('display'),
+  priority: target.style.getPropertyPriority('display'),
+});
+const writeDisplay = (target: HTMLElement, next: DisplayStyle) => {
+  const current = readDisplay(target);
+  if (current.value === next.value && current.priority === next.priority) return;
+  if (next.value) target.style.setProperty('display', next.value, next.priority);
+  else target.style.removeProperty('display');
+};
+
 type ThumbStyleSnapshot = Readonly<{
   width: string;
   height: string;
   transform: string;
-  display: string;
+  display: DisplayStyle;
   sizeVar: string;
   offsetVar: string;
 }>;
@@ -132,7 +145,9 @@ export function createWebScrollSurfaceHost(
       let disposed = false;
       let scrolling = false;
       let endTimer: ReturnType<typeof setTimeout> | undefined;
+      let chromeHidden = false;
       const thumbStyles = new Map<HTMLElement, ThumbStyleSnapshot>();
+      const trackStyles = new Map<HTMLElement, DisplayStyle>();
       const moveLeases = new Map<HTMLElement, MoveGestureHostLease>();
       const dragGrabOffsets = new Map<HTMLElement, number>();
       const original = {
@@ -165,7 +180,7 @@ export function createWebScrollSurfaceHost(
             width: thumb.style.width,
             height: thumb.style.height,
             transform: thumb.style.transform,
-            display: thumb.style.display,
+            display: readDisplay(thumb),
             sizeVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-size'),
             offsetVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-offset'),
           })
@@ -177,7 +192,7 @@ export function createWebScrollSurfaceHost(
         thumb.style.width = original.width;
         thumb.style.height = original.height;
         thumb.style.transform = original.transform;
-        thumb.style.display = original.display;
+        writeDisplay(thumb, original.display);
         if (original.sizeVar) {
           thumb.style.setProperty('--proto-ui-scroll-thumb-size', original.sizeVar);
         } else {
@@ -195,11 +210,54 @@ export function createWebScrollSurfaceHost(
           if (!active.has(thumb)) restoreThumb(thumb);
         }
       };
+      const restoreTrackDisplay = (track: HTMLElement) => {
+        const original = trackStyles.get(track);
+        if (original === undefined) return;
+        writeDisplay(track, original);
+        trackStyles.delete(track);
+      };
       const projectComposedChrome = (facts: ScrollSurfaceSnapshot) => {
-        const active = new Set<HTMLElement>();
         if (connection.projection !== 'composed') {
+          // Hide authored Scrollbar/Thumb chrome while the host projects the
+          // system scrollbar. Reconciled against the current controls on every
+          // pass so controls attached or replaced after the fallback starts
+          // are hidden too: the track (touch-none absolute element) would
+          // otherwise intercept pointer input over the native scrollbar, and
+          // the Thumb (flex-1 bg-border) would paint over it.
+          chromeHidden = true;
+          const active = new Set<HTMLElement>();
+          for (const control of connection.composedChrome?.controls ?? []) {
+            if (!isWebControl(control)) continue;
+            const track = control.trackTarget;
+            const thumb = control.thumbTarget;
+            active.add(thumb);
+            active.add(track);
+            if (!trackStyles.has(track)) {
+              trackStyles.set(track, readDisplay(track));
+            }
+            writeDisplay(track, hiddenDisplay);
+            if (!thumbStyles.has(thumb)) {
+              rememberThumb(thumb);
+            }
+            writeDisplay(thumb, hiddenDisplay);
+          }
+          for (const track of Array.from(trackStyles.keys())) {
+            if (active.has(track)) continue;
+            restoreTrackDisplay(track);
+          }
           restoreInactiveThumbs(active);
           return;
+        }
+        const active = new Set<HTMLElement>();
+        // Restore authored chrome visibility when the host re-projects composed.
+        if (chromeHidden) {
+          chromeHidden = false;
+          for (const track of Array.from(trackStyles.keys())) {
+            restoreTrackDisplay(track);
+          }
+          // Thumb display is restored by restoreInactiveThumbs below when
+          // the thumb is no longer active, or by the composed projection
+          // loop when the thumb is active.
         }
         for (const control of connection.composedChrome?.controls ?? []) {
           if (!isWebControl(control)) continue;
@@ -214,7 +272,7 @@ export function createWebScrollSurfaceHost(
           const available = geometry.available;
 
           if (available <= 0 || axisFacts.visibleRatio >= 1) {
-            thumb.style.display = 'none';
+            writeDisplay(thumb, hiddenDisplay);
             continue;
           }
 
@@ -225,7 +283,7 @@ export function createWebScrollSurfaceHost(
           );
           const offset = Math.max(0, available - thumbExtent) * clampRatio(axisFacts.position);
           const originalThumbStyle = thumbStyles.get(thumb);
-          thumb.style.display = originalThumbStyle?.display ?? '';
+          if (originalThumbStyle) writeDisplay(thumb, originalThumbStyle.display);
           thumb.style.setProperty('--proto-ui-scroll-thumb-size', `${thumbExtent}px`);
           thumb.style.setProperty('--proto-ui-scroll-thumb-offset', `${offset}px`);
           if (axis === 'vertical') {
@@ -389,6 +447,9 @@ export function createWebScrollSurfaceHost(
           moveLeases.clear();
           dragGrabOffsets.clear();
           restoreInactiveThumbs(new Set());
+          for (const track of Array.from(trackStyles.keys())) {
+            restoreTrackDisplay(track);
+          }
           target.style.overflowX = original.overflowX;
           target.style.overflowY = original.overflowY;
           target.style.scrollbarWidth = original.scrollbarWidth;

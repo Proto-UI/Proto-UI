@@ -14,6 +14,7 @@ export * from './gestures/web-move-gesture-host';
 export * from './platform/instance-tree';
 export * from './platform/layout-ready';
 export * from './platform/web-preferences';
+export * from './platform/web-color-scheme-source';
 export * from './public-types';
 export * from './types';
 export * from './platform/focus-entry';

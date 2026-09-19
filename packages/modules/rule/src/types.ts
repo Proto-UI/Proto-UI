@@ -59,6 +59,7 @@ export type RulePort<Props extends PropsBaseType> = {
   resolveStateHandle(id: any): { get(): any } | undefined;
   evaluate(ctx: RuleEvalCtx<Props>): RuleEvalResult;
   registerExtension(ext: RuleExtension<Props>): void;
+  requestStyleReevaluation(): void;
 };
 
 export type RuleFacade<Props extends PropsBaseType> = ModuleFacade & {

@@ -1,0 +1,446 @@
+{
+  "button": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    }
+  ],
+  "outline": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-input bg-input/30 text-foreground h-8 gap-1.5 px-2.5"
+    }
+  ],
+  "checkbox": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[checked]:border-primary data-[indeterminate]:bg-primary data-[indeterminate]:text-primary-foreground data-[indeterminate]:border-primary data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30"
+    }
+  ],
+  "switch": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.075)",
+      "tokens": "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent px-0.5 shadow-xs transition-all duration-200 ease-in-out outline-none bg-input/80 select-none data-[checked]:bg-primary data-[checked]:text-primary-foreground data-[hovered]:not-[data-checked]:bg-input data-[checked]:data-[hovered]:bg-primary/90 data-[pressed]:scale-[0.98] data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:not-[data-checked]:bg-input/50 dark:data-[checked]:bg-primary"
+    }
+  ],
+  "textarea": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.045)",
+      "tokens": "flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none data-[focus-visible]:border-ring data-[focus-visible]:ring-ring/50 data-[focus-visible]:ring-3 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 dark:bg-input/30"
+    }
+  ],
+  "probe": [
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    },
+    {
+      "visible": true,
+      "pending": false,
+      "background": "oklab(0.704006 0.176798 0.0722319 / 0.2)",
+      "tokens": "group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none data-[focus-visible]:border-ring data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50 data-[pressed]:translate-y-px data-[disabled]:pointer-events-none data-[disabled]:opacity-50 border-transparent bg-destructive/20 text-destructive h-8 gap-1.5 px-2.5"
+    }
+  ]
+}

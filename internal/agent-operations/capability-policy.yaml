@@ -1,6 +1,6 @@
 schemaVersion: 2
-policyVersion: 2026-08-28.agent-forward-review-provenance-1
-principle: governed ready work proceeds automatically up to live permission and repository rules
+policyVersion: 2026-09-19.agent-forward-evidence-comment-1
+principle: local assessment decides how far an Agent may go alone, not whether it may participate with a human; governed ready work proceeds automatically up to live permission and repository rules
 executionModes:
   human-assisted:
     source: current trusted user instruction or an active human decision loop
@@ -44,6 +44,7 @@ bands:
     taskClasses:
       - claim-work-item
       - release-own-claim
+      - publish-evidence-comment
       - update-tracked-maintenance-state
       - maintain-docs
       - maintain-contract-projection
