@@ -294,6 +294,9 @@ try {
   fail('capability policy is not executable: ' + error.message);
 }
 
+// Every maintained projection of the scheduled-scope authorization status
+// belongs here: while the scopes are pending, each file must say
+// pending-runtime-identity and describe the read-only boundary.
 const scheduledScopeProjectionPaths = [
   resolve(root, '.agents/skills/pui-review/SKILL.md'),
   resolve(root, 'internal/agent-operations/contributor-agents.md'),
@@ -303,6 +306,10 @@ const scheduledScopeProjectionPaths = [
   resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/agents.md'),
   resolve(root, 'apps/www/src/content/docs/en/contribute/automation.md'),
   resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/automation.md'),
+  resolve(root, 'apps/www/src/content/docs/en/contribute/collaboration.md'),
+  resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/collaboration.md'),
+  resolve(root, 'apps/www/src/content/docs/en/contribute/deliver.md'),
+  resolve(root, 'apps/www/src/content/docs/zh-cn/contribute/deliver.md'),
   resolve(root, 'internal/governance/ci-cd.md'),
   resolve(root, 'internal/governance/ci-cd.zh-CN.md'),
 ];

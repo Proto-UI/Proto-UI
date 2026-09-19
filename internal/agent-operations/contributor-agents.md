@@ -30,7 +30,7 @@ Actual action proceeds through the intersection of:
 - task scope, risk, ownership, and idempotency;
 - the two attended decision classes when they are genuinely present.
 
-No factor substitutes for another. Current-user or active standing authorization covers the bounded workflow; live permission and repository rules still decide whether each external action is accepted. Review disposition, ready-for-review, commit grouping, and exact-head merge proceed automatically when their evidence and platform conditions pass. Only unresolved product direction and privileged or irreversible operations require an attended decision.
+No factor substitutes for another. Current-user authorization covers the bounded workflow today; live permission and repository rules still decide whether each external action is accepted. Under explicit current-user authorization, review disposition, ready-for-review, commit grouping, and exact-head merge proceed automatically when their evidence and platform conditions pass. The scheduled standing scopes remain `pending-runtime-identity` and read-only until broker-verified workload identity is bound, so scheduled runs perform no such writes today; once activated, a standing scope covers its bounded workflow under the same evidence and platform conditions. Only unresolved product direction and privileged or irreversible operations require an attended decision.
 
 ## Run the local assessment
 
