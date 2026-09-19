@@ -179,6 +179,34 @@ export type {
 export { ShadcnTextareaRoot, shadcnTextareaRoot } from './textarea';
 export type { ShadcnTextareaRootProps, ShadcnTextareaRootExposes } from './textarea';
 export {
+  ShadcnScrollAreaRoot,
+  ShadcnScrollAreaViewport,
+  ShadcnScrollAreaScrollbar,
+  ShadcnScrollAreaThumb,
+  shadcnScrollAreaRoot,
+  shadcnScrollAreaViewport,
+  shadcnScrollAreaScrollbar,
+  shadcnScrollAreaThumb,
+} from './scroll-area';
+export type {
+  ShadcnScrollAreaRootProps,
+  ShadcnScrollAreaRootExposes,
+  ShadcnScrollAreaRootStateHandles,
+  ShadcnScrollAreaRootAsHookContract,
+  ShadcnScrollAreaViewportProps,
+  ShadcnScrollAreaViewportExposes,
+  ShadcnScrollAreaViewportStateHandles,
+  ShadcnScrollAreaViewportAsHookContract,
+  ShadcnScrollAreaScrollbarProps,
+  ShadcnScrollAreaScrollbarExposes,
+  ShadcnScrollAreaScrollbarStateHandles,
+  ShadcnScrollAreaScrollbarAsHookContract,
+  ShadcnScrollAreaThumbProps,
+  ShadcnScrollAreaThumbExposes,
+  ShadcnScrollAreaThumbStateHandles,
+  ShadcnScrollAreaThumbAsHookContract,
+} from './scroll-area';
+export {
   ShadcnTooltipGroup,
   ShadcnTooltipRoot,
   ShadcnTooltipTrigger,

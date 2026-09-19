@@ -21,6 +21,72 @@ function artifact(type) {
   return { type, reference: `memory:${type}` };
 }
 
+test('claim and evidence publication route only with the separate evidence and authorization artifacts', () => {
+  const registry = loadSkillRegistry({ root });
+  const handoff = (fromId, nextSkillId, types) => ({
+    schemaVersion: 1,
+    kind: 'proto-ui.skill-handoff',
+    entrypoint: 'development',
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    fromId,
+    nextSkillId,
+    artifacts: types.map(artifact),
+    humanGates: [],
+    notes: [],
+  });
+  const claim = handoff('pui-select', 'pui-claim', [
+    'capability-envelope',
+    'work-item-proposal',
+    'evidence-assessment',
+    'mutation-authorization',
+  ]);
+  assert.equal(validateSkillHandoff(claim, registry).nextSkill.id, 'pui-claim');
+  for (const required of ['evidence-assessment', 'mutation-authorization']) {
+    assert.throws(
+      () =>
+        validateSkillHandoff(
+          { ...claim, artifacts: claim.artifacts.filter((item) => item.type !== required) },
+          registry
+        ),
+      new RegExp(required)
+    );
+  }
+  const publication = handoff('pui-issue', 'pui-evidence-publish', [
+    'capability-envelope',
+    'issue-report',
+    'evidence-publication-packet',
+    'mutation-authorization',
+  ]);
+  assert.equal(validateSkillHandoff(publication, registry).nextSkill.id, 'pui-evidence-publish');
+  for (const required of ['evidence-publication-packet', 'mutation-authorization']) {
+    assert.throws(
+      () =>
+        validateSkillHandoff(
+          {
+            ...publication,
+            artifacts: publication.artifacts.filter((item) => item.type !== required),
+          },
+          registry
+        ),
+      new RegExp(required)
+    );
+  }
+  const receipt = handoff('pui-evidence-publish', null, [
+    'mutation-receipt',
+    'evidence-ledger-update',
+  ]);
+  assert.equal(validateSkillHandoff(receipt, registry).nextSkill, null);
+  assert.throws(
+    () => validateSkillHandoff({ ...receipt, artifacts: [artifact('mutation-receipt')] }, registry),
+    /evidence-ledger-update/
+  );
+  const skill = resolveSkill('pui-evidence-publish', registry);
+  assert.equal(evaluateSkillEligibility(skill, { executionMode: 'autonomous' }).eligible, false);
+  assert.equal(resolveSkill('pui-issue', registry).mutation, 'none');
+  assert.equal(resolveSkill('pui-select', registry).mutation, 'none');
+});
+
 test('registry resolves one deterministic lazy leaf', () => {
   const registry = loadSkillRegistry({ root });
   const skill = resolveSkill('pui-trace', registry);
@@ -154,7 +220,11 @@ test('handoff resolves exactly one next leaf and enforces artifact requirements'
   const selfLoop = {
     ...valid,
     fromId: 'pui-select',
-    artifacts: [...valid.artifacts, artifact('work-item-proposal')],
+    artifacts: [
+      ...valid.artifacts,
+      artifact('work-item-proposal'),
+      artifact('evidence-assessment'),
+    ],
   };
   assert.throws(() => validateSkillHandoff(selfLoop, registry), /recursively select/);
 

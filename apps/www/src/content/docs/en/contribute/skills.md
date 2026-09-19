@@ -58,7 +58,8 @@ A handoff carries typed artifacts and at most one next skill. A terminal handoff
 | `pui-test` | Governed behavior to executable evidence |
 | `pui-docs` | Governed repository fact to human documentation |
 | `pui-validate` | Candidate change to a proportional evidence report |
-| `pui-review` | Candidate exact head to an independent packet and authorized review receipt |
+| `pui-review` | Candidate exact head to an independent revision-bound packet at one declared review class and an authorized review receipt |
+| `pui-evidence-publish` | Prepared, separately authorized Issue evidence to one additive comment receipt; no uploads or metadata changes |
 | `pui-integrate` | Independently approved exact head to a rule-compliant merge receipt |
 | `pui-collaborate` | Governed live collaboration state to one verified reversible mutation receipt |
 

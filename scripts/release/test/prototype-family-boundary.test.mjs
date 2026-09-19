@@ -43,6 +43,7 @@ const SHADCN_FAMILIES = new Set([
   'dropdown',
   'hover-card',
   'select',
+  'scroll-area',
   'switch',
   'tabs',
   'toggle',

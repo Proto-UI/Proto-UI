@@ -1,0 +1,258 @@
+id: T-RULE-COLOR-SCHEME-0001
+type: test
+title: Default colorScheme source, Rule lease and four Adapter evidence
+status: draft
+since: 0.3.0-alpha.0
+lifecycleRationale:
+  en: Source, Runtime, four real-framework happy-dom tests and eight bounded real-browser cases have passed for their stated surfaces. The matrix distinguishes actual recipe/reveal/resource evidence from excluded host domains and the separately observed React default-value gap; independent stable admission remains required.
+  zh-CN: source、Runtime、四个真实框架的 happy-dom 测试及八个有界真实浏览器 case 已通过其声明 surface。矩阵区分实际配方/reveal/资源证据、排除的宿主域和单独观察到的 React 默认值缺口；仍须独立稳定接纳。
+summary: Separate source, owner, lease, reader, Adapter token and browser cases keep the S1-S8 evidence boundary explicit.
+cases:
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-SOURCE-PRIORITY
+    title: Root dark-first priority and system fallback use effective values
+    covers: [C-RULE-COLOR-SCHEME-0001-E, HC-COLOR-SCHEME-INVALIDATION-0001-B]
+    expectation: explicit-markers-system-removal-and-effective-value-dedup
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-SOURCE-RESOURCES
+    title: Lazy shared resources and independent asynchronous subscriptions
+    covers:
+      [
+        C-RULE-COLOR-SCHEME-0001-F,
+        HC-COLOR-SCHEME-INVALIDATION-0001-A,
+        HC-COLOR-SCHEME-INVALIDATION-0001-C,
+        HC-COLOR-SCHEME-INVALIDATION-0001-D,
+      ]
+    expectation: one-service-per-document-final-release-and-generation-safe-batches
+    notes:
+      - The controlled observer/MQL host proves resource ownership and notifications, not browser painting or separate bundle uniqueness.
+      - Throwing subscribers do not prevent later active subscribers from receiving the same or later theme changes; each original callback error remains observable from a queued task.
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-SOURCE-AVAILABILITY
+    title: Missing DOM observation withholds the source and missing MQL retains markers
+    covers: [C-RULE-COLOR-SCHEME-0001-F, HC-COLOR-SCHEME-INVALIDATION-0001-E]
+    expectation: optional-source-with-existing-reader-fallback
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-OWNER
+    title: Mixed Plan replaces the existing contribution without pulling Props
+    covers: [C-RULE-COLOR-SCHEME-0001-A, C-RULE-COLOR-SCHEME-0001-B, M-RULE-0001-G]
+    expectation: complete-ordered-plan-patch-suppress-and-no-direct-structural-or-props-work
+    notes:
+      - Uses a Runtime Effects sink and pending raw Props source; installed extension behavior has a separate case.
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-EXTENSIONS
+    title: The notification port preserves existing extension ordering and short-circuit
+    covers: [C-RULE-COLOR-SCHEME-0001-A, M-RULE-0001-G]
+    expectation: transform-before-after-and-short-circuit-through-the-same-evaluator
+    notes:
+      - This proves the supplied hooks' existing execution semantics, not absence of side effects in arbitrary third-party callbacks.
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-READER
+    title: Sampled readers, missing capability and explicit readMeta override remain intact
+    covers: [M-RULE-META-0001-A]
+    expectation: sampled-values-and-explicit-context-override
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-LEASE
+    title: Only eligible mounted consumers lease and every new view reconciles freshly
+    covers:
+      [
+        C-RULE-COLOR-SCHEME-0001-C,
+        C-RULE-COLOR-SCHEME-0001-D,
+        M-RULE-META-0001-B,
+        M-RULE-META-0001-D,
+      ]
+    expectation: no-lease-before-mounted-or-for-nonconsumers-and-clean-remount
+    notes:
+      - Runtime tests also install the real Web extension policy, verify all Rules are lowered while authored IR still owns one lease, and keep that claim separate from browser CSS painting.
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-PAIRING
+    title: Reset gaps and partially replaced getter/source pairs retire old leases
+    covers:
+      [
+        C-RULE-COLOR-SCHEME-0001-C,
+        C-RULE-COLOR-SCHEME-0001-D,
+        M-RULE-META-0001-C,
+        HC-COLOR-SCHEME-INVALIDATION-0001-A,
+      ]
+    expectation: reference-pairing-one-lease-fresh-reattach-and-late-callback-rejection
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-CURRENT-EFFECTS
+    title: Rebinding Effects redirects style output and terminal requests cannot apply
+    covers:
+      [
+        C-RULE-COLOR-SCHEME-0001-B,
+        C-RULE-COLOR-SCHEME-0001-D,
+        C-RULE-COLOR-SCHEME-0001-L,
+        M-RULE-META-0001-D,
+      ]
+    expectation: latest-effects-sink-with-no-retired-or-terminal-writes
+    notes:
+      - This tests the Runtime capability seam; the browser case separately drives actual Runtime/WC Effects DOM replacement and the official Adapter reveal paths.
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-REACT
+    title: Real React owner/view wiring projects default styles and preserves custom sampling
+    covers: [C-RULE-COLOR-SCHEME-0001-G, C-RULE-COLOR-SCHEME-0001-I, A-REACT-18-19-0001-RULE-META]
+    expectation: mixed-rule-tokens-retained-owner-remount-and-normal-props-sync
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-VUE
+    title: Real Vue 3 owner/view wiring projects default styles and preserves custom sampling
+    covers: [C-RULE-COLOR-SCHEME-0001-G, C-RULE-COLOR-SCHEME-0001-I, A-VUE-3-0001-RULE-META]
+    expectation: mixed-rule-tokens-retained-owner-remount-and-normal-props-sync
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-VUE2
+    title: Real Vue 2 owner/view wiring projects default styles and preserves custom sampling
+    covers: [C-RULE-COLOR-SCHEME-0001-G, C-RULE-COLOR-SCHEME-0001-I, A-VUE-2-0001-RULE-META]
+    expectation: mixed-rule-tokens-retained-owner-remount-and-normal-props-sync
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-WC
+    title: Custom Element owner/view wiring projects default styles and preserves custom sampling
+    covers: [C-RULE-COLOR-SCHEME-0001-G, C-RULE-COLOR-SCHEME-0001-I, A-WEB-COMPONENT-0001-RULE-META]
+    expectation: mixed-rule-tokens-retained-owner-remount-and-normal-props-sync
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-PAINT
+    title: Four real Adapter recipes agree through explicit and system theme transitions
+    covers:
+      [
+        C-RULE-COLOR-SCHEME-0001-H,
+        C-RULE-COLOR-SCHEME-0001-I,
+        A-REACT-18-19-0001-RULE-META-PAINT,
+        A-VUE-3-0001-RULE-META-PAINT,
+        A-VUE-2-0001-RULE-META-PAINT,
+        A-WEB-COMPONENT-0001-RULE-META-PAINT,
+      ]
+    expectation: shadcn-button-and-neighbor-computed-paint-with-no-settled-proto-update
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-LIFETIME
+    title: Current physical surfaces receive the latest recipe before supported reveal
+    covers: [C-RULE-COLOR-SCHEME-0001-L]
+    expectation: initial-and-retained-reveal-strictmode-keepalive-wc-terminal-reconnect-portal-and-native-surface-replacement
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-TRANSITION
+    title: Leaving remains subscribed without changing existing Transition timing
+    covers: [C-RULE-COLOR-SCHEME-0001-J]
+    expectation: unchanged-reduced-motion-fallback-phase-events-and-view-intent
+  - id: T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-EXCLUSIONS
+    title: Custom and scope counterexamples remain outside the default equivalence claim
+    covers: [C-RULE-COLOR-SCHEME-0001-K]
+    expectation: custom-reader-and-local-marker-counterexamples-remain-explicit
+implementations:
+  - id: source
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/web-color-scheme-source.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-COLOR-SCHEME-0001-CASE-SOURCE-PRIORITY
+      - T-RULE-COLOR-SCHEME-0001-CASE-SOURCE-RESOURCES
+      - T-RULE-COLOR-SCHEME-0001-CASE-SOURCE-AVAILABILITY
+    notes:
+      - Eight controlled-host tests cover the default service; no actual computed-style claim.
+  - id: rule-owner
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.color-scheme.contract.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-COLOR-SCHEME-0001-CASE-OWNER
+  - id: rule-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.color-scheme-lifecycle.contract.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-COLOR-SCHEME-0001-CASE-EXTENSIONS
+      - T-RULE-COLOR-SCHEME-0001-CASE-READER
+      - T-RULE-COLOR-SCHEME-0001-CASE-LEASE
+      - T-RULE-COLOR-SCHEME-0001-CASE-PAIRING
+      - T-RULE-COLOR-SCHEME-0001-CASE-CURRENT-EFFECTS
+    notes:
+      - Runtime fake source and Effects output verify lease, reader and execution seams. Physical painting, optimized selector equivalence and framework-specific replay are separate cases.
+  - id: react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/color-scheme.integration.test.ts
+    required: true
+    consumesCases: [T-RULE-COLOR-SCHEME-0001-CASE-REACT]
+    notes:
+      - Real React createRoot under happy-dom checks token/child identity, custom sampling, initial detached and retained remount, and concurrent Props/theme changes with explicit updates. It does not prove browser painting, StrictMode or portals.
+  - id: vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/color-scheme.integration.test.ts
+    required: true
+    consumesCases: [T-RULE-COLOR-SCHEME-0001-CASE-VUE]
+    notes:
+      - Real Vue 3 under happy-dom checks token/child identity, custom sampling, initial detached and retained remount, and concurrent Props/theme changes with explicit updates. It does not prove browser painting, KeepAlive or portals.
+  - id: vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/color-scheme.integration.test.ts
+    required: true
+    consumesCases: [T-RULE-COLOR-SCHEME-0001-CASE-VUE2]
+    notes:
+      - Real Vue 2 under happy-dom checks token/child identity, custom sampling, initial detached and retained remount, and concurrent Props/theme changes with explicit updates. It does not prove browser painting, KeepAlive or portals.
+  - id: web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/color-scheme.integration.test.ts
+    required: true
+    consumesCases: [T-RULE-COLOR-SCHEME-0001-CASE-WC]
+    notes:
+      - Custom Elements under happy-dom check token/child identity, custom sampling, initial detached and retained remount, and concurrent Props/theme changes with explicit updates. This does not prove browser painting, physical reconnect or split Textarea surfaces.
+  - id: browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/test/color-scheme.browser.test.ts
+    required: true
+    consumesCases:
+      - T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-PAINT
+      - T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-LIFETIME
+      - T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-TRANSITION
+      - T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-EXCLUSIONS
+    notes:
+      - Eight Chromium cases use real React StrictMode, Vue 3/Vue 2 KeepAlive and Custom Elements. They measure exact Shadcn recipes, native input draft retention, initial and remount/portal frame sequences, normal Props sync, native observer/MQL release, full WC disconnect/reconnect and Transition fallback/event/presence behavior.
+      - Same-epoch physical replacement uses an actual Runtime plus WC commit/Effects/applier host, not an assertion of arbitrary internal target replacement in every Adapter. Custom/subtree counterexamples are checked; ShadowRoot and cross-document behavior remain outside the guarantee.
+      - Initial React uncontrolled defaultValue projection differs from logical value on both the public baseline and the candidate. The fixture records that existing gap before real input; passing theme/draft checks do not claim that initialization defect is repaired.
+verifies:
+  contracts:
+    - id: C-RULE-COLOR-SCHEME-0001
+      anchors:
+        [
+          C-RULE-COLOR-SCHEME-0001-A,
+          C-RULE-COLOR-SCHEME-0001-B,
+          C-RULE-COLOR-SCHEME-0001-C,
+          C-RULE-COLOR-SCHEME-0001-D,
+          C-RULE-COLOR-SCHEME-0001-E,
+          C-RULE-COLOR-SCHEME-0001-F,
+          C-RULE-COLOR-SCHEME-0001-G,
+          C-RULE-COLOR-SCHEME-0001-H,
+          C-RULE-COLOR-SCHEME-0001-I,
+          C-RULE-COLOR-SCHEME-0001-J,
+          C-RULE-COLOR-SCHEME-0001-K,
+          C-RULE-COLOR-SCHEME-0001-L,
+        ]
+  modules:
+    - id: M-RULE-0001
+      anchors: [M-RULE-0001-G]
+    - id: M-RULE-META-0001
+      anchors: [M-RULE-META-0001-A, M-RULE-META-0001-B, M-RULE-META-0001-C, M-RULE-META-0001-D]
+  hostCaps:
+    - id: HC-COLOR-SCHEME-INVALIDATION-0001
+      anchors:
+        [
+          HC-COLOR-SCHEME-INVALIDATION-0001-A,
+          HC-COLOR-SCHEME-INVALIDATION-0001-B,
+          HC-COLOR-SCHEME-INVALIDATION-0001-C,
+          HC-COLOR-SCHEME-INVALIDATION-0001-D,
+          HC-COLOR-SCHEME-INVALIDATION-0001-E,
+        ]
+  adapters:
+    - id: A-REACT-18-19-0001
+      anchors: [A-REACT-18-19-0001-RULE-META, A-REACT-18-19-0001-RULE-META-PAINT]
+    - id: A-VUE-3-0001
+      anchors: [A-VUE-3-0001-RULE-META, A-VUE-3-0001-RULE-META-PAINT]
+    - id: A-VUE-2-0001
+      anchors: [A-VUE-2-0001-RULE-META, A-VUE-2-0001-RULE-META-PAINT]
+    - id: A-WEB-COMPONENT-0001
+      anchors: [A-WEB-COMPONENT-0001-RULE-META, A-WEB-COMPONENT-0001-RULE-META-PAINT]
+sources:
+  - path: packages/adapters/base/test-utils/color-scheme.ts
+  - path: apps/www/test/fixtures/color-scheme/main.ts
+  - path: apps/www/test/fixtures/color-scheme/host-probes.ts
+  - path: internal/records/2026-09-14-color-scheme-invalidation-proposal.zh-CN.md
+openQuestions:
+  - id: T-RULE-COLOR-SCHEME-0001-Q-ADMISSION
+    question:
+      en: Does this bounded evidence justify independent stable admission without widening the documented exclusions?
+      zh-CN: 此有界证据是否足以支持独立稳定接纳，且不扩大已记录的排除范围？
+    blocks:
+      - activation:T-RULE-COLOR-SCHEME-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped source, Runtime and Adapter token evidence separately from bounded browser recipes, replay, resource release, physical projection and exclusions.
+tags: [rule, meta, color-scheme, test, adapter, lifecycle, draft]

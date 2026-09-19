@@ -1,5 +1,7 @@
 ## Summary
 
+<!-- Humans may submit a plain description; no Agent evidence checklist is required from you. Agents: follow internal/agent-operations/visual-evidence.md, adding a sanitized request paraphrase, uploaded subject-appropriate evidence, and any evidence debt in your own section/comment. This is a soft gate, not an image-presence merge blocker. Upload tutorial: internal/agent-operations/github-evidence-upload.md. -->
+
 <!-- What does this PR change? -->
 
 ## Related context
