@@ -35,4 +35,24 @@ describe('Previewer host mount lease', () => {
 
     expect(host.hasAttribute('data-v-app')).toBe(false);
   });
+
+  it('revokes and clears a host lease after its cleanup throws', () => {
+    const host = document.createElement('div');
+    const failure = new Error('composition cleanup failed');
+    const lease = claimHostMount(host);
+    lease.commit(() => {
+      throw failure;
+    });
+    host.innerHTML = '<span>mounted Runtime</span>';
+    host.setAttribute('data-v-app', '');
+
+    expect(() => lease.release()).toThrow(failure);
+    expect(lease.isCurrent()).toBe(false);
+    expect(host.childNodes).toHaveLength(0);
+    expect(host.hasAttribute('data-v-app')).toBe(false);
+
+    const replacement = claimHostMount(host);
+    expect(replacement.isCurrent()).toBe(true);
+    expect(replacement.release()).toBe(true);
+  });
 });
