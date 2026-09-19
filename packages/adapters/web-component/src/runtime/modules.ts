@@ -132,6 +132,7 @@ const lateAttachShadowWatches = new WeakMap<
   {
     count: number;
     original: Element['attachShadow'];
+    patched: Element['attachShadow'];
     subscribers: Set<LateAttachShadowSubscriber>;
   }
 >();
@@ -162,7 +163,7 @@ function watchLateAttachShadow(
       return root;
     };
     ElementCtor.prototype.attachShadow = patched as typeof original;
-    watch = { count: 0, original, subscribers };
+    watch = { count: 0, original, patched: patched as typeof original, subscribers };
     lateAttachShadowWatches.set(view as Window, watch);
   }
   const subscriber: LateAttachShadowSubscriber = { contains, onLateRoot };
@@ -174,7 +175,13 @@ function watchLateAttachShadow(
     current.subscribers.delete(subscriber);
     current.count -= 1;
     if (current.count === 0) {
-      ElementCtor.prototype.attachShadow = current.original;
+      // Ownership-safe restore: page code or an independently bundled copy may
+      // have wrapped attachShadow after this watch. Never clobber a method
+      // installed after ours; in that case our empty pass-through wrapper
+      // stays in the chain rather than silently deleting the newer patch.
+      if (ElementCtor.prototype.attachShadow === current.patched) {
+        ElementCtor.prototype.attachShadow = current.original;
+      }
       lateAttachShadowWatches.delete(view as Window);
     }
   };
@@ -527,6 +534,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           // by the resolver, without requesting focus or manufacturing facts.
           const Observer = target.ownerDocument.defaultView?.MutationObserver;
           if (config.strategy === 'descendant-first' && Observer) {
+            // The late-attach watch below is installed once but must always
+            // consult the currently observed region, so the root set lives
+            // outside observeTree() and is refreshed on every resample
+            // instead of being captured from the first scan.
+            const observedRoots = new Set<Node>();
             const observeTree = () => {
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
@@ -562,7 +574,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // readiness signal: resample once per newly defined name.
               const registry = target.ownerDocument.defaultView?.customElements;
               const pendingUpgrades = new Set<string>();
-              const observedRoots = new Set<Node>();
+              observedRoots.clear();
               const observe = (root: HTMLElement | ShadowRoot) => {
                 observedRoots.add(root);
                 entryObserver?.observe(root, options);

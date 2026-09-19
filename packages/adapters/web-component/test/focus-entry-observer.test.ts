@@ -95,6 +95,90 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('resamples when a second-generation late root lands inside an observed late root', async () => {
+    // The late-attach watch is installed once; it must consult the currently
+    // observed region, not the first scan. A first late root containing an
+    // already-upgraded rootless element is observed on resample, and a second
+    // open root attached inside it must still revoke the host fallback.
+    const nameOuter = `entry-late-outer-${++serial}`;
+    const nameInner = `entry-late-inner-${++serial}`;
+    class Inner extends HTMLElement {
+      attachLater() {
+        if (this.shadowRoot) return;
+        const root = this.attachShadow({ mode: 'open' });
+        const button = document.createElement('button');
+        button.tabIndex = 0;
+        root.append(button);
+      }
+    }
+    customElements.define(nameInner, Inner);
+    class Outer extends HTMLElement {
+      attachLater() {
+        if (this.shadowRoot) return;
+        const root = this.attachShadow({ mode: 'open' });
+        root.append(document.createElement(nameInner));
+      }
+    }
+    customElements.define(nameOuter, Outer);
+    const host = panel(true);
+    const outer = document.createElement(nameOuter) as Outer;
+    host.append(outer);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    outer.attachLater();
+    await settle();
+    // The inner element is still rootless and exposes no tabbable control.
+    expect(host.tabIndex).toBe(0);
+
+    const inner = outer.shadowRoot!.querySelector(nameInner) as Inner;
+    inner.attachLater();
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('never clobbers a third-party attachShadow patch installed after ours', async () => {
+    // The window-level watch is reference-counted; teardown must restore the
+    // intrinsic only when our wrapper is still top-most. A later page/library
+    // patch stays installed and functional after Proto observers go away.
+    const original = Element.prototype.attachShadow;
+    const host = panel(true);
+    await settle();
+    const protoWrapper = Element.prototype.attachShadow;
+    expect(protoWrapper).not.toBe(original);
+
+    let thirdPartyCalls = 0;
+    const thirdParty = function (this: Element, init: ShadowRootInit): ShadowRoot {
+      thirdPartyCalls += 1;
+      return protoWrapper.call(this, init);
+    };
+    Element.prototype.attachShadow = thirdParty as typeof original;
+    try {
+      host.remove();
+      await settle();
+      expect(Element.prototype.attachShadow).toBe(thirdParty);
+
+      const probe = document.createElement('div');
+      const root = probe.attachShadow({ mode: 'open' });
+      expect(root.mode).toBe('open');
+      expect(thirdPartyCalls).toBe(1);
+    } finally {
+      if (Element.prototype.attachShadow === thirdParty) {
+        Element.prototype.attachShadow = original;
+      }
+    }
+  });
+
+  it('restores the intrinsic when our wrapper is still top-most at teardown', async () => {
+    const original = Element.prototype.attachShadow;
+    const host = panel(true);
+    await settle();
+    expect(Element.prototype.attachShadow).not.toBe(original);
+    host.remove();
+    await settle();
+    expect(Element.prototype.attachShadow).toBe(original);
+  });
+
   it.each([
     [false, true],
     [true, true],
