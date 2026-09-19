@@ -807,6 +807,157 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects descendant entry after CSS-only media-query eligibility changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.setViewportSize({ width: 800, height: 600 });
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: '@media (max-width: 500px) { #css-only-entry-button { display: none; } }',
+      });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-css-only-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.id = 'css-only-entry';
+        host.innerHTML = '<button id="css-only-entry-button">Button</button>';
+        document.body.append(host);
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#css-only-entry')?.getAttribute('tabindex') === null
+      );
+
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (window as any).__cssOnlyRule = sheet.insertRule(
+          '#css-only-entry-button { display: none; }',
+          sheet.cssRules.length
+        );
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        sheet.deleteRule((window as any).__cssOnlyRule);
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+
+      await page.setViewportSize({ width: 400, height: 600 });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+
+      await page.setViewportSize({ width: 800, height: 600 });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('samples and resolves adopted focus descendants in their owning iframe realm', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-adopted-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const host = foreignDocument.adoptNode(new C());
+        host.id = 'adopted-entry';
+        const button = foreignDocument.createElement('button');
+        button.id = 'foreign-button';
+        button.textContent = 'Foreign';
+        const details = foreignDocument.createElement('details');
+        const summary = foreignDocument.createElement('summary');
+        summary.id = 'foreign-summary';
+        summary.textContent = 'Summary';
+        const closedInput = foreignDocument.createElement('input');
+        closedInput.id = 'foreign-closed-input';
+        details.append(summary, closedInput);
+        const firstRadio = foreignDocument.createElement('input');
+        firstRadio.id = 'foreign-radio-a';
+        firstRadio.type = 'radio';
+        firstRadio.name = 'foreign-group';
+        const checkedRadio = foreignDocument.createElement('input');
+        checkedRadio.id = 'foreign-radio-b';
+        checkedRadio.type = 'radio';
+        checkedRadio.name = 'foreign-group';
+        checkedRadio.checked = true;
+        const foreignShadowHost = foreignDocument.createElement('div');
+        const foreignShadowButton = foreignDocument.createElement('button');
+        foreignShadowButton.id = 'foreign-shadow-button';
+        foreignShadowHost.attachShadow({ mode: 'open' }).append(foreignShadowButton);
+        host.append(button, details, firstRadio, checkedRadio, foreignShadowHost);
+        foreignDocument.body.append(host);
+        await new Promise<void>((resolve) =>
+          frame.contentWindow!.requestAnimationFrame(() => resolve())
+        );
+        const sample = p.sample(host);
+        const observed = {
+          targets: sample.targets.map((target: HTMLElement) => target.id),
+          fallback: host.getAttribute('tabindex'),
+          ownerMatches: button.ownerDocument === foreignDocument,
+        };
+        frame.remove();
+        return observed;
+      });
+      expect(result).toEqual({
+        targets: ['foreign-button', 'foreign-summary', 'foreign-radio-b', 'foreign-shadow-button'],
+        fallback: null,
+        ownerMatches: true,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects a composed radio entry after its form owner changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

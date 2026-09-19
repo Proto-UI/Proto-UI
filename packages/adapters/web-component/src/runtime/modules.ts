@@ -403,18 +403,24 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
+  let entryResizeObserver: ResizeObserver | null = null;
   let stopEntryRadioStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
+  let stopEntryViewportWatch: (() => void) | null = null;
   let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
   const stopEntryObserver = () => {
     entryObserver?.disconnect();
     entryObserver = null;
     entryImageObserver?.disconnect();
     entryImageObserver = null;
+    entryResizeObserver?.disconnect();
+    entryResizeObserver = null;
     stopEntryRadioStateWatch?.();
     stopEntryRadioStateWatch = null;
     stopEntryAttachShadowWatch?.();
     stopEntryAttachShadowWatch = null;
+    stopEntryViewportWatch?.();
+    stopEntryViewportWatch = null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
@@ -537,6 +543,20 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           // by the resolver, without requesting focus or manufacturing facts.
           const Observer = target.ownerDocument.defaultView?.MutationObserver;
           if (config.strategy === 'descendant-first' && Observer) {
+            const view = target.ownerDocument.defaultView;
+            const Resize = view?.ResizeObserver;
+            if (Resize) {
+              entryResizeObserver = new Resize(() => {
+                if (entryObserver) projectEntry();
+              });
+            }
+            if (view) {
+              const onViewportResize = () => {
+                if (entryObserver) projectEntry();
+              };
+              view.addEventListener('resize', onViewportResize);
+              stopEntryViewportWatch = () => view.removeEventListener('resize', onViewportResize);
+            }
             // The late-attach watch below is installed once but must always
             // consult the currently observed region, so the root set lives
             // outside observeTree() and is refreshed on every resample
@@ -545,6 +565,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observeTree = () => {
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
+              entryResizeObserver?.disconnect();
               stopEntryRadioStateWatch?.();
               stopEntryRadioStateWatch = null;
               let hasArea = false;
@@ -585,6 +606,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const observe = (root: HTMLElement | ShadowRoot) => {
                 observedRoots.add(root);
                 entryObserver?.observe(root, options);
+                if (root.nodeType === 1) entryResizeObserver?.observe(root as HTMLElement);
                 hasArea ||= !!root.querySelector('area');
                 // Radio-group ownership never crosses a Document/ShadowRoot
                 // boundary. Observe only trees containing a relevant named
@@ -597,6 +619,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
                 if (root instanceof HTMLElement && root.shadowRoot) observe(root.shadowRoot);
                 for (const descendant of root.querySelectorAll<HTMLElement>('*')) {
+                  entryResizeObserver?.observe(descendant);
                   if (descendant.shadowRoot) observe(descendant.shadowRoot);
                   else if (registry) {
                     const name = descendant.localName;
@@ -665,6 +688,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     'style',
                   ],
                 });
+                for (const image of target.ownerDocument.querySelectorAll('img[usemap]'))
+                  entryResizeObserver?.observe(image);
               }
               // Native radio checkedness is property state: a click on a group
               // member outside this entry region, or a form reset, need not

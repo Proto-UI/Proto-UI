@@ -9,9 +9,38 @@ export function deepestActiveElement(doc: Document): Element | null {
   return active;
 }
 
+const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
+
+function isElementNode(value: unknown): value is Element {
+  return !!value && typeof value === 'object' && (value as Node).nodeType === 1;
+}
+
+function isHtmlElement(el: Element): el is HTMLElement {
+  return el.namespaceURI === HTML_NAMESPACE;
+}
+
+function isHtmlTag<Name extends keyof HTMLElementTagNameMap>(
+  el: Element,
+  name: Name
+): el is HTMLElementTagNameMap[Name] {
+  return isHtmlElement(el) && el.localName === name;
+}
+
+function isDocumentNode(node: Node): node is Document {
+  return node.nodeType === 9;
+}
+
+function isShadowRootNode(node: Node): node is ShadowRoot {
+  return node.nodeType === 11 && isElementNode((node as ShadowRoot).host);
+}
+
+function getOwnedComputedStyle(el: Element): CSSStyleDeclaration | null {
+  return el.ownerDocument.defaultView?.getComputedStyle(el) ?? null;
+}
+
 function isInsideOwnedShadowScope(owner: HTMLElement, target: Element | null): boolean {
   let root = target?.getRootNode();
-  while (root instanceof ShadowRoot) {
+  while (root && isShadowRootNode(root)) {
     if (root.host === owner) return true;
     root = root.host.getRootNode();
   }
@@ -36,12 +65,12 @@ export function sampleWebComponentScopeTargets(
     // visible controls from native sequential focus navigation; keep
     // accessibility-tree hiding separate from keyboard-focus eligibility.
     if (el.hasAttribute('inert')) return;
-    const style = getComputedStyle(el);
-    if (style.display === 'none') return;
+    const style = getOwnedComputedStyle(el);
+    if (style?.display === 'none') return;
     // content-visibility:hidden skips the subtree from rendering and from
     // sequential focus navigation (C-AS-FOCUS-SCOPE-0002-J).
-    if (style.contentVisibility === 'hidden') return;
-    if (!(el instanceof HTMLElement)) {
+    if (style?.contentVisibility === 'hidden') return;
+    if (!isHtmlElement(el)) {
       // Non-HTML containers (SVG, MathML) are never candidates themselves,
       // but their descendants (e.g. foreignObject content) stay in the
       // document's sequential focus order.
@@ -54,14 +83,14 @@ export function sampleWebComponentScopeTargets(
         (!el.hasAttribute('tabindex') && (isNativelyFocusable?.(el) || isEditingHost(el)))) &&
       isUsableNativeCandidate(el) &&
       !el.matches(':disabled') &&
-      style.visibility !== 'hidden' &&
-      style.visibility !== 'collapse' &&
-      style.display !== 'contents';
+      style?.visibility !== 'hidden' &&
+      style?.visibility !== 'collapse' &&
+      style?.display !== 'contents';
     // Shadow hosts and slots own separate tabindex-ordered navigation scopes.
     // Sort those scopes independently, then expand each at its owner's position.
     // Sorting a flattened list would let an inner positive tabindex jump ahead
     // of positive targets in an ancestor scope, contrary to native Tab order.
-    const ownsScope = el instanceof HTMLSlotElement || !!el.shadowRoot;
+    const ownsScope = isHtmlTag(el, 'slot') || !!el.shadowRoot;
     let children = entries;
     if (ownsScope && el !== container) {
       if (el.hasAttribute('tabindex') && el.tabIndex < 0) {
@@ -69,7 +98,11 @@ export function sampleWebComponentScopeTargets(
         // programmatic deep focus still has a real position in the composed
         // order. Preserve a non-target marker at the host position so Focus
         // can continue immediately before/after it in either direction.
-        if (activeTarget instanceof HTMLElement && isInsideOwnedShadowScope(el, activeTarget))
+        if (
+          activeTarget &&
+          isHtmlElement(activeTarget) &&
+          isInsideOwnedShadowScope(el, activeTarget)
+        )
           entries.push({ element: activeTarget, target: false, priority: 0 });
         return;
       }
@@ -90,12 +123,12 @@ export function sampleWebComponentScopeTargets(
       });
     } else if (target || el === activeTarget)
       entries.push({ element: el, target: !!target, priority: el.tabIndex });
-    if (el instanceof HTMLSlotElement) {
+    if (isHtmlTag(el, 'slot')) {
       const assigned = el.assignedNodes();
       (assigned.length ? assigned : [...el.children]).forEach((node) => {
-        if (node instanceof Element) visit(node, children);
+        if (isElementNode(node)) visit(node, children);
       });
-    } else if (el instanceof HTMLDetailsElement && !el.open) {
+    } else if (isHtmlTag(el, 'details') && !el.open) {
       const summary = [...el.children].find((child) => child.tagName === 'SUMMARY');
       if (summary) visit(summary, children);
     } else if (el.shadowRoot)
@@ -121,7 +154,7 @@ export function sampleWebComponentScopeTargets(
   // radio remains an anchor so departing it does not re-enter the same group.
   const trees = new Map<Node, Map<HTMLFormElement | null, Map<string, HTMLInputElement[]>>>();
   for (const target of targets) {
-    if (!(target instanceof HTMLInputElement) || target.type !== 'radio' || !target.name) continue;
+    if (!isHtmlTag(target, 'input') || target.type !== 'radio' || !target.name) continue;
     const tree = target.getRootNode();
     let forms = trees.get(tree);
     if (!forms) trees.set(tree, (forms = new Map()));
@@ -140,8 +173,8 @@ export function sampleWebComponentScopeTargets(
       // eligibility traversal, but never return outside targets to Focus.
       visited.clear();
       const entries: Entry[] = [];
-      if (tree instanceof Document) visit(tree.documentElement, entries);
-      else if (tree instanceof ShadowRoot) for (const child of tree.children) visit(child, entries);
+      if (isDocumentNode(tree)) visit(tree.documentElement, entries);
+      else if (isShadowRootNode(tree)) for (const child of tree.children) visit(child, entries);
       eligible = new Set(
         flatten(entries)
           .filter((entry) => entry.target)
@@ -157,7 +190,7 @@ export function sampleWebComponentScopeTargets(
         const active = group.find((el) => el === activeTarget);
         const member = group[0]!;
         const outsideChecked =
-          tree instanceof Document || tree instanceof ShadowRoot
+          isDocumentNode(tree) || isShadowRootNode(tree)
             ? Array.from(tree.querySelectorAll<HTMLInputElement>('input')).find(
                 (el) =>
                   el.type === 'radio' &&
@@ -214,10 +247,10 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
   let lastFocused: HTMLElement | null = null;
   const remember = (event: Event) => {
     const target = event.composedPath()[0];
-    if (!(target instanceof HTMLElement)) return;
+    if (!isElementNode(target) || !isHtmlElement(target)) return;
     if (deepestActiveElement(root.ownerDocument) !== target) return;
     lastFocused = target;
-    if (!(target instanceof HTMLInputElement) || target.type !== 'radio' || !target.name) return;
+    if (!isHtmlTag(target, 'input') || target.type !== 'radio' || !target.name) return;
     history.set(target, {
       order: ++sequence,
       tree: target.getRootNode(),
@@ -264,20 +297,20 @@ function isEditingHost(el: HTMLElement): boolean {
 function isRendered(el: Element): boolean {
   let node: Element | null = el;
   while (node) {
-    if (node instanceof HTMLElement && node.hidden) return false;
-    const style = getComputedStyle(node);
+    if (isHtmlElement(node) && node.hidden) return false;
+    const style = getOwnedComputedStyle(node);
     if (
-      style.display === 'none' ||
-      style.contentVisibility === 'hidden' ||
-      style.visibility === 'hidden' ||
-      style.visibility === 'collapse'
+      style?.display === 'none' ||
+      style?.contentVisibility === 'hidden' ||
+      style?.visibility === 'hidden' ||
+      style?.visibility === 'collapse'
     )
       return false;
     const parent: Element | null = node.parentElement;
     if (parent) node = parent;
     else {
       const root = node.getRootNode();
-      node = root instanceof ShadowRoot ? root.host : null;
+      node = isShadowRootNode(root) ? root.host : null;
     }
   }
   return true;
