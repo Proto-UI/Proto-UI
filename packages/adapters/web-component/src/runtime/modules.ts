@@ -218,6 +218,11 @@ function watchEntryStyleInvalidation(
 ): (() => void) | null {
   const Sheet = view?.CSSStyleSheet;
   const Declaration = view?.CSSStyleDeclaration;
+  const Grouping = (
+    view as unknown as {
+      CSSGroupingRule?: { prototype: Record<string, unknown> };
+    }
+  )?.CSSGroupingRule;
   const Observer = view?.MutationObserver;
   const doc = view?.document;
   if (!view || !Sheet || !Declaration || !Observer || !doc?.documentElement) return null;
@@ -256,6 +261,10 @@ function watchEntryStyleInvalidation(
     patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'deleteRule');
     patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replaceSync');
     patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replace', true);
+    if (Grouping) {
+      patchMethod(Grouping.prototype, 'insertRule');
+      patchMethod(Grouping.prototype, 'deleteRule');
+    }
     patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'setProperty');
     patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'removeProperty');
 
@@ -563,6 +572,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryAttachShadowWatch: (() => void) | null = null;
   let stopEntryViewportWatch: (() => void) | null = null;
   let stopEntryStyleWatch: (() => void) | null = null;
+  let stopEntrySlotWatch: (() => void) | null = null;
+  let stopEntryUpgradeWatch: (() => void) | null = null;
   let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
   const stopEntryObserver = () => {
     entryObserver?.disconnect();
@@ -579,6 +590,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     stopEntryViewportWatch = null;
     stopEntryStyleWatch?.();
     stopEntryStyleWatch = null;
+    stopEntrySlotWatch?.();
+    stopEntrySlotWatch = null;
+    stopEntryUpgradeWatch?.();
+    stopEntryUpgradeWatch = null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
@@ -723,12 +738,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // outside observeTree() and is refreshed on every resample
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
+            const pendingUpgrades = new Set<string>();
+            stopEntryUpgradeWatch = () => pendingUpgrades.clear();
             const observeTree = () => {
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
               entryResizeObserver?.disconnect();
               stopEntryRadioStateWatch?.();
               stopEntryRadioStateWatch = null;
+              stopEntrySlotWatch?.();
+              stopEntrySlotWatch = null;
               let hasArea = false;
               const radioTrees = new Set<Document | ShadowRoot>();
               const options: MutationObserverInit = {
@@ -762,7 +781,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // fallback forever. Upgrade notifications are the bounded
               // readiness signal: resample once per newly defined name.
               const registry = target.ownerDocument.defaultView?.customElements;
-              const pendingUpgrades = new Set<string>();
               observedRoots.clear();
               const observe = (root: HTMLElement | ShadowRoot) => {
                 observedRoots.add(root);
@@ -792,11 +810,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     registry
                       .whenDefined(name)
                       .then(() => {
+                        pendingUpgrades.delete(name);
                         if (!entryObserver) return;
                         projectEntry();
                         observeTree();
                       })
-                      .catch(() => {});
+                      .catch(() => {
+                        pendingUpgrades.delete(name);
+                      });
                   }
                 }
               };
@@ -806,12 +827,30 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // class/style state participates in descendant computed
               // eligibility, so observe only that bounded composed chain.
               let externalAncestor = composedParentElement(target);
+              const externalSlots = new Set<HTMLSlotElement>();
               while (externalAncestor) {
                 entryObserver?.observe(externalAncestor, {
                   attributes: true,
-                  attributeFilter: ['class', 'style', 'hidden', 'inert'],
+                  attributeFilter: ['class', 'style', 'hidden', 'inert', 'open', 'name'],
                 });
+                if (
+                  externalAncestor.namespaceURI === 'http://www.w3.org/1999/xhtml' &&
+                  externalAncestor.localName === 'slot'
+                )
+                  externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
+              }
+              if (externalSlots.size > 0) {
+                const onSlotChange = () => {
+                  if (!entryObserver) return;
+                  projectEntry();
+                  observeTree();
+                };
+                for (const slot of externalSlots) slot.addEventListener('slotchange', onSlotChange);
+                stopEntrySlotWatch = () => {
+                  for (const slot of externalSlots)
+                    slot.removeEventListener('slotchange', onSlotChange);
+                };
               }
               // An already-upgraded descendant can still attach an open root
               // later (from a method, timer, or state transition), which is

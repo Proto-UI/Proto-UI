@@ -874,6 +874,36 @@ describe('Shadow closeout native boundaries', () => {
 
       await page.evaluate(() => {
         const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (window as any).__cssGroupingRule = sheet.insertRule(
+          '@media all {}',
+          sheet.cssRules.length
+        );
+        const group = sheet.cssRules[(window as any).__cssGroupingRule] as CSSMediaRule;
+        group.insertRule('#css-only-entry-button { visibility: hidden; }', 0);
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        const group = sheet.cssRules[(window as any).__cssGroupingRule] as CSSMediaRule;
+        group.deleteRule(0);
+        sheet.deleteRule((window as any).__cssGroupingRule);
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
         (window as any).__cssVisibilityRule = sheet.insertRule(
           '#css-only-entry-button { visibility: hidden; }',
           sheet.cssRules.length
@@ -1057,6 +1087,85 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('rebuilds external entry ancestry after slot reassignment', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-slot-reassignment-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const carrier = document.createElement('div');
+        const root = carrier.attachShadow({ mode: 'open' });
+        const hidden = document.createElement('div');
+        hidden.inert = true;
+        const hiddenSlot = document.createElement('slot');
+        hiddenSlot.name = 'entry';
+        hidden.append(hiddenSlot);
+        const visibleSlot = document.createElement('slot');
+        visibleSlot.name = 'visible';
+        root.append(hidden, visibleSlot);
+        const host = new C();
+        host.slot = 'entry';
+        host.innerHTML = '<button>inside</button>';
+        carrier.append(host);
+        document.body.append(carrier);
+        const frame = () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+        await frame();
+        const hiddenState = host.getAttribute('tabindex');
+        hiddenSlot.name = 'old';
+        visibleSlot.name = 'entry';
+        await frame();
+        const visibleState = host.getAttribute('tabindex');
+        visibleSlot.name = 'visible';
+        hiddenSlot.name = 'entry';
+        await frame();
+        return {
+          hiddenState,
+          visibleState,
+          hiddenAgain: host.getAttribute('tabindex'),
+          assignedVisible: host.assignedSlot === hiddenSlot,
+        };
+      });
+      expect(result).toEqual({
+        hiddenState: '0',
+        visibleState: null,
+        hiddenAgain: '0',
+        assignedVisible: true,
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('samples native SVG links and explicit SVG tabindex targets', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(() => {
+        const scope = document.createElement('div');
+        scope.innerHTML =
+          '<svg><a id="svg-link" href="#destination"><text>link</text></a><circle id="svg-circle" tabindex="0"></circle><rect id="svg-container"></rect></svg>';
+        document.body.append(scope);
+        return (window as any).Closeout.sample(scope).targets.map((el: Element) => el.id);
+      });
+      expect(result).toEqual(['svg-link', 'svg-circle']);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('prunes a slotted scope through hidden flat-tree ancestors outside the container', async () => {
     const page = await browser.newPage();
     try {
@@ -1215,6 +1324,51 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('applies conditional native text padding only to the editor surface', async () => {
+    const page = await browser.newPage();
+    try {
+      const result = await page.evaluate(
+        (artifact) => {
+          const host = document.createElement('x-native-padding-split');
+          host.setAttribute('data-pui-split-root-style', 'data-[invalid]:p-4');
+          host.setAttribute('data-pui-split-text-control', '');
+          host.setAttribute('data-invalid', '');
+          const root = host.attachShadow({ mode: 'open' });
+          const style = document.createElement('style');
+          style.textContent = artifact.cssText;
+          const input = document.createElement('input');
+          input.setAttribute('data-pui-split-surface', '');
+          input.setAttribute('data-pui-style', 'data-[invalid]:p-4');
+          root.append(style, input);
+          document.body.append(host);
+          const hostStyle = getComputedStyle(host);
+          const inputStyle = getComputedStyle(input);
+          return {
+            hostPadding: [
+              hostStyle.paddingTop,
+              hostStyle.paddingRight,
+              hostStyle.paddingBottom,
+              hostStyle.paddingLeft,
+            ],
+            inputPadding: [
+              inputStyle.paddingTop,
+              inputStyle.paddingRight,
+              inputStyle.paddingBottom,
+              inputStyle.paddingLeft,
+            ],
+          };
+        },
+        renderProtoShadowSplitStyleArtifact(['data-[invalid]:p-4'])
+      );
+      expect(result).toEqual({
+        hostPadding: ['0px', '0px', '0px', '0px'],
+        inputPadding: ['16px', '16px', '16px', '16px'],
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
   it('excludes an image-map area when its associated slotted image is not rendered', async () => {
     const page = await browser.newPage();
     try {
@@ -1249,6 +1403,38 @@ describe('Shadow closeout native boundaries', () => {
         hidden: [],
         restored: ['slotted-area'],
       });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('excludes an image-map area while its external image is in closed details content', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(() => {
+        const scope = document.createElement('div');
+        scope.innerHTML =
+          '<map name="details-map" style="display:block"><area id="details-area" href="#destination" tabindex="0" style="display:block"></map>';
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = 'summary';
+        const image = document.createElement('img');
+        image.src =
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        image.useMap = '#details-map';
+        details.append(summary, image);
+        document.body.append(scope, details);
+        const sample = () =>
+          (window as any).Closeout.sample(scope).targets.map((el: HTMLElement) => el.id);
+        const closed = sample();
+        details.open = true;
+        const open = sample();
+        details.open = false;
+        summary.append(image);
+        return { closed, open, summary: sample() };
+      });
+      expect(result).toEqual({ closed: [], open: ['details-area'], summary: ['details-area'] });
     } finally {
       await page.close();
     }

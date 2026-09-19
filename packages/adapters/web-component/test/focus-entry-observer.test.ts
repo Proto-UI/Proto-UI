@@ -85,6 +85,25 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.tabIndex).toBe(0);
   });
 
+  it('registers one pending upgrade continuation per unresolved tag name', async () => {
+    const unresolved = `entry-pending-${++serial}`;
+    const original = customElements.whenDefined.bind(customElements);
+    const whenDefined = vi
+      .spyOn(customElements, 'whenDefined')
+      .mockImplementation((name) => original(name));
+    const host = panel(true);
+    const late = document.createElement(unresolved);
+    host.append(late);
+    await settle();
+
+    late.className = 'one';
+    await settle();
+    late.className = 'two';
+    await settle();
+
+    expect(whenDefined.mock.calls.filter(([name]) => name === unresolved)).toHaveLength(1);
+  });
+
   it('resamples when an already-upgraded descendant attaches a late open root', async () => {
     // attachShadow() from a later method call produces neither a light-tree
     // mutation nor an upgrade signal; the bounded late-attach watch must still
@@ -307,6 +326,26 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(host.hasAttribute('tabindex')).toBe(!open);
     }
   );
+
+  it('reprojects when an external details ancestor opens and closes', async () => {
+    const details = document.createElement('details');
+    details.open = true;
+    document.body.append(details);
+    const host = panel(true);
+    const input = document.createElement('input');
+    host.append(input);
+    details.append(host);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    details.open = false;
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    details.open = true;
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
 
   it.each([false, true])(
     'tracks image-map associations outside the region (composed: %s)',

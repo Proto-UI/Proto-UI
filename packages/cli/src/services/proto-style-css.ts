@@ -432,6 +432,14 @@ function renderShadowSplitCss(tokens: string[]): string {
     if (hostDeclarations.length) {
       lines.push(`  ${selector} {`, ...hostDeclarations.map((d) => `    ${d}`), '  }');
     }
+    const nativeTextHostReset = rule.css.flatMap(splitNativeTextHostResetDeclarations);
+    if (nativeTextHostReset.length) {
+      lines.push(
+        `  ${selector}:host([data-pui-split-text-control]) {`,
+        ...nativeTextHostReset.map((d) => `    ${d}`),
+        '  }'
+      );
+    }
     const surfaceCompensation = rule.css.flatMap(splitSurfaceCompensationDeclarations);
     if (surfaceCompensation.length) {
       lines.push(
@@ -561,6 +569,12 @@ function splitSurfaceCompensationDeclarations(declaration: string): string[] {
   return SPLIT_METRIC_SIDES.includes(side as (typeof SPLIT_METRIC_SIDES)[number])
     ? [physical(side as (typeof SPLIT_METRIC_SIDES)[number])]
     : [];
+}
+
+function splitNativeTextHostResetDeclarations(declaration: string): string[] {
+  const separator = declaration.indexOf(':');
+  const property = declaration.slice(0, separator).trim();
+  return property.startsWith('padding') ? [`${property}: 0;`] : [];
 }
 
 function sortTimingOverrides(rules: CssRule[]): void {

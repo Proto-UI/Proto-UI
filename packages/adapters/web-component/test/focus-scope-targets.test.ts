@@ -33,6 +33,33 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('samples native SVG sequential focus targets without admitting their containers', () => {
+    const scope = document.createElement('div');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'svg-container';
+    const link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+    link.id = 'svg-link';
+    link.setAttribute('href', '#destination');
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.id = 'svg-circle';
+    circle.setAttribute('tabindex', '0');
+    // Happy DOM does not reflect SVG tabindex/href into the native tabIndex
+    // property. Inject only that host fact; Chrome evidence covers the real UA.
+    Object.defineProperty(link, 'tabIndex', { configurable: true, value: 0 });
+    Object.defineProperty(circle, 'tabIndex', { configurable: true, value: 0 });
+    svg.append(link, circle);
+    scope.append(svg);
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'svg-link',
+        'svg-circle',
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
   it('keeps aria-disabled but still tabbable controls in the sample', () => {
     // aria-disabled does not remove a control from native sequential focus
     // navigation; only native disabled/inert/tabindex/visibility rules do.
@@ -203,6 +230,28 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('does not add a nested contenteditable host without an explicit tabindex', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<div id="outer-editor" contenteditable><div id="inner-editor" contenteditable>text</div></div><button id="after" tabindex="0"></button>';
+    const inner = scope.querySelector<HTMLElement>('#inner-editor')!;
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'outer-editor',
+        'after',
+      ]);
+      inner.tabIndex = 0;
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'outer-editor',
+        'inner-editor',
+        'after',
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
   it('excludes image-map areas whose image is CSS-hidden and restores them when rendered', () => {
     const scope = document.createElement('div');
     scope.innerHTML =
@@ -224,6 +273,32 @@ describe('WC scope sequential target sample', () => {
       expect(sample()).toEqual(['before', 'area', 'after']);
     } finally {
       scope.remove();
+    }
+  });
+
+  it('excludes an image-map area while its external image is in closed details content', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<map name="details-map"><area id="details-area" href="#a" tabindex="0"></map>';
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    const image = document.createElement('img');
+    image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    image.useMap = '#details-map';
+    image.style.display = 'inline';
+    details.append(summary, image);
+    document.body.append(scope, details);
+    const sample = () => sampleWebComponentScopeTargets(scope).targets.map((el) => el.id);
+    try {
+      expect(sample()).toEqual([]);
+      details.open = true;
+      expect(sample()).toEqual(['details-area']);
+      details.open = false;
+      summary.append(image);
+      expect(sample()).toEqual(['details-area']);
+    } finally {
+      scope.remove();
+      details.remove();
     }
   });
 

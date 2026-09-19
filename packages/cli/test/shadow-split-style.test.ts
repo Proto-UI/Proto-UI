@@ -188,6 +188,18 @@ describe('private generated Shadow split sizing', () => {
     expect(css).not.toContain(':where(.dark)');
   });
 
+  it('keeps conditional native text-control padding off the host box', () => {
+    const css = renderProtoShadowSplitStyleArtifact(['data-[invalid]:p-4']).cssText;
+    const selector = ':host([data-pui-split-root-style~="data-[invalid]:p-4"][data-invalid])';
+    expect(css).toContain(`${selector} {\n    padding: 1rem;`);
+    expect(css).toContain(
+      `${selector}:host([data-pui-split-text-control]) {\n    padding: 0;\n  }`
+    );
+    expect(css).toContain(
+      `${selector} > [data-pui-split-surface][data-pui-style~="data-[invalid]:p-4"]`
+    );
+  });
+
   it('rejects unverified percentage/variable padding rather than double-evaluating it', () => {
     expect(() => renderProtoShadowSplitStyleArtifact(['p-[10%]'])).toThrow(
       /verified length recipe/

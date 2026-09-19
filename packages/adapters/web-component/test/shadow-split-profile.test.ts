@@ -123,9 +123,8 @@ describe('public WC Shadow split profile', () => {
         const lightOwner = ownerSpy.mock.calls.find(([args]) => args.el === light)![0];
         expect(lightOwner.colorSchemeSource?.getter).toBe(lightOwner.getMeta);
         expect(lightOwner.colorSchemeSource).toBeDefined();
-        expect(
-          ownerSpy.mock.calls.find(([args]) => args.el === splitHost)![0].colorSchemeSource
-        ).toBeUndefined();
+        const splitOwner = ownerSpy.mock.calls.find(([args]) => args.el === splitHost)![0];
+        expect(splitOwner.colorSchemeSource?.getter).toBe(splitOwner.getMeta);
         const before = [...renders];
         html.dataset.theme = 'dark';
         await settle();
@@ -134,12 +133,15 @@ describe('public WC Shadow split profile', () => {
           mode === 'default' ? 'dark' : 'light'
         );
         expect(runs[1].meta!.get('colorScheme')).toBe(mode === 'default' ? 'dark' : 'light');
+        expect(tokens(splitHost)).toBe(mode === 'default' ? 'bg-secondary' : 'bg-primary');
         expect(renders).toEqual(before);
         if (mode !== 'default') {
           scheme = 'dark';
           listeners.forEach((listener) => listener());
           expect(splitHost.getAttribute('data-pui-color-scheme')).toBe('dark');
           expect(runs[1].meta!.get('colorScheme')).toBe('dark');
+          await settle();
+          expect(tokens(splitHost)).toBe('bg-secondary');
           expect(listeners.size).toBe(1);
         }
         // Do not assert new reactive mixed-Rule equivalence for Shadow. Reattach
@@ -160,7 +162,7 @@ describe('public WC Shadow split profile', () => {
             expect(args.getMeta).toBe(lightOwner.getMeta);
             expect(args.colorSchemeSource).toBe(lightOwner.colorSchemeSource);
           } else if (args.el === splitHost) {
-            expect(args.colorSchemeSource).toBeUndefined();
+            expect(args.colorSchemeSource).toBe(splitOwner.colorSchemeSource);
           }
         }
         expect(baseMeta.mock.calls.some((args) => (args as unknown[])[0] === 'colorScheme')).toBe(

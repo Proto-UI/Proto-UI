@@ -98,9 +98,28 @@ export function sampleWebComponentScopeTargets(
     // sequential focus navigation (C-AS-FOCUS-SCOPE-0002-J).
     if (style?.contentVisibility === 'hidden') return;
     if (!isHtmlElement(el)) {
-      // Non-HTML containers (SVG, MathML) are never candidates themselves,
-      // but their descendants (e.g. foreignObject content) stay in the
-      // document's sequential focus order.
+      // Native SVG links and explicit tabindex targets participate in the
+      // document's sequential order. Other non-HTML containers are traversed
+      // without becoming stops themselves (e.g. SVG/foreignObject wrappers).
+      const candidate = el as Element & { tabIndex?: number };
+      const explicitTabStop = el.hasAttribute('tabindex') && (candidate.tabIndex ?? -1) >= 0;
+      const svgLink =
+        el.namespaceURI === 'http://www.w3.org/2000/svg' &&
+        el.localName === 'a' &&
+        (el.hasAttribute('href') || el.hasAttributeNS('http://www.w3.org/1999/xlink', 'href')) &&
+        (candidate.tabIndex ?? -1) >= 0;
+      if (
+        (explicitTabStop || svgLink) &&
+        style?.visibility !== 'hidden' &&
+        style?.visibility !== 'collapse' &&
+        style?.display !== 'contents'
+      ) {
+        entries.push({
+          element: el as unknown as HTMLElement,
+          target: true,
+          priority: candidate.tabIndex ?? 0,
+        });
+      }
       [...el.children].forEach((child) => visit(child, entries));
       return;
     }
@@ -315,13 +334,29 @@ function isEditingHost(el: HTMLElement): boolean {
   const value = el.getAttribute('contenteditable');
   if (value === null) return false;
   const normalized = value.trim().toLowerCase();
-  return normalized === '' || normalized === 'true' || normalized === 'plaintext-only';
+  if (normalized !== '' && normalized !== 'true' && normalized !== 'plaintext-only') return false;
+  return !isEffectivelyEditable(el.parentElement);
+}
+
+function isEffectivelyEditable(el: Element | null): boolean {
+  while (el && isHtmlElement(el)) {
+    const value = el.getAttribute('contenteditable');
+    if (value !== null) {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === '' || normalized === 'true' || normalized === 'plaintext-only')
+        return true;
+      if (normalized === 'false') return false;
+    }
+    el = el.parentElement;
+  }
+  return false;
 }
 
 // An <area> stop exists only while its image is actually rendered. Walk the
 // composed ancestors so a hidden image (or a hidden ancestor/host) revokes
 // eligibility.
 function isRendered(el: Element): boolean {
+  if (isPrunedByExternalAncestor(el)) return false;
   let node: Element | null = el;
   while (node) {
     if (isHtmlElement(node) && node.hidden) return false;

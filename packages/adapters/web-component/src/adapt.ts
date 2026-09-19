@@ -328,6 +328,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       }
       const splitResources = this._splitResources;
       const ownerGetMeta = splitResources?.getMeta ?? getMeta;
+      const runtimeColorSchemeSource = splitResources
+        ? {
+            getter: ownerGetMeta,
+            subscribe: (listener: () => void) => splitResources.environment.subscribe(listener),
+          }
+        : colorSchemeSource;
       this._hostDisplay = installDefaultHostDisplay(thisEl, {
         displayOwner: split ? 'presentation' : 'fallback',
       });
@@ -532,7 +538,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               rawPropsSource,
               effectsPort: splitEffects ?? createWebEffectsPort(applier!),
               getMeta: ownerGetMeta,
-              colorSchemeSource,
+              colorSchemeSource: runtimeColorSchemeSource,
               textControlTarget: this._textControlTarget,
               imageViewTarget: this._imageViewTarget,
               exposeStateWebMode,
@@ -630,7 +636,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         instanceToken: this._instanceToken,
         rawPropsSource,
         getMeta: ownerGetMeta,
-        colorSchemeSource,
+        colorSchemeSource: runtimeColorSchemeSource,
         textControlTarget: this._textControlTarget,
         imageViewTarget: this._imageViewTarget,
         exposeStateWebMode,

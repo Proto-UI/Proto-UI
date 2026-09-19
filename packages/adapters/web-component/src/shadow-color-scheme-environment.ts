@@ -14,6 +14,7 @@ export type ShadowColorSchemeSource = Readonly<{
 export type ShadowColorSchemeEnvironmentOwner = {
   readonly colorScheme: WebColorScheme;
   readonly source: ShadowColorSchemeSource;
+  subscribe(listener: () => void): () => void;
   dispose(): void;
 };
 
@@ -57,6 +58,7 @@ export function createShadowColorSchemeEnvironmentOwner(
   const previousMarker = host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE);
   let colorScheme = readColorScheme(() => resolvedSource.get());
   let disposed = false;
+  const listeners = new Set<() => void>();
   host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
 
   let unsubscribe: () => void;
@@ -72,6 +74,7 @@ export function createShadowColorSchemeEnvironmentOwner(
       }
       colorScheme = next;
       host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
+      for (const listener of [...listeners]) listener();
     });
     if (typeof subscription !== 'function') {
       throw new Error('[WC Adapter] invalid Shadow color-scheme source subscription.');
@@ -89,9 +92,15 @@ export function createShadowColorSchemeEnvironmentOwner(
       return colorScheme;
     },
     source: resolvedSource,
+    subscribe(listener) {
+      if (disposed) return () => {};
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
     dispose() {
       if (disposed) return;
       disposed = true;
+      listeners.clear();
       try {
         unsubscribe();
       } finally {

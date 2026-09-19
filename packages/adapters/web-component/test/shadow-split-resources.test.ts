@@ -248,6 +248,7 @@ function recordingFactories(order: string[]): ShadowSplitResourceFactories {
           get: () => 'light',
           subscribe: () => () => {},
         },
+        subscribe: () => () => {},
         dispose: () => order.push('dispose:environment'),
       };
     },
