@@ -212,6 +212,33 @@ const entryStyleWatches = new WeakMap<
   }
 >();
 
+function isEntryStylesheetElement(node: Node | null): node is Element {
+  if (!node || node.nodeType !== 1) return false;
+  const el = node as Element;
+  return (
+    el.localName === 'style' ||
+    (el.localName === 'link' && (el.getAttribute('rel') ?? '').split(/\s+/).includes('stylesheet'))
+  );
+}
+
+function containsEntryStylesheetElement(node: Node): boolean {
+  return (
+    isEntryStylesheetElement(node) ||
+    (node.nodeType === 1 && !!(node as Element).querySelector('style,link[rel~="stylesheet"]'))
+  );
+}
+
+function invalidatesEntryStyles(record: MutationRecord): boolean {
+  if (record.type === 'characterData') {
+    return isEntryStylesheetElement(record.target.parentElement);
+  }
+  if (record.type === 'attributes') return isEntryStylesheetElement(record.target);
+  return (
+    isEntryStylesheetElement(record.target as Node) ||
+    [...record.addedNodes, ...record.removedNodes].some(containsEntryStylesheetElement)
+  );
+}
+
 function watchEntryStyleInvalidation(
   view: (Window & typeof globalThis) | null,
   onInvalidate: () => void
@@ -287,32 +314,8 @@ function watchEntryStyleInvalidation(
     if (DocumentCtor) patchSetter(DocumentCtor.prototype, 'adoptedStyleSheets');
     if (ShadowRootCtor) patchSetter(ShadowRootCtor.prototype, 'adoptedStyleSheets');
 
-    const isStylesheetElement = (node: Node | null): node is Element => {
-      if (!node || node.nodeType !== 1) return false;
-      const el = node as Element;
-      return (
-        el.localName === 'style' ||
-        (el.localName === 'link' &&
-          (el.getAttribute('rel') ?? '').split(/\s+/).includes('stylesheet'))
-      );
-    };
-    const containsStylesheetElement = (node: Node) =>
-      isStylesheetElement(node) ||
-      (node.nodeType === 1 && !!(node as Element).querySelector('style,link[rel~="stylesheet"]'));
     const observer = new Observer((records) => {
-      if (
-        records.some((record) => {
-          if (record.type === 'characterData') {
-            return isStylesheetElement(record.target.parentElement);
-          }
-          if (record.type === 'attributes') return isStylesheetElement(record.target);
-          return (
-            isStylesheetElement(record.target as Node) ||
-            [...record.addedNodes, ...record.removedNodes].some(containsStylesheetElement)
-          );
-        })
-      )
-        notify();
+      if (records.some(invalidatesEntryStyles)) notify();
     });
     observer.observe(doc.documentElement, {
       subtree: true,
@@ -322,7 +325,7 @@ function watchEntryStyleInvalidation(
       attributeFilter: ['href', 'rel', 'media', 'disabled'],
     });
     const onLoad = (event: Event) => {
-      if (isStylesheetElement(event.target as Node | null)) notify();
+      if (isEntryStylesheetElement(event.target as Node | null)) notify();
     };
     doc.addEventListener('load', onLoad, true);
     watch = {
@@ -571,6 +574,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
+  let entryExternalStyleObserver: MutationObserver | null = null;
   let entryResizeObserver: ResizeObserver | null = null;
   let stopEntryRadioStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
@@ -586,6 +590,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     entryObserver = null;
     entryImageObserver?.disconnect();
     entryImageObserver = null;
+    entryExternalStyleObserver?.disconnect();
+    entryExternalStyleObserver = null;
     entryResizeObserver?.disconnect();
     entryResizeObserver = null;
     stopEntryRadioStateWatch?.();
@@ -753,6 +759,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (!isCurrentEntryObservation()) return;
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
+              entryExternalStyleObserver?.disconnect();
               entryResizeObserver?.disconnect();
               stopEntryRadioStateWatch?.();
               stopEntryRadioStateWatch = null;
@@ -838,17 +845,57 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // eligibility, so observe only that bounded composed chain.
               let externalAncestor = composedParentElement(target);
               const externalSlots = new Set<HTMLSlotElement>();
+              const externalStyleRoots = new Set<ShadowRoot>();
+              const targetRoot = target.getRootNode();
+              if (
+                targetRoot.nodeType === 11 &&
+                !!(targetRoot as ShadowRoot).host &&
+                !observedRoots.has(targetRoot)
+              ) {
+                externalStyleRoots.add(targetRoot as ShadowRoot);
+              }
               while (externalAncestor) {
                 entryObserver?.observe(externalAncestor, {
                   attributes: true,
-                  attributeFilter: ['class', 'style', 'hidden', 'inert', 'open', 'name'],
+                  attributeFilter: [
+                    'class',
+                    'style',
+                    'hidden',
+                    'inert',
+                    'open',
+                    'name',
+                    'disabled',
+                  ],
                 });
+                const externalRoot = externalAncestor.getRootNode();
+                if (
+                  externalRoot.nodeType === 11 &&
+                  !!(externalRoot as ShadowRoot).host &&
+                  !observedRoots.has(externalRoot)
+                ) {
+                  externalStyleRoots.add(externalRoot as ShadowRoot);
+                }
                 if (
                   externalAncestor.namespaceURI === 'http://www.w3.org/1999/xhtml' &&
                   externalAncestor.localName === 'slot'
                 )
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
+              }
+              if (externalStyleRoots.size > 0) {
+                entryExternalStyleObserver ??= new Observer((records) => {
+                  if (!isCurrentEntryObservation()) return;
+                  if (records.some(invalidatesEntryStyles)) projectEntry();
+                });
+                for (const root of externalStyleRoots) {
+                  entryExternalStyleObserver.observe(root, {
+                    subtree: true,
+                    childList: true,
+                    characterData: true,
+                    attributes: true,
+                    attributeFilter: ['href', 'rel', 'media', 'disabled'],
+                  });
+                }
               }
               if (externalSlots.size > 0) {
                 const onSlotChange = () => {
@@ -911,6 +958,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     'hidden',
                     'inert',
                     'aria-hidden',
+                    'open',
                     'class',
                     'style',
                   ],

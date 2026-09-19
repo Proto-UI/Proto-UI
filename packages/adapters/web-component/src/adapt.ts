@@ -237,6 +237,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       super.blur();
     }
 
+    adoptedCallback(_oldDocument: Document, newDocument: Document) {
+      this._splitResources?.environment.adoptDocument(newDocument);
+    }
+
     connectedCallback() {
       // Reuse is valid for synchronous moves, not once terminal teardown starts.
       // The predecessor owns host-wide resources until its complete cleanup;

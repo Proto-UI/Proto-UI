@@ -431,6 +431,27 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('reprojects when an external fieldset ancestor changes disabledness', async () => {
+    const fieldset = document.createElement('fieldset');
+    document.body.append(fieldset);
+    const host = panel(true);
+    const input = document.createElement('input');
+    host.append(input);
+    fieldset.append(host);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    const removeAttribute = vi.spyOn(host, 'removeAttribute');
+
+    fieldset.disabled = true;
+    await settle();
+    expect(removeAttribute).toHaveBeenCalledWith('tabindex');
+
+    removeAttribute.mockClear();
+    fieldset.disabled = false;
+    await settle();
+    expect(removeAttribute).toHaveBeenCalledWith('tabindex');
+  });
+
   it.each([false, true])(
     'tracks image-map associations outside the region (composed: %s)',
     async (composed) => {
@@ -555,6 +576,35 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('reprojects external image-map eligibility when its details ancestor opens', async () => {
+    const host = panel(true);
+    const map = document.createElement('map');
+    map.name = 'details-entry-map';
+    const area = document.createElement('area');
+    area.href = '#destination';
+    area.tabIndex = 0;
+    map.append(area);
+    host.append(map);
+
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    const image = document.createElement('img');
+    image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    image.useMap = '#details-entry-map';
+    details.append(summary, image);
+    document.body.append(details);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    details.open = true;
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    details.open = false;
+    await settle();
+    expect(host.tabIndex).toBe(0);
+  });
+
   it('reprojects after selector state changes on composed ancestors outside the entry region', async () => {
     const style = document.createElement('style');
     style.textContent = '.entry-outer-hidden { visibility: hidden; }';
@@ -580,6 +630,31 @@ describe('WC live focus-entry resolver inputs', () => {
     wrapper.style.visibility = '';
     await settle();
     expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('observes stylesheet DOM changes in an external composed ShadowRoot', async () => {
+    const carrier = document.createElement('div');
+    const root = carrier.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    root.append(style);
+    document.body.append(carrier);
+    const host = panel(true);
+    root.append(host);
+    host.append(document.createElement('button'));
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    const removeAttribute = vi.spyOn(host, 'removeAttribute');
+    style.textContent = '::slotted(*) { visibility: visible; }';
+    await settle();
+    expect(removeAttribute).toHaveBeenCalledWith('tabindex');
+
+    removeAttribute.mockClear();
+    const replacement = document.createElement('style');
+    replacement.textContent = '::slotted(*) { visibility: inherit; }';
+    style.replaceWith(replacement);
+    await settle();
+    expect(removeAttribute).toHaveBeenCalledWith('tabindex');
   });
 
   it('only observes document image bindings while the region contains areas', async () => {

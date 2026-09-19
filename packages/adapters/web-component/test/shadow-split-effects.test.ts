@@ -142,6 +142,22 @@ describe('private Shadow split effects', () => {
     expect(surface.getAttribute('data-pui-style')).toBe('consumer');
   });
 
+  it('rejects a conditionally lowered composite before changing either target', () => {
+    const { host, surface, effects } = setup(['block', 'inline-flex', 'data-[open]:inline-flex']);
+    effects.queueStyle(effect(['block']));
+    effects.requestFlush();
+    const before = [host.outerHTML, surface.outerHTML];
+    const conditional = lowerRootStyleTokens(['inline-flex'], 'data-[open]');
+
+    expect(() => effects.queueStyle(conditional)).toThrow(
+      /inline-flex.*conditional composite recipe is not implemented/
+    );
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    effects.requestFlush();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    effects.dispose();
+  });
+
   it.each(['translate-x-2', 'inline-grid', 'w-96', 'transition-all'])(
     'rejects %s before either target changes, including runtime origin in diagnostics',
     (token) => {

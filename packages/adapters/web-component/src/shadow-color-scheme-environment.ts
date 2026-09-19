@@ -15,6 +15,7 @@ export type ShadowColorSchemeEnvironmentOwner = {
   readonly colorScheme: WebColorScheme;
   readonly source: ShadowColorSchemeSource;
   subscribe(listener: () => void): () => void;
+  adoptDocument(doc: Document): void;
   dispose(): void;
 };
 
@@ -54,32 +55,40 @@ export function createShadowColorSchemeEnvironmentOwner(
   const existing = environmentOwners.get(host);
   if (existing) return existing;
 
-  const resolvedSource = source ?? createDefaultShadowColorSchemeSource(host.ownerDocument);
+  const explicitSource = source !== undefined;
+  let resolvedSource = source ?? createDefaultShadowColorSchemeSource(host.ownerDocument);
+  let sourceDocument = explicitSource ? null : host.ownerDocument;
   const previousMarker = host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE);
   let colorScheme = readColorScheme(() => resolvedSource.get());
   let disposed = false;
+  let sourceGeneration = 0;
   const listeners = new Set<() => void>();
   host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
 
-  let unsubscribe: () => void;
-  try {
-    const subscription = resolvedSource.subscribe(() => {
-      if (disposed) return;
-      const next = readColorScheme(() => resolvedSource.get());
-      if (
-        next === colorScheme &&
-        host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE) === colorScheme
-      ) {
-        return;
-      }
-      colorScheme = next;
-      host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
-      for (const listener of [...listeners]) listener();
+  const syncFromSource = (activeSource: ShadowColorSchemeSource) => {
+    const next = readColorScheme(() => activeSource.get());
+    if (next === colorScheme && host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE) === colorScheme) {
+      return;
+    }
+    colorScheme = next;
+    host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
+    for (const listener of [...listeners]) listener();
+  };
+  const subscribeSource = (nextSource: ShadowColorSchemeSource, generation: number) => {
+    const subscription = nextSource.subscribe(() => {
+      if (disposed || sourceGeneration !== generation || resolvedSource !== nextSource) return;
+      syncFromSource(nextSource);
     });
     if (typeof subscription !== 'function') {
       throw new Error('[WC Adapter] invalid Shadow color-scheme source subscription.');
     }
-    unsubscribe = subscription;
+    return subscription;
+  };
+
+  let unsubscribe: () => void;
+  try {
+    unsubscribe = subscribeSource(resolvedSource, 1);
+    sourceGeneration = 1;
   } catch (error) {
     // A source may retain its callback before throwing; revoke its write authority too.
     disposed = true;
@@ -91,15 +100,39 @@ export function createShadowColorSchemeEnvironmentOwner(
     get colorScheme() {
       return colorScheme;
     },
-    source: resolvedSource,
+    get source() {
+      return resolvedSource;
+    },
     subscribe(listener) {
       if (disposed) return () => {};
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
+    adoptDocument(doc) {
+      if (disposed || explicitSource || sourceDocument === doc) return;
+      const nextSource = createDefaultShadowColorSchemeSource(doc);
+      const nextColorScheme = readColorScheme(() => nextSource.get());
+      const nextGeneration = sourceGeneration + 1;
+      const nextUnsubscribe = subscribeSource(nextSource, nextGeneration);
+      const previousUnsubscribe = unsubscribe;
+      resolvedSource = nextSource;
+      sourceDocument = doc;
+      sourceGeneration = nextGeneration;
+      unsubscribe = nextUnsubscribe;
+      if (
+        nextColorScheme !== colorScheme ||
+        host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE) !== nextColorScheme
+      ) {
+        colorScheme = nextColorScheme;
+        host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
+        for (const listener of [...listeners]) listener();
+      }
+      previousUnsubscribe();
+    },
     dispose() {
       if (disposed) return;
       disposed = true;
+      sourceGeneration += 1;
       listeners.clear();
       try {
         unsubscribe();

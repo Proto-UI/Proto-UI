@@ -22,7 +22,7 @@ beforeAll(async () => {
         export { createShadowSplitEffectsPort as createSplitEffects } from './packages/adapters/web-component/src/shadow-split-effects';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { definePrototype as define, tw } from '@proto.ui/core';
-        export { createRootStyleEffect, resolveRootStyleEntry } from '@proto.ui/core/internal';
+        export { createRootStyleEffect, lowerRootStyleTokens, resolveRootStyleEntry } from '@proto.ui/core/internal';
         export { asTextControl, asFocusEntry, asFocusScope, asFocusable } from '@proto.ui/hooks';
         export { declareTextControl } from '@proto.ui/module-text-control';
       `,
@@ -94,6 +94,121 @@ describe('Shadow closeout native boundaries', () => {
         initial: { scheme: 'dark', marker: 'dark' },
         updated: { scheme: 'light', marker: 'light' },
       });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('rebinds only the default split environment during synchronous cross-document adoption', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        async (artifact) => {
+          const p = (window as any).Closeout;
+          const profile = { mode: 'open', presentation: 'split', styleArtifact: artifact };
+          const createPrototype = (name: string) =>
+            p.define({
+              name,
+              setup(def: any) {
+                def.feedback.style.use(p.tw('block'));
+                return (r: any) => r.slot();
+              },
+            });
+          const settle = () =>
+            new Promise<void>((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            );
+          document.documentElement.dataset.theme = 'light';
+          const frame = document.createElement('iframe');
+          document.body.append(frame);
+          const foreignDocument = frame.contentDocument!;
+          foreignDocument.documentElement.dataset.theme = 'dark';
+
+          const DefaultElement = p.adapt(createPrototype('closeout-default-adoption'), {
+            shadow: profile,
+            schedule: (task: () => void) => task(),
+          });
+          const defaultHost = new DefaultElement();
+          document.body.append(defaultHost);
+          await settle();
+          const resources = (defaultHost as any)._splitResources;
+          const environment = resources.environment;
+          const source = environment.source;
+          const surface = resources.surface;
+          const artifactOwner = resources.artifact;
+
+          foreignDocument.adoptNode(defaultHost);
+          foreignDocument.body.append(defaultHost);
+          await settle();
+          const adoptedResources = (defaultHost as any)._splitResources;
+          const adopted = {
+            marker: defaultHost.getAttribute('data-pui-color-scheme'),
+            resourcesRetained: adoptedResources === resources,
+            environmentRetained: adoptedResources.environment === environment,
+            surfaceRetained: adoptedResources.surface === surface,
+            artifactRetained: adoptedResources.artifact === artifactOwner,
+            sourceRebound: adoptedResources.environment.source !== source,
+          };
+          document.documentElement.dataset.theme = 'dark';
+          await settle();
+          const afterOldDocumentChange = defaultHost.getAttribute('data-pui-color-scheme');
+          foreignDocument.documentElement.dataset.theme = 'light';
+          await settle();
+          const afterNewDocumentChange = defaultHost.getAttribute('data-pui-color-scheme');
+
+          let explicitSubscriptions = 0;
+          const explicitSource = {
+            get: () => 'light',
+            subscribe() {
+              explicitSubscriptions += 1;
+              return () => {};
+            },
+          };
+          const ExplicitElement = p.adapt(createPrototype('closeout-explicit-adoption'), {
+            shadow: { ...profile, colorSchemeSource: explicitSource },
+            schedule: (task: () => void) => task(),
+          });
+          const explicitHost = new ExplicitElement();
+          document.body.append(explicitHost);
+          await settle();
+          const explicitEnvironment = (explicitHost as any)._splitResources.environment;
+          foreignDocument.adoptNode(explicitHost);
+          foreignDocument.body.append(explicitHost);
+          await settle();
+          const explicit = {
+            environmentRetained:
+              (explicitHost as any)._splitResources.environment === explicitEnvironment,
+            sourceRetained: explicitEnvironment.source === explicitSource,
+            subscriptions: explicitSubscriptions,
+            marker: explicitHost.getAttribute('data-pui-color-scheme'),
+          };
+          frame.remove();
+          return { adopted, afterOldDocumentChange, afterNewDocumentChange, explicit };
+        },
+        renderProtoShadowSplitStyleArtifact(['block'])
+      );
+      expect(result).toEqual({
+        adopted: {
+          marker: 'dark',
+          resourcesRetained: true,
+          environmentRetained: true,
+          surfaceRetained: true,
+          artifactRetained: true,
+          sourceRebound: true,
+        },
+        afterOldDocumentChange: 'dark',
+        afterNewDocumentChange: 'light',
+        explicit: {
+          environmentRetained: true,
+          sourceRetained: true,
+          subscriptions: 1,
+          marker: 'light',
+        },
+      });
+      expect(errors).toEqual([]);
     } finally {
       await page.close();
     }
@@ -810,6 +925,89 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects entries after external fieldset and image disclosure changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const createEntry = (name: string, shadow = true) =>
+          p.adapt(
+            p.define({
+              name,
+              setup() {
+                p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                return (r: any) => r.slot();
+              },
+            }),
+            { shadow }
+          );
+        const settle = () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+
+        const FieldsetEntry = createEntry('closeout-external-fieldset-entry');
+        const fieldset = document.createElement('fieldset');
+        const fieldsetHost = new FieldsetEntry();
+        fieldsetHost.append(document.createElement('input'));
+        fieldset.append(fieldsetHost);
+        document.body.append(fieldset);
+
+        const MapEntry = createEntry('closeout-external-map-entry', false);
+        const mapHost = new MapEntry();
+        mapHost.id = 'observed-map-entry';
+        const map = document.createElement('map');
+        map.name = 'closeout-observed-details-map';
+        map.style.display = 'block';
+        const area = document.createElement('area');
+        area.id = 'observed-details-area';
+        area.href = '#destination';
+        area.tabIndex = 0;
+        area.style.display = 'block';
+        map.append(area);
+        mapHost.append(map);
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        const image = document.createElement('img');
+        image.src =
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        image.useMap = '#closeout-observed-details-map';
+        details.append(summary, image);
+        document.body.append(mapHost, details);
+        await settle();
+
+        const snapshot = () => ({
+          fieldset: fieldsetHost.getAttribute('tabindex'),
+          image: mapHost.getAttribute('tabindex'),
+        });
+        const initial = snapshot();
+        fieldset.disabled = true;
+        details.open = true;
+        await settle();
+        const changed = snapshot();
+        const directOpen = p.sample(mapHost).targets.map((target: HTMLElement) => target.id);
+        fieldset.disabled = false;
+        details.open = false;
+        await settle();
+        const directClosed = p.sample(mapHost).targets.map((target: HTMLElement) => target.id);
+        return { initial, changed, restored: snapshot(), directOpen, directClosed };
+      });
+      expect(result).toEqual({
+        initial: { fieldset: null, image: '0' },
+        changed: { fieldset: '0', image: null },
+        restored: { fieldset: null, image: '0' },
+        directOpen: ['observed-details-area'],
+        directClosed: ['observed-map-entry'],
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects descendant entry after CSS-only media-query eligibility changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -845,12 +1043,36 @@ describe('Shadow closeout native boundaries', () => {
         carrier.append(host);
         document.body.append(carrier);
         (window as any).__cssOnlyEntryOuter = outer;
+        (window as any).__cssOnlyEntryStyle = style;
       });
       await page.waitForFunction(
         () => document.querySelector('#css-only-entry')?.getAttribute('tabindex') === null
       );
 
       const visibleBox = await page.locator('#css-only-entry-button').boundingBox();
+      await page.evaluate(() => {
+        (window as any).__cssOnlyEntryStyle.textContent = 'div { visibility: hidden; }';
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+      await page.evaluate(() => {
+        const replacement = document.createElement('style');
+        replacement.textContent = '.entry-outer-hidden { visibility: hidden; }';
+        (window as any).__cssOnlyEntryStyle.replaceWith(replacement);
+        (window as any).__cssOnlyEntryStyle = replacement;
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
       await page.evaluate(() =>
         (window as any).__cssOnlyEntryOuter.classList.add('entry-outer-hidden')
       );
@@ -1359,6 +1581,61 @@ describe('Shadow closeout native boundaries', () => {
         closed: { summary: ['summary-scope-button'], content: [] },
         open: ['details-content-button'],
         closedAgain: [],
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('rejects conditional composite display before native split targets diverge', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        (artifact) => {
+          const p = (window as any).Closeout;
+          const host = document.createElement('x-conditional-composite-split');
+          const root = host.attachShadow({ mode: 'open' });
+          const style = document.createElement('style');
+          style.textContent = artifact.cssText;
+          const surface = document.createElement('div');
+          root.append(style, surface);
+          document.body.append(host);
+          const effects = p.createSplitEffects({
+            host,
+            surface,
+            artifact,
+            prototypeName: 'conditional-composite',
+          });
+          effects.queueStyle(p.createRootStyleEffect([p.resolveRootStyleEntry('block', 'setup')]));
+          effects.requestFlush();
+          const snapshot = () => ({
+            root: host.getAttribute('data-pui-split-root-style'),
+            surface: surface.getAttribute('data-pui-style'),
+            hostDisplay: getComputedStyle(host).display,
+            surfaceDisplay: getComputedStyle(surface).display,
+          });
+          const before = snapshot();
+          let error: string | null = null;
+          try {
+            effects.queueStyle(p.lowerRootStyleTokens(['inline-flex'], 'data-[open]'));
+            effects.requestFlush();
+          } catch (caught) {
+            error = String(caught);
+          }
+          const after = snapshot();
+          effects.dispose();
+          return { before, after, error };
+        },
+        renderProtoShadowSplitStyleArtifact(['block', 'inline-flex', 'data-[open]:inline-flex'])
+      );
+      expect(result.error).toMatch(/conditional composite recipe is not implemented/);
+      expect(result.after).toEqual(result.before);
+      expect(result.before).toEqual({
+        root: 'block',
+        surface: 'block',
+        hostDisplay: 'grid',
+        surfaceDisplay: 'block',
       });
     } finally {
       await page.close();

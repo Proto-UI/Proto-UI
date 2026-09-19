@@ -101,6 +101,55 @@ describe('Shadow color-scheme environment owner', () => {
     owner.dispose();
   });
 
+  it('rebinds a retained default owner after cross-document adoption', async () => {
+    const firstDocument = document.implementation.createHTMLDocument('first-theme');
+    firstDocument.documentElement.dataset.theme = 'light';
+    const nextDocument = document.implementation.createHTMLDocument('next-theme');
+    nextDocument.documentElement.dataset.theme = 'dark';
+    const host = firstDocument.createElement('x-shadow-adopted-owner');
+    firstDocument.body.append(host);
+    const owner = createShadowColorSchemeEnvironmentOwner(host);
+    const firstSource = owner.source;
+    const listener = vi.fn();
+    owner.subscribe(listener);
+
+    nextDocument.adoptNode(host);
+    nextDocument.body.append(host);
+    owner.adoptDocument(nextDocument);
+
+    expect(owner.source).not.toBe(firstSource);
+    expect(owner.colorScheme).toBe('dark');
+    expect(host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe('dark');
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    firstDocument.documentElement.dataset.theme = 'dark';
+    await flushMutationObserver();
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    nextDocument.documentElement.dataset.theme = 'light';
+    await flushMutationObserver();
+    expect(owner.colorScheme).toBe('light');
+    expect(listener).toHaveBeenCalledTimes(2);
+    owner.dispose();
+  });
+
+  it('keeps an explicit source unchanged after cross-document adoption', () => {
+    const firstDocument = document.implementation.createHTMLDocument('explicit-first');
+    const nextDocument = document.implementation.createHTMLDocument('explicit-next');
+    const host = firstDocument.createElement('x-shadow-explicit-adoption');
+    const subscribe = vi.fn(() => () => {});
+    const source: ShadowColorSchemeSource = { get: () => 'dark', subscribe };
+    const owner = createShadowColorSchemeEnvironmentOwner(host, source);
+
+    nextDocument.adoptNode(host);
+    owner.adoptDocument(nextDocument);
+
+    expect(owner.source).toBe(source);
+    expect(subscribe).toHaveBeenCalledTimes(1);
+    expect(owner.colorScheme).toBe('dark');
+    owner.dispose();
+  });
+
   it('uses one explicit source for synchronous reads, marker updates, and terminal cleanup', () => {
     let colorScheme: 'light' | 'dark' = 'light';
     const listeners = new Set<() => void>();

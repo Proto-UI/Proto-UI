@@ -162,6 +162,8 @@ export function createShadowSplitEffectsPort({
         fail(entry, 'H1 physical recipe is absent; regenerate the CLI companion');
       if (entry.role === 'composite' && !COMPOSITES.has(entry.authorToken))
         fail(entry, 'composite recipe is not implemented');
+      if (entry.role === 'composite' && entry.token !== entry.authorToken)
+        fail(entry, 'conditional composite recipe is not implemented');
       const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
       if (!artifact.cssText.includes(`[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`)) {
         fail(entry, 'physical token is absent from the compiled split closure');
