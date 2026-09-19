@@ -559,7 +559,7 @@ test('thread resolution refuses a verified receipt when a new reply races the mu
   );
 });
 
-test('a thread reply racing the resolution triggers a compensating unresolve', () => {
+test('a thread reply racing the resolution stays at one write and reports the race read-only', () => {
   const base = metadataRequest();
   const request = seal({
     ...base,
@@ -607,30 +607,42 @@ test('a thread reply racing the resolution triggers a compensating unresolve', (
   };
   const mutations = [];
   let collections = 0;
-  assert.throws(
-    () =>
-      applyGitHubCollaborationMutation(request, preState, {
-        runner(command, args, options) {
-          mutations.push(options?.input ? JSON.parse(options.input).query : args.join(' '));
-          return JSON.stringify({
-            data: { resolveReviewThread: { thread: { id: 'PRRT_thread', isResolved: true } } },
-          });
-        },
-        collectState() {
-          collections += 1;
-          // Boundary revalidation sees the authorized revision; the race lands
-          // between the boundary check and the resolve mutation.
-          return collections === 1 ? preState : racedState;
-        },
-      }),
-    /desired state was not verified.*do not retry blindly/
-  );
-  assert.equal(mutations.length, 2);
+  let failure;
+  try {
+    applyGitHubCollaborationMutation(request, preState, {
+      runner(command, args, options) {
+        mutations.push(options?.input ? JSON.parse(options.input).query : args.join(' '));
+        return JSON.stringify({
+          data: { resolveReviewThread: { thread: { id: 'PRRT_thread', isResolved: true } } },
+        });
+      },
+      collectState() {
+        collections += 1;
+        // Boundary revalidation sees the authorized revision; the race lands
+        // between the boundary check and the resolve mutation.
+        return collections === 1 ? preState : racedState;
+      },
+    });
+    assert.fail('a raced post-write verification must fail closed');
+  } catch (error) {
+    failure = error;
+  }
+  assert.match(failure.message, /desired state was not verified.*do not retry blindly/);
+  // PR509-COLLAB-MUTATION-COUNT-001: one purpose-bound request attempts at
+  // most its single authorized mutation; the raced state is reported through
+  // read-only reconciliation and any compensation needs a separate request.
+  assert.equal(mutations.length, 1);
   assert.match(mutations[0], /resolveReviewThread/);
-  assert.match(mutations[1], /unresolveReviewThread/);
+  assert.ok(
+    !mutations.some((mutation) => /unresolveReviewThread/.test(mutation)),
+    'an unrequested compensating unresolve mutation must not be issued'
+  );
+  assert.equal(failure.raced, true);
+  assert.match(failure.message, /separately authorized exact-target request/);
+  assert.match(failure.message, /2026-08-27T01:00:09.000Z/);
 });
 
-test('a push racing ready-for-review triggers a compensating draft conversion', () => {
+test('a push racing ready-for-review stays at one write and reports the race read-only', () => {
   const base = metadataRequest();
   const request = seal({
     ...base,
@@ -689,9 +701,13 @@ test('a push racing ready-for-review triggers a compensating draft conversion', 
       }),
     /desired state was not verified.*do not retry blindly/
   );
-  assert.equal(mutations.length, 2);
+  // PR509-COLLAB-MUTATION-COUNT-001: no unrequested compensating write.
+  assert.equal(mutations.length, 1);
   assert.match(mutations[0], /markPullRequestReadyForReview/);
-  assert.match(mutations[1], /convertPullRequestToDraft/);
+  assert.ok(
+    !mutations.some((mutation) => /convertPullRequestToDraft/.test(mutation)),
+    'an unrequested compensating draft conversion must not be issued'
+  );
 });
 
 test('metadata PATCH fails closed when the target drifts at the mutation boundary', () => {

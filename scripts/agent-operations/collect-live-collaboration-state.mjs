@@ -49,20 +49,6 @@ mutation ProtoUiResolveThread($threadId: ID!) {
   }
 }`;
 
-const UNRESOLVE_THREAD_MUTATION = `
-mutation ProtoUiUnresolveThread($threadId: ID!) {
-  unresolveReviewThread(input: { threadId: $threadId }) {
-    thread { id isResolved }
-  }
-}`;
-
-const CONVERT_TO_DRAFT_MUTATION = `
-mutation ProtoUiConvertToDraft($pullRequestId: ID!) {
-  convertPullRequestToDraft(input: { pullRequestId: $pullRequestId }) {
-    pullRequest { id isDraft }
-  }
-}`;
-
 function run(runner, args, { input, allowEmpty = false } = {}) {
   const options = {
     encoding: 'utf8',
@@ -591,33 +577,29 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     postState = collectVerifiedPostWriteState(request, runner, collectState, options);
   } catch (error) {
     // The write reached GitHub but verification found a concurrent change.
-    // Undo our own mutation so the raced target is not left mutated, then
-    // surface the original failure.
-    if (request.action === 'resolve-fixed-review-thread') {
-      const raced = collectState(request, { runner });
-      if (
-        raced.current?.isResolved === true &&
-        raced.current?.threadUpdatedAt !== request.target.threadUpdatedAt
-      ) {
-        try {
-          graphql(runner, UNRESOLVE_THREAD_MUTATION, { threadId: request.target.threadId });
-        } catch {
-          // The compensation is best-effort; the original error governs.
-        }
-      }
-    } else if (request.action === 'mark-exact-head-ready-for-review') {
-      const raced = collectState(request, { runner });
-      if (raced.current?.isDraft === false && raced.current?.headSha !== request.target.headSha) {
-        try {
-          graphql(runner, CONVERT_TO_DRAFT_MUTATION, {
-            pullRequestId: raced.current.nodeId ?? preState.current.nodeId,
-          });
-        } catch {
-          // The compensation is best-effort; the original error governs.
-        }
-      }
+    // One purpose-bound request may attempt at most its single authorized
+    // mutation (PR509-COLLAB-MUTATION-COUNT-001): reconciliation here stays
+    // read-only, and the raced target is reported rather than implicitly
+    // compensated. Undoing the raced write requires a separately authorized
+    // exact-target request.
+    if (
+      !['resolve-fixed-review-thread', 'mark-exact-head-ready-for-review'].includes(request.action)
+    ) {
+      throw error;
     }
-    throw error;
+    let racedSummary = 'live reconciliation after the race failed';
+    try {
+      const raced = collectState(request, { runner });
+      racedSummary = `live state after the race: ${JSON.stringify(raced.current ?? null)}`;
+    } catch {
+      // The original verification failure governs.
+    }
+    const failure = new Error(
+      `${error.message} The single authorized mutation was not compensated; ${racedSummary}. ` +
+        'Inspect the raced target and issue a separately authorized exact-target request if compensation is needed.'
+    );
+    failure.raced = true;
+    throw failure;
   }
   return {
     mutationCount: 1,
