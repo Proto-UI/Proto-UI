@@ -2051,6 +2051,93 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects a composed radio entry after external group membership changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-external-radio-membership-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const formA = document.createElement('form');
+        formA.id = 'external-radio-form-a';
+        const formB = document.createElement('form');
+        formB.id = 'external-radio-form-b';
+        const host = new C();
+        host.id = 'external-radio-membership-entry';
+        host.innerHTML =
+          '<input id="inside-membership-radio" type="radio" name="entry-group" form="external-radio-form-a">';
+        const outside = document.createElement('input');
+        outside.id = 'outside-membership-radio';
+        outside.type = 'radio';
+        outside.name = 'entry-group';
+        outside.setAttribute('form', formA.id);
+        outside.checked = true;
+        document.body.append(formA, formB, host, outside);
+      });
+      const hostTabIndex = () =>
+        page
+          .locator('#external-radio-membership-entry')
+          .evaluate((host) => host.getAttribute('tabindex'));
+      const settle = () =>
+        page.evaluate(() => new Promise<void>((resolve) => queueMicrotask(resolve)));
+      expect(await hostTabIndex()).toBe('0');
+
+      await page
+        .locator('#outside-membership-radio')
+        .evaluate((radio) => radio.setAttribute('name', 'other-group'));
+      await settle();
+      expect(await hostTabIndex()).toBeNull();
+
+      await page
+        .locator('#outside-membership-radio')
+        .evaluate((radio) => radio.setAttribute('name', 'entry-group'));
+      await settle();
+      expect(await hostTabIndex()).toBe('0');
+
+      await page
+        .locator('#outside-membership-radio')
+        .evaluate((radio) => radio.setAttribute('form', 'external-radio-form-b'));
+      await settle();
+      expect(await hostTabIndex()).toBeNull();
+
+      await page
+        .locator('#outside-membership-radio')
+        .evaluate((radio) => radio.setAttribute('form', 'external-radio-form-a'));
+      await settle();
+      expect(await hostTabIndex()).toBe('0');
+
+      await page.locator('#outside-membership-radio').evaluate((radio) => radio.remove());
+      await settle();
+      expect(await hostTabIndex()).toBeNull();
+
+      await page.evaluate(() => {
+        const outside = document.createElement('input');
+        outside.id = 'outside-membership-radio-replacement';
+        outside.type = 'radio';
+        outside.name = 'entry-group';
+        outside.setAttribute('form', 'external-radio-form-a');
+        outside.checked = true;
+        document.body.append(outside);
+      });
+      await settle();
+      expect(await hostTabIndex()).toBe('0');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('continues trapped traversal around deep focus in a negative-tabindex shadow host', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

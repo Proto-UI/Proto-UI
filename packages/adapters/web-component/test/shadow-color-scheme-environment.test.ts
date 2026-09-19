@@ -28,6 +28,7 @@ describe('Shadow color-scheme environment owner', () => {
     document.documentElement.classList.remove('dark', 'light');
     if (originalMatchMedia) window.matchMedia = originalMatchMedia;
     else Reflect.deleteProperty(window, 'matchMedia');
+    vi.unstubAllGlobals();
   });
 
   it('projects the existing explicit-theme, system, and light-fallback precedence synchronously', () => {
@@ -186,6 +187,47 @@ describe('Shadow color-scheme environment owner', () => {
     colorScheme = 'light';
     for (const listener of listeners) listener();
     expect(host.hasAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe(false);
+  });
+
+  it('notifies every active consumer before surfacing callback failures', () => {
+    let colorScheme: 'light' | 'dark' = 'light';
+    const sourceListeners = new Set<() => void>();
+    const source: ShadowColorSchemeSource = {
+      get: () => colorScheme,
+      subscribe(listener) {
+        sourceListeners.add(listener);
+        return () => sourceListeners.delete(listener);
+      },
+    };
+    const host = document.createElement('x-shadow-listener-isolation');
+    const owner = createShadowColorSchemeEnvironmentOwner(host, source);
+    const microtasks: (() => void)[] = [];
+    vi.stubGlobal('queueMicrotask', (callback: () => void) => microtasks.push(callback));
+    const failure = new Error('first environment consumer failed');
+    owner.subscribe(() => {
+      throw failure;
+    });
+    const healthy = vi.fn(() => owner.colorScheme);
+    owner.subscribe(healthy);
+
+    colorScheme = 'dark';
+    expect(() => {
+      for (const listener of [...sourceListeners]) listener();
+    }).not.toThrow();
+    expect(host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe('dark');
+    expect(healthy).toHaveBeenCalledTimes(1);
+    expect(healthy).toHaveLastReturnedWith('dark');
+
+    const reported: unknown[] = [];
+    while (microtasks.length) {
+      try {
+        microtasks.shift()!();
+      } catch (error) {
+        reported.push(error);
+      }
+    }
+    expect(reported).toEqual([failure]);
+    owner.dispose();
   });
 
   it('deduplicates one owner per host and restores a pre-existing marker on disposal', () => {

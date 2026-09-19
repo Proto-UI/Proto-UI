@@ -239,6 +239,64 @@ function invalidatesEntryStyles(record: MutationRecord): boolean {
   );
 }
 
+function isNamedRadioForEntry(node: Node, names: ReadonlySet<string>): boolean {
+  if (node.nodeType !== 1) return false;
+  const element = node as Element;
+  if (element.namespaceURI === 'http://www.w3.org/1999/xhtml' && element.localName === 'input') {
+    const input = element as HTMLInputElement;
+    if (input.type === 'radio' && names.has(input.name)) return true;
+  }
+  return [...element.querySelectorAll<HTMLInputElement>('input[type="radio"][name]')].some(
+    (radio) => names.has(radio.name)
+  );
+}
+
+function containsReferencedRadioForm(node: Node, formIds: ReadonlySet<string>): boolean {
+  if (node.nodeType !== 1 || formIds.size === 0) return false;
+  const element = node as Element;
+  if (
+    element.namespaceURI === 'http://www.w3.org/1999/xhtml' &&
+    element.localName === 'form' &&
+    formIds.has(element.id)
+  ) {
+    return true;
+  }
+  return [...element.querySelectorAll<HTMLFormElement>('form[id]')].some((form) =>
+    formIds.has(form.id)
+  );
+}
+
+function invalidatesEntryRadioGroup(
+  record: MutationRecord,
+  names: ReadonlySet<string>,
+  formIds: ReadonlySet<string>
+): boolean {
+  if (record.type === 'childList') {
+    return [...record.addedNodes, ...record.removedNodes].some(
+      (node) => isNamedRadioForEntry(node, names) || containsReferencedRadioForm(node, formIds)
+    );
+  }
+  if (record.target.nodeType !== 1) return false;
+  const element = record.target as Element;
+  if (element.namespaceURI === 'http://www.w3.org/1999/xhtml' && element.localName === 'form') {
+    return (
+      record.attributeName === 'id' &&
+      (formIds.has(element.id) || formIds.has(record.oldValue ?? ''))
+    );
+  }
+  if (element.namespaceURI !== 'http://www.w3.org/1999/xhtml' || element.localName !== 'input') {
+    return false;
+  }
+  const input = element as HTMLInputElement;
+  const currentOrPreviousNameMatches =
+    names.has(input.name) || (record.attributeName === 'name' && names.has(record.oldValue ?? ''));
+  if (!currentOrPreviousNameMatches) return false;
+  const currentOrPreviousTypeIsRadio =
+    input.type === 'radio' ||
+    (record.attributeName === 'type' && (record.oldValue ?? '').toLowerCase() === 'radio');
+  return currentOrPreviousTypeIsRadio;
+}
+
 function watchEntryStyleInvalidation(
   view: (Window & typeof globalThis) | null,
   onInvalidate: () => void
@@ -575,6 +633,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
   let entryExternalStyleObserver: MutationObserver | null = null;
+  let entryRadioGroupObserver: MutationObserver | null = null;
   let entryResizeObserver: ResizeObserver | null = null;
   let stopEntryRadioStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
@@ -592,6 +651,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     entryImageObserver = null;
     entryExternalStyleObserver?.disconnect();
     entryExternalStyleObserver = null;
+    entryRadioGroupObserver?.disconnect();
+    entryRadioGroupObserver = null;
     entryResizeObserver?.disconnect();
     entryResizeObserver = null;
     stopEntryRadioStateWatch?.();
@@ -760,6 +821,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
               entryExternalStyleObserver?.disconnect();
+              entryRadioGroupObserver?.disconnect();
               entryResizeObserver?.disconnect();
               stopEntryRadioStateWatch?.();
               stopEntryRadioStateWatch = null;
@@ -767,6 +829,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               stopEntrySlotWatch = null;
               let hasArea = false;
               const radioTrees = new Set<Document | ShadowRoot>();
+              const radioNames = new Set<string>();
+              const radioFormIds = new Set<string>();
               const options: MutationObserverInit = {
                 childList: true,
                 subtree: true,
@@ -810,6 +874,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 for (const radio of root.querySelectorAll<HTMLInputElement>(
                   'input[type="radio"][name]'
                 )) {
+                  radioNames.add(radio.name);
+                  const formId = radio.getAttribute('form') || radio.form?.id;
+                  if (formId) radioFormIds.add(formId);
                   const tree = radio.getRootNode();
                   if (tree.nodeType === 9 || (tree.nodeType === 11 && !!(tree as ShadowRoot).host))
                     radioTrees.add(tree as Document | ShadowRoot);
@@ -972,6 +1039,34 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // trees that own named radios in the region and re-evaluate
               // after the native state transition has settled.
               if (radioTrees.size > 0) {
+                entryRadioGroupObserver = new Observer((records) => {
+                  if (!isCurrentEntryObservation()) return;
+                  const alreadyObserved = (node: Node) => {
+                    for (const root of observedRoots) {
+                      if (root === node || root.contains(node)) return true;
+                    }
+                    return false;
+                  };
+                  if (
+                    records.some(
+                      (record) =>
+                        !alreadyObserved(record.target) &&
+                        invalidatesEntryRadioGroup(record, radioNames, radioFormIds)
+                    )
+                  ) {
+                    projectEntry();
+                    observeTree();
+                  }
+                });
+                for (const tree of radioTrees) {
+                  entryRadioGroupObserver.observe(tree, {
+                    subtree: true,
+                    childList: true,
+                    attributes: true,
+                    attributeOldValue: true,
+                    attributeFilter: ['name', 'form', 'type', 'disabled', 'id'],
+                  });
+                }
                 const eventOrigin = (event: Event) => event.composedPath()[0] ?? event.target;
                 const onChange = (event: Event) => {
                   const origin = eventOrigin(event);

@@ -65,6 +65,19 @@ export function createShadowColorSchemeEnvironmentOwner(
   const listeners = new Set<() => void>();
   host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
 
+  const notifyListeners = () => {
+    for (const listener of [...listeners]) {
+      if (!listeners.has(listener)) continue;
+      try {
+        listener();
+      } catch (error) {
+        queueMicrotask(() => {
+          throw error;
+        });
+      }
+    }
+  };
+
   const syncFromSource = (activeSource: ShadowColorSchemeSource) => {
     const next = readColorScheme(() => activeSource.get());
     if (next === colorScheme && host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE) === colorScheme) {
@@ -72,7 +85,7 @@ export function createShadowColorSchemeEnvironmentOwner(
     }
     colorScheme = next;
     host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
-    for (const listener of [...listeners]) listener();
+    notifyListeners();
   };
   const subscribeSource = (nextSource: ShadowColorSchemeSource, generation: number) => {
     const subscription = nextSource.subscribe(() => {
@@ -125,7 +138,7 @@ export function createShadowColorSchemeEnvironmentOwner(
       ) {
         colorScheme = nextColorScheme;
         host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
-        for (const listener of [...listeners]) listener();
+        notifyListeners();
       }
       previousUnsubscribe();
     },
