@@ -7,7 +7,7 @@ Status: transitional readable projection for the reported P1 shadow and later re
 No `spec/**` entity yet owns this repository-operations boundary. Until it is cataloged, the current machine-enforced sources are:
 
 - `internal/agent-operations/schemas/review-input.schema.json` and `scripts/agent-operations/review-runtime.mjs` for canonical review-input v3 and its digest;
-- `internal/agent-operations/schemas/review-packet.schema.json` for review-packet v1;
+- `internal/agent-operations/schemas/review-packet.schema.json` for review-packet v2, with a constrained legacy v1 ingestion path (below);
 - `internal/agent-operations/capability-policy.yaml` and `scripts/agent-operations/review-packet.mjs` for the repository-side review ceiling and live preflight;
 
 Direction and acceptance provenance remain intentionally non-normative:
@@ -22,7 +22,7 @@ The accepted uncataloged gap is the external controller boundary: GitHub event a
 1. Poppy verifies a GitHub App webhook and transactionally fans an allowed event into its ordinary Discord queue and a deduplicated review admission.
 2. A single consumer claims the admission and hands it to a separately operated, authenticated analyzer workload. The workload receives the admitted delivery/digest, freshly re-read PR revision, read-only evidence, and its minimum model credential; it receives no review-write token. This invocation must not require `Actions: write` on the Poppy App.
 3. The workload requests a short-lived challenge over the Cloudflare edge. Poppy verifies an independent HMAC, repository, installation, trusted workload implementation identity, run/attempt, event delivery/digest, processing admission, policy version, and exact base/head before issuing a 32-byte one-time nonce.
-4. The analyzer returns canonical review-input v3 and a review-packet v1 under the same signed identity. It treats PR-controlled text and artifacts as untrusted input and emits no executable authority.
+4. The analyzer returns canonical review-input v3 and a review packet under the same signed identity. It treats PR-controlled text and artifacts as untrusted input and emits no executable authority. The deployed analyzer currently emits review-packet v1; the repository accepts v1 for this legacy ingestion path only. A v1 packet carries no Agent evidence, may render only as a `COMMENT`, and can never authorize a disposition or a merge; schema v2 with `agentEvidence` is required for `APPROVE`, `REQUEST_CHANGES`, and integration. Migrating the dcbot `ReviewPacket`/`ValidatePacket` pair and its fixtures to v2 is tracked as explicit migration debt of this boundary; until then the dual-version ingestion is the deliberate compatibility surface, not an accident.
 5. Poppy re-collects every mutable GitHub fact with complete pagination and count checks, recomputes the canonical digest, verifies exact-head state and check provenance, then calculates `REQUEST_CHANGES`, `APPROVE`, maintainer gate, no-op, or reject deterministically.
 6. In P1, Poppy atomically consumes the challenge and records the shadow decision; it performs no GitHub review mutation.
 

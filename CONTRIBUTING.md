@@ -274,6 +274,8 @@ The Discord Bot's Community, Contributor, and Trusted levels are an entry and tr
 
 ## Agents
 
+Humans may report a symptom in plain language; no screenshot, HTML artifact, or prompt disclosure is required by the [Agent-only evidence policy](./internal/agent-operations/visual-evidence.md). When an Agent takes up an Issue or PR, the Agent owns reproduction, uploaded visuals, a safe request paraphrase, and evidence-debt follow-up. See the [gh upload tutorial](./internal/agent-operations/github-evidence-upload.md).
+
 Agents start with `AGENTS.md` and `$pui-dev`. The entry skill reads the machine registry and loads one atomic skill at a time. Leaf skills are lazy and remain out of context until the current state transition requires them.
 
 The resolver is deterministic: `pnpm agent:skill -- <leaf-id> --mode <execution-mode> --mode-source <trusted-source>` returns one eligible registered path or a blocked result, and `pnpm agent:skill -- --handoff <handoff.json>` validates the completed leaf before resolving at most one next step.

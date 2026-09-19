@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Evidence Publication'
+  short_description: 'Publish one authorized Issue evidence comment'
+  default_prompt: 'Use $pui-evidence-publish to publish this prepared and authorized Issue evidence packet.'
+
+policy:
+  allow_implicit_invocation: false
