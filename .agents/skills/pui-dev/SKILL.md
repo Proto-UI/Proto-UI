@@ -28,6 +28,7 @@ Load only the skill needed for the current transition. The list below is routing
 - use `pui-brainstorm` before normative work whose identity, owner, boundary, or compatibility remains unsettled;
 - use `pui-unclaim` when the current contributor's claim expires, its boundary changes, or work stops;
 - use `pui-issue` or `pui-pr` for bounded read-only queue inspection;
+- use `pui-evidence-publish` only for one prepared, separately authorized additive Issue evidence comment after `pui-issue`; evidence preparation/uploads remain separate authorized work;
 - use `pui-ci`, `pui-govern`, `pui-deploy`, or `pui-deps` for the corresponding bounded read-only operational question;
 - use `pui-spec` or `pui-contract` after the corresponding semantic scope is governed;
 - use `pui-adapter-assess` for a bounded read-only Adapter question and `pui-adapter` only for an explicitly approved Adapter implementation slice;
@@ -51,5 +52,9 @@ An autonomous handoff with a pending human gate is terminal. After the human dec
 Commit and push when the user explicitly requests them and the live branch permission allows it. Do not infer permission to mutate unrelated GitHub state, approve, merge, publish, or release.
 
 ## Communicate
+
+Apply `internal/agent-operations/visual-evidence.md` to Agent-authored or materially advanced Issues and PRs, including historical backfill. Agents own reproduction, uploaded visuals, sanitized request paraphrases, and evidence debt; humans may submit plain descriptions. This is a soft gate, not a new human intake requirement or external-write authority. Read `internal/agent-operations/github-evidence-upload.md` before choosing an upload method.
+
+Show visible bugs in actual running components. For purely internal failures, explain measured variable/state transitions and their consequences as a source-bound technical walkthrough. Prose/log screenshots alone satisfy neither. An all-history backfill includes closed Issues and cannot be completed by a sample or inventory.
 
 Author repository artifacts in the language and form required by their governing source. Communicate progress, decisions, blockers, and handoff in the user's current language. Keep identifiers, paths, API names, and entity IDs canonical.

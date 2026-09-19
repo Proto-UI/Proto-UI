@@ -5,7 +5,12 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 
-import { authorizePullRequestMerge, computeReviewInputDigest } from '../review-runtime.mjs';
+import {
+  agentEvidenceMarker,
+  authorizePullRequestMerge,
+  computeReviewInputDigest,
+} from '../review-runtime.mjs';
+import { agentEvidence } from './fixtures/agent-evidence.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
@@ -34,7 +39,7 @@ function reviewInput(overrides = {}) {
         state: 'APPROVED',
         commitSha: sha('b'),
         submittedAt: '2026-08-27T06:00:00.000Z',
-        body: 'Approved exact head',
+        body: `Approved exact head\n\n<!-- ${evidenceReceiptMarker(sha('b'))} -->`,
       },
     ],
     comments: [],
@@ -58,9 +63,15 @@ function reviewInput(overrides = {}) {
   };
 }
 
+// The merge gate requires a live published receipt carrying the digest of the
+// packet's Agent evidence; the fixture evidence depends only on the head SHA.
+function evidenceReceiptMarker(headSha) {
+  return agentEvidenceMarker({ schemaVersion: 2, agentEvidence: agentEvidence(headSha) });
+}
+
 function packet(input, overrides = {}) {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: 'proto-ui.review-packet',
     repositoryId: input.repositoryId,
     pullRequest: input.pullRequest,
@@ -72,6 +83,7 @@ function packet(input, overrides = {}) {
     scope: ['exact-head pull-request integration'],
     affectedEntities: [],
     affectedSurfaces: ['GitHub pull request'],
+    agentEvidence: agentEvidence(input.headSha),
     findings: [],
     validation: {
       commands: [{ command: 'pnpm test', exitCode: 0, result: 'passed' }],
@@ -119,6 +131,11 @@ function scheduledMerge(overrides = {}) {
 }
 
 test('standing authorization permits an exact-head merge after independent approval', () => {
+  const unverified = packet(reviewInput());
+  unverified.agentEvidence.debt[0].kind = 'verification';
+  const denied = scheduledMerge({ packet: unverified });
+  assert.equal(denied.allowed, false);
+  assert.match(denied.reason, /verification debt/);
   const result = scheduledMerge();
   assert.equal(result.allowed, true);
   assert.equal(result.headSha, sha('b'));
@@ -199,7 +216,7 @@ test('an active change request remains effective across heads until its reviewer
     state: 'APPROVED',
     commitSha: sha('b'),
     submittedAt: '2026-08-27T07:00:00.000Z',
-    body: 'Prior request is resolved; approved exact head',
+    body: `Prior request is resolved; approved exact head\n\n<!-- ${evidenceReceiptMarker(sha('b'))} -->`,
   });
   assert.equal(scheduledMerge({ input: superseded, packet: packet(superseded) }).allowed, true);
 });
@@ -211,4 +228,51 @@ test('spec changes may be mechanically merged only after an independent exact-he
     ],
   });
   assert.equal(scheduledMerge({ input, packet: packet(input) }).allowed, true);
+});
+
+test('merge requires a published Agent evidence receipt and a v2 packet', () => {
+  const unpublished = reviewInput({
+    reviews: [
+      {
+        id: 'PRR_approved_no_receipt',
+        author: 'independent-reviewer',
+        state: 'APPROVED',
+        commitSha: sha('b'),
+        submittedAt: '2026-08-27T06:00:00.000Z',
+        body: 'Approved exact head without any governed evidence receipt',
+      },
+    ],
+  });
+  const denied = scheduledMerge({ input: unpublished, packet: packet(unpublished) });
+  assert.equal(denied.allowed, false);
+  assert.match(denied.reason, /published Agent evidence receipt/);
+
+  const legacyPacket = packet(reviewInput());
+  delete legacyPacket.agentEvidence;
+  legacyPacket.schemaVersion = 1;
+  const legacy = scheduledMerge({ packet: legacyPacket });
+  assert.equal(legacy.allowed, false);
+  assert.match(legacy.reason, /schema v2/);
+
+  const viaComment = reviewInput({
+    reviews: [
+      {
+        id: 'PRR_approved_plain',
+        author: 'independent-reviewer',
+        state: 'APPROVED',
+        commitSha: sha('b'),
+        submittedAt: '2026-08-27T06:00:00.000Z',
+        body: 'Approved exact head',
+      },
+    ],
+    comments: [
+      {
+        id: 'IC_evidence',
+        author: 'agent',
+        body: `Additive Agent evidence publication\n\n<!-- ${evidenceReceiptMarker(sha('b'))} -->`,
+        updatedAt: '2026-08-27T06:30:00.000Z',
+      },
+    ],
+  });
+  assert.equal(scheduledMerge({ input: viaComment, packet: packet(viaComment) }).allowed, true);
 });

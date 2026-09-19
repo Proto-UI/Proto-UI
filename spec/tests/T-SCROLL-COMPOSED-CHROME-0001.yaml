@@ -5,6 +5,14 @@ status: draft
 since: 0.2.0-rc.7
 summary: Covers family binding, proportional Thumb geometry, movement, cleanup, and passive accessibility boundaries.
 cases:
+  - id: T-SCROLL-COMPOSED-CHROME-0001-CASE-DISPLAY-OWNERSHIP
+    title: System chrome suppresses authored controls and restores exact owned inline display
+    covers:
+      - D-SCROLL-PROJECTION-0001-B
+      - D-SCROLL-PROJECTION-0001-D
+      - C-SCROLL-COMPOSED-CHROME-0001-E
+      - HC-SCROLL-SURFACE-0001-F
+    expectation: important-author-display-is-hidden-idempotently-and-value-priority-restored-on-reprojection-replacement-and-disposal
   - id: T-SCROLL-COMPOSED-CHROME-0001-CASE-FAMILY
     title: Context scope and Anatomy relation bind the correct controls
     covers:
@@ -30,6 +38,14 @@ cases:
       - C-SCROLL-COMPOSED-CHROME-0001-F
     expectation: passive-thumb-has-no-focus-or-scrollbar-role
 implementations:
+  - id: web-scroll-chrome-real-cascade
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts
+    required: true
+    consumesCases: [T-SCROLL-COMPOSED-CHROME-0001-CASE-DISPLAY-OWNERSHIP]
+    notes:
+      - Real Chromium layout, CSS cascade and MutationObserver delivery exercise the shared Web host with authored DOM controls. The no-op Move host does not certify gestures or Shadcn family mounting; the separate Shadcn browser journey covers real four-runtime two-axis dragging.
   - id: web-scroll-composed-chrome-host
     kind: adapter-test
     status: passing
@@ -53,6 +69,8 @@ verifies:
     - C-SCROLL-COMPOSED-CHROME-0001
   decisions:
     - D-SCROLL-COMPOSED-PROJECTION-0001
+    - id: D-SCROLL-PROJECTION-0001
+      anchors: [D-SCROLL-PROJECTION-0001-B, D-SCROLL-PROJECTION-0001-D]
   modules:
     - id: M-SCROLL-0001
       since: 0.3.0-alpha.0
@@ -74,6 +92,9 @@ exercises:
     - P-BASE-SCROLL-AREA-SCROLLBAR
     - P-BASE-SCROLL-AREA-THUMB
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Added real Web-host important display cascade, mutation idempotence and exact inline restoration evidence without claiming gesture or complete Prototype conformance.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added executable multi-content resize, late insertion, replacement, and observer cleanup coverage.
