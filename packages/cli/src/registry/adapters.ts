@@ -1,9 +1,14 @@
+export interface RuntimePackage {
+  name: string;
+  versionRange?: string;
+}
+
 export interface Adapter {
   id: string;
   label: string;
   aliases: string[];
   packageName: string;
-  runtimePackages: string[];
+  runtimePackages: RuntimePackage[];
   createImport: string;
   runtimeImport: string | null;
   adapterStatement: string | null;
@@ -16,7 +21,7 @@ export const ADAPTER_REGISTRY: Record<string, Adapter> = {
     label: 'React',
     aliases: ['react'],
     packageName: '@proto.ui/adapter-react',
-    runtimePackages: ['react'],
+    runtimePackages: [{ name: 'react' }],
     createImport: `import { createReactAdapter } from '@proto.ui/adapter-react';`,
     runtimeImport: `import * as React from 'react';`,
     adapterStatement: `const adapt = createReactAdapter(React);`,
@@ -27,11 +32,27 @@ export const ADAPTER_REGISTRY: Record<string, Adapter> = {
     label: 'Vue',
     aliases: ['vue'],
     packageName: '@proto.ui/adapter-vue',
-    runtimePackages: ['vue'],
+    runtimePackages: [{ name: 'vue' }],
     createImport: `import { createVueAdapter } from '@proto.ui/adapter-vue';`,
     runtimeImport: `import * as Vue from 'vue';`,
     adapterStatement: `const adapt = createVueAdapter(Vue);`,
     rootAliasPrefix: 'Vue',
+  },
+  vue2: {
+    id: 'vue2',
+    label: 'Vue 2',
+    aliases: ['vue2', 'vue-2'],
+    packageName: '@proto.ui/adapter-vue2',
+    runtimePackages: [{ name: 'vue', versionRange: '>=2.6.0 <2.7' }],
+    createImport: `import { createVue2Adapter } from '@proto.ui/adapter-vue2';`,
+    runtimeImport: `import Vue from 'vue';`,
+    adapterStatement: `const adapt = createVue2Adapter({
+  extend: Vue.extend.bind(Vue),
+  nextTick: Vue.nextTick.bind(Vue),
+  set: Vue.set.bind(Vue),
+  delete: Vue.delete.bind(Vue),
+});`,
+    rootAliasPrefix: 'Vue2',
   },
   wc: {
     id: 'wc',

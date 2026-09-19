@@ -19,7 +19,7 @@ Adapter package intended to be used together with Proto UI prototypes and the sh
 ## Install
 
 ```bash
-npm install @proto.ui/adapter-react@0.3.0-alpha.0
+npm install @proto.ui/adapter-react@0.3.0-alpha.1
 ```
 
 ## Internal Structure
@@ -48,6 +48,7 @@ npm install @proto.ui/adapter-react@0.3.0-alpha.0
 - `@proto.ui/module-feedback`
 - `@proto.ui/module-focus`
 - `@proto.ui/module-hit-participation`
+- `@proto.ui/module-image-view`
 - `@proto.ui/module-overlay`
 - `@proto.ui/module-positioning`
 - `@proto.ui/module-props`

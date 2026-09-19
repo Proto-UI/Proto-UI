@@ -25,10 +25,17 @@ const RELEASE_ROOTS = [
   '@proto.ui/prototypes-base',
   '@proto.ui/prototypes-shadcn',
 ];
+const VUE2_RELEASE_ROOTS = [
+  '@proto.ui/cli',
+  '@proto.ui/adapter-vue2',
+  '@proto.ui/prototypes-base',
+  '@proto.ui/prototypes-shadcn',
+];
 
 const workDir = mkdtempSync(join(tmpdir(), 'proto-ui-cli-consumer-'));
 const releaseDir = join(workDir, 'release');
 const consumerDir = join(workDir, 'consumer');
+const vue2ConsumerDir = join(workDir, 'vue2-consumer');
 let succeeded = false;
 
 try {
@@ -138,6 +145,13 @@ try {
     run(process.execPath, ['--import', 'tsx', `./${renderer}`], { cwd: consumerDir });
   }
 
+  runVue2Consumer({
+    consumerDir: vue2ConsumerDir,
+    expectedPackages,
+    packageByName,
+    releaseVersion,
+  });
+
   succeeded = true;
   console.log(
     `release consumer smoke: cli ok (${consumerPackageNames.length}/${expectedPackages.length} packed packages consumed)`
@@ -147,6 +161,79 @@ try {
   throw error;
 } finally {
   if (succeeded) rmSync(workDir, { recursive: true, force: true });
+}
+
+function runVue2Consumer({ consumerDir, expectedPackages, packageByName, releaseVersion }) {
+  mkdirSync(consumerDir, { recursive: true });
+  const consumerPackageNames = collectDeclaredClosure(VUE2_RELEASE_ROOTS, packageByName);
+  const protoDependencies = Object.fromEntries(
+    consumerPackageNames.map((name) => {
+      const entry = packageByName.get(name);
+      const tarballPath = join(releaseDir, entry.tarball);
+      assert(existsSync(tarballPath), `missing packed tarball for ${name}`);
+      return [name, toFileSpec(relative(consumerDir, tarballPath))];
+    })
+  );
+
+  writeFileSync(
+    join(consumerDir, 'package.json'),
+    `${JSON.stringify(
+      {
+        name: 'proto-ui-cli-vue2-consumer-smoke',
+        private: true,
+        version: '0.0.0',
+        type: 'module',
+        dependencies: {
+          ...protoDependencies,
+          '@happy-dom/global-registrator': '20.11.0',
+          tsx: '4.21.0',
+          vue: '2.6.14',
+        },
+      },
+      null,
+      2
+    )}\n`
+  );
+
+  run('npm', ['install', '--no-audit', '--no-fund'], { cwd: consumerDir });
+  verifyInstalledRelease({
+    consumerDir,
+    expectedNames: consumerPackageNames,
+    releaseVersion,
+  });
+
+  const cli = join(consumerDir, 'node_modules', '@proto.ui', 'cli', 'bin', 'proto-ui.js');
+  run(process.execPath, [cli, 'init', '--yes', '--no-interactive', '--no-styles'], {
+    cwd: consumerDir,
+  });
+  for (const component of ['shadcn-button', 'base-image', 'shadcn-switch', 'shadcn-dialog']) {
+    run(process.execPath, [cli, 'add', 'vue2', component, '--no-install', '--no-interactive'], {
+      cwd: consumerDir,
+    });
+  }
+
+  const config = readFileSync(join(consumerDir, 'proto-ui', 'config.json'), 'utf8');
+  const facade = readFileSync(
+    join(consumerDir, 'proto-ui', 'components', 'vue2', 'index.ts'),
+    'utf8'
+  );
+  assert(config.includes('@proto.ui/adapter-vue2'), 'Vue 2 config is missing its adapter');
+  for (const expected of [
+    'createVue2Adapter',
+    'extend: Vue.extend.bind(Vue)',
+    'export const ShadcnButton = adapt(shadcnButton)',
+    'export const BaseImageRoot = adapt(imageRoot)',
+    'export const ShadcnSwitch = {',
+    'export const ShadcnDialogContent = {',
+  ]) {
+    assert(facade.includes(expected), `generated Vue 2 facade is missing ${expected}`);
+  }
+
+  cpSync(join(RENDER_FIXTURE_DIR, 'vue2.mjs'), join(consumerDir, 'vue2.mjs'));
+  run(process.execPath, ['--import', 'tsx', './vue2.mjs'], { cwd: consumerDir });
+  console.log(
+    `release consumer smoke: vue2 ok (${consumerPackageNames.length}/${expectedPackages.length} packed packages consumed)`
+  );
 }
 
 function collectDeclaredClosure(rootNames, packageByName) {

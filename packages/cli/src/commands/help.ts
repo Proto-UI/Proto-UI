@@ -20,6 +20,7 @@ Examples:
   proto-ui init --no-styles
   proto-ui init --prototypes brutalist
   proto-ui add react shadcn-button
+  proto-ui add vue2 shadcn-button
   proto-ui add wc shadcn-button --no-install
 `;
 
@@ -53,6 +54,7 @@ Usage:
 Examples:
   proto-ui add react shadcn-button
   proto-ui add vue shadcn-button
+  proto-ui add vue2 shadcn-button
   proto-ui add wc shadcn-button --no-install
 
 Behavior:

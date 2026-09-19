@@ -86,6 +86,43 @@ function renderPreset(host: string, preset: ComponentPreset): string[] {
     ];
   }
 
+  if (host === 'vue2') {
+    return [
+      `export const ${exportName} = {`,
+      `  name: '${exportName}',`,
+      `  inheritAttrs: false,`,
+      `  methods: {`,
+      `    update(this: any) {`,
+      `      this.$refs.root?.update?.();`,
+      `    },`,
+      `    getExposes(this: any) {`,
+      `      return this.$refs.root?.getExposes?.() ?? {};`,
+      `    },`,
+      `    invokeInCallbackScope(this: any, fn: () => void) {`,
+      `      this.$refs.root?.invokeInCallbackScope?.(fn);`,
+      `    },`,
+      `  },`,
+      `  render(this: any, h: any) {`,
+      `    const children = this.$slots.default ?? [];`,
+      `    const hasDirectDefaultPart = children.some(`,
+      `      (child: any) => child.componentOptions?.Ctor === ${defaultPartExport}`,
+      `    );`,
+      `    const namedDefaultPart = this.$scopedSlots?.${inputName}?.() ?? this.$slots.${inputName};`,
+      `    const resolvedDefaultPart = namedDefaultPart`,
+      `      ? namedDefaultPart`,
+      `      : hasDirectDefaultPart`,
+      `        ? []`,
+      `        : [h(${defaultPartExport})];`,
+      `    return h(${rootExport}, {`,
+      `      ref: 'root',`,
+      `      attrs: this.$attrs,`,
+      `      on: this.$listeners,`,
+      `    }, [...children, ...resolvedDefaultPart]);`,
+      `  },`,
+      `};`,
+    ];
+  }
+
   return [
     `export class ${exportName}Element extends ${rootExport}Element {`,
     `  connectedCallback() {`,
@@ -135,7 +172,7 @@ export function renderHostIndex(host: string, componentIds: string[]): string {
     for (const item of entry.items) {
       if (host === 'react') {
         lines.push(`export const ${item.reactExport} = adapt(${item.prototypeImport});`);
-      } else if (host === 'vue') {
+      } else if (host === 'vue' || host === 'vue2') {
         lines.push(`export const ${item.vueExport} = adapt(${item.prototypeImport});`);
       } else if (host === 'wc') {
         lines.push(

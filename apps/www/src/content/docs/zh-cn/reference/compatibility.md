@@ -12,12 +12,13 @@ Proto UI 通过 Adapter profile 实体及其指向 Module、host capability 与�
 | `A-WEB-COMPONENT-0001` | `@proto.ui/adapter-web-component` | Web / Custom Elements | Platform APIs | 从 0.2.0-rc.7 起 `active` |
 | `A-REACT-18-19-0001` | `@proto.ui/adapter-react` | Web / React | `>=18.2.0 <20` | 从 0.2.0-rc.7 起 `active` |
 | `A-VUE-3-0001` | `@proto.ui/adapter-vue` | Web / Vue | `>=3.4.0 <4` | 从 0.2.0-rc.7 起 `active` |
+| `A-VUE-2-0001` | `@proto.ui/adapter-vue2` | Web / Vue | `>=2.6.0 <2.7` | 从 0.3.0-alpha.0 起 `active` |
 
-三者都是官方 Web profile。React 与 Vue 提供跨 framework runtime 的 cross-Adapter 证据，但这**不是** native mobile、desktop 或 server UI 的 multi-host 证据；目录当前没有这些宿主的官方 profile。
+四者都是官方 Web profile。React、Vue 3 与 Vue 2 提供跨 framework runtime 的 cross-Adapter 证据，但这**不是** native mobile、desktop 或 server UI 的 multi-host 证据；目录当前没有这些宿主的官方 profile。
 
 ## 已审计的共同切片
 
-三个 profile 都记录了对以下语义 Module 的 required support：
+四个 profile 都记录了对以下语义 Module 的 required support：
 
 | Module entity         | 能力                   |
 | --------------------- | ---------------------- |
@@ -28,7 +29,7 @@ Proto UI 通过 Adapter profile 实体及其指向 Module、host capability 与�
 | `M-EXPOSE-STATE-0001` | Exposed State          |
 | `M-EXPOSE-EVENT-0001` | Exposed Event          |
 
-三个 profile 还以 translated 方式提供以下 host capability：
+四个 profile 还以 translated 方式提供以下 host capability：
 
 | Host capability entity        | 宿主侧职责                         |
 | ----------------------------- | ---------------------------------- |
@@ -38,7 +39,7 @@ Proto UI 通过 Adapter profile 实体及其指向 Module、host capability 与�
 | `HC-EXPOSES-RECORD-SINK-0001` | 接收 exposed record                |
 | `HC-EXPOSE-EVENT-SINK-0001`   | 接收 exposed event                 |
 
-这说明上述切片已在三个 profile 中完成正向审计，并不表示所有 Module package 或 Core capability 都已分类。当前 profile 没有 `omits` relation：未列出的 Module 只是**尚未登记**，不能被自动解释为支持、不支持或延期。
+这说明上述切片已在四个 profile 中完成正向审计，并不表示所有 Module package 或 Core capability 都已分类。当前 profile 没有 `omits` relation：未列出的 Module 只是**尚未登记**，不能被自动解释为支持、不支持或延期。
 
 ## 证据与解释方式
 
@@ -47,7 +48,7 @@ Proto UI 通过 Adapter profile 实体及其指向 Module、host capability 与�
 请精确使用以下表述：
 
 - **已登记支持：**存在带 role 的、经过审计的 `supports.modules` relation。
-- **已登记省略：**存在带原因的、经过审计的 `omits.modules` relation；当前三个 profile 均没有此类记录。
+- **已登记省略：**存在带原因的、经过审计的 `omits.modules` relation；当前四个 profile 均没有此类记录。
 - **尚未登记：**profile 尚未作出支持或省略决策。
 - **没有官方 profile：**目录没有该宿主的官方 Adapter identity。
 
