@@ -363,6 +363,7 @@ function renderShadowSplitCss(tokens: string[]): string {
     '  --pui-scale-x: initial;',
     '  --pui-scale-y: initial;',
     '  --pui-split-rest-transform: initial;',
+    '  --pui-split-border-uniform: 0px;',
     ...['enter-scale', 'exit-scale', 'enter-opacity', 'exit-opacity', 'animation-duration'].map(
       (property) => `  --pui-${property}: initial;`
     ),
@@ -431,6 +432,14 @@ function renderShadowSplitCss(tokens: string[]): string {
     if (hostDeclarations.length) {
       lines.push(`  ${selector} {`, ...hostDeclarations.map((d) => `    ${d}`), '  }');
     }
+    const surfaceCompensation = rule.css.flatMap(splitSurfaceCompensationDeclarations);
+    if (surfaceCompensation.length) {
+      lines.push(
+        `  ${selector} > [${SPLIT_SURFACE_ATTR}]:not(input, textarea) {`,
+        ...surfaceCompensation.map((d) => `    ${d}`),
+        '  }'
+      );
+    }
     if (splitVariants(rule.token).at(-1) === 'hidden') {
       lines.push(`  ${selector}:host([data-pui-split-text-control]) { display: none; }`);
     }
@@ -484,8 +493,6 @@ function splitHostDeclarations(declaration: string): string[] {
     return [declaration];
   const paddingSides: Record<string, readonly string[]> = {
     padding: SPLIT_METRIC_SIDES,
-    'padding-inline': ['left', 'right'],
-    'padding-block': ['top', 'bottom'],
   };
   if (property.startsWith('padding')) {
     // Font-relative em resolves against the element's own font size. Split
@@ -503,12 +510,19 @@ function splitHostDeclarations(declaration: string): string[] {
         `[shadow split CSS] padding contribution needs a verified length recipe: ${declaration}`
       );
     }
-    const sides = paddingSides[property] ?? [property.slice('padding-'.length)];
-    return sides.map((side) => `--pui-split-padding-${side}: ${value};`);
+    const sides =
+      paddingSides[property] ??
+      (property === 'padding-inline' || property === 'padding-block'
+        ? []
+        : [property.slice('padding-'.length)]);
+    return [declaration, ...sides.map((side) => `--pui-split-padding-${side}: ${value};`)];
   }
   if (/^border(?:-(top|right|bottom|left))?-width$/.test(property)) {
     const side = property.match(/^border-(top|right|bottom|left)-width$/)?.[1];
-    return (side ? [side] : SPLIT_METRIC_SIDES).map((s) => `--pui-split-border-${s}: ${value};`);
+    return [
+      ...(side ? [] : [`--pui-split-border-uniform: ${value};`]),
+      ...(side ? [side] : SPLIT_METRIC_SIDES).map((s) => `--pui-split-border-${s}: ${value};`),
+    ];
   }
   if (property === 'display') {
     if (value === 'none') return ['display: none;'];
@@ -524,6 +538,29 @@ function splitHostDeclarations(declaration: string): string[] {
     return [declaration];
   }
   return [];
+}
+
+function splitSurfaceCompensationDeclarations(declaration: string): string[] {
+  const separator = declaration.indexOf(':');
+  const property = declaration.slice(0, separator).trim();
+  if (!property.startsWith('padding')) return [];
+  const value = declaration
+    .slice(separator + 1)
+    .trim()
+    .replace(/;$/, '');
+  const physical = (side: (typeof SPLIT_METRIC_SIDES)[number]) =>
+    `margin-${side}: calc(0px - ${value} - var(--pui-split-border-${side}));`;
+  if (property === 'padding') return SPLIT_METRIC_SIDES.map(physical);
+  if (property === 'padding-inline' || property === 'padding-block') {
+    const axis = property.slice('padding-'.length);
+    return ['start', 'end'].map(
+      (edge) => `margin-${axis}-${edge}: calc(0px - ${value} - var(--pui-split-border-uniform));`
+    );
+  }
+  const side = property.slice('padding-'.length);
+  return SPLIT_METRIC_SIDES.includes(side as (typeof SPLIT_METRIC_SIDES)[number])
+    ? [physical(side as (typeof SPLIT_METRIC_SIDES)[number])]
+    : [];
 }
 
 function sortTimingOverrides(rules: CssRule[]): void {

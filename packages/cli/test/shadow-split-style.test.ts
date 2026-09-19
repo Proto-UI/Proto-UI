@@ -160,11 +160,28 @@ describe('private generated Shadow split sizing', () => {
     expect(hostRules.some((m) => m[2].includes('border-color: #'))).toBe(false);
   });
 
+  it('preserves logical padding axes in host sizing and surface compensation', () => {
+    const css = renderProtoShadowSplitStyleArtifact(['border', 'px-2', 'py-1']).cssText;
+    expect(css).toContain('--pui-split-border-uniform: 0px;');
+    expect(css).toContain(
+      ':host([data-pui-split-root-style~="border"]) {\n    --pui-split-border-uniform: 1px;'
+    );
+    expect(css).toContain(
+      ':host([data-pui-split-root-style~="px-2"]) {\n    padding-inline: 0.5rem;'
+    );
+    expect(css).toContain(
+      ':host([data-pui-split-root-style~="px-2"]) > [data-pui-split-surface]:not(input, textarea) {\n    margin-inline-start: calc(0px - 0.5rem - var(--pui-split-border-uniform));\n    margin-inline-end: calc(0px - 0.5rem - var(--pui-split-border-uniform));'
+    );
+    expect(css).toContain(
+      ':host([data-pui-split-root-style~="py-1"]) > [data-pui-split-surface]:not(input, textarea) {\n    margin-block-start: calc(0px - 0.25rem - var(--pui-split-border-uniform));\n    margin-block-end: calc(0px - 0.25rem - var(--pui-split-border-uniform));'
+    );
+  });
+
   it('uses the same host state/meta condition for sizing and painting', () => {
     const css = renderProtoShadowSplitStyleArtifact(['dark:data-[checked]:p-4']).cssText;
     const selector =
       ':where(:host([data-pui-color-scheme=\'dark\'])):host([data-pui-split-root-style~="dark:data-[checked]:p-4"][data-checked])';
-    expect(css).toContain(`${selector} {\n    --pui-split-padding-top: 1rem;`);
+    expect(css).toContain(`${selector} {\n    padding: 1rem;\n    --pui-split-padding-top: 1rem;`);
     expect(css).toContain(
       `${selector} > [data-pui-split-surface][data-pui-style~="dark:data-[checked]:p-4"]`
     );

@@ -1,5 +1,4 @@
 import {
-  resolveWebFocusEntryTarget,
   cancelWebEventDefaultAction,
   createCapsWiring,
   createWebMoveGestureHost,
@@ -1086,14 +1085,6 @@ function resolveFocusEntryTarget(
   container: HTMLElement,
   config: { strategy: 'self' | 'descendant-first'; fallback: 'self' | 'none' }
 ): HTMLElement | null {
-  // Keep the established Light DOM entry policy when no Shadow boundary
-  // needs traversal; composed scope sampling is a separate host realization.
-  if (
-    !container.shadowRoot &&
-    !Array.from(container.querySelectorAll<HTMLElement>('*')).some((el) => el.shadowRoot)
-  ) {
-    return resolveWebFocusEntryTarget(container, config, isNativelyFocusable);
-  }
   if (config.strategy === 'descendant-first') {
     const descendant = sampleWebComponentScopeTargets(container, isNativelyFocusable).targets.find(
       (target) => target !== container

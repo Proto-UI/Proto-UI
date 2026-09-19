@@ -203,10 +203,10 @@ describe('adapter-web-component focus wiring', () => {
     child.tabIndex = 0;
     await settle();
     expect(el.hasAttribute('tabindex')).toBe(false);
-    child.setAttribute('aria-disabled', 'true');
+    child.setAttribute('inert', '');
     await settle();
     expect(el.tabIndex).toBe(0);
-    child.removeAttribute('aria-disabled');
+    child.removeAttribute('inert');
     await settle();
     expect(el.hasAttribute('tabindex')).toBe(false);
     child.remove();

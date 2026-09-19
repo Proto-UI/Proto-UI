@@ -19,8 +19,10 @@ beforeAll(async () => {
         export { sampleWebComponentScopeTargets as sample } from './packages/adapters/web-component/src/focus-scope-targets';
         export { createShadowColorSchemeEnvironmentOwner as createEnvironment } from './packages/adapters/web-component/src/shadow-color-scheme-environment';
         export { createWebComponentPortalMount as createPortal } from './packages/adapters/web-component/src/portal-mount';
+        export { createShadowSplitEffectsPort as createSplitEffects } from './packages/adapters/web-component/src/shadow-split-effects';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { definePrototype as define, tw } from '@proto.ui/core';
+        export { createRootStyleEffect, resolveRootStyleEntry } from '@proto.ui/core/internal';
         export { asTextControl, asFocusEntry, asFocusScope, asFocusable } from '@proto.ui/hooks';
         export { declareTextControl } from '@proto.ui/module-text-control';
       `,
@@ -1016,6 +1018,45 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('uses rendered Light DOM eligibility for descendant entry fallback', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-light-rendered-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const host = new C();
+        const button = document.createElement('button');
+        host.append(button);
+        document.body.append(host);
+        const frame = () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+        await frame();
+        const visible = host.getAttribute('tabindex');
+        button.style.visibility = 'hidden';
+        await frame();
+        const hidden = host.getAttribute('tabindex');
+        button.style.visibility = '';
+        await frame();
+        return { visible, hidden, restored: host.getAttribute('tabindex') };
+      });
+      expect(result).toEqual({ visible: null, hidden: '0', restored: null });
+    } finally {
+      await page.close();
+    }
+  });
+
   it('prunes a slotted scope through hidden flat-tree ancestors outside the container', async () => {
     const page = await browser.newPage();
     try {
@@ -1057,6 +1098,118 @@ describe('Shadow closeout native boundaries', () => {
         skipped: [],
         restored: ['slotted-inside'],
       });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('prunes a scope in closed details content while retaining the first summary branch', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        const summaryScope = document.createElement('div');
+        summaryScope.innerHTML = '<button id="summary-scope-button"></button>';
+        summary.append(summaryScope);
+        const contentScope = document.createElement('div');
+        contentScope.innerHTML = '<button id="details-content-button"></button>';
+        details.append(summary, contentScope);
+        document.body.append(details);
+        const sample = (scope: HTMLElement) =>
+          p.sample(scope).targets.map((target: HTMLElement) => target.id);
+        const closed = { summary: sample(summaryScope), content: sample(contentScope) };
+        details.open = true;
+        const open = sample(contentScope);
+        details.open = false;
+        return { closed, open, closedAgain: sample(contentScope) };
+      });
+      expect(result).toEqual({
+        closed: { summary: ['summary-scope-button'], content: [] },
+        open: ['details-content-button'],
+        closedAgain: [],
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('preserves logical split padding axes in a vertical writing mode', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        ({ artifact, documentCss }) => {
+          const p = (window as any).Closeout;
+          const documentStyle = document.createElement('style');
+          documentStyle.textContent = documentCss;
+          document.head.append(documentStyle);
+          const carrier = document.createElement('div');
+          carrier.style.writingMode = 'vertical-rl';
+          const reference = document.createElement('div');
+          reference.textContent = 'Logical';
+          reference.setAttribute('data-pui-style', 'inline-flex border px-2 py-1');
+          const host = document.createElement('x-writing-mode-split');
+          const root = host.attachShadow({ mode: 'open' });
+          const shadowStyle = document.createElement('style');
+          shadowStyle.textContent = artifact.cssText;
+          const surface = document.createElement('div');
+          surface.textContent = 'Logical';
+          root.append(shadowStyle, surface);
+          carrier.append(reference, host);
+          document.body.append(carrier);
+          const effects = p.createSplitEffects({
+            host,
+            surface,
+            artifact,
+            prototypeName: 'writing',
+          });
+          const tokens = ['inline-flex', 'border', 'px-2', 'py-1'];
+          effects.queueStyle(
+            p.createRootStyleEffect(
+              tokens.map((token: string) => p.resolveRootStyleEntry(token, 'setup'))
+            )
+          );
+          effects.requestFlush();
+          const rect = (element: Element) => {
+            const box = element.getBoundingClientRect();
+            return { width: box.width, height: box.height };
+          };
+          const hostStyle = getComputedStyle(host);
+          const surfaceStyle = getComputedStyle(surface);
+          const geometry = { reference: rect(reference), host: rect(host), surface: rect(surface) };
+          const modes = [getComputedStyle(host).writingMode, getComputedStyle(surface).writingMode];
+          const metrics = {
+            host: [
+              hostStyle.paddingTop,
+              hostStyle.paddingRight,
+              hostStyle.paddingBottom,
+              hostStyle.paddingLeft,
+            ],
+            surface: [
+              surfaceStyle.marginTop,
+              surfaceStyle.marginRight,
+              surfaceStyle.marginBottom,
+              surfaceStyle.marginLeft,
+            ],
+          };
+          effects.dispose();
+          return { geometry, modes, metrics };
+        },
+        {
+          artifact: renderProtoShadowSplitStyleArtifact(['inline-flex', 'border', 'px-2', 'py-1']),
+          documentCss: renderProtoStyleTokenCss(['inline-flex', 'border', 'px-2', 'py-1']),
+        }
+      );
+      expect(result.modes).toEqual(['vertical-rl', 'vertical-rl']);
+      expect(result.metrics).toEqual({
+        host: ['8px', '4px', '8px', '4px'],
+        surface: ['-9px', '-5px', '-9px', '-5px'],
+      });
+      expect(result.geometry.host).toEqual(result.geometry.reference);
+      expect(result.geometry.surface).toEqual(result.geometry.reference);
     } finally {
       await page.close();
     }

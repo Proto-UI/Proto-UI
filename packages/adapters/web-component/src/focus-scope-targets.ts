@@ -42,11 +42,17 @@ export function composedParentElement(el: Element): Element | null {
 }
 
 function isPrunedByExternalAncestor(el: Element): boolean {
+  let branch = el;
   let ancestor = composedParentElement(el);
   while (ancestor) {
     if (ancestor.hasAttribute('inert') || (isHtmlElement(ancestor) && ancestor.hidden)) return true;
+    if (isHtmlTag(ancestor, 'details') && !ancestor.open) {
+      const summary = [...ancestor.children].find((child) => isHtmlTag(child, 'summary'));
+      if (branch !== summary) return true;
+    }
     const style = getOwnedComputedStyle(ancestor);
     if (style?.display === 'none' || style?.contentVisibility === 'hidden') return true;
+    branch = ancestor;
     ancestor = composedParentElement(ancestor);
   }
   return false;

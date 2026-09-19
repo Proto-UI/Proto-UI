@@ -36,6 +36,22 @@ afterEach(async () => {
 });
 
 describe('WC live focus-entry resolver inputs', () => {
+  it('uses current rendered eligibility for a Light DOM descendant entry', async () => {
+    const host = panel(false);
+    const button = document.createElement('button');
+    host.append(button);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    button.style.visibility = 'hidden';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    button.style.visibility = '';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
   it('resamples when an observed descendant upgrades and attaches an open root', async () => {
     // attachShadow() produces no light-tree MutationObserver record; the
     // bounded upgrade watch must revoke the host fallback once a late-open

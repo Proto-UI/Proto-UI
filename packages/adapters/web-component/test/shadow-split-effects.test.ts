@@ -64,6 +64,43 @@ describe('private Shadow split effects', () => {
     expect(host.getAttribute(ROOT)).toContain('w-64');
     effects.dispose();
   });
+  it('rejects overlapping animated border widths independently of effect entry order', () => {
+    const { host, surface, effects } = setup(['block', 'border-2', 'border-b', 'transition-all']);
+    const before = [host.outerHTML, surface.outerHTML];
+    expect(() =>
+      effects.queueStyle(effect(['block', 'border-b', 'border-2', 'transition-all']))
+    ).toThrow(/used-value rounding/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    effects.requestFlush();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    effects.dispose();
+  });
+  it('admits logical padding without reading writing mode during atomic preflight', () => {
+    const { host, surface, effects } = setup(['block', 'px-2']);
+    host.style.writingMode = 'vertical-rl';
+    document.body.append(host);
+    try {
+      expect(host.style.writingMode).toBe('vertical-rl');
+      expect(() => effects.queueStyle(effect(['block', 'px-2']))).not.toThrow();
+      effects.requestFlush();
+      expect(host.getAttribute(ROOT)).toBe('block px-2');
+      expect(surface.getAttribute('data-pui-style')).toBe('consumer block px-2');
+    } finally {
+      effects.dispose();
+      host.remove();
+    }
+  });
+  it('rejects logical padding combined with unrepresented directional compensation', () => {
+    const { host, surface, effects } = setup(['block', 'px-2', 'border-b']);
+    const before = [host.outerHTML, surface.outerHTML];
+    expect(() => effects.queueStyle(effect(['block', 'px-2', 'border-b']))).toThrow(
+      /directional token "border-b"/
+    );
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    effects.requestFlush();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    effects.dispose();
+  });
   it('keeps geometry and hit tokens off the surface and rejects old recipes atomically', () => {
     const tokens = [
       'block',

@@ -69,6 +69,25 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it.each(['audio', 'video'] as const)('samples native %s controls', (tag) => {
+    const scope = document.createElement('div');
+    const media = document.createElement(tag);
+    media.id = tag;
+    media.controls = true;
+    // Happy DOM's UA stylesheet reports display:none for media controls;
+    // make the fixture's rendered eligibility explicit.
+    media.style.display = 'inline';
+    scope.append(media);
+    document.body.append(scope);
+    try {
+      expect(sampleWebComponentScopeTargets(scope, (target) => target === media).targets).toEqual([
+        media,
+      ]);
+    } finally {
+      scope.remove();
+    }
+  });
+
   it('excludes content-visibility:hidden subtrees from the sample', () => {
     // C-AS-FOCUS-SCOPE-0002-J: skipped content is not sequentially reachable.
     const scope = document.createElement('div');
@@ -119,6 +138,33 @@ describe('WC scope sequential target sample', () => {
       expect(sample()).toEqual(['inside']);
     } finally {
       carrier.remove();
+    }
+  });
+
+  it('prunes closed-details contents outside the scope but preserves its first summary', () => {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    const summaryScope = document.createElement('div');
+    summaryScope.innerHTML = '<button id="summary-button" tabindex="0"></button>';
+    summary.append(summaryScope);
+    const contentScope = document.createElement('div');
+    contentScope.innerHTML = '<button id="content-button" tabindex="0"></button>';
+    details.append(summary, contentScope);
+    document.body.append(details);
+    try {
+      expect(sampleWebComponentScopeTargets(summaryScope).targets.map((el) => el.id)).toEqual([
+        'summary-button',
+      ]);
+      expect(sampleWebComponentScopeTargets(contentScope).targets).toEqual([]);
+
+      details.open = true;
+      expect(sampleWebComponentScopeTargets(contentScope).targets.map((el) => el.id)).toEqual([
+        'content-button',
+      ]);
+      details.open = false;
+      expect(sampleWebComponentScopeTargets(contentScope).targets).toEqual([]);
+    } finally {
+      details.remove();
     }
   });
 

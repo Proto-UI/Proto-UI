@@ -20,7 +20,7 @@ type Projection = { root: string; surface: string[]; borderWidths: string };
 // to device pixels but interpolates compensating margins continuously. Until
 // a recipe preserves that used-value rounding, reject such transitions under K.
 function borderWidthCandidates(entries: readonly RootStyleEntry[]): number[][] {
-  const base = [0, 0, 0, 0]; // top, right, bottom, left
+  const base = Array.from({ length: 4 }, () => new Set<number>()); // top, right, bottom, left
   const conditional: Array<{ sides: number[]; width: number }> = [];
   for (const entry of entries) {
     const match = /^border(?:-([trbl]))?(?:-(\d+))?$/.exec(entry.authorToken);
@@ -28,11 +28,14 @@ function borderWidthCandidates(entries: readonly RootStyleEntry[]): number[][] {
     const sides = match[1] ? ['trbl'.indexOf(match[1])] : [0, 1, 2, 3];
     const width = Number(match[2] ?? 1);
     if (entry.token !== entry.authorToken) conditional.push({ sides, width });
-    else for (const side of sides) base[side] = width;
+    else for (const side of sides) base[side]!.add(width);
   }
-  return base.map((width, side) =>
+  return base.map((widths, side) =>
     [
-      ...new Set([width, ...conditional.filter((c) => c.sides.includes(side)).map((c) => c.width)]),
+      ...new Set([
+        ...(widths.size ? widths : [0]),
+        ...conditional.filter((c) => c.sides.includes(side)).map((c) => c.width),
+      ]),
     ].sort()
   );
 }
@@ -163,6 +166,18 @@ export function createShadowSplitEffectsPort({
       if (!artifact.cssText.includes(`[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`)) {
         fail(entry, 'physical token is absent from the compiled split closure');
       }
+    }
+    const logicalPadding = entries.find((entry) => /^(?:px|py)-/.test(entry.authorToken));
+    if (logicalPadding) {
+      const unsupported = entries.find(
+        (entry) =>
+          /^(?:p[trbl])-/.test(entry.authorToken) || /^border-[trbl](?:-|$)/.test(entry.authorToken)
+      );
+      if (unsupported)
+        fail(
+          logicalPadding,
+          `logical padding cannot share the split compensation recipe with directional token ${JSON.stringify(unsupported.authorToken)}`
+        );
     }
     const widths = borderWidthCandidates(entries);
     const borderWidths = JSON.stringify(widths);
