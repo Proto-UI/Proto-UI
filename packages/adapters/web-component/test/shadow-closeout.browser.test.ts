@@ -899,6 +899,46 @@ describe('Shadow closeout native boundaries', () => {
 
       await page.evaluate(() => {
         const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (window as any).__cssDeclarationRule = sheet.insertRule(
+          '#css-only-entry-button {}',
+          sheet.cssRules.length
+        );
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (sheet.cssRules[(window as any).__cssDeclarationRule] as CSSStyleRule).style.cssText =
+          'visibility: hidden;';
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+      expect(await page.locator('#css-only-entry-button').boundingBox()).toEqual(visibleBox);
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (sheet.cssRules[(window as any).__cssDeclarationRule] as CSSStyleRule).style.cssText = '';
+        sheet.deleteRule((window as any).__cssDeclarationRule);
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
         (window as any).__cssOnlyRule = sheet.insertRule(
           '#css-only-entry-button { display: none; }',
           sheet.cssRules.length
@@ -941,6 +981,52 @@ describe('Shadow closeout native boundaries', () => {
       );
       expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
       expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('prunes a slotted scope through hidden flat-tree ancestors outside the container', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(() => {
+        const carrier = document.createElement('div');
+        const root = carrier.attachShadow({ mode: 'open' });
+        const hidden = document.createElement('div');
+        hidden.id = 'flat-tree-hidden';
+        const slot = document.createElement('slot');
+        hidden.append(slot);
+        root.append(hidden);
+        const scope = document.createElement('div');
+        scope.id = 'slotted-scope';
+        scope.innerHTML = '<button id="slotted-inside" tabindex="0"></button>';
+        carrier.append(scope);
+        document.body.append(carrier);
+        const sample = () =>
+          (window as any).Closeout.sample(scope).targets.map((el: HTMLElement) => el.id);
+        const visible = sample();
+        hidden.setAttribute('inert', '');
+        const inert = sample();
+        hidden.removeAttribute('inert');
+        hidden.style.contentVisibility = 'hidden';
+        const skipped = sample();
+        hidden.style.contentVisibility = '';
+        return {
+          assigned: scope.assignedSlot === slot,
+          visible,
+          inert,
+          skipped,
+          restored: sample(),
+        };
+      });
+      expect(result).toEqual({
+        assigned: true,
+        visible: ['slotted-inside'],
+        inert: [],
+        skipped: [],
+        restored: ['slotted-inside'],
+      });
     } finally {
       await page.close();
     }

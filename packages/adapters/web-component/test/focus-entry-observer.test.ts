@@ -181,12 +181,22 @@ describe('WC live focus-entry resolver inputs', () => {
 
   it('restores stylesheet invalidation methods when its last entry observer tears down', async () => {
     const original = CSSStyleSheet.prototype.insertRule;
+    const originalCssText = Object.getOwnPropertyDescriptor(
+      CSSStyleDeclaration.prototype,
+      'cssText'
+    );
     const host = panel(true);
     await settle();
     expect(CSSStyleSheet.prototype.insertRule).not.toBe(original);
+    expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')?.set).not.toBe(
+      originalCssText?.set
+    );
     host.remove();
     await settle();
     expect(CSSStyleSheet.prototype.insertRule).toBe(original);
+    expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')).toEqual(
+      originalCssText
+    );
   });
 
   it('never clobbers a third-party stylesheet patch installed after ours', async () => {
@@ -206,6 +216,38 @@ describe('WC live focus-entry resolver inputs', () => {
     } finally {
       if (CSSStyleSheet.prototype.insertRule === thirdParty) {
         CSSStyleSheet.prototype.insertRule = original;
+      }
+    }
+  });
+
+  it('never clobbers a third-party cssText setter installed after ours', async () => {
+    const original = Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')!;
+    const host = panel(true);
+    await settle();
+    const protoDescriptor = Object.getOwnPropertyDescriptor(
+      CSSStyleDeclaration.prototype,
+      'cssText'
+    )!;
+    expect(protoDescriptor.set).not.toBe(original.set);
+    const thirdParty = function (this: CSSStyleDeclaration, value: string) {
+      protoDescriptor.set!.call(this, value);
+    };
+    Object.defineProperty(CSSStyleDeclaration.prototype, 'cssText', {
+      ...protoDescriptor,
+      set: thirdParty,
+    });
+    try {
+      host.remove();
+      await settle();
+      expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')?.set).toBe(
+        thirdParty
+      );
+    } finally {
+      if (
+        Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')?.set ===
+        thirdParty
+      ) {
+        Object.defineProperty(CSSStyleDeclaration.prototype, 'cssText', original);
       }
     }
   });

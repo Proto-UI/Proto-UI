@@ -194,13 +194,19 @@ type EntryStyleMethodPatch = {
   patched: (...args: unknown[]) => unknown;
 };
 
+type EntryStyleSetterPatch = {
+  target: object;
+  key: string;
+  original: PropertyDescriptor;
+  patched: NonNullable<PropertyDescriptor['set']>;
+};
+
 const entryStyleWatches = new WeakMap<
   Window,
   {
     subscribers: Set<() => void>;
     methodPatches: EntryStyleMethodPatch[];
-    visibilityDescriptor: PropertyDescriptor | null;
-    visibilitySetter: ((value: string) => void) | null;
+    setterPatches: EntryStyleSetterPatch[];
     observer: MutationObserver;
     onLoad: (event: Event) => void;
   }
@@ -253,22 +259,20 @@ function watchEntryStyleInvalidation(
     patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'setProperty');
     patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'removeProperty');
 
-    const visibilityDescriptor = Object.getOwnPropertyDescriptor(
-      Declaration.prototype,
-      'visibility'
-    );
-    let visibilitySetter: ((value: string) => void) | null = null;
-    if (visibilityDescriptor?.configurable && visibilityDescriptor.set) {
-      const originalSet = visibilityDescriptor.set;
-      visibilitySetter = function (this: CSSStyleDeclaration, value: string) {
+    const setterPatches: EntryStyleSetterPatch[] = [];
+    const patchSetter = (target: object, key: string) => {
+      const original = Object.getOwnPropertyDescriptor(target, key);
+      if (!original?.configurable || !original.set) return;
+      const originalSet = original.set;
+      const patched = function (this: CSSStyleDeclaration, value: unknown) {
         originalSet.call(this, value);
         notify();
       };
-      Object.defineProperty(Declaration.prototype, 'visibility', {
-        ...visibilityDescriptor,
-        set: visibilitySetter,
-      });
-    }
+      Object.defineProperty(target, key, { ...original, set: patched });
+      setterPatches.push({ target, key, original, patched });
+    };
+    patchSetter(Declaration.prototype, 'visibility');
+    patchSetter(Declaration.prototype, 'cssText');
 
     const isStylesheetElement = (node: Node | null): node is Element => {
       if (!node || node.nodeType !== 1) return false;
@@ -311,8 +315,7 @@ function watchEntryStyleInvalidation(
     watch = {
       subscribers,
       methodPatches,
-      visibilityDescriptor: visibilityDescriptor ?? null,
-      visibilitySetter,
+      setterPatches,
       observer,
       onLoad,
     };
@@ -329,10 +332,10 @@ function watchEntryStyleInvalidation(
     for (const patch of current.methodPatches) {
       if (patch.target[patch.key] === patch.patched) patch.target[patch.key] = patch.original;
     }
-    if (current.visibilityDescriptor && current.visibilitySetter) {
-      const descriptor = Object.getOwnPropertyDescriptor(Declaration.prototype, 'visibility');
-      if (descriptor?.set === current.visibilitySetter) {
-        Object.defineProperty(Declaration.prototype, 'visibility', current.visibilityDescriptor);
+    for (const patch of current.setterPatches) {
+      const descriptor = Object.getOwnPropertyDescriptor(patch.target, patch.key);
+      if (descriptor?.set === patch.patched) {
+        Object.defineProperty(patch.target, patch.key, patch.original);
       }
     }
     entryStyleWatches.delete(view as Window);

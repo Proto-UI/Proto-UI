@@ -35,6 +35,7 @@ function isShadowRootNode(node: Node): node is ShadowRoot {
 }
 
 function composedParentElement(el: Element): Element | null {
+  if (isHtmlElement(el) && el.assignedSlot) return el.assignedSlot;
   if (el.parentElement) return el.parentElement;
   const root = el.getRootNode();
   return isShadowRootNode(root) ? root.host : null;

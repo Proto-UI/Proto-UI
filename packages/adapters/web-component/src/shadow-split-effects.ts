@@ -160,10 +160,7 @@ export function createShadowSplitEffectsPort({
       if (entry.role === 'composite' && !COMPOSITES.has(entry.authorToken))
         fail(entry, 'composite recipe is not implemented');
       const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-      if (
-        entry.roleSource !== 'fallback' &&
-        !artifact.cssText.includes(`[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`)
-      ) {
+      if (!artifact.cssText.includes(`[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`)) {
         fail(entry, 'physical token is absent from the compiled split closure');
       }
     }

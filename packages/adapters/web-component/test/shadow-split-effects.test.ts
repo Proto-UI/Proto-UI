@@ -131,16 +131,43 @@ describe('private Shadow split effects', () => {
     effects.dispose();
   });
 
-  it('preserves lowered provenance and extension fallback without reclassifying selector tokens', () => {
+  it('rejects fallback tokens absent from the artifact before changing either target', () => {
     const { host, surface, effects } = setup();
+    effects.queueStyle(effect(['bg-primary']));
+    effects.requestFlush();
+    const before = [host.outerHTML, surface.outerHTML];
     const lowered = lowerRootStyleTokens(['p-4'], 'dark');
-    effects.queueStyle(
+    expect(() =>
+      effects.queueStyle(
+        createRootStyleEffect([
+          ...lowered.entries,
+          resolveRootStyleEntry('extension-token', 'setup'),
+        ])
+      )
+    ).toThrow(/extension-token.*physical token is absent from the compiled split closure/);
+    effects.requestFlush();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    effects.dispose();
+  });
+
+  it('preserves fallback provenance when the exact physical token belongs to the artifact', () => {
+    const { host, surface, effects, options } = setup();
+    effects.dispose();
+    const admitted = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: `${options.artifact.cssText}\n:host([${ROOT}~="extension-token"]) {}`,
+      },
+    });
+    const lowered = lowerRootStyleTokens(['p-4'], 'dark');
+    admitted.queueStyle(
       createRootStyleEffect([...lowered.entries, resolveRootStyleEntry('extension-token', 'setup')])
     );
-    effects.requestFlush();
+    admitted.requestFlush();
     expect(host.getAttribute(ROOT)).toBe('dark:p-4 extension-token');
     expect(surface.getAttribute('data-pui-style')).toBe('consumer dark:p-4 extension-token');
-    effects.dispose();
+    admitted.dispose();
   });
 
   it('rolls back both targets after an injected DOM write failure', () => {
