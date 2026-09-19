@@ -276,6 +276,45 @@ test('does not let the reviewed site-control bridge exempt a sibling Adapter chu
   );
 });
 
+test('allows Adapter modules in chunks statically imported by the reviewed site-control bridge chunk', () => {
+  const graph = graphFixture();
+  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js');
+  graph.chunks.push(
+    chunk('_astro/site-shadcn-controls.js', {
+      imports: ['_astro/shared-adapter.js'],
+      moduleIds: ['apps/www/src/components/site-shadcn-controls.ts'],
+    }),
+    chunk('_astro/shared-adapter.js', {
+      moduleIds: [
+        'packages/adapters/base/src/host/adapter-host.ts',
+        'packages/adapters/web-component/src/adapt.ts?used',
+      ],
+    })
+  );
+
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+});
+
+test('rejects framework modules even downstream of the reviewed site-control bridge chunk', () => {
+  const graph = graphFixture();
+  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js');
+  graph.chunks.push(
+    chunk('_astro/site-shadcn-controls.js', {
+      imports: ['_astro/shared-adapter.js'],
+      moduleIds: ['apps/www/src/components/site-shadcn-controls.ts'],
+    }),
+    chunk('_astro/shared-adapter.js', {
+      moduleIds: ['node_modules/.pnpm/react@19.2.0/node_modules/react/jsx-runtime.js'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('statically reaches forbidden React/Vue module(s)')
+    )
+  );
+});
+
 test('treats an unproven null-facade entry as a shell root', () => {
   const graph = graphFixture();
   graph.chunks.push(

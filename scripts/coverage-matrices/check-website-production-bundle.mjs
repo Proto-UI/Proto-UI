@@ -7,6 +7,11 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/previewer-client.ts',
+  // The style-isolation fixture page is a route-owned demonstration host: it
+  // statically mounts the reviewed Web Component demo renderer and lazily
+  // mounts each isolated React/Vue/Vue2 Adapter runtime to compare style
+  // projection across hosts.
+  'apps/www/src/pages/en/test/style-isolation.astro?astro&type=script&index=0&lang.ts',
 ]);
 const REVIEWED_DEMONSTRATION_RUNTIME_FACADES = new Set([
   'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts',
@@ -355,6 +360,17 @@ export function collectWebsiteProductionBundleIssues({
       `production bundle graph must contain at most one exact reviewed Website control bridge chunk (found ${reviewedWebsiteControlChunks.size})`
     );
   }
+  // Rollup may hoist the bridge's Adapter dependencies into shared chunks
+  // imported by the reviewed control chunk instead of co-locating them with
+  // it. The exemption therefore covers the control chunk and the chunks it
+  // statically imports, but never unrelated sibling chunks that merely share
+  // a shell closure with the bridge.
+  const reviewedWebsiteControlBridgeChunks = new Set();
+  for (const fileName of reviewedWebsiteControlChunks) {
+    for (const reachedFileName of closure(chunksByFileName, fileName, ['imports'])) {
+      reviewedWebsiteControlBridgeChunks.add(reachedFileName);
+    }
+  }
 
   for (const shellRoot of shellRoots) {
     const shellClosure = closure(chunksByFileName, shellRoot.fileName, ['imports']);
@@ -366,7 +382,7 @@ export function collectWebsiteProductionBundleIssues({
         const isUnapprovedAdapter =
           isProtoUiAdapterModule(moduleId) &&
           !(
-            reviewedWebsiteControlChunks.has(fileName) &&
+            reviewedWebsiteControlBridgeChunks.has(fileName) &&
             isReviewedWebsiteControlAdapterModule(moduleId)
           );
         if (isFrameworkModule || isUnapprovedAdapter) leakedModules.add(moduleId);
