@@ -5,6 +5,10 @@ on:
     paths:
       - .github/workflows/poppy-preview-*.yml
       - integrations/proto-ui-preview/**
+  pull_request_target:
+    paths:
+      - .github/workflows/poppy-preview-*.yml
+      - integrations/proto-ui-preview/**
   push:
     branches: [main]
     paths:
@@ -15,12 +19,20 @@ permissions:
   contents: read
 
 concurrency:
-  group: poppy-preview-security-${{ github.event.pull_request.number || github.ref }}
+  # Include the event name: pull_request and pull_request_target fire together
+  # for the same head and must not cancel each other's lanes.
+  group: poppy-preview-security-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   security-boundary:
     name: Preview trust-boundary tests
+    # Untrusted lane: on pull_request this job checks out and executes
+    # contributor-controlled code, so it stays secret-free and never contacts
+    # the private pinned handler repository. Authoritative pinned-handler
+    # evidence for a pull request head is produced only by the trusted
+    # exact-head lane below.
+    if: github.event_name != 'pull_request_target'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -30,31 +42,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Check out the pinned dcbot preview handler contract
-        id: dcbot-contract
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        continue-on-error: true
-        with:
-          repository: Proto-UI/dcbot
-          ref: 3f60a2b41832a0b02e64a0f4b8bf237355b59806
-          path: .poppy/dcbot-contract
-          fetch-depth: 1
-          persist-credentials: false
-          token: ${{ github.token }}
-
       - name: Use Node.js 22
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: integrations/proto-ui-preview/package-lock.json
-
-      - name: Use Go from the pinned dcbot module
-        if: steps.dcbot-contract.outcome == 'success'
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
-        with:
-          go-version-file: .poppy/dcbot-contract/go.mod
-          cache-dependency-path: .poppy/dcbot-contract/go.sum
 
       - name: Install the integrity-locked test dependencies
         shell: bash
@@ -63,19 +56,6 @@ jobs:
       - name: Run the edge, lifecycle, browser, and lockstep suite
         shell: bash
         run: npm test --prefix integrations/proto-ui-preview
-
-      - name: Verify the pinned dcbot handler source digests
-        if: steps.dcbot-contract.outcome == 'success'
-        env:
-          DCBOT_CONTRACT_ROOT: ${{ github.workspace }}/.poppy/dcbot-contract
-        shell: bash
-        run: node --test integrations/proto-ui-preview/scripts/dcbot-handler-contract.test.mjs
-
-      - name: Run the pinned real dcbot preview handler suite
-        if: steps.dcbot-contract.outcome == 'success'
-        working-directory: .poppy/dcbot-contract
-        shell: bash
-        run: go test ./internal/preview
 
       - name: Install checksum-verified actionlint 1.7.7
         shell: bash
@@ -97,11 +77,140 @@ jobs:
           "$RUNNER_TEMP/actionlint" .github/workflows/poppy-preview-*.yml integrations/proto-ui-preview/.github/workflows/*.yml
 
 
+  dcbot-contract-exact-head:
+    name: Pinned dcbot handler verification (exact head)
+    # Trusted lane. Trust boundary:
+    #   * pull_request_target executes this workflow from the immutable
+    #     default-branch definition, so a pull request cannot alter these
+    #     steps for its own run and the GITHUB_TOKEN stays read-only.
+    #   * DCBOT_CONTRACT_TOKEN is required up front; a missing or
+    #     unauthorized credential fails the check instead of skipping it.
+    #   * The credential is used only to check out the pinned Proto-UI/dcbot
+    #     revision with persist-credentials: false, and the checkout is
+    #     verified to resolve to the pinned commit.
+    #   * The pull request head is checked out separately as inert data
+    #     (contract JSON only); nothing under .pr-head is ever executed.
+    #   * Digest verification runs from an inline script embedded in this
+    #     trusted workflow file, not from any pull-request-controlled path,
+    #     and it rejects unsafe digest paths before reading them.
+    #   * The Go suite executes only pinned-revision dcbot code.
+    # The check run is bound to github.event.pull_request.head.sha, so its
+    # success is non-optional exact-head evidence required before
+    # integration. A concurrent head update starts a new run for the new
+    # head, and the exact-head binding step fails any stale checkout.
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Require the pinned dcbot read credential
+        env:
+          DCBOT_CONTRACT_TOKEN: ${{ secrets.DCBOT_CONTRACT_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "${DCBOT_CONTRACT_TOKEN:-}" ]; then
+            echo "::error::DCBOT_CONTRACT_TOKEN is not configured; pinned dcbot verification is blocking and cannot be skipped."
+            exit 1
+          fi
+
+      - name: Check out the pinned dcbot preview handler contract
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Proto-UI/dcbot
+          ref: 3f60a2b41832a0b02e64a0f4b8bf237355b59806
+          path: .poppy/dcbot-contract
+          fetch-depth: 1
+          persist-credentials: false
+          token: ${{ secrets.DCBOT_CONTRACT_TOKEN }}
+
+      - name: Bind the dcbot checkout to the pinned revision
+        shell: bash
+        run: >-
+          test "$(git -C .poppy/dcbot-contract rev-parse HEAD)" = "3f60a2b41832a0b02e64a0f4b8bf237355b59806"
+
+
+      - name: Check out the exact pull request head contract data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/head
+          path: .pr-head
+          sparse-checkout: integrations/proto-ui-preview/contracts
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Bind the reviewed contract to the exact pull request head
+        shell: bash
+        run: >-
+          test "$(git -C .pr-head rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Use Go from the pinned dcbot module
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: .poppy/dcbot-contract/go.mod
+          cache-dependency-path: .poppy/dcbot-contract/go.sum
+
+      - name: Verify the pinned dcbot handler source digests at the exact head
+        env:
+          DCBOT_CONTRACT_ROOT: ${{ github.workspace }}/.poppy/dcbot-contract
+          PR_HEAD_CONTRACT: ${{ github.workspace }}/.pr-head/integrations/proto-ui-preview/contracts/dcbot-preview-handler-v1.json
+          PINNED_DCBOT_REPOSITORY: Proto-UI/dcbot
+          PINNED_DCBOT_REVISION: 3f60a2b41832a0b02e64a0f4b8bf237355b59806
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/verify-dcbot-contract.mjs" <<'SCRIPT'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { readFile } from 'node:fs/promises';
+          import path from 'node:path';
+
+          const contract = JSON.parse(await readFile(process.env.PR_HEAD_CONTRACT, 'utf8'));
+          assert.equal(
+            contract.repository,
+            process.env.PINNED_DCBOT_REPOSITORY,
+            'contract repository pin drifted from the trusted workflow pin'
+          );
+          assert.equal(
+            contract.revision,
+            process.env.PINNED_DCBOT_REVISION,
+            'contract revision pin drifted from the trusted workflow pin'
+          );
+          const entries = Object.entries(contract.sourceDigests ?? {});
+          assert.ok(entries.length > 0, 'contract must pin at least one dcbot source digest');
+          for (const [relative, expected] of entries) {
+            assert.ok(
+              typeof relative === 'string' &&
+                !path.isAbsolute(relative) &&
+                !relative.split(/[\\/]+/).includes('..'),
+              `unsafe digest path rejected: ${relative}`
+            );
+            const bytes = await readFile(path.join(process.env.DCBOT_CONTRACT_ROOT, relative));
+            const actual = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+            assert.equal(actual, expected, `pinned digest mismatch for ${relative}`);
+          }
+          console.log(
+            `verified ${entries.length} pinned dcbot source digests at ${process.env.PINNED_DCBOT_REVISION}`
+          );
+          SCRIPT
+          node "$RUNNER_TEMP/verify-dcbot-contract.mjs"
+
+      - name: Run the pinned real dcbot preview handler suite
+        working-directory: .poppy/dcbot-contract
+        shell: bash
+        run: go test ./internal/preview
+
   dcbot-contract-pinned:
     name: Pinned dcbot handler verification
-    # The credentialed cross-repository checkout runs only from immutable
-    # default-branch workflow code. pull_request runs never receive the
-    # DCBOT_CONTRACT_TOKEN secret.
+    # Trusted default-branch lane. The credentialed cross-repository checkout
+    # runs only from immutable default-branch workflow code, and it fails
+    # closed: a missing or unauthorized DCBOT_CONTRACT_TOKEN fails the job
+    # instead of silently skipping the pinned verification.
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -112,17 +221,31 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Require the pinned dcbot read credential
+        env:
+          DCBOT_CONTRACT_TOKEN: ${{ secrets.DCBOT_CONTRACT_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "${DCBOT_CONTRACT_TOKEN:-}" ]; then
+            echo "::error::DCBOT_CONTRACT_TOKEN is not configured; pinned dcbot verification is blocking and cannot be skipped."
+            exit 1
+          fi
+
       - name: Check out the pinned dcbot preview handler contract
-        id: dcbot-contract
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        continue-on-error: true
         with:
           repository: Proto-UI/dcbot
           ref: 3f60a2b41832a0b02e64a0f4b8bf237355b59806
           path: .poppy/dcbot-contract
           fetch-depth: 1
           persist-credentials: false
-          token: ${{ secrets.DCBOT_CONTRACT_TOKEN || github.token }}
+          token: ${{ secrets.DCBOT_CONTRACT_TOKEN }}
+
+      - name: Bind the dcbot checkout to the pinned revision
+        shell: bash
+        run: >-
+          test "$(git -C .poppy/dcbot-contract rev-parse HEAD)" = "3f60a2b41832a0b02e64a0f4b8bf237355b59806"
+
 
       - name: Use Node.js 22
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -132,7 +255,6 @@ jobs:
           cache-dependency-path: integrations/proto-ui-preview/package-lock.json
 
       - name: Use Go from the pinned dcbot module
-        if: steps.dcbot-contract.outcome == 'success'
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: .poppy/dcbot-contract/go.mod
@@ -143,14 +265,12 @@ jobs:
         run: npm ci --prefix integrations/proto-ui-preview --ignore-scripts
 
       - name: Verify the pinned dcbot handler source digests
-        if: steps.dcbot-contract.outcome == 'success'
         env:
           DCBOT_CONTRACT_ROOT: ${{ github.workspace }}/.poppy/dcbot-contract
         shell: bash
         run: node --test integrations/proto-ui-preview/scripts/dcbot-handler-contract.test.mjs
 
       - name: Run the pinned real dcbot preview handler suite
-        if: steps.dcbot-contract.outcome == 'success'
         working-directory: .poppy/dcbot-contract
         shell: bash
         run: go test ./internal/preview

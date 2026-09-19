@@ -530,14 +530,23 @@ test('close revocation covers every possibly-owning control plane in both modes'
 test('pull_request security runs never receive the dcbot credential', () => {
   const boundary = security.slice(
     security.indexOf('  security-boundary:'),
+    security.indexOf('  dcbot-contract-exact-head:')
+  );
+  assert.match(boundary, /if: github\.event_name != 'pull_request_target'/);
+  assert.doesNotMatch(boundary, /secrets\.DCBOT_CONTRACT_TOKEN/);
+  assert.doesNotMatch(boundary, /Proto-UI\/dcbot/);
+  const exactHead = security.slice(
+    security.indexOf('  dcbot-contract-exact-head:'),
     security.indexOf('  dcbot-contract-pinned:')
   );
-  assert.doesNotMatch(boundary, /secrets\.DCBOT_CONTRACT_TOKEN/);
-  assert.match(boundary, /token: \$\{\{ github\.token \}\}/);
+  assert.match(exactHead, /if: github\.event_name == 'pull_request_target'/);
+  assert.match(exactHead, /token: \$\{\{ secrets\.DCBOT_CONTRACT_TOKEN \}\}/);
+  assert.doesNotMatch(exactHead, /github\.token/);
+  assert.doesNotMatch(exactHead, /continue-on-error/);
   const pinned = security.slice(security.indexOf('  dcbot-contract-pinned:'));
   assert.match(pinned, /if: github\.event_name == 'push'/);
-  assert.match(pinned, /token: \$\{\{ secrets\.DCBOT_CONTRACT_TOKEN \|\| github\.token \}\}/);
-  assert.match(pinned, /continue-on-error: true/);
+  assert.match(pinned, /token: \$\{\{ secrets\.DCBOT_CONTRACT_TOKEN \}\}/);
+  assert.doesNotMatch(pinned, /continue-on-error/);
 });
 
 test('security CI checks the immutable dcbot handler source and runs its real preview tests', () => {
@@ -547,22 +556,38 @@ test('security CI checks the immutable dcbot handler source and runs its real pr
   assert.match(security, /go test \.\/internal\/preview/);
 });
 
-test('security CI degrades safely when the private contract repo is unreachable', () => {
-  // The pinned dcbot checkout must not fail the job when github.token cannot see
-  // the private repository; an optional PAT restores full verification.
-  assert.match(security, /id: dcbot-contract/);
-  assert.match(security, /continue-on-error: true/);
-  assert.match(security, /token: \$\{\{ secrets\.DCBOT_CONTRACT_TOKEN \|\| github\.token \}\}/);
-  const goSuite = security.indexOf('Run the pinned real dcbot preview handler suite');
-  assert.ok(goSuite > security.indexOf("if: steps.dcbot-contract.outcome == 'success'"));
+test('security CI fails closed when the pinned contract repository is unreachable', () => {
+  // Inability to fetch or test the pinned dcbot revision is blocking for
+  // acceptance: neither trusted lane may skip verification and stay green.
+  assert.match(security, /^  pull_request_target:$/m);
   assert.match(
     security,
-    /if: steps\.dcbot-contract\.outcome == 'success'\n\s+working-directory: \.poppy\/dcbot-contract/
+    /group: poppy-preview-security-\$\{\{ github\.event_name \}\}-\$\{\{ github\.event\.pull_request\.number \|\| github\.ref \}\}/
   );
-  assert.match(
-    security,
-    /if: steps\.dcbot-contract\.outcome == 'success'\n\s+env:\n\s+DCBOT_CONTRACT_ROOT:/
+  const exactHead = security.slice(
+    security.indexOf('  dcbot-contract-exact-head:'),
+    security.indexOf('  dcbot-contract-pinned:')
   );
+  assert.match(exactHead, /DCBOT_CONTRACT_TOKEN is not configured/);
+  assert.doesNotMatch(exactHead, /continue-on-error/);
+  // The trusted lane binds both checkouts before any verification runs:
+  // the pinned dcbot revision and the exact pull request head.
+  assert.match(exactHead, /ref: refs\/pull\/\$\{\{ github\.event\.pull_request\.number \}\}\/head/);
+  assert.match(exactHead, /git -C \.pr-head rev-parse HEAD/);
+  assert.match(exactHead, /\$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
+  assert.match(exactHead, /git -C \.poppy\/dcbot-contract rev-parse HEAD/);
+  // The pull request checkout is inert data: nothing under .pr-head executes.
+  assert.match(exactHead, /sparse-checkout: integrations\/proto-ui-preview\/contracts/);
+  assert.doesNotMatch(exactHead, /working-directory: \.pr-head/);
+  assert.doesNotMatch(exactHead, /(?:npm|node|go)[^\n]*\.pr-head/);
+  // Digest verification runs trusted inline code, enforces the workflow pin,
+  // and rejects unsafe digest paths from the pull-request-controlled JSON.
+  assert.match(exactHead, /PINNED_DCBOT_REVISION/);
+  assert.match(exactHead, /contract revision pin drifted from the trusted workflow pin/);
+  assert.match(exactHead, /unsafe digest path rejected/);
+  const pinned = security.slice(security.indexOf('  dcbot-contract-pinned:'));
+  assert.match(pinned, /DCBOT_CONTRACT_TOKEN is not configured/);
+  assert.doesNotMatch(pinned, /continue-on-error/);
 });
 
 test('installed workflows remain byte-identical to reviewed templates', async (t) => {
