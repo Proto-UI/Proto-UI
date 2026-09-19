@@ -570,6 +570,173 @@ test('review packet requires real scope, evidence accounting, and finding reconc
   assert.throws(() => validateReviewPacket(stillCurrentResolvedFinding, input), /still references/);
 });
 
+test('reconciliation must cover every prior finding exactly once', () => {
+  // PR509-RECONCILIATION-COVERAGE-001: membership alone let a packet silently
+  // omit a prior finding (prior F-OLD with empty resolved/open/new passed).
+  const finding = {
+    id: 'F-1',
+    severity: 'P1',
+    confidence: 'high',
+    file: 'scripts/example.mjs',
+    line: 10,
+    authority: 'AGENTS.md',
+    observed: 'Observed drift',
+    expected: 'Expected governed behavior',
+    impact: 'Review result is misleading',
+    fix: 'Restore the governed boundary',
+  };
+  const input = reviewInput();
+  const priorPacket = {
+    ...packet({}, reviewInput()),
+    headSha: sha('9'),
+    findings: [
+      { ...finding, id: 'F-0' },
+      { ...finding, id: 'F-OLD' },
+    ],
+  };
+  const reconcile = (states) =>
+    packet(
+      {
+        findings: [finding],
+        reconciliation: {
+          priorReviewedHeadSha: sha('9'),
+          priorPacketDigest: computeReviewPacketDigest(priorPacket),
+          resolvedFindingIds: [],
+          openFindingIds: [],
+          newFindingIds: ['F-1'],
+          ...states,
+        },
+      },
+      input
+    );
+  const omitted = reconcile({ resolvedFindingIds: ['F-0'] });
+  assert.throws(
+    () => verifyReconciliation(omitted, priorPacket),
+    /cover every prior finding exactly once/,
+    'an omitted prior finding must fail closed'
+  );
+  const fullyDropped = reconcile({});
+  assert.throws(
+    () => verifyReconciliation(fullyDropped, priorPacket),
+    /cover every prior finding exactly once/,
+    'empty resolved/open sets must not reconcile a non-empty prior packet'
+  );
+  const overlapped = reconcile({ resolvedFindingIds: ['F-0'], openFindingIds: ['F-0', 'F-OLD'] });
+  assert.throws(
+    () => verifyReconciliation(overlapped, priorPacket),
+    /overlap or repeat/,
+    'a finding accounted twice must fail closed'
+  );
+  const unknownNew = reconcile({
+    resolvedFindingIds: ['F-0'],
+    openFindingIds: ['F-OLD'],
+    newFindingIds: ['F-2'],
+  });
+  assert.throws(
+    () => verifyReconciliation(unknownNew, priorPacket),
+    /absent from the current packet/,
+    'new reconciliation must reference a current finding'
+  );
+  const complete = reconcile({ resolvedFindingIds: ['F-0'], openFindingIds: ['F-OLD'] });
+  assert.equal(verifyReconciliation(complete, priorPacket), true);
+});
+
+test('agent:review submit-review consumes the bound prior packet before any live call', () => {
+  // PR509-RECONCILIATION-COVERAGE-001: submission must verify the packet
+  // against the exact prior packet it reconciles whenever priorPacketDigest
+  // is non-null, before any live collection or write.
+  const directory = mkdtempSync(path.join(tmpdir(), 'pui-review-submit-prior-'));
+  const packetPath = path.join(directory, 'packet.json');
+  const priorPath = path.join(directory, 'prior-packet.json');
+  const inputPath = path.join(directory, 'input.json');
+  const handoffPath = path.join(directory, 'handoff.json');
+  const command = path.join(root, 'scripts/agent-operations/review-packet.mjs');
+  try {
+    const finding = {
+      id: 'F-1',
+      severity: 'P1',
+      confidence: 'high',
+      file: 'scripts/example.mjs',
+      line: 10,
+      authority: 'AGENTS.md',
+      observed: 'Observed drift',
+      expected: 'Expected governed behavior',
+      impact: 'Review result is misleading',
+      fix: 'Restore the governed boundary',
+    };
+    const input = reviewInput();
+    const priorPacket = {
+      ...packet({}, reviewInput()),
+      headSha: sha('9'),
+      findings: [{ ...finding, id: 'F-0' }],
+    };
+    const boundPacket = packet(
+      {
+        findings: [finding],
+        reconciliation: {
+          priorReviewedHeadSha: sha('9'),
+          priorPacketDigest: computeReviewPacketDigest(priorPacket),
+          resolvedFindingIds: ['F-0'],
+          openFindingIds: [],
+          newFindingIds: ['F-1'],
+        },
+      },
+      input
+    );
+    writeFileSync(inputPath, JSON.stringify(input));
+    writeFileSync(packetPath, JSON.stringify(boundPacket));
+    writeFileSync(priorPath, JSON.stringify(priorPacket));
+    writeFileSync(
+      handoffPath,
+      JSON.stringify({
+        schemaVersion: 1,
+        kind: 'proto-ui.skill-handoff',
+        entrypoint: 'development',
+        executionMode: 'human-assisted',
+        executionModeSource: 'current-user',
+        fromId: 'pui-validate',
+        nextSkillId: 'pui-review',
+        artifacts: [
+          { type: 'authority-map', reference: 'review authority map' },
+          { type: 'candidate-change', reference: 'bounded candidate change' },
+          { type: 'evidence-report', reference: 'validation evidence' },
+          { type: 'review-input', reference: inputPath },
+        ],
+        humanGates: [],
+        notes: [],
+      })
+    );
+    const submitArgs = [
+      command,
+      'submit-review',
+      '--packet',
+      packetPath,
+      '--input',
+      inputPath,
+      '--handoff',
+      handoffPath,
+    ];
+    assert.throws(
+      () => execFileSync(process.execPath, submitArgs, { cwd: root, encoding: 'utf8' }),
+      (error) => /--prior-packet is required/.test(error.stderr ?? ''),
+      'submission without the bound prior packet must fail before live collection'
+    );
+    const tamperedPrior = { ...priorPacket, recommendedAction: 'COMMENT' };
+    writeFileSync(priorPath, JSON.stringify(tamperedPrior));
+    assert.throws(
+      () =>
+        execFileSync(process.execPath, [...submitArgs, '--prior-packet', priorPath], {
+          cwd: root,
+          encoding: 'utf8',
+        }),
+      (error) => /does not match the recorded priorPacketDigest/.test(error.stderr ?? ''),
+      'submission must verify the exact bound prior packet before live collection'
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('human-assisted review is dispositive without assessment while autonomous review obeys the exact class ceiling', () => {
   const c1 = assessment('C1', ['review-facts-and-ci', 'review-docs-and-links']);
   assert.deepEqual(

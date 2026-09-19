@@ -42,7 +42,7 @@ function usage() {
     '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>]',
     '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
-    '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
+    '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
     '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
     '',
     'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge additionally fails closed unless the live input already contains an exact-head review or comment carrying the packet evidence receipt marker (proto-ui:agent-evidence:sha256=...), so publish the evidence first, then re-collect and rebuild the merge packet. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
@@ -86,6 +86,7 @@ const ALLOWED_OPTIONS = new Map([
       '--assessment',
       '--authorization',
       '--external-evidence-file',
+      '--prior-packet',
     ]),
   ],
   [
@@ -322,6 +323,16 @@ try {
     );
     const execution = validateExecution(args, packet, policy);
     const externalEvidence = readExternalEvidence(args);
+    // Submission must consume the bound prior packet whenever the packet
+    // records one; an incremental reconciliation that is never verified
+    // against its prior findings would otherwise publish unchecked state.
+    if (packet.reconciliation.priorPacketDigest !== null) {
+      const priorPath = args.get('--prior-packet');
+      if (!priorPath)
+        throw new Error('--prior-packet is required when the packet reconciles a prior review');
+      const priorPacket = JSON.parse(fs.readFileSync(priorPath, 'utf8'));
+      verifyReconciliation(packet, priorPacket);
+    }
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
       externalEvidence,
     });

@@ -130,7 +130,7 @@ corepack pnpm@10.32.1 agent:review -- validate --packet <packet.json> --input <r
 corepack pnpm@10.32.1 agent:collaborate -- request-digest --request <request.json>
 corepack pnpm@10.32.1 agent:collaborate -- apply --request <request.json> --handoff <handoff.json> --assessment <result.json>
 corepack pnpm@10.32.1 agent:event-shadow -- replay --delivery <raw-delivery.json> --trust <deployment-trust.json>
-corepack pnpm@10.32.1 agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --authorization explicit-current-user
+corepack pnpm@10.32.1 agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--prior-packet <prior-packet.json>] --authorization explicit-current-user
 corepack pnpm@10.32.1 agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --authorization explicit-current-user
 ```
 
