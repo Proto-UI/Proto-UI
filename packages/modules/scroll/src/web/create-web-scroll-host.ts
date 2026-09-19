@@ -625,13 +625,47 @@ export function createWebScrollSurfaceHost(
         requestedDepartureAxis = null;
         publish();
       };
+      // Bubbled wheel/key input is evidence for this surface only when no
+      // intervening scrollable on the composed path can still consume the
+      // departure direction; scroll chaining hands such input to the
+      // descendant and the outer surface never moves. The real classification
+      // then arrives with the outer surface's own scroll event.
+      const findDepartureConsumer = (event: Event, axis: ScrollAxis): boolean => {
+        if (typeof event.composedPath !== 'function') return false;
+        for (const node of event.composedPath()) {
+          if (node === target) return false;
+          if (!(node instanceof Element)) continue;
+          const style = ownerWindow?.getComputedStyle(node);
+          if (!style) continue;
+          if (axis === 'vertical') {
+            const overflow = style.overflowY;
+            if (
+              (overflow === 'auto' || overflow === 'scroll') &&
+              node.scrollHeight > node.clientHeight &&
+              node.scrollTop > 0
+            ) {
+              return true;
+            }
+          } else {
+            const overflow = style.overflowX;
+            if (
+              (overflow === 'auto' || overflow === 'scroll') &&
+              node.scrollWidth > node.clientWidth &&
+              node.scrollLeft > 0
+            ) {
+              return true;
+            }
+          }
+        }
+        return false;
+      };
       const hasReaderIntent = () => {
         const now = ownerWindow?.performance.now() ?? Date.now();
         const axis = configuredFollowAxis();
         return (axis !== null && readerContacts.hasDeparture(axis)) || readerIntentUntil > now;
       };
       const onWheel = (event: WheelEvent) => {
-        if (event.ctrlKey) return;
+        if (event.ctrlKey || event.defaultPrevented) return;
         const axis = configuredFollowAxis();
         if (!axis) return;
         requestedDepartureAxis = null;
@@ -640,6 +674,7 @@ export function createWebScrollSurfaceHost(
             ? event.deltaY < 0
             : event.deltaX < 0 || (event.shiftKey && event.deltaY < 0);
         if (!leavingEnd) return;
+        if (findDepartureConsumer(event, axis)) return;
         armReaderIntent();
         cancelUnscrollableDeparture(axis);
       };
@@ -734,6 +769,7 @@ export function createWebScrollSurfaceHost(
         readerIntentUntil = 0;
       };
       const onKeyDown = (event: KeyboardEvent) => {
+        if (event.defaultPrevented) return;
         const axis = configuredFollowAxis();
         if (!axis) return;
         const scrollDirection =
@@ -757,6 +793,7 @@ export function createWebScrollSurfaceHost(
         if (!scrollDirection) return;
         requestedDepartureAxis = null;
         if (scrollDirection === 'before') {
+          if (findDepartureConsumer(event, axis)) return;
           armReaderIntent();
           cancelUnscrollableDeparture(axis);
         }

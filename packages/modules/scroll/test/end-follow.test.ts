@@ -186,6 +186,126 @@ describe('module-scroll: end-follow host contract', () => {
     lease.dispose();
   });
 
+  it('ignores departure wheel input already canceled by a descendant', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    const child = document.createElement('div');
+    target.append(child);
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    expect(frames.pending()).toBe(1);
+    child.addEventListener('wheel', (event) => event.preventDefault());
+    child.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: -40 }));
+    // A canceled event cannot scroll this surface: no intent is armed and the
+    // pending follow frame keeps its deadline.
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(300);
+    lease.dispose();
+  });
+
+  it('ignores departure key input already canceled by a descendant', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    const input = document.createElement('input');
+    target.append(input);
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    expect(frames.pending()).toBe(1);
+    input.addEventListener('keydown', (event) => event.preventDefault());
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowUp' })
+    );
+    expect(frames.pending()).toBe(1);
+    frames.runAll();
+    expect(target.scrollTop).toBe(300);
+    lease.dispose();
+  });
+
+  it('attributes bubbled wheel input to an intervening scrollable that can consume it', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    const nested = document.createElement('div');
+    nested.style.overflowY = 'auto';
+    installMetrics(nested, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    nested.scrollTop = 120;
+    const content = document.createElement('div');
+    nested.append(content);
+    target.append(nested);
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    expect(frames.pending()).toBe(1);
+    content.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -40 }));
+    // The nested scroller still has room toward the departure boundary, so the
+    // gesture belongs to it: no synchronous cancellation for the outer surface.
+    expect(frames.pending()).toBe(1);
+    // Outer-surface control: the same input on the viewport itself is
+    // attributable to this surface and cancels the pending frame.
+    target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -40 }));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    expect(frames.pending()).toBe(0);
+    lease.dispose();
+  });
+
+  it('treats wheel input past a boundary-clamped nested scroller as outer input', () => {
+    const frames = installFrameHarness();
+    const target = document.createElement('div');
+    installMetrics(target, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    const nested = document.createElement('div');
+    nested.style.overflowY = 'auto';
+    installMetrics(nested, {
+      clientWidth: 100,
+      scrollWidth: 100,
+      clientHeight: 100,
+      scrollHeight: 400,
+    });
+    // The nested scroller sits at its own departure boundary, so scroll
+    // chaining hands the gesture to the outer surface.
+    nested.scrollTop = 0;
+    const content = document.createElement('div');
+    nested.append(content);
+    target.append(nested);
+    document.body.append(target);
+    const snapshots: ScrollSurfaceSnapshot[] = [];
+    const lease = attachEndFollow(target, snapshots);
+    expect(frames.pending()).toBe(1);
+    content.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -40 }));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    expect(frames.pending()).toBe(0);
+    lease.dispose();
+  });
+
   it('keeps a pending follow frame for boundary-clamped input directed toward the end', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');
