@@ -141,6 +141,21 @@ criteria:
     text:
       en: The standard Adapter wires Scroll with host-owned overflow and the current root, translates normalized requests/facts, and restores owned styles and listeners on teardown. Composed Thumb geometry and Move Gesture remain attached to the same Context/Anatomy-resolved surface; evidence uses simulated Web geometry, not native physics certification.
       zh-CN: standard Adapter 将 Scroll 接入 host-owned overflow 与当前 root，翻译 normalized request/fact，并在 teardown 恢复拥有的样式、释放 listener。composed Thumb geometry 与 Move Gesture 附着到同一个 Context/Anatomy 解析的 surface；证据使用模拟 Web geometry，不是 native physics 认证。
+  - id: A-REACT-18-19-0001-SCROLL-END-FOLLOW
+    text:
+      en: The standard Adapter routes the opt-in vertical policy, read-only atEnd and follow facts, and semantic to-end request through the existing Scroll Module and Web host. The shared simulated-DOM journey verifies end alignment, stationary-contact non-interference, and explicit request completion; it does not certify native panning or promote the draft end-follow contract.
+      zh-CN: standard Adapter 经既有 Scroll Module 与 Web host 路由 opt-in vertical policy、只读 atEnd/follow facts 及 semantic to-end request。共享模拟 DOM journey 验证 end alignment、静止接触不干扰 follow 与显式 request completion；不认证 native panning，也不提升 draft end-follow contract。
+    dependsOn:
+      contracts:
+        - id: C-SCROLL-END-FOLLOW-0001
+          since: 0.3.0-alpha.0
+          anchors:
+            [
+              C-SCROLL-END-FOLLOW-0001-POLICY,
+              C-SCROLL-END-FOLLOW-0001-FACTS,
+              C-SCROLL-END-FOLLOW-0001-INTERRUPT,
+              C-SCROLL-END-FOLLOW-0001-RESUME,
+            ]
   - id: A-REACT-18-19-0001-RULE-META
     text:
       en: The bounded draft Rule Meta slice passes the exact default getter/source pair through owner/view wiring, updates mixed Rule styles without a Proto update, and preserves retained-owner remount and normal Props synchronization. Custom getMeta remains sampled without the default source. Happy-dom evidence covers token/identity behavior, not browser paint or all framework replay paths.
@@ -366,6 +381,9 @@ verifies:
       since: 0.3.0-alpha.0
     - id: T-SCROLL-COMPOSED-CONTROL-0001
       since: 0.3.0-alpha.0
+    - id: T-SCROLL-END-FOLLOW-0001
+      since: 0.3.0-alpha.0
+      anchors: [T-SCROLL-END-FOLLOW-0001-CASE-WEB-ADAPTERS]
 sources:
   - path: packages/adapters/react/test/color-scheme.integration.test.ts
   - path: packages/adapters/base/src/platform/web-color-scheme-source.ts
@@ -396,6 +414,9 @@ sources:
   - path: packages/adapters/react/test/context.integration.test.ts
   - path: packages/adapters/react/test/expose-state-web.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Bound the existing vertical end-follow policy, facts and request journey to precise Adapter evidence without admitting the draft contract as stable.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Cataloged bounded Positioning support with active-view geometry and cleanup evidence.

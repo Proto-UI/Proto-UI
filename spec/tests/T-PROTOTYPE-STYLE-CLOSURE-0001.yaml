@@ -7,8 +7,10 @@ lifecycleRationale:
   en: >-
     Cataloged as draft alongside the draft contract and decision it verifies. Generated-CSS assertions and the standalone four-runtime browser fixture currently cover the Web channel; the mapping stays draft until the style-closure contract is stably admitted and any admitted non-Web host coverage is mapped here.
 
+
   zh-CN: >-
     随其验证的 draft contract 与 decision 一并以 draft 编目。生成 CSS 断言与 standalone 四 Runtime 浏览器 fixture 目前仅覆盖 Web 通道；在 style-closure contract 稳定接纳、且任何获准的非 Web host 覆盖纳入映射之前，本测试实体保持 draft。
+
 
 summary: Maps generated-CSS assertions and a real-browser standalone fixture across all four official Web runtimes to Prototype style closure, scoped native-surface normalization, and consumer ownership boundaries.
 cases:

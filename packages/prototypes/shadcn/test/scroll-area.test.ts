@@ -297,7 +297,7 @@ describe('prototypes/shadcn: scroll-area', () => {
     const lease = createWebScrollSurfaceHost(viewport, {
       moveGestureHost: moveHost,
     }).attach({
-      config: { axes: 'both', projection: 'composed' },
+      config: { axes: 'both', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -314,7 +314,7 @@ describe('prototypes/shadcn: scroll-area', () => {
 
     // Fall back to system: authored chrome must hide.
     lease.update({
-      config: { axes: 'both', projection: 'composed' },
+      config: { axes: 'both', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},

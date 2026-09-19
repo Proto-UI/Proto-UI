@@ -38,17 +38,26 @@ criteria:
     text:
       zh-CN: handle 可以通过 setup-only `bindComposedChrome` 声明 Context scope、Anatomy family/roles 与 orientation expose key，但不得接收 host target 或像素 geometry。
       en: The handle may use setup-only `bindComposedChrome` to declare a Context scope, Anatomy family and roles, and an orientation expose key, but it must not accept host targets or pixel geometry.
+  - id: C-AS-SCROLL-SURFACE-0001-G
+    text:
+      zh-CN: handle 必须通过 setup-only `endFollow` policy、只读 `atEnd`/follow facts 与 semantic `to-end` request 接入 `C-SCROLL-END-FOLLOW-0001`，不得暴露或接收 raw host geometry。
+      en: The handle must reach `C-SCROLL-END-FOLLOW-0001` through a setup-only `endFollow` policy, read-only `atEnd` and follow facts, and the semantic `to-end` request without exposing or accepting raw host geometry.
 sources:
   - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
 dependsOn:
   contracts:
     - C-SCROLL-0001
+    - { id: C-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - C-SCROLL-COMPOSED-CHROME-0001
     - C-AS-HOOK-PRIVILEGED-0001
 verifies:
   tests:
     - T-SCROLL-0001
+    - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added the setup-only end-follow policy, observed facts, and semantic to-end request to the privileged surface handle.
   - version: 0.2.0-rc.7
     change: revised
     summary: Resolved composed-control registration as a setup-only family binding on the privileged surface handle.
