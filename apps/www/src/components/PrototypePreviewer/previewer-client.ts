@@ -6,7 +6,7 @@ import { loadDemo } from './demo-modules';
 import { renderDemo } from './demo-renderer';
 import { collectPrototypeIds } from './demo-types';
 import { releaseHostMount } from './runtimes/host-mount';
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 import { refreshCodePanel } from './code-panel-client';
 import {
   initSiteShadcnControls,

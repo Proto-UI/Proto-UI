@@ -10,7 +10,7 @@ import { loadPrototypes } from '../../../apps/www/src/components/PrototypePrevie
 import {
   AdapterIds,
   type RuntimeId,
-} from '../../../apps/www/src/components/PrototypePreviewer/runtimes/registry';
+} from '../../../apps/www/src/components/PrototypePreviewer/runtimes/ids';
 import brutalistScrollAreaDemo from '../../../apps/www/src/content/docs/zh-cn/demo-brutalist-scroll-area.demo';
 
 vi.mock('../../../apps/www/src/components/PrototypePreviewer/runtimes/react-runtime', () => ({

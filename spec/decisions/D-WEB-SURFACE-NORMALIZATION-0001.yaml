@@ -7,8 +7,10 @@ lifecycleRationale:
   en: >-
     Cataloged as draft. The zero-specificity, data-pui-style-scoped normalization and the reserved theme/proto-ui layer slots are implemented in the generated Web token CSS with CLI evidence, but the early host layer-ordering precondition has only been verified for the current Website integration; stable admission requires that precondition to stay documented and enforceable for every supported host before its first layer declaration.
 
+
   zh-CN: >-
     以 draft 编目。零 specificity、按 data-pui-style 限域的 normalization 与预留的 theme/proto-ui layer slot 已在生成的 Web token CSS 中实现并有 CLI 证据，但 host 提前声明 layer 顺序这一前置条件目前仅在当前 Website 集成中得到验证；稳定接纳要求该前置条件对每个受支持 host 在其首次声明 layer 之前保持文档化且可执行。
+
 
 summary: Generated Web physical token CSS neutralizes user-agent form-control defaults only on styled Proto UI native surfaces, at zero specificity and below Prototype token rules.
 statement:

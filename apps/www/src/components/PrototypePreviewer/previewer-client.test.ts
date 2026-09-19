@@ -12,7 +12,6 @@ const demoSpies = vi.hoisted(() => ({
 }));
 
 vi.mock('./runtimes/registry', () => ({
-  AdapterIds: ['wc', 'vue2'],
   runtimeLoaders: {
     wc: async () => ({
       id: 'wc',

@@ -19,7 +19,7 @@ import {
   resolveProjectionThemeSurfaceStyle,
   watchProjectionThemeSurfaceStyle,
 } from './projection-theme';
-import { isRuntimeId, type RuntimeId } from './runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './runtimes/ids';
 
 export type ProjectedPreviewerOptions = Readonly<{
   root: HTMLElement;

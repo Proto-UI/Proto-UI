@@ -5,7 +5,7 @@ import {
   type PreferredAdapterChangeDetail,
 } from './adapter-preference';
 import { refreshCodePanel } from './PrototypePreviewer/code-panel-client';
-import type { PublicRuntimeId } from './PrototypePreviewer/runtimes/registry';
+import type { PublicRuntimeId } from './PrototypePreviewer/runtimes/ids';
 
 interface CodeExampleController {
   syncGlobalHost(host: PublicRuntimeId): void;

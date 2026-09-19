@@ -9,10 +9,7 @@ import remarkMdx from 'remark-mdx';
 import type { Root } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { readFile } from 'node:fs/promises';
-import {
-  AdapterIds,
-  type RuntimeId,
-} from '../../src/components/PrototypePreviewer/runtimes/registry';
+import { AdapterIds, type RuntimeId } from '../../src/components/PrototypePreviewer/runtimes/ids';
 
 export type PrototypePreviewerProps = {
   demoId?: string;
