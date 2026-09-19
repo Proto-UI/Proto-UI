@@ -691,6 +691,125 @@ describe('Shadow closeout native boundaries', () => {
     }
   );
 
+  it('reprojects a composed entry after external radio selection and form reset', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-live-radio-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const form = document.createElement('form');
+        const host = new C();
+        host.id = 'radio-entry';
+        host.innerHTML =
+          '<input id="inside-radio" type="radio" name="entry-group" checked><label for="inside-radio">Inside</label>';
+        const outside = document.createElement('input');
+        outside.id = 'outside-radio';
+        outside.type = 'radio';
+        outside.name = 'entry-group';
+        const label = document.createElement('label');
+        label.htmlFor = outside.id;
+        label.textContent = 'Outside';
+        form.append(host, outside, label);
+        document.body.append(form);
+      });
+      const projection = () =>
+        page.evaluate(() => {
+          const host = document.querySelector<HTMLElement>('#radio-entry')!;
+          return {
+            hostTabIndex: host.getAttribute('tabindex'),
+            inside: document.querySelector<HTMLInputElement>('#inside-radio')!.checked,
+            outside: document.querySelector<HTMLInputElement>('#outside-radio')!.checked,
+          };
+        });
+      expect(await projection()).toEqual({ hostTabIndex: null, inside: true, outside: false });
+
+      await page.locator('#outside-radio').click();
+      expect(await projection()).toEqual({ hostTabIndex: '0', inside: false, outside: true });
+
+      await page.locator('#inside-radio').click();
+      expect(await projection()).toEqual({ hostTabIndex: null, inside: true, outside: false });
+
+      await page.locator('#outside-radio').click();
+      await page.locator('form').evaluate((form: HTMLFormElement) => form.reset());
+      await page.evaluate(() => new Promise<void>((resolve) => queueMicrotask(resolve)));
+      expect(await projection()).toEqual({ hostTabIndex: null, inside: true, outside: false });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('continues trapped traversal around deep focus in a negative-tabindex shadow host', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-negative-host-scope',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const scope = new C();
+        scope.id = 'negative-host-scope';
+        scope.innerHTML =
+          '<button id="before-negative">Before</button><div id="negative-host" tabindex="-1"></div><button id="after-negative">After</button>';
+        const host = scope.querySelector('#negative-host') as HTMLElement;
+        host.attachShadow({ mode: 'open' }).innerHTML =
+          '<button id="deep-negative-focus">Deep</button>';
+        document.body.append(scope);
+        scope.getExposes().activate();
+      });
+      const focusDeep = () =>
+        page.evaluate(() => {
+          document
+            .querySelector('#negative-host-scope')!
+            .querySelector('#negative-host')!
+            .shadowRoot!.querySelector<HTMLElement>('#deep-negative-focus')!
+            .focus();
+        });
+      const active = () =>
+        page.evaluate(() => {
+          let el = document.activeElement;
+          while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+          return el?.id ?? null;
+        });
+
+      await focusDeep();
+      expect(await active()).toBe('deep-negative-focus');
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('after-negative');
+
+      await focusDeep();
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('before-negative');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('matches native scope-local tabindex order, descendant entry and trapped forward/reverse traversal', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

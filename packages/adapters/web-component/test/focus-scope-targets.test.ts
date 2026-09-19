@@ -299,6 +299,36 @@ describe('WC scope sequential target sample', () => {
       scope.remove();
     }
   });
+  it('retains the traversal position of deep focus inside a negative-tabindex shadow host', () => {
+    const scope = document.createElement('div');
+    const before = document.createElement('button');
+    before.id = 'before';
+    before.tabIndex = 0;
+    const host = document.createElement('div');
+    host.id = 'negative-host';
+    host.setAttribute('tabindex', '-1');
+    const root = host.attachShadow({ mode: 'open' });
+    const inner = document.createElement('button');
+    inner.id = 'inner';
+    inner.tabIndex = 0;
+    root.append(inner);
+    const after = document.createElement('button');
+    after.id = 'after';
+    after.tabIndex = 0;
+    scope.append(before, host, after);
+    document.body.append(scope);
+    try {
+      inner.focus();
+      expect(sampleWebComponentScopeTargets(scope)).toEqual({
+        targets: [before, after],
+        activeTarget: inner,
+        recentTarget: null,
+        activeInsertionIndex: 1,
+      });
+    } finally {
+      scope.remove();
+    }
+  });
   it('excludes hidden inputs and unassociated areas inside an open shadow tree', () => {
     const scope = document.createElement('div');
     const host = document.createElement('div');

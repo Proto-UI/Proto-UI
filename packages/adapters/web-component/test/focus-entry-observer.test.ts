@@ -282,6 +282,59 @@ describe('WC live focus-entry resolver inputs', () => {
     }
   );
 
+  it('reprojects external image-map eligibility after image and ancestor CSS changes', async () => {
+    const host = panel(true);
+    const map = document.createElement('map');
+    map.name = 'css-entry-map';
+    const area = document.createElement('area');
+    area.href = '#destination';
+    area.tabIndex = 0;
+    map.append(area);
+    host.append(map);
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .entry-map-image-hidden { display: none; }
+      .entry-map-ancestor-hidden { visibility: hidden; }
+    `;
+    const wrapper = document.createElement('div');
+    const image = document.createElement('img');
+    image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    image.useMap = '#css-entry-map';
+    wrapper.append(image);
+    document.body.append(style, wrapper);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    image.classList.add('entry-map-image-hidden');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    image.classList.remove('entry-map-image-hidden');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    wrapper.classList.add('entry-map-ancestor-hidden');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    wrapper.classList.remove('entry-map-ancestor-hidden');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    image.style.display = 'none';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    image.style.display = '';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    wrapper.style.visibility = 'hidden';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    wrapper.style.visibility = '';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
   it('only observes document image bindings while the region contains areas', async () => {
     const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const host = panel(false);

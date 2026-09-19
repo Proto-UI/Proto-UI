@@ -90,6 +90,35 @@ describe('WC portal conceal rendering barrier', () => {
     expect(frames.size).toBe(0);
   });
 
+  it.each([['first'], ['second']] as const)(
+    'restores adjacent simultaneous portals in original sibling order (%s restored first)',
+    (first) => {
+      const origin = document.createElement('section');
+      const a = document.createElement('div');
+      a.id = 'a';
+      const b = document.createElement('div');
+      b.id = 'b';
+      const c = document.createElement('div');
+      c.id = 'c';
+      origin.append(a, b, c);
+      document.body.append(origin);
+      const portalA = createWebComponentPortalMount();
+      const portalB = createWebComponentPortalMount();
+
+      portalA.mount(a);
+      portalB.mount(b);
+      expect([...origin.children].map((node) => node.id)).toEqual(['c']);
+      if (first === 'first') {
+        portalA.unmount(a);
+        portalB.unmount(b);
+      } else {
+        portalB.unmount(b);
+        portalA.unmount(a);
+      }
+      expect([...origin.children].map((node) => node.id)).toEqual(['a', 'b', 'c']);
+    }
+  );
+
   it('a newer open retains the epoch, while terminal removal cancels pending work', async () => {
     const calls = { mounted: 0, unmounted: 0, disposed: 0 };
     const Root = AdaptToWebComponent(dialogRoot, { registerAs: 'conceal-dialog-root' });

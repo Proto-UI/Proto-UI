@@ -403,6 +403,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
+  let stopEntryRadioStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
   let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
   const stopEntryObserver = () => {
@@ -410,6 +411,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     entryObserver = null;
     entryImageObserver?.disconnect();
     entryImageObserver = null;
+    stopEntryRadioStateWatch?.();
+    stopEntryRadioStateWatch = null;
     stopEntryAttachShadowWatch?.();
     stopEntryAttachShadowWatch = null;
   };
@@ -542,7 +545,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observeTree = () => {
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
+              stopEntryRadioStateWatch?.();
+              stopEntryRadioStateWatch = null;
               let hasArea = false;
+              const radioTrees = new Set<Document | ShadowRoot>();
               const options: MutationObserverInit = {
                 childList: true,
                 subtree: true,
@@ -579,6 +585,15 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 observedRoots.add(root);
                 entryObserver?.observe(root, options);
                 hasArea ||= !!root.querySelector('area');
+                // Radio-group ownership never crosses a Document/ShadowRoot
+                // boundary. Observe only trees containing a relevant named
+                // radio instead of every document hosting a Focus Entry.
+                for (const radio of root.querySelectorAll<HTMLInputElement>(
+                  'input[type="radio"][name]'
+                )) {
+                  const tree = radio.getRootNode();
+                  if (tree instanceof Document || tree instanceof ShadowRoot) radioTrees.add(tree);
+                }
                 if (root instanceof HTMLElement && root.shadowRoot) observe(root.shadowRoot);
                 for (const descendant of root.querySelectorAll<HTMLElement>('*')) {
                   if (descendant.shadowRoot) observe(descendant.shadowRoot);
@@ -639,8 +654,52 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   subtree: true,
                   childList: true,
                   attributes: true,
-                  attributeFilter: ['usemap', 'src', 'hidden', 'inert', 'aria-hidden'],
+                  attributeFilter: [
+                    'usemap',
+                    'src',
+                    'hidden',
+                    'inert',
+                    'aria-hidden',
+                    'class',
+                    'style',
+                  ],
                 });
+              }
+              // Native radio checkedness is property state: a click on a group
+              // member outside this entry region, or a form reset, need not
+              // produce any MutationObserver record. Observe only the DOM
+              // trees that own named radios in the region and re-evaluate
+              // after the native state transition has settled.
+              if (radioTrees.size > 0) {
+                const eventOrigin = (event: Event) => event.composedPath()[0] ?? event.target;
+                const onChange = (event: Event) => {
+                  const origin = eventOrigin(event);
+                  if (
+                    origin instanceof HTMLInputElement &&
+                    origin.type === 'radio' &&
+                    origin.name
+                  ) {
+                    queueMicrotask(() => {
+                      if (entryObserver) projectEntry();
+                    });
+                  }
+                };
+                const onReset = (event: Event) => {
+                  if (!(eventOrigin(event) instanceof HTMLFormElement)) return;
+                  queueMicrotask(() => {
+                    if (entryObserver) projectEntry();
+                  });
+                };
+                for (const tree of radioTrees) {
+                  tree.addEventListener('change', onChange, true);
+                  tree.addEventListener('reset', onReset, true);
+                }
+                stopEntryRadioStateWatch = () => {
+                  for (const tree of radioTrees) {
+                    tree.removeEventListener('change', onChange, true);
+                    tree.removeEventListener('reset', onReset, true);
+                  }
+                };
               }
             };
             entryObserver = new Observer((records) => {

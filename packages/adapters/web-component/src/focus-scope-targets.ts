@@ -9,6 +9,15 @@ export function deepestActiveElement(doc: Document): Element | null {
   return active;
 }
 
+function isInsideOwnedShadowScope(owner: HTMLElement, target: Element | null): boolean {
+  let root = target?.getRootNode();
+  while (root instanceof ShadowRoot) {
+    if (root.host === owner) return true;
+    root = root.host.getRootNode();
+  }
+  return false;
+}
+
 export function sampleWebComponentScopeTargets(
   container: HTMLElement,
   isNativelyFocusable?: (target: HTMLElement) => boolean,
@@ -56,7 +65,15 @@ export function sampleWebComponentScopeTargets(
     const ownsScope = el instanceof HTMLSlotElement || !!el.shadowRoot;
     let children = entries;
     if (ownsScope && el !== container) {
-      if (el.hasAttribute('tabindex') && el.tabIndex < 0) return;
+      if (el.hasAttribute('tabindex') && el.tabIndex < 0) {
+        // A negative host removes its Shadow scope from sequential stops, but
+        // programmatic deep focus still has a real position in the composed
+        // order. Preserve a non-target marker at the host position so Focus
+        // can continue immediately before/after it in either direction.
+        if (activeTarget instanceof HTMLElement && isInsideOwnedShadowScope(el, activeTarget))
+          entries.push({ element: activeTarget, target: false, priority: 0 });
+        return;
+      }
       children = [];
       const delegatesFocus = !!el.shadowRoot?.delegatesFocus;
       // A non-focusable, non-delegating host (e.g. display:contents) cannot

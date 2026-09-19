@@ -16,7 +16,10 @@ export function createWebComponentPortalMount() {
       if (revoke || el.parentElement === el.ownerDocument.body) return;
       const parent = el.parentNode;
       if (!parent) return;
-      const next = el.nextSibling;
+      // A stable marker survives while adjacent siblings are portaled. A
+      // captured nextSibling does not: restoring A before still-portaled B in
+      // [A, B, C] would otherwise append A after C.
+      const marker = el.ownerDocument.createComment('proto-ui-portal-origin');
       const descriptor = Object.getOwnPropertyDescriptor(el, 'parentNode');
       let ownsParent = false;
       const observer = new MutationObserver(() => {
@@ -48,11 +51,10 @@ export function createWebComponentPortalMount() {
           if (descriptor) Object.defineProperty(el, 'parentNode', descriptor);
           else delete (el as unknown as { parentNode?: Node }).parentNode;
         }
-        // childNodes reflects physical children even for portaled next siblings
-        // whose logical parentNode getter still points at this origin.
-        const reference =
-          next && Array.from(parent.childNodes).includes(next as ChildNode) ? next : null;
-        parent.insertBefore(el, reference);
+        if (marker.parentNode === parent) {
+          parent.insertBefore(el, marker);
+          marker.remove();
+        } else parent.appendChild(el);
       };
       revoke = restore;
       try {
@@ -61,6 +63,7 @@ export function createWebComponentPortalMount() {
         // Observe each containing tree: document does not see mutations inside
         // an open ShadowRoot, and that ShadowRoot does not see its host removal.
         observeOriginTrees();
+        parent.insertBefore(marker, el);
         el.ownerDocument.body.appendChild(el);
         activeProjections.add(el);
       } catch (error) {
