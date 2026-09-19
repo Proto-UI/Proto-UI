@@ -515,16 +515,40 @@ export function verifyReconciliation(packet, priorPacket) {
   assert(Array.isArray(priorPacket.findings), 'the prior review packet has no findings array');
   const priorIds = new Set(priorPacket.findings.map((finding) => finding.id));
   assert(
-    packet.reconciliation.resolvedFindingIds.every((id) => priorIds.has(id)),
+    priorIds.size === priorPacket.findings.length,
+    'the prior review packet contains duplicate finding ids'
+  );
+  const { resolvedFindingIds, openFindingIds, newFindingIds } = packet.reconciliation;
+  // PR509-RECONCILIATION-COVERAGE-001: membership alone is insufficient. The
+  // union of resolved and open must account for every prior finding exactly
+  // once, no state may repeat a finding id, and new ids must be current
+  // findings absent from the prior packet.
+  const accounted = [...resolvedFindingIds, ...openFindingIds, ...newFindingIds];
+  assert(
+    new Set(accounted).size === accounted.length,
+    'finding reconciliation states overlap or repeat a finding id'
+  );
+  assert(
+    resolvedFindingIds.every((id) => priorIds.has(id)),
     'resolved reconciliation references a finding absent from the prior packet'
   );
   assert(
-    packet.reconciliation.openFindingIds.every((id) => priorIds.has(id)),
+    openFindingIds.every((id) => priorIds.has(id)),
     'open reconciliation references a finding absent from the prior packet'
   );
+  const currentIds = new Set(packet.findings.map((finding) => finding.id));
   assert(
-    packet.reconciliation.newFindingIds.every((id) => !priorIds.has(id)),
+    newFindingIds.every((id) => currentIds.has(id)),
+    'new reconciliation references a finding absent from the current packet'
+  );
+  assert(
+    newFindingIds.every((id) => !priorIds.has(id)),
     'new reconciliation reuses a finding id already present in the prior packet'
+  );
+  const coveredPriorIds = new Set([...resolvedFindingIds, ...openFindingIds]);
+  assert(
+    coveredPriorIds.size === priorIds.size && [...priorIds].every((id) => coveredPriorIds.has(id)),
+    'resolved and open reconciliation must cover every prior finding exactly once'
   );
   return true;
 }
