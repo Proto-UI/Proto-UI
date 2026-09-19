@@ -5,6 +5,7 @@ status: draft
 lifecycleRationale: >-
   Retained as draft while the newly cataloged scoped Escape arbitration and active-view resource ownership await stable admission review. Generic focus and additional dismissal policies remain explicitly outside this slice; their future design is not a prerequisite to reviewing the bounded current semantics.
 
+
 since: 0.3.0-alpha.0
 summary: Overlay coordinates one Presence driver, explicit dismissal and optional host resources while delegating outside classification, geometry and input transport.
 criteria:

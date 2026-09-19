@@ -233,7 +233,9 @@ export function createInstanceTreeMarkers(
     declaredAnchor?: LogicalInstanceToken
   ): void {
     const reject = () => {
-      throw new Error('[as-trigger] Trigger group must be a continuous chain; sibling Trigger branches are not supported.');
+      throw new Error(
+        '[as-trigger] Trigger group must be a continuous chain; sibling Trigger branches are not supported.'
+      );
     };
     if (parent && (isRegisteredTrigger(parent) || declaredAnchor === parent)) {
       for (const sibling of CHILDREN_BY_TOKEN.get(parent) ?? []) {

@@ -10,6 +10,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts',
@@ -19,6 +20,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
 ]);
 

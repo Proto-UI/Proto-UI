@@ -3,14 +3,14 @@ type: prototype
 title: Shadcn Select Trigger inherits Base combobox behavior and adds size, styling, and chevron
 status: draft
 since: 0.2.0-rc.0
-summary: Shadcn Select Trigger inherits Base command, combobox accessibility, open request, placeholder, and disabled behavior and adds size, current state styles, and a fixed chevron.
+summary: Shadcn Select Trigger inherits Base command, combobox accessibility, open request, placeholder, and disabled behavior and adds size, current state styles including a one-pixel press displacement, and a fixed chevron.
 statement:
   zh-CN: >-
-    Shadcn Select Trigger 是 `P-BASE-SELECT-TRIGGER` 之上的 direct part，保留 combobox command/a11y、open request、placeholder 与 disabled behavior，并增加 `size: sm | default`、当前 visual feedback 和固定 chevron。`asChild` 明确不提供。
+    Shadcn Select Trigger 是 `P-BASE-SELECT-TRIGGER` 之上的 direct part，保留 combobox command/a11y、open request、placeholder 与 disabled behavior，并增加 `size: sm | default`、包含 1px press displacement 的当前 visual feedback 和固定 chevron。`asChild` 明确不提供。
 
 
   en: >-
-    Shadcn Select Trigger is a direct part over `P-BASE-SELECT-TRIGGER`. It retains combobox command and accessibility, open request, placeholder, and disabled behavior while adding `size: sm | default`, current visual feedback, and a fixed chevron. `asChild` is explicitly unavailable.
+    Shadcn Select Trigger is a direct part over `P-BASE-SELECT-TRIGGER`. It retains combobox command and accessibility, open request, placeholder, and disabled behavior while adding `size: sm | default`, current visual feedback including a one-pixel press displacement, and a fixed chevron. `asChild` is explicitly unavailable.
 
 
 criteria:
@@ -76,12 +76,12 @@ criteria:
   - id: P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES
     text:
       {
-        zh-CN: placeholder、hover、focusVisible、pressed 与 disabled visuals 必须从 inherited states 派生。,
+        zh-CN: placeholder、hover、focusVisible、pressed 与 disabled visuals 必须从 inherited states 派生；pressed Rule 必须一同投射 `bg-input/70` 与 `translate-y-px`，让 Adapter 提供 1px 下压反馈。,
         en: Placeholder,
         hover,
         focusVisible,
         pressed,
-        and disabled visuals must derive from inherited states.,
+        and disabled visuals must derive from inherited states; the pressed Rule must project `bg-input/70` and `translate-y-px` together so the Adapter provides one-pixel downward feedback.,
       }
   - id: P-SHADCN-SELECT-TRIGGER-CHEVRON
     text:
@@ -115,8 +115,8 @@ openQuestions:
         and Icon composition parity converge?,
       }
     context:
-      zh-CN: intentional deviation 是省略对外 `asChild`。待核对项包括 w-fit、transition-[color,box-shadow]、disabled cursor、aria-invalid、dark styles、Value line-clamp 与 nested SVG rules、data-slot/data-size、className/native forwarding，以及官方 Radix Icon wrapper 相对直接 SVG。当前额外 hover/pressed surface 也需评审。
-      en: The intentional deviation is outward `asChild` omission. Gaps include w-fit, transition color and box-shadow, disabled cursor, aria-invalid, dark styles, Value line-clamp and nested-SVG rules, data-slot and data-size, forwarding, and upstream Radix Icon wrapper versus direct SVG. Current extra hover and pressed surfaces also need review.
+      zh-CN: intentional deviation 是省略对外 `asChild`。待核对项包括 w-fit、transition-[color,box-shadow]、disabled cursor、aria-invalid、dark styles、Value line-clamp 与 nested SVG rules、data-slot/data-size、className/native forwarding，以及官方 Radix Icon wrapper 相对直接 SVG。当前额外 hover surface，以及本项目采用的 `translate-y-px` pressed delta 在未来 parity 收敛中是否保留，仍需评审；两者均不声称来自固定 upstream baseline。
+      en: The intentional deviation is outward `asChild` omission. Gaps include w-fit, transition color and box-shadow, disabled cursor, aria-invalid, dark styles, Value line-clamp and nested-SVG rules, data-slot and data-size, forwarding, and upstream Radix Icon wrapper versus direct SVG. The current extra hover surface and whether the project-adopted `translate-y-px` pressed delta should remain during future parity convergence still need review; neither is claimed to come from the pinned upstream baseline.
     blocks: [shadcn select trigger parity roadmap]
 sources:
   - path: packages/prototypes/shadcn/src/select/trigger.proto.ts
@@ -153,6 +153,11 @@ revisions:
       chevron,
       asChild omission,
       and centralized gaps.,
+    },
+    {
+      version: 0.3.0-alpha.0,
+      change: revised,
+      summary: Adopted a Proto UI-specific one-pixel pressed displacement as Adapter-projected Trigger style without claiming pinned-upstream parity.,
     },
   ]
 tags: [prototype, shadcn, select, trigger, upstream-derived, delta, compatibility, visual]

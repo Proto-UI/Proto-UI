@@ -25,21 +25,20 @@ const cases = [
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
   ['core root', 'packages/core/src/index.ts', 6_000],
   ['runtime root', 'packages/runtime/src/index.ts', 60_000],
-  // PR #623 adds opt-in end-follow, host observation, and owned contact-session handling
-  // to module-scroll, which every Adapter root bundles. Attribution on the pinned local
-  // toolchain: main sync base a3095552 measures react 72,498 / vue 72,208; this branch
-  // head measures react 75,397 / vue 75,148 (+~2.9KB gzip each from the scroll slice).
-  // CI at 89ac55c2 independently measured react 75,346 / vue 75,091, matching local
-  // within ~60 bytes. Ceilings keep ~350-600 bytes of headroom.
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 76_000],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_500],
+  // #623 scroll end-follow and #652 shadow split S1-S5 both grow the eager
+  // adapter closures. Combined canonical measurement (main 124f44c9 + both
+  // slices, same toolchain): react 77,986 / vue 77,742 gzip. Ceilings keep
+  // ~500-800 bytes of headroom. Attribution:
+  // internal/records/2026-09-19-adapter-budget-scroll-shadow-combined.zh-CN.md
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 78_500],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 78_500],
   // PR #652 shadow split S1-S5 and composed-tree focus correctness. Canonical CI
   // measures 84,683 gzip bytes at head dd820b30 (main at ddac15da: 75,664 with
   // the same toolchain). Attribution and headroom evidence:
   // internal/records/2026-09-18-wc-adapter-budget-shadow-split-baseline.zh-CN.md
-  // PR #623's scroll slice adds ~2.9KB on top when both land; any combined
-  // overflow beyond 86,000 must go through the budget-policy path, not this PR.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 86_000],
+  // Same combined measurement as above: #652 (85,179 at head 5a5f3b44) plus
+  // the #623 scroll slice (~2.9KB gzip) measures 88,106 gzip when both land.
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 89_000],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];
