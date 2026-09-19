@@ -237,15 +237,10 @@ export function createWebA11yProjectionRegistry(
     const currentValue = target.getAttribute(attr);
     const canRestore =
       ownership.projectedValue !== undefined && currentValue === ownership.projectedValue;
-    const currentTokens = canRestore ? undefined : readTokens(currentValue);
-    const remove = canRestore ? undefined : new Set<string>();
     for (const token of tokens) {
       const count = ownership.counts.get(token)! - 1;
       if (count) ownership.counts.set(token, count);
-      else {
-        ownership.counts.delete(token);
-        if (!ownership.baseline.has(token) && currentTokens?.includes(token)) remove?.add(token);
-      }
+      else ownership.counts.delete(token);
     }
     ownership.projections.delete(projection);
     if (canRestore) {
@@ -262,13 +257,16 @@ export function createWebA11yProjectionRegistry(
       else setTokenListAttr(target, attr, visible);
       ownership.projectedValue = target.getAttribute(attr);
     } else {
-      // Do not replay hidden contributions or an old baseline over host-authored output.
-      if (remove?.size)
-        setTokenListAttr(
-          target,
-          attr,
-          currentTokens!.filter((token) => !remove.has(token))
-        );
+      // A host rewrite supersedes the recorded projection, so the complete
+      // current token list is host-authoritative: rebaseline from it instead of
+      // replaying ownership from the stale baseline. This preserves a host-kept
+      // token even when it is textually equal to the released contribution.
+      const previousBaseline = ownership.baseline;
+      ownership.baseline = new Set(
+        readTokens(currentValue).filter(
+          (token) => !ownership.counts.has(token) || previousBaseline.has(token)
+        )
+      );
       ownership.projectedValue = undefined;
     }
     if (ownership.projections.size === 0) {

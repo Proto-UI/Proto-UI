@@ -151,6 +151,36 @@ describe('Web A11y opaque semantic-object references', () => {
     sourceProjector.dispose?.();
     expect(source.getAttribute('aria-describedby')).toBe('host-help');
   });
+
+  it('preserves a host rewrite that retains the projected token when the projection is released', () => {
+    // T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION; PUI-625-HOST-REWRITE-TOKEN-PRESERVATION.
+    const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-host-rewrite' });
+    const sourceRef = createA11ySemanticObjectRef();
+    const targetRef = createA11ySemanticObjectRef();
+    const source = document.createElement('div');
+    const target = document.createElement('div');
+    const sourceProjector = createWebA11yProjector(source, undefined, registry);
+    const targetProjector = createWebA11yProjector(target, undefined, registry);
+
+    sourceProjector(semanticSnapshot(sourceRef, { describedBy: [targetRef] }));
+    targetProjector(semanticSnapshot(targetRef));
+    const targetId = target.id;
+    expect(source.getAttribute('aria-describedby')).toBe(targetId);
+
+    // The host rewrites the attribute, retaining the projected token and
+    // adding a host-authored token.
+    source.setAttribute('aria-describedby', `${targetId} host-note`);
+
+    // Once the current attribute no longer equals the recorded projectedValue,
+    // releasing the projection must keep the complete host-authored token list.
+    sourceProjector(semanticSnapshot(sourceRef));
+    expect(source.getAttribute('aria-describedby')).toBe(`${targetId} host-note`);
+
+    targetProjector.dispose?.();
+    expect(source.getAttribute('aria-describedby')).toBe(`${targetId} host-note`);
+    sourceProjector.dispose?.();
+    expect(source.getAttribute('aria-describedby')).toBe(`${targetId} host-note`);
+  });
   it('clears prior string ownership when a relation changes to structured refs or is removed', () => {
     // T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION
     const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-migration' });
