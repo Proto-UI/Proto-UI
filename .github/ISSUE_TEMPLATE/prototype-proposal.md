@@ -6,6 +6,8 @@ labels: ['area: prototypes']
 
 ## Contribution path
 
+<!-- Humans may describe the problem in plain language; images, artifacts and prompt disclosure are not required from you. Agents: supplement this item under internal/agent-operations/visual-evidence.md with a sanitized request paraphrase, uploaded subject-appropriate evidence and explicit debt. Upload guide: internal/agent-operations/github-evidence-upload.md. -->
+
 - [ ] Maintain an existing `P-*` identity
 - [ ] Project an existing Base `P-*` into a design language
 - [ ] Implement a maintainer-approved Base semantic slice

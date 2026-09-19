@@ -35,6 +35,8 @@ Never let an Observer verify its own finding or an implementer issue the indepen
 
 ## Report
 
+Apply `internal/agent-operations/visual-evidence.md` when the authorized maintenance scope includes Issue/PR evidence. Agents own reproduction, uploaded visuals, sanitized request paraphrases, and evidence debt. Humans may submit plain descriptions. This soft gate neither authorizes external writes nor changes maintenance independence or closure gates; use `internal/agent-operations/github-evidence-upload.md` for upload mechanisms.
+
 Return the transition performed, resulting state, artifacts, evidence, uncertainty, residual risks, next eligible transition, and any exact human decision required.
 
 Communicate with the user in the user's current language. Keep repository identifiers and artifacts in their governed language.

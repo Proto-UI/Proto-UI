@@ -1,5 +1,5 @@
 schemaVersion: 2
-registryVersion: 2026-08-27.integration-1
+registryVersion: 2026-09-15.evidence-1
 entrypoints:
   development: pui-dev
   maintenance: pui-maintain
@@ -39,7 +39,7 @@ skills:
     taskClass: propose-classification
     mutation: none
     requires: [request-context, capability-envelope]
-    produces: [work-item-proposal]
+    produces: [work-item-proposal, evidence-assessment]
   - id: pui-claim
     entrypoints: [development]
     loadPath: .agents/skills/pui-claim/SKILL.md
@@ -47,7 +47,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: claim-work-item
     mutation: reversible-github-metadata
-    requires: [capability-envelope, work-item-proposal, mutation-authorization]
+    requires: [capability-envelope, work-item-proposal, evidence-assessment, mutation-authorization]
     produces: [mutation-receipt, bounded-subject]
   - id: pui-unclaim
     entrypoints: [development]
@@ -220,6 +220,16 @@ skills:
     mutation: none
     requires: [repository-snapshot, workflow-snapshot]
     produces: [ci-report]
+  - id: pui-evidence-publish
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-evidence-publish/SKILL.md
+    transition: prepared authorized Issue evidence -> one additive comment receipt or no-write result
+    autonomousMinimumBand: C2
+    taskClass: publish-evidence-comment
+    mutation: reversible-github-metadata
+    requires:
+      [capability-envelope, issue-report, evidence-publication-packet, mutation-authorization]
+    produces: [mutation-receipt, evidence-ledger-update]
   - id: pui-govern
     entrypoints: [development]
     loadPath: .agents/skills/pui-govern/SKILL.md

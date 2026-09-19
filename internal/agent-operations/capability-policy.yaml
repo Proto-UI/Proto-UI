@@ -1,5 +1,5 @@
 schemaVersion: 2
-policyVersion: 2026-08-27.scheduled-review-and-integration-1
+policyVersion: 2026-09-15.evidence-comment-1
 principle: local assessment decides how far an Agent may go alone, not whether it may participate with a human
 executionModes:
   human-assisted:
@@ -44,6 +44,7 @@ bands:
     taskClasses:
       - claim-work-item
       - release-own-claim
+      - publish-evidence-comment
       - update-tracked-maintenance-state
       - maintain-docs
       - maintain-contract-projection

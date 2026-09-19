@@ -554,6 +554,23 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/checkbox');
     registerPrototype('shadcn-checkbox-indicator', mod.shadcnCheckboxIndicator);
   },
+  // Runtime-selected preview registry keeps the public Scroll Area package import lazy.
+  'shadcn-scroll-area-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-root', mod.shadcnScrollAreaRoot);
+  },
+  'shadcn-scroll-area-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-viewport', mod.shadcnScrollAreaViewport);
+  },
+  'shadcn-scroll-area-scrollbar': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-scrollbar', mod.shadcnScrollAreaScrollbar);
+  },
+  'shadcn-scroll-area-thumb': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');
+    registerPrototype('shadcn-scroll-area-thumb', mod.shadcnScrollAreaThumb);
+  },
   // Runtime-selected preview registry keeps the real public family import lazy.
   'brutalist-checkbox-root': async () => {
     const mod = await import('@proto.ui/prototypes-brutalist/checkbox');
