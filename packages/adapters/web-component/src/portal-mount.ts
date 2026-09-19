@@ -5,6 +5,10 @@
  */
 const activeProjections = new WeakSet<HTMLElement>();
 
+function isShadowRootNode(node: Node): node is ShadowRoot {
+  return node.nodeType === 11 && !!(node as ShadowRoot).host;
+}
+
 export function isWebComponentPortaled(el: HTMLElement): boolean {
   return activeProjections.has(el);
 }
@@ -22,7 +26,8 @@ export function createWebComponentPortalMount() {
       const marker = el.ownerDocument.createComment('proto-ui-portal-origin');
       const descriptor = Object.getOwnPropertyDescriptor(el, 'parentNode');
       let ownsParent = false;
-      const observer = new MutationObserver(() => {
+      const Observer = el.ownerDocument.defaultView?.MutationObserver ?? MutationObserver;
+      const observer = new Observer(() => {
         // Mutation delivery observes the settled tree, preserving sync moves.
         if (!parent.isConnected) revoke?.();
         else observeOriginTrees();
@@ -33,7 +38,7 @@ export function createWebComponentPortalMount() {
         let tree: Node = parent!.getRootNode();
         while (true) {
           trees.push(tree);
-          if (!(tree instanceof ShadowRoot)) break;
+          if (!isShadowRootNode(tree)) break;
           tree = tree.host.getRootNode();
         }
         if (trees.length === observedTrees.length && trees.every((t, i) => t === observedTrees[i]))

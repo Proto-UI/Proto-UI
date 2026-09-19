@@ -18,6 +18,7 @@ beforeAll(async () => {
       contents: `
         export { sampleWebComponentScopeTargets as sample } from './packages/adapters/web-component/src/focus-scope-targets';
         export { createShadowColorSchemeEnvironmentOwner as createEnvironment } from './packages/adapters/web-component/src/shadow-color-scheme-environment';
+        export { createWebComponentPortalMount as createPortal } from './packages/adapters/web-component/src/portal-mount';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { definePrototype as define, tw } from '@proto.ui/core';
         export { asTextControl, asFocusEntry, asFocusScope, asFocusable } from '@proto.ui/hooks';
@@ -838,6 +839,64 @@ describe('Shadow closeout native boundaries', () => {
         () => document.querySelector('#css-only-entry')?.getAttribute('tabindex') === null
       );
 
+      const visibleBox = await page.locator('#css-only-entry-button').boundingBox();
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (window as any).__cssVisibilityRule = sheet.insertRule(
+          '#css-only-entry-button { visibility: hidden; }',
+          sheet.cssRules.length
+        );
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+      expect(await page.locator('#css-only-entry-button').boundingBox()).toEqual(visibleBox);
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        sheet.deleteRule((window as any).__cssVisibilityRule);
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (window as any).__cssDeclarationRule = sheet.insertRule(
+          '#css-only-entry-button {}',
+          sheet.cssRules.length
+        );
+        (sheet.cssRules[(window as any).__cssDeclarationRule] as CSSStyleRule).style.visibility =
+          'hidden';
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBe('0');
+      await page.evaluate(() => {
+        const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
+        (sheet.cssRules[(window as any).__cssDeclarationRule] as CSSStyleRule).style.visibility =
+          '';
+        sheet.deleteRule((window as any).__cssDeclarationRule);
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      expect(await page.locator('#css-only-entry').getAttribute('tabindex')).toBeNull();
+
       await page.evaluate(() => {
         const sheet = Array.from(document.styleSheets).at(-1) as CSSStyleSheet;
         (window as any).__cssOnlyRule = sheet.insertRule(
@@ -952,6 +1011,95 @@ describe('Shadow closeout native boundaries', () => {
         fallback: null,
         ownerMatches: true,
       });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects an adopted radio entry after foreign-realm checkedness changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-adopted-radio-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const host = foreignDocument.adoptNode(new C());
+        const inside = foreignDocument.createElement('input');
+        inside.type = 'radio';
+        inside.name = 'foreign-entry-group';
+        const outside = foreignDocument.createElement('input');
+        outside.type = 'radio';
+        outside.name = 'foreign-entry-group';
+        outside.checked = true;
+        const form = foreignDocument.createElement('form');
+        host.append(inside);
+        form.append(host, outside);
+        foreignDocument.body.append(form);
+        await new Promise<void>((resolve) =>
+          frame.contentWindow!.requestAnimationFrame(() => resolve())
+        );
+        const initial = host.getAttribute('tabindex');
+        inside.click();
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const updated = host.getAttribute('tabindex');
+        const checked = [inside.checked, outside.checked];
+        frame.remove();
+        return { initial, updated, checked };
+      });
+      expect(result).toEqual({ initial: '0', updated: null, checked: [true, false] });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reclaims a portal whose origin host leaves a foreign ShadowRoot', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const carrier = foreignDocument.createElement('div');
+        const origin = carrier.attachShadow({ mode: 'open' });
+        const parent = foreignDocument.createElement('section');
+        const portal = foreignDocument.createElement('div');
+        origin.append(parent);
+        parent.append(portal);
+        foreignDocument.body.append(carrier);
+        const mount = p.createPortal();
+        mount.mount(portal);
+        const mounted = foreignDocument.body.lastElementChild === portal;
+        carrier.remove();
+        await new Promise<void>((resolve) =>
+          frame.contentWindow!.requestAnimationFrame(() => resolve())
+        );
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const reclaimed = !portal.isConnected && origin.contains(portal);
+        mount.unmount(portal);
+        frame.remove();
+        return { mounted, reclaimed };
+      });
+      expect(result).toEqual({ mounted: true, reclaimed: true });
       expect(errors).toEqual([]);
     } finally {
       await page.close();

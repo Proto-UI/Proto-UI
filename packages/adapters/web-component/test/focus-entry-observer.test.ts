@@ -179,6 +179,37 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(Element.prototype.attachShadow).toBe(original);
   });
 
+  it('restores stylesheet invalidation methods when its last entry observer tears down', async () => {
+    const original = CSSStyleSheet.prototype.insertRule;
+    const host = panel(true);
+    await settle();
+    expect(CSSStyleSheet.prototype.insertRule).not.toBe(original);
+    host.remove();
+    await settle();
+    expect(CSSStyleSheet.prototype.insertRule).toBe(original);
+  });
+
+  it('never clobbers a third-party stylesheet patch installed after ours', async () => {
+    const original = CSSStyleSheet.prototype.insertRule;
+    const host = panel(true);
+    await settle();
+    const protoWrapper = CSSStyleSheet.prototype.insertRule;
+    expect(protoWrapper).not.toBe(original);
+    const thirdParty = function (this: CSSStyleSheet, rule: string, index?: number) {
+      return protoWrapper.call(this, rule, index);
+    };
+    CSSStyleSheet.prototype.insertRule = thirdParty;
+    try {
+      host.remove();
+      await settle();
+      expect(CSSStyleSheet.prototype.insertRule).toBe(thirdParty);
+    } finally {
+      if (CSSStyleSheet.prototype.insertRule === thirdParty) {
+        CSSStyleSheet.prototype.insertRule = original;
+      }
+    }
+  });
+
   it.each([
     [false, true],
     [true, true],

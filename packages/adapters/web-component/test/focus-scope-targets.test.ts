@@ -85,6 +85,43 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('prunes a scope hidden by composed ancestors outside the container', () => {
+    const carrier = document.createElement('div');
+    const outer = document.createElement('div');
+    const scope = document.createElement('div');
+    scope.innerHTML = '<button id="inside" tabindex="0"></button>';
+    outer.append(scope);
+    carrier.append(outer);
+    document.body.append(carrier);
+    const sample = () => sampleWebComponentScopeTargets(scope).targets.map((el) => el.id);
+    try {
+      expect(sample()).toEqual(['inside']);
+      outer.hidden = true;
+      expect(sample()).toEqual([]);
+      outer.hidden = false;
+      outer.setAttribute('inert', '');
+      expect(sample()).toEqual([]);
+      outer.removeAttribute('inert');
+      outer.style.display = 'none';
+      expect(sample()).toEqual([]);
+      outer.style.display = '';
+      outer.style.contentVisibility = 'hidden';
+      expect(sample()).toEqual([]);
+      outer.style.contentVisibility = '';
+      expect(sample()).toEqual(['inside']);
+
+      const shadowCarrier = document.createElement('div');
+      shadowCarrier.attachShadow({ mode: 'open' }).append(outer);
+      carrier.append(shadowCarrier);
+      shadowCarrier.hidden = true;
+      expect(sample()).toEqual([]);
+      shadowCarrier.hidden = false;
+      expect(sample()).toEqual(['inside']);
+    } finally {
+      carrier.remove();
+    }
+  });
+
   it('includes a projected tabbable scope container in its native position', () => {
     // C-AS-FOCUS-SCOPE-0002-J: strategy:self projects a real native stop on
     // the scope owner; sampling must not erase that projected participation.

@@ -187,6 +187,158 @@ function watchLateAttachShadow(
   };
 }
 
+type EntryStyleMethodPatch = {
+  target: Record<string, unknown>;
+  key: string;
+  original: (...args: unknown[]) => unknown;
+  patched: (...args: unknown[]) => unknown;
+};
+
+const entryStyleWatches = new WeakMap<
+  Window,
+  {
+    subscribers: Set<() => void>;
+    methodPatches: EntryStyleMethodPatch[];
+    visibilityDescriptor: PropertyDescriptor | null;
+    visibilitySetter: ((value: string) => void) | null;
+    observer: MutationObserver;
+    onLoad: (event: Event) => void;
+  }
+>();
+
+function watchEntryStyleInvalidation(
+  view: (Window & typeof globalThis) | null,
+  onInvalidate: () => void
+): (() => void) | null {
+  const Sheet = view?.CSSStyleSheet;
+  const Declaration = view?.CSSStyleDeclaration;
+  const Observer = view?.MutationObserver;
+  const doc = view?.document;
+  if (!view || !Sheet || !Declaration || !Observer || !doc?.documentElement) return null;
+  let watch = entryStyleWatches.get(view as Window);
+  if (!watch) {
+    const subscribers = new Set<() => void>();
+    let pending = false;
+    const notify = () => {
+      if (pending) return;
+      pending = true;
+      queueMicrotask(() => {
+        pending = false;
+        for (const subscriber of subscribers) subscriber();
+      });
+    };
+    const methodPatches: EntryStyleMethodPatch[] = [];
+    const patchMethod = (target: Record<string, unknown>, key: string, async = false) => {
+      const original = target[key];
+      if (typeof original !== 'function') return;
+      const patched = function (this: unknown, ...args: unknown[]) {
+        const result = Reflect.apply(original, this, args);
+        if (async && result && typeof (result as PromiseLike<unknown>).then === 'function') {
+          Promise.resolve(result).then(notify, () => {});
+        } else notify();
+        return result;
+      };
+      target[key] = patched;
+      methodPatches.push({
+        target,
+        key,
+        original: original as (...args: unknown[]) => unknown,
+        patched,
+      });
+    };
+    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'insertRule');
+    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'deleteRule');
+    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replaceSync');
+    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replace', true);
+    patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'setProperty');
+    patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'removeProperty');
+
+    const visibilityDescriptor = Object.getOwnPropertyDescriptor(
+      Declaration.prototype,
+      'visibility'
+    );
+    let visibilitySetter: ((value: string) => void) | null = null;
+    if (visibilityDescriptor?.configurable && visibilityDescriptor.set) {
+      const originalSet = visibilityDescriptor.set;
+      visibilitySetter = function (this: CSSStyleDeclaration, value: string) {
+        originalSet.call(this, value);
+        notify();
+      };
+      Object.defineProperty(Declaration.prototype, 'visibility', {
+        ...visibilityDescriptor,
+        set: visibilitySetter,
+      });
+    }
+
+    const isStylesheetElement = (node: Node | null): node is Element => {
+      if (!node || node.nodeType !== 1) return false;
+      const el = node as Element;
+      return (
+        el.localName === 'style' ||
+        (el.localName === 'link' &&
+          (el.getAttribute('rel') ?? '').split(/\s+/).includes('stylesheet'))
+      );
+    };
+    const containsStylesheetElement = (node: Node) =>
+      isStylesheetElement(node) ||
+      (node.nodeType === 1 && !!(node as Element).querySelector('style,link[rel~="stylesheet"]'));
+    const observer = new Observer((records) => {
+      if (
+        records.some((record) => {
+          if (record.type === 'characterData') {
+            return isStylesheetElement(record.target.parentElement);
+          }
+          if (record.type === 'attributes') return isStylesheetElement(record.target);
+          return (
+            isStylesheetElement(record.target as Node) ||
+            [...record.addedNodes, ...record.removedNodes].some(containsStylesheetElement)
+          );
+        })
+      )
+        notify();
+    });
+    observer.observe(doc.documentElement, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['href', 'rel', 'media', 'disabled'],
+    });
+    const onLoad = (event: Event) => {
+      if (isStylesheetElement(event.target as Node | null)) notify();
+    };
+    doc.addEventListener('load', onLoad, true);
+    watch = {
+      subscribers,
+      methodPatches,
+      visibilityDescriptor: visibilityDescriptor ?? null,
+      visibilitySetter,
+      observer,
+      onLoad,
+    };
+    entryStyleWatches.set(view as Window, watch);
+  }
+  watch.subscribers.add(onInvalidate);
+  return () => {
+    const current = entryStyleWatches.get(view as Window);
+    if (!current) return;
+    current.subscribers.delete(onInvalidate);
+    if (current.subscribers.size > 0) return;
+    current.observer.disconnect();
+    doc.removeEventListener('load', current.onLoad, true);
+    for (const patch of current.methodPatches) {
+      if (patch.target[patch.key] === patch.patched) patch.target[patch.key] = patch.original;
+    }
+    if (current.visibilityDescriptor && current.visibilitySetter) {
+      const descriptor = Object.getOwnPropertyDescriptor(Declaration.prototype, 'visibility');
+      if (descriptor?.set === current.visibilitySetter) {
+        Object.defineProperty(Declaration.prototype, 'visibility', current.visibilityDescriptor);
+      }
+    }
+    entryStyleWatches.delete(view as Window);
+  };
+}
+
 function resolveWebComponentTriggerSurface(
   root: HTMLElement,
   logicalSurface: HTMLElement | null
@@ -407,6 +559,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryRadioStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
   let stopEntryViewportWatch: (() => void) | null = null;
+  let stopEntryStyleWatch: (() => void) | null = null;
   let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
   const stopEntryObserver = () => {
     entryObserver?.disconnect();
@@ -421,6 +574,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     stopEntryAttachShadowWatch = null;
     stopEntryViewportWatch?.();
     stopEntryViewportWatch = null;
+    stopEntryStyleWatch?.();
+    stopEntryStyleWatch = null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
@@ -556,6 +711,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               };
               view.addEventListener('resize', onViewportResize);
               stopEntryViewportWatch = () => view.removeEventListener('resize', onViewportResize);
+              stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
+                if (entryObserver) projectEntry();
+              });
             }
             // The late-attach watch below is installed once but must always
             // consult the currently observed region, so the root set lives
@@ -615,9 +773,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   'input[type="radio"][name]'
                 )) {
                   const tree = radio.getRootNode();
-                  if (tree instanceof Document || tree instanceof ShadowRoot) radioTrees.add(tree);
+                  if (tree.nodeType === 9 || (tree.nodeType === 11 && !!(tree as ShadowRoot).host))
+                    radioTrees.add(tree as Document | ShadowRoot);
                 }
-                if (root instanceof HTMLElement && root.shadowRoot) observe(root.shadowRoot);
+                if (root.nodeType === 1 && (root as HTMLElement).shadowRoot)
+                  observe((root as HTMLElement).shadowRoot!);
                 for (const descendant of root.querySelectorAll<HTMLElement>('*')) {
                   entryResizeObserver?.observe(descendant);
                   if (descendant.shadowRoot) observe(descendant.shadowRoot);
@@ -664,7 +824,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (hasArea) {
                 entryImageObserver ??= new Observer((records) => {
                   const containsImage = (node: Node) =>
-                    node instanceof Element && (node.matches('img') || !!node.querySelector('img'));
+                    node.nodeType === 1 &&
+                    ((node as Element).localName === 'img' ||
+                      !!(node as Element).querySelector('img'));
                   if (
                     records.some((record) =>
                       record.type === 'childList'
@@ -701,9 +863,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 const onChange = (event: Event) => {
                   const origin = eventOrigin(event);
                   if (
-                    origin instanceof HTMLInputElement &&
-                    origin.type === 'radio' &&
-                    origin.name
+                    !!origin &&
+                    typeof origin === 'object' &&
+                    (origin as Node).nodeType === 1 &&
+                    (origin as Element).namespaceURI === 'http://www.w3.org/1999/xhtml' &&
+                    (origin as Element).localName === 'input' &&
+                    (origin as HTMLInputElement).type === 'radio' &&
+                    (origin as HTMLInputElement).name
                   ) {
                     queueMicrotask(() => {
                       if (entryObserver) projectEntry();
@@ -711,7 +877,15 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   }
                 };
                 const onReset = (event: Event) => {
-                  if (!(eventOrigin(event) instanceof HTMLFormElement)) return;
+                  const origin = eventOrigin(event);
+                  if (
+                    !origin ||
+                    typeof origin !== 'object' ||
+                    (origin as Node).nodeType !== 1 ||
+                    (origin as Element).namespaceURI !== 'http://www.w3.org/1999/xhtml' ||
+                    (origin as Element).localName !== 'form'
+                  )
+                    return;
                   queueMicrotask(() => {
                     if (entryObserver) projectEntry();
                   });

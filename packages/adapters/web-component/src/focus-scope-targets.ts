@@ -34,6 +34,23 @@ function isShadowRootNode(node: Node): node is ShadowRoot {
   return node.nodeType === 11 && isElementNode((node as ShadowRoot).host);
 }
 
+function composedParentElement(el: Element): Element | null {
+  if (el.parentElement) return el.parentElement;
+  const root = el.getRootNode();
+  return isShadowRootNode(root) ? root.host : null;
+}
+
+function isPrunedByExternalAncestor(el: Element): boolean {
+  let ancestor = composedParentElement(el);
+  while (ancestor) {
+    if (ancestor.hasAttribute('inert') || (isHtmlElement(ancestor) && ancestor.hidden)) return true;
+    const style = getOwnedComputedStyle(ancestor);
+    if (style?.display === 'none' || style?.contentVisibility === 'hidden') return true;
+    ancestor = composedParentElement(ancestor);
+  }
+  return false;
+}
+
 function getOwnedComputedStyle(el: Element): CSSStyleDeclaration | null {
   return el.ownerDocument.defaultView?.getComputedStyle(el) ?? null;
 }
@@ -57,6 +74,9 @@ export function sampleWebComponentScopeTargets(
   const activeTarget = deepestActiveElement(container.ownerDocument);
   type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
   const scope: Entry[] = [];
+  if (isPrunedByExternalAncestor(container)) {
+    return { targets: [], activeTarget, recentTarget: recentFocusTarget?.() ?? null };
+  }
   const visited = new Set<Element>();
   const visit = (el: Element, entries: Entry[]) => {
     if (visited.has(el)) return;
