@@ -68,11 +68,13 @@ function reviewInput(overrides = {}) {
           login: 'contributor',
           name: 'Contributor',
           email: 'contributor@example.com',
+          platform: null,
         },
         committer: {
           login: 'web-flow',
           name: 'GitHub',
           email: 'noreply@github.com',
+          platform: null,
         },
       },
     ],
@@ -254,14 +256,34 @@ test('review packet binds revision and input state and supports incremental reco
       {
         sha: sha('c'),
         message: 'Second',
-        author: { login: 'second-author', name: 'Second', email: 'second@example.com' },
-        committer: { login: 'web-flow', name: 'GitHub', email: 'noreply@github.com' },
+        author: {
+          login: 'second-author',
+          name: 'Second',
+          email: 'second@example.com',
+          platform: null,
+        },
+        committer: {
+          login: 'web-flow',
+          name: 'GitHub',
+          email: 'noreply@github.com',
+          platform: null,
+        },
       },
       {
         sha: sha('b'),
         message: 'First',
-        author: { login: 'first-author', name: 'First', email: 'first@example.com' },
-        committer: { login: 'web-flow', name: 'GitHub', email: 'noreply@github.com' },
+        author: {
+          login: 'first-author',
+          name: 'First',
+          email: 'first@example.com',
+          platform: null,
+        },
+        committer: {
+          login: 'web-flow',
+          name: 'GitHub',
+          email: 'noreply@github.com',
+          platform: null,
+        },
       },
     ],
   });
@@ -969,6 +991,38 @@ test('review submission preserves explicit authorization and activates the bound
       ),
     }).reason,
     /verifiable platform identity/
+  );
+  // PR509-CONTRIBUTOR-IDENTITY-001: a GitHub platform committer verified
+  // through GitHub's own signature attestation is an explicit trusted system
+  // identity, not an unresolved null; the fail-closed rule is not weakened
+  // for human commits without a linked account (the case above).
+  const platformCommitterInput = structuredClone(contributorInput);
+  platformCommitterInput.commits[0].committer = {
+    login: null,
+    name: 'GitHub',
+    email: 'noreply@github.com',
+    platform: { kind: 'github-web-flow', attestation: 'valid-github-signature' },
+  };
+  assert.equal(
+    authorizeReviewSubmission({
+      ...base,
+      input: platformCommitterInput,
+      liveInput: structuredClone(platformCommitterInput),
+      packet: packet(
+        { limitations: [], humanGates: [], recommendedAction: 'APPROVE' },
+        platformCommitterInput
+      ),
+    }).allowed,
+    true
+  );
+  const forgedPlatformInput = structuredClone(platformCommitterInput);
+  forgedPlatformInput.commits[0].committer.platform = {
+    kind: 'github-web-flow',
+    attestation: 'self-declared',
+  };
+  assert.throws(
+    () => validateReviewInputSnapshot(forgedPlatformInput),
+    /platform identity is invalid/
   );
   assert.equal(authorizeReviewSubmission({ ...base, ciConclusion: 'failure' }).allowed, false);
   assert.match(

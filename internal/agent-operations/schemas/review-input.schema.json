@@ -174,11 +174,20 @@
   "$defs": {
     "commitActor": {
       "type": "object",
-      "required": ["login", "name", "email"],
+      "required": ["login", "name", "email", "platform"],
       "properties": {
         "login": { "type": ["string", "null"], "minLength": 1 },
         "name": { "type": "string" },
-        "email": { "type": "string" }
+        "email": { "type": "string" },
+        "platform": {
+          "type": ["object", "null"],
+          "required": ["kind", "attestation"],
+          "properties": {
+            "kind": { "enum": ["github-web-flow"] },
+            "attestation": { "enum": ["valid-github-signature"] }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     }

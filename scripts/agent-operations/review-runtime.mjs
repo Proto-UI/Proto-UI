@@ -174,7 +174,11 @@ export function validateReviewInputSnapshot(input) {
       assert(SHA.test(item.sha), 'review input commit SHA is invalid');
       assert(typeof item.message === 'string', 'review input commit message is invalid');
       for (const role of ['author', 'committer']) {
-        exactKeys(item[role], ['login', 'name', 'email'], `review input commit ${role}`);
+        exactKeys(
+          item[role],
+          ['login', 'name', 'email', 'platform'],
+          `review input commit ${role}`
+        );
         assert(
           item[role].login === null ||
             (typeof item[role].login === 'string' && item[role].login.length > 0),
@@ -185,6 +189,22 @@ export function validateReviewInputSnapshot(input) {
           typeof item[role].email === 'string',
           `review input commit ${role} email is invalid`
         );
+        // A platform-generated actor (GitHub's web-flow committer) carries an
+        // explicit verified platform identity instead of an unresolved null
+        // login; the collector may only set it from GitHub's own signature
+        // attestation, so a forged entry cannot weaken the fail-closed rule.
+        if (item[role].platform !== null) {
+          exactKeys(
+            item[role].platform,
+            ['kind', 'attestation'],
+            `review input commit ${role} platform`
+          );
+          assert(
+            item[role].platform.kind === 'github-web-flow' &&
+              item[role].platform.attestation === 'valid-github-signature',
+            `review input commit ${role} platform identity is invalid`
+          );
+        }
       }
     }
   );
@@ -939,9 +959,15 @@ function dispositionIneligibleLogins(input) {
   return logins;
 }
 
+function hasVerifiedCommitActorIdentity(actor) {
+  return actor.login !== null || actor.platform !== null;
+}
+
 function hasCompleteCommitContributorIdentity(input) {
   return input.commits.every(
-    (commit) => commit.author.login !== null && commit.committer.login !== null
+    (commit) =>
+      hasVerifiedCommitActorIdentity(commit.author) &&
+      hasVerifiedCommitActorIdentity(commit.committer)
   );
 }
 

@@ -4,6 +4,7 @@ import {
   assertNoTruncation,
   buildLiveReviewInput,
   collectLiveReviewInput,
+  GITHUB_WEB_FLOW_PLATFORM,
   MAX_LIVE_RESPONSE_BYTES,
   normalizeCheck,
   submitGitHubMerge,
@@ -192,11 +193,13 @@ test('live collector builds a complete canonical input from the GraphQL payload'
       login: 'contributor',
       name: 'Contributor',
       email: 'contributor@example.com',
+      platform: null,
     },
     committer: {
       login: 'web-flow',
       name: 'GitHub',
       email: 'noreply@github.com',
+      platform: null,
     },
   });
   assert.equal(result.input.pullRequestState, 'OPEN');
@@ -230,6 +233,71 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   assert.equal(result.input.checks[1].conclusion, 'FAILURE');
   assert.equal(summarizeLiveChecks(result.input.checks, trustedOptions), 'success');
   assert.deepEqual(result.input.externalEvidence, []);
+});
+
+test('live collector records a verified GitHub platform committer without weakening fail-closed identity', () => {
+  // Live-realistic GitHub "Update branch" merge modeled on PR #509 commit
+  // 60c8bdd: the human author is linked to an account, while the committer is
+  // GitHub's web-flow identity (user null) attested by GitHub's own valid
+  // GPG signature. The canonical model records that verified platform
+  // identity explicitly instead of an unresolved null.
+  const updateBranch = payload();
+  updateBranch.data.repository.pullRequest.commits.nodes.unshift({
+    commit: {
+      oid: sha('c'),
+      message: "Merge branch 'main' into codex/issue-504-event-shadow",
+      author: { name: 'cyjin.yl', email: 'cyjin.yl@gmail.com', user: { login: 'cyjin-yl' } },
+      committer: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      signature: { __typename: 'GpgSignature', isValid: true, wasSignedByGitHub: true },
+    },
+  });
+  const result = buildLiveReviewInput(
+    updateBranch,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(result.input.commits.length, 2);
+  assert.deepEqual(result.input.commits[0].committer, {
+    login: null,
+    name: 'GitHub',
+    email: 'noreply@github.com',
+    platform: GITHUB_WEB_FLOW_PLATFORM,
+  });
+  assert.equal(result.input.commits[0].author.login, 'cyjin-yl');
+  assert.equal(result.input.commits[0].author.platform, null);
+  assert.equal(result.input.commits[1].committer.platform, null);
+
+  // The same committer shape without GitHub's signature attestation is a
+  // forgeable human identity claim and must stay an unresolved null.
+  const unattested = payload();
+  unattested.data.repository.pullRequest.commits.nodes.unshift({
+    commit: {
+      oid: sha('c'),
+      message: "Merge branch 'main' into codex/issue-504-event-shadow",
+      author: { name: 'cyjin.yl', email: 'cyjin.yl@gmail.com', user: { login: 'cyjin-yl' } },
+      committer: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      signature: { __typename: 'SshSignature', isValid: false, wasSignedByGitHub: false },
+    },
+  });
+  const unresolved = buildLiveReviewInput(
+    unattested,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(unresolved.input.commits[0].committer.platform, null);
+
+  const unsigned = buildLiveReviewInput(
+    payload(),
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(unsigned.input.commits[0].committer.platform, null);
 });
 
 test('live collector derives thread time from comments and never fabricates timestamps', () => {
