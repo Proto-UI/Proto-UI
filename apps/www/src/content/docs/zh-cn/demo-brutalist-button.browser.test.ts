@@ -15,7 +15,7 @@ import {
 } from './browser-harness';
 
 const BUTTON_ROUTE = '/en/ui-libraries/brutalist/components/button/';
-const BUTTON_SELECTOR = '.host [data-pui-root]';
+const BUTTON_SELECTOR = '[data-projection-content] [data-pui-root]';
 const BUTTON_COUNT = 10;
 const BUTTON_RUNTIMES = ['wc', 'react', 'vue'] as const satisfies readonly RuntimeId[];
 const VIEWPORT = { width: 1440, height: 900 } as const;
@@ -69,31 +69,34 @@ function geometryOf(style: ButtonStyle) {
 }
 
 async function resolvedTokenColors(
-  page: Page,
+  surface: Locator,
   tokens: readonly `--pui-${string}`[]
 ): Promise<string[]> {
-  return page.evaluate((colorTokens) => {
-    const rootStyle = getComputedStyle(document.documentElement);
-    const probe = document.createElement('span');
-    probe.style.position = 'fixed';
-    probe.style.pointerEvents = 'none';
-    probe.style.visibility = 'hidden';
-    document.body.append(probe);
-
-    try {
-      return colorTokens.map((token) => {
-        if (!rootStyle.getPropertyValue(token).trim()) {
-          throw new Error(`Theme token ${token} is unavailable.`);
-        }
-        probe.style.setProperty('color', `var(${token})`, 'important');
-        return getComputedStyle(probe).color;
-      });
-    } finally {
-      probe.remove();
-    }
+  // Lane variables live on the projected presentation scope, not :root; read
+  // them from the surface and normalize through a 1x1 canvas so a hex token
+  // compares cleanly with the serialized boxShadow layers.
+  return surface.evaluate((element, colorTokens) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) throw new Error('Canvas 2D context is required to resolve painted colours.');
+    const paint = (color: string): string => {
+      context.clearRect(0, 0, 1, 1);
+      context.fillStyle = '#000';
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+      const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+    const style = getComputedStyle(element);
+    return colorTokens.map((token) => {
+      const value = style.getPropertyValue(token).trim();
+      if (!value) throw new Error(`Theme token ${token} is unavailable on the projected surface.`);
+      return paint(value);
+    });
   }, tokens);
 }
-
 async function persistFrame(locator: Locator, runtime: RuntimeId, frame: string): Promise<void> {
   if (!EVIDENCE_DIR) return;
   await mkdir(EVIDENCE_DIR, { recursive: true });
@@ -157,6 +160,10 @@ describe.sequential('Brutalist Button browser regressions', () => {
           `${runtime}/flat-fills`
         ).toEqual(Array(BUTTON_COUNT).fill('none'));
 
+        // Selecting the runtime can leave the pointer over the first button;
+        // park it at the origin so "resting" is measured without hover state.
+        await page.mouse.move(0, 0);
+        await waitForState(page, 0, 'data-hovered', false);
         const resting = await styleOf(solid);
         expect(resting, `${runtime}/rest`).toMatchObject({
           borderColor: 'rgb(0, 0, 0)',
@@ -210,7 +217,7 @@ describe.sequential('Brutalist Button browser regressions', () => {
         await page.keyboard.press('Tab');
         await waitForState(page, 0, 'data-focus-visible', true);
         const focused = await styleOf(solid);
-        const [ringOffsetColor, ringColor] = await resolvedTokenColors(page, [
+        const [ringOffsetColor, ringColor] = await resolvedTokenColors(solid, [
           '--pui-background',
           '--pui-ring',
         ]);

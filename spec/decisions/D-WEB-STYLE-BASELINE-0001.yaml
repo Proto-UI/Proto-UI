@@ -26,17 +26,40 @@ criteria:
     text:
       zh-CN: box-model 基线必须由 physical token CSS 生成器提供，不得放入 Shadcn theme variable 文件，也不得要求每个尺寸敏感 prototype 重复声明私有 `box-border` token。
       en: The box-model baseline must be provided by the physical token CSS generator rather than the Shadcn theme-variable file, and size-sensitive prototypes must not each repeat a private `box-border` token.
+  - id: D-WEB-STYLE-BASELINE-0001-D
+    text:
+      zh-CN: >-
+        既有三个 scoped selector 的 `box-sizing: border-box` rule 必须位于 `@layer proto-ui` 内并先于 Prototype token rules；当 host 提前声明完整顺序时，reset/base layers 必须低于它，显式 consumer layers 必须高于它。把该 baseline 纳入 `proto-ui` layer 不授权任何额外 reset property。
+
+
+      en: >-
+        The existing `box-sizing: border-box` rule for the three scoped selectors must be inside `@layer proto-ui` and before Prototype token rules; when the host declares the complete order early, reset or base layers must remain below it and explicit consumer layers above it. Moving this baseline into the `proto-ui` layer does not authorize any additional reset property.
+
+
 sources:
   - path: internal/records/2026-07-22-web-box-model-baseline.zh-CN.md
   - path: packages/cli/src/services/proto-style-css.ts
   - path: packages/cli/test/proto-style-css.test.ts
   - path: packages/prototypes/shadcn/src/switch/root.proto.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
+  - path: apps/www/src/pages/en/test/style-isolation.astro
 relates:
   contracts: [C-FEEDBACK-STYLE-0003]
+  decisions:
+    - id: D-WEB-SURFACE-NORMALIZATION-0001
+      since: 0.3.0-alpha.0
   prototypes: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+refines:
+  contracts:
+    - id: C-PROTOTYPE-STYLE-CLOSURE-0001
+      since: 0.3.0-alpha.0
+      anchors: [C-PROTOTYPE-STYLE-CLOSURE-0001-E]
 verifies:
   tests: [T-WEB-STYLE-BASELINE-0001]
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Refined only the placement of the scoped border-box baseline into the Proto UI layer, preserving its box-model-only scope and explicit consumer ownership.
   - version: 0.2.0-rc.1
     change: introduced
     summary: Chose a generated data-pui-style-scoped border-box baseline over a global preflight or per-prototype compensation.

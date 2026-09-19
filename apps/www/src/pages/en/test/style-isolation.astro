@@ -1,0 +1,353 @@
+---
+
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Proto UI style isolation fixture</title>
+    <script is:inline>
+      const theme = new URLSearchParams(window.location.search).get('theme');
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    </script>
+  </head>
+  <body>
+    <main>
+      <h1>Proto UI style isolation fixture</h1>
+      <p>
+        This route intentionally excludes Starlight, Tailwind Preflight, and the Website global
+        stylesheet.
+      </p>
+
+      <div class="fixture-grid">
+        {
+          ['wc', 'react', 'vue', 'vue2'].map((runtime) => (
+            <section class="fixture-runtime" data-runtime-card={runtime}>
+              <h2>{runtime}</h2>
+              <div data-runtime-host={runtime} />
+            </section>
+          ))
+        }
+      </div>
+    </main>
+
+    <div class="token-probes" aria-hidden="true">
+      <span data-token-probe="foreground"></span>
+      <span data-token-probe="background"></span>
+      <span data-token-probe="border"></span>
+      <span data-token-probe="input"></span>
+      <span data-token-probe="transparent"></span>
+      <span data-token-probe="popover"></span>
+    </div>
+
+    <button data-unstyled-control type="button">Unstyled host control</button>
+    <iframe
+      data-unstyled-baseline
+      title="Unstyled browser control baseline"
+      srcdoc="<!doctype html><button data-baseline-control type='button'>Unstyled host control</button>"
+    ></iframe>
+
+    <script>
+      import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer';
+      import {
+        collectPrototypeIds,
+        type DemoSpec,
+      } from '../../../components/PrototypePreviewer/demo-types';
+      import { loadPrototypes } from '../../../components/PrototypePreviewer/prototype-modules';
+      import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/registry';
+
+      const runtimes: RuntimeId[] = ['wc', 'react', 'vue', 'vue2'];
+
+      function createDemo(runtime: RuntimeId): DemoSpec {
+        return {
+          type: 'demo',
+          root: {
+            kind: 'box',
+            className: 'fixture-stack',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-button',
+                ref: `button-${runtime}`,
+                props: { variant: 'outline', size: 'default' },
+                children: ['Standalone button'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-button',
+                ref: `button-override-${runtime}`,
+                className: 'consumer-override',
+                props: { variant: 'outline', size: 'default' },
+                children: ['Consumer override'],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-editable-${runtime}`,
+                props: {
+                  defaultValue: 'Standalone editable',
+                  ariaLabel: 'Standalone editable',
+                  rows: 4,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-disabled-${runtime}`,
+                props: {
+                  defaultValue: 'Standalone disabled',
+                  disabled: true,
+                  ariaLabel: 'Standalone disabled',
+                  rows: 2,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-readonly-${runtime}`,
+                props: {
+                  defaultValue: 'Standalone readonly',
+                  readOnly: true,
+                  ariaLabel: 'Standalone readonly',
+                  rows: 2,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-override-${runtime}`,
+                className: 'consumer-native-override',
+                props: {
+                  defaultValue: 'Standalone consumer override',
+                  ariaLabel: 'Standalone consumer override',
+                  rows: 2,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-textarea-root',
+                ref: `textarea-utility-layer-${runtime}`,
+                className: 'utility-layer-override',
+                props: {
+                  defaultValue: 'Standalone utility layer override',
+                  ariaLabel: 'Standalone utility layer override',
+                  rows: 2,
+                },
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-hover-card-root',
+                ref: `hover-root-${runtime}`,
+                props: { defaultOpen: true, openDelay: 0, closeDelay: 0 },
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-hover-card-trigger',
+                    ref: `hover-trigger-${runtime}`,
+                    children: [`Hover trigger ${runtime}`],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-hover-card-content',
+                    ref: `hover-content-${runtime}`,
+                    props: { side: 'bottom', align: 'center' },
+                    children: [`Standalone hover content ${runtime}`],
+                  },
+                ],
+              },
+            ],
+          },
+        };
+      }
+
+      async function mountFixture(): Promise<void> {
+        const demos = new Map(runtimes.map((runtime) => [runtime, createDemo(runtime)]));
+        const prototypeIds = new Set<string>();
+        for (const demo of demos.values()) collectPrototypeIds(demo.root, prototypeIds);
+        await loadPrototypes([...prototypeIds]);
+
+        const cleanups: Array<() => Promise<void> | void> = [];
+        for (const runtime of runtimes) {
+          const host = document.querySelector<HTMLElement>(`[data-runtime-host="${runtime}"]`);
+          const demo = demos.get(runtime);
+          if (!host || !demo) throw new Error(`Missing style-isolation host for ${runtime}.`);
+          const result = await renderDemo({ runtime, demo, host });
+          cleanups.push(result.destroy);
+          host.dataset.mounted = 'true';
+        }
+
+        window.addEventListener(
+          'pagehide',
+          () => {
+            for (const destroy of cleanups.reverse()) void destroy();
+          },
+          { once: true }
+        );
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        document.documentElement.dataset.styleIsolationReady = 'true';
+      }
+
+      void mountFixture().catch((error: unknown) => {
+        const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
+        document.documentElement.dataset.styleIsolationError = message;
+        document.documentElement.dataset.styleIsolationReady = 'error';
+        console.error(error);
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @layer theme, base, proto-ui, utilities, consumer;
+
+  @import '../../../styles/proto-ui-style.css';
+
+  :root {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    padding: 2rem;
+    background: var(--pui-background);
+    color: var(--pui-foreground);
+    font-family: 'Proto UI Isolation Consumer', sans-serif;
+  }
+
+  h1,
+  h2,
+  p {
+    margin: 0 0 1rem;
+  }
+
+  .fixture-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 20rem));
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .fixture-runtime,
+  [data-runtime-host],
+  .fixture-stack {
+    width: 20rem;
+  }
+
+  .fixture-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  @layer base {
+    textarea[data-pui-style] {
+      box-sizing: content-box;
+      margin: 11px;
+      padding: 19px;
+      border: 5px dotted rgb(190 20 30);
+      background: rgb(210 180 150);
+      color: rgb(15 120 70);
+      opacity: 0.25;
+      font-family: 'Proto UI Base Reset Sentinel', monospace;
+    }
+  }
+
+  @layer consumer {
+    :root[data-theme='light'] {
+      --pui-foreground: rgb(19 31 43);
+      --pui-input: rgb(57 81 105);
+    }
+
+    :root[data-theme='dark'] {
+      --pui-foreground: rgb(221 229 237);
+      --pui-input: rgb(117 139 161);
+    }
+
+    .consumer-override {
+      color: rgb(12 34 56);
+      font-family: 'Proto UI Explicit Consumer', serif;
+    }
+
+    .consumer-native-override {
+      box-sizing: content-box;
+      margin: 4px 6px;
+      padding: 5px 7px;
+      border: 3px dashed rgb(89 67 45);
+      background-color: rgb(23 45 67);
+      color: rgb(210 220 230);
+      opacity: 0.75;
+      font-family: 'Proto UI Native Consumer Override', serif;
+    }
+  }
+  @layer utilities {
+    .utility-layer-override {
+      box-sizing: content-box;
+      margin: 4px 6px;
+      padding: 5px 7px;
+      border: 3px dashed rgb(89 67 45);
+      background-color: rgb(23 45 67);
+      color: rgb(210 220 230);
+      opacity: 0.75;
+      font-family: 'Proto UI Utility Layer Override', serif;
+    }
+  }
+
+  .token-probes {
+    position: fixed;
+    inset: auto auto 0 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  [data-token-probe='foreground'] {
+    color: var(--pui-foreground);
+  }
+
+  [data-token-probe='background'] {
+    background: var(--pui-background);
+  }
+
+  [data-token-probe='border'] {
+    border: 1px solid var(--pui-border);
+  }
+
+  [data-token-probe='input'] {
+    border: 1px solid var(--pui-input);
+    background: color-mix(in oklab, var(--pui-input) 30%, transparent);
+  }
+
+  [data-token-probe='transparent'] {
+    background: transparent;
+  }
+
+  [data-token-probe='popover'] {
+    color: var(--pui-popover-foreground);
+    background: var(--pui-popover);
+  }
+
+  [data-unstyled-control] {
+    position: fixed;
+    inset: auto 0 0 auto;
+  }
+
+  [data-unstyled-baseline] {
+    position: fixed;
+    left: -10000px;
+    bottom: 0;
+    width: 20rem;
+    height: 5rem;
+    border: 0;
+  }
+</style>
