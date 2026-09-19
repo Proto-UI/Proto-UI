@@ -49,11 +49,13 @@ function reviewInput(overrides = {}) {
           login: 'contributor',
           name: 'Contributor',
           email: 'contributor@example.com',
+          platform: null,
         },
         committer: {
           login: 'web-flow',
           name: 'GitHub',
           email: 'noreply@github.com',
+          platform: null,
         },
       },
     ],

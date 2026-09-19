@@ -38,6 +38,11 @@ query($owner: String!, $name: String!, $number: Int!) {
             message
             author { name email user { login } }
             committer { name email user { login } }
+            signature {
+              __typename
+              ... on GpgSignature { isValid wasSignedByGitHub }
+              ... on SshSignature { isValid wasSignedByGitHub }
+            }
             statusCheckRollup {
               contexts(first: 100) {
                 nodes {
@@ -249,6 +254,36 @@ function latestThreadUpdate(thread) {
   return updates.sort().at(-1);
 }
 
+// GitHub attests its own platform-generated commits (web merges, update-branch
+// merges, and other web-flow writes) with a valid signature made by GitHub
+// itself. Such a committer has no account login, but it is not an unresolved
+// human identity either: the canonical model records the verified platform
+// identity explicitly instead of leaving a bare null that fails closed
+// (PR509-CONTRIBUTOR-IDENTITY-001). A human commit without a linked account
+// keeps platform: null and still fails closed.
+export const GITHUB_WEB_FLOW_PLATFORM = {
+  kind: 'github-web-flow',
+  attestation: 'valid-github-signature',
+};
+
+function commitActorIdentity(actor, signature) {
+  const login = actor?.user?.login ?? null;
+  const platform =
+    login === null &&
+    actor?.name === 'GitHub' &&
+    actor?.email === 'noreply@github.com' &&
+    signature?.isValid === true &&
+    signature?.wasSignedByGitHub === true
+      ? structuredClone(GITHUB_WEB_FLOW_PLATFORM)
+      : null;
+  return {
+    login,
+    name: actor?.name ?? '',
+    email: actor?.email ?? '',
+    platform,
+  };
+}
+
 export function buildLiveReviewInput(
   payload,
   repositoryId,
@@ -340,16 +375,8 @@ export function buildLiveReviewInput(
     commits: (pullRequestPayload.commits?.nodes ?? []).map((node) => ({
       sha: node.commit.oid,
       message: node.commit.message ?? '',
-      author: {
-        login: node.commit.author?.user?.login ?? null,
-        name: node.commit.author?.name ?? '',
-        email: node.commit.author?.email ?? '',
-      },
-      committer: {
-        login: node.commit.committer?.user?.login ?? null,
-        name: node.commit.committer?.name ?? '',
-        email: node.commit.committer?.email ?? '',
-      },
+      author: commitActorIdentity(node.commit.author, node.commit.signature),
+      committer: commitActorIdentity(node.commit.committer, node.commit.signature),
     })),
     reviews: (pullRequestPayload.reviews?.nodes ?? []).map((review) => ({
       id: review.id,
