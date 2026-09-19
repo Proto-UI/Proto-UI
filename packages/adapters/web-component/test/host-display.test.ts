@@ -2,8 +2,26 @@ import { describe, expect, it } from 'vitest';
 import { tw } from '@proto.ui/core';
 
 import { AdaptToWebComponent } from '../src/adapt';
+import { installDefaultHostDisplay } from '../src/host-display';
 
 describe('adapter-web-component: host display', () => {
+  it('lets a private presentation recipe own display without removing visibility infrastructure or consumer classes', () => {
+    const host = document.createElement('x-private-split-display');
+    host.className = 'consumer pui-host-root';
+    const controller = installDefaultHostDisplay(host, { displayOwner: 'presentation' });
+    expect(host.className).toBe('consumer');
+    host.setAttribute('data-pui-split-root-style', 'size-4');
+    controller.sync();
+    expect(host.className).toBe('consumer');
+    host.removeAttribute('data-pui-split-root-style');
+    controller.sync();
+    expect(host.className).toBe('consumer');
+    controller.disconnect();
+    controller.disconnect();
+    expect(host.className).toBe('consumer');
+    expect(document.head.textContent).toContain('data-pui-view-detached');
+  });
+
   it('injects a low-specificity block display rule and default host class', async () => {
     const tag = 'x-host-display-default';
 

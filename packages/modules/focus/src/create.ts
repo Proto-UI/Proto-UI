@@ -41,6 +41,7 @@ import {
   FOCUS_SET_ENTRY_FOCUSABLE_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
+  FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
 } from './caps';
 import {
   FOCUS_CENTER,
@@ -101,6 +102,31 @@ function pushOverrideWarning(
   warnings.push(`[Focus] ${owner}.${field} overridden: ${String(prev)} -> ${String(next)}`);
 }
 
+// Keep the explicit field order (including legacy roving labels) without
+// repeating the same optional-patch warning code for every configuration.
+function warnConfigPatch<T extends object>(
+  warnings: string[],
+  owner: 'focusable' | 'entry' | 'scope',
+  previous: T,
+  patch: Partial<T>,
+  fields: readonly (keyof T & string)[],
+  prefix = ''
+) {
+  const keyLabel = (key: unknown) =>
+    (key as FocusScopeKey | undefined)?.meta?.debugLabel ?? (key as FocusScopeKey | undefined)?.id;
+  for (const field of fields) {
+    if (typeof patch[field] === 'undefined') continue;
+    const isKey = field === 'key' || field === 'scopeKey' || field === 'groupKey';
+    pushOverrideWarning(
+      warnings,
+      owner,
+      prefix + field,
+      isKey ? keyLabel(previous[field]) : previous[field],
+      isKey ? keyLabel(patch[field]) : patch[field]
+    );
+  }
+}
+
 /**
  * Reads the UA's own :focus-visible decision for an element, when the
  * environment exposes it. Returns false outside real browsers (jsdom/happy-dom)
@@ -122,6 +148,7 @@ class FocusModuleImpl extends ModuleBase {
   private focusableConfig: FocusableConfig = DEFAULT_FOCUSABLE_CONFIG;
   private focusableDeclared = false;
   private entryDeclared = false;
+  private lastScopeTarget: HTMLElement | null = null;
   private entryConfig: FocusEntryConfig = DEFAULT_ENTRY_CONFIG;
   private scopeDeclared = false;
   private rovingDeclared = false;
@@ -534,6 +561,39 @@ class FocusModuleImpl extends ModuleBase {
         reason: 'focus.scope.trap',
         source: this.prototypeName,
       });
+      const container = this.getRootTarget();
+      if (
+        container &&
+        this.caps.has(FOCUS_SAMPLE_SCOPE_TARGETS_CAP) &&
+        this.caps.has(FOCUS_REQUEST_FOCUS_CAP)
+      ) {
+        const { targets, activeTarget, activeInsertionIndex, recentTarget } = this.caps.get(
+          FOCUS_SAMPLE_SCOPE_TARGETS_CAP
+        )(container, ev.shiftKey ? 'prev' : 'next');
+        if (targets.length === 0) return;
+        // Actual in-scope focus (pointer or programmatic) refreshes the
+        // remembered recovery anchor (C-AS-FOCUS-SCOPE-0002-I); only sampled
+        // targets qualify, so stale or out-of-scope history is ignored.
+        if (recentTarget && targets.includes(recentTarget)) this.lastScopeTarget = recentTarget;
+        let current = targets.findIndex((target) => target === activeTarget);
+        if (current < 0 && activeInsertionIndex === undefined)
+          current = targets.findIndex((target) => target === this.lastScopeTarget);
+        let next =
+          current < 0
+            ? activeInsertionIndex !== undefined
+              ? activeInsertionIndex - (ev.shiftKey ? 1 : 0)
+              : ev.shiftKey
+                ? targets.length - 1
+                : 0
+            : current + (ev.shiftKey ? -1 : 1);
+        next = this.scopeConfig.loop
+          ? (next + targets.length) % targets.length
+          : Math.max(0, Math.min(targets.length - 1, next));
+        // Native host events, not this sample, report any logical focus facts.
+        this.caps.get(FOCUS_REQUEST_FOCUS_CAP)(targets[next]!, { reason: 'keyboard' });
+        this.lastScopeTarget = targets[next]!;
+        return;
+      }
       FOCUS_CENTER.focusInScope(entry, ev.shiftKey ? 'prev' : 'next');
     });
   }
@@ -608,51 +668,13 @@ class FocusModuleImpl extends ModuleBase {
   configureFocusable(patch: FocusableConfigPatch): void {
     this.ensureSetup('focus.configureFocusable');
     this.declareFocusable();
-    if (typeof patch.autoFocus !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'focusable',
-        'autoFocus',
-        this.focusableConfig.autoFocus,
-        patch.autoFocus
-      );
-    }
-    if (typeof patch.disabled !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'focusable',
-        'disabled',
-        this.focusableConfig.disabled,
-        patch.disabled
-      );
-    }
-    if (typeof patch.navParticipation !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'focusable',
-        'navParticipation',
-        this.focusableConfig.navParticipation,
-        patch.navParticipation
-      );
-    }
-    if (typeof patch.scopeKey !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'focusable',
-        'scopeKey',
-        this.focusableConfig.scopeKey?.meta?.debugLabel ?? this.focusableConfig.scopeKey?.id,
-        patch.scopeKey?.meta?.debugLabel ?? patch.scopeKey?.id
-      );
-    }
-    if (typeof patch.groupKey !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'focusable',
-        'groupKey',
-        this.focusableConfig.groupKey?.meta?.debugLabel ?? this.focusableConfig.groupKey?.id,
-        patch.groupKey?.meta?.debugLabel ?? patch.groupKey?.id
-      );
-    }
+    warnConfigPatch(this.warnings, 'focusable', this.focusableConfig, patch, [
+      'autoFocus',
+      'disabled',
+      'navParticipation',
+      'scopeKey',
+      'groupKey',
+    ]);
 
     this.focusableConfig = Object.freeze({
       ...this.focusableConfig,
@@ -667,33 +689,11 @@ class FocusModuleImpl extends ModuleBase {
   configureEntry(patch: FocusEntryConfigPatch): void {
     this.ensureSetup('focus.configureEntry');
     this.declareEntry();
-    if (typeof patch.strategy !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'entry',
-        'strategy',
-        this.entryConfig.strategy,
-        patch.strategy
-      );
-    }
-    if (typeof patch.fallback !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'entry',
-        'fallback',
-        this.entryConfig.fallback,
-        patch.fallback
-      );
-    }
-    if (typeof patch.disabled !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'entry',
-        'disabled',
-        this.entryConfig.disabled,
-        patch.disabled
-      );
-    }
+    warnConfigPatch(this.warnings, 'entry', this.entryConfig, patch, [
+      'strategy',
+      'fallback',
+      'disabled',
+    ]);
 
     this.entryConfig = Object.freeze({
       ...this.entryConfig,
@@ -706,66 +706,18 @@ class FocusModuleImpl extends ModuleBase {
   configureScope(patch: FocusScopeConfigPatch): void {
     this.ensureSetup('focus.configureScope');
     this.declareScope();
-    if (typeof patch.key !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'key',
-        this.scopeConfig.key?.meta?.debugLabel ?? this.scopeConfig.key?.id,
-        patch.key?.meta?.debugLabel ?? patch.key?.id
-      );
-    }
-    if (typeof patch.trap !== 'undefined') {
-      pushOverrideWarning(this.warnings, 'scope', 'trap', this.scopeConfig.trap, patch.trap);
-    }
-    if (typeof patch.loop !== 'undefined') {
-      pushOverrideWarning(this.warnings, 'scope', 'loop', this.scopeConfig.loop, patch.loop);
-    }
-    if (typeof patch.navigation !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'navigation',
-        this.scopeConfig.navigation,
-        patch.navigation
-      );
-    }
-    if (typeof patch.orientation !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'orientation',
-        this.scopeConfig.orientation,
-        patch.orientation
-      );
-    }
-    if (typeof patch.entry !== 'undefined') {
-      pushOverrideWarning(this.warnings, 'scope', 'entry', this.scopeConfig.entry, patch.entry);
-    }
-    if (typeof patch.restore !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'restore',
-        this.scopeConfig.restore,
-        patch.restore
-      );
-    }
-    if (typeof patch.emptyPolicy !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'emptyPolicy',
-        this.scopeConfig.emptyPolicy,
-        patch.emptyPolicy
-      );
-    }
-    if (typeof patch.group !== 'undefined') {
-      pushOverrideWarning(this.warnings, 'scope', 'group', this.scopeConfig.group, patch.group);
-      if (patch.group && typeof patch.group === 'object') {
-        this.configureRoving(patch.group);
-      }
-    }
+    warnConfigPatch(this.warnings, 'scope', this.scopeConfig, patch, [
+      'key',
+      'trap',
+      'loop',
+      'navigation',
+      'orientation',
+      'entry',
+      'restore',
+      'emptyPolicy',
+      'group',
+    ]);
+    if (patch.group && typeof patch.group === 'object') this.configureRoving(patch.group);
 
     this.scopeConfig = Object.freeze({
       ...this.scopeConfig,
@@ -777,60 +729,14 @@ class FocusModuleImpl extends ModuleBase {
   configureRoving(patch: FocusRovingConfigPatch): void {
     this.ensureSetup('focus.configureRoving');
     this.declareRoving();
-    if (typeof patch.key !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'roving.key',
-        this.rovingConfig.key?.meta?.debugLabel ?? this.rovingConfig.key?.id,
-        patch.key?.meta?.debugLabel ?? patch.key?.id
-      );
-    }
-    if (typeof patch.loop !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'roving.loop',
-        this.rovingConfig.loop,
-        patch.loop
-      );
-    }
-    if (typeof patch.navigation !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'roving.navigation',
-        this.rovingConfig.navigation,
-        patch.navigation
-      );
-    }
-    if (typeof patch.orientation !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'roving.orientation',
-        this.rovingConfig.orientation,
-        patch.orientation
-      );
-    }
-    if (typeof patch.entry !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'roving.entry',
-        this.rovingConfig.entry,
-        patch.entry
-      );
-    }
-    if (typeof patch.selectOnFocus !== 'undefined') {
-      pushOverrideWarning(
-        this.warnings,
-        'scope',
-        'roving.selectOnFocus',
-        this.rovingConfig.selectOnFocus,
-        patch.selectOnFocus
-      );
-    }
+    warnConfigPatch(
+      this.warnings,
+      'scope',
+      this.rovingConfig,
+      patch,
+      ['key', 'loop', 'navigation', 'orientation', 'entry', 'selectOnFocus'],
+      'roving.'
+    );
 
     this.rovingConfig = Object.freeze({
       ...this.rovingConfig,
@@ -1042,6 +948,7 @@ class FocusModuleImpl extends ModuleBase {
   }
 
   private setScopeActive(active: boolean): void {
+    if (!active) this.lastScopeTarget = null;
     this.setFocusState(this.activeOwned, active, active ? 'scope.activate' : 'scope.deactivate');
     if (active) {
       this.setFocusState(this.hasFocusedOwned, true, 'scope.activate');
@@ -1158,6 +1065,7 @@ class FocusModuleImpl extends ModuleBase {
       if (self) FOCUS_CENTER.remove(self);
     }
     if (phase === 'disposed') {
+      this.lastScopeTarget = null;
       this.offTargetReady?.();
       this.offTargetReady = undefined;
     }
@@ -1173,6 +1081,7 @@ class FocusModuleImpl extends ModuleBase {
       return;
     }
     if (phase !== 'detached') return;
+    this.lastScopeTarget = null;
     this.invalidateHostFocusTarget();
     const self = this.getSelfToken();
     if (self) FOCUS_CENTER.detach(self);

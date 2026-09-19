@@ -5,6 +5,11 @@ status: draft
 since: 0.2.0-rc.7
 summary: Covers direct ownership, passive boundaries, native tones, default restoration, and structural visual grammar.
 cases:
+  - id: T-BRUTALIST-BADGE-0001-CASE-S1-TONE-CYCLE
+    title: S1 renders each valid tone through repeated live cycles and after reconnect
+    covers:
+      - P-BRUTALIST-BADGE-TONES
+    expectation: actual-canary-sky-coral-paint-not-only-cross-profile-equality
   - id: T-BRUTALIST-BADGE-0001-CASE-1
     title: Badge is a direct passive styled-only prototype
     covers:
@@ -27,6 +32,15 @@ cases:
       - P-BRUTALIST-BADGE-VISUAL-GRAMMAR
     expectation: rendered-brutalist-badge-cross-runtime-visual-grammar
 implementations:
+  - id: website-s1-badge-tone-paths
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-BADGE-0001-CASE-S1-TONE-CYCLE
+    exercises:
+      - P-BRUTALIST-BADGE
   - id: prototypes-brutalist-badge-contract
     kind: module-test
     status: passing
@@ -54,6 +68,9 @@ exercises:
   prototypes:
     - P-BRUTALIST-BADGE
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added real-browser S1 tone-cycle evidence with explicit palette expectations for Light and split, independent of parity-only checks.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added draft Brutalist badge prototype coverage.

@@ -1,0 +1,72 @@
+---
+// Governed draft-profile acceptance scene; see the S3 delivery record.
+import './shadow-split-s3.css';
+const zh = Astro.url.pathname.startsWith('/zh-cn/');
+---
+
+<section
+  id="shadow-split-s3"
+  class="s3"
+  data-shadow-s3
+  data-lang={zh ? 'zh' : 'en'}
+  aria-label="Shadow split S3"
+>
+  <h2>Shadow split · S3</h2>
+  <p>
+    {
+      zh
+        ? '完整 Tabs 承载 S2 设置：隐藏、视图保留与焦点导航。Light / split / mixed 同屏；仍为 draft。'
+        : 'Complete Tabs with S2 settings: hiding, view retention and focus navigation. Light / split / mixed; still draft.'
+    }
+  </p>
+  <div data-s3-app></div>
+  <details>
+    <summary>{zh ? '人工验收目标与边界' : 'Manual targets and boundaries'}</summary>
+    <ol>
+      <li>
+        {
+          zh
+            ? '方向键、Home/End 跳过禁用页；对比 automatic/manual（Enter/Space 激活）与 loop、横/纵向。'
+            : 'Use arrows and Home/End, skipping Disabled; compare automatic/manual activation (Enter/Space), loop and orientation.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? 'Tab 从选中标签进入当前面板的第一个控件；空页回退到面板自身。非当前面板不占布局、不进入 Tab 顺序。'
+            : 'Tab enters the current panel’s first control; Empty falls back to the panel itself. Inactive panels occupy no layout or Tab stops.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '默认离开面板会卸载 view，Content setup 不增加；keepMounted 保持 mount。设置值由本 demo 外部模型保留，不代表所有后代/native 状态自动保留。'
+            : 'Default exit unmounts the view without rerunning Content setup; keepMounted retains mounts. Settings values live in the demo model, not an automatic descendant/native-state guarantee.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '多次切换后组合 checked、disabled、主题、tone、slot、移动和移除重连；检查通知与计数。'
+            : 'Combine repeated switching with checked, disabled, theme, tone, slot, moves and removal/reconnection; inspect counts and notifications.'
+        }
+      </li>
+    </ol>
+    <p>
+      {
+        zh
+          ? '混合列：split Root/Trigger/Content + Light List；设置中 split Switch + Light Thumb、Light Checkbox + split Indicator。Maker slot 仍归 Maker。只使用正式 CLI companion 与 reset 撤销，不增加页面隐藏或尺寸补丁。'
+          : 'Mixed: split Root/Trigger/Content + Light List; split Switch + Light Thumb and Light Checkbox + split Indicator. Slots remain Maker-owned. Uses the real CLI companion and reset exemption, without page hiding/sizing patches.'
+      }
+    </p>
+  </details>
+</section>
+<script>
+  import { mountShadowSplitS3 } from './shadow-split-s3';
+  const initialize = () =>
+    document
+      .querySelectorAll<HTMLElement>('[data-shadow-s3]')
+      .forEach((el) => mountShadowSplitS3(el));
+  initialize();
+  document.addEventListener('astro:page-load', initialize);
+</script>

@@ -2,6 +2,11 @@
 import PrototypePreviewer from './PrototypePreviewer.astro';
 import DialogDemoStyles from './DialogDemoStyles.astro';
 import TransitionDemoStyles from './TransitionDemoStyles.astro';
+import ShadowSplitAcceptance from './ShadowSplitAcceptance.astro';
+import ShadowSplitS2 from './ShadowSplitS2.astro';
+import ShadowSplitS3 from './ShadowSplitS3.astro';
+import ShadowSplitS4 from './ShadowSplitS4.astro';
+import ShadowSplitS5 from './ShadowSplitS5.astro';
 import { getAvailableDemos } from './demo-modules';
 import { InternalAdapterIds, type RuntimeId } from './runtimes/registry';
 
@@ -71,6 +76,11 @@ function getPreviewerClass(demoId: string) {
 
 <TransitionDemoStyles />
 <DialogDemoStyles />
+<ShadowSplitAcceptance />
+<ShadowSplitS2 />
+<ShadowSplitS3 />
+<ShadowSplitS4 />
+<ShadowSplitS5 />
 
 <section class="demo-matrix" aria-label="Demo matrix">
   <div class="demo-matrix__summary" aria-label="Demo matrix summary">

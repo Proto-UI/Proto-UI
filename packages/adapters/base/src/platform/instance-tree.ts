@@ -421,10 +421,10 @@ export function createInstanceTreeMarkers(
   }
 
   function resolveLogicalTriggerEventRouteForTarget(
-    target: EventTarget | null
+    target: EventTarget | null,
+    visited = new Set<Node>()
   ): { matched: true; accepted: boolean; surface: LogicalInstanceToken } | null {
     let cur: Node | null = target instanceof Node ? target : null;
-    const visited = new Set<Node>();
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
@@ -452,6 +452,47 @@ export function createInstanceTreeMarkers(
       cur = cur.parentNode;
     }
     return null;
+  }
+
+  function isLogicalEventRouteCandidate(root: HTMLElement, targets: EventTarget[]): boolean {
+    // Native composedPath already contains the physical ancestors. Only a
+    // logical link diverging from that path can reach an unrelated root.
+    // Nothing is retained across calls: synchronous reparenting stays visible.
+    const path = new Set(targets);
+    if (path.has(root)) return true;
+    const visited = new Set<Node>();
+    const reachesRoot = (start: EventTarget | null): boolean => {
+      let node = start instanceof Node ? start : null;
+      while (node) {
+        if (node === root) return true;
+        if (visited.has(node)) return false;
+        visited.add(node);
+        if (node instanceof HTMLElement) {
+          const linked = readProtoParentMark(node) ?? PROTO_PARENT_BY_INSTANCE.get(node);
+          if (linked && linked !== node && reachesRoot(linked)) return true;
+        }
+        node =
+          typeof ShadowRoot !== 'undefined' && node instanceof ShadowRoot
+            ? node.host
+            : node.parentNode;
+      }
+      return false;
+    };
+    // Also covers native.target / activeElement seeds whose ancestors may not
+    // be in composedPath (keyboard fallback and host-local direct dispatch).
+    for (const target of targets) {
+      if (!(target instanceof Node)) continue;
+      if (target instanceof HTMLElement) {
+        const linked = readProtoParentMark(target) ?? PROTO_PARENT_BY_INSTANCE.get(target);
+        if (linked && !path.has(linked) && reachesRoot(linked)) return true;
+      }
+      const parent =
+        typeof ShadowRoot !== 'undefined' && target instanceof ShadowRoot
+          ? target.host
+          : target.parentNode;
+      if (parent && !path.has(parent) && reachesRoot(parent)) return true;
+    }
+    return false;
   }
 
   function getLogicalTriggerSurfaceOwner(token: LogicalInstanceToken): LogicalInstanceToken {
@@ -590,6 +631,7 @@ export function createInstanceTreeMarkers(
     getLogicalEventRouteOwner: getLogicalTriggerGroupAnchor,
     getLogicalEventRouteSurfaceForTarget,
     resolveLogicalTriggerEventRouteForTarget,
+    isLogicalEventRouteCandidate,
     getLogicalTriggerSurfaceOwner,
     getLogicalTriggerSurfaceRoot,
     subscribeLogicalTriggerSurface,

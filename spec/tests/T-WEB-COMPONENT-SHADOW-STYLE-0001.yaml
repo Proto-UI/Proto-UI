@@ -1,0 +1,414 @@
+id: T-WEB-COMPONENT-SHADOW-STYLE-0001
+type: test
+title: Web Component Shadow style artifact and environment tests
+status: draft
+lifecycleRationale:
+  zh-CN: 映射当前 CLI、stylesheet、环境与 owner 证据；严格 CSP、异步交付和所有样式载体不在覆盖内，尚不构成稳定交付保证。
+  en: Maps current CLI, stylesheet, environment and owner evidence; strict CSP, asynchronous delivery and all carriers are outside coverage and no stable delivery guarantee is admitted.
+since: 0.3.0-alpha.0
+summary: Maps private foundation evidence and production G1 single-truth activation and owner cleanup, separately from bounded browser and CLI delivery evidence.
+cases:
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-PUBLIC-S1
+    title: Public Badge and complete Checkbox Root plus Indicator run through CLI artifacts on demo-matrix
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-N
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-E
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-K
+    expectation: bounded-chrome-first-frame-layout-input-composition-customization-and-lifetime-journey
+    notes:
+      - Actual public AdaptToWebComponent and generated CLI artifact; not private pilot callbacks.
+      - The site's Tailwind base reset explicitly exempts split host padding/border. Disabling that exemption is an expected mismatch diagnostic, not arbitrary host-CSS parity.
+      - No full cross-browser, screen-reader, native control, strict CSP, Dialog or portal conformance claim.
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-PRIVATE-INPUT-JOURNEY
+    title: A private Custom Element Checkbox Root retains boundary input and owner generation around its inner surface
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-H
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-J
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-K
+    expectation: private-eager-first-frame-and-native-input-slot-move-disposal-reconnect-journey-without-public-activation
+    notes:
+      - Uses the WC session, module builders, native router and private CE callback fixture; not the full production AdaptToWebComponent owner.
+      - Checkbox Root only, default slot and Chromium accessibility-tree observation; no Indicator, native text/image control, named slot or screen-reader conformance claim.
+      - Raw surface customization observations in this script expose an unresolved metric gap and are not passing customization conformance.
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-HOST-DISPLAY-OWNERSHIP
+    title: The private split presentation recipe does not compete with document host display fallback
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-B
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-H
+    expectation: split-grid-and-inline-grid-retain-geometry-while-boolean-default-display-remains-unchanged
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-CLI-DELIVERY
+    title: Opt-in commands deliver deterministic same-closure ESM and declarations without changing omitted output
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-L
+    expectation: actual-cli-preset-and-scan-companions-import-and-regenerate-with-fixed-abi
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-CLI-RECOVERY
+    title: Full output preflight and caught-write recovery preserve previous generated files
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-M
+    expectation: invalid-input-or-generation-leaves-output-unchanged-and-late-write-failure-restores-the-set
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-SPLIT-CASCADE
+    title: Private split state and dark conditions retain document cascade precedence for both metrics and paint
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-B
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-C
+    expectation: dark-host-context-adds-no-precedence-over-state-conditions
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-RENDERER-PARITY
+    title: Document and Shadow renderers preserve non-environment output for one token closure
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-B
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-G
+    expectation: shadow-output-preserves-baseline-declarations-order-keyframes-and-diagnostics-without-theme-declarations
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-SELECTOR-ABI
+    title: Dark variants use only the versioned host-local color-scheme marker in Shadow CSS
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-A
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-C
+    expectation: host-color-scheme-v1-replaces-document-ancestor-and-system-fallback-selectors
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-DEFAULT-ENVIRONMENT
+    title: The default environment tracks explicit document themes and system preference by effective precedence
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-D
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-F
+    expectation: synchronous-host-marker-and-deduplicated-dynamic-default-source
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-EXPLICIT-ENVIRONMENT
+    title: A subscribable explicit source is retained for shared marker and runtime color-scheme truth
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-E
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-F
+    expectation: one-source-foundation-supports-synchronous-read-marker-update-and-terminal-unsubscribe
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-SINGLE-TRUTH-ACTIVATION
+    title: Split activation uses the retained explicit source for both marker and runtime color-scheme meta
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-E
+    expectation: one-source-drives-css-and-runtime-meta-without-pull-only-color-scheme-override
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-PRIVATE-META-COMPOSITION
+    title: The private split getter reserves colorScheme and delegates every other meta key
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-E
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-I
+    expectation: retained-source-is-the-only-color-scheme-truth-while-other-keys-delegate-once
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-ARTIFACT-INSTALLATION
+    title: Exact immutable artifacts install through the owner stylesheet while invalid shapes fail closed
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-A
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-G
+    expectation: validated-v1-artifact-installs-and-invalid-kind-version-environment-field-or-css-is-rejected
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-LIFETIME
+    title: Marker and stylesheet survive view epochs and are revoked by terminal owner disposal
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-F
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-G
+    expectation: owner-resources-outlive-view-contents-and-clean-up-idempotently
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-ATOMIC-RESOURCE-COORDINATION
+    title: Split resources create synchronously and roll back every completed step on failure
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-J
+    expectation: environment-stylesheet-surface-creation-is-atomic-with-reverse-idempotent-disposal
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-FIRST-VIEW-ORDERING
+    title: One split resource generation exists before runtime initialization and first view attachment
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-J
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-K
+    expectation: first-connection-establishes-all-owner-resources-before-view-work
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-GENERATION-RETENTION
+    title: View absence remounts and synchronous DOM moves retain one split resource generation
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-F
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-G
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-K
+    expectation: repeatable-view-epochs-and-synchronous-moves-preserve-resource-identities
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-TERMINAL-GENERATION-RENEWAL
+    title: Terminal teardown cleans one generation and reconnect creates a fresh generation
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-F
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-G
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-K
+    expectation: terminal-cleanup-revokes-old-listeners-before-reconnect-creates-new-resources
+  - id: T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-BOOLEAN-NON-INTERFERENCE
+    title: Existing boolean profiles acquire no B1 or C1 marker stylesheet surface or public type change
+    covers:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001-H
+    expectation: light-and-direct-shadow-profiles-remain-byte-for-byte-compatible-at-the-public-boundary
+implementations:
+  - id: public-owner-reconnect-serialization
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-profile.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-GENERATION-RETENTION
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-TERMINAL-GENERATION-RENEWAL
+    notes:
+      - Real lifecycle callback reconnects and a controlled asynchronous host-session disposal seam verify serialized resource renewal; the seam does not claim ordinary terminal Presence waits asynchronously.
+  - id: native-owner-reconnect-style-geometry
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-GENERATION-RETENTION
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-TERMINAL-GENERATION-RENEWAL
+    notes:
+      - Chrome verifies synchronous move retention, real teardown-callback reconnect, fresh resource identity, computed runtime style and live geometry after reconnect, and revoked predecessor environment callbacks.
+  - id: browser-public-shadow-dist-consumer
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-public-consumer.mjs
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-CLI-DELIVERY
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+    notes:
+      - Imports built public Adapter/prototype exports and the CLI companion with no repository source aliases, then checks real Chrome composition/input/cleanup.
+  - id: browser-public-shadow-s1
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-public-browser.mjs
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-PUBLIC-S1
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      - A-WEB-COMPONENT-0001
+  - id: private-shadow-input-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-input-browser.mjs
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-PRIVATE-INPUT-JOURNEY
+  - id: private-shadow-host-display-ownership
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/host-display.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-HOST-DISPLAY-OWNERSHIP
+  - id: private-shadow-host-display-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-prototypes-browser.mjs
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-HOST-DISPLAY-OWNERSHIP
+    notes:
+      - Actual host-display infrastructure with private presentation ownership, not full public AdaptToWebComponent activation.
+  - id: cli-shadow-companion-commands
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/shadow-style-command.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-CLI-DELIVERY
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-CLI-RECOVERY
+  - id: cli-shadow-output-set-recovery
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/style-output-set.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-CLI-RECOVERY
+  - id: cli-shadow-companion-consumers
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/shadow-style-delivery.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-CLI-DELIVERY
+  - id: private-shadow-split-cascade-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-runtime-browser.mjs
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-SPLIT-CASCADE
+    notes:
+      - Actual Chromium state/meta transitions compare host and inner geometry to document CSS, including a competing state padding rule and dark padding rule.
+  - id: private-shadow-split-declaration-generation
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/shadow-split-style.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-SPLIT-CASCADE
+  - id: cli-shadow-style-renderer
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/proto-style-css.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-RENDERER-PARITY
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-SELECTOR-ABI
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+  - id: adapter-web-component-shadow-color-scheme-environment
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-color-scheme-environment.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-DEFAULT-ENVIRONMENT
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-EXPLICIT-ENVIRONMENT
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-LIFETIME
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+    notes:
+      - The private owner retains the exact source; production runtime-meta wiring is mapped separately below.
+  - id: adapter-web-component-shadow-single-truth-activation
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-profile.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-SINGLE-TRUTH-ACTIVATION
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+    notes:
+      - Exercises the public AdaptToWebComponent path rather than C1 fixtures; browser geometry is separate evidence.
+  - id: adapter-web-component-shadow-split-meta
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-meta.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-PRIVATE-META-COMPOSITION
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+  - id: adapter-web-component-shadow-split-resources
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-resources.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-ATOMIC-RESOURCE-COORDINATION
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+  - id: adapter-web-component-shadow-split-owner-generation
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-resource-generation.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-FIRST-VIEW-ORDERING
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-GENERATION-RETENTION
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-TERMINAL-GENERATION-RENEWAL
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+    notes:
+      - This private harness exercises the approved connection and view ordering without wiring or claiming the public split profile.
+  - id: adapter-web-component-shadow-style-artifact
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-style-artifact.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-ARTIFACT-INSTALLATION
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-OWNER-LIFETIME
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+  - id: adapter-web-component-boolean-shadow-compatibility
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/commit.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-BOOLEAN-NON-INTERFERENCE
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+  - id: adapter-web-component-shadow-public-types-compatibility
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/types.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-STYLE-0001-CASE-BOOLEAN-NON-INTERFERENCE
+    exercises:
+      - D-WEB-COMPONENT-SHADOW-STYLE-0001
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001
+verifies:
+  decisions:
+    - id: D-WEB-COMPONENT-SHADOW-STYLE-0001
+      anchors:
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-N
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-A
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-B
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-C
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-D
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-E
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-F
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-G
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-H
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-I
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-J
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-K
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-L
+        - D-WEB-COMPONENT-SHADOW-STYLE-0001-M
+exercises:
+  adapters:
+    - A-WEB-COMPONENT-0001
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+sources:
+  - path: scripts/analysis/shadow-split-public-browser.mjs
+  - path: apps/www/src/components/PrototypePreviewer/ShadowSplitAcceptance.astro
+  - path: scripts/analysis/shadow-split-input-browser.mjs
+  - path: packages/cli/test/shadow-style-command.test.ts
+  - path: packages/cli/test/style-output-set.test.ts
+  - path: packages/cli/test/shadow-style-delivery.test.ts
+  - path: internal/records/2026-09-12-shadow-style-artifact-environment-decision-packet.zh-CN.md
+  - path: internal/records/2026-09-12-shadow-split-activation-boundary-decision-packet.zh-CN.md
+  - path: packages/cli/test/proto-style-css.test.ts
+  - path: packages/adapters/web-component/test/commit.test.ts
+  - path: packages/adapters/web-component/test/shadow-color-scheme-environment.test.ts
+  - path: packages/adapters/web-component/test/shadow-split-meta.test.ts
+  - path: packages/adapters/web-component/test/shadow-split-resources.test.ts
+  - path: packages/adapters/web-component/test/shadow-split-resource-generation.test.ts
+  - path: packages/adapters/web-component/test/shadow-style-artifact.test.ts
+  - path: packages/adapters/web-component/test/types.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added public Adapter teardown/reconnect race and native style/geometry evidence alongside the synchronous private generation harness.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added actual public S1 Chrome demo-matrix journey for Badge and complete Checkbox composition with explicit site reset boundary.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Mapped production G1 single-truth activation to public Adapter tests without promoting draft lifecycle or claiming full browser acceptance.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded private Checkbox Root first-frame, native keyboard/pointer, default-slot, accessibility-tree and owner-renewal evidence; raw customization remains an unresolved observation.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Verified private presentation display ownership against actual host-display infrastructure, preserving Badge inline geometry and Checkbox surface extent without changing boolean Adapter calls.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Marked F1 CLI opt-in, regeneration, caught-write recovery and JS/TS/Vite consumer evidence passing; no public split activation claim.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Planned F1 command, companion consumer and output-set recovery evidence without public Adapter activation.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded E1 conditional cascade and same-source metric evidence without promoting public activation.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Marked the private C1 meta-composition, atomic resource-coordination, and owner-generation lifecycle evidence passing while keeping public split activation planned.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Planned C1 executable evidence for private meta composition, atomic split resources, and owner-generation ordering, retention, cleanup, and renewal while retaining public activation as planned.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Marked the B1 renderer, environment-owner, artifact-owner, and boolean-profile evidence passing while keeping shared runtime-meta activation planned.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Planned executable B1 evidence while retaining passing compatibility coverage for existing boolean profiles.
+tags:
+  - test
+  - adapter
+  - web-component
+  - shadow-dom
+  - stylesheet
+  - color-scheme

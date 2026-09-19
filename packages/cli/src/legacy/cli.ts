@@ -25,7 +25,11 @@ import {
   renderProtoStyleEntryCss,
   renderProtoStyleTokenCss,
 } from '../services/proto-style-css.js';
-import { collectProtoStyleTokens } from '../services/prototype-style-tokens.js';
+import {
+  collectProtoStyleTokens,
+  collectProtoShadowStyleTokenUsage,
+} from '../services/prototype-style-tokens.js';
+import { generateShadowStyleOutputs, shadowOutputPath } from '../services/shadow-style-output.js';
 
 /** Matches docs: apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx (proto-ui/ tree). */
 const PROTO_UI_LAYOUT_TXT = `your-project/
@@ -84,10 +88,13 @@ Usage:
   proto-ui [--help|-h|-help|help]
   proto-ui init [--help|-h|-help] [...]
   proto-ui init [--styles-dir <dir>] [--no-styles] [--adapter <name>] [--prototypes <name>] [--install] [--no-install] [--no-interactive] [--defaults|-y]
-  proto-ui <theme> [--styles-dir <dir>]
-  proto-ui tokens --input <dir> --out <file>
+  proto-ui <shadcn|brutalist> [--styles-dir <dir>] [--shadow-out <file.js>]
+  proto-ui tokens --input <dir> --out <file> [--shadow-out <file.js>]
   proto-ui style [--theme-import <path>] [--tokens-import <path>] --out <file>
   proto-ui theme <name> --out <file>
+
+--shadow-out writes an ESM protoShadowStyleArtifact and same-stem .d.ts alongside
+the document CSS generation. It does not activate a split Shadow Adapter.
 
 Init layout (same as website Quick Start):
 ${PROTO_UI_LAYOUT_TXT}
@@ -364,6 +371,7 @@ function formatPmInstallLine(pm, pkg, dev) {
 }
 
 async function runPreset(themeName, args) {
+  const shadowPath = shadowOutputPath(args);
   const options = parseOptions(args);
   const normalizedTheme = themeName.toLowerCase();
   if (normalizedTheme !== DEFAULT_THEME_NAME && normalizedTheme !== 'brutalist') {
@@ -381,9 +389,34 @@ async function runPreset(themeName, args) {
   const styleOut = path.join(stylesDir, styleFileName);
 
   const tokensOutputFile = path.resolve(process.cwd(), tokensOut);
-  await ensureDirectory(tokensOutputFile);
   const presetTokens =
     normalizedTheme === 'brutalist' ? BRUTALIST_STYLE_TOKENS : SHADCN_STYLE_TOKENS;
+  if (shadowPath) {
+    const styleAbs = path.resolve(styleOut);
+    const themeAbs = path.resolve(themeOut);
+    await generateShadowStyleOutputs({
+      shadowPath,
+      cssPath: tokensOutputFile,
+      tokens: async () => presetTokens,
+      additional: [
+        {
+          path: themeAbs,
+          content: renderPrefixedThemeCss(
+            normalizedTheme === 'brutalist' ? BRUTALIST_THEME_CSS : SHADCN_THEME_CSS
+          ),
+        },
+        {
+          path: styleAbs,
+          content: renderProtoStyleEntryCss({
+            themeImport: toCssImportPath(styleAbs, themeAbs),
+            tokensImport: toCssImportPath(styleAbs, tokensOutputFile),
+          }),
+        },
+      ],
+    });
+    return;
+  }
+  await ensureDirectory(tokensOutputFile);
   await fs.writeFile(tokensOutputFile, renderTokenCss(presetTokens), 'utf8');
   console.log(`[proto-ui] tokens(preset): wrote ${relativeToCwd(tokensOutputFile)}`);
 
@@ -408,11 +441,21 @@ async function runPreset(themeName, args) {
 }
 
 async function runGenerateTokens(args) {
+  const shadowPath = shadowOutputPath(args);
   const options = parseOptions(args);
   const input = requiredOption(options, 'input');
   const outFile = requiredOption(options, 'out');
   const root = path.resolve(process.cwd(), input);
   const outputFile = path.resolve(process.cwd(), outFile);
+
+  if (shadowPath) {
+    await generateShadowStyleOutputs({
+      shadowPath,
+      cssPath: outputFile,
+      tokens: () => collectProtoShadowStyleTokenUsage(root),
+    });
+    return;
+  }
 
   const tokens = await collectProtoStyleTokens(root);
   const css = renderTokenCss(tokens);
