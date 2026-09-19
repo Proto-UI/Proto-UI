@@ -90,10 +90,31 @@ query($owner: String!, $name: String!, $number: Int!) {
 }
 `;
 
-function ghJson(args) {
-  return JSON.parse(
-    execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
-  );
+// Governed payload bound for one live collection response. Node's incidental
+// 1 MiB child-process stdout default previously killed collection with an
+// unattributed ENOBUFS on eligible pull requests (PR509-LIVE-INPUT-BUFFER-001:
+// PR #509's paginated changed-file JSON alone is over 1 MiB). The collector
+// must consume the complete canonical input for an eligible target or fail on
+// this explicit documented bound, never on an implicit buffer ceiling.
+export const MAX_LIVE_RESPONSE_BYTES = 64 * 1024 * 1024;
+
+function ghJson(args, runner = execFileSync) {
+  let stdout;
+  try {
+    stdout = runner('gh', args, {
+      encoding: 'utf8',
+      maxBuffer: MAX_LIVE_RESPONSE_BYTES,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (error) {
+    if (error?.code === 'ENOBUFS') {
+      throw new Error(
+        `live collection response exceeds the documented ${MAX_LIVE_RESPONSE_BYTES}-byte payload bound; bound the review target before submission`
+      );
+    }
+    throw error;
+  }
+  return JSON.parse(stdout);
 }
 
 export function assertNoTruncation(nodes, pageInfo, label) {
@@ -568,27 +589,34 @@ export function submitGitHubMerge(
 export function collectLiveReviewInput(repositoryId, pullRequest, options = {}) {
   const { owner, name } = parseRepositoryId(repositoryId);
   const externalEvidence = Array.isArray(options.externalEvidence) ? options.externalEvidence : [];
-  const raw = ghJson([
-    'api',
-    'graphql',
-    '-f',
-    `query=${QUERY}`,
-    '-F',
-    `owner=${owner}`,
-    '-F',
-    `name=${name}`,
-    '-F',
-    `number=${pullRequest}`,
-  ]);
+  const runner = options.runner ?? execFileSync;
+  const raw = ghJson(
+    [
+      'api',
+      'graphql',
+      '-f',
+      `query=${QUERY}`,
+      '-F',
+      `owner=${owner}`,
+      '-F',
+      `name=${name}`,
+      '-F',
+      `number=${pullRequest}`,
+    ],
+    runner
+  );
   if (raw.errors?.length) {
     throw new Error(`live review-input collection failed: ${raw.errors[0].message}`);
   }
-  const filePages = ghJson([
-    'api',
-    '--paginate',
-    '--slurp',
-    `repos/${owner}/${name}/pulls/${pullRequest}/files?per_page=100`,
-  ]);
+  const filePages = ghJson(
+    [
+      'api',
+      '--paginate',
+      '--slurp',
+      `repos/${owner}/${name}/pulls/${pullRequest}/files?per_page=100`,
+    ],
+    runner
+  );
   if (!Array.isArray(filePages) || !filePages.every(Array.isArray)) {
     throw new Error('live changed-file collection is malformed');
   }
