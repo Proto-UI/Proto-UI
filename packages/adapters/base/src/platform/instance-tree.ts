@@ -10,6 +10,15 @@ type DynamicEventTarget = EventTarget & {
   getTarget(): EventTarget | null;
 };
 
+const isDomNode = (value: unknown): value is Node =>
+  !!value && typeof (value as Node).nodeType === 'number';
+const isHtmlElement = (value: unknown): value is HTMLElement =>
+  isDomNode(value) &&
+  value.nodeType === 1 &&
+  (value as Element).namespaceURI === 'http://www.w3.org/1999/xhtml';
+const isShadowRoot = (value: unknown): value is ShadowRoot =>
+  isDomNode(value) && value.nodeType === 11 && 'host' in value;
+
 export function releaseWebTriggerSurface(target: HTMLElement): void {
   target.removeAttribute('tabindex');
   for (const attr of target.getAttributeNames()) {
@@ -107,7 +116,7 @@ function writeProtoParentMark(instance: HTMLElement, parent: HTMLElement | null)
 
 function readProtoParentMark(instance: HTMLElement): HTMLElement | null {
   const mark = (instance as ElementWithProtoParent)[PROTO_PARENT_INSTANCE];
-  return mark instanceof HTMLElement ? mark : null;
+  return isHtmlElement(mark) ? mark : null;
 }
 
 export type InstanceTreeMarkerOptions = {
@@ -390,18 +399,18 @@ export function createInstanceTreeMarkers(
   function getLogicalEventRouteSurfaceForTarget(
     target: EventTarget | null
   ): LogicalInstanceToken | null {
-    let cur: Node | null = target instanceof Node ? target : null;
+    let cur: Node | null = isDomNode(target) ? target : null;
     const visited = new Set<Node>();
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
 
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
 
-      if (cur instanceof HTMLElement) {
+      if (isHtmlElement(cur)) {
         const token = TOKEN_BY_INSTANCE.get(cur);
         if (token) {
           const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
@@ -424,17 +433,17 @@ export function createInstanceTreeMarkers(
     target: EventTarget | null,
     visited = new Set<Node>()
   ): { matched: true; accepted: boolean; surface: LogicalInstanceToken } | null {
-    let cur: Node | null = target instanceof Node ? target : null;
+    let cur: Node | null = isDomNode(target) ? target : null;
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
 
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
 
-      if (cur instanceof HTMLElement) {
+      if (isHtmlElement(cur)) {
         const token = TOKEN_BY_INSTANCE.get(cur);
         if (token && TRIGGER_TOKENS.has(token)) {
           const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
@@ -462,34 +471,28 @@ export function createInstanceTreeMarkers(
     if (path.has(root)) return true;
     const visited = new Set<Node>();
     const reachesRoot = (start: EventTarget | null): boolean => {
-      let node = start instanceof Node ? start : null;
+      let node = isDomNode(start) ? start : null;
       while (node) {
         if (node === root) return true;
         if (visited.has(node)) return false;
         visited.add(node);
-        if (node instanceof HTMLElement) {
+        if (isHtmlElement(node)) {
           const linked = readProtoParentMark(node) ?? PROTO_PARENT_BY_INSTANCE.get(node);
           if (linked && linked !== node && reachesRoot(linked)) return true;
         }
-        node =
-          typeof ShadowRoot !== 'undefined' && node instanceof ShadowRoot
-            ? node.host
-            : node.parentNode;
+        node = isShadowRoot(node) ? node.host : node.parentNode;
       }
       return false;
     };
     // Also covers native.target / activeElement seeds whose ancestors may not
     // be in composedPath (keyboard fallback and host-local direct dispatch).
     for (const target of targets) {
-      if (!(target instanceof Node)) continue;
-      if (target instanceof HTMLElement) {
+      if (!isDomNode(target)) continue;
+      if (isHtmlElement(target)) {
         const linked = readProtoParentMark(target) ?? PROTO_PARENT_BY_INSTANCE.get(target);
         if (linked && !path.has(linked) && reachesRoot(linked)) return true;
       }
-      const parent =
-        typeof ShadowRoot !== 'undefined' && target instanceof ShadowRoot
-          ? target.host
-          : target.parentNode;
+      const parent = isShadowRoot(target) ? target.host : target.parentNode;
       if (parent && !path.has(parent) && reachesRoot(parent)) return true;
     }
     return false;

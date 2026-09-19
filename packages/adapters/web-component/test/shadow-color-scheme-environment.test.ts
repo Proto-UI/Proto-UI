@@ -189,6 +189,23 @@ describe('Shadow color-scheme environment owner', () => {
     expect(host.hasAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe(false);
   });
 
+  it('accepts a synchronous source notification during subscription', () => {
+    let colorScheme: 'light' | 'dark' = 'light';
+    const host = document.createElement('x-shadow-sync-source');
+    const owner = createShadowColorSchemeEnvironmentOwner(host, {
+      get: () => colorScheme,
+      subscribe(listener) {
+        colorScheme = 'dark';
+        listener();
+        return () => {};
+      },
+    });
+
+    expect(owner.colorScheme).toBe('dark');
+    expect(host.getAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe('dark');
+    owner.dispose();
+  });
+
   it('notifies every active consumer before surfacing callback failures', () => {
     let colorScheme: 'light' | 'dark' = 'light';
     const sourceListeners = new Set<() => void>();

@@ -60,7 +60,11 @@ import {
 } from './platform/instance-tree';
 import { createWebEffectsPort } from './runtime/effects-port';
 import { createShadowTextControlSurface } from './shadow-text-control-surface';
-import { createWebComponentModules, createWebComponentOwnerModules } from './runtime/modules';
+import {
+  createRebindableWebOverlayModal,
+  createWebComponentModules,
+  createWebComponentOwnerModules,
+} from './runtime/modules';
 import { createWebComponentHostSession } from './runtime/session';
 import { createShadowOwnerShell, type ShadowOwnerShell } from './shadow-owner-shell';
 import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
@@ -288,6 +292,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
     private _globalEventTarget = createRebindableEventTarget();
+    private _overlayModal: ReturnType<typeof createRebindableWebOverlayModal>;
 
     private _root: Element | ShadowRoot;
     private _shadowOwnerShell: ShadowOwnerShell | null;
@@ -306,6 +311,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     constructor() {
       super();
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
+      this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
       this._shadowOwnerShell = shadow ? createShadowOwnerShell(this._root as ShadowRoot) : null;
       if (textControl && imageView) {
@@ -350,6 +356,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     adoptedCallback(_oldDocument: Document, newDocument: Document) {
       this._globalEventTarget.setTarget(newDocument.defaultView);
+      this._overlayModal.adoptDocument(newDocument);
       this._splitResources?.environment.adoptDocument(newDocument);
     }
 
@@ -658,6 +665,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               colorSchemeSource: runtimeColorSchemeSource,
               textControlTarget: this._textControlTarget,
               imageViewTarget: this._imageViewTarget,
+              overlayModal: this._overlayModal,
               exposeStateWebMode,
               scrollProjection,
               setExposes,

@@ -68,6 +68,7 @@ import {
   OVERLAY_LAYER_SCHEDULER_CAP,
   OVERLAY_MODAL_CAP,
   createWebOverlayModal,
+  type OverlayModal,
   type OverlayLayerScheduler,
 } from '@proto.ui/module-overlay';
 import {
@@ -416,6 +417,29 @@ function watchEntryStyleInvalidation(
   };
 }
 
+export function createRebindableWebOverlayModal(doc: Document) {
+  let currentDocument = doc;
+  let current = createWebOverlayModal(doc);
+  let locked = false;
+  return {
+    lock() {
+      locked = true;
+      current.lock();
+    },
+    unlock() {
+      locked = false;
+      current.unlock();
+    },
+    adoptDocument(nextDocument: Document) {
+      if (currentDocument === nextDocument) return;
+      current.unlock();
+      currentDocument = nextDocument;
+      current = createWebOverlayModal(nextDocument);
+      if (locked) current.lock();
+    },
+  } satisfies OverlayModal & { adoptDocument(doc: Document): void };
+}
+
 function resolveWebComponentTriggerSurface(
   root: HTMLElement,
   logicalSurface: HTMLElement | null
@@ -608,6 +632,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   subscribeTargetReady: (listener: () => void) => () => void;
   retryTargetReady: () => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
+  overlayModal?: OverlayModal;
 }) {
   const {
     el,
@@ -639,6 +664,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryAttachShadowWatch: (() => void) | null = null;
   let stopEntryViewportWatch: (() => void) | null = null;
   let stopEntryStyleWatch: (() => void) | null = null;
+  let stopEntryMotionWatch: (() => void) | null = null;
   let stopEntrySlotWatch: (() => void) | null = null;
   let stopEntryUpgradeWatch: (() => void) | null = null;
   let entryObserverGeneration = 0;
@@ -663,6 +689,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     stopEntryViewportWatch = null;
     stopEntryStyleWatch?.();
     stopEntryStyleWatch = null;
+    stopEntryMotionWatch?.();
+    stopEntryMotionWatch = null;
     stopEntrySlotWatch?.();
     stopEntrySlotWatch = null;
     stopEntryUpgradeWatch?.();
@@ -808,6 +836,25 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
                 if (isCurrentEntryObservation()) projectEntry();
               });
+              const onMotionEnd = () => {
+                if (isCurrentEntryObservation()) projectEntry();
+              };
+              for (const type of [
+                'transitionend',
+                'transitioncancel',
+                'animationend',
+                'animationcancel',
+              ])
+                target.addEventListener(type, onMotionEnd, true);
+              stopEntryMotionWatch = () => {
+                for (const type of [
+                  'transitionend',
+                  'transitioncancel',
+                  'animationend',
+                  'animationcancel',
+                ])
+                  target.removeEventListener(type, onMotionEnd, true);
+              };
             }
             // The late-attach watch below is installed once but must always
             // consult the currently observed region, so the root set lives
@@ -1226,7 +1273,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('overlay', () => [
       [HOST_ELEMENT_CAP, el],
       [OVERLAY_GLOBAL_MOUNT_CAP, createWebComponentPortalMount()],
-      [OVERLAY_MODAL_CAP, createWebOverlayModal(el.ownerDocument)],
+      [OVERLAY_MODAL_CAP, args.overlayModal ?? createWebOverlayModal(el.ownerDocument)],
       ...(args.overlayLayerScheduler
         ? [[OVERLAY_LAYER_SCHEDULER_CAP, args.overlayLayerScheduler] as const]
         : []),

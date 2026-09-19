@@ -20,6 +20,14 @@ const GLOBAL_ROOT_EVENT_TYPES: Record<string, string> = {
 };
 
 type ElementWithSymbols = HTMLElement & Record<symbol, unknown>;
+const isDomNode = (value: unknown): value is Node =>
+  !!value && typeof (value as Node).nodeType === 'number';
+const isHtmlElement = (value: unknown): value is HTMLElement =>
+  isDomNode(value) &&
+  value.nodeType === 1 &&
+  (value as Element).namespaceURI === 'http://www.w3.org/1999/xhtml';
+const isShadowRoot = (value: unknown): value is ShadowRoot =>
+  isDomNode(value) && value.nodeType === 11 && 'host' in value;
 
 export type SemanticEventRouteResolution = {
   matched: true;
@@ -95,22 +103,22 @@ export function createWebProtoEventRouter(opt: {
   }
 
   function isWithinRoot(target: EventTarget | null) {
-    return target === rootEl || (target instanceof Node && rootEl.contains(target));
+    return target === rootEl || (isDomNode(target) && rootEl.contains(target));
   }
 
   function getLinkedProtoParent(target: EventTarget | null): HTMLElement | null {
-    if (!(target instanceof HTMLElement)) return null;
+    if (!isHtmlElement(target)) return null;
     const linkedParent = (target as ElementWithSymbols)[PROTO_PARENT_INSTANCE_MARK];
-    return linkedParent instanceof HTMLElement ? linkedParent : null;
+    return isHtmlElement(linkedParent) ? linkedParent : null;
   }
 
   function isProtoInstanceNode(target: EventTarget | null): target is HTMLElement {
-    if (!(target instanceof HTMLElement)) return false;
+    if (!isHtmlElement(target)) return false;
     return PROTO_INSTANCE_MARKS.some((mark) => (target as ElementWithSymbols)[mark] === true);
   }
 
   function getTriggerRouteOwner(target: EventTarget | null): object | HTMLElement | null {
-    if (!(target instanceof HTMLElement)) return null;
+    if (!isHtmlElement(target)) return null;
     const owner = (target as ElementWithSymbols)[TRIGGER_OWNER_MARK];
     if (owner === true) return target;
     return owner && (typeof owner === 'object' || typeof owner === 'function')
@@ -122,12 +130,12 @@ export function createWebProtoEventRouter(opt: {
     target: EventTarget | null,
     visited = new Set<Node>()
   ): HTMLElement | null {
-    let cur: Node | null = target instanceof Node ? target : null;
+    let cur: Node | null = isDomNode(target) ? target : null;
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
 
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
@@ -149,11 +157,11 @@ export function createWebProtoEventRouter(opt: {
     target: EventTarget | null,
     visited = new Set<Node>()
   ): object | HTMLElement | null {
-    let cur: Node | null = target instanceof Node ? target : null;
+    let cur: Node | null = isDomNode(target) ? target : null;
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
@@ -182,7 +190,7 @@ export function createWebProtoEventRouter(opt: {
         return resolution.accepted ? resolution.surface : REJECTED_TRIGGER_ROUTE;
       }
       if (options?.includeActiveFallback !== false) {
-        const active = typeof document !== 'undefined' ? document.activeElement : null;
+        const active = rootEl.ownerDocument.activeElement;
         const activeResolution = opt.resolveSemanticEventRoute(active, visited);
         if (activeResolution) {
           return activeResolution.accepted ? activeResolution.surface : REJECTED_TRIGGER_ROUTE;
@@ -199,7 +207,7 @@ export function createWebProtoEventRouter(opt: {
       const targetOwner = opt.resolveEventRouteOwner(native.target);
       if (targetOwner) return targetOwner;
       if (options?.includeActiveFallback !== false) {
-        const active = typeof document !== 'undefined' ? document.activeElement : null;
+        const active = rootEl.ownerDocument.activeElement;
         const activeOwner = opt.resolveEventRouteOwner(active);
         if (activeOwner) return activeOwner;
       }
@@ -214,7 +222,7 @@ export function createWebProtoEventRouter(opt: {
     const targetOwner = getNearestTriggerOwner(native.target, visited);
     if (targetOwner) return targetOwner;
     if (options?.includeActiveFallback === false) return null;
-    const active = typeof document !== 'undefined' ? document.activeElement : null;
+    const active = rootEl.ownerDocument.activeElement;
     return getNearestTriggerOwner(active, visited);
   }
 
@@ -232,7 +240,7 @@ export function createWebProtoEventRouter(opt: {
     const targetOwner = getNearestProtoInstance(native.target, visited);
     if (targetOwner) return targetOwner;
     if (options?.includeActiveFallback === false) return null;
-    const active = typeof document !== 'undefined' ? document.activeElement : null;
+    const active = rootEl.ownerDocument.activeElement;
     return getNearestProtoInstance(active, visited);
   }
 
@@ -240,12 +248,8 @@ export function createWebProtoEventRouter(opt: {
     if (opt.isSemanticEventRouteCandidate) {
       const targets = typeof native.composedPath === 'function' ? native.composedPath() : [];
       if (native.target) targets.push(native.target);
-      if (
-        options?.includeActiveFallback !== false &&
-        typeof document !== 'undefined' &&
-        document.activeElement
-      )
-        targets.push(document.activeElement);
+      if (options?.includeActiveFallback !== false && rootEl.ownerDocument.activeElement)
+        targets.push(rootEl.ownerDocument.activeElement);
       if (!opt.isSemanticEventRouteCandidate(rootEl, targets)) return false;
     }
     const triggerOwner = resolveOwningTrigger(native, options);
@@ -296,8 +300,8 @@ export function createWebProtoEventRouter(opt: {
   }
 
   function hasFocusedDescendant() {
-    const active = typeof document !== 'undefined' ? document.activeElement : null;
-    return active instanceof Node && rootEl.contains(active);
+    const active = rootEl.ownerDocument.activeElement;
+    return isDomNode(active) && rootEl.contains(active);
   }
 
   function shouldSuppressFollowupClick(native: MouseEvent) {

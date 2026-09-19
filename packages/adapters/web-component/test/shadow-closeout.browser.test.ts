@@ -23,7 +23,7 @@ beforeAll(async () => {
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { definePrototype as define, tw } from '@proto.ui/core';
         export { createRootStyleEffect, lowerRootStyleTokens, resolveRootStyleEntry } from '@proto.ui/core/internal';
-        export { asTextControl, asFocusEntry, asFocusScope, asFocusable } from '@proto.ui/hooks';
+        export { asTextControl, asFocusEntry, asFocusScope, asFocusable, asOverlay } from '@proto.ui/hooks';
         export { declareTextControl } from '@proto.ui/module-text-control';
       `,
       resolveDir: process.cwd(),
@@ -256,18 +256,21 @@ describe('Shadow closeout native boundaries', () => {
         const foreignWindow = frame.contentWindow!;
         foreignDocument.adoptNode(host);
         foreignDocument.body.append(host);
-        portal.mount(button);
+        const destinationButton = foreignDocument.createElement('button');
+        destinationButton.textContent = 'Destination press';
+        host.append(destinationButton);
+        portal.mount(destinationButton);
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }));
         const afterOldWindow = host.getExposes().snapshot();
         foreignWindow.dispatchEvent(
           new (foreignWindow as any).KeyboardEvent('keydown', { key: 'A' })
         );
         const afterNewWindow = host.getExposes().snapshot();
-        button.click();
+        destinationButton.click();
         const afterAdoption = host.getExposes().snapshot();
-        const projectedIntoCurrentBody = button.parentElement === foreignDocument.body;
+        const projectedIntoCurrentBody = destinationButton.parentElement === foreignDocument.body;
 
-        portal.unmount(button);
+        portal.unmount(destinationButton);
         frame.remove();
         return {
           beforeAdoption,
@@ -283,6 +286,88 @@ describe('Shadow closeout native boundaries', () => {
         afterNewWindow: { setups: 1, presses: 1, keys: 1 },
         afterAdoption: { setups: 1, presses: 2, keys: 1 },
         projectedIntoCurrentBody: true,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('moves modal body-lock ownership across connected cross-document adoption', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        let setups = 0;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-adopted-modal-lock',
+            setup(def: any) {
+              setups += 1;
+              const overlay = p.asOverlay();
+              overlay.keepMounted();
+              overlay.configure({ modal: true, portal: false });
+              def.expose('open', () => overlay.openOverlay('programmatic'));
+              def.expose('close', () => overlay.close('programmatic'));
+              def.expose('setups', () => setups);
+              return (r: any) => r.slot();
+            },
+          })
+        );
+        const settle = () => new Promise<void>((resolve) => queueMicrotask(resolve));
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+
+        const closed = new C();
+        document.body.append(closed);
+        await settle();
+        foreignDocument.adoptNode(closed);
+        foreignDocument.body.append(closed);
+        closed.getExposes().open();
+        await settle();
+        const afterClosedAdoption = {
+          oldBody: document.body.style.overflow,
+          newBody: foreignDocument.body.style.overflow,
+          setups: closed.getExposes().setups(),
+        };
+        closed.getExposes().close();
+        await settle();
+
+        const open = new C();
+        document.body.append(open);
+        await settle();
+        open.getExposes().open();
+        await settle();
+        const beforeOpenAdoption = {
+          oldBody: document.body.style.overflow,
+          newBody: foreignDocument.body.style.overflow,
+        };
+        foreignDocument.adoptNode(open);
+        foreignDocument.body.append(open);
+        await settle();
+        const afterOpenAdoption = {
+          oldBody: document.body.style.overflow,
+          newBody: foreignDocument.body.style.overflow,
+          setups: open.getExposes().setups(),
+        };
+        open.getExposes().close();
+        await settle();
+        const afterClose = {
+          oldBody: document.body.style.overflow,
+          newBody: foreignDocument.body.style.overflow,
+        };
+        frame.remove();
+        return { afterClosedAdoption, beforeOpenAdoption, afterOpenAdoption, afterClose };
+      });
+      expect(result).toEqual({
+        afterClosedAdoption: { oldBody: '', newBody: 'hidden', setups: 1 },
+        beforeOpenAdoption: { oldBody: 'hidden', newBody: '' },
+        afterOpenAdoption: { oldBody: '', newBody: 'hidden', setups: 2 },
+        afterClose: { oldBody: '', newBody: '' },
       });
       expect(errors).toEqual([]);
     } finally {
@@ -1077,6 +1162,76 @@ describe('Shadow closeout native boundaries', () => {
         restored: { fieldset: null, image: '0' },
         directOpen: ['observed-details-area'],
         directClosed: ['observed-map-entry'],
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry at a native visibility transition endpoint', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: `
+          #transition-entry button { transition: visibility 80ms linear; }
+          #transition-entry.conceal button { visibility: hidden; }
+        `,
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-transition-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          })
+        );
+        const host = new C();
+        host.id = 'transition-entry';
+        const button = document.createElement('button');
+        button.textContent = 'Transition target';
+        host.append(button);
+        document.body.append(host);
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+        const completed = new Promise<string>((resolve, reject) => {
+          const timeout = setTimeout(
+            () => reject(new Error('visibility transition timeout')),
+            1000
+          );
+          button.addEventListener(
+            'transitionend',
+            (event) => {
+              if (event.propertyName !== 'visibility') return;
+              clearTimeout(timeout);
+              resolve(event.propertyName);
+            },
+            { once: true }
+          );
+        });
+        host.classList.add('conceal');
+        const start = {
+          visibility: getComputedStyle(button).visibility,
+          hostTabIndex: host.getAttribute('tabindex'),
+        };
+        const property = await completed;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const end = {
+          visibility: getComputedStyle(button).visibility,
+          hostTabIndex: host.getAttribute('tabindex'),
+        };
+        return { start, property, end };
+      });
+      expect(result).toEqual({
+        start: { visibility: 'visible', hostTabIndex: null },
+        property: 'visibility',
+        end: { visibility: 'hidden', hostTabIndex: '0' },
       });
       expect(errors).toEqual([]);
     } finally {

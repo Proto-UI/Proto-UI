@@ -99,9 +99,9 @@ export function createShadowColorSchemeEnvironmentOwner(
   };
 
   let unsubscribe: () => void;
+  sourceGeneration = 1;
   try {
     unsubscribe = subscribeSource(resolvedSource, 1);
-    sourceGeneration = 1;
   } catch (error) {
     // A source may retain its callback before throwing; revoke its write authority too.
     disposed = true;
