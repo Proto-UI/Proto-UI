@@ -127,12 +127,16 @@ The matrix rows remain authoritative. Each binding joins a scanned source, its c
 | `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand` | `cf3f9dbe41ffd8248860bd623a74157e3e59f6c53bc59f9bde34e5d7c269ab4f` |
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
-| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `e49e1d5bafe3e5232081cea0ac893ebc34f06bcc7f3d08dbc369ae004fdce178` |
-| `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `65fffb6b6189f8cda0cdec2b32c4499658c05a8fe18f3b64187934e98adf0e00` |
+| `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `f9586b77a1877abf172811144583fb64f617ecae0db6df13cc19701a96eb6adb` |
+| `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `c87f05e68b372df69a7a98cb23a44a9822f857256cec94665175befb9430ac39` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel` | `0a7032cb76fa7d77d6c97733def50ca6f78430dc24a9a6b497a831eb7de76f4a` |
-| `apps/www/src/components/PrototypePreviewer/home-demo-client.ts` | `www.demo.home-demo-select` | `38546ede03d9cc2819e7c784b8507d68f9feb1317ce52d2b94ce60df0a8a1502` |
-| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `7f1e13d60c13a724a261096377a319a81c7de352f0d82f23ecdac0c607f43a55` |
+| `apps/www/src/components/PrototypePreviewer/home-demo-client.ts` | `www.demo.home-demo-select` | `3ca6fb18bd31574fdf34e4fd961d51876eb5d0f379e6a451082b9582f2a98c1d` |
+| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `15565b1f2917409e12885b020ca2ccd3d879e3e6cb8d831be7dd64dfc53df0ef` |
+| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `7af3dce4d35b204ca2c33b8c0dfcb6bd506a0a6da9e505ff731de3d2172abb7b` |
+| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `036614134df63553403e861785a1f58e8605074c940d0834e15200253a339cce` |
+| `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `13bb17d4ba45e98ea8ac28cf6bf427c2eedc5fb783671492d6f4e51665b5fbb8` |
+| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style` | `dbb4989b384eaf7e745359ac113b120cb928cde914a983dc268d71ab42408ebb` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `3348c92c313e4f77f5ac319adf9a34a68824f00e57ffa0455702c677ee77d3f1` |
 | `apps/www/src/components/WhitepaperDiagramViewer.astro` | `www.docs.whitepaper-diagram-viewer` | `0ae98ac689b0ba36d8785f81ae0ed5688473bdaecffc6d20f6571e908651c211` |
 | `apps/www/src/components/WikiTerm.astro` | `www.docs.wiki-term` | `8af4d68412ce23bb64052fe76be3e4253525f938d2d681d08cfa36445ac24339` |
@@ -160,6 +164,7 @@ The matrix rows remain authoritative. Each binding joins a scanned source, its c
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts` | `www.demo.authored-controllers` | `cc88bc8d07c0fa55229974d5aa7e32c8e5b7a3c219a09f5532652378944c5657` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-separator.demo.ts` | `www.demo.brutalist-separator` | `58d963578d9f80a4d17db85d431838fee464ea653a59241c3167c66c95a230b6` |
 | `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` | `e0853379e6d8a241101bc82e78f43f4dec9db1d14e522f8c4b72ee46ff05cdb3` |
+| `apps/www/src/pages/en/test/style-isolation.astro` | `www.demo.prototype-previewer`, `www.demo.raw-adapter-runtimes` | `8fb1136b0a7c267073ab1f2c52b135ef199e9109c449b0ef3aadd422ab429ca3` |
 | `apps/www/src/pages/index.astro` | `www.route.root-locale-redirect` | `e50e3349709f152a1f53de9e85fecb17dceb443282b147c917d2ff1a8c37c4a8` |
 | `apps/www/src/scripts/proto-concept.ts` | `www.docs.wiki-term` | `ad5f89a44fd1b396221a7161874e634e0eb038b71395e2c5cb54f7911873925a` |
 

@@ -3,7 +3,14 @@
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Locator } from 'playwright-core';
-import { RUNTIMES, launchBrowser, openRoute, startServer, stopServer } from './browser-harness';
+import {
+  RUNTIMES,
+  choosePreviewRuntime,
+  launchBrowser,
+  openRoute,
+  startServer,
+  stopServer,
+} from './browser-harness';
 
 const SELECT_RUNTIMES = RUNTIMES;
 
@@ -21,22 +28,25 @@ const MOUNTED_ROOT_COUNT = 6;
  * trigger. Reusing the shared helper would turn every assertion below into a
  * timeout that says nothing about the label.
  */
-async function showRuntime(page: Page, previewer: Locator, runtime: string): Promise<void> {
-  const selectRoot = previewer.locator('[data-adapter-select-root]');
-  await selectRoot.locator('wc-shadcn-select-trigger').click();
-  // Select content is portalled while open, so resolve the visible item from
-  // the document rather than assuming it remains a child of the previewer.
-  await page
-    .locator(`wc-shadcn-select-item[data-value="${runtime}"]:visible`)
-    .last()
-    .click({ force: true });
+async function showRuntime(
+  page: Page,
+  previewer: Locator,
+  runtime: (typeof RUNTIMES)[number]
+): Promise<void> {
+  await choosePreviewRuntime(page, previewer, runtime);
   await page.waitForFunction(
     (selected) => {
       const root = document.querySelector('[data-previewer-id]');
-      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
-      const host = root?.querySelector('.host');
-      if (!host || select?.getAttribute('data-value') !== selected) return false;
-      return Array.from(host.querySelectorAll('*')).some(
+      const scope = root?.querySelector<HTMLElement>('[data-projection-scope]');
+      const content = scope?.querySelector<HTMLElement>('[data-projection-content]');
+      if (
+        !content ||
+        scope?.dataset.projectionRuntime !== selected ||
+        scope.dataset.projectionState !== 'ready'
+      ) {
+        return false;
+      }
+      return Array.from(content.querySelectorAll('*')).some(
         (element) => element.getAttribute('role') === 'combobox'
       );
     },
@@ -60,9 +70,9 @@ type ClosedSelect = {
 
 async function readClosedSelect(page: Page): Promise<ClosedSelect> {
   return page.evaluate(() => {
-    const host = document.querySelector('[data-previewer-id] .host');
-    if (!host) throw new Error('The Select demo must render a previewer host.');
-    const trigger = Array.from(host.querySelectorAll('*')).find(
+    const content = document.querySelector('[data-previewer-id] [data-projection-content]');
+    if (!content) throw new Error('The Select demo must render projected content.');
+    const trigger = Array.from(content.querySelectorAll('*')).find(
       (element) => element.getAttribute('role') === 'combobox'
     );
     if (!trigger) throw new Error('The Select demo must render a trigger.');
@@ -75,10 +85,10 @@ async function readClosedSelect(page: Page): Promise<ClosedSelect> {
       displayValue: value?.getAttribute('data-display-value') ?? null,
       // Items live inside the closed content; they register with the Root's
       // collection even though nothing has opened it.
-      registeredItems: host.querySelectorAll('[data-collection-index]').length,
-      mountedRoots: host.querySelectorAll('[data-pui-root]').length,
-      detachedHosts: host.querySelectorAll('[data-pui-view-detached]').length,
-      everOpened: !!host.querySelector('[data-open]'),
+      registeredItems: content.querySelectorAll('[data-collection-index]').length,
+      mountedRoots: content.querySelectorAll('[data-pui-root]').length,
+      detachedHosts: content.querySelectorAll('[data-pui-view-detached]').length,
+      everOpened: !!content.querySelector('[data-open]'),
     };
   });
 }

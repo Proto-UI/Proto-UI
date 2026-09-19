@@ -48,6 +48,7 @@ describe('prototypes/shadcn: hover-card', () => {
     expect(content.getExposes().transitionState.get()).toBe('entering');
     expect(styleContains(content, 'w-64')).toBe(true);
     expect(styleContains(content, 'rounded-md')).toBe(true);
+    expect(styleContains(content, 'border-border')).toBe(true);
     expect(styleContains(content, 'bg-popover')).toBe(true);
     expect(styleContains(content, 'shadow-md')).toBe(true);
     expect(styleContains(content, 'transition-none')).toBe(true);

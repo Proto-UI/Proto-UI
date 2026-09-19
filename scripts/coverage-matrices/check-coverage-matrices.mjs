@@ -158,6 +158,9 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/BrutalistPageStyle.astro': Object.freeze({
     resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
   }),
+  'apps/www/src/components/PrototypePreviewer/projection-theme.ts': Object.freeze({
+    resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
+  }),
   'apps/www/src/components/LucideIconGallery.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
