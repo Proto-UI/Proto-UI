@@ -53,12 +53,13 @@ Handoff 携带有类型的产物，最多指向一个下个 skill。终态 hando
 
 ## 建立证据与读者文档
 
-| Skill           | 完成的一次转换                                            |
-| --------------- | --------------------------------------------------------- |
-| `pui-test`      | 从受治理行为得到可执行证据                                |
-| `pui-docs`      | 从仓库事实得到人类文档                                    |
-| `pui-validate`  | 从候选改动得到相称的验证报告                              |
-| `pui-review`    | 按一个声明的 review class 生成与 revision 绑定的 packet   |
+| Skill | 完成的一次转换 |
+| --- | --- |
+| `pui-test` | 从受治理行为得到可执行证据 |
+| `pui-docs` | 从仓库事实得到人类文档 |
+| `pui-validate` | 从候选改动得到相称的验证报告 |
+| `pui-review` | 按一个声明的 review class 生成与 revision 绑定的 packet |
+| `pui-evidence-publish` | 将已准备、单独授权的 Issue 证据发布为一条补充评论；不上传或改变 Issue 元数据 |
 | `pui-integrate` | 从已批准 exact-head PR 得到受仓库规则约束的 merge receipt |
 
 ## 检查仓库协作面

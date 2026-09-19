@@ -1,16 +1,20 @@
 ---
 name: Bug Report
-about: Report reproducible behavior that conflicts with an existing Proto UI guarantee
+about: Describe a suspected bug or symptom; reproduction and evidence can be added later
 labels: [bug]
 ---
 
 ## Summary
 
+<!-- Humans may describe the problem in plain language; images, artifacts and prompt disclosure are not required from you. Agents: supplement this item under internal/agent-operations/visual-evidence.md with a sanitized request paraphrase, uploaded subject-appropriate evidence and explicit debt. Upload guide: internal/agent-operations/github-evidence-upload.md. -->
+
 What happened, and why does it appear incorrect?
 
-## Reproduction
+**A plain-language symptom report is enough.** All fields below are optional for human reporters. You do not need to find the cause, reproduce it, provide images, or know a spec entity. An Agent following up owns investigation, reproduction and evidence under the Agent policy.
 
-Provide the smallest repository path, public package example, docs route, or external reproduction that demonstrates the problem.
+## Reproduction (optional)
+
+If available, share a repository path, public package example, docs route, or steps you tried. It is fine if you cannot reproduce the symptom yet; an Agent can supplement it in an attributed follow-up.
 
 1.
 2.
@@ -20,9 +24,9 @@ Provide the smallest repository path, public package example, docs route, or ext
 
 Describe the expected observable result. Link the applicable `P-*`, `C-*`, `T-*`, or other spec entity and criterion when known.
 
-## Actual evidence
+## Actual evidence (optional)
 
-Include logs, DOM/accessibility facts, screenshots, failing tests, or a comparison among Web Component, React, and Vue. Avoid relying on screenshots alone for protocol claims.
+Share existing logs, screenshots, tests or comparisons only if convenient; none are required from you. An Agent investigating the report supplies real reproduction evidence and states its limits. Screenshots alone do not prove protocol claims.
 
 ## Suspected ownership
 

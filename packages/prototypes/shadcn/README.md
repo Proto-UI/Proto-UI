@@ -33,6 +33,12 @@ Prefer anatomy-family subpaths so only the selected Shadcn family and its corres
 import { shadcnButton } from '@proto.ui/prototypes-shadcn/button';
 import { shadcnSelectRoot, shadcnSelectTrigger } from '@proto.ui/prototypes-shadcn/select';
 import {
+  shadcnScrollAreaRoot,
+  shadcnScrollAreaViewport,
+  shadcnScrollAreaScrollbar,
+  shadcnScrollAreaThumb,
+} from '@proto.ui/prototypes-shadcn/scroll-area';
+import {
   shadcnTooltipGroup,
   shadcnTooltipRoot,
   shadcnTooltipTrigger,
@@ -52,6 +58,7 @@ The root package export remains available for compatibility. Shadcn families do 
 - `src/hover-card/`
 - `src/index.ts`
 - `src/select/`
+- `src/scroll-area/`
 - `src/switch/`
 - `src/tabs/`
 - `src/toggle/`
