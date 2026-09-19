@@ -68,7 +68,7 @@ If a future proposal needs one of these answers to change, it requires explicit 
 
 ## Contribution boundary
 
-A Compiler proposal should begin as maintainer-guided research. It must identify at least:
+A Compiler proposal begins as Agent-led governed research. Research, candidate entities, implementation probes, and executable evidence may proceed immediately; only product choices not decided by current authority become an attended decision. The proposal must identify at least:
 
 1. the portable source subset and how unsupported constructs fail;
 2. the output host and ownership of generated artifacts;

@@ -1,0 +1,99 @@
+# Agent Event shadow：认证、重放与乱序契约
+
+日期：2026-08-24
+
+关联：Issue #504、PR #485、PR #487、Issue #486
+
+当前实施授权：Issue #504 的 [maintainer decision](https://github.com/Proto-UI/Proto-UI/issues/504#issuecomment-5404591367)
+
+## 这份记录解决什么
+
+PR #485 的维护者讨论已经选择 webhook / event-driven 作为预期主路径，并保留定时 shadow 作为 reconciliation。Issue #504 把这条方向拆成多个 transition。维护者随后正式准入本记录描述的 E0：它可以在最终 controller/runtime 和部署 owner 确定之前落地。本记录只描述这个 Event shadow transition 的实现和边界，不把后续 controller、review 写入或 merge 设计写成既成事实。
+
+这个主题不属于 Proto UI 产品语义，`spec/**` 当前也没有对应实体。现行机器边界仍由 `internal/agent-operations/policy.yaml`、`workflows.yaml` 与 `capability-policy.yaml` 管理。日期化记录只保存这次工程方向和观察，不能覆盖这些文件。
+
+## 已收敛的第一条 transition
+
+第一条 transition 是 contract-only Event shadow：
+
+```text
+signed raw GitHub delivery
+  -> raw-byte HMAC-SHA256 verification
+  -> repository / hook / installation trust binding
+  -> identity-only event envelope
+  -> allowlist and self-echo decision
+  -> delivery replay and object-order decision
+  -> no-write receipt plus pure next state
+```
+
+它不部署 listener，不创建 queue，不运行 Agent，不读取 GitHub write credential，也不修改 GitHub。`ADMITTED` 只表示应当重新采集 live state；`OUT_OF_ORDER` 与 `AMBIGUOUS_ORDER` 只表示应当 reconciliation。Event、sender、fork、CI 或模型输出都不能把这两个结果升级成 mutation authorization。
+
+当前 contract-only allowlist 仅覆盖 `pull_request` 的 `opened`、`reopened`、`synchronize`、`ready_for_review`、`converted_to_draft`、`edited` 与 `closed`。维护者已批准这组精确输入作为 E0 边界；`edited` 只能触发重新读取 live state，任何 authored content 都不是可信 authority。这仍是离线 shadow/replay 的输入边界，不是已部署订阅，也不是未来生产 allowlist 的最终批准。Review、comment、thread 与 check 事件要在各自输入、成本和 reconciliation 契约明确后单独加入。
+
+## 机器工件
+
+- `internal/agent-operations/event-shadow.yaml` 固定 contract 状态、allowlist、fork 边界、去重与乱序规则，以及零写入条件。
+- `schemas/event-shadow-delivery.schema.json` 保存 headers 和原始 body bytes 的 base64 表达，使签名可以针对原字节重算。
+- `schemas/event-shadow-trust.schema.json` 要求部署时提供 repository、hook、installation 和 dedicated Agent actor IDs；这些 ID 不从 payload 自证。
+- `schemas/event-envelope.schema.json` 只保留 repository、delivery、sender、对象、revision 与 fork identity。它不携带 body、comment、patch、commit message、filename 或其他 authored instructions。
+- `schemas/event-shadow-state.schema.json` 描述 delivery keys 和逐 PR cursor；state 的全局原子持久化仍由未来 controller 负责。
+- `schemas/event-shadow-receipt.schema.json` 把结果约束为 `ADMITTED | DUPLICATE | UNSUPPORTED | SELF_ECHO | OUT_OF_ORDER | AMBIGUOUS_ORDER`，并固定 `mutationAuthorized: false` 与 `writeOperationsPerformed: 0`。
+- `scripts/agent-operations/event-shadow.mjs` 实现纯 normalization/evaluation；`event-shadow-cli.mjs` 只做离线 replay，打印 `nextState` 而不写回 state。
+
+## 零信任边界
+
+签名验证使用 request body 的原始 bytes、webhook secret 和 `X-Hub-Signature-256`，并以 constant-time comparison 检查 HMAC-SHA256。验证发生在 JSON 解析之前。Runtime 随后交叉检查 header target、payload repository、hook ID 与 GitHub App installation ID。GitHub 的 raw-body HMAC 不覆盖 transport headers，因此这些 header 只是待交叉检查的 transport claim，不能成为 authority。
+
+签名只证明收到的 raw delivery 与 secret 对应，不能证明 authored content 正确，不能授予 GitHub permission，也不能代替 live state。外部 contributor 与 fork 可以触发观察，但其 actor identity 没有 semantic、review 或 mutation authority。Dedicated Agent 的 self echo 被确定性丢弃。
+
+Delivery key 绑定受信 repository ID 与已经通过 HMAC 的 raw-body digest，不依赖未被该 HMAC 覆盖的 delivery GUID 或 hook header。保持 body 与签名不变而重写 transport headers 仍然命中同一个 replay key；byte-identical delivery 会折叠成一次观察，因为 E0 最多只能要求重新读取 live state。逐 PR cursor 的 key 同时绑定 repository ID 与 PR number，避免复用 state 时让不同仓库的同号 PR 相互污染；cursor 再使用 `updated_at` 与 head SHA 检测明显旧事件。相同时间不能建立 total order，因此必须回到 GitHub live state reconciliation，而不是猜测先后。
+
+Envelope 本身不是可跨信任边界携带的签名凭证。未来 controller 若把 raw delivery、envelope、receipt 或 state 分开传输，必须原子保存原始签名输入，并在消费边界重放 normalization 或增加独立的服务签名。若它还需要跨边界信任 delivery GUID 或 hook header 的来源，受信 ingress 必须把 exact headers 与 raw body 原子捕获并另行认证；重放 GitHub 的 raw-body HMAC 本身做不到这一点。当前实现没有全局 state store、service lease、delivery acknowledgement、dead letter、retry controller 或 kill switch，因而不能宣称已经防止跨 runner replay。
+
+## 可执行证据
+
+`scripts/agent-operations/test/event-shadow.test.mjs` 覆盖：
+
+- GitHub 公布的 HMAC-SHA256 test vector；
+- raw body tamper、错误 secret 等签名失败；
+- repository、hook、installation 与重复 case-insensitive header 的 fail-closed；
+- external fork 只进入 read-only collection；
+- unsupported action 与 dedicated-Agent self echo；
+- delivery replay，以及保持签名 body 不变时 transport header 重写不能重新生成 replay key；
+- schema-valid 的无序 replay state 会被确定性规范化；
+- 明显乱序与无法建立顺序的同时间事件；
+- forged envelope、receipt 与 state 边界；
+- CLI 第一次 replay 与 duplicate replay；
+- 所有结果的零 mutation 字段。
+
+聚焦命令：
+
+```sh
+node --test scripts/agent-operations/test/event-shadow.test.mjs
+corepack pnpm@10.32.1 check:agent-operations
+```
+
+## 已授权但不属于 E0
+
+维护者允许后续 transition 继续实现有界的 no-write automation，包括持久化与恢复、确定性 relevance/direction admission、现有 review packet 管道、私有 maintainer inbox、扩展后的只读事件输入，以及只读 GitHub App 的实现与证据。它们没有进入本次 E0；为保持审查单元清晰，应由后续 transition 分别建立当前范围、验收边界和独立复核。
+
+其中 E1 的输出边界已经明确：direction admission 可以进入 private maintainer inbox，但不能发布 GitHub comment、review 或 check。仓库内容、事件 payload、actor identity、评估分数或模型输出都不能改变这个限制。
+
+## 仍然需要单独决定
+
+- listener 与 durable controller 的部署位置、owner、SLO、acknowledgement、retry、dead letter、lease、cancellation 和 kill switch；
+- pi SDK v2 或 DeepSeek harness 的选择与隔离边界，不能在 repository runtime 中重造 Coding Harness；
+- GitHub App identity、最小 permissions、secret 管理，以及 trust anchor 的部署流程；
+- comment、review、thread、check 等下一批 event allowlist；
+- maintainer inbox、notification 与 decision callback；
+- standing authorization 与 deterministic applier；
+- `REQUEST_CHANGES` + own dismissal 或 `COMMENT` + required check 的可逆 blocking 选择；
+- 任何 GitHub write、Review、approval、merge、publication 或 release graduation。
+
+这些决定应分别形成可审查的 transition。Event shadow 通过测试不能作为其中任何一项的授权证据。
+
+## 外部契约依据
+
+- GitHub Docs, Validating webhook deliveries：<https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries>
+- GitHub Docs, Webhook events and payloads：<https://docs.github.com/en/webhooks/webhook-events-and-payloads>
+- GitHub Docs, Best practices for using webhooks：<https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks>

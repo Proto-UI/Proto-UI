@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "2026-08-20.phase-a",
+  "policyVersion": "2026-08-27.agent-forward-intake-1",
   "mode": "shadow",
   "runId": "AO-SHADOW-20260820T123456Z-fedcba98",
   "generatedAt": "2026-08-20T12:35:00.000Z",

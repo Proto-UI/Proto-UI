@@ -8,10 +8,10 @@ description: '在提交一个新原型或大改动之前，先过一遍这张清
 
 ## 一、我走的是哪条贡献路径？
 
-- 我是在维护已有 P、投射已有 Base，还是实现已批准的 Base slice？
-- Issue 是否写明已经决定、可以决定和不得改变的内容？
-- Issue 是否允许开始实现，还是仍带有 `needs maintainer design`？
-- 如果是新 Base subject，maintainer checkpoint 是否已经记录？
+- 我是在维护已有 P、投射已有 Base，还是实现受治理或候选 Base slice？
+- Issue 是否写明当前受治理方向、candidate scope 与下一步所需证据？
+- 对已有受治理 subject，我是否直接继续 implementation/projection，而不是等待另一层普遍审批？
+- 如果是全新 Base subject，admission 决定是否已记录？如果仍未决，research、candidate graph、draft entity、实现探针和测试是否在不声称已准入的前提下继续推进？
 
 ## 二、我是否从适用 Spec 实体开始？
 

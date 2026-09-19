@@ -1,7 +1,7 @@
 interface:
   display_name: 'Proto UI Spec'
-  short_description: 'Author an approved spec graph change'
-  default_prompt: 'Use $pui-spec to author this approved spec entity change.'
+  short_description: 'Author a governed spec graph change'
+  default_prompt: 'Use $pui-spec to author this governed spec entity change.'
 
 policy:
   allow_implicit_invocation: false

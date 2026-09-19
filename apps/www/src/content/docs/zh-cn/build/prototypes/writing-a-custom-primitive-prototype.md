@@ -1,11 +1,11 @@
 ---
 title: '编写一个定制的单体原型'
-description: '在已批准边界内理解 direct Prototype 与 authored asHook 的最小结构。'
+description: '在受治理边界或候选边界内理解 direct Prototype 与 authored asHook 的最小结构。'
 ---
 
 单体 Prototype 对应一个边界明确、可以独立承担信息通路责任的 protocol subject。Button 与 Toggle 是当前较清楚的例子。
 
-> 本文解释 authoring 结构，不负责批准新的 Base identity。实现新 Base subject 前，必须先完成 maintainer checkpoint，并使用[实现已批准的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)所定义的完整交付流程。
+> 本文解释 authoring 结构。已有受治理 subject 直接从当前 P/T 图继续推进。对于全新的 Base subject，research、candidate graph、draft entity、实现探针和测试都可以立即开始；唯一未决语义决定是 Proto UI 是否把这个独立 subject 准入为 Base identity。两条路径都使用[实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)完成 coherent delivery。
 
 ## 从实体和证据开始
 
@@ -67,10 +67,10 @@ def.event.on('press.commit', (run) => {
 
 ## 一个完整单体 slice 还需要什么
 
-源码文件只是交付面的一部分。获批的新单体 Prototype 通常还需要：
+源码文件只是交付面的一部分。受治理 leaf 或明确标记的 candidate 通常按下面的链路推进：
 
 ```text
-approved checkpoint
+governed identity or candidate draft
 → P criteria and relations
 → T cases and executable tests
 → implementation and public exports
@@ -83,7 +83,7 @@ approved checkpoint
 
 ## 何时暂停
 
-如果实现中需要新增公共 prop/event/state、改变 owner、引入 raw host object，或发现 P/T 与实现互相矛盾，应回到 Issue 请求 checkpoint，而不是在源码里扩张边界。
+如果实现中需要新增公共 prop/event/state、改变 owner、引入 raw host object，或发现 P/T 与实现互相矛盾，应同步更新 candidate 或 governed graph、测试和证据，而不是只在源码里扩张边界；可逆工作继续进入 fresh review。只有证据要求准入另一个全新 Base identity 时才升级，并在准入选择未决期间保持该 identity 为 draft。
 
 ## 下一步
 

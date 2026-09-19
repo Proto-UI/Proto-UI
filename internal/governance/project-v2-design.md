@@ -10,26 +10,26 @@ Use built-in fields where GitHub already owns the fact. Do not copy repository, 
 
 | Field | Type | Meaning | Writer |
 | --- | --- | --- | --- |
-| Status | single select | Current operational position | deterministic automation or maintainer |
-| Readiness | single select | Whether implementation may start | maintainer |
-| Current gate | single select | The next attended decision, if any | maintainer or validated projection |
+| Status | single select | Current operational position | deterministic automation or authorized operator |
+| Readiness | single select | Whether the bounded work can advance | validated readiness projection or independent reviewer |
+| Current decision | single select | The unresolved decision class, normally `none` | validated projection or attended decision recorder |
 | Work type | single select | Stable work taxonomy | deterministic label projection |
-| Area | single select | Owning repository surface | deterministic label projection or maintainer |
-| Effort | single select | Reviewable size and uncertainty | contributor proposal, maintainer confirmation |
-| Priority | single select | Relative queue order | maintainer |
-| Required capability | single select | Minimum autonomous Agent comprehension band | maintainer |
-| Mutation ceiling | single select | Largest permitted action class | maintainer |
+| Area | single select | Owning repository surface | deterministic label projection or authorized operator |
+| Effort | single select | Reviewable size and uncertainty | contributor or Agent proposal with evidence |
+| Priority | single select | Relative queue order | governed queue policy or authorized operator |
+| Required capability | single select | Minimum autonomous Agent comprehension band | deterministic task classification or reviewer |
+| Mutation ceiling | single select | Largest permitted action class | active capability policy |
 | Evidence state | single select | Progress of required executable and review evidence | deterministic projection or reviewer |
 | Claim owner | text | Stable contributor or Agent subject identifier | authorized claim transition |
 | Claim expires | date | End of the current lease | authorized claim transition |
-| Risk | single select | Operational risk used by routing and review | maintainer |
-| Iteration | iteration | Planning window | maintainer |
+| Risk | single select | Operational risk used by routing and review | deterministic risk rules or reviewer |
+| Iteration | iteration | Planning window | governed queue policy or authorized operator |
 
 Field options are governed catalogs. Renaming or adding an option is a policy change, not an ad hoc board edit. Work type, area, and effort mirror canonical labels; automation must map one canonical label to one field value and report duplicates instead of guessing.
 
 ## State machines
 
-`Status` answers where the item is. `Readiness`, `Current gate`, and `Evidence state` answer different questions and must not be inferred from one another.
+`Status` answers where the item is. `Readiness`, `Current decision`, and `Evidence state` answer different questions and must not be inferred from one another.
 
 Allowed `Status` transitions:
 
@@ -39,52 +39,60 @@ Intake -> Shaping -> Ready -> Claimed -> In progress -> Review -> Accepted -> Do
    +-------> Blocked <-+--------+-------------+----------+
 ```
 
-- New items may enter `Intake` deterministically.
-- A maintainer moves an item from `Shaping` to `Ready` after scope, exclusions, authority, implementation authorization, acceptance, and validation are explicit.
-- An authorized claim moves one `Ready` item to `Claimed` and records owner and expiry atomically.
-- Work may enter `In progress` only while the claim, scope, repository revision, authorization, and live task state still match.
-- A contributor may propose `Review`; the maintainer-owned ready-for-review gate remains separate.
-- Independent acceptance permits `Accepted`. Merge or closure may permit `Done`.
-- Any state may move to `Blocked` when its recorded prerequisite becomes false. Unblocking returns to the last justified state, never to a more advanced state.
+- New items enter `Intake` deterministically.
+- Validated readiness moves an item from `Shaping` to `Ready` when scope, exclusions, authority, acceptance, validation, and any real decision boundary are explicit.
+- A current-user or standing-authorized claim moves one `Ready` item to `Claimed` and records owner and expiry atomically.
+- Work enters `In progress` while the claim, scope, repository revision, capability envelope, and live task state still match.
+- Complete implementation and evidence move the exact revision to `Review`; ready-for-review and recheck metadata may advance automatically under their standing scopes.
+- Independent acceptance permits `Accepted`. Exact-head integration or verified closure moves the item to `Done`.
+- Any state may move to `Blocked` when a recorded prerequisite becomes false. Revalidation returns it to the last justified state without skipping evidence.
 
-`Readiness` has four values: `Unassessed`, `Needs decision`, `Ready`, and `Blocked`. Only a maintainer decision may set `Ready`. A label, assessment score, passing check, claim, or Project automation cannot do so.
+`Readiness` has four values: `Unassessed`, `Needs decision`, `Ready`, and `Blocked`. A validated projection may set `Ready` when the Issue has a bounded outcome, applicable authority, explicit exclusions, acceptance criteria, validation commands, no conflicting ownership, and no unresolved product direction. No single label, assessment score, check, or claim proves readiness by itself.
 
-`Evidence state` has five values: `Not planned`, `Planned`, `Running`, `Complete`, and `Failed`. Machine checks may update this field from exact workflow evidence. They cannot update acceptance or semantic readiness.
+`Current decision` has three values: `none`, `unresolved-product-direction`, and `privileged-or-irreversible-operation`. A privileged delivery decision does not prevent otherwise ready implementation and evidence work from advancing.
+
+`Evidence state` has five values: `Not planned`, `Planned`, `Running`, `Complete`, and `Failed`. Machine checks may update this field from exact workflow evidence. A check result alone cannot accept a change or choose product direction; the readiness projection evaluates the complete bounded record.
 
 ## Claims and concurrency
 
-A claim is a lease, not permanent ownership. The claim transition must bind the item identity and update time, contributor identity, approved scope, allowed operations, repository revision, capability envelope, live permission, human authorization, and expiry.
+A claim is a lease, not permanent ownership. The claim transition binds the item identity and update time, contributor identity, governed scope, allowed operations, repository revision, capability envelope, current or standing authorization, live permission, and expiry.
 
-One service-side operation must update `Status`, `Claim owner`, and `Claim expires` with an idempotency key. Before writing, it re-reads assignees, comments, linked pull requests, and current Project fields. If global compare-and-set or an equivalent idempotent service is unavailable, Agents may prepare a claim proposal but must not post or update Project state automatically.
+One service-side operation updates `Status`, `Claim owner`, and `Claim expires` with an idempotency key and compare-and-set or equivalent atomic lease. Before writing, it re-reads assignees, comments, linked pull requests, and current Project fields. Without that concurrency boundary, an Agent returns a claim proposal instead of racing another writer.
 
-Expiry automation may flag a stale claim. It must not delete a human's work, reassign the item, or give the item to another contributor without an attended decision.
+Expiry automation may release the exact expired lease after revalidating that no matching work remains active, preserving its prior owner and evidence in the ledger. It never deletes work or silently transfers a live claim; ambiguous ownership becomes `Needs decision` with one focused packet.
 
 ## Synchronization rules
 
-- Issue close may propose `Done`; it does not override an open pull request, unresolved review, or missing release evidence.
-- Pull-request open, review, merge, and close events update only fields they directly prove.
+- Issue close sets `Done` when linked pull requests, reviews, and required delivery evidence contain no contradiction; otherwise it records the exact unresolved fact.
+- Pull-request open, review, recheck, ready-for-review, merge, and close events update only fields they directly prove.
 - Milestone and iteration remain separate. A milestone expresses an outcome; an iteration expresses a planning window.
 - Label synchronization is one-way from the canonical label taxonomy into Project classification fields. Project workflow state must not create status labels.
 - Every automation writes the source event identity and an idempotency key to its external ledger. Replaying the same event produces no additional mutation.
-- Conflicting facts stop automation and create a read-only drift report. Automation never chooses which source should win when policy does not already decide it.
+- Policy-resolved conflicts reconcile deterministically. A conflict that exposes genuinely unresolved product direction or an ambiguous privileged operation creates one decision packet and leaves the last proven state unchanged.
 
-## Human gates
+## Decision boundaries
 
-The default human-gate catalog lives in `internal/agent-operations/capability-policy.yaml`. Project fields may display the next gate, but cannot satisfy it. Semantic admission, ownership, compatibility tradeoffs, contributor rights, security handling, publication, release, access, secrets, and repository rule changes stay attended. Approval or merge may proceed unattended only through an exact active standing authorization whose live evidence and repository rules already resolve that bounded action; Project state alone never supplies that authorization.
+The default is `Current decision: none`. Ready governed work proceeds through claim, implementation, validation, independent review, recheck, ready-for-review, and exact-head integration when an active standing scope, live permission, trusted CI, provenance, idempotency, and repository rules all agree. Project state displays that evidence but never supplies authority by itself.
+
+Only two decision classes interrupt the automatic path:
+
+- `unresolved-product-direction`: applicable authority does not decide a material semantic identity, ownership, public guarantee, lifecycle, or compatibility choice;
+- `privileged-or-irreversible-operation`: publication, release, access, secrets, rulesets, security disclosure, a DCO/provenance exception, or another operation that cannot be safely bounded and recovered.
+
+Normal finding disposition, commit grouping, claims, labels and ordinary metadata, review disposition, recheck, ready-for-review, and merge are workflow transitions rather than default attended decisions.
 
 ## Rollout
 
-1. Obtain an access token that can read Project V2 and capture a dated baseline of existing Projects, fields, views, and automation.
-2. Create the organization Project with no write automation.
-3. Add the field schema and saved views. Verify that fields do not duplicate semantic authority.
-4. Import a bounded set of live items and compare every projected value with its source.
-5. Enable deterministic intake and evidence projections in shadow mode. Preserve proposed writes as artifacts.
-6. Review idempotency, concurrency, rollback, stale-claim, and permission evidence.
-7. Enable one reversible write class after an explicit maintainer decision. Keep semantic and integration transitions manual unless a separately reviewed standing authorization fixes the exact action, evidence, permission, idempotency, and rollback boundary.
-8. Audit drift and false transitions before adding another write class.
+1. After one privileged-operation authorization provisions the least-privilege Project credential and installation, capture a dated Project V2 baseline and register the exact fields, views, and automation identity.
+2. Create the organization Project, add the governed field schema and saved views, and verify that no field duplicates product authority.
+3. Import a bounded live set and compare every projected value with its canonical Issue, pull request, review, check, or policy source.
+4. Exercise intake, readiness, claims, evidence, review/recheck, ready-for-review, and completion transitions against replay, stale-input, permission-loss, and concurrency fixtures.
+5. Enable deterministic projections and reversible metadata writes under exact standing scopes, atomic leases, durable receipts, and a disable path.
+6. Connect accepted exact heads to the existing review and integration primitives; the Project projects their receipts instead of manufacturing approval.
+7. Audit drift, duplicate suppression, stale-claim recovery, and false transitions continuously while expanding independently evidenced action classes.
 
-Rollback disables the writer, preserves its ledger, and restores only values whose last writer and prior value are proven. Unknown provenance requires manual repair.
+Rollback disables the writer, preserves its ledger, and restores only values whose last writer and prior value are proven. Unknown provenance enters an attended repair as a provenance exception.
 
 ## Acceptance
 
-The Project is operational only when read access is verified, field options match this design, saved views expose each decision queue, event replay is idempotent, stale claims cannot be reassigned silently, conflicting facts fail closed, and the public contribution guide matches the deployed behavior. Until then, Issues and maintainer checkpoints remain the live coordination source.
+The Project is operational when access is verified, fields match this design, views expose ready work and the two decision queues, event replay is idempotent, claims use atomic leases, ordinary metadata transitions reconcile automatically, exact-head review and integration receipts project correctly, and the public contribution guide matches deployed behavior. Issues, pull requests, reviews, checks, and active policy remain the canonical coordination sources throughout rollout.
