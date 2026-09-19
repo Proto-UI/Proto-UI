@@ -543,6 +543,38 @@ describe('WC scope sequential target sample', () => {
       scope.remove();
     }
   });
+  it('retains the traversal position of active SVG inside a negative-tabindex shadow host', () => {
+    const scope = document.createElement('div');
+    const before = document.createElement('button');
+    before.id = 'before-svg';
+    before.tabIndex = 0;
+    const host = document.createElement('div');
+    host.setAttribute('tabindex', '-1');
+    const root = host.attachShadow({ mode: 'open' });
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+    link.id = 'active-svg';
+    link.setAttribute('href', '#destination');
+    link.setAttribute('tabindex', '0');
+    svg.append(link);
+    root.append(svg);
+    const after = document.createElement('button');
+    after.id = 'after-svg';
+    after.tabIndex = 0;
+    scope.append(before, host, after);
+    document.body.append(scope);
+    try {
+      link.focus();
+      expect(sampleWebComponentScopeTargets(scope)).toEqual({
+        targets: [before, after],
+        activeTarget: link,
+        recentTarget: null,
+        activeInsertionIndex: 1,
+      });
+    } finally {
+      scope.remove();
+    }
+  });
   it('excludes hidden inputs and unassociated areas inside an open shadow tree', () => {
     const scope = document.createElement('div');
     const host = document.createElement('div');

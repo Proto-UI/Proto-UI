@@ -218,6 +218,8 @@ function watchEntryStyleInvalidation(
 ): (() => void) | null {
   const Sheet = view?.CSSStyleSheet;
   const Declaration = view?.CSSStyleDeclaration;
+  const DocumentCtor = view?.Document;
+  const ShadowRootCtor = view?.ShadowRoot;
   const Grouping = (
     view as unknown as {
       CSSGroupingRule?: { prototype: Record<string, unknown> };
@@ -273,7 +275,7 @@ function watchEntryStyleInvalidation(
       const original = Object.getOwnPropertyDescriptor(target, key);
       if (!original?.configurable || !original.set) return;
       const originalSet = original.set;
-      const patched = function (this: CSSStyleDeclaration, value: unknown) {
+      const patched = function (this: unknown, value: unknown) {
         originalSet.call(this, value);
         notify();
       };
@@ -282,6 +284,8 @@ function watchEntryStyleInvalidation(
     };
     patchSetter(Declaration.prototype, 'visibility');
     patchSetter(Declaration.prototype, 'cssText');
+    if (DocumentCtor) patchSetter(DocumentCtor.prototype, 'adoptedStyleSheets');
+    if (ShadowRootCtor) patchSetter(ShadowRootCtor.prototype, 'adoptedStyleSheets');
 
     const isStylesheetElement = (node: Node | null): node is Element => {
       if (!node || node.nodeType !== 1) return false;
@@ -574,8 +578,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryStyleWatch: (() => void) | null = null;
   let stopEntrySlotWatch: (() => void) | null = null;
   let stopEntryUpgradeWatch: (() => void) | null = null;
+  let entryObserverGeneration = 0;
   let radioFocusHistory: ReturnType<typeof observeWebComponentRadioFocus> | null = null;
   const stopEntryObserver = () => {
+    entryObserverGeneration += 1;
     entryObserver?.disconnect();
     entryObserver = null;
     entryImageObserver?.disconnect();
@@ -706,6 +712,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             return;
           }
 
+          const observerGeneration = entryObserverGeneration;
+          const isCurrentEntryObservation = () =>
+            entryObserverGeneration === observerGeneration && entryObserver !== null;
           const projectEntry = () => {
             const resolved = resolveFocusEntryTarget(target, config);
             projectFocusable(target, resolved === target);
@@ -720,17 +729,17 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const Resize = view?.ResizeObserver;
             if (Resize) {
               entryResizeObserver = new Resize(() => {
-                if (entryObserver) projectEntry();
+                if (isCurrentEntryObservation()) projectEntry();
               });
             }
             if (view) {
               const onViewportResize = () => {
-                if (entryObserver) projectEntry();
+                if (isCurrentEntryObservation()) projectEntry();
               };
               view.addEventListener('resize', onViewportResize);
               stopEntryViewportWatch = () => view.removeEventListener('resize', onViewportResize);
               stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
-                if (entryObserver) projectEntry();
+                if (isCurrentEntryObservation()) projectEntry();
               });
             }
             // The late-attach watch below is installed once but must always
@@ -741,6 +750,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const pendingUpgrades = new Set<string>();
             stopEntryUpgradeWatch = () => pendingUpgrades.clear();
             const observeTree = () => {
+              if (!isCurrentEntryObservation()) return;
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
               entryResizeObserver?.disconnect();
@@ -811,7 +821,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       .whenDefined(name)
                       .then(() => {
                         pendingUpgrades.delete(name);
-                        if (!entryObserver) return;
+                        if (!isCurrentEntryObservation()) return;
                         projectEntry();
                         observeTree();
                       })
@@ -842,7 +852,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               }
               if (externalSlots.size > 0) {
                 const onSlotChange = () => {
-                  if (!entryObserver) return;
+                  if (!isCurrentEntryObservation()) return;
                   projectEntry();
                   observeTree();
                 };
@@ -867,7 +877,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   return false;
                 },
                 () => {
-                  if (!entryObserver) return;
+                  if (!isCurrentEntryObservation()) return;
                   projectEntry();
                   observeTree();
                 }
@@ -877,6 +887,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // document mutations must not resample ordinary entry regions.
               if (hasArea) {
                 entryImageObserver ??= new Observer((records) => {
+                  if (!isCurrentEntryObservation()) return;
                   const containsImage = (node: Node) =>
                     node.nodeType === 1 &&
                     ((node as Element).localName === 'img' ||
@@ -926,7 +937,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     (origin as HTMLInputElement).name
                   ) {
                     queueMicrotask(() => {
-                      if (entryObserver) projectEntry();
+                      if (isCurrentEntryObservation()) projectEntry();
                     });
                   }
                 };
@@ -941,7 +952,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   )
                     return;
                   queueMicrotask(() => {
-                    if (entryObserver) projectEntry();
+                    if (isCurrentEntryObservation()) projectEntry();
                   });
                 };
                 for (const tree of radioTrees) {
@@ -957,6 +968,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               }
             };
             entryObserver = new Observer((records) => {
+              if (!isCurrentEntryObservation()) return;
               if (
                 records.some(
                   (record) => record.target !== target || record.attributeName !== 'tabindex'

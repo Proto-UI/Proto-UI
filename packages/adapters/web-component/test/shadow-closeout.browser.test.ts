@@ -1048,6 +1048,126 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects descendant entry when populated sheets are adopted into document and shadow roots', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-adopted-sheet-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+
+        const documentHost = new C();
+        documentHost.id = 'document-adopted-entry';
+        documentHost.innerHTML = '<button id="document-adopted-button">Document</button>';
+
+        const shadowHost = new C();
+        shadowHost.id = 'shadow-adopted-entry';
+        const carrier = document.createElement('div');
+        carrier.id = 'adopted-sheet-carrier';
+        carrier.attachShadow({ mode: 'open' }).innerHTML =
+          '<button id="shadow-adopted-button">Shadow</button>';
+        shadowHost.append(carrier);
+        (window as any).__originalDocumentAdoptedSetter = Object.getOwnPropertyDescriptor(
+          Document.prototype,
+          'adoptedStyleSheets'
+        )!.set;
+        (window as any).__originalShadowAdoptedSetter = Object.getOwnPropertyDescriptor(
+          ShadowRoot.prototype,
+          'adoptedStyleSheets'
+        )!.set;
+        document.body.append(documentHost, shadowHost);
+      });
+      await page.waitForFunction(
+        () =>
+          document.querySelector('#document-adopted-entry')?.getAttribute('tabindex') === null &&
+          document.querySelector('#shadow-adopted-entry')?.getAttribute('tabindex') === null
+      );
+      const settleStyles = () =>
+        page.evaluate(
+          () =>
+            new Promise<void>((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            )
+        );
+      expect(
+        await page.evaluate(
+          () =>
+            Object.getOwnPropertyDescriptor(Document.prototype, 'adoptedStyleSheets')!.set !==
+            (window as any).__originalDocumentAdoptedSetter
+        )
+      ).toBe(true);
+      expect(
+        await page.evaluate(
+          () =>
+            Object.getOwnPropertyDescriptor(ShadowRoot.prototype, 'adoptedStyleSheets')!.set !==
+            (window as any).__originalShadowAdoptedSetter
+        )
+      ).toBe(true);
+
+      await page.evaluate(() => {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync('#document-adopted-button { visibility: hidden; }');
+        (window as any).__documentAdoptedEntrySheet = sheet;
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+      });
+      await settleStyles();
+      expect(await page.locator('#document-adopted-entry').getAttribute('tabindex')).toBe('0');
+      expect(
+        await page
+          .locator('#document-adopted-button')
+          .evaluate((el) => getComputedStyle(el).visibility)
+      ).toBe('hidden');
+
+      await page.evaluate(() => {
+        const sheet = (window as any).__documentAdoptedEntrySheet as CSSStyleSheet;
+        document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+          (candidate) => candidate !== sheet
+        );
+      });
+      await settleStyles();
+      expect(await page.locator('#document-adopted-entry').getAttribute('tabindex')).toBeNull();
+
+      await page.evaluate(() => {
+        const root = document.querySelector('#adopted-sheet-carrier')!.shadowRoot!;
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync('#shadow-adopted-button { visibility: hidden; }');
+        (window as any).__shadowAdoptedEntrySheet = sheet;
+        root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
+      });
+      await settleStyles();
+      expect(await page.locator('#shadow-adopted-entry').getAttribute('tabindex')).toBe('0');
+      expect(
+        await page
+          .locator('#adopted-sheet-carrier')
+          .evaluate((el) => getComputedStyle(el.shadowRoot!.querySelector('button')!).visibility)
+      ).toBe('hidden');
+
+      await page.evaluate(() => {
+        const root = document.querySelector('#adopted-sheet-carrier')!.shadowRoot!;
+        const sheet = (window as any).__shadowAdoptedEntrySheet as CSSStyleSheet;
+        root.adoptedStyleSheets = root.adoptedStyleSheets.filter(
+          (candidate) => candidate !== sheet
+        );
+      });
+      await settleStyles();
+      expect(await page.locator('#shadow-adopted-entry').getAttribute('tabindex')).toBeNull();
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('uses rendered Light DOM eligibility for descendant entry fallback', async () => {
     const page = await browser.newPage();
     try {
@@ -1680,7 +1800,7 @@ describe('Shadow closeout native boundaries', () => {
           '<button id="before-negative">Before</button><div id="negative-host" tabindex="-1"></div><button id="after-negative">After</button>';
         const host = scope.querySelector('#negative-host') as HTMLElement;
         host.attachShadow({ mode: 'open' }).innerHTML =
-          '<button id="deep-negative-focus">Deep</button>';
+          '<button id="deep-negative-focus">Deep</button><svg><a id="deep-negative-focus-svg" href="#destination" tabindex="0"><text>Deep SVG</text></a></svg>';
         document.body.append(scope);
         scope.getExposes().activate();
       });
@@ -1705,6 +1825,29 @@ describe('Shadow closeout native boundaries', () => {
       expect(await active()).toBe('after-negative');
 
       await focusDeep();
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('before-negative');
+
+      await page.evaluate(() => {
+        (
+          document
+            .querySelector('#negative-host-scope')!
+            .querySelector('#negative-host')!
+            .shadowRoot!.querySelector('#deep-negative-focus-svg') as SVGElement
+        ).focus();
+      });
+      expect(await active()).toBe('deep-negative-focus-svg');
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('after-negative');
+
+      await page.evaluate(() => {
+        (
+          document
+            .querySelector('#negative-host-scope')!
+            .querySelector('#negative-host')!
+            .shadowRoot!.querySelector('#deep-negative-focus-svg') as SVGElement
+        ).focus();
+      });
       await page.keyboard.press('Shift+Tab');
       expect(await active()).toBe('before-negative');
       expect(errors).toEqual([]);

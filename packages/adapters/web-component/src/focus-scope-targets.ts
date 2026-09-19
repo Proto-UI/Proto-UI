@@ -144,12 +144,12 @@ export function sampleWebComponentScopeTargets(
         // programmatic deep focus still has a real position in the composed
         // order. Preserve a non-target marker at the host position so Focus
         // can continue immediately before/after it in either direction.
-        if (
-          activeTarget &&
-          isHtmlElement(activeTarget) &&
-          isInsideOwnedShadowScope(el, activeTarget)
-        )
-          entries.push({ element: activeTarget, target: false, priority: 0 });
+        if (activeTarget && isInsideOwnedShadowScope(el, activeTarget))
+          entries.push({
+            element: activeTarget as unknown as HTMLElement,
+            target: false,
+            priority: 0,
+          });
         return;
       }
       children = [];

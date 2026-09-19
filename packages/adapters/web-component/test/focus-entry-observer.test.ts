@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { definePrototype } from '@proto.ui/core';
 import { asFocusEntry } from '@proto.ui/hooks';
+import { FOCUS_SET_ENTRY_FOCUSABLE_CAP } from '@proto.ui/module-focus';
 import { AdaptToWebComponent } from '../src';
+import { createWebComponentModules } from '../src/runtime/modules';
 
 // Happy DOM delivers MutationObserver through its task manager, not solely
 // Promise microtasks. Await completion instead of a platform-dependent delay.
@@ -102,6 +104,64 @@ describe('WC live focus-entry resolver inputs', () => {
     await settle();
 
     expect(whenDefined.mock.calls.filter(([name]) => name === unresolved)).toHaveLength(1);
+  });
+
+  it('keeps a replacement entry observer after a superseded upgrade continuation resolves', async () => {
+    const unresolved = `entry-superseded-${++serial}`;
+    const original = customElements.whenDefined.bind(customElements);
+    let resolveUpgrade!: (ctor: CustomElementConstructor) => void;
+    vi.spyOn(customElements, 'whenDefined').mockImplementation((name) =>
+      name === unresolved
+        ? new Promise<CustomElementConstructor>((resolve) => {
+            resolveUpgrade = resolve;
+          })
+        : original(name)
+    );
+    const owner = document.createElement('div');
+    const modules = createWebComponentModules({
+      el: owner,
+      instanceToken: {} as never,
+      router: { rootTarget: owner, globalTarget: window },
+      rawPropsSource: { get: () => ({}), subscribe: () => () => {} },
+      effectsPort: {} as never,
+      textControlTarget: null,
+      imageViewTarget: null,
+      getMeta: () => undefined,
+      setExposes() {},
+      runInCallbackScope: (fn) => fn(),
+      isViewReady: () => true,
+      subscribeTargetReady: () => () => {},
+      retryTargetReady() {},
+    });
+    const setEntry = modules.focus!({ prototypeName: 'entry-observer-generation-test' }).find(
+      ([key]) => key === FOCUS_SET_ENTRY_FOCUSABLE_CAP
+    )![1] as (
+      target: HTMLElement,
+      config: { strategy: 'descendant-first'; fallback: 'self' },
+      enabled: boolean
+    ) => void;
+    const config = { strategy: 'descendant-first', fallback: 'self' } as const;
+    const targetA = document.createElement('div');
+    targetA.append(document.createElement(unresolved));
+    const targetB = document.createElement('div');
+    document.body.append(targetA, targetB);
+    try {
+      setEntry(targetA, config, true);
+      expect(targetA.tabIndex).toBe(0);
+
+      setEntry(targetB, config, true);
+      expect(targetB.tabIndex).toBe(0);
+      resolveUpgrade(class extends HTMLElement {});
+      await settle();
+
+      targetB.append(document.createElement('button'));
+      await settle();
+      expect(targetB.hasAttribute('tabindex')).toBe(false);
+    } finally {
+      setEntry(targetB, config, false);
+      targetA.remove();
+      targetB.remove();
+    }
   });
 
   it('resamples when an already-upgraded descendant attaches a late open root', async () => {
@@ -220,18 +280,42 @@ describe('WC live focus-entry resolver inputs', () => {
       CSSStyleDeclaration.prototype,
       'cssText'
     );
+    const originalDocumentSheets = Object.getOwnPropertyDescriptor(
+      Document.prototype,
+      'adoptedStyleSheets'
+    );
+    const originalShadowSheets = Object.getOwnPropertyDescriptor(
+      ShadowRoot.prototype,
+      'adoptedStyleSheets'
+    );
     const host = panel(true);
     await settle();
     expect(CSSStyleSheet.prototype.insertRule).not.toBe(original);
     expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')?.set).not.toBe(
       originalCssText?.set
     );
+    if (originalDocumentSheets?.set)
+      expect(
+        Object.getOwnPropertyDescriptor(Document.prototype, 'adoptedStyleSheets')?.set
+      ).not.toBe(originalDocumentSheets.set);
+    if (originalShadowSheets?.set)
+      expect(
+        Object.getOwnPropertyDescriptor(ShadowRoot.prototype, 'adoptedStyleSheets')?.set
+      ).not.toBe(originalShadowSheets.set);
     host.remove();
     await settle();
     expect(CSSStyleSheet.prototype.insertRule).toBe(original);
     expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')).toEqual(
       originalCssText
     );
+    if (originalDocumentSheets?.set)
+      expect(Object.getOwnPropertyDescriptor(Document.prototype, 'adoptedStyleSheets')).toEqual(
+        originalDocumentSheets
+      );
+    if (originalShadowSheets?.set)
+      expect(Object.getOwnPropertyDescriptor(ShadowRoot.prototype, 'adoptedStyleSheets')).toEqual(
+        originalShadowSheets
+      );
   });
 
   it('never clobbers a third-party stylesheet patch installed after ours', async () => {
