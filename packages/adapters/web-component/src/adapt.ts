@@ -211,7 +211,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
-      this._shadowOwnerShell = shadow ? createShadowOwnerShell(this._root as ShadowRoot) : null;
+      this._shadowOwnerShell = split ? createShadowOwnerShell(this._root as ShadowRoot) : null;
       if (textControl && imageView) {
         throw new Error(
           '[WC Adapter] text-control and image-view declarations cannot share a root.'
@@ -439,6 +439,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         if (shadow) {
           if (splitResources) splitResources.surface.clearRenderedChildren();
           else this._shadowOwnerShell?.clearRenderedChildren();
+          if (!this._shadowOwnerShell) thisRoot.replaceChildren();
           clearSlotProjector();
           return;
         }

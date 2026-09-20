@@ -163,9 +163,14 @@ describe('private Shadow split effects', () => {
       effects.queueStyle(effect(['bg-primary']));
       effects.requestFlush();
       const before = [host.outerHTML, surface.outerHTML];
-      expect(() => effects.queueStyle(effect(['bg-black', token], 'runtime'))).toThrow(
-        /pilot.*runtime token/
-      );
+      let diagnostic = '';
+      try {
+        effects.queueStyle(effect(['bg-black', token], 'runtime'));
+      } catch (error) {
+        diagnostic = String(error);
+      }
+      expect(diagnostic).toMatch(/pilot.*runtime token/);
+      expect(diagnostic).toMatch(/corrective direction: .+/);
       expect([host.outerHTML, surface.outerHTML]).toEqual(before);
       effects.requestFlush();
       expect([host.outerHTML, surface.outerHTML]).toEqual(before);
@@ -188,14 +193,21 @@ describe('private Shadow split effects', () => {
     effects.requestFlush();
     const before = [host.outerHTML, surface.outerHTML];
     const lowered = lowerRootStyleTokens(['p-4'], 'dark');
-    expect(() =>
+    let diagnostic = '';
+    try {
       effects.queueStyle(
         createRootStyleEffect([
           ...lowered.entries,
           resolveRootStyleEntry('extension-token', 'setup'),
         ])
-      )
-    ).toThrow(/extension-token.*missing token/);
+      );
+    } catch (error) {
+      diagnostic = String(error);
+    }
+    expect(diagnostic).toMatch(/extension-token.*missing token/);
+    expect(diagnostic).toMatch(
+      /corrective direction: include the exact token selector in the Shadow style artifact or remove the token/
+    );
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.dispose();

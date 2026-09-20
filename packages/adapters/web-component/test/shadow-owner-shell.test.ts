@@ -32,7 +32,7 @@ describe('adapter-web-component Shadow owner shell', () => {
     expect(second.isConnected).toBe(false);
   });
 
-  it('preserves non-view ShadowRoot nodes across repeatable view epochs', async () => {
+  it('keeps direct shadow replacement semantics across update, detach, and remount', async () => {
     let run!: RunHandle<any>;
     const proto = definePrototype({
       name: 'x-shadow-owner-view-epochs',
@@ -52,6 +52,7 @@ describe('adapter-web-component Shadow owner shell', () => {
     AdaptToWebComponent(proto, { shadow: true, schedule: (task) => task() });
     const element = document.createElement(proto.name) as HTMLElement & {
       getExposes(): { view: { show(): void; hide(): void } };
+      update(): void;
     };
     document.body.appendChild(element);
     const root = element.shadowRoot;
@@ -60,19 +61,25 @@ describe('adapter-web-component Shadow owner shell', () => {
     expect(element.getAttribute('data-pui-style')).toBe('bg-owner-shell-test');
     expect(root.querySelector('div')?.hasAttribute('data-pui-style')).toBe(false);
 
-    const ownerStyle = document.createElement('style');
-    ownerStyle.setAttribute('data-owner-resource', '');
-    root.prepend(ownerStyle);
-
-    element.getExposes().view.hide();
+    const injectedBeforeUpdate = document.createElement('style');
+    injectedBeforeUpdate.setAttribute('data-untracked-update', '');
+    root.prepend(injectedBeforeUpdate);
+    element.update();
     await flushReconciliation();
-    expect(root.querySelector('div')).toBeNull();
-    expect(root.querySelector('[data-owner-resource]')).toBe(ownerStyle);
+    expect(injectedBeforeUpdate.isConnected).toBe(false);
+    expect(root.innerHTML).toBe('<div>epoch</div>');
 
-    element.getExposes().view.show();
+    const injectedBeforeDetach = document.createElement('style');
+    injectedBeforeDetach.setAttribute('data-untracked-detach', '');
+    root.prepend(injectedBeforeDetach);
+    element.remove();
     await flushReconciliation();
-    expect(root.querySelector('div')?.textContent).toBe('epoch');
-    expect(root.querySelector('[data-owner-resource]')).toBe(ownerStyle);
+    expect(root.childNodes).toHaveLength(0);
+    expect(injectedBeforeDetach.isConnected).toBe(false);
+
+    document.body.appendChild(element);
+    await flushReconciliation();
+    expect(root.innerHTML).toBe('<div>epoch</div>');
 
     element.remove();
     await flushReconciliation();

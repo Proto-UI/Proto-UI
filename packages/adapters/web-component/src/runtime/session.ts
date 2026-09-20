@@ -176,7 +176,9 @@ function commitWebComponentChildren(args: {
   if (shadow) {
     const staging = root.ownerDocument.createDocumentFragment();
     commitChildren(staging, children, { mode: 'shadow' });
-    shadowOwnerShell?.replaceRenderedChildren(Array.from(staging.childNodes));
+    const renderedChildren = Array.from(staging.childNodes);
+    if (shadowOwnerShell) shadowOwnerShell.replaceRenderedChildren(renderedChildren);
+    else root.replaceChildren(...renderedChildren);
     clearSlotProjector();
     eventGate.enable();
     return;

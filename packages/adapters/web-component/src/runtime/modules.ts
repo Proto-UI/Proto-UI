@@ -313,21 +313,48 @@ function collectEntryMediaQueries(
   roots: Iterable<Document | ShadowRoot>
 ) {
   const queries = new Set<string>();
-  const rules: CSSRule[] = [];
-  for (const root of roots) {
-    for (const sheet of [...(root.styleSheets ?? []), ...(root.adoptedStyleSheets ?? [])]) {
-      if (sheet.media?.mediaText) queries.add(sheet.media.mediaText);
+  const visitedSheets = new Set<CSSStyleSheet>();
+  const visitedRules = new Set<CSSRule>();
+  const collectMedia = (media: MediaList | null | undefined) => {
+    try {
+      if (media?.mediaText) queries.add(media.mediaText);
+    } catch {
+      // An opaque imported sheet can still expose its import rule's media.
+    }
+  };
+  const visitRule = (rule: CSSRule) => {
+    if (visitedRules.has(rule)) return;
+    visitedRules.add(rule);
+    if (rule.type === 3 || rule.type === 4)
+      collectMedia((rule as CSSImportRule | CSSMediaRule).media);
+    if (rule.type === 3) {
       try {
-        rules.push(...sheet.cssRules);
+        const imported = (rule as CSSImportRule).styleSheet;
+        if (imported) visitSheet(imported);
       } catch {
-        // Cross-origin sheets remain opaque; their owner media still applies.
+        // Cross-origin imports remain opaque; their rule media still applies.
       }
     }
-  }
-  for (const rule of rules) {
-    if (rule.type === 4) queries.add((rule as CSSMediaRule).media.mediaText);
-    if ('cssRules' in rule) rules.push(...(rule as CSSGroupingRule).cssRules);
-  }
+    try {
+      if ('cssRules' in rule)
+        for (const nested of (rule as CSSGroupingRule).cssRules) visitRule(nested);
+    } catch {
+      // Treat non-standard or opaque grouping rules as leaf rules.
+    }
+  };
+  const visitSheet = (sheet: CSSStyleSheet) => {
+    if (visitedSheets.has(sheet)) return;
+    visitedSheets.add(sheet);
+    collectMedia(sheet.media);
+    try {
+      for (const rule of sheet.cssRules) visitRule(rule);
+    } catch {
+      // Cross-origin sheets remain opaque; their owner media still applies.
+    }
+  };
+  for (const root of roots)
+    for (const sheet of [...(root.styleSheets ?? []), ...(root.adoptedStyleSheets ?? [])])
+      visitSheet(sheet);
   return [...queries].map((query) => view.matchMedia(query));
 }
 
