@@ -2923,7 +2923,7 @@ describe('Shadow closeout native boundaries', () => {
         document.body.append(host);
         await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         const initial = host.getAttribute('tabindex');
-        (host.querySelector('#checked-selector-toggle') as HTMLInputElement).checked = true;
+        (host.querySelector('#checked-selector-toggle') as HTMLInputElement).click();
         await new Promise<void>((resolve) => queueMicrotask(resolve));
         return {
           initial,
