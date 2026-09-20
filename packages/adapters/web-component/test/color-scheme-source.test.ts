@@ -40,4 +40,22 @@ describe('default WC color-scheme source', () => {
     expect(healthy).toHaveBeenCalledOnce();
     expect(() => microtasks.shift()!()).toThrow(failure);
   });
+
+  it('refreshes the effective baseline when consumers resubscribe', () => {
+    let scheme = 'light';
+    const source = createRebindableColorSchemeSource(
+      () => scheme,
+      document.implementation.createHTMLDocument('source')
+    );
+    const listener = vi.fn();
+    const unsubscribe = source.subscribe(listener);
+    unsubscribe();
+
+    scheme = 'dark';
+    source.subscribe(listener);
+    scheme = 'light';
+    source.adoptDocument(document.implementation.createHTMLDocument('destination'));
+
+    expect(listener).toHaveBeenCalledOnce();
+  });
 });

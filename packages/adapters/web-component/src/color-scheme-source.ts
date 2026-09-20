@@ -18,7 +18,10 @@ export function createRebindableColorSchemeSource(getter: (key: string) => unkno
     getter,
     subscribe(listener: () => void) {
       listeners.add(listener);
-      if (listeners.size === 1) unsubscribe = source?.subscribe(notify);
+      if (listeners.size === 1) {
+        effective = getter('colorScheme');
+        unsubscribe = source?.subscribe(notify);
+      }
       return () => {
         listeners.delete(listener);
         if (!listeners.size) unsubscribe?.();
