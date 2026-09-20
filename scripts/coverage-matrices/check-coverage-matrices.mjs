@@ -840,7 +840,7 @@ function rowRecord(headers, cells) {
 }
 
 function includesIssue(value) {
-  return /(^|\D)#\d+\b/.test(value);
+  return /(^|\D)#[1-9]\d*\b/.test(value);
 }
 function issueBindings(value) {
   return [...value.matchAll(/#([1-9]\d*)\b/gu)].map((match) => {
@@ -1537,7 +1537,7 @@ function astContainsInteractiveRuntime(content) {
           return;
         }
         if (
-          /^(?:blur|close|focus|hidePopover|scrollBy|scrollIntoView|scrollTo|select|setRangeText|setSelectionRange|showModal|showPopover|togglePopover)$/u.test(
+          /^(?:blur|click|close|dispatchEvent|focus|hidePopover|scrollBy|scrollIntoView|scrollTo|select|setRangeText|setSelectionRange|showModal|showPopover|togglePopover)$/u.test(
             method
           ) &&
           isDomReceiverExpression(calledMember.receiver, sourceFile, receiverBindings, node)
@@ -2158,7 +2158,8 @@ function countHarnessExportedUserFacingSurfaces(content, absolutePath) {
         exportedNames.add(statement.name.text);
       } else if (
         !statement.name &&
-        statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword)
+        statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword) &&
+        containsRenderedSurface(statement)
       ) {
         exportedNames.add('default');
       }
@@ -2525,6 +2526,12 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
     const importClause = statement.importClause;
     if (statement.moduleSpecifier.text !== 'react') {
       const targetPath = resolveRelativeModule(statement.moduleSpecifier.text);
+      if (targetPath && importClause?.name) {
+        importedCallables.set(importClause.name.text, {
+          importedName: 'default',
+          targetPath,
+        });
+      }
       if (
         targetPath &&
         importClause?.namedBindings &&
@@ -2869,7 +2876,57 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
     const targetContent = fs.readFileSync(imported.targetPath, 'utf8');
     const probeName = '__protoUiImportedActionProbe';
     const createElementName = '__protoUiCreateElementProbe';
-    const probedContent = `${targetContent}\nimport { createElement as ${createElementName} } from 'react';\nexport function ${probeName}() { ${imported.importedName}(); return ${createElementName}('section'); }\n`;
+    let callableName = imported.importedName;
+    let callableProbe = '';
+    if (imported.importedName === 'default') {
+      const defaultCallableName = '__protoUiDefaultCallableProbe';
+      const targetSourceFile = ts.createSourceFile(
+        imported.targetPath,
+        targetContent,
+        ts.ScriptTarget.Latest,
+        true,
+        /\.jsx$/i.test(imported.targetPath)
+          ? ts.ScriptKind.JSX
+          : /\.js$/i.test(imported.targetPath)
+            ? ts.ScriptKind.JS
+            : /\.ts$/i.test(imported.targetPath)
+              ? ts.ScriptKind.TS
+              : ts.ScriptKind.TSX
+      );
+      for (const statement of targetSourceFile.statements) {
+        const isDefault = statement.modifiers?.some(
+          (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
+        );
+        if (isDefault && ts.isFunctionDeclaration(statement)) {
+          const expression = statement
+            .getText(targetSourceFile)
+            .replace(/^export\s+default\s+/u, '');
+          callableProbe = `const ${defaultCallableName} = ${expression};`;
+          break;
+        }
+        if (ts.isExportAssignment(statement) && !statement.isExportEquals) {
+          callableProbe = `const ${defaultCallableName} = ${statement.expression.getText(targetSourceFile)};`;
+          break;
+        }
+        if (
+          ts.isExportDeclaration(statement) &&
+          !statement.moduleSpecifier &&
+          statement.exportClause &&
+          ts.isNamedExports(statement.exportClause)
+        ) {
+          const defaultExport = statement.exportClause.elements.find(
+            (element) => element.name.text === 'default'
+          );
+          if (defaultExport) {
+            callableProbe = `const ${defaultCallableName} = ${(defaultExport.propertyName ?? defaultExport.name).text};`;
+            break;
+          }
+        }
+      }
+      if (!callableProbe) return false;
+      callableName = defaultCallableName;
+    }
+    const probedContent = `${targetContent}\n${callableProbe}\nimport { createElement as ${createElementName} } from 'react';\nexport function ${probeName}() { ${callableName}(); return ${createElementName}('section'); }\n`;
     return astContainsHarnessRenderOrEffectAction(
       probedContent,
       imported.targetPath,
@@ -3375,6 +3432,7 @@ function isExecutableScriptType(type) {
   );
 }
 const DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER = '<dynamic executable script src>';
+const DYNAMIC_STYLESHEET_LINK_SPECIFIER = '<dynamic stylesheet href>';
 
 function externalScriptModuleSpecifiers(content) {
   return jsxOpeningTagCandidates(content)
@@ -3388,6 +3446,25 @@ function externalScriptModuleSpecifiers(content) {
       const specifier = staticMarkupAttribute(openingTag, 'src');
       if (!specifier || /[{}\x60]/u.test(specifier)) {
         return [DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER];
+      }
+      return [specifier];
+    });
+}
+function stylesheetLinkSpecifiers(content) {
+  return jsxOpeningTagCandidates(content)
+    .filter((openingTag) => /^<link\b/iu.test(openingTag))
+    .filter((openingTag) => {
+      const rel = staticMarkupAttribute(openingTag, 'rel');
+      return rel?.split(/\s+/u).some((token) => token.toLowerCase() === 'stylesheet');
+    })
+    .flatMap((openingTag) => {
+      if (!/\bhref\s*=/iu.test(openingTag)) return [];
+      if (/(?:^|\s)(?::href|v-bind:href)\s*=/iu.test(openingTag)) {
+        return [DYNAMIC_STYLESHEET_LINK_SPECIFIER];
+      }
+      const specifier = staticMarkupAttribute(openingTag, 'href');
+      if (!specifier || /[{}\x60]/u.test(specifier)) {
+        return [DYNAMIC_STYLESHEET_LINK_SPECIFIER];
       }
       return [specifier];
     });
@@ -3526,12 +3603,20 @@ function embeddedStyleSegments(content) {
 
 function externalStylesheetSpecifiersForWebsiteSource(absolutePath) {
   const content = fs.readFileSync(absolutePath, 'utf8');
-  const specifiers = /\.(?:css|less|s[ac]ss)$/i.test(absolutePath)
+  const styleSpecifiers = /\.(?:css|less|s[ac]ss)$/i.test(absolutePath)
     ? styleModuleSpecifiers(content)
     : /\.(?:astro|vue|svelte)$/i.test(absolutePath)
       ? embeddedStyleSegments(content).flatMap(styleModuleSpecifiers)
       : [];
-  return specifiers.filter((specifier) => /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(specifier));
+  const markup = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
+  const linkSpecifiers = /\.(?:html?|astro|mdx?|vue|svelte)$/i.test(absolutePath)
+    ? stylesheetLinkSpecifiers(markup)
+    : [];
+  return [...styleSpecifiers, ...linkSpecifiers].filter(
+    (specifier) =>
+      specifier === DYNAMIC_STYLESHEET_LINK_SPECIFIER ||
+      /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(specifier)
+  );
 }
 
 function moduleSpecifiersForWebsiteSource(absolutePath) {
@@ -4113,7 +4198,10 @@ function discoverWebsiteRawImports(rootDir) {
       rawImports.push({
         sourcePath,
         specifier,
-        category: 'external-stylesheet',
+        category:
+          specifier === DYNAMIC_STYLESHEET_LINK_SPECIFIER
+            ? 'dynamic-stylesheet-link'
+            : 'external-stylesheet',
         resolvedPath: null,
       });
     }
@@ -4208,6 +4296,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
       issues.push(
         `${relativePath}: external stylesheet \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
+      );
+      continue;
+    }
+    if (rawImport.category === 'dynamic-stylesheet-link') {
+      issues.push(
+        `${relativePath}: dynamic stylesheet source in \`${rawImport.sourcePath}\` must be static for consumer-wall review`
       );
       continue;
     }
@@ -4743,6 +4837,15 @@ function evidenceCommitMetadata(
         );
       }
     }
+    const mergeRevisionIsCommit =
+      !mergeRevision ||
+      (/^[0-9a-f]{40}$/iu.test(mergeRevision) &&
+        gitOutput(rootDir, ['cat-file', '-t', mergeRevision]) === 'commit');
+    if (mergeRevision && !mergeRevisionIsCommit) {
+      issues.push(
+        `${context}: promotion merge revision \`${mergeRevision}\` must identify a commit object directly`
+      );
+    }
     const checkoutRevision = gitOutput(rootDir, ['rev-parse', 'HEAD']);
     if (
       checkoutRevision &&
@@ -4768,10 +4871,29 @@ function evidenceCommitMetadata(
         );
       }
     }
-    if (
-      gitOutput(rootDir, ['cat-file', '-t', baseRevision]) === 'commit' &&
-      gitOutput(rootDir, ['cat-file', '-t', headRevision]) === 'commit'
-    ) {
+    const baseRevisionIsCommit = gitOutput(rootDir, ['cat-file', '-t', baseRevision]) === 'commit';
+    const headRevisionIsCommit = gitOutput(rootDir, ['cat-file', '-t', headRevision]) === 'commit';
+    if (mergeRevision && mergeRevisionIsCommit && baseRevisionIsCommit && headRevisionIsCommit) {
+      for (const [role, revision] of [
+        ['reviewed base', baseRevision],
+        ['exact head', headRevision],
+      ]) {
+        const containedByMerge = spawnSync(
+          'git',
+          ['merge-base', '--is-ancestor', revision, mergeRevision],
+          { cwd: rootDir, stdio: 'ignore' }
+        );
+        if (containedByMerge.status === 1) {
+          issues.push(
+            `${context}: ${role} \`${revision}\` must be an ancestor of merge revision \`${mergeRevision}\``
+          );
+        } else if (containedByMerge.status !== 0) {
+          issues.push(
+            `${context}: promotion history proof is unavailable between ${role} and merge revision`
+          );
+        }
+      }
+    } else if (!mergeRevision && baseRevisionIsCommit && headRevisionIsCommit) {
       const baseToHead = spawnSync(
         'git',
         ['merge-base', '--is-ancestor', baseRevision, headRevision],

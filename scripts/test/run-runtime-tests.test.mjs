@@ -13,6 +13,13 @@ describe('runtime test plan', () => {
     assert.doesNotMatch(runVitest, /shell:\s*process\.platform/u);
   });
 
+  it('keeps the direct Node and Astro child out of the Windows command shell', () => {
+    const source = fs.readFileSync(new URL('./run-runtime-tests.mjs', import.meta.url), 'utf8');
+    const startServer = source.match(/async function startServer[\s\S]*?\n\}\n/u)?.[0] ?? '';
+    assert.match(startServer, /spawn\(\s*process\.execPath,\s*\[astroCli,[\s\S]*?shell: false/u);
+    assert.doesNotMatch(startServer, /shell:\s*process\.platform/u);
+  });
+
   it('launches the Windows Corepack shim through a shell', () => {
     assert.deepEqual(corepackInvocation('win32'), {
       executable: 'corepack.cmd',

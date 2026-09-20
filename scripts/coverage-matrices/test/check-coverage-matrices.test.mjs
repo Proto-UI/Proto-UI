@@ -7334,6 +7334,141 @@ test('promotion history accepts a checked-out merge revision distinct from the e
   );
 });
 
+test('promotion history accepts divergent base and head revisions through a two-parent merge', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const evidenceRevision = commitFixtureRoot(root);
+
+  execFileSync('git', ['switch', '--quiet', '-c', 'feature'], { cwd: root });
+  writeSelfHostedPromotion(root, evidenceRevision, { websiteBindings });
+  execFileSync('git', ['add', '.'], { cwd: root });
+  execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit',
+      '--quiet',
+      '--no-gpg-sign',
+      '-m',
+      'exact head',
+    ],
+    { cwd: root }
+  );
+  const headRevision = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim();
+
+  const evidenceTree = execFileSync('git', ['rev-parse', `${evidenceRevision}^{tree}`], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim();
+  const baseRevision = execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit-tree',
+      evidenceTree,
+      '-p',
+      evidenceRevision,
+      '-m',
+      'advance base',
+    ],
+    { cwd: root, encoding: 'utf8' }
+  ).trim();
+  const headTree = execFileSync('git', ['rev-parse', `${headRevision}^{tree}`], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim();
+  const mergeRevision = execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit-tree',
+      headTree,
+      '-p',
+      headRevision,
+      '-p',
+      baseRevision,
+      '-m',
+      'synthetic merge',
+    ],
+    { cwd: root, encoding: 'utf8' }
+  ).trim();
+  execFileSync('git', ['update-ref', 'HEAD', mergeRevision], { cwd: root });
+
+  assert.deepEqual(
+    validateCoverageMatrices({ rootDir: root, baseRevision, headRevision, mergeRevision }),
+    { matrixCount: 2 }
+  );
+});
+
+test('promotion history rejects invalid and incomplete merge revision proofs', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const baseRevision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, baseRevision, { websiteBindings });
+  execFileSync('git', ['add', '.'], { cwd: root });
+  execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit',
+      '--quiet',
+      '--no-gpg-sign',
+      '-m',
+      'exact head',
+    ],
+    { cwd: root }
+  );
+  const headRevision = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim();
+  const blobRevision = execFileSync('git', ['hash-object', '-w', '--stdin'], {
+    cwd: root,
+    encoding: 'utf8',
+    input: 'not a commit\n',
+  }).trim();
+
+  assert.match(
+    validationMessage(root, { baseRevision, headRevision, mergeRevision: blobRevision }),
+    new RegExp(
+      'promotion merge revision `' + blobRevision + '` must identify a commit object directly'
+    )
+  );
+  assert.match(
+    validationMessage(root, { baseRevision, headRevision, mergeRevision: baseRevision }),
+    new RegExp(
+      'exact head `' +
+        headRevision +
+        '` must be an ancestor of merge revision `' +
+        baseRevision +
+        '`'
+    )
+  );
+});
+
 test('resolves useCallback-returned functions that execute during render', () => {
   const root = createRoot();
   const relativePath = 'apps/agent-harness/src/run/CallbackAction.tsx';
@@ -7620,6 +7755,45 @@ test('classifies DOM selection methods as governed interaction state', () => {
   }
 });
 
+test('classifies programmatic DOM activation as governed interaction state', () => {
+  for (const [name, expression] of [
+    [
+      'Click',
+      "const buttonRef = { current: document.querySelector('button') }; buttonRef.current?.click()",
+    ],
+    [
+      'DispatchEvent',
+      "const button = document.querySelector('button'); button.dispatchEvent(new Event('click'))",
+    ],
+  ]) {
+    for (const [relativePath, matrixOverrides, expected] of [
+      [
+        `apps/www/src/components/${name}.ts`,
+        [{}, {}],
+        new RegExp(
+          'interactive website source `apps/www/src/components/' + name + '\\.ts` is not bound'
+        ),
+      ],
+      [
+        `apps/agent-harness/src/run/${name}.tsx`,
+        [{}, { Path: `\`apps/agent-harness/src/run/${name}.tsx\`` }],
+        new RegExp(
+          'Harness source `apps/agent-harness/src/run/' +
+            name +
+            '\\.tsx` contains a forbidden interaction'
+        ),
+      ],
+    ]) {
+      const root = createRoot();
+      const absolutePath = path.join(root, relativePath);
+      fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+      fs.writeFileSync(absolutePath, expression, 'utf8');
+      writeValidMatrices(root, ...matrixOverrides);
+      assert.match(validationMessage(root), expected);
+    }
+  }
+});
+
 test('follows action callbacks through executed helpers and local effect wrappers', () => {
   for (const [name, helper, invocation] of [
     [
@@ -7708,4 +7882,147 @@ test('recognizes object-form Vue event directives', () => {
     validationMessage(root),
     /interactive website source `apps\/www\/src\/components\/ObjectEvents\.vue` is not bound/
   );
+});
+
+test('rejects external and dynamic stylesheet links in Website markup', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/src/components/ExternalLink.astro',
+      '<link rel="stylesheet" href="https://cdn.example/astro.css" />',
+      /external stylesheet `https:\/\/cdn\.example\/astro\.css`/,
+    ],
+    [
+      'apps/www/public/external-link.html',
+      '<link rel="alternate stylesheet" href="https://cdn.example/html.css">',
+      /external stylesheet `https:\/\/cdn\.example\/html\.css`/,
+    ],
+    [
+      'apps/www/src/content/docs/external-link.mdx',
+      '<link rel="stylesheet" href="https://cdn.example/mdx.css" />',
+      /external stylesheet `https:\/\/cdn\.example\/mdx\.css`/,
+    ],
+    [
+      'apps/www/src/components/DynamicLink.astro',
+      '<link rel="stylesheet" href={themeUrl} />',
+      /dynamic stylesheet source/,
+    ],
+    [
+      'apps/www/public/dynamic-link.html',
+      '<link rel="stylesheet" href="{{ themeUrl }}">',
+      /dynamic stylesheet source/,
+    ],
+    [
+      'apps/www/src/content/docs/dynamic-link.mdx',
+      '<link rel="stylesheet" href={themeUrl} />',
+      /dynamic stylesheet source/,
+    ],
+    [
+      'apps/www/src/components/BoundLink.vue',
+      '<template><link rel="stylesheet" :href="themeUrl" /></template>',
+      /dynamic stylesheet source/,
+    ],
+    [
+      'apps/www/src/components/BoundLonghandLink.vue',
+      '<template><link rel="stylesheet" v-bind:href="themeUrl" /></template>',
+      /dynamic stylesheet source/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('follows default-imported local action wrappers', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/DefaultWrapper.tsx';
+  const absolutePath = path.join(root, relativePath);
+  const wrapperPath = path.join(root, 'apps/agent-harness/src/run/run.ts');
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import run from './run'; export function Surface() { run(); return <section />; }",
+    'utf8'
+  );
+  fs.writeFileSync(
+    wrapperPath,
+    "import * as actions from './agent-actions'; export default function run() { actions.send(); }",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/DefaultWrapper\.tsx` contains a forbidden interaction/
+  );
+});
+
+test('requires rendered output before counting anonymous default Harness exports', () => {
+  for (const [name, source] of [
+    [
+      'AnonymousStore',
+      'export function Surface() { return <section />; } export default function () { return { ready: true }; }',
+    ],
+    [
+      'AnonymousService',
+      'export function Surface() { return <section />; } export default class { start() { return true; } }',
+    ],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  }
+
+  for (const [name, source] of [
+    [
+      'AnonymousFunctionSurface',
+      'export function Surface() { return <section />; } export default function () { return <aside />; }',
+    ],
+    [
+      'AnonymousClassSurface',
+      'export function Surface() { return <section />; } export default class { render() { return <aside />; } }',
+    ],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        'Harness user-facing source `apps/agent-harness/src/run/' +
+          name +
+          '\\.tsx` exposes 2 exported surfaces but has only 1 distinct matrix owner'
+      )
+    );
+  }
+});
+
+test('rejects zero-valued Issue references before governance lookup', () => {
+  const dependencyRoot = createRoot();
+  writeValidMatrices(dependencyRoot, {}, { 'Dependency and owner': '#0; owner: scroll domain' });
+  assert.match(
+    validationMessage(dependencyRoot),
+    /research rows must link a dependency as #<issue>/
+  );
+
+  const exemptionRoot = createRoot();
+  writeValidMatrices(exemptionRoot, {
+    ID: 'www.infrastructure.pagefind-engine',
+    'Target class': 'infrastructure-exempt',
+    State: 'infrastructure-exempt',
+    'Dependency and owner': 'owner: website team',
+    'Escape or exemption':
+      'Reason: static presentation remains outside semantic ownership; limit: stylesheet only',
+    'Re-review or removal issue': '#000 if the projection gains interaction',
+  });
+  assert.match(validationMessage(exemptionRoot), /must link re-review or removal as #<issue>/);
 });

@@ -128,7 +128,7 @@ async function startServer() {
     {
       cwd: appsWwwRoot,
       detached: process.platform !== 'win32',
-      shell: process.platform === 'win32',
+      shell: false,
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
