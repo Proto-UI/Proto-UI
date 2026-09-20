@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="light" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Button view lifetime</title>
+    <style>
+      @layer fixture, proto-ui;
+      @layer fixture {
+        body {
+          margin: 0;
+          background: var(--pui-background);
+          color: var(--pui-foreground);
+          font-family: system-ui, sans-serif;
+        }
+        main {
+          max-width: 720px;
+          margin: 40px auto;
+          padding: 24px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+        #app > section {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+        }
+        article {
+          min-height: 120px;
+          padding: 24px;
+          border: 1px solid var(--pui-border);
+        }
+        article p {
+          margin: 0 0 24px;
+        }
+        #entry,
+        #outside {
+          margin: 16px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="board">
+      <h1>Button view lifetime</h1>
+      <p id="description"></p>
+      <button id="entry">Before the buttons</button>
+      <div id="app"></div>
+      <button id="outside">Outside the buttons</button>
+    </main>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

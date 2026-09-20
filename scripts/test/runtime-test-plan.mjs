@@ -2,6 +2,7 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
   'apps/www/test/message-composition.browser.test.ts',
   'apps/www/test/color-scheme.browser.test.ts',
+  'apps/www/test/button-view-lifetime.browser.test.ts',
   'apps/workspace/test/lifecycle.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
