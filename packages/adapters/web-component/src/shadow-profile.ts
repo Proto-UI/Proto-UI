@@ -13,7 +13,7 @@ export function normalizeShadowProfile(value: unknown): boolean | WebComponentSh
   if (value === undefined || value === false) return false;
   if (value === true) return true;
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('[WC Adapter] invalid shadow profile value.');
+    throw new Error('shadow-profile:invalid');
   }
   const input = value as Record<string, unknown>;
   const fields = new Set(['mode', 'presentation', 'styleArtifact', 'colorSchemeSource']);
@@ -22,7 +22,7 @@ export function normalizeShadowProfile(value: unknown): boolean | WebComponentSh
     input.mode !== 'open' ||
     input.presentation !== 'split'
   ) {
-    throw new Error('[WC Adapter] invalid shadow split profile.');
+    throw new Error('shadow-split-profile:invalid');
   }
   const styleArtifact = validateShadowStyleArtifact(input.styleArtifact);
   const source = input.colorSchemeSource as ShadowColorSchemeSource | undefined;
@@ -30,7 +30,7 @@ export function normalizeShadowProfile(value: unknown): boolean | WebComponentSh
     source !== undefined &&
     (!source || typeof source.get !== 'function' || typeof source.subscribe !== 'function')
   ) {
-    throw new Error('[WC Adapter] shadow source requires get/subscribe.');
+    throw new Error('shadow-source:get/subscribe');
   }
   return Object.freeze({
     mode: 'open',

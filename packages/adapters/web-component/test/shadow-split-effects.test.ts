@@ -48,7 +48,7 @@ describe('private Shadow split effects', () => {
     const previous = [host.outerHTML, surface.outerHTML];
     expect(() =>
       effects.queueStyle(effect(['block', 'border-2', 'w-64', 'transition-all'], 'runtime'))
-    ).toThrow(/used-value rounding/);
+    ).toThrow(/used-value-rounding/);
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(previous);
     expect(() =>
@@ -58,7 +58,7 @@ describe('private Shadow split effects', () => {
           ...lowerRootStyleTokens(['border-2'], 'data-[checked]').entries,
         ])
       )
-    ).toThrow(/used-value rounding/);
+    ).toThrow(/used-value-rounding/);
     effects.queueStyle(effect(['block', 'border', 'w-64', 'transition-all']));
     effects.requestFlush();
     expect(host.getAttribute(ROOT)).toContain('w-64');
@@ -69,7 +69,7 @@ describe('private Shadow split effects', () => {
     const before = [host.outerHTML, surface.outerHTML];
     expect(() =>
       effects.queueStyle(effect(['block', 'border-b', 'border-2', 'transition-all']))
-    ).toThrow(/used-value rounding/);
+    ).toThrow(/used-value-rounding/);
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
@@ -94,7 +94,7 @@ describe('private Shadow split effects', () => {
     const { host, surface, effects } = setup(['block', 'px-2', 'border-b']);
     const before = [host.outerHTML, surface.outerHTML];
     expect(() => effects.queueStyle(effect(['block', 'px-2', 'border-b']))).toThrow(
-      /directional token "border-b"/
+      /directional:"border-b"/
     );
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.requestFlush();
@@ -122,7 +122,7 @@ describe('private Shadow split effects', () => {
         cssText: options.artifact.cssText.replace('--pui-split-motion-recipe: h1;', ''),
       },
     });
-    expect(() => old.queueStyle(effect(tokens))).toThrow(/H1 physical recipe is absent/);
+    expect(() => old.queueStyle(effect(tokens))).toThrow(/H1 recipe/);
     expect(host.hasAttribute(ROOT)).toBe(false);
     expect(surface.getAttribute('data-pui-style')).toBe('consumer');
     old.dispose();
@@ -149,9 +149,7 @@ describe('private Shadow split effects', () => {
     const before = [host.outerHTML, surface.outerHTML];
     const conditional = lowerRootStyleTokens(['inline-flex'], 'data-[open]');
 
-    expect(() => effects.queueStyle(conditional)).toThrow(
-      /inline-flex.*conditional composite recipe is not implemented/
-    );
+    expect(() => effects.queueStyle(conditional)).toThrow(/inline-flex.*conditional-composite/);
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
@@ -197,7 +195,7 @@ describe('private Shadow split effects', () => {
           resolveRootStyleEntry('extension-token', 'setup'),
         ])
       )
-    ).toThrow(/extension-token.*physical token is absent from the compiled split closure/);
+    ).toThrow(/extension-token.*missing token/);
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.dispose();
@@ -217,9 +215,7 @@ describe('private Shadow split effects', () => {
         ),
       },
     });
-    expect(() => commentOnlyRecipe.queueStyle(effect(['transition-all']))).toThrow(
-      /H1 physical recipe/
-    );
+    expect(() => commentOnlyRecipe.queueStyle(effect(['transition-all']))).toThrow(/H1 recipe/);
     commentOnlyRecipe.dispose();
 
     const receipt = `:host([${ROOT}~="bg-primary"])`;
@@ -233,9 +229,7 @@ describe('private Shadow split effects', () => {
         ),
       },
     });
-    expect(() => unrelatedReceipt.queueStyle(effect(['bg-primary']))).toThrow(
-      /physical token is absent/
-    );
+    expect(() => unrelatedReceipt.queueStyle(effect(['bg-primary']))).toThrow(/missing token/);
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     unrelatedReceipt.dispose();
   });
@@ -285,7 +279,7 @@ describe('private Shadow split effects', () => {
 
   it('enforces exclusive ownership and can rebind after disposal', () => {
     const { effects, options } = setup();
-    expect(() => createShadowSplitEffectsPort(options)).toThrow(/already owned/);
+    expect(() => createShadowSplitEffectsPort(options)).toThrow(/projection-owned/);
     effects.dispose();
     const next = createShadowSplitEffectsPort(options);
     expect(() => effects.queueStyle(effect([]))).toThrow(/disposed/);

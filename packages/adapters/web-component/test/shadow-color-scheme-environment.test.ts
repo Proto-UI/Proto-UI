@@ -265,7 +265,7 @@ describe('Shadow color-scheme environment owner', () => {
     const source = staticSource('sepia' as 'light');
 
     expect(() => createShadowColorSchemeEnvironmentOwner(host, source)).toThrow(
-      '[WC Adapter] invalid Shadow color-scheme source value: sepia.'
+      'shadow-color:value:sepia'
     );
     expect(host.hasAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe(false);
   });
@@ -278,7 +278,7 @@ describe('Shadow color-scheme environment owner', () => {
     };
 
     expect(() => createShadowColorSchemeEnvironmentOwner(host, source)).toThrow(
-      '[WC Adapter] invalid Shadow color-scheme source subscription.'
+      'shadow-color:subscription'
     );
     expect(host.hasAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe(false);
   });

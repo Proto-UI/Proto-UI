@@ -71,6 +71,7 @@ import { createShadowOwnerShell, type ShadowOwnerShell } from './shadow-owner-sh
 import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
 import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
 import { createShadowSplitEffectsPort } from './shadow-split-effects';
+import { stripShadowCssComments } from './shadow-style-artifact';
 import { createPortalConcealBarrier } from './portal-conceal';
 import { adoptWebComponentPortalProjections } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
@@ -93,7 +94,7 @@ export type {
 
 function assertKebabCase(tag: string) {
   if (!tag.includes('-') || tag.toLowerCase() !== tag) {
-    throw new Error(`[WC Adapter] custom element name must be kebab-case and contain '-': ${tag}`);
+    throw new Error(`invalid custom-element name:${tag}`);
   }
 }
 
@@ -139,14 +140,16 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   const split = typeof profile === 'object' ? profile : null;
   const shadow = profile !== false;
   if (split && imageView) {
-    throw new Error('[WC Adapter] Shadow split rejects image-view.');
+    throw new Error('shadow-split:image-view');
   }
   if (
     split &&
     textControl &&
-    !split.styleArtifact.cssText.includes('--pui-split-native-text-recipe: l1;')
+    !stripShadowCssComments(split.styleArtifact.cssText)
+      .replace(/\s/g, '')
+      .includes('--pui-split-native-text-recipe:l1;')
   ) {
-    throw new Error('[WC Adapter] missing native-text recipe.');
+    throw new Error('shadow-split:native-text-recipe');
   }
   const getProps = opt.getProps ?? (() => ({}) as Partial<Props>);
   const schedule = opt.schedule ?? ((task) => queueMicrotask(task));

@@ -1363,6 +1363,63 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects radio entries after in-entry checked and form-id attributes change', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-radio-attribute-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const checkedHost = new C();
+        checkedHost.id = 'checked-attribute-entry';
+        checkedHost.innerHTML = '<input id="checked-inside" type="radio" name="checked-group">';
+        const checkedOutside = document.createElement('input');
+        checkedOutside.type = 'radio';
+        checkedOutside.name = 'checked-group';
+        checkedOutside.checked = true;
+
+        const formHost = new C();
+        formHost.id = 'form-id-entry';
+        formHost.innerHTML = '<form id="entry-form"><input type="radio" name="form-group"></form>';
+        const formOutside = document.createElement('input');
+        formOutside.type = 'radio';
+        formOutside.name = 'form-group';
+        formOutside.setAttribute('form', 'entry-form');
+        formOutside.checked = true;
+        document.body.append(checkedHost, checkedOutside, formHost, formOutside);
+      });
+      await page.waitForFunction(
+        () =>
+          document.querySelector('#checked-attribute-entry')?.getAttribute('tabindex') === '0' &&
+          document.querySelector('#form-id-entry')?.getAttribute('tabindex') === '0'
+      );
+
+      await page.locator('#checked-inside').evaluate((radio) => radio.setAttribute('checked', ''));
+      await page.locator('#entry-form').evaluate((form) => {
+        form.id = 'renamed-entry-form';
+      });
+      await page.waitForFunction(
+        () =>
+          document.querySelector('#checked-attribute-entry')?.getAttribute('tabindex') === null &&
+          document.querySelector('#form-id-entry')?.getAttribute('tabindex') === null
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects entries after external fieldset and image disclosure changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -1825,6 +1882,108 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects descendant entry after arbitrary author media-query changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.emulateMedia({ contrast: 'no-preference' });
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content:
+          '@media (prefers-contrast: more) { #arbitrary-media-entry-button { visibility: hidden; } }',
+      });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-arbitrary-media-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.id = 'arbitrary-media-entry';
+        host.innerHTML = '<button id="arbitrary-media-entry-button">Button</button>';
+        document.body.append(host);
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#arbitrary-media-entry')?.getAttribute('tabindex') === null
+      );
+
+      await page.emulateMedia({ contrast: 'more' });
+      await page.waitForFunction(
+        () => document.querySelector('#arbitrary-media-entry')?.getAttribute('tabindex') === '0'
+      );
+
+      await page.emulateMedia({ contrast: 'no-preference' });
+      await page.waitForFunction(
+        () => document.querySelector('#arbitrary-media-entry')?.getAttribute('tabindex') === null
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry after an external relational-selector dependency changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: '.relational-wrapper:has(.flag) #relational-entry-button { visibility: hidden; }',
+      });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-relational-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relational-wrapper';
+        const inner = document.createElement('div');
+        const host = new C();
+        host.id = 'relational-entry';
+        host.innerHTML = '<button id="relational-entry-button">Button</button>';
+        inner.append(host);
+        wrapper.append(inner);
+        document.body.append(wrapper);
+        (window as any).__relationalWrapper = wrapper;
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#relational-entry')?.getAttribute('tabindex') === null
+      );
+
+      await page.evaluate(() => {
+        const flag = document.createElement('span');
+        flag.className = 'flag';
+        (window as any).__relationalWrapper.append(flag);
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#relational-entry')?.getAttribute('tabindex') === '0'
+      );
+
+      await page.evaluate(() => document.querySelector('.flag')?.remove());
+      await page.waitForFunction(
+        () => document.querySelector('#relational-entry')?.getAttribute('tabindex') === null
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects descendant entry when populated sheets are adopted into document and shadow roots', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -2184,7 +2343,7 @@ describe('Shadow closeout native boundaries', () => {
         },
         renderProtoShadowSplitStyleArtifact(['block', 'inline-flex', 'data-[open]:inline-flex'])
       );
-      expect(result.error).toMatch(/conditional composite recipe is not implemented/);
+      expect(result.error).toMatch(/conditional-composite/);
       expect(result.after).toEqual(result.before);
       expect(result.before).toEqual({
         root: 'block',

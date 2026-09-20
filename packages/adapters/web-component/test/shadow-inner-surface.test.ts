@@ -75,7 +75,7 @@ describe('adapter-web-component Shadow inner surface', () => {
     expect(surface.element.parentNode).toBeNull();
     expect(surface.element.childNodes).toHaveLength(0);
     expect(child.parentNode).toBeNull();
-    expect(() => surface.clearRenderedChildren()).toThrow(/disposed Shadow inner surface/);
+    expect(() => surface.clearRenderedChildren()).toThrow(/shadow-inner:disposed/);
 
     const nextSurface = createShadowInnerSurface(shell);
     expect(nextSurface).not.toBe(surface);

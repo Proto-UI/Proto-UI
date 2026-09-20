@@ -54,7 +54,7 @@ describe('bounded split intrinsic nowrap recipe', () => {
         kind === 'conditional'
           ? lowerRootStyleTokens(base, 'data-[ready]')
           : effect([...base, ...(kind === 'old' ? [] : [kind])]);
-      expect(() => port.queueStyle(next)).toThrow(/nowrap flex intrinsic recipe/);
+      expect(() => port.queueStyle(next)).toThrow(/intrinsic/);
       port.flushNow!();
       expect([host.outerHTML, surface.outerHTML]).toEqual(before);
       port.dispose();

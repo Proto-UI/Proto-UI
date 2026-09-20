@@ -83,7 +83,7 @@ export function createShadowColorSchemeEnvironmentOwner(
       syncFromSource(nextSource);
     });
     if (typeof subscription !== 'function') {
-      throw new Error('[WC Adapter] invalid Shadow color-scheme source subscription.');
+      throw new Error('shadow-color:subscription');
     }
     return subscription;
   };
@@ -155,7 +155,7 @@ export function createShadowColorSchemeEnvironmentOwner(
 function readColorScheme(get: () => WebColorScheme): WebColorScheme {
   const value = get();
   if (value === 'light' || value === 'dark') return value;
-  throw new Error(`[WC Adapter] invalid Shadow color-scheme source value: ${String(value)}.`);
+  throw new Error(`shadow-color:value:${String(value)}`);
 }
 
 function restoreMarker(host: HTMLElement, value: string | null): void {

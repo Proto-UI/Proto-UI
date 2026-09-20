@@ -52,9 +52,10 @@ export function createShadowSplitEffectsPort({
   artifact: ShadowStyleArtifactV1;
   prototypeName: string;
 }): EffectsPort & { dispose(): void } {
+  const invalid = (reason: string) => new Error(`[${prototypeName}]${reason}`);
   const nativeText = surface.localName === 'input' || surface.localName === 'textarea';
   if (!host.shadowRoot || surface.parentNode !== host.shadowRoot) {
-    throw new Error(`[WC split:${prototypeName}] surface is not a direct ShadowRoot child`);
+    throw invalid('surface-parent');
   }
   if (
     activeBindings.has(host) ||
@@ -62,7 +63,7 @@ export function createShadowSplitEffectsPort({
     surface.hasAttribute(SHADOW_SPLIT_SURFACE_ATTR) ||
     (nativeText && host.hasAttribute(NATIVE_TEXT_ATTR))
   ) {
-    throw new Error(`[WC split:${prototypeName}] projection already owned`);
+    throw invalid('projection-owned');
   }
   const cssText = stripShadowCssComments(artifact.cssText).replace(/\s/g, '');
   const ruleSelectors = cssText.match(/[^{}]+(?=\{)/g) ?? [];
@@ -70,12 +71,11 @@ export function createShadowSplitEffectsPort({
     `(?:^|[{}]):host\\(\\[${SHADOW_SPLIT_ROOT_STYLE_ATTR}\\]\\)\\{([^{}]*)\\}`
   ).exec(cssText)?.[1];
   if (!baseDeclarations) {
-    throw new Error(`[WC split:${prototypeName}] missing sizing recipe`);
+    throw invalid('sizing-recipe');
   }
   const hasRecipe = (name: string, version: string) =>
     baseDeclarations.includes(`--pui-split-${name}-recipe:${version};`);
-  if (nativeText && !hasRecipe('native-text', 'l1'))
-    throw new Error(`[WC split:${prototypeName}] missing native-text recipe`);
+  if (nativeText && !hasRecipe('native-text', 'l1')) throw invalid('native-text-recipe');
   activeBindings.add(host);
   const applier = createOwnedTwTokenApplier(surface);
   let latest: Projection | null = null;
@@ -85,15 +85,11 @@ export function createShadowSplitEffectsPort({
   let flushRequested = false;
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
-    throw new Error(
-      `[WC split:${prototypeName}] ${entry.origin} token ${JSON.stringify(entry.authorToken)}: ${reason}.`
-    );
+    throw invalid(`${entry.origin} token ${JSON.stringify(entry.authorToken)}:${reason}`);
   };
   const prepare = (handle: StyleHandle): Projection => {
     if (!('entries' in handle)) {
-      throw new Error(
-        `[WC split:${prototypeName}] requires Root effect provenance before selector lowering`
-      );
+      throw invalid('root-provenance');
     }
     const entries = mergeRootStyleEntries(readRootStyleEntries(handle, 'setup'));
     if (
@@ -104,19 +100,19 @@ export function createShadowSplitEffectsPort({
       )
     ) {
       const slide = entries.find((entry) => /^slide-(in|out)-/.test(entry.authorToken));
-      if (slide) fail(slide, 'K1 does not support slide animation operands');
+      if (slide) fail(slide, 'K1 slide');
     }
     const intrinsicTokens = ['inline-flex', 'flex-1', 'whitespace-nowrap'];
     if (intrinsicTokens.every((token) => entries.some((entry) => entry.authorToken === token))) {
       const flex = entries.find((entry) => entry.authorToken === 'flex-1')!;
-      if (!hasRecipe('intrinsic-nowrap', 'v1')) fail(flex, 'nowrap flex intrinsic recipe absent');
+      if (!hasRecipe('intrinsic-nowrap', 'v1')) fail(flex, 'intrinsic recipe');
       if (
         intrinsicTokens.some((token) =>
           entries.some((entry) => entry.authorToken === token && entry.token !== token)
         ) ||
         entries.some((entry) => /^(?:w-|min-w-|max-w-|size-)/.test(entry.authorToken))
       )
-        fail(flex, 'nowrap flex intrinsic recipe has unsupported operands');
+        fail(flex, 'intrinsic operands');
     }
     for (const entry of entries) {
       if (
@@ -124,13 +120,13 @@ export function createShadowSplitEffectsPort({
         /^(?:(?:min-|max-)?[wh]-|size-|aspect-)/.test(entry.authorToken) &&
         !['w-full', 'min-h-16'].includes(entry.authorToken)
       )
-        fail(entry, 'native sizing allows only w-full/min-h-16');
+        fail(entry, 'native-size');
       if (
         !['setup', 'rule', 'runtime'].includes(entry.origin) ||
         !entry.authorToken ||
         /\s|:/.test(entry.authorToken)
       ) {
-        fail(entry, 'invalid author provenance');
+        fail(entry, 'author-origin');
       }
       const canonical = resolveRootStyleEntry(entry.authorToken, entry.origin);
       if (
@@ -138,30 +134,29 @@ export function createShadowSplitEffectsPort({
         entry.roleSource !== canonical.roleSource ||
         (entry.token !== entry.authorToken && !entry.token.endsWith(`:${entry.authorToken}`))
       ) {
-        fail(entry, 'canonical provenance mismatch');
+        fail(entry, 'canonical-origin');
       }
-      if (entry.role === 'unresolved') fail(entry, 'unresolved application role');
+      if (entry.role === 'unresolved') fail(entry, 'unresolved-role');
       const needsK1 = [
         '-translate-x-1/2',
         '-translate-y-1/2',
         'animate-in',
         'animate-out',
       ].includes(entry.authorToken);
-      if (needsK1 && !hasRecipe('dialog-motion', 'k1')) fail(entry, 'K1 physical recipe is absent');
+      if (needsK1 && !hasRecipe('dialog-motion', 'k1')) fail(entry, 'K1 recipe');
       const needsI1 = entry.authorToken === 'hidden' || entry.authorToken === 'relative';
-      if (needsI1 && !hasRecipe('participation-coordinate', 'i1'))
-        fail(entry, 'I1 physical recipe is absent');
+      if (needsI1 && !hasRecipe('participation-coordinate', 'i1')) fail(entry, 'I1 recipe');
       if (
         ((entry.role === 'root-geometry' && !needsI1 && !needsK1) ||
           entry.role === 'hit-testing' ||
           entry.authorToken === 'transition-all') &&
         !hasRecipe('motion', 'h1')
       )
-        fail(entry, 'H1 physical recipe is absent');
+        fail(entry, 'H1 recipe');
       if (entry.role === 'composite' && !COMPOSITES.has(entry.authorToken))
-        fail(entry, 'composite recipe is not implemented');
+        fail(entry, 'composite');
       if (entry.role === 'composite' && entry.token !== entry.authorToken)
-        fail(entry, 'conditional composite recipe is not implemented');
+        fail(entry, 'conditional-composite');
       const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
       const tokenSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
       if (
@@ -171,7 +166,7 @@ export function createShadowSplitEffectsPort({
             (selector.startsWith(':where(') && selector.includes(`)${tokenSelector}`))
         )
       ) {
-        fail(entry, 'physical token is absent from the compiled split closure');
+        fail(entry, 'missing token');
       }
     }
     const logicalPadding = entries.find((entry) => /^(?:px|py)-/.test(entry.authorToken));
@@ -181,10 +176,7 @@ export function createShadowSplitEffectsPort({
           /^(?:p[trbl])-/.test(entry.authorToken) || /^border-[trbl](?:-|$)/.test(entry.authorToken)
       );
       if (unsupported)
-        fail(
-          logicalPadding,
-          `directional token ${JSON.stringify(unsupported.authorToken)} conflicts with logical padding`
-        );
+        fail(logicalPadding, `directional:${JSON.stringify(unsupported.authorToken)}`);
     }
     const widths = borderWidthCandidates(entries);
     const borderWidths = JSON.stringify(widths);
@@ -194,7 +186,7 @@ export function createShadowSplitEffectsPort({
       (widths.some((values) => values.length > 1) ||
         (applied && applied.borderWidths !== borderWidths))
     ) {
-      fail(animated, 'unsupported used-value rounding');
+      fail(animated, 'used-value-rounding');
     }
     return {
       borderWidths,
@@ -210,7 +202,7 @@ export function createShadowSplitEffectsPort({
     };
   };
   const assertActive = () => {
-    if (disposed) throw new Error(`[WC split:${prototypeName}] effects disposed`);
+    if (disposed) throw invalid('disposed');
   };
   const flush = () => {
     assertActive();

@@ -41,7 +41,7 @@ describe('I1 recipe and atomic projection', () => {
       const previous = [host.outerHTML, surface.outerHTML];
       for (const token of ['hidden', 'relative']) {
         if (old) {
-          expect(() => port.queueStyle(effect([token]))).toThrow(/I1 physical recipe is absent/);
+          expect(() => port.queueStyle(effect([token]))).toThrow(/I1 recipe/);
           port.flushNow!();
           expect([host.outerHTML, surface.outerHTML]).toEqual(previous);
         } else {

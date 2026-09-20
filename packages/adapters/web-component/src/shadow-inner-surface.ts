@@ -31,7 +31,7 @@ export function createShadowInnerSurface(shell: ShadowOwnerShell): ShadowInnerSu
 
   const assertActive = () => {
     if (disposed) {
-      throw new Error('[WC Adapter] cannot use a disposed Shadow inner surface.');
+      throw new Error('shadow-inner:disposed');
     }
   };
 

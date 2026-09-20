@@ -99,7 +99,7 @@ describe('Shadow split resource coordinator', () => {
         colorSchemeSource: source.source,
         baseGetMeta: () => undefined,
       })
-    ).toThrow('invalid Shadow style artifact');
+    ).toThrow('invalid shadow-style');
 
     expect(host.hasAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe(false);
     expect(source.listeners.size).toBe(0);
@@ -121,7 +121,7 @@ describe('Shadow split resource coordinator', () => {
         colorSchemeSource: source,
         baseGetMeta: () => undefined,
       })
-    ).toThrow('invalid Shadow color-scheme source subscription');
+    ).toThrow('shadow-color:subscription');
 
     expect(host.hasAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe(false);
     expect(shell.root.childNodes).toHaveLength(0);

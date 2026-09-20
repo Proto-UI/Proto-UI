@@ -35,7 +35,7 @@ describe('K1 projection and compiled recipe', () => {
     port.flushNow!();
     const before = [host.outerHTML, surface.outerHTML];
     expect(() => port.queueStyle(effect(['grid', 'animate-in', 'slide-in-from-left-2']))).toThrow(
-      /K1 does not support slide animation operands/
+      /K1 slide/
     );
     port.flushNow!();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
@@ -66,9 +66,7 @@ describe('K1 projection and compiled recipe', () => {
     const before = [host.outerHTML, surface.outerHTML];
     for (const token of ['-translate-x-1/2', '-translate-y-1/2', 'animate-in', 'animate-out']) {
       if (old) {
-        expect(() => port.queueStyle(effect(['grid', token]))).toThrow(
-          /K1 physical recipe is absent/
-        );
+        expect(() => port.queueStyle(effect(['grid', token]))).toThrow(/K1 recipe/);
         port.flushNow!();
         expect([host.outerHTML, surface.outerHTML]).toEqual(before);
       } else {

@@ -142,7 +142,7 @@ function commitWebComponentChildren(args: {
   if (textControlTarget) {
     const hasChildren = Array.isArray(children) ? children.length > 0 : children != null;
     if (hasChildren) {
-      throw new Error('[WC Adapter] text-control prototypes must return empty Template children.');
+      throw new Error('text-control Template must be empty');
     }
     if (shadowOwnerShell) {
       if (!shadowOwnerShell.hasOnlyRenderedNode(textControlTarget)) {
@@ -159,7 +159,7 @@ function commitWebComponentChildren(args: {
   if (imageViewTarget) {
     const hasChildren = Array.isArray(children) ? children.length > 0 : children != null;
     if (hasChildren) {
-      throw new Error('[WC Adapter] image-view prototypes must return empty Template children.');
+      throw new Error('image-view Template must be empty');
     }
     if (shadowOwnerShell) {
       if (!shadowOwnerShell.hasOnlyRenderedNode(imageViewTarget)) {

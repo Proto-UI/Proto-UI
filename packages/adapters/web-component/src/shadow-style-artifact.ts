@@ -6,13 +6,6 @@ export const SHADOW_STYLE_ARTIFACT_VERSION = 1 as const;
 export const SHADOW_STYLE_ARTIFACT_ENVIRONMENT = 'host-color-scheme-v1' as const;
 
 const ARTIFACT_FIELDS = new Set(['kind', 'version', 'cssText', 'environment']);
-const DOCUMENT_ENVIRONMENT_MARKERS = [
-  ':where(.dark)',
-  ":where([data-theme='dark'])",
-  ':root',
-  '@media (prefers-color-scheme: dark)',
-];
-
 export type ShadowStyleArtifactV1 = Readonly<{
   kind: typeof SHADOW_STYLE_ARTIFACT_KIND;
   version: typeof SHADOW_STYLE_ARTIFACT_VERSION;
@@ -94,7 +87,7 @@ export function createShadowStyleArtifactOwner(
     stylesheet,
     update(nextArtifact) {
       if (disposed) {
-        throw new Error('[WC Adapter] disposed Shadow style artifact owner');
+        throw new Error('shadow-style:disposed');
       }
       const next = validateShadowStyleArtifact(nextArtifact);
       stylesheet.update(next.cssText);
@@ -114,7 +107,12 @@ export function createShadowStyleArtifactOwner(
 
 function validateShadowSelectorAbi(cssText: string): void {
   const selectors = stripShadowCssComments(cssText);
-  const documentMarker = DOCUMENT_ENVIRONMENT_MARKERS.find((marker) => selectors.includes(marker));
+  const documentRule = selectors
+    .replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1')
+    .match(
+      /(?:^|[;{}])(?:(?!\s*@)[^;{}]*(:where\(\.dark\)|:where\(\[data-theme=|:root)|[^;{}]*(@media \(prefers-color-scheme: dark\)))[^;{}]*\{/
+    );
+  const documentMarker = documentRule?.[1] ?? documentRule?.[2];
   if (documentMarker) {
     throw invalidArtifact(documentMarker);
   }
@@ -142,5 +140,5 @@ function validateShadowSelectorAbi(cssText: string): void {
 export const stripShadowCssComments = (cssText: string) => cssText.replace(/\/\*[\s\S]*?\*\//g, '');
 
 function invalidArtifact(reason: string): Error {
-  return new Error(`[WC Adapter] invalid Shadow style artifact: ${reason}.`);
+  return new Error(`invalid shadow-style:${reason}`);
 }

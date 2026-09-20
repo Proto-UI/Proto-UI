@@ -58,7 +58,7 @@ describe('adapter-web-component Shadow stylesheet owner', () => {
 
     expect(owner.element.parentNode).toBeNull();
     expect(shell.root.querySelector('[data-pui-shadow-stylesheet]')).toBeNull();
-    expect(() => owner.update('')).toThrow(/disposed Shadow stylesheet owner/);
+    expect(() => owner.update('')).toThrow(/shadow-sheet:disposed/);
 
     const nextOwner = createShadowStylesheetOwner(shell, ':host { display: inline; }');
     expect(nextOwner).not.toBe(owner);

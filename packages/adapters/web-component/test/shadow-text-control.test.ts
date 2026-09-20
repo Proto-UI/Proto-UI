@@ -141,7 +141,7 @@ describe('S5 native Shadow text surface', () => {
     await flush();
     const before = host.shadowRoot!.innerHTML,
       rootStyle = host.getAttribute('data-pui-split-root-style');
-    expect(() => (host.getExposes() as any).invalid()).toThrow(/native sizing/);
+    expect(() => (host.getExposes() as any).invalid()).toThrow(/native-size/);
     expect(host.shadowRoot!.innerHTML).toBe(before);
     expect(host.getAttribute('data-pui-split-root-style')).toBe(rootStyle);
   });
@@ -230,6 +230,23 @@ describe('S5 native Shadow text surface', () => {
       /native.*recipe/
     );
     expect(customElements.get(tag)).toBeUndefined();
+  });
+
+  it('accepts equivalent native-text recipe whitespace before registration', () => {
+    const profile = shadow();
+    const equivalent = {
+      ...profile,
+      styleArtifact: {
+        ...profile.styleArtifact,
+        cssText: profile.styleArtifact.cssText.replace(
+          '--pui-split-native-text-recipe: l1;',
+          '--pui-split-native-text-recipe:l1;'
+        ),
+      },
+    };
+    const tag = name();
+    expect(() => AdaptToWebComponent(input, { registerAs: tag, shadow: equivalent })).not.toThrow();
+    expect(customElements.get(tag)).toBeDefined();
   });
 
   it.each([false, true, 'split'] as const)(

@@ -308,6 +308,29 @@ function listenToEntryEvents(
   };
 }
 
+function collectEntryMediaQueries(
+  view: Window & typeof globalThis,
+  roots: Iterable<Document | ShadowRoot>
+) {
+  const queries = new Set<string>();
+  const rules: CSSRule[] = [];
+  for (const root of roots) {
+    for (const sheet of [...(root.styleSheets ?? []), ...(root.adoptedStyleSheets ?? [])]) {
+      if (sheet.media?.mediaText) queries.add(sheet.media.mediaText);
+      try {
+        rules.push(...sheet.cssRules);
+      } catch {
+        // Cross-origin sheets remain opaque; their owner media still applies.
+      }
+    }
+  }
+  for (const rule of rules) {
+    if (rule.type === 4) queries.add((rule as CSSMediaRule).media.mediaText);
+    if ('cssRules' in rule) rules.push(...(rule as CSSGroupingRule).cssRules);
+  }
+  return [...queries].map((query) => view.matchMedia(query));
+}
+
 function watchEntryStyleInvalidation(
   view: (Window & typeof globalThis) | null,
   onInvalidate: () => void
@@ -701,7 +724,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryRadioStateWatch: (() => void) | null = null;
   let stopEntryImageStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
-  let stopEntryViewportWatch: (() => void) | null = null;
   let stopEntryStyleWatch: (() => void) | null = null;
   let stopEntryMotionWatch: (() => void) | null = null;
   let stopEntrySlotWatch: (() => void) | null = null;
@@ -711,31 +733,31 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const stopEntryObserver = () => {
     entryObserverGeneration += 1;
     entryObserver?.disconnect();
-    entryObserver = null;
     entryImageObserver?.disconnect();
-    entryImageObserver = null;
     entryExternalStyleObserver?.disconnect();
-    entryExternalStyleObserver = null;
     entryRadioGroupObserver?.disconnect();
-    entryRadioGroupObserver = null;
+    entryObserver =
+      entryImageObserver =
+      entryExternalStyleObserver =
+      entryRadioGroupObserver =
+        null;
     entryResizeObserver?.disconnect();
     entryResizeObserver = null;
     stopEntryRadioStateWatch?.();
-    stopEntryRadioStateWatch = null;
     stopEntryImageStateWatch?.();
-    stopEntryImageStateWatch = null;
     stopEntryAttachShadowWatch?.();
-    stopEntryAttachShadowWatch = null;
-    stopEntryViewportWatch?.();
-    stopEntryViewportWatch = null;
     stopEntryStyleWatch?.();
-    stopEntryStyleWatch = null;
     stopEntryMotionWatch?.();
-    stopEntryMotionWatch = null;
     stopEntrySlotWatch?.();
-    stopEntrySlotWatch = null;
     stopEntryUpgradeWatch?.();
-    stopEntryUpgradeWatch = null;
+    stopEntryRadioStateWatch =
+      stopEntryImageStateWatch =
+      stopEntryAttachShadowWatch =
+      stopEntryStyleWatch =
+      stopEntryMotionWatch =
+      stopEntrySlotWatch =
+      stopEntryUpgradeWatch =
+        null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
@@ -868,26 +890,19 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (isCurrentEntryObservation()) projectEntry();
               });
             }
-            if (view) {
-              const onViewportResize = () => {
-                if (isCurrentEntryObservation()) projectEntry();
-              };
-              stopEntryViewportWatch = listenToEntryEvents(
-                [view, view.matchMedia('(prefers-reduced-motion: reduce)')],
-                ['resize', 'change'],
-                onViewportResize
-              );
-              stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
-                if (isCurrentEntryObservation()) projectEntry();
-              });
-            }
+            const onViewportResize = () => {
+              if (isCurrentEntryObservation()) projectEntry();
+            };
             // The late-attach watch below is installed once but must always
             // consult the currently observed region, so the root set lives
             // outside observeTree() and is refreshed on every resample
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
-            const pendingUpgrades = new Set<string>();
-            stopEntryUpgradeWatch = () => pendingUpgrades.clear();
+            const pendingUpgrades = new Map<string, [(() => void) | null]>();
+            stopEntryUpgradeWatch = () => {
+              for (const subscription of pendingUpgrades.values()) subscription[0] = null;
+              pendingUpgrades.clear();
+            };
             const observeTree = () => {
               if (!isCurrentEntryObservation()) return;
               entryObserver?.disconnect();
@@ -896,15 +911,17 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               entryRadioGroupObserver?.disconnect();
               entryResizeObserver?.disconnect();
               stopEntryRadioStateWatch?.();
-              stopEntryRadioStateWatch = null;
               stopEntryImageStateWatch?.();
-              stopEntryImageStateWatch = null;
               stopEntrySlotWatch?.();
-              stopEntrySlotWatch = null;
               stopEntryMotionWatch?.();
-              stopEntryMotionWatch = null;
+              stopEntryRadioStateWatch =
+                stopEntryImageStateWatch =
+                stopEntrySlotWatch =
+                stopEntryMotionWatch =
+                  null;
               let hasArea = false;
               const radioTrees = new Set<Document | ShadowRoot>();
+              const mediaRoots = new Set<Document | ShadowRoot>([target.ownerDocument]);
               const radioNames = new Set<string>();
               const radioFormIds = new Set<string>();
               const options: MutationObserverInit = {
@@ -930,6 +947,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   'slot',
                   'name',
                   'form',
+                  'checked',
+                  'id',
                   'class',
                   'style',
                 ],
@@ -943,6 +962,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               observedRoots.clear();
               const observe = (root: HTMLElement | ShadowRoot) => {
                 observedRoots.add(root);
+                if (root.nodeType === 11) mediaRoots.add(root as ShadowRoot);
                 entryObserver?.observe(root, options);
                 if (root.nodeType === 1) entryResizeObserver?.observe(root as HTMLElement);
                 hasArea ||= !!root.querySelector('area');
@@ -968,18 +988,19 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     const name = descendant.localName;
                     if (!name.includes('-') || pendingUpgrades.has(name) || registry.get(name))
                       continue;
-                    pendingUpgrades.add(name);
-                    registry
-                      .whenDefined(name)
-                      .then(() => {
+                    const subscription: [() => void] = [
+                      () => {
                         pendingUpgrades.delete(name);
                         if (!isCurrentEntryObservation()) return;
                         projectEntry();
                         observeTree();
-                      })
-                      .catch(() => {
-                        pendingUpgrades.delete(name);
-                      });
+                      },
+                    ];
+                    pendingUpgrades.set(name, subscription);
+                    registry.whenDefined(name).then(
+                      () => subscription.pop()?.(),
+                      () => subscription.pop()
+                    );
                   }
                 }
               };
@@ -999,11 +1020,17 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 !observedRoots.has(targetRoot)
               ) {
                 externalStyleRoots.add(targetRoot as ShadowRoot);
+                mediaRoots.add(targetRoot as ShadowRoot);
               }
               while (externalAncestor) {
                 motionTargets.add(externalAncestor);
+                const observeExternalSubtree =
+                  externalAncestor !== target.ownerDocument.body &&
+                  externalAncestor !== target.ownerDocument.documentElement;
                 entryObserver?.observe(externalAncestor, {
                   attributes: true,
+                  childList: observeExternalSubtree,
+                  subtree: observeExternalSubtree,
                   attributeFilter: [
                     'class',
                     'style',
@@ -1021,6 +1048,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   !observedRoots.has(externalRoot)
                 ) {
                   externalStyleRoots.add(externalRoot as ShadowRoot);
+                  mediaRoots.add(externalRoot as ShadowRoot);
                 }
                 if (
                   externalAncestor.namespaceURI === 'http://www.w3.org/1999/xhtml' &&
@@ -1029,6 +1057,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
               }
+              const stopEntryEnvironmentEvents = listenToEntryEvents(
+                [view!, ...collectEntryMediaQueries(view!, mediaRoots)],
+                ['resize', 'change'],
+                onViewportResize
+              );
               const projectionEvents = [
                 'transitionend',
                 'transitioncancel',
@@ -1055,6 +1088,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 onProjectionEvent
               );
               stopEntryMotionWatch = () => {
+                stopEntryEnvironmentEvents();
                 stopProjectionEvents();
                 stopExternalStyleEvents();
               };
@@ -1235,6 +1269,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 observeTree();
               }
             });
+            if (view)
+              stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
+                if (isCurrentEntryObservation()) {
+                  projectEntry();
+                  observeTree();
+                }
+              });
             observeTree();
           }
         },

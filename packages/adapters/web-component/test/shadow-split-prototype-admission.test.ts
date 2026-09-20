@@ -35,7 +35,7 @@ describe('composed Shadow prototype admission', () => {
     const host = new Mask();
     try {
       expect(() => parent.append(host)).toThrow(
-        /shadcn-dialog-mask.*rule token "hidden".*I1 physical recipe is absent/
+        /shadcn-dialog-mask.*rule token "hidden".*I1 recipe/
       );
       expect(host.hasAttribute('data-pui-split-root-style')).toBe(false);
       expect(host.shadowRoot?.childNodes.length).toBe(0);

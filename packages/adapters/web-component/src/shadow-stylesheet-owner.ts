@@ -40,7 +40,7 @@ export function createShadowStylesheetOwner(
     },
     update(nextCssText) {
       if (disposed) {
-        throw new Error('[WC Adapter] cannot update a disposed Shadow stylesheet owner.');
+        throw new Error('shadow-sheet:disposed');
       }
       shell.attachOwnerNode(element);
       if (nextCssText === cssText && element.textContent === nextCssText) return;

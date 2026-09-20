@@ -74,6 +74,24 @@ describe('adapter-web-component Shadow style artifact', () => {
     ).not.toThrow();
   });
 
+  it('accepts document marker text inside a Shadow-local attribute value', () => {
+    expect(() =>
+      validateShadowStyleArtifact(
+        artifact(`[data-label=':root'] [data-pui-style~='block'] { display: block; }`)
+      )
+    ).not.toThrow();
+    expect(() =>
+      validateShadowStyleArtifact(
+        artifact(`[data-pui-style~='block'] { --generated-label: ':root'; display: block; }`)
+      )
+    ).not.toThrow();
+    expect(() =>
+      validateShadowStyleArtifact(
+        artifact(`@supports selector(:root) { [data-pui-style~='block'] { display: block; } }`)
+      )
+    ).not.toThrow();
+  });
+
   it.each([
     ['missing', undefined],
     ['wrong kind', { ...artifact(), kind: 'proto-ui.document-style' }],
@@ -158,9 +176,7 @@ describe('adapter-web-component Shadow style artifact', () => {
       ),
     ],
   ])('rejects %s', (_label, input) => {
-    expect(() => validateShadowStyleArtifact(input)).toThrow(
-      '[WC Adapter] invalid Shadow style artifact:'
-    );
+    expect(() => validateShadowStyleArtifact(input)).toThrow('invalid shadow-style:');
   });
 
   it('installs and deterministically updates a stable owner stylesheet', () => {
@@ -184,9 +200,7 @@ describe('adapter-web-component Shadow style artifact', () => {
     const previousArtifact = owner.artifact;
     const previousCss = owner.stylesheet.cssText;
 
-    expect(() => owner.update({ ...artifact(), version: 2 })).toThrow(
-      'invalid Shadow style artifact'
-    );
+    expect(() => owner.update({ ...artifact(), version: 2 })).toThrow('invalid shadow-style');
     expect(owner.artifact).toBe(previousArtifact);
     expect(owner.stylesheet.cssText).toBe(previousCss);
   });
@@ -207,7 +221,7 @@ describe('adapter-web-component Shadow style artifact', () => {
     owner.dispose();
     owner.dispose();
     expect(owner.stylesheet.element.parentNode).toBeNull();
-    expect(() => owner.update(artifact())).toThrow(/disposed Shadow style artifact owner/);
+    expect(() => owner.update(artifact())).toThrow(/shadow-style:disposed/);
 
     const nextOwner = createShadowStyleArtifactOwner(shell, artifact());
     expect(nextOwner).not.toBe(owner);

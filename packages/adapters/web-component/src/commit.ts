@@ -92,17 +92,17 @@ function appendCommittedChild(
 
   if (isReservedType(t) && t.kind === 'slot') {
     if ((child as any).children != null) {
-      throw new Error(`[WC Adapter] slot node must not have children in v0.`);
+      throw new Error('slot:children unsupported');
     }
     if ((child as any).style != null) {
-      throw new Error(`[WC Adapter] slot node must not have style in v0.`);
+      throw new Error('slot:style unsupported');
     }
     // v0: 核心语法层已禁止具名，这里仍防御
     if ((t as any).name) {
-      throw new Error(`[WC Adapter] named slot is not supported in v0.`);
+      throw new Error('slot:named unsupported');
     }
     if (ctx.slotUsed) {
-      throw new Error(`[WC Adapter] multiple slot is not supported in v0.`);
+      throw new Error('slot:multiple unsupported');
     }
     ctx.slotUsed = true;
 
@@ -172,7 +172,7 @@ function appendSvgChild(
 
   const kids = toArray(child.children ?? null);
   if (!svgTagAllowsChildren(child.tag) && kids.length > 0) {
-    throw new Error(`[WC Adapter] svg node <${child.tag}> must not have children.`);
+    throw new Error(`svg <${child.tag}>:children unsupported`);
   }
 
   for (const kid of kids) {

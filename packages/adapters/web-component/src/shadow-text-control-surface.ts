@@ -11,7 +11,7 @@ export function createShadowTextControlSurface(
 ): ShadowInnerSurface {
   let disposed = false;
   const assertActive = () => {
-    if (disposed) throw new Error('[WC Adapter] native Shadow surface is disposed.');
+    if (disposed) throw new Error('shadow-text:disposed');
   };
   // Identity is owner-lived, but initial absence must not acquire a view lease.
   // The first successful view commit attaches the native editor below.
@@ -19,8 +19,7 @@ export function createShadowTextControlSurface(
     element,
     replaceRenderedChildren(nodes) {
       assertActive();
-      if (nodes.length !== 1 || nodes[0] !== element)
-        throw new Error('[WC Adapter] native Shadow surface accepts only its editor.');
+      if (nodes.length !== 1 || nodes[0] !== element) throw new Error('shadow-text:editor-only');
       // attachOwnerNode is idempotent, preserving focus/selection on commits.
       shell.attachOwnerNode(element);
     },
