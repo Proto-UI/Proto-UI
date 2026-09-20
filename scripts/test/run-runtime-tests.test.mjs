@@ -1,10 +1,18 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 
 import { BROWSER_SUITES, corepackInvocation, createRuntimeTestPlan } from './runtime-test-plan.mjs';
 
 describe('runtime test plan', () => {
+  it('keeps forwarded Vitest arguments out of the Windows command shell', () => {
+    const source = fs.readFileSync(new URL('./run-runtime-tests.mjs', import.meta.url), 'utf8');
+    const runVitest = source.match(/async function runVitest[\s\S]*?\n\}\n/u)?.[0] ?? '';
+    assert.match(runVitest, /spawn\(process\.execPath,[\s\S]*?shell: false/u);
+    assert.doesNotMatch(runVitest, /shell:\s*process\.platform/u);
+  });
+
   it('launches the Windows Corepack shim through a shell', () => {
     assert.deepEqual(corepackInvocation('win32'), {
       executable: 'corepack.cmd',

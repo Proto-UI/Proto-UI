@@ -145,8 +145,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Validate the exact PR head; never treat GitHub's temporary merge commit as retained evidence.
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          # Keep GitHub's default synthetic merge checkout for pull requests so
+          # the full suite exercises the feature together with the current base.
+          # Coverage evidence remains bound separately to the exact base/head
+          # revisions supplied above; the merge SHA is never retained evidence.
           fetch-depth: 0
 
       - uses: actions/setup-node@v4

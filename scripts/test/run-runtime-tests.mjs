@@ -188,7 +188,7 @@ async function runVitest(args, baseUrl) {
     const child = spawn(process.execPath, [vitestBin, 'run', ...args], {
       cwd: root,
       env,
-      shell: process.platform === 'win32',
+      shell: false,
       stdio: 'inherit',
     });
     child.on('error', reject);

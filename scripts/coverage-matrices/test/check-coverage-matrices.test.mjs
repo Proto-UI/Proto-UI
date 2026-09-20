@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -420,7 +420,12 @@ function writeSelfHostedWebsiteArtifacts(
 function writeSelfHostedPromotion(
   root,
   revision,
-  { manifestOverrides = {}, evidenceOverrides = {}, matrixOverrides = {} } = {}
+  {
+    manifestOverrides = {},
+    evidenceOverrides = {},
+    matrixOverrides = {},
+    websiteBindings = [],
+  } = {}
 ) {
   const evidencePath = 'internal/website/evidence/s14/closeout.md';
   const resultsPath = 'internal/website/evidence/s14/results.json';
@@ -438,11 +443,16 @@ function writeSelfHostedPromotion(
     validSelfHostedWebsiteEvidence({ Commit: revision, ...evidenceOverrides }),
     'utf8'
   );
-  writeValidMatrices(root, {
-    State: 'self-hosted',
-    Evidence: `\`${evidencePath}\``,
-    ...matrixOverrides,
-  });
+  writeValidMatrices(
+    root,
+    {
+      State: 'self-hosted',
+      Evidence: `\`${evidencePath}\``,
+      ...matrixOverrides,
+    },
+    {},
+    { websiteBindings }
+  );
   return { evidencePath, resultsPath };
 }
 
@@ -4628,7 +4638,7 @@ test('does not infer Agent-action provenance from an ordinary local domain verb'
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
-test('requires provenance for bare exact Agent-action verbs', () => {
+test('rejects imported Agent-action verbs without filename provenance', () => {
   const root = createRoot();
   const localPath = 'apps/agent-harness/src/run/LocalSend.tsx';
   const importedPath = 'apps/agent-harness/src/run/ImportedDomainApproval.tsx';
@@ -4658,7 +4668,10 @@ test('requires provenance for bare exact Agent-action verbs', () => {
   }
   writeValidMatrices(root, {}, { Path: `\`${localPath}\`, \`${importedPath}\`` });
 
-  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/ImportedDomainApproval\.tsx` contains a forbidden interaction/
+  );
 });
 
 test('rejects Agent actions during render in HOC-wrapped default exports', () => {
@@ -6887,5 +6900,436 @@ test('scans test-named modules reachable from production Website sources', () =>
   assert.match(
     validationMessage(root),
     /raw Proto UI import `@proto\.ui\/runtime` in `apps\/www\/src\/components\/bridge\.test\.ts` escapes the website consumer-wall allowlist/
+  );
+});
+
+test('follows DOM receivers destructured from semantic event parameters', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/DestructuredEvent.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'function handler({ currentTarget }) { currentTarget.focus(); } export function Surface() { return <ProtoButton onPress={handler} />; }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/DestructuredEvent\.tsx` contains a forbidden interaction/
+  );
+});
+
+test('classifies native dialog and popover state-changing methods', () => {
+  for (const [relativePath, method, expected] of [
+    [
+      'apps/www/src/components/DialogController.ts',
+      'showModal',
+      /interactive website source `apps\/www\/src\/components\/DialogController\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/PopoverController.tsx',
+      'togglePopover',
+      /Harness source `apps\/agent-harness\/src\/run\/PopoverController\.tsx` contains a forbidden interaction/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `export function Surface() { document.querySelector('dialog').${method}(); return null; }`,
+      'utf8'
+    );
+    writeValidMatrices(
+      root,
+      {},
+      relativePath.startsWith('apps/agent-harness/') ? { Path: `\`${relativePath}\`` } : {}
+    );
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('recognizes computed native-handler keys in intrinsic JSX spreads', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/ComputedHandler.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "const props = { ['onClick']() {} }; export function Surface() { return <button {...props} />; }",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/ComputedHandler\.tsx` contains a forbidden interaction/
+  );
+});
+
+test('rejects Agent actions through class props and neutral named imports', () => {
+  for (const [name, source] of [
+    [
+      'ClassProps',
+      "import React from 'react'; class Surface extends React.Component { render() { this.props.onSend(); return <section />; } } export { Surface };",
+    ],
+    [
+      'NeutralImport',
+      "import { navigate } from './router'; export function Surface() { navigate(); return <section />; }",
+    ],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        `Harness source \`apps/agent-harness/src/run/${name}\\.tsx\` contains a forbidden interaction`
+      )
+    );
+  }
+});
+
+test('scans imperative handles, class initialization and teardown, and module initialization', () => {
+  for (const [name, source] of [
+    [
+      'ImperativeHandle',
+      "import { useImperativeHandle } from 'react'; import * as actions from './agent-actions'; export function Surface({ ref }) { useImperativeHandle(ref, () => { actions.send(); return {}; }); return <section />; }",
+    ],
+    [
+      'ClassField',
+      "import React from 'react'; import * as actions from './agent-actions'; class Surface extends React.Component { state = actions.send(); render() { return <section />; } } export { Surface };",
+    ],
+    [
+      'ClassTeardown',
+      "import React from 'react'; import * as actions from './agent-actions'; class Surface extends React.Component { componentWillUnmount() { actions.stop(); } render() { return <section />; } } export { Surface };",
+    ],
+    [
+      'ClassCatch',
+      "import React from 'react'; import * as actions from './agent-actions'; class Surface extends React.Component { componentDidCatch() { actions.send(); } render() { return <section />; } } export { Surface };",
+    ],
+    [
+      'ModuleInitialization',
+      "import * as actions from './agent-actions'; actions.send(); export function Surface() { return <section />; }",
+    ],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        `Harness source \`apps/agent-harness/src/run/${name}\\.tsx\` contains a forbidden interaction`
+      )
+    );
+  }
+});
+
+test('resolves imported local render-time callables', () => {
+  const root = createRoot();
+  const surfacePath = 'apps/agent-harness/src/run/ImportedHook.tsx';
+  const helperPath = 'apps/agent-harness/src/run/use-send-on-render.ts';
+  fs.mkdirSync(path.dirname(path.join(root, surfacePath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, helperPath),
+    "import * as actions from './agent-actions'; export function useSendOnRender() { actions.send(); }",
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(root, surfacePath),
+    "import { useSendOnRender } from './use-send-on-render'; export function Surface() { useSendOnRender(); return <section />; }",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${surfacePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/ImportedHook\.tsx` contains a forbidden interaction/
+  );
+});
+
+test('keeps the reviewed Harness bootstrap inside forbidden-state scanning', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relativePath = 'apps/agent-harness/src/proto-ui/bootstrap.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import { useEffect } from 'react'; import * as actions from '../run/agent-actions'; export function Bootstrap() { useEffect(() => actions.send(), []); return <section />; }",
+    'utf8'
+  );
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/proto-ui\/bootstrap\.tsx` contains a forbidden interaction/
+  );
+});
+
+test('follows local render helpers when inventorying exported surfaces', () => {
+  for (const [relativePath, expected] of [
+    [
+      'apps/www/src/components/DelegatedSurface.tsx',
+      /website component source `apps\/www\/src\/components\/DelegatedSurface\.tsx` is not classified/,
+    ],
+    [
+      'apps/agent-harness/src/run/DelegatedSurface.tsx',
+      /Harness user-facing source `apps\/agent-harness\/src\/run\/DelegatedSurface\.tsx` is not classified/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      'function View() { return <section />; } export function Surface() { return View(); }',
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('resolves array-form Vite aliases before consumer-wall classification', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const configPath = path.join(root, 'apps/www/astro.config.mjs');
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
+  fs.writeFileSync(
+    configPath,
+    [
+      "import { fileURLToPath } from 'node:url';",
+      "export default { vite: { resolve: { alias: [{ find: 'rawRuntime', replacement: fileURLToPath(new URL('../../packages/runtime/src', import.meta.url)) }] } } };",
+    ].join('\n'),
+    'utf8'
+  );
+  const runtimePath = path.join(root, 'packages/runtime/src/index.ts');
+  fs.mkdirSync(path.dirname(runtimePath), { recursive: true });
+  fs.writeFileSync(runtimePath, 'export const runtime = true;', 'utf8');
+  const sourcePath = 'apps/www/src/components/ArrayAliasRuntime.ts';
+  const absolutePath = path.join(root, sourcePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, "import { runtime } from 'rawRuntime';", 'utf8');
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `rawRuntime` in `apps\/www\/src\/components\/ArrayAliasRuntime\.ts` escapes the website consumer-wall allowlist/
+  );
+});
+
+test('inspects transitive Proto UI imports from bare packages', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const packageRoot = path.join(root, 'node_modules/example-transport');
+  fs.mkdirSync(packageRoot, { recursive: true });
+  fs.writeFileSync(
+    path.join(packageRoot, 'package.json'),
+    JSON.stringify({
+      name: 'example-transport',
+      version: '1.0.0',
+      main: 'index.js',
+      dependencies: { '@proto.ui/runtime': '1.0.0' },
+    }),
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(packageRoot, 'index.js'),
+    "import '@proto.ui/runtime'; export const transport = true;",
+    'utf8'
+  );
+  const sourcePath = 'apps/www/src/components/BareTransport.ts';
+  const absolutePath = path.join(root, sourcePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, "import { transport } from 'example-transport';", 'utf8');
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `example-transport` in `apps\/www\/src\/components\/BareTransport\.ts` escapes the website consumer-wall allowlist/
+  );
+});
+
+test('scans interaction in test-named modules reachable from production', () => {
+  const root = createRoot();
+  const productionPath = 'apps/www/src/components/InteractionBridge.astro';
+  const bridgePath = 'apps/www/src/components/interaction.test.ts';
+  fs.mkdirSync(path.dirname(path.join(root, productionPath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, productionPath),
+    "---\nimport './interaction.test';\n---\n<main />",
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(root, bridgePath),
+    "document.querySelector('button').focus();",
+    'utf8'
+  );
+  writeValidMatrices(root);
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/components\/interaction\.test\.ts` is not bound/
+  );
+});
+
+test('follows Harness imports outside the source root', () => {
+  const root = createRoot();
+  const surfacePath = 'apps/agent-harness/src/run/OutsideHelper.tsx';
+  const helperPath = 'apps/agent-harness/shared/runtime-bridge.ts';
+  fs.mkdirSync(path.dirname(path.join(root, surfacePath)), { recursive: true });
+  fs.mkdirSync(path.dirname(path.join(root, helperPath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, surfacePath),
+    "import '../../shared/runtime-bridge'; export function Surface() { return <section />; }",
+    'utf8'
+  );
+  fs.writeFileSync(path.join(root, helperPath), "import '@proto.ui/runtime';", 'utf8');
+  writeValidMatrices(root, {}, { Path: `\`${surfacePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `@proto\.ui\/runtime` in `apps\/agent-harness\/shared\/runtime-bridge\.ts` escapes the Harness consumer-wall allowlist/
+  );
+});
+
+test('scans inline handlers and executable script sources in public HTML', () => {
+  for (const [name, content, expected] of [
+    [
+      'inline-handler.html',
+      '<button onkeydown="handleKey(event)">Run</button>',
+      /interactive website source `apps\/www\/public\/inline-handler\.html` is not bound/,
+    ],
+    [
+      'external-script.html',
+      '<script src="/vendor/react.js"></script>',
+      /external executable script `\/vendor\/react\.js` in `apps\/www\/public\/external-script\.html` is not reviewed/,
+    ],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/www/public/${name}`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('ignores Markdown dimension artifacts that are not the dogfood evidence record', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/agent-harness/src/run/ToolInvocation.tsx';
+  const absoluteImplementationPath = path.join(root, implementationPath);
+  fs.mkdirSync(path.dirname(absoluteImplementationPath), { recursive: true });
+  fs.writeFileSync(absoluteImplementationPath, 'fixture', 'utf8');
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const { evidencePath } = writeHarnessPromotionArtifacts(root, revision);
+  const evidenceRoot = 'internal/agent-harness/evidence/m1';
+  const keyboardPath = `${evidenceRoot}/keyboard.md`;
+  fs.writeFileSync(path.join(root, keyboardPath), 'Keyboard journey passed.\n', 'utf8');
+  writeValidMatrices(
+    root,
+    {},
+    {
+      ID: 'harness.run.tool-invocation',
+      'Target owner': 'Harness app-local Tool Invocation prototype',
+      'Target class': 'app-local-proto',
+      State: 'dogfooded',
+      Path: `\`${implementationPath}\``,
+      Evidence: `Build: \`${evidenceRoot}/build.log\`; Browser: \`${evidenceRoot}/browser-results.json\`; Accessibility: \`${evidenceRoot}/accessibility-results.json\`; Lifecycle: \`${evidenceRoot}/lifecycle-results.json\`; Design: \`${evidenceRoot}/design-review.txt\`; \`${evidencePath}\`; \`${keyboardPath}\``,
+      'Dependency and owner': 'No blocker; owner: Harness application',
+    }
+  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
+    matrixCount: 2,
+  });
+});
+
+test('rejects truncated evidence images that contain only recognized magic bytes', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const revision = commitFixtureRoot(root);
+  const { evidencePath } = writeSelfHostedPromotion(root, revision);
+  const screenshotPath = path.join(root, 'internal/website/evidence/s14/home-desktop.png');
+  fs.writeFileSync(screenshotPath, Buffer.from('ffd8ff', 'hex'));
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Screenshot: retained artifact must be a recognized image file/
+  );
+  assert.ok(evidencePath);
+});
+
+test('the ordinary local checker supplies stable checkout revisions after promotion', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, revision, { websiteBindings });
+  const env = { ...process.env };
+  delete env.COVERAGE_BASE_REVISION;
+  delete env.COVERAGE_HEAD_REVISION;
+  delete env.COVERAGE_MERGE_REVISION;
+  const result = spawnSync(
+    process.execPath,
+    [path.resolve('scripts/coverage-matrices/check-coverage-matrices.mjs')],
+    { cwd: root, env, encoding: 'utf8' }
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /\[coverage-matrices\] OK \(2 matrices\)/);
+});
+
+test('CI runs the full pull-request suite on GitHub merge checkout', () => {
+  const workflow = fs.readFileSync(path.resolve('.github/workflows/ci.yml'), 'utf8');
+  const testJobStart = workflow.indexOf('\n  test:\n');
+  const remainingWorkflow = workflow.slice(testJobStart + 1);
+  const nextJobOffset = remainingWorkflow.slice(1).search(/^  [a-zA-Z0-9_-]+:\n/mu);
+  const testJob =
+    nextJobOffset < 0 ? remainingWorkflow : remainingWorkflow.slice(0, nextJobOffset + 1);
+  assert.match(testJob, /COVERAGE_HEAD_REVISION:.*pull_request\.head\.sha/u);
+  assert.match(testJob, /COVERAGE_MERGE_REVISION:.*github\.sha/u);
+  const checkout = testJob.match(/- uses: actions\/checkout@v4[\s\S]*?fetch-depth: 0/u)?.[0] ?? '';
+  assert.doesNotMatch(checkout, /^\s*ref:/mu);
+});
+
+test('promotion history accepts a checked-out merge revision distinct from the exact head', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const baseRevision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, baseRevision, { websiteBindings });
+  execFileSync('git', ['add', '.'], { cwd: root });
+  execFileSync(
+    'git',
+    [
+      '-c',
+      'user.name=Coverage Fixture',
+      '-c',
+      'user.email=coverage@example.com',
+      'commit',
+      '--quiet',
+      '--no-gpg-sign',
+      '-m',
+      'exact head',
+    ],
+    { cwd: root }
+  );
+  const headRevision = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim();
+  const mergeRevision = commitFixtureChange(
+    root,
+    'merge-result-marker.txt',
+    'synthetic merge result\n',
+    'synthetic merge result'
+  );
+  assert.deepEqual(
+    validateCoverageMatrices({ rootDir: root, baseRevision, headRevision, mergeRevision }),
+    { matrixCount: 2 }
   );
 });
