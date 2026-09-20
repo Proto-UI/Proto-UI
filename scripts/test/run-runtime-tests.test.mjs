@@ -119,16 +119,17 @@ describe('runtime test plan', () => {
     const jobs = workflow.jobs;
     assert.deepEqual(jobs.browser_test.strategy.matrix.shard, [1, 2, 3, 4]);
     assert.equal(jobs.browser_test.strategy['fail-fast'], false);
-    assert.equal(jobs.test_unit.env.PROTO_UI_RUNTIME_TEST_SCOPE, 'non-browser');
+    assert.equal(jobs.test.env.PROTO_UI_RUNTIME_TEST_SCOPE, 'non-browser');
     const browserStep = jobs.browser_test.steps.find((step) =>
       step.name?.startsWith('Run browser')
     );
     assert.equal(browserStep.env.PROTO_UI_RUNTIME_TEST_SCOPE, 'browser');
     assert.match(browserStep.env.PROTO_UI_RUNTIME_TEST_SHARD, /matrix\.shard.*\/4/);
     assert.match(browserStep.run, /test:runtime/);
-    assert.deepEqual(jobs.test.needs, ['test_unit', 'browser_test']);
-    assert.match(String(jobs.test.if), /always/);
-    const aggregate = jobs.test.steps.map((step) => step.run ?? '').join('\n');
+    assert.equal(jobs.test_gate.name, 'test');
+    assert.deepEqual(jobs.test_gate.needs, ['test', 'browser_test']);
+    assert.match(String(jobs.test_gate.if), /always/);
+    const aggregate = jobs.test_gate.steps.map((step) => step.run ?? '').join('\n');
     assert.match(aggregate, /UNIT_RESULT/);
     assert.match(aggregate, /BROWSER_RESULT/);
   });

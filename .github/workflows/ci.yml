@@ -135,7 +135,7 @@ jobs:
       - name: Type check
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:types
 
-  test_unit:
+  test:
     name: test-unit
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -247,16 +247,16 @@ jobs:
           PROTO_UI_RUNTIME_TEST_SHARD: '${{ matrix.shard }}/4'
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:runtime
 
-  test:
+  test_gate:
     name: test
-    needs: [test_unit, browser_test]
+    needs: [test, browser_test]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Require unit and every browser shard
         env:
-          UNIT_RESULT: ${{ needs.test_unit.result }}
+          UNIT_RESULT: ${{ needs.test.result }}
           BROWSER_RESULT: ${{ needs.browser_test.result }}
         run: |
           echo "test-unit=${UNIT_RESULT}"
