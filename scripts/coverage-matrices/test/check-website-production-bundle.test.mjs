@@ -184,6 +184,27 @@ test('does not mistake an orphaned WC runtime for primary host provenance', () =
   );
 });
 
+test('rejects an extra orphaned Web Component runtime entry', () => {
+  const graph = graphFixture();
+  const facadeModuleId = 'apps/www/src/components/PrototypePreviewer/runtimes/wc-runtime.ts';
+  graph.chunks.push(
+    chunk('_astro/orphaned-wc-runtime.js', {
+      isDynamicEntry: true,
+      facadeModuleId,
+      moduleIds: [
+        'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+        'packages/adapters/web-component/src/adapt.ts',
+      ],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).includes(
+      `reviewed demonstration runtime entry \`${facadeModuleId}\` is orphaned from shell or route-owned entry reachability`
+    )
+  );
+});
+
 test('requires registry and Adapter provenance in the same route-owned demo closure', () => {
   const graph = graphFixture();
   graph.chunks.find((candidate) => candidate.fileName === '_astro/wc-host.js').moduleIds = [

@@ -271,6 +271,17 @@ export function collectWebsiteProductionBundleIssues({
       );
     }
   }
+  for (const runtimeEntry of chunks.filter(
+    (chunk) =>
+      (chunk.isEntry || chunk.isDynamicEntry) &&
+      REVIEWED_DEMONSTRATION_RUNTIME_FACADES.has(chunk.facadeModuleId)
+  )) {
+    if (!reachableEntryChunks.has(runtimeEntry.fileName)) {
+      issues.push(
+        `reviewed demonstration runtime entry \`${runtimeEntry.facadeModuleId}\` is orphaned from shell or route-owned entry reachability`
+      );
+    }
+  }
 
   const hasProvenWebComponentDemonstrationHost = routeOwnedDemoRoots.some((demoRoot) => {
     const moduleIds = [...closure(chunksByFileName, demoRoot.fileName, ['imports'])].flatMap(

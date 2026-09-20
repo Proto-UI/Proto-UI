@@ -1491,6 +1491,34 @@ function astContainsInteractiveRuntime(content) {
         const owner = calledMember.receiver.getText(sourceFile);
         const method = calledMember.name;
         if (
+          owner === 'Object' &&
+          method === 'assign' &&
+          node.arguments[0] &&
+          isDomReceiverExpression(node.arguments[0], sourceFile, receiverBindings, node) &&
+          node.arguments.slice(1).some((argument) => {
+            const source = unwrapTypeScriptExpression(argument);
+            if (!ts.isObjectLiteralExpression(source)) return false;
+            return source.properties.some((property) => {
+              if (!('name' in property) || !property.name) return false;
+              const propertyName = ts.isComputedPropertyName(property.name)
+                ? unwrapTypeScriptExpression(property.name.expression)
+                : property.name;
+              const name =
+                ts.isIdentifier(propertyName) || ts.isStringLiteralLike(propertyName)
+                  ? propertyName.text
+                  : null;
+              return (
+                name !== null &&
+                (NATIVE_EVENT_ATTRIBUTE_NAMES.has(name) ||
+                  GOVERNED_DOM_STATE_PROPERTY_NAMES.has(name))
+              );
+            });
+          })
+        ) {
+          found = true;
+          return;
+        }
+        if (
           method === 'addEventListener' ||
           ((owner === 'customElements' || owner.endsWith('.customElements')) && method === 'define')
         ) {
@@ -1794,12 +1822,17 @@ function discoverWebsiteInteractiveSources(rootDir) {
 function discoverWebsiteComponentSources(rootDir) {
   const websiteSourceRoot = path.join(rootDir, 'apps', 'www', 'src');
   const pagesRoot = path.join(websiteSourceRoot, 'pages');
+  const publicRoot = path.join(rootDir, 'apps', 'www', 'public');
   return walkFiles(websiteSourceRoot)
+    .concat(walkFiles(publicRoot).filter((absolutePath) => /\.html?$/i.test(absolutePath)))
     .filter(
       (absolutePath) =>
         !/\.(?:browser\.)?(?:test|spec)\.(?:astro|vue|svelte|[cm]?[jt]sx?)$/i.test(absolutePath)
     )
     .filter((absolutePath) => {
+      if (absolutePath.startsWith(`${publicRoot}${path.sep}`) && /\.html?$/i.test(absolutePath)) {
+        return true;
+      }
       if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) return true;
       if (absolutePath.startsWith(`${pagesRoot}${path.sep}`) && /\.mdx?$/i.test(absolutePath)) {
         return true;
@@ -3254,12 +3287,23 @@ function isExecutableScriptType(type) {
     essence
   );
 }
+const DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER = '<dynamic executable script src>';
+
 function externalScriptModuleSpecifiers(content) {
   return jsxOpeningTagCandidates(content)
     .filter((openingTag) => /^<script\b/iu.test(openingTag))
     .filter((openingTag) => isExecutableScriptType(staticMarkupAttribute(openingTag, 'type')))
-    .map((openingTag) => staticMarkupAttribute(openingTag, 'src'))
-    .filter((specifier) => typeof specifier === 'string' && specifier.length > 0);
+    .flatMap((openingTag) => {
+      if (!/\bsrc\s*=/iu.test(openingTag)) return [];
+      if (/(?:^|\s)(?::src|v-bind:src)\s*=/iu.test(openingTag)) {
+        return [DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER];
+      }
+      const specifier = staticMarkupAttribute(openingTag, 'src');
+      if (!specifier || /[{}\x60]/u.test(specifier)) {
+        return [DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER];
+      }
+      return [specifier];
+    });
 }
 function isExternalExecutableScriptSpecifier(specifier) {
   return /^(?:[a-z][a-z0-9+.-]*:|\/|\/\/)/iu.test(specifier);
@@ -3393,7 +3437,9 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
   }
   if (/\.html?$/i.test(absolutePath)) {
     return [
-      ...externalScriptModuleSpecifiers(content),
+      ...externalScriptModuleSpecifiers(content).filter(
+        (specifier) => specifier !== DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER
+      ),
       ...embeddedScriptSegments(content).flatMap((segment) =>
         scriptModuleSpecifiers(segment, absolutePath)
       ),
@@ -3401,7 +3447,9 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
   }
   if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
     return [
-      ...externalScriptModuleSpecifiers(content),
+      ...externalScriptModuleSpecifiers(content).filter(
+        (specifier) => specifier !== DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER
+      ),
       ...embeddedScriptSegments(content).flatMap((segment) =>
         scriptModuleSpecifiers(segment, absolutePath)
       ),
@@ -3939,6 +3987,15 @@ function discoverWebsiteRawImports(rootDir) {
       const content = fs.readFileSync(absolutePath, 'utf8');
       const markup = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
       for (const specifier of externalScriptModuleSpecifiers(markup)) {
+        if (specifier === DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER) {
+          rawImports.push({
+            sourcePath,
+            specifier,
+            category: 'dynamic-executable-script',
+            resolvedPath: null,
+          });
+          continue;
+        }
         if (isExternalExecutableScriptSpecifier(specifier)) {
           rawImports.push({
             sourcePath,
@@ -4002,6 +4059,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'external-executable-script') {
       issues.push(
         `${relativePath}: external executable script \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
+      );
+      continue;
+    }
+    if (rawImport.category === 'dynamic-executable-script') {
+      issues.push(
+        `${relativePath}: dynamic executable script source in \`${rawImport.sourcePath}\` must be static for consumer-wall review`
       );
       continue;
     }
@@ -4317,12 +4380,82 @@ function hasImageFileSignature(absolutePath) {
 }
 
 function hasVideoFileSignature(absolutePath) {
-  const signature = readFileSignature(absolutePath);
-  if (!signature) return false;
-  return (
-    signature.subarray(0, 4).equals(Buffer.from('1a45dfa3', 'hex')) ||
-    signature.subarray(4, 8).toString('ascii') === 'ftyp'
-  );
+  if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) return false;
+  const data = fs.readFileSync(absolutePath);
+  if (data.length < 16) return false;
+
+  if (data.subarray(0, 4).equals(Buffer.from('1a45dfa3', 'hex'))) {
+    const readEbmlSize = (offset) => {
+      if (offset >= data.length) return null;
+      const first = data[offset];
+      let length = 1;
+      while (length <= 8 && (first & (0x80 >> (length - 1))) === 0) length += 1;
+      if (length > 8 || offset + length > data.length) return null;
+      let value = BigInt(first & (0xff >> length));
+      for (let index = 1; index < length; index += 1) {
+        value = (value << 8n) | BigInt(data[offset + index]);
+      }
+      return value > BigInt(Number.MAX_SAFE_INTEGER) ? null : { length, value: Number(value) };
+    };
+    const headerSize = readEbmlSize(4);
+    if (!headerSize) return false;
+    const segmentOffset = 4 + headerSize.length + headerSize.value;
+    if (
+      segmentOffset + 5 > data.length ||
+      !data.subarray(segmentOffset, segmentOffset + 4).equals(Buffer.from('18538067', 'hex'))
+    ) {
+      return false;
+    }
+    const segmentSize = readEbmlSize(segmentOffset + 4);
+    if (!segmentSize) return false;
+    const segmentStart = segmentOffset + 4 + segmentSize.length;
+    const segmentEnd = Math.min(data.length, segmentStart + segmentSize.value);
+    if (segmentEnd <= segmentStart) return false;
+    const segment = data.subarray(segmentStart, segmentEnd);
+    const tracks = segment.indexOf(Buffer.from('1654ae6b', 'hex'));
+    const cluster = segment.indexOf(Buffer.from('1f43b675', 'hex'));
+    const simpleBlock = cluster < 0 ? -1 : segment.indexOf(Buffer.from([0xa3]), cluster + 4);
+    const block = cluster < 0 ? -1 : segment.indexOf(Buffer.from([0xa1]), cluster + 4);
+    return tracks >= 0 && cluster >= 0 && (simpleBlock >= 0 || block >= 0);
+  }
+
+  const boxes = [];
+  let offset = 0;
+  for (; offset + 8 <= data.length; ) {
+    let size = data.readUInt32BE(offset);
+    let headerSize = 8;
+    if (size === 1) {
+      if (offset + 16 > data.length) return false;
+      const extendedSize = data.readBigUInt64BE(offset + 8);
+      if (extendedSize > BigInt(Number.MAX_SAFE_INTEGER)) return false;
+      size = Number(extendedSize);
+      headerSize = 16;
+    } else if (size === 0) {
+      size = data.length - offset;
+    }
+    if (size < headerSize || offset + size > data.length) return false;
+    boxes.push({
+      type: data.subarray(offset + 4, offset + 8).toString('ascii'),
+      start: offset + headerSize,
+      end: offset + size,
+    });
+    offset += size;
+  }
+  if (offset !== data.length) return false;
+  const ftyp = boxes.find((box) => box.type === 'ftyp');
+  const moov = boxes.find((box) => box.type === 'moov');
+  const mdat = boxes.find((box) => box.type === 'mdat' && box.end > box.start);
+  if (!ftyp || !moov || !mdat) return false;
+  const moovBytes = data.subarray(moov.start, moov.end);
+  const sampleTable = moovBytes.indexOf(Buffer.from('stsz'));
+  const fragmentRun = moovBytes.indexOf(Buffer.from('trun'));
+  const sampleCount =
+    sampleTable >= 0 && sampleTable + 16 <= moovBytes.length
+      ? moovBytes.readUInt32BE(sampleTable + 12)
+      : fragmentRun >= 0 && fragmentRun + 12 <= moovBytes.length
+        ? moovBytes.readUInt32BE(fragmentRun + 8)
+        : 0;
+  return moovBytes.includes(Buffer.from('vide')) && sampleCount > 0;
 }
 
 function canonicalFileWithinRoot(
@@ -4868,7 +5001,7 @@ function validateRetainedEvidenceArtifacts(record, context, rootDir, issues, mat
     if (/\.(?:mkv|mov|mp4|webm)$/i.test(repositoryPath)) {
       if (!hasVideoFileSignature(absolutePath)) {
         issues.push(
-          `${context}: Multi-frame: retained video artifact has an unrecognized signature: ${repositoryPath}`
+          `${context}: Multi-frame: retained video artifact must be structurally valid and contain frame data: ${repositoryPath}`
         );
       }
       continue;

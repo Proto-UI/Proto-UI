@@ -7417,3 +7417,85 @@ test('fails closed on variable dynamic imports in Website and Harness sources', 
     assert.match(validationMessage(root), expected);
   }
 });
+
+test('rejects dynamic executable script sources in Astro and MDX', () => {
+  for (const extension of ['astro', 'mdx']) {
+    const root = createRoot();
+    const relativePath = `apps/www/src/content/docs/dynamic-script.${extension}`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, '<script is:inline src={runtimeUrl}></script>', 'utf8');
+    writeValidMatrices(root);
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        `dynamic executable script source in \`apps/www/src/content/docs/dynamic-script\\.${extension}\` must be static`
+      )
+    );
+  }
+});
+
+test('rejects DOM handlers installed through Object.assign', () => {
+  for (const [relativePath, expected] of [
+    [
+      'apps/www/src/components/AssignedHandler.ts',
+      /interactive website source `apps\/www\/src\/components\/AssignedHandler\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/AssignedHandler.tsx',
+      /Harness source `apps\/agent-harness\/src\/run\/AssignedHandler\.tsx` contains a forbidden interaction/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      "const button = document.querySelector('button'); Object.assign(button, { onclick() {} });",
+      'utf8'
+    );
+    writeValidMatrices(
+      root,
+      {},
+      relativePath.startsWith('apps/agent-harness/') ? { Path: `\`${relativePath}\`` } : {}
+    );
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('inventories static public HTML pages as user-facing surfaces', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/public/help.html';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    '<main><h1>Help</h1><form><button>Search</button></form></main>',
+    'utf8'
+  );
+  writeValidMatrices(root);
+  assert.match(
+    validationMessage(root),
+    /website component source `apps\/www\/public\/help\.html` is not classified by a matrix row/
+  );
+});
+
+test('rejects truncated retained video evidence with recognized header bytes', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  const videoPath = 'internal/website/evidence/s14/navigation.mp4';
+  writeSelfHostedPromotion(root, revision, {
+    websiteBindings,
+    evidenceOverrides: { 'Multi-frame': `\`${videoPath}\`` },
+  });
+  fs.writeFileSync(path.join(root, videoPath), Buffer.from('000000186674797069736f6d', 'hex'));
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Multi-frame: retained video artifact must be structurally valid and contain frame data/
+  );
+});
