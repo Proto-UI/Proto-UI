@@ -23,11 +23,11 @@
 | `main@c473eae3` | #623 + #625 | react 79,385 / 301,098 / `a51b2d304fc1b5971804a2e498655b11fa2de7159326758649e8637fc5aad3eb` | 78,500 |
 | `main@c473eae3` | #623 + #625 | vue 79,133 / 299,812 / `ea0d8eadf796a25a4a3aa268819a5dcf86cae64bfe5b9defac81038d46315f20` | 78,500 |
 | `main@c473eae3` | #623 + #625 | wc 82,574 / 312,928 / `21a724e93dbc6b3b0cf0b3f7dedb4cfec6292b449a0726fc85b902b21e8a8579` | 89,000 |
-| #652 merge-ref `6c5d1613` | #623 + #625 + #652 | react 82,082 / 306,763 / `f89e034e216162aaa4020b0d95660e1d24a00eeb0e5f809683ca0898860e38b8` | 78,500 |
-| #652 merge-ref `6c5d1613` | #623 + #625 + #652 | vue 81,804 / 305,464 / `a9b74ab036fbddb34ddf955950cb756d3e49a243d357ef413be4caeb82a76873` | 78,500 |
-| #652 merge-ref `6c5d1613` | #623 + #625 + #652 | wc 95,936 / 351,703 / `47197dff7c5d72a12ee6e0a12d050af5cdd0d716b29803505c7d2646f3305dc4` | 89,000 |
+| #652 merge-ref `b53a2bc6` | #623 + #625 + #652 | react 82,082 / 306,763 / `f89e034e216162aaa4020b0d95660e1d24a00eeb0e5f809683ca0898860e38b8` | 78,500 |
+| #652 merge-ref `b53a2bc6` | #623 + #625 + #652 | vue 81,804 / 305,464 / `a9b74ab036fbddb34ddf955950cb756d3e49a243d357ef413be4caeb82a76873` | 78,500 |
+| #652 merge-ref `b53a2bc6` | #623 + #625 + #652 | wc 95,936 / 351,703 / `47197dff7c5d72a12ee6e0a12d050af5cdd0d716b29803505c7d2646f3305dc4` | 89,000 |
 
-对应 CI 证据：`main` run `35515179875` / job `106089855845`；#652 run `35517184826` / job `106095011007`。#509 merge-ref 的三个产物与当前 `main` 逐字节相同，证明其 Agent operations 变更没有形成 package 增量。
+对应 CI 证据：`main` run `35515179875` / job `106089855845`；[#652 run `35517184826` / job `106095011007`](https://github.com/Proto-UI/Proto-UI/actions/runs/35517184826/job/106095011007)。后者 checkout 与 `git log -1` 输出的完整 commit 是 `b53a2bc670cf363e161fa698c03b4d90aa12aa84`，即将 `5a5b58a79a5f2b26c55f649733cef18872b45000` 合入 `c473eae3fe6b66354f5e689fcc1d01241946ed7f` 的历史测量。`6c5d1613ef45093b49f93dd833c90a8312e4ee7a` 属于 #509 merge-ref，不是这份 Shadow 测量的源码；其三个 Adapter 产物与当时 `main` 逐字节相同，未形成 package 增量。
 
 ## 增长归因
 
@@ -46,3 +46,5 @@
 ## 边界
 
 本变更不解除 whole-entry anti-regression 门的阻断性，不改变测量形状，不扩张公共 API 或运行时语义，不修改 spec 实体。旧记录不回写；后续能力增长仍需新的精确测量、归因和独立评审事务。
+
+同一历史 #652 package job 还记录了 `core root` 6,013 / 6,000 与 `runtime root` 61,580 / 60,000 的失败。只代入本事务的三个 Adapter 上限不会消除这两个失败；本 PR 不调整 Core/Runtime 预算，也不证明 #652 的全部预算通过。#652 后续 head 仍须独立取得对应源码的完整 gate 与 review 证据，不能继承这份历史测量的通过结论。
