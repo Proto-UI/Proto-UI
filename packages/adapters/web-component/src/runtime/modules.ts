@@ -873,12 +873,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (isCurrentEntryObservation()) projectEntry();
               };
               stopEntryViewportWatch = listenToEntryEvents(
-                [
-                  view,
-                  view.matchMedia('(prefers-reduced-motion: reduce)'),
-                  view.matchMedia('(prefers-color-scheme: dark)'),
-                  view.matchMedia('(forced-colors: active)'),
-                ],
+                [view, view.matchMedia('(prefers-reduced-motion: reduce)')],
                 ['resize', 'change'],
                 onViewportResize
               );

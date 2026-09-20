@@ -1191,6 +1191,50 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('skips a sampled target whose native focus request is rejected', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        customElements.define(
+          'closeout-rejected-focus',
+          class extends HTMLElement {
+            focus() {}
+          }
+        );
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-rejected-focus-scope',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const scope = new C();
+        scope.id = 'rejected-focus-scope';
+        scope.innerHTML =
+          '<closeout-rejected-focus id="rejected-focus" tabindex="0"></closeout-rejected-focus><button id="accepted-focus">Accepted</button>';
+        document.body.append(scope);
+        document.body.tabIndex = -1;
+        document.body.focus();
+        scope.getExposes().activate();
+      });
+
+      await page.keyboard.press('Tab');
+      expect(await page.evaluate(() => document.activeElement?.id)).toBe('accepted-focus');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each(['single', 'multiline'] as const)(
     'initially absent %s editor acquires no view lease',
     async (lineMode) => {
@@ -3169,6 +3213,55 @@ describe('Shadow closeout native boundaries', () => {
         contentHidden: '0',
         contentRestored: null,
       });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('rebinds active portal adoption after its origin moves to another owner', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const Owner = p.adapt(
+          p.define({ name: 'closeout-portal-rebind-owner', setup: () => (r: any) => r.slot() })
+        );
+        const Child = p.adapt(
+          p.define({ name: 'closeout-portal-rebind-child', setup: () => (r: any) => r.slot() })
+        );
+        const first = new Owner();
+        const second = new Owner();
+        const wrapper = document.createElement('div');
+        const child = new Child();
+        child.id = 'portal-rebind-child';
+        wrapper.append(child);
+        first.append(wrapper);
+        document.body.append(first, second);
+        const portal = p.createPortal();
+        portal.mount(child);
+
+        second.append(wrapper);
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        foreignDocument.adoptNode(second);
+        foreignDocument.body.append(second);
+        const immediate = {
+          ownerDocument: child.ownerDocument === foreignDocument,
+          inDestinationBody: foreignDocument.body.querySelector('#portal-rebind-child') === child,
+          oldBodyClean: document.body.querySelector('#portal-rebind-child') === null,
+        };
+        portal.unmount(child);
+        frame.remove();
+        return immediate;
+      });
+      expect(result).toEqual({ ownerDocument: true, inDestinationBody: true, oldBodyClean: true });
       expect(errors).toEqual([]);
     } finally {
       await page.close();

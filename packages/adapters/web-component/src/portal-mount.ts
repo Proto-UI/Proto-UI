@@ -47,9 +47,28 @@ export function createWebComponentPortalMount() {
       const descriptor = Object.getOwnPropertyDescriptor(el, 'parentNode');
       let ownsParent = false;
       let projected = false;
-      let unbindAdoption = () => {};
+      let unbindAdoption: (() => void) | null = null;
       let observer: MutationObserver | null = null;
       let observedDocument: Document | null = null;
+      const adopt = (document: Document) => {
+        if (el.ownerDocument !== document) document.body?.appendChild(el);
+        observeOriginTrees();
+        // adoptNode() may not be followed by a synchronous reconnect.
+        // Retain the established checkpoint cleanup in that case.
+        queueMicrotask(onMutation);
+      };
+      const bindAdoption = () => {
+        unbindAdoption?.();
+        const owner = findPortalOwner(parent);
+        if (!owner) return;
+        const adoptions = adoptedProjections.get(owner) ?? new Set();
+        adoptions.add(adopt);
+        adoptedProjections.set(owner, adoptions);
+        unbindAdoption = () => {
+          adoptions.delete(adopt);
+          if (!adoptions.size) adoptedProjections.delete(owner);
+        };
+      };
       const onMutation = () => {
         // Mutation delivery observes the settled tree, preserving sync moves.
         if (!parent.isConnected || (projected && marker.parentNode !== parent)) revoke?.();
@@ -57,6 +76,7 @@ export function createWebComponentPortalMount() {
           const proto = getPrototypeByInstance(el);
           const token = (el as any)._instanceToken;
           if (proto && token) markProtoInstance(el, proto, token, true);
+          bindAdoption();
           observeOriginTrees();
         }
       };
@@ -87,7 +107,7 @@ export function createWebComponentPortalMount() {
       const restore = () => {
         if (revoke !== restore) return;
         revoke = null;
-        unbindAdoption();
+        unbindAdoption?.();
         const wasProjected = projected;
         projected = false;
         activeProjections.delete(el);
@@ -103,23 +123,7 @@ export function createWebComponentPortalMount() {
       };
       revoke = restore;
       try {
-        const owner = findPortalOwner(parent);
-        if (owner) {
-          const adoptions = adoptedProjections.get(owner) ?? new Set();
-          const adopt = (document: Document) => {
-            if (projected && el.ownerDocument !== document) document.body?.appendChild(el);
-            observeOriginTrees();
-            // adoptNode() may not be followed by a synchronous reconnect.
-            // Retain the established checkpoint cleanup in that case.
-            queueMicrotask(onMutation);
-          };
-          adoptions.add(adopt);
-          adoptedProjections.set(owner, adoptions);
-          unbindAdoption = () => {
-            adoptions.delete(adopt);
-            if (!adoptions.size) adoptedProjections.delete(owner);
-          };
-        }
+        bindAdoption();
         Object.defineProperty(el, 'parentNode', { get: () => parent, configurable: true });
         ownsParent = true;
         // Observe each containing tree: document does not see mutations inside

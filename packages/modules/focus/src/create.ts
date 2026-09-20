@@ -590,8 +590,16 @@ class FocusModuleImpl extends ModuleBase {
           ? (next + targets.length) % targets.length
           : Math.max(0, Math.min(targets.length - 1, next));
         // Native host events, not this sample, report any logical focus facts.
-        this.caps.get(FOCUS_REQUEST_FOCUS_CAP)(targets[next]!, { reason: 'keyboard' });
-        this.lastScopeTarget = targets[next]!;
+        const request = this.caps.get(FOCUS_REQUEST_FOCUS_CAP);
+        for (let attempts = targets.length; attempts > 0; attempts -= 1) {
+          const target = targets[next]!;
+          if (request(target, { reason: 'keyboard' }) !== false) {
+            this.lastScopeTarget = target;
+            return;
+          }
+          if (!this.scopeConfig.loop && next === (ev.shiftKey ? 0 : targets.length - 1)) return;
+          next = (next + (ev.shiftKey ? -1 : 1) + targets.length) % targets.length;
+        }
         return;
       }
       FOCUS_CENTER.focusInScope(entry, ev.shiftKey ? 'prev' : 'next');

@@ -49,16 +49,16 @@ export function validateShadowStyleArtifact(artifact: unknown): ShadowStyleArtif
   const candidate = artifact as Record<string, unknown>;
   const { kind, version, cssText, environment } = candidate;
   if (kind !== SHADOW_STYLE_ARTIFACT_KIND) {
-    throw invalidArtifact(`kind ${String(kind)}`);
+    throw invalidArtifact('kind');
   }
   if (version !== SHADOW_STYLE_ARTIFACT_VERSION) {
-    throw invalidArtifact(`version ${String(version)}`);
+    throw invalidArtifact('version');
   }
   if (typeof cssText !== 'string') {
     throw invalidArtifact('cssText');
   }
   if (environment !== SHADOW_STYLE_ARTIFACT_ENVIRONMENT) {
-    throw invalidArtifact(`environment ${String(environment)}`);
+    throw invalidArtifact('environment');
   }
 
   validateShadowSelectorAbi(cssText);
@@ -116,7 +116,7 @@ function validateShadowSelectorAbi(cssText: string): void {
   const selectors = stripShadowCssComments(cssText);
   const documentMarker = DOCUMENT_ENVIRONMENT_MARKERS.find((marker) => selectors.includes(marker));
   if (documentMarker) {
-    throw invalidArtifact(`document selector ${documentMarker}`);
+    throw invalidArtifact(documentMarker);
   }
 
   const hasUnscopedDarkToken = selectors.split(/[{},]/).some((selector) => {
@@ -135,7 +135,7 @@ function validateShadowSelectorAbi(cssText: string): void {
     return false;
   });
   if (hasUnscopedDarkToken) {
-    throw invalidArtifact('dark selector');
+    throw invalidArtifact('dark');
   }
 }
 
