@@ -163,6 +163,7 @@ The matrix rows remain authoritative. Each binding joins a scanned source, its c
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-controlled.demo.ts` | `www.demo.authored-controllers` | `0a85a37becbd109ca3a03de437b5dc1e86b4a7d9607f370f068d334e51b2efd9` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts` | `www.demo.authored-controllers` | `cc88bc8d07c0fa55229974d5aa7e32c8e5b7a3c219a09f5532652378944c5657` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-separator.demo.ts` | `www.demo.brutalist-separator` | `58d963578d9f80a4d17db85d431838fee464ea653a59241c3167c66c95a230b6` |
+| `apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts` | `www.demo.authored-controllers` | `c2f2d9b91205a15129c487dcf90549df1ef18fc9dfd772765f3a968805127fea` |
 | `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` | `e0853379e6d8a241101bc82e78f43f4dec9db1d14e522f8c4b72ee46ff05cdb3` |
 | `apps/www/src/pages/en/test/style-isolation.astro` | `www.demo.prototype-previewer`, `www.demo.raw-adapter-runtimes` | `8fb1136b0a7c267073ab1f2c52b135ef199e9109c449b0ef3aadd422ab429ca3` |
 | `apps/www/src/pages/index.astro` | `www.route.root-locale-redirect` | `e50e3349709f152a1f53de9e85fecb17dceb443282b147c917d2ff1a8c37c4a8` |
