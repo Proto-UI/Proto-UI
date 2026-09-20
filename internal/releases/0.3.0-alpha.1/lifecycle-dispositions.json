@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0-alpha.1",
+  "slices": [
+    {
+      "id": "alpha.1-image-view-and-release-preparation",
+      "entities": ["D-IMAGE-VIEW-PROJECTION-0001", "T-IMAGE-VIEW-0001"],
+      "disposition": "remain-draft",
+      "rationale": "D-IMAGE-VIEW-PROJECTION-0001 and T-IMAGE-VIEW-0001 remain draft because both catalog entries still lack the lifecycleRationale required for stable admission; this alpha.1 review reconciles their bounded Web evidence but does not supply that admission rationale.",
+      "evidence": [
+        "spec/decisions/D-IMAGE-VIEW-PROJECTION-0001.yaml",
+        "spec/tests/T-IMAGE-VIEW-0001.yaml",
+        "spec/versions/V-PROTO-UI-0010.yaml",
+        "packages/adapters/vue2/test/image-view.integration.test.ts",
+        "internal/releases/0.3.0-alpha.1/release-notes.md"
+      ]
+    }
+  ]
+}

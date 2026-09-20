@@ -1458,6 +1458,17 @@ function resolveKnownAsHookStateHandles(node) {
     ]);
   }
 
+  if (hookName === 'asRadioGroupItem') {
+    return new Map([...COMMAND_STATE_VARIANTS, ['checked', 'data-[checked]']]);
+  }
+
+  if (hookName === 'asRadioGroupIndicator') {
+    return new Map([
+      ['checked', 'data-[checked]'],
+      ['disabled', 'data-[disabled]'],
+    ]);
+  }
+
   if (hookName === 'asScrollAreaViewport') {
     return new Map([
       ['focused', 'data-[focused]'],

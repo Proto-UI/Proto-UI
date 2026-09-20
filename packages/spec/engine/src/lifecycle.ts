@@ -77,6 +77,28 @@ function relationIds(relations: SpecRelations, version: string): string[] {
   );
 }
 
+function verifiesCriterion(
+  entity: SpecEntity,
+  test: SpecEntity,
+  testCase: SpecEntity['cases'][number],
+  criterionId: string,
+  version: string
+): boolean {
+  return (
+    Object.values(filterRelationsForVersion(test.verifies, version) ?? {}).some((targets) =>
+      targets?.some(
+        (target) =>
+          target.id === entity.id &&
+          (!target.anchors?.length || target.anchors.includes(criterionId))
+      )
+    ) ||
+    (filterRelationsForVersion(entity.verifies, version)?.tests ?? []).some(
+      (target) =>
+        target.id === test.id && (!target.anchors?.length || target.anchors.includes(testCase.id))
+    )
+  );
+}
+
 function hasText(text: SpecLocalizedText | undefined): boolean {
   return (
     text !== undefined &&
@@ -212,7 +234,12 @@ export function getSpecLifecycleReport(
               test.cases.some(
                 (testCase) =>
                   implementation.consumesCases.includes(testCase.id) &&
-                  entity.criteria.some((criterion) => testCase.covers.includes(criterion.id))
+                  entity.criteria.some(
+                    (criterion) =>
+                      testCase.covers.includes(criterion.id) &&
+                      (relationIds(test.exercises, version).includes(entity.id) ||
+                        verifiesCriterion(entity, test, testCase, criterion.id, version))
+                  )
               )
           )
           .map((implementation) => ({
@@ -391,6 +418,7 @@ export function getSpecLifecycleReport(
               test.cases.some(
                 (testCase) =>
                   testCase.covers.includes(criterion.id) &&
+                  verifiesCriterion(entity, test, testCase, criterion.id, version) &&
                   test.implementations.some(
                     (implementation) =>
                       isRecordedPassing(implementation) &&

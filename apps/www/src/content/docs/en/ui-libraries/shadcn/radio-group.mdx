@@ -1,0 +1,38 @@
+---
+title: 'Radio Group'
+description: 'Shadcn radio presentation over the Base single-selection protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+Radio Group contains Root, Item, and Indicator. Base owns the selected value, item order, roving focus, selection requests, and the `radiogroup`/`radio` accessibility objects. This Shadcn projection adds the circular control, selected dot, focus ring, dark tint, and disabled presentation.
+
+<PrototypePreviewer demoId="demo-shadcn-radio-group" initialRuntime="wc" />
+
+## Compose the three parts
+
+Import `shadcnRadioGroupRoot`, `shadcnRadioGroupItem`, and `shadcnRadioGroupIndicator` from `@proto.ui/prototypes-shadcn/radio-group`, then adapt them to your runtime. The root package also exports these objects and their PascalCase aliases. `proto-ui add react shadcn-radio-group` generates the three React facades; `vue`, `vue2`, and `wc` are supported CLI targets too.
+
+Each Item belongs to its nearest Root. Put an Indicator inside each Item whose selected dot should appear. Indicator is an explicit, optional, repeatable part; the CLI does not insert a hidden default part. Its SVG is decorative and creates no extra radio or tab stop.
+
+| Part | Props | Responsibility |
+| --- | --- | --- |
+| Root | `value?`, `defaultValue?`, `disabled?`, `a11yLabel?` | Owns one selected string and the item collection. |
+| Item | `value` (required), `disabled?` | Requests selection and derives checked/effective-disabled state. |
+| Indicator | None | Reflects the nearest Item's checked state. |
+
+Give Root a meaningful `a11yLabel` and every Item a unique non-empty `value`. Item names come from authored content or host labeling. The demo supplies visually hidden text inside each radio and adjacent visible labels; these labels and row spacing belong to the App.
+
+An uncontrolled Root accepts selection and emits `valueChange`. With `value` supplied, it emits a request while the App owns the next value prop; the projection does not manufacture an intermediate checked value. Root retains empty or unmatched values, and a selected Item may remain checked when disabled.
+
+## Try the inherited interaction
+
+Tab into the first group: the selected enabled Item is its entry point. Arrow keys move and select, wrapping across enabled Items; Home and End reach the first and last enabled choices. The disabled Item is skipped. Space selects a focused Item; Enter does not. A successful primary pointer release selects, while a cancelled press does not.
+
+Compare the initially empty group and the disabled group, then repeat in Web Components, React, Vue, and Vue 2. The normal control is 16px with an 8px decorative glyph box. Keyboard focus adds a three-pixel ring; only color and box-shadow transition, over 150ms. Changing the website theme changes the input tint without changing selection.
+
+## Comparison and scope
+
+The comparison source is the [v4 new-york Radio Group at revision `f31ed819`](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/radio-group.tsx). Proto UI is an independent, unofficial implementation. Indicator is a separate public part here, with host-neutral flex centering and checked-driven opacity; upstream embeds its Indicator and positions the icon absolutely. Item explicitly supplies a transparent normal background and flex layout across hosts.
+
+The inherited API has no `asChild`, native form submission/validation, `required`, invalid state, public `orientation`/`loop`, or visual variants. Upstream `aria-invalid` styles are therefore outside this projection. Arrow wrapping is the fixed Base behavior, not a new configurable API. The three catalog entities remain `draft`; this page does not claim full Shadcn/Radix compatibility or stable admission.

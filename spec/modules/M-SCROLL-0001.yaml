@@ -32,9 +32,18 @@ criteria:
     text:
       zh-CN: Module 必须把 family-resolved Scrollbar/Thumb control route 附着到同一 surface session，使 host Move Gesture 产生既有 `control-drag` request，而不是创建第二份 Thumb scroll state。
       en: The module must attach the family-resolved Scrollbar and Thumb control route to the same surface session so host Move Gesture produces the existing `control-drag` request rather than a second Thumb scroll state.
+  - id: M-SCROLL-0001-G
+    text:
+      zh-CN: Module 必须拥有 end-follow portable policy、`atEnd`/follow observed facts 与 `to-end` request arbitration，并把 proximity、layout 与 input classification 留给同一个 bounded Scroll host lease。
+      en: The Module must own the portable end-follow policy, `atEnd` and follow observed facts, and `to-end` request arbitration while leaving proximity, layout, and input classification to the same bounded Scroll host lease.
+  - id: M-SCROLL-0001-H
+    text:
+      zh-CN: Module 必须使 end-follow facts 与 scheduled/request outcome 服从当前 view epoch；detach、replacement 或 dispose 后的旧 callback 不得更新当前 observed handles。
+      en: The Module must bind end-follow facts and scheduled or request outcomes to the current view epoch; an old callback after detach, replacement, or disposal must not update current observed handles.
 satisfies:
   contracts:
     - C-SCROLL-0001
+    - { id: C-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - C-AS-SCROLL-SURFACE-0001
     - C-SCROLL-COMPOSED-CHROME-0001
     - C-SCROLL-COMPOSED-CONTROL-0001
@@ -45,6 +54,7 @@ requires:
 verifies:
   tests:
     - T-SCROLL-0001
+    - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - T-SCROLL-COMPOSED-CHROME-0001
     - T-SCROLL-COMPOSED-CONTROL-0001
 sources:
@@ -52,6 +62,9 @@ sources:
   - path: packages/modules/scroll/src/create.ts
   - path: packages/modules/scroll/src/impl.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added portable end-follow policy, observed facts, semantic request arbitration, and epoch-scoped outcome ownership to the existing Scroll surface session.
   - version: 0.2.0-rc.7
     change: revised
     summary: Attached Move Gesture-backed composed controls to the existing Scroll surface session and request path.

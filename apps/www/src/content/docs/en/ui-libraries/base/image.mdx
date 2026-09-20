@@ -6,17 +6,17 @@ description: 'Host-owned image presentation with explicit accessibility and load
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-`base-image-root` is a draft Base prototype available in the `0.3.0-alpha.0` package line. It declares one host-owned image target and exposes its source, fit, and loading status. Web Components, React, and Vue 3 currently project it to one physical `<img>` per instance. Vue 2 Image View wiring is not implemented; these previews prove a bounded Web profile, not non-Web host support.
+`base-image-root` is a draft Base prototype available in the `0.3.0-alpha.0` package line. It declares one host-owned image target and exposes its source, fit, and loading status. Web Components, React, Vue 3, and Vue 2 currently project it to one physical `<img>` per instance. These previews prove a bounded Web profile, not non-Web host support.
 
 <div>
   <PrototypePreviewer
     demoId="demo-base-image"
     initialRuntime="wc"
-    runtimes={['wc', 'react', 'vue']}
+    runtimes={['wc', 'react', 'vue', 'vue2']}
   />
 </div>
 
-The three upper frames use the same image and size to compare `contain`, `cover`, and `fill`. The small illustration is decorative. The lower image starts without a source: load, replace, break, or clear its source to inspect real `loadingStatusChange` events. A cached or local image may finish loading too quickly to see the intermediate state; the transition log retains it. The controls, frame sizes, and log belong to this demo, not to Base Image.
+The three upper frames use the same image and size to compare `contain`, `cover`, and `fill` across four Web adapters. The small illustration is decorative. The lower image starts without a source: load, replace, break, or clear its source to inspect real `loadingStatusChange` events. A cached or local image may finish loading too quickly to see the intermediate state; the transition log retains it. The controls, frame sizes, and log belong to this demo, not to Base Image.
 
 ## Use Image
 
@@ -42,11 +42,11 @@ export function Cover() {
 }
 ```
 
-Vue uses `createVueAdapter(Vue)(imageRoot)`. Web Components use `AdaptToWebComponent(imageRoot, { registerAs: 'app-image' })`; set the declared props with `setElementProps()` before mounting. Use matching exact package versions throughout the application.
+Vue 3 uses `createVueAdapter(Vue)(imageRoot)` and Vue 2 uses `createVue2Adapter({ extend: Vue.extend.bind(Vue), nextTick: Vue.nextTick.bind(Vue), set: Vue.set.bind(Vue) })(imageRoot)`. Web Components use `AdaptToWebComponent(imageRoot, { registerAs: 'app-image' })`; set the declared props with `setElementProps()` before mounting. Use matching exact package versions throughout the application.
 
-The workspace CLI registers `base-image` for `react`, `vue`, and `wc`, generating `BaseImageRoot` or `BaseImageRootElement`. A build containing the entry supports `proto-ui add react base-image` and the corresponding `vue` / `wc` commands.
+The workspace CLI registers `base-image` for `react`, `vue`, `vue2`, and `wc`, generating `BaseImageRoot` or `BaseImageRootElement`. A build containing the entry supports `proto-ui add react base-image` and the corresponding `vue` / `vue2` / `wc` commands.
 
-Historical release boundary: the `0.3.0-alpha.0` prerelease contains the direct Image exports shown above, but its CLI predates the `base-image` registry entry. Image is outside the stable `0.2.0` surface.
+Historical release boundary: the published `0.3.0-alpha.0` prerelease contains the direct Image exports shown above, but its CLI predates the `base-image` registry entry. Image is outside the stable `0.2.0` surface.
 
 ## Props and Exposes
 
@@ -71,7 +71,7 @@ The current Web profile uses a displayable synchronous cache hit or that source 
 
 ## Compose and Style
 
-Root has no authored children. The application supplies dimensions, framing, and any adjacent caption or status display; `fit` describes how the image fills that physical frame. Web Components retain a custom-element boundary with one inner image; `surfaceClassName` and `surfaceStyle` target the image. React and Vue use the physical image as their root.
+Root has no authored children. The application supplies dimensions, framing, and any adjacent caption or status display; `fit` describes how the image fills that physical frame. Web Components retain a custom-element boundary with one inner image; `surfaceClassName` and `surfaceStyle` target the image. React, Vue 3, and Vue 2 use the physical image as their root.
 
 A prototype reusing the authored hook must also reuse its frozen static requirements so the Adapter can select the image target before setup:
 

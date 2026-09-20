@@ -53,6 +53,11 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
     pressed.set(false, reason);
   };
 
+  // P-BASE-BUTTON-PRESS-LIFECYCLE, P-BASE-BUTTON-POINTER-HOVER
+  def.lifecycle.onUnmounted(() => {
+    clearTransientInteraction('reason: button view unmounted => reset transient interaction');
+  });
+
   // P-BASE-BUTTON-PROP-DISABLED-CONTROLLED, P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT
   const syncDisabled = (nextDisabled: boolean) => {
     disabled.set(nextDisabled, 'reason: sync disabled');

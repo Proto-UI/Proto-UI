@@ -27,15 +27,23 @@ Viewport expose normalized axes、position、visible ratio、direction availabil
 
 `system` 与 `composed` 是同一 protocol 的投射策略。默认值由 Host Adapter 和 design-language preference 共同解析；它们不是两个 Base Prototype。composed mode 中，host 把 normalized facts 映射为 Thumb geometry，并通过现有 scroll engine 路由 movement。Thumb 不拥有独立 offset state、focus target、`scrollbar` role 或 Drag and Drop 语义。
 
+## Composition-level end-follow
+
+Scroll domain 为 append-only surface 提供独立 opt-in 的 `endFollow` policy。声明自有 privileged `asScrollSurface()` 的 composition 可以配置 `{ mode: 'while-at-end', axis: 'vertical' }`，观察每轴 `atEnd` 以及 `endFollow.state`、`endFollow.requestStatus`，并让 accessible jump control 发送 `{ kind: 'to-end', axis: 'vertical' }`。
+
+Host 只在 lease active 时跟随 layout growth；reader 离开末端后 pause，rapid append 会被 coalesce，自然到达末端或 semantic request 会恢复 follow。该能力不移动 focus、不接管 Live Region，也不强制 smooth motion。Raw offset、extent、target 与 pixel threshold 始终留在 host-local boundary。
+
+Base Scroll Area Viewport 默认保持该 policy 为 off。Message label、unread count、history-prepend visual anchoring 与 virtualized collection 仍分别属于 application 或其他 capability。
+
 ## 0.2 交付与证据
 
 稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/scroll-area`。与本组另外六个 family 不同，当前 CLI registry 没有 `base-scroll-area` component facade；它提供的是完整的 `brutalist-scroll-area` projection。Base library author 可以直接消费 public subpath，而面向 App 的 generated usage 当前从风格化投射进入。
 
-`T-BASE-SCROLL-AREA-0001` 及相关 Scroll/Move tests 把 host boundary 映射到 `packages/prototypes/base/test/scroll-area.test.ts` 与 cross-adapter Web conformance。本页 Preview 通过三个 Web Adapter 渲染同一个 logical family。
+`T-BASE-SCROLL-AREA-0001`、`T-SCROLL-END-FOLLOW-0001` 及相关 Scroll/Move tests 把 host boundary 映射到 focused module、real-browser 与 cross-adapter Web conformance。本页 Preview 通过三个 Web Adapter 渲染同一个 Base logical family；由于 Base Viewport 不 opt in，end-follow 使用独立 source-bundled Chromium journey。
 
 ## Lifecycle 与当前限制
 
-Root、Viewport、Scrollbar 与 Thumb entities 当前都是 **draft**。现有证据覆盖 system/composed projection、normalized facts/requests、host cleanup 与 composed Thumb movement。Track-page press、完整 keyboard scrollbar semantics、RTL/writing-mode normalization、velocity 与通用 Drag and Drop 仍不在 guarantee 内。
+Root、Viewport、Scrollbar 与 Thumb entities 当前都是 **draft**。现有证据覆盖 system/composed projection、normalized facts/requests、host cleanup、composed Thumb movement 与独立 opt-in end-follow lease。Track-page press、完整 keyboard scrollbar semantics、RTL/writing-mode normalization、velocity、visual-anchor preservation、virtualization 与通用 Drag and Drop 仍不在 guarantee 内。
 
 ## 参考
 
@@ -43,4 +51,5 @@ Root、Viewport、Scrollbar 与 Thumb entities 当前都是 **draft**。现有�
 - Parts：[Viewport](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-VIEWPORT.yaml)、[Scrollbar](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-SCROLLBAR.yaml)、[Thumb](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-THUMB.yaml)
 - [Scroll Area source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/scroll-area)
 - [Scroll Area evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/scroll-area.test.ts)
+- [End-follow contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml) 与 [evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SCROLL-END-FOLLOW-0001.yaml)
 - 风格化投射：[Brutalist Scroll Area](/zh-cn/ui-libraries/brutalist/components/scroll-area/)

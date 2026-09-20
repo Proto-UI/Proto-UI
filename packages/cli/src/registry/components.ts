@@ -353,6 +353,24 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     },
   ]),
 
+  'shadcn-radio-group': shadcnCompound('shadcn-radio-group', 'shadcn Radio Group', [
+    {
+      prototypeImport: 'shadcnRadioGroupRoot',
+      exportBaseName: 'ShadcnRadioGroupRoot',
+      elementName: 'proto-ui-shadcn-radio-group-root',
+    },
+    {
+      prototypeImport: 'shadcnRadioGroupItem',
+      exportBaseName: 'ShadcnRadioGroupItem',
+      elementName: 'proto-ui-shadcn-radio-group-item',
+    },
+    {
+      prototypeImport: 'shadcnRadioGroupIndicator',
+      exportBaseName: 'ShadcnRadioGroupIndicator',
+      elementName: 'proto-ui-shadcn-radio-group-indicator',
+    },
+  ]),
+
   'shadcn-scroll-area': shadcnCompound('shadcn-scroll-area', 'shadcn Scroll Area', [
     {
       prototypeImport: 'shadcnScrollAreaRoot',

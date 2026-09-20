@@ -94,19 +94,20 @@ function setupRadioGroupRoot(def: DefHandle<RadioGroupRootProps, RadioGroupRootE
 
   let currentRun: RunHandle<RadioGroupRootProps> | null = null;
   let contextSnapshot = initialContext;
+  let currentPreferenceId = '';
 
   const publish = (run: RunHandle<RadioGroupRootProps>, preferredCurrentId?: string): void => {
     const items = getRadioGroupItems(run);
+    if (preferredCurrentId !== undefined) currentPreferenceId = preferredCurrentId;
+    if (!items.some((item) => item.instanceId === currentPreferenceId && !item.disabled)) {
+      currentPreferenceId = '';
+    }
     const next: RadioGroupContextValue = {
       value: value.get(),
       controlled: run.props.isProvided('value'),
       disabled: disabled.get(),
       selectedItemId: canonicalSelectedItem(items, value.get())?.instanceId ?? '',
-      currentItemId: resolveCurrentItemId(
-        items,
-        value.get(),
-        preferredCurrentId ?? contextSnapshot.currentItemId
-      ),
+      currentItemId: resolveCurrentItemId(items, value.get(), currentPreferenceId),
     };
     if (sameContext(contextSnapshot, next)) return;
     contextSnapshot = next;

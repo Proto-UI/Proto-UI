@@ -26,7 +26,7 @@ const EXPECTED_SHARED_BASE_FAMILY_IDS = [
 ] as const;
 
 const EXPECTED_COMPONENT_IDS = {
-  shadcn: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'checkbox'],
+  shadcn: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'checkbox', 'radio-group'],
   brutalist: [
     ...EXPECTED_SHARED_BASE_FAMILY_IDS,
     'badge',
@@ -60,6 +60,7 @@ const EXPECTED_REQUIRED_PART_IDS = {
   separator: ['root'],
   textarea: ['root'],
   checkbox: ['root', 'indicator'],
+  'radio-group': ['root', 'item', 'indicator'],
   badge: ['root'],
   card: ['root', 'header', 'content', 'footer'],
   skeleton: ['root'],
@@ -92,6 +93,29 @@ const EXPECTED_LANE_ONLY_FAMILIES = {
         indicator: {
           basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
           prototypeId: 'shadcn-checkbox-indicator',
+        },
+      },
+    },
+    'radio-group': {
+      baseFamilyId: 'P-BASE-RADIO-GROUP',
+      recipeId: 'demo-shadcn-radio-group',
+      recipePrototypeIds: [
+        'shadcn-radio-group-root',
+        'shadcn-radio-group-item',
+        'shadcn-radio-group-indicator',
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP',
+          prototypeId: 'shadcn-radio-group-root',
+        },
+        item: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM',
+          prototypeId: 'shadcn-radio-group-item',
+        },
+        indicator: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-INDICATOR',
+          prototypeId: 'shadcn-radio-group-indicator',
         },
       },
     },
@@ -512,6 +536,7 @@ describe('Website projection-family manifests', () => {
     }
 
     expect(tryResolveProjectionRecipe('demo-brutalist-checkbox')).toBeNull();
+    expect(tryResolveProjectionRecipe('demo-brutalist-radio-group')).toBeNull();
     expect(tryResolveProjectionRecipe('demo-shadcn-card')).toBeNull();
   });
 

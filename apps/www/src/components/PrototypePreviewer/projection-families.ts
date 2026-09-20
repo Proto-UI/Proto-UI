@@ -15,6 +15,7 @@ export type SharedBaseFamilyId = (typeof SHARED_BASE_FAMILY_IDS)[number];
 export type ProjectionComponentId =
   | SharedBaseFamilyId
   | 'checkbox'
+  | 'radio-group'
   | 'badge'
   | 'card'
   | 'skeleton'
@@ -71,6 +72,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   separator: ['root'],
   textarea: ['root'],
   checkbox: ['root', 'indicator'],
+  'radio-group': ['root', 'item', 'indicator'],
   badge: ['root'],
   card: ['root', 'header', 'content', 'footer'],
   skeleton: ['root'],
@@ -300,6 +302,29 @@ const SHADCN_MANIFEST = {
         indicator: {
           basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
           prototypeId: 'shadcn-checkbox-indicator',
+        },
+      },
+    },
+    'radio-group': {
+      baseFamilyId: 'P-BASE-RADIO-GROUP',
+      recipeId: 'demo-shadcn-radio-group',
+      recipePrototypeIds: [
+        'shadcn-radio-group-root',
+        'shadcn-radio-group-item',
+        'shadcn-radio-group-indicator',
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP',
+          prototypeId: 'shadcn-radio-group-root',
+        },
+        item: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM',
+          prototypeId: 'shadcn-radio-group-item',
+        },
+        indicator: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-INDICATOR',
+          prototypeId: 'shadcn-radio-group-indicator',
         },
       },
     },

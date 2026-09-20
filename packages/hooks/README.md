@@ -13,7 +13,7 @@ Author-facing hook package for accessibility semantics, focus, overlay, trigger,
 ## Install
 
 ```bash
-npm install @proto.ui/hooks@0.3.0-alpha.0
+npm install @proto.ui/hooks@0.3.0-alpha.1
 ```
 
 ## Internal Structure

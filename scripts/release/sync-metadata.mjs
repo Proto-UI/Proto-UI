@@ -54,6 +54,9 @@ const PACKAGE_RULES = {
     purpose:
       'Provides the base template, shared host wiring, and common runtime bridges for building Proto UI adapters.',
     role: 'Adapter foundation package used to translate Proto UI contracts into concrete host integrations.',
+    // Contributor-authored README documents the default color-scheme source;
+    // preserve its lifecycle, cleanup, and exclusion boundaries.
+    preserveReadme: true,
   },
   '@proto.ui/module-a11y': {
     description: 'Proto UI module that records accessibility semantic object IR.',
@@ -66,7 +69,7 @@ const PACKAGE_RULES = {
     preserveReadme: true,
     extraKeywords: ['accessibility'],
   },
-  '@proto.ui/module-anatomy': moduleRule('anatomy capability'),
+  '@proto.ui/module-anatomy': { ...moduleRule('anatomy capability'), preserveReadme: true },
   '@proto.ui/module-as-trigger': moduleRule('as-trigger capability'),
   '@proto.ui/module-boundary': {
     description: 'Proto UI module that provides interaction-boundary capability.',
@@ -98,9 +101,12 @@ const PACKAGE_RULES = {
     extraKeywords: ['signal'],
   },
   '@proto.ui/module-expose-state': moduleRule('state expose capability'),
-  '@proto.ui/module-expose-state-web': moduleRule('web state expose capability'),
+  '@proto.ui/module-expose-state-web': {
+    ...moduleRule('web state expose capability'),
+    preserveReadme: true,
+  },
   '@proto.ui/module-feedback': moduleRule('feedback capability'),
-  '@proto.ui/module-focus': moduleRule('focus capability'),
+  '@proto.ui/module-focus': { ...moduleRule('focus capability'), preserveReadme: true },
   '@proto.ui/module-hit-participation': {
     description: 'Proto UI module that provides hit-participation capability.',
     kind: 'module',
@@ -108,6 +114,7 @@ const PACKAGE_RULES = {
     purpose:
       'Provides reliable hit-testing semantics and click participation interpretation for prototype interaction logic.',
     role: 'Adapter-facing module package used by the Proto UI runtime and adapter layer.',
+    preserveReadme: true,
     extraKeywords: ['hit-participation'],
   },
   '@proto.ui/module-overlay': moduleRule('overlay capability'),
@@ -131,20 +138,30 @@ const PACKAGE_RULES = {
     extraKeywords: ['transition'],
   },
   '@proto.ui/module-props': moduleRule('props capability'),
-  '@proto.ui/module-rule': moduleRule('rule capability'),
-  '@proto.ui/module-rule-expose-state-web': moduleRule('rule-based web state expose capability'),
-  '@proto.ui/module-rule-meta': moduleRule('rule metadata capability'),
-  '@proto.ui/module-scroll': moduleRule('host-mediated scroll capability'),
+  '@proto.ui/module-rule': { ...moduleRule('rule capability'), preserveReadme: true },
+  '@proto.ui/module-rule-expose-state-web': {
+    ...moduleRule('rule-based web state expose capability'),
+    preserveReadme: true,
+  },
+  '@proto.ui/module-rule-meta': {
+    ...moduleRule('rule metadata capability'),
+    // Contributor-authored README documents the color-scheme lease boundary.
+    preserveReadme: true,
+  },
+  '@proto.ui/module-scroll': {
+    ...moduleRule('host-mediated scroll capability'),
+    preserveReadme: true,
+  },
   '@proto.ui/module-state': moduleRule('state capability'),
   '@proto.ui/module-state-accessibility': moduleRule('state accessibility capability'),
   '@proto.ui/module-state-interaction': moduleRule('state interaction capability'),
   '@proto.ui/module-test-sys': moduleRule('test system capability'),
   '@proto.ui/module-text-control': {
-    description: 'Proto UI portable multiline text-control host protocol.',
+    description: 'Proto UI portable single-line and multiline text-control host protocol.',
     kind: 'module',
-    capability: 'multiline text-control host protocol',
+    capability: 'single-line and multiline text-control host protocol',
     purpose:
-      'Owns the host boundary for a semantic plain-text/multiline/host-owned editing requirement: stable controlled or uncontrolled value ownership, normalized input/change/IME composition events, live property projection, and physical focus access. Adapters select the physical host editor; the current Web profile resolves the requirement to `HTMLTextAreaElement`.',
+      'Owns the host boundary for a semantic plain-text, line-mode-aware, host-owned editing requirement: stable controlled or uncontrolled value ownership, normalized input/change/IME composition events, live property projection, and physical focus access. Adapters select the physical host editor; the current Web profile resolves single-line declarations to `HTMLInputElement` and multiline declarations to `HTMLTextAreaElement`.',
     role: 'Adapter-facing dependency used by Base Textarea and the official Web Component, React, Vue, and Vue 2 adapters.',
     // Contributor-authored README documents the host-boundary contract, non-goals,
     // exports, and the draft rc.7 publication status; preserve it.
@@ -161,8 +178,16 @@ const PACKAGE_RULES = {
     preserveReadme: true,
     extraKeywords: ['image', 'image-view'],
   },
-  '@proto.ui/adapter-react': adapterRule('React'),
-  '@proto.ui/adapter-vue': adapterRule('Vue'),
+  '@proto.ui/adapter-react': {
+    ...adapterRule('React'),
+    // Contributor-authored README documents default color-scheme lifecycle.
+    preserveReadme: true,
+  },
+  '@proto.ui/adapter-vue': {
+    ...adapterRule('Vue'),
+    // Contributor-authored README documents default color-scheme lifecycle.
+    preserveReadme: true,
+  },
   '@proto.ui/adapter-vue2': {
     ...adapterRule('Vue 2.6'),
     description:
@@ -172,7 +197,11 @@ const PACKAGE_RULES = {
     preserveReadme: true,
     extraKeywords: ['vue', 'vue2'],
   },
-  '@proto.ui/adapter-web-component': adapterRule('Web Components'),
+  '@proto.ui/adapter-web-component': {
+    ...adapterRule('Web Components'),
+    // Contributor-authored README documents default color-scheme lifecycle.
+    preserveReadme: true,
+  },
   '@proto.ui/cli': {
     description:
       'Proto UI command line tooling for initialization, component facade generation, and style presets.',

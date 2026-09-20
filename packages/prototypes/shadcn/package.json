@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/prototypes-shadcn",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0-alpha.1",
   "private": false,
   "type": "module",
   "sideEffects": false,
@@ -101,6 +101,11 @@
       "types": "./dist/tooltip/index.d.ts",
       "import": "./dist/tooltip/index.js",
       "default": "./dist/tooltip/index.js"
+    },
+    "./radio-group": {
+      "types": "./dist/radio-group/index.d.ts",
+      "import": "./dist/radio-group/index.js",
+      "default": "./dist/radio-group/index.js"
     }
   },
   "description": "shadcn-style Proto UI prototype library for adapter-driven components.",
