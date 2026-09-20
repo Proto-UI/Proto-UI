@@ -5,7 +5,7 @@ const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
 
 type ElementWithProtoParent = HTMLElement & Record<symbol, unknown>;
 
-type DynamicEventTarget = EventTarget & {
+export type RebindableEventTarget = EventTarget & {
   setTarget(target: EventTarget | null): void;
   getTarget(): EventTarget | null;
 };
@@ -28,17 +28,27 @@ export function releaseWebTriggerSurface(target: HTMLElement): void {
   }
 }
 
-function createDynamicEventTarget(): DynamicEventTarget {
-  type Registration = {
-    type: string;
-    listener: EventListenerOrEventListenerObject;
-    options?: boolean | AddEventListenerOptions;
-  };
+export function createRebindableEventTarget(): RebindableEventTarget {
+  type Registration = [
+    string,
+    EventListenerOrEventListenerObject,
+    boolean,
+    boolean,
+    boolean,
+    EventListener,
+    AbortSignal?,
+    (() => void)?,
+  ];
 
   let target: EventTarget | null = null;
   const registrations: Registration[] = [];
-  const capture = (options?: boolean | AddEventListenerOptions | EventListenerOptions) =>
-    typeof options === 'boolean' ? options : options?.capture === true;
+  const remove = (registration: Registration) => {
+    const index = registrations.indexOf(registration);
+    if (index < 0) return;
+    registrations.splice(index, 1);
+    target?.removeEventListener(registration[0], registration[5], registration[2]);
+    if (registration[7]) registration[6]?.removeEventListener('abort', registration[7]);
+  };
 
   const bridge = {
     addEventListener(
@@ -47,18 +57,39 @@ function createDynamicEventTarget(): DynamicEventTarget {
       options?: boolean | AddEventListenerOptions
     ) {
       if (!listener) return;
+      const capture = typeof options === 'boolean' ? options : options?.capture === true;
       if (
         registrations.some(
-          (entry) =>
-            entry.type === type &&
-            entry.listener === listener &&
-            capture(entry.options) === capture(options)
+          (entry) => entry[0] === type && entry[1] === listener && entry[2] === capture
         )
       ) {
         return;
       }
-      registrations.push({ type, listener, options });
-      target?.addEventListener(type, listener, options);
+      const signal = typeof options === 'boolean' ? undefined : options?.signal;
+      if (signal?.aborted) return;
+      const registration = [
+        type,
+        listener,
+        capture,
+        typeof options === 'boolean' ? false : options?.passive === true,
+        typeof options === 'boolean' ? false : options?.once === true,
+        undefined,
+        signal,
+      ] as unknown as Registration;
+      registration[5] = function (event) {
+        if (registration[4]) remove(registration);
+        if (typeof listener === 'function') listener.call(this, event);
+        else listener.handleEvent(event);
+      };
+      if (signal) {
+        registration[7] = () => remove(registration);
+        signal.addEventListener('abort', registration[7], { once: true });
+      }
+      registrations.push(registration);
+      target?.addEventListener(type, registration[5], {
+        capture,
+        passive: registration[3],
+      });
     },
     removeEventListener(
       type: string,
@@ -66,15 +97,11 @@ function createDynamicEventTarget(): DynamicEventTarget {
       options?: boolean | EventListenerOptions
     ) {
       if (!listener) return;
-      const index = registrations.findIndex(
-        (entry) =>
-          entry.type === type &&
-          entry.listener === listener &&
-          capture(entry.options) === capture(options)
+      const capture = typeof options === 'boolean' ? options : options?.capture === true;
+      const registration = registrations.find(
+        (entry) => entry[0] === type && entry[1] === listener && entry[2] === capture
       );
-      if (index < 0) return;
-      const [entry] = registrations.splice(index, 1);
-      target?.removeEventListener(type, listener, entry?.options);
+      if (registration) remove(registration);
     },
     dispatchEvent(event: Event) {
       return target?.dispatchEvent(event) ?? false;
@@ -83,13 +110,16 @@ function createDynamicEventTarget(): DynamicEventTarget {
       if (target === nextTarget) return;
       if (target) {
         for (const entry of registrations) {
-          target.removeEventListener(entry.type, entry.listener, entry.options);
+          target.removeEventListener(entry[0], entry[5], entry[2]);
         }
       }
       target = nextTarget;
       if (target) {
         for (const entry of registrations) {
-          target.addEventListener(entry.type, entry.listener, entry.options);
+          target.addEventListener(entry[0], entry[5], {
+            capture: entry[2],
+            passive: entry[3],
+          });
         }
       }
     },
@@ -98,7 +128,7 @@ function createDynamicEventTarget(): DynamicEventTarget {
     },
   };
 
-  return bridge as DynamicEventTarget;
+  return bridge as RebindableEventTarget;
 }
 
 export type LogicalInstanceToken = object & {
@@ -135,7 +165,7 @@ export function createInstanceTreeMarkers(
   const PARENT_BY_TOKEN = new WeakMap<LogicalInstanceToken, LogicalInstanceToken>();
   const CHILDREN_BY_TOKEN = new WeakMap<LogicalInstanceToken, Set<LogicalInstanceToken>>();
   const TRIGGER_GROUP_ANCHOR_BY_TOKEN = new WeakMap<LogicalInstanceToken, LogicalInstanceToken>();
-  const EVENT_TARGET_BY_TOKEN = new WeakMap<LogicalInstanceToken, DynamicEventTarget>();
+  const EVENT_TARGET_BY_TOKEN = new WeakMap<LogicalInstanceToken, RebindableEventTarget>();
   const BOUND_EVENT_TARGET_BY_TOKEN = new WeakMap<LogicalInstanceToken, EventTarget>();
   const TRIGGER_GROUP_MEMBERS_BY_ANCHOR = new WeakMap<
     LogicalInstanceToken,
@@ -219,7 +249,7 @@ export function createInstanceTreeMarkers(
   }
 
   function syncLogicalEventTarget(token: LogicalInstanceToken): void {
-    const bridge = getLogicalEventTarget(token) as DynamicEventTarget;
+    const bridge = getLogicalEventTarget(token) as RebindableEventTarget;
     const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
     const surface = TRIGGER_GROUP_SURFACE_BY_ANCHOR.get(owner) ?? owner;
     if (surface !== token) {
@@ -340,6 +370,7 @@ export function createInstanceTreeMarkers(
     proto: Prototype<any>,
     token: LogicalInstanceToken = createLogicalInstance(proto)
   ): LogicalInstanceToken {
+    const refreshing = TOKEN_BY_INSTANCE.get(el) === token;
     const parentRoot = getProtoParent(el);
     const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
     if (TRIGGER_TOKENS.has(token)) {
@@ -358,7 +389,7 @@ export function createInstanceTreeMarkers(
       notifyTriggerSurface(owner);
     }
 
-    if (parentToken) setLogicalParentInternal(token, parentToken);
+    if (parentToken || refreshing) setLogicalParentInternal(token, parentToken ?? null);
     for (const descendant of el.querySelectorAll<HTMLElement>('*')) {
       const descendantToken = TOKEN_BY_INSTANCE.get(descendant);
       if (!descendantToken) continue;
@@ -523,7 +554,7 @@ export function createInstanceTreeMarkers(
   function getLogicalEventTarget(token: LogicalInstanceToken): EventTarget {
     let target = EVENT_TARGET_BY_TOKEN.get(token);
     if (!target) {
-      target = createDynamicEventTarget();
+      target = createRebindableEventTarget();
       EVENT_TARGET_BY_TOKEN.set(token, target);
     }
     return target;
@@ -572,13 +603,13 @@ export function createInstanceTreeMarkers(
       PROTO_PARENT_BY_INSTANCE.get(instance) ??
       instance.parentNode;
     while (cur) {
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
       if (isProtoInstance(cur)) return cur as HTMLElement;
 
-      if (cur instanceof HTMLElement) {
+      if (isHtmlElement(cur)) {
         const linkedParent =
           readProtoParentMark(cur) ?? PROTO_PARENT_BY_INSTANCE.get(cur as HTMLElement) ?? null;
         if (linkedParent && linkedParent !== cur) {

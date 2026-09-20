@@ -50,6 +50,16 @@ describe('adapter-web-component Shadow style artifact', () => {
     );
   });
 
+  it('accepts equivalent quoted dark token selectors under the positive host scope', () => {
+    expect(() =>
+      validateShadowStyleArtifact(
+        artifact(
+          `:host([data-pui-color-scheme="dark"]) [ data-pui-style ~= 'dark:bg-input/30' ] { color: red; }`
+        )
+      )
+    ).not.toThrow();
+  });
+
   it.each([
     ['missing', undefined],
     ['wrong kind', { ...artifact(), kind: 'proto-ui.document-style' }],
@@ -64,6 +74,14 @@ describe('adapter-web-component Shadow style artifact', () => {
     [
       'dark rule without the host marker',
       artifact(`:where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
+    ],
+    [
+      'single-quoted dark rule without the host marker',
+      artifact(`:where([data-pui-style~='dark:bg-input/30']) { color: red; }`),
+    ],
+    [
+      'whitespace-normalized dark rule without the host marker',
+      artifact(`:where([ data-pui-style ~= "dark:bg-input/30" ]) { color: red; }`),
     ],
     [
       'unscoped dark rule beside an unrelated host marker',

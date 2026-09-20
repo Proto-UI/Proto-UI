@@ -6,7 +6,7 @@ import {
   type RootStyleEntry,
 } from '@proto.ui/core/internal';
 import { createOwnedTwTokenApplier } from './feedback-style';
-import type { ShadowStyleArtifactV1 } from './shadow-style-artifact';
+import { stripShadowCssComments, type ShadowStyleArtifactV1 } from './shadow-style-artifact';
 
 export const SHADOW_SPLIT_ROOT_STYLE_ATTR = 'data-pui-split-root-style';
 export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
@@ -54,9 +54,7 @@ export function createShadowSplitEffectsPort({
 }): EffectsPort & { dispose(): void } {
   const nativeText = surface.localName === 'input' || surface.localName === 'textarea';
   if (!host.shadowRoot || surface.parentNode !== host.shadowRoot) {
-    throw new Error(
-      `[WC split:${prototypeName}] surface must be a direct child of the host ShadowRoot`
-    );
+    throw new Error(`[WC split:${prototypeName}] surface is not a direct ShadowRoot child`);
   }
   if (
     activeBindings.has(host) ||
@@ -64,15 +62,20 @@ export function createShadowSplitEffectsPort({
     surface.hasAttribute(SHADOW_SPLIT_SURFACE_ATTR) ||
     (nativeText && host.hasAttribute(NATIVE_TEXT_ATTR))
   ) {
-    throw new Error(`[WC split:${prototypeName}] sizing projection is already owned`);
+    throw new Error(`[WC split:${prototypeName}] projection already owned`);
   }
-  if (!artifact.cssText.includes(`:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`)) {
-    throw new Error(`[WC split:${prototypeName}] requires the private generated sizing recipe`);
+  const cssText = stripShadowCssComments(artifact.cssText).replace(/\s/g, '');
+  const ruleSelectors = cssText.match(/[^{}]+(?=\{)/g) ?? [];
+  const baseDeclarations = new RegExp(
+    `(?:^|[{}]):host\\(\\[${SHADOW_SPLIT_ROOT_STYLE_ATTR}\\]\\)\\{([^{}]*)\\}`
+  ).exec(cssText)?.[1];
+  if (!baseDeclarations) {
+    throw new Error(`[WC split:${prototypeName}] missing sizing recipe`);
   }
-  if (nativeText && !artifact.cssText.includes('--pui-split-native-text-recipe: l1;'))
-    throw new Error(
-      `[WC split:${prototypeName}] native text recipe is absent; regenerate the CLI companion`
-    );
+  const hasRecipe = (name: string, version: string) =>
+    baseDeclarations.includes(`--pui-split-${name}-recipe:${version};`);
+  if (nativeText && !hasRecipe('native-text', 'l1'))
+    throw new Error(`[WC split:${prototypeName}] missing native-text recipe`);
   activeBindings.add(host);
   const applier = createOwnedTwTokenApplier(surface);
   let latest: Projection | null = null;
@@ -83,7 +86,7 @@ export function createShadowSplitEffectsPort({
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
     throw new Error(
-      `[WC split:${prototypeName}] ${entry.origin} token ${JSON.stringify(entry.authorToken)}: ${reason}. Supply a supported recipe or use the existing collapsed profile; no target was changed.`
+      `[WC split:${prototypeName}] ${entry.origin} token ${JSON.stringify(entry.authorToken)}: ${reason}.`
     );
   };
   const prepare = (handle: StyleHandle): Projection => {
@@ -106,18 +109,14 @@ export function createShadowSplitEffectsPort({
     const intrinsicTokens = ['inline-flex', 'flex-1', 'whitespace-nowrap'];
     if (intrinsicTokens.every((token) => entries.some((entry) => entry.authorToken === token))) {
       const flex = entries.find((entry) => entry.authorToken === 'flex-1')!;
-      if (!artifact.cssText.includes('--pui-split-intrinsic-nowrap-recipe: v1;'))
-        fail(flex, 'nowrap flex intrinsic recipe is absent; regenerate the CLI companion');
+      if (!hasRecipe('intrinsic-nowrap', 'v1')) fail(flex, 'nowrap flex intrinsic recipe absent');
       if (
         intrinsicTokens.some((token) =>
           entries.some((entry) => entry.authorToken === token && entry.token !== token)
         ) ||
         entries.some((entry) => /^(?:w-|min-w-|max-w-|size-)/.test(entry.authorToken))
       )
-        fail(
-          flex,
-          'nowrap flex intrinsic recipe does not support conditional bases or explicit width constraints'
-        );
+        fail(flex, 'nowrap flex intrinsic recipe has unsupported operands');
     }
     for (const entry of entries) {
       if (
@@ -125,7 +124,7 @@ export function createShadowSplitEffectsPort({
         /^(?:(?:min-|max-)?[wh]-|size-|aspect-)/.test(entry.authorToken) &&
         !['w-full', 'min-h-16'].includes(entry.authorToken)
       )
-        fail(entry, 'S5 native sizing admits only w-full and min-h-16');
+        fail(entry, 'native sizing allows only w-full/min-h-16');
       if (
         !['setup', 'rule', 'runtime'].includes(entry.origin) ||
         !entry.authorToken ||
@@ -139,33 +138,39 @@ export function createShadowSplitEffectsPort({
         entry.roleSource !== canonical.roleSource ||
         (entry.token !== entry.authorToken && !entry.token.endsWith(`:${entry.authorToken}`))
       ) {
-        fail(entry, 'inconsistent canonical provenance');
+        fail(entry, 'canonical provenance mismatch');
       }
-      if (entry.role === 'unresolved') fail(entry, 'application role is unresolved');
+      if (entry.role === 'unresolved') fail(entry, 'unresolved application role');
       const needsK1 = [
         '-translate-x-1/2',
         '-translate-y-1/2',
         'animate-in',
         'animate-out',
       ].includes(entry.authorToken);
-      if (needsK1 && !artifact.cssText.includes('--pui-split-dialog-motion-recipe: k1;'))
-        fail(entry, 'K1 physical recipe is absent; regenerate the CLI companion');
+      if (needsK1 && !hasRecipe('dialog-motion', 'k1')) fail(entry, 'K1 physical recipe is absent');
       const needsI1 = entry.authorToken === 'hidden' || entry.authorToken === 'relative';
-      if (needsI1 && !artifact.cssText.includes('--pui-split-participation-coordinate-recipe: i1;'))
-        fail(entry, 'I1 physical recipe is absent; regenerate the CLI companion');
+      if (needsI1 && !hasRecipe('participation-coordinate', 'i1'))
+        fail(entry, 'I1 physical recipe is absent');
       if (
         ((entry.role === 'root-geometry' && !needsI1 && !needsK1) ||
           entry.role === 'hit-testing' ||
           entry.authorToken === 'transition-all') &&
-        !artifact.cssText.includes('--pui-split-motion-recipe: h1;')
+        !hasRecipe('motion', 'h1')
       )
-        fail(entry, 'H1 physical recipe is absent; regenerate the CLI companion');
+        fail(entry, 'H1 physical recipe is absent');
       if (entry.role === 'composite' && !COMPOSITES.has(entry.authorToken))
         fail(entry, 'composite recipe is not implemented');
       if (entry.role === 'composite' && entry.token !== entry.authorToken)
         fail(entry, 'conditional composite recipe is not implemented');
       const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-      if (!artifact.cssText.includes(`[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`)) {
+      const tokenSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
+      if (
+        !ruleSelectors.some(
+          (selector) =>
+            selector.startsWith(tokenSelector) ||
+            (selector.startsWith(':where(') && selector.includes(`)${tokenSelector}`))
+        )
+      ) {
         fail(entry, 'physical token is absent from the compiled split closure');
       }
     }
@@ -178,7 +183,7 @@ export function createShadowSplitEffectsPort({
       if (unsupported)
         fail(
           logicalPadding,
-          `logical padding cannot share the split compensation recipe with directional token ${JSON.stringify(unsupported.authorToken)}`
+          `directional token ${JSON.stringify(unsupported.authorToken)} conflicts with logical padding`
         );
     }
     const widths = borderWidthCandidates(entries);
@@ -189,10 +194,7 @@ export function createShadowSplitEffectsPort({
       (widths.some((values) => values.length > 1) ||
         (applied && applied.borderWidths !== borderWidths))
     ) {
-      fail(
-        animated,
-        'animated border-width changes require an unsupported used-value rounding recipe'
-      );
+      fail(animated, 'unsupported used-value rounding');
     }
     return {
       borderWidths,
@@ -208,7 +210,7 @@ export function createShadowSplitEffectsPort({
     };
   };
   const assertActive = () => {
-    if (disposed) throw new Error(`[WC split:${prototypeName}] effects binding is disposed`);
+    if (disposed) throw new Error(`[WC split:${prototypeName}] effects disposed`);
   };
   const flush = () => {
     assertActive();

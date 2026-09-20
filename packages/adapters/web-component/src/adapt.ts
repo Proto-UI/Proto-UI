@@ -13,6 +13,7 @@ import {
   createHostSurfaceProjection,
   createEventGate,
   createDefaultWebColorSchemeSource,
+  createRebindableEventTarget,
   createScopedExposesReader,
   createWebProtoEventRouter,
   createViewEpochOwner,
@@ -122,113 +123,31 @@ export interface WebComponentAdapterOptions<Props extends PropsBaseType = PropsB
 const SHARED_OVERLAY_LAYER_SCHEDULER = createZIndexOverlayLayerScheduler();
 const NOTIFY_FOCUS_TARGET_READY = Symbol('proto-ui.notify-focus-target-ready');
 
-type RebindableEventTarget = EventTarget & {
-  setTarget(target: EventTarget | null): void;
-};
-
-function createRebindableEventTarget(): RebindableEventTarget {
-  type Registration = {
-    type: string;
-    listener: EventListenerOrEventListenerObject;
-    capture: boolean;
-    passive: boolean;
-    once: boolean;
-    signal?: AbortSignal;
-    wrapped: EventListener;
-    abort?: () => void;
-  };
-
-  let target: EventTarget | null = null;
-  const registrations: Registration[] = [];
-
-  const remove = (registration: Registration) => {
-    const index = registrations.indexOf(registration);
-    if (index < 0) return;
-    registrations.splice(index, 1);
-    target?.removeEventListener(registration.type, registration.wrapped, registration.capture);
-    if (registration.abort) {
-      registration.signal?.removeEventListener('abort', registration.abort);
-    }
-  };
-
-  const bridge = {
-    addEventListener(
-      type: string,
-      listener: EventListenerOrEventListenerObject | null,
-      options?: boolean | AddEventListenerOptions
-    ) {
-      if (!listener) return;
-      const capture = typeof options === 'boolean' ? options : options?.capture === true;
-      if (
-        registrations.some(
-          (registration) =>
-            registration.type === type &&
-            registration.listener === listener &&
-            registration.capture === capture
-        )
-      ) {
-        return;
-      }
-      const signal = typeof options === 'boolean' ? undefined : options?.signal;
-      if (signal?.aborted) return;
-      const registration = {
-        type,
-        listener,
-        capture,
-        passive: typeof options === 'boolean' ? false : options?.passive === true,
-        once: typeof options === 'boolean' ? false : options?.once === true,
-        signal,
-      } as Registration;
-      registration.wrapped = function (event) {
-        if (registration.once) remove(registration);
-        if (typeof listener === 'function') listener.call(this, event);
-        else listener.handleEvent(event);
+function createRebindableColorSchemeSource(getter: (key: string) => unknown, doc: Document) {
+  let document = doc;
+  let source = createDefaultWebColorSchemeSource(getter, doc);
+  let unsubscribe: (() => void) | undefined;
+  const listeners = new Set<() => void>();
+  const notify = () => listeners.forEach((listener) => listener());
+  return {
+    getter,
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      if (listeners.size === 1) unsubscribe = source?.subscribe(notify);
+      return () => {
+        listeners.delete(listener);
+        if (!listeners.size) unsubscribe?.();
       };
-      if (signal) {
-        registration.abort = () => remove(registration);
-        signal.addEventListener('abort', registration.abort, { once: true });
-      }
-      registrations.push(registration);
-      target?.addEventListener(type, registration.wrapped, {
-        capture,
-        passive: registration.passive,
-      });
     },
-    removeEventListener(
-      type: string,
-      listener: EventListenerOrEventListenerObject | null,
-      options?: boolean | EventListenerOptions
-    ) {
-      if (!listener) return;
-      const capture = typeof options === 'boolean' ? options : options?.capture === true;
-      const registration = registrations.find(
-        (entry) => entry.type === type && entry.listener === listener && entry.capture === capture
-      );
-      if (registration) remove(registration);
-    },
-    dispatchEvent(event: Event) {
-      return target?.dispatchEvent(event) ?? false;
-    },
-    setTarget(nextTarget: EventTarget | null) {
-      if (target === nextTarget) return;
-      if (target) {
-        for (const registration of registrations) {
-          target.removeEventListener(registration.type, registration.wrapped, registration.capture);
-        }
-      }
-      target = nextTarget;
-      if (target) {
-        for (const registration of registrations) {
-          target.addEventListener(registration.type, registration.wrapped, {
-            capture: registration.capture,
-            passive: registration.passive,
-          });
-        }
-      }
+    adoptDocument(next: Document) {
+      if (document === next) return;
+      document = next;
+      unsubscribe?.();
+      source = createDefaultWebColorSchemeSource(getter, next);
+      unsubscribe = listeners.size ? source?.subscribe(notify) : undefined;
+      notify();
     },
   };
-
-  return bridge as RebindableEventTarget;
 }
 
 export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
@@ -246,14 +165,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   const split = typeof profile === 'object' ? profile : null;
   const shadow = profile !== false;
   if (split && imageView) {
-    throw new Error('[WC Adapter] shadow split does not support image-view declarations.');
+    throw new Error('[WC Adapter] Shadow split rejects image-view.');
   }
   if (
     split &&
     textControl &&
     !split.styleArtifact.cssText.includes('--pui-split-native-text-recipe: l1;')
   ) {
-    throw new Error('[WC Adapter] native text recipe is absent; regenerate the CLI companion.');
+    throw new Error('[WC Adapter] missing native-text recipe.');
   }
   const getProps = opt.getProps ?? (() => ({}) as Partial<Props>);
   const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
@@ -288,7 +207,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _focusTargetReadyListeners = new Set<() => void>();
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
-    private readonly _getMeta: (key: string) => unknown;
+    private readonly _getMeta = opt.getMeta ?? createDefaultMetaGetter(() => this.ownerDocument);
+    private _defaultColorSchemeSource =
+      split || opt.getMeta
+        ? undefined
+        : createRebindableColorSchemeSource(this._getMeta, this.ownerDocument);
     private _globalEventTarget = createRebindableEventTarget();
     private _overlayModal: ReturnType<typeof createRebindableWebOverlayModal>;
 
@@ -308,7 +231,6 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     constructor() {
       super();
-      this._getMeta = opt.getMeta ?? createDefaultMetaGetter(() => this.ownerDocument);
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
@@ -356,6 +278,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     adoptedCallback(_oldDocument: Document, newDocument: Document) {
       this._portalConceal.cancel();
       adoptWebComponentPortalProjections(this, newDocument);
+      this._defaultColorSchemeSource?.adoptDocument(newDocument);
       this._globalEventTarget.setTarget(newDocument.defaultView);
       this._overlayModal.adoptDocument(newDocument);
       this._splitResources?.environment.adoptDocument(newDocument);
@@ -455,16 +378,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       const splitResources = this._splitResources;
       const ownerGetMeta = splitResources?.getMeta ?? this._getMeta;
       // Split reserves colorScheme for its retained environment, not the document getter.
-      const colorSchemeSource =
-        split || opt.getMeta
-          ? undefined
-          : createDefaultWebColorSchemeSource(ownerGetMeta, thisEl.ownerDocument);
       const runtimeColorSchemeSource = splitResources
         ? {
             getter: ownerGetMeta,
             subscribe: (listener: () => void) => splitResources.environment.subscribe(listener),
           }
-        : colorSchemeSource;
+        : this._defaultColorSchemeSource;
       this._hostDisplay = installDefaultHostDisplay(thisEl, {
         displayOwner: split ? 'presentation' : 'fallback',
       });

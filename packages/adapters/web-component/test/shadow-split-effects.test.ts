@@ -203,6 +203,43 @@ describe('private Shadow split effects', () => {
     effects.dispose();
   });
 
+  it('rejects recipe and token receipts that exist only in comments or unrelated selectors', () => {
+    const { host, surface, effects, options } = setup();
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const commentOnlyRecipe = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: options.artifact.cssText.replace(
+          '--pui-split-motion-recipe: h1;',
+          '/* --pui-split-motion-recipe: h1; */'
+        ),
+      },
+    });
+    expect(() => commentOnlyRecipe.queueStyle(effect(['transition-all']))).toThrow(
+      /H1 physical recipe/
+    );
+    commentOnlyRecipe.dispose();
+
+    const receipt = `:host([${ROOT}~="bg-primary"])`;
+    const unrelatedReceipt = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: options.artifact.cssText.replace(
+          receipt,
+          `[data-proof='${receipt}'] /* ${receipt} */`
+        ),
+      },
+    });
+    expect(() => unrelatedReceipt.queueStyle(effect(['bg-primary']))).toThrow(
+      /physical token is absent/
+    );
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    unrelatedReceipt.dispose();
+  });
+
   it('preserves fallback provenance when the exact physical token belongs to the artifact', () => {
     const { host, surface, effects, options } = setup();
     effects.dispose();

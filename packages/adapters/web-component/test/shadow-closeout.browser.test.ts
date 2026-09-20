@@ -23,6 +23,7 @@ beforeAll(async () => {
         export { createWebComponentPortalMount as createPortal } from './packages/adapters/web-component/src/portal-mount';
         export { createShadowSplitEffectsPort as createSplitEffects } from './packages/adapters/web-component/src/shadow-split-effects';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
+        export { getLogicalParent, getProtoParent } from './packages/adapters/web-component/src/platform/instance-tree';
         export { definePrototype as define, tw } from '@proto.ui/core';
         export { createRootStyleEffect, lowerRootStyleTokens, resolveRootStyleEntry } from '@proto.ui/core/internal';
         export { asTextControl, asFocusEntry, asFocusScope, asFocusable, asOverlay } from '@proto.ui/hooks';
@@ -273,6 +274,137 @@ describe('Shadow closeout native boundaries', () => {
           marker: 'light',
           reducedMotion: 'explicit-reduced-motion',
         },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('rebinds the default non-split color Rule source with its adopted document', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        document.documentElement.dataset.theme = 'light';
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        foreignDocument.documentElement.dataset.theme = 'dark';
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-default-meta-adoption',
+            setup(def: any) {
+              def.props.define({ enabled: { type: 'boolean', default: true } });
+              def.feedback.style.use(p.tw('bg-primary'));
+              def.rule({
+                when: (w: any) =>
+                  w.all(w.prop('enabled').eq(true), w.meta('colorScheme').eq('dark')),
+                intent: (i: any) => i.feedback.style.use(p.tw('bg-black')),
+              });
+              return (r: any) => r.slot();
+            },
+          }),
+          { schedule: (task: () => void) => task() }
+        );
+        const host = new C();
+        document.body.append(host);
+        const settle = async () => {
+          await new Promise<void>((resolve) => queueMicrotask(resolve));
+          await new Promise<void>((resolve) => queueMicrotask(resolve));
+        };
+        await settle();
+        const initial = host.getAttribute('data-pui-style');
+        foreignDocument.adoptNode(host);
+        foreignDocument.body.append(host);
+        await settle();
+        const adopted = host.getAttribute('data-pui-style');
+        document.documentElement.dataset.theme = 'dark';
+        await settle();
+        const afterSourceChange = host.getAttribute('data-pui-style');
+        foreignDocument.documentElement.dataset.theme = 'light';
+        await settle();
+        const afterDestinationChange = host.getAttribute('data-pui-style');
+        frame.remove();
+        return { initial, adopted, afterSourceChange, afterDestinationChange };
+      });
+      expect(result).toEqual({
+        initial: 'bg-primary',
+        adopted: 'bg-black',
+        afterSourceChange: 'bg-black',
+        afterDestinationChange: 'bg-primary',
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('refreshes adopted logical ancestry through a destination-realm ShadowRoot', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        let childSetups = 0;
+        const Parent = p.adapt(
+          p.define({ name: 'closeout-adopted-logical-parent', setup: () => (r: any) => r.slot() })
+        );
+        const Child = p.adapt(
+          p.define({
+            name: 'closeout-adopted-logical-child',
+            setup() {
+              childSetups += 1;
+              return (r: any) => r.slot();
+            },
+          })
+        );
+        const oldParent = new Parent();
+        const child = new Child();
+        oldParent.append(child);
+        document.body.append(oldParent);
+
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const nextParent = foreignDocument.adoptNode(new Parent());
+        foreignDocument.body.append(nextParent);
+        const carrier = foreignDocument.createElement('div');
+        nextParent.append(carrier);
+        const destinationRoot = carrier.attachShadow({ mode: 'open' });
+        destinationRoot.append(foreignDocument.adoptNode(child));
+        const childToken = (child as any)._instanceToken;
+        const nextToken = (nextParent as any)._instanceToken;
+        const nested = {
+          parent: p.getProtoParent(child) === nextParent,
+          logical: p.getLogicalParent(childToken) === nextToken,
+          destinationRealm: destinationRoot.ownerDocument === foreignDocument,
+          setups: childSetups,
+        };
+        foreignDocument.body.append(child);
+        const detached = {
+          parent: p.getProtoParent(child),
+          logical: p.getLogicalParent(childToken),
+          setups: childSetups,
+        };
+        frame.remove();
+        return {
+          nested,
+          detached: {
+            parent: detached.parent === null,
+            logical: detached.logical === null,
+            setups: detached.setups,
+          },
+        };
+      });
+      expect(result).toEqual({
+        nested: { parent: true, logical: true, destinationRealm: true, setups: 1 },
+        detached: { parent: true, logical: true, setups: 1 },
       });
       expect(errors).toEqual([]);
     } finally {

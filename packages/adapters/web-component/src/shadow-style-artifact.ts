@@ -36,7 +36,7 @@ const artifactOwners = new WeakMap<ShadowRoot, ShadowStyleArtifactOwner>();
  */
 export function validateShadowStyleArtifact(artifact: unknown): ShadowStyleArtifactV1 {
   if (!artifact || typeof artifact !== 'object') {
-    throw invalidArtifact('expected an object');
+    throw invalidArtifact('object required');
   }
 
   const keys = Reflect.ownKeys(artifact);
@@ -44,21 +44,21 @@ export function validateShadowStyleArtifact(artifact: unknown): ShadowStyleArtif
     keys.length !== ARTIFACT_FIELDS.size ||
     keys.some((key) => typeof key !== 'string' || !ARTIFACT_FIELDS.has(key))
   ) {
-    throw invalidArtifact('expected exactly kind, version, cssText, and environment fields');
+    throw invalidArtifact('unexpected fields');
   }
 
   const candidate = artifact as Record<string, unknown>;
   if (candidate.kind !== SHADOW_STYLE_ARTIFACT_KIND) {
-    throw invalidArtifact(`unsupported kind ${String(candidate.kind)}`);
+    throw invalidArtifact(`kind ${String(candidate.kind)} unsupported`);
   }
   if (candidate.version !== SHADOW_STYLE_ARTIFACT_VERSION) {
-    throw invalidArtifact(`unsupported version ${String(candidate.version)}`);
+    throw invalidArtifact(`version ${String(candidate.version)} unsupported`);
   }
   if (typeof candidate.cssText !== 'string') {
-    throw invalidArtifact('cssText must be a string');
+    throw invalidArtifact('cssText string required');
   }
   if (candidate.environment !== SHADOW_STYLE_ARTIFACT_ENVIRONMENT) {
-    throw invalidArtifact(`unsupported environment ${String(candidate.environment)}`);
+    throw invalidArtifact(`environment ${String(candidate.environment)} unsupported`);
   }
 
   validateShadowSelectorAbi(candidate.cssText);
@@ -113,25 +113,27 @@ export function createShadowStyleArtifactOwner(
 }
 
 function validateShadowSelectorAbi(cssText: string): void {
-  const selectors = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+  const selectors = stripShadowCssComments(cssText);
   const documentMarker = DOCUMENT_ENVIRONMENT_MARKERS.find((marker) => selectors.includes(marker));
   if (documentMarker) {
-    throw invalidArtifact(`cssText contains document environment selector ${documentMarker}`);
+    throw invalidArtifact(`document selector ${documentMarker} forbidden`);
   }
 
-  const hasUnscopedDarkToken = selectors
-    .split(/[{},]/)
-    .some(
-      (selector) =>
-        /data-pui-style~="(?:[^"]*:)?dark:/.test(selector) &&
-        !/^\s*(?::where\()?:host\(\[data-pui-color-scheme='dark'\]\)\)?(?=$|[\s>+~.#[:])/.test(
-          selector
-        )
+  const hasUnscopedDarkToken = selectors.split(/[{},]/).some((selector) => {
+    const normalized = selector.replace(/\s/g, '');
+    return (
+      /(?:^|[>+~.#:(])\[data-pui-style~=(['"])(?:[^'"]*:)?dark:[^'"]*\1\]/.test(normalized) &&
+      !/^(?::where\()?:host\(\[data-pui-color-scheme=(['"])dark\1\]\)\)?(?=$|[>+~.#[:])/.test(
+        normalized
+      )
     );
+  });
   if (hasUnscopedDarkToken) {
     throw invalidArtifact(`dark token CSS requires ${SHADOW_DARK_SELECTOR}`);
   }
 }
+
+export const stripShadowCssComments = (cssText: string) => cssText.replace(/\/\*[\s\S]*?\*\//g, '');
 
 function invalidArtifact(reason: string): Error {
   return new Error(`[WC Adapter] invalid Shadow style artifact: ${reason}.`);

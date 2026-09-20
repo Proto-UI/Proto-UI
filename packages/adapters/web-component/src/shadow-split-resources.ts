@@ -59,7 +59,7 @@ export function createShadowSplitResources({
   factories,
 }: ShadowSplitResourceOptions): ShadowSplitResources {
   if (shell.root.host !== host) {
-    throw new Error('[WC Adapter] Shadow split resource host does not own the supplied root.');
+    throw new Error('host does not own the supplied root');
   }
 
   const current = resourceGenerations.get(shell.root);

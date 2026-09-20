@@ -338,38 +338,38 @@ function watchEntryStyleInvalidation(
       });
     };
     const methodPatches: EntryStyleMethodPatch[] = [];
-    const patchMethod = (target: Record<string, unknown>, key: string, async = false) => {
-      const original = target[key];
-      if (typeof original !== 'function') return;
-      const patched = function (this: unknown, ...args: unknown[]) {
-        const result = Reflect.apply(original, this, args);
-        if (async && result && typeof (result as PromiseLike<unknown>).then === 'function') {
-          Promise.resolve(result).then(notify, () => {});
-        } else notify();
-        return result;
-      };
-      target[key] = patched;
-      methodPatches.push({
-        target,
-        key,
-        original: original as (...args: unknown[]) => unknown,
-        patched,
-      });
+    const patchMethods = (target: Record<string, unknown>, keys: readonly string[]) => {
+      for (const key of keys) {
+        const original = target[key];
+        if (typeof original !== 'function') continue;
+        const patched = function (this: unknown, ...args: unknown[]) {
+          const result = Reflect.apply(original, this, args);
+          if (
+            key === 'replace' &&
+            result &&
+            typeof (result as PromiseLike<unknown>).then === 'function'
+          )
+            Promise.resolve(result).then(notify, () => {});
+          else notify();
+          return result;
+        };
+        target[key] = patched;
+        methodPatches.push({
+          target,
+          key,
+          original: original as (...args: unknown[]) => unknown,
+          patched,
+        });
+      }
     };
-    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'insertRule');
-    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'deleteRule');
-    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replaceSync');
-    patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replace', true);
-    if (view.MediaList) {
-      patchMethod(view.MediaList.prototype as unknown as Record<string, unknown>, 'appendMedium');
-      patchMethod(view.MediaList.prototype as unknown as Record<string, unknown>, 'deleteMedium');
+    for (const [target, keys] of [
+      [Sheet.prototype, ['insertRule', 'deleteRule', 'replaceSync', 'replace']],
+      [Grouping, ['insertRule', 'deleteRule']],
+      [Declaration.prototype, ['setProperty', 'removeProperty']],
+      [view.MediaList?.prototype, ['appendMedium', 'deleteMedium']],
+    ] as const) {
+      if (target) patchMethods(target as unknown as Record<string, unknown>, keys);
     }
-    if (Grouping) {
-      patchMethod(Grouping.prototype, 'insertRule');
-      patchMethod(Grouping.prototype, 'deleteRule');
-    }
-    patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'setProperty');
-    patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'removeProperty');
 
     const setterPatches: EntryStyleSetterPatch[] = [];
     const patchSetter = (target: object, key: string, cssName?: string) => {
