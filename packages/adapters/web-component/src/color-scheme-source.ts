@@ -6,8 +6,14 @@ import {
 export function createRebindableColorSchemeSource(getter: (key: string) => unknown, doc: Document) {
   let source = createDefaultWebColorSchemeSource(getter, doc);
   let unsubscribe: (() => void) | undefined;
+  let effective = getter('colorScheme');
   const listeners = new Set<() => void>();
-  const notify = () => notifyColorSchemeListeners(listeners);
+  const notify = () => {
+    const next = getter('colorScheme');
+    if (next === effective) return;
+    effective = next;
+    notifyColorSchemeListeners(listeners);
+  };
   return {
     getter,
     subscribe(listener: () => void) {

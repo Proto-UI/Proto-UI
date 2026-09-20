@@ -67,7 +67,7 @@ import {
   createWebComponentOwnerModules,
 } from './runtime/modules';
 import { createWebComponentHostSession } from './runtime/session';
-import { createShadowOwnerShell, type ShadowOwnerShell } from './shadow-owner-shell';
+import { createShadowOwnerShell } from './shadow-owner-shell';
 import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
 import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
 import { createShadowSplitEffectsPort } from './shadow-split-effects';
@@ -94,7 +94,7 @@ export type {
 
 function assertKebabCase(tag: string) {
   if (!tag.includes('-') || tag.toLowerCase() !== tag) {
-    throw new Error(`invalid custom-element name:${tag}`);
+    throw new Error(`custom-element:name:${tag}`);
   }
 }
 
@@ -193,7 +193,6 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _overlayModal: ReturnType<typeof createRebindableWebOverlayModal>;
 
     private _root: Element | ShadowRoot;
-    private _shadowOwnerShell: ShadowOwnerShell | null;
     private _splitResources: ShadowSplitResources | null = null;
     private _initializationCleanup: (() => void) | null = null;
     private _portalConceal = createPortalConcealBarrier(this);
@@ -211,11 +210,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
-      this._shadowOwnerShell = split ? createShadowOwnerShell(this._root as ShadowRoot) : null;
       if (textControl && imageView) {
-        throw new Error(
-          '[WC Adapter] text-control and image-view declarations cannot share a root.'
-        );
+        throw new Error('WC:text/image conflict');
       }
       if (textControl) {
         this._textControlTarget = document.createElement(
@@ -265,6 +261,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       this._overlayModal.adoptDocument(newDocument);
       this._splitResources?.environment.adoptDocument(newDocument);
       this._hostDisplay?.sync();
+      this[NOTIFY_FOCUS_TARGET_READY]();
     }
 
     connectedCallback() {
@@ -343,7 +340,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       if (split) {
         this._splitResources = createShadowSplitResources({
           host: thisEl,
-          shell: this._shadowOwnerShell!,
+          shell: createShadowOwnerShell(thisRoot as ShadowRoot),
           artifact: split.styleArtifact,
           colorSchemeSource: split.colorSchemeSource,
           baseGetMeta: this._getMeta,
@@ -438,8 +435,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       const releaseRenderedChildren = () => {
         if (shadow) {
           if (splitResources) splitResources.surface.clearRenderedChildren();
-          else this._shadowOwnerShell?.clearRenderedChildren();
-          if (!this._shadowOwnerShell) thisRoot.replaceChildren();
+          else thisRoot.replaceChildren();
           clearSlotProjector();
           return;
         }
@@ -463,7 +459,6 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           shadow,
           host: thisEl,
           root: thisRoot,
-          shadowOwnerShell: this._shadowOwnerShell,
           shadowViewTarget: splitResources?.surface,
           schedule,
           rawPropsSource,

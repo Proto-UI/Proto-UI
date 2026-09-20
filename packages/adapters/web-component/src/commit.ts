@@ -92,17 +92,17 @@ function appendCommittedChild(
 
   if (isReservedType(t) && t.kind === 'slot') {
     if ((child as any).children != null) {
-      throw new Error('slot:children unsupported');
+      throw new Error('slot:children');
     }
     if ((child as any).style != null) {
-      throw new Error('slot:style unsupported');
+      throw new Error('slot:style');
     }
     // v0: 核心语法层已禁止具名，这里仍防御
     if ((t as any).name) {
-      throw new Error('slot:named unsupported');
+      throw new Error('slot:named');
     }
     if (ctx.slotUsed) {
-      throw new Error('slot:multiple unsupported');
+      throw new Error('slot:multiple');
     }
     ctx.slotUsed = true;
 

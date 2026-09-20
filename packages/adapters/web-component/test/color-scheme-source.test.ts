@@ -5,9 +5,23 @@ import { createRebindableColorSchemeSource } from '../src/color-scheme-source';
 afterEach(() => vi.unstubAllGlobals());
 
 describe('default WC color-scheme source', () => {
-  it('notifies every consumer and defers failures while adopting a document', () => {
+  it('does not notify when adoption preserves the effective scheme', () => {
     const source = createRebindableColorSchemeSource(
       () => 'light',
+      document.implementation.createHTMLDocument('source')
+    );
+    const listener = vi.fn();
+    source.subscribe(listener);
+
+    source.adoptDocument(document.implementation.createHTMLDocument('same-scheme'));
+
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('notifies every consumer and defers failures when adoption changes the scheme', () => {
+    let scheme = 'light';
+    const source = createRebindableColorSchemeSource(
+      () => scheme,
       document.implementation.createHTMLDocument('source')
     );
     const microtasks: (() => void)[] = [];
@@ -19,6 +33,7 @@ describe('default WC color-scheme source', () => {
     const healthy = vi.fn();
     source.subscribe(healthy);
 
+    scheme = 'dark';
     expect(() =>
       source.adoptDocument(document.implementation.createHTMLDocument('destination'))
     ).not.toThrow();

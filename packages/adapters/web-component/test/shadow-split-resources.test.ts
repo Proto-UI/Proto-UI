@@ -232,7 +232,7 @@ describe('Shadow split resource coordinator', () => {
         artifact: ARTIFACT,
         baseGetMeta: () => undefined,
       })
-    ).toThrow('host does not own the supplied root');
+    ).toThrow('shadow:not-owned');
     expect(first.host.hasAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE)).toBe(false);
     expect(second.shell.root.childNodes).toHaveLength(0);
   });

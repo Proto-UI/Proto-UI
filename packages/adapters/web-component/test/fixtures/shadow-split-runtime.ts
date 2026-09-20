@@ -80,7 +80,6 @@ export function createSplitRuntimePilot(args: {
       shadow: true,
       host,
       root,
-      shadowOwnerShell: shell,
       shadowViewTarget: resources.surface,
       schedule: (task) => task(),
       rawPropsSource,

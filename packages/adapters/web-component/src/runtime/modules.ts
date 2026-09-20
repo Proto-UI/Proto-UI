@@ -308,39 +308,49 @@ function listenToEntryEvents(
   };
 }
 
-function collectEntryMediaQueries(
+function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
-  roots: Iterable<Document | ShadowRoot>
+  roots: Iterable<Document | ShadowRoot>,
+  target: HTMLElement,
+  ancestors: readonly Element[]
 ) {
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
-  const visitedRules = new Set<CSSRule>();
+  let relational = 0;
+  const candidates = [target, ...ancestors, ...target.querySelectorAll('*')];
   const collectMedia = (media: MediaList | null | undefined) => {
-    try {
-      if (media?.mediaText) queries.add(media.mediaText);
-    } catch {
-      // An opaque imported sheet can still expose its import rule's media.
-    }
+    const query = media?.mediaText;
+    if (query) queries.add(query);
   };
   const visitRule = (rule: CSSRule) => {
-    if (visitedRules.has(rule)) return;
-    visitedRules.add(rule);
     if (rule.type === 3 || rule.type === 4)
       collectMedia((rule as CSSImportRule | CSSMediaRule).media);
     if (rule.type === 3) {
-      try {
-        const imported = (rule as CSSImportRule).styleSheet;
-        if (imported) visitSheet(imported);
-      } catch {
-        // Cross-origin imports remain opaque; their rule media still applies.
+      const imported = (rule as CSSImportRule).styleSheet;
+      if (imported) visitSheet(imported);
+    }
+    if (rule.type === 1) {
+      let selector = (rule as CSSStyleRule).selectorText;
+      if (rule.parentRule?.type === 1)
+        selector = selector.replaceAll(
+          '&',
+          `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
+        );
+      if (selector.includes(':has(') && /(?:^|[\s,>+~])(?:html|body|:root):has\(/.test(selector))
+        relational = 2;
+      if (!relational && selector.includes(':has(')) {
+        try {
+          const probe = selector.replace(/:has\([^)]*\)/g, ':where(*)');
+          relational = candidates.some((candidate) => candidate.matches(probe)) ? 1 : 0;
+        } catch {
+          // Unknown selector syntax is correctness-sensitive: retain a bounded
+          // external-chain fallback rather than silently missing a change.
+          relational = 1;
+        }
       }
     }
-    try {
-      if ('cssRules' in rule)
-        for (const nested of (rule as CSSGroupingRule).cssRules) visitRule(nested);
-    } catch {
-      // Treat non-standard or opaque grouping rules as leaf rules.
-    }
+    if ('cssRules' in rule)
+      for (const nested of (rule as CSSGroupingRule).cssRules) visitRule(nested);
   };
   const visitSheet = (sheet: CSSStyleSheet) => {
     if (visitedSheets.has(sheet)) return;
@@ -350,12 +360,13 @@ function collectEntryMediaQueries(
       for (const rule of sheet.cssRules) visitRule(rule);
     } catch {
       // Cross-origin sheets remain opaque; their owner media still applies.
+      relational ||= 1;
     }
   };
   for (const root of roots)
     for (const sheet of [...(root.styleSheets ?? []), ...(root.adoptedStyleSheets ?? [])])
       visitSheet(sheet);
-  return [...queries].map((query) => view.matchMedia(query));
+  return [[...queries].map((query) => view.matchMedia(query)), relational] as const;
 }
 
 function watchEntryStyleInvalidation(
@@ -745,7 +756,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
-  let entryExternalTreeObserver: MutationObserver | null = null;
   let entryExternalStyleObserver: MutationObserver | null = null;
   let entryRadioGroupObserver: MutationObserver | null = null;
   let entryResizeObserver: ResizeObserver | null = null;
@@ -762,12 +772,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     entryObserverGeneration += 1;
     entryObserver?.disconnect();
     entryImageObserver?.disconnect();
-    entryExternalTreeObserver?.disconnect();
     entryExternalStyleObserver?.disconnect();
     entryRadioGroupObserver?.disconnect();
     entryObserver =
       entryImageObserver =
-      entryExternalTreeObserver =
       entryExternalStyleObserver =
       entryRadioGroupObserver =
         null;
@@ -907,6 +915,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const resolved = resolveFocusEntryTarget(target, config);
             projectFocusable(target, resolved === target);
           };
+          const projectCurrent = () => {
+            if (isCurrentEntryObservation()) projectEntry();
+          };
           projectEntry();
           // Entry policy can be projected before descendant custom elements
           // restore their tabindex on reveal. Track the same DOM inputs used
@@ -915,14 +926,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           if (config.strategy === 'descendant-first' && Observer) {
             const view = target.ownerDocument.defaultView;
             const Resize = view?.ResizeObserver;
-            if (Resize) {
-              entryResizeObserver = new Resize(() => {
-                if (isCurrentEntryObservation()) projectEntry();
-              });
-            }
-            const onViewportResize = () => {
-              if (isCurrentEntryObservation()) projectEntry();
-            };
+            if (Resize) entryResizeObserver = new Resize(projectCurrent);
             // The late-attach watch below is installed once but must always
             // consult the currently observed region, so the root set lives
             // outside observeTree() and is refreshed on every resample
@@ -937,7 +941,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (!isCurrentEntryObservation()) return;
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
-              entryExternalTreeObserver?.disconnect();
               entryExternalStyleObserver?.disconnect();
               entryRadioGroupObserver?.disconnect();
               entryResizeObserver?.disconnect();
@@ -1022,9 +1025,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     const subscription: [() => void] = [
                       () => {
                         pendingUpgrades.delete(name);
-                        if (!isCurrentEntryObservation()) return;
-                        projectEntry();
-                        observeTree();
+                        refreshTree();
                       },
                     ];
                     pendingUpgrades.set(name, subscription);
@@ -1042,13 +1043,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
                 return false;
               };
-              entryExternalTreeObserver ??= new Observer((records) => {
+              entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
-                // External :has() dependencies can change from sibling-tree
-                // mutations, but entry-owned mutations are already handled by
-                // entryObserver. Keeping them out of this path prevents every
-                // sibling entry from rebuilding its complete observation graph.
-                if (records.some((record) => !belongsToObservedEntryTree(record.target)))
+                if (
+                  records.some(
+                    (record) =>
+                      !belongsToObservedEntryTree(record.target) || invalidatesEntryStyles(record)
+                  )
+                )
                   projectEntry();
               });
               // The entry region can itself be slotted or nested below
@@ -1056,6 +1058,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // class/style state participates in descendant computed
               // eligibility, so observe only that bounded composed chain.
               let externalAncestor = composedParentElement(target);
+              const externalAncestors: Element[] = [];
               const externalSlots = new Set<HTMLSlotElement>();
               const externalStyleRoots = new Set<ShadowRoot>();
               const motionTargets = new Set<Element>([target]);
@@ -1069,23 +1072,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 mediaRoots.add(targetRoot as ShadowRoot);
               }
               while (externalAncestor) {
+                externalAncestors.push(externalAncestor);
                 motionTargets.add(externalAncestor);
-                const observeExternalSubtree =
-                  externalAncestor !== target.ownerDocument.body &&
-                  externalAncestor !== target.ownerDocument.documentElement;
-                entryExternalTreeObserver.observe(externalAncestor, {
-                  attributes: true,
-                  childList: observeExternalSubtree,
-                  subtree: observeExternalSubtree,
-                  attributeFilter: [
-                    'class',
-                    'style',
-                    'hidden',
-                    'inert',
-                    'open',
-                    'name',
-                    'disabled',
-                  ],
+                entryObserver?.observe(externalAncestor, {
+                  attributeFilter: options.attributeFilter,
                 });
                 const externalRoot = externalAncestor.getRootNode();
                 if (
@@ -1103,10 +1093,37 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
               }
+              const [mediaQueries, relationalDependency] = collectEntryStyleDependencies(
+                view!,
+                mediaRoots,
+                target,
+                externalAncestors
+              );
+              if (relationalDependency === 1) {
+                for (const ancestor of externalAncestors) {
+                  if (
+                    ancestor === target.ownerDocument.body ||
+                    ancestor === target.ownerDocument.documentElement
+                  )
+                    continue;
+                  entryExternalStyleObserver.observe(ancestor, {
+                    childList: true,
+                    subtree: true,
+                    attributeFilter: options.attributeFilter,
+                  });
+                }
+              }
+              if (relationalDependency === 2) {
+                entryExternalStyleObserver.observe(target.ownerDocument.documentElement, {
+                  childList: true,
+                  subtree: true,
+                  attributeFilter: options.attributeFilter,
+                });
+              }
               const stopEntryEnvironmentEvents = listenToEntryEvents(
-                [view!, ...collectEntryMediaQueries(view!, mediaRoots)],
+                [view!, ...mediaQueries],
                 ['resize', 'change'],
-                onViewportResize
+                projectCurrent
               );
               const projectionEvents = [
                 'transitionend',
@@ -1120,18 +1137,18 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 'focusin',
                 'focusout',
               ];
-              const onProjectionEvent = () => {
-                if (isCurrentEntryObservation()) projectEntry();
-              };
               const stopProjectionEvents = listenToEntryEvents(
                 motionTargets,
                 projectionEvents,
-                onProjectionEvent
+                projectCurrent
               );
+              const onExternalStyleEvent = (event: Event) => {
+                if (isEntryStylesheetElement(event.composedPath()[0] as Node)) refreshTree();
+              };
               const stopExternalStyleEvents = listenToEntryEvents(
                 externalStyleRoots,
                 ['load', 'error'],
-                onProjectionEvent
+                onExternalStyleEvent
               );
               stopEntryMotionWatch = () => {
                 stopEntryEnvironmentEvents();
@@ -1139,10 +1156,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 stopExternalStyleEvents();
               };
               if (externalStyleRoots.size > 0) {
-                entryExternalStyleObserver ??= new Observer((records) => {
-                  if (!isCurrentEntryObservation()) return;
-                  if (records.some(invalidatesEntryStyles)) projectEntry();
-                });
                 for (const root of externalStyleRoots) {
                   entryExternalStyleObserver.observe(root, {
                     subtree: true,
@@ -1154,15 +1167,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               }
               if (externalSlots.size > 0) {
-                const onSlotChange = () => {
-                  if (!isCurrentEntryObservation()) return;
-                  projectEntry();
-                  observeTree();
-                };
                 stopEntrySlotWatch = listenToEntryEvents(
                   externalSlots,
                   ['slotchange'],
-                  onSlotChange
+                  refreshTree
                 );
               }
               // An already-upgraded descendant can still attach an open root
@@ -1179,11 +1187,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   }
                   return false;
                 },
-                () => {
-                  if (!isCurrentEntryObservation()) return;
-                  projectEntry();
-                  observeTree();
-                }
+                refreshTree
               );
               // Both entry resolvers consult document-level image-map bindings.
               // Only regions with areas need this extra observation; unrelated
@@ -1255,8 +1259,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                         invalidatesEntryRadioGroup(record, radioNames, radioFormIds)
                     )
                   ) {
-                    projectEntry();
-                    observeTree();
+                    refreshTree();
                   }
                 });
                 for (const tree of radioTrees) {
@@ -1285,9 +1288,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       : element.localName !== 'form'
                   )
                     return;
-                  queueMicrotask(() => {
-                    if (isCurrentEntryObservation()) projectEntry();
-                  });
+                  queueMicrotask(projectCurrent);
                 };
                 stopEntryRadioStateWatch = listenToEntryEvents(
                   radioTrees,
@@ -1296,6 +1297,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 );
               }
             };
+            function refreshTree() {
+              if (!isCurrentEntryObservation()) return;
+              projectEntry();
+              observeTree();
+            }
             entryObserver = new Observer((records) => {
               if (!isCurrentEntryObservation()) return;
               if (
@@ -1303,19 +1309,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   (record) => record.target !== target || record.attributeName !== 'tabindex'
                 )
               ) {
-                projectEntry();
                 // New native descendants can own open roots. A single DOM
                 // subtree observation never crosses those boundaries.
-                observeTree();
+                refreshTree();
               }
             });
-            if (view)
-              stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
-                if (isCurrentEntryObservation()) {
-                  projectEntry();
-                  observeTree();
-                }
-              });
+            if (view) stopEntryStyleWatch = watchEntryStyleInvalidation(view, refreshTree);
             observeTree();
           }
         },

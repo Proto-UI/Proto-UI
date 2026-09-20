@@ -141,7 +141,9 @@ describe('S5 native Shadow text surface', () => {
     await flush();
     const before = host.shadowRoot!.innerHTML,
       rootStyle = host.getAttribute('data-pui-split-root-style');
-    expect(() => (host.getExposes() as any).invalid()).toThrow(/native-size/);
+    expect(() => (host.getExposes() as any).invalid()).toThrow(
+      /native-size.*fix: companion or change\/remove token/
+    );
     expect(host.shadowRoot!.innerHTML).toBe(before);
     expect(host.getAttribute('data-pui-split-root-style')).toBe(rootStyle);
   });

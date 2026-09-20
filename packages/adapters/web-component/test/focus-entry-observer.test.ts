@@ -705,6 +705,102 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('observes external subtrees only while an author relational selector can reach the entry', async () => {
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const style = document.createElement('style');
+    style.textContent = '.unrelated:has(.flag) .outside { visibility: hidden; }';
+    const nestedStyle = document.createElement('style');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entry-relational-boundary';
+    document.body.append(style, nestedStyle, wrapper);
+    Object.defineProperty(nestedStyle.sheet!, 'cssRules', {
+      configurable: true,
+      value: [
+        {
+          type: 1,
+          selectorText: '&:has(> svg)',
+          parentRule: { type: 1, selectorText: '.nested-unrelated' },
+        },
+      ],
+    });
+    const host = panel(true);
+    wrapper.append(host);
+    host.append(document.createElement('button'));
+    await settle();
+
+    const observesWrapperSubtree = () =>
+      observe.mock.calls.some(
+        ([node, options]) => node === wrapper && options?.childList && options?.subtree
+      );
+    expect(observesWrapperSubtree()).toBe(false);
+    expect(
+      observe.mock.calls.some(
+        ([node, options]) =>
+          node === wrapper && options?.attributeFilter?.includes('class') && !options?.subtree
+      )
+    ).toBe(true);
+
+    const relevantStyle = document.createElement('style');
+    relevantStyle.textContent =
+      '.entry-relational-reachable:has(.flag) button { visibility: hidden; }';
+    const relevantWrapper = document.createElement('div');
+    relevantWrapper.className = 'entry-relational-reachable';
+    document.body.append(relevantStyle, relevantWrapper);
+    const relevantHost = panel(true);
+    relevantWrapper.append(relevantHost);
+    relevantHost.append(document.createElement('button'));
+    await settle();
+    expect(
+      observe.mock.calls.some(
+        ([node, options]) => node === relevantWrapper && options?.childList && options?.subtree
+      )
+    ).toBe(true);
+  });
+
+  it('reprojects for a body-level relational selector without observing unrelated selectors', async () => {
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const style = document.createElement('style');
+    style.textContent =
+      'body:has(> .entry-body-flag) .entry-body-relational button { visibility: hidden; }';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entry-body-relational';
+    document.body.append(style, wrapper);
+    const host = panel(true);
+    wrapper.append(host);
+    const button = document.createElement('button');
+    host.append(button);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility')
+            return document.body.querySelector('.entry-body-flag') ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    expect(
+      observe.mock.calls.some(
+        ([node, options]) =>
+          node === document.documentElement && options?.childList && options?.subtree
+      )
+    ).toBe(true);
+
+    const flag = document.createElement('span');
+    flag.className = 'entry-body-flag';
+    document.body.append(flag);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    flag.remove();
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
   it('observes stylesheet DOM changes in an external composed ShadowRoot', async () => {
     const carrier = document.createElement('div');
     const root = carrier.attachShadow({ mode: 'open' });
@@ -746,6 +842,76 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(removeAttribute).not.toHaveBeenCalled();
   });
 
+  it('rebuilds imported media listeners when an external Shadow stylesheet loads', async () => {
+    const query = '(prefers-contrast: more)';
+    const media = Object.assign(new EventTarget(), {
+      media: query,
+      matches: false,
+      onchange: null,
+      addListener() {},
+      removeListener() {},
+    }) as MediaQueryList;
+    const matchMedia = vi.spyOn(window, 'matchMedia').mockImplementation((value) =>
+      value === query
+        ? media
+        : (Object.assign(new EventTarget(), {
+            media: value,
+            matches: false,
+            onchange: null,
+            addListener() {},
+            removeListener() {},
+          }) as MediaQueryList)
+    );
+    const carrier = document.createElement('div');
+    const root = carrier.attachShadow({ mode: 'open' });
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    root.append(link);
+    document.body.append(carrier);
+    const host = panel(true);
+    root.append(host);
+    const button = document.createElement('button');
+    host.append(button);
+    let hidden = false;
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility') return hidden ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    await settle();
+    expect(matchMedia).not.toHaveBeenCalledWith(query);
+
+    Object.defineProperty(root, 'styleSheets', {
+      configurable: true,
+      value: [
+        {
+          media: { mediaText: '' },
+          cssRules: [
+            {
+              type: 3,
+              media: { mediaText: query },
+              styleSheet: { media: { mediaText: '' }, cssRules: [] },
+            },
+          ],
+        },
+      ],
+    });
+    link.dispatchEvent(new Event('load'));
+    await settle();
+    expect(matchMedia).toHaveBeenCalledWith(query);
+
+    hidden = true;
+    media.dispatchEvent(new Event('change'));
+    await settle();
+    expect(host.tabIndex).toBe(0);
+  });
+
   it('reprojects on accessible imported stylesheet media changes without looping on cycles', async () => {
     const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
     const originalStyleSheets = Object.getOwnPropertyDescriptor(document, 'styleSheets');
@@ -777,8 +943,11 @@ describe('WC live focus-entry resolver inputs', () => {
     const opaqueImport = {
       type: 3,
       media: { mediaText: '(prefers-contrast: more)' },
-      get styleSheet(): CSSStyleSheet {
-        throw new DOMException('opaque', 'SecurityError');
+      styleSheet: {
+        media: { mediaText: '' },
+        get cssRules(): CSSRuleList {
+          throw new DOMException('opaque', 'SecurityError');
+        },
       },
     } as unknown as CSSImportRule;
     importedSheet.cssRules = [

@@ -2622,6 +2622,62 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('rebinds a retained focus-entry observation graph to its adopted document', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-retained-adopted-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.id = 'retained-adopted-entry';
+        const button = document.createElement('button');
+        button.textContent = 'Entry';
+        host.append(button);
+        document.body.append(host);
+        const settle = (view: Window) =>
+          new Promise<void>((resolve) => view.requestAnimationFrame(() => resolve()));
+        await settle(window);
+        const initial = host.getAttribute('tabindex');
+
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const foreignWindow = frame.contentWindow!;
+        const style = foreignDocument.createElement('style');
+        foreignDocument.head.append(style);
+        foreignDocument.adoptNode(host);
+        foreignDocument.body.append(host);
+        await settle(foreignWindow);
+        const adopted = host.getAttribute('tabindex');
+
+        style.sheet!.insertRule('#retained-adopted-entry button { visibility: hidden; }');
+        await Promise.resolve();
+        const hidden = host.getAttribute('tabindex');
+        style.sheet!.deleteRule(0);
+        await Promise.resolve();
+        const visible = host.getAttribute('tabindex');
+        frame.remove();
+        return { initial, adopted, hidden, visible };
+      });
+      expect(result).toEqual({ initial: null, adopted: null, hidden: '0', visible: null });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects an adopted radio entry after foreign-realm checkedness changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

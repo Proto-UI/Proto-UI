@@ -122,7 +122,7 @@ describe('private Shadow split effects', () => {
         cssText: options.artifact.cssText.replace('--pui-split-motion-recipe: h1;', ''),
       },
     });
-    expect(() => old.queueStyle(effect(tokens))).toThrow(/H1 recipe/);
+    expect(() => old.queueStyle(effect(tokens))).toThrow(/H1 recipe.*fix:/);
     expect(host.hasAttribute(ROOT)).toBe(false);
     expect(surface.getAttribute('data-pui-style')).toBe('consumer');
     old.dispose();
@@ -170,7 +170,7 @@ describe('private Shadow split effects', () => {
         diagnostic = String(error);
       }
       expect(diagnostic).toMatch(/pilot.*runtime token/);
-      expect(diagnostic).toMatch(/corrective direction: .+/);
+      expect(diagnostic).toMatch(/fix: .+/);
       expect([host.outerHTML, surface.outerHTML]).toEqual(before);
       effects.requestFlush();
       expect([host.outerHTML, surface.outerHTML]).toEqual(before);
@@ -205,9 +205,7 @@ describe('private Shadow split effects', () => {
       diagnostic = String(error);
     }
     expect(diagnostic).toMatch(/extension-token.*missing token/);
-    expect(diagnostic).toMatch(
-      /corrective direction: include the exact token selector in the Shadow style artifact or remove the token/
-    );
+    expect(diagnostic).toMatch(/fix: companion or change\/remove token/);
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.dispose();

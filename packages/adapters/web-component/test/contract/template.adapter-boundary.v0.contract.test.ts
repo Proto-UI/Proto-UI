@@ -41,10 +41,10 @@ describe('contract: adapter-web-component / template adapter boundary fixture (v
       );
       expect(() =>
         commitChildren(host, { type: { kind: 'slot' }, children: ['x'] } as any)
-      ).toThrow(/slot:children unsupported/);
+      ).toThrow(/slot:children/);
       expect(() =>
         commitChildren(host, { type: { kind: 'slot' }, style: { kind: 'tw', tokens: [] } } as any)
-      ).toThrow(/slot:style unsupported/);
+      ).toThrow(/slot:style/);
     }
   );
 

@@ -16,7 +16,6 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   shadow: boolean;
   host: HTMLElement;
   root: Element | ShadowRoot;
-  shadowOwnerShell: ShadowOwnerShell | null;
   /** Private split pilot seam; owner resources are never Template commit targets. */
   shadowViewTarget?: ShadowViewTarget;
   schedule: (task: () => void) => void;
@@ -46,7 +45,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     shadow,
     host,
     root,
-    shadowOwnerShell,
+    shadowViewTarget,
     schedule,
     rawPropsSource,
     wiring,
@@ -65,6 +64,54 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
 
   let capsHub: any = null;
 
+  const commitWebComponentChildren = (children: TemplateChildren) => {
+    const fixedTarget = textControlTarget ?? imageViewTarget;
+    if (fixedTarget) {
+      if (Array.isArray(children) ? children.length > 0 : children != null)
+        throw new Error('host-target:children');
+      if (shadowViewTarget) {
+        if (!shadowViewTarget.hasOnlyRenderedNode(fixedTarget))
+          shadowViewTarget.replaceRenderedChildren([fixedTarget]);
+      } else if (root.firstChild !== fixedTarget || root.childNodes.length !== 1) {
+        root.replaceChildren(fixedTarget);
+      }
+      clearSlotProjector();
+      eventGate.enable();
+      return;
+    }
+
+    if (shadow) {
+      const staging = root.ownerDocument.createDocumentFragment();
+      commitChildren(staging, children, { mode: 'shadow' });
+      if (shadowViewTarget) shadowViewTarget.replaceRenderedChildren([...staging.childNodes]);
+      else root.replaceChildren(...staging.childNodes);
+      clearSlotProjector();
+      eventGate.enable();
+      return;
+    }
+
+    const only = Array.isArray(children) ? (children.length === 1 ? children[0] : null) : children;
+    const onlyType = only && typeof only === 'object' ? (only as any).type : null;
+    if (onlyType && typeof onlyType === 'object' && onlyType.kind === 'slot') {
+      clearSlotProjector();
+      eventGate.enable();
+      return;
+    }
+
+    const projector = getSlotProjector() ?? ensureSlotProjector();
+    const slotPool = projector.collectSlotPoolBeforeCommit();
+    const owned = new WeakSet<Node>();
+    const result = commitChildren(root as any, children, { mode: 'light', slotPool, owned });
+    projector.afterCommit({
+      owned,
+      slotStart: result.slotStart,
+      slotEnd: result.slotEnd,
+      projected: slotPool,
+      enableMO: result.hasSlot,
+    });
+    eventGate.enable();
+  };
+
   const hostSession = createAdapterHost(
     { ...proto, name: tagName },
     {
@@ -73,18 +120,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       onLifecycleCheckpoint,
       onLifecycleEvent,
       commit: (children, signal) => {
-        commitWebComponentChildren({
-          root,
-          shadowOwnerShell: args.shadowViewTarget ?? shadowOwnerShell,
-          children,
-          shadow,
-          textControlTarget,
-          imageViewTarget,
-          eventGate,
-          getSlotProjector,
-          ensureSlotProjector,
-          clearSlotProjector,
-        });
+        commitWebComponentChildren(children);
         signal?.done();
       },
     },
@@ -113,110 +149,4 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
 
   capsHub = hostSession.caps;
   return { ...hostSession, host };
-}
-
-function commitWebComponentChildren(args: {
-  root: Element | ShadowRoot;
-  shadowOwnerShell: ShadowViewTarget | null;
-  children: TemplateChildren;
-  shadow: boolean;
-  textControlTarget: HTMLElement | null;
-  imageViewTarget: HTMLImageElement | null;
-  eventGate: { enable(): void };
-  getSlotProjector: () => SlotProjector | null;
-  ensureSlotProjector: () => SlotProjector;
-  clearSlotProjector: () => void;
-}) {
-  const {
-    root,
-    shadowOwnerShell,
-    children,
-    shadow,
-    textControlTarget,
-    imageViewTarget,
-    eventGate,
-    getSlotProjector,
-    ensureSlotProjector,
-    clearSlotProjector,
-  } = args;
-  if (textControlTarget) {
-    const hasChildren = Array.isArray(children) ? children.length > 0 : children != null;
-    if (hasChildren) {
-      throw new Error('text-control Template must be empty');
-    }
-    if (shadowOwnerShell) {
-      if (!shadowOwnerShell.hasOnlyRenderedNode(textControlTarget)) {
-        shadowOwnerShell.replaceRenderedChildren([textControlTarget]);
-      }
-    } else if (root.firstChild !== textControlTarget || root.childNodes.length !== 1) {
-      root.replaceChildren(textControlTarget);
-    }
-    clearSlotProjector();
-    eventGate.enable();
-    return;
-  }
-
-  if (imageViewTarget) {
-    const hasChildren = Array.isArray(children) ? children.length > 0 : children != null;
-    if (hasChildren) {
-      throw new Error('image-view Template must be empty');
-    }
-    if (shadowOwnerShell) {
-      if (!shadowOwnerShell.hasOnlyRenderedNode(imageViewTarget)) {
-        shadowOwnerShell.replaceRenderedChildren([imageViewTarget]);
-      }
-    } else if (root.firstChild !== imageViewTarget || root.childNodes.length !== 1) {
-      root.replaceChildren(imageViewTarget);
-    }
-    clearSlotProjector();
-    eventGate.enable();
-    return;
-  }
-
-  if (shadow) {
-    const staging = root.ownerDocument.createDocumentFragment();
-    commitChildren(staging, children, { mode: 'shadow' });
-    const renderedChildren = Array.from(staging.childNodes);
-    if (shadowOwnerShell) shadowOwnerShell.replaceRenderedChildren(renderedChildren);
-    else root.replaceChildren(...renderedChildren);
-    clearSlotProjector();
-    eventGate.enable();
-    return;
-  }
-
-  if (isSlotOnly(children)) {
-    clearSlotProjector();
-    eventGate.enable();
-    return;
-  }
-
-  const projector = getSlotProjector() ?? ensureSlotProjector();
-  const slotPool = projector.collectSlotPoolBeforeCommit();
-  const owned = new WeakSet<Node>();
-
-  const result = commitChildren(root as any, children, {
-    mode: 'light',
-    slotPool,
-    owned,
-  });
-
-  projector.afterCommit({
-    owned,
-    slotStart: result.slotStart,
-    slotEnd: result.slotEnd,
-    projected: slotPool,
-    enableMO: result.hasSlot,
-  });
-
-  eventGate.enable();
-}
-
-function isSlotOnly(children: TemplateChildren): boolean {
-  if (children == null) return false;
-
-  const one = Array.isArray(children) ? (children.length === 1 ? children[0] : null) : children;
-  if (!one || typeof one !== 'object') return false;
-
-  const type = (one as any).type;
-  return !!type && typeof type === 'object' && type.kind === 'slot';
 }

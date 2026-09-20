@@ -59,7 +59,7 @@ export function createShadowSplitResources({
   factories,
 }: ShadowSplitResourceOptions): ShadowSplitResources {
   if (shell.root.host !== host) {
-    throw new Error('host does not own the supplied root');
+    throw new Error('shadow:not-owned');
   }
 
   const current = resourceGenerations.get(shell.root);

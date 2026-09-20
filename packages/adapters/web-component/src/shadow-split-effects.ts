@@ -16,40 +16,6 @@ const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 
 type Projection = { root: string; surface: string[]; borderWidths: string };
 
-function correctiveDirection(reason: string): string {
-  if (reason === 'missing token')
-    return 'include the exact token selector in the Shadow style artifact or remove the token';
-  if (reason === 'unresolved-role')
-    return 'replace the token with one that has an admitted canonical role or remove it';
-  if (reason === 'composite')
-    return 'replace the token with an admitted composite token (block, flex, grid, or inline-flex)';
-  if (reason === 'conditional-composite')
-    return 'use an unconditional admitted composite token or remove the conditional composite';
-  if (reason === 'native-size')
-    return 'replace the native-text size token with w-full or min-h-16, or remove it';
-  if (reason === 'author-origin')
-    return 'provide one unqualified author token from setup, rule, or runtime origin';
-  if (reason === 'canonical-origin')
-    return 'regenerate the Root effect from canonical author provenance';
-  if (reason === 'K1 slide')
-    return 'remove the slide token or use the verified dialog-motion K1 recipe without slide composition';
-  if (reason === 'K1 recipe')
-    return 'provide the verified dialog-motion K1 recipe or remove the motion token';
-  if (reason === 'I1 recipe')
-    return 'provide the verified participation-coordinate I1 recipe or remove the token';
-  if (reason === 'H1 recipe')
-    return 'provide the verified motion H1 recipe or remove the geometry or hit-testing token';
-  if (reason === 'intrinsic recipe')
-    return 'provide the verified intrinsic-nowrap v1 recipe or remove the intrinsic token combination';
-  if (reason === 'intrinsic operands')
-    return 'remove conditional or explicit size operands from the intrinsic-nowrap token combination';
-  if (reason.startsWith('directional:'))
-    return 'remove the directional padding or border token from the logical-padding combination';
-  if (reason === 'used-value-rounding')
-    return 'remove the animated border-width combination or provide a verified rounding recipe';
-  return 'remove the unsupported token combination or provide a verified split recipe for it';
-}
-
 // Fixed border widths are supported by H1. CSS rounds animated border widths
 // to device pixels but interpolates compensating margins continuously. Until
 // a recipe preserves that used-value rounding, reject such transitions under K.
@@ -120,7 +86,7 @@ export function createShadowSplitEffectsPort({
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
     throw invalid(
-      `${entry.origin} token ${JSON.stringify(entry.authorToken)}:${reason}; corrective direction: ${correctiveDirection(reason)}`
+      `${entry.origin} token ${JSON.stringify(entry.authorToken)}:${reason}; fix: companion or change/remove token`
     );
   };
   const prepare = (handle: StyleHandle): Projection => {
