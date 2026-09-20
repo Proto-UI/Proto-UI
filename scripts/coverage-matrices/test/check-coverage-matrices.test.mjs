@@ -7333,3 +7333,87 @@ test('promotion history accepts a checked-out merge revision distinct from the e
     { matrixCount: 2 }
   );
 });
+
+test('resolves useCallback-returned functions that execute during render', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/CallbackAction.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    "import { useCallback } from 'react'; import * as actions from './agent-actions'; export function Surface() { const run = useCallback(() => actions.send(), []); run(); return <section />; }",
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/src\/run\/CallbackAction\.tsx` contains a forbidden interaction/
+  );
+});
+
+test('scans callbacks scheduled during render or effects', () => {
+  for (const [name, scheduler] of [
+    ['Timeout', 'setTimeout'],
+    ['Microtask', 'queueMicrotask'],
+    ['AnimationFrame', 'requestAnimationFrame'],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/Scheduled${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    const scheduledCall = `${scheduler}(() => actions.send(), 0)`;
+    const source =
+      scheduler === 'setTimeout'
+        ? `import { useEffect } from 'react'; import * as actions from './agent-actions'; export function Surface() { useEffect(() => { ${scheduledCall}; }, []); return <section />; }`
+        : `import * as actions from './agent-actions'; export function Surface() { ${scheduledCall}; return <section />; }`;
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        `Harness source \`apps/agent-harness/src/run/Scheduled${name}\\.tsx\` contains a forbidden interaction`
+      )
+    );
+  }
+});
+
+test('scans executable script sources in Markdown and MDX content', () => {
+  for (const extension of ['md', 'mdx']) {
+    const root = createRoot();
+    const relativePath = `apps/www/src/content/docs/remote-script.${extension}`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, '<script src="https://cdn.example/react.js"></script>', 'utf8');
+    writeValidMatrices(root);
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        `external executable script \`https://cdn\\.example/react\\.js\` in \`apps/www/src/content/docs/remote-script\\.${extension}\` is not reviewed`
+      )
+    );
+  }
+});
+
+test('fails closed on variable dynamic imports in Website and Harness sources', () => {
+  for (const [relativePath, expected] of [
+    [
+      'apps/www/src/components/VariableRuntime.ts',
+      /unresolved dynamic import in `apps\/www\/src\/components\/VariableRuntime\.ts` must be statically bounded/,
+    ],
+    [
+      'apps/agent-harness/src/run/VariableRuntime.ts',
+      /unresolved dynamic import in `apps\/agent-harness\/src\/run\/VariableRuntime\.ts` must be statically bounded/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      'export function load(name) { return import(`../../../../packages/runtime/src/${name}.ts`); }',
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});

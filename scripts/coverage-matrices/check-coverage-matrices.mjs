@@ -2444,6 +2444,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
   );
   const effectNames = new Set(['useEffect', 'useInsertionEffect', 'useLayoutEffect']);
   const imperativeHandleNames = new Set(['useImperativeHandle']);
+  const callbackFactoryNames = new Set(['useCallback']);
   const renderEvaluatedHooks = new Map([
     ['useMemo', 'useMemo'],
     ['useState', 'useState'],
@@ -2505,6 +2506,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
           effectNames.add(element.name.text);
         }
         if (importedName === 'useImperativeHandle') imperativeHandleNames.add(element.name.text);
+        if (importedName === 'useCallback') callbackFactoryNames.add(element.name.text);
         if (/^(?:useMemo|useReducer|useState|useSyncExternalStore)$/u.test(importedName)) {
           renderEvaluatedHooks.set(element.name.text, importedName);
         }
@@ -2528,6 +2530,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
         if (initializer.name.text === 'useImperativeHandle') {
           imperativeHandleNames.add(node.name.text);
         }
+        if (initializer.name.text === 'useCallback') callbackFactoryNames.add(node.name.text);
         if (/^(?:useMemo|useReducer|useState|useSyncExternalStore)$/u.test(initializer.name.text)) {
           renderEvaluatedHooks.set(node.name.text, initializer.name.text);
         }
@@ -2550,6 +2553,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
       if (node.propertyName.text === 'useImperativeHandle') {
         imperativeHandleNames.add(node.name.text);
       }
+      if (node.propertyName.text === 'useCallback') callbackFactoryNames.add(node.name.text);
       if (/^(?:useMemo|useReducer|useState|useSyncExternalStore)$/u.test(node.propertyName.text)) {
         renderEvaluatedHooks.set(node.name.text, node.propertyName.text);
       }
@@ -2567,6 +2571,10 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
       }
       if (!imperativeHandleNames.has(alias) && imperativeHandleNames.has(sourceName)) {
         imperativeHandleNames.add(alias);
+        hookAliasesChanged = true;
+      }
+      if (!callbackFactoryNames.has(alias) && callbackFactoryNames.has(sourceName)) {
+        callbackFactoryNames.add(alias);
         hookAliasesChanged = true;
       }
       if (!renderEvaluatedHooks.has(alias) && renderEvaluatedHooks.has(sourceName)) {
@@ -2745,11 +2753,28 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
     });
     callableBindings.set(name, bindings);
   };
+  const useCallbackArgument = (initializer) => {
+    if (!ts.isCallExpression(initializer) || !initializer.arguments[0]) return null;
+    const callee = unwrapTypeScriptExpression(initializer.expression);
+    const isUseCallback =
+      (ts.isIdentifier(callee) && callbackFactoryNames.has(callee.text)) ||
+      (ts.isPropertyAccessExpression(callee) &&
+        ts.isIdentifier(callee.expression) &&
+        reactNamespaceNames.has(callee.expression.text) &&
+        callee.name.text === 'useCallback');
+    if (!isUseCallback) return null;
+    const callback = unwrapTypeScriptExpression(initializer.arguments[0]);
+    return ts.isArrowFunction(callback) || ts.isFunctionExpression(callback) ? callback : null;
+  };
   const collectCallableBindings = (node) => {
     if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
       const initializer = unwrapTypeScriptExpression(node.initializer);
-      if (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)) {
-        addCallableBinding(node.name.text, node, initializer, false);
+      const callable =
+        ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)
+          ? initializer
+          : useCallbackArgument(initializer);
+      if (callable) {
+        addCallableBinding(node.name.text, node, callable, false);
       }
     }
     if (ts.isFunctionDeclaration(node) && node.name && node.body) {
@@ -2805,6 +2830,34 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
       }
       if (ts.isCallExpression(node)) {
         const callee = unwrapTypeScriptExpression(node.expression);
+        const scheduledCallbackName = ts.isIdentifier(callee)
+          ? callee.text
+          : ts.isPropertyAccessExpression(callee) &&
+              ts.isIdentifier(callee.expression) &&
+              /^(?:globalThis|self|window)$/u.test(callee.expression.text)
+            ? callee.name.text
+            : null;
+        if (
+          scheduledCallbackName &&
+          /^(?:queueMicrotask|requestAnimationFrame|setTimeout)$/u.test(scheduledCallbackName) &&
+          node.arguments[0]
+        ) {
+          const callbackExpression = unwrapTypeScriptExpression(node.arguments[0]);
+          const scheduledCallable =
+            ts.isArrowFunction(callbackExpression) || ts.isFunctionExpression(callbackExpression)
+              ? callbackExpression
+              : ts.isIdentifier(callbackExpression)
+                ? resolveCallable(callbackExpression.text, callbackExpression)
+                : null;
+          if (scheduledCallable && !visitedCallables.has(scheduledCallable)) {
+            visitedCallables.add(scheduledCallable);
+            const callbackBody = ts.isFunctionLike(scheduledCallable)
+              ? scheduledCallable.body
+              : scheduledCallable;
+            if (callbackBody) visit(callbackBody, callbackBody);
+            if (found) return;
+          }
+        }
         const callable =
           ts.isArrowFunction(callee) || ts.isFunctionExpression(callee)
             ? callee
@@ -3113,6 +3166,8 @@ function discoverHarnessForbiddenStateMachineSources(rootDir) {
     .sort();
 }
 
+const UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER = '<unresolved dynamic import>';
+
 function scriptModuleSpecifiers(source, fileName) {
   const sourceFile = ts.createSourceFile(
     fileName,
@@ -3168,7 +3223,14 @@ function scriptModuleSpecifiers(source, fileName) {
         (callee.kind === ts.SyntaxKind.ImportKeyword ||
           (ts.isIdentifier(callee) && callee.text === 'require'))
       ) {
-        addLiteral(node.arguments[0]);
+        const argument = node.arguments[0];
+        if (argument && ts.isStringLiteralLike(argument)) addLiteral(argument);
+        else if (
+          callee.kind === ts.SyntaxKind.ImportKeyword &&
+          !/\/\*\s*@vite-ignore\s*\*\//u.test(node.getFullText(sourceFile))
+        ) {
+          specifiers.push(UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER);
+        }
       }
     } else if (ts.isNewExpression(node)) {
       const workerSpecifier = workerEntrySpecifier(node);
@@ -3551,6 +3613,9 @@ function guardedWebsiteImport(
   websiteAliasConfig
 ) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
+  if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
+    return { category: 'unresolved-dynamic-import', resolvedPath: null };
+  }
   if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'adapter-package', resolvedPath: null };
   }
@@ -3703,6 +3768,9 @@ function inspectBarePackageForGuardedWebsiteImports(
 }
 function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
+  if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
+    return { category: 'unresolved-dynamic-import', resolvedPath: null };
+  }
   if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'proto-ui-package', resolvedPath: null };
   }
@@ -3867,9 +3935,10 @@ function discoverWebsiteRawImports(rootDir) {
   const bareInspectionCache = new Map();
   for (const absolutePath of candidates) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
-    if (/\.(?:html?|astro|vue|svelte)$/i.test(absolutePath)) {
+    if (/\.(?:html?|astro|mdx?|vue|svelte)$/i.test(absolutePath)) {
       const content = fs.readFileSync(absolutePath, 'utf8');
-      for (const specifier of externalScriptModuleSpecifiers(content)) {
+      const markup = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
+      for (const specifier of externalScriptModuleSpecifiers(markup)) {
         if (isExternalExecutableScriptSpecifier(specifier)) {
           rawImports.push({
             sourcePath,
@@ -3936,6 +4005,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
+    if (rawImport.category === 'unresolved-dynamic-import') {
+      issues.push(
+        `${relativePath}: unresolved dynamic import in \`${rawImport.sourcePath}\` must be statically bounded for consumer-wall review`
+      );
+      continue;
+    }
     if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
     issues.push(
       `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist`
@@ -3989,6 +4064,12 @@ function validateHarnessRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'forbidden-third-party-package') {
       issues.push(
         `${relativePath}: forbidden third-party Harness UI package \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\``
+      );
+      continue;
+    }
+    if (rawImport.category === 'unresolved-dynamic-import') {
+      issues.push(
+        `${relativePath}: unresolved dynamic import in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
       );
       continue;
     }
