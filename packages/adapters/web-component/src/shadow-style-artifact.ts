@@ -117,7 +117,7 @@ function validateShadowSelectorAbi(cssText: string): void {
     throw invalidArtifact(documentMarker);
   }
 
-  const hasUnscopedDarkToken = selectors.split(/[{},]/).some((selector) => {
+  const hasUnscopedDarkToken = splitShadowSelectorFragments(selectors).some((selector) => {
     const normalized = selector.replace(/\s/g, '');
     if (/\[[^\]]*\\/.test(normalized)) return true;
     for (const token of normalized.matchAll(/\[data-pui-style~=(['"])([^'"]*)\1([is])?\]/gi)) {
@@ -135,6 +135,47 @@ function validateShadowSelectorAbi(cssText: string): void {
   if (hasUnscopedDarkToken) {
     throw invalidArtifact('dark');
   }
+}
+
+// Split rule preludes and top-level selector-list branches without treating
+// commas inside functional selectors or attribute values as branch boundaries.
+// Full CSS parsing is unnecessary for this bounded ABI check, but the scanner
+// must still respect strings, escapes and bracket/parenthesis nesting.
+function splitShadowSelectorFragments(cssText: string): string[] {
+  const fragments: string[] = [];
+  let start = 0;
+  let quote: '"' | "'" | null = null;
+  let parentheses = 0;
+  let brackets = 0;
+
+  const push = (end: number) => {
+    fragments.push(cssText.slice(start, end));
+    start = end + 1;
+  };
+
+  for (let index = 0; index < cssText.length; index += 1) {
+    const char = cssText[index]!;
+    if (char === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === '(') parentheses += 1;
+    else if (char === ')') parentheses = Math.max(0, parentheses - 1);
+    else if (char === '[') brackets += 1;
+    else if (char === ']') brackets = Math.max(0, brackets - 1);
+    else if (char === '{' || char === '}' || (char === ',' && parentheses === 0 && brackets === 0))
+      push(index);
+  }
+  fragments.push(cssText.slice(start));
+  return fragments;
 }
 
 export const stripShadowCssComments = (cssText: string) => cssText.replace(/\/\*[\s\S]*?\*\//g, '');

@@ -406,6 +406,45 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('retains a sampled SVG focus target after focus becomes blank', () => {
+    const scope = document.createElement('div');
+    const before = document.createElement('button');
+    before.id = 'before-svg-history';
+    before.tabIndex = 0;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+    link.id = 'svg-history';
+    link.setAttribute('href', '#destination');
+    link.setAttribute('tabindex', '0');
+    Object.defineProperty(link, 'tabIndex', { configurable: true, value: 0 });
+    svg.append(link);
+    const after = document.createElement('button');
+    after.id = 'after-svg-history';
+    after.tabIndex = 0;
+    scope.append(before, svg, after);
+    document.body.append(scope);
+    const history = observeWebComponentRadioFocus(scope);
+    try {
+      link.focus();
+      expect(history.recent()).toBe(link);
+      (document.body as HTMLElement).tabIndex = -1;
+      document.body.focus();
+      const sample = sampleWebComponentScopeTargets(scope, undefined, 'next', history.order, () =>
+        history.recent()
+      );
+      expect(sample.recentTarget).toBe(link);
+      expect(sample.targets.map((target) => target.id)).toEqual([
+        'before-svg-history',
+        'svg-history',
+        'after-svg-history',
+      ]);
+    } finally {
+      history.dispose();
+      scope.remove();
+      (document.body as HTMLElement).removeAttribute('tabindex');
+    }
+  });
+
   it('revokes native radio history observation with its view lease', () => {
     const scope = document.createElement('div');
     scope.innerHTML =

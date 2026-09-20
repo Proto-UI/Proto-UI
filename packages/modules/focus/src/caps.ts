@@ -72,6 +72,6 @@ export const FOCUS_SAMPLE_SCOPE_TARGETS_CAP = cap<
     activeTarget: Element | null;
     activeInsertionIndex?: number;
     /** View-observed most recent native in-scope focus; never a logical fact. */
-    recentTarget?: HTMLElement | null;
+    recentTarget?: Element | null;
   }
 >('@proto.ui/focus/sampleScopeTargets');

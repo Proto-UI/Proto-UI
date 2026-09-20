@@ -3,6 +3,14 @@ import { definePrototype } from '@proto.ui/core';
 import { asFocusEntry } from '@proto.ui/hooks';
 import { FOCUS_SET_ENTRY_FOCUSABLE_CAP } from '@proto.ui/module-focus';
 import { AdaptToWebComponent } from '../src';
+import {
+  bindLogicalParent,
+  createLogicalInstance,
+  getLogicalTriggerSurfaceRoot,
+  markProtoInstance,
+  mergeLogicalTriggerGroup,
+  unbindProtoInstance,
+} from '../src/platform/instance-tree';
 import { createWebComponentModules } from '../src/runtime/modules';
 
 // Happy DOM delivers MutationObserver through its task manager, not solely
@@ -705,6 +713,102 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('reprojects after a non-whitelisted author attribute changes an external selector', async () => {
+    const style = document.createElement('style');
+    style.textContent = `.entry-author-state[data-state='closed'] button { visibility: hidden; }`;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entry-author-state';
+    document.body.append(style, wrapper);
+    const host = panel(true);
+    wrapper.append(host);
+    const button = document.createElement('button');
+    host.append(button);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility')
+            return wrapper.dataset.state === 'closed' ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    wrapper.dataset.state = 'closed';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    wrapper.dataset.state = 'open';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('reprojects an externally changed delegated nested trigger surface without looping', async () => {
+    const outer = document.createElement('div');
+    const inner = document.createElement('button');
+    outer.append(inner);
+    document.body.append(outer);
+    const proto = { name: `entry-observer-delegated-${++serial}`, setup() {} } as never;
+    const outerToken = createLogicalInstance(proto);
+    const innerToken = createLogicalInstance(proto);
+    markProtoInstance(outer, proto, outerToken);
+    markProtoInstance(inner, proto, innerToken);
+    bindLogicalParent(innerToken, outerToken);
+    mergeLogicalTriggerGroup(outerToken, outerToken);
+    mergeLogicalTriggerGroup(innerToken, outerToken);
+    await settle();
+    expect(getLogicalTriggerSurfaceRoot(outerToken)).toBe(inner);
+
+    const modules = createWebComponentModules({
+      el: outer,
+      instanceToken: outerToken,
+      router: { rootTarget: outer, globalTarget: window },
+      rawPropsSource: { get: () => ({}), subscribe: () => () => {} },
+      effectsPort: {} as never,
+      textControlTarget: null,
+      imageViewTarget: null,
+      getMeta: () => undefined,
+      setExposes() {},
+      runInCallbackScope: (fn) => fn(),
+      isViewReady: () => true,
+      subscribeTargetReady: () => () => {},
+      retryTargetReady() {},
+    });
+    const setEntry = modules.focus!({ prototypeName: 'entry-observer-delegated-test' }).find(
+      ([key]) => key === FOCUS_SET_ENTRY_FOCUSABLE_CAP
+    )![1] as (
+      target: HTMLElement,
+      config: { strategy: 'descendant-first'; fallback: 'self' },
+      enabled: boolean
+    ) => void;
+    const config = { strategy: 'descendant-first', fallback: 'self' } as const;
+    try {
+      setEntry(getLogicalTriggerSurfaceRoot(outerToken)!, config, true);
+      expect(inner.tabIndex).toBe(0);
+
+      const setAttribute = vi.spyOn(inner, 'setAttribute');
+      inner.setAttribute('tabindex', '-1');
+      await settle();
+      expect(inner.tabIndex).toBe(0);
+      const adapterRestores = setAttribute.mock.calls.filter(
+        ([name, value]) => name === 'tabindex' && value === '0'
+      );
+      expect(adapterRestores).toHaveLength(1);
+
+      await settle();
+      expect(adapterRestores).toHaveLength(1);
+    } finally {
+      setEntry(inner, config, false);
+      unbindProtoInstance(innerToken, inner);
+      unbindProtoInstance(outerToken, outer);
+      outer.remove();
+    }
+  });
+
   it('observes external subtrees only while an author relational selector can reach the entry', async () => {
     const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const style = document.createElement('style');
@@ -736,7 +840,7 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(
       observe.mock.calls.some(
         ([node, options]) =>
-          node === wrapper && options?.attributeFilter?.includes('class') && !options?.subtree
+          node === wrapper && options?.attributes && !options?.attributeFilter && !options?.subtree
       )
     ).toBe(true);
 

@@ -911,9 +911,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           const observerGeneration = entryObserverGeneration;
           const isCurrentEntryObservation = () =>
             entryObserverGeneration === observerGeneration && entryObserver !== null;
+          let projectedTargetTabIndex = target.getAttribute('tabindex');
           const projectEntry = () => {
             const resolved = resolveFocusEntryTarget(target, config);
             projectFocusable(target, resolved === target);
+            projectedTargetTabIndex = target.getAttribute('tabindex');
           };
           const projectCurrent = () => {
             if (isCurrentEntryObservation()) projectEntry();
@@ -1055,8 +1057,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               });
               // The entry region can itself be slotted or nested below
               // selector-bearing ancestors outside its owned subtree. Their
-              // class/style state participates in descendant computed
-              // eligibility, so observe only that bounded composed chain.
+              // Arbitrary author attributes can participate in descendant
+              // selectors, so observe every attribute on only this bounded
+              // composed chain instead of guessing a global allowlist.
               let externalAncestor = composedParentElement(target);
               const externalAncestors: Element[] = [];
               const externalSlots = new Set<HTMLSlotElement>();
@@ -1075,7 +1078,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 externalAncestors.push(externalAncestor);
                 motionTargets.add(externalAncestor);
                 entryObserver?.observe(externalAncestor, {
-                  attributeFilter: options.attributeFilter,
+                  attributes: true,
                 });
                 const externalRoot = externalAncestor.getRootNode();
                 if (
@@ -1109,7 +1112,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   entryExternalStyleObserver.observe(ancestor, {
                     childList: true,
                     subtree: true,
-                    attributeFilter: options.attributeFilter,
+                    attributes: true,
                   });
                 }
               }
@@ -1117,7 +1120,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 entryExternalStyleObserver.observe(target.ownerDocument.documentElement, {
                   childList: true,
                   subtree: true,
-                  attributeFilter: options.attributeFilter,
+                  attributes: true,
                 });
               }
               const stopEntryEnvironmentEvents = listenToEntryEvents(
@@ -1306,9 +1309,15 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (!isCurrentEntryObservation()) return;
               if (
                 records.some(
-                  (record) => record.target !== target || record.attributeName !== 'tabindex'
+                  (record) =>
+                    record.target !== target ||
+                    record.attributeName !== 'tabindex' ||
+                    target.getAttribute('tabindex') !== projectedTargetTabIndex
                 )
               ) {
+                // Ignore only the Adapter's currently projected target value.
+                // A delegated surface can also receive an author/runtime write;
+                // a different value must be resampled and restored exactly once.
                 // New native descendants can own open roots. A single DOM
                 // subtree observation never crosses those boundaries.
                 refreshTree();

@@ -76,7 +76,7 @@ export function sampleWebComponentScopeTargets(
   isNativelyFocusable?: (target: HTMLElement) => boolean,
   direction: 'next' | 'prev' = 'next',
   radioFocusOrder?: (radio: HTMLInputElement) => number,
-  recentFocusTarget?: () => HTMLElement | null,
+  recentFocusTarget?: () => Element | null,
   includeBrowsingContexts = false
 ) {
   const activeTarget = deepestActiveElement(container.ownerDocument);
@@ -294,10 +294,10 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
     HTMLInputElement,
     { order: number; tree: Node; form: HTMLFormElement | null; name: string }
   >();
-  let lastFocused: HTMLElement | null = null;
+  let lastFocused: Element | null = null;
   const remember = (event: Event) => {
     const target = event.composedPath()[0];
-    if (!isElementNode(target) || !isHtmlElement(target)) return;
+    if (!isElementNode(target)) return;
     if (deepestActiveElement(root.ownerDocument) !== target) return;
     lastFocused = target;
     if (!isHtmlTag(target, 'input') || target.type !== 'radio' || !target.name) return;

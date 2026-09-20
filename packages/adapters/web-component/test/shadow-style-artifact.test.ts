@@ -74,6 +74,16 @@ describe('adapter-web-component Shadow style artifact', () => {
     ).not.toThrow();
   });
 
+  it('accepts a host-dark-scoped functional selector list', () => {
+    expect(() =>
+      validateShadowStyleArtifact(
+        artifact(
+          `:where(:host([data-pui-color-scheme="dark"])) :is([data-pui-style~="dark:bg-primary"], [data-pui-style~="dark:text-primary"]) { color: red; }`
+        )
+      )
+    ).not.toThrow();
+  });
+
   it('accepts document marker text inside a Shadow-local attribute value', () => {
     expect(() =>
       validateShadowStyleArtifact(
@@ -173,6 +183,12 @@ describe('adapter-web-component Shadow style artifact', () => {
       'dark rule with an optional host-marker branch',
       artifact(
         `:is(:host([data-pui-color-scheme='dark']), :host) :where([data-pui-style~="dark:bg-input/30"]) { color: red; }`
+      ),
+    ],
+    [
+      'top-level unscoped branch beside a scoped functional selector list',
+      artifact(
+        `:where(:host([data-pui-color-scheme='dark'])) :is([data-pui-style~='dark:bg-primary'], [data-pui-style~='dark:text-primary']), [data-pui-style~='dark:border-primary'] { color: red; }`
       ),
     ],
   ])('rejects %s', (_label, input) => {

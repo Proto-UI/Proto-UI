@@ -1191,6 +1191,62 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('recovers trapped forward and reverse traversal from remembered SVG focus', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-svg-scope-recovery',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const scope = new C();
+        scope.id = 'svg-recovery-scope';
+        scope.innerHTML =
+          '<button id="svg-recovery-before">Before</button><svg><a id="svg-recovery-link" href="#destination" tabindex="0"><text>SVG</text></a></svg><button id="svg-recovery-after">After</button>';
+        document.body.append(scope);
+        scope.getExposes().activate();
+      });
+      const active = () =>
+        page.evaluate(() => {
+          let el = document.activeElement;
+          while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+          return el?.id ?? null;
+        });
+      const focusSvgThenBlank = async () => {
+        await page.locator('#svg-recovery-link').focus();
+        expect(await active()).toBe('svg-recovery-link');
+        await page.evaluate(() => {
+          document.body.tabIndex = -1;
+          document.body.focus();
+        });
+        expect(await active()).toBe('');
+      };
+
+      await focusSvgThenBlank();
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('svg-recovery-after');
+
+      await focusSvgThenBlank();
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('svg-recovery-before');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('skips a sampled target whose native focus request is rejected', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -3363,6 +3419,61 @@ describe('Shadow closeout native boundaries', () => {
         visibility: 'hidden',
         fallback: '0',
       });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects entry when an arbitrary author attribute changes external CSS eligibility', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-external-author-attribute-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const style = document.createElement('style');
+        style.textContent = `.external-author-state[data-state='closed'] button { visibility: hidden; }`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'external-author-state';
+        const host = new C();
+        host.id = 'external-author-attribute-entry';
+        host.innerHTML = '<button id="external-author-attribute-button">Target</button>';
+        wrapper.append(host);
+        document.head.append(style);
+        document.body.append(wrapper);
+      });
+      const host = page.locator('#external-author-attribute-entry');
+      const wrapper = page.locator('.external-author-state');
+      expect(await host.getAttribute('tabindex')).toBe(null);
+
+      await wrapper.evaluate((element) => element.setAttribute('data-state', 'closed'));
+      await page.waitForFunction(
+        () =>
+          document.querySelector('#external-author-attribute-entry')?.getAttribute('tabindex') ===
+          '0'
+      );
+      expect(
+        await page
+          .locator('#external-author-attribute-button')
+          .evaluate((target) => getComputedStyle(target).visibility)
+      ).toBe('hidden');
+
+      await wrapper.evaluate((element) => element.setAttribute('data-state', 'open'));
+      await page.waitForFunction(
+        () => !document.querySelector('#external-author-attribute-entry')?.hasAttribute('tabindex')
+      );
       expect(errors).toEqual([]);
     } finally {
       await page.close();

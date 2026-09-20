@@ -148,7 +148,7 @@ class FocusModuleImpl extends ModuleBase {
   private focusableConfig: FocusableConfig = DEFAULT_FOCUSABLE_CONFIG;
   private focusableDeclared = false;
   private entryDeclared = false;
-  private lastScopeTarget: HTMLElement | null = null;
+  private lastScopeTarget: Element | null = null;
   private entryConfig: FocusEntryConfig = DEFAULT_ENTRY_CONFIG;
   private scopeDeclared = false;
   private rovingDeclared = false;
@@ -574,7 +574,8 @@ class FocusModuleImpl extends ModuleBase {
         // Actual in-scope focus (pointer or programmatic) refreshes the
         // remembered recovery anchor (C-AS-FOCUS-SCOPE-0002-I); only sampled
         // targets qualify, so stale or out-of-scope history is ignored.
-        if (recentTarget && targets.includes(recentTarget)) this.lastScopeTarget = recentTarget;
+        if (recentTarget && targets.some((target) => target === recentTarget))
+          this.lastScopeTarget = recentTarget;
         let current = targets.findIndex((target) => target === activeTarget);
         if (current < 0 && activeInsertionIndex === undefined)
           current = targets.findIndex((target) => target === this.lastScopeTarget);
