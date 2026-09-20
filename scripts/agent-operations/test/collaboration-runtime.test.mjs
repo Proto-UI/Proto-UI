@@ -425,6 +425,32 @@ test('workflow reruns require the exact trusted workflow identity and diagnosed 
   assert.match(authorize(request, live).reason, /trusted workflow/);
 });
 
+test('workflow rerun requests reject successful outcomes before live authorization', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'rerun-exact-trusted-workflow',
+    target: {
+      kind: 'workflow-run',
+      runId: 1234,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      attempt: 1,
+      workflowName: 'CI',
+      workflowPath: '.github/workflows/ci.yml',
+    },
+    expected: { status: 'completed', conclusion: 'success' },
+    desired: { mode: 'all' },
+    evidence: [
+      ...base.evidence,
+      { type: 'ci-diagnosis', reference: 'artifact://ci/1234/diagnosis' },
+    ],
+    rationale: 'A successful run must not be rerun as diagnosed failure recovery.',
+  });
+
+  assert.throws(() => validateCollaborationRequest(request), /failure conclusion/);
+});
+
 test('thread resolution requires evidence and the exact unresolved thread revision', () => {
   const base = metadataRequest();
   const request = {
@@ -1691,6 +1717,70 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
   }
 });
 
+test('workflow rerun verification polls until GitHub exposes the advanced attempt', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'rerun-exact-trusted-workflow',
+    target: {
+      kind: 'workflow-run',
+      runId: 1234,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      attempt: 1,
+      workflowName: 'CI',
+      workflowPath: '.github/workflows/ci.yml',
+    },
+    expected: { status: 'completed', conclusion: 'failure' },
+    desired: { mode: 'failed-jobs' },
+    evidence: [
+      ...base.evidence,
+      { type: 'ci-diagnosis', reference: 'artifact://ci/1234/diagnosis' },
+    ],
+  });
+  const preState = {
+    ...metadataLive(),
+    action: request.action,
+    current: {
+      kind: 'workflow-run',
+      runId: 1234,
+      url: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1234',
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      attempt: 1,
+      workflowName: 'CI',
+      workflowPath: '.github/workflows/ci.yml',
+      headRepositoryId: 'github.com:Proto-UI/Proto-UI',
+      status: 'completed',
+      conclusion: 'failure',
+    },
+  };
+  const postState = {
+    ...preState,
+    observedAt: '2026-08-27T01:00:11.000Z',
+    current: { ...preState.current, attempt: 2, status: 'queued', conclusion: null },
+  };
+  let collections = 0;
+  let waits = 0;
+  const result = applyGitHubCollaborationMutation(request, preState, {
+    runner() {
+      return '';
+    },
+    collectState() {
+      collections += 1;
+      return collections < 3 ? preState : postState;
+    },
+    wait() {
+      waits += 1;
+    },
+  });
+
+  assert.equal(result.mutationCount, 1);
+  assert.equal(collections, 3);
+  assert.equal(waits, 2);
+  assert.equal(result.postState.current.attempt, 2);
+});
+
 test('live metadata preflight derives credential permission and the exact pull-request state', () => {
   const request = metadataRequest();
   const calls = [];
@@ -1731,6 +1821,48 @@ test('live metadata preflight derives credential permission and the exact pull-r
   assert.equal(live.current.headSha, HEAD);
   assert.deepEqual(live.current.labels, ['governed']);
   assert.equal(live.current.desiredLabelsExist, true);
+});
+
+test('live collaboration collection uses a governed output bound and reports overflow', () => {
+  const request = metadataRequest();
+  const seenOptions = [];
+  const runner = (command, args, options) => {
+    seenOptions.push(options);
+    if (args.includes('graphql')) {
+      return JSON.stringify({
+        data: { viewer: { login: 'maintainer' }, repository: { viewerPermission: 'WRITE' } },
+      });
+    }
+    return JSON.stringify({
+      number: 509,
+      node_id: 'PR_node',
+      html_url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+      state: 'open',
+      user: { login: 'contributor' },
+      updated_at: UPDATED_AT,
+      head: { sha: HEAD },
+      title: 'Old title',
+      body: 'Old body',
+      milestone: null,
+      assignees: [],
+      labels: [{ name: 'governed' }],
+    });
+  };
+
+  collectLiveCollaborationState(request, { runner });
+  assert.ok(seenOptions.every((options) => options.maxBuffer === 64 * 1024 * 1024));
+
+  assert.throws(
+    () =>
+      collectLiveCollaborationState(request, {
+        runner() {
+          const error = new Error('spawnSync gh ENOBUFS');
+          error.code = 'ENOBUFS';
+          throw error;
+        },
+      }),
+    /documented 67108864-byte payload bound/
+  );
 });
 
 test('live review-request preflight collects every commit contributor identity', () => {

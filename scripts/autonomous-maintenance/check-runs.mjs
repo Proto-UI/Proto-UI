@@ -82,6 +82,58 @@ const allowedForwardIntegrationStatuses = new Set([
   'blocked',
   'integrated',
 ]);
+const RFC3339_TIMESTAMP =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:Z|([+-])(\d{2}):(\d{2}))$/;
+
+function isRfc3339Timestamp(value) {
+  if (typeof value !== 'string') return false;
+  const match = value.match(RFC3339_TIMESTAMP);
+  if (!match) return false;
+  const [
+    ,
+    yearText,
+    monthText,
+    dayText,
+    hourText,
+    minuteText,
+    secondText,
+    ,
+    offsetHourText,
+    offsetMinuteText,
+  ] = match;
+  const [year, month, day, hour, minute, second] = [
+    yearText,
+    monthText,
+    dayText,
+    hourText,
+    minuteText,
+    secondText,
+  ].map(Number);
+  if (
+    month < 1 ||
+    month > 12 ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59 ||
+    (offsetHourText !== undefined && (Number(offsetHourText) > 23 || Number(offsetMinuteText) > 59))
+  ) {
+    return false;
+  }
+  const local = new Date(0);
+  local.setUTCFullYear(year, month - 1, day);
+  local.setUTCHours(hour, minute, second, 0);
+  if (
+    local.getUTCFullYear() !== year ||
+    local.getUTCMonth() !== month - 1 ||
+    local.getUTCDate() !== day ||
+    local.getUTCHours() !== hour ||
+    local.getUTCMinutes() !== minute ||
+    local.getUTCSeconds() !== second
+  ) {
+    return false;
+  }
+  return Number.isFinite(Date.parse(value));
+}
 
 function fail(file, message) {
   errors.push(`${path.relative(root, file)}: ${message}`);
@@ -712,7 +764,7 @@ function validateForwardRunState(run, label) {
       if (receipt.mergeMethod !== 'squash') {
         fail(ledgerFile, `${label}.integration.receipt.mergeMethod must be squash`);
       }
-      if (!Number.isFinite(Date.parse(receipt.mergedAt ?? ''))) {
+      if (!isRfc3339Timestamp(receipt.mergedAt)) {
         fail(ledgerFile, `${label}.integration.receipt.mergedAt must be an RFC 3339 timestamp`);
       }
     }

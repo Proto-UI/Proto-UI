@@ -1,5 +1,9 @@
 import { execFileSync } from 'node:child_process';
-import { assertNoTruncation, parseRepositoryId } from './collect-live-review-input.mjs';
+import {
+  assertNoTruncation,
+  MAX_LIVE_RESPONSE_BYTES,
+  parseRepositoryId,
+} from './collect-live-review-input.mjs';
 import {
   collaborationMarker,
   desiredCollaborationStateSatisfied,
@@ -52,10 +56,21 @@ mutation ProtoUiResolveThread($threadId: ID!) {
 function run(runner, args, { input, allowEmpty = false } = {}) {
   const options = {
     encoding: 'utf8',
+    maxBuffer: MAX_LIVE_RESPONSE_BYTES,
     stdio: input === undefined ? ['ignore', 'pipe', 'pipe'] : ['pipe', 'pipe', 'pipe'],
   };
   if (input !== undefined) options.input = JSON.stringify(input);
-  const output = runner('gh', args, options);
+  let output;
+  try {
+    output = runner('gh', args, options);
+  } catch (error) {
+    if (error?.code === 'ENOBUFS') {
+      throw new Error(
+        `live collaboration response exceeds the documented ${MAX_LIVE_RESPONSE_BYTES}-byte payload bound; bound the collaboration target before mutation`
+      );
+    }
+    throw error;
+  }
   const text = typeof output === 'string' ? output : (output?.toString('utf8') ?? '');
   if (allowEmpty && text.trim() === '') return null;
   try {
@@ -487,7 +502,9 @@ function waitSynchronously(delayMs) {
 function collectVerifiedPostWriteState(request, runner, collectState, options) {
   const isAsynchronousBranchUpdate =
     request.action === 'update-pull-request-branch-at-expected-head';
-  const maxAttempts = isAsynchronousBranchUpdate ? (options.asyncVerificationAttempts ?? 12) : 1;
+  const isAsynchronousWorkflowRerun = request.action === 'rerun-exact-trusted-workflow';
+  const isAsynchronousMutation = isAsynchronousBranchUpdate || isAsynchronousWorkflowRerun;
+  const maxAttempts = isAsynchronousMutation ? (options.asyncVerificationAttempts ?? 12) : 1;
   const delayMs = options.asyncVerificationDelayMs ?? 1_000;
   const wait = options.wait ?? waitSynchronously;
   let postState;
@@ -496,15 +513,20 @@ function collectVerifiedPostWriteState(request, runner, collectState, options) {
     postState = collectState(request, { runner });
     if (desiredCollaborationStateSatisfied(request, postState)) return postState;
     const current = postState.current;
-    const canStillConverge =
-      isAsynchronousBranchUpdate &&
-      current.state === 'OPEN' &&
-      current.baseSha === request.target.baseSha;
+    const canStillConverge = isAsynchronousBranchUpdate
+      ? current.state === 'OPEN' && current.baseSha === request.target.baseSha
+      : isAsynchronousWorkflowRerun &&
+        current.runId === request.target.runId &&
+        current.headSha === request.target.headSha &&
+        current.workflowName === request.target.workflowName &&
+        current.workflowPath === request.target.workflowPath &&
+        current.headRepositoryId === request.repositoryId &&
+        current.attempt === request.target.attempt;
     if (!canStillConverge || attempt === maxAttempts) break;
     wait(delayMs);
   }
 
-  const verification = isAsynchronousBranchUpdate
+  const verification = isAsynchronousMutation
     ? 'bounded post-write verification polling'
     : 'the single post-write read';
   throw new Error(

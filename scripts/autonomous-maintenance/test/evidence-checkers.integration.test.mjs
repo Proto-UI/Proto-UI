@@ -492,6 +492,27 @@ test('run checker rejects a same-path mutation after independent review', (t) =>
   assert.doesNotMatch(result.stderr, /changed inventory does not match/);
 });
 
+test('reviewed-content digests treat inventory paths as literal Git pathspecs', (t) => {
+  const fixture = createFixture(t);
+  const exactPaths = [...fixture.review.changeInventory.exactPaths, ':(exclude)**'].sort();
+  const reviewed = computeReviewedContentDigest({
+    root: fixture.root,
+    baseline: fixture.baselineCommit,
+    head: fixture.exactHeadSha,
+    exactPaths,
+    reviewPath: fixture.reviewPath,
+  });
+  const mutated = computeReviewedContentDigest({
+    root: fixture.root,
+    baseline: fixture.baselineCommit,
+    head: fixture.postReviewMutationHead,
+    exactPaths,
+    reviewPath: fixture.reviewPath,
+  });
+
+  assert.notEqual(mutated, reviewed);
+});
+
 test('run checker rejects a packet-only mutation after independent review', (t) => {
   const fixture = createFixture(t);
   fixture.run.integration.exactHeadSha = fixture.packetOnlyMutationHead;
@@ -504,6 +525,33 @@ test('run checker rejects a packet-only mutation after independent review', (t) 
   assert.equal(result.status, 1);
   assert.match(result.stderr, /reviewed-content digest does not match/);
   assert.doesNotMatch(result.stderr, /changed inventory does not match/);
+});
+
+test('run checker rejects normalized impossible merge timestamps', (t) => {
+  const fixture = createFixture(t);
+  fixture.run.integration = {
+    status: 'integrated',
+    exactHeadSha: fixture.exactHeadSha,
+    receipt: {
+      repositoryId: 'github.com:Proto-UI/Proto-UI',
+      pullRequest: 509,
+      authorizationId: 'explicit-current-user',
+      headSha: fixture.exactHeadSha,
+      liveHeadSha: fixture.exactHeadSha,
+      mergeCommitSha: 'f'.repeat(40),
+      mergeMethod: 'squash',
+      mergedAt: '2026-02-31T00:00:00Z',
+    },
+    evidence: ['exact-head fixture evidence'],
+  };
+  writeRunLedger(fixture.root, fixture.run);
+
+  const result = spawnSync(process.execPath, [runChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /mergedAt must be an RFC 3339 timestamp/);
 });
 
 test('run checker rejects non-independent Observer and Verifier identities', (t) => {

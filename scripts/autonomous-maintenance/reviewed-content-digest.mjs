@@ -8,6 +8,10 @@ import YAML from 'yaml';
 const digestSentinel = `sha256:${'0'.repeat(64)}`;
 const digestDomain = 'proto-ui-autonomous-maintenance-reviewed-content-v1';
 
+function literalPathspecEnv(extra = {}) {
+  return { ...process.env, ...extra, GIT_LITERAL_PATHSPECS: '1' };
+}
+
 function sentinelDigest(record) {
   if (record && typeof record === 'object' && Object.hasOwn(record, 'reviewedContentDigest')) {
     record.reviewedContentDigest = digestSentinel;
@@ -61,6 +65,7 @@ function readCommitMode(root, commit, repositoryPath) {
     const output = execFileSync('git', ['ls-tree', commit, '--', repositoryPath], {
       cwd: root,
       encoding: 'utf8',
+      env: literalPathspecEnv(),
     }).trim();
     return output ? output.split(/\s+/, 1)[0] : null;
   } catch {
@@ -89,7 +94,7 @@ function readWorktreePath(root, repositoryPath) {
 // deletions, interleaved in path order).
 function readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions) {
   const tempDir = mkdtempSync(join(tmpdir(), 'proto-ui-reviewed-content-index-'));
-  const env = { ...process.env, GIT_INDEX_FILE: join(tempDir, 'index') };
+  const env = literalPathspecEnv({ GIT_INDEX_FILE: join(tempDir, 'index') });
   try {
     execFileSync('git', ['read-tree', head], {
       cwd: root,
@@ -125,6 +130,7 @@ function readWorktreeMode(root, repositoryPath) {
     const indexed = execFileSync('git', ['ls-files', '--stage', '--', repositoryPath], {
       cwd: root,
       encoding: 'utf8',
+      env: literalPathspecEnv(),
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
     if (indexed) return indexed.split(/\s+/, 1)[0];
@@ -163,6 +169,7 @@ export function computeReviewedContentDigest({
     ? readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions)
     : execFileSync('git', ['diff', ...diffOptions, baseline, head, '--', ...reviewedPaths], {
         cwd: root,
+        env: literalPathspecEnv(),
         maxBuffer: 64 * 1024 * 1024,
       });
 

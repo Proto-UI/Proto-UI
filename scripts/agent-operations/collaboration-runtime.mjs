@@ -16,6 +16,13 @@ export const COLLABORATION_ACTIONS = Object.freeze([
   'rerun-exact-trusted-workflow',
   'post-bounded-reconciliation-comment',
 ]);
+const RERUN_FAILURE_CONCLUSIONS = new Set([
+  'failure',
+  'timed_out',
+  'action_required',
+  'cancelled',
+  'startup_failure',
+]);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -243,6 +250,10 @@ function validateRequestAction(request) {
     exactKeys(expected, ['status', 'conclusion'], 'request.expected');
     assert(expected.status === 'completed', 'workflow rerun expected status must be completed');
     string(expected.conclusion, 'request.expected.conclusion', { max: 100 });
+    assert(
+      RERUN_FAILURE_CONCLUSIONS.has(expected.conclusion),
+      'workflow rerun expected conclusion must be a diagnosed failure conclusion'
+    );
     exactKeys(desired, ['mode'], 'request.desired');
     assert(['all', 'failed-jobs'].includes(desired.mode), 'request.desired.mode is invalid');
     validateEvidence(request.evidence, { required: true, purpose: 'CI diagnosis' });
