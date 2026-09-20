@@ -1,5 +1,5 @@
-/** Same-document WC portal projection. Logical origin owns its liveness;
- * a physical body child must not outlive a disconnected origin subtree.
+/** Document-local WC portal projection. Logical origin owns its liveness;
+ * a physical body child follows connected adoption and must not outlive a disconnected origin subtree.
  * No open-state writes or Runtime disposal here: restore the DOM projection
  * and let normal Custom Element disconnection settle the owner lifetime.
  */
@@ -27,14 +27,24 @@ export function createWebComponentPortalMount() {
       const descriptor = Object.getOwnPropertyDescriptor(el, 'parentNode');
       let ownsParent = false;
       let projected = false;
-      const Observer = el.ownerDocument.defaultView?.MutationObserver ?? MutationObserver;
-      const observer = new Observer(() => {
+      let observer: MutationObserver | null = null;
+      let observedDocument: Document | null = null;
+      const onMutation = () => {
         // Mutation delivery observes the settled tree, preserving sync moves.
         if (!parent.isConnected || (projected && marker.parentNode !== parent)) revoke?.();
         else observeOriginTrees();
-      });
+      };
       let observedTrees: Node[] = [];
       function observeOriginTrees() {
+        const nextDocument = parent!.ownerDocument ?? el.ownerDocument;
+        if (projected && el.ownerDocument !== nextDocument) nextDocument.body?.appendChild(el);
+        if (observedDocument !== nextDocument) {
+          observer?.disconnect();
+          const Observer = nextDocument.defaultView?.MutationObserver ?? MutationObserver;
+          observer = new Observer(onMutation);
+          observedDocument = nextDocument;
+          observedTrees = [];
+        }
         const trees: Node[] = [];
         let tree: Node = parent!.getRootNode();
         while (true) {
@@ -44,8 +54,8 @@ export function createWebComponentPortalMount() {
         }
         if (trees.length === observedTrees.length && trees.every((t, i) => t === observedTrees[i]))
           return;
-        observer.disconnect();
-        for (const tree of trees) observer.observe(tree, { childList: true, subtree: true });
+        observer!.disconnect();
+        for (const tree of trees) observer!.observe(tree, { childList: true, subtree: true });
         observedTrees = trees;
       }
       const restore = () => {
@@ -54,7 +64,7 @@ export function createWebComponentPortalMount() {
         const wasProjected = projected;
         projected = false;
         activeProjections.delete(el);
-        observer.disconnect();
+        observer?.disconnect();
         if (ownsParent) {
           if (descriptor) Object.defineProperty(el, 'parentNode', descriptor);
           else delete (el as unknown as { parentNode?: Node }).parentNode;

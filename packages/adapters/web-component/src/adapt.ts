@@ -358,6 +358,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       this._globalEventTarget.setTarget(newDocument.defaultView);
       this._overlayModal.adoptDocument(newDocument);
       this._splitResources?.environment.adoptDocument(newDocument);
+      this._hostDisplay?.sync();
     }
 
     connectedCallback() {

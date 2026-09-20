@@ -45,6 +45,7 @@ export function installDefaultHostDisplay(
   if (doc) ensureDefaultHostDisplayRule(doc);
 
   const sync = () => {
+    ensureDefaultHostDisplayRule(el.ownerDocument);
     // A split recipe owns grid/inline-grid inside Shadow. Even a low-specificity
     // document rule on the host wins across that boundary. Keep view visibility
     // infrastructure, but do not compete with the presentation owner's display.
@@ -93,7 +94,7 @@ function isDisplayUtilityClass(token: string): boolean {
 
 function getOrCreateStyleElement(doc: Document): HTMLStyleElement {
   const existing = doc.getElementById(HOST_DISPLAY_STYLE_ID);
-  if (existing instanceof HTMLStyleElement) return existing;
+  if (existing?.localName === 'style') return existing as HTMLStyleElement;
 
   const styleEl = doc.createElement('style');
   styleEl.id = HOST_DISPLAY_STYLE_ID;

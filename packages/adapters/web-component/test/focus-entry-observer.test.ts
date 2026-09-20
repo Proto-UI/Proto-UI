@@ -280,6 +280,14 @@ describe('WC live focus-entry resolver inputs', () => {
       CSSStyleDeclaration.prototype,
       'cssText'
     );
+    const originalDisplay = Object.getOwnPropertyDescriptor(
+      CSSStyleDeclaration.prototype,
+      'display'
+    );
+    const originalContentVisibility = Object.getOwnPropertyDescriptor(
+      CSSStyleDeclaration.prototype,
+      'contentVisibility'
+    );
     const originalDocumentSheets = Object.getOwnPropertyDescriptor(
       Document.prototype,
       'adoptedStyleSheets'
@@ -294,6 +302,12 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')?.set).not.toBe(
       originalCssText?.set
     );
+    expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'display')?.set).not.toBe(
+      originalDisplay?.set
+    );
+    expect(
+      Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'contentVisibility')?.set
+    ).not.toBe(originalContentVisibility?.set);
     if (originalDocumentSheets?.set)
       expect(
         Object.getOwnPropertyDescriptor(Document.prototype, 'adoptedStyleSheets')?.set
@@ -308,6 +322,12 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'cssText')).toEqual(
       originalCssText
     );
+    expect(Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'display')).toEqual(
+      originalDisplay
+    );
+    expect(
+      Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'contentVisibility')
+    ).toEqual(originalContentVisibility);
     if (originalDocumentSheets?.set)
       expect(Object.getOwnPropertyDescriptor(Document.prototype, 'adoptedStyleSheets')).toEqual(
         originalDocumentSheets

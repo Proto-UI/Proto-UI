@@ -198,7 +198,7 @@ type EntryStyleMethodPatch = {
 type EntryStyleSetterPatch = {
   target: object;
   key: string;
-  original: PropertyDescriptor;
+  original?: PropertyDescriptor;
   patched: NonNullable<PropertyDescriptor['set']>;
 };
 
@@ -357,18 +357,29 @@ function watchEntryStyleInvalidation(
     patchMethod(Declaration.prototype as unknown as Record<string, unknown>, 'removeProperty');
 
     const setterPatches: EntryStyleSetterPatch[] = [];
-    const patchSetter = (target: object, key: string) => {
+    const patchSetter = (target: object, key: string, cssName?: string) => {
       const original = Object.getOwnPropertyDescriptor(target, key);
-      if (!original?.configurable || !original.set) return;
-      const originalSet = original.set;
+      if (original ? !original.configurable || !original.set : !cssName) return;
       const patched = function (this: unknown, value: unknown) {
-        originalSet.call(this, value);
+        if (original?.set) original.set.call(this, value);
+        else (this as CSSStyleDeclaration).setProperty(cssName!, String(value));
         notify();
       };
-      Object.defineProperty(target, key, { ...original, set: patched });
+      Object.defineProperty(target, key, {
+        configurable: true,
+        enumerable: original?.enumerable ?? true,
+        get:
+          original?.get ??
+          function (this: CSSStyleDeclaration) {
+            return this.getPropertyValue(cssName!);
+          },
+        set: patched,
+      });
       setterPatches.push({ target, key, original, patched });
     };
-    patchSetter(Declaration.prototype, 'visibility');
+    patchSetter(Declaration.prototype, 'visibility', 'visibility');
+    patchSetter(Declaration.prototype, 'display', 'display');
+    patchSetter(Declaration.prototype, 'contentVisibility', 'content-visibility');
     patchSetter(Declaration.prototype, 'cssText');
     if (DocumentCtor) patchSetter(DocumentCtor.prototype, 'adoptedStyleSheets');
     if (ShadowRootCtor) patchSetter(ShadowRootCtor.prototype, 'adoptedStyleSheets');
@@ -410,7 +421,8 @@ function watchEntryStyleInvalidation(
     for (const patch of current.setterPatches) {
       const descriptor = Object.getOwnPropertyDescriptor(patch.target, patch.key);
       if (descriptor?.set === patch.patched) {
-        Object.defineProperty(patch.target, patch.key, patch.original);
+        if (patch.original) Object.defineProperty(patch.target, patch.key, patch.original);
+        else delete (patch.target as Record<string, unknown>)[patch.key];
       }
     }
     entryStyleWatches.delete(view as Window);
@@ -661,6 +673,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let entryRadioGroupObserver: MutationObserver | null = null;
   let entryResizeObserver: ResizeObserver | null = null;
   let stopEntryRadioStateWatch: (() => void) | null = null;
+  let stopEntryImageStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
   let stopEntryViewportWatch: (() => void) | null = null;
   let stopEntryStyleWatch: (() => void) | null = null;
@@ -683,6 +696,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     entryResizeObserver = null;
     stopEntryRadioStateWatch?.();
     stopEntryRadioStateWatch = null;
+    stopEntryImageStateWatch?.();
+    stopEntryImageStateWatch = null;
     stopEntryAttachShadowWatch?.();
     stopEntryAttachShadowWatch = null;
     stopEntryViewportWatch?.();
@@ -836,25 +851,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
                 if (isCurrentEntryObservation()) projectEntry();
               });
-              const onMotionEnd = () => {
-                if (isCurrentEntryObservation()) projectEntry();
-              };
-              for (const type of [
-                'transitionend',
-                'transitioncancel',
-                'animationend',
-                'animationcancel',
-              ])
-                target.addEventListener(type, onMotionEnd, true);
-              stopEntryMotionWatch = () => {
-                for (const type of [
-                  'transitionend',
-                  'transitioncancel',
-                  'animationend',
-                  'animationcancel',
-                ])
-                  target.removeEventListener(type, onMotionEnd, true);
-              };
             }
             // The late-attach watch below is installed once but must always
             // consult the currently observed region, so the root set lives
@@ -872,8 +868,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               entryResizeObserver?.disconnect();
               stopEntryRadioStateWatch?.();
               stopEntryRadioStateWatch = null;
+              stopEntryImageStateWatch?.();
+              stopEntryImageStateWatch = null;
               stopEntrySlotWatch?.();
               stopEntrySlotWatch = null;
+              stopEntryMotionWatch?.();
+              stopEntryMotionWatch = null;
               let hasArea = false;
               const radioTrees = new Set<Document | ShadowRoot>();
               const radioNames = new Set<string>();
@@ -896,6 +896,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   'open',
                   'usemap',
                   'src',
+                  'srcset',
                   'slot',
                   'name',
                   'form',
@@ -960,6 +961,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               let externalAncestor = composedParentElement(target);
               const externalSlots = new Set<HTMLSlotElement>();
               const externalStyleRoots = new Set<ShadowRoot>();
+              const motionTargets = new Set<Element>([target]);
               const targetRoot = target.getRootNode();
               if (
                 targetRoot.nodeType === 11 &&
@@ -969,6 +971,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 externalStyleRoots.add(targetRoot as ShadowRoot);
               }
               while (externalAncestor) {
+                motionTargets.add(externalAncestor);
                 entryObserver?.observe(externalAncestor, {
                   attributes: true,
                   attributeFilter: [
@@ -996,6 +999,27 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
               }
+              const motionTypes = [
+                'transitionend',
+                'transitioncancel',
+                'animationend',
+                'animationcancel',
+              ];
+              const onMotionEnd = (event: Event) => {
+                if (
+                  isCurrentEntryObservation() &&
+                  (event.currentTarget === target || event.target === event.currentTarget)
+                )
+                  projectEntry();
+              };
+              for (const motionTarget of motionTargets)
+                for (const type of motionTypes)
+                  motionTarget.addEventListener(type, onMotionEnd, true);
+              stopEntryMotionWatch = () => {
+                for (const motionTarget of motionTargets)
+                  for (const type of motionTypes)
+                    motionTarget.removeEventListener(type, onMotionEnd, true);
+              };
               if (externalStyleRoots.size > 0) {
                 entryExternalStyleObserver ??= new Observer((records) => {
                   if (!isCurrentEntryObservation()) return;
@@ -1069,6 +1093,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   attributeFilter: [
                     'usemap',
                     'src',
+                    'srcset',
                     'hidden',
                     'inert',
                     'aria-hidden',
@@ -1079,6 +1104,24 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 });
                 for (const image of target.ownerDocument.querySelectorAll('img[usemap]'))
                   entryResizeObserver?.observe(image);
+                const onImageState = (event: Event) => {
+                  const image = event.target;
+                  if (
+                    isCurrentEntryObservation() &&
+                    !!image &&
+                    typeof image === 'object' &&
+                    (image as Node).nodeType === 1 &&
+                    (image as Element).localName === 'img' &&
+                    (image as Element).hasAttribute('usemap')
+                  )
+                    projectEntry();
+                };
+                target.ownerDocument.addEventListener('load', onImageState, true);
+                target.ownerDocument.addEventListener('error', onImageState, true);
+                stopEntryImageStateWatch = () => {
+                  target.ownerDocument.removeEventListener('load', onImageState, true);
+                  target.ownerDocument.removeEventListener('error', onImageState, true);
+                };
               }
               // Native radio checkedness is property state: a click on a group
               // member outside this entry region, or a form reset, need not

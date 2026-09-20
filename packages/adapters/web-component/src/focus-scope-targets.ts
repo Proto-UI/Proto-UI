@@ -383,10 +383,11 @@ function isUsableNativeCandidate(el: HTMLElement): boolean {
     el.hasAttribute('href') &&
     map?.name &&
     el.isConnected &&
-    Array.from(el.ownerDocument.querySelectorAll('img[usemap]')).some(
+    Array.from(el.ownerDocument.querySelectorAll<HTMLImageElement>('img[usemap]')).some(
       (image) =>
         image.getAttribute('usemap') === `#${map.name}` &&
-        image.getAttribute('src')?.trim() &&
+        (image.currentSrc.trim() || (!image.complete && image.getAttribute('src')?.trim())) &&
+        (!image.complete || image.naturalWidth > 0) &&
         isRendered(image)
     )
   );

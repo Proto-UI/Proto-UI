@@ -2627,4 +2627,443 @@ describe('Shadow closeout native boundaries', () => {
       await page.close();
     }
   });
+
+  it('moves an active portal projection with its adopted logical owner', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        let setups = 0;
+        let presses = 0;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-active-portal-adoption',
+            setup(def: any) {
+              setups += 1;
+              def.event.on('press.commit', () => presses++);
+              def.expose('snapshot', () => ({ setups, presses }));
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const settle = (view: Window) =>
+          new Promise<void>((resolve) =>
+            view.requestAnimationFrame(() => view.requestAnimationFrame(() => resolve()))
+          );
+        const origin = document.createElement('section');
+        const host = new C();
+        host.id = 'active-portal-owner';
+        const button = document.createElement('button');
+        button.textContent = 'Portal press';
+        host.append(button);
+        origin.append(host);
+        document.body.append(origin);
+        await settle(window);
+        const controller = (host as any)._controller;
+        const generation = (host as any)._runtimeGeneration;
+        const portal = p.createPortal();
+        portal.mount(button);
+        await settle(window);
+        const before = {
+          inOldBody: document.body.querySelector('button') === button,
+          ownerDocument: button.ownerDocument === document,
+          snapshot: host.getExposes().snapshot(),
+        };
+
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const foreignWindow = frame.contentWindow!;
+        foreignDocument.adoptNode(origin);
+        foreignDocument.body.append(origin);
+        await settle(foreignWindow);
+        button.click();
+        const after = {
+          oldBodyClean: document.body.querySelector('button') !== button,
+          inNewBody: foreignDocument.body.querySelector('button') === button,
+          ownerDocument: button.ownerDocument === foreignDocument,
+          markerMoved: Array.from(host.childNodes as NodeListOf<ChildNode>).some(
+            (node) => node.nodeType === 8
+          ),
+          controllerRetained: (host as any)._controller === controller,
+          generationRetained: (host as any)._runtimeGeneration === generation,
+          snapshot: host.getExposes().snapshot(),
+        };
+        portal.unmount(button);
+        frame.remove();
+        return { before, after };
+      });
+      expect(result).toEqual({
+        before: {
+          inOldBody: true,
+          ownerDocument: true,
+          snapshot: { setups: 1, presses: 0 },
+        },
+        after: {
+          oldBodyClean: true,
+          inNewBody: true,
+          ownerDocument: true,
+          markerMoved: true,
+          controllerRetained: true,
+          generationRetained: true,
+          snapshot: { setups: 1, presses: 1 },
+        },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects entry after motion completes on an external composed ancestor', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-external-motion-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const carrier = document.createElement('div');
+        const root = carrier.attachShadow({ mode: 'open' });
+        const style = document.createElement('style');
+        style.textContent =
+          '.wrapper { visibility: visible; transition: visibility 80ms linear; } .wrapper.hidden { visibility: hidden; }';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'wrapper';
+        const slot = document.createElement('slot');
+        wrapper.append(slot);
+        root.append(style, wrapper);
+        const host = new C();
+        host.id = 'external-motion-entry';
+        host.innerHTML = '<button>Inside</button>';
+        carrier.append(host);
+        document.body.append(carrier);
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        const initial = host.getAttribute('tabindex');
+        let endpoints = 0;
+        const ended = new Promise<void>((resolve) => {
+          wrapper.addEventListener(
+            'transitionend',
+            () => {
+              endpoints += 1;
+              resolve();
+            },
+            { once: true }
+          );
+        });
+        wrapper.classList.add('hidden');
+        await ended;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        return {
+          initial,
+          endpoints,
+          visibility: getComputedStyle(wrapper).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+      });
+      expect(result).toEqual({
+        initial: null,
+        endpoints: 1,
+        visibility: 'hidden',
+        fallback: '0',
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects zero-size entry descendants after direct CSSOM eligibility assignments', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-cssom-assignment-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent =
+          '#cssom-zero-button { position: absolute; width: 0; height: 0; padding: 0; border: 0; }';
+        document.head.append(style);
+        const rule = style.sheet!.cssRules[0] as CSSStyleRule;
+        const host = new C();
+        host.id = 'cssom-assignment-entry';
+        host.innerHTML = '<button id="cssom-zero-button">Zero</button>';
+        document.body.append(host);
+        const settle = () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+        await settle();
+        const initial = host.getAttribute('tabindex');
+        rule.style.display = 'none';
+        await settle();
+        const displayHidden = host.getAttribute('tabindex');
+        rule.style.display = '';
+        await settle();
+        const displayRestored = host.getAttribute('tabindex');
+        rule.style.contentVisibility = 'hidden';
+        await settle();
+        const contentHidden = host.getAttribute('tabindex');
+        rule.style.contentVisibility = '';
+        await settle();
+        return {
+          initial,
+          displayHidden,
+          displayRestored,
+          contentHidden,
+          contentRestored: host.getAttribute('tabindex'),
+        };
+      });
+      expect(result).toEqual({
+        initial: null,
+        displayHidden: '0',
+        displayRestored: null,
+        contentHidden: '0',
+        contentRestored: null,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('matches native image-map entry eligibility for selected srcset sources', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const valid =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      await page.evaluate((source) => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-srcset-map-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const before = document.createElement('button');
+        before.id = 'srcset-before';
+        const host = new C();
+        host.id = 'srcset-map-entry';
+        host.innerHTML =
+          '<map name="srcset-entry-map" style="display:block"><area id="srcset-area" href="#destination" shape="rect" coords="0,0,1,1" tabindex="0" style="display:block"></map>';
+        const image = document.createElement('img');
+        image.id = 'srcset-image';
+        image.useMap = '#srcset-entry-map';
+        image.srcset = `${source} 1x`;
+        document.body.append(before, host, image);
+      }, valid);
+      await page.waitForFunction(() => {
+        const image = document.querySelector('#srcset-image') as HTMLImageElement;
+        return image.complete && image.naturalWidth === 1 && !!image.currentSrc;
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      const initial = await page.evaluate(() => {
+        const host = document.querySelector('#srcset-map-entry')!;
+        const image = document.querySelector('#srcset-image') as HTMLImageElement;
+        (document.querySelector('#srcset-before') as HTMLElement).focus();
+        return {
+          fallback: host.getAttribute('tabindex'),
+          src: image.getAttribute('src'),
+          currentSrc: !!image.currentSrc,
+          naturalWidth: image.naturalWidth,
+        };
+      });
+      await page.keyboard.press('Tab');
+      const initialActive = await page.evaluate(() => (document.activeElement as HTMLElement)?.id);
+
+      await page.evaluate(() => {
+        (document.querySelector('#srcset-image') as HTMLImageElement).srcset =
+          'data:image/gif;base64,broken 1x';
+      });
+      await page.waitForFunction(() => {
+        const image = document.querySelector('#srcset-image') as HTMLImageElement;
+        return image.complete && image.naturalWidth === 0;
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      const failed = await page.locator('#srcset-map-entry').getAttribute('tabindex');
+
+      await page.evaluate((source) => {
+        (document.querySelector('#srcset-image') as HTMLImageElement).srcset = `${source} 1x`;
+      }, valid);
+      await page.waitForFunction(() => {
+        const image = document.querySelector('#srcset-image') as HTMLImageElement;
+        return image.complete && image.naturalWidth === 1 && !!image.currentSrc;
+      });
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      const restored = await page.evaluate(() => {
+        (document.querySelector('#srcset-before') as HTMLElement).focus();
+        return document.querySelector('#srcset-map-entry')!.getAttribute('tabindex');
+      });
+      await page.keyboard.press('Tab');
+      const restoredActive = await page.evaluate(() => (document.activeElement as HTMLElement)?.id);
+
+      await page.evaluate(() => {
+        (document.querySelector('#srcset-image') as HTMLImageElement).removeAttribute('srcset');
+      });
+      await page.waitForFunction(
+        () => !(document.querySelector('#srcset-image') as HTMLImageElement).currentSrc
+      );
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      const removed = await page.locator('#srcset-map-entry').getAttribute('tabindex');
+      expect({ initial, initialActive, failed, restored, restoredActive, removed }).toEqual({
+        initial: { fallback: null, src: null, currentSrc: true, naturalWidth: 1 },
+        initialActive: 'srcset-area',
+        failed: '0',
+        restored: null,
+        restoredActive: 'srcset-area',
+        removed: '0',
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('installs host display and detached-view rules in the adopted document', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        let normalSetups = 0;
+        let detachedSetups = 0;
+        const Normal = p.adapt(
+          p.define({
+            name: 'closeout-adopted-host-display',
+            setup() {
+              normalSetups += 1;
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const Detached = p.adapt(
+          p.define({
+            name: 'closeout-adopted-detached-display',
+            setup(def: any) {
+              detachedSetups += 1;
+              def.lifecycle.onCreated((run: any) => run.lifecycle.setPresent(false));
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const settle = (view: Window) =>
+          new Promise<void>((resolve) =>
+            view.requestAnimationFrame(() => view.requestAnimationFrame(() => resolve()))
+          );
+        const normal = new Normal();
+        const detached = new Detached();
+        normal.id = 'adopted-host-display';
+        detached.id = 'adopted-detached-display';
+        document.body.append(normal, detached);
+        await settle(window);
+        const normalController = (normal as any)._controller;
+        const detachedController = (detached as any)._controller;
+        const normalGeneration = (normal as any)._runtimeGeneration;
+        const detachedGeneration = (detached as any)._runtimeGeneration;
+        const before = {
+          normal: getComputedStyle(normal).display,
+          detached: getComputedStyle(detached).display,
+        };
+        const frame = document.createElement('iframe');
+        document.body.append(frame);
+        const foreignDocument = frame.contentDocument!;
+        const foreignWindow = frame.contentWindow!;
+        const clean = foreignDocument.getElementById('proto-ui-wc-host-display') === null;
+        foreignDocument.adoptNode(normal);
+        foreignDocument.body.append(normal);
+        foreignDocument.adoptNode(detached);
+        foreignDocument.body.append(detached);
+        await settle(foreignWindow);
+        const after = {
+          normal: foreignWindow.getComputedStyle(normal).display,
+          detached: foreignWindow.getComputedStyle(detached).display,
+          detachedMarker: detached.hasAttribute('data-pui-view-detached'),
+          ruleInstalled: foreignDocument.getElementById('proto-ui-wc-host-display') !== null,
+          controllersRetained:
+            (normal as any)._controller === normalController &&
+            (detached as any)._controller === detachedController,
+          generationsRetained:
+            (normal as any)._runtimeGeneration === normalGeneration &&
+            (detached as any)._runtimeGeneration === detachedGeneration,
+          setups: [normalSetups, detachedSetups],
+        };
+        frame.remove();
+        return { clean, before, after };
+      });
+      expect(result).toEqual({
+        clean: true,
+        before: { normal: 'block', detached: 'none' },
+        after: {
+          normal: 'block',
+          detached: 'none',
+          detachedMarker: true,
+          ruleInstalled: true,
+          controllersRetained: true,
+          generationsRetained: true,
+          setups: [1, 1],
+        },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
 });
