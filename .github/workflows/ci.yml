@@ -135,11 +135,12 @@ jobs:
       - name: Type check
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:types
 
-  test:
+  test_unit:
+    name: test-unit
     runs-on: ubuntu-latest
-    # S1-S5 add ~8 min to the serialized browser matrix. The 20-minute run
-    # completed 24/25 browser suites before timing out; retain every gate.
     timeout-minutes: 30
+    env:
+      PROTO_UI_RUNTIME_TEST_SCOPE: non-browser
     steps:
       - uses: actions/checkout@v4
         with:
@@ -194,6 +195,76 @@ jobs:
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test
+
+  browser_test:
+    name: browser-test (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm (corepack)
+        run: |
+          set -euo pipefail
+          PACKAGE_MANAGER=$(node -p "require('./package.json').packageManager || ''")
+          LOCKFILE_VERSION=$(node -e "const fs=require('fs');const text=fs.readFileSync('pnpm-lock.yaml','utf8');const m=text.match(/^lockfileVersion:\s*['\"]?([^'\"\n]+)['\"]?/m);if(!m){throw new Error('lockfileVersion not found');}process.stdout.write(m[1]);")
+          echo "packageManager=${PACKAGE_MANAGER}"
+          echo "lockfileVersion=${LOCKFILE_VERSION}"
+
+          case "${LOCKFILE_VERSION}" in
+            6* )
+              PNPM_VERSION="8.13.1"
+              ;;
+            9* )
+              PNPM_VERSION="10.32.1"
+              ;;
+            * )
+              echo "Unsupported pnpm lockfileVersion: ${LOCKFILE_VERSION}"
+              exit 1
+              ;;
+          esac
+
+          corepack enable
+          corepack prepare pnpm@"${PNPM_VERSION}" --activate
+          echo "PROTO_PNPM_VERSION=${PNPM_VERSION}" >> "$GITHUB_ENV"
+          echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
+          corepack pnpm@"${PNPM_VERSION}" --version
+
+      - name: Install
+        run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
+
+      - name: Run browser shard ${{ matrix.shard }}/4
+        env:
+          PROTO_UI_RUNTIME_TEST_SCOPE: browser
+          PROTO_UI_RUNTIME_TEST_SHARD: '${{ matrix.shard }}/4'
+        run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:runtime
+
+  test:
+    name: test
+    needs: [test_unit, browser_test]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Require unit and every browser shard
+        env:
+          UNIT_RESULT: ${{ needs.test_unit.result }}
+          BROWSER_RESULT: ${{ needs.browser_test.result }}
+        run: |
+          echo "test-unit=${UNIT_RESULT}"
+          echo "browser-test=${BROWSER_RESULT}"
+          if [[ "${UNIT_RESULT}" != "success" || "${BROWSER_RESULT}" != "success" ]]; then
+            echo "::error::test gate failed because a required unit or browser shard job did not succeed"
+            exit 1
+          fi
 
   release-scan:
     runs-on: ubuntu-latest

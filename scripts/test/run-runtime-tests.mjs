@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { createRuntimeTestPlan, discoverBrowserSuites } from './runtime-test-plan.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Astro dev compiles a route on first request, so a suite probing a cold route
@@ -51,7 +51,6 @@ const READY_ROUTES = [
 ];
 const READY_TIMEOUT_MS = 180_000;
 
-const testPlan = createRuntimeTestPlan(process.argv.slice(2));
 let devServer = null;
 let serverOutput = '';
 let shuttingDown = false;
@@ -197,7 +196,21 @@ for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
 
 let exitCode = 0;
 try {
+  const testPlan = createRuntimeTestPlan(process.argv.slice(2), {
+    scope: process.env.PROTO_UI_RUNTIME_TEST_SCOPE,
+    shard: process.env.PROTO_UI_RUNTIME_TEST_SHARD,
+    discoveredSuites: discoverBrowserSuites(root),
+  });
   for (const phase of testPlan) {
+    console.log(`[test:runtime] ${phase.label}`);
+    if (phase.needsServer) {
+      console.log(
+        `[test:runtime] files:\n${phase.args
+          .filter((arg) => arg.endsWith('.browser.test.ts'))
+          .map((file) => `- ${file}`)
+          .join('\n')}`
+      );
+    }
     const baseUrl = phase.needsServer ? await startServer() : undefined;
     if (baseUrl) {
       console.log(`[test:runtime] sharing ${baseUrl} across the browser suites`);
