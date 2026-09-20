@@ -71,6 +71,7 @@ import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './s
 import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
 import { createShadowSplitEffectsPort } from './shadow-split-effects';
 import { createPortalConcealBarrier } from './portal-conceal';
+import { adoptWebComponentPortalProjections } from './portal-mount';
 import type { WebComponentAdapterConstructor } from './types';
 import type {
   RuntimeCheckpoint,
@@ -355,6 +356,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     adoptedCallback(_oldDocument: Document, newDocument: Document) {
+      adoptWebComponentPortalProjections(this, newDocument);
       this._globalEventTarget.setTarget(newDocument.defaultView);
       this._overlayModal.adoptDocument(newDocument);
       this._splitResources?.environment.adoptDocument(newDocument);

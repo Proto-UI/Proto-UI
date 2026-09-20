@@ -6,6 +6,7 @@ export const {
   PROTO_INSTANCE: __WC_PROTO_INSTANCE,
   createLogicalInstance,
   markProtoInstance,
+  isProtoInstance,
   unbindProtoInstance,
   setProtoParent,
   getProtoParent,

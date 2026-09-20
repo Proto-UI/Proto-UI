@@ -2680,8 +2680,14 @@ describe('Shadow closeout native boundaries', () => {
         const foreignWindow = frame.contentWindow!;
         foreignDocument.adoptNode(origin);
         foreignDocument.body.append(origin);
-        await settle(foreignWindow);
+        const immediate = {
+          oldBodyClean: document.body.querySelector('button') !== button,
+          inNewBody: foreignDocument.body.querySelector('button') === button,
+          ownerDocument: button.ownerDocument === foreignDocument,
+        };
         button.click();
+        const immediateSnapshot = host.getExposes().snapshot();
+        await settle(foreignWindow);
         const after = {
           oldBodyClean: document.body.querySelector('button') !== button,
           inNewBody: foreignDocument.body.querySelector('button') === button,
@@ -2694,8 +2700,28 @@ describe('Shadow closeout native boundaries', () => {
           snapshot: host.getExposes().snapshot(),
         };
         portal.unmount(button);
+        portal.mount(button);
+        document.adoptNode(origin);
+        const abandonedImmediate = {
+          inDestinationBody: document.body.querySelector('button') === button,
+          ownerDocument: button.ownerDocument === document,
+        };
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const abandonedAfterCheckpoint = {
+          destinationBodyClean: document.body.querySelector('button') !== button,
+          restoredToOrigin: button.parentElement === host,
+          originDisconnected: !origin.isConnected,
+        };
+        portal.unmount(button);
         frame.remove();
-        return { before, after };
+        return {
+          before,
+          immediate,
+          immediateSnapshot,
+          after,
+          abandonedImmediate,
+          abandonedAfterCheckpoint,
+        };
       });
       expect(result).toEqual({
         before: {
@@ -2703,6 +2729,12 @@ describe('Shadow closeout native boundaries', () => {
           ownerDocument: true,
           snapshot: { setups: 1, presses: 0 },
         },
+        immediate: {
+          oldBodyClean: true,
+          inNewBody: true,
+          ownerDocument: true,
+        },
+        immediateSnapshot: { setups: 1, presses: 1 },
         after: {
           oldBodyClean: true,
           inNewBody: true,
@@ -2711,6 +2743,15 @@ describe('Shadow closeout native boundaries', () => {
           controllerRetained: true,
           generationRetained: true,
           snapshot: { setups: 1, presses: 1 },
+        },
+        abandonedImmediate: {
+          inDestinationBody: true,
+          ownerDocument: true,
+        },
+        abandonedAfterCheckpoint: {
+          destinationBodyClean: true,
+          restoredToOrigin: true,
+          originDisconnected: true,
         },
       });
       expect(errors).toEqual([]);
