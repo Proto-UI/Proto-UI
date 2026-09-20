@@ -2895,6 +2895,173 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects entry fallback after selector-only checked state changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-checked-selector-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent = '#checked-selector-entry input:checked + button { visibility: hidden }';
+        const host = new C();
+        host.id = 'checked-selector-entry';
+        host.innerHTML =
+          '<input id="checked-selector-toggle" type="checkbox" tabindex="-1"><button id="checked-selector-target">Target</button>';
+        document.head.append(style);
+        document.body.append(host);
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        const initial = host.getAttribute('tabindex');
+        (host.querySelector('#checked-selector-toggle') as HTMLInputElement).checked = true;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        return {
+          initial,
+          visibility: getComputedStyle(host.querySelector('#checked-selector-target')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+      });
+      expect(result).toEqual({ initial: null, visibility: 'hidden', fallback: '0' });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects entry fallback across selector-only hover state changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-hover-selector-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent = '#hover-selector-entry:hover button { visibility: hidden }';
+        const host = new C();
+        host.id = 'hover-selector-entry';
+        host.innerHTML = '<button id="hover-selector-target">Target</button>';
+        document.head.append(style);
+        document.body.append(host);
+      });
+      expect(await page.locator('#hover-selector-entry').getAttribute('tabindex')).toBe(null);
+      await page.locator('#hover-selector-entry').hover();
+      await page.waitForFunction(
+        () => document.querySelector('#hover-selector-entry')?.getAttribute('tabindex') === '0'
+      );
+      expect(
+        await page
+          .locator('#hover-selector-target')
+          .evaluate((target) => getComputedStyle(target).visibility)
+      ).toBe('hidden');
+      await page.mouse.move(0, 0);
+      await page.waitForFunction(
+        () => !document.querySelector('#hover-selector-entry')?.hasAttribute('tabindex')
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects entry fallback after CSSStyleSheet disabled state changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-disabled-sheet-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent = '#disabled-sheet-entry button { visibility: hidden }';
+        const host = new C();
+        host.id = 'disabled-sheet-entry';
+        host.innerHTML = '<button id="disabled-sheet-target">Target</button>';
+        document.head.append(style);
+        document.body.append(host);
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        const initial = host.getAttribute('tabindex');
+        (style.sheet as CSSStyleSheet).disabled = true;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        return {
+          initial,
+          visibility: getComputedStyle(host.querySelector('#disabled-sheet-target')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+      });
+      expect(result).toEqual({ initial: '0', visibility: 'visible', fallback: null });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('does not hand trapped traversal to an iframe browsing context', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-iframe-scope',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const host = new C();
+        host.id = 'iframe-scope';
+        host.innerHTML =
+          '<button id="iframe-before">Before</button><iframe id="unmanaged-frame" srcdoc="<button id=inside>Inside</button>"></iframe><button id="iframe-after">After</button>';
+        document.body.append(host);
+        (host as any).getExposes().activate();
+        (host.querySelector('#iframe-before') as HTMLElement).focus();
+      });
+      await page.keyboard.press('Tab');
+      expect(await page.evaluate(() => document.activeElement?.id)).toBe('iframe-after');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('matches native image-map entry eligibility for selected srcset sources', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

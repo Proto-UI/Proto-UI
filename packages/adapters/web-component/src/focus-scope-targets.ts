@@ -76,7 +76,8 @@ export function sampleWebComponentScopeTargets(
   isNativelyFocusable?: (target: HTMLElement) => boolean,
   direction: 'next' | 'prev' = 'next',
   radioFocusOrder?: (radio: HTMLInputElement) => number,
-  recentFocusTarget?: () => HTMLElement | null
+  recentFocusTarget?: () => HTMLElement | null,
+  includeBrowsingContexts = false
 ) {
   const activeTarget = deepestActiveElement(container.ownerDocument);
   type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
@@ -124,7 +125,10 @@ export function sampleWebComponentScopeTargets(
       return;
     }
     if (el.hidden) return;
+    // A parent-document trap cannot observe later Tab keys after focus enters
+    // an iframe. Entry resolution may opt in when no scope trap owns traversal.
     const target =
+      (includeBrowsingContexts || !isHtmlTag(el, 'iframe')) &&
       (el.tabIndex >= 0 ||
         (!el.hasAttribute('tabindex') && (isNativelyFocusable?.(el) || isEditingHost(el)))) &&
       isUsableNativeCandidate(el) &&

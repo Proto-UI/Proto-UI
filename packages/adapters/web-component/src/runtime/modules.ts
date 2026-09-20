@@ -303,9 +303,13 @@ function watchEntryStyleInvalidation(
   onInvalidate: () => void
 ): (() => void) | null {
   const Sheet = view?.CSSStyleSheet;
+  const StyleSheetCtor = view?.StyleSheet;
   const Declaration = view?.CSSStyleDeclaration;
   const DocumentCtor = view?.Document;
   const ShadowRootCtor = view?.ShadowRoot;
+  const InputCtor = view?.HTMLInputElement;
+  const OptionCtor = view?.HTMLOptionElement;
+  const SelectCtor = view?.HTMLSelectElement;
   const Grouping = (
     view as unknown as {
       CSSGroupingRule?: { prototype: Record<string, unknown> };
@@ -381,8 +385,15 @@ function watchEntryStyleInvalidation(
     patchSetter(Declaration.prototype, 'display', 'display');
     patchSetter(Declaration.prototype, 'contentVisibility', 'content-visibility');
     patchSetter(Declaration.prototype, 'cssText');
+    if (StyleSheetCtor) patchSetter(StyleSheetCtor.prototype, 'disabled');
     if (DocumentCtor) patchSetter(DocumentCtor.prototype, 'adoptedStyleSheets');
     if (ShadowRootCtor) patchSetter(ShadowRootCtor.prototype, 'adoptedStyleSheets');
+    if (InputCtor) {
+      patchSetter(InputCtor.prototype, 'checked');
+      patchSetter(InputCtor.prototype, 'indeterminate');
+    }
+    if (OptionCtor) patchSetter(OptionCtor.prototype, 'selected');
+    if (SelectCtor) patchSetter(SelectCtor.prototype, 'selectedIndex');
 
     const observer = new Observer((records) => {
       if (records.some(invalidatesEntryStyles)) notify();
@@ -677,6 +688,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryAttachShadowWatch: (() => void) | null = null;
   let stopEntryViewportWatch: (() => void) | null = null;
   let stopEntryStyleWatch: (() => void) | null = null;
+  let stopEntryStateWatch: (() => void) | null = null;
   let stopEntryMotionWatch: (() => void) | null = null;
   let stopEntrySlotWatch: (() => void) | null = null;
   let stopEntryUpgradeWatch: (() => void) | null = null;
@@ -704,6 +716,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     stopEntryViewportWatch = null;
     stopEntryStyleWatch?.();
     stopEntryStyleWatch = null;
+    stopEntryStateWatch?.();
+    stopEntryStateWatch = null;
     stopEntryMotionWatch?.();
     stopEntryMotionWatch = null;
     stopEntrySlotWatch?.();
@@ -872,6 +886,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               stopEntryImageStateWatch = null;
               stopEntrySlotWatch?.();
               stopEntrySlotWatch = null;
+              stopEntryStateWatch?.();
+              stopEntryStateWatch = null;
               stopEntryMotionWatch?.();
               stopEntryMotionWatch = null;
               let hasArea = false;
@@ -1005,6 +1021,29 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 'animationend',
                 'animationcancel',
               ];
+              const stateTypes = [
+                'input',
+                'change',
+                'click',
+                'reset',
+                'toggle',
+                'focusin',
+                'focusout',
+                'pointerover',
+                'pointerout',
+                'pointerdown',
+                'pointerup',
+                'pointercancel',
+              ];
+              let stateProjectionPending = false;
+              const onStateChange = () => {
+                if (stateProjectionPending) return;
+                stateProjectionPending = true;
+                queueMicrotask(() => {
+                  stateProjectionPending = false;
+                  if (isCurrentEntryObservation()) projectEntry();
+                });
+              };
               const onMotionEnd = (event: Event) => {
                 if (
                   isCurrentEntryObservation() &&
@@ -1015,6 +1054,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               for (const motionTarget of motionTargets)
                 for (const type of motionTypes)
                   motionTarget.addEventListener(type, onMotionEnd, true);
+              for (const stateTarget of motionTargets)
+                for (const type of stateTypes)
+                  stateTarget.addEventListener(type, onStateChange, true);
+              stopEntryStateWatch = () => {
+                for (const stateTarget of motionTargets)
+                  for (const type of stateTypes)
+                    stateTarget.removeEventListener(type, onStateChange, true);
+              };
               stopEntryMotionWatch = () => {
                 for (const motionTarget of motionTargets)
                   for (const type of motionTypes)
@@ -1370,9 +1417,14 @@ function resolveFocusEntryTarget(
   config: { strategy: 'self' | 'descendant-first'; fallback: 'self' | 'none' }
 ): HTMLElement | null {
   if (config.strategy === 'descendant-first') {
-    const descendant = sampleWebComponentScopeTargets(container, isNativelyFocusable).targets.find(
-      (target) => target !== container
-    );
+    const descendant = sampleWebComponentScopeTargets(
+      container,
+      isNativelyFocusable,
+      'next',
+      undefined,
+      undefined,
+      true
+    ).targets.find((target) => target !== container);
     if (descendant) return descendant;
   }
 

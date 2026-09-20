@@ -4,6 +4,27 @@ import {
   sampleWebComponentScopeTargets,
 } from '../src/focus-scope-targets';
 describe('WC scope sequential target sample', () => {
+  it('excludes iframe browsing contexts from scope traversal while preserving explicit entry opt-in', () => {
+    const scope = document.createElement('div');
+    const before = document.createElement('button');
+    const frame = document.createElement('iframe');
+    const after = document.createElement('button');
+    before.tabIndex = 0;
+    frame.tabIndex = 0;
+    after.tabIndex = 0;
+    scope.append(before, frame, after);
+    document.body.append(scope);
+
+    try {
+      expect(sampleWebComponentScopeTargets(scope).targets).toEqual([before, after]);
+      expect(
+        sampleWebComponentScopeTargets(scope, undefined, 'next', undefined, undefined, true).targets
+      ).toEqual([before, frame, after]);
+    } finally {
+      scope.remove();
+    }
+  });
+
   it('samples HTML focusables below non-HTML containers such as foreignObject', () => {
     // C-AS-FOCUS-SCOPE-0002-J: composed traversal must not stop at SVG
     // boundaries; foreignObject content participates in document order.
