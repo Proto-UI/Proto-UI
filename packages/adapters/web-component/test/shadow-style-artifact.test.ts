@@ -174,6 +174,10 @@ describe('adapter-web-component Shadow style artifact', () => {
       ),
     ],
     [
+      'unscoped dark rule between quoted comment delimiters',
+      artifact(`[data-x="/*"][data-pui-style~="dark:bg-primary"][data-y="*/"] { color: red; }`),
+    ],
+    [
       'dark rule beside a string-only host marker',
       artifact(
         `[data-proof=":host([data-pui-color-scheme='dark'])"] :where([data-pui-style~="dark:bg-input/30"]) { color: red; }`

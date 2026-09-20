@@ -178,7 +178,44 @@ function splitShadowSelectorFragments(cssText: string): string[] {
   return fragments;
 }
 
-export const stripShadowCssComments = (cssText: string) => cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+export function stripShadowCssComments(cssText: string): string {
+  let result = '';
+  let quote: '"' | "'" | null = null;
+
+  for (let index = 0; index < cssText.length; index += 1) {
+    const char = cssText[index]!;
+    if (char === '\\') {
+      result += char;
+      if (index + 1 < cssText.length) result += cssText[++index];
+      continue;
+    }
+    if (quote) {
+      result += char;
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      result += char;
+      continue;
+    }
+    if (char !== '/' || cssText[index + 1] !== '*') {
+      result += char;
+      continue;
+    }
+
+    const commentEnd = cssText.indexOf('*/', index + 2);
+    if (commentEnd === -1) {
+      // Preserve the existing bounded behavior for malformed, unterminated
+      // input; this helper only removes complete CSS comments.
+      result += cssText.slice(index);
+      break;
+    }
+    index = commentEnd + 1;
+  }
+
+  return result;
+}
 
 function invalidArtifact(reason: string): Error {
   return new Error(`invalid shadow-style:${reason}`);
