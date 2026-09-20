@@ -300,6 +300,30 @@ test('an already-satisfied desired state is an idempotent no-op despite mutation
   assert.equal(decision.mutationCount, 0);
 });
 
+test('metadata authorization permits TRIAGE only for reversible metadata fields', () => {
+  const base = metadataRequest();
+  const triageRequest = seal({
+    ...base,
+    desired: {
+      ...base.desired,
+      title: base.expected.title,
+      labels: ['governed', 'triaged'],
+    },
+    rationale: 'Apply reversible triage metadata without editing governed prose.',
+  });
+  const triageLive = {
+    ...metadataLive(),
+    viewerPermission: 'TRIAGE',
+  };
+
+  assert.equal(authorize(triageRequest, triageLive).outcome, 'mutate');
+  assert.match(
+    authorize(triageRequest, { ...triageLive, viewerPermission: 'READ' }).reason,
+    /triage permission/
+  );
+  assert.match(authorize(base, triageLive).reason, /write permission/);
+});
+
 test('review requests reject every pull-request contributor and fail closed on missing identity', () => {
   const base = metadataRequest();
   const reviewerRequest = seal({
@@ -728,6 +752,168 @@ test('metadata PATCH fails closed when the target drifts at the mutation boundar
     /desired state was not verified before mutation.*do not retry blindly/
   );
   assert.equal(writes, 0);
+});
+
+test('review requests revalidate identity and exact-head state before writing', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'request-independent-review',
+    expected: { requestedReviewerLogins: [] },
+    desired: { reviewerLogin: 'independent-reviewer' },
+    rationale: 'Request an independent exact-head review.',
+  });
+  const preState = {
+    ...metadataLive(),
+    action: request.action,
+    current: {
+      kind: 'pull-request',
+      number: 509,
+      nodeId: 'PR_node',
+      url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+      state: 'OPEN',
+      authorLogin: 'contributor',
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      requestedReviewerLogins: [],
+      commitContributorLogins: ['commit-author', 'commit-committer'],
+      commitContributorIdentityComplete: true,
+    },
+  };
+  const races = [
+    { name: 'head', state: { current: { ...preState.current, headSha: NEXT_HEAD } } },
+    {
+      name: 'updatedAt',
+      state: { current: { ...preState.current, updatedAt: '2026-08-27T01:00:09.000Z' } },
+    },
+    {
+      name: 'requested reviewers',
+      state: { current: { ...preState.current, requestedReviewerLogins: ['other-reviewer'] } },
+    },
+    {
+      name: 'contributors',
+      state: {
+        current: {
+          ...preState.current,
+          commitContributorLogins: [...preState.current.commitContributorLogins, 'new-contributor'],
+        },
+      },
+    },
+    {
+      name: 'contributor completeness',
+      state: { current: { ...preState.current, commitContributorIdentityComplete: false } },
+    },
+    { name: 'author', state: { current: { ...preState.current, authorLogin: 'new-author' } } },
+    { name: 'viewer', state: { viewerLogin: 'different-maintainer' } },
+  ];
+
+  for (const race of races) {
+    let writes = 0;
+    const racedState = {
+      ...preState,
+      ...race.state,
+    };
+    assert.throws(
+      () =>
+        applyGitHubCollaborationMutation(request, preState, {
+          runner() {
+            writes += 1;
+            return JSON.stringify({});
+          },
+          collectState() {
+            return racedState;
+          },
+        }),
+      /desired state was not verified before mutation.*do not retry blindly/,
+      race.name
+    );
+    assert.equal(writes, 0, `${race.name} race must fail before any write`);
+  }
+});
+
+test('review requests perform mutation-boundary collection before their single write', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    action: 'request-independent-review',
+    expected: { requestedReviewerLogins: [] },
+    desired: { reviewerLogin: 'independent-reviewer' },
+    rationale: 'Request an independent exact-head review.',
+  });
+  const preState = {
+    ...metadataLive(),
+    action: request.action,
+    current: {
+      kind: 'pull-request',
+      number: 509,
+      nodeId: 'PR_node',
+      url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+      state: 'OPEN',
+      authorLogin: 'contributor',
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      requestedReviewerLogins: [],
+      commitContributorLogins: ['commit-author', 'commit-committer'],
+      commitContributorIdentityComplete: true,
+    },
+  };
+  const postState = {
+    ...preState,
+    current: {
+      ...preState.current,
+      updatedAt: '2026-08-27T01:00:10.000Z',
+      requestedReviewerLogins: ['independent-reviewer'],
+    },
+  };
+  const events = [];
+  let collections = 0;
+
+  const result = applyGitHubCollaborationMutation(request, preState, {
+    runner() {
+      events.push('write');
+      return JSON.stringify({ number: 509, node_id: 'PR_node' });
+    },
+    collectState() {
+      events.push('read');
+      collections += 1;
+      return collections === 1 ? preState : postState;
+    },
+  });
+
+  assert.deepEqual(events, ['read', 'write', 'read']);
+  assert.equal(result.mutationCount, 1);
+});
+
+test('metadata PATCH sends only fields whose desired values changed', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    desired: {
+      ...base.expected,
+      labels: ['governed', 'triaged'],
+    },
+    rationale: 'Apply one reversible metadata change.',
+  });
+  const preState = metadataLive();
+  const postState = metadataLive({
+    labels: ['governed', 'triaged'],
+    updatedAt: '2026-08-27T01:00:10.000Z',
+  });
+  let input;
+  let collections = 0;
+
+  applyGitHubCollaborationMutation(request, preState, {
+    runner(_command, _args, options) {
+      input = JSON.parse(options.input);
+      return JSON.stringify({ number: 509, node_id: 'PR_node' });
+    },
+    collectState() {
+      collections += 1;
+      return collections === 1 ? preState : postState;
+    },
+  });
+
+  assert.deepEqual(input, { labels: ['governed', 'triaged'] });
 });
 
 test('mutation adapter performs exactly one write and one post-write verification', () => {
@@ -1480,9 +1666,11 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
       },
       collectState() {
         collectionCount += 1;
-        return ['resolve-fixed-review-thread', 'mark-exact-head-ready-for-review'].includes(
-          fixture.request.action
-        ) && collectionCount === 1
+        return [
+          'resolve-fixed-review-thread',
+          'mark-exact-head-ready-for-review',
+          'request-independent-review',
+        ].includes(fixture.request.action) && collectionCount === 1
           ? preState
           : postState;
       },

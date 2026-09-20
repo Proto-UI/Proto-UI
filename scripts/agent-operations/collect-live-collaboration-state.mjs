@@ -397,13 +397,24 @@ function mutationResponse(request, runner) {
   const { owner, name } = parseRepositoryId(request.repositoryId);
   const { action } = request;
   if (action === 'update-governed-issue-or-pull-request-metadata') {
-    return mutationRest(runner, 'PATCH', `repos/${owner}/${name}/issues/${request.target.number}`, {
-      title: request.desired.title,
-      body: request.desired.body,
-      milestone: request.desired.milestoneNumber,
-      assignees: request.desired.assignees,
-      labels: request.desired.labels,
-    });
+    const input = {};
+    if (request.desired.title !== request.expected.title) input.title = request.desired.title;
+    if (request.desired.body !== request.expected.body) input.body = request.desired.body;
+    if (request.desired.milestoneNumber !== request.expected.milestoneNumber) {
+      input.milestone = request.desired.milestoneNumber;
+    }
+    if (JSON.stringify(request.desired.assignees) !== JSON.stringify(request.expected.assignees)) {
+      input.assignees = request.desired.assignees;
+    }
+    if (JSON.stringify(request.desired.labels) !== JSON.stringify(request.expected.labels)) {
+      input.labels = request.desired.labels;
+    }
+    return mutationRest(
+      runner,
+      'PATCH',
+      `repos/${owner}/${name}/issues/${request.target.number}`,
+      input
+    );
   }
   if (action === 'update-pull-request-branch-at-expected-head') {
     return mutationRest(
@@ -519,11 +530,16 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
   // Revalidate the exact authorized state at the mutation boundary: a target
   // that drifted after the preflight must fail closed before any write.
   if (
-    ['resolve-fixed-review-thread', 'mark-exact-head-ready-for-review'].includes(request.action) ||
+    [
+      'resolve-fixed-review-thread',
+      'mark-exact-head-ready-for-review',
+      'request-independent-review',
+    ].includes(request.action) ||
     request.action === 'update-governed-issue-or-pull-request-metadata'
   ) {
     const latestState = collectState(request, { runner });
     const current = latestState.current ?? {};
+    const preCurrent = preState.current ?? {};
     const drift =
       current.updatedAt !== request.target.updatedAt ||
       (request.action === 'resolve-fixed-review-thread' &&
@@ -532,7 +548,18 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
           current.isResolved !== request.expected.isResolved)) ||
       (request.action === 'mark-exact-head-ready-for-review' &&
         (current.headSha !== request.target.headSha ||
-          current.isDraft !== request.expected.isDraft));
+          current.isDraft !== request.expected.isDraft)) ||
+      (request.action === 'request-independent-review' &&
+        (current.headSha !== request.target.headSha ||
+          JSON.stringify(current.requestedReviewerLogins) !==
+            JSON.stringify(request.expected.requestedReviewerLogins) ||
+          current.commitContributorIdentityComplete !== true ||
+          preCurrent.commitContributorIdentityComplete !== true ||
+          JSON.stringify(current.commitContributorLogins) !==
+            JSON.stringify(preCurrent.commitContributorLogins) ||
+          current.authorLogin?.toLowerCase() !== preCurrent.authorLogin?.toLowerCase() ||
+          latestState.viewerLogin?.toLowerCase() !== preState.viewerLogin?.toLowerCase() ||
+          latestState.viewerPermission !== preState.viewerPermission));
     if (drift) {
       throw new Error(
         `${request.action} desired state was not verified before mutation; do not retry blindly`

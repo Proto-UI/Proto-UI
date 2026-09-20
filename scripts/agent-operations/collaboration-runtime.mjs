@@ -610,13 +610,24 @@ export function authorizeCollaborationMutation({
     selfAssessment,
   });
   if (authorityFailure) return rejected(request, authorityFailure);
-  if (!['WRITE', 'MAINTAIN', 'ADMIN'].includes(liveState.viewerPermission)) {
-    return rejected(request, 'live credential lacks write permission');
-  }
 
   const current = liveState.current;
   const action = request.action;
   if (action === 'update-governed-issue-or-pull-request-metadata') {
+    const changesGovernedProse =
+      request.desired.title !== request.expected.title ||
+      request.desired.body !== request.expected.body;
+    const allowedPermissions = changesGovernedProse
+      ? ['WRITE', 'MAINTAIN', 'ADMIN']
+      : ['TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'];
+    if (!allowedPermissions.includes(liveState.viewerPermission)) {
+      return rejected(
+        request,
+        changesGovernedProse
+          ? 'live credential lacks write permission for title or body changes'
+          : 'live credential lacks triage permission for reversible metadata changes'
+      );
+    }
     validateCurrentIdentity(current, request.target);
     const closed = requireOpen(request, current);
     if (closed) return closed;
@@ -634,6 +645,10 @@ export function authorizeCollaborationMutation({
       return rejected(request, 'live metadata does not match the exact expected state');
     }
     return mutate(request);
+  }
+
+  if (!['WRITE', 'MAINTAIN', 'ADMIN'].includes(liveState.viewerPermission)) {
+    return rejected(request, 'live credential lacks write permission');
   }
 
   if (action === 'update-pull-request-branch-at-expected-head') {
