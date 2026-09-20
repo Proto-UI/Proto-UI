@@ -122,7 +122,7 @@ function validateShadowSelectorAbi(cssText: string): void {
   const hasUnscopedDarkToken = selectors.split(/[{},]/).some((selector) => {
     const normalized = selector.replace(/\s/g, '');
     return (
-      /(?:^|[>+~.#:(])\[data-pui-style~=(['"])(?:[^'"]*:)?dark:[^'"]*\1\]/.test(normalized) &&
+      /\[data-pui-style~=(['"])(?:[^'"]*:)?dark:[^'"]*\1\]/.test(normalized) &&
       !/^(?::where\()?:host\(\[data-pui-color-scheme=(['"])dark\1\]\)\)?(?=$|[>+~.#[:])/.test(
         normalized
       )
