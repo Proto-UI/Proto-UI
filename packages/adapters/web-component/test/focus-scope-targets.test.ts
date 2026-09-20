@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
@@ -729,6 +729,101 @@ describe('WC scope sequential target sample', () => {
     } finally {
       portal.unmount(projected);
       scope.remove();
+    }
+  });
+
+  it('keeps a portal projection assigned only to the first duplicate named slot', () => {
+    const scope = document.createElement('div');
+    const before = document.createElement('button');
+    before.id = 'before-duplicate-slot';
+    before.tabIndex = 0;
+    const host = document.createElement('div');
+    const shadow = host.attachShadow({ mode: 'open' });
+    const hidden = document.createElement('div');
+    hidden.hidden = true;
+    const first = document.createElement('slot');
+    first.name = 'portal';
+    hidden.append(first);
+    const duplicate = document.createElement('slot');
+    duplicate.name = 'portal';
+    shadow.append(hidden, duplicate);
+    const projected = document.createElement('section');
+    projected.slot = 'portal';
+    const portaled = document.createElement('button');
+    portaled.id = 'hidden-first-slot-portal';
+    portaled.tabIndex = 0;
+    projected.append(portaled);
+    host.append(projected);
+    const after = document.createElement('button');
+    after.id = 'after-duplicate-slot';
+    after.tabIndex = 0;
+    scope.append(before, host, after);
+    document.body.append(scope);
+    const portal = createWebComponentPortalMount();
+    portal.mount(projected);
+
+    try {
+      expect(projected.parentElement).toBe(document.body);
+      expect(sampleWebComponentScopeTargets(scope).targets.map((el) => el.id)).toEqual([
+        'before-duplicate-slot',
+        'after-duplicate-slot',
+      ]);
+    } finally {
+      portal.unmount(projected);
+      scope.remove();
+    }
+  });
+
+  it('remembers logical portal focus without accepting unrelated document focus', () => {
+    const scope = document.createElement('div');
+    const host = document.createElement('div');
+    host.attachShadow({ mode: 'open' }).append(document.createElement('slot'));
+    const projected = document.createElement('section');
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'portal-history';
+    radio.tabIndex = 0;
+    const portaled = document.createElement('button');
+    portaled.id = 'portal-history-target';
+    portaled.tabIndex = 0;
+    projected.append(radio, portaled);
+    host.append(projected);
+    scope.append(host);
+    const unrelated = document.createElement('button');
+    unrelated.id = 'unrelated-document-focus';
+    unrelated.tabIndex = 0;
+    document.body.append(scope, unrelated);
+    const portal = createWebComponentPortalMount();
+    portal.mount(projected);
+    const history = observeWebComponentRadioFocus(scope);
+    const activeElement = vi.spyOn(document, 'activeElement', 'get');
+    const dispatchPhysicalFocus = (target: Element) => {
+      activeElement.mockReturnValue(target);
+      const event = new FocusEvent('focusin', { bubbles: true, composed: true });
+      Object.defineProperty(event, 'composedPath', {
+        configurable: true,
+        value: () => [target, document.body, document.documentElement, document, window],
+      });
+      document.dispatchEvent(event);
+    };
+
+    try {
+      // Happy DOM follows the portal's logical parentNode override for its
+      // synthetic focus path. Inject the browser's physical body path while
+      // retaining the real active element fact used by the observer.
+      dispatchPhysicalFocus(radio);
+      expect(history.order(radio)).toBeGreaterThan(0);
+      expect(history.recent()).toBe(radio);
+      dispatchPhysicalFocus(portaled);
+      expect(history.recent()).toBe(portaled);
+      dispatchPhysicalFocus(unrelated);
+      expect(history.recent()).toBe(portaled);
+    } finally {
+      activeElement.mockRestore();
+      history.dispose();
+      portal.unmount(projected);
+      scope.remove();
+      unrelated.remove();
     }
   });
 });

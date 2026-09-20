@@ -308,11 +308,179 @@ function listenToEntryEvents(
   };
 }
 
+function matchingSelectorParen(selector: string, open: number): number {
+  let depth = 1;
+  let quote = '';
+  for (let index = open + 1; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '(') depth += 1;
+    else if (character === ')' && --depth === 0) return index;
+  }
+  return -1;
+}
+
+function containsDocumentRootSelectorList(selector: string): boolean {
+  let depth = 0;
+  let bracketDepth = 0;
+  let quote = '';
+  let compoundStart = 0;
+  const matchesLastCompound = (end: number) =>
+    containsDocumentRootCompound(selector.slice(compoundStart, end));
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '[') {
+      bracketDepth += 1;
+      continue;
+    }
+    if (character === ']') {
+      bracketDepth = Math.max(0, bracketDepth - 1);
+      continue;
+    }
+    if (bracketDepth) continue;
+    if (character === '(') depth += 1;
+    else if (character === ')') depth = Math.max(0, depth - 1);
+    else if (!depth && character === ',') {
+      if (matchesLastCompound(index)) return true;
+      compoundStart = index + 1;
+    } else if (
+      !depth &&
+      (character === '>' || character === '+' || character === '~' || /\s/.test(character))
+    ) {
+      compoundStart = index + 1;
+    }
+  }
+  return matchesLastCompound(selector.length);
+}
+
+function containsDocumentRootCompound(selector: string): boolean {
+  let bracketDepth = 0;
+  let quote = '';
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '[') {
+      bracketDepth += 1;
+      continue;
+    }
+    if (character === ']') {
+      bracketDepth = Math.max(0, bracketDepth - 1);
+      continue;
+    }
+    if (bracketDepth) continue;
+    if (character === ':') {
+      let end = index + 1;
+      while (/[\w-]/.test(selector[end] ?? '')) end += 1;
+      const name = selector.slice(index + 1, end).toLowerCase();
+      if (name === 'root' && selector[end] !== '(') return true;
+      if (selector[end] === '(') {
+        const close = matchingSelectorParen(selector, end);
+        if (close < 0) return false;
+        if (
+          (name === 'is' || name === 'where') &&
+          containsDocumentRootSelectorList(selector.slice(end + 1, close))
+        )
+          return true;
+        // Root-looking tokens inside :not(), :has(), attribute-like custom
+        // pseudos or other functions do not make the current subject a root.
+        index = close;
+      }
+      continue;
+    }
+    if (!/[a-zA-Z_]/.test(character)) continue;
+    const previous = selector[index - 1];
+    if (previous && !/[\s,>+~(]/.test(previous)) continue;
+    let end = index + 1;
+    while (/[\w-]/.test(selector[end] ?? '')) end += 1;
+    const name = selector.slice(index, end).toLowerCase();
+    if (name === 'html' || name === 'body') return true;
+    index = end - 1;
+  }
+  return false;
+}
+
 function hasDocumentRootRelationalSubject(selector: string): boolean {
-  if (/(?:^|[\s,>+~])(?:html|body|:root)\s*:has\(/.test(selector)) return true;
-  const wrapped = /(?:^|[\s,>+~]):(?:is|where)\(([^)]*)\)\s*:has\(/g;
-  for (const match of selector.matchAll(wrapped)) {
-    if (/(?:^|[\s,>+~])(?:html|body|:root)(?=$|[\s,.#:[>+~])/.test(match[1] ?? '')) return true;
+  let depth = 0;
+  let bracketDepth = 0;
+  let quote = '';
+  const compoundStarts = [0];
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '[') {
+      bracketDepth += 1;
+      continue;
+    }
+    if (character === ']') {
+      bracketDepth = Math.max(0, bracketDepth - 1);
+      continue;
+    }
+    if (bracketDepth) continue;
+    if (character === ':' && selector.slice(index + 1, index + 4).toLowerCase() === 'has') {
+      let open = index + 4;
+      while (/\s/.test(selector[open] ?? '')) open += 1;
+      if (
+        selector[open] === '(' &&
+        containsDocumentRootCompound(selector.slice(compoundStarts[depth] ?? 0, index))
+      )
+        return true;
+    }
+    if (character === '(') {
+      depth += 1;
+      compoundStarts[depth] = index + 1;
+    } else if (character === ')') {
+      compoundStarts.length = depth;
+      depth = Math.max(0, depth - 1);
+    } else if (character === ',' || character === '>' || character === '+' || character === '~') {
+      compoundStarts[depth] = index + 1;
+    } else if (/\s/.test(character)) {
+      compoundStarts[depth] = index + 1;
+    }
   }
   return false;
 }

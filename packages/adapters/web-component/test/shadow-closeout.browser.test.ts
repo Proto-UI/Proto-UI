@@ -2964,7 +2964,7 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
-  it('reprojects entry eligibility for a wrapped body relational selector', async () => {
+  it('reprojects entry eligibility for a recursively wrapped body relational selector', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
@@ -2974,7 +2974,7 @@ describe('Shadow closeout native boundaries', () => {
         const p = (window as any).Closeout;
         const style = document.createElement('style');
         style.textContent =
-          ':where(body):has(> .wrapped-body-entry-flag) #wrapped-body-entry button { visibility: hidden; }';
+          ':where(:is(body)):has(> .wrapped-body-entry-flag) #wrapped-body-entry button { visibility: hidden; }';
         const C = p.adapt(
           p.define({
             name: 'closeout-wrapped-body-entry',
@@ -3399,6 +3399,18 @@ describe('Shadow closeout native boundaries', () => {
       expect(await active()).toBe('portal-after');
       await page.keyboard.press('Shift+Tab');
       expect(await active()).toBe('portal-target');
+
+      await page.locator('body').evaluate((body: HTMLElement) => {
+        body.tabIndex = -1;
+        body.focus();
+      });
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('portal-after');
+
+      await page.locator('#portal-target').focus();
+      await page.locator('body').evaluate((body: HTMLElement) => body.focus());
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('portal-before');
       expect(errors).toEqual([]);
     } finally {
       await page.close();

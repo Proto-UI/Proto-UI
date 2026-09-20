@@ -12,6 +12,7 @@ import {
 const activeProjections = new WeakSet<HTMLElement>();
 const adoptedProjections = new WeakMap<HTMLElement, Set<(document: Document) => void>>();
 const projectionByOriginMarker = new WeakMap<Node, HTMLElement>();
+const originMarkerByProjection = new WeakMap<HTMLElement, Node>();
 
 function isShadowRootNode(node: Node): node is ShadowRoot {
   return node.nodeType === 11 && !!(node as ShadowRoot).host;
@@ -25,6 +26,21 @@ export function isWebComponentPortaled(el: HTMLElement): boolean {
 export function getWebComponentPortalProjectionForOrigin(node: Node): HTMLElement | null {
   const projection = projectionByOriginMarker.get(node);
   return projection && activeProjections.has(projection) ? projection : null;
+}
+
+/** True only when target is physically inside an active projection whose
+ * logical origin remains beneath root (including an open ShadowRoot chain). */
+export function isWebComponentPortalTargetOwnedBy(root: Node, target: Element): boolean {
+  let projection: Element | null = target;
+  while (projection && !activeProjections.has(projection as HTMLElement))
+    projection = projection.parentElement;
+  const origin = projection ? originMarkerByProjection.get(projection as HTMLElement) : undefined;
+  let current: Node | null = origin ?? null;
+  while (current) {
+    if (current === root) return true;
+    current = isShadowRootNode(current) ? current.host : current.parentNode;
+  }
+  return false;
 }
 
 export function adoptWebComponentPortalProjections(owner: HTMLElement, document: Document): void {
@@ -118,6 +134,7 @@ export function createWebComponentPortalMount() {
         const wasProjected = projected;
         projected = false;
         projectionByOriginMarker.delete(marker);
+        originMarkerByProjection.delete(el);
         activeProjections.delete(el);
         observer?.disconnect();
         if (ownsParent) {
@@ -142,6 +159,7 @@ export function createWebComponentPortalMount() {
         projected = true;
         activeProjections.add(el);
         projectionByOriginMarker.set(marker, el);
+        originMarkerByProjection.set(el, marker);
       } catch (error) {
         restore();
         throw error;

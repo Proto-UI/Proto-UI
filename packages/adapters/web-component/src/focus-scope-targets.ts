@@ -3,7 +3,10 @@
 // is observed by the view owner, never converted into logical focus facts.
 // The UA leaves document.activeElement on the outermost host; only the
 // deepest composed active element proves where focus actually landed.
-import { getWebComponentPortalProjectionForOrigin } from './portal-mount';
+import {
+  getWebComponentPortalProjectionForOrigin,
+  isWebComponentPortalTargetOwnedBy,
+} from './portal-mount';
 
 export function deepestActiveElement(doc: Document): Element | null {
   let active = doc.activeElement;
@@ -77,12 +80,21 @@ function logicalSlotNodes(slot: HTMLSlotElement): Node[] {
   const assigned = slot.assignedNodes();
   const root = slot.getRootNode();
   if (!isShadowRootNode(root)) return assigned.length ? assigned : [...slot.childNodes];
+  const ownsPortalProjection =
+    [...root.querySelectorAll<HTMLSlotElement>('slot')].find(
+      (candidate) => candidate.name === slot.name
+    ) === slot;
   const logical: Node[] = [];
   const assignedSet = new Set(assigned);
   for (const node of root.host.childNodes) {
     const projection = getWebComponentPortalProjectionForOrigin(node);
     if (projection) {
-      if ((projection.getAttribute('slot') ?? '') === slot.name) logical.push(projection);
+      // Native slot assignment selects the first same-name slot in tree order,
+      // even when that slot's branch is hidden. A portal projection must not
+      // re-enter through a later visible duplicate merely because its light
+      // node currently lives under body.
+      if (ownsPortalProjection && (projection.getAttribute('slot') ?? '') === slot.name)
+        logical.push(projection);
       continue;
     }
     if (
@@ -323,9 +335,21 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
   >();
   let lastFocused: Element | null = null;
   const remember = (event: Event) => {
-    const target = event.composedPath()[0];
+    const path = event.composedPath();
+    const target = path[0];
     if (!isElementNode(target)) return;
     if (deepestActiveElement(root.ownerDocument) !== target) return;
+    if (!path.includes(root) && !isWebComponentPortalTargetOwnedBy(root, target)) return;
+    // Portal focus follows the physical body path, so observe the owning
+    // document and admit only targets reached by the current logical sample.
+    // An active programmatic-only target is represented by an insertion
+    // position rather than a sequential stop and remains valid history.
+    const sample = sampleWebComponentScopeTargets(root);
+    if (
+      !sample.targets.includes(target as HTMLElement) &&
+      sample.activeInsertionIndex === undefined
+    )
+      return;
     lastFocused = target;
     if (!isHtmlTag(target, 'input') || target.type !== 'radio' || !target.name) return;
     history.set(target, {
@@ -335,7 +359,8 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
       name: target.name,
     });
   };
-  root.addEventListener('focusin', remember, true);
+  const document = root.ownerDocument;
+  document.addEventListener('focusin', remember, true);
   return {
     order(target: HTMLInputElement) {
       const last = history.get(target);
@@ -352,7 +377,7 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
       return lastFocused?.isConnected ? lastFocused : null;
     },
     dispose() {
-      root.removeEventListener('focusin', remember, true);
+      document.removeEventListener('focusin', remember, true);
     },
   };
 }

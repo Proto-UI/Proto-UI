@@ -812,7 +812,8 @@ describe('WC live focus-entry resolver inputs', () => {
   it('observes external subtrees only while an author relational selector can reach the entry', async () => {
     const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const style = document.createElement('style');
-    style.textContent = '.unrelated:has(.flag) .outside { visibility: hidden; }';
+    style.textContent =
+      '.unrelated:has(.flag) .outside, :where(:is(.unrelated)):has(.flag) .outside { visibility: hidden; }';
     const nestedStyle = document.createElement('style');
     const wrapper = document.createElement('div');
     wrapper.className = 'entry-relational-boundary';
@@ -846,7 +847,7 @@ describe('WC live focus-entry resolver inputs', () => {
 
     const relevantStyle = document.createElement('style');
     relevantStyle.textContent =
-      '.entry-relational-reachable:has(.flag) button { visibility: hidden; }';
+      ':where(body :is(.entry-relational-reachable)):has(.flag) button { visibility: hidden; }';
     const relevantWrapper = document.createElement('div');
     relevantWrapper.className = 'entry-relational-reachable';
     document.body.append(relevantStyle, relevantWrapper);
@@ -940,6 +941,50 @@ describe('WC live focus-entry resolver inputs', () => {
 
     const flag = document.createElement('span');
     flag.className = 'entry-wrapped-body-flag';
+    document.body.append(flag);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    flag.remove();
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('reprojects for a recursively wrapped body-level relational selector', async () => {
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const style = document.createElement('style');
+    style.textContent =
+      ':where(:is(body)):has(> .entry-nested-body-flag) .entry-nested-body-relational button { visibility: hidden; }';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entry-nested-body-relational';
+    document.body.append(style, wrapper);
+    const host = panel(true);
+    wrapper.append(host);
+    const button = document.createElement('button');
+    host.append(button);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility')
+            return document.body.querySelector('.entry-nested-body-flag') ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    expect(
+      observe.mock.calls.some(
+        ([node, options]) =>
+          node === document.documentElement && options?.childList && options?.subtree
+      )
+    ).toBe(true);
+
+    const flag = document.createElement('span');
+    flag.className = 'entry-nested-body-flag';
     document.body.append(flag);
     await settle();
     expect(host.tabIndex).toBe(0);
