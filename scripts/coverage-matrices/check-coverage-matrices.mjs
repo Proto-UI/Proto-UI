@@ -3233,7 +3233,13 @@ function relativeImportSpecifier(sourcePath, rootDir, targetPath) {
   return specifier;
 }
 
-function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteAliasConfig) {
+function guardedWebsiteImport(
+  rootDir,
+  canonicalRootDir,
+  sourcePath,
+  specifier,
+  websiteAliasConfig
+) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'adapter-package', resolvedPath: null };
@@ -3260,7 +3266,7 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteAliasConfig
   if (!classifiedSpecifier.startsWith('.') && !aliasMatch) return null;
   const resolvedPath = path
     .relative(
-      rootDir,
+      canonicalRootDir,
       aliasMatch
         ? canonicalImportTarget(path.resolve(aliasMatch.replacement, aliasMatch.suffix))
         : canonicalImportTarget(
@@ -3284,7 +3290,7 @@ function guardedWebsiteImport(rootDir, sourcePath, specifier, websiteAliasConfig
     return { category: 'runtime-internal', resolvedPath };
   }
 }
-function guardedHarnessImport(rootDir, sourcePath, specifier) {
+function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'proto-ui-package', resolvedPath: null };
@@ -3300,7 +3306,7 @@ function guardedHarnessImport(rootDir, sourcePath, specifier) {
   }
   const resolvedPath = path
     .relative(
-      rootDir,
+      canonicalRootDir,
       canonicalImportTarget(path.resolve(rootDir, path.dirname(sourcePath), classifiedSpecifier))
     )
     .replaceAll('\\', '/');
@@ -3430,6 +3436,7 @@ function reachableSourcePaths(
 }
 
 function discoverWebsiteRawImports(rootDir) {
+  const canonicalRootDir = canonicalImportTarget(path.resolve(rootDir));
   const websiteRoot = path.join(rootDir, 'apps', 'www');
   const sourceRoot = path.join(websiteRoot, 'src');
   const publicRoot = path.join(websiteRoot, 'public');
@@ -3464,6 +3471,7 @@ function discoverWebsiteRawImports(rootDir) {
     for (const specifier of moduleSpecifiersForWebsiteSource(absolutePath)) {
       const guardedImport = guardedWebsiteImport(
         rootDir,
+        canonicalRootDir,
         sourcePath,
         specifier,
         websiteAliasConfig
@@ -3477,6 +3485,7 @@ function discoverWebsiteRawImports(rootDir) {
       })) {
         const guardedImport = guardedWebsiteImport(
           rootDir,
+          canonicalRootDir,
           sourcePath,
           relativeImportSpecifier(sourcePath, rootDir, target.absolutePath),
           websiteAliasConfig
@@ -3510,6 +3519,7 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
 }
 
 function discoverHarnessRawImports(rootDir) {
+  const canonicalRootDir = canonicalImportTarget(path.resolve(rootDir));
   const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
   const harnessRoot = path.join(rootDir, 'apps', 'agent-harness');
   const allCandidates = walkFiles(sourceRoot).filter((absolutePath) =>
@@ -3523,7 +3533,7 @@ function discoverHarnessRawImports(rootDir) {
   for (const absolutePath of candidates) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
     for (const specifier of moduleSpecifiersForWebsiteSource(absolutePath)) {
-      const guardedImport = guardedHarnessImport(rootDir, sourcePath, specifier);
+      const guardedImport = guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier);
       if (guardedImport) rawImports.push({ sourcePath, specifier, ...guardedImport });
     }
     for (const patterns of viteGlobPatternGroupsForWebsiteSource(absolutePath)) {
@@ -3532,6 +3542,7 @@ function discoverHarnessRawImports(rootDir) {
       })) {
         const guardedImport = guardedHarnessImport(
           rootDir,
+          canonicalRootDir,
           sourcePath,
           relativeImportSpecifier(sourcePath, rootDir, target.absolutePath)
         );

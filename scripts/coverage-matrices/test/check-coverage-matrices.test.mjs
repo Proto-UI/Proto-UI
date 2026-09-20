@@ -5084,6 +5084,40 @@ test('canonicalizes symlinked Website import targets', () => {
   );
 });
 
+test('canonicalizes an authored root alias before classifying guarded imports', () => {
+  const canonicalRoot = createRoot();
+  const aliasParent = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-authored-root-alias-'));
+  temporaryRoots.push(aliasParent);
+  const authoredRoot = path.join(aliasParent, 'repository');
+  fs.symlinkSync(canonicalRoot, authoredRoot, process.platform === 'win32' ? 'junction' : 'dir');
+  const runtimePath = path.join(canonicalRoot, 'packages/runtime/src/index.ts');
+  fs.mkdirSync(path.dirname(runtimePath), { recursive: true });
+  fs.writeFileSync(runtimePath, 'export const runtime = true;', 'utf8');
+  const cases = [
+    ['apps/www/src/components/RootAliasEscape.ts', 'website', 'WebsiteRootAliasEscape'],
+    ['apps/agent-harness/src/run/RootAliasEscape.ts', 'Harness', 'HarnessRootAliasEscape'],
+  ];
+  for (const [sourcePath, , exportName] of cases) {
+    const absolutePath = path.join(canonicalRoot, sourcePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `import { runtime } from '../../../../packages/runtime/src/index'; export const ${exportName} = runtime;`,
+      'utf8'
+    );
+  }
+  writeValidMatrices(canonicalRoot);
+
+  const message = validationMessage(authoredRoot);
+  for (const [sourcePath, boundary] of cases) {
+    assert.ok(
+      message.includes(
+        `raw Proto UI import \`../../../../packages/runtime/src/index\` in \`${sourcePath}\` escapes the ${boundary} consumer-wall allowlist`
+      )
+    );
+  }
+});
+
 test('scans handwritten sources beside generated Harness facades', () => {
   const root = createRoot();
   const relativePath = 'apps/agent-harness/src/proto-ui/manual.ts';
