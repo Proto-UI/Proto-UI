@@ -150,9 +150,7 @@ describe('source-scanned Shadow Template/Root separation', () => {
       effects.queueStyle(effect('p-2'));
       effects.requestFlush();
       const before = [host.outerHTML, surface.outerHTML];
-      expect(() => effects.queueStyle(effect('p-4'))).toThrow(
-        /absent from the compiled split closure/
-      );
+      expect(() => effects.queueStyle(effect('p-4'))).toThrow(/missing token/);
       effects.requestFlush();
       expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     } finally {
