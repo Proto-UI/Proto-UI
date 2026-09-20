@@ -126,6 +126,18 @@ describe('adapter-web-component Shadow style artifact', () => {
       ),
     ],
     [
+      'system light media around a host-dark rule',
+      artifact(
+        `@media (prefers-color-scheme: light) { :host([data-pui-color-scheme='dark']) [data-pui-style~='dark:bg-input/30'] { color: red; } }`
+      ),
+    ],
+    [
+      'negated system color-scheme media around a host-dark rule',
+      artifact(
+        `@media not (prefers-color-scheme: light) { :host([data-pui-color-scheme='dark']) [data-pui-style~='dark:bg-input/30'] { color: red; } }`
+      ),
+    ],
+    [
       'dark rule without the host marker',
       artifact(`:where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
     ],

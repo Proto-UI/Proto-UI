@@ -111,14 +111,14 @@ function validateShadowSelectorAbi(cssText: string): void {
   const documentRule = structuralCss.match(
     /(?:^|[;{}])(?:(?!\s*@)[^;{}]*(:where\(\.dark\)|:where\(\[data-theme=|:root))[^;{}]*\{/
   );
-  // CSS whitespace around the media feature and its colon is optional, and
-  // at-rule/media-feature identifiers are ASCII case-insensitive. Match the
-  // rule prelude rather than one generator-specific serialization so an
-  // explicit host dark marker cannot be gated by the system preference.
-  const systemDarkRule = structuralCss.match(
-    /(?:^|[;{}])\s*(@media\b[^;{}]*\(\s*prefers-color-scheme\s*:\s*dark\s*\)[^;{}]*)\{/i
+  // The host marker is the artifact's only color-scheme selector context.
+  // Match the media feature structurally across optional whitespace, casing,
+  // values, negation and compound queries so an explicit host-dark rule can
+  // never be gated a second time by the system preference.
+  const systemColorSchemeRule = structuralCss.match(
+    /(?:^|[;{}])\s*(@media\b(?=[^;{}]*\bprefers-color-scheme\b)[^;{}]*)\{/i
   );
-  const documentMarker = documentRule?.[1] ?? systemDarkRule?.[1];
+  const documentMarker = documentRule?.[1] ?? systemColorSchemeRule?.[1];
   if (documentMarker) {
     throw invalidArtifact(documentMarker);
   }
