@@ -2107,13 +2107,14 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
   }
   const isNativeEventName = (name) =>
     /^on[A-Z][A-Za-z0-9_$]*$/u.test(name) || NATIVE_EVENT_ATTRIBUTE_NAMES.has(name);
-  const objectLiteralHasNativeEvent = (objectLiteral, useNode, visitedBindings) =>
+  const objectLiteralHasNativeEvent = (objectLiteral, useNode, visitedBindings, visitedCallables) =>
     objectLiteral.properties.some((property) => {
       if (ts.isSpreadAssignment(property)) {
         return expressionHasNativeEventObject(
           property.expression,
           useNode,
-          new Set(visitedBindings)
+          new Set(visitedBindings),
+          new Set(visitedCallables)
         );
       }
       if (
@@ -2129,6 +2130,7 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
       );
     });
   const objectBindings = new Map();
+  const callableBindings = new Map();
   const lexicalScope = (node) => {
     for (let current = node.parent; current; current = current.parent) {
       if (ts.isBlock(current) || ts.isFunctionLike(current) || ts.isSourceFile(current)) {
@@ -2148,6 +2150,29 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
       });
       objectBindings.set(node.name.text, bindings);
     }
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+      const initializer = unwrapTypeScriptExpression(node.initializer);
+      if (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)) {
+        const bindings = callableBindings.get(node.name.text) ?? [];
+        bindings.push({
+          callable: initializer,
+          hoisted: false,
+          position: node.getStart(sourceFile),
+          scope: lexicalScope(node),
+        });
+        callableBindings.set(node.name.text, bindings);
+      }
+    }
+    if (ts.isFunctionDeclaration(node) && node.name && node.body) {
+      const bindings = callableBindings.get(node.name.text) ?? [];
+      bindings.push({
+        callable: node,
+        hoisted: true,
+        position: node.getStart(sourceFile),
+        scope: lexicalScope(node),
+      });
+      callableBindings.set(node.name.text, bindings);
+    }
     if (
       ts.isBinaryExpression(node) &&
       node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
@@ -2165,10 +2190,58 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
     ts.forEachChild(node, collectObjectBindings);
   };
   collectObjectBindings(sourceFile);
-  const expressionHasNativeEventObject = (expression, useNode, visitedBindings = new Set()) => {
+  const resolveCallable = (name, useNode) => {
+    const bindings = callableBindings.get(name) ?? [];
+    const usePosition = useNode.getStart(sourceFile);
+    for (let scope = lexicalScope(useNode); scope; scope = lexicalScope(scope)) {
+      const binding = bindings
+        .filter((entry) => entry.scope === scope && (entry.hoisted || entry.position < usePosition))
+        .sort((left, right) => right.position - left.position)[0];
+      if (binding) return binding.callable;
+      if (ts.isSourceFile(scope)) break;
+    }
+    return null;
+  };
+  const callableReturnExpressions = (callable) => {
+    if (ts.isArrowFunction(callable) && !ts.isBlock(callable.body)) {
+      return [{ expression: callable.body, useNode: callable }];
+    }
+    const returned = [];
+    const visit = (node) => {
+      if (node !== callable && ts.isFunctionLike(node)) return;
+      if (ts.isReturnStatement(node) && node.expression) {
+        returned.push({ expression: node.expression, useNode: node });
+        return;
+      }
+      ts.forEachChild(node, visit);
+    };
+    if (callable.body) visit(callable.body);
+    return returned;
+  };
+  const expressionHasNativeEventObject = (
+    expression,
+    useNode,
+    visitedBindings = new Set(),
+    visitedCallables = new Set()
+  ) => {
     const candidate = unwrapTypeScriptExpression(expression);
     if (ts.isObjectLiteralExpression(candidate)) {
-      return objectLiteralHasNativeEvent(candidate, useNode, visitedBindings);
+      return objectLiteralHasNativeEvent(candidate, useNode, visitedBindings, visitedCallables);
+    }
+    if (ts.isCallExpression(candidate)) {
+      const callee = unwrapTypeScriptExpression(candidate.expression);
+      if (!ts.isIdentifier(callee)) return false;
+      const callable = resolveCallable(callee.text, candidate);
+      if (!callable || visitedCallables.has(callable)) return false;
+      visitedCallables.add(callable);
+      return callableReturnExpressions(callable).some((returned) =>
+        expressionHasNativeEventObject(
+          returned.expression,
+          returned.useNode,
+          new Set(visitedBindings),
+          new Set(visitedCallables)
+        )
+      );
     }
     if (!ts.isIdentifier(candidate)) return false;
 
@@ -2181,7 +2254,12 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
       if (binding) {
         if (!binding.initializer || visitedBindings.has(binding)) return false;
         visitedBindings.add(binding);
-        return expressionHasNativeEventObject(binding.initializer, binding.node, visitedBindings);
+        return expressionHasNativeEventObject(
+          binding.initializer,
+          binding.node,
+          visitedBindings,
+          visitedCallables
+        );
       }
       if (ts.isSourceFile(scope)) break;
     }
@@ -2601,7 +2679,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath) {
         ? expression.name.text
         : null;
     if (hookKind === 'useReducer') return [0, 2];
-    if (hookKind === 'useSyncExternalStore') return [1, 2];
+    if (hookKind === 'useSyncExternalStore') return [0, 1, 2];
     return hookKind === 'useMemo' || hookKind === 'useState' ? [0] : [];
   };
 

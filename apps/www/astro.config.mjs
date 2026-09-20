@@ -78,6 +78,19 @@ function normalizedBundleModuleId(id) {
   return `${normalizedFilePart}${queryPart}`;
 }
 
+/** @param {string} id */
+function websiteManualChunk(id) {
+  const normalizedId = normalizedBundleModuleId(id);
+  const modulePath = normalizedId?.split('?', 1)[0];
+  if (
+    modulePath === 'apps/www/src/components/site-shadcn-controls.ts' ||
+    /^packages\/adapters\/(?:base|web-component)\//u.test(modulePath ?? '')
+  ) {
+    return 'site-shadcn-controls';
+  }
+  return undefined;
+}
+
 /** @typedef {{ type: 'chunk'; fileName: string; name: string; isEntry: boolean; isDynamicEntry: boolean; facadeModuleId: string | null; imports: string[]; dynamicImports: string[]; modules: Record<string, unknown> }} BundleChunk */
 /** @typedef {{ type: 'asset'; fileName: string; source: string | Uint8Array }} BundleAsset */
 /** @typedef {BundleChunk | BundleAsset} BundleOutput */
@@ -983,6 +996,13 @@ export default defineConfig({
     rehypePlugins: [rehypeEnhancedImage, rehypeScrollableTables],
   },
   vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: websiteManualChunk,
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

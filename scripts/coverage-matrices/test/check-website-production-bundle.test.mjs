@@ -43,7 +43,11 @@ function graphFixture() {
         isEntry: true,
         facadeModuleId:
           'apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts',
+        imports: ['_astro/site-shadcn-controls.js'],
         moduleIds: ['apps/www/src/components/override/Search.astro'],
+      }),
+      chunk('_astro/site-shadcn-controls.js', {
+        moduleIds: ['apps/www/src/components/site-shadcn-controls.ts'],
       }),
       chunk('_astro/home-demo.js', {
         isEntry: true,
@@ -240,30 +244,23 @@ test('rejects Web Component Adapter evidence inside the native/static shell clos
 
 test('allows Adapter modules only in the exact reviewed site-control bridge chunk', () => {
   const graph = graphFixture();
-  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js');
-  graph.chunks.push(
-    chunk('_astro/site-shadcn-controls.js', {
-      moduleIds: [
-        'apps/www/src/components/site-shadcn-controls.ts',
-        'packages/adapters/base/src/host/adapter-host.ts',
-        'packages/adapters/web-component/src/adapt.ts?used',
-      ],
-    })
-  );
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/site-shadcn-controls.js')
+    .moduleIds.push(
+      'packages/adapters/base/src/host/adapter-host.ts',
+      'packages/adapters/web-component/src/adapt.ts?used'
+    );
 
   assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
 });
 
 test('does not let the reviewed site-control bridge exempt a sibling Adapter chunk', () => {
   const graph = graphFixture();
-  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js', '_astro/sibling-adapter.js');
+  graph.chunks[0].imports.push('_astro/sibling-adapter.js');
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/site-shadcn-controls.js')
+    .moduleIds.push('packages/adapters/web-component/src/adapt.ts?used');
   graph.chunks.push(
-    chunk('_astro/site-shadcn-controls.js', {
-      moduleIds: [
-        'apps/www/src/components/site-shadcn-controls.ts',
-        'packages/adapters/web-component/src/adapt.ts?used',
-      ],
-    }),
     chunk('_astro/sibling-adapter.js', {
       moduleIds: ['packages/adapters/web-component/src/runtime/session.ts'],
     })
@@ -276,14 +273,12 @@ test('does not let the reviewed site-control bridge exempt a sibling Adapter chu
   );
 });
 
-test('allows Adapter modules in chunks statically imported by the reviewed site-control bridge chunk', () => {
+test('rejects Adapter modules in chunks statically imported by the reviewed site-control bridge chunk', () => {
   const graph = graphFixture();
-  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js');
+  graph.chunks.find(
+    (candidate) => candidate.fileName === '_astro/site-shadcn-controls.js'
+  ).imports = ['_astro/shared-adapter.js'];
   graph.chunks.push(
-    chunk('_astro/site-shadcn-controls.js', {
-      imports: ['_astro/shared-adapter.js'],
-      moduleIds: ['apps/www/src/components/site-shadcn-controls.ts'],
-    }),
     chunk('_astro/shared-adapter.js', {
       moduleIds: [
         'packages/adapters/base/src/host/adapter-host.ts',
@@ -292,17 +287,38 @@ test('allows Adapter modules in chunks statically imported by the reviewed site-
     })
   );
 
-  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('packages/adapters/web-component/src/adapt.ts?used')
+    )
+  );
+});
+
+test('does not exempt a bridge dependency that the shell reaches without the bridge', () => {
+  const graph = graphFixture();
+  graph.chunks[0].imports.push('_astro/shared-adapter.js');
+  graph.chunks.find(
+    (candidate) => candidate.fileName === '_astro/site-shadcn-controls.js'
+  ).imports = ['_astro/shared-adapter.js'];
+  graph.chunks.push(
+    chunk('_astro/shared-adapter.js', {
+      moduleIds: ['packages/adapters/web-component/src/adapt.ts?used'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('packages/adapters/web-component/src/adapt.ts?used')
+    )
+  );
 });
 
 test('rejects framework modules even downstream of the reviewed site-control bridge chunk', () => {
   const graph = graphFixture();
-  graph.chunks[0].imports.push('_astro/site-shadcn-controls.js');
+  graph.chunks.find(
+    (candidate) => candidate.fileName === '_astro/site-shadcn-controls.js'
+  ).imports = ['_astro/shared-adapter.js'];
   graph.chunks.push(
-    chunk('_astro/site-shadcn-controls.js', {
-      imports: ['_astro/shared-adapter.js'],
-      moduleIds: ['apps/www/src/components/site-shadcn-controls.ts'],
-    }),
     chunk('_astro/shared-adapter.js', {
       moduleIds: ['node_modules/.pnpm/react@19.2.0/node_modules/react/jsx-runtime.js'],
     })
@@ -311,6 +327,28 @@ test('rejects framework modules even downstream of the reviewed site-control bri
   assert.ok(
     collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
       issue.includes('statically reaches forbidden React/Vue module(s)')
+    )
+  );
+});
+
+test('requires one reviewed control bridge that a Website shell statically reaches', () => {
+  const missing = graphFixture();
+  missing.chunks = missing.chunks.filter(
+    (candidate) => candidate.fileName !== '_astro/site-shadcn-controls.js'
+  );
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: missing }).some((issue) =>
+      issue.includes('exactly one reviewed Website control bridge chunk (found 0)')
+    )
+  );
+
+  const orphaned = graphFixture();
+  orphaned.chunks[0].imports = orphaned.chunks[0].imports.filter(
+    (fileName) => fileName !== '_astro/site-shadcn-controls.js'
+  );
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: orphaned }).some((issue) =>
+      issue.includes('no Website shell statically reaches the reviewed Website control bridge')
     )
   );
 });

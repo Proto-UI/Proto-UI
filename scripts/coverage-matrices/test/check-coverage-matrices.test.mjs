@@ -5968,6 +5968,7 @@ test('rejects render-evaluated reducer and external-store callbacks', () => {
   for (const renderHook of [
     'const [value] = useReducer(() => { actions.send(); return 1; }, 0);',
     'const [value] = useReducer((state) => state, 0, () => { actions.send(); return 1; });',
+    'const value = useSyncExternalStore(() => { actions.send(); return () => {}; }, () => 1);',
     'const value = useSyncExternalStore(subscribe, () => { actions.send(); return 1; }, () => { actions.send(); return 1; });',
   ]) {
     const root = createRoot();
@@ -6651,6 +6652,29 @@ test('follows object spreads while resolving native handler props', () => {
     );
     writeValidMatrices(root);
     assert.match(validationMessage(root), expected);
+  }
+});
+
+test('follows local props factories used by intrinsic JSX spreads', () => {
+  for (const factory of [
+    'const createProps = () => ({ onClick() {} });',
+    'function createProps() { return { onClick() {} }; }',
+  ]) {
+    const root = createRoot();
+    const relativePath = 'apps/agent-harness/src/run/FactoryHandlers.tsx';
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `${factory} export function Surface() { return <button {...createProps()}>Run</button>; }`,
+      'utf8'
+    );
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+
+    assert.match(
+      validationMessage(root),
+      /Harness source `apps\/agent-harness\/src\/run\/FactoryHandlers\.tsx` contains a forbidden interaction or DOM state machine/
+    );
   }
 });
 

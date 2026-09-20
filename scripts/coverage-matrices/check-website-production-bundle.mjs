@@ -355,23 +355,20 @@ export function collectWebsiteProductionBundleIssues({
       )
       .map((chunk) => chunk.fileName)
   );
-  if (reviewedWebsiteControlChunks.size > 1) {
+  if (reviewedWebsiteControlChunks.size !== 1) {
     issues.push(
-      `production bundle graph must contain at most one exact reviewed Website control bridge chunk (found ${reviewedWebsiteControlChunks.size})`
+      `production bundle graph must contain exactly one reviewed Website control bridge chunk (found ${reviewedWebsiteControlChunks.size})`
     );
   }
-  // Rollup may hoist the bridge's Adapter dependencies into shared chunks
-  // imported by the reviewed control chunk instead of co-locating them with
-  // it. The exemption therefore covers the control chunk and the chunks it
-  // statically imports, but never unrelated sibling chunks that merely share
-  // a shell closure with the bridge.
-  const reviewedWebsiteControlBridgeChunks = new Set();
-  for (const fileName of reviewedWebsiteControlChunks) {
-    for (const reachedFileName of closure(chunksByFileName, fileName, ['imports'])) {
-      reviewedWebsiteControlBridgeChunks.add(reachedFileName);
-    }
+  if (
+    reviewedWebsiteControlChunks.size === 1 &&
+    !shellRoots.some((shellRoot) => {
+      const shellClosure = closure(chunksByFileName, shellRoot.fileName, ['imports']);
+      return [...reviewedWebsiteControlChunks].some((fileName) => shellClosure.has(fileName));
+    })
+  ) {
+    issues.push('no Website shell statically reaches the reviewed Website control bridge');
   }
-
   for (const shellRoot of shellRoots) {
     const shellClosure = closure(chunksByFileName, shellRoot.fileName, ['imports']);
     const leakedModules = new Set();
@@ -382,7 +379,7 @@ export function collectWebsiteProductionBundleIssues({
         const isUnapprovedAdapter =
           isProtoUiAdapterModule(moduleId) &&
           !(
-            reviewedWebsiteControlBridgeChunks.has(fileName) &&
+            reviewedWebsiteControlChunks.has(fileName) &&
             isReviewedWebsiteControlAdapterModule(moduleId)
           );
         if (isFrameworkModule || isUnapprovedAdapter) leakedModules.add(moduleId);
