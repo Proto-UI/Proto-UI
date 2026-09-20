@@ -73,7 +73,7 @@ query($owner: String!, $name: String!, $number: Int!) {
       }
       reviews(first: 100) {
         nodes { id author { login } state commit { oid } submittedAt body }
-        pageInfo { hasNextPage }
+        pageInfo { hasNextPage endCursor }
       }
       comments(first: 100) {
         nodes { id author { login } body updatedAt }
@@ -88,7 +88,40 @@ query($owner: String!, $name: String!, $number: Int!) {
             pageInfo { hasNextPage }
           }
         }
-        pageInfo { hasNextPage }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+  }
+}
+`;
+
+const REVIEWS_PAGE_QUERY = `
+query($owner: String!, $name: String!, $number: Int!, $cursor: String!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      reviews(first: 100, after: $cursor) {
+        nodes { id author { login } state commit { oid } submittedAt body }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+  }
+}
+`;
+
+const REVIEW_THREADS_PAGE_QUERY = `
+query($owner: String!, $name: String!, $number: Int!, $cursor: String!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      reviewThreads(first: 100, after: $cursor) {
+        nodes {
+          id
+          isResolved
+          comments(first: 100) {
+            nodes { databaseId author { login } body updatedAt }
+            pageInfo { hasNextPage }
+          }
+        }
+        pageInfo { hasNextPage endCursor }
       }
     }
   }
@@ -120,6 +153,49 @@ function ghJson(args, runner = execFileSync) {
     throw error;
   }
   return JSON.parse(stdout);
+}
+
+function collectRemainingConnectionPages({
+  connection,
+  field,
+  query,
+  owner,
+  name,
+  pullRequest,
+  runner,
+}) {
+  while (connection.pageInfo?.hasNextPage === true) {
+    const cursor = connection.pageInfo.endCursor;
+    if (typeof cursor !== 'string' || cursor.length === 0) {
+      throw new Error(`live ${field} collection cannot continue without an end cursor`);
+    }
+    const raw = ghJson(
+      [
+        'api',
+        'graphql',
+        '-f',
+        `query=${query}`,
+        '-F',
+        `owner=${owner}`,
+        '-F',
+        `name=${name}`,
+        '-F',
+        `number=${pullRequest}`,
+        '-F',
+        `cursor=${cursor}`,
+      ],
+      runner
+    );
+    if (raw.errors?.length) {
+      throw new Error(`live ${field} collection failed: ${raw.errors[0].message}`);
+    }
+    const page = raw.data?.repository?.pullRequest?.[field];
+    if (!Array.isArray(page?.nodes) || !page?.pageInfo) {
+      throw new Error(`live ${field} pagination payload is malformed`);
+    }
+    connection.nodes.push(...page.nodes);
+    connection.pageInfo = page.pageInfo;
+  }
 }
 
 export function assertNoTruncation(nodes, pageInfo, label) {
@@ -635,6 +711,26 @@ export function collectLiveReviewInput(repositoryId, pullRequest, options = {}) 
   if (raw.errors?.length) {
     throw new Error(`live review-input collection failed: ${raw.errors[0].message}`);
   }
+  const livePullRequest = raw.data?.repository?.pullRequest;
+  if (!livePullRequest) throw new Error('live pull-request payload is malformed');
+  collectRemainingConnectionPages({
+    connection: livePullRequest.reviews,
+    field: 'reviews',
+    query: REVIEWS_PAGE_QUERY,
+    owner,
+    name,
+    pullRequest,
+    runner,
+  });
+  collectRemainingConnectionPages({
+    connection: livePullRequest.reviewThreads,
+    field: 'reviewThreads',
+    query: REVIEW_THREADS_PAGE_QUERY,
+    owner,
+    name,
+    pullRequest,
+    runner,
+  });
   const filePages = ghJson(
     [
       'api',

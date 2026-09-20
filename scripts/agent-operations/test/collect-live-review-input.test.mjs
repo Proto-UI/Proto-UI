@@ -919,6 +919,87 @@ test('live collector consumes a canonical changed-file response above the legacy
   );
 });
 
+test('live collector paginates reviews and review threads before canonical validation', () => {
+  const initial = payload();
+  initial.data.repository.pullRequest.reviews.pageInfo = {
+    hasNextPage: true,
+    endCursor: 'reviews-page-1',
+  };
+  initial.data.repository.pullRequest.reviewThreads.pageInfo = {
+    hasNextPage: true,
+    endCursor: 'threads-page-1',
+  };
+  const calls = [];
+  const result = collectLiveReviewInput(repositoryId, 487, {
+    runner(_command, args, options) {
+      calls.push({ args, options });
+      if (!args.includes('graphql')) return JSON.stringify([changedFiles]);
+      const query = args.find((value) => value.startsWith('query='));
+      if (query.includes('reviews(first: 100, after: $cursor)')) {
+        return JSON.stringify({
+          data: {
+            repository: {
+              pullRequest: {
+                reviews: {
+                  nodes: [
+                    {
+                      id: 'PRR_review_2',
+                      author: { login: 'later-reviewer' },
+                      state: 'APPROVED',
+                      commit: { oid: sha('b') },
+                      submittedAt: '2026-08-23T07:00:00Z',
+                      body: 'Later review',
+                    },
+                  ],
+                  pageInfo: { hasNextPage: false, endCursor: 'reviews-page-2' },
+                },
+              },
+            },
+          },
+        });
+      }
+      if (query.includes('reviewThreads(first: 100, after: $cursor)')) {
+        return JSON.stringify({
+          data: {
+            repository: {
+              pullRequest: {
+                reviewThreads: {
+                  nodes: [
+                    {
+                      id: 'PRR_kwT2',
+                      isResolved: false,
+                      comments: {
+                        nodes: [
+                          {
+                            databaseId: 1002,
+                            author: { login: 'later-reviewer' },
+                            body: 'Later thread',
+                            updatedAt: '2026-08-23T07:30:00Z',
+                          },
+                        ],
+                        pageInfo: { hasNextPage: false },
+                      },
+                    },
+                  ],
+                  pageInfo: { hasNextPage: false, endCursor: 'threads-page-2' },
+                },
+              },
+            },
+          },
+        });
+      }
+      return JSON.stringify(initial);
+    },
+  });
+
+  assert.equal(result.input.reviews.length, 2);
+  assert.equal(result.input.threads.length, 2);
+  assert.equal(result.input.replies.length, 2);
+  assert.equal(calls.length, 4);
+  assert.ok(calls.slice(1, 3).every(({ args }) => args.includes('-F')));
+  assert.ok(calls.slice(1, 3).every(({ args }) => args.some((value) => value.includes('cursor='))));
+});
+
 test('live collector fails on the explicit documented payload bound instead of an incidental ENOBUFS', () => {
   assert.throws(
     () =>
