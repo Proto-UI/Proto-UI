@@ -296,6 +296,17 @@ describe('WC live focus-entry resolver inputs', () => {
       ShadowRoot.prototype,
       'adoptedStyleSheets'
     );
+    const formSetters = [
+      [HTMLInputElement.prototype, 'checked'],
+      [HTMLInputElement.prototype, 'indeterminate'],
+      [HTMLInputElement.prototype, 'value'],
+      [HTMLTextAreaElement.prototype, 'value'],
+      [HTMLOptionElement.prototype, 'selected'],
+      [HTMLSelectElement.prototype, 'selectedIndex'],
+    ] as const;
+    const originalFormSetters = formSetters.map(([prototype, key]) =>
+      Object.getOwnPropertyDescriptor(prototype, key)
+    );
     const host = panel(true);
     await settle();
     expect(CSSStyleSheet.prototype.insertRule).not.toBe(original);
@@ -316,6 +327,12 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(
         Object.getOwnPropertyDescriptor(ShadowRoot.prototype, 'adoptedStyleSheets')?.set
       ).not.toBe(originalShadowSheets.set);
+    for (const [index, [prototype, key]] of formSetters.entries()) {
+      if (originalFormSetters[index]?.set)
+        expect(Object.getOwnPropertyDescriptor(prototype, key)?.set).not.toBe(
+          originalFormSetters[index]?.set
+        );
+    }
     host.remove();
     await settle();
     expect(CSSStyleSheet.prototype.insertRule).toBe(original);
@@ -336,6 +353,8 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(Object.getOwnPropertyDescriptor(ShadowRoot.prototype, 'adoptedStyleSheets')).toEqual(
         originalShadowSheets
       );
+    for (const [index, [prototype, key]] of formSetters.entries())
+      expect(Object.getOwnPropertyDescriptor(prototype, key)).toEqual(originalFormSetters[index]);
   });
 
   it('never clobbers a third-party stylesheet patch installed after ours', async () => {
@@ -675,6 +694,22 @@ describe('WC live focus-entry resolver inputs', () => {
     style.replaceWith(replacement);
     await settle();
     expect(removeAttribute).toHaveBeenCalledWith('tabindex');
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    root.append(link);
+    await settle();
+    removeAttribute.mockClear();
+    link.dispatchEvent(new Event('load'));
+    await settle();
+    expect(removeAttribute).toHaveBeenCalledWith('tabindex');
+
+    host.remove();
+    await settle();
+    removeAttribute.mockClear();
+    link.dispatchEvent(new Event('load'));
+    await settle();
+    expect(removeAttribute).not.toHaveBeenCalled();
   });
 
   it('only observes document image bindings while the region contains areas', async () => {

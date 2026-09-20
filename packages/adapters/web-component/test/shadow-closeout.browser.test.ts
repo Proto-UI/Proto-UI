@@ -2923,7 +2923,7 @@ describe('Shadow closeout native boundaries', () => {
         document.body.append(host);
         await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         const initial = host.getAttribute('tabindex');
-        (host.querySelector('#checked-selector-toggle') as HTMLInputElement).click();
+        (host.querySelector('#checked-selector-toggle') as HTMLInputElement).checked = true;
         await new Promise<void>((resolve) => queueMicrotask(resolve));
         return {
           initial,
@@ -2934,6 +2934,145 @@ describe('Shadow closeout native boundaries', () => {
       expect(result).toEqual({ initial: null, visibility: 'hidden', fallback: '0' });
       expect(errors).toEqual([]);
     } finally {
+      await page.close();
+    }
+  });
+
+  it.each(['input', 'textarea'] as const)(
+    'reprojects entry fallback after direct %s value changes selector state',
+    async (tag) => {
+      const page = await browser.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(async (controlTag) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: `closeout-${controlTag}-value-selector-entry`,
+              setup() {
+                p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                return (r: any) => r.slot();
+              },
+            }),
+            { shadow: false }
+          );
+          const id = `${controlTag}-value-selector-entry`;
+          const style = document.createElement('style');
+          style.textContent = `#${id} ${controlTag}:placeholder-shown + button { visibility: hidden }`;
+          const host = new C();
+          host.id = id;
+          host.innerHTML =
+            controlTag === 'input'
+              ? '<input placeholder="Hint" tabindex="-1"><button>Target</button>'
+              : '<textarea placeholder="Hint" tabindex="-1"></textarea><button>Target</button>';
+          document.head.append(style);
+          document.body.append(host);
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          const control = host.querySelector(controlTag) as HTMLInputElement | HTMLTextAreaElement;
+          const button = host.querySelector('button')!;
+          const initial = {
+            visibility: getComputedStyle(button).visibility,
+            fallback: host.getAttribute('tabindex'),
+          };
+          control.value = 'ready';
+          await new Promise<void>((resolve) => queueMicrotask(resolve));
+          const filled = {
+            visibility: getComputedStyle(button).visibility,
+            fallback: host.getAttribute('tabindex'),
+          };
+          control.value = '';
+          await new Promise<void>((resolve) => queueMicrotask(resolve));
+          return {
+            initial,
+            filled,
+            empty: {
+              visibility: getComputedStyle(button).visibility,
+              fallback: host.getAttribute('tabindex'),
+            },
+          };
+        }, tag);
+        expect(result).toEqual({
+          initial: { visibility: 'hidden', fallback: '0' },
+          filled: { visibility: 'visible', fallback: null },
+          empty: { visibility: 'hidden', fallback: '0' },
+        });
+        expect(errors).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
+  it('reprojects a slotted entry when an external ShadowRoot stylesheet finishes loading', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    let requestStarted!: () => void;
+    let releaseResponse!: () => void;
+    const started = new Promise<void>((resolve) => (requestStarted = resolve));
+    const released = new Promise<void>((resolve) => (releaseResponse = resolve));
+    await page.route('**/external-entry.css', async (route) => {
+      requestStarted();
+      await released;
+      await route.fulfill({
+        contentType: 'text/css',
+        body: '::slotted(#external-shadow-link-entry) { visibility: hidden; }',
+      });
+    });
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-external-shadow-link-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const carrier = document.createElement('div');
+        const root = carrier.attachShadow({ mode: 'open' });
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://proto-ui.test/external-entry.css';
+        const slot = document.createElement('slot');
+        root.append(link, slot);
+        const host = new C();
+        host.id = 'external-shadow-link-entry';
+        host.innerHTML = '<button>Target</button>';
+        carrier.append(host);
+        (window as any).__externalEntrySheetLoaded = new Promise<void>((resolve, reject) => {
+          link.addEventListener('load', () => resolve(), { once: true });
+          link.addEventListener('error', () => reject(new Error('stylesheet failed')), {
+            once: true,
+          });
+        });
+        document.body.append(carrier);
+      });
+      await started;
+      await page.evaluate(
+        () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      );
+      expect(await page.locator('#external-shadow-link-entry').getAttribute('tabindex')).toBe(null);
+      releaseResponse();
+      const result = await page.evaluate(async () => {
+        await (window as any).__externalEntrySheetLoaded;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const host = document.querySelector<HTMLElement>('#external-shadow-link-entry')!;
+        return {
+          visibility: getComputedStyle(host.querySelector('button')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+      });
+      expect(result).toEqual({ visibility: 'hidden', fallback: '0' });
+      expect(errors).toEqual([]);
+    } finally {
+      releaseResponse();
       await page.close();
     }
   });

@@ -209,16 +209,13 @@ const entryStyleWatches = new WeakMap<
     methodPatches: EntryStyleMethodPatch[];
     setterPatches: EntryStyleSetterPatch[];
     observer: MutationObserver;
-    onLoad: (event: Event) => void;
+    stopEvents: () => void;
   }
 >();
 
 function isEntryStylesheetElement(node: Node | null): node is Element {
-  if (!node || node.nodeType !== 1) return false;
-  const el = node as Element;
   return (
-    el.localName === 'style' ||
-    (el.localName === 'link' && (el.getAttribute('rel') ?? '').split(/\s+/).includes('stylesheet'))
+    !!node && node.nodeType === 1 && (node as Element).matches('style,link[rel~="stylesheet"]')
   );
 }
 
@@ -296,6 +293,19 @@ function invalidatesEntryRadioGroup(
     input.type === 'radio' ||
     (record.attributeName === 'type' && (record.oldValue ?? '').toLowerCase() === 'radio');
   return currentOrPreviousTypeIsRadio;
+}
+
+function listenToEntryEvents(
+  targets: Iterable<EventTarget>,
+  types: readonly string[],
+  listener: EventListener
+) {
+  for (const target of targets)
+    for (const type of types) target.addEventListener(type, listener, true);
+  return () => {
+    for (const target of targets)
+      for (const type of types) target.removeEventListener(type, listener, true);
+  };
 }
 
 function watchEntryStyleInvalidation(
@@ -385,6 +395,14 @@ function watchEntryStyleInvalidation(
     if (StyleSheetCtor) patchSetter(StyleSheetCtor.prototype, 'disabled');
     if (DocumentCtor) patchSetter(DocumentCtor.prototype, 'adoptedStyleSheets');
     if (ShadowRootCtor) patchSetter(ShadowRootCtor.prototype, 'adoptedStyleSheets');
+    for (const [Ctor, keys] of [
+      [view.HTMLInputElement, ['checked', 'indeterminate', 'value']],
+      [view.HTMLTextAreaElement, ['value']],
+      [view.HTMLOptionElement, ['selected']],
+      [view.HTMLSelectElement, ['selectedIndex']],
+    ] as const) {
+      if (Ctor) for (const key of keys) patchSetter(Ctor.prototype, key);
+    }
 
     const observer = new Observer((records) => {
       if (records.some(invalidatesEntryStyles)) notify();
@@ -399,13 +417,13 @@ function watchEntryStyleInvalidation(
     const onLoad = (event: Event) => {
       if (isEntryStylesheetElement(event.target as Node | null)) notify();
     };
-    doc.addEventListener('load', onLoad, true);
+    const stopEvents = listenToEntryEvents([doc], ['load'], onLoad);
     watch = {
       subscribers,
       methodPatches,
       setterPatches,
       observer,
-      onLoad,
+      stopEvents,
     };
     entryStyleWatches.set(view as Window, watch);
   }
@@ -416,7 +434,7 @@ function watchEntryStyleInvalidation(
     current.subscribers.delete(onInvalidate);
     if (current.subscribers.size > 0) return;
     current.observer.disconnect();
-    doc.removeEventListener('load', current.onLoad, true);
+    current.stopEvents();
     for (const patch of current.methodPatches) {
       if (patch.target[patch.key] === patch.patched) patch.target[patch.key] = patch.original;
     }
@@ -848,8 +866,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const onViewportResize = () => {
                 if (isCurrentEntryObservation()) projectEntry();
               };
-              view.addEventListener('resize', onViewportResize);
-              stopEntryViewportWatch = () => view.removeEventListener('resize', onViewportResize);
+              stopEntryViewportWatch = listenToEntryEvents([view], ['resize'], onViewportResize);
               stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
                 if (isCurrentEntryObservation()) projectEntry();
               });
@@ -1014,13 +1031,19 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const onProjectionEvent = () => {
                 if (isCurrentEntryObservation()) projectEntry();
               };
-              for (const projectionTarget of motionTargets)
-                for (const type of projectionEvents)
-                  projectionTarget.addEventListener(type, onProjectionEvent, true);
+              const stopProjectionEvents = listenToEntryEvents(
+                motionTargets,
+                projectionEvents,
+                onProjectionEvent
+              );
+              const stopExternalStyleEvents = listenToEntryEvents(
+                externalStyleRoots,
+                ['load', 'error'],
+                onProjectionEvent
+              );
               stopEntryMotionWatch = () => {
-                for (const projectionTarget of motionTargets)
-                  for (const type of projectionEvents)
-                    projectionTarget.removeEventListener(type, onProjectionEvent, true);
+                stopProjectionEvents();
+                stopExternalStyleEvents();
               };
               if (externalStyleRoots.size > 0) {
                 entryExternalStyleObserver ??= new Observer((records) => {
@@ -1043,11 +1066,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   projectEntry();
                   observeTree();
                 };
-                for (const slot of externalSlots) slot.addEventListener('slotchange', onSlotChange);
-                stopEntrySlotWatch = () => {
-                  for (const slot of externalSlots)
-                    slot.removeEventListener('slotchange', onSlotChange);
-                };
+                stopEntrySlotWatch = listenToEntryEvents(
+                  externalSlots,
+                  ['slotchange'],
+                  onSlotChange
+                );
               }
               // An already-upgraded descendant can still attach an open root
               // later (from a method, timer, or state transition), which is
@@ -1118,12 +1141,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   )
                     projectEntry();
                 };
-                target.ownerDocument.addEventListener('load', onImageState, true);
-                target.ownerDocument.addEventListener('error', onImageState, true);
-                stopEntryImageStateWatch = () => {
-                  target.ownerDocument.removeEventListener('load', onImageState, true);
-                  target.ownerDocument.removeEventListener('error', onImageState, true);
-                };
+                stopEntryImageStateWatch = listenToEntryEvents(
+                  [target.ownerDocument],
+                  ['load', 'error'],
+                  onImageState
+                );
               }
               // Native radio checkedness is property state: a click on a group
               // member outside this entry region, or a form reset, need not
@@ -1160,46 +1182,31 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   });
                 }
                 const eventOrigin = (event: Event) => event.composedPath()[0] ?? event.target;
-                const onChange = (event: Event) => {
-                  const origin = eventOrigin(event);
-                  if (
-                    !!origin &&
-                    typeof origin === 'object' &&
-                    (origin as Node).nodeType === 1 &&
-                    (origin as Element).namespaceURI === 'http://www.w3.org/1999/xhtml' &&
-                    (origin as Element).localName === 'input' &&
-                    (origin as HTMLInputElement).type === 'radio' &&
-                    (origin as HTMLInputElement).name
-                  ) {
-                    queueMicrotask(() => {
-                      if (isCurrentEntryObservation()) projectEntry();
-                    });
-                  }
-                };
-                const onReset = (event: Event) => {
+                const onRadioState = (event: Event) => {
                   const origin = eventOrigin(event);
                   if (
                     !origin ||
                     typeof origin !== 'object' ||
                     (origin as Node).nodeType !== 1 ||
-                    (origin as Element).namespaceURI !== 'http://www.w3.org/1999/xhtml' ||
-                    (origin as Element).localName !== 'form'
+                    (origin as Element).namespaceURI !== 'http://www.w3.org/1999/xhtml'
+                  )
+                    return;
+                  const element = origin as HTMLInputElement;
+                  if (
+                    event.type === 'change'
+                      ? element.localName !== 'input' || element.type !== 'radio' || !element.name
+                      : element.localName !== 'form'
                   )
                     return;
                   queueMicrotask(() => {
                     if (isCurrentEntryObservation()) projectEntry();
                   });
                 };
-                for (const tree of radioTrees) {
-                  tree.addEventListener('change', onChange, true);
-                  tree.addEventListener('reset', onReset, true);
-                }
-                stopEntryRadioStateWatch = () => {
-                  for (const tree of radioTrees) {
-                    tree.removeEventListener('change', onChange, true);
-                    tree.removeEventListener('reset', onReset, true);
-                  }
-                };
+                stopEntryRadioStateWatch = listenToEntryEvents(
+                  radioTrees,
+                  ['change', 'reset'],
+                  onRadioState
+                );
               }
             };
             entryObserver = new Observer((records) => {
