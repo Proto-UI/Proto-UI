@@ -119,6 +119,78 @@ describe('prototypes/base: radio group', () => {
     expect(itemB.getExposes().checked.get()).toBe(false);
   });
 
+  it.each([
+    { props: { defaultValue: 'b' }, disabledItem: '', value: 'b', entry: 'b' },
+    { props: { value: 'b' }, disabledItem: '', value: 'b', entry: 'b' },
+    { props: {}, disabledItem: 'a', value: '', entry: 'b' },
+    { props: { value: 'missing' }, disabledItem: 'a', value: 'missing', entry: 'b' },
+    { props: { defaultValue: 'b' }, disabledItem: 'b', value: 'b', entry: 'a' },
+  ])('derives initial entry from selection and enabled order: %j', async (scenario) => {
+    const root = rootElement();
+    const items = ['a', 'b', 'c'].map((value) =>
+      itemElement(value, value === scenario.disabledItem)
+    );
+    const changes: string[] = [];
+    const previousFocus = document.activeElement;
+    root.addEventListener('valueChange', (event) => {
+      changes.push((event as CustomEvent<{ value: string }>).detail.value);
+    });
+    setElementProps(root, scenario.props);
+    root.append(...items);
+    document.body.append(root);
+    await flushReconciliation();
+
+    expect(root.getExposes().getCollectionCount()).toBe(3);
+    expect(root.getExposes().value.get()).toBe(scenario.value);
+    for (const item of items) {
+      expect(item.tabIndex).toBe(item.textContent === scenario.entry ? 0 : -1);
+      expect(item.getExposes().checked.get()).toBe(item.textContent === scenario.value);
+    }
+    expect(document.activeElement).toBe(previousFocus);
+    expect(changes).toEqual([]);
+  });
+
+  it('recomputes provisional entry when selected items register and collection order changes', async () => {
+    const root = rootElement();
+    const itemA = itemElement('a');
+    const itemB = itemElement('b');
+    const itemC = itemElement('c');
+    const changes: string[] = [];
+    root.addEventListener('valueChange', (event) => {
+      changes.push((event as CustomEvent<{ value: string }>).detail.value);
+    });
+    setElementProps(root, { value: 'b' });
+    root.append(itemA, itemC);
+    document.body.append(root);
+    await flushReconciliation();
+    expect(itemA.tabIndex).toBe(0);
+
+    root.insertBefore(itemB, itemC);
+    await flushReconciliation();
+    expect([itemA.tabIndex, itemB.tabIndex, itemC.tabIndex]).toEqual([-1, 0, -1]);
+    expect(itemB.getExposes().checked.get()).toBe(true);
+
+    itemB.remove();
+    await flushReconciliation();
+    expect(itemA.tabIndex).toBe(0);
+    root.insertBefore(itemC, itemA);
+    await expect.poll(() => [itemC.tabIndex, itemA.tabIndex]).toEqual([0, -1]);
+
+    root.append(itemB);
+    await flushReconciliation();
+    expect([itemC.tabIndex, itemA.tabIndex, itemB.tabIndex]).toEqual([-1, -1, 0]);
+    expect(itemB.getExposes().checked.get()).toBe(true);
+
+    setElementProps(itemB, { value: 'renamed' });
+    await flushReconciliation();
+    expect([itemC.tabIndex, itemA.tabIndex, itemB.tabIndex]).toEqual([0, -1, -1]);
+    setElementProps(itemB, { value: 'b' });
+    await flushReconciliation();
+    expect([itemC.tabIndex, itemA.tabIndex, itemB.tabIndex]).toEqual([-1, -1, 0]);
+    expect(root.getExposes().value.get()).toBe('b');
+    expect(changes).toEqual([]);
+  });
+
   it('owns uncontrolled requests and emits one accepted change per new selection', async () => {
     const root = rootElement();
     const itemA = itemElement('a');
@@ -143,6 +215,10 @@ describe('prototypes/base: radio group', () => {
     expect(itemA.getExposes().checked.get()).toBe(false);
     expect(itemB.getExposes().checked.get()).toBe(true);
     expect(changes).toEqual(['b']);
+
+    setElementProps(root, { a11yLabel: 'Updated group name' });
+    await flushReconciliation();
+    expect([itemA.tabIndex, itemB.tabIndex, itemC.tabIndex]).toEqual([-1, 0, -1]);
 
     expect(root.getExposes().requestValue('b')).toBe(false);
     expect(root.getExposes().requestValue('')).toBe(false);
@@ -180,6 +256,10 @@ describe('prototypes/base: radio group', () => {
     expect(root.getExposes().value.get()).toBe('a');
     expect(itemA.getExposes().checked.get()).toBe(true);
     expect(itemB.getExposes().checked.get()).toBe(false);
+
+    setElementProps(root, { a11yLabel: 'Updated group name' });
+    await flushReconciliation();
+    expect([itemA.tabIndex, itemB.tabIndex]).toEqual([-1, 0]);
 
     setElementProps(root, { value: 'b' });
     await flushReconciliation();
@@ -278,10 +358,91 @@ describe('prototypes/base: radio group', () => {
     expect(root.getExposes().value.get()).toBe('a');
   });
 
-  it('preserves programmatic current focus across unrelated root updates', async () => {
+  it.each(['a', 'b'])(
+    'preserves programmatic current focus across unrelated root updates',
+    async (currentValue) => {
+      const root = rootElement();
+      const itemA = itemElement('a');
+      const itemB = itemElement('b');
+      const itemC = itemElement('c');
+      const current = currentValue === 'a' ? itemA : itemB;
+      const changes: string[] = [];
+      root.addEventListener('valueChange', (event) => {
+        changes.push((event as CustomEvent<{ value: string }>).detail.value);
+      });
+      setElementProps(root, { defaultValue: 'a' });
+      root.append(itemA, itemB);
+      document.body.append(root);
+      await flushReconciliation();
+
+      current.getExposes().focusSelf();
+      await flushReconciliation();
+      expect(root.getExposes().value.get()).toBe('a');
+      expect(current.tabIndex).toBe(0);
+
+      setElementProps(root, { a11yLabel: 'Updated group name' });
+      await flushReconciliation();
+      expect(root.getExposes().value.get()).toBe('a');
+      expect(current.tabIndex).toBe(0);
+
+      setElementProps(root, { value: 'c' });
+      await flushReconciliation();
+      root.append(itemC);
+      await flushReconciliation();
+      root.insertBefore(itemC, itemA);
+      await flushReconciliation();
+      expect(root.getExposes().value.get()).toBe('c');
+      expect(itemC.getExposes().checked.get()).toBe(true);
+      for (const item of [itemA, itemB, itemC]) {
+        expect(item.tabIndex).toBe(item === current ? 0 : -1);
+      }
+      expect(document.activeElement).toBe(current);
+      expect(changes).toEqual([]);
+    }
+  );
+
+  it.each([
+    { method: 'focusFirst', value: 'a', current: 0, next: 'b' },
+    { method: 'focusSelected', value: 'b', current: 1, next: 'c' },
+    { method: 'focusLast', value: 'c', current: 2, next: 'a' },
+  ] as const)('retains current established by Root $method', async (scenario) => {
+    const root = rootElement();
+    const items = ['a', 'b', 'c'].map((value) => itemElement(value));
+    const changes: string[] = [];
+    root.addEventListener('valueChange', (event) => {
+      changes.push((event as CustomEvent<{ value: string }>).detail.value);
+    });
+    setElementProps(root, { value: scenario.value });
+    root.append(...items);
+    document.body.append(root);
+    await flushReconciliation();
+
+    root.getExposes()[scenario.method]();
+    await flushReconciliation();
+    expect(document.activeElement).toBe(items[scenario.current]);
+    expect(root.getExposes().value.get()).toBe(scenario.value);
+
+    setElementProps(root, { value: scenario.next, a11yLabel: 'Updated group name' });
+    await flushReconciliation();
+    expect(root.getExposes().value.get()).toBe(scenario.next);
+    expect(document.activeElement).toBe(items[scenario.current]);
+    expect(items.map((item) => item.tabIndex)).toEqual(
+      items.map((_, index) => (index === scenario.current ? 0 : -1))
+    );
+    expect(items.map((item) => item.getExposes().checked.get())).toEqual(
+      items.map((item) => item.textContent === scenario.next)
+    );
+    expect(changes).toEqual([]);
+  });
+
+  it('discards explicit current when its item becomes disabled or leaves the collection', async () => {
     const root = rootElement();
     const itemA = itemElement('a');
     const itemB = itemElement('b');
+    const changes: string[] = [];
+    root.addEventListener('valueChange', (event) => {
+      changes.push((event as CustomEvent<{ value: string }>).detail.value);
+    });
     setElementProps(root, { defaultValue: 'a' });
     root.append(itemA, itemB);
     document.body.append(root);
@@ -289,15 +450,24 @@ describe('prototypes/base: radio group', () => {
 
     itemB.getExposes().focusSelf();
     await flushReconciliation();
-    expect(root.getExposes().value.get()).toBe('a');
-    expect(itemA.tabIndex).toBe(-1);
-    expect(itemB.tabIndex).toBe(0);
-
-    setElementProps(root, { a11yLabel: 'Updated group name' });
+    setElementProps(itemB, { disabled: true });
     await flushReconciliation();
+    expect([itemA.tabIndex, itemB.tabIndex]).toEqual([0, -1]);
+    setElementProps(itemB, { disabled: false });
+    await flushReconciliation();
+    expect([itemA.tabIndex, itemB.tabIndex]).toEqual([0, -1]);
+
+    itemB.getExposes().focusSelf();
+    await flushReconciliation();
+    itemB.remove();
+    await flushReconciliation();
+    expect(itemA.tabIndex).toBe(0);
+    root.append(itemB);
+    await flushReconciliation();
+    expect([itemA.tabIndex, itemB.tabIndex]).toEqual([0, -1]);
     expect(root.getExposes().value.get()).toBe('a');
-    expect(itemA.tabIndex).toBe(-1);
-    expect(itemB.tabIndex).toBe(0);
+    expect(itemA.getExposes().checked.get()).toBe(true);
+    expect(changes).toEqual([]);
   });
 
   it('wraps both arrow axes, supports Home and End, and skips disabled items', async () => {
@@ -340,6 +510,12 @@ describe('prototypes/base: radio group', () => {
     await flushReconciliation();
     expect(document.activeElement).toBe(itemA);
     expect(root.getExposes().value.get()).toBe('a');
+
+    setElementProps(root, { value: 'c' });
+    await flushReconciliation();
+    expect(document.activeElement).toBe(itemA);
+    expect([itemA.tabIndex, itemB.tabIndex, itemC.tabIndex]).toEqual([0, -1, -1]);
+    expect(itemC.getExposes().checked.get()).toBe(true);
   });
 
   it('derives repeatable indicators without creating another control object', async () => {
