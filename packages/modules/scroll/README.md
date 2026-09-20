@@ -10,6 +10,23 @@ Only current mounted session facts are accepted. Host replacement, detach and te
 
 The draft `M-SCROLL-0001`, `HC-SCROLL-SURFACE-0001` and `T-SCROLL-0001` graph covers four Web Adapters, including composed Thumb Move Gesture. Simulated geometry evidence does not certify browser physics or non-Web accessibility. Virtualization and A11y API redesign remain separate work.
 
+## Optional end-follow
+
+Prototype and composition authors reach end-follow through the privileged `asScrollSurface()` handle:
+
+```ts
+const scroll = asScrollSurface();
+scroll.configure({
+  axes: 'vertical',
+  projection: 'auto',
+  endFollow: { mode: 'while-at-end', axis: 'vertical' },
+});
+```
+
+The handle exposes per-axis `atEnd` plus read-only `endFollow.state` and `endFollow.requestStatus` facts. A jump control sends `scroll.request({ kind: 'to-end', axis: 'vertical' })`; it never receives a DOM node, offset, extent, or pixel threshold.
+
+The policy is off by default. The host owns proximity, layout observation, coalescing, input interruption, and direct end movement. Message counts, unread state, focus, announcements, visual-anchor preservation, and virtualization remain separate owners.
+
 ## Package Role
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.

@@ -39,6 +39,15 @@ Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution 
 - Adds public package metadata, exact-version BOM participation, lifecycle/view-epoch regression evidence, and the `A-VUE-2-0001` profile.
 - Keeps first npm identity bootstrap and Trusted Publisher configuration as explicit pre-publication gates; this draft does not claim the package is already available from npm.
 
+## A11y direct-reference transport
+
+- Gives each logical A11y instance one opaque semantic-object ref and lets module-internal owners set ordered direct-ref relationships without exposing protocol keys or host ids.
+- Adds fail-closed Web projection for missing or duplicate bindings, document-scoped target reservations across view replacement and owner-document movement, immediate snapshot replay after projector replacement, dependency-targeted reconciliation, and deterministic projector cleanup while preserving existing string, State-backed, and additive relation behavior.
+- Fixes scalar cleanup to restore overwritten host baselines and preserve later host changes; heading detach uses shared ownership instead of unconditionally deleting `aria-level`.
+- Fixes explicit-id takeover to release the physical target's generated-ID ownership before capturing a scalar baseline, including shared-target records in one registry; terminal cleanup no longer restores a retired generated id as host data, while true host baselines remain preserved.
+- Re-resolves surviving generated-reference dependents when a shared explicit-id contribution changes or is released, including writer updates and detached terminal disposal, while preserving reservation availability and host-baseline provenance.
+- Keeps the anatomy family/domain/role/key matcher and Tabs migration from #549 / PR #553 outside this lower-level transport slice.
+
 ## Publication status
 
 This preparation does not publish packages, create `v0.3.0-alpha.0`, move npm `next`, or activate `V-PROTO-UI-0009`. Those actions require merge to `main`, a complete release rehearsal over the final reviewed package set, protected publication, and a separate evidence review.
