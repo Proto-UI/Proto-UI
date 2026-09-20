@@ -257,10 +257,6 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   }
   const getProps = opt.getProps ?? (() => ({}) as Partial<Props>);
   const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
-  const getMeta = opt.getMeta ?? createDefaultMetaGetter();
-  // Split reserves colorScheme for its retained environment, not the document getter.
-  const colorSchemeSource =
-    split || opt.getMeta ? undefined : createDefaultWebColorSchemeSource(getMeta);
   const exposeStateWebMode = opt.exposeStateWebMode;
   const scrollProjection = opt.scrollProjection;
   const MAX_FOCUS_TARGET_RETRIES = 3;
@@ -292,6 +288,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _focusTargetReadyListeners = new Set<() => void>();
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
+    private readonly _getMeta: (key: string) => unknown;
     private _globalEventTarget = createRebindableEventTarget();
     private _overlayModal: ReturnType<typeof createRebindableWebOverlayModal>;
 
@@ -311,6 +308,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     constructor() {
       super();
+      this._getMeta = opt.getMeta ?? createDefaultMetaGetter(() => this.ownerDocument);
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
@@ -440,7 +438,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           shell: this._shadowOwnerShell!,
           artifact: split.styleArtifact,
           colorSchemeSource: split.colorSchemeSource,
-          baseGetMeta: getMeta,
+          baseGetMeta: this._getMeta,
           factories: this._textControlTarget
             ? {
                 createSurface: (shell) =>
@@ -455,7 +453,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._surfaceProjection.setSurfaceTarget(this._splitResources.surface.element);
       }
       const splitResources = this._splitResources;
-      const ownerGetMeta = splitResources?.getMeta ?? getMeta;
+      const ownerGetMeta = splitResources?.getMeta ?? this._getMeta;
+      // Split reserves colorScheme for its retained environment, not the document getter.
+      const colorSchemeSource =
+        split || opt.getMeta
+          ? undefined
+          : createDefaultWebColorSchemeSource(ownerGetMeta, thisEl.ownerDocument);
       const runtimeColorSchemeSource = splitResources
         ? {
             getter: ownerGetMeta,

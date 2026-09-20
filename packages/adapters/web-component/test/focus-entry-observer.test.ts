@@ -304,6 +304,8 @@ describe('WC live focus-entry resolver inputs', () => {
     const originalMediaText = MediaListCtor
       ? Object.getOwnPropertyDescriptor(MediaListCtor.prototype, 'mediaText')
       : undefined;
+    const originalAppendMedium = MediaListCtor?.prototype.appendMedium;
+    const originalDeleteMedium = MediaListCtor?.prototype.deleteMedium;
     const formSetters = [
       [HTMLInputElement.prototype, 'checked'],
       [HTMLInputElement.prototype, 'indeterminate'],
@@ -343,6 +345,10 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(Object.getOwnPropertyDescriptor(MediaListCtor.prototype, 'mediaText')?.set).not.toBe(
         originalMediaText.set
       );
+    if (originalAppendMedium && MediaListCtor)
+      expect(MediaListCtor.prototype.appendMedium).not.toBe(originalAppendMedium);
+    if (originalDeleteMedium && MediaListCtor)
+      expect(MediaListCtor.prototype.deleteMedium).not.toBe(originalDeleteMedium);
     for (const [index, [prototype, key]] of formSetters.entries()) {
       if (originalFormSetters[index]?.set)
         expect(Object.getOwnPropertyDescriptor(prototype, key)?.set).not.toBe(
@@ -377,6 +383,10 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(Object.getOwnPropertyDescriptor(MediaListCtor.prototype, 'mediaText')).toEqual(
         originalMediaText
       );
+    if (originalAppendMedium && MediaListCtor)
+      expect(MediaListCtor.prototype.appendMedium).toBe(originalAppendMedium);
+    if (originalDeleteMedium && MediaListCtor)
+      expect(MediaListCtor.prototype.deleteMedium).toBe(originalDeleteMedium);
     for (const [index, [prototype, key]] of formSetters.entries())
       expect(Object.getOwnPropertyDescriptor(prototype, key)).toEqual(originalFormSetters[index]);
   });

@@ -6,6 +6,8 @@ import {
   renderProtoShadowSplitStyleArtifact,
   renderProtoStyleTokenCss,
 } from '../../../cli/src/services/proto-style-css';
+import { SHADCN_STYLE_TOKENS } from '../../../cli/src/generated/shadcn-style-tokens';
+import { BRUTALIST_STYLE_TOKENS } from '../../../cli/src/generated/brutalist-style-tokens';
 
 // D-WEB-COMPONENT-SHADOW-PROFILE-0001-K; C-HOST-VIEW-ATTACHMENT-0001-C;
 // C-AS-FOCUS-SCOPE-0002-J. These source-level edge probes complement the
@@ -44,6 +46,32 @@ afterAll(async () => {
 });
 
 describe('Shadow closeout native boundaries', () => {
+  it.each([
+    ['shadcn', SHADCN_STYLE_TOKENS],
+    ['brutalist', BRUTALIST_STYLE_TOKENS],
+  ] as const)(
+    'styles a Template descendant from the %s preset Shadow closure',
+    async (_name, tokens) => {
+      const page = await browser.newPage();
+      try {
+        const display = await page.evaluate((artifact) => {
+          const host = document.createElement('div');
+          const root = host.attachShadow({ mode: 'open' });
+          const style = document.createElement('style');
+          style.textContent = artifact.cssText;
+          const descendant = document.createElement('span');
+          descendant.setAttribute('data-pui-style', 'block');
+          root.append(style, descendant);
+          document.body.append(host);
+          return getComputedStyle(descendant).display;
+        }, renderProtoShadowSplitStyleArtifact(tokens));
+        expect(display).toBe('block');
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
   it('binds a default Shadow environment to the host document and window', async () => {
     const page = await browser.newPage();
     try {
@@ -125,7 +153,23 @@ describe('Shadow closeout native boundaries', () => {
           const frame = document.createElement('iframe');
           document.body.append(frame);
           const foreignDocument = frame.contentDocument!;
+          const foreignWindow = frame.contentWindow!;
           foreignDocument.documentElement.dataset.theme = 'dark';
+          let sourceReducedMotion = false;
+          let destinationReducedMotion = true;
+          const media = (matches: () => boolean) => (query: string) => ({
+            matches: query === '(prefers-reduced-motion: reduce)' ? matches() : false,
+            addEventListener() {},
+            removeEventListener() {},
+          });
+          Object.defineProperty(window, 'matchMedia', {
+            configurable: true,
+            value: media(() => sourceReducedMotion),
+          });
+          Object.defineProperty(foreignWindow, 'matchMedia', {
+            configurable: true,
+            value: media(() => destinationReducedMotion),
+          });
 
           const DefaultElement = p.adapt(createPrototype('closeout-default-adoption'), {
             shadow: profile,
@@ -139,6 +183,7 @@ describe('Shadow closeout native boundaries', () => {
           const source = environment.source;
           const surface = resources.surface;
           const artifactOwner = resources.artifact;
+          const initialReducedMotion = resources.getMeta('reducedMotion');
 
           foreignDocument.adoptNode(defaultHost);
           foreignDocument.body.append(defaultHost);
@@ -151,7 +196,12 @@ describe('Shadow closeout native boundaries', () => {
             surfaceRetained: adoptedResources.surface === surface,
             artifactRetained: adoptedResources.artifact === artifactOwner,
             sourceRebound: adoptedResources.environment.source !== source,
+            reducedMotion: adoptedResources.getMeta('reducedMotion'),
           };
+          sourceReducedMotion = true;
+          const afterSourceReducedMotionChange = adoptedResources.getMeta('reducedMotion');
+          destinationReducedMotion = false;
+          const afterDestinationReducedMotionChange = adoptedResources.getMeta('reducedMotion');
           document.documentElement.dataset.theme = 'dark';
           await settle();
           const afterOldDocumentChange = defaultHost.getAttribute('data-pui-color-scheme');
@@ -169,6 +219,8 @@ describe('Shadow closeout native boundaries', () => {
           };
           const ExplicitElement = p.adapt(createPrototype('closeout-explicit-adoption'), {
             shadow: { ...profile, colorSchemeSource: explicitSource },
+            getMeta: (key: string) =>
+              key === 'reducedMotion' ? 'explicit-reduced-motion' : undefined,
             schedule: (task: () => void) => task(),
           });
           const explicitHost = new ExplicitElement();
@@ -184,13 +236,23 @@ describe('Shadow closeout native boundaries', () => {
             sourceRetained: explicitEnvironment.source === explicitSource,
             subscriptions: explicitSubscriptions,
             marker: explicitHost.getAttribute('data-pui-color-scheme'),
+            reducedMotion: (explicitHost as any)._splitResources.getMeta('reducedMotion'),
           };
           frame.remove();
-          return { adopted, afterOldDocumentChange, afterNewDocumentChange, explicit };
+          return {
+            initialReducedMotion,
+            adopted,
+            afterSourceReducedMotionChange,
+            afterDestinationReducedMotionChange,
+            afterOldDocumentChange,
+            afterNewDocumentChange,
+            explicit,
+          };
         },
         renderProtoShadowSplitStyleArtifact(['block'])
       );
       expect(result).toEqual({
+        initialReducedMotion: 'no-preference',
         adopted: {
           marker: 'dark',
           resourcesRetained: true,
@@ -198,7 +260,10 @@ describe('Shadow closeout native boundaries', () => {
           surfaceRetained: true,
           artifactRetained: true,
           sourceRebound: true,
+          reducedMotion: 'reduce',
         },
+        afterSourceReducedMotionChange: 'reduce',
+        afterDestinationReducedMotionChange: 'no-preference',
         afterOldDocumentChange: 'dark',
         afterNewDocumentChange: 'light',
         explicit: {
@@ -206,6 +271,7 @@ describe('Shadow closeout native boundaries', () => {
           sourceRetained: true,
           subscriptions: 1,
           marker: 'light',
+          reducedMotion: 'explicit-reduced-motion',
         },
       });
       expect(errors).toEqual([]);
@@ -3214,23 +3280,72 @@ describe('Shadow closeout native boundaries', () => {
         await settle();
         const selectorRestored = host.getAttribute('tabindex');
         const mediaRule = style.sheet!.cssRules[1] as CSSMediaRule;
-        mediaRule.media.mediaText = '(min-width: 1px)';
+        mediaRule.media.appendMedium('all');
+        await settle();
+        const mediaChanged = host.getAttribute('tabindex');
+        mediaRule.media.deleteMedium('all');
         await settle();
         return {
           initial,
           selectorChanged,
           selectorRestored,
-          mediaVisibility: getComputedStyle(host.querySelector('button')!).visibility,
-          mediaChanged: host.getAttribute('tabindex'),
+          mediaChanged,
+          mediaRestoredVisibility: getComputedStyle(host.querySelector('button')!).visibility,
+          mediaRestored: host.getAttribute('tabindex'),
         };
       });
       expect(result).toEqual({
         initial: null,
         selectorChanged: '0',
         selectorRestored: null,
-        mediaVisibility: 'hidden',
         mediaChanged: '0',
+        mediaRestoredVisibility: 'visible',
+        mediaRestored: null,
       });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects entry fallback after nested Shadow style Text mutations', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-shadow-style-text-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const host = new C();
+        const carrier = document.createElement('div');
+        const root = carrier.attachShadow({ mode: 'open' });
+        const style = document.createElement('style');
+        const text = document.createTextNode('button { visibility: hidden; }');
+        style.append(text);
+        root.append(style, document.createElement('button'));
+        host.append(carrier);
+        document.body.append(host);
+        const settle = () => new Promise<void>((resolve) => queueMicrotask(resolve));
+        await settle();
+        const initial = host.getAttribute('tabindex');
+        text.data = 'button { visibility: visible; }';
+        await settle();
+        const visible = host.getAttribute('tabindex');
+        text.nodeValue = 'button { visibility: hidden; }';
+        await settle();
+        return { initial, visible, hiddenAgain: host.getAttribute('tabindex') };
+      });
+      expect(result).toEqual({ initial: '0', visible: null, hiddenAgain: '0' });
       expect(errors).toEqual([]);
     } finally {
       await page.close();

@@ -113,17 +113,20 @@ export function createShadowStyleArtifactOwner(
 }
 
 function validateShadowSelectorAbi(cssText: string): void {
-  const documentMarker = DOCUMENT_ENVIRONMENT_MARKERS.find((marker) => cssText.includes(marker));
+  const selectors = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+  const documentMarker = DOCUMENT_ENVIRONMENT_MARKERS.find((marker) => selectors.includes(marker));
   if (documentMarker) {
     throw invalidArtifact(`cssText contains document environment selector ${documentMarker}`);
   }
 
-  const hasUnscopedDarkToken = cssText
+  const hasUnscopedDarkToken = selectors
     .split(/[{},]/)
     .some(
       (selector) =>
         /data-pui-style~="(?:[^"]*:)?dark:/.test(selector) &&
-        !selector.includes(SHADOW_DARK_SELECTOR)
+        !/^\s*(?::where\()?:host\(\[data-pui-color-scheme='dark'\]\)\)?(?=$|[\s>+~.#[:])/.test(
+          selector
+        )
     );
   if (hasUnscopedDarkToken) {
     throw invalidArtifact(`dark token CSS requires ${SHADOW_DARK_SELECTOR}`);

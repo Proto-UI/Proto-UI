@@ -360,6 +360,10 @@ function watchEntryStyleInvalidation(
     patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'deleteRule');
     patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replaceSync');
     patchMethod(Sheet.prototype as unknown as Record<string, unknown>, 'replace', true);
+    if (view.MediaList) {
+      patchMethod(view.MediaList.prototype as unknown as Record<string, unknown>, 'appendMedium');
+      patchMethod(view.MediaList.prototype as unknown as Record<string, unknown>, 'deleteMedium');
+    }
     if (Grouping) {
       patchMethod(Grouping.prototype, 'insertRule');
       patchMethod(Grouping.prototype, 'deleteRule');
@@ -902,6 +906,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const options: MutationObserverInit = {
                 childList: true,
                 subtree: true,
+                characterData: true,
                 attributes: true,
                 attributeFilter: [
                   'tabindex',

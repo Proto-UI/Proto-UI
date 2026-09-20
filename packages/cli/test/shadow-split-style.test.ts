@@ -79,7 +79,10 @@ describe('private generated Shadow split sizing', () => {
     expect(css).toContain('outline: 2px solid transparent;');
     expect(css).not.toContain(':host([data-pui-split-root-style]) {\n    outline: none;');
     const hostRules = [...css.matchAll(/(:host[^{}]+)\{([^{}]+)\}/g)].filter(
-      (m) => !m[1].includes(' > ') && m[2].includes('outline:')
+      (m) =>
+        m[1].includes('data-pui-split-root-style') &&
+        !m[1].includes(' > ') &&
+        m[2].includes('outline:')
     );
     expect(hostRules).toHaveLength(3);
     expect(

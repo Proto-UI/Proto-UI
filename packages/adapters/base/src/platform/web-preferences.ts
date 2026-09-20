@@ -32,12 +32,15 @@ export function resolveWebColorScheme(
   return 'light';
 }
 
-export function createDefaultWebMetaGetter(): (key: string) => unknown {
+export function createDefaultWebMetaGetter(
+  resolveDocument: () => Document | null = getDocument
+): (key: string) => unknown {
   return (key: string) => {
-    if (key === 'colorScheme') return resolveWebColorScheme();
+    const doc = resolveDocument();
+    const view = doc ? doc.defaultView : getWindow();
+    if (key === 'colorScheme') return resolveWebColorScheme(doc, view);
 
     if (key === 'reducedMotion') {
-      const view = getWindow();
       if (typeof view?.matchMedia === 'function') {
         return view.matchMedia(REDUCED_MOTION_MEDIA_QUERY).matches ? 'reduce' : 'no-preference';
       }

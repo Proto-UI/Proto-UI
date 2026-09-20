@@ -328,7 +328,7 @@ export function renderProtoShadowSplitStyleArtifact(
   const rootTokens = new Set(usage?.rootTokens);
   // Flat/preset inputs carry no target proof, so retain their Root checks.
   const rootClosure = tokens.filter((token) => !templateTokens.has(token) || rootTokens.has(token));
-  const templateClosure = tokens.filter((token) => templateTokens.has(token));
+  const templateClosure = usage ? tokens.filter((token) => templateTokens.has(token)) : tokens;
   return Object.freeze({
     kind: PROTO_SHADOW_STYLE_ARTIFACT_KIND,
     version: PROTO_SHADOW_STYLE_ARTIFACT_VERSION,

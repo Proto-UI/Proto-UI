@@ -226,6 +226,10 @@ describe('source-scanned Shadow Template/Root separation', () => {
     directories.push(dir);
     await run([preset, '--styles-dir', dir, '--shadow-out', path.join(dir, 'shadow.js')]);
     const expected = renderShadowStyleDelivery(tokens, 'protoShadowStyleArtifact');
+    const artifact = JSON.parse(
+      expected.shadowModule.match(/const artifact = Object\.freeze\((.+)\);/)![1]
+    );
+    expect(artifact.cssText).toContain(':where([data-pui-style~="block"])');
     expect(await readFile(path.join(dir, 'shadow.js'), 'utf8')).toBe(expected.shadowModule);
     expect(await readFile(path.join(dir, 'shadow.d.ts'), 'utf8')).toBe(expected.shadowDeclaration);
     expect(await readFile(path.join(dir, 'proto-ui-tokens.generated.css'), 'utf8')).toBe(
