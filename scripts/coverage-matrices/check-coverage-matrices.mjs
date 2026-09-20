@@ -1537,7 +1537,7 @@ function astContainsInteractiveRuntime(content) {
           return;
         }
         if (
-          /^(?:blur|close|focus|hidePopover|scrollBy|scrollIntoView|scrollTo|showModal|showPopover|togglePopover)$/u.test(
+          /^(?:blur|close|focus|hidePopover|scrollBy|scrollIntoView|scrollTo|select|setRangeText|setSelectionRange|showModal|showPopover|togglePopover)$/u.test(
             method
           ) &&
           isDomReceiverExpression(calledMember.receiver, sourceFile, receiverBindings, node)
@@ -1747,7 +1747,7 @@ function openingTagAttributeSyntax(candidate) {
 function containsFrameworkTemplateEventDirective(candidate, absolutePath) {
   const syntax = openingTagAttributeSyntax(candidate);
   if (/\.vue$/i.test(absolutePath)) {
-    return /(?:^|\s)(?:@[A-Za-z][\w:-]*|v-on:[A-Za-z][\w:-]*)(?:\.[A-Za-z][\w-]*)*(?=\s|=|\/?\s*>)/u.test(
+    return /(?:^|\s)(?:@[A-Za-z][\w:-]*|v-on(?::[A-Za-z][\w:-]*)?)(?:\.[A-Za-z][\w-]*)*(?=\s|=|\/?\s*>)/u.test(
       syntax
     );
   }
@@ -2942,6 +2942,20 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
         }
         if (callable && !visitedCallables.has(callable) && callable.body) {
           visitedCallables.add(callable);
+          for (const argument of node.arguments) {
+            const callbackExpression = unwrapTypeScriptExpression(argument);
+            const callback =
+              ts.isArrowFunction(callbackExpression) || ts.isFunctionExpression(callbackExpression)
+                ? callbackExpression
+                : ts.isIdentifier(callbackExpression)
+                  ? resolveCallable(callbackExpression.text, callbackExpression)
+                  : null;
+            if (callback && !visitedCallables.has(callback) && callback.body) {
+              visitedCallables.add(callback);
+              visit(callback.body, callback.body);
+              if (found) return;
+            }
+          }
           visit(callable.body, callable.body);
           if (found) return;
         }
@@ -3377,6 +3391,13 @@ function externalScriptModuleSpecifiers(content) {
       }
       return [specifier];
     });
+}
+function containsProductionImportMap(content) {
+  return jsxOpeningTagCandidates(content).some(
+    (openingTag) =>
+      /^<script\b/iu.test(openingTag) &&
+      staticMarkupAttribute(openingTag, 'type')?.trim().toLowerCase() === 'importmap'
+  );
 }
 function isExternalExecutableScriptSpecifier(specifier) {
   return /^(?:[a-z][a-z0-9+.-]*:|\/|\/\/)/iu.test(specifier);
@@ -4099,6 +4120,14 @@ function discoverWebsiteRawImports(rootDir) {
     if (/\.(?:html?|astro|mdx?|vue|svelte)$/i.test(absolutePath)) {
       const content = fs.readFileSync(absolutePath, 'utf8');
       const markup = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
+      if (containsProductionImportMap(markup)) {
+        rawImports.push({
+          sourcePath,
+          specifier: '<production import map>',
+          category: 'production-import-map',
+          resolvedPath: null,
+        });
+      }
       for (const specifier of externalScriptModuleSpecifiers(markup)) {
         if (specifier === DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER) {
           rawImports.push({
@@ -4169,6 +4198,12 @@ function discoverWebsiteRawImports(rootDir) {
 
 function validateWebsiteRawImports(rootDir, relativePath, issues) {
   for (const rawImport of discoverWebsiteRawImports(rootDir)) {
+    if (rawImport.category === 'production-import-map') {
+      issues.push(
+        `${relativePath}: production import map in \`${rawImport.sourcePath}\` is not reviewed`
+      );
+      continue;
+    }
     if (rawImport.category === 'external-stylesheet') {
       if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
       issues.push(
@@ -4441,18 +4476,60 @@ function readFileSignature(absolutePath, length = 12) {
   }
 }
 
+const PNG_CRC_TABLE = Array.from({ length: 256 }, (_unused, index) => {
+  let value = index;
+  for (let bit = 0; bit < 8; bit += 1) {
+    value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
+  }
+  return value >>> 0;
+});
+
+function pngCrc32(data) {
+  let crc = 0xffffffff;
+  for (const byte of data) crc = PNG_CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function hasValidPngImageData(data) {
+  if (data.length < 57 || !data.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'))) {
+    return false;
+  }
+  let offset = 8;
+  let chunkIndex = 0;
+  let hasImageData = false;
+  while (offset + 12 <= data.length) {
+    const length = data.readUInt32BE(offset);
+    const typeStart = offset + 4;
+    const payloadStart = typeStart + 4;
+    const payloadEnd = payloadStart + length;
+    const chunkEnd = payloadEnd + 4;
+    if (chunkEnd > data.length) return false;
+    const type = data.subarray(typeStart, payloadStart).toString('ascii');
+    if (pngCrc32(data.subarray(typeStart, payloadEnd)) !== data.readUInt32BE(payloadEnd)) {
+      return false;
+    }
+    if (chunkIndex === 0) {
+      if (
+        type !== 'IHDR' ||
+        length !== 13 ||
+        data.readUInt32BE(payloadStart) === 0 ||
+        data.readUInt32BE(payloadStart + 4) === 0
+      ) {
+        return false;
+      }
+    }
+    if (type === 'IDAT' && length > 0) hasImageData = true;
+    if (type === 'IEND') return length === 0 && hasImageData && chunkEnd === data.length;
+    offset = chunkEnd;
+    chunkIndex += 1;
+  }
+  return false;
+}
+
 function hasImageFileSignature(absolutePath) {
   if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) return false;
   const data = fs.readFileSync(absolutePath);
-  const isPng =
-    data.length >= 45 &&
-    data.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) &&
-    data.readUInt32BE(8) === 13 &&
-    data.subarray(12, 16).toString('ascii') === 'IHDR' &&
-    data.readUInt32BE(16) > 0 &&
-    data.readUInt32BE(20) > 0 &&
-    data.subarray(-12).equals(Buffer.from('0000000049454e44ae426082', 'hex'));
-  if (isPng) return true;
+  if (hasValidPngImageData(data)) return true;
 
   if (
     data.length >= 14 &&

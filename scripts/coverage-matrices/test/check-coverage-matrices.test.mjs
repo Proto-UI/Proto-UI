@@ -7594,3 +7594,118 @@ test('rejects unreviewed external Website stylesheet imports', () => {
     );
   }
 });
+
+test('classifies DOM selection methods as governed interaction state', () => {
+  for (const [name, expression] of [
+    ['SetSelectionRange', 'input.setSelectionRange(0, 1)'],
+    ['SetRangeText', "input.setRangeText('x')"],
+    ['Select', 'input.select()'],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/www/src/components/${name}.ts`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `const input = document.querySelector('input'); ${expression};`,
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        'interactive website source `apps/www/src/components/' + name + '\\.ts` is not bound'
+      )
+    );
+  }
+});
+
+test('follows action callbacks through executed helpers and local effect wrappers', () => {
+  for (const [name, helper, invocation] of [
+    [
+      'InvokedCallback',
+      'const invoke = (callback) => callback();',
+      'invoke(() => actions.send());',
+    ],
+    [
+      'EffectWrapper',
+      "import { useEffect } from 'react'; const useMount = (callback) => useEffect(callback, []);",
+      'useMount(() => actions.send());',
+    ],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `import * as actions from './agent-actions'; ${helper} export function Surface() { ${invocation} return <section />; }`,
+      'utf8'
+    );
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        'Harness source `apps/agent-harness/src/run/' +
+          name +
+          '\\.tsx` contains a forbidden interaction'
+      )
+    );
+  }
+});
+
+test('rejects retained PNG screenshots without image data', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, revision, { websiteBindings });
+  const screenshotPath = path.join(root, 'internal/website/evidence/s14/home-desktop.png');
+  fs.writeFileSync(
+    screenshotPath,
+    Buffer.from(
+      '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000049454e44ae426082',
+      'hex'
+    )
+  );
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Screenshot: retained artifact must be a recognized image file/
+  );
+});
+
+test('rejects production import maps without an exact reviewed allowance', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/public/import-map.html';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    '<script type="importmap">{"imports":{"proto":"https://cdn.example/proto-ui.js"}}</script><script type="module">import "proto";</script>',
+    'utf8'
+  );
+  writeValidMatrices(root);
+  assert.match(
+    validationMessage(root),
+    /production import map in `apps\/www\/public\/import-map\.html` is not reviewed/
+  );
+});
+
+test('recognizes object-form Vue event directives', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/ObjectEvents.vue';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    '<template><button v-on="{ click: open }">Open</button></template>'
+  );
+  writeValidMatrices(root);
+  assert.match(
+    validationMessage(root),
+    /interactive website source `apps\/www\/src\/components\/ObjectEvents\.vue` is not bound/
+  );
+});
