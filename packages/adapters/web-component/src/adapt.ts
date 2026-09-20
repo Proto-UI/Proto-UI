@@ -52,6 +52,7 @@ import {
 import { createDefaultMetaGetter } from './platform/meta';
 import {
   createLogicalInstance,
+  bindLogicalParent,
   bindLogicalEventTarget,
   resolveLogicalTriggerEventRouteForTarget,
   isLogicalEventRouteCandidate,
@@ -277,6 +278,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     adoptedCallback(_oldDocument: Document, newDocument: Document) {
       this._portalConceal.cancel();
+      // Adoption detaches the host from its old physical tree before the
+      // destination can connect it. Drop that stale logical edge here; a
+      // subsequent connection will bind the destination parent. Same-document
+      // portal moves deliberately retain their projected logical ownership.
+      bindLogicalParent(this._instanceToken, null);
       adoptWebComponentPortalProjections(this, newDocument);
       this._defaultColorSchemeSource?.adoptDocument(newDocument);
       this._globalEventTarget.setTarget(newDocument.defaultView);

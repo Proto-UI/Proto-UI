@@ -370,7 +370,6 @@ export function createInstanceTreeMarkers(
     proto: Prototype<any>,
     token: LogicalInstanceToken = createLogicalInstance(proto)
   ): LogicalInstanceToken {
-    const refreshing = TOKEN_BY_INSTANCE.get(el) === token;
     const parentRoot = getProtoParent(el);
     const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
     if (TRIGGER_TOKENS.has(token)) {
@@ -389,7 +388,7 @@ export function createInstanceTreeMarkers(
       notifyTriggerSurface(owner);
     }
 
-    if (parentToken || refreshing) setLogicalParentInternal(token, parentToken ?? null);
+    if (parentToken) setLogicalParentInternal(token, parentToken);
     for (const descendant of el.querySelectorAll<HTMLElement>('*')) {
       const descendantToken = TOKEN_BY_INSTANCE.get(descendant);
       if (!descendantToken) continue;

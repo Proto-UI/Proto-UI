@@ -377,34 +377,32 @@ describe('Shadow closeout native boundaries', () => {
         const carrier = foreignDocument.createElement('div');
         nextParent.append(carrier);
         const destinationRoot = carrier.attachShadow({ mode: 'open' });
-        destinationRoot.append(foreignDocument.adoptNode(child));
         const childToken = (child as any)._instanceToken;
         const nextToken = (nextParent as any)._instanceToken;
+        const adoptedChild = foreignDocument.adoptNode(child);
+        const adopted = {
+          parent: p.getProtoParent(child),
+          logical: p.getLogicalParent(childToken),
+        };
+        destinationRoot.append(adoptedChild);
         const nested = {
           parent: p.getProtoParent(child) === nextParent,
           logical: p.getLogicalParent(childToken) === nextToken,
           destinationRealm: destinationRoot.ownerDocument === foreignDocument,
           setups: childSetups,
         };
-        foreignDocument.body.append(child);
-        const detached = {
-          parent: p.getProtoParent(child),
-          logical: p.getLogicalParent(childToken),
-          setups: childSetups,
-        };
         frame.remove();
         return {
-          nested,
-          detached: {
-            parent: detached.parent === null,
-            logical: detached.logical === null,
-            setups: detached.setups,
+          adopted: {
+            parent: adopted.parent === null,
+            logical: adopted.logical === null,
           },
+          nested,
         };
       });
       expect(result).toEqual({
+        adopted: { parent: true, logical: true },
         nested: { parent: true, logical: true, destinationRealm: true, setups: 1 },
-        detached: { parent: true, logical: true, setups: 1 },
       });
       expect(errors).toEqual([]);
     } finally {
