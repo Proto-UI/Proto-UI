@@ -12,7 +12,6 @@ import {
   createHostWiring,
   createHostSurfaceProjection,
   createEventGate,
-  createDefaultWebColorSchemeSource,
   createRebindableEventTarget,
   createScopedExposesReader,
   createWebProtoEventRouter,
@@ -74,6 +73,7 @@ import { createShadowSplitResources, type ShadowSplitResources } from './shadow-
 import { createShadowSplitEffectsPort } from './shadow-split-effects';
 import { createPortalConcealBarrier } from './portal-conceal';
 import { adoptWebComponentPortalProjections } from './portal-mount';
+import { createRebindableColorSchemeSource } from './color-scheme-source';
 import type { WebComponentAdapterConstructor } from './types';
 import type {
   RuntimeCheckpoint,
@@ -123,33 +123,6 @@ export interface WebComponentAdapterOptions<Props extends PropsBaseType = PropsB
 
 const SHARED_OVERLAY_LAYER_SCHEDULER = createZIndexOverlayLayerScheduler();
 const NOTIFY_FOCUS_TARGET_READY = Symbol('proto-ui.notify-focus-target-ready');
-
-function createRebindableColorSchemeSource(getter: (key: string) => unknown, doc: Document) {
-  let document = doc;
-  let source = createDefaultWebColorSchemeSource(getter, doc);
-  let unsubscribe: (() => void) | undefined;
-  const listeners = new Set<() => void>();
-  const notify = () => listeners.forEach((listener) => listener());
-  return {
-    getter,
-    subscribe(listener: () => void) {
-      listeners.add(listener);
-      if (listeners.size === 1) unsubscribe = source?.subscribe(notify);
-      return () => {
-        listeners.delete(listener);
-        if (!listeners.size) unsubscribe?.();
-      };
-    },
-    adoptDocument(next: Document) {
-      if (document === next) return;
-      document = next;
-      unsubscribe?.();
-      source = createDefaultWebColorSchemeSource(getter, next);
-      unsubscribe = listeners.size ? source?.subscribe(notify) : undefined;
-      notify();
-    },
-  };
-}
 
 export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   proto: TProto,

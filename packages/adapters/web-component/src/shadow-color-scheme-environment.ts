@@ -1,5 +1,6 @@
 import {
   createDefaultWebColorSchemeSource,
+  notifyColorSchemeListeners,
   resolveWebColorScheme,
   type WebColorScheme,
 } from '@proto.ui/adapter-base';
@@ -65,18 +66,7 @@ export function createShadowColorSchemeEnvironmentOwner(
   const listeners = new Set<() => void>();
   host.setAttribute(SHADOW_COLOR_SCHEME_ATTRIBUTE, colorScheme);
 
-  const notifyListeners = () => {
-    for (const listener of [...listeners]) {
-      if (!listeners.has(listener)) continue;
-      try {
-        listener();
-      } catch (error) {
-        queueMicrotask(() => {
-          throw error;
-        });
-      }
-    }
-  };
+  const notifyListeners = () => notifyColorSchemeListeners(listeners);
 
   const syncFromSource = (activeSource: ShadowColorSchemeSource) => {
     const next = readColorScheme(() => activeSource.get());

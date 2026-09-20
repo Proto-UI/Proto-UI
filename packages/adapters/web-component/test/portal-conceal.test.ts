@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPortalConcealBarrier } from '../src/portal-conceal';
 import { createWebComponentPortalMount, isWebComponentPortaled } from '../src/portal-mount';
 import { AdaptToWebComponent, setElementProps } from '../src';
+import { getLogicalParent } from '../src/platform/instance-tree';
 import { dialogRoot, dialogContent, dialogClose } from '../../../prototypes/base/src/dialog';
 import type { TransitionControls } from '../../../prototypes/base/src/transition';
 
@@ -134,6 +135,37 @@ describe('WC portal conceal rendering barrier', () => {
     expect(origin.childNodes).toHaveLength(0);
     portal.unmount(host);
     expect(origin.childNodes).toHaveLength(0);
+  });
+
+  it('refreshes portaled ancestry when a plain origin wrapper moves between owners', async () => {
+    const Parent = AdaptToWebComponent(
+      { name: 'portal-reparent-owner', setup: () => undefined },
+      { shadow: false }
+    );
+    const Child = AdaptToWebComponent(
+      { name: 'portal-reparent-child', setup: () => undefined },
+      { shadow: false }
+    );
+    const first = new Parent();
+    const second = new Parent();
+    const wrapper = document.createElement('div');
+    const child = new Child();
+    wrapper.append(child);
+    first.append(wrapper);
+    document.body.append(first, second);
+    const childPortal = createWebComponentPortalMount();
+    childPortal.mount(child);
+    const childToken = (child as any)._instanceToken;
+    const firstToken = (first as any)._instanceToken;
+    const secondToken = (second as any)._instanceToken;
+    expect(getLogicalParent(childToken)).toBe(firstToken);
+
+    second.append(wrapper);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(child.parentElement).toBe(document.body);
+    expect(getLogicalParent(childToken)).toBe(secondToken);
+    childPortal.unmount(child);
   });
 
   it('preserves the origin element when projection fails before body insertion', () => {

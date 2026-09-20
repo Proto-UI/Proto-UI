@@ -36,7 +36,7 @@ const artifactOwners = new WeakMap<ShadowRoot, ShadowStyleArtifactOwner>();
  */
 export function validateShadowStyleArtifact(artifact: unknown): ShadowStyleArtifactV1 {
   if (!artifact || typeof artifact !== 'object') {
-    throw invalidArtifact('object required');
+    throw invalidArtifact('object');
   }
 
   const keys = Reflect.ownKeys(artifact);
@@ -44,29 +44,30 @@ export function validateShadowStyleArtifact(artifact: unknown): ShadowStyleArtif
     keys.length !== ARTIFACT_FIELDS.size ||
     keys.some((key) => typeof key !== 'string' || !ARTIFACT_FIELDS.has(key))
   ) {
-    throw invalidArtifact('unexpected fields');
+    throw invalidArtifact('fields');
   }
 
   const candidate = artifact as Record<string, unknown>;
-  if (candidate.kind !== SHADOW_STYLE_ARTIFACT_KIND) {
-    throw invalidArtifact(`kind ${String(candidate.kind)} unsupported`);
+  const { kind, version, cssText, environment } = candidate;
+  if (kind !== SHADOW_STYLE_ARTIFACT_KIND) {
+    throw invalidArtifact(`kind ${String(kind)}`);
   }
-  if (candidate.version !== SHADOW_STYLE_ARTIFACT_VERSION) {
-    throw invalidArtifact(`version ${String(candidate.version)} unsupported`);
+  if (version !== SHADOW_STYLE_ARTIFACT_VERSION) {
+    throw invalidArtifact(`version ${String(version)}`);
   }
-  if (typeof candidate.cssText !== 'string') {
-    throw invalidArtifact('cssText string required');
+  if (typeof cssText !== 'string') {
+    throw invalidArtifact('cssText');
   }
-  if (candidate.environment !== SHADOW_STYLE_ARTIFACT_ENVIRONMENT) {
-    throw invalidArtifact(`environment ${String(candidate.environment)} unsupported`);
+  if (environment !== SHADOW_STYLE_ARTIFACT_ENVIRONMENT) {
+    throw invalidArtifact(`environment ${String(environment)}`);
   }
 
-  validateShadowSelectorAbi(candidate.cssText);
+  validateShadowSelectorAbi(cssText);
 
   return Object.freeze({
     kind: SHADOW_STYLE_ARTIFACT_KIND,
     version: SHADOW_STYLE_ARTIFACT_VERSION,
-    cssText: candidate.cssText,
+    cssText,
     environment: SHADOW_STYLE_ARTIFACT_ENVIRONMENT,
   });
 }
@@ -94,7 +95,7 @@ export function createShadowStyleArtifactOwner(
     stylesheet,
     update(nextArtifact) {
       if (disposed) {
-        throw new Error('[WC Adapter] cannot update a disposed Shadow style artifact owner.');
+        throw new Error('[WC Adapter] disposed Shadow style artifact owner');
       }
       const next = validateShadowStyleArtifact(nextArtifact);
       stylesheet.update(next.cssText);
@@ -116,13 +117,17 @@ function validateShadowSelectorAbi(cssText: string): void {
   const selectors = stripShadowCssComments(cssText);
   const documentMarker = DOCUMENT_ENVIRONMENT_MARKERS.find((marker) => selectors.includes(marker));
   if (documentMarker) {
-    throw invalidArtifact(`document selector ${documentMarker} forbidden`);
+    throw invalidArtifact(`document selector ${documentMarker}`);
   }
 
   const hasUnscopedDarkToken = selectors.split(/[{},]/).some((selector) => {
     const normalized = selector.replace(/\s/g, '');
+    if (normalized.includes('data-pui') && normalized.includes('\\')) return true;
+    const token = /\[data-pui-style~=(['"])([^'"]*)\1([is])?\]/i.exec(normalized);
+    if (!token) return false;
+    if (token[3]) return true;
     return (
-      /\[data-pui-style~=(['"])(?:[^'"]*:)?dark:[^'"]*\1\]/.test(normalized) &&
+      /(?:^|:)dark:/i.test(token[2]!) &&
       !/^(?::where\()?:host\(\[data-pui-color-scheme=(['"])dark\1\]\)\)?(?=$|[>+~.#[:])/.test(
         normalized
       )

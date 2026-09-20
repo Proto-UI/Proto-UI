@@ -40,6 +40,20 @@ describe('adapter-web-component Shadow style artifact', () => {
     expect(Object.isFrozen(validated)).toBe(true);
   });
 
+  it('validates and copies the same accessor-backed CSS snapshot', () => {
+    let reads = 0;
+    const input = artifact();
+    Object.defineProperty(input, 'cssText', {
+      enumerable: true,
+      get: () => (++reads < 3 ? SHADOW_CSS : `[data-pui-style~='dark:bg-primary'] {}`),
+    });
+
+    const validated = validateShadowStyleArtifact(input);
+
+    expect(reads).toBe(1);
+    expect(validated.cssText).toBe(SHADOW_CSS);
+  });
+
   it('accepts the artifact produced by the CLI Shadow renderer', () => {
     const generated = renderProtoShadowStyleArtifact(['dark:bg-input/30']);
     const validated = validateShadowStyleArtifact(generated);
@@ -90,6 +104,18 @@ describe('adapter-web-component Shadow style artifact', () => {
     [
       'element descendant dark rule without the host marker',
       artifact(`section [data-pui-style~="dark:bg-input/30"] { color: red; }`),
+    ],
+    [
+      'case-insensitive dark token selector',
+      artifact(`[data-pui-style~="DARK:bg-input/30" i] { color: red; }`),
+    ],
+    [
+      'escaped dark token selector',
+      artifact(`[data-pui-style~='d\\000061rk:bg-input/30'] { color: red; }`),
+    ],
+    [
+      'escaped style attribute selector',
+      artifact(`[data-pui-st\\000079le~='dark:bg-input/30'] { color: red; }`),
     ],
     [
       'unscoped dark rule beside an unrelated host marker',

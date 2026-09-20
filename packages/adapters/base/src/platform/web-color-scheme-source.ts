@@ -3,8 +3,21 @@ import { resolveWebColorScheme } from './web-preferences';
 const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 const documentSources = new WeakMap<Document, ReturnType<typeof createDocumentSource>>();
 
+export function notifyColorSchemeListeners(listeners: Set<() => void>): void {
+  for (const listener of [...listeners]) {
+    if (!listeners.has(listener)) continue;
+    try {
+      listener();
+    } catch (error) {
+      queueMicrotask(() => {
+        throw error;
+      });
+    }
+  }
+}
+
 function createDocumentSource(doc: Document) {
-  const listeners = new Set<{ invalidate: () => void }>();
+  const listeners = new Set<() => void>();
   let observer: MutationObserver | undefined;
   let media: MediaQueryList | undefined;
   let onChange: (() => void) | undefined;
@@ -14,7 +27,7 @@ function createDocumentSource(doc: Document) {
 
   return {
     subscribe(invalidate: () => void) {
-      const listener = { invalidate };
+      const listener = () => invalidate();
       listeners.add(listener);
 
       if (listeners.size === 1) {
@@ -29,16 +42,7 @@ function createDocumentSource(doc: Document) {
             const nextValue = resolveWebColorScheme(doc);
             if (nextValue === lastValue) return;
             lastValue = nextValue;
-            for (const entry of [...listeners]) {
-              if (!listeners.has(entry)) continue;
-              try {
-                entry.invalidate();
-              } catch (error) {
-                queueMicrotask(() => {
-                  throw error;
-                });
-              }
-            }
+            notifyColorSchemeListeners(listeners);
           });
         };
         const Observer = doc.defaultView?.MutationObserver ?? MutationObserver;

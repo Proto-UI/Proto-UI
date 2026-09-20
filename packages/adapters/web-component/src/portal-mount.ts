@@ -1,4 +1,8 @@
-import { isProtoInstance } from './platform/instance-tree';
+import {
+  getPrototypeByInstance,
+  isProtoInstance,
+  markProtoInstance,
+} from './platform/instance-tree';
 
 /** Document-local WC portal projection. Logical origin owns its liveness;
  * a physical body child follows connected adoption and must not outlive a disconnected origin subtree.
@@ -49,7 +53,12 @@ export function createWebComponentPortalMount() {
       const onMutation = () => {
         // Mutation delivery observes the settled tree, preserving sync moves.
         if (!parent.isConnected || (projected && marker.parentNode !== parent)) revoke?.();
-        else observeOriginTrees();
+        else {
+          const proto = getPrototypeByInstance(el);
+          const token = (el as any)._instanceToken;
+          if (proto && token) markProtoInstance(el, proto, token, true);
+          observeOriginTrees();
+        }
       };
       let observedTrees: Node[] = [];
       function observeOriginTrees() {
