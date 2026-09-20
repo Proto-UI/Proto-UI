@@ -410,6 +410,43 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('clears and rebinds logical ancestry during ordinary same-document reparenting', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const Parent = p.adapt(
+          p.define({ name: 'closeout-reparent-owner', setup: () => (r: any) => r.slot() })
+        );
+        const Child = p.adapt(
+          p.define({ name: 'closeout-reparent-child', setup: () => (r: any) => r.slot() })
+        );
+        const first = new Parent();
+        const second = new Parent();
+        const plain = document.createElement('div');
+        const child = new Child();
+        first.append(child);
+        document.body.append(first, plain, second);
+        const childToken = (child as any)._instanceToken;
+        const initial = p.getLogicalParent(childToken) === (first as any)._instanceToken;
+
+        plain.append(child);
+        const cleared = p.getLogicalParent(childToken) === null;
+
+        second.append(child);
+        const rebound = p.getLogicalParent(childToken) === (second as any)._instanceToken;
+        return { initial, cleared, rebound };
+      });
+      expect(result).toEqual({ initial: true, cleared: true, rebound: true });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('routes portal input through the current Window after connected cross-document adoption', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

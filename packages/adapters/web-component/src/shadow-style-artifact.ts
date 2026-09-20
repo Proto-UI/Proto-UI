@@ -122,7 +122,7 @@ function validateShadowSelectorAbi(cssText: string): void {
 
   const hasUnscopedDarkToken = selectors.split(/[{},]/).some((selector) => {
     const normalized = selector.replace(/\s/g, '');
-    if (normalized.includes('data-pui') && normalized.includes('\\')) return true;
+    if (/\[[^\]]*\\/.test(normalized)) return true;
     const token = /\[data-pui-style~=(['"])([^'"]*)\1([is])?\]/i.exec(normalized);
     if (!token) return false;
     if (token[3]) return true;

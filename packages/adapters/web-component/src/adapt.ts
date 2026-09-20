@@ -313,7 +313,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       if (this._mountedOnce) {
         // Refresh the logical parent link after a synchronous DOM move.
-        markProtoInstance(this, proto as Prototype<any>, this._instanceToken);
+        // `parentNode` is projected back to the logical origin while a portal
+        // is active, so clearing a missing owner here is safe for ordinary
+        // moves without discarding explicit portal ownership.
+        markProtoInstance(this, proto as Prototype<any>, this._instanceToken, true);
         if (this._pendingOwnedTokens?.length) {
           this._applier?.apply(this._pendingOwnedTokens);
         }

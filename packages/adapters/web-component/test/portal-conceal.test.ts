@@ -137,6 +137,31 @@ describe('WC portal conceal rendering barrier', () => {
     expect(origin.childNodes).toHaveLength(0);
   });
 
+  it('refreshes ordinary logical ancestry across owner and plain-container moves', () => {
+    const Parent = AdaptToWebComponent(
+      { name: 'ordinary-reparent-owner', setup: () => undefined },
+      { shadow: false }
+    );
+    const Child = AdaptToWebComponent(
+      { name: 'ordinary-reparent-child', setup: () => undefined },
+      { shadow: false }
+    );
+    const first = new Parent();
+    const second = new Parent();
+    const plain = document.createElement('div');
+    const child = new Child();
+    first.append(child);
+    document.body.append(first, plain, second);
+    const childToken = (child as any)._instanceToken;
+    expect(getLogicalParent(childToken)).toBe((first as any)._instanceToken);
+
+    plain.append(child);
+    expect(getLogicalParent(childToken)).toBeNull();
+
+    second.append(child);
+    expect(getLogicalParent(childToken)).toBe((second as any)._instanceToken);
+  });
+
   it('refreshes portaled ancestry when a plain origin wrapper moves between owners', async () => {
     const Parent = AdaptToWebComponent(
       { name: 'portal-reparent-owner', setup: () => undefined },

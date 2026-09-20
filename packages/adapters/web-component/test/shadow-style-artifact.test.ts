@@ -118,6 +118,14 @@ describe('adapter-web-component Shadow style artifact', () => {
       artifact(`[data-pui-st\\000079le~='dark:bg-input/30'] { color: red; }`),
     ],
     [
+      'escaped hyphen in style attribute selector',
+      artifact(`[data\\-pui-style~='dark:bg-input/30'] { color: red; }`),
+    ],
+    [
+      'hex-escaped hyphen in style attribute selector',
+      artifact(`[data\\2d pui-style~='dark:bg-input/30'] { color: red; }`),
+    ],
+    [
       'unscoped dark rule beside an unrelated host marker',
       artifact(`${SHADOW_CSS}\n:where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
     ],
