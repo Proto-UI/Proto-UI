@@ -872,7 +872,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const onViewportResize = () => {
                 if (isCurrentEntryObservation()) projectEntry();
               };
-              stopEntryViewportWatch = listenToEntryEvents([view], ['resize'], onViewportResize);
+              stopEntryViewportWatch = listenToEntryEvents(
+                [
+                  view,
+                  view.matchMedia('(prefers-reduced-motion: reduce)'),
+                  view.matchMedia('(prefers-color-scheme: dark)'),
+                  view.matchMedia('(forced-colors: active)'),
+                ],
+                ['resize', 'change'],
+                onViewportResize
+              );
               stopEntryStyleWatch = watchEntryStyleInvalidation(view, () => {
                 if (isCurrentEntryObservation()) projectEntry();
               });

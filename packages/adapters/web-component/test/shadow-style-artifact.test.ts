@@ -106,6 +106,10 @@ describe('adapter-web-component Shadow style artifact', () => {
       artifact(`section [data-pui-style~="dark:bg-input/30"] { color: red; }`),
     ],
     [
+      'dark token after another token attribute',
+      artifact(`[data-pui-style~="p-2"][data-pui-style~="dark:bg-input/30"] { color: red; }`),
+    ],
+    [
       'case-insensitive dark token selector',
       artifact(`[data-pui-style~="DARK:bg-input/30" i] { color: red; }`),
     ],

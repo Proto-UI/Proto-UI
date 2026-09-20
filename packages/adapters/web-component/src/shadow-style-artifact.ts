@@ -6,7 +6,6 @@ export const SHADOW_STYLE_ARTIFACT_VERSION = 1 as const;
 export const SHADOW_STYLE_ARTIFACT_ENVIRONMENT = 'host-color-scheme-v1' as const;
 
 const ARTIFACT_FIELDS = new Set(['kind', 'version', 'cssText', 'environment']);
-const SHADOW_DARK_SELECTOR = ":host([data-pui-color-scheme='dark'])";
 const DOCUMENT_ENVIRONMENT_MARKERS = [
   ':where(.dark)',
   ":where([data-theme='dark'])",
@@ -123,18 +122,20 @@ function validateShadowSelectorAbi(cssText: string): void {
   const hasUnscopedDarkToken = selectors.split(/[{},]/).some((selector) => {
     const normalized = selector.replace(/\s/g, '');
     if (/\[[^\]]*\\/.test(normalized)) return true;
-    const token = /\[data-pui-style~=(['"])([^'"]*)\1([is])?\]/i.exec(normalized);
-    if (!token) return false;
-    if (token[3]) return true;
-    return (
-      /(?:^|:)dark:/i.test(token[2]!) &&
-      !/^(?::where\()?:host\(\[data-pui-color-scheme=(['"])dark\1\]\)\)?(?=$|[>+~.#[:])/.test(
-        normalized
+    for (const token of normalized.matchAll(/\[data-pui-style~=(['"])([^'"]*)\1([is])?\]/gi)) {
+      if (
+        token[3] ||
+        (/(?:^|:)dark:/i.test(token[2]!) &&
+          !/^(?::where\()?:host\(\[data-pui-color-scheme=(['"])dark\1\]\)\)?(?=$|[>+~.#[:])/.test(
+            normalized
+          ))
       )
-    );
+        return true;
+    }
+    return false;
   });
   if (hasUnscopedDarkToken) {
-    throw invalidArtifact(`dark token CSS requires ${SHADOW_DARK_SELECTOR}`);
+    throw invalidArtifact('dark selector');
   }
 }
 

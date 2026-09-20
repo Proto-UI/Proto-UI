@@ -1734,6 +1734,53 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects descendant entry after non-viewport media-query changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content:
+          '@media (prefers-reduced-motion: reduce) { #media-entry-button { visibility: hidden; } }',
+      });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-media-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.id = 'media-entry';
+        host.innerHTML = '<button id="media-entry-button">Button</button>';
+        document.body.append(host);
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#media-entry')?.getAttribute('tabindex') === null
+      );
+
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.waitForFunction(
+        () => document.querySelector('#media-entry')?.getAttribute('tabindex') === '0'
+      );
+
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.waitForFunction(
+        () => document.querySelector('#media-entry')?.getAttribute('tabindex') === null
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects descendant entry when populated sheets are adopted into document and shadow roots', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
