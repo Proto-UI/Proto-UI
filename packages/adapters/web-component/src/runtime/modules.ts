@@ -718,6 +718,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
+  let entryExternalTreeObserver: MutationObserver | null = null;
   let entryExternalStyleObserver: MutationObserver | null = null;
   let entryRadioGroupObserver: MutationObserver | null = null;
   let entryResizeObserver: ResizeObserver | null = null;
@@ -734,10 +735,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     entryObserverGeneration += 1;
     entryObserver?.disconnect();
     entryImageObserver?.disconnect();
+    entryExternalTreeObserver?.disconnect();
     entryExternalStyleObserver?.disconnect();
     entryRadioGroupObserver?.disconnect();
     entryObserver =
       entryImageObserver =
+      entryExternalTreeObserver =
       entryExternalStyleObserver =
       entryRadioGroupObserver =
         null;
@@ -907,6 +910,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (!isCurrentEntryObservation()) return;
               entryObserver?.disconnect();
               entryImageObserver?.disconnect();
+              entryExternalTreeObserver?.disconnect();
               entryExternalStyleObserver?.disconnect();
               entryRadioGroupObserver?.disconnect();
               entryResizeObserver?.disconnect();
@@ -1005,6 +1009,21 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               };
               observe(target);
+              const belongsToObservedEntryTree = (node: Node) => {
+                for (const root of observedRoots) {
+                  if (root === node || root.contains(node)) return true;
+                }
+                return false;
+              };
+              entryExternalTreeObserver ??= new Observer((records) => {
+                if (!isCurrentEntryObservation()) return;
+                // External :has() dependencies can change from sibling-tree
+                // mutations, but entry-owned mutations are already handled by
+                // entryObserver. Keeping them out of this path prevents every
+                // sibling entry from rebuilding its complete observation graph.
+                if (records.some((record) => !belongsToObservedEntryTree(record.target)))
+                  projectEntry();
+              });
               // The entry region can itself be slotted or nested below
               // selector-bearing ancestors outside its owned subtree. Their
               // class/style state participates in descendant computed
@@ -1027,7 +1046,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 const observeExternalSubtree =
                   externalAncestor !== target.ownerDocument.body &&
                   externalAncestor !== target.ownerDocument.documentElement;
-                entryObserver?.observe(externalAncestor, {
+                entryExternalTreeObserver.observe(externalAncestor, {
                   attributes: true,
                   childList: observeExternalSubtree,
                   subtree: observeExternalSubtree,
@@ -1202,16 +1221,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               if (radioTrees.size > 0) {
                 entryRadioGroupObserver = new Observer((records) => {
                   if (!isCurrentEntryObservation()) return;
-                  const alreadyObserved = (node: Node) => {
-                    for (const root of observedRoots) {
-                      if (root === node || root.contains(node)) return true;
-                    }
-                    return false;
-                  };
                   if (
                     records.some(
                       (record) =>
-                        !alreadyObserved(record.target) &&
+                        !belongsToObservedEntryTree(record.target) &&
                         invalidatesEntryRadioGroup(record, radioNames, radioFormIds)
                     )
                   ) {
