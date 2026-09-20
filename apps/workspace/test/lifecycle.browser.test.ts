@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { validateSpecEntity } from '@proto.ui/spec-schema';
 import { launchBrowser } from '../../www/src/content/docs/zh-cn/browser-harness';
 
 type Browser = Awaited<ReturnType<typeof launchBrowser>>;
@@ -94,6 +95,88 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Workspace lifecycle review projection', () => {
+  it('keeps unavailable blocker targets readable without navigating outside the snapshot', async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const entity = (id: string, since: string, extra: Record<string, unknown> = {}) =>
+      validateSpecEntity({
+        id,
+        type: 'contract',
+        title: id,
+        status: 'draft',
+        since,
+        lifecycleRationale: 'Blocker navigation fixture.',
+        criteria: [{ id: `${id}-A`, text: 'A bounded requirement.' }],
+        ...extra,
+      });
+    const available = entity('C-BLOCKER-AVAILABLE-0001', '0.2.0');
+    const future = entity('C-BLOCKER-FUTURE-0001', version);
+    const removed = entity('C-BLOCKER-REMOVED-0001', '0.1.0', {
+      status: 'removed',
+      removedSince: '0.2.0',
+    });
+    const source = entity('C-BLOCKER-SOURCE-0001', '0.2.0', {
+      openQuestions: [
+        {
+          id: 'C-BLOCKER-SOURCE-0001-Q-TARGETS',
+          question: 'Targets remain readable across version changes.',
+          blocks: [future, removed, available].map(
+            (target) => `criterion:${target.id}#${target.criteria[0].id}`
+          ),
+        },
+      ],
+    });
+    await context.route('**/spec-workspace.json', (route) =>
+      route.fulfill({
+        json: {
+          generatedAt: new Date().toISOString(),
+          releases: [],
+          versions: ['0.1.0', '0.2.0', version],
+          latestVersion: version,
+          entities: [available, future, removed, source],
+          catalogValid: true,
+          lifecyclePlans: {},
+          issues: [],
+        },
+      })
+    );
+    const page = await context.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.goto(`${baseUrl}/#/entities/${source.id}`);
+      const inspector = page.locator('.entity-panel');
+      const selectedId = inspector.locator('.entity-meta dd').first();
+      await expect.poll(() => selectedId.innerText()).toBe(source.id);
+      await page.getByRole('button', { name: 'English', exact: true }).click();
+      const toVersion = page.getByRole('combobox', { name: 'To', exact: true });
+      await toVersion.selectOption('0.2.0');
+      for (const target of [future, removed]) {
+        const targets = inspector.locator('.block-targets');
+        await targets.getByText(target.id, { exact: true }).click();
+        const screenshotDir = process.env.PROTO_UI_LIFECYCLE_SCREENSHOT_DIR;
+        if (screenshotDir) {
+          await mkdir(screenshotDir, { recursive: true });
+          await page.screenshot({ path: path.join(screenshotDir, `blocker-${target.id}.png`) });
+        }
+        expect(await selectedId.innerText()).toBe(source.id);
+        expect(new URL(page.url()).hash).toBe(`#/entities/${source.id}`);
+        expect(await targets.getByRole('button', { name: target.id, exact: true }).count()).toBe(0);
+        expect(await targets.innerText()).toContain(target.criteria[0].id);
+      }
+      await inspector.getByRole('button', { name: available.id, exact: true }).click();
+      await expect.poll(() => selectedId.innerText()).toBe(available.id);
+      expect(new URL(page.url()).hash).toBe(`#/entities/${available.id}`);
+      await page.getByRole('button', { name: source.id, exact: true }).click();
+      await toVersion.selectOption(version);
+      await inspector.getByRole('button', { name: future.id, exact: true }).click();
+      await expect.poll(() => selectedId.innerText()).toBe(future.id);
+      expect(new URL(page.url()).hash).toBe(`#/entities/${future.id}`);
+      expect(errors).toEqual([]);
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
+
   for (const width of [1440, 390]) {
     it(`shows the current unreviewed draft and version boundaries at ${width}px`, async () => {
       const context = await browser.newContext({ viewport: { width, height: 900 } });

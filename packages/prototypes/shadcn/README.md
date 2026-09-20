@@ -44,9 +44,16 @@ import {
   shadcnTooltipTrigger,
   shadcnTooltipContent,
 } from '@proto.ui/prototypes-shadcn/tooltip';
+import {
+  shadcnRadioGroupRoot,
+  shadcnRadioGroupItem,
+  shadcnRadioGroupIndicator,
+} from '@proto.ui/prototypes-shadcn/radio-group';
 ```
 
 The root package export remains available for compatibility. Shadcn families do not depend on sibling Shadcn families.
+
+Radio Group composes its three parts explicitly. Base owns the selected value, Collection, roving focus, selection requests, and accessibility; Shadcn adds the circular control and passive selected dot. The family has no native form, `asChild`, public orientation/loop, or visual-variant API. Its catalog entries remain draft.
 
 ## Internal Structure
 
@@ -57,6 +64,7 @@ The root package export remains available for compatibility. Shadcn families do 
 - `src/dropdown/`
 - `src/hover-card/`
 - `src/index.ts`
+- `src/radio-group/`
 - `src/select/`
 - `src/scroll-area/`
 - `src/switch/`

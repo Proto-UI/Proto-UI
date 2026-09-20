@@ -1,0 +1,38 @@
+---
+title: 'Radio Group'
+description: '在 Base 单选协议之上呈现 Shadcn Radio Group。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+Radio Group 包含 Root、Item 和 Indicator。Base 拥有选中值、Item 顺序、roving focus、选值请求，以及 `radiogroup` / `radio` 无障碍对象。Shadcn 投射增加圆形控件、选中圆点、焦点环、暗色底色和禁用外观。
+
+<PrototypePreviewer demoId="demo-shadcn-radio-group" initialRuntime="wc" />
+
+## 组合三个部分
+
+从 `@proto.ui/prototypes-shadcn/radio-group` 导入 `shadcnRadioGroupRoot`、`shadcnRadioGroupItem` 和 `shadcnRadioGroupIndicator`，再适配到所用运行时。包根也导出这些对象及其 PascalCase 别名。`proto-ui add react shadcn-radio-group` 会生成三个 React facade；CLI 同时支持 `vue`、`vue2` 和 `wc` 目标。
+
+每个 Item 属于最近的 Root。需要显示选中圆点时，在 Item 内显式放置 Indicator。Indicator 可省略，也可重复放置；CLI 不会暗中插入默认 part。它的 SVG 仅作装饰，不增加 radio 对象或 tab stop。
+
+| 部分 | Props | 职责 |
+| --- | --- | --- |
+| Root | `value?`、`defaultValue?`、`disabled?`、`a11yLabel?` | 拥有一个选中字符串和 Item 集合。 |
+| Item | 必填 `value`、可选 `disabled?` | 请求选值，派生 checked 与 effective-disabled。 |
+| Indicator | 无 | 反映最近 Item 的 checked 状态。 |
+
+为 Root 提供有意义的 `a11yLabel`，为每个 Item 提供同组内唯一、非空的 `value`。Item 的名称来自 authored content 或宿主标注。示例在每个 radio 内提供视觉隐藏文本，并在旁边显示标签；这些标签和行间布局由 App 拥有。
+
+非受控 Root 接纳选值并发送 `valueChange`。提供 `value` 后，Root 发送请求，由 App 决定后续 value prop；投射不会制造中间 checked 值。空值或无法匹配的值会保留，选中的 Item 变为禁用后也可以继续 checked。
+
+## 体验继承的交互
+
+按 Tab 进入第一组：选中且启用的 Item 是入口。方向键移动并选择，循环经过启用的 Item；Home 和 End 到达首尾启用项，禁用项被跳过。Space 选择当前聚焦项，Enter 不选择。成功的 primary pointer 释放会选择，取消的按压不会选择。
+
+比较初始未选组和整组禁用的状态，再在 Web Components、React、Vue 和 Vue 2 中重复。控件为 16px，装饰 glyph box 为 8px；键盘焦点增加 3px ring，只有 color 与 box-shadow 使用 150ms 过渡。切换网站主题会改变 input 底色，不改变选中值。
+
+## 比较来源与范围
+
+比较来源固定为 [revision `f31ed819` 的 v4 new-york Radio Group](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/radio-group.tsx)。Proto UI 是独立维护的非官方实现。这里把 Indicator 公开为独立 part，用跨宿主的 flex 居中与 checked 驱动的 opacity 呈现；upstream 内嵌 Indicator，并绝对定位图标。Item 显式提供常态透明背景和 flex 布局。
+
+继承的 API 不包含 `asChild`、原生表单提交或验证、`required`、invalid state、公开 `orientation` / `loop` 或视觉 variants，因此没有引入 upstream 的 `aria-invalid` 样式。方向键循环是 Base 的固定行为，不是新增可配置 API。三个 catalog 实体保持 `draft`，此页面不声明完整 Shadcn / Radix 兼容性或稳定准入。

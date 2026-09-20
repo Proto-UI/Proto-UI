@@ -434,6 +434,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/checkbox',
                 },
                 {
+                  label: 'Radio Group',
+                  translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
+                  slug: 'ui-libraries/shadcn/radio-group',
+                },
+                {
                   label: 'Scroll Area',
                   translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
                   slug: 'ui-libraries/shadcn/scroll-area',

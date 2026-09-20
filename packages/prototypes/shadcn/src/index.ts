@@ -233,3 +233,25 @@ export type {
   ShadcnTooltipContentStateHandles,
   ShadcnTooltipContentAsHookContract,
 } from './tooltip';
+export {
+  ShadcnRadioGroupRoot,
+  ShadcnRadioGroupItem,
+  ShadcnRadioGroupIndicator,
+  shadcnRadioGroupRoot,
+  shadcnRadioGroupItem,
+  shadcnRadioGroupIndicator,
+} from './radio-group';
+export type {
+  ShadcnRadioGroupRootProps,
+  ShadcnRadioGroupRootExposes,
+  ShadcnRadioGroupRootStateHandles,
+  ShadcnRadioGroupRootAsHookContract,
+  ShadcnRadioGroupItemProps,
+  ShadcnRadioGroupItemExposes,
+  ShadcnRadioGroupItemStateHandles,
+  ShadcnRadioGroupItemAsHookContract,
+  ShadcnRadioGroupIndicatorProps,
+  ShadcnRadioGroupIndicatorExposes,
+  ShadcnRadioGroupIndicatorStateHandles,
+  ShadcnRadioGroupIndicatorAsHookContract,
+} from './radio-group';

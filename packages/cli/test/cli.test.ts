@@ -215,6 +215,32 @@ describe('@proto.ui/cli', () => {
     }
   });
 
+  it('registers the exact Shadcn Radio Group parts without injecting an Indicator', () => {
+    const entry = COMPONENT_REGISTRY['shadcn-radio-group'];
+    expect(entry).toMatchObject({
+      packageName: '@proto.ui/prototypes-shadcn',
+      importPath: '@proto.ui/prototypes-shadcn/radio-group',
+      stylePreset: 'shadcn',
+      items: [
+        { prototypeImport: 'shadcnRadioGroupRoot', reactExport: 'ShadcnRadioGroupRoot' },
+        { prototypeImport: 'shadcnRadioGroupItem', reactExport: 'ShadcnRadioGroupItem' },
+        {
+          prototypeImport: 'shadcnRadioGroupIndicator',
+          reactExport: 'ShadcnRadioGroupIndicator',
+        },
+      ],
+    });
+    expect(entry.items).toHaveLength(3);
+    expect(entry.preset).toBeUndefined();
+
+    for (const adapter of ['react', 'vue', 'vue2', 'wc'] as const) {
+      const source = renderHostIndex(adapter, ['shadcn-radio-group']);
+      expect(source).toContain("from '@proto.ui/prototypes-shadcn/radio-group'");
+      for (const part of entry.items) expect(source).toContain(part.prototypeImport);
+      expect(source).not.toContain('default-indicator');
+    }
+  });
+
   it('registers the exact shadcn Scroll Area family facade', () => {
     expect(COMPONENT_REGISTRY['shadcn-scroll-area']).toMatchObject({
       packageName: '@proto.ui/prototypes-shadcn',
@@ -543,6 +569,7 @@ describe('@proto.ui/cli', () => {
       `data-[hovered]:not-[data-active]:bg-muted"])[data-hovered]:not([data-active])`
     );
     expect(tokensCss).toContain(`data-[checked]:bg-primary"])[data-checked]`);
+    expect(tokensCss).toContain(`data-[checked]:opacity-100"])[data-checked]`);
     expect(tokensCss).toContain(`[data-pui-style~="animate-in"]`);
     expect(tokensCss).toContain(`[data-pui-style~="animate-out"]`);
     expect(tokensCss).toContain(`[data-pui-style~="fade-in-0"]`);

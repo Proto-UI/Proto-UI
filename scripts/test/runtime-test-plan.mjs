@@ -20,6 +20,8 @@ export const BROWSER_SHARDS = Object.freeze(
       'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
       // 6.619s on main run 35501437043.
       'apps/www/test/radio-group-entry.browser.test.ts',
+      // 23.371s on PR #667 run 35507086643.
+      'apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts',
       'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
       'apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts',
       'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',

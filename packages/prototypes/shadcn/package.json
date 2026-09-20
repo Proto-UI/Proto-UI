@@ -101,6 +101,11 @@
       "types": "./dist/tooltip/index.d.ts",
       "import": "./dist/tooltip/index.js",
       "default": "./dist/tooltip/index.js"
+    },
+    "./radio-group": {
+      "types": "./dist/radio-group/index.d.ts",
+      "import": "./dist/radio-group/index.js",
+      "default": "./dist/radio-group/index.js"
     }
   },
   "description": "shadcn-style Proto UI prototype library for adapter-driven components.",
