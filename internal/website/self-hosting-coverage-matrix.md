@@ -128,11 +128,11 @@ The matrix rows remain authoritative. Each binding joins a scanned source, its c
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
 | `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `f9586b77a1877abf172811144583fb64f617ecae0db6df13cc19701a96eb6adb` |
-| `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `c87f05e68b372df69a7a98cb23a44a9822f857256cec94665175befb9430ac39` |
+| `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `99c58ab2434ecbfb0a0bc67cd1611608d2b8da6c10379f0c6ff0013ead21889d` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel` | `0a7032cb76fa7d77d6c97733def50ca6f78430dc24a9a6b497a831eb7de76f4a` |
 | `apps/www/src/components/PrototypePreviewer/home-demo-client.ts` | `www.demo.home-demo-select` | `3ca6fb18bd31574fdf34e4fd961d51876eb5d0f379e6a451082b9582f2a98c1d` |
-| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `15565b1f2917409e12885b020ca2ccd3d879e3e6cb8d831be7dd64dfc53df0ef` |
+| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `db1bd4aaf6053dfeca125bb8ad66cdb17a8a586977971e2a3a9386bb01d4cc38` |
 | `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `7af3dce4d35b204ca2c33b8c0dfcb6bd506a0a6da9e505ff731de3d2172abb7b` |
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `036614134df63553403e861785a1f58e8605074c940d0834e15200253a339cce` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `13bb17d4ba45e98ea8ac28cf6bf427c2eedc5fb783671492d6f4e51665b5fbb8` |

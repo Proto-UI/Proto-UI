@@ -7499,3 +7499,98 @@ test('rejects truncated retained video evidence with recognized header bytes', (
     /Multi-frame: retained video artifact must be structurally valid and contain frame data/
   );
 });
+
+test('rejects @vite-ignore dynamic imports without an exact reviewed boundary', () => {
+  for (const [relativePath, expected] of [
+    [
+      'apps/www/src/components/IgnoredRuntime.ts',
+      /@vite-ignore dynamic import in `apps\/www\/src\/components\/IgnoredRuntime\.ts` is not reviewed/,
+    ],
+    [
+      'apps/agent-harness/src/run/IgnoredRuntime.ts',
+      /@vite-ignore dynamic import in `apps\/agent-harness\/src\/run\/IgnoredRuntime\.ts` is not reviewed/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      'const runtimeUrl = globalThis.runtimeUrl; void import(/* @vite-ignore */ runtimeUrl);',
+      'utf8'
+    );
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('derives callable identity from explicit Agent action modules', () => {
+  for (const [name, actionImport, invocation] of [
+    ['DefaultAction', "import send from './agent-actions';", 'send();'],
+    ['NamedAction', "import { createSession } from './agent-actions';", 'createSession();'],
+    ['QualifiedAction', "import * as actions from './agent-actions';", 'actions.archiveSession();'],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `${actionImport} export function Surface() { ${invocation} return <section />; }`,
+      'utf8'
+    );
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        'Harness source `apps/agent-harness/src/run/' +
+          name +
+          '\\.tsx` contains a forbidden interaction'
+      )
+    );
+  }
+});
+
+test('classifies checkbox and select state assignments as governed DOM state', () => {
+  for (const [relativePath, source, expected] of [
+    [
+      'apps/www/src/components/CheckedState.ts',
+      "const input = document.querySelector('input'); input.checked = true;",
+      /interactive website source `apps\/www\/src\/components\/CheckedState\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/SelectedIndex.ts',
+      "const select = document.querySelector('select'); select.selectedIndex = 1;",
+      /Harness source `apps\/agent-harness\/src\/run\/SelectedIndex\.ts` contains a forbidden interaction/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, source, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('rejects unreviewed external Website stylesheet imports', () => {
+  for (const [relativePath, content] of [
+    ['apps/www/src/styles/external.css', '@import url(https://cdn.example/proto-ui-theme.css);'],
+    [
+      'apps/www/src/components/ExternalStyle.astro',
+      '<style>@import "https://cdn.example/controls.css";</style>',
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.match(
+      validationMessage(root),
+      new RegExp(
+        'external stylesheet .* in `' + relativePath.replaceAll('.', '\\.') + '` is not reviewed'
+      )
+    );
+  }
+});

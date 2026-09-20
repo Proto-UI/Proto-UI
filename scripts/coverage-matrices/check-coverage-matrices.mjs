@@ -80,8 +80,10 @@ function collectAriaReflectionPropertyNames() {
 const NATIVE_EVENT_ATTRIBUTE_NAMES = collectNativeEventAttributeNames();
 const GOVERNED_DOM_STATE_PROPERTY_NAMES = new Set([
   ...collectAriaReflectionPropertyNames(),
+  'checked',
   'scrollLeft',
   'scrollTop',
+  'selectedIndex',
   'selectionDirection',
   'selectionEnd',
   'selectionStart',
@@ -142,12 +144,18 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-react']),
+    viteIgnoredDynamicImports: Object.freeze([
+      'https://esm.sh/react@18',
+      'https://esm.sh/react-dom@18',
+    ]),
   }),
   'apps/www/src/components/PrototypePreviewer/runtimes/vue-runtime.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-vue']),
+    viteIgnoredDynamicImports: Object.freeze(['https://esm.sh/vue@3']),
   }),
   'apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-vue2']),
+    viteIgnoredDynamicImports: Object.freeze(['https://esm.sh/vue@2.6.14']),
   }),
   'apps/www/src/components/PrototypePreviewer/runtimes/wc-runtime.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
@@ -173,6 +181,9 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       '@proto.ui/prototypes-shadcn/button',
       '@proto.ui/prototypes-shadcn/select',
     ]),
+  }),
+  'apps/www/src/components/override/Search.astro': Object.freeze({
+    viteIgnoredDynamicImports: Object.freeze(['`${bundlePath}pagefind.js`']),
   }),
 });
 
@@ -2623,6 +2634,8 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
       candidate
     );
   };
+  const hasExplicitAgentActionModuleProvenance = (owner) =>
+    /(?:^|[/._-])(?:agent[-_.]?)?actions?(?:$|[/._-])/iu.test(owner);
   const hasAgentActionOwnerProvenance = (owner) =>
     /(?:action|agent|api|approval|client|command|props|request|run|service|tool)/iu.test(owner);
   const bindingElementOwnerProvenance = (bindingElement) => {
@@ -2650,6 +2663,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
   };
   const agentActionAliases = new Set();
   const agentActionOwners = new Set();
+  const agentActionModuleOwners = new Set();
   const aliasEdges = [];
   const bindingElementComesFromParameter = (bindingElement) => {
     let declaration = bindingElement.parent?.parent;
@@ -2663,9 +2677,21 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
       hasAgentActionOwnerProvenance(node.moduleSpecifier.text)
     ) {
       const importClause = node.importClause;
-      if (importClause?.name) agentActionOwners.add(importClause.name.text);
+      const explicitActionModule = hasExplicitAgentActionModuleProvenance(
+        node.moduleSpecifier.text
+      );
+      if (importClause?.name) {
+        agentActionOwners.add(importClause.name.text);
+        if (explicitActionModule) agentActionAliases.add(importClause.name.text);
+      }
       if (importClause?.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
         agentActionOwners.add(importClause.namedBindings.name.text);
+        if (explicitActionModule) agentActionModuleOwners.add(importClause.namedBindings.name.text);
+      }
+      if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+        for (const specifier of importClause.namedBindings.elements) {
+          if (explicitActionModule) agentActionAliases.add(specifier.name.text);
+        }
       }
     }
     if (
@@ -2747,20 +2773,29 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
     }
     return ts.isIdentifier(candidate) && agentActionOwners.has(candidate.text);
   }
+  function qualifiedActionModuleOwnerHasProvenance(expression) {
+    let candidate = unwrapTypeScriptExpression(expression);
+    while (ts.isPropertyAccessExpression(candidate) || ts.isElementAccessExpression(candidate)) {
+      candidate = unwrapTypeScriptExpression(candidate.expression);
+    }
+    return ts.isIdentifier(candidate) && agentActionModuleOwners.has(candidate.text);
+  }
   const isAgentActionExpression = (expression) => {
     const candidate = unwrapTypeScriptExpression(expression);
     if (ts.isIdentifier(candidate)) return agentActionAliases.has(candidate.text);
     if (ts.isPropertyAccessExpression(candidate)) {
       return (
-        isAgentActionVerbName(candidate.name.text) &&
-        qualifiedActionOwnerHasProvenance(candidate.expression)
+        qualifiedActionModuleOwnerHasProvenance(candidate.expression) ||
+        (isAgentActionVerbName(candidate.name.text) &&
+          qualifiedActionOwnerHasProvenance(candidate.expression))
       );
     }
     return (
       ts.isElementAccessExpression(candidate) &&
       ts.isStringLiteralLike(candidate.argumentExpression) &&
-      isAgentActionVerbName(candidate.argumentExpression.text) &&
-      qualifiedActionOwnerHasProvenance(candidate.expression)
+      (qualifiedActionModuleOwnerHasProvenance(candidate.expression) ||
+        (isAgentActionVerbName(candidate.argumentExpression.text) &&
+          qualifiedActionOwnerHasProvenance(candidate.expression)))
     );
   };
   const isAgentActionCall = (node) => {
@@ -3200,6 +3235,23 @@ function discoverHarnessForbiddenStateMachineSources(rootDir) {
 }
 
 const UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER = '<unresolved dynamic import>';
+const VITE_IGNORED_DYNAMIC_IMPORT_SPECIFIER_PREFIX = '<@vite-ignore dynamic import:';
+
+function viteIgnoredDynamicImportSpecifier(argument, sourceFile, literalBindings) {
+  const boundary = ts.isStringLiteralLike(argument)
+    ? argument.text
+    : ts.isIdentifier(argument) && literalBindings.has(argument.text)
+      ? literalBindings.get(argument.text)
+      : argument.getText(sourceFile).trim();
+  return `${VITE_IGNORED_DYNAMIC_IMPORT_SPECIFIER_PREFIX}${boundary}>`;
+}
+
+function viteIgnoredDynamicImportBoundary(specifier) {
+  return specifier.startsWith(VITE_IGNORED_DYNAMIC_IMPORT_SPECIFIER_PREFIX) &&
+    specifier.endsWith('>')
+    ? specifier.slice(VITE_IGNORED_DYNAMIC_IMPORT_SPECIFIER_PREFIX.length, -1)
+    : null;
+}
 
 function scriptModuleSpecifiers(source, fileName) {
   const sourceFile = ts.createSourceFile(
@@ -3210,6 +3262,24 @@ function scriptModuleSpecifiers(source, fileName) {
     ts.ScriptKind.TSX
   );
   const specifiers = [];
+  const literalBindings = new Map();
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isVariableStatement(statement) ||
+      !(statement.declarationList.flags & ts.NodeFlags.Const)
+    ) {
+      continue;
+    }
+    for (const declaration of statement.declarationList.declarations) {
+      if (
+        ts.isIdentifier(declaration.name) &&
+        declaration.initializer &&
+        ts.isStringLiteralLike(declaration.initializer)
+      ) {
+        literalBindings.set(declaration.name.text, declaration.initializer.text);
+      }
+    }
+  }
   const addLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) specifiers.push(node.text);
   };
@@ -3257,11 +3327,14 @@ function scriptModuleSpecifiers(source, fileName) {
           (ts.isIdentifier(callee) && callee.text === 'require'))
       ) {
         const argument = node.arguments[0];
-        if (argument && ts.isStringLiteralLike(argument)) addLiteral(argument);
-        else if (
+        const viteIgnored =
           callee.kind === ts.SyntaxKind.ImportKeyword &&
-          !/\/\*\s*@vite-ignore\s*\*\//u.test(node.getFullText(sourceFile))
-        ) {
+          /\/\*\s*@vite-ignore\s*\*\//u.test(node.getFullText(sourceFile));
+        if (argument && viteIgnored) {
+          specifiers.push(viteIgnoredDynamicImportSpecifier(argument, sourceFile, literalBindings));
+        } else if (argument && ts.isStringLiteralLike(argument)) {
+          addLiteral(argument);
+        } else if (callee.kind === ts.SyntaxKind.ImportKeyword) {
           specifiers.push(UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER);
         }
       }
@@ -3428,6 +3501,16 @@ function styleModuleSpecifiers(content) {
 
 function embeddedStyleSegments(content) {
   return [...content.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/giu)].map((match) => match[1]);
+}
+
+function externalStylesheetSpecifiersForWebsiteSource(absolutePath) {
+  const content = fs.readFileSync(absolutePath, 'utf8');
+  const specifiers = /\.(?:css|less|s[ac]ss)$/i.test(absolutePath)
+    ? styleModuleSpecifiers(content)
+    : /\.(?:astro|vue|svelte)$/i.test(absolutePath)
+      ? embeddedStyleSegments(content).flatMap(styleModuleSpecifiers)
+      : [];
+  return specifiers.filter((specifier) => /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(specifier));
 }
 
 function moduleSpecifiersForWebsiteSource(absolutePath) {
@@ -3660,6 +3743,14 @@ function guardedWebsiteImport(
   specifier,
   websiteAliasConfig
 ) {
+  const viteIgnoredBoundary = viteIgnoredDynamicImportBoundary(specifier);
+  if (viteIgnoredBoundary !== null) {
+    return {
+      category: 'vite-ignored-dynamic-import',
+      boundary: viteIgnoredBoundary,
+      resolvedPath: null,
+    };
+  }
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
     return { category: 'unresolved-dynamic-import', resolvedPath: null };
@@ -3815,6 +3906,14 @@ function inspectBarePackageForGuardedWebsiteImports(
   return null;
 }
 function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) {
+  const viteIgnoredBoundary = viteIgnoredDynamicImportBoundary(specifier);
+  if (viteIgnoredBoundary !== null) {
+    return {
+      category: 'vite-ignored-dynamic-import',
+      boundary: viteIgnoredBoundary,
+      resolvedPath: null,
+    };
+  }
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
     return { category: 'unresolved-dynamic-import', resolvedPath: null };
@@ -3865,6 +3964,12 @@ function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport) {
   if (isReviewedPrototypePackageDependency(sourcePath, guardedImport)) return true;
   const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
   if (!allowance) return false;
+  if (
+    guardedImport.category === 'vite-ignored-dynamic-import' &&
+    allowance.viteIgnoredDynamicImports?.includes(guardedImport.boundary)
+  ) {
+    return true;
+  }
   if (allowance.specifiers?.includes(specifier)) return true;
   if (
     allowance.specifierPrefixes?.some(
@@ -3983,6 +4088,14 @@ function discoverWebsiteRawImports(rootDir) {
   const bareInspectionCache = new Map();
   for (const absolutePath of candidates) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
+    for (const specifier of externalStylesheetSpecifiersForWebsiteSource(absolutePath)) {
+      rawImports.push({
+        sourcePath,
+        specifier,
+        category: 'external-stylesheet',
+        resolvedPath: null,
+      });
+    }
     if (/\.(?:html?|astro|mdx?|vue|svelte)$/i.test(absolutePath)) {
       const content = fs.readFileSync(absolutePath, 'utf8');
       const markup = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
@@ -4056,6 +4169,13 @@ function discoverWebsiteRawImports(rootDir) {
 
 function validateWebsiteRawImports(rootDir, relativePath, issues) {
   for (const rawImport of discoverWebsiteRawImports(rootDir)) {
+    if (rawImport.category === 'external-stylesheet') {
+      if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
+      issues.push(
+        `${relativePath}: external stylesheet \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
+      );
+      continue;
+    }
     if (rawImport.category === 'external-executable-script') {
       issues.push(
         `${relativePath}: external executable script \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
@@ -4065,6 +4185,13 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'dynamic-executable-script') {
       issues.push(
         `${relativePath}: dynamic executable script source in \`${rawImport.sourcePath}\` must be static for consumer-wall review`
+      );
+      continue;
+    }
+    if (rawImport.category === 'vite-ignored-dynamic-import') {
+      if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
+      issues.push(
+        `${relativePath}: @vite-ignore dynamic import in \`${rawImport.sourcePath}\` is not reviewed against an exact URL boundary`
       );
       continue;
     }
@@ -4133,6 +4260,12 @@ function validateHarnessRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'unresolved-dynamic-import') {
       issues.push(
         `${relativePath}: unresolved dynamic import in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
+      );
+      continue;
+    }
+    if (rawImport.category === 'vite-ignored-dynamic-import') {
+      issues.push(
+        `${relativePath}: @vite-ignore dynamic import in \`${rawImport.sourcePath}\` is not reviewed against an exact URL boundary`
       );
       continue;
     }
