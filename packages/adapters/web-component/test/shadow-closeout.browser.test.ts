@@ -3900,6 +3900,68 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects entry fallback after custom validity changes selector state', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-validity-selector-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent =
+          '#validity-selector-entry input:invalid + button { visibility: hidden }';
+        const host = new C();
+        host.id = 'validity-selector-entry';
+        host.innerHTML = '<input tabindex="-1"><button>Target</button>';
+        document.head.append(style);
+        document.body.append(host);
+        const settle = () => new Promise<void>((resolve) => queueMicrotask(resolve));
+        await settle();
+        const input = host.querySelector('input')!;
+        const button = host.querySelector('button')!;
+        const initial = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        input.setCustomValidity('invalid');
+        await settle();
+        const invalid = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        input.setCustomValidity('');
+        await settle();
+        return {
+          initial,
+          invalid,
+          restored: {
+            visibility: getComputedStyle(button).visibility,
+            fallback: host.getAttribute('tabindex'),
+          },
+        };
+      });
+      expect(result).toEqual({
+        initial: { visibility: 'visible', fallback: null },
+        invalid: { visibility: 'hidden', fallback: '0' },
+        restored: { visibility: 'visible', fallback: null },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each(['input', 'textarea'] as const)(
     'reprojects entry fallback after direct %s value changes selector state',
     async (tag) => {

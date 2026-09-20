@@ -314,6 +314,7 @@ describe('WC live focus-entry resolver inputs', () => {
       : undefined;
     const originalAppendMedium = MediaListCtor?.prototype.appendMedium;
     const originalDeleteMedium = MediaListCtor?.prototype.deleteMedium;
+    const originalSetCustomValidity = HTMLInputElement.prototype.setCustomValidity;
     const formSetters = [
       [HTMLInputElement.prototype, 'checked'],
       [HTMLInputElement.prototype, 'indeterminate'],
@@ -357,6 +358,7 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(MediaListCtor.prototype.appendMedium).not.toBe(originalAppendMedium);
     if (originalDeleteMedium && MediaListCtor)
       expect(MediaListCtor.prototype.deleteMedium).not.toBe(originalDeleteMedium);
+    expect(HTMLInputElement.prototype.setCustomValidity).not.toBe(originalSetCustomValidity);
     for (const [index, [prototype, key]] of formSetters.entries()) {
       if (originalFormSetters[index]?.set)
         expect(Object.getOwnPropertyDescriptor(prototype, key)?.set).not.toBe(
@@ -395,6 +397,7 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(MediaListCtor.prototype.appendMedium).toBe(originalAppendMedium);
     if (originalDeleteMedium && MediaListCtor)
       expect(MediaListCtor.prototype.deleteMedium).toBe(originalDeleteMedium);
+    expect(HTMLInputElement.prototype.setCustomValidity).toBe(originalSetCustomValidity);
     for (const [index, [prototype, key]] of formSetters.entries())
       expect(Object.getOwnPropertyDescriptor(prototype, key)).toEqual(originalFormSetters[index]);
   });
@@ -470,6 +473,35 @@ describe('WC live focus-entry resolver inputs', () => {
     input.type = hidden ? 'hidden' : 'text';
     await settle();
     expect(host.hasAttribute('tabindex')).toBe(hidden);
+  });
+
+  it('reprojects when setCustomValidity changes selector-driven descendant eligibility', async () => {
+    const host = panel(true);
+    const input = document.createElement('input');
+    host.before(input);
+    const button = document.createElement('button');
+    host.append(button);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility') return input.validity.valid ? 'visible' : 'hidden';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    input.setCustomValidity('invalid');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    input.setCustomValidity('');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
   it.each([false, true])(

@@ -107,12 +107,18 @@ export function createShadowStyleArtifactOwner(
 
 function validateShadowSelectorAbi(cssText: string): void {
   const selectors = stripShadowCssComments(cssText);
-  const documentRule = selectors
-    .replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1')
-    .match(
-      /(?:^|[;{}])(?:(?!\s*@)[^;{}]*(:where\(\.dark\)|:where\(\[data-theme=|:root)|[^;{}]*(@media \(prefers-color-scheme: dark\)))[^;{}]*\{/
-    );
-  const documentMarker = documentRule?.[1] ?? documentRule?.[2];
+  const structuralCss = selectors.replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
+  const documentRule = structuralCss.match(
+    /(?:^|[;{}])(?:(?!\s*@)[^;{}]*(:where\(\.dark\)|:where\(\[data-theme=|:root))[^;{}]*\{/
+  );
+  // CSS whitespace around the media feature and its colon is optional, and
+  // at-rule/media-feature identifiers are ASCII case-insensitive. Match the
+  // rule prelude rather than one generator-specific serialization so an
+  // explicit host dark marker cannot be gated by the system preference.
+  const systemDarkRule = structuralCss.match(
+    /(?:^|[;{}])\s*(@media\b[^;{}]*\(\s*prefers-color-scheme\s*:\s*dark\s*\)[^;{}]*)\{/i
+  );
+  const documentMarker = documentRule?.[1] ?? systemDarkRule?.[1];
   if (documentMarker) {
     throw invalidArtifact(documentMarker);
   }

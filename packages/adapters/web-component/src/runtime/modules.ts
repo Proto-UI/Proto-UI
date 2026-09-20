@@ -607,6 +607,26 @@ function watchEntryStyleInvalidation(
     ] as const) {
       if (target) patchMethods(target as unknown as Record<string, unknown>, keys);
     }
+    for (const FormControl of [
+      view.HTMLButtonElement,
+      view.HTMLFieldSetElement,
+      view.HTMLInputElement,
+      view.HTMLObjectElement,
+      view.HTMLOutputElement,
+      view.HTMLSelectElement,
+      view.HTMLTextAreaElement,
+    ]) {
+      if (FormControl)
+        patchMethods(FormControl.prototype as unknown as Record<string, unknown>, [
+          'setCustomValidity',
+        ]);
+    }
+    const ElementInternalsCtor = (
+      view as unknown as {
+        ElementInternals?: { prototype: Record<string, unknown> };
+      }
+    ).ElementInternals;
+    if (ElementInternalsCtor) patchMethods(ElementInternalsCtor.prototype, ['setValidity']);
 
     const setterPatches: EntryStyleSetterPatch[] = [];
     const patchSetter = (target: object, key: string, cssName?: string) => {
