@@ -32,8 +32,11 @@ export function getWebComponentPortalProjectionForOrigin(node: Node): HTMLElemen
  * logical origin remains beneath root (including an open ShadowRoot chain). */
 export function isWebComponentPortalTargetOwnedBy(root: Node, target: Element): boolean {
   let projection: Element | null = target;
-  while (projection && !activeProjections.has(projection as HTMLElement))
-    projection = projection.parentElement;
+  while (projection && !activeProjections.has(projection as HTMLElement)) {
+    const tree = projection.getRootNode();
+    projection =
+      projection.parentElement ?? (isShadowRootNode(tree) ? (tree.host as Element) : null);
+  }
   const origin = projection ? originMarkerByProjection.get(projection as HTMLElement) : undefined;
   let current: Node | null = origin ?? null;
   while (current) {

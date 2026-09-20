@@ -359,9 +359,17 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
       name: target.name,
     });
   };
-  const document = root.ownerDocument;
-  document.addEventListener('focusin', remember, true);
+  let document: Document | null = null;
+  const rebind = () => {
+    const next = root.ownerDocument;
+    if (document === next) return;
+    document?.removeEventListener('focusin', remember, true);
+    next.addEventListener('focusin', remember, true);
+    document = next;
+  };
+  rebind();
   return {
+    rebind,
     order(target: HTMLInputElement) {
       const last = history.get(target);
       return last &&
@@ -377,7 +385,8 @@ export function observeWebComponentRadioFocus(root: HTMLElement) {
       return lastFocused?.isConnected ? lastFocused : null;
     },
     dispose() {
-      document.removeEventListener('focusin', remember, true);
+      document?.removeEventListener('focusin', remember, true);
+      document = null;
     },
   };
 }

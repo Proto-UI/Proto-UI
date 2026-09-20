@@ -786,7 +786,12 @@ describe('WC scope sequential target sample', () => {
     const portaled = document.createElement('button');
     portaled.id = 'portal-history-target';
     portaled.tabIndex = 0;
-    projected.append(radio, portaled);
+    const shadowHost = document.createElement('div');
+    const shadowTarget = document.createElement('button');
+    shadowTarget.id = 'portal-shadow-history-target';
+    shadowTarget.tabIndex = 0;
+    shadowHost.attachShadow({ mode: 'open' }).append(shadowTarget);
+    projected.append(radio, portaled, shadowHost);
     host.append(projected);
     scope.append(host);
     const unrelated = document.createElement('button');
@@ -816,14 +821,51 @@ describe('WC scope sequential target sample', () => {
       expect(history.recent()).toBe(radio);
       dispatchPhysicalFocus(portaled);
       expect(history.recent()).toBe(portaled);
+      dispatchPhysicalFocus(shadowTarget);
+      expect(history.recent()).toBe(shadowTarget);
       dispatchPhysicalFocus(unrelated);
-      expect(history.recent()).toBe(portaled);
+      expect(history.recent()).toBe(shadowTarget);
     } finally {
       activeElement.mockRestore();
       history.dispose();
       portal.unmount(projected);
       scope.remove();
       unrelated.remove();
+    }
+  });
+
+  it('rebinds native focus history after its retained root changes document', () => {
+    const scope = document.createElement('div');
+    const target = document.createElement('button');
+    target.tabIndex = 0;
+    scope.append(target);
+    document.body.append(scope);
+    const history = observeWebComponentRadioFocus(scope);
+    const foreignDocument = document.implementation.createHTMLDocument('focus-history-adoption');
+    foreignDocument.adoptNode(scope);
+    foreignDocument.body.append(scope);
+    (history as typeof history & { rebind?: () => void }).rebind?.();
+    const activeElement = vi.spyOn(foreignDocument, 'activeElement', 'get');
+    activeElement.mockReturnValue(target);
+    const event = new FocusEvent('focusin', { bubbles: true, composed: true });
+    Object.defineProperty(event, 'composedPath', {
+      configurable: true,
+      value: () => [
+        target,
+        scope,
+        foreignDocument.body,
+        foreignDocument.documentElement,
+        foreignDocument,
+      ],
+    });
+
+    try {
+      foreignDocument.dispatchEvent(event);
+      expect(history.recent()).toBe(target);
+    } finally {
+      activeElement.mockRestore();
+      history.dispose();
+      scope.remove();
     }
   });
 });

@@ -974,9 +974,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
-    const offReady = args.subscribeTargetReady(listener);
-    const offSurface = subscribeLogicalTriggerSurface(instanceToken, listener);
     const history = observeWebComponentRadioFocus(el);
+    const offReady = args.subscribeTargetReady(() => {
+      history.rebind();
+      listener();
+    });
+    const offSurface = subscribeLogicalTriggerSurface(instanceToken, listener);
     radioFocusHistory = history;
     return () => {
       history.dispose();

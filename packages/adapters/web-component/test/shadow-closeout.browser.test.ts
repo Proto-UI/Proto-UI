@@ -2734,6 +2734,64 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('rebinds retained scope focus history to its adopted document', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-retained-adopted-scope-history',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.id = 'adopted-history-scope';
+        host.innerHTML =
+          '<button id="adopted-history-before">Before</button><button id="adopted-history-middle">Middle</button><button id="adopted-history-after">After</button>';
+        document.body.append(host);
+        host.getExposes().activate();
+        const frame = document.createElement('iframe');
+        frame.id = 'adopted-history-frame';
+        document.body.append(frame);
+        frame.contentDocument!.adoptNode(host);
+        frame.contentDocument!.body.append(host);
+      });
+      const frame = page.frames().find((candidate) => candidate !== page.mainFrame())!;
+      const active = () =>
+        frame.evaluate(() => {
+          let element = document.activeElement;
+          while (element?.shadowRoot?.activeElement) element = element.shadowRoot.activeElement;
+          return element?.id;
+        });
+
+      await frame.locator('#adopted-history-middle').focus();
+      await frame.locator('body').evaluate((body: HTMLElement) => {
+        body.tabIndex = -1;
+        body.focus();
+      });
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('adopted-history-after');
+
+      await frame.locator('#adopted-history-middle').focus();
+      await frame.locator('body').evaluate((body: HTMLElement) => body.focus());
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('adopted-history-before');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects an adopted radio entry after foreign-realm checkedness changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -3367,7 +3425,14 @@ describe('Shadow closeout native boundaries', () => {
         const scope = new C();
         scope.id = 'portaled-focus-scope';
         scope.innerHTML =
-          '<button id="portal-before">Before</button><section id="portal-branch"><button id="portal-target">Portaled</button></section><button id="portal-after">After</button>';
+          '<button id="portal-before">Before</button><section id="portal-branch"><button id="portal-target">Portaled</button><span id="portal-shadow-host"></span></section><button id="portal-after">After</button>';
+        const shadowTarget = document.createElement('button');
+        shadowTarget.id = 'portal-shadow-target';
+        shadowTarget.textContent = 'Portaled shadow';
+        scope
+          .querySelector('#portal-shadow-host')!
+          .attachShadow({ mode: 'open' })
+          .append(shadowTarget);
         document.body.append(scope);
         const portal = p.createPortal();
         portal.mount(scope.querySelector('#portal-branch'));
@@ -3380,7 +3445,7 @@ describe('Shadow closeout native boundaries', () => {
             document.getElementById('portaled-focus-scope')
           ).targets.map((el: HTMLElement) => el.id)
         )
-      ).toEqual(['portal-before', 'portal-target', 'portal-after']);
+      ).toEqual(['portal-before', 'portal-target', 'portal-shadow-target', 'portal-after']);
       const active = () =>
         page.evaluate(() => {
           let el = document.activeElement;
@@ -3392,13 +3457,15 @@ describe('Shadow closeout native boundaries', () => {
       await page.keyboard.press('Tab');
       expect(await active()).toBe('portal-target');
       await page.keyboard.press('Tab');
+      expect(await active()).toBe('portal-shadow-target');
+      await page.keyboard.press('Tab');
       expect(await active()).toBe('portal-after');
       await page.keyboard.press('Tab');
       expect(await active()).toBe('portal-before');
       await page.keyboard.press('Shift+Tab');
       expect(await active()).toBe('portal-after');
       await page.keyboard.press('Shift+Tab');
-      expect(await active()).toBe('portal-target');
+      expect(await active()).toBe('portal-shadow-target');
 
       await page.locator('body').evaluate((body: HTMLElement) => {
         body.tabIndex = -1;
@@ -3407,10 +3474,12 @@ describe('Shadow closeout native boundaries', () => {
       await page.keyboard.press('Tab');
       expect(await active()).toBe('portal-after');
 
-      await page.locator('#portal-target').focus();
+      await page
+        .locator('#portal-shadow-host')
+        .evaluate((host) => (host.shadowRoot!.querySelector('button') as HTMLElement).focus());
       await page.locator('body').evaluate((body: HTMLElement) => body.focus());
       await page.keyboard.press('Shift+Tab');
-      expect(await active()).toBe('portal-before');
+      expect(await active()).toBe('portal-target');
       expect(errors).toEqual([]);
     } finally {
       await page.close();
