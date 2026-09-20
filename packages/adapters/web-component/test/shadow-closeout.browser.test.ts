@@ -2964,6 +2964,127 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects entry eligibility for a wrapped body relational selector', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const style = document.createElement('style');
+        style.textContent =
+          ':where(body):has(> .wrapped-body-entry-flag) #wrapped-body-entry button { visibility: hidden; }';
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-wrapped-body-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.id = 'wrapped-body-entry';
+        host.innerHTML = '<button>Inside</button>';
+        document.head.append(style);
+        document.body.append(host);
+      });
+      const hostTabIndex = () =>
+        page.locator('#wrapped-body-entry').evaluate((host) => host.getAttribute('tabindex'));
+      expect(await hostTabIndex()).toBeNull();
+
+      await page.evaluate(() => {
+        const flag = document.createElement('span');
+        flag.className = 'wrapped-body-entry-flag';
+        document.body.append(flag);
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#wrapped-body-entry')?.getAttribute('tabindex') === '0'
+      );
+      expect(await hostTabIndex()).toBe('0');
+
+      await page.locator('.wrapped-body-entry-flag').evaluate((flag) => flag.remove());
+      await page.waitForFunction(
+        () => !document.querySelector('#wrapped-body-entry')?.hasAttribute('tabindex')
+      );
+      expect(await hostTabIndex()).toBeNull();
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects entry eligibility when only an external container ancestor resizes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const style = document.createElement('style');
+        style.textContent = `
+          #entry-query-layout { display: grid; grid-template-columns: auto minmax(0, 1fr); width: 600px; }
+          #entry-query-container { container-type: inline-size; }
+          @container (width < 300px) {
+            #entry-query-button { visibility: hidden; }
+          }
+        `;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-container-query-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const layout = document.createElement('div');
+        layout.id = 'entry-query-layout';
+        const spacer = document.createElement('div');
+        spacer.id = 'entry-query-spacer';
+        spacer.style.width = '100px';
+        const container = document.createElement('div');
+        container.id = 'entry-query-container';
+        const host = new C();
+        host.id = 'container-query-entry';
+        host.innerHTML = '<button id="entry-query-button">Inside</button>';
+        container.append(host);
+        layout.append(spacer, container);
+        document.head.append(style);
+        document.body.append(layout);
+      });
+      const hostTabIndex = () =>
+        page.locator('#container-query-entry').evaluate((host) => host.getAttribute('tabindex'));
+      expect(await hostTabIndex()).toBeNull();
+
+      // Only this sibling mutates. The entry subtree and its composed
+      // ancestors receive no DOM/attribute change; the container ancestor's
+      // ResizeObserver delivery owns the re-projection.
+      await page.locator('#entry-query-spacer').evaluate((spacer: HTMLElement) => {
+        spacer.style.width = '400px';
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#container-query-entry')?.getAttribute('tabindex') === '0'
+      );
+      expect(await hostTabIndex()).toBe('0');
+
+      await page.locator('#entry-query-spacer').evaluate((spacer: HTMLElement) => {
+        spacer.style.width = '100px';
+      });
+      await page.waitForFunction(
+        () => !document.querySelector('#container-query-entry')?.hasAttribute('tabindex')
+      );
+      expect(await hostTabIndex()).toBeNull();
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('continues trapped traversal around deep focus in a negative-tabindex shadow host', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -3217,6 +3338,67 @@ describe('Shadow closeout native boundaries', () => {
       expect(await active()).toBe('self-entry-child');
       await page.keyboard.press('Tab');
       expect(await active()).toBe('self-entry-scope');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('keeps a logical portal branch in trapped forward and reverse traversal', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-portaled-focus-scope',
+            setup(def: any) {
+              const scope = p.asFocusScope();
+              scope.configure({ trap: true, loop: true, entry: 'manual' });
+              def.expose('activate', () => scope.activate());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const scope = new C();
+        scope.id = 'portaled-focus-scope';
+        scope.innerHTML =
+          '<button id="portal-before">Before</button><section id="portal-branch"><button id="portal-target">Portaled</button></section><button id="portal-after">After</button>';
+        document.body.append(scope);
+        const portal = p.createPortal();
+        portal.mount(scope.querySelector('#portal-branch'));
+        (scope as any)._testPortal = portal;
+        scope.getExposes().activate();
+      });
+      expect(
+        await page.evaluate(() =>
+          (window as any).Closeout.sample(
+            document.getElementById('portaled-focus-scope')
+          ).targets.map((el: HTMLElement) => el.id)
+        )
+      ).toEqual(['portal-before', 'portal-target', 'portal-after']);
+      const active = () =>
+        page.evaluate(() => {
+          let el = document.activeElement;
+          while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+          return el?.id;
+        });
+
+      await page.locator('#portal-before').focus();
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('portal-target');
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('portal-after');
+      await page.keyboard.press('Tab');
+      expect(await active()).toBe('portal-before');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('portal-after');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active()).toBe('portal-target');
       expect(errors).toEqual([]);
     } finally {
       await page.close();

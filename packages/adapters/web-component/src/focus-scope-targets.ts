@@ -3,6 +3,8 @@
 // is observed by the view owner, never converted into logical focus facts.
 // The UA leaves document.activeElement on the outermost host; only the
 // deepest composed active element proves where focus actually landed.
+import { getWebComponentPortalProjectionForOrigin } from './portal-mount';
+
 export function deepestActiveElement(doc: Document): Element | null {
   let active = doc.activeElement;
   while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
@@ -71,6 +73,27 @@ function isInsideOwnedShadowScope(owner: HTMLElement, target: Element | null): b
   return false;
 }
 
+function logicalSlotNodes(slot: HTMLSlotElement): Node[] {
+  const assigned = slot.assignedNodes();
+  const root = slot.getRootNode();
+  if (!isShadowRootNode(root)) return assigned.length ? assigned : [...slot.childNodes];
+  const logical: Node[] = [];
+  const assignedSet = new Set(assigned);
+  for (const node of root.host.childNodes) {
+    const projection = getWebComponentPortalProjectionForOrigin(node);
+    if (projection) {
+      if ((projection.getAttribute('slot') ?? '') === slot.name) logical.push(projection);
+      continue;
+    }
+    if (
+      assignedSet.has(node) ||
+      (node as Node & { assignedSlot?: HTMLSlotElement | null }).assignedSlot === slot
+    )
+      logical.push(node);
+  }
+  return logical.length ? logical : assigned.length ? assigned : [...slot.childNodes];
+}
+
 export function sampleWebComponentScopeTargets(
   container: HTMLElement,
   isNativelyFocusable?: (target: HTMLElement) => boolean,
@@ -86,7 +109,14 @@ export function sampleWebComponentScopeTargets(
     return { targets: [], activeTarget, recentTarget: recentFocusTarget?.() ?? null };
   }
   const visited = new Set<Element>();
-  const visit = (el: Element, entries: Entry[]) => {
+  function visitNode(node: Node, entries: Entry[]) {
+    if (isElementNode(node)) visit(node, entries);
+    else {
+      const projection = getWebComponentPortalProjectionForOrigin(node);
+      if (projection) visit(projection, entries);
+    }
+  }
+  function visit(el: Element, entries: Entry[]) {
     if (visited.has(el)) return;
     visited.add(el);
     // aria-hidden hides a subtree from accessibility APIs but does not remove
@@ -121,7 +151,7 @@ export function sampleWebComponentScopeTargets(
           priority: candidate.tabIndex ?? 0,
         });
       }
-      [...el.children].forEach((child) => visit(child, entries));
+      [...el.childNodes].forEach((child) => visitNode(child, entries));
       return;
     }
     if (el.hidden) return;
@@ -174,17 +204,14 @@ export function sampleWebComponentScopeTargets(
     } else if (target || el === activeTarget)
       entries.push({ element: el, target: !!target, priority: el.tabIndex });
     if (isHtmlTag(el, 'slot')) {
-      const assigned = el.assignedNodes();
-      (assigned.length ? assigned : [...el.children]).forEach((node) => {
-        if (isElementNode(node)) visit(node, children);
-      });
+      logicalSlotNodes(el).forEach((node) => visitNode(node, children));
     } else if (isHtmlTag(el, 'details') && !el.open) {
       const summary = [...el.children].find((child) => child.tagName === 'SUMMARY');
       if (summary) visit(summary, children);
     } else if (el.shadowRoot)
-      [...el.shadowRoot.children].forEach((child) => visit(child, children));
-    else [...el.children].forEach((child) => visit(child, children));
-  };
+      [...el.shadowRoot.childNodes].forEach((child) => visitNode(child, children));
+    else [...el.childNodes].forEach((child) => visitNode(child, children));
+  }
   visit(container, scope);
   const flatten = (entries: Entry[], output: Entry[] = []) => {
     entries.sort(

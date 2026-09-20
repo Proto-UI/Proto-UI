@@ -11,6 +11,7 @@ import {
  */
 const activeProjections = new WeakSet<HTMLElement>();
 const adoptedProjections = new WeakMap<HTMLElement, Set<(document: Document) => void>>();
+const projectionByOriginMarker = new WeakMap<Node, HTMLElement>();
 
 function isShadowRootNode(node: Node): node is ShadowRoot {
   return node.nodeType === 11 && !!(node as ShadowRoot).host;
@@ -18,6 +19,12 @@ function isShadowRootNode(node: Node): node is ShadowRoot {
 
 export function isWebComponentPortaled(el: HTMLElement): boolean {
   return activeProjections.has(el);
+}
+
+/** Resolves only a currently active projection at its logical origin point. */
+export function getWebComponentPortalProjectionForOrigin(node: Node): HTMLElement | null {
+  const projection = projectionByOriginMarker.get(node);
+  return projection && activeProjections.has(projection) ? projection : null;
 }
 
 export function adoptWebComponentPortalProjections(owner: HTMLElement, document: Document): void {
@@ -110,6 +117,7 @@ export function createWebComponentPortalMount() {
         unbindAdoption?.();
         const wasProjected = projected;
         projected = false;
+        projectionByOriginMarker.delete(marker);
         activeProjections.delete(el);
         observer?.disconnect();
         if (ownsParent) {
@@ -133,6 +141,7 @@ export function createWebComponentPortalMount() {
         el.ownerDocument.body.appendChild(el);
         projected = true;
         activeProjections.add(el);
+        projectionByOriginMarker.set(marker, el);
       } catch (error) {
         restore();
         throw error;

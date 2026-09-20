@@ -905,6 +905,120 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('reprojects for a wrapped body-level relational selector', async () => {
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const style = document.createElement('style');
+    style.textContent =
+      ':where(body):has(> .entry-wrapped-body-flag) .entry-wrapped-body-relational button { visibility: hidden; }';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entry-wrapped-body-relational';
+    document.body.append(style, wrapper);
+    const host = panel(true);
+    wrapper.append(host);
+    const button = document.createElement('button');
+    host.append(button);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility')
+            return document.body.querySelector('.entry-wrapped-body-flag') ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    expect(
+      observe.mock.calls.some(
+        ([node, options]) =>
+          node === document.documentElement && options?.childList && options?.subtree
+      )
+    ).toBe(true);
+
+    const flag = document.createElement('span');
+    flag.className = 'entry-wrapped-body-flag';
+    document.body.append(flag);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    flag.remove();
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('reprojects when an external container ancestor alone crosses a query threshold', async () => {
+    const originalResizeObserver = Object.getOwnPropertyDescriptor(window, 'ResizeObserver');
+    const observers: ControlledResizeObserver[] = [];
+    class ControlledResizeObserver {
+      readonly observed = new Set<Element>();
+      constructor(private readonly callback: ResizeObserverCallback) {
+        observers.push(this);
+      }
+      observe(target: Element) {
+        this.observed.add(target);
+      }
+      unobserve(target: Element) {
+        this.observed.delete(target);
+      }
+      disconnect() {
+        this.observed.clear();
+      }
+      trigger(target: Element) {
+        if (!this.observed.has(target)) return false;
+        this.callback([{ target } as ResizeObserverEntry], this as unknown as ResizeObserver);
+        return true;
+      }
+    }
+    Object.defineProperty(window, 'ResizeObserver', {
+      configurable: true,
+      value: ControlledResizeObserver,
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .entry-container-query { container-type: inline-size; }
+      @container (width < 20rem) {
+        .entry-container-query button { visibility: hidden; }
+      }
+    `;
+    const container = document.createElement('div');
+    container.className = 'entry-container-query';
+    document.body.append(style, container);
+    const host = panel(true);
+    container.append(host);
+    const button = document.createElement('button');
+    host.append(button);
+    let belowThreshold = false;
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility') return belowThreshold ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+
+    try {
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(false);
+
+      belowThreshold = true;
+      expect(observers.some((observer) => observer.trigger(container))).toBe(true);
+      await settle();
+      expect(host.tabIndex).toBe(0);
+    } finally {
+      if (originalResizeObserver)
+        Object.defineProperty(window, 'ResizeObserver', originalResizeObserver);
+      else delete (window as unknown as { ResizeObserver?: typeof ResizeObserver }).ResizeObserver;
+    }
+  });
+
   it('observes stylesheet DOM changes in an external composed ShadowRoot', async () => {
     const carrier = document.createElement('div');
     const root = carrier.attachShadow({ mode: 'open' });

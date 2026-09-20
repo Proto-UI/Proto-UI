@@ -3,6 +3,7 @@ import {
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../src/focus-scope-targets';
+import { createWebComponentPortalMount } from '../src/portal-mount';
 describe('WC scope sequential target sample', () => {
   it('excludes iframe browsing contexts from scope traversal while preserving explicit entry opt-in', () => {
     const scope = document.createElement('div');
@@ -693,6 +694,40 @@ describe('WC scope sequential target sample', () => {
       host.remove();
       expect(sampleWebComponentScopeTargets(scope).targets).toEqual([]);
     } finally {
+      scope.remove();
+    }
+  });
+
+  it('keeps an active logical portal branch in forward and reverse trapped samples', () => {
+    const scope = document.createElement('div');
+    const host = document.createElement('div');
+    host.attachShadow({ mode: 'open' }).append(document.createElement('slot'));
+    const before = document.createElement('button');
+    before.id = 'before';
+    before.tabIndex = 0;
+    const projected = document.createElement('section');
+    const portaled = document.createElement('button');
+    portaled.id = 'portaled';
+    portaled.tabIndex = 0;
+    projected.append(portaled);
+    const after = document.createElement('button');
+    after.id = 'after';
+    after.tabIndex = 0;
+    host.append(before, projected, after);
+    scope.append(host);
+    document.body.append(scope);
+    const portal = createWebComponentPortalMount();
+    portal.mount(projected);
+
+    try {
+      expect(projected.parentElement).toBe(document.body);
+      for (const direction of ['next', 'prev'] as const) {
+        expect(
+          sampleWebComponentScopeTargets(scope, undefined, direction).targets.map((el) => el.id)
+        ).toEqual(['before', 'portaled', 'after']);
+      }
+    } finally {
+      portal.unmount(projected);
       scope.remove();
     }
   });

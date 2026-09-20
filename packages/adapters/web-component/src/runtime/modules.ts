@@ -308,6 +308,15 @@ function listenToEntryEvents(
   };
 }
 
+function hasDocumentRootRelationalSubject(selector: string): boolean {
+  if (/(?:^|[\s,>+~])(?:html|body|:root)\s*:has\(/.test(selector)) return true;
+  const wrapped = /(?:^|[\s,>+~]):(?:is|where)\(([^)]*)\)\s*:has\(/g;
+  for (const match of selector.matchAll(wrapped)) {
+    if (/(?:^|[\s,>+~])(?:html|body|:root)(?=$|[\s,.#:[>+~])/.test(match[1] ?? '')) return true;
+  }
+  return false;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -336,8 +345,7 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
-      if (selector.includes(':has(') && /(?:^|[\s,>+~])(?:html|body|:root):has\(/.test(selector))
-        relational = 2;
+      if (selector.includes(':has(') && hasDocumentRootRelationalSubject(selector)) relational = 2;
       if (!relational && selector.includes(':has(')) {
         try {
           const probe = selector.replace(/:has\([^)]*\)/g, ':where(*)');
@@ -1077,6 +1085,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               while (externalAncestor) {
                 externalAncestors.push(externalAncestor);
                 motionTargets.add(externalAncestor);
+                // Container-query eligibility can change solely because a
+                // composed ancestor crosses a size threshold. Reuse the
+                // view-epoch observer over this already bounded chain.
+                entryResizeObserver?.observe(externalAncestor);
                 entryObserver?.observe(externalAncestor, {
                   attributes: true,
                 });

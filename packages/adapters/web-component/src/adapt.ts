@@ -287,6 +287,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           unbindController(this);
           removeDebugHooks(this);
           unbindProtoInstance(this._instanceToken, this);
+          bindLogicalParent(this._instanceToken, null);
           this._controller = null;
           this._invokeUnmounted = null;
           this._exposes = {};
@@ -327,6 +328,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         return;
       }
       if (this._runtimeGeneration > 0) {
+        // Confirmed terminal teardown ends the predecessor's logical
+        // participation. View detach and synchronous moves never reach this
+        // branch, so their retained token keeps its existing ancestry.
+        bindLogicalParent(this._instanceToken, null);
         this._instanceToken = createLogicalInstance(proto as Prototype<any>);
       }
       // The constructor ran before the element had a DOM parent.
@@ -763,6 +768,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               disposed = fn();
             } finally {
               unbindProtoInstance(this._instanceToken, this);
+              bindLogicalParent(this._instanceToken, null);
               this._controller = null;
               this._mountedOnce = false;
               this._pendingOwnedTokens = null;
@@ -782,6 +788,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
         unbindProtoInstance(this._instanceToken, this);
+        bindLogicalParent(this._instanceToken, null);
         this._controller = null;
         this._mountedOnce = false;
         this._pendingOwnedTokens = null;
