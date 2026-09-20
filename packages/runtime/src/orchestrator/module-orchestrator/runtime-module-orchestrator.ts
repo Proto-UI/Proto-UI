@@ -347,6 +347,7 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    let firstError: unknown;
 
     // best-effort clear callback ctx
     this.callbackCtx = undefined;
@@ -354,7 +355,11 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
 
     // dispose hooks first so modules can teardown while caps still readable
     for (const r of this.records) {
-      r.module.hooks.dispose?.();
+      try {
+        r.module.hooks.dispose?.();
+      } catch (error) {
+        firstError ??= error;
+      }
     }
 
     // invalidate host-attached caps only (sys remains)
@@ -365,5 +370,6 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
         // ignore in v0
       }
     }
+    if (firstError) throw firstError;
   }
 }

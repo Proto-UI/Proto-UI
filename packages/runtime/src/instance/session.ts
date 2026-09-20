@@ -498,9 +498,12 @@ export function createRuntimeSession<P extends PropsBaseType>(
     // when a cleanup callback throws. Keep the original creation failure.
     try {
       void dispose().catch(() => {});
-    } catch {
-      // Synchronous teardown failures must not replace the creation error.
-    }
+    } catch {}
+    // Synchronous teardown failures must not replace the creation error.
+    cancelPendingDelayTasks();
+    try {
+      inst.dispose();
+    } catch {}
     throw error;
   }
 

@@ -296,6 +296,14 @@ describe('WC live focus-entry resolver inputs', () => {
       ShadowRoot.prototype,
       'adoptedStyleSheets'
     );
+    const originalSelectorText = Object.getOwnPropertyDescriptor(
+      CSSStyleRule.prototype,
+      'selectorText'
+    );
+    const MediaListCtor = (window as unknown as { MediaList?: typeof MediaList }).MediaList;
+    const originalMediaText = MediaListCtor
+      ? Object.getOwnPropertyDescriptor(MediaListCtor.prototype, 'mediaText')
+      : undefined;
     const formSetters = [
       [HTMLInputElement.prototype, 'checked'],
       [HTMLInputElement.prototype, 'indeterminate'],
@@ -327,6 +335,14 @@ describe('WC live focus-entry resolver inputs', () => {
       expect(
         Object.getOwnPropertyDescriptor(ShadowRoot.prototype, 'adoptedStyleSheets')?.set
       ).not.toBe(originalShadowSheets.set);
+    if (originalSelectorText?.set)
+      expect(Object.getOwnPropertyDescriptor(CSSStyleRule.prototype, 'selectorText')?.set).not.toBe(
+        originalSelectorText.set
+      );
+    if (originalMediaText?.set && MediaListCtor)
+      expect(Object.getOwnPropertyDescriptor(MediaListCtor.prototype, 'mediaText')?.set).not.toBe(
+        originalMediaText.set
+      );
     for (const [index, [prototype, key]] of formSetters.entries()) {
       if (originalFormSetters[index]?.set)
         expect(Object.getOwnPropertyDescriptor(prototype, key)?.set).not.toBe(
@@ -352,6 +368,14 @@ describe('WC live focus-entry resolver inputs', () => {
     if (originalShadowSheets?.set)
       expect(Object.getOwnPropertyDescriptor(ShadowRoot.prototype, 'adoptedStyleSheets')).toEqual(
         originalShadowSheets
+      );
+    if (originalSelectorText?.set)
+      expect(Object.getOwnPropertyDescriptor(CSSStyleRule.prototype, 'selectorText')).toEqual(
+        originalSelectorText
+      );
+    if (originalMediaText?.set && MediaListCtor)
+      expect(Object.getOwnPropertyDescriptor(MediaListCtor.prototype, 'mediaText')).toEqual(
+        originalMediaText
       );
     for (const [index, [prototype, key]] of formSetters.entries())
       expect(Object.getOwnPropertyDescriptor(prototype, key)).toEqual(originalFormSetters[index]);

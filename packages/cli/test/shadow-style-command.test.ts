@@ -123,10 +123,11 @@ describe('F1 public CLI companion delivery', () => {
     );
     expect(run(dir, args).status).toBe(0);
     const after = await snapshot(dir);
-    const expected = renderShadowStyleDelivery(
-      ['dark:bg-primary', 'p-4'],
-      'protoShadowStyleArtifact'
-    );
+    const sourceTokens = ['dark:bg-primary', 'p-4'];
+    const expected = renderShadowStyleDelivery(sourceTokens, 'protoShadowStyleArtifact', {
+      rootTokens: sourceTokens,
+      templateTokens: sourceTokens,
+    });
     expect(after['tokens.css']).toBe(expected.documentCss);
     expect(after['shadow.js']).toBe(expected.shadowModule);
     expect(after['tokens.css']).not.toBe(first['tokens.css']);

@@ -49,6 +49,31 @@ function createDelayHost(prototypeName: string): RuntimeHost<any> & {
 }
 
 describe('runtime contract: core delay primitive (v0)', () => {
+  it('forces failed-creation teardown when disposing diagnostics throw synchronously', () => {
+    const host = createDelayHost('x-delay-failed-creation-diagnostic');
+    const creationError = new Error('created failed');
+    let state!: OwnedStateHandle<boolean>;
+    host.onLifecycleEvent = (event) => {
+      if (event.type === 'instance.phase' && event.phase === 'disposing') {
+        throw new Error('disposing diagnostic failed');
+      }
+    };
+    const proto: Prototype = {
+      name: host.prototypeName,
+      setup(def) {
+        state = def.state.bool('open', false);
+        def.lifecycle.onCreated(() => {
+          delay(0, () => undefined);
+          throw creationError;
+        });
+      },
+    };
+
+    expect(() => createRuntimeSession(proto, host)).toThrow(creationError);
+    expect(host.delays.map((task) => task.cancelled)).toEqual([true]);
+    expect(() => state.get()).toThrow(/disposed/i);
+  });
+
   it.each([false, true])(
     'SHADOW-R3: cancels failed creation work and disposes once (cleanup throws: %s)',
     async (cleanupThrows) => {

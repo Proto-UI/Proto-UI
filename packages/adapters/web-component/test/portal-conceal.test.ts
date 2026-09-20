@@ -90,6 +90,36 @@ describe('WC portal conceal rendering barrier', () => {
     expect(frames.size).toBe(0);
   });
 
+  it('cancels an in-flight conceal barrier when its owner is adopted', async () => {
+    const Owner = AdaptToWebComponent(
+      {
+        name: 'conceal-adopted-owner',
+        setup: () => undefined,
+      },
+      { shadow: false }
+    );
+    const owner = new Owner();
+    const ownerPortal = createWebComponentPortalMount();
+    const origin = document.createElement('div');
+    origin.append(owner);
+    document.body.append(origin);
+    ownerPortal.mount(owner);
+    const barrier = (owner as any)._portalConceal as ReturnType<typeof createPortalConcealBarrier>;
+    let settled = false;
+    const wait = barrier.wait()!.then(() => {
+      settled = true;
+    });
+    const nextDocument = document.implementation.createHTMLDocument('adopted');
+
+    (owner as any).adoptedCallback(document, nextDocument);
+    await Promise.resolve();
+
+    expect(settled).toBe(true);
+    await wait;
+    ownerPortal.unmount(owner);
+    owner.remove();
+  });
+
   it('revokes a projection when renderer replacement removes its origin marker', async () => {
     const origin = host.parentElement!;
     portal.mount(host);

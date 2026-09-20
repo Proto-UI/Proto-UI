@@ -3123,6 +3123,120 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects entry fallback across focus-driven selector state changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-focus-selector-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent =
+          '#focus-switch:focus + #focus-selector-entry button { visibility: hidden }';
+        const input = document.createElement('input');
+        input.id = 'focus-switch';
+        const host = new C();
+        host.id = 'focus-selector-entry';
+        host.innerHTML = '<button>Target</button>';
+        document.head.append(style);
+        document.body.append(input, host);
+        const settle = () => new Promise<void>((resolve) => queueMicrotask(resolve));
+        await settle();
+        const initial = host.getAttribute('tabindex');
+        input.focus();
+        await settle();
+        const focused = {
+          visibility: getComputedStyle(host.querySelector('button')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        input.blur();
+        await settle();
+        return { initial, focused, restored: host.getAttribute('tabindex') };
+      });
+      expect(result).toEqual({
+        initial: null,
+        focused: { visibility: 'hidden', fallback: '0' },
+        restored: null,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects entry fallback after CSS rule selector and media changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-css-rule-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent = `
+          #selector-no-match button { visibility: hidden }
+          @media (max-width: 1px) { #css-rule-entry button { visibility: hidden } }
+        `;
+        const host = new C();
+        host.id = 'css-rule-entry';
+        host.innerHTML = '<button>Target</button>';
+        document.head.append(style);
+        document.body.append(host);
+        const settle = () => new Promise<void>((resolve) => queueMicrotask(resolve));
+        await settle();
+        const initial = host.getAttribute('tabindex');
+        const selectorRule = style.sheet!.cssRules[0] as CSSStyleRule;
+        selectorRule.selectorText = '#css-rule-entry button';
+        await settle();
+        const selectorChanged = host.getAttribute('tabindex');
+        selectorRule.selectorText = '#selector-no-match button';
+        await settle();
+        const selectorRestored = host.getAttribute('tabindex');
+        const mediaRule = style.sheet!.cssRules[1] as CSSMediaRule;
+        mediaRule.media.mediaText = '(min-width: 1px)';
+        await settle();
+        return {
+          initial,
+          selectorChanged,
+          selectorRestored,
+          mediaVisibility: getComputedStyle(host.querySelector('button')!).visibility,
+          mediaChanged: host.getAttribute('tabindex'),
+        };
+      });
+      expect(result).toEqual({
+        initial: null,
+        selectorChanged: '0',
+        selectorRestored: null,
+        mediaVisibility: 'hidden',
+        mediaChanged: '0',
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects entry fallback after CSSStyleSheet disabled state changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

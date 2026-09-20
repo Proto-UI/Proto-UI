@@ -174,6 +174,20 @@ describe('source-scanned Shadow Template/Root separation', () => {
     );
   });
 
+  it('renders an unclassified reusable Template style handle on both targets', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      const labelStyle = tw('text-sm');
+      definePrototype({ name: 'template-handle', setup(def) {
+        def.feedback.style.use(tw('p-2'));
+        return r => r.el('span', { style: labelStyle }, 'Label');
+      }});
+    `);
+
+    expect(artifact.cssText).toContain('[data-pui-split-root-style~="text-sm"]');
+    expect(artifact.cssText).toContain(':where([data-pui-style~="text-sm"])');
+  });
+
   it('keeps lowered Root conditions when the same physical token also occurs in a Template', async () => {
     const { artifact } = await generate(
       template('dark:p-4') +

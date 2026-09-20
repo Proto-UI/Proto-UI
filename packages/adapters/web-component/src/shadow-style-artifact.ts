@@ -118,11 +118,14 @@ function validateShadowSelectorAbi(cssText: string): void {
     throw invalidArtifact(`cssText contains document environment selector ${documentMarker}`);
   }
 
-  const styleTokenPattern = /data-pui-style~="([^"]+)"/g;
-  const hasDarkTokenRule = Array.from(cssText.matchAll(styleTokenPattern)).some((match) =>
-    (match[1] ?? '').split(':').includes('dark')
-  );
-  if (hasDarkTokenRule && !cssText.includes(SHADOW_DARK_SELECTOR)) {
+  const hasUnscopedDarkToken = cssText
+    .split(/[{},]/)
+    .some(
+      (selector) =>
+        /data-pui-style~="(?:[^"]*:)?dark:/.test(selector) &&
+        !selector.includes(SHADOW_DARK_SELECTOR)
+    );
+  if (hasUnscopedDarkToken) {
     throw invalidArtifact(`dark token CSS requires ${SHADOW_DARK_SELECTOR}`);
   }
 }

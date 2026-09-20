@@ -80,10 +80,10 @@ export function createWebProtoEventRouter(opt: {
     target.dispatchEvent(ev);
   }
 
-  function emitPressCommitOnce(native: Event, suppressDirectClick = false) {
+  function emitPressCommitOnce(native: Event) {
     if (hasPressCommitBeenEmittedForRoot(native)) return;
     markPressCommitEmittedForRoot(native);
-    if (suppressDirectClick) suppressFollowupDirectClick = true;
+    suppressFollowupDirectClick = true;
     emit(protoRootBus, 'press.commit', native);
   }
 
@@ -410,12 +410,12 @@ export function createWebProtoEventRouter(opt: {
       }
       if (!rootProxy.__hasProtoListeners('press.commit')) return;
       if (shouldRouteToCurrentRoot(e)) {
-        emitPressCommitOnce(e, true);
+        emitPressCommitOnce(e);
         return;
       }
       if (!isWithinRoot(e.target)) return;
       if (!hasFocusedDescendant()) return;
-      emitPressCommitOnce(e, true);
+      emitPressCommitOnce(e);
     })
   );
 
@@ -423,7 +423,7 @@ export function createWebProtoEventRouter(opt: {
     listen(rootEl, 'keydown', (e: KeyboardEvent) => {
       if (!isEnabled()) return;
       if (!isCommitKey(e.key)) return;
-      emitPressCommitOnce(e, true);
+      emitPressCommitOnce(e);
     })
   );
 
@@ -434,6 +434,7 @@ export function createWebProtoEventRouter(opt: {
       if (rootProxy.__hasProtoListeners('key.up') && shouldRouteToCurrentRoot(e)) {
         emit(protoRootBus, 'key.up', e);
       }
+      if (isCommitKey(e.key)) queueMicrotask(() => (suppressFollowupDirectClick = false));
     })
   );
 
@@ -446,7 +447,6 @@ export function createWebProtoEventRouter(opt: {
       if (!isNativeMouseClick(e)) return;
       if (!shouldRouteToCurrentRoot(e)) return;
       if (shouldSuppressFollowupClick(e)) return;
-      suppressFollowupDirectClick = false;
       emit(protoRootBus, 'press.commit', e);
     })
   );
@@ -457,7 +457,6 @@ export function createWebProtoEventRouter(opt: {
       if (!isNativeMouseClick(e)) return;
       if (!shouldRouteGlobalRootEvent(e, { includeActiveFallback: false })) return;
       if (shouldSuppressFollowupClick(e)) return;
-      suppressFollowupDirectClick = false;
       emit(protoRootBus, 'press.commit', e);
     })
   );

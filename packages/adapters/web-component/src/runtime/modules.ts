@@ -396,6 +396,8 @@ function watchEntryStyleInvalidation(
     if (DocumentCtor) patchSetter(DocumentCtor.prototype, 'adoptedStyleSheets');
     if (ShadowRootCtor) patchSetter(ShadowRootCtor.prototype, 'adoptedStyleSheets');
     for (const [Ctor, keys] of [
+      [view.CSSStyleRule, ['selectorText']],
+      [view.MediaList, ['mediaText']],
       [view.HTMLInputElement, ['checked', 'indeterminate', 'value']],
       [view.HTMLTextAreaElement, ['value']],
       [view.HTMLOptionElement, ['selected']],
@@ -1027,6 +1029,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 'change',
                 'pointerover',
                 'pointerout',
+                'focusin',
+                'focusout',
               ];
               const onProjectionEvent = () => {
                 if (isCurrentEntryObservation()) projectEntry();

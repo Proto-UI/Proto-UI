@@ -65,6 +65,10 @@ describe('adapter-web-component Shadow style artifact', () => {
       'dark rule without the host marker',
       artifact(`:where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
     ],
+    [
+      'unscoped dark rule beside an unrelated host marker',
+      artifact(`${SHADOW_CSS}\n:where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
+    ],
   ])('rejects %s', (_label, input) => {
     expect(() => validateShadowStyleArtifact(input)).toThrow(
       '[WC Adapter] invalid Shadow style artifact:'

@@ -28,6 +28,7 @@ export async function collectProtoShadowStyleTokenUsage(root) {
   const tokens = new Set();
   const templateTokens = new Set();
   const nonTemplateTokens = new Set();
+  const unclassifiedTokens = new Set();
   const occurrences = [];
   const moduleCache = new Map();
   for (const file of await collectSourceFiles(root)) {
@@ -39,11 +40,13 @@ export async function collectProtoShadowStyleTokenUsage(root) {
       sourcePath: path.relative(root, file).split(path.sep).join('/'),
       templateTokens,
       nonTemplateTokens,
+      unclassifiedTokens,
     });
   }
   // Reuse Root occurrence provenance; a token used on both targets needs both
   // outputs and must still pass the complete Root recipe preflight.
   for (const { token } of occurrences) nonTemplateTokens.add(token);
+  for (const token of unclassifiedTokens) templateTokens.add(token);
   return {
     tokens: Array.from(tokens).sort(),
     rootTokens: Array.from(tokens)
@@ -457,10 +460,11 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       for (const token of value.strings.flatMap(splitTokens)) {
         tokens.add(token);
         if (rootInventory?.templateTokens) {
-          (isTemplateStyleCall(node)
-            ? rootInventory.templateTokens
-            : rootInventory.nonTemplateTokens
-          ).add(token);
+          if (isTemplateStyleCall(node)) rootInventory.templateTokens.add(token);
+          else {
+            rootInventory.nonTemplateTokens.add(token);
+            if (!isFeedbackStyleTwCall(node)) rootInventory.unclassifiedTokens.add(token);
+          }
         }
       }
     }
@@ -640,6 +644,15 @@ function isFeedbackStyleUseCall(node) {
   if (!style || !memberIs(style, 'style')) return false;
   const feedback = memberOwner(style);
   return Boolean(feedback && memberIs(feedback, 'feedback'));
+}
+
+function isFeedbackStyleTwCall(node) {
+  return Boolean(
+    ts.findAncestor(
+      node,
+      (ancestor) => ts.isCallExpression(ancestor) && isFeedbackStyleUseCall(ancestor)
+    )
+  );
 }
 
 function isInsideRuleCall(node) {

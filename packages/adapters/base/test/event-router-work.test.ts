@@ -135,7 +135,7 @@ describe('event route traversal work', () => {
     expect(listener).toHaveBeenCalledTimes(4);
   });
 
-  it('clears keyboard follow-up suppression after a once listener leaves no portal demand', () => {
+  it('clears keyboard follow-up suppression when a once listener leaves no portal demand', async () => {
     const root = document.createElement('div');
     const portalButton = document.createElement('button');
     document.body.append(root, portalButton);
@@ -154,7 +154,8 @@ describe('event route traversal work', () => {
 
     portalButton.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
     expect(once).toHaveBeenCalledTimes(1);
-    portalButton.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+    portalButton.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' }));
+    await Promise.resolve();
 
     const later = vi.fn();
     router.rootTarget.addEventListener('press.commit', later);

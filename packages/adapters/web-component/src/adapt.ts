@@ -356,6 +356,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     adoptedCallback(_oldDocument: Document, newDocument: Document) {
+      this._portalConceal.cancel();
       adoptWebComponentPortalProjections(this, newDocument);
       this._globalEventTarget.setTarget(newDocument.defaultView);
       this._overlayModal.adoptDocument(newDocument);
