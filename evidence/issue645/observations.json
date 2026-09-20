@@ -1,0 +1,56 @@
+{
+  "issue": "https://github.com/Proto-UI/Proto-UI/issues/645",
+  "baseline": "c473eae3fe6b66354f5e689fcc1d01241946ed7f",
+  "candidate": "2b8e2f9cb6883cdaaa7d6fa3d1b1d8692dcfa097",
+  "route": "/zh-cn/ui-libraries/shadcn/dialog/",
+  "adapter": "Web Component / ordinary light DOM",
+  "browser": "Chrome for Testing145.0.7632.6",
+  "viewport": {
+    "width": 1100,
+    "height": 900,
+    "deviceScaleFactor": 1
+  },
+  "procedure": [
+    "Native pointer opens Dialog",
+    "Native pointer closes through Mask",
+    "Observe Mask detached while Content remains leaving",
+    "Native pointer reopens through trigger during that exact window",
+    "Native pointer presses Mask at viewport(5,5)"
+  ],
+  "baselineObservation": {
+    "reopenSample": {
+      "isTrusted": true,
+      "maskDetached": true,
+      "contentDetached": false,
+      "contentPhase": "leaving"
+    },
+    "subsequentMaskPress": {
+      "isTrusted": true,
+      "hit": "WC-SHADCN-DIALOG-MASK"
+    },
+    "result": {
+      "open": true,
+      "phase": "entered"
+    }
+  },
+  "candidateObservation": {
+    "sample": {
+      "trusted": true,
+      "maskDetached": true,
+      "contentDetached": false,
+      "phase": "leaving"
+    },
+    "open": false,
+    "phase": "closed",
+    "overflow": ""
+  },
+  "scope": "Actual component screenshots and measured native pointer state transitions, not a simulated rendering. Main branch patches do not include this evidence-only branch.",
+  "retentionOwner": "cyjin-yl",
+  "neverMergeEvidenceBranch": true,
+  "reproductionTest": "apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts",
+  "limitations": [
+    "Screenshots do not alone prove input sequencing; see paired observations and executable regression.",
+    "WC Chromium only; not native Safari/Firefox, other adapters or pending S4 Shadow split.",
+    "CJK page text uses the available fallback font; the English Dialog/preview controls remain visible."
+  ]
+}
