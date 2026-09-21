@@ -44,6 +44,8 @@ export type AnatomyPort = ModulePort & {
   resolvePartInstance(part: AnatomyPartView): unknown | null;
   /** Opaque identity of the current logical instance; never a host target. */
   resolveSelfInstance(): unknown;
+  /** Current same-family claim role for module-to-module consistency checks. */
+  resolveSelfRole(family: AnatomyFamily): string | null;
   /** Nearest same-family ancestor identity for module-to-module structural coordination. */
   resolveAncestorInstance(
     family: AnatomyFamily,

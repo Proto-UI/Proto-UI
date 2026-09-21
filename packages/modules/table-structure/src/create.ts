@@ -44,6 +44,7 @@ export class TableStructureModuleImpl extends ModuleBase {
   ) {
     super(caps);
     this.states = Object.freeze({
+      a11yRole: stateFacade.string('tableA11yRole', ''),
       rowCount: stateFacade.numberDiscrete('tableRowCount', 0),
       columnCount: stateFacade.numberDiscrete('tableColumnCount', 0),
       row: stateFacade.numberDiscrete('tableRow', -1),
@@ -85,7 +86,9 @@ export class TableStructureModuleImpl extends ModuleBase {
     this.stopOrder = null;
     this.stopTargets?.();
     this.stopTargets = null;
-    if (this.role === 'root' && this.domainScope !== null) rootsByDomain.delete(this.domainScope);
+    if (this.domainScope !== null && rootsByDomain.get(this.domainScope) === this) {
+      rootsByDomain.delete(this.domainScope);
+    }
     if (this.instanceIdentity !== null) partsByInstance.delete(this.instanceIdentity);
     this.domainScope = null;
     if (oldRoot && oldRoot !== this) oldRoot.recompute();
@@ -103,12 +106,14 @@ export class TableStructureModuleImpl extends ModuleBase {
     }
     this.role = role;
     if (role === 'root' && !this.stopOrder) {
-      this.stopOrder = this.anatomy.subscribeOrder(TABLE_STRUCTURE_FAMILY, () => this.recompute());
+      this.stopOrder = this.anatomy.subscribeOrder(TABLE_STRUCTURE_FAMILY, () => {
+        if (this.mountPhase === 'mounted') this.notifyRoot();
+      });
     }
     if (role === 'root' && !this.stopTargets) {
-      this.stopTargets = this.anatomy.subscribeTargets(TABLE_STRUCTURE_FAMILY, () =>
-        this.recompute()
-      );
+      this.stopTargets = this.anatomy.subscribeTargets(TABLE_STRUCTURE_FAMILY, () => {
+        if (this.mountPhase === 'mounted') this.notifyRoot();
+      });
     }
     return Object.freeze({
       role,
@@ -132,20 +137,30 @@ export class TableStructureModuleImpl extends ModuleBase {
   private bindDomain(): void {
     if (!this.role) return;
     const next = this.anatomy.resolveDomainScope(TABLE_STRUCTURE_FAMILY);
-    if (Object.is(next, this.domainScope)) return;
     const previous = this.domainScope;
     const previousRoot = previous === null ? null : rootsByDomain.get(previous);
-    if (this.role === 'root' && previous !== null) rootsByDomain.delete(previous);
-    this.clearProjection();
-    this.domainScope = next;
-    if (this.role === 'root' && next !== null) rootsByDomain.set(next, this);
-    if (previousRoot && previousRoot !== this) previousRoot.recompute();
+    if (!Object.is(next, previous)) {
+      if (previous !== null && rootsByDomain.get(previous) === this) {
+        rootsByDomain.delete(previous);
+      }
+      this.clearProjection();
+      this.domainScope = next;
+    }
+    if (next !== null) {
+      const registered = rootsByDomain.get(next);
+      const ownsRoot =
+        this.role === 'root' && this.anatomy.resolveSelfRole(TABLE_STRUCTURE_FAMILY) === 'root';
+      if (ownsRoot && !registered) rootsByDomain.set(next, this);
+      else if (!ownsRoot && registered === this) rootsByDomain.delete(next);
+    }
+    if (!Object.is(next, previous) && previousRoot && previousRoot !== this) {
+      previousRoot.recompute();
+    }
   }
 
   private notifyRoot(): void {
     this.bindDomain();
-    if (this.role === 'root') this.recompute();
-    else if (this.domainScope !== null) rootsByDomain.get(this.domainScope)?.recompute();
+    if (this.domainScope !== null) rootsByDomain.get(this.domainScope)?.recompute();
   }
 
   private readPart(part: AnatomyPartView): TableStructureModuleImpl | null {
@@ -154,7 +169,13 @@ export class TableStructureModuleImpl extends ModuleBase {
   }
 
   private recompute(): void {
-    if (this.role !== 'root' || this.mountPhase !== 'mounted') return;
+    if (
+      this.role !== 'root' ||
+      this.mountPhase !== 'mounted' ||
+      this.domainScope === null ||
+      rootsByDomain.get(this.domainScope) !== this
+    )
+      return;
     const ordered = this.anatomy.order.parts(TABLE_STRUCTURE_FAMILY);
     const domainRecords = ordered
       .map((part) => ({ part, impl: this.readPart(part) }))
@@ -207,6 +228,7 @@ export class TableStructureModuleImpl extends ModuleBase {
     if (!next.valid) return;
 
     const byRef = new Map(records.map(({ impl }) => [impl.a11y.getObjectRef(), impl]));
+    if (next.caption) byRef.get(next.caption)?.applyCaption();
     for (const row of next.rows) {
       byRef.get(row.ref)?.applyRow(row.index);
       for (const cell of row.cells) byRef.get(cell.ref)?.applyCell(cell);
@@ -221,6 +243,7 @@ export class TableStructureModuleImpl extends ModuleBase {
 
   private applyTable(snapshot: TableStructureSnapshot | null): void {
     const valid = snapshot?.valid === true;
+    this.state.set(this.states.a11yRole, valid ? 'table' : '', 'table.structure');
     this.state.set(this.states.rowCount, valid ? snapshot.rowCount : 0, 'table.structure');
     this.state.set(this.states.columnCount, valid ? snapshot.columnCount : 0, 'table.structure');
     this.a11y.setRelation('caption', {
@@ -231,18 +254,34 @@ export class TableStructureModuleImpl extends ModuleBase {
     });
   }
 
+  private applyCaption(): void {
+    this.state.set(this.states.a11yRole, 'caption', 'table.structure');
+  }
+
   private applyRow(index: number | null): void {
+    this.state.set(this.states.a11yRole, index === null ? '' : 'row', 'table.structure');
     this.state.set(this.states.row, index === null ? 0 : index + 1, 'table.structure');
   }
 
   private applyCell(snapshot: TableStructureCellSnapshot | null): void {
+    this.state.set(
+      this.states.a11yRole,
+      snapshot
+        ? snapshot.kind === 'column-header'
+          ? 'columnheader'
+          : snapshot.kind === 'row-header'
+            ? 'rowheader'
+            : 'cell'
+        : '',
+      'table.structure'
+    );
     this.state.set(this.states.row, snapshot ? snapshot.row + 1 : 0, 'table.structure');
     this.state.set(this.states.column, snapshot ? snapshot.column + 1 : 0, 'table.structure');
     this.state.set(this.states.rowSpan, snapshot?.rowSpan ?? 0, 'table.structure');
     this.state.set(this.states.columnSpan, snapshot?.columnSpan ?? 0, 'table.structure');
     this.a11y.setRelation('columnHeaders', { target: snapshot?.columnHeaders ?? [] });
     this.a11y.setRelation('rowHeaders', { target: snapshot?.rowHeaders ?? [] });
-    const labels = snapshot ? [...snapshot.columnHeaders, ...snapshot.rowHeaders] : [];
+    const labels = snapshot?.orderedHeaders ?? [];
     this.a11y.setRelation('labelledBy', {
       target: snapshot && labels.length > 0 ? [...labels, snapshot.ref] : [],
     });

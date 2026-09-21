@@ -53,7 +53,7 @@ describe('M-TABLE-STRUCTURE-0001', () => {
               headerKind: 'row',
               headers: [],
             },
-            { ref: value, kind: 'cell', headers: ['group', 'column', 'row'] },
+            { ref: value, kind: 'cell', headers: ['row', 'group', 'column'] },
           ],
         },
       ],
@@ -62,6 +62,7 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     expect(snapshot.rows[2].cells[1]).toMatchObject({ row: 2, column: 1 });
     expect(snapshot.rows[2].cells[1].columnHeaders).toEqual([group, column]);
     expect(snapshot.rows[2].cells[1].rowHeaders).toEqual([rowHeader]);
+    expect(snapshot.rows[2].cells[1].orderedHeaders).toEqual([rowHeader, group, column]);
     expect(snapshot.rows[2].cells[1].columnHeaders).not.toContain('column');
   });
 
@@ -199,8 +200,14 @@ describe('M-TABLE-STRUCTURE-0001', () => {
 
   it('emits generic A11y facts and clears a part that leaves its Table domain', () => {
     const domain = {};
-    const tokens = { root: {}, row: {}, header: {}, cell: {} };
-    const roles = { root: 'root', row: 'row', header: 'headerCell', cell: 'cell' } as const;
+    const tokens = { root: {}, row: {}, header: {}, cell: {}, rogue: {} };
+    const roles = {
+      root: 'root',
+      row: 'row',
+      header: 'headerCell',
+      cell: 'cell',
+      rogue: 'cell',
+    } as const;
     const tokenByPart = new Map<AnatomyPartView, unknown>();
     const domains = new Map<unknown, unknown | null>(
       Object.values(tokens).map((token) => [token, domain])
@@ -214,6 +221,7 @@ describe('M-TABLE-STRUCTURE-0001', () => {
 
     const values = new Map<object, unknown>();
     const stateFacade = {
+      string: () => ({}),
       numberDiscrete: () => ({}),
     } as unknown as StateFacade;
     const state = {
@@ -226,6 +234,8 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     const anatomyFor = (token: unknown) =>
       ({
         resolveSelfInstance: () => token,
+        resolveSelfRole: () =>
+          ordered.find((part) => Object.is(tokenByPart.get(part), token))?.role ?? null,
         resolvePartInstance: (part: AnatomyPartView) => tokenByPart.get(part) ?? null,
         resolveAncestorInstance: (_family: unknown, part: AnatomyPartView, role: string) => {
           const partToken = tokenByPart.get(part);
@@ -264,6 +274,10 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     handles.cell.configure({ headers: ['name'] });
     for (const module of Object.values(modules)) module.onMountPhase('mounted', 1);
 
+    expect(values.get(handles.root.states.a11yRole)).toBe('table');
+    expect(values.get(handles.row.states.a11yRole)).toBe('row');
+    expect(values.get(handles.header.states.a11yRole)).toBe('columnheader');
+    expect(values.get(handles.cell.states.a11yRole)).toBe('cell');
     expect(values.get(handles.root.states.rowCount)).toBe(1);
     expect(values.get(handles.root.states.columnCount)).toBe(2);
     expect(values.get(handles.row.states.row)).toBe(1);
@@ -273,6 +287,18 @@ describe('M-TABLE-STRUCTURE-0001', () => {
       refs.get(tokens.cell),
     ]);
     const rowPart = ordered.find((part) => tokenByPart.get(part) === tokens.row)!;
+    const rogue = modules.rogue.facade.declare('root');
+    rogue.configure({});
+    expect(rogue.getSnapshot()).toBeNull();
+    expect(handles.root.getSnapshot()?.valid).toBe(false);
+    expect(handles.root.getSnapshot()?.diagnostics.map((item) => item.code)).toContain(
+      'role-mismatch'
+    );
+    expect(values.get(handles.root.states.a11yRole)).toBe('');
+    expect(values.get(handles.cell.states.a11yRole)).toBe('');
+    modules.rogue.dispose();
+    expect(handles.root.getSnapshot()?.valid).toBe(true);
+    expect(values.get(handles.root.states.a11yRole)).toBe('table');
     // Test-only fake: mutate the captured Anatomy role to model a mismatched declaration.
     const mutableRowPart = rowPart as unknown as { role: string };
     mutableRowPart.role = 'cell';
@@ -292,6 +318,8 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     expect(relations.get(tokens.cell)?.get('labelledBy')).toEqual([]);
     expect(values.get(handles.root.states.rowCount)).toBe(0);
     expect(values.get(handles.root.states.columnCount)).toBe(0);
+    expect(values.get(handles.root.states.a11yRole)).toBe('');
+    expect(values.get(handles.cell.states.a11yRole)).toBe('');
 
     modules.cell.dispose();
     modules.header.dispose();

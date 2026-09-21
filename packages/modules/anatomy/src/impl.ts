@@ -463,6 +463,8 @@ export class AnatomyModuleImpl extends ModuleBase {
     resolvePartInstance: (part: AnatomyPartView): unknown | null =>
       CLAIM_BY_PART_VIEW.get(part)?.instance ?? null,
     resolveSelfInstance: (): unknown => this.getSelfToken(),
+    resolveSelfRole: (family: AnatomyFamily): string | null =>
+      CENTER.getClaim(this.getSelfToken(), family)?.role ?? null,
     resolveAncestorInstance: (
       family: AnatomyFamily,
       part: AnatomyPartView,
