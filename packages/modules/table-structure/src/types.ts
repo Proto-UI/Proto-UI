@@ -54,6 +54,7 @@ export type TableStructureCellSnapshot = Readonly<{
   columnSpan: number;
   columnHeaders: readonly A11ySemanticObjectRef[];
   rowHeaders: readonly A11ySemanticObjectRef[];
+  orderedHeaders: readonly A11ySemanticObjectRef[];
 }>;
 
 export type TableStructureRowSnapshot = Readonly<{
@@ -73,6 +74,7 @@ export type TableStructureSnapshot = Readonly<{
 }>;
 
 export type TableStructureStateHandles = Readonly<{
+  a11yRole: OwnedStateHandle<string>;
   rowCount: OwnedStateHandle<number>;
   columnCount: OwnedStateHandle<number>;
   row: OwnedStateHandle<number>;

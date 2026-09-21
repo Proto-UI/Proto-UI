@@ -4,8 +4,8 @@ title: Base Table Row establishes one ordered logical row
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Real source and topology evidence exist; Adapter projection remains planned.
-  zh-CN: 已有真实 source 与 topology 证据；Adapter projection 仍为 planned。
+  en: Real source, topology evidence and bounded Web Component Row projection exist; React, Vue and Vue 2 remain planned.
+  zh-CN: 已有真实 source、topology 证据与有界 Web Component Row projection；React、Vue 与 Vue 2 仍为 planned。
 summary: Row groups authored HeaderCell and Cell parts into one Anatomy-ordered topology row.
 statement:
   en: Base Table Row is a transparent structural part whose current same-domain order determines its zero-based row index and cell sequence.
@@ -37,4 +37,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the transparent ordered Table Row identity and logical row index projection.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded bounded Web Component Row projection while retaining three planned Adapter paths.
 tags: [table, row, base, prototype, draft]

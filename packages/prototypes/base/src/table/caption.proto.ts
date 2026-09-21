@@ -7,8 +7,9 @@ export const tableCaption = definePrototype<TableCaptionProps, TableCaptionExpos
   name: 'base-table-caption',
   setup(def) {
     def.anatomy.claim(TABLE_STRUCTURE_FAMILY, { role: 'caption' });
-    asAccessible().role('caption');
-    asTableStructure<TableCaptionProps>('caption');
+    const accessible = asAccessible();
+    const table = asTableStructure<TableCaptionProps>('caption');
+    accessible.role(table.states.a11yRole);
     return (render) => render.slot();
   },
 });

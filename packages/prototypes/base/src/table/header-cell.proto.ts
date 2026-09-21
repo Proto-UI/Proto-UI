@@ -17,9 +17,8 @@ export const tableHeaderCell = definePrototype<TableHeaderCellProps, TableHeader
     def.props.setDefaults({ headerKey: '', headers: [], rowSpan: 1, columnSpan: 1 });
 
     const accessible = asAccessible();
-    const role = def.state.string('tableHeaderRole', '');
-    accessible.role(role);
     const table = asTableStructure<TableHeaderCellProps>('headerCell');
+    accessible.role(table.states.a11yRole);
     accessible.state('rowIndex', table.states.row);
     accessible.state('columnIndex', table.states.column);
     accessible.state('rowSpan', table.states.rowSpan);
@@ -28,7 +27,6 @@ export const tableHeaderCell = definePrototype<TableHeaderCellProps, TableHeader
     const sync = (props: Readonly<TableHeaderCellProps>) => {
       const headerKind =
         props.headerKind === 'row' || props.headerKind === 'column' ? props.headerKind : undefined;
-      role.set(headerKind === 'row' ? 'rowheader' : headerKind === 'column' ? 'columnheader' : '');
       table.configure({
         headerKey: typeof props.headerKey === 'string' ? props.headerKey : '',
         headerKind,

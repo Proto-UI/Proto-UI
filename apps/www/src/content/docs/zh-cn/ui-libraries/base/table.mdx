@@ -43,9 +43,9 @@ Row 与 cell 顺序来自当前 host-observable Anatomy order。每个 Row 的�
 
 HeaderCell 声明 non-empty、same-domain unique 的 `headerKey` 与 `headerKind: 'column' | 'row'`。Cell 声明 ordered、non-empty header-key set。HeaderCell 可以为 layered header 声明 upstream header keys；upstream 表示 target 在 computed row-major topology 中先于 source，self 与 later/downstream reference 均无效。
 
-Resolution 产出 opaque same-domain semantic-object refs，并按 target kind 分成有序 `columnHeaders` 与 `rowHeaders`；同一个 cell 可以关联多个 header。Missing、empty、duplicate、ambiguous、unprojectable、self 或 downstream reference 都产生 structural diagnostic；实现不得猜测 target 或制造 host id。Resolution 不会搜索 sibling 或 nested Table domain，因此当前 domain 缺失的 key 即使在其它 domain 存在同名 key，也仍然是 missing target。
+Resolution 产出 opaque same-domain semantic-object refs，并按 target kind 分成有序 `columnHeaders` 与 `rowHeaders`；`orderedHeaders` 同时保留跨 header kind 的 authored order，供 host labeling 使用。同一个 cell 可以关联多个 header。Missing、empty、duplicate、ambiguous、unprojectable、self 或 downstream reference 都产生 structural diagnostic；实现不得猜测 target 或制造 host id。Resolution 不会搜索 sibling 或 nested Table domain，因此当前 domain 缺失的 key 即使在其它 domain 存在同名 key，也仍然是 missing target。
 
-Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无效的结构可以保持 mounted 并报告 invalid snapshot，但不能改写 authored content，也不能发送 data-operation signal。
+Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无效的结构可以保持 mounted 并报告 invalid snapshot，但必须清除 owned structural role、coordinate、span 与 relationship；它不能改写 authored content，也不能发送 data-operation signal。
 
 ## Accessibility 与 host 边界
 

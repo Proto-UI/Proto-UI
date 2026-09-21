@@ -35,6 +35,7 @@ type MutableCell = {
   columnSpan: number;
   columnHeaders: A11ySemanticObjectRef[];
   rowHeaders: A11ySemanticObjectRef[];
+  orderedHeaders: A11ySemanticObjectRef[];
 };
 
 export function projectTableStructure(input: TableStructureInput): TableStructureSnapshot {
@@ -121,6 +122,7 @@ export function projectTableStructure(input: TableStructureInput): TableStructur
         columnSpan: size.columnSpan,
         columnHeaders: [],
         rowHeaders: [],
+        orderedHeaders: [],
       };
       cells.push(cell);
       placed.set(inputCell, cell);
@@ -198,6 +200,7 @@ export function projectTableStructure(input: TableStructureInput): TableStructur
           continue;
         }
         if (!source) continue;
+        source.orderedHeaders.push(targetInput.ref);
         if (targetInput.headerKind === 'row') source.rowHeaders.push(targetInput.ref);
         else source.columnHeaders.push(targetInput.ref);
       }
@@ -287,6 +290,7 @@ function freezeSnapshot(snapshot: {
                 ...cell,
                 columnHeaders: Object.freeze([...cell.columnHeaders]),
                 rowHeaders: Object.freeze([...cell.rowHeaders]),
+                orderedHeaders: Object.freeze([...cell.orderedHeaders]),
               })
             )
           ),

@@ -4,8 +4,8 @@ title: Table Structure owns passive two-dimensional topology and header relation
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Checkpoint B implements the approved host-neutral semantic owner with Module and Base evidence. Four-Adapter materialization and reader projection remain Checkpoint C activation blockers.
-  zh-CN: Checkpoint B 实现已批准的 host-neutral semantic owner，并具备 Module 与 Base 证据；四 Adapter materialization 与 reader projection 仍是 Checkpoint C activation blocker。
+  en: Checkpoint B implements the approved host-neutral semantic owner with Module and Base evidence, and bounded Web Component materialization now passes. React, Vue and Vue 2 materialization plus complete reader evidence remain Checkpoint C activation blockers.
+  zh-CN: Checkpoint B 实现已批准的 host-neutral semantic owner，并具备 Module/Base 证据与通过的有界 Web Component materialization；React、Vue、Vue 2 materialization 及完整 reader evidence 仍是 Checkpoint C activation blocker。
 summary: The Table Structure Module recomputes one nearest-domain passive topology from Anatomy order and projects opaque header relationships through generic A11y.
 statement:
   en: Table Structure owns range-based placement, structural validity, diagnostics and ordered opaque header references for one nearest Base Table domain. It consumes Anatomy, State and A11y only; it owns no host service, App data or interaction state.
@@ -21,12 +21,12 @@ criteria:
       zh-CN: Placement 使用 merged column ranges 与每 Row monotonic cursor，只接受 positive safe-integer spans，且不得按 span magnitude 分配空间。
   - id: M-TABLE-STRUCTURE-0001-C
     text:
-      en: Protocol header keys resolve only to unique placeable same-domain HeaderCell semantic-object refs; ordered row and column relationships preserve authored input and reject ambiguous, missing, self or downstream targets.
-      zh-CN: Protocol header keys 只能解析到 unique、placeable、same-domain HeaderCell semantic-object refs；有序 row/column relationships 保留 authored input，并拒绝 ambiguous、missing、self 或 downstream targets。
+      en: Protocol header keys resolve only to unique placeable same-domain HeaderCell semantic-object refs; orderedHeaders preserves authored order across header kinds, rowHeaders and columnHeaders preserve their per-kind order, and ambiguous, missing, self or downstream targets are rejected.
+      zh-CN: Protocol header keys 只能解析到 unique、placeable、same-domain HeaderCell semantic-object refs；orderedHeaders 保留跨 header kind 的 authored order，rowHeaders/columnHeaders 保留各自 kind 内顺序，并拒绝 ambiguous、missing、self 或 downstream target。
   - id: M-TABLE-STRUCTURE-0001-D
     text:
-      en: Insert, remove, reorder and authored-configuration changes recompute a read-only snapshot and generic A11y states/relations; invalid structure clears valid projection facts and remains addressably diagnostic.
-      zh-CN: Insert、remove、reorder 与 authored configuration 变化必须重算只读 snapshot 和通用 A11y states/relations；无效结构清除 valid projection facts，并保留可寻址 diagnostic。
+      en: Insert, remove, reorder and authored-configuration changes recompute a read-only snapshot and generic A11y states and relations; invalid structure clears structural roles and every other valid projection fact while remaining addressably diagnostic.
+      zh-CN: Insert、remove、reorder 与 authored configuration 变化必须重算只读 snapshot 和通用 A11y states/relations；无效结构清除 structural roles 及其它全部 valid projection facts，并保留可寻址 diagnostic。
   - id: M-TABLE-STRUCTURE-0001-E
     text:
       en: The Module exposes no sorting, selection, pagination, virtualization, editing, fetching, focus, layout-table or host-materialization behavior and introduces no Table-specific Host Capability.
@@ -54,4 +54,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Implemented the approved Checkpoint B host-neutral semantic owner, topology, diagnostics and opaque relationship evidence.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded Web Component evidence, global authored header order, and fail-closed semantic-role cleanup while retaining three Adapter activation blockers.
 tags: [table, structure, module, anatomy, accessibility, draft]

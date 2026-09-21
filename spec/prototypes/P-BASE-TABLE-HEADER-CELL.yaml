@@ -4,8 +4,8 @@ title: Base Table HeaderCell declares one keyed row or column header
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Real source and header-graph evidence exist; four-Adapter materialization remains planned.
-  zh-CN: 已有真实 source 与 header-graph 证据；四 Adapter materialization 仍为 planned。
+  en: Real source, header-graph evidence and bounded Web Component HeaderCell materialization exist; React, Vue and Vue 2 remain planned.
+  zh-CN: 已有真实 source、header-graph 证据与有界 Web Component HeaderCell materialization；React、Vue 与 Vue 2 仍为 planned。
 summary: HeaderCell contributes a unique protocol key, header kind, spans and optional upstream header keys to its nearest Table domain.
 statement:
   en: Base Table HeaderCell owns only authored structural facts and App-owned slot content; Table Structure computes its coordinates and opaque relationships.
@@ -41,4 +41,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added keyed row/column HeaderCell facts, computed coordinates and opaque relationship projection.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded content-preserving Web Component HeaderCell relationships while retaining three planned Adapter paths.
 tags: [table, header-cell, base, prototype, accessibility, draft]

@@ -4,8 +4,8 @@ title: Base Table Caption supplies App-owned purpose content
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Real source and Base evidence exist; host materialization remains a Checkpoint C blocker.
-  zh-CN: 已有真实 source 与 Base 证据；host materialization 仍是 Checkpoint C blocker。
+  en: Real source, Base evidence and bounded Web Component caption materialization exist; React, Vue and Vue 2 remain Checkpoint C blockers.
+  zh-CN: 已有真实 source、Base 证据与有界 Web Component caption materialization；React、Vue 与 Vue 2 仍是 Checkpoint C blocker。
 summary: Caption contributes one optional same-domain semantic object while preserving authored content.
 statement:
   en: Base Table Caption claims the optional caption role, projects caption accessibility identity, and transparently preserves one anonymous App-owned slot.
@@ -37,4 +37,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the optional transparent Table Caption identity and semantic relationship source.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded bounded Web Component caption materialization while retaining the remaining Adapter blockers.
 tags: [table, caption, base, prototype, draft]

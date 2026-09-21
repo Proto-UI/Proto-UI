@@ -8,8 +8,8 @@ export const tableRoot = definePrototype<TableRootProps, TableRootExposes>({
   setup(def) {
     def.anatomy.claim(TABLE_STRUCTURE_FAMILY, { role: 'root' });
     const accessible = asAccessible();
-    accessible.role('table');
     const table = asTableStructure<TableRootProps>('root');
+    accessible.role(table.states.a11yRole);
     accessible.state('rowCount', table.states.rowCount);
     accessible.state('columnCount', table.states.columnCount);
     def.expose.method('getStructure', () => table.getSnapshot());

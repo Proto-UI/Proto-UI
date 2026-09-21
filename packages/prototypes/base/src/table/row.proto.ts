@@ -8,8 +8,8 @@ export const tableRow = definePrototype<TableRowProps, TableRowExposes>({
   setup(def) {
     def.anatomy.claim(TABLE_STRUCTURE_FAMILY, { role: 'row' });
     const accessible = asAccessible();
-    accessible.role('row');
     const table = asTableStructure<TableRowProps>('row');
+    accessible.role(table.states.a11yRole);
     accessible.state('rowIndex', table.states.row);
     return (render) => render.slot();
   },

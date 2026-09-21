@@ -4,8 +4,8 @@ title: Base Table owns one passive structural domain and snapshot
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Checkpoint B adds real source and host-neutral Runtime evidence, while Adapter conformance and reader projection remain planned.
-  zh-CN: Checkpoint B 新增真实 source 与 host-neutral Runtime 证据，Adapter conformance 与 reader projection 仍为 planned。
+  en: Real host-neutral source and bounded Web Component evidence exist; React, Vue and Vue 2 conformance plus complete reader evidence remain planned.
+  zh-CN: 已有真实 host-neutral source 与有界 Web Component 证据；React、Vue、Vue 2 conformance 及完整 reader evidence 仍为 planned。
 summary: Base Table establishes the nearest structural domain and exposes its current read-only topology snapshot.
 statement:
   en: Base Table is a transparent passive root over Table Structure. It owns no data operations, focus policy, host layout or design-language presentation.
@@ -54,4 +54,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the passive Base Table root, exact Anatomy domain and read-only structure snapshot.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded bounded Web Component Table evidence while retaining the remaining Adapter and reader activation blockers.
 tags: [table, base, prototype, structure, draft]

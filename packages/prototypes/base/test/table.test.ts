@@ -36,7 +36,7 @@ describe('prototypes/base: Table Structure', () => {
     const value = element('base-table-cell');
     setElementProps(quarter, { headerKey: 'quarter', headerKind: 'column', columnSpan: 2 });
     setElementProps(owner, { headerKey: 'owner', headerKind: 'row' });
-    setElementProps(value, { headers: ['quarter', 'owner'] });
+    setElementProps(value, { headers: ['owner', 'quarter'] });
     headerRow.append(quarter);
     dataRow.append(owner, value);
     root.append(caption, headerRow, dataRow);
@@ -49,6 +49,10 @@ describe('prototypes/base: Table Structure', () => {
       expect(snapshot.rows[1].cells[1]).toMatchObject({ row: 1, column: 1 });
       expect(snapshot.rows[1].cells[1].columnHeaders).toEqual([snapshot.rows[0].cells[0].ref]);
       expect(snapshot.rows[1].cells[1].rowHeaders).toEqual([snapshot.rows[1].cells[0].ref]);
+      expect(snapshot.rows[1].cells[1].orderedHeaders).toEqual([
+        snapshot.rows[1].cells[0].ref,
+        snapshot.rows[0].cells[0].ref,
+      ]);
       expect(snapshot.caption).toBeDefined();
       expect(snapshot.rows[1].cells[1].columnHeaders).not.toContain('quarter');
       setElementProps(value, { headers: ['quarter'] });
@@ -57,6 +61,10 @@ describe('prototypes/base: Table Structure', () => {
       setElementProps(value, { headers: ['quarter', 'owner'] });
       await flush();
       expect(getStructure(root).rows[1].cells[1].rowHeaders).toEqual([
+        getStructure(root).rows[1].cells[0].ref,
+      ]);
+      expect(getStructure(root).rows[1].cells[1].orderedHeaders).toEqual([
+        getStructure(root).rows[0].cells[0].ref,
         getStructure(root).rows[1].cells[0].ref,
       ]);
     } finally {
@@ -134,15 +142,25 @@ describe('prototypes/base: Table Structure', () => {
     setElementProps(cell, { headers: ['name'] });
     setElementProps(orphan, { headers: ['name'] });
     row.append(header, cell);
-    root.append(row, orphan);
+    root.append(row);
     document.body.append(root);
 
     try {
+      await flush();
+      expect(root.getAttribute('role')).toBe('table');
+      expect(row.getAttribute('role')).toBe('row');
+      expect(cell.getAttribute('role')).toBe('cell');
+      root.append(orphan);
       await flush();
       expect(getStructure(root).valid).toBe(false);
       expect(getStructure(root).diagnostics.map((item) => item.code)).toContain(
         'missing-row-parent'
       );
+      expect(root.getAttribute('role')).toBeNull();
+      expect(row.getAttribute('role')).toBeNull();
+      expect(header.getAttribute('role')).toBeNull();
+      expect(cell.getAttribute('role')).toBeNull();
+      expect(orphan.getAttribute('role')).toBeNull();
     } finally {
       root.remove();
       await flush();

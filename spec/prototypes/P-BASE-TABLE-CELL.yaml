@@ -4,8 +4,8 @@ title: Base Table Cell declares spans and ordered header keys
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Real source and topology/header evidence exist; four-Adapter materialization remains planned.
-  zh-CN: 已有真实 source 与 topology/header 证据；四 Adapter materialization 仍为 planned。
+  en: Real source, topology/header evidence and bounded content-preserving Web Component Cell materialization exist; React, Vue and Vue 2 remain planned.
+  zh-CN: 已有真实 source、topology/header 证据与保留内容的有界 Web Component Cell materialization；React、Vue 与 Vue 2 仍为 planned。
 summary: Cell contributes positive spans and an ordered non-empty header-key set to the nearest passive Table domain.
 statement:
   en: Base Table Cell retains App-owned slot content while Table Structure computes coordinates and resolves authored keys into ordered opaque row and column header refs.
@@ -17,8 +17,8 @@ criteria:
       zh-CN: Cell 声明 positive safe rowSpan/columnSpan 与有序 non-empty header-key set；无效 facts 保持 diagnostic，且不得猜测。
   - id: P-BASE-TABLE-CELL-RELATIONS
     text:
-      en: Resolved keys retain authored order and split by target header kind into opaque rowHeaders and columnHeaders.
-      zh-CN: Resolved keys 保留 authored order，并按 target header kind 分为 opaque rowHeaders 与 columnHeaders。
+      en: Resolved keys retain authored order in orderedHeaders and split by target header kind into opaque rowHeaders and columnHeaders without losing per-kind order.
+      zh-CN: Resolved keys 在 orderedHeaders 中保留 authored order，并按 target header kind 分为 opaque rowHeaders 与 columnHeaders，且不丢失各 kind 内顺序。
   - id: P-BASE-TABLE-CELL-CONTENT
     text:
       en: Authored content remains untouched in one anonymous slot and is excluded from the structural data model.
@@ -41,4 +41,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added passive Table Cell spans, ordered header keys and opaque relationship projection.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added cross-kind ordered header projection and bounded content-preserving Web Component evidence while retaining three planned Adapter paths.
 tags: [table, cell, base, prototype, accessibility, draft]

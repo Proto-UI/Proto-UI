@@ -15,8 +15,8 @@ export const tableCell = definePrototype<TableCellProps, TableCellExposes>({
     def.props.setDefaults({ headers: [], rowSpan: 1, columnSpan: 1 });
 
     const accessible = asAccessible();
-    accessible.role('cell');
     const table = asTableStructure<TableCellProps>('cell');
+    accessible.role(table.states.a11yRole);
     accessible.state('rowIndex', table.states.row);
     accessible.state('columnIndex', table.states.column);
     accessible.state('rowSpan', table.states.rowSpan);

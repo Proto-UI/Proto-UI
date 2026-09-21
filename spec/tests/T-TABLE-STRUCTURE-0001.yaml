@@ -212,5 +212,5 @@ revisions:
     summary: Added executable-probe and planned conformance mappings for Table identity, topology, header relations, diagnostics, churn, A11y projection, and negative boundaries.
   - version: 0.3.0-alpha.1
     change: revised
-    summary: Marked Checkpoint B Module and Base implementations passing with topology, nearest-domain, churn, diagnostics and opaque relationship evidence; added bounded passing Web Component ARIA projection evidence while React, Vue and Vue 2 remain planned.
+    summary: Marked Checkpoint B Module and Base implementations passing with topology, nearest-domain, role mismatch, churn, diagnostics, cross-kind ordered relationships and fail-closed role cleanup; added bounded passing Web Component ARIA projection evidence while React, Vue and Vue 2 remain planned.
 tags: [table, structure, test, accessibility]
