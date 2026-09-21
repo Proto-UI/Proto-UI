@@ -675,12 +675,17 @@ function watchEntryStyleInvalidation(
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['href', 'rel', 'media', 'disabled'],
+      attributeFilter: ['href', 'rel', 'media', 'disabled', 'type'],
     });
     const onLoad = (event: Event) => {
       if (isEntryStylesheetElement(event.target as Node | null)) notify();
     };
-    const stopEvents = listenToEntryEvents([doc], ['load'], onLoad);
+    const stopLoadEvents = listenToEntryEvents([doc], ['load'], onLoad);
+    const stopHashEvents = listenToEntryEvents([view], ['hashchange'], notify);
+    const stopEvents = () => {
+      stopLoadEvents();
+      stopHashEvents();
+    };
     watch = {
       subscribers,
       methodPatches,
@@ -1368,7 +1373,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     childList: true,
                     characterData: true,
                     attributes: true,
-                    attributeFilter: ['href', 'rel', 'media', 'disabled'],
+                    attributeFilter: ['href', 'rel', 'media', 'disabled', 'type'],
                   });
                 }
               }

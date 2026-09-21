@@ -4352,6 +4352,148 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects entry fallback when style type changes eligibility', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-style-type-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.type = 'text/plain';
+        style.textContent = '#style-type-entry button { visibility: hidden }';
+        const host = new C();
+        host.id = 'style-type-entry';
+        host.innerHTML = '<button id="style-type-target">Target</button>';
+        document.head.append(style);
+        document.body.append(host);
+        const settle = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        await settle();
+        const initial = {
+          visibility: getComputedStyle(host.querySelector('#style-type-target')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        style.type = 'text/css';
+        await settle();
+        const enabled = {
+          visibility: getComputedStyle(host.querySelector('#style-type-target')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        style.type = 'text/plain';
+        await settle();
+        return {
+          initial,
+          enabled,
+          disabledAgain: {
+            visibility: getComputedStyle(host.querySelector('#style-type-target')!).visibility,
+            fallback: host.getAttribute('tabindex'),
+          },
+        };
+      });
+      expect(result).toEqual({
+        initial: { visibility: 'visible', fallback: null },
+        enabled: { visibility: 'hidden', fallback: '0' },
+        disabledAgain: { visibility: 'visible', fallback: null },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('rebinds target-selector invalidation after document adoption and tears it down', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-target-adoption-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const host = new C();
+        host.id = 'target-adoption-entry';
+        host.innerHTML = '<button id="target-adoption-button">Target</button>';
+        document.body.append(host);
+        const frame = document.createElement('iframe');
+        frame.srcdoc =
+          '<!doctype html><style>#target-adoption-entry:target button { visibility: hidden }</style><body></body>';
+        document.body.append(frame);
+        await new Promise<void>((resolve) =>
+          frame.addEventListener('load', () => resolve(), { once: true })
+        );
+        const frameWindow = frame.contentWindow!;
+        const frameDocument = frame.contentDocument!;
+        frameDocument.adoptNode(host);
+        frameDocument.body.append(host);
+        const settle = () =>
+          new Promise<void>((resolve) => frameWindow.requestAnimationFrame(() => resolve()));
+        await settle();
+        const initial = {
+          visibility: frameWindow.getComputedStyle(host.querySelector('button')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        const changed = new Promise<void>((resolve) =>
+          frameWindow.addEventListener('hashchange', () => resolve(), { once: true })
+        );
+        frameWindow.location.hash = 'target-adoption-entry';
+        await changed;
+        await settle();
+        const targeted = {
+          visibility: frameWindow.getComputedStyle(host.querySelector('button')!).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        host.remove();
+        await Promise.resolve();
+        let writesAfterTeardown = 0;
+        const setAttribute = host.setAttribute;
+        const removeAttribute = host.removeAttribute;
+        host.setAttribute = function (...args: Parameters<HTMLElement['setAttribute']>) {
+          writesAfterTeardown += 1;
+          return setAttribute.apply(this, args);
+        };
+        host.removeAttribute = function (...args: Parameters<HTMLElement['removeAttribute']>) {
+          writesAfterTeardown += 1;
+          return removeAttribute.apply(this, args);
+        };
+        const cleared = new Promise<void>((resolve) =>
+          frameWindow.addEventListener('hashchange', () => resolve(), { once: true })
+        );
+        frameWindow.location.hash = '';
+        await cleared;
+        await settle();
+        return { initial, targeted, writesAfterTeardown };
+      });
+      expect(result).toEqual({
+        initial: { visibility: 'visible', fallback: null },
+        targeted: { visibility: 'hidden', fallback: '0' },
+        writesAfterTeardown: 0,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('does not hand trapped traversal to an iframe browsing context', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

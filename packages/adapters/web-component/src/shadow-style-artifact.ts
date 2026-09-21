@@ -115,9 +115,9 @@ function validateShadowSelectorAbi(cssText: string): void {
   // Match the media feature structurally across optional whitespace, casing,
   // values, negation and compound queries so an explicit host-dark rule can
   // never be gated a second time by the system preference.
-  const systemColorSchemeRule = structuralCss.match(
-    /(?:^|[;{}])\s*(@media\b(?=[^;{}]*\bprefers-color-scheme\b)[^;{}]*)\{/i
-  );
+  const systemColorSchemeRule = [
+    ...structuralCss.matchAll(/(?:^|[;{}])\s*(@media\b[^;{}]*)\{/gi),
+  ].find((match) => /\bprefers-color-scheme\b/i.test(decodeShadowCssEscapes(match[1]!)));
   const documentMarker = documentRule?.[1] ?? systemColorSchemeRule?.[1];
   if (documentMarker) {
     throw invalidArtifact(documentMarker);
@@ -141,6 +141,52 @@ function validateShadowSelectorAbi(cssText: string): void {
   if (hasUnscopedDarkToken) {
     throw invalidArtifact('dark');
   }
+}
+
+// CSS identifiers may encode otherwise ordinary characters with a one-to-six
+// digit hexadecimal escape plus optional trailing whitespace. Decode only an
+// already isolated @media prelude: decoding before structural scanning could
+// incorrectly promote an escaped delimiter into CSS syntax.
+function decodeShadowCssEscapes(value: string): string {
+  let decoded = '';
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index]!;
+    if (character !== '\\') {
+      decoded += character;
+      continue;
+    }
+
+    const escaped = value[index + 1];
+    if (escaped === undefined) break;
+    if (escaped === '\n' || escaped === '\f') {
+      index += 1;
+      continue;
+    }
+    if (escaped === '\r') {
+      index += value[index + 2] === '\n' ? 2 : 1;
+      continue;
+    }
+    if (!/[0-9a-f]/i.test(escaped)) {
+      decoded += escaped;
+      index += 1;
+      continue;
+    }
+
+    let end = index + 1;
+    while (end < value.length && end <= index + 6 && /[0-9a-f]/i.test(value[end]!)) end += 1;
+    const codePoint = Number.parseInt(value.slice(index + 1, end), 16);
+    decoded +=
+      codePoint === 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ? '\uFFFD'
+        : String.fromCodePoint(codePoint);
+    if (/\s/.test(value[end] ?? '')) {
+      if (value[end] === '\r' && value[end + 1] === '\n') end += 1;
+      index = end;
+    } else {
+      index = end - 1;
+    }
+  }
+  return decoded;
 }
 
 // Split rule preludes and top-level selector-list branches without treating

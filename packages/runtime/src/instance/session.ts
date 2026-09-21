@@ -436,7 +436,11 @@ export function createRuntimeSession<P extends PropsBaseType>(
       moduleHub.setProtoPhase('unmounted');
       moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver(null);
       cancelPendingDelayTasks();
-      inst.dispose();
+      try {
+        inst.dispose();
+      } catch (error) {
+        finalError ??= error;
+      }
       setInstancePhase('disposed');
       emit({ type: 'instance.dispose.done' });
       return finalError;

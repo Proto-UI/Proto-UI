@@ -182,4 +182,28 @@ describe('runtime contract: lifecycle transition matrix (v1)', () => {
     await expect(session.dispose()).rejects.toThrow('dispose failure');
     expect(session.instancePhase).toBe('disposed');
   });
+
+  it('finalizes terminal lifecycle when a module disposer throws', async () => {
+    const { host, events } = createControlledHost();
+    const session = createRuntimeSession(simpleProto(), host);
+    const disposeError = new Error('module dispose failure');
+    const records = (
+      session.caps as unknown as {
+        records: Array<{ module: { hooks: { dispose?: () => void } } }>;
+      }
+    ).records;
+    const originalDispose = records[0]!.module.hooks.dispose;
+    records[0]!.module.hooks.dispose = () => {
+      originalDispose?.();
+      throw disposeError;
+    };
+
+    await expect(session.dispose()).rejects.toBe(disposeError);
+    expect(session.instancePhase).toBe('disposed');
+    expect(events.filter((event) => event.type.startsWith('instance.dispose'))).toEqual([
+      { type: 'instance.dispose.begin' },
+      { type: 'instance.dispose.done' },
+    ]);
+    await expect(session.dispose()).resolves.toBeUndefined();
+  });
 });

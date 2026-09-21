@@ -138,6 +138,18 @@ describe('adapter-web-component Shadow style artifact', () => {
       ),
     ],
     [
+      'hex-escaped hyphen in a system color-scheme media feature',
+      artifact(
+        `@media (prefers\\2d color-scheme: light) { :host([data-pui-color-scheme='dark']) [data-pui-style~='dark:bg-input/30'] { color: red; } }`
+      ),
+    ],
+    [
+      'hex-escaped letter in a system color-scheme media feature',
+      artifact(
+        `@media (prefers-color-sch\\65 me: light) { :host([data-pui-color-scheme='dark']) [data-pui-style~='dark:bg-input/30'] { color: red; } }`
+      ),
+    ],
+    [
       'dark rule without the host marker',
       artifact(`:where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
     ],

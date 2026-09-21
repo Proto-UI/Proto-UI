@@ -1137,6 +1137,65 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(removeAttribute).not.toHaveBeenCalled();
   });
 
+  it('reprojects when a style element changes stylesheet eligibility', async () => {
+    const style = document.createElement('style');
+    style.type = 'text/plain';
+    document.head.append(style);
+    const host = panel(false);
+    const button = document.createElement('button');
+    host.append(button);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility') return style.type === 'text/css' ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    style.type = 'text/css';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+  });
+
+  it('reprojects on URL target changes and removes the listener at teardown', async () => {
+    const host = panel(false);
+    const button = document.createElement('button');
+    host.append(button);
+    let targetMatched = false;
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility') return targetMatched ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    targetMatched = true;
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    host.remove();
+    await settle();
+    const setAttribute = vi.spyOn(host, 'setAttribute');
+    targetMatched = false;
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    await settle();
+    expect(setAttribute).not.toHaveBeenCalled();
+  });
+
   it('rebuilds imported media listeners when an external Shadow stylesheet loads', async () => {
     const query = '(prefers-contrast: more)';
     const media = Object.assign(new EventTarget(), {
