@@ -25,8 +25,10 @@ export type TableStructureDiagnosticCode =
   | 'invalid-span'
   | 'row-span-out-of-range'
   | 'column-range-out-of-range'
+  | 'missing-row-parent'
   | 'missing-header-key'
   | 'duplicate-header-key'
+  | 'missing-header-kind'
   | 'missing-cell-headers'
   | 'empty-header-reference'
   | 'duplicate-header-reference'
@@ -68,14 +70,6 @@ export type TableStructureSnapshot = Readonly<{
   valid: boolean;
   diagnostics: readonly TableStructureDiagnostic[];
 }>;
-export type TableStructurePartBridge = Readonly<{
-  role: TablePartRole;
-  ref: A11ySemanticObjectRef;
-  readConfig(): TablePartConfig;
-  applyRow(index: number | null): void;
-  applyCell(snapshot: TableStructureCellSnapshot | null): void;
-  applyTable(snapshot: TableStructureSnapshot | null): void;
-}>;
 
 export type TableStructureStateHandles = Readonly<{
   rowCount: OwnedStateHandle<number>;
@@ -92,7 +86,6 @@ export type TableStructureHandle = Readonly<{
   configure(patch: TablePartConfig): void;
   getObjectRef(): A11ySemanticObjectRef;
   getSnapshot(): TableStructureSnapshot | null;
-  getPartBridge(): TableStructurePartBridge;
 }>;
 
 export type TableStructureFacade = {

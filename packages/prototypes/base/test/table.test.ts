@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { tableCaption, tableCell, tableHeaderCell, tableRoot, tableRow } from '../src/table';
-import type {
-  TableStructurePartBridge,
-  TableStructureSnapshot,
-} from '@proto.ui/module-table-structure';
+import type { TableStructureSnapshot } from '@proto.ui/module-table-structure';
 
 for (const prototype of [tableRoot, tableCaption, tableRow, tableHeaderCell, tableCell]) {
   AdaptToWebComponent(prototype);
@@ -68,7 +65,7 @@ describe('prototypes/base: Table Structure', () => {
     }
   });
 
-  it('recomputes insert remove and authored order without rewriting props', async () => {
+  it('recomputes insert remove and authored order', async () => {
     const root = element('base-table-root');
     const row = element('base-table-row');
     const header = element('base-table-header-cell');
@@ -89,14 +86,6 @@ describe('prototypes/base: Table Structure', () => {
       expect(
         getStructure(root).rows[0].cells.map((cell: { column: number }) => cell.column)
       ).toEqual([0, 1, 3]);
-      const bridge = second.getExposes().__tableStructurePart;
-      if (!bridge || typeof bridge !== 'object' || !('readConfig' in bridge)) {
-        throw new Error('Table Cell internal structure bridge unavailable.');
-      }
-      expect((bridge as TableStructurePartBridge).readConfig()).toMatchObject({
-        headers: ['h'],
-        columnSpan: 2,
-      });
       second.remove();
       await flush();
       expect(getStructure(root)).toMatchObject({ valid: true, columnCount: 2 });
@@ -131,6 +120,55 @@ describe('prototypes/base: Table Structure', () => {
       ).toContain('missing-header-target');
     } finally {
       valid.remove();
+      await flush();
+    }
+  });
+
+  it('rejects a Cell placed directly under Table after a valid Row', async () => {
+    const root = element('base-table-root');
+    const row = element('base-table-row');
+    const header = element('base-table-header-cell');
+    const cell = element('base-table-cell');
+    const orphan = element('base-table-cell');
+    setElementProps(header, { headerKey: 'name', headerKind: 'column' });
+    setElementProps(cell, { headers: ['name'] });
+    setElementProps(orphan, { headers: ['name'] });
+    row.append(header, cell);
+    root.append(row, orphan);
+    document.body.append(root);
+
+    try {
+      await flush();
+      expect(getStructure(root).valid).toBe(false);
+      expect(getStructure(root).diagnostics.map((item) => item.code)).toContain(
+        'missing-row-parent'
+      );
+    } finally {
+      root.remove();
+      await flush();
+    }
+  });
+
+  it('requires HeaderCell authors to choose row or column semantics', async () => {
+    const root = element('base-table-root');
+    const row = element('base-table-row');
+    const header = element('base-table-header-cell');
+    const cell = element('base-table-cell');
+    setElementProps(header, { headerKey: 'name' });
+    setElementProps(cell, { headers: ['name'] });
+    row.append(header, cell);
+    root.append(row);
+    document.body.append(root);
+
+    try {
+      await flush();
+      expect(header.getAttribute('role')).toBeNull();
+      expect(getStructure(root).valid).toBe(false);
+      expect(getStructure(root).diagnostics.map((item) => item.code)).toContain(
+        'missing-header-kind'
+      );
+    } finally {
+      root.remove();
       await flush();
     }
   });

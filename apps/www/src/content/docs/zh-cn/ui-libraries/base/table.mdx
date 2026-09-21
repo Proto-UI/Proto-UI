@@ -3,7 +3,7 @@ title: 'Table（Draft）'
 description: 'Base Table draft structural protocol、已实现的 host-neutral topology、accessibility 边界与待补 Adapter 证据。'
 ---
 
-Base Table 是**已有 Checkpoint B host-neutral 实现的 draft protocol**，不是已发布的 Adapter conformance 声明。当前切片由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001`、`M-TABLE-STRUCTURE-0001`、五个 `P-BASE-TABLE*` identity 与 `T-TABLE-STRUCTURE-0001` 治理。四 Adapter profile 证据、CLI facade 注册、可用 runtime preview 与 design-language 工作仍由 #621 Checkpoint C 继续完成。
+Base Table 是**已有 Checkpoint B host-neutral 实现的 draft protocol**，不是已发布的 Adapter conformance 声明。当前切片由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001`、`M-TABLE-STRUCTURE-0001`、五个 `P-BASE-TABLE*` identity 与 `T-TABLE-STRUCTURE-0001` 治理。React、Vue 与 Vue 2 Adapter profile 证据、CLI facade 注册、可用 runtime preview 与 design-language 工作仍由 #621 Checkpoint C 继续完成。
 
 ## 为什么 Table 是协议
 
@@ -19,7 +19,7 @@ Maker-authored parts、spans 与 header keys
   -> User 可观察的 table relationships
 ```
 
-当前定义已有 portable Module 与 Base family；它仍不声明 official Adapter 已实现完整 host-projection path。
+当前定义已有 portable Module、Base family 与有界的 Web Component host-projection 证据；它不声明完整 Adapter conformance。
 
 ## 已实现的 host-neutral family
 
@@ -51,7 +51,7 @@ Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无�
 
 Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-TABLE`。Table Structure 不请求 physical widget、measurement、input、resource 或 system service。
 
-通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。各 official Adapter profile 的 Table-specific mapping 仍为 planned，不从这项通用 transport 自动推断。
+通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。Web Component 证据现已验证 one-based ARIA row/column count、index、span、caption naming 与 header naming。React、Vue 与 Vue 2 的 Table projection tests 仍为 planned；通过的 Web Component 切片不表示完整的 cross-Adapter 或 assistive-technology conformance。
 
 外部 host 对照只证明 shared information shape：
 
@@ -62,7 +62,7 @@ Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-
 | Header relationships | rowheader/columnheader；必要时显式 relation | row/column header element methods | TableItem row/column header providers |
 | Multiple headers | 多个 semantic relationship targets | header-element arrays | header-provider collections |
 
-这张 matrix 不声明当前 Web、UIKit、Windows 或 cross-host conformance。Native 或 translated materialization 仍是需要 executable evidence 的 Adapter-profile decision。
+这张 matrix 不会把有界的 Web Component assertions 扩大成完整 Web、UIKit、Windows 或 cross-host conformance。Native 或 translated materialization 仍是需要 executable evidence 的 Adapter-profile decision。
 
 ## Table 与 Data Table
 
@@ -83,7 +83,7 @@ Later Data Table composition 可以消费 passive structure，同时组合分别
 
 ## 证据状态
 
-Host-neutral reference probe 与 Checkpoint B Module/Base tests 现已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy 与 passive negative boundaries。新增 `@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 仍为 draft。`T-TABLE-STRUCTURE-0001` 在 Checkpoint C 添加并独立评审对应测试前，继续把四个 official Web Adapter path 标为 `planned`；因此本页暂不提供交互式 Table preview。
+Host-neutral reference probe 与 Module/Base tests 已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy、passive negative boundaries、generic A11y emission 与 projection cleanup。Web Component Adapter test 覆盖 count、index、span、caption identity 与 header identity 的 ARIA materialization。新增 `@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 仍为 draft；React、Vue 与 Vue 2 Adapter tests 仍为 `planned`，本页也暂不提供交互式 Table preview。
 
 ## 参考
 

@@ -8,8 +8,7 @@ export const tableCaption = definePrototype<TableCaptionProps, TableCaptionExpos
   setup(def) {
     def.anatomy.claim(TABLE_STRUCTURE_FAMILY, { role: 'caption' });
     asAccessible().role('caption');
-    const table = asTableStructure<TableCaptionProps>('caption');
-    def.expose.value('__tableStructurePart', table.getPartBridge());
+    asTableStructure<TableCaptionProps>('caption');
     return (render) => render.slot();
   },
 });

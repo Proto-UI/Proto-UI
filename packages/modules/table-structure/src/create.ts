@@ -9,7 +9,7 @@ import type { A11yPort } from '@proto.ui/module-a11y';
 import type { AnatomyPort } from '@proto.ui/module-anatomy';
 import type { StateFacade, StatePort } from '@proto.ui/module-state';
 import { projectTableStructure, type TableStructureCellInput } from './projection';
-import { TABLE_STRUCTURE_FAMILY, TABLE_STRUCTURE_PART_EXPOSE } from './family';
+import { TABLE_STRUCTURE_FAMILY } from './family';
 import type {
   TablePartConfig,
   TablePartRole,
@@ -17,23 +17,23 @@ import type {
   TableStructureFacade,
   TableStructureHandle,
   TableStructureModule,
-  TableStructurePartBridge,
   TableStructurePort,
   TableStructureSnapshot,
   TableStructureStateHandles,
 } from './types';
 
 const rootsByDomain = new Map<unknown, TableStructureModuleImpl>();
+const partsByInstance = new Map<unknown, TableStructureModuleImpl>();
 
 export class TableStructureModuleImpl extends ModuleBase {
   private role: TablePartRole | null = null;
   private config: TablePartConfig = Object.freeze({});
-  private stopTargets: (() => void) | null = null;
   private snapshot: TableStructureSnapshot | null = null;
   private domainScope: unknown | null = null;
   private stopOrder: (() => void) | null = null;
+  private stopTargets: (() => void) | null = null;
   private readonly states: TableStructureStateHandles;
-  private readonly bridge: TableStructurePartBridge;
+  private instanceIdentity: unknown | null = null;
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
@@ -51,26 +51,10 @@ export class TableStructureModuleImpl extends ModuleBase {
       rowSpan: stateFacade.numberDiscrete('tableRowSpan', 0),
       columnSpan: stateFacade.numberDiscrete('tableColumnSpan', 0),
     });
-    const impl = this;
-    this.bridge = Object.freeze({
-      get role() {
-        if (!impl.role) throw new Error('[TableStructure] part role has not been declared.');
-        return impl.role;
-      },
-      ref: this.a11y.getObjectRef(),
-      readConfig: () => this.config,
-      applyRow: (index) => this.applyRow(index),
-      applyCell: (snapshot) => this.applyCell(snapshot),
-      applyTable: (snapshot) => this.applyTable(snapshot),
-    });
   }
-  readonly facade: TableStructureFacade = {
-    declare: (role) => this.declare(role),
-  };
 
-  readonly port: TableStructurePort = {
-    getSnapshot: () => this.snapshot,
-  };
+  readonly facade: TableStructureFacade = { declare: (role) => this.declare(role) };
+  readonly port: TableStructurePort = { getSnapshot: () => this.snapshot };
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
@@ -79,28 +63,32 @@ export class TableStructureModuleImpl extends ModuleBase {
       this.notifyRoot();
       return;
     }
-    if (phase === 'unmounting' || phase === 'detached') this.notifyRoot();
+    if (phase === 'unmounting' || phase === 'detached') {
+      this.clearProjection();
+      this.notifyRoot();
+    }
   }
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
     if (phase !== 'unmounted') return;
-    this.stopOrder?.();
-    this.stopOrder = null;
-    if (this.role === 'root' && this.domainScope !== null) rootsByDomain.delete(this.domainScope);
-    this.stopTargets?.();
-    this.stopTargets = null;
-    this.notifyRoot();
-    this.domainScope = null;
+    this.release();
   }
 
   dispose(): void {
+    this.release();
+  }
+
+  private release(): void {
+    const oldRoot = this.domainScope === null ? null : rootsByDomain.get(this.domainScope);
     this.stopOrder?.();
     this.stopOrder = null;
     this.stopTargets?.();
     this.stopTargets = null;
     if (this.role === 'root' && this.domainScope !== null) rootsByDomain.delete(this.domainScope);
+    if (this.instanceIdentity !== null) partsByInstance.delete(this.instanceIdentity);
     this.domainScope = null;
+    if (oldRoot && oldRoot !== this) oldRoot.recompute();
   }
 
   private declare(role: TablePartRole): TableStructureHandle {
@@ -108,6 +96,10 @@ export class TableStructureModuleImpl extends ModuleBase {
       throw new Error(
         `[TableStructure] part role already declared as ${this.role}; received ${role}.`
       );
+    }
+    if (this.instanceIdentity === null) {
+      this.instanceIdentity = this.anatomy.resolveSelfInstance();
+      partsByInstance.set(this.instanceIdentity, this);
     }
     this.role = role;
     if (role === 'root' && !this.stopOrder) {
@@ -124,7 +116,6 @@ export class TableStructureModuleImpl extends ModuleBase {
       configure: (patch) => this.configure(patch),
       getObjectRef: () => this.a11y.getObjectRef(),
       getSnapshot: () => this.snapshot,
-      getPartBridge: () => this.bridge,
     });
   }
 
@@ -142,9 +133,13 @@ export class TableStructureModuleImpl extends ModuleBase {
     if (!this.role) return;
     const next = this.anatomy.resolveDomainScope(TABLE_STRUCTURE_FAMILY);
     if (Object.is(next, this.domainScope)) return;
-    if (this.role === 'root' && this.domainScope !== null) rootsByDomain.delete(this.domainScope);
+    const previous = this.domainScope;
+    const previousRoot = previous === null ? null : rootsByDomain.get(previous);
+    if (this.role === 'root' && previous !== null) rootsByDomain.delete(previous);
+    this.clearProjection();
     this.domainScope = next;
     if (this.role === 'root' && next !== null) rootsByDomain.set(next, this);
+    if (previousRoot && previousRoot !== this) previousRoot.recompute();
   }
 
   private notifyRoot(): void {
@@ -153,68 +148,72 @@ export class TableStructureModuleImpl extends ModuleBase {
     else if (this.domainScope !== null) rootsByDomain.get(this.domainScope)?.recompute();
   }
 
-  private readBridge(part: AnatomyPartView): TableStructurePartBridge | null {
-    const exposed = part.getExpose(TABLE_STRUCTURE_PART_EXPOSE);
-    return exposed && typeof exposed === 'object' && 'readConfig' in exposed
-      ? (exposed as TableStructurePartBridge)
-      : null;
+  private readPart(part: AnatomyPartView): TableStructureModuleImpl | null {
+    const identity = this.anatomy.resolvePartInstance(part);
+    return identity === null ? null : (partsByInstance.get(identity) ?? null);
   }
 
   private recompute(): void {
     if (this.role !== 'root' || this.mountPhase !== 'mounted') return;
     const ordered = this.anatomy.order.parts(TABLE_STRUCTURE_FAMILY);
-    const captions = ordered
-      .filter((part) => part.role === 'caption')
-      .map((part) => this.readBridge(part))
-      .filter((part): part is TableStructurePartBridge => part !== null);
-    const rowParts = ordered.filter((part) => part.role === 'row');
-    const rows = rowParts.map((rowPart, rowIndex) => {
-      const rowBridge = this.readBridge(rowPart);
-      const start = ordered.indexOf(rowPart) + 1;
-      const nextRow = rowParts[rowIndex + 1];
-      const end = nextRow ? ordered.indexOf(nextRow) : ordered.length;
-      const cells: TableStructureCellInput[] = [];
-      for (const part of ordered.slice(start, end)) {
-        if (part.role !== 'headerCell' && part.role !== 'cell') continue;
-        const bridge = this.readBridge(part);
-        if (!bridge || (bridge.role !== 'headerCell' && bridge.role !== 'cell')) continue;
-        const config = bridge.readConfig();
-        cells.push({
-          ref: bridge.ref,
-          kind: bridge.role,
-          headerKey: config.headerKey,
-          headerKind: config.headerKind,
-          headers: config.headers ?? [],
-          rowSpan: config.rowSpan,
-          columnSpan: config.columnSpan,
-        });
-      }
-      return { ref: rowBridge?.ref ?? this.a11y.getObjectRef(), cells };
+    const records = ordered
+      .map((part) => ({ part, impl: this.readPart(part) }))
+      .filter(
+        (entry): entry is { part: AnatomyPartView; impl: TableStructureModuleImpl } =>
+          entry.impl !== null && Object.is(entry.impl.domainScope, this.domainScope)
+      );
+    const captions = records.filter((entry) => entry.impl.role === 'caption');
+    const rowRecords = records.filter((entry) => entry.impl.role === 'row');
+    const cells = records.filter(
+      (entry) => entry.impl.role === 'headerCell' || entry.impl.role === 'cell'
+    );
+    const rowIndexByIdentity = new Map<unknown, number>();
+    const rows = rowRecords.map(({ part, impl }, index) => {
+      const identity = this.anatomy.resolvePartInstance(part);
+      if (identity !== null) rowIndexByIdentity.set(identity, index);
+      return { ref: impl.a11y.getObjectRef(), cells: [] as TableStructureCellInput[] };
     });
-
-    const bridges = ordered
-      .map((part) => this.readBridge(part))
-      .filter((part): part is TableStructurePartBridge => part !== null);
-    for (const bridge of bridges) {
-      bridge.applyRow(null);
-      bridge.applyCell(null);
-      if (bridge.role === 'root') bridge.applyTable(null);
+    const unmatchedCells: ReturnType<A11yPort['getObjectRef']>[] = [];
+    for (const { part, impl: cell } of cells) {
+      const rowIdentity = this.anatomy.resolveAncestorInstance(TABLE_STRUCTURE_FAMILY, part, 'row');
+      const rowIndex = rowIdentity === null ? undefined : rowIndexByIdentity.get(rowIdentity);
+      if (rowIndex === undefined) {
+        unmatchedCells.push(cell.a11y.getObjectRef());
+        continue;
+      }
+      rows[rowIndex]!.cells.push({
+        ref: cell.a11y.getObjectRef(),
+        kind: cell.role === 'headerCell' ? 'headerCell' : 'cell',
+        headerKey: cell.config.headerKey,
+        headerKind: cell.config.headerKind,
+        headers: cell.config.headers ?? [],
+        rowSpan: cell.config.rowSpan,
+        columnSpan: cell.config.columnSpan,
+      });
     }
 
+    for (const { impl } of records) impl.clearProjection();
     const next = projectTableStructure({
       root: this.a11y.getObjectRef(),
-      captions: captions.map((caption) => caption.ref),
+      captions: captions.map(({ impl }) => impl.a11y.getObjectRef()),
       rows,
+      unmatchedCells,
     });
     this.snapshot = next;
     this.applyTable(next);
     if (!next.valid) return;
+
+    const byRef = new Map(records.map(({ impl }) => [impl.a11y.getObjectRef(), impl]));
     for (const row of next.rows) {
-      bridges.find((bridge) => bridge.ref === row.ref)?.applyRow(row.index);
-      for (const cell of row.cells) {
-        bridges.find((bridge) => bridge.ref === cell.ref)?.applyCell(cell);
-      }
+      byRef.get(row.ref)?.applyRow(row.index);
+      for (const cell of row.cells) byRef.get(cell.ref)?.applyCell(cell);
     }
+  }
+
+  private clearProjection(): void {
+    this.applyRow(null);
+    this.applyCell(null);
+    if (this.role === 'root') this.applyTable(null);
   }
 
   private applyTable(snapshot: TableStructureSnapshot | null): void {
@@ -224,19 +223,25 @@ export class TableStructureModuleImpl extends ModuleBase {
     this.a11y.setRelation('caption', {
       target: valid && snapshot.caption ? [snapshot.caption] : [],
     });
+    this.a11y.setRelation('labelledBy', {
+      target: valid && snapshot.caption ? [snapshot.caption] : [],
+    });
   }
 
   private applyRow(index: number | null): void {
-    this.state.set(this.states.row, index ?? -1, 'table.structure');
+    this.state.set(this.states.row, index === null ? 0 : index + 1, 'table.structure');
   }
 
   private applyCell(snapshot: TableStructureCellSnapshot | null): void {
-    this.state.set(this.states.row, snapshot?.row ?? -1, 'table.structure');
-    this.state.set(this.states.column, snapshot?.column ?? -1, 'table.structure');
+    this.state.set(this.states.row, snapshot ? snapshot.row + 1 : 0, 'table.structure');
+    this.state.set(this.states.column, snapshot ? snapshot.column + 1 : 0, 'table.structure');
     this.state.set(this.states.rowSpan, snapshot?.rowSpan ?? 0, 'table.structure');
     this.state.set(this.states.columnSpan, snapshot?.columnSpan ?? 0, 'table.structure');
     this.a11y.setRelation('columnHeaders', { target: snapshot?.columnHeaders ?? [] });
     this.a11y.setRelation('rowHeaders', { target: snapshot?.rowHeaders ?? [] });
+    this.a11y.setRelation('labelledBy', {
+      target: snapshot ? [...snapshot.columnHeaders, ...snapshot.rowHeaders] : [],
+    });
   }
 }
 

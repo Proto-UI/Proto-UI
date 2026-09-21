@@ -16,5 +16,3 @@ export const TABLE_STRUCTURE_FAMILY = createAnatomyFamily('base-table', {
     { kind: 'contains', parent: 'row', child: 'cell' },
   ],
 });
-
-export const TABLE_STRUCTURE_PART_EXPOSE = '__tableStructurePart';

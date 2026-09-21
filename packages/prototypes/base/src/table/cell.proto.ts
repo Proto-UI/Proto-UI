@@ -21,17 +21,16 @@ export const tableCell = definePrototype<TableCellProps, TableCellExposes>({
     accessible.state('columnIndex', table.states.column);
     accessible.state('rowSpan', table.states.rowSpan);
     accessible.state('columnSpan', table.states.columnSpan);
-    def.expose.value('__tableStructurePart', table.getPartBridge());
 
-    const sync = (props: Readonly<Required<TableCellProps>>) => {
+    const sync = (props: Readonly<TableCellProps>) => {
       table.configure({
-        headers: props.headers,
-        rowSpan: props.rowSpan,
-        columnSpan: props.columnSpan,
+        headers: Array.isArray(props.headers) ? props.headers : [],
+        rowSpan: typeof props.rowSpan === 'number' ? props.rowSpan : 1,
+        columnSpan: typeof props.columnSpan === 'number' ? props.columnSpan : 1,
       });
     };
-    def.lifecycle.onCreated((run) => sync(run.props.get() as Readonly<Required<TableCellProps>>));
-    def.props.watchAll((_run, next) => sync(next as Readonly<Required<TableCellProps>>));
+    def.lifecycle.onCreated((run) => sync(run.props.get()));
+    def.props.watchAll((_run, next) => sync(next));
     return (render) => render.slot();
   },
 });

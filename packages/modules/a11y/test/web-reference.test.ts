@@ -941,6 +941,47 @@ describe('Web A11y opaque semantic-object references', () => {
     }
   );
 
+  it('projects valid ARIA table coordinates and removes invalid numeric facts', () => {
+    const target = document.createElement('div');
+    const projector = createWebA11yProjector(target);
+    const objectRef = createA11ySemanticObjectRef();
+    projector({
+      ...semanticSnapshot(objectRef),
+      states: {
+        rowCount: 2,
+        columnCount: 3,
+        rowIndex: 1,
+        columnIndex: 2,
+        rowSpan: 1,
+        columnSpan: 2,
+      },
+    });
+    expect(target.getAttribute('aria-rowcount')).toBe('2');
+    expect(target.getAttribute('aria-colcount')).toBe('3');
+    expect(target.getAttribute('aria-rowindex')).toBe('1');
+    expect(target.getAttribute('aria-colindex')).toBe('2');
+    expect(target.getAttribute('aria-rowspan')).toBe('1');
+    expect(target.getAttribute('aria-colspan')).toBe('2');
+
+    projector({
+      ...semanticSnapshot(objectRef),
+      states: {
+        rowCount: -1,
+        columnCount: 0,
+        rowIndex: 0,
+        columnIndex: -1,
+        rowSpan: 1.5,
+        columnSpan: Number.NaN,
+      },
+    });
+    expect(target.getAttribute('aria-rowcount')).toBe('-1');
+    expect(target.hasAttribute('aria-colcount')).toBe(false);
+    expect(target.hasAttribute('aria-rowindex')).toBe(false);
+    expect(target.hasAttribute('aria-colindex')).toBe(false);
+    expect(target.hasAttribute('aria-rowspan')).toBe(false);
+    expect(target.hasAttribute('aria-colspan')).toBe(false);
+  });
+
   it('releases one scalar binding before reentering the same physical target', () => {
     const registry = createWebA11yProjectionRegistry();
     const target = document.createElement('div');

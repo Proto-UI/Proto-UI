@@ -13,7 +13,6 @@ export const tableRoot = definePrototype<TableRootProps, TableRootExposes>({
     accessible.state('rowCount', table.states.rowCount);
     accessible.state('columnCount', table.states.columnCount);
     def.expose.method('getStructure', () => table.getSnapshot());
-    def.expose.value('__tableStructurePart', table.getPartBridge());
     return (render) => render.slot();
   },
 });

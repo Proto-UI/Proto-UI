@@ -3,10 +3,10 @@ type: version
 title: Proto UI 0.3.0-alpha.1
 status: draft
 since: 0.3.0-alpha.1
-summary: Second 0.3 alpha release train, preparing the reviewed Vue 2 CLI, Base Image projection, and release-consumer evidence as one globally exact 43-package prerelease identity.
+summary: Second 0.3 alpha release train, preparing the reviewed Vue 2 CLI, Base Image projection, and release-consumer evidence as one globally exact 44-package prerelease identity.
 statement:
-  en: Proto UI 0.3.0-alpha.1 is one draft ecosystem release identity shared exactly by all 43 public @proto.ui packages and the corresponding future immutable spec snapshot.
-  zh-CN: Proto UI 0.3.0-alpha.1 是由全部 43 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行身份。
+  en: Proto UI 0.3.0-alpha.1 is one draft ecosystem release identity shared exactly by all 44 public @proto.ui packages and the corresponding future immutable spec snapshot.
+  zh-CN: Proto UI 0.3.0-alpha.1 是由全部 44 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行身份。
 release:
   version: 0.3.0-alpha.1
   channel: prerelease
@@ -25,8 +25,8 @@ criteria:
       zh-CN: 本 draft 实体可以治理已对齐的 0.3.0-alpha.1 manifest、发行物料、catalog 引用与本地彩排证据，但不得声称 npm 发布、Git tag、GitHub prerelease、next channel 激活或不可变 snapshot 证据已经存在。
   - id: V-PROTO-UI-0010-IDENTITY
     text:
-      en: Before publication, VERSION, all 43 public @proto.ui package manifests, staged internal dependency versions, and the spec snapshot must be prepared at 0.3.0-alpha.1 exactly.
-      zh-CN: 发布前，VERSION、全部 43 个公开 @proto.ui package manifest、暂存发布包的内部依赖版本以及 spec snapshot 必须统一准备为 0.3.0-alpha.1。
+      en: Before publication, VERSION, all 44 public @proto.ui package manifests, staged internal dependency versions, and the spec snapshot must be prepared at 0.3.0-alpha.1 exactly.
+      zh-CN: 发布前，VERSION、全部 44 个公开 @proto.ui package manifest、暂存发布包的内部依赖版本以及 spec snapshot 必须统一准备为 0.3.0-alpha.1。
   - id: V-PROTO-UI-0010-ALPHA-SCOPE
     text:
       en: This train carries reviewed Vue 2 CLI, Base Image projection, and release-consumer evidence and must be presented as alpha rather than a release candidate or stable compatibility promise.
@@ -49,4 +49,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Opened the second globally exact 0.3 alpha train with the reviewed Vue 2 CLI, Base Image projection, consumer smoke evidence, and a bounded bootstrap-latest readiness exception.
+  - version: 0.3.0-alpha.1
+    change: amended
+    summary: Reconciled the draft release identity with the reviewed 44-package BOM after adding Table Structure.
 tags: [release, prerelease, alpha, global-version]

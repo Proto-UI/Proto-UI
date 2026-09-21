@@ -105,7 +105,7 @@ implementations:
       - T-TABLE-STRUCTURE-0001-CASE-EXCLUSIONS
   - id: adapter-web-component-table-contract
     kind: adapter-test
-    status: planned
+    status: passing
     path: packages/adapters/web-component/test/table.test.ts
     required: true
     consumesCases: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]

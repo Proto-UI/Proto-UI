@@ -11,7 +11,6 @@ export const tableRow = definePrototype<TableRowProps, TableRowExposes>({
     accessible.role('row');
     const table = asTableStructure<TableRowProps>('row');
     accessible.state('rowIndex', table.states.row);
-    def.expose.value('__tableStructurePart', table.getPartBridge());
     return (render) => render.slot();
   },
 });

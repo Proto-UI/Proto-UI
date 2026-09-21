@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createA11ySemanticObjectRef } from '@proto.ui/core';
+import { createA11ySemanticObjectRef, type AnatomyPartView } from '@proto.ui/core';
+import type { A11yPort } from '@proto.ui/module-a11y';
+import type { AnatomyPort } from '@proto.ui/module-anatomy';
+import type { StateFacade, StatePort } from '@proto.ui/module-state';
+import { TableStructureModuleImpl } from '../src/create';
 import { projectTableStructure } from '../src/projection';
 
 const ref = () => createA11ySemanticObjectRef();
@@ -130,6 +134,32 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     );
   });
 
+  it('fails closed for cells outside Row ancestry and HeaderCells without an explicit kind', () => {
+    const orphan = ref();
+    const snapshot = projectTableStructure({
+      root: ref(),
+      captions: [],
+      unmatchedCells: [orphan],
+      rows: [
+        {
+          ref: ref(),
+          cells: [
+            { ref: ref(), kind: 'headerCell', headerKey: 'name', headers: [] },
+            { ref: ref(), kind: 'cell', headers: ['name'] },
+          ],
+        },
+      ],
+    });
+
+    expect(snapshot.valid).toBe(false);
+    expect(snapshot.diagnostics).toEqual(
+      expect.arrayContaining([
+        { code: 'missing-row-parent', ref: orphan },
+        expect.objectContaining({ code: 'missing-header-kind' }),
+      ])
+    );
+  });
+
   it('rejects self and downstream HeaderCell edges', () => {
     const first = ref();
     const second = ref();
@@ -162,5 +192,92 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     expect(
       snapshot.diagnostics.filter((item) => item.code === 'non-upstream-header-target')
     ).toHaveLength(2);
+  });
+
+  it('emits generic A11y facts and clears a part that leaves its Table domain', () => {
+    const domain = {};
+    const tokens = { root: {}, row: {}, header: {}, cell: {} };
+    const roles = { root: 'root', row: 'row', header: 'headerCell', cell: 'cell' } as const;
+    const tokenByPart = new Map<AnatomyPartView, unknown>();
+    const domains = new Map<unknown, unknown | null>(
+      Object.values(tokens).map((token) => [token, domain])
+    );
+    const ordered: AnatomyPartView[] = [];
+    for (const [name, token] of Object.entries(tokens)) {
+      const part = { role: roles[name as keyof typeof roles] } as AnatomyPartView;
+      tokenByPart.set(part, token);
+      ordered.push(part);
+    }
+
+    const values = new Map<object, unknown>();
+    const stateFacade = {
+      numberDiscrete: () => ({}),
+    } as unknown as StateFacade;
+    const state = {
+      set: (handle: object, value: unknown) => values.set(handle, value),
+    } as unknown as StatePort;
+    const relations = new Map<unknown, Map<string, readonly unknown[]>>();
+    const refs = new Map<unknown, ReturnType<typeof ref>>(
+      Object.values(tokens).map((token) => [token, ref()])
+    );
+    const anatomyFor = (token: unknown) =>
+      ({
+        resolveSelfInstance: () => token,
+        resolvePartInstance: (part: AnatomyPartView) => tokenByPart.get(part) ?? null,
+        resolveAncestorInstance: (_family: unknown, part: AnatomyPartView, role: string) => {
+          const partToken = tokenByPart.get(part);
+          return role === 'row' && (partToken === tokens.header || partToken === tokens.cell)
+            ? tokens.row
+            : null;
+        },
+        resolveDomainScope: () => domains.get(token) ?? null,
+        order: { parts: () => ordered },
+        subscribeOrder: () => () => {},
+        subscribeTargets: () => () => {},
+      }) as unknown as AnatomyPort;
+    const a11yFor = (token: unknown) =>
+      ({
+        getObjectRef: () => refs.get(token)!,
+        setRelation: (key: string, spec: { target: readonly unknown[] }) => {
+          const current = relations.get(token) ?? new Map<string, readonly unknown[]>();
+          current.set(key, spec.target);
+          relations.set(token, current);
+        },
+      }) as unknown as A11yPort;
+    const caps = { onChange: () => () => {} } as any;
+    const modules = Object.fromEntries(
+      Object.entries(tokens).map(([name, token]) => [
+        name,
+        new TableStructureModuleImpl(caps, anatomyFor(token), a11yFor(token), state, stateFacade),
+      ])
+    ) as Record<keyof typeof tokens, TableStructureModuleImpl>;
+    const handles = {
+      root: modules.root.facade.declare('root'),
+      row: modules.row.facade.declare('row'),
+      header: modules.header.facade.declare('headerCell'),
+      cell: modules.cell.facade.declare('cell'),
+    };
+    handles.header.configure({ headerKey: 'name', headerKind: 'column' });
+    handles.cell.configure({ headers: ['name'] });
+    for (const module of Object.values(modules)) module.onMountPhase('mounted', 1);
+
+    expect(values.get(handles.root.states.rowCount)).toBe(1);
+    expect(values.get(handles.root.states.columnCount)).toBe(2);
+    expect(values.get(handles.row.states.row)).toBe(1);
+    expect(values.get(handles.cell.states.column)).toBe(2);
+    expect(relations.get(tokens.cell)?.get('labelledBy')).toEqual([refs.get(tokens.header)]);
+
+    domains.set(tokens.cell, null);
+    handles.cell.configure({});
+    expect(values.get(handles.cell.states.row)).toBe(0);
+    expect(values.get(handles.cell.states.column)).toBe(0);
+    expect(relations.get(tokens.cell)?.get('labelledBy')).toEqual([]);
+    expect(values.get(handles.root.states.rowCount)).toBe(0);
+    expect(values.get(handles.root.states.columnCount)).toBe(0);
+
+    modules.cell.dispose();
+    modules.header.dispose();
+    modules.row.dispose();
+    modules.root.dispose();
   });
 });

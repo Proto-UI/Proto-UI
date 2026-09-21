@@ -14,38 +14,31 @@ export const tableHeaderCell = definePrototype<TableHeaderCellProps, TableHeader
       rowSpan: { type: 'number', empty: 'fallback' },
       columnSpan: { type: 'number', empty: 'fallback' },
     });
-    def.props.setDefaults({
-      headerKey: '',
-      headerKind: 'column',
-      headers: [],
-      rowSpan: 1,
-      columnSpan: 1,
-    });
+    def.props.setDefaults({ headerKey: '', headers: [], rowSpan: 1, columnSpan: 1 });
 
     const accessible = asAccessible();
-    const role = def.state.string('tableHeaderRole', 'columnheader');
+    const role = def.state.string('tableHeaderRole', '');
     accessible.role(role);
     const table = asTableStructure<TableHeaderCellProps>('headerCell');
     accessible.state('rowIndex', table.states.row);
     accessible.state('columnIndex', table.states.column);
     accessible.state('rowSpan', table.states.rowSpan);
     accessible.state('columnSpan', table.states.columnSpan);
-    def.expose.value('__tableStructurePart', table.getPartBridge());
 
-    const sync = (props: Readonly<Required<TableHeaderCellProps>>) => {
-      role.set(props.headerKind === 'row' ? 'rowheader' : 'columnheader');
+    const sync = (props: Readonly<TableHeaderCellProps>) => {
+      const headerKind =
+        props.headerKind === 'row' || props.headerKind === 'column' ? props.headerKind : undefined;
+      role.set(headerKind === 'row' ? 'rowheader' : headerKind === 'column' ? 'columnheader' : '');
       table.configure({
-        headerKey: props.headerKey,
-        headerKind: props.headerKind,
-        headers: props.headers,
-        rowSpan: props.rowSpan,
-        columnSpan: props.columnSpan,
+        headerKey: typeof props.headerKey === 'string' ? props.headerKey : '',
+        headerKind,
+        headers: Array.isArray(props.headers) ? props.headers : [],
+        rowSpan: typeof props.rowSpan === 'number' ? props.rowSpan : 1,
+        columnSpan: typeof props.columnSpan === 'number' ? props.columnSpan : 1,
       });
     };
-    def.lifecycle.onCreated((run) =>
-      sync(run.props.get() as Readonly<Required<TableHeaderCellProps>>)
-    );
-    def.props.watchAll((_run, next) => sync(next as Readonly<Required<TableHeaderCellProps>>));
+    def.lifecycle.onCreated((run) => sync(run.props.get()));
+    def.props.watchAll((_run, next) => sync(next));
     return (render) => render.slot();
   },
 });

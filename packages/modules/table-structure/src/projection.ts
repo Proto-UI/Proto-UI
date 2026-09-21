@@ -20,6 +20,7 @@ export type TableStructureInput = Readonly<{
   root: A11ySemanticObjectRef;
   captions: readonly A11ySemanticObjectRef[];
   rows: readonly TableStructureRowInput[];
+  unmatchedCells?: readonly A11ySemanticObjectRef[];
 }>;
 
 type Dimensions = Readonly<{ rowSpan: number; columnSpan: number }>;
@@ -39,6 +40,9 @@ export function projectTableStructure(input: TableStructureInput): TableStructur
   const diagnostics: TableStructureDiagnostic[] = [];
   if (input.captions.length > 1) diagnostics.push({ code: 'multiple-captions' });
   if (input.rows.length === 0) diagnostics.push({ code: 'missing-row' });
+  for (const ref of input.unmatchedCells ?? []) {
+    diagnostics.push({ code: 'missing-row-parent', ref });
+  }
 
   let headerCellCount = 0;
   let cellCount = 0;
@@ -50,6 +54,9 @@ export function projectTableStructure(input: TableStructureInput): TableStructur
       if (cell.kind === 'headerCell') {
         headerCellCount++;
         if (!cell.headerKey) diagnostics.push({ code: 'missing-header-key', ref: cell.ref, row });
+        if (cell.headerKind !== 'column' && cell.headerKind !== 'row') {
+          diagnostics.push({ code: 'missing-header-kind', ref: cell.ref, row });
+        }
       } else cellCount++;
     }
   }
