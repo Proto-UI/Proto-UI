@@ -26,6 +26,7 @@ export type TableStructureDiagnosticCode =
   | 'row-span-out-of-range'
   | 'column-range-out-of-range'
   | 'missing-row-parent'
+  | 'role-mismatch'
   | 'missing-header-key'
   | 'duplicate-header-key'
   | 'missing-header-kind'

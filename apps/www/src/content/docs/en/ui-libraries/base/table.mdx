@@ -51,7 +51,7 @@ Insert, removal, and reorder recompute the snapshot from the actual parts. Tempo
 
 Base Table reuses the draft generic A11y direction and `HC-A11Y-0001`; it does not introduce `HC-TABLE`. Table Structure asks for no physical widget, measurement, input, resource, or system service.
 
-The generic A11y path supports opaque semantic-object references and ordered multi-target relationships through the merged #625 prerequisite. The Web Component evidence now verifies one-based ARIA row and column counts, indices, spans, caption naming, and header naming. React, Vue, and Vue 2 Table projection tests remain planned; the passing Web Component slice does not imply complete cross-Adapter or assistive-technology conformance.
+The generic A11y path supports opaque semantic-object references and ordered multi-target relationships through the merged #625 prerequisite. The Web Component evidence now verifies one-based ARIA row and column counts, indices, spans, caption naming, and explicit header labels that retain each cell's authored content. React, Vue, and Vue 2 Table projection tests remain planned; the passing Web Component slice does not imply complete cross-Adapter or assistive-technology conformance.
 
 The external host comparison establishes a shared information shape only:
 
@@ -83,7 +83,7 @@ A later Data Table composition may consume the passive structure while composing
 
 ## Evidence status
 
-The host-neutral reference probe and Module/Base tests cover deterministic placement, multiple-header resolution, diagnostics, nearest-domain isolation, authored-fact churn, exact anatomy, passive negative boundaries, generic A11y emission, and projection cleanup. The Web Component Adapter test covers ARIA materialization for counts, indices, spans, caption identity, and header identity. The new `@proto.ui/module-table-structure` and `@proto.ui/prototypes-base/table` exports remain draft; React, Vue, and Vue 2 Adapter tests remain `planned`, and this page provides no interactive Table preview yet.
+The host-neutral reference probe and Module/Base tests cover deterministic placement, multiple-header resolution, diagnostics, nearest-domain isolation, authored-fact churn, exact anatomy, passive negative boundaries, generic A11y emission, and projection cleanup. The Web Component Adapter test covers ARIA materialization for counts, indices, spans, caption identity, and content-preserving header identity. The new `@proto.ui/module-table-structure` and `@proto.ui/prototypes-base/table` exports remain draft; React, Vue, and Vue 2 Adapter tests remain `planned`, and this page provides no interactive Table preview yet.
 
 ## References
 

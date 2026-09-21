@@ -136,10 +136,12 @@ describe('M-TABLE-STRUCTURE-0001', () => {
 
   it('fails closed for cells outside Row ancestry and HeaderCells without an explicit kind', () => {
     const orphan = ref();
+    const mismatch = ref();
     const snapshot = projectTableStructure({
       root: ref(),
       captions: [],
       unmatchedCells: [orphan],
+      roleMismatches: [mismatch],
       rows: [
         {
           ref: ref(),
@@ -155,6 +157,7 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     expect(snapshot.diagnostics).toEqual(
       expect.arrayContaining([
         { code: 'missing-row-parent', ref: orphan },
+        { code: 'role-mismatch', ref: mismatch },
         expect.objectContaining({ code: 'missing-header-kind' }),
       ])
     );
@@ -265,7 +268,22 @@ describe('M-TABLE-STRUCTURE-0001', () => {
     expect(values.get(handles.root.states.columnCount)).toBe(2);
     expect(values.get(handles.row.states.row)).toBe(1);
     expect(values.get(handles.cell.states.column)).toBe(2);
-    expect(relations.get(tokens.cell)?.get('labelledBy')).toEqual([refs.get(tokens.header)]);
+    expect(relations.get(tokens.cell)?.get('labelledBy')).toEqual([
+      refs.get(tokens.header),
+      refs.get(tokens.cell),
+    ]);
+    const rowPart = ordered.find((part) => tokenByPart.get(part) === tokens.row)!;
+    // Test-only fake: mutate the captured Anatomy role to model a mismatched declaration.
+    const mutableRowPart = rowPart as unknown as { role: string };
+    mutableRowPart.role = 'cell';
+    handles.row.configure({});
+    expect(handles.root.getSnapshot()?.valid).toBe(false);
+    expect(handles.root.getSnapshot()?.diagnostics.map((item) => item.code)).toContain(
+      'role-mismatch'
+    );
+    mutableRowPart.role = 'row';
+    handles.row.configure({});
+    expect(handles.root.getSnapshot()?.valid).toBe(true);
 
     domains.set(tokens.cell, null);
     handles.cell.configure({});

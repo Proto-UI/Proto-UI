@@ -3,7 +3,7 @@ type: test
 title: Table Structure decision, topology, header graph, and boundary evidence
 status: draft
 since: 0.3.0-alpha.0
-summary: Maps the Base Table admission and structural contract to an executable host-neutral topology probe plus planned module, Base prototype, and Web Adapter conformance paths without claiming current host support.
+summary: Maps the Base Table admission and structural contract to executable host-neutral Module and Base evidence, bounded passing Web Component projection evidence, and planned React, Vue, and Vue 2 conformance paths.
 cases:
   - id: T-TABLE-STRUCTURE-0001-CASE-INDEPENDENT-PROTOCOL
     title: Table Structure carries a two-dimensional header graph beyond Template anatomy
@@ -164,6 +164,10 @@ verifies:
         - M-TABLE-STRUCTURE-0001-C
         - M-TABLE-STRUCTURE-0001-D
         - M-TABLE-STRUCTURE-0001-E
+  adapters:
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.1
+      anchors: [A-WEB-COMPONENT-0001-TABLE]
   prototypes:
     - id: P-BASE-TABLE
       since: 0.3.0-alpha.1
@@ -200,11 +204,13 @@ sources:
   - path: spec/contracts/C-TABLE-STRUCTURE-0001.yaml
   - path: https://github.com/Proto-UI/Proto-UI/issues/387
     label: Issue 387 acceptance and implementation boundary
+  - path: spec/adapters/A-WEB-COMPONENT-0001.yaml
+  - path: packages/adapters/web-component/test/table.test.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added executable-probe and planned conformance mappings for Table identity, topology, header relations, diagnostics, churn, A11y projection, and negative boundaries.
   - version: 0.3.0-alpha.1
     change: revised
-    summary: Marked Checkpoint B Module and Base implementations passing with topology, nearest-domain, churn, diagnostics and opaque relationship evidence; four Adapter paths remain planned.
+    summary: Marked Checkpoint B Module and Base implementations passing with topology, nearest-domain, churn, diagnostics and opaque relationship evidence; added bounded passing Web Component ARIA projection evidence while React, Vue and Vue 2 remain planned.
 tags: [table, structure, test, accessibility]

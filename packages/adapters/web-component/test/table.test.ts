@@ -31,6 +31,7 @@ describe('web-component Table A11y projection', () => {
     const cell = element('base-table-cell');
     caption.textContent = 'Accounts';
     header.textContent = 'Name';
+    cell.textContent = 'Ada';
     setElementProps(header, { headerKey: 'name', headerKind: 'column' });
     setElementProps(cell, { headers: ['name'] });
     row.append(header, cell);
@@ -53,7 +54,8 @@ describe('web-component Table A11y projection', () => {
       expect(cell.getAttribute('role')).toBe('cell');
       expect(cell.getAttribute('aria-rowindex')).toBe('1');
       expect(cell.getAttribute('aria-colindex')).toBe('2');
-      expect(cell.getAttribute('aria-labelledby')).toBe(header.id);
+      expect(cell.id).not.toBe('');
+      expect(cell.getAttribute('aria-labelledby')).toBe(`${header.id} ${cell.id}`);
     } finally {
       root.remove();
       await flush();

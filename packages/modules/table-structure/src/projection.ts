@@ -21,6 +21,7 @@ export type TableStructureInput = Readonly<{
   captions: readonly A11ySemanticObjectRef[];
   rows: readonly TableStructureRowInput[];
   unmatchedCells?: readonly A11ySemanticObjectRef[];
+  roleMismatches?: readonly A11ySemanticObjectRef[];
 }>;
 
 type Dimensions = Readonly<{ rowSpan: number; columnSpan: number }>;
@@ -42,6 +43,9 @@ export function projectTableStructure(input: TableStructureInput): TableStructur
   if (input.rows.length === 0) diagnostics.push({ code: 'missing-row' });
   for (const ref of input.unmatchedCells ?? []) {
     diagnostics.push({ code: 'missing-row-parent', ref });
+  }
+  for (const ref of input.roleMismatches ?? []) {
+    diagnostics.push({ code: 'role-mismatch', ref });
   }
 
   let headerCellCount = 0;

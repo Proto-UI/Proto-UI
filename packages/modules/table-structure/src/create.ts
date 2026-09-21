@@ -156,12 +156,14 @@ export class TableStructureModuleImpl extends ModuleBase {
   private recompute(): void {
     if (this.role !== 'root' || this.mountPhase !== 'mounted') return;
     const ordered = this.anatomy.order.parts(TABLE_STRUCTURE_FAMILY);
-    const records = ordered
+    const domainRecords = ordered
       .map((part) => ({ part, impl: this.readPart(part) }))
       .filter(
         (entry): entry is { part: AnatomyPartView; impl: TableStructureModuleImpl } =>
           entry.impl !== null && Object.is(entry.impl.domainScope, this.domainScope)
       );
+    const roleMismatches = domainRecords.filter(({ part, impl }) => part.role !== impl.role);
+    const records = domainRecords.filter(({ part, impl }) => part.role === impl.role);
     const captions = records.filter((entry) => entry.impl.role === 'caption');
     const rowRecords = records.filter((entry) => entry.impl.role === 'row');
     const cells = records.filter(
@@ -192,12 +194,13 @@ export class TableStructureModuleImpl extends ModuleBase {
       });
     }
 
-    for (const { impl } of records) impl.clearProjection();
+    for (const { impl } of domainRecords) impl.clearProjection();
     const next = projectTableStructure({
       root: this.a11y.getObjectRef(),
       captions: captions.map(({ impl }) => impl.a11y.getObjectRef()),
       rows,
       unmatchedCells,
+      roleMismatches: roleMismatches.map(({ impl }) => impl.a11y.getObjectRef()),
     });
     this.snapshot = next;
     this.applyTable(next);
@@ -239,8 +242,9 @@ export class TableStructureModuleImpl extends ModuleBase {
     this.state.set(this.states.columnSpan, snapshot?.columnSpan ?? 0, 'table.structure');
     this.a11y.setRelation('columnHeaders', { target: snapshot?.columnHeaders ?? [] });
     this.a11y.setRelation('rowHeaders', { target: snapshot?.rowHeaders ?? [] });
+    const labels = snapshot ? [...snapshot.columnHeaders, ...snapshot.rowHeaders] : [];
     this.a11y.setRelation('labelledBy', {
-      target: snapshot ? [...snapshot.columnHeaders, ...snapshot.rowHeaders] : [],
+      target: snapshot && labels.length > 0 ? [...labels, snapshot.ref] : [],
     });
   }
 }

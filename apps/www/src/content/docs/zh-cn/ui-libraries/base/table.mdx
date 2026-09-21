@@ -51,7 +51,7 @@ Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无�
 
 Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-TABLE`。Table Structure 不请求 physical widget、measurement、input、resource 或 system service。
 
-通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。Web Component 证据现已验证 one-based ARIA row/column count、index、span、caption naming 与 header naming。React、Vue 与 Vue 2 的 Table projection tests 仍为 planned；通过的 Web Component 切片不表示完整的 cross-Adapter 或 assistive-technology conformance。
+通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。Web Component 证据现已验证 one-based ARIA row/column count、index、span、caption naming，以及保留各 cell authored content 的显式 header label。React、Vue 与 Vue 2 的 Table projection tests 仍为 planned；通过的 Web Component 切片不表示完整的 cross-Adapter 或 assistive-technology conformance。
 
 外部 host 对照只证明 shared information shape：
 
@@ -83,7 +83,7 @@ Later Data Table composition 可以消费 passive structure，同时组合分别
 
 ## 证据状态
 
-Host-neutral reference probe 与 Module/Base tests 已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy、passive negative boundaries、generic A11y emission 与 projection cleanup。Web Component Adapter test 覆盖 count、index、span、caption identity 与 header identity 的 ARIA materialization。新增 `@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 仍为 draft；React、Vue 与 Vue 2 Adapter tests 仍为 `planned`，本页也暂不提供交互式 Table preview。
+Host-neutral reference probe 与 Module/Base tests 已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy、passive negative boundaries、generic A11y emission 与 projection cleanup。Web Component Adapter test 覆盖 count、index、span、caption identity 与保留内容的 header identity ARIA materialization。新增 `@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 仍为 draft；React、Vue 与 Vue 2 Adapter tests 仍为 `planned`，本页也暂不提供交互式 Table preview。
 
 ## 参考
 
