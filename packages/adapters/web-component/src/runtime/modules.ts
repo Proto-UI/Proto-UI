@@ -95,7 +95,10 @@ import {
 } from '@proto.ui/module-rule-meta';
 import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import { type PropsBaseType } from '@proto.ui/types';
-import { createWebComponentPortalMount } from '../portal-mount';
+import {
+  createWebComponentPortalMount,
+  getWebComponentPortalProjectionForOrigin,
+} from '../portal-mount';
 import {
   composedParentElement,
   deepestActiveElement,
@@ -1201,11 +1204,25 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const registry = target.ownerDocument.defaultView?.customElements;
               observedRoots.clear();
               const observe = (root: HTMLElement | ShadowRoot) => {
+                if (observedRoots.has(root)) return;
                 observedRoots.add(root);
                 if (root.nodeType === 11) mediaRoots.add(root as ShadowRoot);
                 entryObserver?.observe(root, options);
                 if (root.nodeType === 1) entryResizeObserver?.observe(root as HTMLElement);
                 hasArea ||= !!root.querySelector('area');
+                // A portal stays logically beneath its origin marker while its
+                // physical projection lives elsewhere (normally document.body).
+                // Follow those markers so eligibility mutations in the moved
+                // branch participate in the same refreshable observation graph.
+                const originWalker = target.ownerDocument.createTreeWalker(
+                  root,
+                  view!.NodeFilter.SHOW_COMMENT
+                );
+                let originMarker: Node | null;
+                while ((originMarker = originWalker.nextNode())) {
+                  const projection = getWebComponentPortalProjectionForOrigin(originMarker);
+                  if (projection) observe(projection);
+                }
                 // Radio-group ownership never crosses a Document/ShadowRoot
                 // boundary. Observe only trees containing a relevant named
                 // radio instead of every document hosting a Focus Entry.
@@ -1337,8 +1354,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 projectCurrent
               );
               const projectionEvents = [
+                'transitionstart',
                 'transitionend',
                 'transitioncancel',
+                'animationstart',
                 'animationend',
                 'animationcancel',
                 'input',

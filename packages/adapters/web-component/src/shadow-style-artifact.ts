@@ -115,9 +115,14 @@ function validateShadowSelectorAbi(cssText: string): void {
   // Match the media feature structurally across optional whitespace, casing,
   // values, negation and compound queries so an explicit host-dark rule can
   // never be gated a second time by the system preference.
-  const systemColorSchemeRule = [
-    ...structuralCss.matchAll(/(?:^|[;{}])\s*(@media\b[^;{}]*)\{/gi),
-  ].find((match) => /\bprefers-color-scheme\b/i.test(decodeShadowCssEscapes(match[1]!)));
+  const systemColorSchemeRule = [...structuralCss.matchAll(/(?:^|[;{}])\s*(@[^;{}]*)\{/g)].find(
+    (match) => {
+      const decodedPrelude = decodeShadowCssEscapes(match[1]!);
+      return (
+        /^@media(?:\s|\()/i.test(decodedPrelude) && /\bprefers-color-scheme\b/i.test(decodedPrelude)
+      );
+    }
+  );
   const documentMarker = documentRule?.[1] ?? systemColorSchemeRule?.[1];
   if (documentMarker) {
     throw invalidArtifact(documentMarker);

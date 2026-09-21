@@ -150,6 +150,12 @@ describe('adapter-web-component Shadow style artifact', () => {
       ),
     ],
     [
+      'hex-escaped letter in the media at-keyword',
+      artifact(
+        `@m\\65 dia (prefers-color-scheme: dark) { :host([data-pui-color-scheme='dark']) [data-pui-style~='dark:bg-input/30'] { color: red; } }`
+      ),
+    ],
+    [
       'dark rule without the host marker',
       artifact(`:where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
     ],

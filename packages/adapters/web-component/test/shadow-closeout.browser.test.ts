@@ -1629,6 +1629,84 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects descendant entry when a delayed animation starts affecting visibility', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: `
+          #delayed-animation-entry button { visibility: hidden; }
+          #delayed-animation-entry.reveal button {
+            animation: reveal-delayed-entry 120ms linear 120ms;
+          }
+          @keyframes reveal-delayed-entry {
+            from, to { visibility: visible; }
+          }
+        `,
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-delayed-animation-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          })
+        );
+        const host = new C();
+        host.id = 'delayed-animation-entry';
+        const button = document.createElement('button');
+        button.textContent = 'Delayed animation target';
+        host.append(button);
+        document.body.append(host);
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+
+        const started = new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error('animationstart timeout')), 1000);
+          button.addEventListener(
+            'animationstart',
+            () => {
+              clearTimeout(timeout);
+              resolve();
+            },
+            { once: true }
+          );
+        });
+        const initial = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        host.classList.add('reveal');
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const delayed = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        await started;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const active = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        return { initial, delayed, active };
+      });
+      expect(result).toEqual({
+        initial: { visibility: 'hidden', fallback: '0' },
+        delayed: { visibility: 'hidden', fallback: '0' },
+        active: { visibility: 'visible', fallback: null },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects descendant entry after CSS-only media-query eligibility changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -3480,6 +3558,54 @@ describe('Shadow closeout native boundaries', () => {
       await page.locator('body').evaluate((body: HTMLElement) => body.focus());
       await page.keyboard.press('Shift+Tab');
       expect(await active()).toBe('portal-target');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry when a body-mounted portal target changes eligibility', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-portaled-entry-projection',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.id = 'portaled-entry-projection';
+        const branch = document.createElement('section');
+        const button = document.createElement('button');
+        button.textContent = 'Portaled entry target';
+        branch.append(button);
+        host.append(branch);
+        document.body.append(host);
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+
+        const portal = p.createPortal();
+        portal.mount(branch);
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const initial = host.getAttribute('tabindex');
+        button.disabled = true;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const disabled = host.getAttribute('tabindex');
+        button.disabled = false;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const restored = host.getAttribute('tabindex');
+        portal.unmount(branch);
+        return { initial, disabled, restored };
+      });
+      expect(result).toEqual({ initial: null, disabled: '0', restored: null });
       expect(errors).toEqual([]);
     } finally {
       await page.close();
