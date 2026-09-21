@@ -654,7 +654,7 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
-      if (styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
+      if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,
           [target, ...ancestors],
@@ -1434,8 +1434,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const externalAncestors: Element[] = [];
               const externalSlots = new Set<HTMLSlotElement>();
               const externalStyleRoots = new Set<ShadowRoot>();
-              const motionTargets = new Set<EventTarget>(observedRoots);
-              motionTargets.add(target);
+              const motionTargets = new Set<Element>([target]);
+              const shadowAnimationTargets = new Set<EventTarget>(
+                [...observedRoots].filter((root) => root.nodeType === 11)
+              );
               const targetRoot = target.getRootNode();
               if (
                 targetRoot.nodeType === 11 &&
@@ -1566,7 +1568,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   );
               };
               const onProjectionEvent = (event: Event) => {
-                if (event.type === 'transitionstart') {
+                if (event.type.startsWith('transition')) {
                   const propertyName = (event as TransitionEvent).propertyName;
                   if (
                     propertyName !== 'visibility' &&
@@ -1585,6 +1587,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 projectionEvents,
                 onProjectionEvent
               );
+              const stopShadowAnimationEvents = listenToEntryEvents(
+                shadowAnimationTargets,
+                ['animationstart', 'animationend', 'animationcancel'],
+                onProjectionEvent
+              );
               const onExternalStyleEvent = (event: Event) => {
                 if (isEntryStylesheetElement(event.composedPath()[0] as Node)) refreshTree();
               };
@@ -1600,6 +1607,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 eligibilityAnimations.clear();
                 stopEntryEnvironmentEvents();
                 stopProjectionEvents();
+                stopShadowAnimationEvents();
                 stopExternalStyleEvents();
               };
               if (externalStyleRoots.size > 0) {
