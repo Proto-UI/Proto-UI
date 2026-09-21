@@ -597,6 +597,9 @@ importers:
       '@proto.ui/module-collection':
         specifier: workspace:*
         version: link:../modules/collection
+      '@proto.ui/module-table-structure':
+        specifier: workspace:*
+        version: link:../modules/table-structure
       '@proto.ui/types':
         specifier: workspace:*
         version: link:../types
@@ -985,6 +988,24 @@ importers:
         specifier: workspace:*
         version: link:../state
 
+  packages/modules/table-structure:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-a11y':
+        specifier: workspace:*
+        version: link:../a11y
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../anatomy
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/module-state':
+        specifier: workspace:*
+        version: link:../state
+
   packages/modules/test-sys:
     dependencies:
       '@proto.ui/core':
@@ -1020,6 +1041,9 @@ importers:
       '@proto.ui/module-image-view':
         specifier: workspace:*
         version: link:../../modules/image-view
+      '@proto.ui/module-table-structure':
+        specifier: workspace:*
+        version: link:../../modules/table-structure
       '@proto.ui/module-text-control':
         specifier: workspace:*
         version: link:../../modules/text-control
@@ -1225,6 +1249,9 @@ importers:
       '@proto.ui/module-state-interaction':
         specifier: workspace:*
         version: link:../modules/state-interaction
+      '@proto.ui/module-table-structure':
+        specifier: workspace:*
+        version: link:../modules/table-structure
       '@proto.ui/module-test-sys':
         specifier: workspace:*
         version: link:../modules/test-sys

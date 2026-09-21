@@ -1,9 +1,9 @@
 ---
 title: 'Table (Draft)'
-description: 'The pre-implementation Base Table structural decision, topology, accessibility boundary, and exclusions.'
+description: 'The draft Base Table structural protocol, implemented host-neutral topology, accessibility boundary, and remaining Adapter evidence.'
 ---
 
-Base Table is a **draft protocol definition**, not a package export or usable component. The current authority consists of `D-BASE-TABLE-STRUCTURE-0001`, `C-TABLE-STRUCTURE-0001`, and `T-TABLE-STRUCTURE-0001`. Runtime, Base prototype, Adapter, CLI, demo, and design-language work remains planned.
+Base Table is a **draft protocol with Checkpoint B host-neutral implementation**, not a released Adapter conformance claim. `D-BASE-TABLE-STRUCTURE-0001`, `C-TABLE-STRUCTURE-0001`, `M-TABLE-STRUCTURE-0001`, the five `P-BASE-TABLE*` identities, and `T-TABLE-STRUCTURE-0001` govern the current slice. Four-Adapter profile evidence, CLI facade registration, usable runtime previews, and design-language work remain planned under #621 Checkpoint C.
 
 ## Why Table is a protocol
 
@@ -19,13 +19,13 @@ Maker-authored parts, spans, and header keys
   -> User-observable table relationships
 ```
 
-The definition does not claim that a current Adapter implements the complete path.
+The definition now has a portable Module and Base family; it still does not claim that an official Adapter implements the complete host-projection path.
 
-## Planned family
+## Implemented host-neutral family
 
-The implementation carrier may add exactly these Base identities once matching source and evidence exist:
+Checkpoint B exports exactly these Base identities with matching source and executable evidence:
 
-| Planned identity | Cardinality | Structural responsibility |
+| Identity | Cardinality | Structural responsibility |
 | --- | --- | --- |
 | `P-BASE-TABLE` | `1..1` | Owns one independent Table anatomy domain and its read-only structural snapshot. |
 | `P-BASE-TABLE-CAPTION` | `0..1` | Supplies the authored caption/purpose semantic object. |
@@ -51,7 +51,7 @@ Insert, removal, and reorder recompute the snapshot from the actual parts. Tempo
 
 Base Table reuses the draft generic A11y direction and `HC-A11Y-0001`; it does not introduce `HC-TABLE`. Table Structure asks for no physical widget, measurement, input, resource, or system service.
 
-The current A11y implementation still represents relationships as strings. Opaque semantic-object references and multi-target relationships are an explicit implementation prerequisite, not completed evidence. Current Adapter profiles also do not catalog Table support.
+The generic A11y path now supports opaque semantic-object references and ordered multi-target relationships through the merged #625 prerequisite. Table-specific mapping by each official Adapter profile remains planned and is not inferred from that generic transport.
 
 The external host comparison establishes a shared information shape only:
 
@@ -83,7 +83,7 @@ A later Data Table composition may consume the passive structure while composing
 
 ## Evidence status
 
-The host-neutral reference probe at `packages/spec/fixtures/src/table-structure/reference.ts` exercises deterministic placement, multiple-header resolution, topology/header diagnostics, and pairwise insertion, removal, and reorder. It cannot represent Anatomy-backed nearest-domain isolation and is not runtime or Adapter conformance. `T-TABLE-STRUCTURE-0001` keeps domain isolation, the Table module, Base family, and four official Web Adapter paths in `planned` status until those tests exist and pass.
+The host-neutral reference probe and Checkpoint B Module/Base tests now cover deterministic placement, multiple-header resolution, diagnostics, nearest-domain isolation, authored-fact churn, exact anatomy, and passive negative boundaries. The new `@proto.ui/module-table-structure` and `@proto.ui/prototypes-base/table` exports remain draft. `T-TABLE-STRUCTURE-0001` keeps all four official Web Adapter paths in `planned` status until Checkpoint C adds and independently reviews those tests; this page therefore provides no interactive Table preview yet.
 
 ## References
 

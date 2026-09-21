@@ -1,14 +1,14 @@
 {
-  "name": "@proto.ui/hooks",
+  "name": "@proto.ui/module-table-structure",
   "version": "0.3.0-alpha.1",
   "private": false,
   "type": "module",
   "dependencies": {
     "@proto.ui/core": "workspace:*",
+    "@proto.ui/module-a11y": "workspace:*",
     "@proto.ui/module-anatomy": "workspace:*",
-    "@proto.ui/module-collection": "workspace:*",
-    "@proto.ui/module-table-structure": "workspace:*",
-    "@proto.ui/types": "workspace:*"
+    "@proto.ui/module-base": "workspace:*",
+    "@proto.ui/module-state": "workspace:*"
   },
   "exports": {
     ".": {
@@ -17,13 +17,13 @@
       "default": "./dist/index.js"
     }
   },
-  "description": "Proto UI built-in author-facing hooks powered by the runtime bridge.",
+  "description": "Proto UI module for passive two-dimensional Table topology and header relationships.",
   "license": "MIT",
-  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/hooks",
+  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/table-structure",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Proto-UI/Proto-UI.git",
-    "directory": "packages/hooks"
+    "directory": "packages/modules/table-structure"
   },
   "bugs": {
     "url": "https://github.com/Proto-UI/Proto-UI/issues"
@@ -33,16 +33,17 @@
   },
   "keywords": [
     "proto-ui",
-    "proto",
-    "ui",
-    "hooks"
+    "module",
+    "table",
+    "accessibility",
+    "topology"
   ],
   "files": [
     "dist/",
     "README.md"
   ],
   "scripts": {
-    "build": "node ../../scripts/build/public-packages.mjs --package @proto.ui/hooks",
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/module-table-structure",
     "prepack": "pnpm run build"
   }
 }

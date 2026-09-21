@@ -8,6 +8,7 @@
     "@proto.ui/core": "workspace:*",
     "@proto.ui/hooks": "workspace:*",
     "@proto.ui/module-text-control": "workspace:*",
+    "@proto.ui/module-table-structure": "workspace:*",
     "@proto.ui/module-image-view": "workspace:*"
   },
   "devDependencies": {
@@ -129,6 +130,11 @@
       "types": "./dist/async-region/index.d.ts",
       "import": "./dist/async-region/index.js",
       "default": "./dist/async-region/index.js"
+    },
+    "./table": {
+      "types": "./dist/table/index.d.ts",
+      "import": "./dist/table/index.js",
+      "default": "./dist/table/index.js"
     }
   },
   "description": "Base Proto UI prototype library for reusable interaction prototypes.",

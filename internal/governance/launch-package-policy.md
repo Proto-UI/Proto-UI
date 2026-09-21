@@ -157,6 +157,7 @@ The following packages should be treated as internal or dependency-directed for 
 - `@proto.ui/module-state`
 - `@proto.ui/module-state-accessibility`
 - `@proto.ui/module-state-interaction`
+- `@proto.ui/module-table-structure`
 - `@proto.ui/module-test-sys`
 - `@proto.ui/module-text-control`
 

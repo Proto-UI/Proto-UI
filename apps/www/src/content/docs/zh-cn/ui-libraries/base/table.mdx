@@ -1,9 +1,9 @@
 ---
 title: 'Table（Draft）'
-description: 'Base Table 实施前的结构决策、二维 topology、accessibility 边界与排除项。'
+description: 'Base Table draft structural protocol、已实现的 host-neutral topology、accessibility 边界与待补 Adapter 证据。'
 ---
 
-Base Table 当前是 **draft protocol definition**，不是 package export，也不是可使用的组件。现阶段 authority 由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001` 与 `T-TABLE-STRUCTURE-0001` 构成；runtime、Base prototype、Adapter、CLI、demo 与 design-language 工作仍处于 planned 状态。
+Base Table 是**已有 Checkpoint B host-neutral 实现的 draft protocol**，不是已发布的 Adapter conformance 声明。当前切片由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001`、`M-TABLE-STRUCTURE-0001`、五个 `P-BASE-TABLE*` identity 与 `T-TABLE-STRUCTURE-0001` 治理。四 Adapter profile 证据、CLI facade 注册、可用 runtime preview 与 design-language 工作仍由 #621 Checkpoint C 继续完成。
 
 ## 为什么 Table 是协议
 
@@ -19,13 +19,13 @@ Maker-authored parts、spans 与 header keys
   -> User 可观察的 table relationships
 ```
 
-当前定义不声称已有 Adapter 完成了整条路径。
+当前定义已有 portable Module 与 Base family；它仍不声明 official Adapter 已实现完整 host-projection path。
 
-## 计划中的 family
+## 已实现的 host-neutral family
 
-只有在匹配的 source 与 evidence 同时存在后，implementation carrier 才可以加入以下五个 Base identities：
+Checkpoint B 以匹配的 source 与 executable evidence 精确导出以下 Base identities：
 
-| Planned identity | Cardinality | 结构职责 |
+| Identity | Cardinality | 结构职责 |
 | --- | --- | --- |
 | `P-BASE-TABLE` | `1..1` | 拥有一个独立 Table anatomy domain 及其只读结构 snapshot。 |
 | `P-BASE-TABLE-CAPTION` | `0..1` | 提供 authored caption/purpose semantic object。 |
@@ -51,7 +51,7 @@ Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无�
 
 Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-TABLE`。Table Structure 不请求 physical widget、measurement、input、resource 或 system service。
 
-当前 A11y implementation 仍以 string 表示 relationship。Opaque semantic-object refs 与 multi-target relationship 是明确的 implementation prerequisite，不是已完成证据；当前 Adapter profiles 也没有编目 Table support。
+通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。各 official Adapter profile 的 Table-specific mapping 仍为 planned，不从这项通用 transport 自动推断。
 
 外部 host 对照只证明 shared information shape：
 
@@ -81,9 +81,9 @@ Base Table 只拥有 passive structure。它明确排除：
 
 Later Data Table composition 可以消费 passive structure，同时组合分别受治理的 data、Collection、selection、pagination、virtualization、editing 与其它 capabilities。
 
-## Evidence 状态
+## 证据状态
 
-`packages/spec/fixtures/src/table-structure/reference.ts` 的 host-neutral reference probe 覆盖 deterministic placement、multiple-header resolution、topology/header diagnostics，以及 pairwise insert、remove 与 reorder；它不能表达由 Anatomy 支撑的 nearest-domain isolation，也不是 runtime 或 Adapter conformance。`T-TABLE-STRUCTURE-0001` 会把 domain isolation、Table module、Base family 与四个 official Web Adapter path 保持为 `planned`，直到对应 tests 真实存在并通过。
+Host-neutral reference probe 与 Checkpoint B Module/Base tests 现已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy 与 passive negative boundaries。新增 `@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 仍为 draft。`T-TABLE-STRUCTURE-0001` 在 Checkpoint C 添加并独立评审对应测试前，继续把四个 official Web Adapter path 标为 `planned`；因此本页暂不提供交互式 Table preview。
 
 ## 参考
 
