@@ -244,6 +244,35 @@ describe('private Shadow split effects', () => {
     unrelatedReceipt.dispose();
   });
 
+  it('rejects a compiled token receipt with an unrelated required host gate', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const gated = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: options.artifact.cssText.replaceAll(
+          `[${ROOT}~="w-full"]`,
+          `[${ROOT}~="w-full"][data-never]`
+        ),
+      },
+    });
+
+    expect(() => gated.queueStyle(effect(['block', 'w-full']))).toThrow(/w-full.*missing token/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    gated.dispose();
+  });
+
+  it('retains punctuation inside the compiled token selector value', () => {
+    const token = 'transition-[color,box-shadow]';
+    const { host, effects } = setup(['block', token]);
+    effects.queueStyle(effect(['block', token]));
+    effects.requestFlush();
+    expect(host.getAttribute(ROOT)).toBe(`block ${token}`);
+    effects.dispose();
+  });
+
   it('preserves fallback provenance when the exact physical token belongs to the artifact', () => {
     const { host, surface, effects, options } = setup();
     effects.dispose();

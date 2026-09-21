@@ -114,6 +114,24 @@ describe('adapter-web-component Shadow style artifact', () => {
       artifact(`:where(.dark) :where([data-pui-style~="dark:bg-input/30"]) { color: red; }`),
     ],
     [
+      'host-context document dark class beside the host marker',
+      artifact(
+        `:host([data-pui-color-scheme='dark']):host-context(.dark) [data-pui-style~='dark:bg-primary'] { color: red; }`
+      ),
+    ],
+    [
+      'host-context document theme attribute beside the host marker',
+      artifact(
+        `:host([data-pui-color-scheme='dark']):host-context([data-theme='dark']) [data-pui-style~='dark:bg-primary'] { color: red; }`
+      ),
+    ],
+    [
+      'escaped host-context pseudo beside the host marker',
+      artifact(
+        `:host([data-pui-color-scheme='dark']):host-con\\74 ext(.dark) [data-pui-style~='dark:bg-primary'] { color: red; }`
+      ),
+    ],
+    [
       'system dark media without optional whitespace',
       artifact(
         `@media(prefers-color-scheme:dark) { :host([data-pui-color-scheme='dark']) [data-pui-style~='dark:bg-input/30'] { color: red; } }`

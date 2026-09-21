@@ -813,9 +813,8 @@ describe('WC scope sequential target sample', () => {
     };
 
     try {
-      // Happy DOM follows the portal's logical parentNode override for its
-      // synthetic focus path. Inject the browser's physical body path while
-      // retaining the real active element fact used by the observer.
+      // Inject the browser's physical body path while retaining the real
+      // active element fact used by the observer.
       dispatchPhysicalFocus(radio);
       expect(history.order(radio)).toBeGreaterThan(0);
       expect(history.recent()).toBe(radio);

@@ -73,7 +73,7 @@ import { createShadowSplitResources, type ShadowSplitResources } from './shadow-
 import { createShadowSplitEffectsPort } from './shadow-split-effects';
 import { stripShadowCssComments } from './shadow-style-artifact';
 import { createPortalConcealBarrier } from './portal-conceal';
-import { adoptWebComponentPortalProjections } from './portal-mount';
+import { adoptWebComponentPortalProjections, isWebComponentPortaled } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
 import type { WebComponentAdapterConstructor } from './types';
 import type {
@@ -314,10 +314,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       if (this._mountedOnce) {
         // Refresh the logical parent link after a synchronous DOM move.
-        // `parentNode` is projected back to the logical origin while a portal
-        // is active, so clearing a missing owner here is safe for ordinary
-        // moves without discarding explicit portal ownership.
-        markProtoInstance(this, proto as Prototype<any>, this._instanceToken, true);
+        // Portal ownership is retained in Adapter metadata while parentNode
+        // continues to report the physical DOM tree.
+        markProtoInstance(
+          this,
+          proto as Prototype<any>,
+          this._instanceToken,
+          !isWebComponentPortaled(this)
+        );
         if (this._pendingOwnedTokens?.length) {
           this._applier?.apply(this._pendingOwnedTokens);
         }

@@ -311,6 +311,29 @@ function listenToEntryEvents(
   };
 }
 
+function animationAffectsEntryEligibility(animation: Animation): boolean {
+  const effect = animation.effect;
+  if (!effect || typeof (effect as KeyframeEffect).getKeyframes !== 'function') return true;
+  try {
+    return (effect as KeyframeEffect)
+      .getKeyframes()
+      .some((keyframe) =>
+        Object.keys(keyframe).some(
+          (property) =>
+            property === 'visibility' ||
+            property === 'display' ||
+            property === 'contentVisibility' ||
+            property === 'content-visibility' ||
+            property.startsWith('--')
+        )
+      );
+  } catch {
+    // An opaque animation is correctness-sensitive. Sampling it is bounded to
+    // this entry region and ends with the animation or the view epoch.
+    return true;
+  }
+}
+
 function matchingSelectorParen(selector: string, open: number): number {
   let depth = 1;
   let quote = '';
@@ -488,6 +511,120 @@ function hasDocumentRootRelationalSubject(selector: string): boolean {
   return false;
 }
 
+function collectSiblingDependencySubjects(
+  selector: string,
+  externalSubjects: readonly Element[],
+  candidates: readonly Element[]
+): Element[] {
+  let depth = 0;
+  let bracketDepth = 0;
+  let quote = '';
+  const siblingPositions: number[] = [];
+  const dependencies = new Set<Element>();
+  const firstCompound = (suffix: string) => {
+    let innerDepth = 0;
+    let innerBracketDepth = 0;
+    let innerQuote = '';
+    for (let index = 0; index < suffix.length; index += 1) {
+      const character = suffix[index]!;
+      if (character === '\\') {
+        index += 1;
+        continue;
+      }
+      if (innerQuote) {
+        if (character === innerQuote) innerQuote = '';
+        continue;
+      }
+      if (character === '"' || character === "'") {
+        innerQuote = character;
+        continue;
+      }
+      if (character === '[') innerBracketDepth += 1;
+      else if (character === ']') innerBracketDepth = Math.max(0, innerBracketDepth - 1);
+      else if (!innerBracketDepth && character === '(') innerDepth += 1;
+      else if (!innerBracketDepth && character === ')') innerDepth = Math.max(0, innerDepth - 1);
+      else if (
+        !innerDepth &&
+        !innerBracketDepth &&
+        (character === '>' || character === '+' || character === '~' || /\s/.test(character))
+      )
+        return suffix.slice(0, index);
+    }
+    return suffix;
+  };
+  const collectBranch = (branchEnd: number) => {
+    for (const position of siblingPositions) {
+      const suffix = selector.slice(position + 1, branchEnd).trim();
+      if (!suffix) continue;
+      try {
+        const subject = firstCompound(suffix);
+        const matchingSubjects = subject
+          ? externalSubjects.filter((candidate) => candidate.matches(subject))
+          : [];
+        if (
+          matchingSubjects.length > 0 &&
+          candidates.some((candidate) => candidate.matches(suffix))
+        )
+          for (const candidate of matchingSubjects) dependencies.add(candidate);
+      } catch {
+        // A sibling-bearing selector that cannot be safely probed remains
+        // correctness-sensitive. Observe sibling branches at every bounded
+        // external subject rather than falling back to the whole document.
+        for (const candidate of externalSubjects) dependencies.add(candidate);
+      }
+    }
+  };
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '[') {
+      bracketDepth += 1;
+      continue;
+    }
+    if (character === ']') {
+      bracketDepth = Math.max(0, bracketDepth - 1);
+      continue;
+    }
+    if (bracketDepth) continue;
+    if (character === '(') depth += 1;
+    else if (character === ')') depth = Math.max(0, depth - 1);
+    else if (!depth && (character === '+' || character === '~')) siblingPositions.push(index);
+    else if (!depth && character === ',') {
+      collectBranch(index);
+      siblingPositions.length = 0;
+    }
+  }
+  collectBranch(selector.length);
+  return [...dependencies];
+}
+
+function styleRuleCanAffectEntryEligibility(rule: CSSStyleRule): boolean {
+  const style = rule.style;
+  if (!style) return false;
+  for (let index = 0; index < style.length; index += 1) {
+    const property = style.item(index);
+    if (
+      property === 'visibility' ||
+      property === 'display' ||
+      property === 'content-visibility' ||
+      property.startsWith('--')
+    )
+      return true;
+  }
+  return false;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -497,6 +634,7 @@ function collectEntryStyleDependencies(
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
+  const siblingSubjects = new Set<Element>();
   const candidates = [target, ...ancestors, ...target.querySelectorAll('*')];
   const collectMedia = (media: MediaList | null | undefined) => {
     const query = media?.mediaText;
@@ -516,6 +654,13 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
+      if (styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
+        for (const subject of collectSiblingDependencySubjects(
+          selector,
+          [target, ...ancestors],
+          candidates
+        ))
+          siblingSubjects.add(subject);
       if (selector.includes(':has(') && hasDocumentRootRelationalSubject(selector)) relational = 2;
       if (!relational && selector.includes(':has(')) {
         try {
@@ -545,7 +690,11 @@ function collectEntryStyleDependencies(
   for (const root of roots)
     for (const sheet of [...(root.styleSheets ?? []), ...(root.adoptedStyleSheets ?? [])])
       visitSheet(sheet);
-  return [[...queries].map((query) => view.matchMedia(query)), relational] as const;
+  return [
+    [...queries].map((query) => view.matchMedia(query)),
+    relational,
+    siblingSubjects,
+  ] as const;
 }
 
 function watchEntryStyleInvalidation(
@@ -1285,7 +1434,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const externalAncestors: Element[] = [];
               const externalSlots = new Set<HTMLSlotElement>();
               const externalStyleRoots = new Set<ShadowRoot>();
-              const motionTargets = new Set<Element>([target]);
+              const motionTargets = new Set<EventTarget>(observedRoots);
+              motionTargets.add(target);
               const targetRoot = target.getRootNode();
               if (
                 targetRoot.nodeType === 11 &&
@@ -1321,12 +1471,24 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
               }
-              const [mediaQueries, relationalDependency] = collectEntryStyleDependencies(
-                view!,
-                mediaRoots,
-                target,
-                externalAncestors
-              );
+              const [mediaQueries, relationalDependency, siblingSubjects] =
+                collectEntryStyleDependencies(view!, mediaRoots, target, externalAncestors);
+              for (const subject of siblingSubjects) {
+                if (subject.parentNode)
+                  entryObserver?.observe(subject.parentNode, {
+                    childList: true,
+                  });
+                let sibling = subject.previousElementSibling;
+                while (sibling) {
+                  entryObserver?.observe(sibling, {
+                    childList: true,
+                    subtree: true,
+                    characterData: true,
+                    attributes: true,
+                  });
+                  sibling = sibling.previousElementSibling;
+                }
+              }
               if (relationalDependency === 1) {
                 for (const ancestor of externalAncestors) {
                   if (
@@ -1367,6 +1529,42 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 'focusin',
                 'focusout',
               ];
+              const eligibilityAnimations = new Set<Animation>();
+              let eligibilityAnimationFrame = 0;
+              const sampleEligibilityAnimations = () => {
+                eligibilityAnimationFrame = 0;
+                for (const animation of eligibilityAnimations) {
+                  if (animation.playState === 'finished' || animation.playState === 'idle')
+                    eligibilityAnimations.delete(animation);
+                }
+                if (!eligibilityAnimations.size || !isCurrentEntryObservation()) return;
+                projectCurrent();
+                eligibilityAnimationFrame = view!.requestAnimationFrame(
+                  sampleEligibilityAnimations
+                );
+              };
+              const trackEligibilityAnimation = (event: AnimationEvent) => {
+                const eventTarget = event.composedPath()[0];
+                if (!(eventTarget instanceof view!.Element)) return;
+                const animations = eventTarget.getAnimations();
+                const named = animations.filter(
+                  (animation) =>
+                    (animation as Animation & { animationName?: string }).animationName ===
+                    event.animationName
+                );
+                // The animationstart event and the Web Animations list can be
+                // observed on adjacent browser checkpoints. If the named CSS
+                // animation is not exposed yet, conservatively inspect every
+                // animation on the event target.
+                for (const animation of named.length ? named : animations) {
+                  if (animationAffectsEntryEligibility(animation))
+                    eligibilityAnimations.add(animation);
+                }
+                if (eligibilityAnimations.size && !eligibilityAnimationFrame)
+                  eligibilityAnimationFrame = view!.requestAnimationFrame(
+                    sampleEligibilityAnimations
+                  );
+              };
               const onProjectionEvent = (event: Event) => {
                 if (event.type === 'transitionstart') {
                   const propertyName = (event as TransitionEvent).propertyName;
@@ -1378,6 +1576,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   )
                     return;
                 }
+                if (event.type === 'animationstart')
+                  trackEligibilityAnimation(event as AnimationEvent);
                 projectCurrent();
               };
               const stopProjectionEvents = listenToEntryEvents(
@@ -1394,6 +1594,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 onExternalStyleEvent
               );
               stopEntryMotionWatch = () => {
+                if (eligibilityAnimationFrame)
+                  view!.cancelAnimationFrame(eligibilityAnimationFrame);
+                eligibilityAnimationFrame = 0;
+                eligibilityAnimations.clear();
                 stopEntryEnvironmentEvents();
                 stopProjectionEvents();
                 stopExternalStyleEvents();

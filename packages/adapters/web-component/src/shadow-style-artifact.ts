@@ -123,7 +123,8 @@ function validateShadowSelectorAbi(cssText: string): void {
       );
     }
   );
-  const documentMarker = documentRule?.[1] ?? systemColorSchemeRule?.[1];
+  const hostContextMarker = findShadowDocumentThemeHostContext(structuralCss);
+  const documentMarker = documentRule?.[1] ?? systemColorSchemeRule?.[1] ?? hostContextMarker;
   if (documentMarker) {
     throw invalidArtifact(documentMarker);
   }
@@ -146,6 +147,20 @@ function validateShadowSelectorAbi(cssText: string): void {
   if (hasUnscopedDarkToken) {
     throw invalidArtifact('dark');
   }
+}
+
+function findShadowDocumentThemeHostContext(cssText: string): string | undefined {
+  for (const match of cssText.matchAll(/:((?:[-\w]|\\(?:[0-9a-f]{1,6}\s?|.))+)\(([^)]*)\)/gi)) {
+    if (decodeShadowCssEscapes(match[1]!).toLowerCase() !== 'host-context') continue;
+    const argument = decodeShadowCssEscapes(match[2]!);
+    if (
+      /(?:^|[^\w-])\.dark(?![\w-])/i.test(argument) ||
+      /\[\s*data-theme(?:\s|[*^$|~]?=|\])/i.test(argument) ||
+      /:root(?![\w-])/i.test(argument)
+    )
+      return match[0];
+  }
+  return undefined;
 }
 
 // CSS identifiers may encode otherwise ordinary characters with a one-to-six

@@ -1777,6 +1777,90 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects descendant entry across intermediate animation keyframe states', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: `
+          #keyframe-entry.run button { animation: keyframe-entry-visibility 20s linear infinite; }
+          @keyframes keyframe-entry-visibility {
+            0%, 20% { visibility: visible; }
+            25%, 75% { visibility: hidden; }
+            80%, 100% { visibility: visible; }
+          }
+        `,
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-keyframe-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          })
+        );
+        const host = new C();
+        host.id = 'keyframe-entry';
+        const button = document.createElement('button');
+        button.textContent = 'Animated eligibility';
+        host.append(button);
+        document.body.append(host);
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        const started = new Promise<void>((resolve) =>
+          button.addEventListener('animationstart', () => resolve(), { once: true })
+        );
+        host.classList.add('run');
+        await started;
+        const animation = button.getAnimations()[0]!;
+        const waitFor = async (predicate: () => boolean) => {
+          for (let frame = 0; frame < 120; frame += 1) {
+            if (predicate()) return;
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          }
+          throw new Error('entry animation projection timeout');
+        };
+
+        animation.currentTime = 10_000;
+        await waitFor(
+          () =>
+            getComputedStyle(button).visibility === 'hidden' &&
+            host.getAttribute('tabindex') === '0'
+        );
+        const hidden = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+
+        animation.currentTime = 19_000;
+        await waitFor(
+          () =>
+            getComputedStyle(button).visibility === 'visible' &&
+            host.getAttribute('tabindex') === null
+        );
+        const visible = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        animation.cancel();
+        return { hidden, visible };
+      });
+      expect(result).toEqual({
+        hidden: { visibility: 'hidden', fallback: '0' },
+        visible: { visibility: 'visible', fallback: null },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects descendant entry after CSS-only media-query eligibility changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -2181,6 +2265,57 @@ describe('Shadow closeout native boundaries', () => {
       await page.evaluate(() => document.querySelector('.flag')?.remove());
       await page.waitForFunction(
         () => document.querySelector('#relational-entry')?.getAttribute('tabindex') === null
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry after a preceding sibling selector changes', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: '.sibling-entry-flag.active ~ .sibling-entry button { visibility: hidden; }',
+      });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-sibling-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const wrapper = document.createElement('div');
+        const flag = document.createElement('div');
+        flag.className = 'sibling-entry-flag';
+        const host = new C();
+        host.id = 'sibling-entry';
+        host.className = 'sibling-entry';
+        host.innerHTML = '<button>Button</button>';
+        wrapper.append(flag, host);
+        document.body.append(wrapper);
+        (window as any).__siblingEntryFlag = flag;
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#sibling-entry')?.getAttribute('tabindex') === null
+      );
+
+      await page.evaluate(() => (window as any).__siblingEntryFlag.classList.add('active'));
+      await page.waitForFunction(
+        () => document.querySelector('#sibling-entry')?.getAttribute('tabindex') === '0'
+      );
+
+      await page.evaluate(() => (window as any).__siblingEntryFlag.classList.remove('active'));
+      await page.waitForFunction(
+        () => document.querySelector('#sibling-entry')?.getAttribute('tabindex') === null
       );
       expect(errors).toEqual([]);
     } finally {
@@ -3029,6 +3164,58 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('preserves native DOM parent and query behavior while a portal is projected', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const origin = document.createElement('section');
+        const projected = document.createElement('div');
+        projected.id = 'native-parent-portal';
+        origin.append(projected);
+        document.body.append(origin);
+        const portal = p.createPortal();
+        portal.mount(projected);
+        const mounted = {
+          parentNodeIsBody: projected.parentNode === document.body,
+          parentElementIsBody: projected.parentElement === document.body,
+          rootIsDocument: projected.getRootNode() === document,
+          absentFromOriginQuery: origin.querySelector('#native-parent-portal') === null,
+          presentInBodyQuery: document.body.querySelector('#native-parent-portal') === projected,
+        };
+        projected.parentNode!.removeChild(projected);
+        const removed = {
+          parentNode: projected.parentNode,
+          absentFromBodyQuery: document.body.querySelector('#native-parent-portal') === null,
+        };
+        portal.unmount(projected);
+        const restored = {
+          parentNodeIsOrigin: projected.parentNode === origin,
+          presentInOriginQuery: origin.querySelector('#native-parent-portal') === projected,
+        };
+        origin.remove();
+        return { mounted, removed, restored };
+      });
+      expect(result).toEqual({
+        mounted: {
+          parentNodeIsBody: true,
+          parentElementIsBody: true,
+          rootIsDocument: true,
+          absentFromOriginQuery: true,
+          presentInBodyQuery: true,
+        },
+        removed: { parentNode: null, absentFromBodyQuery: true },
+        restored: { parentNodeIsOrigin: true, presentInOriginQuery: true },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects a composed radio entry after its form owner changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -3724,6 +3911,7 @@ describe('Shadow closeout native boundaries', () => {
         await settle(window);
         const before = {
           inOldBody: document.body.querySelector('button') === button,
+          parentNodeIsOldBody: button.parentNode === document.body,
           ownerDocument: button.ownerDocument === document,
           snapshot: host.getExposes().snapshot(),
         };
@@ -3737,6 +3925,7 @@ describe('Shadow closeout native boundaries', () => {
         const immediate = {
           oldBodyClean: document.body.querySelector('button') !== button,
           inNewBody: foreignDocument.body.querySelector('button') === button,
+          parentNodeIsNewBody: button.parentNode === foreignDocument.body,
           ownerDocument: button.ownerDocument === foreignDocument,
         };
         button.click();
@@ -3745,6 +3934,7 @@ describe('Shadow closeout native boundaries', () => {
         const after = {
           oldBodyClean: document.body.querySelector('button') !== button,
           inNewBody: foreignDocument.body.querySelector('button') === button,
+          parentNodeIsNewBody: button.parentNode === foreignDocument.body,
           ownerDocument: button.ownerDocument === foreignDocument,
           markerMoved: Array.from(host.childNodes as NodeListOf<ChildNode>).some(
             (node) => node.nodeType === 8
@@ -3780,18 +3970,21 @@ describe('Shadow closeout native boundaries', () => {
       expect(result).toEqual({
         before: {
           inOldBody: true,
+          parentNodeIsOldBody: true,
           ownerDocument: true,
           snapshot: { setups: 1, presses: 0 },
         },
         immediate: {
           oldBodyClean: true,
           inNewBody: true,
+          parentNodeIsNewBody: true,
           ownerDocument: true,
         },
         immediateSnapshot: { setups: 1, presses: 1 },
         after: {
           oldBodyClean: true,
           inNewBody: true,
+          parentNodeIsNewBody: true,
           ownerDocument: true,
           markerMoved: true,
           controllerRetained: true,

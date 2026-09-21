@@ -16,6 +16,102 @@ const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 
 type Projection = { root: string; surface: string[]; borderWidths: string };
 
+function splitReceiptVariants(token: string): string[] {
+  const parts: string[] = [];
+  let current = '';
+  let depth = 0;
+  for (const character of token) {
+    if (character === '[') depth += 1;
+    else if (character === ']') depth = Math.max(0, depth - 1);
+    if (character === ':' && depth === 0) {
+      parts.push(current);
+      current = '';
+    } else current += character;
+  }
+  parts.push(current);
+  return parts.filter(Boolean);
+}
+
+function compiledReceiptSelector(token: string): string | null {
+  const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+  let selector = `[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
+  let dark = false;
+  for (const variant of splitReceiptVariants(token).slice(0, -1)) {
+    if (variant === 'dark') dark = true;
+    else if (['hover', 'active', 'disabled', 'focus-visible'].includes(variant))
+      selector += `:${variant}`;
+    else {
+      const notData = /^not-\[data-([a-zA-Z0-9-]+)\]$/.exec(variant);
+      const data = /^data-\[(.+)\]$/.exec(variant);
+      if (notData) selector += `:not([data-${notData[1]}])`;
+      else if (variant.startsWith('aria-')) selector += `[${variant}='true']`;
+      else if (data) {
+        const body = data[1]!;
+        const equal = body.indexOf('=');
+        if (equal < 0) selector += `[data-${body}]`;
+        else {
+          const name = body.slice(0, equal);
+          const value = body
+            .slice(equal + 1)
+            .replace(/^['"]|['"]$/g, '')
+            .replaceAll('\\', '\\\\')
+            .replaceAll('"', '\\"');
+          selector += `[data-${name}='${value}']`;
+        }
+      } else return null;
+    }
+  }
+  return `${dark ? ":where(:host([data-pui-color-scheme='dark']))" : ''}:host(${selector})`;
+}
+
+function splitSelectorBranches(selector: string): string[] {
+  const branches: string[] = [];
+  let start = 0;
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  let quote = '';
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '[') bracketDepth += 1;
+    else if (character === ']') bracketDepth = Math.max(0, bracketDepth - 1);
+    else if (!bracketDepth && character === '(') parenDepth += 1;
+    else if (!bracketDepth && character === ')') parenDepth = Math.max(0, parenDepth - 1);
+    else if (!parenDepth && !bracketDepth && character === ',') {
+      branches.push(selector.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  branches.push(selector.slice(start).trim());
+  return branches;
+}
+
+function hasExactCompiledReceipt(selectors: readonly string[], token: string): boolean {
+  const receipt = compiledReceiptSelector(token);
+  if (!receipt) return false;
+  const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+  const allowed = new Set([
+    receipt,
+    `${receipt}:host([data-pui-split-text-control])`,
+    `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
+    `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`,
+  ]);
+  return selectors.some((selector) =>
+    splitSelectorBranches(selector).some((branch) => allowed.has(branch))
+  );
+}
+
 // Fixed border widths are supported by H1. CSS rounds animated border widths
 // to device pixels but interpolates compensating margins continuously. Until
 // a recipe preserves that used-value rounding, reject such transitions under K.
@@ -159,15 +255,7 @@ export function createShadowSplitEffectsPort({
         fail(entry, 'composite');
       if (entry.role === 'composite' && entry.token !== entry.authorToken)
         fail(entry, 'conditional-composite');
-      const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-      const tokenSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
-      if (
-        !ruleSelectors.some(
-          (selector) =>
-            selector.startsWith(tokenSelector) ||
-            (selector.startsWith(':where(') && selector.includes(`)${tokenSelector}`))
-        )
-      ) {
+      if (!hasExactCompiledReceipt(ruleSelectors, entry.token)) {
         fail(entry, 'missing token');
       }
     }

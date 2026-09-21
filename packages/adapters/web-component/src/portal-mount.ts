@@ -2,6 +2,7 @@ import {
   getPrototypeByInstance,
   isProtoInstance,
   markProtoInstance,
+  setProtoParent,
 } from './platform/instance-tree';
 
 /** Document-local WC portal projection. Logical origin owns its liveness;
@@ -59,6 +60,11 @@ function findPortalOwner(node: Node): HTMLElement | null {
   return null;
 }
 
+function portalLogicalParent(node: Node): HTMLElement | null {
+  if (node.nodeType === 1) return node as HTMLElement;
+  return isShadowRootNode(node) ? (node.host as HTMLElement) : null;
+}
+
 export function createWebComponentPortalMount() {
   let revoke: (() => void) | null = null;
   return {
@@ -70,8 +76,6 @@ export function createWebComponentPortalMount() {
       // captured nextSibling does not: restoring A before still-portaled B in
       // [A, B, C] would otherwise append A after C.
       const marker = el.ownerDocument.createComment('proto-ui-portal-origin');
-      const descriptor = Object.getOwnPropertyDescriptor(el, 'parentNode');
-      let ownsParent = false;
       let projected = false;
       let unbindAdoption: (() => void) | null = null;
       let observer: MutationObserver | null = null;
@@ -101,7 +105,10 @@ export function createWebComponentPortalMount() {
         else {
           const proto = getPrototypeByInstance(el);
           const token = (el as any)._instanceToken;
-          if (proto && token) markProtoInstance(el, proto, token, true);
+          if (proto && token) {
+            setProtoParent(el, portalLogicalParent(parent));
+            markProtoInstance(el, proto, token);
+          }
           bindAdoption();
           observeOriginTrees();
         }
@@ -140,10 +147,7 @@ export function createWebComponentPortalMount() {
         originMarkerByProjection.delete(el);
         activeProjections.delete(el);
         observer?.disconnect();
-        if (ownsParent) {
-          if (descriptor) Object.defineProperty(el, 'parentNode', descriptor);
-          else delete (el as unknown as { parentNode?: Node }).parentNode;
-        }
+        setProtoParent(el, null);
         if (marker.parentNode === parent) {
           parent.insertBefore(el, marker);
           marker.remove();
@@ -152,17 +156,16 @@ export function createWebComponentPortalMount() {
       revoke = restore;
       try {
         bindAdoption();
-        Object.defineProperty(el, 'parentNode', { get: () => parent, configurable: true });
-        ownsParent = true;
+        setProtoParent(el, portalLogicalParent(parent));
         // Observe each containing tree: document does not see mutations inside
         // an open ShadowRoot, and that ShadowRoot does not see its host removal.
         observeOriginTrees();
         parent.insertBefore(marker, el);
-        el.ownerDocument.body.appendChild(el);
         projected = true;
         activeProjections.add(el);
         projectionByOriginMarker.set(marker, el);
         originMarkerByProjection.set(el, marker);
+        el.ownerDocument.body.appendChild(el);
       } catch (error) {
         restore();
         throw error;
