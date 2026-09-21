@@ -24,14 +24,23 @@ const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
   ['core root', 'packages/core/src/index.ts', 6_000],
-  ['runtime root', 'packages/runtime/src/index.ts', 60_000],
+  // #621 Table Checkpoint B registers module-table-structure in the eager
+  // runtime closure: measured +3,294 gzip bytes over main 9eb93e9b
+  // (63,294 at Table head 2d305208 vs 60,000 on main). Retain ~700 bytes
+  // headroom. Attribution:
+  // internal/records/2026-09-21-table-structure-runtime-budget.zh-CN.md
+  ['runtime root', 'packages/runtime/src/index.ts', 64_000],
   // #623 scroll end-follow, #625 direct-reference transport, and #652 shadow
   // split S1-S5 all grow the eager adapter closures. Exact #652 merge-ref
   // measurement on main c473eae3: react 82,082 / vue 81,804 gzip. Ceilings
   // keep ~700-900 bytes of headroom. Attribution:
   // internal/records/2026-09-20-adapter-budget-direct-reference-shadow-combined.zh-CN.md
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 83_000],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 82_500],
+  // #621 Table Checkpoint B adds a measured +3,394 gzip bytes to the React
+  // adapter root (82,816 at Table head 2d305208; main 79,422) and +3,364 to
+  // the Vue adapter root (82,527; main 79,163). Retain ~700-1,000 bytes of
+  // bounded headroom.
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 83_500],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 83_500],
   // PR #652 shadow split S1-S5 and composed-tree focus correctness. Canonical CI
   // measures 84,683 gzip bytes at head dd820b30 (main at ddac15da: 75,664 with
   // the same toolchain). Attribution and headroom evidence:
