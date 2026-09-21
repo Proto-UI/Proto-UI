@@ -315,6 +315,8 @@ describe('WC live focus-entry resolver inputs', () => {
     const originalAppendMedium = MediaListCtor?.prototype.appendMedium;
     const originalDeleteMedium = MediaListCtor?.prototype.deleteMedium;
     const originalSetCustomValidity = HTMLInputElement.prototype.setCustomValidity;
+    const originalStepUp = HTMLInputElement.prototype.stepUp;
+    const originalStepDown = HTMLInputElement.prototype.stepDown;
     const formSetters = [
       [HTMLInputElement.prototype, 'checked'],
       [HTMLInputElement.prototype, 'indeterminate'],
@@ -359,6 +361,8 @@ describe('WC live focus-entry resolver inputs', () => {
     if (originalDeleteMedium && MediaListCtor)
       expect(MediaListCtor.prototype.deleteMedium).not.toBe(originalDeleteMedium);
     expect(HTMLInputElement.prototype.setCustomValidity).not.toBe(originalSetCustomValidity);
+    expect(HTMLInputElement.prototype.stepUp).not.toBe(originalStepUp);
+    expect(HTMLInputElement.prototype.stepDown).not.toBe(originalStepDown);
     for (const [index, [prototype, key]] of formSetters.entries()) {
       if (originalFormSetters[index]?.set)
         expect(Object.getOwnPropertyDescriptor(prototype, key)?.set).not.toBe(
@@ -398,6 +402,8 @@ describe('WC live focus-entry resolver inputs', () => {
     if (originalDeleteMedium && MediaListCtor)
       expect(MediaListCtor.prototype.deleteMedium).toBe(originalDeleteMedium);
     expect(HTMLInputElement.prototype.setCustomValidity).toBe(originalSetCustomValidity);
+    expect(HTMLInputElement.prototype.stepUp).toBe(originalStepUp);
+    expect(HTMLInputElement.prototype.stepDown).toBe(originalStepDown);
     for (const [index, [prototype, key]] of formSetters.entries())
       expect(Object.getOwnPropertyDescriptor(prototype, key)).toEqual(originalFormSetters[index]);
   });
@@ -503,6 +509,46 @@ describe('WC live focus-entry resolver inputs', () => {
     await settle();
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
+
+  it.each([
+    ['stepUp', -1, 0],
+    ['stepDown', 11, 10],
+  ] as const)(
+    'reprojects when input.%s() crosses a range boundary without an event',
+    async (method, initial, expected) => {
+      const host = panel(true);
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = '0';
+      input.max = '10';
+      input.step = '1';
+      input.value = String(initial);
+      host.before(input);
+      const button = document.createElement('button');
+      host.append(button);
+      const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+        const computed = nativeGetComputedStyle(element, pseudoElement);
+        if (element !== button) return computed;
+        return new Proxy(computed, {
+          get(target, property) {
+            if (property === 'visibility')
+              return input.validity.rangeOverflow || input.validity.rangeUnderflow
+                ? 'hidden'
+                : 'visible';
+            return Reflect.get(target, property, target);
+          },
+        });
+      });
+      await settle();
+      expect(host.tabIndex).toBe(0);
+
+      input[method]();
+      await settle();
+      expect(input.valueAsNumber).toBe(expected);
+      expect(host.hasAttribute('tabindex')).toBe(false);
+    }
+  );
 
   it.each([false, true])(
     'reprojects details without a focusable summary (initially open: %s)',

@@ -4351,6 +4351,81 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects entry fallback after native input stepping crosses range boundaries', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-step-selector-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent =
+          '.step-selector-entry input:out-of-range + button { visibility: hidden }';
+        document.head.append(style);
+        const settle = () => new Promise<void>((resolve) => queueMicrotask(resolve));
+        const observations = [];
+        for (const [method, initial] of [
+          ['stepUp', -1],
+          ['stepDown', 11],
+        ] as const) {
+          const host = new C();
+          host.className = 'step-selector-entry';
+          host.innerHTML = `<input type="number" min="0" max="10" step="1" value="${initial}" tabindex="-1"><button>Target</button>`;
+          document.body.append(host);
+          await settle();
+          const input = host.querySelector('input')!;
+          const button = host.querySelector('button')!;
+          const before = {
+            outOfRange: input.validity.rangeOverflow || input.validity.rangeUnderflow,
+            visibility: getComputedStyle(button).visibility,
+            fallback: host.getAttribute('tabindex'),
+          };
+          input[method]();
+          await settle();
+          observations.push({
+            method,
+            before,
+            after: {
+              value: input.valueAsNumber,
+              outOfRange: input.validity.rangeOverflow || input.validity.rangeUnderflow,
+              visibility: getComputedStyle(button).visibility,
+              fallback: host.getAttribute('tabindex'),
+            },
+          });
+          host.remove();
+        }
+        style.remove();
+        return observations;
+      });
+      expect(result).toEqual([
+        {
+          method: 'stepUp',
+          before: { outOfRange: true, visibility: 'hidden', fallback: '0' },
+          after: { value: 0, outOfRange: false, visibility: 'visible', fallback: null },
+        },
+        {
+          method: 'stepDown',
+          before: { outOfRange: true, visibility: 'hidden', fallback: '0' },
+          after: { value: 10, outOfRange: false, visibility: 'visible', fallback: null },
+        },
+      ]);
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each(['input', 'textarea'] as const)(
     'reprojects entry fallback after direct %s value changes selector state',
     async (tag) => {

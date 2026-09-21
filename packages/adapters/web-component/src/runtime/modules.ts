@@ -773,6 +773,11 @@ function watchEntryStyleInvalidation(
           'setCustomValidity',
         ]);
     }
+    if (view.HTMLInputElement)
+      patchMethods(view.HTMLInputElement.prototype as unknown as Record<string, unknown>, [
+        'stepUp',
+        'stepDown',
+      ]);
     const ElementInternalsCtor = (
       view as unknown as {
         ElementInternals?: { prototype: Record<string, unknown> };
