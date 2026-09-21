@@ -1629,6 +1629,76 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects descendant entry when a delayed transition starts affecting visibility', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: `
+          #delayed-transition-entry button {
+            visibility: hidden;
+            transition: visibility 120ms linear 120ms;
+          }
+          #delayed-transition-entry.reveal button { visibility: visible; }
+        `,
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-delayed-transition-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          })
+        );
+        const host = new C();
+        host.id = 'delayed-transition-entry';
+        const button = document.createElement('button');
+        button.textContent = 'Delayed transition target';
+        host.append(button);
+        document.body.append(host);
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+        const started = new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error('transitionstart timeout')), 1000);
+          button.addEventListener(
+            'transitionstart',
+            (event) => {
+              if (event.propertyName !== 'visibility') return;
+              clearTimeout(timeout);
+              resolve();
+            },
+            { once: true }
+          );
+        });
+        host.classList.add('reveal');
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const delayed = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        await started;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        const active = {
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+        return { delayed, active };
+      });
+      expect(result).toEqual({
+        delayed: { visibility: 'hidden', fallback: '0' },
+        active: { visibility: 'visible', fallback: null },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects descendant entry when a delayed animation starts affecting visibility', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

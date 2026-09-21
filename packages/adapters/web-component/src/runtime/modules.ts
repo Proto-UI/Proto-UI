@@ -1367,10 +1367,23 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 'focusin',
                 'focusout',
               ];
+              const onProjectionEvent = (event: Event) => {
+                if (event.type === 'transitionstart') {
+                  const propertyName = (event as TransitionEvent).propertyName;
+                  if (
+                    propertyName !== 'visibility' &&
+                    propertyName !== 'display' &&
+                    propertyName !== 'content-visibility' &&
+                    !propertyName.startsWith('--')
+                  )
+                    return;
+                }
+                projectCurrent();
+              };
               const stopProjectionEvents = listenToEntryEvents(
                 motionTargets,
                 projectionEvents,
-                projectCurrent
+                onProjectionEvent
               );
               const onExternalStyleEvent = (event: Event) => {
                 if (isEntryStylesheetElement(event.composedPath()[0] as Node)) refreshTree();
