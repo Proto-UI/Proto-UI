@@ -300,6 +300,35 @@ test('live collector records a verified GitHub platform committer without weaken
   assert.equal(unsigned.input.commits[0].committer.platform, null);
 });
 
+test('a GitHub-valid commit signature cannot promote the author role to platform identity', () => {
+  // The commit signature attests the actor that created the commit object
+  // (the committer). The author block is metadata the committer supplies,
+  // so an unlinked author named `GitHub` must not be promoted to the
+  // trusted platform identity from the same attestation; only the
+  // committer role is identified by the commit signature
+  // (PR509-PLATFORM-AUTHOR-IDENTITY-008).
+  const forged = payload();
+  forged.data.repository.pullRequest.commits.nodes.unshift({
+    commit: {
+      oid: sha('d'),
+      message: "Merge branch 'main' into fixture",
+      author: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      committer: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      signature: { __typename: 'GpgSignature', isValid: true, wasSignedByGitHub: true },
+    },
+  });
+  const result = buildLiveReviewInput(
+    forged,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(result.input.commits[0].author.login, null);
+  assert.equal(result.input.commits[0].author.platform, null);
+  assert.deepEqual(result.input.commits[0].committer.platform, GITHUB_WEB_FLOW_PLATFORM);
+});
+
 test('live collector derives thread time from comments and never fabricates timestamps', () => {
   const threaded = payload();
   threaded.data.repository.pullRequest.reviewThreads.nodes[0].comments.nodes.push({
@@ -423,6 +452,62 @@ test('reconciles a lost review POST once using reviewer, head, disposition, and 
   assert.equal(result.reconciled, true);
   assert.equal(result.invocationId, 'invocation-1');
   assert.equal(result.commitId, sha('b'));
+});
+
+test('reconciles a lost review POST whose review list exceeds the legacy 1 MiB buffer', () => {
+  // A review-heavy pull request can push the paginated reconciliation
+  // response far above the implicit 1 MiB child-process buffer. The
+  // reconciliation (and submission) calls must carry the same documented
+  // MAX_LIVE_RESPONSE_BYTES bound, so the applied review is recovered
+  // exactly once instead of surfacing as an unattributed ENOBUFS
+  // (PR509-REVIEW-RECONCILIATION-BUFFER-007).
+  const reviewBody = 'review body';
+  const paddingReviews = Array.from({ length: 2400 }, (_, index) => ({
+    id: 90000 + index,
+    node_id: `PRR_pad_${index}`,
+    user: { login: 'padding-reviewer' },
+    state: 'COMMENTED',
+    commit_id: sha('c'),
+    body: `padding review ${index}\n${'line'.repeat(200)}`,
+  }));
+  const reconciliationJson = JSON.stringify([
+    [
+      {
+        id: 5679,
+        node_id: 'PRR_review_4',
+        user: { login: 'reviewer' },
+        state: 'APPROVED',
+        commit_id: sha('b'),
+        body: reviewBody,
+        html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-5679',
+      },
+      ...paddingReviews,
+    ],
+  ]);
+  assert.ok(
+    reconciliationJson.length > 1024 * 1024,
+    'the regression reconciliation response must exceed the legacy 1 MiB default'
+  );
+  const seenOptions = [];
+  const result = submitGitHubReview(
+    repositoryId,
+    487,
+    { commitId: sha('b'), event: 'APPROVE', body: reviewBody },
+    (command, args, options) => {
+      seenOptions.push(options);
+      if (args[2] === 'POST') throw new Error('connection lost after write');
+      return reconciliationJson;
+    },
+    { reviewerLogin: 'reviewer', invocationId: 'invocation-large' }
+  );
+  assert.equal(seenOptions.length, 2);
+  assert.ok(
+    seenOptions.every((options) => options.maxBuffer === MAX_LIVE_RESPONSE_BYTES),
+    'submission and reconciliation must both carry the documented payload bound'
+  );
+  assert.equal(result.status, 'applied');
+  assert.equal(result.reconciled, true);
+  assert.equal(result.invocationId, 'invocation-large');
 });
 
 test('returns an explicit unknown receipt when review reconciliation cannot prove the write', () => {

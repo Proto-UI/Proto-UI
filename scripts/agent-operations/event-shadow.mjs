@@ -155,11 +155,6 @@ export function normalizeGithubWebhook({ rawBody, headers, secret, trust, observ
   const anchors = validateTrust(trust);
   const deliveryId = normalizedHeaders['x-github-delivery'];
   assert(DELIVERY_ID.test(deliveryId ?? ''), 'X-GitHub-Delivery must be a GUID');
-  const event = normalizedHeaders['x-github-event'];
-  assert(
-    event === 'pull_request',
-    `event ${event ?? '<missing>'} does not match a pull_request payload`
-  );
   const hookId = integer(normalizedHeaders['x-github-hook-id'], 'webhook hook id');
   assert(anchors.hookIds.includes(hookId), `webhook hook id ${hookId} is not trusted`);
   // Single coherent ingress model: a GitHub App webhook. Only App deliveries
@@ -188,6 +183,24 @@ export function normalizeGithubWebhook({ rawBody, headers, secret, trust, observ
     throw new Error(`authenticated webhook payload is invalid JSON: ${error.message}`);
   }
   assert(isObject(payload), 'authenticated webhook payload must be an object');
+  // The event family is derived from the HMAC-authenticated payload
+  // structure, not taken from the unauthenticated X-GitHub-Event header.
+  // A pull_request delivery is the only ingress this shadow accepts; its
+  // authenticated shape carries a top-level number plus a pull_request
+  // object. The header is then cross-checked against the derived family
+  // and fails closed on any mismatch, so a forged event header cannot
+  // relabel an authenticated payload into a different family.
+  const derivedEvent =
+    typeof payload.number === 'number' && isObject(payload.pull_request) ? 'pull_request' : null;
+  assert(
+    derivedEvent === 'pull_request',
+    'authenticated payload does not identify a trusted pull_request event'
+  );
+  const event = normalizedHeaders['x-github-event'];
+  assert(
+    event === derivedEvent,
+    `X-GitHub-Event header ${event ?? '<missing>'} is inconsistent with the authenticated ${derivedEvent} payload`
+  );
   assert(
     typeof payload.action === 'string' && payload.action.length > 0,
     'payload action is required'

@@ -562,6 +562,28 @@ test('an authenticated payload is still rejected when its declared event disagre
   );
 });
 
+test('the event family is derived from the authenticated payload, not the unauthenticated header', () => {
+  // The payload is a genuine, HMAC-authenticated pull_request delivery, but
+  // the header claims a different family. The derived payload family must
+  // win: the header is cross-checked against it and fails closed.
+  assert.throws(
+    () => normalizeGithubWebhook({ ...signedDelivery({ event: 'issues' }), secret, trust }),
+    /X-GitHub-Event header .* is inconsistent with the authenticated pull_request payload/
+  );
+});
+
+test('a forged event header cannot relabel a non-pull_request authenticated payload', () => {
+  // The header says pull_request, but the signed payload is not a
+  // pull_request delivery (no pull_request object). The family is derived
+  // from the payload structure, so the forged header cannot rescue it.
+  const payload = structuredClone(pullRequestPayload());
+  delete payload.pull_request;
+  assert.throws(
+    () => normalizeGithubWebhook({ ...signedDelivery({ payload }), secret, trust }),
+    /authenticated payload does not identify a trusted pull_request event/
+  );
+});
+
 test('signature comparison is not a plain payload digest assertion', () => {
   const rawBody = Buffer.from('{}');
   const digestOnly = `sha256=${createHmac('sha256', '').update(rawBody).digest('hex')}`;

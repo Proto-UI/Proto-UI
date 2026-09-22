@@ -342,9 +342,19 @@ export const GITHUB_WEB_FLOW_PLATFORM = {
   attestation: 'valid-github-signature',
 };
 
-function commitActorIdentity(actor, signature) {
+// A commit signature attests the actor that created the commit object:
+// the committer. The author block is metadata the committer supplies, so a
+// GitHub-valid commit signature can only identify the committer as a
+// verified platform actor; promoting the author from the same attestation
+// would turn an unattested name/email claim into a trusted identity
+// (PR509-PLATFORM-AUTHOR-IDENTITY-008).
+function commitActorIdentity(actor, signature, role) {
+  if (role !== 'author' && role !== 'committer') {
+    throw new Error('commit actor role must be author or committer');
+  }
   const login = actor?.user?.login ?? null;
   const platform =
+    role === 'committer' &&
     login === null &&
     actor?.name === 'GitHub' &&
     actor?.email === 'noreply@github.com' &&
@@ -451,8 +461,8 @@ export function buildLiveReviewInput(
     commits: (pullRequestPayload.commits?.nodes ?? []).map((node) => ({
       sha: node.commit.oid,
       message: node.commit.message ?? '',
-      author: commitActorIdentity(node.commit.author, node.commit.signature),
-      committer: commitActorIdentity(node.commit.committer, node.commit.signature),
+      author: commitActorIdentity(node.commit.author, node.commit.signature, 'author'),
+      committer: commitActorIdentity(node.commit.committer, node.commit.signature, 'committer'),
     })),
     reviews: (pullRequestPayload.reviews?.nodes ?? []).map((review) => ({
       id: review.id,
@@ -522,6 +532,10 @@ export function submitGitHubReview(
       runner('gh', postArgs, {
         encoding: 'utf8',
         input: JSON.stringify({ commit_id: commitId, event, body }),
+        // Same governed output boundary as every other live call: a large
+        // review echo must surface as a documented payload bound, not as an
+        // unattributed ENOBUFS from an implicit 1 MiB ceiling.
+        maxBuffer: MAX_LIVE_RESPONSE_BYTES,
         stdio: ['pipe', 'pipe', 'pipe'],
       })
     );
@@ -536,7 +550,14 @@ export function submitGitHubReview(
     ];
     try {
       const reviewPages = JSON.parse(
-        runner('gh', reconciliationArgs, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+        runner('gh', reconciliationArgs, {
+          encoding: 'utf8',
+          // Same governed output boundary as every other live call; the
+          // reconciliation path must not fall back to an implicit buffer
+          // ceiling (PR509-REVIEW-RECONCILIATION-BUFFER-007).
+          maxBuffer: MAX_LIVE_RESPONSE_BYTES,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        })
       );
       if (!Array.isArray(reviewPages) || !reviewPages.every(Array.isArray)) {
         throw new Error('review pagination returned an invalid page shape');

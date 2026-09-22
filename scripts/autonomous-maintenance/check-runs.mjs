@@ -746,7 +746,15 @@ function validateForwardRunState(run, label) {
               '--',
               ...expectedIntegrationPaths,
             ],
-            { cwd: root, maxBuffer: 64 * 1024 * 1024 }
+            {
+              cwd: root,
+              // Inventory-derived paths are recorded filenames, not user
+              // pathspecs: literal mode keeps Git from interpreting recorded
+              // names containing pathspec magic (e.g. `:(exclude)**`) as
+              // exclusion patterns at the final merge receipt check.
+              env: { ...process.env, GIT_LITERAL_PATHSPECS: '1' },
+              maxBuffer: 64 * 1024 * 1024,
+            }
           );
           if (reviewedTreeDrift.length > 0) {
             fail(
