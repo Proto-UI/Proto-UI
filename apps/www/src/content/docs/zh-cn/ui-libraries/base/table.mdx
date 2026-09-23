@@ -1,9 +1,9 @@
 ---
 title: 'Table（Draft）'
-description: 'Base Table 实施前的结构决策、二维 topology、accessibility 边界与排除项。'
+description: 'Base Table draft structural protocol、已实现的 host-neutral topology、accessibility 边界与待补 Adapter 证据。'
 ---
 
-Base Table 当前是 **draft protocol definition**，不是 package export，也不是可使用的组件。现阶段 authority 由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001` 与 `T-TABLE-STRUCTURE-0001` 构成；runtime、Base prototype、Adapter、CLI、demo 与 design-language 工作仍处于 planned 状态。
+Base Table 是**已有 Checkpoint B host-neutral 实现的 draft protocol**，不是已发布的 Adapter conformance 声明。当前切片由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001`、`M-TABLE-STRUCTURE-0001`、五个 `P-BASE-TABLE*` identity 与 `T-TABLE-STRUCTURE-0001` 治理。React、Vue 与 Vue 2 Adapter profile 证据、CLI facade 注册、可用 runtime preview 与 design-language 工作仍由 #621 Checkpoint C 继续完成。
 
 ## 为什么 Table 是协议
 
@@ -19,13 +19,13 @@ Maker-authored parts、spans 与 header keys
   -> User 可观察的 table relationships
 ```
 
-当前定义不声称已有 Adapter 完成了整条路径。
+当前定义已有 portable Module、Base family 与有界的 Web Component host-projection 证据；它不声明完整 Adapter conformance。
 
-## 计划中的 family
+## 已实现的 host-neutral family
 
-只有在匹配的 source 与 evidence 同时存在后，implementation carrier 才可以加入以下五个 Base identities：
+Checkpoint B 以匹配的 source 与 executable evidence 精确导出以下 Base identities：
 
-| Planned identity | Cardinality | 结构职责 |
+| Identity | Cardinality | 结构职责 |
 | --- | --- | --- |
 | `P-BASE-TABLE` | `1..1` | 拥有一个独立 Table anatomy domain 及其只读结构 snapshot。 |
 | `P-BASE-TABLE-CAPTION` | `0..1` | 提供 authored caption/purpose semantic object。 |
@@ -43,15 +43,15 @@ Row 与 cell 顺序来自当前 host-observable Anatomy order。每个 Row 的�
 
 HeaderCell 声明 non-empty、same-domain unique 的 `headerKey` 与 `headerKind: 'column' | 'row'`。Cell 声明 ordered、non-empty header-key set。HeaderCell 可以为 layered header 声明 upstream header keys；upstream 表示 target 在 computed row-major topology 中先于 source，self 与 later/downstream reference 均无效。
 
-Resolution 产出 opaque same-domain semantic-object refs，并按 target kind 分成有序 `columnHeaders` 与 `rowHeaders`；同一个 cell 可以关联多个 header。Missing、empty、duplicate、ambiguous、unprojectable、self 或 downstream reference 都产生 structural diagnostic；实现不得猜测 target 或制造 host id。Resolution 不会搜索 sibling 或 nested Table domain，因此当前 domain 缺失的 key 即使在其它 domain 存在同名 key，也仍然是 missing target。
+Resolution 产出 opaque same-domain semantic-object refs，并按 target kind 分成有序 `columnHeaders` 与 `rowHeaders`；`orderedHeaders` 同时保留跨 header kind 的 authored order，供 host labeling 使用。同一个 cell 可以关联多个 header。Missing、empty、duplicate、ambiguous、unprojectable、self 或 downstream reference 都产生 structural diagnostic；实现不得猜测 target 或制造 host id。Resolution 不会搜索 sibling 或 nested Table domain，因此当前 domain 缺失的 key 即使在其它 domain 存在同名 key，也仍然是 missing target。
 
-Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无效的结构可以保持 mounted 并报告 invalid snapshot，但不能改写 authored content，也不能发送 data-operation signal。
+Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无效的结构可以保持 mounted 并报告 invalid snapshot，但必须清除 owned structural role、coordinate、span 与 relationship；它不能改写 authored content，也不能发送 data-operation signal。
 
 ## Accessibility 与 host 边界
 
 Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-TABLE`。Table Structure 不请求 physical widget、measurement、input、resource 或 system service。
 
-当前 A11y implementation 仍以 string 表示 relationship。Opaque semantic-object refs 与 multi-target relationship 是明确的 implementation prerequisite，不是已完成证据；当前 Adapter profiles 也没有编目 Table support。
+通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。Web Component 证据现已验证 one-based ARIA row/column count、index、span、caption naming，以及保留各 cell authored content 的显式 header label。React、Vue 与 Vue 2 的 Table projection tests 仍为 planned；通过的 Web Component 切片不表示完整的 cross-Adapter 或 assistive-technology conformance。
 
 外部 host 对照只证明 shared information shape：
 
@@ -62,7 +62,7 @@ Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-
 | Header relationships | rowheader/columnheader；必要时显式 relation | row/column header element methods | TableItem row/column header providers |
 | Multiple headers | 多个 semantic relationship targets | header-element arrays | header-provider collections |
 
-这张 matrix 不声明当前 Web、UIKit、Windows 或 cross-host conformance。Native 或 translated materialization 仍是需要 executable evidence 的 Adapter-profile decision。
+这张 matrix 不会把有界的 Web Component assertions 扩大成完整 Web、UIKit、Windows 或 cross-host conformance。Native 或 translated materialization 仍是需要 executable evidence 的 Adapter-profile decision。
 
 ## Table 与 Data Table
 
@@ -81,9 +81,9 @@ Base Table 只拥有 passive structure。它明确排除：
 
 Later Data Table composition 可以消费 passive structure，同时组合分别受治理的 data、Collection、selection、pagination、virtualization、editing 与其它 capabilities。
 
-## Evidence 状态
+## 证据状态
 
-`packages/spec/fixtures/src/table-structure/reference.ts` 的 host-neutral reference probe 覆盖 deterministic placement、multiple-header resolution、topology/header diagnostics，以及 pairwise insert、remove 与 reorder；它不能表达由 Anatomy 支撑的 nearest-domain isolation，也不是 runtime 或 Adapter conformance。`T-TABLE-STRUCTURE-0001` 会把 domain isolation、Table module、Base family 与四个 official Web Adapter path 保持为 `planned`，直到对应 tests 真实存在并通过。
+Host-neutral reference probe 与 Module/Base tests 已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy、passive negative boundaries、generic A11y emission 与 projection cleanup。Web Component Adapter test 覆盖 count、index、span、caption identity 与保留内容的 header identity ARIA materialization。新增 `@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 仍为 draft；React、Vue 与 Vue 2 Adapter tests 仍为 `planned`，本页也暂不提供交互式 Table preview。
 
 ## 参考
 

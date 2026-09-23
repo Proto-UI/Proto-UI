@@ -1,0 +1,43 @@
+id: P-BASE-TABLE-ROW
+type: prototype
+title: Base Table Row establishes one ordered logical row
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Real source, topology evidence and bounded Web Component Row projection exist; React, Vue and Vue 2 remain planned.
+  zh-CN: 已有真实 source、topology 证据与有界 Web Component Row projection；React、Vue 与 Vue 2 仍为 planned。
+summary: Row groups authored HeaderCell and Cell parts into one Anatomy-ordered topology row.
+statement:
+  en: Base Table Row is a transparent structural part whose current same-domain order determines its zero-based row index and cell sequence.
+  zh-CN: Base Table Row 是透明 structural part，其当前 same-domain order 决定 zero-based row index 与 cell sequence。
+criteria:
+  - id: P-BASE-TABLE-ROW-ORDER
+    text:
+      en: Row order comes only from current host-observable Anatomy order and every valid Row contains at least one HeaderCell or Cell.
+      zh-CN: Row order 只能来自当前 host-observable Anatomy order，且每个 valid Row 至少包含一个 HeaderCell 或 Cell。
+  - id: P-BASE-TABLE-ROW-CONTENT
+    text:
+      en: Row transparently preserves authored descendant parts and introduces no Head, Body or RowGroup identity.
+      zh-CN: Row 透明保留 authored descendant parts，且不引入 Head、Body 或 RowGroup identity。
+dependsOn:
+  contracts: [C-TABLE-STRUCTURE-0001]
+  prototypes: [P-BASE-TABLE]
+  modules: [M-TABLE-STRUCTURE-0001]
+verifies: { tests: [T-TABLE-STRUCTURE-0001] }
+openQuestions:
+  - id: P-BASE-TABLE-ROW-Q-ADAPTERS
+    question:
+      en: Is Row projection proven across the official Adapter profiles?
+      zh-CN: Row projection 是否已在 official Adapter profiles 中取证？
+    blocks: [activation:P-BASE-TABLE-ROW]
+sources:
+  - path: packages/prototypes/base/src/table/row.proto.ts
+  - path: packages/prototypes/base/test/table.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the transparent ordered Table Row identity and logical row index projection.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded bounded Web Component Row projection while retaining three planned Adapter paths.
+tags: [table, row, base, prototype, draft]

@@ -207,11 +207,9 @@ export class OverlayModuleImpl extends ModuleBase {
     this.syncEscapeCandidate();
     if (phase === 'unmounting' || phase === 'detached') {
       this.teardownMountedViewSideEffects();
-      this.boundary.setStackActive(false);
       return;
     }
     if (phase === 'mounted') {
-      if (this.isOpen()) this.boundary.setStackActive(true);
       if (this.viewActive) this.syncViewSideEffects();
     }
   }
@@ -340,12 +338,7 @@ export class OverlayModuleImpl extends ModuleBase {
 
     const wasOpen = this.openState.handle.get();
     if (Object.is(wasOpen, next)) {
-      if (next) {
-        this.boundary.setStackActive(true);
-        if (this.viewActive) this.syncViewSideEffects();
-      } else {
-        this.boundary.setStackActive(false);
-      }
+      if (next && this.viewActive) this.syncViewSideEffects();
       return;
     }
 

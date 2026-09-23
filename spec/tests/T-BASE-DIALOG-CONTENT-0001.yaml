@@ -20,6 +20,12 @@ cases:
       - P-BASE-DIALOG-CONTENT-A11Y-ROLE
       - P-BASE-DIALOG-CONTENT-A11Y-RELATIONS
     expectation: dialog-content-projects-role-modal-and-naming-relations
+  - id: T-BASE-DIALOG-CONTENT-0001-CASE-PARTIAL-REMOUNT
+    title: Content retains outside dismissal after sibling Mask detaches and remounts
+    covers:
+      - P-BASE-DIALOG-CONTENT-PRESENCE
+      - P-BASE-DIALOG-CONTENT-DISMISS
+    expectation: mask-rematerialization-does-not-steal-content-outside-owner
 implementations:
   - id: prototypes-base-dialog-content-contract
     kind: module-test
@@ -29,6 +35,7 @@ implementations:
     consumesCases:
       - T-BASE-DIALOG-CONTENT-0001-CASE-SURFACE
       - T-BASE-DIALOG-CONTENT-0001-CASE-A11Y
+      - T-BASE-DIALOG-CONTENT-0001-CASE-PARTIAL-REMOUNT
     exercises: [P-BASE-DIALOG-CONTENT]
   - id: adapter-web-component-dialog-content-contract
     kind: adapter-test
@@ -37,6 +44,16 @@ implementations:
     required: true
     consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-A11Y]
     exercises: [P-BASE-DIALOG-CONTENT]
+  - id: shadcn-wc-dialog-partial-remount-browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-PARTIAL-REMOUNT]
+    exercises: [P-BASE-DIALOG-CONTENT]
+    notes:
+      - Native Chromium pointer input on the ordinary Shadcn Web Component demo observes the partial-detach window before accepting the reopen sample.
+      - Verifies subsequent mask dismissal, full-detach reopening, Escape and released body overflow; does not claim Shadow split or other native-browser Adapter coverage.
 verifies:
   prototypes:
     - id: P-BASE-DIALOG-CONTENT
@@ -52,4 +69,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: refined
     summary: Added live add/remove coverage for conditional Title and Description relationships and a11yLabel fallback.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added deterministic partial sibling-remount and native Shadcn WC outside-dismissal regression evidence for issue 645 without changing prototype semantics.
 tags: [prototype, base, dialog, content, test]

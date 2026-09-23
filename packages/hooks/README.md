@@ -36,6 +36,7 @@ npm install @proto.ui/hooks@0.3.0-alpha.1
 - `@proto.ui/core`
 - `@proto.ui/module-anatomy`
 - `@proto.ui/module-collection`
+- `@proto.ui/module-table-structure`
 - `@proto.ui/types`
 
 ## License

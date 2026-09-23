@@ -135,6 +135,44 @@ jobs:
       - name: Type check
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:types
 
+  rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned Rust toolchain
+        run: |
+          set -euo pipefail
+          # native/gpui/rust-toolchain.toml selects the channel; this step only
+          # makes sure the components the checks need are present.
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/gpui/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('native/gpui/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Format
+        working-directory: native/gpui
+        run: cargo fmt --all --check
+
+      - name: Lint
+        working-directory: native/gpui
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Test
+        # Replays the shared conformance vectors in packages/host-protocol/vectors
+        # against the Rust host model, from the checked-in sources.
+        working-directory: native/gpui
+        run: cargo test --workspace
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20

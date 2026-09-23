@@ -1,0 +1,173 @@
+{
+  "name": "A delayed activation cannot make a newer commit live",
+  "sessionId": "s1",
+  "steps": [
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": []
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": []
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 2,
+        "template": null,
+        "slots": {
+          "slots": []
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            },
+            {
+              "leaseId": "l-c",
+              "scope": "root",
+              "type": "key.down"
+            }
+          ]
+        },
+        "focus": {
+          "targets": []
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 1,
+      "expect": {
+        "status": "stale"
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "activeEpoch": null,
+        "leases": [
+          {
+            "leaseId": "l-a",
+            "active": false,
+            "released": false
+          },
+          {
+            "leaseId": "l-c",
+            "active": false,
+            "released": false
+          }
+        ]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-1",
+        "viewEpoch": 1,
+        "type": "press.commit",
+        "leaseIds": ["l-a"]
+      },
+      "expect": {
+        "status": "rejected",
+        "reason": "inactive-epoch"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 3,
+      "expect": {
+        "status": "not-installed"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 2,
+      "expect": {
+        "status": "activated"
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "activeEpoch": 1,
+        "leases": [
+          {
+            "leaseId": "l-a",
+            "active": true,
+            "released": false
+          },
+          {
+            "leaseId": "l-c",
+            "active": true,
+            "released": false
+          }
+        ]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-2",
+        "viewEpoch": 1,
+        "type": "key.down",
+        "leaseIds": ["l-c"]
+      },
+      "expect": {
+        "status": "delivered",
+        "leaseIds": ["l-c"]
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 1,
+      "expect": {
+        "status": "stale"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 2,
+      "expect": {
+        "status": "already-active"
+      }
+    }
+  ]
+}

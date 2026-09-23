@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { Prototype } from '@proto.ui/core';
 import { styleContains } from '../../test-utils/style';
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  AdaptToWebComponent,
+  setElementProps,
+  type WebComponentAdapterElement,
+} from '@proto.ui/adapter-web-component';
 import {
   dialogClose,
   dialogContent,
@@ -10,6 +15,12 @@ import {
   dialogTitle,
   dialogTrigger,
 } from '../src/dialog';
+import type {
+  DialogRootProps,
+  DialogRootExposes,
+  DialogContentProps,
+  DialogContentExposes,
+} from '../src/dialog/types';
 
 AdaptToWebComponent(dialogRoot as any);
 AdaptToWebComponent(dialogTrigger as any);
@@ -456,6 +467,58 @@ describe('prototypes/base: dialog', () => {
 
     root.remove();
     await Promise.resolve();
+  });
+
+  it('keeps Content dismissal ownership when only Mask detaches before reopen', async () => {
+    // These custom element tags were registered with the corresponding prototypes above.
+    const root = document.createElement('base-dialog-root') as WebComponentAdapterElement<
+      Prototype<DialogRootProps, DialogRootExposes>
+    >;
+    const trigger = document.createElement('base-dialog-trigger');
+    const mask = document.createElement('base-dialog-mask');
+    const content = document.createElement('base-dialog-content') as WebComponentAdapterElement<
+      Prototype<DialogContentProps, DialogContentExposes>
+    >;
+    root.append(trigger, mask, content);
+    document.body.appendChild(root);
+
+    try {
+      await flushViewReconciliation();
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await completeTransitions(mask, content);
+      mask.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      await flushViewReconciliation();
+      expect(root.getExposes().open.get()).toBe(false);
+      expect(content.getExposes().transitionState.get()).toBe('leaving');
+
+      // Complete only Mask's leave: Content deliberately retains its old view.
+      await completeTransitions(mask);
+      expect(mask.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await completeTransitions(mask, content);
+      expect(root.getExposes().open.get()).toBe(true);
+      expect(mask.hasAttribute('data-pui-view-detached')).toBe(false);
+      expect(content.getExposes().transitionState.get()).toBe('entered');
+
+      mask.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      await flushViewReconciliation();
+      expect(root.getExposes().open.get()).toBe(false);
+
+      // Full detach and reopen remains a distinct, working control.
+      await completeTransitions(mask, content);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await completeTransitions(mask, content);
+      mask.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      await flushViewReconciliation();
+      expect(root.getExposes().open.get()).toBe(false);
+      await completeTransitions(mask, content);
+    } finally {
+      root.remove();
+      await flushViewReconciliation();
+    }
   });
 
   it('mask passthrough projects pointer-events none without changing dialog open state', async () => {

@@ -617,6 +617,49 @@ test('human-assisted review remains open while autonomous review obeys the exact
   );
 });
 
+test('approval discloses a Vercel authorization failure as publication debt', () => {
+  const input = reviewInput({
+    checks: [
+      ...reviewInput().checks,
+      {
+        name: 'Vercel',
+        status: 'COMPLETED',
+        conclusion: 'FAILURE',
+        completedAt: '2026-09-23T03:00:00Z',
+        detailsUrl: 'https://vercel.com/git/authorize?team=external',
+        source: 'vercel',
+        repository: null,
+        workflowName: null,
+        workflowPath: null,
+      },
+    ],
+  });
+  const review = packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input);
+  const submission = {
+    packet: review,
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    authorizationId: 'explicit-current-user',
+    policy,
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+  };
+
+  assert.equal(authorizeReviewSubmission(submission).allowed, false);
+  review.agentEvidence.debt.push({
+    kind: 'publication',
+    missing: 'Vercel preview deployment',
+    reason: 'The external team has not authorized the contributor; repository CI passed.',
+    nextAction: 'Authorize deployment and verify the preview independently.',
+  });
+  assert.equal(authorizeReviewSubmission(submission).allowed, true);
+  assert.match(renderReviewBody(review), /Vercel preview deployment/);
+});
+
 test('review submission preserves explicit authorization and activates the bounded scheduled scope', () => {
   const input = reviewInput();
   const base = {

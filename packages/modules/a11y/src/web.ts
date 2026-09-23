@@ -18,10 +18,19 @@ const ARIA_STATE_ATTRS: Record<string, string> = {
   live: 'aria-live',
   orientation: 'aria-orientation',
   pressed: 'aria-pressed',
+  rowCount: 'aria-rowcount',
+  columnCount: 'aria-colcount',
+  rowIndex: 'aria-rowindex',
+  columnIndex: 'aria-colindex',
+  rowSpan: 'aria-rowspan',
+  columnSpan: 'aria-colspan',
   readOnly: 'aria-readonly',
   selected: 'aria-selected',
   modal: 'aria-modal',
 };
+
+const TABLE_COUNT_STATE_KEYS = new Set(['rowCount', 'columnCount']);
+const POSITIVE_INTEGER_STATE_KEYS = new Set(['rowIndex', 'columnIndex', 'rowSpan', 'columnSpan']);
 
 const ARIA_RELATION_ATTRS: Record<string, string> = {
   controls: 'aria-controls',
@@ -750,9 +759,8 @@ function projectedScalarAttributes(
     );
   }
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {
-    if (Object.prototype.hasOwnProperty.call(snapshot.states, key)) {
-      attrs.set(attr, projectedAttributeValue(snapshot.states[key]));
-    }
+    if (!Object.prototype.hasOwnProperty.call(snapshot.states, key)) continue;
+    attrs.set(attr, projectedStateAttributeValue(key, snapshot.states[key]));
   }
   if (Object.prototype.hasOwnProperty.call(snapshot.states, 'hidden')) {
     attrs.set('aria-hidden', projectedAttributeValue(snapshot.states.hidden));
@@ -819,6 +827,20 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
       el.removeAttribute('data-pui-a11y-merge-children');
     }
   }
+}
+
+function projectedStateAttributeValue(key: string, value: unknown): string | undefined {
+  if (TABLE_COUNT_STATE_KEYS.has(key)) {
+    return typeof value === 'number' && Number.isSafeInteger(value) && (value === -1 || value > 0)
+      ? String(value)
+      : undefined;
+  }
+  if (POSITIVE_INTEGER_STATE_KEYS.has(key)) {
+    return typeof value === 'number' && Number.isSafeInteger(value) && value > 0
+      ? String(value)
+      : undefined;
+  }
+  return projectedAttributeValue(value);
 }
 
 function projectedAttributeValue(value: unknown): string | undefined {

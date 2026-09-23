@@ -112,6 +112,10 @@ criteria:
     text:
       en: Standard Adapter installs the bounded draft Anatomy slice, supplies logical participant and private order facts, and preserves nested domain isolation and target-owned Expose invocation. Host references never enter public PartView.
       zh-CN: standard Adapter 安装有界 draft Anatomy slice，提供逻辑 participant 与内部顺序事实，保持嵌套 domain 隔离和目标归属 Expose 调用。host reference 不进入公开 PartView。
+  - id: A-WEB-COMPONENT-0001-TABLE
+    text:
+      en: The standard Adapter installs the draft Table Structure Module and maps a valid Base Table graph to Web table, row, header and cell roles; one-based ARIA counts, indices and spans; caption naming; and content-preserving explicit header labels. Invalid structure clears owned Table attributes. This bounded evidence does not certify assistive-technology behavior or another Adapter.
+      zh-CN: standard Adapter 安装 draft Table Structure Module，把合法 Base Table graph 投射为 Web table、row、header 与 cell role、one-based ARIA count/index/span、caption naming，以及保留 cell 自身内容的显式 header label。无效结构清理 owned Table attributes。此有界证据不认证 assistive-technology behavior 或其它 Adapter。
   - id: A-WEB-COMPONENT-0001-COLLECTION
     text:
       en: Standard Runtime installs the bounded Collection slice. Explicit items follow host composition changes with current metadata and structural positions; nested Anatomy domains remain isolated and ordinary host descendants are excluded.
@@ -196,6 +200,10 @@ supports:
       since: 0.3.0-alpha.0
       role: required-module
       note: Existing family/domain/order slice; no A11y relationship or new author query policy admission.
+    - id: M-TABLE-STRUCTURE-0001
+      since: 0.3.0-alpha.1
+      role: required-module
+      note: Installed by the standard Runtime; bounded Web Component evidence covers ARIA materialization only, while React, Vue and Vue 2 remain uncataloged for Table support.
     - id: M-RULE-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -352,6 +360,9 @@ verifies:
       since: 0.3.0-alpha.0
     - id: T-ANATOMY-0004
       since: 0.3.0-alpha.0
+    - id: T-TABLE-STRUCTURE-0001
+      since: 0.3.0-alpha.1
+      anchors: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]
     - id: T-RULE-0002
       since: 0.3.0-alpha.0
     - id: T-FEEDBACK-0001
@@ -399,6 +410,7 @@ sources:
   - path: packages/adapters/web-component/test/rule-expose-state-web.integration.test.ts
   - path: packages/adapters/web-component/test/collection.integration.test.ts
   - path: packages/adapters/web-component/test/anatomy.integration.test.ts
+  - path: packages/adapters/web-component/test/table.test.ts
   - path: packages/adapters/web-component/test/rule.integration.test.ts
   - path: packages/adapters/web-component/test/feedback.integration.test.ts
   - path: packages/adapters/web-component/package.json
@@ -503,5 +515,8 @@ revisions:
   - version: 0.3.0-alpha.0
     change: extended
     summary: Cataloged bounded draft Rule Meta wiring and the conditional default colorScheme source, separating token evidence from browser painting.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Cataloged bounded Web Component Table Structure installation and ARIA materialization evidence without widening cross-Adapter or assistive-technology claims.
 tags:
   [adapter, web-component, custom-elements, web, props, event, lifecycle, state, expose, official]

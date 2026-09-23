@@ -1,0 +1,123 @@
+{
+  "name": "A plan installs inactive, activates, then delivers",
+  "sessionId": "s1",
+  "steps": [
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied",
+        "readySurfaces": ["proto-surface", "slot-default"],
+        "diagnosticCodes": []
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "phase": "open",
+        "currentEpoch": 1,
+        "currentCommit": 1,
+        "activeEpoch": null,
+        "leases": [
+          {
+            "leaseId": "l-a",
+            "active": false,
+            "released": false
+          }
+        ]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-1",
+        "viewEpoch": 1,
+        "type": "press.commit",
+        "leaseIds": ["l-a"]
+      },
+      "expect": {
+        "status": "rejected",
+        "reason": "inactive-epoch"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 1,
+      "expect": {
+        "status": "activated"
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-1",
+        "viewEpoch": 1,
+        "type": "press.commit",
+        "leaseIds": ["l-a"]
+      },
+      "expect": {
+        "status": "delivered",
+        "leaseIds": ["l-a"]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-1",
+        "viewEpoch": 1,
+        "type": "press.commit",
+        "leaseIds": ["l-a"]
+      },
+      "expect": {
+        "status": "rejected",
+        "reason": "duplicate-sample"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 1,
+      "expect": {
+        "status": "already-active"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 2,
+      "commitId": 1,
+      "expect": {
+        "status": "not-installed"
+      }
+    }
+  ]
+}

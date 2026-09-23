@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = ["crates/proto-ui-host-protocol", "crates/proto-ui-style"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+publish = false
+rust-version = "1.85"
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

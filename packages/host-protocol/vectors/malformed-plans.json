@@ -1,0 +1,238 @@
+{
+  "name": "Duplicate, reused and malformed registrations are rejected before allocation",
+  "sessionId": "s1",
+  "steps": [
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            },
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "failed",
+        "diagnosticCodes": ["duplicate-lease"]
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "failed",
+        "diagnosticCodes": ["malformed-registration"]
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-z",
+              "scope": "window",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "failed",
+        "diagnosticCodes": ["malformed-registration"]
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "currentEpoch": null,
+        "leases": []
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 2,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "failed",
+        "diagnosticCodes": ["lease-reuse"]
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 2,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "key.down"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "failed",
+        "diagnosticCodes": ["lease-reuse"]
+      }
+    }
+  ]
+}

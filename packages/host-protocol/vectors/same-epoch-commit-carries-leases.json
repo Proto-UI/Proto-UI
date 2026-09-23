@@ -1,0 +1,166 @@
+{
+  "name": "A newer commit in one epoch carries live leases and prunes dropped ones",
+  "sessionId": "s1",
+  "steps": [
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            },
+            {
+              "leaseId": "l-b",
+              "scope": "root",
+              "type": "pointer.down"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 1,
+      "expect": {
+        "status": "activated"
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 2,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            },
+            {
+              "leaseId": "l-c",
+              "scope": "global",
+              "type": "key.down"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "currentCommit": 2,
+        "leases": [
+          {
+            "leaseId": "l-a",
+            "active": true,
+            "released": false
+          },
+          {
+            "leaseId": "l-b",
+            "active": false,
+            "released": true
+          },
+          {
+            "leaseId": "l-c",
+            "active": false,
+            "released": false
+          }
+        ]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-1",
+        "viewEpoch": 1,
+        "type": "press.commit",
+        "leaseIds": ["l-a"]
+      },
+      "expect": {
+        "status": "delivered",
+        "leaseIds": ["l-a"]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-2",
+        "viewEpoch": 1,
+        "type": "key.down",
+        "leaseIds": ["l-c"]
+      },
+      "expect": {
+        "status": "rejected",
+        "reason": "no-active-lease"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 2,
+      "expect": {
+        "status": "activated"
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-3",
+        "viewEpoch": 1,
+        "type": "key.down",
+        "leaseIds": ["l-c"]
+      },
+      "expect": {
+        "status": "delivered",
+        "leaseIds": ["l-c"]
+      }
+    }
+  ]
+}

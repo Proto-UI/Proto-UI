@@ -1,0 +1,47 @@
+id: P-BASE-TABLE-HEADER-CELL
+type: prototype
+title: Base Table HeaderCell declares one keyed row or column header
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Real source, header-graph evidence and bounded Web Component HeaderCell materialization exist; React, Vue and Vue 2 remain planned.
+  zh-CN: 已有真实 source、header-graph 证据与有界 Web Component HeaderCell materialization；React、Vue 与 Vue 2 仍为 planned。
+summary: HeaderCell contributes a unique protocol key, header kind, spans and optional upstream header keys to its nearest Table domain.
+statement:
+  en: Base Table HeaderCell owns only authored structural facts and App-owned slot content; Table Structure computes its coordinates and opaque relationships.
+  zh-CN: Base Table HeaderCell 只拥有 authored structural facts 与 App-owned slot content；Table Structure 计算其 coordinates 与 opaque relationships。
+criteria:
+  - id: P-BASE-TABLE-HEADER-CELL-FACTS
+    text:
+      en: HeaderCell declares a non-empty same-domain-unique headerKey, headerKind column or row, positive safe spans, and an ordered optional upstream key list.
+      zh-CN: HeaderCell 声明 non-empty same-domain-unique headerKey、column/row headerKind、positive safe spans 与有序 optional upstream key list。
+  - id: P-BASE-TABLE-HEADER-CELL-RELATIONS
+    text:
+      en: Resolved upstream targets are opaque semantic-object refs that precede the source in row-major topology; self and downstream edges are diagnostic.
+      zh-CN: Resolved upstream targets 是在 row-major topology 中先于 source 的 opaque semantic-object refs；self 与 downstream edges 产生 diagnostic。
+  - id: P-BASE-TABLE-HEADER-CELL-CONTENT
+    text:
+      en: Authored content remains untouched in one anonymous slot and is never used as a key or data record.
+      zh-CN: Authored content 原样保留在一个 anonymous slot 中，且不作为 key 或 data record。
+dependsOn:
+  contracts: [C-TABLE-STRUCTURE-0001]
+  prototypes: [P-BASE-TABLE-ROW]
+  modules: [M-TABLE-STRUCTURE-0001]
+verifies: { tests: [T-TABLE-STRUCTURE-0001] }
+openQuestions:
+  - id: P-BASE-TABLE-HEADER-CELL-Q-ADAPTERS
+    question:
+      en: Are HeaderCell roles, spans and relationships proven across official Adapter profiles?
+      zh-CN: HeaderCell roles、spans 与 relationships 是否已在 official Adapter profiles 中取证？
+    blocks: [activation:P-BASE-TABLE-HEADER-CELL]
+sources:
+  - path: packages/prototypes/base/src/table/header-cell.proto.ts
+  - path: packages/prototypes/base/test/table.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added keyed row/column HeaderCell facts, computed coordinates and opaque relationship projection.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded content-preserving Web Component HeaderCell relationships while retaining three planned Adapter paths.
+tags: [table, header-cell, base, prototype, accessibility, draft]

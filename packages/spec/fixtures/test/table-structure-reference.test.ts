@@ -63,7 +63,7 @@ describe('spec fixture: Table Structure reference projection', () => {
               headerKey: 'alice',
               headerKind: 'row',
             },
-            { ref: aliceQ1, kind: 'cell', headers: ['quarter-group', 'q1', 'alice'] },
+            { ref: aliceQ1, kind: 'cell', headers: ['alice', 'quarter-group', 'q1'] },
             { ref: aliceQ2, kind: 'cell', headers: ['quarter-group', 'q2', 'alice'] },
           ],
         },
@@ -94,6 +94,7 @@ describe('spec fixture: Table Structure reference projection', () => {
       columnHeaders: [quarterGroup, firstQuarter],
       rowHeaders: [alice],
     });
+    expect(snapshot.rows[2]?.cells[1]?.orderedHeaders).toEqual([alice, quarterGroup, firstQuarter]);
     expect(snapshot.rows[2]?.cells[2]).toMatchObject({
       ref: aliceQ2,
       column: 2,
