@@ -3530,6 +3530,10 @@ function staticMarkupAttribute(openingTag, name) {
   const match = openingTag.match(new RegExp(pattern, 'iu'));
   return match ? (match[2] ?? match[3]) : null;
 }
+function hasHtmlCharacterReference(value) {
+  return /&(?:#(?:\d+|x[\da-f]+);?|[a-z][a-z\d]+;)/iu.test(value);
+}
+
 function isExecutableScriptType(type) {
   if (type === null || type.trim() === '' || type.trim().toLowerCase() === 'module') return true;
   const essence = type.split(';', 1)[0].trim().toLowerCase();
@@ -3548,16 +3552,19 @@ function externalScriptModuleSpecifiers(content) {
     .filter((openingTag) => /^<script\b/iu.test(openingTag))
     .flatMap((openingTag) => {
       const hasSrc = /\bsrc\s*=/iu.test(openingTag);
+      const type = staticMarkupAttribute(openingTag, 'type');
       const dynamicType =
         /(?:^|\s)(?::type|v-bind:type)\s*=/iu.test(openingTag) ||
-        /(?:^|\s)type\s*=\s*(?:\{|\$\{)/iu.test(openingTag);
+        /(?:^|\s)type\s*=\s*(?:\{|\$\{)/iu.test(openingTag) ||
+        (type !== null && hasHtmlCharacterReference(type));
       if (hasSrc && dynamicType) return [DYNAMIC_EXECUTABLE_SCRIPT_TYPE_SPECIFIER];
-      if (!isExecutableScriptType(staticMarkupAttribute(openingTag, 'type')) || !hasSrc) return [];
+      if (!isExecutableScriptType(type) || !hasSrc) return [];
+
       if (/(?:^|\s)(?::src|v-bind:src)\s*=/iu.test(openingTag)) {
         return [DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER];
       }
       const specifier = staticMarkupAttribute(openingTag, 'src');
-      if (!specifier || /[{}\x60]/u.test(specifier)) {
+      if (!specifier || /[{}\x60]/u.test(specifier) || hasHtmlCharacterReference(specifier)) {
         return [DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER];
       }
       return [specifier];
@@ -3573,7 +3580,9 @@ function documentBaseSpecifiers(content) {
         return [DYNAMIC_DOCUMENT_BASE_SPECIFIER];
       }
       const href = staticMarkupAttribute(openingTag, 'href');
-      if (!href || /[{}\x60]/u.test(href)) return [DYNAMIC_DOCUMENT_BASE_SPECIFIER];
+      if (!href || /[{}\x60]/u.test(href) || hasHtmlCharacterReference(href)) {
+        return [DYNAMIC_DOCUMENT_BASE_SPECIFIER];
+      }
       const normalizedHref = href.trim();
       return /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(normalizedHref) ? [normalizedHref] : [];
     });
@@ -3586,9 +3595,12 @@ function stylesheetLinkSpecifiers(content) {
       if (!hasHref) return [];
 
       const hasRel = /(?:^|\s)rel\s*=/iu.test(openingTag);
+      const relAttribute = staticMarkupAttribute(openingTag, 'rel');
       const dynamicRel =
         /(?:^|\s)(?::rel|v-bind:rel)\s*=/iu.test(openingTag) ||
-        (hasRel && /(?:^|\s)rel\s*=\s*(?:\{|\$\{)/iu.test(openingTag));
+        (hasRel && /(?:^|\s)rel\s*=\s*(?:\{|\$\{)/iu.test(openingTag)) ||
+        (relAttribute !== null && hasHtmlCharacterReference(relAttribute));
+
       if (dynamicRel) return [DYNAMIC_STYLESHEET_REL_SPECIFIER];
       if (!hasRel) return [];
 
@@ -3602,7 +3614,7 @@ function stylesheetLinkSpecifiers(content) {
         return [DYNAMIC_STYLESHEET_LINK_SPECIFIER];
       }
       const specifier = staticMarkupAttribute(openingTag, 'href');
-      if (!specifier || /[{}\x60]/u.test(specifier)) {
+      if (!specifier || /[{}\x60]/u.test(specifier) || hasHtmlCharacterReference(specifier)) {
         return [DYNAMIC_STYLESHEET_LINK_SPECIFIER];
       }
       return [specifier];

@@ -6122,6 +6122,38 @@ test('fails closed on external and dynamic document base URLs', () => {
   );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
+test('fails closed on character references in executable and URL attributes', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/EntityEncodedMarkup.astro';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    [
+      '<base href="https&#x3A;//cdn.example/">',
+      '<script src="https&#x3A//cdn.example/runtime.js"></script>',
+      '<script type="text&#x2F;javascript" src="https://cdn.example/typed.js"></script>',
+      '<link rel="stylesheet" href="https&#x3A;//cdn.example/theme.css">',
+      '<link rel="style&#x73;heet" href="https://cdn.example/entity-rel.css">',
+      '<main>Docs</main>',
+    ].join(''),
+    'utf8'
+  );
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    { websiteBindings: [[relativePath, ['www.demo.prototype-previewer']]] }
+  );
+
+  const message = validationMessage(root);
+  assert.match(message, /dynamic document base href/);
+  assert.match(message, /dynamic executable script source/);
+  assert.match(message, /dynamic executable script type/);
+  assert.match(message, /dynamic stylesheet source/);
+  assert.match(message, /dynamic stylesheet relation/);
+});
+
 test('fails closed on dynamically typed scripts with a source URL', () => {
   for (const [relativePath, content, expected] of [
     [
