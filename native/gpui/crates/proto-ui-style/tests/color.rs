@@ -40,15 +40,31 @@ fn parses_both_rgb_syntaxes() {
 }
 
 #[test]
-fn clamps_rgb_channels_and_alpha_at_parse_time() {
+fn clamps_rgb_components_above_range_at_parse_time() {
     assert_eq!(
-        parse_rgba("rgb(300 -10 50%)").unwrap(),
-        Rgba::new(1.0, 0.0, 0.5, 1.0)
+        parse_rgba("rgb(300 255 50%)").unwrap(),
+        Rgba::new(1.0, 1.0, 0.5, 1.0)
     );
+}
+
+#[test]
+fn clamps_rgb_components_below_range_at_parse_time() {
+    assert_eq!(
+        parse_rgba("rgb(-10 0 0)").unwrap(),
+        Rgba::new(0.0, 0.0, 0.0, 1.0)
+    );
+}
+
+#[test]
+fn clamps_alpha_above_one_at_parse_time() {
     assert_eq!(
         parse_rgba("rgb(0 255 0 / 200%)").unwrap(),
         Rgba::new(0.0, 1.0, 0.0, 1.0)
     );
+}
+
+#[test]
+fn clamps_alpha_below_zero_at_parse_time() {
     assert_eq!(
         parse_rgba("rgba(0, 0, 255, -1)").unwrap(),
         Rgba::new(0.0, 0.0, 1.0, 0.0)
@@ -86,8 +102,12 @@ fn converts_lab_through_the_css_color_4_path() {
 }
 
 #[test]
-fn parses_lab_axis_percentages_and_clamps_lightness() {
+fn clamps_lab_lightness_above_range() {
     assert_eq!(rgba8("lab(120% 80 -40)"), [255, 255, 255, 255]);
+}
+
+#[test]
+fn clamps_lab_lightness_below_range() {
     assert_eq!(rgba8("lab(-20% 80 -40)"), [0, 0, 0, 255]);
 }
 
