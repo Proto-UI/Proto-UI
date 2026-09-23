@@ -3,18 +3,31 @@ import test from 'node:test';
 import {
   assertNoTruncation,
   buildLiveReviewInput,
+  collectLiveReviewInput,
+  GITHUB_WEB_FLOW_PLATFORM,
+  MAX_LIVE_RESPONSE_BYTES,
   normalizeCheck,
   submitGitHubMerge,
   submitGitHubReview,
   summarizeLiveChecks,
+  summarizeLiveDco,
 } from '../collect-live-review-input.mjs';
 
 const sha = (letter) => letter.repeat(40);
 const repositoryId = 'github.com:Proto-UI/Proto-UI';
 const trustedProvenance = {
+  providerId: 'APP_github_actions',
   repository: 'Proto-UI/Proto-UI',
   workflowName: 'CI',
   workflowPath: '.github/workflows/ci.yml',
+};
+const trustedDcoOptions = {
+  repositoryId,
+  trustedRepositoryId: repositoryId,
+  trustedCheckName: 'DCO',
+  trustedSource: 'dco',
+  trustedProviderId: 'MDM6QXBwMTg2MQ==',
+  trustedDetailsUrl: 'https://probot.github.io/apps/dco/',
 };
 const trustedOptions = {
   repositoryId,
@@ -50,7 +63,24 @@ function payload(overrides = {}) {
           headRefOid: sha('b'),
           author: { login: 'contributor' },
           commits: {
-            nodes: [{ commit: { oid: sha('b'), messageHeadline: 'Bounded change' } }],
+            nodes: [
+              {
+                commit: {
+                  oid: sha('b'),
+                  message: 'Bounded change\n\nSigned-off-by: Contributor <contributor@example.com>',
+                  author: {
+                    name: 'Contributor',
+                    email: 'contributor@example.com',
+                    user: { login: 'contributor' },
+                  },
+                  committer: {
+                    name: 'GitHub',
+                    email: 'noreply@github.com',
+                    user: { login: 'web-flow' },
+                  },
+                },
+              },
+            ],
             pageInfo: { hasNextPage: false },
           },
           reviews: {
@@ -110,7 +140,7 @@ function payload(overrides = {}) {
                       completedAt: '2026-08-23T06:00:00Z',
                       detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
                       checkSuite: {
-                        app: { slug: 'github-actions' },
+                        app: { id: 'APP_github_actions', slug: 'github-actions' },
                         repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
                         workflowRun: {
                           file: { path: '.github/workflows/ci.yml' },
@@ -155,6 +185,23 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   assert.equal(result.mergeable, 'MERGEABLE');
   assert.equal(result.mergeStateStatus, 'CLEAN');
   assert.equal(result.input.commits.length, 1);
+  assert.equal(result.input.pullRequestAuthor, 'contributor');
+  assert.deepEqual(result.input.commits[0], {
+    sha: sha('b'),
+    message: 'Bounded change\n\nSigned-off-by: Contributor <contributor@example.com>',
+    author: {
+      login: 'contributor',
+      name: 'Contributor',
+      email: 'contributor@example.com',
+      platform: null,
+    },
+    committer: {
+      login: 'web-flow',
+      name: 'GitHub',
+      email: 'noreply@github.com',
+      platform: null,
+    },
+  });
   assert.equal(result.input.pullRequestState, 'OPEN');
   assert.equal(result.input.isDraft, false);
   assert.equal(result.input.baseRefName, 'main');
@@ -184,8 +231,102 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   assert.equal(result.input.checks[1].name, 'legacy-ci');
   assert.equal(result.input.checks[1].status, 'COMPLETED');
   assert.equal(result.input.checks[1].conclusion, 'FAILURE');
-  assert.equal(summarizeLiveChecks(result.input.checks), 'failure');
+  assert.equal(summarizeLiveChecks(result.input.checks, trustedOptions), 'success');
   assert.deepEqual(result.input.externalEvidence, []);
+});
+
+test('live collector records a verified GitHub platform committer without weakening fail-closed identity', () => {
+  // Live-realistic GitHub "Update branch" merge modeled on PR #509 commit
+  // 60c8bdd: the human author is linked to an account, while the committer is
+  // GitHub's web-flow identity (user null) attested by GitHub's own valid
+  // GPG signature. The canonical model records that verified platform
+  // identity explicitly instead of an unresolved null.
+  const updateBranch = payload();
+  updateBranch.data.repository.pullRequest.commits.nodes.unshift({
+    commit: {
+      oid: sha('c'),
+      message: "Merge branch 'main' into codex/issue-504-event-shadow",
+      author: { name: 'cyjin.yl', email: 'cyjin.yl@gmail.com', user: { login: 'cyjin-yl' } },
+      committer: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      signature: { __typename: 'GpgSignature', isValid: true, wasSignedByGitHub: true },
+    },
+  });
+  const result = buildLiveReviewInput(
+    updateBranch,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(result.input.commits.length, 2);
+  assert.deepEqual(result.input.commits[0].committer, {
+    login: null,
+    name: 'GitHub',
+    email: 'noreply@github.com',
+    platform: GITHUB_WEB_FLOW_PLATFORM,
+  });
+  assert.equal(result.input.commits[0].author.login, 'cyjin-yl');
+  assert.equal(result.input.commits[0].author.platform, null);
+  assert.equal(result.input.commits[1].committer.platform, null);
+
+  // The same committer shape without GitHub's signature attestation is a
+  // forgeable human identity claim and must stay an unresolved null.
+  const unattested = payload();
+  unattested.data.repository.pullRequest.commits.nodes.unshift({
+    commit: {
+      oid: sha('c'),
+      message: "Merge branch 'main' into codex/issue-504-event-shadow",
+      author: { name: 'cyjin.yl', email: 'cyjin.yl@gmail.com', user: { login: 'cyjin-yl' } },
+      committer: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      signature: { __typename: 'SshSignature', isValid: false, wasSignedByGitHub: false },
+    },
+  });
+  const unresolved = buildLiveReviewInput(
+    unattested,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(unresolved.input.commits[0].committer.platform, null);
+
+  const unsigned = buildLiveReviewInput(
+    payload(),
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(unsigned.input.commits[0].committer.platform, null);
+});
+
+test('a GitHub-valid commit signature cannot promote the author role to platform identity', () => {
+  // The commit signature attests the actor that created the commit object
+  // (the committer). The author block is metadata the committer supplies,
+  // so an unlinked author named `GitHub` must not be promoted to the
+  // trusted platform identity from the same attestation; only the
+  // committer role is identified by the commit signature
+  // (PR509-PLATFORM-AUTHOR-IDENTITY-008).
+  const forged = payload();
+  forged.data.repository.pullRequest.commits.nodes.unshift({
+    commit: {
+      oid: sha('d'),
+      message: "Merge branch 'main' into fixture",
+      author: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      committer: { name: 'GitHub', email: 'noreply@github.com', user: null },
+      signature: { __typename: 'GpgSignature', isValid: true, wasSignedByGitHub: true },
+    },
+  });
+  const result = buildLiveReviewInput(
+    forged,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(result.input.commits[0].author.login, null);
+  assert.equal(result.input.commits[0].author.platform, null);
+  assert.deepEqual(result.input.commits[0].committer.platform, GITHUB_WEB_FLOW_PLATFORM);
 });
 
 test('live collector derives thread time from comments and never fabricates timestamps', () => {
@@ -212,6 +353,19 @@ test('live collector derives thread time from comments and never fabricates time
     () => buildLiveReviewInput(empty, 'github.com:Proto-UI/Proto-UI', 487, [], changedFiles),
     /no comment timestamps/
   );
+});
+
+test('live collector preserves unavailable review identity as null', () => {
+  const deletedReviewer = payload();
+  deletedReviewer.data.repository.pullRequest.reviews.nodes[0].author = null;
+  const result = buildLiveReviewInput(
+    deletedReviewer,
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    [],
+    changedFiles
+  );
+  assert.equal(result.input.reviews[0].author, null);
 });
 
 test('live collector fails closed on pagination truncation for every connection', () => {
@@ -262,6 +416,118 @@ test('live collector fails closed on pagination truncation for every connection'
     );
     assert.throws(() => assertNoTruncation(undefined, { hasNextPage: true }, label), /malformed/);
   }
+});
+
+test('reconciles a lost review POST once using reviewer, head, disposition, and body identity', () => {
+  const calls = [];
+  const result = submitGitHubReview(
+    repositoryId,
+    487,
+    { commitId: sha('b'), event: 'APPROVE', body: 'review body' },
+    (command, args) => {
+      calls.push({ command, args });
+      if (args[2] === 'POST') throw new Error('connection lost after write');
+      return JSON.stringify([
+        [
+          {
+            id: 5678,
+            node_id: 'PRR_review_3',
+            user: { login: 'reviewer' },
+            state: 'APPROVED',
+            commit_id: sha('b'),
+            body: 'review body',
+            html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-5678',
+          },
+        ],
+      ]);
+    },
+    { reviewerLogin: 'reviewer', invocationId: 'invocation-1' }
+  );
+
+  assert.equal(calls.length, 2);
+  assert.ok(calls[1].args.includes('--slurp'));
+  assert.equal(calls[1].args[1], '--method');
+  assert.equal(calls[1].args[2], 'GET');
+  assert.equal(result.status, 'applied');
+  assert.equal(result.reconciled, true);
+  assert.equal(result.invocationId, 'invocation-1');
+  assert.equal(result.commitId, sha('b'));
+});
+
+test('reconciles a lost review POST whose review list exceeds the legacy 1 MiB buffer', () => {
+  // A review-heavy pull request can push the paginated reconciliation
+  // response far above the implicit 1 MiB child-process buffer. The
+  // reconciliation (and submission) calls must carry the same documented
+  // MAX_LIVE_RESPONSE_BYTES bound, so the applied review is recovered
+  // exactly once instead of surfacing as an unattributed ENOBUFS
+  // (PR509-REVIEW-RECONCILIATION-BUFFER-007).
+  const reviewBody = 'review body';
+  const paddingReviews = Array.from({ length: 2400 }, (_, index) => ({
+    id: 90000 + index,
+    node_id: `PRR_pad_${index}`,
+    user: { login: 'padding-reviewer' },
+    state: 'COMMENTED',
+    commit_id: sha('c'),
+    body: `padding review ${index}\n${'line'.repeat(200)}`,
+  }));
+  const reconciliationJson = JSON.stringify([
+    [
+      {
+        id: 5679,
+        node_id: 'PRR_review_4',
+        user: { login: 'reviewer' },
+        state: 'APPROVED',
+        commit_id: sha('b'),
+        body: reviewBody,
+        html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-5679',
+      },
+      ...paddingReviews,
+    ],
+  ]);
+  assert.ok(
+    reconciliationJson.length > 1024 * 1024,
+    'the regression reconciliation response must exceed the legacy 1 MiB default'
+  );
+  const seenOptions = [];
+  const result = submitGitHubReview(
+    repositoryId,
+    487,
+    { commitId: sha('b'), event: 'APPROVE', body: reviewBody },
+    (command, args, options) => {
+      seenOptions.push(options);
+      if (args[2] === 'POST') throw new Error('connection lost after write');
+      return reconciliationJson;
+    },
+    { reviewerLogin: 'reviewer', invocationId: 'invocation-large' }
+  );
+  assert.equal(seenOptions.length, 2);
+  assert.ok(
+    seenOptions.every((options) => options.maxBuffer === MAX_LIVE_RESPONSE_BYTES),
+    'submission and reconciliation must both carry the documented payload bound'
+  );
+  assert.equal(result.status, 'applied');
+  assert.equal(result.reconciled, true);
+  assert.equal(result.invocationId, 'invocation-large');
+});
+
+test('returns an explicit unknown receipt when review reconciliation cannot prove the write', () => {
+  const calls = [];
+  const result = submitGitHubReview(
+    repositoryId,
+    487,
+    { commitId: sha('b'), event: 'REQUEST_CHANGES', body: 'review body' },
+    (command, args) => {
+      calls.push({ command, args });
+      if (args[2] === 'POST') throw new Error('connection lost after write');
+      return JSON.stringify([[]]);
+    },
+    { reviewerLogin: 'reviewer', invocationId: 'invocation-2' }
+  );
+
+  assert.equal(calls.length, 2);
+  assert.equal(result.status, 'unknown');
+  assert.equal(result.invocationId, 'invocation-2');
+  assert.equal(result.commitId, sha('b'));
 });
 
 test('review submission binds the GitHub Review API write to the inspected commit', () => {
@@ -333,10 +599,18 @@ test('pull-request merge binds GitHub integration to the inspected exact head', 
     { headSha: sha('b'), mergeMethod: 'squash' },
     (command, args, options) => {
       calls.push({ command, args, options });
+      if (args.some((arg) => arg.endsWith('/merge'))) {
+        return JSON.stringify({
+          sha: sha('c'),
+          merged: true,
+          message: 'Pull Request successfully merged',
+        });
+      }
       return JSON.stringify({
-        sha: sha('c'),
         merged: true,
-        message: 'Pull Request successfully merged',
+        head: { sha: sha('b') },
+        merge_commit_sha: sha('c'),
+        merged_at: '2026-08-27T01:00:10Z',
       });
     }
   );
@@ -351,6 +625,9 @@ test('pull-request merge binds GitHub integration to the inspected exact head', 
     'repos/Proto-UI/Proto-UI/pulls/487/merge',
     '--input',
   ]);
+  assert.equal(calls.length, 2);
+  assert.equal(result.liveHeadSha, sha('b'));
+  assert.equal(result.mergedAt, '2026-08-27T01:00:10Z');
   assert.equal(result.headSha, sha('b'));
   assert.equal(result.mergeCommitSha, sha('c'));
   assert.equal(result.reconciled, false);
@@ -490,6 +767,7 @@ test('check context normalization matches both connection node kinds', () => {
       completedAt: null,
       detailsUrl: 'https://example.com',
       source: 'unknown-check-run',
+      providerId: null,
       repository: null,
       workflowName: null,
       workflowPath: null,
@@ -510,11 +788,66 @@ test('check context normalization matches both connection node kinds', () => {
       completedAt: '2026-08-23T06:00:00Z',
       detailsUrl: null,
       source: 'status-context',
+      providerId: null,
       repository: null,
       workflowName: null,
       workflowPath: null,
     }
   );
+});
+
+test('trusted DCO status requires the exact check, app provider, repository, and URL', () => {
+  const trustedDco = {
+    name: 'DCO',
+    status: 'COMPLETED',
+    conclusion: 'SUCCESS',
+    completedAt: '2026-08-23T06:00:00Z',
+    detailsUrl: 'https://probot.github.io/apps/dco/',
+    source: 'dco',
+    providerId: 'MDM6QXBwMTg2MQ==',
+    repository: 'Proto-UI/Proto-UI',
+    workflowName: null,
+    workflowPath: null,
+  };
+  assert.equal(summarizeLiveDco([trustedDco], trustedDcoOptions), 'success');
+  assert.equal(
+    summarizeLiveDco([{ ...trustedDco, conclusion: 'FAILURE' }], trustedDcoOptions),
+    'failure'
+  );
+  const trustedCi = {
+    name: 'test',
+    status: 'COMPLETED',
+    conclusion: 'SUCCESS',
+    completedAt: '2026-08-23T06:00:00Z',
+    detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+    source: 'github-actions',
+    ...trustedProvenance,
+  };
+  const failedDco = { ...trustedDco, conclusion: 'FAILURE' };
+  assert.equal(summarizeLiveChecks([trustedCi, failedDco], trustedOptions), 'success');
+  assert.equal(summarizeLiveDco([trustedCi, failedDco], trustedDcoOptions), 'failure');
+  assert.equal(
+    summarizeLiveDco(
+      [{ ...trustedDco, status: 'IN_PROGRESS', conclusion: null }],
+      trustedDcoOptions
+    ),
+    'unknown'
+  );
+  for (const [field, value] of [
+    ['name', 'DCO lookalike'],
+    ['source', 'github-actions'],
+    ['providerId', 'APP_lookalike'],
+    ['repository', 'fork/Proto-UI'],
+    ['detailsUrl', 'https://example.com/dco'],
+    ['workflowName', 'CI'],
+    ['workflowPath', '.github/workflows/ci.yml'],
+  ]) {
+    assert.equal(
+      summarizeLiveDco([{ ...trustedDco, [field]: value }], trustedDcoOptions),
+      'unknown',
+      `${field} drift must not be trusted as DCO status evidence`
+    );
+  }
 });
 
 test('live check summary accepts neutral terminal conclusions but not pending checks', () => {
@@ -538,7 +871,7 @@ test('live check summary accepts neutral terminal conclusions but not pending ch
           status: 'IN_PROGRESS',
           conclusion: null,
           completedAt: null,
-          detailsUrl: null,
+          detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/2',
           source: 'github-actions',
           ...trustedProvenance,
         },
@@ -560,6 +893,7 @@ test('external success cannot substitute for trusted repository CI evidence', ()
           completedAt: '2026-08-23T06:00:00Z',
           detailsUrl: 'https://vercel.com/example',
           source: 'vercel',
+          providerId: 'APP_vercel',
           repository: 'Proto-UI/Proto-UI',
           workflowName: null,
           workflowPath: null,
@@ -636,5 +970,131 @@ test('external success cannot substitute for trusted repository CI evidence', ()
       options
     ),
     'unknown'
+  );
+});
+
+test('live collector consumes a canonical changed-file response above the legacy 1 MiB buffer', () => {
+  // PR509-LIVE-INPUT-BUFFER-001: PR #509's paginated changed-file JSON is over
+  // 1 MiB; collection must not die on Node's incidental child-process default.
+  const graphqlPayload = payload();
+  const files = Array.from({ length: 100 }, (_, index) => ({
+    filename: `packages/core/src/file-${index}.ts`,
+    previous_filename: null,
+    status: 'modified',
+    patch: `+${'changed line\n'.repeat(1000)}`,
+  }));
+  graphqlPayload.data.repository.pullRequest.changedFiles = files.length;
+  const filePagesJson = JSON.stringify([files]);
+  assert.ok(
+    filePagesJson.length > 1024 * 1024,
+    'the regression changed-file response must exceed the legacy 1 MiB default'
+  );
+  const seenOptions = [];
+  const result = collectLiveReviewInput('github.com:Proto-UI/Proto-UI', 487, {
+    runner(command, args, options) {
+      seenOptions.push(options);
+      return args.includes('graphql') ? JSON.stringify(graphqlPayload) : filePagesJson;
+    },
+  });
+  assert.equal(result.input.changedFiles.length, files.length);
+  assert.ok(
+    seenOptions.length === 2 &&
+      seenOptions.every((options) => options.maxBuffer === MAX_LIVE_RESPONSE_BYTES),
+    'every live collection call must carry the documented payload bound'
+  );
+});
+
+test('live collector paginates reviews and review threads before canonical validation', () => {
+  const initial = payload();
+  initial.data.repository.pullRequest.reviews.pageInfo = {
+    hasNextPage: true,
+    endCursor: 'reviews-page-1',
+  };
+  initial.data.repository.pullRequest.reviewThreads.pageInfo = {
+    hasNextPage: true,
+    endCursor: 'threads-page-1',
+  };
+  const calls = [];
+  const result = collectLiveReviewInput(repositoryId, 487, {
+    runner(_command, args, options) {
+      calls.push({ args, options });
+      if (!args.includes('graphql')) return JSON.stringify([changedFiles]);
+      const query = args.find((value) => value.startsWith('query='));
+      if (query.includes('reviews(first: 100, after: $cursor)')) {
+        return JSON.stringify({
+          data: {
+            repository: {
+              pullRequest: {
+                reviews: {
+                  nodes: [
+                    {
+                      id: 'PRR_review_2',
+                      author: { login: 'later-reviewer' },
+                      state: 'APPROVED',
+                      commit: { oid: sha('b') },
+                      submittedAt: '2026-08-23T07:00:00Z',
+                      body: 'Later review',
+                    },
+                  ],
+                  pageInfo: { hasNextPage: false, endCursor: 'reviews-page-2' },
+                },
+              },
+            },
+          },
+        });
+      }
+      if (query.includes('reviewThreads(first: 100, after: $cursor)')) {
+        return JSON.stringify({
+          data: {
+            repository: {
+              pullRequest: {
+                reviewThreads: {
+                  nodes: [
+                    {
+                      id: 'PRR_kwT2',
+                      isResolved: false,
+                      comments: {
+                        nodes: [
+                          {
+                            databaseId: 1002,
+                            author: { login: 'later-reviewer' },
+                            body: 'Later thread',
+                            updatedAt: '2026-08-23T07:30:00Z',
+                          },
+                        ],
+                        pageInfo: { hasNextPage: false },
+                      },
+                    },
+                  ],
+                  pageInfo: { hasNextPage: false, endCursor: 'threads-page-2' },
+                },
+              },
+            },
+          },
+        });
+      }
+      return JSON.stringify(initial);
+    },
+  });
+
+  assert.equal(result.input.reviews.length, 2);
+  assert.equal(result.input.threads.length, 2);
+  assert.equal(result.input.replies.length, 2);
+  assert.equal(calls.length, 4);
+  assert.ok(calls.slice(1, 3).every(({ args }) => args.includes('-F')));
+  assert.ok(calls.slice(1, 3).every(({ args }) => args.some((value) => value.includes('cursor='))));
+});
+
+test('live collector fails on the explicit documented payload bound instead of an incidental ENOBUFS', () => {
+  assert.throws(
+    () =>
+      collectLiveReviewInput('github.com:Proto-UI/Proto-UI', 487, {
+        runner() {
+          const error = new Error('spawnSync gh ENOBUFS');
+          error.code = 'ENOBUFS';
+          throw error;
+        },
+      }),
+    /exceeds the documented \d+-byte payload bound/
   );
 });

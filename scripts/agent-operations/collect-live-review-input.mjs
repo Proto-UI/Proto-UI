@@ -35,7 +35,14 @@ query($owner: String!, $name: String!, $number: Int!) {
         nodes {
           commit {
             oid
-            messageHeadline
+            message
+            author { name email user { login } }
+            committer { name email user { login } }
+            signature {
+              __typename
+              ... on GpgSignature { isValid wasSignedByGitHub }
+              ... on SshSignature { isValid wasSignedByGitHub }
+            }
             statusCheckRollup {
               contexts(first: 100) {
                 nodes {
@@ -47,7 +54,7 @@ query($owner: String!, $name: String!, $number: Int!) {
                     completedAt
                     detailsUrl
                     checkSuite {
-                      app { slug }
+                      app { id slug }
                       repository { nameWithOwner }
                       workflowRun {
                         file { path }
@@ -66,7 +73,7 @@ query($owner: String!, $name: String!, $number: Int!) {
       }
       reviews(first: 100) {
         nodes { id author { login } state commit { oid } submittedAt body }
-        pageInfo { hasNextPage }
+        pageInfo { hasNextPage endCursor }
       }
       comments(first: 100) {
         nodes { id author { login } body updatedAt }
@@ -81,17 +88,114 @@ query($owner: String!, $name: String!, $number: Int!) {
             pageInfo { hasNextPage }
           }
         }
-        pageInfo { hasNextPage }
+        pageInfo { hasNextPage endCursor }
       }
     }
   }
 }
 `;
 
-function ghJson(args) {
-  return JSON.parse(
-    execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
-  );
+const REVIEWS_PAGE_QUERY = `
+query($owner: String!, $name: String!, $number: Int!, $cursor: String!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      reviews(first: 100, after: $cursor) {
+        nodes { id author { login } state commit { oid } submittedAt body }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+  }
+}
+`;
+
+const REVIEW_THREADS_PAGE_QUERY = `
+query($owner: String!, $name: String!, $number: Int!, $cursor: String!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      reviewThreads(first: 100, after: $cursor) {
+        nodes {
+          id
+          isResolved
+          comments(first: 100) {
+            nodes { databaseId author { login } body updatedAt }
+            pageInfo { hasNextPage }
+          }
+        }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+  }
+}
+`;
+
+// Governed payload bound for one live collection response. Node's incidental
+// 1 MiB child-process stdout default previously killed collection with an
+// unattributed ENOBUFS on eligible pull requests (PR509-LIVE-INPUT-BUFFER-001:
+// PR #509's paginated changed-file JSON alone is over 1 MiB). The collector
+// must consume the complete canonical input for an eligible target or fail on
+// this explicit documented bound, never on an implicit buffer ceiling.
+export const MAX_LIVE_RESPONSE_BYTES = 64 * 1024 * 1024;
+
+function ghJson(args, runner = execFileSync) {
+  let stdout;
+  try {
+    stdout = runner('gh', args, {
+      encoding: 'utf8',
+      maxBuffer: MAX_LIVE_RESPONSE_BYTES,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (error) {
+    if (error?.code === 'ENOBUFS') {
+      throw new Error(
+        `live collection response exceeds the documented ${MAX_LIVE_RESPONSE_BYTES}-byte payload bound; bound the review target before submission`
+      );
+    }
+    throw error;
+  }
+  return JSON.parse(stdout);
+}
+
+function collectRemainingConnectionPages({
+  connection,
+  field,
+  query,
+  owner,
+  name,
+  pullRequest,
+  runner,
+}) {
+  while (connection.pageInfo?.hasNextPage === true) {
+    const cursor = connection.pageInfo.endCursor;
+    if (typeof cursor !== 'string' || cursor.length === 0) {
+      throw new Error(`live ${field} collection cannot continue without an end cursor`);
+    }
+    const raw = ghJson(
+      [
+        'api',
+        'graphql',
+        '-f',
+        `query=${query}`,
+        '-F',
+        `owner=${owner}`,
+        '-F',
+        `name=${name}`,
+        '-F',
+        `number=${pullRequest}`,
+        '-F',
+        `cursor=${cursor}`,
+      ],
+      runner
+    );
+    if (raw.errors?.length) {
+      throw new Error(`live ${field} collection failed: ${raw.errors[0].message}`);
+    }
+    const page = raw.data?.repository?.pullRequest?.[field];
+    if (!Array.isArray(page?.nodes) || !page?.pageInfo) {
+      throw new Error(`live ${field} pagination payload is malformed`);
+    }
+    connection.nodes.push(...page.nodes);
+    connection.pageInfo = page.pageInfo;
+  }
 }
 
 export function assertNoTruncation(nodes, pageInfo, label) {
@@ -112,6 +216,7 @@ export function normalizeCheck(node) {
       completedAt: node.completedAt,
       detailsUrl: node.detailsUrl,
       source: node.checkSuite?.app?.slug ?? 'unknown-check-run',
+      providerId: node.checkSuite?.app?.id ?? null,
       repository: node.checkSuite?.repository?.nameWithOwner ?? null,
       workflowName: node.checkSuite?.workflowRun?.workflow?.name ?? null,
       workflowPath: node.checkSuite?.workflowRun?.file?.path ?? null,
@@ -125,6 +230,7 @@ export function normalizeCheck(node) {
     completedAt: node.createdAt,
     detailsUrl: node.targetUrl,
     source: 'status-context',
+    providerId: null,
     repository: null,
     workflowName: null,
     workflowPath: null,
@@ -142,18 +248,14 @@ function repositoryActionsPrefix(repositoryId) {
 
 export function summarizeLiveChecks(checks, options = {}) {
   if (!Array.isArray(checks) || checks.length === 0) return 'unknown';
-  if (checks.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
-  const allReady = checks.every(
-    (check) => check.status === 'COMPLETED' && SUCCESSFUL_CONCLUSIONS.has(check.conclusion)
-  );
   const actionsPrefix = repositoryActionsPrefix(options.repositoryId);
   const trustedSource = options.trustedSource ?? 'github-actions';
   const trustedRepository = repositoryName(options.trustedRepositoryId ?? options.repositoryId);
   const trustedCheckNames = new Set(options.trustedCheckNames ?? []);
   const trustedWorkflowNames = new Set(options.trustedWorkflowNames ?? []);
   const trustedWorkflowPaths = new Set(options.trustedWorkflowPaths ?? []);
-  const hasTrustedRepositorySuccess = checks.some((check) => {
-    if (check.conclusion !== 'SUCCESS' || typeof check.detailsUrl !== 'string') return false;
+  const trustedChecks = checks.filter((check) => {
+    if (typeof check.detailsUrl !== 'string') return false;
     const isRepositoryAction = actionsPrefix
       ? check.detailsUrl.startsWith(actionsPrefix)
       : /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\//.test(check.detailsUrl);
@@ -171,7 +273,42 @@ export function summarizeLiveChecks(checks, options = {}) {
       workflowPathIsTrusted
     );
   });
-  return allReady && hasTrustedRepositorySuccess ? 'success' : 'unknown';
+  if (
+    trustedChecks.length === 0 ||
+    (trustedCheckNames.size > 0 &&
+      [...trustedCheckNames].some(
+        (expectedName) => !trustedChecks.some((check) => check.name === expectedName)
+      ))
+  ) {
+    return 'unknown';
+  }
+  if (trustedChecks.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
+  const allReady = trustedChecks.every(
+    (check) => check.status === 'COMPLETED' && SUCCESSFUL_CONCLUSIONS.has(check.conclusion)
+  );
+  return allReady && trustedChecks.some((check) => check.conclusion === 'SUCCESS')
+    ? 'success'
+    : 'unknown';
+}
+
+export function summarizeLiveDco(checks, options = {}) {
+  if (!Array.isArray(checks) || checks.length === 0) return 'unknown';
+  const trustedRepository = repositoryName(options.trustedRepositoryId ?? options.repositoryId);
+  const trusted = checks.filter(
+    (check) =>
+      check.name === options.trustedCheckName &&
+      check.source === options.trustedSource &&
+      check.providerId === options.trustedProviderId &&
+      check.repository === trustedRepository &&
+      check.detailsUrl === options.trustedDetailsUrl &&
+      check.workflowName === null &&
+      check.workflowPath === null
+  );
+  if (trusted.length === 0) return 'unknown';
+  if (trusted.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
+  return trusted.every((check) => check.status === 'COMPLETED' && check.conclusion === 'SUCCESS')
+    ? 'success'
+    : 'unknown';
 }
 
 export function parseRepositoryId(repositoryId) {
@@ -193,6 +330,46 @@ function latestThreadUpdate(thread) {
   return updates.sort().at(-1);
 }
 
+// GitHub attests its own platform-generated commits (web merges, update-branch
+// merges, and other web-flow writes) with a valid signature made by GitHub
+// itself. Such a committer has no account login, but it is not an unresolved
+// human identity either: the canonical model records the verified platform
+// identity explicitly instead of leaving a bare null that fails closed
+// (PR509-CONTRIBUTOR-IDENTITY-001). A human commit without a linked account
+// keeps platform: null and still fails closed.
+export const GITHUB_WEB_FLOW_PLATFORM = {
+  kind: 'github-web-flow',
+  attestation: 'valid-github-signature',
+};
+
+// A commit signature attests the actor that created the commit object:
+// the committer. The author block is metadata the committer supplies, so a
+// GitHub-valid commit signature can only identify the committer as a
+// verified platform actor; promoting the author from the same attestation
+// would turn an unattested name/email claim into a trusted identity
+// (PR509-PLATFORM-AUTHOR-IDENTITY-008).
+function commitActorIdentity(actor, signature, role) {
+  if (role !== 'author' && role !== 'committer') {
+    throw new Error('commit actor role must be author or committer');
+  }
+  const login = actor?.user?.login ?? null;
+  const platform =
+    role === 'committer' &&
+    login === null &&
+    actor?.name === 'GitHub' &&
+    actor?.email === 'noreply@github.com' &&
+    signature?.isValid === true &&
+    signature?.wasSignedByGitHub === true
+      ? structuredClone(GITHUB_WEB_FLOW_PLATFORM)
+      : null;
+  return {
+    login,
+    name: actor?.name ?? '',
+    email: actor?.email ?? '',
+    platform,
+  };
+}
+
 export function buildLiveReviewInput(
   payload,
   repositoryId,
@@ -204,6 +381,9 @@ export function buildLiveReviewInput(
   if (!pullRequestPayload) throw new Error('live pull-request payload is incomplete');
   if (!payload?.data?.viewer?.login || !payload?.data?.repository?.viewerPermission) {
     throw new Error('live viewer identity or permission is unavailable');
+  }
+  if (!pullRequestPayload.author?.login) {
+    throw new Error('live pull-request author identity is unavailable');
   }
   if (
     !Number.isInteger(pullRequestPayload.changedFiles) ||
@@ -262,11 +442,12 @@ export function buildLiveReviewInput(
   const checks = (checkContexts?.nodes ?? []).map(normalizeCheck);
 
   const input = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     kind: 'proto-ui.review-input',
     repositoryId,
     pullRequest,
     pullRequestState: pullRequestPayload.state,
+    pullRequestAuthor: pullRequestPayload.author.login,
     isDraft: pullRequestPayload.isDraft,
     baseRefName: pullRequestPayload.baseRefName,
     baseSha: pullRequestPayload.baseRefOid,
@@ -279,11 +460,13 @@ export function buildLiveReviewInput(
     })),
     commits: (pullRequestPayload.commits?.nodes ?? []).map((node) => ({
       sha: node.commit.oid,
-      message: node.commit.messageHeadline ?? '',
+      message: node.commit.message ?? '',
+      author: commitActorIdentity(node.commit.author, node.commit.signature, 'author'),
+      committer: commitActorIdentity(node.commit.committer, node.commit.signature, 'committer'),
     })),
     reviews: (pullRequestPayload.reviews?.nodes ?? []).map((review) => ({
       id: review.id,
-      author: review.author?.login ?? 'ghost',
+      author: review.author?.login ?? null,
       state: review.state,
       commitSha: review.commit?.oid ?? null,
       submittedAt: review.submittedAt ?? null,
@@ -305,7 +488,7 @@ export function buildLiveReviewInput(
     input,
     viewerLogin: payload.data.viewer.login,
     viewerPermission: payload.data.repository.viewerPermission,
-    authorLogin: pullRequestPayload.author?.login,
+    authorLogin: input.pullRequestAuthor,
     mergeable: pullRequestPayload.mergeable,
     mergeStateStatus: pullRequestPayload.mergeStateStatus,
   };
@@ -315,7 +498,8 @@ export function submitGitHubReview(
   repositoryId,
   pullRequest,
   { commitId, event, body },
-  runner = execFileSync
+  runner = execFileSync,
+  { reviewerLogin = null, invocationId = `${commitId}:${event}:${body}` } = {}
 ) {
   const { owner, name } = parseRepositoryId(repositoryId);
   if (!Number.isInteger(pullRequest) || pullRequest < 1) {
@@ -329,36 +513,90 @@ export function submitGitHubReview(
   }
   if (typeof body !== 'string') throw new Error('review submission body is invalid');
 
-  const response = JSON.parse(
-    runner(
-      'gh',
-      [
-        'api',
-        '--method',
-        'POST',
-        `repos/${owner}/${name}/pulls/${pullRequest}/reviews`,
-        '--input',
-        '-',
-      ],
-      {
-        encoding: 'utf8',
-        input: JSON.stringify({ commit_id: commitId, event, body }),
-        stdio: ['pipe', 'pipe', 'pipe'],
-      }
-    )
-  );
-  if (response.commit_id !== commitId) {
-    throw new Error('submitted review commit does not match the inspected head');
-  }
   const expectedState = {
     APPROVE: 'APPROVED',
     REQUEST_CHANGES: 'CHANGES_REQUESTED',
     COMMENT: 'COMMENTED',
   }[event];
+  const postArgs = [
+    'api',
+    '--method',
+    'POST',
+    `repos/${owner}/${name}/pulls/${pullRequest}/reviews`,
+    '--input',
+    '-',
+  ];
+  let response;
+  try {
+    response = JSON.parse(
+      runner('gh', postArgs, {
+        encoding: 'utf8',
+        input: JSON.stringify({ commit_id: commitId, event, body }),
+        // Same governed output boundary as every other live call: a large
+        // review echo must surface as a documented payload bound, not as an
+        // unattributed ENOBUFS from an implicit 1 MiB ceiling.
+        maxBuffer: MAX_LIVE_RESPONSE_BYTES,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
+    );
+  } catch (submissionError) {
+    const reconciliationArgs = [
+      'api',
+      '--method',
+      'GET',
+      '--paginate',
+      '--slurp',
+      `repos/${owner}/${name}/pulls/${pullRequest}/reviews?per_page=100`,
+    ];
+    try {
+      const reviewPages = JSON.parse(
+        runner('gh', reconciliationArgs, {
+          encoding: 'utf8',
+          // Same governed output boundary as every other live call; the
+          // reconciliation path must not fall back to an implicit buffer
+          // ceiling (PR509-REVIEW-RECONCILIATION-BUFFER-007).
+          maxBuffer: MAX_LIVE_RESPONSE_BYTES,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        })
+      );
+      if (!Array.isArray(reviewPages) || !reviewPages.every(Array.isArray)) {
+        throw new Error('review pagination returned an invalid page shape');
+      }
+      const reviews = reviewPages.flat();
+      const matches = reviews.filter(
+        (review) =>
+          review?.commit_id === commitId &&
+          review?.state === expectedState &&
+          review?.body === body &&
+          (reviewerLogin === null || review?.user?.login === reviewerLogin)
+      );
+      if (matches.length === 1) return reviewReceipt(matches[0], invocationId, true);
+    } catch {
+      // Preserve the explicit unknown outcome below; never retry the write.
+    }
+    return {
+      status: 'unknown',
+      reconciled: false,
+      invocationId,
+      commitId,
+      event,
+      error: submissionError instanceof Error ? submissionError.message : String(submissionError),
+    };
+  }
+  if (response.commit_id !== commitId) {
+    throw new Error('submitted review commit does not match the inspected head');
+  }
   if (!['number', 'string'].includes(typeof response.id) || response.state !== expectedState) {
     throw new Error('submitted review receipt is incomplete or has an unexpected state');
   }
+  return reviewReceipt(response, invocationId, false);
+}
+
+function reviewReceipt(response, invocationId, reconciled) {
   return {
+    status: 'applied',
+    reconciled,
+    invocationId,
     id: String(response.id),
     nodeId: response.node_id ?? null,
     state: response.state,
@@ -370,7 +608,7 @@ export function submitGitHubReview(
 export function submitGitHubMerge(
   repositoryId,
   pullRequest,
-  { headSha, mergeMethod },
+  { headSha, mergeMethod, authorizationId = 'explicit-current-user' },
   runner = execFileSync
 ) {
   const { owner, name } = parseRepositoryId(repositoryId);
@@ -380,8 +618,11 @@ export function submitGitHubMerge(
   if (!/^[a-f0-9]{40,64}$/.test(headSha)) {
     throw new Error('merge head SHA is invalid');
   }
-  if (!['merge', 'squash', 'rebase'].includes(mergeMethod)) {
-    throw new Error('merge method is invalid');
+  if (mergeMethod !== 'squash') {
+    throw new Error('merge method must be squash');
+  }
+  if (!['explicit-current-user', 'proto-ui-scheduled-merge-v1'].includes(authorizationId)) {
+    throw new Error('merge authorization is invalid');
   }
 
   let response;
@@ -436,40 +677,90 @@ export function submitGitHubMerge(
   if (response.merged !== true || !/^[a-f0-9]{40,64}$/.test(response.sha ?? '')) {
     throw new Error(`merge was rejected: ${response.message ?? 'receipt is incomplete'}`);
   }
+  let live;
+  try {
+    live = JSON.parse(
+      runner('gh', ['api', `repos/${owner}/${name}/pulls/${pullRequest}`], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      })
+    );
+  } catch (error) {
+    throw new Error(`merge receipt could not be bound to live exact head (${error.message})`);
+  }
+  if (
+    live.merged !== true ||
+    live.head?.sha !== headSha ||
+    live.merge_commit_sha !== response.sha ||
+    !Number.isFinite(Date.parse(live.merged_at ?? ''))
+  ) {
+    throw new Error('merge receipt does not bind the live exact head and squash commit');
+  }
   return {
     merged: true,
     reconciled: false,
+    repositoryId,
+    pullRequest,
+    authorizationId,
     mergeCommitSha: response.sha,
     headSha,
+    liveHeadSha: live.head.sha,
     mergeMethod,
+    mergedAt: live.merged_at,
     message: response.message ?? null,
   };
 }
-
 export function collectLiveReviewInput(repositoryId, pullRequest, options = {}) {
   const { owner, name } = parseRepositoryId(repositoryId);
   const externalEvidence = Array.isArray(options.externalEvidence) ? options.externalEvidence : [];
-  const raw = ghJson([
-    'api',
-    'graphql',
-    '-f',
-    `query=${QUERY}`,
-    '-F',
-    `owner=${owner}`,
-    '-F',
-    `name=${name}`,
-    '-F',
-    `number=${pullRequest}`,
-  ]);
+  const runner = options.runner ?? execFileSync;
+  const raw = ghJson(
+    [
+      'api',
+      'graphql',
+      '-f',
+      `query=${QUERY}`,
+      '-F',
+      `owner=${owner}`,
+      '-F',
+      `name=${name}`,
+      '-F',
+      `number=${pullRequest}`,
+    ],
+    runner
+  );
   if (raw.errors?.length) {
     throw new Error(`live review-input collection failed: ${raw.errors[0].message}`);
   }
-  const filePages = ghJson([
-    'api',
-    '--paginate',
-    '--slurp',
-    `repos/${owner}/${name}/pulls/${pullRequest}/files?per_page=100`,
-  ]);
+  const livePullRequest = raw.data?.repository?.pullRequest;
+  if (!livePullRequest) throw new Error('live pull-request payload is malformed');
+  collectRemainingConnectionPages({
+    connection: livePullRequest.reviews,
+    field: 'reviews',
+    query: REVIEWS_PAGE_QUERY,
+    owner,
+    name,
+    pullRequest,
+    runner,
+  });
+  collectRemainingConnectionPages({
+    connection: livePullRequest.reviewThreads,
+    field: 'reviewThreads',
+    query: REVIEW_THREADS_PAGE_QUERY,
+    owner,
+    name,
+    pullRequest,
+    runner,
+  });
+  const filePages = ghJson(
+    [
+      'api',
+      '--paginate',
+      '--slurp',
+      `repos/${owner}/${name}/pulls/${pullRequest}/files?per_page=100`,
+    ],
+    runner
+  );
   if (!Array.isArray(filePages) || !filePages.every(Array.isArray)) {
     throw new Error('live changed-file collection is malformed');
   }

@@ -5,10 +5,10 @@ description: 'Check contribution readiness, spec ownership, evidence, and delive
 
 ## 1. Which contribution path am I following?
 
-- Am I maintaining an existing P, projecting Base, or implementing an approved Base slice?
-- Does the issue state what is decided, what I may decide, and what must not change?
-- Does the issue authorize implementation, or does it still carry `needs maintainer design`?
-- For a new Base subject, is the maintainer checkpoint recorded?
+- Am I maintaining an existing P, projecting Base, or implementing a governed or candidate Base slice?
+- Does the issue state the current governed direction, the candidate scope, and the evidence needed next?
+- For an existing governed subject, am I continuing implementation or projection rather than waiting for another blanket approval?
+- For a genuinely new Base subject, is the admission decision recorded? If it is unresolved, are research, the candidate graph, draft entities, implementation probes, and tests continuing without claiming admission?
 
 ## 2. Did I start from applicable spec entities?
 

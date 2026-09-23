@@ -1,7 +1,7 @@
 interface:
   display_name: 'Proto UI Brainstorm'
   short_description: 'Turn uncertainty into a decision packet'
-  default_prompt: 'Use $pui-brainstorm to shape this semantic question for a maintainer decision.'
+  default_prompt: 'Use $pui-brainstorm to shape this unresolved product question into one attended decision.'
 
 policy:
   allow_implicit_invocation: false

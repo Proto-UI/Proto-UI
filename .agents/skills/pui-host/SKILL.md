@@ -1,11 +1,11 @@
 ---
 name: pui-host
-description: Implement or revise one approved Proto UI Host Capability connecting a semantic Module to a bounded host responsibility. Use when capability identity, portable need, public shape, availability, failure, replacement, cleanup, fidelity, Adapter realization, and evidence are already governed.
+description: Implement or revise one governed Proto UI Host Capability connecting a semantic Module to a bounded host responsibility. Use when capability identity, portable need, public shape, availability, failure, replacement, cleanup, fidelity, Adapter realization, and evidence are fixed by current authority.
 ---
 
 # Implement a Host Capability slice
 
-1. Require a `pui-trace` map and explicit approval for the capability boundary.
+1. Require a `pui-trace` map and current-user or standing authorization for the governed capability boundary.
 2. Read the owning semantic criteria, Module, Host Capability, Adapter profile, test entities, and current realization.
 3. Model the smallest host responsibility that satisfies the portable need. Keep independently failing responsibilities separate.
 4. Define availability, atomicity, failure, lifetime, replacement, cleanup, and terminal behavior.
@@ -13,7 +13,7 @@ description: Implement or revise one approved Proto UI Host Capability connectin
 6. Add fake-host evidence for portable semantics and real Adapter evidence for declared realization fidelity.
 7. Keep governed-entity and validation work as separate candidate handoffs. Do not load another skill in this transition.
 
-Stop if the capability is only an implementation token, mixes multiple owners, leaks raw host state, needs a new portable guarantee, or cannot be realized honestly. Do not declare provision from source attachment alone.
+Keep implementation tokens, mixed ownership, raw-host leakage, and unsupported provision claims out of the change. Route only a genuinely new portable guarantee or unresolved capability identity to an attended product-direction decision.
 
 ## Explicit handoff
 

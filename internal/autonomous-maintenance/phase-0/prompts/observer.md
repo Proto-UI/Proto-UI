@@ -26,7 +26,8 @@ Permissions:
   and take screenshots.
 
 Method:
-1. Record the baseline commit and initial git status.
+1. Record stable, non-secret Observer `actorId` and task-context `taskId`, plus
+   the baseline commit and initial git status.
 2. Generate and read the current Agent project understanding.
 3. Trace the relevant entity chain and lifecycle.
 4. Inspect implementation, executable tests, adapters, and public projections.

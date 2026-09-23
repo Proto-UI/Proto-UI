@@ -51,7 +51,7 @@ Implementation and entities agree, but exports, CLI, README, website, demos, or 
 
 ### Spec change
 
-The expected behavior itself must change. Pause ordinary maintenance and describe the affected criterion, compatibility impact, alternatives, and required checkpoint in the issue before changing entity revisions, T evidence, and projections.
+The expected behavior itself must change. Trace whether an active entity, accepted draft direction, Issue acceptance criteria, or decision already fixes the new result. When it does, update the entity revision, T evidence, implementation, and projections coherently. When it does not, record the affected criterion, compatibility impact, and alternatives as one `unresolved-product-direction` decision before choosing among them.
 
 ## 3. Keep the change coherent
 
@@ -121,7 +121,7 @@ Run the complete test suite when the impact justifies it. Record the focused tes
 
 ## When maintenance becomes design work
 
-Return to the issue before continuing if you need to:
+Re-read the Issue and current authority for these changes. Continue directly when they already fix the result; otherwise route the smallest `unresolved-product-direction` decision:
 
 - add or change a P criterion;
 - change ownership between Base and a styled projection;

@@ -10,11 +10,12 @@ import {
   authorizePullRequestMerge,
   authorizeReviewSubmission,
   computeReviewInputDigest,
-  decideReviewRun,
+  computeReviewPacketDigest,
   evaluateReviewEligibility,
   inspectReviewRevision,
-  reviewPacketKey,
+  decideReviewRun,
   renderReviewBody,
+  reviewPacketKey,
   validateReviewInputSnapshot,
   validateReviewPacket,
   validateReviewPacketEligibility,
@@ -25,6 +26,7 @@ import {
   submitGitHubMerge,
   submitGitHubReview,
   summarizeLiveChecks,
+  summarizeLiveDco,
 } from './collect-live-review-input.mjs';
 import {
   evaluateSkillEligibility,
@@ -40,7 +42,7 @@ function usage() {
     '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>]',
     '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
-    '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
+    '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
     '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
     '',
     'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge additionally fails closed unless the live input already contains an exact-head review or comment carrying the packet evidence receipt marker (proto-ui:agent-evidence:sha256=...), so publish the evidence first, then re-collect and rebuild the merge packet. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
@@ -84,6 +86,7 @@ const ALLOWED_OPTIONS = new Map([
       '--assessment',
       '--authorization',
       '--external-evidence-file',
+      '--prior-packet',
     ]),
   ],
   [
@@ -171,17 +174,51 @@ function validateExecution(args, packet, policy) {
   validateReviewPacketEligibility(packet, eligibility, handoff.executionMode);
   return { handoff, eligibility, selfAssessment };
 }
-
-function validateIntegrationExecution(args, packet, policy) {
+function validateIntegrationExecution(args, packet, input, policy) {
   const routed = loadIntegrationHandoff(args.get('--handoff'));
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
+  // The reviewed content ceiling was established by the independent reviewer
+  // when this packet was sealed; recomputing it against the integrator's
+  // assessment would reapply the review-class ceiling to an actor who only
+  // performs the bounded integration mutation. Validate the packet against
+  // its declared review class without an actor ceiling, and apply the C2
+  // integration ceiling to the current actor via evaluateSkillEligibility
+  // below.
   const reviewEligibility = evaluateReviewEligibility({
-    executionMode: routed.handoff.executionMode,
+    executionMode: 'human-assisted',
     reviewClass: packet.reviewClass,
-    selfAssessment,
+    selfAssessment: null,
     policy,
   });
-  validateReviewPacketEligibility(packet, reviewEligibility, routed.handoff.executionMode);
+  validateReviewPacketEligibility(packet, reviewEligibility, 'human-assisted');
+  const packetArtifact = routed.handoff.artifacts.find(
+    (artifact) => artifact.type === 'review-packet'
+  );
+  if (!packetArtifact || packetArtifact.reference !== args.get('--packet')) {
+    throw new Error(
+      'integration handoff review-packet artifact does not bind the --packet argument'
+    );
+  }
+  if (packetArtifact.digest !== `sha256:${computeReviewPacketDigest(packet)}`) {
+    throw new Error('integration handoff review-packet artifact does not bind packet content');
+  }
+  const inputArtifact = routed.handoff.artifacts.find(
+    (artifact) => artifact.type === 'review-input'
+  );
+  if (!inputArtifact || inputArtifact.reference !== args.get('--input')) {
+    throw new Error('integration handoff review-input artifact does not bind the --input argument');
+  }
+  if (inputArtifact.digest !== `sha256:${computeReviewInputDigest(input)}`) {
+    throw new Error('integration handoff review-input artifact does not bind input content');
+  }
+  const authorizationArtifact = routed.handoff.artifacts.find(
+    (artifact) => artifact.type === 'mutation-authorization'
+  );
+  if (!authorizationArtifact || authorizationArtifact.reference !== args.get('--authorization')) {
+    throw new Error(
+      'integration handoff mutation-authorization artifact does not bind --authorization'
+    );
+  }
   const skillEligibility = evaluateSkillEligibility(routed.nextSkill, {
     executionMode: routed.handoff.executionMode,
     selfAssessment,
@@ -286,6 +323,16 @@ try {
     );
     const execution = validateExecution(args, packet, policy);
     const externalEvidence = readExternalEvidence(args);
+    // Submission must consume the bound prior packet whenever the packet
+    // records one; an incremental reconciliation that is never verified
+    // against its prior findings would otherwise publish unchecked state.
+    if (packet.reconciliation.priorPacketDigest !== null) {
+      const priorPath = args.get('--prior-packet');
+      if (!priorPath)
+        throw new Error('--prior-packet is required when the packet reconciles a prior review');
+      const priorPacket = JSON.parse(fs.readFileSync(priorPath, 'utf8'));
+      verifyReconciliation(packet, priorPacket);
+    }
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
       externalEvidence,
     });
@@ -300,7 +347,6 @@ try {
       selfAssessment: execution.selfAssessment,
       credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
       reviewer: live.viewerLogin,
-      pullRequestAuthor: live.authorLogin,
       ciConclusion: summarizeLiveChecks(live.input.checks, {
         repositoryId: packet.repositoryId,
         trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
@@ -309,18 +355,35 @@ try {
         trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
         trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
       }),
+      dcoConclusion: summarizeLiveDco(live.input.checks, {
+        repositoryId: packet.repositoryId,
+        trustedRepositoryId: policy.trustedDcoEvidence?.repositoryId,
+        trustedCheckName: policy.trustedDcoEvidence?.checkName,
+        trustedSource: policy.trustedDcoEvidence?.source,
+        trustedProviderId: policy.trustedDcoEvidence?.providerId,
+        trustedDetailsUrl: policy.trustedDcoEvidence?.detailsUrl,
+      }),
     });
     if (!authorization.allowed) {
       output = authorization;
     } else {
-      const receipt = submitGitHubReview(packet.repositoryId, packet.pullRequest, {
-        commitId: packet.headSha,
-        event: authorization.recommendedAction,
-        body: renderReviewBody(packet),
-      });
+      const receipt = submitGitHubReview(
+        packet.repositoryId,
+        packet.pullRequest,
+        {
+          commitId: packet.headSha,
+          event: authorization.recommendedAction,
+          body: renderReviewBody(packet),
+        },
+        undefined,
+        {
+          reviewerLogin: live.viewerLogin,
+          invocationId: `${packet.repositoryId}:${packet.pullRequest}:${packet.headSha}:${authorization.recommendedAction}`,
+        }
+      );
       output = {
         ...authorization,
-        submitted: true,
+        submitted: receipt.status === 'applied',
         receipt,
       };
     }
@@ -330,7 +393,7 @@ try {
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const execution = validateIntegrationExecution(args, packet, policy);
+    const execution = validateIntegrationExecution(args, packet, input, policy);
     const externalEvidence = readExternalEvidence(args);
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
       externalEvidence,
@@ -346,7 +409,6 @@ try {
       selfAssessment: execution.selfAssessment,
       credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
       actor: live.viewerLogin,
-      pullRequestAuthor: live.authorLogin,
       ciConclusion: summarizeLiveChecks(live.input.checks, {
         repositoryId: packet.repositoryId,
         trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
@@ -354,6 +416,14 @@ try {
         trustedCheckNames: policy.trustedCiEvidence?.checkNames,
         trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
         trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
+      }),
+      dcoConclusion: summarizeLiveDco(live.input.checks, {
+        repositoryId: packet.repositoryId,
+        trustedRepositoryId: policy.trustedDcoEvidence?.repositoryId,
+        trustedCheckName: policy.trustedDcoEvidence?.checkName,
+        trustedSource: policy.trustedDcoEvidence?.source,
+        trustedProviderId: policy.trustedDcoEvidence?.providerId,
+        trustedDetailsUrl: policy.trustedDcoEvidence?.detailsUrl,
       }),
       mergeable: live.mergeable,
       mergeStateStatus: live.mergeStateStatus,
@@ -364,6 +434,7 @@ try {
       const receipt = submitGitHubMerge(packet.repositoryId, packet.pullRequest, {
         headSha: authorization.headSha,
         mergeMethod: authorization.mergeMethod,
+        authorizationId: authorization.authorizationId,
       });
       output = {
         ...authorization,

@@ -1,8 +1,8 @@
 # Proto UI Agent 自主维护教程
 
-这篇教程面向希望使用当前 Phase 0.1 流程的 Proto UI 维护者。它解释什么时候适合使用、如何启动每个阶段、需要向 Agent 提供什么，以及人类在什么地方必须做决定。
+这篇教程面向希望使用当前 Phase 0.1 流程的 Proto UI 维护者。它解释什么时候适合使用、如何启动每个阶段、需要向 Agent 提供什么，以及 Agent 如何沿着受治理路径连续推进。
 
-这套流程用于维护已有项目事实，不是通用 feature-development 流程。它不会替代 `spec/**`，也不会自动授权 commit、merge 或 release。
+这套流程用于维护已有项目事实，不是通用 feature-development 流程。它不会替代 `spec/**`。当前用户授权或 standing authorization 可以覆盖 bounded mission 的 remediation、commit、PR 更新、review disposition 与 exact-head merge；publication、release、access、secret、ruleset、security disclosure 和 provenance exception 仍按 privileged 或难以恢复的操作单独处理。
 
 ## 一分钟判断：这个任务适合吗
 
@@ -22,13 +22,13 @@
 | 公共文档投影漂移 | applicable spec guarantee、实际渲染文本 | 中英文文档把两种 fallback 顺序写成一种 |
 | Release 或 package 健康度 | build、install、smoke、registry evidence | package 可构建但 clean consumer 无法导入 |
 
-不适合直接使用：
+需要先切换到普通开发流程或补齐边界的场景：
 
 - 已经明确要实现的普通 feature；
 - 纯审美偏好或没有 oracle 的重构愿望；
-- 需要先决定产品方向才能判断对错的问题；
+- 现有 authority 尚未决定产品方向，因而还无法判断 expected result 的问题；
 - 无法限制范围的“检查整个项目有什么问题”；
-- 要求 Agent 自动合并、发布或提升 stable guarantee 的任务。
+- publication、release、权限或密钥变更，以及提升 stable guarantee 等 privileged 或难以恢复的操作。
 
 ## 整体流程
 
@@ -36,21 +36,24 @@
 flowchart TD
   M["Bounded mission"] --> O["Observer: 调查与反证"]
   O -->|candidate finding| V["Fresh Verifier: 独立核验"]
-  O -->|no finding| L["记录 no-finding run"]
-  V --> D{"人类：是否值得处理？"}
-  D -->|拒绝或继续研究| L
-  D -->|接受 finding| S{"人类：语义方向"}
-  S --> R["Remediator: 限定范围修改与验证"]
+  O -->|no finding| N["记录 no-finding run"]
+  V -->|not reproducible / expected| L["记录独立结论"]
+  V -->|confirmed / partially confirmed| A{"现有 authority 是否固定 expected result？"}
+  A -->|是| R["Remediator: 限定范围修改与验证"]
+  A -->|否| S["unresolved-product-direction 决策包"]
+  S --> R
   R --> Q["Fresh Review Synthesizer"]
   Q -->|incomplete / misleading| R
-  Q -->|semantic tradeoff| S
+  Q -->|authority 未决定的 tradeoff| S
   Q -->|adequate + validation passed| C["自动技术关闭"]
-  C --> I{"人类：集成决定"}
-  I -->|批准| G["Commit / PR evidence / ledger"]
-  I -->|暂缓| L
+  C --> I{"exact head + CI + live permission + repo rules"}
+  I -->|满足| G["Commit / PR / review disposition / merge / ledger"]
+  I -->|head 变化或证据待完成| W["等待或重跑 exact-target evidence"]
+  W --> I
+  I -->|privileged 或不可恢复| P["privileged-or-irreversible-operation 决策包"]
 ```
 
-这里的“自动技术关闭”表示不再需要例行的人类代码正确性批准。它不表示 Agent 可以自动 commit、merge 或 release。
+这里的“自动技术关闭”表示不再需要例行的人类代码正确性批准。集成阶段继续复核 current authorization、exact head、可信 CI、独立 review、live permission、DCO/provenance 和仓库规则；这些条件满足时，Agent 可以完成 commit grouping、PR 更新、review disposition 与 merge。Publication 和 release 不由技术完成自动推导。
 
 ## 关键角色
 
@@ -64,15 +67,15 @@ flowchart TD
 
 ### Controller 或调度任务
 
-当前由维护者和主任务共同承担。它选择下一阶段、保存结果、集中提出人类决策，并维护 queue 和 ledger。
+当前可由维护者启动的主任务或 governed queue 承担。它选择下一阶段、保存结果、维护 exact-item lease、queue 和 ledger，并只在两类异常边界出现时集中提出决策。
 
 ### Remediator
 
-只有在 finding 已接受且语义方向明确后才能修改仓库。修改范围必须服从 Verifier 修正后的 scope。
+在 finding 经独立确认且现有 authority 已固定 expected result 后直接修改仓库；若 authority 尚未决定产品方向，则在该决定解决后继续。修改范围必须服从 Verifier 修正后的 scope。
 
 ### Review Synthesizer
 
-在 fresh task 中检查 packet 是否真实描述了行为变化、影响面、authority、证据限制和残余风险。它不做产品决定，也不替代人类授权集成。
+在 fresh task 中检查 packet 是否真实描述了行为变化、影响面、authority、证据限制和残余风险。它不做产品决定，也不制造泛化的 integration gate；它给出 technical completion 与 exact-head integration eligibility 所需的独立证据。
 
 ## 开始前
 
@@ -92,6 +95,7 @@ flowchart TD
 - validation floor：最少运行哪些检查；
 - stop condition：什么时候必须停止；
 - mutation policy：Phase 0 Observer 必须是 read-only。
+- lease：限定到 exact item 的 single-runner lease；只有存在重叠 runner 时才需要额外的全局协调。
 
 例如，`AM-P0-004` 可以被进一步冻结为：
 
@@ -109,6 +113,8 @@ focused contract/browser evidence。
 ```
 
 避免使用“全面检查 Event”“寻找尽可能多的问题”这类无法判断完成度的任务。
+
+`AM-P0-*` 是这组历史 experiment ID。P0/P1/P2 只表达工作优先级，不表达 Agent 权限，也不要求先清空 P0 才能领取其他 ready mission。
 
 ## 第二步：启动 Observer
 
@@ -168,24 +174,25 @@ Observer 报告 Event bind 失败后存在部分 listener。Verifier 独立复�
 
 因此 finding 被评为 `partially-confirmed`，并从“稳定规范违约”收窄为“特定 target-resolution 失败路径的实现健壮性问题”。
 
-## 第四步：向人类集中请求决定
+## 第四步：根据 authority 自动路由
 
-Controller 不应只问“要不要修”。它需要提供一个集中的 decision packet：
+Controller 根据独立分类和现有 authority 直接决定下一状态：
 
-- 已核验事实和 confidence；
-- 推荐接受、拒绝或继续研究；
-- 批准后允许修改的准确范围；
-- 明确排除项；
-- material residual risks；
-- 批准将触发的下一阶段；
-- commit、merge、publication、release 中哪些仍未授权。
+- `not reproducible` 或 `expected behavior`：记录 rejected outcome；
+- `confirmed` 或 `partially confirmed`，且 authority 已固定 expected result：进入 governed remediation；
+- 证据仍不足：创建 bounded follow-up mission；
+- authority 未决定实质产品取舍：创建 `unresolved-product-direction` decision packet；
+- 下一步涉及 publication、release、access、secret、ruleset、security disclosure、provenance exception 或其他难以恢复的动作：创建 `privileged-or-irreversible-operation` decision packet。
 
-人类需要区分两件事：
+只有后两类需要 attended decision。Decision packet 应集中说明：
 
-1. finding 是否值得处理；
-2. 如果涉及语义，目标行为应该是什么。
+- 已核验事实、confidence 与 authority gap；
+- 推荐决定和它将授权的准确范围；
+- 明确排除项与 material residual risks；
+- 决定后自动恢复的下一阶段；
+- 仍不在 bounded path 内的 privileged 或不可恢复动作。
 
-对于 active guarantee，通常是决定是否保持现有语义并修复漂移。对于 draft direction，可能需要明确接受一种新的或更窄的行为。
+Finding disposition 本身不是人类权限门。对于 active guarantee，以及已经被 contract、接受的 draft direction 或 regression oracle 固定的行为，Agent 直接维护现有语义并修复漂移。只有 draft 仍保留多个实质方向时，才请求最小的产品方向决定。
 
 ## 第五步：创建 remediation review packet
 
@@ -193,26 +200,26 @@ Controller 不应只问“要不要修”。它需要提供一个集中的 decis
 
 - pre-existing active authority；
 - pre-existing draft direction；
-- 本次 proposed semantics；
+- 本次 governed semantics，或确实尚待决定的 proposed semantics；
 - planned spec/implementation/test paths；
 - direct、indirect、excluded、unknown surfaces；
 - evidence claims 和每项 evidence 的限制；
 - residual risks。
 
-这一步的目标不是增加文档数量，而是让人类无需从大型 diff 中逆向推断行为范围。
+这一步的目标不是增加文档数量，而是让独立 Reviewer、Controller 和必要时的维护者无需从大型 diff 中逆向推断行为范围。
 
 ## 第六步：限定范围修复和验证
 
-Remediator 可以在语义批准后修改仓库。推荐顺序：
+Remediator 在 authority 已固定 expected result，或最小产品方向决定已经解决后修改仓库。推荐顺序：
 
 可以在控制任务中发送：
 
 ```text
-Use $pui-remediate to remediate the accepted finding at
+Use $pui-remediate to remediate the independently verified finding at
 internal/autonomous-maintenance/phase-0/findings/<finding>.md.
 
-Follow the approved semantic scope and update the remediation review packet.
-Do not commit, push, merge, publish, or release.
+Follow the authority-resolved semantic scope and update the remediation review
+packet. Leave the resulting exact diff ready for fresh independent review.
 ```
 
 1. 先运行最小 reproduction；
@@ -248,8 +255,8 @@ Finding: <path>
 Packet: <path>
 Baseline: <full commit SHA>
 
-Inspect the actual diff. Remain read-only. Do not make the product or
-integration decision.
+Inspect the actual diff. Remain read-only. Report any unresolved product
+direction and exact-head integration eligibility; do not perform either action.
 ```
 
 可能结果：
@@ -282,19 +289,22 @@ corepack pnpm@10.32.1 check:autonomous-maintenance
 在独立审查已经记录后，可以在控制任务中发送：
 
 ```text
-Use $pui-maintenance-close to perform the Close stage for
-<finding ID>. Do not commit or push; return the concentrated integration
-decision packet when closure checks pass.
+Use $pui-maintenance-close to perform the Close stage for <finding ID>.
+When closure checks pass, continue through the currently authorized commit,
+pull-request update, review disposition, and exact-head integration surface.
+Return a decision packet only for unresolved product direction or a privileged
+or irreversible operation.
 ```
 
-随后 Controller 再向人类集中请求 integration decision。批准应精确说明：
+随后 Controller 复核并记录 integration eligibility：
 
-- 哪些文件组成一个或多个 commit；
-- 是否允许 push 到现有 PR；
-- 是否允许 merge；
-- 是否允许 publication 或 release。
+- current-user 或 standing authorization 覆盖哪些 exact targets；
+- commit grouping 与 PR head 是否仍和已审查 diff 一致；
+- independent review 与可信 CI 是否针对 exact head；
+- live permission、DCO/provenance 与 repository rules 是否满足；
+- mutation 是否幂等，merge receipt 是否可记录。
 
-技术完成本身不推导出这些权限。
+这些条件满足时，Controller 直接完成 commit、PR 更新、review disposition 和 merge 并记录 receipt。Publication、release、access、secret、ruleset、security disclosure 和 provenance exception 继续使用 `privileged-or-irreversible-operation` decision packet。
 
 ## no-finding 应该如何工作
 
@@ -306,7 +316,7 @@ decision packet when closure checks pass.
 - validation floor 的实际结果；
 - Observer 没有创建 tracked mutation。
 
-Observer 停止后，由控制者在新的状态转换中使用 `$pui-record`。它只在最新本地自主上限、完整授权、当前 lease、目标版本与准确变更范围一致时同步 mission、queue 与 run ledger。这个转换不要求 remediation review，因为没有发生修复；它也不能拿来绕过已接受 finding 的独立复核。Verifier 判定 finding 不成立并取得人工 disposition 后，使用同一个终态转换记录 rejected outcome。
+Observer 停止后，由控制者在新的状态转换中使用 `$pui-record`。它只在当前授权、exact-item lease、目标版本与准确变更范围一致时同步 mission、queue 与 run ledger。这个转换不要求 remediation review，因为没有发生修复；它也不能拿来绕过 confirmed finding 的独立 remediation review。Verifier 判定 finding 不成立后，使用同一个终态转换直接记录 rejected outcome。
 
 不要为了提高 finding 数量，把以下内容包装成问题：
 
@@ -322,13 +332,13 @@ Observer 停止后，由控制者在新的状态转换中使用 `$pui-record`。
 
 测试只能证明被执行的行为。它不能证明影响面完整、语义值得接受，或公共文档没有漂移。
 
-### “Verifier 确认 finding，所以可以直接修”
+### “Verifier 确认 finding，下一步是什么”
 
-确认事实不等于批准产品语义。finding disposition 和 semantic decision 是两个门禁。
+先检查 applicable authority 是否已经固定 expected result。已经固定就直接进入 governed remediation；只有 authority 留下实质产品取舍时，才创建 `unresolved-product-direction` decision packet。
 
-### “Review Synthesizer adequate，所以可以 merge”
+### “Review Synthesizer adequate，如何继续集成”
 
-`adequate` 只支持技术完成。commit grouping、merge 和 release 仍属于 integration gate。
+`adequate` 加 required validation 完成技术关闭。Controller 随后复核 exact head、可信 CI、current authorization、live permission、DCO/provenance 和 repository rules；条件满足就完成 commit grouping、PR 更新、review disposition 与 merge。Release 仍属于 privileged 或难以恢复的操作。
 
 ### “在同一个 task 里要求 Agent 忘记之前的结论，就等于独立审查”
 
@@ -338,17 +348,17 @@ Observer 停止后，由控制者在新的状态转换中使用 `$pui-record`。
 
 这会破坏 bounded scope。非阻塞风险应在存在 external oracle 和可限定范围时转成新的 candidate mission。
 
-## 当前仍需人工完成的部分
+## 当前编排方式
 
-Phase 0.1 没有 scheduler 或 controller service。维护者仍需：
+Phase 0.1 尚未部署 scheduler 或 controller service，因此当前由一个维护者启动的控制任务或 governed queue 编排：
 
-- 选择并启动 mission；
+- 选择 ready mission、获取 exact-item lease 并启动；
 - 创建 fresh Verifier 和 Review task；
 - 把 task 结果带回调度任务；
-- 做 finding value、semantic 和 integration 决定；
-- 在需要时批准 Git 写入和外部操作。
+- 自动执行证据驱动的 disposition、governed remediation、closure 和已授权 exact-head integration；
+- 仅把 `unresolved-product-direction` 与 `privileged-or-irreversible-operation` 交给维护者。
 
-因此，子任务完成后不会自动回到“调度中心”。未来的 thin controller 可以自动完成 task creation、artifact handoff、completion callback 和 ledger transition，但应等 no-finding、repeatability 和效率指标证明当前流程值得自动化后再建设。
+子任务完成后需要显式 completion callback 回到控制任务；这是一项编排机制，不是人工权限门。未来的 thin controller 可以直接承接 task creation、artifact handoff、completion callback、lease 与 ledger transition，同时继续保留 fresh independence 和 exact-target mutation controls。
 
 ## 运行结束后的最小检查清单
 
@@ -356,11 +366,12 @@ Phase 0.1 没有 scheduler 或 controller service。维护者仍需：
 - [ ] Observer、Verifier、Reviewer 是否保持 fresh-context independence？
 - [ ] authority 和 lifecycle 是否准确？
 - [ ] finding 是否有 external oracle 和 falsification evidence？
-- [ ] 人类批准的 exact scope 与实际 diff 是否一致？
+- [ ] authority-resolved exact scope 与实际 diff 是否一致？
 - [ ] packet 是否描述了行为，而不只是文件和测试？
 - [ ] residual risks 是否区分 blocking 与 follow-up？
 - [ ] `check:autonomous-maintenance` 是否通过？
 - [ ] queue 与 ledger 是否没有重复 run ID？
-- [ ] commit、merge、publication、release 是否分别得到授权？
+- [ ] commit、PR 更新、review disposition 与 merge 是否满足 current authorization、exact-head、CI、live permission、DCO/provenance 和 repository rules？
+- [ ] 是否只把 unresolved product direction 或 privileged/irreversible operation 留作 attended decision？
 
 如果这些问题都能被直接回答，维护者就不需要重新阅读整个 Agent 轨迹才能判断工作是否可以继续。

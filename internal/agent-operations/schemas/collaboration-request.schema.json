@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proto-ui.dev/schemas/collaboration-request.schema.json",
+  "title": "Proto UI purpose-bound collaboration request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "repositoryId",
+    "authorizationId",
+    "action",
+    "requestedAt",
+    "requestDigest",
+    "target",
+    "expected",
+    "desired",
+    "evidence",
+    "rationale",
+    "humanGates"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "proto-ui.collaboration-request" },
+    "repositoryId": { "type": "string", "pattern": "^github\\.com:[^/\\s]+/[^/\\s]+$" },
+    "authorizationId": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "action": {
+      "enum": [
+        "update-governed-issue-or-pull-request-metadata",
+        "update-pull-request-branch-at-expected-head",
+        "mark-exact-head-ready-for-review",
+        "request-independent-review",
+        "resolve-fixed-review-thread",
+        "rerun-exact-trusted-workflow",
+        "post-bounded-reconciliation-comment"
+      ]
+    },
+    "requestedAt": { "type": "string", "format": "date-time" },
+    "requestDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "target": { "type": "object" },
+    "expected": { "type": "object" },
+    "desired": { "type": "object" },
+    "evidence": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "reference"],
+        "properties": {
+          "type": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "reference": { "type": "string", "minLength": 1, "maxLength": 1000 },
+          "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "humanGates": { "const": [] }
+  },
+  "description": "Action-specific target, expected, and desired shapes are validated by scripts/agent-operations/collaboration-runtime.mjs before any live collection or mutation. requestDigest is the SHA-256 of the canonical request with requestDigest omitted."
+}

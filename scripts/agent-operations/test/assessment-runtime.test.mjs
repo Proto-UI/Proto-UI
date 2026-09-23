@@ -242,7 +242,7 @@ test('self-result verification rejects forged bands, task classes, and digests',
   forgedBand.capability.band = 'C4';
   assert.throws(() => validateSelfAssessmentResult(forgedBand, policy), /digest mismatch/);
   const forgedTasks = structuredClone(result);
-  forgedTasks.capability.eligibleTaskClasses.push('implement-approved-module');
+  forgedTasks.capability.eligibleTaskClasses.push('implement-governed-module');
   forgedTasks.resultDigest = computeSelfAssessmentResultDigest(forgedTasks);
   assert.throws(() => validateSelfAssessmentResult(forgedTasks, policy), /task classes/);
   const forgedReviews = structuredClone(result);
