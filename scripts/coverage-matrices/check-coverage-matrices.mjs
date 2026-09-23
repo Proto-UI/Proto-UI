@@ -1485,6 +1485,7 @@ function astContainsInteractiveRuntime(content) {
     ts.ScriptKind.TSX
   );
   const receiverBindings = domReceiverBindings(sourceFile);
+  const literalBindings = topLevelConstStringBindings(sourceFile);
   let found = false;
   const visit = (node) => {
     if (found) return;
@@ -1547,13 +1548,26 @@ function astContainsInteractiveRuntime(content) {
         }
         if (
           /^(?:removeAttribute|setAttribute|toggleAttribute)$/u.test(method) &&
-          isDomReceiverExpression(calledMember.receiver, sourceFile, receiverBindings, node) &&
-          node.arguments.length > 0 &&
-          ts.isStringLiteralLike(node.arguments[0]) &&
-          /^aria-/u.test(node.arguments[0].text)
+          isDomReceiverExpression(calledMember.receiver, sourceFile, receiverBindings, node)
         ) {
-          found = true;
-          return;
+          const nameArgument = node.arguments[0];
+          const name =
+            nameArgument && ts.isStringLiteralLike(nameArgument)
+              ? nameArgument.text
+              : nameArgument &&
+                  ts.isIdentifier(nameArgument) &&
+                  literalBindings.has(nameArgument.text)
+                ? literalBindings.get(nameArgument.text)
+                : null;
+          const normalizedName = typeof name === 'string' ? name.toLowerCase() : null;
+          if (
+            normalizedName === null ||
+            normalizedName.startsWith('aria-') ||
+            NATIVE_EVENT_ATTRIBUTE_NAMES.has(normalizedName)
+          ) {
+            found = true;
+            return;
+          }
         }
         const classListAccess = staticMemberAccess(calledMember.receiver);
         if (
@@ -3286,17 +3300,34 @@ function containsHarnessForbiddenStateMachine(content, absolutePath) {
   );
 }
 
+function harnessProductionSourceSet(rootDir) {
+  const harnessRoot = path.resolve(rootDir, 'apps', 'agent-harness');
+  const sourceRoot = path.join(harnessRoot, 'src');
+  const sourceRootCandidates = walkFiles(sourceRoot).filter((absolutePath) =>
+    /\.(?:[cm]?[jt]sx?|css|less|s[ac]ss)$/i.test(absolutePath)
+  );
+  const reachable = reachableSourcePaths(sourceRootCandidates, undefined, rootDir);
+  const candidates = [...new Set([...sourceRootCandidates, ...reachable])].filter(
+    (absolutePath) => !isTestNamedSource(absolutePath) || reachable.has(absolutePath)
+  );
+  const harnessSources = candidates.filter((absolutePath) => {
+    const relativePath = path.relative(harnessRoot, absolutePath);
+    return (
+      !path.isAbsolute(relativePath) &&
+      relativePath !== '..' &&
+      !relativePath.startsWith(`..${path.sep}`)
+    );
+  });
+  return { harnessRoot, sourceRoot, candidates, harnessSources };
+}
+
 function discoverHarnessForbiddenStateMachineSources(rootDir) {
-  const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
-  return walkFiles(sourceRoot)
+  const { sourceRoot, harnessSources } = harnessProductionSourceSet(rootDir);
+  return harnessSources
     .filter((absolutePath) => /\.[cm]?[jt]sx?$/i.test(absolutePath))
     .filter((absolutePath) => {
       const relativePath = path.relative(sourceRoot, absolutePath).replaceAll('\\', '/');
-      const isGeneratedFacade = isGeneratedHarnessFacadeSource(relativePath);
-      return (
-        !/\.(?:browser\.)?(?:test|spec|stories)\.[cm]?[jt]sx?$/i.test(absolutePath) &&
-        !isGeneratedFacade
-      );
+      return !isGeneratedHarnessFacadeSource(relativePath);
     })
     .filter((absolutePath) =>
       containsHarnessForbiddenStateMachine(fs.readFileSync(absolutePath, 'utf8'), absolutePath)
@@ -3306,6 +3337,7 @@ function discoverHarnessForbiddenStateMachineSources(rootDir) {
 }
 
 const UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER = '<unresolved dynamic import>';
+const UNRESOLVED_DYNAMIC_REQUIRE_SPECIFIER = '<unresolved dynamic require>';
 const VITE_IGNORED_DYNAMIC_IMPORT_SPECIFIER_PREFIX = '<@vite-ignore dynamic import:';
 
 function viteIgnoredDynamicImportSpecifier(argument, sourceFile, literalBindings) {
@@ -3324,15 +3356,7 @@ function viteIgnoredDynamicImportBoundary(specifier) {
     : null;
 }
 
-function scriptModuleSpecifiers(source, fileName) {
-  const sourceFile = ts.createSourceFile(
-    fileName,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TSX
-  );
-  const specifiers = [];
+function topLevelConstStringBindings(sourceFile) {
   const literalBindings = new Map();
   for (const statement of sourceFile.statements) {
     if (
@@ -3351,6 +3375,19 @@ function scriptModuleSpecifiers(source, fileName) {
       }
     }
   }
+  return literalBindings;
+}
+
+function scriptModuleSpecifiers(source, fileName) {
+  const sourceFile = ts.createSourceFile(
+    fileName,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const specifiers = [];
+  const literalBindings = topLevelConstStringBindings(sourceFile);
   const addLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) specifiers.push(node.text);
   };
@@ -3407,6 +3444,10 @@ function scriptModuleSpecifiers(source, fileName) {
           addLiteral(argument);
         } else if (callee.kind === ts.SyntaxKind.ImportKeyword) {
           specifiers.push(UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER);
+        } else if (argument && ts.isIdentifier(argument) && literalBindings.has(argument.text)) {
+          specifiers.push(literalBindings.get(argument.text));
+        } else {
+          specifiers.push(UNRESOLVED_DYNAMIC_REQUIRE_SPECIFIER);
         }
       }
     } else if (ts.isNewExpression(node)) {
@@ -3433,6 +3474,7 @@ function isExecutableScriptType(type) {
 }
 const DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER = '<dynamic executable script src>';
 const DYNAMIC_STYLESHEET_LINK_SPECIFIER = '<dynamic stylesheet href>';
+const DYNAMIC_STYLESHEET_REL_SPECIFIER = '<dynamic stylesheet relation>';
 
 function externalScriptModuleSpecifiers(content) {
   return jsxOpeningTagCandidates(content)
@@ -3453,12 +3495,23 @@ function externalScriptModuleSpecifiers(content) {
 function stylesheetLinkSpecifiers(content) {
   return jsxOpeningTagCandidates(content)
     .filter((openingTag) => /^<link\b/iu.test(openingTag))
-    .filter((openingTag) => {
-      const rel = staticMarkupAttribute(openingTag, 'rel');
-      return rel?.split(/\s+/u).some((token) => token.toLowerCase() === 'stylesheet');
-    })
     .flatMap((openingTag) => {
-      if (!/\bhref\s*=/iu.test(openingTag)) return [];
+      const hasHref = /(?:^|\s)(?:href|:href|v-bind:href)\s*=/iu.test(openingTag);
+      if (!hasHref) return [];
+
+      const hasRel = /(?:^|\s)rel\s*=/iu.test(openingTag);
+      const dynamicRel =
+        /(?:^|\s)(?::rel|v-bind:rel)\s*=/iu.test(openingTag) ||
+        (hasRel && /(?:^|\s)rel\s*=\s*(?:\{|\$\{)/iu.test(openingTag));
+      if (dynamicRel) return [DYNAMIC_STYLESHEET_REL_SPECIFIER];
+      if (!hasRel) return [];
+
+      const rel = staticMarkupAttribute(openingTag, 'rel');
+      if (rel === null || /[{}\x60]/u.test(rel)) {
+        return [DYNAMIC_STYLESHEET_REL_SPECIFIER];
+      }
+      if (!rel.split(/\s+/u).some((token) => token.toLowerCase() === 'stylesheet')) return [];
+
       if (/(?:^|\s)(?::href|v-bind:href)\s*=/iu.test(openingTag)) {
         return [DYNAMIC_STYLESHEET_LINK_SPECIFIER];
       }
@@ -3615,6 +3668,7 @@ function externalStylesheetSpecifiersForWebsiteSource(absolutePath) {
   return [...styleSpecifiers, ...linkSpecifiers].filter(
     (specifier) =>
       specifier === DYNAMIC_STYLESHEET_LINK_SPECIFIER ||
+      specifier === DYNAMIC_STYLESHEET_REL_SPECIFIER ||
       /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(specifier)
   );
 }
@@ -3861,6 +3915,9 @@ function guardedWebsiteImport(
   if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
     return { category: 'unresolved-dynamic-import', resolvedPath: null };
   }
+  if (classifiedSpecifier === UNRESOLVED_DYNAMIC_REQUIRE_SPECIFIER) {
+    return { category: 'unresolved-dynamic-require', resolvedPath: null };
+  }
   if (/^@proto\.ui\/adapter-[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'adapter-package', resolvedPath: null };
   }
@@ -4023,6 +4080,9 @@ function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) 
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
     return { category: 'unresolved-dynamic-import', resolvedPath: null };
+  }
+  if (classifiedSpecifier === UNRESOLVED_DYNAMIC_REQUIRE_SPECIFIER) {
+    return { category: 'unresolved-dynamic-require', resolvedPath: null };
   }
   if (/^@proto\.ui\/[a-z0-9-]+(?:\/|$)/u.test(classifiedSpecifier)) {
     return { category: 'proto-ui-package', resolvedPath: null };
@@ -4199,9 +4259,11 @@ function discoverWebsiteRawImports(rootDir) {
         sourcePath,
         specifier,
         category:
-          specifier === DYNAMIC_STYLESHEET_LINK_SPECIFIER
-            ? 'dynamic-stylesheet-link'
-            : 'external-stylesheet',
+          specifier === DYNAMIC_STYLESHEET_REL_SPECIFIER
+            ? 'dynamic-stylesheet-relation'
+            : specifier === DYNAMIC_STYLESHEET_LINK_SPECIFIER
+              ? 'dynamic-stylesheet-link'
+              : 'external-stylesheet',
         resolvedPath: null,
       });
     }
@@ -4305,6 +4367,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
+    if (rawImport.category === 'dynamic-stylesheet-relation') {
+      issues.push(
+        `${relativePath}: dynamic stylesheet relation in \`${rawImport.sourcePath}\` must be statically bounded for consumer-wall review`
+      );
+      continue;
+    }
     if (rawImport.category === 'external-executable-script') {
       issues.push(
         `${relativePath}: external executable script \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
@@ -4330,6 +4398,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
+    if (rawImport.category === 'unresolved-dynamic-require') {
+      issues.push(
+        `${relativePath}: unresolved dynamic require in \`${rawImport.sourcePath}\` must be statically bounded for consumer-wall review`
+      );
+      continue;
+    }
     if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
     issues.push(
       `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist`
@@ -4339,15 +4413,7 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
 
 function discoverHarnessRawImports(rootDir) {
   const canonicalRootDir = canonicalImportTarget(path.resolve(rootDir));
-  const sourceRoot = path.join(rootDir, 'apps', 'agent-harness', 'src');
-  const harnessRoot = path.join(rootDir, 'apps', 'agent-harness');
-  const allCandidates = walkFiles(sourceRoot).filter((absolutePath) =>
-    /\.(?:[cm]?[jt]sx?|css|less|s[ac]ss)$/i.test(absolutePath)
-  );
-  const reachable = reachableSourcePaths(allCandidates, undefined, rootDir);
-  const candidates = [...new Set([...allCandidates, ...reachable])].filter(
-    (absolutePath) => !isTestNamedSource(absolutePath) || reachable.has(absolutePath)
-  );
+  const { harnessRoot, candidates } = harnessProductionSourceSet(rootDir);
   const rawImports = [];
   for (const absolutePath of candidates) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
@@ -4389,6 +4455,12 @@ function validateHarnessRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'unresolved-dynamic-import') {
       issues.push(
         `${relativePath}: unresolved dynamic import in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
+      );
+      continue;
+    }
+    if (rawImport.category === 'unresolved-dynamic-require') {
+      issues.push(
+        `${relativePath}: unresolved dynamic require in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
       );
       continue;
     }

@@ -6843,6 +6843,31 @@ test('discovers element-valued DOM property receivers in Website and Harness sou
   }
 });
 
+test('scans production-reachable Harness helpers outside the source root', () => {
+  const root = createRoot();
+  const sourcePath = 'apps/agent-harness/src/run/ReachableHelperCall.tsx';
+  const helperPath = 'apps/agent-harness/shared/review-focus-helper.js';
+  const source = path.join(root, sourcePath);
+  const helper = path.join(root, helperPath);
+  fs.mkdirSync(path.dirname(source), { recursive: true });
+  fs.mkdirSync(path.dirname(helper), { recursive: true });
+  fs.writeFileSync(
+    source,
+    "import { focusReviewButton } from '../../shared/review-focus-helper.js';\nfocusReviewButton();",
+    'utf8'
+  );
+  fs.writeFileSync(
+    helper,
+    'export function focusReviewButton() { document.body.firstElementChild?.focus(); }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${sourcePath}\`` });
+  assert.match(
+    validationMessage(root),
+    /Harness source `apps\/agent-harness\/shared\/review-focus-helper\.js` contains a forbidden interaction/
+  );
+});
+
 test('rejects Agent actions from derived-state class lifecycles', () => {
   for (const method of ['getDerivedStateFromProps', 'getDerivedStateFromError']) {
     const root = createRoot();
@@ -7288,6 +7313,7 @@ test('CI runs the full pull-request suite on GitHub merge checkout', () => {
   const testJob =
     nextJobOffset < 0 ? remainingWorkflow : remainingWorkflow.slice(0, nextJobOffset + 1);
   assert.match(testJob, /COVERAGE_HEAD_REVISION:.*pull_request\.head\.sha/u);
+  assert.match(testJob, /COVERAGE_BASE_REVISION:.*pull_request\.base\.sha/u);
   assert.match(testJob, /COVERAGE_MERGE_REVISION:.*github\.sha/u);
   const checkout = testJob.match(/- uses: actions\/checkout@v4[\s\S]*?fetch-depth: 0/u)?.[0] ?? '';
   assert.doesNotMatch(checkout, /^\s*ref:/mu);
@@ -7553,6 +7579,43 @@ test('fails closed on variable dynamic imports in Website and Harness sources', 
   }
 });
 
+test('fails closed on dynamic CommonJS requires in Website and Harness sources', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/src/components/ConstantRequire.ts',
+      "const target = '@proto.ui/runtime'; require(target);",
+      /raw Proto UI import `@proto\.ui\/runtime` in `apps\/www\/src\/components\/ConstantRequire\.ts` escapes the website consumer-wall allowlist/,
+    ],
+    [
+      'apps/agent-harness/src/run/ConstantRequire.ts',
+      "const target = '@proto.ui/runtime'; require(target);",
+      /raw Proto UI import `@proto\.ui\/runtime` in `apps\/agent-harness\/src\/run\/ConstantRequire\.ts` escapes the Harness consumer-wall allowlist/,
+    ],
+    [
+      'apps/agent-harness/src/run/ThirdPartyRequire.ts',
+      "const target = 'downshift'; require(target);",
+      /forbidden third-party Harness UI package `downshift` in `apps\/agent-harness\/src\/run\/ThirdPartyRequire\.ts`/,
+    ],
+    [
+      'apps/www/src/components/DynamicRequire.ts',
+      'export function load(name) { return require(name); }',
+      /unresolved dynamic require in `apps\/www\/src\/components\/DynamicRequire\.ts` must be statically bounded/,
+    ],
+    [
+      'apps/agent-harness/src/run/DynamicRequire.ts',
+      'export function load(name) { return require(name); }',
+      /unresolved dynamic require in `apps\/agent-harness\/src\/run\/DynamicRequire\.ts` must be statically bounded/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
 test('rejects dynamic executable script sources in Astro and MDX', () => {
   for (const extension of ['astro', 'mdx']) {
     const root = createRoot();
@@ -7596,6 +7659,76 @@ test('rejects DOM handlers installed through Object.assign', () => {
     );
     assert.match(validationMessage(root), expected);
   }
+});
+
+test('classifies event attributes installed through DOM attribute APIs', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/src/components/SetAttributeOnclick.ts',
+      "const button = document.querySelector('button'); button?.setAttribute('ONCLICK', 'source');",
+      /interactive website source `apps\/www\/src\/components\/SetAttributeOnclick\.ts` is not bound/,
+    ],
+    [
+      'apps/www/src/components/RemoveAttributeOnclick.ts',
+      "const button = document.querySelector('button'); button?.removeAttribute('onclick');",
+      /interactive website source `apps\/www\/src\/components\/RemoveAttributeOnclick\.ts` is not bound/,
+    ],
+    [
+      'apps/www/src/components/ToggleAttributeOnclick.ts',
+      "const button = document.querySelector('button'); button?.toggleAttribute('onclick');",
+      /interactive website source `apps\/www\/src\/components\/ToggleAttributeOnclick\.ts` is not bound/,
+    ],
+    [
+      'apps/www/src/components/DynamicAttributeName.ts',
+      "const button = document.querySelector('button'); button?.setAttribute(attributeName, 'source');",
+      /interactive website source `apps\/www\/src\/components\/DynamicAttributeName\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/SetAttributeOnclick.tsx',
+      "const button = document.querySelector('button'); button?.setAttribute('onclick', 'source');",
+      /Harness source `apps\/agent-harness\/src\/run\/SetAttributeOnclick\.tsx` contains a forbidden interaction/,
+    ],
+    [
+      'apps/agent-harness/src/run/RemoveAttributeOnclick.tsx',
+      "const button = document.querySelector('button'); button?.removeAttribute('onclick');",
+      /Harness source `apps\/agent-harness\/src\/run\/RemoveAttributeOnclick\.tsx` contains a forbidden interaction/,
+    ],
+    [
+      'apps/agent-harness/src/run/ToggleAttributeOnclick.tsx',
+      "const button = document.querySelector('button'); button?.toggleAttribute('onclick');",
+      /Harness source `apps\/agent-harness\/src\/run\/ToggleAttributeOnclick\.tsx` contains a forbidden interaction/,
+    ],
+    [
+      'apps/agent-harness/src/run/DynamicAttributeName.tsx',
+      "const button = document.querySelector('button'); button?.setAttribute(attributeName, 'source');",
+      /Harness source `apps\/agent-harness\/src\/run\/DynamicAttributeName\.tsx` contains a forbidden interaction/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(
+      root,
+      {},
+      relativePath.startsWith('apps/agent-harness/') ? { Path: `\`${relativePath}\`` } : {}
+    );
+    assert.match(validationMessage(root), expected);
+  }
+});
+
+test('does not fail closed on unknown attributes of non-DOM receivers', () => {
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/MetadataAttributes.ts';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'const metadata = { setAttribute(name, value) {} }; metadata.setAttribute(name, value);',
+    'utf8'
+  );
+  writeValidMatrices(root);
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('inventories static public HTML pages as user-facing surfaces', () => {
@@ -7926,12 +8059,30 @@ test('rejects external and dynamic stylesheet links in Website markup', () => {
       '<template><link rel="stylesheet" v-bind:href="themeUrl" /></template>',
       /dynamic stylesheet source/,
     ],
+    [
+      'apps/www/src/components/BrutalistPageStyle.astro',
+      `<link rel={enabled ? 'stylesheet' : 'preload'} href="https://cdn.example/raw.css" />`,
+      /dynamic stylesheet relation/,
+    ],
+    [
+      'apps/www/src/content/docs/ConditionalRel.mdx',
+      `<link rel={enabled ? 'stylesheet' : 'preload'} href="https://cdn.example/raw.css" />`,
+      /dynamic stylesheet relation/,
+    ],
+    [
+      'apps/www/src/components/ConditionalRel.vue',
+      '<template><link :rel="stylesheetRelation" href="https://cdn.example/raw.css" /></template>',
+      /dynamic stylesheet relation/,
+    ],
   ]) {
     const root = createRoot();
     const absolutePath = path.join(root, relativePath);
     fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
     fs.writeFileSync(absolutePath, content, 'utf8');
-    writeValidMatrices(root);
+    writeValidMatrices(
+      root,
+      relativePath.includes('ConditionalRel') ? { Path: `\`${relativePath}\`` } : {}
+    );
     assert.match(validationMessage(root), expected);
   }
 });

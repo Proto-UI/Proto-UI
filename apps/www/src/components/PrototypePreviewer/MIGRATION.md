@@ -120,9 +120,12 @@ grep -r "PrototypeLoader" src/content --include="*.mdx"
 your-prototype-id.demo.proto.ts
 ```
 
-### Q: 可以保留 PrototypeLoader 吗？
+### Q: v2 的 `loader` prop 可以保留吗？
 
-**可以**，v3 向后兼容 v2 的 `loader` prop，但不推荐继续使用。
+**不可以。** v3 已移除逐实例 `loader` prop；`PrototypePreviewer` 通过 `prototypeId` 从 `prototype-modules.ts` 的受审查注册表加载原型。
+
+- 若原型位于 `apps/www/src/content/**/*.demo.proto.ts`，文件名决定原型 ID，模块默认导出原型；使用 `<PrototypePreviewer prototypeId="my-prototype" />`。自动扫描路径不需要 `<PrototypeLoader />`。
+- 若原型必须放在该 glob 之外，在 [`prototype-modules.ts`](./prototype-modules.ts) 的 `manualPrototypeModules` 中添加以该 ID 为键的 loader 条目，使用显式 `import()`；需要自定义步骤时可在注册表 loader 内完成，然后仍通过 `prototypeId` 使用。不要把 loader 作为组件 prop 传入。
 
 ### Q: 如何确认迁移成功？
 
@@ -153,7 +156,7 @@ console.log(getAvailablePrototypes()); // 应该包含你的所有原型 ID
 
 1. **一次性迁移**：为整个站点统一迁移到 v3
 2. **测试优先**：先在开发环境测试所有原型
-3. **渐进式部署**：可以先迁移新页面，旧页面保持 v2
+3. **按注册表完成迁移**：升级到 v3 的页面先将原型 ID 加入自动扫描或手动注册表；v3 不支持 v2 的逐实例 `loader` prop 回退。
 4. **文档更新**：更新团队文档说明新的使用方式
 
 ---
