@@ -164,6 +164,60 @@ fn keeps_overflow_clip_distinct_from_hidden() {
 }
 
 #[test]
+fn preserves_flex_relative_alignment_keywords() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("flex-direction", "column-reverse"),
+            ("align-items", "flex-start"),
+            ("justify-content", "flex-end"),
+        ]),
+        LengthContext::default(),
+    );
+    assert_eq!(
+        mapped.refinement.flex_direction,
+        Some(gpui::FlexDirection::ColumnReverse)
+    );
+    assert_eq!(
+        mapped.refinement.align_items,
+        Some(gpui::AlignItems::FlexStart)
+    );
+    assert_eq!(
+        mapped.refinement.justify_content,
+        Some(gpui::JustifyContent::FlexEnd)
+    );
+
+    let logical = map(
+        &declared(&[
+            ("position", "relative"),
+            ("align-items", "start"),
+            ("justify-content", "end"),
+        ]),
+        LengthContext::default(),
+    );
+    assert_eq!(
+        logical.refinement.align_items,
+        Some(gpui::AlignItems::Start)
+    );
+    assert_eq!(
+        logical.refinement.justify_content,
+        Some(gpui::JustifyContent::End)
+    );
+}
+
+#[test]
+fn reports_auto_overflow_when_gpui_only_has_always_scroll() {
+    for (property, value) in [("overflow", "auto"), ("overflow-y", "auto")] {
+        let mapped = map(&declared(&[(property, value)]), LengthContext::default());
+        assert!(mapped.unmapped.iter().any(|(p, v, reason)| {
+            p == property && v == value && *reason == Unmapped::UnsupportedValue
+        }));
+        assert_eq!(mapped.refinement.overflow.x, None);
+        assert_eq!(mapped.refinement.overflow.y, None);
+    }
+}
+
+#[test]
 fn unsupported_flex_basis_does_not_partially_mutate_the_style() {
     let mapped = map(
         &declared(&[("flex", "2 3 fit-content")]),
@@ -274,7 +328,7 @@ const EXPECTED_UNMAPPED: [&str; 28] = [
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 7] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 9] = [
     (
         "width",
         "fit-content",
@@ -319,6 +373,16 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 7] = [
         "position",
         "static",
         "CSS static cannot be represented by GPUI's default Relative position, which may establish a containing block for absolute descendants.",
+    ),
+    (
+        "overflow",
+        "auto",
+        "GPUI has no Auto overflow mode and Scroll reserves scrollbar space even when content fits.",
+    ),
+    (
+        "overflow-y",
+        "auto",
+        "GPUI has no Auto overflow mode and Scroll reserves scrollbar space even when content fits.",
     ),
 ];
 
