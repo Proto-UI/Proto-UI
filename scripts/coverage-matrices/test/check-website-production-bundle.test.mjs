@@ -225,6 +225,39 @@ test('requires registry and Adapter provenance in the same route-owned demo clos
     )
   );
 });
+test('requires the Vue Adapter in every route-owned demo closure', () => {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/second-demo.js', {
+      isEntry: true,
+      facadeModuleId: PREVIEWER_FACADE,
+      dynamicImports: ['_astro/vue-framework-only.js'],
+      moduleIds: ['apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro'],
+    }),
+    chunk('_astro/vue-framework-only.js', {
+      isDynamicEntry: true,
+      moduleIds: ['node_modules/vue/dist/vue.runtime.esm.js'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes(
+        `route-owned demonstration entry \`${PREVIEWER_FACADE}\` does not dynamically reach a vue Adapter runtime chunk`
+      )
+    )
+  );
+  const validGraph = graphFixture();
+  validGraph.chunks.push(
+    chunk('_astro/second-demo-with-vue-adapter.js', {
+      isEntry: true,
+      facadeModuleId: PREVIEWER_FACADE,
+      dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+      moduleIds: ['apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro'],
+    })
+  );
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: validGraph }), []);
+});
 
 test('rejects renamed or inlined framework modules in a shell chunk', () => {
   const graph = graphFixture();

@@ -41,10 +41,20 @@ function moduleIdWithoutQuery(moduleId) {
   return moduleId.split('?', 1)[0].replaceAll('\\', '/');
 }
 
-function forbiddenFrameworkFamily(moduleId) {
+function adapterFamilyForModule(moduleId) {
   const normalized = moduleIdWithoutQuery(moduleId);
   const adapterMatch = normalized.match(/(?:^|\/)packages\/adapters\/(react|vue|vue2)(?:\/|$)/u);
   if (adapterMatch) return adapterMatch[1];
+  const packagedAdapterMatch = normalized.match(
+    /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-(react|vue|vue2)(?:\/|$)/u
+  );
+  return packagedAdapterMatch?.[1] ?? null;
+}
+
+function forbiddenFrameworkFamily(moduleId) {
+  const adapterFamily = adapterFamilyForModule(moduleId);
+  if (adapterFamily) return adapterFamily;
+  const normalized = moduleIdWithoutQuery(moduleId);
   if (
     /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?(?:react|react-dom)(?:\/|$)/u.test(
       normalized
@@ -59,10 +69,7 @@ function forbiddenFrameworkFamily(moduleId) {
   ) {
     return 'vue';
   }
-  const packagedAdapterMatch = normalized.match(
-    /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-(react|vue|vue2)(?:\/|$)/u
-  );
-  return packagedAdapterMatch?.[1] ?? null;
+  return null;
 }
 
 function isWebComponentAdapterModule(moduleId) {
@@ -105,15 +112,12 @@ function reviewedNullFacadeRuntimeModules(chunk) {
     ),
   ];
 }
-function runtimeFamilyForModule(moduleId) {
-  return forbiddenFrameworkFamily(moduleId);
-}
 
 function dynamicRuntimeChunksForFamily(chunks, family) {
   return chunks.filter(
     (chunk) =>
       chunk.isDynamicEntry &&
-      chunk.moduleIds.some((moduleId) => runtimeFamilyForModule(moduleId) === family)
+      chunk.moduleIds.some((moduleId) => adapterFamilyForModule(moduleId) === family)
   );
 }
 
@@ -121,7 +125,7 @@ function runtimeFamilyModulesInClosure(chunksByFileName, rootFileName, edgeField
   const families = new Set();
   for (const fileName of closure(chunksByFileName, rootFileName, edgeFields)) {
     for (const moduleId of chunksByFileName.get(fileName)?.moduleIds ?? []) {
-      const family = runtimeFamilyForModule(moduleId);
+      const family = forbiddenFrameworkFamily(moduleId);
       if (family && REQUIRED_ADAPTER_FAMILIES.includes(family)) families.add(family);
     }
   }
@@ -302,19 +306,13 @@ export function collectWebsiteProductionBundleIssues({
   const forbiddenModulesByChunk = new Map();
   const adapterFamilies = new Set();
   for (const chunk of chunks) {
-    const forbiddenModules = (Array.isArray(chunk.moduleIds) ? chunk.moduleIds : []).filter(
-      (moduleId) => {
-        const family = forbiddenFrameworkFamily(moduleId);
-        if (
-          family &&
-          /(?:^|\/)packages\/adapters\/(?:react|vue|vue2)(?:\/|$)/u.test(
-            moduleIdWithoutQuery(moduleId)
-          )
-        ) {
-          adapterFamilies.add(family);
-        }
-        return family !== null;
-      }
+    const moduleIds = Array.isArray(chunk.moduleIds) ? chunk.moduleIds : [];
+    for (const moduleId of moduleIds) {
+      const adapterFamily = adapterFamilyForModule(moduleId);
+      if (adapterFamily) adapterFamilies.add(adapterFamily);
+    }
+    const forbiddenModules = moduleIds.filter(
+      (moduleId) => forbiddenFrameworkFamily(moduleId) !== null
     );
     forbiddenModulesByChunk.set(chunk.fileName, forbiddenModules);
   }

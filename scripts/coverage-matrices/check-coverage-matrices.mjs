@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import { builtinModules, createRequire } from 'node:module';
+import { inflateSync } from 'node:zlib';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { specEntitySchema } from '@proto.ui/spec-schema';
@@ -3351,6 +3352,8 @@ const UNRESOLVED_DYNAMIC_REQUIRE_SPECIFIER = '<unresolved dynamic require>';
 const VITE_IGNORED_DYNAMIC_IMPORT_SPECIFIER_PREFIX = '<@vite-ignore dynamic import:';
 const UNRESOLVED_IMPORTSCRIPTS_SPECIFIER = '<unresolved importScripts target>';
 const EXTERNAL_IMPORTSCRIPTS_SPECIFIER_PREFIX = '<external importScripts target:';
+const UNRESOLVED_WORKER_ENTRY_SPECIFIER = '<unresolved Worker entry>';
+const EXTERNAL_WORKER_ENTRY_SPECIFIER_PREFIX = '<external Worker entry:';
 
 function viteIgnoredDynamicImportSpecifier(argument, sourceFile, literalBindings) {
   const boundary = ts.isStringLiteralLike(argument)
@@ -3410,6 +3413,15 @@ function externalImportScriptsTarget(specifier) {
     ? specifier.slice(EXTERNAL_IMPORTSCRIPTS_SPECIFIER_PREFIX.length, -1)
     : null;
 }
+function externalWorkerEntrySpecifier(target) {
+  return `${EXTERNAL_WORKER_ENTRY_SPECIFIER_PREFIX}${target}>`;
+}
+
+function externalWorkerEntryTarget(specifier) {
+  return specifier.startsWith(EXTERNAL_WORKER_ENTRY_SPECIFIER_PREFIX) && specifier.endsWith('>')
+    ? specifier.slice(EXTERNAL_WORKER_ENTRY_SPECIFIER_PREFIX.length, -1)
+    : null;
+}
 
 function scriptModuleSpecifiers(source, fileName) {
   const sourceFile = ts.createSourceFile(
@@ -3434,6 +3446,11 @@ function scriptModuleSpecifiers(source, fileName) {
       return null;
     }
     const urlExpression = unwrapTypeScriptExpression(node.arguments[0]);
+    if (ts.isStringLiteralLike(urlExpression)) {
+      return isExternalExecutableScriptSpecifier(urlExpression.text)
+        ? externalWorkerEntrySpecifier(urlExpression.text)
+        : UNRESOLVED_WORKER_ENTRY_SPECIFIER;
+    }
     if (
       !ts.isNewExpression(urlExpression) ||
       !ts.isIdentifier(urlExpression.expression) ||
@@ -3442,27 +3459,38 @@ function scriptModuleSpecifiers(source, fileName) {
       !ts.isStringLiteralLike(urlExpression.arguments[0]) ||
       !urlExpression.arguments[1]
     ) {
-      return null;
+      return UNRESOLVED_WORKER_ENTRY_SPECIFIER;
+    }
+    const target = urlExpression.arguments[0].text;
+    if (isExternalExecutableScriptSpecifier(target)) {
+      return externalWorkerEntrySpecifier(target);
     }
     const base = unwrapTypeScriptExpression(urlExpression.arguments[1]);
     return ts.isPropertyAccessExpression(base) &&
       base.name.text === 'url' &&
       ts.isMetaProperty(base.expression) &&
       base.expression.keywordToken === ts.SyntaxKind.ImportKeyword
-      ? urlExpression.arguments[0].text
-      : null;
+      ? target
+      : UNRESOLVED_WORKER_ENTRY_SPECIFIER;
   };
   const visit = (node) => {
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
       addLiteral(node.moduleSpecifier);
     } else if (ts.isCallExpression(node)) {
       const callee = node.expression;
+      const importScriptsCallee = unwrapTypeScriptExpression(callee);
+      const isImportScriptsCall =
+        (ts.isIdentifier(importScriptsCallee) && importScriptsCallee.text === 'importScripts') ||
+        (ts.isPropertyAccessExpression(importScriptsCallee) &&
+          importScriptsCallee.name.text === 'importScripts' &&
+          ts.isIdentifier(importScriptsCallee.expression) &&
+          /^(?:globalThis|self)$/u.test(importScriptsCallee.expression.text));
       const isImportMetaGlob =
         ts.isPropertyAccessExpression(callee) &&
         /^(?:glob|globEager)$/u.test(callee.name.text) &&
         ts.isMetaProperty(callee.expression) &&
         callee.expression.keywordToken === ts.SyntaxKind.ImportKeyword;
-      if (ts.isIdentifier(callee) && callee.text === 'importScripts') {
+      if (isImportScriptsCall) {
         for (const argument of node.arguments) {
           specifiers.push(importScriptsTargetSpecifier(argument, literalBindings));
         }
@@ -3512,13 +3540,19 @@ function isExecutableScriptType(type) {
 const DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER = '<dynamic executable script src>';
 const DYNAMIC_STYLESHEET_LINK_SPECIFIER = '<dynamic stylesheet href>';
 const DYNAMIC_STYLESHEET_REL_SPECIFIER = '<dynamic stylesheet relation>';
+const DYNAMIC_DOCUMENT_BASE_SPECIFIER = '<dynamic document base href>';
+const DYNAMIC_EXECUTABLE_SCRIPT_TYPE_SPECIFIER = '<dynamic executable script type>';
 
 function externalScriptModuleSpecifiers(content) {
   return jsxOpeningTagCandidates(content)
     .filter((openingTag) => /^<script\b/iu.test(openingTag))
-    .filter((openingTag) => isExecutableScriptType(staticMarkupAttribute(openingTag, 'type')))
     .flatMap((openingTag) => {
-      if (!/\bsrc\s*=/iu.test(openingTag)) return [];
+      const hasSrc = /\bsrc\s*=/iu.test(openingTag);
+      const dynamicType =
+        /(?:^|\s)(?::type|v-bind:type)\s*=/iu.test(openingTag) ||
+        /(?:^|\s)type\s*=\s*(?:\{|\$\{)/iu.test(openingTag);
+      if (hasSrc && dynamicType) return [DYNAMIC_EXECUTABLE_SCRIPT_TYPE_SPECIFIER];
+      if (!isExecutableScriptType(staticMarkupAttribute(openingTag, 'type')) || !hasSrc) return [];
       if (/(?:^|\s)(?::src|v-bind:src)\s*=/iu.test(openingTag)) {
         return [DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER];
       }
@@ -3527,6 +3561,21 @@ function externalScriptModuleSpecifiers(content) {
         return [DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER];
       }
       return [specifier];
+    });
+}
+function documentBaseSpecifiers(content) {
+  return jsxOpeningTagCandidates(content)
+    .filter((openingTag) => /^<base\b/iu.test(openingTag))
+    .flatMap((openingTag) => {
+      const hasHref = /(?:^|\s)(?:href|:href|v-bind:href)\s*=/iu.test(openingTag);
+      if (!hasHref) return [];
+      if (/(?:^|\s)(?::href|v-bind:href)\s*=/iu.test(openingTag)) {
+        return [DYNAMIC_DOCUMENT_BASE_SPECIFIER];
+      }
+      const href = staticMarkupAttribute(openingTag, 'href');
+      if (!href || /[{}\x60]/u.test(href)) return [DYNAMIC_DOCUMENT_BASE_SPECIFIER];
+      const normalizedHref = href.trim();
+      return /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(normalizedHref) ? [normalizedHref] : [];
     });
 }
 function stylesheetLinkSpecifiers(content) {
@@ -3718,7 +3767,9 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
   if (/\.html?$/i.test(absolutePath)) {
     return [
       ...externalScriptModuleSpecifiers(content).filter(
-        (specifier) => specifier !== DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER
+        (specifier) =>
+          specifier !== DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER &&
+          specifier !== DYNAMIC_EXECUTABLE_SCRIPT_TYPE_SPECIFIER
       ),
       ...embeddedScriptSegments(content).flatMap((segment) =>
         scriptModuleSpecifiers(segment, absolutePath)
@@ -3728,7 +3779,9 @@ function moduleSpecifiersForWebsiteSource(absolutePath) {
   if (/\.(?:astro|vue|svelte)$/i.test(absolutePath)) {
     return [
       ...externalScriptModuleSpecifiers(content).filter(
-        (specifier) => specifier !== DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER
+        (specifier) =>
+          specifier !== DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER &&
+          specifier !== DYNAMIC_EXECUTABLE_SCRIPT_TYPE_SPECIFIER
       ),
       ...embeddedScriptSegments(content).flatMap((segment) =>
         scriptModuleSpecifiers(segment, absolutePath)
@@ -3956,6 +4009,17 @@ function guardedWebsiteImport(
       resolvedPath: null,
     };
   }
+  const externalWorkerEntry = externalWorkerEntryTarget(specifier);
+  if (externalWorkerEntry !== null) {
+    return {
+      category: 'external-executable-script',
+      specifier: externalWorkerEntry,
+      resolvedPath: null,
+    };
+  }
+  if (specifier === UNRESOLVED_WORKER_ENTRY_SPECIFIER) {
+    return { category: 'unresolved-worker-entry', resolvedPath: null };
+  }
   if (specifier === UNRESOLVED_IMPORTSCRIPTS_SPECIFIER) {
     return { category: 'unresolved-worker-script', resolvedPath: null };
   }
@@ -4132,6 +4196,17 @@ function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) 
       specifier: externalWorkerScript,
       resolvedPath: null,
     };
+  }
+  const externalWorkerEntry = externalWorkerEntryTarget(specifier);
+  if (externalWorkerEntry !== null) {
+    return {
+      category: 'external-executable-script',
+      specifier: externalWorkerEntry,
+      resolvedPath: null,
+    };
+  }
+  if (specifier === UNRESOLVED_WORKER_ENTRY_SPECIFIER) {
+    return { category: 'unresolved-worker-entry', resolvedPath: null };
   }
   if (specifier === UNRESOLVED_IMPORTSCRIPTS_SPECIFIER) {
     return { category: 'unresolved-worker-script', resolvedPath: null };
@@ -4329,6 +4404,17 @@ function discoverWebsiteRawImports(rootDir) {
     if (/\.(?:html?|astro|mdx?|vue|svelte)$/i.test(absolutePath)) {
       const content = fs.readFileSync(absolutePath, 'utf8');
       const markup = /\.mdx?$/i.test(absolutePath) ? stripMarkdownCode(content) : content;
+      for (const specifier of documentBaseSpecifiers(markup)) {
+        rawImports.push({
+          sourcePath,
+          specifier,
+          category:
+            specifier === DYNAMIC_DOCUMENT_BASE_SPECIFIER
+              ? 'dynamic-document-base'
+              : 'external-document-base',
+          resolvedPath: null,
+        });
+      }
       if (containsProductionImportMap(markup)) {
         rawImports.push({
           sourcePath,
@@ -4338,6 +4424,15 @@ function discoverWebsiteRawImports(rootDir) {
         });
       }
       for (const specifier of externalScriptModuleSpecifiers(markup)) {
+        if (specifier === DYNAMIC_EXECUTABLE_SCRIPT_TYPE_SPECIFIER) {
+          rawImports.push({
+            sourcePath,
+            specifier,
+            category: 'dynamic-executable-script-type',
+            resolvedPath: null,
+          });
+          continue;
+        }
         if (specifier === DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER) {
           rawImports.push({
             sourcePath,
@@ -4413,6 +4508,18 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
+    if (rawImport.category === 'external-document-base') {
+      issues.push(
+        `${relativePath}: external document base href \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
+      );
+      continue;
+    }
+    if (rawImport.category === 'dynamic-document-base') {
+      issues.push(
+        `${relativePath}: dynamic document base href in \`${rawImport.sourcePath}\` must be statically bounded for Website consumer-wall review`
+      );
+      continue;
+    }
     if (rawImport.category === 'external-stylesheet') {
       if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
       issues.push(
@@ -4438,6 +4545,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
+    if (rawImport.category === 'dynamic-executable-script-type') {
+      issues.push(
+        `${relativePath}: dynamic executable script type in \`${rawImport.sourcePath}\` must be statically bounded for Website consumer-wall review`
+      );
+      continue;
+    }
     if (rawImport.category === 'dynamic-executable-script') {
       issues.push(
         `${relativePath}: dynamic executable script source in \`${rawImport.sourcePath}\` must be static for consumer-wall review`
@@ -4460,6 +4573,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'unresolved-dynamic-require') {
       issues.push(
         `${relativePath}: unresolved dynamic require in \`${rawImport.sourcePath}\` must be statically bounded for consumer-wall review`
+      );
+      continue;
+    }
+    if (rawImport.category === 'unresolved-worker-entry') {
+      issues.push(
+        `${relativePath}: unresolved Worker/SharedWorker entry in \`${rawImport.sourcePath}\` must be statically bounded for Website consumer-wall review`
       );
       continue;
     }
@@ -4532,6 +4651,12 @@ function validateHarnessRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'unresolved-dynamic-require') {
       issues.push(
         `${relativePath}: unresolved dynamic require in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
+      );
+      continue;
+    }
+    if (rawImport.category === 'unresolved-worker-entry') {
+      issues.push(
+        `${relativePath}: unresolved Worker/SharedWorker entry in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
       );
       continue;
     }
@@ -4733,13 +4858,97 @@ function pngCrc32(data) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
+function hasValidPngPixelStream(idatData, width, height, bitDepth, colorType, interlaceMethod) {
+  let channels;
+  let validBitDepth;
+  switch (colorType) {
+    case 0:
+      channels = 1;
+      validBitDepth = [1, 2, 4, 8, 16].includes(bitDepth);
+      break;
+    case 2:
+      channels = 3;
+      validBitDepth = bitDepth === 8 || bitDepth === 16;
+      break;
+    case 3:
+      channels = 1;
+      validBitDepth = [1, 2, 4, 8].includes(bitDepth);
+      break;
+    case 4:
+      channels = 2;
+      validBitDepth = bitDepth === 8 || bitDepth === 16;
+      break;
+    case 6:
+      channels = 4;
+      validBitDepth = bitDepth === 8 || bitDepth === 16;
+      break;
+    default:
+      return false;
+  }
+  if (!validBitDepth) return false;
+
+  const passes =
+    interlaceMethod === 0
+      ? [[0, 0, 1, 1]]
+      : [
+          [0, 0, 8, 8],
+          [4, 0, 8, 8],
+          [0, 4, 4, 8],
+          [2, 0, 4, 4],
+          [0, 2, 2, 4],
+          [1, 0, 2, 2],
+          [0, 1, 1, 2],
+        ];
+  const rowPlans = [];
+  let decodedByteLength = 0n;
+  for (const [startX, startY, stepX, stepY] of passes) {
+    const passWidth = width <= startX ? 0 : Math.ceil((width - startX) / stepX);
+    const passHeight = height <= startY ? 0 : Math.ceil((height - startY) / stepY);
+    if (passWidth === 0 || passHeight === 0) continue;
+    const rowLength = 1 + Math.ceil((passWidth * channels * bitDepth) / 8);
+    if (!Number.isSafeInteger(rowLength)) return false;
+    rowPlans.push({ rows: passHeight, rowLength });
+    decodedByteLength += BigInt(passHeight) * BigInt(rowLength);
+  }
+  if (decodedByteLength === 0n || decodedByteLength > BigInt(Number.MAX_SAFE_INTEGER)) {
+    return false;
+  }
+
+  const expectedByteLength = Number(decodedByteLength);
+  let decoded;
+  try {
+    decoded = inflateSync(idatData, { maxOutputLength: expectedByteLength });
+  } catch {
+    return false;
+  }
+  if (decoded.length !== expectedByteLength) return false;
+
+  let offset = 0;
+  for (const { rows, rowLength } of rowPlans) {
+    for (let row = 0; row < rows; row += 1) {
+      if (decoded[offset] > 4) return false;
+      offset += rowLength;
+    }
+  }
+  return offset === decoded.length;
+}
+
 function hasValidPngImageData(data) {
   if (data.length < 57 || !data.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'))) {
     return false;
   }
   let offset = 8;
   let chunkIndex = 0;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  let interlaceMethod = 0;
   let hasImageData = false;
+  let hasIdatChunk = false;
+  let idatSequenceEnded = false;
+  let idatByteLength = 0;
+  const idatChunks = [];
   while (offset + 12 <= data.length) {
     const length = data.readUInt32BE(offset);
     const typeStart = offset + 4;
@@ -4760,9 +4969,38 @@ function hasValidPngImageData(data) {
       ) {
         return false;
       }
+      width = data.readUInt32BE(payloadStart);
+      height = data.readUInt32BE(payloadStart + 4);
+      bitDepth = data.readUInt8(payloadStart + 8);
+      colorType = data.readUInt8(payloadStart + 9);
+      if (data.readUInt8(payloadStart + 10) !== 0 || data.readUInt8(payloadStart + 11) !== 0) {
+        return false;
+      }
+      interlaceMethod = data.readUInt8(payloadStart + 12);
+      if (interlaceMethod !== 0 && interlaceMethod !== 1) return false;
     }
-    if (type === 'IDAT' && length > 0) hasImageData = true;
-    if (type === 'IEND') return length === 0 && hasImageData && chunkEnd === data.length;
+    if (type === 'IDAT') {
+      if (idatSequenceEnded) return false;
+      hasIdatChunk = true;
+      if (length > 0) {
+        hasImageData = true;
+        idatChunks.push(data.subarray(payloadStart, payloadEnd));
+        idatByteLength += length;
+      }
+    } else if (hasIdatChunk && type !== 'IEND') {
+      idatSequenceEnded = true;
+    }
+    if (type === 'IEND') {
+      if (length !== 0 || !hasImageData || chunkEnd !== data.length) return false;
+      return hasValidPngPixelStream(
+        Buffer.concat(idatChunks, idatByteLength),
+        width,
+        height,
+        bitDepth,
+        colorType,
+        interlaceMethod
+      );
+    }
     offset = chunkEnd;
     chunkIndex += 1;
   }

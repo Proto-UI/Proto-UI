@@ -5633,6 +5633,68 @@ test('fails closed on classic worker importScripts targets', () => {
     assert.match(validationMessage(root), expected);
   }
 });
+test('fails closed on non-Vite Worker entry URLs', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/src/components/DirectWorkerUrl.ts',
+      "new Worker('/raw-runtime.js');",
+      /external executable script `\/raw-runtime\.js` in `apps\/www\/src\/components\/DirectWorkerUrl\.ts` is not reviewed/,
+    ],
+    [
+      'apps/www/src/components/DynamicWorkerUrl.ts',
+      'new Worker(workerUrl);',
+      /unresolved Worker\/SharedWorker entry in `apps\/www\/src\/components\/DynamicWorkerUrl\.ts` must be statically bounded for Website consumer-wall review/,
+    ],
+    [
+      'apps/agent-harness/src/run/DirectWorkerUrl.ts',
+      "new Worker('/raw-runtime.js');",
+      /external executable worker script `\/raw-runtime\.js` in `apps\/agent-harness\/src\/run\/DirectWorkerUrl\.ts` is not reviewed for Harness consumer-wall review/,
+    ],
+    [
+      'apps/agent-harness/src/run/DynamicWorkerUrl.ts',
+      'new Worker(workerUrl);',
+      /unresolved Worker\/SharedWorker entry in `apps\/agent-harness\/src\/run\/DynamicWorkerUrl\.ts` must be statically bounded for Harness consumer-wall review/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+test('fails closed on qualified WorkerGlobalScope importScripts calls', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/public/worker-self.js',
+      "self.importScripts('https://cdn.example/raw-runtime.js');",
+      /external executable script `https:\/\/cdn\.example\/raw-runtime\.js` in `apps\/www\/public\/worker-self\.js` is not reviewed/,
+    ],
+    [
+      'apps/www/public/worker-global.js',
+      'globalThis.importScripts(workerUrl);',
+      /unresolved importScripts target in `apps\/www\/public\/worker-global\.js` must be statically bounded/,
+    ],
+    [
+      'apps/agent-harness/src/run/WorkerSelfImportScripts.ts',
+      "self.importScripts('https://cdn.example/raw-runtime.js');",
+      /external executable worker script `https:\/\/cdn\.example\/raw-runtime\.js` in `apps\/agent-harness\/src\/run\/WorkerSelfImportScripts\.ts` is not reviewed/,
+    ],
+    [
+      'apps/agent-harness/src/run/WorkerGlobalImportScripts.ts',
+      'globalThis.importScripts(workerUrl);',
+      /unresolved importScripts target in `apps\/agent-harness\/src\/run\/WorkerGlobalImportScripts\.ts` must be statically bounded/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
 
 test('resolves named effect callbacks in their enclosing lexical scope', () => {
   const root = createRoot();
@@ -6017,6 +6079,76 @@ test('does not classify remote inert JSON script sources as executable', () => {
   );
 
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+test('fails closed on external and dynamic document base URLs', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/src/components/ExternalDocumentBase.astro',
+      '<base href="https://cdn.example/"><script src="raw-runtime.js"></script>',
+      /external document base href `https:\/\/cdn\.example\/` in `apps\/www\/src\/components\/ExternalDocumentBase\.astro` is not reviewed/,
+    ],
+    [
+      'apps/www/src/components/DynamicDocumentBase.astro',
+      '<base href={baseUrl}><script src="raw-runtime.js"></script>',
+      /dynamic document base href in `apps\/www\/src\/components\/DynamicDocumentBase\.astro` must be statically bounded for Website consumer-wall review/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(
+      root,
+      {},
+      {},
+      {
+        websiteBindings: [[relativePath, ['www.demo.prototype-previewer']]],
+      }
+    );
+    assert.match(validationMessage(root), expected);
+  }
+  const root = createRoot();
+  const relativePath = 'apps/www/src/components/LocalDocumentBase.astro';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, '<base href="/docs/"><script src="runtime.js"></script>', 'utf8');
+  writeValidMatrices(
+    root,
+    {},
+    {},
+    {
+      websiteBindings: [[relativePath, ['www.demo.prototype-previewer']]],
+    }
+  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+test('fails closed on dynamically typed scripts with a source URL', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/src/components/DynamicScriptType.astro',
+      '<script type={enabled ? "module" : "application/json"} src="https://cdn.example/runtime.js"></script>',
+      /dynamic executable script type in `apps\/www\/src\/components\/DynamicScriptType\.astro` must be statically bounded/,
+    ],
+    [
+      'apps/www/src/components/BoundScriptType.vue',
+      '<script :type="scriptType" src="https://cdn.example/runtime.js"></script>',
+      /dynamic executable script type in `apps\/www\/src\/components\/BoundScriptType\.vue` must be statically bounded/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(
+      root,
+      {},
+      {},
+      {
+        websiteBindings: [[relativePath, ['www.demo.prototype-previewer']]],
+      }
+    );
+    assert.match(validationMessage(root), expected);
+  }
 });
 
 test('rejects render-evaluated reducer and external-store callbacks', () => {
@@ -8069,6 +8201,38 @@ test('rejects retained PNG screenshots without image data', () => {
       'hex'
     )
   );
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Screenshot: retained artifact must be a recognized image file/
+  );
+});
+test('rejects PNG screenshots with CRC-valid invalid image data streams', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  const { resultsPath } = writeSelfHostedPromotion(root, revision, { websiteBindings });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
+    matrixCount: 2,
+  });
+  const screenshotPath = 'internal/website/evidence/s14/home-desktop.png';
+  const screenshotBytes = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAABElEQVQA//8Ax58umAAAAABJRU5ErkJggg==',
+    'base64'
+  );
+  fs.writeFileSync(path.join(root, screenshotPath), screenshotBytes);
+
+  const manifestPath = path.join(root, resultsPath);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const artifact = manifest.artifacts.find((entry) => entry.path === screenshotPath);
+  assert.ok(artifact);
+  artifact.size = screenshotBytes.length;
+  artifact.sha256 = createHash('sha256').update(screenshotBytes).digest('hex');
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+
   assert.match(
     validationMessage(root, promotionOptions(revision)),
     /Screenshot: retained artifact must be a recognized image file/
