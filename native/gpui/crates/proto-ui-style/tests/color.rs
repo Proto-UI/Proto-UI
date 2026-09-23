@@ -13,6 +13,8 @@ const COLOR_PROPERTIES: [&str; 6] = [
     "outline-color",
 ];
 
+const COLOR_CUSTOM_PROPERTIES: [&str; 2] = ["--pui-ring-color", "--pui-ring-offset-color"];
+
 fn rgba8(value: &str) -> [u8; 4] {
     parse_rgba(value)
         .unwrap_or_else(|error| panic!("{value}: {error:?}"))
@@ -35,6 +37,22 @@ fn parses_both_rgb_syntaxes() {
     assert_eq!(rgba8("rgba(0, 0, 0, 0.75)"), [0, 0, 0, 191]);
     assert_eq!(rgba8("rgb(0 0 0 / 0.5)"), [0, 0, 0, 128]);
     assert_eq!(rgba8("rgb(255, 128, 0)"), [255, 128, 0, 255]);
+}
+
+#[test]
+fn clamps_rgb_channels_and_alpha_at_parse_time() {
+    assert_eq!(
+        parse_rgba("rgb(300 -10 50%)").unwrap(),
+        Rgba::new(1.0, 0.0, 0.5, 1.0)
+    );
+    assert_eq!(
+        parse_rgba("rgb(0 255 0 / 200%)").unwrap(),
+        Rgba::new(0.0, 1.0, 0.0, 1.0)
+    );
+    assert_eq!(
+        parse_rgba("rgba(0, 0, 255, -1)").unwrap(),
+        Rgba::new(0.0, 0.0, 1.0, 0.0)
+    );
 }
 
 #[test]
@@ -65,6 +83,27 @@ fn converts_lab_through_the_css_color_4_path() {
         chromatic[0] > chromatic[1] && chromatic[2] > chromatic[1],
         "expected a magenta-ish cast, got {chromatic:?}"
     );
+}
+
+#[test]
+fn parses_lab_axis_percentages_and_clamps_lightness() {
+    assert_eq!(rgba8("lab(120% 80 -40)"), [255, 255, 255, 255]);
+    assert_eq!(rgba8("lab(-20% 80 -40)"), [0, 0, 0, 255]);
+}
+
+#[test]
+fn maps_lab_percentage_axes_using_css_reference_ranges() {
+    // CSS Color 4 §9.3: -100%/100% a/b span -125/+125. This example renders
+    // as approximately rgb(50.2% 0% 50.2%) after CSS gamut mapping.
+    assert_eq!(rgba8("lab(29.69% 44.888% -29.04%)"), [128, 0, 128, 255]);
+}
+
+#[test]
+fn maps_an_out_of_gamut_lab_color_with_local_minde() {
+    // CSS Color 4 §14.2.1 chooses a constant-lightness, constant-hue Oklch
+    // search. Simple per-channel clipping produces [153, 0, 255] here; the
+    // local-MINDE result reduces chroma to [130, 0, 255].
+    assert_eq!(rgba8("lab(30 160 -160)"), [130, 0, 255, 255]);
 }
 
 #[test]
@@ -122,6 +161,7 @@ fn reports_rather_than_approximates_what_it_cannot_do() {
 #[test]
 fn parses_every_colour_a_theme_can_produce() {
     let mut checked = 0usize;
+    let mut custom_properties_checked = std::collections::BTreeSet::new();
     let mut unresolved = 0usize;
 
     for language in themes().names() {
@@ -130,10 +170,13 @@ fn parses_every_colour_a_theme_can_produce() {
 
             for (token, _) in vocabulary().tokens_with_declarations() {
                 let resolved = vocabulary().resolve_all([token.as_str()]);
-                for property in COLOR_PROPERTIES {
+                for property in COLOR_PROPERTIES.into_iter().chain(COLOR_CUSTOM_PROPERTIES) {
                     let Some(raw) = resolved.get(property) else {
                         continue;
                     };
+                    if COLOR_CUSTOM_PROPERTIES.contains(&property) {
+                        custom_properties_checked.insert(property);
+                    }
                     match theme.substitute(raw) {
                         Substitution::Resolved(value) => {
                             parse(&value).unwrap_or_else(|error| {
@@ -161,6 +204,11 @@ fn parses_every_colour_a_theme_can_produce() {
     // whole test vacuous.
     assert!(checked > 200, "only checked {checked} colours");
     assert!(unresolved > 0, "the cross-language case disappeared");
+    assert_eq!(
+        custom_properties_checked,
+        COLOR_CUSTOM_PROPERTIES.into_iter().collect(),
+        "fixture color custom properties must stay in the completeness walk"
+    );
 }
 
 /// The vocabulary spans every design language; a theme does not.
