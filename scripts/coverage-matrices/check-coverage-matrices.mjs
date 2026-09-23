@@ -2976,12 +2976,22 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
               /^(?:globalThis|self|window)$/u.test(callee.expression.text)
             ? callee.name.text
             : null;
-        if (
-          scheduledCallbackName &&
-          /^(?:queueMicrotask|requestAnimationFrame|setTimeout)$/u.test(scheduledCallbackName) &&
-          node.arguments[0]
-        ) {
-          const callbackExpression = unwrapTypeScriptExpression(node.arguments[0]);
+        const promiseReactionName =
+          ts.isPropertyAccessExpression(callee) &&
+          /^(?:then|catch|finally)$/u.test(callee.name.text)
+            ? callee.name.text
+            : null;
+        const scheduledCallbackArguments = promiseReactionName
+          ? node.arguments.slice(0, promiseReactionName === 'then' ? 2 : 1)
+          : scheduledCallbackName &&
+              /^(?:queueMicrotask|requestAnimationFrame|setTimeout)$/u.test(
+                scheduledCallbackName
+              ) &&
+              node.arguments[0]
+            ? node.arguments.slice(0, 1)
+            : [];
+        for (const callbackArgument of scheduledCallbackArguments) {
+          const callbackExpression = unwrapTypeScriptExpression(callbackArgument);
           const scheduledCallable =
             ts.isArrowFunction(callbackExpression) || ts.isFunctionExpression(callbackExpression)
               ? callbackExpression
@@ -3339,6 +3349,8 @@ function discoverHarnessForbiddenStateMachineSources(rootDir) {
 const UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER = '<unresolved dynamic import>';
 const UNRESOLVED_DYNAMIC_REQUIRE_SPECIFIER = '<unresolved dynamic require>';
 const VITE_IGNORED_DYNAMIC_IMPORT_SPECIFIER_PREFIX = '<@vite-ignore dynamic import:';
+const UNRESOLVED_IMPORTSCRIPTS_SPECIFIER = '<unresolved importScripts target>';
+const EXTERNAL_IMPORTSCRIPTS_SPECIFIER_PREFIX = '<external importScripts target:';
 
 function viteIgnoredDynamicImportSpecifier(argument, sourceFile, literalBindings) {
   const boundary = ts.isStringLiteralLike(argument)
@@ -3376,6 +3388,27 @@ function topLevelConstStringBindings(sourceFile) {
     }
   }
   return literalBindings;
+}
+
+function importScriptsTargetSpecifier(argument, literalBindings) {
+  const target = ts.isStringLiteralLike(argument)
+    ? argument.text
+    : ts.isIdentifier(argument) && literalBindings.has(argument.text)
+      ? literalBindings.get(argument.text)
+      : null;
+  if (typeof target !== 'string' || target.length === 0) {
+    return UNRESOLVED_IMPORTSCRIPTS_SPECIFIER;
+  }
+  if (isExternalExecutableScriptSpecifier(target)) {
+    return `${EXTERNAL_IMPORTSCRIPTS_SPECIFIER_PREFIX}${target}>`;
+  }
+  return target.startsWith('.') ? target : `./${target}`;
+}
+
+function externalImportScriptsTarget(specifier) {
+  return specifier.startsWith(EXTERNAL_IMPORTSCRIPTS_SPECIFIER_PREFIX) && specifier.endsWith('>')
+    ? specifier.slice(EXTERNAL_IMPORTSCRIPTS_SPECIFIER_PREFIX.length, -1)
+    : null;
 }
 
 function scriptModuleSpecifiers(source, fileName) {
@@ -3429,7 +3462,11 @@ function scriptModuleSpecifiers(source, fileName) {
         /^(?:glob|globEager)$/u.test(callee.name.text) &&
         ts.isMetaProperty(callee.expression) &&
         callee.expression.keywordToken === ts.SyntaxKind.ImportKeyword;
-      if (
+      if (ts.isIdentifier(callee) && callee.text === 'importScripts') {
+        for (const argument of node.arguments) {
+          specifiers.push(importScriptsTargetSpecifier(argument, literalBindings));
+        }
+      } else if (
         !isImportMetaGlob &&
         (callee.kind === ts.SyntaxKind.ImportKeyword ||
           (ts.isIdentifier(callee) && callee.text === 'require'))
@@ -3911,6 +3948,17 @@ function guardedWebsiteImport(
       resolvedPath: null,
     };
   }
+  const externalWorkerScript = externalImportScriptsTarget(specifier);
+  if (externalWorkerScript !== null) {
+    return {
+      category: 'external-executable-script',
+      specifier: externalWorkerScript,
+      resolvedPath: null,
+    };
+  }
+  if (specifier === UNRESOLVED_IMPORTSCRIPTS_SPECIFIER) {
+    return { category: 'unresolved-worker-script', resolvedPath: null };
+  }
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
     return { category: 'unresolved-dynamic-import', resolvedPath: null };
@@ -4076,6 +4124,17 @@ function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) 
       boundary: viteIgnoredBoundary,
       resolvedPath: null,
     };
+  }
+  const externalWorkerScript = externalImportScriptsTarget(specifier);
+  if (externalWorkerScript !== null) {
+    return {
+      category: 'external-executable-script',
+      specifier: externalWorkerScript,
+      resolvedPath: null,
+    };
+  }
+  if (specifier === UNRESOLVED_IMPORTSCRIPTS_SPECIFIER) {
+    return { category: 'unresolved-worker-script', resolvedPath: null };
   }
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (classifiedSpecifier === UNRESOLVED_DYNAMIC_IMPORT_SPECIFIER) {
@@ -4404,6 +4463,12 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
+    if (rawImport.category === 'unresolved-worker-script') {
+      issues.push(
+        `${relativePath}: unresolved importScripts target in \`${rawImport.sourcePath}\` must be statically bounded for Website consumer-wall review`
+      );
+      continue;
+    }
     if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
     issues.push(
       `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist`
@@ -4446,6 +4511,12 @@ function discoverHarnessRawImports(rootDir) {
 
 function validateHarnessRawImports(rootDir, relativePath, issues) {
   for (const rawImport of discoverHarnessRawImports(rootDir)) {
+    if (rawImport.category === 'external-executable-script') {
+      issues.push(
+        `${relativePath}: external executable worker script \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed for Harness consumer-wall review`
+      );
+      continue;
+    }
     if (rawImport.category === 'forbidden-third-party-package') {
       issues.push(
         `${relativePath}: forbidden third-party Harness UI package \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\``
@@ -4461,6 +4532,12 @@ function validateHarnessRawImports(rootDir, relativePath, issues) {
     if (rawImport.category === 'unresolved-dynamic-require') {
       issues.push(
         `${relativePath}: unresolved dynamic require in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
+      );
+      continue;
+    }
+    if (rawImport.category === 'unresolved-worker-script') {
+      issues.push(
+        `${relativePath}: unresolved importScripts target in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
       );
       continue;
     }

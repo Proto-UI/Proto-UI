@@ -5592,6 +5592,48 @@ test('enforces consumer walls for Vite Worker and SharedWorker URL entries', () 
   }
 });
 
+test('fails closed on classic worker importScripts targets', () => {
+  for (const [relativePath, content, expected] of [
+    [
+      'apps/www/public/worker.js',
+      "importScripts('https://cdn.example/raw-runtime.js');",
+      /external executable script `https:\/\/cdn\.example\/raw-runtime\.js` in `apps\/www\/public\/worker\.js` is not reviewed/,
+    ],
+    [
+      'apps/www/public/worker-constant.js',
+      "const target = 'https://cdn.example/raw-runtime.js'; importScripts(target);",
+      /external executable script `https:\/\/cdn\.example\/raw-runtime\.js` in `apps\/www\/public\/worker-constant\.js` is not reviewed/,
+    ],
+    [
+      'apps/www/public/worker-dynamic.js',
+      'importScripts(workerUrl);',
+      /unresolved importScripts target in `apps\/www\/public\/worker-dynamic\.js` must be statically bounded/,
+    ],
+    [
+      'apps/www/src/components/WorkerImportScripts.ts',
+      "importScripts('../../../../packages/runtime/src/worker.ts');",
+      /raw Proto UI import `\.\.\/\.\.\/\.\.\/\.\.\/packages\/runtime\/src\/worker\.ts` in `apps\/www\/src\/components\/WorkerImportScripts\.ts` escapes the website consumer-wall allowlist/,
+    ],
+    [
+      'apps/agent-harness/src/run/WorkerImportScripts.ts',
+      "importScripts('https://cdn.example/raw-runtime.js');",
+      /external executable worker script `https:\/\/cdn\.example\/raw-runtime\.js` in `apps\/agent-harness\/src\/run\/WorkerImportScripts\.ts` is not reviewed/,
+    ],
+    [
+      'apps/agent-harness/src/run/WorkerDynamicImportScripts.ts',
+      'importScripts(workerUrl);',
+      /unresolved importScripts target in `apps\/agent-harness\/src\/run\/WorkerDynamicImportScripts\.ts` must be statically bounded/,
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+});
+
 test('resolves named effect callbacks in their enclosing lexical scope', () => {
   const root = createRoot();
   const relativePath = 'apps/agent-harness/src/run/NamedEffect.tsx';
@@ -7536,6 +7578,55 @@ test('scans callbacks scheduled during render or effects', () => {
       )
     );
   }
+});
+
+test('follows Promise reaction callbacks scheduled during render and effects', () => {
+  for (const [name, imports, body] of [
+    [
+      'Then',
+      "import * as actions from './agent-actions';",
+      'Promise.resolve().then(() => actions.send());',
+    ],
+    [
+      'Catch',
+      "import * as actions from './agent-actions';",
+      "Promise.reject(new Error('failure')).catch(() => actions.send());",
+    ],
+    [
+      'FinallyInEffect',
+      "import { useEffect } from 'react'; import * as actions from './agent-actions';",
+      'useEffect(() => { Promise.resolve().finally(() => actions.send()); }, []);',
+    ],
+  ]) {
+    const root = createRoot();
+    const relativePath = `apps/agent-harness/src/run/Promise${name}.tsx`;
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(
+      absolutePath,
+      `${imports} export function Surface() { ${body} return <section />; }`,
+      'utf8'
+    );
+    writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    assert.match(
+      validationMessage(root),
+      /Harness source `apps\/agent-harness\/src\/run\/Promise(?:Then|Catch|FinallyInEffect)\.tsx` contains a forbidden interaction/
+    );
+  }
+});
+
+test('does not reject Promise continuations without Agent actions', () => {
+  const root = createRoot();
+  const relativePath = 'apps/agent-harness/src/run/PromiseNoAction.tsx';
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(
+    absolutePath,
+    'export function Surface() { Promise.resolve().then(() => 1); return <section />; }',
+    'utf8'
+  );
+  writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 test('scans executable script sources in Markdown and MDX content', () => {
