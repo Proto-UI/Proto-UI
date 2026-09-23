@@ -638,3 +638,50 @@ test('external success cannot substitute for trusted repository CI evidence', ()
     'unknown'
   );
 });
+
+test('Vercel authorization failure is not trusted CI, but real CI failures still block', () => {
+  const ci = {
+    name: 'test',
+    status: 'COMPLETED',
+    conclusion: 'SUCCESS',
+    completedAt: '2026-09-23T03:00:00Z',
+    detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+    source: 'github-actions',
+    ...trustedProvenance,
+  };
+  const preview = {
+    name: 'Vercel',
+    status: 'COMPLETED',
+    conclusion: 'FAILURE',
+    completedAt: '2026-09-23T03:00:00Z',
+    detailsUrl: 'https://vercel.com/git/authorize?team=external',
+    source: 'status-context',
+    repository: null,
+    workflowName: null,
+    workflowPath: null,
+  };
+  const options = { ...trustedOptions, trustedCheckNames: ['test'] };
+
+  assert.equal(summarizeLiveChecks([ci, preview], options), 'success');
+  assert.equal(
+    summarizeLiveChecks([{ ...ci, conclusion: 'FAILURE' }, preview], options),
+    'failure'
+  );
+  assert.equal(
+    summarizeLiveChecks([ci, preview, { ...preview, name: 'DCO' }], options),
+    'failure',
+    'repository-required DCO failure cannot be hidden by preview authorization debt'
+  );
+  assert.equal(
+    summarizeLiveChecks([{ ...ci, status: 'IN_PROGRESS', conclusion: null }, preview], options),
+    'unknown'
+  );
+  assert.equal(
+    summarizeLiveChecks(
+      [ci, { ...preview, detailsUrl: 'https://vercel.com/deployments/failed' }],
+      options
+    ),
+    'failure',
+    'a real deployment failure is not an authorization-only preview debt'
+  );
+});
