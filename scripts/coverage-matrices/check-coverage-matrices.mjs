@@ -1602,6 +1602,21 @@ function astContainsInteractiveRuntime(content) {
         return;
       }
     }
+    if (
+      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+      (node.operator === ts.SyntaxKind.PlusPlusToken ||
+        node.operator === ts.SyntaxKind.MinusMinusToken)
+    ) {
+      const updatedProperty = staticMemberAccess(node.operand);
+      if (
+        updatedProperty &&
+        GOVERNED_DOM_STATE_PROPERTY_NAMES.has(updatedProperty.name) &&
+        isDomReceiverExpression(updatedProperty.receiver, sourceFile, receiverBindings, node)
+      ) {
+        found = true;
+        return;
+      }
+    }
     if (ts.isNewExpression(node)) {
       const constructorName = ts.isIdentifier(node.expression)
         ? node.expression.text
@@ -2242,23 +2257,62 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
   );
   const reactNamespaceNames = new Set();
   const reactCreateElementNames = new Set();
+  const importedObjectBindings = new Map();
+  const resolveRelativeModule = (specifier) => {
+    if (!specifier.startsWith('.')) return null;
+    const base = path.resolve(
+      path.dirname(absolutePath),
+      importSpecifierWithoutViteSuffix(specifier)
+    );
+    const variants = [
+      base,
+      ...['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts'].map(
+        (extension) => `${base}${extension}`
+      ),
+      ...['index.js', 'index.jsx', 'index.mjs', 'index.cjs', 'index.ts', 'index.tsx'].map((name) =>
+        path.join(base, name)
+      ),
+    ];
+    return (
+      variants.find((candidate) => fs.existsSync(candidate) && fs.statSync(candidate).isFile()) ??
+      null
+    );
+  };
   for (const statement of sourceFile.statements) {
-    if (
-      !ts.isImportDeclaration(statement) ||
-      !ts.isStringLiteralLike(statement.moduleSpecifier) ||
-      statement.moduleSpecifier.text !== 'react'
-    ) {
+    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteralLike(statement.moduleSpecifier)) {
       continue;
     }
     const importClause = statement.importClause;
-    if (importClause?.name) reactNamespaceNames.add(importClause.name.text);
-    if (importClause?.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
-      reactNamespaceNames.add(importClause.namedBindings.name.text);
+    const specifier = statement.moduleSpecifier.text;
+    if (specifier === 'react') {
+      if (importClause?.name) reactNamespaceNames.add(importClause.name.text);
+      if (importClause?.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
+        reactNamespaceNames.add(importClause.namedBindings.name.text);
+      }
+      if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+        for (const element of importClause.namedBindings.elements) {
+          if (
+            !element.isTypeOnly &&
+            (element.propertyName ?? element.name).text === 'createElement'
+          ) {
+            reactCreateElementNames.add(element.name.text);
+          }
+        }
+      }
+      continue;
     }
-    if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+    if (!importClause || importClause.isTypeOnly) continue;
+    const targetPath = resolveRelativeModule(specifier);
+    const addImportedObject = (localName, importedName) => {
+      importedObjectBindings.set(localName, { importedName, targetPath });
+    };
+    if (importClause.name) addImportedObject(importClause.name.text, 'default');
+    if (importClause.namedBindings && ts.isNamespaceImport(importClause.namedBindings)) {
+      addImportedObject(importClause.namedBindings.name.text, '*');
+    } else if (importClause.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
       for (const element of importClause.namedBindings.elements) {
-        if ((element.propertyName ?? element.name).text === 'createElement') {
-          reactCreateElementNames.add(element.name.text);
+        if (!element.isTypeOnly) {
+          addImportedObject(element.name.text, (element.propertyName ?? element.name).text);
         }
       }
     }
@@ -2382,6 +2436,94 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
     if (callable.body) visit(callable.body);
     return returned;
   };
+  const importedObjectHasNativeEvent = (name) => {
+    const imported = importedObjectBindings.get(name);
+    if (!imported) return false;
+    if (!imported.targetPath || imported.importedName === '*') return true;
+
+    let targetContent;
+    try {
+      targetContent = fs.readFileSync(imported.targetPath, 'utf8');
+    } catch {
+      return true;
+    }
+    const targetSourceFile = ts.createSourceFile(
+      imported.targetPath,
+      targetContent,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX
+    );
+    const localInitializers = new Map();
+    for (const statement of targetSourceFile.statements) {
+      if (!ts.isVariableStatement(statement)) continue;
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name) && declaration.initializer) {
+          localInitializers.set(
+            declaration.name.text,
+            unwrapTypeScriptExpression(declaration.initializer)
+          );
+        }
+      }
+    }
+
+    let localName = imported.importedName;
+    let initializer = null;
+    if (localName === 'default') {
+      const exportedDefault = targetSourceFile.statements.find(
+        (statement) => ts.isExportAssignment(statement) && !statement.isExportEquals
+      );
+      initializer = exportedDefault?.expression ?? null;
+    } else {
+      for (const statement of targetSourceFile.statements) {
+        if (
+          ts.isVariableStatement(statement) &&
+          statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+        ) {
+          const declaration = statement.declarationList.declarations.find(
+            (candidate) => ts.isIdentifier(candidate.name) && candidate.name.text === localName
+          );
+          if (declaration?.initializer) initializer = declaration.initializer;
+        }
+        if (
+          ts.isExportDeclaration(statement) &&
+          statement.exportClause &&
+          ts.isNamedExports(statement.exportClause)
+        ) {
+          const reexport = statement.exportClause.elements.find(
+            (element) => element.name.text === localName
+          );
+          if (reexport) {
+            if (statement.moduleSpecifier) return true;
+            localName = (reexport.propertyName ?? reexport.name).text;
+          }
+        }
+      }
+      initializer ??= localInitializers.get(localName) ?? null;
+    }
+    if (!initializer) return true;
+
+    const inspect = (expression, visitedNames = new Set()) => {
+      const candidate = unwrapTypeScriptExpression(expression);
+      if (ts.isObjectLiteralExpression(candidate)) {
+        return candidate.properties.some((property) => {
+          if (ts.isSpreadAssignment(property)) return true;
+          if (!('name' in property) || !property.name) return false;
+          const propertyName = objectPropertyName(property.name);
+          return propertyName === null || isNativeEventName(propertyName);
+        });
+      }
+      if (ts.isIdentifier(candidate)) {
+        if (visitedNames.has(candidate.text)) return true;
+        const localInitializer = localInitializers.get(candidate.text);
+        if (!localInitializer) return true;
+        visitedNames.add(candidate.text);
+        return inspect(localInitializer, visitedNames);
+      }
+      return true;
+    };
+    return inspect(initializer);
+  };
   const expressionHasNativeEventObject = (
     expression,
     useNode,
@@ -2427,7 +2569,7 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
       }
       if (ts.isSourceFile(scope)) break;
     }
-    return false;
+    return importedObjectHasNativeEvent(candidate.text);
   };
   let found = false;
   const visit = (node) => {
@@ -3354,6 +3496,7 @@ const UNRESOLVED_IMPORTSCRIPTS_SPECIFIER = '<unresolved importScripts target>';
 const EXTERNAL_IMPORTSCRIPTS_SPECIFIER_PREFIX = '<external importScripts target:';
 const UNRESOLVED_WORKER_ENTRY_SPECIFIER = '<unresolved Worker entry>';
 const EXTERNAL_WORKER_ENTRY_SPECIFIER_PREFIX = '<external Worker entry:';
+const EXTERNAL_SCRIPT_ELEMENT_SPECIFIER_PREFIX = '<external script element src:';
 
 function viteIgnoredDynamicImportSpecifier(argument, sourceFile, literalBindings) {
   const boundary = ts.isStringLiteralLike(argument)
@@ -3422,6 +3565,15 @@ function externalWorkerEntryTarget(specifier) {
     ? specifier.slice(EXTERNAL_WORKER_ENTRY_SPECIFIER_PREFIX.length, -1)
     : null;
 }
+function externalScriptElementSpecifier(target) {
+  return `${EXTERNAL_SCRIPT_ELEMENT_SPECIFIER_PREFIX}${target}>`;
+}
+
+function externalScriptElementTarget(specifier) {
+  return specifier.startsWith(EXTERNAL_SCRIPT_ELEMENT_SPECIFIER_PREFIX) && specifier.endsWith('>')
+    ? specifier.slice(EXTERNAL_SCRIPT_ELEMENT_SPECIFIER_PREFIX.length, -1)
+    : null;
+}
 
 function scriptModuleSpecifiers(source, fileName) {
   const sourceFile = ts.createSourceFile(
@@ -3433,6 +3585,83 @@ function scriptModuleSpecifiers(source, fileName) {
   );
   const specifiers = [];
   const literalBindings = topLevelConstStringBindings(sourceFile);
+  const receiverBindings = domReceiverBindings(sourceFile);
+  const scriptElementBindings = new Map();
+  const scriptLexicalScope = (node) => {
+    for (let current = node.parent; current; current = current.parent) {
+      if (ts.isBlock(current) || ts.isFunctionLike(current) || ts.isSourceFile(current)) {
+        return current;
+      }
+    }
+    return sourceFile;
+  };
+  const addScriptElementBinding = (name, node, initializer) => {
+    const bindings = scriptElementBindings.get(name) ?? [];
+    bindings.push({
+      initializer: initializer ? unwrapTypeScriptExpression(initializer) : null,
+      node,
+      position: node.getStart(sourceFile),
+      scope: scriptLexicalScope(node),
+    });
+    scriptElementBindings.set(name, bindings);
+  };
+  const collectScriptElementBindings = (node) => {
+    if ((ts.isVariableDeclaration(node) || ts.isParameter(node)) && ts.isIdentifier(node.name)) {
+      addScriptElementBinding(node.name.text, node, node.initializer);
+    }
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      ts.isIdentifier(node.left)
+    ) {
+      addScriptElementBinding(node.left.text, node, node.right);
+    }
+    ts.forEachChild(node, collectScriptElementBindings);
+  };
+  collectScriptElementBindings(sourceFile);
+  const isScriptElementCreation = (expression) => {
+    const candidate = unwrapTypeScriptExpression(expression);
+    if (!ts.isCallExpression(candidate) || !candidate.arguments[0]) return false;
+    const member = staticMemberAccess(candidate.expression);
+    return Boolean(
+      member &&
+      member.name === 'createElement' &&
+      ts.isStringLiteralLike(candidate.arguments[0]) &&
+      candidate.arguments[0].text.toLowerCase() === 'script' &&
+      isDomReceiverExpression(member.receiver, sourceFile, receiverBindings, candidate)
+    );
+  };
+  const isScriptElementExpression = (expression, useNode, visitedBindings = new Set()) => {
+    const candidate = unwrapTypeScriptExpression(expression);
+    if (isScriptElementCreation(candidate)) return true;
+    if (!ts.isIdentifier(candidate)) return false;
+    const bindings = scriptElementBindings.get(candidate.text) ?? [];
+    const usePosition = useNode.getStart(sourceFile);
+    for (let scope = scriptLexicalScope(useNode); scope; scope = scriptLexicalScope(scope)) {
+      const binding = bindings
+        .filter((entry) => entry.scope === scope && entry.position < usePosition)
+        .sort((left, right) => right.position - left.position)[0];
+      if (binding) {
+        if (!binding.initializer || visitedBindings.has(binding)) return false;
+        visitedBindings.add(binding);
+        return isScriptElementExpression(binding.initializer, binding.node, visitedBindings);
+      }
+      if (ts.isSourceFile(scope)) break;
+    }
+    return false;
+  };
+  const scriptElementSourceSpecifier = (argument) => {
+    if (!argument) return DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER;
+    const source = unwrapTypeScriptExpression(argument);
+    const target = ts.isStringLiteralLike(source)
+      ? source.text
+      : ts.isIdentifier(source) && literalBindings.has(source.text)
+        ? literalBindings.get(source.text)
+        : null;
+    return typeof target === 'string' && isExternalExecutableScriptSpecifier(target)
+      ? externalScriptElementSpecifier(target)
+      : DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER;
+  };
   const addLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) specifiers.push(node.text);
   };
@@ -3474,6 +3703,32 @@ function scriptModuleSpecifiers(source, fileName) {
       : UNRESOLVED_WORKER_ENTRY_SPECIFIER;
   };
   const visit = (node) => {
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      node.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+    ) {
+      const assignedProperty = staticMemberAccess(node.left);
+      if (
+        assignedProperty?.name === 'src' &&
+        isScriptElementExpression(assignedProperty.receiver, node)
+      ) {
+        specifiers.push(scriptElementSourceSpecifier(node.right));
+      }
+    }
+    if (ts.isCallExpression(node)) {
+      const calledMember = staticMemberAccess(node.expression);
+      const attributeName = node.arguments[0];
+      if (
+        calledMember?.name === 'setAttribute' &&
+        isScriptElementExpression(calledMember.receiver, node) &&
+        attributeName &&
+        ts.isStringLiteralLike(attributeName) &&
+        attributeName.text.toLowerCase() === 'src'
+      ) {
+        specifiers.push(scriptElementSourceSpecifier(node.arguments[1]));
+      }
+    }
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
       addLiteral(node.moduleSpecifier);
     } else if (ts.isCallExpression(node)) {
@@ -4029,6 +4284,17 @@ function guardedWebsiteImport(
       resolvedPath: null,
     };
   }
+  const externalScriptElement = externalScriptElementTarget(specifier);
+  if (externalScriptElement !== null) {
+    return {
+      category: 'external-executable-script',
+      specifier: externalScriptElement,
+      resolvedPath: null,
+    };
+  }
+  if (specifier === DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER) {
+    return { category: 'dynamic-executable-script', resolvedPath: null };
+  }
   if (specifier === UNRESOLVED_WORKER_ENTRY_SPECIFIER) {
     return { category: 'unresolved-worker-entry', resolvedPath: null };
   }
@@ -4216,6 +4482,17 @@ function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) 
       specifier: externalWorkerEntry,
       resolvedPath: null,
     };
+  }
+  const externalScriptElement = externalScriptElementTarget(specifier);
+  if (externalScriptElement !== null) {
+    return {
+      category: 'external-script-element',
+      specifier: externalScriptElement,
+      resolvedPath: null,
+    };
+  }
+  if (specifier === DYNAMIC_EXECUTABLE_SCRIPT_SPECIFIER) {
+    return { category: 'dynamic-script-element', resolvedPath: null };
   }
   if (specifier === UNRESOLVED_WORKER_ENTRY_SPECIFIER) {
     return { category: 'unresolved-worker-entry', resolvedPath: null };
@@ -4648,6 +4925,19 @@ function validateHarnessRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
+    if (rawImport.category === 'external-script-element') {
+      issues.push(
+        `${relativePath}: external executable script \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed for Harness consumer-wall review`
+      );
+      continue;
+    }
+    if (rawImport.category === 'dynamic-script-element') {
+      issues.push(
+        `${relativePath}: dynamic executable script source in \`${rawImport.sourcePath}\` must be statically bounded for Harness consumer-wall review`
+      );
+      continue;
+    }
+
     if (rawImport.category === 'forbidden-third-party-package') {
       issues.push(
         `${relativePath}: forbidden third-party Harness UI package \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\``
@@ -5019,6 +5309,33 @@ function hasValidPngImageData(data) {
   return false;
 }
 
+// `sharp` is a Website dependency; decode WebP off-process to keep validation synchronous.
+const WEBP_VALIDATION_SCRIPT = `
+const sharp = require(process.argv[1]);
+sharp(process.argv[2], { failOn: 'warning' }).stats().then(
+  () => {},
+  () => {
+    process.exitCode = 1;
+  }
+);
+`;
+const requireFromWebsite = createRequire(new URL('../../apps/www/package.json', import.meta.url));
+
+function hasValidWebpImageData(absolutePath) {
+  let sharpEntry;
+  try {
+    sharpEntry = requireFromWebsite.resolve('sharp');
+  } catch {
+    return false;
+  }
+  const result = spawnSync(
+    process.execPath,
+    ['-e', WEBP_VALIDATION_SCRIPT, sharpEntry, absolutePath],
+    { stdio: 'ignore', timeout: 15_000, windowsHide: true }
+  );
+  return result.error === undefined && result.status === 0;
+}
+
 function hasImageFileSignature(absolutePath) {
   if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) return false;
   const data = fs.readFileSync(absolutePath);
@@ -5038,10 +5355,10 @@ function hasImageFileSignature(absolutePath) {
     data.length >= 20 &&
     data.subarray(0, 4).toString('ascii') === 'RIFF' &&
     data.subarray(8, 12).toString('ascii') === 'WEBP' &&
-    data.readUInt32LE(4) + 8 <= data.length &&
+    data.readUInt32LE(4) + 8 === data.length &&
     /^(?:VP8 |VP8L|VP8X)$/u.test(data.subarray(12, 16).toString('ascii'))
   ) {
-    return true;
+    return hasValidWebpImageData(absolutePath);
   }
 
   if (

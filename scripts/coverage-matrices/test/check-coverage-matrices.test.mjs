@@ -3909,6 +3909,72 @@ test('rejects governed DOM state property assignments on bounded receivers', () 
     );
   }
 });
+test('detects unary updates to governed DOM state', () => {
+  const root = createRoot();
+  const websitePath = 'apps/www/src/content/docs/UnaryWebsiteScroll.ts';
+  const harnessPath = 'apps/agent-harness/src/run/UnaryHarnessScroll.ts';
+  const safePath = 'apps/agent-harness/src/run/DomainUnaryState.ts';
+  for (const [relativePath, content] of [
+    [websitePath, 'const pane = document.querySelector("div"); pane.scrollTop++;'],
+    [harnessPath, 'const pane = document.querySelector("div"); --pane.scrollLeft;'],
+    [safePath, 'const model = { scrollTop: 0 }; model.scrollTop++;'],
+  ]) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(root, {}, { Path: `\`${harnessPath}\`` });
+
+  const message = validationMessage(root);
+  assert.ok(message.includes(`interactive website source \`${websitePath}\` is not bound`));
+  assert.ok(
+    message.includes(
+      `Harness source \`${harnessPath}\` contains a forbidden interaction or DOM state machine`
+    )
+  );
+  assert.ok(!message.includes(safePath));
+});
+
+test('resolves imported native handler objects spread into intrinsic elements', () => {
+  const root = createRoot();
+  const componentPath = 'apps/agent-harness/src/run/ImportedNativeHandlers.tsx';
+  const handlersPath = 'apps/agent-harness/src/run/native-handlers.ts';
+  for (const [relativePath, content] of [
+    [handlersPath, 'export const handlers = { onKeyDown: () => {} };'],
+    [
+      componentPath,
+      "import { handlers } from './native-handlers'; export const Raw = () => <button {...handlers}>raw</button>;",
+    ],
+  ]) {
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(root, {}, { Path: `\`${componentPath}\`` });
+
+  assert.ok(
+    validationMessage(root).includes(
+      `Harness source \`${componentPath}\` contains a forbidden interaction or DOM state machine`
+    )
+  );
+
+  const safeRoot = createRoot();
+  const safeSourcePath = 'apps/agent-harness/src/run/ImportedSafeProps.tsx';
+  const safePropsPath = 'apps/agent-harness/src/run/safe-props.ts';
+  for (const [relativePath, content] of [
+    [safePropsPath, "export const presentation = { title: 'safe' };"],
+    [
+      safeSourcePath,
+      "import { presentation } from './safe-props'; function Safe() { return <button {...presentation}>safe</button>; }",
+    ],
+  ]) {
+    const absolutePath = path.join(safeRoot, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+  }
+  writeValidMatrices(safeRoot);
+  assert.deepEqual(validateCoverageMatrices({ rootDir: safeRoot }), { matrixCount: 2 });
+});
 
 test('does not treat domain-model property assignments as DOM state machines', () => {
   const root = createRoot();
@@ -5510,6 +5576,50 @@ test('rejects unreviewed external executable script sources in the Website shell
     validationMessage(root),
     /external executable script `https:\/\/cdn\.example\/react\.production\.min\.js` in `apps\/www\/src\/components\/ExternalRuntime\.astro` is not reviewed/
   );
+});
+test('rejects executable scripts injected through DOM APIs', () => {
+  for (const [relativePath, content, expected, kind] of [
+    [
+      'apps/www/src/components/InjectedExternalScript.ts',
+      "const script = document.createElement('script'); script.src = 'https://cdn.example/raw-runtime.js'; document.head.append(script);",
+      /external executable script `https:\/\/cdn\.example\/raw-runtime\.js`/,
+      'website',
+    ],
+    [
+      'apps/www/src/components/InjectedDynamicScript.ts',
+      "function inject(scriptUrl) { const script = document.createElement('script'); script.src = scriptUrl; document.head.append(script); }",
+      /dynamic executable script source/,
+      'website',
+    ],
+    [
+      'apps/agent-harness/src/run/InjectedExternalScript.ts',
+      "const script = document.createElement('script'); script.src = 'https://cdn.example/raw-runtime.js'; document.head.append(script);",
+      /external executable script `https:\/\/cdn\.example\/raw-runtime\.js`/,
+      'harness',
+    ],
+    [
+      'apps/agent-harness/src/run/InjectedDynamicScript.ts',
+      "function inject(scriptUrl) { const script = document.createElement('script'); script.src = scriptUrl; document.head.append(script); }",
+      /dynamic executable script source/,
+      'harness',
+    ],
+  ]) {
+    const root = createRoot();
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, content, 'utf8');
+    if (kind === 'website') {
+      writeValidMatrices(
+        root,
+        {},
+        {},
+        { websiteBindings: [[relativePath, ['www.demo.prototype-previewer']]] }
+      );
+    } else {
+      writeValidMatrices(root, {}, { Path: `\`${relativePath}\`` });
+    }
+    assert.match(validationMessage(root), expected);
+  }
 });
 
 test('rejects dogfooded Harness implementation symlinks escaping the application root', () => {
@@ -8269,6 +8379,49 @@ test('rejects PNG screenshots with CRC-valid invalid image data streams', () => 
     validationMessage(root, promotionOptions(revision)),
     /Screenshot: retained artifact must be a recognized image file/
   );
+});
+test('rejects undecodable WebP evidence and accepts a decoded image', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  const { resultsPath } = writeSelfHostedPromotion(root, revision, { websiteBindings });
+  const screenshotPath = 'internal/website/evidence/s14/home-desktop.png';
+  const manifestPath = path.join(root, resultsPath);
+  const replaceScreenshot = (bytes) => {
+    fs.writeFileSync(path.join(root, screenshotPath), bytes);
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const artifact = manifest.artifacts.find((entry) => entry.path === screenshotPath);
+    assert.ok(artifact);
+    artifact.size = bytes.length;
+    artifact.sha256 = createHash('sha256').update(bytes).digest('hex');
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  };
+  const malformed = Buffer.alloc(20);
+  malformed.write('RIFF', 0, 'ascii');
+  malformed.writeUInt32LE(12, 4);
+  malformed.write('WEBP', 8, 'ascii');
+  malformed.write('VP8 ', 12, 'ascii');
+  malformed.writeUInt32LE(0, 16);
+  replaceScreenshot(malformed);
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Screenshot: retained artifact must be a recognized image file/
+  );
+
+  replaceScreenshot(
+    Buffer.from(
+      'UklGRjYAAABXRUJQVlA4ICoAAACQAQCdASoBAAEAAUAmJaACdLoAA5gA/vdZL/5Kf13eUXPd+tTIx8+4AAA=',
+      'base64'
+    )
+  );
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
+    matrixCount: 2,
+  });
 });
 
 test('rejects production import maps without an exact reviewed allowance', () => {
