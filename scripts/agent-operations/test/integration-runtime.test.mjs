@@ -143,6 +143,46 @@ test('standing authorization permits an exact-head merge after independent appro
   assert.equal(result.actor, 'contributor');
 });
 
+test('merge requires published preview-authorization debt even after independent approval', () => {
+  const preview = {
+    name: 'Vercel',
+    status: 'COMPLETED',
+    conclusion: 'FAILURE',
+    completedAt: '2026-09-23T03:00:00.000Z',
+    detailsUrl: 'https://vercel.com/git/authorize?team=external',
+    source: 'vercel',
+    repository: null,
+    workflowName: null,
+    workflowPath: null,
+  };
+  const input = reviewInput({ checks: [...reviewInput().checks, preview] });
+  const denied = scheduledMerge({ input, packet: packet(input) });
+  assert.equal(denied.allowed, false);
+  assert.match(denied.reason, /preview authorization debt/);
+
+  const evidence = agentEvidence(input.headSha);
+  evidence.debt.push({
+    kind: 'publication',
+    missing: 'Vercel preview deployment',
+    reason: 'The external team has not authorized the contributor; repository CI passed.',
+    nextAction: 'Authorize deployment and verify the preview independently.',
+  });
+  const disclosed = reviewInput({
+    checks: input.checks,
+    reviews: [
+      {
+        ...input.reviews[0],
+        body: `Approved exact head with preview debt\n\n<!-- ${agentEvidenceMarker({ schemaVersion: 2, agentEvidence: evidence })} -->`,
+      },
+    ],
+  });
+  assert.equal(
+    scheduledMerge({ input: disclosed, packet: packet(disclosed, { agentEvidence: evidence }) })
+      .allowed,
+    true
+  );
+});
+
 test('merge authorization fails closed on unresolved review, CI, state, or permission', () => {
   const noApproval = reviewInput({ reviews: [] });
   assert.match(

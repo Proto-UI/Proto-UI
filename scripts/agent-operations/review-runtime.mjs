@@ -39,7 +39,7 @@ const SPEC_ENTITY_PATH =
 export function isExternalPreviewAuthorizationFailure(check) {
   if (
     check?.name !== 'Vercel' ||
-    check.source !== 'status-context' ||
+    check.source !== 'vercel' ||
     check.conclusion !== 'FAILURE' ||
     typeof check.detailsUrl !== 'string'
   ) {
@@ -55,6 +55,16 @@ export function isExternalPreviewAuthorizationFailure(check) {
   } catch {
     return false;
   }
+}
+
+function hasUndisclosedPreviewAuthorizationDebt(packet, input) {
+  return input.checks.some(
+    (check) =>
+      isExternalPreviewAuthorizationFailure(check) &&
+      !packet.agentEvidence.debt.some(
+        (item) => item.kind === 'publication' && item.missing.includes(check.name)
+      )
+  );
 }
 
 function assert(condition, message) {
@@ -1039,15 +1049,7 @@ export function authorizeReviewSubmission({
     ) {
       return { allowed: false, reason: 'APPROVE requires a complete clean review packet' };
     }
-    if (
-      liveInput.checks.some(
-        (check) =>
-          isExternalPreviewAuthorizationFailure(check) &&
-          !packet.agentEvidence.debt.some(
-            (item) => item.kind === 'publication' && item.missing.includes(check.name)
-          )
-      )
-    ) {
+    if (hasUndisclosedPreviewAuthorizationDebt(packet, liveInput)) {
       return { allowed: false, reason: 'external preview authorization debt must be disclosed' };
     }
     if (ciConclusion !== 'success') {
@@ -1168,6 +1170,9 @@ export function authorizePullRequestMerge({
   }
   if (packet.agentEvidence.debt.some((item) => item.kind === 'verification')) {
     return { allowed: false, reason: 'merge has unresolved verification debt' };
+  }
+  if (hasUndisclosedPreviewAuthorizationDebt(packet, liveInput)) {
+    return { allowed: false, reason: 'merge has undisclosed external preview authorization debt' };
   }
   const resolvedByAuthorization = new Set([
     'commit-grouping',

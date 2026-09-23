@@ -58,7 +58,7 @@ query($owner: String!, $name: String!, $number: Int!) {
                       }
                     }
                   }
-                  ... on StatusContext { context state targetUrl createdAt }
+                  ... on StatusContext { context state targetUrl createdAt creator { login __typename } }
                 }
                 pageInfo { hasNextPage }
               }
@@ -127,7 +127,10 @@ export function normalizeCheck(node) {
     conclusion: terminal ? node.state : null,
     completedAt: node.createdAt,
     detailsUrl: node.targetUrl,
-    source: 'status-context',
+    source:
+      node.creator?.login === 'vercel' && node.creator?.__typename === 'Bot'
+        ? 'vercel'
+        : 'status-context',
     repository: null,
     workflowName: null,
     workflowPath: null,

@@ -649,20 +649,26 @@ test('Vercel authorization failure is not trusted CI, but real CI failures still
     source: 'github-actions',
     ...trustedProvenance,
   };
-  const preview = {
-    name: 'Vercel',
-    status: 'COMPLETED',
-    conclusion: 'FAILURE',
-    completedAt: '2026-09-23T03:00:00Z',
-    detailsUrl: 'https://vercel.com/git/authorize?team=external',
-    source: 'status-context',
-    repository: null,
-    workflowName: null,
-    workflowPath: null,
+  const previewStatus = {
+    __typename: 'StatusContext',
+    context: 'Vercel',
+    state: 'FAILURE',
+    createdAt: '2026-09-23T03:00:00Z',
+    targetUrl: 'https://vercel.com/git/authorize?team=external',
+    creator: { login: 'vercel', __typename: 'Bot' },
   };
+  const preview = normalizeCheck(previewStatus);
   const options = { ...trustedOptions, trustedCheckNames: ['test'] };
 
   assert.equal(summarizeLiveChecks([ci, preview], options), 'success');
+  assert.equal(
+    summarizeLiveChecks(
+      [ci, normalizeCheck({ ...previewStatus, creator: { login: 'other', __typename: 'Bot' } })],
+      options
+    ),
+    'failure',
+    'a non-Vercel publisher cannot forge an authorization-only preview debt'
+  );
   assert.equal(
     summarizeLiveChecks([{ ...ci, conclusion: 'FAILURE' }, preview], options),
     'failure'

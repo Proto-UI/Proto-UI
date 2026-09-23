@@ -627,7 +627,7 @@ test('approval discloses a Vercel authorization failure as publication debt', ()
         conclusion: 'FAILURE',
         completedAt: '2026-09-23T03:00:00Z',
         detailsUrl: 'https://vercel.com/git/authorize?team=external',
-        source: 'status-context',
+        source: 'vercel',
         repository: null,
         workflowName: null,
         workflowPath: null,
