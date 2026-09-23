@@ -38,6 +38,37 @@ fn parses_both_rgb_syntaxes() {
 }
 
 #[test]
+fn clamps_rgb_and_alpha_to_the_concrete_rgba_range() {
+    let over = parse_rgba("rgb(300 0 0 / 120%)").unwrap();
+    assert_eq!(over, Rgba::new(1.0, 0.0, 0.0, 1.0));
+
+    let under = parse_rgba("rgb(-30 0 0 / -0.5)").unwrap();
+    assert_eq!(under, Rgba::new(0.0, 0.0, 0.0, 0.0));
+
+    for value in ["rgb(NaN 0 0)", "rgba(0, 0, 0, inf)"] {
+        assert!(
+            matches!(parse_rgba(value), Err(ColorError::Malformed(_))),
+            "{value}"
+        );
+    }
+}
+
+#[test]
+fn rejects_invalid_color_mix_weights_and_duplicate_alpha_forms() {
+    for value in [
+        "color-mix(in oklab, #3366ff -1%, transparent)",
+        "color-mix(in oklab, #3366ff 120%, transparent)",
+        "color-mix(in oklab, #3366ff NaN%, transparent)",
+        "rgb(1, 2, 3, 0.25 / 0.9)",
+    ] {
+        assert!(
+            matches!(parse_rgba(value), Err(ColorError::Malformed(_))),
+            "{value}"
+        );
+    }
+}
+
+#[test]
 fn converts_lab_through_the_css_color_4_path() {
     // The endpoints are exact by definition and catch a wrong white point or a
     // missing gamma encode, both of which would still produce plausible greys.
@@ -67,6 +98,23 @@ fn converts_lab_through_the_css_color_4_path() {
     );
 }
 
+#[test]
+fn clamps_lab_lightness_endpoints_and_gamut_maps_intermediate_values() {
+    assert_eq!(rgba8("lab(100% 40 0)"), [255, 255, 255, 255]);
+    assert_eq!(rgba8("lab(0% 40 0)"), [0, 0, 0, 255]);
+    assert_eq!(rgba8("lab(120% 0 0)"), [255, 255, 255, 255]);
+    assert_eq!(rgba8("lab(-5% 0 0)"), [0, 0, 0, 255]);
+
+    // This recorded Shadcn destructive color is outside sRGB. CSS Color 4's
+    // Oklch chroma-reduction mapping keeps its hue instead of clipping RGB
+    // channels independently (which produces a different, over-saturated red).
+    assert_eq!(rgba8("lab(48.4493% 77.4328 61.5452)"), [231, 0, 11, 255]);
+
+    let mapped = parse_rgba("lab(50% 160 0)").unwrap();
+    for component in [mapped.r, mapped.g, mapped.b, mapped.a] {
+        assert!((0.0..=1.0).contains(&component));
+    }
+}
 #[test]
 fn treats_a_transparent_mix_as_alpha_attenuation() {
     let mixed = parse_rgba("color-mix(in oklab, #3366ff 80%, transparent)").unwrap();
