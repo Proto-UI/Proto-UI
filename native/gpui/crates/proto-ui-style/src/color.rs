@@ -7,10 +7,9 @@
 //! reported rather than approximated, and `parses_every_colour_in_the_fixtures`
 //! fails if a new form appears.
 //!
-//! Lab lightness endpoints follow CSS Color 4's black/white mapping. For an
-//! intermediate Lab value outside sRGB, this bounded parser reports
-//! `Unsupported` rather than independently clipping channels and shifting hue;
-//! full CSS gamut mapping is not yet implemented.
+//! Lab input lightness is clamped to CSS Color 4's 0..100 range. For intermediate
+//! Lab lightness that converts outside sRGB, this parser uses CSS Color 4
+//! §14.2.1 Binary Search Gamut Mapping with Local MINDE, targeting sRGB.
 
 /// Non-premultiplied sRGB with components in `0.0..=1.0`.
 #[derive(Debug, Clone, Copy, PartialEq)]
