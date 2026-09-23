@@ -30,7 +30,15 @@ fn resolve(tokens: &[&str], language: &str) -> proto_ui_style::ResolvedStyle {
 fn maps_layout_and_box_properties() {
     let mapped = map(
         &resolve(
-            &["flex", "flex-col", "items-center", "px-3", "py-1", "gap-2"],
+            &[
+                "relative",
+                "flex",
+                "flex-col",
+                "items-center",
+                "px-3",
+                "py-1",
+                "gap-2",
+            ],
             "shadcn",
         ),
         LengthContext::default(),
@@ -88,10 +96,13 @@ fn maps_a_percentage_to_a_fraction_and_keeps_position() {
 #[test]
 fn maps_font_family_fallbacks_as_distinct_candidates() {
     let mapped = map(
-        &declared(&[(
-            "font-family",
-            "ui-monospace, SFMono-Regular, Menlo, \"Liberation Mono\", monospace",
-        )]),
+        &declared(&[
+            ("position", "relative"),
+            (
+                "font-family",
+                "ui-monospace, SFMono-Regular, Menlo, \"Liberation Mono\", monospace",
+            ),
+        ]),
         LengthContext::default(),
     );
     assert_eq!(
@@ -126,7 +137,10 @@ fn static_position_ignores_insets_and_fixed_position_fails_closed() {
 
     let implicit_static = map(&declared(&[("top", "1rem")]), LengthContext::default());
     assert_eq!(implicit_static.refinement.inset.top, None);
-    assert!(implicit_static.is_complete());
+    assert!(!implicit_static.is_complete());
+    assert!(implicit_static.unmapped.iter().any(|(p, v, reason)| {
+        p == "position" && v == "static" && *reason == Unmapped::UnsupportedValue
+    }));
 
     let fixed = map(
         &declared(&[("position", "fixed"), ("top", "1rem")]),
@@ -260,7 +274,7 @@ const EXPECTED_UNMAPPED: [&str; 28] = [
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 6] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 7] = [
     (
         "width",
         "fit-content",
@@ -300,6 +314,11 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 6] = [
         "position",
         "fixed",
         "GPUI absolute positioning is ancestor-relative and cannot preserve CSS viewport-fixed behavior.",
+    ),
+    (
+        "position",
+        "static",
+        "CSS static cannot be represented by GPUI's default Relative position, which may establish a containing block for absolute descendants.",
     ),
 ];
 
@@ -347,7 +366,7 @@ fn brutalist_radius_substitution_reaches_the_map_as_invalid() {
 #[test]
 fn a_unitless_line_height_multiplies_the_font_size() {
     let mapped = map(
-        &resolve(&["leading-none"], "shadcn"),
+        &resolve(&["relative", "leading-none"], "shadcn"),
         LengthContext::default(),
     );
     assert_eq!(

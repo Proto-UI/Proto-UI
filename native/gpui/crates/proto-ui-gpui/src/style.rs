@@ -72,6 +72,16 @@ pub fn map(resolved: &ResolvedStyle, context: LengthContext) -> MappedStyle {
         Some("relative" | "absolute") => InsetMode::Positioned,
         Some(_) => InsetMode::Unsupported,
     };
+    // CSS defaults to static, but GPUI Style defaults to Relative, which also
+    // establishes a containing block for absolute descendants. Do not claim a
+    // complete mapping when this host cannot express the CSS default.
+    if !resolved.declarations.contains_key("position") {
+        mapped.unmapped.push((
+            "position".into(),
+            "static".into(),
+            Unmapped::UnsupportedValue,
+        ));
+    }
 
     for (property, value) in &resolved.declarations {
         // Custom properties are inputs to a composed declaration that appears
