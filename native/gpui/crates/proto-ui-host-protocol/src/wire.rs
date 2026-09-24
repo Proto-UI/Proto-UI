@@ -29,6 +29,21 @@ pub enum EventScope {
     Global,
 }
 
+/// Reads a field that must be present but may be `null`.
+///
+/// serde reads a missing `Option` field as `None`, which makes an omitted
+/// field indistinguishable from an explicit `null`. The protocol gives the two
+/// different meanings: `a11y: null` retracts a snapshot, and a transaction
+/// without `a11y` is malformed. With `deserialize_with` and no `default`, a
+/// missing field is an error again, while `null` still reads as `None`.
+pub(crate) fn required_nullable<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: serde::Deserialize<'de>,
+{
+    <Option<T> as serde::Deserialize>::deserialize(deserializer)
+}
+
 /// A registration exactly as it arrived. Every field is optional so that a
 /// malformed plan reaches `model` as data and is answered with a bounded
 /// acknowledgement, rather than failing deserialization.
@@ -71,7 +86,6 @@ impl RawEventRegistration {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EventBindingPlan {
-    #[serde(default)]
     pub registrations: Vec<RawEventRegistration>,
 }
 
@@ -85,13 +99,11 @@ pub struct FocusTargetPlan {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FocusPlan {
-    #[serde(default)]
     pub targets: Vec<FocusTargetPlan>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SlotPlan {
-    #[serde(default)]
     pub slots: Vec<SlotRef>,
 }
 
@@ -110,12 +122,21 @@ pub struct A11ySnapshotWire {
     pub role: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<A11yNameWire>,
-    #[serde(default)]
     pub states: serde_json::Map<String, Value>,
-    #[serde(default)]
+    /// Actions the object exposes, such as `activate`, each naming the event
+    /// its invocation dispatches. The host needs these to project platform
+    /// accessibility actions; without the field they were dropped on read.
+    pub actions: std::collections::BTreeMap<String, A11yActionWire>,
     pub relations: serde_json::Map<String, Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub level: Option<u8>,
+}
+
+/// One accessibility action on a snapshot.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct A11yActionWire {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -126,15 +147,11 @@ pub struct ProjectionTransaction {
     pub instance_id: InstanceId,
     pub view_epoch: ViewEpoch,
     pub commit_id: CommitId,
-    #[serde(default)]
     pub template: Value,
-    #[serde(default)]
     pub slots: SlotPlan,
-    #[serde(default)]
     pub events: EventBindingPlan,
-    #[serde(default)]
     pub focus: FocusPlan,
-    #[serde(default)]
+    #[serde(deserialize_with = "required_nullable")]
     pub a11y: Option<A11ySnapshotWire>,
 }
 
@@ -173,7 +190,6 @@ pub struct InputSample {
     pub view_epoch: ViewEpoch,
     #[serde(rename = "type")]
     pub kind: String,
-    #[serde(default)]
     pub lease_ids: Vec<LeaseId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
