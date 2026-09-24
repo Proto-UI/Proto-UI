@@ -21,7 +21,7 @@ describe('private generated Shadow split sizing', () => {
       ':host([data-pui-split-root-style][data-pui-split-text-control]) {\n  display: block;\n  padding: 0;\n  border-width: 0;'
     );
     expect(css).toContain(
-      ':host([data-pui-split-root-style~="hidden"]):host([data-pui-split-text-control]) { display: none; }'
+      ':host([data-pui-split-root-style~="hidden"]):host([data-pui-split-text-control]) {\n    display: none;'
     );
     expect(css).toContain('min-height: 4rem;');
     for (const stable of [
@@ -86,7 +86,12 @@ describe('private generated Shadow split sizing', () => {
     );
     expect(hostRules).toHaveLength(3);
     expect(
-      hostRules.every((m) => m[1].includes('outline-none') && m[2].trim() === 'outline: none;')
+      hostRules.every(
+        (m) =>
+          m[1].includes('outline-none') &&
+          m[2].includes('outline: none;') &&
+          m[2].includes('--pui-split-compiled-receipt:')
+      )
     ).toBe(true);
     expect(renderProtoShadowSplitStyleArtifact(['ring-3']).cssText).not.toContain('outline: none;');
     expect(renderProtoShadowStyleArtifact(['outline-none']).cssText).not.toContain(
@@ -195,9 +200,7 @@ describe('private generated Shadow split sizing', () => {
     const css = renderProtoShadowSplitStyleArtifact(['data-[invalid]:p-4']).cssText;
     const selector = ':host([data-pui-split-root-style~="data-[invalid]:p-4"][data-invalid])';
     expect(css).toContain(`${selector} {\n    padding: 1rem;`);
-    expect(css).toContain(
-      `${selector}:host([data-pui-split-text-control]) {\n    padding: 0;\n  }`
-    );
+    expect(css).toContain(`${selector}:host([data-pui-split-text-control]) {\n    padding: 0;`);
     expect(css).toContain(
       `${selector} > [data-pui-split-surface][data-pui-style~="data-[invalid]:p-4"]`
     );

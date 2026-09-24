@@ -319,6 +319,63 @@ describe('private Shadow split effects', () => {
     gated.dispose();
   });
 
+  it('accepts the generated unconditional layer wrapper case-insensitively', () => {
+    const { host, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const layered = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: options.artifact.cssText.replaceAll('@layer proto-ui', '@LAYER proto-ui'),
+      },
+    });
+
+    layered.queueStyle(effect(['block', 'w-full']));
+    layered.requestFlush();
+    expect(host.getAttribute(ROOT)).toBe('block w-full');
+    layered.dispose();
+  });
+
+  it('rejects a compiled token receipt embedded in an invalid selector list', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const receipt = `:host([${ROOT}~="w-full"])`;
+    const invalidList = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: options.artifact.cssText.replaceAll(receipt, `${receipt}, :pui-nonexistent`),
+      },
+    });
+
+    expect(() => invalidList.queueStyle(effect(['block', 'w-full']))).toThrow(
+      /w-full.*missing token/
+    );
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    invalidList.dispose();
+  });
+
+  it('rejects a compiled token receipt whose declaration recipe was altered', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const receipt = `:host([${ROOT}~="w-full"])`;
+    const cssText = options.artifact.cssText.replace(
+      `${receipt} {\n    width: 100%;`,
+      `${receipt} {\n    color: red;`
+    );
+    expect(cssText).not.toBe(options.artifact.cssText);
+    const altered = createShadowSplitEffectsPort({
+      ...options,
+      artifact: { ...options.artifact, cssText },
+    });
+
+    expect(() => altered.queueStyle(effect(['block', 'w-full']))).toThrow(/w-full.*missing token/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    altered.dispose();
+  });
+
   it('retains punctuation inside the compiled token selector value', () => {
     const token = 'transition-[color,box-shadow]';
     const { host, effects } = setup(['block', token]);

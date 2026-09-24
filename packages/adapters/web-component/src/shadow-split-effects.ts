@@ -13,9 +13,36 @@ export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
 const activeBindings = new WeakSet<HTMLElement>();
 const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
+const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
 
 type Projection = { root: string; surface: string[]; borderWidths: string };
 type CompiledStyleRule = { selector: string; declarations: string };
+
+function splitCompiledReceipt(selector: string, declarations: string): string {
+  const input = `${selector.replace(/\s/g, '')}{${declarations.replace(/\s/g, '')}}`;
+  let hash = 2166136261;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = Math.imul(hash ^ input.charCodeAt(index), 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+// The v1 artifact is a plain value, so this is an integrity receipt for the
+// generated companion rather than authentication of adversarial CSS.
+function hasValidDeclarationReceipt(rule: CompiledStyleRule): boolean {
+  const marker = new RegExp(
+    `(?:^|;)\\s*${SPLIT_COMPILED_RECEIPT}\\s*:\\s*([a-z0-9]+)\\s*;\\s*$`
+  ).exec(rule.declarations);
+  if (!marker || marker.index === undefined) return false;
+  const declarations = rule.declarations.slice(
+    0,
+    marker.index + (marker[0]!.startsWith(';') ? 1 : 0)
+  );
+  return (
+    !declarations.includes(SPLIT_COMPILED_RECEIPT) &&
+    marker[1] === splitCompiledReceipt(rule.selector, declarations)
+  );
+}
 
 function nextCssBoundary(
   cssText: string,
@@ -104,7 +131,7 @@ function collectUnconditionallyAvailableRules(cssText: string): CompiledStyleRul
     if (close < 0) break;
     const prelude = cssText.slice(cursor, boundary.index).trim();
     const body = cssText.slice(boundary.index + 1, close);
-    if (/^@layer(?:\s|$)/.test(prelude)) {
+    if (/^@layer(?:\s|$)/i.test(prelude)) {
       rules.push(...collectUnconditionallyAvailableRules(body));
     } else if (prelude && !prelude.startsWith('@')) {
       rules.push({ selector: prelude, declarations: directCssDeclarations(body) });
@@ -195,7 +222,11 @@ function splitSelectorBranches(selector: string): string[] {
   return branches;
 }
 
-function hasExactCompiledReceipt(selectors: readonly string[], token: string): boolean {
+function hasExactCompiledReceipt(
+  rules: readonly CompiledStyleRule[],
+  entry: RootStyleEntry
+): boolean {
+  const token = entry.token;
   const receipt = compiledReceiptSelector(token);
   if (!receipt) return false;
   const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
@@ -205,8 +236,15 @@ function hasExactCompiledReceipt(selectors: readonly string[], token: string): b
     `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
     `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`,
   ]);
-  return selectors.some((selector) =>
-    splitSelectorBranches(selector).some((branch) => allowed.has(branch))
+  const candidates = rules.filter(({ selector }) => selector.replace(/\s/g, '').includes(receipt));
+  const matching = candidates.filter(({ selector }) => {
+    const branches = splitSelectorBranches(selector.replace(/\s/g, ''));
+    return branches.length === 1 && allowed.has(branches[0]!);
+  });
+  return (
+    matching.length === candidates.length &&
+    matching.length > 0 &&
+    (entry.roleSource === 'fallback' || matching.every(hasValidDeclarationReceipt))
   );
 }
 
@@ -260,7 +298,6 @@ export function createShadowSplitEffectsPort({
     throw invalid('projection-owned');
   }
   const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
-  const ruleSelectors = rules.map(({ selector }) => selector.replace(/\s/g, ''));
   const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
   const baseDeclarations = rules
     .find(({ selector }) => selector.replace(/\s/g, '') === baseSelector)
@@ -354,7 +391,7 @@ export function createShadowSplitEffectsPort({
         fail(entry, 'composite');
       if (entry.role === 'composite' && entry.token !== entry.authorToken)
         fail(entry, 'conditional-composite');
-      if (!hasExactCompiledReceipt(ruleSelectors, entry.token)) {
+      if (!hasExactCompiledReceipt(rules, entry)) {
         fail(entry, 'missing token');
       }
     }

@@ -22,6 +22,29 @@ type CssRule = {
   css: string[];
 };
 
+const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
+
+// Bind each generated split selector to its declaration recipe. This detects
+// stale or locally altered companions; it is not an authenticity signature.
+function splitCompiledReceipt(selector: string, declarations: readonly string[]): string {
+  const input = `${selector.replace(/\s/g, '')}{${declarations.join('').replace(/\s/g, '')}}`;
+  let hash = 2166136261;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = Math.imul(hash ^ input.charCodeAt(index), 16777619);
+  }
+  return `${SPLIT_COMPILED_RECEIPT}: ${(hash >>> 0).toString(36)};`;
+}
+
+function pushSplitRule(lines: string[], selector: string, declarations: readonly string[]): void {
+  lines.push(
+    `  ${selector} {`,
+    ...[...declarations, splitCompiledReceipt(selector, declarations)].map(
+      (declaration) => `    ${declaration}`
+    ),
+    '  }'
+  );
+}
+
 const spacing: Record<string, string> = {
   '0': '0px',
   px: '1px',
@@ -430,26 +453,22 @@ function renderShadowSplitCss(tokens: string[]): string {
       hostDeclarations.push('outline: none;');
     }
     if (hostDeclarations.length) {
-      lines.push(`  ${selector} {`, ...hostDeclarations.map((d) => `    ${d}`), '  }');
+      pushSplitRule(lines, selector, hostDeclarations);
     }
     const nativeTextHostReset = rule.css.flatMap(splitNativeTextHostResetDeclarations);
     if (nativeTextHostReset.length) {
-      lines.push(
-        `  ${selector}:host([data-pui-split-text-control]) {`,
-        ...nativeTextHostReset.map((d) => `    ${d}`),
-        '  }'
-      );
+      pushSplitRule(lines, `${selector}:host([data-pui-split-text-control])`, nativeTextHostReset);
     }
     const surfaceCompensation = rule.css.flatMap(splitSurfaceCompensationDeclarations);
     if (surfaceCompensation.length) {
-      lines.push(
-        `  ${selector} > [${SPLIT_SURFACE_ATTR}]:not(input, textarea) {`,
-        ...surfaceCompensation.map((d) => `    ${d}`),
-        '  }'
+      pushSplitRule(
+        lines,
+        `${selector} > [${SPLIT_SURFACE_ATTR}]:not(input, textarea)`,
+        surfaceCompensation
       );
     }
     if (splitVariants(rule.token).at(-1) === 'hidden') {
-      lines.push(`  ${selector}:host([data-pui-split-text-control]) { display: none; }`);
+      pushSplitRule(lines, `${selector}:host([data-pui-split-text-control])`, ['display: none;']);
     }
   }
   lines.push('}', '');
@@ -669,15 +688,19 @@ function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleC
     const selectors = buildSelectors(rule.token, { target });
     if (selectors.length === 0 || rule.css.length === 0) continue;
     lines.push(`  ${selectors.join(',\n  ')} {`);
-    for (const decl of rule.css) {
-      const translated =
-        target === 'shadow-split'
-          ? decl.replace(
-              /^animation-name: pui-(enter|exit);$/,
-              'animation-name: pui-split-paint-$1;'
-            )
-          : decl;
-      lines.push(`    ${translated}`);
+    const declarations = rule.css.map((declaration) =>
+      target === 'shadow-split'
+        ? declaration.replace(
+            /^animation-name: pui-(enter|exit);$/,
+            'animation-name: pui-split-paint-$1;'
+          )
+        : declaration
+    );
+    for (const declaration of declarations) {
+      lines.push(`    ${declaration}`);
+    }
+    if (target === 'shadow-split') {
+      lines.push(`    ${splitCompiledReceipt(selectors.join(','), declarations)}`);
     }
     lines.push('  }');
     lines.push('');
