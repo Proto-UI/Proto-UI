@@ -70,8 +70,10 @@ import { createWebComponentHostSession } from './runtime/session';
 import { createShadowOwnerShell } from './shadow-owner-shell';
 import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
 import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
-import { createShadowSplitEffectsPort } from './shadow-split-effects';
-import { stripShadowCssComments } from './shadow-style-artifact';
+import {
+  createShadowSplitEffectsPort,
+  hasVerifiedShadowSplitBaseRecipe,
+} from './shadow-split-effects';
 import { createPortalConcealBarrier } from './portal-conceal';
 import { adoptWebComponentPortalProjections, isWebComponentPortaled } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
@@ -145,9 +147,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   if (
     split &&
     textControl &&
-    !stripShadowCssComments(split.styleArtifact.cssText)
-      .replace(/\s/g, '')
-      .includes('--pui-split-native-text-recipe:l1;')
+    !hasVerifiedShadowSplitBaseRecipe(split.styleArtifact, 'native-text', 'l1')
   ) {
     throw new Error('shadow-split:native-text-recipe');
   }

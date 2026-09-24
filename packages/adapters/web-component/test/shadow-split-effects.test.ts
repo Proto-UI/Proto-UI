@@ -10,7 +10,10 @@ import {
   SHADOW_SPLIT_ROOT_STYLE_ATTR as ROOT,
   SHADOW_SPLIT_SURFACE_ATTR as SURFACE,
 } from '../src/shadow-split-effects';
-import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
+import {
+  rewriteSplitBaseDeclarations,
+  rewriteSplitRuleDeclarations,
+} from './shadow-split-test-utils';
 
 function setup(
   tokens = ['flex', 'w-full', 'p-2', 'border-2', 'bg-primary', 'bg-black', 'dark:p-4']
@@ -344,6 +347,44 @@ describe('private Shadow split effects', () => {
     expect(() => gated.queueStyle(effect(['block', 'w-full']))).toThrow(/w-full.*missing token/);
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     gated.dispose();
+  });
+
+  it('rejects a self-consistent receipt whose declarations differ from the canonical recipe', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const selector = `:host([${ROOT}~="w-full"])`;
+    const altered = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: rewriteSplitRuleDeclarations(options.artifact.cssText, selector, (declarations) =>
+          declarations.replace('width: 100%;', 'color: red;')
+        ),
+      },
+    });
+
+    expect(() => altered.queueStyle(effect(['block', 'w-full']))).toThrow(/w-full.*missing token/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    altered.dispose();
+  });
+
+  it('rejects receipts nested in an invalid list-form layer block', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const cssText = options.artifact.cssText.replaceAll(
+      '@layer proto-ui {',
+      '@layer proto-ui, extra {'
+    );
+
+    expect(() =>
+      createShadowSplitEffectsPort({
+        ...options,
+        artifact: { ...options.artifact, cssText },
+      })
+    ).toThrow(/sizing-recipe/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
   });
 
   it('accepts the generated unconditional layer wrapper case-insensitively', () => {

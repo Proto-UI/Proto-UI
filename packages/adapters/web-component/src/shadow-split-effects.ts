@@ -44,6 +44,30 @@ function hasValidDeclarationReceipt(rule: CompiledStyleRule): boolean {
   );
 }
 
+function declarationsBeforeReceipt(rule: CompiledStyleRule): string | null {
+  const marker = new RegExp(
+    `(?:^|;)\\s*${SPLIT_COMPILED_RECEIPT}\\s*:\\s*[a-z0-9]+\\s*;\\s*$`
+  ).exec(rule.declarations);
+  if (!marker || marker.index === undefined) return null;
+  return rule.declarations
+    .slice(0, marker.index + (marker[0]!.startsWith(';') ? 1 : 0))
+    .replace(/\s/g, '');
+}
+
+// Canonical host-sizing recipes are Adapter trust anchors rather than values
+// supplied by the plain artifact. Keep this bounded list explicit: accepting a
+// new generated sizing spelling requires an Adapter update and parity evidence.
+function hasCanonicalSizingRecipe(rule: CompiledStyleRule, entry: RootStyleEntry): boolean {
+  const expected =
+    entry.authorToken === 'w-full'
+      ? 'width:100%;'
+      : entry.authorToken === 'min-h-16'
+        ? 'min-height:4rem;'
+        : null;
+  if (!expected) return true;
+  return declarationsBeforeReceipt(rule) === expected;
+}
+
 function nextCssBoundary(
   cssText: string,
   start: number
@@ -131,7 +155,11 @@ function collectUnconditionallyAvailableRules(cssText: string): CompiledStyleRul
     if (close < 0) break;
     const prelude = cssText.slice(cursor, boundary.index).trim();
     const body = cssText.slice(boundary.index + 1, close);
-    if (/^@layer(?:\s|$)/i.test(prelude)) {
+    // A layer-name list is valid only in statement form. Recursing into an
+    // invalid list-form block would treat rules the browser discards as usable
+    // preflight evidence. Generated companions use one simple named layer;
+    // anonymous blocks are accepted as well.
+    if (/^@layer(?:\s+[-_a-zA-Z][-_a-zA-Z0-9]*(?:\.[-_a-zA-Z][-_a-zA-Z0-9]*)*)?$/i.test(prelude)) {
       rules.push(...collectUnconditionallyAvailableRules(body));
     } else if (prelude && !prelude.startsWith('@')) {
       rules.push({ selector: prelude, declarations: directCssDeclarations(body) });
@@ -139,6 +167,26 @@ function collectUnconditionallyAvailableRules(cssText: string): CompiledStyleRul
     cursor = close + 1;
   }
   return rules;
+}
+
+function verifiedShadowSplitBaseRule(artifact: ShadowStyleArtifactV1): CompiledStyleRule | null {
+  const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
+  const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
+  const baseRule = rules.find(({ selector }) => selector.replace(/\s/g, '') === baseSelector);
+  return baseRule && hasValidDeclarationReceipt(baseRule) ? baseRule : null;
+}
+
+/** Private registration preflight shared with the connection-time effects owner. */
+export function hasVerifiedShadowSplitBaseRecipe(
+  artifact: ShadowStyleArtifactV1,
+  recipe: string,
+  version: string
+): boolean {
+  const baseRule = verifiedShadowSplitBaseRule(artifact);
+  return (
+    !!baseRule &&
+    baseRule.declarations.replace(/\s/g, '').includes(`--pui-split-${recipe}-recipe:${version};`)
+  );
 }
 
 function splitReceiptVariants(token: string): string[] {
@@ -244,7 +292,10 @@ function hasExactCompiledReceipt(
   return (
     matching.length === candidates.length &&
     matching.length > 0 &&
-    (entry.roleSource === 'fallback' || matching.every(hasValidDeclarationReceipt))
+    (entry.roleSource === 'fallback' ||
+      matching.every(
+        (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalSizingRecipe(rule, entry)
+      ))
   );
 }
 
@@ -298,9 +349,8 @@ export function createShadowSplitEffectsPort({
     throw invalid('projection-owned');
   }
   const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
-  const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
-  const baseRule = rules.find(({ selector }) => selector.replace(/\s/g, '') === baseSelector);
-  if (!baseRule || !hasValidDeclarationReceipt(baseRule)) {
+  const baseRule = verifiedShadowSplitBaseRule(artifact);
+  if (!baseRule) {
     throw invalid('sizing-recipe');
   }
   const baseDeclarations = baseRule.declarations.replace(/\s/g, '');

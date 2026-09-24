@@ -7,6 +7,7 @@ import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/p
 import input from '../../../prototypes/base/src/input/root.proto';
 import { ShadcnTextareaRoot as textarea } from '../../../prototypes/shadcn/src/textarea/root.proto';
 import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 let serial = 0;
 const name = () => `s5-text-${++serial}`;
@@ -249,6 +250,24 @@ describe('S5 native Shadow text surface', () => {
     const tag = name();
     expect(() => AdaptToWebComponent(input, { registerAs: tag, shadow: equivalent })).not.toThrow();
     expect(customElements.get(tag)).toBeDefined();
+  });
+
+  it('rejects a native-text marker moved outside the verified base rule before registration', () => {
+    const profile = shadow();
+    const moved = {
+      ...profile,
+      styleArtifact: {
+        ...profile.styleArtifact,
+        cssText: `${rewriteSplitBaseDeclarations(profile.styleArtifact.cssText, (declarations) =>
+          declarations.replace('--pui-split-native-text-recipe: l1;', '')
+        )}\n.unrelated { --pui-split-native-text-recipe: l1; }`,
+      },
+    };
+    const tag = name();
+    expect(() => AdaptToWebComponent(input, { registerAs: tag, shadow: moved })).toThrow(
+      /native.*recipe/
+    );
+    expect(customElements.get(tag)).toBeUndefined();
   });
 
   it.each([false, true, 'split'] as const)(
