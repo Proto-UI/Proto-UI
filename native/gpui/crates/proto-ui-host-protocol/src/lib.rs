@@ -4,9 +4,13 @@
 //! shared conformance vectors in `packages/host-protocol/vectors/`, which both
 //! implementations replay. It has no GPUI dependency and performs no I/O.
 
+pub mod event_type;
 pub mod model;
 pub mod wire;
 
+pub use event_type::{
+    CoreEvent, EventType, ExtensionEvent, InvalidEventType, OptionalEvent, EXTENSION_PREFIX,
+};
 pub use model::{
     ActivationStatus, DefaultActionStatus, DeliveryRejection, DeliveryResult, DisposeResult,
     HostSessionModel, HostSessionSnapshot, InstallOptions, LeaseRecord, ReleaseResult,
