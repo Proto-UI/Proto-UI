@@ -135,6 +135,80 @@ jobs:
       - name: Type check
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:types
 
+  rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned Rust toolchain
+        run: |
+          set -euo pipefail
+          # native/gpui/rust-toolchain.toml selects the channel; this step only
+          # makes sure the components the checks need are present.
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/gpui/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('native/gpui/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Format
+        working-directory: native/gpui
+        run: cargo fmt --all --check
+
+      # The platform-independent crates only. `proto-ui-gpui` depends on GPUI,
+      # whose Linux backends need a system toolchain this job does not install,
+      # and the first fixture is pinned to macOS by
+      # internal/records/2026-09-22-gpui-adapter-architecture-decision.md.
+      # Building it here would assert a platform this work does not claim.
+      - name: Lint
+        working-directory: native/gpui
+        run: cargo clippy -p proto-ui-host-protocol -p proto-ui-style --all-targets -- -D warnings
+
+      - name: Test
+        # Replays the shared conformance vectors in packages/host-protocol/vectors
+        # against the Rust host model, from the checked-in sources.
+        working-directory: native/gpui
+        run: cargo test -p proto-ui-host-protocol -p proto-ui-style
+
+  rust-macos:
+    # Covers the GPUI translation layer on the platform the first fixture pins.
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned Rust toolchain
+        run: |
+          set -euo pipefail
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/gpui/target
+          key: cargo-macos-${{ hashFiles('native/gpui/Cargo.lock') }}
+          restore-keys: cargo-macos-
+
+      - name: Lint
+        working-directory: native/gpui
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Test
+        working-directory: native/gpui
+        run: cargo test --workspace
+
   test:
     name: test-unit
     runs-on: ubuntu-latest

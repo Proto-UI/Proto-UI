@@ -171,6 +171,7 @@ export class TextControlModuleImpl extends ModuleBase {
     this.leaseEpoch += 1;
     const lease = this.lease;
     this.lease = null;
+    this.composing = false;
     lease?.dispose();
   }
 
@@ -189,6 +190,7 @@ export class TextControlModuleImpl extends ModuleBase {
   }
 
   private receive(event: TextControlEvent): void {
+    const epoch = this.leaseEpoch;
     // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
     const canonicalEvent: TextControlEvent = Object.freeze({
       ...event,
@@ -215,7 +217,6 @@ export class TextControlModuleImpl extends ModuleBase {
       this.valueMode === 'controlled' &&
       ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
     if (!mustRestoreControlledValue) return;
-    const epoch = this.leaseEpoch;
     queueMicrotask(() => {
       if (epoch === this.leaseEpoch) this.syncLease();
     });

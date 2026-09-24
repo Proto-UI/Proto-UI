@@ -1,0 +1,18 @@
+{
+  "name": "@proto.ui/host-protocol",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "protoUi": {
+    "release": {
+      "scan": false
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "description": "Private, data-only protocol model fixture for the GPUI host Adapter direction (#687). Not a runtime, transport, or Adapter."
+}

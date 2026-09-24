@@ -156,6 +156,11 @@ const PACKAGE_RULES = {
   '@proto.ui/module-state-accessibility': moduleRule('state accessibility capability'),
   '@proto.ui/module-state-interaction': moduleRule('state interaction capability'),
   '@proto.ui/module-test-sys': moduleRule('test system capability'),
+  '@proto.ui/module-table-structure': {
+    ...moduleRule('passive table structure capability'),
+    preserveReadme: true,
+    extraKeywords: ['table', 'topology'],
+  },
   '@proto.ui/module-text-control': {
     description: 'Proto UI portable single-line and multiline text-control host protocol.',
     kind: 'module',

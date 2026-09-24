@@ -33,6 +33,40 @@ const CHANGED_FILE_STATUSES = new Set([
 const SPEC_ENTITY_PATH =
   /^spec\/(contracts|prototypes|modules|adapters|decisions|host-caps|tests|versions|knowledge)\/[^/]+\.yaml$/;
 
+// An external preview authorization prompt is not evidence about repository CI.
+// Keep its status in the canonical input and require explicit publication debt
+// before approving; actual deployment failures remain blocking checks.
+export function isExternalPreviewAuthorizationFailure(check) {
+  if (
+    check?.name !== 'Vercel' ||
+    check.source !== 'vercel' ||
+    check.conclusion !== 'FAILURE' ||
+    typeof check.detailsUrl !== 'string'
+  ) {
+    return false;
+  }
+  try {
+    const url = new URL(check.detailsUrl);
+    return (
+      url.protocol === 'https:' &&
+      url.hostname === 'vercel.com' &&
+      url.pathname === '/git/authorize'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function hasUndisclosedPreviewAuthorizationDebt(packet, input) {
+  return input.checks.some(
+    (check) =>
+      isExternalPreviewAuthorizationFailure(check) &&
+      !packet.agentEvidence.debt.some(
+        (item) => item.kind === 'publication' && item.missing.includes(check.name)
+      )
+  );
+}
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -1015,6 +1049,9 @@ export function authorizeReviewSubmission({
     ) {
       return { allowed: false, reason: 'APPROVE requires a complete clean review packet' };
     }
+    if (hasUndisclosedPreviewAuthorizationDebt(packet, liveInput)) {
+      return { allowed: false, reason: 'external preview authorization debt must be disclosed' };
+    }
     if (ciConclusion !== 'success') {
       return { allowed: false, reason: 'APPROVE requires successful live checks' };
     }
@@ -1133,6 +1170,9 @@ export function authorizePullRequestMerge({
   }
   if (packet.agentEvidence.debt.some((item) => item.kind === 'verification')) {
     return { allowed: false, reason: 'merge has unresolved verification debt' };
+  }
+  if (hasUndisclosedPreviewAuthorizationDebt(packet, liveInput)) {
+    return { allowed: false, reason: 'merge has undisclosed external preview authorization debt' };
   }
   const resolvedByAuthorization = new Set([
     'commit-grouping',

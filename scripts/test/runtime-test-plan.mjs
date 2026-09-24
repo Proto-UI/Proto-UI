@@ -18,6 +18,8 @@ export const BROWSER_SHARDS = Object.freeze(
       'apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts',
       'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
       'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
+      // 6.478s on main run 35951805853; keep the new suite on the lightest shard.
+      'apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts',
       // 6.619s on main run 35501437043.
       'apps/www/test/radio-group-entry.browser.test.ts',
       // 23.371s on PR #667 run 35507086643.

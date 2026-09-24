@@ -35,7 +35,8 @@
     "@proto.ui/module-presence": "workspace:*",
     "@proto.ui/module-test-sys": "workspace:*",
     "@proto.ui/module-text-control": "workspace:*",
-    "@proto.ui/module-image-view": "workspace:*"
+    "@proto.ui/module-image-view": "workspace:*",
+    "@proto.ui/module-table-structure": "workspace:*"
   },
   "exports": {
     ".": {

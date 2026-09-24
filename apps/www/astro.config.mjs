@@ -53,7 +53,7 @@ function resolveProtoUiSource(id) {
       .replace(/\.d\.ts$/, '.ts')
       .replace(/\.js$/, '.ts');
     const sourcePath = path.resolve(packageRoot, sourceTarget);
-    if (fs.existsSync(sourcePath)) return sourcePath;
+    if (fs.existsSync(sourcePath)) return sourcePath.split(path.sep).join('/');
   }
   return null;
 }

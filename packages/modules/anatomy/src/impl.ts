@@ -460,6 +460,30 @@ export class AnatomyModuleImpl extends ModuleBase {
       const claim = CLAIM_BY_PART_VIEW.get(part);
       return claim?.getRootTarget(claim.instance) ?? null;
     },
+    resolvePartInstance: (part: AnatomyPartView): unknown | null =>
+      CLAIM_BY_PART_VIEW.get(part)?.instance ?? null,
+    resolveSelfInstance: (): unknown => this.getSelfToken(),
+    resolveSelfRole: (family: AnatomyFamily): string | null =>
+      CENTER.getClaim(this.getSelfToken(), family)?.role ?? null,
+    resolveAncestorInstance: (
+      family: AnatomyFamily,
+      part: AnatomyPartView,
+      role: string
+    ): unknown | null => {
+      const claim = CLAIM_BY_PART_VIEW.get(part);
+      if (!claim || claim.family !== family) return null;
+      const domain = this.resolveCurrentDomain(family, false);
+      if (!domain.rootInstance || !domain.claims.includes(claim)) return null;
+      const getParent = this.getParentGetter();
+      let current = getParent(claim.instance);
+      while (current) {
+        const ancestor = CENTER.getClaim(current, family);
+        if (ancestor?.role === role) return current;
+        if (current === domain.rootInstance) return null;
+        current = getParent(current);
+      }
+      return null;
+    },
     resolveDomainScope: (family: AnatomyFamily): unknown | null =>
       this.resolveCurrentDomain(family, false).rootInstance,
     descendantsOf: (
