@@ -6,6 +6,7 @@ import {
 } from '@proto.ui/core/internal';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import { createShadowSplitEffectsPort } from '../src/shadow-split-effects';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 const base = ['inline-flex', 'flex-1', 'whitespace-nowrap'];
 const marker = '--pui-split-intrinsic-nowrap-recipe: v1;';
@@ -39,7 +40,12 @@ describe('bounded split intrinsic nowrap recipe', () => {
       host.attachShadow({ mode: 'open' }).append(surface);
       const artifact = {
         ...generated,
-        cssText: kind === 'old' ? generated.cssText.replace(marker, '') : generated.cssText,
+        cssText:
+          kind === 'old'
+            ? rewriteSplitBaseDeclarations(generated.cssText, (declarations) =>
+                declarations.replace(marker, '')
+              )
+            : generated.cssText,
       };
       const port = createShadowSplitEffectsPort({
         host,

@@ -6,6 +6,7 @@ import {
 } from '@proto.ui/core/internal';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import { createShadowSplitEffectsPort } from '../src/shadow-split-effects';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 // D-STYLE-ROLE P/Q/R/K and D-SHADOW-STYLE P. Physical behavior has separate Chrome coverage.
 const marker = '--pui-split-participation-coordinate-recipe: i1;';
@@ -33,7 +34,11 @@ describe('I1 recipe and atomic projection', () => {
       const generated = renderProtoShadowSplitStyleArtifact(tokens);
       const artifact = {
         ...generated,
-        cssText: old ? generated.cssText.replace(marker, '') : generated.cssText,
+        cssText: old
+          ? rewriteSplitBaseDeclarations(generated.cssText, (declarations) =>
+              declarations.replace(marker, '')
+            )
+          : generated.cssText,
       };
       const port = createShadowSplitEffectsPort({ host, surface, artifact, prototypeName: 'i1' });
       port.queueStyle(effect(['block']));

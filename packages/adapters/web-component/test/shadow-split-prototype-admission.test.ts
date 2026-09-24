@@ -3,6 +3,7 @@ import dialogMask from '../../../prototypes/shadcn/src/dialog/overlay.proto';
 import dialogRoot from '../../../prototypes/shadcn/src/dialog/root.proto';
 import { AdaptToWebComponent, setElementProps } from '../src';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 // D1 pilot boundary + D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 C/K:
 // the actual asDialogMask -> asTransition closure requires an I1 hidden recipe.
@@ -25,7 +26,9 @@ describe('composed Shadow prototype admission', () => {
     ]);
     const oldArtifact = {
       ...artifact,
-      cssText: artifact.cssText.replace('--pui-split-participation-coordinate-recipe: i1;', ''),
+      cssText: rewriteSplitBaseDeclarations(artifact.cssText, (declarations) =>
+        declarations.replace('--pui-split-participation-coordinate-recipe: i1;', '')
+      ),
     };
     const Mask = AdaptToWebComponent(dialogMask, {
       registerAs: 'x-split-mask-admission',

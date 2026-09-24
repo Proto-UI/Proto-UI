@@ -10,6 +10,7 @@ import {
   SHADOW_SPLIT_ROOT_STYLE_ATTR as ROOT,
   SHADOW_SPLIT_SURFACE_ATTR as SURFACE,
 } from '../src/shadow-split-effects';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 function setup(
   tokens = ['flex', 'w-full', 'p-2', 'border-2', 'bg-primary', 'bg-black', 'dark:p-4']
@@ -47,30 +48,6 @@ function wrapMatchingRulesInFalseSupports(cssText: string, selector: string): st
     result += `${cssText.slice(cursor, start)}@supports (display: definitely-not-a-value) {${cssText.slice(start, close)}}`;
     cursor = close;
   }
-}
-
-// Simulate a self-consistent older generated companion so version-specific
-// recipe checks remain independently exercised after base integrity validation.
-function rewriteBaseDeclarations(cssText: string, edit: (declarations: string) => string): string {
-  const selector = `:host([${ROOT}])`;
-  const start = cssText.indexOf(`${selector} {`);
-  const open = cssText.indexOf('{', start);
-  const close = cssText.indexOf('}', open);
-  if (start < 0 || open < 0 || close < 0) throw new Error('generated base recipe not found');
-  const declarations = edit(
-    cssText
-      .slice(open + 1, close)
-      .replace(/\s*--pui-split-compiled-receipt:\s*[a-z0-9]+;\s*$/, '\n')
-  );
-  const input = `${selector.replace(/\s/g, '')}{${declarations.replace(/\s/g, '')}}`;
-  let hash = 2166136261;
-  for (let index = 0; index < input.length; index += 1) {
-    hash = Math.imul(hash ^ input.charCodeAt(index), 16777619);
-  }
-  const body = `${declarations.trimEnd()}\n  --pui-split-compiled-receipt: ${(hash >>> 0).toString(
-    36
-  )};\n`;
-  return `${cssText.slice(0, open + 1)}${body}${cssText.slice(close)}`;
 }
 
 // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 K: preflight is atomic; cleanup is owned.
@@ -161,7 +138,7 @@ describe('private Shadow split effects', () => {
       ...options,
       artifact: {
         ...options.artifact,
-        cssText: rewriteBaseDeclarations(options.artifact.cssText, (declarations) =>
+        cssText: rewriteSplitBaseDeclarations(options.artifact.cssText, (declarations) =>
           declarations.replace('--pui-split-motion-recipe: h1;', '')
         ),
       },
@@ -259,7 +236,7 @@ describe('private Shadow split effects', () => {
     const { host, surface, effects, options } = setup();
     effects.dispose();
     const before = [host.outerHTML, surface.outerHTML];
-    const oldBase = rewriteBaseDeclarations(options.artifact.cssText, (declarations) =>
+    const oldBase = rewriteSplitBaseDeclarations(options.artifact.cssText, (declarations) =>
       declarations.replace('--pui-split-motion-recipe: h1;', '')
     );
     const commentOnlyRecipe = createShadowSplitEffectsPort({

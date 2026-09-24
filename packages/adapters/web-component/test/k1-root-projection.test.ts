@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createRootStyleEffect, resolveRootStyleEntry } from '@proto.ui/core/internal';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import { createShadowSplitEffectsPort } from '../src/shadow-split-effects';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 const marker = '--pui-split-dialog-motion-recipe: k1;';
 const tokens = [
@@ -58,7 +59,11 @@ describe('K1 projection and compiled recipe', () => {
     const generated = renderProtoShadowSplitStyleArtifact(tokens);
     const artifact = {
       ...generated,
-      cssText: old ? generated.cssText.replace(marker, '') : generated.cssText,
+      cssText: old
+        ? rewriteSplitBaseDeclarations(generated.cssText, (declarations) =>
+            declarations.replace(marker, '')
+          )
+        : generated.cssText,
     };
     const port = createShadowSplitEffectsPort({ host, surface, artifact, prototypeName: 'k1' });
     port.queueStyle(effect(['grid']));
