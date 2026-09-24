@@ -15,6 +15,8 @@ describe('private generated Shadow split sizing', () => {
       'px-3',
       'hidden',
     ]).cssText;
+    const baseRule = css.slice(css.indexOf(':host([data-pui-split-root-style]) {')).split('}')[0];
+    expect(baseRule).toContain('--pui-split-compiled-receipt:');
     expect(css).toContain('--pui-split-native-text-recipe: l1;');
     expect(css).toContain('[data-pui-split-surface]:not(input, textarea)');
     expect(css).toContain(

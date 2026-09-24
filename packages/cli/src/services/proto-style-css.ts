@@ -370,38 +370,43 @@ const SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
 const SPLIT_METRIC_SIDES = ['top', 'right', 'bottom', 'left'] as const;
 
 function renderShadowSplitCss(tokens: string[]): string {
+  const baseSelector = `:host([${SPLIT_ROOT_ATTR}])`;
+  const baseDeclarations = [
+    '--pui-split-motion-recipe: h1;',
+    '--pui-split-participation-coordinate-recipe: i1;',
+    '--pui-split-intrinsic-nowrap-recipe: v1;',
+    '--pui-split-dialog-motion-recipe: k1;',
+    '--pui-split-native-text-recipe: l1;',
+    '--pui-split-inline-display: initial;',
+    // Each nested Root composes its own transform, never inherited operands.
+    '--pui-translate-x: initial;',
+    '--pui-translate-y: initial;',
+    '--pui-scale-x: initial;',
+    '--pui-scale-y: initial;',
+    '--pui-split-rest-transform: initial;',
+    '--pui-split-border-uniform: 0px;',
+    ...['enter-scale', 'exit-scale', 'enter-opacity', 'exit-opacity', 'animation-duration'].map(
+      (property) => `--pui-${property}: initial;`
+    ),
+    'display: grid;',
+    'grid-template-columns: minmax(0, 1fr);',
+    'grid-template-rows: minmax(0, 1fr);',
+    'box-sizing: border-box;',
+    'border-style: solid;',
+    'border-color: transparent;',
+    ...SPLIT_METRIC_SIDES.flatMap((side) => [
+      `--pui-split-padding-${side}: 0px;`,
+      `--pui-split-border-${side}: 0px;`,
+      `padding-${side}: var(--pui-split-padding-${side});`,
+      `border-${side}-width: var(--pui-split-border-${side});`,
+    ]),
+  ];
   const lines = [
     '/* Private E1 split recipe; generated synchronously from the document token closure. */',
     '@layer proto-ui {',
-    ':host([data-pui-split-root-style]) {',
-    '  --pui-split-motion-recipe: h1;',
-    '  --pui-split-participation-coordinate-recipe: i1;',
-    '  --pui-split-intrinsic-nowrap-recipe: v1;',
-    '  --pui-split-dialog-motion-recipe: k1;',
-    '  --pui-split-native-text-recipe: l1;',
-    '  --pui-split-inline-display: initial;',
-    // Each nested Root composes its own transform, never inherited operands.
-    '  --pui-translate-x: initial;',
-    '  --pui-translate-y: initial;',
-    '  --pui-scale-x: initial;',
-    '  --pui-scale-y: initial;',
-    '  --pui-split-rest-transform: initial;',
-    '  --pui-split-border-uniform: 0px;',
-    ...['enter-scale', 'exit-scale', 'enter-opacity', 'exit-opacity', 'animation-duration'].map(
-      (property) => `  --pui-${property}: initial;`
-    ),
-    '  display: grid;',
-    '  grid-template-columns: minmax(0, 1fr);',
-    '  grid-template-rows: minmax(0, 1fr);',
-    '  box-sizing: border-box;',
-    '  border-style: solid;',
-    '  border-color: transparent;',
-    ...SPLIT_METRIC_SIDES.flatMap((side) => [
-      `  --pui-split-padding-${side}: 0px;`,
-      `  --pui-split-border-${side}: 0px;`,
-      `  padding-${side}: var(--pui-split-padding-${side});`,
-      `  border-${side}-width: var(--pui-split-border-${side});`,
-    ]),
+    `${baseSelector} {`,
+    ...baseDeclarations.map((declaration) => `  ${declaration}`),
+    `  ${splitCompiledReceipt(baseSelector, baseDeclarations)}`,
     '}',
     // Preserve intrinsic contributions through a one-child flex shell for
     // this bounded combination. An explicit min-content/max-content minimum

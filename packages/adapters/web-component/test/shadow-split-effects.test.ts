@@ -49,6 +49,30 @@ function wrapMatchingRulesInFalseSupports(cssText: string, selector: string): st
   }
 }
 
+// Simulate a self-consistent older generated companion so version-specific
+// recipe checks remain independently exercised after base integrity validation.
+function rewriteBaseDeclarations(cssText: string, edit: (declarations: string) => string): string {
+  const selector = `:host([${ROOT}])`;
+  const start = cssText.indexOf(`${selector} {`);
+  const open = cssText.indexOf('{', start);
+  const close = cssText.indexOf('}', open);
+  if (start < 0 || open < 0 || close < 0) throw new Error('generated base recipe not found');
+  const declarations = edit(
+    cssText
+      .slice(open + 1, close)
+      .replace(/\s*--pui-split-compiled-receipt:\s*[a-z0-9]+;\s*$/, '\n')
+  );
+  const input = `${selector.replace(/\s/g, '')}{${declarations.replace(/\s/g, '')}}`;
+  let hash = 2166136261;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = Math.imul(hash ^ input.charCodeAt(index), 16777619);
+  }
+  const body = `${declarations.trimEnd()}\n  --pui-split-compiled-receipt: ${(hash >>> 0).toString(
+    36
+  )};\n`;
+  return `${cssText.slice(0, open + 1)}${body}${cssText.slice(close)}`;
+}
+
 // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 K: preflight is atomic; cleanup is owned.
 describe('private Shadow split effects', () => {
   it('rejects unimplemented animated border rounding but retains fixed-border sizing animation', () => {
@@ -137,7 +161,9 @@ describe('private Shadow split effects', () => {
       ...options,
       artifact: {
         ...options.artifact,
-        cssText: options.artifact.cssText.replace('--pui-split-motion-recipe: h1;', ''),
+        cssText: rewriteBaseDeclarations(options.artifact.cssText, (declarations) =>
+          declarations.replace('--pui-split-motion-recipe: h1;', '')
+        ),
       },
     });
     expect(() => old.queueStyle(effect(tokens))).toThrow(/H1 recipe.*fix:/);
@@ -233,13 +259,16 @@ describe('private Shadow split effects', () => {
     const { host, surface, effects, options } = setup();
     effects.dispose();
     const before = [host.outerHTML, surface.outerHTML];
+    const oldBase = rewriteBaseDeclarations(options.artifact.cssText, (declarations) =>
+      declarations.replace('--pui-split-motion-recipe: h1;', '')
+    );
     const commentOnlyRecipe = createShadowSplitEffectsPort({
       ...options,
       artifact: {
         ...options.artifact,
-        cssText: options.artifact.cssText.replace(
-          '--pui-split-motion-recipe: h1;',
-          '/* --pui-split-motion-recipe: h1; */'
+        cssText: oldBase.replace(
+          '@layer proto-ui {',
+          '@layer proto-ui {\n/* --pui-split-motion-recipe: h1; */'
         ),
       },
     });
@@ -294,6 +323,27 @@ describe('private Shadow split effects', () => {
           ...options.artifact,
           cssText: `@supports (display: definitely-not-a-value) {${options.artifact.cssText}}`,
         },
+      })
+    ).toThrow(/sizing-recipe/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+  });
+
+  it.each([
+    'display: grid;',
+    '--pui-split-padding-top: 0px;',
+    'padding-top: var(--pui-split-padding-top);',
+    'border-top-width: var(--pui-split-border-top);',
+  ])('rejects a sizing recipe missing the base declaration %s', (declaration) => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const cssText = options.artifact.cssText.replace(declaration, '');
+    expect(cssText).not.toBe(options.artifact.cssText);
+
+    expect(() =>
+      createShadowSplitEffectsPort({
+        ...options,
+        artifact: { ...options.artifact, cssText },
       })
     ).toThrow(/sizing-recipe/);
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);

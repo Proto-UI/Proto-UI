@@ -299,12 +299,11 @@ export function createShadowSplitEffectsPort({
   }
   const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
   const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
-  const baseDeclarations = rules
-    .find(({ selector }) => selector.replace(/\s/g, '') === baseSelector)
-    ?.declarations.replace(/\s/g, '');
-  if (!baseDeclarations) {
+  const baseRule = rules.find(({ selector }) => selector.replace(/\s/g, '') === baseSelector);
+  if (!baseRule || !hasValidDeclarationReceipt(baseRule)) {
     throw invalid('sizing-recipe');
   }
+  const baseDeclarations = baseRule.declarations.replace(/\s/g, '');
   const hasRecipe = (name: string, version: string) =>
     baseDeclarations.includes(`--pui-split-${name}-recipe:${version};`);
   if (nativeText && !hasRecipe('native-text', 'l1')) throw invalid('native-text-recipe');
