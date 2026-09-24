@@ -31,6 +31,24 @@ function setup(
 const effect = (tokens: string[], origin: 'setup' | 'runtime' = 'setup') =>
   createRootStyleEffect(tokens.map((t) => resolveRootStyleEntry(t, origin)));
 
+function wrapMatchingRulesInFalseSupports(cssText: string, selector: string): string {
+  let cursor = 0;
+  let result = '';
+  while (true) {
+    const start = cssText.indexOf(selector, cursor);
+    if (start < 0) return result + cssText.slice(cursor);
+    const open = cssText.indexOf('{', start);
+    let depth = 1;
+    let close = open + 1;
+    for (; close < cssText.length && depth; close += 1) {
+      if (cssText[close] === '{') depth += 1;
+      else if (cssText[close] === '}') depth -= 1;
+    }
+    result += `${cssText.slice(cursor, start)}@supports (display: definitely-not-a-value) {${cssText.slice(start, close)}}`;
+    cursor = close;
+  }
+}
+
 // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 K: preflight is atomic; cleanup is owned.
 describe('private Shadow split effects', () => {
   it('rejects unimplemented animated border rounding but retains fixed-border sizing animation', () => {
@@ -255,6 +273,43 @@ describe('private Shadow split effects', () => {
         cssText: options.artifact.cssText.replaceAll(
           `[${ROOT}~="w-full"]`,
           `[${ROOT}~="w-full"][data-never]`
+        ),
+      },
+    });
+
+    expect(() => gated.queueStyle(effect(['block', 'w-full']))).toThrow(/w-full.*missing token/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    gated.dispose();
+  });
+
+  it('rejects the sizing recipe when the artifact is behind an unrelated conditional gate', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+
+    expect(() =>
+      createShadowSplitEffectsPort({
+        ...options,
+        artifact: {
+          ...options.artifact,
+          cssText: `@supports (display: definitely-not-a-value) {${options.artifact.cssText}}`,
+        },
+      })
+    ).toThrow(/sizing-recipe/);
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+  });
+
+  it('rejects a compiled token receipt behind an unrelated conditional gate', () => {
+    const { host, surface, effects, options } = setup(['block', 'w-full']);
+    effects.dispose();
+    const before = [host.outerHTML, surface.outerHTML];
+    const gated = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: wrapMatchingRulesInFalseSupports(
+          options.artifact.cssText,
+          `:host([${ROOT}~="w-full"])`
         ),
       },
     });

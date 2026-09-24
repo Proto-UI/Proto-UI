@@ -15,6 +15,104 @@ const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 
 type Projection = { root: string; surface: string[]; borderWidths: string };
+type CompiledStyleRule = { selector: string; declarations: string };
+
+function nextCssBoundary(
+  cssText: string,
+  start: number
+): { index: number; character: '{' | ';' } | null {
+  let quote = '';
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  for (let index = start; index < cssText.length; index += 1) {
+    const character = cssText[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '(') parenDepth += 1;
+    else if (character === ')') parenDepth = Math.max(0, parenDepth - 1);
+    else if (character === '[') bracketDepth += 1;
+    else if (character === ']') bracketDepth = Math.max(0, bracketDepth - 1);
+    else if (!parenDepth && !bracketDepth && (character === '{' || character === ';')) {
+      return { index, character };
+    }
+  }
+  return null;
+}
+
+function cssBlockEnd(cssText: string, open: number): number {
+  let depth = 1;
+  let quote = '';
+  for (let index = open + 1; index < cssText.length; index += 1) {
+    const character = cssText[index]!;
+    if (character === '\\') {
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '{') depth += 1;
+    else if (character === '}' && --depth === 0) return index;
+  }
+  return -1;
+}
+
+function directCssDeclarations(cssText: string): string {
+  let cursor = 0;
+  let declarations = '';
+  while (cursor < cssText.length) {
+    const boundary = nextCssBoundary(cssText, cursor);
+    if (!boundary) return declarations + cssText.slice(cursor);
+    if (boundary.character === ';') {
+      declarations += cssText.slice(cursor, boundary.index + 1);
+      cursor = boundary.index + 1;
+      continue;
+    }
+    const close = cssBlockEnd(cssText, boundary.index);
+    if (close < 0) return declarations;
+    cursor = close + 1;
+  }
+  return declarations;
+}
+
+function collectUnconditionallyAvailableRules(cssText: string): CompiledStyleRule[] {
+  const rules: CompiledStyleRule[] = [];
+  let cursor = 0;
+  while (cursor < cssText.length) {
+    const boundary = nextCssBoundary(cssText, cursor);
+    if (!boundary) break;
+    if (boundary.character === ';') {
+      cursor = boundary.index + 1;
+      continue;
+    }
+    const close = cssBlockEnd(cssText, boundary.index);
+    if (close < 0) break;
+    const prelude = cssText.slice(cursor, boundary.index).trim();
+    const body = cssText.slice(boundary.index + 1, close);
+    if (/^@layer(?:\s|$)/.test(prelude)) {
+      rules.push(...collectUnconditionallyAvailableRules(body));
+    } else if (prelude && !prelude.startsWith('@')) {
+      rules.push({ selector: prelude, declarations: directCssDeclarations(body) });
+    }
+    cursor = close + 1;
+  }
+  return rules;
+}
 
 function splitReceiptVariants(token: string): string[] {
   const parts: string[] = [];
@@ -161,11 +259,12 @@ export function createShadowSplitEffectsPort({
   ) {
     throw invalid('projection-owned');
   }
-  const cssText = stripShadowCssComments(artifact.cssText).replace(/\s/g, '');
-  const ruleSelectors = cssText.match(/[^{}]+(?=\{)/g) ?? [];
-  const baseDeclarations = new RegExp(
-    `(?:^|[{}]):host\\(\\[${SHADOW_SPLIT_ROOT_STYLE_ATTR}\\]\\)\\{([^{}]*)\\}`
-  ).exec(cssText)?.[1];
+  const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
+  const ruleSelectors = rules.map(({ selector }) => selector.replace(/\s/g, ''));
+  const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
+  const baseDeclarations = rules
+    .find(({ selector }) => selector.replace(/\s/g, '') === baseSelector)
+    ?.declarations.replace(/\s/g, '');
   if (!baseDeclarations) {
     throw invalid('sizing-recipe');
   }
