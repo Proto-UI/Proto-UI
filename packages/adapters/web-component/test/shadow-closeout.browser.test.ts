@@ -1191,6 +1191,50 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it.each([false, true])(
+    'recovers trapped traversal from remembered programmatic-only focus (reverse: %s)',
+    async (reverse) => {
+      const page = await browser.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      try {
+        await page.addScriptTag({ content: script });
+        await page.evaluate(() => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-programmatic-history-scope',
+              setup(def: any) {
+                const scope = p.asFocusScope();
+                scope.configure({ trap: true, loop: true, entry: 'manual' });
+                def.expose('activate', () => scope.activate());
+                return (r: any) => r.slot();
+              },
+            }),
+            { shadow: true }
+          );
+          const scope = new C();
+          scope.id = 'programmatic-history-scope';
+          scope.innerHTML =
+            '<button id="pha">A</button><button id="phb" tabindex="-1">B</button><button id="phc">C</button>';
+          document.body.append(scope);
+          (window as any).__scope = scope;
+        });
+        await page.evaluate(() => (window as any).__scope.getExposes().activate());
+        await page.locator('#phb').focus();
+        await page.evaluate(() => {
+          document.body.tabIndex = -1;
+          document.body.focus();
+        });
+        await page.keyboard.press(reverse ? 'Shift+Tab' : 'Tab');
+        expect(await page.evaluate(() => document.activeElement?.id)).toBe(reverse ? 'pha' : 'phc');
+        expect(errors).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
   it('recovers trapped forward and reverse traversal from remembered SVG focus', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -1413,6 +1457,48 @@ describe('Shadow closeout native boundaries', () => {
       await page.locator('form').evaluate((form: HTMLFormElement) => form.reset());
       await page.evaluate(() => new Promise<void>((resolve) => queueMicrotask(resolve)));
       expect(await projection()).toEqual({ hostTabIndex: null, inside: true, outside: false });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects a checkbox-dependent entry after its form resets', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: '#reset-checkbox:checked + button { visibility: hidden; }',
+      });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-reset-checkbox-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const form = document.createElement('form');
+        const host = new C();
+        host.id = 'reset-checkbox-entry';
+        host.innerHTML =
+          '<input id="reset-checkbox" type="checkbox" tabindex="-1"><button id="reset-dependent">Target</button>';
+        form.append(host);
+        document.body.append(form);
+      });
+      const tabIndex = () =>
+        page.locator('#reset-checkbox-entry').evaluate((host) => host.getAttribute('tabindex'));
+      expect(await tabIndex()).toBeNull();
+      await page.locator('#reset-checkbox').click();
+      await expect.poll(tabIndex).toBe('0');
+      await page.locator('form').evaluate((form: HTMLFormElement) => form.reset());
+      await expect.poll(tabIndex).toBeNull();
       expect(errors).toEqual([]);
     } finally {
       await page.close();
@@ -2317,6 +2403,50 @@ describe('Shadow closeout native boundaries', () => {
       await page.waitForFunction(
         () => document.querySelector('#sibling-entry')?.getAttribute('tabindex') === null
       );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry after a preceding popover toggles selector matching', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: '#entry-popover:popover-open ~ .popover-entry button { visibility: hidden; }',
+      });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-popover-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const popover = document.createElement('div');
+        popover.id = 'entry-popover';
+        popover.popover = 'manual';
+        const host = new C();
+        host.id = 'popover-entry';
+        host.className = 'popover-entry';
+        host.innerHTML = '<button>Target</button>';
+        document.body.append(popover, host);
+        (window as any).__entryPopover = popover;
+      });
+      const tabIndex = () =>
+        page.locator('#popover-entry').evaluate((host) => host.getAttribute('tabindex'));
+      expect(await tabIndex()).toBeNull();
+      await page.evaluate(() => (window as any).__entryPopover.showPopover());
+      await expect.poll(tabIndex).toBe('0');
+      await page.evaluate(() => (window as any).__entryPopover.hidePopover());
+      await expect.poll(tabIndex).toBeNull();
       expect(errors).toEqual([]);
     } finally {
       await page.close();

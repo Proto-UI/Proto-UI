@@ -567,9 +567,8 @@ class FocusModuleImpl extends ModuleBase {
         this.caps.has(FOCUS_SAMPLE_SCOPE_TARGETS_CAP) &&
         this.caps.has(FOCUS_REQUEST_FOCUS_CAP)
       ) {
-        const { targets, activeTarget, activeInsertionIndex, recentTarget } = this.caps.get(
-          FOCUS_SAMPLE_SCOPE_TARGETS_CAP
-        )(container, ev.shiftKey ? 'prev' : 'next');
+        const { targets, activeTarget, activeInsertionIndex, recentTarget, recentInsertionIndex } =
+          this.caps.get(FOCUS_SAMPLE_SCOPE_TARGETS_CAP)(container, ev.shiftKey ? 'prev' : 'next');
         if (targets.length === 0) return;
         // Actual in-scope focus (pointer or programmatic) refreshes the
         // remembered recovery anchor (C-AS-FOCUS-SCOPE-0002-I); only sampled
@@ -577,12 +576,19 @@ class FocusModuleImpl extends ModuleBase {
         if (recentTarget && targets.some((target) => target === recentTarget))
           this.lastScopeTarget = recentTarget;
         let current = targets.findIndex((target) => target === activeTarget);
-        if (current < 0 && activeInsertionIndex === undefined)
+        const rememberedInsertionIndex =
+          activeInsertionIndex === undefined ? recentInsertionIndex : undefined;
+        if (
+          current < 0 &&
+          activeInsertionIndex === undefined &&
+          rememberedInsertionIndex === undefined
+        )
           current = targets.findIndex((target) => target === this.lastScopeTarget);
+        const insertionIndex = activeInsertionIndex ?? rememberedInsertionIndex;
         let next =
           current < 0
-            ? activeInsertionIndex !== undefined
-              ? activeInsertionIndex - (ev.shiftKey ? 1 : 0)
+            ? insertionIndex !== undefined
+              ? insertionIndex - (ev.shiftKey ? 1 : 0)
               : ev.shiftKey
                 ? targets.length - 1
                 : 0

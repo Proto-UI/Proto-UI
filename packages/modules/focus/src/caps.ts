@@ -73,5 +73,7 @@ export const FOCUS_SAMPLE_SCOPE_TARGETS_CAP = cap<
     activeInsertionIndex?: number;
     /** View-observed most recent native in-scope focus; never a logical fact. */
     recentTarget?: Element | null;
+    /** Ordered marker for a remembered target outside sequential Tab stops. */
+    recentInsertionIndex?: number;
   }
 >('@proto.ui/focus/sampleScopeTargets');

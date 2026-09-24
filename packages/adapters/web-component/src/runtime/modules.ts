@@ -1480,6 +1480,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               }
               const [mediaQueries, relationalDependency, siblingSubjects] =
                 collectEntryStyleDependencies(view!, mediaRoots, target, externalAncestors);
+              const siblingStateTargets = new Set<EventTarget>();
               for (const subject of siblingSubjects) {
                 if (subject.parentNode)
                   entryObserver?.observe(subject.parentNode, {
@@ -1487,6 +1488,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   });
                 let sibling = subject.previousElementSibling;
                 while (sibling) {
+                  siblingStateTargets.add(sibling);
                   entryObserver?.observe(sibling, {
                     childList: true,
                     subtree: true,
@@ -1522,6 +1524,28 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 ['resize', 'change'],
                 projectCurrent
               );
+              const onFormReset = (event: Event) => {
+                const form = event.composedPath()[0];
+                if (
+                  form instanceof view!.HTMLFormElement &&
+                  [...form.elements].some((control) => belongsToObservedEntryTree(control))
+                )
+                  queueMicrotask(projectCurrent);
+              };
+              const stopFormResetEvents = listenToEntryEvents(
+                new Set<EventTarget>([
+                  target.ownerDocument,
+                  target.getRootNode(),
+                  ...observedRoots,
+                ]),
+                ['reset'],
+                onFormReset
+              );
+              const stopSiblingStateEvents = listenToEntryEvents(
+                siblingStateTargets,
+                ['toggle'],
+                projectCurrent
+              );
               const projectionEvents = [
                 'transitionstart',
                 'transitionend',
@@ -1529,6 +1553,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 'animationstart',
                 'animationend',
                 'animationcancel',
+                'toggle',
                 'input',
                 'change',
                 'pointerover',
@@ -1611,6 +1636,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 eligibilityAnimationFrame = 0;
                 eligibilityAnimations.clear();
                 stopEntryEnvironmentEvents();
+                stopFormResetEvents();
+                stopSiblingStateEvents();
                 stopProjectionEvents();
                 stopShadowAnimationEvents();
                 stopExternalStyleEvents();

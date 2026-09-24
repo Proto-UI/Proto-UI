@@ -115,6 +115,7 @@ export function sampleWebComponentScopeTargets(
   includeBrowsingContexts = false
 ) {
   const activeTarget = deepestActiveElement(container.ownerDocument);
+  const recentTarget = recentFocusTarget?.() ?? null;
   type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
   const scope: Entry[] = [];
   if (isPrunedByExternalAncestor(container)) {
@@ -190,9 +191,15 @@ export function sampleWebComponentScopeTargets(
         // programmatic deep focus still has a real position in the composed
         // order. Preserve a non-target marker at the host position so Focus
         // can continue immediately before/after it in either direction.
-        if (activeTarget && isInsideOwnedShadowScope(el, activeTarget))
+        const insertionTarget =
+          activeTarget && isInsideOwnedShadowScope(el, activeTarget)
+            ? activeTarget
+            : recentTarget && isInsideOwnedShadowScope(el, recentTarget)
+              ? recentTarget
+              : null;
+        if (insertionTarget)
           entries.push({
-            element: activeTarget as unknown as HTMLElement,
+            element: insertionTarget as unknown as HTMLElement,
             target: false,
             priority: 0,
           });
@@ -213,7 +220,7 @@ export function sampleWebComponentScopeTargets(
         priority: el.tabIndex,
         children,
       });
-    } else if (target || el === activeTarget)
+    } else if (target || el === activeTarget || el === recentTarget)
       entries.push({ element: el, target: !!target, priority: el.tabIndex });
     if (isHtmlTag(el, 'slot')) {
       logicalSlotNodes(el).forEach((node) => visitNode(node, children));
@@ -306,20 +313,24 @@ export function sampleWebComponentScopeTargets(
       }
   const current = ordered.findIndex((entry) => entry.element === activeTarget);
   const filtered = targets.filter((target) => !excluded.has(target));
+  const insertionIndex = (index: number) =>
+    ordered.slice(0, index).filter((entry) => entry.target && !excluded.has(entry.element)).length;
+  const recent = ordered.findIndex((entry) => entry.element === recentTarget);
   return {
     targets: filtered,
     activeTarget,
     // View-observed native focus history; Focus decides whether to recover
     // from it. Never fabricated from logical state.
-    recentTarget: recentFocusTarget?.() ?? null,
+    recentTarget,
     // Position is not a Tab stop. Focus owns direction/wrapping after native
     // programmatic focus on tabindex=-1 or another currently excluded target.
     ...(current >= 0 && !filtered.includes(activeTarget as HTMLElement)
       ? {
-          activeInsertionIndex: ordered
-            .slice(0, current)
-            .filter((entry) => entry.target && !excluded.has(entry.element)).length,
+          activeInsertionIndex: insertionIndex(current),
         }
+      : {}),
+    ...(recent >= 0 && !filtered.includes(recentTarget as HTMLElement)
+      ? { recentInsertionIndex: insertionIndex(recent) }
       : {}),
   };
 }

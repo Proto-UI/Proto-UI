@@ -407,6 +407,34 @@ describe('WC scope sequential target sample', () => {
     }
   });
 
+  it('retains the insertion position of remembered programmatic-only focus', () => {
+    const scope = document.createElement('div');
+    scope.innerHTML =
+      '<button id="before" tabindex="0"></button><button id="programmatic" tabindex="-1"></button><button id="after" tabindex="0"></button>';
+    document.body.append(scope);
+    const programmatic = scope.querySelector<HTMLElement>('#programmatic')!;
+    const history = observeWebComponentRadioFocus(scope);
+    try {
+      programmatic.focus();
+      (document.body as HTMLElement).tabIndex = -1;
+      document.body.focus();
+      expect(
+        sampleWebComponentScopeTargets(scope, undefined, 'next', history.order, () =>
+          history.recent()
+        )
+      ).toEqual({
+        targets: [scope.firstElementChild, scope.lastElementChild],
+        activeTarget: document.body,
+        recentTarget: programmatic,
+        recentInsertionIndex: 1,
+      });
+    } finally {
+      history.dispose();
+      scope.remove();
+      (document.body as HTMLElement).removeAttribute('tabindex');
+    }
+  });
+
   it('retains a sampled SVG focus target after focus becomes blank', () => {
     const scope = document.createElement('div');
     const before = document.createElement('button');
