@@ -114,6 +114,8 @@ fn clamps_lab_lightness_endpoints_and_gamut_maps_intermediate_values() {
     assert_eq!(rgba8("lab(100% 40 0)"), [255, 255, 255, 255]);
     // CSSWG #8794 places this endpoint at display gamut mapping, after Lab-to-destination conversion.
     assert_ne!(rgba8("lab(0 104.3 -50.9)"), [0, 0, 0, 255]);
+    // Source Lab L=100 is not a white shortcut when converted destination Oklab L is below 1.
+    assert_ne!(rgba8("lab(100% -300 -300)"), [255, 255, 255, 255]);
     assert_eq!(rgba8("lab(120% 0 0)"), [255, 255, 255, 255]);
     assert_eq!(rgba8("lab(-5% 0 0)"), [0, 0, 0, 255]);
 
