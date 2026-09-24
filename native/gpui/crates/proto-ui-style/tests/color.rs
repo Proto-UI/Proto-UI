@@ -12,6 +12,7 @@ const COLOR_PROPERTIES: [&str; 6] = [
     "stroke",
     "outline-color",
 ];
+const COLOR_CUSTOM_PROPERTIES: [&str; 2] = ["--pui-ring-color", "--pui-ring-offset-color"];
 
 fn rgba8(value: &str) -> [u8; 4] {
     parse_rgba(value)
@@ -69,6 +70,16 @@ fn rejects_invalid_color_mix_weights_and_duplicate_alpha_forms() {
 }
 
 #[test]
+fn rejects_mixed_rgb_separator_grammars() {
+    let whitespace_alpha = parse_rgba("rgb(1 2 3 0.5)").is_err();
+    let comma_slash_alpha = parse_rgba("rgb(1, 2, 3 / 0.5)").is_err();
+    assert!(
+        whitespace_alpha && comma_slash_alpha,
+        "invalid mixed RGB grammars accepted: whitespace alpha={whitespace_alpha}, comma/slash alpha={comma_slash_alpha}"
+    );
+}
+
+#[test]
 fn converts_lab_through_the_css_color_4_path() {
     // The endpoints are exact by definition and catch a wrong white point or a
     // missing gamma encode, both of which would still produce plausible greys.
@@ -101,7 +112,8 @@ fn converts_lab_through_the_css_color_4_path() {
 #[test]
 fn clamps_lab_lightness_endpoints_and_gamut_maps_intermediate_values() {
     assert_eq!(rgba8("lab(100% 40 0)"), [255, 255, 255, 255]);
-    assert_eq!(rgba8("lab(0% 40 0)"), [0, 0, 0, 255]);
+    // CSSWG #8794 places this endpoint at display gamut mapping, after Lab-to-destination conversion.
+    assert_ne!(rgba8("lab(0 104.3 -50.9)"), [0, 0, 0, 255]);
     assert_eq!(rgba8("lab(120% 0 0)"), [255, 255, 255, 255]);
     assert_eq!(rgba8("lab(-5% 0 0)"), [0, 0, 0, 255]);
 
@@ -109,12 +121,24 @@ fn clamps_lab_lightness_endpoints_and_gamut_maps_intermediate_values() {
     // Oklch chroma-reduction mapping keeps its hue instead of clipping RGB
     // channels independently (which produces a different, over-saturated red).
     assert_eq!(rgba8("lab(48.4493% 77.4328 61.5452)"), [231, 0, 11, 255]);
+    assert_eq!(rgba8("lab(30 160 -160)"), [130, 0, 255, 255]);
 
     let mapped = parse_rgba("lab(50% 160 0)").unwrap();
     for component in [mapped.r, mapped.g, mapped.b, mapped.a] {
         assert!((0.0..=1.0).contains(&component));
     }
 }
+
+#[test]
+fn maps_converted_lightness_endpoint_to_white() {
+    assert_eq!(rgba8("lab(99% 25 -25)"), [255, 255, 255, 255]);
+}
+
+#[test]
+fn parses_lab_axis_percentages_using_css_reference_range() {
+    assert_eq!(rgba8("lab(29.69% 44.888% -29.04%)"), [128, 0, 128, 255]);
+}
+
 #[test]
 fn treats_a_transparent_mix_as_alpha_attenuation() {
     let mixed = parse_rgba("color-mix(in oklab, #3366ff 80%, transparent)").unwrap();
@@ -170,6 +194,7 @@ fn reports_rather_than_approximates_what_it_cannot_do() {
 #[test]
 fn parses_every_colour_a_theme_can_produce() {
     let mut checked = 0usize;
+    let mut custom_properties_checked = std::collections::BTreeSet::new();
     let mut unresolved = 0usize;
 
     for language in themes().names() {
@@ -178,10 +203,13 @@ fn parses_every_colour_a_theme_can_produce() {
 
             for (token, _) in vocabulary().tokens_with_declarations() {
                 let resolved = vocabulary().resolve_all([token.as_str()]);
-                for property in COLOR_PROPERTIES {
+                for property in COLOR_PROPERTIES.into_iter().chain(COLOR_CUSTOM_PROPERTIES) {
                     let Some(raw) = resolved.get(property) else {
                         continue;
                     };
+                    if COLOR_CUSTOM_PROPERTIES.contains(&property) {
+                        custom_properties_checked.insert(property);
+                    }
                     match theme.substitute(raw) {
                         Substitution::Resolved(value) => {
                             parse(&value).unwrap_or_else(|error| {
@@ -209,6 +237,11 @@ fn parses_every_colour_a_theme_can_produce() {
     // whole test vacuous.
     assert!(checked > 200, "only checked {checked} colours");
     assert!(unresolved > 0, "the cross-language case disappeared");
+    assert_eq!(
+        custom_properties_checked,
+        COLOR_CUSTOM_PROPERTIES.into_iter().collect(),
+        "theme color completeness must retain both ring custom properties"
+    );
 }
 
 /// The vocabulary spans every design language; a theme does not.

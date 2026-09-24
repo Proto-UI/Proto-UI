@@ -164,28 +164,39 @@ fn channel(raw: &str, scale: f32, original: &str) -> Result<f32, ColorError> {
 }
 
 fn parse_rgb(rest: &str, original: &str) -> Result<Rgba, ColorError> {
-    // Both `r, g, b, a` and `r g b / a` occur in the recorded values.
-    let (body, alpha) = match rest.split_once('/') {
+    // CSS has a legacy comma grammar and a modern space-plus-slash grammar.
+    let (body, slash_alpha) = match rest.split_once('/') {
         Some((body, alpha)) => (body, Some(alpha)),
         None => (rest, None),
     };
-    let parts: Vec<&str> = if body.contains(',') {
+    let malformed = || ColorError::Malformed(original.to_string());
+    let comma_syntax = body.contains(',');
+    if comma_syntax && slash_alpha.is_some() {
+        return Err(malformed());
+    }
+    let parts: Vec<&str> = if comma_syntax {
         body.split(',').collect()
     } else {
         body.split_whitespace().collect()
     };
-    let malformed = || ColorError::Malformed(original.to_string());
-    if parts.len() < 3 || parts.len() > 4 {
+    if comma_syntax {
+        if !(3..=4).contains(&parts.len()) {
+            return Err(malformed());
+        }
+    } else if parts.len() != 3 {
         return Err(malformed());
     }
     let r = channel(parts[0], 255.0, original)?;
     let g = channel(parts[1], 255.0, original)?;
     let b = channel(parts[2], 255.0, original)?;
-    let a = match (parts.get(3), alpha) {
-        (Some(_), Some(_)) => return Err(malformed()),
-        (Some(value), None) => channel(value, 1.0, original)?,
-        (None, Some(value)) => channel(value, 1.0, original)?,
-        (None, None) => 1.0,
+    let alpha = if comma_syntax {
+        parts.get(3).copied()
+    } else {
+        slash_alpha
+    };
+    let a = match alpha {
+        Some(value) => channel(value, 1.0, original)?,
+        None => 1.0,
     };
     Ok(Rgba::new(r, g, b, a))
 }
@@ -202,15 +213,14 @@ fn parse_lab(rest: &str, original: &str) -> Result<Rgba, ColorError> {
     if parts.len() != 3 {
         return Err(malformed());
     }
-    // In `lab()` the lightness is on a 0..100 scale and the `%` is notation,
-    // not a fraction: `lab(100% 0 0)` is L=100, not L=1.
+    // CSS Color 4 maps L percentages to [0, 100] and a/b percentages to ±125.
     let lightness = parts[0]
         .trim()
         .trim_end_matches('%')
         .parse::<f32>()
         .map_err(|_| malformed())?;
-    let a = parts[1].parse::<f32>().map_err(|_| malformed())?;
-    let b = parts[2].parse::<f32>().map_err(|_| malformed())?;
+    let a = parse_lab_axis(parts[1], original)?;
+    let b = parse_lab_axis(parts[2], original)?;
     if !lightness.is_finite() || !a.is_finite() || !b.is_finite() {
         return Err(malformed());
     }
@@ -219,6 +229,17 @@ fn parse_lab(rest: &str, original: &str) -> Result<Rgba, ColorError> {
         color.a = channel(alpha, 1.0, original)?;
     }
     Ok(color)
+}
+
+fn parse_lab_axis(raw: &str, original: &str) -> Result<f32, ColorError> {
+    let text = raw.trim();
+    let malformed = || ColorError::Malformed(original.to_string());
+    let value = if let Some(percent) = text.strip_suffix('%') {
+        percent.trim().parse::<f32>().map_err(|_| malformed())? * 1.25
+    } else {
+        text.parse::<f32>().map_err(|_| malformed())?
+    };
+    Ok(value)
 }
 
 /// `color-mix(in oklab, <colour> <percent>, transparent)`.
@@ -290,15 +311,9 @@ fn multiply(matrix: [[f32; 3]; 3], vector: [f32; 3]) -> [f32; 3] {
 }
 
 fn lab_to_srgb(lightness: f32, a: f32, b: f32, original: &str) -> Result<Rgba, ColorError> {
-    // CSS Color 4 clamps Lab lightness before gamut mapping; its endpoints map
-    // to display black/white regardless of the chroma coordinates.
+    // CSS Color 4 clamps source Lab L before conversion; destination endpoints
+    // are determined from converted Oklab lightness during display mapping.
     let lightness = lightness.clamp(0.0, 100.0);
-    if lightness == 0.0 {
-        return Ok(Rgba::new(0.0, 0.0, 0.0, 1.0));
-    }
-    if lightness == 100.0 {
-        return Ok(Rgba::new(1.0, 1.0, 1.0, 1.0));
-    }
 
     let f1 = (lightness + 16.0) / 116.0;
     let f0 = a / 500.0 + f1;
@@ -340,6 +355,14 @@ fn gamut_map_srgb(origin: [f32; 3]) -> Result<Rgba, ()> {
     let origin_lab = linear_srgb_to_oklab(origin);
     if origin_lab.iter().any(|component| !component.is_finite()) {
         return Err(());
+    }
+
+    // This is destination Oklab L (the corresponding OkLCh lightness), not source Lab L.
+    if origin_lab[0] >= 1.0 {
+        return Ok(Rgba::new(1.0, 1.0, 1.0, 1.0));
+    }
+    if origin_lab[0] <= 0.0 {
+        return Ok(Rgba::new(0.0, 0.0, 0.0, 1.0));
     }
     let chroma = origin_lab[1].hypot(origin_lab[2]);
     let hue = origin_lab[2].atan2(origin_lab[1]);
