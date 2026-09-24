@@ -1785,6 +1785,72 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('reprojects a descendant open-root entry at a non-composed transition start', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-shadow-transition-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const host = new C();
+        const carrier = document.createElement('span');
+        const root = carrier.attachShadow({ mode: 'open' });
+        root.innerHTML = `<style>
+          button { visibility: hidden; transition: visibility 80ms linear 80ms; }
+          :host(.reveal) button { visibility: visible; }
+        </style><button>Nested transition target</button>`;
+        host.append(carrier);
+        document.body.append(host);
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        const button = root.querySelector('button')!;
+        const started = new Promise<Event>((resolve, reject) => {
+          const timeout = setTimeout(
+            () => reject(new Error('nested transitionstart timeout')),
+            1000
+          );
+          button.addEventListener(
+            'transitionstart',
+            (event) => {
+              clearTimeout(timeout);
+              resolve(event);
+            },
+            { once: true }
+          );
+        });
+        const initial = host.getAttribute('tabindex');
+        carrier.classList.add('reveal');
+        const event = await started;
+        await new Promise<void>((resolve) => queueMicrotask(resolve));
+        return {
+          initial,
+          composed: event.composed,
+          visibility: getComputedStyle(button).visibility,
+          fallback: host.getAttribute('tabindex'),
+        };
+      });
+      expect(result).toEqual({
+        initial: '0',
+        composed: false,
+        visibility: 'visible',
+        fallback: null,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('reprojects descendant entry when a delayed animation starts affecting visibility', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -4474,6 +4540,67 @@ describe('Shadow closeout native boundaries', () => {
         initial: { visibility: 'visible', fallback: null },
         invalid: { visibility: 'hidden', fallback: '0' },
         restored: { visibility: 'visible', fallback: null },
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('resamples external sibling focus-visible before native Tab traversal', async () => {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-focus-visible-sibling-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: false }
+        );
+        const style = document.createElement('style');
+        style.textContent =
+          '#focus-visible-flag:focus-visible ~ #focus-visible-entry button { visibility: hidden; }';
+        const flag = document.createElement('button');
+        flag.id = 'focus-visible-flag';
+        flag.textContent = 'Flag';
+        const host = new C();
+        host.id = 'focus-visible-entry';
+        host.innerHTML = '<button>Delegated target</button>';
+        const after = document.createElement('button');
+        after.id = 'focus-visible-after';
+        after.textContent = 'After';
+        document.head.append(style);
+        document.body.append(flag, host, after);
+      });
+      await page.locator('#focus-visible-flag').click();
+      expect(
+        await page.locator('#focus-visible-entry').evaluate((host) => ({
+          fallback: host.getAttribute('tabindex'),
+          visibility: getComputedStyle(host.querySelector('button')!).visibility,
+        }))
+      ).toEqual({ fallback: null, visibility: 'visible' });
+
+      await page.keyboard.press('Tab');
+      const result = await page.evaluate(async () => {
+        await new Promise<void>((resolve) => setTimeout(resolve));
+        return {
+          active: document.activeElement?.id,
+          fallback: document.querySelector('#focus-visible-entry')?.getAttribute('tabindex'),
+          afterFocused: document.activeElement?.id === 'focus-visible-after',
+        };
+      });
+      expect(result).toEqual({
+        active: 'focus-visible-entry',
+        fallback: '0',
+        afterFocused: false,
       });
       expect(errors).toEqual([]);
     } finally {

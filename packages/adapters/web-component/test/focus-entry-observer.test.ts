@@ -62,6 +62,67 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('resamples non-composed visibility transitions inside a descendant open root', async () => {
+    const host = panel(true);
+    const carrier = document.createElement('span');
+    const root = carrier.attachShadow({ mode: 'open' });
+    const button = document.createElement('button');
+    root.append(button);
+    host.append(carrier);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    let hidden = false;
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility') return hidden ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    hidden = true;
+    const transition = new TransitionEvent('transitionend', {
+      bubbles: true,
+      composed: false,
+    });
+    Object.defineProperty(transition, 'propertyName', { value: 'visibility' });
+    button.dispatchEvent(transition);
+    expect(host.tabIndex).toBe(0);
+  });
+
+  it('resamples external sibling focus-visible eligibility on keyboard modality input', async () => {
+    const sibling = document.createElement('button');
+    document.body.append(sibling);
+    const host = panel(false);
+    const button = document.createElement('button');
+    host.append(button);
+    const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+    let keyboardModality = false;
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const computed = nativeGetComputedStyle(element, pseudoElement);
+      if (element !== button) return computed;
+      return new Proxy(computed, {
+        get(target, property) {
+          if (property === 'visibility') return keyboardModality ? 'hidden' : 'visible';
+          return Reflect.get(target, property, target);
+        },
+      });
+    });
+    sibling.focus();
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    keyboardModality = true;
+    sibling.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, composed: true })
+    );
+    expect(host.tabIndex).toBe(0);
+  });
+
   it('resamples when an observed descendant upgrades and attaches an open root', async () => {
     // attachShadow() produces no light-tree MutationObserver record; the
     // bounded upgrade watch must revoke the host fallback once a late-open

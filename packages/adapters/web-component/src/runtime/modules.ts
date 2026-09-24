@@ -1274,7 +1274,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             entryObserverGeneration === observerGeneration && entryObserver !== null;
           let projectedTargetTabIndex = target.getAttribute('tabindex');
           const projectEntry = () => {
-            const resolved = resolveFocusEntryTarget(target, config);
+            // A host selected as the substituted Tab stop must remain a valid
+            // focus target for the duration of that focus. Once focus leaves,
+            // the ordinary descendant-first result is restored immediately.
+            const resolved =
+              target.ownerDocument.activeElement === target
+                ? target
+                : resolveFocusEntryTarget(target, config);
             projectFocusable(target, resolved === target);
             projectedTargetTabIndex = target.getAttribute('tabindex');
           };
@@ -1546,6 +1552,30 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 ['toggle'],
                 projectCurrent
               );
+              // Keyboard modality can change :focus-visible matching on an
+              // already-focused external selector subject without focus or DOM
+              // mutation. Capture keydown so fallback projection is current
+              // before the browser performs substituted Tab traversal.
+              let keyboardTraversalPending = false;
+              let keyboardTraversalTimer = 0;
+              const onKeyboardModality = (event: Event) => {
+                const key = event as KeyboardEvent;
+                if (key.key === 'Tab' && !key.altKey && !key.ctrlKey && !key.metaKey) {
+                  keyboardTraversalPending = true;
+                  if (keyboardTraversalTimer) view!.clearTimeout(keyboardTraversalTimer);
+                  keyboardTraversalTimer = view!.setTimeout(() => {
+                    keyboardTraversalTimer = 0;
+                    keyboardTraversalPending = false;
+                    projectCurrent();
+                  });
+                }
+                projectCurrent();
+              };
+              const stopKeyboardModalityEvents = listenToEntryEvents(
+                [target.ownerDocument],
+                ['keydown'],
+                onKeyboardModality
+              );
               const projectionEvents = [
                 'transitionstart',
                 'transitionend',
@@ -1598,6 +1628,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   );
               };
               const onProjectionEvent = (event: Event) => {
+                // Keep the substituted fallback stable while the browser is
+                // consuming the same Tab default action. The subsequent task
+                // resamples after focus-visible/focus state settles.
+                if (
+                  keyboardTraversalPending &&
+                  (event.type === 'focusin' || event.type === 'focusout')
+                )
+                  return;
                 if (event.type.startsWith('transition')) {
                   const propertyName = (event as TransitionEvent).propertyName;
                   if (
@@ -1619,7 +1657,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               );
               const stopShadowAnimationEvents = listenToEntryEvents(
                 shadowAnimationTargets,
-                ['animationstart', 'animationend', 'animationcancel'],
+                [
+                  'transitionstart',
+                  'transitionend',
+                  'transitioncancel',
+                  'animationstart',
+                  'animationend',
+                  'animationcancel',
+                ],
                 onProjectionEvent
               );
               const onExternalStyleEvent = (event: Event) => {
@@ -1638,6 +1683,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 stopEntryEnvironmentEvents();
                 stopFormResetEvents();
                 stopSiblingStateEvents();
+                if (keyboardTraversalTimer) view!.clearTimeout(keyboardTraversalTimer);
+                keyboardTraversalTimer = 0;
+                keyboardTraversalPending = false;
+                stopKeyboardModalityEvents();
                 stopProjectionEvents();
                 stopShadowAnimationEvents();
                 stopExternalStyleEvents();
