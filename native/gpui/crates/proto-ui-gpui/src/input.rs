@@ -33,6 +33,16 @@
 //!
 //! `press.start`, `press.end` and `press.cancel` have no producer in the Web
 //! router, so they have none here either.
+//!
+//! # Where the platform, not the router, differs
+//!
+//! After Enter or Space on a native button, a browser fires a `click` of its
+//! own with `detail === 0`. The Web router has already committed on the key,
+//! so it suppresses that click once. GPUI fires no such click for a key the
+//! host routes itself, so here a zero-detail click is always an activation in
+//! its own right, such as one an assistive technology requests. Suppressing it
+//! would lose that activation. [`KeyboardClick`] says which platform the
+//! router is running on; the rule for each is the Web router's.
 
 use std::collections::HashSet;
 
@@ -106,8 +116,8 @@ pub enum HostInput {
     /// The pointer left the window.
     PointerExit { modifiers: PortableModifiers },
     /// A completed click. `detail` is the click count, and `0` for a click
-    /// the platform synthesizes from keyboard activation — the case the Web
-    /// router suppresses once after a keyboard commit.
+    /// that no pointer produced: one a browser synthesizes after a keyboard
+    /// activation, or one an assistive technology requests.
     Click {
         target: Target,
         detail: u32,
@@ -228,9 +238,22 @@ enum Payload {
     Host,
 }
 
+/// Whether the platform follows a keyboard activation with a click of its own.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum KeyboardClick {
+    /// Nothing follows, as in GPUI. A zero-detail click is an activation in
+    /// its own right, and it commits.
+    #[default]
+    NotSynthesized,
+    /// A zero-detail click follows, as in a browser. The key has already
+    /// committed, so the router suppresses that click once.
+    Synthesized,
+}
+
 /// Routes host input to sessions.
 #[derive(Default)]
 pub struct InputRouter {
+    keyboard_click: KeyboardClick,
     sessions: Vec<SessionState>,
     /// Surfaces under the pointer after the last pointer input, innermost
     /// first, from which enter and leave are derived.
@@ -241,6 +264,14 @@ pub struct InputRouter {
 impl InputRouter {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// A router for a platform that does, or does not, click after a key.
+    pub fn with_keyboard_click(keyboard_click: KeyboardClick) -> Self {
+        Self {
+            keyboard_click,
+            ..Self::default()
+        }
     }
 
     /// Adds a session, or replaces its leases after a new projection.
@@ -479,13 +510,16 @@ impl InputRouter {
     }
 
     /// The Web router's `emitPressCommitOnce`: at most one keyboard commit per
-    /// input per session, and the first one arms click suppression.
+    /// input per session, and the first one arms click suppression on a
+    /// platform that clicks after a key.
     fn commit_once(&mut self, index: usize, payload: &Payload, routing: &mut Routing) {
         let session_id = self.sessions[index].route.session_id.clone();
         if !routing.committed.insert(session_id) {
             return;
         }
-        self.sessions[index].suppress_followup_click = true;
+        if self.keyboard_click == KeyboardClick::Synthesized {
+            self.sessions[index].suppress_followup_click = true;
+        }
         routing.emit(
             &self.sessions[index].route,
             &EventType::Core(CoreEvent::PressCommit),
