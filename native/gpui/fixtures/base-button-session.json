@@ -25,10 +25,10 @@
         "methods": [
           "focusSelf"
         ],
-        "signals": [],
-        "unsupported": [
+        "signals": [
           "click"
-        ]
+        ],
+        "unsupported": []
       },
       {
         "kind": "lifecycle",
@@ -92,10 +92,10 @@
         "methods": [
           "focusSelf"
         ],
-        "signals": [],
-        "unsupported": [
+        "signals": [
           "click"
-        ]
+        ],
+        "unsupported": []
       },
       {
         "kind": "lifecycle",
@@ -251,10 +251,10 @@
         "methods": [
           "focusSelf"
         ],
-        "signals": [],
-        "unsupported": [
+        "signals": [
           "click"
-        ]
+        ],
+        "unsupported": []
       },
       {
         "kind": "lifecycle",
@@ -325,10 +325,10 @@
         "methods": [
           "focusSelf"
         ],
-        "signals": [],
-        "unsupported": [
+        "signals": [
           "click"
-        ]
+        ],
+        "unsupported": []
       },
       {
         "kind": "lifecycle",
