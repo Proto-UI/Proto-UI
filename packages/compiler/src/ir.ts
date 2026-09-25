@@ -69,8 +69,7 @@ export type Operation =
   | 'accessible.role'
   | 'accessible.nameFromContent'
   | 'render.el'
-  | 'render.slot'
-  | 'render.fragment';
+  | 'render.slot';
 
 export interface ParameterIR {
   name: string;

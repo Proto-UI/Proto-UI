@@ -1,6 +1,7 @@
 import {
   compareTraces,
   snapshotTrace,
+  type IdentityNormalization,
   type SemanticCheckpoint,
   type TraceComparison,
 } from './trace';
@@ -75,7 +76,10 @@ export function assessCase(input: {
   candidate?: ObservedRun;
   unsupported?: string;
   authorityBlocker?: string;
-  harnessError?: string;
+  identities?: {
+    reference?: IdentityNormalization;
+    candidate?: IdentityNormalization;
+  };
 }): CaseResult {
   const required = input.requiredCriteria;
   const result: CaseResult = {
@@ -85,13 +89,6 @@ export function assessCase(input: {
     reasons: [],
     failures: [],
   };
-  if (input.harnessError)
-    return {
-      ...result,
-      status: 'BLOCKED',
-      reasons: [input.harnessError],
-      failures: ['harness-defect'],
-    };
   if (input.authorityBlocker)
     return {
       ...result,
@@ -154,7 +151,10 @@ export function assessCase(input: {
   }
   if (result.reasons.length) return result;
   try {
-    result.comparison = compareTraces(input.reference.trace, input.candidate.trace);
+    result.comparison = compareTraces(input.reference.trace, input.candidate.trace, {
+      referenceIdentity: input.identities?.reference,
+      candidateIdentity: input.identities?.candidate,
+    });
   } catch (error) {
     return { ...result, status: 'BLOCKED', reasons: [String(error)], failures: ['harness-defect'] };
   }
