@@ -1447,6 +1447,22 @@ function isDomReceiverExpression(
   ) {
     return true;
   }
+  if (ts.isCallExpression(candidate)) {
+    const collectionMethod = staticMemberAccess(candidate.expression);
+    if (
+      collectionMethod &&
+      /^(?:item|namedItem)$/u.test(collectionMethod.name) &&
+      isDomCollectionExpression(
+        collectionMethod.receiver,
+        sourceFile,
+        receiverBindings,
+        useNode,
+        visitedBindings
+      )
+    ) {
+      return true;
+    }
+  }
   if (isDomAcquisitionCall(candidate, sourceFile, receiverBindings, useNode, visitedBindings)) {
     return true;
   }
@@ -4405,12 +4421,10 @@ function inspectBarePackageForGuardedWebsiteImports(
   } catch {
     return null;
   }
-  const dependencyNames = Object.keys({
-    ...(manifest.dependencies ?? {}),
-    ...(manifest.optionalDependencies ?? {}),
-    ...(manifest.peerDependencies ?? {}),
-  });
-  if (!dependencyNames.some((name) => /^@proto\.ui\//u.test(name))) return null;
+  const dependencyNames = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.optionalDependencies ?? {}),
+  ]);
 
   const resolveRelative = (sourcePath, importedSpecifier) => {
     const classified = importSpecifierWithoutViteSuffix(importedSpecifier);
@@ -4452,7 +4466,12 @@ function inspectBarePackageForGuardedWebsiteImports(
         dependencySpecifier,
         websiteAliasConfig
       );
-      if (guarded) {
+      if (
+        guarded &&
+        /^(?:adapter|prototype|module|core|runtime|hooks)-(?:package|internal)$/u.test(
+          guarded.category
+        )
+      ) {
         const result = {
           category: `transitive-${guarded.category}`,
           resolvedPath: path.relative(rootDir, sourcePath).replaceAll('\\', '/'),
@@ -4461,7 +4480,28 @@ function inspectBarePackageForGuardedWebsiteImports(
         return result;
       }
       const target = resolveRelative(sourcePath, dependencySpecifier);
-      if (target && !visited.has(target)) pending.push(target);
+      if (target) {
+        if (!visited.has(target)) pending.push(target);
+        continue;
+      }
+      const nestedSpecifier = importSpecifierWithoutViteSuffix(dependencySpecifier);
+      const nestedPackageName = nestedSpecifier.startsWith('@')
+        ? nestedSpecifier.split('/').slice(0, 2).join('/')
+        : nestedSpecifier.split('/')[0];
+      if (dependencyNames.has(nestedPackageName) && !isNodeBuiltinSpecifier(nestedSpecifier)) {
+        const nestedImport = inspectBarePackageForGuardedWebsiteImports(
+          rootDir,
+          canonicalRootDir,
+          sourcePath,
+          nestedSpecifier,
+          websiteAliasConfig,
+          cache
+        );
+        if (nestedImport) {
+          cache.set(entryPath, nestedImport);
+          return nestedImport;
+        }
+      }
     }
   }
   return null;
@@ -4887,7 +4927,7 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
     }
     if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
     issues.push(
-      `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist`
+      `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist${rawImport.category?.startsWith('transitive-') ? ` (found ${rawImport.category} in \`${rawImport.resolvedPath}\`)` : ''}`
     );
   }
 }
@@ -5447,43 +5487,202 @@ function hasVideoFileSignature(absolutePath) {
     return tracks >= 0 && cluster >= 0 && (simpleBlock >= 0 || block >= 0);
   }
 
-  const boxes = [];
-  let offset = 0;
-  for (; offset + 8 <= data.length; ) {
-    let size = data.readUInt32BE(offset);
-    let headerSize = 8;
-    if (size === 1) {
-      if (offset + 16 > data.length) return false;
-      const extendedSize = data.readBigUInt64BE(offset + 8);
-      if (extendedSize > BigInt(Number.MAX_SAFE_INTEGER)) return false;
-      size = Number(extendedSize);
-      headerSize = 16;
-    } else if (size === 0) {
-      size = data.length - offset;
+  const readBoxes = (start, end) => {
+    const boxes = [];
+    let cursor = start;
+    while (cursor < end) {
+      if (cursor + 8 > end) return null;
+      let size = data.readUInt32BE(cursor);
+      const type = data.subarray(cursor + 4, cursor + 8).toString('ascii');
+      let headerSize = 8;
+      if (size === 1) {
+        if (cursor + 16 > end) return null;
+        const extendedSize = data.readBigUInt64BE(cursor + 8);
+        if (extendedSize > BigInt(Number.MAX_SAFE_INTEGER)) return null;
+        size = Number(extendedSize);
+        headerSize = 16;
+      } else if (size === 0) {
+        size = end - cursor;
+      }
+      if (type === 'uuid') headerSize += 16;
+      if (size < headerSize || cursor + size > end) return null;
+      boxes.push({ type, start: cursor + headerSize, end: cursor + size });
+      cursor += size;
     }
-    if (size < headerSize || offset + size > data.length) return false;
-    boxes.push({
-      type: data.subarray(offset + 4, offset + 8).toString('ascii'),
-      start: offset + headerSize,
-      end: offset + size,
-    });
-    offset += size;
+    return cursor === end ? boxes : null;
+  };
+  const topLevel = readBoxes(0, data.length);
+  if (!topLevel) return false;
+  const fileType = topLevel.find((box) => box.type === 'ftyp');
+  const movie = topLevel.find((box) => box.type === 'moov');
+  const mediaData = topLevel.filter((box) => box.type === 'mdat' && box.end > box.start);
+  if (
+    !fileType ||
+    fileType.end - fileType.start < 8 ||
+    (fileType.end - fileType.start - 8) % 4 !== 0 ||
+    !movie ||
+    mediaData.length === 0
+  ) {
+    return false;
   }
-  if (offset !== data.length) return false;
-  const ftyp = boxes.find((box) => box.type === 'ftyp');
-  const moov = boxes.find((box) => box.type === 'moov');
-  const mdat = boxes.find((box) => box.type === 'mdat' && box.end > box.start);
-  if (!ftyp || !moov || !mdat) return false;
-  const moovBytes = data.subarray(moov.start, moov.end);
-  const sampleTable = moovBytes.indexOf(Buffer.from('stsz'));
-  const fragmentRun = moovBytes.indexOf(Buffer.from('trun'));
-  const sampleCount =
-    sampleTable >= 0 && sampleTable + 16 <= moovBytes.length
-      ? moovBytes.readUInt32BE(sampleTable + 12)
-      : fragmentRun >= 0 && fragmentRun + 12 <= moovBytes.length
-        ? moovBytes.readUInt32BE(fragmentRun + 8)
-        : 0;
-  return moovBytes.includes(Buffer.from('vide')) && sampleCount > 0;
+
+  const containsVideoSampleTable = (sampleTable) => {
+    const entries = readBoxes(sampleTable.start, sampleTable.end);
+    if (!entries) return false;
+    const sampleDescription = entries.find((box) => box.type === 'stsd');
+    const sampleTiming = entries.find((box) => box.type === 'stts');
+    const sampleToChunk = entries.find((box) => box.type === 'stsc');
+    const sampleSizes = entries.find((box) => box.type === 'stsz');
+    const chunkOffsetTables = entries.filter((box) => box.type === 'stco' || box.type === 'co64');
+    if (
+      !sampleDescription ||
+      !sampleTiming ||
+      !sampleToChunk ||
+      !sampleSizes ||
+      chunkOffsetTables.length !== 1
+    ) {
+      return false;
+    }
+
+    if (sampleDescription.end - sampleDescription.start < 8) return false;
+    const sampleDescriptionCount = data.readUInt32BE(sampleDescription.start + 4);
+    const sampleDescriptions = readBoxes(sampleDescription.start + 8, sampleDescription.end);
+    if (
+      sampleDescriptionCount === 0 ||
+      !sampleDescriptions ||
+      sampleDescriptions.length !== sampleDescriptionCount ||
+      sampleDescriptions.some((box) => box.end - box.start < 8)
+    ) {
+      return false;
+    }
+
+    if (sampleSizes.end - sampleSizes.start < 12) return false;
+    const constantSampleSize = data.readUInt32BE(sampleSizes.start + 4);
+    const sampleCount = data.readUInt32BE(sampleSizes.start + 8);
+    if (sampleCount === 0 || sampleCount > data.length) return false;
+    if (
+      constantSampleSize === 0 &&
+      sampleCount > Math.floor((sampleSizes.end - sampleSizes.start - 12) / 4)
+    ) {
+      return false;
+    }
+    const sampleSizeAt = (index) =>
+      constantSampleSize || data.readUInt32BE(sampleSizes.start + 12 + index * 4);
+
+    if (sampleTiming.end - sampleTiming.start < 8) return false;
+    const timingCount = data.readUInt32BE(sampleTiming.start + 4);
+    if (
+      timingCount === 0 ||
+      timingCount > Math.floor((sampleTiming.end - sampleTiming.start - 8) / 8)
+    ) {
+      return false;
+    }
+    let timedSamples = 0;
+    for (let index = 0; index < timingCount; index += 1) {
+      const entry = sampleTiming.start + 8 + index * 8;
+      const count = data.readUInt32BE(entry);
+      const delta = data.readUInt32BE(entry + 4);
+      if (count === 0 || delta === 0) return false;
+      timedSamples += count;
+      if (timedSamples > sampleCount) return false;
+    }
+    if (timedSamples !== sampleCount) return false;
+
+    if (sampleToChunk.end - sampleToChunk.start < 8) return false;
+    const sampleToChunkCount = data.readUInt32BE(sampleToChunk.start + 4);
+    if (
+      sampleToChunkCount === 0 ||
+      sampleToChunkCount > Math.floor((sampleToChunk.end - sampleToChunk.start - 8) / 12)
+    ) {
+      return false;
+    }
+    const sampleToChunkEntries = [];
+    for (let index = 0; index < sampleToChunkCount; index += 1) {
+      const entry = sampleToChunk.start + 8 + index * 12;
+      const firstChunk = data.readUInt32BE(entry);
+      const samplesPerChunk = data.readUInt32BE(entry + 4);
+      const sampleDescriptionIndex = data.readUInt32BE(entry + 8);
+      if (
+        firstChunk === 0 ||
+        (index === 0 && firstChunk !== 1) ||
+        (index > 0 && firstChunk <= sampleToChunkEntries[index - 1].firstChunk) ||
+        samplesPerChunk === 0 ||
+        sampleDescriptionIndex === 0 ||
+        sampleDescriptionIndex > sampleDescriptionCount
+      ) {
+        return false;
+      }
+      sampleToChunkEntries.push({ firstChunk, samplesPerChunk });
+    }
+
+    const chunkOffsetTable = chunkOffsetTables[0];
+    if (chunkOffsetTable.end - chunkOffsetTable.start < 8) return false;
+    const chunkCount = data.readUInt32BE(chunkOffsetTable.start + 4);
+    const offsetWidth = chunkOffsetTable.type === 'co64' ? 8 : 4;
+    if (
+      chunkCount === 0 ||
+      chunkCount > Math.floor((chunkOffsetTable.end - chunkOffsetTable.start - 8) / offsetWidth) ||
+      sampleToChunkEntries.some((entry) => entry.firstChunk > chunkCount)
+    ) {
+      return false;
+    }
+    const chunkOffsets = [];
+    for (let index = 0; index < chunkCount; index += 1) {
+      const entry = chunkOffsetTable.start + 8 + index * offsetWidth;
+      const offset =
+        offsetWidth === 8 ? data.readBigUInt64BE(entry) : BigInt(data.readUInt32BE(entry));
+      if (offset > BigInt(Number.MAX_SAFE_INTEGER)) return false;
+      chunkOffsets.push(Number(offset));
+    }
+
+    const sampleIsInsideMediaData = (offset, size) =>
+      size > 0 &&
+      Number.isSafeInteger(offset + size) &&
+      mediaData.some((box) => offset >= box.start && offset + size <= box.end);
+    let sampleIndex = 0;
+    let sampleToChunkIndex = 0;
+    for (let chunkIndex = 1; chunkIndex <= chunkCount; chunkIndex += 1) {
+      while (
+        sampleToChunkIndex + 1 < sampleToChunkEntries.length &&
+        sampleToChunkEntries[sampleToChunkIndex + 1].firstChunk <= chunkIndex
+      ) {
+        sampleToChunkIndex += 1;
+      }
+      const samplesPerChunk = sampleToChunkEntries[sampleToChunkIndex].samplesPerChunk;
+      if (sampleIndex + samplesPerChunk > sampleCount) return false;
+      let sampleOffset = chunkOffsets[chunkIndex - 1];
+      for (let index = 0; index < samplesPerChunk; index += 1) {
+        const sampleSize = sampleSizeAt(sampleIndex);
+        if (!sampleIsInsideMediaData(sampleOffset, sampleSize)) return false;
+        sampleOffset += sampleSize;
+        sampleIndex += 1;
+      }
+    }
+    return sampleIndex === sampleCount;
+  };
+
+  const movieEntries = readBoxes(movie.start, movie.end);
+  if (!movieEntries) return false;
+  for (const track of movieEntries.filter((box) => box.type === 'trak')) {
+    const trackEntries = readBoxes(track.start, track.end);
+    const media = trackEntries?.find((box) => box.type === 'mdia');
+    if (!media) continue;
+    const mediaEntries = readBoxes(media.start, media.end);
+    const handler = mediaEntries?.find((box) => box.type === 'hdlr');
+    const mediaInformation = mediaEntries?.find((box) => box.type === 'minf');
+    if (
+      !handler ||
+      handler.end - handler.start < 12 ||
+      data.toString('ascii', handler.start + 8, handler.start + 12) !== 'vide' ||
+      !mediaInformation
+    ) {
+      continue;
+    }
+    const mediaInformationEntries = readBoxes(mediaInformation.start, mediaInformation.end);
+    const sampleTable = mediaInformationEntries?.find((box) => box.type === 'stbl');
+    if (sampleTable && containsVideoSampleTable(sampleTable)) return true;
+  }
+  return false;
 }
 
 function canonicalFileWithinRoot(
@@ -5665,6 +5864,48 @@ function evidenceCommitMetadata(
     ) {
       issues.push(
         `${context}: promoted implementation \`${repositoryPath}\` differs from evidence Commit \`${commit}\``
+      );
+    }
+  }
+
+  const aliasConfig = implementationPaths.some((repositoryPath) =>
+    repositoryPath.startsWith('apps/www/')
+  )
+    ? configuredWebsiteSourceAliases(rootDir)
+    : { aliases: new Map(), unsupported: new Set() };
+  const sourceImplementationRoots = implementationPaths
+    .map((repositoryPath) => path.resolve(rootDir, repositoryPath))
+    .filter((absolutePath) => fs.existsSync(absolutePath) && fs.statSync(absolutePath).isFile());
+  const sourceDependencyPaths = reachableSourcePaths(
+    sourceImplementationRoots,
+    aliasConfig,
+    rootDir
+  );
+  for (const absoluteDependencyPath of sourceDependencyPaths) {
+    const canonicalDependencyPath = canonicalImportTarget(absoluteDependencyPath);
+    const repositoryPath = path.relative(rootDir, canonicalDependencyPath).replaceAll('\\', '/');
+    if (
+      repositoryPath === '' ||
+      repositoryPath.startsWith('../') ||
+      path.isAbsolute(repositoryPath)
+    ) {
+      issues.push(`${context}: promoted dependency must resolve within the repository`);
+      continue;
+    }
+    if (implementationPaths.includes(repositoryPath)) continue;
+    const atEvidence = spawnSync('git', ['show', `${commit}:${repositoryPath}`], {
+      cwd: rootDir,
+      encoding: null,
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    if (atEvidence.status !== 0) {
+      issues.push(
+        `${context}: promoted dependency \`${repositoryPath}\` is absent at evidence Commit \`${commit}\``
+      );
+    } else if (!Buffer.from(atEvidence.stdout).equals(fs.readFileSync(canonicalDependencyPath))) {
+      issues.push(
+        `${context}: promoted dependency \`${repositoryPath}\` differs from evidence Commit \`${commit}\``
       );
     }
   }

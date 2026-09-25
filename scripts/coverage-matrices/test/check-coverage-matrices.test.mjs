@@ -456,6 +456,32 @@ function writeSelfHostedPromotion(
   return { evidencePath, resultsPath };
 }
 
+function writeVideoPromotionFixture(root, revision, websiteBindings, videoPath, videoBytes) {
+  writeSelfHostedPromotion(root, revision, {
+    websiteBindings,
+    evidenceOverrides: { 'Multi-frame': `\`${videoPath}\`` },
+  });
+  const videoAbsolutePath = path.join(root, videoPath);
+  fs.mkdirSync(path.dirname(videoAbsolutePath), { recursive: true });
+  fs.writeFileSync(videoAbsolutePath, videoBytes);
+  const resultsPath = path.join(root, 'internal/website/evidence/s14/results.json');
+  const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+  const frameManifestArtifacts = new Set([
+    'internal/website/evidence/s14/navigation-frames.json',
+    'internal/website/evidence/s14/navigation-before.png',
+    'internal/website/evidence/s14/navigation-after.png',
+  ]);
+  results.artifacts = results.artifacts.filter(
+    (artifact) => !frameManifestArtifacts.has(artifact.path)
+  );
+  results.artifacts.push({
+    path: videoPath,
+    size: fs.statSync(videoAbsolutePath).size,
+    sha256: sourceDigest(root, videoPath),
+  });
+  fs.writeFileSync(resultsPath, `${JSON.stringify(results, null, 2)}\n`, 'utf8');
+}
+
 function validHarnessRow(overrides = {}) {
   return {
     ID: 'harness.transcript.viewport',
@@ -6018,6 +6044,39 @@ test('follows indexed DOM collection receivers in Website and Harness scans', ()
   }
 });
 
+test('follows item and namedItem results from DOM collections', () => {
+  for (const [relativePath, source, expected] of [
+    [
+      'apps/www/src/components/collection-item-focus.ts',
+      "document.querySelectorAll('button').item(0)?.focus();",
+      /interactive website source `apps\/www\/src\/components\/collection-item-focus\.ts` is not bound/,
+    ],
+    [
+      'apps/agent-harness/src/run/collection-named-item.ts',
+      "document.forms.namedItem('login')?.focus();",
+      /Harness source `apps\/agent-harness\/src\/run\/collection-named-item\.ts` contains a forbidden interaction or DOM state machine/,
+    ],
+  ]) {
+    const root = createRoot();
+    const sourcePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, source, 'utf8');
+    writeValidMatrices(root);
+    assert.match(validationMessage(root), expected);
+  }
+  const domainRoot = createRoot();
+  const domainPath = 'apps/www/src/components/domain-item-focus.ts';
+  const absoluteDomainPath = path.join(domainRoot, domainPath);
+  fs.mkdirSync(path.dirname(absoluteDomainPath), { recursive: true });
+  fs.writeFileSync(
+    absoluteDomainPath,
+    'const model = { item() { return { focus() {} }; } }; model.item().focus();',
+    'utf8'
+  );
+  writeValidMatrices(domainRoot);
+  assert.deepEqual(validateCoverageMatrices({ rootDir: domainRoot }), { matrixCount: 2 });
+});
+
 test('rejects Agent actions from exported class mount lifecycle methods', () => {
   const root = createRoot();
   const relativePath = 'apps/agent-harness/src/run/ClassMount.tsx';
@@ -6837,6 +6896,33 @@ test('rejects implementation changed after its evidence revision', () => {
   );
 });
 
+test('rejects evidence when a reachable Website helper changes after capture', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const helperPath = 'apps/www/src/components/override/search-helper.ts';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, implementationPath),
+    "---\nimport { searchLabel } from './search-helper';\n---\n<main>{searchLabel}</main>",
+    'utf8'
+  );
+  fs.writeFileSync(path.join(root, helperPath), "export const searchLabel = 'Search';", 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  writeSelfHostedPromotion(root, revision, { websiteBindings });
+  fs.writeFileSync(
+    path.join(root, helperPath),
+    "export const searchLabel = 'Changed after evidence';",
+    'utf8'
+  );
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /promoted dependency `apps\/www\/src\/components\/override\/search-helper\.ts` differs from evidence Commit/
+  );
+});
+
 test('binds PR580 provenance head separately from merged ancestry evidence', () => {
   const root = createRoot();
   writeValidMatrices(root);
@@ -7499,6 +7585,52 @@ test('inspects transitive Proto UI imports from bare packages', () => {
   );
 });
 
+test('follows nested bare packages to governed Proto UI imports', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const packageA = path.join(root, 'node_modules/example-package-a');
+  const packageB = path.join(packageA, 'node_modules/example-package-b');
+  fs.mkdirSync(packageB, { recursive: true });
+  fs.writeFileSync(
+    path.join(packageA, 'package.json'),
+    JSON.stringify({
+      name: 'example-package-a',
+      version: '1.0.0',
+      main: 'index.js',
+      dependencies: { 'example-package-b': '1.0.0' },
+    }),
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(packageA, 'index.js'),
+    "import 'example-package-b'; export const packageA = true;",
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(packageB, 'package.json'),
+    JSON.stringify({
+      name: 'example-package-b',
+      version: '1.0.0',
+      main: 'index.js',
+      dependencies: { '@proto.ui/runtime': '1.0.0' },
+    }),
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(packageB, 'index.js'),
+    "import '@proto.ui/runtime'; export const packageB = true;",
+    'utf8'
+  );
+  const sourcePath = path.join(root, 'apps/www/src/components/NestedBarePackage.ts');
+  fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+  fs.writeFileSync(sourcePath, "import 'example-package-a';", 'utf8');
+
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `example-package-a` in `apps\/www\/src\/components\/NestedBarePackage\.ts` escapes the website consumer-wall allowlist/
+  );
+});
+
 test('scans interaction in test-named modules reachable from production', () => {
   const root = createRoot();
   const productionPath = 'apps/www/src/components/InteractionBridge.astro';
@@ -8139,6 +8271,113 @@ test('rejects truncated retained video evidence with recognized header bytes', (
     validationMessage(root, promotionOptions(revision)),
     /Multi-frame: retained video artifact must be structurally valid and contain frame data/
   );
+});
+
+test('rejects MP4 marker strings without a video sample table', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  const videoPath = 'internal/website/evidence/s14/marker-only.mp4';
+  const makeBox = (type, payload = Buffer.alloc(0)) => {
+    const header = Buffer.alloc(8);
+    header.writeUInt32BE(header.length + payload.length, 0);
+    header.write(type, 4, 4, 'ascii');
+    return Buffer.concat([header, payload]);
+  };
+  const fakeMoov = Buffer.alloc(20);
+  fakeMoov.write('vide', 0, 4, 'ascii');
+  fakeMoov.write('stsz', 4, 4, 'ascii');
+  fakeMoov.writeUInt32BE(1, 16);
+  const fakeVideo = Buffer.concat([
+    makeBox('ftyp', Buffer.from('isom\0\0\0\0', 'binary')),
+    makeBox('moov', fakeMoov),
+    makeBox('mdat', Buffer.from([0xff])),
+  ]);
+  writeVideoPromotionFixture(root, revision, websiteBindings, videoPath, fakeVideo);
+
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Multi-frame: retained video artifact must be structurally valid and contain frame data/
+  );
+});
+
+test('accepts MP4 evidence with a complete video sample table', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  const uint32 = (value) => {
+    const bytes = Buffer.alloc(4);
+    bytes.writeUInt32BE(value, 0);
+    return bytes;
+  };
+  const box = (type, payload = Buffer.alloc(0)) => {
+    const header = Buffer.alloc(8);
+    header.writeUInt32BE(header.length + payload.length, 0);
+    header.write(type, 4, 4, 'ascii');
+    return Buffer.concat([header, payload]);
+  };
+  const fullBox = (type, payload = Buffer.alloc(0), flags = 0) => {
+    const versionAndFlags = Buffer.alloc(4);
+    versionAndFlags.writeUInt32BE(flags, 0);
+    return box(type, Buffer.concat([versionAndFlags, payload]));
+  };
+  const makeMovie = (sampleOffset) => {
+    const sampleEntry = Buffer.alloc(78);
+    sampleEntry.writeUInt16BE(1, 6);
+    sampleEntry.writeUInt16BE(1, 24);
+    sampleEntry.writeUInt16BE(1, 26);
+    sampleEntry.writeUInt16BE(1, 40);
+    sampleEntry.writeUInt16BE(24, 74);
+    sampleEntry.writeUInt16BE(0xffff, 76);
+    const stsd = fullBox('stsd', Buffer.concat([uint32(1), box('raw ', sampleEntry)]));
+    const stts = fullBox('stts', Buffer.concat([uint32(1), uint32(1), uint32(1)]));
+    const stsc = fullBox('stsc', Buffer.concat([uint32(1), uint32(1), uint32(1), uint32(1)]));
+    const stsz = fullBox('stsz', Buffer.concat([uint32(3), uint32(1)]));
+    const stco = fullBox('stco', Buffer.concat([uint32(1), uint32(sampleOffset)]));
+    const stbl = box('stbl', Buffer.concat([stsd, stts, stsc, stsz, stco]));
+    const vmhd = fullBox('vmhd', Buffer.alloc(8), 1);
+    const url = fullBox('url ', Buffer.alloc(0), 1);
+    const dinf = box('dinf', fullBox('dref', Buffer.concat([uint32(1), url])));
+    const minf = box('minf', Buffer.concat([vmhd, dinf, stbl]));
+    const mdhdPayload = Buffer.alloc(20);
+    mdhdPayload.writeUInt32BE(1, 8);
+    mdhdPayload.writeUInt32BE(1, 12);
+    const mdhd = fullBox('mdhd', mdhdPayload);
+    const hdlr = fullBox(
+      'hdlr',
+      Buffer.concat([uint32(0), Buffer.from('vide'), Buffer.alloc(12), Buffer.from([0])])
+    );
+    const mdia = box('mdia', Buffer.concat([mdhd, hdlr, minf]));
+    const tkhdPayload = Buffer.alloc(80);
+    tkhdPayload.writeUInt32BE(1, 8);
+    tkhdPayload.writeUInt32BE(1, 16);
+    const tkhd = fullBox('tkhd', tkhdPayload, 3);
+    const trak = box('trak', Buffer.concat([tkhd, mdia]));
+    const mvhd = fullBox('mvhd', Buffer.alloc(100));
+    return box('moov', Buffer.concat([mvhd, trak]));
+  };
+  const fileType = box('ftyp', Buffer.from('qt  \0\0\0\0qt  ', 'binary'));
+  const firstMovie = makeMovie(0);
+  const sampleOffset = fileType.length + firstMovie.length + 8;
+  const video = Buffer.concat([
+    fileType,
+    makeMovie(sampleOffset),
+    box('mdat', Buffer.from([0, 0, 0])),
+  ]);
+  const videoPath = 'internal/website/evidence/s14/one-frame.mp4';
+  writeVideoPromotionFixture(root, revision, websiteBindings, videoPath, video);
+
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
+    matrixCount: 2,
+  });
 });
 
 test('rejects @vite-ignore dynamic imports without an exact reviewed boundary', () => {
