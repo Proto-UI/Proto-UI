@@ -54,6 +54,12 @@ export type SessionOpenMessage = {
   readonly instanceId: InstanceId;
   readonly prototypeKey: string;
   readonly props: WireRecord;
+  /**
+   * The open session whose instance this one belongs to, such as a Switch for
+   * its thumb. The host composes the instance tree; the peer resolves context,
+   * anatomy and trigger lookups through it. Absent for a top-level instance.
+   */
+  readonly parentSessionId?: SessionId;
 };
 
 export type SessionOpenedMessage = {
@@ -168,6 +174,22 @@ export type A11ySnapshotMessage = {
   readonly snapshot: A11ySnapshotWire | null;
 };
 
+/**
+ * The instance root's feedback style changed outside a commit, as a rule on
+ * hover or press changes it. It replaces the style the view carried, whole.
+ */
+export type StyleApplyMessage = {
+  readonly kind: 'style.apply';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly tokens: readonly string[];
+};
+
+/**
+ * Ends a session, and before it every session opened inside it, so that no
+ * instance outlives the one it belongs to. The peer reports `session.disposed`
+ * for each, a part before the instance it belongs to.
+ */
 export type SessionDisposeMessage = {
   readonly kind: 'session.dispose';
   readonly sessionId: SessionId;
@@ -213,6 +235,7 @@ export type PeerToHostMessage =
   | ExposeSignalMessage
   | ExposeResultMessage
   | A11ySnapshotMessage
+  | StyleApplyMessage
   | SessionDisposedMessage
   | LifecycleMessage
   | DiagnosticMessage;

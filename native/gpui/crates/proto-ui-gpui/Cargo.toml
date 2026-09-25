@@ -13,6 +13,18 @@ proto-ui-host-protocol = { path = "../proto-ui-host-protocol" }
 proto-ui-style = { path = "../proto-ui-style" }
 serde_json.workspace = true
 
+[features]
+# Builds `tests/accesskit_macos.rs`, which opens a real window and reads it
+# through the platform's accessibility API. Off by default: it needs a window
+# server, and the platform backends take a while to build.
+macos-accessibility-test = ["dep:gpui_platform", "dep:objc2", "dep:raw-window-handle"]
+
+[target.'cfg(target_os = "macos")'.dependencies]
+gpui_platform = { workspace = true, optional = true }
+# The versions AccessKit's macOS adapter already uses.
+objc2 = { version = "0.5.2", optional = true }
+raw-window-handle = { version = "0.6", optional = true }
+
 [dev-dependencies]
 # `test-support` brings GPUI's headless harness: a window that runs a real
 # layout and paint pass, plus simulated pointer and keyboard input. Without it
@@ -21,3 +33,8 @@ serde_json.workspace = true
 gpui = { workspace = true, features = ["test-support"] }
 serde.workspace = true
 serde_json.workspace = true
+
+[[test]]
+name = "accesskit_macos"
+harness = false
+required-features = ["macos-accessibility-test"]
