@@ -153,7 +153,7 @@ describe('semantic differential conformance', () => {
       assessCase({
         id: 'blocked',
         requiredCriteria: [hoverCriterion],
-        harnessError: 'browser unavailable',
+        authorityBlocker: 'browser unavailable',
       }).status
     ).toBe('BLOCKED');
     const run = runOracleSuite([checkpoint()], [hoverOracle]);

@@ -118,8 +118,11 @@ class Frontend {
         ...(parameter.questionToken || type === 'focus-options' ? { optional: true } : {}),
       };
     });
-    if (phase === 'setup' && (parameters.length !== 1 || parameters[0].type !== 'def'))
-      rejectNode(node, 'PUI1006', 'Setup must have one definition handle parameter.');
+    if (
+      phase === 'setup' &&
+      (parameters.length > 1 || (parameters.length === 1 && parameters[0].type !== 'def'))
+    )
+      rejectNode(node, 'PUI1006', 'Setup accepts at most one definition handle parameter.');
     const body = ts.isBlock(node.body)
       ? this.statements(module, node.body.statements, scope, phase)
       : [
