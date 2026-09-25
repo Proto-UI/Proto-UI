@@ -26,6 +26,7 @@ function transaction(overrides: Partial<ProjectionTransaction> = {}): Projection
     slots: { slots: ['slot-default'] },
     events: { registrations: [registration('lease-a'), registration('lease-b', 'pointer.down')] },
     focus: { targets: [{ ref: 'focus-root', sequential: true, programmatic: true }] },
+    style: [],
     a11y: {
       semanticObjectId: 'object-1',
       role: 'button',
@@ -251,6 +252,7 @@ describe('host session model: stale rejection, pruning, retained state', () => {
       transaction({
         viewEpoch: 2,
         commitId: 1,
+        style: [],
         a11y: null,
         slots: { slots: [] },
         events: { registrations: [] },
