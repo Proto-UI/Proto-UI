@@ -8,8 +8,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use proto_ui_host_protocol::model::{
-    ActivationStatus, DefaultActionStatus, DeliveryRejection, DeliveryResult, HostSessionModel,
-    InstallOptions, SessionPhase,
+    ActivationStatus, DefaultActionStatus, DeliveryRejection, DeliveryResult, DetachStatus,
+    HostSessionModel, InstallOptions, SessionPhase,
 };
 use proto_ui_host_protocol::wire::{
     DefaultActionRequest, InputSample, ProjectionAckStatus, ProjectionTransaction,
@@ -60,6 +60,12 @@ enum Step {
         within_window: bool,
         #[serde(rename = "expect")]
         expected: StatusExpectation,
+    },
+    Detach {
+        #[serde(rename = "viewEpoch")]
+        view_epoch: u64,
+        #[serde(rename = "expect")]
+        expected: DisposeExpectation,
     },
     Dispose {
         #[serde(rename = "expect")]
@@ -239,6 +245,23 @@ fn apply(model: &mut HostSessionModel, step: &Step, label: &str) {
         } => {
             let status = model.request_default_action_prevention(request, *within_window);
             assert_eq!(default_action_status(status), expected.status, "{label}");
+        }
+        Step::Detach {
+            view_epoch,
+            expected,
+        } => {
+            let result = model.detach_view(*view_epoch);
+            let status = match result.status {
+                DetachStatus::Detached => "detached",
+                DetachStatus::Stale => "stale",
+                DetachStatus::NotInstalled => "not-installed",
+                DetachStatus::Disposed => "disposed",
+            };
+            assert_eq!(status, expected.status, "{label} status");
+            assert_eq!(
+                &result.released_lease_ids, &expected.released_lease_ids,
+                "{label} releasedLeaseIds"
+            );
         }
         Step::Dispose { expected } => {
             let result = model.dispose();
