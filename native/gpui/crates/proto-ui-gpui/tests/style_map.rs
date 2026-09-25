@@ -30,7 +30,15 @@ fn resolve(tokens: &[&str], language: &str) -> proto_ui_style::ResolvedStyle {
 fn maps_layout_and_box_properties() {
     let mapped = map(
         &resolve(
-            &["flex", "flex-col", "items-center", "px-3", "py-1", "gap-2"],
+            &[
+                "relative",
+                "flex",
+                "flex-col",
+                "items-center",
+                "px-3",
+                "py-1",
+                "gap-2",
+            ],
             "shadcn",
         ),
         LengthContext::default(),
@@ -88,10 +96,13 @@ fn maps_a_percentage_to_a_fraction_and_keeps_position() {
 #[test]
 fn maps_font_family_fallbacks_as_distinct_candidates() {
     let mapped = map(
-        &declared(&[(
-            "font-family",
-            "ui-monospace, SFMono-Regular, Menlo, \"Liberation Mono\", monospace",
-        )]),
+        &declared(&[
+            ("position", "relative"),
+            (
+                "font-family",
+                "ui-monospace, SFMono-Regular, Menlo, \"Liberation Mono\", monospace",
+            ),
+        ]),
         LengthContext::default(),
     );
     assert_eq!(
@@ -126,7 +137,10 @@ fn static_position_ignores_insets_and_fixed_position_fails_closed() {
 
     let implicit_static = map(&declared(&[("top", "1rem")]), LengthContext::default());
     assert_eq!(implicit_static.refinement.inset.top, None);
-    assert!(implicit_static.is_complete());
+    assert!(!implicit_static.is_complete());
+    assert!(implicit_static.unmapped.iter().any(|(p, v, reason)| {
+        p == "position" && v == "static" && *reason == Unmapped::UnsupportedValue
+    }));
 
     let fixed = map(
         &declared(&[("position", "fixed"), ("top", "1rem")]),
@@ -147,6 +161,60 @@ fn keeps_overflow_clip_distinct_from_hidden() {
     let clip = map(&declared(&[("overflow", "clip")]), LengthContext::default());
     assert_eq!(clip.refinement.overflow.x, Some(gpui::Overflow::Clip));
     assert_eq!(clip.refinement.overflow.y, Some(gpui::Overflow::Clip));
+}
+
+#[test]
+fn preserves_flex_relative_alignment_keywords() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("flex-direction", "column-reverse"),
+            ("align-items", "flex-start"),
+            ("justify-content", "flex-end"),
+        ]),
+        LengthContext::default(),
+    );
+    assert_eq!(
+        mapped.refinement.flex_direction,
+        Some(gpui::FlexDirection::ColumnReverse)
+    );
+    assert_eq!(
+        mapped.refinement.align_items,
+        Some(gpui::AlignItems::FlexStart)
+    );
+    assert_eq!(
+        mapped.refinement.justify_content,
+        Some(gpui::JustifyContent::FlexEnd)
+    );
+
+    let logical = map(
+        &declared(&[
+            ("position", "relative"),
+            ("align-items", "start"),
+            ("justify-content", "end"),
+        ]),
+        LengthContext::default(),
+    );
+    assert_eq!(
+        logical.refinement.align_items,
+        Some(gpui::AlignItems::Start)
+    );
+    assert_eq!(
+        logical.refinement.justify_content,
+        Some(gpui::JustifyContent::End)
+    );
+}
+
+#[test]
+fn reports_auto_overflow_when_gpui_only_has_always_scroll() {
+    for (property, value) in [("overflow", "auto"), ("overflow-y", "auto")] {
+        let mapped = map(&declared(&[(property, value)]), LengthContext::default());
+        assert!(mapped.unmapped.iter().any(|(p, v, reason)| {
+            p == property && v == value && *reason == Unmapped::UnsupportedValue
+        }));
+        assert_eq!(mapped.refinement.overflow.x, None);
+        assert_eq!(mapped.refinement.overflow.y, None);
+    }
 }
 
 #[test]
@@ -260,7 +328,7 @@ const EXPECTED_UNMAPPED: [&str; 28] = [
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 6] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 9] = [
     (
         "width",
         "fit-content",
@@ -300,6 +368,21 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 6] = [
         "position",
         "fixed",
         "GPUI absolute positioning is ancestor-relative and cannot preserve CSS viewport-fixed behavior.",
+    ),
+    (
+        "position",
+        "static",
+        "CSS static cannot be represented by GPUI's default Relative position, which may establish a containing block for absolute descendants.",
+    ),
+    (
+        "overflow",
+        "auto",
+        "GPUI has no Auto overflow mode and Scroll reserves scrollbar space even when content fits.",
+    ),
+    (
+        "overflow-y",
+        "auto",
+        "GPUI has no Auto overflow mode and Scroll reserves scrollbar space even when content fits.",
     ),
 ];
 
@@ -347,7 +430,7 @@ fn brutalist_radius_substitution_reaches_the_map_as_invalid() {
 #[test]
 fn a_unitless_line_height_multiplies_the_font_size() {
     let mapped = map(
-        &resolve(&["leading-none"], "shadcn"),
+        &resolve(&["relative", "leading-none"], "shadcn"),
         LengthContext::default(),
     );
     assert_eq!(

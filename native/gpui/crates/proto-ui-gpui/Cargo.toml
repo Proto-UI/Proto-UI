@@ -11,3 +11,12 @@ rust-version.workspace = true
 gpui.workspace = true
 proto-ui-host-protocol = { path = "../proto-ui-host-protocol" }
 proto-ui-style = { path = "../proto-ui-style" }
+
+[dev-dependencies]
+# `test-support` brings GPUI's headless harness: a window that runs a real
+# layout and paint pass, plus simulated pointer and keyboard input. Without it
+# every assertion here would be about the `StyleRefinement` we build rather
+# than about what GPUI does with it.
+gpui = { workspace = true, features = ["test-support"] }
+serde.workspace = true
+serde_json.workspace = true

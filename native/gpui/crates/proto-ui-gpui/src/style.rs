@@ -72,6 +72,16 @@ pub fn map(resolved: &ResolvedStyle, context: LengthContext) -> MappedStyle {
         Some("relative" | "absolute") => InsetMode::Positioned,
         Some(_) => InsetMode::Unsupported,
     };
+    // CSS defaults to static, but GPUI Style defaults to Relative, which also
+    // establishes a containing block for absolute descendants. Do not claim a
+    // complete mapping when this host cannot express the CSS default.
+    if !resolved.declarations.contains_key("position") {
+        mapped.unmapped.push((
+            "position".into(),
+            "static".into(),
+            Unmapped::UnsupportedValue,
+        ));
+    }
 
     for (property, value) in &resolved.declarations {
         // Custom properties are inputs to a composed declaration that appears
@@ -290,16 +300,20 @@ fn apply(
         },
         "align-items" => match value {
             "center" => style.align_items = Some(AlignItems::Center),
-            "flex-start" | "start" => style.align_items = Some(AlignItems::FlexStart),
-            "flex-end" | "end" => style.align_items = Some(AlignItems::FlexEnd),
+            "flex-start" => style.align_items = Some(AlignItems::FlexStart),
+            "start" => style.align_items = Some(AlignItems::Start),
+            "flex-end" => style.align_items = Some(AlignItems::FlexEnd),
+            "end" => style.align_items = Some(AlignItems::End),
             "baseline" => style.align_items = Some(AlignItems::Baseline),
             "stretch" => style.align_items = Some(AlignItems::Stretch),
             _ => return Err(Unmapped::UnsupportedValue),
         },
         "justify-content" => match value {
             "center" => style.justify_content = Some(JustifyContent::Center),
-            "flex-start" | "start" => style.justify_content = Some(JustifyContent::Start),
-            "flex-end" | "end" => style.justify_content = Some(JustifyContent::End),
+            "flex-start" => style.justify_content = Some(JustifyContent::FlexStart),
+            "start" => style.justify_content = Some(JustifyContent::Start),
+            "flex-end" => style.justify_content = Some(JustifyContent::FlexEnd),
+            "end" => style.justify_content = Some(JustifyContent::End),
             "space-between" => style.justify_content = Some(JustifyContent::SpaceBetween),
             "space-around" => style.justify_content = Some(JustifyContent::SpaceAround),
             _ => return Err(Unmapped::UnsupportedValue),
@@ -312,7 +326,8 @@ fn apply(
                 "visible" => Overflow::Visible,
                 "hidden" => Overflow::Hidden,
                 "clip" => Overflow::Clip,
-                "auto" | "scroll" => Overflow::Scroll,
+                "scroll" => Overflow::Scroll,
+                "auto" => return Err(Unmapped::UnsupportedValue),
                 _ => return Err(Unmapped::UnsupportedValue),
             };
             if property != "overflow-y" {
