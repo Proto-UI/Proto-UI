@@ -264,6 +264,15 @@ export function collectWebsiteProductionBundleIssues({
       (chunk.isEntry || chunk.isDynamicEntry) &&
       APPROVED_DEMONSTRATION_ENTRY_FACADES.has(chunk.facadeModuleId)
   );
+
+  for (const facadeModuleId of APPROVED_DEMONSTRATION_ENTRY_FACADES) {
+    const owners = approvedDemoRoots.filter((chunk) => chunk.facadeModuleId === facadeModuleId);
+    if (owners.length !== 1) {
+      issues.push(
+        `production bundle graph must contain exactly one approved demonstration entry for \`${facadeModuleId}\` (found ${owners.length})`
+      );
+    }
+  }
   const routeOwnedDemoRoots = approvedDemoRoots.filter((chunk) => chunk.isEntry);
   const reviewedNullFacadeRuntimeChunks = chunks.filter(
     (chunk) =>

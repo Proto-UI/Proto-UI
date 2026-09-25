@@ -10,6 +10,8 @@ const HOME_DEMO_FACADE =
 const PREVIEWER_FACADE =
   'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts';
 const PREVIEWER_CLIENT_FACADE = 'apps/www/src/components/PrototypePreviewer/previewer-client.ts';
+const STYLE_ISOLATION_FACADE =
+  'apps/www/src/pages/en/test/style-isolation.astro?astro&type=script&index=0&lang.ts';
 
 function chunk(
   fileName,
@@ -56,6 +58,28 @@ function graphFixture() {
         dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
         moduleIds: ['apps/www/src/components/PrototypePreviewer/home-demo-client.ts'],
       }),
+      chunk('_astro/previewer.js', {
+        isEntry: true,
+        facadeModuleId: PREVIEWER_FACADE,
+        dynamicImports: [
+          '_astro/previewer-client.js',
+          '_astro/react.js',
+          '_astro/vue.js',
+          '_astro/vue2.js',
+        ],
+        moduleIds: ['apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro'],
+      }),
+      chunk('_astro/previewer-client.js', {
+        isDynamicEntry: true,
+        facadeModuleId: PREVIEWER_CLIENT_FACADE,
+        moduleIds: ['apps/www/src/components/PrototypePreviewer/previewer-client.ts'],
+      }),
+      chunk('_astro/style-isolation.js', {
+        isEntry: true,
+        facadeModuleId: STYLE_ISOLATION_FACADE,
+        dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+        moduleIds: ['apps/www/src/pages/en/test/style-isolation.astro'],
+      }),
       chunk('_astro/wc-host.js', {
         name: 'wc-host',
         moduleIds: [
@@ -101,6 +125,24 @@ test('accepts module-proven demo runtimes isolated from shell static closures', 
   });
 });
 
+test('requires every approved demonstration facade in the production graph', () => {
+  for (const facadeModuleId of [
+    HOME_DEMO_FACADE,
+    PREVIEWER_FACADE,
+    PREVIEWER_CLIENT_FACADE,
+    STYLE_ISOLATION_FACADE,
+  ]) {
+    const graph = graphFixture();
+    graph.chunks = graph.chunks.filter((candidate) => candidate.facadeModuleId !== facadeModuleId);
+
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).includes(
+        `production bundle graph must contain exactly one approved demonstration entry for \`${facadeModuleId}\` (found 0)`
+      )
+    );
+  }
+});
+
 test('accepts coalesced module-proven demo runtime chunks', () => {
   const graph = graphFixture();
   const runtimeFileNames = new Set(['_astro/react.js', '_astro/vue.js', '_astro/vue2.js']);
@@ -108,9 +150,11 @@ test('accepts coalesced module-proven demo runtime chunks', () => {
     runtimeFileNames.has(candidate.fileName)
   );
   graph.chunks = graph.chunks.filter((candidate) => !runtimeFileNames.has(candidate.fileName));
-  graph.chunks
-    .find((candidate) => candidate.fileName === '_astro/home-demo.js')
-    .dynamicImports.splice(0, 3, '_astro/coalesced-runtimes.js');
+  for (const routeRoot of graph.chunks.filter((candidate) => candidate.isEntry)) {
+    routeRoot.dynamicImports = routeRoot.dynamicImports.map((fileName) =>
+      runtimeFileNames.has(fileName) ? '_astro/coalesced-runtimes.js' : fileName
+    );
+  }
   graph.chunks.push(
     chunk('_astro/coalesced-runtimes.js', {
       isDynamicEntry: true,
@@ -227,13 +271,11 @@ test('requires registry and Adapter provenance in the same route-owned demo clos
 });
 test('requires the Vue Adapter in every route-owned demo closure', () => {
   const graph = graphFixture();
+  const styleIsolationRoot = graph.chunks.find(
+    (candidate) => candidate.facadeModuleId === STYLE_ISOLATION_FACADE
+  );
+  styleIsolationRoot.dynamicImports = ['_astro/vue-framework-only.js'];
   graph.chunks.push(
-    chunk('_astro/second-demo.js', {
-      isEntry: true,
-      facadeModuleId: PREVIEWER_FACADE,
-      dynamicImports: ['_astro/vue-framework-only.js'],
-      moduleIds: ['apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro'],
-    }),
     chunk('_astro/vue-framework-only.js', {
       isDynamicEntry: true,
       moduleIds: ['node_modules/vue/dist/vue.runtime.esm.js'],
@@ -243,20 +285,11 @@ test('requires the Vue Adapter in every route-owned demo closure', () => {
   assert.ok(
     collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
       issue.includes(
-        `route-owned demonstration entry \`${PREVIEWER_FACADE}\` does not dynamically reach a vue Adapter runtime chunk`
+        `route-owned demonstration entry \`${STYLE_ISOLATION_FACADE}\` does not dynamically reach a vue Adapter runtime chunk`
       )
     )
   );
-  const validGraph = graphFixture();
-  validGraph.chunks.push(
-    chunk('_astro/second-demo-with-vue-adapter.js', {
-      isEntry: true,
-      facadeModuleId: PREVIEWER_FACADE,
-      dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
-      moduleIds: ['apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro'],
-    })
-  );
-  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: validGraph }), []);
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: graphFixture() }), []);
 });
 
 test('rejects renamed or inlined framework modules in a shell chunk', () => {
@@ -506,13 +539,11 @@ test('validates dynamic import fields and references', () => {
 
 test('rejects an orphaned dynamic demonstration entry', () => {
   const graph = graphFixture();
-  graph.chunks.push(
-    chunk('_astro/previewer-client.js', {
-      isDynamicEntry: true,
-      facadeModuleId: PREVIEWER_CLIENT_FACADE,
-      imports: ['_astro/react.js'],
-      moduleIds: ['apps/www/src/components/PrototypePreviewer/previewer-client.ts'],
-    })
+  const previewerRoot = graph.chunks.find(
+    (candidate) => candidate.facadeModuleId === PREVIEWER_FACADE
+  );
+  previewerRoot.dynamicImports = previewerRoot.dynamicImports.filter(
+    (fileName) => fileName !== '_astro/previewer-client.js'
   );
 
   assert.ok(
@@ -520,26 +551,6 @@ test('rejects an orphaned dynamic demonstration entry', () => {
       `approved demonstration entry \`${PREVIEWER_CLIENT_FACADE}\` is orphaned from shell or route-owned entry reachability`
     )
   );
-});
-
-test('accepts a dynamic demonstration entry reached from an explicit route-owned demo', () => {
-  const graph = graphFixture();
-  graph.chunks.push(
-    chunk('_astro/previewer.js', {
-      isEntry: true,
-      facadeModuleId: PREVIEWER_FACADE,
-      dynamicImports: ['_astro/previewer-client.js'],
-      moduleIds: ['apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro'],
-    }),
-    chunk('_astro/previewer-client.js', {
-      isDynamicEntry: true,
-      facadeModuleId: PREVIEWER_CLIENT_FACADE,
-      imports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
-      moduleIds: ['apps/www/src/components/PrototypePreviewer/previewer-client.ts'],
-    })
-  );
-
-  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
 });
 
 test('rejects shell dynamic imports of demo-owned framework chunks', () => {

@@ -75,8 +75,8 @@ function collectAriaReflectionPropertyNames() {
   );
 }
 
-// Lowercase inline HTML handlers must be real DOM event attributes. Camel-cased
-// JSX component callbacks remain open-ended because application components can
+// HTML event attribute names are ASCII case-insensitive. Camel-cased JSX
+// component callbacks remain open-ended because application components can
 // define their own `onXxx` semantic events.
 const NATIVE_EVENT_ATTRIBUTE_NAMES = collectNativeEventAttributeNames();
 const GOVERNED_DOM_STATE_PROPERTY_NAMES = new Set([
@@ -2317,8 +2317,16 @@ function astContainsNativeJsxEventHandler(content, absolutePath) {
       }
     }
   }
-  const isNativeEventName = (name) =>
-    /^on[A-Z][A-Za-z0-9_$]*$/u.test(name) || NATIVE_EVENT_ATTRIBUTE_NAMES.has(name);
+  const isNativeEventName = (name) => {
+    if (/^on[A-Z][A-Za-z0-9_$]*$/u.test(name) || NATIVE_EVENT_ATTRIBUTE_NAMES.has(name)) {
+      return true;
+    }
+    if (!/[A-Z]/u.test(name)) return false;
+    const asciiLowercaseName = name.replace(/[A-Z]/gu, (character) =>
+      String.fromCharCode(character.charCodeAt(0) + 32)
+    );
+    return NATIVE_EVENT_ATTRIBUTE_NAMES.has(asciiLowercaseName);
+  };
   const objectPropertyName = (name) => {
     if (ts.isIdentifier(name) || ts.isStringLiteralLike(name)) return name.text;
     if (ts.isComputedPropertyName(name)) {

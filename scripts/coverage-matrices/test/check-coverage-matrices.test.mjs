@@ -935,13 +935,15 @@ test('detects JSX interaction handlers without an event-name allowlist', () => {
   }
 });
 
-test('detects lowercase native event attributes without an event-name allowlist', () => {
+test('detects native HTML event attributes case-insensitively', () => {
   const root = createRoot();
   writeValidMatrices(root);
   for (const [relativePath, attribute] of [
     ['apps/www/src/components/BlurControl.astro', 'onblur'],
     ['apps/www/src/content/docs/focus-control.mdx', 'onfocus'],
     ['apps/www/src/components/DoubleClickControl.astro', 'ondblclick'],
+    ['apps/www/src/components/UppercaseClickControl.astro', 'ONCLICK'],
+    ['apps/www/src/components/UnicodeLookalikeClickControl.astro', 'onKeydown'],
   ]) {
     const sourcePath = path.join(root, relativePath);
     fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
@@ -952,9 +954,15 @@ test('detects lowercase native event attributes without an event-name allowlist'
     'apps/www/src/components/BlurControl.astro',
     'apps/www/src/content/docs/focus-control.mdx',
     'apps/www/src/components/DoubleClickControl.astro',
+    'apps/www/src/components/UppercaseClickControl.astro',
   ]) {
     assert.ok(message.includes(`interactive website source \`${relativePath}\` is not bound`));
   }
+  assert.ok(
+    !message.includes(
+      'interactive website source `apps/www/src/components/UnicodeLookalikeClickControl.astro` is not bound'
+    )
+  );
 });
 
 test('discovers DOM event-property assignments in the website source scan', () => {
