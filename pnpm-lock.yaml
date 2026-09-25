@@ -226,6 +226,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose':
+        specifier: workspace:*
+        version: link:../../modules/expose
       '@proto.ui/module-expose-event':
         specifier: workspace:*
         version: link:../../modules/expose-event

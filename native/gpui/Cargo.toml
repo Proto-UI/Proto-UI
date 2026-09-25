@@ -14,3 +14,7 @@ serde_json = "1.0"
 # Pinned revision, recorded in internal/records/2026-09-22-gpui-upstream-pin.md.
 # crates.io 0.2.2 predates both the web platform and AccessKit.
 gpui = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8" }
+# The platform backends at the same revision. Only the real-window test uses
+# them; `runtime_shaders` builds without the Metal shader compiler, which the
+# Command Line Tools do not ship.
+gpui_platform = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8", features = ["runtime_shaders", "font-kit"] }

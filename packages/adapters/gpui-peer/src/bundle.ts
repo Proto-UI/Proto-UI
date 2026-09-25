@@ -18,6 +18,7 @@ export function createBaseBundle(): PrototypeBundle {
     digest: 'catalog:0.3.0-alpha.1',
     entries: {
       'base-button': () => import('@proto.ui/prototypes-base/button').then((m) => m.default),
+      'base-toggle': () => import('@proto.ui/prototypes-base/toggle').then((m) => m.default),
     },
   };
 }
