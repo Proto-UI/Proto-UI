@@ -84,9 +84,20 @@ impl RawEventRegistration {
     }
 }
 
+/// The trigger group an instance belongs to.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TriggerPlan {
+    /// The session of the group's outermost trigger, which identifies the
+    /// group. A lone trigger anchors its own group.
+    pub anchor: SessionId,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EventBindingPlan {
     pub registrations: Vec<RawEventRegistration>,
+    /// Present when the instance is a trigger.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trigger: Option<TriggerPlan>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -118,6 +129,10 @@ pub enum A11yNameWire {
 #[serde(rename_all = "camelCase")]
 pub struct A11ySnapshotWire {
     pub semantic_object_id: SemanticObjectId,
+    /// The id the Prototype gives the object, which another object's relation
+    /// can name as its target. Absent when the Prototype gives none.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -151,6 +166,9 @@ pub struct ProjectionTransaction {
     pub slots: SlotPlan,
     pub events: EventBindingPlan,
     pub focus: FocusPlan,
+    /// The instance root's feedback style: the merged token list the
+    /// Prototype applies now, which may be empty.
+    pub style: Vec<String>,
     #[serde(deserialize_with = "required_nullable")]
     pub a11y: Option<A11ySnapshotWire>,
 }

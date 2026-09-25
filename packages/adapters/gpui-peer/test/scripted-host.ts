@@ -1,5 +1,6 @@
 import {
   createHostSessionModel,
+  type A11ySnapshotWire,
   type HostSessionModel,
   type HostToPeerMessage,
   type InputSample,
@@ -154,6 +155,16 @@ export class ScriptedHost {
     kind: K
   ): Extract<PeerToHostMessage, { kind: K }> | undefined {
     return this.of(kind).at(-1);
+  }
+
+  /** The accessibility snapshot last sent, with a projection or on its own. */
+  lastA11y(): A11ySnapshotWire | null | undefined {
+    for (let index = this.sent.length - 1; index >= 0; index--) {
+      const message = this.sent[index]!;
+      if (message.kind === 'a11y.snapshot') return message.snapshot;
+      if (message.kind === 'projection.install') return message.transaction.a11y;
+    }
+    return undefined;
   }
 
   /** Latest published value of one exposed state, descriptor included. */
