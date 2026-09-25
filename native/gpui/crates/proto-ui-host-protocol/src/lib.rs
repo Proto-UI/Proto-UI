@@ -5,8 +5,10 @@
 //! implementations replay. It has no GPUI dependency and performs no I/O.
 
 pub mod event_type;
+pub mod frame;
 pub mod messages;
 pub mod model;
+pub mod t0;
 pub mod wire;
 
 pub use event_type::{

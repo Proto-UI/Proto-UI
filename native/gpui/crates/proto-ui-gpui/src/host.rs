@@ -343,27 +343,19 @@ fn host_event(name: &str) -> ExtensionEvent {
 /// The focus target the peer declares for a session: its root surface.
 pub const FOCUS_ROOT_REF: &str = "focus-root";
 
-/// What a `focus.request` asks for.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FocusAction {
-    Focus,
-    Blur,
-}
-
-/// The `focus.result` status for a request, as the wire spells it:
-/// `applied`, `not-ready` or `rejected`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FocusRequestStatus {
-    /// Focus is where the request asked for it.
-    Applied,
-    /// The session's surface is not rendered yet. The peer keeps the request
-    /// and retries when the target becomes ready (`HC-FOCUS-TARGET-0001-C`).
-    NotReady,
-    /// The target is not one this session declares, cannot take focus, or
-    /// GPUI did not move focus to it. Never reported as applied: a focus
-    /// request that did not land must say so (`HC-FOCUS-TARGET-0001-B`).
-    Rejected,
-}
+/// What a `focus.request` asks for, and the `focus.result` status it gets.
+///
+/// These are the wire enums from the protocol crate, so what the host decides
+/// is exactly what it can send. The statuses mean:
+///
+/// - `Applied`: focus is where the request asked for it.
+/// - `NotReady`: the session's surface is not rendered yet. The peer keeps the
+///   request and retries when the target becomes ready
+///   (`HC-FOCUS-TARGET-0001-C`).
+/// - `Rejected`: the target is not one this session declares, cannot take
+///   focus, or GPUI did not move focus to it. Never reported as applied: a
+///   focus request that did not land must say so (`HC-FOCUS-TARGET-0001-B`).
+pub use proto_ui_host_protocol::messages::{FocusAction, FocusResultStatus};
 
 /// The surfaces two innermost-first paths share, innermost first.
 fn common_ancestors(a: &[SurfaceId], b: &[SurfaceId]) -> Vec<SurfaceId> {
@@ -381,10 +373,11 @@ fn common_ancestors(a: &[SurfaceId], b: &[SurfaceId]) -> Vec<SurfaceId> {
 /// A GPUI view rendering a forest of surfaces and feeding their input to an
 /// [`InputBridge`].
 pub struct ProtoHostView {
-    bridge: Rc<RefCell<InputBridge>>,
-    surfaces: Vec<SurfaceNode>,
-    focus: FocusHandle,
-    focus_subscriptions: Vec<Subscription>,
+    pub(crate) bridge: Rc<RefCell<InputBridge>>,
+    pub(crate) surfaces: Vec<SurfaceNode>,
+    pub(crate) focus: FocusHandle,
+    pub(crate) focus_subscriptions: Vec<Subscription>,
+    pub(crate) hub: crate::hub::HostHub,
 }
 
 impl ProtoHostView {
@@ -399,13 +392,14 @@ impl ProtoHostView {
             surfaces,
             focus: cx.focus_handle(),
             focus_subscriptions: Vec::new(),
+            hub: crate::hub::HostHub::default(),
         };
         view.subscribe_focus(window, cx);
         view
     }
 
     /// Watches every focusable surface, and the host root, for focus moving.
-    fn subscribe_focus(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+    pub(crate) fn subscribe_focus(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let mut handles = vec![self.focus.clone()];
         let mut pending: Vec<&SurfaceNode> = self.surfaces.iter().collect();
         while let Some(surface) = pending.pop() {
@@ -438,17 +432,17 @@ impl ProtoHostView {
         action: FocusAction,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) -> FocusRequestStatus {
+    ) -> FocusResultStatus {
         if target != FOCUS_ROOT_REF {
-            return FocusRequestStatus::Rejected;
+            return FocusResultStatus::Rejected;
         }
         let handle = {
             let bridge = self.bridge.borrow();
             let Some(root) = bridge.root_of.get(session_id) else {
-                return FocusRequestStatus::NotReady;
+                return FocusResultStatus::NotReady;
             };
             let Some(handle) = bridge.focus_handle_of(root) else {
-                return FocusRequestStatus::Rejected;
+                return FocusResultStatus::Rejected;
             };
             handle
         };
@@ -456,16 +450,16 @@ impl ProtoHostView {
             FocusAction::Focus => {
                 window.focus(&handle, cx);
                 if handle.is_focused(window) {
-                    FocusRequestStatus::Applied
+                    FocusResultStatus::Applied
                 } else {
-                    FocusRequestStatus::Rejected
+                    FocusResultStatus::Rejected
                 }
             }
             FocusAction::Blur => {
                 if handle.is_focused(window) {
                     window.focus(&self.focus, cx);
                 }
-                FocusRequestStatus::Applied
+                FocusResultStatus::Applied
             }
         }
     }
