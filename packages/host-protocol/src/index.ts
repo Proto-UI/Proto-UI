@@ -24,6 +24,7 @@ export {
   type SessionId,
   type SlotPlan,
   type SlotRef,
+  type TriggerPlan,
   type ViewEpoch,
   type WireScalar,
   type WireValue,

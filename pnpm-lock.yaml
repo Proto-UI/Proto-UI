@@ -217,6 +217,9 @@ importers:
       '@proto.ui/module-a11y':
         specifier: workspace:*
         version: link:../../modules/a11y
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../../modules/anatomy
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
@@ -226,6 +229,9 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose':
+        specifier: workspace:*
+        version: link:../../modules/expose
       '@proto.ui/module-expose-event':
         specifier: workspace:*
         version: link:../../modules/expose-event
