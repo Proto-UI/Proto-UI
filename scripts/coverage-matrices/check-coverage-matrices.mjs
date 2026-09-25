@@ -3151,7 +3151,7 @@ function astContainsHarnessRenderOrEffectAction(content, absolutePath, visitedPa
         const scheduledCallbackArguments = promiseReactionName
           ? node.arguments.slice(0, promiseReactionName === 'then' ? 2 : 1)
           : scheduledCallbackName &&
-              /^(?:queueMicrotask|requestAnimationFrame|setTimeout)$/u.test(
+              /^(?:queueMicrotask|requestAnimationFrame|setInterval|setTimeout)$/u.test(
                 scheduledCallbackName
               ) &&
               node.arguments[0]
@@ -4388,7 +4388,8 @@ function inspectBarePackageForGuardedWebsiteImports(
   importingPath,
   specifier,
   websiteAliasConfig,
-  cache
+  cache,
+  forcedEntryPath = null
 ) {
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (
@@ -4398,15 +4399,56 @@ function inspectBarePackageForGuardedWebsiteImports(
   ) {
     return null;
   }
-  let entryPath;
+  if (forcedEntryPath !== null) {
+    if (cache.has(forcedEntryPath)) return cache.get(forcedEntryPath);
+    cache.set(forcedEntryPath, null);
+    return inspectBarePackageEntry(
+      rootDir,
+      canonicalRootDir,
+      forcedEntryPath,
+      websiteAliasConfig,
+      cache
+    );
+  }
+  const require = createRequire(pathToFileURL(importingPath));
+  const entryCandidates = new Set();
   try {
-    entryPath = createRequire(pathToFileURL(importingPath)).resolve(classifiedSpecifier);
+    entryCandidates.add(require.resolve(classifiedSpecifier));
   } catch {
+    // fall through to import-condition resolution below.
+  }
+  try {
+    entryCandidates.add(require.resolve(classifiedSpecifier, { conditions: ['import'] }));
+  } catch {
+    // CommonJS resolution above remains the fallback when an import entry is absent.
+  }
+  const entryPaths = [...entryCandidates];
+  if (entryPaths.length === 0) return null;
+  if (entryPaths.length > 1) {
+    // Multiple export conditions resolve to different files; inspect each
+    // candidate so a browser/import entry cannot smuggle a governed layer
+    // past the CommonJS condition the require resolver selects.
+    for (const candidate of entryPaths) {
+      if (cache.has(candidate)) return cache.get(candidate);
+      cache.set(candidate, null);
+      const candidateResult = inspectBarePackageEntry(
+        rootDir,
+        canonicalRootDir,
+        candidate,
+        websiteAliasConfig,
+        cache
+      );
+      if (candidateResult) return candidateResult;
+    }
     return null;
   }
+  const entryPath = entryPaths[0];
   if (cache.has(entryPath)) return cache.get(entryPath);
   cache.set(entryPath, null);
+  return inspectBarePackageEntry(rootDir, canonicalRootDir, entryPath, websiteAliasConfig, cache);
+}
 
+function inspectBarePackageEntry(rootDir, canonicalRootDir, entryPath, websiteAliasConfig, cache) {
   let packageRoot = path.dirname(entryPath);
   while (path.dirname(packageRoot) !== packageRoot) {
     const manifestPath = path.join(packageRoot, 'package.json');
@@ -4425,6 +4467,23 @@ function inspectBarePackageForGuardedWebsiteImports(
     ...Object.keys(manifest.dependencies ?? {}),
     ...Object.keys(manifest.optionalDependencies ?? {}),
   ]);
+  // `require.resolve` only selects the CommonJS condition, but Vite bundles
+  // the import/browser condition. Enumerate every exports-map target so the
+  // scanner cannot miss a governed layer behind an unselected condition.
+  const exportTargets = new Set([entryPath]);
+  const collectExportTargets = (node) => {
+    if (typeof node === 'string') {
+      const targetPath = path.resolve(packageRoot, node);
+      if (fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
+        exportTargets.add(targetPath);
+      }
+      return;
+    }
+    if (node && typeof node === 'object') {
+      for (const value of Object.values(node)) collectExportTargets(value);
+    }
+  };
+  collectExportTargets(manifest.exports);
 
   const resolveRelative = (sourcePath, importedSpecifier) => {
     const classified = importSpecifierWithoutViteSuffix(importedSpecifier);
@@ -4452,7 +4511,7 @@ function inspectBarePackageForGuardedWebsiteImports(
       }) ?? null
     );
   };
-  const pending = [entryPath];
+  const pending = [...exportTargets];
   const visited = new Set();
   while (pending.length > 0 && visited.size < 500) {
     const sourcePath = pending.pop();
@@ -5295,6 +5354,7 @@ function hasValidPngImageData(data) {
   let colorType = 0;
   let interlaceMethod = 0;
   let hasImageData = false;
+  let hasPaletteChunk = false;
   let hasIdatChunk = false;
   let idatSequenceEnded = false;
   let idatByteLength = 0;
@@ -5329,8 +5389,13 @@ function hasValidPngImageData(data) {
       interlaceMethod = data.readUInt8(payloadStart + 12);
       if (interlaceMethod !== 0 && interlaceMethod !== 1) return false;
     }
+    if (type === 'PLTE') {
+      if (hasIdatChunk || hasPaletteChunk || length === 0 || length % 3 !== 0) return false;
+      hasPaletteChunk = true;
+    }
     if (type === 'IDAT') {
       if (idatSequenceEnded) return false;
+      if (colorType === 3 && !hasPaletteChunk) return false;
       hasIdatChunk = true;
       if (length > 0) {
         hasImageData = true;
@@ -5465,6 +5530,27 @@ function hasVideoFileSignature(absolutePath) {
       }
       return value > BigInt(Number.MAX_SAFE_INTEGER) ? null : { length, value: Number(value) };
     };
+    // Walk EBML master elements structurally: an element is accepted only when
+    // its declared size fits its parent, and SimpleBlock payloads must contain
+    // at least a track id and frame size header plus nonempty frame data.
+    const readElementId = (offset) => {
+      if (offset >= data.length) return null;
+      const first = data[offset];
+      if (first === 0) return null;
+      let length = 1;
+      while (length <= 4 && (first & (0x80 >> (length - 1))) === 0) length += 1;
+      if (length > 4 || offset + length > data.length) return null;
+      return { id: data.subarray(offset, offset + length), idLength: length };
+    };
+    const parseElement = (offset) => {
+      const elementId = readElementId(offset);
+      if (!elementId) return null;
+      const size = readEbmlSize(offset + elementId.idLength);
+      if (!size) return null;
+      const contentStart = offset + elementId.idLength + size.length;
+      if (contentStart + size.value > data.length) return null;
+      return { id: elementId.id, contentStart, contentEnd: contentStart + size.value };
+    };
     const headerSize = readEbmlSize(4);
     if (!headerSize) return false;
     const segmentOffset = 4 + headerSize.length + headerSize.value;
@@ -5479,12 +5565,39 @@ function hasVideoFileSignature(absolutePath) {
     const segmentStart = segmentOffset + 4 + segmentSize.length;
     const segmentEnd = Math.min(data.length, segmentStart + segmentSize.value);
     if (segmentEnd <= segmentStart) return false;
-    const segment = data.subarray(segmentStart, segmentEnd);
-    const tracks = segment.indexOf(Buffer.from('1654ae6b', 'hex'));
-    const cluster = segment.indexOf(Buffer.from('1f43b675', 'hex'));
-    const simpleBlock = cluster < 0 ? -1 : segment.indexOf(Buffer.from([0xa3]), cluster + 4);
-    const block = cluster < 0 ? -1 : segment.indexOf(Buffer.from([0xa1]), cluster + 4);
-    return tracks >= 0 && cluster >= 0 && (simpleBlock >= 0 || block >= 0);
+
+    const tracksId = Buffer.from('1654ae6b', 'hex');
+    const trackEntryId = Buffer.from('ae', 'hex');
+    const clusterId = Buffer.from('1f43b675', 'hex');
+    const simpleBlockId = Buffer.from('a3', 'hex');
+    let offset = segmentStart;
+    let sawTrack = false;
+    while (offset < segmentEnd) {
+      const element = parseElement(offset);
+      if (!element) return false;
+      if (element.id.equals(tracksId)) {
+        let child = element.contentStart;
+        while (child < element.contentEnd) {
+          const trackEntry = parseElement(child);
+          if (!trackEntry) return false;
+          if (trackEntry.id.equals(trackEntryId)) sawTrack = true;
+          child = trackEntry.contentEnd;
+        }
+      }
+      if (element.id.equals(clusterId)) {
+        let child = element.contentStart;
+        while (child < element.contentEnd) {
+          const block = parseElement(child);
+          if (!block) return false;
+          if (block.id.equals(simpleBlockId) && block.contentEnd > block.contentStart + 3) {
+            return sawTrack;
+          }
+          child = block.contentEnd;
+        }
+      }
+      offset = element.contentEnd;
+    }
+    return false;
   }
 
   const readBoxes = (start, end) => {

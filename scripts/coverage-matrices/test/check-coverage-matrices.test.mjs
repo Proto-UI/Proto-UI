@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { afterEach, test } from 'node:test';
 import {
   MATRIX_CONFIGS,
@@ -16,6 +17,45 @@ const temporaryRoots = [];
 afterEach(() => {
   for (const root of temporaryRoots.splice(0)) fs.rmSync(root, { recursive: true, force: true });
 });
+
+const TEST_PNG_CRC_TABLE = Array.from({ length: 256 }, (_unused, index) => {
+  let value = index;
+  for (let bit = 0; bit < 8; bit += 1) {
+    value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
+  }
+  return value >>> 0;
+});
+function testPngCrc32(data) {
+  let crc = 0xffffffff;
+  for (const byte of data) crc = TEST_PNG_CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type, payload) {
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(payload.length, 0);
+  const typeAndPayload = Buffer.concat([Buffer.from(type, 'ascii'), payload]);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(testPngCrc32(typeAndPayload), 0);
+  return Buffer.concat([length, typeAndPayload, crc]);
+}
+
+function indexedPng({ includePalette }) {
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(1, 0);
+  ihdr.writeUInt32BE(1, 4);
+  ihdr.writeUInt8(1, 8);
+  ihdr.writeUInt8(3, 9);
+  const scanline = zlib.deflateSync(Buffer.from([0x00, 0x00]));
+  const chunks = [
+    Buffer.from('89504e470d0a1a0a', 'hex'),
+    pngChunk('IHDR', ihdr),
+    ...(includePalette ? [pngChunk('PLTE', Buffer.from([0xff, 0x00, 0x00]))] : []),
+    pngChunk('IDAT', scanline),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ];
+  return Buffer.concat(chunks);
+}
 
 function createRoot() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-coverage-matrices-'));
@@ -7631,6 +7671,42 @@ test('follows nested bare packages to governed Proto UI imports', () => {
   );
 });
 
+test('inspects every conditional export entry of a bare package', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const packageRoot = path.join(root, 'node_modules/example-conditional');
+  fs.mkdirSync(packageRoot, { recursive: true });
+  fs.writeFileSync(
+    path.join(packageRoot, 'package.json'),
+    JSON.stringify({
+      name: 'example-conditional',
+      version: '1.0.0',
+      exports: {
+        '.': {
+          require: './safe.cjs',
+          import: './browser.mjs',
+        },
+      },
+      dependencies: { '@proto.ui/runtime': '1.0.0' },
+    }),
+    'utf8'
+  );
+  fs.writeFileSync(path.join(packageRoot, 'safe.cjs'), 'module.exports = { safe: true };', 'utf8');
+  fs.writeFileSync(
+    path.join(packageRoot, 'browser.mjs'),
+    "import '@proto.ui/runtime'; export const browser = true;",
+    'utf8'
+  );
+  const sourcePath = 'apps/www/src/components/ConditionalTransport.ts';
+  const absolutePath = path.join(root, sourcePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, "import { browser } from 'example-conditional';", 'utf8');
+  assert.match(
+    validationMessage(root),
+    /raw Proto UI import `example-conditional` in `apps\/www\/src\/components\/ConditionalTransport\.ts` escapes the website consumer-wall allowlist/
+  );
+});
+
 test('scans interaction in test-named modules reachable from production', () => {
   const root = createRoot();
   const productionPath = 'apps/www/src/components/InteractionBridge.astro';
@@ -7971,8 +8047,8 @@ test('resolves useCallback-returned functions that execute during render', () =>
 test('scans callbacks scheduled during render or effects', () => {
   for (const [name, scheduler] of [
     ['Timeout', 'setTimeout'],
+    ['Interval', 'setInterval'],
     ['Microtask', 'queueMicrotask'],
-    ['AnimationFrame', 'requestAnimationFrame'],
   ]) {
     const root = createRoot();
     const relativePath = `apps/agent-harness/src/run/Scheduled${name}.tsx`;
@@ -7980,7 +8056,7 @@ test('scans callbacks scheduled during render or effects', () => {
     fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
     const scheduledCall = `${scheduler}(() => actions.send(), 0)`;
     const source =
-      scheduler === 'setTimeout'
+      scheduler === 'setTimeout' || scheduler === 'setInterval'
         ? `import { useEffect } from 'react'; import * as actions from './agent-actions'; export function Surface() { useEffect(() => { ${scheduledCall}; }, []); return <section />; }`
         : `import * as actions from './agent-actions'; export function Surface() { ${scheduledCall}; return <section />; }`;
     fs.writeFileSync(absolutePath, source, 'utf8');
@@ -8380,6 +8456,86 @@ test('accepts MP4 evidence with a complete video sample table', () => {
   });
 });
 
+test('rejects WebM marker bytes without parsed track and block elements', () => {
+  const root = createRoot();
+  const implementationPath = 'apps/www/src/components/override/Search.astro';
+  const websiteBindings = [[implementationPath, ['www.shell.search']]];
+  fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+  fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+  writeValidMatrices(root, {}, {}, { websiteBindings });
+  const revision = commitFixtureRoot(root);
+  const ebmlId = (hex) => Buffer.from(hex, 'hex');
+  const ebmlSize = (value) => {
+    if (value < 0x80) {
+      const bytes = Buffer.alloc(1);
+      bytes.writeUInt8(value | 0x80, 0);
+      return bytes;
+    }
+    const length = value < 0x4000 ? 2 : value < 0x200000 ? 3 : 4;
+    const bytes = Buffer.alloc(length);
+    const mask = 0x80 >> (length - 1);
+    bytes.writeUInt8(mask | ((value >> (8 * (length - 1))) & (0xff >> length)), 0);
+    for (let index = 1; index < length; index += 1) {
+      bytes.writeUInt8((value >> (8 * (length - 1 - index))) & 0xff, index);
+    }
+    return bytes;
+  };
+  const element = (hex, payload) => Buffer.concat([ebmlId(hex), ebmlSize(payload.length), payload]);
+  const ebmlHeader = element('1a45dfa3', Buffer.from([0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]));
+  const markerOnly = Buffer.concat([
+    ebmlHeader,
+    element('18538067', Buffer.concat([Buffer.from('1654ae6b1f43b675a3', 'hex')])),
+  ]);
+  const markerOnlyPath = 'internal/website/evidence/s14/webm-marker-only.webm';
+  writeVideoPromotionFixture(
+    root,
+    revision,
+    websiteBindings,
+    markerOnlyPath,
+    Buffer.concat([markerOnly, Buffer.from('1654ae6b1f43b675a3', 'hex')])
+  );
+  assert.match(
+    validationMessage(root, promotionOptions(revision)),
+    /Multi-frame: retained video artifact must be structurally valid and contain frame data/
+  );
+
+  const structuredRoot = createRoot();
+  const structuredImplementationPath = 'apps/www/src/components/override/Search.astro';
+  fs.mkdirSync(path.dirname(path.join(structuredRoot, structuredImplementationPath)), {
+    recursive: true,
+  });
+  fs.writeFileSync(
+    path.join(structuredRoot, structuredImplementationPath),
+    '<main>reviewed</main>',
+    'utf8'
+  );
+  writeValidMatrices(structuredRoot, {}, {}, { websiteBindings });
+  const structuredRevision = commitFixtureRoot(structuredRoot);
+  const trackEntry = element('ae', Buffer.from('01', 'hex'));
+  const tracks = element('1654ae6b', trackEntry);
+  const simpleBlock = element('a3', Buffer.from([0x81, 0x00, 0x03, 0xff, 0xfe, 0xfd]));
+  const cluster = element('1f43b675', simpleBlock);
+  const validWebm = Buffer.concat([
+    ebmlHeader,
+    element('18538067', Buffer.concat([tracks, cluster])),
+  ]);
+  const validWebmPath = 'internal/website/evidence/s14/webm-one-frame.webm';
+  writeVideoPromotionFixture(
+    structuredRoot,
+    structuredRevision,
+    websiteBindings,
+    validWebmPath,
+    validWebm
+  );
+  assert.deepEqual(
+    validateCoverageMatrices({
+      rootDir: structuredRoot,
+      ...promotionOptions(structuredRevision),
+    }),
+    { matrixCount: 2 }
+  );
+});
+
 test('rejects @vite-ignore dynamic imports without an exact reviewed boundary', () => {
   for (const [relativePath, expected] of [
     [
@@ -8594,6 +8750,42 @@ test('rejects retained PNG screenshots without image data', () => {
     validationMessage(root, promotionOptions(revision)),
     /Screenshot: retained artifact must be a recognized image file/
   );
+});
+
+test('rejects indexed PNG evidence without a PLTE chunk and accepts palette-complete PNG', () => {
+  const makeFixtureRoot = (pngBytes) => {
+    const root = createRoot();
+    const implementationPath = 'apps/www/src/components/override/Search.astro';
+    const websiteBindings = [[implementationPath, ['www.shell.search']]];
+    fs.mkdirSync(path.dirname(path.join(root, implementationPath)), { recursive: true });
+    fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
+    writeValidMatrices(root, {}, {}, { websiteBindings });
+    const revision = commitFixtureRoot(root);
+    const { resultsPath } = writeSelfHostedPromotion(root, revision, { websiteBindings });
+    const screenshotRelativePath = 'internal/website/evidence/s14/home-desktop.png';
+    fs.writeFileSync(path.join(root, screenshotRelativePath), pngBytes);
+    const manifestPath = path.join(root, resultsPath);
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const artifact = manifest.artifacts.find((entry) => entry.path === screenshotRelativePath);
+    assert.ok(artifact);
+    artifact.size = pngBytes.length;
+    artifact.sha256 = createHash('sha256').update(pngBytes).digest('hex');
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+    return { root, revision };
+  };
+
+  const missingPalette = makeFixtureRoot(indexedPng({ includePalette: false }));
+  assert.match(
+    validationMessage(missingPalette.root, promotionOptions(missingPalette.revision)),
+    /Screenshot: retained artifact must be a recognized image file/
+  );
+
+  const palette = makeFixtureRoot(indexedPng({ includePalette: true }));
+  const paletteIssues = collectCoverageMatrixIssues({
+    rootDir: palette.root,
+    ...promotionOptions(palette.revision),
+  });
+  assert.ok(paletteIssues.length === 0, JSON.stringify(paletteIssues, null, 2));
 });
 test('rejects PNG screenshots with CRC-valid invalid image data streams', () => {
   const root = createRoot();
