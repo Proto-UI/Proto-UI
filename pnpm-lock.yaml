@@ -607,6 +607,37 @@ importers:
         specifier: ^2.4.9
         version: 2.4.9
 
+  packages/compiler:
+    dependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+    devDependencies:
+      '@proto.ui/adapter-react':
+        specifier: workspace:*
+        version: link:../adapters/react
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../core
+      '@proto.ui/hooks':
+        specifier: workspace:*
+        version: link:../hooks
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../prototypes/base
+      '@types/react':
+        specifier: ^19.2.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.14)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.6(react@19.2.6)
+
   packages/compositions/chatui:
     dependencies:
       '@proto.ui/core':
