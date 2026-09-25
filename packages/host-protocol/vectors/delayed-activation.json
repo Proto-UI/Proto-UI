@@ -26,6 +26,7 @@
         "focus": {
           "targets": []
         },
+        "style": [],
         "a11y": null
       },
       "expect": {
@@ -61,6 +62,7 @@
         "focus": {
           "targets": []
         },
+        "style": [],
         "a11y": null
       },
       "expect": {

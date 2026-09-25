@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { WireRecord } from '@proto.ui/host-protocol';
+import { definePrototype, tw } from '@proto.ui/core';
+import type { PeerToHostMessage, WireRecord } from '@proto.ui/host-protocol';
 import button from '@proto.ui/prototypes-base/button';
+import toggle from '@proto.ui/prototypes-base/toggle';
+import { switchRoot, switchThumb } from '@proto.ui/prototypes-base/switch';
 
 import { createPeerSession, type PeerSession } from '../src/session';
 import { ScriptedHost } from './scripted-host';
@@ -85,6 +88,17 @@ describe('gpui peer: projection cycle', () => {
 });
 
 describe('gpui peer: interaction', () => {
+  it('declares its click event as a signal, not as something unsupported', async () => {
+    // Base Button declares `click` with `def.expose.event`. The declaration
+    // is recognised by the Expose module's predicate; it carries no `kind`.
+    const { host, peer } = createHarness();
+    await peer.mount();
+    const exposes = host.last('expose.descriptor');
+    expect(exposes?.signals).toEqual(['click']);
+    expect(exposes?.unsupported).toEqual([]);
+    await peer.dispose();
+  });
+
   it('tracks pointer state and emits one click per press commit', async () => {
     const { host, peer } = createHarness();
     await peer.mount();
@@ -298,6 +312,183 @@ describe('gpui peer: readiness follows the current projection', () => {
     // Each commit is activated for its own commit id, never a previous one.
     expect(host.of('projection.activate').map((message) => message.commitId)).toEqual([1, 2, 3]);
 
+    await peer.dispose();
+  });
+});
+
+describe('gpui peer: Base Toggle', () => {
+  it('flips active on every commit, announces the new value and projects it as pressed', async () => {
+    const host = new ScriptedHost(SESSION);
+    const peer = createPeerSession({
+      sessionId: SESSION,
+      instanceId: INSTANCE,
+      prototype: toggle,
+      props: {},
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+    });
+    host.bind((message) => peer.handle(message));
+    await peer.mount();
+    expect(host.last('expose.descriptor')?.signals).toEqual(['activeChange']);
+
+    host.input('press.commit');
+    expect(host.exposeState('active')).toBe(true);
+    expect(host.last('a11y.snapshot')?.snapshot?.states.pressed).toBe(true);
+
+    host.input('press.commit');
+    expect(host.exposeState('active')).toBe(false);
+    expect(host.last('a11y.snapshot')?.snapshot?.states.pressed).toBe(false);
+
+    expect(host.of('expose.signal').map((signal) => [signal.name, signal.payload])).toEqual([
+      ['activeChange', { active: true }],
+      ['activeChange', { active: false }],
+    ]);
+    await peer.dispose();
+  });
+});
+
+describe('gpui peer: instances composed into one another', () => {
+  function open(
+    sessionId: string,
+    prototype: Parameters<typeof createPeerSession>[0]['prototype'],
+    parent?: PeerSession,
+    sent?: PeerToHostMessage[]
+  ) {
+    const host = new ScriptedHost(sessionId);
+    const peer = createPeerSession({
+      sessionId,
+      instanceId: `${sessionId}:instance`,
+      prototype,
+      props: {},
+      send: (message) => {
+        sent?.push(message);
+        host.receive(message);
+      },
+      schedule: (task) => task(),
+      parent,
+    });
+    host.bind((message) => peer.handle(message));
+    return { host, peer };
+  }
+
+  it('lets a Switch thumb follow its root through context', async () => {
+    const root = open('switch-root', switchRoot);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer);
+    await thumb.peer.mount();
+    expect(thumb.host.exposeState('checked')).toBe(false);
+
+    root.host.input('press.commit');
+    expect(root.host.exposeState('checked')).toBe(true);
+    expect(thumb.host.exposeState('checked')).toBe(true);
+
+    await thumb.peer.dispose();
+    await root.peer.dispose();
+  });
+
+  it('names the trigger group an instance belongs to, and none for a part that is not one', async () => {
+    const root = open('switch-root', switchRoot);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer);
+    await thumb.peer.mount();
+
+    expect(root.host.last('projection.install')?.transaction.events.trigger).toEqual({
+      anchor: 'switch-root',
+    });
+    expect(thumb.host.last('projection.install')?.transaction.events.trigger).toBeUndefined();
+
+    await thumb.peer.dispose();
+    await root.peer.dispose();
+  });
+
+  it('ends the thumb before the root when the root ends first', async () => {
+    const sent: PeerToHostMessage[] = [];
+    const root = open('switch-root', switchRoot, undefined, sent);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer, sent);
+    await thumb.peer.mount();
+
+    await root.peer.dispose();
+    expect(
+      sent.flatMap((message) => (message.kind === 'session.disposed' ? [message.sessionId] : []))
+    ).toEqual(['switch-thumb', 'switch-root']);
+    // The ended root is no longer an instance anything can belong to.
+    expect(() => open('switch-thumb-2', switchThumb, root.peer)).toThrow(/switch-root has ended/);
+  });
+
+  it('keeps the root running when its thumb ends first', async () => {
+    const root = open('switch-root', switchRoot);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer);
+    await thumb.peer.mount();
+
+    await thumb.peer.dispose();
+    root.host.input('press.commit');
+    expect(root.host.exposeState('checked')).toBe(true);
+
+    await root.peer.dispose();
+    expect(thumb.host.of('session.disposed')).toHaveLength(1);
+    expect(root.host.of('session.disposed')).toHaveLength(1);
+  });
+
+  it('cannot set a thumb up without the root it belongs to', () => {
+    // Setup runs as the session is created, and the thumb's context has no
+    // provider to subscribe to.
+    expect(() => open('switch-thumb', switchThumb)).toThrow(/provider missing/);
+  });
+});
+
+describe('gpui peer: feedback style', () => {
+  // A Prototype of the test's own, hidden while it is off, as an inactive
+  // Tabs panel is.
+  const panel = definePrototype({
+    name: 'test-feedback-panel',
+    setup(def) {
+      const on = def.state.bool('on', false);
+      def.feedback.style.use(tw('rounded-md'));
+      def.rule({
+        when: (w) => w.state(on).eq(false),
+        intent: (i) => i.feedback.style.use(tw('hidden')),
+      });
+      def.event.on('press.commit', () => {
+        on.set(!on.get(), 'reason: test panel press.commit');
+      });
+    },
+  });
+
+  it('carries the root style on the projection, then sends each change whole', async () => {
+    const host = new ScriptedHost(SESSION);
+    const peer = createPeerSession({
+      sessionId: SESSION,
+      instanceId: INSTANCE,
+      prototype: panel,
+      props: {},
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+    });
+    host.bind((message) => peer.handle(message));
+    await peer.mount();
+
+    // The first frame's style arrives with the projection, not after it.
+    expect(host.last('projection.install')?.transaction.style).toEqual(['rounded-md', 'hidden']);
+    expect(host.of('style.apply')).toHaveLength(0);
+
+    // Each change is the whole list, not a difference from the last one.
+    host.input('press.commit');
+    expect(host.last('style.apply')?.tokens).toEqual(['rounded-md']);
+    host.input('press.commit');
+    expect(host.last('style.apply')?.tokens).toEqual(['rounded-md', 'hidden']);
+    expect(host.of('style.apply')).toHaveLength(2);
+
+    await peer.dispose();
+  });
+
+  it('sends nothing for a Prototype with no feedback style', async () => {
+    const { host, peer } = createHarness();
+    await peer.mount();
+    expect(host.last('projection.install')?.transaction.style).toEqual([]);
+    host.input('press.commit');
+    expect(host.of('style.apply')).toHaveLength(0);
     await peer.dispose();
   });
 });
