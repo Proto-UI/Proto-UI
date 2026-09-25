@@ -8380,7 +8380,7 @@ test('rejects PNG screenshots with CRC-valid invalid image data streams', () => 
     /Screenshot: retained artifact must be a recognized image file/
   );
 });
-test('rejects undecodable WebP evidence and accepts a decoded image', () => {
+test('rejects undecodable GIF/JPEG/WebP evidence and accepts decoded images', async () => {
   const root = createRoot();
   const implementationPath = 'apps/www/src/components/override/Search.astro';
   const websiteBindings = [[implementationPath, ['www.shell.search']]];
@@ -8388,40 +8388,110 @@ test('rejects undecodable WebP evidence and accepts a decoded image', () => {
   fs.writeFileSync(path.join(root, implementationPath), '<main>reviewed</main>', 'utf8');
   writeValidMatrices(root, {}, {}, { websiteBindings });
   const revision = commitFixtureRoot(root);
-  const { resultsPath } = writeSelfHostedPromotion(root, revision, { websiteBindings });
-  const screenshotPath = 'internal/website/evidence/s14/home-desktop.png';
+  const { evidencePath, resultsPath } = writeSelfHostedPromotion(root, revision, {
+    websiteBindings,
+  });
   const manifestPath = path.join(root, resultsPath);
-  const replaceScreenshot = (bytes) => {
-    fs.writeFileSync(path.join(root, screenshotPath), bytes);
+  const probePaths = new Set([
+    'internal/website/evidence/s14/probe.jpg',
+    'internal/website/evidence/s14/probe.gif',
+    'internal/website/evidence/s14/probe.webp',
+  ]);
+  const originalScreenshotPath = 'internal/website/evidence/s14/home-desktop.png';
+  const replaceScreenshot = (relativePath, bytes) => {
+    for (const existingPath of [...probePaths, originalScreenshotPath]) {
+      fs.rmSync(path.join(root, existingPath), { force: true });
+    }
+    const absolutePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, bytes);
+
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    const artifact = manifest.artifacts.find((entry) => entry.path === screenshotPath);
-    assert.ok(artifact);
-    artifact.size = bytes.length;
-    artifact.sha256 = createHash('sha256').update(bytes).digest('hex');
+    manifest.artifacts = manifest.artifacts.filter(
+      (artifact) => !probePaths.has(artifact.path) && artifact.path !== originalScreenshotPath
+    );
+    manifest.artifacts.push({
+      path: relativePath,
+      size: bytes.length,
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+    });
     fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+    fs.writeFileSync(
+      path.join(root, evidencePath),
+      validSelfHostedWebsiteEvidence({
+        Commit: revision,
+        Screenshot: `\`${relativePath}\``,
+      }),
+      'utf8'
+    );
   };
-  const malformed = Buffer.alloc(20);
-  malformed.write('RIFF', 0, 'ascii');
-  malformed.writeUInt32LE(12, 4);
-  malformed.write('WEBP', 8, 'ascii');
-  malformed.write('VP8 ', 12, 'ascii');
-  malformed.writeUInt32LE(0, 16);
-  replaceScreenshot(malformed);
 
-  assert.match(
-    validationMessage(root, promotionOptions(revision)),
-    /Screenshot: retained artifact must be a recognized image file/
-  );
-
-  replaceScreenshot(
-    Buffer.from(
-      'UklGRjYAAABXRUJQVlA4ICoAAACQAQCdASoBAAEAAUAmJaACdLoAA5gA/vdZL/5Kf13eUXPd+tTIx8+4AAA=',
-      'base64'
-    )
-  );
   assert.deepEqual(validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }), {
     matrixCount: 2,
   });
+
+  const malformedJpeg = Buffer.from([
+    0xff, 0xd8, 0xff, 0xc0, 0x00, 0x07, 0x08, 0x00, 0x01, 0x00, 0x01, 0xff, 0xd9,
+  ]);
+  const malformedGif = Buffer.from([
+    ...Buffer.from('GIF89a', 'ascii'),
+    0x01,
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x3b,
+  ]);
+  const malformedWebp = Buffer.alloc(20);
+  malformedWebp.write('RIFF', 0, 'ascii');
+  malformedWebp.writeUInt32LE(12, 4);
+  malformedWebp.write('WEBP', 8, 'ascii');
+  malformedWebp.write('VP8 ', 12, 'ascii');
+  malformedWebp.writeUInt32LE(0, 16);
+
+  for (const [relativePath, bytes] of [
+    ['internal/website/evidence/s14/probe.jpg', malformedJpeg],
+    ['internal/website/evidence/s14/probe.gif', malformedGif],
+    ['internal/website/evidence/s14/probe.webp', malformedWebp],
+  ]) {
+    replaceScreenshot(relativePath, bytes);
+    assert.match(
+      validationMessage(root, promotionOptions(revision)),
+      /Screenshot: retained artifact must be a recognized image file/,
+      `${relativePath} must not pass as a decodable screenshot`
+    );
+  }
+
+  const decodedImages = [
+    [
+      'internal/website/evidence/s14/probe.jpg',
+      Buffer.from(
+        '/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAABv/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AJoAcC7/2Q==',
+        'base64'
+      ),
+    ],
+    [
+      'internal/website/evidence/s14/probe.gif',
+      Buffer.from('R0lGODlhAQABAIAAAExpcRhQoCH5BAUAAAAALAAAAAABAAEAAAICTAEAOw==', 'base64'),
+    ],
+    [
+      'internal/website/evidence/s14/probe.webp',
+      Buffer.from(
+        'UklGRjYAAABXRUJQVlA4ICoAAACQAQCdASoBAAEAAUAmJaACdLoAA5gA/vdZL/5Kf13eUXPd+tTIx8+4AAA=',
+        'base64'
+      ),
+    ],
+  ];
+  for (const [relativePath, bytes] of decodedImages) {
+    replaceScreenshot(relativePath, bytes);
+    assert.deepEqual(
+      validateCoverageMatrices({ rootDir: root, ...promotionOptions(revision) }),
+      { matrixCount: 2 },
+      `${relativePath} must remain accepted when its image stream decodes`
+    );
+  }
 });
 
 test('rejects production import maps without an exact reviewed allowance', () => {

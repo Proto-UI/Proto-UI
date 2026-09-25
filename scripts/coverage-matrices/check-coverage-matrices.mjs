@@ -5309,8 +5309,8 @@ function hasValidPngImageData(data) {
   return false;
 }
 
-// `sharp` is a Website dependency; decode WebP off-process to keep validation synchronous.
-const WEBP_VALIDATION_SCRIPT = `
+// `sharp` is a Website dependency; decode non-PNG raster streams off-process to keep validation synchronous.
+const IMAGE_VALIDATION_SCRIPT = `
 const sharp = require(process.argv[1]);
 sharp(process.argv[2], { failOn: 'warning' }).stats().then(
   () => {},
@@ -5321,7 +5321,7 @@ sharp(process.argv[2], { failOn: 'warning' }).stats().then(
 `;
 const requireFromWebsite = createRequire(new URL('../../apps/www/package.json', import.meta.url));
 
-function hasValidWebpImageData(absolutePath) {
+function hasValidDecodedImageData(absolutePath) {
   let sharpEntry;
   try {
     sharpEntry = requireFromWebsite.resolve('sharp');
@@ -5330,7 +5330,7 @@ function hasValidWebpImageData(absolutePath) {
   }
   const result = spawnSync(
     process.execPath,
-    ['-e', WEBP_VALIDATION_SCRIPT, sharpEntry, absolutePath],
+    ['-e', IMAGE_VALIDATION_SCRIPT, sharpEntry, absolutePath],
     { stdio: 'ignore', timeout: 15_000, windowsHide: true }
   );
   return result.error === undefined && result.status === 0;
@@ -5348,7 +5348,7 @@ function hasImageFileSignature(absolutePath) {
     data.readUInt16LE(8) > 0 &&
     data.at(-1) === 0x3b
   ) {
-    return true;
+    return hasValidDecodedImageData(absolutePath);
   }
 
   if (
@@ -5358,7 +5358,7 @@ function hasImageFileSignature(absolutePath) {
     data.readUInt32LE(4) + 8 === data.length &&
     /^(?:VP8 |VP8L|VP8X)$/u.test(data.subarray(12, 16).toString('ascii'))
   ) {
-    return hasValidWebpImageData(absolutePath);
+    return hasValidDecodedImageData(absolutePath);
   }
 
   if (
@@ -5396,7 +5396,7 @@ function hasImageFileSignature(absolutePath) {
     offset += segmentLength;
     if (marker === 0xda) break;
   }
-  return hasFrame;
+  return hasFrame && hasValidDecodedImageData(absolutePath);
 }
 
 function hasVideoFileSignature(absolutePath) {
