@@ -1,3 +1,4 @@
+import { isExposeEventDeclaration } from '@proto.ui/module-expose';
 import {
   createAdapterHost,
   createScopedExposesReader,
@@ -5,13 +6,21 @@ import {
 } from '@proto.ui/adapter-base';
 import {
   isA11ySemanticObjectRef,
+  mergeTwTokensV0,
   type A11ySemanticObjectSnapshot,
+  type EffectsPort,
   type FocusRequestOptions,
   type Prototype,
+  type StyleHandle,
   type TemplateChildren,
 } from '@proto.ui/core';
 import type { ModuleWiring, RuntimeLifecycleEvent } from '@proto.ui/runtime';
 import { A11Y_PROJECT_CAP, type A11yProjector } from '@proto.ui/module-a11y';
+import {
+  ANATOMY_GET_PROTO_CAP,
+  ANATOMY_INSTANCE_TOKEN_CAP,
+  ANATOMY_PARENT_CAP,
+} from '@proto.ui/module-anatomy';
 import {
   AS_TRIGGER_GET_GROUP_EVENT_TARGET_CAP,
   AS_TRIGGER_GET_PROTO_CAP,
@@ -27,6 +36,7 @@ import {
   EVENT_ROOT_TARGET_CAP,
 } from '@proto.ui/module-event';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
   EXPOSES_RECORD_SINK_CAP,
   isExposeStateExternalHandle,
@@ -68,6 +78,12 @@ export type PeerSessionArgs = {
   readonly instanceId: string;
   readonly prototype: Prototype<any>;
   readonly props: WireRecord;
+  /**
+   * The session whose instance this one belongs to, such as a Switch for its
+   * thumb. It must already be mounted: the instance resolves its context,
+   * anatomy domain and trigger group through it during setup.
+   */
+  readonly parent?: PeerSession;
   readonly send: (message: PeerToHostMessage) => void;
   readonly schedule?: (task: () => void) => void;
 };
@@ -90,9 +106,12 @@ export type PeerSessionSnapshot = {
 
 export type PeerSession = {
   readonly sessionId: string;
+  /** The instance's opaque identity, shared by every module that asks for one. */
+  readonly token: object;
   mount(): Promise<void>;
   setProps(props: WireRecord): void;
   handle(message: HostToPeerMessage): void;
+  /** Ends the session, after every session opened inside it, the latest first. */
   dispose(): Promise<void>;
   snapshot(): PeerSessionSnapshot;
 };
@@ -114,8 +133,38 @@ function toWireValue(
   }
 }
 
+/** What the peer knows about an instance, by its token. */
+type InstanceRecord = {
+  readonly sessionId: string;
+  readonly prototype: Prototype<any>;
+  readonly parent: object | null;
+};
+
+/**
+ * Every instance the peer runs in this realm. Sessions share a realm, as the
+ * Context module's providers do, so a lookup that walks up from one instance
+ * reaches the instances the host composed it into.
+ */
+const instances = new WeakMap<object, InstanceRecord>();
+
+/** The sessions opened inside each instance, by its token, in opening order. */
+const openedInside = new WeakMap<object, Set<PeerSession>>();
+
+function recordOf(instance: unknown): InstanceRecord | undefined {
+  return instance !== null && typeof instance === 'object' ? instances.get(instance) : undefined;
+}
+
+const parentOf = (instance: unknown): object | null => recordOf(instance)?.parent ?? null;
+const prototypeOf = (instance: unknown): Prototype<any> | null =>
+  recordOf(instance)?.prototype ?? null;
+
 export function createPeerSession(args: PeerSessionArgs): PeerSession {
   const { sessionId, instanceId, prototype, send } = args;
+  // An ended instance keeps no context, anatomy domain or trigger group to
+  // belong to.
+  if (args.parent && !recordOf(args.parent.token)) {
+    throw new Error(`session ${args.parent.sessionId} has ended; nothing opens inside it`);
+  }
   const schedule = args.schedule ?? ((task: () => void) => queueMicrotask(task));
 
   let raw: Record<string, unknown> = { ...args.props };
@@ -247,6 +296,8 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       : undefined;
     return {
       semanticObjectId: a11yIdOf(snapshot.objectRef),
+      // Relations name their targets by this id; an empty one names nothing.
+      ...(snapshot.id ? { id: snapshot.id } : {}),
       ...(snapshot.role ? { role: snapshot.role } : {}),
       ...(name ? { name } : {}),
       states,
@@ -259,6 +310,38 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       relations,
       ...(snapshot.level !== undefined ? { level: snapshot.level } : {}),
     };
+  };
+
+  // ---------------------------------------------------------------------
+  // Feedback: the instance root's merged token list, whole each time.
+  // ---------------------------------------------------------------------
+  // Inside a commit, and before the first one, the latest list rides on the
+  // projection, so a view shows its style from its first frame. After that a
+  // change is sent as it is flushed; one that changes nothing is not sent.
+  let latestStyle: readonly string[] = [];
+  let queuedStyle: StyleHandle | null = null;
+
+  const flushStyle = () => {
+    const handle = queuedStyle;
+    if (!handle) return;
+    queuedStyle = null;
+    // The same merge the Web effects port applies before it writes.
+    const tokens = handle.kind === 'tw' ? mergeTwTokensV0([...handle.tokens]).tokens : [];
+    if (tokens.length === latestStyle.length && tokens.every((t, i) => t === latestStyle[i])) {
+      return;
+    }
+    latestStyle = tokens;
+    if (flushingCommit || !viewInstalled || disposed) return;
+    send({ kind: 'style.apply', sessionId, viewEpoch, tokens: [...latestStyle] });
+  };
+
+  const effects: EffectsPort = {
+    queueStyle(handle) {
+      // A newer result replaces a pending one (HC-FEEDBACK-STYLE-SINK-0001-A).
+      queuedStyle = handle;
+    },
+    requestFlush: flushStyle,
+    flushNow: flushStyle,
   };
 
   const projector: A11yProjector = Object.assign(
@@ -335,7 +418,9 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
         methods.set(key, projected as (...callArgs: unknown[]) => unknown);
         continue;
       }
-      if (value && typeof value === 'object' && (value as { kind?: string }).kind === 'event') {
+      // An exposed event is a declaration object, recognised by the Expose
+      // module's own predicate; it has no `kind` field to test.
+      if (isExposeEventDeclaration(value)) {
         signals.push(key);
         continue;
       }
@@ -359,6 +444,9 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
   // Capability wiring, attached once the Runtime is ready (CP1).
   // ---------------------------------------------------------------------
   const instanceToken = Object.freeze({ instanceId });
+  instances.set(instanceToken, { sessionId, prototype, parent: args.parent?.token ?? null });
+  // The session of the trigger group's anchor, when this instance is a trigger.
+  let triggerAnchor: string | null = null;
 
   const attachCaps = (wiring: ModuleWiring) => {
     wiring.attach('event', [
@@ -400,20 +488,34 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     ]);
     wiring.attach('expose-state', [[EXPOSES_RECORD_SINK_CAP, publishExposes]]);
     wiring.attach('a11y', [[A11Y_PROJECT_CAP, projector]]);
+    wiring.attach('feedback', [[EFFECTS_CAP, effects]]);
     wiring.attach('as-trigger', [
       [AS_TRIGGER_INSTANCE_CAP, instanceToken],
-      [AS_TRIGGER_PARENT_CAP, () => null],
-      [AS_TRIGGER_GET_PROTO_CAP, () => null],
-      [AS_TRIGGER_MERGE_GROUP_CAP, () => {}],
+      [AS_TRIGGER_PARENT_CAP, parentOf],
+      [AS_TRIGGER_GET_PROTO_CAP, prototypeOf],
+      [
+        AS_TRIGGER_MERGE_GROUP_CAP,
+        (member: unknown, anchor: unknown) => {
+          // Ancestors in the chain recorded their own anchor when they set up.
+          if (member === instanceToken) triggerAnchor = recordOf(anchor)?.sessionId ?? null;
+        },
+      ],
       [AS_TRIGGER_GET_GROUP_EVENT_TARGET_CAP, () => rootBus as unknown as EventTarget],
     ]);
     wiring.attach('context', [
       [CONTEXT_INSTANCE_TOKEN_CAP, instanceToken],
-      [CONTEXT_PARENT_CAP, () => null],
+      [CONTEXT_PARENT_CAP, parentOf],
+    ]);
+    // No root target and no order observer: parts keep the order they
+    // claimed in, which the Anatomy module falls back to (HC-ANATOMY-ORDER-0001).
+    wiring.attach('anatomy', [
+      [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
+      [ANATOMY_PARENT_CAP, parentOf],
+      [ANATOMY_GET_PROTO_CAP, prototypeOf],
     ]);
     wiring.attach('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
-      [FOCUS_PARENT_CAP, () => null],
+      [FOCUS_PARENT_CAP, parentOf],
       [
         FOCUS_ROOT_TARGET_CAP,
         () => (viewInstalled ? (focusTarget as unknown as HTMLElement) : null),
@@ -497,12 +599,16 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       commitId,
       template: serialized.template,
       slots: { slots: serialized.slots },
-      events: { registrations: currentRegistrations() },
+      events: {
+        registrations: currentRegistrations(),
+        ...(triggerAnchor === null ? {} : { trigger: { anchor: triggerAnchor } }),
+      },
       focus: {
         targets: [
           { ref: FOCUS_ROOT_REF, sequential: focusSequential, programmatic: focusProgrammatic },
         ],
       },
+      style: [...latestStyle],
       a11y: latestA11y,
     };
     a11yDirtyDuringCommit = false;
@@ -543,6 +649,42 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     { initialMount: 'manual' }
   );
 
+  // Whether a view exists follows the instance's view intent (C-LIFECYCLE-0008).
+  // Once the host asks for the instance, each change of intent is reconciled
+  // in turn against the latest intent, so an intent a newer one superseded
+  // does nothing (-D). Detaching unmounts the view and keeps the instance
+  // (-E); the host hears which epoch went.
+  let started = false;
+  let viewMounted = false;
+  let reconciling: Promise<void> = Promise.resolve();
+  const reconcileView = (): Promise<void> => {
+    reconciling = reconciling.then(async () => {
+      if (!started || !acceptingInbound || !hostSession) return;
+      const { present, version } = hostSession.viewIntent.getSnapshot();
+      if (present === viewMounted) return;
+      try {
+        if (present) {
+          await hostSession.mount();
+        } else {
+          const detached = viewEpoch;
+          await hostSession.unmount();
+          // An intent that changed meanwhile queued its own reconciliation,
+          // which attaches a new view: this detach is superseded (-D).
+          if (acceptingInbound && hostSession.viewIntent.getSnapshot().version === version) {
+            send({ kind: 'projection.detach', sessionId, viewEpoch: detached });
+          }
+        }
+        viewMounted = present;
+      } catch (error) {
+        // A failed attach or detach leaves the queue usable for the next
+        // intent and for disposal.
+        diagnose('view-reconcile-failed', String(error));
+      }
+    });
+    return reconciling;
+  };
+  const offViewIntent = hostSession.viewIntent.subscribe(() => void reconcileView());
+
   const handleAck = (ack: ProjectionAck) => {
     if (
       !pendingAck ||
@@ -563,6 +705,9 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       });
       return;
     }
+    // A view whose intent went while it attached is detached next; it does
+    // not become live meanwhile (-D).
+    if (!hostSession?.viewIntent.getSnapshot().present) return;
     send({
       kind: 'projection.activate',
       sessionId,
@@ -616,9 +761,15 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     if (scopes.has('root')) rootBus.dispatchEvent(event);
   };
 
-  return {
+  const peerSession: PeerSession = {
     sessionId,
-    mount: () => hostSession!.mount(),
+    token: instanceToken,
+    mount() {
+      // Intent written while the instance was created applies before the
+      // first view does (-H).
+      started = true;
+      return reconcileView();
+    },
     setProps(props) {
       raw = { ...props };
       hostSession?.controller.applyRawProps(raw as any);
@@ -689,6 +840,12 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     async dispose() {
       if (!acceptingInbound) return;
       acceptingInbound = false;
+      offViewIntent();
+      await reconciling;
+      // No instance outlives the one it belongs to.
+      for (const inside of [...(openedInside.get(instanceToken) ?? [])].reverse()) {
+        await inside.dispose();
+      }
       for (const off of exposeUnsubscribes) off();
       exposeUnsubscribes = [];
       exposesReader.invalidate();
@@ -697,6 +854,9 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       await hostSession?.dispose();
       flushReleases();
       disposed = true;
+      // An ended instance is no one's parent, prototype or trigger anchor.
+      instances.delete(instanceToken);
+      if (args.parent) openedInside.get(args.parent.token)?.delete(peerSession);
       send({ kind: 'session.disposed', sessionId });
     },
     snapshot() {
@@ -715,4 +875,10 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       };
     },
   };
+  if (args.parent) {
+    const inside = openedInside.get(args.parent.token) ?? new Set<PeerSession>();
+    inside.add(peerSession);
+    openedInside.set(args.parent.token, inside);
+  }
+  return peerSession;
 }

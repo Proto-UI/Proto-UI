@@ -83,6 +83,11 @@ export type DefaultActionResult = {
   readonly status: 'applied' | 'late-prevention' | 'duplicate' | 'unknown-sample' | 'disposed';
 };
 
+export type DetachResult = {
+  readonly status: 'detached' | 'stale' | 'not-installed' | 'disposed';
+  readonly releasedLeaseIds: readonly LeaseId[];
+};
+
 export type DisposeResult = {
   readonly status: 'disposed' | 'already-disposed';
   readonly releasedLeaseIds: readonly LeaseId[];
@@ -108,6 +113,13 @@ export type HostSessionModel = {
     request: DefaultActionRequest,
     options: { readonly withinWindow: boolean }
   ): DefaultActionResult;
+  /**
+   * Retires the installed view when the instance detaches it: its leases are
+   * released and nothing more is delivered to it. The session stays open, so
+   * the instance keeps its logical state (C-LIFECYCLE-0008-E), and only a
+   * greater epoch can install a view again.
+   */
+  detachView(viewEpoch: ViewEpoch): DetachResult;
   dispose(): DisposeResult;
   snapshot(): HostSessionSnapshot;
 };
@@ -134,6 +146,9 @@ export function createHostSessionModel(sessionId: SessionId): HostSessionModel {
   let currentEpoch: ViewEpoch | null = null;
   let currentCommit: CommitId | null = null;
   let activeEpoch: ViewEpoch | null = null;
+  // The last view the instance detached. No projection, commit or activation
+  // for it, or for anything older, can bring it back.
+  let retiredEpoch: ViewEpoch | null = null;
   let instanceId: InstanceId | null = null;
   let focusTargets: readonly FocusTargetRef[] = [];
   let semanticObjectId: SemanticObjectId | null = null;
@@ -178,10 +193,13 @@ export function createHostSessionModel(sessionId: SessionId): HostSessionModel {
     }
   };
 
+  const isRetired = (viewEpoch: ViewEpoch) => retiredEpoch !== null && viewEpoch <= retiredEpoch;
+
   const isStale = (viewEpoch: ViewEpoch, commitId: CommitId) =>
-    currentEpoch !== null &&
-    currentCommit !== null &&
-    (viewEpoch < currentEpoch || (viewEpoch === currentEpoch && commitId <= currentCommit));
+    isRetired(viewEpoch) ||
+    (currentEpoch !== null &&
+      currentCommit !== null &&
+      (viewEpoch < currentEpoch || (viewEpoch === currentEpoch && commitId <= currentCommit)));
 
   return {
     sessionId,
@@ -332,7 +350,9 @@ export function createHostSessionModel(sessionId: SessionId): HostSessionModel {
 
     activate(viewEpoch, commitId) {
       if (phase === 'disposed') return { status: 'disposed' };
-      if (currentEpoch === null || viewEpoch > currentEpoch) return { status: 'not-installed' };
+      if (currentEpoch === null)
+        return { status: isRetired(viewEpoch) ? 'stale' : 'not-installed' };
+      if (viewEpoch > currentEpoch) return { status: 'not-installed' };
       if (viewEpoch < currentEpoch) return { status: 'stale' };
       // Same epoch: only the installed commit may be activated. Without this
       // a late activation for an earlier commit would activate the current
@@ -410,6 +430,24 @@ export function createHostSessionModel(sessionId: SessionId): HostSessionModel {
         sampleId: request.sampleId,
       });
       return { status: 'late-prevention' };
+    },
+
+    detachView(viewEpoch) {
+      if (phase === 'disposed') return { status: 'disposed', releasedLeaseIds: [] };
+      if (currentEpoch === null || viewEpoch !== currentEpoch) {
+        const older = isRetired(viewEpoch) || (currentEpoch !== null && viewEpoch < currentEpoch);
+        return { status: older ? 'stale' : 'not-installed', releasedLeaseIds: [] };
+      }
+      const releasedLeaseIds = liveLeases().map((lease) => lease.leaseId);
+      for (const lease of liveLeases()) {
+        lease.active = false;
+        lease.released = true;
+      }
+      retiredEpoch = currentEpoch;
+      currentEpoch = null;
+      currentCommit = null;
+      activeEpoch = null;
+      return { status: 'detached', releasedLeaseIds };
     },
 
     dispose() {
