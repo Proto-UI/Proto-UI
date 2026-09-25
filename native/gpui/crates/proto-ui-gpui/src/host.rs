@@ -43,7 +43,7 @@ use gpui::prelude::*;
 use gpui::{
     canvas, div, AnyElement, Context, DispatchPhase, ElementId, FocusHandle, KeyDownEvent,
     KeyUpEvent, MouseButton, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MouseUpEvent,
-    StyleRefinement, Subscription, Window,
+    SharedString, StyleRefinement, Subscription, Window,
 };
 use proto_ui_host_protocol::event_type::{EventType, ExtensionEvent};
 use proto_ui_host_protocol::wire::SessionId;
@@ -62,7 +62,34 @@ pub struct SurfaceNode {
     pub session: SessionId,
     pub style: StyleRefinement,
     pub focus: Option<FocusHandle>,
-    pub children: Vec<SurfaceNode>,
+    pub children: Vec<SurfaceChild>,
+}
+
+/// What a surface contains: more surfaces, or text.
+///
+/// Text is not a surface. It has no identity, takes no input of its own and
+/// belongs to no session, exactly as a DOM text node is not an element.
+#[derive(Clone)]
+pub enum SurfaceChild {
+    /// Boxed: a surface carries a whole style, and text is a handle.
+    Surface(Box<SurfaceNode>),
+    Text(SharedString),
+}
+
+impl From<SurfaceNode> for SurfaceChild {
+    fn from(surface: SurfaceNode) -> Self {
+        Self::Surface(Box::new(surface))
+    }
+}
+
+impl SurfaceNode {
+    /// The child surfaces, skipping text.
+    pub fn child_surfaces(&self) -> impl Iterator<Item = &SurfaceNode> {
+        self.children.iter().filter_map(|child| match child {
+            SurfaceChild::Surface(surface) => Some(surface.as_ref()),
+            SurfaceChild::Text(_) => None,
+        })
+    }
 }
 
 /// Input state shared by the host view and its listeners.
@@ -138,10 +165,10 @@ impl InputBridge {
             if let Some(focus) = &surface.focus {
                 self.focusable.push((focus.clone(), surface.id.clone()));
             }
+            let children: Vec<&SurfaceNode> = surface.child_surfaces().collect();
             pending.extend(
-                surface
-                    .children
-                    .iter()
+                children
+                    .into_iter()
                     .rev()
                     .map(|child| (child, Some(surface))),
             );
@@ -383,7 +410,7 @@ impl ProtoHostView {
         let mut pending: Vec<&SurfaceNode> = self.surfaces.iter().collect();
         while let Some(surface) = pending.pop() {
             handles.extend(surface.focus.clone());
-            pending.extend(surface.children.iter());
+            pending.extend(surface.child_surfaces());
         }
         self.focus_subscriptions = handles
             .iter()
@@ -533,11 +560,9 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
     interactivity.on_any_mouse_up(move |_, _, _| on_up());
     interactivity.on_mouse_move(move |_, _, _| on_move());
     element
-        .children(
-            surface
-                .children
-                .iter()
-                .map(|child| render_surface(child, bridge)),
-        )
+        .children(surface.children.iter().map(|child| match child {
+            SurfaceChild::Surface(surface) => render_surface(surface, bridge),
+            SurfaceChild::Text(text) => text.clone().into_any_element(),
+        }))
         .into_any_element()
 }

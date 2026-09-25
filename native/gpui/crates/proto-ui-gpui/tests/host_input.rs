@@ -23,7 +23,7 @@ use gpui::{
     div, point, px, size, FocusHandle, Keystroke, Modifiers, MouseButton, MouseExitEvent, Pixels,
     PlatformInput, Point, StyleRefinement, TestAppContext, VisualTestContext,
 };
-use proto_ui_gpui::host::{InputBridge, ProtoHostView, SurfaceNode};
+use proto_ui_gpui::host::{InputBridge, ProtoHostView, SurfaceChild, SurfaceNode};
 use proto_ui_gpui::input::{Routed, RoutedLease, SessionRoute};
 use proto_ui_host_protocol::event_type::EventType;
 use proto_ui_host_protocol::wire::EventScope;
@@ -78,7 +78,7 @@ fn surface(
         session: session.into(),
         style,
         focus,
-        children,
+        children: children.into_iter().map(SurfaceChild::from).collect(),
     }
 }
 

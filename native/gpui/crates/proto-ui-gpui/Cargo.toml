@@ -11,6 +11,7 @@ rust-version.workspace = true
 gpui.workspace = true
 proto-ui-host-protocol = { path = "../proto-ui-host-protocol" }
 proto-ui-style = { path = "../proto-ui-style" }
+serde_json.workspace = true
 
 [dev-dependencies]
 # `test-support` brings GPUI's headless harness: a window that runs a real

@@ -440,3 +440,97 @@ fn to_absolute(dimension: Dimension) -> Result<AbsoluteLength, Unmapped> {
         // A percentage has no absolute form; GPUI needs one here.
         .ok_or(Unmapped::UnsupportedValue)
 }
+
+/// A reason one token list did not become a complete style.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StyleIssue {
+    /// The vocabulary has no such token.
+    UnknownToken(String),
+    /// A declaration names a design-language variable the theme does not
+    /// define, so it cannot be painted.
+    UnresolvedVariable { property: String, variable: String },
+    /// A declaration's variable chain was too deep to follow, as a cycle
+    /// makes it.
+    SubstitutionTooDeep { property: String },
+    /// A declaration reached the map and did not map.
+    Unmapped {
+        property: String,
+        value: String,
+        reason: Unmapped,
+    },
+}
+
+/// A style built from tokens, with everything that did not make it.
+#[derive(Debug, Clone, Default)]
+pub struct TokenStyle {
+    pub refinement: StyleRefinement,
+    pub issues: Vec<StyleIssue>,
+}
+
+/// Resolves a token list in cascade order, substitutes the design language's
+/// theme, and maps the result onto GPUI.
+///
+/// `theme` is `None` for a Prototype with no design language, such as the
+/// Base family; a declaration that still references a theme variable is then
+/// reported rather than painted with a guess.
+pub fn style_for_tokens<'a>(
+    tokens: impl IntoIterator<Item = &'a str>,
+    theme: Option<&proto_ui_style::Theme>,
+    context: LengthContext,
+) -> TokenStyle {
+    let mut resolved = proto_ui_style::vocabulary().resolve_all(tokens);
+    let mut issues: Vec<StyleIssue> = resolved
+        .unknown
+        .iter()
+        .map(|token| StyleIssue::UnknownToken(token.clone()))
+        .collect();
+
+    let mut unresolved = Vec::new();
+    for (property, value) in resolved.declarations.iter_mut() {
+        let substitution = match theme {
+            Some(theme) => theme.substitute(value),
+            None if value.contains("var(") => proto_ui_style::Substitution::Missing {
+                variable: value.clone(),
+            },
+            None => continue,
+        };
+        match substitution {
+            proto_ui_style::Substitution::Resolved(text) => *value = text,
+            proto_ui_style::Substitution::Missing { variable } => {
+                unresolved.push(property.clone());
+                issues.push(StyleIssue::UnresolvedVariable {
+                    property: property.clone(),
+                    variable,
+                });
+            }
+            proto_ui_style::Substitution::TooDeep => {
+                unresolved.push(property.clone());
+                issues.push(StyleIssue::SubstitutionTooDeep {
+                    property: property.clone(),
+                });
+            }
+        }
+    }
+    // A declaration whose variable did not resolve is reported above and not
+    // handed to the map, which would only report it a second time.
+    for property in unresolved {
+        resolved.declarations.remove(&property);
+    }
+
+    let mapped = map(&resolved, context);
+    issues.extend(
+        mapped
+            .unmapped
+            .into_iter()
+            .filter(|(_, _, reason)| *reason != Unmapped::ComposedInput)
+            .map(|(property, value, reason)| StyleIssue::Unmapped {
+                property,
+                value,
+                reason,
+            }),
+    );
+    TokenStyle {
+        refinement: mapped.refinement,
+        issues,
+    }
+}

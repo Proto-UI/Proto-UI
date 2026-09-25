@@ -18,7 +18,8 @@ use gpui::{
     VisualTestContext, WindowHandle,
 };
 use proto_ui_gpui::host::{
-    FocusAction, FocusRequestStatus, InputBridge, ProtoHostView, SurfaceNode, FOCUS_ROOT_REF,
+    FocusAction, FocusRequestStatus, InputBridge, ProtoHostView, SurfaceChild, SurfaceNode,
+    FOCUS_ROOT_REF,
 };
 use proto_ui_gpui::input::{Routed, RoutedLease, SessionRoute};
 use proto_ui_host_protocol::event_type::EventType;
@@ -58,7 +59,7 @@ fn surface(
         session: session.into(),
         style: boxed(left),
         focus,
-        children,
+        children: children.into_iter().map(SurfaceChild::from).collect(),
     }
 }
 
