@@ -169,13 +169,16 @@ describe.sequential('shadcn Tooltip browser acceptance', () => {
           await account.getAttribute('aria-describedby'),
           `${runtime}/closed-description`
         ).toBeNull();
-        expect(
-          await account.evaluate(
-            (trigger) =>
-              document.activeElement === trigger || trigger.contains(document.activeElement)
-          ),
-          `${runtime}/focus-retained`
-        ).toBe(true);
+        await expect
+          .poll(
+            () =>
+              account.evaluate(
+                (trigger) =>
+                  document.activeElement === trigger || trigger.contains(document.activeElement)
+              ),
+            { message: `${runtime}/focus-retained` }
+          )
+          .toBe(true);
         expect(
           await page.evaluate(
             () => document.documentElement.scrollWidth - document.documentElement.clientWidth

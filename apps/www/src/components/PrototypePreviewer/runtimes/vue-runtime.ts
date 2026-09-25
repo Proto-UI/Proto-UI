@@ -1,5 +1,5 @@
-import type { RuntimeAPI } from './registry';
-import { createVueAdapter, type VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
+import type { RuntimeAPI } from './ids';
+import type { VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import { claimHostMount, releaseHostMount } from './host-mount';
 
 // 使用 esm.sh 的 ESM 版本懒加载 Vue
@@ -35,7 +35,10 @@ export function createVueRuntime(load = loadVue): RuntimeAPI {
 
     async mount(host, prototype, options) {
       const lease = claimHostMount(host);
-      const Vue = await load();
+      const [Vue, { createVueAdapter }] = await Promise.all([
+        load(),
+        import('@proto.ui/adapter-vue'),
+      ]);
       if (!lease.isCurrent()) return;
 
       const Component = createVueAdapter(Vue as unknown as AdapterVueRuntime)(prototype);

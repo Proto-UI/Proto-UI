@@ -130,7 +130,7 @@ function buildCodeFileContent(
   const reactContent = renderRuntimeBlock(demos, 'react');
   const vueContent = renderRuntimeBlock(demos, 'vue');
   return `import { formatCode } from '@/utils/conversionUtils';
-import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/registry';
+import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/ids';
 
 export const codeMap: Record<RuntimeId, Record<string, string>> = {
   wc: {

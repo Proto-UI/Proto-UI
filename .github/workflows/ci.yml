@@ -212,9 +212,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      COVERAGE_BASE_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+      COVERAGE_HEAD_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      COVERAGE_MERGE_REVISION: ${{ github.event_name == 'pull_request' && github.sha || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
+          # Keep GitHub's default synthetic merge checkout for pull requests so
+          # the full suite exercises the feature together with the current base.
+          # Coverage evidence remains bound separately to the exact base/head
+          # revisions supplied above; the merge SHA is never retained evidence.
           fetch-depth: 0
 
       - uses: actions/setup-node@v4

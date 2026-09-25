@@ -1,4 +1,4 @@
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 import {
   assertDemoSpec,
   type DemoBoxAttrs,

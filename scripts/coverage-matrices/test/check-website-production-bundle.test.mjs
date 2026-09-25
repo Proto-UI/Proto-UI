@@ -1,0 +1,567 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import {
+  collectWebsiteProductionBundleIssues,
+  validateWebsiteProductionBundle,
+} from '../check-website-production-bundle.mjs';
+
+const HOME_DEMO_FACADE =
+  'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts';
+const PREVIEWER_FACADE =
+  'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts';
+const PREVIEWER_CLIENT_FACADE = 'apps/www/src/components/PrototypePreviewer/previewer-client.ts';
+const STYLE_ISOLATION_FACADE =
+  'apps/www/src/pages/en/test/style-isolation.astro?astro&type=script&index=0&lang.ts';
+
+function chunk(
+  fileName,
+  {
+    name = fileName,
+    isEntry = false,
+    isDynamicEntry = false,
+    facadeModuleId = null,
+    imports = [],
+    dynamicImports = [],
+    moduleIds = [],
+  } = {}
+) {
+  return {
+    fileName,
+    name,
+    isEntry,
+    isDynamicEntry,
+    facadeModuleId,
+    imports,
+    dynamicImports,
+    moduleIds,
+  };
+}
+
+function graphFixture() {
+  return {
+    version: 1,
+    chunks: [
+      chunk('_astro/search.js', {
+        isEntry: true,
+        facadeModuleId:
+          'apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts',
+        imports: ['_astro/site-shadcn-controls.js'],
+        moduleIds: ['apps/www/src/components/override/Search.astro'],
+      }),
+      chunk('_astro/site-shadcn-controls.js', {
+        moduleIds: ['apps/www/src/components/site-shadcn-controls.ts'],
+      }),
+      chunk('_astro/home-demo.js', {
+        isEntry: true,
+        facadeModuleId: HOME_DEMO_FACADE,
+        imports: ['_astro/wc-host.js'],
+        dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+        moduleIds: ['apps/www/src/components/PrototypePreviewer/home-demo-client.ts'],
+      }),
+      chunk('_astro/previewer.js', {
+        isEntry: true,
+        facadeModuleId: PREVIEWER_FACADE,
+        dynamicImports: [
+          '_astro/previewer-client.js',
+          '_astro/react.js',
+          '_astro/vue.js',
+          '_astro/vue2.js',
+        ],
+        moduleIds: ['apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro'],
+      }),
+      chunk('_astro/previewer-client.js', {
+        isDynamicEntry: true,
+        facadeModuleId: PREVIEWER_CLIENT_FACADE,
+        moduleIds: ['apps/www/src/components/PrototypePreviewer/previewer-client.ts'],
+      }),
+      chunk('_astro/style-isolation.js', {
+        isEntry: true,
+        facadeModuleId: STYLE_ISOLATION_FACADE,
+        dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+        moduleIds: ['apps/www/src/pages/en/test/style-isolation.astro'],
+      }),
+      chunk('_astro/wc-host.js', {
+        name: 'wc-host',
+        moduleIds: [
+          'apps/www/src/components/PrototypePreviewer/wc-registry.ts?used',
+          'packages/adapters/web-component/src/adapt.ts?used',
+        ],
+      }),
+      chunk('_astro/react.js', {
+        name: 'react-runtime',
+        isDynamicEntry: true,
+        moduleIds: [
+          'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts',
+          'packages/adapters/react/src/index.ts',
+          'node_modules/react/index.js',
+        ],
+      }),
+      chunk('_astro/vue.js', {
+        name: 'vue-runtime',
+        isDynamicEntry: true,
+        moduleIds: [
+          'apps/www/src/components/PrototypePreviewer/runtimes/vue-runtime.ts',
+          'packages/adapters/vue/src/index.ts',
+          'node_modules/vue/dist/vue.runtime.esm.js',
+        ],
+      }),
+      chunk('_astro/vue2.js', {
+        name: 'vue2-runtime',
+        isDynamicEntry: true,
+        moduleIds: [
+          'apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime.ts',
+          'packages/adapters/vue2/src/index.ts',
+        ],
+      }),
+    ],
+  };
+}
+
+test('accepts module-proven demo runtimes isolated from shell static closures', () => {
+  assert.deepEqual(validateWebsiteProductionBundle({ graph: graphFixture() }), {
+    shellRuntime: 'native/static',
+    primaryDemonstrationHost: 'web-component',
+    isolatedDemonstrationRuntimes: 3,
+  });
+});
+
+test('requires every approved demonstration facade in the production graph', () => {
+  for (const facadeModuleId of [
+    HOME_DEMO_FACADE,
+    PREVIEWER_FACADE,
+    PREVIEWER_CLIENT_FACADE,
+    STYLE_ISOLATION_FACADE,
+  ]) {
+    const graph = graphFixture();
+    graph.chunks = graph.chunks.filter((candidate) => candidate.facadeModuleId !== facadeModuleId);
+
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).includes(
+        `production bundle graph must contain exactly one approved demonstration entry for \`${facadeModuleId}\` (found 0)`
+      )
+    );
+  }
+});
+
+test('accepts coalesced module-proven demo runtime chunks', () => {
+  const graph = graphFixture();
+  const runtimeFileNames = new Set(['_astro/react.js', '_astro/vue.js', '_astro/vue2.js']);
+  const runtimeChunks = graph.chunks.filter((candidate) =>
+    runtimeFileNames.has(candidate.fileName)
+  );
+  graph.chunks = graph.chunks.filter((candidate) => !runtimeFileNames.has(candidate.fileName));
+  for (const routeRoot of graph.chunks.filter((candidate) => candidate.isEntry)) {
+    routeRoot.dynamicImports = routeRoot.dynamicImports.map((fileName) =>
+      runtimeFileNames.has(fileName) ? '_astro/coalesced-runtimes.js' : fileName
+    );
+  }
+  graph.chunks.push(
+    chunk('_astro/coalesced-runtimes.js', {
+      isDynamicEntry: true,
+      moduleIds: runtimeChunks.flatMap((candidate) => candidate.moduleIds),
+    })
+  );
+
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+});
+
+test('rejects framework Adapter modules statically owned by a route demo', () => {
+  const graph = graphFixture();
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/home-demo.js')
+    .imports.push('_astro/react.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('statically includes the react Adapter')
+    )
+  );
+});
+
+test('rejects runtime chunks that are not dynamically reachable from a route demo', () => {
+  const graph = graphFixture();
+  graph.chunks.find((candidate) => candidate.fileName === '_astro/home-demo.js').dynamicImports =
+    [];
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('does not dynamically reach a react Adapter runtime chunk')
+    )
+  );
+});
+
+test('rejects a graph without route-owned Web Component host provenance', () => {
+  const graph = graphFixture();
+  graph.chunks.find((candidate) => candidate.fileName === '_astro/home-demo.js').imports =
+    graph.chunks
+      .find((candidate) => candidate.fileName === '_astro/home-demo.js')
+      .imports.filter((fileName) => fileName !== '_astro/wc-host.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).includes(
+      'production bundle graph has no route-owned demonstration entry with static module-level evidence for both the reviewed Web Component facade registry and Web Component Adapter'
+    )
+  );
+});
+
+test('does not mistake an orphaned WC runtime for primary host provenance', () => {
+  const graph = graphFixture();
+  graph.chunks.find((candidate) => candidate.fileName === '_astro/home-demo.js').imports =
+    graph.chunks
+      .find((candidate) => candidate.fileName === '_astro/home-demo.js')
+      .imports.filter((fileName) => fileName !== '_astro/wc-host.js');
+  graph.chunks.push(
+    chunk('_astro/wc-runtime.js', {
+      isDynamicEntry: true,
+      facadeModuleId: 'apps/www/src/components/PrototypePreviewer/runtimes/wc-runtime.ts',
+      moduleIds: [
+        'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+        'packages/adapters/web-component/src/adapt.ts',
+      ],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('no route-owned demonstration entry with static module-level evidence')
+    )
+  );
+});
+
+test('rejects an extra orphaned Web Component runtime entry', () => {
+  const graph = graphFixture();
+  const facadeModuleId = 'apps/www/src/components/PrototypePreviewer/runtimes/wc-runtime.ts';
+  graph.chunks.push(
+    chunk('_astro/orphaned-wc-runtime.js', {
+      isDynamicEntry: true,
+      facadeModuleId,
+      moduleIds: [
+        'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+        'packages/adapters/web-component/src/adapt.ts',
+      ],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).includes(
+      `reviewed demonstration runtime entry \`${facadeModuleId}\` is orphaned from shell or route-owned entry reachability`
+    )
+  );
+});
+
+test('requires registry and Adapter provenance in the same route-owned demo closure', () => {
+  const graph = graphFixture();
+  graph.chunks.find((candidate) => candidate.fileName === '_astro/wc-host.js').moduleIds = [
+    'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+  ];
+  graph.chunks.push(
+    chunk('_astro/second-demo.js', {
+      isEntry: true,
+      facadeModuleId:
+        'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts',
+      moduleIds: ['packages/adapters/web-component/src/adapt.ts'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('no route-owned demonstration entry with static module-level evidence')
+    )
+  );
+});
+test('requires the Vue Adapter in every route-owned demo closure', () => {
+  const graph = graphFixture();
+  const styleIsolationRoot = graph.chunks.find(
+    (candidate) => candidate.facadeModuleId === STYLE_ISOLATION_FACADE
+  );
+  styleIsolationRoot.dynamicImports = ['_astro/vue-framework-only.js'];
+  graph.chunks.push(
+    chunk('_astro/vue-framework-only.js', {
+      isDynamicEntry: true,
+      moduleIds: ['node_modules/vue/dist/vue.runtime.esm.js'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes(
+        `route-owned demonstration entry \`${STYLE_ISOLATION_FACADE}\` does not dynamically reach a vue Adapter runtime chunk`
+      )
+    )
+  );
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: graphFixture() }), []);
+});
+
+test('rejects renamed or inlined framework modules in a shell chunk', () => {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/innocent-helper.js', {
+      name: 'innocent-helper',
+      moduleIds: ['node_modules/.pnpm/react@19.2.0/node_modules/react/jsx-runtime.js'],
+    })
+  );
+  graph.chunks[0].imports.push('_astro/innocent-helper.js');
+
+  const issues = collectWebsiteProductionBundleIssues({ graph });
+  assert.ok(
+    issues.some((issue) => issue.includes('statically reaches forbidden React/Vue module(s)'))
+  );
+  assert.ok(
+    issues.some((issue) =>
+      issue.includes('forbidden framework chunk `_astro/innocent-helper.js` is not owned')
+    )
+  );
+});
+
+test('rejects Web Component Adapter evidence inside the native/static shell closure', () => {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/shell-wc.js', {
+      moduleIds: ['packages/adapters/web-component/src/adapt.ts?used'],
+    })
+  );
+  graph.chunks[0].imports.push('_astro/shell-wc.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('Proto UI Adapter module(s)')
+    )
+  );
+});
+
+test('allows Adapter modules only in the exact reviewed site-control bridge chunk', () => {
+  const graph = graphFixture();
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/site-shadcn-controls.js')
+    .moduleIds.push(
+      'packages/adapters/base/src/host/adapter-host.ts',
+      'packages/adapters/web-component/src/adapt.ts?used'
+    );
+
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+});
+
+test('rejects unreviewed Adapter modules inside the reviewed bridge chunk', () => {
+  const graph = graphFixture();
+  const unreviewedModules = [
+    'packages/adapters/base/src/host/unreviewed-extension.ts',
+    'packages/adapters/web-component/src/unreviewed-extension.ts',
+  ];
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/site-shadcn-controls.js')
+    .moduleIds.push(...unreviewedModules);
+
+  const issues = collectWebsiteProductionBundleIssues({ graph });
+  for (const moduleId of unreviewedModules) {
+    assert.ok(
+      issues.some((issue) => issue.includes(moduleId)),
+      `unreviewed bridge module should be rejected: ${moduleId}`
+    );
+  }
+});
+
+test('does not let the reviewed site-control bridge exempt a sibling Adapter chunk', () => {
+  const graph = graphFixture();
+  graph.chunks[0].imports.push('_astro/sibling-adapter.js');
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/site-shadcn-controls.js')
+    .moduleIds.push('packages/adapters/web-component/src/adapt.ts?used');
+  graph.chunks.push(
+    chunk('_astro/sibling-adapter.js', {
+      moduleIds: ['packages/adapters/web-component/src/runtime/session.ts'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('packages/adapters/web-component/src/runtime/session.ts')
+    )
+  );
+});
+
+test('rejects Adapter modules in chunks statically imported by the reviewed site-control bridge chunk', () => {
+  const graph = graphFixture();
+  graph.chunks.find(
+    (candidate) => candidate.fileName === '_astro/site-shadcn-controls.js'
+  ).imports = ['_astro/shared-adapter.js'];
+  graph.chunks.push(
+    chunk('_astro/shared-adapter.js', {
+      moduleIds: [
+        'packages/adapters/base/src/host/adapter-host.ts',
+        'packages/adapters/web-component/src/adapt.ts?used',
+      ],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('packages/adapters/web-component/src/adapt.ts?used')
+    )
+  );
+});
+
+test('does not exempt a bridge dependency that the shell reaches without the bridge', () => {
+  const graph = graphFixture();
+  graph.chunks[0].imports.push('_astro/shared-adapter.js');
+  graph.chunks.find(
+    (candidate) => candidate.fileName === '_astro/site-shadcn-controls.js'
+  ).imports = ['_astro/shared-adapter.js'];
+  graph.chunks.push(
+    chunk('_astro/shared-adapter.js', {
+      moduleIds: ['packages/adapters/web-component/src/adapt.ts?used'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('packages/adapters/web-component/src/adapt.ts?used')
+    )
+  );
+});
+
+test('rejects framework modules even downstream of the reviewed site-control bridge chunk', () => {
+  const graph = graphFixture();
+  graph.chunks.find(
+    (candidate) => candidate.fileName === '_astro/site-shadcn-controls.js'
+  ).imports = ['_astro/shared-adapter.js'];
+  graph.chunks.push(
+    chunk('_astro/shared-adapter.js', {
+      moduleIds: ['node_modules/.pnpm/react@19.2.0/node_modules/react/jsx-runtime.js'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('statically reaches forbidden React/Vue module(s)')
+    )
+  );
+});
+
+test('requires one reviewed control bridge that a Website shell statically reaches', () => {
+  const missing = graphFixture();
+  missing.chunks = missing.chunks.filter(
+    (candidate) => candidate.fileName !== '_astro/site-shadcn-controls.js'
+  );
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: missing }).some((issue) =>
+      issue.includes('exactly one reviewed Website control bridge chunk (found 0)')
+    )
+  );
+
+  const orphaned = graphFixture();
+  orphaned.chunks[0].imports = orphaned.chunks[0].imports.filter(
+    (fileName) => fileName !== '_astro/site-shadcn-controls.js'
+  );
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: orphaned }).some((issue) =>
+      issue.includes('no Website shell statically reaches the reviewed Website control bridge')
+    )
+  );
+});
+
+test('treats an unproven null-facade entry as a shell root', () => {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/mystery.js', {
+      name: 'mystery',
+      isEntry: true,
+      moduleIds: ['node_modules/.pnpm/react-dom@19.2.0/node_modules/react-dom/client.js'],
+    })
+  );
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/home-demo.js')
+    .imports.push('_astro/mystery.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes(
+        'Website shell entry `<null facade: _astro/mystery.js>` statically reaches forbidden React/Vue module(s)'
+      )
+    )
+  );
+});
+
+test('does not accept benign named runtime wrappers without module-level Adapter evidence', () => {
+  const graph = graphFixture();
+  for (const fileName of ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js']) {
+    graph.chunks.find((candidate) => candidate.fileName === fileName).moduleIds = [
+      'apps/www/src/components/PrototypePreviewer/safe-wrapper.ts',
+    ];
+  }
+
+  const issues = collectWebsiteProductionBundleIssues({ graph });
+  for (const family of ['react', 'vue', 'vue2']) {
+    assert.ok(
+      issues.includes(
+        `production bundle graph has no module-level evidence for the ${family} Adapter`
+      )
+    );
+  }
+});
+
+test('treats an unreviewed entry under PrototypePreviewer as an ordinary shell root', () => {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/unreviewed.js', {
+      isEntry: true,
+      facadeModuleId:
+        'apps/www/src/components/PrototypePreviewer/Unreviewed.astro?astro&type=script&index=0&lang.ts',
+      moduleIds: ['node_modules/.pnpm/vue@3.5.0/node_modules/vue/dist/vue.runtime.esm.js'],
+    })
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes(
+        'Website shell entry `apps/www/src/components/PrototypePreviewer/Unreviewed.astro'
+      )
+    )
+  );
+});
+
+test('validates dynamic import fields and references', () => {
+  const malformed = graphFixture();
+  malformed.chunks[0].dynamicImports = 'not-an-array';
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: malformed }).some((issue) =>
+      issue.includes('must have a string-array dynamicImports field')
+    )
+  );
+
+  const missing = graphFixture();
+  missing.chunks[0].dynamicImports.push('_astro/missing-demo.js');
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: missing }).includes(
+      'production bundle graph chunk `_astro/search.js` dynamicImports references missing chunk `_astro/missing-demo.js`'
+    )
+  );
+});
+
+test('rejects an orphaned dynamic demonstration entry', () => {
+  const graph = graphFixture();
+  const previewerRoot = graph.chunks.find(
+    (candidate) => candidate.facadeModuleId === PREVIEWER_FACADE
+  );
+  previewerRoot.dynamicImports = previewerRoot.dynamicImports.filter(
+    (fileName) => fileName !== '_astro/previewer-client.js'
+  );
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).includes(
+      `approved demonstration entry \`${PREVIEWER_CLIENT_FACADE}\` is orphaned from shell or route-owned entry reachability`
+    )
+  );
+});
+
+test('rejects shell dynamic imports of demo-owned framework chunks', () => {
+  const graph = graphFixture();
+  graph.chunks[0].dynamicImports.push('_astro/react.js');
+
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes(
+        'Website shell entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` dynamically reaches forbidden React/Vue module(s)'
+      )
+    )
+  );
+});

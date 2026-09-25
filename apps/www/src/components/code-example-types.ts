@@ -1,5 +1,5 @@
 import type { CodeLang } from './PrototypePreviewer/code-highlight';
-import type { PublicRuntimeId } from './PrototypePreviewer/runtimes/registry';
+import type { PublicRuntimeId } from './PrototypePreviewer/runtimes/ids';
 
 export type CodeExampleFile = Readonly<{
   name: string;
