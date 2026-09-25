@@ -43,6 +43,14 @@ export const HOST_TO_PEER_EXAMPLES: ExamplesByKind<HostToPeerMessage> = {
       prototypeKey: 'base-button',
       props: { disabled: false, label: 'Save', size: { width: 3 } },
     },
+    {
+      kind: 'session.open',
+      sessionId: 's-3',
+      instanceId: 'switch-thumb-1',
+      prototypeKey: 'base-switch-thumb',
+      props: {},
+      parentSessionId: 's-2',
+    },
   ],
   'props.set': [{ kind: 'props.set', sessionId: 's-1', props: { disabled: true } }],
   'projection.ack': [
@@ -131,6 +139,8 @@ export const PEER_TO_HOST_EXAMPLES: ExamplesByKind<PeerToHostMessage> = {
             { leaseId: 'l-root', scope: 'root', type: 'press.commit' },
             { leaseId: 'l-global', scope: 'global', type: 'key.down' },
           ],
+          // A lone trigger anchors its own group.
+          trigger: { anchor: 's-1' },
         },
         focus: { targets: [{ ref: 'focus-root', sequential: true, programmatic: true }] },
         // Optional snapshot fields absent here and present in `a11y.snapshot`.

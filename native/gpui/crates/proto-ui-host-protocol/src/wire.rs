@@ -84,9 +84,20 @@ impl RawEventRegistration {
     }
 }
 
+/// The trigger group an instance belongs to.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TriggerPlan {
+    /// The session of the group's outermost trigger, which identifies the
+    /// group. A lone trigger anchors its own group.
+    pub anchor: SessionId,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EventBindingPlan {
     pub registrations: Vec<RawEventRegistration>,
+    /// Present when the instance is a trigger.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trigger: Option<TriggerPlan>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

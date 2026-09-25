@@ -29,8 +29,19 @@ export type EventRegistration = {
   readonly type: string;
 };
 
+/** The trigger group an instance belongs to. */
+export type TriggerPlan = {
+  /**
+   * The session of the group's outermost trigger, which identifies the
+   * group. A lone trigger anchors its own group.
+   */
+  readonly anchor: SessionId;
+};
+
 export type EventBindingPlan = {
   readonly registrations: readonly EventRegistration[];
+  /** Present when the instance is a trigger. */
+  readonly trigger?: TriggerPlan;
 };
 
 export type FocusTargetPlan = {
