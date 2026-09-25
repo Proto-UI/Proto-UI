@@ -308,6 +308,25 @@ test('allows Adapter modules only in the exact reviewed site-control bridge chun
   assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
 });
 
+test('rejects unreviewed Adapter modules inside the reviewed bridge chunk', () => {
+  const graph = graphFixture();
+  const unreviewedModules = [
+    'packages/adapters/base/src/host/unreviewed-extension.ts',
+    'packages/adapters/web-component/src/unreviewed-extension.ts',
+  ];
+  graph.chunks
+    .find((candidate) => candidate.fileName === '_astro/site-shadcn-controls.js')
+    .moduleIds.push(...unreviewedModules);
+
+  const issues = collectWebsiteProductionBundleIssues({ graph });
+  for (const moduleId of unreviewedModules) {
+    assert.ok(
+      issues.some((issue) => issue.includes(moduleId)),
+      `unreviewed bridge module should be rejected: ${moduleId}`
+    );
+  }
+});
+
 test('does not let the reviewed site-control bridge exempt a sibling Adapter chunk', () => {
   const graph = graphFixture();
   graph.chunks[0].imports.push('_astro/sibling-adapter.js');

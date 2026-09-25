@@ -28,6 +28,45 @@ const REQUIRED_ADAPTER_FAMILIES = Object.freeze(['react', 'vue', 'vue2']);
 const REVIEWED_WEB_COMPONENT_HOST_MODULE =
   'apps/www/src/components/PrototypePreviewer/wc-registry.ts';
 const REVIEWED_WEBSITE_CONTROL_MODULE = 'apps/www/src/components/site-shadcn-controls.ts';
+// Exact Adapter modules observed in the reviewed production bridge graph.
+// Matrix rule 6 is authoritative; new modules require review, not family-wide inheritance.
+const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
+  'packages/adapters/base/src/events/web-default-action.ts',
+  'packages/adapters/base/src/events/web-event-router.ts',
+  'packages/adapters/base/src/gate/event-gate.ts',
+  'packages/adapters/base/src/gestures/web-move-gesture-host.ts',
+  'packages/adapters/base/src/host/adapter-host.ts',
+  'packages/adapters/base/src/host/exposes.ts',
+  'packages/adapters/base/src/host/surface-projection.ts',
+  'packages/adapters/base/src/host/view-epoch-owner.ts',
+  'packages/adapters/base/src/host/view-visibility.ts',
+  'packages/adapters/base/src/index.ts',
+  'packages/adapters/base/src/lifecycle/teardown.ts',
+  'packages/adapters/base/src/platform/focus-entry.ts',
+  'packages/adapters/base/src/platform/instance-tree.ts',
+  'packages/adapters/base/src/platform/layout-ready.ts',
+  'packages/adapters/base/src/platform/web-color-scheme-source.ts',
+  'packages/adapters/base/src/platform/web-preferences.ts',
+  'packages/adapters/base/src/public-types.ts',
+  'packages/adapters/base/src/types.ts',
+  'packages/adapters/base/src/wiring/caps-builder.ts',
+  'packages/adapters/base/src/wiring/host-wiring.ts',
+  'packages/adapters/web-component/src/adapt.ts',
+  'packages/adapters/web-component/src/commit.ts',
+  'packages/adapters/web-component/src/debug/hooks.ts',
+  'packages/adapters/web-component/src/feedback-style.ts',
+  'packages/adapters/web-component/src/host-display.ts',
+  'packages/adapters/web-component/src/index.ts',
+  'packages/adapters/web-component/src/platform/instance-tree.ts',
+  'packages/adapters/web-component/src/platform/meta.ts',
+  'packages/adapters/web-component/src/props.ts',
+  'packages/adapters/web-component/src/runtime/effects-port.ts',
+  'packages/adapters/web-component/src/runtime/modules.ts',
+  'packages/adapters/web-component/src/runtime/session.ts',
+  'packages/adapters/web-component/src/slot-projector.ts',
+  'packages/adapters/web-component/src/style.ts',
+  'packages/adapters/web-component/src/types.ts',
+]);
 
 export class WebsiteProductionBundleValidationError extends Error {
   constructor(issues) {
@@ -92,14 +131,7 @@ function isProtoUiAdapterModule(moduleId) {
   );
 }
 function isReviewedWebsiteControlAdapterModule(moduleId) {
-  const normalized = moduleIdWithoutQuery(moduleId);
-  return (
-    isWebComponentAdapterModule(moduleId) ||
-    /(?:^|\/)packages\/adapters\/base(?:\/|$)/u.test(normalized) ||
-    /(?:^|\/)node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@proto\.ui\/adapter-base(?:\/|$)/u.test(
-      normalized
-    )
-  );
+  return REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES.has(moduleIdWithoutQuery(moduleId));
 }
 
 function reviewedNullFacadeRuntimeModules(chunk) {
