@@ -209,6 +209,58 @@ jobs:
         working-directory: native/gpui
         run: cargo test --workspace
 
+  rust-interop:
+    # The real Rust host against the real Node peer. These tests are ignored
+    # in the other Rust jobs because they need the repository's node_modules,
+    # so this job installs both toolchains and runs them explicitly.
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm (corepack)
+        run: |
+          set -euo pipefail
+          LOCKFILE_VERSION=$(node -e "const fs=require('fs');const text=fs.readFileSync('pnpm-lock.yaml','utf8');const m=text.match(/^lockfileVersion:\\s*['\\\"]?([^'\\\"\\n]+)['\\\"]?/m);if(!m){throw new Error('lockfileVersion not found');}process.stdout.write(m[1]);")
+          case "${LOCKFILE_VERSION}" in
+            9* ) PNPM_VERSION="10.32.1" ;;
+            * ) echo "Unsupported pnpm lockfileVersion: ${LOCKFILE_VERSION}"; exit 1 ;;
+          esac
+          corepack enable
+          corepack prepare pnpm@"${PNPM_VERSION}" --activate
+          echo "PROTO_PNPM_VERSION=${PNPM_VERSION}" >> "$GITHUB_ENV"
+          echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
+
+      - name: Install
+        run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
+
+      - name: Install the pinned Rust toolchain
+        working-directory: native/gpui
+        run: rustup show active-toolchain
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/gpui/target
+          key: cargo-interop-macos-${{ hashFiles('native/gpui/Cargo.lock') }}
+          restore-keys: cargo-interop-macos-
+
+      - name: T0 interop between the Rust host and the Node peer
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-host-protocol --test t0_peer -- --ignored 2>&1 | tee t0_peer.log
+          # An ignored test that was renamed or filtered away would pass as
+          # zero tests; require that one actually ran.
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" t0_peer.log
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20

@@ -18,7 +18,7 @@ use gpui::{
     VisualTestContext, WindowHandle,
 };
 use proto_ui_gpui::host::{
-    FocusAction, FocusRequestStatus, InputBridge, ProtoHostView, SurfaceChild, SurfaceNode,
+    FocusAction, FocusResultStatus, InputBridge, ProtoHostView, SurfaceChild, SurfaceNode,
     FOCUS_ROOT_REF,
 };
 use proto_ui_gpui::input::{Routed, RoutedLease, SessionRoute};
@@ -143,7 +143,7 @@ impl Host {
         session: &str,
         target: &str,
         action: FocusAction,
-    ) -> FocusRequestStatus {
+    ) -> FocusResultStatus {
         let status = self
             .window
             .update(cx, |view, window, cx| {
@@ -189,7 +189,7 @@ fn focusing_a_session_reports_host_focus_on_its_root_lease_only(cx: &mut TestApp
     );
 
     let status = host.request(cx, "a", FOCUS_ROOT_REF, FocusAction::Focus);
-    assert_eq!(status, FocusRequestStatus::Applied);
+    assert_eq!(status, FocusResultStatus::Applied);
     let routed = host.drain();
     assert_eq!(summary(&routed), vec![fact("a", "host:focus")]);
 
@@ -221,7 +221,7 @@ fn blurring_hands_focus_back_to_the_host(cx: &mut TestAppContext) {
     host.drain();
 
     let status = host.request(cx, "a", FOCUS_ROOT_REF, FocusAction::Blur);
-    assert_eq!(status, FocusRequestStatus::Applied);
+    assert_eq!(status, FocusResultStatus::Applied);
     assert_eq!(summary(&host.drain()), vec![fact("a", "host:blur")]);
 
     // The host root holds focus again, so keys keep arriving.
@@ -252,7 +252,7 @@ fn focus_moving_to_a_part_blurs_its_instance_and_focuses_nobody(cx: &mut TestApp
 fn a_request_for_another_target_is_rejected_and_moves_nothing(cx: &mut TestAppContext) {
     let host = Host::open(cx);
     let status = host.request(cx, "a", "somewhere-else", FocusAction::Focus);
-    assert_eq!(status, FocusRequestStatus::Rejected);
+    assert_eq!(status, FocusResultStatus::Rejected);
     assert!(host.drain().is_empty());
 }
 
@@ -261,14 +261,14 @@ fn a_request_before_the_session_renders_is_not_ready(cx: &mut TestAppContext) {
     // The peer keeps a not-ready request and retries on readiness.
     let host = Host::open(cx);
     let status = host.request(cx, "unrendered", FOCUS_ROOT_REF, FocusAction::Focus);
-    assert_eq!(status, FocusRequestStatus::NotReady);
+    assert_eq!(status, FocusResultStatus::NotReady);
 }
 
 #[gpui::test]
 fn a_root_that_cannot_take_focus_rejects_the_request(cx: &mut TestAppContext) {
     let host = Host::open(cx);
     let status = host.request(cx, "c", FOCUS_ROOT_REF, FocusAction::Focus);
-    assert_eq!(status, FocusRequestStatus::Rejected);
+    assert_eq!(status, FocusResultStatus::Rejected);
     assert!(host.drain().is_empty());
 }
 
@@ -281,14 +281,14 @@ fn a_focus_that_does_not_land_is_rejected_not_reported_applied(cx: &mut TestAppC
         .update(cx, |_, window, cx| window.disable_focus(cx))
         .expect("the view updates");
     let status = host.request(cx, "a", FOCUS_ROOT_REF, FocusAction::Focus);
-    assert_eq!(status, FocusRequestStatus::Rejected);
+    assert_eq!(status, FocusResultStatus::Rejected);
 }
 
 #[gpui::test]
 fn blurring_a_target_that_is_not_focused_changes_nothing(cx: &mut TestAppContext) {
     let host = Host::open(cx);
     let status = host.request(cx, "b", FOCUS_ROOT_REF, FocusAction::Blur);
-    assert_eq!(status, FocusRequestStatus::Applied);
+    assert_eq!(status, FocusResultStatus::Applied);
     assert!(host.drain().is_empty());
 }
 
